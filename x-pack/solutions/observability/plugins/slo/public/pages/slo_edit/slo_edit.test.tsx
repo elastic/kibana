@@ -332,14 +332,10 @@ describe('SLO Edit Page', () => {
 
       const { getByTestId } = render(<SloEditPage />);
 
-      await waitFor(() => {
-        fireEvent.click(getByTestId('sloFormSubmitButton'));
-        expect(mockCreate).toHaveBeenCalledTimes(1);
-      });
-      await waitFor(() => {
-        fireEvent.click(getByTestId('sloFormSubmitButton'));
-        expect(mockCreate).toHaveBeenCalledTimes(2);
-      });
+      fireEvent.click(getByTestId('sloFormSubmitButton'));
+      await waitFor(() => expect(mockCreate).toHaveBeenCalledTimes(1));
+      fireEvent.click(getByTestId('sloFormSubmitButton'));
+      await waitFor(() => expect(mockCreate).toHaveBeenCalledTimes(2));
 
       const [[firstCall], [secondCall]] = mockCreate.mock.calls;
       expect(firstCall.slo.id).toEqual(expect.any(String));
@@ -357,12 +353,12 @@ describe('SLO Edit Page', () => {
 
       const { getByTestId } = render(<SloEditPage />);
 
-      await waitFor(() => {
-        fireEvent.click(getByTestId('sloFormSubmitButton'));
+      fireEvent.click(getByTestId('sloFormSubmitButton'));
+      await waitFor(() =>
         expect(mockCreate).toHaveBeenCalledWith({
           slo: expect.objectContaining({ id: 'slo-id-from-url' }),
-        });
-      });
+        })
+      );
     });
 
     it('renders the SLO Edit Form with prefilled values from a template', async () => {

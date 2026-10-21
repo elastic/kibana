@@ -401,6 +401,10 @@ describe('UpdateSLO', () => {
       mockSummaryTransformManager.getVersion.mockResolvedValue(SLO_RESOURCES_VERSION);
     });
 
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
     it('throws a SecurityException error when the user does not have the required privileges on the source index', async () => {
       mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: false,
@@ -482,7 +486,7 @@ describe('UpdateSLO', () => {
       const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
 
       const executePromise = updateSLO.execute(originalSlo.id, { indicator: newIndicator });
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise(process.nextTick);
       expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalled();
       expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
 
@@ -519,7 +523,6 @@ describe('UpdateSLO', () => {
       ).rejects.toThrow(SLOOperationTimeout);
       await jest.advanceTimersByTimeAsync(FORWARD_DEADLINE_MS);
       await assertion;
-      jest.useRealTimers();
 
       expect(mockRepository.update).toHaveBeenLastCalledWith(originalSlo);
       expect(mockTransformManager.uninstall).toHaveBeenCalled();

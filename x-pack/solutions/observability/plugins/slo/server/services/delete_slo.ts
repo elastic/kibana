@@ -72,22 +72,8 @@ export class DeleteSLO {
     await Promise.all([
       this.transformManager.uninstall(rollupTransformId),
       this.summaryTransformManager.uninstall(summaryTransformId),
-      retryTransientEsErrors(
-        () =>
-          this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-            { id: wildcardPipelineId },
-            { ignore: [404], signal: this.signal }
-          ),
-        { logger: this.logger, retryOptions: this.retryOptions, signal: this.signal }
-      ),
-      retryTransientEsErrors(
-        () =>
-          this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-            { id: customWildcardPipelineId },
-            { ignore: [404], signal: this.signal }
-          ),
-        { logger: this.logger, retryOptions: this.retryOptions, signal: this.signal }
-      ),
+      this.deletePipeline(wildcardPipelineId),
+      this.deletePipeline(customWildcardPipelineId),
       this.repository.deleteById(slo.id, { ignoreNotFound: true }),
     ]);
 
@@ -96,6 +82,17 @@ export class DeleteSLO {
       this.deleteSummaryData(slo.id, options.skipDataDeletion),
       this.deleteAssociatedRules(slo.id, options.skipRuleDeletion),
     ]);
+  }
+
+  private async deletePipeline(id: string) {
+    return retryTransientEsErrors(
+      () =>
+        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+          { id },
+          { ignore: [404], signal: this.signal }
+        ),
+      { logger: this.logger, retryOptions: this.retryOptions, signal: this.signal }
+    );
   }
 
   private async deleteRollupData(sloId: string, skip: boolean): Promise<void> {

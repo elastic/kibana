@@ -38,9 +38,11 @@ export class DefaultSummaryTransformManager implements TransformManager {
     this.retryOptions = retryOptions;
   }
 
-  async install(slo: SLODefinition, options: TransformCallOptions = {}): Promise<TransformId> {
+  async install(
+    slo: SLODefinition,
+    { signal = this.signal }: TransformCallOptions = {}
+  ): Promise<TransformId> {
     const transformParams = await this.generator.generate(slo);
-    const signal = this.getSignal(options);
     try {
       await retryTransientEsErrors(
         (attempt) =>
@@ -83,8 +85,10 @@ export class DefaultSummaryTransformManager implements TransformManager {
     }
   }
 
-  async start(transformId: TransformId, options: TransformCallOptions = {}): Promise<void> {
-    const signal = this.getSignal(options);
+  async start(
+    transformId: TransformId,
+    { signal = this.signal }: TransformCallOptions = {}
+  ): Promise<void> {
     try {
       await retryTransientEsErrors(
         () =>
@@ -116,8 +120,10 @@ export class DefaultSummaryTransformManager implements TransformManager {
     }
   }
 
-  async uninstall(transformId: TransformId, options: TransformCallOptions = {}): Promise<void> {
-    const signal = this.getSignal(options);
+  async uninstall(
+    transformId: TransformId,
+    { signal = this.signal }: TransformCallOptions = {}
+  ): Promise<void> {
     try {
       await retryTransientEsErrors(
         () =>
@@ -157,9 +163,5 @@ export class DefaultSummaryTransformManager implements TransformManager {
       this.logger.debug(`Cannot retrieve SLO transform version [${transformId}]. ${err}`);
       throw err;
     }
-  }
-
-  private getSignal({ signal }: TransformCallOptions): AbortSignal {
-    return signal ?? this.signal;
   }
 }

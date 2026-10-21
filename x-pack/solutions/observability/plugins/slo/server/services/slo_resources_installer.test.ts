@@ -179,6 +179,18 @@ describe('SLOResourcesInstaller', () => {
     expect(rollbackSignal?.aborted).toBe(false);
   });
 
+  it('throws the original error when the deadline is exceeded during the rollback', async () => {
+    const controller = new AbortController();
+    mockTransformManager.install.mockRejectedValue(new SecurityException('missing privileges'));
+    mockTransformManager.uninstall.mockImplementation(async () => {
+      controller.abort(new SLOOperationTimeout('deadline exceeded'));
+    });
+
+    await expect(
+      installer.install(slo, { signal: controller.signal, operation: 'create' })
+    ).rejects.toThrow(SecurityException);
+  });
+
   it('throws a SecurityException when an operation fails with a security exception', async () => {
     mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline.mockRejectedValue({
       meta: { body: { error: { type: 'security_exception', reason: 'missing privileges' } } },

@@ -19,14 +19,13 @@ import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_p
 import type { SLODefinition } from '../domain/models';
 import { SecurityException, SLOOperationTimeout } from '../errors';
 import { createDeadline } from '../utils/deadline';
-import type { RetryOptions } from '../utils/retry';
 import { REQUEST_RETRY_OPTIONS, retryTransientEsErrors } from '../utils/retry';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import type { TransformManager } from './transform_manager';
 
 // Forward + rollback deadlines stay below Kibana's default 120s server.socketTimeout
 export const FORWARD_DEADLINE_MS = 60_000;
-export const ROLLBACK_DEADLINE_MS = 30_000;
+const ROLLBACK_DEADLINE_MS = 30_000;
 
 type Operation = 'create' | 'update' | 'reset';
 
@@ -61,8 +60,7 @@ export class SLOResourcesInstaller {
     private summaryTransformManager: TransformManager,
     private logger: Logger,
     private spaceId: string,
-    private basePath: IBasePath,
-    private retryOptions: RetryOptions = REQUEST_RETRY_OPTIONS
+    private basePath: IBasePath
   ) {}
 
   /**
@@ -101,9 +99,10 @@ export class SLOResourcesInstaller {
       error: failure.reason,
     });
 
+    const timedOut = signal.aborted;
     await this.rollback(slo, service, labels, finalRollback);
 
-    if (signal.aborted) {
+    if (timedOut) {
       throw new SLOOperationTimeout(
         `Timed out while installing the resources of SLO [${slo.id}]. The changes have been rolled back.`
       );
@@ -161,7 +160,7 @@ export class SLOResourcesInstaller {
   private async createPipeline(params: IngestPutPipelineRequest, signal: AbortSignal) {
     return retryTransientEsErrors(
       () => this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(params, { signal }),
-      { logger: this.logger, retryOptions: this.retryOptions, signal }
+      { logger: this.logger, retryOptions: REQUEST_RETRY_OPTIONS, signal }
     );
   }
 
@@ -172,7 +171,7 @@ export class SLOResourcesInstaller {
           { id },
           { ignore: [404], signal }
         ),
-      { logger: this.logger, retryOptions: this.retryOptions, signal }
+      { logger: this.logger, retryOptions: REQUEST_RETRY_OPTIONS, signal }
     );
   }
 
@@ -188,7 +187,7 @@ export class SLOResourcesInstaller {
           },
           { signal }
         ),
-      { logger: this.logger, retryOptions: this.retryOptions, signal }
+      { logger: this.logger, retryOptions: REQUEST_RETRY_OPTIONS, signal }
     );
   }
 
@@ -199,7 +198,7 @@ export class SLOResourcesInstaller {
           { index: SUMMARY_TEMP_INDEX_NAME, id: `slo-${slo.id}`, refresh: true },
           { ignore: [404], signal }
         ),
-      { logger: this.logger, retryOptions: this.retryOptions, signal }
+      { logger: this.logger, retryOptions: REQUEST_RETRY_OPTIONS, signal }
     );
   }
 }

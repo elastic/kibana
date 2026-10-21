@@ -68,7 +68,10 @@ export class DefaultTransformManager implements TransformManager {
     this.retryOptions = retryOptions;
   }
 
-  async install(slo: SLODefinition, options: TransformCallOptions = {}): Promise<TransformId> {
+  async install(
+    slo: SLODefinition,
+    { signal = this.signal }: TransformCallOptions = {}
+  ): Promise<TransformId> {
     const generator = this.generators[slo.indicator.type];
     if (!generator) {
       this.logger.debug('No transform generator found for indicator type.', {
@@ -83,7 +86,6 @@ export class DefaultTransformManager implements TransformManager {
     }
 
     const transformParams = await generator.getTransformParams(slo);
-    const signal = this.getSignal(options);
     try {
       await retryTransientEsErrors(
         (attempt) =>
@@ -144,8 +146,10 @@ export class DefaultTransformManager implements TransformManager {
     }
   }
 
-  async start(transformId: TransformId, options: TransformCallOptions = {}): Promise<void> {
-    const signal = this.getSignal(options);
+  async start(
+    transformId: TransformId,
+    { signal = this.signal }: TransformCallOptions = {}
+  ): Promise<void> {
     try {
       await retryTransientEsErrors(
         () =>
@@ -191,8 +195,10 @@ export class DefaultTransformManager implements TransformManager {
     }
   }
 
-  async uninstall(transformId: TransformId, options: TransformCallOptions = {}): Promise<void> {
-    const signal = this.getSignal(options);
+  async uninstall(
+    transformId: TransformId,
+    { signal = this.signal }: TransformCallOptions = {}
+  ): Promise<void> {
     try {
       await retryTransientEsErrors(
         () =>
@@ -240,10 +246,6 @@ export class DefaultTransformManager implements TransformManager {
       });
       throw err;
     }
-  }
-
-  private getSignal({ signal }: TransformCallOptions): AbortSignal {
-    return signal ?? this.signal;
   }
 
   private async scheduleNowTransform(transformId: TransformId) {
