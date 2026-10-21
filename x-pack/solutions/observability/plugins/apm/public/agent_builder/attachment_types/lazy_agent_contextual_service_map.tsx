@@ -7,10 +7,10 @@
 
 import { dynamic } from '@kbn/shared-ux-utility';
 
-export type { AgentServiceMapProps } from './agent_service_map';
+export type { AgentContextualServiceMapProps } from './agent_contextual_service_map';
 
-export const LazyAgentServiceMap = dynamic(() =>
-  import('./agent_service_map').then((mod) => ({
-    default: mod.AgentServiceMap,
+export const LazyAgentContextualServiceMap = dynamic(() =>
+  import('./agent_contextual_service_map').then((mod) => ({
+    default: mod.AgentContextualServiceMap,
   }))
 );
