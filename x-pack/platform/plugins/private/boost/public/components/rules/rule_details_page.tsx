@@ -272,6 +272,7 @@ export const RuleDetailsPage = () => {
       <EuiSpacer size="xl" />
       <MatchedTable
         type={type}
+        profile={profile}
         matched={matched}
         supersededBy={coverage?.supersededBy ?? new Map()}
       />

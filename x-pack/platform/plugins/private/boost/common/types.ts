@@ -107,13 +107,21 @@ export interface BoostDataAge {
 }
 
 /** A regular index or data stream in the project that boost rules can apply to. */
+export interface BoostDataLifecycle {
+  enabled: boolean;
+  data_retention?: string;
+}
+
 export interface BoostDataSource {
   name: string;
   type: DataSourceType;
   /** Dataset size, or 0 when Elasticsearch doesn't report one. */
   size_in_bytes: number;
-  /** How many documents it holds, when Elasticsearch reports it. */
-  docs_count?: number;
+  /**
+   * A data stream's lifecycle, when it has one: whether it's on, and how long it keeps data, such as
+   * `30d`. Without a retention, it keeps data indefinitely.
+   */
+  lifecycle?: BoostDataLifecycle;
   /** A data stream's data by age, which decides the boost period each part is in. */
   data_ages?: BoostDataAge[];
 }

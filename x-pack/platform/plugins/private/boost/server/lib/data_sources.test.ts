@@ -7,25 +7,25 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import {
-  SAMPLE_DATA_SIZES_GB,
-  getSampleDataAges,
-  getSampleDocsCount,
-} from '../prototype/sample_sizes';
+import { SAMPLE_DATA_SIZES_GB, getSampleDataAges } from '../prototype/sample_sizes';
 import { getDataSources } from './data_sources';
 
 const HOUR = 3_600_000;
 const NOW = Date.UTC(2026, 9, 14);
 
-const stats = (bytes: number, docs: number) => ({
+const store = (bytes: number) => ({
   primaries: {
     store: { size_in_bytes: 0, total_data_set_size_in_bytes: bytes, reserved_in_bytes: 0 },
-    docs: { count: docs, deleted: 0, total_size_in_bytes: bytes },
   },
 });
 
-const dataStream = (name: string, indexNames: string[]): estypes.IndicesDataStream => ({
+const dataStream = (
+  name: string,
+  indexNames: string[],
+  lifecycle?: estypes.IndicesDataStream['lifecycle']
+): estypes.IndicesDataStream => ({
   name,
+  lifecycle,
   indices: indexNames.map((indexName) => ({ index_name: indexName, index_uuid: indexName })),
   generation: indexNames.length,
   hidden: false,
@@ -55,13 +55,21 @@ const createClient = ({ hasLifecycle = true } = {}) => {
     _shards: { total: 1, successful: 1, failed: 0 },
     _all: {},
     indices: {
-      'products-live': stats(5e9, 500),
-      '.ds-logs-app-000001': stats(30e9, 3000),
-      '.ds-logs-app-000002': stats(10e9, 1000),
+      'products-live': store(5e9),
+      '.ds-logs-app-000001': store(30e9),
+      '.ds-logs-app-000002': store(10e9),
     },
   });
   client.indices.getDataStream.mockResolvedValue({
-    data_streams: [dataStream('logs-app', ['.ds-logs-app-000001', '.ds-logs-app-000002'])],
+    data_streams: [
+      // The project's maximum retention caps the data stream's own.
+      dataStream('logs-app', ['.ds-logs-app-000001', '.ds-logs-app-000002'], {
+        enabled: true,
+        data_retention: '90d',
+        effective_retention: '30d',
+      }),
+      dataStream('logs-checkout-default', [], { enabled: true }),
+    ],
   });
   if (hasLifecycle) {
     client.indices.explainDataLifecycle.mockResolvedValue({
@@ -84,14 +92,14 @@ describe('getDataSources', () => {
   beforeEach(() => jest.spyOn(Date, 'now').mockReturnValue(NOW));
   afterEach(() => jest.restoreAllMocks());
 
-  it("counts a data stream's documents and breaks its data down by each backing index's age", async () => {
+  it("reads a data stream's lifecycle and breaks its data down by each backing index's age", async () => {
     const dataSources = await getDataSources(createClient());
 
     expect(dataSources.find(({ name }) => name === 'logs-app')).toEqual({
       name: 'logs-app',
       type: 'data_stream',
       size_in_bytes: 40e9,
-      docs_count: 4000,
+      lifecycle: { enabled: true, data_retention: '30d' },
       data_ages: [
         // Rolled over three days ago.
         { age_hours: 72, size_in_bytes: 30e9 },
@@ -103,17 +111,7 @@ describe('getDataSources', () => {
       name: 'products-live',
       type: 'index',
       size_in_bytes: 5e9,
-      docs_count: 500,
     });
-  });
-
-  it("leaves out document counts that Elasticsearch doesn't report", async () => {
-    const client = createClient();
-    client.indices.stats.mockRejectedValue(new Error('unavailable'));
-    const dataSources = await getDataSources(client);
-
-    expect(dataSources.find(({ name }) => name === 'products-live')?.docs_count).toBeUndefined();
-    expect(dataSources.find(({ name }) => name === 'logs-app')?.docs_count).toBeUndefined();
   });
 
   it('counts backing indices as new when their lifecycle is unavailable', async () => {
@@ -125,7 +123,7 @@ describe('getDataSources', () => {
     ]);
   });
 
-  it('gives sample data streams an illustrative document count and history', async () => {
+  it('gives sample data streams an illustrative history', async () => {
     const dataSources = await getDataSources(createClient());
     const sampleBytes = SAMPLE_DATA_SIZES_GB['logs-checkout-default'] * 1e9;
 
@@ -133,7 +131,8 @@ describe('getDataSources', () => {
       name: 'logs-checkout-default',
       type: 'data_stream',
       size_in_bytes: expect.closeTo(sampleBytes),
-      docs_count: getSampleDocsCount(sampleBytes),
+      // A lifecycle without a retention keeps data indefinitely.
+      lifecycle: { enabled: true, data_retention: undefined },
       data_ages: getSampleDataAges(sampleBytes),
     });
   });

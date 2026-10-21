@@ -23,6 +23,8 @@ import {
   translateSimpleDefaults,
 } from '../../../common/presets';
 import type { BoostProfile, BoostRule, BoostState } from '../../../common/types';
+import { estimateDataSourceVcuRange } from '../../../common/vcu_estimate';
+import { formatCost, roundVcus } from '../cost_format';
 import { ProfileDetailsPage } from '../profiles/profile_details_page';
 import { RuleDetailsPage } from '../rules/rule_details_page';
 
@@ -147,10 +149,15 @@ const mockState: BoostState = {
   ],
   suspended_rules: [],
   data_sources: [
-    { name: 'catalog-fall', type: 'index', size_in_bytes: 4e9, docs_count: 4000 },
-    { name: 'catalog-spring', type: 'index', size_in_bytes: 2e9, docs_count: 2000 },
+    { name: 'catalog-fall', type: 'index', size_in_bytes: 4e9 },
+    { name: 'catalog-spring', type: 'index', size_in_bytes: 2e9 },
     { name: 'products', type: 'index', size_in_bytes: 1e9 },
-    { name: 'logs-app', type: 'data_stream', size_in_bytes: 3e9, docs_count: 3000 },
+    {
+      name: 'logs-app',
+      type: 'data_stream',
+      size_in_bytes: 3e9,
+      lifecycle: { enabled: true, data_retention: '7d' },
+    },
   ],
 };
 
@@ -265,10 +272,10 @@ describe('RuleDetailsPage', () => {
     const springRow = within(matched).getByText('catalog-spring').closest('tr') as HTMLElement;
     expect(within(springRow).queryByTestId('boostSupersedingRule')).not.toBeInTheDocument();
     expect(within(springRow).getByTestId('boostEmptyCell')).toHaveTextContent('—');
-    expect(springRow).toHaveTextContent('2,000');
+    expect(springRow).toHaveTextContent('2 GB');
     const fallRow = within(matched).getByText('catalog-fall').closest('tr') as HTMLElement;
     expect(within(fallRow).getByTestId('boostSupersedingRule')).toHaveTextContent('catalog-first');
-    expect(fallRow).toHaveTextContent('4,000');
+    expect(fallRow).toHaveTextContent('4 GB');
     // The table always pages, however few it matches.
     expect(matched).toHaveTextContent('Rows per page: 10');
   });
@@ -284,10 +291,14 @@ describe('RuleDetailsPage', () => {
     // A higher-ranked rule applies to catalog-fall instead, so its name is struck through.
     expect(within(matched).getByTestId('boostSupersededTarget')).toHaveTextContent('catalog-fall');
     expect(within(matched).getByRole('link', { name: 'catalog-fall' })).toBeInTheDocument();
-    // The rule that applies instead explains itself.
-    await userEvent.hover(within(matched).getByRole('link', { name: 'catalog-first' }));
+    // The column of rules that apply instead explains them once, from an icon in its header, which
+    // stays out of the tab order, since the header's sort button takes the focus.
+    const header = within(matched).getByRole('columnheader', { name: /^Outranked by rule/ });
+    const icon = header.querySelector('[data-euiicon-type="info"]') as Element;
+    expect(icon).not.toHaveAttribute('tabindex');
+    await userEvent.hover(icon);
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
-      '"catalog-first" ranks higher, so it applies instead.'
+      'A higher-ranked rule that applies to the match instead.'
     );
 
     await userEvent.click(within(matched).getByRole('link', { name: 'catalog-spring' }));
@@ -297,11 +308,11 @@ describe('RuleDetailsPage', () => {
     });
   });
 
-  it("opens a data stream's details from Index Management in place, and counts its documents", async () => {
+  it("opens a data stream's details from Index Management in place", async () => {
     mockIndexManagementLocator.navigate.mockClear();
     renderAt(`/rules/${DEFAULT_DATA_STREAMS_RULE_NAME}`);
     const matched = screen.getByTestId('boostRuleMatched');
-    expect(within(matched).getByText('logs-app').closest('tr')).toHaveTextContent('3,000');
+    expect(within(matched).getByText('logs-app').closest('tr')).toHaveTextContent('3 GB');
 
     // The link still leads to Index Management, such as to open it in a new tab.
     const link = await within(matched).findByRole('link', { name: 'logs-app' });
@@ -365,7 +376,7 @@ describe('RuleDetailsPage', () => {
     const { unmount } = renderAt('/rules/catalogs');
     expect(
       within(screen.getByTestId('boostRuleMatched')).getByRole('columnheader', {
-        name: 'Outranked by rule',
+        name: /^Outranked by rule/,
       })
     ).toBeInTheDocument();
     unmount();
@@ -374,9 +385,64 @@ describe('RuleDetailsPage', () => {
     renderAt('/rules/catalog-first');
     expect(
       within(screen.getByTestId('boostRuleMatched')).queryByRole('columnheader', {
-        name: 'Outranked by rule',
+        name: /^Outranked by rule/,
       })
     ).not.toBeInTheDocument();
+  });
+
+  it('estimates the search cost of each match the rule applies to, at rest and at peak', () => {
+    renderAt('/rules/catalogs');
+    const matched = screen.getByTestId('boostRuleMatched');
+    const [spring] = mockState.data_sources.filter(({ name }) => name === 'catalog-spring');
+    const { atRest, atPeak } = estimateDataSourceVcuRange(spring, catalogSearch);
+
+    const springRow = within(matched).getByText('catalog-spring').closest('tr');
+    expect(springRow).toHaveTextContent(formatCost(roundVcus(atRest)));
+    expect(springRow).toHaveTextContent(formatCost(roundVcus(atPeak)));
+    // catalog-first applies to catalog-fall instead, so it costs this rule nothing.
+    const fallRow = within(matched).getByText('catalog-fall').closest('tr') as HTMLElement;
+    expect(within(fallRow).getAllByTestId('boostEmptyCell')).toHaveLength(2);
+    expect(fallRow).not.toHaveTextContent('$');
+  });
+
+  it("shows a data stream's retention, which indices don't have", () => {
+    const { unmount } = renderAt(`/rules/${DEFAULT_DATA_STREAMS_RULE_NAME}`);
+    const matched = screen.getByTestId('boostRuleMatched');
+    expect(
+      within(matched).getByRole('columnheader', { name: /^Data retention/ })
+    ).toBeInTheDocument();
+    expect(within(matched).getByText('logs-app').closest('tr')).toHaveTextContent('7 days');
+    unmount();
+
+    renderAt('/rules/catalogs');
+    expect(
+      within(screen.getByTestId('boostRuleMatched')).queryByRole('columnheader', {
+        name: /^Data retention/,
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  it('sorts matches by the rule that outranks them, with the rest last either way', async () => {
+    // The default rule matches every index: catalog-first and catalogs outrank it for the catalogs.
+    renderAt(`/rules/${DEFAULT_INDICES_RULE_NAME}`);
+    const matched = within(screen.getByTestId('boostRuleMatched'));
+    const getNames = () =>
+      matched
+        .getAllByRole('row')
+        .slice(1)
+        .map(
+          (row) => row.querySelector('[data-test-subj="boostIndexManagementLink"]')?.textContent
+        );
+    const sortButton = () => matched.getByRole('button', { name: /Outranked by rule/ });
+
+    await userEvent.click(sortButton());
+    expect(getNames()).toEqual(['catalog-fall', 'catalog-spring', 'products']);
+    await userEvent.click(sortButton());
+    expect(getNames()).toEqual(['catalog-spring', 'catalog-fall', 'products']);
+
+    // The sort holds as the table re-renders, such as while searching.
+    await userEvent.type(matched.getByRole('searchbox', { name: 'Search indices' }), 'catalog');
+    expect(getNames()).toEqual(['catalog-spring', 'catalog-fall']);
   });
 
   it('has no age timeline for an indices rule', () => {

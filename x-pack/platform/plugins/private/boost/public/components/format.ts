@@ -13,9 +13,6 @@ const numberFormat = new Intl.NumberFormat(i18n.getLocale(), { maximumFractionDi
 
 export const formatBoost = (boost: number): string => numberFormat.format(boost);
 
-/** A count, such as of documents. */
-export const formatCount = (count: number): string => numberFormat.format(count);
-
 export const PROFILE_TYPE_LABELS: Readonly<Record<BoostProfileType, string>> = {
   indices: i18n.translate('xpack.boost.format.indicesType', { defaultMessage: 'Indices' }),
   data_streams: i18n.translate('xpack.boost.format.dataStreamsType', {

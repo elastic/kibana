@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiFieldSearch,
@@ -13,16 +13,26 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { BoostDataSource, BoostProfileType } from '../../../common/types';
-import { formatSize } from '../cost_format';
+import type {
+  BoostDataLifecycle,
+  BoostDataSource,
+  BoostProfile,
+  BoostProfileType,
+} from '../../../common/types';
+import { parseMaxAge, toMaxAgeHours } from '../../../common/validation';
+import { estimateDataSourceVcuRange } from '../../../common/vcu_estimate';
+import { formatCost, formatSize, roundVcus } from '../cost_format';
+import { DetailsLink } from '../details_link';
 import { DetailsSection } from '../details/details_page';
 import { EmptyCell } from '../empty_cell';
-import { formatCount } from '../format';
-import { SupersedingRule, TargetName } from './target_name';
+import { formatMaxAge } from '../format';
+import { TargetName } from './target_name';
 
 /** Whether the rule applies to a match, or a higher-ranked rule outranks it. */
 type MatchStatus = 'applied' | 'outranked';
@@ -36,8 +46,121 @@ const STATUS_LABELS: Readonly<Record<MatchStatus, string>> = {
 
 const STATUSES: readonly MatchStatus[] = ['applied', 'outranked'];
 
+/** A match, with what its columns show and sort by beyond the data source itself. */
+interface MatchedRow extends BoostDataSource {
+  /** The higher-ranked rule that applies to it instead, if any. */
+  outrankedBy?: string;
+  /** Its search VCUs under the rule's profile, unless a higher-ranked rule applies instead. */
+  restVcus?: number;
+  peakVcus?: number;
+  /** How long it keeps data, in hours, or infinite when indefinitely. */
+  retentionHours?: number;
+}
+
+const getRetentionHours = (lifecycle: BoostDataLifecycle | undefined): number | undefined => {
+  if (!lifecycle?.enabled) {
+    return undefined;
+  }
+  if (lifecycle.data_retention === undefined) {
+    return Number.POSITIVE_INFINITY;
+  }
+  const retention = parseMaxAge(lifecycle.data_retention);
+  return retention && toMaxAgeHours(retention);
+};
+
+const renderRetention = (lifecycle: BoostDataLifecycle | undefined) => {
+  if (!lifecycle) {
+    return <EmptyCell />;
+  }
+  if (!lifecycle.enabled) {
+    return i18n.translate('xpack.boost.matchedTable.retentionDisabled', {
+      defaultMessage: 'Disabled',
+    });
+  }
+  // As in Index Management.
+  if (lifecycle.data_retention === undefined) {
+    return (
+      <EuiIconTip
+        type="infinity"
+        position="top"
+        content={i18n.translate('xpack.boost.matchedTable.retentionIndefinite', {
+          defaultMessage: 'Keep data indefinitely',
+        })}
+      />
+    );
+  }
+  return formatMaxAge(lifecycle.data_retention) ?? lifecycle.data_retention;
+};
+
+/**
+ * A column's name, with an icon whose tooltip explains it. A sortable column's name sits in its
+ * sort button, which can't hold anything focusable, so screen readers read the explanation as the
+ * icon's label instead.
+ */
+const ColumnName = ({ name, tip }: { name: string; tip: string }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <span css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.xs }}>
+      {name}
+      <EuiIconTip
+        type="info"
+        color="subdued"
+        content={tip}
+        aria-label={tip}
+        disableScreenReaderOutput
+        // Not focusable, since it's in the sort button, which takes the focus.
+        iconProps={{ tabIndex: undefined }}
+      />
+    </span>
+  );
+};
+
+// The table keeps track of its sorted column by its name, so names with an icon are created once,
+// rather than on each render, which would lose the sort.
+const OUTRANKED_BY_NAME = (
+  <ColumnName
+    name={i18n.translate('xpack.boost.matchedTable.outrankedByColumn', {
+      defaultMessage: 'Outranked by rule',
+    })}
+    tip={i18n.translate('xpack.boost.matchedTable.outrankedByTooltip', {
+      defaultMessage:
+        'A higher-ranked rule that applies to the match instead. To outrank it, increase this rule’s priority.',
+    })}
+  />
+);
+
+const REST_COST_NAME = (
+  <ColumnName
+    name={i18n.translate('xpack.boost.matchedTable.restCostColumn', {
+      defaultMessage: 'Cost at rest',
+    })}
+    tip={i18n.translate('xpack.boost.matchedTable.restCostTooltip', {
+      defaultMessage:
+        'Estimated search cost per hour at the minimum boost of this rule’s profile, with little search load.',
+    })}
+  />
+);
+
+const PEAK_COST_NAME = (
+  <ColumnName
+    name={i18n.translate('xpack.boost.matchedTable.peakCostColumn', {
+      defaultMessage: 'Cost at peak',
+    })}
+    tip={i18n.translate('xpack.boost.matchedTable.peakCostTooltip', {
+      defaultMessage:
+        'Estimated search cost per hour at the maximum boost of this rule’s profile, under peak search load.',
+    })}
+  />
+);
+
+// Outranked matches cost this rule nothing, so they have no cost.
+const renderCost = (vcus: number | undefined) =>
+  vcus === undefined ? <EmptyCell /> : formatCost(roundVcus(vcus));
+
 interface MatchedTableProps {
   type?: BoostProfileType;
+  /** The rule's profile, which its search cost estimates use. */
+  profile?: BoostProfile;
   /** What the rule matches, sorted by name. */
   matched: readonly BoostDataSource[];
   /** Matches that a higher-ranked rule applies to instead, with that rule's name. */
@@ -45,22 +168,41 @@ interface MatchedTableProps {
 }
 
 /**
- * The indices or data streams a rule matches, each linking to its details in Index Management. Those
- * a higher-ranked rule applies to instead are struck through, with that rule in a column that only
- * shows when there are any. A search box filters them by name, and a filter group by whether the
- * rule applies to them, with how many of the search results each would show.
+ * The indices or data streams a rule matches, each linking to its details in Index Management, with
+ * a data stream's retention, and each match's data and search cost at rest and at peak. Those a higher-ranked rule
+ * applies to instead are struck through, with that rule in a column that only shows when there are
+ * any. A search box filters them by name, and a filter group by whether the rule applies to them,
+ * with how many of the search results each would show.
  */
-export const MatchedTable = ({ type, matched, supersededBy }: MatchedTableProps) => {
+export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTableProps) => {
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<MatchStatus>();
   const isDataStreams = type === 'data_streams';
 
+  const rows = useMemo(
+    () =>
+      matched.map((dataSource): MatchedRow => {
+        const outrankedBy = supersededBy.get(dataSource.name);
+        const vcus =
+          profile && outrankedBy === undefined
+            ? estimateDataSourceVcuRange(dataSource, profile)
+            : undefined;
+        return {
+          ...dataSource,
+          outrankedBy,
+          restVcus: vcus?.atRest,
+          peakVcus: vcus?.atPeak,
+          retentionHours: getRetentionHours(dataSource.lifecycle),
+        };
+      }),
+    [matched, supersededBy, profile]
+  );
   // Whether to show the column of rules that outrank matches, which the search doesn't change.
-  const hasOutranked = matched.some(({ name }) => supersededBy.has(name));
-  const getStatus = ({ name }: BoostDataSource): MatchStatus =>
-    supersededBy.has(name) ? 'outranked' : 'applied';
+  const hasOutranked = rows.some(({ outrankedBy }) => outrankedBy !== undefined);
+  const getStatus = ({ outrankedBy }: MatchedRow): MatchStatus =>
+    outrankedBy === undefined ? 'applied' : 'outranked';
   const normalizedQuery = query.trim().toLowerCase();
-  const searched = matched.filter(({ name }) => name.toLowerCase().includes(normalizedQuery));
+  const searched = rows.filter(({ name }) => name.toLowerCase().includes(normalizedQuery));
   // Each filter counts what it would show with the current search.
   const counts: Record<MatchStatus, number> = { applied: 0, outranked: 0 };
   searched.forEach((dataSource) => counts[getStatus(dataSource)]++);
@@ -77,7 +219,7 @@ export const MatchedTable = ({ type, matched, supersededBy }: MatchedTableProps)
         defaultMessage: 'Search indices',
       });
 
-  const columns: Array<EuiBasicTableColumn<BoostDataSource>> = [
+  const columns: Array<EuiBasicTableColumn<MatchedRow>> = [
     {
       field: 'name',
       name: isDataStreams
@@ -86,39 +228,41 @@ export const MatchedTable = ({ type, matched, supersededBy }: MatchedTableProps)
           })
         : i18n.translate('xpack.boost.matchedTable.indexColumn', { defaultMessage: 'Index' }),
       sortable: true,
-      render: (name: string, dataSource: BoostDataSource) => (
-        <TargetName name={name} supersededBy={supersededBy.get(name)} linkedAs={dataSource.type} />
+      render: (name: string, { type: dataSourceType, outrankedBy }: MatchedRow) => (
+        <TargetName name={name} supersededBy={outrankedBy} linkedAs={dataSourceType} />
       ),
     },
-    // Only when a higher-ranked rule applies to any of the matches instead, which it names.
+    // Only when a higher-ranked rule applies to any of the matches instead, which it names. Like
+    // the columns below, matches without a value sort last, whichever the direction.
     ...(hasOutranked
       ? [
           {
-            name: i18n.translate('xpack.boost.matchedTable.outrankedByColumn', {
-              defaultMessage: 'Outranked by rule',
-            }),
-            render: ({ name }: BoostDataSource) => {
-              const supersedingRule = supersededBy.get(name);
-              // The header says what the rule did, so it needs no icon for ranking higher.
-              return supersedingRule ? (
-                <SupersedingRule rule={supersedingRule} isLinked hasIcon={false} />
+            field: 'outrankedBy',
+            name: OUTRANKED_BY_NAME,
+            sortable: true,
+            render: (outrankedBy?: string) =>
+              outrankedBy ? (
+                <DetailsLink kind="rule" name={outrankedBy} data-test-subj="boostSupersedingRule" />
               ) : (
                 <EmptyCell />
-              );
-            },
+              ),
           },
         ]
       : []),
-    {
-      field: 'docs_count',
-      name: i18n.translate('xpack.boost.matchedTable.docsCountColumn', {
-        defaultMessage: 'Documents count',
-      }),
-      width: '13em',
-      sortable: true,
-      dataType: 'number',
-      render: (count?: number) => (count === undefined ? <EmptyCell /> : formatCount(count)),
-    },
+    ...(isDataStreams
+      ? [
+          {
+            field: 'retentionHours',
+            name: i18n.translate('xpack.boost.matchedTable.retentionColumn', {
+              defaultMessage: 'Data retention',
+            }),
+            width: '10em',
+            sortable: true,
+            render: (_hours: number | undefined, { lifecycle }: MatchedRow) =>
+              renderRetention(lifecycle),
+          },
+        ]
+      : []),
     {
       field: 'size_in_bytes',
       name: i18n.translate('xpack.boost.matchedTable.sizeColumn', { defaultMessage: 'Size' }),
@@ -127,6 +271,26 @@ export const MatchedTable = ({ type, matched, supersededBy }: MatchedTableProps)
       dataType: 'number',
       render: formatSize,
     },
+    ...(profile
+      ? [
+          {
+            field: 'restVcus',
+            name: REST_COST_NAME,
+            width: '12em',
+            sortable: true,
+            dataType: 'number' as const,
+            render: renderCost,
+          },
+          {
+            field: 'peakVcus',
+            name: PEAK_COST_NAME,
+            width: '12em',
+            sortable: true,
+            dataType: 'number' as const,
+            render: renderCost,
+          },
+        ]
+      : []),
   ];
 
   return (

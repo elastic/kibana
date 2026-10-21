@@ -103,8 +103,6 @@ interface SupersedingRuleProps {
   hasTooltip?: boolean;
   /** Links the rule's name to its details page, outside forms that would lose their changes. */
   isLinked?: boolean;
-  /** Shows the icon for ranking higher, unless what's around it says so, such as a column header. */
-  hasIcon?: boolean;
 }
 
 /** The rule that applies to a target instead, after an icon for ranking higher. */
@@ -112,28 +110,9 @@ export const SupersedingRule = ({
   rule,
   hasTooltip = true,
   isLinked = false,
-  hasIcon = true,
 }: SupersedingRuleProps) => {
   const { euiTheme } = useEuiTheme();
   const tooltipId = useGeneratedHtmlId();
-
-  if (!hasIcon) {
-    // The rule's name alone, focusable, so keyboard users can open the tooltip, which describes it.
-    const name = isLinked ? (
-      <DetailsLink kind="rule" name={rule} data-test-subj="boostSupersedingRule" />
-    ) : (
-      <span tabIndex={hasTooltip ? 0 : undefined} data-test-subj="boostSupersedingRule">
-        {rule}
-      </span>
-    );
-    return hasTooltip ? (
-      <EuiToolTip id={tooltipId} content={getSupersedingDescription(rule)}>
-        {name}
-      </EuiToolTip>
-    ) : (
-      name
-    );
-  }
 
   const label = (
     <span
