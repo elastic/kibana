@@ -182,7 +182,7 @@ export const extractScriptReadPaths = (script: string): string[] => {
 
   // 1. open(target[, mode])
   const openRe =
-    /\bopen\s*\(\s*(['"][^'"\n]+['"]|[A-Za-z_][A-Za-z0-9_]*)(?:\s*,\s*(?:mode\s*=\s*)?(['"])([^'"\n]*)\2)?/g;
+    /\bopen\s*\(\s*(Path\s*\([^()\n]+\)|['"][^'"\n]+['"]|[A-Za-z_][A-Za-z0-9_]*)(?:\s*,\s*(?:mode\s*=\s*)?(['"])([^'"\n]*)\2)?/g;
   let openMatch = openRe.exec(normalized);
   while (openMatch) {
     const mode = openMatch[3] ?? 'r';
@@ -208,7 +208,8 @@ export const extractScriptReadPaths = (script: string): string[] => {
   }
 
   // 3. fs.readFileSync(target) / fs.readFile(target)
-  const readFileRe = /\breadFile(?:Sync)?\s*\(\s*(['"][^'"\n]+['"]|[A-Za-z_][A-Za-z0-9_]*)/g;
+  const readFileRe =
+    /\breadFile(?:Sync)?\s*\(\s*(Path\s*\([^()\n]+\)|['"][^'"\n]+['"]|[A-Za-z_][A-Za-z0-9_]*)/g;
   let rfMatch = readFileRe.exec(normalized);
   while (rfMatch) {
     const resolved = resolveArg(rfMatch[1]);
@@ -219,6 +220,59 @@ export const extractScriptReadPaths = (script: string): string[] => {
   }
 
   return out;
+};
+
+const splitOutsideQuotes = (input: string, mode: 'list' | 'pipeline'): string[] => {
+  const parts: string[] = [];
+  let cur = '';
+  let quote: "'" | '"' | undefined;
+
+  for (let i = 0; i < input.length; i++) {
+    const ch = input[i];
+    if (quote) {
+      if (ch === '\\' && quote === '"' && i + 1 < input.length) {
+        cur += ch + input[i + 1];
+        i += 1;
+        continue;
+      }
+      if (ch === quote) {
+        quote = undefined;
+      }
+      cur += ch;
+      continue;
+    }
+    if (ch === '\\' && i + 1 < input.length) {
+      cur += ch + input[i + 1];
+      i += 1;
+      continue;
+    }
+    if (ch === "'" || ch === '"') {
+      quote = ch;
+      cur += ch;
+      continue;
+    }
+    if (mode === 'list') {
+      if (ch === ';') {
+        parts.push(cur);
+        cur = '';
+        continue;
+      }
+      if ((ch === '&' && input[i + 1] === '&') || (ch === '|' && input[i + 1] === '|')) {
+        parts.push(cur);
+        cur = '';
+        i += 1;
+        continue;
+      }
+    } else if (ch === '|' && input[i + 1] !== '|') {
+      parts.push(cur);
+      cur = '';
+      continue;
+    }
+    cur += ch;
+  }
+
+  parts.push(cur);
+  return parts;
 };
 
 export interface BashSegmentWithCwd {
@@ -305,9 +359,9 @@ export const splitBashSegmentsWithCwd = (
   const out: BashSegmentWithCwd[] = [];
   for (const { line, scriptBody } of processedLines) {
     const sanitizedLine = line.replace(BASH_URL_RE, '');
-    const statements = sanitizedLine.split(/;|&&|\|\|/);
+    const statements = splitOutsideQuotes(sanitizedLine, 'list');
     for (const statement of statements) {
-      const stages = statement.split('|');
+      const stages = splitOutsideQuotes(statement, 'pipeline');
       for (let pipelineIndex = 0; pipelineIndex < stages.length; pipelineIndex++) {
         const segment = stages[pipelineIndex];
         const cdMatch = BASH_CD_RE.exec(segment);
@@ -423,12 +477,35 @@ const checkDirOrSearchSegment = (
       continue;
     }
     if (!optionsEnded && arg.startsWith('-') && arg !== '-') {
-      if (arg === '-e' || arg === '--regexp' || arg.startsWith('--regexp=')) {
+      const isAttachedShortE = isGrepOrRg && !arg.startsWith('--') && /^-[a-zA-Z]*e.+$/.test(arg);
+      const isBundledTrailingE =
+        isGrepOrRg && !arg.startsWith('--') && /^-[a-zA-Z]{2,}$/.test(arg) && arg.endsWith('e');
+      if (
+        arg === '-e' ||
+        arg === '--regexp' ||
+        arg.startsWith('--regexp=') ||
+        isAttachedShortE ||
+        isBundledTrailingE
+      ) {
         hasExplicitPatternFlag = true;
       }
-      if (arg === '-f' || arg === '--file' || arg.startsWith('--file=')) {
+
+      const isAttachedShortF = isGrepOrRg && !arg.startsWith('--') && /^-[a-zA-Z]*f.+$/.test(arg);
+      const isBundledTrailingF =
+        isGrepOrRg && !arg.startsWith('--') && /^-[a-zA-Z]{2,}$/.test(arg) && arg.endsWith('f');
+      if (
+        arg === '-f' ||
+        arg === '--file' ||
+        arg.startsWith('--file=') ||
+        isAttachedShortF ||
+        isBundledTrailingF
+      ) {
         hasExplicitPatternFlag = true;
-        const fileArg = arg.includes('=') ? arg.slice(arg.indexOf('=') + 1) : args[i + 1];
+        const fileArg = arg.includes('=')
+          ? arg.slice(arg.indexOf('=') + 1)
+          : isAttachedShortF
+          ? arg.slice(arg.indexOf('f') + 1)
+          : args[i + 1];
         if (fileArg && fileArg !== '-' && matchesFilePathForKinds(fileArg, kindSet, cwd)) {
           return true;
         }
@@ -439,7 +516,7 @@ const checkDirOrSearchSegment = (
       ) {
         isRecursive = true;
       }
-      if (SEARCH_VALUE_FLAGS.has(arg)) {
+      if (SEARCH_VALUE_FLAGS.has(arg) || isBundledTrailingE || isBundledTrailingF) {
         i += 1;
       }
       continue;
