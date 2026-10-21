@@ -15,6 +15,7 @@ import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../common';
 import {
   LARGE_WORKFLOW_EXECUTION_POLL_INTERVAL_MS,
   WORKFLOW_EXECUTION_POLL_INTERVAL_MS,
+  WORKFLOW_EXECUTION_POLL_MAX_BACKOFF_MS,
 } from '../../../hooks/polling_constants';
 import { useSerialPolling } from '../../../hooks/use_serial_polling';
 import type { AppDispatch } from '../store/store';
@@ -53,18 +54,35 @@ export const useWorkflowExecutionPolling = (workflowExecutionId: string): Pollin
     },
     pollKey: workflowExecutionId,
     intervalMs: () => {
-      const { execution: currentExecution, stepExecutionsTotal } = store.getState().detail;
-      return currentExecution?.id === workflowExecutionId &&
+      const {
+        execution: currentExecution,
+        stepExecutionsTotal,
+        executionError: currentError,
+      } = store.getState().detail;
+      const baseIntervalMs =
+        currentExecution?.id === workflowExecutionId &&
         stepExecutionsTotal > WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE
-        ? LARGE_WORKFLOW_EXECUTION_POLL_INTERVAL_MS
-        : WORKFLOW_EXECUTION_POLL_INTERVAL_MS;
+          ? LARGE_WORKFLOW_EXECUTION_POLL_INTERVAL_MS
+          : WORKFLOW_EXECUTION_POLL_INTERVAL_MS;
+      return currentError?.id === workflowExecutionId
+        ? Math.min(
+            baseIntervalMs * 2 ** currentError.failureCount,
+            WORKFLOW_EXECUTION_POLL_MAX_BACKOFF_MS
+          )
+        : baseIntervalMs;
     },
     shouldStop: () => {
-      const { execution: currentExecution, executionRequest } = store.getState().detail;
+      const {
+        execution: currentExecution,
+        executionRequest,
+        executionError: currentError,
+      } = store.getState().detail;
+      if (executionRequest) {
+        return false;
+      }
       return (
-        !executionRequest &&
-        currentExecution?.id === workflowExecutionId &&
-        isTerminalStatus(currentExecution.status)
+        (currentError?.id === workflowExecutionId && currentError.isNotFound) ||
+        (currentExecution?.id === workflowExecutionId && isTerminalStatus(currentExecution.status))
       );
     },
   });
