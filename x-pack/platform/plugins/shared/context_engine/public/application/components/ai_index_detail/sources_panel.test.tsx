@@ -36,6 +36,16 @@ jest.mock('@kbn/esql/public', () => ({
   ),
 }));
 
+const mockScopedImprovements = jest.fn();
+
+// Covered on its own; here it only needs to show which suggestions this panel claims.
+jest.mock('./scoped_improvements', () => ({
+  ScopedImprovements: (props: unknown) => {
+    mockScopedImprovements(props);
+    return null;
+  },
+}));
+
 const mockUseDataConnectors = jest.fn(
   (_options?: UseDataConnectorsOptions): UseDataConnectorsResult => ({
     connectors: [{ id: 'connector-gdrive', name: 'Google Drive', actionTypeId: '.google_drive' }],
@@ -109,6 +119,22 @@ const addEsqlSource = (query: string) => {
 describe('SourcesPanel', () => {
   beforeEach(() => {
     mockUseDataConnectors.mockClear();
+    mockScopedImprovements.mockClear();
+  });
+
+  it('is where suggestions about sources are reviewed', () => {
+    const aiIndex = { ...baseAiIndex, sources };
+
+    renderWithProviders(
+      <SourcesPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
+    );
+
+    expect(mockScopedImprovements).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aiIndex,
+        actions: ['add_source', 'edit_source', 'remove_source'],
+      })
+    );
   });
 
   it('shows the loading skeleton while loading and no rows', () => {

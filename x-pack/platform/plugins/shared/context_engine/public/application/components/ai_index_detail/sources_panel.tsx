@@ -29,9 +29,14 @@ import { AiIndexDetailPanelEmptyState } from './ai_index_detail_panel_empty_prom
 import { SourcePicker } from '../source_picker';
 import { getSourceDisplay } from '../source_display';
 import { SourceRow } from '../source_row';
+import { ScopedImprovements } from './scoped_improvements';
+
+/** The improvements that would change this panel's part of the AI index. */
+const SOURCE_ACTIONS = ['add_source', 'edit_source', 'remove_source'] as const;
 
 interface SourcesPanelProps {
   isLoading: boolean;
+  /** Also needed by the suggestions below, which wait for it. */
   aiIndex: GetAiIndexResponse | undefined;
   onSaved: () => void;
   isManaged: boolean;
@@ -208,6 +213,12 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
           })}
         </EuiFlexGroup>
       )}
+
+      <ScopedImprovements
+        aiIndex={aiIndex}
+        actions={SOURCE_ACTIONS}
+        data-test-subj="contextAiIndexSourceImprovements"
+      />
     </EuiPanel>
   );
 };
