@@ -587,6 +587,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Whether the agent can browse the full Elasticsearch and Kibana API surface to discover operations.',
     },
   },
+  'agentBuilder:includeFrozenByDefault': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether built-in Agent Builder tools include frozen tier data by default.',
+    },
+  },
   'agentBuilder:deductiveEnabled': {
     type: 'boolean',
     _meta: { description: 'Whether the external Deductive AI agent execution path is enabled.' },
