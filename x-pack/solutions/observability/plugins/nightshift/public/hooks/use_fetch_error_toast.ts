@@ -1,0 +1,48 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+import { useCallback } from 'react';
+import { useKibana } from './use_kibana';
+import { getFormattedError } from '../common/errors';
+
+export function useFetchErrorToast() {
+  const { notifications } = useKibana().services;
+
+  return useCallback(
+    (error: unknown) => {
+      let requestUrl: string | undefined;
+      if (
+        error &&
+        typeof error === 'object' &&
+        'request' in error &&
+        typeof error.request === 'object' &&
+        !!error.request &&
+        'url' in error.request &&
+        typeof error.request.url === 'string'
+      ) {
+        requestUrl = error.request.url;
+      }
+
+      const formattedError = getFormattedError(error);
+      return notifications.toasts.addError(formattedError, {
+        title: i18n.translate('xpack.nightshift.failedToFetchError', {
+          defaultMessage: 'Failed to fetch data',
+        }),
+        ...(requestUrl !== undefined
+          ? {
+              toastMessage: i18n.translate('xpack.nightshift.failedToFetchErrorMessage', {
+                defaultMessage: '{message} ({requestUrl})',
+                values: { message: formattedError.message, requestUrl },
+              }),
+            }
+          : {}),
+      });
+    },
+    [notifications]
+  );
+}

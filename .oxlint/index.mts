@@ -11,6 +11,8 @@
 // `@kbn/eslint-config` so each rule runs in exactly one linter. When enabling a rule here,
 // delete it from packages/kbn-eslint-config/*.js; when removing one, add it back there.
 // A rule whose ESLint options are stricter than oxlint's implementation must stay in ESLint.
+// Exception: the generated `test-api-clients` bundles keep `@kbn/imports/no_unused_imports` and
+// `import/no-duplicates` in ESLint, because the OpenAPI generator relies on both fixing its output in one pass.
 //
 // oxlint loads this through the repo-root `oxlint.config.mjs` and resolves `files`,
 // `ignorePatterns`, and `jsPlugins` paths relative to that root entry. Rule sets are spread
@@ -25,10 +27,13 @@ import { defineConfig, type OxlintConfig } from 'oxlint';
 import { javascriptRules } from './javascript.mts';
 import { typescriptRules } from './typescript.mts';
 import { jestRules } from './jest.mts';
-import { reactRules } from './react.mts';
+import { reactOverrides, reactRules } from './react.mts';
 import { kibanaOverrides, kibanaRules } from './kibana.mts';
 import { licenseHeaderOverrides } from './license_headers.mts';
 import { scoutOverrides } from './scout.mts';
+import { importsOverrides } from './imports.mts';
+import { i18nOverrides } from './i18n.mts';
+import { telemetryOverrides } from './telemetry.mts';
 import { kbnUiOverrides, kbnUiRules } from './kbn_ui.mts';
 import { alertingV2Overrides } from './alerting_v2.mts';
 import { securityImportsOverrides } from './security_imports.mts';
@@ -40,6 +45,8 @@ import { euiRules } from './eui.mts';
 import { nOverrides } from './n.mts';
 import { playwrightOverrides, playwrightSettings } from './playwright.mts';
 import { testingLibraryOverrides } from './testing_library.mts';
+import { unusedVarsOverrides } from './unused_vars.mts';
+import { importPluginOverrides } from './import_plugin.mts';
 
 export default defineConfig<OxlintConfig>({
   plugins: ['react', 'typescript', 'import', 'jsx-a11y', 'react-perf', 'node', 'jest'],
@@ -47,6 +54,18 @@ export default defineConfig<OxlintConfig>({
     {
       name: '@kbn/eslint',
       specifier: './packages/kbn-eslint-plugin-eslint/oxlint_plugin.js',
+    },
+    {
+      name: '@kbn/imports',
+      specifier: './packages/kbn-eslint-plugin-imports/oxlint_plugin.js',
+    },
+    {
+      name: '@kbn/i18n',
+      specifier: './packages/kbn-eslint-plugin-i18n/oxlint_plugin.js',
+    },
+    {
+      name: '@kbn/telemetry',
+      specifier: './packages/kbn-eslint-plugin-telemetry/oxlint_plugin.js',
     },
     {
       name: '@kbn/disable',
@@ -84,9 +103,14 @@ export default defineConfig<OxlintConfig>({
     ...euiRules,
   },
   overrides: [
+    ...importPluginOverrides,
     ...licenseHeaderOverrides,
     ...kibanaOverrides,
+    ...reactOverrides,
     ...scoutOverrides,
+    ...importsOverrides,
+    ...i18nOverrides,
+    ...telemetryOverrides,
     ...securityImportsOverrides,
     ...kbnUiOverrides,
     ...alertingV2Overrides,
@@ -96,6 +120,7 @@ export default defineConfig<OxlintConfig>({
     ...nOverrides,
     ...playwrightOverrides,
     ...testingLibraryOverrides,
+    ...unusedVarsOverrides,
   ],
   // oxlint's parser rejects TypeScript grammar errors (TS1016: required parameter after an
   // optional one) that ESLint's parser and tsc's `skipLibCheck` let through in this declaration.

@@ -8,7 +8,6 @@
 import type {
   ElementClickListener,
   LayerValue,
-  PartitionFillLabel,
   PartitionLayer,
   TooltipInfo,
 } from '@elastic/charts';
@@ -44,20 +43,6 @@ const clickedKeyword = (elements: Parameters<ElementClickListener>[0]): string |
   const [layer] = elements.flat(2).filter(isLayerValue);
   return layer === undefined ? undefined : `${layer.groupByRollup}`;
 };
-
-/** From elastic/elastic-charts#2912; inert on the pinned 73.2.2, which drops unknown keys. */
-interface FillLabelAlignment {
-  verticalAlignment?: 'top' | 'middle' | 'bottom';
-  horizontalAlignment?: 'left' | 'center' | 'right';
-}
-
-type LayerFillLabel = NonNullable<PartitionLayer['fillLabel']> & FillLabelAlignment;
-
-type ChartsStillLacksFillLabelAlignment = 'verticalAlignment' extends keyof PartitionFillLabel
-  ? never
-  : true;
-const SHIM_NEEDED: ChartsStillLacksFillLabelAlignment = true;
-void SHIM_NEEDED;
 
 const tooltipCell = (
   values: TooltipInfo['values'],
@@ -108,7 +93,7 @@ export function MemoryKeywordTreemap({
     [euiTheme.colors.emptyShade]
   );
 
-  const fillLabel: LayerFillLabel = {
+  const fillLabel: PartitionLayer['fillLabel'] = {
     verticalAlignment: 'middle',
     horizontalAlignment: 'center',
     clipText: false,

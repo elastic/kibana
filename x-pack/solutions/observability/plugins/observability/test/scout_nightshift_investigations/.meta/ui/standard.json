@@ -1,5 +1,5 @@
 {
-  "sha1": "b95ce36e6aed03d61c0001760f1d910d632ec79a",
+  "sha1": "7c8a9a9160b969814b4cf841c551353156b2f158",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -64,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/alert_investigation_action.spec.ts",
-        "line": 119,
-        "column": 16
+        "line": 121,
+        "column": 18
       }
     },
     {
@@ -92,7 +92,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 314,
+        "line": 311,
         "column": 13
       }
     },
@@ -106,7 +106,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 320,
+        "line": 313,
         "column": 24
       }
     },
@@ -120,7 +120,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 352,
+        "line": 349,
         "column": 13
       }
     },
@@ -134,7 +134,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 366,
+        "line": 363,
         "column": 73
       }
     },
@@ -148,7 +148,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 410,
+        "line": 407,
         "column": 9
       }
     },
@@ -162,7 +162,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 431,
+        "line": 428,
         "column": 13
       }
     },
@@ -176,7 +176,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 466,
+        "line": 463,
         "column": 7
       }
     },
@@ -190,7 +190,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 491,
+        "line": 488,
         "column": 13
       }
     },
@@ -204,7 +204,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 526,
+        "line": 523,
         "column": 26
       }
     },
@@ -218,7 +218,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 539,
+        "line": 536,
         "column": 23
       }
     },
@@ -232,7 +232,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 622,
+        "line": 619,
         "column": 25
       }
     },
@@ -246,7 +246,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 666,
+        "line": 663,
         "column": 25
       }
     }
