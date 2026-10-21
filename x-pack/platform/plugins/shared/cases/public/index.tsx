@@ -40,6 +40,7 @@ export type {
   UnifiedValueAttachmentViewProps,
   AttachmentAction,
   DocumentActionProps,
+  RelatedRemovalChoice,
   WorkflowActivityLabelProps,
 } from './client/attachment_framework/types';
 export { AttachmentActionType, defineAttachment } from './client/attachment_framework/types';

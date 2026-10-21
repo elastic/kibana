@@ -179,9 +179,12 @@ export const createRegisteredAttachmentUserActionBuilder = <
             )}
             <RegisteredAttachmentsPropertyActions
               isLoading={isLoading}
-              onDelete={() => handleDeleteComment(attachment.id, deleteSuccessToast)}
+              onDelete={(options) =>
+                handleDeleteComment(attachment.id, deleteSuccessToast, options)
+              }
               registeredAttachmentActions={[...nonVisiblePrimaryActions, ...nonPrimaryActions]}
               hideDefaultActions={!!creationActivity.hideDefaultActions}
+              relatedRemoval={attachmentType.getRelatedRemoval?.({ count: 1 })}
             />
           </UserActionContentToolbar>
         ),
