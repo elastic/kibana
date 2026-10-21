@@ -1828,6 +1828,7 @@
     "@kbn/import-resolver": "workspace:*",
     "@kbn/inference-cli": "workspace:*",
     "@kbn/ink": "workspace:*",
+    "@kbn/jest": "workspace:*",
     "@kbn/jest-benchmarks": "workspace:*",
     "@kbn/jest-serializers": "workspace:*",
     "@kbn/journeys": "workspace:*",
