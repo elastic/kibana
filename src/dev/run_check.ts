@@ -35,7 +35,7 @@ import {
   JEST_CONFIG_NAMES,
   type MoonJestResult,
   type JestFailedTest,
-} from '@kbn/test';
+} from '@kbn/jest';
 import { executeTypeCheckValidation } from './type_check_validation_loader';
 
 import { executeEslintValidation } from './eslint/run_eslint_contract';
