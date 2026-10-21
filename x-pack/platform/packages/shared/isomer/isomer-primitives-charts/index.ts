@@ -5,14 +5,87 @@
  * 2.0.
  */
 
-export { CHART_TYPES, type ChartNode, type ChartType } from './src/charts/define';
-export type { DonutNode } from './src/charts/donut';
-export type { GaugeNode } from './src/charts/gauge';
-export type { HeatmapNode } from './src/charts/heatmap';
-export type { MetricTrendNode } from './src/charts/metric_trend';
-export type { TreemapItem, TreemapNode } from './src/charts/treemap';
-export type { XyChartNode } from './src/charts/xy_chart';
-export type { ValueFormat } from './src/model/format';
-export type { ChartSelection, Predicate, SelectionDimension } from './src/model/selection';
+export {
+  type DonutNode,
+  type DonutPart,
+  type ResolvedDonut,
+  resolveDonut,
+} from './src/charts/donut';
+export {
+  type GaugeBand,
+  type GaugeNode,
+  type ResolvedGauge,
+  resolveGauge,
+} from './src/charts/gauge';
+export {
+  type HeatmapBand,
+  type HeatmapNode,
+  type HeatmapPosition,
+  type ResolvedColorScale,
+  type ResolvedHeatmap,
+  bandIndex,
+  resolveHeatmap,
+} from './src/charts/heatmap';
+export {
+  type MetricChange,
+  type MetricDirection,
+  type MetricTrendNode,
+  type MetricTrendPoint,
+  type ResolvedMetricTrend,
+  resolveMetricTrend,
+} from './src/charts/metric_trend';
+export {
+  type ResolvedTreemap,
+  type TreemapItem,
+  type TreemapNode,
+  type TreemapPart,
+  MAX_TREE_DEPTH,
+  resolveTreemap,
+} from './src/charts/treemap';
+export {
+  type ResolvedXy,
+  type XyChartNode,
+  type XyPosition,
+  type XySeries,
+  resolveXy,
+} from './src/charts/xy_chart';
+export {
+  type PrepareChartsOptions,
+  type PreparedCharts,
+  prepareCharts,
+} from './src/engine/artifacts';
+export { composeEngines } from './src/engine/compose';
+export {
+  type ChartArtifact,
+  type ChartComponents,
+  type ChartEngine,
+  type ChartNode,
+  type ChartSupport,
+  type ChartType,
+  type DrawRequest,
+  type HitMap,
+  type HitMark,
+  type LegendItem,
+  type LiveChartProps,
+  CHART_TYPES,
+} from './src/engine/types';
+export { type ValueFormat, formatValue } from './src/model/format';
+export {
+  type ChartSelection,
+  type Predicate,
+  type SelectionDimension,
+  type SelectionTarget,
+  selectionEvent,
+} from './src/model/selection';
+export { formatShare } from './src/model/share';
+export { type Granularity, formatTime, timeValue } from './src/model/time';
 export { type Tone, TONES } from './src/model/tone';
-export { chartsPack } from './src/pack';
+export {
+  type ChartsPackOptions,
+  chartCardFrame,
+  chartsPack,
+  chartThemes,
+  defineChartsPack,
+} from './src/pack';
+export type { ChartsFrameTheme } from './src/render/context';
+export { type ColorMode, type ResolvedChartTheme, resolveChartTheme } from './src/theme/resolve';

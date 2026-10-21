@@ -8,7 +8,7 @@
 import { chartDistillery } from '../theme/distillery';
 
 const { createStyleModule, tokens } = chartDistillery;
-const { color, font, space, stroke, table } = tokens;
+const { color, font, space, stroke, legend, table } = tokens;
 
 export const figureModule = createStyleModule('figure', ({ css }) => ({
   root: css`
@@ -32,6 +32,47 @@ export const figureModule = createStyleModule('figure', ({ css }) => ({
   `,
   summary: css`
     margin: 0;
+  `,
+  drawing: css`
+    display: flex;
+    gap: ${space.px12};
+  `,
+  plot: css`
+    flex: 0 0 auto;
+    max-width: 100%;
+  `,
+  /** Read by assistive tech and revealed on focus, so the data stays reachable beside a drawing. */
+  visuallyHidden: css`
+    border: 0;
+    clip-path: inset(50%);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  `,
+}));
+
+export const legendModule = createStyleModule('legend', ({ css }) => ({
+  list: css`
+    display: flex;
+    flex-direction: column;
+    gap: ${legend.gap};
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  `,
+  item: css`
+    align-items: center;
+    display: flex;
+    gap: ${legend.gap};
+  `,
+  swatch: css`
+    flex: 0 0 auto;
+    height: ${legend.swatch};
+    width: ${legend.swatch};
   `,
 }));
 
