@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/es-query'
   - '@kbn/datemath'
+  - '@kbn/data-views-plugin'
 tags:
   - plugin
   - prod
