@@ -94,13 +94,19 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     },
 
     async deleteAllApiKeyOneByOne() {
-      const hasApiKeysToDelete = await testSubjects.exists('*apiKeysTableDeleteAction');
-      if (hasApiKeysToDelete) {
-        const apiKeysToDelete = await testSubjects.findAll('*apiKeysTableDeleteAction');
-        for (const element of apiKeysToDelete) {
-          await element.click();
-          await testSubjects.click('confirmModalConfirmButton');
+      const deleteActions = await testSubjects.findAll('*apiKeysTableDeleteAction');
+      const deleteActionSubjects = await Promise.all(
+        deleteActions.map((deleteAction) => deleteAction.getAttribute('data-test-subj'))
+      );
+
+      for (const deleteActionSubject of deleteActionSubjects) {
+        if (!deleteActionSubject) {
+          throw new Error('API key delete action is missing its test subject');
         }
+
+        await testSubjects.click(deleteActionSubject);
+        await testSubjects.click('confirmModalConfirmButton');
+        await testSubjects.waitForDeleted(deleteActionSubject);
       }
     },
 
