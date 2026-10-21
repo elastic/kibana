@@ -135,7 +135,7 @@ describe('Kuery field suggestions', () => {
     expect(keywordIndex).toBeLessThan(analyzedIndex);
   });
 
-  test('should not have descriptions', async () => {
+  test('should not have descriptions for fields without a custom label', async () => {
     const prefix = '';
     const suffix = '';
     const suggestions = await getSuggestions(
@@ -145,6 +145,46 @@ describe('Kuery field suggestions', () => {
     expect(suggestions.length).toBeGreaterThan(0);
     suggestions.forEach((suggestion) => {
       expect(suggestion).not.toHaveProperty('description');
+    });
+  });
+
+  describe('custom labels', () => {
+    beforeEach(() => {
+      querySuggestionsArgs = {
+        indexPatterns: [
+          {
+            ...indexPatternResponse,
+            fields: indexPatternResponse.fields.map((field) =>
+              field.name === 'machine.os' ? { ...field, customLabel: 'Operating system' } : field
+            ),
+          },
+        ],
+      } as unknown as QuerySuggestionGetFnArgs;
+    });
+
+    test('should use the custom label as description and keep the field name as text', async () => {
+      const suggestions = await getSuggestions(
+        querySuggestionsArgs,
+        mockKueryNode({ prefix: 'machine.os', suffix: '' })
+      );
+
+      expect(suggestions.find(({ text }) => text === 'machine.os ')).toHaveProperty(
+        'description',
+        'Operating system'
+      );
+      expect(suggestions.find(({ text }) => text === 'machine.os.raw ')).not.toHaveProperty(
+        'description'
+      );
+    });
+
+    test('should match the custom label', async () => {
+      const suggestions = await getSuggestions(
+        querySuggestionsArgs,
+        mockKueryNode({ prefix: 'operating', suffix: '' })
+      );
+
+      expect(suggestions).toHaveLength(1);
+      expect(suggestions[0].text).toBe('machine.os ');
     });
   });
 
