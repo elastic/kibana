@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/fleet/enrollment_api_keys/{keyId}"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-fleet-enrollment-api-keys-keyid"
   }
 }

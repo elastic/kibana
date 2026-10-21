@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/alerting/rules/backfill/_find"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-rules-backfill-find"
   }
 }

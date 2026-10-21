@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/data_views/data_view/{viewId}/fields"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-updateFieldsMetadataDefault"
   }
 }

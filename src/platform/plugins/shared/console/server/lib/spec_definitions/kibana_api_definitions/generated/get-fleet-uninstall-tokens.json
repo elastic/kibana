@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/fleet/uninstall_tokens"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-uninstall-tokens"
   }
 }

@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/security/entity_store/install"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-security-entity-store-install"
   }
 }

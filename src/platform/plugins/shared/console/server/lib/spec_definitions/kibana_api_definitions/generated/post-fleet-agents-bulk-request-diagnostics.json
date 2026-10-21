@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/fleet/agents/bulk_request_diagnostics"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agents-bulk-request-diagnostics"
   }
 }

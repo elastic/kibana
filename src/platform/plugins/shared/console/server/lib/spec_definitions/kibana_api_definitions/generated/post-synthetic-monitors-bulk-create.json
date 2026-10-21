@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/synthetics/monitors/_bulk_create"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-synthetic-monitors-bulk-create"
   }
 }

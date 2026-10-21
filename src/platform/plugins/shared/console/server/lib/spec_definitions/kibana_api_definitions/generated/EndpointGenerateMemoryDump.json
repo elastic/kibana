@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/endpoint/action/memory_dump"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-EndpointGenerateMemoryDump"
   }
 }

@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/actions/connectors"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-actions-connectors"
   }
 }

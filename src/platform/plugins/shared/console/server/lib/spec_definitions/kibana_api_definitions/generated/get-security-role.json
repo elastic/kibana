@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/security/role"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-security-role"
   }
 }

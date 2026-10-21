@@ -21,8 +21,18 @@ describe('extractKibanaApiPaths', () => {
     };
 
     expect(extractKibanaApiPaths(oasDocument)).toEqual({
-      'get-spaces-space-id': { methods: ['GET'], patterns: ['api/spaces/space/{id}'] },
-      'put-spaces-space-id': { methods: ['PUT'], patterns: ['api/spaces/space/{id}'] },
+      'get-spaces-space-id': {
+        methods: ['GET'],
+        patterns: ['api/spaces/space/{id}'],
+        documentation:
+          'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-spaces-space-id',
+      },
+      'put-spaces-space-id': {
+        methods: ['PUT'],
+        patterns: ['api/spaces/space/{id}'],
+        documentation:
+          'https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-spaces-space-id',
+      },
     });
   });
 

@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/fleet/outputs/{outputId}"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-outputs-outputid"
   }
 }

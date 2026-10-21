@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/fleet/agents/{agentId}/reassign"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agents-agentid-reassign"
   }
 }

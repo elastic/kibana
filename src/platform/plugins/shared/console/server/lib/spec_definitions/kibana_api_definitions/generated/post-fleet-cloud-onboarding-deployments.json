@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/fleet/cloud_onboarding_deployments"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-cloud-onboarding-deployments"
   }
 }

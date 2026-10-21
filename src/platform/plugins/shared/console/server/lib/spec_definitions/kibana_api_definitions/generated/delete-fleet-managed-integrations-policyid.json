@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/fleet/managed_integrations/{policyId}"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-fleet-managed-integrations-policyid"
   }
 }

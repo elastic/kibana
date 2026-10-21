@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/data_views/v2"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-data-views-v2"
   }
 }

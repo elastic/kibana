@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/context_engine/ai_index/_query"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-context-engine-ai-index-query"
   }
 }

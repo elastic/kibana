@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/cases/alerts/{alertId}"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getCasesByAlertDefaultSpace"
   }
 }

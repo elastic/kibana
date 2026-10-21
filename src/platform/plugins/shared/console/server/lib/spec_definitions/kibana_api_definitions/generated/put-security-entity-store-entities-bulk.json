@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/security/entity_store/entities/bulk"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-security-entity-store-entities-bulk"
   }
 }

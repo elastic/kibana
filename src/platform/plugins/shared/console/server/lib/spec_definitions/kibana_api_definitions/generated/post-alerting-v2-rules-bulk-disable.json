@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/alerting/v2/rules/_bulk_disable"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-v2-rules-bulk-disable"
   }
 }

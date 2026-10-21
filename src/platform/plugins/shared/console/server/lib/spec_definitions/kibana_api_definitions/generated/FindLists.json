@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/lists/_find"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-FindLists"
   }
 }

@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/fleet/message_signing_service/rotate_key_pair"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-message-signing-service-rotate-key-pair"
   }
 }

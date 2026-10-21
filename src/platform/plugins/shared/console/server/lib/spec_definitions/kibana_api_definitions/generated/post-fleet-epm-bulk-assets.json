@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/fleet/epm/bulk_assets"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-epm-bulk-assets"
   }
 }

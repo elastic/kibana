@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/alerting/rule/{id}/query_inspector"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-alerting-rule-id-query-inspector"
   }
 }

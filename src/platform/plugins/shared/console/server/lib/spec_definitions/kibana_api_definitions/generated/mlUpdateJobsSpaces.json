@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/ml/saved_objects/update_jobs_spaces"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-mlUpdateJobsSpaces"
   }
 }

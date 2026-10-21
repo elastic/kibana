@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/endpoint/action/cancel"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-CancelAction"
   }
 }

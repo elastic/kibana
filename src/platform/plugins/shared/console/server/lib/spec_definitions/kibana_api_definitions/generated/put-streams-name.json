@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/streams/{name}"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-streams-name"
   }
 }

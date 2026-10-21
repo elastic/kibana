@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/endpoint/action/get_file"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-EndpointGetFileAction"
   }
 }

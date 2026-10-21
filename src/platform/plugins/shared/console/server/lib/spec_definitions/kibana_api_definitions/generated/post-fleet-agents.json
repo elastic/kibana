@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/fleet/agents"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agents"
   }
 }

@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/workflows/managed/workflow/{id}"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-workflows-managed-workflow-id"
   }
 }

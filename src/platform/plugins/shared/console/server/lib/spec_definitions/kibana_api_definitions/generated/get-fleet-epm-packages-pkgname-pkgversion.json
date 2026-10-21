@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/fleet/epm/packages/{pkgName}/{pkgVersion}"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-epm-packages-pkgname-pkgversion"
   }
 }

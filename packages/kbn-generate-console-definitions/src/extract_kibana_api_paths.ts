@@ -11,6 +11,9 @@ import type { EndpointDescription } from '@kbn/console-plugin/common/types';
 
 const HTTP_METHODS = ['get', 'post', 'put', 'delete', 'patch'] as const;
 
+// Same base as `kibanaApiReference` in @kbn/doc-links.
+const KIBANA_API_DOCS_URL = 'https://www.elastic.co/docs/api/doc/kibana/';
+
 interface OasOperation {
   operationId?: unknown;
 }
@@ -20,8 +23,8 @@ interface OasDocument {
 }
 
 /**
- * Builds Console endpoint definitions (methods and URL patterns only) from a
- * parsed Kibana OpenAPI document, one definition per operation keyed by its
+ * Builds Console endpoint definitions (methods, URL patterns and documentation links)
+ * from a parsed Kibana OpenAPI document, one definition per operation keyed by its
  * operationId. Patterns have no leading slash, matching the Elasticsearch ones.
  */
 export const extractKibanaApiPaths = (
@@ -38,6 +41,7 @@ export const extractKibanaApiPaths = (
       result[operationId] = {
         methods: [method.toUpperCase()],
         patterns: [pathTemplate.replace(/^\//, '')],
+        documentation: `${KIBANA_API_DOCS_URL}operation/operation-${operationId}`,
       };
     }
   }

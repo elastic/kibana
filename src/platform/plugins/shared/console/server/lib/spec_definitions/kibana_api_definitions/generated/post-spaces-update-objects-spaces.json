@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/spaces/_update_objects_spaces"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-spaces-update-objects-spaces"
   }
 }

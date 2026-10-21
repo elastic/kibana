@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/tags/{id}"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-tags-id"
   }
 }

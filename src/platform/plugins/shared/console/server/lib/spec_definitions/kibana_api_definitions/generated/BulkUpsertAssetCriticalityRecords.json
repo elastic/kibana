@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/asset_criticality/bulk"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-BulkUpsertAssetCriticalityRecords"
   }
 }

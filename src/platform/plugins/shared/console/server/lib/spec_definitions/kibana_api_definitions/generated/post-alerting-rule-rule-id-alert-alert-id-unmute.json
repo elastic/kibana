@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-rule-rule-id-alert-alert-id-unmute"
   }
 }

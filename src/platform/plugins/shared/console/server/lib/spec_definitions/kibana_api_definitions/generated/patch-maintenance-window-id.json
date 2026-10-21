@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/maintenance_window/{id}"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-patch-maintenance-window-id"
   }
 }

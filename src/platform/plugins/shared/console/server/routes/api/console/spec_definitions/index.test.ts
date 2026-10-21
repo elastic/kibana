@@ -101,10 +101,14 @@ describe('WHEN serving Console spec definitions', () => {
     const response = await handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory);
     const payload = JSON.parse(String(response.payload));
 
-    expect(payload.kibana.endpoints['get-actions-connector-types']).toEqual({
-      methods: ['GET'],
-      patterns: ['api/actions/connector_types'],
-    });
+    expect(payload.kibana.endpoints['get-actions-connector-types']).toEqual(
+      expect.objectContaining({
+        methods: ['GET'],
+        patterns: ['api/actions/connector_types'],
+        documentation:
+          'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-actions-connector-types',
+      })
+    );
   });
 
   it('SHOULD return not modified when the cached response ETag matches', async () => {

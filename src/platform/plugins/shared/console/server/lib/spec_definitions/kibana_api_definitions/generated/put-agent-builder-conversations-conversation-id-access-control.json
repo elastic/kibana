@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/agent_builder/conversations/{conversation_id}/access_control"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-agent-builder-conversations-conversation-id-access-control"
   }
 }

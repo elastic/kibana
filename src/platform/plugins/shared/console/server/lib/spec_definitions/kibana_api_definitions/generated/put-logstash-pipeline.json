@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/logstash/pipeline/{id}"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-logstash-pipeline"
   }
 }

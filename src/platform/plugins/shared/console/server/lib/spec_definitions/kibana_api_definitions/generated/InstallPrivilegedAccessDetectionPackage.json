@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/entity_analytics/privileged_user_monitoring/pad/install"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-InstallPrivilegedAccessDetectionPackage"
   }
 }

@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/alerting/v2/execution_history/action_policies"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-alerting-v2-execution-history-action-policies"
   }
 }

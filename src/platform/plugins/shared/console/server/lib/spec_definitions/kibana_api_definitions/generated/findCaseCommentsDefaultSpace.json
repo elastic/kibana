@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "api/cases/{caseId}/comments/_find"
-    ]
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-findCaseCommentsDefaultSpace"
   }
 }
