@@ -23,6 +23,7 @@
     "@kbn/i18n",
     "@kbn/repo-info",
     "@kbn/storybook",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
+    "@kbn/ui-callout"
   ]
 }

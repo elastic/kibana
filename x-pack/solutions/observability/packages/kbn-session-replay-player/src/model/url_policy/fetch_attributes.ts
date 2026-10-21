@@ -83,7 +83,8 @@ const neutralizeAttribute = (
       }
       return allowance.isAllowedImageUrl(value) ? value : DROP;
     case 'rr_src':
-      // rrweb keeps the source of an iframe here; it is never needed to render and names a remote page.
+      // rrweb records the source of an iframe here and never applies it on rebuild, so it cannot fetch.
+      // It is dropped anyway so that no disallowed origin appears anywhere in a neutralised stream.
       return DROP;
     case 'poster':
     case 'background':
