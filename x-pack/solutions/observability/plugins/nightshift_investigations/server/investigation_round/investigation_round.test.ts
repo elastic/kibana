@@ -421,7 +421,7 @@ describe('server/investigation_round', () => {
       expect(reads.decisionTreeIds).toEqual(['symptom:checkout-latency']);
     });
 
-    it('resolves relative bash references against working_directory and excludes write_file from Cortex/Memory impressions', () => {
+    it('resolves relative bash references against working_directory and excludes write-only operations from Cortex/Memory impressions', () => {
       expect(
         isSeededWorkspaceAccess(SANDBOX_BASH_TOOL_ID, {
           working_directory: '/workspace/memories',
@@ -429,13 +429,43 @@ describe('server/investigation_round', () => {
         })
       ).toBe(true);
 
+      // A telemetry curl command running with working_directory inside a seeded root does not access seeded files
+      expect(
+        isSeededWorkspaceAccess(SANDBOX_BASH_TOOL_ID, {
+          working_directory: '/workspace/memories',
+          command: 'curl -s https://localhost:9200/_cluster/health | jq .',
+        })
+      ).toBe(false);
+
+      // Relative cross-root path resolves against working_directory and checks the target root
+      expect(
+        isSeededWorkspaceAccess(
+          SANDBOX_BASH_TOOL_ID,
+          {
+            working_directory: '/workspace/memories',
+            command: 'cat ../cortex/services/checkout-service.md',
+          },
+          { skipRoots: ['cortex'] }
+        )
+      ).toBe(true);
+      expect(
+        isSeededWorkspaceAccess(
+          SANDBOX_BASH_TOOL_ID,
+          {
+            working_directory: '/workspace/memories',
+            command: 'cat redis-pool-exhaustion.md',
+          },
+          { skipRoots: ['cortex'] }
+        )
+      ).toBe(false);
+
       const steps = stepsFromRound([
         {
           type: 'tool_call',
           tool_id: SANDBOX_BASH_TOOL_ID,
           params: {
             working_directory: '/workspace/memories',
-            command: 'cat redis-pool-exhaustion.md && cat .index.json',
+            command: 'cat redis-pool-exhaustion.md 2>/dev/null && jq ".count > 0" .index.json',
           },
           results: [{ type: 'other', data: { stdout: '...', exit_code: 0 } }],
         },
@@ -447,6 +477,25 @@ describe('server/investigation_round', () => {
             command: 'cat checkout-service.md',
           },
           results: [{ type: 'other', data: { stdout: '...', exit_code: 0 } }],
+        },
+        {
+          type: 'tool_call',
+          tool_id: SANDBOX_BASH_TOOL_ID,
+          params: {
+            working_directory: '/workspace/memories',
+            command:
+              "printf 'new content' > fresh-note.md && echo 'x' | tee tee-note.md && cp redis-pool-exhaustion.md copied-note.md && sed -i 's/a/b/' sed-note.md",
+          },
+          results: [{ type: 'other', data: { stdout: '', exit_code: 0 } }],
+        },
+        {
+          type: 'tool_call',
+          tool_id: SANDBOX_BASH_TOOL_ID,
+          params: {
+            working_directory: '/workspace/cortex/services',
+            command: "cat <<'EOF' > unwritten-service.md\n# Service\nEOF",
+          },
+          results: [{ type: 'other', data: { stdout: '', exit_code: 0 } }],
         },
         {
           type: 'tool_call',
