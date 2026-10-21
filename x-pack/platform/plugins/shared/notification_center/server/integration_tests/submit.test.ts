@@ -10,6 +10,7 @@ import type { CoreSetup } from '@kbn/core/server';
 import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
+import { createNotificationEsClient } from './es_client';
 import { NOTIFICATION_TYPES } from '../../common';
 import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
 import { buildForType, NotificationValidationError } from '../lib/submit';
@@ -28,7 +29,7 @@ const content = (overrides: Record<string, unknown> = {}) => ({
 describe('notificationCenter forType().submit() [integration]', () => {
   let esServer: EsTestCluster;
   let forType: ReturnType<typeof buildForType>;
-  let esClient: ReturnType<EsTestCluster['getClient']>;
+  let esClient: ReturnType<typeof createNotificationEsClient>;
 
   const countById = async (notificationId: string) => {
     await esClient.indices.refresh({ index: NOTIFICATION_DATA_STREAM_NAME });
@@ -46,7 +47,7 @@ describe('notificationCenter forType().submit() [integration]', () => {
       log: new ToolingLog({ writeTo: process.stdout, level: 'error' }),
     });
     await esServer.start();
-    esClient = esServer.getClient();
+    esClient = createNotificationEsClient(esServer.getHostUrls()[0]);
 
     // submit resolves its client via core.getStartServices().elasticsearch, so mock the start
     // service to hand back the test cluster's client.
@@ -89,5 +90,43 @@ describe('notificationCenter forType().submit() [integration]', () => {
     ).rejects.toBeInstanceOf(NotificationValidationError);
 
     expect(await countById('inference:modelStatus:endpoint-c:deprecated')).toHaveLength(0);
+  });
+
+  // Kibana registers no data stream and no index template: the first write above is what made
+  // Elasticsearch build the stream from its descriptor. These two assertions are the only thing
+  // standing between a descriptor that stops matching the plugin and a silent empty bell.
+  describe('the stream Elasticsearch created from its descriptor', () => {
+    it('is a system data stream', async () => {
+      const { data_streams: streams } = await esClient.indices.getDataStream({
+        name: NOTIFICATION_DATA_STREAM_NAME,
+      });
+
+      expect(streams).toHaveLength(1);
+      expect(streams[0].system).toBe(true);
+      expect(streams[0].hidden).toBe(true);
+    });
+
+    it('maps every field the plugin filters, sorts or collapses on', async () => {
+      const mapping = await esClient.indices.getMapping({
+        index: NOTIFICATION_DATA_STREAM_NAME,
+      });
+      const [{ mappings }] = Object.values(mapping);
+
+      expect(mappings.dynamic).toBe('false');
+      expect(mappings.properties).toMatchObject({
+        '@timestamp': { type: 'date' },
+        event_timestamp: { type: 'date' },
+        notification_id: { type: 'keyword' },
+        namespace: { type: 'keyword' },
+        type: { type: 'keyword' },
+        severity: { type: 'keyword' },
+        profile_uid: { type: 'keyword' },
+        space_ids: { type: 'keyword' },
+      });
+      // An over-long value would go unindexed and read back as an absent field, which for
+      // `profile_uid` means "broadcast" — a targeted notification shown to everyone.
+      expect(mappings.properties?.profile_uid).not.toHaveProperty('ignore_above');
+      expect(mappings.properties?.space_ids).not.toHaveProperty('ignore_above');
+    });
   });
 });

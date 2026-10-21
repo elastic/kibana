@@ -76,6 +76,9 @@ export const queryNotifications = async (
   const [response, resolvedReadState] = await Promise.all([
     esClient.search<Notification>({
       index: NOTIFICATION_DATA_STREAM_NAME,
+      // Elasticsearch creates the stream from its descriptor on the first submitted
+      // notification, so until a producer writes one there is no index to read.
+      ignore_unavailable: true,
       query: { bool: { filter: buildFilters(validated) } },
       collapse: { field: 'notification_id' },
       sort: [{ '@timestamp': 'desc' }, { notification_id: 'asc' }],

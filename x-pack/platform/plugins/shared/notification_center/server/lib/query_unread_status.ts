@@ -33,6 +33,8 @@ export const queryUnreadStatus = async (
   const { overrides, readAllBefore } = readState;
   const response = await esClient.search<UnreadStatusSource>({
     index: NOTIFICATION_DATA_STREAM_NAME,
+    // No stream until a producer submits the first notification, same as `queryNotifications`.
+    ignore_unavailable: true,
     // Encodes the read-state invariant that nothing at or before the marker can be unread, which
     // `isReadAt` still enforces per hit. An override can only postdate the marker, never precede
     // it. Pruning here is what makes polling cheap: `can_match` skips whole backing indices.
