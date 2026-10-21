@@ -224,4 +224,50 @@ describe('stepInstallWorkflows', () => {
       [KibanaSavedObjectType.workflow]
     );
   });
+
+  it('also upgrades the workflows of every additional space on a primary-space install', async () => {
+    jest.mocked(installWorkflows).mockResolvedValue([WORKFLOW_REF]);
+    const otherRef = { ...WORKFLOW_REF, id: 'other' };
+    const context = createContext({
+      paths: [WORKFLOW_PATH],
+      installedKibana: [WORKFLOW_REF],
+      additionalSpaces: { default: [], 'space-a': [otherRef], 'space-b': [] },
+    });
+
+    await stepInstallWorkflows(context);
+
+    expect(installWorkflows).toHaveBeenCalledTimes(3);
+    expect(installWorkflows).toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: 'default', previousRefs: [WORKFLOW_REF] })
+    );
+    expect(installWorkflows).toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: 'space-a', previousRefs: [otherRef] })
+    );
+    expect(installWorkflows).toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: 'space-b', previousRefs: [] })
+    );
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
+      context.savedObjectsClient,
+      'my_pkg',
+      [WORKFLOW_REF],
+      'space-a',
+      true,
+      true,
+      [KibanaSavedObjectType.workflow]
+    );
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledTimes(3);
+  });
+
+  it('does not touch other spaces when installing in an additional space', async () => {
+    jest.mocked(installWorkflows).mockResolvedValue([WORKFLOW_REF]);
+    const context = createContext({
+      paths: [WORKFLOW_PATH],
+      spaceId: 'space-a',
+      additionalSpaces: { 'space-a': [], 'space-b': [] },
+    });
+
+    await stepInstallWorkflows(context);
+
+    expect(installWorkflows).toHaveBeenCalledTimes(1);
+  });
 });

@@ -54,27 +54,30 @@ export const stepInstallWorkflows = async (
       : false);
   const { name: pkgName } = packageInstallContext.packageInfo;
 
-  const previousWorkflowRefs = getInstalledWorkflowRefs(
-    installedPkg,
-    spaceId,
-    installAsAdditionalSpace
-  );
-
   const hasWorkflowAssets = packageInstallContext.paths.some(isWorkflowAssetPath);
-  if (!hasWorkflowAssets && !previousWorkflowRefs.length) {
+  const primarySpaceId = installedPkg?.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
+  // A primary-space upgrade also upgrades every additional space, like the Kibana assets step.
+  const additionalSpaceIds =
+    installedPkg && !installAsAdditionalSpace
+      ? Object.keys(installedPkg.attributes.additional_spaces_installed_kibana ?? {}).filter(
+          (additionalSpaceId) => additionalSpaceId !== primarySpaceId
+        )
+      : [];
+  const targets = [
+    { targetSpaceId: spaceId, asAdditionalSpace: installAsAdditionalSpace },
+    ...additionalSpaceIds.map((targetSpaceId) => ({ targetSpaceId, asAdditionalSpace: true })),
+  ].map((target) => ({
+    ...target,
+    previousRefs: getInstalledWorkflowRefs(
+      installedPkg,
+      target.targetSpaceId,
+      target.asAdditionalSpace
+    ),
+  }));
+
+  if (!hasWorkflowAssets && targets.every(({ previousRefs }) => !previousRefs.length)) {
     return;
   }
-
-  const saveRefs = (refs: typeof previousWorkflowRefs) =>
-    saveKibanaAssetsRefs(
-      savedObjectsClient,
-      pkgName,
-      refs,
-      spaceId,
-      installAsAdditionalSpace,
-      true,
-      [KibanaSavedObjectType.workflow]
-    );
 
   const client = (await isWorkflowAssetsFlagEnabled())
     ? await appContextService.getManagedWorkflowsClient()
@@ -90,13 +93,24 @@ export const stepInstallWorkflows = async (
   }
 
   await withPackageSpan('Install workflows', async () => {
-    const assetRefs = await installWorkflows({
-      client,
-      packageInstallContext,
-      spaceId,
-      logger,
-      previousRefs: previousWorkflowRefs,
-    });
-    await saveRefs(assetRefs);
+    for (const { targetSpaceId, asAdditionalSpace, previousRefs } of targets) {
+      if (!hasWorkflowAssets && !previousRefs.length) continue;
+      const assetRefs = await installWorkflows({
+        client,
+        packageInstallContext,
+        spaceId: targetSpaceId,
+        logger,
+        previousRefs,
+      });
+      await saveKibanaAssetsRefs(
+        savedObjectsClient,
+        pkgName,
+        assetRefs,
+        targetSpaceId,
+        asAdditionalSpace,
+        true,
+        [KibanaSavedObjectType.workflow]
+      );
+    }
   });
 };
