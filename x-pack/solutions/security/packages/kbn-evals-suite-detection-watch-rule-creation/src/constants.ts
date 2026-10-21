@@ -27,6 +27,14 @@ export const WORKFLOWS_API_VERSION = '2023-10-31';
 /** Step ids from the managed workflow yaml (@kbn/workflows managed/definitions/alertzero/rule_creation.yaml). */
 export const DRAFT_STEP_ID = 'draft_creation';
 export const REVIEW_STEP_ID = 'review_creation';
+export const PROPOSE_STEP_ID = 'propose_creation';
+
+/**
+ * Investigation id for scoring-only runs. No conversation has this id, so the workflow's
+ * attach_draft step fails (on-failure: continue), propose_creation is skipped, and the run
+ * completes on its own instead of parking on an analyst proposal. The draft is still scored.
+ */
+export const SCORING_INVESTIGATION_ID = '00000000-0000-4000-8000-000000000000';
 
 /**
  * Agent Builder tool the workflow's `ai.agent` step is instructed to call. Consumed by the

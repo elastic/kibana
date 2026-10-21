@@ -19,6 +19,7 @@ import {
   DRAFT_STEP_ID,
   REVIEW_STEP_ID,
   RULE_CREATION_WORKFLOW_ID,
+  SCORING_INVESTIGATION_ID,
   WORKFLOWS_API_VERSION,
 } from './constants';
 import { draftRuleSchema, type DraftRule } from './types';
@@ -123,6 +124,7 @@ export class RuleCreationClient {
 
   async run({
     input,
+    investigationId = SCORING_INVESTIGATION_ID,
     maxWaitMs = 10 * 60_000,
     pollIntervalMs = 5_000,
   }: {
@@ -132,6 +134,7 @@ export class RuleCreationClient {
       evidence: string;
       confidence: number;
     };
+    investigationId?: string;
     maxWaitMs?: number;
     pollIntervalMs?: number;
   }): Promise<RuleCreationResult> {
@@ -141,7 +144,7 @@ export class RuleCreationClient {
         method: 'POST',
         version: WORKFLOWS_API_VERSION,
         headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-        body: JSON.stringify({ inputs: input }),
+        body: JSON.stringify({ inputs: { ...input, investigation_id: investigationId } }),
       }
     );
 
