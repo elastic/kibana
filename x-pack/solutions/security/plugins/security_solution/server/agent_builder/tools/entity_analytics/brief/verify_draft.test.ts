@@ -19,10 +19,9 @@ const facts: EntityFacts[] = ['host:a', 'host:ab', 'user:b', 'user:c', 'user:d']
   })
 );
 
-const priority = (entityId: string, observed = 'Observed.'): BriefPriority => ({
+const priority = (entityId: string, assessment = 'Assessed.'): BriefPriority => ({
   entityId,
-  observed,
-  whyItMatters: 'Matters.',
+  assessment,
   nextStep: 'Next.',
 });
 

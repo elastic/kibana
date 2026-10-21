@@ -72,14 +72,12 @@ const verified: VerifiedBrief = {
   priorities: [
     {
       entityId: 'user:b',
-      observed: 'New and privileged',
-      whyItMatters: 'Nothing else is.',
+      assessment: 'New and privileged, which nothing else is',
       nextStep: 'Review its logins',
     },
     {
       entityId: 'host:a',
-      observed: 'Risk rose.',
-      whyItMatters: 'High impact.',
+      assessment: 'Risk rose on a high impact asset.',
       nextStep: 'Review its alerts.',
     },
   ],
@@ -130,7 +128,7 @@ describe('buildViewModel', () => {
         name: 'jdoe',
         privilegedUser: true,
         firstSeen: '2 days ago',
-        observed: 'New and privileged.',
+        assessment: 'New and privileged, which nothing else is.',
         nextStep: 'Review its logins.',
       },
       {

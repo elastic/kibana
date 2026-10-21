@@ -51,10 +51,8 @@ const fixtureViewModel: BriefViewModel = {
           { name: 'Unusual Logon', count: 1 },
         ],
       },
-      observed:
-        'Has alerts, is newly high/critical, and sits on the watchlist, with risk score 76 (High).',
-      whyItMatters:
-        'Combines a privileged, high-impact identity with three separate flags, unlike any other entity here.',
+      assessment:
+        'A privileged, high-impact identity newly at High risk, with credential and remote access activity together, is the shape of account misuse and should be confirmed before anything else.',
       nextStep:
         'Review the alerts behind the new High risk score and confirm recent access activity.',
       riskHistory: {
@@ -79,10 +77,8 @@ const fixtureViewModel: BriefViewModel = {
       risk: { score: 66, level: 'Moderate', of: 'entity' },
       assetCriticality: 'Extreme impact',
       firstSeen: '2 days ago',
-      observed:
-        'Flagged for alerts and as a new entity, first seen 2 days ago, asset criticality is Extreme impact, risk score 66 (Moderate).',
-      whyItMatters:
-        'Extreme impact criticality on a host seen for the first time this week raises the stakes of its alerts.',
+      assessment:
+        'A high-impact host that appeared this week and is already alerting points to a provisioning or tooling problem more than an intrusion, but confirm that first.',
       nextStep: "Check what triggered the alerts and verify the host's provisioning is expected.",
     },
     {
@@ -93,10 +89,8 @@ const fixtureViewModel: BriefViewModel = {
       risk: { score: 58, level: 'Moderate', of: 'entity' },
       assetCriticality: 'High impact',
       firstSeen: '3 days ago',
-      observed:
-        'Flagged for alerts and as a new entity, first seen 3 days ago, asset criticality is High impact, risk score 58 (Moderate).',
-      whyItMatters:
-        'A newly appeared high-impact host with alerts warrants a look even without other flags.',
+      assessment:
+        'A newly appeared high-impact host with alerts of the same kind as the first priority could be the next step of the same activity.',
       nextStep: "Review the alerts and confirm the host's role and ownership.",
     },
   ],
@@ -112,8 +106,7 @@ const withText = (viewModel: BriefViewModel, wordCount: number): BriefViewModel 
     recommendation: words(wordCount),
     priorities: viewModel.priorities.map((priority) => ({
       ...priority,
-      observed: words(wordCount),
-      whyItMatters: words(wordCount),
+      assessment: words(wordCount * 2),
       nextStep: words(wordCount),
     })),
   };

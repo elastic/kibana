@@ -54,10 +54,9 @@ export const verifyDraft = (draft: BriefDraft, facts: EntityFacts[]): VerifiedBr
     'entityId'
   )
     .slice(0, MAX_PRIORITIES)
-    .map(({ entityId, observed, whyItMatters, nextStep }) => ({
+    .map(({ entityId, assessment, nextStep }) => ({
       entityId,
-      observed: keepFlaggedMentions(observed),
-      whyItMatters: keepFlaggedMentions(whyItMatters),
+      assessment: keepFlaggedMentions(assessment),
       nextStep: keepFlaggedMentions(nextStep),
     }));
   const keepProse = (text: string): string | undefined =>

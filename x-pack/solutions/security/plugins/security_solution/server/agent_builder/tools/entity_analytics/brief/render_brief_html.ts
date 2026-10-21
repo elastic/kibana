@@ -173,9 +173,7 @@ const renderPriority = (priority: Priority): string => {
           ? `<p class="alerts">${escapeHtml(describeAlerts(priority.alerts))}</p>`
           : ''
       }
-      <p class="priority-text">${escapeHtml(priority.observed)} ${escapeHtml(
-    priority.whyItMatters
-  )}</p>
+      <p class="priority-text">${escapeHtml(priority.assessment)}</p>
       <p class="next"><span class="label">Next</span>${escapeHtml(priority.nextStep)}</p>
       ${priority.riskHistory ? renderRiskHistory(name, priority.riskHistory) : ''}
     </li>`;
@@ -334,8 +332,8 @@ const estimateHeight = (viewModel: BriefViewModel): number => {
     HEIGHTS.section +
     (priorities.length === 0
       ? HEIGHTS.line
-      : sumBy(priorities, ({ observed, whyItMatters, nextStep, alerts, riskHistory }) => {
-          const lines = countLines(`${observed} ${whyItMatters}`) + countLines(nextStep);
+      : sumBy(priorities, ({ assessment, nextStep, alerts, riskHistory }) => {
+          const lines = countLines(assessment) + countLines(nextStep);
           return (
             HEIGHTS.priority +
             lines * HEIGHTS.line +

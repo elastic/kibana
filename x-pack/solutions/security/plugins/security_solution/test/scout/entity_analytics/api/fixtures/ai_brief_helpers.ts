@@ -95,8 +95,8 @@ export const buildDraft = (entityId: string): BriefDraft => ({
   priorities: [
     {
       entityId,
-      observed: 'Has High or Critical alerts and newly reached High risk.',
-      whyItMatters: 'A privileged user on a high-impact asset.',
+      assessment:
+        'A privileged user newly at High risk is the shape of account misuse, and should be confirmed first.',
       nextStep: 'Review the alerts for this entity in the last 7 days.',
     },
   ],
