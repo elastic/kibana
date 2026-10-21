@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout-oblt';
+import { globalSetupHook, tags } from '@kbn/scout-oblt';
 import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../../common/feature_flags';
 
-globalSetupHook('Enable the Add Data page V2 feature flag', async ({ apiServices, log }) => {
-  log.info(`[setup] Enabling ${IS_ADD_DATA_PAGE_V2_ENABLED}...`);
-  await apiServices.core.settings({
-    'feature_flags.overrides': { [IS_ADD_DATA_PAGE_V2_ENABLED]: true },
-  });
-});
+globalSetupHook(
+  'Enable the Add Data page V2 feature flag',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.all] },
+  async ({ apiServices, log }) => {
+    log.info(`[setup] Enabling ${IS_ADD_DATA_PAGE_V2_ENABLED}...`);
+    await apiServices.core.settings({
+      'feature_flags.overrides': { [IS_ADD_DATA_PAGE_V2_ENABLED]: true },
+    });
+  }
+);

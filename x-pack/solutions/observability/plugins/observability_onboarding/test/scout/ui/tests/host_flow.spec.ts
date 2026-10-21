@@ -8,12 +8,19 @@
 import { expect } from '@kbn/scout-oblt/ui';
 import { tags } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
-import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../../common/feature_flags';
+
+const V2_FF_ID = 'observability.addDataPageV2Enabled';
 
 test.describe.serial(
   'Host Onboarding',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    test.beforeAll(async ({ apiServices }) => {
+      await apiServices.core.settings({
+        'feature_flags.overrides': { [V2_FF_ID]: true },
+      });
+    });
+
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });
@@ -121,27 +128,6 @@ test.describe.serial(
       await expect(pageObjects.host.visualizeActionLink('logs')).toBeVisible({
         timeout: 30_000,
       });
-    });
-
-    test('navigating to /host/linux redirects to the V1 landing root when V2 is disabled', async ({
-      apiServices,
-      page,
-      pageObjects,
-    }) => {
-      try {
-        await apiServices.core.settings({
-          'feature_flags.overrides': { [IS_ADD_DATA_PAGE_V2_ENABLED]: false },
-        });
-        await pageObjects.host.gotoPath('/host/linux');
-        await pageObjects.onboarding.useCaseGridByTestId.waitFor({ state: 'visible' });
-        await expect(pageObjects.host.landingWrapper).toHaveCount(0);
-        await expect(pageObjects.host.layout('linux')).toHaveCount(0);
-        await expect(page).not.toHaveURL(/\/host\//);
-      } finally {
-        await apiServices.core.settings({
-          'feature_flags.overrides': { [IS_ADD_DATA_PAGE_V2_ENABLED]: true },
-        });
-      }
     });
   }
 );

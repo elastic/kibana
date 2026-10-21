@@ -47,7 +47,8 @@ export type ActionImpact = z.infer<typeof actionImpactSchema>;
 
 /**
  * `always-gate` actions must never be auto-approved, whatever a caller's
- * autonomy policy resolves to.
+ * autonomy policy resolves to. Required, so an action is only auto-approved
+ * when its author declared `autonomy-dependent`.
  */
 export const actionApprovalPolicySchema = z.enum(['always-gate', 'autonomy-dependent']);
 export type ActionApprovalPolicy = z.infer<typeof actionApprovalPolicySchema>;
@@ -68,7 +69,7 @@ export const actionMetadataSchema = z.object({
   category: actionCategorySchema.optional(),
   impact: actionImpactSchema.optional(),
   reversible: z.boolean().optional(),
-  approvalPolicy: actionApprovalPolicySchema.optional(),
+  approvalPolicy: actionApprovalPolicySchema,
   /** A single kind or a list of kinds; the catalog normalizes to a list. */
   subject: z
     .union([actionSubjectKindSchema, z.array(actionSubjectKindSchema).min(1).max(2)])

@@ -17,7 +17,8 @@ export async function getServiceMapServiceBadges({
   environment,
   start,
   end,
-  kuery,
+  // Accepted on the route for backward compatibility; badge counts ignore kuery.
+  kuery: _kuery,
   apmAlertsClient,
   sloClient,
 }: {
@@ -43,7 +44,7 @@ export async function getServiceMapServiceBadges({
           environment,
           start,
           end,
-          kuery,
+          // Badge counts ignore page/dashboard kuery (entity health for service/env).
           serviceNames: uniqueServiceNames,
           maxNumServices: cappedSize,
         })
