@@ -33,6 +33,24 @@ export {
   serializeEvidenceMetadata,
 } from './src/mermaid';
 
+export {
+  carryCounts,
+  countsForTree,
+  decisionEdgeKey,
+  penalizePath,
+  recordVisit,
+  reinforcePath,
+  resolveEdgeRefs,
+} from './src/counts';
+export type {
+  DecisionEdgeCounts,
+  DecisionEdgeRef,
+  DecisionElementCounts,
+  DecisionNodeCounts,
+  DecisionNodeMerge,
+  DecisionTreeCounts,
+} from './src/counts';
+
 export { diffDecisionTrees } from './src/diff';
 export type {
   DecisionEdgeChange,
