@@ -109,9 +109,7 @@ it('marks only the Decision Trees tab with the developer mode badge', async () =
 
   expect(await screen.findByTestId('decisionTreesTab')).toBeInTheDocument();
   const { tabs } = mockAppHeader.mock.lastCall[0];
-  expect(
-    tabs.map(({ id, badge }: { id: string; badge?: unknown }) => ({ id, badge }))
-  ).toEqual([
+  expect(tabs.map(({ id, badge }: { id: string; badge?: unknown }) => ({ id, badge }))).toEqual([
     { id: 'knowledge_indicators', badge: undefined },
     { id: 'memory', badge: undefined },
     { id: 'decision_trees', badge: { iconType: 'code' } },
