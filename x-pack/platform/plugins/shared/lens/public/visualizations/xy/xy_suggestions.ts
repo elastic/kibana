@@ -81,6 +81,7 @@ export function getSuggestions({
   allowMixed,
   datasourceId,
   query,
+  defaultState,
 }: SuggestionRequest<XYVisualizationState>): Array<VisualizationSuggestion<XYVisualizationState>> {
   // Text-based datasource always sets isMultiRow: false regardless of actual data shape,
   // so skip that check for textBased to avoid incorrectly rejecting valid suggestions
@@ -111,7 +112,8 @@ export function getSuggestions({
     mainPalette,
     allowMixed,
     datasourceId,
-    query
+    query,
+    defaultState
   );
 
   if (Array.isArray(suggestions)) {
@@ -129,7 +131,8 @@ function getSuggestionForColumns(
   mainPalette?: SuggestionRequest['mainPalette'],
   allowMixed?: boolean,
   datasourceId?: string,
-  query?: SuggestionRequest['query']
+  query?: SuggestionRequest['query'],
+  defaultState?: SuggestionRequest<XYVisualizationState>['defaultState']
 ):
   | VisualizationSuggestion<XYVisualizationState>
   | Array<VisualizationSuggestion<XYVisualizationState>>
@@ -146,6 +149,7 @@ function getSuggestionForColumns(
     allowMixed,
     datasourceId,
     query,
+    defaultState,
   };
 
   const isEsql = datasourceId === LENS_DATASOURCE_ID.TEXT_BASED;
@@ -251,6 +255,7 @@ function getSuggestionsForLayer({
   allowMixed,
   datasourceId,
   query,
+  defaultState,
 }: {
   layerId: string;
   changeType: TableChangeType;
@@ -265,6 +270,7 @@ function getSuggestionsForLayer({
   allowMixed?: boolean;
   datasourceId?: string;
   query?: SuggestionRequest['query'];
+  defaultState?: SuggestionRequest<XYVisualizationState>['defaultState'];
 }):
   | VisualizationSuggestion<XYVisualizationState>
   | Array<VisualizationSuggestion<XYVisualizationState>> {
@@ -289,6 +295,7 @@ function getSuggestionsForLayer({
     // only use palette if there is a breakdown by dimension
     mainPalette: splitBy ? mainPalette : undefined,
     allowMixed,
+    defaultState,
   };
 
   if (
@@ -571,6 +578,7 @@ function buildSuggestion({
   hide,
   mainPalette,
   allowMixed,
+  defaultState,
 }: {
   currentState: XYVisualizationState | undefined;
   seriesType: SeriesType;
@@ -584,6 +592,7 @@ function buildSuggestion({
   hide?: boolean;
   mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
+  defaultState?: SuggestionRequest<XYVisualizationState>['defaultState'];
 }) {
   let splitBy = splitByColumns && splitByColumns.length > 0 ? splitByColumns : undefined;
 
@@ -646,11 +655,12 @@ function buildSuggestion({
     existingLayer && Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer];
 
   const state: XYVisualizationState = {
-    legend: currentState?.legend ?? {
-      isVisible: true,
-      position: Position.Bottom,
-      layout: LegendLayout.List,
-    },
+    legend: currentState?.legend ??
+      defaultState?.legend ?? {
+        isVisible: true,
+        position: Position.Bottom,
+        layout: LegendLayout.List,
+      },
     valueLabels: currentState?.valueLabels || 'hide',
     fittingFunction: currentState?.fittingFunction ?? FittingFunctions.LINEAR,
     curveType: currentState?.curveType,

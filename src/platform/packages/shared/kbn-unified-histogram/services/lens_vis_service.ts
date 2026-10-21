@@ -40,7 +40,10 @@ import {
 } from '@kbn/visualization-utils';
 import type { LegendSize } from '@kbn/chart-expressions-common';
 import { getRepresentativeQuery } from '@kbn/lens-common';
-import type { XYVisualizationState as XYConfiguration } from '@kbn/lens-common';
+import type {
+  DefaultVisualizationOverrides,
+  XYVisualizationState as XYConfiguration,
+} from '@kbn/lens-common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
@@ -68,10 +71,13 @@ import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
 const ESQL_HISTOGRAM_RESULT_LIMIT = 10000;
 // Discover has little vertical space, so its charts keep the legend on the right.
-const DISCOVER_DEFAULT_LEGEND = {
+const DISCOVER_DEFAULT_LEGEND: XYConfiguration['legend'] = {
   isVisible: true,
   position: 'right',
-} as XYConfiguration['legend'];
+};
+const DISCOVER_VISUALIZATION_OVERRIDES: DefaultVisualizationOverrides = {
+  lnsXY: { legend: DISCOVER_DEFAULT_LEGEND },
+};
 
 /** Lens suggestions still take a DataView. Classic unwraps it; ES|QL uses the registered shim. */
 function resolveLensDataView(dataSource: DataSource): DataView | undefined {
@@ -602,17 +608,15 @@ export class LensVisService {
           )
         : undefined;
 
-      const suggestions = (
+      const suggestions =
         this.lensSuggestionsApi(
           context,
           dataView,
           ['lnsDatatable'],
           ChartType.XY,
-          updatedAttributesWithQuery
-        ) ?? []
-      ).map((suggestion) =>
-        applyDiscoverLegend(suggestion, preferredVisAttributes?.visualizationType)
-      );
+          updatedAttributesWithQuery,
+          DISCOVER_VISUALIZATION_OVERRIDES
+        ) ?? [];
       if (suggestions.length) {
         const suggestion = suggestions[0];
         const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
@@ -720,9 +724,10 @@ export class LensVisService {
         dataView,
         ['lnsDatatable'],
         preferredChartType,
-        visAttributes
+        visAttributes,
+        DISCOVER_VISUALIZATION_OVERRIDES
       ) ?? []
-    ).map((suggestion) => applyDiscoverLegend(suggestion, visAttributes?.visualizationType));
+    );
   };
 
   private getLensAttributesState = ({
@@ -877,23 +882,6 @@ export class LensVisService {
     };
   };
 }
-
-const applyDiscoverLegend = (
-  suggestion: Suggestion,
-  preferredVisualizationType: string | undefined
-): Suggestion => {
-  if (suggestion.visualizationId !== 'lnsXY' || preferredVisualizationType === 'lnsXY') {
-    return suggestion;
-  }
-
-  return {
-    ...suggestion,
-    visualizationState: {
-      ...(suggestion.visualizationState as XYConfiguration),
-      legend: DISCOVER_DEFAULT_LEGEND,
-    },
-  };
-};
 
 function areSuggestionAndVisContextAndQueryParamsStillCompatible({
   suggestionType,
