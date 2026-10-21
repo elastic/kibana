@@ -46,7 +46,7 @@
           "series": [
             {
               "id": "col-count",
-              "label": "Requests",
+              "label": "Count of records",
               "splitOnField": "col-extension",
             },
           ],
@@ -54,11 +54,11 @@
           "stacked": true,
           "xAxis": {
             "id": "col-time",
-            "label": "@timestamp per hour",
+            "label": "@timestamp",
           },
           "yAxis": {
             "id": "col-count",
-            "label": "Requests",
+            "label": "Count of records",
           },
         },
         "queryId": "alembic-requests-by-extension",
@@ -89,7 +89,7 @@
           "series": [
             {
               "id": "col-count",
-              "label": "Requests",
+              "label": "Count of records",
               "splitOnField": "col-extension",
             },
           ],
@@ -97,11 +97,11 @@
           "stacked": true,
           "xAxis": {
             "id": "col-time",
-            "label": "@timestamp per hour",
+            "label": "@timestamp",
           },
           "yAxis": {
             "id": "col-count",
-            "label": "Requests",
+            "label": "Count of records",
           },
         },
         "id": "alembic-requests-by-extension",
@@ -123,7 +123,7 @@
           "kind": "metric",
           "primary": {
             "id": "col-count",
-            "label": "Requests",
+            "label": "Count of records",
           },
         },
         "queryId": "alembic-total-requests",
@@ -142,7 +142,7 @@
           "kind": "metric",
           "primary": {
             "id": "col-count",
-            "label": "Requests",
+            "label": "Count of records",
           },
         },
         "id": "alembic-total-requests",
@@ -165,19 +165,19 @@
             {
               "align": "left",
               "id": "col-host",
-              "label": "Host",
+              "label": "Top 5 values of host.keyword",
             },
             {
               "align": "right",
               "font": "monospace",
               "id": "col-count",
-              "label": "Requests",
+              "label": "Count of records",
             },
             {
               "align": "right",
               "font": "monospace",
               "id": "col-bytes",
-              "label": "Avg bytes",
+              "label": "Average of bytes",
             },
           ],
           "kind": "datatable",
@@ -208,19 +208,19 @@
             {
               "align": "left",
               "id": "col-host",
-              "label": "Host",
+              "label": "Top 5 values of host.keyword",
             },
             {
               "align": "right",
               "font": "monospace",
               "id": "col-count",
-              "label": "Requests",
+              "label": "Count of records",
             },
             {
               "align": "right",
               "font": "monospace",
               "id": "col-bytes",
-              "label": "Avg bytes",
+              "label": "Average of bytes",
             },
           ],
           "kind": "datatable",
@@ -249,7 +249,7 @@
           "layout": "donut",
           "slices": {
             "id": "col-os",
-            "label": "Requests",
+            "label": "Count of records",
             "valueField": "col-count",
           },
         },
@@ -275,7 +275,7 @@
           "layout": "donut",
           "slices": {
             "id": "col-os",
-            "label": "Requests",
+            "label": "Count of records",
             "valueField": "col-count",
           },
         },
@@ -298,15 +298,15 @@
           "kind": "heatmap",
           "value": {
             "id": "col-count",
-            "label": "Requests",
+            "label": "Count of records",
           },
           "xBucket": {
             "id": "col-hour",
-            "label": "@timestamp per 3 hours",
+            "label": "@timestamp",
           },
           "yBucket": {
             "id": "col-os",
-            "label": "OS",
+            "label": "Top 5 values of machine.os.keyword",
           },
         },
         "queryId": "alembic-os-by-hour",
@@ -335,15 +335,15 @@
           "kind": "heatmap",
           "value": {
             "id": "col-count",
-            "label": "Requests",
+            "label": "Count of records",
           },
           "xBucket": {
             "id": "col-hour",
-            "label": "@timestamp per 3 hours",
+            "label": "@timestamp",
           },
           "yBucket": {
             "id": "col-os",
-            "label": "OS",
+            "label": "Top 5 values of machine.os.keyword",
           },
         },
         "id": "alembic-os-by-hour",

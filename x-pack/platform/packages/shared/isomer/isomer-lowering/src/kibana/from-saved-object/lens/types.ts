@@ -229,6 +229,8 @@ export interface DatatableVisualizationState {
 
 export interface DatatableColumnConfig {
   columnId: string;
+  /** The column's width in pixels, as the data grid sizes it. */
+  width?: number;
   isTransposed?: boolean;
   alignment?: 'left' | 'right' | 'center';
   hidden?: boolean;
@@ -250,10 +252,12 @@ export interface DatatableColumnConfig {
    * low-capability renderers.
    */
   palette?: {
+    name?: string;
     params?: {
       rangeType?: 'percent' | 'number';
-      rangeMin?: number;
-      rangeMax?: number;
+      rangeMin?: number | null;
+      rangeMax?: number | null;
+      continuity?: 'above' | 'below' | 'all' | 'none';
       stops?: Array<{ stop?: number; color?: string }>;
       steps?: number;
       reverse?: boolean;

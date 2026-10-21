@@ -161,6 +161,7 @@ describe('fromKibanaSavedObject (Metric)', () => {
     patched.attributes.state.visualization.maxAccessor = 'col-max';
     patched.attributes.state.datasourceStates.formBased.layers['layer-1'].columns['col-max'] = {
       operationType: 'count',
+      customLabel: true,
       label: 'Order goal',
       dataType: 'number',
       isBucketed: false,
@@ -211,6 +212,7 @@ describe('fromKibanaSavedObject (Metric)', () => {
       sourceField: 'test.duration',
       isBucketed: false,
       dataType: 'number',
+      customLabel: true,
       label: 'duration',
       params: {
         format: {

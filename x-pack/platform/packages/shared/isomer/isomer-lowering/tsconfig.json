@@ -12,6 +12,7 @@
     "@kbn/isomer-charts-elastic",
     "@kbn/isomer-primitives-charts",
     "@kbn/isomer-primitives-maps",
-    "@kbn/isomer-primitives-vega"
+    "@kbn/isomer-primitives-vega",
+    "@kbn/lens-common"
   ]
 }

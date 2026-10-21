@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { withRenderedLabels } from './lens_labels';
 import type { AdaptiveLens } from '../../model/adaptive_lens';
 import type { AdaptiveQuery } from '../../model/adaptive_query';
 import type { ViewPlanDiagnostic } from '../../plan/view_plan';
@@ -62,6 +63,12 @@ export interface FromLensSavedObjectOptions {
     id: string,
     type: string
   ) => Record<string, LensColumnFormat> | undefined;
+  /** Resolve a data view's field custom labels (`fieldAttrs[field].customLabel`), which Lens's default labels use. */
+  resolveDataViewFieldLabels?: (
+    name: string,
+    id: string,
+    type: string
+  ) => Record<string, string> | undefined;
   /**
    * Optional Kibana-style time range applied to every synthesized query.
    * Endpoints accept `'now'`, `'now-7d'`, `'now-24h'`, … or ISO 8601
@@ -139,7 +146,7 @@ export const fromLensSavedObject = (
   // formula `WHERE` clauses on data sets that don't use `@timestamp`
   // (e.g. the sample `kibana_sample_data_flights` data view uses
   // `timestamp`).
-  const { indexPatternTitle, timeFieldName, fieldFormats } = resolveIndexPatternMeta(
+  const { indexPatternTitle, timeFieldName, fieldFormats, fieldLabels } = resolveIndexPatternMeta(
     envelope,
     state,
     options
@@ -174,7 +181,8 @@ export const fromLensSavedObject = (
     panelId: envelope.id,
     title,
     ...(subtitle ? { subtitle } : {}),
-    state,
+    // Columns named as Lens renders them; the query above is synthesized from the state as saved.
+    state: withRenderedLabels(state, fieldLabels),
     query: query.query,
     diagnostics: bag,
     ...(fieldFormats ? { fieldFormats } : {}),
@@ -296,6 +304,7 @@ const resolveIndexPatternMeta = (
   indexPatternTitle?: string;
   timeFieldName?: string;
   fieldFormats?: Record<string, LensColumnFormat>;
+  fieldLabels?: Record<string, string>;
 } => {
   const indexPatternRefs = state.datasourceStates?.textBased?.indexPatternRefs ?? [];
   const indexPatternRef = envelope.references?.find(
@@ -329,9 +338,17 @@ const resolveIndexPatternMeta = (
         indexPatternRef.type
       )
     : undefined;
+  const fieldLabels = indexPatternRef
+    ? options.resolveDataViewFieldLabels?.(
+        indexPatternRef.name,
+        indexPatternRef.id,
+        indexPatternRef.type
+      )
+    : undefined;
   return {
     ...(title ? { indexPatternTitle: title } : {}),
     ...(timeFieldName ? { timeFieldName } : {}),
     ...(fieldFormats ? { fieldFormats } : {}),
+    ...(fieldLabels ? { fieldLabels } : {}),
   };
 };

@@ -20,7 +20,11 @@ const DASHBOARDS = [
   ['web_logs_sample.ndjson', 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b'],
 ] as const;
 
-/** What the converter must keep producing: every panel's ES|QL, chart metadata, and dimensions, and the spec. */
+/**
+ * What the converter must keep producing: every panel's ES|QL, chart metadata, and dimensions, and the spec.
+ * Recorded from Alembic's converter, then extended where the lowering keeps more of Lens than it did: a data table
+ * column's \`valueColor\`, \`width\` and \`center\` alignment.
+ */
 describe('planDashboard snapshot', () => {
   it.each(DASHBOARDS)('%s plans as recorded', async (file, id) => {
     for (const timeRange of [undefined, { from: 'now-7d', to: 'now' }]) {

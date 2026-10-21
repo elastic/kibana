@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { LensPalette } from '../../lens_palette';
 import type { Tone } from './tone';
 
 import type { AdaptiveQuery } from './adaptive_query';
@@ -109,7 +110,11 @@ export interface ColumnColorScale {
 export interface ColumnRef {
   id: string;
   label: string;
-  align?: 'left' | 'right';
+  align?: 'left' | 'center' | 'right';
+  /** The column's width in pixels, as Lens's data grid sizes it. */
+  width?: number;
+  /** Lens's value coloring, resolved per cell at bind time as the data table paints it. */
+  valueColor?: { mode: 'cell' | 'text'; palette: LensPalette };
   font?: 'default' | 'monospace';
   summary?: {
     function: 'sum' | 'avg' | 'min' | 'max' | 'count';

@@ -22,6 +22,7 @@ import type {
 } from './kibana/model/adaptive_lens';
 import type { ValueFormatter } from './kibana/model/formatter';
 import { bindAnnotations } from './lens_annotations';
+import { lensCellColors } from './lens_palette';
 import { bindNestedTreemap, isNestedTreemap } from './nested_treemap';
 import { applyLensState, presentationHints } from './lens_presentation';
 
@@ -554,7 +555,8 @@ const bindDatatable = (chart: AdaptiveDatatableChart, response: EsqlResponse): C
           String(b[indices[timeIndex]!] ?? '').localeCompare(String(a[indices[timeIndex]!] ?? ''))
         );
   const cap = Math.min(TABLE_MAX_ROWS, Math.floor(TABLE_MAX_CELLS / Math.max(1, columns.length)));
-  const rows = values.slice(0, cap).map((row) =>
+  const shownValues = values.slice(0, cap);
+  const rows = shownValues.map((row) =>
     columns.map(({ format }, index) => {
       const cell = tableCell(row[indices[index]!], format, types[index]);
       return typeof cell === 'string' ? cell.slice(0, TABLE_MAX_CELL) || null : cell;
@@ -563,10 +565,20 @@ const bindDatatable = (chart: AdaptiveDatatableChart, response: EsqlResponse): C
   const sortColumn = chart.sort ? columns.findIndex(({ id }) => id === chart.sort!.column) : -1;
   return {
     type: 'table',
-    columns: columns.map(({ label, align, format }) => ({
-      label: label.slice(0, 100),
-      ...(align ? { align } : format ? { align: 'right' } : {}),
-    })),
+    columns: columns.map(({ label, align, format, width, valueColor }, index) => {
+      const colors = valueColor
+        ? lensCellColors(
+            valueColor.palette,
+            shownValues.map((row) => row[indices[index]!])
+          )
+        : undefined;
+      return {
+        label: label.slice(0, 100),
+        ...(align ? { align } : format ? { align: 'right' } : {}),
+        ...(width ? { width: Math.min(4096, Math.max(16, width)) } : {}),
+        ...(valueColor && colors ? { color: { mode: valueColor.mode, values: colors } } : {}),
+      };
+    }),
     rows,
     ...(response.values.length > rows.length ? { totalRows: response.values.length } : {}),
     ...(sortColumn >= 0 ? { sort: { column: sortColumn, direction: chart.sort!.direction } } : {}),
