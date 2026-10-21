@@ -10,6 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { DEFAULT_MAX_STEP_SIZE } from './step/errors';
 
 const EventTriggersConfigSchema = schema.object({
