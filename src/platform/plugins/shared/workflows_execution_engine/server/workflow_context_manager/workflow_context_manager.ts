@@ -10,7 +10,7 @@
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KQLSyntaxError } from '@kbn/es-query';
-import { evaluateKql } from '@kbn/eval-kql';
+import { evaluateKql, parseKqlTemplate } from '@kbn/eval-kql';
 import {
   type EsWorkflowStepExecution,
   type SerializedError,
@@ -232,6 +232,29 @@ export class WorkflowContextManager {
     return this.templateEngine.render(obj, { ...context, ...additionalContext });
   }
 
+  /**
+   * Renders a condition that is going to be evaluated as KQL. Values interpolated with `{{ }}`
+   * can only be literals in the condition; see `WorkflowTemplatingEngine.renderCondition`.
+   */
+  public renderConditionWithContext<T>(
+    condition: T,
+    context: Record<string, unknown>,
+    additionalContext?: Record<string, unknown>
+  ): T {
+    return this.templateEngine.renderCondition(condition, { ...context, ...additionalContext });
+  }
+
+  public renderConditionAccordingToContext<T>(
+    condition: T,
+    additionalContext?: Record<string, unknown>
+  ): T {
+    return this.renderConditionWithContext(
+      condition,
+      this.getRenderingContext(condition),
+      additionalContext
+    );
+  }
+
   public evaluateExpressionInContext(template: string): unknown {
     const context = this.getContext();
     return this.templateEngine.evaluateExpression(template, context);
@@ -241,7 +264,7 @@ export class WorkflowContextManager {
     condition: string | boolean | undefined,
     additionalContext?: Record<string, unknown>
   ): boolean {
-    const renderedCondition = this.renderValueAccordingToContext(condition, additionalContext);
+    const renderedCondition = this.renderConditionAccordingToContext(condition, additionalContext);
 
     if (typeof renderedCondition === 'boolean') {
       return renderedCondition;
@@ -252,7 +275,7 @@ export class WorkflowContextManager {
 
     if (typeof renderedCondition === 'string') {
       try {
-        return evaluateKql(renderedCondition, this.getContext());
+        return evaluateKql(parseKqlTemplate(renderedCondition), this.getContext());
       } catch (error) {
         if (error instanceof KQLSyntaxError) {
           throw new Error(

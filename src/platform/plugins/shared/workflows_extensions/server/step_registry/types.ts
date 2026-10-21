@@ -456,6 +456,18 @@ export interface ContextManager {
   renderInputTemplate<T>(input: T, additionalContext?: Record<string, unknown>): T;
 
   /**
+   * Renders a condition that the step evaluates as KQL. Values interpolated with `{{ }}` can only
+   * be literals in the condition: parse the result with `parseKqlTemplate` from `@kbn/eval-kql`
+   * before evaluating it, and use `decodeKqlTemplateValues` to log it.
+   * @param condition - The raw (not yet rendered) condition
+   * @param additionalContext - Optional additional context to merge with workflow context
+   */
+  renderKqlConditionTemplate?(
+    condition: string,
+    additionalContext?: Record<string, unknown>
+  ): string;
+
+  /**
    * Creates a template renderer that snapshots the current workflow context.
    * Intended for synchronous batch operations where the context is stable.
    */

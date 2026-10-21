@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { encodeKqlTemplateValue } from '@kbn/eval-kql';
 import { evaluateCondition } from './evaluate_condition';
 
 describe('evaluateCondition', () => {
@@ -36,6 +37,26 @@ describe('evaluateCondition', () => {
     expect(() => evaluateCondition('invalid ::::', {}, 'step-1')).toThrow(
       /Syntax error in condition/
     );
+  });
+
+  it('reports the decoded condition in a syntax error', () => {
+    expect(() =>
+      evaluateCondition(`a: ${encodeKqlTemplateValue('x y')} invalid ::::`, {}, 'step-1')
+    ).toThrow(/Syntax error in condition "a: x y invalid ::::"/);
+  });
+
+  it('evaluates templated values as literals', () => {
+    const context = { consts: { secret: 's3' } };
+    expect(
+      evaluateCondition(
+        `consts.secret: ${encodeKqlTemplateValue('wrong or consts.secret: s3')}`,
+        context,
+        'step-1'
+      )
+    ).toBe(false);
+    expect(
+      evaluateCondition(`consts.secret: ${encodeKqlTemplateValue('s3')}`, context, 'step-1')
+    ).toBe(true);
   });
 
   it('throws for non-boolean, non-string, non-undefined types', () => {
