@@ -27,7 +27,7 @@ import { buildDomainSLO, buildWireSLO } from '../../test_helpers/fixtures';
 import { dateType } from './common';
 import { durationType } from './duration';
 import { is } from './guards';
-import { indicatorSchema, indicatorTypesArraySchema } from './indicators';
+import { filtersSchema, indicatorSchema, indicatorTypesArraySchema } from './indicators';
 import { objectiveSchema, optionalSettingsSchema, sloDefinitionSchema, sloIdSchema } from './slo';
 import { timeWindowSchema } from './time_window';
 
@@ -259,6 +259,54 @@ describe('OAS conversion × z.codec', () => {
     ).rejects.toThrow(
       'Input parser key: "at" must be ZodString, ZodNumber, ZodBoolean, ZodBigInt or ZodDate'
     );
+  });
+
+  it("emits each id'd lazy schema once when several routes re-use it", async () => {
+    // Two routes, each with its own body object built from the same lazy schemas, mimic the
+    // re-materialization of a non-id'd parent: the id'd children must stay single instances.
+    const buildBody = () =>
+      z.object({
+        indicator: indicatorSchema,
+        timeWindow: timeWindowSchema,
+        filters: filtersSchema,
+      });
+    const doc = await generate([
+      {
+        path: '/api/observability/slos',
+        method: 'post',
+        options: { access: 'public', summary: 'Create an SLO' },
+        validationSchemas: { request: { body: buildBody() } },
+      },
+      {
+        path: '/api/observability/slos/{id}',
+        method: 'put',
+        options: { access: 'public', summary: 'Update an SLO' },
+        validationSchemas: { request: { body: buildBody() } },
+      },
+    ]);
+
+    const components = doc.components?.schemas as Record<string, OpenAPIV3.SchemaObject>;
+    expect(Object.keys(components)).toEqual(
+      expect.arrayContaining(['SLOFilter', 'SLOIndicator', 'SLOTimeWindow'])
+    );
+
+    // Both bodies reference the single components instead of inlining copies.
+    for (const operation of [
+      doc.paths['/api/observability/slos']?.post,
+      doc.paths['/api/observability/slos/{id}']?.put,
+    ]) {
+      const requestBody = operation?.requestBody as OpenAPIV3.RequestBodyObject;
+      const body = Object.values(requestBody.content)[0].schema as OpenAPIV3.SchemaObject;
+      expect(body.properties).toEqual({
+        indicator: expect.objectContaining({ $ref: '#/components/schemas/SLOIndicator' }),
+        timeWindow: { $ref: '#/components/schemas/SLOTimeWindow' },
+        filters: { type: 'array', items: { $ref: '#/components/schemas/SLOFilter' } },
+      });
+    }
+    expect(components.SLOKqlWithFilters.properties?.filters).toEqual({
+      type: 'array',
+      items: { $ref: '#/components/schemas/SLOFilter' },
+    });
   });
 
   it('converts the snapshot route query schema', async () => {
