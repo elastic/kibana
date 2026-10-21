@@ -72,7 +72,14 @@ const flatten = (steps: YamlStep[]): YamlStep[] =>
 const TEMPLATE_VALUES: Partial<ManagedWorkflowTemplateValuesById> = {
   [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: {
     autonomyLevel: 'manual',
-    extras: { autoCloseConfidenceScoreMinThreshold: 0.85, budgetPerHour: 1300, lookbackHours: 24 },
+    extras: {
+      autoCloseConfidenceScoreMinThreshold: 0.85,
+      budgetPerHour: 1300,
+      lookbackHours: 24,
+      minSeverity: 'low',
+      excludeBuildingBlocks: false,
+      excludedRuleTags: [],
+    },
     scheduleInterval: '15m',
     settingsVersion: 1,
   },
