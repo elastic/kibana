@@ -21,3 +21,4 @@ require('./deadline_abort.node_test');
 require('./service_binder.node_test');
 require('./credential_negatives.node_test');
 require('./rc2.node_test');
+require('./parent_span.node_test');

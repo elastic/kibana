@@ -23,6 +23,8 @@ import { GENERIC_LEVERS, LEVER_LABELS } from './protocol';
 import type { ModuleRegistry } from './registry';
 import { startEndpoint } from './transport';
 import type { Endpoint } from './transport';
+import { captureParentSpan } from './worker_core/parent_span';
+import type { ParentSpanContext } from './worker_core/parent_span';
 
 export interface Binding {
   readonly handler: HostHandler;
@@ -71,6 +73,7 @@ interface Execution {
   /** Set when the worker reports the task module loaded; undefined = watchdog not armed yet. */
   startedAt?: number;
   readonly dispatchedAt: number;
+  readonly parentSpan?: ParentSpanContext;
   executionStarted: boolean;
   /** Bootstrap + rule budget + one cancel grace. Hard stop cannot pass this. */
   absoluteCapAt?: number;
@@ -204,6 +207,7 @@ export class ExecutionHost {
         callAborts: new Map(),
         droppedCalls: new Set(),
         dispatchedAt,
+        parentSpan: captureParentSpan(),
         executionStarted: false,
       };
       const abort = () => {
@@ -327,6 +331,7 @@ export class ExecutionHost {
         bundle: execution.bundle,
         input: encode(execution.options.input),
         registry: this.registry.snapshot(),
+        ...(execution.parentSpan ? { parentSpan: execution.parentSpan } : {}),
         ...(stallMs === undefined
           ? {}
           : { heartbeatMs: Math.max(25, Math.min(1000, Math.floor(stallMs / 4))) }),

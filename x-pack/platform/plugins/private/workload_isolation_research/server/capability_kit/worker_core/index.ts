@@ -69,3 +69,5 @@ export {
   verifyRegistryReadiness,
 } from './policies';
 export type { ReadinessToken, SoRouteInput, SoTypeFingerprintInput } from './policies';
+export { captureParentSpan, runWithParentSpan } from './parent_span';
+export type { ParentSpanContext } from './parent_span';

@@ -11,6 +11,7 @@ import { randomUUID } from 'crypto';
 import { encode, decode } from './codecs';
 import type { CodecInput, WireValue } from './codecs';
 import type { AsyncCallback, CancellationInfo, Packet, TaskEntry, WorkerContext } from './protocol';
+import { runWithParentSpan } from './worker_core/parent_span';
 
 const requireModule = createRequire(__filename);
 const send = (packet: Packet): void => {
@@ -295,7 +296,7 @@ const startRuntime = (): void => {
       // Synchronous cold module loading is not a stall; the watchdog arms once code starts.
       if (packet.heartbeatMs !== undefined)
         send({ version: 1, kind: 'started', runId: bundle.runId });
-      value = await task(decode(packet.input), context);
+      value = await runWithParentSpan(packet.parentSpan, () => task(decode(packet.input), context));
       if (run.pending.size) {
         const open = [...run.pending.values()]
           .map((entry) => `${entry.capability}.${entry.operation}`)

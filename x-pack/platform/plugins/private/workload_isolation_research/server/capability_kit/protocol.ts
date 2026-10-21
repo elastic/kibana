@@ -126,6 +126,8 @@ export type Packet =
       readonly registry: RegistrySnapshot;
       /** 0.1.9: requested worker event-loop heartbeat interval (stall watchdog). */
       readonly heartbeatMs?: number;
+      /** Non-recording parent captured on main inside the task-manager span. */
+      readonly parentSpan?: { readonly traceId: string; readonly spanId: string; readonly traceFlags: number };
     }
   | {
       readonly version: 1;
