@@ -185,7 +185,7 @@ function describeAlert(alert: InvestigationAlertSnapshot): string {
   }
 
   lines.push(
-    `This alert's document is in the ${CLASSIC_ALERT_INDICES} indices, filter on kibana.alert.uuid.`
+    `Before you conclude, query the ${CLASSIC_ALERT_INDICES} indices (filter on kibana.alert.uuid) and read this alert's full document.`
   );
 
   if (alert.rule_parameters) {

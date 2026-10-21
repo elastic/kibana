@@ -340,6 +340,7 @@ describe('buildInvestigationMessage with a mixed alert array', () => {
 
     expect(message).toContain('Rule "Latency is too high"');
     expect(message).toContain('Alerting v2 episode episode-1 of rule v2-rule-1');
+    expect(message).toContain('query the .alerts-* indices');
     expect(message).toContain('.rule-events');
     expect(message).toContain('"host.name":"h1"');
   });
