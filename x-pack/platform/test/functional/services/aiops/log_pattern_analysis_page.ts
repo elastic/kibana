@@ -281,7 +281,7 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
         // Selecting a radio is idempotent, so re-issue the click until it registers.
         await retry.waitForWithTimeout(
           'the "New dashboard" option to be selected',
-          30 * 1000,
+          10 * 1000,
           async () => {
             const options = await testSubjects.find('add-to-dashboard-options');
             const label = await options.findByCssSelector(`label[for="new-dashboard-option"]`);
