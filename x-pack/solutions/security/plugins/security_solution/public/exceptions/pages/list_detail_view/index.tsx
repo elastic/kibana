@@ -21,7 +21,10 @@ import { MissingDetectionsPrivilegesCallOut } from '../../../detections/componen
 import { NotFoundPage } from '../../../app/404';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import { ListWithSearch, ManageRules } from '../../components';
-import { ListDetailsAppHeader } from '../../components/list_details_app_header';
+import {
+  ListDetailsAppHeader,
+  ListDetailsFallbackAppHeader,
+} from '../../components/list_details_app_header';
 import { useListDetailsView } from '../../hooks';
 import * as i18n from '../../translations';
 import type { CheckExceptionTtlActionTypes } from '../../components/expired_exceptions_list_items_modal';
@@ -96,11 +99,22 @@ export const ListsDetailViewComponent: FC = () => {
 
   const detailsViewContent = useMemo(() => {
     if (viewerStatus === ViewerStatus.ERROR)
-      return <EmptyViewerState isReadOnly={isReadOnly} viewerStatus={viewerStatus} />;
+      return (
+        <>
+          <ListDetailsFallbackAppHeader />
+          <EmptyViewerState isReadOnly={isReadOnly} viewerStatus={viewerStatus} />
+        </>
+      );
 
     if (isLoading) return <AppHeaderLoading />;
 
-    if (invalidListId || !listName || !list) return <NotFoundPage />;
+    if (invalidListId || !listName || !list)
+      return (
+        <>
+          <ListDetailsFallbackAppHeader />
+          <NotFoundPage />
+        </>
+      );
     return (
       <>
         <ListDetailsAppHeader

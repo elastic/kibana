@@ -47,3 +47,8 @@ export const DELETE_LIST = i18n.translate(
   'xpack.securitySolution.exceptions.listDetailsAppHeader.deleteList',
   { defaultMessage: 'Delete exception list' }
 );
+
+export const FALLBACK_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.listDetailsAppHeader.fallbackTitle',
+  { defaultMessage: 'Exception list' }
+);

@@ -6,3 +6,4 @@
  */
 
 export { ListDetailsAppHeader } from './list_details_app_header';
+export { ListDetailsFallbackAppHeader } from './list_details_fallback_app_header';
