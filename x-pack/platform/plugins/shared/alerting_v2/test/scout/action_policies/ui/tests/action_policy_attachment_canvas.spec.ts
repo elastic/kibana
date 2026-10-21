@@ -195,7 +195,7 @@ test.describe(
 
       await pageObjects.agentChat.canvasAction('Create policy').click();
 
-      await expect(page.getByText(`Policy "${policyName}" created`)).toBeVisible();
+      await expect(page.getByText(`Policy "${policyName}" created`, { exact: true })).toBeVisible();
       await expect(pageObjects.agentChat.canvasAction('Update Policy')).toBeVisible();
       await expect(
         await pageObjects.agentChat.openCanvasOverflowAction('View in Policies')
@@ -222,7 +222,7 @@ test.describe(
       await proposePolicy({ page, pageObjects, llmProxy, policyName });
       await pageObjects.agentChat.openAttachmentCanvas();
       await pageObjects.agentChat.canvasAction('Create policy').click();
-      await expect(page.getByText(`Policy "${policyName}" created`)).toBeVisible();
+      await expect(page.getByText(`Policy "${policyName}" created`, { exact: true })).toBeVisible();
       const viewInPolicies = await pageObjects.agentChat.openCanvasOverflowAction(
         'View in Policies'
       );
