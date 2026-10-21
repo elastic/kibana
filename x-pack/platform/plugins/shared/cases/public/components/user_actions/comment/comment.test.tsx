@@ -97,6 +97,20 @@ describe('createCommentUserActionBuilder', () => {
 
       expect(screen.getByText('edited comment')).toBeInTheDocument();
     });
+
+    it('renders correctly when editing a comment whose attachment saved object is missing', async () => {
+      const userAction = getUserAction('comment', UserActionActions.update);
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        attachments: [],
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('edited comment')).toBeInTheDocument();
+    });
   });
 
   describe('deletions', () => {
@@ -174,17 +188,17 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByText('removed attachment')).toBeInTheDocument();
     });
 
-    it('resolves a migrated external reference through the unified registry', async () => {
+    it('resolves an external reference through the unified registry', async () => {
       // A legacy external-reference delete payload whose type maps to a unified type
       // (endpoint -> security.endpoint) picks up the unified type's removal label.
       const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
       unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
       unifiedAttachmentTypeRegistry.register({
         id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
-        displayName: 'Endpoint',
-        icon: 'logoSecurity',
-        getAttachmentViewObject: () => ({ event: 'added an endpoint' }),
-        getAttachmentRemovalObject: () => ({ event: 'removed endpoint attachment' }),
+        getLabel: () => 'Endpoint',
+        getIcon: () => 'logoSecurity',
+        getCreationActivity: () => ({ event: 'added an endpoint' }),
+        getRemovalActivity: () => ({ event: 'removed endpoint attachment' }),
         schema: z.object({}),
       });
 
@@ -218,9 +232,9 @@ describe('createCommentUserActionBuilder', () => {
       unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
       unifiedAttachmentTypeRegistry.register({
         id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
-        displayName: 'Endpoint',
-        icon: 'logoSecurity',
-        getAttachmentViewObject: () => ({ event: 'added an endpoint' }),
+        getLabel: () => 'Endpoint',
+        getIcon: () => 'logoSecurity',
+        getCreationActivity: () => ({ event: 'added an endpoint' }),
         schema: z.object({}),
       });
 
@@ -276,10 +290,10 @@ describe('createCommentUserActionBuilder', () => {
       unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
       unifiedAttachmentTypeRegistry.register({
         id: 'security.event',
-        displayName: 'Event',
-        icon: 'bell',
-        getAttachmentViewObject: () => ({ event: 'added an event' }),
-        getAttachmentRemovalObject: () => ({ event: 'removed event' }),
+        getLabel: () => 'Event',
+        getIcon: () => 'bell',
+        getCreationActivity: () => ({ event: 'added an event' }),
+        getRemovalActivity: () => ({ event: 'removed event' }),
         schema: z.object({}),
       });
 
@@ -307,15 +321,55 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByText('removed event')).toBeInTheDocument();
     });
 
+    it('passes the saved object id and metadata to getRemovalActivity', () => {
+      const getRemovalActivity = jest.fn().mockReturnValue({ event: 'removed event' });
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        id: 'security.event',
+        getLabel: () => 'Event',
+        getIcon: () => 'bell',
+        getCreationActivity: () => ({ event: 'added an event' }),
+        getRemovalActivity,
+        schema: z.object({}),
+      });
+
+      const userAction = getEventUserAction({
+        action: UserActionActions.delete,
+        payload: {
+          comment: {
+            type: 'security.event',
+            attachmentId: 'event-id-1',
+            metadata: { index: 'event-index-1' },
+            owner: 'securitySolution',
+          },
+        },
+      });
+
+      createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        userAction,
+      }).build();
+
+      expect(getRemovalActivity).toHaveBeenCalledWith(
+        expect.objectContaining({
+          savedObjectId: userAction.commentId,
+          attachmentId: 'event-id-1',
+          metadata: { index: 'event-index-1' },
+        })
+      );
+    });
+
     it('renders correctly when deleting a legacy event attachment', async () => {
       const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
       unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
       unifiedAttachmentTypeRegistry.register({
         id: 'security.event',
-        displayName: 'Event',
-        icon: 'bell',
-        getAttachmentViewObject: () => ({ event: 'added an event' }),
-        getAttachmentRemovalObject: () => ({ event: 'removed event' }),
+        getLabel: () => 'Event',
+        getIcon: () => 'bell',
+        getCreationActivity: () => ({ event: 'added an event' }),
+        getRemovalActivity: () => ({ event: 'removed event' }),
         schema: z.object({}),
       });
 
@@ -331,6 +385,109 @@ describe('createCommentUserActionBuilder', () => {
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
       expect(screen.getByText('removed event')).toBeInTheDocument();
+    });
+  });
+
+  describe('un-hides the create row when the attachment saved object is missing', () => {
+    it('renders a deleted comment as an event-only row without its text', async () => {
+      const userAction = getUserAction('comment', UserActionActions.create, {
+        commentId: basicCase.comments[0].id,
+        payload: {
+          comment: {
+            type: 'comment',
+            data: { content: 'a comment' },
+            owner: 'securitySolution',
+          },
+        },
+      });
+
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        attachments: [],
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(
+        <CommentRenderingProvider value={utils}>
+          <EuiCommentList comments={createdUserAction} />
+        </CommentRenderingProvider>
+      );
+
+      expect(await screen.findByText('added a comment')).toBeInTheDocument();
+      expect(screen.queryByText('a comment')).not.toBeInTheDocument();
+      expect(screen.getByTestId('comment-comment-comment-deleted')).toBeInTheDocument();
+      expect(screen.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
+      expect(screen.getByTestId(`copy-link-${basicCase.comments[0].id}`)).toBeInTheDocument();
+    });
+
+    it('renders a single-alert create row from the payload', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        ...getStackAlertAttachmentType(),
+        id: SECURITY_ALERT_ATTACHMENT_TYPE,
+      });
+
+      const userAction = getAlertUserAction({
+        payload: {
+          comment: {
+            type: SECURITY_ALERT_ATTACHMENT_TYPE,
+            attachmentId: 'alert-id-1',
+            metadata: { index: 'index-id-1', rule: { id: 'rule-id-1', name: 'Awesome rule' } },
+            owner: 'securitySolution',
+          },
+        },
+      });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        attachments: [],
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByTestId('alerts-user-action-alert-comment-id')).toHaveTextContent(
+        'added an alert from Awesome rule'
+      );
+    });
+
+    it('renders a multiple-alerts create row from the payload', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        ...getStackAlertAttachmentType(),
+        id: SECURITY_ALERT_ATTACHMENT_TYPE,
+      });
+
+      const userAction = getMultipleAlertsUserAction({
+        payload: {
+          comment: {
+            type: SECURITY_ALERT_ATTACHMENT_TYPE,
+            attachmentId: ['alert-id-1', 'alert-id-2'],
+            metadata: {
+              index: ['index-id-1', 'index-id-2'],
+              rule: { id: 'rule-id-1', name: 'Awesome rule' },
+            },
+            owner: 'securitySolution',
+          },
+        },
+      });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        attachments: [],
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByTestId('alerts-user-action-alert-comment-id')).toHaveTextContent(
+        'added 2 alerts from Awesome rule'
+      );
     });
   });
 
@@ -632,6 +789,24 @@ describe('createCommentUserActionBuilder', () => {
 
       expect(screen.getByText('added a comment')).toBeInTheDocument();
     });
+
+    it('appends the action source to the create event', () => {
+      const userAction = getUserAction(UserActionTypes.comment, UserActionActions.create, {
+        source: { type: 'agent', id: 'agent-1', name: 'Elastic AI Agent' },
+      });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        attachments: [basicCommentUnified],
+        userAction,
+      });
+
+      renderWithTestingProviders(<EuiCommentList comments={builder.build()} />);
+
+      expect(screen.getByText(/added a comment/)).toBeInTheDocument();
+      expect(screen.getByTestId('user-action-via-source')).toHaveTextContent(
+        'via Elastic AI Agent'
+      );
+    });
   });
 
   describe('Unified event attachments', () => {
@@ -640,11 +815,10 @@ describe('createCommentUserActionBuilder', () => {
       unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
       unifiedAttachmentTypeRegistry.register({
         id: 'security.event',
-        displayName: 'Event',
-        icon: 'bell',
-        getAttachmentViewObject: () => ({
+        getLabel: () => 'Event',
+        getIcon: () => 'bell',
+        getCreationActivity: () => ({
           event: 'added an event',
-          timelineAvatar: <span data-test-subj="event-timeline-avatar" />,
         }),
         schema: z.object({}),
       });
@@ -683,11 +857,10 @@ describe('createCommentUserActionBuilder', () => {
       const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
       unifiedAttachmentTypeRegistry.register({
         id: 'lens',
-        displayName: 'Lens',
-        icon: 'lensApp',
-        getAttachmentViewObject: () => ({
+        getLabel: () => 'Lens',
+        getIcon: () => 'lensApp',
+        getCreationActivity: () => ({
           event: 'added an embeddable',
-          timelineAvatar: 'lensApp',
           ...viewObject,
         }),
         schema: z.object({}),
@@ -729,11 +902,10 @@ describe('createCommentUserActionBuilder', () => {
         unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
         unifiedAttachmentTypeRegistry.register({
           id: 'lens',
-          displayName: 'Lens',
-          icon: 'lensApp',
-          getAttachmentViewObject: () => ({
+          getLabel: () => 'Lens',
+          getIcon: () => 'lensApp',
+          getCreationActivity: () => ({
             event: 'added an embeddable',
-            timelineAvatar: 'lensApp',
             children: React.lazy(SpyLazyFactory),
           }),
           schema: z.object({}),
@@ -823,11 +995,10 @@ describe('createCommentUserActionBuilder', () => {
         unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
         unifiedAttachmentTypeRegistry.register({
           id: 'lens',
-          displayName: 'Lens',
-          icon: 'lensApp',
-          getAttachmentViewObject: () => ({
+          getLabel: () => 'Lens',
+          getIcon: () => 'lensApp',
+          getCreationActivity: () => ({
             event: 'added an embeddable',
-            timelineAvatar: 'lensApp',
           }),
           schema: z.object({}),
         });

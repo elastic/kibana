@@ -156,12 +156,22 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
   }
 
   async function getTaskState(ruleId: string) {
-    const task = await es.get<TaskManagerDoc>({
-      id: `task:${ruleId}`,
-      index: '.kibana_task_manager',
-    });
-
-    return JSON.parse(task._source!.task.state);
+    // The `execute` event log doc is written before Task Manager persists the updated task
+    // state, so the `execute` count is not a valid barrier for this read. Poll the task doc
+    // until alertA's scheduled actions from the just-completed run are present.
+    let state: any;
+    await retry.waitFor(
+      `task state for rule ${ruleId} to hold alertA's scheduled actions`,
+      async () => {
+        const task = await es.get<TaskManagerDoc>({
+          id: `task:${ruleId}`,
+          index: '.kibana_task_manager',
+        });
+        state = JSON.parse(task._source!.task.state);
+        return state.alertInstances?.alertA?.meta?.lastScheduledActions != null;
+      }
+    );
+    return state;
   }
 
   async function waitForEventLogDocs(

@@ -21,10 +21,26 @@ export interface AllSpacesEntry {
 }
 
 /**
- * A space displayed in role management: either a real {@link Space} or the
- * synthetic {@link AllSpacesEntry} "all spaces" pseudo-entry.
+ * Placeholder for a space id referenced by a role privilege that is not present
+ * in the loaded spaces list (deleted space, or one the current user cannot see).
+ * `id` stays a plain string — it is not guaranteed to be a valid {@link Space.id}.
  */
-export type DisplaySpace = Space | AllSpacesEntry;
+export interface UnresolvedSpaceEntry {
+  id: string;
+  name: string;
+  color?: string;
+  initials?: string;
+  disabledFeatures: string[];
+  deleted?: true;
+}
+
+/**
+ * A space displayed in role management: a real {@link Space}, the synthetic
+ * {@link AllSpacesEntry} "all spaces" pseudo-entry, or an
+ * {@link UnresolvedSpaceEntry} placeholder for a privilege space id that could
+ * not be resolved.
+ */
+export type DisplaySpace = Space | AllSpacesEntry | UnresolvedSpaceEntry;
 
 /** Type guard narrowing a {@link DisplaySpace} to the "all spaces" pseudo-entry. */
 export const isAllSpacesEntry = (space: DisplaySpace): space is AllSpacesEntry =>
@@ -37,4 +53,15 @@ export const createAllSpacesEntry = (name: string): AllSpacesEntry => ({
   color: '#D3DAE6',
   initials: '*',
   disabledFeatures: [],
+});
+
+/** Build a placeholder for a privilege space id that is not in the loaded list. */
+export const createUnresolvedSpaceEntry = (
+  spaceId: string,
+  options: { deleted?: true } = {}
+): UnresolvedSpaceEntry => ({
+  id: spaceId,
+  name: spaceId,
+  disabledFeatures: [],
+  ...options,
 });

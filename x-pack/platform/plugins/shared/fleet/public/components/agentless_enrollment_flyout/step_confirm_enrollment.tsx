@@ -8,19 +8,28 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiPanel, EuiText, EuiLink, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiButton, EuiPanel, EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
+import { KbnSuccessCallout, KbnDangerCallout } from '@kbn/ui-callout';
 
-import type { Agent, AgentPolicy } from '../../types';
+import type { Agent, AgentPolicy, PackagePolicy } from '../../types';
 import { useStartServices } from '../../hooks';
+import {
+  AgentlessComponentHealth,
+  getComponentAlertLevel,
+} from '../agentless_status_details_flyout/component_health';
 import { AgentDetailsIntegrations } from '../../applications/fleet/sections/agents/agent_details_page/components/agent_details/agent_details_integrations';
 
 export const AgentlessStepConfirmEnrollment = ({
   agent,
   agentPolicy,
+  packagePolicy,
+  policyName,
   integrationTitle,
 }: {
   agent?: Agent;
   agentPolicy?: AgentPolicy;
+  packagePolicy?: PackagePolicy;
+  policyName: string;
   integrationTitle: string;
 }) => {
   const { docLinks } = useStartServices();
@@ -28,28 +37,31 @@ export const AgentlessStepConfirmEnrollment = ({
 
   // Calculate overall UI state from agent status
   useEffect(() => {
-    if (agent && agent.status === 'online') {
+    const hasFailedComponents =
+      !!agent && !!packagePolicy && getComponentAlertLevel(agent, packagePolicy) === 'failed';
+    if (agent && agent.status === 'online' && !hasFailedComponents) {
       setOverallState('success');
-    } else if (agent && (agent.status === 'error' || agent.status === 'degraded')) {
+    } else if (
+      agent &&
+      (agent.status === 'online' || agent.status === 'error' || agent.status === 'degraded')
+    ) {
       setOverallState('failure');
     } else {
       setOverallState('pending');
     }
-  }, [agent]);
+  }, [agent, packagePolicy]);
 
   if (overallState === 'success') {
     return (
       <>
-        <EuiCallOut
+        <KbnSuccessCallout
           announceOnMount
-          color="success"
           title={i18n.translate(
             'xpack.fleet.agentlessEnrollmentFlyout.confirmEnrollment.successText',
             {
               defaultMessage: 'Managed integration deployment was successful',
             }
           )}
-          iconType="check"
         />
         <EuiSpacer size="m" />
         <EuiText>
@@ -63,24 +75,32 @@ export const AgentlessStepConfirmEnrollment = ({
             />
           </p>
         </EuiText>
+        {agent && packagePolicy && (
+          <>
+            <EuiSpacer size="m" />
+            <AgentlessComponentHealth
+              policyName={policyName}
+              agent={agent}
+              agentPolicy={agentPolicy}
+              packagePolicy={packagePolicy}
+            />
+          </>
+        )}
       </>
     );
   } else if (overallState === 'failure') {
     return (
       <>
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount
-          color="danger"
           title={i18n.translate(
             'xpack.fleet.agentlessEnrollmentFlyout.confirmEnrollment.failureText',
             {
               defaultMessage: 'Managed integration deployment failed',
             }
           )}
-          iconType="warning"
-        >
-          {agent?.last_checkin_message && <p>{agent.last_checkin_message}</p>}
-        </EuiCallOut>
+          text={agent?.last_checkin_message}
+        />
         <EuiSpacer size="m" />
         <EuiText>
           <p>
@@ -101,11 +121,29 @@ export const AgentlessStepConfirmEnrollment = ({
             />
           </p>
         </EuiText>
-        {agent && agentPolicy && (
+        {agent && packagePolicy ? (
           <>
             <EuiSpacer size="m" />
-            <AgentDetailsIntegrations agent={agent} agentPolicy={agentPolicy} linkToLogs={false} />
+            <AgentlessComponentHealth
+              policyName={policyName}
+              agent={agent}
+              agentPolicy={agentPolicy}
+              packagePolicy={packagePolicy}
+              showCallout={false}
+            />
           </>
+        ) : (
+          agent &&
+          agentPolicy && (
+            <>
+              <EuiSpacer size="m" />
+              <AgentDetailsIntegrations
+                agent={agent}
+                agentPolicy={agentPolicy}
+                linkToLogs={false}
+              />
+            </>
+          )
         )}
       </>
     );

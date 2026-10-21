@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor, renderHook, act } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { MockRouter, MockKibanaProvider } from '../../../lib/helper/rtl_helpers';
 import { SyntaxType, useQueryBar, DEBOUNCE_INTERVAL } from './use_query_bar';
 import { MountWithReduxProvider } from '../../../lib';
@@ -16,7 +16,6 @@ import type { UptimeUrlParams } from '../../../lib/helper/url_params';
 
 const SAMPLE_ES_FILTERS = `{"bool":{"should":[{"match_phrase":{"monitor.id":"NodeServer"}}],"minimum_should_match":1}}`;
 
-// FLAKY: https://github.com/elastic/kibana/issues/112677
 describe('useQueryBar', () => {
   let DEFAULT_URL_PARAMS: UptimeUrlParams;
   let wrapper: any;
@@ -26,6 +25,7 @@ describe('useQueryBar', () => {
   let useUpdateKueryStringSpy: jest.SpyInstance;
 
   beforeEach(() => {
+    jest.useFakeTimers();
     DEFAULT_URL_PARAMS = {
       absoluteDateRangeStart: 100,
       absoluteDateRangeEnd: 200,
@@ -52,6 +52,10 @@ describe('useQueryBar', () => {
     useUrlParamsSpy.mockImplementation(() => [jest.fn(), updateUrlParamsMock]);
     useGetUrlParamsSpy.mockReturnValue(DEFAULT_URL_PARAMS);
     useUpdateKueryStringSpy.mockReturnValue([SAMPLE_ES_FILTERS]);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it.each([
@@ -111,14 +115,15 @@ describe('useQueryBar', () => {
         });
       });
 
-      await waitFor(async () => {
-        await new Promise((r) => setInterval(r, DEBOUNCE_INTERVAL + 50));
-        if (shouldExpectCall) {
-          expect(updateUrlParamsMock).toHaveBeenCalledTimes(calledTimes);
-        } else {
-          expect(updateUrlParamsMock).not.toHaveBeenCalled();
-        }
+      act(() => {
+        jest.advanceTimersByTime(DEBOUNCE_INTERVAL + 50);
       });
+
+      if (shouldExpectCall) {
+        expect(updateUrlParamsMock).toHaveBeenCalledTimes(calledTimes);
+      } else {
+        expect(updateUrlParamsMock).not.toHaveBeenCalled();
+      }
     }
   );
 });

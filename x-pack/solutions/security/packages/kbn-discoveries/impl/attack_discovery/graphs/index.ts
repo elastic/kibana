@@ -18,6 +18,8 @@ export type {
   CombinedPrompts,
   GenerationPrompts,
 } from './default_attack_discovery_graph/prompts';
+export { getCombinedAttackDiscoveryPrompt } from './default_attack_discovery_graph/prompts';
+export { getAttackDiscoveriesGenerationSchema } from './default_attack_discovery_graph/schemas';
 
 export {
   ATTACK_DISCOVERY_GRAPH_RUN_NAME,

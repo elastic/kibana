@@ -6,16 +6,49 @@
  */
 
 import { buildExtendedFieldsBackfill } from './build_case_extended_fields';
+import { getFieldSnakeKey, getV2FieldType } from '../../../common/utils/template_fields';
 import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
 
 describe('buildExtendedFieldsBackfill', () => {
+  // Most of these tests exercise value/precedence semantics independent of key derivation, so
+  // they resolve every field to its raw-key-based storage key (matching pre-friendly-name
+  // behavior) via this stub resolver. Dedicated tests below cover link-resolution itself —
+  // `run_case_backfill.ts` supplies the real resolver, backed by field_link_resolution.ts.
+  const rawKeyBackfill = (
+    customFields: Array<{ key: string; type: string; value: unknown }> | undefined,
+    existingExtendedFields: Record<string, unknown> | null | undefined
+  ) =>
+    buildExtendedFieldsBackfill(customFields, existingExtendedFields, (cf) =>
+      getFieldSnakeKey(cf.key, getV2FieldType(cf.type))
+    );
+
   it('returns nothing when there are no custom fields', () => {
-    expect(buildExtendedFieldsBackfill(undefined, {})).toEqual({});
-    expect(buildExtendedFieldsBackfill([], {})).toEqual({});
+    expect(rawKeyBackfill(undefined, {})).toEqual({});
+    expect(rawKeyBackfill([], {})).toEqual({});
+  });
+
+  it('skips a field with no resolvable storage key rather than guessing at the raw legacy key', () => {
+    const result = buildExtendedFieldsBackfill(
+      [{ key: 'unresolved', type: CustomFieldTypes.TEXT, value: 'x' }],
+      {},
+      () => undefined
+    );
+
+    expect(result).toEqual({});
+  });
+
+  it('uses the resolver-provided storage key (the linked definition name), not the raw legacy key', () => {
+    const result = buildExtendedFieldsBackfill(
+      [{ key: 'd64293ff-7ae5-4512-a01a-069b1efdc171', type: CustomFieldTypes.TEXT, value: 'hey' }],
+      {},
+      () => 'legacy_text_required_as_keyword'
+    );
+
+    expect(result).toEqual({ legacy_text_required_as_keyword: 'hey' });
   });
 
   it('maps each v1 custom field type to the matching extended_fields key and stringified value', () => {
-    const result = buildExtendedFieldsBackfill(
+    const result = rawKeyBackfill(
       [
         { key: 'summary', type: CustomFieldTypes.TEXT, value: 'hello' },
         { key: 'count', type: CustomFieldTypes.NUMBER, value: 7 },
@@ -33,7 +66,7 @@ describe('buildExtendedFieldsBackfill', () => {
   });
 
   it('stringifies a false toggle rather than dropping it', () => {
-    const result = buildExtendedFieldsBackfill(
+    const result = rawKeyBackfill(
       [{ key: 'flag', type: CustomFieldTypes.TOGGLE, value: false }],
       {}
     );
@@ -41,7 +74,7 @@ describe('buildExtendedFieldsBackfill', () => {
   });
 
   it('skips null and undefined values (the case left the field empty)', () => {
-    const result = buildExtendedFieldsBackfill(
+    const result = rawKeyBackfill(
       [
         { key: 'a', type: CustomFieldTypes.TEXT, value: null },
         { key: 'b', type: CustomFieldTypes.NUMBER, value: undefined },
@@ -53,7 +86,7 @@ describe('buildExtendedFieldsBackfill', () => {
   });
 
   it('never overwrites a key already present in extended_fields with a non-empty value', () => {
-    const result = buildExtendedFieldsBackfill(
+    const result = rawKeyBackfill(
       [
         { key: 'summary', type: CustomFieldTypes.TEXT, value: 'from-legacy' },
         { key: 'count', type: CustomFieldTypes.NUMBER, value: 9 },
@@ -69,7 +102,7 @@ describe('buildExtendedFieldsBackfill', () => {
     // and users can clear values while the space's backfill is still pending — so '' always
     // wins over the legacy mirror. null cannot come from any user-facing write path, so it is
     // treated as "no v2 value" and filled.
-    const result = buildExtendedFieldsBackfill(
+    const result = rawKeyBackfill(
       [
         { key: 'summary', type: CustomFieldTypes.TEXT, value: 'from-legacy' },
         { key: 'count', type: CustomFieldTypes.NUMBER, value: 9 },
@@ -80,18 +113,12 @@ describe('buildExtendedFieldsBackfill', () => {
   });
 
   it('treats a null extended_fields the same as empty', () => {
-    const result = buildExtendedFieldsBackfill(
-      [{ key: 'a', type: CustomFieldTypes.TEXT, value: 'x' }],
-      null
-    );
+    const result = rawKeyBackfill([{ key: 'a', type: CustomFieldTypes.TEXT, value: 'x' }], null);
     expect(result).toEqual({ a_as_keyword: 'x' });
   });
 
   it('preserves a zero number value', () => {
-    const result = buildExtendedFieldsBackfill(
-      [{ key: 'n', type: CustomFieldTypes.NUMBER, value: 0 }],
-      {}
-    );
+    const result = rawKeyBackfill([{ key: 'n', type: CustomFieldTypes.NUMBER, value: 0 }], {});
     expect(result).toEqual({ n_as_integer: '0' });
   });
 });

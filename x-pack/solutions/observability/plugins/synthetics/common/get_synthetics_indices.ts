@@ -9,9 +9,9 @@ import { SYNTHETICS_INDEX_PATTERN } from './constants';
 
 /**
  * Resolves the index to query for a monitor, prefixing it with a remote cluster
- * alias when the monitor lives on a remote cluster (so it is queried via
- * Cross-Cluster Search). Returns the local pattern unchanged when `remoteName`
- * is not provided.
+ * or CPS project alias when `remoteName` is set. The same `alias:index`
+ * expression is CCS on stateful and a qualified project index on serverless.
+ * Returns the local pattern unchanged when `remoteName` is not provided.
  *
  * `indexPattern` defaults to {@link SYNTHETICS_INDEX_PATTERN} — the value used
  * by virtually every caller — so only pass it for the rare cases that target a

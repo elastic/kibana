@@ -26,6 +26,7 @@ import {
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
+  filters?: DiscoverAppState['filters'];
   cascadedDocumentsContext?: CascadedDocumentsContext;
 }
 
@@ -36,17 +37,24 @@ export interface DiscoverGridProps extends UnifiedDataTableProps {
 export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
   ({
     query,
+    filters,
+    queryContext: providedQueryContext,
     cascadedDocumentsContext,
+    dataSource,
     externalAdditionalControls: customExternalAdditionalControls,
     rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
     onFullScreenChange,
     ...props
   }) => {
     const { dataView } = props;
+    const queryContext = useMemo(
+      () => providedQueryContext ?? { query, filters },
+      [providedQueryContext, query, filters]
+    );
     const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
     const getRowIndicator = useMemo(() => {
-      return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
-    }, [getRowIndicatorProvider, props.dataView]);
+      return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView, dataSource });
+    }, [dataSource, getRowIndicatorProvider, props.dataView]);
 
     const getRowAdditionalLeadingControlsAccessor = useProfileAccessor(
       'getRowAdditionalLeadingControls'
@@ -88,7 +96,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     });
 
     const isCascadedDocumentsAvailable =
-      props.isPlainRecord && !!cascadedDocumentsContext?.availableCascadeGroups.length;
+      dataSource?.kind === 'esql' && !!cascadedDocumentsContext?.availableCascadeGroups.length;
 
     const externalAdditionalControls = useMemo(() => {
       const additionalControls: ReactNode[] = [];
@@ -130,19 +138,22 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     ) : (
       <UnifiedDataTable
         showColumnTokens
-        canDragAndDropColumns
-        enableComparisonMode
-        enableInTableSearch
         renderCustomToolbar={renderCustomToolbar}
-        getRowIndicator={getRowIndicator}
         rowAdditionalLeadingControls={rowAdditionalLeadingControls}
-        visibleCellActions={3} // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
         paginationMode={paginationModeConfig.paginationMode}
         customGridColumnsConfiguration={customGridColumnsConfiguration}
         shouldKeepAdHocDataViewImmutable
         externalAdditionalControls={externalAdditionalControls}
         onFullScreenChange={onFullScreenChange}
         {...props}
+        canDragAndDropColumns
+        enableComparisonMode
+        enableInTableSearch
+        showSummaryColumnToggle
+        visibleCellActions={3} // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
+        queryContext={queryContext}
+        dataSource={dataSource}
+        getRowIndicator={getRowIndicator}
       />
     );
   }

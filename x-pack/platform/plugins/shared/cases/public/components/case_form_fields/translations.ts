@@ -20,10 +20,10 @@ export const LEGACY_CUSTOM_FIELDS_SECTION_TITLE = i18n.translate(
   }
 );
 
-export const LEGACY_CUSTOM_FIELDS_VIEW_CUSTOM_FIELDS = i18n.translate(
-  'xpack.cases.caseFormFields.legacyCustomFieldsViewCustomFields',
+export const LEGACY_CUSTOM_FIELDS_VIEW_FIELD_LIBRARY = i18n.translate(
+  'xpack.cases.caseFormFields.legacyCustomFieldsViewFieldLibrary',
   {
-    defaultMessage: 'custom fields',
+    defaultMessage: 'Field library',
   }
 );
 

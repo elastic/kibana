@@ -19,17 +19,9 @@ jest.mock('../hooks/use_get_field_definitions', () => ({
   useGetFieldDefinitions: () => mockGetFieldDefinitions(),
 }));
 
-jest.mock('../hooks/use_create_field_definition', () => ({
-  useCreateFieldDefinition: () => ({ mutate: jest.fn(), isLoading: false }),
-}));
-
-jest.mock('../hooks/use_update_field_definition', () => ({
-  useUpdateFieldDefinition: () => ({ mutate: jest.fn(), isLoading: false }),
-}));
-
-jest.mock('../hooks/use_delete_field_definition', () => ({
-  useDeleteFieldDefinition: () => ({ mutate: jest.fn() }),
-}));
+// Keep the production mutation hooks connected to their reporter dependencies. The API mock
+// prevents a page test from making a request if it starts a mutation.
+jest.mock('../api/api');
 
 const mockReorderState = { isLoading: false, isError: false };
 
@@ -54,6 +46,15 @@ jest.mock('../components/field_definition_yaml_editor', () => ({
 
 jest.mock('../components/field_definition_preview', () => ({
   FieldDefinitionPreview: () => <div data-test-subj="fieldDefinitionPreview" />,
+}));
+
+const mockReportCreated = jest.fn();
+const mockReportUpdated = jest.fn();
+const mockReportDeleted = jest.fn();
+jest.mock('../../../analytics/field_library', () => ({
+  useFieldDefinitionCreatedEBT: () => mockReportCreated,
+  useFieldDefinitionUpdatedEBT: () => mockReportUpdated,
+  useFieldDefinitionDeletedEBT: () => mockReportDeleted,
 }));
 
 const buildFieldDefinition = (overrides: Partial<FieldDefinition>): FieldDefinition => ({
@@ -103,6 +104,7 @@ describe('AllFieldDefinitionsPage', () => {
       expect.objectContaining({ fieldDefinitionId: 'second', displayOrder: 0 }),
       expect.objectContaining({ fieldDefinitionId: 'first', displayOrder: 1 }),
     ]);
+    expect(mockReportUpdated).not.toHaveBeenCalled();
   });
 
   it('rolls the optimistic order back to the server order when the reorder write fails', async () => {
@@ -291,6 +293,16 @@ describe('AllFieldDefinitionsPage', () => {
     expect(
       within(screen.getByTestId('fieldDefinitionRow-my_field')).getAllByText('my_field').length
     ).toBeGreaterThan(0);
+  });
+
+  it('does not report any field library analytics event on page load', async () => {
+    renderWithTestingProviders(<AllFieldDefinitionsPage />);
+
+    await screen.findByTestId('fieldDefinitionsList');
+
+    expect(mockReportCreated).not.toHaveBeenCalled();
+    expect(mockReportUpdated).not.toHaveBeenCalled();
+    expect(mockReportDeleted).not.toHaveBeenCalled();
   });
 
   describe('Required column', () => {

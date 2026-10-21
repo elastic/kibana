@@ -36,12 +36,7 @@ import React, { useRef, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import type { CoreStart, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
-import {
-  getAvailableLocales,
-  getBrowserPreferredLocale,
-  i18n,
-  toCanonicalLocaleId,
-} from '@kbn/i18n';
+import { getAvailableLocales, i18n, toCanonicalLocaleId } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -668,7 +663,7 @@ function UserPasswordEditor({
   );
 }
 
-function UserSpaceConfigEditor({ formik }: { formik: ReturnType<typeof useUserProfileForm> }) {
+function UserSpacePreferenceEditor({ formik }: { formik: ReturnType<typeof useUserProfileForm> }) {
   const rememberSelectedSpaceLabelId = useGeneratedHtmlId({
     prefix: 'rememberSelectedSpace',
   });
@@ -684,14 +679,14 @@ function UserSpaceConfigEditor({ formik }: { formik: ReturnType<typeof useUserPr
         <h2>
           <FormattedMessage
             id="xpack.security.accountManagement.userProfile.rememberSelectedSpaceGroupTitle"
-            defaultMessage="Space Configuration"
+            defaultMessage="Spaces preferences"
           />
         </h2>
       }
       description={
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.rememberSelectedSpaceGroupDescription"
-          defaultMessage="Spaces related configuration for Kibana."
+          defaultMessage="Spaces related preferences for Kibana."
         />
       }
     >
@@ -715,7 +710,7 @@ function UserSpaceConfigEditor({ formik }: { formik: ReturnType<typeof useUserPr
               <p>
                 <FormattedMessage
                   id="xpack.security.accountManagement.userProfile.rememberSelectedSpaceSwitchDescription"
-                  defaultMessage="Kibana will redirect to last accessed space on login."
+                  defaultMessage="Kibana will open the last accessed space when logging in."
                 />
               </p>
             </EuiText>
@@ -927,7 +922,8 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   )}
                   {/* Cloud users change language via the Language modal in the user menu */}
                   {isCloudUser ? null : <UserLocaleEditor formik={formik} />}
-                  <UserSpaceConfigEditor formik={formik} />
+                  {/* Cloud users modify space configuration via the space configuration modal in the user menu */}
+                  {isCloudUser ? null : <UserSpacePreferenceEditor formik={formik} />}
                 </Form>
               </KibanaPageTemplate.Section>
               {formChanges.count > 0 ? (
@@ -1038,11 +1034,9 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
         values.data &&
         initialValues.data?.userSettings.locale !== values.data.userSettings.locale
       ) {
-        const preferredLocale = getBrowserPreferredLocale();
         services.analytics.reportEvent('display_language_changed', {
           from: initialValues.data?.userSettings.locale ?? '',
           to: values.data.userSettings.locale,
-          ...(preferredLocale ? { preferred_language_kibana_locale: preferredLocale } : {}),
         });
       }
 

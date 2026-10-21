@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { AgentBuilderPluginSetup, ToolAvailabilityConfig } from '@kbn/agent-builder-server';
 import { streamsManagementSkill } from './streams_management_skill';
 
 export const registerAgentBuilderSkills = ({
   agentBuilder,
+  availability,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
+  availability: ToolAvailabilityConfig;
 }): void => {
   if (!agentBuilder) {
     return;
@@ -20,6 +22,6 @@ export const registerAgentBuilderSkills = ({
   const streamsSkills = [streamsManagementSkill];
 
   for (const skill of streamsSkills) {
-    agentBuilder.skills.register(skill);
+    agentBuilder.skills.register({ ...skill, availability });
   }
 };

@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { openAppMenuOverflow } from '@kbn/ui-app-menu/test_helpers';
+/** @deprecated Import from `@kbn/app-menu/test_helpers` instead. */
+export { openAppMenuOverflow } from '@kbn/app-menu/test_helpers';

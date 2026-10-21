@@ -48,7 +48,7 @@ export const PageViewLogInContext: React.FC = () => {
   const logsLocator = getLogsLocatorFromUrlService(url);
 
   const logSources = useAsync(logSourcesService.getFlattenedLogSources);
-  const [{ contextEntry, startTimestamp, endTimestamp }, { setContextEntry }] =
+  const [{ contextEntry, startTimestamp, endTimestamp, projectRouting }, { setContextEntry }] =
     useViewLogInProviderContext();
   const closeModal = useCallback(() => setContextEntry(undefined), [setContextEntry]);
   const { width: vw, height: vh } = useViewportDimensions();
@@ -116,6 +116,7 @@ export const PageViewLogInContext: React.FC = () => {
                   index={logSources.value}
                   timeRange={timeRange}
                   query={contextQuery}
+                  projectRouting={projectRouting}
                   height={'100%'}
                   displayOptions={{
                     solutionNavIdOverride: 'oblt',

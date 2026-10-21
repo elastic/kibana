@@ -12,7 +12,7 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { readRules } from '../../lib/detection_engine/rule_management/logic/detection_rules_client/read_rules';
@@ -20,11 +20,16 @@ import { transform } from '../../lib/detection_engine/rule_management/utils/util
 import { SECURITY_CREATE_DETECTION_RULE_TOOL_ID, SECURITY_LABS_SEARCH_TOOL_ID } from '../tools';
 
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
+import { escapeJsonControlChars } from './escape_json_control_chars';
 
-export const ruleAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  text: z.string().max(500_000),
-  attachmentLabel: z.string().max(1_000).optional(),
-});
+export const ruleAttachmentDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    // Escape raw control characters the model may emit when hand-stringifying the rule JSON, so the
+    // persisted text always parses. See `escapeJsonControlChars`.
+    text: z.string().max(500_000).transform(escapeJsonControlChars),
+    attachmentLabel: z.string().max(1_000).optional(),
+  })
+);
 
 const DETECTION_RULE_SKILL_NAME_ID = 'detection-rule-edit';
 const INVESTIGATE_RULE_SKILL_NAME_ID = 'investigate-rule';

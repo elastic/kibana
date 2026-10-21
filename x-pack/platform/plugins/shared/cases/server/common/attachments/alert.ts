@@ -9,6 +9,7 @@ import { isPlainObject } from 'lodash';
 import type { AttachmentRequestV2 } from '../../../common/types/api';
 import type {
   UnifiedReferenceAttachmentPayload,
+  UnifiedAttachmentPayload,
   AttachmentAttributesV2,
 } from '../../../common/types/domain/attachment/v2';
 import type {
@@ -82,6 +83,7 @@ const toAlertMetadata = (
  * Transformer for alert attachments (legacy schema <-> unified schema).
  * Legacy: { type: 'alert', alertId, index, rule } (AttachmentType.alert)
  * Unified: { type: owner-scoped alert, attachmentId: string|string[], metadata: { index, rule } }
+ * The legacy shape drops `metadata.sourceAttachmentIds`.
  */
 export const alertAttachmentTransformer: AttachmentTypeTransformer<
   AttachmentPersistedAttributes,
@@ -137,7 +139,7 @@ export const alertAttachmentTransformer: AttachmentTypeTransformer<
   isLegacyPayload(attachment: AttachmentRequestV2): attachment is AlertAttachmentPayload {
     return isLegacyAlertAttachment(attachment);
   },
-  isUnifiedPayload(attachment: AttachmentRequestV2): boolean {
+  isUnifiedPayload(attachment: AttachmentRequestV2): attachment is UnifiedAttachmentPayload {
     return isUnifiedAlertAttachment(attachment);
   },
   toUnifiedPayload(attachment: AlertAttachmentPayload): UnifiedReferenceAttachmentPayload {

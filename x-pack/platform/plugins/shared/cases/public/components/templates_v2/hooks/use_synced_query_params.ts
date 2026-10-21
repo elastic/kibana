@@ -7,7 +7,7 @@
 
 /**
  * This hook syncs query params between URL and localStorage.
- * A similar solution exists in `all_cases/use_all_cases_state.tsx`.
+ * A similar solution exists in `all_cases/hooks/use_all_cases_state.tsx`.
  * Consider refactoring to a shared generic hook in the future.
  */
 

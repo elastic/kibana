@@ -8,6 +8,8 @@
 jest.mock('../epm/packages');
 jest.mock('../app_context');
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+
 import { DATA_STREAM_TYPE_VAR_NAME, DATASET_VAR_NAME } from '../../../common/constants';
 import type { PackagePolicy } from '../../types';
 import { PackagePolicyValidationError } from '../../errors';
@@ -690,6 +692,113 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         cluster: ['monitor'],
       },
     });
+  });
+
+  it('Filters out disallowed cluster privileges and logs a warning', async () => {
+    const mockLogger = loggingSystemMock.createLogger();
+    jest.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
+
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-uuid-test-123',
+        name: 'test-policy',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        elasticsearch: {
+          privileges: {
+            cluster: ['monitor', 'all'],
+          },
+        },
+        inputs: [
+          {
+            type: 'test-logs',
+            enabled: true,
+            streams: [
+              {
+                id: 'test-logs',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'some-logs' },
+                compiled_stream: { data_stream: { dataset: 'compiled' } },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'test',
+      packagePolicies
+    );
+    expect(permissions).toMatchObject({
+      'package-policy-uuid-test-123': {
+        cluster: ['monitor'],
+      },
+    });
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('package-policy-uuid-test-123')
+    );
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('all'));
+  });
+
+  it('Omits cluster descriptor when all declared cluster privileges are disallowed', async () => {
+    const mockLogger = loggingSystemMock.createLogger();
+    jest.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
+
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-uuid-test-123',
+        name: 'test-policy',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        elasticsearch: {
+          privileges: {
+            cluster: ['all', 'manage_security'],
+          },
+        },
+        inputs: [
+          {
+            type: 'test-logs',
+            enabled: true,
+            streams: [
+              {
+                id: 'test-logs',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'some-logs' },
+                compiled_stream: { data_stream: { dataset: 'compiled' } },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'test',
+      packagePolicies
+    );
+    expect(permissions?.['package-policy-uuid-test-123']).not.toHaveProperty('cluster');
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('package-policy-uuid-test-123')
+    );
   });
 
   it('Returns the dataset for osquery_manager package', async () => {

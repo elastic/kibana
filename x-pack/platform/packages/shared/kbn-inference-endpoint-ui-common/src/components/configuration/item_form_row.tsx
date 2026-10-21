@@ -7,18 +7,11 @@
 
 import React from 'react';
 
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { ConfigEntryView } from '../../types/types';
-import { FieldType, type Map } from '../../types/types';
+import { FieldType, type ConfigValue } from '../../types/types';
 import { ConfigFieldTitularComponent } from './titular_component_registry';
 import { ConfigurationField } from './configuration_field';
 import * as LABELS from '../../translations';
@@ -31,7 +24,7 @@ interface ItemFormRowProps {
   isInternalProvider?: boolean;
   isEdit?: boolean;
   isLoading: boolean;
-  setConfigEntry: (key: string, value: string | number | boolean | null | Map) => void;
+  setConfigEntry: (key: string, value: ConfigValue) => void;
   reenterSecretsOnEdit?: boolean;
 }
 
@@ -123,10 +116,9 @@ export const ItemFormRow: React.FC<ItemFormRowProps> = ({
       {sensitive && reenterSecretsOnEdit ? (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount={!isEdit}
             size="s"
-            color="warning"
             title={LABELS.RE_ENTER_SECRETS(label)}
           />
         </>

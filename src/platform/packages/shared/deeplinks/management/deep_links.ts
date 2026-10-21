@@ -49,6 +49,7 @@ export type ManagementId =
   | 'episodes'
   | 'content_connectors'
   | 'data_federation'
+  | 'esql_views'
   | 'filesManagement'
   | 'license_management'
   | 'index_lifecycle_management'
@@ -69,6 +70,7 @@ export type ManagementId =
   | 'roles'
   | 'rollup_jobs'
   | 'search_sessions'
+  | 'service_accounts'
   | 'settings'
   | 'snapshot_restore'
   | 'spaces'
@@ -85,7 +87,8 @@ export type ManagementId =
   | 'upgrade_assistant'
   | 'users'
   | 'watcher'
-  | 'genAiSettings';
+  | 'genAiSettings'
+  | 'aiAnonymizationSettings';
 
 export type ManagementDeepLinkId = MonitoringAppId | `${ManagementAppId}:${ManagementId}`;
 
