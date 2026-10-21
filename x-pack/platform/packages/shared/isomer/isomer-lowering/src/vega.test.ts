@@ -10,7 +10,6 @@ import { readFileSync } from 'node:fs';
 
 import { planDashboard } from './dashboard';
 import {
-  kibanaMapToVega,
   kibanaSearchBody,
   parseKibanaVegaSpec,
   selectionsToDsl,
@@ -212,52 +211,5 @@ describe('planDashboard', () => {
       });
       expect((node.spec as { title?: unknown }).title).toBe(node.caption);
     }
-  });
-});
-
-describe('kibanaMapToVega', () => {
-  it('swaps Kibana map mode for a Mercator projection and a projected basemap', () => {
-    const { spec } = parseKibanaVegaSpec(vegaSpecs[0]!.text);
-    const square = {
-      type: 'Polygon',
-      coordinates: [
-        [
-          [-130, 20],
-          [-110, 20],
-          [-110, 40],
-          [-130, 40],
-          [-130, 20],
-        ],
-      ],
-    };
-    const far = {
-      type: 'Polygon',
-      coordinates: [
-        [
-          [100, -10],
-          [101, -10],
-          [101, -9],
-          [100, -10],
-        ],
-      ],
-    };
-    const basemap = {
-      type: 'FeatureCollection',
-      features: [{ geometry: square }, { geometry: far }],
-    };
-    const mapped = kibanaMapToVega(spec, basemap, { width: 600, height: 300 }) as {
-      config: Record<string, unknown>;
-      projections: Array<Record<string, unknown>>;
-      data: Array<{ name: string; values?: Array<{ path: string }> }>;
-    };
-    expect(mapped.config.kibana).toBeUndefined();
-    expect(mapped.projections[0]).toMatchObject({
-      name: 'projection',
-      type: 'mercator',
-      center: [-120, 30],
-      translate: [300, 150],
-    });
-    expect(mapped.data[0]!.values).toHaveLength(1);
-    expect(mapped.data[0]!.values![0]!.path).toMatch(/^M[\d.,L-]+Z$/);
   });
 });

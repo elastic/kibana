@@ -162,7 +162,7 @@ export const convertDashboard = async ({
   };
   const [charts, vega, maps] = await Promise.all([
     bindChartsDashboard(planned, executeEsql, executeFor),
-    bindVegaPanels(planned, search, context.bool),
+    bindVegaPanels(planned, search, context.bool, mapServices),
     bindMapPanels(objects, dashboardId, planned.timeRange, context.bool, {
       search,
       executeEsql,

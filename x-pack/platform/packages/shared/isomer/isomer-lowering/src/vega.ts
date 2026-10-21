@@ -262,129 +262,11 @@ export const inlineVegaData = (
   return copy;
 };
 
-/** A Kibana map-mode spec (`config.kibana.type: "map"`). */
-export const isKibanaMap = (spec: VegaSpec): boolean => {
-  const config = spec.config;
-  return isObject(config) && isObject(config.kibana) && config.kibana.type === 'map';
-};
-
-/** Web Mercator at Leaflet's 256-pixel tiles. */
-const mercatorScale = (zoom: number) => (256 * 2 ** zoom) / (2 * Math.PI);
-
-const RADIANS = Math.PI / 180;
-const mercatorY = (lat: number) =>
-  Math.log(Math.tan(Math.PI / 4 + (Math.max(-85, Math.min(85, lat)) * RADIANS) / 2));
-
-interface Projection {
-  center: [number, number];
-  scale: number;
-  translate: [number, number];
-}
-
-const project = (
-  { center: [lon0, lat0], scale, translate: [tx, ty] }: Projection,
-  [lon, lat]: number[]
-) =>
-  [tx + scale * (lon! - lon0) * RADIANS, ty - scale * (mercatorY(lat!) - mercatorY(lat0))] as const;
-
-type Ring = number[][];
-
-/** Each country as one SVG path in view pixels, so the composition carries strings rather than coordinate arrays. */
-const projectBasemap = (
-  basemap: unknown,
-  projection: Projection,
-  [width, height]: [number, number]
-): Array<{ path: string }> => {
-  const features = (
-    isObject(basemap) && Array.isArray(basemap.features) ? basemap.features : []
-  ) as Array<{
-    geometry?: { type: string; coordinates: unknown };
-  }>;
-  return features.flatMap(({ geometry }) => {
-    if (!geometry) {
-      return [];
-    }
-    const polygons = (
-      geometry.type === 'Polygon'
-        ? [geometry.coordinates]
-        : geometry.type === 'MultiPolygon'
-        ? geometry.coordinates
-        : []
-    ) as Ring[][];
-    const rings = polygons.flat().map((ring) => ring.map((point) => project(projection, point)));
-    const visible = rings.filter((ring) =>
-      ring.some(([x, y]) => x >= -width && x <= 2 * width && y >= -height && y <= 2 * height)
-    );
-    if (visible.length === 0) {
-      return [];
-    }
-    const path = visible
-      .map((ring) => `M${ring.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join('L')}Z`)
-      .join('');
-    return [{ path }];
-  });
-};
-
-/**
- * Stands in for Kibana's map layer: a Mercator `projection` at the saved center and
- * zoom, and country outlines in place of tiles.
- */
-export const kibanaMapToVega = (
-  spec: VegaSpec,
-  basemap: unknown,
-  { width, height }: { width: number; height: number }
-): VegaSpec => {
-  const { kibana, ...config } = spec.config as { kibana: Record<string, unknown> };
-  const number = (key: string, fallback: number) =>
-    typeof kibana[key] === 'number' ? (kibana[key] as number) : fallback;
-  const projection: Projection = {
-    center: [number('longitude', 0), number('latitude', 0)],
-    scale: mercatorScale(number('zoom', 2)),
-    translate: [width / 2, height / 2],
-  };
-  const projections = Array.isArray(spec.projections) ? spec.projections : [];
-  const marks = Array.isArray(spec.marks) ? spec.marks : [];
-  const data = Array.isArray(spec.data) ? spec.data : [];
-  return {
-    ...spec,
-    config,
-    projections: [
-      { name: 'projection', type: 'mercator', ...projection },
-      ...projections.filter((entry) => !(isObject(entry) && entry.name === 'projection')),
-    ],
-    data: [
-      { name: 'kibanaBasemap', values: projectBasemap(basemap, projection, [width, height]) },
-      ...data,
-    ],
-    marks: [
-      {
-        type: 'path',
-        clip: true,
-        from: { data: 'kibanaBasemap' },
-        encode: {
-          update: {
-            path: { field: 'path' },
-            fill: { value: '#98a2b3' },
-            fillOpacity: { value: 0.18 },
-            stroke: { value: '#98a2b3' },
-            strokeOpacity: { value: 0.5 },
-            strokeWidth: { value: 0.5 },
-          },
-        },
-      },
-      ...marks.map((mark) => (isObject(mark) ? { clip: true, ...mark } : mark)),
-    ],
-  };
-};
-
 /** Kibana's own expression functions, which act on the dashboard and mean nothing outside it. */
 const KIBANA_FUNCTIONS = /\bkibana(AddFilter|RemoveFilter|RemoveAllFilters|SetTimeFilter)\s*\(/;
 
 /** Why a Kibana Vega spec cannot be drawn faithfully from inline data, or `undefined`. */
 export const vegaRefusal = (spec: VegaSpec): string | undefined => {
-  if (isKibanaMap(spec)) {
-    return 'Kibana map mode draws over map tiles, which nothing outside Kibana loads';
-  }
   const called = KIBANA_FUNCTIONS.exec(JSON.stringify(spec));
   if (called) {
     return `calls Kibana's ${called[0].replace(/\s*\($/, '')}, which acts on the dashboard`;
@@ -396,11 +278,15 @@ export const vegaRefusal = (spec: VegaSpec): string | undefined => {
   return undefined;
 };
 
-/** A copy of `spec` without `config.kibana`, whose remaining settings only steer Kibana's own container. */
+/**
+ * A copy of `spec` without its Kibana settings (`config.kibana`, or the deprecated `_hostConfig`), which steer
+ * Kibana's own container, as `VegaParser._parseConfig` removes them.
+ */
 export const withoutKibanaConfig = (spec: VegaSpec): VegaSpec => {
-  if (!isObject(spec.config) || !('kibana' in spec.config)) {
-    return spec;
+  const { _hostConfig: _host, ...rest } = spec;
+  if (!isObject(rest.config) || !('kibana' in rest.config)) {
+    return rest;
   }
-  const { kibana: _kibana, ...config } = spec.config;
-  return { ...spec, config };
+  const { kibana: _kibana, ...config } = rest.config;
+  return { ...rest, config };
 };

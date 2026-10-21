@@ -33,8 +33,6 @@ export {
   type VegaSource,
   type VegaSpec,
   inlineVegaData,
-  isKibanaMap,
-  kibanaMapToVega,
   kibanaSearchBody,
   parseKibanaVegaSpec,
   selectionsToDsl,
@@ -47,6 +45,16 @@ export {
   convertDashboard,
 } from './convert';
 export { type BoundPanel, bindVegaPanels } from './vega_panels';
+export {
+  basemapTiles,
+  isKibanaMap,
+  KIBANA_MAP_PROJECTION,
+  kibanaConfigOf,
+  type KibanaMapView,
+  kibanaMapStyle,
+  lowerKibanaMapSpec,
+  parseKibanaMapView,
+} from './vega_map';
 export {
   basemapId,
   bindMapPanels,
