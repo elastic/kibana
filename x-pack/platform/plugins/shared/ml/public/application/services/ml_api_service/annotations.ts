@@ -11,7 +11,7 @@ import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 
-interface GetAnnotationsOptions {
+export interface GetAnnotationsOptions {
   jobIds: string[];
   earliestMs: number | null;
   latestMs: number | null;

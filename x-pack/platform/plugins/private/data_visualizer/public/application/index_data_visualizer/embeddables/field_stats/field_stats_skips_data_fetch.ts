@@ -7,7 +7,10 @@
 
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { FieldStatsInitializerViewType } from '../../../../../common/embeddables/types';
+import {
+  FieldStatsInitializerViewType,
+  type FieldStatsInitialState,
+} from '../../../../../common/embeddables/types';
 
 /**
  * Field statistics are not supported for ES|QL queries. The panel shows an empty
@@ -29,7 +32,7 @@ export function fieldStatsSkipsDataFetch({
   query,
   hasDataView,
 }: {
-  viewType?: FieldStatsInitializerViewType;
+  viewType?: FieldStatsInitializerViewType | NonNullable<FieldStatsInitialState['view_type']>;
   isEsqlEnabled: boolean;
   query?: { esql: string } | AggregateQuery | Query;
   hasDataView: boolean;
