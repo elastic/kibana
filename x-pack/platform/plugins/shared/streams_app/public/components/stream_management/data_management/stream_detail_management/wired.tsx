@@ -10,6 +10,7 @@ import { type Streams, isRoot, isDraftStream, LOGS_ROOT_STREAM_NAME } from '@kbn
 import { EuiCallOut } from '@elastic/eui';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
+import { useStreamDetailBack } from '../../../../hooks/use_stream_detail_back';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { RedirectTo } from '../../../redirect_to';
@@ -89,14 +90,12 @@ function WiredStreamDetailManagementContent({
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
   const router = useStreamsAppRouter();
+  const { back: detailBack } = useStreamDetailBack();
   const { rangeFrom, rangeTo } = useTimeRange();
   const importLifecycleFlyout = useImportLifecycleFlyoutContext();
 
   const isProcessingEnabled = !definition.replicated;
 
-  const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
-    defaultMessage: 'Streams',
-  });
   const wiredBadges: AppHeaderBadge[] = [
     {
       label: i18n.translate('xpack.streams.entityDetailViewWithoutParams.managedBadgeLabel', {
@@ -111,7 +110,7 @@ function WiredStreamDetailManagementContent({
       <>
         <StreamsAppHeader
           title={key}
-          back={{ href: router.link('/'), label: backToStreamsLabel }}
+          back={detailBack}
           badges={wiredBadges}
         />
         <StreamsAppPageTemplate.Body>
@@ -145,7 +144,7 @@ function WiredStreamDetailManagementContent({
       <>
         <StreamsAppHeader
           title={key}
-          back={{ href: router.link('/'), label: backToStreamsLabel }}
+          back={detailBack}
           badges={wiredBadges}
         />
         <StreamsAppPageTemplate.Body>
@@ -167,7 +166,7 @@ function WiredStreamDetailManagementContent({
       <>
         <StreamsAppHeader
           title={key}
-          back={{ href: router.link('/'), label: backToStreamsLabel }}
+          back={detailBack}
           badges={wiredBadges}
         />
         <StreamsAppPageTemplate.Body>

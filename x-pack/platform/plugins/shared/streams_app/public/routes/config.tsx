@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import { DATA_MANAGEMENT_OVERVIEW_RETURN_PARAM } from '@kbn/management-plugin/common';
 import type { RouteMap } from '@kbn/typed-react-router-config';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
@@ -26,6 +27,7 @@ import { DEFAULT_STREAMS_LAYOUT_TAB } from '../components/streams_layout/tabs';
 const timeRangeQueryParams = t.partial({
   rangeFrom: t.string,
   rangeTo: t.string,
+  [DATA_MANAGEMENT_OVERVIEW_RETURN_PARAM]: t.string,
 });
 
 const flyoutParams = t.partial({
@@ -40,6 +42,7 @@ const flyoutParams = t.partial({
 const managementQueryParams = t.partial({
   rangeFrom: t.string,
   rangeTo: t.string,
+  [DATA_MANAGEMENT_OVERVIEW_RETURN_PARAM]: t.string,
   // Data quality page state
   pageState: t.string,
 });

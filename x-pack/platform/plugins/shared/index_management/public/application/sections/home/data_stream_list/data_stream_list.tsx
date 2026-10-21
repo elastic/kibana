@@ -21,6 +21,10 @@ import {
   EuiScreenReaderLive,
 } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
+import {
+  cameFromDataManagementOverview,
+  DATA_MANAGEMENT_OVERVIEW_PATH,
+} from '@kbn/management-plugin/common';
 
 import type { Error } from '../../../../shared_imports';
 import {
@@ -61,7 +65,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   const {
     config: { enableProjectLevelRetentionChecks },
-    core: { getUrlForApp, executionContext },
+    core: { getUrlForApp, executionContext, application },
     plugins: { isFleetEnabled, cloud },
   } = useAppContext();
 
@@ -347,6 +351,13 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
         <DataStreamDetailPanel
           dataStreamName={decodedDataStreamName}
           onClose={(shouldReload?: boolean) => {
+            if (cameFromDataManagementOverview(search)) {
+              void application.navigateToUrl(
+                getUrlForApp('management', { path: DATA_MANAGEMENT_OVERVIEW_PATH })
+              );
+              return;
+            }
+
             history.push(`/${Section.DataStreams}`);
 
             // If the data stream was deleted, we need to refresh the list.

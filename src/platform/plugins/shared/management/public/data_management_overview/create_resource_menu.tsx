@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import type { CoreStart } from '@kbn/core/public';
+import { withDataManagementOverviewReturn } from '../../common/data_management_overview_return';
 import type { DataManagementCreateOverlayId } from '../types';
 
 const createResourceLabel = i18n.translate('management.dataManagementOverview.create.button', {
@@ -26,7 +27,6 @@ export const getCreateResourceMenu = ({
 }): AppHeaderMenu => ({
   primaryActionItem: {
     id: 'createResource',
-    iconType: 'plus',
     label: createResourceLabel,
     testId: 'dataManagementOverviewCreateButton',
     popoverTestId: 'dataManagementOverviewCreateMenu',
@@ -87,7 +87,7 @@ export const getCreateResourceMenu = ({
           defaultMessage: 'Query external data with ES|QL, without ingesting it.',
         }),
         href: getUrlForApp('management', {
-          path: '/data/data_federation/datasets/create',
+          path: withDataManagementOverviewReturn('/data/data_federation/datasets/create'),
         }),
         testId: 'dataManagementOverviewCreateDataset',
       },

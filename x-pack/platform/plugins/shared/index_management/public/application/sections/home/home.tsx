@@ -12,6 +12,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 
 import { AppHeader, type AppHeaderTab } from '@kbn/app-header';
+import {
+  cameFromDataManagementOverview,
+  DATA_MANAGEMENT_OVERVIEW_PATH,
+  DATA_MANAGEMENT_OVERVIEW_RETURN_PARAM,
+  DATA_MANAGEMENT_OVERVIEW_RETURN_VALUE,
+} from '@kbn/management-plugin/common';
 
 import { Section } from '../../../../common/constants';
 import { documentationService } from '../../services/documentation';
@@ -40,14 +46,21 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
     params: { section },
   },
   history,
+  location,
 }) => {
   const {
     plugins: { console: consolePlugin },
     privs,
+    core: { getUrlForApp },
   } = useAppContext();
+  const fromOverview = cameFromDataManagementOverview(location.search);
 
   const onSectionChange = (newSection: Section) => {
-    history.push(`/${newSection}`);
+    history.push(
+      fromOverview
+        ? `/${newSection}?${DATA_MANAGEMENT_OVERVIEW_RETURN_PARAM}=${DATA_MANAGEMENT_OVERVIEW_RETURN_VALUE}`
+        : `/${newSection}`
+    );
   };
 
   const tabs: AppHeaderTab[] = [
@@ -105,6 +118,16 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         title={i18n.translate('xpack.idxMgmt.home.appTitle', {
           defaultMessage: 'Index Management',
         })}
+        {...(fromOverview
+          ? {
+              back: {
+                href: getUrlForApp('management', { path: DATA_MANAGEMENT_OVERVIEW_PATH }),
+                label: i18n.translate('xpack.idxMgmt.home.backToDataManagementOverviewLabel', {
+                  defaultMessage: 'Overview',
+                }),
+              },
+            }
+          : {})}
         tabs={tabs}
         spacing="bleed"
         docLink={documentationService.getIdxMgmtDocumentationLink()}

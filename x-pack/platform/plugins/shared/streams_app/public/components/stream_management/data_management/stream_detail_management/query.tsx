@@ -12,6 +12,7 @@ import { useAbortController } from '@kbn/react-hooks';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
+import { useStreamDetailBack } from '../../../../hooks/use_stream_detail_back';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -51,6 +52,7 @@ export function QueryStreamDetailManagement({
     },
   } = useKibana();
   const router = useStreamsAppRouter();
+  const { back: detailBack, withReturnQuery } = useStreamDetailBack();
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
@@ -95,10 +97,6 @@ export function QueryStreamDetailManagement({
       defaultMessage: 'Attachments',
     }),
   };
-
-  const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
-    defaultMessage: 'Streams',
-  });
 
   const badges: AppHeaderBadge[] = [
     {
@@ -163,7 +161,7 @@ export function QueryStreamDetailManagement({
     label,
     href: router.link('/{key}/management/{tab}', {
       path: { key, tab: tabKey },
-      query: { rangeFrom, rangeTo },
+      query: withReturnQuery({ rangeFrom, rangeTo }),
     }),
     isSelected: tab === tabKey,
     'data-test-subj': `queryStreamDetails-${tabKey}-tab`,
@@ -179,7 +177,7 @@ export function QueryStreamDetailManagement({
     <>
       <StreamsAppHeader
         title={key}
-        back={{ href: router.link('/'), label: backToStreamsLabel }}
+        back={detailBack}
         badges={badges}
         tabs={appHeaderTabs}
         menu={appHeaderMenu}

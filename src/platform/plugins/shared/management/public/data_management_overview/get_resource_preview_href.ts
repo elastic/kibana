@@ -8,6 +8,7 @@
  */
 
 import type { ApplicationStart } from '@kbn/core/public';
+import { withDataManagementOverviewReturn } from '../../common/data_management_overview_return';
 import type { DataManagementResource } from './sample_resources';
 
 type GetUrlForApp = ApplicationStart['getUrlForApp'];
@@ -24,15 +25,17 @@ export const getResourcePreviewHref = (
   switch (resource.kind) {
     case 'index':
       return getUrlForApp('management', {
-        path: `/data/index_management/indices/index_details?indexName=${name}`,
+        path: withDataManagementOverviewReturn(
+          `/data/index_management/indices/index_details?indexName=${name}`
+        ),
       });
     case 'dataStream':
       return getUrlForApp('management', {
-        path: `/data/index_management/data_streams/${name}`,
+        path: withDataManagementOverviewReturn(`/data/index_management/data_streams/${name}`),
       });
     case 'stream':
       return getUrlForApp('streams', {
-        path: `/${name}/management/overview`,
+        path: withDataManagementOverviewReturn(`/${name}/management/overview`),
       });
     case 'esqlView':
     case 'dataset':

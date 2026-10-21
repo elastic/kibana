@@ -25,6 +25,11 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
+import {
+  cameFromDataManagementOverview,
+  DATA_MANAGEMENT_OVERVIEW_RETURN_PARAM,
+  DATA_MANAGEMENT_OVERVIEW_RETURN_VALUE,
+} from '@kbn/management-plugin/common';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { columnPresetActions } from '@kbn/shared-ux-column-presets';
 
@@ -127,12 +132,16 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     truncateText: true,
     sortable: true,
     render: (name: DataStream['name'], dataStream: DataStream) => {
+      const detailsLink = getDataStreamDetailsLink(name);
+      const detailsHref = cameFromDataManagementOverview(history.location.search)
+        ? `${detailsLink}?${DATA_MANAGEMENT_OVERVIEW_RETURN_PARAM}=${DATA_MANAGEMENT_OVERVIEW_RETURN_VALUE}`
+        : detailsLink;
       return (
         <Fragment>
           <EuiLink
             role="button"
             data-test-subj="nameLink"
-            {...reactRouterNavigate(history, getDataStreamDetailsLink(name))}
+            {...reactRouterNavigate(history, detailsHref)}
           >
             {name}
           </EuiLink>
