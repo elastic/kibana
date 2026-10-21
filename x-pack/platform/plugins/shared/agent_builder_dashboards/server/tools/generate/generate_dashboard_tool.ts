@@ -235,15 +235,11 @@ Panel positions and sizes are set automatically after the changes are applied, a
           ],
         });
 
-        // Every requested panel and control failed, so no attachment version is persisted; the
-        // failures reach the agent through the tool result.
+        // None of the requested panels and controls were added, so no attachment version is
+        // persisted; the failures reach the agent through the tool result. Controls the agent
+        // added on its own are left out without a failure, so the failures can be empty.
         const requestedContent = (upsert.panels?.length ?? 0) + (upsert.controls?.length ?? 0) > 0;
-        if (
-          failures.length > 0 &&
-          isNewDashboard &&
-          requestedContent &&
-          isEmptyDashboard(generatedDashboardData)
-        ) {
+        if (isNewDashboard && requestedContent && isEmptyDashboard(generatedDashboardData)) {
           logger.info('Dashboard was not created because none of the changes were applied');
           return {
             results: [
