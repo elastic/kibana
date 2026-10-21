@@ -100,6 +100,4 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

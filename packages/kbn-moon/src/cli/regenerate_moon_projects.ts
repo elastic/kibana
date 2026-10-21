@@ -296,14 +296,18 @@ function applyJestTaskConfig(projectConfig: MoonProjectConfig) {
     MOON_CONST.JEST_CONFIG_FILES
   );
 
+  if (jestConfigName && jestConfigName !== 'jest.config.js') {
+    throw createFailError(
+      `Unsupported Jest config ${jestConfigName} for ${projectConfig.id}. Moon Jest tasks require jest.config.js.`
+    );
+  }
+
   if (!jestConfigName) {
     logger.warning(
       `Could not find jest config for ${projectConfig.id} @ ${projectConfig.project.sourceRoot}`
     );
   } else {
     projectConfig.tags = (projectConfig.tags || []).concat([MOON_CONST.TAG_JEST_UNIT]);
-
-    projectConfig.fileGroups = { ...projectConfig.fileGroups, 'jest-config': [jestConfigName] };
   }
 }
 

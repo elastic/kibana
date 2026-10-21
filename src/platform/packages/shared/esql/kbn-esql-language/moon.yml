@@ -37,6 +37,4 @@ fileGroups:
     - '**/*.ts'
     - jest.integration.config.js
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}
