@@ -25,12 +25,13 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { CoreStart, useService } from '@kbn/core-di-browser';
-
-import { DetailsAndArtifactsStep, LinkedActionPoliciesStep } from '@kbn/alerting-v2-rule-form';
+import {
+  DetailsAndArtifactsStep,
+  LinkedActionPoliciesStep,
+  useRuleFormServices,
+} from '@kbn/alerting-v2-rule-form';
 import type { SequenceFormValues } from '@kbn/alerting-v2-rule-form';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import type { HttpStart } from '@kbn/core/public';
 import { SequenceRuleExecutionStep } from './sequence_rule_execution_step';
 import { useCanSaveSequenceRule } from './use_can_save_sequence_rule';
 
@@ -40,6 +41,11 @@ const fullHeightCss = css`
   height: 100%;
   overflow: hidden;
 `;
+
+const CANVAS_PORTAL_ATTRIBUTES = {
+  class: 'eui-fullHeight',
+  style: 'display: flex; flex-direction: column; min-block-size: 0;',
+};
 const DEFAULT_SIDEBAR_WIDTH = 480;
 const MIN_SIDEBAR_WIDTH = 400;
 const MIN_CANVAS_WIDTH = 400;
@@ -63,7 +69,12 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
   onClose,
   onSave,
 }) => {
-  const http = useService(CoreStart('http')) as HttpStart;
+  const {
+    http,
+    createActionPolicyDisabledReason,
+    createActionPolicyFormFlyout,
+    getActionPolicyEditHref,
+  } = useRuleFormServices();
   const [selectedTab, setSelectedTab] = useState<TabId>('execution');
   const canSave = useCanSaveSequenceRule(seqValues, isSaving);
 
@@ -118,7 +129,14 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
       >
         {selectedTab === 'execution' && <SequenceRuleExecutionStep seqValues={seqValues} />}
         {selectedTab === 'details' && <DetailsAndArtifactsStep />}
-        {selectedTab === 'actions' && <LinkedActionPoliciesStep http={http} />}
+        {selectedTab === 'actions' && (
+          <LinkedActionPoliciesStep
+            http={http}
+            createActionPolicyDisabledReason={createActionPolicyDisabledReason}
+            CreateActionPolicyFormFlyout={createActionPolicyFormFlyout}
+            getActionPolicyEditHref={getActionPolicyEditHref}
+          />
+        )}
       </div>
 
       <div style={{ flexShrink: 0 }}>
@@ -178,7 +196,7 @@ export const SequenceBuilderDetailsSidebar: React.FC<SequenceBuilderDetailsSideb
   onSave,
 }) => {
   const canvasPortalNode = useRef(
-    createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
+    createHtmlPortalNode({ attributes: CANVAS_PORTAL_ATTRIBUTES })
   ).current;
   const sidebarPortalNode = useRef(
     createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
