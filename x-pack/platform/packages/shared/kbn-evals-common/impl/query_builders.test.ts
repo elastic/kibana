@@ -793,6 +793,7 @@ describe('query_builders', () => {
                 buckets: [
                   {
                     key: 'correctness',
+                    doc_count: 10,
                     score_stats: { avg: 0.8, std_deviation: 0.1, min: 0.5, max: 1.0, count: 10 },
                     score_median: { values: { '50.0': 0.85 } },
                   },
@@ -810,8 +811,43 @@ describe('query_builders', () => {
         dataset_name: 'Dataset One',
         evaluator_name: 'correctness',
         example_count: 5,
+        judges_attempted: 10,
+        judges_null_scored: 0,
         stats: { mean: 0.8, median: 0.85, std_dev: 0.1, min: 0.5, max: 1.0, count: 10 },
       });
+    });
+
+    it('reports a judges_null_scored gap when some attempts produced no score', () => {
+      // Every judge in a multi-judge evaluator failed on some examples, so score_stats.count
+      // (non-null scores) is lower than the bucket doc_count (all score documents written).
+      const aggs = {
+        by_dataset: {
+          buckets: [
+            {
+              key: 'ds-1',
+              dataset_name: { buckets: [{ key: 'Dataset One' }] },
+              example_count: { value: 5 },
+              by_evaluator: {
+                buckets: [
+                  {
+                    key: 'correctness',
+                    doc_count: 10,
+                    score_stats: { avg: 0.8, std_deviation: 0.1, min: 0.5, max: 1.0, count: 7 },
+                    score_median: { values: { '50.0': 0.85 } },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      };
+
+      const result = parseStatsAggregationResponse(aggs);
+      expect(result[0].judges_attempted).toBe(10);
+      expect(result[0].judges_null_scored).toBe(3);
+      // The null-scored attempts are surfaced for visibility, but the mean/median above
+      // are unchanged: they still average only the 7 documents with a non-null score.
+      expect(result[0].stats.count).toBe(7);
     });
 
     it('attributes each evaluator to its own judge model, and none to code evaluators', () => {
@@ -1020,6 +1056,8 @@ describe('query_builders', () => {
 
       const result = parseStatsAggregationResponse(aggs);
       expect(result[0].example_count).toBe(0);
+      expect(result[0].judges_attempted).toBe(0);
+      expect(result[0].judges_null_scored).toBe(0);
       expect(result[0].stats).toEqual({
         mean: 0,
         median: 0,
