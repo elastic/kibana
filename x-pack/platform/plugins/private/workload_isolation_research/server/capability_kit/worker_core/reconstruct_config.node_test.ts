@@ -18,6 +18,7 @@ import { test } from 'node:test';
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { configSchema as agentConfigSchema } from '../../../../../../../../x-pack/platform/plugins/shared/agent_builder/server/config';
 import { config as executionConfig } from '../../../../../../../../src/platform/plugins/shared/workflows_execution_engine/server/config';
+import { config as extensionsConfig } from '../../../../../../../../src/platform/plugins/shared/workflows_extensions/server/config';
 import { toPlainConfig } from './policies';
 import { reconstructPluginConfig, restoreSchemaInput } from './reconstruct_config';
 
@@ -66,6 +67,18 @@ test('empty capture is rejected so schema defaults are not applied', () => {
     () => reconstructPluginConfig('agentBuilder', agentConfigSchema, undefined, context),
     /worker-core config reconstruction missing for agentBuilder/
   );
+});
+
+test('an empty owner schema accepts a captured empty object', () => {
+  const validated = extensionsConfig.schema.validate({}, context);
+  assert.deepEqual(validated, {});
+  const rebuilt = reconstructPluginConfig(
+    'workflowsExtensions',
+    extensionsConfig.schema,
+    {},
+    context
+  );
+  assert.deepEqual(rebuilt, {});
 });
 
 test('workflows capture keeps allowedHosts, maxWorkflowDepth, and ByteSizeValue', () => {

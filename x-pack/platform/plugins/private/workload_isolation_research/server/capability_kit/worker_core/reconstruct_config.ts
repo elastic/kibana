@@ -56,9 +56,15 @@ export const restoreSchemaInput = (value: unknown, depth = 0): unknown => {
 const missing = (pluginId: string): boolean =>
   typeof pluginId !== 'string' || pluginId.length === 0;
 
+const hasKeys = (value: unknown): boolean =>
+  !!value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length > 0;
+
 /**
  * Validates one plugin's captured effective config through its owner schema.
- * An empty capture throws so schema defaults cannot replace configured values.
+ * A missing capture throws so schema defaults cannot replace configured values.
+ * An empty object is accepted only when the schema itself has no fields
+ * (`workflowsExtensions` is `schema.object({})`). A schema that fills defaults
+ * still throws.
  */
 export const reconstructPluginConfig = (
   pluginId: string,
@@ -71,10 +77,16 @@ export const reconstructPluginConfig = (
     capturedEffectiveConfig === null ||
     capturedEffectiveConfig === undefined ||
     typeof capturedEffectiveConfig !== 'object' ||
-    Array.isArray(capturedEffectiveConfig) ||
-    Object.keys(capturedEffectiveConfig).length === 0
+    Array.isArray(capturedEffectiveConfig)
   ) {
     throw new Error(`worker-core config reconstruction missing for ${pluginId}`);
+  }
+  if (Object.keys(capturedEffectiveConfig).length === 0) {
+    const validated = configSchema.validate({}, context);
+    if (hasKeys(validated)) {
+      throw new Error(`worker-core config reconstruction missing for ${pluginId}`);
+    }
+    return validated;
   }
   return configSchema.validate(restoreSchemaInput(capturedEffectiveConfig), context);
 };
