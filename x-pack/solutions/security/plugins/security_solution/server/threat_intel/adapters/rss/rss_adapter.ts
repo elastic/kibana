@@ -70,7 +70,8 @@ export const rssAdapter: FetchAdapter = {
       return [];
     }
 
-    const ingestedAt = context.now().toISOString();
+    const now = context.now();
+    const ingestedAt = now.toISOString();
     const spaceId = source._source.space_id ?? GLOBAL_SPACE_ID;
     const language = parsed.language ?? 'en';
     const adapterId = `rss:${source._id}`;
@@ -78,7 +79,7 @@ export const rssAdapter: FetchAdapter = {
     const reports: NormalizedReport[] = [];
     // A feed's backlog is not worth enrichment or hunting; entries without a date are kept.
     const recentEntries = parsed.entries.filter(
-      (entry) => !isPublishedBeforeLookback(entry.publishedAt, context.now())
+      (entry) => !isPublishedBeforeLookback(entry.publishedAt, now)
     );
     const skippedOld = parsed.entries.length - recentEntries.length;
     for (const entry of recentEntries) {
