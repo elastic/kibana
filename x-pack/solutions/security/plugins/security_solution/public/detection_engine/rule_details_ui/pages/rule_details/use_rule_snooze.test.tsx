@@ -126,6 +126,42 @@ describe('useRuleSnooze', () => {
     );
   });
 
+  it('formats the end day as month and day without the year', () => {
+    (useRuleSnoozeSettings as jest.Mock).mockReturnValue({
+      snoozeSettings: {
+        ...unsnoozedSettings,
+        isSnoozedUntil: moment('2099-03-05T12:00:00').toDate(),
+      },
+    });
+    const { result } = renderUseRuleSnooze();
+
+    expect(result.current.badge?.label).toBe('Mar 5');
+  });
+
+  it('formats the scheduled start day in the tooltip as the full month name and day without the year', () => {
+    (useRuleSnoozeSettings as jest.Mock).mockReturnValue({
+      snoozeSettings: {
+        ...unsnoozedSettings,
+        snoozeSchedule: [
+          {
+            id: 'schedule-id',
+            duration: 3600000,
+            rRule: { dtstart: moment('2099-03-05T12:00:00').toISOString(), tzid: 'UTC' },
+          },
+        ],
+      },
+    });
+    const { result } = renderUseRuleSnooze();
+
+    expect(result.current.badge).toEqual(
+      expect.objectContaining({
+        label: 'Mar 5',
+        tooltip: expect.stringContaining('March 5'),
+      })
+    );
+    expect(result.current.badge?.tooltip).not.toContain('2099');
+  });
+
   it('shows an accent "Snoozed" badge for an indefinitely snoozed rule', () => {
     (useRuleSnoozeSettings as jest.Mock).mockReturnValue({
       snoozeSettings: { ...unsnoozedSettings, muteAll: true },
