@@ -21,15 +21,31 @@ const serviceConfig = schema.object({
   showExperimentalLocations: schema.maybe(schema.boolean()),
 });
 
+const secretConnectionsConfig = schema.object({
+  // Off where private-location agents cannot resolve references yet.
+  enabled: schema.boolean({ defaultValue: true }),
+  // Hostnames a secret provider (Vault) connection may point at. `*` allows any.
+  allowedHosts: schema.arrayOf(schema.string({ minLength: 1, maxLength: 253 }), {
+    defaultValue: ['*'],
+    maxSize: 1000,
+  }),
+});
+
 const uptimeConfig = schema.object({
   index: schema.maybe(schema.string()),
   service: schema.maybe(serviceConfig),
+  secretConnections: schema.maybe(secretConnectionsConfig),
   enabled: schema.boolean({ defaultValue: true }),
 });
 
 export const config: PluginConfigDescriptor = {
   schema: uptimeConfig,
-  deprecations: ({ unused }) => [
+  exposeToBrowser: {
+    secretConnections: { enabled: true },
+  },
+  deprecations: ({ renameFromRoot, unused }) => [
+    // Must run first so the `unused` checks below see the renamed keys.
+    renameFromRoot('xpack.uptime', 'xpack.synthetics', { level: 'warning' }),
     unused('experimental.ccs.enabled', { level: 'warning' }),
     unused('rebalancePrivateLocationShardsTaskEnabled', { level: 'warning' }),
   ],
@@ -37,3 +53,6 @@ export const config: PluginConfigDescriptor = {
 
 export type UptimeConfig = TypeOf<typeof uptimeConfig>;
 export type ServiceConfig = TypeOf<typeof serviceConfig>;
+
+export const isSecretConnectionsEnabled = (syntheticsConfig?: UptimeConfig): boolean =>
+  syntheticsConfig?.secretConnections?.enabled ?? true;

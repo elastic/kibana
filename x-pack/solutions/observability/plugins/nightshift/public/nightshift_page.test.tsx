@@ -22,6 +22,10 @@ import { useOnboardingVisibility } from './onboarding/use_onboarding_visibility'
 import type { NightshiftAppHeaderProps } from './app/app_header';
 
 jest.mock('@kbn/observability-shared-plugin/public', () => ({ useBreadcrumbs: jest.fn() }));
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useCurrentEuiBreakpoint: () => 'xl',
+}));
 jest.mock('./app/app', () => ({
   NightshiftApp: () => <div data-test-subj="nightshiftAppStub" />,
 }));
@@ -53,6 +57,17 @@ jest.mock('./sources/page', () => {
       <>
         <NightshiftAppHeader {...headerProps} page="sources" />
         <div data-test-subj="sourcesPageStub" />
+      </>
+    ),
+  };
+});
+jest.mock('./pages/detection/page', () => {
+  const { NightshiftAppHeader } = jest.requireActual('./app/app_header');
+  return {
+    DetectionPage: ({ headerProps }: { headerProps: NightshiftAppHeaderProps }) => (
+      <>
+        <NightshiftAppHeader {...headerProps} page="detection" />
+        <div data-test-subj="detectionPageStub" />
       </>
     ),
   };
@@ -95,7 +110,7 @@ const featureFlags = { useBooleanValue: jest.fn() };
 
 function renderPage(initialPath = '/') {
   const history = createMemoryHistory({ initialEntries: [initialPath] });
-  return render(
+  const renderResult = render(
     <I18nProvider>
       <MockAppHeaderProvider>
         <Router history={history}>
@@ -104,6 +119,7 @@ function renderPage(initialPath = '/') {
       </MockAppHeaderProvider>
     </I18nProvider>
   );
+  return { ...renderResult, history };
 }
 
 describe('NightshiftPage', () => {
@@ -299,6 +315,39 @@ describe('NightshiftPage', () => {
         expect(screen.getByTestId('nightshiftKnowledgeLink')).toBeInTheDocument();
       }
     );
+  });
+
+  it.each(['/detections', '/detections/unknown'])(
+    'redirects %s to the Events tab',
+    async (path) => {
+      const { history } = renderPage(path);
+
+      expect(await screen.findByTestId('detectionPageStub')).toBeInTheDocument();
+      expect(history.location.pathname).toBe('/detections/events');
+    }
+  );
+
+  it('shows Sources and detection Settings in the Detections header', async () => {
+    renderPage('/detections/events');
+
+    expect(await screen.findByTestId('detectionPageStub')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Detections');
+    expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
+
+    const sourcesLink = screen.getByTestId('nightshiftSourcesLink');
+    expect(sourcesLink).toBeVisible();
+    expect(sourcesLink).toHaveAttribute('href', '/app/nightshift/sources');
+
+    await act(async () => fireEvent.click(sourcesLink));
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/sources');
+
+    const settingsLink = screen.getByTestId('nightshiftSettingsLink');
+    expect(settingsLink).toBeVisible();
+    expect(settingsLink).toHaveAttribute('href', '/app/nightshift/settings/detections');
+    expect(screen.queryByTestId('nightshiftAutomationsPrimaryAction')).not.toBeInTheDocument();
+
+    await openAppMenuOverflow();
+    expect(screen.queryByTestId('nightshiftManagementLink')).not.toBeInTheDocument();
   });
 
   describe('sandbox secrets', () => {
