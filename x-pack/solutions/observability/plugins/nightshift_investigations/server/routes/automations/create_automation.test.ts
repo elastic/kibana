@@ -198,3 +198,45 @@ it.each([
   expect(soClient.create).not.toHaveBeenCalled();
   expect(createWorkflow).not.toHaveBeenCalled();
 });
+
+it('creates a Cron schedule with the saved timezone and investigation instructions', async () => {
+  const schedule = {
+    kind: 'schedule',
+    schedulePreset: 'custom',
+    cronExpression: '*/15 9-17 * * 1-5',
+    timezone: 'Europe/Berlin',
+  };
+  await call({
+    trigger: { rows: [schedule] },
+    execution: { promptTemplate: 'Review health.' },
+    isEnabled: true,
+  });
+  expect(soClient.create).toHaveBeenCalledWith(
+    'nightshift-automation',
+    expect.objectContaining({ trigger: { rows: [schedule] } })
+  );
+  const workflow = parse(createWorkflow.mock.calls[0][0].yaml);
+  expect(workflow.triggers).toHaveLength(1);
+  expect(workflow.triggers[0]).toMatchObject({
+    type: 'scheduled',
+    with: { rrule: { freq: 'WEEKLY', tzid: 'Europe/Berlin', byminute: [0, 15, 30, 45] } },
+  });
+  expect(workflow.steps[0].with).toMatchObject({
+    subject_type: 'manual',
+    message: 'Review health.',
+  });
+});
+
+it.each(['60 9 * * *', '0 9 1 * 1', '0 9 * 1 *', '@daily'])(
+  'rejects Cron %s before any writes',
+  async (cronExpression) => {
+    await expect(async () =>
+      call({
+        trigger: { rows: [{ kind: 'schedule', schedulePreset: 'custom', cronExpression }] },
+        execution: { promptTemplate: 'Review health.' },
+      })
+    ).rejects.toThrow();
+    expect(soClient.create).not.toHaveBeenCalled();
+    expect(createWorkflow).not.toHaveBeenCalled();
+  }
+);

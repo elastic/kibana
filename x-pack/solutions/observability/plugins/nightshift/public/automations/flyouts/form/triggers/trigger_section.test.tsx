@@ -84,7 +84,7 @@ describe('AutomationTriggerSection', () => {
     expect(await screen.findByText('Elastic')).toBeInTheDocument();
     expect(screen.getByText('Scheduled')).toBeInTheDocument();
     expect(screen.getByText('Every…')).toBeInTheDocument();
-    expect(screen.queryByText('Custom cron…')).not.toBeInTheDocument();
+    expect(screen.getByText('Custom Cron')).toBeInTheDocument();
     expect(screen.getByText('Slack')).toBeInTheDocument();
     expect(screen.getByText('New message in channel')).toBeInTheDocument();
   });
@@ -236,4 +236,43 @@ describe('AutomationTriggerSection', () => {
     fireEvent.change(screen.getByTestId('automationDailyLimit'), { target: { value: '0' } });
     expect(screen.getByTestId('automationDailyLimit')).toBeInvalid();
   });
+});
+
+it('configures custom Cron and keeps its values when switching trigger kinds', async () => {
+  render(<TriggerSection />);
+  await selectTrigger('automationAddTrigger', 'Custom Cron');
+  fireEvent.change(screen.getByTestId('automationCronExpression'), {
+    target: { value: '*/15 9-17 * * 1-5' },
+  });
+  expect(lastTrigger()).toEqual({
+    kind: 'cron',
+    cronExpression: '*/15 9-17 * * 1-5',
+    timezone: 'UTC',
+  });
+  await selectTrigger('automationChangeTrigger', 'Every…');
+  await selectTrigger('automationChangeTrigger', 'Custom Cron');
+  expect(screen.getByTestId('automationCronExpression')).toHaveValue('*/15 9-17 * * 1-5');
+  fireEvent.change(screen.getByTestId('automationCronExpression'), {
+    target: { value: '0 9 * 1 *' },
+  });
+  expect(
+    screen.getByText('The month field must be *; month restrictions are not supported.')
+  ).toBeInTheDocument();
+});
+
+it('shows saved Cron and timezone in the read-only view', () => {
+  render(
+    <I18nProvider>
+      <AutomationTriggerSection
+        trigger={{ kind: 'cron', cronExpression: '0 9 1,15 * *', timezone: 'Europe/Berlin' }}
+        dailyDispatchLimit="20"
+        onTriggerChange={jest.fn()}
+        onDailyDispatchLimitChange={jest.fn()}
+        readOnly
+      />
+    </I18nProvider>
+  );
+  expect(screen.getByTestId('automationCronExpression')).toHaveTextContent('0 9 1,15 * *');
+  expect(screen.getByText('Europe/Berlin')).toBeInTheDocument();
+  expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
 });

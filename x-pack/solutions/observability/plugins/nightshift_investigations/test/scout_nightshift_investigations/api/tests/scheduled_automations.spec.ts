@@ -69,142 +69,221 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
     });
   });
 
-  apiTest(
-    'an edited schedule starts a scoped investigation and stops it at the configured timeout',
-    async ({ apiClient, kbnClient }) => {
-      apiTest.setTimeout(240_000);
-      const name = uniqueId('scout-scheduled');
-      const due = new Date(Date.now() + 90_000);
-      const schedule = {
-        kind: 'schedule',
-        schedulePreset: 'daily',
-        timezone: 'UTC',
-        time: due.toISOString().slice(11, 16),
-        scopeQuery: 'service.name:checkout',
-      };
-      const body = {
-        name,
-        isEnabled: true,
-        trigger: { rows: [{ kind: 'alert' }, schedule] },
-        execution: { promptTemplate: 'Review checkout errors during the last hour.' },
-        completions: [],
-        runtime: { timeoutSeconds: 30 },
-      };
-      for (const isEnabled of [false, true]) {
-        const response = await apiClient.post(AUTOMATIONS_PATH, {
+  for (const schedulePreset of ['daily', 'custom'] as const) {
+    apiTest(
+      `an edited ${schedulePreset} schedule starts a scoped investigation and stops it at the configured timeout`,
+      async ({ apiClient, kbnClient }) => {
+        apiTest.setTimeout(240_000);
+        const name = uniqueId('scout-scheduled');
+        const due = new Date(Date.now() + 90_000);
+        const scheduleFor = (date: Date) => ({
+          kind: 'schedule',
+          timezone: 'UTC',
+          ...(schedulePreset === 'daily'
+            ? { schedulePreset, time: date.toISOString().slice(11, 16) }
+            : {
+                schedulePreset,
+                cronExpression: `${date.getUTCMinutes()} ${date.getUTCHours()} * * *`,
+              }),
+          scopeQuery: 'service.name:checkout',
+        });
+        const schedule = scheduleFor(due);
+        const body = {
+          name,
+          isEnabled: true,
+          trigger: { rows: [{ kind: 'alert' }, schedule] },
+          execution: { promptTemplate: 'Review checkout errors during the last hour.' },
+          completions: [],
+          runtime: { timeoutSeconds: 30 },
+        };
+        for (const isEnabled of [false, true]) {
+          const response = await apiClient.post(AUTOMATIONS_PATH, {
+            headers: { ...COMMON_HEADERS, ...cookieHeader },
+            body: {
+              ...body,
+              isEnabled,
+              trigger: isEnabled
+                ? {
+                    rows: [
+                      { kind: 'alert' },
+                      {
+                        ...scheduleFor(new Date(due.getTime() + 60 * 60 * 1000)),
+                      },
+                    ],
+                  }
+                : body.trigger,
+            },
+            responseType: 'json',
+          });
+          expect(response).toHaveStatusCode(200);
+          automations.push(response.body as { id: string; workflowId: string });
+        }
+        const [disabled, enabled] = automations;
+        const original = await apiClient.get(`${AUTOMATIONS_PATH}/${enabled.id}`, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
-          body: {
-            ...body,
-            isEnabled,
-            trigger: isEnabled
-              ? {
-                  rows: [
-                    { kind: 'alert' },
-                    {
-                      ...schedule,
-                      time: `${String((due.getUTCHours() + 1) % 24).padStart(2, '0')}:${String(
-                        due.getUTCMinutes()
-                      ).padStart(2, '0')}`,
-                    },
-                  ],
-                }
-              : body.trigger,
-          },
           responseType: 'json',
         });
-        expect(response).toHaveStatusCode(200);
-        automations.push(response.body as { id: string; workflowId: string });
-      }
-      const [disabled, enabled] = automations;
-      const updated = await apiClient.put(`${AUTOMATIONS_PATH}/${enabled.id}`, {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-        body: { trigger: { rows: body.trigger.rows } },
-        responseType: 'json',
-      });
-      expect(updated).toHaveStatusCode(200);
-      expect(updated.body).toMatchObject({ trigger: body.trigger });
-      const workflow = await kbnClient.request<{ valid: boolean }>({
-        method: 'GET',
-        path: `/api/workflows/workflow/${enabled.workflowId}`,
-        headers: WORKFLOW_HEADERS,
-      });
-      expect(workflow.data.valid).toBe(true);
-
-      let investigation: SharedInvestigation | undefined;
-      await expect
-        .poll(
-          async () => {
-            const response = await listSharedInvestigations(
-              apiClient,
-              cookieHeader,
-              'subject_type=manual'
-            );
-            expect(response).toHaveStatusCode(200);
-            const { results } = response.body as { results: SharedInvestigation[] };
-            investigation = results.find((item) =>
-              item.subjects.some((subject) => subject.summary === name)
-            );
-            return investigation?.in_progress;
-          },
-          { timeout: 150_000, intervals: [1_000] }
-        )
-        .toBe(true);
-      if (!investigation) throw new Error('Scheduled investigation was not created');
-      const investigationId = investigation.id;
-      expect(investigation.subjects).toMatchObject([
-        { type: 'manual', id: investigationId, trigger_type: 'automatic' },
-      ]);
-
-      const getRuns = () =>
-        kbnClient.request<WorkflowExecutionListDto>({
+        expect(original).toHaveStatusCode(200);
+        const unchangedWorkflow = await kbnClient.request<{ yaml: string }>({
           method: 'GET',
-          path: '/api/workflows/workflow/system-nightshift-investigation/executions',
+          path: `/api/workflows/workflow/${enabled.workflowId}`,
           headers: WORKFLOW_HEADERS,
-          query: { concurrencyGroupKey: `investigation:${investigationId}`, size: 20 },
         });
-      const runs = await getRuns();
-      expect(runs.data.results).toHaveLength(1);
-      const execution = await kbnClient.request<WorkflowExecutionDto>({
-        method: 'GET',
-        path: `/api/workflows/executions/${runs.data.results[0].id}`,
-        headers: WORKFLOW_HEADERS,
-      });
-      expect(execution.data.workflowDefinition.settings?.timeout).toBe('30s');
-      expect(execution.data.context).toMatchObject({
-        inputs: {
-          message: body.execution.promptTemplate,
-          context: { scope_query: schedule.scopeQuery, source: 'manual' },
-        },
-      });
-      await expect
-        .poll(async () => (await getRuns()).data.results[0]?.status, {
-          timeout: 90_000,
-          intervals: [1_000],
-        })
-        .toBe('timed_out');
-      await expect
-        .poll(
-          async () => {
-            const response = await getSharedInvestigation(apiClient, cookieHeader, investigationId);
-            return (response.body as SharedInvestigation).in_progress;
+        for (const invalid of [{ cronExpression: '0 9 * 1 *' }, { timezone: 'Not/AZone' }]) {
+          const rejected = await apiClient.put(`${AUTOMATIONS_PATH}/${enabled.id}`, {
+            headers: { ...COMMON_HEADERS, ...cookieHeader },
+            responseType: 'json',
+            body: {
+              trigger: {
+                rows: [
+                  {
+                    kind: 'schedule',
+                    schedulePreset: 'custom',
+                    cronExpression: '0 9 * * *',
+                    timezone: 'UTC',
+                    ...invalid,
+                  },
+                ],
+              },
+            },
+          });
+          expect(rejected).toHaveStatusCode(400);
+          const unchanged = await apiClient.get(`${AUTOMATIONS_PATH}/${enabled.id}`, {
+            headers: { ...COMMON_HEADERS, ...cookieHeader },
+            responseType: 'json',
+          });
+          expect(unchanged.body).toStrictEqual(original.body);
+          const workflowAfterRejection = await kbnClient.request<{ yaml: string }>({
+            method: 'GET',
+            path: `/api/workflows/workflow/${enabled.workflowId}`,
+            headers: WORKFLOW_HEADERS,
+          });
+          expect(workflowAfterRejection.data.yaml).toBe(unchangedWorkflow.data.yaml);
+        }
+        const updated = await apiClient.put(`${AUTOMATIONS_PATH}/${enabled.id}`, {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          body: { trigger: { rows: body.trigger.rows } },
+          responseType: 'json',
+        });
+        expect(updated).toHaveStatusCode(200);
+        expect(updated.body).toMatchObject({ trigger: body.trigger });
+        for (const isEnabled of [false, true]) {
+          const toggled = await apiClient.put(`${AUTOMATIONS_PATH}/${enabled.id}`, {
+            headers: { ...COMMON_HEADERS, ...cookieHeader },
+            responseType: 'json',
+            body: { isEnabled },
+          });
+          expect(toggled).toHaveStatusCode(200);
+          expect(toggled.body).toMatchObject({
+            workflowId: enabled.workflowId,
+            isEnabled,
+            trigger: body.trigger,
+          });
+        }
+        const workflow = await kbnClient.request<{ valid: boolean }>({
+          method: 'GET',
+          path: `/api/workflows/workflow/${enabled.workflowId}`,
+          headers: WORKFLOW_HEADERS,
+        });
+        expect(workflow.data.valid).toBe(true);
+
+        let investigation: SharedInvestigation | undefined;
+        await expect
+          .poll(
+            async () => {
+              const response = await listSharedInvestigations(
+                apiClient,
+                cookieHeader,
+                'subject_type=manual'
+              );
+              expect(response).toHaveStatusCode(200);
+              const { results } = response.body as { results: SharedInvestigation[] };
+              investigation = results.find((item) =>
+                item.subjects.some((subject) => subject.summary === name)
+              );
+              return investigation?.in_progress;
+            },
+            { timeout: 150_000, intervals: [1_000] }
+          )
+          .toBe(true);
+        if (!investigation) throw new Error('Scheduled investigation was not created');
+        const investigationId = investigation.id;
+        expect(investigation.subjects).toMatchObject([
+          { type: 'manual', id: investigationId, trigger_type: 'automatic' },
+        ]);
+
+        const getRuns = () =>
+          kbnClient.request<WorkflowExecutionListDto>({
+            method: 'GET',
+            path: '/api/workflows/workflow/system-nightshift-investigation/executions',
+            headers: WORKFLOW_HEADERS,
+            query: { concurrencyGroupKey: `investigation:${investigationId}`, size: 20 },
+          });
+        const runs = await getRuns();
+        expect(runs.data.results).toHaveLength(1);
+        const execution = await kbnClient.request<WorkflowExecutionDto>({
+          method: 'GET',
+          path: `/api/workflows/executions/${runs.data.results[0].id}`,
+          headers: WORKFLOW_HEADERS,
+        });
+        expect(execution.data.workflowDefinition.settings?.timeout).toBe('30s');
+        expect(execution.data.context).toMatchObject({
+          inputs: {
+            message: body.execution.promptTemplate,
+            context: { scope_query: schedule.scopeQuery, source: 'manual' },
           },
-          { timeout: 30_000, intervals: [1_000] }
-        )
-        .toBe(false);
-      const disabledRuns = await apiClient.get(`${AUTOMATIONS_PATH}/${disabled.id}/runs`, {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
-      expect(disabledRuns).toHaveStatusCode(200);
-      expect(disabledRuns.body).toMatchObject({ total: 0, runs: [] });
-    }
-  );
+        });
+        await expect
+          .poll(async () => (await getRuns()).data.results[0]?.status, {
+            timeout: 90_000,
+            intervals: [1_000],
+          })
+          .toBe('timed_out');
+        await expect
+          .poll(
+            async () => {
+              const response = await getSharedInvestigation(
+                apiClient,
+                cookieHeader,
+                investigationId
+              );
+              return (response.body as SharedInvestigation).in_progress;
+            },
+            { timeout: 30_000, intervals: [1_000] }
+          )
+          .toBe(false);
+        const disabledRuns = await apiClient.get(`${AUTOMATIONS_PATH}/${disabled.id}/runs`, {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+        expect(disabledRuns).toHaveStatusCode(200);
+        expect(disabledRuns.body).toMatchObject({ total: 0, runs: [] });
+      }
+    );
+  }
 
   apiTest(
     'rejects unsupported schedules and missing instructions without creating an automation',
     async ({ apiClient }) => {
       for (const overrides of [
         { execution: {} },
+        ...['60 9 * * *', '0 9 * 1 *', '0 9 1 * 1', '@daily'].map((cronExpression) => ({
+          trigger: {
+            rows: [{ kind: 'schedule', schedulePreset: 'custom', cronExpression, timezone: 'UTC' }],
+          },
+        })),
+        {
+          trigger: {
+            rows: [
+              {
+                kind: 'schedule',
+                schedulePreset: 'custom',
+                cronExpression: '0 9 * * *',
+                timezone: 'Not/AZone',
+              },
+            ],
+          },
+        },
         {
           trigger: {
             rows: [{ kind: 'schedule', schedulePreset: 'custom' }],

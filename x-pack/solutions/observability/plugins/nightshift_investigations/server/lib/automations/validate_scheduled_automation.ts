@@ -7,7 +7,7 @@
 
 import { badRequest } from '@hapi/boom';
 import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../../common/automation_limits';
-import { parsePresetSchedule } from '../../../common/automation_schedule';
+import { parseAutomationSchedule } from '../../../common/automation_schedule';
 import type { NightshiftAutomationAttributes } from './types';
 
 /** Rejects schedules that cannot generate an instructions-driven investigation. */
@@ -18,7 +18,7 @@ export const validateScheduledAutomation = (
   if (!schedules.length) return;
   if (schedules.length > 1) throw badRequest('Only one schedule row is supported per automation.');
   for (const row of schedules) {
-    const schedule = parsePresetSchedule(row);
+    const schedule = parseAutomationSchedule(row);
     if (!schedule.success) throw badRequest(schedule.error);
   }
   const instructions = automation.execution.promptTemplate;

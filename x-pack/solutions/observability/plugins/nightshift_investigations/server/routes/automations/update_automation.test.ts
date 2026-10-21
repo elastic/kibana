@@ -332,3 +332,41 @@ it.each([{ name: 'Changed' }, { isEnabled: false }])(
     expect(soClient.update).not.toHaveBeenCalled();
   }
 );
+
+it('updates the same backing workflow when Cron or timezone changes and on disable/re-enable', async () => {
+  const schedule = {
+    kind: 'schedule',
+    schedulePreset: 'custom',
+    cronExpression: '0 9 * * *',
+    timezone: 'UTC',
+  };
+  soClient.get.mockResolvedValue({ attributes: { ...existing, trigger: { rows: [schedule] } } });
+  await call({
+    trigger: { rows: [{ ...schedule, cronExpression: '0 10 1,15 * *', timezone: 'Asia/Kolkata' }] },
+  });
+  expect(updateWorkflow.mock.calls[0][0]).toBe('workflow-1');
+  const workflow = parse(updateWorkflow.mock.calls[0][1].yaml);
+  expect(workflow.triggers).toHaveLength(1);
+  expect(workflow.triggers[0].with.rrule).toMatchObject({
+    freq: 'MONTHLY',
+    tzid: 'Asia/Kolkata',
+    bymonthday: [1, 15],
+    byhour: [10],
+  });
+  for (const isEnabled of [false, true]) {
+    await call({ isEnabled });
+    expect(parse(updateWorkflow.mock.calls.at(-1)[1].yaml).enabled).toBe(isEnabled);
+    expect(updateWorkflow.mock.calls.at(-1)[0]).toBe('workflow-1');
+  }
+});
+
+it.each([
+  { cronExpression: '0 9 * 1 *', timezone: 'UTC' },
+  { cronExpression: '0 9 * * *', timezone: 'Not/AZone' },
+])('rejects invalid Cron updates before writes: %j', async (schedule) => {
+  await expect(async () =>
+    call({ trigger: { rows: [{ kind: 'schedule', schedulePreset: 'custom', ...schedule }] } })
+  ).rejects.toThrow();
+  expect(updateWorkflow).not.toHaveBeenCalled();
+  expect(soClient.update).not.toHaveBeenCalled();
+});

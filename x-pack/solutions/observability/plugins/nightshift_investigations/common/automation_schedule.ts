@@ -7,6 +7,7 @@
 
 import { ScheduledTriggerSchema } from '@kbn/workflows';
 import { lazySchema, z } from '@kbn/zod/v4';
+import { MAX_CRON_EXPRESSION_LENGTH, parseCronExpression } from './cron_schedule';
 
 export const presetScheduleSchema = lazySchema(() => {
   const timezone = z.string().max(100).optional();
@@ -37,6 +38,26 @@ export const presetScheduleSchema = lazySchema(() => {
 });
 
 export type PresetSchedule = z.infer<typeof presetScheduleSchema>;
+
+export const automationScheduleSchema = lazySchema(() =>
+  z.union([
+    presetScheduleSchema,
+    z.object({
+      schedulePreset: z.literal('custom'),
+      cronExpression: z
+        .string()
+        .min(1)
+        .max(MAX_CRON_EXPRESSION_LENGTH)
+        .superRefine((value, ctx) => {
+          const result = parseCronExpression(value);
+          if (!result.success) ctx.addIssue({ code: 'custom', message: result.error });
+        }),
+      timezone: z.string().max(100).optional(),
+    }),
+  ])
+);
+
+export type AutomationSchedule = z.infer<typeof automationScheduleSchema>;
 
 export type PresetScheduleResult =
   | { success: true; schedule: PresetSchedule; trigger: z.infer<typeof ScheduledTriggerSchema> }
@@ -77,5 +98,26 @@ export const parsePresetSchedule = (row: object): PresetScheduleResult => {
   });
   return result.success
     ? { success: true, schedule, trigger: result.data }
+    : { success: false, error: 'Invalid schedule timezone.' };
+};
+
+/** Validates preset or custom schedules against the workflow scheduler contract. */
+export const parseAutomationSchedule = (
+  row: object
+):
+  | { success: true; schedule: AutomationSchedule; trigger: z.infer<typeof ScheduledTriggerSchema> }
+  | { success: false; error: string } => {
+  const parsed = automationScheduleSchema.safeParse(row);
+  if (!parsed.success) return { success: false, error: parsed.error.message };
+  const schedule = parsed.data;
+  if (schedule.schedulePreset !== 'custom') return parsePresetSchedule(schedule);
+  const cron = parseCronExpression(schedule.cronExpression);
+  if (!cron.success) return cron;
+  const trigger = ScheduledTriggerSchema.safeParse({
+    type: 'scheduled',
+    with: { rrule: { ...cron.calendar, tzid: schedule.timezone ?? 'UTC' } },
+  });
+  return trigger.success
+    ? { success: true, schedule, trigger: trigger.data }
     : { success: false, error: 'Invalid schedule timezone.' };
 };

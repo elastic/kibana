@@ -6,7 +6,7 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
-import { presetScheduleSchema } from '../../../common/automation_schedule';
+import { automationScheduleSchema } from '../../../common/automation_schedule';
 import { MAX_RULE_NAMES } from '../../../common/automation_limits';
 
 export const triggerRowSchema = lazySchema(() =>
@@ -19,7 +19,7 @@ export const triggerRowSchema = lazySchema(() =>
       alertStatus: z.enum(['active', 'inactive', 'any']).optional(),
       tags: z.array(z.string().max(500)).optional(),
     }),
-    presetScheduleSchema.and(
+    automationScheduleSchema.and(
       z.object({
         kind: z.literal('schedule'),
         scopeQuery: z.string().max(10000).optional(),

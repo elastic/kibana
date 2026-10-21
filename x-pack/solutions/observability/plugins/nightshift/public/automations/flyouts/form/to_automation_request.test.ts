@@ -405,3 +405,41 @@ describe('automation request', () => {
     });
   });
 });
+
+it('round trips Cron and preserves scope guidance and mixed triggers on edit', () => {
+  const automation = buildAutomation({
+    trigger: {
+      rows: [
+        {
+          kind: 'schedule',
+          schedulePreset: 'custom',
+          cronExpression: '*/15 9-17 * * 1-5',
+          timezone: 'Europe/Berlin',
+          scopeQuery: 'service.name:checkout',
+        },
+        { kind: 'alert', ruleNames: ['CPU'] },
+        { kind: 'slack', event: 'message', channels: ['C1'] },
+      ],
+    },
+    execution: { promptTemplate: 'Review checkout health.' },
+  });
+  const values = toAutomationFormValues(automation);
+  if (values.trigger?.kind !== 'cron') throw new Error('Expected Cron');
+  expect(toAutomationRequestBody({ ...values, trigger: values.trigger }).trigger.rows[0]).toEqual({
+    kind: 'schedule',
+    schedulePreset: 'custom',
+    cronExpression: '*/15 9-17 * * 1-5',
+    timezone: 'Europe/Berlin',
+  });
+  const updated = toAutomationUpdateBody(
+    {
+      ...values,
+      trigger: { ...values.trigger, cronExpression: '0 10 * * *', timezone: 'Asia/Kolkata' },
+    },
+    automation
+  );
+  expect(updated.trigger?.rows).toEqual([
+    { ...automation.trigger.rows[0], cronExpression: '0 10 * * *', timezone: 'Asia/Kolkata' },
+    ...automation.trigger.rows.slice(1),
+  ]);
+});

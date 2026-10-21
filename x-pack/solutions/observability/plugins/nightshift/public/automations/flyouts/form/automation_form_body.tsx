@@ -149,7 +149,9 @@ export const AutomationFormBody = ({
       <FormSection>
         <AutomationInstructions
           maxLength={
-            values.trigger?.kind === 'every' ? MAX_AUTOMATION_INSTRUCTIONS_LENGTH : undefined
+            values.trigger?.kind === 'every' || values.trigger?.kind === 'cron'
+              ? MAX_AUTOMATION_INSTRUCTIONS_LENGTH
+              : undefined
           }
           instructions={values.instructions}
           mode={values.mode}
