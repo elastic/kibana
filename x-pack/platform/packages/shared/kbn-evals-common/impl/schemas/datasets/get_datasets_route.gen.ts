@@ -17,7 +17,12 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
-import { DatasetMaturity, DatasetFacets, DatasetTags } from '../common_attributes.gen';
+import {
+  DatasetMaturity,
+  DatasetFacets,
+  DatasetTags,
+  RedactedSpaceIds,
+} from '../common_attributes.gen';
 
 export const DatasetSummary = lazySchema(() =>
   z.object({
@@ -26,6 +31,7 @@ export const DatasetSummary = lazySchema(() =>
     description: z.string(),
     tags: DatasetTags.optional(),
     maturity: DatasetMaturity.optional(),
+    space_ids: RedactedSpaceIds.optional(),
     examples_count: z.number().int(),
     created_at: z.string(),
     updated_at: z.string(),
@@ -40,7 +46,7 @@ export const GetEvaluationDatasetsRequestQuery = lazySchema(() =>
     /**
      * Filter datasets by name or description
      */
-    search: z.string().max(256).optional(),
+    search: z.string().max(256).optional().describe('Filter datasets by name or description'),
     /**
      * Only return datasets carrying every one of these tags. Comparison is case-insensitive.
      */
@@ -50,18 +56,27 @@ export const GetEvaluationDatasetsRequestQuery = lazySchema(() =>
         .min(1)
         .max(64)
         .regex(/^[a-zA-Z0-9][a-zA-Z0-9:._-]*$/)
-    ).optional(),
+    )
+      .optional()
+      .describe(
+        'Only return datasets carrying every one of these tags. Comparison is case-insensitive.'
+      ),
     /**
      * Only return datasets at one of these maturity levels.
      */
-    maturity: ArrayFromString(DatasetMaturity).optional(),
+    maturity: ArrayFromString(DatasetMaturity)
+      .optional()
+      .describe('Only return datasets at one of these maturity levels.'),
     /**
      * Sorting by `maturity` orders the levels alphabetically rather than by how curated they are.
      */
     sort_field: z
       .enum(['name', 'created_at', 'updated_at', 'examples_count', 'maturity'])
       .optional()
-      .default('updated_at'),
+      .default('updated_at')
+      .describe(
+        'Sorting by `maturity` orders the levels alphabetically rather than by how curated they are.'
+      ),
     sort_order: z.enum(['asc', 'desc']).optional().default('desc'),
   })
 );

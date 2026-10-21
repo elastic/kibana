@@ -38,10 +38,10 @@ test.describe(
     }) => {
       await browserAuth.loginAsAdmin();
 
-      // Navigate to Discover and wait for the page to be ready
+      // Discover opens on the space's default data view, which is not guaranteed to hold
+      // this stream's data, so nothing can be asserted until 'All logs' is selected.
       await pageObjects.discover.goto({ queryMode: 'classic' });
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.discover.waitForHistogramRendered();
 
       await pageObjects.discover.selectDataView('All logs');
       await pageObjects.discover.waitUntilSearchingHasFinished();
@@ -81,10 +81,10 @@ test.describe(
     }) => {
       await browserAuth.loginAsAdmin();
 
-      // Navigate to Discover and wait for the page to be ready
+      // Discover opens on the space's default data view, which is not guaranteed to hold
+      // this stream's data, so nothing can be asserted until 'All logs' is selected.
       await pageObjects.discover.goto({ queryMode: 'classic' });
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.discover.waitForHistogramRendered();
 
       await pageObjects.discover.selectDataView('All logs');
       await pageObjects.discover.waitUntilSearchingHasFinished();

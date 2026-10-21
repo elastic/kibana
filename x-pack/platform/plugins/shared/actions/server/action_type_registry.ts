@@ -11,6 +11,8 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import type { ActionType as CommonActionType } from '../common';
 import { areValidFeatures, MAX_FEATURE_ID_LENGTH } from '../common';
 import type { ActionsConfigurationUtilities } from './actions_config';
@@ -229,6 +231,7 @@ export class ActionTypeRegistry {
           title: actionType.name,
           maxAttempts,
           cost: TaskCost.Tiny,
+          taskTypeGroup: TaskTypeGroup.Actions,
           createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
         },
       });
@@ -313,5 +316,12 @@ export class ActionTypeRegistry {
 
   isDeprecated(actionTypeId: string): boolean {
     return Boolean(this.actionTypes.get(actionTypeId)?.isDeprecated);
+  }
+
+  /**
+   * Returns the connector spec stored for a spec-backed type, or undefined.
+   */
+  public getSpec(id: string): ConnectorSpec | undefined {
+    return this.actionTypes.get(id)?.spec;
   }
 }

@@ -5,7 +5,7 @@
 # Contract:
 # - FLAKY_TEST_WORKING_DIRECTORY: initial cwd before the command (usually "." = kibana repo root).
 # - FLAKY_TEST_COMMAND: shell snippet executed via `bash -c` (often includes `cd <package> && …`).
-# - FLAKY_TEST_JUNIT_MERGE_DIRECTORY (optional): repo-relative path where `yarn junit:merge` runs when
+# - FLAKY_TEST_JUNIT_MERGE_DIRECTORY (optional): repo-relative path where `pnpm junit:merge` runs when
 #   it differs from FLAKY_TEST_WORKING_DIRECTORY (typical for Security Cypress: package root).
 # - FLAKY_TEST_SCOUT_LABEL (optional): argument to upload_scout_cypress_events for Buildkite analytics.
 # - KIBANA_INSTALL_DIR: repo-root distributable ($PARENT_DIR/kibana-build-xpack), even when the command
@@ -70,7 +70,7 @@ if [[ "${_junit_merge_dir}" != "." ]]; then
   cd "${_junit_merge_dir}"
 fi
 if node -e "const p=require('./package.json'); process.exit(p.scripts?.['junit:merge'] ? 0 : 1)" 2>/dev/null; then
-  yarn junit:merge || :
+  pnpm junit:merge || :
 fi
 
 if [[ -n "${FLAKY_TEST_SCOUT_LABEL:-}" ]]; then

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, isoDateTime } from '@kbn/zod';
 import { isInternalURL } from '@kbn/std';
 import {
   NOTIFICATION_NAMESPACES,
@@ -72,16 +72,18 @@ export const ctaSchema = z
   })
   .strict();
 
+/** Idempotency key; see notification_id.ts for the ID conventions. */
+export const notificationIdSchema = z.string().min(1).max(512);
+
 /**
  * Field shape shared by the write and read schemas. `namespace` and `type` are
  * both drawn from the notification registry
  */
 const notificationObject = z
   .object({
-    /** Idempotency key; see notification_id.ts for the ID conventions. */
-    notification_id: z.string().min(1).max(512),
+    notification_id: notificationIdSchema,
     /** Occurrence time, set by NC for `timeseries` notification kind */
-    event_timestamp: z.iso.datetime().optional(),
+    event_timestamp: isoDateTime().optional(),
     /** Registry namespace that owns this notification, e.g. `inference`. */
     namespace: z.enum(NOTIFICATION_NAMESPACES),
     /** Registry type within `namespace`, e.g. `modelStatus` */
@@ -114,7 +116,7 @@ export const notificationWriteSchema = notificationObject.superRefine((value, ct
 export const notificationReadSchema = notificationObject
   .extend({
     /** Ingest time, stamped on write by NC — never producer-supplied. */
-    '@timestamp': z.iso.datetime(),
+    '@timestamp': isoDateTime(),
     namespace: z.string().min(1).max(64),
     type: z.string().min(1).max(64),
     // Catch unknown severity tiers that may be added in the future
@@ -124,14 +126,13 @@ export const notificationReadSchema = notificationObject
 
 /**
  * Read-path query params. Used primarily at the HTTP GET route boundary.
- *`queryNotifications` re-parses it for extra validation..
+ *`queryNotifications` re-parses it for extra validation.
  */
 export const notificationQueryParamsSchema = z
   .object({
     namespace: z.string().min(1).max(64).optional(),
     type: z.string().min(1).max(64).optional(),
-    severity: z.array(z.enum(SEVERITIES)).max(SEVERITIES.length).optional(),
-    from: z.iso.datetime().optional(),
-    to: z.iso.datetime().optional(),
+    from: isoDateTime().optional(),
+    to: isoDateTime().optional(),
   })
   .strict();

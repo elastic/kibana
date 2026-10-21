@@ -22,6 +22,7 @@ import { errors } from '@elastic/elasticsearch';
 import { escapeQuotes } from '@kbn/es-query';
 import { coerce } from 'semver';
 import pMap from 'p-map';
+import { chunk } from 'lodash';
 
 import type { AgentPolicy } from '../../common/types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
@@ -29,17 +30,34 @@ import { agentPolicyService, appContextService, packagePolicyService } from '../
 import { getPackageInfo } from '../services/epm/packages';
 import { getAgentTemplateAssetsMap } from '../services/epm/packages/get';
 import {
-  buildVariantAgentsKuery,
+  getVariantAgentsKuery,
+  getVariantPolicyIdsFromAgentsWithoutBaseId,
   deleteVersionSpecificFleetServerPolicies,
+  deleteVersionSpecificFleetServerPoliciesForVersions,
+  getAgentCountsForVariantPolicyIds,
+  getAgentVersionsForVersionSpecificPolicies,
   hasAgentVersionConditionInInputTemplate,
 } from '../services/utils/version_specific_policies';
 import { fetchAllAgentsByKuery, getAgentsByKuery } from '../services/agents';
 import { reassignAgents } from '../services/agents/reassign';
+import { AgentAlreadyAssignedError } from '../errors';
 import {
   splitVersionSuffixFromPolicyId,
-  buildVersionVariantsKueryFragment,
+  classifyPolicyId,
+  buildAgentVersionVariantsKueryFragment,
+  getSentinelVersionPolicyId,
+  hasSentinelVersionPolicy,
+  hasSentinelVersionSuffix,
 } from '../../common/services/version_specific_policies_utils';
-import { AGENT_POLICY_INDEX, AGENT_POLICY_VERSION_SEPARATOR } from '../../common/constants';
+import {
+  AGENT_POLICY_INDEX,
+  AGENT_POLICY_VERSION_SEPARATOR,
+  AGENT_TYPE_OPAMP,
+  AGENTS_INDEX,
+  NOT_OPAMP_AGENT_KUERY,
+} from '../../common/constants';
+import { RunMetrics } from './version_specific_policy_assignment_run_metrics';
+import { isSentinelPolicyVersionEnabled } from '../services/utils/sentinel_policy_version';
 
 import { throwIfAborted } from './utils';
 
@@ -51,15 +69,55 @@ const DEFAULT_INTERVAL = '1m';
 const TIMEOUT = '5m';
 const AGENT_POLICIES_BATCHSIZE = 500;
 const AGENTS_BATCHSIZE = 1000;
+
+// OpAMP collectors have no policy to move between: they get no policy action to acknowledge, so a
+// reassigned collector would stay `updating` (its `policy_revision` is cleared). The task never selects them.
+const NOT_OPAMP_COLLECTOR_ES_FILTER = [{ term: { type: AGENT_TYPE_OPAMP } }];
+// Agents moved per reassignment: `reassignAgents` loads the agent documents of its ids and updates them in
+// one bulk request, so a group of tens of thousands of agents (e.g. inactive ones, the first time they are
+// selected) is moved in batches, with a pause point between them for the abort signal.
+const REASSIGN_BATCHSIZE = 1000;
 const MAX_CONCURRENT_REASSIGNMENTS = 5;
 // Time window to look for recently upgraded agents
 const RECENTLY_UPGRADED_WINDOW_MINUTES = 30;
 // Upper bound on the number of distinct version-specific policy ids we inspect for orphaned agents
 // in a single run. Far above any realistic deployment; a safety valve against unbounded aggregations.
 const MAX_VERSION_SPECIFIC_POLICY_BUCKETS = 10000;
+// A variant whose .fleet-policies document was written within this window is considered "fresh" and
+// is never deleted, even if no agents are assigned to it right now. This atomically closes the
+// race with a concurrent deployPolicies call: any racing write stamps a fresh @timestamp
+// (agent_policy.ts:1946), which the deleteByQuery range filter excludes without a TOCTOU window.
+const STALE_VARIANT_GRACE_MS = 60 * 60 * 1000; // 1 hour
+// The orphan sweep is a safety net: policy updates already reassign agents directly. It reads up to
+// MAX_VERSION_SPECIFIC_POLICY_BUCKETS policy ids and the parent policies of the variants, so it does not run
+// on every run. It runs right away when the sentinel version is turned on or off, which changes what is orphaned.
+const ORPHAN_SWEEP_INTERVAL_MS = 10 * 60 * 1000;
+// Upper bound of the distinct `policy_id`s of agents without `policy_base_id` that the candidate query reads: none
+// once the startup backfill has run, only the agents of an older fleet-server in a mixed version rollout.
+const MAX_AGENTS_WITHOUT_POLICY_BASE_ID = 10000;
+
+interface VersionSpecificPolicyAssignmentTaskState {
+  lastSweepAt?: string;
+  sentinelVersionEnabled?: boolean;
+  // the state of a task is a `Record<string, unknown>`
+  [key: string]: unknown;
+}
+
+// Agent fields read by the task: the id (always returned), the policy id and the agent version
+const AGENT_SOURCE_FIELDS = ['policy_id', 'agent.version'];
+
+// Options of the agent queries that only read the fields above: no agent status runtime field (and the
+// inactivity timeouts scan it needs), no agent status in the response and only the needed source fields.
+// With `showInactive: false` agents that are inactive by timeout are then not excluded, unenrolled agents are.
+const LIGHT_AGENT_QUERY_OPTIONS = {
+  includeStatusRuntimeField: false,
+  fetchFields: [] as string[],
+  _source: AGENT_SOURCE_FIELDS,
+};
 
 interface VersionSpecificPolicyAssignmentTaskConfig {
   taskInterval?: string;
+  orphanSweepIntervalMs?: number;
 }
 
 interface VersionSpecificPolicyAssignmentTaskSetupContract {
@@ -83,11 +141,13 @@ export class VersionSpecificPolicyAssignmentTask {
   private logger: Logger;
   private wasStarted: boolean = false;
   private taskInterval: string;
+  private orphanSweepIntervalMs: number;
 
   constructor(setupContract: VersionSpecificPolicyAssignmentTaskSetupContract) {
     const { core, taskManager, logFactory, config } = setupContract;
     this.logger = logFactory.get(this.taskId);
     this.taskInterval = config.taskInterval ?? DEFAULT_INTERVAL;
+    this.orphanSweepIntervalMs = config.orphanSweepIntervalMs ?? ORPHAN_SWEEP_INTERVAL_MS;
 
     taskManager.registerTaskDefinitions({
       [TYPE]: {
@@ -180,10 +240,59 @@ export class VersionSpecificPolicyAssignmentTask {
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
+    // Duration and memory of the run, only measured when debug logs are on
+    const runMetrics = this.logger.isLevelEnabled('debug') ? new RunMetrics() : undefined;
+    const measurePhase = <T>(name: string, fn: () => Promise<T>): Promise<T> =>
+      runMetrics ? runMetrics.measurePhase(name, fn) : fn();
+    let runSentinelVersionEnabled: boolean | undefined;
+
     try {
-      await this.processAgentPoliciesWithVersionConditions(esClient, soClient, signal);
-      await this.reassignAgentsFromOrphanedVersionSpecificPolicies(esClient, soClient, signal);
+      // Track which variant policy ids Phase 1 deployed this run so Phase 2 does not delete
+      // them: Phase 1 skips agents already correctly assigned, so a wrongly-deleted variant is
+      // never recreated and the agent stays stranded on a missing policy permanently.
+      const deployedThisRun = new Set<string>();
+      // Packages without an agent version condition in their input templates, to not load them again
+      // for every agent policy of the run
+      const packageHasTemplateCondition = new Map<string, boolean>();
+      const sentinelVersionEnabled = await isSentinelPolicyVersionEnabled();
+      runSentinelVersionEnabled = sentinelVersionEnabled;
+      const previousState = (taskInstance.state ?? {}) as VersionSpecificPolicyAssignmentTaskState;
+      await measurePhase('versionConditionPolicies', () =>
+        this.processAgentPoliciesWithVersionConditions(
+          esClient,
+          soClient,
+          signal,
+          deployedThisRun,
+          packageHasTemplateCondition
+        )
+      );
+      if (sentinelVersionEnabled) {
+        await measurePhase('sentinelAssignment', () =>
+          this.assignAgentsToSentinelPolicies(esClient, soClient, signal)
+        );
+      }
+      const shouldSweepOrphans = this.shouldSweepOrphans(previousState, sentinelVersionEnabled);
+      if (shouldSweepOrphans) {
+        await measurePhase('orphanSweep', () =>
+          this.reassignAgentsFromOrphanedVersionSpecificPolicies(
+            esClient,
+            soClient,
+            signal,
+            deployedThisRun,
+            sentinelVersionEnabled
+          )
+        );
+      } else {
+        this.logger.debug(
+          '[VersionSpecificPolicyAssignmentTask] Skipping the orphan sweep, it ran recently'
+        );
+      }
       this.endRun('success');
+      const state: VersionSpecificPolicyAssignmentTaskState = {
+        lastSweepAt: shouldSweepOrphans ? new Date().toISOString() : previousState.lastSweepAt,
+        sentinelVersionEnabled,
+      };
+      return { state };
     } catch (err) {
       if (err instanceof errors.RequestAbortedError) {
         this.logger.warn(
@@ -194,8 +303,56 @@ export class VersionSpecificPolicyAssignmentTask {
       }
       this.logger.error(`[VersionSpecificPolicyAssignmentTask] Error: ${err}`);
       this.endRun('error');
+    } finally {
+      if (runMetrics) {
+        this.logger.debug(
+          `[VersionSpecificPolicyAssignmentTask] Run metrics: ${JSON.stringify({
+            sentinelVersionEnabled: runSentinelVersionEnabled,
+            ...runMetrics.stop(),
+          })}`
+        );
+      }
     }
   };
+
+  private shouldSweepOrphans(
+    state: VersionSpecificPolicyAssignmentTaskState,
+    sentinelVersionEnabled: boolean
+  ): boolean {
+    if (!state.lastSweepAt || state.sentinelVersionEnabled !== sentinelVersionEnabled) {
+      return true;
+    }
+    const elapsedMs = Date.now() - Date.parse(state.lastSweepAt);
+    return Number.isNaN(elapsedMs) || elapsedMs >= this.orphanSweepIntervalMs;
+  }
+
+  /**
+   * Moves the agents to the policy in batches of `REASSIGN_BATCHSIZE`. The agents that were not moved when the run
+   * is aborted or fails stay selected, and are moved by the next run.
+   */
+  private async reassignAgentsInBatches(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    agentIds: string[],
+    targetPolicyId: string,
+    options: { showInactive: boolean },
+    signal: AbortSignal
+  ) {
+    for (const agentIdsBatch of chunk(agentIds, REASSIGN_BATCHSIZE)) {
+      throwIfAborted(signal);
+      await reassignAgents(
+        soClient,
+        esClient,
+        {
+          agentIds: agentIdsBatch,
+          showInactive: options.showInactive,
+          spaceId: '*',
+          _internalCrossSpace: true,
+        },
+        targetPolicyId
+      );
+    }
+  }
 
   private endRun(msg: string = '') {
     this.logger.debug(
@@ -209,7 +366,9 @@ export class VersionSpecificPolicyAssignmentTask {
   private async processAgentPoliciesWithVersionConditions(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
-    signal: AbortSignal
+    signal: AbortSignal,
+    deployedThisRun: Set<string>,
+    packageHasTemplateCondition: Map<string, boolean>
   ) {
     // Fetch agent policies with version conditions in batches
     const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {
@@ -229,11 +388,189 @@ export class VersionSpecificPolicyAssignmentTask {
         return;
       }
 
+      // One query for the page: only the policies that have agents to look at are visited, instead of
+      // a count query for every policy of every run.
+      const policyIdsWithCandidates = await this.findPolicyIdsWithCandidateAgents(
+        esClient,
+        agentPolicyPageResults.map((agentPolicy) => agentPolicy.id)
+      );
+      this.logger.debug(
+        `[VersionSpecificPolicyAssignmentTask] ${policyIdsWithCandidates.size} of ${agentPolicyPageResults.length} agent policies have agents to assign`
+      );
+
       for (const agentPolicy of agentPolicyPageResults) {
+        if (!policyIdsWithCandidates.has(agentPolicy.id)) {
+          continue;
+        }
         throwIfAborted(signal);
-        await this.processAgentPolicyForVersionAssignment(esClient, soClient, agentPolicy, signal);
+        await this.processAgentPolicyForVersionAssignment(
+          esClient,
+          soClient,
+          agentPolicy,
+          signal,
+          deployedThisRun,
+          packageHasTemplateCondition
+        );
       }
     }
+  }
+
+  /**
+   * Moves agents on a plain policy id to the `<id>#sentinel` copy, for policies without version
+   * conditions (those are handled by `processAgentPoliciesWithVersionConditions`). The plain
+   * `.fleet-policies` document is kept, since newly enrolled agents start on it.
+   *
+   * Managed and agentless policies are left on the plain id.
+   */
+  private async assignAgentsToSentinelPolicies(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    signal: AbortSignal
+  ) {
+    const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {
+      kuery: [
+        `not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.has_agent_version_conditions:true`,
+        // Keep in sync with `hasSentinelVersionPolicy`.
+        `not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
+        `not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
+      ].join(' and '),
+      perPage: AGENT_POLICIES_BATCHSIZE,
+      fields: ['id', 'revision'],
+      spaceId: '*',
+    });
+
+    for await (const agentPolicyPageResults of agentPolicyFetcher) {
+      throwIfAborted(signal);
+      if (!agentPolicyPageResults.length) {
+        return;
+      }
+      const revisionByPolicyId = new Map(agentPolicyPageResults.map((p) => [p.id, p.revision]));
+
+      const agentIdsByPolicyId = new Map<string, string[]>();
+      const agentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
+        kuery: `policy_id:(${agentPolicyPageResults
+          .map((p) => `"${escapeQuotes(p.id)}"`)
+          .join(' or ')}) and ${NOT_OPAMP_AGENT_KUERY}`,
+        perPage: AGENTS_BATCHSIZE,
+        showInactive: false,
+        ...LIGHT_AGENT_QUERY_OPTIONS,
+      });
+      for await (const agentsBatch of agentsFetcher) {
+        throwIfAborted(signal);
+        for (const agent of agentsBatch) {
+          if (!agent.policy_id) continue;
+          const agentIds = agentIdsByPolicyId.get(agent.policy_id);
+          if (agentIds) {
+            agentIds.push(agent.id);
+          } else {
+            agentIdsByPolicyId.set(agent.policy_id, [agent.id]);
+          }
+        }
+      }
+      if (agentIdsByPolicyId.size === 0) {
+        continue;
+      }
+
+      const policyIdsToAssign = await this.ensureSentinelPoliciesUpToDate(
+        esClient,
+        soClient,
+        new Map(
+          [...agentIdsByPolicyId.keys()].map((policyId) => [
+            policyId,
+            revisionByPolicyId.get(policyId) ?? 0,
+          ])
+        )
+      );
+
+      await pMap(
+        policyIdsToAssign,
+        async (policyId) => {
+          throwIfAborted(signal);
+          const agentIds = agentIdsByPolicyId.get(policyId)!;
+          const targetPolicyId = getSentinelVersionPolicyId(policyId);
+          this.logger.debug(
+            `[VersionSpecificPolicyAssignmentTask] Reassigning ${agentIds.length} agents to ${targetPolicyId}`
+          );
+          try {
+            await this.reassignAgentsInBatches(
+              esClient,
+              soClient,
+              agentIds,
+              targetPolicyId,
+              { showInactive: false },
+              signal
+            );
+          } catch (error) {
+            this.logReassignError(targetPolicyId, error);
+          }
+        },
+        { concurrency: MAX_CONCURRENT_REASSIGNMENTS }
+      );
+    }
+  }
+
+  /**
+   * The single place that guarantees `#sentinel` documents exist: every flow that assigns agents to
+   * `#sentinel` must call this first and only target the returned policy ids.
+   *
+   * Deploys the policies whose `#sentinel` document is missing or behind the policy revision (e.g. the
+   * policy was not updated since the sentinel version was enabled), so agents are never moved to a
+   * `#sentinel` policy that does not exist yet. Returns the policy ids whose `#sentinel` document is
+   * up to date, which are safe to assign agents to.
+   */
+  private async ensureSentinelPoliciesUpToDate(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    revisionByPolicyId: Map<string, number>
+  ): Promise<string[]> {
+    const policyIds = [...revisionByPolicyId.keys()];
+    if (policyIds.length === 0) {
+      return [];
+    }
+    const getUpToDatePolicyIds = async () => {
+      const response = await esClient.search<
+        unknown,
+        { policies: { buckets: Array<{ key: string; max_revision: { value: number | null } }> } }
+      >({
+        index: AGENT_POLICY_INDEX,
+        ignore_unavailable: true,
+        size: 0,
+        query: { terms: { policy_id: policyIds.map(getSentinelVersionPolicyId) } },
+        aggs: {
+          policies: {
+            terms: { field: 'policy_id', size: policyIds.length },
+            aggs: { max_revision: { max: { field: 'revision_idx' } } },
+          },
+        },
+      });
+      const upToDate = new Set<string>();
+      for (const bucket of response.aggregations?.policies?.buckets ?? []) {
+        const { baseId } = splitVersionSuffixFromPolicyId(bucket.key);
+        if ((bucket.max_revision.value ?? 0) >= (revisionByPolicyId.get(baseId) ?? 0)) {
+          upToDate.add(baseId);
+        }
+      }
+      return upToDate;
+    };
+
+    const upToDate = await getUpToDatePolicyIds();
+    const toDeploy = policyIds.filter((id) => !upToDate.has(id));
+    if (toDeploy.length === 0) {
+      return policyIds;
+    }
+
+    this.logger.debug(
+      `[VersionSpecificPolicyAssignmentTask] Deploying sentinel policy for ${toDeploy.length} agent policies`
+    );
+    try {
+      await agentPolicyService.deployPolicies(soClient, toDeploy, undefined, { spaceId: '*' });
+    } catch (error) {
+      this.logger.error(
+        `[VersionSpecificPolicyAssignmentTask] Error deploying sentinel policies: ${error}`
+      );
+    }
+    const upToDateAfterDeploy = await getUpToDatePolicyIds();
+    return policyIds.filter((id) => upToDateAfterDeploy.has(id));
   }
 
   /**
@@ -243,7 +580,9 @@ export class VersionSpecificPolicyAssignmentTask {
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
     agentPolicy: AgentPolicy,
-    signal: AbortSignal
+    signal: AbortSignal,
+    deployedThisRun: Set<string>,
+    packageHasTemplateCondition: Map<string, boolean>
   ) {
     this.logger.debug(
       `[VersionSpecificPolicyAssignmentTask] Processing agent policy ${agentPolicy.id}`
@@ -270,8 +609,105 @@ export class VersionSpecificPolicyAssignmentTask {
       soClient,
       agentPolicy.id,
       agentVersionGroups,
-      signal
+      signal,
+      deployedThisRun,
+      packageHasTemplateCondition
     );
+  }
+
+  /**
+   * Which of the given agent policies have agents that `findAgentsNeedingVersionSpecificPolicies` may
+   * find, with one search for all of them. Same agents as its query, so that it can skip the others:
+   * - active agents on the policy or on its `#sentinel` copy
+   * - active agents on a variant that were recently upgraded
+   *
+   * Agents without `policy_base_id` (enrolled by an older fleet-server) are matched through their
+   * `policy_id`, so that a missing field never hides an agent. Those can be of any agent policy, so
+   * when there are more distinct `policy_id`s than the aggregation returns, every policy of the page is
+   * looked at rather than skipping some that the truncated result did not show.
+   */
+  private async findPolicyIdsWithCandidateAgents(
+    esClient: ElasticsearchClient,
+    agentPolicyIds: string[]
+  ): Promise<Set<string>> {
+    const policyIds = new Set(agentPolicyIds);
+    if (policyIds.size === 0) {
+      return new Set();
+    }
+    const sentinelPolicyIds = agentPolicyIds.map(getSentinelVersionPolicyId);
+    const parentPolicyIds = [...agentPolicyIds, ...sentinelPolicyIds];
+    const recentlyUpgradedTime = this.getRecentlyUpgradedTime();
+
+    const response = await esClient.search<
+      unknown,
+      {
+        base_policy_ids: { buckets: Array<{ key: string }> };
+        without_policy_base_id: {
+          policy_ids: { buckets: Array<{ key: string }>; sum_other_doc_count?: number };
+        };
+      }
+    >({
+      index: AGENTS_INDEX,
+      ignore_unavailable: true,
+      size: 0,
+      query: {
+        bool: {
+          filter: [{ term: { active: true } }],
+          must_not: NOT_OPAMP_COLLECTOR_ES_FILTER,
+          should: [
+            // on the policy or on its `#sentinel` copy
+            { terms: { policy_id: parentPolicyIds } },
+            // on a variant that was recently upgraded: matched by the base policy id, or
+            // for agents without it, by any `policy_id` of an agent that was recently upgraded
+            {
+              bool: {
+                filter: [
+                  { terms: { policy_base_id: agentPolicyIds } },
+                  { range: { upgraded_at: { gte: recentlyUpgradedTime } } },
+                ],
+              },
+            },
+            {
+              bool: {
+                filter: [{ range: { upgraded_at: { gte: recentlyUpgradedTime } } }],
+                must_not: [{ exists: { field: 'policy_base_id' } }],
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+      aggs: {
+        base_policy_ids: { terms: { field: 'policy_base_id', size: policyIds.size } },
+        without_policy_base_id: {
+          filter: { bool: { must_not: [{ exists: { field: 'policy_base_id' } }] } },
+          aggs: {
+            policy_ids: { terms: { field: 'policy_id', size: MAX_AGENTS_WITHOUT_POLICY_BASE_ID } },
+          },
+        },
+      },
+    });
+
+    if (response.aggregations?.without_policy_base_id?.policy_ids?.sum_other_doc_count) {
+      this.logger.debug(
+        `[VersionSpecificPolicyAssignmentTask] More than ${MAX_AGENTS_WITHOUT_POLICY_BASE_ID} policy ids of agents without policy_base_id: looking at all the agent policies of the page`
+      );
+      return policyIds;
+    }
+
+    const found = new Set<string>();
+    for (const { key } of response.aggregations?.base_policy_ids?.buckets ?? []) {
+      found.add(key);
+    }
+    for (const { key } of response.aggregations?.without_policy_base_id?.policy_ids?.buckets ??
+      []) {
+      found.add(classifyPolicyId(key).baseId);
+    }
+    return new Set([...found].filter((policyId) => policyIds.has(policyId)));
+  }
+
+  private getRecentlyUpgradedTime(): string {
+    return new Date(Date.now() - RECENTLY_UPGRADED_WINDOW_MINUTES * 60 * 1000).toISOString();
   }
 
   /**
@@ -297,17 +733,18 @@ export class VersionSpecificPolicyAssignmentTask {
     // 1. Agents on the parent policy (not a versioned policy)
     // 2. Agents that were recently upgraded
     // 3. Agents on versioned policy with mismatched version or outdated revision
-    const recentlyUpgradedTime = new Date(
-      Date.now() - RECENTLY_UPGRADED_WINDOW_MINUTES * 60 * 1000
-    ).toISOString();
+    const recentlyUpgradedTime = this.getRecentlyUpgradedTime();
 
-    // Query 1: Agents on parent policy (newly enrolled or need initial assignment)
-    const parentPolicyKuery = `policy_id:"${escapeQuotes(agentPolicyId)}"`;
+    // Query 1: Agents on parent policy (newly enrolled or need initial assignment), or on its
+    // `#sentinel` copy (the policy had no version conditions before and agents were moved to `#sentinel`)
+    const parentPolicyKuery = `policy_id:("${escapeQuotes(agentPolicyId)}" or "${escapeQuotes(
+      getSentinelVersionPolicyId(agentPolicyId)
+    )}")`;
 
     // Query 2: Agents on any versioned policy derived from this parent that:
     //   - Were recently upgraded (version might have changed)
     //   - May need to move to a different versioned policy
-    const versionedPolicyKuery = `${buildVersionVariantsKueryFragment(
+    const versionedPolicyKuery = `${buildAgentVersionVariantsKueryFragment(
       agentPolicyId
     )} AND upgraded_at >= "${recentlyUpgradedTime}"`;
 
@@ -315,17 +752,19 @@ export class VersionSpecificPolicyAssignmentTask {
     // Agents already on the correct versioned policy will receive updated revisions
     // automatically through fleet-server after deployPolicies updates .fleet-policies.
 
-    const combinedKuery = `(${parentPolicyKuery}) OR (${versionedPolicyKuery})`;
+    const combinedKuery = `((${parentPolicyKuery}) OR (${versionedPolicyKuery})) AND ${NOT_OPAMP_AGENT_KUERY}`;
 
     this.logger.debug(
       `[VersionSpecificPolicyAssignmentTask] Searching for agents with kuery: ${combinedKuery}`
     );
 
-    // First, check if there are any agents matching our criteria
+    // First, check if there are any agents matching our criteria. Agents that are inactive by timeout are
+    // included: the stored `active` field is used instead of the status, and moving them is a metadata update.
     const { total } = await getAgentsByKuery(esClient, soClient, {
       kuery: combinedKuery,
       showInactive: false,
       perPage: 0,
+      includeStatusRuntimeField: false,
     });
 
     if (total === 0) {
@@ -337,49 +776,56 @@ export class VersionSpecificPolicyAssignmentTask {
     );
 
     // Fetch agents and group by minor version
-    const agentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
-      kuery: combinedKuery,
-      perPage: AGENTS_BATCHSIZE,
-      showInactive: false,
-    });
+    const groupAgentsByMinorVersion = async (
+      agentsFetcher: Awaited<ReturnType<typeof fetchAllAgentsByKuery>>
+    ) => {
+      for await (const agentsBatch of agentsFetcher) {
+        throwIfAborted(signal);
 
-    for await (const agentsBatch of agentsFetcher) {
-      throwIfAborted(signal);
-
-      for (const agent of agentsBatch) {
-        const agentVersion = agent.agent?.version;
-        if (!agentVersion) {
-          continue;
-        }
-
-        const minorVersion = this.extractMinorVersion(agentVersion);
-        if (!minorVersion) {
-          continue;
-        }
-
-        // Check if agent is already on the correct versioned policy for its version
-        const currentPolicyId = agent.policy_id;
-        if (currentPolicyId) {
-          const { baseId, version: policyVersion } =
-            splitVersionSuffixFromPolicyId(currentPolicyId);
-
-          // If agent is on a versioned policy with matching version, skip.
-          // We don't check policy_revision here - agents with outdated revisions
-          // will receive updates automatically through fleet-server after deployPolicies.
-          if (policyVersion === minorVersion && baseId === agentPolicyId) {
+        for (const agent of agentsBatch) {
+          const agentVersion = agent.agent?.version;
+          if (!agentVersion) {
             continue;
           }
-        }
 
-        // Group agent by minor version
-        const existingGroup = agentsByMinorVersion.get(minorVersion);
-        if (existingGroup) {
-          existingGroup.push(agent.id);
-        } else {
-          agentsByMinorVersion.set(minorVersion, [agent.id]);
+          const minorVersion = this.extractMinorVersion(agentVersion);
+          if (!minorVersion) {
+            continue;
+          }
+
+          // Check if agent is already on the correct versioned policy for its version
+          const currentPolicyId = agent.policy_id;
+          if (currentPolicyId) {
+            const { baseId, version: policyVersion } =
+              splitVersionSuffixFromPolicyId(currentPolicyId);
+
+            // If agent is on a versioned policy with matching version, skip.
+            // We don't check policy_revision here - agents with outdated revisions
+            // will receive updates automatically through fleet-server after deployPolicies.
+            if (policyVersion === minorVersion && baseId === agentPolicyId) {
+              continue;
+            }
+          }
+
+          // Group agent by minor version
+          const existingGroup = agentsByMinorVersion.get(minorVersion);
+          if (existingGroup) {
+            existingGroup.push(agent.id);
+          } else {
+            agentsByMinorVersion.set(minorVersion, [agent.id]);
+          }
         }
       }
-    }
+    };
+
+    await groupAgentsByMinorVersion(
+      await fetchAllAgentsByKuery(esClient, soClient, {
+        kuery: combinedKuery,
+        perPage: AGENTS_BATCHSIZE,
+        showInactive: false,
+        ...LIGHT_AGENT_QUERY_OPTIONS,
+      })
+    );
 
     // Convert map to array of AgentVersionGroup
     const versionGroups: AgentVersionGroup[] = [];
@@ -417,7 +863,9 @@ export class VersionSpecificPolicyAssignmentTask {
     soClient: SavedObjectsClientContract,
     parentPolicyId: string,
     agentVersionGroups: AgentVersionGroup[],
-    signal: AbortSignal
+    signal: AbortSignal,
+    deployedThisRun: Set<string>,
+    packageHasTemplateCondition: Map<string, boolean>
   ) {
     // Deploy the parent policy with version-specific policies for each version found
     const versionsToCreate = agentVersionGroups.map((group) => group.minorVersion);
@@ -432,11 +880,18 @@ export class VersionSpecificPolicyAssignmentTask {
       // Compile version-specific inputs for package policies with agent version conditions
       const packagePolicies = await packagePolicyService.findAllForAgentPolicy(
         soClient,
-        parentPolicyId
+        parentPolicyId,
+        { spaceIds: ['*'] }
       );
 
       for (const packagePolicy of packagePolicies) {
         if (!packagePolicy.package) {
+          continue;
+        }
+
+        const packageKey = `${packagePolicy.package.name}@${packagePolicy.package.version}`;
+        // Nothing to compile for a package without an agent version condition in its input templates
+        if (packageHasTemplateCondition.get(packageKey) === false) {
           continue;
         }
 
@@ -452,7 +907,9 @@ export class VersionSpecificPolicyAssignmentTask {
           savedObjectsClient: soClient,
         });
 
-        if (hasAgentVersionConditionInInputTemplate(assetsMap)) {
+        const hasTemplateCondition = hasAgentVersionConditionInInputTemplate(assetsMap);
+        packageHasTemplateCondition.set(packageKey, hasTemplateCondition);
+        if (hasTemplateCondition) {
           this.logger.debug(
             `[VersionSpecificPolicyAssignmentTask] Compiling version-specific inputs for package policy ${packagePolicy.id}`
           );
@@ -470,7 +927,14 @@ export class VersionSpecificPolicyAssignmentTask {
       // This will create the version-specific policies in .fleet-policies index
       await agentPolicyService.deployPolicies(soClient, [parentPolicyId], undefined, {
         agentVersions: versionsToCreate,
+        spaceId: '*',
       });
+      // Record every variant deployed this run so Phase 2 does not delete them: Phase 1 skips
+      // agents already on the correct variant, so a wrongly-deleted variant is never recreated
+      // and the agent stays stranded on a missing policy permanently.
+      for (const version of versionsToCreate) {
+        deployedThisRun.add(`${parentPolicyId}${AGENT_POLICY_VERSION_SEPARATOR}${version}`);
+      }
 
       // Reassign agents to their version-specific policies
       await pMap(
@@ -507,69 +971,106 @@ export class VersionSpecificPolicyAssignmentTask {
     );
 
     try {
-      await reassignAgents(
-        soClient,
+      await this.reassignAgentsInBatches(
         esClient,
-        {
-          agentIds,
-          showInactive: false,
-        },
-        targetPolicyId
+        soClient,
+        agentIds,
+        targetPolicyId,
+        // the agents were selected above, agents that are inactive by timeout included
+        { showInactive: true },
+        signal
       );
 
       this.logger.debug(
         `[VersionSpecificPolicyAssignmentTask] Successfully reassigned agents to ${targetPolicyId}`
       );
     } catch (error) {
-      this.logger.error(
-        `[VersionSpecificPolicyAssignmentTask] Error reassigning agents to ${targetPolicyId}: ${error}`
-      );
+      this.logReassignError(targetPolicyId, error);
     }
   }
 
   /**
-   * Orphan sweep: find version-specific (variant) policies whose parent policy no longer requires
-   * them (e.g. the integration/input that required them was removed), reassign any agents still on
-   * those variants back to the base policy so they keep syncing, and delete the stale variant
-   * documents.
+   * `AgentAlreadyAssignedError` means that the agents were already moved to the target policy since they
+   * were selected. That is expected, so it is not logged as an error. Other reassignment errors, e.g. hosted
+   * agents, are still logged as errors.
+   */
+  private logReassignError(targetPolicyId: string, error: unknown) {
+    const message = `[VersionSpecificPolicyAssignmentTask] Error reassigning agents to ${targetPolicyId}: ${error}`;
+    if (error instanceof AgentAlreadyAssignedError) {
+      this.logger.debug(message);
+    } else {
+      this.logger.error(message);
+    }
+  }
+
+  /**
+   * Reconcile version-specific (variant) `.fleet-policies` documents against the set of versions
+   * that actually need them. Two cases:
    *
-   * This complements the reassignment done inline when the agent policy is updated: it is the
-   * cross-space source of truth that recovers agents the inline path can't (agents in a different
-   * space than the request, or updates that predate the inline fix) and removes the variant
-   * documents once no agent references them. See https://github.com/elastic/kibana/issues/276294
+   * 1. Parent has `has_agent_version_conditions: false` (or the policy was deleted): all variant
+   *    documents are stale. Reassign any remaining agents back to the base policy, then delete all
+   *    variant documents. This is the pre-existing path, unchanged.
+   *
+   * 2. Parent still has `has_agent_version_conditions: true`: the parent is healthy but individual
+   *    per-version variants may have become stale (e.g. `#9.2` once Kibana moved on and every
+   *    enrolled agent upgraded). Delete variants that are outside the default bounded set AND have
+   *    zero agents assigned, subject to a grace window so any racing deploy is not caught mid-flight.
+   *    See https://github.com/elastic/kibana/issues/283077 (Half A).
    */
   private async reassignAgentsFromOrphanedVersionSpecificPolicies(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
-    signal: AbortSignal
+    signal: AbortSignal,
+    deployedThisRun: Set<string>,
+    sentinelVersionEnabled: boolean
   ) {
-    // Cheap first pass: enumerate the distinct policy ids present in `.fleet-policies` via a terms
-    // aggregation (not gated by `search.allow_expensive_queries`). That index is far smaller than
-    // `.fleet-agents` (one set of documents per policy, not per agent), so we drive the sweep off it
-    // rather than scanning agents; working from the documents also means stale variants are cleaned
-    // up even once every agent has already moved off them. The version suffix is filtered in memory
-    // below, which keeps the aggregation to a single field and yields exactly the base ids that have
-    // variant documents.
+    // Enumerate the distinct policy ids present in `.fleet-policies` via a terms aggregation with a
+    // max(@timestamp) sub-aggregation. Driving from .fleet-policies is cheaper than scanning
+    // .fleet-agents (one set of docs per policy, not per agent) and correctly cleans up variants
+    // even after every agent has moved off them.
     const policiesResponse = await esClient.search<
       unknown,
-      { variant_policies: { buckets: Array<{ key: string }>; sum_other_doc_count: number } }
+      {
+        variant_policies: {
+          buckets: Array<{ key: string; last_written: { value: number | null } }>;
+          sum_other_doc_count: number;
+        };
+      }
     >({
       index: AGENT_POLICY_INDEX,
       ignore_unavailable: true,
       size: 0,
       aggs: {
-        // Named 'variant_policies' for intent. The field is 'policy_id' (not 'policy_base_id')
-        // because we need every doc in the index — base and variant alike. Version-suffixed ids
-        // are then filtered in memory below to derive the set of parent ids with variant docs.
         variant_policies: {
           terms: { field: 'policy_id', size: MAX_VERSION_SPECIFIC_POLICY_BUCKETS },
+          aggs: {
+            last_written: { max: { field: '@timestamp' } },
+          },
         },
       },
     });
 
     const variantPoliciesAgg = policiesResponse.aggregations?.variant_policies;
     const buckets = variantPoliciesAgg?.buckets ?? [];
-    if (buckets.length === 0) {
+    // Agents on a versioned `policy_id` without `policy_base_id` (enrolled by a downlevel
+    // fleet-server after the last backfill). Their variant document may already be gone, in which
+    // case the parent would never be visited via `.fleet-policies` alone.
+    const agentOnlyVariantIdsByParent = await getVariantPolicyIdsFromAgentsWithoutBaseId(
+      esClient,
+      signal
+    );
+    if (sentinelVersionEnabled) {
+      // `#sentinel` is not a variant to clean up while the sentinel version is enabled.
+      for (const [baseId, ids] of agentOnlyVariantIdsByParent) {
+        const nonSentinelIds = ids.filter((id) => !hasSentinelVersionSuffix(id));
+        if (nonSentinelIds.length === 0) {
+          agentOnlyVariantIdsByParent.delete(baseId);
+        } else {
+          agentOnlyVariantIdsByParent.set(baseId, nonSentinelIds);
+        }
+      }
+    }
+    if (buckets.length === 0 && agentOnlyVariantIdsByParent.size === 0) {
       return;
     }
     if (variantPoliciesAgg?.sum_other_doc_count) {
@@ -578,43 +1079,187 @@ export class VersionSpecificPolicyAssignmentTask {
       );
     }
 
-    // Keep only version-specific variant ids (e.g. `policy1#9.4`) and collapse them down to their
-    // distinct parent policy ids.
-    const basePolicyIds = [
-      ...new Set(
-        buckets
-          .map((bucket) => splitVersionSuffixFromPolicyId(bucket.key))
-          .filter(({ version }) => version !== null)
-          .map(({ baseId }) => baseId)
-      ),
-    ];
-    if (basePolicyIds.length === 0) {
+    // Partition buckets into variant vs base, preserving last-written timestamp.
+    interface VariantBucket {
+      policyId: string;
+      baseId: string;
+      version: string;
+      lastWritten: number;
+    }
+    const variantBuckets: VariantBucket[] = [];
+    const basePolicyIdSet = new Set<string>();
+    for (const bucket of buckets) {
+      const { kind, baseId, version } = classifyPolicyId(bucket.key);
+      if (kind === 'base') continue;
+      if (kind === 'sentinel' && sentinelVersionEnabled) continue;
+      variantBuckets.push({
+        policyId: bucket.key,
+        baseId,
+        version,
+        lastWritten: bucket.last_written.value ?? 0,
+      });
+      basePolicyIdSet.add(baseId);
+    }
+    for (const baseId of agentOnlyVariantIdsByParent.keys()) {
+      basePolicyIdSet.add(baseId);
+    }
+    if (variantBuckets.length === 0 && basePolicyIdSet.size === 0) {
       return;
     }
 
-    // A variant is only orphaned if its parent policy still exists but no longer has version
-    // conditions. Parents that still have conditions are healthy; parents that no longer exist are
-    // handled by the agent policy deletion flow (which unenrolls agents and removes documents).
+    const basePolicyIds = [...basePolicyIdSet];
     const parentPolicies = await agentPolicyService.getByIds(
       soClient,
       basePolicyIds.map((id) => ({ id, spaceId: '*' })),
-      { fields: ['id', 'has_agent_version_conditions'], ignoreMissing: true }
+      {
+        fields: [
+          'id',
+          'revision',
+          'is_managed',
+          'supports_agentless',
+          'has_agent_version_conditions',
+        ],
+        ignoreMissing: true,
+      }
     );
-    const orphanedParentPolicyIds = parentPolicies
-      .filter((policy) => !policy.has_agent_version_conditions)
-      .map((policy) => policy.id);
+    const parentPoliciesById = new Map(parentPolicies.map((p) => [p.id, p]));
 
-    if (orphanedParentPolicyIds.length === 0) {
+    // Split parents into the two cases.
+    const noConditionParentIds = new Set<string>();
+    const withConditionParentIds = new Set<string>();
+    for (const id of basePolicyIds) {
+      const parent = parentPoliciesById.get(id);
+      if (!parent) continue; // deleted policy — handled by the agent policy deletion flow
+      if (parent.has_agent_version_conditions) {
+        withConditionParentIds.add(id);
+      } else {
+        noConditionParentIds.add(id);
+      }
+    }
+
+    // Case 1: parent no longer has version conditions — reassign all agents and delete all variants.
+    if (noConditionParentIds.size > 0) {
+      this.logger.debug(
+        `[VersionSpecificPolicyAssignmentTask] Found ${noConditionParentIds.size} agent policies with orphaned version-specific assignments to clean up`
+      );
+      for (const parentPolicyId of noConditionParentIds) {
+        throwIfAborted(signal);
+        await this.reassignOrphanedAgentsToBasePolicy(
+          esClient,
+          soClient,
+          parentPolicyId,
+          signal,
+          agentOnlyVariantIdsByParent.get(parentPolicyId),
+          sentinelVersionEnabled,
+          parentPoliciesById.get(parentPolicyId)
+        );
+      }
+    }
+
+    // Case 2: parent still has version conditions but individual variants may be stale.
+    if (withConditionParentIds.size > 0) {
+      throwIfAborted(signal);
+      await this.deleteStaleVariantsForActiveParents(
+        esClient,
+        soClient,
+        variantBuckets.filter((b) => withConditionParentIds.has(b.baseId)),
+        deployedThisRun,
+        signal
+      );
+    }
+  }
+
+  /**
+   * For parent policies that still have `has_agent_version_conditions: true`, delete any variant
+   * documents that are outside the default bounded set AND have zero agents assigned AND were last
+   * written more than STALE_VARIANT_GRACE_MS ago. See https://github.com/elastic/kibana/issues/283077
+   */
+  private async deleteStaleVariantsForActiveParents(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    variantBuckets: Array<{
+      policyId: string;
+      baseId: string;
+      version: string;
+      lastWritten: number;
+    }>,
+    deployedThisRun: Set<string>,
+    signal: AbortSignal
+  ) {
+    const boundedSet = new Set(await getAgentVersionsForVersionSpecificPolicies());
+    const now = Date.now();
+    const writtenBeforeThreshold = now - STALE_VARIANT_GRACE_MS;
+
+    // Filter to candidates: outside the bounded set, not deployed this run, and older than GRACE.
+    const candidates = variantBuckets.filter(
+      (b) =>
+        !boundedSet.has(b.version) &&
+        !deployedThisRun.has(b.policyId) &&
+        b.lastWritten < writtenBeforeThreshold
+    );
+    if (candidates.length === 0) {
       return;
     }
 
-    this.logger.debug(
-      `[VersionSpecificPolicyAssignmentTask] Found ${orphanedParentPolicyIds.length} agent policies with orphaned version-specific assignments to clean up`
+    // Check which candidates actually have agents (including inactive) to avoid deleting a variant
+    // an agent still references. The @timestamp range in the deleteByQuery also closes this race
+    // atomically, but the pre-check avoids the ES write for the common case where agents remain.
+    const candidatePolicyIds = candidates.map((c) => c.policyId);
+    const agentCounts = await getAgentCountsForVariantPolicyIds(esClient, candidatePolicyIds);
+
+    const toDelete = candidates
+      .filter((c) => (agentCounts.get(c.policyId) ?? 0) === 0)
+      .map((c) => c.policyId);
+
+    if (toDelete.length === 0) {
+      return;
+    }
+
+    this.logger.info(
+      `[VersionSpecificPolicyAssignmentTask] Deleting ${
+        toDelete.length
+      } stale version-specific variant document(s) for active parents: ${toDelete.join(', ')}`
     );
 
-    for (const parentPolicyId of orphanedParentPolicyIds) {
-      throwIfAborted(signal);
-      await this.reassignOrphanedAgentsToBasePolicy(esClient, soClient, parentPolicyId, signal);
+    throwIfAborted(signal);
+    const writtenBefore = new Date(writtenBeforeThreshold).toISOString();
+    await deleteVersionSpecificFleetServerPoliciesForVersions(esClient, toDelete, {
+      writtenBefore,
+    });
+
+    // Self-heal: re-check the deleted ids for agents in case a new agent was just assigned.
+    // If any survived, immediately redeploy the variant so the agent is not stranded permanently.
+    const postDeleteCounts = await getAgentCountsForVariantPolicyIds(esClient, toDelete);
+    const toRedeploy = toDelete.filter((id) => (postDeleteCounts.get(id) ?? 0) > 0);
+    if (toRedeploy.length > 0) {
+      this.logger.warn(
+        `[VersionSpecificPolicyAssignmentTask] ${
+          toRedeploy.length
+        } deleted variant(s) have agents after deletion (race); redeploying: ${toRedeploy.join(
+          ', '
+        )}`
+      );
+      // Group by base policy id and redeploy the affected versions.
+      const byParent = new Map<string, string[]>();
+      for (const policyId of toRedeploy) {
+        const { kind, baseId, version } = classifyPolicyId(policyId);
+        if (kind !== 'agentVersion') continue;
+        if (!byParent.has(baseId)) byParent.set(baseId, []);
+        byParent.get(baseId)!.push(version);
+      }
+      for (const [parentId, versions] of byParent) {
+        throwIfAborted(signal);
+        try {
+          await agentPolicyService.deployPolicies(soClient, [parentId], undefined, {
+            agentVersions: versions,
+            spaceId: '*',
+          });
+        } catch (err) {
+          this.logger.error(
+            `[VersionSpecificPolicyAssignmentTask] Error redeploying variant(s) for ${parentId}: ${err}`
+          );
+        }
+      }
     }
   }
 
@@ -626,10 +1271,28 @@ export class VersionSpecificPolicyAssignmentTask {
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
     parentPolicyId: string,
-    signal: AbortSignal
+    signal: AbortSignal,
+    agentOnlyVariantPolicyIds: string[] = [],
+    sentinelVersionEnabled: boolean = false,
+    parentPolicy?: Pick<AgentPolicy, 'revision' | 'is_managed' | 'supports_agentless'>
   ) {
+    // With the sentinel version enabled, `#sentinel` agents and documents are kept, and agents on
+    // other variants go straight to `#sentinel` instead of the base policy.
+    const sentinelPolicyId = getSentinelVersionPolicyId(parentPolicyId);
     try {
-      const variantAgentsKuery = buildVariantAgentsKuery(parentPolicyId);
+      // Include agents on a versioned `policy_id` that lack `policy_base_id` (enrolled by a downlevel
+      // fleet-server after the last backfill) so they are reassigned before the variant docs are deleted.
+      const allVariantAgentsKuery = await getVariantAgentsKuery(
+        esClient,
+        parentPolicyId,
+        agentOnlyVariantPolicyIds
+      );
+      // OpAMP collectors are left alone, like in the assignment: they have no policy to move between
+      const variantAgentsKuery = `(${
+        sentinelVersionEnabled
+          ? `(${allVariantAgentsKuery}) and not policy_id:"${escapeQuotes(sentinelPolicyId)}"`
+          : allVariantAgentsKuery
+      }) and ${NOT_OPAMP_AGENT_KUERY}`;
 
       const agentIds: string[] = [];
       // Include inactive agents: reassignment is a metadata update on `.fleet-agents` that is valid
@@ -639,6 +1302,7 @@ export class VersionSpecificPolicyAssignmentTask {
         kuery: variantAgentsKuery,
         perPage: AGENTS_BATCHSIZE,
         showInactive: true,
+        ...LIGHT_AGENT_QUERY_OPTIONS,
       });
       for await (const agentsBatch of agentsFetcher) {
         throwIfAborted(signal);
@@ -648,12 +1312,33 @@ export class VersionSpecificPolicyAssignmentTask {
       }
 
       if (agentIds.length > 0) {
+        // Only target `#sentinel` once its document is known to exist, otherwise the agents would
+        // be left on a missing policy. Falling back to the base policy is always safe: the
+        // sentinel assignment moves the agents later.
+        let targetPolicyId = parentPolicyId;
+        if (sentinelVersionEnabled && (!parentPolicy || hasSentinelVersionPolicy(parentPolicy))) {
+          const upToDatePolicyIds = await this.ensureSentinelPoliciesUpToDate(
+            esClient,
+            soClient,
+            new Map([[parentPolicyId, parentPolicy?.revision ?? 0]])
+          );
+          if (upToDatePolicyIds.includes(parentPolicyId)) {
+            targetPolicyId = sentinelPolicyId;
+          }
+        }
         this.logger.info(
-          `[VersionSpecificPolicyAssignmentTask] Reassigning ${agentIds.length} orphaned agents from version-specific policies of ${parentPolicyId} back to the base policy`
+          `[VersionSpecificPolicyAssignmentTask] Reassigning ${agentIds.length} orphaned agents from version-specific policies of ${parentPolicyId} back to ${targetPolicyId}`
         );
         // Reassign by agent id (not kuery) so agents in every space are covered — the task runs
         // with a space-agnostic saved objects client.
-        await reassignAgents(soClient, esClient, { agentIds, showInactive: true }, parentPolicyId);
+        await this.reassignAgentsInBatches(
+          esClient,
+          soClient,
+          agentIds,
+          targetPolicyId,
+          { showInactive: true },
+          signal
+        );
 
         // bulkUpdateAgents collects per-agent ES errors without throwing, so reassignAgents
         // returns { actionId } even if some updates silently failed (e.g. retry_on_conflict
@@ -663,6 +1348,10 @@ export class VersionSpecificPolicyAssignmentTask {
           kuery: variantAgentsKuery,
           showInactive: true,
           perPage: 0,
+          // The default `NOT status:unenrolled` filter queries a runtime field, which Elasticsearch
+          // rejects when `search.allow_expensive_queries` is false. The stored `active:true` filter
+          // used instead excludes unenrolled agents just the same.
+          includeStatusRuntimeField: false,
         });
         if (remaining > 0) {
           this.logger.warn(
@@ -674,7 +1363,9 @@ export class VersionSpecificPolicyAssignmentTask {
 
       // All agents have been moved off the variant policies (or there were none to move).
       // Safe to remove the now-stale variant documents.
-      await deleteVersionSpecificFleetServerPolicies(esClient, parentPolicyId);
+      await deleteVersionSpecificFleetServerPolicies(esClient, parentPolicyId, {
+        keepPolicyIds: sentinelVersionEnabled ? [sentinelPolicyId] : [],
+      });
     } catch (error) {
       this.logger.error(
         `[VersionSpecificPolicyAssignmentTask] Error reassigning orphaned agents from version-specific policies of ${parentPolicyId}: ${error}`

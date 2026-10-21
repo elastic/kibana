@@ -52,6 +52,8 @@ export type GenerateWorkflowParams = GenerateWorkflowOptions & GenerateWorkflowD
 export interface GenerateWorkflowResponse {
   /** The validated, parsed workflow definition. */
   workflow: WorkflowYaml;
+  /** The validated workflow YAML, preserving comments and formatting. */
+  yaml: string;
   /** The natural-language text content of the LLM's final turn */
   response: string;
 }
@@ -94,6 +96,11 @@ export interface ValidationResult {
   parsedWorkflow?: WorkflowYaml;
   /** Compact human-readable strings; empty when valid. */
   errors: string[];
+  /**
+   * ES|QL sources the cluster does not know. They do not block generation: the
+   * source can exist where and when the workflow runs.
+   */
+  unknownSources: string[];
 }
 
 /**

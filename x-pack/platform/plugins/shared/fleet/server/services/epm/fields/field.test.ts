@@ -8,7 +8,7 @@
 import { readFileSync } from 'fs';
 import path from 'path';
 
-import globby from 'globby';
+import { globbySync } from 'globby';
 import { parse } from 'yaml';
 
 import { getField, processFields, processFieldsWithWildcard } from './field';
@@ -27,7 +27,7 @@ expect.addSnapshotSerializer({
 
 test('tests loading fields.yml', () => {
   // Find all .yml files to run tests on
-  const files = globby.sync(path.join(__dirname, '/tests/*.yml'));
+  const files = globbySync(path.join(__dirname, '/tests/*.yml'));
   for (const file of files) {
     const fieldsYML = readFileSync(file, 'utf-8');
     const fields: Field[] = parse(fieldsYML);

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
+import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { ML_ANOMALIES_INDEX } from '../../../../../common/constants';
 import { useIntervalForHeatmap } from '../anomaly_heatmap_interval';
 import type { AnomalyBand } from '../anomaly_bands';
@@ -53,15 +53,20 @@ const ENTITY_NAME_FIELD: Record<(typeof ANOMALY_ENTITY_TYPES)[number], string> =
  * - entity_type: "user" | "host" | "service" (based on which EUID matched)
  * - entity_name: the display name from the winning entity type's name field
  */
-const getEuidEvaluationBlock = (euidApi: EntityStoreEuid) => {
+const getEuidEvaluationBlock = ({ euid, getBuiltInEntityDefinition }: EntityStoreEuidApi) => {
   const parts: string[] = [];
 
   for (const entityType of ANOMALY_ENTITY_TYPES) {
-    const fieldEvals = euidApi.esql.getFieldEvaluations(entityType);
+    const fieldEvals = euid.esql.getFieldEvaluations(getBuiltInEntityDefinition(entityType));
     if (fieldEvals) {
       parts.push(`| EVAL ${fieldEvals}`);
     }
-    parts.push(`| EVAL ${euidApi.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
+    parts.push(
+      `| EVAL ${euid.esql.getEuidEvaluation(
+        getBuiltInEntityDefinition(entityType),
+        `${entityType}_euid`
+      )}`
+    );
   }
 
   parts.push(
@@ -92,7 +97,7 @@ const getEuidEvaluationBlock = (euidApi: EntityStoreEuid) => {
  * Uses the entity store's entity.id field (EUID format).
  * Optionally filters by watchlist when watchlistId is provided.
  */
-const getEntityStoreJoinBlock = (spaceId: string, watchlistId?: string) => {
+const getEntityStoreJoinBlock = (entitiesIndexName: string, watchlistId?: string) => {
   // Filter ensures only entities that exist in the entity store are shown.
   // For watchlists, the watchlist filter implicitly achieves this.
   const entityFilter = watchlistId
@@ -102,7 +107,7 @@ const getEntityStoreJoinBlock = (spaceId: string, watchlistId?: string) => {
   return `
     | EVAL entity.id = entity_id
     | RENAME @timestamp AS event_timestamp
-    | LOOKUP JOIN ${getLatestEntitiesIndexName(spaceId)} ON entity.id
+    | LOOKUP JOIN ${entitiesIndexName} ON entity.id
     | RENAME event_timestamp AS @timestamp
     ${entityFilter}`;
 };
@@ -136,8 +141,12 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
   jobIds,
 }: EsqlSourceParams & { rowsLimit: number }): string | undefined => {
   const euidApi = useEntityStoreEuidApi();
+  // LOOKUP JOIN needs the live concrete index name; on un-migrated deployments
+  // that is still the legacy `.entities.v2.latest.security_{space}` index.
+  const { data: resolvedIndex } = useResolvedLatestEntitiesIndexName(spaceId);
+  const entitiesIndexName = resolvedIndex?.indexName;
 
-  if (!euidApi || !spaceId) return undefined;
+  if (!euidApi || !spaceId || !entitiesIndexName) return undefined;
 
   if (viewBy === 'jobId') {
     return `SET unmapped_fields="nullify";
@@ -145,10 +154,10 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
     ${BASE_RECORD_FILTER}
     ${TIME_RANGE_FILTER}
     ${getJobIdsFilter(jobIds)}
-    ${getEuidEvaluationBlock(euidApi.euid)}
+    ${getEuidEvaluationBlock(euidApi)}
     | WHERE entity_id IS NOT NULL
     ${getEntityIdsFilter(entityIds)}
-    ${getEntityStoreJoinBlock(spaceId, watchlistId)}
+    ${getEntityStoreJoinBlock(entitiesIndexName, watchlistId)}
     ${getHiddenBandsFilters(anomalyBands)}
     | STATS max_record_score = MAX(record_score) BY job_id
     | SORT max_record_score DESC
@@ -162,10 +171,10 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
     ${BASE_RECORD_FILTER}
     ${TIME_RANGE_FILTER}
     ${getJobIdsFilter(jobIds)}
-    ${getEuidEvaluationBlock(euidApi.euid)}
+    ${getEuidEvaluationBlock(euidApi)}
     | WHERE entity_id IS NOT NULL
     ${getEntityIdsFilter(entityIds)}
-    ${getEntityStoreJoinBlock(spaceId, watchlistId)}
+    ${getEntityStoreJoinBlock(entitiesIndexName, watchlistId)}
     ${getHiddenBandsFilters(anomalyBands)}
     | STATS max_record_score = MAX(record_score), entity_name = VALUES(entity_name), entity_type = VALUES(entity_type) BY entity_id
     | EVAL entity_name = MV_FIRST(entity_name), entity_type = MV_FIRST(entity_type)
@@ -186,8 +195,10 @@ export const useRecentAnomaliesDataEsqlSource = ({
 }: EsqlSourceParams & { rowLabels?: string[]; timeRange?: { from: string; to: string } }) => {
   const euidApi = useEntityStoreEuidApi();
   const interval = useIntervalForHeatmap(timeRange);
+  const { data: resolvedIndex } = useResolvedLatestEntitiesIndexName(spaceId);
+  const entitiesIndexName = resolvedIndex?.indexName;
 
-  if (!euidApi || !spaceId || !rowLabels) return undefined;
+  if (!euidApi || !spaceId || !rowLabels || !entitiesIndexName) return undefined;
   const formattedLabels = rowLabels.map((each) => `"${each}"`).join(', ');
 
   if (viewBy === 'jobId') {
@@ -195,10 +206,10 @@ export const useRecentAnomaliesDataEsqlSource = ({
     FROM ${ML_ANOMALIES_INDEX}
     ${BASE_RECORD_FILTER} AND job_id IN (${formattedLabels})
     ${TIME_RANGE_FILTER}
-    ${getEuidEvaluationBlock(euidApi.euid)}
+    ${getEuidEvaluationBlock(euidApi)}
     | WHERE entity_id IS NOT NULL
     ${getEntityIdsFilter(entityIds)}
-    ${getEntityStoreJoinBlock(spaceId, watchlistId)}
+    ${getEntityStoreJoinBlock(entitiesIndexName, watchlistId)}
     ${getHiddenBandsFilters(anomalyBands)}
     | EVAL job_id_to_record_score = CONCAT(job_id, " : ", TO_STRING(record_score))
     | STATS job_id_to_record_score = VALUES(job_id_to_record_score) BY @timestamp = BUCKET(@timestamp, ${interval}h)
@@ -217,9 +228,9 @@ export const useRecentAnomaliesDataEsqlSource = ({
     ${BASE_RECORD_FILTER}
     ${TIME_RANGE_FILTER}
     ${getJobIdsFilter(jobIds)}
-    ${getEuidEvaluationBlock(euidApi.euid)}
+    ${getEuidEvaluationBlock(euidApi)}
     | WHERE entity_id IN (${formattedLabels})
-    ${getEntityStoreJoinBlock(spaceId, watchlistId)}
+    ${getEntityStoreJoinBlock(entitiesIndexName, watchlistId)}
     ${getHiddenBandsFilters(anomalyBands)}
     | EVAL entity_id_to_record_score = CONCAT(entity_id, " : ", TO_STRING(record_score))
     | STATS entity_id_to_record_score = VALUES(entity_id_to_record_score) BY @timestamp = BUCKET(@timestamp, ${interval}h)

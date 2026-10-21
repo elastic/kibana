@@ -185,7 +185,9 @@ async function fetchAgentVersionsFromApi() {
   };
 
   // Use a fresh AbortController per attempt so a timed-out request doesn't carry its
-  // already-aborted signal into the retry.
+  // already-aborted signal into the retry. `fetch` resolves as soon as the response headers
+  // arrive, so the body is read here too — clearing the timer any earlier would leave the
+  // body read unbounded, and a stalled body would hang every caller indefinitely.
   const fetchWithTimeout = async () => {
     const controller = new AbortController();
     const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs);
@@ -194,20 +196,23 @@ async function fetchAgentVersionsFromApi() {
       timeoutHandle.unref();
     }
     try {
-      return await fetch(PRODUCT_VERSIONS_URL, { ...options, signal: controller.signal });
+      const response = await fetch(PRODUCT_VERSIONS_URL, {
+        ...options,
+        signal: controller.signal,
+      });
+      return { status: response.status, rawBody: await response.text() };
     } finally {
       clearTimeout(timeoutHandle);
     }
   };
 
   try {
-    const response = await pRetry(fetchWithTimeout, { retries: 1 });
-    const rawBody = await response.text();
+    const { status, rawBody } = await pRetry(fetchWithTimeout, { retries: 1 });
 
     // We need to handle non-200 responses gracefully here to support airgapped environments where
     // Kibana doesn't have internet access to query this API
-    if (response.status >= 400) {
-      logger.debug(`Status code ${response.status} received from versions API: ${rawBody}`);
+    if (status >= 400) {
+      logger.debug(`Status code ${status} received from versions API: ${rawBody}`);
       return [];
     }
 

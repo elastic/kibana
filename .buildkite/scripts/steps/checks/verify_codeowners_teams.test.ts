@@ -7,22 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('@kbn/code-owners', () => ({
-  getTeams: jest.fn(),
-  getCodeOwnersEntries: jest.fn(),
+const mockGetTeams = jest.fn();
+const mockGetCodeOwnersEntries = jest.fn();
+
+jest.mock('../../../pipeline-utils/load_kibana_module.ts', () => ({
+  loadKibanaModule: jest.fn(() => ({
+    getTeams: mockGetTeams,
+    getCodeOwnersEntries: mockGetCodeOwnersEntries,
+  })),
 }));
 
 import type { CodeOwnersEntry, Team } from '@kbn/code-owners';
-import { getCodeOwnersEntries, getTeams } from '@kbn/code-owners';
 import {
   findConnectorSpecsOwnershipIssues,
   findUnrecognizedTeams,
   getCodeownersTeams,
   getRegistryGithubTeams,
-} from './verify_codeowners_teams';
-
-const mockGetTeams = jest.mocked(getTeams);
-const mockGetCodeOwnersEntries = jest.mocked(getCodeOwnersEntries);
+} from './verify_codeowners_teams.ts';
 
 const team = (id: string, githubTeam?: string): Team =>
   ({ id, name: id, github: { team: githubTeam } } as Team);

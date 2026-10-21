@@ -8,6 +8,13 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+import { PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
+import {
+  DISCOVER_TABS_LOCAL_STORAGE_KEY,
+  METRICS_TEST_INDEX_NAME,
+  RECENTLY_EXPLORED_METRICS_STORAGE_KEY_PREFIX,
+} from '../constants';
 import type { PaginationLocators } from './pagination';
 import { createGridPagination } from './pagination';
 import type { MetricsFlyout } from './flyout';
@@ -42,6 +49,11 @@ export class MetricsExperiencePage {
   public readonly gridSettings: GridSettings;
   public readonly fullscreenButton: Locator;
   public readonly chromeHeader: Locator;
+  /**
+   * The app scroll container carries the inline offset a push flyout applies for as long as it is
+   * open. See `grid_global_app_style` for the rule this resolves against.
+   */
+  public readonly appScrollContainer: Locator;
 
   private readonly page: ScoutPage;
 
@@ -66,6 +78,7 @@ export class MetricsExperiencePage {
     this.gridSettings = createGridSettings(page);
     this.fullscreenButton = page.testSubj.locator('metricsExperienceToolbarFullScreen');
     this.chromeHeader = page.testSubj.locator('kbnChromeLayoutHeader');
+    this.appScrollContainer = page.locator(`#${APP_MAIN_SCROLL_CONTAINER_ID}`);
   }
 
   public getCardByIndex(index: number): Locator {
@@ -195,5 +208,115 @@ export class MetricsExperiencePage {
    */
   public getCardTitle(index: number): Locator {
     return this.getCardByIndex(index).locator('[data-test-subj="embeddablePanelTitle"]');
+  }
+
+  /**
+   * Returns the highlighted title segments of the card at `index`
+   */
+  public getCardTitleHighlights(index: number): Locator {
+    return this.getCardTitle(index).locator('mark');
+  }
+
+  /**
+   * Returns the highlighted title segment containing `text`
+   */
+  public getCardTitleHighlight(index: number, text: string): Locator {
+    return this.getCardTitleHighlights(index).filter({ hasText: text });
+  }
+
+  /**
+   * Returns the decoded `_p` (profile state) segment of a Discover URL, or an
+   * empty string when the URL carries none. Standalone Discover keeps its app
+   * state in the URL fragment (`useHashQuery`), so `_p` is read out of the
+   * hash's query string rather than the top-level search params.
+   */
+  public getProfileState(url: string): string {
+    const { hash } = new URL(url);
+    const queryStart = hash.indexOf('?');
+    if (queryStart === -1) {
+      return '';
+    }
+    return new URLSearchParams(hash.slice(queryStart + 1)).get(PROFILE_STATE_URL_KEY) ?? '';
+  }
+
+  /**
+   * Reads a metrics profile-state field persisted in local tab storage, or `undefined` when no
+   * open tab carries one (defaults are stripped rather than written). Tab state is written on a
+   * 300ms trailing throttle, so poll this before reloading or navigating.
+   */
+  public getPersistedMetricsStateField(
+    field:
+      | 'sortDirection'
+      | 'sortField'
+      | 'counterAggregation'
+      | 'gaugeAggregation'
+      | 'histogramPercentile'
+  ): Promise<string | undefined> {
+    return this.page.evaluate(
+      ([storageKey, fieldName]) => {
+        const raw = window.localStorage.getItem(storageKey);
+        if (!raw) return undefined;
+        const { openTabs } = JSON.parse(raw) as {
+          openTabs?: Array<{
+            profileState?: { metricsState?: Record<string, string> };
+          }>;
+        };
+        return openTabs?.find((tab) => tab.profileState?.metricsState?.[fieldName] != null)
+          ?.profileState?.metricsState?.[fieldName];
+      },
+      [DISCOVER_TABS_LOCAL_STORAGE_KEY, field] as const
+    );
+  }
+
+  /**
+   * Returns the key the "Recently explored" sort records for `metricName`. Mirrors
+   * `getMetricUniqueKey` in `@kbn/unified-chart-section-viewer`.
+   */
+  public getRecentlyExploredMetricKey(
+    metricName: string,
+    indexName: string = METRICS_TEST_INDEX_NAME
+  ): string {
+    return `${indexName}::${metricName}`;
+  }
+
+  /**
+   * Reads this browser's "Recently explored" metric keys, most recent first. Requires the page to
+   * be on a Kibana app route (see `getRecentlyExploredStorageKey`).
+   */
+  public getRecentlyExploredMetrics(): Promise<string[]> {
+    const storageKey = this.getRecentlyExploredStorageKey();
+    return this.page.evaluate((key) => {
+      const raw = window.localStorage.getItem(key);
+      return raw ? (JSON.parse(raw) as string[]) : [];
+    }, storageKey);
+  }
+
+  /**
+   * Replaces this browser's "Recently explored" metric keys. The grid reads them when it mounts,
+   * so reload the page afterwards. Requires the page to be on a Kibana app route (see
+   * `getRecentlyExploredStorageKey`).
+   */
+  public async setRecentlyExploredMetrics(metricKeys: string[]): Promise<void> {
+    const storageKey = this.getRecentlyExploredStorageKey();
+    await this.page.evaluate(
+      ([key, keys]) => window.localStorage.setItem(key, JSON.stringify(keys)),
+      [storageKey, metricKeys] as const
+    );
+  }
+
+  /**
+   * Resolves the "Recently explored" storage key the way the Discover plugin does, from the
+   * space-aware base path: on an app route that is everything in the path before `/app/`.
+   */
+  private getRecentlyExploredStorageKey(): string {
+    const { pathname } = new URL(this.page.url());
+    const appPathIndex = pathname.indexOf('/app/');
+    if (appPathIndex === -1) {
+      throw new Error(`Expected a Kibana app URL to resolve the base path, got ${pathname}`);
+    }
+    const basePath = pathname.slice(0, appPathIndex);
+    return `${RECENTLY_EXPLORED_METRICS_STORAGE_KEY_PREFIX}-${Buffer.from(basePath).toString(
+      'base64'
+    )}`;
   }
 }

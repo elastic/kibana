@@ -77,7 +77,8 @@ export const indexHostsAndAlerts = usageTracker.track(
     numResponseActions?: number,
     alertIds?: string[],
     isServerless: boolean = false,
-    logger_?: ToolingLog
+    logger_?: ToolingLog,
+    responseState?: 'success'
   ): Promise<IndexedHostsAndAlertsResponse> => {
     const random = seedrandom(seed);
     const logger = logger_ ?? createToolingLogger();
@@ -103,81 +104,92 @@ export const indexHostsAndAlerts = usageTracker.track(
 
     const shouldWaitForEndpointMetadataDocs = fleet;
 
-    // Stop any running metadata transforms before (re)installing/upgrading the Endpoint package.
-    // An upgrade deletes and recreates the transform configs, which kills a still-running
-    // prior-version transform mid-reload and leaves it in an unrecoverable failed state — that
-    // dead transform then never populates the united metadata index and the test's wait times out.
-    // On a first install there are no transforms yet (allow_no_match makes this a no-op).
-    if (shouldWaitForEndpointMetadataDocs) {
-      await stopMetadataTransforms(client, epmEndpointPackage.version);
-    }
-
-    // Ensure fleet is setup and endpoint package installed
-    await setupFleetForEndpoint(kbnClient, logger);
-
-    // If `fleet` integration is true, then ensure a (fake) fleet-server is connected
-    if (fleet) {
-      await enableFleetServerIfNecessary(client, isServerless, kbnClient, logger);
-    }
-
-    // Keep a map of host applied policy ids (fake) to real ingest package configs (policy record)
-    const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
-
-    if (shouldWaitForEndpointMetadataDocs) {
-      await waitForMetadataTransformsReady(client, epmEndpointPackage.version);
-      await stopMetadataTransforms(client, epmEndpointPackage.version);
-    }
-
-    for (let i = 0; i < numHosts; i++) {
-      const generator = new DocGenerator(random);
-      const indexedHosts = await indexEndpointHostDocs({
-        numDocs,
-        client,
-        kbnClient,
-        realPolicies,
-        epmEndpointPackage,
-        metadataIndex,
-        policyResponseIndex,
-        enrollFleet: fleet,
-        generator,
-        withResponseActions,
-        numResponseActions,
-        alertIds,
-      });
-
-      mergeAndAppendArrays(response, indexedHosts);
-
-      if (alertsPerHost > 0) {
-        await indexAlerts({
-          client,
-          eventIndex,
-          alertIndex,
-          generator,
-          numAlerts: alertsPerHost,
-          options,
-        });
+    try {
+      // Stop any running metadata transforms before (re)installing/upgrading the Endpoint package.
+      // An upgrade deletes and recreates the transform configs, which kills a still-running
+      // prior-version transform mid-reload and leaves it in an unrecoverable failed state — that
+      // dead transform then never populates the united metadata index and the test's wait times out.
+      // On a first install there are no transforms yet (allow_no_match makes this a no-op).
+      if (shouldWaitForEndpointMetadataDocs) {
+        await stopMetadataTransforms(client, epmEndpointPackage.version);
       }
 
-      if (options.deviceEvents && options.deviceEvents > 0) {
-        await indexDeviceEvents({
-          client,
-          deviceIndex,
-          generator,
-          numDeviceEvents: options.deviceEvents,
-          options,
-        });
+      // Ensure fleet is setup and endpoint package installed
+      await setupFleetForEndpoint(kbnClient, logger);
+
+      // If `fleet` integration is true, then ensure a (fake) fleet-server is connected
+      if (fleet) {
+        await enableFleetServerIfNecessary(client, isServerless, kbnClient, logger);
       }
-    }
 
-    if (shouldWaitForEndpointMetadataDocs) {
-      await startMetadataTransforms(
-        client,
-        response.agents.map((agent) => agent.agent?.id ?? ''),
-        epmEndpointPackage.version
-      );
-    }
+      // Keep a map of host applied policy ids (fake) to real ingest package configs (policy record)
+      const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
 
-    return response;
+      if (shouldWaitForEndpointMetadataDocs) {
+        await waitForMetadataTransformsReady(client, epmEndpointPackage.version);
+        await stopMetadataTransforms(client, epmEndpointPackage.version);
+      }
+
+      for (let i = 0; i < numHosts; i++) {
+        const generator = new DocGenerator(random);
+        const indexedHosts = await indexEndpointHostDocs({
+          numDocs,
+          client,
+          kbnClient,
+          realPolicies,
+          epmEndpointPackage,
+          metadataIndex,
+          policyResponseIndex,
+          enrollFleet: fleet,
+          generator,
+          withResponseActions,
+          numResponseActions,
+          alertIds,
+          responseState,
+        });
+
+        mergeAndAppendArrays(response, indexedHosts);
+
+        if (alertsPerHost > 0) {
+          await indexAlerts({
+            client,
+            eventIndex,
+            alertIndex,
+            generator,
+            numAlerts: alertsPerHost,
+            options,
+          });
+        }
+
+        if (options.deviceEvents && options.deviceEvents > 0) {
+          await indexDeviceEvents({
+            client,
+            deviceIndex,
+            generator,
+            numDeviceEvents: options.deviceEvents,
+            options,
+          });
+        }
+      }
+
+      if (shouldWaitForEndpointMetadataDocs) {
+        await startMetadataTransforms(
+          client,
+          response.agents.map((agent) => agent.agent?.id ?? ''),
+          epmEndpointPackage.version
+        );
+      }
+
+      return response;
+    } catch (error) {
+      // Hosts and policies are indexed before metadata transforms start. A throw
+      // after that point never returns `response`, so roll those documents back
+      // here. Callers only receive this value on success.
+      if (response.hosts.length > 0 || response.agents.length > 0) {
+        await deleteIndexedHostsAndAlerts(client, kbnClient, response).catch(() => undefined);
+      }
+      throw error;
+    }
   }
 );
 

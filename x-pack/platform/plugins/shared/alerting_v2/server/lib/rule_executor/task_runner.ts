@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { inject, injectable } from 'inversify';
 
-import type { HaltReason, RuleExecutorTaskParams } from './types';
+import type { HaltReason } from './types';
 import type {
   RuleExecutionPipelineContract,
   RuleExecutionPipelineInput,
@@ -20,8 +21,12 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
+import { buildTaskRunEventFields } from './execution_outcome';
 
-type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal' | 'executionUuid'>;
+type TaskRunParams = Pick<
+  RunContext,
+  'taskInstance' | 'signal' | 'executionUuid' | 'setCustomTaskRunEventFields'
+>;
 
 @injectable()
 export class RuleExecutorTaskRunner {
@@ -30,12 +35,25 @@ export class RuleExecutorTaskRunner {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  public async run({ taskInstance, signal, executionUuid }: TaskRunParams): Promise<RunResult> {
+  public async run({
+    taskInstance,
+    signal,
+    executionUuid,
+    setCustomTaskRunEventFields,
+  }: TaskRunParams): Promise<RunResult> {
     const input = this.createRuleExecutionInput(taskInstance, signal, executionUuid);
 
-    const result = await this.pipeline.execute(input);
+    let result: RuleExecutionPipelineResult;
+    try {
+      result = await this.pipeline.execute(input);
+    } catch (error) {
+      setCustomTaskRunEventFields(buildTaskRunEventFields({ input, error }));
+      throw error;
+    }
 
-    return this.buildRunResult(result, taskInstance);
+    setCustomTaskRunEventFields(buildTaskRunEventFields({ input, result }));
+
+    return this.buildRunResult(result, input.logger, taskInstance);
   }
 
   /**
@@ -46,15 +64,23 @@ export class RuleExecutorTaskRunner {
     signal: AbortSignal,
     executionUuid: string
   ): RuleExecutionPipelineInput {
-    const params = taskInstance.params as RuleExecutorTaskParams;
+    const params = taskInstance.params as { ruleId: string; spaceId: string };
+    const spaceId = brandSpaceId(params.spaceId);
     const scheduledAt = taskInstance.scheduledAt;
+    const logger = this.logger.forSubsystem('ruleExecutor').withLabels({
+      rule_id: params.ruleId,
+      space_id: spaceId,
+      task_id: taskInstance.id,
+      execution_id: executionUuid,
+    });
 
     return {
       ruleId: params.ruleId,
-      spaceId: params.spaceId,
+      spaceId,
       scheduledAt: this.getScheduledAtISOString(scheduledAt, taskInstance.startedAt),
       abortSignal: signal,
       executionUuid,
+      logger,
     };
   }
 
@@ -75,6 +101,7 @@ export class RuleExecutorTaskRunner {
    */
   private buildRunResult(
     result: RuleExecutionPipelineResult,
+    logger: LoggerServiceContract,
     taskInstance: TaskRunParams['taskInstance']
   ): RunResult {
     if (result.completed) {
@@ -82,10 +109,7 @@ export class RuleExecutorTaskRunner {
     }
 
     if (result.haltReason === 'rule_deleted') {
-      const params = taskInstance.params as RuleExecutorTaskParams;
-      this.logger.debug({
-        message: `Rule "${params.ruleId}" in the "${params.spaceId}" space no longer exists. Its corresponding task will be removed by Task Manager.`,
-      });
+      logger.debug({ message: 'Rule no longer exists; task will be removed' });
       throwUnrecoverableError(new Error('Rule no longer exists'));
     }
 

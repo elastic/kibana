@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/calculate-width-from-char-count'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-visualizations'
+  defaultOwner: '@elastic/kibana-dashboards'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/calculate-width-from-char-count'
   description: Moon project for @kbn/calculate-width-from-char-count
   channel: ''
-  owner: '@elastic/kibana-visualizations'
+  owner: '@elastic/kibana-dashboards'
   sourceRoot: src/platform/packages/shared/kbn-calculate-width-from-char-count
 dependsOn: []
 tags:

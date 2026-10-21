@@ -45,6 +45,8 @@ export const generateConfig = async ({
         // always install Endpoint package by default when Fleet sets up
         `--xpack.fleet.packages.0.name=endpoint`,
         `--xpack.fleet.packages.0.version=latest`,
+        // Mock prebuilt-rules setup uploads the bundled security_detection_engine package name.
+        `--xpack.fleet.internal.skipUploadPackageValidation=true`,
         // set any experimental feature flags for testing
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([])}`,
 

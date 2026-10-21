@@ -29,17 +29,21 @@ export const GetScheduledQueryResultsResponse = lazySchema(() =>
         /**
          * The paginated list of query result rows.
          */
-        edges: z.array(z.object({})).optional(),
+        edges: z
+          .array(z.object({}))
+          .optional()
+          .describe('The paginated list of query result rows.'),
         /**
          * The total number of result rows.
          */
-        total: z.number().int().optional(),
+        total: z.number().int().optional().describe('The total number of result rows.'),
         /**
          * Debug/inspection data for the search query.
          */
-        inspect: z.object({}).optional(),
+        inspect: z.object({}).optional().describe('Debug/inspection data for the search query.'),
       })
-      .optional(),
+      .optional()
+      .describe('The query results data wrapper.'),
   })
 );
 export type GetScheduledQueryResultsResponse = z.infer<typeof GetScheduledQueryResultsResponse>;

@@ -42,4 +42,24 @@ describe('createCaseUserActionBuilder ', () => {
 
     expect(screen.getByText('created case "a title"')).toBeInTheDocument();
   });
+
+  it('appends the action source to the create event', () => {
+    const userAction = getUserAction('create_case', UserActionActions.create, {
+      source: { type: 'agent', id: 'agent-1', name: 'Elastic AI Agent' },
+    });
+    // @ts-ignore no need to pass all the arguments
+    const builder = createCaseUserActionBuilder({
+      ...builderArgs,
+      userAction,
+    });
+
+    render(
+      <TestProviders>
+        <EuiCommentList comments={builder.build()} />
+      </TestProviders>
+    );
+
+    expect(screen.getByText(/created case "a title"/)).toBeInTheDocument();
+    expect(screen.getByTestId('user-action-via-source')).toHaveTextContent('via Elastic AI Agent');
+  });
 });

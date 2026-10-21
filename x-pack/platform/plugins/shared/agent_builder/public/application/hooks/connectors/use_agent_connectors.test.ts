@@ -70,7 +70,7 @@ describe('useAgentConnectors', () => {
   };
 
   describe('unassign', () => {
-    it('when connector_ids is undefined, sets connector_ids to [all ids] minus the removed one', async () => {
+    it('when connector_ids is undefined (no connectors), unassign is a no-op (empty stays empty)', async () => {
       const { result } = setup(undefined);
 
       await act(async () => {
@@ -78,7 +78,7 @@ describe('useAgentConnectors', () => {
       });
 
       expect(update).toHaveBeenCalledWith('agent-1', {
-        configuration: { connector_ids: ['c2', 'c3'] },
+        configuration: { connector_ids: [] },
       });
     });
 
@@ -120,9 +120,9 @@ describe('useAgentConnectors', () => {
   });
 
   describe('assignedConnectors', () => {
-    it('returns all connectors when connector_ids is undefined', () => {
+    it('returns empty array when connector_ids is undefined (no connectors assigned)', () => {
       const { result } = setup(undefined);
-      expect(result.current.assignedConnectors).toEqual(ALL_CONNECTORS);
+      expect(result.current.assignedConnectors).toEqual([]);
     });
 
     it('returns only assigned connectors when connector_ids is an explicit list', () => {

@@ -35,11 +35,11 @@ describe('FlashMessages', () => {
     const callouts = screen.getAllByTestId('flashMessageCallout');
     expect(callouts).toHaveLength(5);
     // success type maps to iconType='check'
-    expect(callouts[0].querySelector('[data-euiicon-type="check"]')).not.toBeNull();
+    expect(callouts[0].querySelector('[data-euiicon-type="checkCircleFill"]')).not.toBeNull();
     expect(screen.getByTestId('error')).toBeInTheDocument();
     // info type maps to iconType='info'
     expect(
-      callouts[callouts.length - 1].querySelector('[data-euiicon-type="info"]')
+      callouts[callouts.length - 1].querySelector('[data-euiicon-type="infoFill"]')
     ).not.toBeNull();
   });
 

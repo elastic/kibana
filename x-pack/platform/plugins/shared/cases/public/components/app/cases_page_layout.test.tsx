@@ -9,113 +9,31 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { TestProviders } from '../../common/mock';
-import { KibanaServices } from '../../common/lib/kibana';
 import { CasesPageLayout, getCasesPageLayoutVariant } from './cases_page_layout';
 
-const allRedesignFlags = {
-  list: true,
-  details: true,
-  settings: true,
-};
-
 describe('CasesPageLayout', () => {
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
   it.each([
-    ['/cases', 'list', 'compact'],
-    ['/cases/create', 'list', 'compact'],
-    ['/cases/example-id', 'details', 'compact'],
-    ['/cases/example-id/comment-id', 'details', 'compact'],
-    ['/cases/configure', 'settings', 'compact'],
-    ['/cases/configure/templates', 'settings', 'compact'],
-    ['/cases/configure/field-library', 'settings', 'compact'],
-    ['/', 'list', 'compact'],
-  ] as const)(
-    'maps %s to %s when casesRedesign.%s is enabled',
-    (pathname, enabledFlag, expectedVariant) => {
-      const basePath = pathname.startsWith('/cases') ? '/cases' : '/';
-
-      expect(
-        getCasesPageLayoutVariant({
-          pathname,
-          basePath,
-          casesRedesign: {
-            ...allRedesignFlags,
-            [enabledFlag]: false,
-          },
-        })
-      ).toBe('legacy');
-
-      expect(
-        getCasesPageLayoutVariant({
-          pathname,
-          basePath,
-          casesRedesign: allRedesignFlags,
-        })
-      ).toBe(expectedVariant);
-    }
-  );
+    ['/cases', '/cases'],
+    ['/cases/create', '/cases'],
+    ['/cases/example-id', '/cases'],
+    ['/cases/example-id/comment-id', '/cases'],
+    ['/cases/configure', '/cases'],
+    ['/cases/configure/templates', '/cases'],
+    ['/cases/configure/field-library', '/cases'],
+    ['/', '/'],
+  ] as const)('maps %s to compact', (pathname, basePath) => {
+    expect(getCasesPageLayoutVariant({ pathname, basePath })).toBe('compact');
+  });
 
   it.each([
     ['/cases/configure/templates/create', '/cases'],
     ['/cases/configure/templates/example-id/edit', '/cases'],
     ['/configure/templates/create', '/'],
-  ] as const)(
-    'maps template editor path %s to fullHeight regardless of casesRedesign.settings',
-    (pathname, basePath) => {
-      expect(
-        getCasesPageLayoutVariant({
-          pathname,
-          basePath,
-          casesRedesign: { ...allRedesignFlags, settings: false },
-        })
-      ).toBe('fullHeight');
-
-      expect(
-        getCasesPageLayoutVariant({
-          pathname,
-          basePath,
-          casesRedesign: allRedesignFlags,
-        })
-      ).toBe('fullHeight');
-    }
-  );
-
-  it('applies legacy padding when the route redesign is disabled', () => {
-    jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
-      casesRedesign: {
-        list: false,
-        details: true,
-        settings: true,
-      },
-    } as ReturnType<typeof KibanaServices.getConfig>);
-
-    render(
-      <TestProviders>
-        <MemoryRouter initialEntries={['/cases']}>
-          <CasesPageLayout basePath="/cases">{'Cases content'}</CasesPageLayout>
-        </MemoryRouter>
-      </TestProviders>
-    );
-
-    const pageLayout = screen.getByTestId('casesPageLayout');
-    expect(pageLayout).toHaveAttribute('data-layout-variant', 'legacy');
-    expect(pageLayout).toHaveStyle({
-      padding: '24px',
-    });
+  ] as const)('maps template editor path %s to fullHeight', (pathname, basePath) => {
+    expect(getCasesPageLayoutVariant({ pathname, basePath })).toBe('fullHeight');
   });
 
   it('does not apply outer padding for compact routes', () => {
-    jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
-      casesRedesign: {
-        list: true,
-        details: false,
-        settings: false,
-      },
-    } as ReturnType<typeof KibanaServices.getConfig>);
-
     render(
       <TestProviders>
         <MemoryRouter initialEntries={['/cases']}>
@@ -129,5 +47,19 @@ describe('CasesPageLayout', () => {
     expect(pageLayout).not.toHaveStyle({
       padding: '24px',
     });
+  });
+
+  it('grows the template editor to full height', () => {
+    render(
+      <TestProviders>
+        <MemoryRouter initialEntries={['/cases/configure/templates/create']}>
+          <CasesPageLayout basePath="/cases">{'Cases content'}</CasesPageLayout>
+        </MemoryRouter>
+      </TestProviders>
+    );
+
+    const pageLayout = screen.getByTestId('casesPageLayout');
+    expect(pageLayout).toHaveAttribute('data-layout-variant', 'fullHeight');
+    expect(pageLayout).toHaveStyle({ flex: 1 });
   });
 });

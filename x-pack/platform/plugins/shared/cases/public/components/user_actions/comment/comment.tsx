@@ -45,6 +45,7 @@ const getDeleteLabelTitle = ({
     registry: unifiedAttachmentTypeRegistry,
     getId: () => resolveUnifiedAttachmentType(comment, owner),
     getAttachmentProps: () => ({
+      savedObjectId: userAction.commentId ?? userAction.id,
       attachmentId: getReferenceAttachmentId(comment),
       metadata: 'metadata' in comment ? comment.metadata : undefined,
     }),
@@ -79,7 +80,7 @@ const getDeleteLabelFromRegistry = ({
   };
 
   const attachmentType = registry.get(attachmentTypeId);
-  const attachmentLabel = attachmentType.getAttachmentRemovalObject?.(props).event ?? null;
+  const attachmentLabel = attachmentType.getRemovalActivity?.(props).event ?? null;
 
   return attachmentLabel != null ? attachmentLabel : registeredAttachmentCommonLabel;
 };
@@ -119,7 +120,9 @@ const getCreateCommentUserAction = ({
   userProfiles,
   caseData,
   unifiedAttachmentTypeRegistry,
+  permissions,
   attachment,
+  isDeleted,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
   loadingCommentIds,
@@ -128,13 +131,14 @@ const getCreateCommentUserAction = ({
 }: {
   userAction: SnakeToCamelCase<CommentUserAction>;
   attachment: AttachmentUIV2;
+  isDeleted: boolean;
 } & Omit<
   UserActionBuilderArgs,
   'comments' | 'index' | 'handleOutlineComment' | 'currentUserProfile'
 >): EuiCommentProps[] => {
-  // Migrated external-reference / `actions` attachments are projected to their unified
-  // shape by the cases server before reaching the client (UI reads always use
-  // `mode: 'unified'`), so legacy-shaped attachments have no client-side renderer.
+  // External-reference / `actions` attachments are projected to their
+  // unified shape by the cases server before reaching the client, so
+  // legacy-shaped attachments have no client-side renderer.
   if (isLegacyAttachmentRequest(attachment)) {
     return [];
   }
@@ -152,8 +156,10 @@ const getCreateCommentUserAction = ({
       userProfiles,
       attachment,
       unifiedAttachmentTypeRegistry,
+      permissions,
       caseData,
       isLoading: loadingCommentIds.includes(attachment.id),
+      isDeleted,
       handleDeleteComment,
       manageMarkdownEditIds,
       selectedOutlineCommentId,
@@ -168,12 +174,29 @@ const getCreateCommentUserAction = ({
   return [];
 };
 
+/** Rebuilds a deleted attachment from its create user action payload. */
+const buildAttachmentFromPayload = (
+  userAction: SnakeToCamelCase<CommentUserAction>
+): AttachmentUIV2 =>
+  ({
+    ...userAction.payload.comment,
+    id: userAction.commentId ?? userAction.id,
+    createdAt: userAction.createdAt,
+    createdBy: userAction.createdBy,
+    pushedAt: null,
+    pushedBy: null,
+    updatedAt: null,
+    updatedBy: null,
+    version: '',
+  } as AttachmentUIV2);
+
 export const createCommentUserActionBuilder: UserActionBuilder = ({
   appId,
   caseData,
   casesConfiguration,
   userProfiles,
   unifiedAttachmentTypeRegistry,
+  permissions,
   userAction,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
@@ -197,20 +220,21 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
       });
     }
 
-    const attachment = attachments.find((c) => c.id === attachmentUserAction.commentId);
-
-    if (attachment == null) {
-      return [];
-    }
     if (attachmentUserAction.action === UserActionActions.create) {
-      const commentAction = getCreateCommentUserAction({
+      const liveAttachment = attachments.find((c) => c.id === attachmentUserAction.commentId);
+      const isDeleted = liveAttachment == null;
+      const attachment = liveAttachment ?? buildAttachmentFromPayload(attachmentUserAction);
+
+      return getCreateCommentUserAction({
         appId,
         caseData,
         casesConfiguration,
         userProfiles,
         userAction: attachmentUserAction,
         unifiedAttachmentTypeRegistry,
+        permissions,
         attachment,
+        isDeleted,
         manageMarkdownEditIds,
         selectedOutlineCommentId,
         loadingCommentIds,
@@ -219,8 +243,6 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         caseConnectors,
         attachments,
       });
-
-      return commentAction;
     }
 
     const label = getUpdateLabelTitle();

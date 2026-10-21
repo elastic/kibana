@@ -16,7 +16,6 @@ import { StreamManagementDefaultRedirect } from '../components/stream_management
 import { StreamsRootRedirect } from '../components/streams_root_redirect';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
-import { SignificantEventsAppRedirect } from '../components/significant_events_app_redirect';
 import { StreamsLayout } from '../components/streams_layout';
 import { DEFAULT_STREAMS_LAYOUT_TAB } from '../components/streams_layout/tabs';
 
@@ -72,38 +71,6 @@ const streamsAppRoutes = {
         params: t.partial({
           query: timeRangeQueryParams,
         }),
-      },
-      '/_discovery': {
-        element: <Outlet />,
-        children: {
-          '/_discovery': {
-            element: <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />,
-          },
-          '/_discovery/{tab}': {
-            element: <SignificantEventsAppRedirect />,
-            params: t.intersection([
-              t.type({
-                path: t.type({
-                  tab: t.string,
-                }),
-              }),
-              t.partial({
-                query: t.partial({
-                  rangeFrom: t.string,
-                  rangeTo: t.string,
-                  search: t.string,
-                  status: t.string,
-                  type: t.union([t.string, t.array(t.string)]),
-                  subtype: t.union([t.string, t.array(t.string)]),
-                  stream: t.union([t.string, t.array(t.string)]),
-                  showComputed: t.string,
-                  selectedItem: t.string,
-                  selectedEvent: t.string,
-                }),
-              }),
-            ]),
-          },
-        },
       },
       /**
        * Declared before `/{key}` so the literal path wins over a stream name.

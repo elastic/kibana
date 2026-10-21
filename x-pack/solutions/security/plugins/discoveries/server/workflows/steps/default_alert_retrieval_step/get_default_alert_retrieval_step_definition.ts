@@ -11,6 +11,7 @@ import type { Replacements } from '@kbn/elastic-assistant-common';
 import { getAnonymizedAlerts } from '@kbn/discoveries/impl/attack_discovery/graphs';
 import { DefaultAlertRetrievalStepCommonDefinition } from '../../../../common/step_types/default_alert_retrieval_step';
 import type { DiscoveriesPluginStartDeps } from '../../../types';
+import { asNonEmpty } from '../../../lib/non_empty_string';
 import { resolveConnectorDetails } from '../../helpers/resolve_connector_details';
 import { fetchAnonymizationFields } from './helpers/fetch_anonymization_fields';
 import {
@@ -113,13 +114,23 @@ export const getDefaultAlertRetrievalStepDefinition = ({
           page_content: alertString,
         }));
 
-        const { connectorName } = await resolveConnectorDetails({
-          actionsClient,
-          connectorId,
-          inference: pluginsStart.inference,
-          logger: _logger,
-          request,
-        });
+        // Retrieval needs no LLM connector; it is used only to label the
+        // output with the optional `connector_name`. `resolveConnectorDetails`
+        // throws when it cannot resolve, so without this guard a caller that
+        // has no connector id yet fails here, after paying for the query.
+        const resolvedConnectorId = asNonEmpty(connectorId);
+        const connectorName =
+          resolvedConnectorId != null
+            ? (
+                await resolveConnectorDetails({
+                  actionsClient,
+                  connectorId: resolvedConnectorId,
+                  inference: pluginsStart.inference,
+                  logger: _logger,
+                  request,
+                })
+              ).connectorName
+            : undefined;
 
         return {
           output: {

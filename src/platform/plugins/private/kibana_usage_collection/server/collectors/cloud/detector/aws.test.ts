@@ -41,9 +41,9 @@ describe('AWS', () => {
       });
 
       const response = await awsService['_checkIfService']();
-      expect(readFile).toBeCalledTimes(0);
-      expect(fetchMock).toBeCalledTimes(1);
-      expect(fetchMock).toBeCalledWith(
+      expect(readFile).toHaveBeenCalledTimes(0);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(fetchMock).toHaveBeenCalledWith(
         'http://169.254.169.254/2016-09-02/dynamic/instance-identity/document',
         {
           method: 'GET',
@@ -118,8 +118,8 @@ describe('AWS', () => {
       mockIsWindows.mockReturnValue(true);
 
       const response = await awsService['_checkIfService']();
-      expect(mockIsWindows).toBeCalledTimes(1);
-      expect(readFile).toBeCalledTimes(0);
+      expect(mockIsWindows).toHaveBeenCalledTimes(1);
+      expect(readFile).toHaveBeenCalledTimes(0);
 
       expect(response.getName()).toEqual('aws');
       expect(response.isConfirmed()).toBe(false);
@@ -197,7 +197,7 @@ describe('AWS', () => {
           return 'eC2abcdef-ghijk\n';
         });
 
-        expect(readFile).toBeCalledTimes(2);
+        expect(readFile).toHaveBeenCalledTimes(2);
         expect(response.isConfirmed()).toEqual(true);
         expect(response.toJSON()).toMatchInlineSnapshot(`
           Object {
@@ -216,7 +216,7 @@ describe('AWS', () => {
         readFile.mockResolvedValueOnce('ec2Uuid');
 
         const response = await awsService['tryToDetectUuid']();
-        expect(readFile).toBeCalledTimes(2);
+        expect(readFile).toHaveBeenCalledTimes(2);
 
         expect(response.isConfirmed()).toEqual(true);
         expect(response.toJSON()).toMatchInlineSnapshot(`

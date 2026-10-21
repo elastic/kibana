@@ -10,9 +10,9 @@ import type { ElasticsearchClient, IClusterClient, KibanaRequest } from '@kbn/co
 export const getReadEsClient = (
   clusterClient: IClusterClient,
   request: KibanaRequest,
-  cpsEnabled: boolean
+  cpsActive: boolean
 ): ElasticsearchClient => {
-  if (cpsEnabled) {
+  if (cpsActive) {
     return clusterClient.asScoped(request, { projectRouting: 'space' }).asCurrentUser;
   }
 

@@ -6,13 +6,23 @@
  */
 
 import { SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS, buildSupervisesConfigs } from './configs';
-import { buildActorDiscoveryQuery } from '../engine/build_actor_discovery_query';
+import {
+  buildActorDiscoveryQuery,
+  getPageActorValues,
+} from '../engine/build_actor_discovery_query';
 import { buildTargetsPerActorQuery } from '../engine/build_targets_per_actor_query';
 import { COMPOSITE_PAGE_SIZE } from '../engine/constants';
 import type { OverrideRelationshipIntegrationConfig } from '../engine/types';
 
 const overrideConfigs = SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS.filter(
   (c): c is OverrideRelationshipIntegrationConfig => c.kind === 'override'
+);
+
+// The IDP configs read raw_identifiers off the entity index. The workday config
+// is log-inverted and shares none of that query shape, so the raw_identifiers
+// assertions below are scoped to these two.
+const rawIdentifiersConfigs = SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS.filter(
+  (c) => c.id !== 'workday'
 );
 
 // id → (entity.source values, namespace suffix) the config is expected to emit.
@@ -25,13 +35,19 @@ const EXPECTED_SOURCE_BY_ID: Record<string, { entitySources: string[]; namespace
     entitySources: ['entityanalytics_entra_id', 'entityanalytics_entra_id.user'],
     namespace: 'entra_id',
   },
+  sailpoint_identity_sc: {
+    entitySources: ['sailpoint_identity_sc', 'sailpoint_identity_sc.identities'],
+    namespace: 'sailpoint_identity_sc',
+  },
 };
 
 describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
-  it('ships exactly the expected IDP integrations (okta + entra_id)', () => {
+  it('ships exactly the expected IDP integrations and workday (okta + entra_id + sailpoint + workday)', () => {
     expect(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS.map((c) => c.id).sort()).toEqual([
       'entityanalytics_entra_id',
       'entityanalytics_okta',
+      'sailpoint_identity_sc',
+      'workday',
     ]);
   });
 
@@ -68,15 +84,15 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     }
   );
 
-  it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+  it.each(rawIdentifiersConfigs)(
     '$id: indexPattern points to the entity index (not a log index)',
     (config) => {
-      expect(config.indexPattern('myns')).toContain('.entities.v2.latest.security_myns');
+      expect(config.indexPattern('myns')).toBe('entities-latest-myns');
       expect(config.indexPattern('default')).not.toContain('myns');
     }
   );
 
-  it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+  it.each(rawIdentifiersConfigs)(
     '$id: override query unions all three raw identifier fields with null-safe CASE guards',
     (config) => {
       const query = buildTargetsPerActorQuery(config, 'default');
@@ -98,7 +114,7 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     }
   );
 
-  it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+  it.each(rawIdentifiersConfigs)(
     '$id: override query MV_EXPANDs rawTargetKey BEFORE CONCAT (CONCAT is null on multi-valued input)',
     (config) => {
       const { namespace } = EXPECTED_SOURCE_BY_ID[config.id];
@@ -111,7 +127,7 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     }
   );
 
-  it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+  it.each(rawIdentifiersConfigs)(
     '$id: override query builds the user EUID with the IDP namespace suffix',
     (config) => {
       const { namespace } = EXPECTED_SOURCE_BY_ID[config.id];
@@ -120,7 +136,7 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     }
   );
 
-  it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+  it.each(rawIdentifiersConfigs)(
     '$id: override query guards against non-EUID and namespace-only target values',
     (config) => {
       const { namespace } = EXPECTED_SOURCE_BY_ID[config.id];
@@ -140,7 +156,7 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     }
   );
 
-  it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+  it.each(rawIdentifiersConfigs)(
     '$id: override query sets actorUserId from entity.id (already EUID-prefixed)',
     (config) => {
       const query = buildTargetsPerActorQuery(config, 'default');
@@ -149,7 +165,9 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
   );
 
   describe('lookback window', () => {
-    it('declares disableLookbackWindow on every config (entity-index source)', () => {
+    it('declares disableLookbackWindow on every config', () => {
+      // IDP configs gate on entity.lifecycle.last_seen; Workday gates on event.ingested.
+      // Neither wants the engine's @timestamp window.
       for (const config of SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS) {
         expect(config.disableLookbackWindow).toBe(true);
       }
@@ -188,7 +206,7 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     // entity.source may be the bare integration name OR the full <integration>.user
     // dataset (depending on whether the integration emits event.module), so both
     // are matched.
-    it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+    it.each(rawIdentifiersConfigs)(
       '$id: Step 1 composite agg filters match any of the entity.source values',
       (config) => {
         const { entitySources } = EXPECTED_SOURCE_BY_ID[config.id];
@@ -198,7 +216,7 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
       }
     );
 
-    it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+    it.each(rawIdentifiersConfigs)(
       '$id: Step 2 ES|QL override filters entity.source IN the configured values',
       (config) => {
         const { entitySources } = EXPECTED_SOURCE_BY_ID[config.id];
@@ -250,10 +268,15 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
   });
 
   describe('golden snapshots', () => {
+    // Only configs with `scopeToPageActorValues` read these; the engine passes them per page.
+    const pageActorValues = ['__manager_email__', '__manager_id__'];
+
     it.each(SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS)(
       '$id: targets-per-actor ES|QL is locked (no watermark)',
       (config) => {
-        expect(buildTargetsPerActorQuery(config, '__namespace__')).toMatchSnapshot();
+        expect(
+          buildTargetsPerActorQuery(config, '__namespace__', pageActorValues)
+        ).toMatchSnapshot();
       }
     );
 
@@ -263,8 +286,224 @@ describe('SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
         const config = buildSupervisesConfigs('2026-06-01T00:00:00.000Z').find(
           (c) => c.id === id
         ) as OverrideRelationshipIntegrationConfig;
-        expect(config.esqlQueryOverride('__namespace__')).toMatchSnapshot();
+        expect(config.esqlQueryOverride('__namespace__', pageActorValues)).toMatchSnapshot();
       }
     );
+  });
+});
+
+describe('workday (log-inverted) supervises config', () => {
+  const getWorkdayConfig = (lastProcessedTimestamp?: string) =>
+    buildSupervisesConfigs(lastProcessedTimestamp).find(
+      (c): c is OverrideRelationshipIntegrationConfig => c.id === 'workday'
+    )!;
+
+  it('is registered alongside the entity-index configs', () => {
+    expect(
+      buildSupervisesConfigs()
+        .map((c) => c.id)
+        .sort()
+    ).toEqual([
+      'entityanalytics_entra_id',
+      'entityanalytics_okta',
+      'sailpoint_identity_sc',
+      'workday',
+    ]);
+  });
+
+  it('reads the workday user log data stream, not the entity index', () => {
+    expect(getWorkdayConfig().indexPattern('default')).toBe('logs-workday.user-default');
+  });
+
+  it('declares a user → user override config with target validation', () => {
+    const config = getWorkdayConfig();
+    expect(config.kind).toBe('override');
+    expect(config.relationshipKey).toBe('supervises');
+    expect(config.targetEntityType).toBe('user');
+    expect(config.validateTargetIds).toBe(true);
+  });
+
+  it('disables the engine lookback because @timestamp is Hire_Date', () => {
+    expect(getWorkdayConfig().disableLookbackWindow).toBe(true);
+  });
+
+  it('buckets managers, not reports, in step 1', () => {
+    expect(getWorkdayConfig().customActor?.fields).toEqual([
+      'workday.user.Manager_Email',
+      'workday.user.Manager_ID',
+    ]);
+  });
+
+  it('never reads the Worker_s_Manager display name', () => {
+    const query = getWorkdayConfig().esqlQueryOverride('default');
+    expect(query).not.toContain('Worker_s_Manager');
+    expect(JSON.stringify(getWorkdayConfig().compositeAggAdditionalFilters)).not.toContain(
+      'Worker_s_Manager'
+    );
+  });
+
+  it('emits the engine actor and relationship columns', () => {
+    const query = getWorkdayConfig().esqlQueryOverride('default');
+    expect(query).toContain('STATS supervises = VALUES(targetEntityId) BY actorUserId');
+  });
+
+  it('does not prepend the engine preamble (the engine adds it)', () => {
+    expect(getWorkdayConfig().esqlQueryOverride('default')).not.toContain('unmapped_fields');
+  });
+
+  it('builds the actor EUID from both manager fields, null-safely', () => {
+    const query = getWorkdayConfig().esqlQueryOverride('default');
+    // MV_APPEND(null, x) returns null, so each side must fall back when the
+    // other is null; an unguarded append drops managers on partial rows.
+    expect(query).toContain('MV_APPEND(workday.user.Manager_Email, workday.user.Manager_ID)');
+    expect(query).toContain('MV_EXPAND managerKey');
+    expect(query).toContain('CONCAT("user:", managerKey, "@workday")');
+  });
+
+  it('guards against namespace-only and malformed actor EUIDs', () => {
+    const query = getWorkdayConfig().esqlQueryOverride('default');
+    expect(query).toContain('actorUserId != "user:@workday"');
+    expect(query).toContain('actorUserId RLIKE ".+:.+@.+"');
+  });
+
+  it('derives the target EUID via the canonical helper, not a hand-built CONCAT', () => {
+    const query = getWorkdayConfig().esqlQueryOverride('default');
+    // The helper emits the full user ranking (email > id > name@domain > name)
+    // plus the entity.namespace evaluation it depends on.
+    expect(query).toContain('targetEntityId =');
+    expect(query).toContain('entity.namespace');
+    expect(query).not.toContain('CONCAT("user:", user.email');
+  });
+
+  it('keeps the full target ranking including the user.domain arm', () => {
+    const query = getWorkdayConfig().esqlQueryOverride('default');
+    // Workday dissects user.domain from user.email, so the domain arm is
+    // unreachable in practice — but it must still be present, because the
+    // helper is the guard against the ranking drifting from user.ts.
+    expect(query).toContain('user_domain_present');
+    expect(query).toContain('user_email_present');
+    expect(query).toContain('user_id_present');
+  });
+
+  it('emits the host-scoped local branch, which Workday rows must not trigger', () => {
+    const query = getWorkdayConfig().esqlQueryOverride('default');
+    // The `local` branch outranks the IDP branch and fires on
+    // (user.name AND host.id), yielding user:<name>@<host.id>@local. Workday
+    // user rows carry no host.id so it never wins, but if the ingest pipeline
+    // ever adds one, every Workday target EUID would silently re-key. This
+    // assertion documents the dependency; the Scout suite proves the outcome.
+    expect(query).toContain('_euid_branch_0_cond');
+    expect(query).toContain('"local"');
+  });
+
+  it('never filters on @timestamp in either step', () => {
+    const config = getWorkdayConfig('2026-09-01T00:00:00.000Z');
+    expect(config.esqlQueryOverride('default')).not.toContain('@timestamp');
+    expect(JSON.stringify(config.compositeAggAdditionalFilters)).not.toContain('@timestamp');
+  });
+
+  describe('actor expansion vs the Step 2 row cap', () => {
+    // `MV_EXPAND managerKey` can turn one composite bucket (Manager_Email,
+    // Manager_ID) into two distinct actorUserId groups. Composite paging is
+    // one-way, so any grouped row the LIMIT discards is never revisited and
+    // those managers' reports are silently never written.
+    const actorFieldCount = 2;
+    // Default `esql.query.result_truncation_max_size`; a higher LIMIT is capped silently.
+    const ESQL_RESULT_CAP = 10_000;
+
+    it('caps Step 2 rows above the Step 1 page size, not at it', () => {
+      const query = getWorkdayConfig().esqlQueryOverride('default');
+      const limit = Number(/\| LIMIT (\d+)/.exec(query)?.[1]);
+
+      expect(limit).toBeGreaterThanOrEqual(COMPOSITE_PAGE_SIZE * actorFieldCount);
+      // Guards the specific regression: reusing COMPOSITE_PAGE_SIZE here would
+      // drop up to half the actors on a saturated page.
+      expect(limit).not.toBe(COMPOSITE_PAGE_SIZE);
+    });
+
+    it('scopes Step 2 to the page actor values, which bounds the rows by the page', () => {
+      // Without the scope, a document matched through one manager field brings
+      // in its other field's value from another page, and rows have no bound.
+      expect(getWorkdayConfig().scopeToPageActorValues).toBe(true);
+    });
+
+    it("fits a saturated page's actor values under both the LIMIT and the ES|QL result cap", () => {
+      // Worst case: every bucket carries a distinct email and a distinct id.
+      const buckets = Array.from({ length: COMPOSITE_PAGE_SIZE }, (_, i) => ({
+        key: {
+          'workday.user.Manager_Email': `manager${i}@corp`,
+          'workday.user.Manager_ID': `id${i}`,
+        },
+        doc_count: 1,
+      }));
+      const config = getWorkdayConfig();
+      const pageActorValues = getPageActorValues(config, buckets);
+      const limit = Number(/\| LIMIT (\d+)/.exec(config.esqlQueryOverride('default'))?.[1]);
+
+      expect(pageActorValues).toHaveLength(COMPOSITE_PAGE_SIZE * actorFieldCount);
+      expect(pageActorValues.length).toBeLessThanOrEqual(limit);
+      expect(limit).toBeLessThanOrEqual(ESQL_RESULT_CAP);
+    });
+
+    it('scales the cap with every field unioned into the actor key', () => {
+      // If a third manager identifier is ever unioned into managerKey, a bucket
+      // can expand threefold and this cap has to grow with it.
+      const query = getWorkdayConfig().esqlQueryOverride('default');
+      const limit = Number(/\| LIMIT (\d+)/.exec(query)?.[1]);
+      const expandedFields = ['workday.user.Manager_Email', 'workday.user.Manager_ID'].filter(
+        (field) => query.includes(`MV_APPEND(${field}`) || query.includes(`, ${field})`)
+      );
+
+      expect(expandedFields).toHaveLength(actorFieldCount);
+      expect(limit).toBe(COMPOSITE_PAGE_SIZE * expandedFields.length);
+    });
+
+    it('keeps the Step 1 page size at the engine default', () => {
+      // Only the Step 2 cap compensates for expansion; widening Step 1 instead
+      // would change how many actors the engine discovers per iteration.
+      const query = buildActorDiscoveryQuery(getWorkdayConfig(), undefined) as {
+        aggs: { users: { composite: { size: number } } };
+      };
+      expect(query.aggs.users.composite.size).toBe(COMPOSITE_PAGE_SIZE);
+    });
+  });
+
+  describe('first run vs incremental', () => {
+    it('scans the full inventory when there is no watermark', () => {
+      const config = getWorkdayConfig();
+      // `event.ingested` still appears as the latest-snapshot sort key; what must
+      // be absent on a first run is a time *filter* on it.
+      expect(config.esqlQueryOverride('default')).not.toContain('event.ingested >=');
+      expect(JSON.stringify(config.compositeAggAdditionalFilters)).not.toContain('event.ingested');
+    });
+
+    it('narrows both steps to a 30d event.ingested window once a watermark exists', () => {
+      const config = getWorkdayConfig('2026-09-01T00:00:00.000Z');
+      expect(config.esqlQueryOverride('default')).toContain('event.ingested');
+      expect(JSON.stringify(config.compositeAggAdditionalFilters)).toContain('event.ingested');
+    });
+
+    it('uses a fixed window rather than the watermark value, so a delayed run cannot open a gap', () => {
+      const config = getWorkdayConfig('2026-09-01T00:00:00.000Z');
+      expect(config.esqlQueryOverride('default')).not.toContain('2026-09-01T00:00:00.000Z');
+    });
+
+    it('resets its relationships before each run', () => {
+      // Workday re-emits the full inventory every poll, so a manager change must
+      // remove the previous edge. The engine cannot retract, so the config clears
+      // and repopulates instead.
+      expect(getWorkdayConfig().resetRelationshipsBeforeRun).toEqual({
+        entitySource: 'workday',
+      });
+    });
+
+    it('leaves the IDP configs additive', () => {
+      // Okta and Entra read raw_identifiers off the entity index, which is already
+      // current-state; they have no stale-edge problem to solve and must not be
+      // cleared.
+      for (const config of buildSupervisesConfigs().filter((c) => c.id !== 'workday')) {
+        expect(config.resetRelationshipsBeforeRun).toBeUndefined();
+      }
+    });
   });
 });

@@ -125,15 +125,13 @@ function buildNamedPaletteLensState({
     name: palette,
     params: {
       name: palette,
-      progression: 'fixed', // to be removed
-      reverse: false, // always applied to steps during transform
+      reverse: false, // the stops own the color order, the reverse flag is a no-op
       rangeType: useNumericRange ? 'number' : 'percent',
       // distributed palettes span the full domain; the recalculated min/max act as bounds except for the cases
       // where we use a user-defined max or min. In those cases, we need to open both ends to ensure that
       // values outside the range are still colored.
       continuity: 'all',
       steps: numberOfBands,
-      maxSteps: Math.max(DEFAULT_COLOR_STEPS, numberOfBands),
     },
   };
 }
@@ -209,8 +207,7 @@ export function fromColorByValueAPIToLensState(
     name: CUSTOM_PALETTE,
     params: {
       name: CUSTOM_PALETTE,
-      progression: 'fixed', // to be removed
-      reverse: false, // always applied to steps during transform
+      reverse: false, // the stops own the color order, the reverse flag is a no-op
       // @ts-expect-error - This can be null
       rangeMin,
       // @ts-expect-error - This can be null
@@ -219,8 +216,6 @@ export function fromColorByValueAPIToLensState(
       stops,
       colorStops,
       continuity: getContinuity(rangeMin, rangeMax),
-      steps: stops.length,
-      maxSteps: Math.max(5, stops.length), // TODO: point this to a constant or a common default
     },
   };
 }
@@ -235,7 +230,8 @@ export function getRangeValue(value?: number | null): number | null {
  * - A named (non-custom) palette becomes a `distributed_palette`: per-band stops are dropped
  *   since the palette service owns the band distribution.
  * - A custom palette becomes a `dynamic` config, rematerializing each stop as a
- *   `{ gte, lt | lte, color }` step and applying `reverse` to the stop colors first.
+ *   `{ gte, lt | lte, color }` step. The stored stops already own the color order, so the
+ *   historical `reverse` flag is ignored.
  */
 export function fromColorByValueLensStateToAPI(
   config: PaletteOutput<CustomPaletteParams> | undefined
@@ -265,26 +261,20 @@ export function fromColorByValueLensStateToAPI(
     };
   }
 
-  const { rangeType, reverse, continuity: rawContinuity } = colorParams;
-  const originalStops = colorParams.stops ?? [];
+  const { rangeType, continuity: rawContinuity } = colorParams;
+  // The stops are the only source of color order. The `reverse` flag is a historical memo that the
+  // transform must not apply. Every editor that ever wrote `reverse: true` also saved the
+  // stops already reversed, so re-applying it here would double-reverse migrated panels.
+  const stops = colorParams.stops ?? [];
   // Continuity drives the open/closed bounds on the first and last API steps.
   // An open bound (no gte/lte) signals that the color extends beyond the defined range.
   // When the SO omits `continuity` (common for older/real panels), fall back to deriving
-  // it from the range bounds, matching `getContinuity` used by the reverse transform.
+  // it from the range bounds.
   const continuity = rawContinuity ?? getContinuity(rangeMin, rangeMax);
   const isOpenBelow = continuity === 'below' || continuity === 'all';
   const isOpenAbove = continuity === 'above' || continuity === 'all';
 
   const range = paletteRangeCompat.toAPI(rangeType) ?? LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE;
-  const stops = !reverse
-    ? originalStops
-    : originalStops
-        .slice()
-        .reverse()
-        .map(({ color }, i) => ({
-          ...originalStops[i],
-          color,
-        }));
   const mappedSteps = stops.map((step, i): ColorByValueStep => {
     const { stop: currentStop, color } = step;
     if (i === 0) {
@@ -543,7 +533,6 @@ function fromAPIMappingToAssignments(
       return {
         rules: fromRulesAPIToLensState(assignment.values),
         color: fromColorDefAPIToLensState(assignment.color),
-        touched: false,
       };
     });
   }
@@ -551,7 +540,6 @@ function fromAPIMappingToAssignments(
     return {
       rules: fromRulesAPIToLensState(assignment.values),
       color: { type: 'gradient' },
-      touched: false,
     };
   });
 }
@@ -578,7 +566,6 @@ export function fromColorMappingAPIToLensState(
       color: colorMapping.unassigned
         ? fromColorDefAPIToLensState(colorMapping.unassigned)
         : { type: 'loop' },
-      touched: false,
     },
   ];
   const assignments = fromAPIMappingToAssignments(colorMapping);
@@ -587,10 +574,7 @@ export function fromColorMappingAPIToLensState(
       ? { type: colorMapping.mode }
       : {
           type: colorMapping.mode,
-          steps: (colorMapping.gradient?.map(fromColorDefAPIToLensState) ?? []).map((step) => ({
-            ...step,
-            touched: false,
-          })),
+          steps: colorMapping.gradient?.map(fromColorDefAPIToLensState) ?? [],
           sort: colorMapping.sort ?? 'asc',
         };
 
