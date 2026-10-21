@@ -16,6 +16,8 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  useEuiMaxBreakpoint,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { AppHeaderProps } from '@kbn/app-header';
 import { AppHeader } from '@kbn/app-header';
@@ -52,6 +54,8 @@ interface DetailsPageProps {
   menu?: AppHeaderProps['menu'];
   /** Shown above the details, such as when advanced mode is off. */
   notice?: ReactNode;
+  /** Whether the details are bands between dividers, rather than panels. */
+  hasBands?: boolean;
   children?: ReactNode;
 }
 
@@ -63,6 +67,7 @@ export const DetailsPage = ({
   badges,
   menu,
   notice,
+  hasBands = false,
   children,
 }: DetailsPageProps) => {
   const { appParams, chrome } = useBoostServices();
@@ -89,16 +94,20 @@ export const DetailsPage = ({
         menu={isFound ? menu : undefined}
         spacing="bleed"
       />
-      <EuiSpacer size="l" />
+      {/* Bands start with their own padding, so a band's dividers meet the header's border. */}
+      {!(isFound && hasBands) && <EuiSpacer size="l" />}
       <EuiPageSection paddingSize="none" color="transparent" restrictWidth>
         {isFound ? (
           <>
-            {notice && (
-              <>
-                {notice}
-                <EuiSpacer size="l" />
-              </>
-            )}
+            {notice &&
+              (hasBands ? (
+                <DetailsBand>{notice}</DetailsBand>
+              ) : (
+                <>
+                  {notice}
+                  <EuiSpacer size="l" />
+                </>
+              ))}
             {children}
           </>
         ) : (
@@ -125,6 +134,73 @@ export const DetailsPage = ({
         )}
       </EuiPageSection>
     </>
+  );
+};
+
+interface DetailsBandProps {
+  /** Whether a divider follows the band, which the last band leaves out. */
+  hasDivider?: boolean;
+  children: ReactNode;
+  'data-test-subj'?: string;
+}
+
+/** A section of a banded details page, with a divider below. */
+export const DetailsBand = ({
+  hasDivider = true,
+  children,
+  'data-test-subj': dataTestSubj,
+}: DetailsBandProps) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      css={{
+        paddingBlock: euiTheme.size.l,
+        borderBlockEnd: hasDivider ? euiTheme.border.thin : undefined,
+      }}
+      data-test-subj={dataTestSubj}
+    >
+      {children}
+    </div>
+  );
+};
+
+interface DetailsSplitBandProps {
+  start: ReactNode;
+  end: ReactNode;
+}
+
+/**
+ * Two sections side by side in a band, with a divider between them that runs the band's height.
+ * On narrow screens they stack, with a divider between them.
+ */
+export const DetailsSplitBand = ({ start, end }: DetailsSplitBandProps) => {
+  const { euiTheme } = useEuiTheme();
+  const narrow = useEuiMaxBreakpoint('m');
+  return (
+    <div
+      css={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        borderBlockEnd: euiTheme.border.thin,
+        [narrow]: { gridTemplateColumns: '1fr' },
+      }}
+    >
+      <div css={{ paddingBlock: euiTheme.size.l, paddingInlineEnd: euiTheme.size.l }}>{start}</div>
+      <div
+        css={{
+          paddingBlock: euiTheme.size.l,
+          paddingInlineStart: euiTheme.size.l,
+          borderInlineStart: euiTheme.border.thin,
+          [narrow]: {
+            paddingInlineStart: 0,
+            borderInlineStart: 'none',
+            borderBlockStart: euiTheme.border.thin,
+          },
+        }}
+      >
+        {end}
+      </div>
+    </div>
   );
 };
 

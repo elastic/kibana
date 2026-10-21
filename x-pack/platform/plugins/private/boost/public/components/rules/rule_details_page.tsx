@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { EuiBadge, EuiCode, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiCode } from '@elastic/eui';
 import { AppHeaderLoading } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../../../common/constants';
@@ -18,7 +18,13 @@ import { useBoostServices } from '../../hooks/use_boost_services';
 import { useBoostState } from '../../hooks/use_boost_state';
 import { AgeTimeline } from '../age_timeline';
 import { COST_DISCLAIMER, formatSize, getCostText } from '../cost_format';
-import { DetailsPage, DetailsPanel, SimpleModeNotice } from '../details/details_page';
+import {
+  DetailsBand,
+  DetailsPage,
+  DetailsSection,
+  DetailsSplitBand,
+  SimpleModeNotice,
+} from '../details/details_page';
 import { DetailsList } from '../details/details_list';
 import { DetailsLink } from '../details_link';
 import { PROFILE_TYPE_LABELS, formatDataSourceCount } from '../format';
@@ -97,6 +103,7 @@ export const RuleDetailsPage = () => {
       list="rules"
       name={name}
       isFound
+      hasBands
       badges={[
         ...(type ? [{ label: PROFILE_TYPE_LABELS[type], color: 'hollow' as const }] : []),
         // The same color as the badge in the rules list.
@@ -158,13 +165,12 @@ export const RuleDetailsPage = () => {
         )
       }
     >
-      <EuiFlexGroup gutterSize="l" alignItems="stretch">
-        <EuiFlexItem>
-          <DetailsPanel
+      <DetailsSplitBand
+        start={
+          <DetailsSection
             title={i18n.translate('xpack.boost.ruleDetails.settingsTitle', {
               defaultMessage: 'Settings',
             })}
-            fillsHeight
             data-test-subj="boostRuleSettings"
           >
             <DetailsList
@@ -203,14 +209,13 @@ export const RuleDetailsPage = () => {
                 },
               ]}
             />
-          </DetailsPanel>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <DetailsPanel
+          </DetailsSection>
+        }
+        end={
+          <DetailsSection
             title={i18n.translate('xpack.boost.ruleDetails.usageTitle', {
               defaultMessage: 'Usage',
             })}
-            fillsHeight
             data-test-subj="boostRuleUsage"
           >
             <DetailsList
@@ -252,30 +257,30 @@ export const RuleDetailsPage = () => {
                 },
               ]}
             />
-          </DetailsPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </DetailsSection>
+        }
+      />
 
       {profile?.type === 'data_streams' && (
-        <>
-          <EuiSpacer size="l" />
-          <DetailsPanel
+        <DetailsBand>
+          <DetailsSection
             title={i18n.translate('xpack.boost.ruleDetails.ageTimelineTitle', {
               defaultMessage: 'Age timeline',
             })}
           >
             <AgeTimeline profile={profile} dataStreams={applied} appliesThrough="rule" />
-          </DetailsPanel>
-        </>
+          </DetailsSection>
+        </DetailsBand>
       )}
 
-      <EuiSpacer size="xl" />
-      <MatchedTable
-        type={type}
-        profile={profile}
-        matched={matched}
-        supersededBy={coverage?.supersededBy ?? new Map()}
-      />
+      <DetailsBand hasDivider={false}>
+        <MatchedTable
+          type={type}
+          profile={profile}
+          matched={matched}
+          supersededBy={coverage?.supersededBy ?? new Map()}
+        />
+      </DetailsBand>
 
       {flyout && (
         <RuleFlyout
