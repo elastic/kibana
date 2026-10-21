@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiButton,
@@ -54,7 +54,16 @@ function isSeverity(value: string | undefined): value is Severity {
 
 const INVESTIGATIONS_SEARCH_DEBOUNCE_MS = 300;
 
-export function NightshiftApp(): React.ReactElement {
+export interface NightshiftAppProps {
+  /** Owned by the page so the header's primary action can toggle it. */
+  isStartInvestigationOpen?: boolean;
+  onCloseStartInvestigation?: () => void;
+}
+
+export function NightshiftApp({
+  isStartInvestigationOpen = false,
+  onCloseStartInvestigation,
+}: NightshiftAppProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { application, nightshiftInvestigations, agenticInvestigations, agentBuilder } =
     useKibana().services;
@@ -102,13 +111,6 @@ export function NightshiftApp(): React.ReactElement {
     agenticInvestigations != null &&
     agentBuilder != null;
   const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
-  const [isStartInvestigationOpen, setIsStartInvestigationOpen] = useState(false);
-
-  const toggleStartInvestigation = useCallback(
-    () => setIsStartInvestigationOpen((isOpen) => !isOpen),
-    []
-  );
-  const closeStartInvestigation = useCallback(() => setIsStartInvestigationOpen(false), []);
 
   const selectedInvestigationId = useMemo(
     () => getNightshiftInvestigationIdFromSearch(search),
@@ -271,15 +273,10 @@ export function NightshiftApp(): React.ReactElement {
         isLoading={isInitialLoading}
         hasActiveInvestigations={hasActiveInvestigations}
         showAllEventsHref={showAllEventsHref}
-        onStartInvestigationClick={canManage ? toggleStartInvestigation : undefined}
-        isStartInvestigationOpen={isStartInvestigationOpen}
       />
 
-      {isStartInvestigationOpen && (
-        <>
-          <EuiSpacer size="l" />
-          <StartInvestigationPanel onClose={closeStartInvestigation} />
-        </>
+      {canManage && isStartInvestigationOpen && (
+        <StartInvestigationPanel onClose={() => onCloseStartInvestigation?.()} />
       )}
 
       <EuiSpacer size="l" />

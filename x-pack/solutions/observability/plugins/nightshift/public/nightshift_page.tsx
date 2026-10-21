@@ -135,6 +135,18 @@ export function NightshiftPage(): React.ReactElement | null {
   // Before the first investigation the page is only about onboarding, as in the design.
   const hidesHeaderActions = isOnboarding && !onboarding.latestInvestigation;
 
+  // The landing page owns the start investigation panel so the header's primary action can toggle it.
+  const [isStartInvestigationOpen, setIsStartInvestigationOpen] = useState(false);
+  const toggleStartInvestigation = useCallback(
+    () => setIsStartInvestigationOpen((isOpen) => !isOpen),
+    []
+  );
+  const closeStartInvestigation = useCallback(() => setIsStartInvestigationOpen(false), []);
+  useEffect(() => {
+    setIsStartInvestigationOpen(false);
+  }, [pathname]);
+  const isLandingContent = !canUseAutomationsPage && !isOnboarding && !onboarding.isLoading;
+
   useBreadcrumbs(
     [
       {
@@ -292,6 +304,9 @@ export function NightshiftPage(): React.ReactElement | null {
               canUseAutomations && !hidesHeaderActions ? navigateToAutomations : undefined
             }
             automationsHref={canUseAutomations && !hidesHeaderActions ? automationsHref : undefined}
+            onStartInvestigationClick={
+              canManage && isLandingContent ? toggleStartInvestigation : undefined
+            }
             back={
               canUseAutomationsPage
                 ? {
@@ -328,7 +343,10 @@ export function NightshiftPage(): React.ReactElement | null {
                 <EuiLoadingSpinner size="xl" />
               </EuiFlexGroup>
             ) : (
-              <NightshiftApp />
+              <NightshiftApp
+                isStartInvestigationOpen={isStartInvestigationOpen}
+                onCloseStartInvestigation={closeStartInvestigation}
+              />
             )}
           </EuiPageTemplate.Section>
         </>

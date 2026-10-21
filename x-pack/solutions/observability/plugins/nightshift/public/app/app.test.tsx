@@ -10,7 +10,7 @@ import { usePageReady } from '@kbn/ebt-tools';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
-import React from 'react';
+import React, { type ComponentProps } from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { NightshiftApp } from './app';
 import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
@@ -160,11 +160,14 @@ function LocationProbe(): React.ReactElement {
   return <span data-test-subj="locationProbe">{useLocation().search}</span>;
 }
 
-function renderApp({ initialEntries = ['/'] }: { initialEntries?: string[] } = {}) {
+function renderApp({
+  initialEntries = ['/'],
+  ...appProps
+}: { initialEntries?: string[] } & ComponentProps<typeof NightshiftApp> = {}) {
   return render(
     <I18nProvider>
       <MemoryRouter initialEntries={initialEntries}>
-        <NightshiftApp />
+        <NightshiftApp {...appProps} />
         <LocationProbe />
       </MemoryRouter>
     </I18nProvider>
@@ -421,21 +424,33 @@ describe('NightshiftApp', () => {
     );
   });
 
-  it('opens and closes the start investigation panel from the header', () => {
-    renderApp();
-
-    const startButton = screen.getByTestId('o11yNightshiftAppStartInvestigationButton');
+  it('only shows the start investigation panel while the page has it open', () => {
+    const { rerender } = renderApp();
     expect(screen.queryByTestId('nightshiftStartInvestigationPanel')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
+    ).not.toBeInTheDocument();
 
-    fireEvent.click(startButton);
+    rerender(
+      <I18nProvider>
+        <MemoryRouter>
+          <NightshiftApp isStartInvestigationOpen />
+          <LocationProbe />
+        </MemoryRouter>
+      </I18nProvider>
+    );
     expect(screen.getByTestId('nightshiftStartInvestigationPanel')).toBeInTheDocument();
-    expect(startButton).toHaveAttribute('aria-expanded', 'true');
-
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel investigation' }));
-    expect(screen.queryByTestId('nightshiftStartInvestigationPanel')).not.toBeInTheDocument();
   });
 
-  it('hides the start investigation button without the Nightshift manage privilege', () => {
+  it('asks the page to close the start investigation panel on cancel', () => {
+    const onCloseStartInvestigation = jest.fn();
+    renderApp({ isStartInvestigationOpen: true, onCloseStartInvestigation });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel investigation' }));
+    expect(onCloseStartInvestigation).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not show the start investigation panel without the Nightshift manage privilege', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -449,11 +464,9 @@ describe('NightshiftApp', () => {
       },
     });
 
-    renderApp();
+    renderApp({ isStartInvestigationOpen: true });
 
-    expect(
-      screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftStartInvestigationPanel')).not.toBeInTheDocument();
     expect(screen.getByTestId('o11yNightshiftAppShowAllLink')).toBeInTheDocument();
   });
 });
