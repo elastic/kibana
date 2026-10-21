@@ -11,7 +11,8 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSubject } from '../../../common/subjects/subject';
-import { subjectAttachmentRenderer } from './subject_attachment_definition';
+import { createSubjectAttachmentRenderer } from './subject_attachment_definition';
+import { SubjectHrefResolverContext, type SubjectHrefResolver } from './subject_href';
 import type { SubjectRowData } from './subject_title';
 import { SubjectList, SubjectView } from './subject_view';
 
@@ -22,14 +23,19 @@ const base = {
   createdAt: '2026-07-28T14:00:00.000Z',
 };
 
-const renderView = (subject: InvestigationSubject) =>
+const renderView = (subject: InvestigationSubject, resolveSubjectHref?: SubjectHrefResolver) =>
   render(
     <EuiProvider>
       <I18nProvider>
-        <SubjectView document={subject} variant="details" />
+        <SubjectHrefResolverContext.Provider value={resolveSubjectHref}>
+          <SubjectView document={subject} variant="details" />
+        </SubjectHrefResolverContext.Provider>
       </I18nProvider>
     </EuiProvider>
   );
+
+const resolveSubjectHref: SubjectHrefResolver = ({ type, id }) =>
+  type === 'manual' ? undefined : `/app/solution/${type}/${id}`;
 
 describe('SubjectView', () => {
   it('renders an alert as one compact row that links to the alert URL', () => {
@@ -77,6 +83,60 @@ describe('SubjectView', () => {
     renderView({ ...base, subjectType: 'alert', subjectId: 'alert-1' });
 
     expect(screen.getByTestId('investigationSubjectTitle')).toHaveTextContent('alert-1');
+  });
+
+  it('links an alert without a URL where the solution resolves it', () => {
+    renderView(
+      { ...base, subjectType: 'alert', subjectId: 'alert-1', snapshot: { rule_name: 'Latency' } },
+      resolveSubjectHref
+    );
+
+    const row = screen.getByTestId('investigationSubject-alert');
+    expect(row.tagName).toBe('A');
+    expect(row).toHaveAttribute('href', '/app/solution/alert/alert-1');
+    expect(row).not.toHaveAttribute('target');
+  });
+
+  it("prefers an alert's own URL over the solution's link", () => {
+    renderView(
+      {
+        ...base,
+        subjectType: 'alert',
+        subjectId: 'alert-1',
+        snapshot: { rule_name: 'Latency', url: '/app/discover#/view/1' },
+      },
+      resolveSubjectHref
+    );
+
+    expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute(
+      'href',
+      '/app/discover#/view/1'
+    );
+  });
+
+  it('links a significant event where the solution resolves it', () => {
+    renderView(
+      {
+        ...base,
+        subjectType: 'significant_event',
+        subjectId: 'event-1',
+        summary: 'Checkout errors spiked',
+      },
+      resolveSubjectHref
+    );
+
+    const row = screen.getByTestId('investigationSubject-significant_event');
+    expect(row.tagName).toBe('A');
+    expect(row).toHaveAttribute('href', '/app/solution/significant_event/event-1');
+  });
+
+  it('does not link a resolved URL that is not a path or http(s) URL', () => {
+    renderView(
+      { ...base, subjectType: 'significant_event', subjectId: 'event-1', summary: 'Errors' },
+      () => 'data:text/html,hello'
+    );
+
+    expect(screen.getByTestId('investigationSubject-significant_event').tagName).toBe('DIV');
   });
 
   it('renders a significant event and a question by their summary, without a link', () => {
@@ -233,9 +293,9 @@ describe('SubjectList', () => {
   });
 });
 
-describe('subjectAttachmentRenderer', () => {
+describe('createSubjectAttachmentRenderer', () => {
   it('labels subjects by type', () => {
-    const { getLabel } = subjectAttachmentRenderer;
+    const { getLabel } = createSubjectAttachmentRenderer(() => undefined);
 
     expect(
       getLabel({
@@ -254,5 +314,25 @@ describe('subjectAttachmentRenderer', () => {
       })
     ).toBe('Slack: #oncall');
     expect(getLabel({ ...base, subjectType: 'manual', subjectId: 'q' })).toBe('Question');
+  });
+
+  it('links the loaded content where the resolver says', async () => {
+    const SubjectContent = await createSubjectAttachmentRenderer(resolveSubjectHref).loadContent();
+
+    render(
+      <EuiProvider>
+        <I18nProvider>
+          <SubjectContent
+            document={{ ...base, subjectType: 'significant_event', subjectId: 'event-1' }}
+            variant="inline"
+          />
+        </I18nProvider>
+      </EuiProvider>
+    );
+
+    expect(screen.getByTestId('investigationSubject-significant_event')).toHaveAttribute(
+      'href',
+      '/app/solution/significant_event/event-1'
+    );
   });
 });

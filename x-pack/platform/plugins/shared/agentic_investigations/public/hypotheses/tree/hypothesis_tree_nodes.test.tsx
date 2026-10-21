@@ -22,6 +22,10 @@ import {
   HypothesisTreeNode,
   type HypothesisTreeFlowNode,
 } from './hypothesis_tree_nodes';
+import {
+  SubjectHrefResolverContext,
+  type SubjectHrefResolver,
+} from '../../subjects/attachments/subject_href';
 
 jest.mock('@kbn/proposals-plugin/public');
 
@@ -29,15 +33,20 @@ const flags = { isSelected: false, isDimmed: false, selectedActionIndex: null };
 
 const renderNode = (
   data: HypothesisTreeFlowNode['data'],
-  actions = { onSelectAction: jest.fn(), onSelectNode: jest.fn() }
+  actions = { onSelectAction: jest.fn(), onSelectNode: jest.fn() },
+  resolveSubjectHref?: SubjectHrefResolver
 ) => {
   render(
     <EuiProvider>
       <I18nProvider>
         <ReactFlowProvider>
-          <HypothesisTreeActionsContext.Provider value={actions}>
-            <HypothesisTreeNode {...({ id: 'node', data } as NodeProps<HypothesisTreeFlowNode>)} />
-          </HypothesisTreeActionsContext.Provider>
+          <SubjectHrefResolverContext.Provider value={resolveSubjectHref}>
+            <HypothesisTreeActionsContext.Provider value={actions}>
+              <HypothesisTreeNode
+                {...({ id: 'node', data } as NodeProps<HypothesisTreeFlowNode>)}
+              />
+            </HypothesisTreeActionsContext.Provider>
+          </SubjectHrefResolverContext.Provider>
         </ReactFlowProvider>
       </I18nProvider>
     </EuiProvider>
@@ -135,6 +144,26 @@ describe('HypothesisTreeNode', () => {
     const link = screen.getByTestId('investigationHypothesisTreeTriggerLink');
     expect(link).toHaveTextContent('Open in Slack');
     expect(link).toHaveAttribute('target', '_blank');
+  });
+
+  it('links a significant event trigger where the solution resolves it', () => {
+    renderNode(
+      {
+        kind: 'trigger',
+        title: 'Checkout errors spiked',
+        subjects: [
+          { type: 'significant_event', id: 'se-1', summary: 'Checkout errors', created_at: 'x' },
+        ],
+        ...flags,
+      },
+      undefined,
+      ({ type, id }) => `/app/solution/${type}/${id}`
+    );
+
+    const link = screen.getByTestId('investigationHypothesisTreeTriggerLink');
+    expect(link).toHaveTextContent('View significant event');
+    expect(link).toHaveAttribute('href', '/app/solution/significant_event/se-1');
+    expect(link).not.toHaveAttribute('target');
   });
 
   it('does not link a subject without a link', () => {

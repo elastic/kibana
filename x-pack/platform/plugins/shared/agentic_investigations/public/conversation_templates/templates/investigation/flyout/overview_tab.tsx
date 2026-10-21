@@ -17,6 +17,10 @@ import type { Investigation } from '../../../../../common';
 import { HypothesisTreeCard } from '../../../../hypotheses/tree/hypothesis_tree_card';
 import { ImpactContent } from '../../../../impact/attachments/impact_view';
 import { SubjectList } from '../../../../subjects/attachments/subject_view';
+import {
+  SubjectHrefResolverContext,
+  type SubjectHrefResolver,
+} from '../../../../subjects/attachments/subject_href';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import { getInvestigationDisplayTitle } from '../to_view_model';
 
@@ -77,6 +81,8 @@ export const InvestigationOverview: React.FC<
   OverviewSlotRenderProps & {
     /** Present when a solution registered an entity flyout. Entity-store ids open it. */
     onOpenEntity?: (entity: ImpactEntityTarget) => void;
+    /** Links subjects (and the hypothesis tree's trigger) to the pages solutions registered. */
+    resolveSubjectHref?: SubjectHrefResolver;
   }
 > = ({
   conversation,
@@ -84,6 +90,7 @@ export const InvestigationOverview: React.FC<
   proposedActionsContent,
   proposedActionsCount,
   onOpenEntity,
+  resolveSubjectHref,
 }) => {
   const { data } = useInvestigation(conversation.id);
   const investigation = useMemo(() => {
@@ -99,13 +106,15 @@ export const InvestigationOverview: React.FC<
   );
 
   return (
-    <OverviewTab
-      investigation={investigation}
-      attachments={conversation.attachments}
-      groupedAttachments={groupedAttachments}
-      proposedActionsContent={proposedActionsContent}
-      proposedActionsCount={proposedActionsCount}
-      sections={sections}
-    />
+    <SubjectHrefResolverContext.Provider value={resolveSubjectHref}>
+      <OverviewTab
+        investigation={investigation}
+        attachments={conversation.attachments}
+        groupedAttachments={groupedAttachments}
+        proposedActionsContent={proposedActionsContent}
+        proposedActionsCount={proposedActionsCount}
+        sections={sections}
+      />
+    </SubjectHrefResolverContext.Provider>
   );
 };

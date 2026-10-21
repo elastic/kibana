@@ -13,6 +13,7 @@ import type { Conversation } from '@kbn/agent-builder-common';
 import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigations-common';
 import type { Investigation } from '../../../../../common';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
+import type { SubjectHrefResolver } from '../../../../subjects/attachments/subject_href';
 import { InvestigationOverview } from './overview_tab';
 
 jest.mock('../../../../investigations/hooks/use_investigation');
@@ -57,13 +58,14 @@ const investigation: Investigation = {
   proposals: [],
 };
 
-const renderOverview = () =>
+const renderOverview = (resolveSubjectHref?: SubjectHrefResolver) =>
   render(
     <EuiProvider>
       <I18nProvider>
         <InvestigationOverview
           conversation={conversation}
           groupedAttachments={groupedAttachments}
+          resolveSubjectHref={resolveSubjectHref}
         />
       </I18nProvider>
     </EuiProvider>
@@ -83,6 +85,24 @@ describe('InvestigationOverview', () => {
     expect(screen.queryByTestId('investigationHypotheses')).not.toBeInTheDocument();
     expect(screen.getByTestId('investigationHypothesisTreeButton')).toHaveTextContent(
       '1 hypothesis analyzed'
+    );
+  });
+
+  it('links the subjects where the solution resolves them', () => {
+    mockUseInvestigation.mockReturnValue({
+      data: {
+        ...investigation,
+        subjects: [
+          { type: 'significant_event', id: 'se-1', summary: 'Checkout errors', created_at: 'x' },
+        ],
+      },
+    });
+
+    renderOverview(({ type, id }) => `/app/solution/${type}/${id}`);
+
+    expect(screen.getByTestId('investigationSubject-significant_event')).toHaveAttribute(
+      'href',
+      '/app/solution/significant_event/se-1'
     );
   });
 
