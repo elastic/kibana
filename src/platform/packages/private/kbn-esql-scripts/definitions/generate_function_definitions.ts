@@ -29,8 +29,6 @@ import { promqlFunctionDefinitions } from '@elastic/esql-definitions/promql-func
 import { promqlOperatorDefinitions as pkgPromqlOperatorDefs } from '@elastic/esql-definitions/promql-operators';
 import { promqlFunctionDocs } from '@elastic/esql-definitions/promql-function-docs';
 import { promqlOperatorDocs } from '@elastic/esql-definitions/promql-operator-docs';
-import { inlineCasts } from '@elastic/esql-definitions/inline-cast';
-import { timeSeriesAggregates } from '@elastic/esql-definitions/time-series-aggregates';
 import type { GeneratedFile } from '../lib/generated_file';
 import {
   GENERATED_DEFINITIONS_DIR,
@@ -710,22 +708,6 @@ export const renderFunctionDefinitions = (): GeneratedFile[] => {
 export const esqlFunctionNames = ${JSON.stringify(functionNames, null, 2)};
 
 ${functionsEnum}
-`,
-  });
-
-  const castsMap = JSON.stringify(inlineCasts, null, 2);
-  files.push({
-    path: join(GENERATED_DEFINITIONS_DIR, 'inline_casts_mapping.ts'),
-    content: `${FILE_HEADER}
-export const inlineCastsMapping = ${castsMap} as const;
-`,
-  });
-
-  const timeSeriesAggregatesMap = JSON.stringify(timeSeriesAggregates, null, 2);
-  files.push({
-    path: join(GENERATED_DEFINITIONS_DIR, 'time_series_aggregates.ts'),
-    content: `${FILE_HEADER}
-export const timeSeriesAggregates: Record<string, { function: string; returnType: string }> = ${timeSeriesAggregatesMap};
 `,
   });
 
