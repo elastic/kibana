@@ -10,26 +10,30 @@ This article goes through how authentication is set up in Scout and which fixtur
 
 Scout uses [SAML](https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/saml) to authenticate in tests, the same way Elastic Cloud does. The login selector (the page that lets a user pick between authentication providers) is disabled, so every login goes straight to SAML.
 
-| Deployment | Local run                               | Cloud run (ECH, MKI)                             |
-| ---------- | --------------------------------------- | ------------------------------------------------ |
-| Stateful   | SAML via a mock Identity Provider (IdP) | SAML via the real IdP with pre-provisioned users |
-| Serverless | SAML via a mock Identity Provider (IdP) | SAML via the real IdP with pre-provisioned users |
+| Deployment | Local run                               | Cloud run (ECH, MKI)                                    |
+| ---------- | --------------------------------------- | ------------------------------------------------------- |
+| Stateful   | SAML via a mock Identity Provider (IdP) | SAML via Elastic Cloud's IdP with pre-provisioned users |
+| Serverless | SAML via a mock Identity Provider (IdP) | SAML via Elastic Cloud's IdP with pre-provisioned users |
 
-Kibana's role definitions are defined in the `roles.yml` files in the `@kbn/es` package. They are Kibana's local copy of the [Elastic Cloud roles](https://www.elastic.co/docs/deploy-manage/users-roles/cloud-organization/user-roles#general-assign-user-roles-table) (`admin`, `editor`, `viewer`, and so on). Serverless uses the roles of the selected project type and has the native realm disabled.
+Tests use Elasticsearch role definitions from the `roles.yml` files in the `@kbn/es` package. The serverless files are a copy of the [Elastic Cloud project roles](https://www.elastic.co/docs/deploy-manage/users-roles/cloud-organization/user-roles#general-assign-user-roles-table) (`admin`, `editor`, `viewer`, and so on) for the selected project type, and serverless has the native realm disabled. The stateful file is test-only: `viewer` and `editor` mirror the built-in Elasticsearch roles, and `admin` is a test role that does not exist in stateful Elasticsearch. It exists so deployment-agnostic tests can use the same role names in both.
 
 ::::::{warning}
 The serverless files are copied from `elasticsearch-controller`, so a role change must land there first and be mirrored in `roles.yml` right after.
 ::::::
 
-## Why SAML realm roles [scout-auth-why-saml]
+## How SAML users get their roles [scout-auth-why-saml]
 
-In Cloud, users log in through an IdP and get roles from it. Scout follows the same path: when a test asks for role `viewer`, the mock IdP issues a SAML assertion for a generated user with that role, Kibana issues a session cookie, and Scout caches it per role and worker.
+In Cloud, users log in through an IdP, and Elasticsearch role mappings turn the groups in the SAML assertion into roles. Scout follows the same path: when a test asks for role `viewer`, Scout creates a SAML response signed with the mock IdP certificate for a generated user, with `viewer` in the `groups` attribute, and posts it to Kibana. Elasticsearch validates the assertion and maps the group to the `viewer` role, Kibana returns a session cookie, and Scout caches it per role and Playwright worker. When a test fails, Playwright retries it on a new worker with a newly created session.
 
-Tests exercise the same authentication and authorization path as real users. On Cloud runs the same calls perform a real SAML login with pre-provisioned users, so test code does not change.
+Locally the browser redirect to the IdP is skipped. What tests share with real users is the realm, the role mapping, and the authorization checks. On Cloud runs the same calls perform a real SAML login with pre-provisioned users, so test code does not change.
+
+::::::{warning}
+Local authentication is partly mocked. A test passing locally does not prove the feature works on MKI or ECH, where the real IdP and Elastic Cloud configuration are used.
+::::::
 
 ## The user in the config [scout-auth-config-user]
 
-`config.auth` is an internal Scout user with full privileges. Scout uses it only for `esClient` and `kbnClient`, which exist for test data setup and cleanup. Everything that represents a user of the product goes through SAML.
+`config.auth` is an internal Scout user with full privileges. On MKI it replicates the operator user, on ECH it is a superuser. Scout uses it for `esClient` and `kbnClient`, which exist for test data setup and cleanup, and internally to read the Kibana version. Everything that represents a user of the product goes through SAML.
 
 ## What each fixture does [scout-auth-fixtures]
 
