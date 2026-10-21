@@ -132,14 +132,14 @@ describe('Redux selection and styling with the legacy workspace', () => {
   });
 
   it('updates Redux snapshots after merges, blocklisting, and unblocking', () => {
-    const { store, workspace } = setup();
+    const { store } = setup();
     store.dispatch(mergeNodes({ parentId: 'field..third', childId: 'field..second' }));
     expect(store.getState().workspace.nodesById['field..second'].parentId).toBe('field..third');
     store.dispatch(toggleNodeSelection({ nodeId: 'field..third', replace: true }));
     store.dispatch(blocklistSelectedNodes());
     expect(store.getState().workspace.blocklistedNodeIds).toContain('field..third');
     expect(store.getState().workspace.selectedNodeIds).toEqual([]);
-    store.dispatch(unblockNode(workspace.blocklistedNodes[0].id));
+    store.dispatch(unblockNode('field..third'));
     expect(store.getState().workspace.blocklistedNodeIds).not.toContain('field..third');
     store.dispatch(unblockAllNodes());
     expect(store.getState().workspace.blocklistedNodeIds).toEqual([]);
