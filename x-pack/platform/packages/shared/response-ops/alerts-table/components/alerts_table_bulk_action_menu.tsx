@@ -40,7 +40,7 @@ interface AlertsTableBulkActionMenuProps {
 
 const ACTION_GROUP_ORDER = [
   ['status'],
-  ['assignees', 'cases', 'tags'],
+  ['assignees', 'cases', 'caseRemoval', 'tags'],
   ['timeline'],
   ['custom'],
   ['workflow'],
