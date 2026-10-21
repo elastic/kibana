@@ -52,6 +52,7 @@ import {
   getIngestPipelineName,
 } from '../utils/event_ingested_pipeline';
 import { riskScoreSeriesEntityBatchSize } from '../utils/elasticsearch_terms_limits';
+import { toScoreTypeFilter } from './score_type_filter';
 
 interface RiskScoringDataClientOpts {
   logger: Logger;
@@ -599,33 +600,6 @@ const toDateHistogramInterval = (interval: {
     ? { calendar_interval: calendarExpression }
     : { fixed_interval: `${interval.value}${interval.unit}` };
 };
-
-const toScoreTypeFilter = (
-  riskPath: string,
-  scoreType: string | undefined
-): Array<Record<string, unknown>> => {
-  if (scoreType === undefined) {
-    return [];
-  }
-
-  // documents written before score_type was introduced have no field — treat as base
-  if (scoreType === 'base') {
-    return [
-      {
-        bool: {
-          should: [
-            { term: { [`${riskPath}.score_type`]: 'base' } },
-            { bool: { must_not: { exists: { field: `${riskPath}.score_type` } } } },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-    ];
-  }
-
-  return [{ term: { [`${riskPath}.score_type`]: scoreType } }];
-};
-
 const getRiskFromSource = (
   source: RiskScoreTimeSeriesSource,
   entityType: string

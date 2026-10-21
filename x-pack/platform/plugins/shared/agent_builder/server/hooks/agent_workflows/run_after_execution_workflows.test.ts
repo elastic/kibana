@@ -16,7 +16,7 @@ import {
   type ConversationRound,
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
-import { ExecutionStatus } from '@kbn/workflows';
+import { AGENT_BUILDER_HOOK_TRIGGER_SOURCE, ExecutionStatus } from '@kbn/workflows';
 import {
   MAX_TOOL_RESULT_ARRAY_ITEMS,
   MAX_TOOL_RESULT_DATA_CHARS,
@@ -267,6 +267,8 @@ describe('runAfterExecutionWorkflows', () => {
       expect(executeWorkflowMock).toHaveBeenCalledWith(
         expect.objectContaining({
           workflowId: 'wf-1',
+          // Lets a workflow refuse runs that a user started directly.
+          triggeredBy: AGENT_BUILDER_HOOK_TRIGGER_SOURCE,
           workflowParams: {
             prompt: 'my question',
             response: 'my answer',
