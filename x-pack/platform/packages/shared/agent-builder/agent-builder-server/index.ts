@@ -152,6 +152,8 @@ export type {
 export type {
   AgentExecutionParams,
   AgentExecution,
+  ConversationAgentExecution,
+  StoredConversationExecutionParams,
   ExecuteAgentParams,
   ExecuteAgentResult,
   FindExecutionsFilter,

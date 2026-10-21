@@ -843,8 +843,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     parentExecution?: ParentExecution;
     appendRefresh?: Refresh;
   }): Promise<string> {
-    const { nextInput, origin: requestOrigin } = params;
-    const author = conversationClient.getAuthor(requestOrigin?.author);
+    const { nextInput, origin: requestOrigin, author: requestAuthor } = params;
+    const author = conversationClient.getAuthor(requestOrigin?.author, requestAuthor);
     const origin = requestOrigin ? { type: requestOrigin.type } : undefined;
     const base = {
       conversation,

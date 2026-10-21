@@ -762,6 +762,9 @@ export const CONVERSATION_TITLE_MAX_LENGTH = 500;
  */
 export const CONVERSATION_ID_MAX_LENGTH = 256;
 
+/** Maximum length of the display name a workflow may record on a user message it writes. */
+export const USER_MESSAGE_AUTHOR_NAME_MAX_LENGTH = 256;
+
 /** Maximum accepted length for a conversation metadata key */
 export const CONVERSATION_METADATA_KEY_MAX_LENGTH = 256;
 

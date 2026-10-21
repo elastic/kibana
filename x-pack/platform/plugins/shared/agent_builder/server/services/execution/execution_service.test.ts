@@ -1399,6 +1399,16 @@ describe('AgentExecutionService', () => {
       expect(options).toMatchObject({ refresh: false });
     });
 
+    it('passes the author decoration to the client and stores it for the run', async () => {
+      const author = { full_name: 'Attack Discovery Review' };
+
+      await converse({ author });
+
+      expect(conversationClient.getAuthor).toHaveBeenCalledWith(undefined, author);
+      const [{ agentParams }] = mockExecutionClient.create.mock.calls[0];
+      expect(agentParams).toMatchObject({ author });
+    });
+
     it('falls back to the conversation owner when the requester has no author, as the round rewrite does', async () => {
       await converse();
 
@@ -1588,6 +1598,34 @@ describe('AgentExecutionService', () => {
       });
     });
 
+    it('passes the author decoration to the conversation client', async () => {
+      const author = { full_name: 'Attack Discovery Review' };
+
+      await append({ author });
+
+      expect(conversationClient.getAuthor).toHaveBeenCalledWith(undefined, author);
+    });
+
+    it('writes the service account name the client resolved onto the message actor', async () => {
+      conversationClient.getAuthor.mockReturnValueOnce({
+        id: 'service_account:kibana/alertzero-workers',
+        username: 'kibana/alertzero-workers',
+        type: 'service_account',
+        full_name: 'Attack Discovery Review',
+      });
+
+      await append({ author: { full_name: 'Attack Discovery Review' } });
+
+      const [{ events }] = conversationClient.appendEvents.mock.calls[0];
+      expect(events[0].actor).toMatchObject({
+        type: 'user',
+        id: 'service_account:kibana/alertzero-workers',
+        username: 'kibana/alertzero-workers',
+        principal_type: 'service_account',
+        full_name: 'Attack Discovery Review',
+      });
+    });
+
     it('persists the message without recording an execution', async () => {
       await append();
 
@@ -1680,7 +1718,7 @@ describe('AgentExecutionService', () => {
         },
       });
 
-      expect(conversationClient.getAuthor).toHaveBeenCalledWith(author);
+      expect(conversationClient.getAuthor).toHaveBeenCalledWith(author, undefined);
       const [{ events }] = conversationClient.appendEvents.mock.calls[0];
       expect(events[0].actor).toMatchObject({
         type: 'external',

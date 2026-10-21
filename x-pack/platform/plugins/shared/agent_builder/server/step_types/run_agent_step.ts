@@ -72,11 +72,13 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           schema,
           message,
           conversation_id: conversationId,
+          author_name: authorNameRaw,
           attachments,
           metadata,
           configuration_overrides: configurationOverrides,
           approvals,
         } = context.input;
+        const authorName = normalizeOptionalStringParam(authorNameRaw);
 
         const {
           'agent-id': agentId,
@@ -156,6 +158,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
             agentId: effectiveAgentId,
             connectorId: effectiveConnectorId,
             conversationId,
+            ...(authorName ? { author: { full_name: authorName } } : {}),
             autoCreateConversationWithId: createConversation,
             storeConversation,
             accessControl,

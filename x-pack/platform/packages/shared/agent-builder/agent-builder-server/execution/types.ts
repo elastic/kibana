@@ -106,6 +106,12 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   readOnly?: boolean;
   /** External origin that initiated this execution, used to resolve the conversation and attribute the round. */
   origin?: ExecutionConversationOrigin;
+  /**
+   * Display decoration for the user message this request writes. Honoured only when the request
+   * principal is a service account, which has no display name on any backend; silently dropped
+   * for interactive users. Never affects the actor's `id`, `username` or `type`.
+   */
+  author?: Pick<ConversationRoundAuthor, 'full_name'>;
   /** Callback delivery configuration for this execution. */
   callback?: {
     /** URL to deliver the execution result to. */
