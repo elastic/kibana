@@ -7,9 +7,8 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { EsTestCluster } from '@kbn/test';
-import { createTestEsCluster } from '@kbn/test';
+import { createEsClientForTesting, createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
-import { createNotificationEsClient } from './es_client';
 import type { NotificationDocument } from '../../common/types';
 import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
 import { queryNotifications } from '../lib/query_notifications';
@@ -36,7 +35,7 @@ const doc = (
 
 describe('queryNotifications [integration]', () => {
   let esServer: EsTestCluster;
-  let esClient: ReturnType<typeof createNotificationEsClient>;
+  let esClient: ReturnType<typeof createEsClientForTesting>;
   let seedNotifications: (documents: NotificationDocument[]) => Promise<void>;
   const logger = loggingSystemMock.createLogger();
 
@@ -51,7 +50,12 @@ describe('queryNotifications [integration]', () => {
       log: new ToolingLog({ writeTo: process.stdout, level: 'error' }),
     });
     await esServer.start();
-    esClient = createNotificationEsClient(esServer.getHostUrls()[0]);
+    esClient = createEsClientForTesting({
+      esUrl: esServer.getHostUrls()[0],
+      // Elasticsearch serves a system data stream only to a caller sending a product origin.
+      // Core's client always sends it, which is why the plugin itself never has to.
+      headers: { 'x-elastic-product-origin': 'kibana' },
+    });
 
     seedNotifications = async (documents: NotificationDocument[]) => {
       const response = await esClient.bulk({

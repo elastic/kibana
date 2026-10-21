@@ -6,7 +6,7 @@
  */
 
 import { of } from 'rxjs';
-import type { BulkRequest, BulkResponse, ErrorCause } from '@elastic/elasticsearch/lib/api/types';
+import type { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { CoreSetup } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { NOTIFICATION_TYPES, SEVERITY } from '../../common';
@@ -16,15 +16,8 @@ import type { NotificationCenterPluginStart, NotificationCenterStartDependencies
 
 const modelStatus = NOTIFICATION_TYPES.inference.modelStatus;
 
-const bulkResponse = (error?: ErrorCause): BulkResponse => ({
-  took: 1,
-  errors: error !== undefined,
-  items: [{ create: { _index: '.ds-kibana-notifications-000001', status: 201, error } }],
-});
-
-/** The document the single `create` operation appended. */
-const appendedDocument = (request?: BulkRequest) =>
-  request?.operations?.[1] as NotificationDocument;
+/** The document the `create` appended. */
+const appendedDocument = (request?: IndexRequest) => request?.document as NotificationDocument;
 
 const content = {
   entity: 'my-endpoint',
@@ -35,34 +28,33 @@ const content = {
 
 const createCoreMock = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const elasticsearch = elasticsearchServiceMock.createStart();
-  const { bulk } = elasticsearch.client.asInternalUser;
-  bulk.mockResolvedValue(bulkResponse());
+  const { index } = elasticsearch.client.asInternalUser;
   const getBooleanValue$ = jest.fn().mockReturnValue(of(enabled));
   const core = {
     getStartServices: jest
       .fn()
       .mockResolvedValue([{ elasticsearch, featureFlags: { getBooleanValue$ } }]),
   } as unknown as CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>;
-  return { core, bulk, getBooleanValue$ };
+  return { core, index, getBooleanValue$ };
 };
 
 const setup = (opts: { enabled?: boolean } = {}) => {
-  const { core, bulk, getBooleanValue$ } = createCoreMock(opts);
-  return { forType: buildForType(core), bulk, getBooleanValue$ };
+  const { core, index, getBooleanValue$ } = createCoreMock(opts);
+  return { forType: buildForType(core), index, getBooleanValue$ };
 };
 
 describe('buildForType', () => {
   it('appends one document with the id built from the type + id parts, a stamped @timestamp, and defaulted severity', async () => {
-    const { forType, bulk } = setup();
+    const { forType, index } = setup();
 
     const result = await forType(modelStatus).submit(content);
 
     expect(result).toEqual({ status: 'submitted' });
-    expect(bulk).toHaveBeenCalledTimes(1);
-    const [request] = bulk.mock.calls[0];
+    expect(index).toHaveBeenCalledTimes(1);
+    const [request] = index.mock.calls[0];
     expect(request?.index).toBe('.kibana-notifications');
-    // One `create` action and the document it appends; a data stream accepts no other action.
-    expect(request?.operations).toEqual([{ create: {} }, expect.any(Object)]);
+    // A data stream accepts no other op type.
+    expect(request?.op_type).toBe('create');
     const document = appendedDocument(request);
     expect(document.notification_id).toBe('inference:modelStatus:my-endpoint:deprecated');
     expect(document.namespace).toBe('inference');
@@ -74,11 +66,11 @@ describe('buildForType', () => {
   });
 
   it('stores a producer-provided severity', async () => {
-    const { forType, bulk } = setup();
+    const { forType, index } = setup();
 
     await forType(modelStatus).submit({ ...content, severity: SEVERITY.warning });
 
-    const [request] = bulk.mock.calls[0];
+    const [request] = index.mock.calls[0];
     expect(appendedDocument(request).severity).toBe('warning');
   });
 
@@ -94,12 +86,12 @@ describe('buildForType', () => {
   });
 
   it('skips the write and reports skipped_disabled when the type flag is off', async () => {
-    const { forType, bulk } = setup({ enabled: false });
+    const { forType, index } = setup({ enabled: false });
 
     const result = await forType(modelStatus).submit(content);
 
     expect(result).toEqual({ status: 'skipped_disabled' });
-    expect(bulk).not.toHaveBeenCalled();
+    expect(index).not.toHaveBeenCalled();
   });
 
   it('submits immediately without evaluating a flag when the type declares none', async () => {
@@ -111,30 +103,28 @@ describe('buildForType', () => {
         NOTIFICATION_TYPE_ENABLED_DEFAULT: false,
       }));
       const { buildForType: buildIsolated } = await import('./submit');
-      const { core, bulk, getBooleanValue$ } = createCoreMock();
+      const { core, index, getBooleanValue$ } = createCoreMock();
 
       const result = await buildIsolated(core)(modelStatus).submit(content);
 
       expect(getBooleanValue$).not.toHaveBeenCalled();
-      expect(bulk).toHaveBeenCalledTimes(1);
+      expect(index).toHaveBeenCalledTimes(1);
       expect(result).toEqual({ status: 'submitted' });
     });
   });
 
   it('rejects invalid content with a typed error and writes nothing', async () => {
-    const { forType, bulk } = setup();
+    const { forType, index } = setup();
 
     await expect(forType(modelStatus).submit({ ...content, title: '' })).rejects.toBeInstanceOf(
       NotificationValidationError
     );
-    expect(bulk).not.toHaveBeenCalled();
+    expect(index).not.toHaveBeenCalled();
   });
 
-  it('throws when the bulk create reports a failure', async () => {
-    const { forType, bulk } = setup();
-    bulk.mockResolvedValueOnce(
-      bulkResponse({ type: 'document_parsing_exception', reason: 'mapping conflict' })
-    );
+  it('propagates a rejected write', async () => {
+    const { forType, index } = setup();
+    index.mockRejectedValueOnce(new Error('mapping conflict'));
 
     await expect(forType(modelStatus).submit(content)).rejects.toThrow('mapping conflict');
   });

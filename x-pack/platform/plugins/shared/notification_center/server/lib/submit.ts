@@ -78,15 +78,13 @@ const writeNotification = async (
     '@timestamp': new Date().toISOString(),
   };
 
-  // A data stream accepts only `create`, so append through the bulk API rather than `index`.
-  const response = await elasticsearch.client.asInternalUser.bulk<NotificationDocument>({
+  // A data stream accepts only `create`, so append with `op_type` rather than a plain index.
+  // A rejected write throws, so there is no response body to inspect.
+  await elasticsearch.client.asInternalUser.index<NotificationDocument>({
     index: NOTIFICATION_DATA_STREAM_NAME,
-    operations: [{ create: {} }, document],
+    op_type: 'create',
+    document,
   });
-  if (response.errors) {
-    const reason = response.items[0]?.create?.error?.reason ?? 'unknown error';
-    throw new Error(`Failed to append notification: ${reason}`);
-  }
 
   return { status: 'submitted' };
 };
