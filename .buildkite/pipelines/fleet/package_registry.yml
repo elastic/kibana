@@ -80,7 +80,7 @@ steps:
       enableNestedVirtualization: true
       machineType: n2-highmem-4
     timeout_in_minutes: 75
-    parallelism: 22
+    parallelism: 12
     key: defend-workflows-stateful
     depends_on: build
     retry:
@@ -97,7 +97,7 @@ steps:
       enableNestedVirtualization: true
       machineType: n2-highmem-4
     timeout_in_minutes: 75
-    parallelism: 14
+    parallelism: 9
     key: defend-workflows-serverless
     depends_on: build
     retry:
@@ -114,7 +114,7 @@ steps:
       machineType: n2-highmem-4
       preemptible: true
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 3
     key: osquery-cypress-stateful
     depends_on: build
     retry:
@@ -131,7 +131,7 @@ steps:
       machineType: n2-highmem-4
       preemptible: true
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 3
     key: osquery-cypress-serverless
     depends_on: build
     retry:
