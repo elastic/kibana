@@ -15,6 +15,7 @@ import { StatusError } from '../streams/errors/status_error';
 import { toEsqlRequest } from '../streams/helpers/esql';
 import { UNIT_STATS_DEFAULT_WINDOW_MS, UNIT_STATS_REQUEST_TIMEOUT_MS } from './constants';
 import { toSearchError } from './errors/search_errors';
+import { STATS_ERROR_CODE, type UnitStatsError } from './errors/unit_stats_error';
 import { toRows, type EsqlRow } from './mappers/esql_rows';
 import {
   joinDestinationRows,
@@ -171,13 +172,18 @@ export class UnitStatsClient {
     try {
       if (!(await this.doesUnitMetricsStreamExist())) return [];
     } catch (error) {
-      const failure = this.toKindError(error, query.unitId, 'stream probe');
+      const what = 'stream probe';
+      const failure = toSearchError(error, what);
+      this.logFailure(failure, { unitId: query.unitId, what });
+      const statsError = failure.toStatsError();
 
       return [
         destinationIds.length > 0
-          ? this.destinationFailure({ ids: destinationIds, bucketMs, failure })
+          ? this.destinationFailure({ ids: destinationIds, bucketMs, failure: statsError })
           : undefined,
-        processorIds.length > 0 ? this.processorFailure({ ids: processorIds, failure }) : undefined,
+        processorIds.length > 0
+          ? this.processorFailure({ ids: processorIds, failure: statsError })
+          : undefined,
       ];
     }
 
@@ -229,11 +235,20 @@ export class UnitStatsClient {
     return chunks.flat();
   }
 
-  /** The error a failed query puts on every id of its kind, so the other kind is unaffected. */
-  private toKindError(error: unknown, unitId: string, what: string): StreamsUnit.StatsError {
+  /**
+   * Logs a failed query. A query that fails or times out is not expected, so it is a `warn`. A
+   * 403, 429 or 503 is an expected state of the cluster, so it stays at `debug`.
+   */
+  private logFailure(failure: UnitStatsError, { unitId, what }: { unitId: string; what: string }) {
     const { logger } = this.dependencies;
-    logger.debug(`Unit stats ${what} failed for unit [${unitId}]: ${(error as Error).message}`);
-    return toSearchError(error, what).toStatsError();
+    const isUnexpected =
+      failure.code === STATS_ERROR_CODE.error || failure.code === STATS_ERROR_CODE.timeout;
+    const { cause } = failure;
+    logger[isUnexpected ? 'warn' : 'debug'](
+      `Unit stats ${what} failed for unit [${unitId}] (${failure.code}): ${
+        cause instanceof Error ? cause.message : String(cause)
+      }`
+    );
   }
 
   private async getDestinationStats({
@@ -269,11 +284,10 @@ export class UnitStatsClient {
         ),
       };
     } catch (error) {
-      return this.destinationFailure({
-        ids,
-        bucketMs,
-        failure: this.toKindError(error, query.unitId, what),
-      });
+      const failure = toSearchError(error, what);
+      this.logFailure(failure, { unitId: query.unitId, what });
+
+      return this.destinationFailure({ ids, bucketMs, failure: failure.toStatsError() });
     }
   }
 
@@ -315,10 +329,10 @@ export class UnitStatsClient {
         results: Object.fromEntries(ids.map((id) => [id, mapped[id] ?? noProcessorStats()])),
       };
     } catch (error) {
-      return this.processorFailure({
-        ids,
-        failure: this.toKindError(error, query.unitId, what),
-      });
+      const failure = toSearchError(error, what);
+      this.logFailure(failure, { unitId: query.unitId, what });
+
+      return this.processorFailure({ ids, failure: failure.toStatsError() });
     }
   }
 

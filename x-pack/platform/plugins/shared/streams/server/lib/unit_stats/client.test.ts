@@ -125,11 +125,12 @@ const statsQueries = (esql: jest.Mock): string[] =>
 const run = (
   esql: jest.Mock,
   request: StreamsUnit.StatsRequest = {},
-  statsUnit: StreamsUnit.Configuration = unit
+  statsUnit: StreamsUnit.Configuration = unit,
+  logger = loggingSystemMock.createLogger()
 ) =>
   new UnitStatsClient({
     esClient: { esql: { query: esql } } as unknown as ElasticsearchClient,
-    logger: loggingSystemMock.createLogger(),
+    logger,
   }).getStats({ unitId: 'default', unit: statsUnit, request, now });
 
 describe('UnitStatsClient.getStats', () => {
@@ -395,6 +396,25 @@ describe('UnitStatsClient.getStats', () => {
       expect(response.components.destinations['es-prod'].error).toBeUndefined();
       expect(response.components.destinations['es-prod'].events.incoming.rate.value).toBe(4.6);
       expect(response.error).toBeUndefined();
+    });
+
+    it('logs a query that fails or times out at warn, and an expected cluster state at debug', async () => {
+      const logsFor = async (error: Error) => {
+        const logger = loggingSystemMock.createLogger();
+        await run(makeEsql({ destinationRate: failWith(error) }), {}, unit, logger);
+        return logger;
+      };
+
+      const failed = await logsFor(responseError(500));
+      const timedOut = await logsFor(new errors.TimeoutError('timeout', {} as never));
+      const busy = await logsFor(responseError(429));
+      const forbidden = await logsFor(responseError(403));
+
+      expect(failed.warn).toHaveBeenCalledTimes(1);
+      expect(timedOut.warn).toHaveBeenCalledTimes(1);
+      expect(busy.warn).not.toHaveBeenCalled();
+      expect(busy.debug).toHaveBeenCalledTimes(1);
+      expect(forbidden.warn).not.toHaveBeenCalled();
     });
 
     it('gives a failed kind no data from the query that did succeed', async () => {
