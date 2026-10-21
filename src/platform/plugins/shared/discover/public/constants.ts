@@ -13,10 +13,9 @@ export const SEARCH_SESSION_ID_QUERY_PARAM = 'searchSessionId';
 
 export const CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY = 'discover.cascadeLayoutEnabled';
 export const SESSION_HTTP_API_ENABLED_FEATURE_FLAG_KEY = 'discover.sessionHttpApiEnabled';
-export const ENABLE_TANSTACK_DOC_VIEWER_TABLE_FEATURE_FLAG_KEY =
-  'discover.enableTanstackDocViewerTable';
+export const KBN_DATA_GRID_ENABLED_FEATURE_FLAG_KEY = 'discover.kbnDataGridEnabled';
 
-/** Default when the feature flag is unset: keep the existing EUI fields table. */
-export const DEFAULT_ENABLE_TANSTACK_DOC_VIEWER_TABLE = false;
+/** Default when the feature flag is unset: keep the existing EuiDataGrid based tables. */
+export const DEFAULT_KBN_DATA_GRID_ENABLED = false;
 
 export { IS_ESQL_DEFAULT_FEATURE_FLAG_KEY } from '@kbn/discover-utils';

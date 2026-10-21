@@ -51,7 +51,7 @@ import {
   useRestorableState,
   withRestorableState,
 } from './restorable_state';
-import { TanStackTableGrid } from './tanstack_table_grid';
+import { FieldsDataGrid } from './fields_data_grid';
 
 interface ItemsEntry {
   pinnedRows: FieldRow[];
@@ -98,7 +98,7 @@ const InternalDocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
   hideFilteringOnComputedColumns,
-  gridImplementation,
+  isKbnDataGridEnabled,
 }: DocViewRenderProps) => {
   const styles = useMemoCss(componentStyles);
 
@@ -393,10 +393,9 @@ const InternalDocViewerTable = ({
         </EuiSelectableMessage>
       ) : (
         <EuiFlexItem grow={Boolean(containerHeight)} css={styles.fieldsGridWrapper}>
-          {gridImplementation === 'tanstack' ? (
-            <TanStackTableGrid
+          {isKbnDataGridEnabled ? (
+            <FieldsDataGrid
               key={`fields-table-${hit.id}`}
-              containerWidth={containerWidth}
               rows={rows}
               isEsqlMode={isEsqlMode}
               toasts={toasts}

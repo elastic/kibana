@@ -342,7 +342,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: jest.fn(() => false),
       getIsEsqlDefault: jest.fn(() => false),
-      getDocViewerGridImplementation: jest.fn(() => 'unified'),
+      getKbnDataGridEnabled: jest.fn(() => false),
     },
     embeddableEditor: {
       isByValueEditor: jest.fn(() => false),

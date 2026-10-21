@@ -37,8 +37,6 @@ import type { UseTableFiltersCallbacksReturn } from './table_filters';
 import { useRestorableRef } from './restorable_state';
 import { GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE } from './table_grid_constants';
 
-export { GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE };
-
 function getGridProps(
   gridStyle?: EuiDataGridStyle
 ): Pick<EuiDataGridProps, 'columnVisibility' | 'rowHeightsOptions' | 'gridStyle'> {

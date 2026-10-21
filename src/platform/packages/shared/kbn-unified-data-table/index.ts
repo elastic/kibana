@@ -49,10 +49,3 @@ export type { UnifiedDataTableRestorableState } from './src/restorable_state';
 export { UnifiedDataTableSourceColumnHeader } from './src/components/data_table_source_column_header';
 
 export { type EuiDataGridRefProps } from '@elastic/eui';
-
-export {
-  CellActionsBubble,
-  type CellActionsBubbleAction,
-  type CellActionsBubbleProps,
-} from './src/components/cell_actions_bubble/cell_actions_bubble';
-export { cellActionsHostStyles } from './src/components/cell_actions_bubble/cell_actions_bubble_styles';

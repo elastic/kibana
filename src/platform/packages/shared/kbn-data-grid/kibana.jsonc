@@ -1,0 +1,8 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/data-grid",
+  "owner": "@elastic/kibana-discover",
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Generic, document-agnostic data grid (TanStack Table + Virtual) with cells, cell actions, cell expansion, keyboard navigation and EUI theming"
+}

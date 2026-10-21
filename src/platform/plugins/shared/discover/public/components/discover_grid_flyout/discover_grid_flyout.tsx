@@ -97,7 +97,7 @@ export function DiscoverGridFlyout({
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
   const isEsqlQuery = isOfAggregateQueryType(query);
-  const gridImplementation = services.discoverFeatureFlags.getDocViewerGridImplementation();
+  const isKbnDataGridEnabled = services.discoverFeatureFlags.getKbnDataGridEnabled();
   // Get actual hit with updated highlighted searches
   const actualHit = useMemo(() => hits?.find(({ id }) => id === hit?.id) || hit, [hit, hits]);
 
@@ -167,7 +167,7 @@ export function DiscoverGridFlyout({
       initialShareableState={initialShareableState}
       onShareableStateChange={onShareableStateChange}
       hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
-      gridImplementation={gridImplementation}
+      isKbnDataGridEnabled={isKbnDataGridEnabled}
     />
   );
 }

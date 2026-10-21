@@ -8,19 +8,8 @@
  */
 
 import type { FocusEvent, KeyboardEvent, MouseEvent, RefObject } from 'react';
-import React, {
-  createContext,
-  memo,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import { flexRender, type Cell, type Row } from '@tanstack/react-table';
-import type { Virtualizer } from '@tanstack/react-virtual';
-import type { EuiDataGridColumnCellAction } from '@elastic/eui';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { SerializedStyles } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -29,52 +18,22 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiPortal,
-  EuiSpacer,
   EuiText,
   EuiToolTip,
   keys,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { KbnWarningCallout } from '@kbn/ui-callout';
-import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { CellActionsBubbleAction } from '@kbn/unified-data-table';
-import { CellActionsBubble } from '@kbn/unified-data-table';
-import type { FieldRow } from './field_row';
-import { TableCell } from './table_cell';
 import {
-  getFilterExistsDisabledWarning,
-  getFilterInOutPairDisabledWarning,
-} from './table_cell_actions';
-import type { UseTableFiltersCallbacksReturn } from './table_filters';
-import { GRID_COLUMN_FIELD_VALUE } from './table_grid_constants';
-import type { GRID_COLUMN_FIELD_NAME } from './table_grid_constants';
-import { PIN_COLUMN_ID } from './tanstack_table_grid_constants';
-import type { TableStyles } from './tanstack_table_grid_styles';
-import { getPopoverAnchorStyles, popoverContentStyles } from './tanstack_table_grid_styles';
-
-type FieldColumnId = typeof GRID_COLUMN_FIELD_NAME | typeof GRID_COLUMN_FIELD_VALUE;
-
-/** Data shared by all field table cells, provided once by the grid instead of through column closures. */
-export interface FieldTableData {
-  rows: FieldRow[];
-  searchTerm?: string;
-  isEsqlMode: boolean;
-  onFindSearchTermMatch?: UseTableFiltersCallbacksReturn['onFindSearchTermMatch'];
-  filter?: DocViewFilterFn;
-  hideFilteringOnComputedColumns?: boolean;
-  fieldCellActions: EuiDataGridColumnCellAction[];
-  fieldValueCellActions: EuiDataGridColumnCellAction[];
-}
-
-export const FieldTableDataContext = createContext<FieldTableData | null>(null);
-
-const useFieldTableData = () => {
-  const data = useContext(FieldTableDataContext);
-  if (!data) {
-    throw new Error('FieldTableCell must be rendered inside a FieldTableDataContext provider');
-  }
-  return data;
-};
+  CELL_ACTIONS_TRIGGER_TEST_SUBJ,
+  CELL_EXPANSION_CLOSE_TEST_SUBJ,
+  CELL_EXPANSION_POPOVER_TEST_SUBJ,
+  CELL_EXPAND_BUTTON_TEST_SUBJ,
+} from '../constants';
+import type { DataGridStyles } from '../styles';
+import { getPopoverAnchorStyles, popoverContentStyles } from '../styles';
+import type { DataGridInternalColumn, DataGridProps } from '../types';
+import type { CellActionsBubbleAction } from './cell_actions_bubble/cell_actions_bubble';
+import { CellActionsBubble } from './cell_actions_bubble/cell_actions_bubble';
 
 interface CellExpansion {
   /** Viewport rect of what opened the expansion popover; undefined while it is closed. */
@@ -82,23 +41,6 @@ interface CellExpansion {
   open: (anchor?: HTMLElement | null) => void;
   close: () => void;
 }
-
-interface GridCellContextValue {
-  // Whether the cell is hovered or focused, so the comparatively heavy cell actions only mount for it.
-  isActive: boolean;
-  anchorRef: RefObject<HTMLDivElement | null>;
-  expansion: CellExpansion;
-}
-
-const GridCellContext = createContext<GridCellContextValue | null>(null);
-
-const useGridCell = () => {
-  const context = useContext(GridCellContext);
-  if (!context) {
-    throw new Error('FieldTableCell must be rendered inside a GridCell');
-  }
-  return context;
-};
 
 const useCellExpansion = (cellRef: RefObject<HTMLDivElement | null>): CellExpansion => {
   const [anchorRect, setAnchorRect] = useState<DOMRect>();
@@ -157,44 +99,34 @@ const CellActionPopoverButton: typeof EuiButtonEmpty = (props) => (
   <EuiButtonEmpty {...props} size="s" />
 );
 
-interface FieldTableCellProps {
+interface CellContentProps<TRow> {
+  column: DataGridInternalColumn<TRow>;
+  row: TRow;
   rowIndex: number;
   colIndex: number;
-  columnId: FieldColumnId;
+  // Whether the cell is hovered or focused, so the comparatively heavy cell actions only mount for it.
+  isActive: boolean;
+  anchorRef: RefObject<HTMLDivElement | null>;
+  expansion: CellExpansion;
 }
 
-export const FieldTableCell = memo(({ rowIndex, colIndex, columnId }: FieldTableCellProps) => {
-  const {
-    rows,
-    searchTerm,
-    isEsqlMode,
-    onFindSearchTermMatch,
-    filter,
-    hideFilteringOnComputedColumns,
-    fieldCellActions,
-    fieldValueCellActions,
-  } = useFieldTableData();
-  const { isActive, anchorRef, expansion } = useGridCell();
+const CellContent = <TRow,>({
+  column,
+  row,
+  rowIndex,
+  colIndex,
+  isActive,
+  anchorRef,
+  expansion,
+}: CellContentProps<TRow>) => {
+  const { id: columnId, cellActions = [], renderCell, renderCellExpansionFooter } = column;
   const { anchorRect, open: openExpansion, close: closeExpansion } = expansion;
   const isExpanded = anchorRect !== undefined;
-  const cellActions =
-    columnId === GRID_COLUMN_FIELD_VALUE ? fieldValueCellActions : fieldCellActions;
 
-  const row = rows[rowIndex];
-  const warningMessage = useMemo(() => {
-    if (!isExpanded) {
-      return undefined;
-    }
-    const params = { row, onFilter: filter, hideFilteringOnComputedColumns };
-    return columnId === GRID_COLUMN_FIELD_VALUE
-      ? getFilterInOutPairDisabledWarning(params)
-      : getFilterExistsDisabledWarning(params);
-  }, [isExpanded, row, filter, hideFilteringOnComputedColumns, columnId]);
-
-  const expandLabel = i18n.translate('unifiedDocViewer.fieldsTable.expandCellLabel', {
+  const expandLabel = i18n.translate('kbnDataGrid.cell.expandLabel', {
     defaultMessage: 'Expand cell',
   });
-  const closePopoverLabel = i18n.translate('unifiedDocViewer.fieldsTable.closePopover', {
+  const closePopoverLabel = i18n.translate('kbnDataGrid.cell.closePopoverLabel', {
     defaultMessage: 'Close popover',
   });
 
@@ -227,7 +159,7 @@ export const FieldTableCell = memo(({ rowIndex, colIndex, columnId }: FieldTable
           <EuiToolTip content={expandLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               // Same test subj as EuiDataGrid's expand button, so existing tests keep working.
-              data-test-subj="euiDataGridCellExpandButton"
+              data-test-subj={CELL_EXPAND_BUTTON_TEST_SUBJ}
               iconType="maximize"
               aria-label={expandLabel}
               size="xs"
@@ -242,18 +174,9 @@ export const FieldTableCell = memo(({ rowIndex, colIndex, columnId }: FieldTable
     ];
   }, [cellActions, colIndex, columnId, expandLabel, onExpandClick, rowIndex]);
 
-  const cellContentProps = {
-    searchTerm: searchTerm || '',
-    rows,
-    rowIndex,
-    columnId,
-    isESQLMode: isEsqlMode,
-    onFindSearchTermMatch,
-  };
-
   return (
     <>
-      <TableCell {...cellContentProps} isDetails={false} />
+      {renderCell({ row, rowIndex, columnId, isDetails: false })}
       {(isActive || isExpanded) && (
         <CellActionsBubble
           anchorCellRef={anchorRef}
@@ -270,26 +193,25 @@ export const FieldTableCell = memo(({ rowIndex, colIndex, columnId }: FieldTable
             ownFocus
             closePopover={closeExpansion}
             anchorPosition="downRight"
-            aria-label={i18n.translate('unifiedDocViewer.fieldsTable.cellPopoverAriaLabel', {
+            aria-label={i18n.translate('kbnDataGrid.cell.popoverAriaLabel', {
               defaultMessage: 'Cell details',
             })}
             panelPaddingSize="s"
             // Same test subj as EuiDataGrid's expansion popover, so existing tests keep working.
-            panelProps={{ 'data-test-subj': 'euiDataGridExpansionPopover' }}
+            panelProps={{ 'data-test-subj': CELL_EXPANSION_POPOVER_TEST_SUBJ }}
             button={<span aria-hidden="true" />}
           >
             <EuiFlexGroup gutterSize="none" responsive={false} alignItems="flexStart">
               <EuiFlexItem>
                 <EuiText size="s" css={popoverContentStyles}>
-                  <TableCell {...cellContentProps} isDetails />
+                  {renderCell({ row, rowIndex, columnId, isDetails: true })}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={closePopoverLabel} disableScreenReaderOutput>
                   <EuiButtonIcon
                     aria-label={closePopoverLabel}
-                    // Same test subj as the Discover grid cell popover close control.
-                    data-test-subj="docTableClosePopover"
+                    data-test-subj={CELL_EXPANSION_CLOSE_TEST_SUBJ}
                     iconType="cross"
                     iconSize="s"
                     size="xs"
@@ -316,40 +238,48 @@ export const FieldTableCell = memo(({ rowIndex, colIndex, columnId }: FieldTable
                 </EuiFlexGroup>
               </EuiPopoverFooter>
             )}
-            {Boolean(warningMessage) && (
-              <div>
-                <EuiSpacer size="xs" />
-                <KbnWarningCallout announceOnMount={false} title={warningMessage} size="s" />
-              </div>
-            )}
+            {renderCellExpansionFooter?.(row)}
           </EuiPopover>
         </EuiPortal>
       )}
     </>
   );
-});
-
-export const getColumnCss = (styles: TableStyles, columnId: string) => {
-  if (columnId === GRID_COLUMN_FIELD_VALUE) {
-    return styles.valueColumn;
-  }
-  return columnId === PIN_COLUMN_ID ? styles.pinColumn : styles.nameColumn;
 };
 
-interface GridCellProps {
-  cell: Cell<FieldRow, unknown>;
-  styles: TableStyles;
+interface DataGridCellProps<TRow> {
+  column: DataGridInternalColumn<TRow>;
+  row: TRow;
+  rowIndex: number;
+  /** 1-based, matching `aria-colindex`. */
+  colIndex: number;
+  styles: DataGridStyles;
+  layoutCss: SerializedStyles;
+  getCellProps?: DataGridProps<TRow>['getCellProps'];
   /** Roving tabindex: only one cell of the grid is a tab stop. */
   isTabStop: boolean;
 }
 
-export const GridCell = memo(({ cell, styles, isTabStop }: GridCellProps) => {
+const DataGridCellComponent = <TRow,>({
+  column,
+  row,
+  rowIndex,
+  colIndex,
+  styles,
+  layoutCss,
+  getCellProps,
+  isTabStop,
+}: DataGridCellProps<TRow>) => {
   const [isActive, setIsActive] = useState(false);
   const cellRef = useRef<HTMLDivElement>(null);
   const expansion = useCellExpansion(cellRef);
   const { open: openExpansion } = expansion;
-  const { id: columnId } = cell.column;
-  const hasActions = columnId !== PIN_COLUMN_ID;
+  const { id: columnId, isControl, cellCss, renderCell } = column;
+  const isInteractive = !isControl;
+  const {
+    css: extraCss,
+    className,
+    'data-test-subj': dataTestSubj,
+  } = getCellProps?.({ row, rowIndex, columnId }) ?? {};
 
   const onActivate = useCallback(() => setIsActive(true), []);
   const onDeactivate = useCallback(() => setIsActive(false), []);
@@ -370,78 +300,45 @@ export const GridCell = memo(({ cell, styles, isTabStop }: GridCellProps) => {
         // Prefer the expand icon when the actions toolbar is open; otherwise the collapsed
         // trigger sits in the same corner and is the correct popover anchor.
         const expandAnchor =
-          cell.querySelector<HTMLElement>('[data-test-subj="euiDataGridCellExpandButton"]') ??
-          cell.querySelector<HTMLElement>('[data-test-subj="tanStackCellActionsButton"]');
+          cell.querySelector<HTMLElement>(`[data-test-subj="${CELL_EXPAND_BUTTON_TEST_SUBJ}"]`) ??
+          cell.querySelector<HTMLElement>(`[data-test-subj="${CELL_ACTIONS_TRIGGER_TEST_SUBJ}"]`);
         openExpansion(expandAnchor ?? cell);
       }
     },
     [openExpansion]
   );
 
-  const contextValue = useMemo(
-    () => ({ isActive, anchorRef: cellRef, expansion }),
-    [isActive, expansion]
-  );
-
   return (
     <div
       ref={cellRef}
       role="gridcell"
-      aria-colindex={cell.column.getIndex() + 1}
+      aria-colindex={colIndex}
       data-gridcell-column-id={columnId}
+      data-test-subj={dataTestSubj}
+      className={className}
       tabIndex={isTabStop ? 0 : -1}
-      onMouseEnter={hasActions ? onActivate : undefined}
-      onMouseLeave={hasActions ? onDeactivate : undefined}
-      onFocus={hasActions ? onActivate : undefined}
-      onBlur={hasActions ? onBlur : undefined}
-      onKeyDown={hasActions ? onKeyDown : undefined}
-      css={[styles.cell, hasActions && styles.cellWithActions, getColumnCss(styles, columnId)]}
+      onMouseEnter={isInteractive ? onActivate : undefined}
+      onMouseLeave={isInteractive ? onDeactivate : undefined}
+      onFocus={isInteractive ? onActivate : undefined}
+      onBlur={isInteractive ? onBlur : undefined}
+      onKeyDown={isInteractive ? onKeyDown : undefined}
+      css={[styles.cell, isInteractive && styles.cellWithActions, layoutCss, cellCss, extraCss]}
     >
-      <GridCellContext.Provider value={contextValue}>
-        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-      </GridCellContext.Provider>
+      {isInteractive ? (
+        <CellContent
+          column={column}
+          row={row}
+          rowIndex={rowIndex}
+          colIndex={colIndex}
+          isActive={isActive}
+          anchorRef={cellRef}
+          expansion={expansion}
+        />
+      ) : (
+        renderCell({ row, rowIndex, columnId, isDetails: false })
+      )}
     </div>
   );
-});
+};
 
-interface GridRowProps {
-  row: Row<FieldRow>;
-  ariaRowIndex: number;
-  isStriped: boolean;
-  styles: TableStyles;
-  /** Column index (1-based) of the grid's tab stop when it is in this row. */
-  tabStopColIndex?: number;
-  // Set for virtualized rows, so the virtualizer can measure their auto height.
-  virtualIndex?: number;
-  measureElement?: Virtualizer<HTMLDivElement, Element>['measureElement'];
-}
-
-export const GridRow = memo(
-  ({
-    row,
-    ariaRowIndex,
-    isStriped,
-    styles,
-    tabStopColIndex,
-    virtualIndex,
-    measureElement,
-  }: GridRowProps) => (
-    <div
-      ref={measureElement}
-      data-index={virtualIndex}
-      role="row"
-      aria-rowindex={ariaRowIndex}
-      className="kbnDocViewer__tanStackRow"
-      css={[styles.row, isStriped && styles.rowStriped]}
-    >
-      {row.getVisibleCells().map((cell) => (
-        <GridCell
-          key={cell.id}
-          cell={cell}
-          styles={styles}
-          isTabStop={cell.column.getIndex() + 1 === tabStopColIndex}
-        />
-      ))}
-    </div>
-  )
-);
+export const DataGridCell = memo(DataGridCellComponent) as typeof DataGridCellComponent;

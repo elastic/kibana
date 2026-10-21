@@ -11,10 +11,23 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { cellActionsHostStyles } from '@kbn/unified-data-table';
-import { NAME_COLUMN_WIDTH_VAR, PIN_COLUMN_WIDTH } from './tanstack_table_grid_constants';
+import { cellActionsHostStyles } from './components/cell_actions_bubble/cell_actions_bubble_styles';
+import {
+  DATA_GRID_COLUMN_WIDTH_VAR_PREFIX,
+  DATA_GRID_REVEAL_ON_ROW_HOVER_CLASS,
+  DATA_GRID_ROW_CLASS,
+} from './constants';
 
-export type TableStyles = ReturnType<typeof useMemoCss<typeof componentStyles>>;
+export type DataGridStyles = ReturnType<typeof useMemoCss<typeof componentStyles>>;
+
+export const getColumnWidthVar = (columnIndex: number) =>
+  `${DATA_GRID_COLUMN_WIDTH_VAR_PREFIX}${columnIndex}`;
+
+/** Fixed width columns follow a CSS variable, so resizing doesn't re-render the rows. */
+export const getColumnLayoutStyles = (columnIndex: number, hasFixedWidth: boolean) =>
+  hasFixedWidth
+    ? css({ width: `var(${getColumnWidthVar(columnIndex)})`, flexShrink: 0 })
+    : css({ flex: '1 1 0', minWidth: 0 });
 
 // EuiPopover anchors to its own wrapper: overlay it on the expand icon (the trigger unmounts when the
 // bubble collapses), fixed in the viewport because the portal sits outside the virtualized rows.
@@ -38,9 +51,7 @@ export const popoverContentStyles = css({
 
 export const componentStyles = {
   scrollContainer: (themeContext: UseEuiTheme) => {
-    const { euiTheme } = themeContext;
     const { fontSize } = euiFontSize(themeContext, 's');
-    const fieldNameTopPadding = `calc(${euiTheme.size.xs} * 1.5)`;
 
     return css({
       position: 'relative',
@@ -51,28 +62,11 @@ export const componentStyles = {
       overflowX: 'hidden',
       fontSize,
 
-      '.kbnDocViewer__fieldName': {
-        paddingTop: fieldNameTopPadding,
-        paddingLeft: 0,
-        lineHeight: euiTheme.font.lineHeightMultiplier,
-      },
-
-      '.kbnDocViewer__fieldName_icon': {
-        paddingTop: fieldNameTopPadding,
-        lineHeight: euiTheme.font.lineHeightMultiplier,
-      },
-
-      '.kbnDocViewer__fieldName_multiFieldBadge': {
-        margin: `${euiTheme.size.xs} 0`,
-        fontWeight: euiTheme.font.weight.regular,
-        fontFamily: euiTheme.font.family,
-      },
-
-      '.kbnDocViewer__fieldsGrid__pinAction': {
+      [`.${DATA_GRID_REVEAL_ON_ROW_HOVER_CLASS}`]: {
         opacity: 0,
       },
 
-      '.kbnDocViewer__tanStackRow:hover .kbnDocViewer__fieldsGrid__pinAction, [data-gridcell-column-id="pin_field"]:focus-within .kbnDocViewer__fieldsGrid__pinAction':
+      [`.${DATA_GRID_ROW_CLASS}:hover .${DATA_GRID_REVEAL_ON_ROW_HOVER_CLASS}, [role="gridcell"]:focus-within .${DATA_GRID_REVEAL_ON_ROW_HOVER_CLASS}`]:
         {
           opacity: 1,
         },
@@ -130,7 +124,7 @@ export const componentStyles = {
         backgroundColor: euiTheme.colors.borderBasePlain,
       },
     }),
-  // Keeps many pinned fields from taking over the whole table.
+  // Keeps many pinned rows from taking over the whole grid.
   pinnedRows: ({ euiTheme }: UseEuiTheme) =>
     css({
       maxBlockSize: '40vh',
@@ -174,23 +168,5 @@ export const componentStyles = {
         outline: `${euiTheme.focus.width} solid ${euiTheme.colors.primary}`,
         outlineOffset: `calc(-1 * ${euiTheme.focus.width})`,
       },
-      '&[data-gridcell-column-id="name"]': {
-        paddingBlock: 0,
-      },
-      '&[data-gridcell-column-id="pin_field"]': {
-        padding: `calc(${euiTheme.size.xs} / 2) 0 0 ${euiTheme.size.xs}`,
-      },
     }),
-  pinColumn: css({
-    width: PIN_COLUMN_WIDTH,
-    flexShrink: 0,
-  }),
-  nameColumn: css({
-    width: `var(${NAME_COLUMN_WIDTH_VAR})`,
-    flexShrink: 0,
-  }),
-  valueColumn: css({
-    flex: '1 1 0',
-    minWidth: 0,
-  }),
 };

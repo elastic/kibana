@@ -12,6 +12,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiPortal, keys, useEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
+import { CELL_ACTIONS_TRIGGER_TEST_SUBJ } from '../../constants';
 import { CELL_ACTIONS_BUBBLE_CLASS, cellActionsBubbleStyles } from './cell_actions_bubble_styles';
 
 const CELL_ACTIONS_HOVER_OPEN_DELAY_MS = 350;
@@ -59,7 +60,7 @@ export const CellActionsBubble = React.memo(
     actions,
     anchorCellRef,
     stayVisible = false,
-    triggerTestSubj = 'tanStackCellActionsButton',
+    triggerTestSubj = CELL_ACTIONS_TRIGGER_TEST_SUBJ,
     toolbarAriaLabel,
     onTriggerActivate,
   }: CellActionsBubbleProps) => {
@@ -78,7 +79,7 @@ export const CellActionsBubble = React.memo(
 
     const cellActionsLabel =
       toolbarAriaLabel ??
-      i18n.translate('unifiedDataTable.cellActionsBubble.triggerAriaLabel', {
+      i18n.translate('kbnDataGrid.cellActionsBubble.triggerAriaLabel', {
         defaultMessage: 'Cell actions',
       });
 

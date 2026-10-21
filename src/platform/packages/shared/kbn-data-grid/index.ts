@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const PIN_COLUMN_ID = 'pin_field';
-export const PIN_COLUMN_WIDTH = 32;
-export const MIN_NAME_COLUMN_WIDTH = 150;
-export const MAX_NAME_COLUMN_WIDTH = 350;
-export const ESTIMATED_ROW_HEIGHT = 34;
-export const OVERSCAN = 10;
-// Column widths are applied through a CSS variable so resizing doesn't re-render rows.
-export const NAME_COLUMN_WIDTH_VAR = '--kbnDocViewerNameColumnWidth';
+export { DataGrid } from './src/components/data_grid';
+export { DATA_GRID_REVEAL_ON_ROW_HOVER_CLASS } from './src/constants';
+export type {
+  DataGridCellRenderProps,
+  DataGridColumn,
+  DataGridControlColumn,
+  DataGridElementProps,
+  DataGridProps,
+  DataGridRef,
+} from './src/types';
