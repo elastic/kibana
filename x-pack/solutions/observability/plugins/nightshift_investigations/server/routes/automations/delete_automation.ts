@@ -51,11 +51,17 @@ export const deleteAutomationRoute = createNightshiftInvestigationsServerRoute({
       const workflow = await workflowsManagement.management
         .getWorkflow(workflowId, spaceId, request)
         .catch(() => null);
-      if (workflow?.definition?.settings?.run_as) {
-        // A workflow bound to a service account keeps running as that account, so it must not
-        // outlive its automation: refuse before deleting anything, and let a failed delete fail
-        // the request and keep the automation.
-        await getInvestigatorServiceAccountService().assertCanModifyBoundAutomations(request);
+      // Only a workflow read as unbound may outlive its automation. A workflow bound to a service
+      // account keeps running as that account; so may one whose binding can't be read (lookup
+      // failed, or the caller can't read it). For those, a failed delete fails the request and
+      // keeps the automation. Deleting a workflow that no longer exists succeeds.
+      const isKnownUnbound =
+        Boolean(workflow?.definition) && !workflow?.definition?.settings?.run_as;
+      if (!isKnownUnbound) {
+        // Changing a bound workflow requires manage_security; refuse before deleting anything.
+        if (workflow?.definition?.settings?.run_as) {
+          await getInvestigatorServiceAccountService().assertCanModifyBoundAutomations(request);
+        }
         await workflowsManagement.management.deleteWorkflows([workflowId], spaceId, request);
       } else {
         // Best-effort: if workflow deletion fails the SO is still removed; an orphaned unbound
