@@ -16,17 +16,24 @@ import type {
 } from '@kbn/inspector-plugin/public';
 import { AppHeader, type AppHeaderBack, type AppHeaderMenu } from '@kbn/app-header';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { GraphState } from '../../state_management';
-import { datasourceSelector, hasFieldsSelector, metaDataSelector } from '../../state_management';
-import type { GraphSavePolicy, GraphWorkspaceSavedObject, Workspace } from '../../types';
-import type { AsObservable, SettingsWorkspaceProps } from '../settings';
+import type { GraphDispatch, GraphState } from '../../state_management';
+import {
+  datasourceSelector,
+  hasFieldsSelector,
+  metaDataSelector,
+  unblockAllNodes,
+  unblockNode,
+  workspaceSelector,
+} from '../../state_management';
+import type { GraphSavePolicy, GraphWorkspaceSavedObject } from '../../types';
+import { getIcon } from '../../helpers/style_choices';
+import type { AsObservable, BlocklistedNodeDisplay, SettingsWorkspaceProps } from '../settings';
 import { Settings } from '../settings';
 import { asSyncedObservable } from '../../helpers/as_observable';
 import { useInspector } from '../../helpers/use_inspector';
 import { getHomePath } from '../../services/url';
 
 interface WorkspaceTopNavMenuProps {
-  workspace: Workspace | undefined;
   confirmWipeWorkspace: (
     onConfirm: () => void,
     text?: string,
@@ -44,16 +51,17 @@ interface WorkspaceTopNavMenuProps {
 
 export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
   const store = useStore<GraphState>();
+  const dispatch = store.dispatch as GraphDispatch;
   const location = useLocation();
   const history = useHistory();
   const title = useSelector(metaDataSelector).title;
   const hasFields = useSelector(hasFieldsSelector);
   const datasource = useSelector(datasourceSelector);
   const allSavingDisabled = props.graphSavePolicy === 'none';
-  const isInspectDisabled = !props.workspace?.lastRequest;
+  const isInspectDisabled = props.requestAdapter.getRequests().length === 0;
   const canSave = Boolean(props.capabilities.graph.save);
 
-  const { confirmWipeWorkspace, savedWorkspace, workspace } = props;
+  const { confirmWipeWorkspace, savedWorkspace } = props;
 
   const { onOpenInspector } = useInspector({
     inspect: props.inspect,
@@ -127,14 +135,24 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
         }),
         iconType: 'gear',
         run: () => {
-          const currentWorkspace = workspace as Workspace;
-
-          const settingsObservable = asSyncedObservable(() => ({
-            blocklistedNodes: currentWorkspace.blocklistedNodes,
-            unblockNode: currentWorkspace.unblockNode,
-            unblockAll: currentWorkspace.unblockAll,
-            canEditDrillDownUrls: props.canEditDrillDownUrls,
-          })) as unknown as AsObservable<SettingsWorkspaceProps>['observable'];
+          const settingsObservable = asSyncedObservable(() => {
+            const { blocklistedNodeIds, blocklistedNodesById } = workspaceSelector(
+              store.getState()
+            );
+            return {
+              blocklistedNodes: blocklistedNodeIds.map((id) => {
+                const node = blocklistedNodesById[id];
+                return {
+                  id,
+                  label: node.label,
+                  icon: getIcon(node.icon ?? ''),
+                };
+              }),
+              unblockNode: (node: BlocklistedNodeDisplay) => dispatch(unblockNode(node.id)),
+              unblockAll: () => dispatch(unblockAllNodes()),
+              canEditDrillDownUrls: props.canEditDrillDownUrls,
+            };
+          }) as unknown as AsObservable<SettingsWorkspaceProps>['observable'];
 
           props.coreStart.overlays.openFlyout(
             toMountPoint(
@@ -199,6 +217,7 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
     canSave,
     confirmWipeWorkspace,
     datasource,
+    dispatch,
     hasFields,
     history,
     isInspectDisabled,
@@ -209,7 +228,6 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
     props.isInitialized,
     savedWorkspace,
     store,
-    workspace,
   ]);
 
   return <AppHeader title={title} back={back} menu={menu} />;

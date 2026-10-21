@@ -178,6 +178,7 @@ export class GraphPage {
       .getByRole('dialog', { name: 'Select a data source' })
       .getByRole('button', { name: dataViewName, exact: true })
       .click();
+    await this.addFieldButton.waitFor({ state: 'visible' });
     // EuiBadge is not a native control, so toBeEnabled() ignores its aria-disabled state.
     await expect(this.addFieldButton).toHaveAttribute('aria-disabled', 'false');
   }
@@ -189,6 +190,7 @@ export class GraphPage {
       .getByRole('dialog', { name: 'Select a data source' })
       .getByRole('button', { name: dataViewName, exact: true })
       .click();
+    await this.addFieldButton.waitFor({ state: 'visible' });
     // EuiBadge is not a native control, so toBeEnabled() ignores its aria-disabled state.
     await expect(this.addFieldButton).toHaveAttribute('aria-disabled', 'false');
   }

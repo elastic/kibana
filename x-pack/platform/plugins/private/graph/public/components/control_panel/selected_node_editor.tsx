@@ -6,20 +6,28 @@
  */
 
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Workspace, WorkspaceNode } from '../../types';
+import type { SelectedNodeView } from './selected_node_item';
 import { IconRenderer } from '../icon_renderer';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
 import { gphFormGroupSmallStyles } from './control_plane.styles';
+import {
+  groupSelectedNodes,
+  setNodeLabel,
+  type GraphDispatch,
+  ungroupNode,
+} from '../../state_management';
 
 interface SelectedNodeEditorProps {
-  workspace: Workspace;
-  selectedNode: WorkspaceNode;
+  selectedNodes: SelectedNodeView[];
+  selectedNode: SelectedNodeView;
 }
 
-export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEditorProps) => {
+export const SelectedNodeEditor = ({ selectedNodes, selectedNode }: SelectedNodeEditorProps) => {
+  const dispatch = useDispatch<GraphDispatch>();
   const { euiTheme } = useEuiTheme();
   const groupButtonMsg = i18n.translate('xpack.graph.sidebar.groupButtonTooltip', {
     defaultMessage: 'group the currently selected items into {latestSelectionLabel}',
@@ -31,14 +39,13 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
   });
 
   const onGroupButtonClick = () => {
-    workspace.groupSelections(selectedNode);
+    dispatch(groupSelectedNodes(selectedNode.id));
   };
   const onClickUngroup = () => {
-    workspace.ungroup(selectedNode);
+    dispatch(ungroupNode(selectedNode.id));
   };
   const onChangeSelectedVertexLabel = (event: React.ChangeEvent<HTMLInputElement>) => {
-    selectedNode.label = event.target.value;
-    workspace.changeHandler();
+    dispatch(setNodeLabel({ nodeId: selectedNode.id, label: event.target.value }));
   };
 
   return (
@@ -48,8 +55,8 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
         {selectedNode.data.field} {selectedNode.data.term}
       </div>
 
-      {(workspace.selectedNodes.length > 1 ||
-        (workspace.selectedNodes.length > 0 && workspace.selectedNodes[0] !== selectedNode)) && (
+      {(selectedNodes.length > 1 ||
+        (selectedNodes.length > 0 && selectedNodes[0] !== selectedNode)) && (
         <EuiToolTip content={groupButtonMsg}>
           <EuiButtonEmpty
             data-test-subj="graphGroupSelection"

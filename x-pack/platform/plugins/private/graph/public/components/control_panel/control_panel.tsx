@@ -7,17 +7,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { connect } from 'react-redux';
+import { connect, useDispatch, useSelector, useStore } from 'react-redux';
 import { type UseEuiTheme, useEuiShadow, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type {
-  ControlType,
-  TermIntersect,
-  UrlTemplate,
-  Workspace,
-  WorkspaceField,
-  WorkspaceNode,
-} from '../../types';
+import type { ControlType, TermIntersect, UrlTemplate, WorkspaceField } from '../../types';
 import { urlTemplateRegex } from '../../helpers/url_template';
 import { SelectionToolBar } from './selection_tool_bar';
 import { ControlPanelToolBar } from './control_panel_tool_bar';
@@ -27,23 +20,33 @@ import { MergeCandidates } from './merge_candidates';
 import { DrillDowns } from './drill_downs';
 import { DrillDownIconLinks } from './drill_down_icon_links';
 import type { GraphState } from '../../state_management';
-import { liveResponseFieldsSelector, templatesSelector } from '../../state_management';
-import { SelectedNodeItem } from './selected_node_item';
+import {
+  deselectNode,
+  type GraphDispatch,
+  liveResponseFieldsSelector,
+  templatesSelector,
+} from '../../state_management';
+import { SelectedNodeItem, type SelectedNodeView } from './selected_node_item';
+import { getIcon } from '../../helpers/style_choices';
+import { getOutlinkEncoder } from '../../helpers/outlink_encoders';
 import { gphSidebarHeaderStyles } from '../../styles';
+import { createRuntimeGraphFromState } from '../../services/workspace/sync_runtime_topology';
+import {
+  areControlPanelWorkspacesEqual,
+  controlPanelWorkspaceSelector,
+} from './control_panel_workspace_selector';
 
 export interface TargetOptions {
   toFields: WorkspaceField[];
 }
 
 interface ControlPanelProps {
-  renderCounter: number;
-  workspace: Workspace;
   control: ControlType;
-  selectedNode?: WorkspaceNode;
+  selectedNodeId?: string;
   colors: string[];
   mergeCandidates: TermIntersect[];
   onSetControl: (control: ControlType) => void;
-  selectSelected: (node: WorkspaceNode) => void;
+  selectSelected: (nodeId: string) => void;
 }
 
 interface ControlPanelStateProps {
@@ -52,32 +55,54 @@ interface ControlPanelStateProps {
 }
 
 const ControlPanelComponent = ({
-  workspace,
   liveResponseFields,
   urlTemplates,
   control,
-  selectedNode,
+  selectedNodeId,
   colors,
   mergeCandidates,
   onSetControl,
   selectSelected,
 }: ControlPanelProps & ControlPanelStateProps) => {
-  const hasNodes = workspace.nodes.length === 0;
+  const dispatch = useDispatch<GraphDispatch>();
+  const store = useStore<GraphState>();
+  const workspaceState = useSelector(controlPanelWorkspaceSelector, areControlPanelWorkspacesEqual);
+  const { nodeIds, nodesById, selectedNodeIds } = workspaceState;
+  const childCounts = nodeIds.reduce<Record<string, number>>((counts, nodeId) => {
+    const parentId = nodesById[nodeId].parentId;
+    if (parentId) counts[parentId] = (counts[parentId] ?? 0) + 1;
+    return counts;
+  }, {});
+  const selectedNodes = selectedNodeIds.map((nodeId): SelectedNodeView => {
+    const node = nodesById[nodeId];
+    return {
+      ...node,
+      icon: getIcon(node.icon ?? ''),
+      numChildren: childCounts[nodeId] ?? 0,
+    };
+  });
+  const hasNodes = nodeIds.length === 0;
+  const selectedNode = selectedNodes.find(({ id }) => id === selectedNodeId);
 
   const openUrlTemplate = (template: UrlTemplate) => {
+    const encoder = getOutlinkEncoder(template.encoderId);
+    if (!encoder) {
+      return;
+    }
     const url = template.url;
-    const newUrl = url.replace(urlTemplateRegex, template.encoder.encode(workspace!));
+    const newUrl = url.replace(
+      urlTemplateRegex,
+      encoder.encode(createRuntimeGraphFromState(store.getState().workspace), selectedNodeIds)
+    );
     window.open(newUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const onSelectedFieldClick = (node: WorkspaceNode) => {
-    selectSelected(node);
-    workspace.changeHandler();
+  const onSelectedFieldClick = (node: SelectedNodeView) => {
+    selectSelected(node.id);
   };
 
-  const onDeselectNode = (node: WorkspaceNode) => {
-    workspace.deselectNode(node);
-    workspace.changeHandler();
+  const onDeselectNode = (node: SelectedNodeView) => {
+    dispatch(deselectNode(node.id));
     onSetControl('none');
   };
 
@@ -91,11 +116,7 @@ const ControlPanelComponent = ({
         styles.gphSidebar,
       ]}
     >
-      <ControlPanelToolBar
-        workspace={workspace}
-        liveResponseFields={liveResponseFields}
-        onSetControl={onSetControl}
-      />
+      <ControlPanelToolBar liveResponseFields={liveResponseFields} onSetControl={onSetControl} />
 
       <div>
         <div css={gphSidebarHeaderStyles}>
@@ -103,9 +124,9 @@ const ControlPanelComponent = ({
             defaultMessage: 'Selections',
           })}
         </div>
-        <SelectionToolBar workspace={workspace} onSetControl={onSetControl} />
+        <SelectionToolBar onSetControl={onSetControl} />
         <div css={styles.gphSelectionList}>
-          {workspace.selectedNodes.length === 0 && (
+          {selectedNodes.length === 0 && (
             <p className="help-block">
               {i18n.translate('xpack.graph.sidebar.selections.noSelectionsHelpText', {
                 defaultMessage: 'No selections. Click on vertices to add.',
@@ -113,11 +134,11 @@ const ControlPanelComponent = ({
             </p>
           )}
 
-          {workspace.selectedNodes.map((node) => (
+          {selectedNodes.map((node) => (
             <SelectedNodeItem
               key={node.id}
               node={node}
-              isHighlighted={selectedNode === node}
+              isHighlighted={selectedNodeId === node.id}
               onSelectedFieldClick={onSelectedFieldClick}
               onDeselectNode={onDeselectNode}
             />
@@ -132,18 +153,12 @@ const ControlPanelComponent = ({
       {control === 'drillDowns' && (
         <DrillDowns urlTemplates={urlTemplates} openUrlTemplate={openUrlTemplate} />
       )}
-      {control === 'style' && workspace.selectedNodes.length > 0 && (
-        <SelectStyle workspace={workspace} colors={colors} />
-      )}
+      {control === 'style' && selectedNodes.length > 0 && <SelectStyle colors={colors} />}
       {control === 'editLabel' && selectedNode && (
-        <SelectedNodeEditor workspace={workspace} selectedNode={selectedNode} />
+        <SelectedNodeEditor selectedNodes={selectedNodes} selectedNode={selectedNode} />
       )}
       {control === 'mergeTerms' && (
-        <MergeCandidates
-          workspace={workspace}
-          mergeCandidates={mergeCandidates}
-          onSetControl={onSetControl}
-        />
+        <MergeCandidates mergeCandidates={mergeCandidates} onSetControl={onSetControl} />
       )}
     </div>
   );

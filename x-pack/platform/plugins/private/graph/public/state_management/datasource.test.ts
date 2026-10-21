@@ -12,7 +12,15 @@ import { datasourceSelector, requestDatasource } from './datasource';
 import { registerDatasourceListeners } from './datasource_listeners';
 import { fieldsSelector } from './fields';
 import { updateSettings } from './advanced_settings';
-import { createWorkspaceState, workspaceChanged, workspaceInitializedSelector } from './workspace';
+import {
+  createRuntimeGraphState,
+  initializeWorkspace,
+  workspaceChanged,
+  workspaceInitializedSelector,
+  workspaceSelector,
+  workspaceGraphMerged,
+  undoWorkspace,
+} from './workspace';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 const waitForPromise = () => new Promise((r) => setTimeout(r));
@@ -52,9 +60,9 @@ describe('datasource listener', () => {
 
   it('keeps a new workspace uninitialized after selecting a datasource', async () => {
     env.mockedDeps.notifyReact.mockImplementation(() => {
-      const workspace = env.mockedDeps.getWorkspace();
+      const workspace = env.mockedDeps.getRuntimeGraph();
       if (workspace) {
-        env.store.dispatch(workspaceChanged(createWorkspaceState(workspace)));
+        env.store.dispatch(workspaceChanged(createRuntimeGraphState(workspace)));
       }
     });
 
@@ -64,12 +72,47 @@ describe('datasource listener', () => {
     expect(workspaceInitializedSelector(env.store.getState())).toBe(false);
   });
 
+  it('clears graph state and history when switching datasource', async () => {
+    env.store.dispatch(initializeWorkspace());
+    env.store.dispatch(
+      workspaceGraphMerged({ nodes: [{ field: 'field', term: 'term' }], edges: [] })
+    );
+    env.store.dispatch(undoWorkspace());
+    expect(workspaceSelector(env.store.getState()).redoHistory).toHaveLength(1);
+
+    dispatchRequest();
+    await waitForPromise();
+
+    const workspaceState = workspaceSelector(env.store.getState());
+    expect(workspaceState).toEqual({
+      isInitialized: false,
+      isLayoutRunning: false,
+      nodesById: {},
+      nodeIds: [],
+      edgesById: {},
+      edgeIds: [],
+      selectedNodeIds: [],
+      selectedEdgeIds: [],
+      blocklistedNodesById: {},
+      blocklistedNodeIds: [],
+      undoHistory: [],
+      redoHistory: [],
+    });
+    const runtimeGraph = env.mockedDeps.getRuntimeGraph();
+    expect(new Set(Object.keys(runtimeGraph?.nodesMap ?? {}))).toEqual(
+      new Set(workspaceState.nodeIds)
+    );
+    expect(new Set(Object.keys(runtimeGraph?.edgesMap ?? {}))).toEqual(
+      new Set(workspaceState.edgeIds)
+    );
+  });
+
   it('should initialize workspace with the current advanced settings', async () => {
     const newSettings = { timeoutMillis: 123 } as AdvancedSettings;
     env.store.dispatch(updateSettings(newSettings));
     dispatchRequest();
     await waitForPromise();
-    expect(env.mockedDeps.createWorkspace).toHaveBeenCalledWith('test-pattern', newSettings);
+    expect(env.mockedDeps.createRuntimeGraph).toHaveBeenCalledWith();
   });
 
   it('should not carry over diversity field into new workspace', async () => {
@@ -80,9 +123,7 @@ describe('datasource listener', () => {
     env.store.dispatch(updateSettings(newSettings));
     dispatchRequest();
     await waitForPromise();
-    expect(env.mockedDeps.createWorkspace).toHaveBeenCalledWith('test-pattern', {
-      timeoutMillis: 123,
-    });
+    expect(env.mockedDeps.createRuntimeGraph).toHaveBeenCalledWith();
   });
 
   it('should discard a stale response when a newer datasource request finishes first', async () => {
@@ -113,11 +154,8 @@ describe('datasource listener', () => {
     await waitForPromise();
 
     expect(fieldsSelector(env.store.getState()).map(({ name }) => name)).toEqual(['second-field']);
-    expect(env.mockedDeps.createWorkspace).toHaveBeenCalledTimes(1);
-    expect(env.mockedDeps.createWorkspace).toHaveBeenCalledWith(
-      'second-pattern',
-      expect.anything()
-    );
+    expect(env.mockedDeps.createRuntimeGraph).toHaveBeenCalledTimes(1);
+    expect(env.mockedDeps.createRuntimeGraph).toHaveBeenCalledWith();
   });
 
   it('should error with a toast and abort if index pattern is not found', async () => {

@@ -8,9 +8,15 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { GraphWorkspaceSavedObject, Workspace } from '../types';
+import type { GraphWorkspaceSavedObject, RuntimeGraph } from '../types';
 import type { GraphStoreDependencies, GraphState, StartGraphListening } from '.';
-import { createWorkspaceState, initializeWorkspace, submitSearch, workspaceChanged } from '.';
+import {
+  createRuntimeGraphState,
+  initializeWorkspace,
+  submitSearch,
+  workspaceChanged,
+  workspaceRuntimeChanged,
+} from '.';
 import { datasourceSelector } from './datasource';
 import type { IndexpatternDatasource } from './datasource';
 import { setDatasource } from './datasource';
@@ -87,14 +93,12 @@ export const registerPersistenceListeners = (
         return;
       }
 
-      const createdWorkspace = deps.createWorkspace(
-        indexPattern.title,
-        settingsSelector(listenerApi.getState())
-      );
+      const createdWorkspace = deps.createRuntimeGraph();
       const { urlTemplates, advancedSettings, allFields } = savedWorkspaceToAppState(
         savedWorkspace,
         indexPattern,
-        createdWorkspace
+        createdWorkspace,
+        deps.mergeRuntimeGraph
       );
 
       // put everything in the store
@@ -112,11 +116,15 @@ export const registerPersistenceListeners = (
       listenerApi.dispatch(updateSettings(advancedSettings));
       listenerApi.dispatch(loadTemplates(urlTemplates));
       listenerApi.dispatch(initializeWorkspace());
-      listenerApi.dispatch(workspaceChanged(createWorkspaceState(createdWorkspace)));
+      listenerApi.dispatch(
+        workspaceChanged(
+          createRuntimeGraphState(createdWorkspace, deps.getLayoutController()?.isRunning())
+        )
+      );
       if (urlQuery) {
         listenerApi.dispatch(submitSearch(urlQuery));
       }
-      createdWorkspace.runLayout();
+      deps.getLayoutController()?.start();
     },
   });
 
@@ -130,21 +138,25 @@ export const registerPersistenceListeners = (
     effect: async (action: MatchedAction<GraphWorkspaceSavedObject>, listenerApi) => {
       listenerApi.cancelActiveListeners();
       const state = listenerApi.getState();
-      const workspace = deps.getWorkspace();
+      const runtimeGraph = deps.getRuntimeGraph();
       const selectedDatasource = datasourceSelector(state).current;
-      if (!workspace || selectedDatasource.type === 'none') {
+      if (!runtimeGraph || selectedDatasource.type === 'none') {
         return;
       }
 
       const savedObjectId = await Promise.race([
         showModal({
           deps,
-          workspace,
+          runtimeGraph,
           savedWorkspace: action.payload,
           getState: () => {
-            const currentWorkspace = deps.getWorkspace();
+            const currentWorkspace = deps.getRuntimeGraph();
             if (currentWorkspace) {
-              listenerApi.dispatch(workspaceChanged(createWorkspaceState(currentWorkspace)));
+              listenerApi.dispatch(
+                workspaceRuntimeChanged(
+                  createRuntimeGraphState(currentWorkspace, deps.getLayoutController()?.isRunning())
+                )
+              );
             }
             return listenerApi.getState();
           },
@@ -163,13 +175,13 @@ export const registerPersistenceListeners = (
 
 function showModal({
   deps,
-  workspace,
+  runtimeGraph,
   savedWorkspace,
   getState,
   selectedDatasource,
 }: {
   deps: GraphStoreDependencies;
-  workspace: Workspace;
+  runtimeGraph: RuntimeGraph;
   savedWorkspace: GraphWorkspaceSavedObject;
   getState: () => GraphState;
   selectedDatasource: IndexpatternDatasource;
@@ -207,7 +219,7 @@ function showModal({
           values: { workspaceTitle: savedWorkspace.title },
         });
         let text;
-        if (!canSaveData && workspace.nodes.length > 0) {
+        if (!canSaveData && runtimeGraph.nodes.length > 0) {
           text = i18n.translate('xpack.graph.saveWorkspace.successNotification.noDataSavedText', {
             defaultMessage: 'The configuration was saved, but the data was not saved',
           });
@@ -239,7 +251,7 @@ function showModal({
 
   openSaveModal({
     savePolicy: deps.savePolicy,
-    hasData: workspace.nodes.length > 0 || workspace.blocklistedNodes.length > 0,
+    hasData: runtimeGraph.nodes.length > 0 || runtimeGraph.blocklistedNodes.length > 0,
     workspace: savedWorkspace,
     saveWorkspace: saveWorkspaceHandler,
     services: deps,

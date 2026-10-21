@@ -88,10 +88,14 @@ export const useGraphLoader = ({ toastNotifications, coreStart }: UseGraphLoader
     [requestAdapter]
   );
 
-  // Replacement function for graphClientWorkspace's comms so
-  // that it works with Kibana.
+  // Adapts Graph Explore requests to Kibana HTTP, inspector, and loading services.
   const callNodeProxy = useCallback(
-    (indexName: string, query: ExploreRequest, responseHandler: GraphExploreCallback) => {
+    (
+      indexName: string,
+      query: ExploreRequest,
+      responseHandler: GraphExploreCallback,
+      errorHandler?: (error: Error) => void
+    ) => {
       const dsl = { index: indexName, query };
       const request = { body: JSON.stringify(dsl) };
       setLoading(true);
@@ -118,15 +122,21 @@ export const useGraphLoader = ({ toastNotifications, coreStart }: UseGraphLoader
         .catch((e) => {
           inspectRequest.error({ json: e });
           handleHttpError(e);
+          errorHandler?.(e);
         })
         .finally(() => setLoading(false));
     },
     [coreStart.http, getRequestInspector, handleHttpError, requestAdapter, toastNotifications]
   );
 
-  // Helper function for the graphClientWorkspace to perform a query
+  // Adapts Elasticsearch search requests to Kibana HTTP, inspector, and loading services.
   const callSearchNodeProxy = useCallback(
-    (indexName: string, query: SearchRequest, responseHandler: GraphSearchCallback) => {
+    (
+      indexName: string,
+      query: SearchRequest,
+      responseHandler: GraphSearchCallback,
+      errorHandler?: (error: Error) => void
+    ) => {
       const dsl = { index: indexName, body: query };
       const request = { body: JSON.stringify(dsl) };
       setLoading(true);
@@ -145,6 +155,7 @@ export const useGraphLoader = ({ toastNotifications, coreStart }: UseGraphLoader
         .catch((e) => {
           inspectRequest.error({ json: e });
           handleHttpError(e);
+          errorHandler?.(e);
         })
         .finally(() => setLoading(false));
     },

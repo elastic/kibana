@@ -6,12 +6,13 @@
  */
 
 import React, { useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import type { ZoomEvent } from 'd3';
 import d3 from 'd3';
 import { css } from '@emotion/react';
 import { type UseEuiTheme, euiTextTruncate, useEuiTheme } from '@elastic/eui';
 import type {
-  Workspace,
+  RuntimeGraph,
   WorkspaceNode,
   TermIntersect,
   ControlType,
@@ -20,12 +21,23 @@ import type {
 import { makeNodeId } from '../../services/persistence';
 import { getIconOffset, IconRenderer } from '../icon_renderer';
 import { noUserSelectStyles } from '../../styles';
+import {
+  toggleEdgeSelection,
+  toggleNodeSelection,
+  type GraphDispatch,
+  workspaceSelector,
+} from '../../state_management';
 
 export interface GraphVisualizationProps {
-  workspace: Workspace;
+  runtimeGraph: RuntimeGraph;
   onSetControl: (control: ControlType) => void;
-  selectSelected: (node: WorkspaceNode) => void;
+  selectSelected: (nodeId: string) => void;
   onSetMergeCandidates: (terms: TermIntersect[]) => void;
+  getMergeCandidates?: (nodes: WorkspaceNode[]) => Promise<TermIntersect[]>;
+  onToggleNodeSelection: (node: WorkspaceNode, replace: boolean) => boolean;
+  onToggleEdgeSelection: (edge: WorkspaceEdge) => boolean;
+  selectedNodeIds: readonly string[];
+  selectedEdgeIds: readonly string[];
 }
 
 function registerZooming(element: SVGSVGElement) {
@@ -54,10 +66,15 @@ function makeEdgeId(edge: WorkspaceEdge) {
 }
 
 export function GraphVisualization({
-  workspace,
+  runtimeGraph,
   selectSelected,
   onSetControl,
   onSetMergeCandidates,
+  getMergeCandidates,
+  onToggleNodeSelection,
+  onToggleEdgeSelection,
+  selectedNodeIds,
+  selectedEdgeIds,
 }: GraphVisualizationProps) {
   const svgRoot = useRef<SVGSVGElement | null>(null);
 
@@ -67,17 +84,11 @@ export function GraphVisualization({
     // Selection logic - shift key+click helps selects multiple nodes
     // Without the shift key we deselect all prior selections (perhaps not
     // a great idea for touch devices with no concept of shift key)
-    if (!event.shiftKey) {
-      const prevSelection = n.isSelected;
-      workspace.selectNone();
-      n.isSelected = prevSelection;
-    }
-    if (workspace.toggleNodeSelection(n)) {
-      selectSelected(n);
+    if (onToggleNodeSelection(n, !event.shiftKey)) {
+      selectSelected(n.id);
     } else {
       onSetControl('none');
     }
-    workspace.changeHandler();
   };
 
   const handleMergeCandidatesCallback = (termIntersects: TermIntersect[]) => {
@@ -86,21 +97,12 @@ export function GraphVisualization({
     onSetControl('mergeTerms');
   };
 
-  const edgeClick = (edge: WorkspaceEdge) => {
-    // no multiple selection for now
-    const currentSelection = workspace.getEdgeSelection();
-    if (currentSelection.length && currentSelection[0] !== edge) {
-      workspace.clearEdgeSelection();
-    }
-    if (!edge.isSelected) {
-      workspace.addEdgeToSelection(edge);
-    } else {
-      workspace.removeEdgeFromSelection(edge);
-    }
+  const edgeClick = async (edge: WorkspaceEdge) => {
+    const isSelected = onToggleEdgeSelection(edge);
     onSetControl('edgeSelection');
 
-    if (edge.isSelected) {
-      workspace.getAllIntersections(handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
+    if (isSelected && getMergeCandidates) {
+      handleMergeCandidatesCallback(await getMergeCandidates([edge.topSrc, edge.topTarget]));
     }
   };
 
@@ -122,8 +124,8 @@ export function GraphVisualization({
     >
       <g>
         <g>
-          {workspace.edges &&
-            workspace.edges.map((edge) => (
+          {runtimeGraph.edges &&
+            runtimeGraph.edges.map((edge) => (
               <g key={makeEdgeId(edge)} css={styles.edgeWrapper}>
                 {/* Draw two edges: a thicker one for better click handling and the one to show the user */}
                 <line
@@ -137,7 +139,7 @@ export function GraphVisualization({
                   css={[
                     styles.edge(euiThemeContext),
                     // the stroke and stroke-opacity are overridden
-                    edge.isSelected &&
+                    selectedEdgeIds.includes(edge.id ?? makeEdgeId(edge)) &&
                       css`
                         stroke: ${euiThemeContext.euiTheme.colors.darkShade};
                         stroke-opacity: 0.95;
@@ -164,8 +166,8 @@ export function GraphVisualization({
               </g>
             ))}
         </g>
-        {workspace.nodes &&
-          workspace.nodes
+        {runtimeGraph.nodes &&
+          runtimeGraph.nodes
             .filter((node) => !node.parent)
             .map((node) => {
               const iconOffset = getIconOffset(node.icon);
@@ -200,7 +202,7 @@ export function GraphVisualization({
                       css`
                         fill: ${node.color};
                       `,
-                      node.isSelected &&
+                      selectedNodeIds.includes(node.id) &&
                         css`
                           stroke-width: ${euiThemeContext.euiTheme.size.xs};
                           stroke: ${euiThemeContext.euiTheme.colors.borderBasePrimary};
@@ -299,6 +301,37 @@ const svgTextStyles = ({ euiTheme }: UseEuiTheme) =>
     fill: euiTheme.colors.darkShade,
     color: euiTheme.colors.darkShade,
   });
+
+type ReduxGraphVisualizationProps = Omit<
+  GraphVisualizationProps,
+  'onToggleNodeSelection' | 'onToggleEdgeSelection' | 'selectedNodeIds' | 'selectedEdgeIds'
+>;
+
+export const ReduxGraphVisualization = (props: ReduxGraphVisualizationProps) => {
+  const dispatch = useDispatch<GraphDispatch>();
+  // D3 mutates the runtime graph; workspace updates trigger position renders during layout ticks.
+  const { selectedEdgeIds, selectedNodeIds } = useSelector(workspaceSelector);
+
+  return (
+    <GraphVisualization
+      {...props}
+      selectedNodeIds={selectedNodeIds}
+      selectedEdgeIds={selectedEdgeIds}
+      onToggleNodeSelection={(node, replace) => {
+        const isSelected = selectedNodeIds.includes(node.id);
+        const willBeSelected = replace ? !isSelected || selectedNodeIds.length > 1 : !isSelected;
+        dispatch(toggleNodeSelection({ nodeId: node.id, replace }));
+        return willBeSelected;
+      }}
+      onToggleEdgeSelection={(edge) => {
+        const edgeId = edge.id ?? makeEdgeId(edge);
+        const willBeSelected = !selectedEdgeIds.includes(edgeId);
+        dispatch(toggleEdgeSelection(edgeId));
+        return willBeSelected;
+      }}
+    />
+  );
+};
 
 const styles = {
   graph: css({

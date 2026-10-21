@@ -10,11 +10,11 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { GraphStoreDependencies, StartGraphListening } from './store';
 import { loadFields } from './fields';
 import { mapFields } from '../services/persistence';
-import { settingsSelector } from './advanced_settings';
 import type { IndexpatternDatasource } from './datasource';
 import { datasourceLoaded, setDatasource, requestDatasource } from './datasource';
 import type { MatchedAction } from './helpers';
 import { matchesAction } from './helpers';
+import { createRuntimeGraphState, workspaceChanged } from './workspace';
 
 /**
  * Listener loading field information when the datasource is switched. This will overwrite current settings
@@ -24,7 +24,7 @@ import { matchesAction } from './helpers';
  */
 export const registerDatasourceListeners = (
   startListening: StartGraphListening,
-  { indexPatternProvider, notifications, createWorkspace, notifyReact }: GraphStoreDependencies
+  { indexPatternProvider, notifications, createRuntimeGraph, notifyReact }: GraphStoreDependencies
 ) => {
   startListening({
     matcher: matchesAction(requestDatasource),
@@ -52,7 +52,8 @@ export const registerDatasourceListeners = (
 
       listenerApi.dispatch(loadFields(mapFields(indexPattern)));
       listenerApi.dispatch(datasourceLoaded());
-      createWorkspace(indexPattern.title, settingsSelector(listenerApi.getState()));
+      const runtimeGraph = createRuntimeGraph();
+      listenerApi.dispatch(workspaceChanged(createRuntimeGraphState(runtimeGraph)));
       notifyReact();
     },
   });

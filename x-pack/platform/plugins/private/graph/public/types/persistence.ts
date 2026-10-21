@@ -12,7 +12,7 @@ import type { WorkspaceNode, WorkspaceEdge } from './workspace_state';
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
 /**
- * Workspace fetched from server.
+ * RuntimeGraph fetched from server.
  */
 export interface GraphWorkspaceSavedObject {
   copyOnSave?: boolean;
@@ -48,7 +48,7 @@ export interface SerializedWorkspaceState {
   exploreControls: AdvancedSettings;
 }
 
-export interface SerializedUrlTemplate extends Omit<UrlTemplate, 'encoder' | 'icon'> {
+export interface SerializedUrlTemplate extends Omit<UrlTemplate, 'encoderId' | 'icon'> {
   encoderID: string;
   iconClass?: string;
 }

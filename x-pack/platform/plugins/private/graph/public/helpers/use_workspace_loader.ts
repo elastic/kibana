@@ -16,13 +16,13 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { GraphStore } from '../state_management';
-import type { GraphWorkspaceSavedObject, Workspace } from '../types';
+import type { GraphWorkspaceSavedObject, RuntimeGraph } from '../types';
 import { getEmptyWorkspace, getSavedWorkspace } from './saved_workspace_utils';
 import { getEditUrl } from '../services/url';
 
 export interface UseWorkspaceLoaderProps {
   store: GraphStore;
-  workspaceRef: React.MutableRefObject<Workspace | undefined>;
+  runtimeGraphRef: React.MutableRefObject<RuntimeGraph | undefined>;
   contentClient: ContentClient;
   coreStart: CoreStart;
   spaces?: SpacesApi;
@@ -47,7 +47,7 @@ interface WorkspaceLoadedState {
 export const useWorkspaceLoader = ({
   coreStart,
   spaces,
-  workspaceRef,
+  runtimeGraphRef,
   store,
   contentClient,
   data,
@@ -128,7 +128,7 @@ export const useWorkspaceLoader = ({
        */
       if (fetchedSavedWorkspace.id) {
         loadWorkspace(fetchedSavedWorkspace, dataViews);
-      } else if (workspaceRef.current) {
+      } else if (runtimeGraphRef.current) {
         clearStore();
       }
       setState({
@@ -146,7 +146,7 @@ export const useWorkspaceLoader = ({
     contentClient,
     setState,
     coreStart,
-    workspaceRef,
+    runtimeGraphRef,
     spaces,
     data.dataViews,
   ]);

@@ -7,14 +7,14 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { NotificationsStart, HttpStart, OverlayStart } from '@kbn/core/public';
-import type { Action } from 'redux';
+import type { Action, Dispatch } from 'redux';
 import { configureStore, createListenerMiddleware } from '@reduxjs/toolkit';
 import type { ChromeStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { GraphStoreDependencies, GraphStore, GraphState, StartGraphListening } from './store';
 import { createRootReducer } from './store';
-import type { Workspace } from '../types';
+import type { RuntimeGraph } from '../types';
 
 export interface MockedGraphEnvironment {
   store: GraphStore;
@@ -45,16 +45,18 @@ export function createMockGraphStore({
   initialStateOverwrites?: Partial<GraphState>;
 }): MockedGraphEnvironment {
   const coreStart = coreMock.createStart();
-  const workspaceMock = {
-    runLayout: jest.fn(),
-    simpleSearch: jest.fn(),
+  const layoutControllerMock = {
+    start: jest.fn(),
+    stop: jest.fn(),
+    isRunning: jest.fn(() => false),
+  };
+  const workspaceMock: RuntimeGraph = {
     nodes: [],
+    nodesMap: {},
     edges: [],
-    selectedNodes: [],
-    getEdgeSelection: jest.fn(() => []),
-    options: {},
+    edgesMap: {},
     blocklistedNodes: [],
-  } as unknown as Workspace;
+  };
 
   const mockedDeps: jest.Mocked<GraphStoreDependencies> = {
     ...coreStart,
@@ -64,8 +66,9 @@ export function createMockGraphStore({
     chrome: {
       setBreadcrumbs: jest.fn(),
     } as unknown as ChromeStart,
-    createWorkspace: jest.fn((_index: string, _advancedSettings) => workspaceMock),
-    getWorkspace: jest.fn(() => workspaceMock),
+    createRuntimeGraph: jest.fn(() => workspaceMock),
+    getRuntimeGraph: jest.fn(() => workspaceMock),
+    getLayoutController: jest.fn(() => layoutControllerMock),
     contentClient: {
       get: jest.fn(),
       search: jest.fn(),
@@ -93,9 +96,12 @@ export function createMockGraphStore({
       openModal: jest.fn(),
     } as unknown as OverlayStart,
     handleSearchQueryError: jest.fn(),
+    exploreGraph: jest.fn(),
+    searchGraph: jest.fn(),
+    mergeRuntimeGraph: jest.fn(),
     ...mockedDepsOverwrites,
   };
-  const listenerMiddleware = createListenerMiddleware<GraphState, GraphStore['dispatch']>();
+  const listenerMiddleware = createListenerMiddleware<GraphState, Dispatch<Action<string>>>();
   const rootReducer = createRootReducer(mockedDeps.addBasePath);
   const initializedRootReducer = (state: GraphState | undefined, action: Action<string>) =>
     rootReducer(state || (initialStateOverwrites as GraphState), action);
