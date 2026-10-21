@@ -31,6 +31,14 @@ const resolvedUser = {
   profileUid: 'worker-uid',
 };
 const resolveUser = jest.fn().mockResolvedValue(resolvedUser);
+const resolveWorkerName = jest.fn().mockResolvedValue(undefined);
+
+/** A service account has no full name of its own, so the Worker names it. */
+const serviceAccountUser = {
+  username: 'kibana/alertzero_alert_triage',
+  fullName: null,
+  email: null,
+};
 
 /** Allows everything by default; a test overrides the one call it exercises. */
 const allowAll = (): jest.Mocked<ProposalPrivilegesChecker> => ({
@@ -255,6 +263,7 @@ describe('proposals.createProposal step', () => {
     definition: getCreateProposalStepDefinition({
       getProposalsService: () => ({ create } as unknown as ProposalsService),
       resolveUser,
+      resolveWorkerName,
       privileges,
     }),
     privileges,
@@ -295,6 +304,58 @@ describe('proposals.createProposal step', () => {
       alwaysGate: false,
       expiresAt: '2026-09-04T00:00:00.000Z',
     });
+  });
+
+  it('should name the creator after the Worker when the account has no full name', async () => {
+    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending' });
+    resolveUser.mockResolvedValueOnce(serviceAccountUser);
+    resolveWorkerName.mockResolvedValueOnce('Alert Triage');
+    const { definition } = createDefinition(create);
+
+    await definition.handler(
+      createContext({ conversationId: 'conv-1', origin: 'alertzero', comment: 'Tune' })
+    );
+
+    expect(resolveWorkerName).toHaveBeenCalledWith({
+      executionId: EXECUTION_ID,
+      spaceId: SPACE_ID,
+      request: FAKE_REQUEST,
+    });
+    expect(create).toHaveBeenCalledWith(expect.anything(), {
+      spaceId: SPACE_ID,
+      request: FAKE_REQUEST,
+      user: { ...serviceAccountUser, fullName: 'Alert Triage' },
+    });
+  });
+
+  it('should keep the raw username when no Worker name resolves', async () => {
+    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending' });
+    resolveUser.mockResolvedValueOnce(serviceAccountUser);
+    const { definition } = createDefinition(create);
+
+    await definition.handler(
+      createContext({ conversationId: 'conv-1', origin: 'alertzero', comment: 'Tune' })
+    );
+
+    expect(create).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ user: serviceAccountUser })
+    );
+  });
+
+  it('should not look up a Worker name for a user who already has a full name', async () => {
+    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending' });
+    const { definition } = createDefinition(create);
+
+    await definition.handler(
+      createContext({ conversationId: 'conv-1', origin: 'alertzero', comment: 'Tune' })
+    );
+
+    expect(resolveWorkerName).not.toHaveBeenCalled();
+    expect(create).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ user: resolvedUser })
+    );
   });
 
   it('should hand the proposalId to the service as its id', async () => {
@@ -511,6 +572,7 @@ describe('proposals.updateProposal step', () => {
     getUpdateProposalStepDefinition({
       getProposalsService: () => ({ update } as unknown as ProposalsService),
       resolveUser,
+      resolveWorkerName,
       privileges,
     });
 
@@ -554,6 +616,40 @@ describe('proposals.updateProposal step', () => {
     );
   });
 
+  it('should name an auto-approving Worker as the decider when the account has no full name', async () => {
+    const update = jest
+      .fn()
+      .mockResolvedValue({ id: 'proposal-1', status: 'executing', decision: 'approved' });
+    resolveUser.mockResolvedValueOnce(serviceAccountUser);
+    resolveWorkerName.mockResolvedValueOnce('Alert Triage');
+
+    await updateDefinition(update).handler(
+      createContext({ proposalId: 'proposal-1', decision: 'approved', status: 'executing' })
+    );
+
+    expect(resolveWorkerName).toHaveBeenCalledWith({
+      executionId: EXECUTION_ID,
+      spaceId: SPACE_ID,
+      request: FAKE_REQUEST,
+    });
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({ decidedBy: { ...serviceAccountUser, fullName: 'Alert Triage' } }),
+      SPACE_ID
+    );
+  });
+
+  it('should not look up a Worker name when a person decided', async () => {
+    const update = jest
+      .fn()
+      .mockResolvedValue({ id: 'proposal-1', status: 'executing', decision: 'approved' });
+
+    await updateDefinition(update).handler(
+      createContext({ proposalId: 'proposal-1', decision: 'approved', status: 'executing' })
+    );
+
+    expect(resolveWorkerName).not.toHaveBeenCalled();
+  });
+
   it('should fall back to the gate username when the request yields no identity', async () => {
     const update = jest
       .fn()
@@ -589,6 +685,7 @@ describe('proposals.updateProposal step', () => {
       SPACE_ID
     );
     expect(resolveUser).not.toHaveBeenCalled();
+    expect(resolveWorkerName).not.toHaveBeenCalled();
   });
 
   it('should return the decision so the workflow can read back what it wrote', async () => {
