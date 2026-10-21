@@ -16,3 +16,6 @@ export const RISK_SCORE_ENTITY_CALCULATION_URL =
 export const RISK_SCORE_ENTITY_CALCULATION_V2_URL =
   `${INTERNAL_RISK_SCORE_URL}/calculation/entity_v2` as const;
 export const RISK_SCORE_HISTORY_URL = `${PUBLIC_RISK_SCORE_URL}/history` as const;
+
+/** Entity store maintainer that runs V2 risk scoring. */
+export const RISK_SCORE_MAINTAINER_ID = 'risk-score' as const;
