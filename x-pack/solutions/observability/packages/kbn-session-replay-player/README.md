@@ -190,7 +190,8 @@ node scripts/storybook session_replay_player
 node scripts/jest --config x-pack/solutions/observability/packages/kbn-session-replay-player/jest.config.js
 ```
 
-Stories cover the common cases, long and slow loading, failure and retry, every unavailable state,
+Every story has a "What is this story about?" button at the bottom left that explains what to look
+at and which controls it has. Stories cover the common cases, long and slow loading, failure and retry, every unavailable state,
 dense markers, canvas, hostile content, narrow and flyout layouts, and rapid mounting and
 unmounting. The hostile story is the one to open with the browser's network panel visible: nothing
 is requested and nothing runs.

@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { SessionReplayPlayer } from '../..';
 import type { ReplayTimeUpdateReason, SessionReplayPlayerHandle } from '../..';
+import { withStoryInfo } from './story_info';
 import {
   FIXTURES,
   Frame,
@@ -45,6 +46,7 @@ const meta: Meta<typeof ReplayStory> = {
         <Story />
       </Frame>
     ),
+    withStoryInfo,
   ],
 };
 

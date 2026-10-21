@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { Suspense, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { SessionReplayThumbnail, extractThumbnailSnapshot } from '../..';
 import type { ReplayEvent, ReplayThumbnailSnapshot } from '../..';
 import { parseReplayEvents } from '../model/replay_event_guards';
 import { formatClock } from '../model/time_format';
+import { withStoryInfo } from './story_info';
 import { FIXTURES } from './story_data';
 import thumbShopList from '../../fixtures/thumb_shop_list.json';
 import thumbCheckout from '../../fixtures/thumb_checkout.json';
@@ -38,20 +39,21 @@ interface Row {
   events: ReplayEvent[];
 }
 
-const ROWS: Row[] = Array.from({ length: 25 }, (_, position) => {
-  const page = PAGES[position % PAGES.length];
-  const outcome: Outcome = position === 7 ? 'missing' : position === 12 ? 'fails' : 'ok';
-  return {
-    id: `session-${position + 1}`,
-    page: page.name,
-    durationMs: page.durationMs + position * 1_000,
-    outcome,
-    events: page.events,
-  };
-});
+const buildRows = (count: number): Row[] =>
+  Array.from({ length: count }, (_, position) => {
+    const page = PAGES[position % PAGES.length];
+    const outcome: Outcome = position === 7 ? 'missing' : position === 12 ? 'fails' : 'ok';
+    return {
+      id: `session-${position + 1}`,
+      page: page.name,
+      durationMs: page.durationMs + position * 1_000,
+      outcome,
+      events: page.events,
+    };
+  });
 
 /** What a host does: fetch the start of the recording, then take the snapshot from it. */
-const loadSnapshot = (row: Row): Promise<ReplayThumbnailSnapshot | undefined> =>
+const loadSnapshot = (row: Row, latencyMs: number): Promise<ReplayThumbnailSnapshot | undefined> =>
   new Promise((resolve, reject) => {
     setTimeout(() => {
       if (row.outcome === 'fails') {
@@ -59,20 +61,35 @@ const loadSnapshot = (row: Row): Promise<ReplayThumbnailSnapshot | undefined> =>
       } else {
         resolve(row.outcome === 'missing' ? undefined : extractThumbnailSnapshot(row.events));
       }
-    }, 150 + Math.random() * 600);
+    }, latencyMs * (0.75 + Math.random() * 0.5));
   });
 
-const ThumbnailCell = ({ row }: { row: Row }) => {
+const ThumbnailCell = ({
+  row,
+  latencyMs,
+  onFetched,
+}: {
+  row: Row;
+  latencyMs: number;
+  onFetched: () => void;
+}) => {
   const [snapshot, setSnapshot] = useState<ReplayThumbnailSnapshot>();
   useEffect(() => {
     let cancelled = false;
-    loadSnapshot(row)
-      .then((loaded) => !cancelled && setSnapshot(loaded))
-      .catch(() => undefined);
+    loadSnapshot(row, latencyMs)
+      .then((loaded) => {
+        if (!cancelled) {
+          setSnapshot(loaded);
+        }
+      })
+      .catch(() => undefined)
+      .finally(() => !cancelled && onFetched());
     return () => {
       cancelled = true;
     };
-  }, [row]);
+    // The list is remounted when the controls change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <Suspense fallback={null}>
       <SessionReplayThumbnail snapshot={snapshot} data-test-subj={`thumbnail-${row.id}`} />
@@ -80,36 +97,63 @@ const ThumbnailCell = ({ row }: { row: Row }) => {
   );
 };
 
-const SessionList = () => {
-  const rows = useMemo(() => ROWS, []);
+interface ListArgs {
+  rows: number;
+  latencyMs: number;
+}
+
+const SessionList = ({ rows: rowCount, latencyMs }: ListArgs) => {
+  const rows = useMemo(() => buildRows(rowCount), [rowCount]);
+  const [fetched, setFetched] = useState(0);
+  const [drawn, setDrawn] = useState(0);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const timer = setInterval(
+      () => setDrawn(listRef.current?.querySelectorAll('[data-state=drawn]').length ?? 0),
+      250
+    );
+    return () => clearInterval(timer);
+  }, []);
+
   return (
-    <div style={{ height: 520, overflowY: 'auto' }} data-test-subj="sessionList">
-      {rows.map((row) => (
-        <EuiFlexGroup
-          key={row.id}
-          alignItems="center"
-          gutterSize="m"
-          responsive={false}
-          style={{ padding: 8, borderBottom: '1px solid rgba(128,128,128,0.2)' }}
-        >
-          <EuiFlexItem grow={false}>
-            <ThumbnailCell row={row} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="s">
-              <strong>{row.id}</strong> · {row.page}
-              <br />
-              {formatClock(row.durationMs)} · {row.events.length} events at start
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ))}
-    </div>
+    <>
+      <EuiText size="xs" data-test-subj="sessionListStatus">
+        Rows: {rows.length} · snapshots fetched: {fetched} · thumbnails drawn: {drawn}
+      </EuiText>
+      <div ref={listRef} style={{ height: 520, overflowY: 'auto' }} data-test-subj="sessionList">
+        {rows.map((row) => (
+          <EuiFlexGroup
+            key={row.id}
+            alignItems="center"
+            gutterSize="m"
+            responsive={false}
+            style={{ padding: 8, borderBottom: '1px solid rgba(128,128,128,0.2)' }}
+          >
+            <EuiFlexItem grow={false}>
+              <ThumbnailCell
+                row={row}
+                latencyMs={latencyMs}
+                onFetched={() => setFetched((count) => count + 1)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s">
+                <strong>{row.id}</strong> · {row.page}
+                <br />
+                {formatClock(row.durationMs)} · {row.events.length} events at start
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ))}
+      </div>
+    </>
   );
 };
 
 const meta: Meta = {
   title: 'Observability/Session replay thumbnail',
+  decorators: [withStoryInfo],
   parameters: {
     docs: {
       description: {
@@ -125,14 +169,25 @@ export default meta;
 
 type Story = StoryObj;
 
-export const SessionListWithThumbnails: Story = {
-  render: () => <SessionList />,
+export const SessionListWithThumbnails: StoryObj<ListArgs> = {
+  args: { rows: 25, latencyMs: 400 },
+  argTypes: {
+    rows: { control: 'select', options: [25, 100, 500] },
+    latencyMs: {
+      name: 'latencyMs (fetch latency)',
+      control: 'select',
+      options: [0, 400, 2_000, 6_000],
+    },
+  },
+  // The list restarts when a control changes so every row fetches again.
+  render: (args) => <SessionList key={`${args.rows}-${args.latencyMs}`} {...args} />,
   parameters: {
     docs: {
       description: {
         story:
-          '25 rows over six synthetic pages. Row 8 has no recording, row 13 fails to load, and the ' +
-          'hostile page shows its first frame with nothing fetched. Scroll to draw the rest.',
+          'Rows over six synthetic pages. Row 8 has no recording, row 13 fails to load, and the ' +
+          'hostile page shows its first frame with nothing fetched. Use the controls to make the ' +
+          'list longer or the fetches slower, and scroll to draw the rest.',
       },
     },
   },

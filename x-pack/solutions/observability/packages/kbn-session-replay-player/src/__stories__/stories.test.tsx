@@ -11,6 +11,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { composeStories } from '@storybook/react';
 import * as stories from './session_replay_player.stories';
 import * as thumbnailStories from './thumbnail.stories';
+import { STORY_INFO } from './story_info_content';
 import {
   installIframeSandboxProperty,
   silenceJsdomScrollErrors,
@@ -86,5 +87,24 @@ describe('thumbnail stories', () => {
       await screen.findAllByRole('img', { name: 'Preview of the recorded page' })
     ).toHaveLength(25);
     unmount();
+  });
+});
+
+describe('story information', () => {
+  it.each(
+    [...Object.values(composed), ...Object.values(composedThumbnails)].map((story) => [story.id])
+  )('%s explains itself', (id) => {
+    const info = STORY_INFO[id.split('--')[1]];
+
+    expect(info?.about).toBeTruthy();
+    expect(info?.notice.length).toBeGreaterThan(0);
+  });
+
+  it('has no entry for a story that does not exist', () => {
+    const ids = [...Object.values(composed), ...Object.values(composedThumbnails)].map(
+      (story) => story.id.split('--')[1]
+    );
+
+    expect(Object.keys(STORY_INFO).filter((key) => !ids.includes(key))).toEqual([]);
   });
 });
