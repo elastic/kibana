@@ -42,6 +42,9 @@ export const renderSlackMessageStepDefinition = ({
     outputSchema: z.object({
       text: z.string().describe('Fallback and notification text'),
       blocks: z.array(z.looseObject({ type: z.string() })).describe('Slack Block Kit blocks'),
+      metadata: z
+        .looseObject({ entities: z.array(z.looseObject({ entity_type: z.string() })) })
+        .describe('Slack Work Object card, for slack2.sendMessage only'),
     }),
     handler: async (context) => {
       const {

@@ -674,6 +674,30 @@ const slackMessageBlocksSchema = () =>
       'Slack Block Kit blocks (https://docs.slack.dev/reference/block-kit/blocks) that lay out the message. When set, text is the notification and fallback text only.'
     );
 
+const SLACK_MAX_WORK_OBJECT_ENTITIES = 5;
+
+const slackMessageMetadataSchema = () =>
+  z
+    .object({
+      entities: z
+        .array(
+          z.looseObject({
+            entity_type: z
+              .string()
+              .min(1)
+              .max(100)
+              .describe('Work Object entity type, for example slack#/entities/incident'),
+            url: z.string().min(1).max(2000).describe('Link the card opens'),
+          })
+        )
+        .min(1)
+        .max(SLACK_MAX_WORK_OBJECT_ENTITIES),
+    })
+    .optional()
+    .describe(
+      'Slack Work Object cards (https://docs.slack.dev/messaging/work-objects-implementation) attached to a new message. Only the Elastic Slack app forwards it, and only when posting: it is ignored on updateMessage and when the connector holds its own Slack token.'
+    );
+
 export const SlackSendMessageInputSchema = lazySchema(() =>
   z.object({
     channel: z
@@ -685,6 +709,7 @@ export const SlackSendMessageInputSchema = lazySchema(() =>
       ),
     text: z.string().min(1).max(SLACK_MAX_MESSAGE_TEXT_LENGTH).describe('The message text to send'),
     blocks: slackMessageBlocksSchema(),
+    metadata: slackMessageMetadataSchema(),
     threadTs: z
       .string()
       .max(SLACK_MAX_TIMESTAMP_LENGTH)

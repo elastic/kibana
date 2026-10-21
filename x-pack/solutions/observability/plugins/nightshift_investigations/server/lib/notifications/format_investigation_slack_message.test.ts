@@ -7,6 +7,8 @@
 
 import {
   buildInvestigationSlackBlocks,
+  buildInvestigationWorkObject,
+  renderInvestigationSlackMessage,
   formatInvestigationSlackMessage,
 } from './format_investigation_slack_message';
 import type { NotifiableInvestigation } from './notification_delivery';
@@ -305,5 +307,97 @@ describe('buildInvestigationSlackBlocks', () => {
       url: URL,
     });
     expect(sectionTexts(blocks)).toEqual(['*What went wrong*', 'Investigation failed']);
+  });
+});
+
+describe('buildInvestigationWorkObject', () => {
+  const entityOf = (params: Parameters<typeof buildInvestigationWorkObject>[0]) => {
+    const [entity] = buildInvestigationWorkObject(params).entities as Array<{
+      entity_type: string;
+      url: string;
+      external_ref: { id: string; type: string };
+      entity_payload: {
+        attributes: { title: { text: string }; display_type: string };
+        fields: Record<string, { value: string }>;
+        custom_fields?: Array<{ key: string; label: string; value: string; type: string }>;
+      };
+    }>;
+    return entity;
+  };
+
+  it.each([
+    {
+      phase: 'started' as const,
+      investigation: completed({ verdict: 'Not yet' }),
+      reason: undefined,
+      fields: { status: { value: 'Investigating' } },
+      customFields: undefined,
+    },
+    {
+      phase: 'completed' as const,
+      investigation: completed({
+        verdict: 'A bad deploy saturated the pool.',
+        hypotheses: [
+          { candidate: 'Pool exhaustion', confidence: 0.9, status: 'confirmed' },
+          { candidate: 'DNS', confidence: 0.2, status: 'dismissed' },
+        ],
+      }),
+      reason: undefined,
+      fields: {
+        status: { value: 'Completed' },
+        description: { value: 'A bad deploy saturated the pool.' },
+        service: { value: 'checkout' },
+      },
+      customFields: [
+        {
+          key: 'top_hypothesis',
+          label: 'Top hypothesis',
+          value: 'Confirmed · 90%',
+          type: 'string',
+        },
+      ],
+    },
+    {
+      phase: 'completed' as const,
+      investigation: completed({ impact: { summary: 'Checkout is slow', entities: [] } }),
+      reason: undefined,
+      fields: { status: { value: 'Completed' }, description: { value: 'Checkout is slow' } },
+      customFields: undefined,
+    },
+    {
+      phase: 'failed' as const,
+      investigation: completed(),
+      reason: 'Agent timed out',
+      fields: { status: { value: 'Failed' }, description: { value: 'Agent timed out' } },
+      customFields: undefined,
+    },
+  ])('maps the $phase phase to the card fields', (testCase) => {
+    const { phase, investigation, reason, fields, customFields } = testCase;
+    const entity = entityOf({ investigation, url: URL, phase, reason });
+
+    expect(entity.entity_type).toBe('slack#/entities/incident');
+    expect(entity.url).toBe(URL);
+    expect(entity.external_ref).toEqual({ id: 'inv-1', type: 'investigation' });
+    expect(entity.entity_payload.attributes).toEqual({
+      title: { text: 'Checkout latency spike' },
+      display_type: 'Investigation',
+    });
+    expect(entity.entity_payload.fields).toEqual(fields);
+    expect(entity.entity_payload.custom_fields).toEqual(customFields);
+  });
+
+  it('bounds the title and description', () => {
+    const entity = entityOf({
+      investigation: completed({ title: 'T'.repeat(500), verdict: 'v '.repeat(500) }),
+      url: URL,
+    });
+    expect(entity.entity_payload.attributes.title.text).toHaveLength(150);
+    expect(entity.entity_payload.fields.description.value.length).toBeLessThanOrEqual(120);
+  });
+
+  it('is part of the rendered message', () => {
+    expect(
+      renderInvestigationSlackMessage({ investigation: completed(), url: URL }).metadata
+    ).toEqual(buildInvestigationWorkObject({ investigation: completed(), url: URL }));
   });
 });

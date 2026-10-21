@@ -123,6 +123,7 @@ export async function relaySendMessage(
       channel,
       message: input.text,
       ...(input.blocks?.length ? { blocks: input.blocks } : {}),
+      ...(input.metadata ? { metadata: input.metadata } : {}),
       ...(input.threadTs ? { threadTs: input.threadTs } : {}),
     });
 
