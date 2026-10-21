@@ -30,6 +30,13 @@ export const TIME_COLUMN_LABEL = i18n.translate(
   'xpack.nightshift.detectionPage.events.columns.time',
   { defaultMessage: 'Time' }
 );
+export const TIME_COLUMN_TOOLTIP = i18n.translate(
+  'xpack.nightshift.detectionPage.events.columns.timeTooltip',
+  {
+    defaultMessage:
+      'When the event was raised. The time range shows every event that was live during it, so ongoing events raised earlier still appear.',
+  }
+);
 export const ACTIONS_COLUMN_LABEL = i18n.translate(
   'xpack.nightshift.detectionPage.events.columns.actions',
   { defaultMessage: 'Actions' }

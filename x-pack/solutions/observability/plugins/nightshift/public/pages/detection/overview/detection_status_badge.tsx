@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiHealth, EuiSkeletonRectangle, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiHealth, EuiIcon, EuiSkeletonRectangle, EuiToolTip } from '@elastic/eui';
 import type { SignificantEventsMaintenanceStatus } from '@kbn/significant-events-plugin/common';
 import React from 'react';
 import {
@@ -51,9 +51,8 @@ export const DetectionStatusBadge = ({
   const isPaused = status.state === 'paused';
   return (
     <EuiBadge color="hollow" data-test-subj="nightshiftDetectionStatus">
-      <EuiHealth color={isPaused ? 'warning' : 'primary'} textSize="xs">
-        {isPaused ? PAUSED_STATUS_LABEL : MONITORING_STATUS_LABEL}
-      </EuiHealth>
+      <EuiIcon type="dot" color={isPaused ? 'warning' : 'primary'} aria-hidden={true} />{' '}
+      {isPaused ? PAUSED_STATUS_LABEL : MONITORING_STATUS_LABEL}
     </EuiBadge>
   );
 };

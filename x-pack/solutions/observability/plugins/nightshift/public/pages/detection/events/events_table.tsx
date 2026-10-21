@@ -49,6 +49,7 @@ import {
   SEVERITY_LABEL,
   STATUS_LABEL,
   TIME_COLUMN_LABEL,
+  TIME_COLUMN_TOOLTIP,
   VIEW_INVESTIGATION_LABEL,
 } from './translations';
 import type { EventsSort } from './use_events_url_state';
@@ -107,7 +108,8 @@ export const EventsTable = ({
       {
         field: 'created_at',
         name: TIME_COLUMN_LABEL,
-        width: '8em',
+        nameTooltip: { content: TIME_COLUMN_TOOLTIP },
+        width: '9em',
         sortable: true,
         render: (createdAt: string) => {
           const time = Date.parse(createdAt);
@@ -127,7 +129,7 @@ export const EventsTable = ({
       {
         field: 'status',
         name: STATUS_LABEL,
-        width: '9em',
+        width: '11em',
         sortable: true,
         render: (status: SignificantEventResponse['status']) => (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
