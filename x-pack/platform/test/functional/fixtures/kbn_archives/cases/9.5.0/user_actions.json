@@ -1,0 +1,207 @@
+{
+  "attributes": {
+    "assignees": [],
+    "closed_at": null,
+    "closed_by": null,
+    "connector": {
+      "fields": [],
+      "name": "none",
+      "type": ".none"
+    },
+    "created_at": "2026-07-01T10:00:00.000Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "description": "a case created before action sources",
+    "duration": null,
+    "external_service": null,
+    "owner": "securitySolutionFixture",
+    "settings": {
+      "syncAlerts": false
+    },
+    "severity": "low",
+    "status": "open",
+    "tags": [
+      "upgrade"
+    ],
+    "title": "Pre 9.6 case",
+    "updated_at": "2026-07-01T10:02:00.000Z",
+    "updated_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    }
+  },
+  "coreMigrationVersion": "8.5.0",
+  "id": "c0a9e5f0-5f1a-11f1-9c3e-1d2b3c4d5e01",
+  "migrationVersion": {
+    "cases": "8.5.0"
+  },
+  "references": [],
+  "type": "cases",
+  "updated_at": "2026-07-01T10:02:00.000Z",
+  "version": "WzEwMCwxXQ=="
+}
+
+{
+  "attributes": {
+    "comment": "an edited comment from before action sources",
+    "created_at": "2026-07-01T10:01:00.000Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "owner": "securitySolutionFixture",
+    "pushed_at": null,
+    "pushed_by": null,
+    "type": "user",
+    "updated_at": "2026-07-01T10:02:00.000Z",
+    "updated_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    }
+  },
+  "coreMigrationVersion": "8.5.0",
+  "id": "c0a9e5f0-5f1a-11f1-9c3e-1d2b3c4d5e02",
+  "migrationVersion": {
+    "cases-comments": "8.5.0"
+  },
+  "references": [
+    {
+      "id": "c0a9e5f0-5f1a-11f1-9c3e-1d2b3c4d5e01",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "type": "cases-comments",
+  "updated_at": "2026-07-01T10:02:00.000Z",
+  "version": "WzEwMSwxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "create",
+    "created_at": "2026-07-01T10:00:00.000Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "owner": "securitySolutionFixture",
+    "payload": {
+      "assignees": [],
+      "connector": {
+        "fields": null,
+        "name": "none",
+        "type": ".none"
+      },
+      "description": "a case created before action sources",
+      "owner": "securitySolutionFixture",
+      "settings": {
+        "syncAlerts": false
+      },
+      "severity": "low",
+      "status": "open",
+      "tags": [
+        "upgrade"
+      ],
+      "title": "Pre 9.6 case"
+    },
+    "type": "create_case"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "c0a9e5f0-5f1a-11f1-9c3e-1d2b3c4d5e03",
+  "typeMigrationVersion": "8.5.0",
+  "references": [
+    {
+      "id": "c0a9e5f0-5f1a-11f1-9c3e-1d2b3c4d5e01",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2026-07-01T10:00:00.000Z",
+  "version": "WzEwMiwxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "create",
+    "created_at": "2026-07-01T10:01:00.000Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "owner": "securitySolutionFixture",
+    "payload": {
+      "comment": {
+        "comment": "a comment from before action sources",
+        "owner": "securitySolutionFixture",
+        "type": "user"
+      }
+    },
+    "type": "comment"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "c0a9e5f0-5f1a-11f1-9c3e-1d2b3c4d5e04",
+  "typeMigrationVersion": "8.5.0",
+  "references": [
+    {
+      "id": "c0a9e5f0-5f1a-11f1-9c3e-1d2b3c4d5e01",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "c0a9e5f0-5f1a-11f1-9c3e-1d2b3c4d5e02",
+      "name": "associated-cases-comments",
+      "type": "cases-comments"
+    }
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2026-07-01T10:01:00.000Z",
+  "version": "WzEwMywxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "update",
+    "created_at": "2026-07-01T10:02:00.000Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "owner": "securitySolutionFixture",
+    "payload": {
+      "comment": {
+        "comment": "an edited comment from before action sources",
+        "owner": "securitySolutionFixture",
+        "type": "user"
+      }
+    },
+    "type": "comment"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "c0a9e5f0-5f1a-11f1-9c3e-1d2b3c4d5e05",
+  "typeMigrationVersion": "8.5.0",
+  "references": [
+    {
+      "id": "c0a9e5f0-5f1a-11f1-9c3e-1d2b3c4d5e01",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "c0a9e5f0-5f1a-11f1-9c3e-1d2b3c4d5e02",
+      "name": "associated-cases-comments",
+      "type": "cases-comments"
+    }
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2026-07-01T10:02:00.000Z",
+  "version": "WzEwNCwxXQ=="
+}
