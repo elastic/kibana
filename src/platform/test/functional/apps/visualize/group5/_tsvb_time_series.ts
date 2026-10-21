@@ -198,7 +198,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const cleanup = async () => {
             const discardDashboardPromptButton = 'discardDashboardPromptButton';
             await dashboard.navigateToApp();
-            if (await testSubjects.exists(discardDashboardPromptButton)) {
+            if (await testSubjects.waitForExists(discardDashboardPromptButton, { timeout: 2000 })) {
               await dashboard.clickUnsavedChangesDiscard(discardDashboardPromptButton, true);
             }
           };

@@ -217,7 +217,7 @@ export class GraphPageObject extends FtrService {
     await this.testSubjects.click('confirmSaveSavedObjectButton');
 
     // Confirm that the Graph has been saved.
-    return await this.testSubjects.exists('saveGraphSuccess', { timeout: 10000 });
+    return await this.testSubjects.waitForExists('saveGraphSuccess', { timeout: 10000 });
   }
 
   async getSearchFilter() {
