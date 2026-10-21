@@ -14,6 +14,13 @@ failure percentage and its recent failed attempts with their Buildkite jobs. Exi
 the link the next time the reporter updates them; failure comments on `main` include it too.
 Tests without an exact file path get no link.
 
+For every failure the reporter asks ci-stats which `failed-test` issue tracks the test, by name,
+file or Scout test id, and links it from the failure's HTML report, the Buildkite annotation and
+the Slack message. If that issue is a flaky suite issue (see below), the failure is recorded there
+as on a per-test issue: the count goes up, the issue is reopened if needed and a comment names the
+test and the build. The count is kept in the issue's `failed-test` metadata; the daily report's
+body and `flaky-test-suite` metadata are left alone.
+
 ## `node scripts/report_flaky_test_issues`
 
 Files one `failed-test` issue per flaky test suite, from the report written by
