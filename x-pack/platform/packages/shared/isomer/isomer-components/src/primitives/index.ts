@@ -16,3 +16,4 @@ export { type LinkNode, link } from './link';
 export { type FieldsNode, fields } from './fields';
 export { type CodeNode, code } from './code';
 export { type TableNode, table } from './table';
+export { type ImageNode, image } from './image';

@@ -14,6 +14,7 @@ import type {
   DividerNode,
   FieldsNode,
   HeaderNode,
+  ImageNode,
   LinkNode,
   MarkdownNode,
   QuoteNode,
@@ -27,6 +28,7 @@ import {
   divider,
   fields,
   header,
+  image,
   link,
   markdown,
   quote,
@@ -48,6 +50,7 @@ export const componentsPrimitives = [
   fields,
   code,
   table,
+  image,
 ] as const;
 
 /** A node of any of the pack's primitives, one per entry of {@link componentsPrimitives}. */
@@ -62,7 +65,8 @@ export type ComponentsNode =
   | LinkNode
   | FieldsNode
   | CodeNode
-  | TableNode;
+  | TableNode
+  | ImageNode;
 
 /** Kibana's content and layout primitives. */
 export const componentsPack = definePrimitivePack({
@@ -79,6 +83,7 @@ export const componentsPack = definePrimitivePack({
         types: ['header', 'section', 'context', 'divider', 'quote', 'actions', 'link'],
       },
       { title: 'Data', types: ['fields', 'code', 'table'] },
+      { title: 'Media', types: ['image'] },
     ],
   },
 });
