@@ -18,6 +18,8 @@ export interface AppLinkTarget {
 export interface ComponentsRenderContext extends StyledRenderContext {
   /** Resolves a Kibana app path to a URL, such as through `application.getUrlForApp`; `undefined` when it can't. */
   resolveAppLink?: (target: AppLinkTarget) => string | undefined;
+  /** Resolves a Files plugin file id to a URL to show it from, such as its blob route; `undefined` when it can't. */
+  resolveFileUrl?: (fileId: string) => string | undefined;
 }
 
 export interface ComponentsPackTypes extends DefaultPackTypes {
