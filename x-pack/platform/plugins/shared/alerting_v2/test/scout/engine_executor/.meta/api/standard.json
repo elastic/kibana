@@ -1,29 +1,9 @@
 {
-  "sha1": "bbbd3aaac5f90469ae5e42baeeabff8e69ea88f7",
+  "sha1": "1fe72250bf5c0a3aca4c8c40ca5944d670248328",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "671d749bbe1ca54-abc3c97abd88ccf",
-      "title": "Enable alerting:v2:enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_executor/api/tests/global.setup.ts",
-        "line": 5,
-        "column": 1
-      }
-    },
     {
       "id": "24f1f623b044491-0e977e98fb99ba7",
       "title": "Rule executor writes one breach event per matching ES|QL row",
@@ -706,26 +686,6 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_executor/api/tests/task_run_event_fields.spec.ts",
         "line": 168,
         "column": 20
-      }
-    },
-    {
-      "id": "3bdac2849a177e1-ebf10327abcc16d",
-      "title": "Unset alerting:v2:enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_executor/api/tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
       }
     }
   ]

@@ -1,29 +1,9 @@
 {
-  "sha1": "5f7e2b7f9c52fe3192052d27db31d6a4f6bbf29a",
+  "sha1": "80176e2f583f4d51e1ec55f5a2943eca6ba142f3",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "88922a52a5a9911-abc3c97abd88ccf",
-      "title": "Enable alerting:v2:enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/global.setup.ts",
-        "line": 5,
-        "column": 1
-      }
-    },
     {
       "id": "e8f6d3c738719c6-8cf1f3cf6c6d663",
       "title": "Action Policies - create and edit creates a policy from the form and persists what was typed",
@@ -120,26 +100,6 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_affected_rules.spec.ts",
         "line": 69,
         "column": 7
-      }
-    },
-    {
-      "id": "51fb9f3f83006da-ebf10327abcc16d",
-      "title": "Unset alerting:v2:enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
       }
     }
   ]

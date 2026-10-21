@@ -1,25 +1,9 @@
 {
-  "sha1": "1ac39fdf47a223e54f56bb78ac6654a750b0faf7",
+  "sha1": "d6a063645af876daad3a5c94f54ea59f678af5dc",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "3f05c3f65c25f67-abc3c97abd88ccf",
-      "title": "Enable alerting:v2:enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/rules/api/tests/global.setup.ts",
-        "line": 5,
-        "column": 1
-      }
-    },
     {
       "id": "bc93397deafcea1-bd6311afcd7a993",
       "title": "Rule changed EBT telemetry reports rule.created",
@@ -88,22 +72,6 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/rules/api/tests/ebt_telemetry.spec.ts",
         "line": 106,
         "column": 41
-      }
-    },
-    {
-      "id": "dd0c7aa91a9ba39-ebf10327abcc16d",
-      "title": "Unset alerting:v2:enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/rules/api/tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
       }
     }
   ]

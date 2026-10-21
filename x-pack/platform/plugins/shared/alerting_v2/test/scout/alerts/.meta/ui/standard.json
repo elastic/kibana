@@ -1,29 +1,9 @@
 {
-  "sha1": "4f5ff1050bd836a3c5a4bfb04a47ce7017d30655",
+  "sha1": "db0d0808f9dcb7be3bea205b8be169939cc6042f",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "fef55e6491d8ba2-abc3c97abd88ccf",
-      "title": "Enable alerting:v2:enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/global.setup.ts",
-        "line": 5,
-        "column": 1
-      }
-    },
     {
       "id": "9b3107218cc9fa6-1f5f70779c6d72c",
       "title": "Alerts management page - privilege-based access alerting_v2_alerts all user sees the full page",
@@ -315,26 +295,6 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/execution_history_smoke.spec.ts",
         "line": 95,
         "column": 24
-      }
-    },
-    {
-      "id": "6cfc57e3b6509ee-ebf10327abcc16d",
-      "title": "Unset alerting:v2:enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
       }
     }
   ]

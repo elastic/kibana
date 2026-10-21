@@ -1,23 +1,9 @@
 {
-  "sha1": "29e53f1176f765b2a51d1ea5057806f92c8b7ccd",
+  "sha1": "484c12b1b6c1ee2b8ca4fb3b267fbb8b02f38300",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "6b2f3209971ee50-abc3c97abd88ccf",
-      "title": "Enable alerting:v2:enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/engine/api/tests/global.setup.ts",
-        "line": 5,
-        "column": 1
-      }
-    },
     {
       "id": "6990a4f8525f004-38a863d2228c7ae",
       "title": "Alert actions cleanup task is scheduled to run daily",
@@ -42,20 +28,6 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/engine/api/tests/alert_actions_cleanup.spec.ts",
         "line": 43,
         "column": 29
-      }
-    },
-    {
-      "id": "60de58613aee394-ebf10327abcc16d",
-      "title": "Unset alerting:v2:enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/engine/api/tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
       }
     }
   ]

@@ -1,29 +1,9 @@
 {
-  "sha1": "ca27412b8c6a5c71d961d91d8afcf6910818484d",
+  "sha1": "a69b9ea6511e82ed608246dad9fee1dc910c5af6",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "852c21c1d2be413-abc3c97abd88ccf",
-      "title": "Enable alerting:v2:enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/global.setup.ts",
-        "line": 5,
-        "column": 1
-      }
-    },
     {
       "id": "99fc3811e9937a3-ef889f717578f66",
       "title": "Bulk create rules API create: should create two rules",
@@ -6224,26 +6204,6 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/upsert_rule.spec.ts",
         "line": 377,
         "column": 15
-      }
-    },
-    {
-      "id": "aeb2aa318ba67d2-ebf10327abcc16d",
-      "title": "Unset alerting:v2:enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
       }
     }
   ]

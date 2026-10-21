@@ -1,29 +1,9 @@
 {
-  "sha1": "ad6dc950d65e68d579b0b218a337f9ffba616507",
+  "sha1": "5a931ad77bef7e8cacc86a611dba2296b86a0ec1",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "b8b552fe3701c4d-abc3c97abd88ccf",
-      "title": "Enable alerting:v2:enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_director/api/tests/global.setup.ts",
-        "line": 5,
-        "column": 1
-      }
-    },
     {
       "id": "4a7a792eea1cb6f-d8099f4a61f66f4",
       "title": "Director skips director processing for signal rules",
@@ -390,26 +370,6 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_director/api/tests/director.spec.ts",
         "line": 1528,
         "column": 27
-      }
-    },
-    {
-      "id": "60e31abba830f79-ebf10327abcc16d",
-      "title": "Unset alerting:v2:enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_director/api/tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
       }
     }
   ]

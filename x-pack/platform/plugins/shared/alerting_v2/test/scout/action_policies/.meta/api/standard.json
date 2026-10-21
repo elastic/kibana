@@ -1,29 +1,9 @@
 {
-  "sha1": "ebbfa8e02448579eae2f0d84119ee04d581308dc",
+  "sha1": "4fba2813d2796407e11c6462ff54876da7e5e076",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "7f8644673ad0e37-abc3c97abd88ccf",
-      "title": "Enable alerting:v2:enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/global.setup.ts",
-        "line": 5,
-        "column": 1
-      }
-    },
     {
       "id": "3cb6157cbbcf4d2-e3935007edba260",
       "title": "Bulk delete action policies API delete: deletes policies",
@@ -4351,26 +4331,6 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/upsert_action_policy.spec.ts",
         "line": 410,
         "column": 49
-      }
-    },
-    {
-      "id": "293110019c0df82-ebf10327abcc16d",
-      "title": "Unset alerting:v2:enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/api/tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
       }
     }
   ]

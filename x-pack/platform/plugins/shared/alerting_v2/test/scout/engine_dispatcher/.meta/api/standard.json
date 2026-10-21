@@ -1,29 +1,9 @@
 {
-  "sha1": "3d9097f88994f8bcb693a7411aa4570b3ca2d90a",
+  "sha1": "b3ef08fd4bae4e83327a21d9401318132a508c80",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "fdd03da0e57b354-abc3c97abd88ccf",
-      "title": "Enable alerting:v2:enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/global.setup.ts",
-        "line": 5,
-        "column": 1
-      }
-    },
     {
       "id": "99c74a111068925-4e8d7b869f4b346",
       "title": "Dispatcher runs the workflow of an action policy a breaching rule fires the policy and its workflow runs to completion",
@@ -404,26 +384,6 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
         "line": 1864,
         "column": 27
-      }
-    },
-    {
-      "id": "a1b7f8c5e8a3cf5-ebf10327abcc16d",
-      "title": "Unset alerting:v2:enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
       }
     }
   ]

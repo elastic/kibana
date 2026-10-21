@@ -2,7 +2,7 @@
 
 Scout tests for the alerting_v2 plugin, grouped into **namespaces** so CI can schedule them as independent Playwright configs. There is no custom server config set, so the same suites can run on serverless.
 
-Each config has a global setup hook that turns on the `alerting:v2:enabled` advanced setting (every alerting_v2 route returns 503 without it) and a global teardown hook that unsets it. The exception is `agent_builder_skills`, which needs the setting unset to cover the disabled cases.
+The `alerting:v2:enabled` advanced setting (every alerting_v2 route returns 503 without it) registers with `value: true`, so it is on by default wherever the plugin runs — no setup hook is needed to enable it. The `agent_builder_skills` suite flips it off at runtime to cover the disabled cases and restores it in `afterEach`.
 
 ## Namespaces
 
@@ -16,7 +16,7 @@ Each config has a global setup hook that turns on the `alerting:v2:enabled` adva
 | `engine_dispatcher` | Dispatcher | — | Split out of `engine` to cut CI wall-time. `API_ENGINE_TAG`. API-only. |
 | `engine_executor` | Rule executor | — | Split out of `engine` to cut CI wall-time (heaviest suite). `API_ENGINE_TAG`. API-only. |
 | `management` | — | `management_required_privileges` | Stateful classic and serverless Observability complete, the only solution that mounts the alerting v2 pages. UI-only. |
-| `agent_builder_skills` | Agent Builder alerting v2 skill gating | — | No global setup, so `alerting:v2:enabled` starts unset. API-only. |
+| `agent_builder_skills` | Agent Builder alerting v2 skill gating | — | Flips `alerting:v2:enabled` off at runtime to cover the disabled cases, restoring it in `afterEach`. API-only. |
 
 `API_ENGINE_TAG` (`common/constants.ts`) is the shared tag for API and engine suites, currently `tags.deploymentAgnostic`.
 
@@ -54,8 +54,8 @@ Specs that seed `.rule-events` directly (`ruleEvents.seed`), such as the dispatc
 
 ```text
 test/scout/
-├── agent_builder_skills/api/     # no global setup
-├── common/{builders,constants,roles,settings,urls}.ts
+├── agent_builder_skills/api/
+├── common/{builders,constants,roles,urls}.ts
 ├── common/services/
 ├── common/api/fixtures/          # apiTest + alertingV2 apiServices
 ├── common/ui/fixtures/           # test + page objects
@@ -69,7 +69,7 @@ test/scout/
 └── management/ui/
 ```
 
-Each namespace category has `playwright.config.ts` (`testDir: './tests'`, `runGlobalSetup: true`), `tests/global.{setup,teardown}.ts`, and a one-line fixture re-export from `common/`. Specs import `../fixtures`.
+Each namespace category has `playwright.config.ts` (`testDir: './tests'`) and a one-line fixture re-export from `common/`. Specs import `../fixtures`.
 
 These suites are sequential (`workers: 1`). Do not add a parallel API lane until cleanup is isolated — almost every spec calls cluster-wide `*.cleanUp()`.
 
