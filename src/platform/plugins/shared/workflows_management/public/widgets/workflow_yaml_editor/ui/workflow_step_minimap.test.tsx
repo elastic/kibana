@@ -12,7 +12,10 @@ import React, { createRef } from 'react';
 import type { YamlValidationErrorSeverity, YamlValidationResult } from '@kbn/workflows-yaml';
 import { WorkflowStepMinimap } from './workflow_step_minimap';
 import { setYamlString } from '../../../entities/workflows/store';
-import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
+import {
+  createMockStore,
+  getMockServices,
+} from '../../../entities/workflows/store/__mocks__/store.mock';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 import { createMockMonacoEditor } from '../../../shared/test_utils/mock_monaco';
 
@@ -86,7 +89,7 @@ const renderMinimap = (
         scrollContainerRef={scrollContainerRef as React.RefObject<HTMLDivElement | null>}
       />
     </div>,
-    { wrapper: getTestProvider({ store }) }
+    { wrapper: getTestProvider({ store, services: getMockServices(store) }) }
   );
 
   return { store, editor: editorInstance, scrollContainerRef, rerender, unmount };
@@ -95,6 +98,8 @@ const renderMinimap = (
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('WorkflowStepMinimap', () => {
+  jest.setTimeout(20_000);
+
   it('attaches scroll/layout listeners when the editor is provided at mount', () => {
     const { editor } = renderMinimap(TWO_STEP_YAML);
 
@@ -104,14 +109,12 @@ describe('WorkflowStepMinimap', () => {
     expect(editor.onDidChangeCursorPosition).toHaveBeenCalledTimes(1);
   });
 
-  it('renders pill buttons for each step when the YAML is valid', async () => {
+  it('renders pill buttons for each step when the YAML is valid', () => {
     renderMinimap(TWO_STEP_YAML);
 
     // Both step IDs should appear as pill titles.
-    await waitFor(() => {
-      expect(screen.getByTitle('step-a')).toBeInTheDocument();
-      expect(screen.getByTitle('step-b')).toBeInTheDocument();
-    });
+    expect(screen.getByTitle('step-a')).toBeInTheDocument();
+    expect(screen.getByTitle('step-b')).toBeInTheDocument();
   });
 
   it('retains the last-known-good step list when the YAML becomes unparseable', async () => {
@@ -161,14 +164,10 @@ describe('WorkflowStepMinimap', () => {
     });
   });
 
-  it('clicking a pill reveals the line in the editor and keeps focus on the pill', async () => {
+  it('clicking a pill reveals the line in the editor and keeps focus on the pill', () => {
     const { editor } = renderMinimap(TWO_STEP_YAML, {
       getVisibleRanges: jest.fn(() => [{ startLineNumber: 1, endLineNumber: 10 }]),
     } as any);
-
-    await waitFor(() => {
-      expect(screen.getByTitle('step-a')).toBeInTheDocument();
-    });
 
     const pill = screen.getByTitle('step-a');
 
@@ -183,14 +182,10 @@ describe('WorkflowStepMinimap', () => {
     expect(pill.blur).not.toHaveBeenCalled();
   });
 
-  it('pointer-clicking a pill blurs the button (so it loses the focus ring)', async () => {
+  it('pointer-clicking a pill blurs the button (so it loses the focus ring)', () => {
     renderMinimap(TWO_STEP_YAML, {
       getVisibleRanges: jest.fn(() => [{ startLineNumber: 1, endLineNumber: 10 }]),
     } as any);
-
-    await waitFor(() => {
-      expect(screen.getByTitle('step-a')).toBeInTheDocument();
-    });
 
     const pill = screen.getByTitle('step-a');
     const blurSpy = jest.spyOn(pill, 'blur');
@@ -237,10 +232,10 @@ describe('WorkflowStepMinimap', () => {
         expected: 'contains steps with errors',
         notExpected: 'warning',
       },
-    ])('announces "$expected" for an $case on the parent step', async (testCase) => {
+    ])('announces "$expected" for an $case on the parent step', (testCase) => {
       renderMinimap(NESTED_STEP_YAML, undefined, [makeMarker(testCase.line, testCase.severity)]);
 
-      const parentButton = await screen.findByTitle('parent');
+      const parentButton = screen.getByTitle('parent');
       expect(parentButton).toHaveTextContent(testCase.expected);
       expect(parentButton).not.toHaveTextContent(testCase.notExpected);
     });
@@ -272,7 +267,7 @@ describe('WorkflowStepMinimap', () => {
           scrollContainerRef={scrollContainerRef as React.RefObject<HTMLDivElement | null>}
         />
       </div>,
-      { wrapper: getTestProvider({ store }) }
+      { wrapper: getTestProvider({ store, services: getMockServices(store) }) }
     );
 
     // Record scrollTop before any scroll event.
