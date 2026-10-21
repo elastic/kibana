@@ -229,13 +229,21 @@ describe('resolveConversation', () => {
     expect(client.getByOrigin).not.toHaveBeenCalled();
   });
 
-  it('rejects a second resolver', () => {
-    const { registerConversationResolver } = createCallbackDeliveryService().setup();
-    registerConversationResolver(jest.fn());
+  it('returns the first answer among registered resolvers in registration order', async () => {
+    const { service, callbacks, client } = startService('conversation-1');
+    const skipped = jest.fn().mockResolvedValue(undefined);
+    const first = jest.fn().mockResolvedValue({ conversationId: 'investigation-1' });
+    const second = jest.fn().mockResolvedValue({ conversationId: 'investigation-2' });
+    callbacks.registerConversationResolver(skipped);
+    callbacks.registerConversationResolver(first);
+    callbacks.registerConversationResolver(second);
 
-    expect(() => registerConversationResolver(jest.fn())).toThrow(
-      'A callback conversation resolver is already registered'
-    );
+    await expect(service.resolveConversation(context)).resolves.toEqual({
+      conversationId: 'investigation-1',
+    });
+    expect(skipped).toHaveBeenCalledWith(context);
+    expect(second).not.toHaveBeenCalled();
+    expect(client.getByOrigin).not.toHaveBeenCalled();
   });
 });
 

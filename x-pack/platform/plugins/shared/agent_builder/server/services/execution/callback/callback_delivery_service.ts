@@ -29,7 +29,7 @@ const callbackRetryOptions = {
 export class CallbackDeliveryService {
   private readonly actions: ActionsPluginSetup;
   private readonly transports: CallbackTransportRegistry;
-  private conversationResolver?: CallbackConversationResolver;
+  private readonly conversationResolvers: CallbackConversationResolver[] = [];
   private defaultConversationResolver?: CallbackConversationResolver;
 
   constructor({ actions }: { actions: ActionsPluginSetup }) {
@@ -41,11 +41,7 @@ export class CallbackDeliveryService {
   setup(): CallbacksSetup {
     return {
       registerConversationResolver: (resolver) => {
-        if (this.conversationResolver) {
-          throw new Error('A callback conversation resolver is already registered');
-        }
-
-        this.conversationResolver = resolver;
+        this.conversationResolvers.push(resolver);
       },
       registerTransport: (transport) => this.transports.register(transport),
     };
@@ -57,16 +53,18 @@ export class CallbackDeliveryService {
   }
 
   /**
-   * The conversation an external conversation continues: the registered resolver's answer, else
-   * the default lookup's. An error from the registered resolver propagates.
+   * The conversation an external conversation continues: the first registered resolver's answer,
+   * else the default lookup's. An error from a registered resolver propagates.
    */
   async resolveConversation(
     context: CallbackConversationResolverContext
   ): Promise<{ conversationId: string } | undefined> {
-    const resolved = await this.conversationResolver?.(context);
+    for (const resolver of this.conversationResolvers) {
+      const resolved = await resolver(context);
 
-    if (resolved) {
-      return resolved;
+      if (resolved) {
+        return resolved;
+      }
     }
 
     return this.defaultConversationResolver?.(context);

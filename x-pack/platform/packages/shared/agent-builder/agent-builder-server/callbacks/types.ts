@@ -33,9 +33,9 @@ export interface CallbackTransportDefinition {
 /** AgentBuilder callbacks setup contract. */
 export interface CallbacksSetup {
   /**
-   * Registers a resolver asked first for the conversation an execution's origin continues, when the
-   * execution names no conversation. When it returns `undefined`, the default lookup by origin
-   * runs. Only one may be registered.
+   * Registers a resolver for the conversation an execution's origin continues, when the execution
+   * names no conversation. Resolvers are asked in registration order and the first answer wins.
+   * When all return `undefined`, the default lookup by origin runs.
    */
   registerConversationResolver(resolver: CallbackConversationResolver): void;
   /** Registers a callback transport. The first registered transport that handles a URL delivers to it. */
