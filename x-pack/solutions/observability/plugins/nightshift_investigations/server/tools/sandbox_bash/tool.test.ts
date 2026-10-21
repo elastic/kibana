@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 import type { ResolveConnectorCredentials } from './connector_credentials';

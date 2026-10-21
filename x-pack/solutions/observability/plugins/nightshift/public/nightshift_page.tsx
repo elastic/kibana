@@ -255,9 +255,6 @@ export function NightshiftPage(): React.ReactElement | null {
                   knowledgeHref,
                   onSettingsClick: canManageAndConfigure ? navigateToSettings : undefined,
                   settingsHref: canManageAndConfigure ? settingsHref : undefined,
-                  onSandboxSecretsClick: canManageSandboxSecrets
-                    ? openSandboxSecretsFlyout
-                    : undefined,
                   onAutomationsClick: canUseAutomations ? navigateToAutomations : undefined,
                   automationsHref: canUseAutomations ? automationsHref : undefined,
                 }}

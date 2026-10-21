@@ -25,7 +25,6 @@ export type DetectionPageHeaderProps = Pick<
   | 'knowledgeHref'
   | 'onSettingsClick'
   | 'settingsHref'
-  | 'onSandboxSecretsClick'
   | 'onAutomationsClick'
   | 'automationsHref'
 >;
