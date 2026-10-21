@@ -361,27 +361,27 @@ These files touch all AlertZero Workers (Triage, Attack Discovery, Forensics, De
 
 #### Automated
 
-- [x] 1.1 git mv 12 Hunt files into `definitions/alertzero/hunt/` and fix relative imports
-- [x] 1.2 Extract `hunt_worker_template.ts` (+ test) from `worker_template_values`
-- [x] 1.3 Create `hunt/index.ts` barrel and re-export from `definitions/alertzero/index.ts`
-- [x] 1.4 Split `hunt_version_hashes.test.ts` from `managed_workflow_definitions.test.ts`
-- [x] 1.5 Split `hunt_registry.test.ts` from `managed_workflow_definitions.test.ts`
-- [x] 1.6 Update `@kbn/evals-suite-hunt-watch` for `definitions/alertzero/hunt/` paths
-- [x] 1.7 `node scripts/jest src/platform/packages/shared/kbn-workflows/managed` passes
-- [x] 1.8 `node scripts/jest x-pack/solutions/security/packages/kbn-evals-suite-hunt-watch` passes
-- [x] 1.9 type_check for kbn-workflows, evals-suite-hunt-watch, and kbn-alertzero-common passes
+- [x] 1.1 git mv 12 Hunt files into `definitions/alertzero/hunt/` and fix relative imports — f242bb12d30f
+- [x] 1.2 Extract `hunt_worker_template.ts` (+ test) from `worker_template_values` — f242bb12d30f
+- [x] 1.3 Create `hunt/index.ts` barrel and re-export from `definitions/alertzero/index.ts` — f242bb12d30f
+- [x] 1.4 Split `hunt_version_hashes.test.ts` from `managed_workflow_definitions.test.ts` — f242bb12d30f
+- [x] 1.5 Split `hunt_registry.test.ts` from `managed_workflow_definitions.test.ts` — f242bb12d30f
+- [x] 1.6 Update `@kbn/evals-suite-hunt-watch` for `definitions/alertzero/hunt/` paths — f242bb12d30f
+- [x] 1.7 `node scripts/jest src/platform/packages/shared/kbn-workflows/managed` passes — f242bb12d30f
+- [x] 1.8 `node scripts/jest x-pack/solutions/security/packages/kbn-evals-suite-hunt-watch` passes — f242bb12d30f
+- [x] 1.9 type_check for kbn-workflows, evals-suite-hunt-watch, and kbn-alertzero-common passes — f242bb12d30f
 
 #### Manual
 
-- [x] 1.10 Confirm `definitions/alertzero/` top-level listing contains no `hunt*`, `worker_reports.hunt.test.ts`, or `find_or_create_investigation.*` files
+- [x] 1.10 Confirm `definitions/alertzero/` top-level listing contains no `hunt*`, `worker_reports.hunt.test.ts`, or `find_or_create_investigation.*` files — f242bb12d30f
 
 ### Phase 2: Group isolated Hunt Watch files into `hunt/` subdirectories in `alertzero`
 
 #### Automated
 
-- [ ] 2.1 Move `hunt_children_contract.test.ts` into `server/managed_workflows/hunt/`
-- [ ] 2.2 Move `use_hunt_threat_intel_supply.ts` into `public/hooks/hunt/` and update importers
-- [ ] 2.3 Phase 2 jest + type_check gates pass
+- [x] 2.1 Move `hunt_children_contract.test.ts` into `server/managed_workflows/hunt/`
+- [x] 2.2 Move `use_hunt_threat_intel_supply.ts` into `public/hooks/hunt/` and update importers
+- [x] 2.3 Phase 2 jest + type_check gates pass
 
 ### Phase 3: Update `.github/CODEOWNERS` and verify every Hunt Watch path
 
