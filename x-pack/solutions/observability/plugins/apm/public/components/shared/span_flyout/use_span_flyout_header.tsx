@@ -6,23 +6,17 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { asDuration, HttpStatusCode, PercentOfParent, Timestamp } from '@kbn/apm-ui-shared';
+import { HttpStatusCode, Timestamp } from '@kbn/apm-ui-shared';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import type { ReactElement } from 'react';
 import React from 'react';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import {
-  ENVIRONMENT_NOT_DEFINED,
-  getNextEnvironmentUrlParam,
-} from '../../../../common/environment_filter_values';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
 import type { Span } from '../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { getFailureBadgeDescriptor } from '../badge/failure_badge';
 import { getSyncBadgeDescriptor } from '../badge/sync_badge';
 import { DependencyLink } from '../links/dependency_link';
@@ -39,6 +33,8 @@ import {
   SERVICE_LABEL,
   TRANSACTION_LABEL,
 } from '../waterfall_item_flyout/constants';
+import { useWaterfallItemLinkParams } from '../waterfall_item_flyout/use_waterfall_item_link_params';
+import { WaterfallItemDuration } from '../waterfall_item_flyout/waterfall_item_duration';
 
 const { Badge, InfoBlock, MetaBlock } = FlyoutTemplate.Header;
 
@@ -95,11 +91,8 @@ export function useSpanFlyoutHeader({
   parentTransaction?: Transaction;
   totalDuration?: number;
 }): SpanFlyoutHeaderParts {
-  const { query } = useAnyOfApmParams(
-    '/services/{serviceName}/transactions/view',
-    '/mobile-services/{serviceName}/transactions/view',
-    '/dependencies/operation'
-  );
+  const { query, latencyAggregationType, serviceGroup, nextEnvironment } =
+    useWaterfallItemLinkParams(parentTransaction?.service?.environment);
   const router = useApmRouter();
   const trackEvent = useUiTracker();
   const { euiTheme } = useEuiTheme();
@@ -108,18 +101,8 @@ export function useSpanFlyoutHeader({
     return { metaBlocks: [], infoBlocks: [], badges: [] };
   }
 
-  const latencyAggregationType =
-    ('latencyAggregationType' in query && query.latencyAggregationType) ||
-    LatencyAggregationType.avg;
-  const serviceGroup = ('serviceGroup' in query && query.serviceGroup) || '';
-
-  const nextEnvironment = getNextEnvironmentUrlParam({
-    requestedEnvironment: parentTransaction?.service?.environment ?? ENVIRONMENT_NOT_DEFINED.value,
-    currentEnvironmentUrlParam: query.environment,
-  });
-
   const spanName = span.span?.name ?? NOT_AVAILABLE_LABEL;
-  const dependencyName = span.span?.destination?.service.resource;
+  const dependencyName = span.span?.destination?.service?.resource;
   const transactionServiceName = parentTransaction?.service?.name;
   const transactionName = parentTransaction?.transaction?.name;
   const spanHttpUrl = span.url?.original || span.span?.http?.url?.original;
@@ -260,20 +243,11 @@ export function useSpanFlyoutHeader({
       >
         <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <span>
-              {asDuration(duration)}
-              {totalDuration ? (
-                <>
-                  {' '}
-                  &nbsp;
-                  <PercentOfParent
-                    duration={duration}
-                    totalDuration={totalDuration}
-                    parentType="transaction"
-                  />
-                </>
-              ) : null}
-            </span>
+            <WaterfallItemDuration
+              duration={duration}
+              parentDuration={totalDuration}
+              parentType="transaction"
+            />
           </EuiFlexItem>
           {composite && (
             <EuiFlexItem grow={false}>

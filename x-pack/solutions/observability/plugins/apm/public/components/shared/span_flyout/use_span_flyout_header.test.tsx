@@ -140,6 +140,17 @@ describe('useSpanFlyoutHeader', () => {
     expect(parts.badges).toEqual([]);
   });
 
+  it('omits the dependency block when span.destination has no service', () => {
+    const spanWithoutDestinationService = {
+      ...baseSpan,
+      span: { ...baseSpan.span, destination: {} },
+    } as unknown as Span;
+
+    const parts = renderHeader(spanWithoutDestinationService);
+
+    expect(getTestSubjects(parts.infoBlocks)).not.toContain('spanFlyoutInfo-dependency');
+  });
+
   it('does not crash when transaction.agent is missing', () => {
     const txWithoutAgent = {
       ...baseTransaction,

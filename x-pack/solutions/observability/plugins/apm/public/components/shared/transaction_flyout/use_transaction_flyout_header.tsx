@@ -6,22 +6,15 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
-import { asDuration, HttpStatusCode, PercentOfParent, Timestamp } from '@kbn/apm-ui-shared';
+import { COLD_START_BADGE_LABEL, HttpStatusCode, Timestamp } from '@kbn/apm-ui-shared';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
 import React from 'react';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import {
-  ENVIRONMENT_ALL,
-  ENVIRONMENT_NOT_DEFINED,
-  getNextEnvironmentUrlParam,
-} from '../../../../common/environment_filter_values';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { TransactionDetailLink } from '../links/apm/transaction_detail_link';
 import { ServiceLink } from '../links/apm/service_link';
 import { getErrorCountBadgeDescriptor } from '../summary/error_count_summary_item_badge';
@@ -36,6 +29,8 @@ import {
   SERVICE_LABEL,
   TRANSACTION_LABEL,
 } from '../waterfall_item_flyout/constants';
+import { useWaterfallItemLinkParams } from '../waterfall_item_flyout/use_waterfall_item_link_params';
+import { WaterfallItemDuration } from '../waterfall_item_flyout/waterfall_item_duration';
 
 const { Badge, InfoBlock, MetaBlock } = FlyoutTemplate.Header;
 
@@ -48,10 +43,6 @@ export const TRANSACTION_DETAILS_LABEL = i18n.translate(
 
 const USER_AGENT_LABEL = i18n.translate('xpack.apm.transactionDetails.userAgentAndVersionLabel', {
   defaultMessage: 'User agent & version',
-});
-
-const COLD_START_LABEL = i18n.translate('xpack.apm.transactionFlyout.coldStartBadge', {
-  defaultMessage: 'cold start',
 });
 
 export interface TransactionFlyoutHeaderParts {
@@ -75,27 +66,14 @@ export function useTransactionFlyoutHeader({
   errorCount: number;
   rootTransactionDuration?: number;
 }): TransactionFlyoutHeaderParts {
-  const { query } = useAnyOfApmParams(
-    '/services/{serviceName}/transactions/view',
-    '/mobile-services/{serviceName}/transactions/view',
-    '/dependencies/operation'
-  );
+  const { query, latencyAggregationType, serviceGroup, nextEnvironment } =
+    useWaterfallItemLinkParams(transaction?.service?.environment);
   const { link } = useApmRouter();
   const { euiTheme } = useEuiTheme();
 
   if (!transaction) {
     return { metaBlocks: [], infoBlocks: [], badges: [] };
   }
-
-  const latencyAggregationType =
-    ('latencyAggregationType' in query && query.latencyAggregationType) ||
-    LatencyAggregationType.avg;
-  const serviceGroup = ('serviceGroup' in query && query.serviceGroup) || '';
-
-  const nextEnvironment = getNextEnvironmentUrlParam({
-    requestedEnvironment: transaction.service?.environment ?? ENVIRONMENT_NOT_DEFINED.value,
-    currentEnvironmentUrlParam: query?.environment ?? ENVIRONMENT_ALL.value,
-  });
 
   const serviceName = transaction.service?.name;
   const agentName = transaction.agent?.name;
@@ -215,18 +193,11 @@ export function useTransactionFlyoutHeader({
         title={DURATION_LABEL}
         data-test-subj="transactionFlyoutInfo-duration"
       >
-        {asDuration(duration)}
-        {rootTransactionDuration ? (
-          <>
-            {' '}
-            &nbsp;
-            <PercentOfParent
-              duration={duration}
-              totalDuration={rootTransactionDuration}
-              parentType="trace"
-            />
-          </>
-        ) : null}
+        <WaterfallItemDuration
+          duration={duration}
+          parentDuration={rootTransactionDuration}
+          parentType="trace"
+        />
       </InfoBlock>
     );
   }
@@ -284,7 +255,7 @@ export function useTransactionFlyoutHeader({
         color="warning"
         data-test-subj="transactionFlyoutBadge-coldStart"
       >
-        {COLD_START_LABEL}
+        {COLD_START_BADGE_LABEL}
       </Badge>
     );
   }

@@ -49,7 +49,7 @@ An `id` also identifies the part within its parent, so it must be unique among s
 
 ### Tabs
 
-With tabs, a `Body.Section` directly under `Body` applies to every tab. It renders below the tab bar and above the active tab panel, after any callouts, and it stays in place across tab switches. Use it for content that belongs to the whole flyout, such as a summary every tab depends on. Sections inside a `Body.TabPanel` belong to that tab only.
+With tabs, a `Body.Section` or `Body.Accordion` directly under `Body` applies to every tab. It renders below the tab bar and above the active tab panel, after any callouts, and it stays in place across tab switches. Use it for content that belongs to the whole flyout, such as a summary every tab depends on. Sections inside a `Body.TabPanel` belong to that tab only.
 
 ```tsx
 <FlyoutTemplate.Body>
@@ -60,7 +60,7 @@ With tabs, a `Body.Section` directly under `Body` applies to every tab. It rende
 </FlyoutTemplate.Body>
 ```
 
-Like callouts, a section under `Body` does not remount or re-render on a tab switch. With controlled tabs, the same advice about memoizing applies (see [Callouts](#callouts)). An `Accordion` or unstructured content directly under `Body` still renders nothing in tabbed mode.
+Like callouts, a section or accordion under `Body` does not remount or re-render on a tab switch. With controlled tabs, the same advice about memoizing applies (see [Callouts](#callouts)). Unstructured content directly under `Body` renders nothing in tabbed mode.
 
 ### Borders
 

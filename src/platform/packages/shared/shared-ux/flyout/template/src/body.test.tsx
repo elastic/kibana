@@ -652,4 +652,32 @@ describe('FlyoutTemplate body sections in tabbed mode', () => {
     expect(screen.getByTestId('sharedSection')).toBe(section);
     expect(renderCount).toHaveBeenCalledTimes(rendersBeforeSwitch);
   });
+
+  it('renders an accordion under Body above the active tab panel, in source order with sections', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never" tabs={TABS}>
+        <FlyoutTemplate.Header title="Span" />
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.Accordion title="Shared accordion" initialIsOpen>
+            accordion content
+          </FlyoutTemplate.Body.Accordion>
+          <FlyoutTemplate.Body.Section title="Shared section">section content</FlyoutTemplate.Body.Section>
+          <FlyoutTemplate.Body.TabPanel tabId="overview" data-test-subj="overviewPanel">
+            overview content
+          </FlyoutTemplate.Body.TabPanel>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    const accordionContent = screen.getByText('accordion content');
+    const sectionContent = screen.getByText('section content');
+    expect(screen.getByTestId('overviewPanel')).not.toContainElement(accordionContent);
+    expect(
+      accordionContent.compareDocumentPosition(sectionContent) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      sectionContent.compareDocumentPosition(screen.getByTestId('overviewPanel')) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
 });

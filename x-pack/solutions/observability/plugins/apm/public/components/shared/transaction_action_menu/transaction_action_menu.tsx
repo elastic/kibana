@@ -133,8 +133,7 @@ function ActionMenuSections({
   profilingLocators?: ProfilingLocators;
 }) {
   const { uiActions } = useApmPluginContext();
-  // Copied because the hook's result is memoized and external items are pushed onto it.
-  const sections = [...useTransactionActionMenuSections(transaction, profilingLocators)];
+  const sections = useTransactionActionMenuSections(transaction, profilingLocators);
 
   const externalMenuItems = useAsync(() => {
     return transaction

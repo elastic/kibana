@@ -13,7 +13,6 @@ import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public'
 import { getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
@@ -25,7 +24,7 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { getSections } from './sections';
 
-/** Resolves the built-in "Investigate" menu sections for a transaction. The result is memoized; copy it before adding sections. */
+/** Resolves the built-in "Investigate" menu sections for a transaction. */
 export function useTransactionActionMenuSections(
   transaction: Transaction | undefined,
   profilingLocators: ProfilingLocators | undefined
@@ -63,41 +62,21 @@ export function useTransactionActionMenuSections(
   const basePath = core.http.basePath;
   const dataViewId = dataView?.id;
 
-  return useMemo(
-    () =>
-      getSections({
-        transaction,
-        basePath,
-        location,
-        apmRouter,
-        infraLinksAvailable,
-        uptimeLocator,
-        profilingLocators,
-        rangeFrom,
-        rangeTo,
-        environment,
-        logsLocator,
-        dataViewId,
-        assetDetailsLocator,
-        discoverLocator,
-        metricsIndices,
-      }),
-    [
-      transaction,
-      basePath,
-      location,
-      apmRouter,
-      infraLinksAvailable,
-      uptimeLocator,
-      profilingLocators,
-      rangeFrom,
-      rangeTo,
-      environment,
-      logsLocator,
-      dataViewId,
-      assetDetailsLocator,
-      discoverLocator,
-      metricsIndices,
-    ]
-  );
+  return getSections({
+    transaction,
+    basePath,
+    location,
+    apmRouter,
+    infraLinksAvailable,
+    uptimeLocator,
+    profilingLocators,
+    rangeFrom,
+    rangeTo,
+    environment,
+    logsLocator,
+    dataViewId,
+    assetDetailsLocator,
+    discoverLocator,
+    metricsIndices,
+  });
 }

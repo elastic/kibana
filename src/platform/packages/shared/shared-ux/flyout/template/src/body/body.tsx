@@ -137,9 +137,15 @@ export const BodyZone = ({ children, 'data-test-subj': dataTestSubj }: FlyoutBod
       items,
       resolveZoneTestSubj(undefined, bodyTestSubj, 'Banner')
     );
-    // Only tab panels render below the tab bar, so sections under `Body` join the banner to stay
-    // visible on every tab.
-    const sections = isTabbedMode ? partsOf(items, SECTION_PART_NAME) : [];
+    // Only tab panels render below the tab bar, so sections and accordions under `Body` join the
+    // banner to stay visible on every tab.
+    const sections = isTabbedMode
+      ? items.filter(
+          (item): item is ParsedPart =>
+            item.type === 'part' &&
+            (item.part === SECTION_PART_NAME || item.part === ACCORDION_PART_NAME)
+        )
+      : [];
     if (sections.length === 0) return callouts;
     return (
       <>
