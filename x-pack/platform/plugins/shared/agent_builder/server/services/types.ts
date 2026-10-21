@@ -26,7 +26,11 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import type { HooksServiceSetup, HooksServiceStart } from '@kbn/agent-builder-server';
+import type {
+  CallbacksSetup,
+  HooksServiceSetup,
+  HooksServiceStart,
+} from '@kbn/agent-builder-server';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './execution/runner';
@@ -65,6 +69,7 @@ export interface InternalSetupServices {
   plugins: PluginsServiceSetup;
   metering: MeteringService;
   conversationTemplates: ConversationTemplatesServiceSetup;
+  callbacks: CallbacksSetup;
 }
 
 export interface InternalStartServices {

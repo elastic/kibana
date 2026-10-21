@@ -77,8 +77,6 @@ export const deliverCallbackEvents = ({
     return Promise.resolve();
   }
 
-  const transport = callbackDeliveryService.createTransport(callbackUrl);
-
   const deliverEvent = (event: ChatEvent) => {
     const isTerminal = isRoundCompleteEvent(event);
     const delivery = callbackDeliveryService.makeCallbackRequest({
@@ -87,7 +85,7 @@ export const deliverCallbackEvents = ({
         event,
         ...(isTerminal ? { idempotency_key: execution.executionId } : {}),
       },
-      transport,
+      callbackUrl,
       retry: isTerminal,
     });
 
@@ -155,7 +153,7 @@ export const deliverCallbackEvents = ({
               error: serializeExecutionError(error),
               idempotency_key: execution.executionId,
             },
-            transport,
+            callbackUrl,
             retry: true,
           });
 
