@@ -50,8 +50,6 @@ import {
   ATTACK_TAKE_ACTION_ITEM_TEST_ID,
 } from '../../../fixtures/page_objects/attack_cases_page';
 
-const ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING =
-  'securitySolution:enableAlertsAndAttacksAlignment';
 const ENABLE_NEW_FLYOUT_SETTING = 'securitySolution:enableNewFlyout';
 
 const CASE_DESCRIPTION = 'Created by the Scout attack case-attachment test';
@@ -199,7 +197,6 @@ spaceTest.describe(
       await page.setViewportSize({ width: 1920, height: 1080 });
       await apiServices.cases.cleanup.deleteAllCases(scoutSpace.id);
       await scoutSpace.uiSettings.set({
-        [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: true,
         // The attack attachment's navigation button supports both flyouts; pin the legacy one
         // so this suite asserts the same flyout body as the rest of the attacks specs.
         [ENABLE_NEW_FLYOUT_SETTING]: false,
@@ -216,7 +213,6 @@ spaceTest.describe(
       }
 
       await apiServices.cases.cleanup.deleteAllCases(scoutSpace.id);
-      await scoutSpace.uiSettings.unset(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
       await scoutSpace.uiSettings.unset(ENABLE_NEW_FLYOUT_SETTING);
     });
 
