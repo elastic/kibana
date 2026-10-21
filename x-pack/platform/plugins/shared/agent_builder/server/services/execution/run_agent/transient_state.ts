@@ -8,6 +8,7 @@
 import type {
   AttachmentTimelineEvent,
   CompactionSummary,
+  CompactionTrigger,
   ConversationRoundStep,
 } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
@@ -24,7 +25,7 @@ export type ResearchOutcome =
 
 /** A compaction decided by `contextManagement`, executed by `compactContext`. */
 export interface CompactionRequest {
-  trigger: 'forced' | 'round_start' | 'proactive';
+  trigger: CompactionTrigger;
   /** Max tokens of completed cycles kept verbatim before the current one. */
   tailCapTokens: number;
   /** Input tokens that motivated the compaction, when known. */

@@ -103,6 +103,8 @@ import {
 } from './agent_builder/attachment_types';
 import { registerAlertsFlyoutGroupedAttachment } from './agent_builder/attachment_types/alerts';
 import { registerAttacksFlyoutGroupedAttachment } from './agent_builder/attachment_types/attack_discovery/register_attacks_flyout_grouped_attachment';
+import { registerIocsFlyoutGroupedAttachment } from './agent_builder/attachment_types/investigation_iocs/register_iocs_flyout_grouped_attachment';
+import { registerTimelineFlyoutGroupedAttachment } from './agent_builder/attachment_types/investigation_timeline/register_timeline_flyout_grouped_attachment';
 import { registerRulesFlyoutGroupedAttachment } from './agent_builder/attachment_types/rule/register_rules_flyout_grouped_attachment';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
@@ -342,6 +344,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.logger.error('Failed to register entity attachment type', e);
       });
 
+    // Always register the attack attachment renderer so that attachments created
+    // while the feature flag was enabled continue to display correctly after the
+    // flag is disabled. The flag gates server-side writes; client-side rendering
+    // must be unconditional to avoid "Attachment type is not registered" errors.
+    // Lazily imported to keep the attack attachment module out of the page-load bundle.
+    import('./cases/attachments/attack')
+      .then(({ getAttackAttachment }) => {
+        cases.attachmentFramework.registerAttachment(getAttackAttachment());
+      })
+      .catch((e) => {
+        this.logger.error('Failed to register attack attachment type', e);
+      });
+
     this.registerDiscoverSharedFeatures(core, plugins);
 
     return this.contract.getSetupContract();
@@ -432,6 +447,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         searchSession: plugins.data.search.session,
         uiSettings: core.uiSettings,
+        rendering: core.rendering,
+        registerImpactEntityOpener: plugins.agenticInvestigations?.registerImpactEntityOpener,
       });
       if (this.experimentalFeatures.rulePreviewAttachmentEnabled) {
         registerRulePreviewAttachment({
@@ -568,12 +585,21 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       search: plugins.data.search.search,
       resolveSecurityCanvasContext,
     });
-    registerAttacksFlyoutGroupedAttachment({ register, getSpaceId, resolveSecurityCanvasContext });
+    registerAttacksFlyoutGroupedAttachment({
+      register,
+      application: core.application,
+      getSpaceId,
+      resolveSecurityCanvasContext,
+    });
     registerRulesFlyoutGroupedAttachment({
       register,
       application: core.application,
       resolveSecurityCanvasContext,
     });
+    if (this.experimentalFeatures.endpointForensicAnalysisSkill) {
+      registerTimelineFlyoutGroupedAttachment({ register, resolveSecurityCanvasContext });
+      registerIocsFlyoutGroupedAttachment({ register, resolveSecurityCanvasContext });
+    }
   }
 
   public async registerDiscoverSharedFeatures(

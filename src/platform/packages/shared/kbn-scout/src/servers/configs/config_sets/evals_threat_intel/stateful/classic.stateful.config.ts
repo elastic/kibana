@@ -16,7 +16,7 @@ import type { ScoutServerConfig } from '../../../../../types';
  * Extends the tracing config and enables AlertZero (plus its required soft-off
  * deps) so `/internal/threat_intel/*` registers. `searchInferenceEndpoints`
  * stays on: Agent Builder requires it, AlertZero requires Agent Builder, and
- * the suite pins AlertZero Fast/Reasoning Model Settings to the model under
+ * the suite pins AlertZero Efficient/Frontier Model Settings to the model under
  * test instead of relying on the genAi default fallback.
  *
  * Usage:

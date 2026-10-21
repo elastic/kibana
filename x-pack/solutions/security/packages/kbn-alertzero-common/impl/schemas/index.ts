@@ -89,6 +89,7 @@ export {
 export {
   HuntCoordinatorRequestBody,
   HuntCoordinatorResponse,
+  HuntCoordinatorResult,
   HuntCoordinatorStatus,
 } from './hunt/hunt_coordinator_route.gen';
 export {
@@ -99,3 +100,4 @@ export {
   WriteHuntEvidenceRequestBody,
   WriteHuntEvidenceResponse,
 } from './hunt/write_hunt_evidence_route.gen';
+export { huntResultSchema, isoDatetimeSchema, type HuntResult } from './hunt/hunt_result';

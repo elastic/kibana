@@ -13,9 +13,9 @@ import type {
 } from '@kbn/agent-builder-common';
 import {
   EventActorType,
-  ROUND_DERIVED_EVENT_ID_SUFFIXES,
   isAttachmentEvent,
   roundUserMessageEventId,
+  timelineExecutionId,
 } from '@kbn/agent-builder-common';
 import type {
   AttachmentChange,
@@ -84,7 +84,7 @@ export class RunAttachmentEvents {
     const events = attachmentChangesToEvents(changes, {
       source,
       actor: source === 'chat_input' ? inputActor : { type: EventActorType.agent, id: agentId },
-      execution_id: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}`,
+      execution_id: timelineExecutionId(roundId, 0),
       trigger_event_id: triggerEventId,
     });
     this.events.push(...events);

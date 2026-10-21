@@ -47,7 +47,7 @@ import {
   resumeExecutionId,
   roundUserMessageEventId,
 } from '@kbn/agent-builder-common';
-import type { ConversationClient } from '../../conversation';
+import type { ActivityContext, ConversationClient } from '../../conversation';
 import {
   roundToEvents,
   userMessageEvent,
@@ -137,6 +137,7 @@ export const persistUserMessage = async ({
   user,
   additionalEvents = [],
   attachments,
+  activity,
   appendRefresh,
 }: {
   conversation: ConversationWithOperation;
@@ -151,6 +152,8 @@ export const persistUserMessage = async ({
   /** Attachment change events to store in the same write, after the message. */
   additionalEvents?: TimelineEvent[];
   attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
+  /** Attribution of the `conversation_created` activity when this write creates the conversation. */
+  activity?: ActivityContext;
   /**
    * Refresh of the write onto an existing conversation. Creating one always refreshes: the
    * origin lookup finds conversations by search.
@@ -194,7 +197,7 @@ export const persistUserMessage = async ({
             ? { parent_conversation: conversation.parent_conversation }
             : {}),
         },
-        { source: 'execution' }
+        { source: 'execution', ...(activity ? { activity } : {}) }
       );
       return event.id;
     } catch (error) {

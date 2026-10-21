@@ -13,8 +13,11 @@ import type { AttachmentAddedEventData } from '@kbn/agent-builder-common';
 import {
   ChatEventType,
   CONVERSATION_SCHEMA_VERSION,
+  ConversationActivityEventType,
   DEFAULT_CONVERSATION_TITLE,
+  EventActorType,
   TimelineEventType,
+  isActivityEvent,
 } from '@kbn/agent-builder-common';
 import {
   createGenAiConnectorForProxy,
@@ -166,6 +169,7 @@ apiTest.describe(
             conversationIds.push(conversation.id);
             expect(conversation.rounds).toStrictEqual([]);
             expect(conversation.events?.map(({ type }) => type)).toStrictEqual([
+              ConversationActivityEventType.conversationCreated,
               TimelineEventType.userMessage,
             ]);
             expect(conversation.title).toBe(DEFAULT_CONVERSATION_TITLE);
@@ -199,10 +203,12 @@ apiTest.describe(
               conversationId
             );
             expect(stored.rounds).toStrictEqual([]);
-            expect(stored.events).toHaveLength(2);
-            expect(
-              stored.events?.every((event) => event.type === TimelineEventType.userMessage)
-            ).toBe(true);
+            // The creation activity, then the two messages.
+            expect(stored.events?.map(({ type }) => type)).toStrictEqual([
+              ConversationActivityEventType.conversationCreated,
+              TimelineEventType.userMessage,
+              TimelineEventType.userMessage,
+            ]);
             expect(llmProxy.interceptedRequests).toHaveLength(requestsBefore);
           }
         );
@@ -325,8 +331,12 @@ apiTest.describe(
         const conversation = created.body as GetConversationResponse;
         conversationIds.push(conversation.id);
         expect(conversation.rounds).toStrictEqual([]);
-        // The user message plus the attachment_added change event it carried alongside it.
-        expect(conversation.events).toHaveLength(2);
+        // The creation activity, the user message, and the attachment_added change event it
+        // carried alongside it.
+        expect(conversation.events).toHaveLength(3);
+        expect(conversation.events![0].type).toBe(
+          ConversationActivityEventType.conversationCreated
+        );
         const userMessage = conversation.events!.find(
           (event) => event.type === TimelineEventType.userMessage
         )!;
@@ -340,6 +350,13 @@ apiTest.describe(
         );
         expect(inputEvents).toHaveLength(1);
         expect((inputEvents[0].data as AttachmentAddedEventData).format).toBe(2);
+        // The attachment change is activity as well as timeline, so both list it.
+        expect(
+          conversation.events!.filter(isActivityEvent).map((event) => event.type)
+        ).toStrictEqual([
+          ConversationActivityEventType.conversationCreated,
+          TimelineEventType.attachmentAdded,
+        ]);
         expect(conversation.attachments).toHaveLength(1);
       }
     );
@@ -365,9 +382,20 @@ apiTest.describe(
       // The response is the conversation (events-forward), not a round-shaped payload.
       expect(body.title).toBe(MOCKED_LLM_TITLE);
       expect(body.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
-      expect((body.events ?? []).map((event) => event.type)).toStrictEqual(
-        ROUND_DERIVED_EVENT_TYPES
-      );
+      // Creation activity, the round's events, then the generated title recorded as activity.
+      expect((body.events ?? []).map((event) => event.type)).toStrictEqual([
+        ConversationActivityEventType.conversationCreated,
+        ...ROUND_DERIVED_EVENT_TYPES,
+        ConversationActivityEventType.titleUpdated,
+      ]);
+      // The run generated the title, so the agent is the actor and the event names the execution.
+      const titleUpdated = body.events!.at(-1)!;
+      expect(titleUpdated.actor.type).toBe(EventActorType.agent);
+      expect(typeof titleUpdated.execution_id).toBe('string');
+      expect(titleUpdated.data).toStrictEqual({
+        previous_title: DEFAULT_CONVERSATION_TITLE,
+        title: MOCKED_LLM_TITLE,
+      });
       expect(body.rounds[0].response.message).toBe(MOCKED_LLM_RESPONSE);
 
       // The same timeline is served by the existing conversation GET.
@@ -405,8 +433,13 @@ apiTest.describe(
 
       const body = second.body as GetConversationResponse;
       expect(body.rounds).toHaveLength(2);
-      // Two completed rounds project to two event trios.
-      expect(body.events).toHaveLength(ROUND_DERIVED_EVENT_TYPES.length * 2);
+      // Two completed rounds project to two event trios, framed by the creation activity and the
+      // title generated after the first round.
+      expect(body.events).toHaveLength(ROUND_DERIVED_EVENT_TYPES.length * 2 + 2);
+      expect(body.events?.filter(isActivityEvent).map((event) => event.type)).toStrictEqual([
+        ConversationActivityEventType.conversationCreated,
+        ConversationActivityEventType.titleUpdated,
+      ]);
     });
 
     apiTest(
@@ -441,6 +474,7 @@ apiTest.describe(
         );
         expect(stored.rounds).toStrictEqual([]);
         expect(stored.events?.map(({ type }) => type)).toStrictEqual([
+          ConversationActivityEventType.conversationCreated,
           TimelineEventType.userMessage,
         ]);
       }

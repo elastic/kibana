@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { buildInboundEventsClient } from './client';
 import { ingestInboundEvent } from './ingest';
@@ -45,7 +46,7 @@ describe('buildInboundEventsClient', () => {
     await client.ingest({
       connectorTypeId: '.slack',
       connectorId: 'c1',
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
       headers: {},
       query: {},
       body: {},
