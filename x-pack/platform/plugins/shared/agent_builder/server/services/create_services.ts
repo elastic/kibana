@@ -39,7 +39,7 @@ import {
 import { type PluginsService, createPluginsService } from './plugins';
 import { CallbackDeliveryService } from './execution/callback';
 import { createSpaceSettingsService } from './space_settings';
-import { SurfacesServiceImpl } from './surfaces';
+import { SurfacesServiceImpl, createImageAssetSource } from './surfaces';
 import { ConversationTemplatesService } from './conversation/templates';
 
 interface ServiceInstances {
@@ -139,6 +139,7 @@ export class ServiceManager {
     deploymentInfo,
     deductiveRegister,
     isomer,
+    files,
     getSurfaceBaseUrl,
     conversationEventBus,
   }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
@@ -272,6 +273,7 @@ export class ServiceManager {
     const surfaces = new SurfacesServiceImpl({
       attachmentsService: attachments,
       isomer,
+      assetSources: [createImageAssetSource({ getFiles: () => files })],
       getBaseUrl: getSurfaceBaseUrl,
       logger: logger.get('surfaces'),
     });

@@ -13,6 +13,7 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { FilesStart } from '@kbn/files-plugin/server';
 import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
@@ -131,6 +132,8 @@ export interface ServicesStartDeps {
   licensing: LicensingPluginStart;
   deploymentInfo: DeploymentInfo;
   isomer: IsomerPluginStart;
+  /** Reads the files of image attachments that Slack replies upload. */
+  files: FilesStart;
   /**
    * The space's Kibana URL, from `getKibanaUrl`, that surfaces such as Slack resolve Kibana app
    * links against. Undefined when no Kibana URL can be resolved.
