@@ -668,6 +668,10 @@ export type ESQLRow = unknown[];
 export interface EsqlProfileTimeSpan {
   took_millis?: number;
   took_nanos?: number;
+  /** Epoch millis. Present on newer profiles and absent on older ones. */
+  start_millis?: number;
+  /** Epoch millis. Present on newer profiles and absent on older ones. */
+  stop_millis?: number;
 }
 
 /** One operator inside an ES|QL profile driver. `status` fields vary by operator. */
@@ -682,6 +686,13 @@ export interface EsqlProfileDriver {
   cluster_name?: string;
   node_name?: string;
   operators?: EsqlProfileOperator[];
+  /** Epoch millis when this driver started. Absent on older profiles. */
+  start_millis?: number;
+  /** Epoch millis when this driver stopped. Absent on older profiles. */
+  stop_millis?: number;
+  took_nanos?: number;
+  /** CPU time for this driver, excluding waiting. */
+  cpu_nanos?: number;
 }
 
 /** Physical plan text attached to an ES|QL profile. */

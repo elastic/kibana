@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAccordion,
-  EuiButtonGroup,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,10 +23,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EsqlProfilePlan } from '@kbn/es-types';
 import type {
   AggregatedOperator,
   PlanningPhaseId,
+  QueryProfileTimeline,
   QueryProfileView,
+  TimelineDriver,
+  TimelineOperator,
 } from './aggregate_esql_profile';
 import { operatorIconType } from './operator_icon';
 import {
@@ -39,68 +42,38 @@ import {
   formatThroughput,
 } from './query_profile_format';
 
-type SortMode = 'slowest' | 'pipeline';
+const TIMELINE_GROUP_ORDER = ['data', 'node_reduce', 'final'];
+
+type TimelineZoom = { kind: 'query' } | { kind: 'planning' } | { kind: 'driver'; driverId: string };
 
 export function QueryProfileBody({ view }: { view: QueryProfileView }) {
-  const [sortMode, setSortMode] = useState<SortMode>('slowest');
+  return view.hasTimeline ? <TimelineProfile view={view} /> : <PipelineProfile view={view} />;
+}
+
+function PipelineProfile({ view }: { view: QueryProfileView }) {
   const [expandedOperator, setExpandedOperator] = useState<string | undefined>();
-  const operators = useMemo(
-    () => sortOperators(view.operators, sortMode),
-    [view.operators, sortMode]
+  const operators = [...view.operators].sort(
+    (left, right) => left.pipelineIndex - right.pipelineIndex
   );
 
   return (
     <>
       <DurationBar view={view} />
       <EuiSpacer size="s" />
-      <EuiText size="xs" color="subdued">
-        <p>
-          <FormattedMessage
-            id="data.inspector.queryProfile.driverCountDescription"
-            defaultMessage="{driverCount, plural, one {# driver} other {# drivers}}"
-            values={{ driverCount: view.driverCount }}
-          />
-        </p>
-      </EuiText>
+      <DriverCount count={view.driverCount} />
       {view.operators.length > 0 ? (
         <>
           <EuiSpacer size="xs" />
           <EuiText size="xs" color="subdued">
             <p>
               <FormattedMessage
-                id="data.inspector.queryProfile.cpuTimeDescription"
-                defaultMessage="Operator times are CPU time summed across drivers, so they will not add up to the total query time."
+                id="data.inspector.queryProfile.planOrderDescription"
+                defaultMessage="Steps follow the order they run. Open a step to see why it took time."
               />
             </p>
           </EuiText>
-          <EuiSpacer size="m" />
-          <EuiButtonGroup
-            legend={i18n.translate('data.inspector.queryProfile.operatorOrderLabel', {
-              defaultMessage: 'Operator order',
-            })}
-            options={[
-              {
-                id: 'slowest',
-                label: i18n.translate('data.inspector.queryProfile.slowestFirstButtonLabel', {
-                  defaultMessage: 'Slowest first',
-                }),
-              },
-              {
-                id: 'pipeline',
-                label: i18n.translate('data.inspector.queryProfile.pipelineOrderButtonLabel', {
-                  defaultMessage: 'Pipeline order',
-                }),
-              },
-            ]}
-            idSelected={sortMode}
-            onChange={(id) => {
-              if (id === 'slowest' || id === 'pipeline') {
-                setSortMode(id);
-              }
-            }}
-            buttonSize="compressed"
-            data-test-subj="esqlQueryProfileSort"
-          />
+          <EuiSpacer size="xs" />
+          <CpuTimeNote />
           <EuiSpacer size="l" />
           {operators.map((operator) => (
             <OperatorRow
@@ -116,57 +89,78 @@ export function QueryProfileBody({ view }: { view: QueryProfileView }) {
           ))}
         </>
       ) : (
-        <>
-          <EuiSpacer size="m" />
-          <EuiText size="s" color="subdued">
-            <p>
-              <FormattedMessage
-                id="data.inspector.queryProfile.noOperatorsDescription"
-                defaultMessage="This profile did not include any operators."
-              />
-            </p>
-          </EuiText>
-        </>
+        <NoOperators />
       )}
-      {view.plans.length > 0 ? (
-        <>
-          <EuiSpacer size="m" />
-          <EuiAccordion
-            id="esqlQueryProfilePlan"
-            buttonContent={i18n.translate('data.inspector.queryProfile.physicalPlanButtonLabel', {
-              defaultMessage: 'Physical plan',
-            })}
-            data-test-subj="esqlQueryProfilePlan"
-          >
-            <EuiSpacer size="s" />
-            {view.plans.map((plan, index) => (
-              <div key={`${plan.node_name ?? 'plan'}-${index}`}>
-                {plan.node_name ? (
-                  <EuiText size="xs" color="subdued">
-                    <p>{plan.node_name}</p>
-                  </EuiText>
-                ) : null}
-                <EuiCodeBlock language="text" fontSize="s" paddingSize="s" isCopyable>
-                  {plan.plan}
-                </EuiCodeBlock>
-              </div>
-            ))}
-          </EuiAccordion>
-        </>
-      ) : null}
+      <PhysicalPlan plans={view.plans} />
     </>
   );
 }
 
-function sortOperators(operators: AggregatedOperator[], sortMode: SortMode): AggregatedOperator[] {
-  return [...operators].sort((left, right) =>
-    sortMode === 'pipeline'
-      ? left.pipelineIndex - right.pipelineIndex
-      : right.processNanos - left.processNanos || left.pipelineIndex - right.pipelineIndex
+function TimelineProfile({ view }: { view: QueryProfileView }) {
+  const [zoom, setZoom] = useState<TimelineZoom>({ kind: 'query' });
+  const [expandedOperator, setExpandedOperator] = useState<string | undefined>();
+  const domain = zoomDomain(view.timeline, zoom);
+  const selectedDriver =
+    zoom.kind === 'driver'
+      ? view.timeline.drivers.find((driver) => driver.id === zoom.driverId)
+      : undefined;
+
+  const zoomOut = () => {
+    setZoom({ kind: 'query' });
+    setExpandedOperator(undefined);
+  };
+
+  return (
+    <>
+      <DurationBar
+        view={view}
+        showSplit={false}
+        crumb={
+          zoom.kind === 'query' ? undefined : (
+            <TimelineCrumb current={zoomCrumbLabel(zoom, selectedDriver)} onZoomOut={zoomOut} />
+          )
+        }
+      />
+      <EuiSpacer size="s" />
+      <DriverCount count={view.driverCount} />
+      <EuiSpacer size="xs" />
+      <CpuTimeNote />
+      <EuiSpacer size="m" />
+      <TimelineLanes
+        timeline={view.timeline}
+        domain={domain}
+        zoom={zoom}
+        onSelectPlanning={() => {
+          setZoom({ kind: 'planning' });
+          setExpandedOperator(undefined);
+        }}
+        onSelectDriver={(driverId) => {
+          setZoom({ kind: 'driver', driverId });
+          setExpandedOperator(undefined);
+        }}
+      />
+      {selectedDriver ? (
+        <DriverZoom
+          driver={selectedDriver}
+          expandedOperator={expandedOperator}
+          onToggle={setExpandedOperator}
+        />
+      ) : null}
+      {zoom.kind === 'planning' ? <PlanningPhaseList view={view} /> : null}
+      <PhysicalPlan plans={view.plans} />
+    </>
   );
 }
 
-function DurationBar({ view }: { view: QueryProfileView }) {
+function DurationBar({
+  view,
+  showSplit = true,
+  crumb,
+}: {
+  view: QueryProfileView;
+  showSplit?: boolean;
+  crumb?: React.ReactNode;
+}) {
   const styles = useProfileStyles();
   const planning = view.planningTookMillis;
   const execution = view.executionTookMillis;
@@ -200,43 +194,52 @@ function DurationBar({ view }: { view: QueryProfileView }) {
             </p>
           </EuiText>
         </EuiFlexItem>
+        {crumb ? (
+          <EuiFlexItem>
+            <div css={styles.crumbSlot}>{crumb}</div>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <div css={styles.summaryTrack} role="img" aria-label={durationAriaLabel(view)}>
-        {hasSplit ? (
-          <>
-            <div css={styles.planningSegment} style={{ width: `${planningShare}%` }} />
-            <div css={styles.executionSegment} style={{ width: `${executionShare}%` }} />
-          </>
-        ) : (
-          <div css={styles.executionSegment} style={{ width: '100%' }} />
-        )}
-      </div>
-      {hasSplit ? (
+      {showSplit ? (
         <>
-          <EuiSpacer size="xs" />
-          <EuiFlexGroup gutterSize="m" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={<PlanningTooltip view={view} />}>
-                <LegendSwatch
-                  colorCss={styles.planningSwatch}
-                  label={i18n.translate('data.inspector.queryProfile.planningLegendLabel', {
-                    defaultMessage: 'Planning {time}',
-                    values: { time: formatDurationMillis(planning ?? 0) },
-                  })}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <LegendSwatch
-                colorCss={styles.executionSwatch}
-                label={i18n.translate('data.inspector.queryProfile.executionLegendLabel', {
-                  defaultMessage: 'Execution {time}',
-                  values: { time: formatDurationMillis(execution ?? 0) },
-                })}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <div css={styles.summaryTrack} role="img" aria-label={durationAriaLabel(view)}>
+            {hasSplit ? (
+              <>
+                <div css={styles.planningSegment} style={{ width: `${planningShare}%` }} />
+                <div css={styles.executionSegment} style={{ width: `${executionShare}%` }} />
+              </>
+            ) : (
+              <div css={styles.executionSegment} style={{ width: '100%' }} />
+            )}
+          </div>
+          {hasSplit ? (
+            <>
+              <EuiSpacer size="xs" />
+              <EuiFlexGroup gutterSize="m" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={<PlanningTooltip view={view} />}>
+                    <LegendSwatch
+                      colorCss={styles.planningSwatch}
+                      label={i18n.translate('data.inspector.queryProfile.planningLegendLabel', {
+                        defaultMessage: 'Planning {time}',
+                        values: { time: formatDurationMillis(planning ?? 0) },
+                      })}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <LegendSwatch
+                    colorCss={styles.executionSwatch}
+                    label={i18n.translate('data.inspector.queryProfile.executionLegendLabel', {
+                      defaultMessage: 'Execution {time}',
+                      values: { time: formatDurationMillis(execution ?? 0) },
+                    })}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          ) : null}
         </>
       ) : null}
     </div>
@@ -315,11 +318,6 @@ function OperatorRow({
           </span>
           <span css={styles.operatorName}>
             <span css={styles.operatorTitle}>{operator.title}</span>
-            {operator.detail ? (
-              <span css={styles.operatorDetail} title={operator.detail}>
-                {operator.detail}
-              </span>
-            ) : null}
           </span>
           <span css={styles.operatorTime}>{time}</span>
           <span css={styles.operatorShare}>{share}</span>
@@ -365,7 +363,9 @@ function OperatorRow({
           ) : null}
         </span>
       </button>
-      {isExpanded ? <OperatorDetails operator={operator} /> : null}
+      {isExpanded ? (
+        <OperatorDetails operator={operator.operator} drivers={operator.drivers} />
+      ) : null}
     </div>
   );
 }
@@ -380,14 +380,26 @@ function shareColor(styles: ReturnType<typeof useProfileStyles>, share: number):
   return styles.cool;
 }
 
-function OperatorDetails({ operator }: { operator: AggregatedOperator }) {
+function OperatorDetails({
+  operator,
+  drivers,
+}: {
+  operator: string;
+  drivers: Array<{
+    label: string;
+    processNanos: number;
+    rowsReceived: number;
+    rowsEmitted: number;
+    rawStatus: Record<string, unknown>;
+  }>;
+}) {
   return (
     <div data-test-subj="esqlQueryProfileOperatorDetails">
       <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued">
-        <p>{operator.operator}</p>
+        <p>{operator}</p>
       </EuiText>
-      {operator.drivers.map((driver) => (
+      {drivers.map((driver) => (
         <EuiText key={driver.label} size="xs" color="subdued">
           <p>
             {i18n.translate('data.inspector.queryProfile.driverLineLabel', {
@@ -404,7 +416,7 @@ function OperatorDetails({ operator }: { operator: AggregatedOperator }) {
       ))}
       <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable>
         {JSON.stringify(
-          operator.drivers.map((driver) => ({ driver: driver.label, status: driver.rawStatus })),
+          drivers.map((driver) => ({ driver: driver.label, status: driver.rawStatus })),
           null,
           2
         )}
@@ -505,6 +517,468 @@ function planningPhaseLabel(id: PlanningPhaseId): string {
   }
 }
 
+function TimelineCrumb({ current, onZoomOut }: { current: string; onZoomOut: () => void }) {
+  const styles = useProfileStyles();
+
+  return (
+    <nav
+      css={styles.crumb}
+      aria-label={i18n.translate('data.inspector.queryProfile.timelineZoomAriaLabel', {
+        defaultMessage: 'Timeline zoom',
+      })}
+    >
+      <button
+        type="button"
+        css={styles.crumbAncestor}
+        onClick={onZoomOut}
+        data-test-subj="esqlQueryProfileZoomOut"
+      >
+        <FormattedMessage
+          id="data.inspector.queryProfile.fullQueryButtonLabel"
+          defaultMessage="Full query"
+        />
+      </button>
+      <EuiIcon type="chevronSingleRight" size="s" color="subdued" aria-hidden={true} />
+      <span css={styles.crumbCurrent}>{current}</span>
+    </nav>
+  );
+}
+
+function zoomCrumbLabel(zoom: TimelineZoom, driver: TimelineDriver | undefined): string {
+  if (zoom.kind === 'planning') {
+    return i18n.translate('data.inspector.queryProfile.planningLaneLabel', {
+      defaultMessage: 'Planning',
+    });
+  }
+  return driver?.nodeName || driver?.label || '';
+}
+
+function DriverCount({ count }: { count: number }) {
+  return (
+    <EuiText size="xs" color="subdued">
+      <p>
+        <FormattedMessage
+          id="data.inspector.queryProfile.driverCountDescription"
+          defaultMessage="{driverCount, plural, one {# driver} other {# drivers}}"
+          values={{ driverCount: count }}
+        />
+      </p>
+    </EuiText>
+  );
+}
+
+function CpuTimeNote() {
+  return (
+    <EuiText size="xs" color="subdued">
+      <p>
+        <FormattedMessage
+          id="data.inspector.queryProfile.cpuTimeDescription"
+          defaultMessage="Operator times are CPU time summed across drivers, so they will not add up to the total query time."
+        />
+      </p>
+    </EuiText>
+  );
+}
+
+function NoOperators() {
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <EuiText size="s" color="subdued">
+        <p>
+          <FormattedMessage
+            id="data.inspector.queryProfile.noOperatorsDescription"
+            defaultMessage="This profile did not include any operators."
+          />
+        </p>
+      </EuiText>
+    </>
+  );
+}
+
+function PhysicalPlan({ plans }: { plans: EsqlProfilePlan[] }) {
+  if (plans.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <EuiAccordion
+        id="esqlQueryProfilePlan"
+        buttonContent={i18n.translate('data.inspector.queryProfile.physicalPlanButtonLabel', {
+          defaultMessage: 'Physical plan',
+        })}
+        data-test-subj="esqlQueryProfilePlan"
+      >
+        <EuiSpacer size="s" />
+        {plans.map((plan, index) => (
+          <div key={`${plan.node_name ?? 'plan'}-${index}`}>
+            {plan.node_name ? (
+              <EuiText size="xs" color="subdued">
+                <p>{plan.node_name}</p>
+              </EuiText>
+            ) : null}
+            <EuiCodeBlock language="text" fontSize="s" paddingSize="s" isCopyable>
+              {plan.plan}
+            </EuiCodeBlock>
+          </div>
+        ))}
+      </EuiAccordion>
+    </>
+  );
+}
+
+function TimelineLanes({
+  timeline,
+  domain,
+  zoom,
+  onSelectPlanning,
+  onSelectDriver,
+}: {
+  timeline: QueryProfileTimeline;
+  domain: { startMillis: number; stopMillis: number };
+  zoom: TimelineZoom;
+  onSelectPlanning: () => void;
+  onSelectDriver: (driverId: string) => void;
+}) {
+  const styles = useProfileStyles();
+  const planningBox = timeline.planning
+    ? laneBox(
+        timeline.planning.startMillis,
+        timeline.planning.stopMillis,
+        domain.startMillis,
+        domain.stopMillis
+      )
+    : undefined;
+  const groups = groupDrivers(
+    timeline.drivers.flatMap((driver) => {
+      const box = laneBox(
+        driver.startMillis,
+        driver.stopMillis,
+        domain.startMillis,
+        domain.stopMillis
+      );
+      return box ? [{ driver, box }] : [];
+    })
+  );
+
+  return (
+    <div css={styles.lanes} data-test-subj="esqlQueryProfileTimeline">
+      {planningBox && timeline.planning ? (
+        <LaneButton
+          label={i18n.translate('data.inspector.queryProfile.planningLaneLabel', {
+            defaultMessage: 'Planning',
+          })}
+          time={formatDurationMillis(timeline.planning.stopMillis - timeline.planning.startMillis)}
+          ariaLabel={i18n.translate('data.inspector.queryProfile.planningLaneAriaLabel', {
+            defaultMessage: 'Planning, {time}',
+            values: {
+              time: formatDurationMillis(
+                timeline.planning.stopMillis - timeline.planning.startMillis
+              ),
+            },
+          })}
+          box={planningBox}
+          colorCss={styles.planningSegment}
+          isSelected={zoom.kind === 'planning'}
+          onClick={onSelectPlanning}
+          testSubject="esqlQueryProfilePlanningLane"
+        />
+      ) : null}
+      {groups.map((group) => (
+        <div key={group.description || 'other'}>
+          <EuiText size="xs" color="subdued">
+            <p css={styles.groupLabel}>{descriptionGroupLabel(group.description)}</p>
+          </EuiText>
+          {group.drivers.map(({ driver, box }) => (
+            <LaneButton
+              key={driver.id}
+              label={driver.nodeName || driver.label}
+              time={formatDurationMillis(driver.stopMillis - driver.startMillis)}
+              ariaLabel={i18n.translate('data.inspector.queryProfile.timelineLaneAriaLabel', {
+                defaultMessage: '{label}, {time}',
+                values: {
+                  label: driver.label,
+                  time: formatDurationMillis(driver.stopMillis - driver.startMillis),
+                },
+              })}
+              box={box}
+              colorCss={styles.executionSegment}
+              isSelected={zoom.kind === 'driver' && zoom.driverId === driver.id}
+              onClick={() => onSelectDriver(driver.id)}
+              driverLabel={driver.label}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function LaneButton({
+  label,
+  time,
+  ariaLabel,
+  box,
+  colorCss,
+  isSelected,
+  onClick,
+  driverLabel,
+  testSubject = 'esqlQueryProfileLane',
+}: {
+  label: string;
+  time: string;
+  ariaLabel: string;
+  box: { left: number; width: number };
+  colorCss: ReturnType<typeof css>;
+  isSelected: boolean;
+  onClick: () => void;
+  driverLabel?: string;
+  testSubject?: string;
+}) {
+  const styles = useProfileStyles();
+
+  return (
+    <button
+      type="button"
+      css={styles.laneButton}
+      aria-label={ariaLabel}
+      aria-pressed={isSelected}
+      onClick={onClick}
+      data-test-subj={testSubject}
+    >
+      <span css={styles.laneLabel}>
+        <span css={styles.laneName}>{label}</span>
+        <span css={styles.laneTime}>{time}</span>
+      </span>
+      <span css={styles.laneTrack}>
+        <span
+          css={[styles.laneBar, colorCss, isSelected ? styles.laneBarSelected : undefined]}
+          style={{ left: `${box.left}%`, width: `${box.width}%` }}
+          data-test-subj="esqlQueryProfileLaneBar"
+          data-driver-label={driverLabel}
+        />
+      </span>
+    </button>
+  );
+}
+
+function DriverZoom({
+  driver,
+  expandedOperator,
+  onToggle,
+}: {
+  driver: TimelineDriver;
+  expandedOperator: string | undefined;
+  onToggle: (operatorKey: string | undefined) => void;
+}) {
+  const styles = useProfileStyles();
+  const expanded = driver.operators.find(
+    (operator, index) => operatorKey(operator, index) === expandedOperator
+  );
+
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <EuiText size="xs" color="subdued">
+        <p>
+          <FormattedMessage
+            id="data.inspector.queryProfile.driverCpuDescription"
+            defaultMessage="CPU time inside this driver. These widths are not wall-clock time."
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer size="s" />
+      {driver.operators.length === 0 ? (
+        <NoOperators />
+      ) : (
+        <div css={styles.operatorStrip} data-test-subj="esqlQueryProfileOperatorStrip">
+          {driver.operators.map((operator, index) => {
+            const key = operatorKey(operator, index);
+            const time = formatDurationMillis(operator.processNanos / 1e6);
+            const share = formatShare(operator.share);
+            return (
+              <button
+                key={key}
+                type="button"
+                css={styles.stripStep}
+                style={{ flexGrow: Math.max(operator.share * 100, 1) }}
+                aria-expanded={expandedOperator === key}
+                aria-label={i18n.translate('data.inspector.queryProfile.operatorButtonAriaLabel', {
+                  defaultMessage: '{title}, {time}, {share}',
+                  values: { title: operator.title, time, share },
+                })}
+                onClick={() => onToggle(expandedOperator === key ? undefined : key)}
+                data-test-subj="esqlQueryProfileOperator"
+              >
+                <span css={styles.stripTitle}>{operator.title}</span>
+                <span css={styles.stripShare}>{share}</span>
+                <span
+                  css={styles.stripBar}
+                  style={{ background: shareColor(styles, operator.share) }}
+                />
+              </button>
+            );
+          })}
+        </div>
+      )}
+      {expanded ? (
+        <OperatorDetails
+          operator={expanded.operator}
+          drivers={[
+            {
+              label: driver.label,
+              processNanos: expanded.processNanos,
+              rowsReceived: expanded.rowsReceived,
+              rowsEmitted: expanded.rowsEmitted,
+              rawStatus: expanded.rawStatus,
+            },
+          ]}
+        />
+      ) : null}
+    </>
+  );
+}
+
+function PlanningPhaseList({ view }: { view: QueryProfileView }) {
+  return (
+    <div data-test-subj="esqlQueryProfilePlanningPhases">
+      <EuiSpacer size="m" />
+      {view.planningPhases.length === 0 ? (
+        <EuiText size="xs" color="subdued">
+          <p>
+            <FormattedMessage
+              id="data.inspector.queryProfile.planningZoomDescription"
+              defaultMessage="Planning {time}"
+              values={{ time: formatDurationMillis(view.planningTookMillis ?? 0) }}
+            />
+          </p>
+        </EuiText>
+      ) : (
+        view.planningPhases.map((phase) => (
+          <EuiText key={phase.id} size="xs">
+            <p>
+              {i18n.translate('data.inspector.queryProfile.planningPhaseLabel', {
+                defaultMessage: '{phase} {time}',
+                values: {
+                  phase: planningPhaseLabel(phase.id),
+                  time: formatDurationMillis(phase.tookMillis),
+                },
+              })}
+            </p>
+          </EuiText>
+        ))
+      )}
+    </div>
+  );
+}
+
+function operatorKey(operator: TimelineOperator, index: number): string {
+  return `${index}:${operator.operator}`;
+}
+
+function zoomDomain(
+  timeline: QueryProfileTimeline,
+  zoom: TimelineZoom
+): { startMillis: number; stopMillis: number } {
+  if (zoom.kind === 'planning' && timeline.planning) {
+    return timeline.planning;
+  }
+  if (zoom.kind === 'driver') {
+    const driver = timeline.drivers.find((item) => item.id === zoom.driverId);
+    if (driver) {
+      return { startMillis: driver.startMillis, stopMillis: driver.stopMillis };
+    }
+  }
+  return fullDomain(timeline);
+}
+
+function fullDomain(timeline: QueryProfileTimeline): { startMillis: number; stopMillis: number } {
+  const spans = [...(timeline.planning ? [timeline.planning] : []), ...timeline.drivers];
+  if (spans.length === 0) {
+    return { startMillis: 0, stopMillis: 0 };
+  }
+  return {
+    startMillis: Math.min(...spans.map((span) => span.startMillis)),
+    stopMillis: Math.max(...spans.map((span) => span.stopMillis)),
+  };
+}
+
+function laneBox(
+  startMillis: number,
+  stopMillis: number,
+  domainStart: number,
+  domainEnd: number
+): { left: number; width: number } | undefined {
+  const selected = startMillis === domainStart && stopMillis === domainEnd;
+  const domain = domainEnd - domainStart;
+  if (domain <= 0) {
+    return selected ? { left: 0, width: 100 } : undefined;
+  }
+
+  const start = Math.max(startMillis, domainStart);
+  const stop = Math.min(stopMillis, domainEnd);
+  if (stop <= start) {
+    return selected ? { left: 0, width: 100 } : undefined;
+  }
+
+  const left = ((start - domainStart) / domain) * 100;
+  const width = ((stop - start) / domain) * 100;
+  const clampedWidth = Math.min(100, Math.max(width, 1.5));
+  const clampedLeft = Math.min(Math.max(left, 0), 100 - clampedWidth);
+  return { left: clampedLeft, width: clampedWidth };
+}
+
+function groupDrivers(
+  entries: Array<{ driver: TimelineDriver; box: { left: number; width: number } }>
+): Array<{
+  description: string;
+  drivers: Array<{ driver: TimelineDriver; box: { left: number; width: number } }>;
+}> {
+  const groups = new Map<
+    string,
+    Array<{ driver: TimelineDriver; box: { left: number; width: number } }>
+  >();
+  entries.forEach((entry) => {
+    const current = groups.get(entry.driver.description) ?? [];
+    current.push(entry);
+    groups.set(entry.driver.description, current);
+  });
+
+  const known = TIMELINE_GROUP_ORDER.filter((description) => groups.has(description));
+  const rest = [...groups.keys()].filter(
+    (description) => !TIMELINE_GROUP_ORDER.includes(description)
+  );
+  return [...known, ...rest].map((description) => ({
+    description,
+    drivers: groups.get(description) ?? [],
+  }));
+}
+
+function descriptionGroupLabel(description: string): string {
+  switch (description) {
+    case 'data':
+      return i18n.translate('data.inspector.queryProfile.dataDriversLabel', {
+        defaultMessage: 'Data',
+      });
+    case 'node_reduce':
+      return i18n.translate('data.inspector.queryProfile.nodeReduceDriversLabel', {
+        defaultMessage: 'Node reduce',
+      });
+    case 'final':
+      return i18n.translate('data.inspector.queryProfile.finalDriversLabel', {
+        defaultMessage: 'Final',
+      });
+    case '':
+      return i18n.translate('data.inspector.queryProfile.otherDriversLabel', {
+        defaultMessage: 'Other',
+      });
+    default:
+      return description;
+  }
+}
+
 const useProfileStyles = () => {
   const { euiTheme } = useEuiTheme();
 
@@ -589,16 +1063,6 @@ const useProfileStyles = () => {
       white-space: nowrap;
       text-overflow: ellipsis;
     `,
-    operatorDetail: css`
-      display: block;
-      margin-top: ${euiTheme.size.xs};
-      overflow: hidden;
-      color: ${euiTheme.colors.textSubdued};
-      font-size: ${euiTheme.font.scale.xs * euiTheme.base}px;
-      line-height: 1.4;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    `,
     operatorTime: css`
       flex-shrink: 0;
       min-width: ${euiTheme.base * 4}px;
@@ -622,6 +1086,146 @@ const useProfileStyles = () => {
       color: ${euiTheme.colors.textSubdued};
       font-size: ${euiTheme.font.scale.xs * euiTheme.base}px;
       line-height: 1.4;
+    `,
+    crumbSlot: css`
+      display: flex;
+      justify-content: flex-end;
+      min-width: 0;
+    `,
+    crumb: css`
+      display: flex;
+      align-items: center;
+      gap: ${euiTheme.size.xs};
+      min-width: 0;
+    `,
+    crumbAncestor: css`
+      flex-shrink: 0;
+      padding: 0;
+      color: ${euiTheme.colors.primary};
+      font-size: ${euiTheme.font.scale.xs * euiTheme.base}px;
+      font-weight: ${euiTheme.font.weight.medium};
+      line-height: 1.4;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    `,
+    crumbCurrent: css`
+      overflow: hidden;
+      font-size: ${euiTheme.font.scale.xs * euiTheme.base}px;
+      font-weight: ${euiTheme.font.weight.bold};
+      line-height: 1.4;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    `,
+    lanes: css`
+      max-height: ${euiTheme.base * 20}px;
+      overflow-y: auto;
+    `,
+    groupLabel: css`
+      margin-top: ${euiTheme.size.s};
+      margin-bottom: ${euiTheme.size.xs};
+    `,
+    laneButton: css`
+      display: grid;
+      grid-template-columns: minmax(${euiTheme.base * 9}px, ${euiTheme.base * 14}px) 1fr;
+      align-items: center;
+      gap: ${euiTheme.size.s};
+      width: 100%;
+      margin-bottom: ${euiTheme.size.xs};
+      padding: ${euiTheme.size.xs};
+      text-align: start;
+      background: transparent;
+      border: none;
+      border-radius: ${euiTheme.border.radius.medium};
+      cursor: pointer;
+      color: inherit;
+
+      &:hover,
+      &[aria-pressed='true'] {
+        background: ${euiTheme.colors.backgroundBaseInteractiveHover};
+      }
+    `,
+    laneLabel: css`
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: ${euiTheme.size.s};
+      min-width: 0;
+    `,
+    laneName: css`
+      overflow: hidden;
+      font-size: ${euiTheme.font.scale.xs * euiTheme.base}px;
+      line-height: 1.4;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    `,
+    laneTime: css`
+      flex-shrink: 0;
+      color: ${euiTheme.colors.textSubdued};
+      font-size: ${euiTheme.font.scale.xs * euiTheme.base}px;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.4;
+    `,
+    laneTrack: css`
+      position: relative;
+      height: ${euiTheme.size.m};
+      overflow: hidden;
+      background: ${euiTheme.colors.backgroundBaseFormsControlDisabled};
+      border-radius: ${euiTheme.border.radius.medium};
+    `,
+    laneBar: css`
+      position: absolute;
+      top: 0;
+      bottom: 0;
+    `,
+    laneBarSelected: css`
+      box-shadow: inset 0 0 0 2px ${euiTheme.colors.text};
+    `,
+    operatorStrip: css`
+      display: flex;
+      gap: ${euiTheme.size.xs};
+      overflow-x: auto;
+    `,
+    stripStep: css`
+      display: flex;
+      flex-direction: column;
+      flex-basis: 0;
+      gap: ${euiTheme.size.xs};
+      min-width: ${euiTheme.base * 6}px;
+      padding: ${euiTheme.size.s};
+      text-align: start;
+      background: transparent;
+      border: none;
+      border-radius: ${euiTheme.border.radius.medium};
+      cursor: pointer;
+      color: inherit;
+
+      &:hover,
+      &[aria-expanded='true'] {
+        background: ${euiTheme.colors.backgroundBaseInteractiveHover};
+      }
+    `,
+    stripTitle: css`
+      overflow: hidden;
+      font-weight: ${euiTheme.font.weight.bold};
+      font-size: ${euiTheme.font.scale.s * euiTheme.base}px;
+      line-height: 1.4;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    `,
+    stripShare: css`
+      color: ${euiTheme.colors.textSubdued};
+      font-size: ${euiTheme.font.scale.xs * euiTheme.base}px;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.4;
+    `,
+    stripBar: css`
+      height: ${euiTheme.size.s};
+      border-radius: ${euiTheme.border.radius.medium};
     `,
   };
 };

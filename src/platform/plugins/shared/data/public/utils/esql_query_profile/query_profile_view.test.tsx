@@ -50,6 +50,48 @@ const readerProfile = {
   plans: [{ node_name: 'node-a', plan: 'LimitExec' }],
 };
 
+const timelineProfile = {
+  query: { took_millis: 2_000, start_millis: 1_000, stop_millis: 3_000 },
+  planning: { took_millis: 500, start_millis: 1_000, stop_millis: 1_500 },
+  parsing: { took_millis: 40 },
+  drivers: [
+    {
+      description: 'data',
+      node_name: 'node-a',
+      start_millis: 1_500,
+      stop_millis: 2_200,
+      operators: [
+        {
+          operator: 'LimitOperator',
+          status: { process_nanos: 1_000_000, rows_received: 4, rows_emitted: 1 },
+        },
+        {
+          operator: 'ValuesSourceReaderOperator[fields = [body]]',
+          status: {
+            process_nanos: 1_000_000_000,
+            rows_received: 10,
+            rows_emitted: 4,
+            bytes_read: 5_000_000,
+            bytes_decoded: 80_000_000,
+          },
+        },
+      ],
+    },
+    {
+      description: 'data',
+      node_name: 'node-b',
+      start_millis: 1_600,
+      stop_millis: 2_800,
+      operators: [
+        {
+          operator: 'EvalOperator',
+          status: { process_nanos: 2_000_000, rows_received: 1, rows_emitted: 1 },
+        },
+      ],
+    },
+  ],
+};
+
 const chartProfile = {
   query: { took_millis: 100 },
   planning: { took_millis: 10 },
@@ -105,7 +147,12 @@ describe('getEsqlQueryProfileViewDescription', () => {
 describe('QueryProfileView', () => {
   const esql = jest.fn(async ({ query }: { query: string }) => ({
     rawResponse: {
-      profile: query === 'FROM logs | STATS count()' ? chartProfile : readerProfile,
+      profile:
+        query === 'FROM logs | STATS count()'
+          ? chartProfile
+          : query === 'FROM timeline'
+          ? timelineProfile
+          : readerProfile,
     },
   }));
   const search = { esql } as unknown as Pick<ISearchStart, 'esql'>;
@@ -130,9 +177,11 @@ describe('QueryProfileView', () => {
     expect(screen.getByText('Planning 500 ms')).toBeInTheDocument();
     expect(screen.getByText('Execution 1.5 s')).toBeInTheDocument();
 
-    const [reader] = screen.getAllByTestId('esqlQueryProfileOperator');
+    const reader = screen
+      .getAllByTestId('esqlQueryProfileOperator')
+      .find((row) => row.textContent?.includes('ValuesSourceReader'));
     expect(reader).toHaveTextContent('ValuesSourceReader');
-    expect(reader).toHaveTextContent('[fields = [body]]');
+    expect(reader).not.toHaveTextContent('[fields = [body]]');
     expect(reader).toHaveTextContent('100%');
     expect(reader).toHaveTextContent('10 in, 4 out');
     expect(reader).toHaveTextContent('5 MB stored, 80 MB decoded');
@@ -162,6 +211,9 @@ describe('QueryProfileView', () => {
     fireEvent.click(await screen.findByRole('button', { name: /ValuesSourceReader/ }));
 
     await waitFor(() => {
+      expect(screen.getByTestId('esqlQueryProfileOperatorDetails')).toHaveTextContent(
+        '[fields = [body]]'
+      );
       expect(screen.getByTestId('esqlQueryProfileOperatorDetails')).toHaveTextContent(
         'data · node-a'
       );
@@ -198,7 +250,7 @@ describe('QueryProfileView', () => {
     );
   });
 
-  it('switches to pipeline order', async () => {
+  it('shows operators in plan order', async () => {
     const requests = new RequestAdapter();
     logRequest(requests, 'Documents', {
       query: 'FROM logs',
@@ -207,14 +259,60 @@ describe('QueryProfileView', () => {
 
     renderView(<QueryProfileView adapters={{ requests }} search={search} />);
 
-    expect((await screen.findAllByTestId('esqlQueryProfileOperator'))[0]).toHaveTextContent(
-      'ValuesSourceReader'
-    );
+    const operators = await screen.findAllByTestId('esqlQueryProfileOperator');
+    expect(operators[0]).toHaveTextContent('Limit');
+    expect(operators[1]).toHaveTextContent('ValuesSourceReader');
+    expect(screen.queryByRole('button', { name: 'Slowest first' })).not.toBeInTheDocument();
+  });
 
-    await userEvent.click(screen.getByRole('button', { name: 'Pipeline order' }));
+  it('zooms the timeline into a driver and back out', async () => {
+    const requests = new RequestAdapter();
+    logRequest(requests, 'Documents', {
+      query: 'FROM timeline',
+      include_execution_metadata: true,
+    });
 
+    renderView(<QueryProfileView adapters={{ requests }} search={search} />);
+
+    expect(await screen.findByTestId('esqlQueryProfileTimeline')).toBeInTheDocument();
+    expect(screen.queryByText('Planning 500 ms')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('esqlQueryProfileOperator')).not.toBeInTheDocument();
+    expect(laneWidth('data · node-a')).toBeLessThan(100);
+    expect(screen.getByRole('button', { name: /node-b/ })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /^Planning/ }));
+    expect(screen.getByText('Parsing 40 ms')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Full query' }));
+    expect(screen.queryByText('Parsing 40 ms')).not.toBeInTheDocument();
+    expect(laneWidth('data · node-a')).toBeLessThan(100);
+
+    await userEvent.click(screen.getByRole('button', { name: /node-a/ }));
+    expect(laneWidth('data · node-a')).toBe(100);
     const operators = screen.getAllByTestId('esqlQueryProfileOperator');
     expect(operators[0]).toHaveTextContent('Limit');
     expect(operators[1]).toHaveTextContent('ValuesSourceReader');
+    expect(screen.queryByText('Eval')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /ValuesSourceReader/ }));
+    expect(screen.getByTestId('esqlQueryProfileOperatorDetails')).toHaveTextContent(
+      '[fields = [body]]'
+    );
+    expect(screen.getByTestId('esqlQueryProfileOperatorDetails')).toHaveTextContent(
+      'data · node-a'
+    );
+
+    expect(screen.getByRole('navigation', { name: 'Timeline zoom' })).toHaveTextContent('node-a');
+    await userEvent.click(screen.getByRole('button', { name: 'Full query' }));
+    expect(laneWidth('data · node-a')).toBeLessThan(100);
+    expect(screen.queryByTestId('esqlQueryProfileOperator')).not.toBeInTheDocument();
   });
 });
+
+function laneWidth(label: string): number {
+  const bar = document.querySelector(`[data-driver-label="${label}"]`);
+  if (!(bar instanceof HTMLElement)) {
+    throw new Error(`Missing lane ${label}`);
+  }
+  return parseFloat(bar.style.width);
+}

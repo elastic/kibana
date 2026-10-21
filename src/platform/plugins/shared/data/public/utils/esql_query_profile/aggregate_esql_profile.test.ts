@@ -73,6 +73,8 @@ describe('aggregateEsqlProfile', () => {
     expect(reader.expansion).toBe(1_000);
     expect(reader.share).toBe(1);
     expect(reader.drivers).toHaveLength(2);
+    expect(view.hasTimeline).toBe(false);
+    expect(view.timeline).toEqual({ drivers: [] });
   });
 
   it('keeps time and rows when a reader does not report bytes_decoded', () => {
@@ -176,7 +178,99 @@ describe('aggregateEsqlProfile', () => {
       driverCount: 0,
       operators: [],
       plans: [],
+      hasTimeline: false,
+      timeline: { drivers: [] },
     });
+  });
+
+  it('builds a timeline from driver clocks and skips spans without one', () => {
+    const view = aggregateEsqlProfile({
+      planning: { took_millis: 5, start_millis: 1_000, stop_millis: 1_005 },
+      drivers: [
+        {
+          description: 'data',
+          node_name: 'node-a',
+          start_millis: 1_005,
+          stop_millis: 1_000,
+          operators: [
+            {
+              operator: 'DroppedOperator',
+              status: { process_nanos: 9, rows_received: 1, rows_emitted: 1 },
+            },
+          ],
+        },
+        {
+          description: 'data',
+          node_name: 'node-b',
+          start_millis: 1_010,
+          stop_millis: 1_050,
+          took_nanos: 40_000_000,
+          cpu_nanos: 30_000_000,
+          operators: [
+            {
+              operator: 'LimitOperator',
+              status: { process_nanos: 1, rows_received: 2, rows_emitted: 2 },
+            },
+            {
+              operator: 'ValuesSourceReaderOperator[fields = [body]]',
+              status: { process_nanos: 3, rows_received: 4, rows_emitted: 4 },
+            },
+          ],
+        },
+        {
+          description: 'final',
+          operators: [
+            {
+              operator: 'OutputOperator',
+              status: { process_nanos: 1, rows_received: 1, rows_emitted: 1 },
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(view.hasTimeline).toBe(true);
+    expect(view.timeline.planning).toEqual({ startMillis: 1_000, stopMillis: 1_005 });
+    expect(view.timeline.drivers).toHaveLength(1);
+    expect(view.timeline.drivers[0]).toEqual(
+      expect.objectContaining({
+        id: '1',
+        description: 'data',
+        nodeName: 'node-b',
+        label: 'data · node-b',
+        startMillis: 1_010,
+        stopMillis: 1_050,
+        tookNanos: 40_000_000,
+        cpuNanos: 30_000_000,
+      })
+    );
+    expect(view.timeline.drivers[0].operators.map((operator) => operator.title)).toEqual([
+      'Limit',
+      'ValuesSourceReader',
+    ]);
+    expect(view.timeline.drivers[0].operators[0].share).toBe(0.25);
+    expect(view.timeline.drivers[0].operators[1].share).toBe(0.75);
+    expect(view.operators.map((operator) => operator.title)).toContain('Dropped');
+  });
+
+  it('does not open a timeline when no driver has a clock', () => {
+    const view = aggregateEsqlProfile({
+      planning: { start_millis: 1, stop_millis: 2, took_millis: 1 },
+      drivers: [
+        {
+          operators: [
+            {
+              operator: 'EvalOperator',
+              status: { process_nanos: 1, rows_received: 1, rows_emitted: 1 },
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(view.hasTimeline).toBe(false);
+    expect(view.timeline.drivers).toEqual([]);
+    expect(view.timeline.planning).toEqual({ startMillis: 1, stopMillis: 2 });
   });
 });
 

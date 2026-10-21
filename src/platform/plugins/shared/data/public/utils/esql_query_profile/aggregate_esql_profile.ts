@@ -60,6 +60,42 @@ export interface AggregatedOperator {
   drivers: AggregatedOperatorDriver[];
 }
 
+/** One operator inside a single driver, in that driver's pipeline order. */
+export interface TimelineOperator {
+  operator: string;
+  title: string;
+  detail?: string;
+  processNanos: number;
+  /** Share of this driver's summed process time, from 0 to 1. */
+  share: number;
+  rowsReceived: number;
+  rowsEmitted: number;
+  rawStatus: Record<string, unknown>;
+}
+
+/** Wall-clock span for one driver. Operators are not placed on this clock. */
+export interface TimelineDriver {
+  id: string;
+  description: string;
+  nodeName?: string;
+  label: string;
+  startMillis: number;
+  stopMillis: number;
+  tookNanos?: number;
+  cpuNanos?: number;
+  operators: TimelineOperator[];
+}
+
+export interface TimelinePlanning {
+  startMillis: number;
+  stopMillis: number;
+}
+
+export interface QueryProfileTimeline {
+  planning?: TimelinePlanning;
+  drivers: TimelineDriver[];
+}
+
 export interface QueryProfileView {
   queryTookMillis?: number;
   planningTookMillis?: number;
@@ -68,6 +104,9 @@ export interface QueryProfileView {
   driverCount: number;
   operators: AggregatedOperator[];
   plans: EsqlProfilePlan[];
+  /** True when at least one driver has a usable start and stop. */
+  hasTimeline: boolean;
+  timeline: QueryProfileTimeline;
 }
 
 interface OperatorAccumulator {
@@ -107,6 +146,7 @@ export function aggregateEsqlProfile(profile: unknown): QueryProfileView {
 
   const drivers = parsed?.drivers ?? [];
   const operators = aggregateOperators(drivers, readPipelineIndex(drivers));
+  const timeline = readTimeline(parsed, drivers);
 
   return {
     queryTookMillis,
@@ -118,6 +158,8 @@ export function aggregateEsqlProfile(profile: unknown): QueryProfileView {
     plans: (parsed?.plans ?? []).filter(
       (plan) => typeof plan.plan === 'string' && plan.plan.length > 0
     ),
+    hasTimeline: timeline.drivers.length > 0,
+    timeline,
   };
 }
 
@@ -267,6 +309,83 @@ function toAggregatedOperator(
     expansion,
     drivers: operator.drivers,
   };
+}
+
+function readTimeline(
+  profile: EsqlQueryProfile | undefined,
+  drivers: EsqlProfileDriver[]
+): QueryProfileTimeline {
+  const planning = readClock(profile?.planning?.start_millis, profile?.planning?.stop_millis);
+  const timelineDrivers = drivers.flatMap((driver, index) => {
+    const clock = readClock(driver.start_millis, driver.stop_millis);
+    if (!clock) {
+      return [];
+    }
+
+    return [
+      {
+        id: String(index),
+        description: driver.description ?? '',
+        nodeName: driver.node_name,
+        label: driverLabel(driver.description, driver.node_name, index),
+        ...clock,
+        tookNanos: readFinite(driver.took_nanos),
+        cpuNanos: readFinite(driver.cpu_nanos),
+        operators: readDriverOperators(driver),
+      },
+    ];
+  });
+
+  return {
+    ...(planning ? { planning } : {}),
+    drivers: timelineDrivers,
+  };
+}
+
+/** Operators stay in the driver's own order. Share is of this driver only. */
+function readDriverOperators(driver: EsqlProfileDriver): TimelineOperator[] {
+  const operators = (driver.operators ?? []).flatMap((entry) => {
+    if (!entry || typeof entry.operator !== 'string' || entry.operator.length === 0) {
+      return [];
+    }
+    const status = isRecord(entry.status) ? entry.status : {};
+    return [
+      {
+        operator: entry.operator,
+        processNanos: readNumber(status, 'process_nanos') ?? 0,
+        rowsReceived: readNumber(status, 'rows_received') ?? 0,
+        rowsEmitted: readNumber(status, 'rows_emitted') ?? 0,
+        rawStatus: status,
+      },
+    ];
+  });
+  const totalProcessNanos = operators.reduce((sum, operator) => sum + operator.processNanos, 0);
+
+  return operators.map((operator) => {
+    const { title, detail } = formatOperatorLabel(operator.operator);
+    return {
+      ...operator,
+      title,
+      detail,
+      share: totalProcessNanos > 0 ? operator.processNanos / totalProcessNanos : 0,
+    };
+  });
+}
+
+function readClock(
+  start: number | undefined,
+  stop: number | undefined
+): { startMillis: number; stopMillis: number } | undefined {
+  const startMillis = readFinite(start);
+  const stopMillis = readFinite(stop);
+  if (startMillis === undefined || stopMillis === undefined || stopMillis < startMillis) {
+    return undefined;
+  }
+  return { startMillis, stopMillis };
+}
+
+function readFinite(value: number | undefined): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 }
 
 function driverLabel(
