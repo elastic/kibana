@@ -171,6 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:xpack.uptime.alerts.tlsCertificate',
         'alerting_health_check',
         'alerting_telemetry',
+        'alerting_v2:alert_actions_cleanup',
         'alerting_v2:dispatcher',
         'alerting_v2:invalidate_api_keys',
         'alerting_v2:rule_executor',
