@@ -89,7 +89,7 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
         'xpack.agentBuilder.uiSettings.includeFrozenByDefault.description',
         {
           defaultMessage:
-            'Makes the built-in Elastic Agent Builder tools include frozen tier data unless the agent explicitly excludes it. Querying the frozen tier recovers searchable snapshots from object storage, which is slow and can make tool calls time out. Custom tools are not affected and keep their own setting.',
+            'Makes the built-in Agent Builder tools include frozen tier data by default.',
         }
       ),
       name: i18n.translate('xpack.agentBuilder.uiSettings.includeFrozenByDefault.name', {
