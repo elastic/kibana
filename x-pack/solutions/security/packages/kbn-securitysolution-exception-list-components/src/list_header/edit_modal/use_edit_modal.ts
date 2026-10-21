@@ -13,7 +13,7 @@ import type { ListDetails } from '../../types';
 
 interface UseEditModal {
   listDetails: ListDetails;
-  onSave: (newListDetails: ListDetails) => void;
+  onSave: (newListDetails: ListDetails) => void | Promise<unknown>;
 }
 
 export const useEditModal = ({ listDetails, onSave }: UseEditModal) => {
@@ -37,11 +37,15 @@ export const useEditModal = ({ listDetails, onSave }: UseEditModal) => {
     setNewListDetails({ ...newListDetails, [name]: value });
   };
 
-  const onSubmit = (e?: SyntheticEvent) => {
+  const onSubmit = async (e?: SyntheticEvent) => {
+    e?.preventDefault();
     if (error) return;
     setShowProgress(true);
-    onSave(newListDetails);
-    e?.preventDefault();
+    try {
+      await onSave(newListDetails);
+    } finally {
+      setShowProgress(false);
+    }
   };
   return {
     error,

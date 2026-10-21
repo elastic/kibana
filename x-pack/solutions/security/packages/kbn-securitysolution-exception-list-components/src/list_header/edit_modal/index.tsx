@@ -28,7 +28,7 @@ import { useEditModal } from './use_edit_modal';
 
 interface EditModalProps {
   listDetails: ListDetails;
-  onSave: (newListDetails: ListDetails) => void;
+  onSave: (newListDetails: ListDetails) => void | Promise<unknown>;
   onCancel: () => void;
 }
 

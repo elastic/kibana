@@ -197,6 +197,7 @@ describe('ListDetailsAppHeader', () => {
 
     await waitFor(() => expect(defaultProps.onEditListDetails).toHaveBeenCalled());
     expect(screen.getByTestId('editModalSaveBtn')).toBeInTheDocument();
+    expect(screen.queryByTestId('editModalProgess')).not.toBeInTheDocument();
   });
 
   it('hides the edit action when read only', async () => {
