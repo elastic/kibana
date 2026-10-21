@@ -645,6 +645,38 @@
       }
     },
     {
+      "id": "69411a87481f950-011564e7a181c6d",
+      "title": "Agent Builder - converse callback API ships the image for upload in place of its tag when the callback uploads assets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
+        "line": 349,
+        "column": 12
+      }
+    },
+    {
+      "id": "69411a87481f950-d3340e7c0ee2bcb",
+      "title": "Agent Builder - converse callback API shows the image's name when the callback doesn't upload assets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
+        "line": 384,
+        "column": 18
+      }
+    },
+    {
       "id": "69411a87481f950-92f5e782bc9e4c1",
       "title": "Agent Builder - converse callback API stores callback origin authorship on list and get conversation responses",
       "expectedStatus": "passed",
@@ -656,8 +688,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 268,
-        "column": 14
+        "line": 397,
+        "column": 28
       }
     },
     {
@@ -672,8 +704,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 365,
-        "column": 15
+        "line": 481,
+        "column": 23
       }
     },
     {
@@ -688,8 +720,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 397,
-        "column": 18
+        "line": 520,
+        "column": 16
       }
     },
     {
@@ -704,8 +736,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 439,
-        "column": 19
+        "line": 559,
+        "column": 24
       }
     },
     {
@@ -720,8 +752,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 507,
-        "column": 17
+        "line": 624,
+        "column": 13
       }
     },
     {
@@ -736,8 +768,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 568,
-        "column": 13
+        "line": 687,
+        "column": 11
       }
     },
     {
@@ -752,8 +784,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 627,
-        "column": 13
+        "line": 746,
+        "column": 15
       }
     },
     {
@@ -768,8 +800,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 668,
-        "column": 32
+        "line": 786,
+        "column": 9
       }
     },
     {
