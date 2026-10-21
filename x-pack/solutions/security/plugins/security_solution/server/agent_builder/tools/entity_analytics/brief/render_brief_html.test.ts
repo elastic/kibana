@@ -42,7 +42,7 @@ const fixtureViewModel: BriefViewModel = {
       name: 'a.rodriguez',
       type: 'user',
       risk: { score: 76, level: 'High', of: 'resolution group' },
-      assetCriticality: 'High impact',
+      assetCriticality: 'high_impact',
       privilegedUser: true,
       assessment:
         'Credential and remote access activity on a privileged identity newly at High risk is the shape of account misuse.',
@@ -70,7 +70,7 @@ const fixtureViewModel: BriefViewModel = {
       name: 'docker-host-prod-01',
       type: 'host',
       risk: { score: 66, level: 'Moderate', of: 'entity' },
-      assetCriticality: 'Extreme impact',
+      assetCriticality: 'extreme_impact',
       firstSeen: '2 days ago',
       assessment:
         'A host that appeared this week and is already alerting looks more like a provisioning problem.',
@@ -83,7 +83,7 @@ const fixtureViewModel: BriefViewModel = {
       name: 'jump-box-01',
       type: 'host',
       risk: { score: 58, level: 'Moderate', of: 'entity' },
-      assetCriticality: 'High impact',
+      assetCriticality: 'high_impact',
       firstSeen: '3 days ago',
       assessment:
         'A new host with alerts of the same kind as the first priority is worth a second look.',

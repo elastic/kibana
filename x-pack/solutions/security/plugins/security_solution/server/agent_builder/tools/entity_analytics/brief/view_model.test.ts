@@ -37,7 +37,13 @@ const scope: EntityAnalyticsScope = {
 
 const entities: CandidateEntities = {
   candidates: [
-    { id: 'host:a', name: 'web_01', type: 'host', tileIds: ['entitiesWithAlerts'], record: {} },
+    {
+      id: 'host:a',
+      name: 'web_01',
+      type: 'host',
+      tileIds: ['entitiesWithAlerts'],
+      record: { asset: { criticality: 'high_impact' } },
+    },
     { id: 'user:b', name: 'jdoe', type: 'user', tileIds: ['newEntity'], record: {} },
   ],
   capturedCount: 2,
@@ -147,7 +153,7 @@ describe('buildViewModel', () => {
         rank: 2,
         name: 'web_01',
         risk: { score: 82, level: 'High', of: 'resolution group' },
-        assetCriticality: 'High impact',
+        assetCriticality: 'high_impact',
         // First seen only for an entity flagged as new.
         firstSeen: undefined,
         riskHistory: { points: [{ score: 40 }, { score: 82 }] },

@@ -8,9 +8,10 @@
 import fs from 'fs';
 import path from 'path';
 import { clamp, escape, once } from 'lodash';
+import moment from 'moment';
 import Mustache from 'mustache';
 import { CUSTOM_CONTENT_MAX_HEIGHT, CUSTOM_CONTENT_MIN_HEIGHT } from '@kbn/custom-content-common';
-import { formatCount, formatDateTime } from './describe_scope';
+import { formatCount, formatStoredValue } from './describe_scope';
 import { estimateBriefHeight } from './estimate_brief_height';
 import { buildRiskHistoryContext } from './risk_history_chart';
 import type { BriefViewModel } from './view_model';
@@ -52,7 +53,7 @@ const buildContext = (viewModel: BriefViewModel, css: string) => {
   return {
     css,
     title: getTitleParts(viewModel).join(' · '),
-    captured: formatDateTime(scope.capturedAt),
+    captured: moment.utc(scope.capturedAt).format('D MMM YYYY, HH:mm [UTC]'),
     notes: getNotes(viewModel),
     summary,
     periodLabel: scope.periodLabel,
@@ -77,8 +78,8 @@ const buildContext = (viewModel: BriefViewModel, css: string) => {
         isGroup: priority.risk.of === 'resolution group',
       },
       criticality: priority.assetCriticality && {
-        text: priority.assetCriticality,
-        key: priority.assetCriticality.split(' ')[0].toLowerCase(),
+        text: formatStoredValue(priority.assetCriticality),
+        key: priority.assetCriticality,
       },
       watchlist: priority.privilegedUser,
       riskHistory:

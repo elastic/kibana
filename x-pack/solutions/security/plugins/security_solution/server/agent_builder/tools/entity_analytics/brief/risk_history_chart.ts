@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { scaleLinear, scaleUtc } from 'd3-scale';
+import moment from 'moment';
 import { EntityRiskLevelsEnum } from '../../../../../common/api/entity_analytics/common';
 import { RISK_LEVEL_RANGES } from '../../../../../common/entity_analytics/risk_engine/risk_levels';
-import { formatMonthDay } from './describe_scope';
 import type { BriefRiskHistory } from './view_model';
 
 /** The fewest points that make a line worth drawing. */
@@ -25,8 +26,6 @@ const LEVELS = [
   EntityRiskLevelsEnum.Moderate,
 ];
 
-const format = (value: number): string => value.toFixed(1);
-
 const describeTrend = (first: number, last: number): string => {
   if (last > first) {
     return 'rose from';
@@ -41,16 +40,15 @@ const describeTrend = (first: number, last: number): string => {
 export const buildRiskHistoryContext = ({ points, of }: BriefRiskHistory, periodLabel: string) => {
   const [first, last] = [points[0], points[points.length - 1]];
   const [firstScore, lastScore] = [Math.round(first.score), Math.round(last.score)];
-  const start = new Date(first.t).getTime();
-  const duration = new Date(last.t).getTime() - start || 1;
-  const x = (time: string) =>
-    LEFT + ((new Date(time).getTime() - start) / duration) * (RIGHT - LEFT);
-  const y = (score: number) => TOP + (1 - score / 100) * (BOTTOM - TOP);
-  const path = points.map(({ t, score }) => `${format(x(t))},${format(y(score))}`).join(' ');
-  // One dated tick at the end of each day and at both ends, never closer than 60 px.
-  const ticks = points
-    .filter(({ t }, i) => [0, points.length - 1].includes(i) || new Date(t).getUTCHours() === 23)
-    .filter(({ t }, i, all) => i === 0 || x(t) - x(all[i - 1].t) > 60);
+  const x = scaleUtc()
+    .domain([new Date(first.t), new Date(last.t)])
+    .rangeRound([LEFT, RIGHT]);
+  const y = scaleLinear().domain([0, 100]).rangeRound([BOTTOM, TOP]);
+  const path = points.map(({ t, score }) => `${x(new Date(t))},${y(score)}`).join(' ');
+  const day = (iso: string) => moment.utc(iso).format('D MMM');
+  // Days over a period of days, times over a period of hours.
+  const spansDays = moment.utc(last.t).diff(first.t, 'days') >= 2;
+  const tickFormat = spansDays ? 'D MMM' : 'HH:mm';
   return {
     caption: `Risk score, last ${periodLabel}${
       of === 'resolution group' ? ', resolution group' : ''
@@ -61,22 +59,23 @@ export const buildRiskHistoryContext = ({ points, of }: BriefRiskHistory, period
       height: HEIGHT,
       left: LEFT,
       right: RIGHT,
-      ariaLabel: `Risk score ${describeTrend(
-        firstScore,
-        lastScore
-      )} ${firstScore} on ${formatMonthDay(first.t)} to ${lastScore} on ${formatMonthDay(last.t)}`,
+      ariaLabel: `Risk score ${describeTrend(firstScore, lastScore)} ${firstScore} on ${day(
+        first.t
+      )} to ${lastScore} on ${day(last.t)}`,
       bands: LEVELS.map((level) => ({
         label: `${level} ${RISK_LEVEL_RANGES[level].start}`,
-        y: format(y(RISK_LEVEL_RANGES[level].start)),
+        y: y(RISK_LEVEL_RANGES[level].start),
         labelX: RIGHT + 6,
-        labelY: format(y(RISK_LEVEL_RANGES[level].start) + 3),
+        labelY: y(RISK_LEVEL_RANGES[level].start) + 3,
       })),
-      area: `${LEFT},${y(0)} ${path} ${format(x(last.t))},${y(0)}`,
+      area: `${LEFT},${y(0)} ${path} ${x(new Date(last.t))},${y(0)}`,
       path,
-      dots: points.map(({ t, score }) => ({ x: format(x(t)), y: format(y(score)) })),
-      first: { x: format(x(first.t)), y: format(y(first.score) - 7), text: firstScore },
-      last: { x: format(x(last.t) - 7), y: format(y(last.score) - 6), text: lastScore },
-      ticks: ticks.map(({ t }) => ({ x: format(x(t)), y: HEIGHT - 6, text: formatMonthDay(t) })),
+      dots: points.map(({ t, score }) => ({ x: x(new Date(t)), y: y(score) })),
+      first: { x: x(new Date(first.t)), y: y(first.score) - 7, text: firstScore },
+      last: { x: x(new Date(last.t)) - 7, y: y(last.score) - 6, text: lastScore },
+      ticks: x
+        .ticks(5)
+        .map((tick) => ({ x: x(tick), y: HEIGHT - 6, text: moment.utc(tick).format(tickFormat) })),
     },
   };
 };

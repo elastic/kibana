@@ -9,6 +9,7 @@ import { compact } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
+import { getAssetCriticality } from '../../../../lib/entity_analytics/lead_generation/observation_modules/utils';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import {
   SIGNAL_CARD_IDS,
@@ -80,6 +81,7 @@ export const BriefViewModel = lazySchema(() =>
             of: z.enum(['entity', 'resolution group']),
           })
           .optional(),
+        /** As the Entity Store stores it, such as `extreme_impact`. */
         assetCriticality: z.string().optional(),
         privilegedUser: z.literal(true).optional(),
         firstSeen: z.string().optional(),
@@ -165,8 +167,8 @@ export const buildViewModel = ({
         if (!entityFacts) {
           return [];
         }
-        const { name, type, flaggedFor, risk, assetCriticality, privilegedUser, firstSeen } =
-          entityFacts;
+        const { name, type, flaggedFor, risk, privilegedUser, firstSeen } = entityFacts;
+        const candidate = entities.candidates.find(({ id }) => id === entityId);
         return [
           {
             rank: index + 1,
@@ -174,7 +176,7 @@ export const buildViewModel = ({
             name,
             type,
             risk: risk && { score: risk.score, level: risk.level, of: risk.of },
-            assetCriticality,
+            assetCriticality: candidate && getAssetCriticality(candidate),
             privilegedUser,
             // As the prompt does: first seen only for an entity flagged as new.
             firstSeen: flaggedFor.includes('newEntity') ? firstSeen : undefined,

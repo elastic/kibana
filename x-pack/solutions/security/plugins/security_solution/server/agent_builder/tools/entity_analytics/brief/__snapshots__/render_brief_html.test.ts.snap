@@ -23,12 +23,14 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
 .brief .count-label{min-height:2.6em;font-size:12px;line-height:1.3;opacity:.8}
 .brief .count-value{font-size:22px;font-weight:700;line-height:1.1}
 .brief .count-change{font-size:12px;font-weight:600}
+.brief .flat{font-weight:400;opacity:.7}
 .brief .up{color:var(--cc-color-danger)}
 .brief .down{color:var(--cc-color-accent)}
 .brief .callout{padding:10px 16px;border-left:3px solid var(--cc-color-primary);border-radius:var(--cc-radius);background:var(--cc-color-surface)}
 .brief .callout h2{margin-bottom:4px;font-size:14px}
 .brief .priorities{display:flex;flex-direction:column;gap:8px;padding:0;list-style:none}
 .brief .priority{display:grid;grid-template-columns:24px 1fr auto;gap:8px 12px;padding:12px 16px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius);background:var(--cc-color-surface)}
+/* Everything after the rank, title and pills spans under the title. */
 .brief .priority>:nth-child(n+4){grid-column:2/-1}
 .brief .rank{display:flex;align-items:center;justify-content:center;width:24px;height:24px;margin-top:2px;border-radius:50%;background:var(--cc-color-primary);color:var(--cc-color-surface);font-size:12px;font-weight:700}
 .brief .name{font-size:16px;font-weight:700;line-height:1.3;overflow-wrap:anywhere}
@@ -39,9 +41,9 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
 .brief .level-high{border-color:transparent;background:#C86100;color:#fff}
 .brief .level-moderate{border-color:transparent;background:var(--cc-color-warning);color:#1D2A3E}
 .brief .dot{width:8px;height:8px;border-radius:50%;background:color-mix(in srgb,var(--cc-color-text) 40%,transparent)}
-.brief .dot[data-level=extreme]{background:var(--cc-color-danger)}
-.brief .dot[data-level=high]{background:#D36108}
-.brief .dot[data-level=medium]{background:var(--cc-color-warning)}
+.brief .dot[data-level=extreme_impact]{background:var(--cc-color-danger)}
+.brief .dot[data-level=high_impact]{background:#D36108}
+.brief .dot[data-level=medium_impact]{background:var(--cc-color-warning)}
 .brief .why{margin-top:-4px;opacity:.7}
 .brief .chart{padding-top:8px;border-top:1px solid var(--cc-color-border)}
 .brief .chart figcaption{display:flex;justify-content:space-between;gap:8px;margin-bottom:4px;font-size:12px}
@@ -49,6 +51,7 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
 .brief .chart svg{display:block;color:var(--cc-color-primary)}
 .brief .chart line{stroke:var(--cc-color-border);stroke-dasharray:3 3}
 .brief .chart text{font-size:10px;fill:var(--cc-color-text);opacity:.6}
+.brief .chart .strong{font-weight:700;opacity:1}
 .brief .chart polygon{fill:currentColor;opacity:.08}
 .brief .chart polyline{fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round}
 .brief .chart circle{fill:currentColor}
@@ -105,7 +108,7 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
         </div>
         <div class=\\"pills\\">
           <span class=\\"pill level-high\\">Risk 76 High · group</span>
-          <span class=\\"pill\\"><span class=\\"dot\\" data-level=\\"high\\"></span>High impact</span>
+          <span class=\\"pill\\"><span class=\\"dot\\" data-level=\\"high_impact\\"></span>High impact</span>
           <span class=\\"pill watchlist\\">Watchlist: privileged users</span>
         </div>
         <p class=\\"prose\\">Credential and remote access activity on a privileged identity newly at High risk is the shape of account misuse.</p>
@@ -114,18 +117,18 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
 <figure class=\\"chart\\">
   <figcaption><span class=\\"label\\">Risk score, last 7 days, resolution group</span><span>34 Low → 76 High</span></figcaption>
   <svg viewBox=\\"0 0 640 96\\" width=\\"100%\\" role=\\"img\\" aria-label=\\"Risk score rose from 34 on 15 Oct to 76 on 20 Oct\\">
-    <line x1=\\"30\\" x2=\\"570\\" y1=\\"20.0\\" y2=\\"20.0\\"/>
-    <text x=\\"576\\" y=\\"23.0\\">Critical 90</text>
-    <line x1=\\"30\\" x2=\\"570\\" y1=\\"32.0\\" y2=\\"32.0\\"/>
-    <text x=\\"576\\" y=\\"35.0\\">High 70</text>
-    <line x1=\\"30\\" x2=\\"570\\" y1=\\"50.0\\" y2=\\"50.0\\"/>
-    <text x=\\"576\\" y=\\"53.0\\">Moderate 40</text>
-    <polygon points=\\"30,74 30.0,53.6 150.2,36.4 270.4,31.3 390.6,29.8 510.8,28.5 570.0,28.5 570.0,74\\"/>
-    <polyline points=\\"30.0,53.6 150.2,36.4 270.4,31.3 390.6,29.8 510.8,28.5 570.0,28.5\\"/>
-    <circle cx=\\"30.0\\" cy=\\"53.6\\" r=\\"3\\"/><circle cx=\\"150.2\\" cy=\\"36.4\\" r=\\"3\\"/><circle cx=\\"270.4\\" cy=\\"31.3\\" r=\\"3\\"/><circle cx=\\"390.6\\" cy=\\"29.8\\" r=\\"3\\"/><circle cx=\\"510.8\\" cy=\\"28.5\\" r=\\"3\\"/><circle cx=\\"570.0\\" cy=\\"28.5\\" r=\\"3\\"/>
-    <text x=\\"30.0\\" y=\\"46.6\\" text-anchor=\\"middle\\">34</text>
-    <text x=\\"563.0\\" y=\\"22.5\\" text-anchor=\\"end\\" style=\\"opacity:1;font-weight:700\\">76</text>
-    <text x=\\"30.0\\" y=\\"90\\" text-anchor=\\"middle\\">15 Oct</text><text x=\\"150.2\\" y=\\"90\\" text-anchor=\\"middle\\">16 Oct</text><text x=\\"270.4\\" y=\\"90\\" text-anchor=\\"middle\\">17 Oct</text><text x=\\"390.6\\" y=\\"90\\" text-anchor=\\"middle\\">18 Oct</text><text x=\\"510.8\\" y=\\"90\\" text-anchor=\\"middle\\">19 Oct</text>
+    <line x1=\\"30\\" x2=\\"570\\" y1=\\"20\\" y2=\\"20\\"/>
+    <text x=\\"576\\" y=\\"23\\">Critical 90</text>
+    <line x1=\\"30\\" x2=\\"570\\" y1=\\"32\\" y2=\\"32\\"/>
+    <text x=\\"576\\" y=\\"35\\">High 70</text>
+    <line x1=\\"30\\" x2=\\"570\\" y1=\\"50\\" y2=\\"50\\"/>
+    <text x=\\"576\\" y=\\"53\\">Moderate 40</text>
+    <polygon points=\\"30,74 30,54 150,36 270,31 391,30 511,28 570,28 570,74\\"/>
+    <polyline points=\\"30,54 150,36 270,31 391,30 511,28 570,28\\"/>
+    <circle cx=\\"30\\" cy=\\"54\\" r=\\"3\\"/><circle cx=\\"150\\" cy=\\"36\\" r=\\"3\\"/><circle cx=\\"270\\" cy=\\"31\\" r=\\"3\\"/><circle cx=\\"391\\" cy=\\"30\\" r=\\"3\\"/><circle cx=\\"511\\" cy=\\"28\\" r=\\"3\\"/><circle cx=\\"570\\" cy=\\"28\\" r=\\"3\\"/>
+    <text x=\\"30\\" y=\\"47\\" text-anchor=\\"middle\\">34</text>
+    <text class=\\"strong\\" x=\\"563\\" y=\\"22\\" text-anchor=\\"end\\">76</text>
+    <text x=\\"35\\" y=\\"90\\" text-anchor=\\"middle\\">16 Oct</text><text x=\\"155\\" y=\\"90\\" text-anchor=\\"middle\\">17 Oct</text><text x=\\"275\\" y=\\"90\\" text-anchor=\\"middle\\">18 Oct</text><text x=\\"396\\" y=\\"90\\" text-anchor=\\"middle\\">19 Oct</text><text x=\\"516\\" y=\\"90\\" text-anchor=\\"middle\\">20 Oct</text>
   </svg>
 </figure>
       </li>
@@ -137,7 +140,7 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
         </div>
         <div class=\\"pills\\">
           <span class=\\"pill level-moderate\\">Risk 66 Moderate</span>
-          <span class=\\"pill\\"><span class=\\"dot\\" data-level=\\"extreme\\"></span>Extreme impact</span>
+          <span class=\\"pill\\"><span class=\\"dot\\" data-level=\\"extreme_impact\\"></span>Extreme impact</span>
           
         </div>
         <p class=\\"prose\\">A host that appeared this week and is already alerting looks more like a provisioning problem.</p>
@@ -152,7 +155,7 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
         </div>
         <div class=\\"pills\\">
           <span class=\\"pill level-moderate\\">Risk 58 Moderate</span>
-          <span class=\\"pill\\"><span class=\\"dot\\" data-level=\\"high\\"></span>High impact</span>
+          <span class=\\"pill\\"><span class=\\"dot\\" data-level=\\"high_impact\\"></span>High impact</span>
           
         </div>
         <p class=\\"prose\\">A new host with alerts of the same kind as the first priority is worth a second look.</p>

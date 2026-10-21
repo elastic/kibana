@@ -10,7 +10,7 @@
     <polyline points="{{path}}"/>
     {{#dots}}<circle cx="{{x}}" cy="{{y}}" r="3"/>{{/dots}}
     <text x="{{first.x}}" y="{{first.y}}" text-anchor="middle">{{first.text}}</text>
-    <text x="{{last.x}}" y="{{last.y}}" text-anchor="end" style="opacity:1;font-weight:700">{{last.text}}</text>
+    <text class="strong" x="{{last.x}}" y="{{last.y}}" text-anchor="end">{{last.text}}</text>
     {{#ticks}}<text x="{{x}}" y="{{y}}" text-anchor="middle">{{text}}</text>{{/ticks}}
   </svg>
   {{/chart}}
