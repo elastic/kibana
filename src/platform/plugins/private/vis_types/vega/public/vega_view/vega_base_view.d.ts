@@ -8,24 +8,22 @@
  */
 
 import type { IExternalUrl } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { View } from 'vega';
 import type { IServiceSettings } from './vega_map_view/service_settings/service_settings_types';
 import type { VegaRenderDescriptor } from '../data_model/types';
-import type { VegaEventHandler } from '../types';
+import type { VegaFilterAction } from '../types';
 import type { createVegaStateRestorer } from '../lib/vega_state_restorer';
 
 interface VegaViewParams {
   parentEl: HTMLDivElement;
-  fireEvent: VegaEventHandler;
   descriptor: VegaRenderDescriptor;
   /** Receives every error the view displays, so the parent can surface it (e.g. in the inspector). */
   onError: (message: string) => void;
   /** Receives the live Vega view once it is created, so the parent can inspect its data and signals. */
   onViewCreated: (view: View) => void;
+  /** Validates and applies a filter action the spec raised; rejects to report an error. */
+  onFilterAction: (action: VegaFilterAction) => Promise<void>;
   serviceSettings: IServiceSettings;
-  filterManager: DataPublicPluginStart['query']['filterManager'];
-  timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
   vegaStateRestorer: ReturnType<typeof createVegaStateRestorer>;
   externalUrl: IExternalUrl;
   showWarnings: boolean;

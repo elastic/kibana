@@ -10,6 +10,14 @@
 /** Event name emitted by Vega specs when a filter should be applied to the host application. */
 export const VEGA_EVENT_APPLY_FILTER = 'applyFilter';
 
+/** Vega expression functions a spec calls to change Kibana's filters or time range. */
+export const VEGA_FILTER_FUNCTIONS = [
+  'kibanaAddFilter',
+  'kibanaRemoveFilter',
+  'kibanaRemoveAllFilters',
+  'kibanaSetTimeFilter',
+] as const;
+
 export const ADD_VEGA_EMBEDDABLE_ACTION_ID = 'addVegaEmbeddableAction';
 
 /** Legacy "Add Vega" action that navigates to the Visualize editor (Canvas + flag-off Dashboard). */

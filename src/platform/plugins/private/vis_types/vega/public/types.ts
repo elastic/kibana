@@ -21,3 +21,12 @@ export interface VegaEvent {
 }
 
 export type VegaEventHandler = (event: VegaEvent) => void;
+
+/**
+ * A spec's request to change Kibana's filters, raised by one of the `VEGA_FILTER_FUNCTIONS`. The
+ * view only forwards the call; the parent validates the name and arguments before acting on it.
+ */
+export interface VegaFilterAction {
+  fn: string;
+  args: readonly unknown[];
+}

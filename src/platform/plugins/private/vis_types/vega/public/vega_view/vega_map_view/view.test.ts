@@ -132,9 +132,7 @@ describe('vega_map_view/view', () => {
         descriptor: vegaParser.toRenderDescriptor(),
         onError: jest.fn(),
         onViewCreated: jest.fn(),
-        filterManager: dataPluginStart.query.filterManager,
-        timefilter: dataPluginStart.query.timefilter.timefilter,
-        fireEvent: (event: any) => {},
+        onFilterAction: jest.fn(),
         parentEl: document.createElement('div'),
         vegaStateRestorer: {
           save: jest.fn(),

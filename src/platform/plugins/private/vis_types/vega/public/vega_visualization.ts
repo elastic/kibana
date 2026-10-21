@@ -17,6 +17,7 @@ import type { DebugValues } from './vega_inspector/vega_adapter';
 import { getNotifications, getData } from './services';
 import type { VegaView } from './vega_view/vega_view';
 import { createVegaStateRestorer } from './lib/vega_state_restorer';
+import { createVegaFilterActionHandler } from './vega_view/vega_filter_action_handler';
 
 export type VegaVisType = new (el: HTMLDivElement, fireEvent: VegaEventHandler) => {
   render(visData: VegaRenderDescriptor, inspectorAdapters?: VegaInspectorAdapters): Promise<void>;
@@ -74,12 +75,9 @@ export const createVegaVisualization = (
         }
 
         const serviceSettings = await getServiceSettings();
-        const { filterManager } = this.dataPlugin.query;
-        const { timefilter } = this.dataPlugin.query.timefilter;
         const vegaViewParams = {
           externalUrl: core.http.externalUrl,
           parentEl: this.el,
-          fireEvent: this.fireEvent,
           vegaStateRestorer: this.vegaStateRestorer,
           descriptor,
           onError: (message: string) => inspectorAdapters?.vega.setError(message),
@@ -89,9 +87,12 @@ export const createVegaVisualization = (
               view: view as DebugValues['view'],
               spec: descriptor.vlspec || descriptor.spec,
             }),
+          onFilterAction: createVegaFilterActionHandler({
+            spec: descriptor.isVegaLite && descriptor.vlspec ? descriptor.vlspec : descriptor.spec,
+            filterManager: this.dataPlugin.query.filterManager,
+            fireEvent: this.fireEvent,
+          }),
           serviceSettings,
-          filterManager,
-          timefilter,
           showWarnings,
         };
 
