@@ -57,7 +57,7 @@ import {
   getRuleExecutorTaskId,
 } from '../rule_executor/schedule';
 import type { AlertingPublisherContext } from '../events/domain_events';
-import { EventOriginToken } from '../event_origin/token';
+import { RuleEventActorToken } from '../event_origin/token';
 import { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import type { EventRule } from '../events/rule_event_publisher/rule_event_publisher';
 import {
@@ -225,7 +225,7 @@ export class RulesClient {
     @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry,
-    @inject(EventOriginToken) actor: RuleEventActor,
+    @inject(RuleEventActorToken) actor: RuleEventActor,
     @inject(RulesClientOptionsToken) rulesClientOptions: CreateRulesClientOptions
   ) {
     this.eventContext = { request, origin: toEventOrigin(actor, request, rulesClientOptions) };

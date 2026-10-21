@@ -10,7 +10,7 @@ import { Request } from '@kbn/core-di-server';
 import { inject, injectable } from 'inversify';
 import type { RuleEventActor } from '../../event_origin/origin_schemas';
 import { toEventOrigin } from '../../event_origin/rule_event_origin';
-import { EventOriginToken } from '../../event_origin/token';
+import { RuleEventActorToken } from '../../event_origin/token';
 import {
   AlertingDomainEventBusToken,
   type AlertingDomainEvent,
@@ -53,7 +53,7 @@ export class RuleExecutorEventPublisher implements RuleExecutorEventPublisherCon
     @inject(AlertingDomainEventBusToken)
     private readonly eventBus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
     @inject(Request) private readonly request: KibanaRequest,
-    @inject(EventOriginToken) private readonly actor: RuleEventActor
+    @inject(RuleEventActorToken) private readonly actor: RuleEventActor
   ) {}
 
   public publishExecutionSucceeded(payload: RuleExecutionSucceededPayload): void {

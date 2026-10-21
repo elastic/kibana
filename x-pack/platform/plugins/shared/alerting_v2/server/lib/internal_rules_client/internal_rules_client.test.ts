@@ -12,7 +12,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import type { RuleEventActor } from '../event_origin/origin_schemas';
-import { EventOriginToken } from '../event_origin/token';
+import { RuleEventActorToken } from '../event_origin/token';
 import { RulesClient } from '../rules_client';
 import type { BulkResponse } from '../rules_client';
 import { createRulesClient } from '../rules_client/rules_client.mock';
@@ -75,7 +75,7 @@ const setup = (
         const spaceId = get(RequestSpaceIdToken);
         snapshots.push({
           spaceId,
-          origin: get(EventOriginToken),
+          origin: get(RuleEventActorToken),
           headers: get(Request).headers,
           soClient: get(RuleSavedObjectsClientToken),
         });

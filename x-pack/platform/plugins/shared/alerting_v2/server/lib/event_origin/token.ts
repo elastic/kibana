@@ -13,4 +13,4 @@ import type { RuleEventActor } from './origin_schemas';
  * credentials, or the `internal` Kibana user acting on its own. Defaults to
  * `user`. Publishers combine this actor with the request into the context origin.
  */
-export const EventOriginToken = createToken<RuleEventActor>('alerting_v2.EventOrigin');
+export const RuleEventActorToken = createToken<RuleEventActor>('alerting_v2.RuleEventActor');
