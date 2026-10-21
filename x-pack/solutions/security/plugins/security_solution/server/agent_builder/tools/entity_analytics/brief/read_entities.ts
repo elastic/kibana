@@ -98,9 +98,7 @@ export const readEntities = async ({
 };
 
 /** Maps each entity id in the view's available tiles to its tile ids. */
-export const selectCandidateTiles = ({
-  tiles,
-}: EntityAnalyticsScope): Map<string, SignalCardId[]> => {
+const selectCandidateTiles = ({ tiles }: EntityAnalyticsScope): Map<string, SignalCardId[]> => {
   const tileIdsByEntityId = new Map<string, SignalCardId[]>();
   for (const tileId of SIGNAL_CARD_IDS) {
     const tile = tiles[tileId];
@@ -166,7 +164,7 @@ export const rankCandidates = (
   ).slice(0, MAX_BRIEF_CANDIDATES);
 
 /** The risk the brief states for a candidate, and where its scores are stored. */
-export interface CandidateRisk {
+interface CandidateRisk {
   of: 'entity' | 'resolution group';
   score: number;
   level: EntityRiskLevels;
