@@ -16,7 +16,8 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   sourceRoot: x-pack/platform/packages/shared/isomer/isomer-primitives-charts
-dependsOn: []
+dependsOn:
+  - '@kbn/isomer-theme'
 tags:
   - shared-common
   - package

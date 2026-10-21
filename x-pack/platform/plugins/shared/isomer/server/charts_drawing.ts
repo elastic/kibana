@@ -12,7 +12,8 @@ import { createTakumiImageBackend } from '@elastic/isomer-image-takumi';
 import { createKibanaIsomerRuntime, type KibanaIsomerRuntime } from '@kbn/isomer';
 import type { ChartHints } from '@kbn/isomer-charts-elastic';
 import { componentsPack } from '@kbn/isomer-components';
-import { chartCardFrame, defineChartsPack, prepareCharts } from '@kbn/isomer-primitives-charts';
+import { defineChartsPack, prepareCharts } from '@kbn/isomer-primitives-charts';
+import { cardContentWidth } from '@kbn/isomer-theme';
 import { fromRoot } from '@kbn/repo-info';
 
 const FONTS = fromRoot('src/core/packages/apps/server-internal/assets/fonts');
@@ -26,8 +27,8 @@ const FACES = [
   ['Elastic UI Numeric', 'elastic_ui_numeric/ElasticUINumeric-Variable.woff2'],
 ] as const;
 
-/** The width every chart draws at, inside the snapshot card frame's padding. */
-export const DEFAULT_CHART_SIZE = { width: 600, height: 300 };
+/** The size every chart draws at: the snapshot card frame's content width. */
+export const DEFAULT_CHART_SIZE = { width: cardContentWidth(), height: 300 };
 
 export interface DrawnRender {
   /** `html` markup, or a base64 PNG of the `snapshot` surface. */
@@ -58,10 +59,9 @@ export const createChartsDrawing = async ({
     ...(hints ? { hints } : {}),
     fonts: FACES.map(([family, file]) => ({ family, path: join(FONTS, file) })),
   });
+  // The snapshot surface draws in the runtime's default card frame; charts size themselves for it at DEFAULT_CHART_SIZE.
   const runtime = createKibanaIsomerRuntime({
-    packs: [componentsPack, defineChartsPack(engine)],
-    // The components pack declares no frame theme, so the packs share none; the card frame is the charts pack's own.
-    frames: { card: chartCardFrame as never },
+    packs: [componentsPack, defineChartsPack(engine, { drawHeight: DEFAULT_CHART_SIZE.height })],
   });
   const walk = createChildNodeWalker(runtime.primitives);
   const takumi = createTakumiImageBackend({

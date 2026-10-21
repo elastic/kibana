@@ -8,15 +8,21 @@
 import type { StyleHandle } from '@elastic/distillate';
 import type { DefaultPackTypes, StyledRenderContext, SurfaceMap } from '@elastic/isomer-sdk';
 
+import { type BorealisTokenValues, borealisDark } from '@kbn/isomer-theme';
+
 import type { ColorMode } from '../theme/resolve';
 
 /**
- * What a frame drawing charts must supply. A chart reads the mode from it under `snapshot`, the only
- * surface that resolves one; any richer host palette carrying `colorMode` satisfies it.
+ * The theme a frame drawing charts supplies: Kibana's runtime types every frame's theme as Borealis
+ * token values, which carry no mode, so `colorModeOf` reads it from the values.
  */
-export interface ChartsFrameTheme {
-  colorMode: ColorMode;
-}
+export type ChartsFrameTheme = BorealisTokenValues;
+
+/** `dark` when the frame's theme is Borealis dark, otherwise `light`. */
+export const colorModeOf = (theme: ChartsFrameTheme): ColorMode =>
+  theme === borealisDark || theme.color.background.plain === borealisDark.color.background.plain
+    ? 'dark'
+    : 'light';
 
 export interface ChartPackTypes extends DefaultPackTypes {
   theme: ChartsFrameTheme;
