@@ -28,7 +28,12 @@ import {
   type InvestigationTranscriptStep,
   type RawRoundResult,
 } from './round_loader';
-import { FILE_TOOL_IDS, splitBashSegmentsWithCwd } from './seeded_filter';
+import {
+  extractSegmentVerb,
+  FILE_TOOL_IDS,
+  PATH_TOKEN_RE,
+  splitBashSegmentsWithCwd,
+} from './seeded_filter';
 
 export interface WorkspaceReadsSummary {
   /** Canonical Cortex page IDs (`cortex_<entityType>_<slug>`) opened by the agent (excludes `README.md` / `INDEX.md`). */
@@ -50,15 +55,11 @@ const BUCKET_TO_ENTITY_TYPE = new Map<string, CortexEntityType>(
 );
 
 const BASH_DECISION_TREE_FILE_RE =
-  /(?:^|\/)decision_tree_([a-z0-9]+(?:-[a-z0-9]+)*)\.md(?:$|[^a-z0-9-])/g;
-
+  /(?:^|\/)decision_tree_([a-z0-9][a-z0-9-]*)\.md(?=$|[^a-z0-9-])/g;
 const BASH_QUOTED_STRING_RE = /'[^']*'|"(?:[^"\\]|\\.)*"/g;
 const BASH_UNQUOTED_STDOUT_REDIRECT_RE = /(?:^|[^\d&>])(?:1|&)?>>?\|?\s*(?!&)(?!\/dev\/stdout\b)/;
 const BASH_WRITE_CALL_RE =
-  /\b(?:sed|perl)\b[^;|&\n]*\s-[a-zA-Z]*i|\b(?:write_text|writeFileSync)\s*\(|\bopen\s*\([^)]*,\s*['"][wa+]/;
-const BASH_LEADING_KEYWORDS_RE =
-  /^(?:\s*(?:do|then|else|elif|while|until|if|time|!|\(|env|command|sudo)\b)+/;
-const BASH_LEADING_ENV_ASSIGN_RE = /^(?:\s*[A-Za-z_][A-Za-z0-9_]*=(?:'[^']*'|"[^"]*"|\S+))+/;
+  /\b(?:sed|perl)\s+-[a-zA-Z]*i\b|\b(?:write_text|writeFileSync)\s*\(|\bopen\s*\([^()\n]{1,200},\s*['"][wa+]/;
 
 // Commands whose arguments are never read and printed as file contents to stdout.
 const NON_FILE_READING_VERBS = new Set<string>([
@@ -91,10 +92,6 @@ const NON_FILE_READING_VERBS = new Set<string>([
   'wget',
 ]);
 
-// Matches relative or absolute `.md` or `.index.json` file tokens in a bash read command.
-const BASH_FILE_TOKEN_RE =
-  /(?:^|[\s'"=(:<])((?:\/workspace\/|\.\.?\/|[a-z0-9_.-]+\/)*(?:[a-z0-9][a-z0-9_-]*\.md|\.index\.json))(?=[^a-z0-9._/-]|$)/gi;
-
 interface MutableReads {
   cortexIds: Set<string>;
   memoryIds: Set<string>;
@@ -103,6 +100,18 @@ interface MutableReads {
   memoryIndex: boolean;
   decisionTreeIndex: boolean;
 }
+
+const recordDecisionTreeFileMatches = (rawText: string, acc: MutableReads): void => {
+  BASH_DECISION_TREE_FILE_RE.lastIndex = 0;
+  let match = BASH_DECISION_TREE_FILE_RE.exec(rawText);
+  while (match) {
+    const slug = match[1];
+    if (!slug.endsWith('-')) {
+      acc.decisionTreeIds.add(symptomTreeId(slug));
+    }
+    match = BASH_DECISION_TREE_FILE_RE.exec(rawText);
+  }
+};
 
 const recordResolvedFilePath = (
   rawPath: string,
@@ -117,16 +126,16 @@ const recordResolvedFilePath = (
       return;
     }
     const relative = resolved.slice(`${CORTEX_WORKSPACE_ROOT}/`.length);
-    if (relative === 'INDEX.md') {
+    if (relative.toUpperCase() === 'INDEX.MD') {
       acc.cortexIndex = true;
       return;
     }
-    if (relative === 'README.md') {
+    if (relative.toUpperCase() === 'README.MD') {
       return;
     }
     const parts = relative.split('/');
-    if (parts.length === 2 && parts[1].endsWith('.md')) {
-      const entityType = BUCKET_TO_ENTITY_TYPE.get(parts[0]);
+    if (parts.length === 2 && parts[1].toLowerCase().endsWith('.md')) {
+      const entityType = BUCKET_TO_ENTITY_TYPE.get(parts[0].toLowerCase());
       const rawSlug = parts[1].slice(0, -'.md'.length);
       if (entityType && rawSlug.length > 0) {
         acc.cortexIds.add(toCortexKiId(entityType, rawSlug));
@@ -144,10 +153,10 @@ const recordResolvedFilePath = (
       acc.memoryIndex = true;
       return;
     }
-    if (relative === 'README.md' || relative.includes('/')) {
+    if (relative.toUpperCase() === 'README.MD' || relative.includes('/')) {
       return;
     }
-    if (relative.endsWith('.md')) {
+    if (relative.toLowerCase().endsWith('.md')) {
       const rawSlug = relative.slice(0, -'.md'.length);
       const id = toMemoryKiId(rawSlug);
       if (isCanonicalMemoryId(id) && slugFromMemoryId(id) === rawSlug) {
@@ -159,27 +168,13 @@ const recordResolvedFilePath = (
 
   if (resolved.startsWith(`${DECISION_TREE_WORKSPACE_ROOT}/`)) {
     const relative = resolved.slice(`${DECISION_TREE_WORKSPACE_ROOT}/`.length);
-    if (relative === MONITORS_INDEX_FILENAME) {
+    if (relative.toLowerCase() === MONITORS_INDEX_FILENAME) {
       acc.decisionTreeIndex = true;
       return;
     }
   }
 
-  BASH_DECISION_TREE_FILE_RE.lastIndex = 0;
-  let match = BASH_DECISION_TREE_FILE_RE.exec(rawPath);
-  while (match) {
-    acc.decisionTreeIds.add(symptomTreeId(match[1]));
-    match = BASH_DECISION_TREE_FILE_RE.exec(rawPath);
-  }
-};
-
-const extractSegmentVerb = (segment: string): string | undefined => {
-  const stripped = segment
-    .replace(BASH_LEADING_KEYWORDS_RE, '')
-    .replace(BASH_LEADING_ENV_ASSIGN_RE, '')
-    .trim();
-  const match = /^([A-Za-z0-9_./-]+)/.exec(stripped);
-  return match ? Path.posix.basename(match[1]).toLowerCase() : undefined;
+  recordDecisionTreeFileMatches(rawPath, acc);
 };
 
 const recordBashCommandReads = (
@@ -188,12 +183,7 @@ const recordBashCommandReads = (
   workingDirectory?: string
 ): void => {
   // Decision tree attribution includes both reads and edits anywhere in the command.
-  BASH_DECISION_TREE_FILE_RE.lastIndex = 0;
-  let treeMatch = BASH_DECISION_TREE_FILE_RE.exec(command);
-  while (treeMatch) {
-    acc.decisionTreeIds.add(symptomTreeId(treeMatch[1]));
-    treeMatch = BASH_DECISION_TREE_FILE_RE.exec(command);
-  }
+  recordDecisionTreeFileMatches(command, acc);
 
   for (const { segment, cwd } of splitBashSegmentsWithCwd(command, workingDirectory)) {
     const unquoted = segment.replace(BASH_QUOTED_STRING_RE, '');
@@ -205,11 +195,15 @@ const recordBashCommandReads = (
       continue;
     }
 
-    BASH_FILE_TOKEN_RE.lastIndex = 0;
-    let fileMatch = BASH_FILE_TOKEN_RE.exec(segment);
-    while (fileMatch) {
-      recordResolvedFilePath(fileMatch[1], acc, { baseDir: cwd });
-      fileMatch = BASH_FILE_TOKEN_RE.exec(segment);
+    const tokens = segment.match(PATH_TOKEN_RE) ?? [];
+    for (const token of tokens) {
+      if (token.startsWith('-')) {
+        continue;
+      }
+      const lower = token.toLowerCase();
+      if (lower.endsWith('.md') || lower.endsWith('.index.json')) {
+        recordResolvedFilePath(token, acc, { baseDir: cwd });
+      }
     }
   }
 };
