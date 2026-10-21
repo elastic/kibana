@@ -23,7 +23,7 @@ const StoryInfoButton = ({ info }: { info: StoryInfoContent }) => {
 
   return (
     <>
-      <div style={{ position: 'fixed', left: 8, bottom: 8, zIndex: 1 }}>
+      <div style={{ marginTop: 8 }}>
         <EuiButtonEmpty
           size="s"
           iconType="info"
