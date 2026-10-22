@@ -24,6 +24,7 @@ const TREE: DecisionTreeDetail = {
   mermaid: '```mermaid\nflowchart TD\n    S1([Latency]) --> X1((Pool))\n```',
   evidence_gatherer_metadata: [],
   learnings: [],
+  counts: { nodes: [], edges: [] },
 };
 
 const createStore = (trees: DecisionTreeDetail[]): jest.Mocked<DecisionTreeStore> =>
@@ -35,6 +36,7 @@ const createStore = (trees: DecisionTreeDetail[]): jest.Mocked<DecisionTreeStore
       .fn()
       .mockImplementation(async (treeId: string) => trees.find((tree) => tree.tree_id === treeId)),
     commit: jest.fn(),
+    updateCounts: jest.fn(),
     listVersions: jest.fn(),
     getVersion: jest.fn(),
     archive: jest.fn(),
