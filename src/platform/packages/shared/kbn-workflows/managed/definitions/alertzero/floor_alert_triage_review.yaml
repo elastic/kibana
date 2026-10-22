@@ -24,9 +24,10 @@ settings:
   # Manual autonomy, and a failed or unauthorized attempt re-parks within the same deadline, so
   # the Worker Investigation lifecycle contract puts the ceiling at 168 h. Keep this above it.
   timeout: "170h"
-  # No concurrency limit: every batch with confident false positives raises its proposal. A noisy
-  # rule can therefore have many proposals waiting for a decision at once. Spotting noisy rules,
-  # for example from knowledge indicators, is handled separately and is not decided here.
+  # No concurrency limit. The batch consults the disposition indicator before it starts
+  # this review, so a rule that already has a decision or a waiting proposal does not
+  # start another one. This review still raises the one proposal it was given, then
+  # writes that decision back onto the indicator.
 
 triggers:
   # Started by the Alert Triage Worker. Manual so it owns no schedule of its own.
@@ -81,6 +82,11 @@ triggers:
         - fp_candidate_ids
         - confidence_floor
       additionalProperties: false
+
+consts:
+  # Must match `consts.ai_index_id` and the indicator id in floor_alert_triage_batch.yaml.
+  # A test pins both.
+  ai_index_id: security-investigations
 
 # =============================================================================
 # Steps
@@ -235,10 +241,58 @@ steps:
           message: >-
             Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} closed as false positive.
 
+      # Replaces the pending_review indicator the batch wrote. Later batches close
+      # without a new proposal. A failed write leaves pending_review in place, so the
+      # next batch will not raise another proposal and will not auto-close either.
+      - name: record_standing_close
+        type: context-engine.createKi
+        on-failure:
+          continue: true
+        with:
+          ai_index_id: "{{ consts.ai_index_id }}"
+          ki_id: "fp-disposition-{{ workflow.spaceId }}-{{ inputs.rule_id }}"
+          refresh: true
+          ki:
+            type: security.fp_disposition
+            title: "False-positive disposition"
+            description: "Approved closure for rule {{ inputs.rule_id }}. Later batches close without a new proposal."
+            tags:
+              - alert-triage
+              - false-positive
+            attributes:
+              disposition: standing_close
+              rule_id: "{{ inputs.rule_id }}"
+              space_id: "{{ workflow.spaceId }}"
+              proposal_id: "{{ steps.create_fp_proposal.output.proposalId }}"
+
   - name: handle_dismissed
     type: if
     condition: "${{ variables.proposal_outcome == 'dismissed' }}"
     steps:
+      # Recorded even when the proposal details cannot be read. The outcome itself is
+      # already dismissed, and leaving pending_review in place would block every later
+      # batch without applying this decision.
+      - name: record_do_not_close
+        type: context-engine.createKi
+        on-failure:
+          continue: true
+        with:
+          ai_index_id: "{{ consts.ai_index_id }}"
+          ki_id: "fp-disposition-{{ workflow.spaceId }}-{{ inputs.rule_id }}"
+          refresh: true
+          ki:
+            type: security.fp_disposition
+            title: "False-positive disposition"
+            description: "Dismissed closure for rule {{ inputs.rule_id }}. Later batches do not propose closing these false positives."
+            tags:
+              - alert-triage
+              - false-positive
+            attributes:
+              disposition: do_not_close
+              rule_id: "{{ inputs.rule_id }}"
+              space_id: "{{ workflow.spaceId }}"
+              proposal_id: "{{ steps.create_fp_proposal.output.proposalId }}"
+
       # get_proposal is allowed to fail-and-continue (retried above first). The retag does
       # not depend on its content, but the outcome comment and the decision itself do:
       # without a successful read there is no decider or reason to report, and closing the
@@ -364,6 +418,16 @@ steps:
     type: if
     condition: "${{ variables.proposal_outcome == 'expired' }}"
     steps:
+      # Drop pending_review. Nobody accepted or rejected the verdict, so the next batch
+      # of new alerts from this rule may propose again. The alerts in this batch stay tagged.
+      - name: drop_pending_disposition_on_expiry
+        type: context-engine.deleteKi
+        on-failure:
+          continue: true
+        with:
+          ai_index_id: "{{ consts.ai_index_id }}"
+          ki_id: "fp-disposition-{{ workflow.spaceId }}-{{ inputs.rule_id }}"
+
       - name: close_investigation_after_expiry
         type: ai.conversation.metadata.patch
         on-failure:
@@ -410,6 +474,14 @@ steps:
     type: if
     condition: "${{ variables.proposal_outcome == 'unknown' }}"
     steps:
+      - name: drop_pending_disposition_on_unknown
+        type: context-engine.deleteKi
+        on-failure:
+          continue: true
+        with:
+          ai_index_id: "{{ consts.ai_index_id }}"
+          ki_id: "fp-disposition-{{ workflow.spaceId }}-{{ inputs.rule_id }}"
+
       - name: post_comment_outcome_unknown
         type: ai.conversation.add_user_message
         on-failure:
