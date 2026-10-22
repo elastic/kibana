@@ -46,12 +46,27 @@ const compileTemplate = (template: string, toPattern: (name: string) => string):
     .map((part, index) => (index % 2 === 0 ? escapeRegExp(part) : toPattern(part)))
     .join('');
 
-const compileServer = ({ url, variables }: OperationServer): ServerPrefix => {
-  const source = compileTemplate(url.replace(/\/+$/, ''), (name) => {
+const compileServerTemplate = ({ url, variables }: OperationServer): string =>
+  compileTemplate(url.replace(/\/+$/, ''), (name) => {
     const values = variables[name]?.enum ?? [];
     return values.length > 0 ? `(?:${values.map(escapeRegExp).join('|')})` : '[^/]*';
   });
-  return { regExp: new RegExp(`^${source}(?=/|$)`, 'i'), relative: url.startsWith('/') };
+
+const compileServer = (server: OperationServer): ServerPrefix => ({
+  regExp: new RegExp(`^${compileServerTemplate(server)}(?=/|$)`, 'i'),
+  relative: server.url.startsWith('/'),
+});
+
+const toMatchTarget = ({ relative }: ServerPrefix, url: URL): string =>
+  relative ? url.pathname : `${url.origin}${url.pathname}`;
+
+/** Returns whether a request URL, without query string, is the whole of a server-style URL template. */
+export const compileUrlMatcher = (server: OperationServer): ((url: URL) => boolean) => {
+  const pattern: ServerPrefix = {
+    regExp: new RegExp(`^${compileServerTemplate(server)}/?$`, 'i'),
+    relative: server.url.startsWith('/'),
+  };
+  return (url) => pattern.regExp.test(toMatchTarget(pattern, url));
 };
 
 const compileRoute = (operation: ContractOperation): Route => {
@@ -79,9 +94,9 @@ const getOperationPath = ({ servers }: Route, url: URL): string | undefined => {
   if (servers.length === 0) {
     return url.pathname;
   }
-  const prefixes = servers.flatMap(({ regExp, relative }) => {
-    const target = relative ? url.pathname : `${url.origin}${url.pathname}`;
-    const match = regExp.exec(target);
+  const prefixes = servers.flatMap((server) => {
+    const target = toMatchTarget(server, url);
+    const match = server.regExp.exec(target);
     return match ? [target.slice(match[0].length) || '/'] : [];
   });
   return prefixes.reduce<string | undefined>(

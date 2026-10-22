@@ -177,6 +177,19 @@ describe('sampleJsonSchema', () => {
     });
   });
 
+  it('skips object examples and defaults with optional: required', () => {
+    const withDefault = {
+      ...schema,
+      default: { query: 'x', limit: 10, filter: { field: 'f' } },
+      example: { query: 'y', limit: 20, filter: { field: 'g' } },
+    };
+
+    expect(sampleJsonSchema(withDefault, { optional: 'required' })).toEqual({
+      query: 'string',
+      filter: { field: 'string' },
+    });
+  });
+
   it('samples at the upper bounds with boundary, ignoring defaults', () => {
     const bounded = {
       type: 'object',
