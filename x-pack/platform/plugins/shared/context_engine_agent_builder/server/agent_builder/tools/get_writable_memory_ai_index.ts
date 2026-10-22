@@ -44,6 +44,11 @@ export const getWritableMemoryAiIndex = async ({
       `AI index '${aiIndexId}' uses an index pattern and cannot accept memory writes.`
     );
   }
+  if (aiIndex.dest.type === 'data_stream') {
+    throw new Error(
+      `AI index '${aiIndexId}' is backed by a data stream; memory requires a slice-enabled index.`
+    );
+  }
 
   return aiIndex;
 };

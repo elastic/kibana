@@ -7,6 +7,11 @@
 
 import { agentBuilderDefaultAiIndexId } from '@kbn/agent-builder-common';
 import { smlAiIndexDescription, smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
+import {
+  MEMORY_AI_INDEX_DESCRIPTION,
+  MEMORY_AI_INDEX_DEST,
+  MEMORY_AI_INDEX_ID,
+} from '@kbn/context-engine-plugin/common/memory';
 
 export interface DefaultAiIndex {
   esqlTarget: string;
@@ -23,5 +28,9 @@ export const defaultAiIndices: Record<string, DefaultAiIndex> = {
   [agentBuilderDefaultAiIndexId]: {
     esqlTarget: smlIndexName,
     description: smlAiIndexDescription,
+  },
+  [MEMORY_AI_INDEX_ID]: {
+    esqlTarget: MEMORY_AI_INDEX_DEST,
+    description: MEMORY_AI_INDEX_DESCRIPTION,
   },
 };

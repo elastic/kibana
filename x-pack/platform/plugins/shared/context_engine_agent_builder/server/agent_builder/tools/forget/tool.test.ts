@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { contextEngineMemoryTools } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -20,16 +20,20 @@ jest.mock('../../assert_context_engine_write_access', () => ({
 
 const assertContextEngineWriteAccessMock = jest.mocked(assertContextEngineWriteAccess);
 
+const MEMORY_INDEX = 'ai-index-idx-support';
+
 describe('forget tool', () => {
   const get = jest.fn();
-  const search = jest.fn();
+  const getDocument = jest.fn();
   const index = jest.fn();
+  const getCurrentUser = jest.fn();
 
   const createTool = () =>
     createForgetTool({
       getAiIndexService: async () => ({ get } as unknown as AiIndexService),
       getCoreStart: async () => {
         const coreStart = coreMock.createStart();
+        coreStart.security.authc.getCurrentUser = getCurrentUser;
         coreStart.uiSettings.globalAsScopedToClient = jest
           .fn()
           .mockReturnValue({ get: jest.fn().mockResolvedValue(true) });
@@ -45,10 +49,7 @@ describe('forget tool', () => {
       spaceId: 'space-1',
       esClient: {
         ...context.esClient,
-        asCurrentUser: {
-          search,
-          index,
-        },
+        asCurrentUser: { get: getDocument, index },
       },
       runContext: {
         runId: 'run-1',
@@ -69,6 +70,15 @@ describe('forget tool', () => {
     id: 'memory-1',
   };
 
+  const existingMemory = (source: Record<string, unknown>) => ({
+    found: true,
+    _index: MEMORY_INDEX,
+    _id: 'memory-1',
+    _seq_no: 7,
+    _primary_term: 2,
+    _source: source,
+  });
+
   const run = async () => {
     const handler = createTool().handler;
     if (!handler) {
@@ -80,45 +90,36 @@ describe('forget tool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     assertContextEngineWriteAccessMock.mockResolvedValue();
+    getCurrentUser.mockReturnValue({ username: 'alice', profile_uid: 'u_alice' });
     get.mockResolvedValue({
       id: 'support',
       memory_enabled: true,
-      dest: { type: 'index', value: 'ai-index-idx-support' },
+      dest: { type: 'index', value: MEMORY_INDEX },
     });
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'memory-1',
-            _index: 'ai-index-idx-support',
-            _seq_no: 7,
-            _primary_term: 2,
-            _source: {
-              '@timestamp': '2026-09-01T00:00:00.000Z',
-              id: 'memory-1',
-              type: 'memory.session_fact',
-              title: 'Duration mapping',
-              description: 'duration_ms is a keyword.',
-              content: 'Cast duration_ms before numeric comparisons.',
-              updated_at: '2026-09-01T00:00:00.000Z',
-              attributes: { 'memory.session_id': 'conversation-1' },
-              governance: {
-                provenance: {
-                  created_by: {
-                    uri: 'tool://platform.context_engine.remember',
-                    metadata: { run_id: 'run-0', agent_id: 'agent-1' },
-                  },
-                  updated_by: {
-                    uri: 'tool://platform.context_engine.remember',
-                    metadata: { run_id: 'run-0', agent_id: 'agent-1' },
-                  },
-                },
-              },
+    getDocument.mockResolvedValue(
+      existingMemory({
+        '@timestamp': '2026-09-01T00:00:00.000Z',
+        id: 'memory-1',
+        type: 'memory.session_fact',
+        title: 'Duration mapping',
+        description: 'duration_ms is a keyword.',
+        content: 'Cast duration_ms before numeric comparisons.',
+        updated_at: '2026-09-01T00:00:00.000Z',
+        attributes: { 'memory.session_id': 'conversation-1' },
+        governance: {
+          provenance: {
+            created_by: {
+              uri: 'user://u_alice',
+              metadata: { tool_id: 'platform.context_engine.remember', run_id: 'run-0' },
+            },
+            updated_by: {
+              uri: 'user://u_alice',
+              metadata: { tool_id: 'platform.context_engine.remember', run_id: 'run-0' },
             },
           },
-        ],
-      },
-    });
+        },
+      })
+    );
   });
 
   it('registers an ID-only destructive tool without confirmation', () => {
@@ -135,21 +136,19 @@ describe('forget tool', () => {
     expect(tool.confirmation).toBeUndefined();
   });
 
-  it('tombstones an index-backed memory using concurrency metadata', async () => {
+  it('tombstones the memory in the caller slice using concurrency metadata', async () => {
     const result = await run();
 
     expect(assertContextEngineWriteAccessMock).toHaveBeenCalled();
     expect(get).toHaveBeenCalledWith('support', 'space-1');
-    expect(search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        index: 'ai-index-idx-support',
-        query: { ids: { values: ['memory-1'] } },
-        seq_no_primary_term: true,
-      })
+    expect(getDocument).toHaveBeenCalledWith(
+      { index: MEMORY_INDEX, id: 'memory-1', _slice: 'u_alice' },
+      { ignore: [404] }
     );
     expect(index).toHaveBeenCalledWith({
-      index: 'ai-index-idx-support',
+      index: MEMORY_INDEX,
       id: 'memory-1',
+      _slice: 'u_alice',
       if_seq_no: 7,
       if_primary_term: 2,
       document: expect.objectContaining({
@@ -160,12 +159,16 @@ describe('forget tool', () => {
         governance: {
           provenance: {
             created_by: {
-              uri: 'tool://platform.context_engine.remember',
-              metadata: { run_id: 'run-0', agent_id: 'agent-1' },
+              uri: 'user://u_alice',
+              metadata: { tool_id: 'platform.context_engine.remember', run_id: 'run-0' },
             },
             updated_by: {
-              uri: 'tool://platform.context_engine.forget',
-              metadata: { run_id: 'run-1', agent_id: 'agent-1' },
+              uri: 'user://u_alice',
+              metadata: {
+                tool_id: 'platform.context_engine.forget',
+                run_id: 'run-1',
+                agent_id: 'agent-1',
+              },
             },
           },
           lifecycle: {
@@ -185,105 +188,58 @@ describe('forget tool', () => {
     });
   });
 
-  it('appends a tombstone for a data-stream-backed memory', async () => {
-    get.mockResolvedValue({
-      id: 'support',
-      memory_enabled: true,
-      dest: { type: 'data_stream', value: 'ai-index-ds-support' },
-    });
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'generated-document-id',
-            _index: '.ds-ai-index-ds-support-000001',
-            _source: {
-              '@timestamp': '2026-09-01T00:00:00.000Z',
-              id: 'memory-1',
-              type: 'memory.session',
-              title: 'Session summary',
-              description: 'Summary',
-              content: 'Summary',
-              updated_at: '2026-09-01T00:00:00.000Z',
-              attributes: { 'memory.session_id': 'conversation-1' },
-              governance: {
-                provenance: {
-                  created_by: {
-                    uri: 'tool://platform.context_engine.remember',
-                    metadata: { run_id: 'run-0', agent_id: 'agent-1' },
-                  },
-                },
-              },
-            },
-          },
-        ],
-      },
-    });
+  it('rejects a caller without a user identity', async () => {
+    getCurrentUser.mockReturnValue({ username: 'alice' });
 
-    await run();
+    const result = await run();
 
-    expect(search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        index: 'ai-index-ds-support',
-        query: { term: { id: 'memory-1' } },
-        sort: [{ '@timestamp': 'desc' }],
-        size: 1,
-      })
-    );
-    expect(index).toHaveBeenCalledWith({
-      index: 'ai-index-ds-support',
-      document: expect.objectContaining({
-        '@timestamp': expect.any(String),
-        id: 'memory-1',
-        updated_at: expect.any(String),
-        attributes: { 'memory.session_id': 'conversation-1' },
-        governance: {
-          provenance: {
-            created_by: {
-              uri: 'tool://platform.context_engine.remember',
-              metadata: { run_id: 'run-0', agent_id: 'agent-1' },
-            },
-            updated_by: {
-              uri: 'tool://platform.context_engine.forget',
-              metadata: { run_id: 'run-1', agent_id: 'agent-1' },
-            },
-          },
-          lifecycle: {
-            status: 'deleted',
+    expect(result).toEqual({
+      results: [
+        {
+          type: ToolResultType.error,
+          data: {
+            message: 'Failed to forget memory: Cannot store user memory without a user identity.',
           },
         },
-      }),
-      op_type: 'create',
-      refresh: 'wait_for',
+      ],
     });
-    expect(index.mock.calls[0][0]).not.toHaveProperty('id');
-    expect(index.mock.calls[0][0].document['@timestamp']).not.toBe('2026-09-01T00:00:00.000Z');
+    expect(getDocument).not.toHaveBeenCalled();
+    expect(index).not.toHaveBeenCalled();
+  });
+
+  it('reports a memory outside the caller slice as not found', async () => {
+    getDocument.mockResolvedValue({ found: false });
+
+    const result = await run();
+
+    expect(index).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      results: [
+        {
+          type: ToolResultType.error,
+          data: {
+            message:
+              "Failed to forget memory: Memory 'memory-1' was not found in AI index 'support'.",
+          },
+        },
+      ],
+    });
   });
 
   it('does not write another revision when the memory is already tombstoned', async () => {
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'memory-1',
-            _index: 'ai-index-idx-support',
-            _seq_no: 7,
-            _primary_term: 2,
-            _source: {
-              '@timestamp': '2026-09-01T00:00:00.000Z',
-              id: 'memory-1',
-              type: 'memory.session_fact',
-              title: 'Duration mapping',
-              description: 'duration_ms is a keyword.',
-              content: 'Cast duration_ms before numeric comparisons.',
-              updated_at: '2026-09-01T00:00:00.000Z',
-              attributes: { 'memory.session_id': 'conversation-1' },
-              governance: { lifecycle: { status: 'deleted' } },
-            },
-          },
-        ],
-      },
-    });
+    getDocument.mockResolvedValue(
+      existingMemory({
+        '@timestamp': '2026-09-01T00:00:00.000Z',
+        id: 'memory-1',
+        type: 'memory.session_fact',
+        title: 'Duration mapping',
+        description: 'duration_ms is a keyword.',
+        content: 'Cast duration_ms before numeric comparisons.',
+        updated_at: '2026-09-01T00:00:00.000Z',
+        attributes: { 'memory.session_id': 'conversation-1' },
+        governance: { lifecycle: { status: 'deleted' } },
+      })
+    );
 
     const result = await run();
 
@@ -302,7 +258,7 @@ describe('forget tool', () => {
     get.mockResolvedValue({
       id: 'support',
       memory_enabled: false,
-      dest: { type: 'index', value: 'ai-index-idx-support' },
+      dest: { type: 'index', value: MEMORY_INDEX },
     });
 
     const result = await run();
@@ -317,32 +273,22 @@ describe('forget tool', () => {
         },
       ],
     });
-    expect(search).not.toHaveBeenCalled();
+    expect(getDocument).not.toHaveBeenCalled();
     expect(index).not.toHaveBeenCalled();
   });
 
   it('does not delete a non-memory document', async () => {
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'memory-1',
-            _index: 'ai-index-idx-support',
-            _seq_no: 7,
-            _primary_term: 2,
-            _source: {
-              '@timestamp': '2026-09-01T00:00:00.000Z',
-              id: 'memory-1',
-              type: 'index_metadata',
-              title: 'Index metadata',
-              description: 'Metadata',
-              content: 'Metadata',
-              updated_at: '2026-09-01T00:00:00.000Z',
-            },
-          },
-        ],
-      },
-    });
+    getDocument.mockResolvedValue(
+      existingMemory({
+        '@timestamp': '2026-09-01T00:00:00.000Z',
+        id: 'memory-1',
+        type: 'index_metadata',
+        title: 'Index metadata',
+        description: 'Metadata',
+        content: 'Metadata',
+        updated_at: '2026-09-01T00:00:00.000Z',
+      })
+    );
 
     const result = await run();
 

@@ -25,6 +25,7 @@ import {
   type StoredMemoryDocument,
   updateMemoryProvenance,
 } from '../memory_document';
+import { resolveMemoryUserSlice } from '../memory_slice';
 
 const forgetSchema = z.object({
   aiIndexId: aiIndexIdFieldSchema.describe(
@@ -58,9 +59,9 @@ export const createForgetTool = ({
     openWorldHint: false,
   },
   description: dedent`
-    Mark a memory as deleted in a memory-enabled Context Engine AI index so it is no longer
-    recalled. Provide the id returned by the remember tool. The memory remains stored as a
-    lifecycle tombstone.
+    Mark one of the current user's memories as deleted in a memory-enabled Context Engine AI
+    index so it is no longer recalled. Provide the id returned by the remember tool. The memory
+    remains stored as a lifecycle tombstone.
   `,
   schema: forgetSchema,
   handler: async (params, context) => {
@@ -82,44 +83,25 @@ export const createForgetTool = ({
         getCoreStart,
       });
 
+      const slice = await resolveMemoryUserSlice({ request, esClient, getCoreStart });
       const currentUserClient = esClient.asCurrentUser;
-      const searchResponse = await currentUserClient.search<StoredMemoryDocument>({
-        index: aiIndex.dest.value,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        ...(aiIndex.dest.type === 'data_stream'
-          ? {
-              query: { term: { id: params.id } },
-              sort: [{ '@timestamp': 'desc' as const }],
-              size: 1,
-            }
-          : {
-              query: { ids: { values: [params.id] } },
-              seq_no_primary_term: true,
-              size: 2,
-            }),
-      });
-
-      if (aiIndex.dest.type === 'index' && searchResponse.hits.hits.length > 1) {
-        throw new Error(
-          `Memory '${params.id}' exists in multiple indices matched by AI index '${params.aiIndexId}'.`
-        );
-      }
-
-      const [existingHit] = searchResponse.hits.hits;
-      if (!existingHit?._source) {
+      const existing = await currentUserClient.get<StoredMemoryDocument>(
+        { index: aiIndex.dest.value, id: params.id, _slice: slice },
+        { ignore: [404] }
+      );
+      if (!existing.found || !existing._source) {
         throw new Error(`Memory '${params.id}' was not found in AI index '${params.aiIndexId}'.`);
       }
       if (
-        existingHit._source.type !== 'memory.session' &&
-        existingHit._source.type !== 'memory.session_fact'
+        existing._source.type !== 'memory.session' &&
+        existing._source.type !== 'memory.session_fact'
       ) {
         throw new Error(
           `Document '${params.id}' in AI index '${params.aiIndexId}' is not a memory.`
         );
       }
 
-      if (existingHit._source.governance?.lifecycle?.status === 'deleted') {
+      if (existing._source.governance?.lifecycle?.status === 'deleted') {
         return {
           results: [
             {
@@ -133,39 +115,34 @@ export const createForgetTool = ({
       const now = new Date().toISOString();
       const agent = getAgentFromRunContext(runContext);
       const writer = createMemoryWriter({
+        userId: slice,
         toolId: contextEngineMemoryTools.forget,
         runId: runContext.runId,
         agentId: agent?.agentId,
       });
       const tombstoneDocument: StoredMemoryDocument = {
-        ...existingHit._source,
-        '@timestamp': aiIndex.dest.type === 'data_stream' ? now : existingHit._source['@timestamp'],
+        ...existing._source,
         updated_at: now,
         governance: {
-          ...updateMemoryProvenance(existingHit._source.governance, writer, false),
+          ...updateMemoryProvenance(existing._source.governance, writer, false),
           lifecycle: {
-            ...existingHit._source.governance?.lifecycle,
+            ...existing._source.governance?.lifecycle,
             status: 'deleted',
           },
         },
       };
 
-      if (
-        aiIndex.dest.type === 'index' &&
-        (existingHit._seq_no === undefined || existingHit._primary_term === undefined)
-      ) {
+      if (existing._seq_no === undefined || existing._primary_term === undefined) {
         throw new Error(`Memory '${params.id}' is missing concurrency metadata.`);
       }
 
       await currentUserClient.index({
-        index: aiIndex.dest.type === 'index' ? existingHit._index : aiIndex.dest.value,
-        ...(aiIndex.dest.type === 'index' && {
-          id: params.id,
-          if_seq_no: existingHit._seq_no,
-          if_primary_term: existingHit._primary_term,
-        }),
+        index: aiIndex.dest.value,
+        id: params.id,
+        _slice: slice,
+        if_seq_no: existing._seq_no,
+        if_primary_term: existing._primary_term,
         document: tombstoneDocument,
-        ...(aiIndex.dest.type === 'data_stream' && { op_type: 'create' as const }),
         refresh: 'wait_for',
       });
 

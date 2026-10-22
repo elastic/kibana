@@ -35,6 +35,7 @@ import {
   type StoredMemoryDocument,
   updateMemoryProvenance,
 } from '../memory_document';
+import { ensureMemorySliceIndex, resolveMemoryUserSlice } from '../memory_slice';
 
 const memoryTypeSchema = z.enum(MEMORY_KI_TYPES);
 const DEFAULT_MEMORY_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
@@ -114,9 +115,10 @@ export const createRememberTool = ({
   },
   description: dedent`
     Write a memory to a memory-enabled Context Engine AI index.
-    Memory is shared with users and agents that can access this AI index. Only record findings
-    useful to others working in this context, such as discovered patterns, effective approaches,
-    or domain knowledge. Do not record personal details or individual user preferences.
+    Memory is private to the current user: the server stores every memory in the user's own
+    slice, and only that user can recall, revise, or forget it. Record findings useful to this
+    user in later sessions, such as discovered patterns, effective approaches, domain knowledge,
+    and their stated preferences.
     Use memory.session_fact for a granular fact discovered during a session.
     Use memory.session for a synthesis of what was tried, what worked, and what should be done
     differently. Omit id to create a memory; provide an id returned by an earlier call only when
@@ -161,7 +163,10 @@ export const createRememberTool = ({
         getCoreStart,
       });
 
+      const slice = await resolveMemoryUserSlice({ request, esClient, getCoreStart });
       const currentUserClient = esClient.asCurrentUser;
+      await ensureMemorySliceIndex({ esClient: currentUserClient, index: aiIndex.dest.value });
+
       const currentDate = getCurrentDate();
       const now = currentDate.toISOString();
       const defaultExpiresAt = new Date(
@@ -169,69 +174,47 @@ export const createRememberTool = ({
       ).toISOString();
       const logicalId = params.id ?? generateId();
       const writer = createMemoryWriter({
+        userId: slice,
         toolId: contextEngineMemoryTools.remember,
         runId: runContext.runId,
         agentId: agent?.agentId,
       });
-      let existingBackingIndex: string | undefined;
       let existingSeqNo: number | undefined;
       let existingPrimaryTerm: number | undefined;
       let existingDocument: StoredMemoryDocument | undefined;
 
       if (params.id) {
-        const searchResponse = await currentUserClient.search<StoredMemoryDocument>({
-          index: aiIndex.dest.value,
-          ignore_unavailable: true,
-          allow_no_indices: true,
-          ...(aiIndex.dest.type === 'data_stream'
-            ? {
-                query: { term: { id: params.id } },
-                sort: [{ '@timestamp': 'desc' as const }],
-                size: 1,
-              }
-            : {
-                query: { ids: { values: [params.id] } },
-                seq_no_primary_term: true,
-                size: 2,
-              }),
-        });
-
-        if (aiIndex.dest.type === 'index' && searchResponse.hits.hits.length > 1) {
-          throw new Error(
-            `Memory '${params.id}' exists in multiple indices matched by AI index '${params.aiIndexId}'.`
-          );
-        }
-
-        const [existingHit] = searchResponse.hits.hits;
-        if (!existingHit?._source) {
+        const existing = await currentUserClient.get<StoredMemoryDocument>(
+          { index: aiIndex.dest.value, id: params.id, _slice: slice },
+          { ignore: [404] }
+        );
+        if (!existing.found || !existing._source) {
           throw new Error(`Memory '${params.id}' was not found in AI index '${params.aiIndexId}'.`);
         }
         if (
-          existingHit._source.type !== 'memory.session' &&
-          existingHit._source.type !== 'memory.session_fact'
+          existing._source.type !== 'memory.session' &&
+          existing._source.type !== 'memory.session_fact'
         ) {
           throw new Error(
             `Document '${params.id}' in AI index '${params.aiIndexId}' is not a memory.`
           );
         }
-        if (existingHit._source.type !== params.type) {
+        if (existing._source.type !== params.type) {
           throw new Error(
-            `Memory '${params.id}' has type '${existingHit._source.type}' and cannot be revised as '${params.type}'.`
+            `Memory '${params.id}' has type '${existing._source.type}' and cannot be revised as '${params.type}'.`
           );
         }
-        if (existingHit._source.governance?.lifecycle?.status === 'deleted') {
+        if (existing._source.governance?.lifecycle?.status === 'deleted') {
           throw new Error(`Memory '${params.id}' was deleted and cannot be revised.`);
         }
 
-        existingBackingIndex = existingHit._index;
-        existingSeqNo = existingHit._seq_no;
-        existingPrimaryTerm = existingHit._primary_term;
-        existingDocument = existingHit._source;
+        existingSeqNo = existing._seq_no;
+        existingPrimaryTerm = existing._primary_term;
+        existingDocument = existing._source;
       }
 
       const document: StoredMemoryDocument = {
-        '@timestamp':
-          aiIndex.dest.type === 'data_stream' ? now : existingDocument?.['@timestamp'] ?? now,
+        '@timestamp': existingDocument?.['@timestamp'] ?? now,
         id: logicalId,
         type: params.type,
         title: params.title,
@@ -263,27 +246,18 @@ export const createRememberTool = ({
         ),
       };
 
-      if (
-        aiIndex.dest.type === 'index' &&
-        existingDocument &&
-        (existingSeqNo === undefined || existingPrimaryTerm === undefined)
-      ) {
+      if (existingDocument && (existingSeqNo === undefined || existingPrimaryTerm === undefined)) {
         throw new Error(`Memory '${logicalId}' is missing concurrency metadata.`);
       }
 
       await currentUserClient.index({
-        index:
-          aiIndex.dest.type === 'index' && existingBackingIndex
-            ? existingBackingIndex
-            : aiIndex.dest.value,
-        ...(aiIndex.dest.type === 'index' && { id: logicalId }),
+        index: aiIndex.dest.value,
+        id: logicalId,
+        _slice: slice,
         document,
-        ...(aiIndex.dest.type === 'data_stream' || !existingDocument
-          ? { op_type: 'create' as const }
-          : {
-              if_seq_no: existingSeqNo,
-              if_primary_term: existingPrimaryTerm,
-            }),
+        ...(existingDocument
+          ? { if_seq_no: existingSeqNo, if_primary_term: existingPrimaryTerm }
+          : { op_type: 'create' as const }),
         refresh: 'wait_for',
       });
 

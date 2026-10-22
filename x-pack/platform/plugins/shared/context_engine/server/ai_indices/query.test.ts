@@ -17,7 +17,7 @@ import {
   MAX_AI_INDEX_QUERY_RESPONSE_BYTES,
 } from '../../common/constants';
 import type { QueryAiIndicesRequest } from '../../common/http_api/ai_indices';
-import { buildAiIndexSpaceFilter } from '../../common/space_filter';
+import { buildAiIndexReadFilter } from '../../common/space_filter';
 import { AiIndexQueryResponseTooLargeError, InvalidAiIndexQueryError } from './errors';
 import { queryAiIndices } from './query';
 
@@ -34,10 +34,11 @@ describe('queryAiIndices', () => {
 
   const lastRequest = () => esqlQuery.mock.calls[0][0];
 
-  it('injects the space filter, response cap, and default limit', async () => {
+  it('injects the read filter, response cap, and default limit', async () => {
     const result = await queryAiIndices({
       esClient,
       spaceId: 'marketing',
+      slice: 'u_1',
       query: 'FROM ai-index-idx-a',
     });
 
@@ -45,7 +46,7 @@ describe('queryAiIndices', () => {
     expect(esqlQuery).toHaveBeenCalledWith(
       {
         query: `FROM ai-index-idx-a | LIMIT ${DEFAULT_AI_INDEX_QUERY_LIMIT}`,
-        filter: buildAiIndexSpaceFilter('marketing'),
+        filter: buildAiIndexReadFilter({ spaceId: 'marketing', slice: 'u_1' }),
         drop_null_columns: true,
         allow_partial_results: true,
       },

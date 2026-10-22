@@ -22,6 +22,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type { AgentConfiguration, AgentDefinition } from '@kbn/agent-builder-common';
 import { AgentsService } from './agents_service';
+import { MEMORY_AI_INDEX_ID } from '@kbn/context-engine-plugin/common/memory';
 import { defaultAiIndices } from './default_ai_indices';
 import type { AgentsServiceStart } from './types';
 import type { AgentsServiceStartDeps } from './agents_service';
@@ -210,13 +211,17 @@ describe('AgentsService', () => {
       it('grants the default AI index to chat agents that have none', async () => {
         const resolved = await resolve({ tools: [], ai_indices: [] });
 
-        expect(resolved.ai_indices).toEqual([agentBuilderDefaultAiIndexId]);
+        expect(resolved.ai_indices).toEqual([agentBuilderDefaultAiIndexId, MEMORY_AI_INDEX_ID]);
       });
 
       it("unions the default AI index with the agent's own", async () => {
         const resolved = await resolve({ tools: [], ai_indices: ['custom-index'] });
 
-        expect(resolved.ai_indices).toEqual([agentBuilderDefaultAiIndexId, 'custom-index']);
+        expect(resolved.ai_indices).toEqual([
+          agentBuilderDefaultAiIndexId,
+          MEMORY_AI_INDEX_ID,
+          'custom-index',
+        ]);
       });
 
       it('derives the chat type defaults from the default AI indices map', async () => {

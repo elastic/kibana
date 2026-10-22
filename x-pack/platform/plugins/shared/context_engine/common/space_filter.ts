@@ -6,6 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { MEMORY_SLICE_FIELD } from './memory';
 
 export const AI_INDEX_PRIVILEGES_PATH = 'permissions.kibana.privileges';
 const SPACE_FIELD = `${AI_INDEX_PRIVILEGES_PATH}.space`;
@@ -44,5 +45,28 @@ export const buildAiIndexSpaceFilter = (spaceId: string): QueryDslQueryContainer
       },
     ],
     minimum_should_match: 1,
+  },
+});
+
+/** Docs outside any slice, or in the caller's slice. Memory indices are sliced by user id. */
+export const buildAiIndexSliceFilter = (slice: string | undefined): QueryDslQueryContainer => ({
+  bool: {
+    should: [
+      { bool: { must_not: { exists: { field: MEMORY_SLICE_FIELD } } } },
+      ...(slice !== undefined ? [{ term: { [MEMORY_SLICE_FIELD]: slice } }] : []),
+    ],
+    minimum_should_match: 1,
+  },
+});
+
+export const buildAiIndexReadFilter = ({
+  spaceId,
+  slice,
+}: {
+  spaceId: string;
+  slice: string | undefined;
+}): QueryDslQueryContainer => ({
+  bool: {
+    filter: [buildAiIndexSpaceFilter(spaceId), buildAiIndexSliceFilter(slice)],
   },
 });

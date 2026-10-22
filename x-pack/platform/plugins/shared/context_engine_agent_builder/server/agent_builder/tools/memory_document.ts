@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { buildUserScopeUri } from '@kbn/context-engine-plugin/common/memory';
+
 interface MemoryReference {
   uri: string;
   relation?: string;
@@ -44,16 +46,19 @@ export interface StoredMemoryDocument {
 }
 
 export const createMemoryWriter = ({
+  userId,
   toolId,
   runId,
   agentId,
 }: {
+  userId: string;
   toolId: string;
   runId: string;
   agentId?: string;
 }): MemoryWriter => ({
-  uri: `tool://${toolId}`,
+  uri: buildUserScopeUri(userId),
   metadata: {
+    tool_id: toolId,
     run_id: runId,
     ...(agentId !== undefined && { agent_id: agentId }),
   },

@@ -60,6 +60,17 @@ describe('getWritableMemoryAiIndex', () => {
     await expect(run()).rejects.toThrow("AI index 'support' does not have memory enabled.");
   });
 
+  it('rejects data stream destinations', async () => {
+    get.mockResolvedValue({
+      ...aiIndex,
+      dest: { type: 'data_stream', value: 'ai-index-ds-support' },
+    });
+
+    await expect(run()).rejects.toThrow(
+      "AI index 'support' is backed by a data stream; memory requires a slice-enabled index."
+    );
+  });
+
   it('rejects index-pattern destinations', async () => {
     get.mockResolvedValue({
       ...aiIndex,

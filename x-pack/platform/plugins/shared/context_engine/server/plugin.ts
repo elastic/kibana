@@ -21,6 +21,11 @@ import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settin
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '../common/constants';
 import { apiPrivileges } from '../common/features';
+import {
+  MEMORY_AI_INDEX_DESCRIPTION,
+  MEMORY_AI_INDEX_DEST,
+  MEMORY_AI_INDEX_ID,
+} from '../common/memory';
 import type {
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
@@ -51,6 +56,7 @@ import { createVerifyKi } from './step_types/verify_ki';
 import { registerStepDefinitions } from './step_types';
 import { ContextEngineAnalyticsService, registerContextEngineUsageCollector } from './telemetry';
 import { isContextEngineEnabledInSpace } from './utils/is_context_engine_enabled_in_space';
+import { resolveMemorySlice } from './utils/resolve_memory_slice';
 import { resolveSpaceId } from './utils/resolve_space_id';
 
 /** Must match the `pluginId` on the managed workflow definition. */
@@ -96,6 +102,15 @@ export class ContextEnginePlugin
   ): ContextEnginePluginSetup {
     registerFeatures({ features: setupDeps.features });
     this.setupWorkflowsManagement(coreSetup);
+
+    this.aiIndexRegistry.register(MEMORY_AI_INDEX_ID, {
+      description: MEMORY_AI_INDEX_DESCRIPTION,
+      memory_enabled: true,
+      dest: { type: 'index', value: MEMORY_AI_INDEX_DEST },
+      automations: [],
+      sources: [],
+      traces: [],
+    });
 
     this.workflowsManagement = setupDeps.workflowsManagement?.management;
 
@@ -396,6 +411,7 @@ export class ContextEnginePlugin
       new AiIndexDataReadService({
         esClient,
         spaceId: resolveSpaceId(startDeps.spaces, request),
+        getSlice: () => resolveMemorySlice({ request, security: coreStart.security, esClient }),
         auditLogger: coreStart.security.audit.asScoped(request),
         aiIndexService,
         logger: this.logger,

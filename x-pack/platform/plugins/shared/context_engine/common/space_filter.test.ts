@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { AI_INDEX_PRIVILEGES_PATH, buildAiIndexSpaceFilter } from './space_filter';
+import {
+  AI_INDEX_PRIVILEGES_PATH,
+  buildAiIndexReadFilter,
+  buildAiIndexSliceFilter,
+  buildAiIndexSpaceFilter,
+} from './space_filter';
 
 describe('buildAiIndexSpaceFilter', () => {
   it('matches documents scoped to the space or to the global wildcard', () => {
@@ -40,6 +45,39 @@ describe('buildAiIndexSpaceFilter', () => {
           },
         ],
         minimum_should_match: 1,
+      },
+    });
+  });
+});
+
+describe('buildAiIndexSliceFilter', () => {
+  it('matches unsliced documents or the caller slice', () => {
+    expect(buildAiIndexSliceFilter('u_1')).toEqual({
+      bool: {
+        should: [
+          { bool: { must_not: { exists: { field: '_slice' } } } },
+          { term: { _slice: 'u_1' } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('matches only unsliced documents without a caller slice', () => {
+    expect(buildAiIndexSliceFilter(undefined)).toEqual({
+      bool: {
+        should: [{ bool: { must_not: { exists: { field: '_slice' } } } }],
+        minimum_should_match: 1,
+      },
+    });
+  });
+});
+
+describe('buildAiIndexReadFilter', () => {
+  it('requires both the space and slice filters', () => {
+    expect(buildAiIndexReadFilter({ spaceId: 'marketing', slice: 'u_1' })).toEqual({
+      bool: {
+        filter: [buildAiIndexSpaceFilter('marketing'), buildAiIndexSliceFilter('u_1')],
       },
     });
   });
