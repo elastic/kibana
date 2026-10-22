@@ -11,7 +11,7 @@ import {
   MAX_PARAM_VALUE_LENGTH,
   MAX_ROUTE_STRING_LENGTH,
 } from '../../../common/constants/monitor_attribute_limits';
-import { secretKeys } from '../../../common/constants/monitor_management';
+import { ConfigKey, secretKeys } from '../../../common/constants/monitor_management';
 import {
   fullBrowserMonitor,
   fullHttpMonitor,
@@ -76,10 +76,31 @@ describe('monitor attribute schema', () => {
     expect(monitorCreateSchema.validate(monitor)).toEqual(monitor);
   });
 
+  it('accepts a schedule number longer than the public route cap', () => {
+    const monitor = {
+      ...fullHttpMonitor(),
+      [ConfigKey.SCHEDULE]: {
+        number: '1'.repeat(33),
+        unit: 'm',
+      },
+    };
+
+    expect(monitorCreateSchema.validate(monitor)).toEqual(monitor);
+  });
+
   it('accepts a screenshots value the browser codec already allows', () => {
     const monitor = {
       ...fullBrowserMonitor(),
       screenshots: 'false',
+    };
+
+    expect(monitorCreateSchema.validate(monitor)).toEqual(monitor);
+  });
+
+  it('accepts more TLS versions than the four protocol names', () => {
+    const monitor = {
+      ...fullHttpMonitor(),
+      [ConfigKey.TLS_VERSION]: Array.from({ length: 11 }, () => 'TLSv1.2'),
     };
 
     expect(monitorCreateSchema.validate(monitor)).toEqual(monitor);

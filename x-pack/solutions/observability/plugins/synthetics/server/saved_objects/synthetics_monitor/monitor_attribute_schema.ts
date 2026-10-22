@@ -25,12 +25,12 @@ import {
   AUTH_STRING_MAX,
 } from '../../../common/runtime_types/schemas/monitor_configs';
 
-// The public monitor route caps strings at 4096 and lists at 1000. A project
-// push does not, and a space change deletes the saved object before creating
-// it again. Stored attributes use the project body ceiling so that recreate
-// still accepts a monitor the project route already saved.
+// The public monitor route caps strings at 4096. A project push does not, and a
+// space change deletes the saved object before creating it again. Stored strings
+// use the project body ceiling so recreate still accepts what that route saved.
+// Array length stays uncapped, matching the monitor codecs.
 const storedString = () => schema.string({ maxLength: MAX_MONITOR_PAYLOAD_BYTES });
-const stringArray = () => schema.arrayOf(storedString(), { maxSize: MAX_MONITOR_PAYLOAD_BYTES });
+const stringArray = () => schema.arrayOf(storedString());
 
 const literals = (values: readonly string[]) =>
   schema.oneOf(values.map((value) => schema.literal(value)) as [Type<string>]);
@@ -40,7 +40,7 @@ const loose = <P extends Record<string, Type<unknown>>>(props: P) =>
 
 const scheduleSchema = loose({
   // Stored as a string. A numeric value is also accepted.
-  number: schema.oneOf([schema.string({ maxLength: 32 }), schema.number()]),
+  number: schema.oneOf([storedString(), schema.number()]),
   unit: schema.maybe(literals(Object.values(ScheduleUnit))),
 });
 
@@ -134,9 +134,7 @@ export const monitorCreateSchema = schema.object({
   [ConfigKey.TAGS]: stringArray(),
   // A location is a service or private location object. Tests also store a location id string.
   [ConfigKey.LOCATIONS]: schema.maybe(
-    schema.arrayOf(schema.oneOf([storedString(), locationSchema]), {
-      maxSize: MAX_MONITOR_PAYLOAD_BYTES,
-    })
+    schema.arrayOf(schema.oneOf([storedString(), locationSchema]))
   ),
   [ConfigKey.APM_SERVICE_NAME]: schema.maybe(storedString()),
   [ConfigKey.MONITOR_QUERY_ID]: schema.maybe(storedString()),
@@ -189,9 +187,7 @@ export const monitorCreateSchema = schema.object({
   [ConfigKey.REQUEST_HEADERS_CHECK]: schema.maybe(stringRecord()),
   [ConfigKey.USERNAME]: schema.maybe(storedString()),
   [ConfigKey.PROXY_HEADERS]: schema.maybe(stringRecord()),
-  [ConfigKey.RESPONSE_JSON_CHECK]: schema.maybe(
-    schema.arrayOf(responseJsonCheckSchema, { maxSize: MAX_MONITOR_PAYLOAD_BYTES })
-  ),
+  [ConfigKey.RESPONSE_JSON_CHECK]: schema.maybe(schema.arrayOf(responseJsonCheckSchema)),
   [ConfigKey.KERBEROS]: schema.maybe(kerberosSchema),
   [ConfigKey.NTLM]: schema.maybe(ntlmSchema),
   [ConfigKey.WAIT]: schema.maybe(storedString()),
@@ -205,10 +201,7 @@ export const monitorCreateSchema = schema.object({
   [ConfigKey.JOURNEY_FILTERS_TAGS]: schema.maybe(stringArray()),
   [ConfigKey.IGNORE_HTTPS_ERRORS]: schema.maybe(schema.boolean()),
   [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: schema.maybe(
-    schema.oneOf([
-      storedString(),
-      schema.arrayOf(storedString(), { maxSize: MAX_MONITOR_PAYLOAD_BYTES }),
-    ])
+    schema.oneOf([storedString(), schema.arrayOf(storedString())])
   ),
   [ConfigKey.THROTTLING_CONFIG]: schema.maybe(
     loose({
@@ -219,16 +212,11 @@ export const monitorCreateSchema = schema.object({
   ),
   [ConfigKey.SYNTHETICS_ARGS]: schema.maybe(stringArray()),
   [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: schema.maybe(
-    schema.oneOf([
-      storedString(),
-      schema.arrayOf(storedString(), { maxSize: MAX_MONITOR_PAYLOAD_BYTES }),
-    ])
+    schema.oneOf([storedString(), schema.arrayOf(storedString())])
   ),
   [ConfigKey.TLS_CERTIFICATE]: schema.maybe(storedString()),
   [ConfigKey.TLS_VERIFICATION_MODE]: schema.maybe(literals(Object.values(VerificationMode))),
-  [ConfigKey.TLS_VERSION]: schema.maybe(
-    schema.arrayOf(literals(Object.values(TLSVersion)), { maxSize: 10 })
-  ),
+  [ConfigKey.TLS_VERSION]: schema.maybe(schema.arrayOf(literals(Object.values(TLSVersion)))),
   [ConfigKey.TLS_KEY]: schema.maybe(storedString()),
   [ConfigKey.TLS_KEY_PASSPHRASE]: schema.maybe(storedString()),
   // Secret ConfigKeys are packed into this JSON string before the document is stored.
