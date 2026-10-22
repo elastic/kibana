@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import ATTACK_DISCOVERY_ATTACH_YAML from './attack_discovery_attach.yaml';
 import ATTACK_DISCOVERY_BATCHED_GENERATION_YAML from './attack_discovery_batched_generation.yaml';
 import ATTACK_DISCOVERY_FP_TP_ANALYSIS_YAML from './attack_discovery_fp_tp_analysis.yaml';
 import ATTACK_DISCOVERY_REVIEW_YAML from './attack_discovery_review.yaml';
@@ -30,13 +31,20 @@ export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID =
   'system-security-attack-discovery-batched-generation';
 export const ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID =
   'system-security-attack-discovery-fp-tp-analysis';
+export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID =
+  'system-security-attack-discovery-attach';
 
+/**
+ * Version 6 clusters attacks before the review fan-out and attaches a duplicate
+ * to the Investigation that already describes it. The YAML change rolls out
+ * through `definitionHash`; the bump is the deliberate signal.
+ */
 export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 5,
+  version: 6,
   yaml: ATTACK_DISCOVERY_RUNNER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -53,14 +61,35 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
  * detection alerts behind a true-positive or inconclusive attack.
  *
  * Version 10 carries the telemetry report steps.
+ *
+ * Version 11 journals `related_investigation_id` when a closed false positive
+ * matched on entities only, so the new review links back to it.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 10,
+  version: 11,
   yaml: ATTACK_DISCOVERY_REVIEW_YAML,
+} as const satisfies ManagedWorkflowDefinition;
+
+/**
+ * Attaches a duplicate Attack Discovery to an existing Investigation and skips
+ * FP/TP. Internal, like the other children the runner executes: it owns no trigger.
+ *
+ * Version 2 journals the match, the attachment attempt, and alert retirement as
+ * separate notes. The retirement note follows the review: it is written only for
+ * a handed-off true positive or inconclusive. The YAML change rolls out through
+ * `definitionHash`; the bump is the deliberate signal.
+ */
+export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW = {
+  billable: false,
+  id: ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID,
+  management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
+  pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
+  version: 2,
+  yaml: ATTACK_DISCOVERY_ATTACH_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
 /**

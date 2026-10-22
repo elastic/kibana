@@ -105,6 +105,14 @@ triggers:
             Workflow execution id of the runner that launched this review, recorded
             on the Investigation below. It is the only link back to the parent the
             engine keeps. Empty on a standalone run.
+        related_investigation_id:
+          type: string
+          maxLength: 256
+          description: >-
+            Set when this attack shares a host and a user with a closed
+            false-positive Investigation but does not share its alerts. The review
+            still runs FP/TP on a new Investigation and journals the link. Empty
+            when there is nothing to link.
       # The attack's identity is required: without the persisted document id there
       # is nothing to attach by reference and nothing to close. Everything else
       # defaults from `consts` so the worker and this workflow can be upgraded
@@ -320,6 +328,24 @@ steps:
           Autonomy: {{ inputs.autonomy | default: consts.default_autonomy }}.
           Parent run: {{ inputs.parent_run_id }}.
           This execution: {{ execution.id }}.
+    on-failure:
+      continue: true
+
+  # A closed false positive stays the match only while the new attack shares its
+  # alerts. Host and user alone, after that close, start a new Investigation; this
+  # note is the link back so the two are not silent strangers.
+  - name: journal_related_investigation
+    type: workflow.execute
+    if: "${{ inputs.related_investigation_id != blank }}"
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+        message: >-
+          This attack shares entities with closed false-positive Investigation
+          {{ inputs.related_investigation_id }} and does not share its alerts.
+          It is reviewed on its own.
     on-failure:
       continue: true
 
