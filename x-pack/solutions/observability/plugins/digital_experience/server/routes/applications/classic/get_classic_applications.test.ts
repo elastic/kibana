@@ -71,6 +71,7 @@ describe('getClassicApplications', () => {
         },
       ],
       environments: ['production', 'staging'],
+      pageLoadsOverTime: [],
     });
   });
 

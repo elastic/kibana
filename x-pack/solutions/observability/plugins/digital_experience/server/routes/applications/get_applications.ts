@@ -15,6 +15,7 @@ import type {
   ApplicationSource,
   ApplicationSummary,
   ApplicationsResponse,
+  PageLoadsOverTime,
 } from '../../../common/types/applications';
 import type { SourceApplications } from './types';
 
@@ -89,9 +90,11 @@ export const getApplications = async ({
 
   const loaded: SourceApplications[] = [];
   const failures: SourceFailure[] = [];
+  const pageLoadsOverTime: PageLoadsOverTime = { otel: [], classic: [] };
   results.forEach((result, index) => {
     if (result.status === 'fulfilled') {
       loaded.push(result.value);
+      pageLoadsOverTime[sources[index].source] = result.value.pageLoadsOverTime;
     } else {
       failures.push({ source: sources[index].source, error: result.reason });
     }
@@ -106,5 +109,6 @@ export const getApplications = async ({
   return {
     applications: loaded.flatMap(({ applications }) => applications).sort(byPageLoadsThenName),
     environments: sortEnvironments(new Set(loaded.flatMap(({ environments }) => environments))),
+    pageLoadsOverTime,
   };
 };

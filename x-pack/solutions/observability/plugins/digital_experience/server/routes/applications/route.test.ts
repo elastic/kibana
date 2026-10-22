@@ -57,8 +57,16 @@ const runHandler = ({
 describe('GET /internal/digital_experience/applications', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedOtel.mockResolvedValue({ applications: [], environments: ['production'] });
-    mockedClassic.mockResolvedValue({ applications: [], environments: ['staging'] });
+    mockedOtel.mockResolvedValue({
+      applications: [],
+      environments: ['production'],
+      pageLoadsOverTime: [],
+    });
+    mockedClassic.mockResolvedValue({
+      applications: [],
+      environments: ['staging'],
+      pageLoadsOverTime: [],
+    });
   });
 
   it('queries both sources on stateful', async () => {

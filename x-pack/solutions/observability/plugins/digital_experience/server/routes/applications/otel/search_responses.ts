@@ -6,6 +6,7 @@
  */
 
 import type { TermsAggregation } from '../../../lib/helpers/aggregations';
+import type { DateHistogramAggregation } from '../../../lib/helpers/time_series';
 import type { VitalAggregation } from '../../../lib/helpers/web_vitals';
 
 // The aggregations `search_requests.ts` asks for, by the same names.
@@ -39,4 +40,9 @@ export type SpansBucket = EnvironmentAggregations & {
 export type SearchAggregations<TBucket> = EnvironmentAggregations & {
   environmentNotDefined: { doc_count: number };
   inEnvironment: { applications: { buckets: TBucket[] } };
+};
+
+/** `logsSearch` also counts the page loads over time. */
+export type LogsAggregations = SearchAggregations<LogsBucket> & {
+  inEnvironment: { pageLoadsOverTime: { histogram: DateHistogramAggregation } };
 };

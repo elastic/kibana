@@ -8,6 +8,7 @@
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { bucketKeys } from '../../../lib/helpers/aggregations';
 import { withNotDefined } from '../../../lib/helpers/environment';
+import { toTimeSeries } from '../../../lib/helpers/time_series';
 import { SEARCH_SPAN_NAMES } from '../constants';
 import type { SourceApplications } from '../types';
 import type { SearchParams } from './search_requests';
@@ -36,5 +37,6 @@ export const getClassicApplications = async ({
       bucketKeys(aggregations?.environments),
       aggregations?.environmentNotDefined.doc_count ?? 0
     ),
+    pageLoadsOverTime: toTimeSeries(aggregations?.inEnvironment.pageLoadsOverTime?.histogram),
   };
 };

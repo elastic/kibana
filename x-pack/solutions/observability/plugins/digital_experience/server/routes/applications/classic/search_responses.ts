@@ -6,6 +6,7 @@
  */
 
 import type { TermsAggregation } from '../../../lib/helpers/aggregations';
+import type { DateHistogramAggregation } from '../../../lib/helpers/time_series';
 import type { VitalAggregation } from '../../../lib/helpers/web_vitals';
 
 // The aggregations `search_requests.ts` asks for, by the same names.
@@ -29,5 +30,8 @@ export interface ClassicBucket {
 export interface SearchAggregations {
   environments: TermsAggregation;
   environmentNotDefined: { doc_count: number };
-  inEnvironment: { applications: { buckets: ClassicBucket[] } };
+  inEnvironment: {
+    applications: { buckets: ClassicBucket[] };
+    pageLoadsOverTime: { histogram: DateHistogramAggregation };
+  };
 }

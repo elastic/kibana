@@ -8,11 +8,12 @@
 import { withSpan } from '@kbn/apm-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { withNotDefined } from '../../../lib/helpers/environment';
+import { toTimeSeries } from '../../../lib/helpers/time_series';
 import { SEARCH_SPAN_NAMES } from '../constants';
 import type { SourceApplications } from '../types';
 import type { SearchParams } from './search_requests';
 import { logsSearch, spansSearch } from './search_requests';
-import type { LogsBucket, SearchAggregations, SpansBucket } from './search_responses';
+import type { LogsAggregations, SearchAggregations, SpansBucket } from './search_responses';
 import { environmentsOf, toApplication } from './to_application';
 
 interface GetOtelApplicationsParams extends SearchParams {
@@ -30,7 +31,7 @@ const searchOtelApplications = async ({
     esClient.search(logsSearch(searchParams), { signal }),
     esClient.search(spansSearch(searchParams), { signal }),
   ]);
-  const logs = logsResponse.aggregations as unknown as SearchAggregations<LogsBucket> | undefined;
+  const logs = logsResponse.aggregations as unknown as LogsAggregations | undefined;
   const spans = spansResponse.aggregations as unknown as
     | SearchAggregations<SpansBucket>
     | undefined;
@@ -49,6 +50,7 @@ const searchOtelApplications = async ({
   return {
     applications,
     environments: withNotDefined(environmentsOf(logs, spans), notDefinedCount),
+    pageLoadsOverTime: toTimeSeries(logs?.inEnvironment.pageLoadsOverTime?.histogram),
   };
 };
 

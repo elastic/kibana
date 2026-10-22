@@ -141,6 +141,7 @@ describe('getOtelApplications', () => {
         },
       ],
       environments: ['production', 'staging', 'canary'],
+      pageLoadsOverTime: [],
     });
   });
 

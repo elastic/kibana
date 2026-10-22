@@ -8,7 +8,11 @@
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { forbidden } from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { ApplicationSource, ApplicationSummary } from '../../../common/types/applications';
+import type {
+  ApplicationSource,
+  ApplicationSummary,
+  TimeSeriesPoint,
+} from '../../../common/types/applications';
 import { getApplications } from './get_applications';
 
 const app = (
@@ -32,10 +36,11 @@ const app = (
   lastSeen: null,
 });
 
-const result = (applications: ApplicationSummary[], environments: string[] = []) => ({
-  applications,
-  environments,
-});
+const result = (
+  applications: ApplicationSummary[],
+  environments: string[] = [],
+  pageLoadsOverTime: TimeSeriesPoint[] = []
+) => ({ applications, environments, pageLoadsOverTime });
 
 describe('getApplications', () => {
   const logger = loggingSystemMock.createLogger();
@@ -76,12 +81,37 @@ describe('getApplications', () => {
     expect(environments).toEqual(['ENVIRONMENT_NOT_DEFINED', 'Alpha', 'production']);
   });
 
+  it('returns the page loads over time of each source', async () => {
+    const otel = [{ timestamp: 0, count: 2 }];
+    const classic = [{ timestamp: 0, count: 5 }];
+
+    const { pageLoadsOverTime } = await getApplications({
+      getOtelApplications: async () => result([], [], otel),
+      getClassicApplications: async () => result([], [], classic),
+      logger,
+    });
+
+    expect(pageLoadsOverTime).toEqual({ otel, classic });
+  });
+
+  it('returns no page loads over time for a source that failed', async () => {
+    const { pageLoadsOverTime } = await getApplications({
+      getOtelApplications: async () => result([], [], [{ timestamp: 0, count: 2 }]),
+      getClassicApplications: async () => {
+        throw new Error('classic down');
+      },
+      logger,
+    });
+
+    expect(pageLoadsOverTime.classic).toEqual([]);
+  });
+
   it('does not query Classic without a Classic fetcher (serverless)', async () => {
     const getOtelApplications = jest.fn().mockResolvedValue(result([app('shop', 'otel', 1)]));
 
     const response = await getApplications({ getOtelApplications, logger });
 
-    expect(response).toEqual(result([app('shop', 'otel', 1)]));
+    expect(response.applications).toEqual([app('shop', 'otel', 1)]);
   });
 
   it('returns the other source when one fails', async () => {
@@ -93,7 +123,8 @@ describe('getApplications', () => {
       logger,
     });
 
-    expect(response).toEqual(result([app('shop', 'classic', 1)], ['production']));
+    expect(response.applications).toEqual([app('shop', 'classic', 1)]);
+    expect(response.environments).toEqual(['production']);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('security_exception'));
   });
 

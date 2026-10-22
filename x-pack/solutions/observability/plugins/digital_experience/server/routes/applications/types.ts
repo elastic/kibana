@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { ApplicationSummary } from '../../../common/types/applications';
+import type { ApplicationSummary, TimeSeriesPoint } from '../../../common/types/applications';
 
 /** What one source returns: its applications and every environment it saw in the time range. */
 export interface SourceApplications {
   applications: ApplicationSummary[];
   environments: string[];
+  /** Page loads over the time range in the selected environment. */
+  pageLoadsOverTime: TimeSeriesPoint[];
 }

@@ -67,4 +67,19 @@ export interface ApplicationsResponse {
   applications: ApplicationSummary[];
   /** Every environment in the time range, whatever the `environment` filter, for the picker. */
   environments: string[];
+  /** Page loads over the time range in the selected environment, per source. */
+  pageLoadsOverTime: PageLoadsOverTime;
+}
+
+/** The documents in one bucket of a histogram over the time range. */
+export interface TimeSeriesPoint {
+  /** Start of the bucket, in epoch milliseconds. */
+  timestamp: number;
+  count: number;
+}
+
+/** Both sources use the same buckets; a source that isn't queried has none. */
+export interface PageLoadsOverTime {
+  otel: TimeSeriesPoint[];
+  classic: TimeSeriesPoint[];
 }

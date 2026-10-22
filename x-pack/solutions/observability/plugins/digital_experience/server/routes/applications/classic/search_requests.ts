@@ -20,6 +20,7 @@ import { dateRangeQuery, termQuery, termsQuery } from '@kbn/es-query';
 import type { CoreWebVital } from '../../../../common/core_web_vitals';
 import { CORE_WEB_VITAL } from '../../../../common/core_web_vitals';
 import { LAST_SEEN_AGGREGATION } from '../../../lib/helpers/aggregations';
+import { dateHistogram } from '../../../lib/helpers/time_series';
 import { environmentFilter, environmentNotDefinedFilter } from '../../../lib/helpers/environment';
 import { vitalStatsAggs } from '../../../lib/helpers/web_vitals';
 import {
@@ -143,6 +144,10 @@ export const classicSearch = ({
             ttfb: webVital(TTFB_FIELD, CORE_WEB_VITAL.ttfb),
             lastSeen: LAST_SEEN_AGGREGATION,
           },
+        },
+        pageLoadsOverTime: {
+          ...documentCount(pageLoadTransactions),
+          aggs: { histogram: dateHistogram(start, end) },
         },
       },
     },

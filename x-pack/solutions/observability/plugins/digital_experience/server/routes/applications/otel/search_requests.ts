@@ -20,6 +20,7 @@ import {
 import type { CoreWebVital } from '../../../../common/core_web_vitals';
 import { CORE_WEB_VITAL } from '../../../../common/core_web_vitals';
 import { LAST_SEEN_AGGREGATION } from '../../../lib/helpers/aggregations';
+import { dateHistogram } from '../../../lib/helpers/time_series';
 import { environmentFilter, environmentNotDefinedFilter } from '../../../lib/helpers/environment';
 import { vitalStatsAggs } from '../../../lib/helpers/web_vitals';
 import {
@@ -82,14 +83,14 @@ const webVital = (vital: CoreWebVital) => ({
 /** The applications in the selected environment, and every environment so the picker lists all. */
 const applicationsByEnvironment = (
   environment: string | undefined,
-  applications: estypes.AggregationsAggregationContainer
+  aggs: { applications: estypes.AggregationsAggregationContainer } & Record<
+    string,
+    estypes.AggregationsAggregationContainer
+  >
 ) => ({
   ...environmentTerms(MAX_ENVIRONMENTS),
   environmentNotDefined: { filter: environmentNotDefinedFilter(ENVIRONMENT_FIELDS) },
-  inEnvironment: {
-    filter: environmentFilter(ENVIRONMENT_FIELDS, environment),
-    aggs: { applications },
-  },
+  inEnvironment: { filter: environmentFilter(ENVIRONMENT_FIELDS, environment), aggs },
 });
 
 /** Page loads, JS errors and web vitals per application, from the logs. */
@@ -108,22 +109,28 @@ export const logsSearch = ({ start, end, environment }: SearchParams): estypes.S
     },
   },
   aggs: applicationsByEnvironment(environment, {
-    terms: {
-      field: SERVICE_NAME,
-      size: MAX_APPLICATIONS_PER_SOURCE,
-      // The cap keeps the applications with the most page loads.
-      order: { pageLoads: 'desc' },
+    applications: {
+      terms: {
+        field: SERVICE_NAME,
+        size: MAX_APPLICATIONS_PER_SOURCE,
+        // The cap keeps the applications with the most page loads.
+        order: { pageLoads: 'desc' },
+      },
+      aggs: {
+        ...environmentTerms(MAX_ENVIRONMENTS_PER_APPLICATION),
+        pageLoads: eventCount(EVENT_NAVIGATION_TIMING),
+        jsErrors: eventCount(EVENT_EXCEPTION),
+        lcp: webVital(CORE_WEB_VITAL.lcp),
+        inp: webVital(CORE_WEB_VITAL.inp),
+        cls: webVital(CORE_WEB_VITAL.cls),
+        fcp: webVital(CORE_WEB_VITAL.fcp),
+        ttfb: webVital(CORE_WEB_VITAL.ttfb),
+        lastSeen: LAST_SEEN_AGGREGATION,
+      },
     },
-    aggs: {
-      ...environmentTerms(MAX_ENVIRONMENTS_PER_APPLICATION),
-      pageLoads: eventCount(EVENT_NAVIGATION_TIMING),
-      jsErrors: eventCount(EVENT_EXCEPTION),
-      lcp: webVital(CORE_WEB_VITAL.lcp),
-      inp: webVital(CORE_WEB_VITAL.inp),
-      cls: webVital(CORE_WEB_VITAL.cls),
-      fcp: webVital(CORE_WEB_VITAL.fcp),
-      ttfb: webVital(CORE_WEB_VITAL.ttfb),
-      lastSeen: LAST_SEEN_AGGREGATION,
+    pageLoadsOverTime: {
+      ...eventCount(EVENT_NAVIGATION_TIMING),
+      aggs: { histogram: dateHistogram(start, end) },
     },
   }),
 });
@@ -144,12 +151,14 @@ export const spansSearch = ({ start, end, environment }: SearchParams): estypes.
     },
   },
   aggs: applicationsByEnvironment(environment, {
-    terms: { field: SERVICE_NAME, size: MAX_APPLICATIONS_PER_SOURCE },
-    aggs: {
-      ...environmentTerms(MAX_ENVIRONMENTS_PER_APPLICATION),
-      lastSeen: LAST_SEEN_AGGREGATION,
-      // Failed: an HTTP error status (4xx or 5xx).
-      failed: { filter: { range: { [HTTP_RESPONSE_STATUS_CODE]: { gte: 400 } } } },
+    applications: {
+      terms: { field: SERVICE_NAME, size: MAX_APPLICATIONS_PER_SOURCE },
+      aggs: {
+        ...environmentTerms(MAX_ENVIRONMENTS_PER_APPLICATION),
+        lastSeen: LAST_SEEN_AGGREGATION,
+        // Failed: an HTTP error status (4xx or 5xx).
+        failed: { filter: { range: { [HTTP_RESPONSE_STATUS_CODE]: { gte: 400 } } } },
+      },
     },
   }),
 });
