@@ -14,8 +14,8 @@ export interface PlannedControl {
   /** The control id, or its position in `controls` when it has none. */
   identifier: string;
   control: ControlInput;
-  /** Whether the control replaces an existing control with the same id. */
-  replacesExisting: boolean;
+  /** The id of the existing control this control replaces, if any. */
+  replaces?: string;
 }
 
 /** A planned control with the id it is stored under. */
@@ -27,8 +27,8 @@ export type IdentifiedControl = Omit<PlannedControl, 'control'> & {
  * Whether a control that cannot be applied is reported. Controls the agent added on its own are
  * left out silently, but the replacement of an existing control is always reported.
  */
-export const isReported = ({ control, replacesExisting }: PlannedControl): boolean =>
-  control.user_requested === true || replacesExisting;
+export const isReported = ({ control, replaces }: PlannedControl): boolean =>
+  control.user_requested === true || replaces !== undefined;
 
 /** Planned controls that can be applied, and a failure for each one that cannot. */
 export interface ControlsResult {

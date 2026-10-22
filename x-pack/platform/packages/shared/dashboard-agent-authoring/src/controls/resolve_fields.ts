@@ -185,7 +185,7 @@ export const resolveControlFields = async ({
   const failures: DashboardFailure[] = [];
 
   controls.forEach((plannedControl) => {
-    const { identifier, control, replacesExisting } = plannedControl;
+    const { identifier, control, replaces } = plannedControl;
     const capabilities =
       control.type === TIME_SLIDER_CONTROL ? undefined : capabilitiesByIndex.get(control.index);
     if (control.type === TIME_SLIDER_CONTROL || !capabilities) {
@@ -198,7 +198,7 @@ export const resolveControlFields = async ({
       resolvedControls.push({
         identifier,
         control: { ...control, field_name: resolution.resolvedFieldName },
-        replacesExisting,
+        replaces,
       });
       return;
     }

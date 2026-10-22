@@ -86,12 +86,12 @@ export const applyControls = ({
   }
 
   const replacementsById = new Map(
-    controls.flatMap(({ control, replacesExisting }) =>
-      replacesExisting ? [[control.id, control] as const] : []
+    controls.flatMap(({ control, replaces }) =>
+      replaces === undefined ? [] : [[replaces, control] as const]
     )
   );
-  const newControls = controls.flatMap(({ control, replacesExisting }) =>
-    replacesExisting ? [] : [control]
+  const newControls = controls.flatMap(({ control, replaces }) =>
+    replaces === undefined ? [control] : []
   );
   return {
     ...dashboardData,

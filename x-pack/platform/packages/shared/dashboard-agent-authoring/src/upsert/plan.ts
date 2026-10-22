@@ -272,7 +272,7 @@ const rejectInvalidItems = (
   const validControls = controls.flatMap((control, index): PlannedControl[] => {
     const { id } = control;
     if (id === undefined) {
-      return [{ identifier: `controls[${index}]`, control, replacesExisting: false }];
+      return [{ identifier: `controls[${index}]`, control }];
     }
     if (conflictingIds.has(id)) {
       return [];
@@ -282,7 +282,7 @@ const rejectInvalidItems = (
       recordFailure('control', id, idError);
       return [];
     }
-    return [{ identifier: id, control, replacesExisting: controlsById.has(id) }];
+    return [{ identifier: id, control, replaces: controlsById.has(id) ? id : undefined }];
   });
 
   return {

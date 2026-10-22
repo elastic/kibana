@@ -37,16 +37,9 @@ export const filterDuplicateTimeSliders = ({
   const existingTimeSliderIds = new Set(
     existingTimeSliders.flatMap((control) => getControlId(control) ?? [])
   );
-  const isInPlaceTimeSlider = ({ control: { type, id }, replacesExisting }: PlannedControl) =>
-    type === TIME_SLIDER_CONTROL &&
-    replacesExisting &&
-    id !== undefined &&
-    existingTimeSliderIds.has(id);
-  const replacedIds = new Set(
-    controls.flatMap(({ control: { id }, replacesExisting }) =>
-      replacesExisting && id !== undefined ? [id] : []
-    )
-  );
+  const isInPlaceTimeSlider = ({ control: { type }, replaces }: PlannedControl) =>
+    type === TIME_SLIDER_CONTROL && replaces !== undefined && existingTimeSliderIds.has(replaces);
+  const replacedIds = new Set(controls.flatMap(({ replaces }) => replaces ?? []));
   const hasTimeSlider =
     controls.some(isInPlaceTimeSlider) ||
     existingTimeSliders.some((control) => {
