@@ -103,8 +103,6 @@ describe('durationSchema', () => {
     expect(durationSchema.parse(value)).toBe(value);
   });
 
-  // Zero and zero-padded durations are deliberately accepted (reviewed decision):
-  // `0s` is a value, and `007m` parses to the same instant as `7m`.
   it.each(['0s', '0ms', '0m', '007m', '05s'])(
     'accepts the zero or zero-padded duration "%s"',
     (value) => {

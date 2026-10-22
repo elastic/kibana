@@ -122,8 +122,6 @@ apiTest.describe('Bulk get rules API', { tag: testData.API_ENGINE_TAG }, () => {
         body: { ids: [rule.id, 'does-not-exist'] },
       });
 
-      // A missing id no longer fails the request: the found rule is returned in
-      // `items` and the missing id is reported in `errors`.
       expect(response).toHaveStatusCode(200);
       expect(response.body.items.map((item: { id: string }) => item.id)).toStrictEqual([rule.id]);
 

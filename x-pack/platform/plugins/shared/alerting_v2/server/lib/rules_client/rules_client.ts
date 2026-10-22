@@ -937,10 +937,9 @@ export class RulesClient {
       );
     }
 
-    const items = ids.flatMap((id) => {
-      const rule = rulesById.get(id);
-      return rule ? [rule] : [];
-    });
+    const items = ids
+      .map((id) => rulesById.get(id))
+      .filter((rule): rule is RuleResponse => rule !== undefined);
 
     return { items, errors };
   }
