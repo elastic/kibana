@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { PayloadAction } from 'redux-toolkit-v1';
 import moment from 'moment';
 
 import { contextMiddleware } from '.';
@@ -25,23 +24,38 @@ const createMiddleware = (data: DataPublicPluginStart, state?: Partial<LensAppSt
   });
   const store = {
     getState: jest.fn(() => ({
-      lens: state || {
+      lens: {
         ...initialState,
         activeDatasourceId: 'formBased',
-        datasourceStates: { formBased: { state: {} } },
+        datasourceStates: { formBased: { state: {}, isLoading: false } },
+        ...state,
       },
     })),
     dispatch: jest.fn(),
   };
   const next = jest.fn();
 
-  const invoke = (action: PayloadAction<Partial<LensAppState> | void>) =>
-    middleware(store)(next)(action);
+  const invoke = (action: unknown) => middleware(store)(next)(action);
 
   return { store, next, invoke };
 };
 
 describe('contextMiddleware', () => {
+  it.each([
+    { type: 'unrelated' },
+    { type: 'unrelated', payload: null },
+    { type: 'unrelated', payload: 42 },
+    { type: 'unrelated', payload: 'value' },
+  ])('forwards actions without an object payload: %j', (action) => {
+    const data = mockDataPlugin();
+    storeDeps.datasourceMap.formBased.isTimeBased = () => false;
+    const { next, invoke } = createMiddleware(data);
+
+    invoke(action);
+
+    expect(next).toHaveBeenCalledWith(action);
+  });
+
   describe('time update', () => {
     it('does update the searchSessionId when the state changes and too much time passed', () => {
       const data = mockDataPlugin();
