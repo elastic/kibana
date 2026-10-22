@@ -115,6 +115,30 @@ describe('token endpoints', () => {
     expect(grantedScopes((await refresh('read')).body.access_token)).toEqual(['read']);
   });
 
+  it('keeps the original grant in refresh tokens, and refuses to widen it (RFC 6749 §6)', async () => {
+    const password = await requestToken('https://api.example.com/oauth/token', {
+      body: 'grant_type=password&username=user&password=pass&scope=read%20write',
+    });
+    const refresh = (refreshToken: string, scope?: string) =>
+      requestToken('https://api.example.com/oauth/refresh', {
+        body: new URLSearchParams({
+          grant_type: 'refresh_token',
+          refresh_token: refreshToken,
+          ...(scope ? { scope } : {}),
+        }).toString(),
+      });
+
+    const narrowed = await refresh(password.body.refresh_token, 'read');
+    const again = await refresh(narrowed.body.refresh_token);
+    const widened = await refresh(password.body.refresh_token, 'read delete');
+
+    expect(grantedScopes(again.body.access_token)).toEqual(['read', 'write']);
+    expect(widened).toEqual({
+      status: 400,
+      body: expect.objectContaining({ error: 'invalid_scope' }),
+    });
+  });
+
   it('reads no scopes from tokens issued without a scope or not issued by the mock', async () => {
     const { body } = await requestToken('https://auth.example.com/oauth/token', {
       body: 'grant_type=client_credentials&client_id=id',
@@ -138,11 +162,12 @@ describe('token endpoints', () => {
   describe('JWT bearer assertions', () => {
     const assertion = (claims: Record<string, unknown>) =>
       `e30.${Buffer.from(JSON.stringify(claims)).toString('base64url')}.signature`;
-    const exchange = (jwt: string) =>
+    const exchange = (jwt: string, scope?: string) =>
       requestToken('https://auth.example.com/oauth/token', {
         body: new URLSearchParams({
           grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
           assertion: jwt,
+          ...(scope ? { scope } : {}),
         }).toString(),
       });
 
@@ -158,6 +183,12 @@ describe('token endpoints', () => {
         },
       });
       expect(grantedScopes(body.access_token)).toEqual(['read', 'write']);
+    });
+
+    it('reads the scopes from the request when the assertion claims none (RFC 7523)', async () => {
+      const { body } = await exchange(assertion({ iss: 'service-account' }), 'read');
+
+      expect(grantedScopes(body.access_token)).toEqual(['read']);
     });
 
     it('issues an ID token for a target audience', async () => {

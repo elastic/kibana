@@ -221,6 +221,27 @@ const issued = (body: Record<string, unknown>): TokenExchange => ({
   violations: [],
 });
 
+// RFC 6749 §6: a refresh may ask for fewer scopes than the original grant, never more, and the
+// new refresh token keeps the original grant. Refresh tokens the mock didn't issue for specific
+// scopes (`grant` undefined) aren't checked.
+const refresh = (grant: string[] | undefined, requested: string[]): TokenExchange => {
+  const added = grant ? requested.filter((scope) => !grant.includes(scope)) : [];
+  if (added.length > 0) {
+    return oauthError(400, 'invalid_scope', `The refresh token wasn't granted ${added.join(' ')}`, [
+      'body',
+      'scope',
+    ]);
+  }
+  const scopes = requested.length > 0 ? requested : grant ?? [];
+  return issued({
+    access_token: withScopes(ACCESS_TOKEN, scopes),
+    token_type: 'Bearer',
+    expires_in: 3600,
+    refresh_token: withScopes(REFRESH_TOKEN, grant ?? []),
+    ...(scopes.length > 0 ? { scope: scopes.join(' ') } : {}),
+  });
+};
+
 const hasClientCredentials = (form: URLSearchParams, authorization: string | undefined) =>
   form.has('client_id') || /^basic\s+\S/i.test(authorization ?? '');
 
@@ -280,27 +301,27 @@ export const respondToTokenRequest = (
     if (!claims) {
       return oauthError(400, 'invalid_grant', 'The assertion is not a JWT', ['body', 'assertion']);
     }
-    // Google issues an ID token instead when the assertion asks for one.
+    // Google issues an ID token instead when the assertion asks for one. Google puts the scopes
+    // in the assertion's claims; RFC 7523 also allows them as the request's `scope`.
+    const claimed = parseScopes(claims.scope);
+    const scopes = claimed.length > 0 ? claimed : parseScopes(form.get('scope'));
     const token =
       typeof claims.target_audience === 'string'
         ? { id_token: ID_TOKEN }
-        : {
-            access_token: withScopes(ACCESS_TOKEN, parseScopes(claims.scope)),
-            token_type: 'Bearer',
-          };
+        : { access_token: withScopes(ACCESS_TOKEN, scopes), token_type: 'Bearer' };
     return issued({ ...token, expires_in: 3600 });
   }
-  // A refresh keeps the scopes of the original grant unless it asks for fewer (RFC 6749 §6).
   const requested = parseScopes(form.get('scope'));
-  const scopes =
-    grant === 'refresh_token' && requested.length === 0
-      ? scopesOf(form.get('refresh_token') ?? '', REFRESH_TOKEN) ?? []
-      : requested;
+  if (grant === 'refresh_token') {
+    return refresh(scopesOf(form.get('refresh_token') ?? '', REFRESH_TOKEN), requested);
+  }
   return issued({
-    access_token: withScopes(ACCESS_TOKEN, scopes),
+    access_token: withScopes(ACCESS_TOKEN, requested),
     token_type: 'Bearer',
     expires_in: 3600,
-    ...(grant === 'client_credentials' ? {} : { refresh_token: withScopes(REFRESH_TOKEN, scopes) }),
-    ...(scopes.length > 0 ? { scope: scopes.join(' ') } : {}),
+    ...(grant === 'client_credentials'
+      ? {}
+      : { refresh_token: withScopes(REFRESH_TOKEN, requested) }),
+    ...(requested.length > 0 ? { scope: requested.join(' ') } : {}),
   });
 };
