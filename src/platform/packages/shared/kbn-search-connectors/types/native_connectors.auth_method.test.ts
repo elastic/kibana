@@ -30,6 +30,21 @@ describe('Exchange Server and Outlook auth_method configuration', () => {
   const exchangeConfig = NATIVE_CONNECTOR_DEFINITIONS.exchange_server!.configuration;
   const outlookConfig = NATIVE_CONNECTOR_DEFINITIONS.outlook!.configuration;
 
+  it.each([
+    ['exchange_server', exchangeConfig],
+    ['outlook', outlookConfig],
+  ])('uses unique field order values for %s', (_name, config) => {
+    const orders = Object.values(config).map((field) => (field as ConnectorConfigProperties).order);
+    expect(new Set(orders).size).toBe(orders.length);
+  });
+
+  it('keeps document level security as the last Outlook field', () => {
+    const orders = Object.values(outlookConfig).map(
+      (field) => (field as ConnectorConfigProperties).order as number
+    );
+    expect(getField(outlookConfig, 'use_document_level_security').order).toBe(Math.max(...orders));
+  });
+
   it('defaults Exchange Server auth_method to ntlm', () => {
     expect(getField(exchangeConfig, 'auth_method').value).toBe('ntlm');
   });
