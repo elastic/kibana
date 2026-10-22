@@ -11,6 +11,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { ExecutionStatus } from '@kbn/workflows';
+import { WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { WorkflowExecutionFlyout } from './workflow_execution_flyout';
 import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
@@ -445,7 +446,19 @@ describe('WorkflowExecutionFlyout triggered by', () => {
     });
   });
 
-  const renderFlyout = (services = createStartServicesMock()) => {
+  const createServices = ({
+    showExecutor = true,
+    isServerless = false,
+  }: { showExecutor?: boolean; isServerless?: boolean } = {}) => {
+    const services = createStartServicesMock();
+    services.settings.client.get.mockImplementation((key: string, defaultValue?: unknown) =>
+      key === WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID ? showExecutor : defaultValue
+    );
+    services.cloud.isServerlessEnabled = isServerless;
+    return services;
+  };
+
+  const renderFlyout = (services = createServices()) => {
     render(<WorkflowExecutionFlyout executionId="exec-1" onClose={jest.fn()} />, {
       wrapper: getTestProvider({ services }),
     });
@@ -453,7 +466,7 @@ describe('WorkflowExecutionFlyout triggered by', () => {
   };
 
   it('resolves the profile UID to the user display name', async () => {
-    const services = createStartServicesMock();
+    const services = createServices();
     services.userProfile.bulkGet.mockResolvedValue([profile]);
 
     renderFlyout(services);
@@ -471,7 +484,7 @@ describe('WorkflowExecutionFlyout triggered by', () => {
   });
 
   it('keeps the raw UID when the profile cannot be resolved', async () => {
-    const services = createStartServicesMock();
+    const services = createServices();
     services.userProfile.bulkGet.mockResolvedValue([]);
 
     renderFlyout(services);
@@ -482,5 +495,41 @@ describe('WorkflowExecutionFlyout triggered by', () => {
     });
 
     expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).toHaveTextContent(profileUid);
+  });
+
+  it('hides the unresolved UID on serverless, like the execution list', async () => {
+    const services = createServices({ isServerless: true });
+    services.userProfile.bulkGet.mockResolvedValue([]);
+
+    renderFlyout(services);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).not.toHaveTextContent(
+      profileUid
+    );
+    expect(screen.queryByTestId('workflowExecutionFlyoutExecutedByCopy')).not.toBeInTheDocument();
+  });
+
+  it('does not look up profiles nor show the user when the show executor setting is off', async () => {
+    const services = createServices({ showExecutor: false });
+    services.userProfile.bulkGet.mockResolvedValue([profile]);
+
+    renderFlyout(services);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(services.userProfile.bulkGet).not.toHaveBeenCalled();
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).not.toHaveTextContent(
+      profileUid
+    );
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).not.toHaveTextContent(
+      'elastic'
+    );
+    expect(screen.queryByTestId('workflowExecutionFlyoutExecutedByCopy')).not.toBeInTheDocument();
   });
 });

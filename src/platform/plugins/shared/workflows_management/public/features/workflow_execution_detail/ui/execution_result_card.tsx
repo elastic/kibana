@@ -21,9 +21,12 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { ServiceAccountName } from '../../../entities/service_accounts';
 import { getExecutedByLabel, useUserProfilesByUid } from '../../../entities/user_profiles';
+import { useKibana } from '../../../hooks/use_kibana';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
@@ -57,12 +60,20 @@ export const ExecutionResultCard = ({
     [workflowExecution.duration]
   );
   const executedByValue = workflowExecution.executedBy?.trim() || '';
+  const showExecutor = useUiSetting<boolean>(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID, true);
+  const { cloud } = useKibana().services;
+  const showUnresolvedExecutors = !cloud?.isServerlessEnabled;
   const { data: executedByProfiles } = useUserProfilesByUid({
-    enabled: true,
+    enabled: showExecutor,
     uids: executedByValue ? [executedByValue] : [],
   });
-  const executedByDisplay =
-    getExecutedByLabel(executedByProfiles?.get(executedByValue), executedByValue) || '-';
+  const resolvedExecutedBy = showExecutor
+    ? getExecutedByLabel(
+        executedByProfiles?.get(executedByValue),
+        showUnresolvedExecutors ? executedByValue : undefined
+      )
+    : undefined;
+  const executedByDisplay = resolvedExecutedBy || '-';
 
   return (
     <div
@@ -228,7 +239,7 @@ export const ExecutionResultCard = ({
                 </EuiText>
               </EuiToolTip>
             </EuiFlexItem>
-            {executedByValue ? (
+            {resolvedExecutedBy ? (
               <EuiFlexItem grow={false}>
                 <EuiCopy textToCopy={executedByValue}>
                   {(copy) => {
