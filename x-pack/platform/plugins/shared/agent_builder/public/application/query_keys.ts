@@ -23,6 +23,9 @@ export const queryKeys = {
       ['conversations', 'search', { query, agentId: opts.agentId ?? null }] as const,
     byId: (conversationId: string) => ['conversations', conversationId],
   },
+  attachments: {
+    supportedBinaryTypes: ['attachments', 'binary', 'supported_types'] as const,
+  },
   agentProfiles: {
     all: ['agentProfiles'] as const,
     agentAiIndicesList: ['agentProfiles', 'aiIndices'] as const,

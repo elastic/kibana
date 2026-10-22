@@ -52,6 +52,24 @@ const imageAttachment = createVersionedAttachment({
   ],
 });
 
+const binaryAttachment = createVersionedAttachment({
+  id: 'story-binary-attachment',
+  type: AttachmentType.binary,
+  versions: [
+    {
+      version: 1,
+      data: {
+        file_id: 'story-binary-file',
+        name: 'invoice.pdf',
+        mime_type: 'application/pdf',
+        text: 'Hello',
+      },
+      created_at: '2026-09-03T11:17:50.000Z',
+      content_hash: 'story-binary-hash',
+    },
+  ],
+});
+
 const userRef = (attachmentId: string): AttachmentVersionRef => ({
   attachment_id: attachmentId,
   version: 1,
@@ -74,7 +92,7 @@ const meta: Meta<typeof UserMessage> = {
     author: { id: STORYBOOK_CURRENT_USER_ID },
     isPendingCurrentRound: false,
     startedAt: '2026-01-01T10:00:00.000Z',
-    conversationAttachments: [textAttachment, imageAttachment],
+    conversationAttachments: [textAttachment, imageAttachment, binaryAttachment],
   },
 };
 export default meta;
@@ -108,5 +126,28 @@ export const WithoutTextWithImageAttachment: Story = {
   args: {
     input: '',
     attachmentRefs: [userRef(imageAttachment.id)],
+  },
+};
+
+export const WithDocumentAttachment: Story = {
+  args: {
+    input: "[invoice.pdf](binary://invoice.pdf) What's in the PDF?",
+    attachmentRefs: [userRef(binaryAttachment.id)],
+  },
+};
+
+/** The document tile lives in the bubble, so it stays when there is no text. */
+export const WithoutTextWithDocumentAttachment: Story = {
+  args: {
+    input: '',
+    attachmentRefs: [userRef(binaryAttachment.id)],
+  },
+};
+
+export const WithImageAndDocumentAttachments: Story = {
+  args: {
+    input:
+      '[screenshot.png](image://screenshot.png) [invoice.pdf](binary://invoice.pdf) Compare them.',
+    attachmentRefs: [userRef(imageAttachment.id), userRef(binaryAttachment.id)],
   },
 };

@@ -18,10 +18,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import { AttachmentType, type Attachment } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { getTextFileName } from './file_type';
+import { FileAttachmentPill } from './file_attachment_pill';
 import { ThumbnailAttachmentPill } from './thumbnail_attachment_pill';
 
 const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.removeAriaLabel', {
@@ -32,6 +34,7 @@ export interface AttachmentPillProps {
   attachment: Attachment;
   onRemoveAttachment?: () => void;
   isHighlighted?: boolean;
+  isLoading?: boolean;
 }
 
 const DEFAULT_ICON = 'document';
@@ -40,6 +43,7 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
   attachment,
   onRemoveAttachment,
   isHighlighted = false,
+  isLoading = false,
 }) => {
   const { attachmentsService } = useAgentBuilderServices();
   const { euiTheme } = useEuiTheme();
@@ -56,6 +60,20 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
         attachmentId={attachment.id}
         thumbnailUrl={thumbnailUrl}
         label={label}
+        onRemoveAttachment={onRemoveAttachment}
+        isHighlighted={isHighlighted}
+      />
+    );
+  }
+
+  const textFileName = getTextFileName(attachment);
+  if (attachment.type === AttachmentType.binary || textFileName) {
+    return (
+      <FileAttachmentPill
+        attachmentId={attachment.id}
+        name={textFileName ?? label}
+        mimeType={(attachment.data as { mime_type?: string } | undefined)?.mime_type}
+        isLoading={isLoading}
         onRemoveAttachment={onRemoveAttachment}
         isHighlighted={isHighlighted}
       />

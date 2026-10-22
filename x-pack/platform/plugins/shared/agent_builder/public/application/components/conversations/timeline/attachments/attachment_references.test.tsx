@@ -19,6 +19,7 @@ import {
   AttachmentType,
 } from '@kbn/agent-builder-common/attachments';
 import { AttachmentReferences } from './attachment_references';
+import type { ResolvedReference } from './use_resolved_attachment_references';
 
 // The pill styles read the theme from Emotion context, so renders need a provider.
 const render = (ui: React.ReactElement) => rtlRender(<EuiThemeProvider>{ui}</EuiThemeProvider>);
@@ -261,7 +262,9 @@ describe('AttachmentReferences', () => {
     expect(pills).toHaveLength(1);
   });
 
-  describe('excludeTypes', () => {
+  describe('isExcluded', () => {
+    const isImage = ({ attachment }: ResolvedReference) => attachment.type === AttachmentType.image;
+
     const makeImageVersioned = (id: string, description?: string): VersionedAttachment => ({
       id,
       type: AttachmentType.image,
@@ -271,12 +274,12 @@ describe('AttachmentReferences', () => {
       ...(description !== undefined ? { description } : {}),
     });
 
-    it('hides image-type refs when excludeTypes includes image', () => {
+    it('hides image-type refs when isExcluded matches images', () => {
       const { container } = render(
         <AttachmentReferences
           attachmentRefs={[makeRef('img1')]}
           conversationAttachments={[makeImageVersioned('img1', 'photo.png')]}
-          excludeTypes={[AttachmentType.image]}
+          isExcluded={isImage}
         />
       );
       expect(container.firstChild).toBeNull();
@@ -287,14 +290,14 @@ describe('AttachmentReferences', () => {
         <AttachmentReferences
           attachmentRefs={[makeRef('img1')]}
           conversationAttachments={[makeImageVersioned('img1', 'photo.png')]}
-          excludeTypes={[AttachmentType.image]}
+          isExcluded={isImage}
         />
       );
       expect(container.firstChild).toBeNull();
       expect(screen.queryByText('Added')).not.toBeInTheDocument();
     });
 
-    it('still renders non-image refs when excludeTypes includes image', () => {
+    it('still renders non-image refs when isExcluded matches images', () => {
       render(
         <AttachmentReferences
           attachmentRefs={[makeRef('img1'), makeRef('txt1')]}
@@ -302,7 +305,7 @@ describe('AttachmentReferences', () => {
             makeImageVersioned('img1', 'photo.png'),
             makeVersioned('txt1', 'Text Label'),
           ]}
-          excludeTypes={[AttachmentType.image]}
+          isExcluded={isImage}
         />
       );
       expect(screen.getByText('Added')).toBeInTheDocument();
@@ -310,7 +313,7 @@ describe('AttachmentReferences', () => {
       expect(screen.queryByText('photo.png')).not.toBeInTheDocument();
     });
 
-    it('renders all refs when excludeTypes is empty', () => {
+    it('renders all refs when nothing is excluded', () => {
       render(
         <AttachmentReferences
           attachmentRefs={[makeRef('img1'), makeRef('txt1')]}
@@ -318,7 +321,6 @@ describe('AttachmentReferences', () => {
             makeImageVersioned('img1', 'photo.png'),
             makeVersioned('txt1', 'Text Label'),
           ]}
-          excludeTypes={[]}
         />
       );
       expect(screen.getByText('Added')).toBeInTheDocument();

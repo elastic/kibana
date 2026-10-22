@@ -12,7 +12,10 @@ import { useCurrentUser } from '../../../../hooks/use_current_user';
 import { useUserProfiles } from '../../../../hooks/use_user_profiles';
 import { UserMessage } from './user_message';
 import { ResponseActions } from '../response/response_actions';
-import { UserMessageImages } from './user_message_images';
+import { UserMessageAttachmentTiles } from './user_message_attachment_tiles';
+import { isTileAttachment, useUserMessageFiles } from './use_user_message_files';
+import { AttachmentReferences } from '../attachments/attachment_references';
+import type { UserMessageFile } from './use_user_message_files';
 import { useUserMessageThumbnails } from './use_user_message_thumbnails';
 import type { UserMessageThumbnail } from './use_user_message_thumbnails';
 
@@ -29,24 +32,27 @@ jest.mock('../response/response_actions', () => ({
 }));
 
 jest.mock('../attachments/attachment_references', () => ({
-  AttachmentReferences: () => <div data-test-subj="agentBuilderUserMessageAttachments" />,
+  AttachmentReferences: jest.fn(() => <div data-test-subj="agentBuilderUserMessageAttachments" />),
 }));
 
 jest.mock('../../../../context/conversation/conversation_context', () => ({
   useConversationContext: jest.fn(() => ({ isEmbeddedContext: false })),
 }));
 
-jest.mock('./user_message_images', () => ({
-  UserMessageImages: jest.fn(() => <div data-test-subj="agentBuilderUserMessageImages" />),
+jest.mock('./user_message_attachment_tiles', () => ({
+  UserMessageAttachmentTiles: jest.fn(() => <div data-test-subj="agentBuilderUserMessageTiles" />),
 }));
 
 jest.mock('./use_user_message_thumbnails');
+jest.mock('./use_user_message_files');
 
 const mockUseCurrentUser = jest.mocked(useCurrentUser);
 const mockUseUserMessageThumbnails = jest.mocked(useUserMessageThumbnails);
+const mockUseUserMessageFiles = jest.mocked(useUserMessageFiles);
 const mockUseUserProfiles = jest.mocked(useUserProfiles);
 const MockResponseActions = jest.mocked(ResponseActions);
-const MockUserMessageImages = jest.mocked(UserMessageImages);
+const MockUserMessageAttachmentTiles = jest.mocked(UserMessageAttachmentTiles);
+const MockAttachmentReferences = jest.mocked(AttachmentReferences);
 
 const thumbnail: UserMessageThumbnail = {
   key: 'img1-v1',
@@ -54,6 +60,13 @@ const thumbnail: UserMessageThumbnail = {
   thumbnailUrl: 'data:image/png;base64,abc',
   label: 'photo.png',
   name: 'photo.png',
+};
+
+const file: UserMessageFile = {
+  key: 'doc1-v1',
+  attachmentId: 'doc1',
+  name: 'notes.md',
+  mimeType: 'text/markdown',
 };
 
 const currentUser = {
@@ -73,8 +86,9 @@ const currentUser = {
 describe('UserMessage', () => {
   beforeEach(() => {
     MockResponseActions.mockClear();
-    MockUserMessageImages.mockClear();
+    MockUserMessageAttachmentTiles.mockClear();
     mockUseUserMessageThumbnails.mockReturnValue([]);
+    mockUseUserMessageFiles.mockReturnValue([]);
     mockUseCurrentUser.mockReturnValue({
       currentUser,
       isLoading: false,
@@ -123,7 +137,7 @@ describe('UserMessage', () => {
     expect(avatar.nextElementSibling).toBe(content);
   });
 
-  it('renders UserMessageImages inside the panel when attachments are present', () => {
+  it('renders UserMessageAttachmentTiles inside the panel when attachments are present', () => {
     render(
       <UserMessage
         input="Show me the preview"
@@ -133,10 +147,10 @@ describe('UserMessage', () => {
       />
     );
 
-    expect(screen.getByTestId('agentBuilderUserMessageImages')).toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderUserMessageTiles')).toBeInTheDocument();
   });
 
-  it('passes hoveredImageName=null initially to UserMessageImages', () => {
+  it('passes hoveredAttachmentName=null initially to UserMessageAttachmentTiles', () => {
     render(
       <UserMessage
         input="hello"
@@ -146,8 +160,8 @@ describe('UserMessage', () => {
       />
     );
 
-    const [props] = MockUserMessageImages.mock.calls[0];
-    expect(props.hoveredImageName).toBeNull();
+    const [props] = MockUserMessageAttachmentTiles.mock.calls[0];
+    expect(props.hoveredAttachmentName).toBeNull();
   });
 
   describe('when the message has no text', () => {
@@ -168,7 +182,7 @@ describe('UserMessage', () => {
       renderMessage(input);
 
       expect(screen.queryByLabelText('User input')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('agentBuilderUserMessageImages')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('agentBuilderUserMessageTiles')).not.toBeInTheDocument();
       expect(screen.queryByTestId('agentBuilderUserMessageActions')).not.toBeInTheDocument();
     });
 
@@ -185,12 +199,50 @@ describe('UserMessage', () => {
       renderMessage('');
 
       expect(screen.getByLabelText('User input')).toBeInTheDocument();
-      expect(screen.getByTestId('agentBuilderUserMessageImages')).toBeInTheDocument();
+      expect(screen.getByTestId('agentBuilderUserMessageTiles')).toBeInTheDocument();
+      expect(screen.queryByTestId('agentBuilderUserMessageActions')).not.toBeInTheDocument();
+    });
+
+    it('keeps the bubble with the file tile when there is a document', () => {
+      mockUseUserMessageFiles.mockReturnValue([file]);
+
+      renderMessage('');
+
+      expect(screen.getByLabelText('User input')).toBeInTheDocument();
+      expect(screen.getByTestId('agentBuilderUserMessageTiles')).toBeInTheDocument();
       expect(screen.queryByTestId('agentBuilderUserMessageActions')).not.toBeInTheDocument();
     });
   });
 
-  it('passes the thumbnails to UserMessageImages', () => {
+  it('keeps the attachments that show as tiles out of the references list', () => {
+    render(
+      <UserMessage
+        input="hello"
+        isPendingCurrentRound={false}
+        startedAt="2026-01-01T00:00:00.000Z"
+      />
+    );
+
+    const [props] = MockAttachmentReferences.mock.calls[0];
+    expect(props.isExcluded).toBe(isTileAttachment);
+  });
+
+  it('passes the files to UserMessageAttachmentTiles', () => {
+    mockUseUserMessageFiles.mockReturnValue([file]);
+
+    render(
+      <UserMessage
+        input="hello"
+        isPendingCurrentRound={false}
+        startedAt="2026-01-01T00:00:00.000Z"
+      />
+    );
+
+    const [props] = MockUserMessageAttachmentTiles.mock.calls[0];
+    expect(props.files).toEqual([file]);
+  });
+
+  it('passes the thumbnails to UserMessageAttachmentTiles', () => {
     mockUseUserMessageThumbnails.mockReturnValue([thumbnail]);
 
     render(
@@ -201,7 +253,7 @@ describe('UserMessage', () => {
       />
     );
 
-    const [props] = MockUserMessageImages.mock.calls[0];
+    const [props] = MockUserMessageAttachmentTiles.mock.calls[0];
     expect(props.thumbnails).toEqual([thumbnail]);
   });
 });

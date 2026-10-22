@@ -7,14 +7,15 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { FileMimeType } from '../file_type';
 import { MessageEditor } from './message_editor';
 import { createTextFragment, NON_BREAKING_SPACE } from './utils';
 import type { MessageEditorController, MessageEditorInstance } from './use_message_editor';
 import { CommandId } from './command_menu';
 import {
-  createImagePlaceholderElement,
-  IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE,
-} from './image_placeholder';
+  createAttachmentPlaceholderElement,
+  ATTACHMENT_PLACEHOLDER_REMOVE_ATTRIBUTE,
+} from './attachment_placeholder';
 import type {
   CommandMenuComponentProps,
   CommandMenuHandle,
@@ -498,7 +499,278 @@ describe('MessageEditor', () => {
     fireEvent.paste(editor, { clipboardData: dataTransfer });
 
     expect(onPasteFile).toHaveBeenCalledWith(pngFile);
-    expect(editor.querySelector('[data-image-placeholder]')).not.toBeNull();
+    expect(editor.querySelector('[data-attachment-placeholder]')).not.toBeNull();
+  });
+
+  describe('pasting a file', () => {
+    const PDF_FILE = new File([new Uint8Array(4)], 'invoice.pdf', { type: 'application/pdf' });
+
+    const pasteFiles = ({
+      acceptedFileMimeTypes,
+      onPasteFile,
+      onUnsupportedFile,
+      files,
+    }: {
+      acceptedFileMimeTypes?: FileMimeType[];
+      onPasteFile: jest.Mock;
+      onUnsupportedFile?: jest.Mock;
+      files: File[];
+    }) => {
+      const { messageEditor } = createMockMessageEditor();
+      render(
+        <MessageEditor
+          messageEditor={messageEditor}
+          onSubmit={mockOnSubmit}
+          onPasteFile={onPasteFile}
+          onUnsupportedFile={onUnsupportedFile}
+          acceptedFileMimeTypes={acceptedFileMimeTypes}
+          data-test-subj="messageEditor"
+        />
+      );
+      const editor = screen.getByTestId('messageEditor');
+      editor.focus();
+      const range = document.createRange();
+      range.setStart(editor, 0);
+      range.collapse(true);
+      const sel = window.getSelection()!;
+      sel.removeAllRanges();
+      sel.addRange(range);
+
+      fireEvent.paste(editor, {
+        clipboardData: {
+          getData: jest.fn().mockReturnValue(''),
+          items: files.map((file) => ({ kind: 'file', type: file.type, getAsFile: () => file })),
+        },
+      });
+      return { editor };
+    };
+
+    const pasteFile = ({
+      file = PDF_FILE,
+      ...params
+    }: {
+      acceptedFileMimeTypes?: FileMimeType[];
+      onPasteFile: jest.Mock;
+      onUnsupportedFile?: jest.Mock;
+      file?: File;
+    }) => ({ ...pasteFiles({ ...params, files: [file] }), pastedFile: file });
+
+    it('calls onPasteFile and inserts a binary chip when the type is accepted', () => {
+      const onPasteFile = jest.fn().mockReturnValue('invoice.pdf');
+
+      const { editor, pastedFile } = pasteFile({
+        acceptedFileMimeTypes: ['application/pdf'],
+        onPasteFile,
+      });
+
+      expect(onPasteFile).toHaveBeenCalledWith(pastedFile);
+      const chip = editor.querySelector('[data-attachment-placeholder]');
+      expect(chip).not.toBeNull();
+      expect(chip?.getAttribute('data-placeholder-kind')).toBe('binary');
+    });
+
+    it('inserts a text chip for a Markdown file with an empty type', () => {
+      const onPasteFile = jest.fn().mockReturnValue('notes.md');
+      const file = new File(['# Notes'], 'notes.md', { type: '' });
+
+      const { editor } = pasteFile({
+        acceptedFileMimeTypes: ['text/markdown'],
+        onPasteFile,
+        file,
+      });
+
+      expect(onPasteFile).toHaveBeenCalledWith(file);
+      expect(
+        editor.querySelector('[data-attachment-placeholder]')?.getAttribute('data-placeholder-kind')
+      ).toBe('text');
+    });
+
+    it.each([
+      ['notes.txt', 'text/plain'],
+      ['data.csv', 'text/csv'],
+    ] as const)('inserts a text chip for %s', (name, type) => {
+      const onPasteFile = jest.fn().mockReturnValue(name);
+
+      const { editor } = pasteFile({
+        acceptedFileMimeTypes: [type],
+        onPasteFile,
+        file: new File(['a,b'], name, { type: '' }),
+      });
+
+      expect(
+        editor.querySelector('[data-attachment-placeholder]')?.getAttribute('data-placeholder-kind')
+      ).toBe('text');
+    });
+
+    it('inserts no chip when onPasteFile refuses the file', () => {
+      const onPasteFile = jest.fn().mockReturnValue(undefined);
+
+      const { editor } = pasteFile({
+        acceptedFileMimeTypes: ['application/pdf'],
+        onPasteFile,
+      });
+
+      expect(onPasteFile).toHaveBeenCalled();
+      expect(editor.querySelector('[data-attachment-placeholder]')).toBeNull();
+    });
+
+    it('ignores the file when no file type is accepted', () => {
+      const onPasteFile = jest.fn().mockReturnValue('invoice.pdf');
+
+      const { editor } = pasteFile({ onPasteFile });
+
+      expect(onPasteFile).not.toHaveBeenCalled();
+      expect(editor.querySelector('[data-attachment-placeholder]')).toBeNull();
+    });
+
+    it('ignores a PDF when only Markdown and text are accepted', () => {
+      const onPasteFile = jest.fn().mockReturnValue('invoice.pdf');
+      const onUnsupportedFile = jest.fn();
+
+      const { editor } = pasteFile({
+        acceptedFileMimeTypes: ['text/markdown', 'text/plain'],
+        onPasteFile,
+        onUnsupportedFile,
+      });
+
+      expect(onPasteFile).not.toHaveBeenCalled();
+      expect(onUnsupportedFile).toHaveBeenCalledTimes(1);
+      expect(editor.querySelector('[data-attachment-placeholder]')).toBeNull();
+    });
+
+    it('calls onUnsupportedFile for a file type that is not accepted', () => {
+      const onPasteFile = jest.fn();
+      const onUnsupportedFile = jest.fn();
+
+      const { editor } = pasteFile({
+        acceptedFileMimeTypes: ['text/markdown'],
+        onPasteFile,
+        onUnsupportedFile,
+        file: new File(['x'], 'report.docx', { type: '' }),
+      });
+
+      expect(onUnsupportedFile).toHaveBeenCalledTimes(1);
+      expect(onUnsupportedFile).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'report.docx' })
+      );
+      expect(onPasteFile).not.toHaveBeenCalled();
+      expect(editor.querySelector('[data-attachment-placeholder]')).toBeNull();
+    });
+
+    it('does not call onUnsupportedFile for an accepted file', () => {
+      const onUnsupportedFile = jest.fn();
+
+      pasteFile({
+        acceptedFileMimeTypes: ['application/pdf'],
+        onPasteFile: jest.fn().mockReturnValue('invoice.pdf'),
+        onUnsupportedFile,
+      });
+
+      expect(onUnsupportedFile).not.toHaveBeenCalled();
+    });
+
+    it('inserts a chip for every accepted file in one paste', () => {
+      const onPasteFile = jest.fn((file: File) => file.name);
+
+      const { editor } = pasteFiles({
+        acceptedFileMimeTypes: ['text/markdown', 'text/plain'],
+        onPasteFile,
+        files: [
+          new File(['a'], 'a.md', { type: '' }),
+          new File(['b'], 'b.txt', { type: 'text/plain' }),
+        ],
+      });
+
+      expect(onPasteFile).toHaveBeenCalledTimes(2);
+      expect(editor.querySelectorAll('[data-attachment-placeholder]')).toHaveLength(2);
+    });
+
+    it('inserts the accepted files before an unsupported one, then stops and reports it', () => {
+      const onPasteFile = jest.fn((file: File) => file.name);
+      const onUnsupportedFile = jest.fn();
+
+      const { editor } = pasteFiles({
+        acceptedFileMimeTypes: ['text/markdown', 'text/plain'],
+        onPasteFile,
+        onUnsupportedFile,
+        files: [
+          new File(['a'], 'a.md', { type: '' }),
+          new File(['x'], 'report.docx', { type: '' }),
+          new File(['b'], 'b.txt', { type: 'text/plain' }),
+        ],
+      });
+
+      expect(onPasteFile).toHaveBeenCalledTimes(1);
+      expect(onUnsupportedFile).toHaveBeenCalledTimes(1);
+      expect(editor.querySelectorAll('[data-attachment-placeholder]')).toHaveLength(1);
+    });
+
+    it('stops pasting after onPasteFile refuses a file', () => {
+      const onPasteFile = jest.fn().mockReturnValue(undefined);
+
+      pasteFiles({
+        acceptedFileMimeTypes: ['text/markdown'],
+        onPasteFile,
+        files: [new File(['a'], 'a.md', { type: '' }), new File(['b'], 'b.md', { type: '' })],
+      });
+
+      expect(onPasteFile).toHaveBeenCalledTimes(1);
+    });
+
+    it('still accepts a Markdown file when only Markdown and text are accepted', () => {
+      const onPasteFile = jest.fn().mockReturnValue('notes.md');
+
+      pasteFile({
+        acceptedFileMimeTypes: ['text/markdown', 'text/plain'],
+        onPasteFile,
+        file: new File(['# Notes'], 'notes.md', { type: 'text/markdown' }),
+      });
+
+      expect(onPasteFile).toHaveBeenCalled();
+    });
+
+    it('ignores a file type that is not supported', () => {
+      const onPasteFile = jest.fn().mockReturnValue('report.docx');
+      const file = new File([new Uint8Array(4)], 'report.docx', {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      });
+
+      const { editor } = pasteFile({
+        acceptedFileMimeTypes: ['application/pdf', 'text/markdown', 'text/plain'],
+        onPasteFile,
+        file,
+      });
+
+      expect(onPasteFile).not.toHaveBeenCalled();
+      expect(editor.querySelector('[data-attachment-placeholder]')).toBeNull();
+    });
+
+    it('marks a binary chip as uploading from uploadingNames', () => {
+      const { messageEditor } = createMockMessageEditor();
+      const { rerender } = render(
+        <MessageEditor
+          messageEditor={messageEditor}
+          onSubmit={mockOnSubmit}
+          data-test-subj="messageEditor"
+        />
+      );
+      const editor = screen.getByTestId('messageEditor');
+      editor.appendChild(createAttachmentPlaceholderElement('invoice.pdf', 'binary'));
+
+      rerender(
+        <MessageEditor
+          messageEditor={messageEditor}
+          onSubmit={mockOnSubmit}
+          uploadingNames={new Set(['invoice.pdf'])}
+          data-test-subj="messageEditor"
+        />
+      );
+
+      expect(editor.querySelector('[data-attachment-placeholder]')).toHaveAttribute(
+        'data-uploading',
+        'true'
+      );
+    });
   });
 
   it('marks a pasted placeholder chip as uploading immediately', () => {
@@ -531,7 +803,7 @@ describe('MessageEditor', () => {
       },
     });
 
-    const chip = editor.querySelector('[data-image-placeholder]') as HTMLElement;
+    const chip = editor.querySelector('[data-attachment-placeholder]') as HTMLElement;
     expect(chip).not.toBeNull();
     expect(chip.getAttribute('data-uploading')).toBe('true');
   });
@@ -577,7 +849,7 @@ describe('MessageEditor', () => {
       />
     );
 
-    const chip = editor.querySelector('[data-image-placeholder]') as HTMLElement;
+    const chip = editor.querySelector('[data-attachment-placeholder]') as HTMLElement;
     expect(chip).not.toBeNull();
     expect(chip.getAttribute('data-uploading')).toBeNull();
   });
@@ -611,7 +883,7 @@ describe('MessageEditor', () => {
       },
     });
 
-    const chip = editor.querySelector('[data-image-placeholder]') as HTMLElement;
+    const chip = editor.querySelector('[data-attachment-placeholder]') as HTMLElement;
     expect(chip).not.toBeNull();
 
     const spaceNode = chip.nextSibling;
@@ -648,7 +920,7 @@ describe('MessageEditor', () => {
 
     fireEvent.paste(editor, { clipboardData: dataTransfer });
 
-    expect(editor.querySelector('[data-image-placeholder]')).toBeNull();
+    expect(editor.querySelector('[data-attachment-placeholder]')).toBeNull();
   });
 
   it('plain-text paste still works when an image paste handler is registered', () => {
@@ -695,18 +967,18 @@ describe('MessageEditor', () => {
     );
 
     const editor = screen.getByTestId('messageEditor');
-    const chip = createImagePlaceholderElement('test.png');
+    const chip = createAttachmentPlaceholderElement('test.png');
     editor.appendChild(chip);
-    expect(editor.querySelector('[data-image-placeholder]')).not.toBeNull();
+    expect(editor.querySelector('[data-attachment-placeholder]')).not.toBeNull();
 
     const crossIcon = chip.querySelector(
-      `[${IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE}]`
+      `[${ATTACHMENT_PLACEHOLDER_REMOVE_ATTRIBUTE}]`
     ) as SVGSVGElement;
     expect(crossIcon).not.toBeNull();
 
     fireEvent.mouseDown(crossIcon);
 
-    expect(editor.querySelector('[data-image-placeholder]')).toBeNull();
+    expect(editor.querySelector('[data-attachment-placeholder]')).toBeNull();
     expect(messageEditor.onChange).toHaveBeenCalled();
     expect(onAfterInput).toHaveBeenCalled();
   });

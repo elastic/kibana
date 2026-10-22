@@ -14,7 +14,11 @@ import {
 } from '@elastic/eui';
 import type { PluggableList } from 'unified';
 import { sortedCommandDefinitions } from '../../conversation_input/message_editor/command_menu';
-import { IMAGE_ATTACHMENT_SCHEME } from '../../conversation_input/message_editor/image_placeholder';
+import {
+  IMAGE_ATTACHMENT_SCHEME,
+  BINARY_ATTACHMENT_SCHEME,
+  TEXT_ATTACHMENT_SCHEME,
+} from '../../conversation_input/message_editor/attachment_placeholder';
 import {
   createConversationMarkdownComponents,
   esqlLanguagePlugin,
@@ -23,6 +27,8 @@ import {
   useUserMessageTextStyles,
   type UserMessageTextStyles,
 } from './use_user_message_text_styles';
+
+const BADGE_NAME_TOOLTIP_MIN_LENGTH = 20;
 
 // Badges are markdown links, e.g. `[/Summarize](skill://skill-1)`. EUI's parser drops links that
 // are not http(s)/mailto, so badge schemes must be allow-listed.
@@ -36,6 +42,8 @@ export const ALLOWED_LINK_PROTOCOLS = [
   'mailto:',
   ...sortedCommandDefinitions.map((definition) => `${definition.scheme}:`),
   `${IMAGE_ATTACHMENT_SCHEME}:`,
+  `${BINARY_ATTACHMENT_SCHEME}:`,
+  `${TEXT_ATTACHMENT_SCHEME}:`,
 ];
 
 export const parseSchemeAndPath = (href: string): { scheme: string; path: string } | undefined => {
@@ -65,7 +73,7 @@ export const escapeCommandBadgeLabels = (text: string): string =>
   );
 
 interface UseUserMessageMarkdownPluginsArgs {
-  onHoverImage?: (name: string | null) => void;
+  onHoverAttachment?: (name: string | null) => void;
   onLinkClick: (href: string, e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
@@ -77,7 +85,7 @@ interface UserMessageMarkdownPlugins {
 
 /** Markdown plugins for user messages. Badge links render as badges. */
 export const useUserMessageMarkdownPlugins = ({
-  onHoverImage,
+  onHoverAttachment,
   onLinkClick,
 }: UseUserMessageMarkdownPluginsArgs): UserMessageMarkdownPlugins => {
   const styles = useUserMessageTextStyles();
@@ -102,22 +110,36 @@ export const useUserMessageMarkdownPlugins = ({
         const { href, children } = props;
         const parsed = href ? parseSchemeAndPath(href) : undefined;
 
-        if (parsed?.scheme === IMAGE_ATTACHMENT_SCHEME) {
+        if (
+          parsed?.scheme === IMAGE_ATTACHMENT_SCHEME ||
+          parsed?.scheme === BINARY_ATTACHMENT_SCHEME ||
+          parsed?.scheme === TEXT_ATTACHMENT_SCHEME
+        ) {
           const name = decodeBadgeName(parsed.path);
-          return (
-            <EuiToolTip content={name} disableScreenReaderOutput>
-              <span
-                css={styles.imageBadgeWrapper}
-                tabIndex={0}
-                onMouseEnter={onHoverImage ? () => onHoverImage(name) : undefined}
-                onMouseLeave={onHoverImage ? () => onHoverImage(null) : undefined}
-              >
-                <EuiIcon type="image" size="s" aria-hidden={true} />
-                <span className="image-badge-label" css={styles.imageBadgeInner}>
-                  {name}
-                </span>
+          const badge = (
+            <span
+              css={styles.imageBadgeWrapper}
+              tabIndex={0}
+              onMouseEnter={onHoverAttachment ? () => onHoverAttachment(name) : undefined}
+              onMouseLeave={onHoverAttachment ? () => onHoverAttachment(null) : undefined}
+            >
+              <EuiIcon
+                type={parsed.scheme === IMAGE_ATTACHMENT_SCHEME ? 'image' : 'document'}
+                size="s"
+                aria-hidden={true}
+              />
+              <span className="image-badge-label" css={styles.imageBadgeInner}>
+                {name}
               </span>
+            </span>
+          );
+          // The badge cuts long names, so only those need a tooltip with the full name.
+          return name.length > BADGE_NAME_TOOLTIP_MIN_LENGTH ? (
+            <EuiToolTip content={name} disableScreenReaderOutput>
+              {badge}
             </EuiToolTip>
+          ) : (
+            badge
           );
         }
 
@@ -142,7 +164,7 @@ export const useUserMessageMarkdownPlugins = ({
         [rehypeToReactPlugin, rehypeToReactOptions],
       ] as PluggableList,
     };
-  }, [styles, onHoverImage, onLinkClick]);
+  }, [styles, onHoverAttachment, onLinkClick]);
 
   return { parsingPluginList, processingPluginList, styles };
 };

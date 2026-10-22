@@ -8,7 +8,7 @@
 import { deserializeInputSegments } from './command_badge_serializer';
 import { serializeEditorContent, encodeImageName } from '../serialize';
 import { createCommandBadgeElement } from './create_badge_element';
-import { createImagePlaceholderElement } from '../image_placeholder';
+import { createAttachmentPlaceholderElement } from '../attachment_placeholder';
 import { CommandId } from '../command_menu/types';
 
 describe('serializeEditorContent', () => {
@@ -130,23 +130,39 @@ describe('serializeEditorContent', () => {
 
   it('serializes an image placeholder element', () => {
     const div = document.createElement('div');
-    div.appendChild(createImagePlaceholderElement('photo.png'));
+    div.appendChild(createAttachmentPlaceholderElement('photo.png'));
 
     expect(serializeEditorContent(div)).toBe('[photo.png](image://photo.png)');
   });
 
   it('serializes an image placeholder with special characters in name', () => {
     const div = document.createElement('div');
-    div.appendChild(createImagePlaceholderElement('Screenshot (1).png'));
+    div.appendChild(createAttachmentPlaceholderElement('Screenshot (1).png'));
 
     expect(serializeEditorContent(div)).toBe(
       '[Screenshot (1).png](image://Screenshot%20%281%29.png)'
     );
   });
 
+  it('serializes a text file placeholder element with the text scheme', () => {
+    const div = document.createElement('div');
+    div.appendChild(createAttachmentPlaceholderElement('my notes (1).md', 'text'));
+
+    expect(serializeEditorContent(div)).toBe('[my notes (1).md](text://my%20notes%20%281%29.md)');
+  });
+
+  it('serializes a binary placeholder element with the binary scheme', () => {
+    const div = document.createElement('div');
+    div.appendChild(createAttachmentPlaceholderElement('My invoice (1).pdf', 'binary'));
+
+    expect(serializeEditorContent(div)).toBe(
+      '[My invoice (1).pdf](binary://My%20invoice%20%281%29.pdf)'
+    );
+  });
+
   it('strips brackets from image display name', () => {
     const div = document.createElement('div');
-    div.appendChild(createImagePlaceholderElement('file[1].png'));
+    div.appendChild(createAttachmentPlaceholderElement('file[1].png'));
 
     expect(serializeEditorContent(div)).toBe('[file1.png](image://file%5B1%5D.png)');
   });
@@ -287,6 +303,30 @@ describe('deserializeInputSegments', () => {
     const segments = deserializeInputSegments('[photo.png](image://photo.png)');
 
     expect(segments).toEqual([{ type: 'image', name: 'photo.png' }]);
+  });
+
+  it('parses a text file segment', () => {
+    const segments = deserializeInputSegments('[my notes.md](text://my%20notes.md)');
+
+    expect(segments).toEqual([{ type: 'text_file', name: 'my notes.md' }]);
+  });
+
+  it('preserves a text file link with malformed percent-encoding as text', () => {
+    const segments = deserializeInputSegments('[x](text://bad%.md)');
+
+    expect(segments).toEqual([{ type: 'text', value: '[x](text://bad%.md)' }]);
+  });
+
+  it('parses a binary segment', () => {
+    const segments = deserializeInputSegments('[My invoice.pdf](binary://My%20invoice.pdf)');
+
+    expect(segments).toEqual([{ type: 'binary', name: 'My invoice.pdf' }]);
+  });
+
+  it('preserves a binary link with malformed percent-encoding as text', () => {
+    const segments = deserializeInputSegments('[x](binary://bad%.pdf)');
+
+    expect(segments).toEqual([{ type: 'text', value: '[x](binary://bad%.pdf)' }]);
   });
 
   it('decodes percent-encoded image names', () => {

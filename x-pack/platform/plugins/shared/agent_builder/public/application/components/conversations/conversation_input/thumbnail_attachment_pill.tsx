@@ -6,19 +6,8 @@
  */
 
 import { css } from '@emotion/react';
-import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
-import { getEbtProps } from '@kbn/ebt-click';
-import { ATTACHMENT_PILL_WIDTH, ATTACHMENT_PILL_HEIGHT } from './image_upload_styles';
-
-const removeAriaLabel = i18n.translate(
-  'xpack.agentBuilder.thumbnailAttachmentPill.removeAriaLabel',
-  {
-    defaultMessage: 'Remove attachment',
-  }
-);
+import React from 'react';
+import { AttachmentTile } from './attachment_tile';
 
 export interface ThumbnailAttachmentPillProps {
   /** Attachment id — used for the data-test-subj selector. */
@@ -37,90 +26,21 @@ export const ThumbnailAttachmentPill: React.FC<ThumbnailAttachmentPillProps> = (
   label,
   onRemoveAttachment,
   isHighlighted = false,
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const [isHovered, setIsHovered] = useState(false);
-  const canRemoveAttachment = Boolean(onRemoveAttachment);
-
-  return (
-    <div
+}) => (
+  <AttachmentTile
+    attachmentId={attachmentId}
+    onRemoveAttachment={onRemoveAttachment}
+    isHighlighted={isHighlighted}
+  >
+    <img
+      src={thumbnailUrl}
+      alt={label}
       css={css`
-        position: relative;
-        width: ${ATTACHMENT_PILL_WIDTH}px;
-        height: ${ATTACHMENT_PILL_HEIGHT}px;
-        aspect-ratio: ${ATTACHMENT_PILL_WIDTH} / ${ATTACHMENT_PILL_HEIGHT};
-        border-radius: ${euiTheme.size.s};
-        background-color: ${euiTheme.colors.backgroundBaseSubdued};
-        box-shadow: 0 0 0 ${euiTheme.border.width.thin}
-          ${isHighlighted
-            ? euiTheme.colors.borderStrongPrimary
-            : canRemoveAttachment && isHovered
-            ? euiTheme.colors.borderBasePrimary
-            : euiTheme.colors.borderBaseSubdued};
-        overflow: hidden;
-        flex-shrink: 0;
-
-        .agentBuilderThumbnailRemoveButton {
-          opacity: 0;
-        }
-        &:hover .agentBuilderThumbnailRemoveButton,
-        &:focus-within .agentBuilderThumbnailRemoveButton {
-          opacity: 1;
-        }
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
       `}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      data-test-subj={`agentBuilderAttachmentPill-${attachmentId}`}
-    >
-      <img
-        src={thumbnailUrl}
-        alt={label}
-        css={css`
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        `}
-      />
-      <div
-        css={css`
-          position: absolute;
-          inset: 0;
-          background-color: ${euiTheme.colors.backgroundLightPrimary};
-          opacity: ${canRemoveAttachment && isHovered ? 0.75 : 0};
-          pointer-events: none;
-        `}
-      />
-      {canRemoveAttachment && (
-        <EuiButtonIcon
-          iconType="cross"
-          size="s"
-          className="agentBuilderThumbnailRemoveButton"
-          css={css`
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: ${euiTheme.size.l};
-            height: ${euiTheme.size.l};
-            border-radius: ${euiTheme.border.radius.small};
-            color: ${euiTheme.colors.textPrimary};
-            &:focus {
-              opacity: 1;
-            }
-            &::before {
-              display: none;
-            }
-          `}
-          aria-label={removeAriaLabel}
-          onClick={onRemoveAttachment}
-          {...getEbtProps({
-            element: AGENT_BUILDER_UI_EBT.element.pageContent,
-            action: AGENT_BUILDER_UI_EBT.action.conversation.REMOVE_ATTACHMENT,
-            detail: 'conversation',
-          })}
-        />
-      )}
-    </div>
-  );
-};
+    />
+  </AttachmentTile>
+);

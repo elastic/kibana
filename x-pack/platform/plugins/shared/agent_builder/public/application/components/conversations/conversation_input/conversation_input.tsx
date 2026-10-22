@@ -49,7 +49,7 @@ import { useToasts } from '../../../hooks/use_toasts';
 import { InputActions } from './input_actions';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
-import { useImageUpload } from './use_image_upload';
+import { useAttachmentUploads } from './use_attachment_uploads';
 
 const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.container.label', {
   defaultMessage: 'Message input form',
@@ -253,7 +253,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   onEditorFocus,
   onSubmitOverride,
 }) => {
-  const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
+  const [hoveredAttachmentName, setHoveredAttachmentName] = useState<string | null>(null);
 
   const { isResponseLoading } = useConversationStream();
   const { isFetched } = useAgentBuilderAgents();
@@ -324,15 +324,24 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     autoSendInitialMessage,
     resetInitialMessage,
   } = useConversationContext();
-  const { submitMessage, isCreatingConversation } = useSubmitMessage();
+  const { submitMessage, createConversation, isCreatingConversation } = useSubmitMessage();
   const { triggerMode, setTriggerMode, isSelectable: isTriggerModeSelectable } = useTriggerMode();
   const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
 
-  const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
-    useImageUpload({
-      addErrorToast,
-      messageEditorController,
-    });
+  const {
+    uploadingNames,
+    loadingFiles,
+    uploadingChipNames,
+    isUploading,
+    acceptedFileMimeTypes,
+    pendingConversationId,
+    handlePasteFile,
+    handleUnsupportedFile,
+    handleAfterInput,
+    handleRemoveAttachment,
+    handleRemoveLoadingFile,
+    handleSubmitted: handleUploadsSubmitted,
+  } = useAttachmentUploads({ addErrorToast, messageEditorController, createConversation });
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
@@ -356,7 +365,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     !agentExists ||
     isAgentModelLoading ||
     isAwaitingPrompt ||
-    uploadingNames.size > 0;
+    isUploading;
 
   const placeholder = isAgentDeleted ? disabledPlaceholder(agentId) : enabledPlaceholder;
 
@@ -490,10 +499,11 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       return;
     }
     lastEditorContentRef.current = '';
+    handleUploadsSubmitted();
     if (onSubmitOverride) {
       onSubmitOverride(content);
     } else {
-      submitMessage(content);
+      submitMessage(content, { conversationId: pendingConversationId });
     }
     clearDraft();
     messageEditorController.clear();
@@ -510,14 +520,16 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       isCollapsed={shouldCollapseInput}
       triggerMode={triggerMode}
     >
-      {(visibleAttachments.length > 0 || uploadingNames.size > 0) && (
+      {(visibleAttachments.length > 0 || isUploading) && (
         <EuiFlexItem grow={false}>
           <AttachmentPillsRow
             attachments={visibleAttachments}
             uploadingNames={uploadingNames}
+            loadingFiles={loadingFiles}
+            onRemoveLoadingFile={handleRemoveLoadingFile}
             removable
             onRemoveAttachment={handleRemoveAttachment}
-            hoveredImageName={hoveredImageName}
+            hoveredAttachmentName={hoveredAttachmentName}
           />
         </EuiFlexItem>
       )}
@@ -530,9 +542,11 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
           ariaLabel={messageEditorAriaLabel}
           data-test-subj="agentBuilderConversationInputEditor"
           onPasteFile={upsertAttachments ? handlePasteFile : undefined}
+          onUnsupportedFile={upsertAttachments ? handleUnsupportedFile : undefined}
+          acceptedFileMimeTypes={acceptedFileMimeTypes}
           onAfterInput={handleAfterInput}
-          onHoveredPlaceholderChange={setHoveredImageName}
-          uploadingNames={uploadingNames}
+          onHoveredPlaceholderChange={setHoveredAttachmentName}
+          uploadingNames={uploadingChipNames}
         />
       </EuiFlexItem>
       {isMessageTooLong && (

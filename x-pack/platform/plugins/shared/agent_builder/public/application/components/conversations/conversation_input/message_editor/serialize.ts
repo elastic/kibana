@@ -6,8 +6,21 @@
  */
 
 import { isElementCommandBadge, serializeCommandBadge } from './command_badge';
-import { IMAGE_ATTACHMENT_SCHEME, isElementImagePlaceholder } from './image_placeholder';
+import {
+  getPlaceholderKind,
+  IMAGE_ATTACHMENT_SCHEME,
+  isElementAttachmentPlaceholder,
+  BINARY_ATTACHMENT_SCHEME,
+  TEXT_ATTACHMENT_SCHEME,
+  type PlaceholderKind,
+} from './attachment_placeholder';
 import { stripZeroWidthSpaces } from './utils';
+
+const SCHEME_BY_KIND: Readonly<Record<PlaceholderKind, string>> = {
+  image: IMAGE_ATTACHMENT_SCHEME,
+  binary: BINARY_ATTACHMENT_SCHEME,
+  text: TEXT_ATTACHMENT_SCHEME,
+};
 
 /**
  * Encodes an image filename for use as the path in a serialized image link.
@@ -20,7 +33,7 @@ export const encodeImageName = (name: string): string =>
 /**
  * Walks child nodes of the editor element and serializes to text.
  * Badge spans are converted to `[/label](scheme://metadataValue)`.
- * Image placeholders are converted to `[name](image://encodedName)`.
+ * Image, binary and text file placeholders are converted to `[name](image://encodedName)`, `[name](binary://encodedName)` and `[name](text://encodedName)`.
  * Text nodes are appended as-is, with caret-target ZWS characters stripped.
  */
 export const serializeEditorContent = (editorElement: HTMLElement): string => {
@@ -36,10 +49,11 @@ export const serializeEditorContent = (editorElement: HTMLElement): string => {
       continue;
     }
     const element = node as HTMLElement;
-    if (isElementImagePlaceholder(element)) {
+    if (isElementAttachmentPlaceholder(element)) {
       const name = element.getAttribute('aria-label') ?? '';
       const displayName = name.replace(/[\[\]]/g, '');
-      result += `[${displayName}](${IMAGE_ATTACHMENT_SCHEME}://${encodeImageName(name)})`;
+      const scheme = SCHEME_BY_KIND[getPlaceholderKind(element)];
+      result += `[${displayName}](${scheme}://${encodeImageName(name)})`;
     } else if (isElementCommandBadge(element)) {
       result += serializeCommandBadge(element);
     } else if (element.tagName === 'BR') {

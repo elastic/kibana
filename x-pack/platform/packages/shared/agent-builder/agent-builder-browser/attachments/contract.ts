@@ -275,6 +275,7 @@ export interface CreateAttachmentArgs {
   origin?: string;
   description?: string;
   hidden?: boolean;
+  signal?: AbortSignal;
 }
 
 /**
