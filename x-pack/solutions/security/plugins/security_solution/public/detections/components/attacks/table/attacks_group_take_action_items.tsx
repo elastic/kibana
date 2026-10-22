@@ -30,6 +30,7 @@ import { useAttackRunWorkflowContextMenuItems } from '../../../hooks/attacks/bul
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { AttacksActionMenu } from './attacks_action_menu';
 import { ATTACK_DISCOVERY_ACTION_IDS } from '../../../../common/constants/action_ids';
+import { getRemoveFromCaseItems } from '../../../../cases/attachments/attack/remove_from_case_items';
 import { toAttacksToAttach } from '../../../../cases/attachments/attack/utils';
 
 interface AttacksGroupTakeActionItemsProps {
@@ -38,6 +39,8 @@ interface AttacksGroupTakeActionItemsProps {
   closePopover?: () => void;
   /** Optional callback to run after an action is successfully taken */
   onActionSuccess?: () => void;
+  /** Adds "Remove from case", for surfaces showing the attacks of a case. */
+  onRemoveFromCase?: () => void;
   /** Whether to include the AI assistant action in the menu (default true) */
   showAiAssistantAction?: boolean;
   /** Whether to include the navigation action (default true); off where the surface has its own. */
@@ -60,6 +63,7 @@ export function AttacksGroupTakeActionItems({
   attack,
   closePopover,
   onActionSuccess,
+  onRemoveFromCase,
   showAiAssistantAction = true,
   showNavigationAction = true,
   telemetrySource,
@@ -134,7 +138,6 @@ export function AttacksGroupTakeActionItems({
     useAttackRunWorkflowContextMenuItems({
       attacksForWorkflowRun: attacksWithTimelineAlerts,
       closePopover,
-      telemetrySource,
     });
 
   const { items: investigateInTimelineItems } = useAttackInvestigateInTimelineContextMenuItems({
@@ -223,6 +226,11 @@ export function AttacksGroupTakeActionItems({
     [addToDatasetAction]
   );
 
+  const removeFromCaseItems = useMemo(
+    () => getRemoveFromCaseItems({ onRemove: onRemoveFromCase, closePopover }),
+    [closePopover, onRemoveFromCase]
+  );
+
   return (
     <AttacksActionMenu
       assigneeItems={assignItems}
@@ -232,6 +240,7 @@ export function AttacksGroupTakeActionItems({
       datasetItems={datasetItems}
       isRemoteDocument={isRemoteDocument}
       navigationItems={showNavigationAction || isRemoteDocument ? navigationItems : []}
+      removeFromCaseItems={removeFromCaseItems}
       runWorkflowItems={runWorkflowItems}
       runWorkflowPanels={runWorkflowPanels}
       showAiAssistantAction={showAiAssistantAction}

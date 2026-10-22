@@ -24,6 +24,7 @@ import type { ActionMetadata, WorkflowExecutionDto } from '@kbn/workflows';
 import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
 import {
   DEFAULT_PROPOSAL_TITLE,
+  isTerminal,
   PROPOSAL_ATTACHMENT_TYPE,
   PROPOSALS_RESUME_CHANNEL,
 } from '@kbn/proposals-common';
@@ -296,16 +297,21 @@ export class ProposalsService {
     });
 
     const current = await this.settleOrphans(
-      response.hits.hits
-        .filter((hit): hit is typeof hit & { _id: string } => hit._id !== undefined)
-        .map((hit) => toProposal(hit._id, hit._source as ProposalDocument)),
+      response.hits.hits.reduce<Proposal[]>((proposals, hit) => {
+        if (hit._id !== undefined) {
+          proposals.push(toProposal(hit._id, hit._source));
+        }
+        return proposals;
+      }, []),
       spaceId,
       request
     );
     // A proposal settled on this read no longer matches the status it was searched by.
-    const matching = query.status
-      ? current.filter(({ status }) => status === query.status)
-      : current;
+    const matching = current.filter(
+      ({ status }) =>
+        (!query.status || status === query.status) &&
+        (!query.statuses || query.statuses.includes(status))
+    );
     const settledAway = current.length - matching.length;
 
     const proposals = await this.withMetadataBatch(matching, spaceId, request);
@@ -1398,6 +1404,7 @@ type QueryFilterList = Array<Record<string, unknown>>;
 /** Filters only in-process callers may use; none is part of the HTTP list contract. */
 export interface InProcessProposalFilters {
   categories?: string[];
+  statuses?: ProposalStatus[];
   conversationIds?: string[];
 }
 
@@ -1431,6 +1438,9 @@ const toFilterClauses = (
   }
   if (filters.categories) {
     filter.push({ terms: { category: filters.categories } });
+  }
+  if (filters.statuses) {
+    filter.push({ terms: { status: filters.statuses } });
   }
   if (filters.conversationIds) {
     filter.push({ terms: { conversationId: filters.conversationIds } });
@@ -1469,21 +1479,6 @@ const stripRanks = ({ ranks, ...proposal }: StoredProposalRecord): Proposal => p
 
 const toProposal = (id: string, document: ProposalDocument): Proposal =>
   stripRanks({ id, ...document });
-
-/**
- * A status that has settled. `pending` and `executing` are the only two a
- * proposal can still be moved out of.
- */
-const isTerminal = (status: ProposalStatus): boolean =>
-  status === 'succeeded' ||
-  status === 'failed' ||
-  status === 'expired' ||
-  status === 'no_action' ||
-  // Undecided, unlike the other four, but equally unable to move: a
-  // superseded proposal is not the live revision anymore, and a caller that
-  // still holds its id (a stale workflow variable, a retried step) must not
-  // be able to resurrect it via update().
-  status === 'superseded';
 
 /** Still waiting on its gate: undecided, or approved with the action running. */
 const isUnsettled = ({ status, supersededBy }: Proposal): boolean =>

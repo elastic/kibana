@@ -52,7 +52,7 @@ import {
   combineEntityGroupFilters,
   getEntityGroupRecords,
 } from '../../../flyout/entity_details/shared/entity_store_group_utils';
-import type { EntityViewMode } from '../../../flyout/entity_details/shared/types';
+import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 enum KIBANA_ALERTS {
@@ -111,7 +111,7 @@ export const AlertsDetailsTable = memo(
     onShowAlert: (eventId: string, indexName: string, ruleName?: string) => void;
     /**
      * Scope ID of the table or panel that opened this flyout. When the scope has
-     * a registered time-range override in {@link SCOPE_ALERT_TIME_RANGE_OVERRIDES}
+     * a registered time-range override in {@link getScopeFlyoutTimeRange}
      * that window is used for the alerts query instead of the global time range.
      */
     scopeId?: string;

@@ -357,7 +357,13 @@ describe('ProposalsService', () => {
       const workflowsApi = createWorkflowsApi();
       workflowsApi.getWorkflow.mockResolvedValue({
         definition: {
-          consts: { actionMetadata: { name: 'Create rule', category: 'tune' } },
+          consts: {
+            actionMetadata: {
+              name: 'Create rule',
+              category: 'tune',
+              approvalPolicy: 'autonomy-dependent',
+            },
+          },
           triggers: [
             {
               type: 'manual',
@@ -398,7 +404,15 @@ describe('ProposalsService', () => {
       const storage = createStorage();
       const workflowsApi = createWorkflowsApi();
       workflowsApi.getWorkflow.mockResolvedValue({
-        definition: { consts: { actionMetadata: { name: 'Create rule', category: 'tune' } } },
+        definition: {
+          consts: {
+            actionMetadata: {
+              name: 'Create rule',
+              category: 'tune',
+              approvalPolicy: 'autonomy-dependent',
+            },
+          },
+        },
       });
       const { service } = createService(storage, workflowsApi);
 
@@ -475,7 +489,14 @@ describe('ProposalsService', () => {
       const workflowsApi = createWorkflowsApi();
       workflowsApi.getWorkflow.mockResolvedValue({
         definition: {
-          consts: { actionMetadata: { name: 'Contain host', category: 'contain', impact: 'high' } },
+          consts: {
+            actionMetadata: {
+              name: 'Contain host',
+              category: 'contain',
+              impact: 'high',
+              approvalPolicy: 'autonomy-dependent',
+            },
+          },
         },
       });
       const { service } = createService(storage, workflowsApi);
@@ -502,7 +523,14 @@ describe('ProposalsService', () => {
       const workflowsApi = createWorkflowsApi();
       workflowsApi.getWorkflow.mockResolvedValue({
         definition: {
-          consts: { actionMetadata: { name: 'Create rule', category: 'tune', impact: 'high' } },
+          consts: {
+            actionMetadata: {
+              name: 'Create rule',
+              category: 'tune',
+              impact: 'high',
+              approvalPolicy: 'autonomy-dependent',
+            },
+          },
         },
       });
       const { service } = createService(storage, workflowsApi);
@@ -530,7 +558,14 @@ describe('ProposalsService', () => {
       const workflowsApi = createWorkflowsApi();
       workflowsApi.getWorkflow.mockResolvedValue({
         definition: {
-          consts: { actionMetadata: { name: 'Create rule', category: 'tune', impact: 'high' } },
+          consts: {
+            actionMetadata: {
+              name: 'Create rule',
+              category: 'tune',
+              impact: 'high',
+              approvalPolicy: 'autonomy-dependent',
+            },
+          },
         },
       });
       const { service } = createService(storage, workflowsApi);
@@ -553,7 +588,15 @@ describe('ProposalsService', () => {
       const storage = createStorage();
       const workflowsApi = createWorkflowsApi();
       workflowsApi.getWorkflow.mockResolvedValue({
-        definition: { consts: { actionMetadata: { name: 'Create rule', category: 'tune' } } },
+        definition: {
+          consts: {
+            actionMetadata: {
+              name: 'Create rule',
+              category: 'tune',
+              approvalPolicy: 'autonomy-dependent',
+            },
+          },
+        },
       });
       const { service } = createService(storage, workflowsApi);
 
@@ -583,7 +626,15 @@ describe('ProposalsService', () => {
       const storage = createStorage();
       const workflowsApi = createWorkflowsApi();
       workflowsApi.getWorkflow.mockResolvedValue({
-        definition: { consts: { actionMetadata: { name: 'Create rule', category: 'tune' } } },
+        definition: {
+          consts: {
+            actionMetadata: {
+              name: 'Create rule',
+              category: 'tune',
+              approvalPolicy: 'autonomy-dependent',
+            },
+          },
+        },
       });
       const { service } = createService(storage, workflowsApi);
 
@@ -611,7 +662,15 @@ describe('ProposalsService', () => {
       const storage = createStorage();
       const workflowsApi = createWorkflowsApi();
       workflowsApi.getWorkflow.mockResolvedValue({
-        definition: { consts: { actionMetadata: { name: 'Create rule', category: 'tune' } } },
+        definition: {
+          consts: {
+            actionMetadata: {
+              name: 'Create rule',
+              category: 'tune',
+              approvalPolicy: 'autonomy-dependent',
+            },
+          },
+        },
       });
       const { service } = createService(storage, workflowsApi);
 
@@ -1928,7 +1987,13 @@ describe('ProposalsService', () => {
       const workflowsApi = createWorkflowsApi();
       workflowsApi.getWorkflow.mockResolvedValue({
         definition: {
-          consts: { actionMetadata: { name: 'Create rule', category: 'tune' } },
+          consts: {
+            actionMetadata: {
+              name: 'Create rule',
+              category: 'tune',
+              approvalPolicy: 'autonomy-dependent',
+            },
+          },
           triggers: [
             {
               type: 'manual',
@@ -2165,6 +2230,30 @@ describe('ProposalsService', () => {
           { term: { origin: 'alertzero' } },
           { terms: { category: ['respond', 'investigate'] } },
         ])
+      );
+    });
+
+    it('filters by any of the given statuses', async () => {
+      const storage = createStorage();
+      storage.search.mockResolvedValue({
+        hits: { hits: [] },
+        aggregations: { by_conversation: { buckets: [] } },
+      });
+      const { service } = createService(storage);
+
+      await service.countByConversation(
+        {
+          statuses: ['pending', 'executing'],
+          excludeSuperseded: true,
+          excludeExpired: false,
+        },
+        SPACE_ID,
+        10
+      );
+
+      const [searchRequest] = storage.search.mock.calls[0];
+      expect(searchRequest.query.bool.filter).toEqual(
+        expect.arrayContaining([{ terms: { status: ['pending', 'executing'] } }])
       );
     });
   });

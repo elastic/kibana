@@ -1752,7 +1752,7 @@ finishes and then call this operation once.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Returns time-bucketed anomaly counts and tactic distribution for a given entity.
+   * Returns time-bucketed anomaly counts and tactic distribution for a given entity. In `resolved` mode the entity's resolution group is combined.
    */
   async getAnomalyOverview(props: GetAnomalyOverviewProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetAnomalyOverview`);
@@ -1771,7 +1771,7 @@ finishes and then call this operation once.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity.
+   * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity. In `resolved` mode the entity's resolution group is combined.
    */
   async getAnomalySummary(props: GetAnomalySummaryProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetAnomalySummary`);
