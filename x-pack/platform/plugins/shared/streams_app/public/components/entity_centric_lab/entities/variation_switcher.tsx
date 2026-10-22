@@ -50,6 +50,12 @@ const PROTOTYPE_CHANGELOG: readonly {
 }[] = [
   {
     date: '2026-10-22',
+    summary: 'Compact golden signal tiles and K8s filter-for via facet dropdowns.',
+    details:
+      'Flyout and expanded Overview golden signal summary cards are shorter with balanced value/unit typography (Display options still scales density). Kubernetes grid “Filter for” sets page cluster/namespace/node/deployment dropdowns only—no search-bar pills and no “Filter out” cell action. Bump to v1.12.',
+  },
+  {
+    date: '2026-10-22',
     summary:
       'Left-nav inventory counts, alert dots, list defaults, and group-by label polish.',
     details:
