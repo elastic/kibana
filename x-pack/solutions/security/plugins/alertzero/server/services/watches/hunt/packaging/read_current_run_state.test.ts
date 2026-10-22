@@ -727,7 +727,7 @@ describe('readCurrentRunState', () => {
     });
   });
 
-  it('threads endpoint capabilities and their source from the enrollment resolver onto the host, [] reported when unenrolled', async () => {
+  it('threads endpoint capabilities and their source from the enrollment resolver onto the host, none when unenrolled', async () => {
     const state = await readCurrentRunState({
       attachments: [sseAttachment({})],
       reportId,
@@ -774,9 +774,7 @@ describe('readCurrentRunState', () => {
       resolveHostEnrollment: async () => ({ enrolled: false }),
       rehydrateProcessSelectors,
     });
-    expect(unenrolled?.hosts).toEqual([
-      { name: 'host-a', enrolled: false, capabilities: [], capabilitiesSource: 'reported' },
-    ]);
+    expect(unenrolled?.hosts).toEqual([{ name: 'host-a', enrolled: false, capabilities: [] }]);
   });
 
   it('forwards matched.ioc to the rehydrator as a presence flag alongside technique_id', async () => {

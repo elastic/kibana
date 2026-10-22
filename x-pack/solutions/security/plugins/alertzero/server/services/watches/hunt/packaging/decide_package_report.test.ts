@@ -292,9 +292,7 @@ describe('decidePackageReport', () => {
     const result = decidePackageReport({
       conversationId,
       state: baseHitState({
-        hosts: [
-          { name: 'ghost', enrolled: false, capabilities: [], capabilitiesSource: 'reported' },
-        ],
+        hosts: [{ name: 'ghost', enrolled: false, capabilities: [] }],
       }),
       catalog: { ok: true, actions: [isolateHost] },
     });
@@ -309,7 +307,7 @@ describe('decidePackageReport', () => {
       state: baseHitState({
         hosts: [
           enrolledHost('host-a', 'agent-a'),
-          { name: 'ghost', enrolled: false, capabilities: [], capabilitiesSource: 'reported' },
+          { name: 'ghost', enrolled: false, capabilities: [] },
         ],
       }),
       catalog: { ok: true, actions: [isolateHost] },
@@ -821,7 +819,7 @@ describe('decidePackageReport', () => {
               capabilities: [],
               capabilitiesSource: 'reported',
             },
-            { name: 'ghost', enrolled: false, capabilities: [], capabilitiesSource: 'reported' },
+            { name: 'ghost', enrolled: false, capabilities: [] },
           ],
           processSelectors: [
             {

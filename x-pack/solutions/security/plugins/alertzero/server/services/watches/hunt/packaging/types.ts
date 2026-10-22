@@ -21,10 +21,10 @@ export interface CurrentRunHost {
   /** `Endpoint.capabilities` from the endpoint metadata document. */
   capabilities: string[];
   /**
-   * `'unavailable'` when the metadata could not be read, so an empty `capabilities` means nothing
-   * is known rather than that the endpoint reports none.
+   * Set for enrolled hosts. `'unavailable'` when the metadata could not be read, so an empty
+   * `capabilities` means nothing is known rather than that the endpoint reports none.
    */
-  capabilitiesSource: CapabilitiesSource;
+  capabilitiesSource?: CapabilitiesSource;
 }
 
 /** Process selector fillable into kill/suspend `parameters`. */

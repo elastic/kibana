@@ -52,17 +52,20 @@ interface EndpointCapabilities {
 const UNAVAILABLE: EndpointCapabilities = { capabilities: [], capabilitiesSource: 'unavailable' };
 
 /**
- * Reads the endpoint's capability list from its metadata document. Conservative: a missing
- * index, document, or field yields `[]` marked `'reported'`, and a failed search yields `[]`
- * marked `'unavailable'`. Neither skips the host; both mean "suspend only".
+ * Reads the endpoint's capability list from its metadata document. Conservative: a failed search
+ * yields `[]` marked `'unavailable'`, and so does an empty result when the caller cannot read the
+ * whole pattern, because an empty result is then ambiguous. Otherwise a missing document or
+ * field yields `[]` marked `'reported'`. None of these skips the host; all mean "suspend only".
  */
 const readEndpointCapabilities = async ({
   esClient,
   agentId,
+  canReadWholePattern,
   logger,
 }: {
   esClient: ElasticsearchClient;
   agentId: string;
+  canReadWholePattern: boolean;
   logger?: Logger;
 }): Promise<EndpointCapabilities> => {
   try {
@@ -94,7 +97,11 @@ const readEndpointCapabilities = async ({
       ignore_unavailable: true,
       allow_no_indices: true,
     });
-    const capabilities = response.hits.hits[0]?._source?.Endpoint?.capabilities;
+    const [hit] = response.hits.hits;
+    if (!hit && !canReadWholePattern) {
+      return UNAVAILABLE;
+    }
+    const capabilities = hit?._source?.Endpoint?.capabilities;
     return {
       capabilities:
         Array.isArray(capabilities) &&
@@ -104,10 +111,8 @@ const readEndpointCapabilities = async ({
       capabilitiesSource: 'reported',
     };
   } catch (error) {
-    // Warn, not debug: a privilege failure here silently downgrades every response to
-    // "suspend only", and nothing else would surface it.
     logger?.warn(
-      `resolveHostEnrollment: endpoint capabilities lookup failed for agent ${agentId}; treating as none — ${
+      `resolveHostEnrollment: endpoint capabilities lookup failed for agent ${agentId}; treating as unknown — ${
         error instanceof Error ? error.message : String(error)
       }`
     );
@@ -116,26 +121,24 @@ const readEndpointCapabilities = async ({
 };
 
 /**
- * Whether the calling identity can read the endpoint metadata. A search by an identity with no
- * privilege on the pattern resolves to zero authorized indices and returns an empty, error-free
- * result rather than a 403, so the search cannot tell "unreadable" from "no document". This probe
- * can. A probe that cannot run is treated as readable, so it never makes the outcome worse than
- * searching without it.
+ * Whether the calling identity can read the whole endpoint metadata pattern. A search by an
+ * identity with no privilege on the pattern resolves to zero authorized indices and returns an
+ * empty, error-free result rather than a 403, so the search cannot tell "unreadable" from "no
+ * document". This probe can. It only says whether the whole pattern is covered, so a `false` does
+ * not skip the search: a narrower grant can still find the document. A probe that cannot run is
+ * treated as readable, so it never makes the outcome worse than searching without it.
  */
-const canReadEndpointMetadata = async (
+const canReadWholeEndpointMetadataPattern = async (
   esClient: ElasticsearchClient,
   logger?: Logger
 ): Promise<boolean> => {
-  if (!esClient.security?.hasPrivileges) {
-    return true;
-  }
   try {
     const { has_all_requested: hasAllRequested } = await esClient.security.hasPrivileges({
       index: [{ names: [ENDPOINT_METADATA_CURRENT_PATTERN], privileges: ['read'] }],
     });
     if (!hasAllRequested) {
       logger?.warn(
-        `resolveHostEnrollment: caller lacks read privilege on ${ENDPOINT_METADATA_CURRENT_PATTERN}; treating every host in this run as capabilities unknown`
+        `resolveHostEnrollment: caller lacks read privilege on ${ENDPOINT_METADATA_CURRENT_PATTERN}; a host with no readable metadata document in this run is treated as capabilities unknown`
       );
     }
     return hasAllRequested;
@@ -174,13 +177,18 @@ export const makeResolveHostEnrollment = (
   }
   // Probed on the first enrolled host and shared by every lookup this resolver makes, so one
   // packaging run costs one privilege check.
-  let canRead: Promise<boolean> | undefined;
+  let canReadWholePattern: Promise<boolean> | undefined;
   const readCapabilities = async (agentId: string): Promise<EndpointCapabilities> => {
     if (!esClient) {
       return UNAVAILABLE;
     }
-    canRead ??= canReadEndpointMetadata(esClient, logger);
-    return (await canRead) ? readEndpointCapabilities({ esClient, agentId, logger }) : UNAVAILABLE;
+    canReadWholePattern ??= canReadWholeEndpointMetadataPattern(esClient, logger);
+    return readEndpointCapabilities({
+      esClient,
+      agentId,
+      canReadWholePattern: await canReadWholePattern,
+      logger,
+    });
   };
   return async (hostName) => {
     const escaped = escapeKuery(hostName);

@@ -206,6 +206,7 @@ describe('makeResolveHostEnrollment', () => {
     it('yields [] marked unavailable and logs a warning when the metadata search throws (e.g. the index is unreadable)', async () => {
       const esClient = {
         search: jest.fn().mockRejectedValue(new Error('search_phase_execution_exception')),
+        security: { hasPrivileges: jest.fn().mockResolvedValue({ has_all_requested: true }) },
       } as unknown as ElasticsearchClient;
       const logger = { warn: jest.fn() } as unknown as Logger;
       const resolve = makeResolveHostEnrollment(
@@ -239,7 +240,7 @@ describe('makeResolveHostEnrollment', () => {
 
       // A search by an identity with no privilege on the pattern resolves to zero authorized
       // indices and comes back empty, so only the self-check can tell this from "no document".
-      it('marks capabilities unavailable without searching when the caller cannot read the pattern', async () => {
+      it('marks an empty result unavailable when the caller cannot read the whole pattern', async () => {
         const logger = loggingSystemMock.createLogger();
         const hasPrivileges = hasPrivilegesFor(false);
         const esClient = esClientWith([], hasPrivileges);
@@ -258,11 +259,28 @@ describe('makeResolveHostEnrollment', () => {
         expect(hasPrivileges).toHaveBeenCalledWith({
           index: [{ names: [ENDPOINT_METADATA_CURRENT_PATTERN], privileges: ['read'] }],
         });
-        expect(esClient.search).not.toHaveBeenCalled();
+        expect(esClient.search).toHaveBeenCalledTimes(1);
         expect(logger.warn).toHaveBeenCalledTimes(1);
         expect(logger.warn).toHaveBeenCalledWith(
-          `resolveHostEnrollment: caller lacks read privilege on ${ENDPOINT_METADATA_CURRENT_PATTERN}; treating every host in this run as capabilities unknown`
+          `resolveHostEnrollment: caller lacks read privilege on ${ENDPOINT_METADATA_CURRENT_PATTERN}; a host with no readable metadata document in this run is treated as capabilities unknown`
         );
+      });
+
+      // `has_privileges` on a wildcard is true only when the role covers the whole pattern, so a
+      // narrower grant reports false yet can still read the document.
+      it('still reports a document found under a narrower grant', async () => {
+        const esClient = esClientWith(
+          [{ _source: { Endpoint: { capabilities: ['isolation'] } } }],
+          hasPrivilegesFor(false)
+        );
+        const resolve = makeResolveHostEnrollment(agentClientWith([{ id: 'agent-1' }]), esClient);
+
+        await expect(resolve('host-a')).resolves.toEqual({
+          enrolled: true,
+          agentId: 'agent-1',
+          capabilities: ['isolation'],
+          capabilitiesSource: 'reported',
+        });
       });
 
       it('checks once per resolver, however many enrolled hosts it resolves', async () => {
@@ -317,16 +335,6 @@ describe('makeResolveHostEnrollment', () => {
           )
         );
         expect(logger.warn).not.toHaveBeenCalled();
-      });
-
-      it('falls through to the search when the client has no security API', async () => {
-        const esClient = {
-          search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
-        } as unknown as ElasticsearchClient;
-        const resolve = makeResolveHostEnrollment(agentClientWith([{ id: 'agent-1' }]), esClient);
-
-        await expect(resolve('host-a')).resolves.toMatchObject({ capabilitiesSource: 'reported' });
-        expect(esClient.search).toHaveBeenCalledTimes(1);
       });
     });
   });

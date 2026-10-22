@@ -262,7 +262,7 @@ export const readCurrentRunState = async ({
         capabilitiesSource: enrollment.capabilitiesSource,
       });
     } else {
-      hosts.push({ name, enrolled: false, capabilities: [], capabilitiesSource: 'reported' });
+      hosts.push({ name, enrolled: false, capabilities: [] });
     }
   }
 
