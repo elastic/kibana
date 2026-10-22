@@ -47,18 +47,12 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   noActionBadge: i18n.translate('xpack.proposals.approvalModal.noActionBadge', {
     defaultMessage: 'Approved',
   }),
-  outdatedBadge: i18n.translate('xpack.proposals.approvalModal.outdatedBadge', {
-    defaultMessage: 'Outdated',
-  }),
   /** A to-do proposal the analyst marked as applied: they carried it out, nothing automated ran. */
   markedAppliedBadge: i18n.translate('xpack.proposals.approvalModal.markedAppliedBadge', {
     defaultMessage: 'Applied',
   }),
   expiredBadge: i18n.translate('xpack.proposals.approvalModal.expiredBadge', {
     defaultMessage: 'Expired',
-  }),
-  approvingBadge: i18n.translate('xpack.proposals.approvalModal.approvingBadge', {
-    defaultMessage: 'Approving',
   }),
   applyingBadge: i18n.translate('xpack.proposals.approvalModal.applyingBadge', {
     defaultMessage: 'Applying',
@@ -77,9 +71,6 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   }),
   declinedBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.declinedTitle', {
     defaultMessage: 'Declined',
-  }),
-  approvingBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.approvingTitle', {
-    defaultMessage: 'Approving',
   }),
   applyingBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.applyingTitle', {
     defaultMessage: 'Applying',

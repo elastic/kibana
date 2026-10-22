@@ -513,12 +513,12 @@ describe('ApprovalContent', () => {
   });
 
   describe('decision outcome', () => {
-    it('shows Approving when isSubmitting is set, hiding the actions', () => {
+    it('shows Applying when isSubmitting is set, hiding the actions', () => {
       renderContent({ isSubmitting: 'applying', currentActorName: 'Ava' });
 
       // The badge and the outcome banner's own title both say it.
-      expect(screen.getAllByText('Approving').length).toBeGreaterThanOrEqual(2);
-      expect(screen.getByTestId('approvalContent-outcome')).toHaveTextContent(/^Approving • Ava$/);
+      expect(screen.getAllByText('Applying').length).toBeGreaterThanOrEqual(2);
+      expect(screen.getByTestId('approvalContent-outcome')).toHaveTextContent(/^Applying • Ava$/);
       expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
     });
 
@@ -527,20 +527,20 @@ describe('ApprovalContent', () => {
       renderContent({ isSubmitting: 'applying', submittedAt, currentActorName: 'Ava' });
 
       expect(screen.getByTestId('approvalContent-outcome')).toHaveTextContent(
-        `Approving • Ava on ${moment(submittedAt).format(DATE_TIME_FORMAT)}`
+        `Applying • Ava on ${moment(submittedAt).format(DATE_TIME_FORMAT)}`
       );
     });
 
-    it('keeps showing Approving across an unmount and remount mid-submission, since isSubmitting is sourced externally', () => {
+    it('keeps showing Applying across an unmount and remount mid-submission, since isSubmitting is sourced externally', () => {
       const { unmount } = renderContent({ isSubmitting: 'applying', currentActorName: 'Ava' });
-      expect(screen.getAllByText('Approving').length).toBeGreaterThanOrEqual(2);
+      expect(screen.getAllByText('Applying').length).toBeGreaterThanOrEqual(2);
       unmount();
 
       // A fresh mount — standing in for the host being closed and reopened — reads the same
       // externally sourced `isSubmitting`, unlike a local `useState` that would have died with
       // the unmount.
       renderContent({ isSubmitting: 'applying', currentActorName: 'Ava' });
-      expect(screen.getAllByText('Approving').length).toBeGreaterThanOrEqual(2);
+      expect(screen.getAllByText('Applying').length).toBeGreaterThanOrEqual(2);
     });
 
     it('keeps showing Applying for a recorded decision whose action is still executing', () => {

@@ -629,7 +629,7 @@ describe('ConversationsPage decisions', () => {
     expect(dismissMutateAsync).not.toHaveBeenCalled();
   });
 
-  it('stays open and shows Approving while useIsApprovingProposal reports this proposal in flight', () => {
+  it('stays open and shows Applying while useIsApprovingProposal reports this proposal in flight', () => {
     mockUseIsApprovingProposal.mockImplementation((id: string) => id === 'prop-1');
     renderPage('/');
     openApproval();
@@ -638,7 +638,7 @@ describe('ConversationsPage decisions', () => {
     // (expired deadline, someone decided first) reads the same way: still open. Approving only
     // resumes the gate workflow, whose action still runs afterward, so being in flight must not
     // yet claim "Applied" — only a refetched, real decision can.
-    expect(approvalDialog().getAllByText('Approving').length).toBeGreaterThan(0);
+    expect(approvalDialog().getAllByText('Applying').length).toBeGreaterThan(0);
     expect(approvalDialog().queryByText('Applied')).not.toBeInTheDocument();
     expect(screen.getByRole('dialog', { name: 'Revoke sessions' })).toBeInTheDocument();
   });

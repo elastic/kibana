@@ -144,14 +144,14 @@ describe('ProposedActionButton', () => {
     expect(baseProps.onConfirm).toHaveBeenCalledTimes(1);
   });
 
-  it('shows Approving on the row and in the modal when isSubmitting is set, hiding the actions', () => {
+  it('shows Applying on the row and in the modal when isSubmitting is set, hiding the actions', () => {
     renderButton({ isSubmitting: 'applying' });
     fireEvent.click(screen.getByTestId('proposedAction'));
 
-    // The row badge, not just the modal's own header badge — both say "Approving".
+    // The row badge, not just the modal's own header badge — both say "Applying".
     const row = screen.getByTestId('proposedAction');
-    expect(within(row).getByText('Approving')).toBeInTheDocument();
-    expect(within(screen.getByRole('dialog')).getAllByText('Approving').length).toBeGreaterThan(0);
+    expect(within(row).getByText('Applying')).toBeInTheDocument();
+    expect(within(screen.getByRole('dialog')).getAllByText('Applying').length).toBeGreaterThan(0);
     expect(screen.queryByTestId('proposedAction-modal-confirm')).not.toBeInTheDocument();
   });
 

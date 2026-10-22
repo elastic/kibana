@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { isTodoProposal, PROPOSAL_CATEGORY_TODO } from '@kbn/proposals-common';
 import type { ApprovalProposal, ApprovalDecision } from './types';
-import { getSubmittingPhase, type ApprovalPhase } from './approval_outcome';
+import type { ApprovalPhase } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import { formatDismissReason } from './dismiss_reason';
 
@@ -138,8 +138,7 @@ export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecisio
  */
 const approvedStatusFor = (proposal: ApprovalProposal): Exclude<ApprovalPhase, 'pending'> => {
   if (isProposalExpired(proposal)) {
-    // Replaced before anyone decided: not timed out, just no longer the one to act on.
-    return isProposalReplaced(proposal) && !proposal.decision ? 'outdated' : 'expired';
+    return 'expired';
   }
   if (proposal.decision !== 'approved') {
     return 'declined';
@@ -219,5 +218,5 @@ export const getProposalPhase = (
   isSubmitting?: 'applying' | 'declining'
 ): ApprovalPhase => {
   const decision = getProposalDecision(proposal);
-  return decision ? decision.status : isSubmitting ? getSubmittingPhase(isSubmitting) : 'pending';
+  return decision ? decision.status : isSubmitting ?? 'pending';
 };

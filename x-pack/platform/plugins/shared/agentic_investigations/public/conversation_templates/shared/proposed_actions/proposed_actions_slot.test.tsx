@@ -276,19 +276,19 @@ describe('ProposedActionsSlot', () => {
     });
   });
 
-  it('shows Approving on the row and its modal, scoped to the proposal useIsApprovingProposal reports', () => {
+  it('shows Applying on the row and its modal, scoped to the proposal useIsApprovingProposal reports', () => {
     mockConversationProposalsPage([mockProposal]);
     mockUseIsApprovingProposal.mockImplementation((id) => id === 'proposal-1');
 
     renderSlot();
 
     const row = screen.getByTestId('investigationFlyoutProposedAction-proposal-1');
-    expect(within(row).getByText('Approving')).toBeInTheDocument();
+    expect(within(row).getByText('Applying')).toBeInTheDocument();
 
     fireEvent.click(row);
     // Approving only resumes the gate workflow — the action it starts still runs afterward, so
     // being in flight must not yet claim "Applied". Only a refetched, real decision can.
-    expect(within(screen.getByRole('dialog')).getAllByText('Approving').length).toBeGreaterThan(0);
+    expect(within(screen.getByRole('dialog')).getAllByText('Applying').length).toBeGreaterThan(0);
     expect(within(screen.getByRole('dialog')).queryByText('Applied')).not.toBeInTheDocument();
   });
 

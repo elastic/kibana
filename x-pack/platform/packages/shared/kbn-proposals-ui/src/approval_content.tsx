@@ -51,7 +51,7 @@ export interface ApprovalContentProps {
   /** ISO timestamp the host started the in-flight approve/decline at, if it knows it. */
   submittedAt?: string;
   /**
-   * Who is submitting right now, for the Approving banner's "Requested by". Falls back to a
+   * Who is submitting right now, for the Applying and Declining banners. Falls back to a
    * generic "You" when omitted, so a host that has not wired a profile lookup still gets a
    * coherent transient state.
    */
@@ -254,13 +254,14 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     // A decision in flight has no reason to give yet, only what it is waiting on.
     const startedBy = currentActorName ?? APPROVAL_MODAL_TRANSLATIONS.currentActorFallback;
     const startedAt = since ? moment(since).format(DATE_TIME_FORMAT) : undefined;
-    // A decision still in flight keeps the state's own title (Approving, Declining, Applying), then
+    // A decision still in flight keeps the state's own title (Applying, Declining), then
     // who asked and when as the description.
     const inFlightDescription =
-      approvalPhase === 'approving' || approvalPhase === 'declining'
+      approvalPhase === 'declining'
         ? APPROVAL_MODAL_TRANSLATIONS.whoAndWhenBannerDescription(startedBy, startedAt)
         : approvalPhase === 'applying'
-        ? // Approved and running: the request is the saved decision's.
+        ? // The click still in flight (the current user's) or the approval running (the saved
+          // decision's).
           APPROVAL_MODAL_TRANSLATIONS.whoAndWhenBannerDescription(
             decision?.actorName ?? startedBy,
             decision?.decidedAt ?? since
@@ -286,10 +287,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
             .join('. ')
         : undefined;
     // Anything else keeps just its reason (a failure's, say); a decision in flight has none yet.
-    const isInFlight =
-      approvalPhase === 'approving' ||
-      approvalPhase === 'applying' ||
-      approvalPhase === 'declining';
+    const isInFlight = approvalPhase === 'applying' || approvalPhase === 'declining';
     const bannerReason =
       inFlightDescription ?? settledDescription ?? (isInFlight ? undefined : decision?.reason);
     const isSettledOrTransient = approvalPhase !== 'pending';

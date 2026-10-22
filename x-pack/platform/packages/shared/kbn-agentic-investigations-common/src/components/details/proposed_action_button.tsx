@@ -174,7 +174,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
       setSubmittedAt(isSubmitting ? new Date().toISOString() : undefined);
     }, [isSubmitting]);
     const actorName =
-      decision?.status === 'expired' || decision?.status === 'outdated'
+      decision?.status === 'expired'
         ? undefined
         : decision?.actorName ?? (isSubmitting ? currentActorName : undefined);
     const actedAt = decision?.decidedAt ?? submittedAt;
@@ -182,7 +182,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     // A failed record says why it failed, in red, rather than who acted: the badge already says "Failed".
     const failureReason = decision?.status === 'failed' ? decision.reason : undefined;
     const isFailure = isRetry || decision?.status === 'failed';
-    const isExpired = decision?.status === 'expired' || decision?.status === 'outdated';
+    const isExpired = decision?.status === 'expired';
     // Why it can no longer be decided: the same text the modal's callout repeats.
     const expiredReason = isExpired ? getExpiredCaption(proposal) : undefined;
 
