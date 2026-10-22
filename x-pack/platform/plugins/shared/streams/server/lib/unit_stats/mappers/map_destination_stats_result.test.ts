@@ -33,8 +33,8 @@ describe('mapDestinationStatsRows', () => {
               { start: '2026-10-20T10:01:00.000Z', value: 240 },
             ],
           },
-          failures: { rate: { value: 0, unit: '{item}', time_unit: 's' } },
         },
+        failed: { rate: { value: 0, unit: '{item}', time_unit: 's' } },
       },
     });
     expect(streamsUnitStatsDestinationResultSchema.parse(result)).toEqual(result);
@@ -56,13 +56,9 @@ describe('mapDestinationStatsRows', () => {
 
     const result = mapDestinationStatsRows({ rows, bucketMs })['es-prod'];
 
-    expect(result.latency.average).toEqual({ value: null, unit: null });
-    expect(result.events.incoming.rate).toEqual({ value: null, unit: null, time_unit: null });
-    expect(result.events.incoming.failures.rate).toEqual({
-      value: null,
-      unit: null,
-      time_unit: null,
-    });
+    expect(result.latency.average).toEqual({ value: null, unit: 's' });
+    expect(result.events.incoming.rate).toEqual({ value: null, unit: '{item}', time_unit: 's' });
+    expect(result.events.failed.rate).toEqual({ value: null, unit: '{item}', time_unit: 's' });
     expect(result.events.incoming.total.value).toBe(510);
   });
 

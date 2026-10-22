@@ -25,8 +25,8 @@ describe('mapProcessorStatsRows', () => {
       events: {
         incoming: {
           rate: { value: 4.6, unit: '{item}', time_unit: 's' },
-          failures: { rate: { value: null, unit: null, time_unit: null } },
         },
+        failed: { rate: { value: null, unit: '{item}', time_unit: 's' } },
       },
     });
     expect(streamsUnitStatsProcessorResultSchema.parse(result)).toEqual(result);
@@ -52,25 +52,25 @@ describe('mapProcessorStatsRows', () => {
 
     const result = mapProcessorStatsRows({ rows })['uppercase-message'];
 
-    expect(result.events.incoming.rate).toEqual({ value: null, unit: null, time_unit: null });
-    expect(result.processing_duration.average).toEqual({ value: null, unit: null });
+    expect(result.events.incoming.rate).toEqual({ value: null, unit: '{item}', time_unit: 's' });
+    expect(result.processing_duration.average).toEqual({ value: null, unit: 's' });
   });
 
   // Processor failures are not queried yet, so there is no failed_rate column.
-  it('leaves the failures rate as no data when there is no failed_rate column', () => {
+  it('leaves the failed rate as no data when there is no failed_rate column', () => {
     const result = mapProcessorStatsRows({ rows: { 'uppercase-message': joined } })[
       'uppercase-message'
     ];
 
-    expect(result.events.incoming.failures.rate.value).toBeNull();
+    expect(result.events.failed.rate.value).toBeNull();
   });
 
-  it('places the failures rate once the query returns it, including a real zero', () => {
+  it('places the failed rate once the query returns it, including a real zero', () => {
     const rows = { 'uppercase-message': { ...joined, failed_rate: 0 } };
 
     const result = mapProcessorStatsRows({ rows })['uppercase-message'];
 
-    expect(result.events.incoming.failures.rate).toEqual({
+    expect(result.events.failed.rate).toEqual({
       value: 0,
       unit: '{item}',
       time_unit: 's',

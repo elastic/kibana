@@ -8,11 +8,11 @@
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { SECONDS_UNIT, STATS_COLUMN } from '../constants';
 import { indexById, numberOrNull, type EsqlRow, type EsqlValue } from './esql_rows';
-import { noRate, noValue, toItemRate, toValue } from './stats_values';
+import { toItemRate, toValue } from './stats_values';
 
 export const noProcessorStats = (): StreamsUnit.StatsProcessorResult => ({
-  processing_duration: { average: noValue() },
-  events: { incoming: { rate: noRate(), failures: { rate: noRate() } } },
+  processing_duration: { average: toValue(null, SECONDS_UNIT) },
+  events: { incoming: { rate: toItemRate(null) }, failed: { rate: toItemRate(null) } },
 });
 
 /** What the two processor queries return for one processor. */
@@ -46,7 +46,7 @@ export const joinProcessorRows = ({
 /**
  * Places the joined rows of each processor into its result. A column that ES|QL returned as
  * null stays no data. Processor failures are not queried yet, see `buildProcessorRateQuery`, so
- * there is no failures column and that rate stays no data.
+ * there is no failed rate column and that rate stays no data.
  */
 export const mapProcessorStatsRows = ({
   rows,
@@ -63,8 +63,8 @@ export const mapProcessorStatsRows = ({
         events: {
           incoming: {
             rate: toItemRate(numberOrNull(row[STATS_COLUMN.incomingRate])),
-            failures: { rate: toItemRate(numberOrNull(row[STATS_COLUMN.failedRate])) },
           },
+          failed: { rate: toItemRate(numberOrNull(row[STATS_COLUMN.failedRate])) },
         },
       },
     ])

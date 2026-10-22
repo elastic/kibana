@@ -69,8 +69,8 @@ describe('toValue', () => {
     expect(toValue(0, '{item}')).toEqual({ value: 0, unit: '{item}' });
   });
 
-  it('leaves the unit null when there is no value', () => {
-    expect(toValue(null, 's')).toEqual({ value: null, unit: null });
+  it('keeps the unit when there is no value', () => {
+    expect(toValue(null, 's')).toEqual({ value: null, unit: 's' });
   });
 });
 
@@ -79,7 +79,7 @@ describe('toItemRate', () => {
     expect(toItemRate(0.5)).toEqual({ value: 0.5, unit: '{item}', time_unit: 's' });
   });
 
-  it('leaves both units null when there is no value', () => {
-    expect(toItemRate(null)).toEqual({ value: null, unit: null, time_unit: null });
+  it('keeps both units when there is no value', () => {
+    expect(toItemRate(null)).toEqual({ value: null, unit: '{item}', time_unit: 's' });
   });
 });

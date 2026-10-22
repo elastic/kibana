@@ -12,17 +12,15 @@ import { numberOrNull, type EsqlRow } from './esql_rows';
 export type StatsValue = StreamsUnit.StatsDestinationResult['latency']['average'];
 export type StatsRate = StreamsUnit.StatsDestinationResult['events']['incoming']['rate'];
 
-/** A leaf with no data. The unit is null only when the value is. */
-export const noValue = (): StatsValue => ({ value: null, unit: null });
-
-export const noRate = (): StatsRate => ({ value: null, unit: null, time_unit: null });
-
-export const toValue = (value: number | null, unit: string): StatsValue =>
-  value === null ? noValue() : { value, unit };
+/** A leaf always has its unit. A null value means no data. */
+export const toValue = (value: number | null, unit: string): StatsValue => ({ value, unit });
 
 /** A rate of items per second. */
-export const toItemRate = (value: number | null): StatsRate =>
-  value === null ? noRate() : { value, unit: ITEM_UNIT, time_unit: RATE_TIME_UNIT };
+export const toItemRate = (value: number | null): StatsRate => ({
+  value,
+  unit: ITEM_UNIT,
+  time_unit: RATE_TIME_UNIT,
+});
 
 /**
  * The series of a destination from its sums rows, and the total of its points, so the total

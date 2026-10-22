@@ -8,17 +8,17 @@
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { ITEM_UNIT, SECONDS_UNIT, STATS_COLUMN } from '../constants';
 import { groupById, indexById, numberOrNull, type EsqlRow, type EsqlValue } from './esql_rows';
-import { noRate, noValue, toItemRate, toSeries, toValue } from './stats_values';
+import { toItemRate, toSeries, toValue } from './stats_values';
 
 export const noDestinationStats = (bucketMs: number): StreamsUnit.StatsDestinationResult => ({
-  latency: { average: noValue() },
+  latency: { average: toValue(null, SECONDS_UNIT) },
   events: {
     incoming: {
-      total: noValue(),
-      rate: noRate(),
+      total: toValue(null, ITEM_UNIT),
+      rate: toItemRate(null),
       series: { bucket_ms: bucketMs, points: [] },
-      failures: { rate: noRate() },
     },
+    failed: { rate: toItemRate(null) },
   },
 });
 
@@ -76,8 +76,8 @@ export const mapDestinationStatsRows = ({
               total: toValue(total, ITEM_UNIT),
               rate: toItemRate(numberOrNull(row[STATS_COLUMN.incomingRate])),
               series,
-              failures: { rate: toItemRate(numberOrNull(row[STATS_COLUMN.failedRate])) },
             },
+            failed: { rate: toItemRate(numberOrNull(row[STATS_COLUMN.failedRate])) },
           },
         },
       ];
