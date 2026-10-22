@@ -9,6 +9,7 @@
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import type { CallToolResult, JSONRPCMessage, RequestId } from '@modelcontextprotocol/sdk/types.js';
+import { CfWorkerJsonSchemaValidator } from '@modelcontextprotocol/sdk/validation/cfworker-provider.js';
 import {
   CallToolRequestSchema,
   CallToolResultSchema,
@@ -290,7 +291,8 @@ export const createMcpProtocol = (
   ): Promise<JSONRPCMessage[]> => {
     const server = new Server(
       { name: 'connector-contract-mock', version: '1.0.0' },
-      { capabilities: { tools: {} } }
+      // The SDK's default Ajv validator compiles schemas to code, which Jest disallows.
+      { capabilities: { tools: {} }, jsonSchemaValidator: new CfWorkerJsonSchemaValidator() }
     );
     server.setRequestHandler(ListToolsRequestSchema, () => ({ tools: [...tools.values()] }));
     server.setRequestHandler(CallToolRequestSchema, ({ params }, { requestId }) => {
@@ -335,6 +337,8 @@ export const createMcpProtocol = (
         readOnly: annotations?.readOnlyHint === true,
       })),
     ],
+    // `tools/list` answers from the spec's tools, never from a stored response.
+    answerable: operationNames,
     rejectedResponses,
     handle: async (request) => {
       if (request.method !== 'post') {

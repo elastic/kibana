@@ -349,10 +349,7 @@ export const createEmulatorFetch = ({
     ...loadedProtocols.flatMap(({ instance }) => instance.rejectedResponses),
     ...rejectUnknownNamedResponses(
       namedResponses,
-      loadedProtocols.map(({ source, instance }) => ({
-        source,
-        operations: new Set(instance.operations.map(({ name }) => name)),
-      }))
+      loadedProtocols.map(({ source, instance }) => ({ source, operations: instance.answerable }))
     ),
   ];
   return {
