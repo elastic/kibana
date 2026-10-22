@@ -13,19 +13,19 @@ import type { WorkerWarningReason } from './worker_warning_content';
 import * as settingsI18n from '../settings_translations';
 
 /**
- * Warning reasons for a Worker's `blockingReasons`; `no_model` is the only one so far. The header
- * icon is a tooltip, which can't hold a working link, so only interactive surfaces such as the
- * post-save notice get one.
+ * Warning reasons for a Worker's `blockingReasons`. The header icon is a tooltip, which can't
+ * hold a working link, so only interactive surfaces such as the post-save notice get one.
  */
 export const getBlockingWarningReasons = (
   worker: Pick<Worker, 'id' | 'blockingReasons'>,
   { withLink }: { withLink: boolean }
 ): WorkerWarningReason[] => {
-  if (!isWorkerEnableBlocked(worker.blockingReasons)) {
+  if (!worker.blockingReasons.length) {
     return [];
   }
-  return [
-    {
+  const reasons: WorkerWarningReason[] = [];
+  if (isWorkerEnableBlocked(worker.blockingReasons)) {
+    reasons.push({
       id: 'no_model',
       message: withLink ? (
         <FormattedMessage
@@ -40,6 +40,14 @@ export const getBlockingWarningReasons = (
       ) : (
         settingsI18n.NO_MODEL_REASON_PLAIN
       ),
-    },
-  ];
+    });
+  }
+  if (worker.blockingReasons.includes('weak_role')) {
+    // No link: restoring the role is an Elasticsearch-side action, not a page this app can link to.
+    reasons.push({
+      id: 'weak_role',
+      message: settingsI18n.WEAK_ROLE_REASON,
+    });
+  }
+  return reasons;
 };

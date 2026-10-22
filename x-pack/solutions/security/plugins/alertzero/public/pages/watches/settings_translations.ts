@@ -285,6 +285,14 @@ export const NO_MODEL_REASON_PLAIN = i18n.translate(
   }
 );
 
+export const WEAK_ROLE_REASON = i18n.translate(
+  'xpack.alertzero.watches.settings.worker.blockingReason.weakRole',
+  {
+    defaultMessage:
+      'The account this Worker runs as no longer has its built-in role, so its runs may be failing or missing required permissions. Restore the role on the service account in Elasticsearch.',
+  }
+);
+
 /* -------------------------------------------------------------------------- */
 /* Section headings                                                           */
 /* -------------------------------------------------------------------------- */
