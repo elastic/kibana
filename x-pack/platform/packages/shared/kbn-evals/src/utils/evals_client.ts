@@ -45,6 +45,17 @@ export interface EvaluatorStats {
   datasetId: string;
   datasetName: string;
   evaluatorName: string;
+  /**
+   * Score documents written for this evaluator, including ones whose score came back
+   * null (e.g. every judge in a multi-judge evaluator failed). `stats.count` only
+   * reflects non-null scores, so `judgesAttempted - stats.count` is how many attempts
+   * were dropped from the mean without changing its denominator. Absent on responses
+   * from a Kibana predating this field; treat as equal to `stats.count` (no degradation
+   * visible) in that case.
+   */
+  judgesAttempted?: number;
+  /** Score documents attempted but not counted in `stats` because the score was null. */
+  judgesNullScored?: number;
   stats: {
     mean: number;
     median: number;
@@ -152,7 +163,12 @@ const toIngestScoresError = (statusCode: 400 | 429 | 500, body: IngestScoresResu
     body,
   }) as IngestScoresError;
 
-const mapStatsResponse = (
+/**
+ * Maps a parsed get-experiment response to the CLI's stats shape. Exported so
+ * report rendering can be tested against real parsed payloads (e.g. the
+ * pre-upgrade response, which omits the judge-accounting fields).
+ */
+export const mapStatsResponse = (
   response: ReturnType<typeof GetEvaluationExperimentResponse.parse>
 ): ExperimentStats => {
   const { task_model: taskModel, evaluator_model: evaluatorModel } = response;
@@ -168,6 +184,8 @@ const mapStatsResponse = (
       datasetId: stat.dataset_id,
       datasetName: stat.dataset_name,
       evaluatorName: stat.evaluator_name,
+      judgesAttempted: stat.judges_attempted ?? stat.stats.count,
+      judgesNullScored: stat.judges_null_scored ?? 0,
       stats: {
         mean: stat.stats.mean,
         median: stat.stats.median,
