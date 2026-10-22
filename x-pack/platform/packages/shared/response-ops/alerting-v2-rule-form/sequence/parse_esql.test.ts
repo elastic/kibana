@@ -245,6 +245,21 @@ describe('parseSequenceEsql', () => {
       expect(parseSequenceEsql(query)).toBeNull();
     });
 
+    it('returns null when the recovery query targets a step the sequence does not have', () => {
+      const state: SequenceFormValues = {
+        steps: [
+          { id: generateStepId(), rules: [makeRule('rule-a')], operator: 'and' },
+          { id: generateStepId(), rules: [makeRule('rule-b')], operator: 'and' },
+        ],
+        hopWindows: [{ value: 5, unit: 'm' }],
+        recoveryStepIndices: [0, 1],
+      };
+      const breach = buildSequenceEsql(state);
+      const recovery = buildSequenceRecoveryEsql(state).replace(/a_1\b/g, 'a_5');
+
+      expect(parseSequenceEsql(breach, recovery)).toBeNull();
+    });
+
     it('returns null when hop windows are missing', () => {
       const query = [
         'FROM .rule-events',

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleKind } from '@kbn/alerting-v2-schemas';
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
@@ -47,7 +48,7 @@ interface FetchedRule {
   id: string;
   name: string;
   groupingFields: string[];
-  kind: 'alert' | 'signal';
+  kind: RuleKind;
 }
 
 interface CanvasContentProps {
@@ -252,7 +253,7 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
   const addRuleToStep = useCallback(
     (
       stepId: string,
-      payload: { id: string; name: string; groupingFields: string[]; kind: 'alert' | 'signal' }
+      payload: { id: string; name: string; groupingFields: string[]; kind: RuleKind }
     ) => {
       setSeqValues((prev) => ({
         ...prev,
@@ -302,7 +303,7 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
           id: string;
           name: string;
           groupingFields: string[];
-          kind: 'alert' | 'signal';
+          kind: RuleKind;
         };
         setSeqValues((prev) => {
           if (prev.steps.some((s) => s.rules.some((r) => r.ruleId === id))) return prev;

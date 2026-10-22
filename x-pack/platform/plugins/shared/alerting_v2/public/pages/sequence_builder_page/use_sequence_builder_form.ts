@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { RuleKind } from '@kbn/alerting-v2-schemas';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -48,6 +49,10 @@ const getDefaultFormValues = (): FormValues => ({
 
 export type SequenceBuilderStep = 'alert' | 'recovery';
 
+export type SequenceBuilderLoadError = 'fetch' | 'parse';
+
+const SEQUENCE_BUILDER_TYPE = 'sequence';
+
 export const useSequenceBuilderForm = (
   ruleId: string | undefined,
   options?: { isClone?: boolean }
@@ -55,7 +60,11 @@ export const useSequenceBuilderForm = (
   const isClone = options?.isClone ?? false;
   const rulesApi = useService(RulesApi);
 
-  const { data: editData, isLoading } = useQuery({
+  const {
+    data: editData,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: sequenceBuilderKeys.editRule(ruleId!),
     enabled: Boolean(ruleId),
     refetchOnWindowFocus: false,
@@ -85,6 +94,7 @@ export const useSequenceBuilderForm = (
 
   const rawParsedSeqValues = useMemo<SequenceFormValues | undefined>(() => {
     if (!editData) return undefined;
+    if (editData.metadata.builder?.type !== SEQUENCE_BUILDER_TYPE) return undefined;
     const breachQuery = editData.query ? getBreachEsqlQuery(editData.query) : '';
     if (!breachQuery) return undefined;
     const recoveryQuery = editData.query
@@ -106,7 +116,7 @@ export const useSequenceBuilderForm = (
   );
 
   const { data: ruleFetchResult, isLoading: isRuleFetchLoading } = useQuery<{
-    rules: Record<string, { name: string; groupingFields: string[]; kind: 'alert' | 'signal' }>;
+    rules: Record<string, { name: string; groupingFields: string[]; kind: RuleKind }>;
     failedCount: number;
   }>({
     queryKey: sequenceBuilderKeys.ruleFetch(parsedRuleIds),
@@ -118,10 +128,7 @@ export const useSequenceBuilderForm = (
       const settled = await Promise.allSettled(
         parsedRuleIds.map((id) => rulesApi.getRule(id, signal))
       );
-      const rules: Record<
-        string,
-        { name: string; groupingFields: string[]; kind: 'alert' | 'signal' }
-      > = {};
+      const rules: Record<string, { name: string; groupingFields: string[]; kind: RuleKind }> = {};
       let failedCount = 0;
       for (const result of settled) {
         if (result.status === 'fulfilled') {
@@ -166,9 +173,17 @@ export const useSequenceBuilderForm = (
     };
   }, [rawParsedSeqValues, isRuleFetchPending, fetchedRules]);
 
+  const loadError = useMemo<SequenceBuilderLoadError | undefined>(() => {
+    if (!ruleId) return undefined;
+    if (isError) return 'fetch';
+    if (editData && !rawParsedSeqValues) return 'parse';
+    return undefined;
+  }, [ruleId, isError, editData, rawParsedSeqValues]);
+
   return {
     methods,
     isLoading: (Boolean(ruleId) && isLoading) || isRuleFetchPending,
+    loadError,
     parsedSeqValues,
     savedRecoveryStepIndices: rawParsedSeqValues?.recoveryStepIndices,
     savedStepsCount: rawParsedSeqValues?.steps.length,
@@ -187,14 +202,6 @@ export const useSequenceBuilderState = (initialSeqValues?: SequenceFormValues) =
   const [step, setStep] = useState<SequenceBuilderStep>('alert');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
-  const hasSyncedSeqRef = useRef(false);
-  useEffect(() => {
-    if (initialSeqValues && !hasSyncedSeqRef.current) {
-      hasSyncedSeqRef.current = true;
-      setSeqValues(initialSeqValues);
-    }
-  }, [initialSeqValues]);
 
   const seqValuesRef = useRef(seqValues);
   seqValuesRef.current = seqValues;
@@ -228,7 +235,7 @@ export const useSequenceBuilderState = (initialSeqValues?: SequenceFormValues) =
             : undefined,
         };
 
-        const payload = composeFormToCreateRequest(merged, 'sequence');
+        const payload = composeFormToCreateRequest(merged, SEQUENCE_BUILDER_TYPE);
 
         if (ruleId) {
           await rulesApi.upsertRule(ruleId, payload);

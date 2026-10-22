@@ -5,21 +5,18 @@
  * 2.0.
  */
 
+import type { RuleKind } from '@kbn/alerting-v2-schemas';
 import { buildSequenceEsql, buildSequenceRecoveryEsql } from './build_esql';
 import type { SequenceFormValues } from './form_types';
 import { generateStepId } from './form_types';
 
-const makeRule = (
-  id: string,
-  groupingFields: string[] = [],
-  kind: 'alert' | 'signal' = 'alert'
-) => ({
+const makeRule = (id: string, groupingFields: string[] = [], kind: RuleKind = 'alert') => ({
   ruleId: id,
   ruleName: `Rule ${id}`,
   groupingFields,
   kind,
 });
-const makeCorrelatedRule = (id: string, kind: 'alert' | 'signal' = 'alert') =>
+const makeCorrelatedRule = (id: string, kind: RuleKind = 'alert') =>
   makeRule(id, ['host.name'], kind);
 const makeSignalRule = (id: string, groupingFields: string[] = []) =>
   makeRule(id, groupingFields, 'signal');

@@ -127,7 +127,7 @@ export {
 } from './flyout/compose_discover/compose_mappers';
 
 // Sequence builder
-export type { SequenceFormValues, SequenceRule, HopWindow } from './sequence/form_types';
+export type { SequenceFormValues, SequenceSubRule, HopWindow } from './sequence/form_types';
 export {
   RULE_DRAG_MIME_TYPE,
   generateStepId,
