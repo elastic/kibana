@@ -37,10 +37,12 @@
 .brief .level-critical{border-color:transparent;background:var(--cc-color-danger);color:#fff}
 .brief .level-high{border-color:transparent;background:#C86100;color:#fff}
 .brief .level-moderate{border-color:transparent;background:var(--cc-color-warning);color:#1D2A3E}
-.brief .dot{width:8px;height:8px;border-radius:50%;background:color-mix(in srgb,var(--cc-color-text) 40%,transparent)}
-.brief .dot[data-level=extreme_impact]{background:var(--cc-color-danger)}
-.brief .dot[data-level=high_impact]{background:#D36108}
-.brief .dot[data-level=medium_impact]{background:var(--cc-color-warning)}
+/* The page's criticality badge colours: EUI's severity colours, which the card's tokens don't carry. */
+.brief .dot{width:8px;height:8px;border-radius:50%;background:#E3E8F2}
+.brief .dot[data-level=extreme_impact]{background:#EE4C48}
+.brief .dot[data-level=high_impact]{background:#FF995E}
+.brief .dot[data-level=medium_impact]{background:#FCD883}
+.brief .dot[data-level=low_impact]{background:#B5E5F2}
 .brief .why{margin-top:-4px;opacity:.7}
 .brief .chart{padding-top:8px;border-top:1px solid var(--cc-color-border)}
 .brief .chart figcaption{display:flex;justify-content:space-between;gap:8px;margin-bottom:4px;font-size:12px}

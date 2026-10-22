@@ -216,7 +216,7 @@ describe('renderBriefHtml', () => {
   it('keeps the chart however tall the brief is, and opens the card at its maximum', () => {
     const { html, height } = renderBriefHtml(withText(fixtureViewModel, 30));
 
-    expect(html).toContain('<svg');
+    expect(html).toContain('<svg viewBox="0 0 640');
     expect(height).toBe(CUSTOM_CONTENT_MAX_HEIGHT);
   });
 
@@ -236,8 +236,8 @@ describe('renderBriefHtml', () => {
         ],
       }).html;
 
-    expect(withPoints(3)).toContain('<svg');
-    expect(withPoints(2)).not.toContain('<svg');
+    expect(withPoints(3)).toContain('<svg viewBox="0 0 640');
+    expect(withPoints(2)).not.toContain('<svg viewBox="0 0 640');
     expect(withPoints(2)).toContain('76 High');
     expect(withPoints(1)).not.toContain('<figure');
   });
