@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { lazySchema, z } from '@kbn/zod/v4';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 const ENDPOINT = '/internal/nightshift/investigations/service_account';
+// Ids are opaque: `kibana/<name>` on stateful, a generated id on Serverless.
+const SERVICE_ACCOUNT_ID_MAX_LENGTH = 1024;
 
 // Creating the role and account and binding the workflow are each authorized by Elasticsearch
 // and the workflows plugin against `manage_security`; route privileges cannot express a cluster
@@ -39,8 +42,24 @@ export const enableInvestigatorServiceAccountRoute = createNightshiftInvestigati
     summary: 'Set up Nightshift in this space with its service account',
   },
   security: DELEGATED_AUTHZ,
-  handler: async ({ request, getInvestigatorServiceAccountService, getSpaceId }) =>
-    getInvestigatorServiceAccountService().enable(request, getSpaceId(request)),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        // Found or created by the caller (`ensureNightshiftServiceAccounts`); only the service
+        // accounts backend assigns them, so they cannot be derived from the account names.
+        serviceAccountIds: z.object({
+          agent: z.string().min(1).max(SERVICE_ACCOUNT_ID_MAX_LENGTH),
+          automations: z.string().min(1).max(SERVICE_ACCOUNT_ID_MAX_LENGTH),
+        }),
+      }),
+    })
+  ),
+  handler: async ({ request, params, getInvestigatorServiceAccountService, getSpaceId }) =>
+    getInvestigatorServiceAccountService().enable(
+      request,
+      getSpaceId(request),
+      params.body.serviceAccountIds
+    ),
 });
 
 export const disableInvestigatorServiceAccountRoute = createNightshiftInvestigationsServerRoute({
