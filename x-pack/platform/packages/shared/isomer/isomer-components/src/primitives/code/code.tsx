@@ -11,7 +11,7 @@ import { fromTextChildren } from '@elastic/isomer-sdk/author';
 import { md } from '@elastic/isomer-sdk/markdown';
 import type { SlackRichTextBlock } from '@elastic/isomer-sdk/slack';
 
-import { componentIcon, definePrimitive, plainText } from '../../lib';
+import { componentIcon, definePrimitive, plainText, SIZE, TEXT, snapshotMetrics } from '../../lib';
 import { codeReactRenderer } from './code_react';
 
 const codeSchema = z.object({
@@ -61,6 +61,10 @@ export const code = definePrimitive<CodeNode, typeof codeSchema>({
   },
   icon,
   examples: [example, { type: 'code', text: '{\n  "status": "green"\n}', language: 'json' }],
+  metrics: snapshotMetrics<CodeNode>(
+    'code',
+    ({ text }) => text.split('\n').length * TEXT.s.lineHeight + 3 * SIZE.m
+  ),
   renderers: {
     react: codeReactRenderer,
     text: ({ text }) => text,

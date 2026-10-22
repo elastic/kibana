@@ -13,7 +13,15 @@ import { md } from '@elastic/isomer-sdk/markdown';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
 
-import { componentIcon, definePrimitive, plainText } from '../../lib';
+import {
+  componentIcon,
+  definePrimitive,
+  plainText,
+  SIZE,
+  TEXT,
+  snapshotMetrics,
+  textHeight,
+} from '../../lib';
 import { fieldEntries } from './field_entries';
 import { fieldsSlackRenderer } from './fields_slack';
 
@@ -108,6 +116,15 @@ export const fields = definePrimitive<FieldsNode, typeof fieldsSchema>({
       ],
     },
   ],
+  // Sized as a label above each value, which is how the snapshot renderer lays out this grid.
+  metrics: snapshotMetrics<FieldsNode>('fields', (node) => {
+    const entries = fieldEntries(node);
+    return entries.reduce(
+      (height, { label, value }) =>
+        height + textHeight(label, TEXT.s) + textHeight(value, TEXT.s) + 2 * SIZE.xs,
+      SIZE.m - SIZE.xs
+    );
+  }),
   renderers: {
     react: (node, { context }) => (
       <dl {...nodeAnchor(context, node)} className={classNames(context, handles.root)}>

@@ -13,7 +13,16 @@ import { md } from '@elastic/isomer-sdk/markdown';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
 
-import { componentIcon, definePrimitive, oneLine, plainText } from '../../lib';
+import {
+  componentIcon,
+  definePrimitive,
+  oneLine,
+  plainText,
+  SIZE,
+  TEXT,
+  snapshotMetrics,
+  textHeight,
+} from '../../lib';
 import type { ComponentsPackTypes } from '../../lib';
 import { linkSlackRenderer } from './link_slack';
 import { appLinkPath, reactLinkHref, staticLinkUrl } from './resolve_link';
@@ -149,6 +158,10 @@ export const link = definePrimitive<LinkNode, typeof linkSchema>({
       url: 'https://www.elastic.co/docs/explore-analyze',
     },
   ],
+  metrics: snapshotMetrics<LinkNode>(
+    'link',
+    ({ label }) => textHeight(oneLine(label), TEXT.s) + SIZE.s
+  ),
   renderers: {
     react: linkReactRenderer,
     text: (node) => {

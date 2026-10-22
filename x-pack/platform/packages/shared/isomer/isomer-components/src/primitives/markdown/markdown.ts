@@ -9,8 +9,9 @@ import type { PrimitiveNode } from '@elastic/isomer-sdk';
 import { requiredString, z } from '@elastic/isomer-sdk';
 import { md } from '@elastic/isomer-sdk/markdown';
 
-import { componentIcon, definePrimitive } from '../../lib';
+import { componentIcon, definePrimitive, snapshotMetrics } from '../../lib';
 import { markdownReactRenderer } from './markdown_react';
+import { markdownSnapshotHeight } from './markdown_snapshot_height';
 
 /** A block of GitHub-flavored Markdown. */
 export interface MarkdownNode extends PrimitiveNode {
@@ -60,6 +61,7 @@ export const markdown = definePrimitive<MarkdownNode>({
     example,
   },
   icon,
+  metrics: snapshotMetrics<MarkdownNode>('markdown', ({ text }) => markdownSnapshotHeight(text)),
   examples,
   renderers: {
     react: markdownReactRenderer,

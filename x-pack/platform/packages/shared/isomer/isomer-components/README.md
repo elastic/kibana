@@ -47,6 +47,8 @@ There's no list primitive. For a list built from data, such as a graph's nodes, 
 
 React and HTML are styled with [`@kbn/isomer-theme`](../isomer-theme): each primitive has a style module on Borealis tokens, and the pack's `styleAdapter` emits the CSS a render uses under the `.isomer` root, in light and dark. Rendered through `createKibanaIsomerRuntime`, React output is styled with no further setup.
 
+Every primitive declares `metrics.snapshotHeight`, its estimated height in a Kibana card, through `snapshotMetrics` in `src/lib/snapshot_height.ts`: text wrapped at the width of the card being estimated (`cardContentWidth()`), plus the larger of its vertical margins. A `section` sizes its body through the heights the others register. These are estimates calibrated against takumi, the renderer Studio draws PNGs with, and lean tall; they go once Isomer measures content (elastic/isomer#256).
+
 Each primitive is a folder under `src/primitives/`, registered in `src/pack.ts`. `src/pack.test.ts` checks that registration and runs conformance for every example on every surface.
 
 ## Isomer Studio
