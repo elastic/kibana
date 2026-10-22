@@ -21,6 +21,36 @@ as on a per-test issue: the count goes up, the issue is reopened if needed and a
 test and the build. The count is kept in the issue's `failed-test` metadata; the daily report's
 body and `flaky-test-suite` metadata are left alone.
 
+### Consistent failures
+
+A test that fails every attempt build after build is a break, not a flaky test. With
+`--consistent-failure-issues owner/name` (default `CONSISTENT_FAILURE_ISSUES_REPO`; unset,
+nothing is checked) the reporter looks the job's failures up in the Scout test events, over the
+last 4 days of the job's pipeline and branch, per config and target, and files one issue per
+test file that broke. `kibana-on-merge` sets `CONSISTENT_FAILURE_ISSUES_REPO: elastic/appex-qa-ai`,
+so for now these issues go to the sandbox while the per-test issues keep being filed in
+`elastic/kibana`. The check writes nothing when the per-test issues do not either
+(`--no-github-update`, or `REPORT_FAILED_TESTS_TO_GITHUB` unset), and an error in it is logged
+without failing the job's reporting.
+
+A test fails consistently when its latest builds, at least two, all failed on every attempt and
+the 20 settled builds before all passed; a new test with no history before counts too. A build
+is settled once a second attempt of the job reported the test or, when none has, once Buildkite
+says the build finished. The current build is never asked about, so a job that does not retry contributes to the
+check of the next build. The check runs on every failing attempt and finds a break again on every
+build while it lasts; the issue filed the first time keeps it from filing another.
+
+The issue is titled `Failing <Framework> [UI|API] suite: <title>`, with the `describe` block the
+breaking tests share or the file name, and labelled like a flaky suite issue (`failed-test` plus
+the owning teams' labels, in `elastic/kibana` only). The body names the failing builds, the last
+passing build and the compare link between the two commits, the tests with their history links
+and the last failure's message, and ends with `flaky-test-suite` metadata (file, title,
+framework, test ids, branch, pipeline), so `/skip` and `report_flaky_test_issues` treat it as a
+suite issue. A file gets no new issue when an open `failed-test` issue of the target repository
+is already about the suite, or every breaking test has a per-test issue; other issues that
+mention the file are linked as possibly related. A job files at most 5 issues, most broken tests
+first: more than that looks like a systemic failure rather than a break.
+
 ## `node scripts/report_flaky_test_issues`
 
 Files one `failed-test` issue per flaky test suite, from the report written by
