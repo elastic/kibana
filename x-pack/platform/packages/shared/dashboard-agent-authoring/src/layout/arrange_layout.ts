@@ -153,13 +153,13 @@ const getRemovedGrids = (
 };
 
 /**
- * Writes the ids that `instructions` name as short ids, like the rest of the request. Ids that are
- * plain words are left, since they may be words of the instructions.
+ * Writes the ids that `instructions` name as short ids, like the rest of the request, including ids
+ * that are plain words such as "latency", since the arranger only sees the short ids.
  */
 const aliasInstructions = (instructions: string, aliasById: ReadonlyMap<string, string>): string =>
   instructions
     .split(/([^\w-]+)/)
-    .map((word) => (/[^A-Za-z]/.test(word) ? aliasById.get(word) ?? word : word))
+    .map((word) => aliasById.get(word) ?? word)
     .join('');
 
 /**
