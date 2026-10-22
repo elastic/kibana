@@ -15,7 +15,6 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { ActionPolicyAttachmentData } from '@kbn/alerting-v2-schemas';
 import type { WorkflowsManagementClient } from '@kbn/workflows-management-plugin/server';
-import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import type { ValidateWorkflowResponseDto } from '@kbn/workflows';
 import {
   actionPolicyOperationSchema,
@@ -25,6 +24,7 @@ import {
 import { validateDestinations, type WorkflowDestinationDiagnostic } from './validate_destinations';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
+import type { AttachmentsServiceContract } from '../../../lib/services/attachments_service';
 
 const manageActionPolicySchema = lazySchema(() =>
   z.object({
@@ -40,6 +40,7 @@ const manageActionPolicySchema = lazySchema(() =>
 
 export interface ManageActionPolicyToolDeps {
   logger: LoggerServiceContract;
+  attachmentsService: AttachmentsServiceContract;
   getWorkflowClient: (request: KibanaRequest) => Pick<WorkflowsManagementClient, 'getWorkflow'>;
   getAvailableConnectors: (
     spaceId: string,
@@ -62,6 +63,7 @@ export interface ManageActionPolicyToolDeps {
 
 export const manageActionPolicyTool = ({
   logger,
+  attachmentsService,
   getWorkflowClient,
   getAvailableConnectors,
   validateWorkflow,
@@ -77,7 +79,7 @@ user to the "Create policy" or "Update Policy" button in the rendered attachment
 Use operations[] to:
 1. set_metadata — set name and description
 2. set_destinations — set workflow destinations (type: 'workflow', id: '<workflow-id>')
-3. set_matcher — set matcher \`tags\` (string[]) to match by rule routing tags, or a KQL \`expression\` over alert context fields, or null for catch-all. To target one specific rule, put a shared routing tag on both the rule (via manage_rule \`set_metadata\` \`routing_tags\`) and \`matcher.tags\`.
+3. set_matcher — set matcher \`tags\` (string[]) to match a family of rules by routing tag, or a KQL \`expression\` over alert context fields, or null for catch-all. To target one specific rule, call \`${ALERTING_TOOL_IDS.linkActionPolicyToRule}\` instead of setting tags here. Do not call \`set_matcher\` after that link.
 4. set_grouping — set groupingMode (per_alert | all | per_field) and groupBy fields
 5. set_throttle — set throttle strategy and optional interval
 6. validate — validate the accumulated policy against the API request schema; throws if not ready to save`,
@@ -88,16 +90,10 @@ Use operations[] to:
   ) => {
     let policyId: string | undefined;
     try {
-      const currentAttachment = previousAttachmentId
-        ? attachments.getAttachmentRecord(previousAttachmentId)
-        : undefined;
-
-      const isNew = !currentAttachment;
-      const attachmentId = previousAttachmentId ?? uuidv4();
-
-      const currentData: Partial<ActionPolicyAttachmentData> =
-        currentAttachment?.versions.at(-1)?.data ?? {};
-      policyId = currentAttachment?.origin;
+      const attachmentsClient = attachmentsService.getClient(attachments);
+      const draft = attachmentsClient.actionPolicies.getDraft(previousAttachmentId);
+      const { isNew, data: currentData } = draft;
+      policyId = draft.origin;
 
       const updatedData = executeActionPolicyOperations(currentData, operations, {
         isNew,
@@ -135,7 +131,7 @@ Use operations[] to:
           isNew || operations.some((op) => op.operation === 'set_destinations');
 
         const destinationResult = await validateDestinations(updatedData.destinations, {
-          attachments,
+          workflowAttachments: attachmentsClient.workflows,
           persistedWorkflowLookup: getWorkflowClient(request),
           connectorLookup: { findConnectorById },
           spaceId,
@@ -147,23 +143,7 @@ Use operations[] to:
         workflowDiagnostics = destinationResult.diagnostics;
       }
 
-      const attachmentInput = {
-        id: attachmentId,
-        type: ACTION_POLICY_ATTACHMENT_TYPE,
-        description: `Action Policy: ${updatedData.name ?? attachmentId}`,
-        data: updatedData,
-      };
-
-      const attachment = isNew
-        ? await attachments.add(attachmentInput)
-        : await attachments.update(attachmentId, {
-            data: updatedData,
-            description: attachmentInput.description,
-          });
-
-      if (!attachment) {
-        throw new Error(`Failed to persist action policy attachment "${attachmentId}".`);
-      }
+      const attachment = await attachmentsClient.actionPolicies.saveDraft(draft, updatedData);
 
       logger.debug({
         message: () =>

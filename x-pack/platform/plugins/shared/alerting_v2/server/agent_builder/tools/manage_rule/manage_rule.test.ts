@@ -12,8 +12,10 @@ jest.mock('uuid', () => ({
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
+import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
+import { AttachmentsService } from '../../../lib/services/attachments_service';
 import { manageRuleTool } from './manage_rule';
 
 const getEsqlQueryMock = (ctx: ToolHandlerContextMock) =>
@@ -68,7 +70,10 @@ describe('manageRuleTool', () => {
 
   beforeEach(() => {
     logger = createLogger();
-    tool = manageRuleTool({ logger: logger as unknown as LoggerServiceContract });
+    tool = manageRuleTool({
+      logger: logger as unknown as LoggerServiceContract,
+      attachmentsService: new AttachmentsService(),
+    });
   });
 
   it('describes operations from the schema helpers', () => {
@@ -493,6 +498,7 @@ describe('manageRuleTool', () => {
     it('updates an persisted attachment when ruleAttachmentId is provided', async () => {
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
+        type: RULE_ATTACHMENT_TYPE,
         versions: [
           {
             data: {
@@ -572,6 +578,7 @@ describe('manageRuleTool', () => {
     it('includes rule_id on unexpected errors when the rule is already persisted', async () => {
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
+        type: RULE_ATTACHMENT_TYPE,
         origin: 'rule-persisted-id',
         versions: [
           {
@@ -604,6 +611,7 @@ describe('manageRuleTool', () => {
     it('includes rule_id on unexpected errors when the rule is only in memory', async () => {
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
+        type: RULE_ATTACHMENT_TYPE,
         versions: [
           {
             data: {

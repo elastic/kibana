@@ -12,6 +12,7 @@ import {
   ALERTING_TOOL_IDS,
   ALERTING_V2_ENABLED_SETTING_ID,
 } from '@kbn/alerting-v2-constants';
+import { linkActionPolicyToRuleTool } from '../tools/link_routing_tag';
 import { manageActionPolicyTool } from '../tools/manage_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import {
@@ -139,7 +140,9 @@ For a new policy, start with \`set_metadata\` (name required), then \`set_destin
 
 For an existing policy, pass the \`actionPolicyAttachmentId\` and only include the operations for the requested changes.
 
-See the [action-policy-matchers reference](./references/action-policy-matchers.md) when choosing matcher fields. To scope a policy to one rule, use a shared routing tag on both the rule's \`routing_tags\` and \`matcher.tags\` — the \`matcher\` field in the operations table below shows the shape but does not expand its \`tags\`/\`expression\` sub-fields; consult the matchers reference for the full API. For whether to scope to one rule or many, consult [single-rule action policies](./references/action-policy-single-rule.md) or [multi-rule action policies](./references/action-policy-multi-rule.md).
+See the [action-policy-matchers reference](./references/action-policy-matchers.md) when choosing matcher fields. To scope a policy to one rule, call \`${
+      ALERTING_TOOL_IDS.linkActionPolicyToRule
+    }\` with this policy attachment and the rule attachment. Do not set \`matcher.tags\` by hand for that link, and do not call \`set_matcher\` after it. The \`matcher\` field in the operations table below shows the shape but does not expand its \`tags\`/\`expression\` sub-fields; consult the matchers reference for the full API. For whether to scope to one rule or many, consult [single-rule action policies](./references/action-policy-single-rule.md) or [multi-rule action policies](./references/action-policy-multi-rule.md).
 
 ${generateActionPolicyOperationsDoc()}
 
@@ -211,9 +214,19 @@ An action policy only requires its destination **workflows** to be saved first. 
 
 After rendering the attachments, remind the user to save the workflow before the action policy.
 
-Policies are linked to rules only by \`matcher.tags\`, matched against the rule's \`metadata.routing_tags\`. If a tag in the policy's \`matcher.tags\` is carried by a rule attachment in the conversation that is still unsaved, remind the user that the rule has not been saved yet. Explain that unless another saved rule already carries that routing tag, the policy will not match any alerts until the rule is saved. Do not search for or fetch other rules to check this.
+Policies are linked to rules only by \`matcher.tags\`, matched against the rule's \`metadata.routing_tags\`. For one specific rule, \`${
+      ALERTING_TOOL_IDS.linkActionPolicyToRule
+    }\` writes both. The policy does not wait on the rule being saved.
 
-Do not add this reminder for catch-all policies, for policies that route only by \`matcher.expression\`, or when the policy's tags are not on the unsaved rule.
+When that tool result has \`rule_saved: false\`, the reply must name \`routing_tag\` and state both that the rule is unsaved and that the policy matches no alerts until the rule carrying that tag is saved. Do not search for or fetch other rules to check this.
+
+Do not add this reminder for catch-all policies, for policies that route only by \`matcher.expression\`, or when neither link tool was called.
+
+After \`${
+      ALERTING_TOOL_IDS.linkActionPolicyToRule
+    }\`, render both attachments with the ids and versions from the tool result:
+\`<render_attachment id="{ruleAttachment.id}" version="{ruleAttachment.version}"/>\`
+\`<render_attachment id="{actionPolicyAttachment.id}" version="{actionPolicyAttachment.version}"/>\`
 
 ## Customization Hints
 
@@ -227,7 +240,9 @@ After creating the defaults, briefly mention:
 ## When to Load References
 
 ### Single-rule Action Policies
-When notifying on one specific rule (link via a shared routing tag on both the rule's \`routing_tags\` and \`matcher.tags\`), consult the [action-policy-single-rule reference](./references/action-policy-single-rule.md).
+When notifying on one specific rule, call \`${
+      ALERTING_TOOL_IDS.linkActionPolicyToRule
+    }\`, then consult the [action-policy-single-rule reference](./references/action-policy-single-rule.md). Catch-all and expression-only policies do not call this tool.
 
 ### Multi-rule Action Policies
 When the user wants one policy across several rules, a catch-all, or routing by tag/severity, consult the [action-policy-multi-rule reference](./references/action-policy-multi-rule.md).
@@ -252,5 +267,5 @@ When the user asks how a notification gets from a rule firing to email/Slack, co
 
 ### Workflow Dispatch Payload
 When choosing Liquid variables for a notification workflow, including query-specific \`alert.data.*\` fields, consult the [workflow-dispatch-payload reference](./references/workflow-dispatch-payload.md).`,
-    getInlineTools: () => [manageActionPolicyTool(deps)],
+    getInlineTools: () => [manageActionPolicyTool(deps), linkActionPolicyToRuleTool(deps)],
   });
