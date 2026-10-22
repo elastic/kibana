@@ -506,8 +506,10 @@ export class NightshiftInvestigationsClient {
       ? await findInvestigationConversation(conversations, investigationId)
       : undefined;
     if (existing) this.assertConversationTarget(existing.telemetryTarget, telemetry_target);
-    const telemetryTarget = existing
-      ? existing.telemetryTarget
+    // A pending claim holder may not have its conversation yet. Its queued follow-up must
+    // inherit that conversation's binding rather than receive a new-conversation default.
+    const telemetryTarget = isFollowUp
+      ? existing?.telemetryTarget ?? telemetry_target
       : telemetry_target ?? this.telemetryConfig?.default_telemetry_target;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
