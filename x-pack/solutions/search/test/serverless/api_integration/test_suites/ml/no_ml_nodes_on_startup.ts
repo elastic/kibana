@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from 'expect';
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { EXPECTED_STARTUP_TRAINED_MODEL_IDS } from './constants';
 
@@ -21,10 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { trained_model_configs: models } = await es.ml.getTrainedModels({ size: 1000 });
       const modelIds = models.map(({ model_id: modelId }) => modelId).sort();
 
-      expect({ modelIds, guidance: GUIDANCE }).toEqual({
-        modelIds: [...EXPECTED_STARTUP_TRAINED_MODEL_IDS].sort(),
-        guidance: GUIDANCE,
-      });
+      expect(modelIds).to.eql([...EXPECTED_STARTUP_TRAINED_MODEL_IDS].sort(), GUIDANCE);
     });
 
     it('has no trained model deployments', async () => {
@@ -33,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
         .filter(({ deployment_stats: deploymentStats }) => deploymentStats !== undefined)
         .map(({ model_id: modelId }) => modelId);
 
-      expect({ deployed, guidance: GUIDANCE }).toEqual({ deployed: [], guidance: GUIDANCE });
+      expect(deployed).to.eql([], GUIDANCE);
     });
   });
 }
