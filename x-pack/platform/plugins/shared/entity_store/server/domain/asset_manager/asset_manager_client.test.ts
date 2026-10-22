@@ -566,7 +566,7 @@ describe('AssetManagerClient', () => {
         });
         expect(nonPriorityLogsExtractionConfigByType.user).toMatchObject({
           maxLogsPerWindowCapBehavior: 'drop',
-          maxLogsPerWindow: LATEST_LOG_EXTRACTION_DEFAULTS.maxLogsPerWindow,
+          maxLogsPerWindow: 500000,
           frequency: '5m',
         });
         expect(logsExtractionConfigByType.host).toMatchObject({

@@ -27,3 +27,10 @@ export {
 export { resolveAlertLabel, type ResolveAlertLabelParams } from './resolve_alert_label';
 export { buildRulePayload } from './rule_mappers';
 export { attachmentDataToActionPolicyPayload } from './action_policy_mappers';
+export {
+  encodeSeriesId,
+  decodeSeriesId,
+  InvalidSeriesIdError,
+  type SeriesRef,
+  type DecodedSeriesId,
+} from './series_id';

@@ -33,7 +33,13 @@ const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
 const buildDataTableRecordMock = jest.mocked(buildDataTableRecord);
 const useAlertingEpisodeSourceDataViewMock = jest.mocked(useAlertingEpisodeSourceDataView);
 
-const mockTableRender = jest.fn(() => <div data-test-subj="mock-doc-viewer-table" />);
+const mockTableRender = jest.fn(
+  (_props: {
+    dataView: {
+      getFieldByName: (name: string) => { type: string } | undefined;
+    };
+  }) => <div data-test-subj="mock-doc-viewer-table" />
+);
 
 const mockUnifiedDocViewer = {
   registry: {
@@ -107,12 +113,28 @@ const mockEsqlResponses = (eventData: string | null | 'error') => {
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
 
+const sourceDataView = {
+  id: 'mock-data-view',
+  toSpec: () => ({
+    id: 'mock-data-view',
+    title: 'logs-*',
+    fields: {
+      'host.name': {
+        name: 'host.name',
+        type: 'string',
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+  }),
+};
+
 describe('AlertEpisodeMetadataSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
     useAlertingEpisodeSourceDataViewMock.mockReturnValue({
-      value: { id: 'mock-data-view' },
+      value: sourceDataView,
       loading: false,
     } as never);
   });
@@ -187,11 +209,16 @@ describe('AlertEpisodeMetadataSection', () => {
       expect.objectContaining({
         hit: expect.objectContaining({
           id: 'mock-id',
-          raw: { _source: { threshold_met: true } },
+          raw: { _source: { data: { threshold_met: true } } },
         }),
-        dataView: expect.objectContaining({ id: 'mock-data-view' }),
+        dataView: expect.objectContaining({
+          id: 'mock-data-view-data-container',
+        }),
       })
     );
+    const passedDataView = mockTableRender.mock.calls.at(-1)?.[0]?.dataView;
+    expect(passedDataView?.getFieldByName('host.name')).toBeUndefined();
+    expect(passedDataView?.getFieldByName('data.host.name')?.type).toBe('string');
   });
 
   it('strips _id/_index/_score/_ignored metadata fields from the rendered hit', async () => {
@@ -199,9 +226,9 @@ describe('AlertEpisodeMetadataSection', () => {
     // view's metaFields into `flattened` even though this hit never had real values for them.
     buildDataTableRecordMock.mockReturnValueOnce({
       id: 'mock-id',
-      raw: { _source: { threshold_met: true } },
+      raw: { _source: { data: { threshold_met: true } } },
       flattened: {
-        threshold_met: true,
+        'data.threshold_met': true,
         _id: undefined,
         _index: undefined,
         _score: undefined,
@@ -224,7 +251,7 @@ describe('AlertEpisodeMetadataSection', () => {
     expect(mockTableRender).toHaveBeenCalledWith(
       expect.objectContaining({
         hit: expect.objectContaining({
-          flattened: { threshold_met: true },
+          flattened: { 'data.threshold_met': true },
         }),
       })
     );

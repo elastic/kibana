@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { buildPolicyBaseIdWithFallbackKuery } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
-import { escapeQuotes } from '@kbn/es-query';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
@@ -26,6 +26,11 @@ import {
 import { scheduleTestNowCleanUp } from '../../tasks/clean_up_package_policies_task';
 import type { SyntheticsServerSetup } from '../../types';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
+import {
+  getSecretConnectionDelivery,
+  SecretConnectionError,
+  type HeartbeatVaultConfig,
+} from '../get_secret_connection';
 import type {
   HeartbeatConfig,
   MonitorFields,
@@ -81,7 +86,8 @@ export type CreatePackagePoliciesResult = BulkCreatedPolicies & {
 };
 
 export interface FailedPolicyUpdate {
-  packagePolicy: NewPackagePolicyWithId;
+  /** Absent when the policy could not be generated at all. */
+  packagePolicy?: NewPackagePolicyWithId;
   config?: HeartbeatConfig;
   error?: Error | SavedObjectError;
 }
@@ -236,7 +242,9 @@ export class SyntheticsPrivateLocation {
     runOnce?: boolean,
     conditionHosts?: EnrolledAgents,
     existingCondition?: string | null,
-    shardingMode: AgentShardingMode = 'inactive'
+    shardingMode: AgentShardingMode = 'inactive',
+    secretConnections?: HeartbeatVaultConfig[],
+    secretStorageEnabled = true
   ): Promise<NewPackagePolicy | null> {
     const { label: locName } = privateLocation;
 
@@ -290,6 +298,15 @@ export class SyntheticsPrivateLocation {
 
       newPolicy.namespace = await this.getPolicyNamespace(configNamespace);
 
+      // `secretConnections` is fetched ONCE per space by the caller
+      // (createPackagePolicies / editMonitors) — E1 — and formatSyntheticsPolicy
+      // attaches only the ones THIS monitor references (A2), as a single Fleet
+      // secret. It is undefined on the inspect path (A1): Fleet's inspect()
+      // compiles vars verbatim (no secret-ization), so attaching them would return
+      // plaintext credentials to the caller.
+      //
+      // When Fleet secret storage is disabled the blob would be stored in plaintext,
+      // so formatSyntheticsPolicy refuses to attach it (`secretStorageEnabled`).
       const { formattedPolicy } = formatSyntheticsPolicy(
         newPolicy,
         config.type,
@@ -314,7 +331,10 @@ export class SyntheticsPrivateLocation {
           ...(config.fields?.kibanaUrl ? { kibanaUrl: config.fields.kibanaUrl } : {}),
         },
         globalParams,
-        maintenanceWindows
+        maintenanceWindows,
+        undefined,
+        secretConnections,
+        secretStorageEnabled
       );
 
       return formattedPolicy;
@@ -324,7 +344,8 @@ export class SyntheticsPrivateLocation {
       // to the caller's generic "unable to create package policy" path.
       if (
         e instanceof Error &&
-        e.message.includes('Synthetics integration version 1.12.0 or later')
+        (e.message.includes('Synthetics integration version 1.12.0 or later') ||
+          e instanceof SecretConnectionError)
       ) {
         throw e;
       }
@@ -350,7 +371,7 @@ export class SyntheticsPrivateLocation {
         showInactive: false,
         perPage,
         page,
-        kuery: `policy_id:"${escapeQuotes(agentPolicyId)}"`,
+        kuery: buildPolicyBaseIdWithFallbackKuery(agentPolicyId),
       });
 
       for (const agent of agents) {
@@ -415,6 +436,12 @@ export class SyntheticsPrivateLocation {
     const newPolicies: NewPackagePolicyWithId[] = [];
     const locationErrors: ServiceLocationErrors = [];
     const newPolicyTemplate = await this.buildNewPolicy(spaceId);
+    // E1: fetch the space's vault connections ONCE (they're decrypted), not per
+    // monitor × location.
+    const { secretConnections, secretStorageEnabled } = await getSecretConnectionDelivery(
+      this.server,
+      spaceId
+    );
     const referencedPrivateLocations = this.getReferencedPrivateLocations(
       configs,
       privateLocations
@@ -466,7 +493,9 @@ export class SyntheticsPrivateLocation {
             runOnce,
             enrolledAgents,
             undefined,
-            shardingMode
+            shardingMode,
+            secretConnections,
+            secretStorageEnabled
           );
 
           if (!newPolicy) {
@@ -557,6 +586,8 @@ export class SyntheticsPrivateLocation {
         conditionHosts,
         undefined,
         shardingMode
+        // secretConnections omitted (A1): never attach vault credentials to inspect
+        // output — Fleet's inspect() compiles vars verbatim, with no secret-ization.
       );
 
       const pkgPolicy = {
@@ -600,15 +631,22 @@ export class SyntheticsPrivateLocation {
       };
     }
 
-    const [newPolicyTemplate, { policies: existingPolicies, allSpaces }] = await Promise.all([
+    // E1: fetch the space's vault connections ONCE, not per monitor × location.
+    const [
+      newPolicyTemplate,
+      { policies: existingPolicies, allSpaces },
+      { secretConnections, secretStorageEnabled },
+    ] = await Promise.all([
       this.buildNewPolicy(spaceId),
       this.getExistingPolicies(
         configs.map(({ config }) => config),
         allPrivateLocations,
         spaceId
       ),
+      getSecretConnectionDelivery(this.server, spaceId),
     ]);
 
+    const failedSecretConnectionUpdates: FailedPolicyUpdate[] = [];
     const policiesToUpdate: UpdatePackagePolicyWithId[] = [];
     const policiesToCreate: NewPackagePolicyWithId[] = [];
     const policiesToDelete: string[] = [];
@@ -627,6 +665,13 @@ export class SyntheticsPrivateLocation {
       const { locations } = config;
 
       const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
+
+      // Queued per monitor so a monitor that fails on a secret connection applies none of its
+      // policy changes — the caller reverts its saved object, and the two must stay in sync.
+      const monitorPoliciesToUpdate: UpdatePackagePolicyWithId[] = [];
+      const monitorPoliciesToCreate: NewPackagePolicyWithId[] = [];
+      const monitorPoliciesToDelete: string[] = [];
+      let secretConnectionError: SecretConnectionError | undefined;
 
       for (const privateLocation of allPrivateLocations) {
         const hasLocation = monitorPrivateLocations?.some((loc) => loc.id === privateLocation.id);
@@ -660,7 +705,9 @@ export class SyntheticsPrivateLocation {
               undefined,
               enrolledAgentsByLocation.get(privateLocation.id),
               existingCondition,
-              shardingMode
+              shardingMode,
+              secretConnections,
+              secretStorageEnabled
             );
 
             if (!newPolicy) {
@@ -668,25 +715,41 @@ export class SyntheticsPrivateLocation {
             }
 
             if (hasNewFormatPolicyId) {
-              policiesToUpdate.push({ ...newPolicy, id: newId } as UpdatePackagePolicyWithId);
-              policiesToDelete.push(...legacyPolicyIds);
+              monitorPoliciesToUpdate.push({
+                ...newPolicy,
+                id: newId,
+              } as UpdatePackagePolicyWithId);
+              monitorPoliciesToDelete.push(...legacyPolicyIds);
             } else if (hasAnyLegacyPolicyId) {
-              policiesToDelete.push(...legacyPolicyIds);
-              policiesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
+              monitorPoliciesToDelete.push(...legacyPolicyIds);
+              monitorPoliciesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
             } else {
-              policiesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
+              monitorPoliciesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
             }
           } else {
             if (hasNewFormatPolicyId) {
-              policiesToDelete.push(newId);
+              monitorPoliciesToDelete.push(newId);
             }
-            policiesToDelete.push(...legacyPolicyIds);
+            monitorPoliciesToDelete.push(...legacyPolicyIds);
           }
         } catch (e) {
           this.server.logger.error(e);
+          // One monitor's bad connection must not block the rest of the batch.
+          if (e instanceof SecretConnectionError) {
+            secretConnectionError = e;
+            break;
+          }
           throwAddEditError(hasPolicy, privateLocation.label, config[ConfigKey.NAME]);
         }
       }
+
+      if (secretConnectionError) {
+        failedSecretConnectionUpdates.push({ config, error: secretConnectionError });
+        continue;
+      }
+      policiesToUpdate.push(...monitorPoliciesToUpdate);
+      policiesToCreate.push(...monitorPoliciesToCreate);
+      policiesToDelete.push(...monitorPoliciesToDelete);
     }
 
     const uniqueToDelete = [...new Set(policiesToDelete)];
@@ -749,7 +812,7 @@ export class SyntheticsPrivateLocation {
     });
 
     return {
-      failedUpdates,
+      failedUpdates: [...(failedUpdates ?? []), ...failedSecretConnectionUpdates],
       failedCreates: createResponse.failed,
     };
   }
