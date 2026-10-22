@@ -139,14 +139,11 @@ describe('readAlertRules', () => {
 });
 
 describe('buildRulesAggregation', () => {
-  it('takes the two rules with the most severe alerts, then the most alerts', () => {
+  it('takes the two rules whose alerts have the highest risk score, then the most alerts', () => {
     const { terms, aggs } = buildRulesAggregation();
 
     expect(terms.size).toBe(2);
-    expect(terms.order).toEqual([{ highestSeverity: 'desc' }, { _count: 'desc' }]);
-    const { ranks } = aggs.highestSeverity.max.script.params;
-    expect(ranks.critical).toBeGreaterThan(ranks.high);
-    expect(ranks.high).toBeGreaterThan(ranks.medium);
-    expect(ranks.medium).toBeGreaterThan(ranks.low);
+    expect(terms.order).toEqual([{ highestRiskScore: 'desc' }, { _count: 'desc' }]);
+    expect(aggs.highestRiskScore.max.field).toBe('kibana.alert.risk_score');
   });
 });

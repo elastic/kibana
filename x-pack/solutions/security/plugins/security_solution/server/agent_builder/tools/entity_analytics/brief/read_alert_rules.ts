@@ -12,7 +12,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
-import { ALERT_RULE_NAME, ALERT_SEVERITY, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_RISK_SCORE, ALERT_RULE_NAME, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 import { ALERT_ENTITY_ID } from '../../../../../common/field_maps/field_names';
@@ -22,8 +22,6 @@ import type { BriefCandidate, EntityAlerts } from './types';
 
 /** The two most important rules are given to the model, and the rest are counted. */
 const MAX_RULES_PER_ENTITY = 2;
-/** How the severity of an alert ranks its rule: the highest severity of a rule's alerts comes first. */
-const SEVERITY_RANKS = { low: 1, medium: 2, high: 3, critical: 4 };
 /** The members of a group whose records match its alerts without an entity id. Stamped alerts match every member. */
 const MAX_MEMBERS_MATCHED_BY_RECORD = 20;
 /** Rule names are written by users, so a long one is cut. */
@@ -120,23 +118,14 @@ export const readAlertRules = async ({
   }
 };
 
-/** The rules with the most severe alerts first, then the most alerts. */
+/** The rules whose alerts have the highest risk score first, then the most alerts. */
 export const buildRulesAggregation = () => ({
   terms: {
     field: ALERT_RULE_NAME,
     size: MAX_RULES_PER_ENTITY,
-    order: [{ highestSeverity: 'desc' as const }, { _count: 'desc' as const }],
+    order: [{ highestRiskScore: 'desc' as const }, { _count: 'desc' as const }],
   },
-  aggs: {
-    highestSeverity: {
-      max: {
-        script: {
-          source: `params.ranks.getOrDefault(doc['${ALERT_SEVERITY}'].size() == 0 ? '' : doc['${ALERT_SEVERITY}'].value, 0)`,
-          params: { ranks: SEVERITY_RANKS },
-        },
-      },
-    },
-  },
+  aggs: { highestRiskScore: { max: { field: ALERT_RISK_SCORE } } },
 });
 
 /** The ids of a candidate and its members. */
