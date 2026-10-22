@@ -210,8 +210,8 @@ export class ToolManager implements IToolManager {
   }
 
   private getMaxToolTokens(tool: ExecutableTool, dynamicToolId?: string): number {
-    const dynamicTool = dynamicToolId ? this.getDynamicTool(dynamicToolId) : undefined;
-    return dynamicTool?.maxResultTokens ?? tool.maxResultTokens ?? this.maxToolResultTokens;
+    const innerTool = dynamicToolId ? this.getExecutable(dynamicToolId) : undefined;
+    return innerTool?.maxResultTokens ?? tool.maxResultTokens ?? this.maxToolResultTokens;
   }
 
   private async convertExecutableTools(input: ExecutableToolInput): Promise<ConvertedTools> {

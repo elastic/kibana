@@ -1155,5 +1155,36 @@ describe('ToolManager', () => {
       expect(untagged).toContain('Preview (first 10 tokens):');
       expect(untagged).toContain('not recoverable');
     });
+
+    it('applies a natively bound tool budget when the meta-tool fell back to it', async () => {
+      // the meta-tool dispatches to a native tool called by the wrong path; its budget still applies
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: { ...createMockExecutableTool('native.tool'), maxResultTokens: Infinity },
+        logger: mockLogger,
+      });
+      // the meta-tool's own buildContent, not the native tool's
+      const metaBuildContent = (() => {
+        const { toolToLangchain } = jest.requireMock(
+          '@kbn/agent-builder-genai-utils/langchain'
+        ) as { toolToLangchain: jest.Mock };
+        // last one: mock calls accumulate across tests and each test has its own manager
+        const call = [...toolToLangchain.mock.calls]
+          .reverse()
+          .find(
+            ([params]: [{ tool: { id: string } }]) => params.tool.id === 'execute_dynamic_tool'
+          );
+        return call[0].buildContent as ReturnType<typeof lastBuildContent>;
+      })();
+
+      const content = metaBuildContent({
+        results: hugeResults,
+        toolId: 'execute_dynamic_tool',
+        toolCallId: 'call-1',
+        dynamicToolId: 'native.tool',
+      });
+
+      expect(content).toEqual(JSON.stringify({ results: hugeResults }));
+    });
   });
 });
