@@ -35,6 +35,7 @@ import { nginxGroupItem, singleSchemaGroupItem } from './__fixtures__/groups';
 import type { SchemaModel, SchemaState, WizardStream } from './model';
 import {
   getAgentInputErrors,
+  getContentInstallText,
   getDeploymentMethods,
   getDetectStatus,
   getInstallSummary,
@@ -272,6 +273,36 @@ describe('group wizard model', () => {
       });
       // Input packages can't require content packs: nothing to show for Apache OTel.
       expect(getInstallSummary(apacheInputOtelPackageInfo).contentPackages).toEqual([]);
+    });
+  });
+
+  // PROTOTYPE: "Install content" review text
+  describe('content', () => {
+    const summary = getInstallSummary(nginxOtelIntegrationPackageInfo);
+
+    it('lists content when on, what is skipped when off', () => {
+      expect(getContentInstallText(summary, true)).toEqual({
+        hasContent: true,
+        installed:
+          'Nginx OpenTelemetry 1.0.0: Elasticsearch assets, plus content: 3 dashboards and 8 other Kibana assets (alert and SLO templates, ML jobs, saved searches).',
+      });
+      expect(getContentInstallText(summary, false)).toEqual({
+        hasContent: true,
+        installed: 'Nginx OpenTelemetry 1.0.0: Elasticsearch assets only.',
+        skipped:
+          'Not installed: 3 dashboards and 8 other Kibana assets (alert and SLO templates, ML jobs, saved searches). Reinstall Nginx OpenTelemetry with content to add them later.',
+      });
+    });
+
+    it('no checkbox for packages without content of their own', () => {
+      expect(getContentInstallText(getInstallSummary(apacheInputOtelPackageInfo), true)).toEqual({
+        hasContent: false,
+        installed:
+          'Apache HTTP Server (OpenTelemetry) 0.1.2: Elasticsearch assets. No content in this package.',
+      });
+      expect(getContentInstallText(getInstallSummary(nginxOtelPackageInfo), true).installed).toBe(
+        'Nginx (OpenTelemetry) 0.1.0: Elasticsearch assets, plus content from nginx_otel 0.7.0.'
+      );
     });
   });
 

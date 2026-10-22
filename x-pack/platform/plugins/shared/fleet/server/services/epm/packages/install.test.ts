@@ -243,6 +243,28 @@ describe('createInstallation', () => {
     });
   });
 
+  // PROTOTYPE: "Install content"
+  it('saves skip_kibana_assets only when content is skipped', async () => {
+    soClient.create.mockClear();
+    await createInstallation({
+      savedObjectsClient: soClient,
+      packageInfo,
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+      skipKibanaAssets: true,
+    });
+    expect(soClient.create.mock.calls[0][1]).toMatchObject({ skip_kibana_assets: true });
+
+    soClient.create.mockClear();
+    await createInstallation({
+      savedObjectsClient: soClient,
+      packageInfo,
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+    });
+    expect(soClient.create.mock.calls[0][1]).not.toHaveProperty('skip_kibana_assets');
+  });
+
   describe('installSource: upload', () => {
     it('should call audit logger', async () => {
       await createInstallation({
@@ -491,6 +513,40 @@ describe('install', () => {
         packageName: 'apache',
         status: 'success',
         automaticInstall: false,
+      });
+    });
+
+    // PROTOTYPE: "Install content" - explicit choice wins, else the saved one (upgrade, reinstall)
+    describe('skipKibanaAssets', () => {
+      const installWith = async (
+        saved: boolean | undefined,
+        requested: boolean | undefined
+      ): Promise<boolean | undefined> => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        jest.mocked(installStateMachine._stateMachineInstallPackage).mockClear();
+        jest.mocked(getInstallationObject).mockResolvedValueOnce({
+          attributes: { version: '1.2.0', installed_kibana: [], skip_kibana_assets: saved },
+        } as any);
+        await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+          skipKibanaAssets: requested,
+        });
+        return jest.mocked(installStateMachine._stateMachineInstallPackage).mock.calls[0][0]
+          .skipKibanaAssets;
+      };
+
+      it('keeps the saved choice on upgrade when none is requested', async () => {
+        expect(await installWith(true, undefined)).toBe(true);
+        expect(await installWith(undefined, undefined)).toBe(false);
+      });
+
+      it('uses the requested choice over the saved one', async () => {
+        expect(await installWith(true, false)).toBe(false);
+        expect(await installWith(false, true)).toBe(true);
       });
     });
 

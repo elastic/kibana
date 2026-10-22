@@ -876,6 +876,12 @@ export interface Installation {
   namespace_customization_settings?: { [namespace: string]: { ilm_policy?: string } };
   /** Snapshot of dependency version changes made when this (composable) package was last installed/upgraded; used for rollback */
   previous_dependency_versions?: Array<{ name: string; previous_version: string | null }> | null;
+  /**
+   * PROTOTYPE: "Install content" off. Kibana assets (everything under `kibana/`: dashboards, ML
+   * jobs, alert and SLO templates, saved searches) are not installed. Elasticsearch assets always
+   * are. Kept across upgrades and reinstalls until an install request sets it again.
+   */
+  skip_kibana_assets?: boolean;
 }
 
 export interface PackageUsageStats {

@@ -323,8 +323,13 @@ export async function stepCreateAlertingAssets(
     | 'spaceId'
     | 'request'
     | 'installedPkg'
+    | 'skipKibanaAssets'
   > & { installAsAdditionalSpace?: boolean }
 ) {
+  // PROTOTYPE: "Install content" off - no alerting templates or rules either.
+  if (context.skipKibanaAssets) {
+    return;
+  }
   const {
     logger,
     savedObjectsClient,

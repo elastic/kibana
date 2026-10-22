@@ -548,6 +548,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     ignoreMappingUpdateErrors: request.query?.ignoreMappingUpdateErrors,
     skipDataStreamRollover: request.query?.skipDataStreamRollover,
     skipDependencyCheck: request.query?.skipDependencyCheck,
+    skipKibanaAssets: request.body?.skip_kibana_assets,
   });
 
   if (!res.error) {
@@ -910,6 +911,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       keep_policies_up_to_date: attributes.keep_policies_up_to_date,
       namespace_customization_enabled_for: attributes.namespace_customization_enabled_for,
       namespace_customization_settings: attributes.namespace_customization_settings,
+      skip_kibana_assets: attributes.skip_kibana_assets,
     };
 
     return {

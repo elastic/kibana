@@ -44,6 +44,7 @@ import type {
   WizardStream,
 } from './model';
 import {
+  getContentInstallText,
   getEnabledSignals,
   getEnabledStreams,
   getSchemaInfo,
@@ -429,13 +430,18 @@ export const ReviewStep: React.FC<{
   agentPolicyLabel?: string;
   integrationSettings: React.ReactNode;
   onEdit: (step: string) => void;
+  /** PROTOTYPE: "Install content" checkbox (all of the package's Kibana assets, or none). */
+  installContent: boolean;
+  onInstallContentChange: (installContent: boolean) => void;
+  /** Set when the package is already installed: the choice was made then, shown read-only. */
+  installContentLockedReason?: string;
 }> = (props) => {
   const { euiTheme } = useEuiTheme();
   const { model, state, title } = props;
   const streams = getEnabledStreams(model, state);
   const signals = getEnabledSignals(model, state);
   const summary = props.installSummary;
-  const contentNames = summary?.contentPackages.map((c) => `${c.package} ${c.version}`) ?? [];
+  const contentText = summary && getContentInstallText(summary, props.installContent);
 
   const row = (label: string, value: React.ReactNode, editStep?: string) => (
     <div
@@ -526,27 +532,37 @@ export const ReviewStep: React.FC<{
             'how'
           )}
         {props.agentPolicyLabel && row('Agent policy', props.agentPolicyLabel, 'how')}
-        {summary &&
+        {contentText &&
           row(
             'Installs',
-            <>
-              {summary.packageTitle} {summary.packageVersion}
-              {summary.dashboards + summary.otherKibanaAssets + summary.elasticsearchAssets > 0 &&
-                ` with ${summary.dashboards} dashboards and ${
-                  summary.otherKibanaAssets + summary.elasticsearchAssets
-                } other assets`}
-              {contentNames.length > 0 && `, plus assets from ${contentNames.join(', ')}`}
-              {summary.dashboards === 0 && contentNames.length === 0 && (
-                <>
-                  {' '}
-                  <EuiText size="xs" color="subdued" component="span">
-                    (no dashboards)
-                  </EuiText>
-                </>
+            <div data-test-subj="groupWizardInstalls">
+              {contentText.installed}
+              {contentText.skipped && (
+                <EuiText size="xs" color="subdued">
+                  {contentText.skipped}
+                </EuiText>
               )}
-            </>
+            </div>
           )}
       </EuiPanel>
+
+      {contentText?.hasContent && (
+        <EuiFormRow
+          helpText={
+            props.installContentLockedReason ??
+            'Dashboards, alert and SLO templates, ML jobs and saved searches. Index templates and ingest pipelines are always installed.'
+          }
+        >
+          <EuiCheckbox
+            id="groupWizardInstallContent"
+            label="Install content"
+            checked={props.installContent}
+            disabled={!!props.installContentLockedReason}
+            onChange={(e) => props.onInstallContentChange(e.target.checked)}
+            data-test-subj="groupWizardInstallContent"
+          />
+        </EuiFormRow>
+      )}
 
       {props.agentPolicySection}
       {props.integrationSettings}

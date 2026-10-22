@@ -28,6 +28,7 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
     verificationResult,
     installedPkg,
     installedAsDependencyOf,
+    skipKibanaAssets,
   } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName, version: pkgVersion } = packageInfo;
@@ -66,6 +67,7 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
             installedAsDependencyOf,
             existingIsDependencyOf: installedPkg.attributes.is_dependency_of ?? [],
             dependencies,
+            skipKibanaAssets,
           })
         );
       } else {
@@ -92,6 +94,7 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
           installedAsDependencyOf,
           existingIsDependencyOf: installedPkg.attributes.is_dependency_of ?? [],
           dependencies,
+          skipKibanaAssets,
         })
       );
     }
@@ -107,6 +110,7 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
         verificationResult,
         installedAsDependencyOf,
         dependencies,
+        skipKibanaAssets,
       })
     );
   }

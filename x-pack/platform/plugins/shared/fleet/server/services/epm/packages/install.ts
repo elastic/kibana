@@ -420,6 +420,8 @@ interface InstallRegistryPackageParams {
   automaticInstall?: boolean;
   installedAsDependencyOf?: { name: string; version: string };
   skipDependencyCheck?: boolean;
+  /** PROTOTYPE: "Install content" off. Undefined keeps the installation's saved choice. */
+  skipKibanaAssets?: boolean;
 }
 
 export interface CustomPackageDatasetConfiguration {
@@ -508,6 +510,7 @@ async function installPackageFromRegistry({
   automaticInstall = false,
   installedAsDependencyOf,
   skipDependencyCheck = false,
+  skipKibanaAssets,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
@@ -622,6 +625,7 @@ async function installPackageFromRegistry({
       automaticInstall,
       installedAsDependencyOf,
       skipDependencyCheck,
+      skipKibanaAssets,
     });
 
     // After a successful, user-initiated (non-automatic) non-content-package install, trigger an
@@ -705,6 +709,8 @@ export async function installPackageWithStateMachine(options: {
   installedAsDependencyOf?: { name: string; version: string };
   skipDependencyCheck?: boolean;
   authorizedSpaces?: string[];
+  /** PROTOTYPE: "Install content" off. Undefined keeps the installation's saved choice. */
+  skipKibanaAssets?: boolean;
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
 
@@ -731,6 +737,9 @@ export async function installPackageWithStateMachine(options: {
     skipDependencyCheck,
     authorizedSpaces,
   } = options;
+  // PROTOTYPE: an explicit choice wins, else the one saved on the installation (upgrade, reinstall).
+  const skipKibanaAssets =
+    options.skipKibanaAssets ?? installedPkg?.attributes.skip_kibana_assets ?? false;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
   logger.info(
@@ -857,6 +866,7 @@ export async function installPackageWithStateMachine(options: {
       installedAsDependencyOf,
       skipDependencyCheck,
       authorizedSpaces,
+      skipKibanaAssets,
     })
       .then(async (assets) => {
         logger.debug(`Removing old assets from previous versions of ${pkgName}`);
@@ -1097,6 +1107,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       automaticInstall,
       installedAsDependencyOf,
       skipDependencyCheck,
+      skipKibanaAssets,
     } = args;
 
     const matchingBundledPackage = await getBundledPackageByPkgKey(pkgkey);
@@ -1145,6 +1156,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       automaticInstall,
       installedAsDependencyOf,
       skipDependencyCheck,
+      skipKibanaAssets,
     });
 
     return response;
@@ -1312,6 +1324,7 @@ export async function restartInstallation(options: {
   installedAsDependencyOf?: { name: string; version: string };
   existingIsDependencyOf?: { name: string; version: string }[];
   dependencies?: PackageDependencies | null;
+  skipKibanaAssets?: boolean;
 }) {
   const {
     savedObjectsClient,
@@ -1321,6 +1334,7 @@ export async function restartInstallation(options: {
     verificationResult,
     previousVersion,
     dependencies,
+    skipKibanaAssets,
   } = options;
 
   let savedObjectUpdate: Partial<Installation> = {
@@ -1330,6 +1344,8 @@ export async function restartInstallation(options: {
     install_source: installSource,
     previous_version: previousVersion,
     ...(dependencies ? { dependencies } : {}),
+    // PROTOTYPE: "Install content" choice
+    skip_kibana_assets: !!skipKibanaAssets,
   };
 
   if (options.installedAsDependencyOf) {
@@ -1371,6 +1387,7 @@ export async function createInstallation(options: {
   verificationResult?: PackageVerificationResult;
   installedAsDependencyOf?: { name: string; version: string };
   dependencies?: PackageDependencies | null;
+  skipKibanaAssets?: boolean;
 }) {
   const {
     savedObjectsClient,
@@ -1379,6 +1396,7 @@ export async function createInstallation(options: {
     verificationResult,
     dependencies,
     installedAsDependencyOf,
+    skipKibanaAssets,
   } = options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
   const typedStreams = getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME).filter(
@@ -1415,6 +1433,8 @@ export async function createInstallation(options: {
     ...(installedAsDependencyOf
       ? { is_dependency_of: [installedAsDependencyOf], installed_as_dependency: true }
       : {}),
+    // PROTOTYPE: "Install content" choice
+    ...(skipKibanaAssets ? { skip_kibana_assets: true } : {}),
   };
 
   if (verificationResult) {

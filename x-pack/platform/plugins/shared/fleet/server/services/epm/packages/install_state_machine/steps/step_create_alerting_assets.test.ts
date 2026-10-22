@@ -762,6 +762,25 @@ describe('stepCreateAlertingAssets', () => {
     );
   });
 
+  // PROTOTYPE: "Install content" off
+  it('creates no rules or templates with skipKibanaAssets', async () => {
+    jest.mocked(saveKibanaAssetsRefs).mockClear();
+    const traverseEntries = jest.fn();
+    await stepCreateAlertingAssets({
+      savedObjectsClient,
+      spaceId: DEFAULT_SPACE_ID,
+      packageInstallContext: {
+        packageInfo: { name: 'elastic_agent' },
+        archiveIterator: { traverseEntries, getPaths: jest.fn() },
+      },
+      logger: loggingSystemMock.createLogger(),
+      request: httpServerMock.createKibanaRequest(),
+      skipKibanaAssets: true,
+    } as any);
+    expect(traverseEntries).not.toHaveBeenCalled();
+    expect(saveKibanaAssetsRefs).not.toHaveBeenCalled();
+  });
+
   it('saves rule refs to additional_spaces_installed_kibana when installAsAdditionalSpace is true', async () => {
     const hashedTemplateId = getSpaceScopedAssetId('template-id', 'my-space');
     const rulesClient = {

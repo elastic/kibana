@@ -44,6 +44,7 @@ import type {
 } from '../../../../../../../types';
 import {
   sendGetPackageInfoByKeyForRq,
+  sendInstallPackage,
   useAuthz,
   useLink,
   useStartServices,
@@ -269,6 +270,8 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({
   }>();
   const [visited, setVisited] = useState<WizardStep[]>([COLLECT_STEP]);
   const [saved, setSaved] = useState<SavedPolicyResult>();
+  // PROTOTYPE: "Install content" (review step), on by default, kept across schema switches.
+  const [installContent, setInstallContent] = useState(true);
 
   const [policyMode, setPolicyMode] = useState<AgentPolicyMode>('new');
   const [existingPolicyId, setExistingPolicyId] = useState<string>();
@@ -378,6 +381,8 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({
       }
       policyOverrides={policyOverrides}
       onPolicyFieldChange={(field, value) => setPolicyOverrides((p) => ({ ...p, [field]: value }))}
+      installContent={installContent}
+      onInstallContentChange={setInstallContent}
       methods={methods}
       method={method}
       onMethodChange={setPickedMethod}
@@ -431,6 +436,8 @@ interface BodyProps {
   onVarGroupChange: (scopeKey: string, groupName: string, optionName: string) => void;
   policyOverrides: PolicyOverrides;
   onPolicyFieldChange: (field: 'name' | 'namespace', value: string) => void;
+  installContent: boolean;
+  onInstallContentChange: (installContent: boolean) => void;
   methods: SetupTechnology[];
   method: SetupTechnology;
   onMethodChange: (method: SetupTechnology) => void;
@@ -457,6 +464,7 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
   const { schema, model, state, steps, step, saved, packageInfo, group } = props;
   const { euiTheme } = useEuiTheme();
   const { getHref } = useLink();
+  const { notifications } = useStartServices();
   const hasFleetAddAgentsPrivileges = useAuthz().fleet.addAgents;
   const [isDocModalOpen, setIsDocModalOpen] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
@@ -533,6 +541,20 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
     onVarGroupChange: props.onVarGroupChange,
   };
 
+  // PROTOTYPE: "Install content". An installed package keeps the choice it was installed with
+  // (shown read-only). Otherwise, with content off, install the package without Kibana assets
+  // before the stock submit, which then finds it installed. Content on = stock flow, unchanged.
+  const installation =
+    packageInfo && 'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
+  const isInstalled = installation?.install_status === 'installed';
+  const installContent = isInstalled ? !installation?.skip_kibana_assets : props.installContent;
+  const installContentLockedReason = isInstalled
+    ? `${packageInfo?.title} is already installed ${
+        installContent ? 'with' : 'without'
+      } content. Reinstall it to change this.`
+    : undefined;
+  const [isInstallingPackage, setIsInstallingPackage] = useState(false);
+
   const index = steps.indexOf(step);
   const nextStep = steps[index + 1];
   const prevStep = steps[index - 1];
@@ -542,7 +564,7 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
   const policyValid =
     isAgentless ||
     (props.policyMode === 'new' ? !!props.newAgentPolicy.name.trim() : !!props.existingPolicyId);
-  const isSaving = formState === 'LOADING' && !saved;
+  const isSaving = (formState === 'LOADING' || isInstallingPackage) && !saved;
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
   const canSave = !!packageInfo && isInitialized && !isSaving;
   // Agent policy goes on "how" when that step shows, else on review.
@@ -564,12 +586,25 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
     }
     props.goTo(nextStep);
   };
-  const onSave = () => {
+  const onSave = async () => {
     const firstWithErrors = steps.find(stepHasErrors);
     if (hasErrors || firstWithErrors) {
       setShowErrors(true);
       if (firstWithErrors && firstWithErrors !== step) props.goTo(firstWithErrors);
       return;
+    }
+    if (packageInfo && !isInstalled && !installContent) {
+      setIsInstallingPackage(true);
+      const res = await sendInstallPackage(packageInfo.name, packageInfo.version, false, {
+        skipKibanaAssets: true,
+      });
+      setIsInstallingPackage(false);
+      if (res.error) {
+        notifications.toasts.addError(new Error(res.error.message), {
+          title: `Couldn't install ${packageInfo.title}`,
+        });
+        return;
+      }
     }
     onSubmit({ skipConfirmModal: true });
   };
@@ -690,6 +725,9 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
           state={state}
           packagePolicy={packagePolicy}
           installSummary={packageInfo ? getInstallSummary(packageInfo) : undefined}
+          installContent={installContent}
+          onInstallContentChange={props.onInstallContentChange}
+          installContentLockedReason={installContentLockedReason}
           method={props.method}
           showMethod={props.showHow}
           agentPolicySection={!props.showHow ? agentPolicySection : undefined}

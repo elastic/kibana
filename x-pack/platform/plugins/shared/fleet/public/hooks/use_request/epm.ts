@@ -346,8 +346,22 @@ export const sendGetFileByPath = (filePath: string) => {
   });
 };
 
-export const sendInstallPackage = (pkgName: string, pkgVersion: string, force: boolean = false) => {
-  const body = force ? { force } : undefined;
+export const sendInstallPackage = (
+  pkgName: string,
+  pkgVersion: string,
+  force: boolean = false,
+  // PROTOTYPE: "Install content" checkbox. Omitted keeps the installation's saved choice.
+  options: { skipKibanaAssets?: boolean } = {}
+) => {
+  const body =
+    force || options.skipKibanaAssets !== undefined
+      ? {
+          ...(force ? { force } : {}),
+          ...(options.skipKibanaAssets !== undefined
+            ? { skip_kibana_assets: options.skipKibanaAssets }
+            : {}),
+        }
+      : undefined;
   return sendRequest<InstallPackageResponse, FleetErrorResponse>({
     path: epmRouteService.getInstallPath(pkgName, pkgVersion),
     method: 'post',

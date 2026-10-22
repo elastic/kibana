@@ -121,6 +121,24 @@ describe('stepInstallKibanaAssets', () => {
     await expect(installationPromise).resolves.not.toThrow();
     expect(installKibanaAssetsAndReferencesMultispace).toHaveBeenCalledTimes(1);
   });
+
+  // PROTOTYPE: "Install content"
+  it('passes skipKibanaAssets through', async () => {
+    mockedInstallKibanaAssetsAndReferencesMultispace.mockClear();
+    await stepInstallKibanaAssets({
+      savedObjectsClient: soClient,
+      esClient,
+      logger: loggerMock.create(),
+      packageInstallContext,
+      installType: 'install',
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+      skipKibanaAssets: true,
+    });
+    expect(mockedInstallKibanaAssetsAndReferencesMultispace).toHaveBeenCalledWith(
+      expect.objectContaining({ skipKibanaAssets: true })
+    );
+  });
   esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   appContextService.start(createAppContextStartContractMock());
 
@@ -211,6 +229,23 @@ describe('stepInstallKibanaAssetsWithStreaming', () => {
 
     // Verify that archiveIterator was used
     expect(archiveIterator.traverseEntries).toHaveBeenCalled();
+  });
+
+  // PROTOTYPE: "Install content"
+  it('installs nothing with skipKibanaAssets', async () => {
+    const archiveIterator = { traverseEntries: jest.fn(), getPaths: jest.fn() };
+    const result = await stepInstallKibanaAssetsWithStreaming({
+      savedObjectsClient: soClient,
+      esClient,
+      logger: loggerMock.create(),
+      packageInstallContext: { ...packageInstallContext, archiveIterator },
+      installType: 'install',
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+      skipKibanaAssets: true,
+    });
+    expect(result).toEqual({ installedKibanaAssetsRefs: [] });
+    expect(archiveIterator.traverseEntries).not.toHaveBeenCalled();
   });
 });
 

@@ -77,6 +77,13 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
     throw new FleetNotFoundError('Requested version is not installed');
   }
 
+  // PROTOTYPE: "Install content" off is kept for every space. Installing content later means
+  // reinstalling the package with `skip_kibana_assets: false`.
+  if (installation.attributes.skip_kibana_assets) {
+    logger.debug(`Skipping Kibana assets for ${pkgName}: installed without content`);
+    return response.ok({ body: { success: true } });
+  }
+
   const { packageInfo } = installedPkgWithAssets;
 
   const spaceIds = request.body?.space_ids ?? [spaceId];

@@ -17,7 +17,14 @@ import { installKibanaAssetsWithStreaming } from '../../../kibana/assets/install
 import { indexPatternTypes } from '../../../kibana/index_pattern/install';
 
 export async function stepInstallKibanaAssets(context: InstallContext) {
-  const { savedObjectsClient, logger, installedPkg, packageInstallContext, spaceId } = context;
+  const {
+    savedObjectsClient,
+    logger,
+    installedPkg,
+    packageInstallContext,
+    spaceId,
+    skipKibanaAssets,
+  } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName, title: pkgTitle } = packageInfo;
 
@@ -31,6 +38,7 @@ export async function stepInstallKibanaAssets(context: InstallContext) {
       logger,
       spaceId,
       assetTags: packageInfo?.asset_tags,
+      skipKibanaAssets,
     })
   );
   // Necessary to avoid async promise rejection warning
@@ -44,6 +52,12 @@ export async function stepInstallKibanaAssetsWithStreaming(context: InstallConte
   const { savedObjectsClient, packageInstallContext, spaceId, installedPkg } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName } = packageInfo;
+
+  // PROTOTYPE: "Install content" off. No refs, so cleanUpUnusedKibanaAssetsStep removes any
+  // previously installed ones.
+  if (context.skipKibanaAssets) {
+    return { installedKibanaAssetsRefs: [] };
+  }
 
   const installedKibanaAssetsRefs = await withPackageSpan(
     'Install Kibana assets with streaming',

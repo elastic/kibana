@@ -344,6 +344,49 @@ export const getInstallSummary = (packageInfo: PackageInfo): InstallSummary => {
   };
 };
 
+/**
+ * PROTOTYPE: "Install content" review text. Content = the package's Kibana assets (everything
+ * under `kibana/`), all or nothing. Elasticsearch assets always install.
+ */
+export const getContentInstallText = (
+  summary: InstallSummary,
+  installContent: boolean
+): { hasContent: boolean; installed: string; skipped?: string } => {
+  const contentCount = summary.dashboards + summary.otherKibanaAssets;
+  const pkg = `${summary.packageTitle} ${summary.packageVersion}`;
+  const esText =
+    summary.elasticsearchAssets > 0
+      ? `${summary.elasticsearchAssets} Elasticsearch assets (index templates, ingest pipelines)`
+      : 'Elasticsearch assets';
+  if (contentCount === 0) {
+    // Composable packages (pre package-structure design) pull content from a content package.
+    const deps = summary.contentPackages.map((c) => `${c.package} ${c.version}`).join(', ');
+    return {
+      hasContent: false,
+      installed: deps
+        ? `${pkg}: ${esText}, plus content from ${deps}.`
+        : `${pkg}: ${esText}. No content in this package.`,
+    };
+  }
+  const parts = [
+    summary.dashboards > 0 ? plural(summary.dashboards, 'dashboard') : undefined,
+    summary.otherKibanaAssets > 0
+      ? plural(summary.otherKibanaAssets, 'other Kibana asset') +
+        ' (alert and SLO templates, ML jobs, saved searches)'
+      : undefined,
+  ].filter(Boolean);
+  const content = parts.join(' and ');
+  return installContent
+    ? { hasContent: true, installed: `${pkg}: ${esText}, plus content: ${content}.` }
+    : {
+        hasContent: true,
+        installed: `${pkg}: ${esText} only.`,
+        skipped: `Not installed: ${content}. Reinstall ${summary.packageTitle} with content to add them later.`,
+      };
+};
+
+const plural = (n: number, noun: string) => `${n} ${noun}${n === 1 ? '' : 's'}`;
+
 /** Var group selections with defaults filled in: first option of each group, like the stock form. */
 export const getVarGroupSelections = (
   varGroups: RegistryVarGroup[] | undefined,
