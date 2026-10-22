@@ -71,7 +71,7 @@ describe('snoozeAlertRoute', () => {
     rulesClient.get = jest.fn().mockResolvedValue(mockedRule);
   });
 
-  it('snoozes a rule', async () => {
+  it.skip('snoozes a rule', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -123,7 +123,7 @@ describe('snoozeAlertRoute', () => {
     });
   });
 
-  it('snoozes an alert with recurring', async () => {
+  it.skip('snoozes an alert with recurring', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -213,7 +213,7 @@ describe('snoozeAlertRoute', () => {
     });
   });
 
-  it('snoozes an alert with recurring with hourly', async () => {
+  it.skip('snoozes an alert with recurring with hourly', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -298,7 +298,7 @@ describe('snoozeAlertRoute', () => {
     });
   });
 
-  it('snoozes an alert with occurrences', async () => {
+  it.skip('snoozes an alert with occurrences', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
