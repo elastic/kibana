@@ -72,6 +72,18 @@ describe('POST /internal/streams/unit/{id}/_stats handler', () => {
     expect(params).toEqual({ path: { id: 'default' } });
   });
 
+  it('accepts a request with no body, and still validates a body that is present', () => {
+    const { params } = route;
+
+    expect(params?.safeParse({ path: { id: 'default' } }).success).toBe(true);
+    expect(params?.safeParse({ path: { id: 'default' }, body: { components: [] } }).success).toBe(
+      true
+    );
+    expect(
+      params?.safeParse({ path: { id: 'default' }, body: { components: 'es-prod' } }).success
+    ).toBe(false);
+  });
+
   it('treats a missing body as the empty request', async () => {
     const response = await callHandler();
 

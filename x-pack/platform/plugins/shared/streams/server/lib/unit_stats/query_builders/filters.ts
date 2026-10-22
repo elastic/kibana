@@ -14,13 +14,21 @@ export interface StatsWindow {
   end: string;
 }
 
+/** What every stats query for one request shares. The builders add their component ids. */
+export interface StatsQueryBaseParams {
+  unitId: string;
+  window: StatsWindow;
+  /** Set only when the request pins a config hash. */
+  configHash?: string;
+}
+
 /**
  * Keeps the documents of one unit inside the window and, only when the request pins one,
  * of one config hash. Values are inlined as escaped string literals.
  */
 export const filterByUnitAndWindow = (
   query: ComposerQuery,
-  { unitId, window, configHash }: { unitId: string; window: StatsWindow; configHash?: string }
+  { unitId, window, configHash }: StatsQueryBaseParams
 ): ComposerQuery => {
   const inWindow = query.pipe`WHERE ${normalizeColumn(UNIT_ID_FIELD)} == ${unitId}
     AND @timestamp >= ${window.start} AND @timestamp < ${window.end}`;

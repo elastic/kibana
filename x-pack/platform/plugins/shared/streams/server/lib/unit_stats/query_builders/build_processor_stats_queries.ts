@@ -19,14 +19,10 @@ import {
   filterByIds,
   filterByUnitAndWindow,
   nullifyUnmappedColumns,
-  type StatsWindow,
+  type StatsQueryBaseParams,
 } from './filters';
 
-interface ProcessorStatsQueryParams {
-  unitId: string;
-  window: StatsWindow;
-  /** Set only when the request pins a config hash. */
-  configHash?: string;
+interface ProcessorStatsQueryParams extends StatsQueryBaseParams {
   /** A non-empty list of processor ids. The telemetry calls them steps. */
   ids: string[];
 }

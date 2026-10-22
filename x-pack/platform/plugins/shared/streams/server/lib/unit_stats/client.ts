@@ -40,33 +40,15 @@ import {
   buildProcessorSumsQuery,
 } from './query_builders/build_processor_stats_queries';
 import { buildStreamProbeQuery } from './query_builders/build_stream_probe_query';
-import type { StatsWindow } from './query_builders/filters';
+import type { StatsQueryBaseParams } from './query_builders/filters';
 import { getIdsPerSeriesQuery, getSeriesBucketMs } from './utils/series_bucket';
 import { validateDestination, validateProcessor } from './validate_components';
-
-/** What every stats query for one request shares. */
-interface StatsQuery {
-  unitId: string;
-  window: StatsWindow;
-  /** Set only when the request pins a config hash. */
-  configHash?: string;
-}
 
 /** The results of one kind, and the error when its queries failed. */
 interface KindOutcome<TResult> {
   results: Record<string, TResult>;
   error?: UnitStatsError;
 }
-
-const dedupe = (refs: StreamsUnit.StatsComponentRef[]): StreamsUnit.StatsComponentRef[] => {
-  const seen = new Set<string>();
-  return refs.filter(({ kind, id }) => {
-    const key = `${kind}:${id}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-};
 
 export class UnitStatsClient {
   constructor(
@@ -93,48 +75,39 @@ export class UnitStatsClient {
       end: now.toISOString(),
     };
     const bucketMs = getSeriesBucketMs(Date.parse(window.end) - Date.parse(window.start));
-    const query: StatsQuery = { unitId, window, configHash };
+    const baseParams: StatsQueryBaseParams = { unitId, window, configHash };
 
     const destinationConfigs = new Map((unit.destinations ?? []).map((d) => [d.id, d]));
     const processorConfigs = new Map((unit.processors ?? []).map((p) => [p.id, p]));
 
-    // Omitted or empty: every destination and processor in the unit, if one request can hold them.
-    const unitRefs = [
-      ...(unit.destinations ?? []).map(({ id }) => ({ kind: 'destination' as const, id })),
-      ...(unit.processors ?? []).map(({ id }) => ({ kind: 'processor' as const, id })),
-    ];
-    if (!request.components?.length && unitRefs.length > MAX_STREAMS_UNIT_STATS_COMPONENTS) {
-      throw new StatusError(
-        `This unit has ${unitRefs.length} components, and one request can name at most ${MAX_STREAMS_UNIT_STATS_COMPONENTS}. Pass "components" to choose which ones.`,
-        400
-      );
-    }
-    const refs = dedupe(request.components?.length ? request.components : unitRefs);
+    // Omitted: every destination and processor in the unit, if one request can hold them. A list,
+    // even an empty one, names exactly the components to answer for.
+    const refs = request.components ?? this.getAllUnitRefs(unit);
 
     const destinations: Record<string, StreamsUnit.StatsDestinationResult> = {};
     const processors: Record<string, StreamsUnit.StatsProcessorResult> = {};
-    const destinationIds: string[] = [];
-    const processorIds: string[] = [];
+    const queryableRefs: StreamsUnit.StatsComponentRef[] = [];
 
-    for (const { kind, id } of refs) {
-      if (kind === 'destination') {
+    for (const ref of refs) {
+      if (ref.kind === 'destination') {
         const { result, queryable } = validateDestination({
-          config: destinationConfigs.get(id),
+          config: destinationConfigs.get(ref.id),
           bucketMs,
         });
-        destinations[id] = result;
-        if (queryable) destinationIds.push(id);
+        destinations[ref.id] = result;
+        if (queryable) queryableRefs.push(ref);
       } else {
-        const { result, queryable } = validateProcessor({ config: processorConfigs.get(id) });
-        processors[id] = result;
-        if (queryable) processorIds.push(id);
+        const { result, queryable } = validateProcessor({
+          config: processorConfigs.get(ref.id),
+        });
+        processors[ref.id] = result;
+        if (queryable) queryableRefs.push(ref);
       }
     }
 
-    const [destinationOutcome, processorOutcome] = await this.getOutcomes({
-      query,
-      destinationIds,
-      processorIds,
+    const [destinationOutcome, processorOutcome] = await this.getComponentStats({
+      baseParams,
+      refs: queryableRefs,
       bucketMs,
     });
     Object.assign(destinations, destinationOutcome?.results);
@@ -156,30 +129,47 @@ export class UnitStatsClient {
     };
   }
 
+  /** Every destination and processor in the unit, as long as one request can name them all. */
+  private getAllUnitRefs(unit: StreamsUnit.Configuration): StreamsUnit.StatsComponentRef[] {
+    const refs = [
+      ...(unit.destinations ?? []).map(({ id }) => ({ kind: 'destination' as const, id })),
+      ...(unit.processors ?? []).map(({ id }) => ({ kind: 'processor' as const, id })),
+    ];
+    if (refs.length > MAX_STREAMS_UNIT_STATS_COMPONENTS) {
+      throw new StatusError(
+        `This unit has ${refs.length} components, and one request can name at most ${MAX_STREAMS_UNIT_STATS_COMPONENTS}. Pass "components" to choose which ones.`,
+        400
+      );
+    }
+    return refs;
+  }
+
   /**
-   * One pair of queries per kind, all in parallel. A kind with no queryable ids runs none. The
-   * probe gates them: with no stream there is nothing to query, so the ids keep their no data
-   * results. If the probe fails, no query runs and each kind gets its error.
+   * The stats of the components to query, by kind: one pair of queries per kind, all in parallel.
+   * A kind with no components runs none. The probe gates them: with no stream there is nothing to
+   * query, so the components keep their no data results. If the probe fails, no query runs and
+   * each kind gets its error.
    */
-  private async getOutcomes({
-    query,
-    destinationIds,
-    processorIds,
+  private async getComponentStats({
+    baseParams,
+    refs,
     bucketMs,
   }: {
-    query: StatsQuery;
-    destinationIds: string[];
-    processorIds: string[];
+    baseParams: StatsQueryBaseParams;
+    refs: StreamsUnit.StatsComponentRef[];
     bucketMs: number;
   }) {
-    if (destinationIds.length + processorIds.length === 0) return [];
+    const destinationIds = refs.flatMap(({ kind, id }) => (kind === 'destination' ? [id] : []));
+    const processorIds = refs.flatMap(({ kind, id }) => (kind === 'processor' ? [id] : []));
+
+    if (refs.length === 0) return [];
 
     try {
       if (!(await this.doesUnitMetricsStreamExist())) return [];
     } catch (error) {
       const what = 'stream probe';
       const failure = toSearchError(error, what);
-      this.logFailure(failure, { unitId: query.unitId, what });
+      this.logFailure(failure, { unitId: baseParams.unitId, what });
 
       return [
         destinationIds.length > 0
@@ -191,9 +181,11 @@ export class UnitStatsClient {
 
     return Promise.all([
       destinationIds.length > 0
-        ? this.getDestinationStats({ query, ids: destinationIds, bucketMs })
+        ? this.getDestinationStats({ baseParams, ids: destinationIds, bucketMs })
         : undefined,
-      processorIds.length > 0 ? this.getProcessorStats({ query, ids: processorIds }) : undefined,
+      processorIds.length > 0
+        ? this.getProcessorStats({ baseParams, ids: processorIds })
+        : undefined,
     ]);
   }
 
@@ -254,25 +246,25 @@ export class UnitStatsClient {
   }
 
   private async getDestinationStats({
-    query,
+    baseParams,
     ids,
     bucketMs,
   }: {
-    query: StatsQuery;
+    baseParams: StatsQueryBaseParams;
     ids: string[];
     bucketMs: number;
   }): Promise<KindOutcome<StreamsUnit.StatsDestinationResult>> {
     const what = 'destination stats';
     const chunkSize = getIdsPerSeriesQuery({
-      rangeMs: Date.parse(query.window.end) - Date.parse(query.window.start),
+      rangeMs: Date.parse(baseParams.window.end) - Date.parse(baseParams.window.start),
       bucketMs,
     });
 
     try {
       const [rateRows, sumsRows] = await Promise.all([
-        this.runQuery(buildDestinationRateQuery({ ...query, ids })),
+        this.runQuery(buildDestinationRateQuery({ ...baseParams, ids })),
         this.runQueryInChunks(ids, chunkSize, (chunkIds) =>
-          buildDestinationSumsQuery({ ...query, ids: chunkIds, bucketMs })
+          buildDestinationSumsQuery({ ...baseParams, ids: chunkIds, bucketMs })
         ),
       ]);
       const mapped = mapDestinationStatsRows({
@@ -287,7 +279,7 @@ export class UnitStatsClient {
       };
     } catch (error) {
       const failure = toSearchError(error, what);
-      this.logFailure(failure, { unitId: query.unitId, what });
+      this.logFailure(failure, { unitId: baseParams.unitId, what });
 
       return this.destinationFailure({ ids, bucketMs, failure });
     }
@@ -312,18 +304,18 @@ export class UnitStatsClient {
   }
 
   private async getProcessorStats({
-    query,
+    baseParams,
     ids,
   }: {
-    query: StatsQuery;
+    baseParams: StatsQueryBaseParams;
     ids: string[];
   }): Promise<KindOutcome<StreamsUnit.StatsProcessorResult>> {
     const what = 'processor stats';
 
     try {
       const [rateRows, sumsRows] = await Promise.all([
-        this.runQuery(buildProcessorRateQuery({ ...query, ids })),
-        this.runQuery(buildProcessorSumsQuery({ ...query, ids })),
+        this.runQuery(buildProcessorRateQuery({ ...baseParams, ids })),
+        this.runQuery(buildProcessorSumsQuery({ ...baseParams, ids })),
       ]);
       const mapped = mapProcessorStatsRows({ rows: joinProcessorRows({ rateRows, sumsRows }) });
 
@@ -332,7 +324,7 @@ export class UnitStatsClient {
       };
     } catch (error) {
       const failure = toSearchError(error, what);
-      this.logFailure(failure, { unitId: query.unitId, what });
+      this.logFailure(failure, { unitId: baseParams.unitId, what });
 
       return this.processorFailure({ ids, failure });
     }

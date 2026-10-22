@@ -30,7 +30,7 @@ export const getStreamsUnitStatsRoute = createServerRoute({
     path: z.object({
       id: streamsUnitIdentifierSchema.describe('The unit id.'),
     }),
-    body: streamsUnitStatsRequestSchema,
+    body: streamsUnitStatsRequestSchema.optional(),
   }),
   handler: async ({
     params,
@@ -49,7 +49,7 @@ export const getStreamsUnitStatsRoute = createServerRoute({
     return unitStatsClient.getStats({
       unitId: params.path.id,
       unit,
-      // The route repository drops an empty `{}` body before the handler.
+      // No body, or an empty `{}` body that the route repository drops, is the empty request.
       request: params.body ?? {},
     });
   },

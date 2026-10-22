@@ -20,14 +20,10 @@ import {
   filterByIds,
   filterByUnitAndWindow,
   nullifyUnmappedColumns,
-  type StatsWindow,
+  type StatsQueryBaseParams,
 } from './filters';
 
-interface DestinationStatsQueryParams {
-  unitId: string;
-  window: StatsWindow;
-  /** Set only when the request pins a config hash. */
-  configHash?: string;
+interface DestinationStatsQueryParams extends StatsQueryBaseParams {
   /** A non-empty list of destination ids. */
   ids: string[];
 }

@@ -150,8 +150,8 @@ describe('UnitStatsClient.getStats', () => {
               { start: '2026-10-19T11:47:00.000Z', value: 240 },
             ],
           },
-          failures: { rate: { value: 0, unit: '{item}', time_unit: 's' } },
         },
+        failed: { rate: { value: 0, unit: '{item}', time_unit: 's' } },
       },
     });
     expect(response.components.processors['uppercase-message']).toEqual({
@@ -159,38 +159,30 @@ describe('UnitStatsClient.getStats', () => {
       events: {
         incoming: {
           rate: { value: 4.6, unit: '{item}', time_unit: 's' },
-          failures: { rate: { value: null, unit: null, time_unit: null } },
         },
+        failed: { rate: { value: null, unit: '{item}', time_unit: 's' } },
       },
     });
     expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
   });
 
   describe('components', () => {
-    it.each([
-      ['omitted', {}],
-      ['an empty list', { components: [] }],
-    ])(
-      'answers for every component, keyed by kind and id, when components is %s',
-      async (_, req) => {
-        const response = await run(makeEsql(), req);
+    it('answers for every component, keyed by kind and id, when components is omitted', async () => {
+      const response = await run(makeEsql(), {});
 
-        expect(Object.keys(response.components.destinations)).toEqual(['es-prod', 'es-dev', 'dbg']);
-        expect(Object.keys(response.components.processors)).toEqual(['uppercase-message']);
-        expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
-      }
-    );
+      expect(Object.keys(response.components.destinations)).toEqual(['es-prod', 'es-dev', 'dbg']);
+      expect(Object.keys(response.components.processors)).toEqual(['uppercase-message']);
+      expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
+    });
 
-    it('collapses duplicate components', async () => {
+    it('answers for no component, and makes no ES call, when components is an empty list', async () => {
       const esql = makeEsql();
-      const ref = { kind: 'destination' as const, id: 'es-prod' };
 
-      const response = await run(esql, { components: [ref, ref] });
+      const response = await run(esql, { components: [] });
 
-      expect(Object.keys(response.components.destinations)).toEqual(['es-prod']);
-      const queries = statsQueries(esql);
-      expect(queries).toHaveLength(2);
-      queries.forEach((query) => expect(query).toContain('IN ("es-prod")'));
+      expect(response.components).toEqual({ destinations: {}, processors: {} });
+      expect(esql).not.toHaveBeenCalled();
+      expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
     });
 
     it('answers only for the kind that is named, and does not fall back to the rest of the unit', async () => {
