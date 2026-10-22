@@ -10,6 +10,7 @@
     "@kbn/core-base-server-internal",
     "@kbn/core-base-server-mocks",
     "@kbn/core-pubsub-server",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/logging-mocks"
   ]
 }
