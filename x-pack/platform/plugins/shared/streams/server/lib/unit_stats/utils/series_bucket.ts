@@ -5,39 +5,26 @@
  * 2.0.
  */
 
-import { ESQL_MAX_ROWS, SERIES_MIN_BUCKET_MS, SERIES_TARGET_POINTS } from '../constants';
+import { boundsDescendingRaw, calcAutoIntervalNear } from '@kbn/data-plugin/common';
+import { SERIES_MAX_BUCKETS, SERIES_MIN_BUCKET_MS, SERIES_TARGET_BUCKETS } from '../constants';
 
-const MINUTE_MS = 60 * 1000;
-const HOUR_MS = 60 * MINUTE_MS;
-const DAY_MS = 24 * HOUR_MS;
+/** The widths Discover's auto interval can pick, narrowest first. */
+const LADDER_WIDTHS_MS = boundsDescendingRaw
+  .map(({ interval }) => Number(interval))
+  .sort((a, b) => a - b);
 
 /**
- * Same breakpoints as `getMeaningfulBucketMs` in
- * `streams_app/public/util/stream_overview_esql.ts`. The streams plugin cannot depend on
- * `streams_app`, so the rule is copied. Adds the 10 s floor.
+ * The bucket width of a series, picked the way Discover picks its auto interval: the nearest
+ * "nice" width for about `SERIES_TARGET_BUCKETS` buckets. When that gives more than
+ * `SERIES_MAX_BUCKETS` buckets, the next wider widths are tried, and past the widest one the
+ * width that fits exactly is used. A bucket is never narrower than the export interval.
  */
 export const getSeriesBucketMs = (rangeMs: number): number => {
-  const bucketMs = (() => {
-    if (rangeMs < 15 * MINUTE_MS) return Math.floor(rangeMs / SERIES_TARGET_POINTS);
-    if (rangeMs <= HOUR_MS) return MINUTE_MS;
-    if (rangeMs <= 6 * HOUR_MS) return 5 * MINUTE_MS;
-    if (rangeMs <= DAY_MS) return 15 * MINUTE_MS;
-    if (rangeMs <= 3 * DAY_MS) return HOUR_MS;
-    if (rangeMs <= 10 * DAY_MS) return 6 * HOUR_MS;
-    return DAY_MS;
-  })();
+  const nearestMs = Number(calcAutoIntervalNear(SERIES_TARGET_BUCKETS, rangeMs));
+  const fits = (widthMs: number) => Math.ceil(rangeMs / widthMs) <= SERIES_MAX_BUCKETS;
+  const bucketMs =
+    LADDER_WIDTHS_MS.find((widthMs) => widthMs >= nearestMs && fits(widthMs)) ??
+    Math.ceil(rangeMs / SERIES_MAX_BUCKETS);
+
   return Math.max(bucketMs, SERIES_MIN_BUCKET_MS);
 };
-
-/**
- * How many ids one series query can ask for, so that its rows (ids times buckets) stay within
- * `ESQL_MAX_ROWS`. The first and last buckets can be partial, so the window covers one more
- * bucket than its length divided by the bucket width.
- */
-export const getIdsPerSeriesQuery = ({
-  rangeMs,
-  bucketMs,
-}: {
-  rangeMs: number;
-  bucketMs: number;
-}): number => Math.max(1, Math.floor(ESQL_MAX_ROWS / (Math.ceil(rangeMs / bucketMs) + 1)));

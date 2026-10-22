@@ -5,26 +5,44 @@
  * 2.0.
  */
 
-import { ESQL_MAX_ROWS } from '../constants';
-import { getIdsPerSeriesQuery, getSeriesBucketMs } from './series_bucket';
+import { MAX_STREAMS_UNIT_STATS_COMPONENTS } from '@kbn/streams-schema';
+import { ESQL_MAX_ROWS, SERIES_MAX_BUCKETS } from '../constants';
+import { getSeriesBucketMs } from './series_bucket';
 
-const MINUTE = 60 * 1000;
+const SECOND = 1000;
+const MINUTE = 60 * SECOND;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
+const WEEK = 7 * DAY;
+const YEAR = 365 * DAY;
+const MONTH = 30 * DAY;
 
 describe('getSeriesBucketMs', () => {
   it.each([
-    ['5 minutes', 5 * MINUTE, 12_000],
-    ['14 minutes', 14 * MINUTE, 33_600],
-    ['15 minutes', 15 * MINUTE, MINUTE],
+    ['5 minutes', 5 * MINUTE, 10 * SECOND],
+    ['15 minutes', 15 * MINUTE, 30 * SECOND],
     ['1 hour', HOUR, MINUTE],
     ['6 hours', 6 * HOUR, 5 * MINUTE],
-    ['24 hours', DAY, 15 * MINUTE],
+    ['24 hours', DAY, 30 * MINUTE],
     ['3 days', 3 * DAY, HOUR],
-    ['10 days', 10 * DAY, 6 * HOUR],
-    ['30 days', 30 * DAY, DAY],
-  ])('snaps a %s range to the bucket width', (_label, rangeMs, expected) => {
+    ['7 days', 7 * DAY, 3 * HOUR],
+    ['30 days', 30 * DAY, 12 * HOUR],
+    ['90 days', 90 * DAY, DAY],
+    ['1 year', YEAR, WEEK],
+    ['5 years', 5 * YEAR, MONTH],
+  ])('picks the width Discover would for a %s range', (_label, rangeMs, expected) => {
     expect(getSeriesBucketMs(rangeMs)).toBe(expected);
+  });
+
+  it('steps up to a wider width when the nearest one gives more buckets than the cap', () => {
+    // Discover would pick 1 day here, which is 180 buckets.
+    expect(getSeriesBucketMs(180 * DAY)).toBe(WEEK);
+  });
+
+  it('uses the width that fits exactly when the range is wider than the widest ladder width', () => {
+    const rangeMs = 200 * YEAR;
+
+    expect(getSeriesBucketMs(rangeMs)).toBe(Math.ceil(rangeMs / SERIES_MAX_BUCKETS));
   });
 
   it('never goes below the 10 second export interval', () => {
@@ -33,33 +51,30 @@ describe('getSeriesBucketMs', () => {
   });
 });
 
-describe('getIdsPerSeriesQuery', () => {
-  it.each([
-    ['15 minutes, 1 minute buckets', 15 * MINUTE, MINUTE, 625],
-    ['24 hours, 15 minute buckets', DAY, 15 * MINUTE, 103],
-    ['365 days, 1 day buckets', 365 * DAY, DAY, 27],
-  ])('allows the ids that fit the row cap for %s', (_label, rangeMs, bucketMs, expected) => {
-    expect(getIdsPerSeriesQuery({ rangeMs, bucketMs })).toBe(expected);
-  });
-
-  it('counts a partial first and last bucket', () => {
-    // 90 seconds in 60 second buckets touch up to 3 buckets, not 1.5.
-    expect(getIdsPerSeriesQuery({ rangeMs: 90_000, bucketMs: 60_000 })).toBe(
-      Math.floor(ESQL_MAX_ROWS / 3)
+describe('the series row budget', () => {
+  it('lets every component of a request have a full series in one query', () => {
+    // A partial bucket at each end adds one to the bucket count.
+    expect(MAX_STREAMS_UNIT_STATS_COMPONENTS * (SERIES_MAX_BUCKETS + 1)).toBeLessThanOrEqual(
+      ESQL_MAX_ROWS
     );
   });
 
-  it('allows at least one id, however long the window', () => {
-    expect(getIdsPerSeriesQuery({ rangeMs: 100_000 * DAY, bucketMs: DAY })).toBe(1);
+  it.each([
+    10 * SECOND,
+    5 * MINUTE,
+    HOUR,
+    DAY,
+    30 * DAY,
+    99 * DAY,
+    100 * DAY,
+    180 * DAY,
+    YEAR,
+    5 * YEAR,
+    200 * YEAR,
+  ])('keeps the series of a %s ms range within the row cap for the most components', (rangeMs) => {
+    const bucketMs = getSeriesBucketMs(rangeMs);
+    const rowsPerId = Math.ceil(rangeMs / bucketMs) + 1;
+
+    expect(rowsPerId * MAX_STREAMS_UNIT_STATS_COMPONENTS).toBeLessThanOrEqual(ESQL_MAX_ROWS);
   });
-
-  it.each([5 * MINUTE, 15 * MINUTE, HOUR, 6 * HOUR, DAY, 3 * DAY, 10 * DAY, 30 * DAY, 365 * DAY])(
-    'keeps ids times buckets within the row cap for a %s ms window',
-    (rangeMs) => {
-      const bucketMs = getSeriesBucketMs(rangeMs);
-      const ids = getIdsPerSeriesQuery({ rangeMs, bucketMs });
-
-      expect(ids * (Math.ceil(rangeMs / bucketMs) + 1)).toBeLessThanOrEqual(ESQL_MAX_ROWS);
-    }
-  );
 });

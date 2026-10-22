@@ -90,6 +90,7 @@ dependsOn:
   - '@kbn/server-http-tools'
   - '@kbn/task-manager-plugin'
   - '@kbn/core-logging-server-mocks'
+  - '@kbn/data-plugin'
 tags:
   - plugin
   - prod

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { MAX_STREAMS_UNIT_STATS_COMPONENTS } from '@kbn/streams-schema';
+
 /**
  * Stream, field names and the window for unit stats, in one place.
  *
@@ -51,8 +53,15 @@ export const STATS_COLUMN = {
   avgDurationPerItem: 'avg_duration_per_item',
 } as const;
 
-/** Same target as the classic Streams histograms (`STREAMS_HISTOGRAM_NUM_DATA_POINTS`). */
-export const SERIES_TARGET_POINTS = 25;
+/** The bucket count a series aims for, as Discover's auto interval does with a bar target. */
+export const SERIES_TARGET_BUCKETS = 50;
+
+/**
+ * The most buckets a series can have. One series query returns one row per id and bucket (and
+ * a partial bucket at each end), so the cap keeps every id of one request within `ESQL_MAX_ROWS`
+ * and no query needs to be split.
+ */
+export const SERIES_MAX_BUCKETS = Math.floor(ESQL_MAX_ROWS / MAX_STREAMS_UNIT_STATS_COMPONENTS) - 1;
 
 /** The export interval. A bucket is never narrower. */
 export const SERIES_MIN_BUCKET_MS = 10_000;

@@ -87,6 +87,7 @@
     "@kbn/agent-builder-sml-plugin",
     "@kbn/server-http-tools",
     "@kbn/task-manager-plugin",
-    "@kbn/core-logging-server-mocks"
+    "@kbn/core-logging-server-mocks",
+    "@kbn/data-plugin"
   ]
 }

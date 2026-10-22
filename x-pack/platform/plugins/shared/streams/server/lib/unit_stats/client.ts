@@ -10,7 +10,6 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { MAX_STREAMS_UNIT_STATS_COMPONENTS, type StreamsUnit } from '@kbn/streams-schema';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
-import { chunk } from 'lodash';
 import { StatusError } from '../streams/errors/status_error';
 import { toEsqlRequest } from '../streams/helpers/esql';
 import { UNIT_STATS_DEFAULT_WINDOW_MS, UNIT_STATS_REQUEST_TIMEOUT_MS } from './constants';
@@ -41,7 +40,7 @@ import {
 } from './query_builders/build_processor_stats_queries';
 import { buildStreamProbeQuery } from './query_builders/build_stream_probe_query';
 import type { StatsQueryBaseParams } from './query_builders/filters';
-import { getIdsPerSeriesQuery, getSeriesBucketMs } from './utils/series_bucket';
+import { getSeriesBucketMs } from './utils/series_bucket';
 import { validateDestination, validateProcessor } from './validate_components';
 
 /** The results of one kind, and the error when its queries failed. */
@@ -217,18 +216,6 @@ export class UnitStatsClient {
     return toRows(response);
   }
 
-  /** The rows of a query run for each chunk of `chunkSize` ids, in parallel. */
-  private async runQueryInChunks(
-    ids: string[],
-    chunkSize: number,
-    buildQuery: (chunkIds: string[]) => ComposerQuery
-  ): Promise<EsqlRow[]> {
-    const chunks = await Promise.all(
-      chunk(ids, chunkSize).map((chunkIds) => this.runQuery(buildQuery(chunkIds)))
-    );
-    return chunks.flat();
-  }
-
   /**
    * Logs a failed query. A query that fails or times out is not expected, so it is a `warn`. A
    * 403, 429 or 503 is an expected state of the cluster, so it stays at `debug`.
@@ -255,17 +242,11 @@ export class UnitStatsClient {
     bucketMs: number;
   }): Promise<KindOutcome<StreamsUnit.StatsDestinationResult>> {
     const what = 'destination stats';
-    const chunkSize = getIdsPerSeriesQuery({
-      rangeMs: Date.parse(baseParams.window.end) - Date.parse(baseParams.window.start),
-      bucketMs,
-    });
 
     try {
       const [rateRows, sumsRows] = await Promise.all([
         this.runQuery(buildDestinationRateQuery({ ...baseParams, ids })),
-        this.runQueryInChunks(ids, chunkSize, (chunkIds) =>
-          buildDestinationSumsQuery({ ...baseParams, ids: chunkIds, bucketMs })
-        ),
+        this.runQuery(buildDestinationSumsQuery({ ...baseParams, ids, bucketMs })),
       ]);
       const mapped = mapDestinationStatsRows({
         rows: joinDestinationRows({ rateRows, sumsRows }),

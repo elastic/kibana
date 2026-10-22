@@ -144,7 +144,7 @@ describe('UnitStatsClient.getStats', () => {
           total: { value: 510, unit: '{item}' },
           rate: { value: 4.6, unit: '{item}', time_unit: 's' },
           series: {
-            bucket_ms: 60_000,
+            bucket_ms: 30_000,
             points: [
               { start: '2026-10-19T11:46:00.000Z', value: 270 },
               { start: '2026-10-19T11:47:00.000Z', value: 240 },
@@ -278,12 +278,11 @@ describe('UnitStatsClient.getStats', () => {
       const sumsQueries = (esql: jest.Mock) =>
         statsQueries(esql).filter((query) => !isRateQuery(query) && query.includes('destination'));
 
-      it('asks for the sums once and the rates once when the window allows every id', async () => {
+      it('asks for the sums once and the rates once', async () => {
         const esql = makeEsql();
 
         await run(esql, {}, maxDestinations);
 
-        // The default window allows 588 ids per series query.
         expect(sumsQueries(esql)).toHaveLength(1);
         const rateQueries = statsQueries(esql).filter(
           (query) => isRateQuery(query) && query.includes('destination')
@@ -291,17 +290,16 @@ describe('UnitStatsClient.getStats', () => {
         expect(rateQueries).toHaveLength(1);
       });
 
-      it('splits the sums query for the longest window', async () => {
+      it('asks for the sums once, whatever the window', async () => {
         const esql = makeEsql();
 
         await run(
           esql,
-          { filter: { time_range: { start: '2025-10-18T12:00:00.000Z', end: now.toISOString() } } },
+          { filter: { time_range: { start: '2021-10-19T12:00:00.000Z', end: now.toISOString() } } },
           maxDestinations
         );
 
-        // A 366 day window has 367 day buckets and allows 27 ids per series query.
-        expect(sumsQueries(esql)).toHaveLength(4);
+        expect(sumsQueries(esql)).toHaveLength(1);
       });
 
       it('rejects an omitted components list when the unit has more components than a request can name', async () => {

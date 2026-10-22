@@ -64,7 +64,9 @@ export const buildDestinationRateQuery = (params: DestinationStatsQueryParams): 
  * Items per destination and time bucket, ordered by bucket, from a plain `FROM`: a plain sum
  * inside `TS` is the last value of each series, not a sum of deltas. `items` is a counter, so
  * it is cast first.
- * Returns at most `ESQL_MAX_ROWS` rows (ids times buckets), silently, so the caller chunks ids.
+ * Returns at most `ESQL_MAX_ROWS` rows (ids times buckets) and truncates silently. A request
+ * names a bounded number of ids and `bucketMs` gives at most `SERIES_MAX_BUCKETS` buckets, so
+ * the result always fits.
  */
 export const buildDestinationSumsQuery = ({
   bucketMs,
