@@ -162,7 +162,9 @@ describe('ProposedActionsSlot', () => {
     mockConversationProposalsPage([mockProposal]);
     renderSlot();
     fireEvent.click(screen.getByText('Isolate cfo-mbp-14 — host isolation'));
-    expect(screen.getByRole('button', { name: 'Approve' })).toBeDisabled();
+    // A user who cannot decide is offered no Approve or Decline at all.
+    expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Decline' })).not.toBeInTheDocument();
     expect(approveMutateAsync).not.toHaveBeenCalled();
     expect(dismissMutateAsync).not.toHaveBeenCalled();
   });
@@ -229,7 +231,7 @@ describe('ProposedActionsSlot', () => {
     fireEvent.click(screen.getByTestId('investigationFlyoutProposedAction-proposal-2'));
 
     const dialog = screen.getByRole('dialog');
-    expect(within(dialog).getByText('Applied')).toBeInTheDocument();
+    expect(within(dialog).getAllByText('Applied').length).toBeGreaterThan(0);
     expect(
       screen.queryByTestId('investigationFlyoutProposedAction-proposal-2-modal-confirm')
     ).not.toBeInTheDocument();
@@ -276,19 +278,19 @@ describe('ProposedActionsSlot', () => {
     });
   });
 
-  it('shows Applying on the row and its modal, scoped to the proposal useIsApprovingProposal reports', () => {
+  it('shows Approving on the row and its modal, scoped to the proposal useIsApprovingProposal reports', () => {
     mockConversationProposalsPage([mockProposal]);
     mockUseIsApprovingProposal.mockImplementation((id) => id === 'proposal-1');
 
     renderSlot();
 
     const row = screen.getByTestId('investigationFlyoutProposedAction-proposal-1');
-    expect(within(row).getByText('Applying')).toBeInTheDocument();
+    expect(within(row).getByText('Approving')).toBeInTheDocument();
 
     fireEvent.click(row);
     // Approving only resumes the gate workflow — the action it starts still runs afterward, so
     // being in flight must not yet claim "Applied". Only a refetched, real decision can.
-    expect(within(screen.getByRole('dialog')).getAllByText('Applying').length).toBeGreaterThan(0);
+    expect(within(screen.getByRole('dialog')).getAllByText('Approving').length).toBeGreaterThan(0);
     expect(within(screen.getByRole('dialog')).queryByText('Applied')).not.toBeInTheDocument();
   });
 

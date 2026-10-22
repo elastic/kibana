@@ -46,6 +46,9 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   expiredBadge: i18n.translate('xpack.proposals.approvalModal.expiredBadge', {
     defaultMessage: 'Expired',
   }),
+  approvingBadge: i18n.translate('xpack.proposals.approvalModal.approvingBadge', {
+    defaultMessage: 'Approving',
+  }),
   applyingBadge: i18n.translate('xpack.proposals.approvalModal.applyingBadge', {
     defaultMessage: 'Applying',
   }),
@@ -59,19 +62,30 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
     defaultMessage: 'Irreversible',
   }),
   appliedBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.appliedTitle', {
-    defaultMessage: 'Applied successfully',
+    defaultMessage: 'Applied',
   }),
   declinedBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.declinedTitle', {
     defaultMessage: 'Declined',
   }),
+  approvingBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.approvingTitle', {
+    defaultMessage: 'Approving',
+  }),
   applyingBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.applyingTitle', {
     defaultMessage: 'Applying',
   }),
+  approvingBannerDescription: i18n.translate(
+    'xpack.proposals.approvalModal.outcome.approvingDescription',
+    { defaultMessage: 'Awaiting approval request to return' }
+  ),
+  applyingBannerDescription: i18n.translate(
+    'xpack.proposals.approvalModal.outcome.applyingDescription',
+    { defaultMessage: 'Might take several minutes' }
+  ),
   decliningBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.decliningTitle', {
     defaultMessage: 'Declining',
   }),
   failedBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.failedTitle', {
-    defaultMessage: 'Action failed',
+    defaultMessage: 'Failed',
   }),
   noActionBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.noActionTitle', {
     defaultMessage: 'Approved',
@@ -83,20 +97,61 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
     defaultMessage: 'You',
   }),
   unknownActorFallback: i18n.translate('xpack.proposals.approvalModal.outcome.unknownActor', {
-    defaultMessage: 'Someone',
+    defaultMessage: 'Approver is unknown',
+  }),
+  unknownDeclinerFallback: i18n.translate('xpack.proposals.approvalModal.outcome.unknownDecliner', {
+    defaultMessage: 'Decliner is unknown',
   }),
   previousFailureCalloutTitle: i18n.translate(
     'xpack.proposals.approvalModal.previousFailureCallout',
-    { defaultMessage: 'A previous attempt at this action failed' }
+    { defaultMessage: 'Failed' }
   ),
-  failedAttemptCalloutTitle: i18n.translate('xpack.proposals.approvalModal.failedAttemptCallout', {
-    defaultMessage: 'This attempt failed to execute the action',
-  }),
+  previousFailureCalloutBody: (error: string) =>
+    i18n.translate('xpack.proposals.approvalModal.previousFailureCalloutBody', {
+      defaultMessage: 'Previous attempt failed: {error}. Try one more time',
+      // The reason often ends in a full stop of its own.
+      values: { error: error.trim().replace(/[.\s]+$/, '') },
+    }),
   // Deliberately silent on *why* it expired: `isProposalExpired` is true both once the deadline
   // passes and when the workflow settles a proposal as `status: 'expired'` beforehand (e.g. after
   // exhausting its retry attempts), and this wording has to be true for either cause.
-  expiredCalloutTitle: i18n.translate('xpack.proposals.approvalModal.expiredCallout', {
-    defaultMessage:
-      'This proposal expired before a decision was made and can no longer be actioned.',
+  restrictedCalloutTitle: i18n.translate('xpack.proposals.approvalModal.restrictedCalloutTitle', {
+    defaultMessage: 'Restricted',
   }),
+  restrictedCalloutBody: i18n.translate('xpack.proposals.approvalModal.restrictedCalloutBody', {
+    defaultMessage: "You don't have permissions to act on this proposal",
+  }),
+  replacedCalloutTitle: i18n.translate('xpack.proposals.approvalModal.replacedCallout', {
+    defaultMessage: 'Replaced',
+  }),
+  replacedCalloutDescription: i18n.translate(
+    'xpack.proposals.approvalModal.replacedCalloutDescription',
+    {
+      defaultMessage: 'This proposal was replaced by a newer one and can no longer be actioned.',
+    }
+  ),
+  expiredCalloutTitle: i18n.translate('xpack.proposals.approvalModal.expiredCallout', {
+    defaultMessage: 'Expired',
+  }),
+  expiresCalloutTitle: (deadline: string) =>
+    i18n.translate('xpack.proposals.approvalModal.expiresCallout', {
+      defaultMessage: 'Expires on {deadline}',
+      values: { deadline },
+    }),
+  expiredCalloutTitleOn: (deadline: string) =>
+    i18n.translate('xpack.proposals.approvalModal.expiredCalloutOn', {
+      defaultMessage: 'Expired on {deadline}',
+      values: { deadline },
+    }),
+  expiredCalloutDescriptionWithReason: (reason: string) =>
+    i18n.translate('xpack.proposals.approvalModal.expiredCalloutDescriptionWithReason', {
+      defaultMessage: 'This proposal can no longer be actioned. {reason}',
+      values: { reason },
+    }),
+  expiredCalloutDescription: i18n.translate(
+    'xpack.proposals.approvalModal.expiredCalloutDescription',
+    {
+      defaultMessage: "This proposal wasn't decided in time and can no longer be actioned.",
+    }
+  ),
 });

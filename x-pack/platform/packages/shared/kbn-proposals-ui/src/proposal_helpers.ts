@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import type { ApprovalProposal, ApprovalDecision } from './types';
 import type { ApprovalPhase } from './approval_outcome';
@@ -29,24 +28,6 @@ const impactCaptionPart = (proposal: ApprovalProposal): string | undefined => {
       });
 };
 
-/** Returns `undefined` when there is no deadline. A past deadline still returns text. */
-const deadlineCaptionPart = (proposal: ApprovalProposal): string | undefined => {
-  if (!proposal.expiresAt) {
-    return undefined;
-  }
-  const deadline = moment(proposal.expiresAt).format(DATE_TIME_FORMAT);
-  if (isProposalExpired(proposal)) {
-    return i18n.translate('xpack.proposals.approvalModal.caption.expired', {
-      defaultMessage: 'Expired on {deadline}',
-      values: { deadline },
-    });
-  }
-  return i18n.translate('xpack.proposals.approvalModal.caption.expires', {
-    defaultMessage: 'Expires on {deadline}',
-    values: { deadline },
-  });
-};
-
 export interface ProposalCaptionPart {
   text: string;
   /** True for the "Irreversible" part, which the UI highlights. */
@@ -68,9 +49,7 @@ export const getProposalCaptionParts = (
       ? { text: APPROVAL_MODAL_TRANSLATIONS.reversible }
       : { text: APPROVAL_MODAL_TRANSLATIONS.irreversible, isIrreversible: true },
     ...(includeRiskDetails
-      ? [impactCaptionPart(proposal), deadlineCaptionPart(proposal)].map((text) =>
-          text === undefined ? undefined : { text }
-        )
+      ? [impactCaptionPart(proposal)].map((text) => (text === undefined ? undefined : { text }))
       : []),
   ];
   return parts.filter(
@@ -82,7 +61,7 @@ export const getProposalCaptionParts = (
  * Returns the line under a proposal title: its category and whether it is reversible.
  * Returns `undefined` when the proposal has neither.
  *
- * Set `includeRiskDetails` to add the impact and the decision deadline. Use it for one proposal,
+ * Set `includeRiskDetails` to add the impact. Use it for one proposal,
  * such as in the modal. Do not use it for a list of rows, because the repeated text is noisy.
  */
 export const getProposalCaption = (
@@ -110,15 +89,18 @@ export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecisio
   if (!proposal.decision && !isProposalExpired(proposal)) {
     return undefined;
   }
+  const knownActorName = proposal.decidedBy?.fullName ?? proposal.decidedBy?.username;
   const actorName = proposal.decision
-    ? proposal.decidedBy?.fullName ??
-      proposal.decidedBy?.username ??
-      APPROVAL_MODAL_TRANSLATIONS.unknownActorFallback
+    ? knownActorName ??
+      (proposal.decision === 'approved'
+        ? APPROVAL_MODAL_TRANSLATIONS.unknownActorFallback
+        : APPROVAL_MODAL_TRANSLATIONS.unknownDeclinerFallback)
     : undefined;
   const status = approvedStatusFor(proposal);
   return {
     status,
     actorName,
+    isActorUnknown: proposal.decision !== undefined && knownActorName === undefined,
     decidedAt: proposal.decidedAt,
     // A failed action reports why it failed, so the analyst is not left with "Action failed"
     // alone. A decline's reason is structured (`dismissReason`), with the free-text rationale
@@ -175,11 +157,18 @@ export const getProposalTone = (proposal: ApprovalProposal): 'primary' | 'danger
   return impact === 'high' || impact === 'critical' ? 'danger' : 'primary';
 };
 
+/** Replaced by a newer proposal, by a retry or a revision. */
+export const isProposalReplaced = (proposal: ApprovalProposal): boolean =>
+  proposal.supersededBy !== undefined || proposal.status === 'superseded';
+
 /**
  * `status: 'expired'` is the workflow's reliable settlement for an unanswered proposal (on
  * attempt exhaustion, or a failure) before the deadline itself passes. A deadline that has passed
  * but not yet been swept to this status still reads `pending` here; that lag is accepted rather
  * than compared against `expiresAt` directly.
+ *
+ * A replaced proposal nobody ever decided reads as expired too: it can no longer be actioned, and
+ * "expired" is how the UI already says that. One that was decided keeps its own outcome.
  */
 export const isProposalExpired = (proposal: ApprovalProposal): boolean =>
-  proposal.status === 'expired';
+  proposal.status === 'expired' || (isProposalReplaced(proposal) && !proposal.decision);

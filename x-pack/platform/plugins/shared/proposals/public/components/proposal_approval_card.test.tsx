@@ -31,21 +31,6 @@ jest.mock('@elastic/eui', () => ({
   EuiSpacer: () => <div />,
 }));
 
-jest.mock('@kbn/ui-callout', () => ({
-  KbnInfoCallout: ({ title }: { title: string }) => (
-    <div data-test-subj="info-callout">{title}</div>
-  ),
-  KbnDangerCallout: ({ title }: { title: string }) => (
-    <div data-test-subj="danger-callout">{title}</div>
-  ),
-  KbnWarningCallout: ({ title, children }: { title: string; children?: React.ReactNode }) => (
-    <div data-test-subj="warning-callout">
-      {title}
-      {children}
-    </div>
-  ),
-}));
-
 /** Set by the `ApprovalContent` mock on every render, so a test can invoke an action directly
  *  (e.g. to assert what its promise rejects with) without going through a simulated click. */
 let latestOnApprove: (() => void | Promise<void>) | undefined;
@@ -245,14 +230,18 @@ describe('ProposalApprovalCard', () => {
   describe('error / no-data state', () => {
     it('renders a danger callout when the query errors', () => {
       setupMocks(null, { isError: true });
-      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-      expect(getByTestId('danger-callout')).toBeInTheDocument();
+      const { getByText } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+      expect(
+        getByText('Unable to load this proposal. Try refreshing the page.')
+      ).toBeInTheDocument();
     });
 
     it('renders a danger callout when query succeeds but returns no data', () => {
       setupMocks(null);
-      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-      expect(getByTestId('danger-callout')).toBeInTheDocument();
+      const { getByText } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+      expect(
+        getByText('Unable to load this proposal. Try refreshing the page.')
+      ).toBeInTheDocument();
     });
   });
 
@@ -430,7 +419,7 @@ describe('ProposalApprovalCard', () => {
         })
       );
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-      expect(getByTestId('approval-decision')).toHaveTextContent('applying:Someone');
+      expect(getByTestId('approval-decision')).toHaveTextContent('applying:Approver is unknown');
     });
   });
 
@@ -458,12 +447,8 @@ describe('ProposalApprovalCard', () => {
       );
 
       expect(getByText('Original recommendation')).toBeInTheDocument();
-      expect(getByText('This proposal has been replaced.')).toBeInTheDocument();
       expect(
         container.querySelector('[data-test-subj="proposalCard-proposal-1-confirm"]')
-      ).toBeDisabled();
-      expect(
-        container.querySelector('[data-test-subj="proposalDismiss-proposal-1"]')
       ).toBeDisabled();
       expect(queryByText(/No further action is needed/)).not.toBeInTheDocument();
       expect(container.querySelector('[data-test-subj="approval-decision"]')).toBeNull();
@@ -498,9 +483,6 @@ describe('ProposalApprovalCard', () => {
       );
       expect(container.querySelector('[data-test-subj="mock-dismiss-form"]')).toBeNull();
       expect(latestOnDismiss).toBeUndefined();
-      expect(
-        container.querySelector('[data-test-subj="proposalDismiss-proposal-1"]')
-      ).toBeDisabled();
     });
   });
 

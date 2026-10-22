@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
-import { EuiModal, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiModal, useGeneratedHtmlId } from '@elastic/eui';
 import { ApprovalContent } from './approval_content';
 import type { DeclineParams, AlwaysAllowOption, ApprovalProposal } from './types';
 
@@ -63,14 +63,13 @@ export const ApprovalModal = memo<ApprovalModalProps>(
     currentActorName,
     'data-test-subj': dataTestSubj,
   }) => {
-    const { euiTheme } = useEuiTheme();
     const titleId = useGeneratedHtmlId({ prefix: 'ApprovalModal' });
 
     return (
       <EuiModal
         aria-labelledby={titleId}
         onClose={onClose}
-        css={css({ maxWidth: 640, width: '100%', borderRadius: euiTheme.size.xs })}
+        css={css({ maxWidth: 640, width: '100%' })}
         data-test-subj={dataTestSubj}
       >
         <ApprovalContent

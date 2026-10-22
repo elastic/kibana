@@ -44,6 +44,9 @@ export const ApprovalContentHeader = memo<ApprovalContentHeaderProps>(
           flexDirection: 'column',
           alignItems: 'flex-start',
           padding: euiTheme.size.base,
+          // The modal's close button sits over the header's top-right corner, so a long title
+          // has to stop short of it.
+          paddingInlineEnd: euiTheme.size.xxl,
         })}
       >
         <EuiTitle id={titleId} size="s">

@@ -53,27 +53,22 @@ describe('ApprovalModal', () => {
     jest.clearAllMocks();
   });
 
-  it('keeps proposal details readable but prevents decisions in read-only mode', () => {
+  it('keeps proposal details readable but offers no decision buttons in read-only mode', () => {
     renderModal({ readOnly: true });
     expect(screen.getByText('Apply monitored exception')).toBeInTheDocument();
-    expect(screen.getByTestId('approvalModal-confirm')).toBeDisabled();
-    expect(screen.getByTestId('approvalModal-dismiss')).toBeDisabled();
-    fireEvent.click(screen.getByTestId('approvalModal-confirm'));
-    fireEvent.click(screen.getByTestId('approvalModal-dismiss'));
-    expect(baseProps.onConfirm).not.toHaveBeenCalled();
-    expect(baseProps.onDismiss).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('approvalModal-confirm')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('approvalModal-dismiss')).not.toBeInTheDocument();
   });
 
-  it('prevents declining if the modal becomes read-only while the decline form is open', () => {
+  it('drops the decline form and its buttons if the modal becomes read-only while it is open', () => {
     const { rerender } = renderModal();
     fireEvent.click(screen.getByTestId('approvalModal-dismiss'));
     expect(screen.getByTestId('approvalModal-confirm-decline')).toBeEnabled();
 
     rerender(<ApprovalModal {...baseProps} readOnly />);
 
-    expect(screen.getByTestId('approvalModal-confirm-decline')).toBeDisabled();
-    fireEvent.click(screen.getByTestId('approvalModal-confirm-decline'));
-    expect(baseProps.onDismiss).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('approvalModal-confirm-decline')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('approvalModal-decline-form')).not.toBeInTheDocument();
   });
 
   it('renders the proposal inside a modal dialog', () => {

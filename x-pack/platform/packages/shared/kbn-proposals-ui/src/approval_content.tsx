@@ -17,6 +17,7 @@ import { ApprovalStatusCallouts } from './approval_status_callouts';
 import { ApprovalContentFooter } from './approval_content_footer';
 import {
   getApprovalOutcomeBadge,
+  getSubmittingPhase,
   getApprovalOutcomeBanner,
   type ApprovalPhase,
 } from './approval_outcome';
@@ -26,6 +27,7 @@ import {
   getProposalDecision,
   getProposalTone,
   isProposalExpired,
+  isProposalReplaced,
 } from './proposal_helpers';
 import { ProposalCaption } from './proposal_caption';
 import type { ApprovalAction, AlwaysAllowOption, DeclineParams, ApprovalProposal } from './types';
@@ -132,7 +134,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
 
     const actorName = currentActorName ?? APPROVAL_MODAL_TRANSLATIONS.currentActorFallback;
     const isExpired = isProposalExpired(proposal);
-    const isReplaced = proposal.supersededBy !== undefined || proposal.status === 'superseded';
+    const isReplaced = isProposalReplaced(proposal);
     const displayMode = isReplaced ? 'view' : mode;
     const decision = getProposalDecision(proposal);
     const tone = getProposalTone(proposal);
@@ -223,42 +225,78 @@ export const ApprovalContent = memo<ApprovalContentProps>(
       }
     }, []);
 
-    const approvalPhase: ApprovalPhase = isReplaced
-      ? 'pending'
-      : decision
-      ? decision.status
-      : isSubmitting ?? 'pending';
+    const approvalPhase: ApprovalPhase =
+      isReplaced && !isExpired && !decision
+        ? 'pending'
+        : decision
+        ? decision.status
+        : isSubmitting
+        ? getSubmittingPhase(isSubmitting)
+        : 'pending';
 
     // A replaced card stays 'pending' for the footer and banner (see `approvalPhase`), but a failed
     // attempt still has to say how it ended; replaced revisions keep no badge, since their
     // successor carries the live state.
     const isReplacedFailure = isReplaced && decision?.status === 'failed';
-    const badge = getApprovalOutcomeBadge(isReplacedFailure ? 'failed' : approvalPhase);
+    // An undecided proposal this user has no permission to decide: the same restricted state the
+    // flyout row shows, so the row and its modal agree.
+    const isRestricted = !!readOnly && !isReplaced && approvalPhase === 'pending' && !isExpired;
+    // Undecided but offered again after a failed run: the badge says so, like the flyout row.
+    const isRetry =
+      !isRestricted &&
+      !isReplaced &&
+      approvalPhase === 'pending' &&
+      Boolean(proposal.previousExecutionError);
+    const badge = isRestricted
+      ? {
+          color: 'warning' as const,
+          iconType: 'lock' as const,
+          label: APPROVAL_MODAL_TRANSLATIONS.restrictedCalloutTitle,
+          isLoading: false,
+        }
+      : getApprovalOutcomeBadge(isReplacedFailure || isRetry ? 'failed' : approvalPhase);
     const banner = isReplaced ? undefined : getApprovalOutcomeBanner(approvalPhase);
-    const bannerSuffix = decision?.reason;
+    // A decision in flight has no reason to give yet, only what it is waiting on.
+    const bannerSuffix =
+      approvalPhase === 'approving'
+        ? APPROVAL_MODAL_TRANSLATIONS.approvingBannerDescription
+        : approvalPhase === 'applying' || approvalPhase === 'declining'
+        ? APPROVAL_MODAL_TRANSLATIONS.applyingBannerDescription
+        : decision?.reason;
     const isSettledOrTransient = approvalPhase !== 'pending';
 
     const hasReplacedCaption = isReplaced && getProposalCaption(proposal) !== undefined;
-    const headerCaption = decision?.actorName ? (
-      <>
-        {hasReplacedCaption && (
-          <>
-            <ProposalCaption proposal={proposal} /> •{' '}
-          </>
-        )}
-        <ApprovalActorTime
-          actorName={decision.actorName}
-          at={decision.decidedAt}
-          executed={decision.status === 'failed'}
-        />
-      </>
-    ) : !isReplaced && isSubmitting && since ? (
-      <ApprovalActorTime actorName={actorName} at={since} live />
-    ) : (
-      getProposalCaption(proposal, { includeRiskDetails: !isReplaced }) && (
-        <ProposalCaption proposal={proposal} includeRiskDetails={!isReplaced} />
-      )
-    );
+    // A failed action names its type here instead of who decided it: the banner carries the
+    // reason, and the badge the outcome.
+    const isFailedDecision = decision?.status === 'failed';
+    // While an approval is still being sent nothing is recorded, so there is no one to attribute it
+    // to: the header keeps the action's own characteristics, as for a proposal awaiting a decision.
+    const headerCaption =
+      decision?.actorName && !isFailedDecision ? (
+        <>
+          {hasReplacedCaption && (
+            <>
+              <ProposalCaption proposal={proposal} /> •{' '}
+            </>
+          )}
+          <ApprovalActorTime
+            actorName={decision.actorName}
+            at={decision.decidedAt}
+            isUnknown={decision.isActorUnknown}
+          />
+        </>
+      ) : !isReplaced && isSubmitting && since && approvalPhase !== 'approving' ? (
+        <ApprovalActorTime actorName={actorName} at={since} />
+      ) : (
+        getProposalCaption(proposal, {
+          includeRiskDetails: !isReplaced && !isFailedDecision && !isRetry,
+        }) && (
+          <ProposalCaption
+            proposal={proposal}
+            includeRiskDetails={!isReplaced && !isFailedDecision && !isRetry}
+          />
+        )
+      );
 
     const defaultButtonColor: EuiButtonColor = tone === 'danger' ? 'danger' : 'primary';
 
@@ -270,13 +308,13 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     // "Declining", and the footer with Cancel/Decline is gone too (via `isSettledOrTransient`) —
     // showing the form alongside a banner that says the decision is already in flight would be
     // confusing.
-    const showDeclineForm = displayMode === 'declining' && isSubmitting !== 'declining';
+    const showDeclineForm =
+      displayMode === 'declining' && isSubmitting !== 'declining' && !isRestricted;
 
     return (
       <>
         <ApprovalContentHeader
           badge={badge}
-          showStatusBadge={!isReplaced || isReplacedFailure}
           caption={headerCaption}
           title={proposal.title}
           titleId={titleId ?? generatedTitleId}
@@ -301,11 +339,17 @@ export const ApprovalContent = memo<ApprovalContentProps>(
         {/* A replaced card's only callout is why its own attempt failed; the rest belong to the
             live successor. */}
         <ApprovalStatusCallouts
-          isPending={!isReplaced && approvalPhase === 'pending'}
+          isPending={!isReplaced && !isRestricted && approvalPhase === 'pending'}
           previousExecutionError={proposal.previousExecutionError}
           failedAttemptError={isReplacedFailure ? proposal.executionError : undefined}
-          isExpired={!isReplaced && isExpired}
+          isExpired={isExpired}
           expiredReason={proposal.rationale}
+          expiresAt={proposal.expiresAt}
+          upcomingExpiry={
+            !isReplaced && approvalPhase === 'pending' ? proposal.expiresAt : undefined
+          }
+          isRestricted={isRestricted}
+          isReplaced={isReplaced}
           data-test-subj={dataTestSubj}
         />
 
@@ -319,9 +363,11 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           />
         )}
 
+        {/* A restricted user has nothing to submit (the callout above says why), and neither does a
+            replaced proposal: its successor is the one to decide. */}
         {/* Decided/transient states name their actor in the header caption already — no need
             to repeat it here, so there is nothing left in the footer to show. */}
-        {!isSettledOrTransient && hasFooter && (
+        {!isSettledOrTransient && hasFooter && !isRestricted && !isReplaced && (
           <ApprovalContentFooter
             secondaryActions={resolvedSecondaryActions}
             primaryAction={resolvedPrimaryAction}

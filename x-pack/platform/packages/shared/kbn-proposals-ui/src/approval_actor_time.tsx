@@ -5,112 +5,97 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import moment from 'moment';
-import { EuiToolTip } from '@elastic/eui';
-import { FormattedMessage, FormattedRelative, FormattedTime } from '@kbn/i18n-react';
-import { selectUnit } from '@formatjs/intl-utils';
+import { css } from '@emotion/react';
+import { EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { DATE_TIME_FORMAT } from './proposal_helpers';
 
 export interface ApprovalActorTimeProps {
   actorName: string;
   /**
-   * ISO 8601 timestamp. Omitted only when the record genuinely carries none — rendering "by
-   * {actorName}" alone rather than inventing a time, since a fabricated one would read as real
-   * audit attribution and would keep changing on every reopen.
+   * ISO 8601 timestamp. Omitted only when the record genuinely carries none — rendering the actor
+   * alone rather than inventing a time, since a fabricated one would read as real audit
+   * attribution and would keep changing on every reopen.
    */
   at?: string;
-  /**
-   * Ages itself as a relative time ("8s ago") for a decision still being submitted. A settled
-   * decision shows the fixed clock time instead. It matches the time of the decision, not how long
-   * ago that was. A tooltip on the clock time shows the full date and time.
-   */
-  live?: boolean;
-  /** Prefixes "executed", for an approved action that ran and failed. */
-  executed?: boolean;
-  /**
-   * Leads the caption with the outcome in sentence case ("Approved by …"), for a caption that
-   * stands on its own rather than following other header text. Wins over `executed`.
-   */
-  outcome?: 'approved' | 'declined' | 'executed';
+  /** The name is a fallback for an unknown decider, shown in the disabled text colour. */
+  isUnknown?: boolean;
 }
 
-const UPDATE_INTERVAL_SECONDS = 1;
+/** Abbreviated on purpose ("3 sec ago"), which react-intl's relative-time formatter cannot do. */
+const formatAgo = (at: string, now: number): string => {
+  const seconds = Math.max(0, Math.floor((now - new Date(at).getTime()) / 1000));
+  if (seconds < 60) {
+    return i18n.translate('xpack.proposals.approvalActorTime.secondsAgo', {
+      defaultMessage: '{count} sec ago',
+      values: { count: seconds },
+    });
+  }
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) {
+    return i18n.translate('xpack.proposals.approvalActorTime.minutesAgo', {
+      defaultMessage: '{count} min ago',
+      values: { count: minutes },
+    });
+  }
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    return i18n.translate('xpack.proposals.approvalActorTime.hoursAgo', {
+      defaultMessage: '{count} hr ago',
+      values: { count: hours },
+    });
+  }
+  return i18n.translate('xpack.proposals.approvalActorTime.daysAgo', {
+    defaultMessage: '{count} {count, plural, one {day} other {days}} ago',
+    values: { count: Math.floor(hours / 24) },
+  });
+};
 
-/** react-intl throws rather than schedule an update once the unit passes an hour. */
-const INCREMENTABLE_UNITS: ReadonlyArray<ReturnType<typeof selectUnit>['unit']> = [
-  'second',
-  'minute',
-  'hour',
-];
-
-export const ApprovalActorTime = ({
-  actorName,
-  at,
-  live = false,
-  executed = false,
-  outcome,
-}: ApprovalActorTimeProps) => {
-  if (at === undefined) {
-    if (outcome) {
-      return (
-        <FormattedMessage
-          id="xpack.proposals.approvalActorTime.outcomeLabelWithoutTime"
-          defaultMessage="{outcome, select, approved {Approved} declined {Declined} other {Executed}} by {actorName}"
-          values={{ outcome, actorName: <strong>{actorName}</strong> }}
-        />
-      );
+/** Ticks every second while the time is still within the last minute, every minute after that. */
+const useNow = (at: string | undefined): number => {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (at === undefined) {
+      return;
     }
-
-    return (
-      <FormattedMessage
-        id={
-          executed
-            ? 'xpack.proposals.approvalActorTime.executedLabelWithoutTime'
-            : 'xpack.proposals.approvalActorTime.labelWithoutTime'
-        }
-        defaultMessage={executed ? 'executed by {actorName}' : 'by {actorName}'}
-        values={{ actorName: <strong>{actorName}</strong> }}
-      />
+    setNow(Date.now());
+    const id = setInterval(
+      () => setNow(Date.now()),
+      Date.now() - new Date(at).getTime() < 60_000 ? 1000 : 60_000
     );
+    return () => clearInterval(id);
+  }, [at]);
+  return now;
+};
+
+/**
+ * "Kate Sosedova • 3 sec ago" — the one who/when line every state of a proposal shows, in the
+ * flyout row and the modal header alike, so the two never word the same fact differently. The
+ * outcome itself (applied, declined, failed…) is the badge's to say. A tooltip on the time shows
+ * the full date and time.
+ */
+export const ApprovalActorTime = ({ actorName, at, isUnknown = false }: ApprovalActorTimeProps) => {
+  const { euiTheme } = useEuiTheme();
+  const now = useNow(at);
+  const name = (
+    <span css={isUnknown ? css({ color: euiTheme.colors.textDisabled }) : undefined}>
+      {actorName}
+    </span>
+  );
+
+  if (at === undefined) {
+    return name;
   }
 
-  const { unit } = selectUnit(new Date(at));
-
   return (
-    <FormattedMessage
-      id={
-        outcome
-          ? 'xpack.proposals.approvalActorTime.outcomeLabel'
-          : executed
-          ? 'xpack.proposals.approvalActorTime.executedLabel'
-          : 'xpack.proposals.approvalActorTime.label'
-      }
-      defaultMessage={
-        outcome
-          ? '{outcome, select, approved {Approved} declined {Declined} other {Executed}} by {actorName} at {time}'
-          : executed
-          ? 'executed by {actorName} at {time}'
-          : 'by {actorName} at {time}'
-      }
-      values={{
-        outcome,
-        actorName: <strong>{actorName}</strong>,
-        time: live ? (
-          <FormattedRelative
-            value={at}
-            updateIntervalInSeconds={
-              INCREMENTABLE_UNITS.includes(unit) ? UPDATE_INTERVAL_SECONDS : undefined
-            }
-          />
-        ) : (
-          <EuiToolTip content={moment(at).format(DATE_TIME_FORMAT)}>
-            <span tabIndex={0}>
-              <FormattedTime value={at} />
-            </span>
-          </EuiToolTip>
-        ),
-      }}
-    />
+    <>
+      {name}
+      {' • '}
+      <EuiToolTip content={moment(at).format(DATE_TIME_FORMAT)}>
+        <span tabIndex={0}>{formatAgo(at, now)}</span>
+      </EuiToolTip>
+    </>
   );
 };

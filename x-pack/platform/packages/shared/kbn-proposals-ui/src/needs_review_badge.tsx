@@ -6,13 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiBadge,
-  EuiLoadingSpinner,
-  type EuiBadgeProps,
-  type IconType,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiBadge, EuiLoadingSpinner, type EuiBadgeProps, type IconType } from '@elastic/eui';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 
 export interface ProposedActionStatusBadgeProps {
@@ -21,6 +15,8 @@ export interface ProposedActionStatusBadgeProps {
   label?: string;
   /** Swaps the icon for a spinner, for a decision that is still being submitted. */
   isLoading?: boolean;
+  /** Greyed-out look, for a state the user can do nothing about while it settles. */
+  isDisabled?: boolean;
 }
 
 export const ProposedActionStatusBadge = ({
@@ -28,17 +24,15 @@ export const ProposedActionStatusBadge = ({
   iconType = 'clock',
   label = APPROVAL_MODAL_TRANSLATIONS.needsReviewBadge,
   isLoading = false,
+  isDisabled = false,
 }: ProposedActionStatusBadgeProps) => {
-  const { euiTheme } = useEuiTheme();
-
   return (
-    <EuiBadge color={color} iconType={isLoading ? undefined : iconType}>
-      {isLoading && (
-        <EuiLoadingSpinner
-          size="s"
-          style={{ position: 'relative', top: euiTheme.size.xxs, marginRight: euiTheme.size.xs }}
-        />
-      )}
+    // The loader is the badge's own icon, so EUI places and sizes it like any other.
+    <EuiBadge
+      color={color}
+      iconType={isLoading ? EuiLoadingSpinner : iconType}
+      isDisabled={isDisabled}
+    >
       {label}
     </EuiBadge>
   );

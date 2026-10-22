@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiButtonIcon,
   EuiText,
   EuiToolTip,
   euiTextTruncate,
@@ -17,8 +18,9 @@ import {
 import {
   ApprovalActorTime,
   ApprovalModal,
-  type ApprovalActorTimeProps,
   getApprovalOutcomeBadge,
+  getSubmittingPhase,
+  isProposalReplaced,
   getProposalCaption,
   ProposalCaption,
   getProposalDecision,
@@ -28,7 +30,6 @@ import {
   type DeclineParams,
 } from '@kbn/proposals-ui';
 import { DETAILS_FLYOUT_LABELS } from './translations';
-import { getEmptyValue } from '../helpers';
 import { useIsTextTruncated } from '../use_is_text_truncated';
 
 export interface ProposedActionButtonProps {
@@ -54,18 +55,20 @@ export interface ProposedActionButtonProps {
   'data-test-subj'?: string;
 }
 
-const ACTOR_OUTCOME_BY_STATUS: Partial<Record<ApprovalPhase, ApprovalActorTimeProps['outcome']>> = {
-  applied: 'approved',
-  applying: 'approved',
-  declined: 'declined',
-  failed: 'executed',
-};
-
 const PENDING_BADGE = {
   color: 'primary' as const,
   iconType: 'clock' as const,
   label: DETAILS_FLYOUT_LABELS.proposedAction.needsReviewBadge,
   isLoading: false,
+  isDisabled: false,
+};
+
+const RESTRICTED_BADGE = {
+  color: 'warning' as const,
+  iconType: 'lock' as const,
+  label: DETAILS_FLYOUT_LABELS.proposedAction.restrictedBadge,
+  isLoading: false,
+  isDisabled: false,
 };
 
 /**
@@ -75,6 +78,19 @@ const PENDING_BADGE = {
  * surrounding `ProposedActionsList`.
  */
 const rowStyles = ({ euiTheme }: UseEuiTheme) => ({
+  // The row's button and, for a retry, the icon beside it: the list item carries the hover tint so
+  // both sit on it, and each keeps the base padding on its own sides.
+  item: css`
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    transition: background ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
+
+    &:hover,
+    &:focus-within {
+      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+    }
+  `,
   row: css`
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -89,12 +105,6 @@ const rowStyles = ({ euiTheme }: UseEuiTheme) => ({
     font: inherit;
     text-align: start;
     cursor: pointer;
-    transition: background ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
-
-    &:hover,
-    &:focus-visible {
-      background-color: ${euiTheme.colors.backgroundBaseSubdued};
-    }
 
     &:focus-visible {
       outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
@@ -112,6 +122,12 @@ const rowStyles = ({ euiTheme }: UseEuiTheme) => ({
     ${euiTextTruncate()}
   `,
   // The tooltip anchor must stretch like the button it wraps, or the grid collapses to content.
+  retry: css`
+    margin-inline-end: ${euiTheme.size.base};
+  `,
+  noType: css`
+    color: ${euiTheme.colors.textDisabled};
+  `,
   tooltipAnchor: css`
     display: block;
     min-inline-size: 0;
@@ -148,31 +164,102 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     const openModal = useCallback(() => setIsModalOpen(true), []);
     const closeModal = useCallback(() => setIsModalOpen(false), []);
 
-    const approvalPhase: ApprovalPhase = decision ? decision.status : isSubmitting ?? 'pending';
+    const approvalPhase: ApprovalPhase = decision
+      ? decision.status
+      : isSubmitting
+      ? getSubmittingPhase(isSubmitting)
+      : 'pending';
 
-    const badge = getApprovalOutcomeBadge(approvalPhase) ?? PENDING_BADGE;
+    // Only an undecided proposal is restricted: a decided one reports its outcome to everyone.
+    const isRestricted = readOnly && approvalPhase === 'pending';
+    // Still undecided, but offered again after a run of its action failed: the row says so and
+    // offers the retry, which is the same approval the modal's Approve button submits.
+    const isRetry =
+      !readOnly && approvalPhase === 'pending' && Boolean(proposal.previousExecutionError);
+
+    const badge = isRestricted
+      ? RESTRICTED_BADGE
+      : isRetry
+      ? getApprovalOutcomeBadge('failed') ?? PENDING_BADGE
+      : getApprovalOutcomeBadge(approvalPhase) ?? PENDING_BADGE;
 
     const pendingCaption = getProposalCaption(proposal) && <ProposalCaption proposal={proposal} />;
 
-    // A decision with no `actorName` is a terminal state nobody actually decided (expired,
-    // chiefly) — the badge label alone ("Expired") already says what happened, so this only adds
-    // "by {name}" when there is a real actor to name. Only the outcomes below read naturally with
-    // one; any other status (an expired proposal that has an actor, say) keeps the badge label.
-    const actorOutcome = decision ? ACTOR_OUTCOME_BY_STATUS[decision.status] : undefined;
-    const caption =
-      decision?.actorName && actorOutcome ? (
-        <ApprovalActorTime
-          actorName={decision.actorName}
-          at={decision.decidedAt}
-          outcome={actorOutcome}
-        />
-      ) : decision ? (
-        badge.label
-      ) : pendingCaption ? (
-        pendingCaption
-      ) : (
-        getEmptyValue()
-      );
+    // Who and when, worded the same in every state and in the modal header too: the saved
+    // decision when there is one, else the current user from when their click went out. A
+    // decision with no `actorName` is one nobody made (expired, chiefly) — the badge label alone
+    // ("Expired") already says what happened — and so is an expired proposal that has an actor.
+    const [submittedAt, setSubmittedAt] = useState<string | undefined>();
+    useEffect(() => {
+      setSubmittedAt(isSubmitting ? new Date().toISOString() : undefined);
+    }, [isSubmitting]);
+    const actorName =
+      decision?.status === 'expired'
+        ? undefined
+        : decision?.actorName ?? (isSubmitting ? currentActorName : undefined);
+    const actedAt = decision?.decidedAt ?? submittedAt;
+
+    // A failed record says why it failed, in red, rather than who acted: the badge already says "Failed".
+    const failureReason = decision?.status === 'failed' ? decision.reason : undefined;
+    // A decline says why, rather than who — or that no reason was given.
+    const hasDeclineReason =
+      (proposal.dismissReason && proposal.dismissReason !== 'no_reason') || proposal.rationale;
+    const declineReason =
+      decision?.status === 'declined'
+        ? hasDeclineReason
+          ? decision.reason
+          : DETAILS_FLYOUT_LABELS.proposedAction.noReasonCaption
+        : undefined;
+    const isFailure = isRetry || decision?.status === 'failed';
+    const isExpired = decision?.status === 'expired';
+    // Why it expired: replaced by a successor, else the gate's own reason when it left one, else
+    // that nobody decided in time.
+    const expiredReason = isExpired
+      ? isProposalReplaced(proposal)
+        ? DETAILS_FLYOUT_LABELS.proposedAction.expiredReplacedCaption
+        : proposal.rationale || DETAILS_FLYOUT_LABELS.proposedAction.expiredTimedOutCaption
+      : undefined;
+
+    // Nothing to say about the action itself: the caption says so, in a disabled colour, rather
+    // than leaving a bare dash.
+    const hasNoType =
+      !failureReason &&
+      !pendingCaption &&
+      !isFailure &&
+      !(approvalPhase === 'approving' || actorName || isRestricted || decision);
+
+    const caption = isRetry ? (
+      // Offered again after a failed attempt: the row invites another go, and the modal says why.
+      DETAILS_FLYOUT_LABELS.proposedAction.retryCaption
+    ) : expiredReason ? (
+      expiredReason
+    ) : failureReason ? (
+      failureReason
+    ) : declineReason ? (
+      declineReason
+    ) : hasNoType ? (
+      DETAILS_FLYOUT_LABELS.proposedAction.noTypeCaption
+    ) : isFailure ? (
+      // No reason on record: the caption says so, in the failure colour.
+      DETAILS_FLYOUT_LABELS.proposedAction.noFailureReasonCaption
+    ) : approvalPhase === 'approving' ? (
+      // Not yet recorded, so there is no decision to attribute: the row waits on the server.
+      DETAILS_FLYOUT_LABELS.proposedAction.awaitingApprovalCaption
+    ) : actorName ? (
+      <ApprovalActorTime actorName={actorName} at={actedAt} isUnknown={decision?.isActorUnknown} />
+    ) : isRestricted ? (
+      DETAILS_FLYOUT_LABELS.proposedAction.restrictedCaption
+    ) : decision ? (
+      badge.label
+    ) : (
+      pendingCaption
+    );
+
+    // Captions that only say something is missing read in the disabled text colour.
+    const isMuted =
+      hasNoType ||
+      (decision?.status === 'declined' && !hasDeclineReason) ||
+      (!isRetry && decision?.status === 'failed' && !failureReason);
 
     const [titleElement, setTitleElement] = useState<HTMLSpanElement | null>(null);
     const isTitleTruncated = useIsTextTruncated(titleElement, proposal.title);
@@ -196,7 +283,23 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
             </EuiText>
           </span>
           {caption && (
-            <EuiText size="xs" color="subdued" component="span">
+            <EuiText
+              size="xs"
+              color={
+                isMuted
+                  ? 'subdued'
+                  : isRestricted || isExpired
+                  ? 'warning'
+                  : isFailure
+                  ? 'danger'
+                  : 'subdued'
+              }
+              component="span"
+              css={[
+                (isFailure || declineReason || expiredReason) && styles.title,
+                isMuted && styles.noType,
+              ]}
+            >
               {caption}
             </EuiText>
           )}
@@ -206,12 +309,35 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
           iconType={badge.iconType}
           label={badge.label}
           isLoading={badge.isLoading}
+          isDisabled={badge.isDisabled}
         />
       </button>
     );
 
+    const retryButton = isRetry && (
+      // Positioned on the tooltip's own anchor: left in flow, it adds a line below the row.
+      <EuiToolTip
+        content={DETAILS_FLYOUT_LABELS.proposedAction.retryTooltip}
+        // The button's own aria-label says the same, so the tooltip is not read out twice.
+        disableScreenReaderOutput
+        position="top"
+        anchorProps={{ css: styles.retry }}
+      >
+        <EuiButtonIcon
+          iconType="refresh"
+          color="primary"
+          size="xs"
+          iconSize="m"
+          aria-label={DETAILS_FLYOUT_LABELS.proposedAction.retryTooltip}
+          // The host surfaces a rejection itself (a toast), so it is not repeated here.
+          onClick={() => onConfirm().catch(() => {})}
+          data-test-subj={dataTestSubj ? `${dataTestSubj}-retry` : undefined}
+        />
+      </EuiToolTip>
+    );
+
     return (
-      <li>
+      <li css={styles.item}>
         {/* Anchored on the button itself, so keyboard focus reveals the full title too. */}
         {isTitleTruncated ? (
           <EuiToolTip
@@ -224,6 +350,8 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
         ) : (
           button
         )}
+
+        {retryButton}
 
         {isModalOpen && (
           <ApprovalModal

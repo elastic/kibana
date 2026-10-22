@@ -143,14 +143,14 @@ describe('ProposedActionButton', () => {
     expect(baseProps.onConfirm).toHaveBeenCalledTimes(1);
   });
 
-  it('shows Applying on the row and in the modal when isSubmitting is set, hiding the actions', () => {
+  it('shows Approving on the row and in the modal while the approval is being sent, hiding the actions', () => {
     renderButton({ isSubmitting: 'applying' });
     fireEvent.click(screen.getByTestId('proposedAction'));
 
-    // The row badge, not just the modal's own header badge — both say "Applying".
+    // The row badge, not just the modal's own header badge — both say "Approving".
     const row = screen.getByTestId('proposedAction');
-    expect(within(row).getByText('Applying')).toBeInTheDocument();
-    expect(within(screen.getByRole('dialog')).getAllByText('Applying').length).toBeGreaterThan(0);
+    expect(within(row).getByText('Approving')).toBeInTheDocument();
+    expect(within(screen.getByRole('dialog')).getAllByText('Approving').length).toBeGreaterThan(0);
     expect(screen.queryByTestId('proposedAction-modal-confirm')).not.toBeInTheDocument();
   });
 
@@ -194,6 +194,90 @@ describe('ProposedActionButton', () => {
     expect(screen.queryByTestId('proposedAction-modal-dismiss')).not.toBeInTheDocument();
   });
 
+  it('shows a Restricted badge and a request-permissions caption when the user cannot decide', () => {
+    renderButton({ readOnly: true });
+
+    expect(screen.getByText('Restricted')).toBeInTheDocument();
+    expect(screen.getByText("You don't have permissions to act")).toBeInTheDocument();
+    expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+  });
+
+  it('says "No action type" in a disabled colour for a proposal with no category or reversibility', () => {
+    renderButton({
+      proposal: { ...mockProposal, category: undefined, action: undefined },
+    });
+
+    const caption = screen.getByText('No action type');
+    expect(caption.className).toMatch(/noType|textDisabled|css-/);
+    expect(screen.queryByText('–')).not.toBeInTheDocument();
+  });
+
+  it('greys out the Approving badge while a decision is in flight', () => {
+    renderButton({ isSubmitting: 'applying' });
+
+    expect(screen.getByText('Approving').closest('.euiBadge')?.className).toMatch(/-disabled/);
+  });
+
+  describe('while applying', () => {
+    it('says it is awaiting approval, naming no one, while the approval is still being sent', () => {
+      renderButton({ isSubmitting: 'applying', currentActorName: 'Kate Sosedova' });
+
+      expect(screen.getByText('Awaiting approval')).toBeInTheDocument();
+      expect(screen.queryByText('Kate Sosedova')).not.toBeInTheDocument();
+    });
+
+    it('does the same while a decline is in flight', () => {
+      renderButton({ isSubmitting: 'declining', currentActorName: 'Kate Sosedova' });
+
+      expect(screen.getByText('Kate Sosedova')).toBeInTheDocument();
+      expect(screen.getByText(/sec ago$/)).toBeInTheDocument();
+    });
+
+    it('names who approved and when once the saved record is executing', () => {
+      renderButton({
+        proposal: {
+          ...mockProposal,
+          decision: 'approved',
+          status: 'executing',
+          decidedBy: { fullName: 'Bonnie Fishel', username: 'bfishel', email: null },
+          decidedAt: '2024-01-01T17:20:00.000Z',
+        },
+      });
+
+      expect(screen.getByText('Bonnie Fishel')).toBeInTheDocument();
+      expect(screen.getByText(/ago$/)).toBeInTheDocument();
+      expect(screen.queryByText(/approved by/i)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('a proposal offered again after a failed attempt', () => {
+    const retried = { ...mockProposal, previousExecutionError: 'Timed out waiting for workflow' };
+
+    it('shows a Failed badge with a try-again caption instead of Needs review', () => {
+      renderButton({ proposal: retried });
+
+      expect(screen.getByText('Failed')).toBeInTheDocument();
+      expect(screen.getByText('Try one more time')).toBeInTheDocument();
+      expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+    });
+
+    it('retries by approving, without opening the modal', () => {
+      const onConfirm = jest.fn().mockResolvedValue(undefined);
+      renderButton({ proposal: retried, onConfirm });
+      fireEvent.click(screen.getByTestId('proposedAction-retry'));
+
+      expect(onConfirm).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('proposedAction-modal')).not.toBeInTheDocument();
+    });
+
+    it('offers no retry to a user who cannot decide', () => {
+      renderButton({ proposal: retried, readOnly: true });
+
+      expect(screen.queryByTestId('proposedAction-retry')).not.toBeInTheDocument();
+      expect(screen.getByText('Restricted')).toBeInTheDocument();
+    });
+  });
+
   describe('a decided proposal', () => {
     const decidedProposal: ApprovalProposal = {
       ...mockProposal,
@@ -215,7 +299,7 @@ describe('ProposedActionButton', () => {
     it('shows the full date and time in a tooltip on the time of the decision', async () => {
       renderButton({ proposal: decidedProposal });
 
-      fireEvent.mouseOver(screen.getByText(/^\d{1,2}:\d{2}/));
+      fireEvent.mouseOver(screen.getByText(/ago$/));
 
       expect(await screen.findByRole('tooltip')).toHaveTextContent(/^1 Jan 2024, \d{2}:\d{2}$/);
     });
@@ -226,15 +310,57 @@ describe('ProposedActionButton', () => {
       expect(screen.getByText('Declined')).toBeInTheDocument();
     });
 
-    it.each<[string, Partial<ApprovalProposal>, RegExp]>([
-      ['approved', {}, /^Approved by\s/],
-      ['declined', { decision: 'dismissed' }, /^Declined by\s/],
-      ['failed', { status: 'failed' }, /^Executed by\s/],
-    ])('captions a %s proposal with who acted and when', (_, overrides, caption) => {
-      renderButton({ proposal: { ...decidedProposal, ...overrides } });
+    it.each<[string, Partial<ApprovalProposal>]>([['approved', {}]])(
+      'captions a %s proposal with who acted and when, leaving the outcome to the badge',
+      (_, overrides) => {
+        renderButton({ proposal: { ...decidedProposal, ...overrides } });
 
-      expect(screen.getByText(caption)).toBeInTheDocument();
-      expect(screen.getByText('Bonnie Fishel')).toBeInTheDocument();
+        expect(screen.getByText('Bonnie Fishel')).toBeInTheDocument();
+        expect(screen.getByText(/ago$/)).toBeInTheDocument();
+        expect(screen.queryByText(/(approved|declined|executed) by/i)).not.toBeInTheDocument();
+      }
+    );
+
+    it('captions a declined proposal with the reason it was declined, not who acted', () => {
+      renderButton({
+        proposal: {
+          ...decidedProposal,
+          decision: 'dismissed',
+          dismissReason: 'false_positive',
+          rationale: 'Known noisy pod',
+        },
+      });
+
+      expect(
+        screen.getByText('Not a real issue (false positive) — Known noisy pod')
+      ).toBeInTheDocument();
+      expect(screen.queryByText('Bonnie Fishel')).not.toBeInTheDocument();
+    });
+
+    it('says no reason was provided when a decline carries none', () => {
+      renderButton({
+        proposal: { ...decidedProposal, decision: 'dismissed', dismissReason: 'no_reason' },
+      });
+
+      expect(screen.getByText('No reason provided')).toBeInTheDocument();
+      expect(screen.queryByText('Bonnie Fishel')).not.toBeInTheDocument();
+    });
+
+    it('captions a failed proposal with the reason it failed, not who acted', () => {
+      renderButton({
+        proposal: { ...decidedProposal, status: 'failed', executionError: 'Rollback was rejected' },
+      });
+
+      expect(screen.getByText('Rollback was rejected')).toBeInTheDocument();
+      expect(screen.queryByText('Bonnie Fishel')).not.toBeInTheDocument();
+    });
+
+    it('says no failure reason was provided for a failed proposal with none', () => {
+      renderButton({ proposal: { ...decidedProposal, status: 'failed' } });
+
+      expect(screen.getByText('No failure reason provided')).toBeInTheDocument();
+      expect(screen.queryByText('Bonnie Fishel')).not.toBeInTheDocument();
+      expect(screen.queryByText('No action type')).not.toBeInTheDocument();
     });
 
     it('is still clickable, opening a read-only modal for the closed record', () => {
@@ -243,7 +369,7 @@ describe('ProposedActionButton', () => {
       fireEvent.click(screen.getByTestId('proposedAction'));
 
       const dialog = screen.getByRole('dialog');
-      expect(within(dialog).getByText('Applied')).toBeInTheDocument();
+      expect(within(dialog).getAllByText('Applied').length).toBeGreaterThan(0);
       expect(screen.queryByTestId('proposedAction-modal-confirm')).not.toBeInTheDocument();
     });
 
@@ -259,14 +385,15 @@ describe('ProposedActionButton', () => {
     it('shows a Failed badge for an approved proposal whose action did not succeed', () => {
       renderButton({ proposal: { ...decidedProposal, status: 'failed' } });
 
-      expect(screen.getByText('Failed')).toBeInTheDocument();
+      expect(screen.getAllByText('Failed').length).toBeGreaterThan(0);
       expect(screen.queryByText('Applied')).not.toBeInTheDocument();
     });
 
-    it('keeps the badge label as the caption for an expired proposal that has an actor', () => {
+    it('captions why it expired, not who acted, for an expired proposal that has an actor', () => {
       renderButton({ proposal: { ...decidedProposal, status: 'expired' } });
 
-      expect(screen.getAllByText('Expired').length).toBeGreaterThanOrEqual(2);
+      expect(screen.getByText('Expired')).toBeInTheDocument();
+      expect(screen.getByText('Decision timed out')).toBeInTheDocument();
       expect(screen.queryByText(/Approved by/)).not.toBeInTheDocument();
     });
 
@@ -285,10 +412,30 @@ describe('ProposedActionButton', () => {
     it('shows an Expired badge instead of Needs review, though nobody ever decided it', () => {
       renderButton({ proposal: expiredProposal });
 
-      // The badge and the caption below it both read "Expired": nobody names a decider, so the
-      // caption falls back to the same label rather than a fabricated "by Unknown".
-      expect(screen.getAllByText('Expired').length).toBeGreaterThanOrEqual(2);
+      expect(screen.getByText('Expired')).toBeInTheDocument();
       expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+    });
+
+    it("captions why it expired: timed out, the gate's own reason, or replaced", () => {
+      const { unmount } = renderButton({ proposal: expiredProposal });
+      expect(screen.getByText('Decision timed out')).toBeInTheDocument();
+      unmount();
+
+      const withReason = renderButton({
+        proposal: { ...expiredProposal, rationale: 'Gate timed out after 3 attempts' },
+      });
+      expect(screen.getByText('Gate timed out after 3 attempts')).toBeInTheDocument();
+      withReason.unmount();
+
+      renderButton({ proposal: { ...mockProposal, status: 'superseded', supersededBy: 'next' } });
+      expect(screen.getByText('Replaced by a newer proposal')).toBeInTheDocument();
+    });
+
+    it('colours the caption as a warning', () => {
+      renderButton({ proposal: expiredProposal });
+
+      const caption = screen.getByText('Decision timed out');
+      expect(caption.closest('.euiText')?.className).toMatch(/warning/);
     });
 
     it('is still clickable, opening a read-only modal with no actions to take', () => {
@@ -297,7 +444,7 @@ describe('ProposedActionButton', () => {
       fireEvent.click(screen.getByTestId('proposedAction'));
 
       const dialog = screen.getByRole('dialog');
-      expect(within(dialog).getByText('Expired')).toBeInTheDocument();
+      expect(within(dialog).getAllByText('Expired').length).toBeGreaterThan(0);
       expect(screen.queryByTestId('proposedAction-modal-confirm')).not.toBeInTheDocument();
       expect(screen.queryByTestId('proposedAction-modal-dismiss')).not.toBeInTheDocument();
     });

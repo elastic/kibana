@@ -92,10 +92,12 @@ describe('ProposalDecision', () => {
     expect(screen.getByTestId('investigationHypothesisTreeProposal-p-1-dismiss')).toBeEnabled();
   });
 
-  it('disables the decision without the decide capability', () => {
+  it('offers no decision without the decide capability', () => {
     setup({ canDecide: false });
 
-    expect(screen.getByTestId('investigationHypothesisTreeProposal-p-1-confirm')).toBeDisabled();
+    expect(
+      screen.queryByTestId('investigationHypothesisTreeProposal-p-1-confirm')
+    ).not.toBeInTheDocument();
   });
 
   it('says so when the proposal cannot be read', () => {

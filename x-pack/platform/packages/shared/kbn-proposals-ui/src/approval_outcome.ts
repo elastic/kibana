@@ -8,6 +8,14 @@
 import type { EuiBadgeProps, IconType } from '@elastic/eui';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 
+/**
+ * The phase of a decision the host reports as in flight (`isSubmitting`). An approval still being
+ * sent is `'approving'`; once it is recorded and its action runs, the record itself reads
+ * `'applying'` (see {@link ApprovalPhase}).
+ */
+export const getSubmittingPhase = (isSubmitting: 'applying' | 'declining'): ApprovalPhase =>
+  isSubmitting === 'applying' ? 'approving' : 'declining';
+
 /** What a primary action resolves to once its promise settles. */
 export type ApprovalOutcomeStatus = 'applied' | 'declined';
 
@@ -27,6 +35,7 @@ export type ApprovalOutcomeStatus = 'applied' | 'declined';
  */
 export type ApprovalPhase =
   | 'pending'
+  | 'approving'
   | 'applying'
   | 'declining'
   | ApprovalOutcomeStatus
@@ -39,6 +48,7 @@ export interface ApprovalOutcomeBadge {
   iconType: IconType;
   label: string;
   isLoading: boolean;
+  isDisabled?: boolean;
 }
 
 export interface ApprovalOutcomeBanner {
@@ -65,12 +75,21 @@ export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBa
         label: APPROVAL_MODAL_TRANSLATIONS.declinedBadge,
         isLoading: false,
       };
+    case 'approving':
+      return {
+        color: 'primary',
+        iconType: 'clock',
+        label: APPROVAL_MODAL_TRANSLATIONS.approvingBadge,
+        isLoading: true,
+        isDisabled: true,
+      };
     case 'applying':
       return {
         color: 'primary',
         iconType: 'clock',
         label: APPROVAL_MODAL_TRANSLATIONS.applyingBadge,
         isLoading: true,
+        isDisabled: true,
       };
     case 'declining':
       return {
@@ -78,6 +97,7 @@ export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBa
         iconType: 'clock',
         label: APPROVAL_MODAL_TRANSLATIONS.decliningBadge,
         isLoading: true,
+        isDisabled: true,
       };
     case 'failed':
       return {
@@ -95,7 +115,7 @@ export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBa
       };
     case 'no_action':
       return {
-        color: 'default',
+        color: 'success',
         iconType: 'check',
         label: APPROVAL_MODAL_TRANSLATIONS.noActionBadge,
         isLoading: false,
@@ -121,6 +141,12 @@ export const getApprovalOutcomeBanner = (
         title: APPROVAL_MODAL_TRANSLATIONS.declinedBannerTitle,
         isLoading: false,
       };
+    case 'approving':
+      return {
+        color: 'primary',
+        title: APPROVAL_MODAL_TRANSLATIONS.approvingBannerTitle,
+        isLoading: true,
+      };
     case 'applying':
       return {
         color: 'primary',
@@ -141,7 +167,7 @@ export const getApprovalOutcomeBanner = (
       };
     case 'no_action':
       return {
-        color: 'primary',
+        color: 'success',
         title: APPROVAL_MODAL_TRANSLATIONS.noActionBannerTitle,
         isLoading: false,
       };
