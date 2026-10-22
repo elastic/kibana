@@ -369,8 +369,24 @@ describe('workspace state', () => {
     environment.store.dispatch(
       workspaceChanged({
         ...environment.store.getState().workspace,
-        nodesById: { one: { ...node, id: 'one', label: 'One', color: 'blue' } },
-        nodeIds: ['one'],
+        nodesById: {
+          one: { ...node, id: 'one', label: 'One', color: 'blue' },
+          two: { ...node, id: 'two', label: 'Two', color: 'blue' },
+        },
+        nodeIds: ['one', 'two'],
+        edgesById: {
+          connected: {
+            id: 'connected',
+            sourceId: 'one',
+            targetId: 'two',
+            topSourceId: 'one',
+            topTargetId: 'two',
+            label: '',
+            weight: 5,
+            width: 3,
+          },
+        },
+        edgeIds: ['connected'],
         selectedNodeIds: [],
       })
     );

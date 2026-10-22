@@ -116,6 +116,28 @@ describe('Redux-owned workspace editing', () => {
     );
   });
 
+  it('removes a selected group, its descendants and dangling edges from Redux and the runtime', () => {
+    const { store, workspace } = setup();
+    store.dispatch(mergeNodes({ parentId: 'field..third', childId: 'field..second' }));
+    store.dispatch(toggleNodeSelection({ nodeId: 'field..third', replace: true }));
+
+    expect(workspace.nodesMap['field..second'].parent?.id).toBe('field..third');
+    expect(workspace.edges).toHaveLength(1);
+    expect(store.getState().workspace.edgeIds).toHaveLength(1);
+
+    store.dispatch(deleteSelectedNodes());
+
+    const { nodeIds, nodesById, edgeIds, edgesById } = store.getState().workspace;
+    expect(nodeIds).toEqual(['field..first']);
+    expect(Object.keys(nodesById)).toEqual(['field..first']);
+    expect(edgeIds).toEqual([]);
+    expect(edgesById).toEqual({});
+    expect(workspace.nodes.map(({ id }) => id)).toEqual(['field..first']);
+    expect(workspace.nodesMap['field..second']).toBeUndefined();
+    expect(workspace.nodesMap['field..third']).toBeUndefined();
+    expect(workspace.edges).toEqual([]);
+  });
+
   it('projects grouping, merging and ungrouping, including visible edge endpoints', () => {
     const { store, workspace } = setup();
     store.dispatch(toggleNodeSelection({ nodeId: 'field..second', replace: true }));
