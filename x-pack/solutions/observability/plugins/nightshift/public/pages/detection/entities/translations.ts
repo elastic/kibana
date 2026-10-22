@@ -25,19 +25,37 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
 export const FILTER_LABEL = i18n.translate(
   'xpack.nightshift.detectionPage.entities.filterAriaLabel',
   {
-    defaultMessage: 'Filter entities by rules',
+    defaultMessage: 'Filter entities',
   }
 );
-export const HAS_RULES_LABEL = i18n.translate(
-  'xpack.nightshift.detectionPage.entities.hasRulesLabel',
+export const RULES_FILTER_GROUP_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.rulesFilterGroupLabel',
   {
-    defaultMessage: 'Has rules',
+    defaultMessage: 'Rules',
+  }
+);
+export const HAVE_RULES_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.haveRulesLabel',
+  {
+    defaultMessage: 'Have rules',
   }
 );
 export const NO_RULES_LABEL = i18n.translate(
-  'xpack.nightshift.detectionPage.entities.noRulesLabel',
+  'xpack.nightshift.detectionPage.entities.dontHaveRulesLabel',
   {
-    defaultMessage: 'No rules',
+    defaultMessage: "Don't have rules",
+  }
+);
+export const EVENTS_FILTER_GROUP_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.eventsFilterGroupLabel',
+  {
+    defaultMessage: 'Events',
+  }
+);
+export const SIGNIFICANT_EVENTS_FILTER_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.significantEventsFilterLabel',
+  {
+    defaultMessage: 'Significant events',
   }
 );
 export const SERVICES_LABEL = i18n.translate(
@@ -61,6 +79,12 @@ export const STORAGE_LABEL = i18n.translate(
 export const OTHER_LABEL = i18n.translate('xpack.nightshift.detectionPage.entities.otherLabel', {
   defaultMessage: 'Other',
 });
+export const NO_ENTITY_GROUP_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.noEntityGroupLabel',
+  {
+    defaultMessage: 'No entity',
+  }
+);
 export const UNASSIGNED_LABEL = i18n.translate(
   'xpack.nightshift.detectionPage.entities.unassignedLabel',
   {

@@ -21,10 +21,14 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { NightshiftAppHeader } from '../../app/app_header';
 import type { NightshiftAppHeaderProps } from '../../app/app_header';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
+import {
+  NIGHTSHIFT_EVENT_ID_QUERY_PARAM,
+  NIGHTSHIFT_RULE_ID_QUERY_PARAM,
+} from '../../common/url_params';
 import { useDetectionOverview } from '../../data/detection_overview/use_detection_overview';
 import { useMaintenanceStatus } from '../../data/maintenance/use_significant_events_maintenance';
 import { useKibana } from '../../hooks/use_kibana';
@@ -32,11 +36,8 @@ import type { DetectionTabId } from './detection_tabs';
 import { DETECTION_TAB_IDS, DETECTION_TAB_LABELS } from './detection_tabs';
 import { DetectionOverview } from './overview/detection_overview';
 import { EntitiesPanel } from './entities/entities_panel';
-import {
-  ENTITY_QUERY_PARAM,
-  UNASSIGNED_QUERY_PARAM,
-  useEntitySelection,
-} from './use_entity_selection';
+import { PAGE_QUERY_PARAM } from './constants';
+import { useEntitySelection } from './use_entity_selection';
 import {
   RANGE_FROM_QUERY_PARAM,
   RANGE_TO_QUERY_PARAM,
@@ -73,18 +74,19 @@ export const DetectionPage = ({
 }): React.ReactElement => {
   const { application } = useKibana().services;
   const history = useHistory();
+  const location = useLocation();
   const { euiTheme } = useEuiTheme();
   const maintenanceStatus = useMaintenanceStatus();
   const { timeRange, setTimeRange } = useDetectionTimeRange();
   const overview = useDetectionOverview(timeRange);
   const selection = useEntitySelection();
-  // Tabs share the time range and entity selection; other filters belong to one tab.
-  const tabParams = new URLSearchParams({
-    [RANGE_FROM_QUERY_PARAM]: timeRange.from,
-    [RANGE_TO_QUERY_PARAM]: timeRange.to,
-  });
-  selection.entities.forEach((id) => tabParams.append(ENTITY_QUERY_PARAM, id));
-  if (selection.unassigned) tabParams.set(UNASSIGNED_QUERY_PARAM, 'true');
+  // Tab switches keep every filter, so returning to a tab restores it; only pages and flyouts reset.
+  const tabParams = new URLSearchParams(location.search);
+  [PAGE_QUERY_PARAM, NIGHTSHIFT_EVENT_ID_QUERY_PARAM, NIGHTSHIFT_RULE_ID_QUERY_PARAM].forEach(
+    (param) => tabParams.delete(param)
+  );
+  tabParams.set(RANGE_FROM_QUERY_PARAM, timeRange.from);
+  tabParams.set(RANGE_TO_QUERY_PARAM, timeRange.to);
   const tabSearch = `?${tabParams.toString()}`;
 
   return (

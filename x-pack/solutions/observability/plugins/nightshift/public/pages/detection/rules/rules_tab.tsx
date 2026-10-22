@@ -19,6 +19,7 @@ import {
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
+import { useDebounceFn } from '@kbn/react-hooks';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -54,6 +55,11 @@ import {
   SEARCH_PLACEHOLDER,
 } from './translations';
 
+// Its own param, so the Rules search and the Events search both survive tab switches.
+const RULES_SEARCH_QUERY_PARAM = 'rulesSearch';
+// Module-level so useDebounceFn keeps one debounced function across renders.
+const SEARCH_DEBOUNCE_OPTIONS = { wait: 300 };
+
 export const RulesTab = ({
   timeRange,
   onTimeRangeChange,
@@ -75,7 +81,19 @@ export const RulesTab = ({
   const isEntityLoading = unassigned && entitiesQuery.isLoading;
   const isEntityError = unassigned && entitiesQuery.isError && !entitiesQuery.data;
   const { demoteRules, isPending } = useRulesDemote({});
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(
+    () => new URLSearchParams(location.search).get(RULES_SEARCH_QUERY_PARAM) ?? ''
+  );
+  const { run: writeSearch } = useDebounceFn((value: string) => {
+    const params = new URLSearchParams(history.location.search);
+    if (value.trim()) params.set(RULES_SEARCH_QUERY_PARAM, value);
+    else params.delete(RULES_SEARCH_QUERY_PARAM);
+    history.replace({ ...history.location, search: `?${params.toString()}` });
+  }, SEARCH_DEBOUNCE_OPTIONS);
+  const updateSearch = (value: string) => {
+    setSearch(value);
+    writeSearch(value);
+  };
   const [selected, setSelected] = useState<DetectionRule[]>([]);
   const [pendingDelete, setPendingDelete] = useState<DetectionRule[]>();
   const openLinks = useRef(new Map<string, HTMLAnchorElement | HTMLButtonElement | null>());
@@ -172,7 +190,7 @@ export const RulesTab = ({
             fullWidth
             isClearable
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) => updateSearch(event.target.value)}
             aria-label={SEARCH_PLACEHOLDER}
             placeholder={SEARCH_PLACEHOLDER}
             data-test-subj="nightshiftDetectionRulesSearch"
@@ -298,7 +316,7 @@ export const RulesTab = ({
                 search.trim() ? (
                   <EuiButton
                     data-test-subj="nightshiftRulesTabButton"
-                    onClick={() => setSearch('')}
+                    onClick={() => updateSearch('')}
                     {...getEbtProps({
                       action: NIGHTSHIFT_EBT_ACTIONS.CLEAR_RULES_SEARCH,
                       element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_RULES_TABLE,

@@ -128,9 +128,9 @@ describe('DetectionPage', () => {
     expect(mockUseDetectionOverview).toHaveBeenLastCalledWith({ from: 'now-24h', to: 'now' });
   });
 
-  it('keeps selected entities and Unassigned when switching tabs', async () => {
+  it('keeps entities and every tab filter when switching tabs, but not the page or flyout', async () => {
     const history = renderPage(
-      '/detections/events?entity=checkout&entity=expired&unassigned=true&page=3&search=errors'
+      '/detections/events?entity=checkout&entity=expired&unassigned=true&severity=critical&search=errors&rulesSearch=agent&page=3&eventId=event-1'
     );
     expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('nightshiftDetectionTab-rules'));
@@ -139,7 +139,10 @@ describe('DetectionPage', () => {
     expect(params.getAll('entity')).toEqual(['checkout', 'expired']);
     expect(params.get('unassigned')).toBe('true');
     expect(params.get('rangeFrom')).toBe('now-24h');
+    expect(params.get('severity')).toBe('critical');
+    expect(params.get('search')).toBe('errors');
+    expect(params.get('rulesSearch')).toBe('agent');
     expect(params.has('page')).toBe(false);
-    expect(params.has('search')).toBe(false);
+    expect(params.has('eventId')).toBe(false);
   });
 });

@@ -42,17 +42,21 @@ import {
   ERROR_TITLE,
   FILTER_LABEL,
   getActiveEventsTooltip,
-  HAS_RULES_LABEL,
+  EVENTS_FILTER_GROUP_LABEL,
+  HAVE_RULES_LABEL,
   KNOWLEDGE_LINK,
+  NO_ENTITY_GROUP_LABEL,
+  UNASSIGNED_LABEL,
   NO_MATCHES_DESCRIPTION,
   NO_RULES_LABEL,
   OTHER_LABEL,
   RETRY_LABEL,
+  RULES_FILTER_GROUP_LABEL,
   SEARCH_PLACEHOLDER,
   SERVICES_LABEL,
+  SIGNIFICANT_EVENTS_FILTER_LABEL,
   STORAGE_LABEL,
   TRUNCATED_DESCRIPTION,
-  UNASSIGNED_LABEL,
   UNKNOWN_LABEL,
 } from './translations';
 
@@ -64,6 +68,14 @@ const ENTITY_GROUPS = [
 ] as const;
 
 type EntityOption = EuiSelectableOption;
+const ATTRIBUTE_FILTERS = ['have_rules', 'no_rules', 'significant_events'] as const;
+type AttributeFilter = (typeof ATTRIBUTE_FILTERS)[number];
+const isAttributeFilter = (key?: string): key is AttributeFilter =>
+  ATTRIBUTE_FILTERS.includes(key as AttributeFilter);
+
+// Entities with active significant events lead each group, busiest first; the rest follow A to Z.
+const compareEntities = (left: DetectionEntity, right: DetectionEntity): number =>
+  right.active_events - left.active_events || left.name.localeCompare(right.name);
 
 export const EntitiesPanel = ({
   timeRange,
@@ -80,15 +92,17 @@ export const EntitiesPanel = ({
   const query = useDetectionEntities(timeRange);
   const [search, setSearch] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [rulesFilters, setRulesFilters] = useState<string[]>([]);
+  const [attributeFilters, setAttributeFilters] = useState<AttributeFilter[]>([]);
   const { entities: selected, unassigned, clear, toggleEntity, toggleUnassigned } = selection;
   const entities = query.data?.entities ?? [];
   const term = search.trim().toLowerCase();
-  const hasRules = rulesFilters.includes('has');
-  const noRules = rulesFilters.includes('none');
-  const matches = (name: string, rules: number) =>
+  const haveRules = attributeFilters.includes('have_rules');
+  const noRules = attributeFilters.includes('no_rules');
+  const withEvents = attributeFilters.includes('significant_events');
+  const matches = (name: string, rules: number, activeEvents: number) =>
     name.toLowerCase().includes(term) &&
-    (hasRules === noRules || (hasRules ? rules > 0 : rules === 0));
+    (haveRules === noRules || (haveRules ? rules > 0 : rules === 0)) &&
+    (!withEvents || activeEvents > 0);
   const makeOption = (
     entity: Pick<DetectionEntity, 'id' | 'name' | 'active_events'>,
     icon: string,
@@ -122,26 +136,29 @@ export const EntitiesPanel = ({
         ENTITY_GROUPS.find(({ subtypes }) =>
           (subtypes as readonly string[]).includes(entity.subtype)
         ) ?? ENTITY_GROUPS[3];
-      return entityGroup === group && matches(entity.name, entity.rules);
+      return entityGroup === group && matches(entity.name, entity.rules, entity.active_events);
     });
     if (matching.length) {
       options.push({ key: `group:${group.icon}`, label: group.label, isGroupLabel: true });
       options.push(
-        ...matching
-          .sort((left, right) => left.name.localeCompare(right.name))
-          .map((entity) => makeOption(entity, group.icon))
+        ...matching.sort(compareEntities).map((entity) => makeOption(entity, group.icon))
       );
     }
   }
   const liveIds = new Set(entities.map(({ id }) => id));
-  const unknown = query.data ? selected.filter((id) => !liveIds.has(id) && matches(id, 0)) : [];
+  const unknown = query.data ? selected.filter((id) => !liveIds.has(id) && matches(id, 0, 0)) : [];
   if (unknown.length) {
     options.push({ key: 'group:unknown', label: UNKNOWN_LABEL, isGroupLabel: true });
     options.push(
       ...unknown.map((id) => makeOption({ id, name: id, active_events: 0 }, 'tokenKey'))
     );
   }
-  if (query.data && matches(UNASSIGNED_LABEL, query.data.unassigned.rules)) {
+  if (
+    query.data &&
+    matches(UNASSIGNED_LABEL, query.data.unassigned.rules, query.data.unassigned.active_events)
+  ) {
+    // Its own section, so it doesn't read as part of the last entity group.
+    options.push({ key: 'group:no-entity', label: NO_ENTITY_GROUP_LABEL, isGroupLabel: true });
     options.push(
       makeOption(
         {
@@ -154,10 +171,19 @@ export const EntitiesPanel = ({
       )
     );
   }
+  const isChecked = (key: AttributeFilter) => (attributeFilters.includes(key) ? 'on' : undefined);
   const filterOptions: EuiSelectableOption[] = [
-    { key: 'has', label: HAS_RULES_LABEL, checked: hasRules ? 'on' : undefined },
-    { key: 'none', label: NO_RULES_LABEL, checked: noRules ? 'on' : undefined },
+    { label: RULES_FILTER_GROUP_LABEL, isGroupLabel: true },
+    { label: HAVE_RULES_LABEL, key: 'have_rules', checked: isChecked('have_rules') },
+    { label: NO_RULES_LABEL, key: 'no_rules', checked: isChecked('no_rules') },
+    { label: EVENTS_FILTER_GROUP_LABEL, isGroupLabel: true },
+    {
+      label: SIGNIFICANT_EVENTS_FILTER_LABEL,
+      key: 'significant_events',
+      checked: isChecked('significant_events'),
+    },
   ];
+  const hasAttributeFilter = haveRules !== noRules || withEvents;
   const filterButton = (
     <EuiPopover
       isOpen={isFilterOpen}
@@ -172,8 +198,8 @@ export const EntitiesPanel = ({
             iconType="filter"
             aria-label={FILTER_LABEL}
             aria-expanded={isFilterOpen}
-            aria-pressed={hasRules !== noRules}
-            color={hasRules !== noRules ? 'primary' : 'text'}
+            aria-pressed={hasAttributeFilter}
+            color={hasAttributeFilter ? 'primary' : 'text'}
             onClick={() => setIsFilterOpen(!isFilterOpen)}
           />
         </EuiToolTip>
@@ -183,11 +209,13 @@ export const EntitiesPanel = ({
         aria-label={FILTER_LABEL}
         options={filterOptions}
         onChange={(next) =>
-          setRulesFilters(
-            next.filter(({ checked }) => checked === 'on').map(({ key }) => key ?? '')
+          setAttributeFilters(
+            next.flatMap(({ checked, key }) =>
+              checked === 'on' && isAttributeFilter(key) ? [key] : []
+            )
           )
         }
-        listProps={{ bordered: false, isVirtualized: false }}
+        listProps={{ bordered: false, isVirtualized: false, showIcons: true }}
       >
         {(list) => list}
       </EuiSelectable>
@@ -206,14 +234,14 @@ export const EntitiesPanel = ({
           <EuiNotificationBadge color="subdued">{entities.length}</EuiNotificationBadge>
         </EuiFlexItem>
         <EuiFlexItem />
-        {selected.length > 0 || unassigned || rulesFilters.length > 0 ? (
+        {selected.length > 0 || unassigned || attributeFilters.length > 0 ? (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               data-test-subj="nightshiftEntitiesPanelButton"
               size="xs"
               onClick={() => {
                 clear();
-                setRulesFilters([]);
+                setAttributeFilters([]);
                 setSearch('');
               }}
             >
