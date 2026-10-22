@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import {
+  DATE_TIME_FORMAT,
   getProposalCaption,
   getProposalDecision,
   getProposalTone,
@@ -121,29 +123,23 @@ describe('getProposalCaption', () => {
 
   it('appends the decision deadline, formatted the same way the host renders any other date', () => {
     const expiresAt = '2999-01-05T17:00:00.000Z';
-    const formattedDeadline = new Date(expiresAt).toLocaleString(undefined, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    });
+    const formattedDeadline = moment(expiresAt).format(DATE_TIME_FORMAT);
     expect(
       getProposalCaption(proposal({ category: 'configure', impact: 'high', expiresAt }), {
         includeRiskDetails: true,
       })
-    ).toBe(`Configure • High impact • Expires ${formattedDeadline}`);
+    ).toBe(`Configure • High impact • Expires on ${formattedDeadline}`);
   });
 
-  it('shows Expired rather than a formatted deadline once the decision window has passed', () => {
+  it('shows the expiry date and time once the decision window has passed', () => {
+    const expiresAt = '2024-01-05T17:00:00.000Z';
+    const formattedDeadline = moment(expiresAt).format(DATE_TIME_FORMAT);
     expect(
       getProposalCaption(
-        proposal({
-          category: 'configure',
-          impact: 'high',
-          status: 'expired',
-          expiresAt: '2024-01-05T17:00:00.000Z',
-        }),
+        proposal({ category: 'configure', impact: 'high', status: 'expired', expiresAt }),
         { includeRiskDetails: true }
       )
-    ).toBe('Configure • High impact • Expired');
+    ).toBe(`Configure • High impact • Expired on ${formattedDeadline}`);
   });
 
   it('omits the deadline segment entirely when the proposal carries no expiresAt', () => {

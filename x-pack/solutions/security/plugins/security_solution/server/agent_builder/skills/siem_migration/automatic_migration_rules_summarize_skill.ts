@@ -11,6 +11,7 @@ import {
   SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
   SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID,
   SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
+  SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID,
 } from '../../tools/siem_migrations';
 import {
   AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK,
@@ -18,17 +19,13 @@ import {
   NAME_NEVER_ID_BLOCK,
   AUTOMATIC_MIGRATION_GENERAL_GUIDELINES,
 } from './rules/content';
-import { RULE_MIGRATION_SKILLS } from './rules/skill_ids';
+import { RULE_MIGRATION_SKILLS } from './rules/skill_catalog';
 
 export const automaticMigrationRulesSummarizeSkill = defineSkillType({
-  id: RULE_MIGRATION_SKILLS.SUMMARIZE,
-  name: RULE_MIGRATION_SKILLS.SUMMARIZE,
+  id: RULE_MIGRATION_SKILLS.SUMMARIZE.id,
+  name: RULE_MIGRATION_SKILLS.SUMMARIZE.id,
   basePath: 'skills/security/siem_migrations',
-  description: `Summarize Automatic Rule Migration progress: list every rule migration with its status and rule counts, or drill into one migration's task progress and translation stats.
-
-Use when the user asks "how are my rule migrations doing", wants an overview, or asks about a specific rule migration by name.
-
-Read-only. Automatic Migration also covers dashboards — this skill handles rule migrations only.`,
+  description: RULE_MIGRATION_SKILLS.SUMMARIZE.description,
   content: `
 # When to use this skill
 
@@ -55,6 +52,10 @@ ${NAME_NEVER_ID_BLOCK}
   Returns an empty zero-shape when the migration has no items.
 - \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` — list the rules in one migration with their
   translation result and status (projected fields only). Supports filtering and pagination.
+- \`${SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID}\` — the resources (macros,
+  lookups, reference sets, watchlists) a single migration (by id) is still missing, as
+  \`{ name, type }\` items.
+  The only source of truth for missing resources.
 
 ## Workflow
 
@@ -62,9 +63,13 @@ ${NAME_NEVER_ID_BLOCK}
    \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` and present the list.
 2. **Drill in**: if the user names a migration, resolve the name to an id (Name→ID block) and call
    \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` for config and task progress, and
-   \`${SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID}\` for translation breakdown.
+   \`${SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID}\` for translation breakdown, and
+   \`${SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID}\` for missing resources (always).
 3. **Rules**: if the user wants to see the rules inside a migration, call \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\`
    with the resolved id (page is zero-based).
+4. **Missing resources**: always part of a single-migration summary — do not wait for the user to
+   ask. Answer only from \`${SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID}\` — never
+   infer missing resources from translation stats or per-rule translation results.
 
 ## Rendering
 
@@ -78,6 +83,10 @@ ${NAME_NEVER_ID_BLOCK}
   show connector id, started_at, and any error.
 - **Rules**: a table of original title, translated title (or "—"), translation result, status.
   State the page number and that more pages exist when \`total\` exceeds the rows shown.
+- **Missing resources** (part of every single-migration summary): group by \`type\` and list every
+  resource name under its type, with a count per type. An empty result means nothing is missing — say so. To resolve them, the user
+  uploads the resources in the Automatic Migration UI and reprocesses the affected rules
+  (\`${RULE_MIGRATION_SKILLS.START.id}\` skill).
 
 ${AUTOMATIC_MIGRATION_NAVIGATION_BLOCK}
 
@@ -92,5 +101,6 @@ invent a migration id or name. If a tool returns an empty zero-shape (no items),
     SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
     SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID,
     SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
+    SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID,
   ],
 });

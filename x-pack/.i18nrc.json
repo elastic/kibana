@@ -60,6 +60,7 @@
     "xpack.dataQuality": "platform/plugins/shared/data_quality",
     "xpack.datasetQuality": "platform/plugins/shared/dataset_quality",
     "xpack.dataUsage": "platform/plugins/private/data_usage",
+    "xpack.digitalExperience": "solutions/observability/plugins/digital_experience",
     "xpack.discover": "platform/plugins/private/discover_enhanced",
     "xpack.createClassicStreamFlyout": "platform/packages/shared/kbn-classic-stream-flyout",
     "xpack.crossClusterReplication": "platform/plugins/private/cross_cluster_replication",
@@ -241,6 +242,7 @@
     "xpack.serverlessWorkplaceAI": "solutions/workplaceai/plugins/serverless_workplace_ai",
     "xpack.sloShared": "platform/plugins/shared/slo_shared",
     "xpack.workplaceai": "solutions/workplaceai/plugins/workplace_ai_app",
+    "xpack.entityInventoryApp": ["solutions/observability/plugins/entity_inventory_app"],
     "xpack.agentBuilderDashboards": "platform/plugins/shared/agent_builder_dashboards",
     "xpack.alertingV2EpisodesUi": "platform/packages/shared/response-ops/alerting-v2-episodes-ui",
     "xpack.embeddableAlertsTable": "platform/plugins/shared/embeddable_alerts_table",
@@ -256,7 +258,7 @@
       "platform/packages/shared/kbn-streamlang-yaml-editor"
     ]
   },
-  "exclude": ["examples", "platform/plugins/shared/agent_builder_workflows"],
+  "exclude": ["examples"],
   "translations": [
     "@kbn/translations-plugin/translations/zh-CN.json",
     "@kbn/translations-plugin/translations/ja-JP.json",

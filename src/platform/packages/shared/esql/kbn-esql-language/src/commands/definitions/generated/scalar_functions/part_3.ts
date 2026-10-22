@@ -1356,7 +1356,7 @@ const toTextDefinition: FunctionDefinition = {
   description: i18n.translate('esqlLanguage.esql.definitions.to_text', {
     defaultMessage: 'Converts an input value into text.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {

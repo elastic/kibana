@@ -20,7 +20,7 @@ import type { EncryptedSavedObjectsService } from '../../server/crypto';
 import * as EncryptedSavedObjectsModule from '../../server/saved_objects';
 
 // This will only change if new ESOs are introduced. This number should never get smaller.
-export const ESO_TYPES_COUNT = 28 as const;
+export const ESO_TYPES_COUNT = 29 as const;
 
 describe('checking changes on all registered encrypted SO types', () => {
   let esServer: TestElasticsearchUtils;
@@ -88,6 +88,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "synthetics-monitor": "de18413761b36881d871e677c248336a70c90f0508e58f4162ee4cd579be2148",
         "synthetics-monitor-multi-space": "c05bd0271eb934cef46af2fc32591ac6ed10b20ac34e049fd0d3ca1362fd4136",
         "synthetics-param": "747ba9d1b7addf5b131713abe7868bd767af6ce0cf8b6b0f335f4ef34b280c7e",
+        "synthetics-secret-connection": "fcf558d5ef016148d52dd9b2c40de4ae986bcf627c058db338c31ef1eb6cf282",
         "task": "bba5345e2443d1dd107d1f9de8810cbfbfe74941bc6d1b1dbe8c61e175f57b75",
         "uptime-synthetics-api-key": "5ca81f180763e85397fa8c6508adcd60efd0f916e29bac6dcd5b4564f1db7375",
         "user_connector_token": "7f818fe3827daa31d23b874e480176d105e629cf5da88f5f4e56033e78c3acca",
@@ -188,6 +189,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "service-account-workload-binding|1",
         "synthetics-monitor|2",
         "synthetics-monitor|1",
+        "synthetics-secret-connection|1",
         "task|9",
         "task|8",
         "task|7",
