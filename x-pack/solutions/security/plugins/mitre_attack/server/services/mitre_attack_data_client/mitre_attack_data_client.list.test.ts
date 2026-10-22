@@ -117,7 +117,20 @@ describe('MitreAttackDataClient.list', () => {
         per_page: 1,
         page: 1,
       })
-      .mockResolvedValueOnce({ saved_objects: [], total: 0, per_page: 10000, page: 1 });
+      .mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'enterprise:15.1:TA0001',
+            type: MITRE_ATTACK_ENTITY_SO_TYPE,
+            references: [],
+            score: 0,
+            attributes: getMockMitreTactic({ framework_version: '15.1' }),
+          },
+        ],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      });
 
     await buildClient().list({ types: ['tactic'] });
 
@@ -141,7 +154,20 @@ describe('MitreAttackDataClient.list', () => {
         per_page: 1,
         page: 1,
       })
-      .mockResolvedValueOnce({ saved_objects: [], total: 0, per_page: 10000, page: 1 });
+      .mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'enterprise:15.1:TA0001',
+            type: MITRE_ATTACK_ENTITY_SO_TYPE,
+            references: [],
+            score: 0,
+            attributes: getMockMitreTactic({ framework_version: '15.1' }),
+          },
+        ],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      });
 
     await buildClient().list({ types: ['technique'] });
 
@@ -165,7 +191,20 @@ describe('MitreAttackDataClient.list', () => {
         per_page: 1,
         page: 1,
       })
-      .mockResolvedValueOnce({ saved_objects: [], total: 0, per_page: 10000, page: 1 });
+      .mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'enterprise:15.1:TA0001',
+            type: MITRE_ATTACK_ENTITY_SO_TYPE,
+            references: [],
+            score: 0,
+            attributes: getMockMitreTactic({ framework_version: '15.1' }),
+          },
+        ],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      });
 
     await buildClient().list({ types: ['subtechnique'] });
 
@@ -267,7 +306,7 @@ describe('MitreAttackDataClient.list', () => {
     expect(result.subtechniques).toHaveLength(0);
   });
 
-  it('throws MitreDataUnavailableError when a canonical query returns empty (storage loss)', async () => {
+  it('throws MitreDataUnavailableError when an unpinned query returns empty (storage loss)', async () => {
     savedObjectsRepository.find.mockResolvedValueOnce({
       saved_objects: [],
       total: 0,
@@ -279,7 +318,7 @@ describe('MitreAttackDataClient.list', () => {
     expect(dataService.reportEmptyWhileReady).toHaveBeenCalled();
   });
 
-  it('returns empty collection without throwing when a filtered query returns empty', async () => {
+  const mockLatestVersionThenEmpty = () =>
     savedObjectsRepository.find
       .mockResolvedValueOnce({
         saved_objects: [
@@ -297,7 +336,33 @@ describe('MitreAttackDataClient.list', () => {
       })
       .mockResolvedValueOnce({ saved_objects: [], total: 0, per_page: 10000, page: 1 });
 
-    const result = await buildClient().list({ framework: 'atlas' });
+  it('throws and reports when a non-enterprise framework query returns empty', async () => {
+    mockLatestVersionThenEmpty();
+
+    await expect(buildClient().list({ framework: 'atlas' })).rejects.toThrow(
+      MitreDataUnavailableError
+    );
+    expect(dataService.reportEmptyWhileReady).toHaveBeenCalled();
+  });
+
+  it('throws and reports when a types-filtered enterprise query returns empty', async () => {
+    mockLatestVersionThenEmpty();
+
+    await expect(
+      buildClient().list({ framework: 'enterprise', types: ['tactic'] })
+    ).rejects.toThrow(MitreDataUnavailableError);
+    expect(dataService.reportEmptyWhileReady).toHaveBeenCalled();
+  });
+
+  it('returns empty collection without throwing or reporting when a frameworkVersion is pinned', async () => {
+    savedObjectsRepository.find.mockResolvedValueOnce({
+      saved_objects: [],
+      total: 0,
+      per_page: 10000,
+      page: 1,
+    });
+
+    const result = await buildClient().list({ framework: 'atlas', frameworkVersion: '0.0' });
 
     expect(result.tactics).toHaveLength(0);
     expect(result.techniques).toHaveLength(0);

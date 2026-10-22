@@ -22,10 +22,8 @@ interface MitreAttackDataClientDeps {
   >;
 }
 
-const isCanonicalQuery = (params?: MitreListParams): boolean =>
-  (!params?.framework || params.framework === 'enterprise') &&
-  !params?.frameworkVersion &&
-  !params?.types?.length;
+/** Every bundled framework has tactics, techniques and subtechniques; only a pinned version may legitimately match nothing. */
+const expectsData = (params?: MitreListParams): boolean => !params?.frameworkVersion;
 
 export const createMitreAttackDataClient = ({
   savedObjectsRepository,
@@ -50,7 +48,7 @@ export const createMitreAttackDataClient = ({
       collection.tactics.length === 0 &&
       collection.techniques.length === 0 &&
       collection.subtechniques.length === 0;
-    if (isEmpty && isCanonicalQuery(params)) {
+    if (isEmpty && expectsData(params)) {
       dataService.reportEmptyWhileReady();
       throw new MitreDataUnavailableError('population_failed');
     }

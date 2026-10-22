@@ -204,16 +204,35 @@ export default ({ getService }: FtrProviderContext) => {
         await seedMitreEntities(es, loadMitreArtifact());
       });
 
-      it('returns 503 when no saved objects exist for a canonical enterprise query', async () => {
+      it('returns 503 when no saved objects exist', async () => {
         const { status } = await mitreAttackApi.getEntities();
 
-        // The data client detects the empty canonical enterprise result and throws
+        // The data client detects the empty result and throws
         // MitreDataUnavailableError('population_failed'), which the route maps to 503.
         // This also triggers background repopulation via reportEmptyWhileReady().
         expect(status).to.eql(503);
 
         // reportEmptyWhileReady() fires async repopulation; wait for it to finish
         // so it does not race with the next test's beforeEach or the after() cleanup.
+        await waitForMitrePopulation(es, log, loadMitreArtifact().length);
+      });
+
+      it('returns 503 for a non-enterprise framework query when no saved objects exist', async () => {
+        const { status } = await mitreAttackApi.getEntities({ framework: 'atlas' });
+
+        expect(status).to.eql(503);
+
+        await waitForMitrePopulation(es, log, loadMitreArtifact().length);
+      });
+
+      it('returns 503 for a types-filtered query when no saved objects exist', async () => {
+        const { status } = await mitreAttackApi.getEntities({
+          framework: 'enterprise',
+          types: 'tactic',
+        });
+
+        expect(status).to.eql(503);
+
         await waitForMitrePopulation(es, log, loadMitreArtifact().length);
       });
 

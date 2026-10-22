@@ -58,8 +58,13 @@ export class MitreAttackDataService {
     return this.state.status === 'ready' || this.state.status === 'degraded';
   }
 
+  /** Status reflects the data callers are served, so a repair serving partial data reports `degraded`. */
   public getStatus(): MitreDataStatus {
-    const result: MitreDataStatus = { status: this.state.status };
+    const isServingPartialData =
+      this.state.status === 'initializing' && this.state.servesPartialData;
+    const result: MitreDataStatus = {
+      status: isServingPartialData ? 'degraded' : this.state.status,
+    };
     if (this.lastError !== undefined) {
       result.lastError = this.lastError;
     }
@@ -150,17 +155,18 @@ export class MitreAttackDataService {
       const entities = loadMitreArtifact();
       const chunks = chunk(entities, BULK_CREATE_BATCH_SIZE);
       const allErrors: Array<{ id: string; message: string }> = [];
+      const soIds = new Map<(typeof entities)[number], string>();
 
       for (const batch of chunks) {
-        const objects = batch.map((entity) => ({
-          id: buildSoId({
+        const objects = batch.map((entity) => {
+          const id = buildSoId({
             framework: entity.framework,
             frameworkVersion: entity.framework_version,
             id: entity.id,
-          }),
-          type: MITRE_ATTACK_ENTITY_SO_TYPE,
-          attributes: entity,
-        }));
+          });
+          soIds.set(entity, id);
+          return { id, type: MITRE_ATTACK_ENTITY_SO_TYPE, attributes: entity };
+        });
 
         const bulkResponse = await this.savedObjectsRepository.bulkCreate(objects, {
           overwrite: true,
@@ -193,8 +199,13 @@ export class MitreAttackDataService {
         return false;
       }
 
+      // Only successfully written entities are counted.
+      const failedIds = new Set(allErrors.map(({ id }) => id));
       const counts: Partial<Record<MitreFramework, number>> = {};
       for (const entity of entities) {
+        if (failedIds.has(soIds.get(entity) ?? '')) {
+          continue;
+        }
         counts[entity.framework as MitreFramework] =
           (counts[entity.framework as MitreFramework] ?? 0) + 1;
       }

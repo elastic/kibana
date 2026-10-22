@@ -26,8 +26,9 @@ export const resetResolveMitreBucketsCache = (): void => {
 /**
  * Returns MITRE entity summary buckets for one framework from the managed data client when
  * one is given, otherwise from the cached legacy blob (enterprise only). The data client throws
- * `MitreDataUnavailableError` when population has not finished; it propagates so callers hit their
- * existing degraded-mode handling instead of treating every rule's MITRE IDs as invalid.
+ * `MitreDataUnavailableError` when data for the framework is missing or unavailable; it
+ * propagates so callers hit their existing degraded-mode handling instead of treating every
+ * rule's MITRE IDs as invalid.
  */
 export const resolveMitreBuckets = async (
   mitreDataClient?: MitreAttackDataClient,
