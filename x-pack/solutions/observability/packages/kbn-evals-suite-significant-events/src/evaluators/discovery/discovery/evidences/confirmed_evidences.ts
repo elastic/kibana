@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { UNCONFIRMED_EVENT_MAX_CONFIDENCE } from '@kbn/significant-events-schema';
 import type { DiscoveryEvaluator } from '../../types';
 import { summarizeEsqlGrounding } from '../../utils/tool_usage';
 
 /**
- * CODE evaluator: every `active` event must carry a `confirms` signal and the agent must
- * have run `execute_esql` this cycle. Score = valid active / active; null when none active.
+ * CODE evaluator: the agent must have run `execute_esql` this cycle, and every `active` event must
+ * carry a `confirms` signal or be rated as unconfirmed (low severity, at most the unconfirmed-event
+ * confidence). Score = valid active / active; null when none active.
  */
 export const confirmedEvidencesEvaluator: DiscoveryEvaluator = {
   name: 'confirmed_evidences',
@@ -39,15 +41,21 @@ export const confirmedEvidencesEvaluator: DiscoveryEvaluator = {
     openEvents.forEach((event, i) => {
       const signals = (event.signals ?? []).filter((s) => s.type === 'detection');
       const hasConfirmsSignal = signals.some((s) => s.verdict === 'confirms');
+      const isRatedAsUnconfirmed =
+        event.severity === 'low' && (event.confidence ?? 0) <= UNCONFIRMED_EVENT_MAX_CONFIDENCE;
 
-      if (hasConfirmsSignal && sufficientEsqlCoverage) {
+      if ((hasConfirmsSignal || isRatedAsUnconfirmed) && sufficientEsqlCoverage) {
         satisfied++;
       } else if (!sufficientEsqlCoverage) {
         issues.push(
           `[${i}] agent ran ${esqlCallCount} execute_esql call(s) for ${openEvents.length} active event(s) — insufficient per-event coverage`
         );
       } else {
-        issues.push(`[${i}] active with no confirms signal`);
+        issues.push(
+          `[${i}] active with no confirms signal, rated ${event.severity} at confidence ${
+            event.confidence ?? 'unset'
+          } instead of low at most ${UNCONFIRMED_EVENT_MAX_CONFIDENCE}`
+        );
       }
     });
 
@@ -57,7 +65,7 @@ export const confirmedEvidencesEvaluator: DiscoveryEvaluator = {
       explanation:
         issues.length > 0
           ? `${issues.join('; ')} (score=${score.toFixed(2)})`
-          : `All ${openEvents.length} active event(s) backed by confirms, grounding-verified signals`,
+          : `All ${openEvents.length} active event(s) are confirmed, or rated as unconfirmed, on grounding-verified signals`,
     });
   },
 };

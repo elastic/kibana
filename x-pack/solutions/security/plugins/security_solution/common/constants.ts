@@ -14,7 +14,6 @@ import * as i18n from './translations';
 
 export {
   ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
-  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
 
