@@ -87,7 +87,6 @@ describe('automation request', () => {
             ruleNamePattern: ' cpu ',
             ruleNames: ['Disk full'],
             ruleTags: ['infra'],
-            alertStatus: 'inactive',
           },
         })
       ).toEqual({
@@ -100,7 +99,6 @@ describe('automation request', () => {
               kind: 'alert',
               ruleNamePattern: 'cpu',
               ruleNames: ['Disk full'],
-              alertStatus: 'inactive',
               tags: ['infra'],
             },
           ],
@@ -168,6 +166,7 @@ describe('automation request', () => {
             kind: 'slack_message',
             channels: ['#oncall'],
             users: ['emily'],
+            bots: ['PagerDuty'],
             messageFilter: ' outage ',
           },
         }).trigger
@@ -178,6 +177,7 @@ describe('automation request', () => {
             event: 'message',
             channels: ['#oncall'],
             users: ['emily'],
+            bots: ['PagerDuty'],
             messageFilter: 'outage',
           },
         ],

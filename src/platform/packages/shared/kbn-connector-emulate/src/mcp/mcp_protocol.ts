@@ -8,9 +8,10 @@
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import type { JSONRPCMessage, RequestId } from '@modelcontextprotocol/sdk/types.js';
+import type { CallToolResult, JSONRPCMessage, RequestId } from '@modelcontextprotocol/sdk/types.js';
 import {
   CallToolRequestSchema,
+  CallToolResultSchema,
   ErrorCode,
   isJSONRPCRequest,
   JSONRPCMessageSchema,
@@ -19,12 +20,15 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import type {
   ContractProtocol,
+  ContractProtocolOptions,
   ContractRequest,
   ContractResponse,
   NamedOperation,
   ProtocolExchange,
   Violation,
 } from '../contract/types';
+import { selectNamedResponses } from '../engine/named_responses';
+import type { StoredResponse } from '../engine/response_engine';
 import { sampleJsonSchema } from '../engine/sample_schema';
 import { toEndpoint } from '../graphql/graphql_protocol';
 import { validateValue } from '../openapi/schema_violations';
@@ -153,6 +157,7 @@ interface LoadedTool {
   readonly tool: McpTool;
   /** The tool's schemas resolve their refs within it, e.g. `#/$defs/...` of its inputSchema. */
   readonly spec: ContractSpec;
+  readonly outputSpec?: ContractSpec;
 }
 
 // Servers written in Go, such as GitHub's, list tools without one as `outputSchema: null`.
@@ -169,7 +174,12 @@ const loadTools = (tools: readonly McpTool[]): Map<string, LoadedTool> => {
     if (loaded.has(tool.name)) {
       throw new Error(`The MCP spec lists the tool ${tool.name} more than once`);
     }
-    loaded.set(tool.name, { tool, spec: { document: tool.inputSchema, dialect: 'draft-2020-12' } });
+    const { inputSchema, outputSchema } = tool;
+    loaded.set(tool.name, {
+      tool,
+      spec: { document: inputSchema, dialect: 'draft-2020-12' },
+      ...(outputSchema ? { outputSpec: { document: outputSchema, dialect: 'draft-2020-12' } } : {}),
+    });
   }
   return loaded;
 };
@@ -221,20 +231,62 @@ const toResult = ({ outputSchema }: McpTool) => {
   return outputSchema && isRecord(value) ? { content, structuredContent: value } : { content };
 };
 
+const TOOL_CALL = 'tools/call ';
+
+// A stored response is the `result` of the vendor's JSON-RPC reply to the tools/call request.
+const readStoredResult = (
+  { body }: StoredResponse,
+  loaded: LoadedTool | undefined
+): { result?: CallToolResult; violations: Violation[] } => {
+  const parsed = CallToolResultSchema.safeParse(body);
+  if (!parsed.success) {
+    const message = 'The response is not a tools/call result';
+    return { violations: [{ path: ['body'], code: 'result', message }] };
+  }
+  const { data: result } = parsed;
+  const outputSchema = loaded?.tool.outputSchema;
+  if (!loaded?.outputSpec || !outputSchema || result.structuredContent === undefined) {
+    return { result, violations: [] };
+  }
+  const violations = validateValue(
+    { spec: loaded.outputSpec },
+    { pointer: '', schema: outputSchema },
+    result.structuredContent,
+    {
+      path: ['body', 'structuredContent'],
+      subject: `Result of ${loaded.tool.name}`,
+      direction: 'response',
+    }
+  );
+  return { result, violations };
+};
+
 /**
  * Answers MCP's Streamable HTTP transport at the spec's endpoints, as a stateless server
  * listing the spec's tools. `tools/call` arguments are validated against each tool's
  * `inputSchema`; unknown tools and invalid arguments get JSON-RPC `InvalidParams` errors.
- * Results are a sample of the tool's `outputSchema` as JSON text, and as `structuredContent`
- * when it is an object. Throws when a tool has no `inputSchema` object or is listed twice.
+ * Results come from the tool's fixture or recording, else are a sample of its `outputSchema`
+ * as JSON text, and as `structuredContent` when it is an object. Throws when a tool has no
+ * `inputSchema` object or is listed twice.
  */
-export const createMcpProtocol = (spec: McpSpec, source?: string): ContractProtocol => {
+export const createMcpProtocol = (
+  spec: McpSpec,
+  { source, responses = [] }: ContractProtocolOptions = {}
+): ContractProtocol => {
   const loadedTools = loadTools(spec.tools);
   const tools = new Map([...loadedTools].map(([name, { tool }]) => [name, tool]));
+  const operationNames = new Set([...tools.keys()].map((name) => `${TOOL_CALL}${name}`));
+  const { served, rejected: rejectedResponses } = selectNamedResponses(responses, {
+    source,
+    operations: operationNames,
+    check: (name, response) =>
+      readStoredResult(response, loadedTools.get(name.slice(TOOL_CALL.length))).violations,
+  });
 
   const answer = async (
     messages: readonly JSONRPCMessage[],
-    violations: Map<RequestId, Violation[]>
+    violations: Map<RequestId, Violation[]>,
+    resultViolations: Map<RequestId, Violation[]>
   ): Promise<JSONRPCMessage[]> => {
     const server = new Server(
       { name: 'connector-contract-mock', version: '1.0.0' },
@@ -248,7 +300,20 @@ export const createMcpProtocol = (spec: McpSpec, source?: string): ContractProto
         violations.set(requestId, found);
         throw new McpError(ErrorCode.InvalidParams, found.map(({ message }) => message).join('; '));
       }
-      return toResult(loaded.tool);
+      const stored = served.get(`${TOOL_CALL}${params.name}`);
+      if (!stored) {
+        return toResult(loaded.tool);
+      }
+      // Only fixtures can break the spec here; recordings that do aren't served.
+      const { result, violations: broken } = readStoredResult(stored.response, loaded);
+      resultViolations.set(requestId, broken);
+      if (!result) {
+        throw new McpError(
+          ErrorCode.InternalError,
+          broken.map(({ message }) => message).join('; ')
+        );
+      }
+      return result;
     });
     const transport = createExchangeTransport();
     await server.connect(transport);
@@ -265,11 +330,12 @@ export const createMcpProtocol = (spec: McpSpec, source?: string): ContractProto
     operations: [
       { name: 'tools/list', ...at, readOnly: true },
       ...[...tools.values()].map(({ name, annotations }) => ({
-        name: `tools/call ${name}`,
+        name: `${TOOL_CALL}${name}`,
         ...at,
         readOnly: annotations?.readOnlyHint === true,
       })),
     ],
+    rejectedResponses,
     handle: async (request) => {
       if (request.method !== 'post') {
         return notAllowed(request.method);
@@ -280,15 +346,24 @@ export const createMcpProtocol = (spec: McpSpec, source?: string): ContractProto
       }
       const { messages, batch } = read;
       const violations = new Map<RequestId, Violation[]>();
-      const replies = await answer(messages, violations);
+      const resultViolations = new Map<RequestId, Violation[]>();
+      const replies = await answer(messages, violations, resultViolations);
       const requestViolations = messages.flatMap((message) =>
         isJSONRPCRequest(message) ? violations.get(message.id) ?? [] : []
+      );
+      const responseViolations = messages.flatMap((message) =>
+        isJSONRPCRequest(message) ? resultViolations.get(message.id) ?? [] : []
       );
       const response: ContractResponse =
         replies.length === 0
           ? { statusCode: 202 }
           : { statusCode: 200, headers: JSON_HEADERS, body: batch ? replies : replies[0] };
-      return { response, ...describe(messages, tools, source), requestViolations };
+      return {
+        response,
+        ...describe(messages, tools, source),
+        requestViolations,
+        responseViolations,
+      };
     },
   };
 };

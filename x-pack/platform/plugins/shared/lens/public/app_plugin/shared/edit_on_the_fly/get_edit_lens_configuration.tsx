@@ -9,8 +9,8 @@ import type { FC } from 'react';
 import React, { useCallback, useRef, useState } from 'react';
 import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Provider } from 'react-redux-v7';
-import type { MiddlewareAPI, Dispatch, Action } from 'redux-toolkit-v1';
+import { Provider } from 'react-redux';
+import type { Middleware } from '@reduxjs/toolkit';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -19,6 +19,7 @@ import { isEqual } from 'lodash';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type {
   TypedLensSerializedState,
+  LensState,
   DatasourceMap,
   VisualizationMap,
   LensAppServices,
@@ -74,10 +75,10 @@ const getDatasourceStateValues = (datasourceStates: DatasourceStates) =>
 
 // exported for testing
 export const updatingMiddleware =
-  (updater: LensPanelStateUpdater) =>
-  (store: MiddlewareAPI) =>
-  (next: Dispatch) =>
-  (action: Action) => {
+  (updater: LensPanelStateUpdater): Middleware<{}, LensState> =>
+  (store) =>
+  (next) =>
+  (action) => {
     const {
       datasourceStates: prevDatasourceStates,
       visualization: prevVisualization,
@@ -101,7 +102,9 @@ export const updatingMiddleware =
       if (
         initExisting.match(action) ||
         initEmpty.match(action) ||
-        setSelectedLayerId.match(action)
+        setSelectedLayerId.match(action) ||
+        !visualization.activeId ||
+        !activeDatasourceId
       ) {
         return;
       }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ContractResponse, Responder, Violation } from '../contract/types';
+import type { ContractResponse, NamedOperationRef, Responder, Violation } from '../contract/types';
 import type { ContractOperation } from '../openapi/types';
 import { validateResponse } from '../openapi/validate_response';
 
@@ -27,15 +27,18 @@ export interface StoredResponse {
   readonly body?: unknown;
 }
 
-/** A hand-written response for an operation, served whenever the operation is called. */
+/**
+ * A hand-written response for an operation, served whenever the operation is called. Operations
+ * of protocols such as GraphQL and MCP are named, e.g. `{ name: 'query boards' }`.
+ */
 export interface ResponseFixture {
-  readonly operation: OperationRef;
+  readonly operation: OperationRef | NamedOperationRef;
   readonly response: StoredResponse;
 }
 
 /** A request/response pair captured from the real vendor API. */
 export interface RecordedExchange {
-  readonly operation: OperationRef;
+  readonly operation: OperationRef | NamedOperationRef;
   readonly request?: {
     readonly query?: Readonly<Record<string, string | string[]>>;
     readonly headers?: Readonly<Record<string, string>>;
@@ -52,8 +55,10 @@ export interface Recording {
 /** A fixture or recording the mock doesn't serve, because the spec contradicts it. */
 export interface RejectedResponse {
   readonly source: 'fixture' | 'recording';
-  /** `METHOD /path` as the fixture or recording names it. */
+  /** `METHOD /path`, or the operation's name, as the fixture or recording names it. */
   readonly operation: string;
+  /** With named specs, the spec that contradicts it. */
+  readonly spec?: string;
   readonly violations: readonly Violation[];
   /** Set by `combineEmulators`: the connector whose fixture or recording it is. */
   readonly connector?: string;
@@ -77,6 +82,12 @@ export interface ResponseEngine {
    */
   readonly recordedExchanges: (operation: ContractOperation) => readonly RecordedExchange[];
 }
+
+export const isNamedOperationRef = (
+  ref: OperationRef | NamedOperationRef
+): ref is NamedOperationRef => 'name' in ref;
+
+export const isSuccessStatus = (status: number): boolean => status >= 200 && status < 300;
 
 /** Formats an operation reference as `METHOD /path`, the key fixtures and recordings match on. */
 export const toOperationKey = ({ method, path }: OperationRef): string =>
@@ -110,7 +121,7 @@ const toContractResponse = ({ status, headers = {}, body }: StoredResponse): Con
   };
 };
 
-const NOT_IN_SPEC: Violation = {
+export const NOT_IN_SPEC: Violation = {
   path: [],
   code: 'operation',
   message: 'The spec has no such operation',
@@ -134,10 +145,19 @@ export const createResponseEngine = (
 
   const add = (origin: RejectedResponse['source'], entry: ResponseFixture | RecordedExchange) => {
     const { operation: ref, response } = entry;
+    // Protocols such as GraphQL serve their named operations themselves.
+    if (isNamedOperationRef(ref)) {
+      return;
+    }
     const key = toOperationKey(ref);
     const matched = findOperations(ref);
     if (matched.length === 0) {
-      rejected.push({ source: origin, operation: key, violations: [NOT_IN_SPEC] });
+      rejected.push({
+        source: origin,
+        operation: key,
+        ...(ref.source === undefined ? {} : { spec: ref.source }),
+        violations: [NOT_IN_SPEC],
+      });
       return;
     }
     const contractResponse = toContractResponse(response);
@@ -146,7 +166,13 @@ export const createResponseEngine = (
       const violations =
         origin === 'recording' ? validateResponse(operation, contractResponse) : [];
       if (violations.length > 0) {
-        rejected.push({ source: origin, operation: key, violations });
+        const { source } = operation.spec;
+        rejected.push({
+          source: origin,
+          operation: key,
+          ...(source === undefined ? {} : { spec: source }),
+          violations,
+        });
       } else {
         if (origin === 'fixture') {
           withFixture.add(operation);
@@ -165,7 +191,7 @@ export const createResponseEngine = (
   // Error responses are kept in recordings for tests that ask for them, not served by default.
   recordings
     .flatMap(({ exchanges }) => exchanges)
-    .filter(({ response: { status } }) => status >= 200 && status < 300)
+    .filter(({ response: { status } }) => isSuccessStatus(status))
     .forEach((exchange) => add('recording', exchange));
 
   return {

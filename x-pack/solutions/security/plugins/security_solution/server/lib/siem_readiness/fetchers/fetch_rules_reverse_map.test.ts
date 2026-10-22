@@ -256,6 +256,59 @@ describe('fetchRulesReverseMap', () => {
     });
   });
 
+  describe('MITRE framework filtering', () => {
+    const run = async (threat: unknown[]) => {
+      const rulesClient = createMockRulesClient([
+        {
+          id: 'rule-fw',
+          name: 'Framework Rule',
+          enabled: true,
+          params: { type: 'query', index: ['logs-*'], threat },
+          tags: [],
+        },
+      ]);
+      const esClient = createMockEsClient({
+        indices: {
+          getSettings: jest.fn().mockResolvedValue({}),
+          resolveIndex: jest.fn().mockResolvedValue({
+            indices: [{ name: 'logs-test' }],
+            data_streams: [],
+          }),
+        },
+      } as unknown as Partial<ElasticsearchClient>);
+      const result = await fetchRulesReverseMap({
+        rulesClient,
+        esClient,
+        dataViewsService: createMockDataViewsService(),
+        logger: createMockLogger(),
+      });
+      return result.indexToRules.get('logs-test')?.[0].tactics;
+    };
+
+    const attack = {
+      framework: 'MITRE ATT&CK',
+      tactic: { id: 'TA0001', name: 'Initial Access' },
+    };
+    const atlas = {
+      framework: 'MITRE ATLAS',
+      tactic: { id: 'AML.TA0000', name: 'Reconnaissance' },
+    };
+
+    it('should yield no tactics for an ATLAS-only entry', async () => {
+      expect(await run([atlas])).toEqual([]);
+    });
+
+    it('should keep only the ATT&CK tactic for a mixed rule', async () => {
+      expect(await run([atlas, attack])).toEqual([{ id: 'TA0001', name: 'Initial Access' }]);
+    });
+
+    it('should keep entries with no framework', async () => {
+      expect(await run([{ tactic: attack.tactic }])).toEqual([
+        { id: 'TA0001', name: 'Initial Access' },
+      ]);
+    });
+  });
+
   describe('tactic totals', () => {
     it('should compute global tactic totals across all rules', async () => {
       const mockRules = [
