@@ -6,37 +6,19 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiBadge,
-  EuiCheckableCard,
-  EuiConfirmModal,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  EuiToolTip,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
+import { ChoiceCards } from '../choice_cards';
+import type { ChoiceCardOption } from '../choice_cards';
 
 // Re-export the canonical type from the matrix so all consumers use the same spelling.
 export type { DeploymentMethod };
 
-interface DeploymentMethodOption {
-  value: DeploymentMethod;
-  /** Bold name shown on the card */
-  name: string;
-  /** One line of help shown under the name */
-  description: string;
-  isRecommended?: boolean;
-}
-
-const DEPLOYMENT_METHOD_OPTIONS: DeploymentMethodOption[] = [
+const DEPLOYMENT_METHOD_OPTIONS: Array<ChoiceCardOption<DeploymentMethod>> = [
   {
     value: 'managed_integration',
     name: i18n.translate(
@@ -86,7 +68,6 @@ export function DeploymentMethodCard({
   availableMethods,
   unsupportedServices,
 }: DeploymentMethodCardProps) {
-  const radioGroupName = useGeneratedHtmlId({ prefix: 'deploymentMethod' });
   const confirmModalTitleId = useGeneratedHtmlId();
   const [pendingMethod, setPendingMethod] = useState<DeploymentMethod | null>(null);
 
@@ -117,47 +98,6 @@ export function DeploymentMethodCard({
     ? (unsupportedServices?.[pendingMethod] ?? []).map((s) => s.name)
     : [];
 
-  const cards = (
-    <EuiFlexGroup gutterSize="m" responsive={false} wrap>
-      {options.map((option) => (
-        <EuiFlexItem key={option.value} style={{ minWidth: 280 }}>
-          <EuiCheckableCard
-            id={`${radioGroupName}-${option.value}`}
-            name={radioGroupName}
-            checkableType="radio"
-            value={option.value}
-            checked={option.value === selectedOption.value}
-            onChange={() => handleSelect(option.value)}
-            disabled={cardsDisabled}
-            data-test-subj={`deploymentMethodCard-${option.value}`}
-            label={
-              <>
-                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <strong>{option.name}</strong>
-                  </EuiFlexItem>
-                  {option.isRecommended && (
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="hollow">
-                        <FormattedMessage
-                          id="xpack.ingestHub.authenticateAndDeployStep.deploymentMethod.recommended"
-                          defaultMessage="Recommended"
-                        />
-                      </EuiBadge>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-                <EuiText size="s" color="subdued">
-                  {option.description}
-                </EuiText>
-              </>
-            }
-          />
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
-  );
-
   return (
     <section data-test-subj="deploymentMethodCard">
       <EuiTitle size="m">
@@ -169,27 +109,25 @@ export function DeploymentMethodCard({
         </h2>
       </EuiTitle>
       <EuiSpacer size="m" />
-      {/* span needed: disabled cards have pointer-events:none; the span intercepts hover and
-          keyboard focus (tabIndex) so the tooltip fires for mouse and keyboard users. Only shown
-          for the post-deploy lock; a forced method has nothing to explain here. */}
-      {disabled && !locked ? (
-        <EuiToolTip
-          display="block"
-          content={i18n.translate(
-            'xpack.ingestHub.authenticateAndDeployStep.deploymentMethodCard.disabledTooltip',
-            {
-              defaultMessage:
-                'Deployment method cannot be changed after services have been deployed. Start a new session to choose a different method.',
-            }
-          )}
-        >
-          <span tabIndex={0} style={{ display: 'block' }}>
-            {cards}
-          </span>
-        </EuiToolTip>
-      ) : (
-        cards
-      )}
+      <ChoiceCards
+        options={options}
+        selectedValue={selectedOption.value}
+        onChange={handleSelect}
+        disabled={cardsDisabled}
+        // Only the lock after a deploy needs explaining; a forced method has nothing to explain.
+        disabledTooltip={
+          disabled && !locked
+            ? i18n.translate(
+                'xpack.ingestHub.authenticateAndDeployStep.deploymentMethodCard.disabledTooltip',
+                {
+                  defaultMessage:
+                    'Deployment method cannot be changed after services have been deployed. Start a new session to choose a different method.',
+                }
+              )
+            : undefined
+        }
+        testSubjPrefix="deploymentMethodCard"
+      />
 
       {pendingMethod && (
         <EuiConfirmModal
