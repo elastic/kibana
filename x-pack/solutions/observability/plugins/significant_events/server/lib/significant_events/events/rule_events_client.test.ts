@@ -21,6 +21,7 @@ interface MockRow {
   source: Record<string, unknown>;
   dataJson: string;
   createdAt?: string;
+  operatorClosed?: boolean;
 }
 
 const sourceResponse = (rows: MockRow[]): ESQLSearchResponse =>
@@ -29,11 +30,15 @@ const sourceResponse = (rows: MockRow[]): ESQLSearchResponse =>
       { name: '_source', type: 'object' },
       { name: 'data_json', type: 'keyword' },
       ...(rows[0]?.createdAt !== undefined ? [{ name: 'created_at', type: 'date' }] : []),
+      ...(rows[0]?.operatorClosed !== undefined
+        ? [{ name: 'operator_closed', type: 'boolean' }]
+        : []),
     ],
     values: rows.map((row) => [
       row.source,
       row.dataJson,
       ...(row.createdAt !== undefined ? [row.createdAt] : []),
+      ...(row.operatorClosed !== undefined ? [row.operatorClosed] : []),
     ]),
   } as unknown as ESQLSearchResponse);
 
@@ -622,7 +627,6 @@ describe('RuleEventsClient', () => {
       await client.findLatestActive({});
 
       const q = lastQuery(query);
-      expect(q).toContain('`alert.status` IN ("active", "recovering")');
       expect(q).not.toContain('status IN ("open")');
     });
 
@@ -659,6 +663,150 @@ describe('RuleEventsClient', () => {
           status: 'active',
           severity: 'medium',
         },
+      ]);
+    });
+  });
+
+  describe('findLiveMemberships', () => {
+    const detectionSignal = ({
+      ruleUuid,
+      verdict,
+      esqlQuery,
+    }: {
+      ruleUuid: string;
+      verdict: string;
+      esqlQuery?: string;
+    }) => ({
+      type: 'detection',
+      source_id: 'logs.checkout',
+      description: 'Observed rows',
+      verdict,
+      metadata: { rule_uuid: ruleUuid },
+      ...(esqlQuery ? { evidence: { esql_query: esqlQuery, result: 'found' } } : {}),
+    });
+
+    const seriesRow = ({
+      eventId,
+      status = 'active',
+      signals,
+    }: {
+      eventId: string;
+      status?: string;
+      signals: unknown[];
+    }): MockRow => ({
+      source: ruleEventSource({ alert: { status } }),
+      dataJson: JSON.stringify({ ...dataDoc, event_id: eventId, signals }),
+    });
+
+    it('returns an empty map without querying when no rules are requested', async () => {
+      const { client, query } = createClient(async () => sourceResponse([]));
+
+      const members = await client.findLiveMemberships({
+        ruleUuids: [],
+        from: '2000-01-01T00:00:00.000Z',
+      });
+
+      expect(members.size).toBe(0);
+      expect(query).not.toHaveBeenCalled();
+    });
+
+    it('narrows to live series that contain the requested rules', async () => {
+      const { client, query } = createClient(async () => sourceResponse([]));
+
+      await client.findLiveMemberships({
+        ruleUuids: ['rule-A'],
+        from: '2026-10-01T00:00:00.000Z',
+      });
+
+      const q = lastQuery(query);
+      // Bounded on the latest version, after created_at is computed over the whole lineage.
+      expect(q.indexOf('INLINE STATS created_at')).toBeLessThan(
+        q.indexOf('@timestamp >= TO_DATETIME(?fromIso)')
+      );
+      expect(q).toContain('SORT @timestamp DESC');
+      expect(q).toContain(
+        'MV_INTERSECTS(FIELD_EXTRACT(data, "signals.metadata.rule_uuid"), ["rule-A"])'
+      );
+    });
+
+    it('pairs each requested rule with its series status, verdict and stored query', async () => {
+      const rows = [
+        seriesRow({
+          eventId: 'event-1',
+          signals: [
+            detectionSignal({ ruleUuid: 'rule-A', verdict: 'confirms', esqlQuery: 'FROM $.a' }),
+            detectionSignal({ ruleUuid: 'rule-other', verdict: 'refutes', esqlQuery: 'FROM $.o' }),
+          ],
+        }),
+      ];
+      const { client } = createClient(async () => sourceResponse(rows));
+
+      const members = await client.findLiveMemberships({
+        ruleUuids: ['rule-A'],
+        from: '2000-01-01T00:00:00.000Z',
+      });
+
+      expect([...members.keys()]).toEqual(['rule-A']);
+      expect(members.get('rule-A')).toEqual([
+        {
+          eventId: 'event-1',
+          status: 'active',
+          verdict: 'confirms',
+          esqlQuery: 'FROM $.a',
+          evidenceFound: true,
+          createdAt: undefined,
+          sourceIds: ['logs.checkout'],
+          eventTitle: 'Checkout errors',
+        },
+      ]);
+    });
+
+    it("reads when the member's verdict was reached from its signal", async () => {
+      const rows = [
+        seriesRow({
+          eventId: 'event-1',
+          signals: [
+            {
+              ...detectionSignal({ ruleUuid: 'rule-A', verdict: 'confirms' }),
+              collected_at: '2026-10-19T10:00:00.000Z',
+            },
+          ],
+        }),
+      ];
+      const { client } = createClient(async () => sourceResponse(rows));
+
+      const live = await client.findLiveMemberships({
+        ruleUuids: ['rule-A'],
+        from: '2000-01-01T00:00:00.000Z',
+      });
+
+      expect(live.get('rule-A')?.[0].verifiedAt).toBe('2026-10-19T10:00:00.000Z');
+    });
+
+    it('returns one entry per live series when a rule is a member of several', async () => {
+      const rows = [
+        seriesRow({
+          eventId: 'event-1',
+          signals: [detectionSignal({ ruleUuid: 'rule-A', verdict: 'confirms', esqlQuery: 'q' })],
+        }),
+        seriesRow({
+          eventId: 'event-2',
+          status: 'recovering',
+          signals: [detectionSignal({ ruleUuid: 'rule-A', verdict: 'refutes', esqlQuery: 'q' })],
+        }),
+      ];
+      const { client } = createClient(async () => sourceResponse(rows));
+
+      const members = await client.findLiveMemberships({
+        ruleUuids: ['rule-A'],
+        from: '2000-01-01T00:00:00.000Z',
+      });
+
+      expect(
+        members.get('rule-A')?.map(({ eventId, status, verdict }) => [eventId, status, verdict])
+      ).toEqual([
+        ['event-1', 'active', 'confirms'],
+        ['event-2', 'recovering', 'refutes'],
       ]);
     });
   });

@@ -40,7 +40,24 @@ export type BaselineDecision = (typeof BASELINE_DECISIONS)[number];
 /** Why a detection is skipped: nothing changed since the stored verdict. */
 export const SKIP_REASONS = ['still_breaching', 'still_healthy'] as const;
 
+/**
+ * Why a detection reaches the agent. `state_changed`: the probe contradicts a stored verdict.
+ * `probe_unavailable`: the probe could not run; `probe_status` says why.
+ */
+export const NEEDS_AGENT_REASONS = [
+  'state_changed',
+  'probe_unavailable',
+  'unjudged_member',
+  'not_live_member',
+  'member_joining',
+  'series_too_old',
+  'above_normal',
+  'flaky_probe',
+  'over_cap',
+] as const;
+
 export type SkipReason = (typeof SKIP_REASONS)[number];
+export type NeedsAgentReason = (typeof NEEDS_AGENT_REASONS)[number];
 
 export const baselineObservationSchema = lazySchema(() =>
   z.object({
