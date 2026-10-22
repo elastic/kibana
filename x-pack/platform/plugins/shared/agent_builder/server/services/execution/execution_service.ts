@@ -127,24 +127,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       interactive,
     } = args;
     const executionId = providedExecutionId ?? uuidv4();
-    const agentId = params.agentId ?? agentBuilderDefaultAgentId;
+    const agentId = this.requestedAgentId(params);
     const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
     const interactivity = normalizeInteractive(interactive, mode);
     const executionClient = this.createExecutionClient();
-
-    if (
-      params.reasoningLevel !== undefined &&
-      !(await this.isIdempotentReplay({ executionClient, executionId, metadata }))
-    ) {
-      const connector = await this.resolveExecutionConnector({
-        agentId,
-        connectorId: params.connectorId,
-        request,
-      });
-      if (connector) {
-        validateReasoningEffort(connector, params.reasoningLevel);
-      }
-    }
 
     const { conversationClient, parentExecution } = await this.resolveConversationClient({
       request,
@@ -159,6 +145,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       args.mode === AgentExecutionMode.conversation
         ? await this.resolveConversationRequest({
             params: args.params,
+            agentId,
             request,
             conversationClient,
             spaceId,
@@ -169,6 +156,20 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const validatedParams = conversationParams ?? (await this.validateAttachments(params, request));
     const receivedAt = resolvedConversation?.receivedAt ?? new Date();
     const executionAgentId = conversationParams?.agentId ?? agentId;
+
+    if (
+      params.reasoningLevel !== undefined &&
+      !(await this.isIdempotentReplay({ executionClient, executionId, metadata }))
+    ) {
+      const connector = await this.resolveExecutionConnector({
+        agentId: executionAgentId,
+        connectorId: params.connectorId,
+        request,
+      });
+      if (connector) {
+        validateReasoningEffort(connector, params.reasoningLevel);
+      }
+    }
 
     // Reserved for the round this run opens, so its events are named after it.
     const roundId = uuidv4();
@@ -354,6 +355,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const conversationClient = await this.deps.conversationService.getScopedClient({ request });
     const { validatedParams, conversation, receivedAt } = await this.resolveConversationRequest({
       params,
+      agentId: this.requestedAgentId(params),
       request,
       conversationClient,
       spaceId: getCurrentSpaceId({ request, spaces: this.deps.spaces }),
@@ -803,11 +805,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
    */
   private async resolveConversationRequest({
     params,
+    agentId,
     request,
     conversationClient,
     spaceId,
   }: {
     params: ConversationExecutionParams;
+    agentId: string;
     request: KibanaRequest;
     conversationClient: ConversationClient;
     spaceId: string;
@@ -818,7 +822,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   }> {
     const validatedParams = await this.validateAttachments(params, request);
     const receivedAt = new Date();
-    const { origin, conversationId, agentId } = validatedParams;
+    const { origin, conversationId } = validatedParams;
 
     const resolved = await this.resolveConversation({
       conversationId,
@@ -850,14 +854,14 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
    */
   private async resolveConversation({
     conversationId,
-    agentId = agentBuilderDefaultAgentId,
+    agentId,
     origin,
     spaceId,
     request,
     conversationClient,
   }: {
     conversationId?: string;
-    agentId?: string;
+    agentId: string;
     origin?: ExecutionConversationOrigin;
     spaceId: string;
     request: KibanaRequest;
@@ -977,5 +981,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       logger: this.logger.get('execution-client'),
       esClient: this.deps.elasticsearch.client.asInternalUser,
     });
+  }
+
+  /** The agent a request asks for, or the default agent when it names none. */
+  private requestedAgentId({ agentId }: { agentId?: string }): string {
+    return agentId ?? agentBuilderDefaultAgentId;
   }
 }

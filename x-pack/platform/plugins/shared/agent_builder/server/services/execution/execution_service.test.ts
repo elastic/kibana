@@ -1084,10 +1084,60 @@ describe('AgentExecutionService', () => {
         { code: InferenceTaskErrorCode.requestError, meta: { status: 400 } }
       );
 
-      expect(conversationService.getScopedClient).not.toHaveBeenCalled();
       expect(conversationClient.create).not.toHaveBeenCalled();
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
       expect(mockExecutionClient.create).not.toHaveBeenCalled();
       expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
+    });
+
+    it('validates the model of the agent the origin resolves to', async () => {
+      resolveConversation.mockResolvedValueOnce({
+        conversationId: 'investigation-1',
+        agentId: 'investigation-agent',
+      });
+      conversationClient.get.mockResolvedValueOnce(
+        createEmptyConversation({
+          id: 'investigation-1',
+          agent_id: 'investigation-agent',
+          schema_version: CONVERSATION_SCHEMA_VERSION,
+        })
+      );
+      agentRegistry.get.mockImplementation(async (agentId: string) =>
+        createMockedInternalAgent({
+          id: agentId,
+          configuration: {
+            tools: [],
+            ...(agentId === 'investigation-agent'
+              ? { inference_feature_id: 'investigation_feature' }
+              : {}),
+          },
+        })
+      );
+      getForFeature.mockResolvedValueOnce({
+        endpoints: [createEisConnector(['high'], 'feature-endpoint')],
+        warnings: [],
+        soEntryFound: false,
+      });
+
+      await expect(
+        service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          params: {
+            agentId: 'agent-1',
+            reasoningLevel: 'xhigh',
+            origin: { type: ConversationOriginType.Slack, external_conversation_id: 'thread-1' },
+            nextInput: { message: 'hello' },
+          },
+          useTaskManager: true,
+        })
+      ).rejects.toMatchObject({ code: InferenceTaskErrorCode.requestError });
+
+      expect(agentRegistry.get).toHaveBeenCalledWith('investigation-agent');
+      expect(getForFeature).toHaveBeenCalledWith('investigation_feature', expect.anything(), {
+        onlyReturnConfigured: true,
+      });
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
     });
 
     it('starts the execution when the requested connector cannot be resolved', async () => {
