@@ -103,7 +103,9 @@ GET  /internal/nightshift/investigations/service_account           # status, age
 POST /internal/nightshift/investigations/service_account/_disable  # teardown
 ```
 
-Only the service accounts backend assigns account ids: `kibana/<name>` on stateful, a generated id on Serverless (UIAM), where several accounts may also share a name. So the caller finds or creates the accounts first, as the current user, with `ensureNightshiftServiceAccounts` from `common`, and passes their ids to `_enable` as `{ "serviceAccountIds": { "agent": "...", "automations": "..." } }`. The setup step in the app does both on one click. `ensureNightshiftServiceAccounts` lists the accounts by name and reuses one Kibana can run as. It creates a missing account only after checking that its role exists, so a stateful deployment without the roles gets a clear error instead of an account without privileges.
+Only the service accounts backend assigns account ids: `kibana/<name>` on stateful, a generated id on Serverless (UIAM). So the caller finds or creates the accounts first, as the current user, with `ensureNightshiftServiceAccounts` from `common`, and passes their ids to `_enable` as `{ "serviceAccountIds": { "agent": "...", "automations": "..." } }`. The setup step in the app does both on one click.
+
+Only the first space of a deployment has to do that. The accounts are shared by every space, so the status reports the ones an already set-up space uses as `knownServiceAccountIds`, and the setup step passes those straight to `_enable` instead of looking the accounts up again. `_enable` falls back to them when a caller sends no ids. `ensureNightshiftServiceAccounts` lists the accounts by name and reuses one Kibana can run as. It creates a missing account only after checking that its role exists, so a stateful deployment without the roles gets a clear error instead of an account without privileges.
 
 `_enable`:
 
