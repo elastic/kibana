@@ -12,6 +12,8 @@ import { STACK_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { mockServices } from '../common/__mocks__/services.mock';
 import type { Services } from '../common/services';
+import { SecurityPageName } from '@kbn/deeplinks-security';
+import { alertZeroLink } from '@kbn/security-solution-navigation/links';
 import { createNavigationTree } from './navigation_tree';
 
 describe('createNavigationTree', () => {
@@ -37,7 +39,23 @@ describe('createNavigationTree', () => {
     return services;
   };
 
-  it('always includes context engine first in classic chat experience', () => {
+  it('places Escalations right under AlertZero, with Watches after them', () => {
+    const { body } = createNavigationTree(
+      createServices(),
+      AIChatExperience.Agent
+    ) as NavigationTreeDefinition;
+
+    const links = body.map((item) => item.link);
+    const alertZeroIndex = links.indexOf(alertZeroLink());
+    const escalationsIndex = links.indexOf(alertZeroLink(SecurityPageName.alertZeroEscalations));
+    const watchesIndex = links.indexOf(alertZeroLink(SecurityPageName.alertZeroWatches));
+
+    expect(alertZeroIndex).toBeGreaterThanOrEqual(0);
+    expect(escalationsIndex).toBe(alertZeroIndex + 1);
+    expect(watchesIndex).toBeGreaterThan(escalationsIndex);
+  });
+
+  it('includes context engine first in classic chat experience, with no agent builder link', () => {
     const { body } = createNavigationTree(
       createServices(),
       AIChatExperience.Classic
@@ -54,20 +72,21 @@ describe('createNavigationTree', () => {
     expect(agentBuilderNode).toBeUndefined();
   });
 
-  it('keeps context engine first when agent builder nav is in the middle', () => {
+  it('keeps agent builder in its lower position and places context engine right after it when the nav-at-top flag is off', () => {
     const { body } = createNavigationTree(
       createServices({ agentBuilderNavAtTop: false }),
       AIChatExperience.Agent
     ) as NavigationTreeDefinition;
 
-    const contextEngineIndex = body.findIndex((item) => item.link === 'context_engine');
     const agentBuilderIndex = body.findIndex((item) => item.link === 'agent_builder');
+    const contextEngineIndex = body.findIndex((item) => item.link === 'context_engine');
 
-    expect(contextEngineIndex).toBe(0);
-    expect(agentBuilderIndex).toBeGreaterThan(contextEngineIndex);
+    // Agent Builder stays in its existing (non-top) spot; it must not move to index 0.
+    expect(agentBuilderIndex).toBeGreaterThan(0);
+    expect(contextEngineIndex).toBe(agentBuilderIndex + 1);
   });
 
-  it('keeps context engine below agent builder when agent builder nav is at the top', () => {
+  it('places agent builder and context engine together at the top when the nav-at-top flag is on', () => {
     const { body } = createNavigationTree(
       createServices({ agentBuilderNavAtTop: true }),
       AIChatExperience.Agent
@@ -78,6 +97,10 @@ describe('createNavigationTree', () => {
 
     expect(agentBuilderIndex).toBe(0);
     expect(contextEngineIndex).toBe(1);
+    expect(body[contextEngineIndex]).toMatchObject({
+      icon: 'tableSparkles',
+      link: 'context_engine',
+    });
   });
 
   it('includes Stack Rules in Stack Management > Alerts and Insights', () => {

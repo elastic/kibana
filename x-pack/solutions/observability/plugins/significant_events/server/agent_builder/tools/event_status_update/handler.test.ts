@@ -5,10 +5,8 @@
  * 2.0.
  */
 
+import { asRuleEventsClient } from '../../../lib/significant_events/events/rule_events_client.mock';
 import { updateEventStatusToolHandler } from './handler';
-
-const makeLogger = () =>
-  ({ error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() } as never);
 
 describe('updateEventStatusToolHandler', () => {
   it('creates a new event version when status changes', async () => {
@@ -17,20 +15,20 @@ describe('updateEventStatusToolHandler', () => {
         event_id: 'event-id-1',
         status: 'active',
       }),
-      bulkCreate: jest.fn().mockResolvedValue({}),
     };
+    const alertEventsClient = { createAlertEvent: jest.fn().mockResolvedValue(undefined) };
 
     const result = await updateEventStatusToolHandler({
-      eventClient: eventClient as never,
+      eventSearchClient: asRuleEventsClient(eventClient, {
+        getAlertEventsClient: async () => alertEventsClient as never,
+      }),
       eventId: 'event-id-1',
       status: 'inactive',
-      logger: makeLogger(),
     });
 
-    expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
-    expect(eventClient.bulkCreate).toHaveBeenCalledWith(
-      [expect.objectContaining({ status: 'inactive' })],
-      { throwOnFail: true, refresh: 'wait_for' }
+    expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
+    expect(alertEventsClient.createAlertEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ alert_status: 'inactive' })
     );
     expect(result).toEqual({
       event_id: 'event-id-1',
@@ -43,19 +41,18 @@ describe('updateEventStatusToolHandler', () => {
   it('ignores when event is missing or status unchanged', async () => {
     const eventClientMissing = {
       findLatestByEventId: jest.fn().mockResolvedValue(undefined),
-      bulkCreate: jest.fn(),
     };
     const missing = await updateEventStatusToolHandler({
-      eventClient: eventClientMissing as never,
+      eventSearchClient: asRuleEventsClient(eventClientMissing),
       eventId: 'event-id-1',
       status: 'inactive',
-      logger: makeLogger(),
     });
     expect(missing).toEqual({
       event_id: 'event-id-1',
       updated: 0,
       ignored: 1,
       status: 'inactive',
+      reason: 'not_found',
     });
 
     const eventClientSame = {
@@ -63,19 +60,18 @@ describe('updateEventStatusToolHandler', () => {
         event_id: 'event-id-1',
         status: 'inactive',
       }),
-      bulkCreate: jest.fn(),
     };
     const same = await updateEventStatusToolHandler({
-      eventClient: eventClientSame as never,
+      eventSearchClient: asRuleEventsClient(eventClientSame),
       eventId: 'event-id-1',
       status: 'inactive',
-      logger: makeLogger(),
     });
     expect(same).toEqual({
       event_id: 'event-id-1',
       updated: 0,
       ignored: 1,
       status: 'inactive',
+      reason: 'already_in_state',
     });
   });
 });

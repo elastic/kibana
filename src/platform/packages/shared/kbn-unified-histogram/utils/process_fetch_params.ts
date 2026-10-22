@@ -11,11 +11,11 @@ import { omit } from 'lodash';
 import { type Filter, isOfAggregateQueryType } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewField, getAbsoluteTimeRange } from '@kbn/data-plugin/common';
-import { hasTransformationalCommand } from '@kbn/esql-utils';
+import { hasTransformationalCommand, isESQLColumnGroupable } from '@kbn/esql-utils';
+import { fieldSupportsBreakdown } from '@kbn/field-utils';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
-import { DataViewSource, EsqlSource, getOrRegisterEsqlDataView } from '@kbn/data-source';
+import { getOrRegisterEsqlDataView } from '@kbn/data-source';
 import type {
   UnifiedHistogramFetchParams,
   UnifiedHistogramFetchParamsExternal,
@@ -25,12 +25,6 @@ import type {
 const EMPTY_FILTERS: Filter[] = [];
 const EMPTY_ESQL_VARIABLES: ESQLControlVariable[] = [];
 const DEFAULT_TIME_INTERVAL = 'auto';
-
-export interface ProcessFetchParamsResult {
-  fetchParams: UnifiedHistogramFetchParams;
-  /** DataView derived from dataSource. Only used for the Lens suggestions API — nowhere else. */
-  lensDataView: DataView | undefined;
-}
 
 export const buildFetchParams = ({
   params,
@@ -46,9 +40,8 @@ export const buildFetchParams = ({
     params.relativeTimeRange ?? services.data.query.timefilter.timefilter.getTimeDefaults();
   const { dataSource } = params;
 
-  const columns = params.columns;
+  const columns = dataSource.kind === 'esql' ? dataSource.resultColumns : undefined;
   const isTimeBased = dataSource.isTimeBased() && !dataSource.isRollup();
-  const isESQLQuery = Boolean(query && isOfAggregateQueryType(query));
   const breakdownField = 'breakdownField' in params ? params.breakdownField : initialBreakdownField;
 
   const fetchParams: UnifiedHistogramFetchParams = {
@@ -61,8 +54,8 @@ export const buildFetchParams = ({
     // additional
     lastReloadRequestTime: Date.now(),
     isTimeBased,
-    isESQLQuery,
-    columnsMap: params.columns?.reduce<Record<string, DatatableColumn>>((acc, column) => {
+    columns,
+    columnsMap: columns?.reduce<Record<string, DatatableColumn>>((acc, column) => {
       acc[column.id] = column;
       return acc;
     }, {}),
@@ -71,7 +64,6 @@ export const buildFetchParams = ({
       query,
       columns,
       isTimeBased,
-      isESQLQuery,
       breakdownField,
     }),
     timeInterval: params.timeInterval ?? DEFAULT_TIME_INTERVAL,
@@ -88,33 +80,29 @@ export const processFetchParams = async ({
   params: UnifiedHistogramFetchParamsExternal;
   services: UnifiedHistogramServices;
   initialBreakdownField: string | undefined;
-}): Promise<ProcessFetchParamsResult> => {
+}): Promise<UnifiedHistogramFetchParams> => {
   const { dataSource } = params;
   const fetchParams = buildFetchParams({ params, services, initialBreakdownField });
 
-  let lensDataView: DataView | undefined;
-  if (dataSource instanceof DataViewSource) {
-    lensDataView = dataSource.getDataView();
-  } else if (dataSource instanceof EsqlSource) {
-    lensDataView = await getOrRegisterEsqlDataView(services.dataViews, dataSource);
+  // The Lens suggestions API still takes a DataView, which LensVisService looks up synchronously
+  if (dataSource.kind === 'esql') {
+    await getOrRegisterEsqlDataView(services.dataViews, dataSource);
   }
 
-  return { fetchParams, lensDataView };
+  return fetchParams;
 };
 
 function getProcessedBreakdownField({
   isTimeBased,
-  isESQLQuery,
   dataSource,
   query,
   columns,
   breakdownField,
 }: {
   isTimeBased: boolean;
-  isESQLQuery: boolean;
   dataSource: UnifiedHistogramFetchParamsExternal['dataSource'];
   query: UnifiedHistogramFetchParams['query'];
-  columns: UnifiedHistogramFetchParamsExternal['columns'];
+  columns: UnifiedHistogramFetchParams['columns'];
   breakdownField: string | undefined;
 }) {
   if (!isTimeBased) {
@@ -126,18 +114,21 @@ function getProcessedBreakdownField({
     return undefined;
   }
 
-  if (isESQLQuery) {
+  // only keep a breakdown field the chart can actually use, so the selector label stays in sync
+  if (dataSource.kind === 'esql') {
     const breakdownColumn = columns?.find((column) => column.name === breakdownField);
-    const field = breakdownColumn
-      ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(breakdownColumn))
-      : undefined;
+    const field =
+      breakdownColumn && isESQLColumnGroupable(breakdownColumn)
+        ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(breakdownColumn))
+        : undefined;
     return {
       field,
     };
   }
 
-  const dvs = dataSource instanceof DataViewSource ? dataSource.getDataView() : undefined;
+  const dataView = dataSource.kind === 'index-pattern' ? dataSource.getDataView() : undefined;
+  const field = breakdownField ? dataView?.getFieldByName(breakdownField) : undefined;
   return {
-    field: breakdownField ? dvs?.getFieldByName(breakdownField) : undefined,
+    field: field && fieldSupportsBreakdown(field) ? field : undefined,
   };
 }

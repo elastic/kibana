@@ -44,10 +44,12 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/rison'
   - '@kbn/task-manager-plugin'
+  - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/core-http-server'
   - '@kbn/core-test-helpers-test-utils'
   - '@kbn/safer-lodash-set'
   - '@kbn/reporting-common'
+  - '@kbn/std'
   - '@kbn/core-http-router-server-internal'
   - '@kbn/reporting-public'
   - '@kbn/reporting-server'
@@ -86,6 +88,7 @@ dependsOn:
   - '@kbn/core-user-profile-browser-mocks'
   - '@kbn/zod'
   - '@kbn/deeplinks-analytics'
+  - '@kbn/es-query'
 tags:
   - plugin
   - prod
@@ -98,6 +101,4 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

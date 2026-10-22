@@ -24,6 +24,7 @@ import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { PLUGIN_ID } from '@kbn/reporting-server';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
@@ -167,6 +168,40 @@ describe('Reporting Plugin', () => {
     );
   });
 
+  describe('screenshotting provider', () => {
+    const startWith = async (startDeps: Partial<ReportingStartDeps>) => {
+      plugin.setup(coreSetup, pluginSetup);
+      await new Promise(setImmediate);
+      const reportingCore = (plugin as unknown as { reportingCore: ReportingCore }).reportingCore;
+      const pluginStartSpy = jest.spyOn(reportingCore, 'pluginStart');
+
+      plugin.start(coreStart, { ...pluginStart, ...startDeps });
+      await new Promise(setImmediate);
+
+      return pluginStartSpy.mock.calls[0][0];
+    };
+
+    it('uses pageRenderScreenshotting in place of screenshotting when it is enabled', async () => {
+      const pageRenderScreenshotting = createMockScreenshottingStart();
+
+      const startDeps = await startWith({ pageRenderScreenshotting });
+
+      expect(startDeps.screenshotting).toBe(pageRenderScreenshotting);
+    });
+
+    it('uses screenshotting when pageRenderScreenshotting is disabled', async () => {
+      const startDeps = await startWith({});
+
+      expect(startDeps.screenshotting).toBe(pluginStart.screenshotting);
+    });
+
+    it('passes core feature flags through', async () => {
+      const startDeps = await startWith({});
+
+      expect(startDeps.featureFlags).toBe(coreStart.featureFlags);
+    });
+  });
+
   it('logs start issues', async () => {
     // wait for the setup phase background work
     plugin.setup(coreSetup, pluginSetup);
@@ -255,6 +290,36 @@ describe('Reporting Plugin', () => {
       expect(registerSpy).not.toHaveBeenCalledWith(
         expect.objectContaining({ id: PNG_REPORT_TYPE_V2 })
       );
+    });
+
+    it('registers the deprecated PDF v1 export type in traditional build flavour', () => {
+      registerSpy.mockClear();
+      plugin.setup(coreSetup, pluginSetup);
+
+      expect(registerSpy.mock.calls.map(([exportType]) => exportType.id)).toEqual([
+        CSV_REPORT_TYPE,
+        CSV_REPORT_TYPE_V2,
+        PDF_REPORT_TYPE,
+        PDF_REPORT_TYPE_V2,
+        PNG_REPORT_TYPE_V2,
+      ]);
+    });
+
+    it('does not register the deprecated PDF v1 export type in serverless build flavour', () => {
+      const serverlessInitContext = coreMock.createPluginInitializerContext(configSchema);
+      // Force type-cast to convert `ReadOnly<PackageInfo>` to mutable `PackageInfo`.
+      (serverlessInitContext.env.packageInfo as PackageInfo).buildFlavor = 'serverless';
+      plugin = new ReportingPlugin(serverlessInitContext);
+
+      registerSpy.mockClear();
+      plugin.setup(coreSetup, pluginSetup);
+
+      expect(registerSpy.mock.calls.map(([exportType]) => exportType.id)).toEqual([
+        CSV_REPORT_TYPE,
+        CSV_REPORT_TYPE_V2,
+        PDF_REPORT_TYPE_V2,
+        PNG_REPORT_TYPE_V2,
+      ]);
     });
   });
 

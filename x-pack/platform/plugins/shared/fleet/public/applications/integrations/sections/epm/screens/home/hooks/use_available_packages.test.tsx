@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react';
 
 import type { PackageListItem } from '../../../../../types';
 
+const mockUseAuthz = jest.fn();
 const mockUseAgentless = jest.fn();
 const mockUseGetPackageVerificationKeyId = jest.fn();
 const mockUseGetPackagesQuery = jest.fn();
@@ -26,6 +27,7 @@ jest.mock(
 );
 
 jest.mock('../../../../../hooks', () => ({
+  useAuthz: () => mockUseAuthz(),
   useGetPackagesQuery: (params: any) => mockUseGetPackagesQuery(params),
   useGetCategoriesQuery: (params: any) => mockUseGetCategoriesQuery(params),
   useGetAppendCustomIntegrationsQuery: () => mockUseGetAppendCustomIntegrationsQuery(),
@@ -68,6 +70,9 @@ jest.mock('../../../../../services', () => ({
 jest.mock('../../../../../../../../common/services', () => ({
   isInputOnlyPolicyTemplate: (template: any) => template.type === 'input',
   isIntegrationPolicyTemplate: (template: any) => template.type === 'integration',
+  shouldAddIntegrationFromCatalog: jest.requireActual(
+    '../../../../../../../../common/services/package_helpers'
+  ).shouldAddIntegrationFromCatalog,
   filterPolicyTemplatesTiles: (_behavior: any, topPackage: any, integrations: any[]) => {
     if (integrations.length > 0) {
       return integrations;
@@ -107,13 +112,15 @@ jest.mock('../util', () => ({
 }));
 
 jest.mock('..', () => ({
-  mapToCard: ({ item }: any) => ({
+  mapToCard: ({ item, canAddIntegration }: any) => ({
     id: item.id,
     title: item.title || item.name,
     description: item.description || '',
     categories: item.categories || [],
     url: `/detail/${item.name}`,
     supportsAgentless: item.supportsAgentless,
+    addIntegrationFromCatalog: item.addIntegrationFromCatalog,
+    canAddIntegration,
   }),
 }));
 
@@ -174,6 +181,8 @@ describe('useAvailablePackages', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockUseAuthz.mockReturnValue({ integrations: { all: true } });
 
     mockExperimentalFeaturesServiceGet.mockReturnValue({
       enableIntegrationCollectionTiles: false,
@@ -316,6 +325,102 @@ describe('useAvailablePackages', () => {
 
       expect(result.current.filteredCards).toHaveLength(1);
       expect(result.current.filteredCards[0].title).toBe('Nginx');
+    });
+
+    it('should classify packages with policy templates and no data streams as addable before policy templates are stripped', () => {
+      mockUseGetPackagesQuery.mockReturnValue({
+        data: {
+          items: [
+            {
+              ...mockBasicPackage,
+              id: 'apm-1.0.0',
+              name: 'apm',
+              title: 'APM',
+              policy_templates: [
+                { name: 'apmserver', title: 'APM Server', description: 'APM', type: 'integration' },
+              ],
+            },
+          ],
+        },
+        isLoading: false,
+        error: null,
+      });
+
+      const { result } = renderHook(() =>
+        useAvailablePackages({ prereleaseIntegrationsEnabled: false })
+      );
+
+      expect(result.current.filteredCards).toHaveLength(1);
+      expect(result.current.filteredCards[0]).toMatchObject({ addIntegrationFromCatalog: true });
+    });
+
+    it('should classify packages without data streams or policy templates as not addable', () => {
+      mockUseGetPackagesQuery.mockReturnValue({
+        data: { items: [mockBasicPackage] },
+        isLoading: false,
+        error: null,
+      });
+
+      const { result } = renderHook(() =>
+        useAvailablePackages({ prereleaseIntegrationsEnabled: false })
+      );
+
+      expect(result.current.filteredCards[0]).toMatchObject({ addIntegrationFromCatalog: false });
+    });
+
+    it('should pass the integrations write privilege to mapToCard', () => {
+      mockUseGetPackagesQuery.mockReturnValue({
+        data: { items: [mockBasicPackage] },
+        isLoading: false,
+        error: null,
+      });
+
+      const { result, rerender } = renderHook(() =>
+        useAvailablePackages({ prereleaseIntegrationsEnabled: false })
+      );
+      expect(result.current.allCards[0]).toMatchObject({ canAddIntegration: true });
+
+      mockUseAuthz.mockReturnValue({ integrations: { all: false } });
+      rerender();
+      expect(result.current.allCards[0]).toMatchObject({ canAddIntegration: false });
+    });
+
+    it('should allow adding integrations when authz is not available', () => {
+      mockUseAuthz.mockReturnValue(undefined);
+      mockUseGetPackagesQuery.mockReturnValue({
+        data: { items: [mockBasicPackage] },
+        isLoading: false,
+        error: null,
+      });
+
+      const { result } = renderHook(() =>
+        useAvailablePackages({ prereleaseIntegrationsEnabled: false })
+      );
+
+      expect(result.current.allCards[0]).toMatchObject({ canAddIntegration: true });
+    });
+
+    it('should pass the integrations write privilege to applyGrouping', () => {
+      mockExperimentalFeaturesServiceGet.mockReturnValue({
+        enableIntegrationCollectionTiles: true,
+      });
+      mockUseAuthz.mockReturnValue({ integrations: { all: false } });
+      mockUseGetPackagesQuery.mockReturnValue({
+        data: { items: [mockBasicPackage] },
+        isLoading: false,
+        error: null,
+      });
+
+      renderHook(() =>
+        useAvailablePackages({
+          prereleaseIntegrationsEnabled: false,
+          enableCollectionGrouping: true,
+        })
+      );
+
+      expect(mockApplyGrouping).toHaveBeenCalledWith(
+        expect.objectContaining({ canAddIntegration: false })
+      );
     });
 
     it('should remove Kubernetes package granularity', () => {

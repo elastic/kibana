@@ -16,6 +16,7 @@ import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/se
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { oauthAuthorizeRoute } from './oauth_authorize';
+import { connectorAuthCounter } from '../lib/connector_metrics';
 import { OAuthStateClient } from '../lib/oauth_state_client';
 import { OAuthAuthorizationService } from '../lib/oauth_authorization_service';
 import { actionsConfigMock } from '../actions_config.mock';
@@ -106,6 +107,7 @@ describe('oauthAuthorizeRoute', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.spyOn(connectorAuthCounter, 'add').mockImplementation(() => {});
     router = httpServiceMock.createRouter();
     (verifyAccessAndContext as jest.Mock).mockImplementation((_license, handler) => handler);
 
@@ -226,6 +228,12 @@ describe('oauthAuthorizeRoute', () => {
     await handler(context, req, res);
 
     expect(mockRateLimiter.log).toHaveBeenCalledWith('test-profile-uid', 'authorize');
+    expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+      'auth.phase': 'initiate',
+      'connector.auth_type': 'unknown',
+      success: false,
+      'error.type': 'rate_limited',
+    });
     expect(res.customError).toHaveBeenCalledWith(
       expect.objectContaining({
         statusCode: 429,
@@ -358,6 +366,7 @@ describe('oauthAuthorizeRoute', () => {
   });
 
   it('returns authorization URL on success', async () => {
+    mockActionsClient.get.mockResolvedValue({ actionTypeId: '.github' });
     mockOAuthServiceInstance.getOAuthConfig.mockResolvedValue({
       authTypeId: 'oauth_authorization_code',
       authorizationUrl: 'https://provider.example.com/authorize',
@@ -394,6 +403,14 @@ describe('oauthAuthorizeRoute', () => {
           'https://provider.example.com/authorize?client_id=client-id&response_type=code&state=random-state',
         state: 'random-state',
       },
+    });
+
+    expect(connectorAuthCounter.add).toHaveBeenCalledTimes(1);
+    expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+      'auth.phase': 'initiate',
+      'connector.auth_type': 'oauth_authorization_code',
+      'connector.type': '.github',
+      success: true,
     });
 
     // Verify OAuth state was created with the correct params

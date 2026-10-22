@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/293357
-type: enhancement
-products:
-- product: cloud-serverless
-- product: kibana
-title: Show release and end of life in the Elastic Inference Service table
-description: Improves the Elastic Inference Service table so it shows the model name, type, provider, release date, and end of life.
