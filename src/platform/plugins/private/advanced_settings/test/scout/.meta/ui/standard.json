@@ -1,21 +1,21 @@
 {
-  "sha1": "7152c876138c3e4036ad1d3a26e79fc8af8e7548",
+  "sha1": "d9cfd0f834d0033b8e6bfe01cd5c16ff875f7233",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "3fbb83247d46cbc-f88b548a3856022",
-      "title": "Advanced settings - accessibility settings page has no a11y violations",
+      "id": "20fd3ec90091101-d65a2ca4be0f9c3",
+      "title": "Advanced settings - edit and save searches, edits and saves settings without a11y violations",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_a11y.spec.ts",
-        "line": 28,
-        "column": 64
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_edit.spec.ts",
+        "line": 29,
+        "column": 23
       }
     },
     {

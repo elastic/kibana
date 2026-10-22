@@ -61,6 +61,10 @@ export class GrokDebuggerPage {
       await this.setCustomPatternInput(customPattern);
     }
 
+    return await this.simulate();
+  }
+
+  async simulate() {
     await this.simulateButton.click();
     await expect.poll(() => this.getStructuredOutput()).not.toStrictEqual({});
 
