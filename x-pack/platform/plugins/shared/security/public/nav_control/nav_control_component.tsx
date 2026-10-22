@@ -202,7 +202,11 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
         panels={[
           {
             id: 0,
-            title: displayName,
+            title: (
+              <span className="eui-displayBlock eui-textTruncate" title={displayName}>
+                {displayName}
+              </span>
+            ),
             content: (
               <ContextMenuContent items={items} closePopover={() => setIsPopoverOpen(false)} />
             ),

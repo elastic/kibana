@@ -210,7 +210,12 @@ describe('SecurityNavControl', () => {
               class="euiContextMenuPanelTitle__text css-8u7lys-text"
               id="generated-id_euiContextMenuPanelTitle"
             >
-              full name
+              <span
+                class="eui-displayBlock eui-textTruncate"
+                title="full name"
+              >
+                full name
+              </span>
             </h2>
           </div>
           <div
@@ -390,7 +395,12 @@ describe('SecurityNavControl', () => {
               class="euiContextMenuPanelTitle__text css-8u7lys-text"
               id="generated-id_euiContextMenuPanelTitle"
             >
-              full name
+              <span
+                class="eui-displayBlock eui-textTruncate"
+                title="full name"
+              >
+                full name
+              </span>
             </h2>
           </div>
           <div
@@ -537,7 +547,12 @@ describe('SecurityNavControl', () => {
               class="euiContextMenuPanelTitle__text css-8u7lys-text"
               id="generated-id_euiContextMenuPanelTitle"
             >
-              full name
+              <span
+                class="eui-displayBlock eui-textTruncate"
+                title="full name"
+              >
+                full name
+              </span>
             </h2>
           </div>
           <div
