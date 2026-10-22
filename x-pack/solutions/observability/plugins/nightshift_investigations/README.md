@@ -103,16 +103,18 @@ GET  /internal/nightshift/investigations/service_account           # status, age
 POST /internal/nightshift/investigations/service_account/_disable  # teardown
 ```
 
+Only the service accounts backend assigns account ids: `kibana/<name>` on stateful, a generated id on Serverless (UIAM), where several accounts may also share a name. So the caller finds or creates the accounts first, as the current user, with `ensureNightshiftServiceAccounts` from `common`, and passes their ids to `_enable` as `{ "serviceAccountIds": { "agent": "...", "automations": "..." } }`. The setup step in the app does both on one click. `ensureNightshiftServiceAccounts` lists the accounts by name and reuses one Kibana can run as. It creates a missing account only after checking that its role exists, so a stateful deployment without the roles gets a clear error instead of an account without privileges.
+
 `_enable`:
 
 1. Refuses with 400 when service accounts are off, 403 without `manage_security`, and 404 when the space does not exist, before writing anything.
-2. Creates the accounts that are missing. Existing accounts are reused.
-3. Installs the space's bound workflows with `settings.run_as` set to the agent account, the entry point `system-nightshift-investigation-bound-<space>` last. A setup that fails part-way leaves the space reading as not set up. A failed install names the workflow.
-4. Checks that every installed workflow is bound to the agent account, and fails otherwise.
+2. Installs the space's bound workflows with `settings.run_as` set to the agent account, the entry point `system-nightshift-investigation-bound-<space>` last. The entry point also keeps the automations account's id, as its `automationsServiceAccountId` template value. A setup that fails part-way leaves the space reading as not set up. A failed install names the workflow.
+3. Turns bound workflows an admin disabled back on.
+4. Checks that every installed workflow is bound to the agent account and that the entry point is enabled, and fails otherwise.
 
-Setups of one space run one after another. `_enable` is idempotent: running it again repairs a space whose workflows were removed or are bound to another account. A workflow can only be bound from an authenticated request with `manage_security`, so setup cannot happen at startup. On later boots, the dynamic-workflow upgrade reuses the existing bindings.
+Setups of one space run one after another. `_enable` is idempotent: running it again repairs a space whose workflows were removed, disabled, or bound to another account. A workflow can only be bound from an authenticated request with `manage_security`, so setup cannot happen at startup. On later boots, the dynamic-workflow upgrade reuses the existing bindings.
 
-A space counts as set up when its entry point is installed, enabled and bound to the agent account. `_disable` uninstalls the space's bound workflows and keeps the accounts, which other spaces share.
+A space counts as set up when its entry point is installed, enabled and bound to an account; that account is the space's agent account, and every other bound workflow has to run as it too. Each space keeps its own ids, so spaces are set up independently. `_disable` uninstalls the space's bound workflows and keeps the accounts, which other spaces share.
 
 ## How investigations are stored and run
 

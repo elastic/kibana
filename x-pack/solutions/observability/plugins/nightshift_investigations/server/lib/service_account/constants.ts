@@ -7,56 +7,34 @@
 
 import { getNightshiftBoundInvestigationWorkflowId } from '@kbn/workflows/managed';
 
-/**
- * The Nightshift service accounts. There is one of each per deployment, shared by every space:
- * - `agent` runs investigations, their sandbox tools and their Agent Builder hooks.
- * - `automations` runs automation workflows, which start investigations.
- */
-export type NightshiftServiceAccountKind = 'agent' | 'automations';
-
-export const NIGHTSHIFT_SERVICE_ACCOUNT_KINDS: readonly NightshiftServiceAccountKind[] = [
-  'agent',
-  'automations',
-];
-
-/** `kibana/<name>`; user-managed service accounts live in the `kibana` namespace. */
-export const getNightshiftServiceAccountName = (kind: NightshiftServiceAccountKind): string =>
-  `nightshift_${kind}`;
-
-export const getNightshiftServiceAccountId = (kind: NightshiftServiceAccountKind): string =>
-  `kibana/${getNightshiftServiceAccountName(kind)}`;
-
-/**
- * The role an account holds. Nightshift never creates or changes these roles. On Serverless they
- * are elasticsearch-controller predefined roles, whose names must start with `_`. On stateful they
- * are named like the account and created by whoever sets up the deployment (see the README). The
- * roles cover every space; the per-space bound workflows decide where an account acts.
- */
-export const getNightshiftRoleName = (
-  kind: NightshiftServiceAccountKind,
-  { isServerless }: { isServerless: boolean }
-): string => {
-  const name = getNightshiftServiceAccountName(kind);
-  return isServerless ? `_${name}` : name;
-};
-
-/** The account investigations run as. */
-export const INVESTIGATOR_SERVICE_ACCOUNT_ID = getNightshiftServiceAccountId('agent');
-
 export { getNightshiftBoundInvestigationWorkflowId as getBoundInvestigationWorkflowId };
 
 /**
- * Whether a space's investigation entry point is ready: installed, enabled and bound to the agent
+ * Template value of the entry point holding the automations account's id. The agent account's id
+ * is the entry point's own `serviceAccountId` value, which renders as its `settings.run_as`.
+ */
+export const AUTOMATIONS_SERVICE_ACCOUNT_ID_VALUE = 'automationsServiceAccountId';
+
+interface EntryPointLike {
+  enabled?: boolean;
+  definition?: { settings?: { run_as?: string } } | null;
+}
+
+/**
+ * The agent account a space is set up with: the account its investigation entry point runs as.
+ * The service accounts backend assigns the id (a generated one on Serverless), so a space is
+ * compared against its own entry point rather than a fixed id.
+ */
+export const getEntryPointServiceAccountId = (
+  workflow: EntryPointLike | null | undefined
+): string | undefined => {
+  const runAs = workflow?.definition?.settings?.run_as;
+  return typeof runAs === 'string' && runAs.length > 0 ? runAs : undefined;
+};
+
+/**
+ * Whether a space's investigation entry point is ready: installed, enabled and bound to an
  * account. A space is set up exactly when this holds.
  */
-export const isEntryPointReady = (
-  workflow:
-    | { enabled?: boolean; definition?: { settings?: { run_as?: string } } | null }
-    | null
-    | undefined
-): boolean =>
-  Boolean(
-    workflow?.definition &&
-      workflow.enabled &&
-      workflow.definition.settings?.run_as === INVESTIGATOR_SERVICE_ACCOUNT_ID
-  );
+export const isEntryPointReady = (workflow: EntryPointLike | null | undefined): boolean =>
+  Boolean(workflow?.definition && workflow.enabled && getEntryPointServiceAccountId(workflow));
