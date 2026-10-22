@@ -34,7 +34,7 @@ import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/err
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
-import type { RuleEventActor } from '../event_origin/origin_schemas';
+import type { EventOriginActor } from '../event_origin/origin_schemas';
 import { toEventOrigin } from '../event_origin/event_origin';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
@@ -57,7 +57,7 @@ import {
   getRuleExecutorTaskId,
 } from '../rule_executor/schedule';
 import type { AlertingPublisherContext } from '../events/domain_events';
-import { RuleEventActorToken } from '../event_origin/token';
+import { EventOriginActorToken } from '../event_origin/token';
 import { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import type { EventRule } from '../events/rule_event_publisher/rule_event_publisher';
 import {
@@ -225,7 +225,7 @@ export class RulesClient {
     @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry,
-    @inject(RuleEventActorToken) actor: RuleEventActor,
+    @inject(EventOriginActorToken) actor: EventOriginActor,
     @inject(RulesClientOptionsToken) rulesClientOptions: CreateRulesClientOptions
   ) {
     this.eventContext = { request, origin: toEventOrigin(actor, request, rulesClientOptions) };

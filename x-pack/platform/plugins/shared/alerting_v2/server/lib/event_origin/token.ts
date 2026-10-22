@@ -6,11 +6,11 @@
  */
 
 import { createToken } from '@kbn/core-di';
-import type { RuleEventActor } from './origin_schemas';
+import type { EventOriginActor } from './origin_schemas';
 
 /**
  * Who is behind a change in the current scope: a `user` request with
  * credentials, or the `internal` Kibana user acting on its own. Defaults to
  * `user`. Publishers combine this actor with the request into the context origin.
  */
-export const RuleEventActorToken = createToken<RuleEventActor>('alerting_v2.RuleEventActor');
+export const EventOriginActorToken = createToken<EventOriginActor>('alerting_v2.EventOriginActor');
