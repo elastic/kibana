@@ -66,6 +66,8 @@ describe('serialize', () => {
       ],
       workspace: {
         isInitialized: true,
+        selectedNodeIds: [],
+        selectedEdgeIds: [],
         nodesById: {
           'node-0': {
             id: 'node-0',

@@ -28,6 +28,9 @@ jest.mock('../../../../../../hooks', () => ({
   sendBulkUpgradeAgentlessPolicies: jest.fn(),
 }));
 
+// These renders take ~45ms, so the 5s default only ever fails to a CI wall-clock stall.
+jest.setTimeout(30_000);
+
 const agentPolicies = [
   { id: 'agentless-1', name: 'Agentless', supports_agentless: true },
 ] as AgentPolicy[];
@@ -65,19 +68,19 @@ describe('PackagePolicyUpgradeCell', () => {
     }
   });
 
-  it('links to the legacy upgrade route for a non-agentless policy', async () => {
+  it('links to the legacy upgrade route for a non-agentless policy', () => {
     const utils = renderCell({ packagePolicy: createPackagePolicy({ supports_agentless: false }) });
-    const button = await utils.findByTestId('integrationPolicyUpgradeBtn');
+    const button = utils.getByTestId('integrationPolicyUpgradeBtn');
     expect(button).toHaveAttribute('href');
   });
 
-  it('links to the legacy upgrade route for an agentless policy while disableAgentlessLegacyAPI is off', async () => {
+  it('links to the legacy upgrade route for an agentless policy while disableAgentlessLegacyAPI is off', () => {
     jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       ...allowedExperimentalValues,
       disableAgentlessLegacyAPI: false,
     });
     const utils = renderCell({ packagePolicy: createPackagePolicy({ supports_agentless: true }) });
-    const button = await utils.findByTestId('integrationPolicyUpgradeBtn');
+    const button = utils.getByTestId('integrationPolicyUpgradeBtn');
     // Flag off (default): the legacy edit-page upgrade still works, so the link is untouched.
     expect(button).toHaveAttribute('href');
   });
@@ -95,7 +98,7 @@ describe('PackagePolicyUpgradeCell', () => {
         packagePolicy: createPackagePolicy({ supports_agentless: true }),
       });
 
-      const button = await utils.findByTestId('integrationPolicyUpgradeBtn');
+      const button = utils.getByTestId('integrationPolicyUpgradeBtn');
       // The agentless upgrade opens a confirm modal instead of linking to the (blocked) legacy route.
       expect(button).not.toHaveAttribute('href');
 
@@ -104,7 +107,7 @@ describe('PackagePolicyUpgradeCell', () => {
       });
 
       // The shared agentless-upgrade confirm modal is shown.
-      expect(await utils.findByTestId('confirmModalConfirmButton')).toBeInTheDocument();
+      expect(utils.getByTestId('confirmModalConfirmButton')).toBeInTheDocument();
     });
   });
 });
