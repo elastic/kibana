@@ -12,7 +12,7 @@ import { AppHeaderLoading } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../../../common/constants';
 import { getAppliedRules, getRuleCoverage } from '../../../common/resolution';
-import { estimateDataSourcesVcuRange } from '../../../common/vcu_estimate';
+import { estimateDataSourcesVcuRange, estimateProjectVcuRange } from '../../../common/vcu_estimate';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useBoostState } from '../../hooks/use_boost_state';
 import { AgeTimeline } from '../age_timeline';
@@ -24,6 +24,7 @@ import {
   DetailsSplitBand,
 } from '../details/details_page';
 import { DetailsList } from '../details/details_list';
+import { ShareMeter, ShareMeterGroup } from '../details/share_meter';
 import { DetailsLink } from '../details_link';
 import { PROFILE_TYPE_LABELS, formatDataSourceCount } from '../format';
 import { LoadError } from '../load_error';
@@ -74,6 +75,9 @@ export const RuleDetailsPage = () => {
   const applied = matched.filter((dataSource) => appliedRules.get(dataSource.name)?.name === name);
   const sizeInBytes = applied.reduce((total, { size_in_bytes: bytes }) => total + bytes, 0);
   const vcus = profile ? estimateDataSourcesVcuRange(applied, profile) : { atRest: 0, atPeak: 0 };
+  // The whole project, which the rule's storage and search cost are each a share of.
+  const projectSize = dataSources.reduce((total, { size_in_bytes: bytes }) => total + bytes, 0);
+  const projectVcus = estimateProjectVcuRange(dataSources, appliedRules, profiles);
   const existingNames = new Set(dataSources.map(({ name: dataSourceName }) => dataSourceName));
   const [firstPattern = ''] = patterns;
   // Matches how the rule form opens it: a pattern, or names that were selected.
@@ -224,7 +228,15 @@ export const RuleDetailsPage = () => {
                   title: i18n.translate('xpack.boost.ruleDetails.storageSize', {
                     defaultMessage: 'Storage size',
                   }),
-                  description: formatSize(sizeInBytes),
+                  description: (
+                    <ShareMeter
+                      value={sizeInBytes}
+                      total={projectSize}
+                      data-test-subj="boostRuleStorageShare"
+                    >
+                      {formatSize(sizeInBytes)}
+                    </ShareMeter>
+                  ),
                 },
                 {
                   title: i18n.translate('xpack.boost.ruleDetails.cost', {
@@ -232,11 +244,22 @@ export const RuleDetailsPage = () => {
                   }),
                   tip: COST_DISCLAIMER,
                   description: (
-                    <>
-                      {getCostText('atRest', vcus.atRest)}
-                      <br />
-                      {getCostText('atPeak', vcus.atPeak)}
-                    </>
+                    <ShareMeterGroup>
+                      <ShareMeter
+                        value={vcus.atRest}
+                        total={projectVcus.atRest}
+                        data-test-subj="boostRuleRestCostShare"
+                      >
+                        {getCostText('atRest', vcus.atRest)}
+                      </ShareMeter>
+                      <ShareMeter
+                        value={vcus.atPeak}
+                        total={projectVcus.atPeak}
+                        data-test-subj="boostRulePeakCostShare"
+                      >
+                        {getCostText('atPeak', vcus.atPeak)}
+                      </ShareMeter>
+                    </ShareMeterGroup>
                   ),
                 },
               ]}

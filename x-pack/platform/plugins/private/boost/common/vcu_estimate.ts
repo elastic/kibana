@@ -188,6 +188,23 @@ export const estimateDataSourcesVcuRange = (
     NO_VCUS
   );
 
+/**
+ * Search VCUs the whole project uses today: each index and data stream under the profile of the
+ * rule that applies to it.
+ */
+export const estimateProjectVcuRange = (
+  dataSources: readonly BoostDataSource[],
+  appliedRules: ReadonlyMap<string, BoostRule>,
+  profiles: readonly BoostProfile[]
+): VcuRange => {
+  const profilesByName = new Map(profiles.map((profile) => [profile.name, profile]));
+  return dataSources.reduce<VcuRange>((total, dataSource) => {
+    const rule = appliedRules.get(dataSource.name);
+    const profile = rule && profilesByName.get(rule.boost_profile);
+    return profile ? addRanges(total, estimateDataSourceVcuRange(dataSource, profile)) : total;
+  }, NO_VCUS);
+};
+
 /** The search cost an estimate covers, today and with a change. */
 export interface CostImpact {
   /** The data sources the estimate covers with the change, and their total size. */

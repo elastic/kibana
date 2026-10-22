@@ -29,7 +29,8 @@ export const DetailsList = ({ items }: { items: readonly DetailsListItem[] }) =>
         title: tip ? (
           <span css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.xs }}>
             {title}
-            <EuiIconTip type="info" color="subdued" content={tip} aria-label={title} />
+            {/* Without a color, the icon takes its title's. */}
+            <EuiIconTip type="info" content={tip} aria-label={title} />
           </span>
         ) : (
           title

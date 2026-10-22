@@ -32,7 +32,7 @@ import type {
   DataStreamsBoostProfile,
   IndicesBoostProfile,
 } from '../../../common/types';
-import { estimateDataSourcesVcuRange } from '../../../common/vcu_estimate';
+import { estimateDataSourcesVcuRange, estimateProjectVcuRange } from '../../../common/vcu_estimate';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useBoostState } from '../../hooks/use_boost_state';
 import { AgeTimeline } from '../age_timeline';
@@ -44,6 +44,7 @@ import {
   DetailsSplitBand,
 } from '../details/details_page';
 import { DetailsList } from '../details/details_list';
+import { ShareMeter, ShareMeterGroup } from '../details/share_meter';
 import { DetailsLink } from '../details_link';
 import { EmptyCell } from '../empty_cell';
 import { PROFILE_TYPE_LABELS, formatBoost, formatDataSourceCount, formatMaxAge } from '../format';
@@ -106,10 +107,9 @@ const DataStreamsSettings = ({ profile }: { profile: DataStreamsBoostProfile }) 
       }),
       render: (id: PeriodRow['id']) => (
         <span>
-          {PERIOD_LABELS[id].title}{' '}
+          {PERIOD_LABELS[id].title} {/* Without a color, the icon takes its phase name's. */}
           <EuiIconTip
             type="info"
-            color="subdued"
             content={PERIOD_LABELS[id].description}
             aria-label={PERIOD_LABELS[id].title}
           />
@@ -190,6 +190,9 @@ export const ProfileDetailsPage = () => {
     .sort((a, b) => a.name.localeCompare(b.name));
   const sizeInBytes = usedBy.reduce((total, { size_in_bytes: bytes }) => total + bytes, 0);
   const vcus = estimateDataSourcesVcuRange(usedBy, profile);
+  // The whole project, which the profile's storage and search cost are each a share of.
+  const projectSize = dataSources.reduce((total, { size_in_bytes: bytes }) => total + bytes, 0);
+  const projectVcus = estimateProjectVcuRange(dataSources, appliedRules, profiles);
   const usedByDefaultRule = profileRules.some(({ is_builtin: isBuiltin }) => isBuiltin);
 
   const editLabel = i18n.translate('xpack.boost.profileDetails.editAction', {
@@ -382,7 +385,15 @@ export const ProfileDetailsPage = () => {
                   title: i18n.translate('xpack.boost.profileDetails.storageSize', {
                     defaultMessage: 'Storage size',
                   }),
-                  description: formatSize(sizeInBytes),
+                  description: (
+                    <ShareMeter
+                      value={sizeInBytes}
+                      total={projectSize}
+                      data-test-subj="boostProfileStorageShare"
+                    >
+                      {formatSize(sizeInBytes)}
+                    </ShareMeter>
+                  ),
                 },
                 {
                   title: i18n.translate('xpack.boost.profileDetails.cost', {
@@ -390,11 +401,22 @@ export const ProfileDetailsPage = () => {
                   }),
                   tip: COST_DISCLAIMER,
                   description: (
-                    <>
-                      {getCostText('atRest', vcus.atRest)}
-                      <br />
-                      {getCostText('atPeak', vcus.atPeak)}
-                    </>
+                    <ShareMeterGroup>
+                      <ShareMeter
+                        value={vcus.atRest}
+                        total={projectVcus.atRest}
+                        data-test-subj="boostProfileRestCostShare"
+                      >
+                        {getCostText('atRest', vcus.atRest)}
+                      </ShareMeter>
+                      <ShareMeter
+                        value={vcus.atPeak}
+                        total={projectVcus.atPeak}
+                        data-test-subj="boostProfilePeakCostShare"
+                      >
+                        {getCostText('atPeak', vcus.atPeak)}
+                      </ShareMeter>
+                    </ShareMeterGroup>
                   ),
                 },
               ]}

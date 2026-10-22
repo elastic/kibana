@@ -213,6 +213,7 @@ describe('ProfileDetailsPage', () => {
     // The table always pages, however few use the profile.
     expect(usedBy).toHaveTextContent('Rows per page: 10');
     expect(screen.getByTestId('boostProfileUsage')).toHaveTextContent('Applies to1 index');
+    expect(screen.getByTestId('boostProfileStorageShare')).toHaveTextContent(/GB\d+% of project/);
   });
 
   it('only offers to duplicate an Elastic-managed profile', () => {
@@ -278,6 +279,14 @@ describe('RuleDetailsPage', () => {
     expect(usage).toHaveTextContent('Matches2 indices');
     expect(usage).toHaveTextContent('Applies to1 index');
     expect(usage).toHaveTextContent(/Storage size\d/);
+    // Its storage and search cost at rest and at peak are each shown as a share of the project's.
+    expect(screen.getByTestId('boostRuleStorageShare')).toHaveTextContent(/GB\d+% of project/);
+    expect(screen.getByTestId('boostRuleRestCostShare')).toHaveTextContent(
+      /at rest<?\d+% of project/
+    );
+    expect(screen.getByTestId('boostRulePeakCostShare')).toHaveTextContent(
+      /at peak<?\d+% of project/
+    );
 
     const matched = screen.getByTestId('boostRuleMatched');
     expect(within(matched).getByRole('heading', { name: 'Matching indices' })).toBeInTheDocument();

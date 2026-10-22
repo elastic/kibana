@@ -15,6 +15,8 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiInMemoryTable,
+  EuiProgress,
+  EuiScreenReaderOnly,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
@@ -153,6 +155,44 @@ const PEAK_COST_NAME = (
   />
 );
 
+// The size bars' width, in rem, so the column fits it whatever the text size around it.
+const SIZE_BAR_WIDTH = '5rem';
+
+// The size bars' column has no visible header, as the bars sit beside the sizes they chart.
+const SIZE_BAR_NAME = (
+  <EuiScreenReaderOnly>
+    <span>
+      {i18n.translate('xpack.boost.matchedTable.sizeBarColumn', {
+        defaultMessage: 'Storage size compared with the largest match',
+      })}
+    </span>
+  </EuiScreenReaderOnly>
+);
+
+interface SizeBarProps {
+  bytes: number;
+  /** The largest match's size, which fills the bar. */
+  maxBytes: number;
+  isOutranked: boolean;
+}
+
+/**
+ * A bar scaled to the largest match's size, so sizes compare at a glance. An outranked match's bar
+ * takes the disabled color of its struck-through name, so it recedes.
+ */
+const SizeBar = ({ bytes, maxBytes, isOutranked }: SizeBarProps) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiProgress
+      value={bytes}
+      max={maxBytes > 0 ? maxBytes : 1}
+      size="s"
+      color={isOutranked ? euiTheme.colors.textDisabled : 'primary'}
+      css={{ inlineSize: SIZE_BAR_WIDTH }}
+    />
+  );
+};
+
 // Outranked matches cost this rule nothing, so they have no cost.
 const renderCost = (vcus: number | undefined) =>
   vcus === undefined ? <EmptyCell /> : formatCost(roundVcus(vcus));
@@ -175,6 +215,7 @@ interface MatchedTableProps {
  * with how many of the search results each would show.
  */
 export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTableProps) => {
+  const { euiTheme } = useEuiTheme();
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<MatchStatus>();
   const isDataStreams = type === 'data_streams';
@@ -197,6 +238,8 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
       }),
     [matched, supersededBy, profile]
   );
+  // The largest match fills its size bar; the search doesn't change it, so bars keep their scale.
+  const maxBytes = Math.max(0, ...rows.map(({ size_in_bytes: bytes }) => bytes));
   // Whether to show the column of rules that outrank matches, which the search doesn't change.
   const hasOutranked = rows.some(({ outrankedBy }) => outrankedBy !== undefined);
   const getStatus = ({ outrankedBy }: MatchedRow): MatchStatus =>
@@ -272,6 +315,17 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
       sortable: true,
       dataType: 'number',
       render: formatSize,
+    },
+    // Each size's bar, in a column of its own beside the right-aligned sizes. Cards on narrow
+    // screens list the sizes alone.
+    {
+      name: SIZE_BAR_NAME,
+      // The bar's width, and the cell's padding on either side.
+      width: `calc(${SIZE_BAR_WIDTH} + ${euiTheme.size.base})`,
+      mobileOptions: { show: false },
+      render: ({ size_in_bytes: bytes, outrankedBy }: MatchedRow) => (
+        <SizeBar bytes={bytes} maxBytes={maxBytes} isOutranked={outrankedBy !== undefined} />
+      ),
     },
     ...(profile
       ? [

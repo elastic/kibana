@@ -183,7 +183,7 @@ export const DataStreamTimeline = ({
               >
                 <EuiText size="xs" color="inherit">
                   <div
-                    css={[lineCss, { fontWeight: euiTheme.font.weight.bold }]}
+                    css={[lineCss, { fontWeight: euiTheme.font.weight.medium }]}
                     title={PERIOD_LABELS[period].title}
                   >
                     {PERIOD_LABELS[period].title}
