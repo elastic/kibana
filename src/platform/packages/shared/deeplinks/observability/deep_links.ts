@@ -92,7 +92,10 @@ export type MetricsLinkId =
   | 'metrics-explorer'
   | 'hosts'
   | 'settings'
-  | 'assetDetails';
+  | 'assetDetails'
+  | 'inventory-all-resources'
+  | 'inventory-hosts'
+  | 'inventory-kubernetes';
 
 export type ApmLinkId =
   | 'services'

@@ -6,6 +6,9 @@
  */
 
 import type React from 'react';
+import type { AppDeepLink } from '@kbn/core/public';
+import type { NodeDefinition } from '@kbn/core-chrome-browser';
+import type { NavigationEntry } from '@kbn/observability-shared-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityInventoryAppSetupDependencies {}
@@ -15,8 +18,12 @@ export interface EntityInventoryAppStartDependencies {}
 
 export interface EntityInventoryAppPublicSetup {
   showEntityInventory: boolean;
+  deepLinks: AppDeepLink[];
+  navEntries: NavigationEntry[];
 }
 
 export interface EntityInventoryAppPublicStart {
   getAppComponent: () => React.ComponentType;
+  showEntityInventory: boolean;
+  navTreeChildren: NodeDefinition[];
 }
