@@ -38,7 +38,13 @@ jest.mock('@kbn/embeddable-plugin/public', () => {
       }, []);
       return (
         <div className="embedPanel" id={`mockEmbedPanel_${maybeId}`}>
-          <div className="kbnGridPanel--dragHandle" data-test-subj={`mockPanelHeader_${maybeId}`} />
+          <div className="kbnGridPanel--dragHandle" data-test-subj={`mockPanelHeader_${maybeId}`}>
+            <span className="embPanel__titleInlineEdit">
+              <button type="button" data-test-subj={`mockPanelTitle_${maybeId}`}>
+                Panel title
+              </button>
+            </span>
+          </div>
           <p data-test-subj={`mockPanelContent_${maybeId}`}>mockEmbeddablePanel</p>
         </div>
       );
@@ -306,12 +312,33 @@ describe('select mode clicks', () => {
     expect(dashboardApi.selectedPanelIds$.value.has('1')).toBe(true);
   });
 
-  test('a plain click on the drag area does not select the panel', async () => {
+  test('a single plain click on the drag area selects the panel', async () => {
     const { component, dashboardApi } = await setup();
     await act(async () => {
       fireEvent.click(component.getByTestId('mockPanelHeader_1'), { detail: 1 });
     });
+
+    expect(dashboardApi.selectedPanelIds$.value.has('1')).toBe(true);
+  });
+
+  test('a plain click on the inline-editable title does not select the panel', async () => {
+    const { component, dashboardApi } = await setup();
+    await act(async () => {
+      fireEvent.click(component.getByTestId('mockPanelTitle_1'), { detail: 1 });
+    });
     expect(dashboardApi.selectedPanelIds$.value.has('1')).toBe(false);
+  });
+
+  test('Cmd/Ctrl+click on the title still selects the panel', async () => {
+    const { component, dashboardApi } = await setup();
+    await act(async () => {
+      fireEvent.click(component.getByTestId('mockPanelTitle_1'), {
+        detail: 1,
+        metaKey: true,
+        ctrlKey: true,
+      });
+    });
+    expect(dashboardApi.selectedPanelIds$.value.has('1')).toBe(true);
   });
 });
 

@@ -76,6 +76,8 @@ const InlineEditablePanelTitle = ({
 
   return (
     <span
+      // lets containers (e.g. the dashboard in select mode) keep title editing available
+      className="embPanel__titleInlineEdit"
       // prevents the dashboard grid from starting a panel drag while editing the title
       data-kbn-grid-no-drag={isEditing || undefined}
       css={css`

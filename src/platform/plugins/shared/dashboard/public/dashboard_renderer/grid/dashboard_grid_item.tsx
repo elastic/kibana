@@ -29,7 +29,6 @@ import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_inter
 import { printViewportVisStyles } from '../print_styles';
 import { DASHBOARD_MARGIN_SIZE, SELECTION_DRAG_THRESHOLD_PX } from './constants';
 import { getHighlightStyles } from './highlight_styles';
-import { isDragAreaClick } from './panel_click_hint';
 import { PanelContextMenuContext, SelectionPreviewContext } from './panel_context_menu';
 import { SelectedPanelActions } from './selected_panel_actions';
 import { isSelectionModifierPressed } from './selection_modifier';
@@ -151,12 +150,10 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
     }, [id, dashboardApi, scrollToPanelId, highlightPanelId, ref, blurPanel]);
 
     // In select mode the panel's content is out of reach for the keyboard too, so Tab moves between
-    // panels instead of into charts and title editors
+    // panels instead of into charts. The header stays reachable for inline title editing.
     useEffect(() => {
       if (!isInSelectMode || typeof ref === 'function' || !ref?.current) return;
-      const regions = Array.from(
-        ref.current.querySelectorAll<HTMLElement>('.embPanel__content, .embPanel__header')
-      );
+      const regions = Array.from(ref.current.querySelectorAll<HTMLElement>('.embPanel__content'));
       regions.forEach((region) => region.setAttribute('inert', ''));
       return () => regions.forEach((region) => region.removeAttribute('inert'));
     }, [isInSelectMode, isRenderable, ref]);
@@ -226,9 +223,9 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
 
     const mouseDownPositionRef = useRef<{ x: number; y: number } | null>(null);
 
-    // In select mode (entered by selecting a panel) a plain click on a panel toggles it. The
-    // panel's own actions keep working, and clicks from portaled content (e.g. hover action
-    // popovers), on the drag area or that end a panel drag are ignored.
+    // In select mode (entered by selecting a panel) a plain click anywhere on a panel, header
+    // included, toggles it. The panel's own actions keep working, and clicks from portaled content
+    // (e.g. hover action popovers) or that end a panel drag are ignored.
     const isSelectModeClick = useCallback(
       (e: React.MouseEvent) => {
         if (viewMode !== 'edit' || !isSelectMode) return false;
@@ -236,12 +233,11 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
         if (!(e.currentTarget as HTMLElement).contains(target)) return false;
         if (
           target.closest(
-            'input, textarea, [contenteditable="true"], .embPanel__hoverActions, [data-test-subj^="dashboardSelectedPanelActions"]'
+            'input, textarea, [contenteditable="true"], .embPanel__hoverActions, .embPanel__titleInlineEdit, [data-test-subj^="dashboardSelectedPanelActions"]'
           )
         ) {
           return false;
         }
-        if (isDragAreaClick(e, e.currentTarget as HTMLElement)) return false;
         const start = mouseDownPositionRef.current;
         return (
           !start ||
@@ -352,9 +348,13 @@ const dashboardGridItemStyles = {
         '&.dshDashboardGrid__item--selectMode': {
           position: 'relative',
           // in select mode a click anywhere on a panel selects it, so its content (chart tooltips,
-          // brushing, title editing, ...) stops reacting to the pointer and clicks land on the panel
+          // brushing, ...) stops reacting to the pointer and clicks land on the panel. Inline title
+          // editing is the one exception.
           '.embPanel__content, .embPanel__header': {
             pointerEvents: 'none',
+          },
+          '.embPanel__header .embPanel__titleInlineEdit': {
+            pointerEvents: 'auto',
           },
         },
         '&:hover .dshDashboardGrid__selectionIndicator:not(.dshDashboardGrid__selectionIndicator--checked)':
