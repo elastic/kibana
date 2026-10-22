@@ -842,6 +842,7 @@ async function installPackageByUpload({
       await validatePackageUpload({
         packageInfo,
         paths,
+        archiveIterator,
         installedPkg,
         savedObjectsClient,
         esClient,
