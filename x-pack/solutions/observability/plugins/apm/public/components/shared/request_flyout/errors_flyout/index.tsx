@@ -24,7 +24,8 @@ import { UnifiedDocViewerObservabilityTraceDocFlyout } from '@kbn/unified-doc-vi
 import React, { useMemo, useState } from 'react';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
-import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
+import { useRequestFlyoutFetcher } from '../use_request_flyout_fetcher';
 import { useLogsIndexPattern } from '../../../../hooks/use_logs_index_pattern';
 import { useServiceErrorsFromLogs } from '../../../app/error_group_overview/errors_from_logs/use_service_errors_from_logs';
 import { RequestFlyoutApmErrorGroupFlyout } from '../apm_error_group_flyout';
@@ -84,7 +85,7 @@ export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props
     [logsIndexPattern, apmIndices?.transaction, apmIndices?.error]
   );
 
-  const { data: apmData, status: apmStatus } = useFetcher(
+  const { data: apmData, status: apmStatus } = useRequestFlyoutFetcher(
     (callApmApi) =>
       callApmApi('GET /internal/apm/services/{serviceName}/errors/groups/main_statistics', {
         params: {

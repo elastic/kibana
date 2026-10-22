@@ -11,7 +11,8 @@ import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations
 import { EVENT_OUTCOME } from '../../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../../common/event_outcome';
 import { LatencyDistributionChartType } from '../../../../../common/latency_distribution_chart_types';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useRequestFlyoutFetcher } from '../use_request_flyout_fetcher';
 import { getTransactionDistributionChartData } from '../../../app/correlations/get_transaction_distribution_chart_data';
 import { useRequestFlyoutContext } from '../request_flyout_context';
 
@@ -27,7 +28,7 @@ export function useRequestFlyoutLatencyDistribution() {
   } = useRequestFlyoutContext();
 
   // All-spans fetch: establishes the durationMin/durationMax for the second fetch.
-  const { data: overallLatencyData = {}, status: overallLatencyStatus } = useFetcher(
+  const { data: overallLatencyData = {}, status: overallLatencyStatus } = useRequestFlyoutFetcher(
     (callApmApi) =>
       callApmApi('POST /internal/apm/latency/overall_distribution/spans', {
         params: {
@@ -58,7 +59,7 @@ export function useRequestFlyoutLatencyDistribution() {
   const hasData = Array.isArray(overallLatencyHistogram) && overallLatencyHistogram.length > 0;
 
   // Failed-spans fetch: uses durationMin/durationMax from the first fetch to align bucket sizes.
-  const { data: errorHistogramData = {} } = useFetcher(
+  const { data: errorHistogramData = {} } = useRequestFlyoutFetcher(
     (callApmApi) => {
       if (!overallLatencyData.durationMin || !overallLatencyData.durationMax) {
         return;

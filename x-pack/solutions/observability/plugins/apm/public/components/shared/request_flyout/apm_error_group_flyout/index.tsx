@@ -36,7 +36,8 @@ import {
   getEnvironmentLabel,
 } from '../../../../../common/environment_filter_values';
 import { getTimestampUs } from '../../../../../common/utils/get_timestamp_us';
-import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
+import { useRequestFlyoutFetcher } from '../use_request_flyout_fetcher';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { ErrorSampleDetailTabContent } from '../../../app/error_group_details/error_sampler/error_sample_detail';
 import { getTabs } from '../../../app/error_group_details/error_sampler/error_tabs';
@@ -74,7 +75,7 @@ export function RequestFlyoutApmErrorGroupFlyout({
   const [samplePage, setSamplePage] = useState(0);
   const [activeTabKey, setActiveTabKey] = useState<string | undefined>();
 
-  const { data: samples, status: samplesStatus } = useFetcher(
+  const { data: samples, status: samplesStatus } = useRequestFlyoutFetcher(
     (callApmApi) =>
       callApmApi('GET /internal/apm/services/{serviceName}/errors/{groupId}/samples', {
         params: {
@@ -88,7 +89,7 @@ export function RequestFlyoutApmErrorGroupFlyout({
   const errorSampleIds = samples?.errorSampleIds ?? [];
   const errorId = errorSampleIds[samplePage];
 
-  const { data: errorData, status: errorStatus } = useFetcher(
+  const { data: errorData, status: errorStatus } = useRequestFlyoutFetcher(
     (callApmApi) => {
       if (!errorId) return;
       return callApmApi(

@@ -103,16 +103,20 @@ test.describe(
       await expect(serviceFlyoutPage.flyout).toBeHidden();
     });
 
-    test('shows popover when clicking on an edge', async ({ pageObjects: { serviceMapPage } }) => {
+    test('opens the request flyout when clicking on an edge', async ({
+      pageObjects: { serviceMapPage },
+      page,
+    }) => {
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForEdgeToLoad(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
-      await serviceMapPage.openEdgePopover(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
-      await expect(serviceMapPage.serviceMapPopoverContent).toBeVisible();
-      await expect(serviceMapPage.serviceMapEdgeExploreTracesButton).toBeVisible();
-      await expect(serviceMapPage.serviceMapEdgeExploreTracesButton).toHaveText('Explore traces');
+      await serviceMapPage.openEdgeFlyout(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
 
-      const popoverTitle = await serviceMapPage.getPopoverTitle();
-      expect(popoverTitle).toContain(`${SERVICE_OPBEANS_JAVA} → ${DEPENDENCY_POSTGRESQL}`);
+      await expect(serviceMapPage.requestFlyoutTitle).toHaveText(
+        `${SERVICE_OPBEANS_JAVA} → ${DEPENDENCY_POSTGRESQL}`
+      );
+
+      await page.keyboard.press('Escape');
+      await expect(serviceMapPage.requestFlyout).toBeHidden();
     });
 
     test('shows popover when clicking on a dependency node', async ({

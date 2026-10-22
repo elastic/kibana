@@ -15,7 +15,3 @@
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../../common/service_map';
 
 export type ServiceMapSelection = ServiceMapNode | ServiceMapEdge;
-
-export function isEdge(selection: ServiceMapSelection): selection is ServiceMapEdge {
-  return 'source' in selection && 'target' in selection;
-}

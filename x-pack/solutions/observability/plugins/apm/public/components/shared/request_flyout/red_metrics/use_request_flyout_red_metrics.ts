@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useRequestFlyoutFetcher } from '../use_request_flyout_fetcher';
 import { ChartType, getTimeSeriesColor } from '../../charts/helper/get_timeseries_color';
 import { getLatencyChartType } from '../../service_flyout/overview/chart_configs/shared/chart_builders';
 import { useRequestFlyoutContext } from '../request_flyout_context';
@@ -24,7 +25,7 @@ export function useRequestFlyoutRedMetrics({
     filters: { environment, start, end },
   } = useRequestFlyoutContext();
 
-  const { data, status: fetchStatus } = useFetcher(
+  const { data, status: fetchStatus } = useRequestFlyoutFetcher(
     (callApmApi) =>
       callApmApi('GET /internal/apm/service-map/dependency', {
         params: {

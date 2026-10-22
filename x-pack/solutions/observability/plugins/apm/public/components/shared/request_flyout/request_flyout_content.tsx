@@ -8,6 +8,10 @@
 import { EuiFlyoutBody, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import {
+  EdgePayloadMetricsList,
+  hasEdgePayloadMetrics,
+} from '../../app/service_map/popover/edge_payload_metrics';
 import { getEnvironmentLabel } from '../../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { RequestFlyoutFailedCalls } from './failed_calls';
@@ -77,8 +81,11 @@ export function RequestFlyoutContent({ childSession, historyKey }: RequestFlyout
             <EuiSpacer size="m" />
             <RequestFlyoutLatencyDistribution />
           </>
+        ) : // The metrics are the ones of the exit spans to the resources of the connection. Without
+        // resources, only the metrics that came with the map (the AI Agent map) can be shown.
+        hasEdgePayloadMetrics(connection.payloadMetrics) ? (
+          <EdgePayloadMetricsList metrics={connection.payloadMetrics} />
         ) : (
-          // The metrics are the ones of the exit spans to the resources of the connection.
           <EuiText size="s" color="subdued" data-test-subj="requestFlyoutMetricsNotAvailable">
             {i18n.translate('xpack.apm.requestFlyout.metricsNotAvailable', {
               defaultMessage:

@@ -60,17 +60,10 @@ function findGroups(nodes: ServiceMapNode[], edges: ServiceMapEdge[]): GroupInfo
   return [...groups.values()].filter((g) => g.targets.length >= MINIMUM_GROUP_SIZE);
 }
 
-/**
- * Create a grouped node from a group of nodes.
- */
-function createGroupedNode(
+function getGroupedConnections(
   group: GroupInfo,
   nodesById: Map<string, ServiceMapNode>
-): ServiceMapNode {
-  const firstTarget = nodesById.get(group.targets[0]);
-  const firstData =
-    firstTarget && isDependencyNodeData(firstTarget.data) ? firstTarget.data : undefined;
-
+): GroupedNodeData['groupedConnections'] {
   const groupedConnections: GroupedNodeData['groupedConnections'] = [];
   for (const targetId of group.targets) {
     const node = nodesById.get(targetId);
@@ -83,6 +76,21 @@ function createGroupedNode(
       });
     }
   }
+  return groupedConnections;
+}
+
+/**
+ * Create a grouped node from a group of nodes.
+ */
+function createGroupedNode(
+  group: GroupInfo,
+  nodesById: Map<string, ServiceMapNode>
+): ServiceMapNode {
+  const firstTarget = nodesById.get(group.targets[0]);
+  const firstData =
+    firstTarget && isDependencyNodeData(firstTarget.data) ? firstTarget.data : undefined;
+
+  const groupedConnections = getGroupedConnections(group, nodesById);
 
   const groupedData: GroupedNodeData = {
     id: group.id,
@@ -109,7 +117,12 @@ function createGroupedNode(
 /**
  * Create edges from sources to a grouped node
  */
-function createIncomingGroupedEdges(group: GroupInfo): ServiceMapEdge[] {
+function createIncomingGroupedEdges(
+  group: GroupInfo,
+  nodesById: Map<string, ServiceMapNode>
+): ServiceMapEdge[] {
+  // The request flyout lists the grouped resources of the edge.
+  const groupedConnections = getGroupedConnections(group, nodesById);
   return group.sources.map((source) => ({
     id: `${source}~>${group.id}`,
     source,
@@ -117,7 +130,7 @@ function createIncomingGroupedEdges(group: GroupInfo): ServiceMapEdge[] {
     type: 'default' as const,
     style: DEFAULT_EDGE_STYLE,
     markerEnd: createEdgeMarker(),
-    data: { isBidirectional: false, isGrouped: true },
+    data: { isBidirectional: false, isGrouped: true, groupedConnections },
   }));
 }
 
@@ -193,7 +206,7 @@ export function groupResourceNodes(
 
   // Create grouped nodes and edges
   const groupedNodes = groups.map((g) => createGroupedNode(g, nodesById));
-  const incomingGroupedEdges = groups.flatMap((g) => createIncomingGroupedEdges(g));
+  const incomingGroupedEdges = groups.flatMap((g) => createIncomingGroupedEdges(g, nodesById));
   const outgoingGroupedEdges = createOutgoingGroupedEdges(groups, edges, groupedNodeIds);
 
   return {

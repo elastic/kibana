@@ -6,7 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
+import { useRequestFlyoutFetcher } from '../use_request_flyout_fetcher';
 import { useRequestFlyoutContext } from '../request_flyout_context';
 
 /**
@@ -24,7 +25,7 @@ export function useRequestFlyoutOperations() {
   // resources.
   const resolvedDependencyName = dependencyName ?? dependencies[0];
 
-  const { data, status } = useFetcher(
+  const { data, status } = useRequestFlyoutFetcher(
     (callApmApi) => {
       if (!resolvedDependencyName) {
         return;

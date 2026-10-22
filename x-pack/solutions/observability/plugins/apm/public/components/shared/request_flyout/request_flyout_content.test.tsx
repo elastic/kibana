@@ -56,7 +56,7 @@ describe('RequestFlyoutContent', () => {
     renderInRequestFlyout(content, {
       connection: {
         ...connection,
-        groupedResources: [{ id: 'a', label: 'a', spanType: 'external', spanSubtype: 'http' }],
+        groupedResources: [{ resource: 'a', spanType: 'external', spanSubtype: 'http' }],
       },
     });
 

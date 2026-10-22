@@ -7,7 +7,8 @@
 
 import type { ConnectionTransactionGroup } from '@kbn/apm-api-shared';
 import { useMemo } from 'react';
-import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
+import { useRequestFlyoutFetcher } from '../use_request_flyout_fetcher';
 import { useRequestFlyoutContext } from '../request_flyout_context';
 
 export type { ConnectionTransactionGroup };
@@ -22,7 +23,7 @@ export function useRequestFlyoutTransactions() {
   // A connection is scoped by its target service or by its resources.
   const isApplicable = Boolean(targetServiceName) || dependencies.length > 0;
 
-  const { data, status } = useFetcher(
+  const { data, status } = useRequestFlyoutFetcher(
     (callApmApi) => {
       if (!isApplicable) {
         return;

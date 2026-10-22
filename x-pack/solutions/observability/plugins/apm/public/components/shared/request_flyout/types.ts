@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { EdgePayloadMetrics } from '../../app/service_map/popover/edge_payload_metrics';
+
 /** A resource of a grouped edge, e.g. one of the HTTP APIs behind an "N resources" node. */
 export interface GroupedResource {
   /** span.destination.service.resource of the resource. */
@@ -42,6 +44,11 @@ export interface RequestFlyoutConnection {
    * one opens a child flyout scoped to that resource.
    */
   groupedResources?: GroupedResource[];
+  /**
+   * Metrics that came with the map (the AI Agent map), shown when the edge has no resource to
+   * fetch metrics for.
+   */
+  payloadMetrics?: EdgePayloadMetrics;
 }
 
 /**
