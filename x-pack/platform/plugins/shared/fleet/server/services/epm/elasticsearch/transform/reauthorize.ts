@@ -16,7 +16,10 @@ import pMap from 'p-map';
 
 import { MAX_CONCURRENT_TRANSFORMS_OPERATIONS } from '../../../../constants';
 import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
+import { FleetUnauthorizedError } from '../../../../errors';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
+import { getInstallation } from '../../packages/get';
+import { isTrustedInstallSource } from '../../packages/install_source';
 import type { Installation } from '../../../../../common';
 import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { retryTransientEsErrors } from '../retry';
@@ -156,6 +159,46 @@ export async function handleTransformReauthorizeAndStart({
     throw Error(
       'A valid secondary authorization with sufficient `manage_transform` permission is needed to re-authorize and start transforms. ' +
         'This could be because security is not enabled, or API key cannot be generated.'
+    );
+  }
+
+  // Reauthorizing re-binds a transform to whoever calls this route, and this route requires
+  // transform admin on top of Fleet privileges. For a caller-authored package that would undo
+  // the identity binding applied at install time: a user with Integrations All could upload a
+  // transform they have no privileges to run, leave it deferred, and have a transform admin
+  // start it with their own, broader privileges — reaching exactly the restricted indices the
+  // uploader was denied. Through this Fleet route, an uploaded transform runs with its uploader's
+  // privileges or not at all.
+  // This does not cover Stack Management > Transforms: its own reauthorize action
+  // (`/internal/transform/reauthorize_transforms`) rebinds any transform with a failed privileges
+  // check to the calling transform admin without consulting Fleet's install source. Tracked in
+  // https://github.com/elastic/kibana/issues/299756.
+  const installation = await getInstallation({ savedObjectsClient, pkgName, logger });
+  if (!isTrustedInstallSource(installation?.install_source)) {
+    throw new FleetUnauthorizedError(
+      `Cannot reauthorize transforms from a ${
+        installation?.install_source ?? 'non-registry'
+      } package: transforms in caller-authored packages stay bound to the Elasticsearch privileges of the user who installed them. Reinstall the package as a user who holds the privileges the transforms need.`
+    );
+  }
+
+  // The transform ids come from the request body, not from the package named in the URL. Without
+  // this check the gate above could be satisfied by pointing the URL at any trusted package while
+  // naming an uploaded package's transform in the body, which would rebind it to the caller.
+  // Only transforms this installation actually owns may be reauthorized through its route.
+  const installedTransformIds = new Set(
+    (installation?.installed_es ?? [])
+      .filter((asset) => asset.type === ElasticsearchAssetType.transform)
+      .map((asset) => asset.id)
+  );
+  const unownedTransformIds = transforms
+    .map(({ transformId }) => transformId)
+    .filter((transformId) => !installedTransformIds.has(transformId));
+  if (unownedTransformIds.length > 0) {
+    throw new FleetUnauthorizedError(
+      `Cannot reauthorize transforms that are not installed by package ${pkgName}: ${unownedTransformIds.join(
+        ', '
+      )}.`
     );
   }
 
