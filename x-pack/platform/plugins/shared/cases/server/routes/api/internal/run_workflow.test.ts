@@ -9,10 +9,22 @@ import {
   WorkflowsManagementApiActions,
   WorkflowsManagementOperationPrivileges,
 } from '@kbn/workflows';
+import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createCasesClientMock } from '../../../client/mocks';
 import type { CasesWorkflowOperations } from '../../../client/workflows/operations';
 import type { CasesWorkflowRunService } from '../../../workflows/execution/service';
+import type { CasesRequestHandlerContext } from '../../../types';
+import { registerRoutes } from '../register_routes';
+import type { CaseRoute } from '../types';
 import { createRunWorkflowRoute, runCaseWorkflowParamsSchema } from './run_workflow';
+
+/**
+ * Mirrors the workflows plugin's `WorkflowTriggerInputError`, which that plugin does not export:
+ * trigger preprocessing rejects a bad selection with an error carrying `statusCode: 400`.
+ */
+class TriggerInputError extends Error {
+  public readonly statusCode = 400;
+}
 
 describe('run workflow route', () => {
   const casesClient = createCasesClientMock();
@@ -85,6 +97,42 @@ describe('run workflow route', () => {
         activityStatus: 'succeeded',
       },
     });
+  });
+
+  it('responds with a 400 when trigger preprocessing rejects the selection', async () => {
+    const router = httpServiceMock.createRouter();
+    registerRoutes({
+      router,
+      logger: loggingSystemMock.createLogger(),
+      routes: [route] as CaseRoute[],
+      kibanaVersion: '9.3.0',
+    });
+    const [, registeredHandler] = router.post.mock.calls[0];
+    const response = httpServerMock.createResponseFactory();
+    service.run.mockRejectedValue(
+      new TriggerInputError('No documents found with the provided IDs')
+    );
+
+    await registeredHandler(
+      { cases: {} } as unknown as CasesRequestHandlerContext,
+      httpServerMock.createKibanaRequest({
+        method: 'post',
+        params: { workflow_id: 'workflow-1' },
+        body: {
+          caseIds: ['case-1'],
+          inputs: { event: { triggerType: 'document', documentIds: [] } },
+          origin: { type: 'cases.case', caseId: 'case-1' },
+        },
+      }),
+      response
+    );
+
+    expect(response.customError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        statusCode: 400,
+        body: expect.objectContaining({ message: 'No documents found with the provided IDs' }),
+      })
+    );
   });
 
   describe('params schema', () => {
