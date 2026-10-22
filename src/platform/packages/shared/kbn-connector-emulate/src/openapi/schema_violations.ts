@@ -187,7 +187,7 @@ const toViolation = (
 
 /** Validates a value against a schema of an operation, mapping schema errors to violations. */
 export const validateValue = (
-  { spec }: ContractOperation,
+  { spec }: Pick<ContractOperation, 'spec'>,
   schema: SpecSchema | undefined,
   value: unknown,
   context: ValueContext
