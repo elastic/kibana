@@ -1,0 +1,114 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+
+export const ENTITIES_TITLE = i18n.translate('xpack.nightshift.detectionPage.entities.panelTitle', {
+  defaultMessage: 'Entities',
+});
+export const CLEAR_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.clearButtonLabel',
+  {
+    defaultMessage: 'Clear',
+  }
+);
+export const SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.searchPlaceholder',
+  {
+    defaultMessage: 'Find entity…',
+  }
+);
+export const FILTER_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.filterAriaLabel',
+  {
+    defaultMessage: 'Filter entities by rules',
+  }
+);
+export const HAS_RULES_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.hasRulesLabel',
+  {
+    defaultMessage: 'Has rules',
+  }
+);
+export const NO_RULES_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.noRulesLabel',
+  {
+    defaultMessage: 'No rules',
+  }
+);
+export const SERVICES_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.servicesLabel',
+  {
+    defaultMessage: 'Services',
+  }
+);
+export const DATABASES_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.databasesLabel',
+  {
+    defaultMessage: 'Databases',
+  }
+);
+export const STORAGE_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.storageLabel',
+  {
+    defaultMessage: 'Storage',
+  }
+);
+export const OTHER_LABEL = i18n.translate('xpack.nightshift.detectionPage.entities.otherLabel', {
+  defaultMessage: 'Other',
+});
+export const UNASSIGNED_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.unassignedLabel',
+  {
+    defaultMessage: 'Unassigned',
+  }
+);
+export const UNKNOWN_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.unknownLabel',
+  {
+    defaultMessage: 'No longer known',
+  }
+);
+export const EMPTY_DESCRIPTION = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.emptyDescription',
+  {
+    defaultMessage: 'No entities learned yet.',
+  }
+);
+export const KNOWLEDGE_LINK = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.knowledgeLinkText',
+  {
+    defaultMessage: 'Go to Knowledge',
+  }
+);
+export const NO_MATCHES_DESCRIPTION = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.noMatchesDescription',
+  {
+    defaultMessage: 'No entities match.',
+  }
+);
+export const TRUNCATED_DESCRIPTION = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.truncatedDescription',
+  {
+    defaultMessage: 'Showing the first 1,000 entities.',
+  }
+);
+export const ERROR_TITLE = i18n.translate('xpack.nightshift.detectionPage.entities.errorTitle', {
+  defaultMessage: 'Could not load entities',
+});
+export const RETRY_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.retryButtonLabel',
+  {
+    defaultMessage: 'Retry',
+  }
+);
+export const getActiveEventsTooltip = (count: number): string =>
+  i18n.translate('xpack.nightshift.detectionPage.entities.activeEventsTooltip', {
+    defaultMessage:
+      '{count, plural, one {# active significant event} other {# active significant events}}',
+    values: { count },
+  });

@@ -31,6 +31,7 @@ import {
 import { RuleFlyout } from '../../../components/entities/rule/rule_flyout';
 import type { DetectionRule } from '../../../data/rules/use_detection_rules';
 import { useDetectionRuleById, useDetectionRules } from '../../../data/rules/use_detection_rules';
+import { useDetectionEntities } from '../../../data/detection_entities/use_detection_entities';
 import { useRulesDemote } from '../../../data/rules/use_rules_demote';
 import { useBlocksNewActivity } from '../../../data/maintenance/use_significant_events_maintenance';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -48,6 +49,7 @@ import {
   NO_RULES_BODY,
   NO_RULES_TITLE,
   NO_SEARCH_RESULTS,
+  NO_ENTITY_RESULTS,
   RETRY_LABEL,
   SEARCH_PLACEHOLDER,
 } from './translations';
@@ -55,15 +57,23 @@ import {
 export const RulesTab = ({
   timeRange,
   onTimeRangeChange,
+  entities,
+  unassigned,
 }: {
   timeRange: DetectionTimeRange;
   onTimeRangeChange: (range: DetectionTimeRange) => void;
+  entities: string[];
+  unassigned: boolean;
 }): React.ReactElement => {
   const history = useHistory();
   const location = useLocation();
   const { application, notifications } = useKibana().services;
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const rulesQuery = useDetectionRules(timeRange);
+  const entitiesQuery = useDetectionEntities(timeRange);
+  const hasEntityFilter = entities.length > 0 || unassigned;
+  const isEntityLoading = unassigned && entitiesQuery.isLoading;
+  const isEntityError = unassigned && entitiesQuery.isError && !entitiesQuery.data;
   const { demoteRules, isPending } = useRulesDemote({});
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<DetectionRule[]>([]);
@@ -75,13 +85,24 @@ export const RulesTab = ({
   const needsLookup = Boolean(ruleId) && !loadedRule && rulesQuery.isTruncated;
   const ruleLookup = useDetectionRuleById(timeRange, ruleId, needsLookup);
   const activeRule = loadedRule ?? (needsLookup ? ruleLookup.rule : undefined);
+  const entityRules = useMemo(() => {
+    if (!hasEntityFilter) return rulesQuery.rules;
+    const liveIds = new Set(entitiesQuery.data?.entities.map(({ id }) => id) ?? []);
+    return rulesQuery.rules.filter(({ query }) => {
+      const features = query.features ?? [];
+      return (
+        features.some(({ id }) => entities.includes(id)) ||
+        (unassigned && Boolean(entitiesQuery.data) && !features.some(({ id }) => liveIds.has(id)))
+      );
+    });
+  }, [hasEntityFilter, rulesQuery.rules, entitiesQuery.data, entities, unassigned]);
   const filteredRules = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return rulesQuery.rules.filter(
+    return entityRules.filter(
       ({ query }) =>
         query.title.toLowerCase().includes(term) || query.description.toLowerCase().includes(term)
     );
-  }, [rulesQuery.rules, search]);
+  }, [entityRules, search]);
 
   const updateRuleId = useCallback(
     (id?: string, replace = false) => {
@@ -121,7 +142,7 @@ export const RulesTab = ({
 
   useEffect(() => {
     setSelected([]);
-  }, [search, timeRange.from, timeRange.to]);
+  }, [search, timeRange.from, timeRange.to, entities, unassigned]);
 
   const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
   const handleClose = () => {
@@ -170,7 +191,7 @@ export const RulesTab = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {rulesQuery.isError && !rulesQuery.hasData ? (
+      {(rulesQuery.isError && !rulesQuery.hasData) || isEntityError ? (
         <KbnDangerCallout
           announceOnMount
           title={ERROR_TITLE}
@@ -180,7 +201,10 @@ export const RulesTab = ({
             primary: {
               children: RETRY_LABEL,
               iconType: 'refresh',
-              onClick: () => void rulesQuery.refetch(),
+              onClick: () => {
+                void rulesQuery.refetch();
+                void entitiesQuery.refetch();
+              },
             },
           }}
         />
@@ -193,7 +217,7 @@ export const RulesTab = ({
         />
       ) : (
         <>
-          <RuleMatchesChart rules={rulesQuery.rules} loading={rulesQuery.isLoading} />
+          <RuleMatchesChart rules={entityRules} loading={rulesQuery.isLoading || isEntityLoading} />
           <EuiSpacer size="m" />
           {rulesQuery.isTruncated ? (
             <>
@@ -264,27 +288,31 @@ export const RulesTab = ({
             ) : null}
           </EuiFlexGroup>
           <EuiSpacer size="s" />
-          {rulesQuery.hasData && filteredRules.length === 0 ? (
+          {rulesQuery.hasData && !isEntityLoading && filteredRules.length === 0 ? (
             <EuiEmptyPrompt
               iconType="magnify"
-              title={<h2>{NO_SEARCH_RESULTS}</h2>}
+              title={
+                <h2>{!search.trim() && hasEntityFilter ? NO_ENTITY_RESULTS : NO_SEARCH_RESULTS}</h2>
+              }
               actions={
-                <EuiButton
-                  data-test-subj="nightshiftRulesTabButton"
-                  onClick={() => setSearch('')}
-                  {...getEbtProps({
-                    action: NIGHTSHIFT_EBT_ACTIONS.CLEAR_RULES_SEARCH,
-                    element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_RULES_TABLE,
-                  })}
-                >
-                  {CLEAR_SEARCH_LABEL}
-                </EuiButton>
+                search.trim() ? (
+                  <EuiButton
+                    data-test-subj="nightshiftRulesTabButton"
+                    onClick={() => setSearch('')}
+                    {...getEbtProps({
+                      action: NIGHTSHIFT_EBT_ACTIONS.CLEAR_RULES_SEARCH,
+                      element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_RULES_TABLE,
+                    })}
+                  >
+                    {CLEAR_SEARCH_LABEL}
+                  </EuiButton>
+                ) : undefined
               }
             />
           ) : (
             <RulesTable
               rules={filteredRules}
-              loading={rulesQuery.isFetching}
+              loading={rulesQuery.isFetching || isEntityLoading}
               selectedRuleId={ruleId}
               selected={selected}
               canManage={canManage}

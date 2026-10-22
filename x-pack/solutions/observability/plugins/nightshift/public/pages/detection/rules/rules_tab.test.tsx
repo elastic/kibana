@@ -26,6 +26,9 @@ let mockBlocksActivity = false;
 
 jest.mock('../../../data/rules/use_detection_rules');
 jest.mock('../../../data/rules/use_rules_demote');
+jest.mock('../../../data/detection_entities/use_detection_entities', () => ({
+  useDetectionEntities: () => ({ data: { entities: [] }, isLoading: false, isError: false }),
+}));
 jest.mock('../../../data/maintenance/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({ blocksActivity: mockBlocksActivity }),
 }));
@@ -90,7 +93,12 @@ const renderTab = (path = '/detections/rules') => {
     <I18nProvider>
       <EuiProvider>
         <Router history={history}>
-          <RulesTab timeRange={{ from: 'now-24h', to: 'now' }} onTimeRangeChange={jest.fn()} />
+          <RulesTab
+            timeRange={{ from: 'now-24h', to: 'now' }}
+            onTimeRangeChange={jest.fn()}
+            entities={[]}
+            unassigned={false}
+          />
         </Router>
       </EuiProvider>
     </I18nProvider>

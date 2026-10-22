@@ -76,6 +76,8 @@ const renderTab = (initialPath = '/detections/events') => {
       <EuiProvider>
         <Router history={history}>
           <EventsTab
+            entities={[]}
+            unassigned={false}
             timeRange={{ from: 'now-24h', to: 'now' }}
             onTimeRangeChange={mockTimeRangeChange}
           />
