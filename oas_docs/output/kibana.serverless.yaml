@@ -48100,6 +48100,31 @@ paths:
                     type: string
                   maxItems: 10
                   type: array
+                pendingAgentlessPolicies:
+                  description: Agentless policies to create once the CloudFormation stack launched from this deployment reports back. Each is the body the create-agentless-policy API would receive, without the cloud connector, which the server adds. Requires the same privileges as that API. Never returned.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      id:
+                        maxLength: 256
+                        minLength: 1
+                        type: string
+                      instanceIds:
+                        items:
+                          maxLength: 256
+                          minLength: 1
+                          type: string
+                        maxItems: 100
+                        type: array
+                      request:
+                        $ref: '#/components/schemas/Kibana_HTTP_APIs_create_managed_integration_request'
+                    required:
+                      - id
+                      - instanceIds
+                      - request
+                  maxItems: 100
+                  type: array
                 provider:
                   description: Cloud provider.
                   enum:
