@@ -21,7 +21,7 @@
  * `SyntaxError: ... Missing semicolon`. Forcing this standalone handler ensures `.peggy` files are
  * compiled by Peggy and handed to `module._compile` directly, bypassing the load hook.
  *
- * This is similar to the Jest Peggy setup in src/platform/packages/shared/kbn-test/src/jest/transforms/peggy.js.
+ * This is similar to the Jest Peggy setup in src/platform/packages/shared/kbn-jest/src/transforms/peggy.js.
  */
 import { requireHook } from '@kbn/peggy';
 requireHook({ force: true });

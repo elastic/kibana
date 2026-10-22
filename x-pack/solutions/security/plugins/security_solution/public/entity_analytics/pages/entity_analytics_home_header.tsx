@@ -22,14 +22,23 @@ const SETTINGS_LABEL = i18n.translate(
   { defaultMessage: 'Settings' }
 );
 
+const PRODUCT_TOUR_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.homePage.productTourMenuItemLabel',
+  { defaultMessage: 'Product tour' }
+);
+
 export const ENTITY_ANALYTICS_HOME_MANAGEMENT_MENU_ITEM_TEST_ID =
   'entityAnalyticsHomeSettingsMenuItem';
+export const ENTITY_ANALYTICS_HOME_PRODUCT_TOUR_MENU_ITEM_TEST_ID =
+  'entityAnalyticsHomeProductTourMenuItem';
 
-interface EntityAnalyticsHomeHeaderProps {
+export interface EntityAnalyticsHomeHeaderProps {
+  /** Adds a Product tour menu item that starts the page tour. */
+  onStartTour?: () => void;
   primaryActionItem?: AppHeaderMenu['primaryActionItem'];
 }
 
-const HomeHeader = ({ primaryActionItem }: EntityAnalyticsHomeHeaderProps) => {
+const HomeHeader = ({ onStartTour, primaryActionItem }: EntityAnalyticsHomeHeaderProps) => {
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const { docLinks } = useKibana().services;
 
@@ -46,9 +55,22 @@ const HomeHeader = ({ primaryActionItem }: EntityAnalyticsHomeHeaderProps) => {
           order: 1,
           testId: ENTITY_ANALYTICS_HOME_MANAGEMENT_MENU_ITEM_TEST_ID,
         },
+        ...(onStartTour
+          ? [
+              {
+                id: 'entityAnalyticsProductTour',
+                label: PRODUCT_TOUR_LABEL,
+                iconType: 'bulb' as const,
+                run: onStartTour,
+                overflow: true,
+                order: 2,
+                testId: ENTITY_ANALYTICS_HOME_PRODUCT_TOUR_MENU_ITEM_TEST_ID,
+              },
+            ]
+          : []),
       ],
     }),
-    [getSecuritySolutionUrl, primaryActionItem]
+    [getSecuritySolutionUrl, onStartTour, primaryActionItem]
   );
 
   return (

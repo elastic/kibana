@@ -1,9 +1,23 @@
 {
-  "sha1": "75bd556adf58e36fc65f90b7e5a7500fc29f2e08",
+  "sha1": "0132aff9757c72ab9e7fb226ec0fefd11f431669",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "c30f17786915658-f5dd65e979bb70b",
+      "title": "Endpoint get-file download serves the file uploaded for a completed get-file action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/api/tests/get_file_download.spec.ts",
+        "line": 98,
+        "column": 26
+      }
+    },
     {
       "id": "1e63e4c416fb8d2-83e039b82992336",
       "title": "Endpoint isolation metadata returns only hosts whose isolation state matches the KQL filter",
@@ -14,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/api/tests/isolation_metadata_filter.spec.ts",
-        "line": 85,
+        "line": 86,
         "column": 26
       }
     },
@@ -28,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/api/tests/isolation_metadata_filter.spec.ts",
-        "line": 127,
+        "line": 128,
         "column": 16
       }
     }
