@@ -25,17 +25,7 @@ const buildStoredControl = (control: ControlInput, id: string): DashboardPinnedP
   const { type, width = 'medium', grow = true } = control;
 
   if (type === TIME_SLIDER_CONTROL) {
-    const config = {
-      ...DEFAULT_TIME_SLIDER_STATE,
-    } satisfies Extract<DashboardPinnedPanel, { type: typeof TIME_SLIDER_CONTROL }>['config'];
-
-    return {
-      type,
-      id,
-      width,
-      grow,
-      config,
-    };
+    return { type, id, width, grow, config: { ...DEFAULT_TIME_SLIDER_STATE } };
   }
 
   if (type === OPTIONS_LIST_CONTROL) {
