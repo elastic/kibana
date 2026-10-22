@@ -32,6 +32,4 @@ fileGroups:
     - oxlint_plugin.js
     - src/rules/__fixtures__/*.mjs
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}
