@@ -193,6 +193,10 @@ export default ({ getService }: FtrProviderContext) => {
     // an empty data source. The after() hook restores data so subsequent suites
     // (in other files) are not affected.
     describe('empty data source', () => {
+      beforeEach(async () => {
+        await deleteAllMitreEntities(es);
+      });
+
       after(async () => {
         // Unconditional restore: even a partial state (some docs present) can
         // leak to later files, so always delete then reseed to ensure a clean slate.
@@ -201,14 +205,16 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('returns 503 when no saved objects exist for a canonical enterprise query', async () => {
-        await deleteAllMitreEntities(es);
-
         const { status } = await mitreAttackApi.getEntities();
 
         // The data client detects the empty canonical enterprise result and throws
         // MitreDataUnavailableError('population_failed'), which the route maps to 503.
         // This also triggers background repopulation via reportEmptyWhileReady().
         expect(status).to.eql(503);
+
+        // reportEmptyWhileReady() fires async repopulation; wait for it to finish
+        // so it does not race with the next test's beforeEach or the after() cleanup.
+        await waitForMitrePopulation(es, log, loadMitreArtifact().length);
       });
 
       it('serves data for every framework after the index is repopulated with the full artifact via bulk insert', async () => {
