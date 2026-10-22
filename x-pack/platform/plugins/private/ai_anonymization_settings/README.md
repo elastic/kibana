@@ -37,9 +37,14 @@ this page.
   `default_builtin_regex_rules.test.ts` in `@kbn/ai-anonymization-common` fails if a rule behaves differently on the two engines or is
   slow on long inputs.
 - **Not covered by the built-ins:** email addresses in scripts other than Latin, Greek and Cyrillic
-  (CJK, Arabic, Hebrew, ...), IPv6 addresses, and bare single-label host names (`server01`,
-  `nas.local`). Four-part version numbers (`3.11.4.2`) are indistinguishable from IPv4 addresses and
+  (CJK, Arabic, Hebrew, ...) and bare single-label host names (`server01`, `nas.local`). Four-part version numbers (`3.11.4.2`) are indistinguishable from IPv4 addresses and
   are masked.
+- **Well-known public sites are not masked as host names** (`github.com`, `mitre.org`, `nist.gov`,
+  `cisa.gov`, `owasp.org`, `virustotal.com`, `microsoft.com`, `ss64.com`, ... and their
+  subdomains). The list is `PUBLIC_DOMAINS` in `@kbn/ai-anonymization-common`
+  (`builtin_match_filters.ts`); keep it short, because a customer's own domain on it would never be
+  masked. Such filters apply to built-in rules only: a pattern cannot express them because it must
+  also run on RE2, which has no lookbehind.
 - **The pattern tester needs the `manage_advanced_settings` privilege** and runs on its own small
   worker pool with a short timeout, separate from the pool serving AI requests. It can be turned off
   with `xpack.aiAnonymizationSettings.patternTester.enabled: false` (default `true`), in which case

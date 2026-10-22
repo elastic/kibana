@@ -48,6 +48,29 @@ const IPV4_OCTET = '(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)';
 // masked whole instead of leaving `.5` behind.
 const IPV4_PATTERN = `\\b(?:${IPV4_OCTET}\\.){3}${IPV4_OCTET}(?:\\.[0-9]{1,3}){0,4}\\b`;
 
+// IPv6 in full, `::`-compressed (`fe80::1`, `2001:db8::`, `::1`) and IPv4-mapped (`::ffff:1.2.3.4`)
+// form. Every alternative needs either eight groups or a `::`, so clock times (`12:30:45`), MAC
+// addresses and `host:port` are not matched. Alternatives list the longest tail first because the
+// first one that matches wins. Words that merely end in hex digits before `::` (`std::`, `a::int`)
+// are rejected by `shouldKeepBuiltInMatch`.
+const IPV6_GROUP = '[0-9A-Fa-f]{1,4}';
+const IPV6_PATTERN = [
+  `::(?:[fF]{4}:)?(?:${IPV4_OCTET}\\.){3}${IPV4_OCTET}`,
+  `(?:${IPV6_GROUP}:){1,5}:(?:${IPV4_OCTET}\\.){3}${IPV4_OCTET}`,
+  `(?:${IPV6_GROUP}:){6}(?:${IPV4_OCTET}\\.){3}${IPV4_OCTET}`,
+  `(?:${IPV6_GROUP}:){7}${IPV6_GROUP}`,
+  `${IPV6_GROUP}:(?::${IPV6_GROUP}){1,6}`,
+  `(?:${IPV6_GROUP}:){1,2}(?::${IPV6_GROUP}){1,5}`,
+  `(?:${IPV6_GROUP}:){1,3}(?::${IPV6_GROUP}){1,4}`,
+  `(?:${IPV6_GROUP}:){1,4}(?::${IPV6_GROUP}){1,3}`,
+  `(?:${IPV6_GROUP}:){1,5}(?::${IPV6_GROUP}){1,2}`,
+  `(?:${IPV6_GROUP}:){1,6}:${IPV6_GROUP}`,
+  `(?:${IPV6_GROUP}:){1,7}:`,
+  `:(?::${IPV6_GROUP}){1,7}`,
+]
+  .map((alternative) => `(?:${alternative})`)
+  .join('|');
+
 const HOST_LABEL = '[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?';
 
 // Suffixes that are safe to match after a single label (`github.io`, `docs.elastic.co`).
@@ -197,9 +220,18 @@ export const DEFAULT_BUILTIN_REGEX_RULES: RegexAnonymizationRule[] = [
     name: 'IPv4 addresses',
     entityClass: 'IP',
     type: 'RegExp',
-    // IPv6 is not covered. Four-part version numbers (e.g. `3.11.4.2`) are indistinguishable from
-    // addresses and are masked.
+    // Four-part version numbers (e.g. `3.11.4.2`) are indistinguishable from addresses and are
+    // masked.
     pattern: IPV4_PATTERN,
+    enabled: true,
+    builtIn: true,
+  },
+  {
+    id: 'builtin-ipv6',
+    name: 'IPv6 addresses',
+    entityClass: 'IP',
+    type: 'RegExp',
+    pattern: IPV6_PATTERN,
     enabled: true,
     builtIn: true,
   },

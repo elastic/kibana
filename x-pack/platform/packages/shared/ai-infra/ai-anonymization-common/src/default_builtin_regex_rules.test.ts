@@ -43,6 +43,27 @@ describe.each(ENGINES)('built-in regex rules on %s', (engine) => {
   const expectSpans = (id: string, input: string, expected: string[]) =>
     expect(findAll(engine, patternFor(id), input)).toEqual(expected);
 
+  // What the pipeline actually masks: raw pattern matches that survive the rule's match filter.
+  const expectKept = (id: string, input: string, expected: string[]) => {
+    const kept = (
+      engine === 'native'
+        ? [...input.matchAll(new RegExp(patternFor(id), 'g'))].map(
+            (m) => [m.index ?? 0, m[0]] as const
+          )
+        : (() => {
+            const matcher = RE2JS.compile(patternFor(id)).matcher(input);
+            const found: Array<readonly [number, string]> = [];
+            while (matcher.find()) {
+              found.push([matcher.start(), input.substring(matcher.start(), matcher.end())]);
+            }
+            return found;
+          })()
+    )
+      .filter(([start, text]) => shouldKeepBuiltInMatch(id, input, start, start + text.length))
+      .map(([, text]) => text);
+    expect(kept).toEqual(expected);
+  };
+
   describe('builtin-email', () => {
     const id = 'builtin-email';
 
@@ -217,6 +238,66 @@ describe.each(ENGINES)('built-in regex rules on %s', (engine) => {
     });
   });
 
+  describe('public domain allow-list', () => {
+    it.each([
+      'https://github.com/elastic/kibana',
+      'https://attack.mitre.org/techniques/T1053/',
+      'see ss64.com for syntax',
+      'docs.github.com and GITHUB.COM',
+    ])('leaves public sites in %s unmasked', (input) => {
+      expectKept('builtin-host-name', input, []);
+    });
+
+    it('still masks private hosts and look-alikes of public sites', () => {
+      expectKept(
+        'builtin-host-name',
+        'web-qa-01.corp.example.com notgithub.com github.com.evil.example.com',
+        ['web-qa-01.corp.example.com', 'notgithub.com', 'github.com.evil.example.com']
+      );
+    });
+  });
+
+  describe('builtin-ipv6', () => {
+    const id = 'builtin-ipv6';
+
+    it.each([
+      '2001:db8::1',
+      'fe80::1',
+      '::1',
+      '2001:db8::',
+      '2001:0db8:85a3:0000:0000:8a2e:0370:7334',
+      '1:2:3:4:5:6:7:8',
+      '2001:db8:0:0:1::1',
+      '::ffff:192.168.1.1',
+      '64:ff9b::192.0.2.33',
+      'FE80::ABCD:1234',
+    ])('masks %s whole', (address) => {
+      expectKept(id, address, [address]);
+    });
+
+    it('masks an address in a URL, a log line and a sentence', () => {
+      expectKept(id, 'GET http://[2001:db8::1]:8080/x from fe80::1%eth0.', [
+        '2001:db8::1',
+        'fe80::1',
+      ]);
+    });
+
+    it.each([
+      '12:30:45',
+      '2024-01-01T12:30:45.123Z',
+      '00:1a:2b:3c:4d:5e',
+      'localhost:9200',
+      'std::string',
+      'x = a::int',
+      'Foo::Bar::baz',
+      'ES|QL: field::keyword',
+      '::',
+      'dd:cc',
+    ])('does not match %s', (input) => {
+      expectKept(id, input, []);
+    });
+  });
+
   describe('builtin-account-login', () => {
     const id = 'builtin-account-login';
 
@@ -311,6 +392,8 @@ describe.each(ENGINES)('built-in regex rules on %s', (engine) => {
       'hyphenated run': 'a-'.repeat(50_000),
       'dotted numbers': '1.2.3.'.repeat(17_000),
       'short labels': 'ab.'.repeat(33_000),
+      'hex groups': 'a:'.repeat(25_000),
+      'double colons': '1::'.repeat(17_000),
     };
 
     it.each(BUILT_IN_IDS)('%s stays fast', (id) => {
@@ -330,6 +413,7 @@ describe('built-in regex rules across engines', () => {
     'web-01.prod.example.com DC01.CORP.EXAMPLE.COM foo.test.ts kibana.dev.yml logger.info',
     'api.example.com.internal https://kibana.example.com/app srv.example.es a.b.c.d.e.f.g.com',
     'CORP\\a.mehta C:\\Users\\jon NT AUTHORITY\\SYSTEM line1\\nline2',
+    '2001:db8::1 fe80::1 ::ffff:1.2.3.4 12:30:45 std::string 1:2:3:4:5:6:7:8 a::int ::1',
     'QACORP\\\\jdoe SORT count DESC\\n| LIMIT 20 CORP\\nancy C:\\WINDOWS\\System32',
   ];
 
