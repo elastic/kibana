@@ -7,15 +7,6 @@
 
 import { of, lastValueFrom } from 'rxjs';
 import { OsqueryQueries } from '../../../common/search_strategy/osquery';
-
-// The agent-carried space only speaks for documents Kibana never stamped, so the
-// fallback pairs its term with the absence of the trusted top-level field.
-const actionDataFallback = (spaceId: string) => ({
-  bool: {
-    filter: { term: { 'action_data.space_id': spaceId } },
-    must_not: { exists: { field: 'space_id' } },
-  },
-});
 import type {
   FactoryQueryTypes,
   StrategyRequestType,
@@ -30,6 +21,15 @@ import {
 import { OSQUERY_SEARCH_STRATEGY_AUTHZ_ERROR } from '../constants';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
 import { ID_BOUND_FACTORY_QUERY_TYPES, osquerySearchStrategyProvider } from '.';
+
+// The agent-carried space only speaks for documents Kibana never stamped, so the
+// fallback pairs its term with the absence of the trusted top-level field.
+const actionDataFallback = (spaceId: string) => ({
+  bool: {
+    filter: { term: { 'action_data.space_id': spaceId } },
+    must_not: { exists: { field: 'space_id' } },
+  },
+});
 
 jest.mock('@kbn/data-plugin/server', () => ({
   shimHitsTotal: (rawResponse: unknown) => rawResponse,
