@@ -49,5 +49,6 @@
     "@kbn/code-editor-mock",
     "@kbn/ui-callout",
     "@kbn/discover-session-constants",
+    "@kbn/data-grid",
   ]
 }

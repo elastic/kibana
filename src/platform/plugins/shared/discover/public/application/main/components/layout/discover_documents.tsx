@@ -608,6 +608,7 @@ function DiscoverDocumentsComponent({
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
           <DiscoverGrid
             ariaLabelledBy="documentsAriaLabel"
+            isKbnDataGridEnabled={services.discoverFeatureFlags.getKbnDataGridEnabled()}
             cascadedDocumentsContext={cascadedDocumentsContext}
             columns={currentColumns}
             expandedDoc={expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER ? expandedDoc : undefined}

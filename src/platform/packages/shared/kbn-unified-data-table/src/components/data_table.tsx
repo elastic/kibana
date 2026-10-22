@@ -69,6 +69,7 @@ import {
   useDataGridInTableSearch,
 } from '@kbn/data-grid-in-table-search';
 import { useThrottleFn } from '@kbn/react-hooks';
+import { EuiDataGridAdapter } from '@kbn/data-grid';
 import { getDataViewFieldFromDataSource } from '@kbn/discover-utils';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
@@ -95,6 +96,7 @@ import {
 import { convertValueToString } from '../utils/convert_value_to_string';
 import { getRowsPerPageOptions } from '../utils/rows_per_page';
 import { getRenderCellValueFn } from '../utils/get_render_cell_value';
+import type { CellActionsCache } from './data_table_columns';
 import {
   getEuiGridColumns,
   getLeadControlColumns,
@@ -447,6 +449,11 @@ interface InternalUnifiedDataTableProps {
    */
   renderCustomGridBody?: (args: EuiDataGridCustomBodyProps) => React.ReactNode;
   /**
+   * Renders the table with `@kbn/data-grid` instead of `EuiDataGrid`. Set from the
+   * `discover.kbnDataGridEnabled` feature flag.
+   */
+  isKbnDataGridEnabled?: boolean;
+  /**
    * Optional render for the grid toolbar
    * @param toolbarProps
    * @param gridProps
@@ -591,6 +598,7 @@ interface InternalUnifiedDataTableProps {
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
+const EuiDataGridAdapterMemoized = React.memo(EuiDataGridAdapter);
 
 const InternalUnifiedDataTable = React.forwardRef<
   EuiDataGridRefProps,
@@ -671,6 +679,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       customGridColumnsConfiguration,
       enableComparisonMode,
       enableInTableSearch = false,
+      isKbnDataGridEnabled = false,
       cellContext,
       renderCellPopover,
       getRowIndicator,
@@ -1233,6 +1242,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     const onChangeRowHeight = isJsonSourceMode ? undefined : onChangeRowHeightSetting;
     const onChangeRowHeightLines = isJsonSourceMode ? undefined : onChangeRowHeightLinesSetting;
 
+    const cellActionsCache = useRef<CellActionsCache>(new Map()).current;
     const euiGridColumns = useMemo(
       () =>
         getEuiGridColumns({
@@ -1268,6 +1278,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           dataGridRef,
           hideFilteringOnComputedColumns,
           documentsDisplayMode,
+          cellActionsCache,
         }),
       [
         cellActionsHandling,
@@ -1298,6 +1309,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         hideFilteringOnComputedColumns,
         documentsDisplayMode,
         isPlainRecord,
+        cellActionsCache,
       ]
     );
 
@@ -1632,6 +1644,31 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     const isLoaded = loadingState === DataLoadingState.loaded;
 
+    // The props both `EuiDataGrid` and the `@kbn/data-grid` adapter take.
+    const dataGridProps = {
+      id: dataGridId,
+      'aria-describedby': randomId,
+      'aria-labelledby': ariaLabelledBy,
+      columns: euiGridColumns,
+      columnVisibility: columnsVisibility,
+      'data-test-subj': 'docTable',
+      leadingControlColumns,
+      onColumnResize: onResize,
+      pagination: paginationMode === 'multiPage' ? paginationObj : undefined,
+      renderCellValue: renderCellValueWithInTableSearchSupport,
+      rowCount,
+      sorting: sorting as EuiDataGridSorting,
+      toolbarVisibility,
+      rowHeightsOptions,
+      gridStyle,
+      renderCustomToolbar: renderCustomToolbarFn,
+      trailingControlColumns,
+      cellContext: cellContextWithInTableSearchSupport,
+      renderCellPopover: renderCustomPopover,
+      virtualizationOptions,
+      onFullScreenChange: onDataGridFullScreenChange,
+    };
+
     if (!rowCount && loadingState === DataLoadingState.loading) {
       return (
         <div
@@ -1702,37 +1739,25 @@ const InternalUnifiedDataTable = React.forwardRef<
                 docMap={docMap}
                 replaceSelectedDocs={replaceSelectedDocs}
                 setIsCompareActive={setIsCompareActive}
+                isKbnDataGridEnabled={isKbnDataGridEnabled}
               />
-            ) : (
-              <EuiDataGridMemoized
-                // Remount on display-mode change to reset EuiDataGrid's auto-height cache; otherwise
+            ) : isKbnDataGridEnabled ? (
+              <EuiDataGridAdapterMemoized
+                // Remount on display-mode change to reset the auto-height cache; otherwise
                 // some rows stay stuck at the taller JSON height when switching back to table mode.
                 // Full screen is restored after the remount (see isFullScreenRef).
                 key={documentsDisplayMode}
-                id={dataGridId}
-                aria-describedby={randomId}
-                aria-labelledby={ariaLabelledBy}
-                columns={euiGridColumns}
-                columnVisibility={columnsVisibility}
-                data-test-subj="docTable"
-                leadingControlColumns={leadingControlColumns}
-                onColumnResize={onResize}
-                pagination={paginationMode === 'multiPage' ? paginationObj : undefined}
-                renderCellValue={renderCellValueWithInTableSearchSupport}
+                {...dataGridProps}
                 ref={dataGridRef}
-                rowCount={rowCount}
+              />
+            ) : (
+              <EuiDataGridMemoized
+                // Same as above.
+                key={documentsDisplayMode}
+                {...dataGridProps}
+                ref={dataGridRef}
                 schemaDetectors={schemaDetectors}
-                sorting={sorting as EuiDataGridSorting}
-                toolbarVisibility={toolbarVisibility}
-                rowHeightsOptions={rowHeightsOptions}
-                gridStyle={gridStyle}
                 renderCustomGridBody={renderCustomGridBody}
-                renderCustomToolbar={renderCustomToolbarFn}
-                trailingControlColumns={trailingControlColumns}
-                cellContext={cellContextWithInTableSearchSupport}
-                renderCellPopover={renderCustomPopover}
-                virtualizationOptions={virtualizationOptions}
-                onFullScreenChange={onDataGridFullScreenChange}
               />
             )}
           </div>
