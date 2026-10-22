@@ -244,6 +244,7 @@ describe('RuleDetailPage', () => {
         sortField: 'startedAt',
         sortOrder: 'desc',
         enabled: true,
+        keepPreviousData: false,
       });
 
       const metadataSection = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.metadata);
