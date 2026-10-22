@@ -11,7 +11,6 @@ import { HITL_SLACK_ACTION_APPROVE, HITL_SLACK_ACTION_SUBMIT } from '@kbn/workfl
 import {
   buildHitlSlackApprovalBlocks,
   buildHitlSlackInputBlocksFromSchema,
-  mapSlackStateValuesToInput,
 } from './hitl_slack_interactive_blocks';
 
 const resume = {
@@ -57,21 +56,5 @@ describe('hitl_slack_interactive_blocks', () => {
       elements: Array<{ action_id: string }>;
     };
     expect(actions.elements[0]?.action_id).toBe(HITL_SLACK_ACTION_SUBMIT);
-  });
-
-  it('maps Slack state.values into resume input', () => {
-    expect(
-      mapSlackStateValuesToInput({
-        hitl_field_reason: {
-          reason: { type: 'plain_text_input', value: 'looks good' },
-        },
-        hitl_field_approved: {
-          approved: {
-            type: 'radio_buttons',
-            selected_option: { value: 'true' },
-          },
-        },
-      })
-    ).toEqual({ reason: 'looks good', approved: true });
   });
 });

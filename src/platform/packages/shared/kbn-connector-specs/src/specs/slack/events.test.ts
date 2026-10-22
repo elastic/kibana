@@ -24,6 +24,8 @@ import {
   SLACK_HITL_ACTION_APPROVE,
   SLACK_HITL_ACTION_EVENT_ID,
   SLACK_HITL_ACTION_EVENT_KEY,
+  SLACK_HITL_ACTION_REJECT,
+  SLACK_HITL_ACTION_SUBMIT,
   SLACK_MEMBER_JOINED_CHANNEL_EVENT_ID,
   SLACK_MEMBER_JOINED_CHANNEL_EVENT_KEY,
   SLACK_MESSAGE_EVENT_ID,
@@ -480,5 +482,84 @@ describe('Slack inbound events', () => {
       slackUserId: 'U99',
     });
     expect(validateEmittedEvents(events.definitions, result.events)).toEqual({ ok: true });
+  });
+
+  it('parses the form-urlencoded payload Slack Interactivity actually posts', async () => {
+    const correlation = JSON.stringify({
+      v: 1,
+      e: 'exec-1',
+      s: 'step-1',
+      t: 'token-1',
+      p: 'default',
+      k: 'a',
+    });
+    const result = expectEmit(
+      await events.handleEvents(
+        createContext({
+          payload: JSON.stringify({
+            type: 'block_actions',
+            response_url: 'https://hooks.slack.com/actions/T/B/xxx',
+            user: { id: 'U99' },
+            actions: [{ action_id: SLACK_HITL_ACTION_REJECT, value: correlation }],
+          }),
+        })
+      )
+    );
+
+    expect(result.events[0]?.payload).toMatchObject({
+      kind: 'approval',
+      approved: false,
+      responseUrl: 'https://hooks.slack.com/actions/T/B/xxx',
+      slackUserId: 'U99',
+    });
+  });
+
+  it('maps waitForInput state.values into inputJson', async () => {
+    const correlation = JSON.stringify({
+      v: 1,
+      e: 'exec-1',
+      s: 'step-1',
+      t: 'token-1',
+      p: 'default',
+      k: 'i',
+    });
+    const result = expectEmit(
+      await events.handleEvents(
+        createContext({
+          type: 'block_actions',
+          actions: [{ action_id: SLACK_HITL_ACTION_SUBMIT, value: correlation }],
+          state: {
+            values: {
+              hitl_field_reason: {
+                reason: { type: 'plain_text_input', value: 'looks good' },
+              },
+              hitl_field_approved: {
+                approved: { type: 'radio_buttons', selected_option: { value: 'true' } },
+              },
+              hitl_field_count: {
+                count: { type: 'number_input', value: '3' },
+              },
+            },
+          },
+        })
+      )
+    );
+
+    expect(JSON.parse(String(result.events[0]?.payload.inputJson))).toEqual({
+      reason: 'looks good',
+      approved: true,
+      count: 3,
+    });
+  });
+
+  it('does not emit a workflow event for non-HITL block actions', async () => {
+    await expect(
+      events.handleEvents(
+        createContext({
+          type: 'block_actions',
+          actions: [{ action_id: 'other.action', value: '{}' }],
+        })
+      )
+    ).resolves.toEqual({ type: 'emit', events: [] });
   });
 });

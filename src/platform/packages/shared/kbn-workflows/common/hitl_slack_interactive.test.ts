@@ -8,41 +8,43 @@
  */
 
 import {
-  decodeHitlSlackCorrelation,
   encodeHitlSlackCorrelation,
-  HITL_SLACK_ACTION_APPROVE,
   HITL_SLACK_CORRELATION_VERSION,
-  isHitlSlackActionId,
 } from './hitl_slack_interactive';
 
 describe('hitl_slack_interactive', () => {
-  it('round-trips correlation payloads', () => {
-    const encoded = encodeHitlSlackCorrelation({
-      v: HITL_SLACK_CORRELATION_VERSION,
-      executionId: 'exec-1',
-      stepId: 'step-1',
-      token: 'a'.repeat(64),
-      spaceId: 'default',
-      kind: 'approval',
-    });
-    expect(decodeHitlSlackCorrelation(encoded)).toEqual({
-      v: HITL_SLACK_CORRELATION_VERSION,
-      executionId: 'exec-1',
-      stepId: 'step-1',
-      token: 'a'.repeat(64),
-      spaceId: 'default',
-      kind: 'approval',
+  it('encodes the compact correlation the Slack inbound parser accepts', () => {
+    expect(
+      JSON.parse(
+        encodeHitlSlackCorrelation({
+          v: HITL_SLACK_CORRELATION_VERSION,
+          executionId: 'exec-1',
+          stepId: 'step-1',
+          token: 'a'.repeat(64),
+          spaceId: 'default',
+          kind: 'input',
+        })
+      )
+    ).toEqual({
+      v: 1,
+      e: 'exec-1',
+      s: 'step-1',
+      t: 'a'.repeat(64),
+      p: 'default',
+      k: 'i',
     });
   });
 
-  it('rejects malformed correlation', () => {
-    expect(decodeHitlSlackCorrelation('')).toBeUndefined();
-    expect(decodeHitlSlackCorrelation('not-json')).toBeUndefined();
-    expect(decodeHitlSlackCorrelation(JSON.stringify({ v: 2 }))).toBeUndefined();
-  });
-
-  it('recognizes HITL action ids', () => {
-    expect(isHitlSlackActionId(HITL_SLACK_ACTION_APPROVE)).toBe(true);
-    expect(isHitlSlackActionId('something.else')).toBe(false);
+  it('rejects a correlation that exceeds the Slack button value limit', () => {
+    expect(() =>
+      encodeHitlSlackCorrelation({
+        v: HITL_SLACK_CORRELATION_VERSION,
+        executionId: 'e'.repeat(2000),
+        stepId: 'step-1',
+        token: 'token',
+        spaceId: 'default',
+        kind: 'approval',
+      })
+    ).toThrow(/exceeds 2000/);
   });
 });
