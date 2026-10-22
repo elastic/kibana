@@ -587,14 +587,7 @@ per action, at most 3, strongest first:
 - `confidence` — `high`, `medium`, or `low`: how strongly the findings support that the action
   resolves or mitigates the confirmed problem.
 - `impact` — how disruptive carrying it out is.
-- `category` — always one of these, the one that best names the kind of action:
-  - `mitigate` — restore service without fixing the cause: roll back a deploy, config change, or
-    feature flag; restart; fail over; shift traffic; shed load; add capacity.
-  - `remediate` — a lasting change to the code, config, or deployment that removes the cause.
-  - `investigate` — gather what is still needed to act safely, such as logs, a heap dump, or a
-    profile.
-  - `escalate` — bring in a person or team: page the owning on-call, or open a ticket with the
-    owner of a dependency.
+- `category` — always `"todo"`: the analyst carries the action out and marks it as applied.
 
 ```json
 {
@@ -603,11 +596,11 @@ per action, at most 3, strongest first:
   "origin": "nightshift",
   "confidence": "high",
   "impact": "low",
-  "category": "mitigate"
+  "category": "todo"
 }
 ```
 
-Proposals run nothing: an analyst carries them out and approves or dismisses them. Only propose
+Proposals run nothing: an analyst carries them out and marks them as applied. Only propose
 actions the findings support; when nothing needs doing, propose nothing.
 
 </recording_results>

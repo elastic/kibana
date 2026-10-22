@@ -42,7 +42,9 @@ export type ApprovalPhase =
   | 'failed'
   | 'expired'
   | 'outdated'
-  | 'no_action';
+  | 'no_action'
+  /** A to-do proposal (`isTodoProposal`) the analyst marked as applied. */
+  | 'marked_applied';
 
 export interface ApprovalOutcomeBadge {
   color: EuiBadgeProps['color'];
@@ -128,6 +130,13 @@ export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBa
         label: APPROVAL_MODAL_TRANSLATIONS.noActionBadge,
         isLoading: false,
       };
+    case 'marked_applied':
+      return {
+        color: 'success',
+        iconType: 'check',
+        label: APPROVAL_MODAL_TRANSLATIONS.markedAppliedBadge,
+        isLoading: false,
+      };
     default:
       return undefined;
   }
@@ -177,6 +186,12 @@ export const getApprovalOutcomeBanner = (
       return {
         color: 'success',
         title: APPROVAL_MODAL_TRANSLATIONS.noActionBannerTitle,
+        isLoading: false,
+      };
+    case 'marked_applied':
+      return {
+        color: 'success',
+        title: APPROVAL_MODAL_TRANSLATIONS.markedAppliedBannerTitle,
         isLoading: false,
       };
     default:

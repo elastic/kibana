@@ -210,7 +210,7 @@ const PROMOTABLE_TIER_RANK_LITERAL = PROMOTABLE_TIERS_BY_PRECISION.map(
  * Params (passed via `params` — never interpolated into the script body):
  *   report_id  — dedup key
  *   provider   — source.name of the citing report
- *   trail      — Maltrail trail label (content.title), null for non-maltrail
+ *   trail      — indicator-list label (content.title), null when absent
  *   reference  — per-IOC nearest-ref URL (or source.url), null when absent
  *   first_seen — lineage.extracted_at of the citing report
  *   now        — wall-clock ISO string at the time of the bulk call
@@ -655,8 +655,9 @@ export const registerPromoteThreatIndicatorsTask = ({
           let latestExtractedAt = previousState.lastSyncedAt;
           // Only advance the cursor when the scan drained the backlog. A
           // completed scan that stored a mid-batch tick used to skip remaining
-          // siblings: `text_indicator_list` stamps one `lineage.extracted_at`
-          // across every chunk of a large list (5_000 nested objects), so `gt`
+          // siblings: the retired `text_indicator_list` adapter stamped one
+          // `lineage.extracted_at` across every chunk of a large list (5_000
+          // nested objects), and those reports are still in the index, so `gt`
           // on that tick dropped the rest. Writes are idempotent (stable `_id`
           // + report_id dedupe), so the range is `gte` and re-scanning the
           // handful of boundary-timestamp docs every 15m is cheap. Enrich is

@@ -25,6 +25,15 @@ const baseProposal: ApprovalProposal = {
   status: 'pending',
 };
 
+/** The analyst carries it out and marks it as applied. */
+const todoProposal: ApprovalProposal = {
+  title: 'Revert the pool-size config change',
+  impact: 'low',
+  comment: 'Set `connection_pool.max_size` back to 100.',
+  status: 'pending',
+  category: 'todo',
+};
+
 const baseProps: ApprovalContentProps = {
   proposal: baseProposal,
   onApprove: jest.fn(),
@@ -277,6 +286,55 @@ describe('ApprovalContent', () => {
   it('renders the Approve button, labeled the same way regardless of host', () => {
     renderContent();
     expect(screen.getByTestId('approvalContent-confirm')).toHaveTextContent('Approve');
+  });
+
+  describe('to-do proposal', () => {
+    it('offers a single I applied button instead of Approve and Decline', () => {
+      renderContent({ proposal: todoProposal, secondaryActions: undefined, onDismiss: jest.fn() });
+
+      expect(screen.getByTestId('approvalContent-confirm')).toHaveTextContent('I applied');
+      expect(screen.queryByText('Approve')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('approvalContent-dismiss')).not.toBeInTheDocument();
+    });
+
+    it('records the application through onApprove when I applied is clicked', async () => {
+      const onApprove = jest.fn();
+      renderContent({ proposal: todoProposal, onApprove });
+
+      fireEvent.click(screen.getByTestId('approvalContent-confirm'));
+
+      await waitFor(() => expect(onApprove).toHaveBeenCalledTimes(1));
+    });
+
+    it('reads its category as "To do" in the caption', () => {
+      renderContent({ proposal: todoProposal });
+
+      expect(screen.getByText(/^To do/)).toBeInTheDocument();
+    });
+
+    it('keeps Approve and Decline for a proposal without an action in another category', () => {
+      // Lacking an action does not make it a to-do: it may still ask for permission.
+      renderContent({ proposal: { ...todoProposal, category: 'tune' }, onDismiss: jest.fn() });
+
+      expect(screen.getByTestId('approvalContent-confirm')).toHaveTextContent('Approve');
+      expect(screen.getByTestId('approvalContent-dismiss')).toBeInTheDocument();
+    });
+
+    it('shows a to-do marked as applied as Applied, not Approved', () => {
+      renderContent({
+        proposal: {
+          ...todoProposal,
+          decision: 'approved',
+          decidedBy: { fullName: 'Ava', username: 'ava', email: null },
+          decidedAt: '2024-01-01T17:20:00.000Z',
+          status: 'no_action',
+        },
+      });
+
+      // The badge and the outcome banner's own title both say it.
+      expect(screen.getAllByText('Applied')).toHaveLength(2);
+      expect(screen.queryByText('Approved')).not.toBeInTheDocument();
+    });
   });
 
   it('keeps the Approve button primary even for high/critical impact', () => {
