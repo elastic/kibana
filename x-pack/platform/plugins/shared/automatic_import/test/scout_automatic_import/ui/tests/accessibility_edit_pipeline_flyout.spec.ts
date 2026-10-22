@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 
+import type { DataStreamResults } from '../../../../common';
 import { test } from '../fixtures';
 import { CONNECTORS_API, CONNECTORS_WITH_ONE, FLEET_PACKAGES_API } from '../fixtures/mock_data';
 
@@ -37,8 +38,16 @@ const MOCK_DATA_STREAM_RESULTS = {
   ingest_pipeline: {
     processors: [{ rename: { field: 'message', target_field: 'event.original' } }],
   },
-  results: [{ '@timestamp': '2024-01-01T00:00:00.000Z', message: 'sample log line' }],
-};
+  results: [{ '@timestamp': '2024-01-01T00:00:00.000Z', 'event.original': 'sample log line' }],
+  field_mapping: [
+    { name: '@timestamp', type: 'date', is_ecs: true },
+    { name: 'event.original', type: 'keyword', is_ecs: true },
+  ],
+  field_type_overrides: [],
+  approved_field_types: [],
+  data_stream_approved: false,
+  version: 'WzEsMV0=',
+} satisfies DataStreamResults;
 
 test.describe(
   'Automatic Import — accessibility — edit pipeline flyout',
