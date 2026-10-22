@@ -533,11 +533,81 @@ describe('useAgentDetection', () => {
     });
   });
 
+  describe('asking Fleet about many agents', () => {
+    const AGENTS = (count: number) =>
+      Array.from({ length: count }, (_, i) => agent(`a${i}`, 'online', 'policy-s3'));
+    const requestedIds = () => mockSendIncomingData.mock.calls.map(([{ agentsIds }]) => agentsIds);
+
+    beforeEach(() => mockSendIncomingData.mockResolvedValue({ data: { items: [] } }));
+
+    it('sends the ids of a small policy in one request', async () => {
+      setup({ agents: AGENTS(100) });
+
+      await mockUseQuery.mock.calls[0][0].queryFn();
+
+      expect(requestedIds()).toHaveLength(1);
+      expect(requestedIds()[0]).toHaveLength(100);
+    });
+
+    it('splits a large policy into batches, so the request URL stays small', async () => {
+      setup({ agents: AGENTS(250) });
+
+      await mockUseQuery.mock.calls[0][0].queryFn();
+
+      expect(requestedIds().map((ids) => ids.length)).toEqual([100, 100, 50]);
+      expect(requestedIds().flat()).toEqual(AGENTS(250).map(({ id }) => id));
+    });
+
+    it('stops at the first batch that has an agent with data', async () => {
+      mockSendIncomingData.mockResolvedValue({ data: { items: [{ a3: { data: true } }] } });
+      setup({ agents: AGENTS(250) });
+
+      const result = await mockUseQuery.mock.calls[0][0].queryFn();
+
+      expect(requestedIds()).toHaveLength(1);
+      expect(result).toEqual({ 'aws@4.0.0': ['a3'] });
+    });
+
+    it('finds data in a later batch', async () => {
+      mockSendIncomingData.mockImplementation(async ({ agentsIds }) => ({
+        data: { items: agentsIds.includes('a230') ? [{ a230: { data: true } }] : [] },
+      }));
+      setup({ agents: AGENTS(250) });
+
+      const result = await mockUseQuery.mock.calls[0][0].queryFn();
+
+      expect(requestedIds()).toHaveLength(3);
+      expect(result).toEqual({ 'aws@4.0.0': ['a230'] });
+    });
+
+    it('reports no data when no batch has any', async () => {
+      setup({ agents: AGENTS(250) });
+
+      expect(await mockUseQuery.mock.calls[0][0].queryFn()).toEqual({ 'aws@4.0.0': [] });
+    });
+  });
+
   describe('when the agent list is truncated', () => {
     it('does not call an instance healthy, since an omitted agent may not be', () => {
       const { result } = setup({ isTruncated: true });
 
       expect(result.current.summaryByInstanceId.s3.health).toBe('pending');
+    });
+
+    it('marks the verdict incomplete, so the badge does not show the agent as healthy', () => {
+      const { result } = setup({ isTruncated: true });
+
+      expect(result.current.summaryByInstanceId.s3.isIncomplete).toBe(true);
+    });
+
+    it('does not mark a complete list, or an unhealthy agent that was seen, incomplete', () => {
+      mockGetComponentAlertLevel.mockReturnValue('error');
+      const unhealthy = setup({ isTruncated: true, agents: [agent('a1', 'error', 'policy-s3')] });
+      expect(unhealthy.result.current.summaryByInstanceId.s3.isIncomplete).toBeUndefined();
+
+      mockGetComponentAlertLevel.mockReturnValue(null);
+      const complete = setup({ isTruncated: false });
+      expect(complete.result.current.summaryByInstanceId.s3.isIncomplete).toBeUndefined();
     });
 
     it('does not claim the integration runs fine while the agent is unhealthy elsewhere', () => {

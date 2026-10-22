@@ -87,16 +87,28 @@ export function ServiceAgentStatus({
   agentInfo,
 }: ServiceAgentStatusProps) {
   const [openFlyout, setOpenFlyout] = useState<FlyoutKind | undefined>();
-  const { agent, agentPolicy, packagePolicy, policyId, health, issue, unhealthyElsewhere } =
-    agentInfo;
+  const {
+    agent,
+    agentPolicy,
+    packagePolicy,
+    policyId,
+    health,
+    issue,
+    unhealthyElsewhere,
+    isIncomplete,
+  } = agentInfo;
   const packageVersion = packagePolicy?.package?.version;
 
-  const flyoutKind = getFlyoutKind({
-    hasAgent: !!agent,
-    isSettled: health === 'healthy' || health === 'unhealthy',
-    hasPackagePolicy: !!packagePolicy,
-    canShowEnrollment: deploymentMethod === 'managed_integration' && !!packageVersion,
-  });
+  // With the agent list cut short, the agent seen is not the whole picture: show Pending, and open
+  // nothing, since the enrollment flyout would claim an agent that does exist is missing.
+  const flyoutKind = isIncomplete
+    ? undefined
+    : getFlyoutKind({
+        hasAgent: !!agent,
+        isSettled: health === 'healthy' || health === 'unhealthy',
+        hasPackagePolicy: !!packagePolicy,
+        canShowEnrollment: deploymentMethod === 'managed_integration' && !!packageVersion,
+      });
   const close = () => setOpenFlyout(undefined);
   // The badge is Fleet's view of the whole agent. When it is unhealthy only because of other
   // integrations, say so, so it does not read as a contradiction of this one running.
@@ -110,7 +122,10 @@ export function ServiceAgentStatus({
 
   // Fleet reports an agent that cannot run the integration as Healthy. Show it as the Unhealthy
   // it is for this deployment, so the badge does not contradict the tile.
-  const badgeAgent = agent && issue ? { ...agent, status: 'degraded' as const } : agent;
+  const badgeAgent = (() => {
+    if (isIncomplete) return undefined;
+    return agent && issue ? { ...agent, status: 'degraded' as const } : agent;
+  })();
 
   // Said in the badge's own check-in tooltip, so the last check-in stays visible for every status.
   const tooltipExtraContent =
@@ -134,7 +149,7 @@ export function ServiceAgentStatus({
         agent={badgeAgent}
         tooltipExtraContent={tooltipExtraContent}
         onClick={flyoutKind ? () => setOpenFlyout(flyoutKind) : undefined}
-        data-test-subj={getBadgeTestSubj({ hasAgent: !!agent, isClickable: !!flyoutKind })}
+        data-test-subj={getBadgeTestSubj({ hasAgent: !!badgeAgent, isClickable: !!flyoutKind })}
       />
     </Suspense>
   );

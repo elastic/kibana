@@ -50,7 +50,24 @@ export interface InstanceAgentSummary {
    * cannot be its own yet; it comes from another integration of the same package.
    */
   noLiveUnits?: boolean;
+  /**
+   * The agent list was cut short, so this verdict may miss an unhealthy agent. The badge must not
+   * show the agent's own status as if it were the whole picture.
+   */
+  isIncomplete?: boolean;
 }
+
+/**
+ * Fleet takes the agent ids in the query string, so a large policy has to go out in batches to
+ * keep the request URL within what servers and proxies accept.
+ */
+export const AGENT_IDS_PER_REQUEST = 100;
+
+/** Splits a list into batches of at most `size`. */
+export const toBatches = <T>(items: T[], size: number): T[][] =>
+  Array.from({ length: Math.ceil(items.length / size) }, (_, i) =>
+    items.slice(i * size, (i + 1) * size)
+  );
 
 export interface DataRequestInstance {
   agentIds: string[];

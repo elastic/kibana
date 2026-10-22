@@ -21,6 +21,7 @@ import {
   NOT_RUNNING_GRACE_MS,
   pickWorstAgentInstanceId,
   summarizeInstanceAgents,
+  toBatches,
   usesAgentDataApi,
 } from './agent_detection';
 
@@ -1004,5 +1005,20 @@ describe('usesAgentDataApi', () => {
 
   it('is false for OTel when the policy is not known yet', () => {
     expect(usesAgentDataApi({ isOtel: true })).toBe(false);
+  });
+});
+
+describe('toBatches', () => {
+  it('splits a list into batches of at most the given size, in order', () => {
+    expect(toBatches([1, 2, 3, 4, 5], 2)).toEqual([[1, 2], [3, 4], [5]]);
+  });
+
+  it('keeps a list that fits in one batch whole', () => {
+    expect(toBatches([1, 2, 3], 3)).toEqual([[1, 2, 3]]);
+    expect(toBatches([1, 2, 3], 10)).toEqual([[1, 2, 3]]);
+  });
+
+  it('returns no batches for an empty list', () => {
+    expect(toBatches([], 5)).toEqual([]);
   });
 });

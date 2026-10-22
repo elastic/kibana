@@ -308,6 +308,31 @@ describe('ServiceAgentStatus', () => {
     });
   });
 
+  describe('a verdict made from a truncated agent list', () => {
+    const incomplete = (overrides: Partial<ServiceAgentInfo> = {}) =>
+      info({ health: 'pending', isIncomplete: true, ...overrides });
+
+    it('shows Pending, not the status of the agent that was seen', () => {
+      renderStatus(incomplete());
+
+      expect(screen.queryByTestId('agentHealth')).not.toBeInTheDocument();
+      expect(screen.getByTestId('serviceTile-agentPendingBadge')).toHaveTextContent('Pending');
+    });
+
+    it('opens nothing, not even the enrollment flyout of a managed integration', () => {
+      renderStatus(incomplete(), 'managed_integration');
+
+      expect(screen.queryByTestId('serviceTile-agentStatusButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('agentTooltip')).not.toBeInTheDocument();
+    });
+
+    it('shows the status of the agent when the verdict is complete', () => {
+      renderStatus(info({ health: 'healthy' }));
+
+      expect(screen.getByTestId('agentHealth')).toHaveTextContent('online');
+    });
+  });
+
   describe('an agent that does not exist yet', () => {
     const noAgent = (overrides: Partial<ServiceAgentInfo> = {}) =>
       info({ health: 'pending', agent: undefined, agentIds: [], ...overrides });

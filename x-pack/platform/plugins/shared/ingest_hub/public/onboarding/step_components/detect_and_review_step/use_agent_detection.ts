@@ -22,6 +22,7 @@ import {
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import {
   applyNotRunningGrace,
+  AGENT_IDS_PER_REQUEST,
   NOT_RUNNING_GRACE_MS,
   OTEL_NOT_RUNNING_GRACE_MS,
   assessAgent,
@@ -32,6 +33,7 @@ import {
   getApplicableAgents,
   instanceHasData,
   summarizeInstanceAgents,
+  toBatches,
   usesAgentDataApi,
   type AssessmentByAgentId,
   type DataRequestInstance,
@@ -175,7 +177,7 @@ export function useAgentDetection({
       // verdict cannot be given. An unhealthy one stands: the agents seen are real.
       const summary: InstanceAgentSummary =
         isTruncated && fullSummary.health === 'healthy'
-          ? { ...fullSummary, health: 'pending', unhealthyElsewhere: undefined }
+          ? { ...fullSummary, health: 'pending', unhealthyElsewhere: undefined, isIncomplete: true }
           : fullSummary;
       summaries[instanceId] = summary;
 
@@ -241,12 +243,17 @@ export function useAgentDetection({
     queryFn: async () => {
       const entries = await Promise.all(
         dataRequests.map(async ({ key, pkgName, pkgVersion, agentIds }) => {
-          const { data } = await sendGetAgentIncomingData({
-            agentsIds: agentIds,
-            pkgName,
-            pkgVersion,
-          });
-          const withData = extractAgentIdsWithData(data?.items ?? []);
+          const withData: string[] = [];
+          // One agent with data answers for the instance, so stop at the first batch that has one.
+          for (const batch of toBatches(agentIds, AGENT_IDS_PER_REQUEST)) {
+            const { data } = await sendGetAgentIncomingData({
+              agentsIds: batch,
+              pkgName,
+              pkgVersion,
+            });
+            withData.push(...extractAgentIdsWithData(data?.items ?? []));
+            if (withData.length > 0) break;
+          }
           return [key, withData] as const;
         })
       );
