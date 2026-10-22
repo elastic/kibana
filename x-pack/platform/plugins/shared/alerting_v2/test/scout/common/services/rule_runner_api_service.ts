@@ -48,8 +48,9 @@ export interface WaitForReportedRunParams {
 
 /**
  * Drives rule executions until a condition holds. Scheduled runs are at least
- * 1m apart, so every poll whose condition is unmet requests a run through `_run`;
- * a 409 (run already in flight) is expected and the next poll retries.
+ * 1m apart, so a poll whose condition is unmet requests a run through `_run`,
+ * unless a run is already pending; a 409 (run already in flight) is expected and
+ * the next poll retries.
  */
 export interface RuleRunnerApiService {
   /** Runs the rule until at least `min` `.rule-events` documents match `filter`. */
@@ -67,6 +68,23 @@ export interface RuleRunnerApiService {
   runThen: <T>(ruleId: string, read: () => Promise<T>) => () => Promise<T>;
 }
 
+interface PollUntilAtLeastParams {
+  /** Value `count` must reach. */
+  min: number;
+  /** Current value of the condition being polled. */
+  count: () => Promise<number>;
+  /** Requests one execution through `_run`. */
+  requestRun: () => Promise<number>;
+  /** Delay between polls, and therefore between requested runs. */
+  intervalMs: number;
+  timeoutMs?: number;
+  /**
+   * Completed executor-task runs. Omit when `count` counts runs itself, so that one
+   * query serves both rather than two identical ones per poll.
+   */
+  countCompletedRuns?: () => Promise<number>;
+}
+
 export const getRuleRunnerApiService = ({
   log,
   runRule,
@@ -78,14 +96,14 @@ export const getRuleRunnerApiService = ({
   ruleEvents: Pick<RuleEventsApiService, 'find'>;
   ruleExecutorTask: Pick<RuleExecutorTaskApiService, 'countRuns' | 'findReportedRuns'>;
 }): RuleRunnerApiService => {
-  const pollUntilAtLeast = (
-    min: number,
-    count: () => Promise<number>,
-    countCompletedRuns: () => Promise<number>,
-    requestRun: () => Promise<number>,
-    intervalMs: number,
-    timeoutMs: number = POLL_TIMEOUT_MS
-  ) => {
+  const pollUntilAtLeast = ({
+    min,
+    count,
+    requestRun,
+    intervalMs,
+    timeoutMs = POLL_TIMEOUT_MS,
+    countCompletedRuns,
+  }: PollUntilAtLeastParams) => {
     // Completed executor-task runs observed when we last drove `_run`. A run stays
     // "in flight" until that count advances; while one is in flight we skip `_run` so
     // a run completing mid-poll cannot stack an extra execution (and extra event batch).
@@ -96,14 +114,18 @@ export const getRuleRunnerApiService = ({
     return expect
       .poll(
         async () => {
+          // Read the runs before the condition: Task Manager logs `task-run` only after
+          // the run resolved and the executor writes its events inside the run, so every
+          // run counted here already has its output visible to the `count()` below.
+          const completedRuns = await countCompletedRuns?.();
           const current = await count();
           if (current >= min) return current;
 
-          const completedRuns = await countCompletedRuns();
-          const runInFlight = drivenAtRuns !== undefined && completedRuns <= drivenAtRuns;
+          const observedRuns = completedRuns ?? current;
+          const runInFlight = drivenAtRuns !== undefined && observedRuns <= drivenAtRuns;
 
           if (!runInFlight) {
-            drivenAtRuns = completedRuns;
+            drivenAtRuns = observedRuns;
             await requestRun();
           }
 
@@ -117,15 +139,15 @@ export const getRuleRunnerApiService = ({
   return {
     waitForEvents: (ruleId, min, filter, { intervalMs = POLL_INTERVAL_MS } = {}) =>
       measurePerformanceAsync(log, 'ruleRunner.waitForEvents', () =>
-        pollUntilAtLeast(
+        pollUntilAtLeast({
           min,
-          async () => (await ruleEvents.find(ruleId, filter)).length,
+          count: async () => (await ruleEvents.find(ruleId, filter)).length,
           // Total completed runs for the task; only its monotonic growth matters here,
           // so count from epoch rather than a window bound.
-          () => ruleExecutorTask.countRuns({ ruleId, since: new Date(0) }),
-          () => runRule(ruleId),
-          intervalMs
-        )
+          countCompletedRuns: () => ruleExecutorTask.countRuns({ ruleId, since: new Date(0) }),
+          requestRun: () => runRule(ruleId),
+          intervalMs,
+        })
       ),
 
     waitForExecutions: ({
@@ -135,17 +157,16 @@ export const getRuleRunnerApiService = ({
       spaceId = DEFAULT_SPACE_ID,
       timeoutMs,
     }) =>
-      measurePerformanceAsync(log, 'ruleRunner.waitForExecutions', () => {
-        const countRuns = () => ruleExecutorTask.countRuns({ ruleId, since, spaceId });
-        return pollUntilAtLeast(
-          runs,
-          countRuns,
-          countRuns,
-          () => runRule(ruleId, { spaceId }),
-          POLL_INTERVAL_MS,
-          timeoutMs
-        );
-      }),
+      measurePerformanceAsync(log, 'ruleRunner.waitForExecutions', () =>
+        // The condition counts runs itself, so it doubles as the completed-run count.
+        pollUntilAtLeast({
+          min: runs,
+          count: () => ruleExecutorTask.countRuns({ ruleId, since, spaceId }),
+          requestRun: () => runRule(ruleId, { spaceId }),
+          intervalMs: POLL_INTERVAL_MS,
+          timeoutMs,
+        })
+      ),
 
     waitForReportedRun: ({
       ruleId,
