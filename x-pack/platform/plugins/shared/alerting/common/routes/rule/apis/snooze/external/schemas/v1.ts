@@ -28,11 +28,6 @@ export const snoozeBodySchema = schema.object({
 export const snoozeResponseSchema = schema.object({
   body: schema.object({
     schedule: schema.object({
-      id: schema.string({
-        meta: {
-          description: 'Identifier of the snooze schedule.',
-        },
-      }),
       custom: schema.maybe(scheduleRequestSchemaV1),
     }),
   }),

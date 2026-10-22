@@ -118,7 +118,6 @@ export const snoozeRuleRoute = (
           const response: SnoozeResponseV1 = {
             body: {
               schedule: {
-                id: snoozeScheduleId,
                 ...(transformedCustomSchedule && {
                   custom: {
                     ...transformedCustomSchedule,
