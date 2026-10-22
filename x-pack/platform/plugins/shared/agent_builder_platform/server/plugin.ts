@@ -22,6 +22,10 @@ import { registerSkills } from './skills';
 import { createConnectorSmlType } from './sml_types/connector';
 import { createConnectorLifecycleHandler } from './connector_lifecycle/connector_lifecycle_handler';
 import { setAgentBuilderDashboard } from './dashboard/install_dashboard';
+import { createBinaryConverters } from './attachment_types/binary/converters';
+import type { DocumentExtractionAvailability } from './attachment_types/binary/extraction/extraction_availability';
+import { createDocumentExtractionAvailability } from './attachment_types/binary/extraction/extraction_availability';
+import { registerBinarySupportedTypesRoute } from './routes/binary_supported_types';
 
 export class AgentBuilderPlatformPlugin
   implements
@@ -33,6 +37,7 @@ export class AgentBuilderPlatformPlugin
     >
 {
   private logger: Logger;
+  private documentExtractionAvailability?: DocumentExtractionAvailability;
 
   constructor(context: PluginInitializerContext<PluginConfig>) {
     this.logger = context.logger.get();
@@ -46,10 +51,29 @@ export class AgentBuilderPlatformPlugin
       coreSetup,
       setupDeps,
     });
+    const getEsClient = async () => {
+      const [coreStart] = await coreSetup.getStartServices();
+      return coreStart.elasticsearch.client.asInternalUser;
+    };
+    const documentExtractionLogger = this.logger.get('document-extraction');
+    const extractionAvailability = createDocumentExtractionAvailability({
+      logger: documentExtractionLogger,
+    });
+    this.documentExtractionAvailability = extractionAvailability;
+    const binaryConverters = createBinaryConverters({
+      getEsClient,
+      extractionAvailability,
+      logger: documentExtractionLogger,
+    });
     registerAttachmentTypes({
       coreSetup,
       setupDeps,
+      binaryConverters,
       logger: this.logger,
+    });
+    registerBinarySupportedTypesRoute({
+      router: coreSetup.http.createRouter(),
+      binaryConverters,
     });
     registerConversationTemplates({ setupDeps });
     registerConversationEventTypes({ setupDeps });
@@ -83,6 +107,8 @@ export class AgentBuilderPlatformPlugin
   }
 
   start(coreStart: CoreStart): AgentBuilderPlatformPluginStart {
+    this.documentExtractionAvailability?.start(coreStart.elasticsearch.client.asInternalUser);
+
     return {
       tracingFeatures: {
         setDashboard: ({ enabled, spaceId }) =>
@@ -91,5 +117,7 @@ export class AgentBuilderPlatformPlugin
     };
   }
 
-  stop() {}
+  stop() {
+    this.documentExtractionAvailability?.stop();
+  }
 }

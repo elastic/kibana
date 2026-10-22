@@ -52,6 +52,8 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/files-plugin'
   - '@kbn/cloud-plugin'
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/inference-tracing'
 tags:
   - plugin
   - prod
