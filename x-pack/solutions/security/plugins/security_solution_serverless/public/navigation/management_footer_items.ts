@@ -25,6 +25,17 @@ export const createManagementFooterItemsTree = (
       renderAs: 'panelOpener',
       children: [
         {
+          children: [
+            {
+              breadcrumbStatus: 'hidden',
+              link: 'management:data_management_overview',
+              title: i18nStrings.ingestAndManageData.overview.title,
+            },
+          ],
+          id: 'data_management_overview',
+          title: '',
+        },
+        {
           title: i18nStrings.ingestAndManageData.ingestAndIntegrations.title,
           breadcrumbStatus: 'hidden',
           children: [

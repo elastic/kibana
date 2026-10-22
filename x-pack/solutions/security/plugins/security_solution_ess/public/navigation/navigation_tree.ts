@@ -156,6 +156,16 @@ export const createNavigationTree = (
         renderAs: 'panelOpener',
         children: [
           {
+            children: [
+              {
+                link: 'management:data_management_overview',
+                title: i18nStrings.ingestAndManageData.overview.title,
+              },
+            ],
+            id: 'data_management_overview',
+            title: '',
+          },
+          {
             title: i18nStrings.ingestAndManageData.ingestAndIntegrations.title,
             children: [
               { link: 'integrations' },

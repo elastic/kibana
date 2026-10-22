@@ -470,6 +470,18 @@ export const createNavigationTree = ({
         breadcrumbStatus: 'hidden',
         children: [
           {
+            children: [
+              {
+                link: 'management:data_management_overview',
+                title: i18n.translate('xpack.serverlessObservability.nav.dataManagement.overview', {
+                  defaultMessage: 'Overview',
+                }),
+              },
+            ],
+            id: 'data_management_overview',
+            title: '',
+          },
+          {
             title: i18n.translate('xpack.serverlessObservability.nav.ingestAndIntegrations', {
               defaultMessage: 'Ingest and integrations',
               description:

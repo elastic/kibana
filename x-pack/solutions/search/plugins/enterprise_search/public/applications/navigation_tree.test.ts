@@ -9,7 +9,7 @@ import { firstValueFrom, of } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
-import { STACK_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
+import { DATA_MANAGEMENT_NAV_ID, STACK_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 
 import { getNavigationTreeDefinition } from '../navigation_tree';
 
@@ -28,6 +28,31 @@ const getStackManagement = async (): Promise<NodeDefinition | undefined> => {
 };
 
 describe('Elasticsearch solution navigation tree', () => {
+  it('places Overview above Indices and data streams in Data management', async () => {
+    const core = coreMock.createStart();
+    core.settings.globalClient.get.mockReturnValue(false);
+
+    const definition = getNavigationTreeDefinition({
+      core,
+      dynamicItems$: of({}),
+      isCloudEnabled: false,
+    });
+    const { body } = (await firstValueFrom(definition.navigationTree$)) as NavigationTreeDefinition;
+    const dataManagement = body.find((item) => item.id === DATA_MANAGEMENT_NAV_ID);
+    const [overview, indicesAndDataStreams] = dataManagement?.children ?? [];
+
+    expect(overview).toEqual(
+      expect.objectContaining({
+        id: 'data_management_overview',
+        title: '',
+      })
+    );
+    expect(overview?.children?.[0]).toEqual(
+      expect.objectContaining({ link: 'management:data_management_overview' })
+    );
+    expect(indicesAndDataStreams?.title).toBe('Indices and data streams');
+  });
+
   it('includes Stack Alerts in Stack Management > Alerts and Insights', async () => {
     const stackManagement = await getStackManagement();
     const alertsSection = stackManagement?.children?.find(

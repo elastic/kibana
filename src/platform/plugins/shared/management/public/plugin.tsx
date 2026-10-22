@@ -40,6 +40,7 @@ import {
   getSectionsServiceStartPrivate,
 } from './management_sections_service';
 import type { ManagementSection } from './utils';
+import { registerDataManagementCreateOverlay } from './data_management_create_overlays';
 
 const defaultAutoOpsStatusResult: AutoOpsStatusResult = {
   isCloudConnectAutoopsEnabled: false,
@@ -202,10 +203,31 @@ export class ManagementPlugin
         .subscribe((style) => this.isSidebarEnabled$.next(style === 'classic'));
     });
 
+    const sections = this.managementSections.setup();
+    sections.section.data.registerApp({
+      id: 'data_management_overview',
+      title: kbnI18n.translate('management.dataManagementOverview.title', {
+        defaultMessage: 'Overview',
+      }),
+      order: -1,
+      // Stay out of global search. Solution navs link it explicitly; classic nav shows it in the Data sidebar.
+      hideFromGlobalSearch: true,
+      visibleIn: ['projectSideNav'],
+      async mount(params) {
+        const [{ renderDataManagementOverview }, [coreStart, startPlugins]] = await Promise.all([
+          import('./data_management_overview/data_management_overview_page'),
+          core.getStartServices(),
+        ]);
+
+        return renderDataManagementOverview(coreStart, params, startPlugins.share);
+      },
+    });
+
     return {
-      sections: this.managementSections.setup(),
+      sections,
       locator,
       registerAutoOpsStatusHook: this.registerAutoOpsStatusHook,
+      registerDataManagementCreateOverlay,
     };
   }
 

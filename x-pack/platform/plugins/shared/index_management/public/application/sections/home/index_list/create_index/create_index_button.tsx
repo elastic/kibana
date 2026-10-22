@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import type { History, Location } from 'history';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { EuiButton } from '@elastic/eui';
@@ -16,10 +17,41 @@ export interface CreateIndexButtonProps {
   loadIndices: () => void;
   share?: SharePluginStart;
   dataTestSubj?: string;
+  /** Opens the modal on mount. Used by the data management overview create menu. */
+  defaultOpen?: boolean;
+  history?: History;
+  location?: Location;
 }
 
-export const CreateIndexButton = ({ loadIndices, share, dataTestSubj }: CreateIndexButtonProps) => {
-  const [createIndexModalOpen, setCreateIndexModalOpen] = useState<boolean>(false);
+const withoutCreateIndexParam = (search: string): string => {
+  const params = new URLSearchParams(search);
+  if (!params.has('createIndex')) {
+    return search;
+  }
+  params.delete('createIndex');
+  const nextSearch = params.toString();
+  return nextSearch ? `?${nextSearch}` : '';
+};
+
+export const CreateIndexButton = ({
+  loadIndices,
+  dataTestSubj,
+  defaultOpen = false,
+  history,
+  location,
+}: CreateIndexButtonProps) => {
+  const [createIndexModalOpen, setCreateIndexModalOpen] = useState<boolean>(defaultOpen);
+
+  const closeModal = () => {
+    setCreateIndexModalOpen(false);
+    if (!history || !location) {
+      return;
+    }
+    const search = withoutCreateIndexParam(location.search);
+    if (search !== location.search) {
+      history.replace({ ...location, search });
+    }
+  };
 
   return (
     <>
@@ -37,10 +69,7 @@ export const CreateIndexButton = ({ loadIndices, share, dataTestSubj }: CreateIn
         />
       </EuiButton>
       {createIndexModalOpen && (
-        <CreateIndexModal
-          closeModal={() => setCreateIndexModalOpen(false)}
-          loadIndices={loadIndices}
-        />
+        <CreateIndexModal closeModal={closeModal} loadIndices={loadIndices} />
       )}
     </>
   );

@@ -28,6 +28,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useAsync from 'react-use/lib/useAsync';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
+import { useStreamDetailBack } from '../../../../hooks/use_stream_detail_back';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import {
   STREAMS_HISTOGRAM_NUM_DATA_POINTS,
@@ -72,6 +73,7 @@ export function Wrapper({
   topContent?: ReactNode;
 }) {
   const router = useStreamsAppRouter();
+  const { back: detailBack, withReturnQuery } = useStreamDetailBack();
   const { definition } = useStreamDetail();
   const {
     core: {
@@ -282,9 +284,6 @@ export function Wrapper({
     navigateToApp('/streams');
   }, [definition, abortController.signal, navigateToApp, streamsRepositoryClient]);
 
-  const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
-    defaultMessage: 'Streams',
-  });
   const viewInDiscoverLabel = i18n.translate('xpack.streams.streamDetailView.viewInDiscoverLabel', {
     defaultMessage: 'View in Discover',
   });
@@ -337,7 +336,7 @@ export function Wrapper({
     label: currentTab.label,
     href: router.link('/{key}/management/{tab}', {
       path: { key: streamId, tab: tabName },
-      query: { rangeFrom, rangeTo },
+      query: withReturnQuery({ rangeFrom, rangeTo }),
     }),
     isSelected: tab === tabName,
     'data-test-subj': getTabTestSubj(tabName, currentTab),
@@ -349,7 +348,7 @@ export function Wrapper({
     <>
       <StreamsAppHeader
         title={streamId}
-        back={{ href: router.link('/'), label: backToStreamsLabel }}
+        back={detailBack}
         badges={appHeaderBadges}
         tabs={appHeaderTabs}
         menu={appHeaderMenu}

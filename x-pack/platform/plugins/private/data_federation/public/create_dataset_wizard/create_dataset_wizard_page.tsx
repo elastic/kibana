@@ -17,7 +17,11 @@ import {
 } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import { useHistory } from 'react-router-dom';
+import {
+  cameFromDataManagementOverview,
+  DATA_MANAGEMENT_OVERVIEW_PATH,
+} from '@kbn/management-plugin/common';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormProvider, useForm } from 'react-hook-form';
 
@@ -78,9 +82,11 @@ export function CreateDatasetWizardPage({
   initialDataSet?: DataSetWithName;
 }) {
   const history = useHistory();
+  const { search } = useLocation();
   const {
-    services: { datasetsClient, toasts, reportUiCounter },
+    services: { application, datasetsClient, toasts, reportUiCounter },
   } = useKibana<DataFederationKibanaServices>();
+  const fromOverview = cameFromDataManagementOverview(search);
   const isEditMode = initialDataSet !== undefined;
   const datasetNameToEdit = initialDataSet?.name;
   const [saveError, setSaveError] = useState<SaveError | null>(null);
@@ -131,8 +137,14 @@ export function CreateDatasetWizardPage({
   };
 
   const goToDatasets = useCallback(() => {
+    if (fromOverview && application) {
+      void application.navigateToUrl(
+        application.getUrlForApp('management', { path: DATA_MANAGEMENT_OVERVIEW_PATH })
+      );
+      return;
+    }
     history.push(DATASETS_PATH);
-  }, [history]);
+  }, [application, fromOverview, history]);
 
   const onSave = useCallback(async () => {
     const values = methods.getValues();
@@ -240,8 +252,14 @@ export function CreateDatasetWizardPage({
             : createDatasetWizardStrings.pageTitle
         }
         back={{
-          href: history.createHref({ pathname: DATASETS_PATH }),
-          label: createDatasetWizardStrings.backToListLabel,
+          href:
+            fromOverview && application
+              ? application.getUrlForApp('management', { path: DATA_MANAGEMENT_OVERVIEW_PATH })
+              : history.createHref({ pathname: DATASETS_PATH }),
+          label:
+            fromOverview && application
+              ? createDatasetWizardStrings.backToOverviewLabel
+              : createDatasetWizardStrings.backToListLabel,
         }}
         spacing="bleed"
       />

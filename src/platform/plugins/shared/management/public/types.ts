@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactElement } from 'react';
 import type { Observable } from 'rxjs';
 import type {
   ScopedHistory,
@@ -36,6 +37,19 @@ export interface AutoOpsStatusResult {
 /** @public */
 export type AutoOpsStatusHook = () => AutoOpsStatusResult;
 
+/** Resource create UIs the data management overview can open without leaving the page. */
+export type DataManagementCreateOverlayId = 'index' | 'dataStream' | 'esqlView';
+
+export interface DataManagementCreateOverlayProps {
+  onClose: () => void;
+  /** Set when the ES|QL view overlay should edit this view instead of creating one. */
+  esqlViewName?: string;
+}
+
+export type DataManagementCreateOverlayRenderer = (
+  props: DataManagementCreateOverlayProps
+) => ReactElement | null;
+
 export interface ManagementSetup {
   sections: SectionsServiceSetup;
   locator: LocatorPublic<ManagementAppLocatorParams>;
@@ -44,6 +58,14 @@ export interface ManagementSetup {
    * Used by the cloud_connect plugin to provide connection status to the management landing page.
    */
   registerAutoOpsStatusHook: (hook: AutoOpsStatusHook) => void;
+  /**
+   * Registers a create modal or flyout for the data management overview.
+   * The overview renders it on the overview page instead of navigating away.
+   */
+  registerDataManagementCreateOverlay: (
+    id: DataManagementCreateOverlayId,
+    render: DataManagementCreateOverlayRenderer
+  ) => void;
 }
 
 export interface DefinedSections {

@@ -11,6 +11,10 @@ import type { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageTemplate, EuiText, EuiCode } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
+import {
+  cameFromDataManagementOverview,
+  DATA_MANAGEMENT_OVERVIEW_PATH,
+} from '@kbn/management-plugin/common';
 
 import { resetIndexUrlParams } from './reset_index_url_params';
 import type { IndexDetailsTabId } from '../../../../../../common/constants';
@@ -18,24 +22,35 @@ import { IndexDetailsSection, Section } from '../../../../../../common/constants
 import type { Index } from '../../../../../../common';
 import type { Error } from '../../../../../shared_imports';
 import { loadIndex } from '../../../../services';
+import { useAppContext } from '../../../../app_context';
 import { DetailsPageError } from './details_page_error';
 import { DetailsPageContent } from './details_page_content';
 
 export const DetailsPage: FunctionComponent<
   RouteComponentProps<{ indexName: string; indexDetailsSection: IndexDetailsSection }>
 > = ({ location: { search }, history }) => {
+  const {
+    core: { application, getUrlForApp },
+  } = useAppContext();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const indexName = queryParams.get('indexName') ?? '';
   const tab: IndexDetailsTabId = queryParams.get('tab') ?? IndexDetailsSection.Overview;
+  const fromOverview = cameFromDataManagementOverview(search);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [index, setIndex] = useState<Index | null>();
 
   const navigateToIndicesList = useCallback(() => {
+    if (fromOverview) {
+      void application.navigateToUrl(
+        getUrlForApp('management', { path: DATA_MANAGEMENT_OVERVIEW_PATH })
+      );
+      return;
+    }
     const paramsString = resetIndexUrlParams(search);
     history.push(`/${Section.Indices}${paramsString ? '?' : ''}${paramsString}`);
-  }, [history, search]);
+  }, [application, fromOverview, getUrlForApp, history, search]);
 
   const fetchIndexDetails = useCallback(async () => {
     if (indexName) {
@@ -100,6 +115,7 @@ export const DetailsPage: FunctionComponent<
         indexName={indexName}
         resendRequest={fetchIndexDetails}
         navigateToIndicesList={navigateToIndicesList}
+        cameFromOverview={fromOverview}
       />
     );
   }

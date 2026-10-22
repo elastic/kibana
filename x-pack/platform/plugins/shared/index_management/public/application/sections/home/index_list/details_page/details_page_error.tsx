@@ -20,10 +20,12 @@ export const DetailsPageError = ({
   indexName,
   resendRequest,
   navigateToIndicesList,
+  cameFromOverview = false,
 }: {
   indexName: string;
   resendRequest: () => Promise<void>;
   navigateToIndicesList: () => void;
+  cameFromOverview?: boolean;
 }) => {
   return (
     <EuiPageTemplate.EmptyPrompt
@@ -57,10 +59,17 @@ export const DetailsPageError = ({
               iconType="chevronSingleLeft"
               onClick={navigateToIndicesList}
             >
-              <FormattedMessage
-                id="xpack.idxMgmt.indexDetails.backToIndicesButtonLabel"
-                defaultMessage="Back to indices"
-              />
+              {cameFromOverview ? (
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexDetails.backToOverviewButtonLabel"
+                  defaultMessage="Back to overview"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexDetails.backToIndicesButtonLabel"
+                  defaultMessage="Back to indices"
+                />
+              )}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

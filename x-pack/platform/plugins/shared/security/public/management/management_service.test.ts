@@ -61,6 +61,7 @@ describe('ManagementService', () => {
         },
         locator: {} as any,
         registerAutoOpsStatusHook: jest.fn(),
+        registerDataManagementCreateOverlay: jest.fn(),
       };
 
       const service = new ManagementService({} as unknown as ConfigType);
@@ -204,6 +205,7 @@ describe('ManagementService', () => {
         },
         locator: {} as any,
         registerAutoOpsStatusHook: jest.fn(),
+        registerDataManagementCreateOverlay: jest.fn(),
       };
 
       const config = {
@@ -297,6 +299,7 @@ describe('ManagementService', () => {
         },
         locator: {} as any,
         registerAutoOpsStatusHook: jest.fn(),
+        registerDataManagementCreateOverlay: jest.fn(),
       };
 
       const { authc } = securityMock.createSetup();

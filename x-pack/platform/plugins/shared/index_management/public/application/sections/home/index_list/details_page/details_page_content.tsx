@@ -15,6 +15,10 @@ import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import { ROLLUP_DEPRECATION_BADGE_LABEL, RollupDeprecationTooltip } from '@kbn/rollup';
 
 import { AppHeader, type AppHeaderTab, type AppHeaderBadge } from '@kbn/app-header';
+import {
+  cameFromDataManagementOverview,
+  DATA_MANAGEMENT_OVERVIEW_PATH,
+} from '@kbn/management-plugin/common';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useIndexErrors } from '../../../../hooks/use_index_errors';
 import { resetIndexUrlParams } from './reset_index_url_params';
@@ -82,6 +86,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
   const {
     core: {
       application: { capabilities },
+      getUrlForApp,
     },
     config: { enableIndexStats },
     plugins: { console: consolePlugin, ml },
@@ -152,6 +157,14 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
   // An internal app link; the global redirectAppLinks wrapper turns the click into SPA navigation.
   // The preserved indices-list params (filter, hidden toggle, …) are carried in the href itself.
   const indicesListBack = useMemo(() => {
+    if (cameFromDataManagementOverview(search)) {
+      return {
+        href: getUrlForApp('management', { path: DATA_MANAGEMENT_OVERVIEW_PATH }),
+        label: i18n.translate('xpack.idxMgmt.indexDetails.backToDataManagementOverviewLabel', {
+          defaultMessage: 'Overview',
+        }),
+      };
+    }
     const paramsString = resetIndexUrlParams(search);
     return {
       href: `/app/management/data/index_management/${Section.Indices}${
@@ -161,7 +174,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
         defaultMessage: 'Indices',
       }),
     };
-  }, [search]);
+  }, [getUrlForApp, search]);
 
   const onIndexRefresh = useCallback(() => {
     return resendDocumentsSampleRequest();

@@ -37,6 +37,7 @@ import {
 } from './discover_features';
 import { StreamsTelemetryService } from './telemetry/service';
 import { StreamsAppLocatorDefinition } from '../common/locators';
+import { OverviewClassicStreamFlyout } from './components/stream_list_view/overview_classic_stream_flyout';
 
 const StreamsApplication = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.StreamsApplication }))
@@ -96,9 +97,17 @@ export class StreamsAppPlugin
     this.logger = context.logger.get();
     this.version = context.env.packageInfo.version;
   }
-  setup(coreSetup: CoreSetup<StreamsAppStartDependencies>): StreamsAppPublicSetup {
+  setup(
+    coreSetup: CoreSetup<StreamsAppStartDependencies>,
+    { management }: StreamsAppSetupDependencies
+  ): StreamsAppPublicSetup {
     this.telemetry.setup(coreSetup.analytics);
     const startServicesPromise = coreSetup.getStartServices();
+    const getStartServices = () => coreSetup.getStartServices();
+
+    management?.registerDataManagementCreateOverlay('dataStream', ({ onClose }) => (
+      <OverviewClassicStreamFlyout getStartServices={getStartServices} onClose={onClose} />
+    ));
 
     coreSetup.application.register({
       id: 'streams',

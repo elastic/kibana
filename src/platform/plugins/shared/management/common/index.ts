@@ -8,3 +8,10 @@
  */
 
 export type { ManagementAppLocator } from './locator';
+export {
+  DATA_MANAGEMENT_OVERVIEW_PATH,
+  DATA_MANAGEMENT_OVERVIEW_RETURN_PARAM,
+  DATA_MANAGEMENT_OVERVIEW_RETURN_VALUE,
+  cameFromDataManagementOverview,
+  withDataManagementOverviewReturn,
+} from './data_management_overview_return';

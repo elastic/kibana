@@ -72,6 +72,7 @@
     "@kbn/language-documentation",
     "@kbn/licensing-plugin",
     "@kbn/logging",
+    "@kbn/management-plugin",
     "@kbn/management-settings-ids",
     "@kbn/monaco",
     "@kbn/navigation-plugin",

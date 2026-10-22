@@ -98,6 +98,19 @@ export function createNavigationTree({
         children: [
           {
             children: [
+              {
+                breadcrumbStatus: 'hidden',
+                link: 'management:data_management_overview',
+                title: i18n.translate('xpack.serverlessVectordb.nav.dataManagement.overview', {
+                  defaultMessage: 'Overview',
+                }),
+              },
+            ],
+            id: 'data_management_overview',
+            title: '',
+          },
+          {
+            children: [
               { link: 'management:index_management', breadcrumbStatus: 'hidden' },
               { link: 'management:data_federation', breadcrumbStatus: 'hidden' },
               { link: 'management:esql_views', breadcrumbStatus: 'hidden' },

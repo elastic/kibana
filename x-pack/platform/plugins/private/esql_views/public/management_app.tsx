@@ -41,6 +41,25 @@ interface ManagementAppProps {
 
 type FormState = { type: 'create' } | { type: 'edit'; view: EsqlView };
 
+const CREATE_VIEW_QUERY_VALUE = 'view';
+
+const shouldOpenCreateForm = (): boolean =>
+  new URLSearchParams(window.location.search).get('create') === CREATE_VIEW_QUERY_VALUE;
+
+const clearCreateFormParam = (): void => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('create') !== CREATE_VIEW_QUERY_VALUE) {
+    return;
+  }
+  params.delete('create');
+  const search = params.toString();
+  window.history.replaceState(
+    window.history.state,
+    '',
+    `${window.location.pathname}${search ? `?${search}` : ''}${window.location.hash}`
+  );
+};
+
 export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
   canCreate,
   canEdit,
@@ -55,7 +74,9 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
   toasts,
 }) => {
   const { error, isLoading, reload, status, views } = useEsqlViews(client);
-  const [formState, setFormState] = useState<FormState>();
+  const [formState, setFormState] = useState<FormState | undefined>(() =>
+    canCreate && shouldOpenCreateForm() ? { type: 'create' } : undefined
+  );
   const [selectedViews, setSelectedViews] = useState<EsqlView[]>([]);
 
   useEffect(() => {
@@ -170,8 +191,12 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
           EsqlEditor={EsqlEditor}
           previewDependencies={previewDependencies}
           telemetryClient={telemetryClient}
-          onClose={() => setFormState(undefined)}
+          onClose={() => {
+            clearCreateFormParam();
+            setFormState(undefined);
+          }}
           onSave={async () => {
+            clearCreateFormParam();
             await reload();
             setFormState(undefined);
           }}
