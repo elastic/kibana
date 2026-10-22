@@ -26,10 +26,13 @@ import { BRIEF_PERIOD_LABELS, describeDelta, formatCount } from './describe_scop
 // Drafting the brief
 
 export const MAX_PRIORITIES = 3;
-const WORD_LIMITS = {
+/** How much the whole brief says: it is read in about a minute. */
+const BRIEF_WORD_BUDGET = 250;
+/** Guidance for each part, not caps: the words go where the evidence is. */
+const WORD_GUIDES = {
   title: 8,
   summary: 40,
-  assessment: 20,
+  assessment: 30,
   whyFirst: 15,
   nextStep: 20,
   recommendation: 30,
@@ -49,11 +52,11 @@ export const DRAFT_SYSTEM_PROMPT = `You write a short Entity Analytics brief for
 - The reader sees the page's counts, and beside your text, for each priority: the risk score and level, asset criticality, watchlists, and first seen. The alerts and anomalies are not shown: your text is where the reader learns about them.
 
 ## Output
-- title: a short headline for the pattern of the period, at most ${WORD_LIMITS.title} words, with no counts and no mention of an entity. Follow the rule on findings below.
+- title: a short headline for the pattern of the period, about ${WORD_GUIDES.title} words, with no counts and no mention of an entity. Follow the rule on findings below.
 - summary: one or two sentences on the pattern of the period, never the counts the page shows. Never comment on which or how many entities are listed: the brief states its coverage itself. Follow the rule on findings below.
 - priorities: up to ${MAX_PRIORITIES} entities to look at first, most important first. Entities flagged several ways, with high criticality, privilege or high risk usually come first. Use fewer when the data doesn't support ${MAX_PRIORITIES}; never pad. Always include the field.
 - A priority's text sits under the entity's name: never name, mention or refer back to the entity in it ("its alerts", not "this user's alerts").
-- assessment: one sentence, at most ${WORD_LIMITS.assessment} words, on what the evidence looks like taken together. whyFirst: one sentence, at most ${WORD_LIMITS.whyFirst} words, on why that puts the entity ahead of the others. Never repeat what the reader already sees: the risk score, criticality, watchlists or first seen. Name the alert rules through their tokens and give their counts.
+- assessment: one sentence, about ${WORD_GUIDES.assessment} words, on what the evidence looks like taken together. whyFirst: one sentence, about ${WORD_GUIDES.whyFirst} words, on why that puts the entity ahead of the others. Never repeat what the reader already sees: the risk score, criticality, watchlists or first seen. Name the alert rules through their tokens and give their counts.
 - Cite an alert rule only as {{ rule <index> }}, and an anomaly job only as {{ job <index> }}, with the index it has in the alerts or anomalies of the entity you write about, copied exactly and only inside assessment or whyFirst; the reader sees its name. Never write a rule or job name yourself.
 - Cite each listed rule or job at most once. Put it inside the sentence's own grammar, with its count written as a word before it, such as "three {{ rule 1 }} alerts": never in brackets, never as "x3" or ": 3". When otherRuleCount is above zero, say "and N other rules" with that number written as a word, and never calculate it.
 - Findings: the title, the summary, the assessment, whyFirst and the recommendation name what to confirm, never what happened. Words such as "lateral movement", "compromise", "attack", "pivot", "breakout", "coordinated" and "exfiltration" state a finding: never use them in any of them. Say "looks like", "is the shape of" or "worth confirming" instead.
@@ -61,7 +64,8 @@ export const DRAFT_SYSTEM_PROMPT = `You write a short Entity Analytics brief for
   Bad: "High impact, on a watchlist and newly seen, with risk score 76 (High)."
 - recommendation: the one step to take first across the whole view, not only for the first priority. It must make sense on its own. Follow the rule on findings below.
 - Mention an entity only as {{ entity.id <entityId> }}, copied exactly; the reader sees its name. Never write a name or EUID yourself, or refer to an entity any other way, such as "this account", "this identity" or "this host".
-- Keep to the word limits in the schema. The brief is read in about a minute.
+- Budget: the whole brief is read in about a minute, so keep its prose within about ${BRIEF_WORD_BUDGET} words. A {{ rule }} or {{ job }} token counts as one word, because the reader sees its name but you didn't write it. The lengths given for each part are guidance, not caps. Spend the words where the evidence is: a priority with one flag and one rule should be short, and the richest one can run longer.
+- Value over length: a sentence that only lists facts the card shows is a failure even when it is short. One judgement that connects two facts is worth more than three facts.
 
 ## Accuracy
 - Use only the view and the entities. A priority quotes only numbers from its own entity or the view. Never calculate, add up, estimate or round, including previous values (the view gives the change, not the old count) and ratios such as "doubled".
@@ -132,16 +136,16 @@ export const BriefDraft = lazySchema(() =>
           assessment: z
             .string()
             .describe(
-              `One sentence, at most ${WORD_LIMITS.assessment} words, on what the evidence looks like taken together. Repeat nothing the reader already sees. Name the alert rules as {{ rule <index> }}, with their counts, and the anomaly job as {{ job <index> }}. Don't start with the entity name.`
+              `One sentence, about ${WORD_GUIDES.assessment} words, on what the evidence looks like taken together. Repeat nothing the reader already sees. Name the alert rules as {{ rule <index> }}, with their counts, and the anomaly job as {{ job <index> }}. Don't start with the entity name.`
             ),
           whyFirst: z
             .string()
             .describe(
-              `One sentence, at most ${WORD_LIMITS.whyFirst} words, on why that puts the entity ahead of the others.`
+              `One sentence, about ${WORD_GUIDES.whyFirst} words, on why that puts the entity ahead of the others.`
             ),
           nextStep: z
             .string()
-            .describe(`One specific investigation step, at most ${WORD_LIMITS.nextStep} words`),
+            .describe(`One specific investigation step, about ${WORD_GUIDES.nextStep} words`),
         })
       )
       .describe(
@@ -150,17 +154,17 @@ export const BriefDraft = lazySchema(() =>
     title: z
       .string()
       .describe(
-        `A headline for the pattern of the period, at most ${WORD_LIMITS.title} words. No counts, no entity mentions.`
+        `A headline for the pattern of the period, about ${WORD_GUIDES.title} words. No counts, no entity mentions.`
       ),
     summary: z
       .string()
       .describe(
-        `One or two sentences, at most ${WORD_LIMITS.summary} words, on the pattern of the period. Don't repeat the page's counts.`
+        `One or two sentences, about ${WORD_GUIDES.summary} words, on the pattern of the period. Don't repeat the page's counts.`
       ),
     recommendation: z
       .string()
       .describe(
-        `The one step to take first across the view, at most ${WORD_LIMITS.recommendation} words.`
+        `The one step to take first across the view, about ${WORD_GUIDES.recommendation} words.`
       ),
   })
 );
