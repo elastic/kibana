@@ -399,6 +399,8 @@ export class PreviewController {
       // document the user is no longer asking for, and clear a possible previous fetch error.
       this.debouncedLoadDocument.cancel();
       this.setFetchDocError(null);
+      // An in-flight lookup set this flag and its discarded response will not reset it
+      this.setIsLoadingPreview(false);
     }
   };
 
@@ -550,8 +552,9 @@ export class PreviewController {
       .catch((err) => [null, err]);
 
     // A custom document ID was entered while the sample documents were being fetched:
-    // discard this response, the single document load owns the state now.
-    if (this.internalState$.getValue().customDocIdToLoad !== null) {
+    // discard this response, the single document load owns the state now. A cleared (empty)
+    // ID keeps the sample documents as they are the fallback the user returns to.
+    if (Boolean(this.internalState$.getValue().customDocIdToLoad?.trim())) {
       return;
     }
 
@@ -725,14 +728,13 @@ export class PreviewController {
     fieldName: string,
     values: unknown[],
     type: Params['type'],
-    format: Params['format'],
-    customLabel?: Params['customLabel']
+    format: Params['format']
   ) => {
     const value = toPreviewValue(values);
     const formattedValue = this.valueFormatter({ value, type, format });
 
     this.setPreviewResponse({
-      fields: [{ key: fieldName, label: customLabel ?? undefined, value, formattedValue }],
+      fields: [{ key: fieldName, value, formattedValue }],
       error: null,
     });
   };

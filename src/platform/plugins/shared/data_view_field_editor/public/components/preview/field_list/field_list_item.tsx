@@ -71,15 +71,18 @@ export interface PreviewListItemProps {
   hasScriptError?: boolean;
   /** Indicates whether the field list item comes from the Painless script */
   isFromScript?: boolean;
+  /** Display label of the field, falls back to the field key when not set */
+  label?: string;
 }
 
 const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview;
 
 export const PreviewListItem: React.FC<PreviewListItemProps> = ({
-  field: { key, label, value, formattedValue, isPinned = false },
+  field: { key, value, formattedValue, isPinned = false },
   toggleIsPinned,
   hasScriptError,
   isFromScript = false,
+  label,
 }) => {
   const styles = useMemoCss(componentStyles);
 

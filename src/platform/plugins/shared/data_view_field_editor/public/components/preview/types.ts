@@ -104,10 +104,7 @@ export interface Params {
 }
 
 export interface FieldPreview {
-  /** Field name (or `<parent>.<subfield>` for composite subfields), also used as the row id */
   key: string;
-  /** Display label of the field, falls back to the key when not set */
-  label?: string;
   value: unknown;
   formattedValue?: ReactNode;
   type?: string;
