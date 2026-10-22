@@ -22,7 +22,6 @@ import { AppHeaderLoading } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { PLUGIN_ID } from '../../../common/constants';
-import { getModeRules } from '../../../common/mode_switch';
 import type { RuleCoverage } from '../../../common/resolution';
 import { getAppliedRules, getRuleCoverage } from '../../../common/resolution';
 import type {
@@ -43,7 +42,6 @@ import {
   DetailsPage,
   DetailsSection,
   DetailsSplitBand,
-  SimpleModeNotice,
 } from '../details/details_page';
 import { DetailsList } from '../details/details_list';
 import { DetailsLink } from '../details_link';
@@ -173,9 +171,7 @@ export const ProfileDetailsPage = () => {
     return <DetailsPage list="profiles" name={name} isFound={false} />;
   }
 
-  // What applies in advanced mode, which is where custom rules and profiles take effect.
-  const rules = getModeRules(state, 'advanced');
-  const { profiles, data_sources: dataSources } = state;
+  const { rules, profiles, data_sources: dataSources } = state;
   const coverage = getRuleCoverage(dataSources, rules, profiles);
   const profileRules: RuleRow[] = rules
     .filter(({ boost_profile: profileName }) => profileName === name)
@@ -195,7 +191,6 @@ export const ProfileDetailsPage = () => {
   const sizeInBytes = usedBy.reduce((total, { size_in_bytes: bytes }) => total + bytes, 0);
   const vcus = estimateDataSourcesVcuRange(usedBy, profile);
   const usedByDefaultRule = profileRules.some(({ is_builtin: isBuiltin }) => isBuiltin);
-  const isAdvanced = state.settings.mode === 'advanced';
 
   const editLabel = i18n.translate('xpack.boost.profileDetails.editAction', {
     defaultMessage: 'Edit profile',
@@ -336,16 +331,6 @@ export const ProfileDetailsPage = () => {
               ],
             }
       }
-      notice={
-        !isAdvanced && (
-          <SimpleModeNotice>
-            {i18n.translate('xpack.boost.profileDetails.simpleModeNotice', {
-              defaultMessage:
-                'Custom boost rules are suspended until advanced mode is turned back on. The details below show how this profile applies in advanced mode.',
-            })}
-          </SimpleModeNotice>
-        )
-      }
     >
       <DetailsSplitBand
         start={
@@ -376,7 +361,7 @@ export const ProfileDetailsPage = () => {
                     defaultMessage: 'Boost rules',
                   }),
                   description:
-                    profileRules.length > 0 && isAdvanced ? (
+                    profileRules.length > 0 ? (
                       <EuiLink {...reactRouterNavigate(history, getProfileRulesLocation(name))}>
                         {profileRules.length}
                       </EuiLink>
@@ -433,8 +418,7 @@ export const ProfileDetailsPage = () => {
             defaultMessage: 'Boost rules using this profile',
           })}
           titleAppend={
-            canEdit &&
-            isAdvanced && (
+            canEdit && (
               <EuiButton
                 size="s"
                 onClick={() => setFlyout('createRule')}

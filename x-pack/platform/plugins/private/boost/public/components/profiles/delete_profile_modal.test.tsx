@@ -13,9 +13,8 @@ import {
   BUILTIN_INDICES_PROFILE_NAMES,
   BUILTIN_PROFILES,
   DEFAULT_INDICES_RULE_NAME,
-  DEFAULT_SIMPLE_MODE_DEFAULTS,
+  DEFAULT_RULE_PROFILES,
   createDefaultRules,
-  translateSimpleDefaults,
 } from '../../../common/presets';
 import type { BoostProfile, BoostRule } from '../../../common/types';
 import { DeleteProfileModal } from './delete_profile_modal';
@@ -52,7 +51,7 @@ describe('DeleteProfileModal', () => {
           rules={[
             rule('catalogs', 'catalog-*', 'catalog-search', 2),
             rule('archives', '*-fall', BUILTIN_INDICES_PROFILE_NAMES.on_demand, 1),
-            ...createDefaultRules(translateSimpleDefaults(DEFAULT_SIMPLE_MODE_DEFAULTS)),
+            ...createDefaultRules(DEFAULT_RULE_PROFILES),
           ]}
           profiles={[...BUILTIN_PROFILES, profile]}
           dataSources={[

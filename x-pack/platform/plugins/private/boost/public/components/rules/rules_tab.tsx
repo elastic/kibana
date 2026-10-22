@@ -33,6 +33,8 @@ import type { ProfileSelections } from './profile_filter';
 import { ProfileFilter, matchesProfileFilter } from './profile_filter';
 import { DetailsLink } from '../details_link';
 import { RuleMatches } from './rule_matches';
+import { getDefaultRuleType } from '../../../common/presets';
+import { ProjectDefaultFlyout } from '../project_defaults/project_default_flyout';
 import { RuleFlyout } from './rule_flyout';
 import { DeleteRuleModal } from './delete_rule_modal';
 
@@ -66,6 +68,8 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
   const [ruleToDelete, setRuleToDelete] = useState<RuleRow>();
   // Undefined while closed; an empty object creates a rule, and `rule` edits one.
   const [flyout, setFlyout] = useState<{ rule?: BoostRule; duplicateOf?: BoostRule }>();
+  // A default rule is edited as its project default, which the page's defaults edit too.
+  const [editedDefaultType, setEditedDefaultType] = useState<BoostProfileType>();
   const { search: locationSearch } = useLocation();
   // Read once, so the filter is the user's to change afterwards.
   const [profileSelections, setProfileSelections] = useState<ProfileSelections>(() => {
@@ -108,7 +112,14 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
         icon: 'pencil',
         type: 'icon',
         isPrimary: true,
-        onClick: (rule) => setFlyout({ rule }),
+        onClick: (rule) => {
+          const defaultType = getDefaultRuleType(rule.name);
+          if (rule.is_builtin && defaultType) {
+            setEditedDefaultType(defaultType);
+          } else {
+            setFlyout({ rule });
+          }
+        },
         'data-test-subj': 'editBoostRule',
       },
       {
@@ -285,6 +296,13 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
           rule={flyout.rule}
           duplicateOf={flyout.duplicateOf}
           onClose={() => setFlyout(undefined)}
+        />
+      )}
+
+      {editedDefaultType && (
+        <ProjectDefaultFlyout
+          type={editedDefaultType}
+          onClose={() => setEditedDefaultType(undefined)}
         />
       )}
 

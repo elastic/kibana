@@ -11,13 +11,10 @@ import type {
   BoostProfile,
   BoostProfileType,
   BoostRule,
-  BoostSettings,
-  CustomDefaults,
   DataStreamsBoostProfile,
   DefaultRuleProfiles,
   DataStreamsWindowId,
   IndicesPresetId,
-  SimpleModeDefaults,
 } from './types';
 
 export const BUILTIN_INDICES_PROFILE_NAMES: Readonly<Record<IndicesPresetId, string>> = {
@@ -35,14 +32,22 @@ export const BUILTIN_DATA_STREAMS_PROFILE_NAMES: Readonly<Record<DataStreamsWind
 export const DEFAULT_INDICES_RULE_NAME = 'elastic-default-indices';
 export const DEFAULT_DATA_STREAMS_RULE_NAME = 'elastic-default-data-streams';
 
-export const DEFAULT_SIMPLE_MODE_DEFAULTS: SimpleModeDefaults = {
-  indices: 'performant',
-  data_streams: { window: 'last_7_days' },
+/** The default rule for each profile type, which applies to whatever no other rule matches. */
+export const DEFAULT_RULE_NAMES: Readonly<Record<BoostProfileType, string>> = {
+  indices: DEFAULT_INDICES_RULE_NAME,
+  data_streams: DEFAULT_DATA_STREAMS_RULE_NAME,
 };
 
-export const NO_CUSTOM_DEFAULTS: CustomDefaults = {
-  indices_profile: null,
-  data_streams_profile: null,
+/** The project's defaults out of the box: Performant indices and the last 7 days of data streams. */
+export const DEFAULT_RULE_PROFILES: DefaultRuleProfiles = {
+  indices_profile: BUILTIN_INDICES_PROFILE_NAMES.performant,
+  data_streams_profile: BUILTIN_DATA_STREAMS_PROFILE_NAMES.last_7_days,
+};
+
+/** Where each type's default profile is kept. */
+export const DEFAULT_PROFILE_KEYS: Readonly<Record<BoostProfileType, keyof DefaultRuleProfiles>> = {
+  indices: 'indices_profile',
+  data_streams: 'data_streams_profile',
 };
 
 const createWindowPeriods = (
@@ -111,66 +116,11 @@ export const BUILTIN_PROFILES: readonly BoostProfile[] = [
   },
 ];
 
-/** Translates simple-mode defaults into the profiles referenced by the two default rules. */
-export const translateSimpleDefaults = ({
-  indices,
-  data_streams: dataStreams,
-}: SimpleModeDefaults): DefaultRuleProfiles => ({
-  indices_profile: BUILTIN_INDICES_PROFILE_NAMES[indices],
-  data_streams_profile: BUILTIN_DATA_STREAMS_PROFILE_NAMES[dataStreams.window],
-});
-
-/** Returns the profiles the default rules reference in the current mode. */
-export const getEffectiveDefaults = ({
-  mode,
-  simple,
-  custom_defaults: customDefaults,
-}: BoostSettings): DefaultRuleProfiles => {
-  const synced = translateSimpleDefaults(simple);
-  if (mode === 'simple') {
-    return synced;
-  }
-
-  return {
-    indices_profile: customDefaults.indices_profile ?? synced.indices_profile,
-    data_streams_profile: customDefaults.data_streams_profile ?? synced.data_streams_profile,
-  };
-};
-
-const findPresetId = <TId extends string>(
-  profileNames: Readonly<Record<TId, string>>,
-  profileName: string
-): TId | undefined =>
-  (Object.keys(profileNames) as TId[]).find((id) => profileNames[id] === profileName);
-
-/**
- * Points a default rule at a profile. An Elastic-managed profile selects the matching simple-mode
- * option, keeping both modes in sync; a custom profile stops syncing that type until a managed
- * profile is chosen again.
- */
-export const setDefaultRuleProfile = (
-  settings: BoostSettings,
-  type: BoostProfileType,
-  profileName: string
-): BoostSettings => {
-  const { simple, custom_defaults: customDefaults } = settings;
-
-  if (type === 'indices') {
-    const preset = findPresetId(BUILTIN_INDICES_PROFILE_NAMES, profileName);
-    return {
-      ...settings,
-      simple: preset ? { ...simple, indices: preset } : simple,
-      custom_defaults: { ...customDefaults, indices_profile: preset ? null : profileName },
-    };
-  }
-
-  const window = findPresetId(BUILTIN_DATA_STREAMS_PROFILE_NAMES, profileName);
-  return {
-    ...settings,
-    simple: window ? { ...simple, data_streams: { window } } : simple,
-    custom_defaults: { ...customDefaults, data_streams_profile: window ? null : profileName },
-  };
-};
+/** The profile type a default rule applies to, or undefined for a custom rule. */
+export const getDefaultRuleType = (ruleName: string): BoostProfileType | undefined =>
+  (Object.keys(DEFAULT_RULE_NAMES) as BoostProfileType[]).find(
+    (type) => DEFAULT_RULE_NAMES[type] === ruleName
+  );
 
 export const createDefaultRules = ({
   indices_profile: indicesProfile,

@@ -12,9 +12,8 @@ import {
   BUILTIN_INDICES_PROFILE_NAMES,
   BUILTIN_PROFILES,
   DEFAULT_INDICES_RULE_NAME,
-  DEFAULT_SIMPLE_MODE_DEFAULTS,
+  DEFAULT_RULE_PROFILES,
   createDefaultRules,
-  translateSimpleDefaults,
 } from '../../../common/presets';
 import type { BoostRule } from '../../../common/types';
 import { DeleteRuleModal } from './delete_rule_modal';
@@ -39,7 +38,7 @@ const rules = [
   rule('catalogs', 'catalog-*', BUILTIN_INDICES_PROFILE_NAMES.high_availability, 2),
   rule('fall', '*-fall', BUILTIN_INDICES_PROFILE_NAMES.on_demand, 1),
   rule('unused', 'nothing-*', BUILTIN_INDICES_PROFILE_NAMES.on_demand, 1),
-  ...createDefaultRules(translateSimpleDefaults(DEFAULT_SIMPLE_MODE_DEFAULTS)),
+  ...createDefaultRules(DEFAULT_RULE_PROFILES),
 ];
 
 const renderModal = (ruleName: string) =>
@@ -78,11 +77,7 @@ describe('DeleteRuleModal', () => {
       )
     ).toEqual([
       ['catalog-fall', 'fall', BUILTIN_INDICES_PROFILE_NAMES.on_demand],
-      [
-        'catalog-spring',
-        DEFAULT_INDICES_RULE_NAME,
-        translateSimpleDefaults(DEFAULT_SIMPLE_MODE_DEFAULTS).indices_profile,
-      ],
+      ['catalog-spring', DEFAULT_INDICES_RULE_NAME, DEFAULT_RULE_PROFILES.indices_profile],
     ]);
   });
 

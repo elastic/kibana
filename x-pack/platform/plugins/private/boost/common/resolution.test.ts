@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  BUILTIN_PROFILES,
-  DEFAULT_SIMPLE_MODE_DEFAULTS,
-  createDefaultRules,
-  translateSimpleDefaults,
-} from './presets';
+import { BUILTIN_PROFILES, DEFAULT_RULE_PROFILES, createDefaultRules } from './presets';
 import {
   countRulesByProfile,
   getAppliedRules,
@@ -34,7 +29,7 @@ const customIndicesProfile: BoostProfile = {
 
 const profiles = [...BUILTIN_PROFILES, customIndicesProfile];
 const profilesByName = new Map(profiles.map((profile) => [profile.name, profile]));
-const defaultRules = createDefaultRules(translateSimpleDefaults(DEFAULT_SIMPLE_MODE_DEFAULTS));
+const defaultRules = createDefaultRules(DEFAULT_RULE_PROFILES);
 
 const rule = (name: string, patterns: string | string[], priority = 0): BoostRule => ({
   name,
@@ -188,7 +183,7 @@ describe('getAppliedRules', () => {
         priority: 1,
         is_builtin: false,
       },
-      ...createDefaultRules(translateSimpleDefaults(DEFAULT_SIMPLE_MODE_DEFAULTS)),
+      ...createDefaultRules(DEFAULT_RULE_PROFILES),
     ];
     const dataSources: BoostDataSource[] = [
       { name: 'products-live', type: 'index', size_in_bytes: 1 },

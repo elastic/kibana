@@ -17,10 +17,8 @@ import {
   BUILTIN_PROFILES,
   DEFAULT_DATA_STREAMS_RULE_NAME,
   DEFAULT_INDICES_RULE_NAME,
-  DEFAULT_SIMPLE_MODE_DEFAULTS,
-  NO_CUSTOM_DEFAULTS,
+  DEFAULT_RULE_PROFILES,
   createDefaultRules,
-  translateSimpleDefaults,
 } from '../../../common/presets';
 import type { BoostProfile, BoostRule, BoostState } from '../../../common/types';
 import { estimateDataSourceVcuRange } from '../../../common/vcu_estimate';
@@ -135,19 +133,14 @@ const customRule = (
 });
 
 const mockState: BoostState = {
-  settings: {
-    mode: 'advanced',
-    simple: DEFAULT_SIMPLE_MODE_DEFAULTS,
-    custom_defaults: NO_CUSTOM_DEFAULTS,
-  },
+  settings: { default_profiles: DEFAULT_RULE_PROFILES },
   profiles: [...BUILTIN_PROFILES, catalogSearch, clicks],
   rules: [
     customRule('catalog-first', ['catalog-fall'], BUILTIN_INDICES_PROFILE_NAMES.on_demand, 5),
     customRule('catalogs', ['catalog-*'], 'catalog-search', 1),
     customRule('unused-clicks', ['nothing-*'], 'clicks', 1),
-    ...createDefaultRules(translateSimpleDefaults(DEFAULT_SIMPLE_MODE_DEFAULTS)),
+    ...createDefaultRules(DEFAULT_RULE_PROFILES),
   ],
-  suspended_rules: [],
   data_sources: [
     { name: 'catalog-fall', type: 'index', size_in_bytes: 4e9 },
     { name: 'catalog-spring', type: 'index', size_in_bytes: 2e9 },

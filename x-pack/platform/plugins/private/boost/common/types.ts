@@ -61,39 +61,21 @@ export interface BoostRule {
 /** Rule payload for create and update requests; the server sets `is_builtin`. */
 export type BoostRuleInput = Omit<BoostRule, 'is_builtin'>;
 
-export type BoostMode = 'simple' | 'advanced';
-
 export type IndicesPresetId = 'on_demand' | 'performant' | 'high_availability';
 
 export type DataStreamsWindowId = 'last_1_day' | 'last_3_days' | 'last_7_days';
 
-export interface SimpleModeDefaults {
-  indices: IndicesPresetId;
-  data_streams: {
-    window: DataStreamsWindowId;
-  };
-}
-
-/** Profiles referenced by the two default rules. */
+/**
+ * The profiles the two default rules use, which are the project's defaults: an Elastic-managed
+ * preset, or a custom profile of the same type.
+ */
 export interface DefaultRuleProfiles {
   indices_profile: string;
   data_streams_profile: string;
 }
 
-/**
- * Custom profiles that the default rules use in advanced mode, or `null` while a default rule uses
- * an Elastic-managed profile. Simple mode and advanced mode stay in sync for each type until that
- * type's default rule uses a custom profile.
- */
-export interface CustomDefaults {
-  indices_profile: string | null;
-  data_streams_profile: string | null;
-}
-
 export interface BoostSettings {
-  mode: BoostMode;
-  simple: SimpleModeDefaults;
-  custom_defaults: CustomDefaults;
+  default_profiles: DefaultRuleProfiles;
   updated_at?: string;
 }
 
@@ -129,9 +111,7 @@ export interface BoostDataSource {
 export interface BoostState {
   settings: BoostSettings;
   profiles: BoostProfile[];
-  /** The rules in effect: custom rules in advanced mode only, and the two default rules. */
+  /** The custom rules, highest priority first, then the two default rules. */
   rules: BoostRule[];
-  /** Custom rules that simple mode suspends, which apply again in advanced mode. */
-  suspended_rules: BoostRule[];
   data_sources: BoostDataSource[];
 }

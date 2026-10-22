@@ -1,7 +1,9 @@
 # Search boost (prototype)
 
-Prototype of the serverless **Search boost** page: project-level boost defaults ("simple" mode) and
-boost profiles and boost rules ("advanced" mode) for Elasticsearch and Vector DB projects.
+Prototype of the serverless **Search boost** page for Elasticsearch and Vector DB projects: the
+project's boost defaults for indices and for data streams, above the boost profiles and boost rules
+that tune specific ones. Each default is the profile its default boost rule uses, which applies to
+whatever no other rule matches: an Elastic-managed preset, or a custom profile.
 
 - The page is a sibling of Index Management under **Data management → Indices and data streams**.
 - State is stored in the hidden, project-wide `boost_prototype` saved object type, so everyone using

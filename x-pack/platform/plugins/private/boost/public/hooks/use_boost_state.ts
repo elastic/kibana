@@ -10,19 +10,15 @@ import { i18n } from '@kbn/i18n';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import {
   BOOST_DEFAULT_RULES_API_PATH,
-  BOOST_MODE_API_PATH,
   BOOST_PROFILES_API_PATH,
   BOOST_RULES_API_PATH,
-  BOOST_SIMPLE_DEFAULTS_API_PATH,
   BOOST_STATE_API_PATH,
 } from '../../common/constants';
 import type {
-  BoostMode,
   BoostProfileInput,
   BoostProfileType,
   BoostRuleInput,
   BoostState,
-  SimpleModeDefaults,
 } from '../../common/types';
 import { useBoostServices } from './use_boost_services';
 
@@ -57,24 +53,6 @@ const useBoostMutation = <TVariables>(
     onError: (error) => notifications.toasts.addError(error, { title: errorTitle }),
   });
 };
-
-export const useUpdateSimpleDefaults = () =>
-  useBoostMutation(
-    (http, simple: SimpleModeDefaults) =>
-      http.put<BoostState>(BOOST_SIMPLE_DEFAULTS_API_PATH, { body: JSON.stringify(simple) }),
-    i18n.translate('xpack.boost.updateSimpleDefaultsErrorTitle', {
-      defaultMessage: 'Unable to save boost defaults',
-    })
-  );
-
-export const useUpdateMode = () =>
-  useBoostMutation(
-    (http, mode: BoostMode) =>
-      http.put<BoostState>(BOOST_MODE_API_PATH, { body: JSON.stringify({ mode }) }),
-    i18n.translate('xpack.boost.updateModeErrorTitle', {
-      defaultMessage: 'Unable to switch boost mode',
-    })
-  );
 
 export const useCreateProfile = () =>
   useBoostMutation(
@@ -125,7 +103,7 @@ export const useUpdateRule = () =>
     })
   );
 
-/** Points a default rule at a profile of its type, which also syncs simple mode for managed ones. */
+/** Sets the project's default for a profile type: the profile its default rule uses. */
 export const useUpdateDefaultRule = () =>
   useBoostMutation(
     (http, { type, profileName }: { type: BoostProfileType; profileName: string }) =>
@@ -133,7 +111,7 @@ export const useUpdateDefaultRule = () =>
         body: JSON.stringify({ boost_profile: profileName }),
       }),
     i18n.translate('xpack.boost.updateDefaultRuleErrorTitle', {
-      defaultMessage: 'Unable to save boost rule',
+      defaultMessage: 'Unable to save project default',
     })
   );
 

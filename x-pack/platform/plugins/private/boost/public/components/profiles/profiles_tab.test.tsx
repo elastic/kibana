@@ -11,9 +11,8 @@ import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   BUILTIN_PROFILES,
-  DEFAULT_SIMPLE_MODE_DEFAULTS,
+  DEFAULT_RULE_PROFILES,
   createDefaultRules,
-  translateSimpleDefaults,
 } from '../../../common/presets';
 import type { BoostProfile } from '../../../common/types';
 import { ProfilesTab } from './profiles_tab';
@@ -37,7 +36,7 @@ describe('ProfilesTab', () => {
           <ProfilesTab
             profiles={[...BUILTIN_PROFILES, customProfile('catalog-search')]}
             rules={[
-              ...createDefaultRules(translateSimpleDefaults(DEFAULT_SIMPLE_MODE_DEFAULTS)),
+              ...createDefaultRules(DEFAULT_RULE_PROFILES),
               {
                 name: 'catalogs',
                 index_patterns: ['catalog-*'],

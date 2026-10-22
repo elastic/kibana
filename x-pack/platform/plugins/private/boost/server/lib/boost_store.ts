@@ -9,17 +9,16 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { BOOST_SAVED_OBJECT_TYPE, BOOST_SETTINGS_SAVED_OBJECT_ID } from '../../common/constants';
 import {
+  BUILTIN_DATA_STREAMS_PROFILE_NAMES,
+  BUILTIN_INDICES_PROFILE_NAMES,
   BUILTIN_PROFILES,
   DEFAULT_DATA_STREAMS_RULE_NAME,
   DEFAULT_INDICES_RULE_NAME,
-  DEFAULT_SIMPLE_MODE_DEFAULTS,
-  NO_CUSTOM_DEFAULTS,
+  DEFAULT_PROFILE_KEYS,
+  DEFAULT_RULE_PROFILES,
   createDefaultRules,
-  getEffectiveDefaults,
-  setDefaultRuleProfile,
 } from '../../common/presets';
 import type {
-  BoostMode,
   BoostProfile,
   BoostProfileInput,
   BoostProfileType,
@@ -27,16 +26,24 @@ import type {
   BoostRuleInput,
   BoostSettings,
   BoostState,
-  CustomDefaults,
-  SimpleModeDefaults,
+  DataStreamsWindowId,
+  DefaultRuleProfiles,
+  IndicesPresetId,
 } from '../../common/types';
 import { getDataSources } from './data_sources';
 import { BoostRequestError } from './errors';
 
-type SettingsAttributes = Pick<BoostSettings, 'mode' | 'simple'> & {
+/** Settings saved before the project's defaults and boost rules shared one page. */
+interface LegacySettingsAttributes {
+  simple?: { indices: IndicesPresetId; data_streams: { window: DataStreamsWindowId } };
+  /** The default rules' custom profiles, or `null` where they used the simple settings. */
+  custom_defaults?: Record<keyof DefaultRuleProfiles, string | null>;
+}
+
+type SettingsAttributes = LegacySettingsAttributes & {
   kind: 'settings';
-  /** Missing from settings saved before custom defaults existed. */
-  custom_defaults?: CustomDefaults;
+  /** Missing from legacy settings. */
+  default_profiles?: DefaultRuleProfiles;
 };
 
 type ProfileAttributes = BoostProfileInput & { kind: 'profile' };
@@ -59,26 +66,43 @@ const DEFAULT_RULE_NAMES = [DEFAULT_INDICES_RULE_NAME, DEFAULT_DATA_STREAMS_RULE
 
 const BUILTIN_PROFILE_NAMES = BUILTIN_PROFILES.map(({ name }) => name);
 
-const DEFAULT_SETTINGS: BoostSettings = {
-  mode: 'simple',
-  simple: DEFAULT_SIMPLE_MODE_DEFAULTS,
-  custom_defaults: NO_CUSTOM_DEFAULTS,
-};
+/**
+ * The default rules' profiles from legacy settings: a custom profile where one was set, and
+ * otherwise the simple-mode preset, as their advanced mode applied them.
+ */
+const fromLegacySettings = ({
+  simple,
+  custom_defaults: customDefaults,
+}: LegacySettingsAttributes): DefaultRuleProfiles => ({
+  indices_profile:
+    customDefaults?.indices_profile ??
+    (simple
+      ? BUILTIN_INDICES_PROFILE_NAMES[simple.indices]
+      : DEFAULT_RULE_PROFILES.indices_profile),
+  data_streams_profile:
+    customDefaults?.data_streams_profile ??
+    (simple
+      ? BUILTIN_DATA_STREAMS_PROFILE_NAMES[simple.data_streams.window]
+      : DEFAULT_RULE_PROFILES.data_streams_profile),
+});
 
 const getSettings = async (client: SavedObjectsClientContract): Promise<BoostSettings> => {
   try {
     const {
-      attributes: { mode, simple, custom_defaults: customDefaults = NO_CUSTOM_DEFAULTS },
+      attributes: { default_profiles: defaultProfiles, ...legacy },
       updated_at: updatedAt,
     } = await client.get<SettingsAttributes>(
       BOOST_SAVED_OBJECT_TYPE,
       BOOST_SETTINGS_SAVED_OBJECT_ID
     );
 
-    return { mode, simple, custom_defaults: customDefaults, updated_at: updatedAt };
+    return {
+      default_profiles: defaultProfiles ?? fromLegacySettings(legacy),
+      updated_at: updatedAt,
+    };
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-      return DEFAULT_SETTINGS;
+      return { default_profiles: DEFAULT_RULE_PROFILES };
     }
     throw error;
   }
@@ -86,14 +110,9 @@ const getSettings = async (client: SavedObjectsClientContract): Promise<BoostSet
 
 const saveSettings = async (
   client: SavedObjectsClientContract,
-  { mode, simple, custom_defaults: customDefaults }: BoostSettings
+  { default_profiles: defaultProfiles }: BoostSettings
 ): Promise<void> => {
-  const attributes: SettingsAttributes = {
-    kind: 'settings',
-    mode,
-    simple,
-    custom_defaults: customDefaults,
-  };
+  const attributes: SettingsAttributes = { kind: 'settings', default_profiles: defaultProfiles };
 
   await client.create(BOOST_SAVED_OBJECT_TYPE, attributes, {
     id: BOOST_SETTINGS_SAVED_OBJECT_ID,
@@ -134,10 +153,7 @@ const getCustomRules = async (client: SavedObjectsClientContract): Promise<Boost
     .sort((a, b) => b.priority - a.priority || a.name.localeCompare(b.name));
 };
 
-/**
- * Returns the settings, the profiles and rules in effect, and the project's data sources. Custom
- * rules only apply in advanced mode; simple mode suspends them, and returns them separately.
- */
+/** Returns the settings, the profiles and rules, and the project's data sources. */
 export const getState = async (
   client: SavedObjectsClientContract,
   esClient: ElasticsearchClient
@@ -148,14 +164,10 @@ export const getState = async (
     getCustomRules(client),
     getDataSources(esClient),
   ]);
-  const defaultRules = createDefaultRules(getEffectiveDefaults(settings));
-  const isAdvanced = settings.mode === 'advanced';
-
   return {
     settings,
     profiles: [...BUILTIN_PROFILES, ...customProfiles],
-    rules: isAdvanced ? [...customRules, ...defaultRules] : defaultRules,
-    suspended_rules: isAdvanced ? [] : customRules,
+    rules: [...customRules, ...createDefaultRules(settings.default_profiles)],
     data_sources: dataSources,
   };
 };
@@ -238,14 +250,14 @@ export const deleteProfile = async (
   assertNotBuiltin(name, 'deleted');
   await getCustomProfile(client, name);
 
-  const [{ custom_defaults: customDefaults }, customRules] = await Promise.all([
+  const [{ default_profiles: defaultProfiles }, customRules] = await Promise.all([
     getSettings(client),
     getCustomRules(client),
   ]);
   const defaultRuleName =
-    customDefaults.indices_profile === name
+    defaultProfiles.indices_profile === name
       ? DEFAULT_INDICES_RULE_NAME
-      : customDefaults.data_streams_profile === name
+      : defaultProfiles.data_streams_profile === name
       ? DEFAULT_DATA_STREAMS_RULE_NAME
       : undefined;
   if (defaultRuleName) {
@@ -265,13 +277,6 @@ export const deleteProfile = async (
     );
   }
   await client.delete(BOOST_SAVED_OBJECT_TYPE, profileId(name));
-};
-
-export const updateSimpleDefaults = async (
-  client: SavedObjectsClientContract,
-  simple: SimpleModeDefaults
-): Promise<void> => {
-  await saveSettings(client, { ...(await getSettings(client)), simple });
 };
 
 const assertProfileExists = async (client: SavedObjectsClientContract, name: string) => {
@@ -361,7 +366,10 @@ export const deleteRule = async (
   await client.delete(BOOST_SAVED_OBJECT_TYPE, ruleId(name));
 };
 
-/** Points the default rule for a profile type at an Elastic-managed or custom profile of that type. */
+/**
+ * Sets the project's default for a profile type, which its default rule uses: an Elastic-managed or
+ * custom profile of that type.
+ */
 export const updateDefaultRule = async (
   client: SavedObjectsClientContract,
   type: BoostProfileType,
@@ -374,14 +382,10 @@ export const updateDefaultRule = async (
     throw new BoostRequestError(400, `Boost profile [${profileName}] is not a ${type} profile.`);
   }
 
-  await saveSettings(client, setDefaultRuleProfile(await getSettings(client), type, profileName));
-};
-
-export const updateMode = async (
-  client: SavedObjectsClientContract,
-  mode: BoostMode
-): Promise<void> => {
-  await saveSettings(client, { ...(await getSettings(client)), mode });
+  const { default_profiles: defaultProfiles } = await getSettings(client);
+  await saveSettings(client, {
+    default_profiles: { ...defaultProfiles, [DEFAULT_PROFILE_KEYS[type]]: profileName },
+  });
 };
 
 /**

@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  BUILTIN_PROFILES,
-  DEFAULT_SIMPLE_MODE_DEFAULTS,
-  createDefaultRules,
-  translateSimpleDefaults,
-} from './presets';
+import { BUILTIN_PROFILES, DEFAULT_RULE_PROFILES, createDefaultRules } from './presets';
 import type {
   BoostDataAge,
   BoostDataSource,
@@ -205,7 +200,7 @@ describe('cost impacts', () => {
     pinned: false,
   };
   const profiles = [...BUILTIN_PROFILES, fast];
-  const defaultRules = createDefaultRules(translateSimpleDefaults(DEFAULT_SIMPLE_MODE_DEFAULTS));
+  const defaultRules = createDefaultRules(DEFAULT_RULE_PROFILES);
   const products = index('products', 10);
   const users = index('users', 2);
   const dataSources = [products, users, index('archive', 50)];

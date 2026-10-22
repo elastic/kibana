@@ -13,8 +13,6 @@ export const BOOST_SAMPLE_DATA_SAVED_OBJECT_ID = 'boost-sample-data';
 
 export const BOOST_API_BASE_PATH = '/internal/boost';
 export const BOOST_STATE_API_PATH = `${BOOST_API_BASE_PATH}/state`;
-export const BOOST_SIMPLE_DEFAULTS_API_PATH = `${BOOST_API_BASE_PATH}/simple_defaults`;
-export const BOOST_MODE_API_PATH = `${BOOST_API_BASE_PATH}/mode`;
 export const BOOST_DEFAULT_RULES_API_PATH = `${BOOST_API_BASE_PATH}/default_rules`;
 export const BOOST_PROFILES_API_PATH = `${BOOST_API_BASE_PATH}/profiles`;
 export const BOOST_RULES_API_PATH = `${BOOST_API_BASE_PATH}/rules`;

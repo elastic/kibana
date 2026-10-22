@@ -11,7 +11,6 @@ import { EuiBadge, EuiCode } from '@elastic/eui';
 import { AppHeaderLoading } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../../../common/constants';
-import { getModeRules } from '../../../common/mode_switch';
 import { getAppliedRules, getRuleCoverage } from '../../../common/resolution';
 import { estimateDataSourcesVcuRange } from '../../../common/vcu_estimate';
 import { useBoostServices } from '../../hooks/use_boost_services';
@@ -23,7 +22,6 @@ import {
   DetailsPage,
   DetailsSection,
   DetailsSplitBand,
-  SimpleModeNotice,
 } from '../details/details_page';
 import { DetailsList } from '../details/details_list';
 import { DetailsLink } from '../details_link';
@@ -32,6 +30,8 @@ import { LoadError } from '../load_error';
 import { MANAGED_BADGE_LABEL } from '../profiles/profiles_tab';
 import { DeleteRuleModal } from './delete_rule_modal';
 import { MatchedTable } from './matched_table';
+import { getDefaultRuleType } from '../../../common/presets';
+import { ProjectDefaultFlyout } from '../project_defaults/project_default_flyout';
 import { RuleFlyout } from './rule_flyout';
 import { getAllUnmatchedLabel } from './rule_matches';
 import { DEFAULT_BADGE_LABEL } from './rules_tab';
@@ -55,15 +55,14 @@ export const RuleDetailsPage = () => {
     return <AppHeaderLoading />;
   }
 
-  // What applies in advanced mode, which is where custom rules take effect.
-  const rules = getModeRules(state, 'advanced');
+  const { rules, profiles, data_sources: dataSources } = state;
   const rule = rules.find((item) => item.name === name);
   if (!rule) {
     return <DetailsPage list="rules" name={name} isFound={false} />;
   }
 
-  const { profiles, data_sources: dataSources } = state;
   const { is_builtin: isDefaultRule, index_patterns: patterns } = rule;
+  const defaultType = isDefaultRule ? getDefaultRuleType(name) : undefined;
   const profile = profiles.find((item) => item.name === rule.boost_profile);
   const type = profile?.type;
   const coverage = getRuleCoverage(dataSources, rules, profiles).get(name);
@@ -75,7 +74,6 @@ export const RuleDetailsPage = () => {
   const applied = matched.filter((dataSource) => appliedRules.get(dataSource.name)?.name === name);
   const sizeInBytes = applied.reduce((total, { size_in_bytes: bytes }) => total + bytes, 0);
   const vcus = profile ? estimateDataSourcesVcuRange(applied, profile) : { atRest: 0, atPeak: 0 };
-  const isAdvanced = state.settings.mode === 'advanced';
   const existingNames = new Set(dataSources.map(({ name: dataSourceName }) => dataSourceName));
   const [firstPattern = ''] = patterns;
   // Matches how the rule form opens it: a pattern, or names that were selected.
@@ -147,21 +145,6 @@ export const RuleDetailsPage = () => {
                   ],
             }
           : undefined
-      }
-      notice={
-        !isAdvanced && (
-          <SimpleModeNotice>
-            {isDefaultRule
-              ? i18n.translate('xpack.boost.ruleDetails.simpleModeDefaultNotice', {
-                  defaultMessage:
-                    'Default rules use the profiles chosen in simple mode until advanced mode is turned back on. The details below show how this rule applies in advanced mode.',
-                })
-              : i18n.translate('xpack.boost.ruleDetails.simpleModeNotice', {
-                  defaultMessage:
-                    'This rule is suspended until advanced mode is turned back on. The details below show how it applies in advanced mode.',
-                })}
-          </SimpleModeNotice>
-        )
       }
     >
       <DetailsSplitBand
@@ -281,7 +264,11 @@ export const RuleDetailsPage = () => {
         />
       </DetailsBand>
 
-      {flyout && (
+      {/* A default rule is edited as its project default. */}
+      {flyout === 'edit' && defaultType && (
+        <ProjectDefaultFlyout type={defaultType} onClose={() => setFlyout(undefined)} />
+      )}
+      {flyout && !(flyout === 'edit' && defaultType) && (
         <RuleFlyout
           rule={flyout === 'edit' ? rule : undefined}
           duplicateOf={flyout === 'duplicate' ? rule : undefined}

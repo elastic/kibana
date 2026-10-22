@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataStreamsWindowId, IndicesPresetId } from '../../common/types';
+import {
+  BUILTIN_DATA_STREAMS_PROFILE_NAMES,
+  BUILTIN_INDICES_PROFILE_NAMES,
+} from '../../common/presets';
+import type { BoostProfileType, DataStreamsWindowId, IndicesPresetId } from '../../common/types';
 
 export interface PresetOption<TId extends string> {
   id: TId;
@@ -83,3 +87,24 @@ export const DATA_STREAMS_WINDOW_OPTIONS: ReadonlyArray<PresetOption<DataStreams
     isDefault: true,
   },
 ];
+
+/** A project default's Elastic-managed choices, each with the profile it uses. */
+export interface DefaultPresetOption {
+  profileName: string;
+  label: string;
+  description: string;
+  isDefault: boolean;
+}
+
+export const DEFAULT_PRESET_OPTIONS: Readonly<
+  Record<BoostProfileType, readonly DefaultPresetOption[]>
+> = {
+  indices: INDICES_PRESET_OPTIONS.map(({ id, ...option }) => ({
+    ...option,
+    profileName: BUILTIN_INDICES_PROFILE_NAMES[id],
+  })),
+  data_streams: DATA_STREAMS_WINDOW_OPTIONS.map(({ id, ...option }) => ({
+    ...option,
+    profileName: BUILTIN_DATA_STREAMS_PROFILE_NAMES[id],
+  })),
+};

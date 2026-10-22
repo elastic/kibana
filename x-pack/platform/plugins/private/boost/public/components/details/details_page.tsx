@@ -10,7 +10,6 @@ import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   EuiButton,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiPageSection,
   EuiSpacer,
@@ -51,22 +50,12 @@ interface DetailsPageProps {
   isFound: boolean;
   badges?: AppHeaderProps['badges'];
   menu?: AppHeaderProps['menu'];
-  /** Shown above the details, such as when advanced mode is off. */
-  notice?: ReactNode;
   /** The details, in bands between dividers. */
   children?: ReactNode;
 }
 
 /** A boost rule's or profile's details page: its header, with a way back to its list. */
-export const DetailsPage = ({
-  list,
-  name,
-  isFound,
-  badges,
-  menu,
-  notice,
-  children,
-}: DetailsPageProps) => {
+export const DetailsPage = ({ list, name, isFound, badges, menu, children }: DetailsPageProps) => {
   const { appParams, chrome } = useBoostServices();
   const history = useHistory();
   const listLabel = LIST_LABELS[list];
@@ -95,10 +84,7 @@ export const DetailsPage = ({
       {!isFound && <EuiSpacer size="l" />}
       <EuiPageSection paddingSize="none" color="transparent" restrictWidth>
         {isFound ? (
-          <>
-            {notice && <DetailsBand>{notice}</DetailsBand>}
-            {children}
-          </>
+          children
         ) : (
           <EuiEmptyPrompt
             iconType="search"
@@ -227,18 +213,4 @@ export const DetailsSection = ({
     <DetailsTitle title={title} titleAppend={titleAppend} />
     {children}
   </div>
-);
-
-/** Says that advanced mode is off, so custom rules don't apply. Details show advanced mode. */
-export const SimpleModeNotice = ({ children }: { children: ReactNode }) => (
-  <EuiCallOut
-    size="s"
-    iconType="info"
-    title={i18n.translate('xpack.boost.details.simpleModeTitle', {
-      defaultMessage: 'Advanced mode is off',
-    })}
-    data-test-subj="boostDetailsSimpleModeNotice"
-  >
-    <p>{children}</p>
-  </EuiCallOut>
 );

@@ -12,9 +12,9 @@ import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   BUILTIN_PROFILES,
-  DEFAULT_SIMPLE_MODE_DEFAULTS,
+  DEFAULT_DATA_STREAMS_RULE_NAME,
+  DEFAULT_RULE_PROFILES,
   createDefaultRules,
-  translateSimpleDefaults,
 } from '../../../common/presets';
 import type { BoostProfile, BoostRule } from '../../../common/types';
 import { RulesTab, getProfileRulesLocation } from './rules_tab';
@@ -25,6 +25,14 @@ jest.mock('../../hooks/use_boost_services', () => ({
 
 jest.mock('../../hooks/use_boost_state', () => ({
   useDeleteRule: () => ({ mutate: jest.fn(), isLoading: false }),
+}));
+
+// The project default's editor, which edits a default rule.
+jest.mock('../project_defaults/project_default_flyout', () => ({
+  ProjectDefaultFlyout: ({ type }: { type: string }) => {
+    const { createElement } = jest.requireActual('react');
+    return createElement('div', { 'data-test-subj': 'mockProjectDefaultFlyout' }, type);
+  },
 }));
 
 const customProfile = (name: string): BoostProfile => ({
@@ -57,7 +65,7 @@ const renderTab = (path: string) =>
       <IntlProvider locale="en">
         <RulesTab
           rules={[
-            ...createDefaultRules(translateSimpleDefaults(DEFAULT_SIMPLE_MODE_DEFAULTS)),
+            ...createDefaultRules(DEFAULT_RULE_PROFILES),
             customRule('catalogs', 'catalog-search'),
             customRule('archives', 'archive-search'),
             // Picks two indices, one of which a higher-priority rule takes.
@@ -265,5 +273,16 @@ describe('RulesTab search', () => {
     await userEvent.type(screen.getByRole('searchbox'), 'users');
 
     expect(screen.queryByText('picked')).not.toBeInTheDocument();
+  });
+});
+
+describe('RulesTab editing', () => {
+  it('edits a default rule as its project default', async () => {
+    renderTab('/rules');
+    const row = screen.getByText(DEFAULT_DATA_STREAMS_RULE_NAME).closest('tr') as HTMLElement;
+
+    await userEvent.click(within(row).getByRole('button', { name: 'Edit' }));
+
+    expect(screen.getByTestId('mockProjectDefaultFlyout')).toHaveTextContent('data_streams');
   });
 });

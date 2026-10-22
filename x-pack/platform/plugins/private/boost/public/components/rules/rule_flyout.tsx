@@ -57,12 +57,7 @@ import type { TargetPreview } from './pattern_matches';
 import { PatternMatchStatus, PatternMatches, getPartialPattern } from './pattern_matches';
 import { FLYOUT_WIDTH } from '../flyout_width';
 import { ProfileFlyoutContent } from '../profiles/profile_flyout';
-import {
-  useBoostState,
-  useCreateRule,
-  useUpdateDefaultRule,
-  useUpdateRule,
-} from '../../hooks/use_boost_state';
+import { useBoostState, useCreateRule, useUpdateRule } from '../../hooks/use_boost_state';
 import { PROFILE_TYPE_LABELS } from '../format';
 import type { RuleDraft, RuleDraftErrors } from './rule_draft';
 import {
@@ -131,24 +126,10 @@ const SELECT_PROFILE_FOR_PATTERN = i18n.translate('xpack.boost.ruleForm.selectPr
   defaultMessage: 'Select a boost profile to input an index pattern.',
 });
 
-const getProfileHelpText = (defaultRuleType: BoostProfileType | undefined) => {
-  if (defaultRuleType === 'indices') {
-    return i18n.translate('xpack.boost.ruleForm.defaultIndicesProfileDescription', {
-      defaultMessage:
-        "This rule applies to every index that no other rule matches. An Elastic-managed profile also sets simple mode's default for indices; a custom profile stops the two from syncing.",
-    });
-  }
-  if (defaultRuleType === 'data_streams') {
-    return i18n.translate('xpack.boost.ruleForm.defaultDataStreamsProfileDescription', {
-      defaultMessage:
-        "This rule applies to every data stream that no other rule matches. An Elastic-managed profile also sets simple mode's default for data streams; a custom profile stops the two from syncing.",
-    });
-  }
-  return i18n.translate('xpack.boost.ruleForm.profileDescription', {
-    defaultMessage:
-      "The profile's type decides whether this rule applies to indices or data streams.",
-  });
-};
+const PROFILE_HELP_TEXT = i18n.translate('xpack.boost.ruleForm.profileDescription', {
+  defaultMessage:
+    "The profile's type decides whether this rule applies to indices or data streams.",
+});
 
 /** Passed to each option's renderer through EUI's `data`, which keeps it out of the page's HTML. */
 interface PickOptionData {
@@ -218,24 +199,19 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
   }, [profileFieldKey]);
   const { mutate: createRule, isLoading: isCreating } = useCreateRule();
   const { mutate: updateRule, isLoading: isUpdating } = useUpdateRule();
-  const { mutate: updateDefaultRule, isLoading: isUpdatingDefault } = useUpdateDefaultRule();
-  const isSaving = isCreating || isUpdating || isUpdatingDefault;
+  const isSaving = isCreating || isUpdating;
 
   if (!state) {
     return null;
   }
 
   const isEditing = rule !== undefined;
-  const isDefaultRule = rule?.is_builtin ?? false;
   const { profiles, rules, data_sources: dataSources } = state;
   const profilesByName = new Map(profiles.map((profile) => [profile.name, profile]));
   // While the user types in the profile field, targets keep the last profile's type.
   const type = profilesByName.get(draft.profileName || lastProfileName)?.type;
   // Wording for the disabled target controls until a profile sets the type.
   const targetType = type ?? 'indices';
-  // A default rule keeps its type, so it only offers profiles of that type.
-  const defaultRuleType =
-    isDefaultRule && rule ? profilesByName.get(rule.boost_profile)?.type : undefined;
   // The rule being edited is replaced by the draft when previewing what the draft would apply to.
   const otherRules = rules.filter(({ name }) => name !== rule?.name);
   const draftErrors = getRuleDraftErrors(draft, isEditing ? [] : rules.map(({ name }) => name));
@@ -283,9 +259,10 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
     !draftErrors.pattern &&
     patternPreview.length === 0 &&
     !isSavedPattern;
-  const errors: RuleDraftErrors = isDefaultRule
-    ? { profile: draftErrors.profile }
-    : { ...draftErrors, patternMatches: hasNoMatches ? 'none' : undefined };
+  const errors: RuleDraftErrors = {
+    ...draftErrors,
+    patternMatches: hasNoMatches ? 'none' : undefined,
+  };
   const visibleErrors = showErrors ? errors : {};
 
   const onSave = () => {
@@ -314,29 +291,27 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
       onClose();
     };
 
-    if (defaultRuleType) {
-      updateDefaultRule({ type: defaultRuleType, profileName: draft.profileName }, { onSuccess });
-    } else if (isEditing) {
+    if (isEditing) {
       updateRule(ruleDraftToInput(draft), { onSuccess });
     } else {
       createRule(ruleDraftToInput(draft), { onSuccess });
     }
   };
 
-  const profileOptions: Array<EuiComboBoxOptionOption<string>> = (
-    defaultRuleType ? [defaultRuleType] : PROFILE_TYPES
-  ).map((profileType) => ({
-    label: PROFILE_TYPE_LABELS[profileType],
-    isGroupLabelOption: true,
-    options: profiles
-      .filter((profile) => profile.type === profileType)
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map(({ name, is_builtin: isBuiltin }) => ({
-        label: name,
-        value: name,
-        append: isBuiltin ? <EuiBadge>{MANAGED_BADGE_LABEL}</EuiBadge> : undefined,
-      })),
-  }));
+  const profileOptions: Array<EuiComboBoxOptionOption<string>> = PROFILE_TYPES.map(
+    (profileType) => ({
+      label: PROFILE_TYPE_LABELS[profileType],
+      isGroupLabelOption: true,
+      options: profiles
+        .filter((profile) => profile.type === profileType)
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map(({ name, is_builtin: isBuiltin }) => ({
+          label: name,
+          value: name,
+          append: isBuiltin ? <EuiBadge>{MANAGED_BADGE_LABEL}</EuiBadge> : undefined,
+        })),
+    })
+  );
 
   // The plain-text selection shows its option's append inside the field, before the arrow.
   const selectedProfileType = profilesByName.get(draft.profileName)?.type;
@@ -411,8 +386,7 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
 
   // The rule's own cost: what it applies to after higher-ranked rules, compared with the saved rule
   // when editing, or the original when duplicating.
-  const hasValidTargets =
-    isDefaultRule || (draft.mode === 'pattern' ? !errors.pattern : draft.picked.length > 0);
+  const hasValidTargets = draft.mode === 'pattern' ? !errors.pattern : draft.picked.length > 0;
   const impact =
     draft.profileName && type && hasValidTargets
       ? estimateRuleCost({
@@ -564,7 +538,7 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
           </EuiLink>
         </EuiText>
       }
-      helpText={getProfileHelpText(defaultRuleType)}
+      helpText={PROFILE_HELP_TEXT}
       isInvalid={Boolean(visibleErrors.profile)}
       error={visibleErrors.profile && PROFILE_REQUIRED_MESSAGE}
       fullWidth
@@ -658,7 +632,7 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
           forRule={{
             ruleName: draft.name || undefined,
             type,
-            isTypeLocked: isDefaultRule,
+            isTypeLocked: false,
             estimate: estimateWithNewProfile,
             onCreate: onProfileCreate,
           }}
@@ -676,14 +650,6 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
         <EuiTitle size="s">
           <h2 id={titleId}>{title}</h2>
         </EuiTitle>
-        {isDefaultRule && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiBadge>
-              {i18n.translate('xpack.boost.ruleForm.defaultBadge', { defaultMessage: 'Default' })}
-            </EuiBadge>
-          </>
-        )}
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -713,145 +679,142 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
 
         {profileRow}
 
-        {/* Default rules always apply to everything else, so only their profile can change. */}
-        {!isDefaultRule && (
-          <>
-            {/* EUI only spaces rows that are siblings, so the group and the row after it take the
+        <>
+          {/* EUI only spaces rows that are siblings, so the group and the row after it take the
                 same space. */}
-            <EuiSpacer size="m" />
-            <EuiFlexGroup gutterSize="m" responsive={false}>
-              <EuiFlexItem>
-                <EuiFormRow
-                  display="rowCompressed"
-                  labelType="legend"
-                  label={i18n.translate('xpack.boost.ruleForm.targetsLabel', {
-                    defaultMessage: 'Targets',
-                  })}
-                  helpText={
-                    !type
-                      ? SELECT_PROFILE_FIRST
-                      : type === 'data_streams'
-                      ? i18n.translate('xpack.boost.ruleForm.dataStreamsAppliesToDescription', {
-                          defaultMessage: 'Enter a name or pattern, or select data streams.',
-                        })
-                      : i18n.translate('xpack.boost.ruleForm.indicesAppliesToDescription', {
-                          defaultMessage: 'Enter a name or pattern, or select indices.',
-                        })
-                  }
-                  fullWidth
-                >
-                  {/* A wrapper takes the row's id, so the tooltip keeps its own. The tooltip only
-                  explains the disabled state, so it's dropped once a profile is chosen. */}
-                  <div>
-                    {type ? (
-                      modeToggle
-                    ) : (
-                      <EuiToolTip content={SELECT_PROFILE_FIRST} display="block">
-                        {modeToggle}
-                      </EuiToolTip>
-                    )}
-                  </div>
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} css={{ inlineSize: PRIORITY_WIDTH }}>
-                {priorityRow}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-
-            {draft.mode === 'pattern' ? (
-              <>
-                {/* The tooltip wraps the row, so the input stays the row's child and keeps its
-                    label. */}
-                {type ? (
-                  patternRow
-                ) : (
-                  <EuiToolTip content={SELECT_PROFILE_FOR_PATTERN} display="block">
-                    {patternRow}
-                  </EuiToolTip>
-                )}
-                <EuiSpacer size="s" />
-                <PatternMatches
-                  type={type}
-                  targetType={targetType}
-                  pattern={pattern}
-                  exactMatches={patternPreview}
-                  partialMatches={partialPreview}
-                  names={typedDataSources.map(({ name }) => name)}
-                  maxHeight={PREVIEW_MAX_HEIGHT}
-                />
-              </>
-            ) : (
+          <EuiSpacer size="m" />
+          <EuiFlexGroup gutterSize="m" responsive={false}>
+            <EuiFlexItem>
               <EuiFormRow
                 display="rowCompressed"
-                label={PROFILE_TYPE_LABELS[targetType]}
-                labelAppend={
-                  <TargetStatus
-                    label={i18n.translate('xpack.boost.ruleForm.pickedCount', {
-                      defaultMessage: '{count} selected',
-                      values: { count: draft.picked.length },
-                    })}
-                    data-test-subj="boostRulePickedCount"
-                  />
+                labelType="legend"
+                label={i18n.translate('xpack.boost.ruleForm.targetsLabel', {
+                  defaultMessage: 'Targets',
+                })}
+                helpText={
+                  !type
+                    ? SELECT_PROFILE_FIRST
+                    : type === 'data_streams'
+                    ? i18n.translate('xpack.boost.ruleForm.dataStreamsAppliesToDescription', {
+                        defaultMessage: 'Enter a name or pattern, or select data streams.',
+                      })
+                    : i18n.translate('xpack.boost.ruleForm.indicesAppliesToDescription', {
+                        defaultMessage: 'Enter a name or pattern, or select indices.',
+                      })
                 }
-                isInvalid={Boolean(pickedError)}
-                error={pickedError}
                 fullWidth
               >
-                <EuiSelectable
-                  aria-label={PICK_LABELS[targetType]}
-                  searchable
-                  searchProps={{
-                    compressed: true,
-                    placeholder: i18n.translate('xpack.boost.ruleForm.pickSearchPlaceholder', {
-                      defaultMessage: 'Search',
-                    }),
-                    onChange: setPickSearch,
-                  }}
-                  options={pickOptions}
-                  // A name that a higher-ranked rule would keep is struck through and disabled,
-                  // whether or not it's selected, until this rule's priority outranks that rule.
-                  renderOption={({ label, supersededBy }, searchValue) => (
-                    <EuiHighlight
-                      search={searchValue}
-                      css={
-                        supersededBy
-                          ? { textDecoration: 'line-through', color: euiTheme.colors.textDisabled }
-                          : undefined
-                      }
-                      data-test-subj={supersededBy ? 'boostSupersededTarget' : undefined}
-                    >
-                      {label}
-                    </EuiHighlight>
+                {/* A wrapper takes the row's id, so the tooltip keeps its own. The tooltip only
+                  explains the disabled state, so it's dropped once a profile is chosen. */}
+                <div>
+                  {type ? (
+                    modeToggle
+                  ) : (
+                    <EuiToolTip content={SELECT_PROFILE_FIRST} display="block">
+                      {modeToggle}
+                    </EuiToolTip>
                   )}
-                  onChange={(options) =>
-                    updateDraft({
-                      picked: options
-                        .filter(({ checked }) => checked === 'on')
-                        .map(({ label }) => label),
-                    })
-                  }
-                  listProps={{ rowHeight: PICK_ROW_HEIGHT }}
-                  height={pickListHeight}
-                  isLoading={isSaving}
-                  data-test-subj="boostRulePicker"
-                >
-                  {(list, search) => (
-                    <>
-                      {search}
-                      <EuiSpacer size="s" />
-                      {/* A panel draws the border and padding, which the list would count in its
-                          own width. */}
-                      <EuiPanel hasBorder hasShadow={false} paddingSize="s">
-                        {list}
-                      </EuiPanel>
-                    </>
-                  )}
-                </EuiSelectable>
+                </div>
               </EuiFormRow>
-            )}
-          </>
-        )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} css={{ inlineSize: PRIORITY_WIDTH }}>
+              {priorityRow}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+
+          {draft.mode === 'pattern' ? (
+            <>
+              {/* The tooltip wraps the row, so the input stays the row's child and keeps its
+                    label. */}
+              {type ? (
+                patternRow
+              ) : (
+                <EuiToolTip content={SELECT_PROFILE_FOR_PATTERN} display="block">
+                  {patternRow}
+                </EuiToolTip>
+              )}
+              <EuiSpacer size="s" />
+              <PatternMatches
+                type={type}
+                targetType={targetType}
+                pattern={pattern}
+                exactMatches={patternPreview}
+                partialMatches={partialPreview}
+                names={typedDataSources.map(({ name }) => name)}
+                maxHeight={PREVIEW_MAX_HEIGHT}
+              />
+            </>
+          ) : (
+            <EuiFormRow
+              display="rowCompressed"
+              label={PROFILE_TYPE_LABELS[targetType]}
+              labelAppend={
+                <TargetStatus
+                  label={i18n.translate('xpack.boost.ruleForm.pickedCount', {
+                    defaultMessage: '{count} selected',
+                    values: { count: draft.picked.length },
+                  })}
+                  data-test-subj="boostRulePickedCount"
+                />
+              }
+              isInvalid={Boolean(pickedError)}
+              error={pickedError}
+              fullWidth
+            >
+              <EuiSelectable
+                aria-label={PICK_LABELS[targetType]}
+                searchable
+                searchProps={{
+                  compressed: true,
+                  placeholder: i18n.translate('xpack.boost.ruleForm.pickSearchPlaceholder', {
+                    defaultMessage: 'Search',
+                  }),
+                  onChange: setPickSearch,
+                }}
+                options={pickOptions}
+                // A name that a higher-ranked rule would keep is struck through and disabled,
+                // whether or not it's selected, until this rule's priority outranks that rule.
+                renderOption={({ label, supersededBy }, searchValue) => (
+                  <EuiHighlight
+                    search={searchValue}
+                    css={
+                      supersededBy
+                        ? { textDecoration: 'line-through', color: euiTheme.colors.textDisabled }
+                        : undefined
+                    }
+                    data-test-subj={supersededBy ? 'boostSupersededTarget' : undefined}
+                  >
+                    {label}
+                  </EuiHighlight>
+                )}
+                onChange={(options) =>
+                  updateDraft({
+                    picked: options
+                      .filter(({ checked }) => checked === 'on')
+                      .map(({ label }) => label),
+                  })
+                }
+                listProps={{ rowHeight: PICK_ROW_HEIGHT }}
+                height={pickListHeight}
+                isLoading={isSaving}
+                data-test-subj="boostRulePicker"
+              >
+                {(list, search) => (
+                  <>
+                    {search}
+                    <EuiSpacer size="s" />
+                    {/* A panel draws the border and padding, which the list would count in its
+                          own width. */}
+                    <EuiPanel hasBorder hasShadow={false} paddingSize="s">
+                      {list}
+                    </EuiPanel>
+                  </>
+                )}
+              </EuiSelectable>
+            </EuiFormRow>
+          )}
+        </>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

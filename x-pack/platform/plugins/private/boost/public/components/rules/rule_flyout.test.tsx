@@ -13,11 +13,8 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   BUILTIN_DATA_STREAMS_PROFILE_NAMES,
   BUILTIN_PROFILES,
-  DEFAULT_DATA_STREAMS_RULE_NAME,
-  DEFAULT_SIMPLE_MODE_DEFAULTS,
-  NO_CUSTOM_DEFAULTS,
+  DEFAULT_RULE_PROFILES,
   createDefaultRules,
-  translateSimpleDefaults,
 } from '../../../common/presets';
 import type { BoostDataSource, BoostProfile, BoostRule, BoostState } from '../../../common/types';
 import { RuleFlyout } from './rule_flyout';
@@ -42,14 +39,9 @@ const rule: BoostRule = {
 };
 
 const state: BoostState = {
-  settings: {
-    mode: 'advanced',
-    simple: DEFAULT_SIMPLE_MODE_DEFAULTS,
-    custom_defaults: NO_CUSTOM_DEFAULTS,
-  },
+  settings: { default_profiles: DEFAULT_RULE_PROFILES },
   profiles: [...BUILTIN_PROFILES, customProfile('zeta-search'), customProfile('alpha-search')],
-  rules: [...createDefaultRules(translateSimpleDefaults(DEFAULT_SIMPLE_MODE_DEFAULTS)), rule],
-  suspended_rules: [],
+  rules: [...createDefaultRules(DEFAULT_RULE_PROFILES), rule],
   data_sources: [
     { name: 'catalog-fall', type: 'index', size_in_bytes: 4e9 },
     { name: 'products', type: 'index', size_in_bytes: 1e9 },
@@ -136,16 +128,6 @@ describe('RuleFlyout profile picker', () => {
     await userEvent.click(getInput());
 
     expect(screen.getByText('Data streams')).toBeInTheDocument();
-  });
-
-  it("only lists profiles of a default rule's type", async () => {
-    const { getInput } = renderFlyout(
-      state.rules.find(({ name }) => name === DEFAULT_DATA_STREAMS_RULE_NAME)
-    );
-
-    await userEvent.click(getInput());
-
-    expect(screen.queryByText('Indices')).not.toBeInTheDocument();
   });
 
   it('can be emptied with select-all and Delete, and restores the last profile on blur', async () => {
@@ -242,16 +224,6 @@ describe('RuleFlyout profile creation', () => {
     expect(screen.getByTestId('boostRulePriority')).toHaveValue(7);
     expect(screen.getByTestId('boostRuleCreateProfile')).toHaveFocus();
   });
-
-  it("locks a default rule's new profile to the rule's type", async () => {
-    renderFlyout(state.rules.find(({ name }) => name === DEFAULT_DATA_STREAMS_RULE_NAME));
-
-    await userEvent.click(screen.getByTestId('boostRuleCreateProfile'));
-
-    expect(getTypeRadio('data_streams')).toBeChecked();
-    expect(getTypeRadio('data_streams')).toBeDisabled();
-    expect(getTypeRadio('indices')).toBeDisabled();
-  });
 });
 
 describe('RuleFlyout estimate', () => {
@@ -270,6 +242,13 @@ describe('RuleFlyout estimate', () => {
 
   describe('with a data stream', () => {
     const indices = state.data_sources;
+    const logsRule: BoostRule = {
+      name: 'logs',
+      index_patterns: ['logs-*'],
+      boost_profile: BUILTIN_DATA_STREAMS_PROFILE_NAMES.last_7_days,
+      priority: 1,
+      is_builtin: false,
+    };
     beforeEach(() => {
       state.data_sources = [...indices, logsApp];
     });
@@ -278,10 +257,7 @@ describe('RuleFlyout estimate', () => {
     });
 
     it("splits a data streams rule's estimate between its profile's periods", () => {
-      const [defaultDataStreamsRule] = state.rules.filter(
-        ({ name }) => name === DEFAULT_DATA_STREAMS_RULE_NAME
-      );
-      renderFlyout(defaultDataStreamsRule);
+      renderFlyout(logsRule);
 
       expect(getEstimate()).toHaveTextContent('1 data stream · 3 GB');
       expect(screen.getByTestId('boostCostEstimate-atRest')).toBeInTheDocument();
@@ -296,10 +272,7 @@ describe('RuleFlyout estimate', () => {
     });
 
     it("shows a period's cost in a tooltip", async () => {
-      const [defaultDataStreamsRule] = state.rules.filter(
-        ({ name }) => name === DEFAULT_DATA_STREAMS_RULE_NAME
-      );
-      renderFlyout(defaultDataStreamsRule);
+      renderFlyout(logsRule);
 
       expect(screen.getByTestId('boostCostEstimateTimeline-recent')).not.toHaveTextContent('$');
       await userEvent.hover(
