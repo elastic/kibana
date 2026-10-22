@@ -27,6 +27,8 @@ export type QuickActionIds = [
   string?,
   string?,
   string?,
+  string?,
+  string?,
   string?
 ];
 
@@ -52,6 +54,7 @@ export const DEFAULT_QUICK_ACTIONS: QuickActions = {
     'CONVERT_LEGACY_MARKDOWN',
     'ACTION_FILTERS_NOTIFICATION',
     'ACTION_ESQL_NOTIFICATION',
+    'refinePanelWithChat',
   ],
   view: [
     'clearControl',

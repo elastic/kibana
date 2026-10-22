@@ -9,12 +9,15 @@ import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
   ENHANCE_DASHBOARD_ACTION_ID,
+  REFINE_WITH_CHAT_ACTION_ID,
 } from '@kbn/dashboard-plugin/public';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { AgentBuilderDashboardsPlugin } from './plugin';
 import type { AgentBuilderDashboardsPluginPublicStartDependencies } from './types';
 
 jest.mock('./attachment_types', () => ({
   registerDashboardAttachmentUiDefinition: jest.fn(() => jest.fn()),
+  registerDashboardPanelAttachmentUiDefinition: jest.fn(),
   createIdGenerator: () => ({
     current: 'draft-id',
     next: jest.fn(),
@@ -23,6 +26,7 @@ jest.mock('./attachment_types', () => ({
 
 describe('AgentBuilderDashboardsPlugin', () => {
   const registerActionAsync = jest.fn();
+  const attachAction = jest.fn();
   const openChat = jest.fn();
 
   const createCoreStart = (showAgentBuilder: boolean) =>
@@ -52,11 +56,13 @@ describe('AgentBuilderDashboardsPlugin', () => {
       },
       uiActions: {
         registerActionAsync,
+        attachAction,
       },
     } as unknown as AgentBuilderDashboardsPluginPublicStartDependencies);
 
   beforeEach(() => {
     registerActionAsync.mockClear();
+    attachAction.mockClear();
     openChat.mockClear();
   });
 
@@ -73,6 +79,11 @@ describe('AgentBuilderDashboardsPlugin', () => {
       ENHANCE_DASHBOARD_ACTION_ID,
       expect.any(Function)
     );
+    expect(registerActionAsync).toHaveBeenCalledWith(
+      REFINE_WITH_CHAT_ACTION_ID,
+      expect.any(Function)
+    );
+    expect(attachAction).toHaveBeenCalledWith(ON_OPEN_PANEL_MENU, REFINE_WITH_CHAT_ACTION_ID);
 
     const openChatAction = await registerActionAsync.mock.calls[0][1]();
     expect(openChatAction.id).toBe(OPEN_DASHBOARD_CHAT_ACTION_ID);
@@ -89,5 +100,6 @@ describe('AgentBuilderDashboardsPlugin', () => {
     plugin.start(createCoreStart(false), createStartDependencies());
 
     expect(registerActionAsync).not.toHaveBeenCalled();
+    expect(attachAction).not.toHaveBeenCalled();
   });
 });
