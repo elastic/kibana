@@ -26,6 +26,7 @@ import {
   createSummaryTransformManagerMock,
   createTransformManagerMock,
 } from './mocks';
+import type { SLODefinition } from '../domain/models';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { TransformManager } from './transform_manager';
 
@@ -230,17 +231,30 @@ describe('CreateSLO', () => {
       );
     });
 
-    it('claims the SLO definition before installing any resource', async () => {
+    it('waits for the SLO definition claim before installing any resource', async () => {
+      let resolveClaim: (slo: SLODefinition) => void = () => {};
+      mockRepository.create.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveClaim = resolve;
+          })
+      );
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
 
-      await createSLO.execute(sloParams);
+      const executePromise = createSLO.execute(sloParams);
+      await jest.advanceTimersByTimeAsync(0);
 
-      const [claimOrder] = mockRepository.create.mock.invocationCallOrder;
-      const [pipelineOrder] =
-        mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline.mock.invocationCallOrder;
-      const [transformOrder] = mockTransformManager.install.mock.invocationCallOrder;
-      expect(claimOrder).toBeLessThan(pipelineOrder);
-      expect(claimOrder).toBeLessThan(transformOrder);
+      expect(mockRepository.create).toHaveBeenCalled();
+      expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).not.toHaveBeenCalled();
+      expect(mockTransformManager.install).not.toHaveBeenCalled();
+      expect(mockSummaryTransformManager.install).not.toHaveBeenCalled();
+
+      const [[claimedSlo]] = mockRepository.create.mock.calls;
+      resolveClaim(claimedSlo);
+      await executePromise;
+
+      expect(mockTransformManager.install).toHaveBeenCalled();
+      expect(mockSummaryTransformManager.install).toHaveBeenCalled();
     });
 
     it('does not install nor roll back any resource when the SLO id is already claimed', async () => {
