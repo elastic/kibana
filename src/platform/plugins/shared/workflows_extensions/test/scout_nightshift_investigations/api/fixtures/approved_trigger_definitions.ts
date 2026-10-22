@@ -128,11 +128,11 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'cases.attachmentsAdded',
-    schemaHash: 'af8917afcff27e816e16aab810bb0295d4ea16931414fc266aa629f220e4592c',
+    schemaHash: '77ead983583983a13c3b771915293553e5febfd9d7940c4780ea2737596acf9c',
   },
   {
     id: 'cases.attachmentsDeleted',
-    schemaHash: 'af15c7003f07847f8e3b553e83925d6a82b2de4a0c66f9ecec4e48957c616ad1',
+    schemaHash: 'e75633546da2dec88fe25d5d1093b643b9168726fdf9c58b7d8bc0d41999ae23',
   },
   {
     id: 'cases.caseCreated',
