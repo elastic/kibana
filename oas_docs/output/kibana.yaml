@@ -49762,7 +49762,7 @@ paths:
                     - otel
                   type: string
                 description:
-                  description: Integration description from the Service Settings step.
+                  description: Integration description from the Service settings step.
                   maxLength: 2048
                   type: string
                 globalRegion:
@@ -49770,7 +49770,7 @@ paths:
                   maxLength: 64
                   type: string
                 integrationName:
-                  description: Integration name as entered in the Service Settings step, before any per-package suffix is applied.
+                  description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                   maxLength: 160
                   type: string
                 mechanisms:
@@ -49930,7 +49930,7 @@ paths:
                         description: Opaque deployment name; for AWS, the CFN stack name.
                         type: string
                       description:
-                        description: Integration description from the Service Settings step.
+                        description: Integration description from the Service settings step.
                         type: string
                       ecfStacks:
                         description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
@@ -49980,7 +49980,7 @@ paths:
                       id:
                         type: string
                       integrationName:
-                        description: Integration name as entered in the Service Settings step, before any per-package suffix is applied.
+                        description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
                       mechanisms:
                         items:
@@ -50283,7 +50283,7 @@ paths:
                         description: Opaque deployment name; for AWS, the CFN stack name.
                         type: string
                       description:
-                        description: Integration description from the Service Settings step.
+                        description: Integration description from the Service settings step.
                         type: string
                       ecfStacks:
                         description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
@@ -50333,7 +50333,7 @@ paths:
                       id:
                         type: string
                       integrationName:
-                        description: Integration name as entered in the Service Settings step, before any per-package suffix is applied.
+                        description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
                       mechanisms:
                         items:
@@ -50529,7 +50529,7 @@ paths:
                   maxLength: 255
                   type: string
                 description:
-                  description: Integration description from the Service Settings step. Send null to clear it.
+                  description: Integration description from the Service settings step. Send null to clear it.
                   maxLength: 2048
                   nullable: true
                   type: string
@@ -50705,7 +50705,7 @@ paths:
                         description: Opaque deployment name; for AWS, the CFN stack name.
                         type: string
                       description:
-                        description: Integration description from the Service Settings step.
+                        description: Integration description from the Service settings step.
                         type: string
                       ecfStacks:
                         description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
@@ -50755,7 +50755,7 @@ paths:
                       id:
                         type: string
                       integrationName:
-                        description: Integration name as entered in the Service Settings step, before any per-package suffix is applied.
+                        description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
                       mechanisms:
                         items:
@@ -50985,7 +50985,7 @@ paths:
                           description: Opaque deployment name; for AWS, the CFN stack name.
                           type: string
                         description:
-                          description: Integration description from the Service Settings step.
+                          description: Integration description from the Service settings step.
                           type: string
                         ecfStacks:
                           description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
@@ -51035,7 +51035,7 @@ paths:
                         id:
                           type: string
                         integrationName:
-                          description: Integration name as entered in the Service Settings step, before any per-package suffix is applied.
+                          description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                           type: string
                         mechanisms:
                           items:
