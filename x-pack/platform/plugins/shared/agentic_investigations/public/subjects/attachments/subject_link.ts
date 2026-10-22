@@ -7,7 +7,12 @@
 
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ALERTS_LOCATOR_ID, SIGNIFICANT_EVENTS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import { ALERTING_V2_EPISODES_LOCATOR } from '@kbn/alerting-v2-constants';
+import {
+  ALERTS_LOCATOR_ID,
+  createObservabilityAlertingV2Host,
+  SIGNIFICANT_EVENTS_APP_LOCATOR_ID,
+} from '@kbn/deeplinks-observability';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -23,15 +28,33 @@ interface SubjectLocatorTarget {
   params: SerializableRecord;
 }
 
+/** Where alerting v2 episode details live: the alerts page of the Observability Alerting app. */
+const OBSERVABILITY_ALERTING_EPISODES_HOST = createObservabilityAlertingV2Host(
+  (app, { alerts }) => ({ app, pathPrefix: alerts })
+);
+
+/** The subject fields a locator target is built from. */
+export type SubjectLocatorInput = Pick<SubjectRowData, 'type' | 'id'> & {
+  /** `snapshot.alert_version` of an alert subject; `v2` is an alerting v2 episode. */
+  alertVersion?: string;
+};
+
 /**
- * The page a subject opens, as a locator and its params, from the subject's type and id alone: an
- * alert's details page (the id is its `kibana.alert.uuid`), or a significant event in the
- * Significant Events app.
+ * The page a subject opens, as a locator and its params, from the subject's type and id: an
+ * alert's details page (a classic alert by its `kibana.alert.uuid`, an alerting v2 alert by its
+ * episode id), or a significant event in the Significant Events app.
  */
 export const getSubjectLocatorTarget = ({
   type,
   id,
-}: SubjectRowData): SubjectLocatorTarget | undefined => {
+  alertVersion,
+}: SubjectLocatorInput): SubjectLocatorTarget | undefined => {
+  if (type === 'alert' && alertVersion === 'v2') {
+    return {
+      locatorId: ALERTING_V2_EPISODES_LOCATOR,
+      params: { episodeId: id, host: OBSERVABILITY_ALERTING_EPISODES_HOST },
+    };
+  }
   if (type === 'alert') {
     return { locatorId: ALERTS_LOCATOR_ID, params: { alertId: id } };
   }
@@ -91,13 +114,15 @@ export const useSubjectLink = (subject: SubjectRowData | undefined): SubjectLink
   const { share } = useKibana<SubjectLinkServices>().services;
   const subjectType = subject?.type;
   const subjectId = subject?.id;
-  // Keyed on the type and id, so a re-render with an equal subject keeps the located URL.
+  const alertVersion = subject?.snapshot?.alert_version;
+  // Keyed on the type, id and alert version, so a re-render with an equal subject keeps the
+  // located URL.
   const target = useMemo(
     () =>
       subjectType && subjectId
-        ? getSubjectLocatorTarget({ type: subjectType, id: subjectId })
+        ? getSubjectLocatorTarget({ type: subjectType, id: subjectId, alertVersion })
         : undefined,
-    [subjectType, subjectId]
+    [subjectType, subjectId, alertVersion]
   );
   // Memoized so the effect below does not re-run, and loop, when a lookup returns a new object.
   const locator = useMemo(

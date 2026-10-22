@@ -123,6 +123,27 @@ describe('SubjectView', () => {
     expect(row).not.toHaveAttribute('target');
   });
 
+  it('links an alerting v2 alert to its episode details page, by rule name', async () => {
+    const { services } = createShare();
+    renderView(
+      {
+        ...base,
+        subjectType: 'alert',
+        subjectId: 'episode-1',
+        snapshot: { alert_version: 'v2', rule_name: 'CPU high', rule_id: 'rule-1' },
+      },
+      services
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute(
+        'href',
+        '/located/ALERTING_V2_EPISODES_LOCATOR?{"episodeId":"episode-1","host":{"app":"observabilityAlerting","pathPrefix":"/alerts"}}'
+      )
+    );
+    expect(screen.getByTestId('investigationSubjectTitle')).toHaveTextContent('CPU high');
+  });
+
   it('links a significant event to the Significant Events app, opened in place', async () => {
     const { services, navigate } = createShare();
     renderView(

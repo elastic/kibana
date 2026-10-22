@@ -58,6 +58,8 @@ export const alertSubjectSnapshotSchema = z
     /** `kibana.alert.url`: the link the rule type writes, if any (for example a Discover link). */
     url: z.string().max(2000).optional(),
     rule_tags: z.array(z.string().max(500)).max(50).optional(),
+    /** Which alerting the alert comes from: `v1` (classic, the default) or `v2` (an episode). */
+    alert_version: z.string().max(100).optional(),
   })
   .refine((value) => Object.keys(value).length <= MAX_SNAPSHOT_KEYS, {
     message: `snapshot exceeds ${MAX_SNAPSHOT_KEYS} key limit`,

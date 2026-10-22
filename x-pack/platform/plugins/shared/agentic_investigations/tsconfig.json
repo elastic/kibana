@@ -54,6 +54,7 @@
     "@kbn/visualization-utils",
     "@kbn/shared-ux-ai-components",
     "@kbn/deeplinks-observability",
+    "@kbn/alerting-v2-constants",
     "@kbn/share-plugin",
     "@kbn/utility-types"
   ],
