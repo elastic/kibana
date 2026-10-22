@@ -2232,6 +2232,30 @@ describe('ProposalsService', () => {
         ])
       );
     });
+
+    it('filters by any of the given statuses', async () => {
+      const storage = createStorage();
+      storage.search.mockResolvedValue({
+        hits: { hits: [] },
+        aggregations: { by_conversation: { buckets: [] } },
+      });
+      const { service } = createService(storage);
+
+      await service.countByConversation(
+        {
+          statuses: ['pending', 'executing'],
+          excludeSuperseded: true,
+          excludeExpired: false,
+        },
+        SPACE_ID,
+        10
+      );
+
+      const [searchRequest] = storage.search.mock.calls[0];
+      expect(searchRequest.query.bool.filter).toEqual(
+        expect.arrayContaining([{ terms: { status: ['pending', 'executing'] } }])
+      );
+    });
   });
 
   describe('getLatestRevision', () => {

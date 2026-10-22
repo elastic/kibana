@@ -41,6 +41,11 @@ import { useRunningSummary } from '../../hooks/use_running_summary';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { ConversationsPage } from './conversations_page';
 
+const mockDropDecided = jest.fn();
+jest.mock('./queue/use_drop_decided_proposal', () => ({
+  useDropDecidedProposal: () => mockDropDecided,
+}));
+
 jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
   ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
 }));
@@ -323,6 +328,7 @@ const setStatusMutate = jest.fn();
 const assignInvestigationMutate = jest.fn().mockResolvedValue({});
 
 beforeEach(() => {
+  mockDropDecided.mockClear();
   approveMutateAsync.mockResolvedValue(undefined);
   dismissMutateAsync.mockResolvedValue(undefined);
   mockUseApproveProposal.mockReturnValue({ mutateAsync: approveMutateAsync });
@@ -593,6 +599,26 @@ describe('ConversationsPage decisions', () => {
     );
   });
 
+  it('keeps an approved proposal in its category while its action runs', async () => {
+    renderPage('/');
+    openApproval();
+
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Approve' }));
+    await waitFor(() => expect(approveMutateAsync).toHaveBeenCalled());
+
+    expect(mockDropDecided).not.toHaveBeenCalled();
+  });
+
+  it('removes a declined proposal from its category because it closes at once', async () => {
+    renderPage('/');
+    openApproval();
+
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
+
+    await waitFor(() => expect(mockDropDecided).toHaveBeenCalledWith('prop-1'));
+  });
+
   it('does not offer proposal decisions without Proposals Manage even with AlertZero All', () => {
     renderPage('/', { proposalsCapabilities: { showProposals: true, decideProposals: false } });
     // Only the read-only "Copy link" remains in the menu: no decision can be made from it.
@@ -686,7 +712,11 @@ describe('ConversationsPage decisions', () => {
 
   it('offers only Copy link for a decided proposal when escalation is not available', async () => {
     // A decided investigation without `canManageEscalations` keeps just the read-only item.
-    mockProposals({ closed: [{ ...actionProposal, decidedAt: '2024-01-02T00:00:00Z' }] });
+    mockProposals({
+      closed: [
+        { ...actionProposal, decidedAt: '2024-01-02T00:00:00Z', status: 'succeeded' as const },
+      ],
+    });
 
     renderPage('/');
     await expandClosed();
@@ -699,7 +729,14 @@ describe('ConversationsPage decisions', () => {
   it('counts only undecided proposals as work needing attention', () => {
     mockProposals({
       respond: [actionProposal],
-      closed: [{ ...actionProposal, id: 'prop-2', decidedAt: '2024-01-02T00:00:00Z' }],
+      closed: [
+        {
+          ...actionProposal,
+          id: 'prop-2',
+          decidedAt: '2024-01-02T00:00:00Z',
+          status: 'succeeded' as const,
+        },
+      ],
     });
     mockOpenCount(1);
 
@@ -724,7 +761,11 @@ describe('ConversationsPage decisions', () => {
   });
 
   it('reads as an empty queue when the window holds only decisions already made', () => {
-    mockProposals({ closed: [{ ...actionProposal, decidedAt: '2024-01-02T00:00:00Z' }] });
+    mockProposals({
+      closed: [
+        { ...actionProposal, decidedAt: '2024-01-02T00:00:00Z', status: 'succeeded' as const },
+      ],
+    });
     mockOpenCount(0);
 
     renderPage('/');
@@ -823,7 +864,9 @@ describe('ConversationsPage idle state', () => {
   });
 
   it('hides the panel when the window holds only closed proposals', () => {
-    mockProposals({ closed: [{ ...proposal, decidedAt: '2024-01-02T00:00:00Z' }] });
+    mockProposals({
+      closed: [{ ...proposal, decidedAt: '2024-01-02T00:00:00Z', status: 'succeeded' as const }],
+    });
     mockOpenCount(0);
 
     renderPage('/');
@@ -833,7 +876,12 @@ describe('ConversationsPage idle state', () => {
 });
 
 describe('ConversationsPage queue sections', () => {
-  const closedProposal = { ...proposal, id: 'prop-c', decidedAt: '2024-01-02T00:00:00Z' };
+  const closedProposal = {
+    ...proposal,
+    id: 'prop-c',
+    decidedAt: '2024-01-02T00:00:00Z',
+    status: 'succeeded' as const,
+  };
   const bucketOf = (size: number, overrides: Partial<ProposalItem> = {}) =>
     Array.from({ length: size }, (_, i) => ({ ...proposal, id: `prop-${i}`, ...overrides }));
 
@@ -936,6 +984,7 @@ describe('ConversationsPage queue sections', () => {
         closed: bucketOf(CLOSED_PAGE_SIZE + 7).map((p) => ({
           ...p,
           decidedAt: '2024-01-02T00:00:00Z',
+          status: 'succeeded' as const,
         })),
       });
 

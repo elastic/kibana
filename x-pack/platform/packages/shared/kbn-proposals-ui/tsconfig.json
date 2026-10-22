@@ -17,5 +17,6 @@
     "@kbn/proposals-common",
     "@kbn/i18n-react",
     "@kbn/ui-callout",
+    "@kbn/test-jest-helpers",
   ]
 }

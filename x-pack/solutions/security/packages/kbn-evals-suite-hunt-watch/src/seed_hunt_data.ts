@@ -13,6 +13,7 @@ import type { HttpHandler } from '@kbn/core/public';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
+  OPEN_PROPOSAL_STATUSES,
   PROPOSALS_API_VERSION,
   PROPOSALS_INTERNAL_URL,
   PROPOSAL_DISMISS_URL,
@@ -472,9 +473,6 @@ export const seedHuntData = async ({
 interface ProposalsListResponse {
   proposals: Array<{ id: string; status?: string }>;
 }
-
-/** Statuses the Worker's candidate query treats as an open Proposal (`OPEN_PROPOSAL_STATUSES`). */
-const OPEN_PROPOSAL_STATUSES = ['pending', 'executing'] as const;
 
 const listOpenProposals = async ({
   fetch,

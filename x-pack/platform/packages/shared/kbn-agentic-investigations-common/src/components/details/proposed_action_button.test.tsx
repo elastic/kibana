@@ -50,7 +50,14 @@ describe('ProposedActionButton', () => {
     renderButton();
     expect(screen.getByText('Isolate cfo-mbp-14 — host isolation')).toBeInTheDocument();
     expect(screen.getByText('Needs review')).toBeInTheDocument();
-    expect(screen.getByText('Response action • Irreversible')).toBeInTheDocument();
+    expect(screen.getByTestId('proposedAction')).toHaveTextContent(
+      'Response action • Irreversible'
+    );
+  });
+
+  it('shows "Irreversible" in the danger color', () => {
+    renderButton();
+    expect(screen.getByText('Irreversible').className).toMatch(/danger/i);
   });
 
   it('names the row with its own title and status, not a fixed string every row shares', () => {
@@ -202,7 +209,15 @@ describe('ProposedActionButton', () => {
       expect(screen.getByText('Applied')).toBeInTheDocument();
       expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
       expect(screen.getByText(/Bonnie Fishel/)).toBeInTheDocument();
-      expect(screen.queryByText('Response action • Irreversible')).not.toBeInTheDocument();
+      expect(screen.queryByText('Irreversible')).not.toBeInTheDocument();
+    });
+
+    it('shows the full date and time in a tooltip on the time of the decision', async () => {
+      renderButton({ proposal: decidedProposal });
+
+      fireEvent.mouseOver(screen.getByText(/^\d{1,2}:\d{2}/));
+
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(/^1 Jan 2024, \d{2}:\d{2}$/);
     });
 
     it('shows a Declined badge for a dismissed proposal', () => {
