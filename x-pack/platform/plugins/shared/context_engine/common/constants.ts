@@ -43,9 +43,32 @@ export const MAX_SIGNAL_GROUPS = 100;
 export const DEFAULT_SIGNALS_PAGE_SIZE = 25;
 export const MAX_SIGNALS_PAGE_SIZE = 100;
 
+/** Read and decision routes for the improvements a feedback analysis run proposed. */
+export const aiIndexImprovementsPath = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/improvements`;
+export const improvementApprovePath = `${aiIndexImprovementsPath}/{improvementId}/approve`;
+export const improvementRejectPath = `${aiIndexImprovementsPath}/{improvementId}/reject`;
+/** Triggers one analysis off-schedule. */
+export const aiIndexFeedbackAnalysisRunPath = `${AI_INDEX_FEEDBACK_ANALYSIS_PATH}/_run`;
+
+/** Version of the internal Improvements API, shared between route registration and the browser client. */
+export const IMPROVEMENTS_INTERNAL_API_VERSION = '1';
+
+export const MAX_IMPROVEMENT_ID_LENGTH = 512;
+
 /** Default and maximum page size when listing improvements (one entry per improvement lineage). */
 export const DEFAULT_IMPROVEMENTS_PAGE_SIZE = 25;
 export const MAX_IMPROVEMENTS_PAGE_SIZE = 100;
+
+/**
+ * Upper bound on `from + size`, so deep pagination cannot exceed ES `index.max_result_window`.
+ */
+export const MAX_IMPROVEMENTS_RESULT_WINDOW = 10000;
+
+/**
+ * How much a reviewer may write when rejecting a suggestion. Shared with the input that collects
+ * it, so the field stops at the length the route would refuse rather than failing on submit.
+ */
+export const MAX_IMPROVEMENT_REJECT_REASON_LENGTH = 2048;
 
 /**
  * Version of the public AI index API, shared between the server route
@@ -144,6 +167,14 @@ export const SIGNAL_GENERATOR_SCHEDULE_INTERVAL = '1h';
 
 /** Skill id of the feedback loop's own analysis skill; rounds that load it are excluded from signal generation. */
 export const ANALYZE_AND_IMPROVE_SKILL_ID = 'analyze-and-improve';
+
+/**
+ * Id of the built-in Context Engine agent (registered by `contextEngineAgentBuilder`). Lives here,
+ * not there, because `contextEngine` cannot depend on `contextEngineAgentBuilder` — that plugin
+ * depends on this one — and both the feedback-analysis default and the agent registration itself
+ * need the same id.
+ */
+export const CONTEXT_ENGINE_SETUP_AGENT_ID = 'platform.context_engine.setup' as const;
 
 /**
  * Prefix for the per-space Agent Builder OTel traces indices (one per Kibana space). Kept

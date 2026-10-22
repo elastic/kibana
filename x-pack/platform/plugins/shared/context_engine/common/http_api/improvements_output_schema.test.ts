@@ -48,15 +48,27 @@ describe('buildImprovementsOutputSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('requires at least one signal id, so a proposal is always attached to evidence', () => {
+  it('takes a proposal with no signals behind it', () => {
+    // A run over a window with no signals reads the index itself — an indicator its source
+    // contradicts, an automation producing nothing — and has no ids to cite for any of it.
+    const result = proposedImprovementSchema.safeParse({
+      action: 'add_ki',
+      title: 'Add something',
+      rationale: 'The description promises coverage no indicator holds.',
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('still takes the signal ids when a run has them', () => {
     const result = proposedImprovementSchema.safeParse({
       action: 'add_ki',
       title: 'Add something',
       rationale: 'Because.',
-      signal_ids: [],
+      signal_ids: ['trace-1:span-1'],
     });
 
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
   it('drops the improvements array entirely when the index is observe-only', () => {
