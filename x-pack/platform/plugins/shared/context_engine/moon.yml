@@ -101,6 +101,4 @@ fileGroups:
     - scripts/**/*
     - test/scout_agent_builder/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}
