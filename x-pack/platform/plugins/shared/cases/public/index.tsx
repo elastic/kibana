@@ -40,9 +40,12 @@ export type {
   UnifiedValueAttachmentViewProps,
   AttachmentAction,
   DocumentActionProps,
+  RelatedRemovalChoice,
   WorkflowActivityLabelProps,
 } from './client/attachment_framework/types';
 export { AttachmentActionType, defineAttachment } from './client/attachment_framework/types';
+export { getRemoveFromCaseActions } from './client/attachment_framework/remove_from_case_actions';
+export type { RemoveFromCaseActions } from './client/attachment_framework/remove_from_case_actions';
 export { useCasesContext } from './components/cases_context/use_cases_context';
 export {
   useCaseAttachmentWorkflowRouting,
