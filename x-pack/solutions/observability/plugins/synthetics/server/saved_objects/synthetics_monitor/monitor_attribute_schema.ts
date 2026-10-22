@@ -8,6 +8,7 @@
 import { schema, type Type } from '@kbn/config-schema';
 import {
   MAX_MONITOR_FANOUT_SIZE,
+  MAX_MONITOR_PAYLOAD_BYTES,
   MAX_PARAM_VALUE_LENGTH,
   MAX_ROUTE_STRING_LENGTH,
 } from '../../../common/constants/monitor_attribute_limits';
@@ -29,9 +30,6 @@ import {
   AUTH_INLINE_CONF_MAX,
   AUTH_STRING_MAX,
 } from '../../../common/runtime_types/schemas/monitor_configs';
-
-// `secrets` is the JSON of every secret field, so it has to hold more than one script.
-const SECRETS_STRING = MAX_PARAM_VALUE_LENGTH * 8;
 
 const shortString = () => schema.string({ maxLength: MAX_ROUTE_STRING_LENGTH });
 const longString = () => schema.string({ maxLength: MAX_PARAM_VALUE_LENGTH });
@@ -234,7 +232,7 @@ export const monitorCreateSchema = schema.object({
   [ConfigKey.TLS_KEY]: schema.maybe(longString()),
   [ConfigKey.TLS_KEY_PASSPHRASE]: schema.maybe(longString()),
   // Secret ConfigKeys are packed into this JSON string before the document is stored.
-  secrets: schema.maybe(schema.string({ maxLength: SECRETS_STRING })),
+  secrets: schema.maybe(schema.string({ maxLength: MAX_MONITOR_PAYLOAD_BYTES })),
 });
 
 export const monitorForwardCompatibilitySchema = monitorCreateSchema.extends(

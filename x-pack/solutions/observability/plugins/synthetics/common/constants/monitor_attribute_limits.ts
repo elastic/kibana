@@ -10,3 +10,6 @@ export const MAX_ROUTE_STRING_LENGTH = 4096;
 export const MAX_MONITOR_FANOUT_SIZE = 1000;
 // Params hold PEM chains / keys; 10KB 400s those. 1MB is a DoS cap, not a product limit.
 export const MAX_PARAM_VALUE_LENGTH = 1_000_000;
+// Bulk-create and project routes accept this body. The secrets cap uses it because
+// create validation runs on the encrypted value, which is larger than the packed fields.
+export const MAX_MONITOR_PAYLOAD_BYTES = 100 * 1024 * 1024;

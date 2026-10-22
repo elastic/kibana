@@ -6,6 +6,7 @@
  */
 
 import { omit, pick } from 'lodash';
+import { MAX_PARAM_VALUE_LENGTH } from '../../../common/constants/monitor_attribute_limits';
 import { secretKeys } from '../../../common/constants/monitor_management';
 import {
   fullBrowserMonitor,
@@ -55,6 +56,15 @@ describe('monitor attribute schema', () => {
 
   it('accepts a monitor after secret fields are packed into secrets', () => {
     const stored = withPackedSecrets(fullHttpMonitor());
+
+    expect(monitorCreateSchema.validate(stored)).toEqual(stored);
+  });
+
+  it('accepts a secrets string larger than one secret field', () => {
+    const stored = {
+      ...withPackedSecrets(fullHttpMonitor()),
+      secrets: 'x'.repeat(MAX_PARAM_VALUE_LENGTH * 8 + 1),
+    };
 
     expect(monitorCreateSchema.validate(stored)).toEqual(stored);
   });
