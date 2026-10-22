@@ -83,6 +83,7 @@ const toAlertMetadata = (
  * Transformer for alert attachments (legacy schema <-> unified schema).
  * Legacy: { type: 'alert', alertId, index, rule } (AttachmentType.alert)
  * Unified: { type: owner-scoped alert, attachmentId: string|string[], metadata: { index, rule } }
+ * The legacy shape drops `metadata.sourceAttachmentIds`.
  */
 export const alertAttachmentTransformer: AttachmentTypeTransformer<
   AttachmentPersistedAttributes,

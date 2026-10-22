@@ -502,6 +502,22 @@ steps:
 
         {{ steps.classify_alerts.output.generated_summary }}{% if steps.classify_alerts.output.connector_id != '' %} _(Connector: `{{ steps.classify_alerts.output.connector_id }}`{% if steps.classify_alerts.output.agent_id != '' %}, Agent: `{{ steps.classify_alerts.output.agent_id }}`{% endif %})_{% endif %}
 
+  # Telemetry: how the batch was classified.
+  - name: report_batch_classified
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: alert_triage_batch_classified
+      alerts_total: "${{ variables.alert_count | default: 0 }}"
+      verdicts_true_positive: "${{ steps.classify_alerts.output.true_positive_count | default: 0 }}"
+      verdicts_false_positive: "${{ steps.classify_alerts.output.false_positive_count | default: 0 }}"
+      verdicts_inconclusive: "${{ steps.classify_alerts.output.inconclusive_count | default: 0 }}"
+      alerts_without_verdict: "${{ variables.alert_count | default: 0 | minus: variables.verdict_count | at_least: 0 }}"
+      fp_candidates: "${{ variables.fp_candidate_count | default: 0 }}"
+      fp_below_floor: "${{ steps.classify_alerts.output.false_positive_count | default: 0 | minus: variables.fp_candidate_count | at_least: 0 }}"
+      investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+
   # ---------------------------------------------------------------------------
   # 6. Record the impacted hosts and users on the Investigation through the shared
   #    investigations.attachImpact step (the landing-page entity pills read it).
@@ -912,6 +928,16 @@ steps:
               updates:
                 status: closed
 
+          - name: report_investigation_closed_no_fp
+            type: alertzero.reportWorkerOutcome
+            if: "${{ steps.close_no_fp.error == blank and steps.close_no_fp.output.changed_fields contains 'status' }}"
+            on-failure:
+              continue: true
+            with:
+              event: worker_investigation_closed
+              investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              close_reason: other
+
           - name: post_comment_outcome_no_fp
             type: ai.conversation.add_user_message
             on-failure:
@@ -921,3 +947,33 @@ steps:
               message: >-
                 Triage complete. No false positive alerts met the {{ inputs.confidence_floor }} confidence floor; no proposal created.
                 {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.false_positive_count }} false positive (below threshold), {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
+
+  # Telemetry: the run's outcome, last so it sees whether the closure review started.
+  - name: report_worker_run_completed
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: worker_run_completed
+      candidates_found: "${{ variables.alert_count | default: 0 }}"
+      items_dispatched: "${{ variables.verdict_count | default: 0 }}"
+      items_failed: "${{ variables.alert_count | default: 0 | minus: variables.verdict_count | at_least: 0 }}"
+      items_in_flight: "{% if variables.review_dispatch == 'started' %}{{ variables.fp_candidate_count }}{% else %}0{% endif %}"
+      degraded_reason: |-
+        {%- if variables.alert_count > 0 and variables.verdict_count == 0 -%}
+        dependency_unavailable
+        {%- elsif variables.verdict_count < variables.alert_count -%}
+        missing_data
+        {%- else -%}
+        none
+        {%- endif -%}
+      run_outcome: |-
+        {%- if variables.alert_count == 0 -%}
+        empty_nothing_pending
+        {%- elsif variables.verdict_count == 0 -%}
+        failed_all_items
+        {%- elsif variables.verdict_count < variables.alert_count -%}
+        degraded_partial
+        {%- else -%}
+        produced
+        {%- endif -%}

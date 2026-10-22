@@ -10,7 +10,6 @@ import type { VisualizationStage } from '@kbn/visualizations-plugin/public';
 import type { MapItem } from '../common/content_management';
 import {
   APP_ID,
-  APP_ICON,
   APP_NAME,
   getEditPath,
   MAP_PATH,
@@ -28,7 +27,7 @@ export const mapsVisTypeAlias = {
   description: i18n.translate('xpack.maps.visTypeAlias.description', {
     defaultMessage: 'Create and style maps with multiple layers and indices.',
   }),
-  icon: APP_ICON,
+  icon: 'map',
   stage: 'production' as VisualizationStage,
   order: 40,
   appExtensions: {
@@ -50,7 +49,7 @@ export const mapsVisTypeAlias = {
             editUrl: getEditPath(id),
             editApp: APP_ID,
           },
-          icon: APP_ICON,
+          icon: 'map',
           stage: 'production' as VisualizationStage,
           savedObjectType: type,
           typeTitle: APP_NAME,

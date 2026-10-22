@@ -75,6 +75,7 @@ export interface AttachmentForDeletion {
   /** The file of a file attachment, read from the stored fields whether or not they decode. */
   fileId?: string;
   attributes?: AttachmentAttributesV2;
+  version?: string;
 }
 
 export type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'> & {
