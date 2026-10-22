@@ -163,6 +163,7 @@ export const NewRelic: ConnectorSpec = {
       {
         type: 'api_key_header',
         isRecommended: true,
+        supportsSandbox: true,
         defaults: { headerField: 'API-Key' },
         overrides: {
           meta: {
