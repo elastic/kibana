@@ -33,14 +33,16 @@ describe('source_create tool', () => {
     featurePrivilege = 'all',
     create = jest.fn().mockResolvedValue(checkout),
     maintenanceState = 'enabled',
+    getState = jest.fn().mockResolvedValue(maintenanceState),
   }: {
     featurePrivilege?: NightshiftFeaturePrivilege;
     create?: jest.Mock;
     maintenanceState?: SignificantEventsMaintenanceState;
+    getState?: jest.Mock;
   }) =>
     createSourceCreateTool({
       ...createSourceToolDeps({ featurePrivilege, sourcesClient: { create } }),
-      maintenanceService: { getState: jest.fn().mockResolvedValue(maintenanceState) },
+      maintenanceService: { getState },
     });
 
   beforeEach(() => {
@@ -70,6 +72,20 @@ describe('source_create tool', () => {
     });
     expect(paused).toEqual({
       results: [{ type: 'other', data: expect.objectContaining({ onboarding_paused: true }) }],
+    });
+  });
+
+  it('does not create the source when the pause state cannot be read', async () => {
+    const create = jest.fn();
+    const getState = jest.fn().mockRejectedValue(new Error('state unavailable'));
+
+    const result = await createTool({ create, getState }).handler(params, createMockToolContext());
+
+    expect(create).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      results: [
+        { type: 'error', data: { message: expect.stringContaining('Failed to create source') } },
+      ],
     });
   });
 

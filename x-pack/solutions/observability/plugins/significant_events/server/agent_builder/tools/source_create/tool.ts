@@ -100,9 +100,12 @@ export const createSourceCreateTool = ({
       getScopedClients,
       server,
       logger,
-      run: async ({ sourcesClient }) => ({
-        ...toSourceSummary(await sourcesClient.create(toolParams)),
-        ...(await getOnboardingPausedFlag({ maintenanceService, request })),
-      }),
+      run: async ({ sourcesClient }) => {
+        const onboardingPaused = await getOnboardingPausedFlag({ maintenanceService, request });
+        return {
+          ...toSourceSummary(await sourcesClient.create(toolParams)),
+          ...onboardingPaused,
+        };
+      },
     }),
 });

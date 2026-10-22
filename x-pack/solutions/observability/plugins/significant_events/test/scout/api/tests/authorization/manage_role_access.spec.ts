@@ -312,54 +312,70 @@ for (const { name, label, role } of ROLES) {
         ]);
       });
 
-      apiTest('creates, updates and deletes a source from Agent Builder', async ({ apiClient }) => {
-        const title = `${name}-tool-source-${uuidv4()}`;
+      apiTest(
+        'creates, updates and deletes a source from Agent Builder',
+        async ({ apiClient, kbnClient }) => {
+          const title = `${name}-tool-source-${uuidv4()}`;
 
-        const createResponse = await executeTool(apiClient, toolHeaders, SOURCE_CREATE_TOOL_ID, {
-          title,
-          esql: ACCESS_SOURCE_ESQL,
-        });
-        expect(createResponse).toHaveStatusCode(200);
-        const created = createResponse.body.results[0];
-        expect(created).toStrictEqual(
-          expect.objectContaining({
-            type: 'other',
-            data: expect.objectContaining({ title, enabled: true }),
-          })
-        );
-        const { id, slug } = created.data;
-
-        const updatedTitle = `${title}-renamed`;
-        const updateResponse = await executeTool(apiClient, toolHeaders, SOURCE_UPDATE_TOOL_ID, {
-          source: slug,
-          title: updatedTitle,
-          enabled: false,
-        });
-        expect(updateResponse).toHaveStatusCode(200);
-        expect(updateResponse.body.results[0].data).toStrictEqual(
-          expect.objectContaining({
-            id,
-            slug,
-            title: updatedTitle,
+          const createResponse = await executeTool(apiClient, toolHeaders, SOURCE_CREATE_TOOL_ID, {
+            title,
             esql: ACCESS_SOURCE_ESQL,
-            enabled: false,
-          })
-        );
+          });
+          expect(createResponse).toHaveStatusCode(200);
+          const created = createResponse.body.results[0];
+          expect(created).toStrictEqual(
+            expect.objectContaining({
+              type: 'other',
+              data: expect.objectContaining({ title, enabled: true }),
+            })
+          );
+          const { id, slug } = created.data;
+          try {
+            const updatedTitle = `${title}-renamed`;
+            const updateResponse = await executeTool(
+              apiClient,
+              toolHeaders,
+              SOURCE_UPDATE_TOOL_ID,
+              {
+                source: slug,
+                title: updatedTitle,
+                enabled: false,
+              }
+            );
+            expect(updateResponse).toHaveStatusCode(200);
+            expect(updateResponse.body.results[0].data).toStrictEqual(
+              expect.objectContaining({
+                id,
+                slug,
+                title: updatedTitle,
+                esql: ACCESS_SOURCE_ESQL,
+                enabled: false,
+              })
+            );
 
-        const deleteResponse = await executeTool(apiClient, toolHeaders, SOURCE_DELETE_TOOL_ID, {
-          source: slug,
-        });
-        expect(deleteResponse).toHaveStatusCode(200);
-        expect(deleteResponse.body.results[0].data).toStrictEqual(
-          expect.objectContaining({ deleted: true, id })
-        );
+            const deleteResponse = await executeTool(
+              apiClient,
+              toolHeaders,
+              SOURCE_DELETE_TOOL_ID,
+              {
+                source: slug,
+              }
+            );
+            expect(deleteResponse).toHaveStatusCode(200);
+            expect(deleteResponse.body.results[0].data).toStrictEqual(
+              expect.objectContaining({ deleted: true, id })
+            );
 
-        const getResponse = await apiClient.get(`${SOURCES_ENDPOINT}/${id}`, {
-          headers,
-          responseType: 'json',
-        });
-        expect(getResponse).toHaveStatusCode(404);
-      });
+            const getResponse = await apiClient.get(`${SOURCES_ENDPOINT}/${id}`, {
+              headers,
+              responseType: 'json',
+            });
+            expect(getResponse).toHaveStatusCode(404);
+          } finally {
+            await deleteAccessSource({ kbnClient, sourceId: id });
+          }
+        }
+      );
 
       apiTest(
         'cleans up the knowledge indicators of a source deleted from Agent Builder',

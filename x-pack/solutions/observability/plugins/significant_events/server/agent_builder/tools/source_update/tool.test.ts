@@ -33,11 +33,13 @@ describe('source_update tool', () => {
     update = jest.fn(),
     setEnabled = jest.fn(),
     maintenanceState = 'enabled',
+    getState = jest.fn().mockResolvedValue(maintenanceState),
   }: {
     featurePrivilege?: NightshiftFeaturePrivilege;
     update?: jest.Mock;
     setEnabled?: jest.Mock;
     maintenanceState?: SignificantEventsMaintenanceState;
+    getState?: jest.Mock;
   }) =>
     createSourceUpdateTool({
       ...createSourceToolDeps({
@@ -48,7 +50,7 @@ describe('source_update tool', () => {
           setEnabled,
         },
       }),
-      maintenanceService: { getState: jest.fn().mockResolvedValue(maintenanceState) },
+      maintenanceService: { getState },
     });
 
   beforeEach(() => {
@@ -144,6 +146,25 @@ describe('source_update tool', () => {
     });
   });
 
+  it('changes nothing when the pause state cannot be read', async () => {
+    const update = jest.fn();
+    const setEnabled = jest.fn();
+    const getState = jest.fn().mockRejectedValue(new Error('state unavailable'));
+
+    const result = await createTool({ update, setEnabled, getState }).handler(
+      { source: 'checkout', title: 'Checkout v2', enabled: false },
+      createMockToolContext()
+    );
+
+    expect(update).not.toHaveBeenCalled();
+    expect(setEnabled).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      results: [
+        { type: 'error', data: { message: expect.stringContaining('Failed to update source') } },
+      ],
+    });
+  });
+
   it('refuses a call that changes nothing', async () => {
     const update = jest.fn();
     const setEnabled = jest.fn();
@@ -186,6 +207,21 @@ describe('source_update tool', () => {
     });
   });
 
+  it('warns that a new query resets the source knowledge, and is marked destructive', async () => {
+    const { annotations, confirmation } = createTool({});
+
+    expect(annotations?.destructiveHint).toBe(true);
+    expect(
+      await confirmation?.getConfirmation?.({
+        toolParams: { source: 'checkout', esql: 'FROM logs-checkout-v2-*' },
+        context: createMockToolContext(),
+      })
+    ).toMatchObject({
+      message: expect.stringContaining('so they are deleted and any running onboarding is stopped'),
+      confirm_text: 'Save and reset knowledge',
+    });
+  });
+
   it('always asks the user to confirm and shows what changes', async () => {
     const { confirmation } = createTool({});
 
@@ -197,6 +233,7 @@ describe('source_update tool', () => {
       })
     ).toMatchObject({
       message: expect.stringMatching(/checkout.*title: "Checkout v2".*enabled: false/),
+      confirm_text: 'Update',
     });
   });
 });

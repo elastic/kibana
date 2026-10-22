@@ -67,6 +67,8 @@ export const createSourceUpdateTool = ({
 
     A new query is validated and run as the current user, so the user needs read access to the
     indices it targets. An invalid query returns an error that says why, and nothing is changed.
+    Changing the query deletes the source's Knowledge Indicators and rules and stops any running
+    onboarding, because they describe the old query. Tell the user before changing it.
 
     Returns the updated source. ${ONBOARDING_PAUSED_DESCRIPTION} When other fields are changed together
     with \`enabled\` and only setting \`enabled\` fails, the other changes are kept and
@@ -75,7 +77,7 @@ export const createSourceUpdateTool = ({
   annotations: {
     title: 'Update Nightshift Source',
     readOnlyHint: false,
-    destructiveHint: false,
+    destructiveHint: true,
     idempotentHint: false,
     openWorldHint: false,
   },
@@ -87,6 +89,8 @@ export const createSourceUpdateTool = ({
       const changeList = Object.entries(withoutUndefined(changes))
         .map(([field, value]) => `${field}: ${JSON.stringify(value)}`)
         .join(', ');
+      // A new query makes the stored knowledge stale, so its prompt says that it is reset.
+      const resetsKnowledge = changes.esql !== undefined;
       return {
         title: i18n.translate(
           'xpack.significantEvents.agentBuilder.tools.sourceUpdate.confirmation.title',
@@ -94,19 +98,35 @@ export const createSourceUpdateTool = ({
             defaultMessage: 'Update Nightshift Source',
           }
         ),
-        message: i18n.translate(
-          'xpack.significantEvents.agentBuilder.tools.sourceUpdate.confirmation.message',
-          {
-            defaultMessage: 'Update source "{source}" ({changeList})?',
-            values: { source, changeList },
-          }
-        ),
-        confirm_text: i18n.translate(
-          'xpack.significantEvents.agentBuilder.tools.sourceUpdate.confirmation.confirm',
-          {
-            defaultMessage: 'Update',
-          }
-        ),
+        message: resetsKnowledge
+          ? i18n.translate(
+              'xpack.significantEvents.agentBuilder.tools.sourceUpdate.confirmation.queryChangeMessage',
+              {
+                defaultMessage:
+                  'Update source "{source}" ({changeList})? Its knowledge indicators and rules describe the old query, so they are deleted and any running onboarding is stopped. Onboard the source again to rebuild them.',
+                values: { source, changeList },
+              }
+            )
+          : i18n.translate(
+              'xpack.significantEvents.agentBuilder.tools.sourceUpdate.confirmation.message',
+              {
+                defaultMessage: 'Update source "{source}" ({changeList})?',
+                values: { source, changeList },
+              }
+            ),
+        confirm_text: resetsKnowledge
+          ? i18n.translate(
+              'xpack.significantEvents.agentBuilder.tools.sourceUpdate.confirmation.queryChangeConfirm',
+              {
+                defaultMessage: 'Save and reset knowledge',
+              }
+            )
+          : i18n.translate(
+              'xpack.significantEvents.agentBuilder.tools.sourceUpdate.confirmation.confirm',
+              {
+                defaultMessage: 'Update',
+              }
+            ),
         cancel_text: i18n.translate(
           'xpack.significantEvents.agentBuilder.tools.sourceUpdate.confirmation.cancel',
           {
@@ -133,6 +153,7 @@ export const createSourceUpdateTool = ({
         }
 
         const current = await resolveSource(sourcesClient, slugOrId);
+        const onboardingPaused = await getOnboardingPausedFlag({ maintenanceService, request });
         let updated = current;
         if (hasContentChanges) {
           // Parsing keeps exactly the fields an update request carries, so the stored values of a
@@ -165,7 +186,7 @@ export const createSourceUpdateTool = ({
         return {
           ...toSourceSummary(updated),
           ...(enabledChangeFailed && { enabled_change_failed: enabledChangeFailed }),
-          ...(await getOnboardingPausedFlag({ maintenanceService, request })),
+          ...onboardingPaused,
         };
       },
     }),
