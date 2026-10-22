@@ -108,7 +108,6 @@ export const javascriptRules: DummyRuleMap = {
   // 'no-new': 'error',
   'no-new-wrappers': 'error',
   // 'no-path-concat': 'error',
-  // 'no-restricted-imports': [2, RESTRICTED_MODULES],
   // 'no-restricted-modules': [2, RESTRICTED_MODULES],
   // 'no-restricted-syntax': [
   //   'error',

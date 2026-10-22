@@ -144,6 +144,19 @@ module.exports = {
 }
 ```
 
+## no_deprecated_imports
+
+typescript-eslint's `no-restricted-imports` under a separate name, so deprecated imports can be reported as warnings while `no-restricted-imports` reports errors for the same files. It accepts the same options and uses the ESLint `create` API in Oxlint. Kibana configures it in `.oxlint/kibana.mts`.
+
+```javascript
+'@kbn/eslint/no_deprecated_imports': [
+  'warn',
+  {
+    paths: [{ name: 'enzyme', message: 'Please use @testing-library/react instead.' }],
+  },
+],
+```
+
 ## no_unsafe_console
 
 Disables the usage of kbn-security-hardening/console/unsafeConsole.
