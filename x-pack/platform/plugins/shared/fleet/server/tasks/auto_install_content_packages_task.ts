@@ -50,9 +50,16 @@ interface AutoInstallContentPackagesTaskStartContract {
   taskManager: TaskManagerStartContract;
 }
 
+interface DiscoveryPackage {
+  name: string;
+  version: string;
+  // PROTOTYPE: integration packages can declare `discovery` too (package structure design)
+  type?: string;
+}
+
 interface DiscoveryMap {
   [key: string]: {
-    packages: Array<{ name: string; version: string }>;
+    packages: DiscoveryPackage[];
   };
 }
 
@@ -222,16 +229,19 @@ export class AutoInstallContentPackagesTask {
 
   private async installPackages(
     packageClient: PackageClient,
-    packagesToInstall: Array<{ name: string; version: string }>
+    packagesToInstall: DiscoveryPackage[]
   ) {
     await pMap(
       packagesToInstall,
-      async ({ name, version }) => {
+      async ({ name, version, type }) => {
         try {
+          // PROTOTYPE: an integration package is installed content-only: Kibana and Elasticsearch
+          // assets, no integration policy (the data comes from the user's own collector).
+          // Streaming installs Kibana assets only, so it's kept for content packages.
           await packageClient.installPackage({
             pkgName: name,
             pkgVersion: version,
-            useStreaming: true, // Use streaming for content packages
+            useStreaming: type !== 'integration',
             automaticInstall: true,
           });
         } catch (error) {
@@ -288,7 +298,7 @@ export class AutoInstallContentPackagesTask {
       datasetsOfInstalledContentPackages
     );
 
-    const packagesToInstall: { [name: string]: string } = {};
+    const packagesToInstall: { [name: string]: DiscoveryPackage } = {};
 
     for (const [dataset, mapValue] of Object.entries(discoveryMapWithNotInstalledPackages)) {
       const packages = mapValue.packages;
@@ -296,14 +306,17 @@ export class AutoInstallContentPackagesTask {
       const hasData = datasetsWithData.includes(dataset);
 
       if (hasData) {
-        for (const { name, version } of packages) {
-          if (!installedPackagesMap[name] || semverGt(version, installedPackagesMap[name])) {
-            packagesToInstall[name] = version;
+        for (const pkg of packages) {
+          if (
+            !installedPackagesMap[pkg.name] ||
+            semverGt(pkg.version, installedPackagesMap[pkg.name])
+          ) {
+            packagesToInstall[pkg.name] = pkg;
           }
         }
       }
     }
-    return Object.entries(packagesToInstall).map(([name, version]) => ({ name, version }));
+    return Object.values(packagesToInstall);
   }
 
   private async getDatasetsWithData(
@@ -327,9 +340,15 @@ export class AutoInstallContentPackagesTask {
   }
 
   private async getContentPackagesDiscoveryMap(prerelease: boolean): Promise<DiscoveryMap> {
-    const type = 'content';
     const discoveryMap: DiscoveryMap = {};
-    const registryItems = await Registry.fetchList({ prerelease, type });
+    // PROTOTYPE: content packages and, per the package structure design, integration packages
+    // that declare `discovery` (e.g. nginx_otel 1.0.0).
+    const registryItems = (
+      await Promise.all([
+        Registry.fetchList({ prerelease, type: 'content' }),
+        Registry.fetchList({ prerelease, type: 'integration' }),
+      ])
+    ).flat();
 
     registryItems.forEach((item) => {
       if (item.discovery?.datasets) {
@@ -340,7 +359,11 @@ export class AutoInstallContentPackagesTask {
                 packages: [],
               };
             }
-            discoveryMap[field.name].packages.push({ name: item.name, version: item.version });
+            discoveryMap[field.name].packages.push({
+              name: item.name,
+              version: item.version,
+              type: item.type,
+            });
           }
         });
       }
