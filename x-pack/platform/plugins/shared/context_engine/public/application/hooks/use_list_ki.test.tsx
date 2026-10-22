@@ -84,7 +84,7 @@ describe('useListKi', () => {
           query: expect.objectContaining({
             size: 10,
             type: 'playbook',
-            lifecycle_status: ['active', 'deleted'],
+            lifecycle_status: ['active', 'deleted', 'verification_failed'],
           }),
         })
       );
