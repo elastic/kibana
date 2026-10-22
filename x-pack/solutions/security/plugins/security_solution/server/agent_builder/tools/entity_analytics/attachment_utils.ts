@@ -17,9 +17,9 @@ import type { SecurityAgentBuilderAttachments } from '../../../../common/constan
  * whose `id` contains `@` or URL-shaped substrings). The `build*AttachmentId`
  * helpers already emit `<namespace>:<type>:<hex>`, which satisfies this
  * pattern, so the regex is a belt-and-braces regression detector — not a
- * substitute for hashing.
+ * substitute for hashing. The UUIDs `attachments.add` returns match it too.
  */
-const AUTOLINK_SAFE_ATTACHMENT_ID_PATTERN = /^[a-z0-9:.]+$/;
+const AUTOLINK_SAFE_ATTACHMENT_ID_PATTERN = /^[a-z0-9:.-]+$/;
 
 /**
  * Returns a pre-formatted `<render_attachment id="..." version="..." />`
@@ -38,7 +38,7 @@ const AUTOLINK_SAFE_ATTACHMENT_ID_PATTERN = /^[a-z0-9:.]+$/;
  *   does not silently desynchronise security-emitted tags.
  *
  * Callers MUST pass an id produced by one of the hashed `build*AttachmentId`
- * helpers; the assertion below fires otherwise so a future refactor that
+ * helpers or by `attachments.add`; the assertion below fires otherwise so a future refactor that
  * bypasses hashing surfaces immediately instead of shipping a broken tag to
  * the client.
  */
@@ -52,7 +52,7 @@ export const buildRenderAttachmentTag = ({
   if (!AUTOLINK_SAFE_ATTACHMENT_ID_PATTERN.test(attachmentId)) {
     throw new Error(
       `buildRenderAttachmentTag received an unsafe attachmentId "${attachmentId}" — ` +
-        `expected a hashed id from a build*AttachmentId helper.`
+        `expected a hashed id from a build*AttachmentId helper or a UUID.`
     );
   }
   const { tagName } = renderAttachmentElement;
