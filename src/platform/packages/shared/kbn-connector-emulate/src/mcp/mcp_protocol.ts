@@ -337,6 +337,8 @@ export const createMcpProtocol = (
         readOnly: annotations?.readOnlyHint === true,
       })),
     ],
+    // `tools/list` answers from the spec's tools, never from a stored response.
+    answerable: operationNames,
     rejectedResponses,
     handle: async (request) => {
       if (request.method !== 'post') {

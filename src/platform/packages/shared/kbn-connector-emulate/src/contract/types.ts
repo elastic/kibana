@@ -75,6 +75,8 @@ export interface ContractProtocol {
   readonly endpoints: readonly string[];
   /** Every operation the spec declares, named as `ProtocolExchange.operations` names them. */
   readonly operations: readonly NamedOperation[];
+  /** The operations a fixture or recording can answer, such as `query boards`, by name. */
+  readonly answerable: ReadonlySet<string>;
   /** Recordings that aren't served because the spec contradicts them. */
   readonly rejectedResponses: readonly RejectedResponse[];
   handle(request: ContractRequest): Promise<ProtocolExchange>;

@@ -234,6 +234,7 @@ export const createGraphQLProtocol = (
         readOnly: name.startsWith('query '),
       })
     ),
+    answerable: operationNames,
     rejectedResponses,
     handle: async (request) => {
       if (request.method !== 'get' && request.method !== 'post') {
