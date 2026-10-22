@@ -6,6 +6,7 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { CUSTOM_APP_EMBEDDABLE_TYPE, CUSTOM_APP_STATE_VERSION } from '@kbn/custom-app-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
 import {
   addPanelsItemSchema,
@@ -177,6 +178,60 @@ describe('by-value panel type registry', () => {
     expect(
       getConfigPanelEditError('markdown', { id: 'panel-1', type: 'lens', config: {}, grid })
     ).toMatch(/Panel "panel-1" with type "lens" cannot be edited as markdown/);
+  });
+});
+
+describe('custom app panels', () => {
+  const document = {
+    state: {},
+    root: { type: 'heading', id: 'title', text: 'Hello' },
+  };
+  const add = {
+    source: 'config' as const,
+    type: 'custom_app' as const,
+    config: { document },
+  };
+
+  it.each([
+    ['add_panels', addPanelsItemSchema],
+    ['add_section', addSectionPanelItemSchema],
+  ])('accepts an app by value in %s', (_, schema) => {
+    expect(schema.safeParse(add).success).toBe(true);
+  });
+
+  it('refuses an app that is not valid, such as one whose custom content has no template yet', () => {
+    const unwritten = {
+      state: {},
+      root: { type: 'custom_content', id: 'board', prompt: 'A status board' },
+    };
+
+    expect(addPanelsItemSchema.safeParse({ ...add, config: { document: unwritten } }).success).toBe(
+      false
+    );
+  });
+
+  it('edits an app by panel id, replacing it', () => {
+    expect(
+      editPanelItemSchema.safeParse({
+        source: 'config',
+        type: 'custom_app',
+        panelId: 'app-1',
+        config: { document },
+      }).success
+    ).toBe(true);
+  });
+
+  it('is stored as a custom app panel, with the version of its state added', () => {
+    expect(buildConfigPanelContent('custom_app', { document, title: 'Mine' })).toEqual({
+      type: CUSTOM_APP_EMBEDDABLE_TYPE,
+      config: { document, title: 'Mine', version: CUSTOM_APP_STATE_VERSION },
+    });
+  });
+
+  it('refuses to edit a panel of another type as a custom app', () => {
+    expect(
+      getConfigPanelEditError('custom_app', { id: 'p', type: 'lens', config: {}, grid })
+    ).toMatch(/Panel "p" with type "lens" cannot be edited as custom app/);
   });
 });
 

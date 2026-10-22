@@ -12,6 +12,7 @@
     "@kbn/agent-builder-visualizations-common",
     "@kbn/as-code-dashboard-schema",
     "@kbn/controls-constants",
+    "@kbn/custom-app-common",
     "@kbn/custom-content-common",
     "@kbn/dashboard-markdown-schemas",
     "@kbn/esql-utils",

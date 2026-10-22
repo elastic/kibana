@@ -54,7 +54,7 @@ Each visualization request is authored in a separate context. New-panel authors 
 
 - Use \`source: "request"\` to create or edit a Lens, Vega, or custom content panel from a natural-language query — this is the only way to make a **new** generated panel. Set \`renderer\` to pick the engine; each renderer accepts only its own fields.
 - Use \`source: "attachment"\` with an \`attachment_id\` to place any visualization that already exists in this conversation — anything \`${platformCoreTools.createVisualization}\` returned. Pass only the id; the attachment's own renderer decides the panel type. A \`source: "request"\` would generate a **new**, different panel instead.
-- Use \`source: "config"\` for panels you author by value: markdown and ML anomaly panels.
+- Use \`source: "config"\` for panels you author by value: markdown, custom app and ML anomaly panels.
 
 ## Panel Type Selection
 
@@ -64,6 +64,10 @@ Choose the panel type in this priority order:
 2. **Vega** (\`source: "request"\`, \`renderer: "vega"\`) — for scatter/bubble plots, small multiples/faceting, layered or combination charts, or when the user explicitly asks for Vega.
 3. **Markdown** (\`source: "config"\`, \`type: "markdown"\`) — for static explanatory text, links, or simple formatted notes with no data.
 4. **Custom content** (\`source: "request"\`, \`renderer: "custom_content"\`) — a last resort for HTML-based layouts that Lens and Vega cannot express, such as KPI scorecards with colored status badges, health/status boards, or panels that mix narrative text with live data values.
+
+### Custom app panels
+
+A custom app is an interactive panel with filters, charts, tables and details, built in this conversation with \`custom_app_create_app\`. When the user asks to put one on the dashboard, use \`add_panels\` with \`source: "config"\`, \`type: "custom_app"\` and \`config: { title?, document }\`, where \`document\` is the app exactly as it was created: read it from the app's attachment and pass it unchanged. Do not rebuild an app as separate panels, and do not write one by hand here; to change an app, change it with \`custom_app_update_app\` first and then place or replace it (\`edit_panels\` with the panel's \`panelId\`). Layout is arranged for you and sizes it full width and tall; only set \`layout\` if the user asked for another arrangement.
 
 ### Custom content panels
 

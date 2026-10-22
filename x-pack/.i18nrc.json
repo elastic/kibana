@@ -212,6 +212,7 @@
     "xpack.watcher": "platform/plugins/private/watcher",
     "xpack.eventStacktrace": "platform/packages/shared/kbn-event-stacktrace",
     "xpack.notificationCenter": "platform/plugins/shared/notification_center",
+    "xpack.customApp": "platform/plugins/shared/custom_app",
     "xpack.customContent": [
       "platform/packages/shared/custom-content/custom-content-renderer",
       "platform/plugins/shared/custom_content"
