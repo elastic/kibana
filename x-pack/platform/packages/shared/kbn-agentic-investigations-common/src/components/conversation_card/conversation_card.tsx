@@ -29,7 +29,7 @@ interface ConversationCardProps {
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
-  /** When false the card is inert and its chat control and menu are disabled. Defaults to true. */
+  /** When false the card is inert, its assignees are hidden, and its chat control and menu are disabled. Defaults to true. */
   canOpenInvestigationDetails?: boolean;
   /** URL for this card's chat, so its control renders as a link. */
   chatHref?: string;
@@ -147,13 +147,15 @@ export const ConversationCard = memo<ConversationCardProps>(
                    * Stop propagation so interacting with the assignee picker
                    * (clicking the + button or selecting a user) does not trigger the card click.
                    */}
-                  <EuiFlexItem
-                    grow={false}
-                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                    onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}
-                  >
-                    {renderAssignees(investigation)}
-                  </EuiFlexItem>
+                  {canOpenInvestigationDetails && (
+                    <EuiFlexItem
+                      grow={false}
+                      onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                      onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}
+                    >
+                      {renderAssignees(investigation)}
+                    </EuiFlexItem>
+                  )}
                   <EuiFlexItem grow={false}>
                     <ConversationsActionsGroup
                       investigation={investigation}
