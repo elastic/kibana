@@ -45,7 +45,10 @@ import { EnvironmentFilter } from './components/environment_filter';
 import { PageLoadsChart } from './components/page_loads_chart';
 import { SourceFilter } from './components/source_filter';
 import { TimeRangePicker } from '../../components/time_range_picker';
-import { APPLICATIONS_LIST_EBT_ELEMENTS, DIGITAL_EXPERIENCE_EBT_ACTIONS } from '../../ebt_constants';
+import {
+  APPLICATIONS_LIST_EBT_ELEMENTS,
+  DIGITAL_EXPERIENCE_EBT_ACTIONS,
+} from '../../ebt_constants';
 import { useDigitalExperienceRouter } from '../../hooks/use_digital_experience_router';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useListQuery } from '../../hooks/use_list_query';
@@ -222,7 +225,6 @@ const CLASSIC_DATA_HINT = i18n.translate('xpack.digitalExperience.applications.c
 });
 
 const getRowId = ({ serviceName, source }: ApplicationRow) => `${source}:${serviceName}`;
-
 
 const APPLICATION_COLUMN = i18n.translate(
   'xpack.digitalExperience.applications.applicationColumn',
