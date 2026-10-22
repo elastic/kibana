@@ -176,9 +176,9 @@ const spliceYaml = (yaml: string, start: number, end: number, replacement: strin
 
 type EditScope =
   | { type: 'property'; key: string }
-  | { type: 'step'; stepName: string }
+  | { type: 'step'; stepName: string; parentStepName?: string }
   | { type: 'insertStep'; parentStepName?: string }
-  | { type: 'deleteStep'; stepName: string };
+  | { type: 'deleteStep'; stepName: string; parentStepName?: string };
 
 interface StepJson {
   name?: string;
@@ -261,7 +261,9 @@ const verifyEditIntegrity = (
   if (stepsNeedPerItemCheck && editScope.type !== 'property') {
     let excludeName: string | undefined;
     if (editScope.type === 'step' || editScope.type === 'deleteStep') {
-      excludeName = editScope.stepName;
+      // A nested step is not in the root `steps` list, so the comparison has to
+      // skip its root ancestor, which is where the change shows up.
+      excludeName = editScope.parentStepName ?? editScope.stepName;
     } else if (editScope.type === 'insertStep') {
       excludeName = editScope.parentStepName;
     }
@@ -405,6 +407,7 @@ export const modifyStep = (
   return checkedResult(yaml, spliceYaml(yaml, range[0], range[1], replacement), {
     type: 'step',
     stepName,
+    parentStepName: findRootAncestorStepName(doc, range, stepName),
   });
 };
 
@@ -482,7 +485,14 @@ export const modifyStepProperty = (
   if (!stepNode) return { success: false, yaml, error: `Step "${stepName}" not found` };
 
   const indentUnit = detectIndent(yaml);
-  const scope: EditScope = { type: 'step', stepName };
+  const stepNodeRange = nodeRange(stepNode);
+  const scope: EditScope = {
+    type: 'step',
+    stepName,
+    parentStepName: stepNodeRange
+      ? findRootAncestorStepName(doc, stepNodeRange, stepName)
+      : undefined,
+  };
 
   if (ENABLE_DOT_NOTATION_PATHS && property.includes('.')) {
     const dotResult = resolveDotNotationProperty(
@@ -674,6 +684,7 @@ export const deleteStep = (yaml: string, stepName: string): EditResult => {
   return checkedResult(yaml, spliceYaml(yaml, deleteStart, range[1], ''), {
     type: 'deleteStep',
     stepName,
+    parentStepName: findRootAncestorStepName(doc, range, stepName),
   });
 };
 
