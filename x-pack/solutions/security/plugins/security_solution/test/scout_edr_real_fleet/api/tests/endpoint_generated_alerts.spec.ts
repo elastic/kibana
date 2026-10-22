@@ -12,6 +12,7 @@ import { ENDPOINT_ALERTS_INDEX } from '../../../../scripts/endpoint/common/const
 import {
   countEndpointAlertsForAgent,
   deleteDetectionAlertsForAgent,
+  describeEndpointDetectionState,
   getEndpointSecurityAlertsQuery,
   getSecurityRoleApiKey,
   restartEndpointSecurityRule,
@@ -19,8 +20,9 @@ import {
 } from '../fixtures/endpoint_generated_alerts';
 import { apiTest } from '../fixtures';
 
+const MALICIOUS_COMMAND_TARGET = '/dev/tcp/foo';
 /** Matches an Elastic Defend malicious-behavior rule; the agent blocks it and raises an alert. */
-const MALICIOUS_COMMAND = 'bash -c cat /dev/tcp/foo';
+const MALICIOUS_COMMAND = `bash -c cat ${MALICIOUS_COMMAND_TARGET}`;
 const ENDPOINT_ALERT_TIMEOUT_MS = 240_000;
 const DETECTION_ALERT_TIMEOUT_MS = 180_000;
 const POLL_INTERVAL_MS = 2_000;
@@ -34,8 +36,23 @@ apiTest.describe(
   'Endpoint generated alerts',
   { tag: ['@local-stateful-classic', '@local-serverless-security_complete'] },
   () => {
-    apiTest.afterEach(async ({ esClient, enrolledEndpoint }) => {
-      await deleteDetectionAlertsForAgent(esClient, enrolledEndpoint.agentId);
+    apiTest.afterEach(async ({ esClient, enrolledEndpoint, log }, testInfo) => {
+      try {
+        if (testInfo.status !== testInfo.expectedStatus) {
+          const detectionState = await describeEndpointDetectionState(
+            esClient,
+            enrolledEndpoint.agentId,
+            MALICIOUS_COMMAND_TARGET
+          );
+          log.error(`[edr_real_fleet] Endpoint detection state: ${detectionState}`);
+          await testInfo.attach('endpoint-detection-state', {
+            body: detectionState,
+            contentType: 'application/json',
+          });
+        }
+      } finally {
+        await deleteDetectionAlertsForAgent(esClient, enrolledEndpoint.agentId);
+      }
     });
 
     apiTest(

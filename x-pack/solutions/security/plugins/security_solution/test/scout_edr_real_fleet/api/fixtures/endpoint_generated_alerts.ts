@@ -21,12 +21,23 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
 } from '../../../../common/constants';
-import { ENDPOINT_ALERTS_INDEX } from '../../../../scripts/endpoint/common/constants';
+import { POLICY_RESPONSE_INDEX } from '../../../../common/endpoint/constants';
+import type { HostPolicyResponse } from '../../../../common/endpoint/types';
+import { HostPolicyResponseActionStatus } from '../../../../common/endpoint/types';
+import {
+  ENDPOINT_ALERTS_INDEX,
+  ENDPOINT_EVENTS_INDEX,
+} from '../../../../scripts/endpoint/common/constants';
 import type { HostVmExecResponse } from '../../../../scripts/endpoint/common/types';
 import { getHostVmClient } from '../../../../scripts/endpoint/common/vm_services';
 
 const DETECTION_ALERTS_INDEX = `${DEFAULT_ALERTS_INDEX}-default`;
 const HOST_COMMAND_TIMEOUT_MS = 60_000;
+
+interface ProcessEventSource {
+  process?: { command_line?: string; args?: string[] };
+  event?: { action?: string };
+}
 
 interface SecurityRoleApiKeyProvider {
   getApiKey: (roleName: string) => Promise<RoleApiCredentials>;
@@ -59,6 +70,58 @@ export const countEndpointAlertsForAgent = async (
     query: { term: { 'agent.id': agentId } },
   });
   return count;
+};
+
+/**
+ * Summarizes why an Endpoint alert may be missing: whether the Endpoint recorded the
+ * trigger process, and which protections and global artifacts its policy response reports.
+ */
+export const describeEndpointDetectionState = async (
+  esClient: EsClient,
+  agentId: string,
+  triggerArg: string
+): Promise<string> => {
+  const agentFilter = { term: { 'agent.id': agentId } };
+  const [triggerEvents, processEventCount, policyResponses] = await Promise.all([
+    esClient.search<ProcessEventSource>({
+      index: ENDPOINT_EVENTS_INDEX,
+      ignore_unavailable: true,
+      size: 3,
+      track_total_hits: true,
+      sort: [{ '@timestamp': 'desc' }],
+      _source: ['process.command_line', 'process.args', 'event.action'],
+      query: { bool: { filter: [agentFilter, { term: { 'process.args': triggerArg } }] } },
+    }),
+    esClient.count({ index: ENDPOINT_EVENTS_INDEX, ignore_unavailable: true, query: agentFilter }),
+    esClient.search<HostPolicyResponse>({
+      index: POLICY_RESPONSE_INDEX,
+      ignore_unavailable: true,
+      size: 1,
+      sort: [{ '@timestamp': 'desc' }],
+      query: agentFilter,
+    }),
+  ]);
+
+  const applied = policyResponses.hits.hits[0]?._source?.Endpoint.policy.applied;
+  const { total } = triggerEvents.hits;
+
+  return JSON.stringify({
+    triggerProcessEvents: {
+      total: typeof total === 'number' ? total : total?.value,
+      samples: triggerEvents.hits.hits.map(({ _source }) => _source),
+    },
+    processEventsForAgent: processEventCount.count,
+    policyResponse: applied
+      ? {
+          status: applied.status,
+          behaviorProtection: applied.response.configurations.behavior_protection?.status,
+          failedActions: applied.actions
+            .filter(({ status }) => status !== HostPolicyResponseActionStatus.success)
+            .map(({ name, status, message }) => `${name} (${status}): ${message}`),
+          globalArtifacts: applied.artifacts.global.identifiers?.map(({ name }) => name) ?? [],
+        }
+      : 'none',
+  });
 };
 
 /**
