@@ -9,7 +9,7 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 import { createSpacesAndUsers, deleteSpacesAndUsers } from '../../../../common/lib/authentication';
 
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
-  describe('cases attachments framework (attackAttachmentsEnabled OFF)', function () {
+  describe('cases attachments framework (attackAttachments OFF)', function () {
     before(async () => {
       await createSpacesAndUsers(getService);
     });

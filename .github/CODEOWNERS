@@ -565,7 +565,7 @@ src/platform/packages/shared/kbn-coloring @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-config @elastic/kibana-core
 src/platform/packages/shared/kbn-config-schema @elastic/kibana-core
 src/platform/packages/shared/kbn-connector-cli @elastic/workchat-eng
-src/platform/packages/shared/kbn-connector-contract-mock @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-emulate @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-schemas @elastic/response-ops
 src/platform/packages/shared/kbn-connector-specs @elastic/response-ops
 src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-discover
@@ -1220,7 +1220,7 @@ x-pack/platform/plugins/private/logstash @elastic/logstash
 x-pack/platform/plugins/private/monitoring @elastic/stack-monitoring
 x-pack/platform/plugins/private/monitoring_collection @elastic/stack-monitoring
 x-pack/platform/plugins/private/observability_ai_assistant_management @elastic/nightshift-context-and-research-team
-x-pack/platform/plugins/private/otel_telemetry_collection @elastic/observability-bi
+x-pack/platform/plugins/private/otel_telemetry_collection @elastic/obs-bi-team
 x-pack/platform/plugins/private/page_render_screenshotting @elastic/response-ops
 x-pack/platform/plugins/private/painless_lab @elastic/kibana-management
 x-pack/platform/plugins/private/product_intercept @elastic/appex-sharedux
@@ -1455,7 +1455,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance @elastic/secur
 x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/security-threat-hunting
-x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-detection-platform
+x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment @elastic/security-investigations
@@ -1531,7 +1531,6 @@ src/platform/packages/private/kbn-code-owners/teams.jsonc @elastic/kibana-operat
 src/platform/plugins/private/ftr_apis/server/routes/task_manager @elastic/response-ops
 
 x-pack/platform/test/serverless/api_integration/test_suites/platform_security @elastic/kibana-security
-/src/platform/test/functional/apps/management @elastic/kibana-management
 
 # Saved object fixtures
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/action @elastic/response-ops
@@ -2054,6 +2053,9 @@ x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/s
 /x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams_app/test/scout/data_quality @elastic/kibana-management
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/doc_counts.ts @elastic/kibana-management
+/x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle @elastic/kibana-management
+/x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality @elastic/kibana-management
+/x-pack/platform/plugins/shared/streams/test/scout/api/lib/doc_counts.ts @elastic/kibana-management
 /x-pack/performance/configs/streams_* @elastic/nightshift-sre-agent-team @elastic/streams-ui
 /x-pack/performance/journeys_e2e/streams_* @elastic/nightshift-sre-agent-team @elastic/streams-ui
 
@@ -3198,14 +3200,6 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_invest
 # AlertZero managed workflows (shared files: index, constants, template values, rule workflows)
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero @elastic/security-solution
 # Per-watch definitions. Keep @elastic/security-solution until product-team ownership is settled.
-src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_floor.ts @elastic/security-solution
-src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_floor.yaml @elastic/security-solution
-src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_officer.ts @elastic/security-solution
-src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_officer.yaml @elastic/security-solution
-src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_deep.ts @elastic/security-solution
-src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_deep.yaml @elastic/security-solution
-src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_detection.ts @elastic/security-solution
-src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/watch_detection.yaml @elastic/security-solution
 
 # Actions directories
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/actions/defend @elastic/security-defend-workflows
@@ -3226,6 +3220,7 @@ x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analy
 # AlertZero Hunt Watch services
 /x-pack/solutions/security/plugins/alertzero/server/routes/hunt @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/server/services/watches/hunt @elastic/security-investigations
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/hunt @elastic/security-investigations
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/hunt @elastic/security-investigations
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/hunt.schema.yaml @elastic/security-investigations
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/hunt.gen.ts @elastic/security-investigations
