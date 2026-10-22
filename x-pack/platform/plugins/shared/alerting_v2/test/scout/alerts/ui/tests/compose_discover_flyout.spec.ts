@@ -592,7 +592,6 @@ test.describe('ComposeDiscoverFlyout — create and edit flows', { tag: testData
         )
         .toBe('event.ingested');
     });
-
   });
 
   test('create flow: signal (standalone) kind can select timestamp and create', async ({
@@ -642,7 +641,6 @@ test.describe('ComposeDiscoverFlyout — create and edit flows', { tag: testData
         )
         .toBe('timestamp');
     });
-
   });
 
   test('step validation: Next disabled without query, name validation blocks advancement', async ({

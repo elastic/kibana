@@ -117,6 +117,8 @@ apiTest.describe('Rule metadata.template', { tag: testData.API_ENGINE_TAG }, () 
       );
       expect(findResponse).toHaveStatusCode(200);
       const found = findResponse.body.items.find((item: { id: string }) => item.id === created.id);
+      // The rule stays discoverable through find; only its template is withheld.
+      expect(found?.id).toBe(created.id);
       expect(found?.metadata.template).toBeUndefined();
 
       // The link stays in storage; only the public response omits it.

@@ -166,7 +166,9 @@ apiTest.describe('Create tag episode action API', { tag: testData.API_ENGINE_TAG
       }),
     ]);
 
-    for (const tags of [['production'], []]) {
+    // Apply a tag, then clear with `null` (an empty array is rejected), proving a
+    // cleared set can be re-applied below.
+    for (const tags of [['production'], null]) {
       const setupResponse = await apiClient.post(getTagEpisodeActionUrl(episodeId), {
         headers: writerHeaders,
         body: { tags },

@@ -244,7 +244,12 @@ export class RulesAdapterV2 implements IRulesManagementClient {
     const conflicts = errors.filter(
       ({ error }) => error.code === ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
     );
-    const conflictIds = [...knownConflicts.map(({ id }) => id), ...conflicts.map(({ id }) => id)];
+    const conflictIds: string[] = [
+      ...knownConflicts.map(({ id }) => id),
+      // A bulk-create error omits `id` only for items created without a client id;
+      // every rule here is created with one, so drop any id-less error defensively.
+      ...conflicts.flatMap(({ id }) => (id ? [id] : [])),
+    ];
     const fatal = errors.filter(
       ({ error }) => error.code !== ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS
     );
@@ -256,7 +261,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
         new Error(`V2 bulk create failed for ${fatal.length} rule(s): ${detail}`),
         createdIds,
         conflictIds,
-        fatal.map(({ id }) => id)
+        fatal.flatMap(({ id }) => (id ? [id] : []))
       );
     }
 
