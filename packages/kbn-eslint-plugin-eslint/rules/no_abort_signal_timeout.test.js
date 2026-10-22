@@ -78,6 +78,18 @@ ruleTester.run('@kbn/eslint/no_abort_signal_timeout', rule, {
         }
       `,
     },
+    {
+      code: dedent`
+        import { timeoutSignal } from '@kbn/std';
+
+        function load(timeout?: number) {
+          const deadline = timeout ? timeoutSignal(timeout) : undefined;
+          return fetch(url, { signal: deadline }).finally(() => {
+            deadline?.dispose();
+          });
+        }
+      `,
+    },
   ],
   invalid: [
     {
@@ -248,6 +260,167 @@ ruleTester.run('@kbn/eslint/no_abort_signal_timeout', rule, {
         }
       `,
       errors: [timeoutError],
+    },
+    {
+      code: [
+        'async function run(esClient) {',
+        '  const signal = AbortSignal.timeout(1000);',
+        '  const query = `FROM logs',
+        '| WHERE ${field}',
+        '| LIMIT 10`;',
+        '  return await esClient.esql.query({ query }, { signal });',
+        '}',
+      ].join('\n'),
+      errors: [timeoutError],
+      output: [
+        "import { timeoutSignal } from '@kbn/std';",
+        'async function run(esClient) {',
+        '  const signal = timeoutSignal(1000);',
+        '  try {',
+        '    const query = `FROM logs',
+        '| WHERE ${field}',
+        '| LIMIT 10`;',
+        '    return await esClient.esql.query({ query }, { signal });',
+        '  } finally {',
+        '    signal.dispose();',
+        '  }',
+        '}',
+      ].join('\n'),
+    },
+    {
+      code: [
+        'async function run(esClient) {',
+        '  const first = await esClient.esql.query({ signal: AbortSignal.timeout(1000) });',
+        '  const query = `FROM logs',
+        '| WHERE x > 1`;',
+        '  return await esClient.esql.query({ query, signal: first });',
+        '}',
+      ].join('\n'),
+      errors: [timeoutError],
+      output: [
+        "import { timeoutSignal } from '@kbn/std';",
+        'async function run(esClient) {',
+        '  const deadline = timeoutSignal(1000);',
+        '  try {',
+        '    const first = await esClient.esql.query({ signal: deadline });',
+        '    const query = `FROM logs',
+        '| WHERE x > 1`;',
+        '    return await esClient.esql.query({ query, signal: first });',
+        '  } finally {',
+        '    deadline.dispose();',
+        '  }',
+        '}',
+      ].join('\n'),
+    },
+    {
+      code: dedent`
+        import { timeoutSignal } from '@kbn/std';
+
+        async function run(url) {
+          const deadline = timeoutSignal(1000);
+          const res = await fetch(url, { signal: deadline });
+          const body = await res.json();
+          deadline.dispose();
+          return body;
+        }
+      `,
+      errors: [undisposedError],
+      output: dedent`
+        import { timeoutSignal } from '@kbn/std';
+
+        async function run(url) {
+          const deadline = timeoutSignal(1000);
+          try {
+            const res = await fetch(url, { signal: deadline });
+            const body = await res.json();
+            deadline.dispose();
+            return body;
+          } finally {
+            deadline.dispose();
+          }
+        }
+      `,
+    },
+    {
+      code: dedent`
+        import { timeoutSignal } from '@kbn/std';
+
+        async function run(url) {
+          const deadline = timeoutSignal(1000);
+          try {
+            await fetch(url, { signal: deadline });
+          } catch (error) {
+            deadline.dispose();
+            throw error;
+          }
+        }
+      `,
+      errors: [undisposedError],
+      output: dedent`
+        import { timeoutSignal } from '@kbn/std';
+
+        async function run(url) {
+          const deadline = timeoutSignal(1000);
+          try {
+            try {
+              await fetch(url, { signal: deadline });
+            } catch (error) {
+              deadline.dispose();
+              throw error;
+            }
+          } finally {
+            deadline.dispose();
+          }
+        }
+      `,
+    },
+    {
+      code: dedent`
+        import { timeoutSignal } from '@kbn/std';
+
+        async function run(url) {
+          const signal = timeoutSignal(1000);
+          await work(signal);
+          function release(signal) {
+            signal.dispose();
+          }
+          return release;
+        }
+      `,
+      errors: [undisposedError],
+    },
+    {
+      code: dedent`
+        import { timeoutSignal } from '@kbn/std';
+
+        async function load(url) {
+          const deadline = timeoutSignal(1000);
+          await fetch(url, { signal: deadline });
+          try {
+            await work();
+          } finally {
+            deadline.dispose();
+          }
+        }
+      `,
+      errors: [undisposedError],
+      output: dedent`
+        import { timeoutSignal } from '@kbn/std';
+
+        async function load(url) {
+          const deadline = timeoutSignal(1000);
+          try {
+            await fetch(url, { signal: deadline });
+            try {
+              await work();
+            } finally {
+              deadline.dispose();
+            }
+          } finally {
+            deadline.dispose();
+          }
+        }
+      `,
     },
   ],
 });

@@ -14,12 +14,15 @@
  * the deadline. timeoutSignal() from @kbn/std is the replacement: dispose it
  * when the work settles (`using`, or dispose() in a finally).
  *
- * This is a direct check. It treats a `using` binding, or a dispose() call on
- * that binding in the same function, as cleared. It does not follow helpers.
+ * This is a direct check. It treats a `using` binding, or a dispose() in a
+ * `finally` (try or promise `.finally()`) that covers every use of that
+ * binding, as cleared. A dispose() on the success path does not count. It
+ * does not follow helpers.
  * The fixer rewrites a binding, or an awaited inline call, to timeoutSignal()
- * inside try/finally. Prettier 2.8 cannot parse `using`, so the fixer does not
- * emit it. Values that escape the function, and calls that are not awaited,
- * are reported without a fix.
+ * inside try/finally. Lines that begin inside a template literal stay put, so
+ * the fix does not change string values. Prettier 2.8 cannot parse `using`,
+ * so the fixer does not emit it. Values that escape the function, and calls
+ * that are not awaited, are reported without a fix.
  */
 
 const FUNCTION_TYPES = new Set([
@@ -215,6 +218,182 @@ function isDisposeCall(node, name) {
 }
 
 /**
+ * @param {any} parent
+ * @param {any} node
+ */
+function containsRange(parent, node) {
+  return (
+    !!parent?.range &&
+    !!node?.range &&
+    node.range[0] >= parent.range[0] &&
+    node.range[1] <= parent.range[1]
+  );
+}
+
+/**
+ * Walk `root`'s body without entering nested functions.
+ *
+ * @param {any} root
+ * @param {(node: any) => void} visit
+ */
+function walkOwnBody(root, visit) {
+  /**
+   * @param {any} node
+   */
+  const walkChildren = (node) => {
+    if (!node || typeof node.type !== 'string' || FUNCTION_TYPES.has(node.type)) {
+      return;
+    }
+    visit(node);
+    for (const child of childNodes(node)) {
+      walkChildren(child);
+    }
+  };
+  for (const child of childNodes(root)) {
+    walkChildren(child);
+  }
+}
+
+/**
+ * @param {any} node
+ */
+function isDeclarationId(node) {
+  const parent = node.parent;
+  if (!parent) {
+    return false;
+  }
+  if (parent.type === 'VariableDeclarator' && parent.id === node) {
+    return true;
+  }
+  if (parent.type === 'CatchClause' && parent.param === node) {
+    return true;
+  }
+  if (FUNCTION_TYPES.has(parent.type)) {
+    return parent.id === node || parent.params?.includes(node);
+  }
+  return false;
+}
+
+/**
+ * Property names and type positions are not uses of the binding.
+ *
+ * @param {any} node
+ */
+function isValueReference(node) {
+  const parent = node.parent;
+  if (!parent) {
+    return false;
+  }
+  if (parent.type === 'MemberExpression' && parent.property === node && !parent.computed) {
+    return false;
+  }
+  if (
+    (parent.type === 'Property' || parent.type === 'ObjectProperty') &&
+    parent.key === node &&
+    !parent.computed &&
+    !parent.shorthand
+  ) {
+    return false;
+  }
+  let current = parent;
+  while (current && !FUNCTION_TYPES.has(current.type)) {
+    if (
+      (current.type === 'TSAsExpression' ||
+        current.type === 'TSSatisfiesExpression' ||
+        current.type === 'TSTypeAssertion' ||
+        current.type === 'TSNonNullExpression') &&
+      containsRange(current.expression, node)
+    ) {
+      current = current.parent;
+      continue;
+    }
+    if (typeof current.type === 'string' && current.type.startsWith('TS')) {
+      return false;
+    }
+    current = current.parent;
+  }
+  return true;
+}
+
+/**
+ * `try` whose `finally` contains this dispose call, in `scope` and not in a nested function.
+ *
+ * @param {any} disposeCall
+ * @param {any} scope
+ * @returns {any | null}
+ */
+function tryStatementFinalizer(disposeCall, scope) {
+  let current = disposeCall.parent;
+  while (current && current !== scope) {
+    if (FUNCTION_TYPES.has(current.type)) {
+      return null;
+    }
+    if (
+      current.type === 'TryStatement' &&
+      current.finalizer &&
+      containsRange(current.finalizer, disposeCall)
+    ) {
+      let parent = current.parent;
+      while (parent && parent !== scope) {
+        if (FUNCTION_TYPES.has(parent.type)) {
+          return null;
+        }
+        parent = parent.parent;
+      }
+      return parent === scope ? current : null;
+    }
+    current = current.parent;
+  }
+  return null;
+}
+
+/**
+ * Call to `.finally()` whose callback contains this dispose call.
+ *
+ * @param {any} disposeCall
+ * @param {any} scope
+ * @returns {any | null}
+ */
+function promiseFinallyCall(disposeCall, scope) {
+  const fn = enclosingFunction(disposeCall);
+  if (!fn || fn === scope) {
+    return null;
+  }
+
+  let argument = fn;
+  let parent = fn.parent;
+  while (parent && UNWRAP_TYPES.has(parent.type)) {
+    argument = parent;
+    parent = parent.parent;
+  }
+  if (parent?.type !== 'CallExpression' || !parent.arguments?.includes(argument)) {
+    return null;
+  }
+
+  const callee = unwrap(parent.callee);
+  if (
+    callee?.type !== 'MemberExpression' ||
+    callee.computed ||
+    callee.property?.type !== 'Identifier' ||
+    callee.property.name !== 'finally'
+  ) {
+    return null;
+  }
+
+  let current = parent;
+  while (current && current !== scope) {
+    if (FUNCTION_TYPES.has(current.type)) {
+      return null;
+    }
+    current = current.parent;
+  }
+  return current === scope ? parent : null;
+}
+
+/**
+ * True when `name` is disposed on the settlement path, and every use in this
+ * function sits inside that `try` or promise `.finally()` call.
+ *
  * @param {any} scope
  * @param {string} name
  */
@@ -222,13 +401,40 @@ function hasDisposeCall(scope, name) {
   if (!scope) {
     return false;
   }
-  let found = false;
+
+  /** @type {any[]} */
+  const regions = [];
   walk(scope, (node) => {
-    if (isDisposeCall(node, name)) {
-      found = true;
+    if (!isDisposeCall(node, name)) {
+      return;
+    }
+    const tryStatement = tryStatementFinalizer(node, scope);
+    if (tryStatement) {
+      regions.push(tryStatement);
+      return;
+    }
+    const promiseFinally = promiseFinallyCall(node, scope);
+    if (promiseFinally) {
+      regions.push(promiseFinally);
     }
   });
-  return found;
+  if (regions.length === 0) {
+    return false;
+  }
+
+  let covered = true;
+  walkOwnBody(scope, (node) => {
+    if (!covered || node.type !== 'Identifier' || node.name !== name) {
+      return;
+    }
+    if (!isValueReference(node) || isDeclarationId(node)) {
+      return;
+    }
+    if (!regions.some((region) => containsRange(region, node))) {
+      covered = false;
+    }
+  });
+  return covered;
 }
 
 /**
@@ -605,12 +811,76 @@ function applyReplacements(text, base, replacements) {
 }
 
 /**
- * @param {string} text
+ * Template-element ranges inside `region`, shifted by hoist replacements so they
+ * match the text `indentLines` receives. A call sits in an interpolation, never
+ * inside an element, so a replacement only slides later ranges.
+ *
+ * @param {any} block
+ * @param {number[]} regionRange
+ * @param {{ name: string, call: any }[]} hoists
+ * @returns {number[][]}
  */
-function indentLines(text) {
+function protectedTemplateRanges(block, regionRange, hoists) {
+  /** @type {number[][]} */
+  let ranges = [];
+  walk(block, (node) => {
+    if (node.type !== 'TemplateElement' || !node.range) {
+      return;
+    }
+    const start = Math.max(node.range[0], regionRange[0]);
+    const end = Math.min(node.range[1], regionRange[1]);
+    if (start < end) {
+      ranges.push([start, end]);
+    }
+  });
+
+  const edits = hoists
+    .filter((hoist) => hoist.call?.range)
+    .map((hoist) => ({
+      start: hoist.call.range[0],
+      end: hoist.call.range[1],
+      delta: hoist.name.length - (hoist.call.range[1] - hoist.call.range[0]),
+    }))
+    .sort((left, right) => right.start - left.start);
+
+  for (const edit of edits) {
+    ranges = ranges.map(([start, end]) => {
+      if (end <= edit.start) {
+        return [start, end];
+      }
+      if (start >= edit.end) {
+        return [start + edit.delta, end + edit.delta];
+      }
+      return [start, end];
+    });
+  }
+
+  const base = regionRange[0];
+  return ranges.map(([start, end]) => [start - base, end - base]);
+}
+
+/**
+ * Indent code lines, but leave a line that begins inside a template literal
+ * unchanged. Those characters are the string value.
+ *
+ * @param {string} text
+ * @param {number[][]} [protectedRanges]
+ */
+function indentLines(text, protectedRanges) {
+  let offset = 0;
   return text
     .split('\n')
-    .map((line) => (line.trim() === '' ? line : `  ${line}`))
+    .map((line) => {
+      const start = offset;
+      offset += line.length + 1;
+      const insideTemplate = protectedRanges?.some(
+        ([rangeStart, rangeEnd]) => start >= rangeStart && start < rangeEnd
+      );
+      if (insideTemplate || line.trim() === '') {
+        return line;
+      }
+      return `  ${line}`;
+    })
     .join('\n');
 }
 
@@ -694,6 +964,7 @@ function buildBlockWrap(wraps, source) {
     disposeNames,
     callees,
     regionRange,
+    protectedRanges: protectedTemplateRanges(block, regionRange, hoists),
     body: applyReplacements(
       text.slice(regionRange[0], regionRange[1]),
       regionRange[0],
@@ -707,14 +978,16 @@ function buildBlockWrap(wraps, source) {
  * @param {{ name: string, args: string }[]} hoists
  * @param {string[]} disposeNames
  * @param {string} body
+ * @param {number[][]} [protectedRanges]
  */
-function buildWrappedRegion(indent, hoists, disposeNames, body) {
+function buildWrappedRegion(indent, hoists, disposeNames, body, protectedRanges) {
   const hoistText = hoists
     .map((entry) => `${indent}const ${entry.name} = timeoutSignal(${entry.args});\n`)
     .join('');
   const disposeText = disposeNames.map((name) => `${indent}  ${name}.dispose();`).join('\n');
   return `${hoistText}${indent}try {\n${indentLines(
-    body
+    body,
+    protectedRanges
   )}\n${indent}} finally {\n${disposeText}\n${indent}}`;
 }
 
@@ -879,7 +1152,8 @@ module.exports = {
               built.regionLine.indent,
               built.hoists,
               built.disposeNames,
-              built.body
+              built.body,
+              built.protectedRanges
             );
             if (importAtStatement) {
               wrapped = `import { timeoutSignal } from '@kbn/std';\n${wrapped}`;
