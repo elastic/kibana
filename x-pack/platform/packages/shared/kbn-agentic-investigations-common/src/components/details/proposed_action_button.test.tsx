@@ -337,7 +337,7 @@ describe('ProposedActionButton', () => {
           proposal: { ...expiredProposal, expiresAt: '2026-10-23T12:00:00.000Z' },
         });
 
-        expect(screen.getByText('Can no longer be actioned')).toBeInTheDocument();
+        expect(screen.getByText('Can no longer be applied')).toBeInTheDocument();
         expect(screen.queryByText('Decision timed out')).not.toBeInTheDocument();
       });
 

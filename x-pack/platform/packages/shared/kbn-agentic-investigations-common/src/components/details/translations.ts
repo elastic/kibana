@@ -87,19 +87,9 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     }),
   },
   proposedAction: {
-    needsReviewBadge: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.needsReview', {
-      defaultMessage: 'Needs review',
-    }),
-    restrictedBadge: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.restricted', {
-      defaultMessage: 'Restricted',
-    }),
     restrictedCaption: i18n.translate(
       'xpack.alertzero.detailsFlyout.proposedAction.restrictedCaption',
       { defaultMessage: "You don't have permissions to act" }
-    ),
-    awaitingApprovalCaption: i18n.translate(
-      'xpack.alertzero.detailsFlyout.proposedAction.awaitingApproval',
-      { defaultMessage: 'Awaiting approval' }
     ),
     noTypeCaption: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.noType', {
       defaultMessage: 'No action type',
@@ -107,24 +97,9 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     retryCaption: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.retryCaption', {
       defaultMessage: 'Try one more time',
     }),
-    noReasonCaption: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.noReason', {
-      defaultMessage: 'No reason provided',
-    }),
     noFailureReasonCaption: i18n.translate(
       'xpack.alertzero.detailsFlyout.proposedAction.noFailureReason',
       { defaultMessage: 'No reason found' }
-    ),
-    expiredTimedOutCaption: i18n.translate(
-      'xpack.alertzero.detailsFlyout.proposedAction.expiredTimedOut',
-      { defaultMessage: 'Decision timed out' }
-    ),
-    expiredReplacedCaption: i18n.translate(
-      'xpack.alertzero.detailsFlyout.proposedAction.expiredReplaced',
-      { defaultMessage: 'Replaced by a newer proposal' }
-    ),
-    expiredGenericCaption: i18n.translate(
-      'xpack.alertzero.detailsFlyout.proposedAction.expiredGeneric',
-      { defaultMessage: 'Can no longer be actioned' }
     ),
     retryTooltip: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.retryTooltip', {
       defaultMessage: 'Retry applying',

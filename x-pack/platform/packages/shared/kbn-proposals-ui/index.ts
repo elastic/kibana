@@ -10,11 +10,11 @@ export { ApprovalContent, type ApprovalContentProps } from './src/approval_conte
 export { ApprovalActorTime, type ApprovalActorTimeProps } from './src/approval_actor_time';
 export {
   getApprovalOutcomeBadge,
-  getSubmittingPhase,
   type ApprovalOutcomeBadge,
   type ApprovalOutcomeStatus,
   type ApprovalPhase,
 } from './src/approval_outcome';
+export { getProposalBadge, type ProposalBadgeOptions } from './src/proposal_badge';
 export {
   ProposedActionStatusBadge,
   type ProposedActionStatusBadgeProps,
@@ -26,6 +26,8 @@ export {
   getProposalTone,
   isProposalExpired,
   isProposalReplaced,
+  getExpiredCaption,
+  getProposalPhase,
   hasDeadlinePassed,
 } from './src/proposal_helpers';
 export type {

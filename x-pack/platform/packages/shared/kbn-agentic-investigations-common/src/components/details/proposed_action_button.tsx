@@ -18,15 +18,13 @@ import {
 import {
   ApprovalActorTime,
   ApprovalModal,
-  getApprovalOutcomeBadge,
-  getSubmittingPhase,
-  isProposalReplaced,
-  hasDeadlinePassed,
+  getProposalBadge,
+  getProposalPhase,
+  getExpiredCaption,
   getProposalCaption,
   ProposalCaption,
   getProposalDecision,
   ProposedActionStatusBadge,
-  type ApprovalPhase,
   type ApprovalProposal,
   type DeclineParams,
 } from '@kbn/proposals-ui';
@@ -55,22 +53,6 @@ export interface ProposedActionButtonProps {
   currentActorName?: string;
   'data-test-subj'?: string;
 }
-
-const PENDING_BADGE = {
-  color: 'primary' as const,
-  iconType: 'clock' as const,
-  label: DETAILS_FLYOUT_LABELS.proposedAction.needsReviewBadge,
-  isLoading: false,
-  isDisabled: false,
-};
-
-const RESTRICTED_BADGE = {
-  color: 'warning' as const,
-  iconType: 'lock' as const,
-  label: DETAILS_FLYOUT_LABELS.proposedAction.restrictedBadge,
-  isLoading: false,
-  isDisabled: false,
-};
 
 /**
  * A native button styled like a "What's happened" row (`GroupedAttachmentRow`), rather than a
@@ -169,11 +151,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     const openModal = useCallback(() => setIsModalOpen(true), []);
     const closeModal = useCallback(() => setIsModalOpen(false), []);
 
-    const approvalPhase: ApprovalPhase = decision
-      ? decision.status
-      : isSubmitting
-      ? getSubmittingPhase(isSubmitting)
-      : 'pending';
+    const approvalPhase = getProposalPhase(proposal, isSubmitting);
 
     // Only an undecided proposal is restricted: a decided one reports its outcome to everyone.
     const isRestricted = readOnly && approvalPhase === 'pending';
@@ -182,16 +160,13 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     const isRetry =
       !readOnly && approvalPhase === 'pending' && Boolean(proposal.previousExecutionError);
 
-    const badge = isRestricted
-      ? RESTRICTED_BADGE
-      : isRetry
-      ? getApprovalOutcomeBadge('failed') ?? PENDING_BADGE
-      : getApprovalOutcomeBadge(approvalPhase) ?? PENDING_BADGE;
+    // The same badge the modal shows in its header.
+    const badge = getProposalBadge(proposal, { readOnly, isSubmitting });
 
     const pendingCaption = getProposalCaption(proposal) && <ProposalCaption proposal={proposal} />;
 
-    // Who and when, worded the same in every state and in the modal header too: the saved
-    // decision when there is one, else the current user from when their click went out. A
+    // Who and when: the saved decision when there is one, else the current user from when their
+    // click went out. A
     // decision with no `actorName` is one nobody made (expired, chiefly) — the badge label alone
     // ("Expired") already says what happened — and so is an expired proposal that has an actor.
     const [submittedAt, setSubmittedAt] = useState<string | undefined>();
@@ -206,36 +181,15 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
 
     // A failed record says why it failed, in red, rather than who acted: the badge already says "Failed".
     const failureReason = decision?.status === 'failed' ? decision.reason : undefined;
-    // A decline says why, rather than who — or that no reason was given.
-    const hasDeclineReason =
-      (proposal.dismissReason && proposal.dismissReason !== 'no_reason') || proposal.rationale;
-    const declineReason =
-      decision?.status === 'declined'
-        ? hasDeclineReason
-          ? decision.reason
-          : DETAILS_FLYOUT_LABELS.proposedAction.noReasonCaption
-        : undefined;
     const isFailure = isRetry || decision?.status === 'failed';
     const isExpired = decision?.status === 'expired' || decision?.status === 'outdated';
-    // Why it expired: replaced by a successor, else the gate's own reason when it left one, else
-    // that nobody decided in time.
-    const expiredReason = isExpired
-      ? isProposalReplaced(proposal)
-        ? DETAILS_FLYOUT_LABELS.proposedAction.expiredReplacedCaption
-        : proposal.rationale ||
-          // Settled before its deadline (a failed workflow, say), so it did not time out.
-          (proposal.expiresAt && !hasDeadlinePassed(proposal)
-            ? DETAILS_FLYOUT_LABELS.proposedAction.expiredGenericCaption
-            : DETAILS_FLYOUT_LABELS.proposedAction.expiredTimedOutCaption)
-      : undefined;
+    // Why it can no longer be decided: the same text the modal's callout repeats.
+    const expiredReason = isExpired ? getExpiredCaption(proposal) : undefined;
 
     // Nothing to say about the action itself: the caption says so, in a disabled colour, rather
     // than leaving a bare dash.
     const hasNoType =
-      !failureReason &&
-      !pendingCaption &&
-      !isFailure &&
-      !(approvalPhase === 'approving' || actorName || isRestricted || decision);
+      !failureReason && !pendingCaption && !isFailure && !(actorName || isRestricted || decision);
 
     const caption = isRetry ? (
       // Offered again after a failed attempt: the row invites another go, and the modal says why.
@@ -244,16 +198,11 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
       expiredReason
     ) : failureReason ? (
       failureReason
-    ) : declineReason ? (
-      declineReason
     ) : hasNoType ? (
       DETAILS_FLYOUT_LABELS.proposedAction.noTypeCaption
     ) : isFailure ? (
       // No reason on record: the caption says so, in the failure colour.
       DETAILS_FLYOUT_LABELS.proposedAction.noFailureReasonCaption
-    ) : approvalPhase === 'approving' ? (
-      // Not yet recorded, so there is no decision to attribute: the row waits on the server.
-      DETAILS_FLYOUT_LABELS.proposedAction.awaitingApprovalCaption
     ) : actorName ? (
       <ApprovalActorTime actorName={actorName} at={actedAt} isUnknown={decision?.isActorUnknown} />
     ) : isRestricted ? (
@@ -265,10 +214,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     );
 
     // Captions that only say something is missing read in the disabled text colour.
-    const isMuted =
-      hasNoType ||
-      (decision?.status === 'declined' && !hasDeclineReason) ||
-      (!isRetry && decision?.status === 'failed' && !failureReason);
+    const isMuted = hasNoType || (!isRetry && decision?.status === 'failed' && !failureReason);
 
     const [titleElement, setTitleElement] = useState<HTMLSpanElement | null>(null);
     const isTitleTruncated = useIsTextTruncated(titleElement, proposal.title);
@@ -304,10 +250,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
                   : 'subdued'
               }
               component="span"
-              css={[
-                (isFailure || declineReason || expiredReason) && styles.title,
-                isMuted && styles.noType,
-              ]}
+              css={[(isFailure || expiredReason) && styles.title, isMuted && styles.noType]}
             >
               {caption}
             </EuiText>

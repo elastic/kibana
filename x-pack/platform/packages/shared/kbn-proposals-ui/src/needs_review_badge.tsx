@@ -21,7 +21,7 @@ export interface ProposedActionStatusBadgeProps {
 
 export const ProposedActionStatusBadge = ({
   color = 'primary',
-  iconType = 'clock',
+  iconType = 'eye',
   label = APPROVAL_MODAL_TRANSLATIONS.needsReviewBadge,
   isLoading = false,
   isDisabled = false,

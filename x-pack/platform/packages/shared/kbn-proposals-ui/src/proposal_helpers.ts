@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { isTodoProposal, PROPOSAL_CATEGORY_TODO } from '@kbn/proposals-common';
 import type { ApprovalProposal, ApprovalDecision } from './types';
-import type { ApprovalPhase } from './approval_outcome';
+import { getSubmittingPhase, type ApprovalPhase } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import { formatDismissReason } from './dismiss_reason';
 
@@ -190,3 +190,34 @@ export const isProposalReplaced = (proposal: ApprovalProposal): boolean =>
  */
 export const isProposalExpired = (proposal: ApprovalProposal): boolean =>
   proposal.status === 'expired' || (isProposalReplaced(proposal) && !proposal.decision);
+
+/**
+ * Why a proposal that can no longer be decided is in that state, as the flyout row captions it and
+ * the modal's callout repeats it: replaced by a newer proposal, else the gate's own saved reason,
+ * else that nobody decided in time. A proposal settled before its deadline (a failed workflow, say)
+ * did not time out, so it gets the generic wording instead of claiming one.
+ */
+export const getExpiredCaption = (proposal: ApprovalProposal): string => {
+  if (isProposalReplaced(proposal)) {
+    return APPROVAL_MODAL_TRANSLATIONS.outdatedCaption;
+  }
+  if (proposal.rationale) {
+    return proposal.rationale;
+  }
+  return proposal.expiresAt && !hasDeadlinePassed(proposal)
+    ? APPROVAL_MODAL_TRANSLATIONS.expiredGenericCaption
+    : APPROVAL_MODAL_TRANSLATIONS.expiredTimedOutCaption;
+};
+
+/**
+ * Where a proposal is right now: its recorded decision when it has one, else the host's in-flight
+ * approve/decline, else still awaiting a decision. The flyout row and the modal both read it from
+ * here, so they always agree on the phase.
+ */
+export const getProposalPhase = (
+  proposal: ApprovalProposal,
+  isSubmitting?: 'applying' | 'declining'
+): ApprovalPhase => {
+  const decision = getProposalDecision(proposal);
+  return decision ? decision.status : isSubmitting ? getSubmittingPhase(isSubmitting) : 'pending';
+};

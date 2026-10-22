@@ -69,6 +69,8 @@ export const ApprovalModal = memo<ApprovalModalProps>(
       <EuiModal
         aria-labelledby={titleId}
         onClose={onClose}
+        // Clicking outside dismisses it, like Escape or the close button.
+        outsideClickCloses
         css={css({ maxWidth: 640, width: '100%' })}
         data-test-subj={dataTestSubj}
       >

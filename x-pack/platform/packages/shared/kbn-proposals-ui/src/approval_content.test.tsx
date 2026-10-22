@@ -92,7 +92,7 @@ describe('ApprovalContent', () => {
     }
   );
 
-  it('shows who acted and when on a replaced proposal that had been decided', () => {
+  it('shows the outcome of a replaced proposal that had been decided', () => {
     renderContent({
       proposal: {
         ...baseProposal,
@@ -103,7 +103,7 @@ describe('ApprovalContent', () => {
         supersededBy: 'successor',
       },
     });
-    expect(screen.getByText('elastic')).toBeInTheDocument();
+    expect(screen.getByText('Applied')).toBeInTheDocument();
     expect(screen.queryByTestId('approvalContent-outcome')).not.toBeInTheDocument();
   });
 
@@ -306,10 +306,10 @@ describe('ApprovalContent', () => {
       await waitFor(() => expect(onApprove).toHaveBeenCalledTimes(1));
     });
 
-    it('reads its category as "To do" in the caption', () => {
+    it('reads its category as "Manual action" in the caption', () => {
       renderContent({ proposal: todoProposal });
 
-      expect(screen.getByText(/^To do/)).toBeInTheDocument();
+      expect(screen.getByText(/^Manual action/)).toBeInTheDocument();
     });
 
     it('keeps Approve and Decline for a proposal without an action in another category', () => {
@@ -388,7 +388,7 @@ describe('ApprovalContent', () => {
       proposal: { ...baseProposal, previousExecutionError: 'HTTP 400: something went wrong' },
     });
     expect(screen.getByTestId('approvalContent-previous-failure')).toHaveTextContent(
-      'Previous attempt failed: HTTP 400: something went wrong'
+      'Attempt failed, try one more time • HTTP 400: something went wrong'
     );
     expect(
       isBefore(
@@ -423,7 +423,7 @@ describe('ApprovalContent', () => {
   it('renders an expiry explanation once the workflow settles the proposal as expired', () => {
     renderContent({ proposal: { ...baseProposal, status: 'expired' } });
     expect(screen.getByTestId('approvalContent-expired')).toHaveTextContent(
-      "This proposal wasn't decided in time and can no longer be actioned."
+      'Expired and can no longer be applied'
     );
   });
 
@@ -463,19 +463,19 @@ describe('ApprovalContent', () => {
       });
 
       const callout = screen.getByTestId('approvalContent-expired');
-      expect(callout).toHaveTextContent('Expired • This proposal can no longer be actioned.');
+      expect(callout).toHaveTextContent('Expired and can no longer be applied');
       expect(callout).not.toHaveTextContent('Expired on');
       expect(callout).not.toHaveTextContent("wasn't decided in time");
     });
 
-    it('says when it expired, and that nobody decided in time, once the deadline has passed', () => {
+    it('says when it expired, and that it timed out, once the deadline has passed', () => {
       renderContent({
         proposal: { ...baseProposal, status: 'expired', expiresAt: '2026-10-21T12:00:00.000Z' },
       });
 
       const callout = screen.getByTestId('approvalContent-expired');
-      expect(callout).toHaveTextContent('Expired on');
-      expect(callout).toHaveTextContent("wasn't decided in time");
+      expect(callout).toHaveTextContent(/Oct 2026/);
+      expect(callout).toHaveTextContent('Decision timed out');
     });
   });
 
@@ -517,7 +517,7 @@ describe('ApprovalContent', () => {
       // The badge and the outcome banner's own title both say it.
       expect(screen.getAllByText('Approving').length).toBeGreaterThanOrEqual(2);
       expect(screen.getByTestId('approvalContent-outcome')).toHaveTextContent(
-        /^Approving • Awaiting approval request to return$/
+        /^Approving • Ava on .+$/
       );
       expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
     });
@@ -650,12 +650,12 @@ describe('ApprovalContent', () => {
       // Expiry resolves to a real (actor-less) decision via `getProposalDecision`, so the footer
       // — Approve alongside it — is gone the same way it is for any other decided proposal.
       renderContent({ onDismiss: jest.fn(), proposal: { ...baseProposal, status: 'expired' } });
-      expect(screen.getAllByText('Expired').length).toBeGreaterThanOrEqual(2);
+      expect(screen.getByText('Expired')).toBeInTheDocument();
       expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
       expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
       expect(screen.queryByTestId('approvalContent-dismiss')).not.toBeInTheDocument();
       expect(screen.getByTestId('approvalContent-expired')).toHaveTextContent(
-        "This proposal wasn't decided in time and can no longer be actioned."
+        'Expired and can no longer be applied'
       );
     });
   });
@@ -789,9 +789,7 @@ describe('ApprovalContent', () => {
         />
       );
       expect(screen.queryByTestId('card-decline-form')).not.toBeInTheDocument();
-      expect(screen.getByTestId('card-outcome')).toHaveTextContent(
-        /^Declining • Might take several minutes$/
-      );
+      expect(screen.getByTestId('card-outcome')).toHaveTextContent(/^Declining • You on .+$/);
     });
   });
 });

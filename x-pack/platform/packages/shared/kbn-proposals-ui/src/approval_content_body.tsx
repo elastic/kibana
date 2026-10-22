@@ -25,8 +25,8 @@ interface ApprovalContentBodyProps {
   comment?: string;
   /** `undefined` for a still-pending decision, which has no outcome to report yet. */
   banner?: ApprovalOutcomeBanner;
-  /** Appended to the banner title after a ` • `, e.g. a decline's reason. */
-  bannerSuffix?: React.ReactNode;
+  /** Why the outcome is what it is: the banner's description, after the title. */
+  bannerReason?: React.ReactNode;
   /** A rejected `primaryAction`/`onDismiss` call, surfaced here rather than thrown away. */
   actionError?: string;
   'data-test-subj'?: string;
@@ -43,7 +43,7 @@ const processingPluginList = getDefaultEuiMarkdownProcessingPlugins({
  * viewport.
  */
 export const ApprovalContentBody = memo<ApprovalContentBodyProps>(
-  ({ mode, comment, banner, bannerSuffix, actionError, 'data-test-subj': dataTestSubj }) => {
+  ({ mode, comment, banner, bannerReason, actionError, 'data-test-subj': dataTestSubj }) => {
     const { euiTheme } = useEuiTheme();
 
     return (
@@ -77,7 +77,7 @@ export const ApprovalContentBody = memo<ApprovalContentBodyProps>(
             color={banner.color}
             // The loader is the one custom icon; every other state keeps EUI's own icon for its colour.
             iconType={banner.isLoading ? EuiLoadingSpinner : undefined}
-            title={<InlineCalloutTitle title={banner.title} description={bannerSuffix} />}
+            title={<InlineCalloutTitle title={banner.title} description={bannerReason} />}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-outcome` : undefined}
           />
         )}

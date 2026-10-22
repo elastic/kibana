@@ -158,7 +158,7 @@ describe('getProposalDecision', () => {
     // a decision that plainly exists.
     expect(
       getProposalDecision(proposal({ decision: 'approved', status: 'succeeded' }))
-    ).toMatchObject({ status: 'applied', actorName: 'Approver is unknown' });
+    ).toMatchObject({ status: 'applied', actorName: 'Unknown approver' });
   });
 
   it('passes decidedAt through as undefined rather than inventing one when the record has none', () => {

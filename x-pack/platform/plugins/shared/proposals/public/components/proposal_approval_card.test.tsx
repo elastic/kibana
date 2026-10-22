@@ -434,7 +434,7 @@ describe('ProposalApprovalCard', () => {
         })
       );
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-      expect(getByTestId('approval-decision')).toHaveTextContent('applying:Approver is unknown');
+      expect(getByTestId('approval-decision')).toHaveTextContent('applying:Unknown approver');
     });
   });
 

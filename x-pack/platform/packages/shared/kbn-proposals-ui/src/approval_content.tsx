@@ -6,28 +6,27 @@
  */
 
 import React, { memo, useCallback, useEffect, useState } from 'react';
+import moment from 'moment';
 import { type EuiButtonColor, useGeneratedHtmlId } from '@elastic/eui';
 import { isTodoProposal, type DismissReason } from '@kbn/proposals-common';
 import { ApprovalContentHeader } from './approval_content_header';
-import { ApprovalActorTime } from './approval_actor_time';
 import { AlwaysAllowCheckbox } from './always_allow_checkbox';
 import { DeclineReasonForm } from './decline_reason_form';
 import { ApprovalContentBody } from './approval_content_body';
 import { ApprovalStatusCallouts } from './approval_status_callouts';
 import { ApprovalContentFooter } from './approval_content_footer';
-import {
-  getApprovalOutcomeBadge,
-  getSubmittingPhase,
-  getApprovalOutcomeBanner,
-  type ApprovalPhase,
-} from './approval_outcome';
+import { getApprovalOutcomeBanner } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
+import { getProposalBadge } from './proposal_badge';
 import {
+  DATE_TIME_FORMAT,
   getProposalCaption,
   getProposalDecision,
   getProposalTone,
   isProposalExpired,
   isProposalReplaced,
+  getExpiredCaption,
+  getProposalPhase,
 } from './proposal_helpers';
 import { ProposalCaption } from './proposal_caption';
 import type { ApprovalAction, AlwaysAllowOption, DeclineParams, ApprovalProposal } from './types';
@@ -50,8 +49,8 @@ export interface ApprovalContentProps {
    */
   isSubmitting?: 'applying' | 'declining';
   /**
-   * Who is submitting right now, for the "Applying"/"Declining" phase's live caption. Falls back
-   * to a generic "You" when omitted, so a host that has not wired a profile lookup still gets a
+   * Who is submitting right now, for the Approving banner's "Requested by". Falls back to a
+   * generic "You" when omitted, so a host that has not wired a profile lookup still gets a
    * coherent transient state.
    */
   currentActorName?: string;
@@ -124,17 +123,15 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const [mode, setMode] = useState<'view' | 'declining'>('view');
     const [dismissReason, setDismissReason] = useState<DismissReason>('no_reason');
     const [rationale, setRationale] = useState('');
-    // Only for the live "Xs ago" caption below — not for the phase itself, which reads `isSubmitting`
-    // directly. Resets whenever this component (re)mounts while already submitting, so a modal
-    // reopened mid-submission restarts the counter rather than reading the true elapsed time; the
-    // phase it is captioning is still correct either way.
-    const [since, setSince] = useState<string | undefined>(undefined);
-
+    // When the decision started, for the in-progress banners' "Requested by … at …". Only a caption —
+    // the phase itself reads `isSubmitting` directly. It restarts if this component (re)mounts
+    // mid-submission, so a modal reopened then shows when it was reopened, not the true start.
+    const [since, setSince] = useState<string | undefined>(() =>
+      isSubmitting ? new Date().toISOString() : undefined
+    );
     useEffect(() => {
       setSince(isSubmitting ? new Date().toISOString() : undefined);
     }, [isSubmitting]);
-
-    const actorName = currentActorName ?? APPROVAL_MODAL_TRANSLATIONS.currentActorFallback;
     const isExpired = isProposalExpired(proposal);
     const isReplaced = isProposalReplaced(proposal);
     const displayMode = isReplaced ? 'view' : mode;
@@ -233,14 +230,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
       }
     }, []);
 
-    const approvalPhase: ApprovalPhase =
-      isReplaced && !isExpired && !decision
-        ? 'pending'
-        : decision
-        ? decision.status
-        : isSubmitting
-        ? getSubmittingPhase(isSubmitting)
-        : 'pending';
+    const approvalPhase = getProposalPhase(proposal, isSubmitting);
 
     // A replaced card stays 'pending' for the footer and banner (see `approvalPhase`), but a failed
     // attempt still has to say how it ended; replaced revisions keep no badge, since their
@@ -249,63 +239,56 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     // An undecided proposal this user has no permission to decide: the same restricted state the
     // flyout row shows, so the row and its modal agree.
     const isRestricted = !!readOnly && !isReplaced && approvalPhase === 'pending' && !isExpired;
-    // Undecided but offered again after a failed run: the badge says so, like the flyout row.
-    const isRetry =
-      !isRestricted &&
-      !isReplaced &&
-      approvalPhase === 'pending' &&
-      Boolean(proposal.previousExecutionError);
-    const badge = isRestricted
-      ? {
-          color: 'warning' as const,
-          iconType: 'lock' as const,
-          label: APPROVAL_MODAL_TRANSLATIONS.restrictedCalloutTitle,
-          isLoading: false,
-        }
-      : getApprovalOutcomeBadge(isReplacedFailure || isRetry ? 'failed' : approvalPhase);
+    // Shared with the flyout row, so the badge outside and the badge inside always agree.
+    const badge = getProposalBadge(proposal, { readOnly, isSubmitting });
     const banner = isReplaced ? undefined : getApprovalOutcomeBanner(approvalPhase);
     // A decision in flight has no reason to give yet, only what it is waiting on.
-    const bannerSuffix =
-      approvalPhase === 'approving'
-        ? APPROVAL_MODAL_TRANSLATIONS.approvingBannerDescription
-        : approvalPhase === 'applying' || approvalPhase === 'declining'
-        ? APPROVAL_MODAL_TRANSLATIONS.applyingBannerDescription
-        : decision?.reason;
+    const startedBy = currentActorName ?? APPROVAL_MODAL_TRANSLATIONS.currentActorFallback;
+    const startedAt = moment(since).format(DATE_TIME_FORMAT);
+    // A decision still in flight keeps the state's own title (Approving, Declining, Applying), then
+    // who asked and when as the description.
+    const inFlightDescription =
+      approvalPhase === 'approving' || approvalPhase === 'declining'
+        ? APPROVAL_MODAL_TRANSLATIONS.whoAndWhenBannerDescription(startedBy, startedAt)
+        : approvalPhase === 'applying'
+        ? // Approved and running: the request is the saved decision's.
+          APPROVAL_MODAL_TRANSLATIONS.whoAndWhenBannerDescription(
+            decision?.actorName ?? startedBy,
+            moment(decision?.decidedAt ?? since).format(DATE_TIME_FORMAT)
+          )
+        : undefined;
+    // A settled decision: who decided it and when, then the reason if there is one.
+    const settledDescription =
+      approvalPhase === 'applied' ||
+      approvalPhase === 'marked_applied' ||
+      approvalPhase === 'no_action' ||
+      approvalPhase === 'declined'
+        ? [
+            APPROVAL_MODAL_TRANSLATIONS.whoAndWhenBannerDescription(
+              decision?.actorName ?? APPROVAL_MODAL_TRANSLATIONS.unknownActorFallback,
+              decision?.decidedAt ? moment(decision.decidedAt).format(DATE_TIME_FORMAT) : undefined
+            ),
+            typeof decision?.reason === 'string' ? decision.reason : undefined,
+          ]
+            .filter(Boolean)
+            // Two plain sentences: who and when, a full stop, then the reason.
+            .join('. ')
+        : undefined;
+    // Anything else keeps just its reason (a failure's, say); a decision in flight has none yet.
+    const isInFlight =
+      approvalPhase === 'approving' ||
+      approvalPhase === 'applying' ||
+      approvalPhase === 'declining';
+    const bannerReason =
+      inFlightDescription ?? settledDescription ?? (isInFlight ? undefined : decision?.reason);
     const isSettledOrTransient = approvalPhase !== 'pending';
 
-    const hasReplacedCaption = isReplaced && getProposalCaption(proposal) !== undefined;
-    // A failed action names its type here instead of who decided it: the banner carries the
-    // reason, and the badge the outcome.
-    const isFailedDecision = decision?.status === 'failed';
-    // While an approval is still being sent nothing is recorded, so there is no one to attribute it
-    // to: the header keeps the action's own characteristics, as for a proposal awaiting a decision.
-    const headerCaption =
-      decision?.actorName && !isFailedDecision ? (
-        <>
-          {hasReplacedCaption && (
-            <>
-              <ProposalCaption proposal={proposal} /> •{' '}
-            </>
-          )}
-          <ApprovalActorTime
-            actorName={decision.actorName}
-            at={decision.decidedAt}
-            isUnknown={decision.isActorUnknown}
-            isPrecise
-          />
-        </>
-      ) : !isReplaced && isSubmitting && since && approvalPhase !== 'approving' ? (
-        <ApprovalActorTime actorName={actorName} at={since} isPrecise />
-      ) : (
-        getProposalCaption(proposal, {
-          includeRiskDetails: !isReplaced && !isFailedDecision && !isRetry,
-        }) && (
-          <ProposalCaption
-            proposal={proposal}
-            includeRiskDetails={!isReplaced && !isFailedDecision && !isRetry}
-          />
-        )
-      );
+    // The header always names the action itself — type, reversibility and impact, whichever of
+    // them the proposal has — in every state. The banner says what is happening or happened, and
+    // by whom.
+    const headerCaption = getProposalCaption(proposal, { includeRiskDetails: true }) && (
+      <ProposalCaption proposal={proposal} includeRiskDetails />
+    );
 
     const defaultButtonColor: EuiButtonColor = tone === 'danger' ? 'danger' : 'primary';
 
@@ -335,7 +318,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           mode={isRestricted ? 'view' : displayMode}
           comment={proposal.comment}
           banner={banner}
-          bannerSuffix={bannerSuffix}
+          bannerReason={bannerReason}
           actionError={actionError}
           data-test-subj={dataTestSubj}
         />
@@ -354,7 +337,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           previousExecutionError={proposal.previousExecutionError}
           failedAttemptError={isReplacedFailure ? proposal.executionError : undefined}
           isExpired={isExpired}
-          expiredReason={proposal.rationale}
+          expiredCaption={isExpired ? getExpiredCaption(proposal) : undefined}
           expiresAt={proposal.expiresAt}
           upcomingExpiry={
             !isReplaced && approvalPhase === 'pending' ? proposal.expiresAt : undefined

@@ -30,8 +30,8 @@ interface ApprovalStatusCalloutsProps {
    * hold for either cause since this flag does not distinguish them.
    */
   isExpired: boolean;
-  /** Why the proposal expired, if known. */
-  expiredReason?: string;
+  /** Why it can no longer be decided, as the flyout row captions it (`getExpiredCaption`). */
+  expiredCaption?: string;
   /** Replaced by a successor: read-only, and the callout says why there is nothing to decide. */
   isReplaced?: boolean;
   /** ISO 8601 deadline, when the proposal carries one: the callout says when it expired. */
@@ -97,7 +97,7 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
     previousExecutionError,
     failedAttemptError,
     isExpired,
-    expiredReason,
+    expiredCaption,
     expiresAt,
     upcomingExpiry,
     isRestricted = false,
@@ -114,17 +114,16 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
           <StatusCallout
             color="danger"
             title={APPROVAL_MODAL_TRANSLATIONS.previousFailureCalloutTitle}
-            description={APPROVAL_MODAL_TRANSLATIONS.previousFailureCalloutBody(
-              previousExecutionError
-            )}
+            description={previousExecutionError}
             data-test-subj={testSubj('previous-failure')}
           />
         )}
 
         {upcomingExpiry && (
           <StatusCallout
-            color="primary"
-            title={APPROVAL_MODAL_TRANSLATIONS.expiresCalloutTitle(formatDeadline(upcomingExpiry))}
+            color="warning"
+            title={APPROVAL_MODAL_TRANSLATIONS.expiresSoonCalloutTitle}
+            description={formatDeadline(upcomingExpiry)}
             data-test-subj={testSubj('expires')}
           />
         )}
@@ -132,17 +131,16 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
         {isRestricted && (
           <StatusCallout
             color="warning"
-            title={APPROVAL_MODAL_TRANSLATIONS.restrictedCalloutTitle}
-            description={APPROVAL_MODAL_TRANSLATIONS.restrictedCalloutBody}
+            title={APPROVAL_MODAL_TRANSLATIONS.restrictedCalloutBody}
             data-test-subj={testSubj('restricted')}
           />
         )}
 
         {isReplaced && !isExpired && (
+          // Looks exactly like the callout of a replaced proposal nobody decided.
           <StatusCallout
-            color="primary"
+            color="warning"
             title={APPROVAL_MODAL_TRANSLATIONS.replacedCalloutTitle}
-            description={APPROVAL_MODAL_TRANSLATIONS.replacedCalloutDescription}
             data-test-subj={testSubj('replaced')}
           />
         )}
@@ -161,21 +159,22 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
             color="warning"
             title={
               isReplaced
-                ? APPROVAL_MODAL_TRANSLATIONS.outdatedCalloutTitle
-                : expiresAt && deadlinePassed
-                ? APPROVAL_MODAL_TRANSLATIONS.expiredCalloutTitleOn(formatDeadline(expiresAt))
+                ? APPROVAL_MODAL_TRANSLATIONS.replacedCalloutTitle
                 : APPROVAL_MODAL_TRANSLATIONS.expiredCalloutTitle
             }
-            // A stored reason already says why, so the timing is left out.
+            // Why, the same text the card shows, then when (only once the deadline has really
+            // passed). The generic "can no longer be applied" is the title's own message already.
             description={
               isReplaced
-                ? APPROVAL_MODAL_TRANSLATIONS.replacedCalloutDescription
-                : expiredReason
-                ? APPROVAL_MODAL_TRANSLATIONS.expiredCalloutDescriptionWithReason(expiredReason)
-                : expiresAt && !deadlinePassed
-                ? // Settled before its deadline (a failed workflow, say), so it did not time out.
-                  APPROVAL_MODAL_TRANSLATIONS.expiredCalloutDescriptionGeneric
-                : APPROVAL_MODAL_TRANSLATIONS.expiredCalloutDescription
+                ? undefined
+                : [
+                    expiredCaption !== APPROVAL_MODAL_TRANSLATIONS.expiredGenericCaption
+                      ? expiredCaption
+                      : undefined,
+                    expiresAt && deadlinePassed ? formatDeadline(expiresAt) : undefined,
+                  ]
+                    .filter(Boolean)
+                    .join('. ') || undefined
             }
             data-test-subj={testSubj('expired')}
           />

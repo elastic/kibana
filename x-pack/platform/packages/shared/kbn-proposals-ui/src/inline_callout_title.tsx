@@ -10,15 +10,16 @@ import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 
 export interface InlineCalloutTitleProps {
-  /** The state word, in the callout's own bold title. */
+  /** Everything but the reason, in the callout's own bold title. */
   title: string;
-  /** Detail on the same line, in regular weight; omitted when the title says it all. */
+  /** The reason, if there is one, on the same line in regular weight. */
   description?: React.ReactNode;
 }
 
 /**
- * The title every proposal callout uses: "Title • description" on one line. EUI's own title stays
- * bold; only the description is set back to regular weight, so the state word reads first.
+ * The title every proposal callout uses: a bold title with everything but the reason, then the
+ * reason alone as a regular-weight description — "Failed • HTTP 500: host unreachable". EUI's own
+ * title stays bold; only the description is set back to regular weight.
  */
 export const InlineCalloutTitle = ({ title, description }: InlineCalloutTitleProps) => {
   const { euiTheme } = useEuiTheme();
