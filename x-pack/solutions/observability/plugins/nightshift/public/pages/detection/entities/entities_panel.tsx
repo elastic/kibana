@@ -237,7 +237,7 @@ export const EntitiesPanel = ({
           compressed: true,
           append: filterButton,
         }}
-        listProps={{ bordered: false, showIcons: true, isVirtualized: false }}
+        listProps={{ bordered: false, showIcons: true }}
         emptyMessage={NO_MATCHES_DESCRIPTION}
         noMatchesMessage={NO_MATCHES_DESCRIPTION}
         onChange={(_, __, changed) => {
