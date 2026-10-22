@@ -46,46 +46,6 @@ function getExpressionForLayer(
       },
     };
   });
-  if (!queryColumns.length) {
-    return {
-      type: 'expression',
-      chain: [
-        {
-          type: 'function',
-          function: 'createTable',
-          arguments: { ids: [], names: [], rowCount: [1] },
-        },
-        ...staticExpressions,
-      ],
-    };
-  }
-
-  let idMapper: Record<string, OriginalColumn[]> = {};
-  queryColumns.forEach((col) => {
-    // Only pick fields that OriginalColumn declares; the Omit<> drops the
-    // `interval: never` discriminant that doesn't apply to text-based columns.
-    const entry: OriginalColumn = {
-      id: col.columnId,
-      label: col.customLabel ? col.label ?? col.fieldName : col.fieldName,
-      variable: col.variable,
-      ...(col.params?.dropPartials !== undefined ? { dropPartials: col.params.dropPartials } : {}),
-      format: col.params?.format,
-      dataType: col.meta?.type as OriginalColumn['dataType'],
-      customLabel: col.customLabel,
-      // no operation type for text-based columns
-      operationType: undefined,
-    };
-    if (idMapper[col.fieldName]) {
-      idMapper[col.fieldName].push(entry);
-    } else {
-      idMapper = {
-        ...idMapper,
-        [col.fieldName]: [entry],
-      };
-    }
-  });
-  const timeFieldName = layer.timeField ?? undefined;
-
   const formatterOverrides: ExpressionAstFunction[] = layer.columns
     .filter((col) => col.params?.format)
     .map((col) => {
@@ -124,6 +84,47 @@ function getExpressionForLayer(
 
       return base;
     });
+
+  if (!queryColumns.length) {
+    return {
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'createTable',
+          arguments: { ids: [], names: [], rowCount: [1] },
+        },
+        ...staticExpressions,
+        ...formatterOverrides,
+      ],
+    };
+  }
+
+  let idMapper: Record<string, OriginalColumn[]> = {};
+  queryColumns.forEach((col) => {
+    // Only pick fields that OriginalColumn declares; the Omit<> drops the
+    // `interval: never` discriminant that doesn't apply to text-based columns.
+    const entry: OriginalColumn = {
+      id: col.columnId,
+      label: col.customLabel ? col.label ?? col.fieldName : col.fieldName,
+      variable: col.variable,
+      ...(col.params?.dropPartials !== undefined ? { dropPartials: col.params.dropPartials } : {}),
+      format: col.params?.format,
+      dataType: col.meta?.type as OriginalColumn['dataType'],
+      customLabel: col.customLabel,
+      // no operation type for text-based columns
+      operationType: undefined,
+    };
+    if (idMapper[col.fieldName]) {
+      idMapper[col.fieldName].push(entry);
+    } else {
+      idMapper = {
+        ...idMapper,
+        [col.fieldName]: [entry],
+      };
+    }
+  });
+  const timeFieldName = layer.timeField ?? undefined;
 
   if (!layer.table) {
     const textBasedQueryToAst = textBasedQueryStateToExpressionAst({

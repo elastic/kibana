@@ -76,6 +76,43 @@ describe('toExpression', () => {
     expect(findExpressionFunction(expression, 'mathColumn').arguments.expression).toEqual(['42']);
   });
 
+  it.each(['bytes', 'percent', 'number'])('formats static-only thresholds as %s', (formatId) => {
+    const state: TextBasedPrivateState = {
+      ...baseState,
+      layers: {
+        a: {
+          ...baseState.layers.a,
+          columns: [
+            {
+              columnId: 'threshold',
+              fieldName: '42',
+              operationType: 'static_value',
+              params: { value: '42', format: { id: formatId, params: { decimals: 2 } } },
+            },
+          ],
+        },
+      },
+    };
+    const expression = toExpression(state, 'a');
+
+    expect(expression?.chain.map(({ function: name }) => name)).toEqual([
+      'createTable',
+      'mathColumn',
+      'lens_format_column',
+    ]);
+    expect(findExpressionFunction(expression, 'lens_format_column').arguments).toEqual({
+      format: [formatId],
+      columnId: ['threshold'],
+      decimals: [2],
+      suffix: [],
+      compact: [],
+      pattern: [],
+      fromUnit: [],
+      toUnit: [],
+      parentFormat: [],
+    });
+  });
+
   it.each([
     {
       description: 'the form-based default label',
