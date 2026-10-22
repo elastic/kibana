@@ -162,6 +162,11 @@ class PublishNormalizationTests(ScriptTestCase):
         self.assertEqual(self.dry_run("<!-- cost: usd=0.98 pricing=2026-10-21 -->\n", "--model", "m").returncode, 65)
         self.assertEqual(self.dry_run("<!-- cost: usd=0.9773 -->\n", "--model", "m").returncode, 65)
 
+    def test_cost_marker_without_tokens_marker_fails(self) -> None:
+        result = self.dry_run(f"<!-- verbosity: lean -->\n{COST}\n# Plan\n", "--model", "m")
+        self.assertEqual(result.returncode, 65)
+        self.assertIn("cost marker without a tokens marker", result.stderr)
+
     def test_dry_run_keeps_the_draft(self) -> None:
         draft = self.write("# Plan\n")
         self.run_script(PUBLISH, "--dry-run", "--model", "m", "1", str(draft))

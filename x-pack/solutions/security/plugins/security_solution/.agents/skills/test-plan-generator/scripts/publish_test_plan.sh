@@ -29,8 +29,8 @@
 #     <model> comes from --model, else from the draft's generated-by marker;
 #     the script refuses to publish without one. A missing verbosity marker
 #     (draft from an older skill version) becomes `standard`. The tokens and
-#     cost markers are kept only if the draft has them. The draft file is not
-#     edited.
+#     cost markers are kept only if the draft has them; a cost marker without
+#     a tokens marker is refused. The draft file is not edited.
 #   - --dry-run prints the comment body that would be published and exits
 #     without calling GitHub or deleting the draft.
 #   - Requires `gh` (GitHub CLI) installed and authenticated. If `gh` is not
@@ -39,7 +39,8 @@
 # Exit codes:
 #   0  success
 #   64 usage / argument error
-#   65 draft file is malformed (no model, invalid or duplicated top marker)
+#   65 draft file is malformed (no model, invalid or duplicated top marker,
+#      cost marker without tokens marker)
 #   66 draft file does not exist
 #   69 `gh` CLI is not installed
 #   70 unexpected response from GitHub API (could not resolve comment id, etc.)
@@ -179,6 +180,10 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   HEADER_LINES=$((HEADER_LINES + PENDING_BLANKS + 1))
   PENDING_BLANKS=0
 done <"$DRAFT_FILE"
+
+if [[ -n "$COST" && -z "$TOKENS" ]]; then
+  malformed 'cost marker without a tokens marker: both come from the same session-token-usage.py run.'
+fi
 
 if [[ -z "$MODEL" ]]; then
   [[ -n "$DRAFT_MODEL" ]] || malformed 'no model identifier: pass --model <id> (the id written in the footer).'

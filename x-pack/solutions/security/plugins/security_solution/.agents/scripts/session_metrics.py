@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import http.client
 import json
 import math
 import os
@@ -24,10 +25,9 @@ MODEL_PRICES_PATH = Path(__file__).resolve().parent / "model_prices.json"
 MODEL_PRICES_URL = (
     "https://raw.githubusercontent.com/github/gh-aw/main/actions/setup/js/models.json"
 )
-FETCH_TIMEOUT_SECONDS = 5
+FETCH_TIMEOUT_SECONDS = 2
 MAX_REMOTE_CATALOG_BYTES = 1_000_000
 CACHE_WRITE_1H_INPUT_MULTIPLIER = 2
-PRICE_FIELDS = ("input", "output", "cache_read", "cache_write")
 ALLOWED_SCOPES = frozenset(("orchestrator", "worker"))
 ALLOWED_ARTIFACT_KINDS = frozenset(
     (
@@ -293,7 +293,7 @@ def fetch_price_catalog(url: str, checked: str) -> PriceCatalog:
     try:
         with urllib.request.urlopen(url, timeout=FETCH_TIMEOUT_SECONDS) as response:
             body = response.read(MAX_REMOTE_CATALOG_BYTES + 1)
-    except (OSError, ValueError) as exc:
+    except (OSError, ValueError, http.client.HTTPException) as exc:
         raise ValueError(f"Unable to fetch price catalog: {url}") from exc
     if len(body) > MAX_REMOTE_CATALOG_BYTES:
         raise ValueError(f"Price catalog is too large: {url}")
@@ -311,26 +311,39 @@ def fetch_price_catalog(url: str, checked: str) -> PriceCatalog:
         model: entry.get("cost") if isinstance(entry, dict) else None
         for model, entry in models.items()
     }
-    return PriceCatalog(source=url, checked=checked, models=_parse_model_prices(costs))
+    # A remote entry without a valid price only leaves that model unpriced.
+    prices = _parse_model_prices(costs, skip_invalid=True)
+    if not prices:
+        raise ValueError(f"Price catalog has no valid Anthropic prices: {url}")
+    return PriceCatalog(source=url, checked=checked, models=prices)
 
 
-def _parse_model_prices(raw_models: Mapping[str, Any]) -> dict[str, ModelPrice]:
+def _parse_model_prices(
+    raw_models: Mapping[str, Any], skip_invalid: bool = False
+) -> dict[str, ModelPrice]:
     models: dict[str, ModelPrice] = {}
     for model, prices in raw_models.items():
-        if not isinstance(prices, dict):
-            raise ValueError(f"Price catalog entry must be an object: {model}")
-        values = {price_field: prices.get(price_field) for price_field in PRICE_FIELDS}
-        for price_field in ("input", "output"):
-            if _as_price(values[price_field]) is None:
-                raise ValueError(f"Price catalog entry needs {price_field}: {model}")
-        input_price = _as_price(values["input"]) or 0.0
-        models[model] = ModelPrice(
-            input=input_price,
-            output=_as_price(values["output"]) or 0.0,
-            cache_read=_price_or(values["cache_read"], input_price),
-            cache_write=_price_or(values["cache_write"], input_price),
-        )
+        price = _model_price(prices)
+        if price is not None:
+            models[model] = price
+        elif not skip_invalid:
+            raise ValueError(f"Price catalog entry needs valid input and output prices: {model}")
     return models
+
+
+def _model_price(prices: Any) -> ModelPrice | None:
+    if not isinstance(prices, dict):
+        return None
+    input_price = _as_price(prices.get("input"))
+    output_price = _as_price(prices.get("output"))
+    if input_price is None or output_price is None:
+        return None
+    return ModelPrice(
+        input=input_price,
+        output=output_price,
+        cache_read=_price_or(prices.get("cache_read"), input_price),
+        cache_write=_price_or(prices.get("cache_write"), input_price),
+    )
 
 
 def _as_price(value: Any) -> float | None:
@@ -404,9 +417,12 @@ def estimate_cost_usd(
     return cost
 
 
-def format_cost(cost_usd: float, catalog: PriceCatalog) -> str:
-    """Render the one-line cost format used by the test plan cost marker."""
-    return f"usd={cost_usd:.4f} pricing={catalog.checked}"
+def format_cost(cost_usd: float, catalog: PriceCatalog) -> str | None:
+    """Render the test plan cost marker value, or None when the cost rounds to zero."""
+    usd = f"{cost_usd:.4f}"
+    if float(usd) == 0:
+        return None
+    return f"usd={usd} pricing={catalog.checked}"
 
 
 def format_legacy_usage(totals: TokenTotals) -> str:

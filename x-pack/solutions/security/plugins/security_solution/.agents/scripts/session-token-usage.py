@@ -9,8 +9,8 @@ With --with-cost, prints the estimated list-price cost on a second line, taken
 from the same read of the transcript:
     input=N output=N cache_create=N cache_read=N total=N
     usd=N.NNNN pricing=YYYY-MM-DD
-The second line is left out when any model in the session has no price in
-model_prices.json.
+The second line is left out when any model in the session has no price, or
+when the cost rounds to 0.0000.
 
 Each API response is counted once: Claude Code repeats a response's usage on
 every transcript line of that response, so lines sharing a message id are
@@ -140,7 +140,11 @@ def main() -> int:
     if cost is None:
         print("No price for every model in the session; cost left out.", file=sys.stderr)
         return 0
-    print(format_cost(cost, catalog))
+    cost_line = format_cost(cost, catalog)
+    if cost_line is None:
+        print("Cost rounds to zero; cost left out.", file=sys.stderr)
+        return 0
+    print(cost_line)
     return 0
 
 

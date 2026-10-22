@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import http.client
 import json
 import math
 import os
@@ -9,6 +10,7 @@ import tempfile
 import unittest
 from datetime import date
 from pathlib import Path
+from unittest import mock
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -542,6 +544,9 @@ class SessionMetricsParserTests(unittest.TestCase):
             sonnet_5 = 2 * 2e-6 + 20 * 1e-5 + 1000 * 2e-7 + 100 * 2.5e-6
             self.assertAlmostEqual(cost, sonnet_5_5 + sonnet_5)
             self.assertEqual(format_cost(0.12345, CATALOG), "usd=0.1235 pricing=2026-10-21")
+            self.assertEqual(format_cost(0.00005, CATALOG), "usd=0.0001 pricing=2026-10-21")
+            self.assertIsNone(format_cost(0.00004, CATALOG))
+            self.assertIsNone(format_cost(0.0, CATALOG))
 
     def test_estimate_cost_is_unavailable_when_a_model_has_no_price(self):
         with tempfile.TemporaryDirectory() as raw_dir:
@@ -619,6 +624,28 @@ class SessionMetricsParserTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     fetch_price_catalog(path.as_uri(), "2026-10-22")
 
+    def test_fetch_price_catalog_skips_entries_without_a_valid_price(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            mixed = json.loads(json.dumps(GH_AW_MODELS))
+            mixed["providers"]["anthropic"]["models"].update(
+                {
+                    "claude-no-cost": {"provider_type": "anthropic"},
+                    "claude-bad-output": {"cost": {"input": "1e-06", "output": "free"}},
+                }
+            )
+            models = Path(raw_dir) / "models.json"
+            models.write_text(json.dumps(mixed), encoding="utf-8")
+
+            catalog = fetch_price_catalog(models.as_uri(), "2026-10-22")
+
+            self.assertEqual(list(catalog.models), ["claude-sonnet-5-5"])
+
+    def test_fetch_price_catalog_turns_a_broken_download_into_a_value_error(self):
+        broken = http.client.IncompleteRead(b"{")
+        with mock.patch("session_metrics.urllib.request.urlopen", side_effect=broken):
+            with self.assertRaises(ValueError):
+                fetch_price_catalog("https://example.invalid/models.json", "2026-10-22")
+
     def test_with_cost_uses_downloaded_prices_and_falls_back_to_the_copy(self):
         with tempfile.TemporaryDirectory() as raw_dir:
             transcript = Path(raw_dir) / "session.jsonl"
@@ -675,6 +702,33 @@ class SessionMetricsParserTests(unittest.TestCase):
                 result.stdout,
                 "input=2 output=10 cache_create=100 cache_read=1000 total=1112\n",
             )
+
+            cheap_models = Path(raw_dir) / "cheap_models.json"
+            cheap_models.write_text(
+                json.dumps(
+                    {
+                        "providers": {
+                            "anthropic": {
+                                "models": {
+                                    "claude-sonnet-5-5": {
+                                        "cost": {"input": "1e-12", "output": "1e-12"}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            result = self.run_script(
+                "--with-cost", str(priced), prices_url=cheap_models.as_uri()
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(
+                result.stdout,
+                "input=2 output=10 cache_create=100 cache_read=1000 total=1112\n",
+            )
+            self.assertIn("Cost rounds to zero", result.stderr)
 
             missing = self.run_script("--with-cost", str(Path(raw_dir) / "missing.jsonl"))
             self.assertEqual(missing.returncode, 1)
