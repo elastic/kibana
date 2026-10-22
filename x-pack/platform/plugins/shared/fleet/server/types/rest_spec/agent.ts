@@ -18,6 +18,13 @@ import { NewAgentActionSchema } from '../models';
 import { validateKuery } from '../../routes/utils/filter_utils';
 import { ListResponseSchema } from '../../routes/schema/utils';
 
+const validateAgentsKueryField = (value: string) => {
+  const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
+  if (validationObj?.error) {
+    return validationObj?.error;
+  }
+};
+
 const ActionIdSchema = schema.object({
   actionId: schema.string(),
 });
@@ -493,6 +500,7 @@ export const PostBulkAgentUnenrollRequestSchema = {
         meta: {
           description: 'KQL query string, leave empty to action all agents',
         },
+        validate: validateAgentsKueryField,
       }),
     ]),
     force: schema.maybe(
@@ -538,6 +546,7 @@ export const PostBulkRemoveCollectorsRequestSchema = {
       ),
       schema.string({
         meta: { description: 'KQL query string. Leave empty to target all collectors' },
+        validate: validateAgentsKueryField,
       }),
     ]),
     includeInactive: schema.maybe(
@@ -573,7 +582,10 @@ export const PostAgentUpgradeRequestSchema = {
 
 export const PostBulkAgentUpgradeRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    agents: schema.oneOf([
+      schema.arrayOf(schema.string(), { maxSize: 10000 }),
+      schema.string({ validate: validateAgentsKueryField }),
+    ]),
     source_uri: schema.maybe(schema.string()),
     version: schema.string({ validate: validateVersion }),
     force: schema.maybe(schema.boolean()),
@@ -620,7 +632,10 @@ export const PostRequestDiagnosticsActionRequestSchema = {
 
 export const PostBulkRequestDiagnosticsActionRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    agents: schema.oneOf([
+      schema.arrayOf(schema.string(), { maxSize: 10000 }),
+      schema.string({ validate: validateAgentsKueryField }),
+    ]),
     batchSize: schema.maybe(schema.number()),
     additional_metrics: schema.maybe(
       schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]), {
@@ -680,7 +695,10 @@ export const DeleteAgentUploadFileResponseSchema = schema.object({
 export const PostBulkAgentReassignRequestSchema = {
   body: schema.object({
     policy_id: schema.string(),
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    agents: schema.oneOf([
+      schema.arrayOf(schema.string(), { maxSize: 10000 }),
+      schema.string({ validate: validateAgentsKueryField }),
+    ]),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
     dryRun: schema.maybe(schema.boolean()),
@@ -722,7 +740,10 @@ export const MigrateSingleAgentResponseSchema = ActionIdSchema;
 
 export const BulkMigrateAgentsRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    agents: schema.oneOf([
+      schema.arrayOf(schema.string(), { maxSize: 10000 }),
+      schema.string({ validate: validateAgentsKueryField }),
+    ]),
     uri: schema.uri(),
     enrollment_token: schema.string(),
     settings: schema.maybe(schema.object(BulkMigrateOptionsSchema)),
@@ -737,7 +758,10 @@ export const BulkMigrateAgentsResponseSchema = schema.oneOf([ActionIdSchema, Dry
 
 export const PostBulkUpdateAgentTagsRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    agents: schema.oneOf([
+      schema.arrayOf(schema.string(), { maxSize: 10000 }),
+      schema.string({ validate: validateAgentsKueryField }),
+    ]),
     tagsToAdd: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
     tagsToRemove: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
     batchSize: schema.maybe(schema.number()),
@@ -999,7 +1023,10 @@ export const ChangeAgentPrivilegeLevelResponseSchema = ActionIdOrMessageSchema;
 
 export const BulkChangeAgentsPrivilegeLevelRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    agents: schema.oneOf([
+      schema.arrayOf(schema.string(), { maxSize: 10000 }),
+      schema.string({ validate: validateAgentsKueryField }),
+    ]),
     batchSize: schema.maybe(schema.number()),
     user_info: schema.maybe(
       schema.object({
@@ -1029,7 +1056,10 @@ export const PostAgentRollbackResponseSchema = ActionIdOrMessageSchema;
 
 export const PostBulkAgentRollbackRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    agents: schema.oneOf([
+      schema.arrayOf(schema.string(), { maxSize: 10000 }),
+      schema.string({ validate: validateAgentsKueryField }),
+    ]),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
     dryRun: schema.maybe(schema.boolean()),
@@ -1051,7 +1081,7 @@ export const PostBulkAgentRestartRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([
       schema.arrayOf(schema.string({ maxLength: 512 }), { maxSize: 10000 }),
-      schema.string({ maxLength: 1_000_000 }),
+      schema.string({ maxLength: 1_000_000, validate: validateAgentsKueryField }),
     ]),
     batchSize: schema.maybe(schema.number({ min: 1 })),
     includeInactive: schema.boolean({ defaultValue: false }),
