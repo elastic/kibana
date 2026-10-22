@@ -276,7 +276,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async waitForRequestToComplete() {
-    await this.retry.tryForTime(30_000, async () => {
+    await this.retry.try(async () => {
       const inProgress =
         (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
         (await this.testSubjects.exists('consoleRequestInProgressBadge'));
