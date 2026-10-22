@@ -128,11 +128,11 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'cases.attachmentsAdded',
-    schemaHash: 'af8917afcff27e816e16aab810bb0295d4ea16931414fc266aa629f220e4592c',
+    schemaHash: '77ead983583983a13c3b771915293553e5febfd9d7940c4780ea2737596acf9c',
   },
   {
     id: 'cases.attachmentsDeleted',
-    schemaHash: 'af15c7003f07847f8e3b553e83925d6a82b2de4a0c66f9ecec4e48957c616ad1',
+    schemaHash: 'e75633546da2dec88fe25d5d1093b643b9168726fdf9c58b7d8bc0d41999ae23',
   },
   {
     id: 'cases.caseCreated',
@@ -228,15 +228,15 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'nightshift-investigations.completed',
-    schemaHash: '9c4a56800d90d397279b9e40a872a64d5cee0a3675556850dc16afa5840d3b9a',
+    schemaHash: '45751406a08db8725fd09651f83294e104cba5fc442d2855def0dee678abb5b0',
   },
   {
     id: 'nightshift-investigations.failed',
-    schemaHash: 'd5e9e788b13edf73d0f57d07f127e63153eb52a0b2dcb6dfdcaf80b751a428ec',
+    schemaHash: 'd3e858523a3b105f3f15ba199f5020ec9665c70a4857a8f7b024c4764dffea5b',
   },
   {
     id: 'nightshift-investigations.started',
-    schemaHash: '80cdd17e8634561e45af961d8df628f767dd02e2ed4e44c7ec2d3170bd39839b',
+    schemaHash: '3530efdfc8f92f51cd0f93eee863f033e5a9d6621b81e43fbfd197838424c00b',
   },
   {
     id: 'security.alertAssigneesChanged',
@@ -324,7 +324,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'slack2.message',
-    schemaHash: '971da8845e40c5900b3d729ae9f02ceccfc2a1b8dd0442534bdf710a0fdd31a3',
+    schemaHash: '2645d776ad762b38f99a1446b90054e11c2c32b97720c534c94eb757b6056147',
   },
   {
     id: 'slack2.reaction_added',

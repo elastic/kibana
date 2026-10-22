@@ -814,10 +814,9 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       (selectedLightStep?.status === ExecutionStatus.WAITING_FOR_INPUT ||
         activeStepExecution?.status === ExecutionStatus.WAITING_FOR_INPUT);
     // An injected child step is not the parent run's wait. Resume that child run.
+    // The run's own wait is resumed from the header, so the step panel only carries child runs.
     const resumeSelectedChildStep =
       selectedStepWaitingForInput && resolvedExecutionId !== executionId;
-    const resumeSelectedOwnStep =
-      Boolean(waitingStepExecutionId) && selectedStepExecutionId === waitingStepExecutionId;
     const selectedStepForResume = activeStepExecution ?? selectedLightStep;
     const stepName = selectedLightStep?.stepId ?? activeStepExecution?.stepId ?? '';
 
@@ -1097,7 +1096,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     {!isPseudoStep && stepAiWithModel && (
                       <AiStepSection ai={stepAiWithModel} connectorName={aiConnectorName} />
                     )}
-                    {!isPseudoStep && (resumeSelectedOwnStep || resumeSelectedChildStep) && (
+                    {!isPseudoStep && resumeSelectedChildStep && (
                       <div
                         css={{
                           paddingTop: euiTheme.size.m,
@@ -1105,34 +1104,21 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                         }}
                       >
                         <ResumeExecutionButton
-                          executionId={resumeSelectedChildStep ? resolvedExecutionId : executionId}
-                          workflowId={
-                            resumeSelectedChildStep
-                              ? selectedStepForResume?.workflowId
-                              : workflowExecution?.workflowId
-                          }
+                          executionId={resolvedExecutionId}
+                          workflowId={selectedStepForResume?.workflowId}
                           stepStartedAt={
-                            selectedLightStep?.startedAt ??
-                            activeStepExecution?.startedAt ??
-                            waitingStepStartedAt
+                            selectedLightStep?.startedAt ?? activeStepExecution?.startedAt
                           }
-                          resumeMessage={
-                            resumeSelectedChildStep
-                              ? resumeMessageForStepExecution(selectedStepForResume ?? undefined)
-                              : resumeMessage
-                          }
-                          resumeSchema={
-                            resumeSelectedChildStep
-                              ? resumeSchemaForStepExecution(selectedStepForResume ?? undefined)
-                              : resumeSchema
-                          }
-                          approvalLabels={
-                            resumeSelectedChildStep
-                              ? approvalLabelsForStepExecution(selectedStepForResume ?? {})
-                              : approvalLabels
-                          }
+                          resumeMessage={resumeMessageForStepExecution(
+                            selectedStepForResume ?? undefined
+                          )}
+                          resumeSchema={resumeSchemaForStepExecution(
+                            selectedStepForResume ?? undefined
+                          )}
+                          approvalLabels={approvalLabelsForStepExecution(
+                            selectedStepForResume ?? {}
+                          )}
                           waitingStepExecutionId={selectedStepExecutionId ?? undefined}
-                          submitState={resumeSelectedChildStep ? undefined : resumeSubmitState}
                         />
                       </div>
                     )}
