@@ -142,20 +142,20 @@ describe('validateInlineAction', () => {
   it('validates slack params against the slack schema', () => {
     expect(
       validateInlineAction(slack({ params: 'channel: C123\nthreadTs: "1"\n' })).params
-    ).toEqual(['text is required.', 'Unknown field: threadTs.']);
+    ).toEqual(["'text' is required.", "Unknown field: 'threadTs'."]);
   });
 
   it('reports a list field given a string', () => {
     expect(
       validateInlineAction(inline({ params: 'to: a@example.com\nsubject: Hi\nmessage: Body\n' }))
         .params
-    ).toEqual(['to must be a list of strings.']);
+    ).toEqual(["'to' must be a list of strings."]);
   });
 
   it('names every field left empty', () => {
     expect(
       validateInlineAction(inline({ params: 'to:\n  - ""\nsubject: ""\nmessage: Body\n' })).params
-    ).toEqual(['to is required.', 'subject is required.']);
+    ).toEqual(["'to' is required.", "'subject' is required."]);
   });
 
   it('reports malformed YAML with its location', () => {

@@ -118,7 +118,7 @@ describe('buildInlineWorkflowYaml', () => {
         connectorId: 'c1',
         params: 'channel: C1\nfoo: bar',
       })
-    ).toThrow('text is required. Unknown field: foo.');
+    ).toThrow("'text' is required. Unknown field: 'foo'.");
   });
 
   it('throws when the params YAML is malformed', () => {

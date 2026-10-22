@@ -27,13 +27,13 @@ const paramsNotAMap = (): string =>
 
 const fieldRequired = (field: string): string =>
   i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.validation.fieldRequired', {
-    defaultMessage: '{field} is required.',
+    defaultMessage: "''{field}'' is required.",
     values: { field },
   });
 
 const fieldMustBeString = (field: string): string =>
   i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.validation.fieldMustBeString', {
-    defaultMessage: '{field} must be a string.',
+    defaultMessage: "''{field}'' must be a string.",
     values: { field },
   });
 
@@ -41,14 +41,14 @@ const fieldMustBeStringList = (field: string): string =>
   i18n.translate(
     'xpack.responseOps.alertingV2RuleForm.actionForm.validation.fieldMustBeStringList',
     {
-      defaultMessage: '{field} must be a list of strings.',
+      defaultMessage: "''{field}'' must be a list of strings.",
       values: { field },
     }
   );
 
 const unknownFields = (fields: string[]): string =>
   i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.validation.unknownFields', {
-    defaultMessage: 'Unknown field: {fields}.',
+    defaultMessage: "Unknown field: ''{fields}''.",
     values: { fields: fields.join(', ') },
   });
 

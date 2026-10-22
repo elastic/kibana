@@ -64,29 +64,29 @@ describe('parseInlineParams', () => {
   describe('schema errors', () => {
     it('names every blank field of the untouched email template', () => {
       expect(parseInlineParams(email, email.paramsTemplate).errors).toEqual([
-        'to is required.',
-        'subject is required.',
-        'message is required.',
+        "'to' is required.",
+        "'subject' is required.",
+        "'message' is required.",
       ]);
     });
 
     it('names every blank field of the untouched slack template', () => {
       expect(parseInlineParams(slack, slack.paramsTemplate).errors).toEqual([
-        'channel is required.',
-        'text is required.',
+        "'channel' is required.",
+        "'text' is required.",
       ]);
     });
 
     it('reports missing and null fields as required', () => {
       expect(parseInlineParams(email, 'to:\nsubject: Hi\n').errors).toEqual([
-        'to is required.',
-        'message is required.',
+        "'to' is required.",
+        "'message' is required.",
       ]);
     });
 
     it('reports an empty list as required', () => {
       expect(parseInlineParams(email, 'to: []\nsubject: Hi\nmessage: Body\n').errors).toEqual([
-        'to is required.',
+        "'to' is required.",
       ]);
     });
 
@@ -94,25 +94,25 @@ describe('parseInlineParams', () => {
       expect(
         parseInlineParams(email, 'to: [a@b.com]\nsubject: Hi\nmessage: Body\ncc: ["", " "]\n')
           .errors
-      ).toEqual(['cc is required.']);
+      ).toEqual(["'cc' is required."]);
     });
 
     it('reports a string where a list is expected', () => {
       expect(
         parseInlineParams(email, 'to: a@example.com\nsubject: Hi\nmessage: Body\n').errors
-      ).toEqual(['to must be a list of strings.']);
+      ).toEqual(["'to' must be a list of strings."]);
     });
 
     it('reports a list or number where a string is expected', () => {
       expect(parseInlineParams(email, 'to: [a@b.com]\nsubject: [Hi]\nmessage: 5\n').errors).toEqual(
-        ['subject must be a string.', 'message must be a string.']
+        ["'subject' must be a string.", "'message' must be a string."]
       );
     });
 
     it('reports unknown fields', () => {
       expect(
         parseInlineParams(slack, 'channel: C123\ntext: Hello\nthreadTs: "1"\nblocks: []\n').errors
-      ).toEqual(['Unknown field: threadTs, blocks.']);
+      ).toEqual(["Unknown field: 'threadTs, blocks'."]);
     });
 
     it('does not return params when invalid', () => {
