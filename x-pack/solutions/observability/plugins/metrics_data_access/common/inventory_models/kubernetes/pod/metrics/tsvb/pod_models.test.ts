@@ -69,6 +69,11 @@ describe('pod TSVB models', () => {
     expect(tx?.split_mode).toBe('terms');
     expect(rx?.terms_field).toBe('interface');
     expect(tx?.terms_field).toBe('interface');
+    // The terms split must be bounded well above the default ten terms, otherwise a
+    // pod with more than ten interfaces would have its summed total silently
+    // truncated to the ten most frequent interfaces.
+    expect(rx?.terms_size).toBeGreaterThan(10);
+    expect(tx?.terms_size).toBeGreaterThan(10);
     expect(rx?.filter).toEqual({ query: 'direction: receive', language: 'kuery' });
     expect(tx?.filter).toEqual({ query: 'direction: transmit', language: 'kuery' });
     expect(rx?.metrics[0]).toMatchObject({ field: SEMCONV_K8S_POD_NETWORK_IO, type: 'max' });

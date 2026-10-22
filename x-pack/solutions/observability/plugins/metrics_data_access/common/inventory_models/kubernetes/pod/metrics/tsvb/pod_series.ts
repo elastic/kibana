@@ -19,6 +19,12 @@ import {
 // missing limit avg becomes 0 and the node utilization is selected.
 const LIMIT_FALLBACK_SCRIPT = 'params.with_limit > 0.0 ? params.with_limit : params.without_limit';
 
+// TSVB (and Elasticsearch) default a terms split to the ten most frequent
+// terms, so a pod with more than ten network interfaces would have its total
+// silently truncated to that subset. Bound the interface enumeration well above
+// any realistic per-pod interface count so the `series_agg` sum covers them all.
+const NETWORK_INTERFACE_TERMS_SIZE = 1000;
+
 export const podModelRequires = (schema?: DataSchemaFormat): string[] =>
   schema === 'semconv' ? [KUBELET_STATS_RECEIVER_OTEL] : ['kubernetes.pod'];
 
@@ -147,7 +153,9 @@ export const podNetworkSeries = (
   // then sum those rates back into a single series with a `series_agg`. This makes
   // the Pod Detail total match the Inventory snapshot, which sums per-interface
   // rates rather than collapsing interfaces with a single `max`. The direction is
-  // applied as a series `filter` (the same term filter the snapshot uses).
+  // applied as a series `filter` (the same term filter the snapshot uses). The
+  // terms split is bounded by `terms_size` so a many-interface pod is not silently
+  // truncated to the default ten terms before the sum.
   metrics.push({
     id: `sum-interfaces-network-${direction}`,
     function: 'sum',
@@ -158,6 +166,7 @@ export const podNetworkSeries = (
     id: direction,
     split_mode: 'terms',
     terms_field: 'interface',
+    terms_size: NETWORK_INTERFACE_TERMS_SIZE,
     filter: {
       query: direction === 'rx' ? 'direction: receive' : 'direction: transmit',
       language: 'kuery',
