@@ -117,6 +117,16 @@ export const getRateLimitTitle = (count: number) =>
     values: { count },
   });
 
+export const globalLimitLabels = {
+  title: i18n.translate('xpack.nightshift.automations.globalLimitBannerTitle', {
+    defaultMessage: 'Automations are paused: the deployment-wide investigation limit was reached',
+  }),
+  body: i18n.translate('xpack.nightshift.automations.globalLimitBannerBody', {
+    defaultMessage:
+      'Automatic investigations resume at 00:00 UTC. Alerts that continue an open investigation and manual investigations are not blocked.',
+  }),
+};
+
 export const runCountColumns = [
   {
     status: 'succeeded',

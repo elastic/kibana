@@ -10,3 +10,4 @@ export { InvestigationQuotaDeniedError } from './investigation_quota_denied_erro
 export { InvalidInvestigationContextError } from './invalid_investigation_context_error';
 export { InvestigationUnavailableError } from './investigation_unavailable_error';
 export { InvalidNotificationDestinationError } from './invalid_notification_destination_error';
+export { AutomationDailyLimitReachedError } from './automation_daily_limit_reached_error';

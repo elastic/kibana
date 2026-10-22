@@ -1146,6 +1146,75 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
   });
 
+  it('runs beforeOpeningNew before the global quota check for a new automatic investigation', async () => {
+    const beforeOpeningNew = jest.fn().mockResolvedValue(undefined);
+
+    await makeClient().start(
+      {
+        subject: { type: 'alert', id: 'alert-1' },
+        trigger_type: 'automatic',
+        context: { alerts: [makeAlert('alert-1')] },
+      },
+      { beforeOpeningNew }
+    );
+
+    expect(beforeOpeningNew.mock.invocationCallOrder[0]).toBeLessThan(
+      investigationQuotaCallback.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('does not run beforeOpeningNew for a start that continues an open investigation', async () => {
+    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
+    withConversations(makeConversation({ id: 'inv-1' }));
+    subjectsClient.listByConversationIds.mockResolvedValue([makeStoredSubject()]);
+    const beforeOpeningNew = jest.fn();
+
+    await makeClient().start(
+      {
+        subject: { type: 'alert', id: 'alert-1' },
+        trigger_type: 'automatic',
+        context: { alerts: [makeAlert('alert-1')] },
+      },
+      { beforeOpeningNew }
+    );
+
+    expect(beforeOpeningNew).not.toHaveBeenCalled();
+  });
+
+  it('does not run beforeOpeningNew for a manual start', async () => {
+    const beforeOpeningNew = jest.fn();
+
+    await makeClient().start(
+      {
+        subject: { type: 'alert', id: 'alert-1' },
+        trigger_type: 'manual',
+        context: { alerts: [makeAlert('alert-1')] },
+      },
+      { beforeOpeningNew }
+    );
+
+    expect(beforeOpeningNew).not.toHaveBeenCalled();
+  });
+
+  it('does not consult the global quota when beforeOpeningNew denies the start', async () => {
+    const error = new Error('own limit');
+    const beforeOpeningNew = jest.fn().mockRejectedValue(error);
+
+    await expect(
+      makeClient().start(
+        {
+          subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: 'automatic',
+          context: { alerts: [makeAlert('alert-1')] },
+        },
+        { beforeOpeningNew }
+      )
+    ).rejects.toBe(error);
+
+    expect(investigationQuotaCallback).not.toHaveBeenCalled();
+    expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
+  });
+
   it('describes the alerts again when every alert is already part of the investigation', async () => {
     agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
     withConversations(makeConversation({ id: 'inv-1' }));

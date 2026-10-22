@@ -12,6 +12,7 @@ import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useHistory, useParams } from 'react-router-dom';
 import { RETRY_BUTTON_LABEL } from '../common/messages';
 import { useKibana } from '../hooks/use_kibana';
+import { useRunQuotas } from '../settings/hooks/use_significant_events_run_quotas';
 import { CreateAutomationFlyout } from './flyouts/create_flyout/create_automation_flyout';
 import { useAutomationFilters } from './hooks/use_automation_filters';
 import { useAutomationUsage, type TimeRange } from './hooks/use_automation_usage';
@@ -27,6 +28,7 @@ import {
 import { AutomationsEmptyPrompt, FilteredEmptyPrompt } from './list/automations_empty_prompt';
 import { AutomationsTable } from './list/automations_table';
 import { AutomationsToolbar } from './list/automations_toolbar';
+import { GlobalLimitCallout } from './list/global_limit_callout';
 import { RateLimitCallout } from './list/rate_limit_callout';
 import { getDeleteConfirmTitle, listLabels } from './list/translations';
 import { toCloneRequestBody } from './utils/clone_automation';
@@ -34,6 +36,7 @@ import { AutomationDetailFlyout } from './detail_flyout/automation_detail_flyout
 import {
   getAutomationFacets,
   isAutomationRateLimited,
+  isGlobalInvestigationLimitReached,
   isOnlyRateLimitedFilter,
   statusLabels,
 } from './utils/filter_automations';
@@ -80,6 +83,8 @@ export const AutomationsPage = (): React.ReactElement => {
     visibleAutomations,
     options,
   } = useAutomationFilters(automations, getFacets);
+  const { data: quotas } = useRunQuotas();
+  const isGlobalLimitReached = isGlobalInvestigationLimitReached(quotas);
   const rateLimitedCount = automations.filter(isRateLimited).length;
   const openCreateFlyout = canManage ? () => navigate('/automations/new') : undefined;
   const isEmpty = !isInitialLoading && !error && automations.length === 0;
@@ -150,6 +155,12 @@ export const AutomationsPage = (): React.ReactElement => {
     <>
       {!isEmpty && (
         <>
+          {isGlobalLimitReached && (
+            <>
+              <GlobalLimitCallout />
+              <EuiSpacer size="m" />
+            </>
+          )}
           {rateLimitedCount > 0 && (
             <>
               <RateLimitCallout

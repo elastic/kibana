@@ -389,18 +389,21 @@ export class NightshiftInvestigationsClient {
     };
   }
 
-  async start({
-    subject,
-    title,
-    trigger_type,
-    message,
-    timeout_seconds,
-    source_ids,
-    connector_id,
-    context = {},
-    notificationDestinations,
-    slack_thread: slackThread,
-  }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
+  async start(
+    {
+      subject,
+      title,
+      trigger_type,
+      message,
+      timeout_seconds,
+      source_ids,
+      connector_id,
+      context = {},
+      notificationDestinations,
+      slack_thread: slackThread,
+    }: StartInvestigationRequest,
+    { beforeOpeningNew }: { beforeOpeningNew?: () => Promise<void> } = {}
+  ): Promise<StartInvestigationResponse> {
     if (!(await this.checkInfrastructureAvailability())) {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
@@ -463,7 +466,12 @@ export class NightshiftInvestigationsClient {
       newInvestigationId,
       // Only a start that opens a new investigation counts against the daily automatic quota:
       // a follow-up adds a round to an investigation that was already paid for.
-      assertCanOpenNew: () => this.assertQuotaForNewInvestigation(trigger_type),
+      assertCanOpenNew: async () => {
+        if (trigger_type === 'automatic') {
+          await beforeOpeningNew?.();
+        }
+        await this.assertQuotaForNewInvestigation(trigger_type);
+      },
     });
     const isFollowUp = investigationId !== newInvestigationId;
 
