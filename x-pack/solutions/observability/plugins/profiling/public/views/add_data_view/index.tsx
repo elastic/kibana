@@ -13,7 +13,7 @@ import { useEnabledProfilingStatus } from '../../components/contexts/profiling_s
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
-import { hasUsableProfilingData } from '../../utils/has_usable_profiling_data';
+import { hasProfilingData } from '../../utils/has_profiling_data';
 import { OtelAddDataInstructions } from './otel/otel_add_data_instructions';
 import { UniversalProfilingAddData } from './universal_profiling/universal_profiling_add_data';
 
@@ -68,7 +68,7 @@ export function AddDataView() {
         defaultMessage: 'Add profiling data',
       })}
       tabs={tabs}
-      suppressMenu={!hasUsableProfilingData(profilingStatus) || universalProfiling.hasLegacyData}
+      suppressMenu={!hasProfilingData(profilingStatus) || universalProfiling.hasLegacyData}
     >
       {selectedSchema === ProfilingSchema.ECS ? (
         <UniversalProfilingAddData />

@@ -198,23 +198,19 @@ describe('saveDiscoverSession', () => {
     expect(toolkit.getCurrentTab().appState.hideSidebar).toBe(true);
   });
 
-  it('should clear the draft session title once a new session is saved', async () => {
+  it('should persist the title when a new session is saved', async () => {
     const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
     await toolkit.initializeTabs();
-    await toolkit.internalState
-      .dispatch(internalStateActions.renameDiscoverSession({ newTitle: 'Draft title' }))
-      .unwrap();
 
     await toolkit.internalState
       .dispatch(
         internalStateActions.saveDiscoverSession(
-          getSaveDiscoverSessionParams({ newTitle: 'Draft title' })
+          getSaveDiscoverSessionParams({ newTitle: 'New title' })
         )
       )
       .unwrap();
 
-    expect(toolkit.internalState.getState().draftSessionTitle).toBeUndefined();
-    expect(toolkit.internalState.getState().persistedDiscoverSession?.title).toBe('Draft title');
+    expect(toolkit.internalState.getState().persistedDiscoverSession?.title).toBe('New title');
   });
 
   it('should not update local state if saveDiscoverSession returns undefined', async () => {

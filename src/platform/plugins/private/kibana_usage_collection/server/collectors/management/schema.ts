@@ -182,10 +182,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'securitySolution:enableAlertsAndAttacksAlignment': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'securitySolution:enableAttackDiscoveryWorkflows': {
     type: 'boolean',
     _meta: { description: 'Enables Attack Discovery Workflows for this space.' },
@@ -587,6 +583,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Whether the agent can browse the full Elasticsearch and Kibana API surface to discover operations.',
     },
   },
+  'agentBuilder:includeFrozenByDefault': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether built-in Agent Builder tools include frozen tier data by default.',
+    },
+  },
   'agentBuilder:deductiveEnabled': {
     type: 'boolean',
     _meta: { description: 'Whether the external Deductive AI agent execution path is enabled.' },
@@ -690,6 +692,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'labs:dashboard:deferBelowFold': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
+  },
+  'discover:enableSolutionProfilesInClassic': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether Discover loads Observability and Security contextual profiles in Classic navigation.',
+    },
   },
   'discover:showFieldStatistics': {
     type: 'boolean',
@@ -858,11 +867,18 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable Streams Canvas',
     },
   },
-  'observability:streamsSigEventsIndexPatterns': {
-    type: 'keyword',
+  'observability:nightshiftContinuousOnboardingEnabled': {
+    type: 'boolean',
     _meta: {
       description:
-        'Comma-separated index patterns used for Significant Events stream filtering and analysis.',
+        'Non-default value of whether continuous knowledge indicator onboarding is enabled.',
+    },
+  },
+  'observability:nightshiftContinuousOnboardingIntervalHours': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the minimum hours between continuous knowledge indicator onboarding runs per source.',
     },
   },
   'observability:streamsSigEventsScheduledDiscoveryEnabled': {
@@ -1024,6 +1040,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Whether the AI agent creates a new conversation per alert analysis',
     },
   },
+  'securitySolution:alertAnalysisWorkflowUsePrompt': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the alert analysis workflow classifies with a single prompt instead of an AI agent',
+    },
+  },
   'securitySolution:alertAnalysisWorkflowTagPrefix': {
     type: 'keyword',
     _meta: {
@@ -1060,6 +1083,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable token usage tracking in Kibana',
+    },
+  },
+  'genAiSettings:inferenceStreaming': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Enables streaming of LLM interactions in Kibana. When disabled, forces Kibana to use non-streaming inference requests.',
     },
   },
   'alerting:v1:showV1ObservabilityAlertsTable': {

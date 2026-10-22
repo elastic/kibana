@@ -57,6 +57,7 @@ const fullyMigratedReportMappings = () => ({
     content: {
       properties: {
         article_url: { ignore_above: 2048 },
+        published_at: {},
       },
     },
     lineage: { properties: { content_scrubbed_at: {} } },
@@ -300,6 +301,15 @@ describe('index_templates — migrations', () => {
     expect(patchedPaths).toContain('lineage.content_scrubbed_at');
   });
 
+  it('adds content.published_at when absent', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties.content.properties as Record<string, unknown>).published_at;
+
+    const { patchedPaths } = await runMigrations({ reportMappings: mappings });
+
+    expect(patchedPaths).toContain('content.published_at');
+  });
+
   it('repairs a partial Diamond context mapping missing char leaves', async () => {
     const mappings = fullyMigratedReportMappings();
     delete (mappings.properties.extracted.properties.diamond.properties as Record<string, unknown>)
@@ -540,7 +550,7 @@ describe('index_templates — mapping coverage guard', () => {
     expect(reportsTemplate).not.toContain('data_stream:');
   });
 
-  it('extracted.iocs includes reference and block_index fields (v19 maltrail adapter fields)', () => {
+  it('extracted.iocs includes historical reference and block_index fields', () => {
     // `reference` also carries an `ignore_above`, so match the declaration prefix.
     expect(src).toContain("reference: { type: 'keyword' as const");
     expect(src).toContain("block_index: { type: 'integer' as const }");
@@ -716,6 +726,19 @@ describe('index_templates — post-migration schema check', () => {
     expect(verificationError).toBeUndefined();
   });
 
+  it('fails when content.published_at is still missing after migrating', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties.content.properties as Record<string, unknown>).published_at;
+
+    const { verificationError } = await runMigrations({ reportMappings: mappings });
+
+    expect(verificationError?.message).toMatch(/content\.published_at/);
+  });
+
+  it('declares content.published_at as a date in the reports template', () => {
+    expect(src).toContain("published_at: { type: 'date' as const }");
+  });
+
   it('fails when a report field is still missing after migrating', async () => {
     const mappings = fullyMigratedReportMappings();
     delete (mappings.properties.extracted.properties as Record<string, unknown>).diamond;
@@ -786,7 +809,7 @@ describe('index_templates — post-migration schema check', () => {
 
   // v19 writes `reference` and `block_index` in one putMapping, but a failed v19 then a
   // successful v26 keyword-bounds putMapping re-adds `reference` without `block_index`,
-  // so checking `reference` alone passed while strict rejected Maltrail reports.
+  // so checking `reference` alone passed while strict rejected indicator-list reports.
   it('fails when the v19 leaf extracted.iocs.block_index is missing', async () => {
     const mappings = fullyMigratedReportMappings();
     delete (mappings.properties.extracted.properties.iocs.properties as Record<string, unknown>)

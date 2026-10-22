@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import '@kbn/code-editor-mock/jest_helper';
 import React from 'react';
 import { waitFor, render, screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';

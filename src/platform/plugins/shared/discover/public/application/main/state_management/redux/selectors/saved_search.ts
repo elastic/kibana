@@ -12,6 +12,7 @@ import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { selectTab } from './tabs';
 import {
+  getTabDataView,
   selectTabRuntimeState,
   selectTabTypeForPersistence,
   type RuntimeStateManager,
@@ -37,7 +38,7 @@ export const selectTabSavedSearch = async ({
   const currentState = getState();
   const tabState = selectTab(currentState, tabId);
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-  const currentDataView = tabRuntimeState?.currentDataView$.getValue();
+  const currentDataView = getTabDataView(tabRuntimeState);
 
   return fromSavedObjectTabToSavedSearch({
     tab: fromTabStateToSavedObjectTab({
