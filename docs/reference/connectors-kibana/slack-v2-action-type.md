@@ -93,7 +93,7 @@ That posts Block Kit controls (Approve/Decline, or fields from the `waitForInput
 Requirements:
 
 1. Turn **Receive events** on for the Slack (v2) connector and copy the webhook URL and ingest token.
-2. In the Slack app, set **Event Subscriptions → Request URL** and **Interactivity → Request URL** to that ingest URL (include the ingest token as for Events).
+2. In the Slack app, turn on **Interactivity & Shortcuts** and set **Interactivity → Request URL** to that ingest URL, including the ingest token. Leave Socket Mode off so Slack shows the Request URL. **Event Subscriptions** are not required for these clicks. Set **Event Subscriptions → Request URL** to the same ingest URL only when workflows should also start from Slack events.
 3. Use conversation IDs the bot can post to.
 
 `interactive: true` does not start a new workflow from the button click; it resumes the paused HITL step.
