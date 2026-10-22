@@ -110,7 +110,7 @@ POST /internal/nightshift/investigations/service_account/_disable  # teardown
 
 Only the service accounts backend assigns account ids: `kibana/<name>` on stateful, a generated id on Serverless (UIAM). So the caller finds or creates the accounts first, as the current user, with `ensureNightshiftServiceAccounts` from `common`, and passes their ids to `_enable` as `{ "serviceAccountIds": { "agent": "...", "automations": "..." } }`. The setup step in the app does both on one click.
 
-Only the first space of a deployment has to do that. The accounts are shared by every space, so the status reports the ones an already set-up space uses as `knownServiceAccountIds`, and the setup step passes those straight to `_enable` instead of looking the accounts up again. `_enable` falls back to them when a caller sends no ids. `ensureNightshiftServiceAccounts` lists the accounts by name and reuses one Kibana can run as. It creates a missing account only after checking that its role exists, so a stateful deployment without the roles gets a clear error instead of an account without privileges.
+Every space does that: the account directory is the one source of which account a space binds to, so an account recreated outside Kibana is picked up on the next setup. The accounts are shared, so the lookup finds the ones the first space created and later spaces reuse them. `ensureNightshiftServiceAccounts` lists the accounts by name and reuses one Kibana can run as. It creates a missing account only after checking that its role exists, so a stateful deployment without the roles gets a clear error instead of an account without privileges.
 
 `_enable`:
 

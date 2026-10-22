@@ -20,7 +20,6 @@ const status = (overrides: Record<string, unknown> = {}) => ({
   serviceAccountsEnabled: true,
   canModifyBoundWorkflows: true,
   serviceAccountId: null,
-  knownServiceAccountIds: null,
   role: 'nightshift_agent',
   bound: false,
   serviceAccounts: [],
