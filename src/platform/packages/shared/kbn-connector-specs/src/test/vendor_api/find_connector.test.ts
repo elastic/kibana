@@ -18,6 +18,12 @@ describe('findConnector', () => {
     expect(directory).toBe(path.resolve(__dirname, '../../specs/datadog/vendor_api'));
   });
 
+  it('finds connectors that all_specs.ts re-exports by name', async () => {
+    const { connector } = await findConnector('threatq');
+
+    expect(connector.metadata.id).toBe('.threatq');
+  });
+
   it('fails for an unknown id', async () => {
     await expect(findConnector('.nope')).rejects.toThrow('metadata.id ".nope"');
   });
