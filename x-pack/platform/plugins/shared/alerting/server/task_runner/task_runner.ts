@@ -13,6 +13,7 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { addSpanLabels } from '@kbn/apm-utils';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { ActionScheduler, type RunResult } from './action_scheduler';
 import type {
   RuleRunnerErrorStackTraceLog,
@@ -81,6 +82,7 @@ import {
   evaluatePerAlertSnoozeExpiry,
   evaluatePerAlertSnoozeConditions,
 } from './lib';
+import { getAlertFieldValue } from './lib/evaluate_per_alert_snooze_conditions';
 import {
   ErrorWithType,
   isOutdatedTaskVersionError,
@@ -90,6 +92,15 @@ import type { AlertStatusChangedV1Payload } from '../../common/workflows/trigger
 import { ALERT_STATUS_CHANGED_EVENT_TYPE } from '../lib/workflow_extensions/events';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
+
+/**
+ * The severity of an alert as the alerts client built it for this run, or null when the rule type
+ * sets none or the alert has no built document (rule types on the legacy alerts client).
+ */
+const getBuiltAlertSeverity = (alertAsData: Record<string, unknown> | undefined): string | null => {
+  const severity = alertAsData ? getAlertFieldValue(alertAsData, ALERT_SEVERITY) : undefined;
+  return typeof severity === 'string' ? severity : null;
+};
 
 interface TaskRunnerConstructorParams<
   Params extends RuleTypeParams,
@@ -645,6 +656,9 @@ export class TaskRunner<
                 status: 'active' as const,
                 actionGroup: newAlertActionGroups.get(id) ?? null,
                 start: alert.getStart(),
+                severity: getBuiltAlertSeverity(
+                  alertsClient.getBuiltActiveAlertDataByInstanceId(id)
+                ),
               },
             })),
             ...recoveredEntries.map(([, alert]) => ({
@@ -655,6 +669,7 @@ export class TaskRunner<
                 status: 'recovered' as const,
                 actionGroup: alert.getLastScheduledActions()?.group ?? null,
                 start: alert.getStart(),
+                severity: null,
               },
             })),
           ],
