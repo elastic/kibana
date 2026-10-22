@@ -170,6 +170,58 @@ describe('executeRegexRulesTask', () => {
     ).toThrow(/"Broken pattern" has an invalid regular expression/);
   });
 
+  describe('custom rules run on RE2', () => {
+    const custom = (pattern: string): RegexAnonymizationRule => ({
+      type: 'RegExp',
+      enabled: true,
+      id: 'custom-1',
+      name: 'Custom',
+      entityClass: 'MISC',
+      pattern,
+    });
+    const matchesOf = (pattern: string, content: string) =>
+      executeRegexRulesTask({ rules: [custom(pattern)], records: [{ content }] }).map(
+        ({ matchValue }) => matchValue
+      );
+
+    // The QA M6 input: with native RegExp this pattern backtracks for far longer than the worker timeout.
+    it('finishes in linear time on a catastrophic pattern and input', () => {
+      const start = performance.now();
+      const result = matchesOf('(a+)+$', `${'a'.repeat(5000)}!`);
+
+      expect(performance.now() - start).toBeLessThan(1000);
+      expect(result).toEqual([]);
+    });
+
+    it.each([
+      ['a Unicode property class', '\\p{L}+@x', 'héllo@x', ['héllo@x']],
+      ['an inline flag', '(?i)secret', 'a SeCrEt b', ['SeCrEt']],
+      ['an emoji as one character', '.', '😀', ['😀']],
+      ['a character code', '\\x{00e9}', 'café', ['é']],
+    ])('supports %s', (_, pattern, content, expected) => {
+      expect(matchesOf(pattern, content)).toEqual(expected);
+    });
+
+    it.each([
+      ['lookahead', 'foo(?=bar)'],
+      ['lookbehind', '(?<=@)\\w+'],
+      ['a backreference', '(a)\\1'],
+      ['a \\u escape', '\\u00e9'],
+    ])('rejects %s and says how custom patterns are written', (_, pattern) => {
+      expect(() => matchesOf(pattern, 'x')).toThrow(
+        /"Custom" has an invalid regular expression.*RE2/
+      );
+    });
+
+    it('keeps built-in rules on native RegExp, which they are tested against', () => {
+      const builtIn = { ...custom('(?:ab)(?=c)'), builtIn: true };
+
+      expect(
+        executeRegexRulesTask({ rules: [builtIn], records: [{ content: 'abc' }] })
+      ).toHaveLength(1);
+    });
+  });
+
   describe('built-in account rule', () => {
     const accountRule: RegexAnonymizationRule = {
       ...(DEFAULT_BUILTIN_REGEX_RULES.find(

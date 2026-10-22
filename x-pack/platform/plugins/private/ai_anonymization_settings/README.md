@@ -32,6 +32,13 @@ this page.
   a mask is `<ENTITY>_<SHA-1 of the original value>`. Values from a small space (an IPv4 range, a
   list of usernames or host names) can be recovered from the mask by guessing. Do not describe the
   masks as irreversible.
+- **Custom patterns use RE2 syntax** (`re2js`), not JavaScript's. They match in linear time, so no
+  pattern or input can stall the regex worker. Lookahead, lookbehind, backreferences and `\uXXXX`
+  escapes are rejected (write `\x{00e9}`); `(?i)`, `\p{L}` and similar are accepted. `\s` and `\w`
+  are ASCII-only. The page and the pattern tester enforce this. The saved setting's schema does
+  not, on purpose: Core also validates the stored value on read and discards the whole setting
+  (masking off) if one rule is invalid, so a rule written through the API that RE2 cannot compile
+  fails at run time instead, and `onFailure` decides what happens.
 - **Built-in patterns are written to run the same on native `RegExp` and on RE2.** Do not add
   lookahead, lookbehind, backreferences or unbounded quantifiers to them;
   `default_builtin_regex_rules.test.ts` in `@kbn/ai-anonymization-common` fails if a rule behaves differently on the two engines or is
