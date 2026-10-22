@@ -40,16 +40,18 @@ test.describe('Advanced settings - common settings', { tag: tags.deploymentAgnos
     await pageObjects.settings.goto();
   });
 
-  test('renders every common space setting field', async ({ pageObjects }) => {
-    for (const settingId of COMMON_SPACE_SETTINGS) {
-      await expect.soft(pageObjects.settings.getField(settingId), settingId).toBeVisible();
-    }
-  });
+  test('renders every common space and global setting field', async ({ pageObjects }) => {
+    await test.step('space settings tab', async () => {
+      for (const settingId of COMMON_SPACE_SETTINGS) {
+        await expect.soft(pageObjects.settings.getField(settingId), settingId).toBeVisible();
+      }
+    });
 
-  test('renders every common global setting field', async ({ pageObjects }) => {
-    await pageObjects.settings.openGlobalSettingsTab();
-    for (const settingId of COMMON_GLOBAL_SETTINGS) {
-      await expect.soft(pageObjects.settings.getField(settingId), settingId).toBeVisible();
-    }
+    await test.step('global settings tab', async () => {
+      await pageObjects.settings.openGlobalSettingsTab();
+      for (const settingId of COMMON_GLOBAL_SETTINGS) {
+        await expect.soft(pageObjects.settings.getField(settingId), settingId).toBeVisible();
+      }
+    });
   });
 });
