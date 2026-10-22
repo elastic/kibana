@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
-import { InvestigationSection } from './investigation_section';
+import { InvestigationSection, type InvestigationSectionProps } from './investigation_section';
 
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
@@ -36,36 +36,44 @@ const investigation: InvestigationSummary = {
 };
 
 const renderSection = ({
+  id = 'critical',
   isInitialLoading = false,
   investigations = [],
   total = 0,
   hasMore = false,
   error = null,
+  isExpanded = true,
+  onToggle = jest.fn(),
   onShowMore = jest.fn(),
   onRetry = jest.fn(),
-}: {
-  isInitialLoading?: boolean;
-  investigations?: InvestigationSummary[];
-  total?: number;
-  hasMore?: boolean;
-  error?: Error | null;
-  onShowMore?: () => void;
-  onRetry?: () => void;
-} = {}) =>
+}: Partial<InvestigationSectionProps> = {}) =>
   render(
     <I18nProvider>
       <InvestigationSection
-        id="critical"
+        id={id}
         investigations={investigations}
         total={total}
         hasMore={hasMore}
         isInitialLoading={isInitialLoading}
         error={error}
+        isExpanded={isExpanded}
+        onToggle={onToggle}
         onShowMore={onShowMore}
         onRetry={onRetry}
       />
     </I18nProvider>
   );
+
+/** EUI makes the accordion arrow the keyboard control; it carries the expanded state. */
+const getToggleControl = (id: string): HTMLElement => {
+  const control = document.querySelector<HTMLElement>(
+    `[aria-controls="nightshiftInvestigationSection-${id}-accordion"][aria-expanded]`
+  );
+  if (control == null) {
+    throw new Error(`No toggle control for section ${id}`);
+  }
+  return control;
+};
 
 describe('InvestigationSection', () => {
   it('shows a skeleton, and no count, while the section is still loading', () => {
@@ -86,39 +94,72 @@ describe('InvestigationSection', () => {
   });
 
   it('shows Show more only when more investigations are available', () => {
-    const { rerender } = render(
-      <I18nProvider>
-        <InvestigationSection
-          id="critical"
-          investigations={[investigation]}
-          total={1}
-          hasMore={false}
-          onShowMore={jest.fn()}
-          onRetry={jest.fn()}
-        />
-      </I18nProvider>
-    );
+    const { unmount } = renderSection({ investigations: [investigation], total: 1 });
 
     expect(
       screen.queryByTestId('nightshiftInvestigationSectionShowMore-critical')
     ).not.toBeInTheDocument();
+    unmount();
 
-    rerender(
-      <I18nProvider>
-        <InvestigationSection
-          id="critical"
-          investigations={[investigation]}
-          total={11}
-          hasMore={true}
-          onShowMore={jest.fn()}
-          onRetry={jest.fn()}
-        />
-      </I18nProvider>
-    );
+    renderSection({ investigations: [investigation], total: 11, hasMore: true });
 
     expect(
       screen.getByTestId('nightshiftInvestigationSectionShowMore-critical')
     ).toBeInTheDocument();
+  });
+
+  it('says how many rows the next page brings out of those not loaded yet', () => {
+    const { unmount } = renderSection({
+      investigations: [investigation],
+      total: 23,
+      hasMore: true,
+    });
+
+    expect(screen.getByTestId('nightshiftInvestigationSectionShowMore-critical')).toHaveTextContent(
+      'Show 10 more of 22'
+    );
+    unmount();
+
+    renderSection({ investigations: [investigation], total: 5, hasMore: true });
+
+    expect(screen.getByTestId('nightshiftInvestigationSectionShowMore-critical')).toHaveTextContent(
+      'Show 4 more of 4'
+    );
+  });
+
+  it('keeps the heading and count while collapsed, and hides the rows from assistive tech', () => {
+    renderSection({ investigations: [investigation], total: 1, isExpanded: false });
+
+    expect(screen.getByRole('heading', { name: 'Critical' })).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftInvestigationSectionCount-critical')).toHaveTextContent(
+      '1'
+    );
+    expect(getToggleControl('critical')).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByTestId('investigationCard').closest('[inert]')).not.toBeNull();
+  });
+
+  it('exposes the rows while expanded', () => {
+    renderSection({ investigations: [investigation], total: 1, isExpanded: true });
+
+    expect(getToggleControl('critical')).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByTestId('investigationCard').closest('[inert]')).toBeNull();
+  });
+
+  it('toggles from the whole header and from the arrow', () => {
+    const onToggle = jest.fn();
+    renderSection({ investigations: [investigation], total: 1, onToggle });
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionToggle-critical'));
+    fireEvent.click(getToggleControl('critical'));
+
+    expect(onToggle).toHaveBeenCalledTimes(2);
+  });
+
+  it('titles the closed section', () => {
+    renderSection({ id: 'closed', investigations: [investigation], total: 1 });
+
+    expect(screen.getByRole('heading', { name: 'Closed' })).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftInvestigationSection-closed')).toBeInTheDocument();
   });
 
   it('loads more investigations for this section only', () => {

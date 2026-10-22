@@ -32,10 +32,16 @@ import {
 const IN_PROGRESS_REFETCH_INTERVAL_MS = 5_000;
 
 /**
- * `not-rated` holds the investigations nothing works on that have no severity: the agent did not
- * record one, for example because its run ended early. There is no failed state.
+ * `not-rated` holds the open investigations nothing works on that have no severity: the agent did
+ * not record one, for example because its run ended early. There is no failed state. `closed`
+ * holds every closed investigation, whatever its severity.
  */
-export type InvestigationSectionId = 'in-progress' | Severity | 'not-rated';
+export type InvestigationSectionId = 'in-progress' | Severity | 'not-rated' | 'closed';
+
+/** Sections that start collapsed; the rest start expanded. */
+export const COLLAPSED_BY_DEFAULT_SECTION_IDS: ReadonlySet<InvestigationSectionId> = new Set([
+  'closed',
+]);
 
 export interface InvestigationSectionState extends FetchInvestigationsResult {
   id: InvestigationSectionId;
@@ -55,8 +61,8 @@ export interface InvestigationSectionsResult {
   /**
    * Investigations matching the current filters, each counted once. `totalCount` sums the
    * sections, and a running investigation also appears in its severity section, so it is not a
-   * distinct count. The severity counts come from one query over all investigations, so adding
-   * the unrated section's total gives every match exactly once.
+   * distinct count. The severity counts come from one query over all open investigations, so
+   * adding the unrated and closed sections' totals gives every match exactly once.
    */
   matchedCount: number;
   loadedCount: number;
@@ -66,8 +72,10 @@ export interface InvestigationSectionsResult {
 const toInvestigationIds = (investigations: InvestigationSummary[]): Set<string> =>
   new Set(investigations.map(({ id }) => id));
 
+// Closed investigations have their own section, so the severity tiers only list open ones.
 const tierSection = (severity: Severity) => ({
   inProgress: false,
+  status: 'open' as const,
   severities: [severity],
 });
 
@@ -109,16 +117,23 @@ export const useInvestigationSections = ({
   const high = useFetchInvestigations({ ...tierSection('high'), query });
   const medium = useFetchInvestigations({ ...tierSection('medium'), query });
   const low = useFetchInvestigations({ ...tierSection('low'), query });
-  const notRated = useFetchInvestigations({ inProgress: false, severities: ['none'], query });
+  const notRated = useFetchInvestigations({
+    inProgress: false,
+    status: 'open',
+    severities: ['none'],
+    query,
+  });
+  const closed = useFetchInvestigations({ inProgress: false, status: 'closed', query });
 
-  // The shared counts cannot leave out running investigations, so the tiles include them.
+  // The shared counts cannot leave out running investigations, so the tiles include them. They
+  // leave out closed ones, like the tier sections the tiles scroll to.
   const severityCountsQuery = useQuery({
     queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'severityCounts', query],
     enabled: agenticInvestigations != null,
     queryFn: ({ signal }) =>
       http.get<InvestigationSeverityCounts>(SHARED_INVESTIGATIONS_SEVERITY_COUNTS_URL, {
         version: SHARED_INVESTIGATIONS_API_VERSION,
-        query: query ? { query } : {},
+        query: { status: 'open', ...(query ? { query } : {}) },
         signal,
       }),
     keepPreviousData: true,
@@ -129,6 +144,7 @@ export const useInvestigationSections = ({
   const { refetch: refetchMedium } = medium;
   const { refetch: refetchLow } = low;
   const { refetch: refetchNotRated } = notRated;
+  const { refetch: refetchClosed } = closed;
   const { refetch: refetchSeverityCounts } = severityCountsQuery;
 
   // An investigation leaving the in-progress section landed in one of the others, so the rest are
@@ -167,6 +183,7 @@ export const useInvestigationSections = ({
     refetchMedium();
     refetchLow();
     refetchNotRated();
+    refetchClosed();
     void refetchSeverityCounts();
   }, [
     query,
@@ -178,6 +195,7 @@ export const useInvestigationSections = ({
     refetchMedium,
     refetchLow,
     refetchNotRated,
+    refetchClosed,
     refetchSeverityCounts,
   ]);
 
@@ -189,8 +207,9 @@ export const useInvestigationSections = ({
       toSectionState({ id: 'medium', queryResult: medium }),
       toSectionState({ id: 'low', queryResult: low }),
       toSectionState({ id: 'not-rated', queryResult: notRated }),
+      toSectionState({ id: 'closed', queryResult: closed }),
     ],
-    [inProgress, critical, high, medium, low, notRated]
+    [inProgress, critical, high, medium, low, notRated, closed]
   );
 
   const severityCounts = useMemo(
@@ -219,7 +238,8 @@ export const useInvestigationSections = ({
       severityCounts.high +
       severityCounts.medium +
       severityCounts.low +
-      notRated.total,
+      notRated.total +
+      closed.total,
     loadedCount: sections.reduce((sum, section) => sum + section.investigations.length, 0),
     refetchAll,
   };
