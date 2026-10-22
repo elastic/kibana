@@ -171,6 +171,7 @@ dependsOn:
   - '@kbn/core-feature-flags-browser'
   - '@kbn/core-feature-flags-browser-mocks'
   - '@kbn/core-feature-flags-server'
+  - '@kbn/core-pubsub-server'
   - '@kbn/core-feature-flags-server-mocks'
   - '@kbn/core-pricing-browser'
   - '@kbn/core-pricing-server-internal'
