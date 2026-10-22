@@ -42,8 +42,13 @@ export {
 } from './kql_to_esql';
 export type { EpisodeKqlTranslationErrorReason } from './kql_to_esql';
 
-export { buildEpisodeQuery, buildEpisodeGroupHashQuery } from './episode_query';
-export type { EpisodeGroupHashEsqlRow } from './episode_query';
+export {
+  buildEpisodeQuery,
+  buildEpisodeGroupHashQuery,
+  buildBulkEpisodeQuery,
+  BULK_EPISODE_FIELDS,
+} from './episode_query';
+export type { EpisodeGroupHashEsqlRow, BulkEpisodeEsqlRow } from './episode_query';
 
 export { buildEpisodeEventsQuery, ALERT_EPISODE_EVENT_FIELDS } from './episode_events_query';
 export type { EpisodeEventRow, BuildEpisodeEventsQueryOptions } from './episode_events_query';

@@ -9,6 +9,7 @@ import { esql } from '@elastic/esql';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import {
   ALERT_EPISODE_FIELDS,
+  addEpisodeAggregation,
   buildEpisodesBaseQuery,
   type AlertEpisodeEsqlRow,
 } from './episodes_query';
@@ -31,6 +32,40 @@ export const buildEpisodeQuery = (
     buildEpisodesBaseQuery(spaceId, { groupHash }).where`episode.id == ${episodeId}`
       .pipe`LIMIT 1`.keep(...ALERT_EPISODE_FIELDS)
   );
+
+export const BULK_EPISODE_FIELDS = [
+  'episode.id',
+  'episode.status',
+  'rule.id',
+  'group_hash',
+  'first_timestamp',
+  'last_timestamp',
+  'episode_data',
+  'severity',
+  'source',
+] as const;
+
+export type BulkEpisodeEsqlRow = Pick<AlertEpisodeEsqlRow, (typeof BULK_EPISODE_FIELDS)[number]>;
+
+/**
+ * Builds an ES|QL query that returns one aggregated row per requested episode id
+ * (identity, status, first and last event timestamps, latest data, severity and
+ * source). It reads only `.rule-events` and filters on the episode ids before the
+ * aggregation, so it skips the action state and never aggregates the whole space.
+ */
+export const buildBulkEpisodeQuery = (
+  spaceId: string,
+  episodeIds: string[]
+): TypedEsqlQuery<BulkEpisodeEsqlRow> => {
+  const query = esql.from([ALERT_EVENTS_DATA_STREAM], ['_source']).where`space_id == ${spaceId}`
+    .where`type == "alert"`.where`episode.id IN (${episodeIds.map((episodeId) =>
+    esql.str(episodeId)
+  )})`;
+
+  addEpisodeAggregation(query);
+
+  return asTypedEsqlQuery<BulkEpisodeEsqlRow>(query.keep(...BULK_EPISODE_FIELDS));
+};
 
 /**
  * Raw ES|QL response shape of the group hash lookup.

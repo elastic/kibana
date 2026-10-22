@@ -6,7 +6,11 @@
  */
 
 import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
-import { buildEpisodeQuery, buildEpisodeGroupHashQuery } from './episode_query';
+import {
+  buildBulkEpisodeQuery,
+  buildEpisodeQuery,
+  buildEpisodeGroupHashQuery,
+} from './episode_query';
 
 const SPACE_ID = 'default';
 const GROUP_HASH = 'group-hash-1';
@@ -70,5 +74,26 @@ describe('buildEpisodeGroupHashQuery', () => {
     expect(queryString).toContain('SORT @timestamp DESC');
     expect(queryString).toContain('LIMIT 1');
     expect(queryString).toContain('KEEP group_hash');
+  });
+});
+
+describe('buildBulkEpisodeQuery', () => {
+  it('filters on the episode ids before the aggregation', () => {
+    const queryString = buildBulkEpisodeQuery(SPACE_ID, ['ep-1', 'ep-2']).print('basic');
+    const filterIndex = queryString.indexOf('episode.id IN ("ep-1", "ep-2")');
+    expect(filterIndex).toBeGreaterThan(-1);
+    expect(filterIndex).toBeLessThan(queryString.indexOf('INLINE STATS'));
+  });
+
+  it('reads only the events data stream', () => {
+    const queryString = buildBulkEpisodeQuery(SPACE_ID, ['ep-1']).print('basic');
+    expect(queryString).toContain(ALERT_EVENTS_DATA_STREAM);
+    expect(queryString).not.toContain(ALERT_ACTIONS_DATA_STREAM);
+  });
+
+  it('keeps only the snapshot fields', () => {
+    const queryString = buildBulkEpisodeQuery(SPACE_ID, ['ep-1']).print('basic');
+    expect(queryString).toMatch(/KEEP [^|]*first_timestamp[^|]*episode_data/);
+    expect(queryString).not.toMatch(/KEEP [^|]*\bseries_id\b/);
   });
 });

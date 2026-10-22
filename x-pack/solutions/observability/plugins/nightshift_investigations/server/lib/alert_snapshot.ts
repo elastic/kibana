@@ -6,17 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
-import { esql } from '@elastic/esql';
 import { isResponseError } from '@kbn/es-errors';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import {
-  ALERT_EPISODE_FIELDS,
-  asTypedEsqlQuery,
-  buildEpisodesBaseQuery,
-  rowsFromEsql,
-  type AlertEpisodeEsqlRow,
-} from '@kbn/alerting-v2-common-queries';
+import { buildBulkEpisodeQuery, rowsFromEsql } from '@kbn/alerting-v2-common-queries';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import {
@@ -138,11 +131,15 @@ const fetchRuleNames = async (
     return new Map();
   }
   const rulesClient = await getRulesClient();
-  const rules = await rulesClient.getRules(ruleIds).catch((error) => {
-    if (Boom.isBoom(error) && [403, 404].includes(error.output.statusCode)) return [];
-    throw error;
-  });
-  return new Map(rules.map(({ id, metadata }) => [id, metadata.name]));
+  const rules = await Promise.all(
+    ruleIds.map((id) =>
+      rulesClient.getRule({ id }).catch((error) => {
+        if (Boom.isBoom(error) && [403, 404].includes(error.output.statusCode)) return undefined;
+        throw error;
+      })
+    )
+  );
+  return new Map(rules.flatMap((rule) => (rule ? [[rule.id, rule.metadata.name]] : [])));
 };
 
 const isEventsUnavailable = (error: unknown): boolean =>
@@ -155,10 +152,7 @@ const fetchV2Snapshots = async (
   { esClient, getRulesClient, spaceId }: EpisodeLookup,
   episodeIds: string[]
 ): Promise<Map<string, V2AlertSnapshot>> => {
-  const episodeQuery = buildEpisodesBaseQuery(spaceId).where`episode.id IN (${episodeIds.map(
-    (episodeId) => esql.str(episodeId)
-  )})`.keep(...ALERT_EPISODE_FIELDS);
-  const typedQuery = asTypedEsqlQuery<AlertEpisodeEsqlRow>(episodeQuery);
+  const episodeQuery = buildBulkEpisodeQuery(spaceId, episodeIds);
 
   const response = await esClient.esql
     .query({ query: episodeQuery.print('basic') })
@@ -170,7 +164,7 @@ const fetchV2Snapshots = async (
     return new Map();
   }
 
-  const episodes = rowsFromEsql(typedQuery, response as ESQLSearchResponse);
+  const episodes = rowsFromEsql(episodeQuery, response as ESQLSearchResponse);
   const ruleNames = await fetchRuleNames(getRulesClient, [
     ...new Set(episodes.map((episode) => episode['rule.id'])),
   ]);

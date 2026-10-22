@@ -74,12 +74,12 @@ describe('fetchInvestigationAlertSnapshots', () => {
   });
 
   const makeLookup = ({
-    getRules = jest.fn().mockResolvedValue([{ id: 'v2-rule', metadata: { name: 'V2 rule' } }]),
+    getRule = jest.fn(async ({ id }: { id: string }) => ({ id, metadata: { name: 'V2 rule' } })),
     queryError,
     columns = [] as string[],
     rows = [] as unknown[][],
   }: {
-    getRules?: jest.Mock;
+    getRule?: jest.Mock;
     queryError?: Error;
     columns?: string[];
     rows?: unknown[][];
@@ -94,8 +94,8 @@ describe('fetchInvestigationAlertSnapshots', () => {
             }),
       },
     },
-    getRules,
-    getRulesClient: jest.fn().mockResolvedValue({ getRules }),
+    getRule,
+    getRulesClient: jest.fn().mockResolvedValue({ getRule }),
     spaceId: 'default',
   });
 
@@ -165,7 +165,7 @@ describe('fetchInvestigationAlertSnapshots', () => {
 
   it('leaves the rule name unset when the user cannot read the rule', async () => {
     const lookup = makeLookup({
-      getRules: jest.fn().mockRejectedValue(Boom.forbidden('forbidden')),
+      getRule: jest.fn().mockRejectedValue(Boom.forbidden('forbidden')),
       columns: [
         'episode.id',
         'first_timestamp',
@@ -190,6 +190,41 @@ describe('fetchInvestigationAlertSnapshots', () => {
 
     expect(snapshot).toEqual(expect.objectContaining({ id: 'episode-1' }));
     expect(snapshot).not.toHaveProperty('rule_name', expect.any(String));
+  });
+
+  it('keeps the names of readable rules when another rule is inaccessible', async () => {
+    const lookup = makeLookup({
+      getRule: jest.fn(async ({ id }: { id: string }) => {
+        if (id === 'hidden-rule') throw Boom.forbidden('forbidden');
+        return { id, metadata: { name: 'V2 rule' } };
+      }),
+      columns: [
+        'episode.id',
+        'first_timestamp',
+        'last_timestamp',
+        'episode.status',
+        'rule.id',
+        'group_hash',
+      ],
+      rows: [
+        ['ep-1', '2026-09-02T10:00:00.000Z', '2026-09-02T10:05:00.000Z', 'active', 'v2-rule', 'h1'],
+        [
+          'ep-2',
+          '2026-09-02T10:00:00.000Z',
+          '2026-09-02T10:05:00.000Z',
+          'active',
+          'hidden-rule',
+          'h2',
+        ],
+      ],
+    });
+
+    const snapshots = await run(makeAlertsClient({ alerts: [] }), lookup, ['ep-1', 'ep-2']);
+
+    expect(snapshots).toEqual([
+      expect.objectContaining({ id: 'ep-1', rule_name: 'V2 rule' }),
+      expect.not.objectContaining({ rule_name: expect.any(String) }),
+    ]);
   });
 
   it('lists every id it cannot find in one not found error', async () => {
