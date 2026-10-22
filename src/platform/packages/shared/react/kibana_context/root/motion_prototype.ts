@@ -26,10 +26,15 @@ const ACCORDION_ARROW_MASK = `url("data:image/svg+xml,${encodeURIComponent(
 
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
+/** Page enter length for inspection. This is not an EUI motion token. */
+export const PAGE_ENTER_DURATION = '1.5s';
+
 /**
  * Prototype motions mounted once for the whole Kibana UI.
  * Tooltips reuse the popover reveal. Tab bars slide one indicator between selections.
  * Accordions rotate a custom arrow glyph and slide their content open.
+ * Callouts and banners fade and collapse their height only when dismissed.
+ * Switching apps fades the new page in and lifts its content blocks a short distance.
  */
 export const MotionPrototype = () => {
   const { euiTheme, highContrastMode } = useEuiTheme();
@@ -67,6 +72,8 @@ const retainMotionPrototype = (tokens: MotionTokens): (() => void) => {
 let motionTokens: MotionTokens | undefined;
 let styleElement: HTMLStyleElement | undefined;
 let stopTabs: (() => void) | undefined;
+let stopCallouts: (() => void) | undefined;
+let stopPages: (() => void) | undefined;
 
 const applyMotionPrototype = () => {
   if (!styleElement || !motionTokens) return;
@@ -74,12 +81,29 @@ const applyMotionPrototype = () => {
   const settings = getMotionRefreshSettings();
   styleElement.textContent = buildMotionCss(motionTokens, settings);
 
-  const tabsOn = settings.tabs && !window.matchMedia(REDUCED_MOTION_QUERY).matches;
+  const motionAllowed = !window.matchMedia(REDUCED_MOTION_QUERY).matches;
+  const tabsOn = settings.tabs && motionAllowed;
   if (tabsOn && !stopTabs) {
     stopTabs = startTabIndicator();
   } else if (!tabsOn && stopTabs) {
     stopTabs();
     stopTabs = undefined;
+  }
+
+  const calloutsOn = settings.callout && motionAllowed;
+  if (calloutsOn && !stopCallouts) {
+    stopCallouts = startCalloutMotion(motionTokens);
+  } else if (!calloutsOn && stopCallouts) {
+    stopCallouts();
+    stopCallouts = undefined;
+  }
+
+  const pagesOn = settings.page && motionAllowed;
+  if (pagesOn && !stopPages) {
+    stopPages = startPageMotion();
+  } else if (!pagesOn && stopPages) {
+    stopPages();
+    stopPages = undefined;
   }
 };
 
@@ -89,7 +113,10 @@ const startMotionPrototype = (tokens: MotionTokens): (() => void) => {
   style.id = STYLE_ELEMENT_ID;
   styleElement = style;
   document.head.appendChild(style);
-  document.documentElement.setAttribute('data-kbn-motion-prototype', 'tooltip-tabs-accordion');
+  document.documentElement.setAttribute(
+    'data-kbn-motion-prototype',
+    'tooltip-tabs-accordion-callout-page'
+  );
   applyMotionPrototype();
   const unsubscribe = subscribeMotionRefreshSettings(applyMotionPrototype);
 
@@ -97,6 +124,10 @@ const startMotionPrototype = (tokens: MotionTokens): (() => void) => {
     unsubscribe();
     stopTabs?.();
     stopTabs = undefined;
+    stopCallouts?.();
+    stopCallouts = undefined;
+    stopPages?.();
+    stopPages = undefined;
     style.remove();
     styleElement = undefined;
     motionTokens = undefined;
@@ -127,6 +158,10 @@ const buildMotionCss = (tokens: MotionTokens, settings: MotionRefreshSettings): 
     indicatorThickness,
     accordionDuration,
     accordionEasing,
+    calloutDuration,
+    calloutEasing,
+    pageEasing,
+    pageRise,
   } = tokens;
 
   const tooltipCss = settings.tooltip
@@ -231,9 +266,53 @@ const buildMotionCss = (tokens: MotionTokens, settings: MotionRefreshSettings): 
 `
     : '';
 
+  const calloutCss = settings.callout
+    ? `
+  [data-kbn-callout-motion='exit'] {
+    overflow: hidden;
+    box-sizing: border-box;
+    min-height: 0;
+    transition:
+      height ${calloutDuration} ${calloutEasing},
+      opacity ${calloutDuration} ${calloutEasing},
+      padding-top ${calloutDuration} ${calloutEasing},
+      padding-bottom ${calloutDuration} ${calloutEasing},
+      margin-top ${calloutDuration} ${calloutEasing},
+      margin-bottom ${calloutDuration} ${calloutEasing},
+      border-top-width ${calloutDuration} ${calloutEasing},
+      border-bottom-width ${calloutDuration} ${calloutEasing};
+  }
+  [data-kbn-callout-motion='exit'] {
+    pointer-events: none;
+  }
+`
+    : '';
+
+  const pageCss = settings.page
+    ? `
+  @keyframes kbnPageEnter {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes kbnPageRise {
+    from { transform: translateY(${pageRise}); }
+    to { transform: none; }
+  }
+  .kbnAppWrapper[data-kbn-page-enter='hold'] {
+    opacity: 0;
+  }
+  .kbnAppWrapper[data-kbn-page-enter='enter'] {
+    animation: kbnPageEnter ${PAGE_ENTER_DURATION} ${pageEasing} both;
+  }
+  .kbnAppWrapper[data-kbn-page-enter='enter'] > * > * {
+    animation: kbnPageRise ${PAGE_ENTER_DURATION} ${pageEasing} both;
+  }
+`
+    : '';
+
   return `
 @media (prefers-reduced-motion: no-preference) {
-${tooltipCss}${tabsCss}${accordionCss}}
+${tooltipCss}${tabsCss}${accordionCss}${calloutCss}${pageCss}}
 `;
 };
 
@@ -480,5 +559,283 @@ const startTabIndicator = (): (() => void) => {
     watched.clear();
     selectedByTabs.clear();
     pending.clear();
+  };
+};
+
+const CALLOUT_SELECTOR = '.euiCallOut, .euiBanner';
+const CALLOUT_MOTION_ATTR = 'data-kbn-callout-motion';
+
+interface CalloutBox {
+  height: number;
+  paddingTop: string;
+  paddingBottom: string;
+  marginTop: string;
+  marginBottom: string;
+  borderTopWidth: string;
+  borderBottomWidth: string;
+}
+
+const readCalloutBox = (node: HTMLElement): CalloutBox => {
+  const style = window.getComputedStyle(node);
+  return {
+    height: node.getBoundingClientRect().height,
+    paddingTop: style.paddingTop,
+    paddingBottom: style.paddingBottom,
+    marginTop: style.marginTop,
+    marginBottom: style.marginBottom,
+    borderTopWidth: style.borderTopWidth,
+    borderBottomWidth: style.borderBottomWidth,
+  };
+};
+
+const collapseCallout = (node: HTMLElement) => {
+  node.style.height = '0px';
+  node.style.opacity = '0';
+  node.style.paddingTop = '0px';
+  node.style.paddingBottom = '0px';
+  node.style.marginTop = '0px';
+  node.style.marginBottom = '0px';
+  node.style.borderTopWidth = '0px';
+  node.style.borderBottomWidth = '0px';
+};
+
+const expandCallout = (node: HTMLElement, box: CalloutBox) => {
+  node.style.height = `${box.height}px`;
+  node.style.opacity = '1';
+  node.style.paddingTop = box.paddingTop;
+  node.style.paddingBottom = box.paddingBottom;
+  node.style.marginTop = box.marginTop;
+  node.style.marginBottom = box.marginBottom;
+  node.style.borderTopWidth = box.borderTopWidth;
+  node.style.borderBottomWidth = box.borderBottomWidth;
+};
+
+const clearCalloutMotionStyles = (node: HTMLElement) => {
+  node.style.height = '';
+  node.style.opacity = '';
+  node.style.paddingTop = '';
+  node.style.paddingBottom = '';
+  node.style.marginTop = '';
+  node.style.marginBottom = '';
+  node.style.borderTopWidth = '';
+  node.style.borderBottomWidth = '';
+  node.style.transition = '';
+};
+
+const durationMs = (value: string): number => {
+  const amount = parseFloat(value);
+  if (Number.isNaN(amount)) return 250;
+  return value.trim().endsWith('ms') ? amount : amount * 1000;
+};
+
+const calloutsIn = (node: HTMLElement): HTMLElement[] => {
+  if (node.getAttribute(CALLOUT_MOTION_ATTR) === 'exit') return [];
+  if (node.matches(CALLOUT_SELECTOR)) return [node];
+  if (node.childElementCount > 8) return [];
+  const found = [...node.querySelectorAll<HTMLElement>(CALLOUT_SELECTOR)];
+  if (found.length === 0 || found.length > 3) return [];
+  return found;
+};
+
+/**
+ * Callouts and banners appear with the rest of the page. Dismissing one plays the
+ * study's height-and-fade on a stand-in, because React has already unmounted it.
+ */
+const startCalloutMotion = (tokens: MotionTokens): (() => void) => {
+  const boxes = new WeakMap<HTMLElement, CalloutBox>();
+  const timers = new Set<number>();
+  const exitTimeout = durationMs(tokens.calloutDuration) + 80;
+
+  const remember = (node: HTMLElement) => {
+    if (node.getAttribute(CALLOUT_MOTION_ATTR)) return;
+    if (node.closest(`[${CALLOUT_MOTION_ATTR}="exit"]`)) return;
+    node.setAttribute(CALLOUT_MOTION_ATTR, 'shown');
+    boxes.set(node, readCalloutBox(node));
+    resizeObserver.observe(node);
+  };
+
+  const playExit = (node: HTMLElement, box: CalloutBox) => {
+    node.style.transition = 'none';
+    expandCallout(node, box);
+    node.getBoundingClientRect();
+    window.requestAnimationFrame(() => {
+      if (!node.isConnected) return;
+      node.style.transition = '';
+      node.getBoundingClientRect();
+      collapseCallout(node);
+    });
+  };
+
+  const exit = (node: HTMLElement, parent: Node, next: Node | null) => {
+    if (!(parent instanceof HTMLElement) || !parent.isConnected) return;
+    const box = boxes.get(node) ?? readCalloutBox(node);
+    if (box.height < 1) return;
+
+    const standIn = node.cloneNode(true) as HTMLElement;
+    clearCalloutMotionStyles(standIn);
+    standIn.setAttribute(CALLOUT_MOTION_ATTR, 'exit');
+    standIn.setAttribute('aria-hidden', 'true');
+    standIn.inert = true;
+    parent.insertBefore(standIn, next);
+    playExit(standIn, box);
+    const remove = () => {
+      standIn.remove();
+    };
+    const timer = window.setTimeout(() => {
+      timers.delete(timer);
+      remove();
+    }, exitTimeout);
+    timers.add(timer);
+    standIn.addEventListener('transitionend', (event) => {
+      if (event.target === standIn && event.propertyName === 'height') remove();
+    });
+  };
+
+  const resizeObserver = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      const node = entry.target;
+      if (!(node instanceof HTMLElement)) continue;
+      if (node.getAttribute(CALLOUT_MOTION_ATTR) !== 'shown') continue;
+      boxes.set(node, readCalloutBox(node));
+    }
+  });
+
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      mutation.addedNodes.forEach((added) => {
+        if (!(added instanceof HTMLElement)) return;
+        calloutsIn(added).forEach(remember);
+      });
+      if (!mutation.target.isConnected) continue;
+      mutation.removedNodes.forEach((removed) => {
+        if (!(removed instanceof HTMLElement) || removed.isConnected) return;
+        const leaving = calloutsIn(removed);
+        for (let index = leaving.length - 1; index >= 0; index -= 1) {
+          exit(leaving[index], mutation.target, mutation.nextSibling);
+        }
+      });
+    }
+  });
+
+  document.querySelectorAll<HTMLElement>(CALLOUT_SELECTOR).forEach(remember);
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  return () => {
+    observer.disconnect();
+    resizeObserver.disconnect();
+    timers.forEach((timer) => window.clearTimeout(timer));
+    timers.clear();
+    document.querySelectorAll<HTMLElement>(`[${CALLOUT_MOTION_ATTR}="exit"]`).forEach((node) => {
+      node.remove();
+    });
+  };
+};
+
+const APP_PAGE_SELECTOR = '.kbnAppWrapper[aria-busy]';
+const PAGE_ENTER_ATTR = 'data-kbn-page-enter';
+
+const pageWrappersIn = (node: HTMLElement): HTMLElement[] => {
+  const found: HTMLElement[] = [];
+  if (node.matches(APP_PAGE_SELECTOR)) found.push(node);
+  node.querySelectorAll<HTMLElement>(APP_PAGE_SELECTOR).forEach((wrapper) => found.push(wrapper));
+  return found;
+};
+
+/**
+ * Fades the app in and lifts its content blocks once the next app has mounted.
+ * The header and navigation sit outside this wrapper, and in-app routes reuse it.
+ */
+const startPageMotion = (): (() => void) => {
+  const exitTimeout = durationMs(PAGE_ENTER_DURATION) + 80;
+  const played = new WeakSet<HTMLElement>();
+  const attributeObservers = new Map<HTMLElement, MutationObserver>();
+  const cleanups = new Map<HTMLElement, () => void>();
+
+  const release = (wrapper: HTMLElement) => {
+    attributeObservers.get(wrapper)?.disconnect();
+    attributeObservers.delete(wrapper);
+    cleanups.get(wrapper)?.();
+    cleanups.delete(wrapper);
+  };
+
+  const playEnter = (wrapper: HTMLElement) => {
+    if (played.has(wrapper)) return;
+    played.add(wrapper);
+    attributeObservers.get(wrapper)?.disconnect();
+    attributeObservers.delete(wrapper);
+    wrapper.setAttribute(PAGE_ENTER_ATTR, 'hold');
+
+    let timeout = 0;
+    let frame = 0;
+    const onEnd = (event: AnimationEvent) => {
+      if (event.target !== wrapper || event.animationName !== 'kbnPageEnter') return;
+      release(wrapper);
+    };
+    // Wait until the new page has painted. A heavy app blocks the main thread
+    // long enough to consume a short fade before the first frame.
+    const start = () => {
+      if (!wrapper.isConnected) return;
+      wrapper.setAttribute(PAGE_ENTER_ATTR, 'enter');
+      wrapper.addEventListener('animationend', onEnd);
+      timeout = window.setTimeout(() => release(wrapper), exitTimeout);
+    };
+    frame = window.requestAnimationFrame(() => {
+      frame = window.requestAnimationFrame(start);
+    });
+    cleanups.set(wrapper, () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timeout);
+      wrapper.removeEventListener('animationend', onEnd);
+      wrapper.removeAttribute(PAGE_ENTER_ATTR);
+    });
+  };
+
+  const arm = (wrapper: HTMLElement) => {
+    if (played.has(wrapper) || attributeObservers.has(wrapper)) return;
+    if (wrapper.getAttribute('aria-busy') === 'false') {
+      playEnter(wrapper);
+      return;
+    }
+
+    wrapper.setAttribute(PAGE_ENTER_ATTR, 'hold');
+    const observer = new MutationObserver(() => {
+      if (wrapper.getAttribute('aria-busy') === 'false') playEnter(wrapper);
+    });
+    attributeObservers.set(wrapper, observer);
+    observer.observe(wrapper, { attributes: true, attributeFilter: ['aria-busy'] });
+    if (wrapper.getAttribute('aria-busy') === 'false') playEnter(wrapper);
+  };
+
+  document.querySelectorAll<HTMLElement>(APP_PAGE_SELECTOR).forEach((wrapper) => {
+    if (wrapper.getAttribute('aria-busy') === 'false') {
+      played.add(wrapper);
+      return;
+    }
+    arm(wrapper);
+  });
+
+  const discovery = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      mutation.addedNodes.forEach((added) => {
+        if (!(added instanceof HTMLElement)) return;
+        pageWrappersIn(added).forEach(arm);
+      });
+      mutation.removedNodes.forEach((removed) => {
+        if (!(removed instanceof HTMLElement)) return;
+        pageWrappersIn(removed).forEach(release);
+      });
+    }
+  });
+  discovery.observe(document.body, { childList: true, subtree: true });
+
+  return () => {
+    discovery.disconnect();
+    attributeObservers.forEach((observer) => observer.disconnect());
+    attributeObservers.clear();
+    cleanups.forEach((cleanup) => cleanup());
+    cleanups.clear();
+    document.querySelectorAll<HTMLElement>(`[${PAGE_ENTER_ATTR}]`).forEach((node) => {
+      node.removeAttribute(PAGE_ENTER_ATTR);
+    });
   };
 };

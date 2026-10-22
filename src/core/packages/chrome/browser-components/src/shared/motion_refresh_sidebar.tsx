@@ -18,15 +18,12 @@
 
 import React from 'react';
 import {
+  EuiAccordion,
   EuiBasicTable,
   EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiTitle,
   useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -34,6 +31,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { SidebarBody, SidebarHeader } from '@kbn/core-chrome-sidebar-components';
 import {
+  PAGE_ENTER_DURATION,
   resolveMotionTokens,
   setMotionRefreshEnabled,
   setMotionRefreshItem,
@@ -210,6 +208,58 @@ const contentOffsetUseLabel = i18n.translate(
   }
 );
 
+const calloutTitle = i18n.translate('core.ui.chrome.headerGlobalNav.motionRefreshCalloutTitle', {
+  defaultMessage: 'Callout',
+});
+
+const calloutDescription = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshCalloutDescription',
+  {
+    defaultMessage:
+      'Callouts and banners appear with the rest of the page. Dismissing one fades it and collapses its height, so the page does not jump.',
+  }
+);
+
+const calloutSwitchLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshCalloutToggleSwitch',
+  {
+    defaultMessage: 'Enable callout motion',
+  }
+);
+
+const calloutHeightUseLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshCalloutHeightUseLabel',
+  {
+    defaultMessage: 'Dismiss',
+  }
+);
+
+const pageTitle = i18n.translate('core.ui.chrome.headerGlobalNav.motionRefreshPageTitle', {
+  defaultMessage: 'Page',
+});
+
+const pageDescription = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshPageDescription',
+  {
+    defaultMessage:
+      'Switching to another app fades the new page in and lifts its content a short distance. The header and navigation stay in place. Moving within an app stays instant.',
+  }
+);
+
+const pageSwitchLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshPageToggleSwitch',
+  {
+    defaultMessage: 'Enable page motion',
+  }
+);
+
+const pageRiseUseLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshPageRiseUseLabel',
+  {
+    defaultMessage: 'Rise',
+  }
+);
+
 interface TokenRow {
   id: string;
   token: string;
@@ -260,30 +310,23 @@ const MotionSection = ({
   rows: TokenRow[];
   caption: string;
 }) => (
-  <section aria-labelledby={`motionRefresh-${id}-title`}>
-    <EuiFlexGroup
-      alignItems="center"
-      justifyContent="spaceBetween"
-      gutterSize="s"
-      responsive={false}
-    >
-      <EuiFlexItem>
-        <EuiTitle size="xs">
-          <h3 id={`motionRefresh-${id}-title`}>{title}</h3>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiSwitch
-          label={switchLabel}
-          showLabel={false}
-          checked={checked}
-          compressed
-          onChange={(event) => setMotionRefreshItem(id, event.target.checked)}
-          data-test-subj={`motionRefresh-${id}-switch`}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer size="s" />
+  <EuiAccordion
+    id={`motionRefresh-${id}`}
+    buttonContent={title}
+    borders="horizontal"
+    paddingSize="m"
+    extraAction={
+      <EuiSwitch
+        label={switchLabel}
+        showLabel={false}
+        checked={checked}
+        compressed
+        onChange={(event) => setMotionRefreshItem(id, event.target.checked)}
+        data-test-subj={`motionRefresh-${id}-switch`}
+      />
+    }
+    data-test-subj={`motionRefresh-${id}`}
+  >
     <EuiText size="s">
       <p>{description}</p>
     </EuiText>
@@ -296,7 +339,7 @@ const MotionSection = ({
       tableLayout="auto"
       data-test-subj={`motionRefresh-${id}-tokens`}
     />
-  </section>
+  </EuiAccordion>
 );
 
 export interface MotionRefreshSidebarProps {
@@ -308,7 +351,8 @@ export const MotionRefreshSidebar = ({ onClose }: MotionRefreshSidebarProps) => 
   const { euiTheme, highContrastMode } = useEuiTheme();
   const settings = useMotionRefreshSettings();
   const tokens = resolveMotionTokens(euiTheme, Boolean(highContrastMode));
-  const allOn = settings.tooltip && settings.tabs && settings.accordion;
+  const allOn =
+    settings.tooltip && settings.tabs && settings.accordion && settings.callout && settings.page;
 
   const tooltipRows: TokenRow[] = [
     { id: 'delay', token: 'animation.extraFast', value: tokens.tooltipDelay, use: delayUseLabel },
@@ -357,6 +401,27 @@ export const MotionRefreshSidebar = ({ onClose }: MotionRefreshSidebarProps) => 
     { id: 'offset', token: 'size.s', value: tokens.drift, use: contentOffsetUseLabel },
   ];
 
+  const calloutRows: TokenRow[] = [
+    {
+      id: 'duration',
+      token: 'animation.normal',
+      value: tokens.calloutDuration,
+      use: calloutHeightUseLabel,
+    },
+    {
+      id: 'easing',
+      token: 'animation.resistance',
+      value: tokens.calloutEasing,
+      use: easingUseLabel,
+    },
+  ];
+
+  const pageRows: TokenRow[] = [
+    { id: 'duration', token: PAGE_ENTER_DURATION, value: PAGE_ENTER_DURATION, use: fadeUseLabel },
+    { id: 'easing', token: 'animation.resistance', value: tokens.pageEasing, use: easingUseLabel },
+    { id: 'rise', token: 'size.xs', value: tokens.pageRise, use: pageRiseUseLabel },
+  ];
+
   return (
     <>
       <SidebarHeader title={panelTitle} onClose={onClose} />
@@ -376,7 +441,7 @@ export const MotionRefreshSidebar = ({ onClose }: MotionRefreshSidebarProps) => 
           <EuiText size="xs" color="subdued">
             <p>{allMotionsDescription}</p>
           </EuiText>
-          <EuiHorizontalRule margin="l" />
+          <EuiSpacer size="m" />
           <MotionSection
             id="tooltip"
             title={tooltipTitle}
@@ -386,7 +451,6 @@ export const MotionRefreshSidebar = ({ onClose }: MotionRefreshSidebarProps) => 
             rows={tooltipRows}
             caption={tooltipTitle}
           />
-          <EuiHorizontalRule margin="l" />
           <MotionSection
             id="tabs"
             title={tabsTitle}
@@ -396,7 +460,6 @@ export const MotionRefreshSidebar = ({ onClose }: MotionRefreshSidebarProps) => 
             rows={tabRows}
             caption={tabsTitle}
           />
-          <EuiHorizontalRule margin="l" />
           <MotionSection
             id="accordion"
             title={accordionTitle}
@@ -405,6 +468,24 @@ export const MotionRefreshSidebar = ({ onClose }: MotionRefreshSidebarProps) => 
             checked={settings.accordion}
             rows={accordionRows}
             caption={accordionTitle}
+          />
+          <MotionSection
+            id="callout"
+            title={calloutTitle}
+            description={calloutDescription}
+            switchLabel={calloutSwitchLabel}
+            checked={settings.callout}
+            rows={calloutRows}
+            caption={calloutTitle}
+          />
+          <MotionSection
+            id="page"
+            title={pageTitle}
+            description={pageDescription}
+            switchLabel={pageSwitchLabel}
+            checked={settings.page}
+            rows={pageRows}
+            caption={pageTitle}
           />
         </div>
       </SidebarBody>

@@ -18,18 +18,22 @@
 
 import { useSyncExternalStore } from 'react';
 
-export type MotionRefreshId = 'tooltip' | 'tabs' | 'accordion';
+export type MotionRefreshId = 'tooltip' | 'tabs' | 'accordion' | 'callout' | 'page';
 
 export interface MotionRefreshSettings {
   tooltip: boolean;
   tabs: boolean;
   accordion: boolean;
+  callout: boolean;
+  page: boolean;
 }
 
 const DEFAULT_SETTINGS: MotionRefreshSettings = {
   tooltip: true,
   tabs: true,
   accordion: true,
+  callout: true,
+  page: true,
 };
 
 let settings: MotionRefreshSettings = { ...DEFAULT_SETTINGS };
@@ -39,7 +43,7 @@ const emit = () => {
   listeners.forEach((listener) => listener());
 };
 
-/** Reads the current motion refresh switches. All three start enabled. */
+/** Reads the current motion refresh switches. Every motion starts enabled. */
 export const getMotionRefreshSettings = (): MotionRefreshSettings => settings;
 
 /** Subscribes to motion refresh switch changes. */
@@ -59,10 +63,22 @@ export const setMotionRefreshItem = (id: MotionRefreshId, enabled: boolean): voi
 
 /** Turns every motion update on or off together. */
 export const setMotionRefreshEnabled = (enabled: boolean): void => {
-  if (settings.tooltip === enabled && settings.tabs === enabled && settings.accordion === enabled) {
+  if (
+    settings.tooltip === enabled &&
+    settings.tabs === enabled &&
+    settings.accordion === enabled &&
+    settings.callout === enabled &&
+    settings.page === enabled
+  ) {
     return;
   }
-  settings = { tooltip: enabled, tabs: enabled, accordion: enabled };
+  settings = {
+    tooltip: enabled,
+    tabs: enabled,
+    accordion: enabled,
+    callout: enabled,
+    page: enabled,
+  };
   emit();
 };
 

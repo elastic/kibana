@@ -34,6 +34,10 @@ export interface MotionTokens {
   indicatorThickness: string;
   accordionDuration: string;
   accordionEasing: string;
+  calloutDuration: string;
+  calloutEasing: string;
+  pageEasing: string;
+  pageRise: string;
 }
 
 /** Resolves the motion-study tokens from the active EUI theme. */
@@ -60,5 +64,9 @@ export const resolveMotionTokens = (
     indicatorThickness: highContrastMode ? `calc(${underline} * 2)` : underline,
     accordionDuration: normal,
     accordionEasing: resistance,
+    calloutDuration: normal,
+    calloutEasing: resistance,
+    pageEasing: resistance,
+    pageRise: cssToken(euiTheme.size.xs, '4px'),
   };
 };
