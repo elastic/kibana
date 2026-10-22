@@ -115,7 +115,7 @@ export class ToolsService {
     });
 
     const getRegistry: ToolsServiceStart['getRegistry'] = async ({ request }) => {
-      const space = getCurrentSpaceId({ request, spaces });
+      const space = getCurrentSpaceId({ request });
       const builtinProvider = await builtinProviderFn({ request, space });
       const persistedProvider = await persistedProviderFn({ request, space });
       const healthClient = createToolHealthClient({
@@ -144,7 +144,7 @@ export class ToolsService {
     };
 
     const getHealthClient: ToolsServiceStart['getHealthClient'] = ({ request }) => {
-      const space = getCurrentSpaceId({ request, spaces });
+      const space = getCurrentSpaceId({ request });
       return createToolHealthClient({
         space,
         logger,

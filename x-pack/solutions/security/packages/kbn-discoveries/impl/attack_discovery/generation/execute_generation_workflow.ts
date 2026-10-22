@@ -14,7 +14,6 @@ import type {
 } from '@kbn/core/server';
 import dateMath from '@kbn/datemath';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import moment from 'moment';
 import { uniq } from 'lodash/fp';
 import { ERROR_CATEGORIES, type ErrorCategory } from '@kbn/discoveries-schemas';
@@ -549,12 +548,7 @@ export async function executeGenerationWorkflow({
       throw new Error('Attack Discovery workflows are not enabled');
     }
 
-    const { spaces: spacesPlugin } = pluginsStart as { spaces?: SpacesPluginStart };
-
-    spaceId = getSpaceId({
-      request,
-      spaces: spacesPlugin?.spacesService,
-    });
+    spaceId = getSpaceId({ request });
 
     // Authoritative authorization guard (sole choke point for ALL four AD 2.0
     // surfaces: ad hoc, scheduled, agent-builder tool, and workflow run-step).

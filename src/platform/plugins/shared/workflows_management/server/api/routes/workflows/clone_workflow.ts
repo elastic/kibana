@@ -16,7 +16,7 @@ import { idParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerCloneWorkflowRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit } = deps;
+  const { router, api, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/workflow/{id}/clone',
@@ -44,7 +44,7 @@ export function registerCloneWorkflowRoute(deps: RouteDependencies) {
       withAvailabilityCheck(async (context, request, response) => {
         try {
           const { id } = request.params;
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const workflow = await api.getWorkflow(id, spaceId, request);
           if (!workflow) {
             return response.notFound();

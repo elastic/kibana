@@ -137,7 +137,7 @@ export class WorkflowsPlugin
           );
         }
 
-        const spaceId = spaces.getSpaceId(request);
+        const spaceId = request.spaceId;
         const savedObjectsClient = coreStart.savedObjects
           .getUnsafeInternalClient()
           .asScopedToNamespace(spaceId);

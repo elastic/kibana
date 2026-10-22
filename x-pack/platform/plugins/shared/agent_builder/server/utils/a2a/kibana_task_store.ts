@@ -71,7 +71,7 @@ export class KibanaTaskStore implements TaskStore {
   ) {}
 
   async load(taskId: string): Promise<Task | undefined> {
-    const { execution, spaces } = this.getInternalServices();
+    const { execution } = this.getInternalServices();
     const agentExecution = await execution.getExecution(taskId);
     if (!agentExecution) {
       return undefined;
@@ -79,7 +79,7 @@ export class KibanaTaskStore implements TaskStore {
 
     // The execution is fetched by raw document id with no space filter, so it must be checked
     // here — otherwise a caller in one space could poll a task scheduled in another space.
-    const currentSpaceId = getCurrentSpaceId({ request: this.kibanaRequest, spaces });
+    const currentSpaceId = getCurrentSpaceId({ request: this.kibanaRequest });
     if (agentExecution.spaceId !== currentSpaceId) {
       return undefined;
     }

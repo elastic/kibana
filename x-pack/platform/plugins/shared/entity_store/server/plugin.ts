@@ -207,10 +207,7 @@ export class EntityStorePlugin
       getMaintainerStatus: (namespace, ids) =>
         getMaintainerStatus({ taskManager: plugins.taskManager, namespace, logger, ids }),
       getEntityDefinitionsClient: (request) =>
-        createEntityDefinitionsClient(
-          entityDefinitionRegistry,
-          plugins.spaces.spacesService.getSpaceId(request)
-        ),
+        createEntityDefinitionsClient(entityDefinitionRegistry, request.spaceId),
       getEntityDefinitionsClientForSpace: (spaceId) =>
         createEntityDefinitionsClient(entityDefinitionRegistry, spaceId),
     };

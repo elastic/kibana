@@ -290,7 +290,7 @@ export class WorkflowsService {
 
     this.crudService = new WorkflowCrudService({
       authz: this.pluginsStart.security?.authz,
-      getSpaceId: (request) => this.plugins.spaces.spacesService.getSpaceId(request),
+      getSpaceId: (request) => request.spaceId,
       getServiceAccountBindings: () => this.workflowsExecutionEngine.serviceAccountBindings,
       logger: this.logger,
       workflowStorage: this.workflowStorage,

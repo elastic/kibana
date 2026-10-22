@@ -144,7 +144,7 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       }
     } catch (error) {
       if (error.output?.statusCode === 404) {
-        const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+        const spaceId = request.spaceId;
         return response.notFound({
           body: { message: `Kibana space '${spaceId}' does not exist` },
         });

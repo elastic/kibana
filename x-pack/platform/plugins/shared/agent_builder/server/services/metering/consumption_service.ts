@@ -90,9 +90,9 @@ class ConsumptionServiceImpl implements ConsumptionService {
   }
 
   private getScopedClient({ request }: { request: KibanaRequest }): ConsumptionClient {
-    const { elasticsearch, spaces } = this.getStartDeps();
+    const { elasticsearch } = this.getStartDeps();
     const esClient = elasticsearch.client.asScoped(request).asInternalUser;
-    const space = getCurrentSpaceId({ request, spaces });
+    const space = getCurrentSpaceId({ request });
     const { agent_id: agentId } = request.params as { agent_id: string };
     const {
       size,

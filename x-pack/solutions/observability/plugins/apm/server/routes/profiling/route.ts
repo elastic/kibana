@@ -151,10 +151,9 @@ const profilingStatusRoute = createApmServerRoute({
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ProfilingStatusResponse> => {
     const { context, plugins, logger } = resources;
-    const [core, profilingDataAccessStart, spacesStart] = await Promise.all([
+    const [core, profilingDataAccessStart] = await Promise.all([
       context.core,
       plugins.profilingDataAccess?.start(),
-      plugins.spaces?.start(),
     ]);
     if (profilingDataAccessStart) {
       const abortSignal = getRequestAbortedSignal(resources.request.events.aborted$);
@@ -163,7 +162,7 @@ const profilingStatusRoute = createApmServerRoute({
           profilingDataAccessStart,
           esClient: core.elasticsearch.client,
           soClient: core.savedObjects.client,
-          spaceId: spacesStart?.spacesService.getSpaceId(resources.request),
+          spaceId: resources.request.spaceId,
           abortSignal,
         });
 

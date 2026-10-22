@@ -175,7 +175,7 @@ export const registerGetPipelineDataRoute = (
           const { execution_id: executionId } = request.params;
           const { generation_workflow_run_id: clientGenerationWorkflowRunId } = request.query;
 
-          const { coreStart, pluginsStart } = await getStartServices();
+          const { coreStart } = await getStartServices();
           const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
           const eventLogIndex = await getEventLogIndex();
 
@@ -190,10 +190,7 @@ export const registerGetPipelineDataRoute = (
             });
           }
 
-          const spaceId = getSpaceId({
-            request,
-            spaces: pluginsStart.spaces?.spacesService,
-          });
+          const spaceId = getSpaceId({ request });
 
           // Step 1: Reconstruct WorkflowExecutionsTracking from event log
           const tracking = await getWorkflowExecutionsTracking({

@@ -6,7 +6,6 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { PluginStart } from '@kbn/core-di';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
@@ -29,7 +28,6 @@ import {
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 import { ALERTING_LOG_CODES, type AlertingV2LogCode } from '../errors/error_codes';
-import type { AlertingServerStartDependencies } from '../../types';
 import type { ResolvedSearchIds } from './build_execution_history_item';
 import {
   collectIdsFromEvents,
@@ -93,8 +91,6 @@ export class ActionPolicyExecutionHistoryClient {
     @inject(RulesClient) private readonly rulesClient: RulesClient,
     @inject(WorkflowsManagementApiToken)
     private readonly workflowsManagement: WorkflowsServerPluginSetup['management'],
-    @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
-    private readonly spaces: AlertingServerStartDependencies['spaces'],
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
     this.logger = loggerService.forSubsystem('executionHistory');
@@ -114,7 +110,7 @@ export class ActionPolicyExecutionHistoryClient {
   }: ListExecutionHistoryArgs): Promise<ListExecutionHistoryResult> {
     const effectiveFrom =
       from ?? new Date(Date.now() - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
-    const spaceId = this.spaces.spacesService.getSpaceId(request);
+    const spaceId = request.spaceId;
     const searchIsActive = search !== undefined && search.trim() !== '';
 
     const matchingSearchIds = await this.resolveSearchIds(search);

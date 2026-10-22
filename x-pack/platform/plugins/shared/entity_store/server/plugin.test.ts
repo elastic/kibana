@@ -148,12 +148,10 @@ describe('EntityStorePlugin entity definition registry', () => {
 
   it('derives the namespace from the request space', () => {
     const startContract = startPlugin();
-    const request = httpServerMock.createKibanaRequest();
-    jest.mocked(startPlugins.spaces.spacesService.getSpaceId).mockReturnValue(asSpaceId('space-a'));
+    const request = httpServerMock.createKibanaRequest({ spaceId: asSpaceId('space-a') });
 
     const client = startContract.getEntityDefinitionsClient(request);
 
     expect(client.namespace).toBe('space-a');
-    expect(startPlugins.spaces.spacesService.getSpaceId).toHaveBeenCalledWith(request);
   });
 });

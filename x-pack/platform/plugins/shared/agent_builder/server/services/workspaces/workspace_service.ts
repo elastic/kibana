@@ -42,7 +42,7 @@ class WorkspaceServiceImpl implements WorkspaceService {
   constructor(private readonly deps: WorkspaceServiceDeps) {}
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<ScopedWorkspaceClient> {
-    const { logger, elasticsearch, spaces, conversations } = this.deps;
+    const { logger, elasticsearch, conversations } = this.deps;
 
     const conversationClient = await conversations.getScopedClient({ request });
     const workspaceClient = new WorkspaceClient({
@@ -50,7 +50,7 @@ class WorkspaceServiceImpl implements WorkspaceService {
         logger,
         esClient: elasticsearch.client.asScoped(request).asInternalUser,
       }),
-      space: getCurrentSpaceId({ request, spaces }),
+      space: getCurrentSpaceId({ request }),
     });
 
     return {

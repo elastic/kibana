@@ -74,7 +74,7 @@ export const registerCreateScheduleRoute = (
         try {
           const { pluginsStart } = await getStartServices();
 
-          const spaceId = getSpaceId({ request, spaces: pluginsStart.spaces?.spacesService });
+          const spaceId = getSpaceId({ request });
           // Reject a client-supplied alerts index that targets another space or
           // a cross-space wildcard so the persisted schedule is space-correct at
           // rest (a schedule's space never changes).

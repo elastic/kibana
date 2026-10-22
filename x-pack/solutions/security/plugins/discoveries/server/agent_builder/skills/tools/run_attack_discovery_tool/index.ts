@@ -208,10 +208,7 @@ export const getRunAttackDiscoveryTool = ({
       // Resolve the space the same way `executeGenerationWorkflow` does for its
       // authorization guard, so the alerts index is bounded to the caller's own
       // space rather than hardcoded to `-default`.
-      const spaceId = getSpaceId({
-        request: context.request,
-        spaces: pluginsStart.spaces?.spacesService,
-      });
+      const spaceId = getSpaceId({ request: context.request });
 
       const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(context.request);
 

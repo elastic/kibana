@@ -20,7 +20,7 @@ import {
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerMgetWorkflowsRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit } = deps;
+  const { router, api, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/mget',
@@ -70,7 +70,7 @@ export function registerMgetWorkflowsRoute(deps: RouteDependencies) {
           if (!hasWorkflowReadPrivilege(request)) {
             return response.forbidden();
           }
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const { ids, source } = request.body;
           const workflowsForAuthorization = await api.getWorkflowsByIds(ids, spaceId, request);
           workflowsForAuthorization.forEach((workflow) =>

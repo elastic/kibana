@@ -128,7 +128,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     } = args;
     const executionId = providedExecutionId ?? uuidv4();
     const agentId = params.agentId ?? agentBuilderDefaultAgentId;
-    const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
+    const spaceId = getCurrentSpaceId({ request });
     const interactivity = normalizeInteractive(interactive, mode);
     const executionClient = this.createExecutionClient();
 
@@ -355,7 +355,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       params,
       request,
       conversationClient,
-      spaceId: getCurrentSpaceId({ request, spaces: this.deps.spaces }),
+      spaceId: getCurrentSpaceId({ request }),
     });
 
     const created = conversation.operation === 'CREATE';
@@ -692,7 +692,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     request: KibanaRequest,
     options?: FindExecutionsOptions
   ): Promise<AgentExecution[]> {
-    const defaultSpaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
+    const defaultSpaceId = getCurrentSpaceId({ request });
     const executionClient = this.createExecutionClient();
     return executionClient.find({
       ...options,

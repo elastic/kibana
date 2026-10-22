@@ -17,7 +17,6 @@ import type {
   SavedObject,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { InvalidatePendingApiKey } from '@kbn/alerting-plugin/server/types';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import type {
@@ -422,7 +421,7 @@ export function defineRoutes(
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> => {
       try {
-        const [, { actions, security, spaces }] = await core.getStartServices();
+        const [, { actions, security }] = await core.getStartServices();
         const actionsClient = await actions.getActionsClientWithRequest(req);
 
         const createAPIKeyResult =
@@ -435,7 +434,7 @@ export function defineRoutes(
         await actionsClient.bulkEnqueueExecution([
           {
             id: req.params.id,
-            spaceId: spaces ? spaces.spacesService.getSpaceId(req) : DEFAULT_SPACE_ID,
+            spaceId: req.spaceId,
             executionId: uuidv4(),
             apiKey: createAPIKeyResult
               ? Buffer.from(`${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`).toString(
@@ -643,7 +642,7 @@ export function defineRoutes(
       const { id } = req.params;
       const [, { encryptedSavedObjects, spaces }] = await core.getStartServices();
 
-      const spaceId = spaces ? spaces.spacesService.getSpaceId(req) : 'default';
+      const spaceId = req.spaceId;
 
       let namespace: string | undefined;
       if (spaces && spaceId) {

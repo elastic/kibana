@@ -519,12 +519,11 @@ export class ActionsPlugin
       http: core.http,
       getStartServices: core.getStartServices,
       logger: this.logger,
-      spaces: this.spaces,
       inMemoryConnectors: this.inMemoryConnectors,
       getConnectorEventEmitter: () => this.connectorEventEmitter,
     });
     defineRoutes({
-      getSpaceId: (request) => this.spaces?.spacesService.getSpaceId(request) ?? 'default',
+      getSpaceId: (request) => request.spaceId,
       router,
       licenseState: this.licenseState,
       actionsConfigUtils,

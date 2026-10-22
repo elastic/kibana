@@ -88,7 +88,7 @@ export const runAfterExecutionWorkflows = async ({
     return;
   }
 
-  const { spaces, uiSettings, savedObjects } = getInternalServices();
+  const { uiSettings, savedObjects } = getInternalServices();
   const soClient = savedObjects.getScopedClient(context.request);
   const uiSettingsClient = uiSettings.asScopedToClient(soClient);
   const isEnabled = (await uiSettingsClient.get<boolean>(WORKFLOWS_UI_SETTING_ID)) ?? true;
@@ -97,7 +97,7 @@ export const runAfterExecutionWorkflows = async ({
     return;
   }
 
-  const spaceId = getCurrentSpaceId({ request: context.request, spaces });
+  const spaceId = getCurrentSpaceId({ request: context.request });
   const { round } = context;
 
   const toolCallSteps = round.steps.filter(isToolCallStep);

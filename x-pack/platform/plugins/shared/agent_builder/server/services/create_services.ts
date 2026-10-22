@@ -219,7 +219,6 @@ export class ServiceManager {
       logger: logger.get('conversations'),
       security,
       elasticsearch,
-      spaces,
       agents,
       eventBus: conversationEventBus,
       conversationEvents,
