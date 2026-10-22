@@ -137,25 +137,24 @@ const PINNED_BAR_SELECTORS = [APP_HEADER_SELECTOR, TIMELINE_BAR_SELECTOR];
 
 /**
  * Height of the bars pinned over the page while it scrolls, which Kibana's content height doesn't
- * leave out. Measured once the element given the ref mounts, as the header renders only after the
- * page loads.
+ * leave out. Found once the element given the ref mounts, as the header renders only after the
+ * page loads, and again on leaving full screen, which unmounts the header. Observed rather than
+ * measured once: the timeline bar collapses in full screen and regrows only after it.
  */
-const usePinnedBarsHeight = (): [number, (element: HTMLElement | null) => void] => {
+const usePinnedBarsHeight = (
+  isFullScreen: boolean
+): [number, (element: HTMLElement | null) => void] => {
   const [element, setElement] = useState<HTMLElement | null>(null);
   const [height, setHeight] = useState(0);
   useEffect(() => {
-    if (!element) return;
-    const measure = () =>
-      setHeight(
-        sumBy(
-          PINNED_BAR_SELECTORS,
-          (selector) => document.querySelector(selector)?.getBoundingClientRect().height ?? 0
-        )
-      );
-    measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, [element]);
+    if (!element || isFullScreen) return;
+    const bars = PINNED_BAR_SELECTORS.flatMap((selector) => document.querySelector(selector) ?? []);
+    const observer = new ResizeObserver(() =>
+      setHeight(sumBy(bars, (bar) => bar.getBoundingClientRect().height))
+    );
+    bars.forEach((bar) => observer.observe(bar));
+    return () => observer.disconnect();
+  }, [element, isFullScreen]);
   return [height, setElement];
 };
 
@@ -387,7 +386,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   const scopeId = getEntityAnalyticsNewHomeScopeId(timeRange);
 
   const [isGridFullScreen, setIsGridFullScreen] = useState(false);
-  const [pinnedBarsHeight, gridAreaRef] = usePinnedBarsHeight();
+  const [pinnedBarsHeight, gridAreaRef] = usePinnedBarsHeight(isGridFullScreen);
 
   const activeColumns = rowsMode === 'individual' ? INDIVIDUAL_ROWS_COLUMNS : RESOLVED_ROWS_COLUMNS;
 
