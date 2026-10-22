@@ -281,7 +281,7 @@ export class ManagementPlugin
     }
 
     this.visibleInSubscription = merge(...visibleInUpdates$).subscribe(({ app, visibleIn }) => {
-      if (visibleIn) {
+      if (visibleIn !== undefined) {
         this.runtimeVisibleIn.set(app, visibleIn);
       } else {
         this.runtimeVisibleIn.delete(app);

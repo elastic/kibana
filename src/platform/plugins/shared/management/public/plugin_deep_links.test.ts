@@ -149,9 +149,23 @@ describe('ManagementPlugin appUpdater deep link visibleIn', () => {
 
       failing$.error(new Error('boom'));
       expect(getApp('test-failing')?.visibleIn).toEqual(['globalSearch']);
+      expect(getApp('test-healthy')?.visibleIn).toEqual(['projectSideNav']);
 
       healthy$.next(['globalSearch', 'projectSideNav']);
       expect(getApp('test-healthy')?.visibleIn).toEqual(['globalSearch', 'projectSideNav']);
+    });
+
+    it('treats an empty visibleIn$ emission as hidden everywhere, not as a fallback', () => {
+      setup.sections.section.kibana.registerApp({
+        id: 'test-empty',
+        title: 'Empty',
+        mount: jest.fn(),
+        visibleIn: ['globalSearch'],
+        visibleIn$: new BehaviorSubject<AppDeepLinkLocations[]>([]),
+      });
+
+      start();
+      expect(getApp('test-empty')?.visibleIn).toEqual([]);
     });
 
     it('keeps an app hidden by hideFromGlobalSearch once visibleIn$ emits', () => {
