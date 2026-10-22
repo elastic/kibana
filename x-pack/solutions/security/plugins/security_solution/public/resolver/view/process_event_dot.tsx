@@ -395,6 +395,7 @@ const UnstyledProcessEventDot = React.memo(
         id={generatedNodeHTMLID}
         tabIndex={-1}
       >
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
         <svg
           viewBox="-15 -15 90 30"
           preserveAspectRatio="xMidYMid meet"
