@@ -76,6 +76,7 @@ jest.mock('../../../hooks/use_send_user_message', () => ({
 jest.mock('../../../hooks/use_toasts', () => ({
   useToasts: jest.fn(),
 }));
+const mockOnEditorRender = jest.fn();
 const mockHandlePasteImage = jest.fn();
 jest.mock('./use_image_upload', () => {
   const actual = jest.requireActual('./use_image_upload');
@@ -103,6 +104,7 @@ jest.mock('./message_editor', () => ({
   useMessageEditor: jest.fn(),
   MessageEditor: (props: typeof mockMessageEditorProps) => {
     mockMessageEditorProps = props;
+    mockOnEditorRender();
     return (
       <button data-test-subj="mock-message-editor-submit" type="button" onClick={props.onSubmit}>
         submit
@@ -254,6 +256,13 @@ const editorController = {
 
 const renderInput = (ui: React.ReactElement) => render(ui, { wrapper: EuiProvider });
 
+/**
+ * `ConversationInput` is memoized, so `rerender` with the same props is skipped. A new callback
+ * makes it render again and read the changed hook mocks, as a real hook update would.
+ */
+const rerenderInput = (rerender: (ui: React.ReactElement) => void) =>
+  rerender(<ConversationInput onEditorFocus={jest.fn()} />);
+
 // ConversationInput replaces this bar with a fake selector. These cases render the real one.
 const { InputActions } = jest.requireActual('./input_actions') as typeof import('./input_actions');
 
@@ -352,6 +361,26 @@ describe('ConversationInput', () => {
     expect(submitMessage).not.toHaveBeenCalled();
   });
 
+  describe('rendering cost', () => {
+    it('does not render again when its parent renders with the same props', () => {
+      const onEditorFocus = jest.fn();
+      const { rerender } = renderInput(<ConversationInput onEditorFocus={onEditorFocus} />);
+      expect(mockOnEditorRender).toHaveBeenCalledTimes(1);
+
+      rerender(<ConversationInput onEditorFocus={onEditorFocus} />);
+
+      expect(mockOnEditorRender).toHaveBeenCalledTimes(1);
+    });
+
+    it('renders again when a prop changes', () => {
+      const { rerender } = renderInput(<ConversationInput onEditorFocus={jest.fn()} />);
+
+      rerender(<ConversationInput onEditorFocus={jest.fn()} />);
+
+      expect(mockOnEditorRender).toHaveBeenCalledTimes(2);
+    });
+  });
+
   describe('message length limit', () => {
     it('does not show a warning for a message within the limit', () => {
       renderInput(<ConversationInput />);
@@ -419,7 +448,7 @@ describe('ConversationInput', () => {
 
       selectTalkToUsers();
       mockedUseIsSharedConversation.mockReturnValue(false);
-      rerender(<ConversationInput />);
+      rerenderInput(rerender);
 
       expect(screen.getByTestId('agentBuilderConversationInputPostToTeamHeader')).toHaveAttribute(
         'aria-hidden',
@@ -437,7 +466,7 @@ describe('ConversationInput', () => {
 
       selectTalkToUsers();
       mockedUseConversationId.mockReturnValue('conv-2');
-      rerender(<ConversationInput />);
+      rerenderInput(rerender);
 
       expect(screen.getByTestId('mock-trigger-mode-selector')).toHaveValue('always');
     });
@@ -447,9 +476,9 @@ describe('ConversationInput', () => {
 
       selectTalkToUsers();
       mockedUseIsSharedConversation.mockReturnValue(false);
-      rerender(<ConversationInput />);
+      rerenderInput(rerender);
       mockedUseIsSharedConversation.mockReturnValue(true);
-      rerender(<ConversationInput />);
+      rerenderInput(rerender);
 
       expect(screen.getByTestId('mock-trigger-mode-selector')).toHaveValue('always');
     });
@@ -955,7 +984,7 @@ describe('ConversationInput', () => {
       editorController.clear.mockClear();
 
       mockedUseConversationId.mockReturnValue('conv-2');
-      rerender(<ConversationInput />);
+      rerenderInput(rerender);
 
       expect(editorController.clear).toHaveBeenCalledTimes(1);
     });

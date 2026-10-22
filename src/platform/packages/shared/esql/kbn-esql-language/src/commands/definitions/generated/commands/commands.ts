@@ -46,6 +46,10 @@ export const commandsMetadata: Record<string, ElasticsearchCommandDefinition> = 
     type: 'command',
     name: 'explain',
   },
+  fillnull: {
+    type: 'command',
+    name: 'fillnull',
+  },
   fork: {
     type: 'command',
     name: 'fork',
@@ -772,6 +776,7 @@ export enum EsqlCommandNames {
   ENRICH = 'enrich',
   EVAL = 'eval',
   EXPLAIN = 'explain',
+  FILLNULL = 'fillnull',
   FORK = 'fork',
   GROK = 'grok',
   HIGHLIGHT = 'highlight',

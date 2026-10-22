@@ -7,93 +7,147 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { DOCUMENT_EXTRACTION_ENDPOINT_ID } from './constants';
+import {
+  DOCUMENT_EXTRACTION_AVAILABILITY_INTERVAL_MS,
+  DOCUMENT_EXTRACTION_AVAILABILITY_RETRY_MS,
+  DOCUMENT_EXTRACTION_ENDPOINT_ID,
+} from './constants';
 import { createDocumentExtractionAvailability } from './extraction_availability';
 
 const createEsClient = (get: jest.Mock) =>
   ({ inference: { get } } as unknown as ElasticsearchClient);
 
+interface GetEndpointsResponse {
+  endpoints: Array<{ inference_id: string }>;
+}
+
+const found = async (): Promise<GetEndpointsResponse> => ({
+  endpoints: [{ inference_id: DOCUMENT_EXTRACTION_ENDPOINT_ID }],
+});
+const notFound = async (): Promise<GetEndpointsResponse> => {
+  throw Object.assign(new Error('not found'), { statusCode: 404 });
+};
+const serverError = async (): Promise<GetEndpointsResponse> => {
+  throw Object.assign(new Error('server error'), { statusCode: 500 });
+};
+
 describe('document extraction availability', () => {
   const logger = loggingSystemMock.createLogger();
-  const createAvailability = () => createDocumentExtractionAvailability({ logger });
+  let availability: ReturnType<typeof createDocumentExtractionAvailability>;
+
+  const startWith = async (get: jest.Mock) => {
+    availability.start(createEsClient(get));
+    await jest.advanceTimersByTimeAsync(0);
+  };
 
   beforeEach(() => {
+    jest.useFakeTimers();
     jest.clearAllMocks();
+    availability = createDocumentExtractionAvailability({ logger });
+  });
+
+  afterEach(() => {
+    availability.stop();
+    jest.useRealTimers();
   });
 
   it('is not available before the check runs', () => {
-    const { isAvailable } = createAvailability();
-    expect(isAvailable()).toBe(false);
+    expect(availability.isAvailable()).toBe(false);
   });
 
   it('is available when the endpoint is found', async () => {
-    const { check, isAvailable } = createAvailability();
-    const get = jest.fn(async () => ({
-      endpoints: [{ inference_id: DOCUMENT_EXTRACTION_ENDPOINT_ID }],
-    }));
+    const get = jest.fn(found);
 
-    await check(createEsClient(get));
+    await startWith(get);
 
     expect(get).toHaveBeenCalledWith({ inference_id: DOCUMENT_EXTRACTION_ENDPOINT_ID });
-    expect(isAvailable()).toBe(true);
+    expect(availability.isAvailable()).toBe(true);
   });
 
   it('is not available when ES returns no endpoints', async () => {
-    const { check, isAvailable } = createAvailability();
-    const get = jest.fn(async () => ({ endpoints: [] }));
+    await startWith(jest.fn(async () => ({ endpoints: [] })));
 
-    await check(createEsClient(get));
-
-    expect(isAvailable()).toBe(false);
+    expect(availability.isAvailable()).toBe(false);
   });
 
   it('is not available when the endpoint is not found (404)', async () => {
-    const { check, isAvailable } = createAvailability();
-    const get = jest.fn(async () => {
-      throw Object.assign(new Error('not found'), { statusCode: 404 });
-    });
+    await startWith(jest.fn(notFound));
 
-    await check(createEsClient(get));
-
-    expect(isAvailable()).toBe(false);
+    expect(availability.isAvailable()).toBe(false);
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('is not available and logs a warning for any other error', async () => {
-    const { check, isAvailable } = createAvailability();
-    const get = jest.fn(async () => {
-      throw Object.assign(new Error('server error'), { statusCode: 500 });
-    });
+  it('checks again every interval and picks up an endpoint added later', async () => {
+    const get = jest.fn(notFound);
+    await startWith(get);
+    expect(availability.isAvailable()).toBe(false);
 
-    await check(createEsClient(get));
+    get.mockImplementation(found);
+    await jest.advanceTimersByTimeAsync(DOCUMENT_EXTRACTION_AVAILABILITY_INTERVAL_MS);
 
-    expect(isAvailable()).toBe(false);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('server error'));
+    expect(get).toHaveBeenCalledTimes(2);
+    expect(availability.isAvailable()).toBe(true);
   });
 
-  it('checks only once', async () => {
-    const { check } = createAvailability();
-    const get = jest.fn(async () => ({
-      endpoints: [{ inference_id: DOCUMENT_EXTRACTION_ENDPOINT_ID }],
-    }));
-    const esClient = createEsClient(get);
+  it('picks up an endpoint that was removed', async () => {
+    const get = jest.fn(found);
+    await startWith(get);
+    expect(availability.isAvailable()).toBe(true);
 
-    await Promise.all([check(esClient), check(esClient)]);
-    await check(esClient);
+    get.mockImplementation(notFound);
+    await jest.advanceTimersByTimeAsync(DOCUMENT_EXTRACTION_AVAILABILITY_INTERVAL_MS);
+
+    expect(availability.isAvailable()).toBe(false);
+  });
+
+  it('logs a warning and retries sooner when the check fails', async () => {
+    const get = jest.fn(serverError);
+    await startWith(get);
+
+    expect(availability.isAvailable()).toBe(false);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('server error'));
+
+    get.mockImplementation(found);
+    await jest.advanceTimersByTimeAsync(DOCUMENT_EXTRACTION_AVAILABILITY_RETRY_MS);
+
+    expect(get).toHaveBeenCalledTimes(2);
+    expect(availability.isAvailable()).toBe(true);
+  });
+
+  it('keeps the last known state when a later check fails', async () => {
+    const get = jest.fn(found);
+    await startWith(get);
+
+    get.mockImplementation(serverError);
+    await jest.advanceTimersByTimeAsync(DOCUMENT_EXTRACTION_AVAILABILITY_INTERVAL_MS);
+
+    expect(logger.warn).toHaveBeenCalled();
+    expect(availability.isAvailable()).toBe(true);
+  });
+
+  it('logs the state only when it changes', async () => {
+    await startWith(jest.fn(found));
+    await jest.advanceTimersByTimeAsync(DOCUMENT_EXTRACTION_AVAILABILITY_INTERVAL_MS);
+
+    expect(logger.info).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops checking after stop', async () => {
+    const get = jest.fn(found);
+    await startWith(get);
+
+    availability.stop();
+    await jest.advanceTimersByTimeAsync(DOCUMENT_EXTRACTION_AVAILABILITY_INTERVAL_MS * 2);
 
     expect(get).toHaveBeenCalledTimes(1);
   });
 
-  it('keeps the state separate for each instance', async () => {
-    const first = createAvailability();
-    const second = createAvailability();
-    const get = jest.fn(async () => ({
-      endpoints: [{ inference_id: DOCUMENT_EXTRACTION_ENDPOINT_ID }],
-    }));
+  it('starts only once', async () => {
+    const get = jest.fn(found);
 
-    await first.check(createEsClient(get));
+    availability.start(createEsClient(get));
+    await startWith(get);
 
-    expect(first.isAvailable()).toBe(true);
-    expect(second.isAvailable()).toBe(false);
+    expect(get).toHaveBeenCalledTimes(1);
   });
 });

@@ -59,9 +59,7 @@ const downloadBinary = async (file: BinaryFile, maxBytes: number): Promise<Buffe
 
 const getRequestAbortedSignal = (request: KibanaRequest) => {
   const controller = new AbortController();
-  const subscription = request.events.aborted$.subscribe({
-    complete: () => controller.abort(),
-  });
+  const subscription = request.events.aborted$.subscribe(() => controller.abort());
   return { signal: controller.signal, stopListening: () => subscription.unsubscribe() };
 };
 

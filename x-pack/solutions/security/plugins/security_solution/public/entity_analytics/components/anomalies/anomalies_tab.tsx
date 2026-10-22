@@ -27,6 +27,7 @@ import type { SeverityOption } from '@kbn/ml-plugin/public';
 import type { EntityType } from '@kbn/entity-store/common';
 import type { DateRangePickerSettings, TimeRangeBoundsOption } from '@kbn/date-range-picker/types';
 import { DateRangePicker, type DateRangePickerOnChangeProps } from '@kbn/date-range-picker';
+import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import type { AnomalyScoreRange } from '../../../../common/api/entity_analytics';
 import { parseDateWithDefault } from '../../../common/utils/default_date_settings';
 import { useKibana } from '../../../common/lib/kibana';
@@ -91,9 +92,15 @@ interface AnomaliesTabProps {
   entityId: string;
   entityName: string;
   entityType: EntityType;
+  mode?: EntityViewMode;
 }
 
-export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityName, entityType }) => {
+export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({
+  entityId,
+  entityName,
+  entityType,
+  mode,
+}) => {
   const [datePickerValue, setDatePickerValue] = useState<string>(DEFAULT_DATE_PICKER_VALUE);
   const [start, setStart] = useState<string>(DEFAULT_TIME_RANGE.from);
   const [end, setEnd] = useState<string>(DEFAULT_TIME_RANGE.to);
@@ -194,6 +201,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityName
   const anomalyOverview = useAnomalyOverview({
     entityId,
     entityType,
+    mode,
     from: timeRangeMs.from,
     to: timeRangeMs.to,
     threatTactics: selectedTactic ? [selectedTactic] : undefined,
@@ -214,6 +222,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityName
   const anomalySummary = useAnomalySummary({
     entityId,
     entityType,
+    mode,
     body: {
       from: timeRangeMs.from,
       to: timeRangeMs.to,

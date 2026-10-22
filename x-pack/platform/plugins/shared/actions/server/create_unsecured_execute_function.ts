@@ -6,6 +6,7 @@
  */
 
 import type { ISavedObjectsRepository, SavedObjectsBulkResponse } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type {
@@ -149,7 +150,7 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
       return {
         taskType: `actions:${connectorTypeIds[actionId]}`,
         params: {
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           actionTaskParamsId: so.id,
         },
         state: {},

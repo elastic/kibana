@@ -20,7 +20,9 @@ import {
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
   ESCALATION_TEMPLATE_ID,
   INVESTIGATION_TEMPLATE_ID,
+  MAX_ESCALATIONS_PAGE_SIZE,
 } from '../../../common/escalations/constants';
+import { MAX_ESCALATIONS_SCAN } from '../constants';
 
 const logger = loggingSystemMock.createLogger();
 const request = httpServerMock.createKibanaRequest();
@@ -656,6 +658,133 @@ describe('EscalationsService.list', () => {
     });
   });
 
+  describe('entity filter', () => {
+    const withLinked = (id: string, linked: string[]) => ({
+      ...MOCK_SUMMARY,
+      id,
+      metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: linked },
+    });
+
+    it('applies the text search to every scanned page', async () => {
+      const { service, impactClient, client } = makeService({
+        search: jest.fn().mockResolvedValue({ results: [withLinked('e1', ['inv-1'])], total: 1 }),
+      });
+      impactClient.getEntitiesByConversationId.mockResolvedValue(
+        new Map([['inv-1', [{ id: 'host-1' }]]])
+      );
+
+      await service.list(request, {
+        page: 1,
+        per_page: 50,
+        status: 'open',
+        entity: 'host-1',
+        search: 'ransomware',
+      });
+
+      expect(client.search).toHaveBeenCalledWith(expect.objectContaining({ query: 'ransomware' }));
+    });
+
+    it('lists only escalations impacting the entity and counts only those', async () => {
+      const { service, impactClient, client } = makeService({
+        search: jest.fn().mockResolvedValue({
+          results: [
+            withLinked('e1', ['inv-1']),
+            withLinked('e2', ['inv-2']),
+            withLinked('e3', ['inv-3']),
+          ],
+          total: 3,
+        }),
+      });
+      impactClient.getEntitiesByConversationId.mockResolvedValue(
+        new Map([
+          ['inv-1', [{ id: 'host-1' }]],
+          ['inv-2', [{ id: 'user-1' }]],
+          ['inv-3', [{ id: 'host-1' }]],
+        ])
+      );
+
+      const result = await service.list(request, {
+        page: 2,
+        per_page: 1,
+        status: 'open',
+        entity: 'host-1',
+      });
+
+      expect(result.pagination).toEqual({ total: 2, page: 2, per_page: 1 });
+      expect(result.results.map(({ id }) => id)).toEqual(['e3']);
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({ page: 1, perPage: MAX_ESCALATIONS_PAGE_SIZE })
+      );
+    });
+
+    it('stops scanning at the scan cap and says so', async () => {
+      const { service, client } = makeService({
+        search: jest.fn(async ({ page }: { page: number }) => ({
+          results: Array.from({ length: MAX_ESCALATIONS_PAGE_SIZE }, (_, i) => ({
+            ...MOCK_SUMMARY,
+            id: `e${page}-${i}`,
+          })),
+          total: 100_000,
+        })),
+      });
+
+      const scanned = await service.scanWithEntityIds(request, { status: 'open' });
+
+      expect(scanned).toHaveLength(MAX_ESCALATIONS_SCAN);
+      expect(client.search).toHaveBeenCalledTimes(MAX_ESCALATIONS_SCAN / MAX_ESCALATIONS_PAGE_SIZE);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('truncated'));
+    });
+
+    it('counts an escalation once when paging shifts it onto two pages', async () => {
+      const { service } = makeService({
+        search: jest.fn(async ({ page }: { page: number }) => ({
+          results: [page === 1 ? MOCK_SUMMARY : { ...MOCK_SUMMARY }],
+          total: 2 * MAX_ESCALATIONS_PAGE_SIZE,
+        })),
+      });
+
+      expect(await service.scanWithEntityIds(request, { status: 'open' })).toHaveLength(1);
+    });
+
+    it('hydrates the whole scan with one impact read', async () => {
+      const { service, impactClient } = makeService({
+        search: jest.fn(async ({ page }: { page: number }) => ({
+          results: [
+            {
+              ...MOCK_SUMMARY,
+              id: `e${page}`,
+              metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: [`inv-${page}`] },
+            },
+          ],
+          total: 3 * MAX_ESCALATIONS_PAGE_SIZE,
+        })),
+      });
+
+      await service.scanWithEntityIds(request, { status: 'open' });
+
+      expect(impactClient.getEntitiesByConversationId).toHaveBeenCalledTimes(1);
+    });
+
+    it('fails when the impact read fails, rather than filtering on partial data', async () => {
+      const { service, impactClient } = makeService({
+        search: jest.fn().mockResolvedValue({
+          results: [
+            {
+              ...MOCK_SUMMARY,
+              metadata: { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: ['inv-1'] },
+            },
+          ],
+          total: 1,
+        }),
+      });
+      impactClient.getEntitiesByConversationId.mockRejectedValue(new Error('impact down'));
+
+      await expect(
+        service.list(request, { page: 1, per_page: 50, status: 'open', entity: 'host-1' })
+      ).rejects.toThrow('impact down');
+    });
+  });
+
   describe('entity_ids', () => {
     const withLinked = (id: string, linked: string[]) => ({
       ...MOCK_SUMMARY,
@@ -675,11 +804,11 @@ describe('EscalationsService.list', () => {
           [
             'inv-1',
             [
-              { id: 'host-1', type: 'host' },
-              { id: 'user-1', type: 'user' },
+              { id: 'host-1', type: 'host', name: 'web-01' },
+              { id: 'user-1', type: 'user', name: 'it.admin' },
             ],
           ],
-          ['inv-2', [{ id: 'host-1', type: 'host' }, { id: 'svc-1' }]],
+          ['inv-2', [{ id: 'host-1', type: 'host', name: 'later' }, { id: 'svc-1' }]],
         ])
       );
 
@@ -694,6 +823,7 @@ describe('EscalationsService.list', () => {
       ]);
       expect(result.results[0].entity_ids).toEqual(['host-1', 'user-1', 'svc-1']);
       expect(result.results[0].entity_types).toEqual({ 'host-1': 'host', 'user-1': 'user' });
+      expect(result.results[0].entity_names).toEqual({ 'host-1': 'web-01', 'user-1': 'it.admin' });
       expect(result.results[1]).not.toHaveProperty('entity_ids');
     });
 

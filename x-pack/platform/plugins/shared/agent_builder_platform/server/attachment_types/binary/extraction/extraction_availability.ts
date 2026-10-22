@@ -5,54 +5,80 @@
  * 2.0.
  */
 
+import { type Subscription, defer, delay, repeat, retry, tap, timer } from 'rxjs';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { DOCUMENT_EXTRACTION_ENDPOINT_ID } from './constants';
+import {
+  DOCUMENT_EXTRACTION_AVAILABILITY_INTERVAL_MS,
+  DOCUMENT_EXTRACTION_AVAILABILITY_RETRY_MS,
+  DOCUMENT_EXTRACTION_ENDPOINT_ID,
+} from './constants';
 
 export interface DocumentExtractionAvailability {
   isAvailable: () => boolean;
-  check: (esClient: ElasticsearchClient) => Promise<void>;
+  start: (esClient: ElasticsearchClient) => void;
+  stop: () => void;
 }
 
 const getStatusCode = (error: unknown): number | undefined =>
   (error as { statusCode?: number } | undefined)?.statusCode;
 
+const findEndpoint = async (esClient: ElasticsearchClient): Promise<boolean> => {
+  try {
+    const { endpoints } = await esClient.inference.get({
+      inference_id: DOCUMENT_EXTRACTION_ENDPOINT_ID,
+    });
+    return endpoints.some(({ inference_id: id }) => id === DOCUMENT_EXTRACTION_ENDPOINT_ID);
+  } catch (error) {
+    if (getStatusCode(error) === 404) {
+      return false;
+    }
+    throw error;
+  }
+};
+
 /**
- * Creates a holder for the document extraction state. `check` looks for the endpoint once per instance.
+ * Creates a holder for the document extraction state. `start` looks for the endpoint now and then every hour.
  */
 export const createDocumentExtractionAvailability = ({
   logger,
 }: {
   logger: Logger;
 }): DocumentExtractionAvailability => {
-  let available = false;
-  let availabilityCheck: Promise<void> | undefined;
+  let available: boolean | undefined;
+  let subscription: Subscription | undefined;
 
-  const isAvailable = (): boolean => available;
-
-  const check = (esClient: ElasticsearchClient): Promise<void> => {
-    availabilityCheck ??= (async () => {
-      try {
-        const { endpoints } = await esClient.inference.get({
-          inference_id: DOCUMENT_EXTRACTION_ENDPOINT_ID,
-        });
-        available = endpoints.some(
-          ({ inference_id: id }) => id === DOCUMENT_EXTRACTION_ENDPOINT_ID
-        );
-      } catch (error) {
-        available = false;
-        if (getStatusCode(error) !== 404) {
-          logger.warn(
-            `Could not check the document extraction endpoint: ${(error as Error).message}`
-          );
-        }
-      }
-      logger.info(
-        `PDF reading is ${available ? 'available' : 'not available'} on this deployment.`
-      );
-    })();
-    return availabilityCheck;
+  const setAvailable = (next: boolean) => {
+    if (next === available) {
+      return;
+    }
+    available = next;
+    logger.info(`PDF reading is ${available ? 'available' : 'not available'} on this deployment.`);
   };
 
-  return { isAvailable, check };
+  const start = (esClient: ElasticsearchClient) => {
+    if (subscription) {
+      return;
+    }
+    subscription = defer(() => findEndpoint(esClient))
+      .pipe(
+        tap(setAvailable),
+        delay(DOCUMENT_EXTRACTION_AVAILABILITY_INTERVAL_MS),
+        repeat(),
+        retry({
+          delay: (error: Error) => {
+            logger.warn(`Could not check the document extraction endpoint: ${error.message}`);
+            return timer(DOCUMENT_EXTRACTION_AVAILABILITY_RETRY_MS);
+          },
+        })
+      )
+      .subscribe();
+  };
+
+  const stop = () => {
+    subscription?.unsubscribe();
+    subscription = undefined;
+  };
+
+  return { isAvailable: () => available === true, start, stop };
 };

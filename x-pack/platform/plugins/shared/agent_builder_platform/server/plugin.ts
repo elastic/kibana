@@ -69,6 +69,7 @@ export class AgentBuilderPlatformPlugin
       coreSetup,
       setupDeps,
       binaryConverters,
+      logger: this.logger,
     });
     registerBinarySupportedTypesRoute({
       router: coreSetup.http.createRouter(),
@@ -106,7 +107,7 @@ export class AgentBuilderPlatformPlugin
   }
 
   start(coreStart: CoreStart): AgentBuilderPlatformPluginStart {
-    void this.documentExtractionAvailability?.check(coreStart.elasticsearch.client.asInternalUser);
+    this.documentExtractionAvailability?.start(coreStart.elasticsearch.client.asInternalUser);
 
     return {
       tracingFeatures: {
@@ -116,5 +117,7 @@ export class AgentBuilderPlatformPlugin
     };
   }
 
-  stop() {}
+  stop() {
+    this.documentExtractionAvailability?.stop();
+  }
 }
