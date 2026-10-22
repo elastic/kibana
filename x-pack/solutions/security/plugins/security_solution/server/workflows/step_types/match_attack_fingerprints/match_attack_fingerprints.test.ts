@@ -407,6 +407,61 @@ describe('matchAttackFingerprints', () => {
     expect(hosts).toHaveLength(101);
   });
 
+  it('attaches when the matching fingerprint is on the second page', async () => {
+    const noise = Array.from({ length: 100 }, (_, index) => {
+      const id = `noise-${index}`;
+      const hit = fingerprintHit({
+        alert_ids: [`other-${index}-a`, `other-${index}-b`],
+        host_entity_ids: [`other-host-${index}`],
+        user_entity_ids: [`other-user-${index}`],
+      });
+      return {
+        ...hit,
+        _id: id,
+        _source: { ...hit._source, id },
+        sort: ['2026-10-22T12:00:00.000Z', id],
+      };
+    });
+    const match = {
+      ...fingerprintHit(),
+      sort: ['2026-10-22T11:00:00.000Z', 'stored-fp'],
+    };
+    const search = jest.fn(async (params: { index?: string; search_after?: unknown }) => {
+      if (params.index !== ATTACK_FINGERPRINT_INDEX) {
+        return {
+          aggregations: {
+            first: { value_as_string: '2026-10-21T10:00:00.000Z' },
+            last: { value_as_string: '2026-10-21T10:30:00.000Z' },
+          },
+        };
+      }
+      return { hits: { hits: params.search_after === undefined ? noise : [match] } };
+    });
+    const esClient = {
+      search,
+      index: jest.fn(),
+      get: jest.fn(),
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    } as unknown as ElasticsearchClient;
+    const contextManager = {
+      callKibanaApi: jest.fn(async () => ({
+        body: { metadata: { status: 'open', close_reason: '', verdict: '' } },
+      })),
+    } as unknown as StepHandlerContext['contextManager'];
+
+    const output = await matchAttackFingerprints({
+      attacks: [attackDocument(ATTACK_ID, ['a1', 'a2'])],
+      contextManager,
+      esClient,
+      logger,
+      now: new Date('2026-10-21T12:00:00.000Z'),
+      spaceId: 'default',
+    });
+
+    expect(output.reviews).toEqual([]);
+    expect(output.attachments[0]?.investigation_id).toBe('11111111-1111-8111-8111-111111111111');
+  });
+
   it('writes the host name and the de-anonymized summary, and leaves the review anonymized', async () => {
     getAlertEntitiesMock.mockResolvedValue({
       entities: [
