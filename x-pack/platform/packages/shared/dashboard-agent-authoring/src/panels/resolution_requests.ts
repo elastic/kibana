@@ -51,8 +51,18 @@ export const toEditResolutionRequest = (
   };
 
   if (panelInput.renderer === 'custom_content') {
-    const { query, esql } = panelInput;
-    return { request: { ...base, renderer: panelInput.renderer, nlQuery: query, esql } };
+    const { query, esql, hasData, regenerateESQL, index } = panelInput;
+    return {
+      request: {
+        ...base,
+        renderer: panelInput.renderer,
+        nlQuery: query,
+        esql,
+        hasData,
+        regenerateESQL,
+        index,
+      },
+    };
   }
   if (renderer === 'custom_content') {
     return {
@@ -86,7 +96,8 @@ export const toCreationResolutionRequest = ({
   const base = { operationType, identifier: query, nlQuery: query, esql };
 
   if (panelInput.renderer === 'custom_content') {
-    return { ...base, renderer: panelInput.renderer };
+    const { hasData, index } = panelInput;
+    return { ...base, renderer: panelInput.renderer, hasData, index };
   }
 
   const { renderer, index, chartType } = panelInput;

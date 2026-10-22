@@ -64,34 +64,45 @@ describe('custom_content panel schemas', () => {
     renderer: 'custom_content' as const,
     grid,
     query: 'Show a KPI card for total errors',
+    hasData: false,
   };
 
   it.each([
     ['add_panels', addPanelsItemSchema],
     ['add_section', addSectionPanelItemSchema],
-  ])('accepts a custom_content request with only a query through %s', (_, schema) => {
+  ])('accepts a custom_content request with a query and hasData through %s', (_, schema) => {
     expect(schema.safeParse(customContentRequest).success).toBe(true);
   });
 
   it.each([
     ['add_panels', addPanelsItemSchema],
     ['add_section', addSectionPanelItemSchema],
+  ])('rejects a custom_content request that does not state hasData through %s', (_, schema) => {
+    const { hasData, ...withoutHasData } = customContentRequest;
+    expect(schema.safeParse(withoutHasData).success).toBe(false);
+  });
+
+  it.each([
+    ['add_panels', addPanelsItemSchema],
+    ['add_section', addSectionPanelItemSchema],
   ])(
-    'keeps esql and drops Lens-only fields on a custom_content request through %s',
+    'keeps esql, hasData and index and drops the Lens-only chartType on a custom_content request through %s',
     (_, schema) => {
       const result = schema.safeParse({
         ...customContentRequest,
         esql: 'FROM logs-* | STATS count = COUNT(*) BY service.name',
         chartType: SupportedChartType.Metric,
+        hasData: true,
         index: 'logs-*',
       });
 
       expect(result.success).toBe(true);
       expect(result.data).toMatchObject({
         esql: 'FROM logs-* | STATS count = COUNT(*) BY service.name',
+        hasData: true,
+        index: 'logs-*',
       });
       expect(result.data).not.toHaveProperty('chartType');
-      expect(result.data).not.toHaveProperty('index');
     }
   );
 
