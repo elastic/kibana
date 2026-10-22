@@ -8,7 +8,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ProposalNotFoundError } from '@kbn/proposals-plugin/server';
-import { buildHuntProposalId } from '../common/hunt_proposal_id';
+import { buildProposalId } from './proposal_id';
 import { createProposalSlotResolver } from './resolve_proposal_slot';
 
 const SPACE = 'default';
@@ -17,7 +17,7 @@ const NOW = Date.parse('2026-10-09T12:00:00.000Z');
 const request = httpServerMock.createKibanaRequest();
 
 const idAt = (generation: number, spaceId = SPACE) =>
-  buildHuntProposalId({ spaceId, subjectKey: SUBJECT, generation });
+  buildProposalId({ spaceId, subjectKey: SUBJECT, generation });
 
 interface Chain {
   status: 'pending' | 'executing' | 'succeeded' | 'failed' | 'no_action' | 'expired';
@@ -274,6 +274,11 @@ describe('createProposalSlotResolver', () => {
         { endpoint_ids: ['agent-a'], parameters: { entity_id: 'ent-1' } },
         { endpoint_ids: ['agent-a'], parameters: { entity_id: 'ent-2' } },
       ],
+      [
+        'a process by pid',
+        { endpoint_ids: ['agent-a'], parameters: { pid: 4242 } },
+        { endpoint_ids: ['agent-a'], parameters: { pid: 4343 } },
+      ],
     ])('compares what %s is identified by', async (_label, wanted, revisedTo) => {
       const service = createService({ [idAt(0)]: { status: 'pending', actionInput: revisedTo } });
       const { resolve } = resolver(service);
@@ -287,6 +292,23 @@ describe('createProposalSlotResolver', () => {
       await expect(
         resolver(same).resolve({ subjectKey: SUBJECT, actionInput: wanted })
       ).resolves.toMatchObject({ kind: 'converge' });
+    });
+
+    it('ignores the pid when the entity id selects the process', async () => {
+      const service = createService({
+        [idAt(0)]: {
+          status: 'pending',
+          actionInput: { endpoint_ids: ['agent-a'], parameters: { entity_id: 'e1' } },
+        },
+      });
+      const { resolve } = resolver(service);
+
+      await expect(
+        resolve({
+          subjectKey: SUBJECT,
+          actionInput: { endpoint_ids: ['agent-a'], parameters: { entity_id: 'e1', pid: 4242 } },
+        })
+      ).resolves.toMatchObject({ kind: 'converge', live: { proposalId: idAt(0) } });
     });
 
     it('holds a finding that carries no action input, like the recommendation', async () => {

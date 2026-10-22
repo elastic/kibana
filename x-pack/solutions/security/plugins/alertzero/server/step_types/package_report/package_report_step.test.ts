@@ -7,8 +7,8 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createOpenProposalChecker } from '../../services/watches/hunt/packaging/check_open_proposals';
-import { createAlsoRaisedByAppender } from '../../services/watches/hunt/packaging/converge_on_live_proposal';
-import { createProposalSlotResolver } from '../../services/watches/hunt/packaging/resolve_proposal_slot';
+import { createAlsoRaisedByAppender } from '../../services/proposals/dedup/converge_on_live_proposal';
+import { createProposalSlotResolver } from '../../services/proposals/dedup/resolve_proposal_slot';
 import { runPackageReport } from '../../services/watches/hunt/packaging/run_package_report';
 import { getPackageReportStepDefinition } from './package_report_step';
 
@@ -19,12 +19,12 @@ jest.mock('../../services/watches/hunt/packaging/run_package_report', () => ({
 jest.mock('../../services/watches/hunt/packaging/check_open_proposals', () => ({
   createOpenProposalChecker: jest.fn(),
 }));
-jest.mock('../../services/watches/hunt/packaging/converge_on_live_proposal', () => ({
-  ...jest.requireActual('../../services/watches/hunt/packaging/converge_on_live_proposal'),
+jest.mock('../../services/proposals/dedup/converge_on_live_proposal', () => ({
+  ...jest.requireActual('../../services/proposals/dedup/converge_on_live_proposal'),
   createAlsoRaisedByAppender: jest.fn(),
 }));
-jest.mock('../../services/watches/hunt/packaging/resolve_proposal_slot', () => ({
-  ...jest.requireActual('../../services/watches/hunt/packaging/resolve_proposal_slot'),
+jest.mock('../../services/proposals/dedup/resolve_proposal_slot', () => ({
+  ...jest.requireActual('../../services/proposals/dedup/resolve_proposal_slot'),
   createProposalSlotResolver: jest.fn(),
 }));
 

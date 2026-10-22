@@ -9,7 +9,7 @@ import { get, isEqual } from 'lodash';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { ProposalNotFoundError } from '@kbn/proposals-plugin/server';
-import { buildHuntProposalId } from '../common/hunt_proposal_id';
+import { buildProposalId } from './proposal_id';
 import { isTransientError, retryTransient } from './retry_transient';
 
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
@@ -26,11 +26,19 @@ type ProposalReader = Pick<
 const MAX_GENERATIONS = 50;
 
 /**
- * Where an action's input says what it acts on: the agent or the process. Everything else in
+ * Where an action's input says what it acts on: the agent or the process (by entity id or pid). Everything else in
  * the input (a reason, a comment) can be revised freely without the Proposal being about
  * something else.
  */
-const TARGET_PATHS = ['endpoint_ids', 'parameters.entity_id'] as const;
+const TARGET_PATHS = ['endpoint_ids', 'parameters.entity_id', 'parameters.pid'] as const;
+
+/**
+ * The pid only selects the process when no entity id is given: the subject key prefers the entity
+ * id (`buildProposalSubjectKeyFromActionInput`), so a finding carrying both converges on a live
+ * Proposal that carries just the entity id.
+ */
+const isProcessSelector = (path: (typeof TARGET_PATHS)[number], wanted: unknown): boolean =>
+  path !== 'parameters.pid' || get(wanted, 'parameters.entity_id') === undefined;
 
 /**
  * Whether a live Proposal still holds the subject a finding is about: it acts on the same target.
@@ -45,7 +53,7 @@ const holdsSubject = (
   wanted: Record<string, unknown> | undefined,
   live: Record<string, unknown> | undefined
 ): boolean =>
-  TARGET_PATHS.every((path) => {
+  TARGET_PATHS.filter((path) => isProcessSelector(path, wanted)).every((path) => {
     const wantedValue = get(wanted, path);
     return wantedValue === undefined || isEqual(get(live, path), wantedValue);
   });
@@ -163,7 +171,7 @@ export const createProposalSlotResolver = ({
       await ensureCanRead();
 
       for (let generation = 0; generation < MAX_GENERATIONS; generation++) {
-        const rootId = buildHuntProposalId({ spaceId, subjectKey, generation });
+        const rootId = buildProposalId({ spaceId, subjectKey, generation });
 
         let head;
         try {
@@ -219,7 +227,7 @@ export const createProposalSlotResolver = ({
       throw new Error(`more than ${MAX_GENERATIONS} settled proposals under one subject`);
     } catch (err) {
       logger?.warn(
-        `package_report: could not resolve a proposal slot for subject ${subjectKey}: ${
+        `proposal_dedup: could not resolve a proposal slot for subject ${subjectKey}: ${
           (err as Error).message
         }`
       );

@@ -7,11 +7,21 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
-import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../../../common/proposals/origin';
+import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../../common/proposals/origin';
 import { retryTransient } from './retry_transient';
-import type { CountExistingProposals } from './run_package_report';
 
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
+
+/**
+ * Count of Proposals the Investigation already carries (any status, including settled), before
+ * this run's own proposals are minted. It is the baseline `expectedProposalCount` is built on (see
+ * below), so the settlement barrier each gate checks accounts for proposals that already existed
+ * before this run, not just the ones this run mints. Not a guard: whether a finding gets a
+ * Proposal is decided per subject by {@link ResolveProposalSlot}, not by whether the Investigation
+ * has any. See the implementation (`check_existing_proposals.ts`) for which statuses count as
+ * "existing" and why.
+ */
+export type CountExistingProposals = (investigationConversationId: string) => Promise<number>;
 
 /**
  * Implements {@link CountExistingProposals} -- see that type's own doc comment for the invariants
@@ -62,7 +72,7 @@ export const createExistingProposalsCounter = ({
       return total;
     } catch (err) {
       logger?.warn(
-        `package_report: could not check for existing proposals on ${conversationId}: ${
+        `proposal_dedup: could not check for existing proposals on ${conversationId}: ${
           (err as Error).message
         }`
       );
