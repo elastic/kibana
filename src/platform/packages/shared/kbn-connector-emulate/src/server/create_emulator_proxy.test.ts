@@ -196,6 +196,28 @@ describe('createEmulatorProxy', () => {
     );
   });
 
+  it('answers 400 to absolute-form requests whose URL does not parse', async () => {
+    const response = await new Promise<{ status: number; body: string }>((resolve, reject) => {
+      const request = httpRequest(
+        { host: proxyUrl.hostname, port: proxyUrl.port, path: 'http://%FF/' },
+        (reply) => {
+          let text = '';
+          reply.setEncoding('utf8');
+          reply.on('data', (chunk) => (text += chunk));
+          reply.on('end', () => resolve({ status: reply.statusCode ?? 0, body: text }));
+        }
+      );
+      request.on('error', reject);
+      request.end();
+    });
+
+    expect(response.status).toBe(400);
+    expect(JSON.parse(response.body)).toEqual(
+      expect.objectContaining({ title: 'Invalid request target' })
+    );
+    expect(mock.calls).toEqual([]);
+  });
+
   it('answers 502 when the mock throws', async () => {
     await proxy.close();
     proxy = createEmulatorProxy({
