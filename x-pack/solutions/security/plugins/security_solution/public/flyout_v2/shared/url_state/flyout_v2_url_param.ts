@@ -262,6 +262,8 @@ export interface EntityAnomalyInsightsDescriptor {
   entityType: string;
   value: string;
   entityId?: string;
+  mode?: EntityDescriptorMode;
+  scopeId?: string;
 }
 
 export interface EntityAlertsInsightsDescriptor {
@@ -315,6 +317,7 @@ export interface EntityResolutionDescriptor {
   entityType: string;
   entityName: string;
   scopeId: string;
+  mode?: EntityDescriptorMode;
 }
 
 /**

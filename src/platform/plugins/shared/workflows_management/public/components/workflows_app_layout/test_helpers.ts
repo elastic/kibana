@@ -17,7 +17,7 @@ const BASE_URL = `http://localhost:5601/app/${PLUGIN_ID}`;
 /** Mirrors the deep links registered by `getDeepLinks`. */
 const NAV_LINK_FIXTURES: Record<WorkflowsPageName, { title: string; path: string }> = {
   [WorkflowsPageName.list]: { title: 'Workflows', path: '/' },
-  [WorkflowsPageName.library]: { title: 'Template Library', path: '/library' },
+  [WorkflowsPageName.library]: { title: 'Template library', path: '/library' },
   [WorkflowsPageName.executions]: { title: 'Executions', path: '/executions' },
 };
 

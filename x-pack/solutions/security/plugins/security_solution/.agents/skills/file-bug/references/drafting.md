@@ -1,10 +1,12 @@
 # Drafting a Security Solution bug (load while collecting)
 
-Field rules live here once. `SKILL.md` is the procedure; this file is the field rules. `check-pack`, `check-draft`, `infer-deployment`, `format-title`, and `scan-sensitive` are the source of truth — if prose and a script disagree, trust the script. On create (`--title`), `check-draft` also requires a visible stamp and filled Describe / Version / Steps / Current / Expected sections in the body. Filled template headings (Version, Feature flags, Deployment, Role, Spaces, Steps, Current, Expected) count as pack answers even when the finding JSON does not mirror them. Comment / reopen omit `--title`.
+Field rules live here; `SKILL.md` is the procedure. `check-pack`, `check-draft`, `infer-deployment`, `format-title`, and `scan-sensitive` are the source of truth — if prose and a script disagree, trust the script. On create (`--title`), `check-draft` also requires a visible stamp and filled Describe / Version / Steps / Current / Expected sections. Filled template headings count as pack answers even when the finding JSON does not mirror them. Comment / reopen omit `--title`.
 
-Repo: `elastic/kibana`. Body: this skill's `templates/bug-report.md` (not `.github/ISSUE_TEMPLATE/Bug_report.md`). Follow `.agents/skills/kbn-github` (explicit confirm, then `gh`).
+Repo: `$TARGET_REPO` (SKILL.md Classify; `elastic/kibana` unless security-sensitive). Body: this skill's `templates/bug-report.md` (not `.github/ISSUE_TEMPLATE/Bug_report.md`). Follow `.agents/skills/kbn-github` (explicit confirm, then `gh`).
 
 Do not invent steps, expected behaviour, versions, or feature-flag names.
+
+**Stamp:** every create body ends with the visible line `Filed via file-bug` (`check-draft` gaps `stamp` without it). `write` also appends the hidden marker `<!-- filed-via: file-bug v1 -->` so skill-filed tickets can be found by tooling; it adds each line only if missing, so never add the marker by hand.
 
 ## Scope
 
@@ -18,25 +20,17 @@ Related things you noticed (other controls, similar gaps, “same category”) d
 
 ## Ready to file
 
-Always show the full draft and **end the turn** before any `write`. The human must see title, type, labels, body, and files, then approve **that** draft in a later message.
-
-Run `scan-wip` on the finding and draft. Hits: draft/WIP PR, work in progress, known or intentional limitation, by design, not yet implemented. A matching open or draft PR from search is the same stop. Noting it under Additional information is **not** clearance. Ask **file anyway?** Hard stop. Only then `check-draft --wip-ok`.
+`scan-wip` hits — draft/WIP PR, work in progress, known or intentional limitation, by design, not yet implemented, or a matching open or draft PR from search — are not cleared by a note under Additional information. Ask **file anyway?** Hard stop. Only then `check-draft --wip-ok`.
 
 ## Headings
 
-Use the template headings. **Version** (stack). **Original install method** when known (`from source (dev)` for local/scout). **Steps to reproduce**, **Current behaviour (with screenshots and recordings)**, **Expected behavior**.
+Use the template headings. Each heading stays on its own line with the value on the next line (`**Version:**` then `9.3.0`); `check-draft` reads sections that way, so an inline `**Version:** 9.3.0` counts as a gap. **Version** (stack). **Original install method** when known (`from source (dev)` for local/scout). **Steps to reproduce**, **Current behaviour (with screenshots and recordings)**, **Expected behavior**.
 
-**Title** (new issues): `[<team name>] [Bug] <short symptom>`. Run `format-title` after you have a `Team:*` label (human or `infer-team`). If inference is `ask`, ask the human before create. Do not invent a team. If `format-title` exits 2, the symptom is too long — ask the human to shorten it. Do not file a clipped title.
+**Title** (new issues): `[<team name>] [Bug] <short symptom>` from `format-title`, after a `Team:*` label from `infer-team` or the human (ask when inference is `ask`; never invent a team). If `format-title` exits 2 the symptom is too long: ask for a shorter one; do not file a clipped title.
 
-**Release label:** run `infer-release`. A concrete stack version (`9.6.0`, `v9.6.0`, `9.6.0 (notes…)`) becomes `v9.6.0` — pass that label on `check-draft` and `write`. `write` does not infer or add a `v*` label after write-yes. `Unknown` is not a release gap — omit the `v*` label. A PR build, `main`, or other unparseable concrete version still asks. Do not invent a `v*` label. Create also always gets `bug` and `triage_needed`. GitHub Type is Bug (`write` sets `--type Bug`).
+**Release label:** `infer-release`; pass the `vX.Y.Z` it returns on `check-draft` and `write` (`write` does not infer one). `Unknown` is not a gap: omit the label; an unparseable version asks; never invent one. Create always gets `bug` and `triage_needed`, and `write` sets `--type Bug`.
 
-**Feature flags:** exact flag id, on/off, and **how to enable it**. If confirmed default/GA, write `No feature flag (default/GA)`.
-
-**Role required to reproduce:** specific Kibana/Security role, or none / any.
-
-**Spaces:** default space, custom space, or both. Prefill from `space_id` (session space, not “both”). Prefill **Role** from `setup.resolved_role` when present.
-
-**Preconditions:** only when the repro needs setup before step 1 (data, integrations, flags already covered above, users, index state). Omit the heading when there are none.
+**Preconditions:** only when the repro needs setup before step 1 (data, integrations, users, index state). Omit the heading when there are none.
 
 Omit **Server OS version**, **Browser and Browser OS versions**, **Elastic Endpoint version**, **Errors in browser console**, and **Logs and/or server output** when empty. Same for any other heading with no value.
 
@@ -57,47 +51,26 @@ Do not treat the draft as complete (and do not ask for a write-yes) until these 
 3. Is a **specific role** required to reproduce?
 4. Can it be reproduced in the **default space**, a **custom space**, or **both**?
 
-If they do not know, **keep the heading** and write `Unknown`. If they stay vague after one follow-up, `Unknown`.
+If they do not know, **keep the heading** and write `Unknown`; the same after one vague follow-up. Confirmed default/GA is `No feature flag (default/GA)`. Prefill **Spaces** from `space_id` (the session space, not “both”) and **Role** from `setup.resolved_role` when present.
 
 ## Deployment
 
-Run `infer-deployment`. Do not re-derive the mapping in your head.
-
-- Pack names `deployment` → use that.
-- Tester `environment.type`: `serverless` → Serverless; `stateful-ess` / `stateful-classic` / `stateful` → ECH.
-- Scout `arch`/`domain`: `serverless` / `stateful` → same labels.
-- A URL that contains `cloud` is a **hint** — still ask (`infer-deployment` exits 2).
-- `kind: scout` or `kind: local` with no type/arch/URL → ask.
-- `user-provided` without more signal → ask.
-- Write **both** only if the human or pack says both.
-
-Do not assume every session is local Scout. Read `config.json` / the session URL / Scout architecture. You may note Scout or local under install method or Preconditions as *how* it was exercised.
-
-## Thin pack
-
-A pack is **thin** when `check-pack` exits 2. `Unknown` counts as answered, including `version: Unknown` (no `release` gap — do not invent a `v*` label). A concrete version that is not `X.Y` / `X.Y.Z` still asks for release. Run environment-setup questions on a thin pack.
+Run `infer-deployment`; do not re-derive the mapping (`serverless` → Serverless, `stateful*` → ECH, a URL that contains `cloud` is only a hint and asks, write **both** only if the human or pack says so). Do not assume every session is local Scout: read `config.json` / the session URL / Scout architecture, and note Scout or local under install method or Preconditions as *how* it was exercised.
 
 ## Sanitize
 
-Before draft-and-stop, run `scan-sensitive` on the finding and draft. Flag emails, `SDH…` / case IDs, NDA, “customer name/id”. Strip or ask to strip anything not needed to repro. Cases product language (`Opening case 12345`, `Cases table`) will flag — confirm and keep when it is UI text, not a customer ID, then `check-draft --sensitive-ok`. Default repo stays `elastic/kibana`. If they say the content is sensitive / NDA, **stop** and ask whether to file in `elastic/security-team` instead — do not switch silently.
+Before draft-and-stop, run `scan-sensitive` on the finding and draft. Flag emails, `SDH…` / case IDs, NDA, “customer name/id”. Strip or ask to strip anything not needed to repro. Cases product language (`Opening case 12345`, `Cases table`) will flag — confirm and keep when it is UI text, not a customer ID, then `check-draft --sensitive-ok`. Security-sensitive bugs go to `elastic/security-team` (SKILL.md Classify); `--sensitive-ok` never unlocks `security_issue`, which only high-precision patterns (CVE id, key block, token or key value) raise; wording such as "vulnerability" or "exploit" is reported as a `security_hint` and never gates.
 
 ## Environment setup questions
 
-Ask what a reproducer needs to stand up the environment — one question at a time, only what is still unknown. From-scratch filings **and** a **thin** exploratory-tester pack.
-
-- How they installed / which deployment they used (if not already answered)
-- Sample data, Fleet, integrations, endpoint, or other products that must be present
-- Users, privileges, or spaces beyond the always-ask role/space questions
-- Anything else that belongs under **Preconditions:**
-
-Do not assume a local or Scout session is what a triager will use. Write the answers into **Preconditions:** when they are needed to reproduce.
+On from-scratch filings **and** a **thin** exploratory-tester pack (`check-pack` exits 2; `Unknown` counts as answered), ask what a reproducer needs, one question at a time and only what is unknown: install method or deployment, sample data / Fleet / integrations / endpoint, users, privileges or spaces beyond the always-ask items, and anything else for **Preconditions:**. Do not assume a local or Scout session is what a triager will use.
 
 ## Media
 
 Given a recording and stills:
 
 1. Watch them. Draft steps, current behaviour, and expected if the UI makes it obvious. Quote what was on screen; do not invent clicks you did not see.
-2. Put screenshot and recording/video paths (`Screenshot:`, `Recording:`, `Video:`) under **Current behaviour**. Resolve `` `$SESSION_DIR/...` `` to the real session directory. Upload those files; `embed-uploads` writes images as `![name](url)` and videos as `<video src="url" controls></video>` on their own paragraph (GitHub inlines both).
+2. Put screenshot and recording/video paths (`Screenshot:`, `Recording:`, `Video:`) under **Current behaviour**. Resolve `` `$SESSION_DIR/...` `` to the real session directory. Upload those files (GitHub's undocumented `user-attachments` endpoint, which can change); `embed-uploads` writes images as `![name](url)` and videos as `<video src="url" controls></video>` on their own paragraph (GitHub inlines both).
 3. Use a visible route or UI area for `Team:*` inference.
 4. Ask for what media cannot provide: version, the always-ask items, console/network, server OS, endpoint version, expected if unclear.
 5. If the video is unreadable or too long to trust, say so and ask for a still of the failure.
@@ -108,4 +81,4 @@ Given a recording and stills:
 
 ## Existing `#N`
 
-Still search; still confirm. Prefer comment / reopen+comment. Still ask always-ask items that are **not already on that issue**. In the comment, add any missing repro context — do not only attach files. Do not retitle the existing issue unless the human asks.
+Still search; still confirm. Prefer comment / reopen+comment. With no `--finding`, `check-draft` on a comment skips the template-field gaps (the existing issue holds them) and still runs the sensitive, security, WIP and media gates. Still ask always-ask items that are **not already on that issue**. In the comment, add any missing repro context — do not only attach files. Do not retitle the existing issue unless the human asks.
