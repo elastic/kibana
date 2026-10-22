@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { NamedResponse } from '../engine/named_responses';
+import type { RejectedResponse } from '../engine/response_engine';
 import type { OperationMatch, OperationMismatch } from '../openapi/match_operation';
 import type { ContractOperation, Violation } from '../openapi/types';
 
@@ -56,12 +58,25 @@ export interface ProtocolExchange {
   /** Protocol messages that call no vendor operation, such as MCP's `initialize`. */
   readonly messages?: readonly string[];
   readonly requestViolations: readonly Violation[];
+  /** Where a served fixture or recording breaks the spec. */
+  readonly responseViolations?: readonly Violation[];
+}
+
+export interface ContractProtocolOptions {
+  /** The spec's name, for named specs. */
+  readonly source?: string;
+  /** Fixtures and recordings of named operations, preferred to sampled responses. */
+  readonly responses?: readonly NamedResponse[];
 }
 
 /** Answers the requests to the endpoints of a spec whose operations aren't HTTP routes. */
 export interface ContractProtocol {
   /** The `origin` and `pathname` of each URL it answers, without a trailing slash. */
   readonly endpoints: readonly string[];
+  /** The names of the operations the spec declares, such as `query boards`. */
+  readonly operations: ReadonlySet<string>;
+  /** Recordings that aren't served because the spec contradicts them. */
+  readonly rejectedResponses: readonly RejectedResponse[];
   handle(request: ContractRequest): Promise<ProtocolExchange>;
 }
 
