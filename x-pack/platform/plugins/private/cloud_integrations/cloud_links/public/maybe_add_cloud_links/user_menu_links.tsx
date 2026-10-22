@@ -36,7 +36,7 @@ export const createUserMenuLinks = async ({
       }),
       iconType: 'user',
       href: profileUrl,
-      target: '_blank',
+      isExternal: true,
       order: 100,
       setAsProfile: true,
     });
@@ -50,7 +50,8 @@ export const createUserMenuLinks = async ({
       }),
       iconType: 'chartGauge',
       href: billingUrl,
-      target: '_blank',
+      isExternal: true,
+      dataTestSubj: 'userMenuLink__billing',
       order: 200,
     });
   }
@@ -62,7 +63,7 @@ export const createUserMenuLinks = async ({
       }),
       iconType: 'users',
       href: organizationUrl,
-      target: '_blank',
+      isExternal: true,
       order: 300,
     });
   }

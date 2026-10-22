@@ -128,15 +128,17 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   if (userMenuLinks.length) {
     const userMenuLinkMenuItems = userMenuLinks
       .sort(({ order: orderA = Infinity }, { order: orderB = Infinity }) => orderA - orderB)
-      .map(({ label, iconType, href, target, onClick, content }: UserMenuLink) => ({
-        name: label,
-        icon: <EuiIcon type={iconType} size="m" aria-hidden={true} />,
-        href,
-        target,
-        onClick,
-        'data-test-subj': `userMenuLink__${label}`,
-        content,
-      }));
+      .map(
+        ({ label, iconType, href, isExternal, dataTestSubj, onClick, content }: UserMenuLink) => ({
+          name: label,
+          icon: <EuiIcon type={iconType} size="m" aria-hidden={true} />,
+          href,
+          ...(isExternal && { target: '_blank' }),
+          onClick,
+          'data-test-subj': dataTestSubj ?? `userMenuLink__${label}`,
+          content,
+        })
+      );
     items.push(...userMenuLinkMenuItems);
   }
 
