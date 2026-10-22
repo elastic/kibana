@@ -75,7 +75,7 @@ const setup = ({
   const workflowsExtensions = {
     getClient: jest.fn().mockResolvedValue({ managedWorkflows }),
   } as unknown as WorkflowsExtensionsServerPluginStart;
-  const getWorkflow = jest.fn(async () => ({
+  const getWorkflow = jest.fn(async (_id: string) => ({
     enabled: state.enabled,
     valid: true,
     definition: { settings: { run_as: state.runAs } },
@@ -299,7 +299,11 @@ describe('createInvestigatorServiceAccountService', () => {
       });
       getWorkflow.mockImplementation(async (id: string) =>
         id === 'wf-a-2'
-          ? { enabled: true, definition: { settings: { run_as: AUTOMATIONS_ACCOUNT } } }
+          ? {
+              enabled: true,
+              valid: true,
+              definition: { settings: { run_as: AUTOMATIONS_ACCOUNT } },
+            }
           : { enabled: true, valid: true, definition: { settings: { run_as: AGENT_ACCOUNT } } }
       );
 
