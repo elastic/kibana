@@ -10,21 +10,23 @@
 import type { DataSource } from '@kbn/data-source';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
-import type { UnifiedHistogramFetchParams } from '@kbn/unified-histogram/types';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { isESQLColumnGroupable } from '@kbn/esql-utils';
+import { fieldSupportsBreakdown } from '@kbn/field-utils';
 
 /**
- * Resolves the selected traces breakdown field for the toolbar selector.
- * ES|QL has no Classic DataView, so the field is built from result columns
- * (same path as Unified Histogram `process_fetch_params`).
+ * Resolves a breakdown field name against the data source, keeping only fields the chart can group by
+ * (the same ones the breakdown selector offers) so the selector label stays in sync with the chart.
  */
-export const getTracesBreakdownField = ({
+export const resolveBreakdownField = ({
   breakdownField,
   dataSource,
   columns,
 }: {
   breakdownField: string | undefined;
   dataSource: DataSource;
-  columns: UnifiedHistogramFetchParams['columns'];
+  /** ES|QL result columns; ignored for a data view source. */
+  columns: readonly DatatableColumn[] | undefined;
 }): DataViewField | undefined => {
   if (!breakdownField) {
     return undefined;
@@ -32,10 +34,11 @@ export const getTracesBreakdownField = ({
 
   if (dataSource.kind === 'esql') {
     const breakdownColumn = columns?.find((column) => column.name === breakdownField);
-    return breakdownColumn
+    return breakdownColumn && isESQLColumnGroupable(breakdownColumn)
       ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(breakdownColumn))
       : undefined;
   }
 
-  return dataSource.getDataView().getFieldByName(breakdownField);
+  const field = dataSource.getDataView().getFieldByName(breakdownField);
+  return field && fieldSupportsBreakdown(field) ? field : undefined;
 };
