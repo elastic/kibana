@@ -12,13 +12,14 @@ import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import type { DetectionRule } from '../../../data/rules/use_detection_rules';
-import { useDetectionRules } from '../../../data/rules/use_detection_rules';
+import { useDetectionRuleById, useDetectionRules } from '../../../data/rules/use_detection_rules';
 import { useRulesDemote } from '../../../data/rules/use_rules_demote';
 import { RulesTab } from './rules_tab';
 
 const mockWarning = jest.fn();
 const mockDemoteRules = jest.fn();
 const mockUseDetectionRules = useDetectionRules as jest.Mock;
+const mockUseDetectionRuleById = useDetectionRuleById as jest.Mock;
 const mockUseRulesDemote = useRulesDemote as jest.Mock;
 let mockCanManage = true;
 let mockBlocksActivity = false;
@@ -114,6 +115,7 @@ describe('RulesTab', () => {
       getSourceTitle: (id: string) => id,
       refetch: jest.fn(),
     });
+    mockUseDetectionRuleById.mockReturnValue({ rule: undefined, isResolved: false });
   });
 
   it('renders all rules', () => {
@@ -143,6 +145,21 @@ describe('RulesTab', () => {
     const history = renderTab('/detections/rules?ruleId=missing');
     await waitFor(() => expect(mockWarning).toHaveBeenCalled());
     expect(history.location.search).not.toContain('ruleId');
+  });
+
+  it('looks up a deep-linked rule outside the first 1,000 instead of calling it missing', () => {
+    mockUseDetectionRules.mockReturnValue({
+      ...mockUseDetectionRules(),
+      total: 1001,
+      isTruncated: true,
+    });
+    const farRule = { query: { id: 'q1001', title: 'Far rule', description: '' }, matches: 0 };
+    mockUseDetectionRuleById.mockReturnValue({ rule: farRule, isResolved: true });
+    const history = renderTab('/detections/rules?ruleId=q1001');
+    expect(mockUseDetectionRuleById).toHaveBeenCalledWith(expect.anything(), 'q1001', true);
+    expect(screen.getByTestId('ruleFlyoutStub')).toHaveTextContent('Far rule');
+    expect(mockWarning).not.toHaveBeenCalled();
+    expect(history.location.search).toContain('ruleId=q1001');
   });
 
   it('demotes selected rules after confirmation', async () => {

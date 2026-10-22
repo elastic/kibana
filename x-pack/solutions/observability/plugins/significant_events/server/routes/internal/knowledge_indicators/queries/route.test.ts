@@ -506,6 +506,17 @@ describe('getDiscoveryQueriesRoute source resolution', () => {
     );
   });
 
+  it('narrows the read to the requested query ids', async () => {
+    await discoveryQueriesRoute.handler(
+      makeDiscoveryHandlerParams({ ...discoveryBaseQuery, queryIds: ['q1'] })
+    );
+
+    expect(mockFetchQueryLinks).toHaveBeenCalledWith(
+      expect.objectContaining({ filters: expect.objectContaining({ queryIds: ['q1'] }) }),
+      kiClient
+    );
+  });
+
   it('searches only the sources the caller can read', async () => {
     assertReadable.mockImplementation(async (id: string) => {
       if (id === 'logs.b') {

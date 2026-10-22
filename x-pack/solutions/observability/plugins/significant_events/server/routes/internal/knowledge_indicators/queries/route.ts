@@ -71,6 +71,8 @@ import { validateEsqlQueryForSourceOrThrow } from '../../../../lib/significant_e
 const RECONCILE_SOURCE_CONCURRENCY = 3;
 // Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
 const RECONCILE_MAX_SOURCES = 10;
+// Id lookups are for deep links into the discovery table, not bulk reads.
+const MAX_DISCOVERY_QUERY_IDS = 100;
 
 const dateFromString = makeIsoDateFromString('ISO 8601 datetime');
 
@@ -452,6 +454,16 @@ const getDiscoveryQueriesRoute = createServerRoute({
         .optional()
         .describe('Number of items per page'),
       status: queryStatusSchema,
+      queryIds: z
+        .union([
+          z
+            .string()
+            .max(MAX_ID_LENGTH)
+            .transform((id) => [id]),
+          z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_DISCOVERY_QUERY_IDS),
+        ])
+        .optional()
+        .describe('Only return queries with these ids'),
     }),
   }),
   options: {
@@ -488,6 +500,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
       perPage = 10,
       status,
       searchMode,
+      queryIds,
     } = params.query;
     assertValidDateRange(from, to);
 
@@ -505,7 +518,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
       {
         sourceIds,
         query,
-        filters: { ruleUnbacked: toRuleUnbackedFilter(status) },
+        filters: { ruleUnbacked: toRuleUnbackedFilter(status), queryIds },
         searchMode,
       },
       kiClient

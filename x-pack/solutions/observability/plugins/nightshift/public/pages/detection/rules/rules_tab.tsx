@@ -20,7 +20,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import {
@@ -30,7 +30,7 @@ import {
 } from '../../../common/url_params';
 import { RuleFlyout } from '../../../components/entities/rule/rule_flyout';
 import type { DetectionRule } from '../../../data/rules/use_detection_rules';
-import { useDetectionRules } from '../../../data/rules/use_detection_rules';
+import { useDetectionRuleById, useDetectionRules } from '../../../data/rules/use_detection_rules';
 import { useRulesDemote } from '../../../data/rules/use_rules_demote';
 import { useBlocksNewActivity } from '../../../data/maintenance/use_significant_events_maintenance';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -71,13 +71,18 @@ export const RulesTab = ({
   const [pendingDelete, setPendingDelete] = useState<DetectionRule[]>();
   const openLinks = useRef(new Map<string, HTMLAnchorElement | HTMLButtonElement | null>());
   const ruleId = getNightshiftRuleIdFromSearch(location.search);
-  const activeRule = rulesQuery.rules.find(({ query }) => query.id === ruleId);
-  const filteredRules = rulesQuery.rules.filter(({ query }) => {
+  const loadedRule = rulesQuery.rules.find(({ query }) => query.id === ruleId);
+  // A deep link can point past the loaded first page; look that rule up on its own.
+  const needsLookup = Boolean(ruleId) && !loadedRule && rulesQuery.isTruncated;
+  const ruleLookup = useDetectionRuleById(timeRange, ruleId, needsLookup);
+  const activeRule = loadedRule ?? (needsLookup ? ruleLookup.rule : undefined);
+  const filteredRules = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return (
-      query.title.toLowerCase().includes(term) || query.description.toLowerCase().includes(term)
+    return rulesQuery.rules.filter(
+      ({ query }) =>
+        query.title.toLowerCase().includes(term) || query.description.toLowerCase().includes(term)
     );
-  });
+  }, [rulesQuery.rules, search]);
 
   const updateRuleId = useCallback(
     (id?: string, replace = false) => {
@@ -97,7 +102,8 @@ export const RulesTab = ({
       !activeRule &&
       rulesQuery.hasData &&
       !rulesQuery.isFetching &&
-      !rulesQuery.isError
+      !rulesQuery.isError &&
+      (!needsLookup || ruleLookup.isResolved)
     ) {
       notifications.toasts.addWarning({ title: NOT_FOUND_TITLE });
       updateRuleId(undefined, true);
@@ -108,6 +114,8 @@ export const RulesTab = ({
     rulesQuery.hasData,
     rulesQuery.isFetching,
     rulesQuery.isError,
+    needsLookup,
+    ruleLookup.isResolved,
     notifications.toasts,
     updateRuleId,
   ]);

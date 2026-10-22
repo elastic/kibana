@@ -42,13 +42,15 @@ export const useFetchDiscoveryQueries = (
     page: number;
     perPage: number;
     status?: QueryStatus[];
+    /** Only these query ids. */
+    queryIds?: string[];
     /** Fixed occurrence window; defaults to the global time filter. */
     timeRange?: TimeRange;
     enabled?: boolean;
   },
   deps: unknown[] = []
 ) => {
-  const { name, query, page, perPage, status, timeRange, enabled = true } = options;
+  const { name, query, page, perPage, status, queryIds, timeRange, enabled = true } = options;
   const {
     significantEvents: { significantEventsRepositoryClient },
     data,
@@ -80,6 +82,7 @@ export const useFetchDiscoveryQueries = (
             page,
             perPage,
             status,
+            queryIds,
           },
         },
         signal: signal ?? null,
@@ -126,6 +129,7 @@ export const useFetchDiscoveryQueries = (
       page,
       perPage,
       status?.join(','),
+      queryIds?.join(','),
       ...deps,
     ],
     queryFn: fetchDiscoveryQueries,

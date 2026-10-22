@@ -73,10 +73,6 @@ const RuleActions = ({
             iconType="ellipsis"
             aria-label={ACTIONS_LABEL}
             onClick={() => setOpen(true)}
-            {...getEbtProps({
-              action: NIGHTSHIFT_EBT_ACTIONS.VIEW_RULE,
-              element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_RULES_TABLE,
-            })}
           />
         </EuiToolTip>
       }
