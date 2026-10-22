@@ -8,15 +8,16 @@
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import { buildHuntInvestigationConversationId } from '../common/hunt_investigation_id';
-import { buildHuntProposalId } from '../common/hunt_proposal_id';
 import {
-  PackageReportIdentityError,
+  buildProposalId,
+  buildProposalSubjectKey,
   computeExpectedProposalCount,
-  runPackageReport,
-} from './run_package_report';
+  type LiveProposal,
+  type ProposalSlot,
+  type WantedProposal,
+} from '../../../proposals/dedup';
+import { PackageReportIdentityError, runPackageReport } from './run_package_report';
 import type { RunPackageReportDeps } from './run_package_report';
-import { buildProposalSubjectKey } from './decide_package_report';
-import type { LiveProposal, ProposalSlot, WantedProposal } from './resolve_proposal_slot';
 import type { CoverageSubject } from './types';
 
 const reportId = 'rpt-package-1';
@@ -210,7 +211,7 @@ const deps = (overrides: Partial<RunPackageReportDeps> = {}): RunPackageReportDe
   // Every subject is free by default, at the first generation, as it is in an empty space.
   resolveProposalSlot: async ({ subjectKey }) => ({
     kind: 'mint',
-    proposalId: buildHuntProposalId({ spaceId: 'default', subjectKey, generation: 0 }),
+    proposalId: buildProposalId({ spaceId: 'default', subjectKey, generation: 0 }),
   }),
   appendAlsoRaisedBy: async () => 'revised',
   hasOpenProposal: async () => false,
@@ -561,7 +562,7 @@ describe('runPackageReport', () => {
     expect(result.converged).toEqual([]);
     // Created under the id derived from what it proposes, which is what lets a second run meet it.
     expect(result.proposals[0].proposalId).toBe(
-      buildHuntProposalId({
+      buildProposalId({
         spaceId: 'default',
         subjectKey: result.proposals[0].subjectKey,
         generation: 0,
@@ -770,7 +771,7 @@ describe('runPackageReport', () => {
       const resolveProposalSlot = jest.fn(
         async ({ subjectKey }: WantedProposal): Promise<ProposalSlot> => ({
           kind: 'mint',
-          proposalId: buildHuntProposalId({ spaceId: 'default', subjectKey, generation: 0 }),
+          proposalId: buildProposalId({ spaceId: 'default', subjectKey, generation: 0 }),
         })
       );
 
@@ -842,7 +843,7 @@ describe('runPackageReport', () => {
               ? { kind: 'converge', live }
               : {
                   kind: 'mint',
-                  proposalId: buildHuntProposalId({
+                  proposalId: buildProposalId({
                     spaceId: 'default',
                     subjectKey,
                     generation: 0,
@@ -932,7 +933,7 @@ describe('runPackageReport', () => {
               ? { kind: 'converge', live: liveProposal() }
               : {
                   kind: 'mint',
-                  proposalId: buildHuntProposalId({
+                  proposalId: buildProposalId({
                     spaceId: 'default',
                     subjectKey,
                     generation: 0,
