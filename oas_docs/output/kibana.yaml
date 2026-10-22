@@ -113,9 +113,249 @@ tags:
     x-displayName: Context Engine
   - name: Dashboards
     description: |
-      > This documentation is temporarily hosted at a separate location.
-      >
-      > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
+      A [dashboard](https://www.elastic.co/docs/explore-analyze/dashboards) is a collection of panels arranged on a grid. Each panel can contain a visualization, a Discover session, an image, markdown text, or an interactive filter control. Use this API to create and manage dashboards programmatically.
+
+      ## When to use this API
+
+      - Use this API to define a complete, self-contained dashboard in a single payload, including inline visualizations (both data view and ES|QL based), controls, and filters.
+      - Use the [Visualizations API](../operation/operation-create-visualization) to create reusable charts saved to your [visualization library](https://www.elastic.co/docs/explore-analyze/visualize/visualize-library). You can then embed them in dashboards as linked panels using their ID.
+
+      ## Stability
+
+      | 9.4 | 9.5 | Serverless |
+      | --- | --- | --- |
+      | Experimental | Generally available ¹ | Generally available ² |
+
+      ¹ This version introduces breaking changes. Refer to the [Kibana release notes](https://www.elastic.co/docs/release-notes/kibana/breaking-changes).
+
+      ² On July 13, 2026, a new version of this API released on Elastic Cloud Serverless and introduced breaking changes. Refer to the [Elastic Cloud Serverless release notes](https://www.elastic.co/docs/release-notes/cloud-serverless/breaking-changes).
+
+      ## Get started
+
+      Before you begin:
+
+      - **Authentication**: Refer to [Authentication](https://www.elastic.co/docs/api/doc/kibana#authentication) in the Kibana API documentation.
+      - **CSRF protection**: Write operations (`POST`, `PUT`, `DELETE`) require the `kbn-xsrf: true` header.
+      - **Spaces**: If you use non-default [Kibana spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces), prepend `s/{space_id}/` to the path.
+
+      ### Try it now
+
+      Create your first dashboard right now. The following example creates a dashboard with an ES|QL line chart showing log entries over time. You can run it as-is once you have the [Kibana sample logs dataset](https://www.elastic.co/docs/manage-data/ingest/sample-data) installed:
+
+      ```bash
+      curl -X POST "${KIBANA_URL}/api/dashboards" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "title": "My first API dashboard",
+          "panels": [
+            {
+              "grid": {
+                "x": 0,
+                "y": 0,
+                "w": 24,
+                "h": 10
+              },
+              "type": "vis",
+              "config": {
+                "type": "xy",
+                "title": "Total log entries over time",
+                "layers": [
+                  {
+                    "type": "line",
+                    "data_source": {
+                      "type": "esql",
+                      "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
+                    },
+                    "x": {
+                      "column": "BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
+                    },
+                    "y": [
+                      {
+                        "column": "count"
+                      }
+                    ]
+                  }
+                ],
+                "axis": {
+                  "x": {
+                    "title": {
+                      "visible": false
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }'
+      ```
+
+      All examples on this page use [Kibana sample datasets](https://www.elastic.co/docs/manage-data/ingest/sample-data) (`kibana_sample_data_logs`, `kibana_sample_data_ecommerce`, `kibana_sample_data_flights`). To use your own data, replace the `FROM` pattern and field references.
+
+      ### Dashboard structure
+
+      A [dashboard](https://www.elastic.co/docs/explore-analyze/dashboards) is structured as follows:
+
+      - **`title`** (required): the display name of the dashboard.
+      - **`panels`**: array of items placed on a 48-column grid. Each item has a `type`, a `grid` position (`x`, `y`, `w`, `h`), and a `config`. Two item shapes are supported:
+        - **Panel**: any content type, including visualizations, Discover sessions, images, markdown, and filter controls. The `type` field determines the panel's content and the structure of its `config`.
+        - **Section**: a collapsible group of panels. Use sections to organize a large dashboard into logical groups. A section has a `grid.y` position and its own nested `panels` array.
+
+        The grid is 48 columns wide. Use `w: 48` for a full-width panel, `w: 24` for half-width, and so on. Height (`h`) and vertical position (`y`) are in grid rows with no fixed maximum.
+      - **`pinned_panels`**: filter controls pinned at the top of the dashboard that apply to all panels. Filter controls placed in `panels` apply only to panels in the same section.
+      - **`filters`**, **`query`**, **`time_range`**: filter the data displayed across all panels.
+
+      ### Panel types
+
+      The `type` field in each panel determines what it contains and the structure of its `config`:
+
+      | Type | Description |
+      |------|-------------|
+      | `vis` | Visualization (bar, line, metric, and so on), supports both data view and ES&#124;QL queries |
+      | `discover_session` | Discover session |
+      | `image` | Image |
+      | `markdown` | Markdown text |
+      | `links` | Navigation links to dashboards and external URLs |
+      | `esql_control` | ES&#124;QL variable control |
+      | `options_list_control` | Dropdown filter by field value |
+      | `range_slider_control` | Slider filter by numeric range |
+      | `time_slider_control` | Time range slider |
+
+      Additional panel types for observability use cases:
+
+      | Type | Description |
+      |------|-------------|
+      | `slo_alerts` | SLO alerts |
+      | `slo_burn_rate` | SLO burn rate |
+      | `slo_error_budget` | SLO error budget |
+      | `slo_overview` | SLO overview |
+      | `synthetics_monitors` | Synthetics monitors |
+      | `synthetics_stats_overview` | Synthetics stats overview |
+      | `apm_service_map` | APM service map |
+
+      Additional panel types for machine learning use cases:
+
+      | Type | Description |
+      |------|-------------|
+      | `ml_single_metric_viewer` | Single metric viewer |
+      | `ml_anomaly_swimlane` | Anomaly swim lane |
+      | `ml_anomaly_charts` | Anomaly charts |
+      | `aiops_change_point_chart` | Change point detection chart |
+      | `aiops_log_rate_analysis` | Log rate analysis |
+      | `aiops_pattern_analysis` | Pattern analysis |
+      | `field_stats_table` | Field statistics table |
+
+      > info
+      > The following panel types are supported in the Kibana UI but not yet by the REST API: `map`, `legacy_vis`, `alerts_table`. Write operations (`POST`, `PUT`) return a `400` error when these panel types are included. Read operations (`GET`) strip these panels from the response and include them in a list of warnings.
+
+      ### Panel type availability
+
+      You can specify a panel **inline** so it exists only in that dashboard, or reference a panel already saved to the library and link it from multiple dashboards. Support for some panel types is added over time, so the available types depend on your Kibana version.
+
+      | Panel type | Inline | Linked from library |
+      | --- | --- | --- |
+      | Visualizations | Since 9.4 | Since 9.4 |
+      | Discover sessions | Since 9.4 | Since 9.4 |
+      | Images | Since 9.4 | N/A |
+      | Markdown | Since 9.4 | Since 9.4 |
+      | Links | Since 9.5 | Since 9.5 |
+      | Controls | Since 9.4 | N/A |
+      | SLO | Since 9.4 | N/A |
+      | Synthetics | Since 9.4 | N/A |
+      | APM service map | Since 9.5 | N/A |
+      | Machine learning and AIOps | Since 9.5 | N/A |
+      | Maps | Coming soon | Coming soon |
+      | Vega | Coming soon | Coming soon |
+      | Alerts table | Coming soon | N/A |
+      | Legacy visualizations | N/A | N/A |
+
+      ### Embedding library items
+
+      `vis`, `discover_session`, `markdown`, and `links` panels can be embedded **inline** (full config stored in the dashboard) or **linked from library** (references a library item by ID).
+
+      For the full `config` schema for visualization panels, including chart types, metric operations, and breakdowns, refer to the [Visualizations API](../operation/operation-create-visualization).
+
+      - **Inline**: use when the panel is specific to this dashboard or must work across Kibana spaces. The panel configuration goes directly inside `config`:
+
+        ```json
+        {
+          "grid": {
+            "x": 0,
+            "y": 0,
+            "w": 12,
+            "h": 8
+          },
+          "type": "vis",
+          "config": {
+            "type": "metric",
+            "title": "Average bytes",
+            "data_source": {
+              "type": "data_view_spec",
+              "index_pattern": "kibana_sample_data_logs",
+              "time_field": "timestamp"
+            },
+            "metrics": [
+              {
+                "type": "primary",
+                "operation": "average",
+                "field": "bytes"
+              }
+            ]
+          }
+        }
+        ```
+
+      - **Linked from library**: references an item in your library by its ID. Use `ref_id` with any supported panel type (`vis`, `discover_session`, `markdown`, `links`). Use the [Visualizations API](../operation/operation-create-visualization) to create and retrieve IDs for visualization items.
+
+        ```json
+        {
+          "grid": {
+            "x": 0,
+            "y": 0,
+            "w": 12,
+            "h": 8
+          },
+          "type": "vis",
+          "config": {
+            "ref_id": "1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d"
+          }
+        }
+        ```
+
+      ### ES|QL visualizations
+
+      To create ES|QL-based charts, embed them inline as `vis` panels and set `data_source.type` to `"esql"`.
+
+      - **`metric` charts**: reference query result columns in `metrics` using `column`:
+
+        ```json
+        {
+          "grid": {
+            "x": 0,
+            "y": 0,
+            "w": 12,
+            "h": 6
+          },
+          "type": "vis",
+          "config": {
+            "type": "metric",
+            "title": "Total requests",
+            "data_source": {
+              "type": "esql",
+              "query": "FROM logs-* | STATS count = COUNT()"
+            },
+            "metrics": [
+              {
+                "type": "primary",
+                "column": "count"
+              }
+            ]
+          }
+        }
+        ```
+
+      - **`xy` charts**: `data_source` goes inside each layer. Use `BUCKET(@timestamp, 75, ?_tstart, ?_tend)` to align time-series buckets with the dashboard's selected time range. For a complete xy chart example, see the [Create a dashboard](../operation/operation-create-dashboard) endpoint.
     externalDocs:
       description: Dashboards documentation
       url: https://www.elastic.co/docs/explore-analyze/dashboards
@@ -138,7 +378,7 @@ tags:
       ## When to use this API
 
       - Use this API to define a complete, self-contained Discover session in a single payload, including tabs based on ES|QL queries or data views.
-      - Use the [Dashboards API](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards/operation/create-dashboard) to embed Discover sessions in dashboards as `discover_session` panels, either inline or linked by ID.
+      - Use the [Dashboards API](../operation/operation-create-dashboard) to embed Discover sessions in dashboards as `discover_session` panels, either inline or linked by ID.
 
       ## Get started
 
@@ -542,9 +782,95 @@ tags:
       Enables you to invalidate user sessions for security and session management purposes.
   - name: Visualizations
     description: |
-      > This documentation is temporarily hosted at a separate location.
-      >
-      > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
+      Create, retrieve, update, and delete [Kibana visualizations](https://www.elastic.co/docs/explore-analyze/visualize/lens). Visualizations created through this API are saved to your [visualization library](https://www.elastic.co/docs/explore-analyze/visualize/visualize-library).
+
+      ## When to use this API
+
+      - Use this API to create reusable charts saved to the visualization library. You can then embed them in dashboards by referencing their ID from the [Dashboards API](../operation/operation-create-dashboard).
+      - Use the [Dashboards API](../operation/operation-create-dashboard) when you want to define a complete dashboard in one request, or when you need ES|QL-based visualizations.
+
+      ## Stability
+
+      | 9.4 | 9.5 | Serverless |
+      | --- | --- | --- |
+      | Experimental | Generally available ¹ | Generally available ² |
+
+      ¹ This version introduces breaking changes. Refer to the [Kibana release notes](https://www.elastic.co/docs/release-notes/kibana/breaking-changes).
+
+      ² On July 13, 2026, a new version of this API released on Elastic Cloud Serverless and introduced breaking changes. Refer to the [Elastic Cloud Serverless release notes](https://www.elastic.co/docs/release-notes/cloud-serverless/breaking-changes).
+
+      ## Get started
+
+      Before you begin:
+
+      - **Authentication**: Refer to [Authentication](https://www.elastic.co/docs/api/doc/kibana#authentication) in the Kibana API documentation.
+      - **CSRF protection**: Write operations (`POST`, `PUT`, `DELETE`) require the `kbn-xsrf: true` header.
+      - **Spaces**: If you use non-default [Kibana spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces), prepend `s/{space_id}/` to the path.
+
+      ### Try it now
+
+      The following example creates a line chart showing log entries over time. You can run it after installing the [Kibana sample logs dataset](https://www.elastic.co/docs/manage-data/ingest/sample-data):
+
+      ```bash
+      curl -X POST "${KIBANA_URL}/api/visualizations" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "type": "xy",
+          "title": "Total log entries over time",
+          "layers": [
+            {
+              "type": "line",
+              "data_source": {
+                "type": "data_view_spec",
+                "index_pattern": "kibana_sample_data_logs",
+                "time_field": "timestamp"
+              },
+              "x": {
+                "operation": "date_histogram",
+                "field": "timestamp"
+              },
+              "y": [
+                {
+                  "operation": "count"
+                }
+              ]
+            }
+          ]
+        }'
+      ```
+
+      All curl examples in this reference use [Kibana sample datasets](https://www.elastic.co/docs/manage-data/ingest/sample-data) (`kibana_sample_data_logs`, `kibana_sample_data_ecommerce`, `kibana_sample_data_flights`). To use your own data, replace the `index_pattern` and field names.
+
+      ### How a visualization is structured
+
+      Every visualization requires at minimum:
+
+      - **`type`**: the chart to render. Each chart type has its own required fields, so the full structure of the request body depends on which `type` you specify.
+      - **`data_source`**: how data is fetched. You can reference an existing Kibana data view by ID (`"type": "data_view_reference"`), define a data view inline using an index pattern (`"type": "data_view_spec"`), or use an ES|QL query (`"type": "esql"`). Note that ES|QL is only supported via the [Dashboards API](../operation/operation-create-dashboard). For most chart types, `data_source` is a top-level field. For XY charts, it belongs inside each layer in `layers[]`.
+
+      You can also include `query` and `filters` to apply KQL or Lucene filters to all chart data. Both are optional and can be omitted.
+
+      Everything else is chart-specific: `layers` for XY charts, `metrics` for metric charts, and so on. Refer to the request schema on the [Create a visualization](../operation/operation-create-visualization) endpoint for the full shape of each type.
+
+      ### Chart types
+
+      The `type` field in the request body determines the chart type:
+
+      | Type | Chart | Documentation |
+      |------|-------|---------------|
+      | `data_table` | Data table | [Table](https://www.elastic.co/docs/explore-analyze/visualize/charts/tables) |
+      | `gauge` | Gauge (bullet, circular) | [Gauge](https://www.elastic.co/docs/explore-analyze/visualize/charts/gauge-charts) |
+      | `heatmap` | Heat map | [Heat map](https://www.elastic.co/docs/explore-analyze/visualize/charts/heat-map-charts) |
+      | `metric` | Single value metric | [Metric](https://www.elastic.co/docs/explore-analyze/visualize/charts/metric-charts) |
+      | `mosaic` | Mosaic | [Mosaic](https://www.elastic.co/docs/explore-analyze/visualize/charts/mosaic-charts) |
+      | `pie` | Pie or donut (use `donut_hole` to control the hole size) | [Pie](https://www.elastic.co/docs/explore-analyze/visualize/charts/pie-charts) |
+      | `region_map` | Region map (choropleth) | [Region map](https://www.elastic.co/docs/explore-analyze/visualize/charts/region-map-charts) |
+      | `tag_cloud` | Tag cloud | [Tag cloud](https://www.elastic.co/docs/explore-analyze/visualize/charts/tag-cloud-charts) |
+      | `treemap` | Treemap | [Treemap](https://www.elastic.co/docs/explore-analyze/visualize/charts/treemap-charts) |
+      | `waffle` | Waffle | [Waffle](https://www.elastic.co/docs/explore-analyze/visualize/charts/waffle-charts) |
+      | `xy` | Bar, line, area (and stacked/percentage variants) | [Bar](https://www.elastic.co/docs/explore-analyze/visualize/charts/bar-charts), [Line](https://www.elastic.co/docs/explore-analyze/visualize/charts/line-charts), [Area](https://www.elastic.co/docs/explore-analyze/visualize/charts/area-charts) |
     externalDocs:
       description: Visualizations documentation
       url: https://www.elastic.co/docs/explore-analyze/visualize/lens
@@ -25513,66 +25839,1320 @@ paths:
           name: product_name
   /api/dashboards:
     get:
-      tags:
-        - Dashboards
-      summary: Search dashboards
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/dashboards</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a paginated list of dashboards. Each result includes title, description, tags, and metadata, but not the full panel layout. Use `GET /api/dashboards/{id}` to retrieve the complete state.
       operationId: search-dashboards
-      description: |
-        > This documentation is temporarily hosted at a separate location.
-        >
-        > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
+      parameters:
+        - description: The page of results to return.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: The number of results to return per page.
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            maximum: 1000
+            minimum: 1
+            type: number
+        - description: Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax. Multi-word terms require all words to match.
+          in: query
+          name: query
+          required: false
+          schema:
+            type: string
+        - description: A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are included.
+          in: query
+          name: tags
+          required: false
+          schema:
+            default: []
+            description: Tag IDs associated with this dashboard.
+            items:
+              maxLength: 250
+              type: string
+            maxItems: 100
+            type: array
+        - description: A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are excluded.
+          in: query
+          name: excluded_tags
+          required: false
+          schema:
+            default: []
+            description: Tag IDs associated with this dashboard.
+            items:
+              maxLength: 250
+              type: string
+            maxItems: 100
+            type: array
+        - description: A tag name to include. Accepts a single tag name or multiple tag names. When multiple are specified, library items matching any of the tag names are included. If the same name is shared by multiple tags, items matching any of those tags are included.
+          in: query
+          name: tag_names
+          required: false
+          schema:
+            items:
+              type: string
+            maxItems: 100
+            type: array
+            x-state: Generally available; added in 9.6.0
+        - description: A tag name to exclude. Accepts a single tag name or multiple tag names. When multiple are specified, library items matching any of the tag names are excluded. If the same name is shared by multiple tags, items matching any of those tags are excluded.
+          in: query
+          name: excluded_tag_names
+          required: false
+          schema:
+            items:
+              type: string
+            maxItems: 100
+            type: array
+            x-state: Generally available; added in 9.6.0
       responses:
         '200':
-          description: See the full Dashboards API reference for detailed response schemas.
+          content:
+            application/json:
+              examples:
+                searchDashboardsResponse:
+                  description: |
+                    Paginated list of dashboard summaries. Each item includes the ID, a subset of dashboard state fields (`title`, `time_range` if set), and metadata. Full panel content is not included - use the GET endpoint to retrieve a specific dashboard.
+                  summary: Search dashboards response
+                  value:
+                    data:
+                      - data:
+                          title: Web logs overview
+                        id: 3c4b8e10-d57a-11ef-9a52-4f3c2a8d0e1b
+                        meta:
+                          created_at: '2026-04-13T10:00:00.000Z'
+                          managed: false
+                          updated_at: '2026-04-13T10:00:00.000Z'
+                          version: WzEwMiwxXQ==
+                      - data:
+                          time_range:
+                            from: now-7d
+                            to: now
+                          title: Operations overview
+                        id: 7f2a1c40-e83b-11ef-a641-7d5b3f9e1c2a
+                        meta:
+                          created_at: '2026-04-12T08:00:00.000Z'
+                          managed: false
+                          updated_at: '2026-04-12T14:22:00.000Z'
+                          version: WzEwMSwxXQ==
+                    meta:
+                      page: 1
+                      per_page: 20
+                      total: 2
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    description: List of dashboards matching the query. Each entry includes summary fields but not the full panel layout.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        data:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            access_control:
+                              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-access-control'
+                            description:
+                              description: A short description of the dashboard.
+                              type: string
+                            tags:
+                              default: []
+                              description: Tag IDs associated with this dashboard.
+                              items:
+                                maxLength: 250
+                                type: string
+                              maxItems: 100
+                              type: array
+                            time_range:
+                              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+                            title:
+                              description: The dashboard title.
+                              type: string
+                          required:
+                            - title
+                        id:
+                          description: The dashboard ID.
+                          type: string
+                        meta:
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                      required:
+                        - id
+                        - data
+                        - meta
+                    maxItems: 1000
+                    type: array
+                  meta:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      page:
+                        default: 1
+                        description: The returned page of results.
+                        minimum: 1
+                        type: number
+                      per_page:
+                        default: 20
+                        description: The number of results returned per page.
+                        maximum: 1000
+                        minimum: 1
+                        type: number
+                      total:
+                        description: The total number of results matching the query.
+                        type: number
+                    required:
+                      - total
+                required:
+                  - data
+                  - meta
+          description: success
+        '400':
+          description: bad request
+        '403':
+          description: forbidden
+        '500':
+          description: internal server error
+      summary: Search dashboards
+      tags:
+        - Dashboards
+      x-codeSamples:
+        - label: Search dashboards - cURL
+          lang: cURL
+          source: |
+            curl -X GET "${KIBANA_URL}/api/dashboards?query=web+logs&per_page=10" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - label: Search dashboards - Console
+          lang: Console
+          source: |
+            GET kbn:/api/dashboards?query=web+logs&per_page=10
+        - label: Filter by tag name - cURL
+          lang: cURL_tag_names
+          source: |
+            curl -X GET "${KIBANA_URL}/api/dashboards?tag_names=Security&tag_names=Observability" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - label: Filter by tag name - Console
+          lang: Console_tag_names
+          source: |
+            GET kbn:/api/dashboards?tag_names=Security&tag_names=Observability
+        - label: Exclude by tag name - cURL
+          lang: cURL_excluded_tag_names
+          source: |
+            curl -X GET "${KIBANA_URL}/api/dashboards?excluded_tag_names=Deprecated" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - label: Exclude by tag name - Console
+          lang: Console_excluded_tag_names
+          source: |
+            GET kbn:/api/dashboards?excluded_tag_names=Deprecated
+      x-state: Generally available; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
     post:
-      tags:
-        - Dashboards
-      summary: Create a dashboard
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/dashboards</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates a new dashboard and returns its ID, full state, and metadata.
       operationId: create-dashboard
-      description: |
-        > This documentation is temporarily hosted at a separate location.
-        >
-        > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createDashboard:
+                summary: Create a simple dashboard
+                value:
+                  panels:
+                    - config:
+                        content: |-
+                          ## Web logs overview
+
+                          &nbsp;
+
+                          Created with the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana) using the Kibana sample web logs dataset (`kibana_sample_data_logs`). Contains:
+                          - This markdown panel
+                          - 2 metrics, showing request count and average response size
+                          - A line chart based on an ES|QL query
+
+                          &nbsp;
+
+                          &nbsp;
+
+                          [Learn more about dashboards](https://www.elastic.co/docs/explore-analyze/dashboards)
+                      grid:
+                        h: 15
+                        w: 24
+                        x: 0
+                        'y': 0
+                      type: markdown
+                    - config:
+                        data_source:
+                          index_pattern: kibana_sample_data_logs
+                          time_field: timestamp
+                          type: data_view_spec
+                        metrics:
+                          - operation: count
+                            type: primary
+                        type: metric
+                      grid:
+                        h: 5
+                        w: 12
+                        x: 24
+                        'y': 0
+                      type: vis
+                    - config:
+                        data_source:
+                          index_pattern: kibana_sample_data_logs
+                          time_field: timestamp
+                          type: data_view_spec
+                        metrics:
+                          - field: bytes
+                            operation: average
+                            type: primary
+                        type: metric
+                      grid:
+                        h: 5
+                        w: 12
+                        x: 36
+                        'y': 0
+                      type: vis
+                    - config:
+                        axis:
+                          x:
+                            title:
+                              visible: false
+                        layers:
+                          - data_source:
+                              query: FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)
+                              type: esql
+                            type: line
+                            x:
+                              column: BUCKET(@timestamp, 75, ?_tstart, ?_tend)
+                            'y':
+                              - column: count
+                        title: Requests over time
+                        type: xy
+                      grid:
+                        h: 10
+                        w: 24
+                        x: 24
+                        'y': 5
+                      type: vis
+                  title: Web logs overview
+              createDashboardWithSectionsAndControls:
+                summary: Create a dashboard with sections and controls
+                value:
+                  panels:
+                    - collapsed: false
+                      grid:
+                        'y': 0
+                      panels:
+                        - config:
+                            data_source:
+                              index_pattern: kibana_sample_data_logs
+                              time_field: timestamp
+                              type: data_view_spec
+                            metrics:
+                              - operation: count
+                                type: primary
+                            type: metric
+                          grid:
+                            h: 5
+                            w: 12
+                            x: 0
+                            'y': 0
+                          type: vis
+                        - config:
+                            data_source:
+                              index_pattern: kibana_sample_data_logs
+                              time_field: timestamp
+                              type: data_view_spec
+                            metrics:
+                              - field: bytes
+                                operation: average
+                                type: primary
+                            type: metric
+                          grid:
+                            h: 5
+                            w: 12
+                            x: 12
+                            'y': 0
+                          type: vis
+                      title: Key metrics
+                    - collapsed: false
+                      grid:
+                        'y': 8
+                      panels:
+                        - config:
+                            axis:
+                              x:
+                                title:
+                                  visible: false
+                            layers:
+                              - data_source:
+                                  index_pattern: kibana_sample_data_logs
+                                  time_field: timestamp
+                                  type: data_view_spec
+                                type: line
+                                x:
+                                  field: timestamp
+                                  operation: date_histogram
+                                'y':
+                                  - operation: count
+                            title: Requests over time
+                            type: xy
+                          grid:
+                            h: 10
+                            w: 24
+                            x: 0
+                            'y': 0
+                          type: vis
+                        - config:
+                            axis:
+                              x:
+                                title:
+                                  visible: false
+                            layers:
+                              - data_source:
+                                  query: FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)
+                                  type: esql
+                                type: line
+                                x:
+                                  column: BUCKET(@timestamp, 75, ?_tstart, ?_tend)
+                                'y':
+                                  - column: count
+                            title: Requests over time (ES|QL)
+                            type: xy
+                          grid:
+                            h: 10
+                            w: 24
+                            x: 24
+                            'y': 0
+                          type: vis
+                      title: Traffic trends
+                  pinned_panels:
+                    - config:
+                        data_view_id: 90943e30-9a47-11e8-b64d-95841ca0b247
+                        exclude: false
+                        exists_selected: false
+                        field_name: response.keyword
+                        ignore_validations: false
+                        run_past_timeout: false
+                        search_technique: prefix
+                        selected_options: []
+                        single_select: false
+                        sort:
+                          by: _count
+                          direction: desc
+                        title: Response code
+                        use_global_filters: true
+                        values_source: field
+                      grow: true
+                      type: options_list_control
+                      width: medium
+                  time_range:
+                    from: now-7d
+                    to: now
+                  title: Operations overview
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-data'
       responses:
-        '200':
-          description: See the full Dashboards API reference for detailed response schemas.
+        '201':
+          content:
+            application/json:
+              examples:
+                createDashboardResponse:
+                  description: |
+                    Response to creating a dashboard. Returns the generated ID, the full dashboard state in `data`, and metadata. Default option values are always returned even when not explicitly set in the request. Panel `id` values are generated automatically.
+                  summary: Create dashboard response
+                  value:
+                    data:
+                      access_control:
+                        access_mode: write_restricted
+                      options:
+                        auto_apply_filters: true
+                        hide_panel_borders: false
+                        hide_panel_titles: false
+                        sync_colors: false
+                        sync_cursor: true
+                        sync_tooltips: false
+                        use_margins: true
+                      panels:
+                        - config:
+                            content: '## Web logs overview'
+                          grid:
+                            h: 15
+                            w: 24
+                            x: 0
+                            'y': 0
+                          id: a1b2c3d4-0001-4000-8000-000000000001
+                          type: markdown
+                        - config:
+                            data_source:
+                              index_pattern: kibana_sample_data_logs
+                              time_field: timestamp
+                              type: data_view_spec
+                            ignore_global_filters: false
+                            metrics:
+                              - empty_as_null: false
+                                operation: count
+                                type: primary
+                            sampling: 1
+                            styling:
+                              primary:
+                                labels:
+                                  alignment: left
+                                position: bottom
+                                value:
+                                  alignment: right
+                                  sizing: auto
+                            title: ''
+                            type: metric
+                          grid:
+                            h: 5
+                            w: 12
+                            x: 24
+                            'y': 0
+                          id: a1b2c3d4-0001-4000-8000-000000000002
+                          type: vis
+                        - config:
+                            data_source:
+                              index_pattern: kibana_sample_data_logs
+                              time_field: timestamp
+                              type: data_view_spec
+                            ignore_global_filters: false
+                            metrics:
+                              - field: bytes
+                                operation: average
+                                type: primary
+                            sampling: 1
+                            styling:
+                              primary:
+                                labels:
+                                  alignment: left
+                                position: bottom
+                                value:
+                                  alignment: right
+                                  sizing: auto
+                            title: ''
+                            type: metric
+                          grid:
+                            h: 5
+                            w: 12
+                            x: 36
+                            'y': 0
+                          id: a1b2c3d4-0001-4000-8000-000000000003
+                          type: vis
+                        - config:
+                            axis:
+                              x:
+                                domain:
+                                  rounding: false
+                                  type: fit
+                                grid:
+                                  visible: true
+                                labels:
+                                  orientation: horizontal
+                                scale: ordinal
+                                ticks:
+                                  visible: true
+                                title:
+                                  visible: false
+                              'y':
+                                anchor: start
+                                domain:
+                                  rounding: true
+                                  type: full
+                                grid:
+                                  visible: true
+                                labels:
+                                  orientation: horizontal
+                                scale: linear
+                                ticks:
+                                  visible: true
+                                title:
+                                  visible: true
+                            layers:
+                              - data_source:
+                                  query: FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)
+                                  type: esql
+                                ignore_global_filters: false
+                                sampling: 1
+                                type: line
+                                x:
+                                  column: BUCKET(@timestamp, 75, ?_tstart, ?_tend)
+                                'y':
+                                  - axis_id: 'y'
+                                    column: count
+                            legend:
+                              layout:
+                                truncate:
+                                  max_lines: 1
+                                type: grid
+                              placement: outside
+                              position: right
+                              visibility: hidden
+                            styling:
+                              interpolation: linear
+                              overlays:
+                                current_time_marker:
+                                  visible: false
+                                partial_buckets:
+                                  visible: false
+                              points:
+                                visibility: auto
+                            title: Requests over time
+                            type: xy
+                          grid:
+                            h: 10
+                            w: 24
+                            x: 24
+                            'y': 5
+                          id: a1b2c3d4-0001-4000-8000-000000000003
+                          type: vis
+                      pinned_panels: []
+                      title: Web logs overview
+                    id: 3c4b8e10-d57a-11ef-9a52-4f3c2a8d0e1b
+                    meta:
+                      created_at: '2026-04-13T10:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T10:00:00.000Z'
+                      version: WzEwMiwxXQ==
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-data'
+                  id:
+                    description: The unique ID of the dashboard, as returned by the create or search endpoints.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: created
+        '400':
+          description: invalid request
+        '403':
+          description: forbidden
+      summary: Create a dashboard
+      tags:
+        - Dashboards
+      x-state: Generally available; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/dashboards/{id}:
-    get:
-      tags:
-        - Dashboards
-      summary: Get a dashboard
-      operationId: get-dashboard
-      description: |
-        > This documentation is temporarily hosted at a separate location.
-        >
-        > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
-      responses:
-        '200':
-          description: See the full Dashboards API reference for detailed response schemas.
-    put:
-      tags:
-        - Dashboards
-      summary: Upsert a dashboard
-      operationId: upsert-dashboard
-      description: |
-        > This documentation is temporarily hosted at a separate location.
-        >
-        > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
-      responses:
-        '200':
-          description: See the full Dashboards API reference for detailed response schemas.
     delete:
-      tags:
-        - Dashboards
-      summary: Delete a dashboard
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/dashboards/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Permanently deletes a dashboard by ID.
       operationId: delete-dashboard
-      description: |
-        > This documentation is temporarily hosted at a separate location.
-        >
-        > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The dashboard ID, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
         '200':
-          description: See the full Dashboards API reference for detailed response schemas.
+          description: deleted
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+        '500':
+          description: internal server error
+      summary: Delete a dashboard
+      tags:
+        - Dashboards
+      x-codeSamples:
+        - label: Delete a dashboard - cURL
+          lang: cURL
+          source: |
+            curl -X DELETE "${KIBANA_URL}/api/dashboards/3c4b8e10-d57a-11ef-9a52-4f3c2a8d0e1b" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - label: Delete a dashboard - Console
+          lang: Console
+          source: |
+            DELETE kbn:/api/dashboards/3c4b8e10-d57a-11ef-9a52-4f3c2a8d0e1b
+      x-state: Generally available; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/dashboards/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns the complete state of a dashboard by ID.
+      operationId: get-dashboard
+      parameters:
+        - description: The dashboard ID, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getDashboardResponse:
+                  description: |
+                    The full dashboard state including all panels, options, and metadata.
+                  summary: Get dashboard response
+                  value:
+                    data:
+                      options:
+                        auto_apply_filters: true
+                        hide_panel_borders: false
+                        hide_panel_titles: false
+                        sync_colors: false
+                        sync_cursor: true
+                        sync_tooltips: false
+                        use_margins: true
+                      panels:
+                        - config:
+                            data_source:
+                              index_pattern: kibana_sample_data_logs
+                              time_field: timestamp
+                              type: data_view_spec
+                            ignore_global_filters: false
+                            metrics:
+                              - empty_as_null: false
+                                operation: count
+                                type: primary
+                            sampling: 1
+                            styling:
+                              primary:
+                                labels:
+                                  alignment: left
+                                position: bottom
+                                value:
+                                  alignment: right
+                                  sizing: auto
+                            title: Total requests
+                            type: metric
+                          grid:
+                            h: 8
+                            w: 12
+                            x: 0
+                            'y': 0
+                          id: a1b2c3d4-0001-4000-8000-000000000001
+                          type: vis
+                        - config:
+                            data_source:
+                              index_pattern: kibana_sample_data_logs
+                              time_field: timestamp
+                              type: data_view_spec
+                            ignore_global_filters: false
+                            metrics:
+                              - field: bytes
+                                operation: average
+                                type: primary
+                            sampling: 1
+                            styling:
+                              primary:
+                                labels:
+                                  alignment: left
+                                position: bottom
+                                value:
+                                  alignment: right
+                                  sizing: auto
+                            title: Average response size
+                            type: metric
+                          grid:
+                            h: 8
+                            w: 12
+                            x: 12
+                            'y': 0
+                          id: a1b2c3d4-0001-4000-8000-000000000002
+                          type: vis
+                        - config:
+                            axis:
+                              x:
+                                domain:
+                                  rounding: false
+                                  type: fit
+                                grid:
+                                  visible: true
+                                labels:
+                                  orientation: horizontal
+                                scale: ordinal
+                                ticks:
+                                  visible: true
+                                title:
+                                  visible: false
+                              'y':
+                                anchor: start
+                                domain:
+                                  rounding: true
+                                  type: full
+                                grid:
+                                  visible: true
+                                labels:
+                                  orientation: horizontal
+                                scale: linear
+                                ticks:
+                                  visible: true
+                                title:
+                                  visible: true
+                            layers:
+                              - data_source:
+                                  query: FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)
+                                  type: esql
+                                ignore_global_filters: false
+                                sampling: 1
+                                type: line
+                                x:
+                                  column: BUCKET(@timestamp, 75, ?_tstart, ?_tend)
+                                'y':
+                                  - axis_id: 'y'
+                                    column: count
+                            legend:
+                              layout:
+                                truncate:
+                                  max_lines: 1
+                                type: grid
+                              placement: outside
+                              position: right
+                              visibility: hidden
+                            styling:
+                              interpolation: linear
+                              overlays:
+                                current_time_marker:
+                                  visible: false
+                                partial_buckets:
+                                  visible: false
+                              points:
+                                visibility: auto
+                            title: Requests over time
+                            type: xy
+                          grid:
+                            h: 10
+                            w: 24
+                            x: 0
+                            'y': 15
+                          id: a1b2c3d4-0001-4000-8000-000000000003
+                          type: vis
+                      pinned_panels: []
+                      title: Web logs overview
+                    id: 3c4b8e10-d57a-11ef-9a52-4f3c2a8d0e1b
+                    meta:
+                      created_at: '2026-04-13T10:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T10:00:00.000Z'
+                      version: WzEwMiwxXQ==
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-data'
+                  id:
+                    description: The unique ID of the dashboard, as returned by the create or search endpoints.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                  warnings:
+                    description: A list of warnings returned by the Dashboards API. Present only when one or more dashboard properties failed validation.
+                    items:
+                      anyOf:
+                        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-dropped-panel-warning'
+                        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-dropped-property-warning'
+                    maxItems: 100
+                    type: array
+                required:
+                  - id
+                  - data
+                  - meta
+          description: success
+        '400':
+          description: invalid response
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+        '500':
+          description: internal server error
+      summary: Get a dashboard
+      tags:
+        - Dashboards
+      x-codeSamples:
+        - label: Get a dashboard - cURL
+          lang: cURL
+          source: |
+            curl -X GET "${KIBANA_URL}/api/dashboards/3c4b8e10-d57a-11ef-9a52-4f3c2a8d0e1b" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - label: Get a dashboard - Console
+          lang: Console
+          source: |
+            GET kbn:/api/dashboards/3c4b8e10-d57a-11ef-9a52-4f3c2a8d0e1b
+      x-state: Generally available; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    put:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/dashboards/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates a new dashboard with the given ID if none exists, or replaces the complete state of an
+        existing one.
+
+        > warn
+        > This is a full replacement. Any panels not included in the request body are permanently
+        > removed. To make targeted changes, retrieve the current state first with
+        > GET /api/dashboards/{id}, apply your changes, and submit the full updated object.
+
+        You can optionally include `access_control.access_mode` to change the dashboard access mode.
+        If the authenticated user is not authorized to change access mode for the target dashboard,
+        the request returns a `403` response with a descriptive `message`.
+      operationId: upsert-dashboard
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique ID of the dashboard to be created or updated
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateDashboard:
+                summary: Update a dashboard
+                value:
+                  panels:
+                    - config:
+                        data_source:
+                          index_pattern: kibana_sample_data_logs
+                          time_field: timestamp
+                          type: data_view_spec
+                        metrics:
+                          - operation: count
+                            type: primary
+                        type: metric
+                      grid:
+                        h: 5
+                        w: 12
+                        x: 0
+                        'y': 0
+                      type: vis
+                    - config:
+                        data_source:
+                          index_pattern: kibana_sample_data_logs
+                          time_field: timestamp
+                          type: data_view_spec
+                        metrics:
+                          - field: bytes
+                            operation: average
+                            type: primary
+                        type: metric
+                      grid:
+                        h: 5
+                        w: 12
+                        x: 12
+                        'y': 0
+                      type: vis
+                    - config:
+                        axis:
+                          x:
+                            title:
+                              visible: false
+                        layers:
+                          - data_source:
+                              query: FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)
+                              type: esql
+                            type: line
+                            x:
+                              column: BUCKET(@timestamp, 75, ?_tstart, ?_tend)
+                            'y':
+                              - column: count
+                        title: Requests over time
+                        type: xy
+                      grid:
+                        h: 10
+                        w: 24
+                        x: 0
+                        'y': 8
+                      type: vis
+                    - config:
+                        data_source:
+                          index_pattern: kibana_sample_data_logs
+                          time_field: timestamp
+                          type: data_view_spec
+                        metrics:
+                          - field: clientip
+                            operation: unique_count
+                            type: primary
+                        type: metric
+                      grid:
+                        h: 5
+                        w: 12
+                        x: 24
+                        'y': 8
+                      type: vis
+                  title: Web logs overview
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-data'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateDashboardResponse:
+                  description: |
+                    The complete updated dashboard state after a full replacement. Note that `meta.created_at` is not returned in update responses - use the GET endpoint to retrieve it.
+                  summary: Update dashboard response
+                  value:
+                    data:
+                      options:
+                        auto_apply_filters: true
+                        hide_panel_borders: false
+                        hide_panel_titles: false
+                        sync_colors: false
+                        sync_cursor: true
+                        sync_tooltips: false
+                        use_margins: true
+                      panels:
+                        - config:
+                            content: |-
+                              ## Web logs overview
+
+                              &nbsp;
+
+                              Created with the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana) using the Kibana sample web logs dataset (`kibana_sample_data_logs`). Contains:
+                              - This markdown panel
+                              - 2 metrics, showing request count and average response size
+                              - A line chart based on an ES|QL query
+
+                              &nbsp;
+
+                              &nbsp;
+
+                              [Learn more about dashboards](https://www.elastic.co/docs/explore-analyze/dashboards)
+                          grid:
+                            h: 15
+                            w: 24
+                            x: 0
+                            'y': 0
+                          id: a1b2c3d4-0001-4000-8000-000000000001
+                          type: markdown
+                        - config:
+                            data_source:
+                              index_pattern: kibana_sample_data_logs
+                              time_field: timestamp
+                              type: data_view_spec
+                            ignore_global_filters: false
+                            metrics:
+                              - empty_as_null: false
+                                operation: count
+                                type: primary
+                            sampling: 1
+                            styling:
+                              primary:
+                                labels:
+                                  alignment: left
+                                position: bottom
+                                value:
+                                  alignment: right
+                                  sizing: auto
+                            title: ''
+                            type: metric
+                          grid:
+                            h: 5
+                            w: 12
+                            x: 24
+                            'y': 0
+                          id: a1b2c3d4-0001-4000-8000-000000000002
+                          type: vis
+                        - config:
+                            data_source:
+                              index_pattern: kibana_sample_data_logs
+                              time_field: timestamp
+                              type: data_view_spec
+                            ignore_global_filters: false
+                            metrics:
+                              - field: bytes
+                                operation: average
+                                type: primary
+                            sampling: 1
+                            styling:
+                              primary:
+                                labels:
+                                  alignment: left
+                                position: bottom
+                                value:
+                                  alignment: right
+                                  sizing: auto
+                            title: ''
+                            type: metric
+                          grid:
+                            h: 5
+                            w: 12
+                            x: 36
+                            'y': 0
+                          id: a1b2c3d4-0001-4000-8000-000000000003
+                          type: vis
+                        - config:
+                            axis:
+                              x:
+                                domain:
+                                  rounding: false
+                                  type: fit
+                                grid:
+                                  visible: true
+                                labels:
+                                  orientation: horizontal
+                                scale: ordinal
+                                ticks:
+                                  visible: true
+                                title:
+                                  visible: false
+                              'y':
+                                anchor: start
+                                domain:
+                                  rounding: true
+                                  type: full
+                                grid:
+                                  visible: true
+                                labels:
+                                  orientation: horizontal
+                                scale: linear
+                                ticks:
+                                  visible: true
+                                title:
+                                  visible: true
+                            layers:
+                              - data_source:
+                                  query: FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)
+                                  type: esql
+                                ignore_global_filters: false
+                                sampling: 1
+                                type: line
+                                x:
+                                  column: BUCKET(@timestamp, 75, ?_tstart, ?_tend)
+                                'y':
+                                  - axis_id: 'y'
+                                    column: count
+                            legend:
+                              layout:
+                                truncate:
+                                  max_lines: 1
+                                type: grid
+                              placement: outside
+                              position: right
+                              visibility: hidden
+                            styling:
+                              interpolation: linear
+                              overlays:
+                                current_time_marker:
+                                  visible: false
+                                partial_buckets:
+                                  visible: false
+                              points:
+                                visibility: auto
+                            title: Requests over time
+                            type: xy
+                          grid:
+                            h: 10
+                            w: 24
+                            x: 24
+                            'y': 5
+                          id: a1b2c3d4-0001-4000-8000-000000000003
+                          type: vis
+                        - config:
+                            data_source:
+                              index_pattern: kibana_sample_data_logs
+                              time_field: timestamp
+                              type: data_view_spec
+                            ignore_global_filters: false
+                            metrics:
+                              - empty_as_null: false
+                                field: clientip
+                                operation: unique_count
+                                type: primary
+                            sampling: 1
+                            styling:
+                              primary:
+                                labels:
+                                  alignment: left
+                                position: bottom
+                                value:
+                                  alignment: right
+                                  sizing: auto
+                            title: Unique visitors
+                            type: metric
+                          grid:
+                            h: 10
+                            w: 24
+                            x: 24
+                            'y': 8
+                          id: a1b2c3d4-0001-4000-8000-000000000004
+                          type: vis
+                      pinned_panels: []
+                      title: Web logs overview
+                    id: 3c4b8e10-d57a-11ef-9a52-4f3c2a8d0e1b
+                    meta:
+                      managed: false
+                      updated_at: '2026-04-13T11:00:00.000Z'
+                      version: WzEwMywxXQ==
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-data'
+                  id:
+                    description: The unique ID of the dashboard, as returned by the create or search endpoints.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: updated
+        '201':
+          content:
+            application/json:
+              examples:
+                createDashboardResponse:
+                  description: |
+                    Response when PUT creates a new dashboard (no existing dashboard with the given ID). Returns the generated state and metadata. Default option values are always returned even when not explicitly set in the request.
+                  summary: Create dashboard response (PUT)
+                  value:
+                    data:
+                      options:
+                        auto_apply_filters: true
+                        hide_panel_borders: false
+                        hide_panel_titles: false
+                        sync_colors: false
+                        sync_cursor: true
+                        sync_tooltips: false
+                        use_margins: true
+                      panels:
+                        - config:
+                            data_source:
+                              index_pattern: kibana_sample_data_logs
+                              time_field: timestamp
+                              type: data_view_spec
+                            ignore_global_filters: false
+                            metrics:
+                              - empty_as_null: false
+                                operation: count
+                                type: primary
+                            sampling: 1
+                            styling:
+                              primary:
+                                labels:
+                                  alignment: left
+                                position: bottom
+                                value:
+                                  alignment: right
+                                  sizing: auto
+                            title: ''
+                            type: metric
+                          grid:
+                            h: 5
+                            w: 12
+                            x: 0
+                            'y': 0
+                          id: a1b2c3d4-0001-4000-8000-000000000001
+                          type: vis
+                      pinned_panels: []
+                      title: Web logs overview
+                    id: 3c4b8e10-d57a-11ef-9a52-4f3c2a8d0e1b
+                    meta:
+                      created_at: '2026-04-13T10:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T10:00:00.000Z'
+                      version: WzEwMiwxXQ==
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-data'
+                  id:
+                    description: The unique ID of the dashboard, as returned by the create or search endpoints.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: created
+        '400':
+          description: invalid request
+        '403':
+          description: forbidden
+        '409':
+          description: conflict
+      summary: Upsert a dashboard
+      tags:
+        - Dashboards
+      x-state: Generally available; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/data_views:
     get:
       description: |
@@ -139952,66 +141532,912 @@ paths:
           name: product_name
   /api/visualizations:
     get:
-      tags:
-        - Visualizations
-      summary: Search visualizations
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/visualizations</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a paginated list of Lens visualizations matching the optional `query` text.
       operationId: search-visualizations
-      description: |
-        > This documentation is temporarily hosted at a separate location.
-        >
-        > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
+      parameters:
+        - description: The saved object fields to include in each result. When omitted, all fields are returned.
+          in: query
+          name: fields
+          required: false
+          schema:
+            items:
+              type: string
+            maxItems: 100
+            type: array
+        - description: The fields to match the `query` text against. Defaults to `title` when omitted.
+          in: query
+          name: search_fields
+          required: false
+          schema:
+            items:
+              type: string
+            maxItems: 100
+            type: array
+        - description: Text to match against `search_fields`.
+          in: query
+          name: query
+          required: false
+          schema:
+            type: string
+        - description: The page of results to return.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: The number of results to return per page.
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            maximum: 1000
+            minimum: 1
+            type: number
       responses:
         '200':
-          description: See the full Visualizations API reference for detailed response schemas.
+          content:
+            application/json:
+              examples:
+                searchVisualizationsResponse:
+                  description: |
+                    Paginated list of visualizations matching the query. Each item includes the ID, full chart configuration, and metadata. Use the GET endpoint to retrieve a single visualization by ID.
+                  summary: Search visualizations response
+                  value:
+                    data:
+                      - data:
+                          data_source:
+                            index_pattern: kibana_sample_data_logs
+                            time_field: timestamp
+                            type: data_view_spec
+                          ignore_global_filters: false
+                          metrics:
+                            - empty_as_null: false
+                              operation: count
+                              type: primary
+                          sampling: 1
+                          styling:
+                            primary:
+                              labels:
+                                alignment: left
+                              position: bottom
+                              value:
+                                alignment: right
+                                sizing: auto
+                          tags: []
+                          title: Total requests
+                          type: metric
+                        id: 1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d
+                        meta:
+                          created_at: '2026-04-13T10:00:00.000Z'
+                          managed: false
+                          updated_at: '2026-04-13T10:00:00.000Z'
+                          version: WzU5LDFd
+                      - data:
+                          axis:
+                            x:
+                              domain:
+                                rounding: false
+                                type: fit
+                              grid:
+                                visible: true
+                              labels:
+                                orientation: horizontal
+                              ticks:
+                                visible: true
+                              title:
+                                visible: true
+                            'y':
+                              domain:
+                                rounding: true
+                                type: full
+                              grid:
+                                visible: true
+                              labels:
+                                orientation: horizontal
+                              scale: linear
+                              ticks:
+                                visible: true
+                              title:
+                                visible: true
+                          layers:
+                            - data_source:
+                                index_pattern: kibana_sample_data_logs
+                                time_field: timestamp
+                                type: data_view_spec
+                              ignore_global_filters: false
+                              sampling: 1
+                              type: line
+                              x:
+                                drop_partial_intervals: false
+                                field: timestamp
+                                include_empty_rows: true
+                                operation: date_histogram
+                                suggested_interval: auto
+                                use_original_time_range: false
+                              'y':
+                                - axis: 'y'
+                                  empty_as_null: false
+                                  operation: count
+                          legend:
+                            layout:
+                              truncate:
+                                max_lines: 1
+                              type: grid
+                            placement: outside
+                            position: right
+                            visibility: hidden
+                          styling:
+                            interpolation: linear
+                            overlays:
+                              current_time_marker:
+                                visible: false
+                              partial_buckets:
+                                visible: false
+                            points:
+                              visibility: auto
+                          tags: []
+                          title: Log entries over time
+                          type: xy
+                        id: 3a7c2e10-b3c5-11ef-bd7a-2b6b1a8c0f3d
+                        meta:
+                          created_at: '2026-04-13T10:05:00.000Z'
+                          managed: false
+                          updated_at: '2026-04-13T10:05:00.000Z'
+                          version: WzYwLDFd
+                    meta:
+                      page: 1
+                      per_page: 20
+                      total: 2
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    items:
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_visResponseItem'
+                    maxItems: 1000
+                    type: array
+                  meta:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      page:
+                        default: 1
+                        description: The returned page of results.
+                        minimum: 1
+                        type: number
+                      per_page:
+                        default: 20
+                        description: The number of results returned per page.
+                        maximum: 1000
+                        minimum: 1
+                        type: number
+                      total:
+                        description: The total number of results matching the query.
+                        type: number
+                    required:
+                      - total
+                required:
+                  - data
+                  - meta
+          description: Ok
+        '400':
+          description: Malformed request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+      summary: Search visualizations
+      tags:
+        - Visualizations
+      x-codeSamples:
+        - label: Search visualizations - cURL
+          lang: cURL
+          source: |
+            curl -X GET "${KIBANA_URL}/api/visualizations?query=requests&per_page=10" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - label: Search visualizations - Console
+          lang: Console
+          source: |
+            GET kbn:/api/visualizations?query=requests&per_page=10
+      x-state: Generally available; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
     post:
-      tags:
-        - Visualizations
-      summary: Create visualization
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/visualizations</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates a Lens visualization and saves it to the library.
+
+        ES|QL visualizations cannot be created through this endpoint.
       operationId: create-visualization
-      description: |
-        > This documentation is temporarily hosted at a separate location.
-        >
-        > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createDataTableVisualization:
+                summary: Create a data table
+                value:
+                  data_source:
+                    index_pattern: kibana_sample_data_logs
+                    time_field: timestamp
+                    type: data_view_spec
+                  ignore_global_filters: false
+                  metrics:
+                    - empty_as_null: false
+                      operation: count
+                  rows:
+                    - fields:
+                        - response.keyword
+                      limit: 5
+                      operation: terms
+                  sampling: 1
+                  tags: []
+                  title: Top response codes
+                  type: data_table
+              createDataViewReferenceVisualization:
+                summary: Create a visualization using a library data view
+                value:
+                  data_source:
+                    ref_id: 90943e30-9a47-11e8-b64d-95841ca0b247
+                    type: data_view_reference
+                  ignore_global_filters: false
+                  metrics:
+                    - empty_as_null: false
+                      operation: count
+                      type: primary
+                  sampling: 1
+                  tags: []
+                  title: Total requests (library data view)
+                  type: metric
+              createMetricVisualization:
+                summary: Create a metric visualization
+                value:
+                  data_source:
+                    index_pattern: kibana_sample_data_logs
+                    time_field: timestamp
+                    type: data_view_spec
+                  ignore_global_filters: false
+                  metrics:
+                    - empty_as_null: false
+                      operation: count
+                      type: primary
+                  sampling: 1
+                  tags: []
+                  title: Total requests
+                  type: metric
+              createPieVisualization:
+                summary: Create a pie/donut chart
+                value:
+                  data_source:
+                    index_pattern: kibana_sample_data_logs
+                    time_field: timestamp
+                    type: data_view_spec
+                  group_by:
+                    - fields:
+                        - response.keyword
+                      limit: 5
+                      operation: terms
+                  ignore_global_filters: false
+                  metrics:
+                    - empty_as_null: false
+                      operation: count
+                  sampling: 1
+                  styling:
+                    donut_hole: m
+                    labels:
+                      position: outside
+                      visible: true
+                    values:
+                      mode: percentage
+                      visible: true
+                  tags: []
+                  title: Requests by response code
+                  type: pie
+              createXYVisualization:
+                summary: Create an XY line chart
+                value:
+                  layers:
+                    - data_source:
+                        index_pattern: kibana_sample_data_logs
+                        time_field: timestamp
+                        type: data_view_spec
+                      ignore_global_filters: false
+                      sampling: 1
+                      type: line
+                      x:
+                        drop_partial_intervals: false
+                        field: timestamp
+                        include_empty_rows: true
+                        operation: date_histogram
+                        suggested_interval: auto
+                        use_original_time_range: false
+                      'y':
+                        - empty_as_null: false
+                          operation: count
+                  tags: []
+                  title: Log entries over time
+                  type: xy
+            schema:
+              anyOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyMetricLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_xyLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_regionMapLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleLibItemNoESQL'
       responses:
-        '200':
-          description: See the full Visualizations API reference for detailed response schemas.
+        '201':
+          content:
+            application/json:
+              examples:
+                createDataTableVisualizationResponse:
+                  description: |
+                    Response after creating a data table broken down by response code. Note that `rows` items gain a server-populated `rank_by` sort order.
+                  summary: Create a data table
+                  value:
+                    data:
+                      data_source:
+                        index_pattern: kibana_sample_data_logs
+                        time_field: timestamp
+                        type: data_view_spec
+                      ignore_global_filters: false
+                      metrics:
+                        - empty_as_null: false
+                          operation: count
+                      rows:
+                        - fields:
+                            - response.keyword
+                          limit: 5
+                          operation: terms
+                          rank_by:
+                            direction: desc
+                            metric_index: 0
+                            type: metric
+                      sampling: 1
+                      tags: []
+                      title: Top response codes
+                      type: data_table
+                    id: 83660652-bc77-46a1-8dca-5d512949eba6
+                    meta:
+                      created_at: '2026-04-13T10:15:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T10:15:00.000Z'
+                      version: Wzc4LDFd
+                createDataViewReferenceResponse:
+                  description: |
+                    Response after creating a metric chart that references an existing saved data view by ID (`ref_id`) instead of defining an inline index pattern.
+                  summary: Create a visualization using a library data view
+                  value:
+                    data:
+                      data_source:
+                        ref_id: 90943e30-9a47-11e8-b64d-95841ca0b247
+                        type: data_view_reference
+                      ignore_global_filters: false
+                      metrics:
+                        - empty_as_null: false
+                          operation: count
+                          type: primary
+                      sampling: 1
+                      styling:
+                        primary:
+                          labels:
+                            alignment: left
+                          position: bottom
+                          value:
+                            alignment: right
+                            sizing: auto
+                      tags: []
+                      title: Total requests (library data view)
+                      type: metric
+                    id: cc44837a-7f20-42ee-b317-9af4f5eacc9c
+                    meta:
+                      created_at: '2026-04-13T10:20:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T10:20:00.000Z'
+                      version: Wzc5LDFd
+                createMetricVisualizationResponse:
+                  description: |
+                    Response after creating a metric chart (count of requests) using an inline data view. Server-populated defaults are included in the response.
+                  summary: Create a metric visualization
+                  value:
+                    data:
+                      data_source:
+                        index_pattern: kibana_sample_data_logs
+                        time_field: timestamp
+                        type: data_view_spec
+                      ignore_global_filters: false
+                      metrics:
+                        - empty_as_null: false
+                          operation: count
+                          type: primary
+                      sampling: 1
+                      styling:
+                        primary:
+                          labels:
+                            alignment: left
+                          position: bottom
+                          value:
+                            alignment: right
+                            sizing: auto
+                      tags: []
+                      title: Total requests
+                      type: metric
+                    id: 1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d
+                    meta:
+                      created_at: '2026-04-13T10:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T10:00:00.000Z'
+                      version: WzU5LDFd
+                createPieVisualizationResponse:
+                  description: |
+                    Response after creating a donut chart broken down by response code. Note that `group_by` items gain a server-populated `rank_by` sort order, and `legend`, `values`, and `labels` are populated with defaults.
+                  summary: Create a pie/donut chart
+                  value:
+                    data:
+                      data_source:
+                        index_pattern: kibana_sample_data_logs
+                        time_field: timestamp
+                        type: data_view_spec
+                      group_by:
+                        - fields:
+                            - response.keyword
+                          limit: 5
+                          operation: terms
+                          rank_by:
+                            direction: desc
+                            metric_index: 0
+                            type: metric
+                      ignore_global_filters: false
+                      legend:
+                        visibility: auto
+                      metrics:
+                        - empty_as_null: false
+                          operation: count
+                      sampling: 1
+                      styling:
+                        donut_hole: m
+                        labels:
+                          position: outside
+                          visible: true
+                        values:
+                          mode: percentage
+                          visible: true
+                      tags: []
+                      title: Requests by response code
+                      type: pie
+                    id: 2cac466f-ff49-4d34-8d69-487a93a179c2
+                    meta:
+                      created_at: '2026-04-13T10:10:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T10:10:00.000Z'
+                      version: Wzc3LDFd
+                createXYVisualizationResponse:
+                  description: |
+                    Response after creating an XY line chart. The response includes server-populated defaults for axis configuration, styling, and legend.
+                  summary: Create an XY line chart
+                  value:
+                    data:
+                      axis:
+                        x:
+                          domain:
+                            rounding: false
+                            type: fit
+                          grid:
+                            visible: true
+                          labels:
+                            orientation: horizontal
+                          ticks:
+                            visible: true
+                          title:
+                            visible: true
+                        'y':
+                          domain:
+                            rounding: true
+                            type: full
+                          grid:
+                            visible: true
+                          labels:
+                            orientation: horizontal
+                          scale: linear
+                          ticks:
+                            visible: true
+                          title:
+                            visible: true
+                      layers:
+                        - data_source:
+                            index_pattern: kibana_sample_data_logs
+                            time_field: timestamp
+                            type: data_view_spec
+                          ignore_global_filters: false
+                          sampling: 1
+                          type: line
+                          x:
+                            drop_partial_intervals: false
+                            field: timestamp
+                            include_empty_rows: true
+                            operation: date_histogram
+                            suggested_interval: auto
+                            use_original_time_range: false
+                          'y':
+                            - axis: 'y'
+                              empty_as_null: false
+                              operation: count
+                      legend:
+                        layout:
+                          truncate:
+                            max_lines: 1
+                          type: grid
+                        placement: outside
+                        position: right
+                        visibility: hidden
+                      styling:
+                        interpolation: linear
+                        overlays:
+                          current_time_marker:
+                            visible: false
+                          partial_buckets:
+                            visible: false
+                        points:
+                          visibility: auto
+                      tags: []
+                      title: Log entries over time
+                      type: xy
+                    id: 3a7c2e10-b3c5-11ef-bd7a-2b6b1a8c0f3d
+                    meta:
+                      created_at: '2026-04-13T10:05:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T10:05:00.000Z'
+                      version: WzYwLDFd
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_visResponseItem'
+          description: Created
+        '400':
+          description: Malformed request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+      summary: Create visualization
+      tags:
+        - Visualizations
+      x-state: Generally available; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/visualizations/{id}:
-    get:
-      tags:
-        - Visualizations
-      summary: Get visualization
-      operationId: get-visualization
-      description: |
-        > This documentation is temporarily hosted at a separate location.
-        >
-        > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
-      responses:
-        '200':
-          description: See the full Visualizations API reference for detailed response schemas.
-    put:
-      tags:
-        - Visualizations
-      summary: Upsert visualization
-      operationId: upsert-visualization
-      description: |
-        > This documentation is temporarily hosted at a separate location.
-        >
-        > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
-      responses:
-        '200':
-          description: See the full Visualizations API reference for detailed response schemas.
     delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/visualizations/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Permanently deletes a Lens visualization. If the visualization is referenced by a dashboard panel, the panel shows an error after deletion.
+      operationId: delete-visualization
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The visualization identifier, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Malformed request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+      summary: Delete visualization
       tags:
         - Visualizations
-      summary: Delete visualization
-      operationId: delete-visualization
-      description: |
-        > This documentation is temporarily hosted at a separate location.
-        >
-        > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
+      x-codeSamples:
+        - label: Delete a visualization - cURL
+          lang: cURL
+          source: |
+            curl -X DELETE "${KIBANA_URL}/api/visualizations/1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - label: Delete a visualization - Console
+          lang: Console
+          source: |
+            DELETE kbn:/api/visualizations/1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d
+      x-state: Generally available; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/visualizations/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a single Lens visualization by its ID.
+      operationId: get-visualization
+      parameters:
+        - description: The visualization identifier, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
         '200':
-          description: See the full Visualizations API reference for detailed response schemas.
+          content:
+            application/json:
+              examples:
+                getVisualizationResponse:
+                  description: |
+                    The full visualization state including the chart configuration and metadata.
+                  summary: Get visualization response
+                  value:
+                    data:
+                      data_source:
+                        index_pattern: kibana_sample_data_logs
+                        time_field: timestamp
+                        type: data_view_spec
+                      ignore_global_filters: false
+                      metrics:
+                        - empty_as_null: false
+                          operation: count
+                          type: primary
+                      sampling: 1
+                      styling:
+                        primary:
+                          labels:
+                            alignment: left
+                          position: bottom
+                          value:
+                            alignment: right
+                            sizing: auto
+                      tags: []
+                      title: Total requests
+                      type: metric
+                    id: 1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d
+                    meta:
+                      created_at: '2026-04-13T10:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T10:00:00.000Z'
+                      version: WzU5LDFd
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_visResponseItem'
+          description: Ok
+        '400':
+          description: Malformed request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Resource not found
+        '500':
+          description: Internal Server Error
+      summary: Get visualization
+      tags:
+        - Visualizations
+      x-codeSamples:
+        - label: Get a visualization - cURL
+          lang: cURL
+          source: |
+            curl -X GET "${KIBANA_URL}/api/visualizations/1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - label: Get a visualization - Console
+          lang: Console
+          source: |
+            GET kbn:/api/visualizations/1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d
+      x-state: Generally available; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/visualizations/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Replaces the full configuration of an existing Lens visualization. Partial updates are not supported.
+        To make incremental changes, retrieve the visualization first, modify the fields you need, then send the complete object back.
+
+        If no visualization exists with the specified ID, a new one is created.
+
+        ES|QL visualizations cannot be updated through this endpoint.
+      operationId: upsert-visualization
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The visualization identifier, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateVisualization:
+                summary: Update a visualization
+                value:
+                  data_source:
+                    index_pattern: kibana_sample_data_logs
+                    time_field: timestamp
+                    type: data_view_spec
+                  ignore_global_filters: false
+                  metrics:
+                    - empty_as_null: false
+                      operation: count
+                      type: primary
+                  sampling: 1
+                  tags: []
+                  title: Total requests (updated)
+                  type: metric
+            schema:
+              anyOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyMetricLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_xyLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_regionMapLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapLibItemNoESQL'
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleLibItemNoESQL'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateVisualizationResponse:
+                  description: |
+                    The complete updated visualization state after a full replacement. PUT replaces the entire chart configuration - fields omitted from the request are reset to their defaults. `meta.created_at` reflects the update time rather than the original creation time.
+                  summary: Update visualization response
+                  value:
+                    data:
+                      data_source:
+                        index_pattern: kibana_sample_data_logs
+                        time_field: timestamp
+                        type: data_view_spec
+                      ignore_global_filters: false
+                      metrics:
+                        - empty_as_null: false
+                          operation: count
+                          type: primary
+                      sampling: 1
+                      styling:
+                        primary:
+                          labels:
+                            alignment: left
+                          position: bottom
+                          value:
+                            alignment: right
+                            sizing: auto
+                      tags: []
+                      title: Total requests (updated)
+                      type: metric
+                    id: 1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d
+                    meta:
+                      created_at: '2026-04-13T11:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T11:00:00.000Z'
+                      version: WzYxLDFd
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_visResponseItem'
+          description: Ok
+        '201':
+          content:
+            application/json:
+              examples:
+                createdVisualizationResponse:
+                  description: |
+                    The created visualization state. Server-populated defaults are included in the response.
+                  summary: Update visualization response
+                  value:
+                    data:
+                      data_source:
+                        index_pattern: kibana_sample_data_logs
+                        time_field: timestamp
+                        type: data_view_spec
+                      ignore_global_filters: false
+                      metrics:
+                        - empty_as_null: false
+                          operation: count
+                          type: primary
+                      sampling: 1
+                      styling:
+                        primary:
+                          labels:
+                            alignment: left
+                          position: bottom
+                          value:
+                            alignment: right
+                            sizing: auto
+                      tags: []
+                      title: Total requests (updated)
+                      type: metric
+                    id: 1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d
+                    meta:
+                      created_at: '2026-04-13T11:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T11:00:00.000Z'
+                      version: WzYxLDFd
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_visResponseItem'
+          description: Created
+        '400':
+          description: Malformed request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+      summary: Upsert visualization
+      tags:
+        - Visualizations
+      x-state: Generally available; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/workflows:
     delete:
       description: |-
