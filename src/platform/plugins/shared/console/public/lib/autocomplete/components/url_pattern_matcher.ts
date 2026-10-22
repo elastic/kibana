@@ -124,6 +124,17 @@ export class UrlPatternMatcher {
                 multiValued,
                 allowNonValid
               );
+            } else if (typeof endpointComponent === 'string') {
+              // endpoint specific component that is resolved by name, e.g. a Kibana API
+              // path param whose values are loaded from the cluster
+              const factory =
+                this.byMethod[method].parametrizedComponentFactories.getComponent(
+                  endpointComponent
+                );
+              c =
+                typeof factory === 'function'
+                  ? factory(part, activeComponent)
+                  : new SimpleParamComponent(part, activeComponent);
             } else {
               // eslint-disable-next-line no-console
               console.warn('incorrectly configured url component ', part, ' in endpoint', endpoint);

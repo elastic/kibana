@@ -347,7 +347,7 @@ Another change is replacing jQuery with the core http client to communicate with
 
 ### Outstanding issues
 #### Autocomplete suggestions for Kibana API endpoints
-Requests starting with `kbn:` are autocompleted against Kibana API definitions, kept separate from the Elasticsearch ones. Currently only methods and URL paths are suggested; query parameters, path parameter values and request bodies are not yet.
+Requests starting with `kbn:` are autocompleted against Kibana API definitions, kept separate from the Elasticsearch ones. They provide the methods and URL paths, the query parameters (booleans, enums and free text), the path parameters that have a fixed set of values, and the top levels of the JSON request body (field names, booleans, enums and nested fields up to a fixed depth; `allOf`, `oneOf` and `anyOf` are merged into one set of suggestions). Values that depend on the cluster, such as space or connector ids, are not suggested yet.
 The definitions (one file per OpenAPI operation) live in [`kibana_api_definitions/generated`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/kibana_api_definitions/generated) and are generated from the Kibana OpenAPI bundle (`oas_docs/output/kibana.yaml`) by running:
 
 ```

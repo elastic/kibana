@@ -11,6 +11,8 @@ import _ from 'lodash';
 import { populateContext } from '../autocomplete/engine';
 
 import * as kb from '.';
+import { KibanaValuesProvider } from './kibana_values';
+import type { HttpSetup } from '@kbn/core/public';
 import { AutocompleteInfo, setAutocompleteInfo } from '../../services';
 import type { AutoCompleteContext, ResultTerm } from '../autocomplete/types';
 import { isRecord } from '../../../common/utils/record_utils';
@@ -189,6 +191,42 @@ describe('Knowledge base', () => {
       );
       expect(context.endpoint?.id).toBe('get-features');
       expect(context.endpoint?.paramsAutocomplete.getTopLevelComponents('GET')).toEqual([]);
+    });
+
+    describe('WHEN a path param holds a cluster specific value', () => {
+      beforeEach(() => {
+        const get = jest.fn().mockResolvedValue([{ id: 'marketing', name: 'Marketing' }]);
+        kb._test.setKibanaValues(new KibanaValuesProvider({ get } as unknown as HttpSetup));
+        kb._test.setKibanaApi({
+          'get-spaces-space-id': {
+            methods: ['GET'],
+            patterns: ['api/spaces/space/{id}'],
+            url_components: { id: '__kibana_space' },
+          },
+        });
+      });
+
+      afterEach(() => {
+        kb._test.setKibanaValues(undefined);
+      });
+
+      it('suggests the values loaded from the cluster and accepts any value', async () => {
+        // the first request starts loading the values in the background
+        suggestionsFor(['api', 'spaces', 'space'], true);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(suggestionsFor(['api', 'spaces', 'space'], true)).toStrictEqual(['marketing']);
+
+        const context: AutoCompleteContext = { method: 'GET' };
+        populateContext(
+          ['api', 'spaces', 'space', 'anything', '__url_path_end__'],
+          context,
+          null,
+          true,
+          kb.getTopLevelUrlCompleteComponents('GET', true)
+        );
+        expect(context.endpoint?.id).toBe('get-spaces-space-id');
+      });
     });
 
     it('ignores non-record values', () => {

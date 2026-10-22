@@ -59,6 +59,59 @@ spaceTest.describe('Console Kibana API autocomplete', { tag: tags.deploymentAgno
     }
   );
 
+  spaceTest(
+    'suggests the ids of the spaces in the cluster for a space path param',
+    async ({ pageObjects }) => {
+      await pageObjects.console.typeText('GET kbn:/api/spaces/space/');
+
+      // the first suggestions for a Kibana request start loading the cluster specific values
+      // in the background, so they show up in the ones requested after that
+      await expect(async () => {
+        await pageObjects.console.requestAutocompleteSuggestions();
+        await pageObjects.console.waitForAutocompleteTriggerWindow();
+        expect(await pageObjects.console.getAutocompleteSuggestions()).toContain('default');
+      }).toPass({ timeout: 20000 });
+    }
+  );
+
+  spaceTest('suggests the query params of a Kibana API', async ({ pageObjects }) => {
+    await pageObjects.console.typeText('GET kbn:/api/spaces/space?pur');
+    await pageObjects.console.requestAutocompleteSuggestions();
+    await expect(pageObjects.console.suggestWidget).toBeVisible();
+
+    expect(await pageObjects.console.getAutocompleteSuggestions()).toContain('purpose');
+  });
+
+  spaceTest('suggests the values of an enum query param', async ({ pageObjects }) => {
+    await pageObjects.console.typeText('GET kbn:/api/spaces/space?purpose=');
+    await pageObjects.console.requestAutocompleteSuggestions();
+    await expect(pageObjects.console.suggestWidget).toBeVisible();
+
+    expect(await pageObjects.console.getAutocompleteSuggestions()).toStrictEqual(
+      expect.arrayContaining(['any', 'copySavedObjectsIntoSpace'])
+    );
+  });
+
+  spaceTest('suggests the body fields of a Kibana API', async ({ pageObjects }) => {
+    await pageObjects.console.typeText('POST kbn:/api/spaces/space\n{\n"');
+    await pageObjects.console.requestAutocompleteSuggestions();
+    await expect(pageObjects.console.suggestWidget).toBeVisible();
+
+    expect(await pageObjects.console.getAutocompleteSuggestions()).toStrictEqual(
+      expect.arrayContaining(['disabledFeatures', 'initials'])
+    );
+  });
+
+  spaceTest('suggests the values of an enum body field', async ({ pageObjects }) => {
+    await pageObjects.console.typeText('POST kbn:/api/spaces/space\n{\n"solution": "');
+    await pageObjects.console.requestAutocompleteSuggestions();
+    await expect(pageObjects.console.suggestWidget).toBeVisible();
+
+    expect(await pageObjects.console.getAutocompleteSuggestions()).toStrictEqual(
+      expect.arrayContaining(['security', 'oblt', 'es', 'classic'])
+    );
+  });
+
   [
     {
       request: 'GET kbn:/api/features',
