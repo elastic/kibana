@@ -201,6 +201,20 @@ export interface EmbeddableChatAccess {
   hasLlmConnector: boolean;
 }
 
+/** A service account principal the chat is about to label. */
+export interface ServiceAccountPrincipalRef {
+  id?: string;
+  username?: string;
+}
+
+/**
+ * Returns a display name for a service account, or `undefined` when this resolver does not
+ * recognize the principal. The chat then keeps the username.
+ */
+export type ServiceAccountDisplayNameResolver = (
+  principal: ServiceAccountPrincipalRef
+) => string | undefined;
+
 /**
  * Public start contract for the browser-side agentBuilder plugin.
  */
@@ -236,6 +250,11 @@ export interface AgentBuilderPluginStart {
    * Conversations service contract, can be used to append events to conversations.
    */
   conversations: ConversationsServiceStartContract;
+  /**
+   * Supplies a human-readable name for a service account principal shown as a chat author.
+   * The stored username stays the principal. Called when the author has no `full_name`.
+   */
+  registerServiceAccountDisplayName: (resolver: ServiceAccountDisplayNameResolver) => void;
   /**
    * Resolves Agent Builder access (enterprise license, LLM connector). Callers must
    * also require `application.capabilities.agentBuilder.show === true` before

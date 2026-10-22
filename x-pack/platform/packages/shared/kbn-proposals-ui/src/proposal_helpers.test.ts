@@ -6,6 +6,10 @@
  */
 
 import {
+  clearProposalActorDisplayNameResolvers,
+  registerProposalActorDisplayName,
+} from './proposal_actor_display_name';
+import {
   getProposalCaption,
   getProposalDecision,
   getProposalTone,
@@ -156,6 +160,10 @@ describe('getProposalCaption', () => {
 });
 
 describe('getProposalDecision', () => {
+  beforeEach(() => {
+    clearProposalActorDisplayNameResolvers();
+  });
+
   it('is undefined while the proposal is still awaiting a decision', () => {
     expect(getProposalDecision(proposal())).toBeUndefined();
   });
@@ -180,6 +188,40 @@ describe('getProposalDecision', () => {
       })
     );
     expect(decision!.decidedAt).toBeUndefined();
+  });
+
+  it('uses a registered display name when the decider has no full name', () => {
+    registerProposalActorDisplayName(({ username }) =>
+      username === 'kibana/alertzero_alert_triage' ? 'Alert Triage (service account)' : undefined
+    );
+
+    expect(
+      getProposalDecision(
+        proposal({
+          decision: 'approved',
+          status: 'succeeded',
+          decidedBy: {
+            fullName: null,
+            username: 'kibana/alertzero_alert_triage',
+            email: null,
+          },
+        })
+      )
+    ).toMatchObject({ actorName: 'Alert Triage (service account)' });
+  });
+
+  it("prefers the decider's full name over a registered display name", () => {
+    registerProposalActorDisplayName(() => 'Alert Triage (service account)');
+
+    expect(
+      getProposalDecision(
+        proposal({
+          decision: 'approved',
+          status: 'succeeded',
+          decidedBy: { fullName: 'Ava', username: 'kibana/alertzero_alert_triage', email: null },
+        })
+      )
+    ).toMatchObject({ actorName: 'Ava' });
   });
 
   it("prefers the decider's full name, falling back to username", () => {

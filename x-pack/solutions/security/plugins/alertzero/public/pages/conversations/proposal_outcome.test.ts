@@ -68,6 +68,36 @@ describe('proposalOutcome', () => {
     ).toBe('Declined by Maya Chen');
   });
 
+  it('names a worker service account instead of its principal', () => {
+    expect(
+      proposalOutcome({
+        ...baseProposal,
+        decision: 'approved',
+        status: 'succeeded',
+        decidedBy: {
+          username: 'kibana/alertzero_alert_triage',
+          fullName: null,
+          email: null,
+        },
+      })
+    ).toBe('Approved by Alert Triage (service account)');
+  });
+
+  it('keeps a person full name ahead of the service account map', () => {
+    expect(
+      proposalOutcome({
+        ...baseProposal,
+        decision: 'approved',
+        status: 'succeeded',
+        decidedBy: {
+          username: 'kibana/alertzero_alert_triage',
+          fullName: 'Maya Chen',
+          email: null,
+        },
+      })
+    ).toBe('Approved by Maya Chen');
+  });
+
   it('falls back to the username when the profile carries no full name', () => {
     expect(
       proposalOutcome({

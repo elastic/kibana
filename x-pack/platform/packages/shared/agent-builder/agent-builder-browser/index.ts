@@ -71,6 +71,8 @@ export type { ConversationInputShellProps } from './conversation_input_shell';
 export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
+  ServiceAccountDisplayNameResolver,
+  ServiceAccountPrincipalRef,
   EmbeddableChatAccess,
   EmbeddableConversationProps,
   PublicEmbeddableConversationProps,

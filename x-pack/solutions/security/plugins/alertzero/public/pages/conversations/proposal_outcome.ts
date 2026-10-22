@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ProposalItem } from '../../../common/proposals/list';
+import { serviceAccountActorName } from '../../../common/service_account_display_name';
 
 const AUTO = i18n.translate('xpack.alertzero.proposalOutcome.auto', { defaultMessage: 'Auto' });
 
@@ -54,7 +55,8 @@ export const proposalOutcome = ({
   // A failed run is reported as such whoever approved it: the approval did not take effect.
   if (decision === 'approved' && status === 'failed') return FAILED;
 
-  const name = decidedBy?.fullName ?? decidedBy?.username;
+  const name =
+    decidedBy?.fullName ?? serviceAccountActorName(decidedBy?.username) ?? decidedBy?.username;
   if (!name) {
     return decision === 'approved' ? AUTO : DECLINED;
   }

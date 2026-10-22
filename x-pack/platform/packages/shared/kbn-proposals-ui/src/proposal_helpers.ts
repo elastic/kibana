@@ -10,6 +10,7 @@ import type { ApprovalProposal, ApprovalDecision } from './types';
 import type { ApprovalPhase } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import { formatDismissReason } from './dismiss_reason';
+import { resolveProposalActorDisplayName } from './proposal_actor_display_name';
 
 /** Stored lowercase (`configure`, `respond`, ...); the caption reads it in sentence case. */
 const toSentenceCase = (value: string): string =>
@@ -93,6 +94,7 @@ export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecisio
   }
   const actorName = proposal.decision
     ? proposal.decidedBy?.fullName ??
+      resolveProposalActorDisplayName(proposal.decidedBy) ??
       proposal.decidedBy?.username ??
       APPROVAL_MODAL_TRANSLATIONS.unknownActorFallback
     : undefined;

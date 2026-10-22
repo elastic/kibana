@@ -114,6 +114,7 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     conversationEvents: createConversationEventsStartMock(),
     tools: createToolStartMock(),
     conversations: createConversationsStartMock(),
+    registerServiceAccountDisplayName: jest.fn(),
     events: {
       chat$: EMPTY,
       getChatEvents$: jest.fn().mockReturnValue(EMPTY),
