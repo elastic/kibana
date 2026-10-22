@@ -87,3 +87,5 @@ ${attachmentToolsInstructions()}
     ...contextMessages,
   ];
 };
+
+// TEST ONLY (do not merge): touches a file the evals suggester maps to the agent-builder suite.
