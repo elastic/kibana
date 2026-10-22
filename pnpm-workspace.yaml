@@ -33,7 +33,6 @@ allowBuilds:
   'core-js-pure': false # donation banner
   'es5-ext': false # prints an informational message
   'lmdb': false # native bindings; prebuilds are sufficient
-  'ms-chromium-edge-driver': false # downloads Edge driver only if EDGEDRIVER_DOWNLOAD_ON_INSTALL
   'msgpackr-extract': false # native bindings; prebuilds are sufficient
   'msw': false # copies a worker script if configured; unused
   'nice-napi': false # optional piscina nice-value helper
@@ -299,7 +298,6 @@ packages:
   - 'packages/kbn-whereis-pkg-cli'
   - 'packages/kbn-yarn-lock-validator'
   - 'src/cli'
-  - 'src/core'
   - 'src/core/packages/analytics/browser'
   - 'src/core/packages/analytics/browser-internal'
   - 'src/core/packages/analytics/browser-mocks'
@@ -345,6 +343,7 @@ packages:
   - 'src/core/packages/chrome/sidebar/sidebar-internal'
   - 'src/core/packages/chrome/sidebar/sidebar-mocks'
   - 'src/core/packages/config/server-internal'
+  - 'src/core/packages/core'
   - 'src/core/packages/custom-branding/browser'
   - 'src/core/packages/custom-branding/browser-internal'
   - 'src/core/packages/custom-branding/browser-mocks'
