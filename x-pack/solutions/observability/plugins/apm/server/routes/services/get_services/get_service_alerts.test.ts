@@ -16,6 +16,7 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { getServicesAlerts } from './get_service_alerts';
 import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 
 interface QueryFilter {
@@ -147,10 +148,7 @@ describe('getServicesAlerts', () => {
     );
     expect(sloClause!.bool!.minimum_should_match).toBe(1);
 
-    const standardEnvClause = envFilter!.bool!.should!.find(
-      (s) => s.term?.[SERVICE_ENVIRONMENT] === 'production'
-    );
-    expect(standardEnvClause).toBeDefined();
+    expect(envFilter!.bool!.should).toEqual(expect.arrayContaining(environmentQuery('production')));
   });
 
   it('does not add SLO-specific environment filter when environment is ENVIRONMENT_ALL', async () => {

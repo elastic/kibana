@@ -42,10 +42,12 @@ describe('createUrlSyncObservables', () => {
         dispatch: toolkit.internalState.dispatch,
         getState: toolkit.internalState.getState,
         internalState$: from(toolkit.internalState),
+        services,
       }),
       internalState: toolkit.internalState,
       runtimeStateManager: toolkit.runtimeStateManager,
       tabId: persistedTab.id,
+      services,
     };
   };
 
@@ -144,6 +146,20 @@ describe('createUrlSyncObservables', () => {
     state = internalState.getState();
     tab = selectTab(state, tabId);
     expect(tab.globalState.filters).toEqual(newFilters);
+  });
+
+  it('should normalize an invalid time range to the timefilter default when set on globalStateContainer', async () => {
+    const { result, internalState, tabId, services } = await setup();
+
+    result.globalStateContainer.set({
+      time: { from: 'now-15m', to: 'to-infinity-and-beyond' },
+      refreshInterval: undefined,
+      filters: undefined,
+    });
+
+    const state = internalState.getState();
+    const tab = selectTab(state, tabId);
+    expect(tab.globalState.timeRange).toEqual(services.timefilter.getTimeDefaults());
   });
 
   it('should not set app state when nothing is passed', async () => {

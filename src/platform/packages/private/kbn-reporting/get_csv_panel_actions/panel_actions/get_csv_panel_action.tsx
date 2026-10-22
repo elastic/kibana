@@ -34,6 +34,7 @@ import {
   apiIsOfType,
   apiPublishesTitle,
   getInheritedViewMode,
+  getTitle,
   type PublishesSavedObjectId,
   type PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
@@ -234,7 +235,8 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
       return;
     }
 
-    const title = embeddable.title$.getValue() ?? '';
+    // By-value panels have no saved search the server could derive a title from, so always send one
+    const title = getTitle(embeddable) || this.i18nStrings.generate.fallbackDiscoverTitle;
 
     const { columns, getSearchSource } = await this.getSharingData(savedSearch);
     const searchSource = getSearchSource({

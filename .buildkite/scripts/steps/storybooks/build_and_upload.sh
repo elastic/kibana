@@ -11,4 +11,4 @@ else
   .buildkite/scripts/bootstrap.sh
 fi
 
-ts-node .buildkite/scripts/steps/storybooks/build_and_upload.ts
+node .buildkite/scripts/steps/storybooks/build_and_upload.ts
