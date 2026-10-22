@@ -461,11 +461,13 @@ export const openDescriptorAsStart = (
         value: d.value,
         entityId: d.entityId,
         mode: d.mode,
+        scopeId: d.scopeId,
         ...originParams,
         onOpenEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
           entityId: d.entityId,
+          scopeId: d.scopeId,
           mode: d.mode,
         }),
       });

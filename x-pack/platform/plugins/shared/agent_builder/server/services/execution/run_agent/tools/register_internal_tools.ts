@@ -173,6 +173,7 @@ export const registerInternalTools = async ({
           subagentTracker,
           conversationExists,
           transientOnly: conversationAccess !== 'readWrite',
+          discoveryEnabled,
         })
       );
       // send_message and sleep only serve persistent and background sub-agents.

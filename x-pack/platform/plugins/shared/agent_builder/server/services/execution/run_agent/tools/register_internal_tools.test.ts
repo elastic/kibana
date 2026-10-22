@@ -164,6 +164,19 @@ describe('registerInternalTools - subagents', () => {
       expect.objectContaining({ transientOnly: false })
     );
   });
+
+  it.each([true, false])(
+    'passes the API discovery setting (%s) to run_subagent',
+    async (apiDiscovery) => {
+      const { context } = createContext({ experimentalFeatures: { apiDiscovery } });
+
+      await register(context);
+
+      expect(createSubagentTool).toHaveBeenCalledWith(
+        expect.objectContaining({ discoveryEnabled: apiDiscovery })
+      );
+    }
+  );
 });
 
 describe('registerInternalTools - execute_dynamic_tool', () => {

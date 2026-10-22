@@ -48,6 +48,4 @@ fileGroups:
     - common/**/*
     - public/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}
