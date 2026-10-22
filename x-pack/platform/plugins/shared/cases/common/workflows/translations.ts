@@ -578,10 +578,18 @@ export const CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_DESCRIPTIO
   }
 );
 
+export const ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_IDS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.attachmentsAdded.eventSchema.ids',
+  {
+    defaultMessage:
+      'The IDs of the added attachments themselves (all of the same type), not of the alerts or events they reference.',
+  }
+);
+
 export const ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION = i18n.translate(
   'xpack.cases.workflowTriggers.attachmentsAdded.eventSchema.attachmentIds',
   {
-    defaultMessage: 'The IDs of the attachments that were added (all of the same type).',
+    defaultMessage: 'Deprecated. Use ids instead, which has the same values.',
   }
 );
 
@@ -592,10 +600,18 @@ export const ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION 
   }
 );
 
+export const ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_IDS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.attachmentsDeleted.eventSchema.ids',
+  {
+    defaultMessage:
+      'The IDs of the deleted attachments themselves (all of the same type), not of the alerts or events they reference. Use alertIds or eventIds for those.',
+  }
+);
+
 export const ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION = i18n.translate(
   'xpack.cases.workflowTriggers.attachmentsDeleted.eventSchema.attachmentIds',
   {
-    defaultMessage: 'The IDs of the attachments that were deleted (all of the same type).',
+    defaultMessage: 'Deprecated. Use ids instead, which has the same values.',
   }
 );
 
@@ -763,6 +779,28 @@ export const DELETE_OBSERVABLE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   {
     defaultMessage:
       'This step deletes the specified observable from the case. The step echoes back the case_id and observable_id that were removed.',
+  }
+);
+
+export const DELETE_ATTACHMENTS_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.deleteAttachments.label',
+  {
+    defaultMessage: 'Cases - Delete attachments',
+  }
+);
+
+export const DELETE_ATTACHMENTS_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.deleteAttachments.description',
+  {
+    defaultMessage: 'Deletes one or more attachments from a case',
+  }
+);
+
+export const DELETE_ATTACHMENTS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.deleteAttachments.documentation.details',
+  {
+    defaultMessage:
+      "This step deletes the specified attachments from the case in a single request and records each deletion in the case activity. If any attachment isn't on the case, the step fails and deletes nothing. The step returns the case_id and the ids it deleted.",
   }
 );
 
