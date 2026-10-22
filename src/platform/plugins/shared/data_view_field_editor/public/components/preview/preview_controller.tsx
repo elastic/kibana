@@ -384,6 +384,7 @@ export class PreviewController {
   setCustomDocIdToLoad = (customDocIdToLoad: string | null) => {
     // A blank ID (e.g. only whitespace) cannot be loaded, treat it like leaving custom mode
     const idToLoad = customDocIdToLoad?.trim() ? customDocIdToLoad : null;
+    const { isFetchingDocument: wasFetchingDocument } = this.internalState$.getValue();
 
     this.updateState({
       customDocIdToLoad,
@@ -399,8 +400,12 @@ export class PreviewController {
       // document the user is no longer asking for, and clear a possible previous fetch error.
       this.debouncedLoadDocument.cancel();
       this.setFetchDocError(null);
-      // An in-flight lookup set this flag and its discarded response will not reset it
-      this.setIsLoadingPreview(false);
+      // The discarded lookup raised the preview-loading flag for a preview that will no longer
+      // run, so reset it — unless an in-flight _execute request still owns the flag, in which
+      // case its response will settle it.
+      if (wasFetchingDocument && this.inFlightPreviewId === null) {
+        this.setIsLoadingPreview(false);
+      }
     }
   };
 
