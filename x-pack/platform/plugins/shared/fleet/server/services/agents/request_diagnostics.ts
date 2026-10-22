@@ -16,6 +16,7 @@ import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import type { GetAgentsOptions } from '.';
 import { getAgents, getAgentsByKuery } from './crud';
 import { createAgentAction } from './actions';
+import { throwIfAgentlessAgent } from './hosted_agent';
 import { openPointInTime } from './crud';
 import {
   RequestDiagnosticsActionRunner,
@@ -28,6 +29,13 @@ export async function requestDiagnostics(
   agentId: string,
   additionalMetrics?: RequestDiagnosticsAdditionalMetrics[]
 ): Promise<{ actionId: string }> {
+  await throwIfAgentlessAgent(
+    soClient,
+    esClient,
+    agentId,
+    `Cannot request diagnostics for managed agent ${agentId}`
+  );
+
   const currentSpaceId = getCurrentNamespace(soClient);
 
   const response = await createAgentAction(esClient, soClient, {
