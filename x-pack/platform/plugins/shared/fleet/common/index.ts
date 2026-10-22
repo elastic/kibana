@@ -80,6 +80,7 @@ export {
   displayedAssetTypes,
   displayedAssetTypesLookup,
   CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT,
+  AWS_ONBOARDING_SERVICE_COUNT,
   // Download source constants
   DEFAULT_DOWNLOAD_SOURCE_REFERENCE,
 } from './constants';

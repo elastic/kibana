@@ -18,6 +18,8 @@ export const AWS_TITLE = i18n.translate('xpack.fleet.onboardingOverride.awsTitle
 
 export const AWS_ONBOARDING_PACKAGE_NAME = 'aws';
 
+export { AWS_ONBOARDING_SERVICE_COUNT } from '../../common/constants';
+
 // hiding tiles that are included in the AWS onboarding flow: https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/ingest_hub/public/onboarding/aws_service_matrix.ts#L188
 export const HIDDEN_TILE_NAMES = new Set([
   'aws',
