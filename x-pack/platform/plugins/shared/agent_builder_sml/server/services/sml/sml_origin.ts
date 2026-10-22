@@ -26,6 +26,15 @@ export const parseSmlEntryId = (entryId: string) => {
     : undefined;
 };
 
+/** Decodes an entry id taken from a `sml://` link, keeping it as is when the encoding is malformed. */
+export const decodeSmlLinkId = (id: string): string => {
+  try {
+    return decodeURIComponent(id);
+  } catch {
+    return id;
+  }
+};
+
 export const smlEntryIdFromOriginUri = (originUri: string): string => {
   const separatorIndex = originUri.indexOf(SCHEME_SEPARATOR);
   return separatorIndex === -1

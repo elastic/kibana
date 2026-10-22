@@ -56,6 +56,8 @@ const autocompleteFromTypes = async (
   sml: SmlService,
   logger: Logger
 ): Promise<SmlAutocompleteResult[]> => {
+  // Items from the APIs carry no tags, so none of them can match a tag filter.
+  if (filters?.tags?.length) return [];
   const lookups = sml
     .listTypeDefinitions()
     .filter(

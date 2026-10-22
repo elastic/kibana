@@ -172,6 +172,14 @@ describe('registerAutocompleteRoute', () => {
       });
     });
 
+    it('returns nothing for a tag filter, which the types cannot honor', async () => {
+      const dashboard = createType('dashboard', [{ originId: 'd1', title: 'D1' }]);
+      mockSmlService.listTypeDefinitions.mockReturnValue([dashboard]);
+
+      expect(await call({ query: '*', size: 10, filters: { tags: ['sales'] } })).toEqual([]);
+      expect(dashboard.searchByTitle).not.toHaveBeenCalled();
+    });
+
     it('still returns the other types when one lookup fails', async () => {
       const dashboard = createType('dashboard');
       dashboard.searchByTitle.mockRejectedValue(new Error('boom'));
