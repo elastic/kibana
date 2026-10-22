@@ -280,6 +280,16 @@ export const sampleSchema = (
                 : null,
             ]);
           }
+          // Maps such as AWS tags may require entries (`minProperties`).
+          const minProperties = numberOrUndefined(node.minProperties) ?? 0;
+          for (let index = sampled.length; index < minProperties; index++) {
+            sampled.push([
+              `key${index + 1}`,
+              isRecord(additionalProperties)
+                ? child(additionalProperties, 'additionalProperties')
+                : 'value',
+            ]);
+          }
         }
         return Object.fromEntries(sampled);
       }
