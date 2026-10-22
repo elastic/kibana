@@ -76,6 +76,15 @@ describe('monitor attribute schema', () => {
     expect(monitorCreateSchema.validate(monitor)).toEqual(monitor);
   });
 
+  it('accepts a screenshots value the browser codec already allows', () => {
+    const monitor = {
+      ...fullBrowserMonitor(),
+      screenshots: 'false',
+    };
+
+    expect(monitorCreateSchema.validate(monitor)).toEqual(monitor);
+  });
+
   it('accepts a secrets string larger than one secret field', () => {
     const stored = {
       ...withPackedSecrets(fullHttpMonitor()),

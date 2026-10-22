@@ -16,7 +16,6 @@ import {
   MonitorTypeEnum,
   ResponseBodyIndexPolicy,
   ScheduleUnit,
-  ScreenshotOption,
   SourceType,
   TLSVersion,
   VerificationMode,
@@ -200,7 +199,8 @@ export const monitorCreateSchema = schema.object({
   [ConfigKey.TEXT_ASSERTION]: schema.maybe(storedString()),
   [ConfigKey.SOURCE_INLINE]: schema.maybe(storedString()),
   [ConfigKey.SOURCE_PROJECT_CONTENT]: schema.maybe(storedString()),
-  [ConfigKey.SCREENSHOTS]: schema.maybe(literals(Object.values(ScreenshotOption))),
+  // BrowserFieldsCodec accepts any string. The UI enum is on, off, only-on-failure.
+  [ConfigKey.SCREENSHOTS]: schema.maybe(storedString()),
   [ConfigKey.JOURNEY_FILTERS_MATCH]: schema.maybe(storedString()),
   [ConfigKey.JOURNEY_FILTERS_TAGS]: schema.maybe(stringArray()),
   [ConfigKey.IGNORE_HTTPS_ERRORS]: schema.maybe(schema.boolean()),
