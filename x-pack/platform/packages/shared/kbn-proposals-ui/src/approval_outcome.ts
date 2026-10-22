@@ -41,6 +41,7 @@ export type ApprovalPhase =
   | ApprovalOutcomeStatus
   | 'failed'
   | 'expired'
+  | 'outdated'
   | 'no_action';
 
 export interface ApprovalOutcomeBadge {
@@ -111,6 +112,13 @@ export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBa
         color: 'warning',
         iconType: 'clock',
         label: APPROVAL_MODAL_TRANSLATIONS.expiredBadge,
+        isLoading: false,
+      };
+    case 'outdated':
+      return {
+        color: 'warning',
+        iconType: 'clock',
+        label: APPROVAL_MODAL_TRANSLATIONS.outdatedBadge,
         isLoading: false,
       };
     case 'no_action':

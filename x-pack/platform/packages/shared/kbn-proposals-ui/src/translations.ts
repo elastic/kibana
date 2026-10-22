@@ -43,6 +43,9 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   noActionBadge: i18n.translate('xpack.proposals.approvalModal.noActionBadge', {
     defaultMessage: 'Approved',
   }),
+  outdatedBadge: i18n.translate('xpack.proposals.approvalModal.outdatedBadge', {
+    defaultMessage: 'Outdated',
+  }),
   expiredBadge: i18n.translate('xpack.proposals.approvalModal.expiredBadge', {
     defaultMessage: 'Expired',
   }),
@@ -123,6 +126,9 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   }),
   replacedCalloutTitle: i18n.translate('xpack.proposals.approvalModal.replacedCallout', {
     defaultMessage: 'Replaced',
+  }),
+  outdatedCalloutTitle: i18n.translate('xpack.proposals.approvalModal.outdatedCallout', {
+    defaultMessage: 'Outdated',
   }),
   replacedCalloutDescription: i18n.translate(
     'xpack.proposals.approvalModal.replacedCalloutDescription',

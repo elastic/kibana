@@ -195,7 +195,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
       setSubmittedAt(isSubmitting ? new Date().toISOString() : undefined);
     }, [isSubmitting]);
     const actorName =
-      decision?.status === 'expired'
+      decision?.status === 'expired' || decision?.status === 'outdated'
         ? undefined
         : decision?.actorName ?? (isSubmitting ? currentActorName : undefined);
     const actedAt = decision?.decidedAt ?? submittedAt;
@@ -212,7 +212,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
           : DETAILS_FLYOUT_LABELS.proposedAction.noReasonCaption
         : undefined;
     const isFailure = isRetry || decision?.status === 'failed';
-    const isExpired = decision?.status === 'expired';
+    const isExpired = decision?.status === 'expired' || decision?.status === 'outdated';
     // Why it expired: replaced by a successor, else the gate's own reason when it left one, else
     // that nobody decided in time.
     const expiredReason = isExpired

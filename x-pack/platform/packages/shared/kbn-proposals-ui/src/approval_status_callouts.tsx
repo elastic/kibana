@@ -160,7 +160,9 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
           <StatusCallout
             color="warning"
             title={
-              expiresAt && deadlinePassed && !isReplaced
+              isReplaced
+                ? APPROVAL_MODAL_TRANSLATIONS.outdatedCalloutTitle
+                : expiresAt && deadlinePassed
                 ? APPROVAL_MODAL_TRANSLATIONS.expiredCalloutTitleOn(formatDeadline(expiresAt))
                 : APPROVAL_MODAL_TRANSLATIONS.expiredCalloutTitle
             }

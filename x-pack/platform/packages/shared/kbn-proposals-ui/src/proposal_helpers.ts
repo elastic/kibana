@@ -130,7 +130,8 @@ export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecisio
  */
 const approvedStatusFor = (proposal: ApprovalProposal): Exclude<ApprovalPhase, 'pending'> => {
   if (isProposalExpired(proposal)) {
-    return 'expired';
+    // Replaced before anyone decided: not timed out, just no longer the one to act on.
+    return isProposalReplaced(proposal) && !proposal.decision ? 'outdated' : 'expired';
   }
   if (proposal.decision !== 'approved') {
     return 'declined';
