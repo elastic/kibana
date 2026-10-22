@@ -63,7 +63,9 @@ export const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => c
   // floating controls (toolbar, zoom, minimap) stay put when the window resizes.
   flex: 1 1 auto;
   min-height: 0;
-  width: 100%;
+  width: auto;
+  margin-inline: ${euiTheme.size.m};
+  margin-bottom: ${euiTheme.size.m};
   background: ${euiTheme.colors.backgroundBaseSubdued};
 
   // Communicate pannable space: open hand at rest, grabbing while dragging.
@@ -81,9 +83,8 @@ export const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => c
     border-color: ${euiTheme.colors.borderBaseProminent};
   }
 
-  // Configured unit nodes: a plus while hovering a handle you can drag from,
-  // and a blue ring around every handle that can receive the line.
-  .react-flow__handle.streamsConnectionHandle {
+  // Configured unit nodes and processing nodes: an open circle at each side.
+  .react-flow__handle.streamsNodeHandle {
     width: 16px;
     height: 16px;
     background: ${euiTheme.colors.backgroundBasePlain};
@@ -96,6 +97,8 @@ export const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => c
     line-height: 1;
   }
 
+  // A plus while hovering a handle you can drag from, and a blue ring around
+  // every handle that can receive the line.
   .react-flow__handle.streamsConnectionHandle.connectablestart.connectionindicator:hover::after {
     content: '+';
   }

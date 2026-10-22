@@ -20,7 +20,9 @@ import {
   sendTo,
   setup,
   stateIn,
+  stopChild,
 } from 'xstate';
+import { processingFlyoutMachine } from '../../../../stream_processing_flyout/state_management/processing_flyout_machine';
 import {
   createDestinationsMachineImplementations,
   destinationsStateMachine,
@@ -51,6 +53,19 @@ import {
   type CanvasState,
   type RouteEdit,
 } from './types';
+import {
+  PROCESSING_FLYOUT_ID,
+  canApplyProcessingDraft,
+  getProcessingFlyoutOpening,
+  getProcessingRollbackUpdate,
+  getProcessingSaveUpdate,
+  isSavingProcessing,
+  notifyProcessingSaveFailed,
+  notifyProcessingSaved,
+  processingSavedToastTitle,
+  rejectBusyProcessingSave,
+  rejectMissingSlotProcessingSave,
+} from './processing_flyout_actions';
 
 export interface StoreUrlStateParams {
   urlState: CanvasUrlInput;
@@ -69,6 +84,7 @@ export const canvasStateMachine = setup({
     loadUnitDefinition: getPlaceholderFor(createLoadUnitDefinitionActor),
     validateUnitDefinition: getPlaceholderFor(createValidateUnitDefinitionActor),
     persistUnitDefinition: getPlaceholderFor(createPersistUnitDefinitionActor),
+    processingFlyoutMachine,
   },
   actions: {
     /* URL state actions */
@@ -150,6 +166,8 @@ export const canvasStateMachine = setup({
         savingComponentIds: undefined,
         savingComponentKind: undefined,
         savingComponentIntent: undefined,
+        processingRollbackUnit: undefined,
+        processingSaveIds: undefined,
         error: undefined,
       };
     }),
@@ -300,6 +318,26 @@ export const canvasStateMachine = setup({
             };
       }
     ),
+    stopProcessingFlyout: stopChild(PROCESSING_FLYOUT_ID),
+    clearProcessingFlyout: assign({ processingFlyout: undefined }),
+    openProcessingFlyout: assign(({ context, event, spawn, self }) => {
+      if (event.type !== 'processing.open') {
+        return {};
+      }
+      const opening = getProcessingFlyoutOpening(context.nextUnit, event, self);
+      if (!opening) {
+        return {};
+      }
+      const { input, line } = opening;
+      const ref = spawn('processingFlyoutMachine', { id: PROCESSING_FLYOUT_ID, input });
+      return { processingFlyout: { slot: input.slot, ref, ...(line ? { line } : {}) } };
+    }),
+    prepareProcessingSave: assign((args) => getProcessingSaveUpdate(args)),
+    notifyProcessingSaved,
+    notifyProcessingSaveFailed,
+    rejectMissingSlotProcessingSave,
+    rejectBusyProcessingSave,
+    restoreProcessingRollback: assign((args) => getProcessingRollbackUpdate(args)),
     syncRoutingEditMode: assign({
       editingRoute: ({ context, event }) => {
         switch (event.type) {
@@ -323,6 +361,8 @@ export const canvasStateMachine = setup({
     ]),
     isSavingComponentChange: ({ context }) => (context.savingComponentIds?.length ?? 0) > 0,
     isSavingConnection: ({ context }) => context.savingComponentIntent === 'connect',
+    isSavingProcessing,
+    canApplyProcessingDraft,
   },
 }).createMachine({
   id: 'canvasMachine',
@@ -422,6 +462,17 @@ export const canvasStateMachine = setup({
             },
           ],
         },
+        'processing.open': {
+          actions: ['stopProcessingFlyout', 'clearProcessingFlyout', 'openProcessingFlyout'],
+        },
+        'processing.close': {
+          actions: ['stopProcessingFlyout', 'clearProcessingFlyout'],
+        },
+        // Only reached while the unit is loading or saving; the unit states below
+        // accept the request when they can persist it.
+        'processing.save': {
+          actions: 'rejectBusyProcessingSave',
+        },
       },
       states: {
         unit: {
@@ -463,6 +514,14 @@ export const canvasStateMachine = setup({
                   target: 'validating',
                   actions: 'prepareUnitSave',
                 },
+                'processing.save': [
+                  {
+                    guard: 'canApplyProcessingDraft',
+                    target: 'validating',
+                    actions: 'prepareProcessingSave',
+                  },
+                  { actions: 'rejectMissingSlotProcessingSave' },
+                ],
                 'unit.reload': { target: 'reloading' },
               },
             },
@@ -506,6 +565,15 @@ export const canvasStateMachine = setup({
                 },
                 onError: [
                   {
+                    guard: 'isSavingProcessing',
+                    target: 'saveFailed',
+                    actions: [
+                      'storeUnitFailure',
+                      'notifyProcessingSaveFailed',
+                      'restoreProcessingRollback',
+                    ],
+                  },
+                  {
                     guard: 'isSavingComponentChange',
                     target: 'saveFailed',
                     actions: [
@@ -533,22 +601,46 @@ export const canvasStateMachine = setup({
                 id: 'persistUnitDefinition',
                 src: 'persistUnitDefinition',
                 input: ({ context }) => context.savingUnit ?? context.nextUnit,
-                onDone: {
-                  target: 'ready',
-                  // Sync while the saving component is still set. storePersistedUnitDefinition
-                  // clears it, and a later sync would tell the source or destination
-                  // machine the unit merely reloaded, leaving its create flow on "saving".
-                  actions: [
-                    'syncSavedUnitToOriginator',
-                    'syncSavedUnitToPeer',
-                    'notifyUnitSaved',
-                    // Commit while the create intent is still set. storePersistedUnitDefinition
-                    // clears it.
-                    'commitCreateHistory',
-                    'storePersistedUnitDefinition',
-                  ],
-                },
+                onDone: [
+                  {
+                    guard: 'isSavingProcessing',
+                    target: 'ready',
+                    actions: [
+                      'syncSavedUnitToOriginator',
+                      'syncSavedUnitToPeer',
+                      'notifyUnitSaved',
+                      'notifyProcessingSaved',
+                      'stopProcessingFlyout',
+                      'clearProcessingFlyout',
+                      'storePersistedUnitDefinition',
+                    ],
+                  },
+                  {
+                    target: 'ready',
+                    // Sync while the saving component is still set. storePersistedUnitDefinition
+                    // clears it, and a later sync would tell the source or destination
+                    // machine the unit merely reloaded, leaving its create flow on "saving".
+                    actions: [
+                      'syncSavedUnitToOriginator',
+                      'syncSavedUnitToPeer',
+                      'notifyUnitSaved',
+                      // Commit while the create intent is still set. storePersistedUnitDefinition
+                      // clears it.
+                      'commitCreateHistory',
+                      'storePersistedUnitDefinition',
+                    ],
+                  },
+                ],
                 onError: [
+                  {
+                    guard: 'isSavingProcessing',
+                    target: 'saveFailed',
+                    actions: [
+                      'storeUnitFailure',
+                      'notifyProcessingSaveFailed',
+                      'restoreProcessingRollback',
+                    ],
+                  },
                   {
                     guard: 'isSavingComponentChange',
                     target: 'saveFailed',
@@ -584,6 +676,14 @@ export const canvasStateMachine = setup({
                   target: 'validating',
                   actions: 'prepareUnitSave',
                 },
+                'processing.save': [
+                  {
+                    guard: 'canApplyProcessingDraft',
+                    target: 'validating',
+                    actions: 'prepareProcessingSave',
+                  },
+                  { actions: 'rejectMissingSlotProcessingSave' },
+                ],
                 'unit.reload': { target: 'reloading' },
               },
             },
@@ -755,6 +855,10 @@ function createDiscardCreateHistoryAction(createHistoryRef: CanvasCreateHistoryR
 
 function createNotifyUnitSavedAction({ core }: Pick<CanvasStateServiceDeps, 'core'>) {
   return ({ context }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
+    if (context.savingComponentIntent === 'processing') {
+      core.notifications.toasts.addSuccess({ title: processingSavedToastTitle });
+      return;
+    }
     // Source and destination creates already toast their own success. This confirms
     // the canvas Save action, which is the only persist with no component attached.
     if (context.savingComponentKind || context.savingComponentIntent) {

@@ -1,0 +1,1810 @@
+{
+  "schema_version": "v1",
+  "component_revision": "sha256:184deeb99068734eb569bd2352fb89e4ff487136c4e1631acc923d61ee915a1c",
+  "components": [
+    {
+      "type": "otlp",
+      "kind": "source",
+      "display_name": "Otlp",
+      "description": "Receives OTLP data from the managed ingestion path.",
+      "supported_telemetry": [
+        "logs",
+        "metrics",
+        "traces",
+        "docs",
+        "profiles"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "beta"
+    },
+    {
+      "type": "add_fields",
+      "kind": "processor",
+      "display_name": "Add fields",
+      "description": "Add, change and remove fields on records.",
+      "supported_telemetry": [
+        "logs",
+        "metrics",
+        "traces",
+        "docs",
+        "profiles"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental"
+    },
+    {
+      "type": "elasticsearch",
+      "kind": "destination",
+      "display_name": "Elasticsearch",
+      "description": "Writes records to one fixed Elasticsearch index or data stream.",
+      "supported_telemetry": [
+        "logs",
+        "docs",
+        "metrics",
+        "traces"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental"
+    }
+  ],
+  "metadata": {
+    "schema_version": "v1",
+    "enum_sets": {
+      "ottl.contexts": {
+        "options": [
+          {
+            "value": "resource",
+            "label": "Resource",
+            "description": "Fields of the resource that produced the telemetry, such as the service name."
+          },
+          {
+            "value": "scope",
+            "label": "Scope",
+            "description": "Fields of the instrumentation scope (the library) that produced the telemetry."
+          },
+          {
+            "value": "log",
+            "label": "Log",
+            "description": "Fields of a log record, such as its body, severity and attributes.",
+            "supported_telemetry": [
+              "logs",
+              "docs"
+            ]
+          },
+          {
+            "value": "span",
+            "label": "Span",
+            "description": "Fields of a trace span, such as its name, status and attributes.",
+            "supported_telemetry": [
+              "traces"
+            ]
+          },
+          {
+            "value": "spanevent",
+            "label": "Span event",
+            "description": "Fields of an event recorded on a span, such as an exception.",
+            "supported_telemetry": [
+              "traces"
+            ]
+          },
+          {
+            "value": "metric",
+            "label": "Metric",
+            "description": "Fields of a metric, such as its name, unit and type.",
+            "supported_telemetry": [
+              "metrics"
+            ]
+          },
+          {
+            "value": "datapoint",
+            "label": "Data point",
+            "description": "Fields of a metric data point, such as its value and attributes.",
+            "supported_telemetry": [
+              "metrics"
+            ]
+          },
+          {
+            "value": "exemplar",
+            "label": "Exemplar",
+            "description": "Fields of an exemplar, a sample trace attached to a metric data point.",
+            "supported_telemetry": [
+              "metrics"
+            ]
+          },
+          {
+            "value": "profile",
+            "label": "Profile",
+            "description": "Fields of a profile, such as its duration and sampling period.",
+            "supported_telemetry": [
+              "profiles"
+            ]
+          }
+        ]
+      },
+      "path.locations": {
+        "options": [
+          {
+            "value": "record",
+            "label": "Record",
+            "description": "The complete current telemetry record."
+          },
+          {
+            "value": "body",
+            "label": "Body",
+            "description": "The log record body.",
+            "supported_telemetry": [
+              "logs",
+              "docs"
+            ]
+          },
+          {
+            "value": "resource",
+            "label": "Resource",
+            "description": "Resource-level fields shared by telemetry records."
+          },
+          {
+            "value": "scope",
+            "label": "Scope",
+            "description": "Instrumentation scope fields."
+          },
+          {
+            "value": "attributes",
+            "label": "Attributes",
+            "description": "The current record's attributes."
+          },
+          {
+            "value": "metadata",
+            "label": "Metadata",
+            "description": "Batch-level metadata that travels with the data through the pipeline. It is not sent to the destination with each record."
+          },
+          {
+            "value": "doc",
+            "label": "Document",
+            "description": "The document being built, with ECS-style dotted field names.",
+            "supported_telemetry": [
+              "docs"
+            ]
+          }
+        ]
+      }
+    },
+    "path_sets": {
+      "ottl.paths": {
+        "contexts": {
+          "datapoint": [
+            {
+              "path": "attributes",
+              "value_kind": "object",
+              "description": "All attributes of the data point."
+            },
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the data point. Replace key with the attribute name."
+            },
+            {
+              "path": "positive",
+              "value_kind": "object",
+              "description": "Positive buckets of an exponential histogram."
+            },
+            {
+              "path": "positive.offset",
+              "value_kind": "integer",
+              "description": "Offset of the positive buckets of an exponential histogram."
+            },
+            {
+              "path": "positive.bucket_counts",
+              "value_kind": "array",
+              "description": "Counts of the positive buckets of an exponential histogram."
+            },
+            {
+              "path": "negative",
+              "value_kind": "object",
+              "description": "Negative buckets of an exponential histogram."
+            },
+            {
+              "path": "negative.offset",
+              "value_kind": "integer",
+              "description": "Offset of the negative buckets of an exponential histogram."
+            },
+            {
+              "path": "negative.bucket_counts",
+              "value_kind": "array",
+              "description": "Counts of the negative buckets of an exponential histogram."
+            },
+            {
+              "path": "start_time_unix_nano",
+              "value_kind": "integer",
+              "description": "Start of the measured interval, in nanoseconds since the Unix epoch."
+            },
+            {
+              "path": "time_unix_nano",
+              "value_kind": "integer",
+              "description": "When the value was recorded, in nanoseconds since the Unix epoch."
+            },
+            {
+              "path": "start_time",
+              "value_kind": "any",
+              "description": "Start of the measured interval."
+            },
+            {
+              "path": "time",
+              "value_kind": "any",
+              "description": "When the value was recorded."
+            },
+            {
+              "path": "value_double",
+              "value_kind": "number",
+              "description": "Floating-point data point value."
+            },
+            {
+              "path": "value_int",
+              "value_kind": "integer",
+              "description": "Integer data point value."
+            },
+            {
+              "path": "exemplars",
+              "value_kind": "array",
+              "description": "Exemplars attached to the data point."
+            },
+            {
+              "path": "flags",
+              "value_kind": "integer",
+              "description": "Flags of the data point."
+            },
+            {
+              "path": "count",
+              "value_kind": "integer",
+              "description": "Number of values recorded in a histogram or summary."
+            },
+            {
+              "path": "sum",
+              "value_kind": "number",
+              "description": "Sum of the values recorded in a histogram or summary."
+            },
+            {
+              "path": "bucket_counts",
+              "value_kind": "array",
+              "description": "Counts of the histogram buckets."
+            },
+            {
+              "path": "explicit_bounds",
+              "value_kind": "array",
+              "description": "Upper bounds of the histogram buckets."
+            },
+            {
+              "path": "scale",
+              "value_kind": "integer",
+              "description": "Scale of an exponential histogram."
+            },
+            {
+              "path": "zero_count",
+              "value_kind": "integer",
+              "description": "Number of zero values in an exponential histogram."
+            },
+            {
+              "path": "quantile_values",
+              "value_kind": "array",
+              "description": "Quantile values of a summary."
+            }
+          ],
+          "exemplar": [
+            {
+              "path": "time_unix_nano",
+              "value_kind": "integer",
+              "description": "When the sample was recorded, in nanoseconds since the Unix epoch."
+            },
+            {
+              "path": "time",
+              "value_kind": "any",
+              "description": "When the sample was recorded."
+            },
+            {
+              "path": "double_value",
+              "value_kind": "number",
+              "description": "Floating-point exemplar value."
+            },
+            {
+              "path": "int_value",
+              "value_kind": "integer",
+              "description": "Integer exemplar value."
+            },
+            {
+              "path": "trace_id",
+              "value_kind": "any",
+              "description": "ID of the trace the sample belongs to."
+            },
+            {
+              "path": "trace_id.string",
+              "value_kind": "string",
+              "description": "ID of the trace the sample belongs to, as a hex string."
+            },
+            {
+              "path": "span_id",
+              "value_kind": "any",
+              "description": "ID of the span the sample belongs to."
+            },
+            {
+              "path": "span_id.string",
+              "value_kind": "string",
+              "description": "ID of the span the sample belongs to, as a hex string."
+            },
+            {
+              "path": "filtered_attributes",
+              "value_kind": "object",
+              "description": "Attributes that were dropped from the data point but kept on the sample."
+            },
+            {
+              "path": "filtered_attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One filtered attribute. Replace key with the attribute name."
+            }
+          ],
+          "log": [
+            {
+              "path": "attributes",
+              "value_kind": "object",
+              "description": "All attributes of the log record."
+            },
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the log record. Replace key with the attribute name."
+            },
+            {
+              "path": "event_name",
+              "value_kind": "string",
+              "description": "Name of the event the log describes."
+            },
+            {
+              "path": "trace_id",
+              "value_kind": "any",
+              "description": "ID of the trace the log belongs to."
+            },
+            {
+              "path": "trace_id.string",
+              "value_kind": "string",
+              "description": "ID of the trace the log belongs to, as a hex string."
+            },
+            {
+              "path": "span_id",
+              "value_kind": "any",
+              "description": "ID of the span the log belongs to."
+            },
+            {
+              "path": "span_id.string",
+              "value_kind": "string",
+              "description": "ID of the span the log belongs to, as a hex string."
+            },
+            {
+              "path": "time_unix_nano",
+              "value_kind": "integer",
+              "description": "When the event happened, in nanoseconds since the Unix epoch."
+            },
+            {
+              "path": "observed_time_unix_nano",
+              "value_kind": "integer",
+              "description": "When the event was observed, in nanoseconds since the Unix epoch."
+            },
+            {
+              "path": "time",
+              "value_kind": "any",
+              "description": "When the event happened."
+            },
+            {
+              "path": "observed_time",
+              "value_kind": "any",
+              "description": "When the event was observed."
+            },
+            {
+              "path": "severity_number",
+              "value_kind": "integer",
+              "description": "Severity of the log as a number."
+            },
+            {
+              "path": "severity_text",
+              "value_kind": "string",
+              "description": "Severity of the log as text, such as INFO or ERROR."
+            },
+            {
+              "path": "body",
+              "value_kind": "any",
+              "description": "The log body: a message or structured data."
+            },
+            {
+              "path": "body[\"key\"]",
+              "value_kind": "any",
+              "description": "One field of a structured log body. Replace key with the field name."
+            },
+            {
+              "path": "body.string",
+              "value_kind": "string",
+              "description": "The log body as a string."
+            },
+            {
+              "path": "dropped_attributes_count",
+              "value_kind": "integer",
+              "description": "Number of attributes dropped from the log record."
+            },
+            {
+              "path": "flags",
+              "value_kind": "integer",
+              "description": "Flags of the log record."
+            }
+          ],
+          "metric": [
+            {
+              "path": "name",
+              "value_kind": "string",
+              "description": "Name of the metric."
+            },
+            {
+              "path": "description",
+              "value_kind": "string",
+              "description": "Description of the metric."
+            },
+            {
+              "path": "unit",
+              "value_kind": "string",
+              "description": "Unit of the metric."
+            },
+            {
+              "path": "type",
+              "value_kind": "integer",
+              "description": "Type of the metric, such as gauge or sum, as a number."
+            },
+            {
+              "path": "metadata",
+              "value_kind": "object",
+              "description": "Metadata attached to the metric."
+            },
+            {
+              "path": "aggregation_temporality",
+              "value_kind": "integer",
+              "description": "Whether values are deltas or cumulative, as a number."
+            },
+            {
+              "path": "is_monotonic",
+              "value_kind": "boolean",
+              "description": "Whether a sum only ever increases."
+            },
+            {
+              "path": "data_points",
+              "value_kind": "array",
+              "description": "The data points of the metric."
+            }
+          ],
+          "profile": [
+            {
+              "path": "attributes",
+              "value_kind": "object",
+              "description": "All attributes of the profile."
+            },
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the profile. Replace key with the attribute name."
+            },
+            {
+              "path": "sample_type",
+              "value_kind": "object",
+              "description": "What the samples measure."
+            },
+            {
+              "path": "sample_type.type",
+              "value_kind": "string",
+              "description": "What the samples measure, such as cpu."
+            },
+            {
+              "path": "sample_type.unit",
+              "value_kind": "string",
+              "description": "Unit of the sample values, such as nanoseconds."
+            },
+            {
+              "path": "sample",
+              "value_kind": "array",
+              "description": "The samples of the profile."
+            },
+            {
+              "path": "time_unix_nano",
+              "value_kind": "integer",
+              "description": "When the profile was collected, in nanoseconds since the Unix epoch."
+            },
+            {
+              "path": "time",
+              "value_kind": "any",
+              "description": "When the profile was collected."
+            },
+            {
+              "path": "duration_unix_nano",
+              "value_kind": "integer",
+              "description": "Profile duration in nanoseconds."
+            },
+            {
+              "path": "duration",
+              "value_kind": "integer",
+              "description": "Profile duration."
+            },
+            {
+              "path": "period_type",
+              "value_kind": "object",
+              "description": "What the sampling period measures."
+            },
+            {
+              "path": "period_type.type",
+              "value_kind": "string",
+              "description": "What the sampling period measures, such as cpu."
+            },
+            {
+              "path": "period_type.unit",
+              "value_kind": "string",
+              "description": "Sampling period unit."
+            },
+            {
+              "path": "period",
+              "value_kind": "integer",
+              "description": "Profile sampling period."
+            },
+            {
+              "path": "profile_id",
+              "value_kind": "any",
+              "description": "ID of the profile."
+            },
+            {
+              "path": "profile_id.string",
+              "value_kind": "string",
+              "description": "ID of the profile, as a hex string."
+            },
+            {
+              "path": "attribute_indices",
+              "value_kind": "array",
+              "description": "Indices of the profile attributes."
+            },
+            {
+              "path": "dropped_attributes_count",
+              "value_kind": "integer",
+              "description": "Number of attributes dropped from the profile."
+            },
+            {
+              "path": "original_payload_format",
+              "value_kind": "string",
+              "description": "Format of the original profile payload."
+            },
+            {
+              "path": "original_payload",
+              "value_kind": "any",
+              "description": "The original profile payload."
+            }
+          ],
+          "resource": [
+            {
+              "path": "attributes",
+              "value_kind": "object",
+              "description": "All attributes of the resource."
+            },
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the resource. Replace key with the attribute name."
+            },
+            {
+              "path": "attributes[\"service.name\"]",
+              "value_kind": "string",
+              "description": "Service name."
+            },
+            {
+              "path": "attributes[\"deployment.environment.name\"]",
+              "value_kind": "string",
+              "description": "Deployment environment."
+            },
+            {
+              "path": "dropped_attributes_count",
+              "value_kind": "integer",
+              "description": "Number of attributes dropped from the resource."
+            }
+          ],
+          "scope": [
+            {
+              "path": "name",
+              "value_kind": "string",
+              "description": "Instrumentation scope name."
+            },
+            {
+              "path": "version",
+              "value_kind": "string",
+              "description": "Instrumentation scope version."
+            },
+            {
+              "path": "dropped_attributes_count",
+              "value_kind": "integer",
+              "description": "Number of attributes dropped from the scope."
+            },
+            {
+              "path": "attributes",
+              "value_kind": "object",
+              "description": "All attributes of the instrumentation scope."
+            },
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the instrumentation scope. Replace key with the attribute name."
+            }
+          ],
+          "span": [
+            {
+              "path": "attributes",
+              "value_kind": "object",
+              "description": "All attributes of the span."
+            },
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the span. Replace key with the attribute name."
+            },
+            {
+              "path": "trace_id",
+              "value_kind": "any",
+              "description": "ID of the trace the span belongs to."
+            },
+            {
+              "path": "trace_id.string",
+              "value_kind": "string",
+              "description": "ID of the trace the span belongs to, as a hex string."
+            },
+            {
+              "path": "span_id",
+              "value_kind": "any",
+              "description": "ID of the span."
+            },
+            {
+              "path": "span_id.string",
+              "value_kind": "string",
+              "description": "ID of the span, as a hex string."
+            },
+            {
+              "path": "parent_span_id",
+              "value_kind": "any",
+              "description": "ID of the parent span."
+            },
+            {
+              "path": "parent_span_id.string",
+              "value_kind": "string",
+              "description": "ID of the parent span, as a hex string."
+            },
+            {
+              "path": "trace_state",
+              "value_kind": "string",
+              "description": "W3C trace state of the span."
+            },
+            {
+              "path": "trace_state[\"key\"]",
+              "value_kind": "string",
+              "description": "One entry of the W3C trace state. Replace key with the entry name."
+            },
+            {
+              "path": "status",
+              "value_kind": "object",
+              "description": "Status of the span."
+            },
+            {
+              "path": "status.code",
+              "value_kind": "integer",
+              "description": "Status code of the span: 0 unset, 1 ok, 2 error."
+            },
+            {
+              "path": "status.message",
+              "value_kind": "string",
+              "description": "Message describing the span status."
+            },
+            {
+              "path": "name",
+              "value_kind": "string",
+              "description": "Name of the span."
+            },
+            {
+              "path": "kind",
+              "value_kind": "integer",
+              "description": "Kind of the span as a number, such as server or client."
+            },
+            {
+              "path": "kind.string",
+              "value_kind": "string",
+              "description": "Kind of the span as text, such as Server or Client."
+            },
+            {
+              "path": "start_time_unix_nano",
+              "value_kind": "integer",
+              "description": "When the span started, in nanoseconds since the Unix epoch."
+            },
+            {
+              "path": "end_time_unix_nano",
+              "value_kind": "integer",
+              "description": "When the span ended, in nanoseconds since the Unix epoch."
+            },
+            {
+              "path": "start_time",
+              "value_kind": "any",
+              "description": "When the span started."
+            },
+            {
+              "path": "end_time",
+              "value_kind": "any",
+              "description": "When the span ended."
+            },
+            {
+              "path": "dropped_attributes_count",
+              "value_kind": "integer",
+              "description": "Number of attributes dropped from the span."
+            },
+            {
+              "path": "events",
+              "value_kind": "array",
+              "description": "Events recorded on the span."
+            },
+            {
+              "path": "dropped_events_count",
+              "value_kind": "integer",
+              "description": "Number of events dropped from the span."
+            },
+            {
+              "path": "links",
+              "value_kind": "array",
+              "description": "Links from the span to other spans."
+            },
+            {
+              "path": "dropped_links_count",
+              "value_kind": "integer",
+              "description": "Number of links dropped from the span."
+            },
+            {
+              "path": "flags",
+              "value_kind": "integer",
+              "description": "Flags of the span."
+            }
+          ],
+          "spanevent": [
+            {
+              "path": "attributes",
+              "value_kind": "object",
+              "description": "All attributes of the span event."
+            },
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the span event. Replace key with the attribute name."
+            },
+            {
+              "path": "time_unix_nano",
+              "value_kind": "integer",
+              "description": "When the event happened, in nanoseconds since the Unix epoch."
+            },
+            {
+              "path": "time",
+              "value_kind": "any",
+              "description": "When the event happened."
+            },
+            {
+              "path": "name",
+              "value_kind": "string",
+              "description": "Name of the span event."
+            },
+            {
+              "path": "dropped_attributes_count",
+              "value_kind": "integer",
+              "description": "Number of attributes dropped from the span event."
+            },
+            {
+              "path": "event_index",
+              "value_kind": "integer",
+              "description": "Position of the event within its span."
+            }
+          ]
+        },
+        "locations": {
+          "attributes": [
+            {
+              "path": "service.name",
+              "value_kind": "string",
+              "description": "Service name attribute."
+            },
+            {
+              "path": "deployment[\"environment\"][\"name\"]",
+              "value_kind": "string",
+              "description": "Deployment environment attribute."
+            }
+          ],
+          "body": [
+            {
+              "path": "message",
+              "value_kind": "string",
+              "description": "Message in a structured log body.",
+              "supported_telemetry": [
+                "logs",
+                "docs"
+              ]
+            },
+            {
+              "path": "event[\"category\"]",
+              "value_kind": "string",
+              "description": "Event category in a structured log body.",
+              "supported_telemetry": [
+                "logs",
+                "docs"
+              ]
+            }
+          ],
+          "record": [
+            {
+              "path": "attributes",
+              "value_kind": "object",
+              "description": "All attributes of the log record.",
+              "supported_telemetry": [
+                "logs"
+              ]
+            },
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the log record. Replace key with the attribute name.",
+              "supported_telemetry": [
+                "logs"
+              ]
+            },
+            {
+              "path": "event_name",
+              "value_kind": "string",
+              "description": "Name of the event the log describes.",
+              "supported_telemetry": [
+                "logs"
+              ]
+            },
+            {
+              "path": "trace_id",
+              "value_kind": "any",
+              "description": "ID of the trace the log belongs to.",
+              "supported_telemetry": [
+                "logs"
+              ]
+            },
+            {
+              "path": "trace_id.string",
+              "value_kind": "string",
+              "description": "ID of the trace the log belongs to, as a hex string.",
+              "supported_telemetry": [
+                "logs"
+              ]
+            },
+            {
+              "path": "span_id",
+              "value_kind": "any",
+              "description": "ID of the span the log belongs to.",
+              "supported_telemetry": [
+                "logs"
+              ]
+            },
+            {
+              "path": "span_id.string",
+              "value_kind": "string",
+              "description": "ID of the span the log belongs to, as a hex string.",
+              "supported_telemetry": [
+                "logs"
+              ]
+            },
+            {
+              "path": "time_unix_nano",
+              "value_kind": "integer",
+              "description": "When the event happened, in nanoseconds since the Unix epoch.",
+              "supported_telemetry": [
+                "logs"
+              ]
+            },
+            {
+              "path": "observed_time_unix_nano",
+              "value_kind": "integer",
+              "description": "When the event was observed, in nanoseconds since the Unix epoch.",
+              "supported_telemetry": [
+                "logs"
+              ]
+            },
+            {
+              "path": "time",
+              "value_kind": "any",
+              "description": "When the event happened.",
+              "supported_telemetry": [
+                "logs"
+              ]
+            },
+            {
+              "path": "observed_time",
+              "value_kind": "any",
+              "description": "When the event was observed.",
+              "supported_telemetry": [
+                "logs"
+              ]
+            },
+            {
+              "path": "severity_number",
+              "value_kind": "integer",
+              "description": "Severity of the log as a number.",
+              "supported_telemetry": [
+                "logs"
+              ]
+            },
+            {
+              "path": "severity_text",
+              "value_kind": "string",
+              "description": "Severity of the log as text, such as INFO or ERROR.",
+              "supported_telemetry": [
+                "logs"
+              ]
+            },
+            {
+              "path": "body",
+              "value_kind": "any",
+              "description": "The log body: a message or structured data.",
+              "supported_telemetry": [
+                "logs"
+              ]
+            },
+            {
+              "path": "body[\"key\"]",
+              "value_kind": "any",
+              "description": "One field of a structured log body. Replace key with the field name.",
+              "supported_telemetry": [
+                "logs"
+              ]
+            },
+            {
+              "path": "body.string",
+              "value_kind": "string",
+              "description": "The log body as a string.",
+              "supported_telemetry": [
+                "logs"
+              ]
+            },
+            {
+              "path": "dropped_attributes_count",
+              "value_kind": "integer",
+              "description": "Number of attributes dropped from the log record.",
+              "supported_telemetry": [
+                "logs"
+              ]
+            },
+            {
+              "path": "flags",
+              "value_kind": "integer",
+              "description": "Flags of the log record.",
+              "supported_telemetry": [
+                "logs"
+              ]
+            },
+            {
+              "path": "attributes",
+              "value_kind": "object",
+              "description": "All attributes of the data point.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the data point. Replace key with the attribute name.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "positive",
+              "value_kind": "object",
+              "description": "Positive buckets of an exponential histogram.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "positive.offset",
+              "value_kind": "integer",
+              "description": "Offset of the positive buckets of an exponential histogram.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "positive.bucket_counts",
+              "value_kind": "array",
+              "description": "Counts of the positive buckets of an exponential histogram.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "negative",
+              "value_kind": "object",
+              "description": "Negative buckets of an exponential histogram.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "negative.offset",
+              "value_kind": "integer",
+              "description": "Offset of the negative buckets of an exponential histogram.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "negative.bucket_counts",
+              "value_kind": "array",
+              "description": "Counts of the negative buckets of an exponential histogram.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "start_time_unix_nano",
+              "value_kind": "integer",
+              "description": "Start of the measured interval, in nanoseconds since the Unix epoch.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "time_unix_nano",
+              "value_kind": "integer",
+              "description": "When the value was recorded, in nanoseconds since the Unix epoch.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "start_time",
+              "value_kind": "any",
+              "description": "Start of the measured interval.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "time",
+              "value_kind": "any",
+              "description": "When the value was recorded.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "value_double",
+              "value_kind": "number",
+              "description": "Floating-point data point value.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "value_int",
+              "value_kind": "integer",
+              "description": "Integer data point value.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "exemplars",
+              "value_kind": "array",
+              "description": "Exemplars attached to the data point.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "flags",
+              "value_kind": "integer",
+              "description": "Flags of the data point.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "count",
+              "value_kind": "integer",
+              "description": "Number of values recorded in a histogram or summary.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "sum",
+              "value_kind": "number",
+              "description": "Sum of the values recorded in a histogram or summary.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "bucket_counts",
+              "value_kind": "array",
+              "description": "Counts of the histogram buckets.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "explicit_bounds",
+              "value_kind": "array",
+              "description": "Upper bounds of the histogram buckets.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "scale",
+              "value_kind": "integer",
+              "description": "Scale of an exponential histogram.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "zero_count",
+              "value_kind": "integer",
+              "description": "Number of zero values in an exponential histogram.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "quantile_values",
+              "value_kind": "array",
+              "description": "Quantile values of a summary.",
+              "supported_telemetry": [
+                "metrics"
+              ]
+            },
+            {
+              "path": "attributes",
+              "value_kind": "object",
+              "description": "All attributes of the span.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the span. Replace key with the attribute name.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "trace_id",
+              "value_kind": "any",
+              "description": "ID of the trace the span belongs to.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "trace_id.string",
+              "value_kind": "string",
+              "description": "ID of the trace the span belongs to, as a hex string.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "span_id",
+              "value_kind": "any",
+              "description": "ID of the span.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "span_id.string",
+              "value_kind": "string",
+              "description": "ID of the span, as a hex string.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "parent_span_id",
+              "value_kind": "any",
+              "description": "ID of the parent span.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "parent_span_id.string",
+              "value_kind": "string",
+              "description": "ID of the parent span, as a hex string.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "trace_state",
+              "value_kind": "string",
+              "description": "W3C trace state of the span.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "trace_state[\"key\"]",
+              "value_kind": "string",
+              "description": "One entry of the W3C trace state. Replace key with the entry name.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "status",
+              "value_kind": "object",
+              "description": "Status of the span.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "status.code",
+              "value_kind": "integer",
+              "description": "Status code of the span: 0 unset, 1 ok, 2 error.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "status.message",
+              "value_kind": "string",
+              "description": "Message describing the span status.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "name",
+              "value_kind": "string",
+              "description": "Name of the span.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "kind",
+              "value_kind": "integer",
+              "description": "Kind of the span as a number, such as server or client.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "kind.string",
+              "value_kind": "string",
+              "description": "Kind of the span as text, such as Server or Client.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "start_time_unix_nano",
+              "value_kind": "integer",
+              "description": "When the span started, in nanoseconds since the Unix epoch.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "end_time_unix_nano",
+              "value_kind": "integer",
+              "description": "When the span ended, in nanoseconds since the Unix epoch.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "start_time",
+              "value_kind": "any",
+              "description": "When the span started.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "end_time",
+              "value_kind": "any",
+              "description": "When the span ended.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "dropped_attributes_count",
+              "value_kind": "integer",
+              "description": "Number of attributes dropped from the span.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "events",
+              "value_kind": "array",
+              "description": "Events recorded on the span.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "dropped_events_count",
+              "value_kind": "integer",
+              "description": "Number of events dropped from the span.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "links",
+              "value_kind": "array",
+              "description": "Links from the span to other spans.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "dropped_links_count",
+              "value_kind": "integer",
+              "description": "Number of links dropped from the span.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "flags",
+              "value_kind": "integer",
+              "description": "Flags of the span.",
+              "supported_telemetry": [
+                "traces"
+              ]
+            },
+            {
+              "path": "attributes",
+              "value_kind": "object",
+              "description": "All attributes of the profile.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            },
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the profile. Replace key with the attribute name.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            },
+            {
+              "path": "sample_type",
+              "value_kind": "object",
+              "description": "What the samples measure.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            },
+            {
+              "path": "sample_type.type",
+              "value_kind": "string",
+              "description": "What the samples measure, such as cpu.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            },
+            {
+              "path": "sample_type.unit",
+              "value_kind": "string",
+              "description": "Unit of the sample values, such as nanoseconds.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            },
+            {
+              "path": "sample",
+              "value_kind": "array",
+              "description": "The samples of the profile.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            },
+            {
+              "path": "time_unix_nano",
+              "value_kind": "integer",
+              "description": "When the profile was collected, in nanoseconds since the Unix epoch.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            },
+            {
+              "path": "time",
+              "value_kind": "any",
+              "description": "When the profile was collected.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            },
+            {
+              "path": "duration_unix_nano",
+              "value_kind": "integer",
+              "description": "Profile duration in nanoseconds.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            },
+            {
+              "path": "duration",
+              "value_kind": "integer",
+              "description": "Profile duration.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            },
+            {
+              "path": "period_type",
+              "value_kind": "object",
+              "description": "What the sampling period measures.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            },
+            {
+              "path": "period_type.type",
+              "value_kind": "string",
+              "description": "What the sampling period measures, such as cpu.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            },
+            {
+              "path": "period_type.unit",
+              "value_kind": "string",
+              "description": "Sampling period unit.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            },
+            {
+              "path": "period",
+              "value_kind": "integer",
+              "description": "Profile sampling period.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            },
+            {
+              "path": "profile_id",
+              "value_kind": "any",
+              "description": "ID of the profile.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            },
+            {
+              "path": "profile_id.string",
+              "value_kind": "string",
+              "description": "ID of the profile, as a hex string.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            },
+            {
+              "path": "attribute_indices",
+              "value_kind": "array",
+              "description": "Indices of the profile attributes.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            },
+            {
+              "path": "dropped_attributes_count",
+              "value_kind": "integer",
+              "description": "Number of attributes dropped from the profile.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            },
+            {
+              "path": "original_payload_format",
+              "value_kind": "string",
+              "description": "Format of the original profile payload.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            },
+            {
+              "path": "original_payload",
+              "value_kind": "any",
+              "description": "The original profile payload.",
+              "supported_telemetry": [
+                "profiles"
+              ]
+            }
+          ],
+          "resource": [
+            {
+              "path": "attributes",
+              "value_kind": "object",
+              "description": "All attributes of the resource."
+            },
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the resource. Replace key with the attribute name."
+            },
+            {
+              "path": "attributes[\"service.name\"]",
+              "value_kind": "string",
+              "description": "Service name."
+            },
+            {
+              "path": "attributes[\"deployment.environment.name\"]",
+              "value_kind": "string",
+              "description": "Deployment environment."
+            },
+            {
+              "path": "dropped_attributes_count",
+              "value_kind": "integer",
+              "description": "Number of attributes dropped from the resource."
+            }
+          ],
+          "scope": [
+            {
+              "path": "name",
+              "value_kind": "string",
+              "description": "Instrumentation scope name."
+            },
+            {
+              "path": "version",
+              "value_kind": "string",
+              "description": "Instrumentation scope version."
+            },
+            {
+              "path": "dropped_attributes_count",
+              "value_kind": "integer",
+              "description": "Number of attributes dropped from the scope."
+            },
+            {
+              "path": "attributes",
+              "value_kind": "object",
+              "description": "All attributes of the instrumentation scope."
+            },
+            {
+              "path": "attributes[\"key\"]",
+              "value_kind": "any",
+              "description": "One attribute of the instrumentation scope. Replace key with the attribute name."
+            }
+          ]
+        }
+      }
+    }
+  },
+  "definitions": [
+    {
+      "kind": "source",
+      "type": "otlp",
+      "schema_version": "v1",
+      "display_name": "Otlp",
+      "description": "Receives OTLP data from the managed ingestion path.",
+      "supported_telemetry": [
+        "logs",
+        "metrics",
+        "traces",
+        "docs",
+        "profiles"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "beta",
+      "fields": [],
+      "help": {
+        "summary": "Receives OTLP data from the managed ingestion path."
+      }
+    },
+    {
+      "kind": "processor",
+      "type": "add_fields",
+      "schema_version": "v1",
+      "display_name": "Add fields",
+      "description": "Add, change and remove fields on records.",
+      "supported_telemetry": [
+        "logs",
+        "metrics",
+        "traces",
+        "docs",
+        "profiles"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental",
+      "fields": [
+        {
+          "name": "fields",
+          "type": "array",
+          "label": "Fields",
+          "required": true,
+          "items": {
+            "type": "object",
+            "fields": [
+              {
+                "name": "location",
+                "type": "enum",
+                "label": "Location",
+                "description": "Portable base location of the path. Omit it to write a full OTTL path.",
+                "ui": {
+                  "row": "target",
+                  "width": "s"
+                },
+                "enum_set": "path.locations"
+              },
+              {
+                "name": "context",
+                "type": "enum",
+                "label": "Context",
+                "description": "Explicit OTTL context of the path. Not used together with location.",
+                "ui": {
+                  "row": "target",
+                  "width": "s"
+                },
+                "enum_set": "ottl.contexts"
+              },
+              {
+                "name": "path",
+                "type": "path",
+                "label": "Path",
+                "description": "Field path within the location, or a full OTTL path when no location is set.",
+                "required": true,
+                "ui": {
+                  "row": "target",
+                  "width": "m"
+                },
+                "path_set": "ottl.paths"
+              },
+              {
+                "name": "value",
+                "type": "literal",
+                "label": "Value",
+                "description": "Literal value to write. Mutually exclusive with ottl_value.",
+                "available_when": {
+                  "path": "/action",
+                  "operator": "neq",
+                  "value": "delete"
+                },
+                "ui": {
+                  "row": "value",
+                  "width": "m"
+                },
+                "literal_kinds": [
+                  "string",
+                  "integer",
+                  "number",
+                  "boolean",
+                  "null"
+                ]
+              },
+              {
+                "name": "ottl_value",
+                "type": "string",
+                "label": "OTTL value",
+                "description": "OTTL expression evaluated in the applicable context. Mutually exclusive with value.",
+                "available_when": {
+                  "path": "/action",
+                  "operator": "neq",
+                  "value": "delete"
+                },
+                "ui": {
+                  "row": "value",
+                  "width": "m"
+                },
+                "min_length": 1,
+                "format": "ottl_value"
+              },
+              {
+                "name": "action",
+                "type": "enum",
+                "label": "Action",
+                "required": true,
+                "ui": {
+                  "row": "target",
+                  "width": "xs"
+                },
+                "options": [
+                  {
+                    "value": "upsert",
+                    "label": "Upsert",
+                    "description": "Write unconditionally."
+                  },
+                  {
+                    "value": "update",
+                    "label": "Update",
+                    "description": "Write only when the field already exists."
+                  },
+                  {
+                    "value": "insert",
+                    "label": "Insert",
+                    "description": "Write only when the field is absent."
+                  },
+                  {
+                    "value": "delete",
+                    "label": "Delete",
+                    "description": "Remove the field. No value is used."
+                  }
+                ]
+              }
+            ],
+            "choice_groups": [
+              {
+                "id": "target_path",
+                "label": "Target",
+                "fields": [
+                  "location",
+                  "context"
+                ],
+                "min_selected": 1,
+                "max_selected": 1,
+                "default_field": "location"
+              },
+              {
+                "id": "value_source",
+                "label": "Value",
+                "fields": [
+                  "value",
+                  "ottl_value"
+                ],
+                "min_selected": 1,
+                "max_selected": 1,
+                "default_field": "value"
+              }
+            ]
+          },
+          "allow_item_telemetry": true,
+          "min_items": 1
+        }
+      ],
+      "help": {
+        "summary": "Add, change and remove fields on records."
+      }
+    },
+    {
+      "kind": "destination",
+      "type": "elasticsearch",
+      "schema_version": "v1",
+      "display_name": "Elasticsearch",
+      "description": "Writes records to one fixed Elasticsearch index or data stream.",
+      "supported_telemetry": [
+        "logs",
+        "docs",
+        "metrics",
+        "traces"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental",
+      "fields": [
+        {
+          "name": "index",
+          "type": "string",
+          "label": "Index",
+          "description": "The index or data stream every record is written to. It must be a fixed, lowercase name with no wildcards, templates or date math.",
+          "required": true
+        },
+        {
+          "name": "api_key",
+          "type": "secret",
+          "label": "API key",
+          "description": "An Elasticsearch API key, for testing. Without it the key comes from the environment."
+        }
+      ],
+      "help": {
+        "summary": "Writes records to one fixed Elasticsearch index or data stream."
+      }
+    }
+  ]
+}

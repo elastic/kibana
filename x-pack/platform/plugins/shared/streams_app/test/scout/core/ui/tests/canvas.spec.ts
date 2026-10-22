@@ -290,10 +290,8 @@ test.describe(
       await expect(page.getByText('Add processing')).toBeVisible();
       await expect(page.getByText('Add routing')).toBeVisible();
 
-      await page.getByText('Add processing').click();
-      await expect(
-        page.getByTestId('streamsProcessingFlyout').getByText('Add Processing')
-      ).toBeVisible();
+      await page.getByText('Add routing').click();
+      await expect(page.getByTestId('streamsRoutingFlyout').getByText('Add Routing')).toBeVisible();
     });
   }
 );

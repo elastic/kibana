@@ -5,48 +5,67 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import type { Unit } from './unit_repository';
+import {
+  EDGE_FORWARDING,
+  GRAPH_ENDPOINT_KIND,
+  PROCESSING_SLOT_KIND,
+  type ProcessingNodeRef,
+  type UnitEdgeForwarding,
+  type UnitGraphEndpoint,
+  type UnitSignal,
+} from './unit_graph';
+import {
+  PIPELINE_ENTRY,
+  isDelegatingRoute,
+  type PipelineConfig,
+  type RouteRule,
+  type UnitPipeline,
+} from './unit_pipeline';
+import { pruneUnit } from './unit_processing';
 
 /**
- * Wires sources to destinations.
+ * Wires sources and processing to destinations.
  *
- * Each source has its own pipeline. Unconditional wires are that pipeline's
- * `destinations` list, which can name several destinations. Conditional wires
- * are `routes` rules, which cannot share a pipeline with `destinations`. A new
- * wire on a pipeline that already uses routes is stored as a catch-all rule so
- * a later condition can be set on it without changing the connection model.
+ * A line from a source carries its records unprocessed, so it is stored on one
+ * of the source's pipelines without processors, created when the source has
+ * none. A line from a processing node is stored on the pipeline that owns those
+ * processors, after them. Unconditional wires are a pipeline's `destinations`
+ * list, which can name several destinations. Conditional wires are `routes`
+ * rules, which cannot share a pipeline with `destinations`. A new wire on a
+ * pipeline that already uses routes is stored as a catch-all rule so a later
+ * condition can be set on it without changing the connection model.
  */
-
-type UnitPipeline = Unit['unit']['pipelines'][number];
-type PipelineConfig = UnitPipeline['config'];
 
 const DEFAULT_SUPPORTED_TELEMETRY = ['logs', 'metrics', 'traces'] as const;
 const PIPELINE_ID_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
 
-export type UnitConnectionForwarding = 'direct' | 'route';
+/** Where a line starts: a source (unprocessed records) or a processing node (processed records). */
+export type UnitConnectionOrigin = Exclude<
+  UnitGraphEndpoint,
+  { kind: typeof GRAPH_ENDPOINT_KIND.destination }
+>;
 
 export interface UnitConnection {
   sourceId: string;
   destinationId: string;
   /** `direct` is an unconditional destinations list. `route` is a routing rule. */
-  forwarding: UnitConnectionForwarding;
+  forwarding: UnitEdgeForwarding;
 }
 
-type RouteRule = Extract<PipelineConfig[number], { name: 'routes' }>['value'][number];
+type IdentifierEntryName = typeof PIPELINE_ENTRY.sources | typeof PIPELINE_ENTRY.destinations;
 
-const readIdentifiers = (config: PipelineConfig, name: 'sources' | 'destinations'): string[] => {
+const readIdentifiers = (config: PipelineConfig, name: IdentifierEntryName): string[] => {
   for (const entry of config) {
-    if (entry.name === 'sources' && name === 'sources') {
-      return [...entry.value];
-    }
-    if (entry.name === 'destinations' && name === 'destinations') {
+    if (entry.name === name) {
       return [...entry.value];
     }
   }
   return [];
 };
 
-const withIdentifiers = <Name extends 'sources' | 'destinations'>(
+const withIdentifiers = <Name extends IdentifierEntryName>(
   config: PipelineConfig,
   name: Name,
   value: string[]
@@ -62,11 +81,11 @@ const withIdentifiers = <Name extends 'sources' | 'destinations'>(
 };
 
 const pipelineUsesRoutes = (pipeline: UnitPipeline): boolean =>
-  pipeline.config.some((entry) => entry.name === 'routes');
+  pipeline.config.some((entry) => entry.name === PIPELINE_ENTRY.routes);
 
 const readRoutes = (config: PipelineConfig): RouteRule[] => {
   for (const entry of config) {
-    if (entry.name === 'routes') {
+    if (entry.name === PIPELINE_ENTRY.routes) {
       return [...entry.value];
     }
   }
@@ -75,27 +94,27 @@ const readRoutes = (config: PipelineConfig): RouteRule[] => {
 
 const withRoutes = (config: PipelineConfig, routes: readonly RouteRule[]): PipelineConfig => {
   if (routes.length === 0) {
-    return config.filter((entry) => entry.name !== 'routes');
+    return config.filter((entry) => entry.name !== PIPELINE_ENTRY.routes);
   }
-  const exists = config.some((entry) => entry.name === 'routes');
+  const exists = config.some((entry) => entry.name === PIPELINE_ENTRY.routes);
   if (!exists) {
-    return [...config, { name: 'routes', value: [...routes] }];
+    return [...config, { name: PIPELINE_ENTRY.routes, value: [...routes] }];
   }
   return config.map((entry) =>
-    entry.name === 'routes' ? { ...entry, value: [...routes] } : entry
+    entry.name === PIPELINE_ENTRY.routes ? { ...entry, value: [...routes] } : entry
   );
 };
 
 const routeDestinationIds = (route: RouteRule): readonly string[] =>
-  'destinations' in route ? route.destinations : [];
+  isDelegatingRoute(route) ? [] : route.destinations;
 
 const isCatchAllDestinationRoute = (route: RouteRule): boolean =>
-  route.when === undefined && 'destinations' in route;
+  route.when === undefined && !isDelegatingRoute(route);
 
 /** A catch-all that delegates to child pipelines already consumes every record. */
 const catchAllBlocksDestination = (routes: readonly RouteRule[]): boolean => {
   const catchAll = routes.find((route) => route.when === undefined);
-  return catchAll !== undefined && !('destinations' in catchAll);
+  return catchAll !== undefined && isDelegatingRoute(catchAll);
 };
 
 const routesIncludeDestination = (routes: readonly RouteRule[], destinationId: string): boolean =>
@@ -110,7 +129,7 @@ const addDestinationToRoutes = (
     return [...routes, { destinations: [destinationId] }];
   }
   return routes.map((route, index) => {
-    if (index !== catchAllIndex || !('destinations' in route)) {
+    if (index !== catchAllIndex || isDelegatingRoute(route)) {
       return route;
     }
     if (route.destinations.includes(destinationId)) {
@@ -125,7 +144,7 @@ const removeDestinationFromRoutes = (
   destinationId: string
 ): RouteRule[] =>
   routes.flatMap((route) => {
-    if (!('destinations' in route) || !route.destinations.includes(destinationId)) {
+    if (isDelegatingRoute(route) || !route.destinations.includes(destinationId)) {
       return [route];
     }
     const destinations = route.destinations.filter((id) => id !== destinationId);
@@ -133,8 +152,8 @@ const removeDestinationFromRoutes = (
   });
 
 const pipelineForwards = (config: PipelineConfig): boolean =>
-  readIdentifiers(config, 'destinations').length > 0 ||
-  config.some((entry) => entry.name === 'routes');
+  readIdentifiers(config, PIPELINE_ENTRY.destinations).length > 0 ||
+  config.some((entry) => entry.name === PIPELINE_ENTRY.routes);
 
 const replacePipelines = (unit: Unit, pipelines: Unit['unit']['pipelines']): Unit => ({
   ...unit,
@@ -144,8 +163,34 @@ const replacePipelines = (unit: Unit, pipelines: Unit['unit']['pipelines']): Uni
   },
 });
 
-const findSourcePipelineIndex = (pipelines: Unit['unit']['pipelines'], sourceId: string): number =>
-  pipelines.findIndex((pipeline) => readIdentifiers(pipeline.config, 'sources').includes(sourceId));
+const hasProcessors = (pipeline: UnitPipeline): boolean =>
+  pipeline.config.some(
+    (entry) => entry.name === PIPELINE_ENTRY.processors && entry.value.length > 0
+  );
+
+const forwardsDirectlyTo = (pipeline: UnitPipeline, destinationId: string): boolean =>
+  pipelineUsesRoutes(pipeline)
+    ? routesIncludeDestination(readRoutes(pipeline.config), destinationId)
+    : readIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations).includes(destinationId);
+
+/**
+ * The source pipeline whose lines start at the source: one without processors.
+ * With a destination, only the pipeline that forwards to it matches.
+ */
+const findUnprocessedSourcePipelineIndex = (
+  pipelines: Unit['unit']['pipelines'],
+  sourceId: string,
+  destinationId?: string
+): number =>
+  pipelines.findIndex(
+    (pipeline) =>
+      !hasProcessors(pipeline) &&
+      readIdentifiers(pipeline.config, PIPELINE_ENTRY.sources).includes(sourceId) &&
+      (destinationId === undefined || forwardsDirectlyTo(pipeline, destinationId))
+  );
+
+const findPipelineIndex = (unit: Unit, pipelineId: string): number =>
+  unit.unit.pipelines.findIndex(({ id }) => id === pipelineId);
 
 const writePipeline = (unit: Unit, pipelineIndex: number, config: PipelineConfig): Unit => {
   const pipelines = unit.unit.pipelines.flatMap((pipeline, index) => {
@@ -209,12 +254,9 @@ const appendSourcePipeline = (
     {
       id: pipelineIdForSource(unit, sourceId),
       supported_telemetry: [...supportedTelemetry],
-      config: [{ name: 'sources', value: [sourceId] }, ...forwarding],
+      config: [{ name: PIPELINE_ENTRY.sources, value: [sourceId] }, ...forwarding],
     },
   ]);
-
-const processorEntries = (config: PipelineConfig): PipelineConfig =>
-  config.filter((entry) => entry.name === 'processors');
 
 const detachSource = (unit: Unit, pipelineIndex: number, sourceId: string): Unit => {
   const pipeline = unit.unit.pipelines[pipelineIndex];
@@ -223,8 +265,8 @@ const detachSource = (unit: Unit, pipelineIndex: number, sourceId: string): Unit
     pipelineIndex,
     withIdentifiers(
       pipeline.config,
-      'sources',
-      readIdentifiers(pipeline.config, 'sources').filter((id) => id !== sourceId)
+      PIPELINE_ENTRY.sources,
+      readIdentifiers(pipeline.config, PIPELINE_ENTRY.sources).filter((id) => id !== sourceId)
     )
   );
 };
@@ -242,7 +284,40 @@ const pushConnection = (
   connections.push(connection);
 };
 
-/** Source/destination pairs each source pipeline currently forwards. */
+/** Destinations a pipeline forwards to, following route delegation into processing pipelines. */
+const forwardedDestinations = (
+  pipeline: UnitPipeline,
+  pipelinesById: ReadonlyMap<string, UnitPipeline>,
+  forwarding: UnitEdgeForwarding,
+  visiting: ReadonlySet<string>
+): Array<{ destinationId: string; forwarding: UnitEdgeForwarding }> => {
+  if (visiting.has(pipeline.id)) {
+    return [];
+  }
+  const nextVisiting = new Set(visiting).add(pipeline.id);
+  if (!pipelineUsesRoutes(pipeline)) {
+    return readIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations).map((destinationId) => ({
+      destinationId,
+      forwarding,
+    }));
+  }
+  return readRoutes(pipeline.config).flatMap((route) => {
+    if (!isDelegatingRoute(route)) {
+      return route.destinations.map((destinationId) => ({
+        destinationId,
+        forwarding: EDGE_FORWARDING.route,
+      }));
+    }
+    return route.pipelines.flatMap((childId) => {
+      const child = pipelinesById.get(childId);
+      return child
+        ? forwardedDestinations(child, pipelinesById, EDGE_FORWARDING.route, nextVisiting)
+        : [];
+    });
+  });
+};
+
+/** Source/destination pairs each source pipeline currently forwards, including through delegation. */
 export const getUnitConnections = (
   unit: Unit,
   configuredSourceIds: ReadonlySet<string>,
@@ -250,35 +325,51 @@ export const getUnitConnections = (
 ): UnitConnection[] => {
   const seen = new Set<string>();
   const connections: UnitConnection[] = [];
+  const pipelinesById = new Map(unit.unit.pipelines.map((pipeline) => [pipeline.id, pipeline]));
   for (const pipeline of unit.unit.pipelines) {
-    const sources = readIdentifiers(pipeline.config, 'sources').filter((id) =>
+    const sources = readIdentifiers(pipeline.config, PIPELINE_ENTRY.sources).filter((id) =>
       configuredSourceIds.has(id)
     );
-    if (pipelineUsesRoutes(pipeline)) {
-      const destinationIds = readRoutes(pipeline.config).flatMap((route) => [
-        ...routeDestinationIds(route),
-      ]);
-      for (const sourceId of sources) {
-        for (const destinationId of destinationIds) {
-          if (!configuredDestinationIds.has(destinationId)) {
-            continue;
-          }
-          pushConnection(connections, seen, { sourceId, destinationId, forwarding: 'route' });
-        }
-      }
+    if (sources.length === 0) {
       continue;
     }
-    const destinations = readIdentifiers(pipeline.config, 'destinations').filter((id) =>
-      configuredDestinationIds.has(id)
-    );
+    const destinations = forwardedDestinations(
+      pipeline,
+      pipelinesById,
+      EDGE_FORWARDING.direct,
+      new Set()
+    ).filter(({ destinationId }) => configuredDestinationIds.has(destinationId));
     for (const sourceId of sources) {
-      for (const destinationId of destinations) {
-        pushConnection(connections, seen, { sourceId, destinationId, forwarding: 'direct' });
+      for (const { destinationId, forwarding } of destinations) {
+        pushConnection(connections, seen, { sourceId, destinationId, forwarding });
       }
     }
   }
   return connections;
 };
+
+const pipelineReaches = (unit: Unit, pipeline: UnitPipeline, destinationId: string): boolean => {
+  const pipelinesById = new Map(unit.unit.pipelines.map((item) => [item.id, item]));
+  return forwardedDestinations(pipeline, pipelinesById, EDGE_FORWARDING.direct, new Set()).some(
+    (forwarded) => forwarded.destinationId === destinationId
+  );
+};
+
+/** Whether any of the source's pipelines already delivers to the destination, processed or not. */
+const sourceReaches = (unit: Unit, sourceId: string, destinationId: string): boolean =>
+  unit.unit.pipelines.some(
+    (pipeline) =>
+      readIdentifiers(pipeline.config, PIPELINE_ENTRY.sources).includes(sourceId) &&
+      pipelineReaches(unit, pipeline, destinationId)
+  );
+
+const sharesSignal = (left: readonly UnitSignal[], right: readonly UnitSignal[]): boolean =>
+  left.some((signal) => right.includes(signal));
+
+const TELEMETRY_FIT = {
+  unknown: 'unknown',
+  incompatible: 'incompatible',
+} as const;
 
 /**
  * Signals both components accept. `unknown` means one side is not on the unit,
@@ -289,16 +380,16 @@ const telemetryFit = (
   unit: Unit,
   sourceId: string,
   destinationId: string
-): 'unknown' | 'incompatible' | UnitPipeline['supported_telemetry'] => {
+): (typeof TELEMETRY_FIT)[keyof typeof TELEMETRY_FIT] | UnitPipeline['supported_telemetry'] => {
   const source = unit.unit.sources?.find((item) => item.id === sourceId);
   const destination = unit.unit.destinations?.find((item) => item.id === destinationId);
   if (!source || !destination) {
-    return 'unknown';
+    return TELEMETRY_FIT.unknown;
   }
   const destinationSignals = new Set(destination.supported_telemetry);
   const shared = source.supported_telemetry.filter((signal) => destinationSignals.has(signal));
   if (shared.length === 0) {
-    return 'incompatible';
+    return TELEMETRY_FIT.incompatible;
   }
   return shared;
 };
@@ -309,37 +400,33 @@ const pipelineTelemetry = (
   destinationId: string
 ): UnitPipeline['supported_telemetry'] => {
   const fit = telemetryFit(unit, sourceId, destinationId);
-  return fit === 'unknown' || fit === 'incompatible' ? [...DEFAULT_SUPPORTED_TELEMETRY] : fit;
+  return fit === TELEMETRY_FIT.unknown || fit === TELEMETRY_FIT.incompatible
+    ? [...DEFAULT_SUPPORTED_TELEMETRY]
+    : fit;
 };
 
+/** A source line is refused when the source already delivers to the destination on any path. */
 export const canConnectSourceToDestination = (
   unit: Unit,
   sourceId: string,
   destinationId: string
 ): boolean => {
   const fit = telemetryFit(unit, sourceId, destinationId);
-  if (fit === 'incompatible') {
+  if (fit === TELEMETRY_FIT.incompatible || sourceReaches(unit, sourceId, destinationId)) {
     return false;
   }
-  const pipelineIndex = findSourcePipelineIndex(unit.unit.pipelines, sourceId);
+  const pipelineIndex = findUnprocessedSourcePipelineIndex(unit.unit.pipelines, sourceId);
   if (pipelineIndex === -1) {
     return true;
   }
   const pipeline = unit.unit.pipelines[pipelineIndex];
-  if (fit !== 'unknown') {
-    const pipelineSignals = new Set(pipeline.supported_telemetry);
-    if (!fit.some((signal) => pipelineSignals.has(signal))) {
-      return false;
-    }
+  if (fit !== TELEMETRY_FIT.unknown && !sharesSignal(fit, pipeline.supported_telemetry)) {
+    return false;
   }
-  if (pipelineUsesRoutes(pipeline)) {
-    const routes = readRoutes(pipeline.config);
-    return !routesIncludeDestination(routes, destinationId) && !catchAllBlocksDestination(routes);
-  }
-  return !readIdentifiers(pipeline.config, 'destinations').includes(destinationId);
+  return !pipelineUsesRoutes(pipeline) || !catchAllBlocksDestination(readRoutes(pipeline.config));
 };
 
-/** Adds a destination to the source's own pipeline, creating that pipeline when needed. */
+/** Adds a destination to the source's pipeline without processors, creating it when needed. */
 export const connectSourceToDestination = (
   unit: Unit,
   sourceId: string,
@@ -348,14 +435,14 @@ export const connectSourceToDestination = (
   if (!canConnectSourceToDestination(unit, sourceId, destinationId)) {
     return unit;
   }
-  const pipelineIndex = findSourcePipelineIndex(unit.unit.pipelines, sourceId);
+  const pipelineIndex = findUnprocessedSourcePipelineIndex(unit.unit.pipelines, sourceId);
   if (pipelineIndex === -1) {
     return appendSourcePipeline(unit, sourceId, pipelineTelemetry(unit, sourceId, destinationId), [
-      { name: 'destinations', value: [destinationId] },
+      { name: PIPELINE_ENTRY.destinations, value: [destinationId] },
     ]);
   }
   const pipeline = unit.unit.pipelines[pipelineIndex];
-  const sources = readIdentifiers(pipeline.config, 'sources');
+  const sources = readIdentifiers(pipeline.config, PIPELINE_ENTRY.sources);
   if (pipelineUsesRoutes(pipeline)) {
     const routes = addDestinationToRoutes(readRoutes(pipeline.config), destinationId);
     if (sources.length === 1) {
@@ -365,44 +452,45 @@ export const connectSourceToDestination = (
       detachSource(unit, pipelineIndex, sourceId),
       sourceId,
       pipeline.supported_telemetry,
-      [...processorEntries(pipeline.config), { name: 'routes', value: routes }]
+      [{ name: PIPELINE_ENTRY.routes, value: routes }]
     );
   }
-  const destinations = readIdentifiers(pipeline.config, 'destinations');
+  const destinations = readIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations);
   if (sources.length === 1) {
     return writePipeline(
       unit,
       pipelineIndex,
-      withIdentifiers(pipeline.config, 'destinations', [...destinations, destinationId])
+      withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, [
+        ...destinations,
+        destinationId,
+      ])
     );
   }
   return appendSourcePipeline(
     detachSource(unit, pipelineIndex, sourceId),
     sourceId,
     pipeline.supported_telemetry,
-    [
-      ...processorEntries(pipeline.config),
-      { name: 'destinations', value: [...destinations, destinationId] },
-    ]
+    [{ name: PIPELINE_ENTRY.destinations, value: [...destinations, destinationId] }]
   );
 };
 
-/** Drops one drawn line from the source pipeline that owns it. */
+/** Drops one line drawn from the source, from the pipeline without processors that owns it. */
 export const disconnectSourceFromDestination = (
   unit: Unit,
   sourceId: string,
   destinationId: string
 ): Unit => {
-  const pipelineIndex = findSourcePipelineIndex(unit.unit.pipelines, sourceId);
+  const pipelineIndex = findUnprocessedSourcePipelineIndex(
+    unit.unit.pipelines,
+    sourceId,
+    destinationId
+  );
   if (pipelineIndex === -1) {
     return unit;
   }
   const pipeline = unit.unit.pipelines[pipelineIndex];
-  const sources = readIdentifiers(pipeline.config, 'sources');
+  const sources = readIdentifiers(pipeline.config, PIPELINE_ENTRY.sources);
   if (pipelineUsesRoutes(pipeline)) {
-    if (!routesIncludeDestination(readRoutes(pipeline.config), destinationId)) {
-      return unit;
-    }
     const routes = removeDestinationFromRoutes(readRoutes(pipeline.config), destinationId);
     if (sources.length === 1) {
       return writePipeline(unit, pipelineIndex, withRoutes(pipeline.config, routes));
@@ -412,21 +500,17 @@ export const disconnectSourceFromDestination = (
       return detached;
     }
     return appendSourcePipeline(detached, sourceId, pipeline.supported_telemetry, [
-      ...processorEntries(pipeline.config),
-      { name: 'routes', value: routes },
+      { name: PIPELINE_ENTRY.routes, value: routes },
     ]);
   }
-  const destinations = readIdentifiers(pipeline.config, 'destinations');
-  if (!destinations.includes(destinationId)) {
-    return unit;
-  }
+  const destinations = readIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations);
   if (sources.length === 1) {
     return writePipeline(
       unit,
       pipelineIndex,
       withIdentifiers(
         pipeline.config,
-        'destinations',
+        PIPELINE_ENTRY.destinations,
         destinations.filter((id) => id !== destinationId)
       )
     );
@@ -437,59 +521,202 @@ export const disconnectSourceFromDestination = (
     return detached;
   }
   return appendSourcePipeline(detached, sourceId, pipeline.supported_telemetry, [
-    ...processorEntries(pipeline.config),
-    { name: 'destinations', value: remaining },
+    { name: PIPELINE_ENTRY.destinations, value: remaining },
   ]);
 };
 
-/** Moves a line onto a new source or destination handle. */
+/**
+ * Moves one source line off the pipeline it shares with other lines onto a new
+ * source pipeline, so processing can be added to that line alone. Lines on
+ * routes are left alone: each route already has its own slot.
+ */
+export const isolateSourceLine = (
+  unit: Unit,
+  sourceId: string,
+  destinationId: string
+): { unit: Unit; pipelineId: string } | undefined => {
+  const pipeline =
+    unit.unit.pipelines[
+      findUnprocessedSourcePipelineIndex(unit.unit.pipelines, sourceId, destinationId)
+    ];
+  if (!pipeline || pipelineUsesRoutes(pipeline)) {
+    return undefined;
+  }
+  const released = disconnectSourceFromDestination(unit, sourceId, destinationId);
+  const pipelineId = pipelineIdForSource(released, sourceId);
+  return {
+    unit: appendSourcePipeline(released, sourceId, pipeline.supported_telemetry, [
+      { name: PIPELINE_ENTRY.destinations, value: [destinationId] },
+    ]),
+    pipelineId,
+  };
+};
+
+/**
+ * Only pipeline processing can start a line. A route's branch targets belong to
+ * its routing node, so its processing node does not add to them.
+ */
+const canConnectProcessingToDestination = (
+  unit: Unit,
+  ref: ProcessingNodeRef,
+  destinationId: string
+): boolean => {
+  if (ref.kind !== PROCESSING_SLOT_KIND.pipeline) {
+    return false;
+  }
+  const pipeline = unit.unit.pipelines.find(({ id }) => id === ref.pipelineId);
+  if (!pipeline) {
+    return false;
+  }
+  const destination = unit.unit.destinations?.find(({ id }) => id === destinationId);
+  if (destination && !sharesSignal(destination.supported_telemetry, pipeline.supported_telemetry)) {
+    return false;
+  }
+  if (
+    pipelineReaches(unit, pipeline, destinationId) ||
+    readIdentifiers(pipeline.config, PIPELINE_ENTRY.sources).some((sourceId) =>
+      sourceReaches(unit, sourceId, destinationId)
+    )
+  ) {
+    return false;
+  }
+  return !pipelineUsesRoutes(pipeline) || !catchAllBlocksDestination(readRoutes(pipeline.config));
+};
+
+const connectProcessingToDestination = (
+  unit: Unit,
+  ref: ProcessingNodeRef,
+  destinationId: string
+): Unit => {
+  if (!canConnectProcessingToDestination(unit, ref, destinationId)) {
+    return unit;
+  }
+  const pipelineIndex = findPipelineIndex(unit, ref.pipelineId);
+  const pipeline = unit.unit.pipelines[pipelineIndex];
+  const { config } = pipeline;
+  return writePipeline(
+    unit,
+    pipelineIndex,
+    pipelineUsesRoutes(pipeline)
+      ? withRoutes(config, addDestinationToRoutes(readRoutes(config), destinationId))
+      : withIdentifiers(config, PIPELINE_ENTRY.destinations, [
+          ...readIdentifiers(config, PIPELINE_ENTRY.destinations),
+          destinationId,
+        ])
+  );
+};
+
+const disconnectProcessingFromDestination = (
+  unit: Unit,
+  ref: ProcessingNodeRef,
+  destinationId: string
+): Unit => {
+  const pipelineIndex =
+    ref.kind === PROCESSING_SLOT_KIND.pipeline ? findPipelineIndex(unit, ref.pipelineId) : -1;
+  const pipeline = unit.unit.pipelines[pipelineIndex];
+  if (!pipeline || !forwardsDirectlyTo(pipeline, destinationId)) {
+    return unit;
+  }
+  const { config } = pipeline;
+  return writePipeline(
+    unit,
+    pipelineIndex,
+    pipelineUsesRoutes(pipeline)
+      ? withRoutes(config, removeDestinationFromRoutes(readRoutes(config), destinationId))
+      : withIdentifiers(
+          config,
+          PIPELINE_ENTRY.destinations,
+          readIdentifiers(config, PIPELINE_ENTRY.destinations).filter((id) => id !== destinationId)
+        )
+  );
+};
+
+export const canConnectToDestination = (
+  unit: Unit,
+  origin: UnitConnectionOrigin,
+  destinationId: string
+): boolean =>
+  origin.kind === GRAPH_ENDPOINT_KIND.source
+    ? canConnectSourceToDestination(unit, origin.id, destinationId)
+    : canConnectProcessingToDestination(unit, origin.ref, destinationId);
+
+/** Draws a line from a source (unprocessed records) or a processing node (processed records). */
+export const connectToDestination = (
+  unit: Unit,
+  origin: UnitConnectionOrigin,
+  destinationId: string
+): Unit =>
+  origin.kind === GRAPH_ENDPOINT_KIND.source
+    ? connectSourceToDestination(unit, origin.id, destinationId)
+    : connectProcessingToDestination(unit, origin.ref, destinationId);
+
+/**
+ * Removes one drawn line. A pipeline left forwarding nowhere is dropped with
+ * the processors only it used.
+ */
+export const disconnectFromDestination = (
+  unit: Unit,
+  origin: UnitConnectionOrigin,
+  destinationId: string
+): Unit =>
+  pruneUnit(
+    unit,
+    origin.kind === GRAPH_ENDPOINT_KIND.source
+      ? disconnectSourceFromDestination(unit, origin.id, destinationId)
+      : disconnectProcessingFromDestination(unit, origin.ref, destinationId)
+  );
+
+/** Moves a line onto a new start or destination handle. */
 export const moveUnitConnection = (
   unit: Unit,
   {
-    previousSourceId,
+    previousOrigin,
     previousDestinationId,
-    sourceId,
+    origin,
     destinationId,
   }: {
-    previousSourceId: string;
+    previousOrigin: UnitConnectionOrigin;
     previousDestinationId: string;
-    sourceId: string;
+    origin: UnitConnectionOrigin;
     destinationId: string;
   }
 ): Unit => {
-  if (previousSourceId === sourceId && previousDestinationId === destinationId) {
+  if (isEqual(previousOrigin, origin) && previousDestinationId === destinationId) {
     return unit;
   }
-  const released = disconnectSourceFromDestination(unit, previousSourceId, previousDestinationId);
-  if (!canConnectSourceToDestination(released, sourceId, destinationId)) {
-    return unit;
+  const released = disconnectFromDestination(unit, previousOrigin, previousDestinationId);
+  if (canConnectToDestination(released, origin, destinationId)) {
+    return connectToDestination(released, origin, destinationId);
   }
-  return connectSourceToDestination(released, sourceId, destinationId);
+  // Releasing a processing node's last line drops its pipeline, so add the new line first.
+  const connected = connectToDestination(unit, origin, destinationId);
+  return connected === unit
+    ? unit
+    : disconnectFromDestination(connected, previousOrigin, previousDestinationId);
 };
 
-/** Drops a deleted component id from pipeline source and destination lists. */
-export const removeComponentFromPipelines = (unit: Unit, componentId: string): Unit =>
+const removeComponentReferences = (unit: Unit, componentId: string): Unit =>
   replacePipelines(
     unit,
     unit.unit.pipelines.flatMap((pipeline) => {
-      const hadSources = pipeline.config.some((entry) => entry.name === 'sources');
+      const hadSources = pipeline.config.some((entry) => entry.name === PIPELINE_ENTRY.sources);
       const config: PipelineConfig = [];
       for (const entry of pipeline.config) {
-        if (entry.name === 'sources') {
+        if (entry.name === PIPELINE_ENTRY.sources) {
           const value = entry.value.filter((id) => id !== componentId);
           if (value.length > 0) {
             config.push({ ...entry, value });
           }
           continue;
         }
-        if (entry.name === 'destinations') {
+        if (entry.name === PIPELINE_ENTRY.destinations) {
           const value = entry.value.filter((id) => id !== componentId);
           if (value.length > 0) {
             config.push({ ...entry, value });
           }
           continue;
         }
-        if (entry.name === 'routes') {
+        if (entry.name === PIPELINE_ENTRY.routes) {
           const value = removeDestinationFromRoutes(entry.value, componentId);
           if (value.length > 0) {
             config.push({ ...entry, value });
@@ -501,9 +728,16 @@ export const removeComponentFromPipelines = (unit: Unit, componentId: string): U
       if (config.length === 0 || !pipelineForwards(config)) {
         return [];
       }
-      if (hadSources && !config.some((entry) => entry.name === 'sources')) {
+      if (hadSources && !config.some((entry) => entry.name === PIPELINE_ENTRY.sources)) {
         return [];
       }
       return [{ ...pipeline, config }];
     })
   );
+
+/**
+ * Drops a deleted component id from pipeline source and destination lists, then
+ * removes processing pipelines (and their processors) the deletion orphaned.
+ */
+export const removeComponentFromPipelines = (unit: Unit, componentId: string): Unit =>
+  pruneUnit(unit, removeComponentReferences(unit, componentId));

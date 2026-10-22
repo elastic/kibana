@@ -8,9 +8,13 @@
 import { createDefaultUnit, type Unit } from './unit_repository';
 import {
   canConnectSourceToDestination,
+  canConnectToDestination,
   connectSourceToDestination,
+  connectToDestination,
+  disconnectFromDestination,
   disconnectSourceFromDestination,
   getUnitConnections,
+  isolateSourceLine,
   moveUnitConnection,
   removeComponentFromPipelines,
 } from './unit_connections';
@@ -25,6 +29,40 @@ const unitWith = (pipelines: Unit['unit']['pipelines']): Unit => ({
     pipelines,
   },
 });
+
+const source = (id: string) => ({ kind: 'source' as const, id });
+const processing = (pipelineId: string) => ({
+  kind: 'processing' as const,
+  ref: { kind: 'pipeline' as const, pipelineId },
+});
+
+/** `otlp-input` -> processing (`tag`) -> `es-logs`, plus an untouched `nop-input` pipeline. */
+const processedUnit = (destinations: string[] = ['es-logs']): Unit => {
+  const unit = unitWith([
+    {
+      id: 'nop',
+      supported_telemetry: ['logs'],
+      config: [
+        { name: 'sources', value: ['nop-input'] },
+        { name: 'destinations', value: ['debug-out'] },
+      ],
+    },
+    {
+      id: 'main',
+      supported_telemetry: ['logs'],
+      config: [
+        { name: 'sources', value: ['otlp-input'] },
+        { name: 'processors', value: ['tag'] },
+        { name: 'destinations', value: destinations },
+      ],
+    },
+  ]);
+  unit.unit.processors = [{ id: 'tag', type: 'add_fields', supported_telemetry: ['logs'] }];
+  return unit;
+};
+
+const pipelineConfig = (unit: Unit, pipelineId: string) =>
+  unit.unit.pipelines.find(({ id }) => id === pipelineId)?.config;
 
 const sharedPipeline = (): Unit['unit']['pipelines'][number] => ({
   id: 'main',
@@ -256,9 +294,9 @@ describe('unit connections', () => {
       'es-metrics'
     );
     const next = moveUnitConnection(connected, {
-      previousSourceId: 'otlp-input',
+      previousOrigin: source('otlp-input'),
       previousDestinationId: 'es-logs',
-      sourceId: 'bulk-input',
+      origin: source('bulk-input'),
       destinationId: 'es-logs',
     });
 
@@ -271,9 +309,9 @@ describe('unit connections', () => {
   it('moves a line onto a free destination', () => {
     const connected = connectSourceToDestination(unitWith([]), 'otlp-input', 'es-logs');
     const next = moveUnitConnection(connected, {
-      previousSourceId: 'otlp-input',
+      previousOrigin: source('otlp-input'),
       previousDestinationId: 'es-logs',
-      sourceId: 'otlp-input',
+      origin: source('otlp-input'),
       destinationId: 'es-metrics',
     });
 
@@ -309,6 +347,206 @@ describe('unit connections', () => {
     const next = connectSourceToDestination(unit, 'otlp-input', 'es-logs');
 
     expect(next.unit.pipelines[0]?.supported_telemetry).toEqual(['logs']);
+  });
+
+  it('follows route delegation through processing pipelines', () => {
+    const delegated = unitWith([
+      {
+        id: 'p-otlp-input',
+        supported_telemetry: ['logs'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          { name: 'routes', value: [{ pipelines: ['processing-1'] }] },
+        ],
+      },
+      {
+        id: 'processing-1',
+        supported_telemetry: ['logs'],
+        config: [
+          { name: 'processors', value: ['add-fields-1'] },
+          { name: 'destinations', value: ['es-logs'] },
+        ],
+      },
+    ]);
+
+    expect(getUnitConnections(delegated, configuredSources, configuredDestinations)).toEqual([
+      { sourceId: 'otlp-input', destinationId: 'es-logs', forwarding: 'route' },
+    ]);
+  });
+
+  describe('with processing on the source pipeline', () => {
+    it('stores a line from the source on a pipeline without processors', () => {
+      const next = connectToDestination(processedUnit(), source('otlp-input'), 'es-metrics');
+
+      expect(pipelineConfig(next, 'main')).toEqual(pipelineConfig(processedUnit(), 'main'));
+      expect(pipelineConfig(next, 'p-otlp-input')).toEqual([
+        { name: 'sources', value: ['otlp-input'] },
+        { name: 'destinations', value: ['es-metrics'] },
+      ]);
+      expect(getUnitConnections(next, configuredSources, configuredDestinations)).toEqual([
+        { sourceId: 'nop-input', destinationId: 'debug-out', forwarding: 'direct' },
+        { sourceId: 'otlp-input', destinationId: 'es-logs', forwarding: 'direct' },
+        { sourceId: 'otlp-input', destinationId: 'es-metrics', forwarding: 'direct' },
+      ]);
+    });
+
+    it('stores a line from the processing node after its processors', () => {
+      const next = connectToDestination(processedUnit(), processing('main'), 'es-metrics');
+
+      expect(pipelineConfig(next, 'main')).toEqual([
+        { name: 'sources', value: ['otlp-input'] },
+        { name: 'processors', value: ['tag'] },
+        { name: 'destinations', value: ['es-logs', 'es-metrics'] },
+      ]);
+      expect(next.unit.pipelines.map(({ id }) => id)).toEqual(['nop', 'main']);
+    });
+
+    it('refuses a second line to a destination the source already delivers to', () => {
+      const unit = connectToDestination(processedUnit(), source('otlp-input'), 'es-metrics');
+
+      expect(canConnectToDestination(unit, source('otlp-input'), 'es-logs')).toBe(false);
+      expect(canConnectToDestination(unit, processing('main'), 'es-metrics')).toBe(false);
+      expect(canConnectToDestination(unit, processing('main'), 'es-logs')).toBe(false);
+      expect(canConnectToDestination(unit, processing('main'), 'debug-out')).toBe(true);
+    });
+
+    it('does not start lines from route processing', () => {
+      const unit = unitWith([
+        {
+          id: 'main',
+          supported_telemetry: ['logs'],
+          config: [
+            { name: 'sources', value: ['otlp-input'] },
+            { name: 'routes', value: [{ processors: ['tag'], destinations: ['es-logs'] }] },
+          ],
+        },
+      ]);
+
+      expect(
+        canConnectToDestination(
+          unit,
+          { kind: 'processing', ref: { kind: 'route', pipelineId: 'main', routeIndex: 0 } },
+          'es-metrics'
+        )
+      ).toBe(false);
+    });
+
+    it('unhooks a line from the source without touching the processing pipeline', () => {
+      const unit = connectToDestination(processedUnit(), source('otlp-input'), 'es-metrics');
+      const next = disconnectFromDestination(unit, source('otlp-input'), 'es-metrics');
+
+      expect(next).toEqual(processedUnit());
+    });
+
+    it('drops the processing pipeline and its processors with its last line', () => {
+      const next = disconnectFromDestination(processedUnit(), processing('main'), 'es-logs');
+
+      expect(next.unit.pipelines.map(({ id }) => id)).toEqual(['nop']);
+      expect(next.unit.processors).toEqual([]);
+    });
+
+    it('moves the last processed line onto another destination', () => {
+      const next = moveUnitConnection(processedUnit(), {
+        previousOrigin: processing('main'),
+        previousDestinationId: 'es-logs',
+        origin: processing('main'),
+        destinationId: 'es-metrics',
+      });
+
+      expect(pipelineConfig(next, 'main')).toEqual([
+        { name: 'sources', value: ['otlp-input'] },
+        { name: 'processors', value: ['tag'] },
+        { name: 'destinations', value: ['es-metrics'] },
+      ]);
+      expect(next.unit.processors?.map(({ id }) => id)).toEqual(['tag']);
+    });
+
+    it('moves a processed line onto the source so it carries unprocessed records', () => {
+      const next = moveUnitConnection(processedUnit(['es-logs', 'es-metrics']), {
+        previousOrigin: processing('main'),
+        previousDestinationId: 'es-metrics',
+        origin: source('otlp-input'),
+        destinationId: 'es-metrics',
+      });
+
+      expect(pipelineConfig(next, 'main')).toEqual(pipelineConfig(processedUnit(), 'main'));
+      expect(pipelineConfig(next, 'p-otlp-input')).toEqual([
+        { name: 'sources', value: ['otlp-input'] },
+        { name: 'destinations', value: ['es-metrics'] },
+      ]);
+    });
+  });
+
+  describe('isolateSourceLine', () => {
+    it('moves one fan-out line onto a pipeline of its own', () => {
+      const unit = unitWith([
+        {
+          id: 'main',
+          supported_telemetry: ['logs'],
+          config: [
+            { name: 'sources', value: ['otlp-input'] },
+            { name: 'destinations', value: ['es-logs', 'es-metrics'] },
+          ],
+        },
+      ]);
+      const isolated = isolateSourceLine(unit, 'otlp-input', 'es-metrics');
+
+      expect(isolated?.pipelineId).toBe('p-otlp-input');
+      expect(isolated?.unit.unit.pipelines).toEqual([
+        {
+          id: 'main',
+          supported_telemetry: ['logs'],
+          config: [
+            { name: 'sources', value: ['otlp-input'] },
+            { name: 'destinations', value: ['es-logs'] },
+          ],
+        },
+        {
+          id: 'p-otlp-input',
+          supported_telemetry: ['logs'],
+          config: [
+            { name: 'sources', value: ['otlp-input'] },
+            { name: 'destinations', value: ['es-metrics'] },
+          ],
+        },
+      ]);
+    });
+
+    it('leaves the other sources of a shared pipeline wired as they were', () => {
+      const isolated = isolateSourceLine(unitWith([sharedPipeline()]), 'otlp-input', 'es-logs');
+      const next = isolated?.unit ?? unitWith([]);
+
+      expect(isolated?.pipelineId).toBe('p-otlp-input-2');
+      expect(pipelineConfig(next, 'p-otlp-input-2')).toEqual([
+        { name: 'sources', value: ['otlp-input'] },
+        { name: 'destinations', value: ['es-logs'] },
+      ]);
+      expect(getUnitConnections(next, configuredSources, configuredDestinations)).toEqual(
+        expect.arrayContaining(
+          getUnitConnections(
+            unitWith([sharedPipeline()]),
+            configuredSources,
+            configuredDestinations
+          )
+        )
+      );
+      expect(getUnitConnections(next, configuredSources, configuredDestinations)).toHaveLength(4);
+    });
+
+    it('does not move a line that a route rule carries', () => {
+      const routed = unitWith([
+        {
+          id: 'main',
+          supported_telemetry: ['logs'],
+          config: [
+            { name: 'sources', value: ['otlp-input'] },
+            { name: 'routes', value: [{ destinations: ['es-logs', 'es-metrics'] }] },
+          ],
+        },
+      ]);
+
+      expect(isolateSourceLine(routed, 'otlp-input', 'es-logs')).toBeUndefined();
+    });
   });
 
   it('removes a deleted destination from its source pipeline', () => {
