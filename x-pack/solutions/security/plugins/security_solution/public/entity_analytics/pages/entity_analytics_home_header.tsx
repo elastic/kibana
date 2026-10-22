@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AppHeaderMenu } from '@kbn/app-header';
+import { USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG } from '../../../common/constants';
 import { SecurityPageName } from '../../app/types';
 import { SecurityAppHeader } from '../../common/components/app_header';
 import { useKibana } from '../../common/lib/kibana';
@@ -40,7 +41,12 @@ export interface EntityAnalyticsHomeHeaderProps {
 export const EntityAnalyticsHomeHeader = React.memo(
   ({ onStartTour }: EntityAnalyticsHomeHeaderProps) => {
     const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
-    const { docLinks } = useKibana().services;
+    const { docLinks, featureFlags } = useKibana().services;
+    // The new page's route drops the template padding that `largeBleed` reaches out of.
+    const isNewHomePageEnabled = featureFlags.useBooleanValue(
+      USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG,
+      false
+    );
 
     const menu = useMemo<AppHeaderMenu>(
       () => ({
@@ -78,7 +84,7 @@ export const EntityAnalyticsHomeHeader = React.memo(
       <SecurityAppHeader
         title={PAGE_TITLE}
         menu={menu}
-        spacing="largeBleed"
+        spacing={isNewHomePageEnabled ? 'standard' : 'largeBleed'}
         docLink={docLinks.links.securitySolution.entityAnalytics.entityRiskScoring}
       />
     );

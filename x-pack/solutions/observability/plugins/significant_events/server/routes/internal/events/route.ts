@@ -336,7 +336,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Attach investigation to event',
-    description: 'Record a completed investigation against a significant event.',
+    description: 'Record a completed or failed investigation against a significant event.',
   },
   security: {
     authz: {
@@ -372,7 +372,7 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     access: 'internal',
     summary: 'Trigger investigation workflow for a significant event',
     description:
-      'Starts the managed investigation workflow for the given significant event and returns the workflow execution id.',
+      'Starts the managed investigation workflow for the given significant event, records the running investigation, and returns the workflow execution id.',
   },
   security: {
     authz: {
@@ -392,7 +392,8 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     logger,
     maintenanceService,
   }): Promise<{ executionId: string }> => {
-    const { getEventSearchClient, licensing } = await getScopedClients({ request });
+    const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } =
+      await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
@@ -415,6 +416,27 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     if (!executionId) {
       throw serverUnavailable(
         'Investigation workflow is not available. Ensure workflows management is enabled and Kibana has finished installing managed workflows.'
+      );
+    }
+
+    try {
+      await attachInvestigationToEvent({
+        eventSearchClient: eventClient,
+        eventId: params.path.id,
+        investigation: {
+          workflow_execution_id: executionId,
+          started_at: new Date().toISOString(),
+        },
+        alertEventsClient: await getAlertEventsClient(),
+        emitTrigger,
+        logger,
+      });
+    } catch (error) {
+      // The investigation already started, so a failed attachment must not fail the request.
+      logger.warn(
+        `Could not attach running investigation to event "${params.path.id}": ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
     }
 
