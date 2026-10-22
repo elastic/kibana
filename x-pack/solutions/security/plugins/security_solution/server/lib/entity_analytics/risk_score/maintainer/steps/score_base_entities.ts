@@ -29,6 +29,8 @@ import type { RiskScoreModifierEntity, ScoredEntityPage, StepResult } from './pi
 import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
 import type { EsqlPageProfileSummary } from '../utils/esql_page_profile';
 import { shouldProfilePage, summarizeEsqlPage } from '../utils/esql_page_profile';
+import type { PageStepTimings } from '../utils/page_step_timings';
+import { createPageStepTimings } from '../utils/page_step_timings';
 import type { ScopedLogger } from '../utils/with_log_context';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
 import { createMissingEntities as runCreateMissingEntities } from './create_missing_entities';
@@ -48,6 +50,8 @@ interface ScoreBaseEntitiesParams {
   abortSignal?: AbortSignal;
   /** Explicit creation opt-in; also makes lookup failures fatal so they cannot be treated as misses. */
   createMissingEntities: boolean;
+  /** Collects each page's step times; pass one in to read them after the stage. */
+  pageTimings?: PageStepTimings;
 }
 
 interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
@@ -114,6 +118,7 @@ export const calculateBaseEntityScores = async function* ({
   calculationRunId,
   abortSignal,
   createMissingEntities,
+  pageTimings = createPageStepTimings(),
 }: ScoreBaseEntitiesParams): AsyncGenerator<ScoredEntityPage> {
   let afterKey: Record<string, string> | undefined;
   let previousPageUpperBound: string | undefined;
@@ -132,16 +137,20 @@ export const calculateBaseEntityScores = async function* ({
       return;
     }
 
-    const pageResult = await fetchNextEuidPage({
-      esClient,
-      entityType,
-      alertFilters,
-      alertsIndex,
-      pageSize,
-      afterKey,
-      stamped,
-    });
+    pageTimings.startPage();
+    const pageResult = await pageTimings.time('discovery', () =>
+      fetchNextEuidPage({
+        esClient,
+        entityType,
+        alertFilters,
+        alertsIndex,
+        pageSize,
+        afterKey,
+        stamped,
+      })
+    );
     if (!pageResult) {
+      pageTimings.dropPage();
       return;
     }
 
@@ -157,6 +166,7 @@ export const calculateBaseEntityScores = async function* ({
       alertFilters,
       stamped,
       profile: shouldProfilePage(pageNumber),
+      pageTimings,
     });
     previousPageUpperBound = pageResult.upperBound;
     if (profileSummary) {
@@ -164,23 +174,27 @@ export const calculateBaseEntityScores = async function* ({
     }
 
     if (scores.length > 0) {
-      const entities = await fetchEntitiesByIds({
-        crudClient,
-        entityIds: scores.map((score) => score.entity_id),
-        logger,
-        errorContext:
-          'Error fetching entities for base modifier application. Base scoring will proceed without modifiers',
-        strict: createMissingEntities,
-      });
+      const entities = await pageTimings.time('entityFetch', () =>
+        fetchEntitiesByIds({
+          crudClient,
+          entityIds: scores.map((score) => score.entity_id),
+          logger,
+          errorContext:
+            'Error fetching entities for base modifier application. Base scoring will proceed without modifiers',
+          strict: createMissingEntities,
+        })
+      );
 
-      yield applyBaseScoreModifiers({
-        scores,
-        entities,
-        now,
-        entityType,
-        calculationRunId,
-        watchlistConfigs,
-      });
+      yield pageTimings.timeSync('modifiers', () =>
+        applyBaseScoreModifiers({
+          scores,
+          entities,
+          now,
+          entityType,
+          calculationRunId,
+          watchlistConfigs,
+        })
+      );
     }
   } while (afterKey !== undefined);
 };
@@ -191,6 +205,7 @@ export const scoreBaseEntities = async ({
   createMissingEntities: createMissingEntitiesEnabled,
   refresh,
   collectScores,
+  pageTimings = createPageStepTimings(),
   ...params
 }: ScoreAndPersistBaseEntitiesParams): Promise<Phase1BaseScoringSummary> => {
   let pagesProcessed = 0;
@@ -208,6 +223,7 @@ export const scoreBaseEntities = async ({
   for await (const page of calculateBaseEntityScores({
     ...params,
     createMissingEntities: createMissingEntitiesEnabled,
+    pageTimings,
   })) {
     pagesProcessed += 1;
     scoresCalculated += page.scores.length;
@@ -222,16 +238,18 @@ export const scoreBaseEntities = async ({
 
     if (missingScores.length > 0) {
       if (createMissingEntitiesEnabled) {
-        const createResult = await runCreateMissingEntities({
-          esClient: params.esClient,
-          crudClient: params.crudClient,
-          entityType: params.entityType,
-          alertsIndex: params.alertsIndex,
-          alertFilters: params.alertFilters,
-          logger: params.logger,
-          missingScores,
-          abortSignal: params.abortSignal,
-        });
+        const createResult = await pageTimings.time('entityCreation', () =>
+          runCreateMissingEntities({
+            esClient: params.esClient,
+            crudClient: params.crudClient,
+            entityType: params.entityType,
+            alertsIndex: params.alertsIndex,
+            alertFilters: params.alertFilters,
+            logger: params.logger,
+            missingScores,
+            abortSignal: params.abortSignal,
+          })
+        );
 
         entitiesCreated += createResult.created.length;
         entityCreationsSkipped += createResult.skipped.length;
@@ -266,14 +284,17 @@ export const scoreBaseEntities = async ({
       scores: riskIndexScores,
       logger: params.logger,
       refresh,
+      pageTimings,
     });
-    const { docsWritten, errorsCount } = await persistScoresToEntityStore({
-      crudClient: params.crudClient,
-      logger: params.logger,
-      entityType: params.entityType,
-      scores: entityStoreScores,
-      enabled: idBasedRiskScoringEnabled,
-    });
+    const { docsWritten, errorsCount } = await pageTimings.time('storeWrite', () =>
+      persistScoresToEntityStore({
+        crudClient: params.crudClient,
+        logger: params.logger,
+        entityType: params.entityType,
+        scores: entityStoreScores,
+        enabled: idBasedRiskScoringEnabled,
+      })
+    );
     scoresWrittenEntityStore += docsWritten;
     scoresFailed += errorsCount;
 
@@ -379,6 +400,7 @@ const scorePageFromAlerts = async ({
   alertFilters,
   stamped,
   profile,
+  pageTimings,
 }: {
   esClient: ElasticsearchClient;
   entityType: EntityType;
@@ -389,27 +411,36 @@ const scorePageFromAlerts = async ({
   alertFilters: QueryDslQueryContainer[];
   stamped: boolean;
   profile: boolean;
+  pageTimings: PageStepTimings;
 }): Promise<{ scores: ParsedRiskScore[]; profileSummary?: EsqlPageProfileSummary }> => {
   const query = getBaseScoreESQL(entityType, bounds, sampleSize, pageSize, alertsIndex);
   const startedAt = Date.now();
-  const esqlResponse = await esClient.esql.query(
-    {
-      query,
-      filter: {
-        bool: {
-          filter: stamped
-            ? [...alertFilters, getStampedEuidRangeFilter(entityType, bounds)]
-            : alertFilters,
+  const esqlResponse = await pageTimings.time(
+    'esql',
+    () =>
+      esClient.esql.query(
+        {
+          query,
+          filter: {
+            bool: {
+              filter: stamped
+                ? [...alertFilters, getStampedEuidRangeFilter(entityType, bounds)]
+                : alertFilters,
+            },
+          },
+          ...(profile ? { profile: true } : {}),
         },
-      },
-      ...(profile ? { profile: true } : {}),
-    },
-    { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
+        { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
+      ),
+    (response) => response.took
   );
+  const wallMs = Date.now() - startedAt;
 
   return {
-    scores: (esqlResponse.values ?? []).map(parseEsqlBaseScoreRow(alertsIndex, sampleSize)),
-    profileSummary: profile ? summarizeEsqlPage(esqlResponse, Date.now() - startedAt) : undefined,
+    scores: pageTimings.timeSync('parse', () =>
+      (esqlResponse.values ?? []).map(parseEsqlBaseScoreRow(alertsIndex, sampleSize))
+    ),
+    profileSummary: profile ? summarizeEsqlPage(esqlResponse, wallMs) : undefined,
   };
 };
 

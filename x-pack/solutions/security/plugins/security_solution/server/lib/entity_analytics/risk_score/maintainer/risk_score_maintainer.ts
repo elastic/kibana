@@ -51,6 +51,8 @@ import { pruneLookupIndex } from './lookup/prune_lookup_index';
 import { runResolutionScoringStep } from './steps/run_resolution_scoring_step';
 import { createRunMetricsTracker } from './utils/run_metrics_tracker';
 import { createRunHealthTracker } from './utils/run_health';
+import type { PageStepTimings } from './utils/page_step_timings';
+import { createPageStepTimings } from './utils/page_step_timings';
 import { buildLookupIndex } from './steps/build_lookup_index';
 import { DEFAULT_ALERT_SAMPLE_SIZE } from '../constants';
 import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan, wrapTaskRun } from '../../telemetry/traces';
@@ -517,6 +519,8 @@ const executeEntityTypeRun = async ({
   const entityRunStartedAtMs = Date.now();
   const runTag = toRunTag(calculationRunId);
   const runLogger = withLogContext(logger, `[risk_score_maintainer][${entityType}][run:${runTag}]`);
+  const logPageTimings = (stage: 'base' | 'resolution', pageTimings: PageStepTimings) =>
+    runLogger.info(`[${stage}] page step timings ${JSON.stringify(pageTimings.summary())}`);
   let runStatus: 'success' | 'error' | 'aborted' = 'success';
   let runErrorKind: MaintainerErrorKind | undefined;
   const runMetrics = metricsTracker.newRun();
@@ -552,6 +556,7 @@ const executeEntityTypeRun = async ({
   const alertFilters = buildAlertFilters(runConfig.configuration, entityType, runLogger);
   const baseStage = runTelemetry.startBaseStage();
   const baseStartedAtMs = Date.now();
+  const basePageTimings = createPageStepTimings();
 
   try {
     const baseSummary = await runWithSpan({
@@ -575,6 +580,7 @@ const executeEntityTypeRun = async ({
           idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
           createMissingEntities: runConfig.createMissingEntitiesEnabled,
           writer: runConfig.writer,
+          pageTimings: basePageTimings,
         }),
     });
     runLogger.debug('completed base scoring pass');
@@ -616,6 +622,8 @@ const executeEntityTypeRun = async ({
     );
 
     throw error;
+  } finally {
+    logPageTimings('base', basePageTimings);
   }
 
   checkAbortBetweenStages();
@@ -624,6 +632,7 @@ const executeEntityTypeRun = async ({
     // Stage 2: score resolution targets (group scores).
     const resolutionStage = runTelemetry.startResolutionStage();
     const resolutionStartedAtMs = Date.now();
+    const resolutionPageTimings = createPageStepTimings();
     try {
       const resolutionResult = await runWithSpan({
         name: ENTITY_ANALYTICS_SPAN_NAMES.stageResolution,
@@ -646,6 +655,7 @@ const executeEntityTypeRun = async ({
             idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
             writer: runConfig.writer,
             alertFilters,
+            pageTimings: resolutionPageTimings,
           }),
       });
       metricsTracker.recordResolution(runMetrics, resolutionResult);
@@ -682,6 +692,8 @@ const executeEntityTypeRun = async ({
         durationMs: Date.now() - resolutionStartedAtMs,
         errorKind: 'unexpected',
       });
+    } finally {
+      logPageTimings('resolution', resolutionPageTimings);
     }
   } else {
     frameworkTelemetryStages.push({
