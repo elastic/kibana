@@ -197,11 +197,8 @@ export abstract class SubActionConnector<Config, Secrets> {
     // The error response body may also be a stream, e.g. for the GenAI connector
     if (error.response?.config?.responseType === 'stream' && error.response?.data) {
       try {
-        // Consume the source directly with an async iterator: unlike pipe(), an
-        // async iteration propagates the source's 'error' event into this
-        // try/catch. The error body is a nice-to-have; a source error (e.g. a
-        // truncated error response) must fail the read, never the process.
-        // See https://github.com/elastic/kibana/issues/299804
+        // for await propagates a source stream error into this catch; pipe()
+        // would emit an unhandled 'error' event instead
         for await (const chunk of error.response.data as Readable) {
           responseBody += chunk.toString();
         }

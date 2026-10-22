@@ -342,17 +342,11 @@ describe('SubActionConnector', () => {
         service.testUrl({ url: 'https://example.com' }, connectorUsageCollector)
       ).rejects.toThrow('Message: rate limited. Code: 429');
 
-      // the consumed stream is replaced with the parsed body
       expect(error.response?.data).toEqual({ errorMessage: 'rate limited', errorCode: 429 });
     });
 
     it('does not throw an unhandled error event when a streaming error response is truncated', async () => {
       // https://github.com/elastic/kibana/issues/299804
-      // A truncated error body (e.g. a proxy denying CONNECT, the error page
-      // split across TCP segments) destroys the source stream with an error
-      // after some data was received. The source error must surface as a
-      // rejected request, never as an unhandled 'error' event, which would
-      // crash the Kibana process.
       const error = createAxiosError();
       error.config = {
         ...error.config,
@@ -377,7 +371,6 @@ describe('SubActionConnector', () => {
       process.on('uncaughtException', onUnhandled);
       process.on('unhandledRejection', onUnhandled);
 
-      // must reject (a failed request), not hang and not crash the process
       await expect(async () =>
         service.testUrl({ url: 'https://example.com' }, connectorUsageCollector)
       ).rejects.toThrow('Status code: 403');
