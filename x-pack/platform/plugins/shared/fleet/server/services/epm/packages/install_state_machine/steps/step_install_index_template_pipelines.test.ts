@@ -474,6 +474,61 @@ describe('stepInstallIndexTemplatePipelines', () => {
     ).toBe(true);
   });
 
+  // PROTOTYPE: found on the stack upgrading nginx_otel_input 0.3.0 -> 0.4.0
+  it('strips the .otel suffix of OTel input package templates (no metrics-x.otel.otel)', async () => {
+    mockedInstallIndexTemplatesAndPipelines.mockResolvedValue({
+      installedTemplates: [],
+      esReferences: [],
+    });
+    const packageInstallContext = {
+      packageInfo: {
+        title: 'NGINX OpenTelemetry Input',
+        name: 'nginx_otel_input',
+        version: '0.4.0',
+        description: 'test',
+        type: 'input',
+        format_version: '3.5.0',
+        owner: { github: 'elastic/fleet' },
+        policy_templates: [
+          {
+            name: 'nginxreceiver',
+            title: 'NGINX',
+            description: 'NGINX',
+            type: 'metrics',
+            input: 'otelcol',
+            template_path: 'input.yml.hbs',
+            vars: [],
+          },
+        ],
+      } as any,
+      assetsMap: new Map(),
+      archiveIterator: createArchiveIteratorFromMap(new Map()),
+      paths: [],
+    };
+    const mockInstalledPackageSo = getMockInstalledPackageSo([
+      { id: 'metrics-nginxreceiver.otel', type: ElasticsearchAssetType.indexTemplate },
+    ]);
+
+    await stepInstallIndexTemplatePipelines({
+      savedObjectsClient: soClient,
+      // @ts-ignore
+      savedObjectsImporter: jest.fn(),
+      esClient,
+      logger: loggerMock.create(),
+      packageInstallContext,
+      installedPkg: mockInstalledPackageSo,
+      installType: 'update',
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+      esReferences: [],
+    });
+
+    const callArg = mockedInstallIndexTemplatesAndPipelines.mock.calls[0][0];
+    expect(callArg.onlyForDataStreams!.map((ds) => [ds.type, ds.dataset])).toEqual([
+      ['metrics', 'nginxreceiver'],
+    ]);
+  });
+
   it('Should not call installIndexTemplatesAndPipelines if packageInfo type is input and no data streams are found', async () => {
     mockedInstallIndexTemplatesAndPipelines.mockResolvedValue({
       installedTemplates: [

@@ -19,6 +19,8 @@ import type { ReplacedPackageMove } from '../../../../../../common/types';
 export interface MovedPackageNotice {
   /** Title of the package the policies moved to */
   replacementTitle: string;
+  /** Name of the package the policies moved to */
+  replacementName?: string;
   move: ReplacedPackageMove;
 }
 
@@ -26,11 +28,20 @@ const policiesText = (n: number) =>
   n === 1 ? '1 integration policy' : `${n} integration policies`;
 
 /** Text of one notice, kept out of the component so it can be unit tested. */
-export const getMovedPackageNoticeText = ({ replacementTitle, move }: MovedPackageNotice) => {
+export const getMovedPackageNoticeText = ({
+  replacementTitle,
+  replacementName,
+  move,
+}: MovedPackageNotice) => {
   const moved = move.package_policies;
+  // Old and new packages can share a title (nginx_otel_integration and nginx_otel on the stack).
+  const sameTitle = move.title === replacementTitle;
+  const from = sameTitle ? `${move.title} (${move.package})` : move.title;
+  const to =
+    sameTitle && replacementName ? `${replacementTitle} (${replacementName})` : replacementTitle;
   const unmapped = moved.flatMap((p) => p.unmapped_vars.map((v) => `${p.name} (${v})`));
   return {
-    title: `${move.title} now lives in ${replacementTitle}`,
+    title: `${from} now lives in ${to}`,
     moved: moved.length
       ? `${policiesText(
           moved.length
@@ -76,11 +87,16 @@ export const MovedPackagesCallout: React.FC<{ notices: MovedPackageNotice[] }> =
 
 /** Notices of every installed package in `items` that replaced others. */
 export const getMovedPackageNotices = (
-  items: Array<{ title: string; installationInfo?: { moved_from?: ReplacedPackageMove[] } }>
+  items: Array<{
+    name: string;
+    title: string;
+    installationInfo?: { moved_from?: ReplacedPackageMove[] };
+  }>
 ): MovedPackageNotice[] =>
   items.flatMap((item) =>
     (item.installationInfo?.moved_from ?? []).map((move) => ({
       replacementTitle: item.title,
+      replacementName: item.name,
       move,
     }))
   );

@@ -354,10 +354,8 @@ export const getContentInstallText = (
 ): { hasContent: boolean; installed: string; skipped?: string } => {
   const contentCount = summary.dashboards + summary.otherKibanaAssets;
   const pkg = `${summary.packageTitle} ${summary.packageVersion}`;
-  const esText =
-    summary.elasticsearchAssets > 0
-      ? `${summary.elasticsearchAssets} Elasticsearch assets (index templates, ingest pipelines)`
-      : 'Elasticsearch assets';
+  // No count: package-level asset lists don't include the per data stream templates and pipelines.
+  const esText = 'Elasticsearch assets (index templates, ingest pipelines)';
   if (contentCount === 0) {
     // Composable packages (pre package-structure design) pull content from a content package.
     const deps = summary.contentPackages.map((c) => `${c.package} ${c.version}`).join(', ');

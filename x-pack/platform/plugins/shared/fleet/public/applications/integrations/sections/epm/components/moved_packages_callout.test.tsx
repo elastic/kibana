@@ -36,14 +36,26 @@ const move: ReplacedPackageMove = {
 
 describe('MovedPackagesCallout', () => {
   const installed = [
-    { title: 'Nginx OpenTelemetry', installationInfo: { moved_from: [move] } },
-    { title: 'Redis', installationInfo: {} },
+    { name: 'nginx_otel', title: 'Nginx OpenTelemetry', installationInfo: { moved_from: [move] } },
+    { name: 'redis', title: 'Redis', installationInfo: {} },
   ];
 
   it('one notice per move, from the replacement installation', () => {
     expect(getMovedPackageNotices(installed)).toEqual([
-      { replacementTitle: 'Nginx OpenTelemetry', move },
+      { replacementTitle: 'Nginx OpenTelemetry', replacementName: 'nginx_otel', move },
     ]);
+  });
+
+  it('adds package names when the old and new titles are the same', () => {
+    expect(
+      getMovedPackageNoticeText({
+        replacementTitle: 'Nginx (OpenTelemetry)',
+        replacementName: 'nginx_otel',
+        move: { ...move, package: 'nginx_otel_integration', title: 'Nginx (OpenTelemetry)' },
+      }).title
+    ).toBe(
+      'Nginx (OpenTelemetry) (nginx_otel_integration) now lives in Nginx (OpenTelemetry) (nginx_otel)'
+    );
   });
 
   it('says where the package lives now, what moved, what was dropped and what stayed', () => {

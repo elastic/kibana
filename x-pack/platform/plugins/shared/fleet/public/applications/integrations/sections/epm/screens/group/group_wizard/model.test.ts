@@ -282,11 +282,12 @@ describe('group wizard model', () => {
       expect(getContentInstallText(summary, true)).toEqual({
         hasContent: true,
         installed:
-          'Nginx OpenTelemetry 1.0.0: Elasticsearch assets, plus content: 3 dashboards and 8 other Kibana assets (alert and SLO templates, ML jobs, saved searches).',
+          'Nginx OpenTelemetry 1.0.0: Elasticsearch assets (index templates, ingest pipelines), plus content: 3 dashboards and 8 other Kibana assets (alert and SLO templates, ML jobs, saved searches).',
       });
       expect(getContentInstallText(summary, false)).toEqual({
         hasContent: true,
-        installed: 'Nginx OpenTelemetry 1.0.0: Elasticsearch assets only.',
+        installed:
+          'Nginx OpenTelemetry 1.0.0: Elasticsearch assets (index templates, ingest pipelines) only.',
         skipped:
           'Not installed: 3 dashboards and 8 other Kibana assets (alert and SLO templates, ML jobs, saved searches). Reinstall Nginx OpenTelemetry with content to add them later.',
       });
@@ -296,10 +297,10 @@ describe('group wizard model', () => {
       expect(getContentInstallText(getInstallSummary(apacheInputOtelPackageInfo), true)).toEqual({
         hasContent: false,
         installed:
-          'Apache HTTP Server (OpenTelemetry) 0.1.2: Elasticsearch assets. No content in this package.',
+          'Apache HTTP Server (OpenTelemetry) 0.1.2: Elasticsearch assets (index templates, ingest pipelines). No content in this package.',
       });
       expect(getContentInstallText(getInstallSummary(nginxOtelPackageInfo), true).installed).toBe(
-        'Nginx (OpenTelemetry) 0.1.0: Elasticsearch assets, plus content from nginx_otel 0.7.0.'
+        'Nginx (OpenTelemetry) 0.1.0: Elasticsearch assets (index templates, ingest pipelines), plus content from nginx_otel 0.7.0.'
       );
     });
   });
