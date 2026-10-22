@@ -5498,7 +5498,7 @@ importers:
         version: link:packages/kbn-eslint-plugin-telemetry
       '@kbn/esql-resource-browser-storybook-config':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-resource-browser/.storybook
+        version: link:src/platform/packages/shared/kbn-esql-resource-browser-storybook-config
       '@kbn/esql-scripts':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-esql-scripts
@@ -5555,7 +5555,7 @@ importers:
         version: link:x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks
       '@kbn/evals-suite-ml':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/ml/evals
+        version: link:x-pack/platform/packages/private/ml/kbn-evals-suite-ml
       '@kbn/evals-suite-nightshift-investigations':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations
@@ -8103,7 +8103,7 @@ importers:
 
   src/platform/packages/shared/kbn-esql-resource-browser: {}
 
-  src/platform/packages/shared/kbn-esql-resource-browser/.storybook: {}
+  src/platform/packages/shared/kbn-esql-resource-browser-storybook-config: {}
 
   src/platform/packages/shared/kbn-eval-kql: {}
 
@@ -8919,6 +8919,8 @@ importers:
 
   x-pack/platform/packages/private/ml/json_schemas: {}
 
+  x-pack/platform/packages/private/ml/kbn-evals-suite-ml: {}
+
   x-pack/platform/packages/private/ml/local_storage: {}
 
   x-pack/platform/packages/private/ml/nested_property: {}
@@ -9452,8 +9454,6 @@ importers:
   x-pack/platform/plugins/shared/maps: {}
 
   x-pack/platform/plugins/shared/ml: {}
-
-  x-pack/platform/plugins/shared/ml/evals: {}
 
   x-pack/platform/plugins/shared/notification_center: {}
 

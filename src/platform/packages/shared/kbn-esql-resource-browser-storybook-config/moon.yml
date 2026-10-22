@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/esql-resource-browser-storybook-config
   channel: ''
   owner: '@elastic/kibana-management'
-  sourceRoot: src/platform/packages/shared/kbn-esql-resource-browser/.storybook
+  sourceRoot: src/platform/packages/shared/kbn-esql-resource-browser-storybook-config
 dependsOn:
   - '@kbn/storybook'
 tags:
