@@ -109,6 +109,19 @@ describe('Entity Nodes', () => {
       expect(screen.queryByTestId(GRAPH_NODE_EXPAND_BUTTON_ID)).not.toBeInTheDocument();
     });
 
+    it('should not render expand button when the toolbar is wired but has no items', () => {
+      renderNodeInFlow({ interactive: true, label: 'Unknown', toolbarItemsFn: () => [] });
+      expect(screen.queryByTestId(GRAPH_NODE_EXPAND_BUTTON_ID)).not.toBeInTheDocument();
+    });
+
+    it('should not render expand button when the toolbar has items', () => {
+      const items: NodeToolbarItem[] = [
+        { iconType: 'eye', label: 'Show actor', onClick: jest.fn(), testSubject: 'btn' },
+      ];
+      renderNodeInFlow({ interactive: true, toolbarItemsFn: () => items });
+      expect(screen.queryByTestId(GRAPH_NODE_EXPAND_BUTTON_ID)).not.toBeInTheDocument();
+    });
+
     it('should call expandButtonClick when expand button is clicked', () => {
       const mockExpandButtonClick = jest.fn();
       renderNodeInFlow({ interactive: true, expandButtonClick: mockExpandButtonClick });
