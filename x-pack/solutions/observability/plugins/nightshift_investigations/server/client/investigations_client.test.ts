@@ -186,7 +186,8 @@ const BOUND_WORKFLOW_ID = `${NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID}-${SPACE
 /** How an investigation run started through a space's entry point executes. */
 const INVESTIGATOR_IDENTITY = {
   type: 'service_account' as const,
-  id: 'kibana/nightshift_agent',
+  // As the backend assigned it: an opaque id on Serverless.
+  id: 'uiam-agent-1',
 };
 
 /** The space's entry point, bound to its agent account. */
@@ -356,12 +357,12 @@ describe('NightshiftInvestigationsClient.start()', () => {
       { id: BOUND_WORKFLOW_ID, enabled: false, valid: true, definition: BOUND_DEFINITION },
     ],
     [
-      'bound to another account',
+      'not bound to an account',
       {
         id: BOUND_WORKFLOW_ID,
         enabled: true,
         valid: true,
-        definition: { steps: [], settings: { run_as: 'kibana/someone_else' } },
+        definition: { steps: [], settings: {} },
       },
     ],
   ])('refuses to start while the space is %s', async (_, boundWorkflow) => {
@@ -1406,6 +1407,16 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(conversations.create).not.toHaveBeenCalled();
     expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
     expect(conversations.patchMetadata).not.toHaveBeenCalled();
+  });
+
+  it('rejects a run as the agent account when the space is no longer set up', async () => {
+    withExecution();
+    mockManagement.getWorkflow.mockResolvedValueOnce(null);
+
+    await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
+      /only run as the Nightshift service account/
+    );
+    expect(conversations.create).not.toHaveBeenCalled();
   });
 
   it('creates the investigation conversation and records the run subjects', async () => {
