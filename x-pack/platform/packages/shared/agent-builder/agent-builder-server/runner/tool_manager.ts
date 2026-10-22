@@ -125,7 +125,7 @@ export interface ToolManager {
    * if no such tool was registered for this run. Use with `Runner.runInternalTool`
    * to dispatch a tool from outside the LangChain graph (e.g. `exec_tool` in bash)
    * while still going through the standard hooks/telemetry pipeline.
-   * Resolves natively bound tools first, then tools registered with `registerDynamicTools`.
+   * Resolves natively bound tools first, then tools added with a `DynamicToolInput`.
    */
   getExecutable(toolId: string): ExecutableTool | undefined;
 

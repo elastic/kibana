@@ -55,7 +55,7 @@ export const createToolManager = (): ToolManager => {
  * Dynamic tools are limited to a certain capacity to prevent too many tools from being added to the agent.
  * Least recently used tools are evicted when the capacity is reached.
  *
- * Tools registered with `registerDynamicTools` are a third kind: never bound to the model, only
+ * Tools added with a `DynamicToolInput` are a third kind: never bound to the model, only
  * reachable through the `execute_dynamic_tool` meta-tool (see `DynamicToolRegistry`).
  */
 export class ToolManager implements IToolManager {
