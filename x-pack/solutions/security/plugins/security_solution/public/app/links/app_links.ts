@@ -10,7 +10,6 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 
 import type { ExperimentalFeatures } from '../../../common';
-import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '../../../common/constants';
 import { aiValueLinks } from '../../reports/links';
 import { configurationsLinks, getConfigurationsLinks } from '../../configurations/links';
 import { links as attackDiscoveryLinks } from '../../attack_discovery/links';
@@ -69,10 +68,7 @@ export const getFilteredLinks = async (
   );
   const chatExperience: AIChatExperience = await firstValueFrom(chatExperience$);
   const filteredConfigurationsLinks = getConfigurationsLinks(chatExperience);
-  const enableAlertsAndAttacksAlignment = core.uiSettings.get(
-    ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-    experimentalFeatures.enableAlertsAndAttacksAlignment
-  );
+  const { enableAlertsAndAttacksAlignment } = experimentalFeatures;
 
   return Object.freeze([
     dashboardsLinks,

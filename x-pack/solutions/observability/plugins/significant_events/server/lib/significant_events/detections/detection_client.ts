@@ -21,7 +21,8 @@ import {
   runPaginatedLatestSourceEsqlQuery,
   runFindByIdEsqlQuery,
   runFindByIdsEsqlQuery,
-  runGetProcessedMarkerIds,
+  runGetProcessedMarkers,
+  runFindSkippedDetectionIds,
 } from '../latest_source_query';
 import {
   DETECTIONS_DATA_STREAM,
@@ -62,6 +63,9 @@ const ESQL_MAX_ROWS = 10_000;
 // rule doesn't produce an unbounded scroll.
 const DETECTION_HISTORY_LIMIT = 20;
 
+// Cap on the skipped detections one event's lifecycle shows.
+const SKIPPED_PER_EVENT_LIMIT = 1000;
+
 // Detections carry `change_point_type`; processed markers carry `processed_by` instead.
 // Every detection read filters on this so marker docs never surface as detections.
 const detectionFilter = (): ESQLAstExpression =>
@@ -94,8 +98,8 @@ export class DetectionClient {
   }
 
   // `processed` is derived: a detection is processed iff a marker references its exact id.
-  private async getProcessedIds(detectionIds: string[]): Promise<Set<string>> {
-    return runGetProcessedMarkerIds({
+  private async getProcessedMarkers(detectionIds: string[]) {
+    return runGetProcessedMarkers({
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: DETECTIONS_DATA_STREAM,
@@ -156,6 +160,33 @@ export class DetectionClient {
       limit: DETECTION_HISTORY_LIMIT,
     });
     return { hits: await this.withDerivedProcessed(hits) };
+  }
+
+  /**
+   * The detections the classifier closed on the strength of the given event, oldest→newest: the
+   * newest SKIPPED_PER_EVENT_LIMIT of them, with `truncated` set when there are more. A detection
+   * whose latest marker no longer carries that skip is left out.
+   */
+  async findSkippedForEvent(eventId: string): Promise<{ hits: Detection[]; truncated: boolean }> {
+    const { ids, truncated } = await runFindSkippedDetectionIds({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: DETECTIONS_DATA_STREAM,
+      idField: FIELD_DETECTION_ID,
+      eventId,
+      limit: SKIPPED_PER_EVENT_LIMIT,
+    });
+    const { hits: rawHits } = await runFindByIdsEsqlQuery<RawDetection>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: DETECTIONS_DATA_STREAM,
+      idField: FIELD_DETECTION_ID,
+      idValues: ids,
+      where: detectionFilter(),
+      limit: ids.length,
+    });
+    const hits = await this.withDerivedProcessed(rawHits);
+    return { hits: hits.filter((hit) => hit.skip?.event_id === eventId), truncated };
   }
 
   async findLatest(options: DetectionsSearchOptions = {}): Promise<{ hits: Detection[] }> {
@@ -296,11 +327,16 @@ export class DetectionClient {
   }
 
   private async withDerivedProcessed(rawHits: RawDetection[]): Promise<Detection[]> {
-    const processedIds = await this.getProcessedIds(
+    const markers = await this.getProcessedMarkers(
       rawHits.map((h) => h.detection_id).filter((id): id is string => Boolean(id))
     );
-    return rawHits.map(
-      (raw) => ({ ...raw, processed: processedIds.has(raw.detection_id ?? '') } as Detection)
-    );
+    return rawHits.map((raw) => {
+      const marker = markers.get(raw.detection_id ?? '');
+      return {
+        ...raw,
+        processed: marker !== undefined,
+        ...(marker?.skip ? { skip: { ...marker.skip, checked_at: marker.processedAt } } : {}),
+      } as Detection;
+    });
   }
 }

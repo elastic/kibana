@@ -6,10 +6,18 @@
  */
 
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ControlType, Workspace } from '../../types';
+import {
+  clearNodeSelection,
+  invertNodeSelection,
+  selectAllNodes,
+  selectNeighborNodes,
+  type GraphDispatch,
+} from '../../state_management';
 
 interface SelectionToolBarProps {
   workspace: Workspace;
@@ -17,6 +25,7 @@ interface SelectionToolBarProps {
 }
 
 export const SelectionToolBar = ({ workspace, onSetControl }: SelectionToolBarProps) => {
+  const dispatch = useDispatch<GraphDispatch>();
   const haveNodes = workspace.nodes.length === 0;
 
   const selectAllButtonMsg = i18n.translate(
@@ -46,23 +55,19 @@ export const SelectionToolBar = ({ workspace, onSetControl }: SelectionToolBarPr
 
   const onSelectAllClick = () => {
     onSetControl('none');
-    workspace.selectAll();
-    workspace.changeHandler();
+    dispatch(selectAllNodes());
   };
   const onSelectNoneClick = () => {
     onSetControl('none');
-    workspace.selectNone();
-    workspace.changeHandler();
+    dispatch(clearNodeSelection());
   };
   const onInvertSelectionClick = () => {
     onSetControl('none');
-    workspace.selectInvert();
-    workspace.changeHandler();
+    dispatch(invertNodeSelection());
   };
   const onSelectNeighboursClick = () => {
     onSetControl('none');
-    workspace.selectNeighbours();
-    workspace.changeHandler();
+    dispatch(selectNeighborNodes());
   };
 
   return (
