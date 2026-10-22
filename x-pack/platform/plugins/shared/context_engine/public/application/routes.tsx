@@ -17,7 +17,11 @@ export const ContextEngineRoutes = () => (
   <Routes>
     <Route path={CONTEXT_ENGINE_PATHS.create} exact component={CreateAiIndexPage} />
     <Route path={CONTEXT_ENGINE_PATHS.viewKi} exact component={ViewKiPage} />
-    <Route path={CONTEXT_ENGINE_PATHS.detail} exact component={AiIndexDetailPage} />
+    <Route
+      path={[CONTEXT_ENGINE_PATHS.detail, CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators]}
+      exact
+      component={AiIndexDetailPage}
+    />
     <Route path={CONTEXT_ENGINE_PATHS.landing} exact component={ContextLandingPage} />
   </Routes>
 );

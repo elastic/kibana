@@ -217,14 +217,54 @@ export type FlyoutFooterSecondaryActionProps = Omit<
 > &
   FlyoutFooterActionBaseProps;
 
-/**
- * A single item in a footer action menu (either a clickable action or a separator).
- */
 type WithStringName<T> = T extends { name: ReactNode } ? Omit<T, 'name'> & { name: string } : T;
 
-export type FlyoutFooterMenuItem = WithStringName<
-  Extract<EuiContextMenuPanelItemDescriptor, { renderItem?: never }>
->;
+/**
+ * @deprecated Only for {@link FlyoutFooterMenuCustomItem}, which is deprecated.
+ */
+export interface FlyoutFooterMenuItemRenderContext {
+  /** Closes the footer action menu. */
+  closeMenu: () => void;
+}
+
+/**
+ * A menu item that renders its own content and handles its own clicks. The menu does not close
+ * when it is clicked; call `closeMenu` from the render context instead.
+ *
+ * @deprecated Interactive content inside a context menu conflicts with the menu's keyboard
+ * navigation, and the template does not work around it:
+ * - The menu claims the arrow keys. Arrow keys pressed in the item's own controls, including a
+ *   text field or a nested popover, move focus through the menu or go back a panel.
+ * - EUI opens a sub-panel on ArrowRight by matching the focused element's position against the
+ *   panel's items, so a custom item can make ArrowRight open the wrong sub-panel, or none.
+ * - The item gets no `menuitem` role, icon, or click-to-close behavior.
+ *
+ * This is a temporary allowance for menus that already have such items. Redesign them as plain
+ * items and nested panels so it can be removed.
+ */
+export interface FlyoutFooterMenuCustomItem {
+  key: string;
+  /**
+   * Called while rendering the item, and again whenever `panels` changes. Content that depends on
+   * other state should be a component that reads that state itself.
+   *
+   * @deprecated See {@link FlyoutFooterMenuCustomItem}.
+   */
+  renderItem: (context: FlyoutFooterMenuItemRenderContext) => ReactNode;
+  name?: never;
+  onClick?: never;
+  href?: never;
+  panel?: never;
+  isSeparator?: never;
+}
+
+/**
+ * A single item in a footer action menu (a clickable action, a separator, or a deprecated custom
+ * item).
+ */
+export type FlyoutFooterMenuItem =
+  | WithStringName<Extract<EuiContextMenuPanelItemDescriptor, { renderItem?: never }>>
+  | FlyoutFooterMenuCustomItem;
 
 /**
  * A sub-menu panel inside a footer action menu.

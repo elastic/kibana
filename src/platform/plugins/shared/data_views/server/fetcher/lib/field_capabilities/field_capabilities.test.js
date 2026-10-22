@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint import/no-duplicates: 0 */
 import sinon from 'sinon';
 import { identity, shuffle, sortBy } from 'lodash';
 

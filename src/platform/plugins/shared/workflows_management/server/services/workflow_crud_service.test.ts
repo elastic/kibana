@@ -1168,6 +1168,64 @@ describe('WorkflowCrudService', () => {
       );
     });
 
+    describe('overwrite=true without read access to the existing workflow', () => {
+      const setup = (sourceOverrides: Partial<WorkflowProperties>) => {
+        const core = coreMock.createStart();
+        core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
+        const { deps, client } = makeDeps(undefined, { getCoreStart: () => core });
+        client.search.mockResolvedValue({
+          hits: { hits: [occSearchHit('wf-1', sourceOverrides, 7, 2)] },
+        });
+        return { service: new WorkflowCrudService(deps), client };
+      };
+      const hidden = {
+        owner_id: 'owner',
+        access_control: { access_mode: 'private' as const, entries: [] },
+      };
+
+      it.each([
+        ['in the target space', 'default'],
+        ['in another space', 'space-a'],
+      ])('reports a hidden workflow %s as already existing', async (_, existingSpaceId) => {
+        const { service, client } = setup({ ...hidden, spaceId: existingSpaceId });
+
+        const result = await service.bulkCreateWorkflows(
+          [{ id: 'wf-1', yaml: validYaml('A') }],
+          'default',
+          request,
+          { overwrite: true }
+        );
+
+        expect(result.created).toEqual([]);
+        expect(result.failed).toEqual([
+          { index: 0, id: 'wf-1', error: "Workflow with id 'wf-1' already exists" },
+        ]);
+        expect(client.index).not.toHaveBeenCalled();
+      });
+
+      it('keeps the access error for a workflow the caller can read but not edit', async () => {
+        const { service, client } = setup({
+          ...hidden,
+          access_control: {
+            access_mode: 'private',
+            entries: [{ type: 'user', id: 'outsider', role: 'viewer', added_at: '2026-09-10' }],
+          },
+        });
+
+        const result = await service.bulkCreateWorkflows(
+          [{ id: 'wf-1', yaml: validYaml('A') }],
+          'default',
+          request,
+          { overwrite: true }
+        );
+
+        expect(result.failed).toEqual([
+          { index: 0, id: 'wf-1', error: 'You do not have access to this workflow.' },
+        ]);
+        expect(client.index).not.toHaveBeenCalled();
+      });
+    });
+
     it('overwrite=true retries OCC conflicts for existing workflows', async () => {
       const { deps, client } = makeDeps();
       client.search
@@ -2394,7 +2452,7 @@ describe('WorkflowCrudService', () => {
         steps: [],
       };
 
-      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockResolvedValue({
         updatedDataPatch: {
           definition: parsedDefinition,
           name: 'Parsed Workflow',
@@ -2466,7 +2524,7 @@ describe('WorkflowCrudService', () => {
         steps: [],
       };
 
-      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockResolvedValue({
         updatedDataPatch: {
           definition: parsedDefinition,
           name: 'Parsed Workflow',
@@ -2649,7 +2707,7 @@ describe('WorkflowCrudService', () => {
     });
 
     it('returns hoisted YAML validation errors without changing stored definition', async () => {
-      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockResolvedValue({
         updatedDataPatch: {
           definition: null,
           enabled: false,
@@ -2710,7 +2768,7 @@ describe('WorkflowCrudService', () => {
       // `applyYamlUpdate` is mocked, so this asserts that `updateWorkflow` spreads the
       // returned patch (including `name`) into the indexed document — not that the name
       // is recovered from the raw YAML (that parsing is covered in workflow_prepare.test.ts).
-      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockResolvedValue({
         updatedDataPatch: {
           definition: null,
           enabled: false,
@@ -3389,13 +3447,13 @@ describe('WorkflowCrudService administrator writes', () => {
 
 describe('WorkflowCrudService force deletion access', () => {
   it.each([
-    ['legacy', undefined, 'another-user', true],
-    ['public non-owner', { access_mode: 'public', entries: [] }, 'another-user', true],
-    ['public API key', { access_mode: 'public', entries: [] }, undefined, true],
-    ['private owner', { access_mode: 'private', entries: [] }, 'owner', true],
-    ['private administrator', { access_mode: 'private', entries: [] }, 'admin', true],
-    ['private API key', { access_mode: 'private', entries: [] }, 'admin-api-key', false],
-    ['private non-owner', { access_mode: 'private', entries: [] }, 'another-user', false],
+    ['legacy', undefined, 'another-user', 'deleted'],
+    ['public non-owner', { access_mode: 'public', entries: [] }, 'another-user', 'deleted'],
+    ['public API key', { access_mode: 'public', entries: [] }, undefined, 'deleted'],
+    ['private owner', { access_mode: 'private', entries: [] }, 'owner', 'deleted'],
+    ['private administrator', { access_mode: 'private', entries: [] }, 'admin', 'deleted'],
+    ['private API key', { access_mode: 'private', entries: [] }, 'admin-api-key', 'hidden'],
+    ['private non-owner', { access_mode: 'private', entries: [] }, 'another-user', 'hidden'],
     [
       'private editor',
       {
@@ -3410,9 +3468,9 @@ describe('WorkflowCrudService force deletion access', () => {
         ],
       },
       'another-user',
-      false,
+      'forbidden',
     ],
-  ] as const)('%s', async (_, accessControl, profileId, allowed) => {
+  ] as const)('%s', async (_, accessControl, profileId, outcome) => {
     const core = coreMock.createStart();
     const request = httpServerMock.createKibanaRequest();
     core.userProfile.getCurrentProfileId.mockResolvedValue(profileId ?? null);
@@ -3465,13 +3523,17 @@ describe('WorkflowCrudService force deletion access', () => {
         })
       );
     }
-    if (allowed) {
+    if (outcome === 'deleted') {
       await expect(result).resolves.toMatchObject({ deleted: 1, failures: [] });
       expect(core.elasticsearch.client.asInternalUser.delete).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'wf-1', if_seq_no: 6, if_primary_term: 1 })
       );
     } else {
-      await expect(result).rejects.toThrow();
+      if (outcome === 'hidden') {
+        await expect(result).resolves.toMatchObject({ deleted: 0, failures: [] });
+      } else {
+        await expect(result).rejects.toThrow();
+      }
       expect(client.index).not.toHaveBeenCalled();
       expect(core.elasticsearch.client.asInternalUser.delete).not.toHaveBeenCalled();
       expect(deps.stepExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
@@ -3658,6 +3720,76 @@ describe('batched ordinary workflow deletion', () => {
     ]);
     expect(client.bulk).toHaveBeenCalledTimes(1);
     expect(client.search).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('deleting hidden and already deleted workflows', () => {
+  const hiddenSource = {
+    owner_id: 'owner',
+    access_control: { access_mode: 'private' as const, entries: [] },
+  };
+
+  const setup = () => {
+    const core = coreMock.createStart();
+    core.userProfile.getCurrentProfileId.mockResolvedValue('outsider');
+    const { deps, client } = makeDeps(undefined, { getCoreStart: () => core });
+    return {
+      service: new WorkflowCrudService(deps),
+      request: httpServerMock.createKibanaRequest(),
+      client,
+    };
+  };
+
+  it('deletes an already soft-deleted workflow again', async () => {
+    const { service, request, client } = setup();
+    client.search.mockResolvedValue({
+      hits: {
+        hits: [
+          occSearchHit('gone', {
+            enabled: false,
+            deleted_at: new Date('2024-02-01T00:00:00.000Z'),
+          }),
+        ],
+      },
+    });
+
+    await expect(service.deleteWorkflows(['gone'], 'default', {}, request)).resolves.toEqual({
+      total: 1,
+      deleted: 1,
+      failures: [],
+      successfulIds: ['gone'],
+    });
+  });
+
+  it('skips a hidden workflow in a batch exactly like an unknown one', async () => {
+    const { service, request, client } = setup();
+    client.bulk.mockResolvedValue({ items: [{ index: { _id: 'visible', status: 200 } }] });
+    client.search.mockResolvedValueOnce({
+      hits: { hits: [occSearchHit('hidden', hiddenSource), occSearchHit('visible')] },
+    });
+    const hidden = await service.deleteWorkflows(['hidden', 'visible'], 'default', {}, request);
+    client.search.mockResolvedValueOnce({ hits: { hits: [occSearchHit('visible')] } });
+    const unknown = await service.deleteWorkflows(['unknown', 'visible'], 'default', {}, request);
+
+    expect(hidden).toEqual({ total: 2, deleted: 1, failures: [], successfulIds: ['visible'] });
+    expect(unknown).toEqual(hidden);
+    for (const [{ operations }] of client.bulk.mock.calls) {
+      expect(operations).toEqual([{ index: expect.objectContaining({ _id: 'visible' }) }]);
+    }
+  });
+
+  it('skips a single hidden workflow without writing', async () => {
+    const { service, request, client } = setup();
+    client.search.mockResolvedValue({ hits: { hits: [occSearchHit('hidden', hiddenSource)] } });
+
+    await expect(service.deleteWorkflows(['hidden'], 'default', {}, request)).resolves.toEqual({
+      total: 1,
+      deleted: 0,
+      failures: [],
+      successfulIds: [],
+    });
+    expect(client.index).not.toHaveBeenCalled();
+    expect(client.bulk).not.toHaveBeenCalled();
   });
 });
 

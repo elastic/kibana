@@ -25,7 +25,7 @@ const log = new ToolingLog();
 const testWriter = new ToolingLogCollectingWriter();
 log.setWriters([testWriter]);
 
-const nodeVersion = Fs.readFileSync(Path.resolve(REPO_ROOT, '.node-version'), 'utf8').trim();
+const nodeVersion = Fs.readFileSync(Path.resolve(REPO_ROOT, '.nvmrc'), 'utf8').trim();
 
 // The node variant may be overriden by an environment variable,
 // to provide test coverage against pointer-compression
