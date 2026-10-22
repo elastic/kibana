@@ -44,6 +44,9 @@ describe('useSetInitialValue', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     mockUseEditorActionContext.mockReturnValue(editorDispatchMock);
+    (removeLoadFromParameter as jest.Mock).mockImplementation(() => {
+      window.location.hash = window.location.hash.split('?')[0];
+    });
   });
 
   it('should set the initial value only once', async () => {
@@ -232,7 +235,7 @@ describe('useSetInitialValue', () => {
     });
   });
 
-  it('should apply a data URI present on mount even when a dependency changes right away', async () => {
+  it('should apply a data URI present on mount once when an effect dependency changes', async () => {
     Object.defineProperty(window, 'location', {
       writable: true,
       value: {
@@ -252,11 +255,11 @@ describe('useSetInitialValue', () => {
         { initialProps: { localStorageValue: 'initial value' } }
       );
 
-      // Console autosaves the editor content, which hands the hook a new localStorageValue
-      // and so re-runs its effect, cleanup included.
-      rerender({ localStorageValue: 'autosaved value' });
+      // Re-run the effect before the previous implementation's debounce could complete.
+      rerender({ localStorageValue: 'updated value' });
     });
 
+    expect(editorDispatchMock).toHaveBeenCalledTimes(1);
     expect(editorDispatchMock).toHaveBeenCalledWith({
       type: 'setRequestToRestore',
       payload: { request: 'decompressed data' },
