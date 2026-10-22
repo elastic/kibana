@@ -91,9 +91,7 @@ test.describe(
       });
 
       await pageObjects.toasts.waitForToastWithText('Investigation started');
-      expect(await pageObjects.toasts.getMessageText()).toContain(
-        'You will find it in Nightshift'
-      );
+      expect(await pageObjects.toasts.getMessageText()).toContain('You will find it in Nightshift');
       await pageObjects.alertPage.viewStartedInvestigation();
       await expect(page).toHaveURL(/\/app\/nightshift\?investigationId=investigation-1$/);
     });
@@ -117,9 +115,7 @@ test.describe(
       });
 
       await pageObjects.toasts.waitForToastWithText('Investigation started');
-      expect(await pageObjects.toasts.getMessageText()).toContain(
-        'You will find it in Nightshift'
-      );
+      expect(await pageObjects.toasts.getMessageText()).toContain('You will find it in Nightshift');
       await pageObjects.alertPage.viewStartedInvestigation();
       await expect(page).toHaveURL(/\/app\/nightshift\?investigationId=investigation-1$/);
     });
