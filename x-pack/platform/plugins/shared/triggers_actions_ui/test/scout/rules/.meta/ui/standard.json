@@ -1,5 +1,5 @@
 {
-  "sha1": "146c2cb484271aabf62cdd8c063c7f9584b971c1",
+  "sha1": "763105061d92a44b401d01aac564514dd414df00",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -466,8 +466,8 @@
       }
     },
     {
-      "id": "62e8d809df42e39-70e582e72ffdc19",
-      "title": "Rules settings flyout opens, shows configured values, and persists changes",
+      "id": "62e8d809df42e39-6d598720f2d75a8",
+      "title": "Rules settings page opens, shows configured values, and persists changes",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -475,7 +475,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_settings.spec.ts",
-        "line": 36,
+        "line": 35,
         "column": 65
       }
     },
