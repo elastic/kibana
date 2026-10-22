@@ -103,7 +103,7 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   }),
   markedAppliedBannerTitle: i18n.translate(
     'xpack.proposals.approvalModal.outcome.markedAppliedTitle',
-    { defaultMessage: 'Applied' }
+    { defaultMessage: 'Marked as applied' }
   ),
   /** The caption's name for the to-do category, which reads oddly sentence-cased as "Todo". */
   todoCategory: i18n.translate('xpack.proposals.approvalModal.caption.todoCategory', {

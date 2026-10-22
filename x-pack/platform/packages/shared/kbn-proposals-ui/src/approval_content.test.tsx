@@ -331,8 +331,8 @@ describe('ApprovalContent', () => {
         },
       });
 
-      // The badge and the outcome banner's own title both say it.
-      expect(screen.getAllByText('Applied')).toHaveLength(2);
+      expect(screen.getByText('Applied')).toBeInTheDocument();
+      expect(screen.getByText('Marked as applied')).toBeInTheDocument();
       expect(screen.queryByText('Approved')).not.toBeInTheDocument();
     });
   });
