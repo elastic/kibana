@@ -298,6 +298,7 @@ export const arrangeDashboardLayout = async ({
       dashboardData,
       failure: {
         type: DASHBOARD_FAILURE_TYPES.layout,
+        kind: 'dashboard',
         identifier: 'layout',
         error: `The layout request was not applied, so panel positions and sizes are unchanged: ${message}`,
       },

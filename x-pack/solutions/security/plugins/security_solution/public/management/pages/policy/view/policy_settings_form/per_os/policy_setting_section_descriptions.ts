@@ -10,33 +10,34 @@ import { i18n } from '@kbn/i18n';
 export const POLICY_SETTING_SECTION_DESCRIPTIONS = Object.freeze({
   malware: i18n.translate('xpack.securitySolution.endpoint.policy.details.malwareDescription', {
     defaultMessage:
-      'Configure how Elastic Defend protects your endpoints. Changes apply to all hosts assigned to this policy.',
+      'Scan files on your endpoints for malware. When prevention is on, Elastic Defend blocks malicious files from running and quarantines them.',
   }),
   maliciousBehavior: i18n.translate(
     'xpack.securitySolution.endpoint.policy.details.maliciousBehaviorDescription',
     {
       defaultMessage:
-        'Control how Elastic Defend responds to malicious behavior on your endpoints. Choose between detection only or full prevention, and configure user notification behavior.',
+        'Watch running processes on your endpoints for known malicious behavior. When prevention is on, Elastic Defend stops the process.',
     }
   ),
   memoryThreat: i18n.translate(
     'xpack.securitySolution.endpoint.policy.details.memoryThreatDescription',
     {
       defaultMessage:
-        'Prevent in-memory attacks such as shellcode injection, reflective DLL loading, and malicious Office macros.',
+        'Find in-memory attacks on your endpoints. When prevention is on, Elastic Defend stops the affected process or thread.',
     }
   ),
   ransomware: i18n.translate(
     'xpack.securitySolution.endpoint.policy.details.ransomwareDescription',
     {
       defaultMessage:
-        'Detect ransomware by monitoring canary files and taking response actions when encryption activity is identified.',
+        'Look for ransomware behavior on your endpoints. When prevention is on, Elastic Defend blocks the ransomware from running.',
     }
   ),
   antivirusSolution: i18n.translate(
     'xpack.securitySolution.endpoint.policy.details.antivirusSolutionDescription',
     {
-      defaultMessage: 'Register Elastic as an official Antivirus solution.',
+      defaultMessage:
+        'Register Elastic Security as antivirus software on your endpoints. Registering also disables Windows Defender.',
     }
   ),
   deviceControl: i18n.translate(
@@ -58,6 +59,13 @@ export const POLICY_SETTING_SECTION_DESCRIPTIONS = Object.freeze({
     {
       defaultMessage:
         'Select which system events to collect for monitoring and analysis. Selecting more event types increases visibility but may impact performance — enable only what you use and require.',
+    }
+  ),
+  aiDataCollection: i18n.translate(
+    'xpack.securitySolution.endpoint.policy.details.aiDataCollectionDescription',
+    {
+      defaultMessage:
+        'Identify AI tools and add that context to events that Elastic Defend collects from them. This improves visibility into AI activity on your hosts.',
     }
   ),
 });

@@ -74,6 +74,4 @@ fileGroups:
     - public/**/*.json
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

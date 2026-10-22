@@ -245,6 +245,7 @@ describe('start', () => {
       http: startDeps.http,
       docLinks: startDeps.docLinks,
       customBranding: startDeps.customBranding,
+      notifications: startDeps.notifications,
     });
 
     it('ClassicHeader renders within ChromeComponentsProvider', async () => {

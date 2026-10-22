@@ -98,13 +98,13 @@ export class RuleEventPublisher implements RuleEventPublisherContract {
     }
   }
 
-  private toEventPayload(rule: EventRule, correlationId?: string): RuleEventPayload {
-    const { ruleId, spaceId, rule: domainRule } = rule;
+  private toEventPayload(eventRule: EventRule, correlationId?: string): RuleEventPayload {
+    const { ruleId, spaceId, rule } = eventRule;
     return {
       ruleId,
       spaceId,
       ...(correlationId ? { correlationId } : {}),
-      ...(domainRule ? { rule: domainRule } : {}),
+      ...(rule ? { rule } : {}),
     };
   }
 
