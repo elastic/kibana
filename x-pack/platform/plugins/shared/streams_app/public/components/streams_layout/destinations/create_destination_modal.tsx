@@ -32,6 +32,8 @@ import { DestinationTypeFields } from './destination_type_fields';
 import { DESTINATION_TYPE_DEFINITIONS } from './destination_type_registry';
 import type { DestinationStorageKind } from './types';
 
+const CREATE_DESTINATION_MODAL_WIDTH = 560;
+
 interface CreateDestinationModalProps {
   destinations: Pick<
     DestinationsController,
@@ -107,7 +109,8 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
     <EuiModal
       aria-labelledby={modalTitleId}
       onClose={isCreatingDestination ? () => undefined : onClose}
-      maxWidth={560}
+      maxWidth={CREATE_DESTINATION_MODAL_WIDTH}
+      style={{ width: CREATE_DESTINATION_MODAL_WIDTH }}
       data-test-subj="streamsCreateDestinationModal"
     >
       <EuiModalHeader>

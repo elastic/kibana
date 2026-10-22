@@ -41,25 +41,62 @@ export const DestinationGridCell = ({
         </EuiFlexGroup>
       );
     case 'type':
-      return <EuiBadge color="hollow">{LOCAL_ELASTICSEARCH_LABEL}</EuiBadge>;
+      return (
+        <EuiFlexGroup
+          justifyContent="flexEnd"
+          alignItems="center"
+          gutterSize="none"
+          responsive={false}
+        >
+          <EuiBadge color="hollow">{LOCAL_ELASTICSEARCH_LABEL}</EuiBadge>
+        </EuiFlexGroup>
+      );
     case 'indices':
       if (resolvedIndicesStatus === 'loading' && targetedIndexCount === 0) {
-        return <EuiLoadingSpinner size="s" />;
+        return (
+          <EuiFlexGroup
+            justifyContent="flexEnd"
+            alignItems="center"
+            gutterSize="none"
+            responsive={false}
+          >
+            <EuiLoadingSpinner size="s" />
+          </EuiFlexGroup>
+        );
       }
       if (resolvedIndicesStatus === 'unavailable') {
-        return '-';
+        return (
+          <EuiFlexGroup
+            justifyContent="flexEnd"
+            alignItems="center"
+            gutterSize="none"
+            responsive={false}
+          >
+            <span>-</span>
+          </EuiFlexGroup>
+        );
       }
       return (
-        <EuiBadge
-          color="hollow"
-          data-test-subj="streamsDestinationIndexCountBadge"
-          aria-label={i18n.translate('xpack.streams.destinations.table.indexCountBadgeAriaLabel', {
-            defaultMessage: '{indexCount, plural, one {# index} other {# indices}}',
-            values: { indexCount: targetedIndexCount },
-          })}
+        <EuiFlexGroup
+          justifyContent="flexEnd"
+          alignItems="center"
+          gutterSize="none"
+          responsive={false}
         >
-          {targetedIndexCount}
-        </EuiBadge>
+          <EuiBadge
+            color="hollow"
+            data-test-subj="streamsDestinationIndexCountBadge"
+            aria-label={i18n.translate(
+              'xpack.streams.destinations.table.indexCountBadgeAriaLabel',
+              {
+                defaultMessage: '{indexCount, plural, one {# index} other {# indices}}',
+                values: { indexCount: targetedIndexCount },
+              }
+            )}
+          >
+            {targetedIndexCount}
+          </EuiBadge>
+        </EuiFlexGroup>
       );
     default:
       return null;

@@ -97,6 +97,9 @@ export const DestinationIndicesTable = ({
         name: i18n.translate('xpack.streams.destinations.indices.nameColumnLabel', {
           defaultMessage: 'Name',
         }),
+        minWidth: euiTheme.base * 14,
+        maxWidth: euiTheme.base * 22,
+        align: 'left',
         render: (index: ResolvedDestinationIndex) => (
           <EuiLink
             data-test-subj="streamsDestinationIndexLink"
@@ -121,8 +124,8 @@ export const DestinationIndicesTable = ({
       },
       {
         name: DOCUMENTS_COLUMN_HEADER,
-        width: '180px',
-        align: 'right',
+        minWidth: euiTheme.base * 10,
+        align: 'center',
         render: (index: ResolvedDestinationIndex) => (
           <DocumentsColumn
             indexPattern={index.name}
@@ -130,13 +133,14 @@ export const DestinationIndicesTable = ({
             retainHistogramQueryFetch={stats.retainIndexHistogram}
             timeState={stats.timeState}
             numDataPoints={stats.numDataPoints}
+            layout="stacked"
           />
         ),
       },
       {
         name: INGESTION_COLUMN_HEADER,
-        width: '112px',
-        align: 'right',
+        minWidth: euiTheme.base * 8,
+        align: 'center',
         render: (index: ResolvedDestinationIndex) =>
           index.is_data_stream ? (
             <IngestionColumn
@@ -150,8 +154,8 @@ export const DestinationIndicesTable = ({
       },
       {
         name: STORAGE_COLUMN_HEADER,
-        width: '120px',
-        align: 'right',
+        minWidth: euiTheme.base * 8,
+        align: 'center',
         render: (index: ResolvedDestinationIndex) =>
           index.is_data_stream ? (
             <StorageColumn
@@ -165,7 +169,8 @@ export const DestinationIndicesTable = ({
       },
       {
         name: DATA_QUALITY_COLUMN_HEADER,
-        width: '112px',
+        minWidth: euiTheme.base * 8,
+        align: 'center',
         render: (index: ResolvedDestinationIndex) => {
           if (!index.is_data_stream) {
             return <DataStreamOnlyValue />;
@@ -206,7 +211,8 @@ export const DestinationIndicesTable = ({
         name: (
           <span aria-label={RETENTION_COLUMN_HEADER_ARIA_LABEL}>{RETENTION_COLUMN_HEADER}</span>
         ),
-        width: '220px',
+        minWidth: euiTheme.base * 12,
+        align: 'center',
         render: (index: ResolvedDestinationIndex) =>
           index.is_data_stream ? (
             <RetentionColumn
@@ -219,7 +225,7 @@ export const DestinationIndicesTable = ({
           ),
       },
     ],
-    [rangeFrom, rangeTo, router, stats]
+    [euiTheme.base, rangeFrom, rangeTo, router, stats]
   );
 
   const expandedContentStyles = css`
@@ -288,6 +294,7 @@ export const DestinationIndicesTable = ({
       <EuiBasicTable
         compressed
         responsiveBreakpoint={false}
+        tableLayout="auto"
         tableCaption={i18n.translate('xpack.streams.destinations.indices.tableCaption', {
           defaultMessage: 'Indices targeted by this destination',
         })}

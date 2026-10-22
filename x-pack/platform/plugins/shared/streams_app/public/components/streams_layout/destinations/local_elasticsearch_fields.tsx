@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiButtonGroup,
@@ -66,6 +67,9 @@ interface LocalElasticsearchFieldsProps {
 }
 
 const ALL_SCOPE: IndexScope = 'all';
+
+/** Spacer + signal group + field + help/error, so the dialog does not jump. */
+const STATIC_INDEX_FIELDS_MIN_HEIGHT = 196;
 
 const ALL_PREPEND = i18n.translate('xpack.streams.destinations.allSignalsPrependLabel', {
   defaultMessage: 'logs / metrics / traces',
@@ -336,7 +340,11 @@ export const LocalElasticsearchFields = ({
         </>
       )}
       {showIndexFields && (
-        <>
+        <div
+          css={css`
+            min-block-size: ${STATIC_INDEX_FIELDS_MIN_HEIGHT}px;
+          `}
+        >
           <EuiSpacer size="s" />
           <EuiButtonGroup
             legend={i18n.translate('xpack.streams.destinations.indexScopeLegend', {
@@ -380,7 +388,7 @@ export const LocalElasticsearchFields = ({
               data-test-subj={INDEX_FIELD_TEST_SUBJ[indexScope]}
             />
           </EuiFormRow>
-        </>
+        </div>
       )}
     </>
   );

@@ -45,6 +45,9 @@ const DESTINATION_ACTIONS_LABEL = i18n.translate(
   { defaultMessage: 'Destination actions' }
 );
 
+const TYPE_COLUMN_INITIAL_WIDTH = 200;
+const INDICES_COLUMN_INITIAL_WIDTH = 100;
+
 export const DESTINATION_GRID_COLUMNS: EuiDataGridColumn[] = [
   {
     id: 'name',
@@ -58,12 +61,18 @@ export const DESTINATION_GRID_COLUMNS: EuiDataGridColumn[] = [
     displayAsText: i18n.translate('xpack.streams.destinations.table.typeColumnLabel', {
       defaultMessage: 'Type',
     }),
+    initialWidth: TYPE_COLUMN_INITIAL_WIDTH,
+    schema: 'numeric',
+    displayHeaderCellProps: { className: 'eui-textRight' },
   },
   {
     id: 'indices',
     displayAsText: i18n.translate('xpack.streams.destinations.table.modeColumnLabel', {
       defaultMessage: 'Indices',
     }),
+    initialWidth: INDICES_COLUMN_INITIAL_WIDTH,
+    schema: 'numeric',
+    displayHeaderCellProps: { className: 'eui-textRight' },
   },
 ];
 
