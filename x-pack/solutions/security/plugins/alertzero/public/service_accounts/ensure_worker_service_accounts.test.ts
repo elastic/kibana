@@ -207,7 +207,26 @@ describe('ensureWorkerServiceAccounts', () => {
     });
 
     expect(serviceAccounts.create).toHaveBeenCalledTimes(1);
-    expect(results.get(TRIAGE)).toEqual({ ok: true, serviceAccountId: `kibana/${name}` });
+    expect(results.get(TRIAGE)).toEqual({
+      ok: true,
+      serviceAccountId: `kibana/${name}`,
+      replacedBound: true,
+    });
+  });
+
+  it('fails a binding whose account exists but is disabled', async () => {
+    const name = WORKER_SERVICE_ACCOUNT_NAMES[TRIAGE];
+    const { http, serviceAccounts } = setup({
+      pages: [{ serviceAccounts: [{ ...account(name), id: 'kibana/bound', enabled: false }] }],
+    });
+
+    const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [TRIAGE], {
+      ...STATEFUL,
+      boundAccountIds: new Map([[TRIAGE, 'kibana/bound']]),
+    });
+
+    expect(results.get(TRIAGE)?.ok).toBe(false);
+    expect(serviceAccounts.create).not.toHaveBeenCalled();
   });
 
   it('reports a failure when the lookup after a conflict also fails', async () => {

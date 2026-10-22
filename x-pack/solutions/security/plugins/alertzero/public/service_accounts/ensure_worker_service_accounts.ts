@@ -44,8 +44,8 @@ interface RoleResponse {
 }
 
 export type WorkerServiceAccountResult =
-  | { ok: true; serviceAccountId: string }
-  | { ok: false; error: string };
+  /** `replacedBound` is set when the worker's bound account was gone and had to be replaced. */
+  { ok: true; serviceAccountId: string; replacedBound?: boolean } | { ok: false; error: string };
 
 const LIST_PAGE_SIZE = 100;
 // A concurrent create lists an account before its credential is stored, so it reads as unusable
@@ -130,10 +130,14 @@ const ensureOne = async (
   if (!accountName) return { ok: false, error: i18n.NO_PREBUILT_ROLE };
 
   const bound = boundAccountId && accounts.find(({ id }) => id === boundAccountId);
-  if (bound) return { ok: true, serviceAccountId: bound.id };
+  if (bound) return toResult(bound);
+
+  const replacedBound = Boolean(boundAccountId);
+  const withReplaced = (result: WorkerServiceAccountResult): WorkerServiceAccountResult =>
+    result.ok && replacedBound ? { ...result, replacedBound } : result;
 
   const existing = findByName(accounts, accountName);
-  if (existing) return toResult(existing);
+  if (existing) return withReplaced(toResult(existing));
 
   try {
     const roleName = await findRole(accountName);
@@ -142,12 +146,12 @@ const ensureOne = async (
       description: i18n.accountDescription(roleName),
       roles: [roleName],
     });
-    return { ok: true, serviceAccountId: created.id };
+    return withReplaced({ ok: true, serviceAccountId: created.id });
   } catch (error) {
     if (!isConflict(error)) return { ok: false, error: toMessage(error) };
     // Created concurrently, for example from another tab. A failed lookup is reported like any
     // other failure, so callers always get a result for this worker.
-    return awaitConcurrentAccount(http, accountName, error);
+    return withReplaced(await awaitConcurrentAccount(http, accountName, error));
   }
 };
 
