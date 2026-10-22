@@ -275,7 +275,8 @@ export interface CallbacksSetup {
   /**
    * Registers a resolver for the conversation an execution's origin continues, when the execution
    * names no conversation. Resolvers are asked in registration order and the first answer wins.
-   * When all return `undefined`, the default lookup by origin runs.
+   * When all return `undefined`, the default lookup by origin runs. A resolver may also name the
+   * agent the turn runs on; otherwise it runs on the agent the request names.
    */
   registerConversationResolver(resolver: CallbackConversationResolver): void;
   /** Registers a callback transport. The first registered transport that handles a URL delivers to it. */

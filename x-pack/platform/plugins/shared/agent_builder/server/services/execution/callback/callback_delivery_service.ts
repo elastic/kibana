@@ -8,6 +8,7 @@
 import pRetry, { AbortError } from 'p-retry';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
 import type {
+  CallbackConversationResolution,
   CallbackConversationResolver,
   CallbackConversationResolverContext,
   CallbacksSetup,
@@ -52,12 +53,12 @@ export class CallbackDeliveryService {
   async resolveConversation(
     context: CallbackConversationResolverContext,
     conversationClient: ConversationClient
-  ): Promise<string | undefined> {
+  ): Promise<CallbackConversationResolution | undefined> {
     for (const resolver of this.conversationResolvers) {
       const resolved = await resolver(context);
 
       if (resolved) {
-        return resolved.conversationId;
+        return resolved;
       }
     }
 
@@ -65,7 +66,7 @@ export class CallbackDeliveryService {
       external_conversation_id: context.origin.external_conversation_id,
     });
 
-    return conversation?.id;
+    return conversation ? { conversationId: conversation.id } : undefined;
   }
 
   validateCallbackUrl(callbackUrl: string): void {

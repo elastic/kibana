@@ -35,6 +35,7 @@ import {
 } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { attachmentChangesToEvents } from '@kbn/agent-builder-server/attachments';
+import type { CallbackConversationResolution } from '@kbn/agent-builder-server/callbacks';
 import type {
   AbortExecutionOptions,
   AbortExecutionResult,
@@ -820,7 +821,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const receivedAt = new Date();
     const { origin, conversationId } = validatedParams;
 
-    const resolvedConversationId = await this.resolveConversationId({
+    const resolution = await this.resolveConversation({
       conversationId,
       origin,
       spaceId,
@@ -830,7 +831,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     const conversation = await getConversation({
       agentId: validatedParams.agentId ?? agentBuilderDefaultAgentId,
-      conversationId: resolvedConversationId,
+      conversationId: resolution?.conversationId,
       autoCreateConversationWithId: validatedParams.autoCreateConversationWithId,
       conversationClient,
       accessControl: validatedParams.accessControl,
@@ -839,12 +840,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       subagentCreation: validatedParams.subagentCreation,
     });
 
-    // A conversation the origin continues runs on its own agent, not the one the caller names.
-    const continuesOrigin = !conversationId && resolvedConversationId !== undefined;
-
     return {
-      validatedParams: continuesOrigin
-        ? { ...validatedParams, agentId: conversation.agent_id }
+      validatedParams: resolution?.agentId
+        ? { ...validatedParams, agentId: resolution.agentId }
         : validatedParams,
       conversation,
       receivedAt,
@@ -852,10 +850,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   }
 
   /**
-   * The conversation an execution continues: the one it names, else the one its origin continues.
-   * `undefined` starts a new conversation.
+   * The conversation an execution continues, and the agent it runs on when a resolver names one:
+   * the conversation it names, else the one its origin continues. `undefined` starts a new conversation.
    */
-  private async resolveConversationId({
+  private async resolveConversation({
     conversationId,
     origin,
     spaceId,
@@ -867,9 +865,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     spaceId: string;
     request: KibanaRequest;
     conversationClient: ConversationClient;
-  }): Promise<string | undefined> {
-    if (conversationId || !origin) {
-      return conversationId;
+  }): Promise<CallbackConversationResolution | undefined> {
+    if (conversationId) {
+      return { conversationId };
+    }
+
+    if (!origin) {
+      return undefined;
     }
 
     return this.deps.callbackDeliveryService.resolveConversation(

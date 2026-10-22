@@ -43,10 +43,13 @@ const setup = ({
 };
 
 describe('createThreadConversationResolver', () => {
-  it('continues the investigation that claimed the thread', async () => {
+  it('continues the investigation that claimed the thread on its own agent', async () => {
     const { resolveThread, findClaimHolder, bulkGet } = setup({ holder: 'investigation-1' });
 
-    await expect(resolveThread()).resolves.toEqual({ conversationId: 'investigation-1' });
+    await expect(resolveThread()).resolves.toEqual({
+      conversationId: 'investigation-1',
+      agentId: 'investigation-agent',
+    });
     expect(findClaimHolder).toHaveBeenCalledWith(
       { type: 'slack_thread', id: THREAD_KEY },
       'default'

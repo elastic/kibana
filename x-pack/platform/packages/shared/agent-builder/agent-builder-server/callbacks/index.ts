@@ -6,6 +6,7 @@
  */
 
 export type {
+  CallbackConversationResolution,
   CallbackConversationResolver,
   CallbackConversationResolverContext,
   CallbackTransportDefinition,

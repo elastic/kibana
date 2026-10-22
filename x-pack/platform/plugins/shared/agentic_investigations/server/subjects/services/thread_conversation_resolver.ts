@@ -40,13 +40,15 @@ export const createThreadConversationResolver = ({
     // turn as not found, so the thread gets an ordinary answer instead.
     const conversations = await getConversationClient(request);
     const readable = await conversations.bulkGet([conversationId]);
-    if (!readable.has(conversationId)) {
+    const investigation = readable.get(conversationId);
+    if (!investigation) {
       logger.debug(
         `Investigation [${conversationId}] claims Slack thread [${origin.external_conversation_id}] but is not readable; not continuing it`
       );
       return undefined;
     }
 
-    return { conversationId };
+    // The Relay names one agent for every turn, so the investigation keeps its own.
+    return { conversationId, agentId: investigation.agent_id };
   };
 };

@@ -169,13 +169,18 @@ describe('resolveConversation', () => {
   it('returns the first answer among registered resolvers in registration order', async () => {
     const { service, callbacks, client } = setupService('conversation-1');
     const skipped = jest.fn().mockResolvedValue(undefined);
-    const first = jest.fn().mockResolvedValue({ conversationId: 'investigation-1' });
+    const first = jest
+      .fn()
+      .mockResolvedValue({ conversationId: 'investigation-1', agentId: 'investigation-agent' });
     const second = jest.fn().mockResolvedValue({ conversationId: 'investigation-2' });
     callbacks.registerConversationResolver(skipped);
     callbacks.registerConversationResolver(first);
     callbacks.registerConversationResolver(second);
 
-    await expect(service.resolveConversation(context, client)).resolves.toBe('investigation-1');
+    await expect(service.resolveConversation(context, client)).resolves.toEqual({
+      conversationId: 'investigation-1',
+      agentId: 'investigation-agent',
+    });
     expect(skipped).toHaveBeenCalledWith(context);
     expect(first).toHaveBeenCalledWith(context);
     expect(second).not.toHaveBeenCalled();
@@ -186,7 +191,9 @@ describe('resolveConversation', () => {
     const { service, callbacks, client } = setupService('conversation-1');
     callbacks.registerConversationResolver(jest.fn().mockResolvedValue(undefined));
 
-    await expect(service.resolveConversation(context, client)).resolves.toBe('conversation-1');
+    await expect(service.resolveConversation(context, client)).resolves.toEqual({
+      conversationId: 'conversation-1',
+    });
     expect(client.getByOrigin).toHaveBeenCalledWith({ external_conversation_id: 'thread-1' });
   });
 

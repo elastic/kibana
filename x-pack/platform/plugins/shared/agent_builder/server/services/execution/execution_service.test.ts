@@ -1385,8 +1385,11 @@ describe('AgentExecutionService', () => {
         schema_version: CONVERSATION_SCHEMA_VERSION,
       });
 
-      it('continues the conversation the origin resolves to, on its stored agent', async () => {
-        resolveConversation.mockResolvedValueOnce('investigation-1');
+      it('continues the conversation the origin resolves to, on the agent it resolves to', async () => {
+        resolveConversation.mockResolvedValueOnce({
+          conversationId: 'investigation-1',
+          agentId: 'investigation-agent',
+        });
         conversationClient.get.mockResolvedValueOnce(boundConversation);
 
         await converse({ conversationId: undefined, origin });
@@ -1404,6 +1407,21 @@ describe('AgentExecutionService', () => {
         expect(agentId).toBe('investigation-agent');
         expect(agentParams).toMatchObject({
           agentId: 'investigation-agent',
+          conversationId: 'investigation-1',
+          conversationOperation: 'UPDATE',
+        });
+      });
+
+      it('continues the conversation the origin resolves to, on the requested agent when no agent is resolved', async () => {
+        resolveConversation.mockResolvedValueOnce({ conversationId: 'investigation-1' });
+        conversationClient.get.mockResolvedValueOnce(boundConversation);
+
+        await converse({ conversationId: undefined, origin });
+
+        const [{ agentId, agentParams }] = mockExecutionClient.create.mock.calls[0];
+        expect(agentId).toBe('agent-1');
+        expect(agentParams).toMatchObject({
+          agentId: 'agent-1',
           conversationId: 'investigation-1',
           conversationOperation: 'UPDATE',
         });
