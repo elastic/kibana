@@ -94,10 +94,10 @@ Kibana warns on middleware spreading and draft reassignment via `@kbn/imports/no
 
 `@kbn/imports/restricted_redux_imports` also warns on `createStore` / `legacy_createStore` imports from `redux` and `redux-v4`; prefer `configureStore`. See [import restrictions](../../../packages/kbn-eslint-plugin-imports/README.mdx#redux-store-import-warnings).
 
-Run directly from the repository root; `node scripts/eslint` hides warnings:
+Run from the repository root through the wrapper, which runs Oxlint and reports these warnings before invoking ESLint:
 
 ```bash
-node -r ./src/setup_node_env node_modules/eslint/bin/eslint.js path/to/file.ts
+node scripts/eslint path/to/file.ts
 ```
 
 ## Review output
