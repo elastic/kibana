@@ -8,6 +8,7 @@
  */
 
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
+import { grantedScopes } from './token_endpoints';
 
 const spec = {
   openapi: '3.0.3',
@@ -49,12 +50,13 @@ describe('token endpoints', () => {
     expect(token).toEqual({
       status: 200,
       body: {
-        access_token: 'contract-mock-access-token',
+        access_token: expect.stringMatching(/^contract-mock-access-token\./),
         token_type: 'Bearer',
         expires_in: 3600,
         scope: 'read',
       },
     });
+    expect(grantedScopes(token.body.access_token)).toEqual(['read']);
 
     const items = await fetch('https://api.example.com/v1/items', {
       headers: { authorization: `Bearer ${token.body.access_token}` },
@@ -96,6 +98,34 @@ describe('token endpoints', () => {
     ]);
   });
 
+  it('keeps the original scopes on refresh unless fewer are requested', async () => {
+    const password = await requestToken('https://api.example.com/oauth/token', {
+      body: 'grant_type=password&username=user&password=pass&scope=read%20write',
+    });
+    const refresh = (scope?: string) =>
+      requestToken('https://api.example.com/oauth/refresh', {
+        body: new URLSearchParams({
+          grant_type: 'refresh_token',
+          refresh_token: password.body.refresh_token,
+          ...(scope ? { scope } : {}),
+        }).toString(),
+      });
+
+    expect(grantedScopes((await refresh()).body.access_token)).toEqual(['read', 'write']);
+    expect(grantedScopes((await refresh('read')).body.access_token)).toEqual(['read']);
+  });
+
+  it('reads no scopes from tokens issued without a scope or not issued by the mock', async () => {
+    const { body } = await requestToken('https://auth.example.com/oauth/token', {
+      body: 'grant_type=client_credentials&client_id=id',
+    });
+
+    expect(body.access_token).toBe('contract-mock-access-token');
+    expect(grantedScopes(body.access_token)).toBeUndefined();
+    expect(grantedScopes('a-static-token-from-connector-config')).toBeUndefined();
+    expect(grantedScopes('contract-mock-access-token.not-base64-json')).toBeUndefined();
+  });
+
   it('accepts client credentials in a Basic header', async () => {
     const { status } = await requestToken('https://auth.example.com/oauth/token', {
       headers: { ...FORM, authorization: 'Basic aWQ6c2VjcmV0' },
@@ -116,15 +146,18 @@ describe('token endpoints', () => {
         }).toString(),
       });
 
-    it('issues an access token for a scope', async () => {
-      expect(await exchange(assertion({ scope: 'read' }))).toEqual({
+    it('issues an access token for the scopes the assertion claims', async () => {
+      const { status, body } = await exchange(assertion({ scope: 'read write' }));
+
+      expect({ status, body }).toEqual({
         status: 200,
         body: {
-          access_token: 'contract-mock-access-token',
+          access_token: expect.stringMatching(/^contract-mock-access-token\./),
           token_type: 'Bearer',
           expires_in: 3600,
         },
       });
+      expect(grantedScopes(body.access_token)).toEqual(['read', 'write']);
     });
 
     it('issues an ID token for a target audience', async () => {
