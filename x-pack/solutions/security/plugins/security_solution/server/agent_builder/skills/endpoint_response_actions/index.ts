@@ -95,7 +95,13 @@ from chat: say so and point the analyst to the Response Actions UI.
   (and \`reason: ambiguous_hostname\` when several endpoints share the name);
   \`error: invalid_argument\` means the request itself was out of range (narrow
   filters instead of paging further), while \`error: insufficient_privileges\`
-  and \`error: unknown_error\` mean the lookup itself could not run. Details in
+  and \`error: unknown_error\` mean the lookup itself could not run, and
+  \`error: license_tier_required\` means the deployment's license tier does not
+  include the capability — report the \`requiredLicenseTier\` it returns, do not
+  suggest a role grant or the Security UI (the same limit applies there), and
+  do not re-offer that action this conversation. License tier can also make a
+  write unavailable before you call it, so do not promise isolate, scan, or
+  running-processes will succeed until the tool result confirms. Details in
   \`./reference\`.`;
 
 export const createEndpointResponseActionsSkill = (
