@@ -40,7 +40,7 @@ import {
 } from '@elastic/eui';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
@@ -137,22 +137,6 @@ const FLYOUT_CLASSNAME = 'workflowExecutionFlyout';
 const EXECUTION_PANEL_WIDTH = 560;
 const MIN_PANEL_WIDTH = 280;
 
-const FLYOUT_CONTENT_CSS = {
-  '.euiFlyout__content': {
-    width: '100%',
-    minWidth: 0,
-    height: '100%',
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'column' as const,
-  },
-};
-
-// Overlay enables EUI's focus trap. `ownFocus={false}` (forced on a session child) only
-// releases it on the first outside click, which pulls focus out of the YAML editor.
-const STEP_DETAIL_FOCUS_TRAP_PROPS = {
-  disabled: true,
-} as React.ComponentProps<typeof EuiFlyout>['focusTrapProps'];
 /** Field column: content-sized between a header-comfortable min and a path-truncation max. */
 const FIELD_COLUMN_MIN_PX = 100;
 const FIELD_COLUMN_MAX_PX = 160;
@@ -911,9 +895,13 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const stepTestTargetName = runModeInfo?.stepTestTargetName ?? '';
 
     const historyKeyRef = useRef(Symbol('workflow-execution-flyout'));
-    // The step flyout can inherit the session only after the run flyout has registered it.
+    // The run registers its session in a layout effect, which runs before this one.
+    // The step can inherit that session only if it mounts afterwards.
     const [isExecutionFlyoutActive, setIsExecutionFlyoutActive] = useState(false);
     const onExecutionFlyoutActive = useCallback(() => {
+      setIsExecutionFlyoutActive(true);
+    }, []);
+    useLayoutEffect(() => {
       setIsExecutionFlyoutActive(true);
     }, []);
     const onCloseStepDetail: React.ComponentProps<typeof EuiFlyout>['onClose'] = useCallback(
@@ -927,9 +915,15 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       },
       [setSelectedStepExecutionId]
     );
+    // EUI re-registers this flyout when `aria-label` changes, and that closes the step.
+    // Hold the name from before the step was opened.
+    const [executionAriaName, setExecutionAriaName] = useState(workflowName);
+    if (selectedStepExecutionId == null && executionAriaName !== workflowName) {
+      setExecutionAriaName(workflowName);
+    }
     const executionAriaLabel = i18n.translate('workflows.executionFlyout.ariaLabel', {
       defaultMessage: 'Execution of {name}',
-      values: { name: workflowName },
+      values: { name: executionAriaName },
     });
 
     return (
@@ -948,20 +942,11 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
             resizable={true}
             paddingSize="none"
             hideCloseButton
-            focusTrapProps={STEP_DETAIL_FOCUS_TRAP_PROPS}
+            // The overlay trap treats the editor as outside and drops focus on the first click.
+            includeSelectorInFocusTrap='[data-test-subj="workflowYamlEditor"]'
             data-test-subj="workflowExecutionStepFlyout"
-            css={FLYOUT_CONTENT_CSS}
           >
-            <div
-              css={{
-                boxSizing: 'border-box',
-                display: 'flex',
-                flexDirection: 'column',
-                height: '100%',
-                width: '100%',
-                overflow: 'hidden',
-              }}
-            >
+            <EuiFlyoutHeader css={{ padding: 0 }}>
               <div
                 css={{
                   display: 'flex',
@@ -1014,12 +999,11 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                   />
                 </EuiToolTip>
               </div>
+            </EuiFlyoutHeader>
 
+            <EuiFlyoutBody>
               <div
                 css={{
-                  flex: 1,
-                  overflowY: 'auto',
-                  overflowX: 'hidden',
                   // No paddingTop — the first accordion already has header padding.
                   paddingInline: euiTheme.size.base,
                   paddingBottom: euiTheme.size.base,
@@ -1211,7 +1195,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                   </>
                 )}
               </div>
-            </div>
+            </EuiFlyoutBody>
           </EuiFlyout>
         ) : null}
         <EuiFlyout
@@ -1233,7 +1217,6 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
           hideCloseButton
           className={FLYOUT_CLASSNAME}
           data-test-subj="workflowExecutionFlyout"
-          css={FLYOUT_CONTENT_CSS}
         >
           <div
             css={{

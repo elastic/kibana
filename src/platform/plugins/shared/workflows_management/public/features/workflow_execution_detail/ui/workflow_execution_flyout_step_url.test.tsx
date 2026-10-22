@@ -204,7 +204,9 @@ describe('WorkflowExecutionFlyout step URL and field paths', () => {
         onClose?: (event: Event, meta?: { reason?: string }) => void;
       };
     }
-    let fiber = (stepFlyout as unknown as Record<string, FlyoutFiber>)[fiberKey!];
+    let fiber: FlyoutFiber | null = (stepFlyout as unknown as Record<string, FlyoutFiber>)[
+      fiberKey!
+    ];
     let closeStepFlyout: ((event: Event, meta?: { reason?: string }) => void) | undefined;
     while (fiber) {
       const onClose = fiber.memoizedProps?.onClose;
@@ -240,7 +242,9 @@ describe('WorkflowExecutionFlyout step URL and field paths', () => {
         onResize?: (width: number) => void;
       };
     }
-    let fiber = (runFlyout as unknown as Record<string, FlyoutFiber>)[fiberKey!];
+    let fiber: FlyoutFiber | null = (runFlyout as unknown as Record<string, FlyoutFiber>)[
+      fiberKey!
+    ];
     let runFlyoutProps: FlyoutFiber['memoizedProps'];
     while (fiber) {
       if (fiber.memoizedProps?.id === 'execution') {
@@ -254,6 +258,26 @@ describe('WorkflowExecutionFlyout step URL and field paths', () => {
     expect(runFlyoutProps?.size).toBe(560);
     expect(runFlyoutProps?.onResize).toBeUndefined();
     expect(screen.getByTestId('workflowExecutionStepFlyout')).toBeInTheDocument();
+  });
+
+  it('keeps the step panel open when the workflow name changes', () => {
+    mockUrlState.selectedStepExecutionId = 'step-123';
+
+    const { rerender } = render(
+      <WorkflowExecutionFlyout executionId="exec-1" workflowName="Before" onClose={jest.fn()} />,
+      { wrapper: getTestProvider({}) }
+    );
+
+    expect(screen.getByRole('heading', { name: 'Before' })).toBeInTheDocument();
+    expect(screen.getByTestId('workflowExecutionStepFlyout')).toBeInTheDocument();
+
+    rerender(
+      <WorkflowExecutionFlyout executionId="exec-1" workflowName="After" onClose={jest.fn()} />
+    );
+
+    expect(screen.getByRole('heading', { name: 'After' })).toBeInTheDocument();
+    expect(screen.getByTestId('workflowExecutionStepFlyout')).toBeInTheDocument();
+    expect(mockSetSelectedStepExecution).not.toHaveBeenCalled();
   });
 
   it('offers copy only on metadata rows that exist in the workflow context', () => {
