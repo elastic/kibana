@@ -10,6 +10,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { BULK_FILTER_MAX_RESOURCES } from '@kbn/alerting-v2-schemas';
 import { RULE_KIND_TOOLTIPS } from '@kbn/alerting-v2-constants';
+import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
 import { RulesListTable, type RulesListTableProps } from './rules_list_table';
 
 const mockRules = [
@@ -108,11 +109,16 @@ const defaultProps: RulesListTableProps = {
   onTableChange: jest.fn(),
 };
 
-const renderTable = (overrides: Partial<RulesListTableProps> = {}) => {
+const renderTable = (
+  overrides: Partial<RulesListTableProps> = {},
+  locators = createMockLocators()
+) => {
   const props = { ...defaultProps, ...overrides };
   return render(
     <I18nProvider>
-      <RulesListTable {...props} />
+      <MockLocatorProvider locators={locators}>
+        <RulesListTable {...props} />
+      </MockLocatorProvider>
     </I18nProvider>
   );
 };
@@ -489,6 +495,23 @@ describe('RulesListTable', () => {
   });
 
   describe('row actions menu', () => {
+    it('renders View details first, linking to the rule details page', async () => {
+      const locators = createMockLocators();
+      (locators.rulesLocators.getRedirectUrl as jest.Mock).mockReturnValue('/rule-1-details');
+      renderTable({}, locators);
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      const viewDetails = await screen.findByTestId('viewRuleDetails-rule-1');
+      expect(locators.rulesLocators.getRedirectUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' });
+      expect(viewDetails).toHaveAttribute('href', '/rule-1-details');
+      expect(
+        screen
+          .getAllByTestId(/^(viewRuleDetails|runRule|editRule|cloneRule)-rule-1$/)
+          .map((item) => item.getAttribute('data-test-subj'))[0]
+      ).toBe('viewRuleDetails-rule-1');
+    });
+
     it('calls onEdit when edit action is clicked', async () => {
       const onEdit = jest.fn();
       renderTable({ onEdit });
@@ -657,11 +680,17 @@ describe('RulesListTable', () => {
       expect(screen.queryByTestId('checkboxSelectRow-rule-1')).not.toBeInTheDocument();
     });
 
-    it('hides the quick edit and actions menu affordances', () => {
+    it('hides the quick edit shortcut and write actions, but still shows View details', async () => {
       renderTable({ canWrite: false });
 
       expect(screen.queryByTestId('quickEditRule-rule-1')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      expect(await screen.findByTestId('viewRuleDetails-rule-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('runRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('editRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cloneRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('deleteRule-rule-1')).not.toBeInTheDocument();
     });
 
     it('still shows View change history (a read action) without write actions', async () => {
