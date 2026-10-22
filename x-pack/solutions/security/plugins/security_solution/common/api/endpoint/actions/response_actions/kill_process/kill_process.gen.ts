@@ -33,8 +33,16 @@ export const KillProcessRouteRequestBody = lazySchema(() =>
             .number()
             .int()
             .min(1)
-            .optional()
             .describe('The process ID (PID) of the process to terminate.'),
+          /**
+           * Whether to terminate all child processes of the specified process. Valid only for Endpoint agent type.
+           */
+          kill_descendants: z
+            .boolean()
+            .optional()
+            .describe(
+              'Whether to terminate all child processes of the specified process. Valid only for Endpoint agent type.'
+            ),
         }),
         z.object({
           /**
@@ -44,8 +52,16 @@ export const KillProcessRouteRequestBody = lazySchema(() =>
             .string()
             .min(1)
             .max(256)
-            .optional()
             .describe('The entity ID of the process to terminate.'),
+          /**
+           * Whether to terminate all child processes of the specified process. Valid only for Endpoint agent type.
+           */
+          kill_descendants: z
+            .boolean()
+            .optional()
+            .describe(
+              'Whether to terminate all child processes of the specified process. Valid only for Endpoint agent type.'
+            ),
         }),
         z.object({
           /**
@@ -55,7 +71,6 @@ export const KillProcessRouteRequestBody = lazySchema(() =>
             .string()
             .min(1)
             .max(1024)
-            .optional()
             .describe(
               'The name of the process to terminate. Valid for SentinelOne agent type only.'
             ),

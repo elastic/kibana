@@ -78,13 +78,23 @@ components:
             parameters:
               oneOf:
                 - type: object
+                  title: "PID"
+                  required:
+                    - pid
                   properties:
                     pid:
                       type: integer
                       description: "The process ID (PID) of the process to terminate."
                       example: 123
                       minimum: 1
+                    kill_descendants:
+                      type: boolean
+                      description: "Whether to terminate all child processes of the specified process. Valid only for Endpoint agent type."
+                      example: true
                 - type: object
+                  title: "Entity ID"
+                  required:
+                    - entity_id
                   properties:
                     entity_id:
                       type: string
@@ -92,7 +102,14 @@ components:
                       example: "abc123"
                       minLength: 1
                       maxLength: 256
+                    kill_descendants:
+                      type: boolean
+                      description: "Whether to terminate all child processes of the specified process. Valid only for Endpoint agent type."
+                      example: true
                 - type: object
+                  title: "Process Name"
+                  required:
+                    - process_name
                   properties:
                     process_name:
                       type: string
