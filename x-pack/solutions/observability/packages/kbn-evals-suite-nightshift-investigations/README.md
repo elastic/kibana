@@ -164,6 +164,21 @@ fallback. Full report evidence remains available through the investigation and a
 Independently, error text above 10,000 characters keeps that prefix plus a truncation marker and
 remains an execution failure. Ordinary reports are preserved unchanged.
 
+A pending proposal ends an investigation's `in_progress` while its agent is still working, so the
+runner treats the investigation as finished only once its workflow execution (the last of the
+conversation's `workflow_execution_ids`) reaches a terminal status, and reads the report then.
+
+Each score also stores `run_metrics`: when the run was requested; the time until that workflow
+execution finished; each `ai.agent` step's duration and input, cached-input and output tokens from
+the execution; and each conversation round's LLM and tool calls. `trace_ids` lists every round's
+traces. Seven CODE evaluators (`time_to_report_s`, `agent_time_s`, `input_tokens`,
+`cached_input_tokens`, `output_tokens`, `llm_calls`, `tool_calls`) score those as minimized
+metrics, so `node scripts/evals compare` pairs them across runs like the judge scores. A metric
+the run could not measure scores `null`, never zero. The spec logs each metric's mean, p50 and
+p95 over the run. Cost is tokens times the model's prices and is not computed by the suite.
+Cortex and memory are disabled, so no post-execution LLM work runs outside the workflow's agent
+steps.
+
 The `evals_nightshift_investigations` server config extends `evals_tracing` whenever the hook
 exports sandbox credentials. Otherwise it is plain `evals_tracing`, so the smoke eval needs no
 sandbox credentials. It enables the investigation engine, its `nightshift.enabled` feature flag

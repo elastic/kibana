@@ -53,6 +53,36 @@ export interface InvestigationReport {
   proposals?: Array<Pick<InvestigationProposalSummary, 'title' | 'comment' | 'status'>>;
 }
 
+/** One conversation round's LLM and tool calls, as Agent Builder recorded them. */
+export interface RoundMetrics {
+  started_at: string;
+  llm_calls: number;
+  tool_calls: number;
+}
+
+/** One `ai.agent` step of the investigation workflow: how long it ran and what it consumed. */
+export interface AgentStepMetrics {
+  step_id: string;
+  started_at: string;
+  duration_ms: number;
+  /** Includes `cached_input_tokens`. */
+  input_tokens: number;
+  cached_input_tokens: number;
+  output_tokens: number;
+}
+
+/** How long an investigation took to report and what each agent and round cost. */
+export interface RunMetrics {
+  /** When the eval requested the investigation. */
+  requested_at: string;
+  /** From the request to the first poll that saw the investigation workflow finished. */
+  time_to_report_ms?: number;
+  /** Absent when the workflow execution could not be read, so nothing is undercounted. */
+  agent_steps?: AgentStepMetrics[];
+  /** Absent when no round was persisted. */
+  rounds?: RoundMetrics[];
+}
+
 /** `running` while the investigation agent runs, `complete` after. */
 export type InvestigationRunState = 'running' | 'complete';
 
@@ -66,6 +96,9 @@ export interface InvestigationTaskOutput {
   report_truncated?: boolean;
   conversation_round_count?: number;
   traceId?: string;
+  /** Every round's traces in order; `traceId` is the last of them. */
+  trace_ids?: string[];
+  run_metrics?: RunMetrics;
   execution_error?: string;
   decision_trees_accessed?: AccessedDecisionTree[];
   tool_call_trajectory?: TrajectoryStep[];

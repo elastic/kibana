@@ -10,15 +10,19 @@ import type { HttpHandler } from '@kbn/core/public';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { EvalConnector } from '@kbn/evals';
+import { isTerminalStatus } from '@kbn/workflows';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { StartInvestigationResponse } from '@kbn/nightshift-investigations-plugin/common';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
 import { extractAccessedDecisionTrees } from './decision_tree_evidence';
 import { extractToolCallTrajectory } from './tool_call_trajectory';
+import { toAgentStepMetrics, toRoundMetrics } from './run_metrics';
 import type {
   InvestigationExample,
   InvestigationReport,
   InvestigationTaskOutput,
+  RunMetrics,
   TrajectoryStep,
 } from './types';
 
@@ -37,6 +41,12 @@ const CONVERSATION_PERSIST_ATTEMPTS = 60;
 const investigationPath = (id: string) =>
   `/internal/investigations/investigations/${encodeURIComponent(id)}`;
 const INVESTIGATIONS_API_HEADERS = { 'elastic-api-version': '1' };
+const PUBLIC_API_HEADERS = { 'elastic-api-version': '2023-10-31' };
+
+interface InvestigationConversation {
+  rounds: ConversationRound[];
+  metadata?: { workflow_execution_ids?: string[] };
+}
 
 /** Keeps as many (already per-field-bounded) trajectory steps, in order, as fit the byte budget. */
 const boundTrajectory = (trajectory: TrajectoryStep[]): TrajectoryStep[] => {
@@ -98,17 +108,22 @@ const readInvestigation = async (
 const readConversation = async (
   fetch: HttpHandler,
   id: string
-): Promise<{ rounds: ConversationRound[] } | undefined> => {
+): Promise<InvestigationConversation | undefined> => {
   try {
-    return await fetch<{ rounds: ConversationRound[] }>(
+    return await fetch<InvestigationConversation>(
       `/api/agent_builder/conversations/${encodeURIComponent(id)}`,
-      { headers: { 'elastic-api-version': '2023-10-31' } }
+      { headers: PUBLIC_API_HEADERS }
     );
   } catch (error) {
     if (isNotFound(error)) return undefined;
     throw error;
   }
 };
+
+const readExecution = (fetch: HttpHandler, id: string): Promise<WorkflowExecutionDto> =>
+  fetch<WorkflowExecutionDto>(`/api/workflows/executions/${encodeURIComponent(id)}`, {
+    headers: PUBLIC_API_HEADERS,
+  });
 
 const isPersisted = (conversation: { rounds: ConversationRound[] } | undefined): boolean =>
   Boolean(
@@ -163,11 +178,14 @@ export const runInvestigation = async (
   connector: Pick<EvalConnector, 'id'>
 ): Promise<InvestigationTaskOutput> => {
   const started = Date.now();
+  const runMetrics: RunMetrics = { requested_at: new Date(started).toISOString() };
   const output: InvestigationTaskOutput = {
     case_id: example.metadata.case_id,
     query: example.input.question,
+    run_metrics: runMetrics,
   };
   let investigation: Investigation | undefined;
+  let workflowRunning: boolean | undefined;
   try {
     const { investigation_id: investigationId } = await fetch<StartInvestigationResponse>(
       '/internal/nightshift/investigations',
@@ -196,6 +214,29 @@ export const runInvestigation = async (
       await setTimeout(POLL_INTERVAL_MS);
       investigation = (await readInvestigation(fetch, investigationId)) ?? investigation;
     }
+    // A pending proposal ends `in_progress` while the agent is still working, so the report is
+    // only final once the investigation's workflow execution has finished.
+    const conversation = await readConversation(fetch, investigationId);
+    const executionId = conversation?.metadata?.workflow_execution_ids?.at(-1);
+    if (executionId) {
+      workflowRunning = true;
+      let execution = await readExecution(fetch, executionId);
+      while (!isTerminalStatus(execution.status)) {
+        if (Date.now() - started > INVESTIGATION_TIMEOUT_MS) {
+          throw new Error(
+            `Investigation workflow was still running after ${
+              INVESTIGATION_TIMEOUT_MS / 60_000
+            } minutes`
+          );
+        }
+        await setTimeout(POLL_INTERVAL_MS);
+        execution = await readExecution(fetch, executionId);
+      }
+      workflowRunning = false;
+      runMetrics.time_to_report_ms = Date.now() - started;
+      runMetrics.agent_steps = toAgentStepMetrics(execution);
+      investigation = (await readInvestigation(fetch, investigationId)) ?? investigation;
+    }
   } catch (error) {
     output.execution_error = error instanceof Error ? error.message : String(error);
   }
@@ -203,25 +244,24 @@ export const runInvestigation = async (
 
   // A timeout or failed poll must not discard the conversation accumulated before the failure.
   try {
-    output.workflow_status = investigation.in_progress ? 'running' : 'complete';
+    const running = workflowRunning ?? investigation.in_progress;
+    output.workflow_status = running ? 'running' : 'complete';
     output.structured_report = toInvestigationReport(investigation);
-    if (!investigation.in_progress && !investigation.metadata.verdict) {
+    if (!running && !investigation.metadata.verdict) {
       // There is no failed state: a run that ended without a conclusion recorded none.
       output.execution_error ??= NO_CONCLUSION_ERROR;
     }
-    const conversation = await readFinishedConversation(
-      fetch,
-      investigation.id,
-      !investigation.in_progress
-    );
-    if (!investigation.in_progress && !isPersisted(conversation)) {
+    const conversation = await readFinishedConversation(fetch, investigation.id, !running);
+    if (!running && !isPersisted(conversation)) {
       output.execution_error = UNPERSISTED_CONVERSATION_ERROR;
     }
     output.conversation_round_count = conversation.rounds.length;
-    output.traceId = conversation.rounds
+    const traceIds = conversation.rounds
       .flatMap(({ trace_id: traceId }) => (typeof traceId === 'string' ? [traceId] : traceId ?? []))
-      .filter(Boolean)
-      .at(-1);
+      .filter(Boolean);
+    output.traceId = traceIds.at(-1);
+    output.trace_ids = traceIds;
+    runMetrics.rounds = toRoundMetrics(conversation.rounds);
     const accessedTrees = extractAccessedDecisionTrees(conversation.rounds);
     if (accessedTrees.length > 0) {
       output.decision_trees_accessed = accessedTrees.map(({ tree_id: treeId, content }) => ({
