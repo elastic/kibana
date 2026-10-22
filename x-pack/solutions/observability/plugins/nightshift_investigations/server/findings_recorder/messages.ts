@@ -13,6 +13,11 @@ import {
 } from '@kbn/agent-builder-common';
 import { MessageRole, type Message, type ToolCall } from '@kbn/inference-common';
 import { REPLY_USER_TOOL_ID } from '../tools/reply_user/tool';
+import { SANDBOX_BASH_TOOL_ID } from '../tools/sandbox_bash/tool';
+import { SANDBOX_STR_REPLACE_TOOL_ID } from '../tools/sandbox_bash/str_replace_tool';
+import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
+import { SANDBOX_WRITE_FILE_TOOL_ID } from '../tools/sandbox_bash/write_file_tool';
+import { TIME_CONVERTER_TOOL_ID } from '../tools/time_converter/tool';
 import { ANSWER_MAX_CHARS, QUESTION_MAX_CHARS, TOOL_RESULT_MAX_CHARS } from './constants';
 import { LIVE_INSTRUCTION, FINAL_INSTRUCTION } from './prompt';
 
@@ -172,16 +177,36 @@ export const buildRecorderMessages = ({
   return messages;
 };
 
-/** Every tool name the conversation mentions, so the provider sees a definition for each. */
-export const replayedToolNames = (messages: readonly Message[]): string[] => {
-  const names = new Set<string>();
+/**
+ * Tools the investigator can call. The recorder is given a definition for every one of them on
+ * every pass, whether or not it has been called yet, so the tool list never changes between
+ * passes. Providers cache tools ahead of the system prompt and the messages, so a list that grew
+ * as the agent used new tools would throw the cached conversation away each time.
+ */
+const KNOWN_AGENT_TOOLS = [
+  'attachments_add',
+  'attachments_diff',
+  'attachments_list',
+  'attachments_read',
+  'attachments_update',
+  REPLY_USER_TOOL_ID,
+  SANDBOX_BASH_TOOL_ID,
+  SANDBOX_STR_REPLACE_TOOL_ID,
+  SANDBOX_VIEW_FILE_TOOL_ID,
+  SANDBOX_WRITE_FILE_TOOL_ID,
+  TIME_CONVERTER_TOOL_ID,
+];
+
+/** The tool names to define: the known ones, then any other the conversation calls, in a fixed order. */
+export const toolNamesToDefine = (messages: readonly Message[]): string[] => {
+  const names = new Set<string>(KNOWN_AGENT_TOOLS);
   for (const message of messages) {
     if (message.role === MessageRole.Assistant) {
       message.toolCalls?.forEach((call) => names.add(call.function.name));
     }
   }
   names.delete(STRUCTURED_OUTPUT_TOOL);
-  return [...names];
+  return [...names].sort();
 };
 
 /** The agent's final answer: the last `reply_user` response, else the round's response message. */

@@ -16,7 +16,7 @@ import {
   countTurns,
   extractAnswer,
   groupTurns,
-  replayedToolNames,
+  toolNamesToDefine,
   STRUCTURED_OUTPUT_TOOL,
   type RecorderTurn,
 } from './messages';
@@ -182,19 +182,29 @@ describe('buildRecorderMessages', () => {
   });
 });
 
-describe('replayedToolNames', () => {
-  it('lists the tools the conversation called, without the answer tool', () => {
-    const earlier: RecorderTurn = {
-      atGroups: 1,
-      final: false,
-      answer: { summary: 's', hypotheses: [] },
-    };
+describe('toolNamesToDefine', () => {
+  it('always lists the investigator tools, so the list is the same on every pass', () => {
+    const early = toolNamesToDefine(
+      buildRecorderMessages({ steps: steps.slice(0, 2), turns: [], final: false })
+    );
+    const late = toolNamesToDefine(buildRecorderMessages({ steps, turns: [], final: true }));
 
-    const names = replayedToolNames(
-      buildRecorderMessages({ steps, turns: [earlier], final: false })
+    expect(early).toEqual(late);
+    expect(early).toEqual(
+      expect.arrayContaining(['nightshift_sandbox_bash', 'reply_user', 'time_converter_tool'])
+    );
+    expect(early).not.toContain(STRUCTURED_OUTPUT_TOOL);
+    expect([...early].sort()).toEqual(early);
+  });
+
+  it('adds a tool it has not heard of, after sorting', () => {
+    const odd = toolStep('g7', 'c7', 'some_other_tool', {}, { text: 'x' });
+
+    const names = toolNamesToDefine(
+      buildRecorderMessages({ steps: [odd], turns: [], final: false })
     );
 
-    expect(names.sort()).toEqual(['nightshift_sandbox_bash', 'nightshift_sandbox_view_file']);
+    expect(names).toContain('some_other_tool');
   });
 });
 

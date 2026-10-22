@@ -108,6 +108,8 @@ describe('runFindingsPass', () => {
       content: LIVE_INSTRUCTION,
     });
     expect(call.toolChoice).toEqual({ function: 'structuredOutput' });
+    expect(call.cacheControl).toEqual({ type: 'ephemeral', ttl: '5m' });
+    expect(call.sessionId).toBe('c1');
     expect(Object.keys(call.tools)).toContain('structuredOutput');
   });
 

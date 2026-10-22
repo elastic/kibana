@@ -17,7 +17,7 @@ import type { PassGuard, RecorderMemory } from './coordinator';
 import {
   buildRecorderMessages,
   countTurns,
-  replayedToolNames,
+  toolNamesToDefine,
   STRUCTURED_OUTPUT_TOOL,
 } from './messages';
 import { FINDINGS_JSON_SCHEMA, findingsOutputSchema, type FindingsOutput } from './output_schema';
@@ -94,9 +94,10 @@ export const runFindingsPass = async (
 
     const messages = buildRecorderMessages({ question, steps, turns: memory.turns(), final });
     // The agent's tool calls are replayed as they happened, so each tool needs a definition for
-    // the provider to accept them. The recorder never calls them: only the answer tool is forced.
+    // the provider to accept them. The list is fixed so the cached prefix survives from one pass
+    // to the next. The recorder never calls them: only the answer tool is forced.
     const replayed = Object.fromEntries(
-      replayedToolNames(messages).map((name) => [
+      toolNamesToDefine(messages).map((name) => [
         name,
         {
           description: 'Called earlier in this conversation.',
@@ -120,6 +121,10 @@ export const runFindingsPass = async (
           messages,
           tools: tools as never,
           toolChoice: { function: STRUCTURED_OUTPUT_TOOL } as never,
+          // The conversation only grows at the end, so ask for the prefix to be cached, as the
+          // agent's own calls do: a retry or the next pass then reads most of it back.
+          cacheControl: { type: 'ephemeral', ttl: '5m' },
+          sessionId: conversationId,
           abortSignal: guard.signal,
         })) as unknown as {
           toolCalls?: Array<{ function: { name: string; arguments: unknown } }>;
