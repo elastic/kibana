@@ -217,3 +217,11 @@ xpack.actions.preconfigured:
       inferenceId: ".google-gemini-3.0-flash-chat_completion"
       providerConfig:
         model_id: "google-gemini-3.0-flash"
+
+# TEST ONLY, DO NOT MERGE: switches Nightshift's service account setup on for an e2e test of
+# elastic/obs-execution#570 on a PR-deployed Serverless project.
+xpack.security.serviceAccounts.enabled: true
+xpack.agenticInvestigations.enabled: true
+xpack.proposals.enabled: true
+feature_flags.overrides.nightshift.enabled: true
+uiSettings.overrides.workflows:ui:enabled: true
