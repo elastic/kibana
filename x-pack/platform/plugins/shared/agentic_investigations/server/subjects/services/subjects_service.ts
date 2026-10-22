@@ -223,7 +223,7 @@ export class SubjectsService {
 
   /**
    * The investigation holding the subject's claim in the space, open or closed, and unchecked for
-   * access: callers read the conversation to decide. A key no claim can hold has no holder.
+   * access: whoever continues it checks the conversation. A key no claim can hold has no holder.
    */
   async findClaimHolder(
     subject: InvestigationSubjectKey,

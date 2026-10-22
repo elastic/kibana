@@ -159,6 +159,7 @@ describe('AgentExecutionService', () => {
   const agentService = createAgentsServiceStartMock();
   const callbackDeliveryService = new CallbackDeliveryService({
     actions: actionsMock.createSetup(),
+    logger,
   });
   const resolveConversation = jest.spyOn(callbackDeliveryService, 'resolveConversation');
 

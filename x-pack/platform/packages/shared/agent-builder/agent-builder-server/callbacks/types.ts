@@ -16,18 +16,10 @@ export interface CallbackConversationResolverContext {
   request: KibanaRequest;
 }
 
-/** The conversation an external conversation continues. */
-export interface CallbackConversationResolution {
-  /** The agent the turn runs on. Defaults to the agent the request names. */
-  agentId?: string;
-  /** The conversation the turn continues. */
-  conversationId: string;
-}
-
 /** The conversation an external conversation continues, or `undefined` when none does. Throws when the lookup fails. */
 export type CallbackConversationResolver = (
   context: CallbackConversationResolverContext
-) => Promise<CallbackConversationResolution | undefined>;
+) => Promise<{ conversationId: string } | undefined>;
 
 /** Delivers callback payloads to the callback URLs it handles. */
 export interface CallbackTransportDefinition {

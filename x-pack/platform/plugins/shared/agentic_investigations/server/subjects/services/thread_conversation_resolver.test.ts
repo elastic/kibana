@@ -6,32 +6,17 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import { ConversationOriginType } from '@kbn/agent-builder-common';
-import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { SubjectsService } from './subjects_service';
 import { createThreadConversationResolver } from './thread_conversation_resolver';
 
 const THREAD_KEY = 'slack:T1:C1:1700000000.000100';
 const request = httpServerMock.createKibanaRequest();
 
-const setup = ({
-  holder,
-  readable = holder ? [holder] : [],
-}: {
-  holder?: string;
-  readable?: string[];
-} = {}) => {
+const setup = ({ holder }: { holder?: string } = {}) => {
   const findClaimHolder = jest.fn().mockResolvedValue(holder);
-  const bulkGet = jest
-    .fn()
-    .mockResolvedValue(
-      new Map(readable.map((id) => [id, { id, agent_id: 'investigation-agent' }]))
-    );
   const resolve = createThreadConversationResolver({
     getSubjectsService: () => ({ findClaimHolder } as unknown as SubjectsService),
-    getConversationClient: async () => ({ bulkGet } as unknown as ConversationPublicClient),
-    logger: loggerMock.create(),
   });
   const resolveThread = () =>
     resolve({
@@ -39,33 +24,22 @@ const setup = ({
       spaceId: 'default',
       request,
     });
-  return { resolveThread, findClaimHolder, bulkGet };
+  return { resolveThread, findClaimHolder };
 };
 
 describe('createThreadConversationResolver', () => {
-  it('continues the investigation that claimed the thread on its own agent', async () => {
-    const { resolveThread, findClaimHolder, bulkGet } = setup({ holder: 'investigation-1' });
+  it('continues the investigation that claimed the thread', async () => {
+    const { resolveThread, findClaimHolder } = setup({ holder: 'investigation-1' });
 
-    await expect(resolveThread()).resolves.toEqual({
-      conversationId: 'investigation-1',
-      agentId: 'investigation-agent',
-    });
+    await expect(resolveThread()).resolves.toEqual({ conversationId: 'investigation-1' });
     expect(findClaimHolder).toHaveBeenCalledWith(
       { type: 'slack_thread', id: THREAD_KEY },
       'default'
     );
-    expect(bulkGet).toHaveBeenCalledWith(['investigation-1']);
   });
 
   it('leaves a thread no investigation claimed to the next resolver', async () => {
-    const { resolveThread, bulkGet } = setup();
-
-    await expect(resolveThread()).resolves.toBeUndefined();
-    expect(bulkGet).not.toHaveBeenCalled();
-  });
-
-  it('does not continue a claiming investigation the caller cannot read', async () => {
-    const { resolveThread } = setup({ holder: 'investigation-1', readable: [] });
+    const { resolveThread } = setup();
 
     await expect(resolveThread()).resolves.toBeUndefined();
   });
