@@ -36,6 +36,7 @@ export const createUserMenuLinks = async ({
       }),
       iconType: 'user',
       href: profileUrl,
+      target: '_blank',
       order: 100,
       setAsProfile: true,
     });
@@ -45,10 +46,11 @@ export const createUserMenuLinks = async ({
   if (billingUrl) {
     userMenuLinks.push({
       label: i18n.translate('xpack.cloudLinks.userMenuLinks.billingLinkText', {
-        defaultMessage: 'Billing',
+        defaultMessage: 'Billing and subscription',
       }),
       iconType: 'chartGauge',
       href: billingUrl,
+      target: '_blank',
       order: 200,
     });
   }
@@ -58,8 +60,9 @@ export const createUserMenuLinks = async ({
       label: i18n.translate('xpack.cloudLinks.userMenuLinks.organizationLinkText', {
         defaultMessage: 'Organization',
       }),
-      iconType: 'gear',
+      iconType: 'users',
       href: organizationUrl,
+      target: '_blank',
       order: 300,
     });
   }

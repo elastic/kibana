@@ -15,6 +15,7 @@ export interface UserMenuLink {
   href: string;
   order?: number;
   setAsProfile?: boolean;
+  target?: string;
   onClick?: (event: MouseEvent<Element>) => void;
   /** Render a custom ReactNode instead of the default <EuiContextMenuItem /> */
   content?: ReactNode | ((args: { closePopover: () => void }) => ReactNode);

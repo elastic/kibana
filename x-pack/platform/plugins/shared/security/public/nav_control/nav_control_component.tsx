@@ -51,6 +51,7 @@ const ContextMenuContent = ({ items, closePopover }: ContextMenuProps) => {
             key={i}
             icon={item.icon}
             href={item.href}
+            target={item.target}
             onClick={item.onClick}
             data-test-subj={item['data-test-subj']}
           >
@@ -127,10 +128,11 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   if (userMenuLinks.length) {
     const userMenuLinkMenuItems = userMenuLinks
       .sort(({ order: orderA = Infinity }, { order: orderB = Infinity }) => orderA - orderB)
-      .map(({ label, iconType, href, onClick, content }: UserMenuLink) => ({
+      .map(({ label, iconType, href, target, onClick, content }: UserMenuLink) => ({
         name: label,
         icon: <EuiIcon type={iconType} size="m" aria-hidden={true} />,
         href,
+        target,
         onClick,
         'data-test-subj': `userMenuLink__${label}`,
         content,

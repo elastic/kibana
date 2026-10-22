@@ -30,7 +30,7 @@ export class CloudLinksPageObject {
   }
 
   async isBillingLinkVisible(): Promise<boolean> {
-    return this.page.testSubj.locator('userMenuLink__Billing').isVisible();
+    return this.page.testSubj.locator('userMenuLink__Billing and subscription').isVisible();
   }
 
   async isOrganizationLinkVisible(): Promise<boolean> {
