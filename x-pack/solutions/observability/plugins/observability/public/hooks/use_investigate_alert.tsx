@@ -216,7 +216,7 @@ export const useInvestigateAlert = ({
                   <p>
                     <FormattedMessage
                       id="xpack.observability.alerts.investigationStartedDescription"
-                      defaultMessage="You will find it on Elastic Nightshift home page"
+                      defaultMessage="You will find it in Nightshift"
                     />
                   </p>
                 </EuiText>

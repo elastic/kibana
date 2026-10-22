@@ -314,7 +314,7 @@ describe('useInvestigateAlert', () => {
       title: 'Investigation started',
       text: expect.any(Function),
     });
-    expect(screen.getByText('You will find it on Elastic Nightshift home page')).toBeVisible();
+    expect(screen.getByText('You will find it in Nightshift')).toBeVisible();
     const viewLink = screen.getByRole('link', { name: 'View investigation' });
     expect(viewLink).toHaveAttribute('href', '/app/nightshift?investigationId=investigation-1');
     // The list does not show the started investigation yet: it counts as in progress anyway.
