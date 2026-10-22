@@ -46,14 +46,11 @@ export const enableInvestigatorServiceAccountRoute = createNightshiftInvestigati
     z.object({
       body: z.object({
         // Found or created by the caller (`ensureNightshiftServiceAccounts`); only the service
-        // accounts backend assigns them, so they cannot be derived from the account names. May be
-        // left out once another space is set up, which is when the accounts already exist.
-        serviceAccountIds: z
-          .object({
-            agent: z.string().min(1).max(SERVICE_ACCOUNT_ID_MAX_LENGTH),
-            automations: z.string().min(1).max(SERVICE_ACCOUNT_ID_MAX_LENGTH),
-          })
-          .optional(),
+        // accounts backend assigns them, so they cannot be derived from the account names.
+        serviceAccountIds: z.object({
+          agent: z.string().min(1).max(SERVICE_ACCOUNT_ID_MAX_LENGTH),
+          automations: z.string().min(1).max(SERVICE_ACCOUNT_ID_MAX_LENGTH),
+        }),
       }),
     })
   ),
