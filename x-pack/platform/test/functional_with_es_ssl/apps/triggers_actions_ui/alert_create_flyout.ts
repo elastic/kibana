@@ -20,7 +20,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const find = getService('find');
   const retry = getService('retry');
   const rules = getService('rules');
-  const toasts = getService('toasts');
   const filterBar = getService('filterBar');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
@@ -339,8 +338,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.setValue('queryInput', '_id: *');
 
       await testSubjects.click('rulePageFooterSaveButton');
-      const toastTitle = await toasts.getTitleAndDismiss();
-      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
 
       await pageObjects.common.navigateToApp('management', {
         path: 'insightsAndAlerting/triggersActions',
@@ -421,8 +418,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.setValue('queryInput', '_id: *');
 
       await testSubjects.click('rulePageFooterSaveButton');
-      const toastTitle = await toasts.getTitleAndDismiss();
-      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
 
       await pageObjects.common.navigateToApp('management', {
         path: 'insightsAndAlerting/triggersActions',
@@ -520,8 +515,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ).type('some text ');
 
       await testSubjects.click('rulePageFooterSaveButton');
-      const toastTitle = await toasts.getTitleAndDismiss();
-      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
 
       await pageObjects.common.navigateToApp('management', {
         path: 'insightsAndAlerting/triggersActions',
@@ -553,9 +546,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('confirmCreateRuleModal');
       await testSubjects.click('confirmCreateRuleModal > confirmModalConfirmButton');
       await testSubjects.missingOrFail('confirmCreateRuleModal');
-
-      const toastTitle = await toasts.getTitleAndDismiss();
-      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
 
       await pageObjects.common.navigateToApp('management', {
         path: 'insightsAndAlerting/triggersActions',

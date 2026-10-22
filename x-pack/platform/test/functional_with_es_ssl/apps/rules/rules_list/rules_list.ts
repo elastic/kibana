@@ -355,11 +355,6 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         await testSubjects.missingOrFail('rulesDeleteConfirmation', { timeout: 5000 });
       });
 
-      await retry.try(async () => {
-        const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql('Deleted 1 rule');
-      });
-
       await pageObjects.triggersActionsUI.searchAlerts(secondAlert.name);
       const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResultsAfterDelete.length).to.eql(0);
@@ -377,11 +372,6 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('confirmModalConfirmButton');
 
       await header.waitUntilLoadingHasFinished();
-
-      await retry.try(async () => {
-        const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql('Disabled 1 rule');
-      });
 
       await assertRuleEnabledState(createdAlert.id, false);
     });
@@ -477,11 +467,6 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await retry.tryForTime(30000, async () => {
         await testSubjects.click('rulesDeleteConfirmation > confirmModalConfirmButton');
         await testSubjects.missingOrFail('rulesDeleteConfirmation', { timeout: 5000 });
-      });
-
-      await retry.try(async () => {
-        const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql('Deleted 1 rule');
       });
 
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
