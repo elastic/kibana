@@ -6,6 +6,9 @@
  */
 
 import type { Workspace } from '../types';
+import { createWorkspace } from '../services/workspace/graph_client_workspace';
+import { getIcon } from '../helpers/style_choices';
+import { createGraphStore, type GraphStore } from './store';
 import { fetchTopNodes } from '../services/fetch_top_nodes';
 import { setDatasource } from './datasource';
 import { loadFields } from './fields';
@@ -18,6 +21,7 @@ import {
   createWorkspaceState,
   deleteSelectedNodes,
   groupSelectedNodes,
+  mergeNodes,
   initializeWorkspace,
   invertNodeSelection,
   redoWorkspace,
@@ -34,6 +38,10 @@ import {
   ungroupNode,
   workspaceChanged,
   workspaceInitializedSelector,
+  workspaceGraphMergeStarted,
+  workspaceGraphMerged,
+  workspaceLoaded,
+  workspaceRuntimeChanged,
 } from './workspace';
 
 jest.mock('../services/fetch_top_nodes', () => ({
@@ -288,272 +296,186 @@ describe('workspace state', () => {
     expect(environment.store.getState().workspace.nodesById.selected.color).toBe('blue');
   });
 
-  it('removes selected groups and their dangling edges', () => {
-    const environment = createMockGraphStore({});
-    const state = {
-      ...environment.store.getState().workspace,
-      nodesById: {
-        'field..first': { id: 'field..first' },
-        'field..second': { id: 'field..second', parentId: 'field..third' },
-        'field..third': { id: 'field..third' },
-      },
-      nodeIds: ['field..first', 'field..second', 'field..third'],
-      edgesById: {
-        removed: { id: 'removed', sourceId: 'field..first', targetId: 'field..second' },
-      },
-      edgeIds: ['removed'],
-      selectedNodeIds: ['field..third'],
-    } as unknown as ReturnType<typeof environment.store.getState>['workspace'];
-    environment.store.dispatch(workspaceChanged(state));
-
-    environment.store.dispatch(deleteSelectedNodes());
-
-    expect(environment.store.getState().workspace.nodeIds).toEqual(['field..first']);
-    expect(environment.store.getState().workspace.edgeIds).toEqual([]);
-    expect(environment.store.getState().workspace.nodesById['field..second']).toBeUndefined();
-    expect(environment.store.getState().workspace.edgesById).toEqual({});
-  });
-
-  it('moves selected nodes into the blocklist', () => {
-    const environment = createMockGraphStore({});
-    const state = {
-      ...environment.store.getState().workspace,
-      nodesById: {
-        'field..first': { id: 'field..first' },
-        'field..second': { id: 'field..second' },
-        'field..third': { id: 'field..third' },
-      },
-      nodeIds: ['field..first', 'field..second', 'field..third'],
-      edgesById: {
-        removed: { id: 'removed', sourceId: 'field..first', targetId: 'field..second' },
-      },
-      edgeIds: ['removed'],
-      selectedNodeIds: ['field..first'],
-    } as unknown as ReturnType<typeof environment.store.getState>['workspace'];
-    environment.store.dispatch(workspaceChanged(state));
-
-    environment.store.dispatch(blocklistSelectedNodes());
-
-    expect(environment.store.getState().workspace.nodeIds).toEqual([
-      'field..second',
-      'field..third',
-    ]);
-    expect(environment.store.getState().workspace.blocklistedNodeIds).toEqual(['field..first']);
-    expect(environment.store.getState().workspace.edgeIds).toEqual([]);
-    expect(environment.store.getState().workspace.selectedNodeIds).toEqual([]);
-  });
-
-  it('keeps normalized blocklisted IDs consistent when the runtime contains an existing ID', () => {
-    const environment = createMockGraphStore({});
-    const workspace = createWorkspaceMock();
-    const existing = {
-      id: 'field..first',
-      data: { field: 'field', term: 'first' },
-      label: 'Existing',
+  describe('topology and history snapshots', () => {
+    const workspaces: Workspace[] = [];
+    const setup = () => {
+      const workspace = createWorkspace({
+        graphMergeStarted: () => store.dispatch(workspaceGraphMergeStarted()),
+        topologyChangeHandler: () =>
+          store.dispatch(workspaceGraphMerged(createWorkspaceState(workspace))),
+      });
+      workspaces.push(workspace);
+      const { mockedDeps } = createMockGraphStore({});
+      mockedDeps.getWorkspace.mockReturnValue(workspace);
+      mockedDeps.notifyReact.mockImplementation(() =>
+        store.dispatch(workspaceRuntimeChanged(createWorkspaceState(workspace)))
+      );
+      const store: GraphStore = createGraphStore(mockedDeps);
+      workspace.mergeGraph({
+        nodes: ['first', 'second', 'third'].map((term) => ({
+          id: '',
+          field: 'field',
+          term,
+          label: term,
+          color: 'blue',
+          icon: getIcon('folder'),
+          data: { field: 'field', term },
+        })),
+        edges: [{ source: 0, target: 1, weight: 5, width: 3, doc_count: 7 }],
+      });
+      workspace.stopLayout();
+      store.dispatch(workspaceLoaded(createWorkspaceState(workspace)));
+      return { store, workspace };
     };
-    const selected = { ...existing, label: 'Selected' };
-    Object.assign(workspace, {
-      nodes: [selected],
-      edges: [],
-      blocklistedNodes: [existing],
-      selectedNodes: [selected],
+    afterEach(() => {
+      workspaces.forEach((workspace) => workspace.stopLayout());
+      workspaces.length = 0;
     });
-    environment.store.dispatch(workspaceChanged(createWorkspaceState(workspace)));
 
-    environment.store.dispatch(blocklistSelectedNodes());
+    it('removes selected groups and their dangling edges', () => {
+      const { store, workspace } = setup();
+      store.dispatch(mergeNodes({ parentId: 'field..third', childId: 'field..second' }));
+      store.dispatch(toggleNodeSelection({ nodeId: 'field..third', replace: true }));
 
-    const { blocklistedNodeIds, blocklistedNodesById, nodeIds } =
-      environment.store.getState().workspace;
-    expect(nodeIds).not.toContain(selected.id);
-    expect(blocklistedNodeIds).toEqual([selected.id]);
-    expect(blocklistedNodeIds).toEqual(Object.keys(blocklistedNodesById));
-    expect(blocklistedNodesById[selected.id].label).toBe('Selected');
-  });
+      store.dispatch(deleteSelectedNodes());
 
-  it('removes all nodes when deleting with no selection', () => {
-    const environment = createMockGraphStore({});
-    const node = { x: 1, y: 1, scaledSize: 10, data: { field: 'field', term: 'term' } };
-    environment.store.dispatch(
-      workspaceChanged({
-        ...environment.store.getState().workspace,
-        nodesById: {
-          'field..first': { ...node, id: 'field..first', label: 'first', color: 'blue' },
-          'field..second': { ...node, id: 'field..second', label: 'second', color: 'blue' },
-          'field..third': { ...node, id: 'field..third', label: 'third', color: 'blue' },
-        },
-        nodeIds: ['field..first', 'field..second', 'field..third'],
-        edgesById: {
-          connected: {
-            id: 'connected',
-            sourceId: 'field..first',
-            targetId: 'field..second',
-            topSourceId: 'field..first',
-            topTargetId: 'field..second',
-            label: '',
-            weight: 5,
-            width: 3,
-          },
-        },
-        edgeIds: ['connected'],
-        selectedNodeIds: [],
-      })
-    );
-
-    environment.store.dispatch(deleteSelectedNodes());
-
-    expect(environment.store.getState().workspace.nodeIds).toEqual([]);
-    expect(environment.store.getState().workspace.nodesById).toEqual({});
-    expect(environment.store.getState().workspace.edgeIds).toEqual([]);
-    expect(environment.store.getState().workspace.edgesById).toEqual({});
-  });
-
-  it('does not blocklist nodes when there is no selection', () => {
-    const environment = createMockGraphStore({});
-    const node = { x: 1, y: 1, scaledSize: 10, data: { field: 'field', term: 'term' } };
-    environment.store.dispatch(
-      workspaceChanged({
-        ...environment.store.getState().workspace,
-        nodesById: {
-          'field..first': { ...node, id: 'field..first', label: 'first', color: 'blue' },
-          'field..second': { ...node, id: 'field..second', label: 'second', color: 'blue' },
-          'field..third': { ...node, id: 'field..third', label: 'third', color: 'blue' },
-        },
-        nodeIds: ['field..first', 'field..second', 'field..third'],
-        selectedNodeIds: [],
-      })
-    );
-
-    environment.store.dispatch(blocklistSelectedNodes());
-
-    expect(environment.store.getState().workspace.nodeIds).toEqual([
-      'field..first',
-      'field..second',
-      'field..third',
-    ]);
-    expect(environment.store.getState().workspace.blocklistedNodeIds).toEqual([]);
-  });
-
-  it('groups selected top-level nodes without reparenting already grouped nodes', () => {
-    const environment = createMockGraphStore({});
-    const state = {
-      ...environment.store.getState().workspace,
-      nodesById: {
-        'field..first': { id: 'field..first' },
-        'field..second': { id: 'field..second', parentId: 'field..first' },
-        'field..third': { id: 'field..third' },
-      },
-      nodeIds: ['field..first', 'field..second', 'field..third'],
-      selectedNodeIds: ['field..second', 'field..first'],
-    } as unknown as ReturnType<typeof environment.store.getState>['workspace'];
-    environment.store.dispatch(workspaceChanged(state));
-
-    environment.store.dispatch(groupSelectedNodes('field..third'));
-
-    expect(environment.store.getState().workspace.nodesById['field..first'].parentId).toBe(
-      'field..third'
-    );
-    expect(environment.store.getState().workspace.nodesById['field..second'].parentId).toBe(
-      'field..first'
-    );
-    expect(environment.store.getState().workspace.selectedNodeIds).toEqual(['field..third']);
-
-    environment.store.dispatch(ungroupNode('field..third'));
-    expect(
-      environment.store.getState().workspace.nodesById['field..first'].parentId
-    ).toBeUndefined();
-    expect(environment.store.getState().workspace.nodesById['field..second'].parentId).toBe(
-      'field..first'
-    );
-  });
-
-  it('removes individual and all blocklisted nodes', () => {
-    const environment = createMockGraphStore({});
-    const state = {
-      ...environment.store.getState().workspace,
-      blocklistedNodesById: {
-        'field..first': { id: 'field..first' },
-        'field..second': { id: 'field..second' },
-      },
-      blocklistedNodeIds: ['field..first', 'field..second'],
-    } as unknown as ReturnType<typeof environment.store.getState>['workspace'];
-    environment.store.dispatch(workspaceChanged(state));
-
-    environment.store.dispatch(unblockNode('field..first'));
-    expect(environment.store.getState().workspace.blocklistedNodeIds).toEqual(['field..second']);
-    expect(
-      environment.store.getState().workspace.blocklistedNodesById['field..first']
-    ).toBeUndefined();
-
-    environment.store.dispatch(unblockAllNodes());
-    expect(environment.store.getState().workspace.blocklistedNodeIds).toEqual([]);
-    expect(environment.store.getState().workspace.blocklistedNodesById).toEqual({});
-  });
-
-  it('undoes and redoes topology changes while publishing serializable snapshots', () => {
-    const environment = createMockGraphStore({});
-    const state = {
-      ...environment.store.getState().workspace,
-      nodesById: {
-        'field..first': { id: 'field..first' },
-        'field..second': { id: 'field..second' },
-        'field..third': { id: 'field..third' },
-      },
-      nodeIds: ['field..first', 'field..second', 'field..third'],
-      selectedNodeIds: ['field..first'],
-    } as unknown as ReturnType<typeof environment.store.getState>['workspace'];
-    environment.store.dispatch(workspaceChanged(state));
-    environment.store.dispatch(deleteSelectedNodes());
-
-    expect(environment.store.getState().workspace.nodeIds).toEqual([
-      'field..second',
-      'field..third',
-    ]);
-    expect(environment.store.getState().workspace.undoHistory).toHaveLength(1);
-
-    environment.store.dispatch(undoWorkspace());
-    expect(environment.store.getState().workspace.nodeIds).toContain('field..first');
-    expect(environment.store.getState().workspace.redoHistory).toHaveLength(1);
-
-    environment.store.dispatch(redoWorkspace());
-    expect(environment.store.getState().workspace.nodeIds).not.toContain('field..first');
-    expect(environment.store.getState().workspace.undoHistory).toHaveLength(1);
-    const snapshot = environment.store.getState().workspace;
-    expect(JSON.parse(JSON.stringify(snapshot))).toEqual(snapshot);
-  });
-
-  it('preserves history across runtime snapshots and initialization across undo and redo', () => {
-    const environment = createMockGraphStore({});
-    const workspace = createWorkspaceMock();
-    Object.assign(workspace, {
-      nodes: [{ id: 'selected', data: { field: 'field', term: 'selected' } }],
-      edges: [],
+      expect(store.getState().workspace.nodeIds).toEqual(['field..first']);
+      expect(store.getState().workspace.edgeIds).toEqual([]);
+      expect(workspace.nodesMap['field..second']).toBeUndefined();
+      expect(workspace.edges).toEqual([]);
+      expect(store.getState().workspace.edgesById).toEqual({});
     });
-    const initialState = createWorkspaceState(workspace);
-    environment.store.dispatch(workspaceChanged(initialState));
-    environment.store.dispatch(deleteSelectedNodes());
-    const { undoHistory } = environment.store.getState().workspace;
 
-    expect(undoHistory).toHaveLength(1);
-    expect(undoHistory[0]).not.toHaveProperty('isInitialized');
-    expect(undoHistory[0]).not.toHaveProperty('undoHistory');
-    expect(undoHistory[0]).not.toHaveProperty('redoHistory');
+    it('moves selected nodes into the blocklist', () => {
+      const { store } = setup();
+      store.dispatch(toggleNodeSelection({ nodeId: 'field..first', replace: true }));
 
-    environment.store.dispatch(initializeWorkspace());
-    environment.store.dispatch(workspaceChanged(initialState));
-    expect(environment.store.getState().workspace.undoHistory).toEqual(undoHistory);
-    expect(workspaceInitializedSelector(environment.store.getState())).toBe(true);
+      store.dispatch(blocklistSelectedNodes());
 
-    environment.store.dispatch(undoWorkspace());
-    expect(workspaceInitializedSelector(environment.store.getState())).toBe(true);
-    const { redoHistory } = environment.store.getState().workspace;
-    expect(redoHistory).toHaveLength(1);
+      expect(store.getState().workspace.nodeIds).toEqual(['field..second', 'field..third']);
+      expect(store.getState().workspace.blocklistedNodeIds).toEqual(['field..first']);
+      expect(store.getState().workspace.edgeIds).toEqual([]);
+      expect(store.getState().workspace.selectedNodeIds).toEqual([]);
+    });
 
-    environment.store.dispatch(workspaceChanged(initialState));
-    expect(environment.store.getState().workspace.redoHistory).toEqual(redoHistory);
+    it('keeps normalized blocklisted IDs consistent when the runtime contains an existing ID', () => {
+      const { store, workspace } = setup();
+      const selected = workspace.nodesMap['field..first'];
+      workspace.blocklistedNodes.push({ ...selected, label: 'Existing' });
+      store.dispatch(workspaceRuntimeChanged(createWorkspaceState(workspace)));
+      store.dispatch(setNodeLabel({ nodeId: selected.id, label: 'Selected' }));
+      store.dispatch(toggleNodeSelection({ nodeId: selected.id, replace: true }));
 
-    environment.store.dispatch(redoWorkspace());
-    expect(workspaceInitializedSelector(environment.store.getState())).toBe(true);
-    expect(environment.store.getState().workspace.undoHistory).toHaveLength(1);
+      store.dispatch(blocklistSelectedNodes());
+
+      const { blocklistedNodeIds, blocklistedNodesById, nodeIds } = store.getState().workspace;
+      expect(nodeIds).not.toContain(selected.id);
+      expect(blocklistedNodeIds).toEqual([selected.id]);
+      expect(blocklistedNodeIds).toEqual(Object.keys(blocklistedNodesById));
+      expect(blocklistedNodesById[selected.id].label).toBe('Selected');
+    });
+
+    it('removes all nodes when deleting with no selection', () => {
+      const { store } = setup();
+
+      store.dispatch(deleteSelectedNodes());
+
+      expect(store.getState().workspace.nodeIds).toEqual([]);
+      expect(store.getState().workspace.nodesById).toEqual({});
+      expect(store.getState().workspace.edgeIds).toEqual([]);
+      expect(store.getState().workspace.edgesById).toEqual({});
+    });
+
+    it('does not blocklist nodes when there is no selection', () => {
+      const { store } = setup();
+
+      store.dispatch(blocklistSelectedNodes());
+
+      expect(store.getState().workspace.nodeIds).toEqual([
+        'field..first',
+        'field..second',
+        'field..third',
+      ]);
+      expect(store.getState().workspace.blocklistedNodeIds).toEqual([]);
+    });
+
+    it('groups selected top-level nodes without reparenting already grouped nodes', () => {
+      const { store } = setup();
+      store.dispatch(mergeNodes({ parentId: 'field..first', childId: 'field..second' }));
+      store.dispatch(toggleNodeSelection({ nodeId: 'field..second', replace: false }));
+      store.dispatch(toggleNodeSelection({ nodeId: 'field..first', replace: false }));
+
+      store.dispatch(groupSelectedNodes('field..third'));
+
+      expect(store.getState().workspace.nodesById['field..first'].parentId).toBe('field..third');
+      expect(store.getState().workspace.nodesById['field..second'].parentId).toBe('field..first');
+      expect(store.getState().workspace.selectedNodeIds).toEqual(['field..third']);
+      store.dispatch(ungroupNode('field..third'));
+      expect(store.getState().workspace.nodesById['field..first'].parentId).toBeUndefined();
+      expect(store.getState().workspace.nodesById['field..second'].parentId).toBe('field..first');
+    });
+
+    it('removes individual and all blocklisted nodes', () => {
+      const { store, workspace } = setup();
+      store.dispatch(toggleNodeSelection({ nodeId: 'field..first', replace: true }));
+      store.dispatch(toggleNodeSelection({ nodeId: 'field..second', replace: false }));
+      const first = workspace.nodesMap['field..first'];
+      store.dispatch(blocklistSelectedNodes());
+
+      store.dispatch(unblockNode(first.id));
+
+      expect(store.getState().workspace.blocklistedNodeIds).toEqual(['field..second']);
+      expect(store.getState().workspace.blocklistedNodesById['field..first']).toBeUndefined();
+      store.dispatch(unblockAllNodes());
+      expect(store.getState().workspace.blocklistedNodeIds).toEqual([]);
+      expect(store.getState().workspace.blocklistedNodesById).toEqual({});
+    });
+
+    it('undoes and redoes topology changes while publishing serializable snapshots', () => {
+      const { store, workspace } = setup();
+      store.dispatch(toggleNodeSelection({ nodeId: 'field..first', replace: true }));
+      const historyLength = store.getState().workspace.undoHistory.length;
+      store.dispatch(deleteSelectedNodes());
+      expect(store.getState().workspace.undoHistory).toHaveLength(historyLength + 1);
+      expect(store.getState().workspace.nodeIds).toEqual(['field..second', 'field..third']);
+
+      store.dispatch(undoWorkspace());
+      expect(store.getState().workspace.nodeIds).toContain('field..first');
+      expect(store.getState().workspace.redoHistory).toHaveLength(1);
+      store.dispatch(redoWorkspace());
+      expect(store.getState().workspace.nodeIds).not.toContain('field..first');
+      expect(store.getState().workspace.undoHistory).toHaveLength(historyLength + 1);
+      const snapshot = createWorkspaceState(workspace);
+      expect(JSON.parse(JSON.stringify(snapshot))).toEqual(snapshot);
+    });
+
+    it('preserves history across runtime snapshots and initialization across undo and redo', () => {
+      const { store, workspace } = setup();
+      store.dispatch(toggleNodeSelection({ nodeId: 'field..first', replace: true }));
+      store.dispatch(deleteSelectedNodes());
+      const { undoHistory } = store.getState().workspace;
+
+      expect(undoHistory).toHaveLength(1);
+      expect(undoHistory[0]).not.toHaveProperty('isInitialized');
+      expect(undoHistory[0]).not.toHaveProperty('undoHistory');
+      expect(undoHistory[0]).not.toHaveProperty('redoHistory');
+
+      store.dispatch(initializeWorkspace());
+      store.dispatch(workspaceRuntimeChanged(createWorkspaceState(workspace)));
+      expect(store.getState().workspace.undoHistory).toEqual(undoHistory);
+      expect(workspaceInitializedSelector(store.getState())).toBe(true);
+
+      store.dispatch(undoWorkspace());
+      expect(workspaceInitializedSelector(store.getState())).toBe(true);
+      const { redoHistory } = store.getState().workspace;
+      expect(redoHistory).toHaveLength(1);
+
+      store.dispatch(workspaceRuntimeChanged(createWorkspaceState(workspace)));
+      expect(store.getState().workspace.redoHistory).toEqual(redoHistory);
+      store.dispatch(redoWorkspace());
+      expect(workspaceInitializedSelector(store.getState())).toBe(true);
+      expect(store.getState().workspace.undoHistory).toHaveLength(1);
+    });
   });
 
   it('keeps edge selection single-valued', () => {
