@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/search-types'
   - '@kbn/utility-types'
   - '@kbn/licensing-types'
+  - '@kbn/change-history'
 tags:
   - shared-common
   - package
@@ -39,6 +40,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -12,7 +12,23 @@ import { createStepHandlerContext } from './test_utils';
 const createContext = (input: unknown) =>
   createStepHandlerContext({ input, stepType: 'cases.getAllAttachments' });
 
-const userCommentFixture = {
+// What the (unified-only) client actually returns from `attachments.getAll`.
+const unifiedCommentFixture = {
+  id: 'comment-1',
+  type: 'comment' as const,
+  data: { content: 'Investigating now' },
+  owner: 'securitySolution',
+  created_at: '2020-02-19T23:06:33.798Z',
+  created_by: { full_name: 'Leslie Knope', username: 'lknope', email: 'leslie.knope@elastic.co' },
+  pushed_at: null,
+  pushed_by: null,
+  updated_at: null,
+  updated_by: null,
+  version: 'WzQ3LDFc',
+};
+
+// What the step should output: the output schema mirrors the public (legacy) wire shape.
+const legacyCommentFixture = {
   id: 'comment-1',
   type: 'user' as const,
   comment: 'Investigating now',
@@ -36,8 +52,8 @@ describe('getAllAttachmentsStepDefinition', () => {
     expect(definition.inputSchema.safeParse({ case_id: 'case-1' }).success).toBe(true);
   });
 
-  it('calls attachments.getAll with correct params and returns all attachments', async () => {
-    const getAll = jest.fn().mockResolvedValue([userCommentFixture]);
+  it('calls attachments.getAll with correct params and converts unified attachments back to the legacy wire shape', async () => {
+    const getAll = jest.fn().mockResolvedValue([unifiedCommentFixture]);
     const getCasesClient = jest.fn().mockResolvedValue({
       attachments: { getAll },
     } as unknown as CasesClient);
@@ -47,7 +63,7 @@ describe('getAllAttachmentsStepDefinition', () => {
 
     expect(getAll).toHaveBeenCalledWith({ caseID: 'case-1' });
     expect(result).toEqual({
-      output: { attachments: [userCommentFixture] },
+      output: { attachments: [legacyCommentFixture] },
     });
   });
 

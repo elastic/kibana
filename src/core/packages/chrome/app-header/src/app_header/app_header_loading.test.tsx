@@ -25,21 +25,25 @@ const renderLoading = (
 };
 
 describe('AppHeaderLoading', () => {
-  it('claims the inline app-header slot and releases it on unmount', () => {
+  it('claims the inline app-header slot without a title and releases it on unmount', () => {
     const chrome = chromeServiceMock.createStartContract();
+    const emissions: Array<{ title?: unknown } | undefined> = [];
+    const subscription = chrome.inlineAppHeader.get$().subscribe((value) => emissions.push(value));
+
     const { unmount } = renderLoading(<AppHeaderLoading />, chrome);
 
-    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(true);
+    expect(chrome.inlineAppHeader.register).toHaveBeenCalledWith(undefined);
 
     unmount();
 
-    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(false);
+    expect(emissions).toEqual([undefined, {}, undefined]);
+    subscription.unsubscribe();
   });
 
   it('does not claim the slot when only the view is rendered', () => {
     const chrome = chromeServiceMock.createStartContract();
     renderLoading(<AppHeaderLoadingView />, chrome);
 
-    expect(chrome.next.inlineAppHeader.set).not.toHaveBeenCalled();
+    expect(chrome.inlineAppHeader.register).not.toHaveBeenCalled();
   });
 });

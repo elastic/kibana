@@ -8,17 +8,13 @@
 import { z } from '@kbn/zod/v4';
 import { stringify as stringifyYaml } from 'yaml';
 import { ToolType } from '@kbn/agent-builder-common';
+import type { ApiTarget } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import {
-  EXPANDABLE_KEY,
-  getUnsupportedReason,
-  loadApi,
-  targetSchema,
-  toDescribedSchema,
-} from '../../api';
-import type { ApiRegistryDefinition, ApiTarget } from '../../api';
+import { EXPANDABLE_KEY, loadApi, targetSchema, toDescribedSchema } from '../../api';
+import type { ApiRegistryDefinition } from '../../api';
+import { createApiIdentifierSchema } from './api_identifier';
 import { apiFailureToErrorResult } from './errors';
 
 export interface ApiDescribeResultData {
@@ -30,32 +26,49 @@ export interface ApiDescribeResultData {
   destructive: boolean;
   params_schema_yaml: string;
   expandable_types: string[];
-  unsupported_reason?: string;
 }
 
-const describeSchema = z.object({
-  target: targetSchema,
-  api: z
-    .string()
-    .describe(
-      `The API identifier returned by the ${internalTools.discoverApis} tool, formed from the namespace ` +
-        'and name (e.g. "indices.create", "bulk", "cluster.health").'
-    ),
-});
+const createDescribeSchema = (discoveryEnabled: boolean) =>
+  z.object({
+    target: targetSchema,
+    api: createApiIdentifierSchema(discoveryEnabled),
+  });
 
-export const createDescribeApiTool = (): InternalBuiltinToolDefinition<typeof describeSchema> => {
+export const createDescribeApiTool = ({
+  discoveryEnabled,
+}: {
+  discoveryEnabled: boolean;
+}): InternalBuiltinToolDefinition<ReturnType<typeof createDescribeSchema>> => {
+  const usageGuidance = discoveryEnabled
+    ? ''
+    : `Do not call this tool unless a skill or the user explicitly names the operation to call. It
+cannot search for or list operations, and there is no other tool that can. Never invent an
+identifier, recall one from memory (even one you are confident exists), or adapt one from a URL,
+from documentation, or after an unknown-identifier error. Asking for a result does not name an
+operation. Only describe an operation you are about to call with \`${internalTools.executeApi}\`.
+This tool is not a general reference for how an API works. When nothing you were given names the
+operation, do not use this tool or \`${internalTools.executeApi}\` at all. Do the task with your
+other tools instead, or tell the user the operation is not available.
+
+`;
+  const identifierGuidance = discoveryEnabled
+    ? `Use the \`${internalTools.discoverApis}\` tool first to find the \`api\` identifier, then call`
+    : `Describe the operation here to confirm it exists and to see its params, then call`;
+
+  const summary = discoveryEnabled
+    ? 'Get the full parameter specification for an HTTP API operation.'
+    : 'Get the full parameter specification for an HTTP API operation that a skill or the user explicitly named.';
+
   return {
     id: internalTools.describeApi,
     type: ToolType.builtin,
-    description: `Get the full parameter specification for an HTTP API operation.
+    description: `${summary}
 
-Returns:
+${usageGuidance}Returns:
 - The HTTP \`method\` and \`path\` template (e.g. \`PUT /{index}/_create/{id}\`). Every name it
   interpolates is one of the parameters below, and must be supplied for the call to run.
 - \`destructive\`: whether the operation modifies or deletes existing data. Prefer a non-destructive
   alternative when one exists.
-- \`unsupported_reason\`: present only when the operation cannot be executed at all — look for
-  another operation that does the same job.
 - A YAML document describing every accepted parameter with its type and description. It is one flat
   set: pass them all in a single \`params\` map and the routing into the URL path, query string, and
   request body is handled for you.
@@ -69,9 +82,9 @@ Returns:
 - \`expandable_types\`: the name of every type the schema stubbed, so you can see up front what
   still has to be expanded before you can fill it in.
 
-Use the \`${internalTools.discoverApis}\` tool first to find the \`api\` identifier, then call
+${identifierGuidance}
 \`${internalTools.executeApi}\` with the same \`target\` and \`api\` plus the \`params\` from this schema.`,
-    schema: describeSchema,
+    schema: createDescribeSchema(discoveryEnabled),
     handler: async ({ target, api }, { logger }) => {
       const loadResult = await loadApi(target, api);
       if (loadResult.status !== 'loaded') {
@@ -82,6 +95,7 @@ Use the \`${internalTools.discoverApis}\` tool first to find the \`api\` identif
               target,
               api,
               logger,
+              discoveryEnabled,
             }),
           ],
         };
@@ -113,8 +127,6 @@ Use the \`${internalTools.discoverApis}\` tool first to find the \`api\` identif
         }
       }
 
-      const unsupportedReason = getUnsupportedReason(definition);
-
       const data: ApiDescribeResultData = {
         target,
         api,
@@ -124,7 +136,6 @@ Use the \`${internalTools.discoverApis}\` tool first to find the \`api\` identif
         destructive: definition.destructive,
         params_schema_yaml: paramsYaml,
         expandable_types: expandableTypes,
-        ...(unsupportedReason === undefined ? {} : { unsupported_reason: unsupportedReason }),
       };
 
       return {

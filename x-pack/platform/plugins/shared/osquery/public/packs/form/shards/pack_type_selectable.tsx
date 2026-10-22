@@ -53,8 +53,32 @@ const PackTypeSelectableComponent = ({
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
             <EuiCheckableCard
+              id={`${idPrefix}-global`}
+              name={idPrefix}
+              checkableType="radio"
+              css={FULL_HEIGHT_CSS}
+              label={
+                <strong>
+                  {i18n.translate('xpack.osquery.pack.form.globalLabel', {
+                    defaultMessage: 'Global',
+                  })}
+                </strong>
+              }
+              checked={packType === 'global'}
+              onChange={handleSelectGlobal}
+              disabled={isDisabled}
+              data-test-subj="osqueryPackTypeGlobal"
+            >
+              {i18n.translate('xpack.osquery.pack.form.globalDescription', {
+                defaultMessage: 'Use pack across all policies.',
+              })}
+            </EuiCheckableCard>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCheckableCard
               id={`${idPrefix}-policy`}
               name={idPrefix}
+              checkableType="radio"
               css={FULL_HEIGHT_CSS}
               label={
                 <strong>
@@ -70,29 +94,7 @@ const PackTypeSelectableComponent = ({
             >
               {i18n.translate('xpack.osquery.pack.form.policyDescription', {
                 defaultMessage:
-                  'Schedule pack for selected agent policies. If Osquery Manager is shared across policies, the pack may also run on the other policies that use that integration.',
-              })}
-            </EuiCheckableCard>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiCheckableCard
-              id={`${idPrefix}-global`}
-              name={idPrefix}
-              css={FULL_HEIGHT_CSS}
-              label={
-                <strong>
-                  {i18n.translate('xpack.osquery.pack.form.globalLabel', {
-                    defaultMessage: 'Global',
-                  })}
-                </strong>
-              }
-              checked={packType === 'global'}
-              onChange={handleSelectGlobal}
-              disabled={isDisabled}
-              data-test-subj="osqueryPackTypeGlobal"
-            >
-              {i18n.translate('xpack.osquery.pack.form.globalDescription', {
-                defaultMessage: 'Use pack across all policies',
+                  'Use pack for specific policies. If Osquery Manager is shared across policies, the pack may also run on the other policies that use that integration.',
               })}
             </EuiCheckableCard>
           </EuiFlexItem>

@@ -32,3 +32,18 @@ export async function tryForTime<T>(
 
 /** Sleep helper used to mirror the FTR fixed `setTimeout` waits. */
 export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * One polling budget shared by every `tryForTime` in a test.
+ *
+ * Per-poll timeouts that are each under the test timeout can still exceed it
+ * once added up, and when they do the test dies on the Playwright timeout with
+ * no assertion message to explain what never happened. Pass `remaining()` to
+ * each `tryForTime` so the last poll still fails with its own error.
+ */
+export const createDeadline = (totalMs: number) => {
+  const deadline = Date.now() + totalMs;
+  return {
+    remaining: () => Math.max(0, deadline - Date.now()),
+  };
+};

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { WORKFLOWS_MANAGEMENT_FEATURE_ID, WorkflowsManagementUiActions } from '@kbn/workflows';
 
 import { ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING } from '../../../../../common/constants';
@@ -41,30 +41,9 @@ export interface UseHasWorkflowsPrivileges {
  */
 export const useHasWorkflowsPrivileges = (): UseHasWorkflowsPrivileges => {
   const { application, featureFlags, uiSettings } = useKibana().services;
-  const [isWorkflowsEnabled, setIsWorkflowsEnabled] = useState<boolean>(false);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadFeatureFlag = async () => {
-      const ffEnabled = await featureFlags.getBooleanValue(
-        'securitySolution.attackDiscoveryWorkflowsEnabled',
-        true
-      );
-
-      if (!cancelled) {
-        setIsWorkflowsEnabled(
-          ffEnabled && uiSettings.get(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING, false)
-        );
-      }
-    };
-
-    loadFeatureFlag();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [featureFlags, uiSettings]);
+  const isWorkflowsEnabled =
+    featureFlags.useBooleanValue('securitySolution.attackDiscoveryWorkflowsEnabled', true) &&
+    uiSettings.get(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING, false);
 
   return useMemo<UseHasWorkflowsPrivileges>(() => {
     if (!isWorkflowsEnabled) {

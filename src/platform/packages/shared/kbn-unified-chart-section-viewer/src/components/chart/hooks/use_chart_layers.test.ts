@@ -194,6 +194,8 @@ describe('useChartLayers', () => {
       counterAggregation: 'max' as const,
       gaugeAggregation: 'avg' as const,
       histogramPercentile: 'p95' as const,
+      dimensions: [],
+      searchTerm: '',
     };
 
     renderHook(() =>
@@ -205,5 +207,24 @@ describe('useChartLayers', () => {
     );
 
     expect(createMetricAggregation).toHaveBeenCalledWith(expect.objectContaining({ gridSettings }));
+  });
+
+  it('forwards customFunction to createMetricAggregation', () => {
+    renderHook(() =>
+      useChartLayers({
+        metricItem: {
+          metricName: 'duration_ms',
+          fieldTypes: [ES_FIELD_TYPES.DOUBLE],
+          metricTypes: ['histogram'],
+          units: ['ms'],
+        },
+        dimensions: [],
+        customFunction: 'AVG',
+      })
+    );
+
+    expect(createMetricAggregation).toHaveBeenCalledWith(
+      expect.objectContaining({ customFunction: 'AVG', metricName: 'duration_ms' })
+    );
   });
 });

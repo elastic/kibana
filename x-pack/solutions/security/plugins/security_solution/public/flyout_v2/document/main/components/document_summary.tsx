@@ -51,8 +51,7 @@ const GENERATE = i18n.translate('xpack.securitySolution.alertSummary.generate', 
 const GENERATE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.alertSummary.generateDescription',
   {
-    defaultMessage:
-      'Create AI summary of the alert to better understand its key characteristics and see recommended actions.',
+    defaultMessage: 'Get a quick summary of this alert and suggested next steps.',
   }
 );
 const GENERATION_ERROR_TITLE = i18n.translate(
@@ -200,8 +199,8 @@ export const DocumentSummary = memo(
               <EuiFlexItem grow={false}>
                 <AiButton
                   onClick={fetchAISummary}
-                  size="m"
-                  iconType="aiAssistantLogo"
+                  size="s"
+                  iconType="productAgent"
                   data-test-subj={GENERATE_INSIGHTS_BUTTON_TEST_ID}
                   isDisabled={messageAndReplacements == null}
                 >

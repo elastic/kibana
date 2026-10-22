@@ -264,6 +264,137 @@
             }
           }
         },
+        "digital_experience": {
+          "properties": {
+            "appId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "The application being tracked"
+              }
+            },
+            "viewId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "Always `main`"
+              }
+            },
+            "clicks_total": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application since we started counting them"
+              }
+            },
+            "clicks_7_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 7 days"
+              }
+            },
+            "clicks_30_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 30 days"
+              }
+            },
+            "clicks_90_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 90 days"
+              }
+            },
+            "minutes_on_screen_total": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen since we started counting them."
+              }
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 7 days"
+              }
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 30 days"
+              }
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 90 days"
+              }
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application being tracked"
+                    }
+                  },
+                  "viewId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application view being tracked"
+                    }
+                  },
+                  "clicks_total": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the application sub view since we started counting them"
+                    }
+                  },
+                  "clicks_7_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 7 days"
+                    }
+                  },
+                  "clicks_30_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 30 days"
+                    }
+                  },
+                  "clicks_90_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 90 days"
+                    }
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application sub view is active and on-screen since we started counting them."
+                    }
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 7 days"
+                    }
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 30 days"
+                    }
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 90 days"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "discover": {
           "properties": {
             "appId": {
@@ -6421,6 +6552,137 @@
             }
           }
         },
+        "observabilityAlerting": {
+          "properties": {
+            "appId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "The application being tracked"
+              }
+            },
+            "viewId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "Always `main`"
+              }
+            },
+            "clicks_total": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application since we started counting them"
+              }
+            },
+            "clicks_7_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 7 days"
+              }
+            },
+            "clicks_30_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 30 days"
+              }
+            },
+            "clicks_90_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 90 days"
+              }
+            },
+            "minutes_on_screen_total": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen since we started counting them."
+              }
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 7 days"
+              }
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 30 days"
+              }
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 90 days"
+              }
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application being tracked"
+                    }
+                  },
+                  "viewId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application view being tracked"
+                    }
+                  },
+                  "clicks_total": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the application sub view since we started counting them"
+                    }
+                  },
+                  "clicks_7_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 7 days"
+                    }
+                  },
+                  "clicks_30_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 30 days"
+                    }
+                  },
+                  "clicks_90_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 90 days"
+                    }
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application sub view is active and on-screen since we started counting them."
+                    }
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 7 days"
+                    }
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 30 days"
+                    }
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 90 days"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "onboarding": {
           "properties": {
             "appId": {
@@ -11725,12 +11987,6 @@
             "description": "Non-default value of setting."
           }
         },
-        "securitySolution:enableAlertsAndAttacksAlignment": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "securitySolution:enableAttackDiscoveryWorkflows": {
           "type": "boolean",
           "_meta": {
@@ -12271,6 +12527,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "alerting:v2:experimentalFeatures": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Enables experimental features in Alerting v2 when true."
+          }
+        },
         "observability:logSources": {
           "type": "array",
           "items": {
@@ -12302,6 +12564,36 @@
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
+          }
+        },
+        "agentBuilder:apiDiscovery": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Whether the agent can browse the full Elasticsearch and Kibana API surface to discover operations."
+          }
+        },
+        "agentBuilder:includeFrozenByDefault": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Whether built-in Agent Builder tools include frozen tier data by default."
+          }
+        },
+        "agentBuilder:deductiveEnabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Whether the external Deductive AI agent execution path is enabled."
+          }
+        },
+        "agentBuilder:deductiveEndpoint": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Base URL of the external Deductive backend."
+          }
+        },
+        "agentBuilder:deductiveApiKey": {
+          "type": "keyword",
+          "_meta": {
+            "description": "API key for the external Deductive backend (redacted from telemetry)."
           }
         },
         "contextEngine:enabled": {
@@ -12376,6 +12668,12 @@
             "description": "Whether managed workflows are visible in workflow experiences."
           }
         },
+        "workflows:executionFlyout:aiDiagnose:enabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Whether the Diagnose with AI action is enabled on failed-step error panels."
+          }
+        },
         "banners:placement": {
           "type": "keyword",
           "_meta": {
@@ -12404,6 +12702,12 @@
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
+          }
+        },
+        "discover:enableSolutionProfilesInClassic": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Whether Discover loads Observability and Security contextual profiles in Classic navigation."
           }
         },
         "discover:showFieldStatistics": {
@@ -12458,6 +12762,12 @@
           "type": "long",
           "_meta": {
             "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmMaxNumberOfServices": {
+          "type": "long",
+          "_meta": {
+            "description": "Maximum number of services shown in the APM Services Inventory."
           }
         },
         "observability:apmEnableTransactionProfiling": {
@@ -12625,10 +12935,16 @@
             "description": "Enable Streams Canvas"
           }
         },
-        "observability:streamsSigEventsIndexPatterns": {
-          "type": "keyword",
+        "observability:nightshiftContinuousOnboardingEnabled": {
+          "type": "boolean",
           "_meta": {
-            "description": "Comma-separated index patterns used for Significant Events stream filtering and analysis."
+            "description": "Non-default value of whether continuous knowledge indicator onboarding is enabled."
+          }
+        },
+        "observability:nightshiftContinuousOnboardingIntervalHours": {
+          "type": "long",
+          "_meta": {
+            "description": "Non-default value of the minimum hours between continuous knowledge indicator onboarding runs per source."
           }
         },
         "observability:streamsSigEventsScheduledDiscoveryEnabled": {
@@ -12709,6 +13025,12 @@
             "description": "Enable diagnostic mode"
           }
         },
+        "observability:nightshiftDeveloperMode": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of whether Nightshift developer mode is enabled."
+          }
+        },
         "genAiSettings:defaultAIConnector": {
           "type": "keyword",
           "_meta": {
@@ -12778,6 +13100,12 @@
             "description": "Whether the AI agent creates a new conversation per alert analysis"
           }
         },
+        "securitySolution:alertAnalysisWorkflowUsePrompt": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Whether the alert analysis workflow classifies with a single prompt instead of an AI agent"
+          }
+        },
         "securitySolution:alertAnalysisWorkflowTagPrefix": {
           "type": "keyword",
           "_meta": {
@@ -12788,6 +13116,12 @@
           "type": "boolean",
           "_meta": {
             "description": "Enables integration-specific entity enrichment in the Security graph (actor sub-type, target identity, display names)."
+          }
+        },
+        "cloudSecurityPosture:graphShowUnknownTargetEnabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Enables displaying nodes whose target entity is unknown or unresolved in the Security graph."
           }
         },
         "elasticRamen:enabled": {
@@ -12806,6 +13140,18 @@
           "type": "boolean",
           "_meta": {
             "description": "Enable token usage tracking in Kibana"
+          }
+        },
+        "genAiSettings:inferenceStreaming": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Enables streaming of LLM interactions in Kibana. When disabled, forces Kibana to use non-streaming inference requests."
+          }
+        },
+        "alerting:v1:showV1ObservabilityAlertsTable": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Whether the V1 Observability alerts table is shown when Alerting v2 is enabled."
           }
         }
       }
@@ -13460,6 +13806,25 @@
           }
         },
         "csm": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The event that is tracked"
+                }
+              },
+              "value": {
+                "type": "long",
+                "_meta": {
+                  "description": "The value of the event"
+                }
+              }
+            }
+          }
+        },
+        "digital_experience": {
           "type": "array",
           "items": {
             "properties": {

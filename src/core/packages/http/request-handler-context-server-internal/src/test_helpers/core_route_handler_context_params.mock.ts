@@ -17,7 +17,7 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 
 export const createCoreRouteHandlerContextParamsMock = () => {
   return {
-    featureFlags: coreFeatureFlagsMock.createStart(),
+    featureFlags: coreFeatureFlagsMock.createInternalStart(),
     elasticsearch: elasticsearchServiceMock.createInternalStart(),
     savedObjects: savedObjectsServiceMock.createInternalStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),

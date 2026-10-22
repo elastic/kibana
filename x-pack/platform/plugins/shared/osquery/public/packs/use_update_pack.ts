@@ -16,14 +16,15 @@ import { pagePathGetters } from '../common/page_paths';
 import { PACKS_ID } from './constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { showTargetingWarningToast } from './targeting_warning_toast';
-import type { PackSavedObject } from './types';
+import type { PackSavedObject, ClearableExecutionDefaults } from './types';
 
 interface UseUpdatePackProps {
   withRedirect?: boolean;
   options?: UseMutationOptions<
     { data: PackSavedObject },
     { body: { message: string; error: string } },
-    Partial<PackSavedObject> & { id: string }
+    Omit<Partial<PackSavedObject>, 'min_osquery_version' | 'result_type' | 'platform'> &
+      ClearableExecutionDefaults & { id: string }
   >;
 }
 
@@ -39,7 +40,8 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
   return useMutation<
     { data: PackSavedObject },
     { body: { message: string; error: string } },
-    Partial<PackSavedObject> & { id: string }
+    Omit<Partial<PackSavedObject>, 'min_osquery_version' | 'result_type' | 'platform'> &
+      ClearableExecutionDefaults & { id: string }
   >(
     ({ id, ...payload }) =>
       http.put(`/api/osquery/packs/${id}`, {

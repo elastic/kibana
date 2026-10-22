@@ -49,6 +49,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
         navigateToUrl: jest.fn(),
       },
       cases: {
+        config: { attachmentsEnabled: false },
         helpers: {
           canUseCases: jest.fn().mockReturnValue({
             all: true,
@@ -69,7 +70,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
         ui: { getCasesContext: mockCasesContext },
       },
       featureFlags: {
-        getBooleanValue: jest.fn().mockResolvedValue(false),
+        useBooleanValue: jest.fn().mockReturnValue(false),
       },
       uiSettings: {
         get: jest.fn().mockReturnValue(false),
@@ -113,6 +114,7 @@ jest.mock(
       navigateToUrl: jest.fn(),
     },
     cases: {
+      config: { attachmentsEnabled: false },
       helpers: {
         canUseCases: jest.fn().mockReturnValue({
           all: true,
@@ -133,7 +135,7 @@ jest.mock(
       ui: { getCasesContext: mockCasesContext },
     },
     featureFlags: {
-      getBooleanValue: jest.fn().mockResolvedValue(false),
+      useBooleanValue: jest.fn().mockReturnValue(false),
     },
     uiSettings: {
       get: jest.fn().mockReturnValue(false),

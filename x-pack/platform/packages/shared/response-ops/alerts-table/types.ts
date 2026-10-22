@@ -34,6 +34,7 @@ import type {
   EuiDataGridRefProps,
   EuiDataGridSorting,
   EuiDataGridToolBarVisibilityOptions,
+  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import type {
   MappingRuntimeFields,
@@ -106,18 +107,20 @@ export interface SystemCellComponentMap {
 
 export type SystemCellId = keyof SystemCellComponentMap;
 
-type UseCasesAddToNewCaseFlyout = (props?: Record<string, unknown> & { onSuccess: () => void }) => {
-  open: (props: { attachments?: any[]; getAttachments?: (owner: string) => any[] }) => void;
-  close: () => void;
-};
+interface CaseInfo {
+  id: string;
+  owner: string;
+}
 
 type UseCasesAddToExistingCaseModal = (
-  props?: Record<string, unknown> & { onSuccess: () => void }
+  props?: Record<string, unknown> & {
+    onSuccess: (theCase: CaseInfo, isNewCase: boolean) => void;
+  }
 ) => {
   open: ({
     getAttachments,
   }: {
-    getAttachments: ({ theCase }: { theCase?: { id: string; owner: string } }) => any[];
+    getAttachments: ({ theCase }: { theCase?: CaseInfo }) => any[];
   }) => void;
   close: () => void;
 };
@@ -145,13 +148,11 @@ export interface CasesService {
     getCasesContext: () => FC<any>;
   };
   hooks: {
-    useCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
     useCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
   };
   helpers: {
     groupAlertsByRule: (items: any[], owner: string) => any[];
     canUseCases: (owners: CasesOwner[]) => any;
-    getRuleIdFromEvent: (event: { data: any[]; ecs: Ecs }) => { id: string; name: string };
   };
 }
 
@@ -545,6 +546,8 @@ export type RenderContext<AC extends AdditionalContext> = {
   showAlertStatusWithFlapping?: boolean;
 
   bulkActionsStore: [BulkActionsState, Dispatch<BulkActionsReducerAction>];
+
+  allowLinks?: boolean;
 } & SetRequired<
   Pick<
     AlertsTableProps<AC>,
@@ -643,6 +646,10 @@ export interface PublicAlertsDataGridProps
    * Options to customize the actions menu for each cell
    */
   cellActionsOptions?: CellActionsOptions;
+  /**
+   * When `false`, the page size selector is hidden. Defaults to `true`.
+   */
+  isInteractive?: boolean;
 }
 
 export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalContext>
@@ -715,9 +722,22 @@ export type AlertActionsProps<AC extends AdditionalContext = AdditionalContext> 
       canModifyAlerts?: boolean;
     };
 
+export type BulkActionGroupId =
+  | 'status'
+  | 'assignees'
+  | 'cases'
+  | 'caseRemoval'
+  | 'tags'
+  | 'timeline'
+  | 'custom'
+  | 'workflow'
+  | 'chat';
+
 export interface BulkActionsConfig {
   label: string;
   key: string;
+  icon?: EuiContextMenuPanelItemDescriptor['icon'];
+  groupId?: BulkActionGroupId;
   'data-test-subj'?: string;
   disableOnQuery: boolean;
   disabledLabel?: string;

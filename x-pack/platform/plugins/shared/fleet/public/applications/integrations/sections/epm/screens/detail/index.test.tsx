@@ -500,6 +500,70 @@ describe('When on integration detail', () => {
     });
   });
 
+  describe('and the package has non FIPS policy templates', () => {
+    const renderWithFips = async ({
+      isFipsEnabled,
+      fipsCompatible,
+    }: {
+      isFipsEnabled: boolean;
+      fipsCompatible: boolean;
+    }) => {
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+        ...baseResponse,
+        item: {
+          ...baseResponse.item,
+          policy_templates: baseResponse.item.policy_templates?.map((template) => ({
+            ...template,
+            fips_compatible: fipsCompatible,
+          })),
+        },
+      });
+      mockedApi.responseProvider.fleetSetup.mockReturnValue({
+        isReady: true,
+        missing_requirements: [],
+        missing_optional_features: [],
+        is_fips_enabled: isFipsEnabled,
+      });
+      await render();
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+    };
+
+    it(
+      'should hide the Configs tab when FIPS is enabled and all policy templates are non FIPS',
+      async () => {
+        await renderWithFips({ isFipsEnabled: true, fipsCompatible: false });
+
+        await renderResult.findByTestId('tab-settings');
+        expect(renderResult.queryByTestId('tab-configs')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should show the Configs tab when FIPS is enabled and the policy templates are FIPS compatible',
+      async () => {
+        await renderWithFips({ isFipsEnabled: true, fipsCompatible: true });
+
+        expect(await renderResult.findByTestId('tab-configs')).not.toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should show the Configs tab when FIPS is not enabled even if the policy templates are non FIPS',
+      async () => {
+        await renderWithFips({ isFipsEnabled: false, fipsCompatible: false });
+
+        expect(await renderResult.findByTestId('tab-configs')).not.toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+  });
+
   describe('and the Add integration button is clicked', () => {
     beforeEach(async () => {
       await render();
@@ -516,6 +580,81 @@ describe('When on integration detail', () => {
         'http://localhost/mock/app/integrations/detail/nginx-0.3.7/add-integration'
       );
     });
+  });
+
+  describe('and the AWS onboarding flow is enabled', () => {
+    const renderAwsDetail = async () => {
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+        ...baseResponse,
+        item: {
+          ...baseResponse.item,
+          name: 'aws',
+          title: 'AWS',
+          status: 'not_installed' as const,
+        },
+      });
+      testRenderer.startServices.featureFlags.useBooleanValue.mockReturnValue(true);
+      testRenderer.startServices.application.getUrlForApp.mockReturnValue(
+        '/mock/app/onboarding/aws'
+      );
+
+      await render();
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+    };
+
+    it(
+      'should link the Add button to the onboarding flow',
+      async () => {
+        await renderAwsDetail();
+        const addButton = (await renderResult.findByTestId(
+          'addIntegrationPolicyButton'
+        )) as HTMLAnchorElement;
+        expect(addButton.href).toEqual('http://localhost/mock/app/onboarding/aws');
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should start a new onboarding session when the Add button is clicked',
+      async () => {
+        await renderAwsDetail();
+        await act(async () => {
+          (await renderResult.findByTestId('addIntegrationPolicyButton')).click();
+        });
+
+        expect(testRenderer.startServices.application.navigateToApp).toHaveBeenCalledWith(
+          'onboarding',
+          { path: '/aws', state: { newSession: true } }
+        );
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should keep the Fleet flow when an agent policy is preselected',
+      async () => {
+        act(() =>
+          testRenderer.mountHistory.push(detailPageUrlPath, {
+            forAgentPolicyId: 'agent-policy-1',
+          })
+        );
+        await renderAwsDetail();
+        await act(async () => {
+          (await renderResult.findByTestId('addIntegrationPolicyButton')).click();
+        });
+
+        expect(testRenderer.startServices.application.navigateToApp).not.toHaveBeenCalledWith(
+          'onboarding',
+          expect.anything()
+        );
+      },
+      TESTS_TIMEOUT
+    );
   });
 
   describe('and on the Policies Tab', () => {

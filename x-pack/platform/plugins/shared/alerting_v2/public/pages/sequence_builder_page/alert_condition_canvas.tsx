@@ -15,7 +15,8 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import type { ColorMode } from '@xyflow/react';
 import { Background, Controls, ReactFlow, ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -35,8 +36,9 @@ import type {
   SequenceEdgeType,
 } from '@kbn/alerting-v2-rule-form';
 import { RulesApi } from '../../services/rules_api';
-import { toFindRulesRequest } from '../../hooks/use_fetch_rules';
 import { useCanvasFitView } from './use_canvas_fit_view';
+import { CollapsibleSidePanel } from './collapsible_side_panel';
+import { listSequenceBuilderRules } from './list_sequence_builder_rules';
 
 const nodeTypes = { sequenceStage: SequenceNode };
 const edgeTypes = { sequenceHop: SequenceEdge };
@@ -70,7 +72,12 @@ const AlertCanvasContent: React.FC<CanvasContentProps> = ({
 
   return (
     <div
-      style={{ height: '100%', position: 'relative' }}
+      css={css`
+        flex: 1;
+        min-block-size: 0;
+        block-size: 100%;
+        position: relative;
+      `}
       onDragOver={(e) => e.preventDefault()}
       onDrop={onDrop}
       data-test-subj="sequenceBuilderAlertCanvas"
@@ -151,18 +158,21 @@ const RuleListItem: React.FC<{ rule: FetchedRule }> = ({ rule }) => (
 export interface AlertConditionCanvasProps {
   seqValues: SequenceFormValues;
   setSeqValues: React.Dispatch<React.SetStateAction<SequenceFormValues>>;
+  isRuleListOpen: boolean;
+  onToggleRuleList: () => void;
   excludeRuleId?: string;
 }
 
 export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
   seqValues,
   setSeqValues,
+  isRuleListOpen,
+  onToggleRuleList,
   excludeRuleId,
 }) => {
   const { colorMode } = useEuiTheme();
   const rulesApi = useService(RulesApi);
 
-  // TODO: Add pagination or infinite scroll for users with more than 200 rules
   const {
     data: rulesData,
     isLoading: isLoadingRules,
@@ -170,8 +180,8 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
   } = useQuery({
     queryKey: ['sequence-builder-available-rules'],
     refetchOnWindowFocus: false,
-    queryFn: () =>
-      rulesApi.listRules(toFindRulesRequest({ perPage: 200, sortField: 'name', sortOrder: 'asc' })),
+    retry: false,
+    queryFn: () => listSequenceBuilderRules((params) => rulesApi.listRules(params)),
   });
 
   const fetchedRules = useMemo<FetchedRule[]>(
@@ -184,6 +194,7 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
       })),
     [rulesData]
   );
+  const isRulesListTruncated = (rulesData?.total ?? 0) > fetchedRules.length;
 
   const usedRuleIds = useMemo<Set<string>>(
     () => new Set(seqValues.steps.flatMap((s) => s.rules.map((r) => r.ruleId))),
@@ -221,8 +232,7 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
           ...prev,
           steps: nextSteps,
           hopWindows: hopWindows.slice(0, Math.max(0, nextSteps.length - 1)),
-          recoveryStepIndex: Math.max(0, Math.min(prev.recoveryStepIndex, nextSteps.length - 1)),
-          recoveryStepIndices: undefined,
+          recoveryStepIndices: [Math.max(0, nextSteps.length - 1)],
         };
       });
     },
@@ -309,8 +319,7 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
               0,
               nextSteps.length - 1
             ),
-            recoveryStepIndex: nextSteps.length - 1,
-            recoveryStepIndices: undefined,
+            recoveryStepIndices: [nextSteps.length - 1],
           };
         });
       } catch {
@@ -337,15 +346,13 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
 
   const { nodes, edges } = useMemo(
     () =>
-      layoutSequence(
-        stages,
-        hopWindowStrings,
-        removeRule,
-        changeStepOperator,
-        addRuleToStep,
-        updateHopWindow,
-        closeAllHopPopoversTick
-      ),
+      layoutSequence(stages, hopWindowStrings, {
+        onRemoveRule: removeRule,
+        onOperatorChange: changeStepOperator,
+        onDropRule: addRuleToStep,
+        onHopWindowChange: updateHopWindow,
+        closeAllTick: closeAllHopPopoversTick,
+      }),
     [
       stages,
       hopWindowStrings,
@@ -357,57 +364,79 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
     ]
   );
 
-  return (
-    <EuiFlexGroup gutterSize="none" style={{ height: '100%', overflow: 'hidden' }}>
-      <EuiFlexItem grow={false} style={{ width: 260, overflow: 'auto', padding: 8 }}>
-        <EuiText size="xs">
-          <strong>
-            <FormattedMessage
-              id="xpack.alertingV2.sequenceBuilderPage.availableRulesTitle"
-              defaultMessage="Available rules"
-            />
-          </strong>
-        </EuiText>
-        <EuiFlexGroup direction="column" gutterSize="xs" style={{ marginTop: 8 }}>
-          {isLoadingRules ? (
-            <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: '100%' }}>
-              <EuiLoadingSpinner size="m" />
-            </EuiFlexGroup>
-          ) : isRulesError ? (
-            <EuiText size="s" color="danger">
-              <FormattedMessage
-                id="xpack.alertingV2.sequenceBuilderPage.rulesLoadError"
-                defaultMessage="Failed to load rules"
-              />
-            </EuiText>
-          ) : (
-            <>
-              {availableRules.map((rule) => (
-                <EuiFlexItem key={rule.id} grow={false}>
-                  <RuleListItem rule={rule} />
-                </EuiFlexItem>
-              ))}
-              {availableRules.length === 0 && (
-                <EuiText size="s" color="subdued">
-                  {fetchedRules.length === 0 ? (
-                    <FormattedMessage
-                      id="xpack.alertingV2.sequenceBuilderPage.noRulesFound"
-                      defaultMessage="No rules found"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.alertingV2.sequenceBuilderPage.allRulesUsed"
-                      defaultMessage="All rules are placed on the canvas"
-                    />
-                  )}
-                </EuiText>
-              )}
-            </>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
+  const availableRulesTitle = i18n.translate(
+    'xpack.alertingV2.sequenceBuilderPage.availableRulesTitle',
+    { defaultMessage: 'Available rules' }
+  );
 
-      <EuiFlexItem style={{ minWidth: 0 }}>
+  return (
+    <EuiFlexGroup
+      gutterSize="none"
+      css={css`
+        flex: 1;
+        min-block-size: 0;
+        overflow: hidden;
+      `}
+    >
+      <CollapsibleSidePanel
+        title={availableRulesTitle}
+        isOpen={isRuleListOpen}
+        onToggle={onToggleRuleList}
+      >
+        {isLoadingRules ? (
+          <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: '100%' }}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexGroup>
+        ) : isRulesError ? (
+          <EuiText size="s" color="danger">
+            <FormattedMessage
+              id="xpack.alertingV2.sequenceBuilderPage.rulesLoadError"
+              defaultMessage="Failed to load rules"
+            />
+          </EuiText>
+        ) : (
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            {availableRules.map((rule) => (
+              <EuiFlexItem key={rule.id} grow={false}>
+                <RuleListItem rule={rule} />
+              </EuiFlexItem>
+            ))}
+            {availableRules.length === 0 && !isRulesListTruncated && (
+              <EuiText size="s" color="subdued">
+                {fetchedRules.length === 0 ? (
+                  <FormattedMessage
+                    id="xpack.alertingV2.sequenceBuilderPage.noRulesFound"
+                    defaultMessage="No rules found"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.alertingV2.sequenceBuilderPage.allRulesUsed"
+                    defaultMessage="All rules are placed on the canvas"
+                  />
+                )}
+              </EuiText>
+            )}
+            {isRulesListTruncated && (
+              <EuiText size="s" color="subdued" data-test-subj="sequenceBuilderRulesTruncated">
+                <FormattedMessage
+                  id="xpack.alertingV2.sequenceBuilderPage.rulesTruncatedDescription"
+                  defaultMessage="Showing the first {count} rules."
+                  values={{ count: <FormattedNumber value={fetchedRules.length} /> }}
+                />
+              </EuiText>
+            )}
+          </EuiFlexGroup>
+        )}
+      </CollapsibleSidePanel>
+
+      <EuiFlexItem
+        css={css`
+          min-inline-size: 0;
+          min-block-size: 0;
+          display: flex;
+          flex-direction: column;
+        `}
+      >
         <ReactFlowProvider>
           <AlertCanvasContent
             nodes={nodes}

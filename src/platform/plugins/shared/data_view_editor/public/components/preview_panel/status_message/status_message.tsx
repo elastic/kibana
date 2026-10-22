@@ -9,7 +9,12 @@
 
 import React from 'react';
 
-import { KbnInfoCallout, KbnSuccessCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import {
+  KbnDangerCallout,
+  KbnInfoCallout,
+  KbnSuccessCallout,
+  KbnWarningCallout,
+} from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MatchedIndicesSet } from '../../../types';
 
@@ -18,6 +23,8 @@ interface StatusMessageProps {
   isIncludingSystemIndices: boolean;
   query: string;
   showSystemIndices: boolean;
+  /** Set when the user lacks the privileges to view the indices matching the query */
+  error?: Error;
 }
 
 const NoMatchStatusMessage = (allIndicesLength: number) => (
@@ -58,11 +65,36 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
   isIncludingSystemIndices,
   query,
   showSystemIndices,
+  error,
 }) => {
   let statusMessage;
   let statusColor: 'primary' | 'success' | 'warning' | undefined;
 
   const allIndicesLength = allIndices.length;
+
+  if (error) {
+    return (
+      <KbnDangerCallout
+        data-test-subj="createIndexPatternStatusMessage"
+        title={
+          <FormattedMessage
+            id="indexPatternEditor.status.noPrivilegesLabel"
+            defaultMessage="You don't have permission to view the data streams, indices, or index aliases that match your index pattern."
+          />
+        }
+        text={
+          <FormattedMessage
+            id="indexPatternEditor.status.noPrivilegesDetail"
+            defaultMessage="Ask an administrator to grant you the {readPrivilege} and {viewIndexMetadataPrivilege} index privileges."
+            values={{
+              readPrivilege: <code>read</code>,
+              viewIndexMetadataPrivilege: <code>view_index_metadata</code>,
+            }}
+          />
+        }
+      />
+    );
+  }
 
   if (query.length === 0) {
     statusColor = 'primary';

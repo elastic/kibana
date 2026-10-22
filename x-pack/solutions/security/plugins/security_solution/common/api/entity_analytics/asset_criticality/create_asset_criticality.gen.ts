@@ -24,7 +24,10 @@ export const CreateAssetCriticalityRecordRequestBody = lazySchema(() =>
       /**
        * If 'wait_for' the request will wait for the index refresh.
        */
-      refresh: z.literal('wait_for').optional(),
+      refresh: z
+        .literal('wait_for')
+        .optional()
+        .describe("If 'wait_for' the request will wait for the index refresh."),
     })
   )
 );

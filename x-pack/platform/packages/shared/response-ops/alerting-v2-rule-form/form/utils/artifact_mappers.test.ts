@@ -25,14 +25,14 @@ describe('mapArtifacts', () => {
       {
         id: 'dashboard-1',
         type: DASHBOARD_ARTIFACT_TYPE,
-        data: { dashboardId: 'dash-1' },
+        data: { dashboard_id: 'dash-1' },
         value: 'dash-1',
       },
     ];
 
     expect(mapArtifacts(artifacts)).toEqual([
       { id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, data: { content: 'steps' } },
-      { id: 'dashboard-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
+      { id: 'dashboard-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboard_id: 'dash-1' } },
     ]);
   });
 });

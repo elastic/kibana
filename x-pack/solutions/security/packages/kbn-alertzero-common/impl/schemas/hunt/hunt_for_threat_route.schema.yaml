@@ -1,0 +1,67 @@
+openapi: 3.0.0
+info:
+  title: Run AlertZero Hunt Tier 1 threat hunt API endpoint
+  version: '1'
+paths:
+  /internal/alertzero/hunt/hunt_for_threat:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: HuntForThreat
+      description: >-
+        Runs Tier 1's deterministic search over the space's Security Solution
+        default data view. A blocked scope is refused with 409.
+      summary: Run Tier 1 deterministic hunt
+      tags:
+        - AlertZero API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                iocs:
+                  type: array
+                  maxItems: 100
+                  items:
+                    $ref: '../components/hunt.schema.yaml#/components/schemas/HuntIoc'
+                techniques:
+                  type: array
+                  maxItems: 100
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 32
+                time_range:
+                  type: object
+                  required: [from, to]
+                  properties:
+                    from:
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                    to:
+                      type: string
+                      minLength: 1
+                      maxLength: 64
+                size:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [scope, result]
+                properties:
+                  scope:
+                    $ref: '../components/hunt.schema.yaml#/components/schemas/HuntScope'
+                  result:
+                    $ref: '../components/hunt.schema.yaml#/components/schemas/HuntForThreatResult'
+        '409':
+          description: The hunt scope is blocked (nothing in the default data view is visible to this hunt)

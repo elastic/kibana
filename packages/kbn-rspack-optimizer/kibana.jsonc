@@ -2,6 +2,8 @@
   "type": "shared-server",
   "id": "@kbn/rspack-optimizer",
   "owner": "@elastic/kibana-operations",
-  "description": "RSPack-based bundler for Kibana platform plugins",
+  "description": "Rspack-based bundler for Kibana platform plugins",
+  "group": "platform",
+  "visibility": "private",
   "devOnly": true
 }

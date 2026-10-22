@@ -5,27 +5,26 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { MAX_DATE_RANGE_LENGTH, MAX_ROUTE_STRING_LENGTH } from '../zod_query';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getErrorGroups } from '../../queries/get_error_groups';
 import { safeJsonParse } from './safe_json_parse';
 
-const MAX_QUERY_PARAM_LENGTH = 4096;
-
 export const getErrorGroupsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.ERROR_GROUPS,
   validate: {
-    query: schema.object({
-      from: schema.string({ maxLength: MAX_QUERY_PARAM_LENGTH }),
-      to: schema.string({ maxLength: MAX_QUERY_PARAM_LENGTH }),
-      monitorTypes: schema.maybe(schema.string({ maxLength: MAX_QUERY_PARAM_LENGTH })),
-      locations: schema.maybe(schema.string({ maxLength: MAX_QUERY_PARAM_LENGTH })),
-      tags: schema.maybe(schema.string({ maxLength: MAX_QUERY_PARAM_LENGTH })),
-      projects: schema.maybe(schema.string({ maxLength: MAX_QUERY_PARAM_LENGTH })),
-      statusCodes: schema.maybe(schema.string({ maxLength: MAX_QUERY_PARAM_LENGTH })),
-      query: schema.maybe(schema.string({ maxLength: MAX_QUERY_PARAM_LENGTH })),
+    query: z.strictObject({
+      from: z.string().max(MAX_DATE_RANGE_LENGTH),
+      to: z.string().max(MAX_DATE_RANGE_LENGTH),
+      monitorTypes: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
+      locations: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
+      tags: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
+      projects: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
+      statusCodes: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
+      query: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
     }),
   },
   handler: async ({ syntheticsEsClient, request, spaceId }) => {

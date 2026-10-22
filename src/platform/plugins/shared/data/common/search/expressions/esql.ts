@@ -26,6 +26,8 @@ import {
   isComputedColumn,
   getQuerySummary,
   buildRenameSourceFieldMap,
+  resolveSourceField,
+  getEsqlInspectorStats,
 } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import { buildEsQuery, type Filter, getTimeZoneFromSettings } from '@kbn/es-query';
@@ -99,6 +101,7 @@ function mapResponseToDatatable(
   const hasEmptyColumns = body.all_columns && body.all_columns?.length > body.columns.length;
   const lookup = new Set(hasEmptyColumns ? body.columns?.map(({ name }) => name) || [] : []);
   const indexPattern = getIndexPatternFromESQLQuery(query);
+  const approximationApplied = body.approximation_applied;
 
   const appliedTimeRange = input?.timeRange
     ? {
@@ -127,9 +130,11 @@ function mapResponseToDatatable(
         ? KBN_FIELD_TYPES.CONFLICT
         : esFieldTypeToKibanaFieldType(type);
 
-      const isSourceFieldFilterable =
-        !querySummary.newColumns.has(name) || (renameSourceFieldMap?.has(name) ?? false);
-      const sourceField = renameSourceFieldMap?.get(name) ?? name;
+      const { isSourceFieldFilterable, sourceField } = resolveSourceField(
+        name,
+        querySummary,
+        renameSourceFieldMap ?? new Map()
+      );
 
       return {
         id: name,
@@ -184,6 +189,7 @@ function mapResponseToDatatable(
       statistics: {
         totalCount: normalizedValues.length,
       },
+      ...(approximationApplied !== undefined && { approximationApplied }),
     },
     columns: updatedWithVariablesColumns,
     rows,
@@ -370,48 +376,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
 
         // Inspector logging on success
         logInspectorRequest()
-          .stats({
-            hits: {
-              label: i18n.translate('data.search.es_search.hitsLabel', {
-                defaultMessage: 'Hits',
-              }),
-              value: `${rawResponse.values.length}`,
-              description: i18n.translate('data.search.es_search.hitsDescription', {
-                defaultMessage: 'The number of documents returned by the query.',
-              }),
-            },
-            ...(rawResponse?.took && {
-              queryTime: {
-                label: i18n.translate('data.search.es_search.queryTimeLabel', {
-                  defaultMessage: 'Query time',
-                }),
-                value: i18n.translate('data.search.es_search.queryTimeValue', {
-                  defaultMessage: '{queryTime}ms',
-                  values: { queryTime: rawResponse.took },
-                }),
-                description: i18n.translate('data.search.es_search.queryTimeDescription', {
-                  defaultMessage:
-                    'The time it took to process the query. ' +
-                    'Does not include the time to send the request or parse it in the browser.',
-                }),
-              },
-            }),
-            ...(rawResponse &&
-              'documents_found' in rawResponse && {
-                documentsProcessed: {
-                  label: i18n.translate('data.search.es_search.documentsProcessedLabel', {
-                    defaultMessage: 'Documents processed',
-                  }),
-                  value: rawResponse.documents_found,
-                  description: i18n.translate(
-                    'data.search.es_search.documentsProcessedDescription',
-                    {
-                      defaultMessage: 'The number of documents processed by the query.',
-                    }
-                  ),
-                },
-              }),
-          })
+          .stats(getEsqlInspectorStats(rawResponse))
           .json({
             ...params,
             ...(input?.isApproximate !== undefined && { approximation: input.isApproximate }),

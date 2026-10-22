@@ -440,7 +440,7 @@ These plugins must call `getClient(request)` to get the event log client.
 Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
 
 ```
-yarn test:jest x-pack/platform/plugins/shared/event_log --watch
+pnpm test:jest x-pack/platform/plugins/shared/event_log --watch
 ```
 
 ### API Integration tests

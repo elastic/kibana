@@ -6,7 +6,6 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
@@ -26,6 +25,12 @@ export interface InferenceFeatureConfig {
   isTechPreview?: boolean;
   isBeta?: boolean;
   ignoreGlobalDefault?: boolean;
+  /**
+   * When true, the feature's model list contains only endpoints whose
+   * `capabilities.templates.policy` is `required`. Other features keep those
+   * endpoints hidden.
+   */
+  allowTemplateRequiredModels?: boolean;
   visibilityCondition?: {
     key: string;
     value: string | number | boolean | null;
@@ -41,6 +46,7 @@ export interface InferenceFeatureRegistryContract {
 export interface InferenceFeatureRegistryStartContract extends InferenceFeatureRegistryContract {
   getAll: () => InferenceFeatureConfig[];
   get: (featureId: string) => InferenceFeatureConfig | undefined;
+  updateRecommendedEndpoints: (featureId: string, endpoints: string[]) => void;
 }
 
 export interface SearchInferenceEndpointsPluginSetup {
@@ -59,10 +65,26 @@ export interface ResolvedInferenceApiEndpoints {
   soEntryFound: boolean;
 }
 
+export interface GetForFeatureOptions {
+  /**
+   * When true, bypasses the global-default-prepend logic in `resolveModelsForFeature` and
+   * skips the `KIBANA_DEFAULT_CHAT_COMPLETION` ultimate fallback.
+   *
+   * - SO overrides and `recommendedEndpoints` are still returned normally.
+   * - An empty list signals "nothing explicitly configured for this feature".
+   *
+   * Use this when the caller wants a clean "nothing configured" signal and
+   * handles the fallback itself (e.g. Agent Builder falling back to the
+   * user's current execution model).
+   */
+  onlyReturnConfigured?: boolean;
+}
+
 export interface InferenceEndpointsContract {
   getForFeature: (
     featureId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    opts?: GetForFeatureOptions
   ) => Promise<ResolvedInferenceApiEndpoints>;
 }
 
@@ -72,7 +94,6 @@ export interface SearchInferenceEndpointsPluginStart {
 }
 
 export interface SearchInferenceEndpointsPluginStartDependencies {
-  actions: ActionsPluginStartContract;
   inference: InferenceServerStart;
 }
 

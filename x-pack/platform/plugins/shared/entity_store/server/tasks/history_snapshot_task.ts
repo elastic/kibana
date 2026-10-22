@@ -14,23 +14,24 @@ import {
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
 import { parseDurationToMs } from '../infra/time';
-import { TasksConfig } from './config';
+import { getHistorySnapshotTaskId, TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
 import type { EntityStoreCoreSetup } from '../types';
 import { EntityStoreGlobalStateClient } from '../domain/saved_objects';
 import { HistorySnapshotClient } from '../domain/history_snapshot';
 import { wrapTaskRun } from '../telemetry/traces';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
 
 const config = TasksConfig[EntityStoreTaskType.enum.historySnapshot];
 
-export const getHistorySnapshotTaskId = (namespace: string): string =>
-  `${config.type}:${namespace}`;
-
 interface RunHistorySnapshotTaskParams {
-  taskInstance: { state: Record<string, unknown>; id: string };
+  taskInstance: {
+    state: Record<string, unknown>;
+    id: string;
+    schedule?: { interval?: string };
+  };
   signal: AbortSignal;
-  fakeRequest: KibanaRequest | null | undefined;
   core: EntityStoreCoreSetup;
   logger: Logger;
 }
@@ -38,12 +39,12 @@ interface RunHistorySnapshotTaskParams {
 async function runHistorySnapshotTask({
   taskInstance,
   signal,
-  fakeRequest,
   core,
   logger,
 }: RunHistorySnapshotTaskParams): Promise<{
   state: Record<string, unknown>;
   shouldDeleteTask?: boolean;
+  schedule?: { interval: string };
 }> {
   const namespace = taskInstance.state?.namespace as string | undefined;
   if (!namespace) {
@@ -51,7 +52,7 @@ async function runHistorySnapshotTask({
     return { state: taskInstance.state };
   }
 
-  const [start] = await core.getStartServices();
+  const [start, plugins] = await core.getStartServices();
   if (
     await shouldDeleteOrphanedEntityStoreTask({
       coreStart: start,
@@ -62,28 +63,39 @@ async function runHistorySnapshotTask({
     return { state: taskInstance.state, shouldDeleteTask: true };
   }
 
-  if (!fakeRequest) {
-    logger.error('No fake request found, skipping history snapshot task');
-    return { state: taskInstance.state };
-  }
-
-  const soClient = start.savedObjects.getScopedClient(fakeRequest);
-  const esClient = start.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+  const soClient = start.savedObjects.getUnsafeInternalClient().asScopedToNamespace(namespace);
+  const esClient = start.elasticsearch.client.asInternalUser;
   const taskLogger = logger.get(taskInstance.id);
 
   const globalStateClient = new EntityStoreGlobalStateClient(soClient, namespace, taskLogger);
   const historySnapshotClient = new HistorySnapshotClient({
     logger: taskLogger,
     esClient,
+    internalEsClient: esClient,
     namespace,
     globalStateClient,
+    taskManager: plugins.taskManager,
   });
 
   await historySnapshotClient.runHistorySnapshot({
     abortSignal: signal,
   });
 
-  return { state: taskInstance.state };
+  // A run that was already in progress skips Task Manager's schedule update. Adopt the stored
+  // interval when this run finishes so a concurrent config change is not lost.
+  let schedule: { schedule: { interval: string } } | undefined;
+  try {
+    const frequency = (await globalStateClient.find())?.historySnapshot.frequency;
+    const currentInterval = taskInstance.schedule?.interval;
+    if (frequency && frequency !== currentInterval) {
+      schedule = { schedule: { interval: frequency } };
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.warn(`Error reading history snapshot frequency for reschedule, received ${message}`);
+  }
+
+  return { state: taskInstance.state, ...schedule };
 }
 
 export function registerHistorySnapshotTask({
@@ -111,24 +123,32 @@ export function registerHistorySnapshotTask({
           }),
         },
       },
-      createTaskRunner: ({ taskInstance, signal, fakeRequest }) => ({
-        run: () =>
-          wrapTaskRun({
-            spanName: 'entityStore.task.history_snapshot.run',
-            namespace: taskInstance.state.namespace,
-            attributes: {
-              'entity_store.task.id': taskInstance.id,
-              'entity_store.task.type': taskType,
-            },
-            run: () =>
-              runHistorySnapshotTask({
-                taskInstance,
-                signal,
-                fakeRequest,
-                core,
-                logger,
-              }),
-          }),
+      createTaskRunner: ({ taskInstance, signal }) => ({
+        run: async () => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.executionContext.withContext(
+            buildEaExecutionContext(
+              EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_HISTORY_SNAPSHOT_TASK,
+              taskInstance.id
+            ),
+            () =>
+              wrapTaskRun({
+                spanName: 'entityStore.task.history_snapshot.run',
+                namespace: taskInstance.state.namespace,
+                attributes: {
+                  'entity_store.task.id': taskInstance.id,
+                  'entity_store.task.type': taskType,
+                },
+                run: () =>
+                  runHistorySnapshotTask({
+                    taskInstance,
+                    signal,
+                    core,
+                    logger,
+                  }),
+              })
+          );
+        },
       }),
     },
   });

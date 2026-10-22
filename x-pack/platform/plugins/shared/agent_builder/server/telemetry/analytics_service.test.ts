@@ -5,19 +5,26 @@
  * 2.0.
  */
 
+import { createAnalytics } from '@elastic/ebt/client';
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { ATTACHMENT_REF_ACTOR, AttachmentType } from '@kbn/agent-builder-common/attachments';
 import {
   AGENT_BUILDER_EVENT_TYPES,
   agentBuilderServerEbtEvents,
+  ConversationOriginType,
   ConversationRoundStatus,
   ConversationRoundStepType,
   agentBuilderDefaultAgentId,
+  attachmentTools,
   ToolType,
   type ConversationRound,
+  type VersionedAttachment,
 } from '@kbn/agent-builder-common';
+import type { ReportConversationFieldsChangedParams } from '@kbn/agent-builder-common/telemetry/agent_builder_events';
 import { ModelProvider } from '@kbn/inference-common';
+import type { ExecutionTelemetry } from '../services/execution/utils/report_round_telemetry';
 import { AnalyticsService } from './analytics_service';
 
 describe('AnalyticsService', () => {
@@ -50,8 +57,141 @@ describe('AnalyticsService', () => {
     });
   });
 
+  describe('reportConversationFieldsChanged', () => {
+    const params: ReportConversationFieldsChangedParams = {
+      conversation_id: 'conversation-1',
+      template_id: 'investigation',
+      source: 'execution',
+      change_kind: 'updated',
+      changed_fields: { status: true, close_reason: true },
+      changes: [
+        { field: 'status', previous_value: 'open', next_value: 'closed' },
+        { field: 'close_reason', next_value: 'benign' },
+      ],
+    };
+
+    it('reports the event as given', () => {
+      service.reportConversationFieldsChanged(params);
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.ConversationFieldsChanged,
+        params
+      );
+    });
+
+    it('never throws when reporting fails', () => {
+      analytics.reportEvent.mockImplementation(() => {
+        throw new Error('analytics down');
+      });
+
+      expect(() => service.reportConversationFieldsChanged(params)).not.toThrow();
+      expect(logger.debug).toHaveBeenCalled();
+    });
+
+    describe('against the registered schema, in dev mode', () => {
+      const devAnalytics = createAnalytics({ isDev: true, logger: loggerMock.create() });
+
+      beforeAll(() => {
+        new AnalyticsService(
+          devAnalytics as unknown as AnalyticsServiceSetup,
+          loggerMock.create()
+        ).registerAgentBuilderEventTypes();
+      });
+
+      afterAll(async () => {
+        await devAnalytics.shutdown();
+      });
+
+      it('accepts a close and its reason in one payload', () => {
+        expect(() =>
+          devAnalytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationFieldsChanged, params)
+        ).not.toThrow();
+      });
+
+      it('accepts a create, with no previous value', () => {
+        expect(() =>
+          devAnalytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationFieldsChanged, {
+            conversation_id: 'conversation-1',
+            template_id: 'investigation',
+            source: 'workflow',
+            change_kind: 'created',
+            changed_fields: { status: true },
+            changes: [{ field: 'status', next_value: 'open' }],
+          })
+        ).not.toThrow();
+      });
+
+      it('accepts a cleared field, with no next value', () => {
+        expect(() =>
+          devAnalytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationFieldsChanged, {
+            conversation_id: 'conversation-1',
+            template_id: 'investigation',
+            source: 'server_api',
+            change_kind: 'updated',
+            changed_fields: { close_reason: true },
+            changes: [{ field: 'close_reason', previous_value: 'benign' }],
+          })
+        ).not.toThrow();
+      });
+
+      it('rejects a change without the field name', () => {
+        expect(() =>
+          devAnalytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationFieldsChanged, {
+            ...params,
+            changes: [{ previous_value: 'open', next_value: 'closed' }],
+          })
+        ).toThrow(/field/);
+      });
+
+      // `changed_fields` is a pass_through record, which EBT doesn't validate, so its shape is
+      // guaranteed by describeConversationFieldsChanged and its tests instead.
+      it('does not validate changed_fields, a pass_through record', () => {
+        const { changed_fields: _changedFields, ...withoutChangedFields } = params;
+
+        expect(() =>
+          devAnalytics.reportEvent(
+            AGENT_BUILDER_EVENT_TYPES.ConversationFieldsChanged,
+            withoutChangedFields
+          )
+        ).not.toThrow();
+      });
+
+      it('rejects a key the schema does not declare, at the top level', () => {
+        expect(() =>
+          devAnalytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationFieldsChanged, {
+            ...params,
+            verdict: 'free text',
+          })
+        ).toThrow(/verdict/);
+      });
+
+      it('rejects a key the schema does not declare, inside a change', () => {
+        expect(() =>
+          devAnalytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationFieldsChanged, {
+            ...params,
+            changes: [{ field: 'verdict', next_value: 'closed', text: 'free text' }],
+          })
+        ).toThrow(/text/);
+      });
+    });
+  });
+
   describe('reportRoundComplete', () => {
     const modelProvider = ModelProvider.OpenAI;
+    const imageAttachments: VersionedAttachment[] = [
+      {
+        id: 'image-1',
+        type: AttachmentType.image,
+        versions: [],
+        current_version: 1,
+      },
+      {
+        id: 'image-2',
+        type: AttachmentType.image,
+        versions: [],
+        current_version: 1,
+      },
+    ];
     const round: ConversationRound = {
       id: 'round-1',
       input: { message: 'hi' },
@@ -86,6 +226,7 @@ describe('AnalyticsService', () => {
         round,
         roundCount: 2,
         modelProvider,
+        conversationAttachments: [],
       });
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.RoundComplete, {
@@ -93,6 +234,7 @@ describe('AnalyticsService', () => {
         attachments: undefined,
         conversation_id: 'conversation-1',
         execution_id: undefined,
+        origin: undefined,
         input_tokens: 4,
         llm_calls: 3,
         message_length: 2,
@@ -112,14 +254,77 @@ describe('AnalyticsService', () => {
       });
     });
 
-    it('keeps the real tool id in tools_invoked for built-in tools (by tool_type)', () => {
+    it('reports reasoning tokens and the distinct models of the round', () => {
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conversation-1',
+        round: {
+          ...round,
+          model_usage: {
+            ...round.model_usage,
+            reasoning_tokens: 3,
+            connectors: [
+              {
+                connector_id: 'c1',
+                model: 'gpt-97q',
+                llm_calls: 2,
+                input_tokens: 3,
+                output_tokens: 4,
+              },
+              {
+                connector_id: 'c2',
+                model: 'small-1',
+                llm_calls: 1,
+                input_tokens: 1,
+                output_tokens: 1,
+              },
+              {
+                connector_id: 'c3',
+                model: 'small-1',
+                llm_calls: 1,
+                input_tokens: 1,
+                output_tokens: 1,
+              },
+            ],
+          },
+        },
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: [],
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundComplete,
+        expect.objectContaining({
+          reasoning_tokens: 3,
+          models: ['gpt-97q', 'small-1'],
+          models_count: 2,
+        })
+      );
+    });
+
+    it('omits the models of a round without a per-model breakdown', () => {
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        round,
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: [],
+      });
+
+      const [, payload] = analytics.reportEvent.mock.calls[0];
+      expect(payload).not.toHaveProperty('models');
+      expect(payload).not.toHaveProperty('models_count');
+    });
+
+    it('reports attachments.read in tools_invoked', () => {
       const roundWithBuiltinTool: ConversationRound = {
         ...round,
         steps: [
           {
             type: ConversationRoundStepType.toolCall,
             tool_call_id: 'tool-call-1',
-            tool_id: 'platform.dashboard.manage_dashboard',
+            tool_id: attachmentTools.read,
             tool_type: ToolType.builtin,
             params: {},
             results: [],
@@ -133,13 +338,81 @@ describe('AnalyticsService', () => {
         round: roundWithBuiltinTool,
         roundCount: 2,
         modelProvider,
+        conversationAttachments: [],
       });
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(
         AGENT_BUILDER_EVENT_TYPES.RoundComplete,
         expect.objectContaining({
-          tools_invoked: ['platform.dashboard.manage_dashboard'],
+          tools_invoked: [attachmentTools.read],
         })
+      );
+    });
+
+    it('reports image attachments referenced by the user', () => {
+      const roundWithImageAttachments: ConversationRound = {
+        ...round,
+        input: {
+          message: 'What is in these images?',
+          attachment_refs: [
+            {
+              attachment_id: 'image-1',
+              version: 1,
+              actor: ATTACHMENT_REF_ACTOR.user,
+            },
+            {
+              attachment_id: 'image-2',
+              version: 1,
+              actor: ATTACHMENT_REF_ACTOR.user,
+            },
+          ],
+        },
+      };
+
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conversation-1',
+        round: roundWithImageAttachments,
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: imageAttachments,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundComplete,
+        expect.objectContaining({
+          attachments: [AttachmentType.image, AttachmentType.image],
+        })
+      );
+    });
+
+    it('does not report image attachments referenced by the agent', () => {
+      const roundWithAgentImageReference: ConversationRound = {
+        ...round,
+        input: {
+          message: 'Continue',
+          attachment_refs: [
+            {
+              attachment_id: 'image-1',
+              version: 1,
+              actor: ATTACHMENT_REF_ACTOR.agent,
+            },
+          ],
+        },
+      };
+
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conversation-1',
+        round: roundWithAgentImageReference,
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: imageAttachments,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundComplete,
+        expect.objectContaining({ attachments: undefined })
       );
     });
 
@@ -150,6 +423,7 @@ describe('AnalyticsService', () => {
         round,
         roundCount: 2,
         modelProvider,
+        conversationAttachments: [],
       });
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.RoundComplete, {
@@ -157,6 +431,7 @@ describe('AnalyticsService', () => {
         attachments: undefined,
         conversation_id: 'conversation-1',
         execution_id: undefined,
+        origin: undefined,
         input_tokens: 4,
         llm_calls: 3,
         message_length: 2,
@@ -174,6 +449,53 @@ describe('AnalyticsService', () => {
         tool_call_errors: 0,
         tools_invoked: ['custom-3c9388baa67aef90'],
       });
+    });
+
+    it('reports the origin stamped on the round', () => {
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conversation-1',
+        round: { ...round, origin: { type: ConversationOriginType.Slack } },
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: [],
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundComplete,
+        expect.objectContaining({ origin: ConversationOriginType.Slack })
+      );
+    });
+
+    it('reports the workflow execution id', () => {
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conversation-1',
+        round,
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: [],
+        workflowExecutionId: 'workflow-run-1',
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundComplete,
+        expect.objectContaining({ workflow_execution_id: 'workflow-run-1' })
+      );
+    });
+
+    it('leaves the workflow execution id unset for a round no workflow step started', () => {
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conversation-1',
+        round,
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: [],
+      });
+
+      const [[, payload]] = analytics.reportEvent.mock.calls;
+      expect(payload).toEqual(expect.objectContaining({ workflow_execution_id: undefined }));
     });
 
     it('does not throw when reporting throws', () => {
@@ -188,6 +510,7 @@ describe('AnalyticsService', () => {
           round,
           roundCount: 2,
           modelProvider,
+          conversationAttachments: [],
         })
       ).not.toThrow();
     });
@@ -203,6 +526,7 @@ describe('AnalyticsService', () => {
         round,
         roundCount: 2,
         modelProvider,
+        conversationAttachments: [],
       });
 
       expect(logger.debug).toHaveBeenCalled();
@@ -449,6 +773,82 @@ describe('AnalyticsService', () => {
     });
   });
 
+  describe('reportCompactionTriggered', () => {
+    it('reports the CompactionTriggered event with correct field mapping', () => {
+      service.reportCompactionTriggered({
+        agentId: agentBuilderDefaultAgentId,
+        executionId: 'exec-1',
+        trigger: 'proactive',
+        tokenCountBefore: 90_000,
+        tokenCountAfter: 30_000,
+        summarizedCycleCount: 4,
+        modelId: 'connector-abc',
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.CompactionTriggered,
+        {
+          agent_id: agentBuilderDefaultAgentId,
+          execution_id: 'exec-1',
+          trigger: 'proactive',
+          token_count_before: 90_000,
+          token_count_after: 30_000,
+          summarized_cycle_count: 4,
+          model_id: 'connector-abc',
+        }
+      );
+    });
+
+    it('hashes a custom agent_id', () => {
+      service.reportCompactionTriggered({
+        agentId: 'my_custom_agent',
+        trigger: 'forced',
+        tokenCountBefore: 50_000,
+        tokenCountAfter: 10_000,
+        summarizedCycleCount: 2,
+        modelId: 'connector-abc',
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.CompactionTriggered,
+        expect.objectContaining({ agent_id: 'custom-da3031a511e7fadf', execution_id: undefined })
+      );
+    });
+
+    it('emits literal "unknown" when agentId is omitted', () => {
+      service.reportCompactionTriggered({
+        trigger: 'proactive',
+        tokenCountBefore: 1,
+        tokenCountAfter: 1,
+        summarizedCycleCount: 1,
+        modelId: 'connector-abc',
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.CompactionTriggered,
+        expect.objectContaining({ agent_id: 'unknown' })
+      );
+    });
+
+    it('does not throw when reporting throws', () => {
+      analytics.reportEvent.mockImplementation(() => {
+        throw new Error('boom');
+      });
+
+      expect(() =>
+        service.reportCompactionTriggered({
+          agentId: 'my_custom_agent',
+          trigger: 'proactive',
+          tokenCountBefore: 1,
+          tokenCountAfter: 1,
+          summarizedCycleCount: 1,
+          modelId: 'connector-abc',
+        })
+      ).not.toThrow();
+      expect(logger.debug).toHaveBeenCalled();
+    });
+  });
+
   describe('reportPluginImported', () => {
     it('reports source_type `url` when sourceType is "url" and hashes the plugin id', () => {
       service.reportPluginImported({
@@ -506,6 +906,201 @@ describe('AnalyticsService', () => {
     });
   });
 
+  describe('reportExecutionComplete', () => {
+    const modelProvider = ModelProvider.OpenAI;
+
+    const buildRound = (parts: Partial<ConversationRound> = {}): ConversationRound =>
+      ({
+        id: 'round-1',
+        status: ConversationRoundStatus.completed,
+        input: { message: 'hi' },
+        response: { message: 'there' },
+        steps: [],
+        started_at: '2026-01-01T00:00:00.000Z',
+        time_to_first_token: 10,
+        time_to_last_token: 20,
+        model_usage: { connector_id: 'c1', llm_calls: 1, input_tokens: 4, output_tokens: 2 },
+        ...parts,
+      } as ConversationRound);
+
+    const telemetry = (parts: Partial<ExecutionTelemetry> = {}): ExecutionTelemetry => ({
+      roundId: 'round-1',
+      roundCount: 2,
+      executionIndex: 1,
+      executionRound: buildRound(),
+      roundTotals: buildRound({
+        model_usage: {
+          connector_id: 'c1',
+          llm_calls: 3,
+          input_tokens: 10,
+          output_tokens: 5,
+        },
+      }),
+      isRoundTerminal: true,
+      isResume: true,
+      pendingPromptTypes: [],
+      promptResponseTypes: [],
+      promptResponseOutcomes: [],
+      ...parts,
+    });
+
+    it("reports this execution's own usage, not the round totals", () => {
+      service.reportExecutionComplete({
+        agentId: 'my-agent',
+        conversationId: 'conversation-1',
+        executionId: 'execution-1',
+        modelProvider,
+        conversationAttachments: [],
+        telemetry: telemetry(),
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+      const [eventType, payload] = analytics.reportEvent.mock.calls[0];
+      expect(eventType).toBe(AGENT_BUILDER_EVENT_TYPES.ExecutionComplete);
+      expect(payload).toEqual(
+        expect.objectContaining({
+          round_id: 'round-1',
+          round_number: 2,
+          execution_index: 1,
+          trigger: 'prompt_response',
+          outcome: 'responded',
+          input_tokens: 4,
+          output_tokens: 2,
+          llm_calls: 1,
+          // the round's message, which only the first execution carries
+          message_length: 2,
+          response_length: 5,
+        })
+      );
+    });
+
+    it("reports this execution's reasoning tokens and models", () => {
+      service.reportExecutionComplete({
+        agentId: 'my-agent',
+        modelProvider,
+        conversationAttachments: [],
+        telemetry: telemetry({
+          executionRound: buildRound({
+            model_usage: {
+              connector_id: 'c1',
+              llm_calls: 1,
+              input_tokens: 4,
+              output_tokens: 2,
+              reasoning_tokens: 1,
+              connectors: [
+                {
+                  connector_id: 'c1',
+                  model: 'gpt-97q',
+                  llm_calls: 1,
+                  input_tokens: 4,
+                  output_tokens: 2,
+                  reasoning_tokens: 1,
+                },
+              ],
+            },
+          }),
+        }),
+      });
+
+      const [, payload] = analytics.reportEvent.mock.calls[0];
+      expect(payload).toEqual(
+        expect.objectContaining({ reasoning_tokens: 1, models: ['gpt-97q'], models_count: 1 })
+      );
+    });
+
+    it('resolves user image attachments from refs, as round_complete does', () => {
+      const conversationAttachments: VersionedAttachment[] = [
+        { id: 'image-1', type: AttachmentType.image, versions: [], current_version: 1 },
+      ];
+
+      service.reportExecutionComplete({
+        agentId: 'my-agent',
+        modelProvider,
+        conversationAttachments,
+        telemetry: telemetry({
+          roundTotals: buildRound({
+            input: {
+              message: 'what is this?',
+              attachment_refs: [
+                { attachment_id: 'image-1', version: 1, actor: ATTACHMENT_REF_ACTOR.user },
+                { attachment_id: 'image-1', version: 1, actor: ATTACHMENT_REF_ACTOR.agent },
+              ],
+            },
+          }),
+        }),
+      });
+
+      const [, payload] = analytics.reportEvent.mock.calls[0];
+      expect(payload).toEqual(expect.objectContaining({ attachments: [AttachmentType.image] }));
+    });
+
+    it('marks a pause and carries the prompt types it paused on', () => {
+      service.reportExecutionComplete({
+        agentId: 'my-agent',
+        modelProvider,
+        conversationAttachments: [],
+        telemetry: telemetry({
+          isRoundTerminal: false,
+          isResume: false,
+          executionIndex: 0,
+          pendingPromptTypes: ['confirmation'],
+        }),
+      });
+
+      const [, payload] = analytics.reportEvent.mock.calls[0];
+      expect(payload).toEqual(
+        expect.objectContaining({
+          trigger: 'user_message',
+          outcome: 'prompt_requested',
+          prompt_count: 1,
+          prompt_types: ['confirmation'],
+        })
+      );
+    });
+
+    it('omits the optional HITL fields when there are none', () => {
+      service.reportExecutionComplete({
+        agentId: 'my-agent',
+        modelProvider,
+        conversationAttachments: [],
+        telemetry: telemetry({ isResume: false, executionIndex: 0 }),
+      });
+
+      const [, payload] = analytics.reportEvent.mock.calls[0];
+      expect(payload).not.toHaveProperty('prompt_count');
+      expect(payload).not.toHaveProperty('prompt_response_types');
+      expect(payload).not.toHaveProperty('human_latency_ms');
+    });
+
+    it('carries the human latency when it was measured', () => {
+      service.reportExecutionComplete({
+        agentId: 'my-agent',
+        modelProvider,
+        conversationAttachments: [],
+        telemetry: telemetry({ humanLatencyMs: 30_000 }),
+      });
+
+      const [, payload] = analytics.reportEvent.mock.calls[0];
+      expect(payload).toEqual(expect.objectContaining({ human_latency_ms: 30_000 }));
+    });
+
+    it('does not throw when reporting fails', () => {
+      analytics.reportEvent.mockImplementation(() => {
+        throw new Error('EBT unavailable');
+      });
+
+      expect(() =>
+        service.reportExecutionComplete({
+          agentId: 'my-agent',
+          modelProvider,
+          conversationAttachments: [],
+          telemetry: telemetry(),
+        })
+      ).not.toThrow();
+      expect(logger.debug).toHaveBeenCalled();
+    });
+  });
+
   describe('reportRoundError', () => {
     const defaultArgs = {
       agentId: agentBuilderDefaultAgentId,
@@ -527,6 +1122,33 @@ describe('AnalyticsService', () => {
         expect.objectContaining({
           error_message: `${'a'.repeat(500)}`,
         })
+      );
+    });
+
+    it('reports the round origin as origin', () => {
+      service.reportRoundError({ ...defaultArgs, roundOrigin: ConversationOriginType.Slack });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundError,
+        expect.objectContaining({ origin: ConversationOriginType.Slack })
+      );
+    });
+
+    it('leaves origin unset when the round has no external origin', () => {
+      service.reportRoundError(defaultArgs);
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundError,
+        expect.objectContaining({ origin: undefined })
+      );
+    });
+
+    it('reports the workflow execution id', () => {
+      service.reportRoundError({ ...defaultArgs, workflowExecutionId: 'workflow-run-1' });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundError,
+        expect.objectContaining({ workflow_execution_id: 'workflow-run-1' })
       );
     });
   });
@@ -573,6 +1195,23 @@ describe('AnalyticsService', () => {
         expect.objectContaining({
           tool_id: 'platform.dashboard.manage_dashboard',
         })
+      );
+    });
+
+    it('reports the conversation origin alongside the tool call source', () => {
+      service.reportToolCallSuccess({
+        agentId: agentBuilderDefaultAgentId,
+        origin: ConversationOriginType.Slack,
+        toolId: 'my_custom_tool',
+        toolCallId: 'tc-1',
+        source: 'agent',
+        resultTypes: ['other'],
+        duration: 50,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.ToolCallSuccess,
+        expect.objectContaining({ origin: ConversationOriginType.Slack, source: 'agent' })
       );
     });
 
@@ -654,6 +1293,24 @@ describe('AnalyticsService', () => {
         expect.objectContaining({
           error_message: 'x'.repeat(500),
         })
+      );
+    });
+
+    it('reports the conversation origin alongside the tool call source', () => {
+      service.reportToolCallError({
+        agentId: agentBuilderDefaultAgentId,
+        origin: ConversationOriginType.Slack,
+        toolId: 'tool-1',
+        toolCallId: 'tc-1',
+        source: 'agent',
+        errorType: 'tool_error',
+        errorMessage: 'fail',
+        duration: 50,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.ToolCallError,
+        expect.objectContaining({ origin: ConversationOriginType.Slack, source: 'agent' })
       );
     });
 

@@ -414,7 +414,9 @@ export const AnsibleControllerConnector: ConnectorSpec = {
     ),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['agentBuilder'],
+    // Step 2 of the two-step release. `.ansible_controller` shipped with
+    // ['agentBuilder'] only and is now registered on every Production-NonCanary node.
+    supportedFeatureIds: ['agentBuilder', 'workflows'],
   },
 
   auth: {
@@ -502,6 +504,7 @@ export const AnsibleControllerConnector: ConnectorSpec = {
   actions: {
     request: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Make an authenticated request to any Controller / AWX API path. Prefer typed actions when they fit. ' +
         'Paths under the configured apiBasePath are typical (e.g. /job_templates/). Streaming and ' +
@@ -521,6 +524,7 @@ export const AnsibleControllerConnector: ConnectorSpec = {
 
     listJobTemplates: {
       isTool: true,
+      scope: 'read',
       description:
         'List job templates with optional filters. Returns a slim summary per template (id, name, playbook, ask_* flags, org/inventory/project).',
       input: ListJobTemplatesInputSchema,
@@ -547,6 +551,7 @@ export const AnsibleControllerConnector: ConnectorSpec = {
 
     getJobTemplate: {
       isTool: true,
+      scope: 'read',
       description:
         'Get a job template by id, including ask_* / survey flags so you know what launch prompts are required.',
       input: GetJobTemplateInputSchema,
@@ -561,6 +566,7 @@ export const AnsibleControllerConnector: ConnectorSpec = {
 
     getJobTemplateLaunchOptions: {
       isTool: true,
+      scope: 'read',
       description:
         'GET launch options for a job template (defaults, survey, ask_* prompts). Call this before launchJobTemplate.',
       input: GetJobTemplateLaunchOptionsInputSchema,
@@ -574,6 +580,7 @@ export const AnsibleControllerConnector: ConnectorSpec = {
 
     launchJobTemplate: {
       isTool: true,
+      scope: 'write',
       description:
         'Launch a job template (POST …/launch/). This mutates real infrastructure — confirm template id, inventory/limit, and extra_vars first. Prefer getJobTemplateLaunchOptions beforehand.',
       input: LaunchJobTemplateInputSchema,
@@ -608,6 +615,7 @@ export const AnsibleControllerConnector: ConnectorSpec = {
 
     listJobs: {
       isTool: true,
+      scope: 'read',
       description:
         'List jobs with optional status / template / inventory filters. Returns slim summaries suitable for diagnose loops.',
       input: ListJobsInputSchema,
@@ -633,6 +641,7 @@ export const AnsibleControllerConnector: ConnectorSpec = {
 
     getJob: {
       isTool: true,
+      scope: 'read',
       description:
         'Get a job by id — status, timestamps, playbook, inventory/template summaries, and a capped result_traceback.',
       input: GetJobInputSchema,
@@ -651,6 +660,7 @@ export const AnsibleControllerConnector: ConnectorSpec = {
 
     getJobStdout: {
       isTool: true,
+      scope: 'read',
       description: `Retrieve job stdout (format=txt by default). Output is capped to the last ${MAX_STDOUT_CHARS} characters. html format is not supported.`,
       input: GetJobStdoutInputSchema,
       output: lazySchema(() =>
@@ -688,6 +698,7 @@ export const AnsibleControllerConnector: ConnectorSpec = {
 
     listJobEvents: {
       isTool: true,
+      scope: 'read',
       description:
         'List job events for a job. Prefer failed=true when diagnosing. Returns slim event payloads (task, host, event, short stdout).',
       input: ListJobEventsInputSchema,
@@ -715,6 +726,7 @@ export const AnsibleControllerConnector: ConnectorSpec = {
 
     cancelJob: {
       isTool: true,
+      scope: 'destroy',
       description: 'Cancel a running or pending job (POST …/cancel/).',
       input: CancelJobInputSchema,
       handler: async (ctx, input: CancelJobInput) => {
@@ -728,6 +740,7 @@ export const AnsibleControllerConnector: ConnectorSpec = {
 
     listInventories: {
       isTool: true,
+      scope: 'read',
       description: 'List inventories with optional organization / search filters. Slim response.',
       input: ListInventoriesInputSchema,
       handler: async (ctx, input: ListInventoriesInput) => {
@@ -748,6 +761,7 @@ export const AnsibleControllerConnector: ConnectorSpec = {
 
     listHosts: {
       isTool: true,
+      scope: 'read',
       description: 'List hosts, optionally filtered by inventory / name / enabled. Slim response.',
       input: ListHostsInputSchema,
       handler: async (ctx, input: ListHostsInput) => {
@@ -769,6 +783,7 @@ export const AnsibleControllerConnector: ConnectorSpec = {
 
     listProjects: {
       isTool: true,
+      scope: 'read',
       description:
         'List projects (SCM type/url/branch summary). Credential secrets are scrubbed from the response.',
       input: ListProjectsInputSchema,
@@ -790,6 +805,7 @@ export const AnsibleControllerConnector: ConnectorSpec = {
 
     getMe: {
       isTool: true,
+      scope: 'read',
       description:
         'Return the authenticated user (GET …/me/). Useful for connectivity checks and agent context.',
       input: GetMeInputSchema,

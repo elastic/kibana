@@ -47,6 +47,7 @@ import type { TransformConfigUnion } from '../../../../../../common/types/transf
 import { isLatestTransform } from '../../../../../../common/types/transform';
 
 import { getCreateTransformRequestBody } from '../../../../common';
+import { useGetTransformCpsEnabled } from '../../../../hooks';
 import type { SearchItems } from '../../../../hooks/use_search_items';
 import { useAppDependencies } from '../../../../app_dependencies';
 import { useTransformHasLinkedProjects } from '../../../../hooks/use_transform_has_linked_projects';
@@ -117,8 +118,14 @@ export const Wizard: FC<WizardProps> = React.memo(
     const appDependencies = useAppDependencies();
     const { uiSettings, data, dataViewEditor, fieldFormats, charts, cps } = appDependencies;
     const cpsManager = cps?.cpsManager;
-    const linkedProjectsState = useTransformHasLinkedProjects(cpsManager);
-    const canUseProjectScope = Boolean(cps?.isTierEligible && cpsManager && !cloneConfig);
+    const canCheckProjectScope = Boolean(cps?.isTierEligible && cpsManager && !cloneConfig);
+    const { data: isTransformCpsEnabled } = useGetTransformCpsEnabled({
+      enabled: canCheckProjectScope,
+    });
+    const canUseProjectScope = canCheckProjectScope && isTransformCpsEnabled === true;
+    const linkedProjectsState = useTransformHasLinkedProjects(
+      canUseProjectScope ? cpsManager : undefined
+    );
     const shouldUseProjectScope = Boolean(
       canUseProjectScope && linkedProjectsState.hasLinkedProjects !== false
     );
