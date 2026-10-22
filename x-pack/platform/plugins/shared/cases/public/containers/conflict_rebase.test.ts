@@ -74,6 +74,54 @@ describe('conflict_rebase', () => {
     });
   });
 
+  it('keeps rebasing while the conflict is caused by system drift only', async () => {
+    const executeRequest = jest
+      .fn()
+      .mockRejectedValueOnce(conflictError)
+      .mockRejectedValueOnce(conflictError)
+      .mockResolvedValueOnce('ok');
+    const fetchLatestCase = jest
+      .fn()
+      .mockResolvedValueOnce({ ...basicCaseFixture, incrementalId: 42, version: 'WzQ4LDFd' })
+      .mockResolvedValueOnce({ ...basicCaseFixture, incrementalId: 43, version: 'WzQ5LDFd' });
+
+    const response = await rebaseCaseMutationOnConflict({
+      request: { caseId: basicCaseFixture.id, version: basicCaseFixture.version },
+      preRequestServerState: [basicCaseFixture],
+      executeRequest,
+      fetchLatestCase,
+      buildRetryRequest: ({ request, latestCases }) => ({
+        ...request,
+        version: latestCases.get(basicCaseFixture.id)?.version ?? request.version,
+      }),
+    });
+
+    expect(response).toBe('ok');
+    expect(executeRequest).toHaveBeenNthCalledWith(3, {
+      caseId: basicCaseFixture.id,
+      version: 'WzQ5LDFd',
+    });
+  });
+
+  it('gives up rebasing after the retry cap is reached', async () => {
+    const executeRequest = jest.fn().mockRejectedValue(conflictError);
+    const fetchLatestCase = jest
+      .fn()
+      .mockResolvedValue({ ...basicCaseFixture, incrementalId: 42, version: 'WzQ4LDFd' });
+
+    await expect(
+      rebaseCaseMutationOnConflict({
+        request: { caseId: basicCaseFixture.id, version: basicCaseFixture.version },
+        preRequestServerState: [basicCaseFixture],
+        executeRequest,
+        fetchLatestCase,
+        buildRetryRequest: ({ request }) => request,
+      })
+    ).rejects.toThrow('Conflict');
+
+    expect(executeRequest).toHaveBeenCalledTimes(4);
+  });
+
   it('re-throws the original error when user-visible fields changed on the latest case', async () => {
     const executeRequest = jest
       .fn()
