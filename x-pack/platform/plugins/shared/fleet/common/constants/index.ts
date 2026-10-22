@@ -81,12 +81,3 @@ export const AUTO_UPGRADE_DEFAULT_RETRIES = ['30m', '1h', '2h', '4h', '8h', '16h
 export const FLEET_LOG_INDICES = [AGENT_STATUS_CHANGE_DATA_STREAM_NAME];
 
 export const SCHEDULED_UNENROLL_ACTION_ID_PREFIX = 'ScheduledUnenrollInactiveAgents-';
-
-/**
- * Number of services the AWS onboarding flow offers, shown as "Collection of N" on the AWS tile in
- * the catalog. It is the number of ECS-format entries in the onboarding service matrix; the
- * OpenTelemetry entries are variants of those. Fleet cannot import the matrix (ingest_hub depends on
- * Fleet), a test in ingest_hub fails when the two drift apart:
- * x-pack/platform/plugins/shared/ingest_hub/public/onboarding/aws_service_matrix.test.ts
- */
-export const AWS_ONBOARDING_SERVICE_COUNT = 40;

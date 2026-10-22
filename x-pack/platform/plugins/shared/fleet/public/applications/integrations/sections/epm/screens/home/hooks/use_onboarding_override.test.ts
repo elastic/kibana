@@ -23,7 +23,6 @@ jest.mock('../../../../../hooks', () => ({
   }),
 }));
 
-import { AWS_ONBOARDING_SERVICE_COUNT } from '../../../../../../../services/aws_onboarding_override';
 import { useOnboardingOverride } from './use_onboarding_override';
 
 const ALL_HIDDEN_NAMES = [
@@ -142,11 +141,21 @@ describe('useOnboardingOverride', () => {
       expect(tile.categories).toEqual(['aws', 'security', 'observability']);
     });
 
-    it('sets the collection size to the number of services of the onboarding flow', () => {
+    it('sets the collection size to the number of services behind the tile', () => {
+      const guardduty = { ...makeCard('aws', 'epr:aws-guardduty'), title: 'Amazon GuardDuty' };
+      const cloudtrail = { ...makeCard('aws', 'epr:aws-cloudtrail'), title: 'AWS CloudTrail' };
+      const otel = { ...makeCard('aws_cloudtrail_otel'), title: 'AWS CloudTrail OpenTelemetry' };
+      const { result } = renderHook(() => useOnboardingOverride());
+      const [tile] = result.current.applyOnboardingOverride([guardduty, cloudtrail, otel]);
+
+      expect(tile.collectionSize).toBe(2);
+    });
+
+    it('does not set a collection size when no service is hidden behind the tile', () => {
       const { result } = renderHook(() => useOnboardingOverride());
       const [tile] = result.current.applyOnboardingOverride([makeCard('aws', 'epr:aws')]);
 
-      expect(tile.collectionSize).toBe(AWS_ONBOARDING_SERVICE_COUNT);
+      expect(tile.collectionSize).toBeUndefined();
     });
 
     it('leaves OpenTelemetry and content packages out of the search members', () => {

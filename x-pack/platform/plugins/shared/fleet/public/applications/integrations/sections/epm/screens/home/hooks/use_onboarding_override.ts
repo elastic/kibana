@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { useStartServices } from '../../../../../hooks';
 import {
   AWS_ONBOARDING_PACKAGE_NAME,
-  AWS_ONBOARDING_SERVICE_COUNT,
   AWS_TITLE,
   ONBOARDING_APP_ID,
   ONBOARDING_AWS_PATH,
@@ -84,7 +83,7 @@ export function useOnboardingOverride() {
         categories,
         searchableContent,
         searchMembers: members,
-        collectionSize: AWS_ONBOARDING_SERVICE_COUNT,
+        ...(members.length > 0 ? { collectionSize: members.length } : {}),
         onCardClick: navigateToOnboarding,
       };
 

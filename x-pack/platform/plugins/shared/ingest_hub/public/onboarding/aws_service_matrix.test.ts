@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { AWS_ONBOARDING_SERVICE_COUNT } from '@kbn/fleet-plugin/common';
 import type { AwsServiceMatrixEntry, DeploymentMethod, SignalType } from './aws_service_matrix';
 import {
   AWS_SERVICES_STATIC,
@@ -66,15 +65,6 @@ const BUILT_MATRIX = buildAwsServiceMatrix(MOCK_PACKAGES, AWS_SERVICES_STATIC);
 describe('AWS service matrix', () => {
   it('should have at least 40 entries', () => {
     expect(BUILT_MATRIX.length).toBeGreaterThanOrEqual(40);
-  });
-
-  it('matches the service count Fleet shows on the AWS catalog tile', () => {
-    // Fleet hardcodes AWS_ONBOARDING_SERVICE_COUNT (it cannot import this matrix). The OpenTelemetry
-    // entries are variants of the ECS ones, so the count is the ECS-format services.
-    const ecsServices = AWS_SERVICES_STATIC.filter(
-      (entry) => entry.showInUI !== false && (entry.dataFormat ?? 'ecs') === 'ecs'
-    );
-    expect(AWS_ONBOARDING_SERVICE_COUNT).toBe(ecsServices.length);
   });
 
   it('should have no duplicate ids', () => {
