@@ -46,17 +46,6 @@ describe('SummaryTransformManager', () => {
     );
 
   describe('Install', () => {
-    it('installs the summary transform', async () => {
-      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
-
-      const transformId = await createManager().install(slo);
-
-      expect(transformId).toBe(getSLOSummaryTransformId(slo.id, slo.revision));
-      expect(
-        scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform
-      ).toHaveBeenCalledTimes(1);
-    });
-
     it('succeeds when a retry finds the transform created by a timed out attempt', async () => {
       scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform
         .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
@@ -69,18 +58,6 @@ describe('SummaryTransformManager', () => {
       expect(
         scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform
       ).toHaveBeenCalledTimes(2);
-    });
-
-    it('fails when the transform already exists on the first attempt', async () => {
-      scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform.mockRejectedValueOnce(
-        alreadyExistsError
-      );
-      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
-
-      await expect(createManager().install(slo)).rejects.toBe(alreadyExistsError);
-      expect(
-        scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform
-      ).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -440,7 +440,6 @@ describe('UpdateSLO', () => {
       ).toHaveBeenCalledTimes(2);
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
-      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalled();
       expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledWith(
         expect.objectContaining({ index: SUMMARY_TEMP_INDEX_NAME }),
         { ignore: [404] }

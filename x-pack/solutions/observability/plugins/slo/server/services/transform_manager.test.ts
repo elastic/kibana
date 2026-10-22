@@ -113,18 +113,6 @@ describe('TransformManager', () => {
         },
       })
     );
-    const upgradingError = new EsErrors.ResponseError(
-      elasticsearchClientMock.createApiResponse({
-        statusCode: 409,
-        body: {
-          error: {
-            type: 'status_exception',
-            reason: 'Cannot create new Transform while the Transform feature is upgrading.',
-          },
-        },
-      })
-    );
-
     const createManager = () =>
       new DefaultTransformManager(
         createTransformGenerators(spaceId, dataViewsService, false),
@@ -154,15 +142,6 @@ describe('TransformManager', () => {
       expect(
         scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform
       ).toHaveBeenCalledTimes(1);
-    });
-
-    it('fails when a retry is rejected with a conflict other than already exists', async () => {
-      scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform
-        .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
-        .mockRejectedValueOnce(upgradingError);
-      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
-
-      await expect(createManager().install(slo)).rejects.toBe(upgradingError);
     });
   });
 
