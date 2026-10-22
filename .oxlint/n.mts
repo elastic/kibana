@@ -1,0 +1,46 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { OxlintOverride } from 'oxlint';
+
+export const nOverrides: OxlintOverride[] = [
+  {
+    files: [
+      // Security Solution and related packages
+      'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
+      'x-pack/solutions/security/plugins/elastic_assistant/**/*.{js,mjs,ts,tsx}',
+      'x-pack/platform/plugins/shared/automatic_import/**/*.{js,mjs,ts,tsx}',
+      'x-pack/platform/packages/shared/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
+      'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
+      'x-pack/platform/packages/shared/kbn-langchain/**/*.{js,mjs,ts,tsx}',
+      'x-pack/solutions/security/packages/**/*.{js,mjs,ts,tsx}',
+      'x-pack/solutions/security/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
+      'x-pack/solutions/security/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
+      'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
+      'x-pack/solutions/security/plugins/timelines/**/*.{js,mjs,ts,tsx}',
+      'x-pack/platform/plugins/shared/cases/**/*.{js,mjs,ts,tsx}',
+      'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
+      'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
+      // Lists
+      'x-pack/solutions/security/plugins/lists/**/*.{js,mjs,ts,tsx}',
+      // Workflows
+      'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
+      'src/platform/plugins/shared/workflows_execution_engine/**/*.{js,mjs,ts,tsx}',
+      'src/platform/plugins/shared/workflows_extensions/**/*.{js,mjs,ts,tsx}',
+      'src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}',
+      'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
+    ],
+    // `no-deprecated-api` only tracks globals such as `Buffer` when they are declared, as the
+    // ESLint `node` env does for these files.
+    env: { node: true },
+    rules: {
+      'n/no-deprecated-api': 'error',
+    },
+  },
+];
