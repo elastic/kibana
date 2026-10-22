@@ -100,18 +100,10 @@ export const useSetUpNightshiftServiceAccount = (): UseMutationResult<
       if (!investigationsClient) {
         throw new Error('Nightshift investigations plugin is unavailable');
       }
-      // The accounts are shared by every space, so a deployment that already has them only needs
-      // them bound here. Only the first space of a deployment looks them up or creates them.
-      const known =
-        queryClient.getQueryData<InvestigatorServiceAccountStatus>(
-          QUERY_KEY
-        )?.knownServiceAccountIds;
-      const serviceAccountIds =
-        known ??
-        (await ensureNightshiftServiceAccounts(
-          createBrowserServiceAccountsApi({ http, serviceAccounts: security.serviceAccounts }),
-          { isServerless }
-        ));
+      const serviceAccountIds = await ensureNightshiftServiceAccounts(
+        createBrowserServiceAccountsApi({ http, serviceAccounts: security.serviceAccounts }),
+        { isServerless }
+      );
       return investigationsClient.fetch(
         'POST /internal/nightshift/investigations/service_account/_enable',
         { signal: null, params: { body: { serviceAccountIds } } }
