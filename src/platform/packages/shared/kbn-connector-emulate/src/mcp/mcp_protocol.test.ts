@@ -9,6 +9,7 @@
 
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { CfWorkerJsonSchemaValidator } from '@modelcontextprotocol/sdk/validation/cfworker-provider.js';
 import type { Emulator } from '../fetch/create_emulator_fetch';
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
 import type { McpSpec } from './mcp_protocol';
@@ -47,7 +48,10 @@ const spec: McpSpec = {
 };
 
 const connect = async ({ fetch: mockFetch }: Emulator): Promise<Client> => {
-  const client = new Client({ name: 'test', version: '1.0.0' });
+  const client = new Client(
+    { name: 'test', version: '1.0.0' },
+    { jsonSchemaValidator: new CfWorkerJsonSchemaValidator() }
+  );
   await client.connect(new StreamableHTTPClientTransport(new URL(ENDPOINT), { fetch: mockFetch }));
   return client;
 };
