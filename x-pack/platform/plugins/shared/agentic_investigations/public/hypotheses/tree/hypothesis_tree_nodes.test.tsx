@@ -22,7 +22,8 @@ import {
   HypothesisTreeNode,
   type HypothesisTreeFlowNode,
 } from './hypothesis_tree_nodes';
-import { SubjectLinksContext, type SubjectLinks } from '../../subjects/attachments/subject_href';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { SubjectLinkServices } from '../../subjects/attachments/subject_link';
 
 jest.mock('@kbn/proposals-plugin/public');
 
@@ -31,19 +32,19 @@ const flags = { isSelected: false, isDimmed: false, selectedActionIndex: null };
 const renderNode = (
   data: HypothesisTreeFlowNode['data'],
   actions = { onSelectAction: jest.fn(), onSelectNode: jest.fn() },
-  subjectLinks: SubjectLinks = {}
+  services: SubjectLinkServices = {}
 ) => {
   render(
     <EuiProvider>
       <I18nProvider>
         <ReactFlowProvider>
-          <SubjectLinksContext.Provider value={subjectLinks}>
+          <KibanaContextProvider services={services}>
             <HypothesisTreeActionsContext.Provider value={actions}>
               <HypothesisTreeNode
                 {...({ id: 'node', data } as NodeProps<HypothesisTreeFlowNode>)}
               />
             </HypothesisTreeActionsContext.Provider>
-          </SubjectLinksContext.Provider>
+          </KibanaContextProvider>
         </ReactFlowProvider>
       </I18nProvider>
     </EuiProvider>
@@ -143,9 +144,21 @@ describe('HypothesisTreeNode', () => {
     expect(link).toHaveAttribute('target', '_blank');
   });
 
-  it('links a significant event trigger where the solution resolves it, opened in place', () => {
+  it('links a significant event trigger through its locator, opened in place', async () => {
     const actions = { onSelectAction: jest.fn(), onSelectNode: jest.fn() };
-    const navigateToUrl = jest.fn().mockResolvedValue(undefined);
+    const navigate = jest.fn().mockResolvedValue(undefined);
+    const services = {
+      share: {
+        url: {
+          locators: {
+            get: (locatorId: string) => ({
+              getUrl: async () => `/located/${locatorId}`,
+              navigate,
+            }),
+          },
+        },
+      },
+    } as unknown as SubjectLinkServices;
     renderNode(
       {
         kind: 'trigger',
@@ -156,16 +169,16 @@ describe('HypothesisTreeNode', () => {
         ...flags,
       },
       actions,
-      { resolveSubjectHref: ({ type, id }) => `/app/solution/${type}/${id}`, navigateToUrl }
+      services
     );
 
-    const link = screen.getByTestId('investigationHypothesisTreeTriggerLink');
+    const link = await screen.findByTestId('investigationHypothesisTreeTriggerLink');
     expect(link).toHaveTextContent('View significant event');
-    expect(link).toHaveAttribute('href', '/app/solution/significant_event/se-1');
+    expect(link).toHaveAttribute('href', '/located/SIGNIFICANT_EVENTS_APP_LOCATOR');
     expect(link).not.toHaveAttribute('target');
 
     fireEvent.click(link);
-    expect(navigateToUrl).toHaveBeenCalledWith('/app/solution/significant_event/se-1');
+    expect(navigate).toHaveBeenCalledWith({ tab: 'significant_events', selectedEvent: 'se-1' });
     expect(actions.onSelectNode).not.toHaveBeenCalled();
   });
 

@@ -26,7 +26,6 @@ import type {
   AgenticInvestigationsPublicStartDependencies,
   ImpactEntityOpener,
 } from './types';
-import type { SubjectHrefResolver, SubjectLinks } from './subjects/attachments/subject_href';
 
 const LazyInvestigationCardComponent = React.lazy(async () => {
   const { InvestigationCard } = await import(
@@ -62,16 +61,6 @@ export class AgenticInvestigationsPublicPlugin
   private readonly escalationsEnabled: boolean;
   private readonly groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
   private impactEntityOpener: ImpactEntityOpener | undefined;
-  private subjectHrefResolvers: SubjectHrefResolver[] = [];
-  private readonly resolveSubjectHref: SubjectHrefResolver = (subject) => {
-    for (const resolver of this.subjectHrefResolvers) {
-      const href = resolver(subject);
-      if (href !== undefined) {
-        return href;
-      }
-    }
-    return undefined;
-  };
 
   constructor(context: PluginInitializerContext<AgenticInvestigationsPublicConfig>) {
     this.escalationsEnabled = context.config.get().escalations.enabled;
@@ -92,10 +81,6 @@ export class AgenticInvestigationsPublicPlugin
     startDeps: AgenticInvestigationsPublicStartDependencies
   ): AgenticInvestigationsPublicPluginStart {
     const { agentBuilder } = startDeps;
-    const subjectLinks: SubjectLinks = {
-      resolveSubjectHref: this.resolveSubjectHref,
-      navigateToUrl: core.application.navigateToUrl,
-    };
     if (agentBuilder) {
       registerImpactAttachmentTypes(agentBuilder, () => this.impactEntityOpener);
       if (this.escalationsEnabled) {
@@ -104,7 +89,7 @@ export class AgenticInvestigationsPublicPlugin
           application: core.application,
         });
       }
-      registerSubjectAttachmentTypes(agentBuilder, subjectLinks);
+      registerSubjectAttachmentTypes(agentBuilder, { share: startDeps.share });
       registerHypothesesAttachmentTypes(agentBuilder);
       registerTemplate({
         core,
@@ -114,7 +99,6 @@ export class AgenticInvestigationsPublicPlugin
         escalationsEnabled: this.escalationsEnabled,
         groupedAttachments: this.groupedAttachments,
         getImpactEntityOpener: () => this.impactEntityOpener,
-        subjectLinks,
         templates: this.escalationsEnabled
           ? [investigationTemplate, escalationTemplate]
           : [investigationTemplate],
@@ -124,15 +108,11 @@ export class AgenticInvestigationsPublicPlugin
       registerImpactEntityOpener: (opener) => {
         this.impactEntityOpener = opener;
       },
-      registerSubjectHrefResolver: (resolver) => {
-        this.subjectHrefResolvers = [...this.subjectHrefResolvers, resolver];
-      },
       InvestigationCard: LazyInvestigationCard,
     };
   }
 
   stop() {
     this.impactEntityOpener = undefined;
-    this.subjectHrefResolvers = [];
   }
 }

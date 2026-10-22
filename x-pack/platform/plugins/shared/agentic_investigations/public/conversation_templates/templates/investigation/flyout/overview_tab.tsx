@@ -17,14 +17,8 @@ import type { Investigation } from '../../../../../common';
 import { HypothesisTreeCard } from '../../../../hypotheses/tree/hypothesis_tree_card';
 import { ImpactContent } from '../../../../impact/attachments/impact_view';
 import { SubjectList } from '../../../../subjects/attachments/subject_view';
-import {
-  SubjectLinksContext,
-  type SubjectLinks,
-} from '../../../../subjects/attachments/subject_href';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import { getInvestigationDisplayTitle } from '../to_view_model';
-
-const NO_SUBJECT_LINKS: SubjectLinks = {};
 
 const readMetadataString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.trim().length > 0 ? value : undefined;
@@ -83,8 +77,6 @@ export const InvestigationOverview: React.FC<
   OverviewSlotRenderProps & {
     /** Present when a solution registered an entity flyout. Entity-store ids open it. */
     onOpenEntity?: (entity: ImpactEntityTarget) => void;
-    /** Links subjects (and the hypothesis tree's trigger) to the pages solutions registered. */
-    subjectLinks?: SubjectLinks;
   }
 > = ({
   conversation,
@@ -92,7 +84,6 @@ export const InvestigationOverview: React.FC<
   proposedActionsContent,
   proposedActionsCount,
   onOpenEntity,
-  subjectLinks = NO_SUBJECT_LINKS,
 }) => {
   const { data } = useInvestigation(conversation.id);
   const investigation = useMemo(() => {
@@ -108,15 +99,13 @@ export const InvestigationOverview: React.FC<
   );
 
   return (
-    <SubjectLinksContext.Provider value={subjectLinks}>
-      <OverviewTab
-        investigation={investigation}
-        attachments={conversation.attachments}
-        groupedAttachments={groupedAttachments}
-        proposedActionsContent={proposedActionsContent}
-        proposedActionsCount={proposedActionsCount}
-        sections={sections}
-      />
-    </SubjectLinksContext.Provider>
+    <OverviewTab
+      investigation={investigation}
+      attachments={conversation.attachments}
+      groupedAttachments={groupedAttachments}
+      proposedActionsContent={proposedActionsContent}
+      proposedActionsCount={proposedActionsCount}
+      sections={sections}
+    />
   );
 };

@@ -16,7 +16,7 @@ import type {
 } from '../../../common/subjects/subject';
 import type { InvestigationAttachmentContentProps } from '../../investigation_attachments';
 import { getSubjectTitle, type SubjectRowData } from './subject_title';
-import { useSubjectHref, useSubjectLinkClick } from './subject_href';
+import { useSubjectLink } from './subject_link';
 import {
   OPENS_IN_NEW_TAB,
   TRIGGER_LABEL,
@@ -263,15 +263,14 @@ const getSubjectDescription = (
 
 /**
  * One compact row per subject: an icon for its type, what it is called, and "Trigger · <type>".
- * The row links where `useSubjectHref` resolves the subject to; without a link it is plain text.
+ * The row links where `useSubjectLink` says (the subject's page, else its own link); without a
+ * link it is plain text.
  */
 export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean }> = ({
   subject,
   isNested = false,
 }) => {
-  const href = useSubjectHref(subject);
-  const isExternal = href !== undefined && subject.type === 'slack_thread';
-  const onLinkClick = useSubjectLinkClick(isExternal ? undefined : href);
+  const { href, onClick: onLinkClick, isExternal } = useSubjectLink(subject);
   return (
     <CompactRow
       iconType={SUBJECT_ICONS[subject.type]}

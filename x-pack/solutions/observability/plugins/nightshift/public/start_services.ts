@@ -5,31 +5,22 @@
  * 2.0.
  */
 
-import type { AppUpdater, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { AppUpdater, PluginInitializerContext } from '@kbn/core/public';
 import { catchError, from, map, of } from 'rxjs';
 import type { BehaviorSubject, Subscription } from 'rxjs';
-import { createNightshiftSubjectHrefResolver } from './investigation/subject_href_resolver';
 import type { NightshiftStartDependencies } from './types';
 
-/**
- * Registers optional attachments and investigation subject links, and updates app visibility from
- * the detection availability API.
- */
+/** Registers optional attachments and updates app visibility from the detection availability API. */
 export const startNightshiftServices = ({
-  coreStart,
   pluginsStart,
   appUpdater$,
   context,
 }: {
-  coreStart: CoreStart;
   pluginsStart: NightshiftStartDependencies;
   appUpdater$: BehaviorSubject<AppUpdater>;
   context: PluginInitializerContext;
 }): Subscription => {
-  const { agentBuilder, agenticInvestigations } = pluginsStart;
-  agenticInvestigations?.registerSubjectHrefResolver(
-    createNightshiftSubjectHrefResolver(coreStart.application)
-  );
+  const { agentBuilder } = pluginsStart;
   if (agentBuilder) {
     void import('./chat/agent_builder/significant_event_attachments')
       .then(({ registerNightshiftAgentBuilderAttachments }) => {

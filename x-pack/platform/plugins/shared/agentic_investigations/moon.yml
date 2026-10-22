@@ -58,6 +58,9 @@ dependsOn:
   - '@kbn/core-ui-settings-browser'
   - '@kbn/visualization-utils'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/deeplinks-observability'
+  - '@kbn/share-plugin'
+  - '@kbn/utility-types'
 tags:
   - plugin
   - prod

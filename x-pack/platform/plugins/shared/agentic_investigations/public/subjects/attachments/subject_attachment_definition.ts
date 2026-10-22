@@ -12,7 +12,7 @@ import type {
   InvestigationAttachmentContentProps,
   InvestigationAttachmentRenderer,
 } from '../../investigation_attachments';
-import { SubjectLinksContext, type SubjectLinks } from './subject_href';
+import type { SubjectLinkServices } from './subject_link';
 import { SUBJECT_LABEL, slackChannelLabel, subjectAttachmentLabel } from './translations';
 
 const labelDetail = ({
@@ -31,10 +31,10 @@ const labelDetail = ({
 
 /**
  * Browser UI for the investigation_subject attachment; the content loads on first render and
- * links the subject the way `subjectLinks` says.
+ * links the subject to its page through the `share` locators in `services`.
  */
 export const createSubjectAttachmentRenderer = (
-  subjectLinks: SubjectLinks
+  services: SubjectLinkServices
 ): InvestigationAttachmentRenderer<InvestigationSubject> & {
   type: typeof SUBJECT_ATTACHMENT_TYPE;
 } => ({
@@ -46,13 +46,17 @@ export const createSubjectAttachmentRenderer = (
       : SUBJECT_LABEL,
   icon: 'bullseye',
   loadContent: async () => {
-    const { SubjectView } = await import('./subject_view');
+    const [{ SubjectView }, { KibanaContextProvider }] = await Promise.all([
+      import('./subject_view'),
+      import('@kbn/kibana-react-plugin/public'),
+    ]);
+    // Agent Builder renders attachments in its own React root, without this plugin's services.
     const SubjectViewWithLinks: React.FC<
       InvestigationAttachmentContentProps<InvestigationSubject>
     > = (props) =>
       React.createElement(
-        SubjectLinksContext.Provider,
-        { value: subjectLinks },
+        KibanaContextProvider,
+        { services },
         React.createElement(SubjectView, props)
       );
     return SubjectViewWithLinks;

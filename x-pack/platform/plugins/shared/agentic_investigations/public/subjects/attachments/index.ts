@@ -8,15 +8,12 @@
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { registerInvestigationAttachmentRenderer } from '../../investigation_attachments';
 import { createSubjectAttachmentRenderer } from './subject_attachment_definition';
-import type { SubjectLinks } from './subject_href';
+import type { SubjectLinkServices } from './subject_link';
 
 /** Registers the investigation subject flyout/inline renderer with Agent Builder. */
 export const registerSubjectAttachmentTypes = (
   agentBuilder: AgentBuilderPluginStart,
-  subjectLinks: SubjectLinks
+  services: SubjectLinkServices
 ): void => {
-  registerInvestigationAttachmentRenderer(
-    agentBuilder,
-    createSubjectAttachmentRenderer(subjectLinks)
-  );
+  registerInvestigationAttachmentRenderer(agentBuilder, createSubjectAttachmentRenderer(services));
 };
