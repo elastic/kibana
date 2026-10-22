@@ -437,16 +437,37 @@ export const isExpired = (proposal: Pick<Proposal, 'status'>): boolean =>
   proposal.status === 'expired';
 
 /**
- * A status that has settled. `pending` and `executing` are the only two a
- * proposal can still be moved out of.
+ * Gives the phase of each status. It is a `Record` over every `ProposalStatus`. If you add a
+ * status and do not place it here, the compiler reports an error. The groups below come from this
+ * map, so they cannot drift from it.
+ *
+ * - `open`: can still change. `pending` waits for a decision. `executing` is approved and running.
+ * - `settled`: the result is known. Nothing runs again.
+ * - `replaced`: not decided, but it cannot change. A superseded proposal is not the live
+ *   revision. A caller can still hold its id (a stale workflow variable or a retried step).
+ *   That caller must not revive it through `update()`.
  */
+const PROPOSAL_STATUS_PHASE = {
+  pending: 'open',
+  executing: 'open',
+  succeeded: 'settled',
+  failed: 'settled',
+  expired: 'settled',
+  no_action: 'settled',
+  superseded: 'replaced',
+} as const satisfies Record<ProposalStatus, 'open' | 'settled' | 'replaced'>;
+
+type ProposalStatusPhase = (typeof PROPOSAL_STATUS_PHASE)[ProposalStatus];
+
+const statusesInPhase = (phase: ProposalStatusPhase): ProposalStatus[] =>
+  proposalStatusSchema.options.filter((status) => PROPOSAL_STATUS_PHASE[status] === phase);
+
+/** Statuses that can still change: waiting for a decision, or approved and running. */
+export const OPEN_PROPOSAL_STATUSES = statusesInPhase('open');
+
+/** Statuses with a known result. `superseded` is not here: its successor represents it. */
+export const SETTLED_PROPOSAL_STATUSES = statusesInPhase('settled');
+
+/** Returns true for a settled or replaced status. Only `pending` and `executing` return false. */
 export const isTerminal = (status: ProposalStatus): boolean =>
-  status === 'succeeded' ||
-  status === 'failed' ||
-  status === 'expired' ||
-  status === 'no_action' ||
-  // Undecided, unlike the other four, but equally unable to move: a
-  // superseded proposal is not the live revision anymore, and a caller that
-  // still holds its id (a stale workflow variable, a retried step) must not
-  // be able to resurrect it via update().
-  status === 'superseded';
+  PROPOSAL_STATUS_PHASE[status] !== 'open';

@@ -13,6 +13,7 @@ import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
   AGENT_BUILDER_API_DISCOVERY_SETTING_ID,
+  AGENT_BUILDER_INCLUDE_FROZEN_BY_DEFAULT_SETTING_ID,
   AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
   AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID,
   AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID,
@@ -79,7 +80,23 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       }),
       schema: schema.boolean(),
       value: false,
-      experimental: true,
+      technicalPreview: true,
+      requiresPageReload: false,
+      readonly: false,
+    },
+    [AGENT_BUILDER_INCLUDE_FROZEN_BY_DEFAULT_SETTING_ID]: {
+      description: i18n.translate(
+        'xpack.agentBuilder.uiSettings.includeFrozenByDefault.description',
+        {
+          defaultMessage:
+            'Makes the built-in Agent Builder tools include frozen tier data by default.',
+        }
+      ),
+      name: i18n.translate('xpack.agentBuilder.uiSettings.includeFrozenByDefault.name', {
+        defaultMessage: 'Elastic Agent Builder: Include frozen tier data by default',
+      }),
+      schema: schema.boolean(),
+      value: false,
       requiresPageReload: false,
       readonly: false,
     },

@@ -1570,6 +1570,25 @@ steps:
                 {% endfor %}
                 Return one verdict for every alert id above, exactly once.
 
+          # The messages path keeps the full preamble above. The template already
+          # has its own instructions, so the static preamble is dropped. Shared
+          # context (rule, prevalence, noise, close history) stays: the template
+          # system prompt does not include it, and the confidence tiers need it.
+          # The worker batch_summary rule lives in the preamble, so it is
+          # appended here when this run is a worker.
+          - name: template_alerts_text
+            type: data.set
+            with:
+              alerts_text: |
+                {% assign alert_parts = steps.build_agent_message.output.message | split: '## Shared Context' %}
+                {{ steps.build_agent_message.output.message | remove_first: alert_parts.first | strip }}
+                {% if inputs.calledByWorker == true %}
+                Also return a `batch_summary` string: 1–2 sentences (≤45 words total), grouped by
+                host or user, explaining *why* the verdicts came out that way. Do not repeat per-alert
+                rationale; state the pattern. Omit the field entirely if there is nothing meaningful to
+                add beyond the verdict counts.
+                {% endif %}
+
           - name: runAgent_step
             type: ai.agent
             # Skipped when the space's "use a prompt" setting is on, and always on the Worker path;
@@ -1578,12 +1597,18 @@ steps:
             if: "${{ variables.use_prompt != true }}"
             agent-id: "{{ variables.agent_id }}"
             connector-id: "{{ variables.connector_id }}"
-            # Exactly one of connector-id / connector-id-by-feature must be non-empty at
-            # execution time. Liquid renders "" for the unused variable; the ai.agent step's
-            # superRefine only fires when BOTH are non-empty, so they coexist safely.
-            # Standalone path: connector_id_by_feature="", connector_id=<real id>.
+            # First id: a saved model on alertzero_template_models replaces the connector.
+            # An empty row does not. The id is skipped when AlertZero is disabled and
+            # the feature is not registered, so a standalone connector-id still runs.
+            # Second id: the tier. Liquid renders "" for the unused
+            # variable and a blank entry is ignored.
+            # Standalone path: connector_id=<real id>, connector_id_by_feature="".
             # Worker path: connector_id="", connector_id_by_feature=<feature id>.
-            connector-id-by-feature: "{{ variables.connector_id_by_feature }}"
+            # A real tier still conflicts with a real connector-id.
+            # Keep in sync with ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+            connector-id-by-feature:
+              - alertzero_template_models
+              - "{{ variables.connector_id_by_feature }}"
             create-conversation: "${{ variables.create_conversation }}"
             # The default maxResponseContentLength (1 MB) is too small for a 50-alert batch.
             # Azure OpenAI's buffered response for all verdicts can exceed 1 MB; Bedrock bypasses
@@ -1607,6 +1632,12 @@ steps:
                 tools: []
                 skill_ids: []
               message: "{{ steps.build_agent_message.output.message }}"
+              # Used only when the connector requires an EIS prompt template.
+              # Other connectors ignore these fields and send `message`.
+              template_id: ".alert-triage"
+              template_version: 1
+              template_variables:
+                alerts_text: "{{ steps.template_alerts_text.output.alerts_text }}"
 
               # One verdict object per alert in the batch (see consts.batch_reply_schema).
               schema: "${{ consts.batch_reply_schema }}"
@@ -1623,9 +1654,11 @@ steps:
             type: ai.prompt
             if: "${{ variables.use_prompt == true }}"
             connector-id: "{{ variables.connector_id }}"
-            # Same as runAgent_step: exactly one of the two is non-empty at execution time, and
-            # ai.prompt treats a blank value as unset.
-            connector-id-by-feature: "{{ variables.connector_id_by_feature }}"
+            # Same list as runAgent_step: a saved template-row model wins, an empty row does not,
+            # and a blank tier entry is ignored.
+            connector-id-by-feature:
+              - alertzero_template_models
+              - "{{ variables.connector_id_by_feature }}"
             # The default maxResponseContentLength (1 MB) is too small for a 50-alert batch (see
             # runAgent_step).
             max-step-size: '10mb'
@@ -1647,6 +1680,12 @@ steps:
               continue: true
             with:
               prompt: "{{ steps.build_agent_message.output.message }}"
+              # Used only when the connector requires an EIS prompt template.
+              # Other connectors ignore these fields and send `prompt`.
+              template_id: ".alert-triage"
+              template_version: 1
+              template_variables:
+                alerts_text: "{{ steps.template_alerts_text.output.alerts_text }}"
 
               # The same reply as runAgent_step (see consts.batch_reply_schema).
               schema: "${{ consts.batch_reply_schema }}"

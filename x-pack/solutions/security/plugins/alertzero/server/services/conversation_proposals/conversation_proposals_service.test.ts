@@ -164,7 +164,7 @@ describe('ConversationProposalsService', () => {
       expect(proposalsService.list).toHaveBeenCalledWith(
         expect.objectContaining({
           category: 'respond',
-          status: 'pending',
+          statuses: ['pending', 'executing'],
           excludeSuperseded: true,
           size: 10,
           from: 0,
@@ -514,6 +514,7 @@ describe('ConversationProposalsService', () => {
       expect(proposalsService.list).toHaveBeenCalledWith(
         expect.objectContaining({
           decidedWithinHours: 72,
+          statuses: ['succeeded', 'failed', 'expired', 'no_action'],
           excludeSuperseded: true,
           size: 25,
           from: 0,
