@@ -143,14 +143,14 @@ export class InspectorPage {
   /**
    * The names of the requests listed by the open inspector's request chooser,
    * in the order they are offered. Leaves the chooser closed, since its open
-   * list covers the request detail tabs.
+   * list covers the request detail tabs. With a single request the chooser has
+   * no list to open, so the selected request is returned instead.
    */
   async getRequestNames(): Promise<string[]> {
-    const names = await this.page.components
-      .comboBox('inspectorRequestChooser')
-      .getAllVisibleOptions();
+    const requestChooser = this.page.components.comboBox('inspectorRequestChooser');
+    const names = await requestChooser.getAllVisibleOptions();
     await this.page.keyboard.press('Escape');
-    return names;
+    return names.length > 0 ? names : requestChooser.getSelectedOptions();
   }
 
   /** The selected request's total time, in milliseconds, as the Requests view reports it. */

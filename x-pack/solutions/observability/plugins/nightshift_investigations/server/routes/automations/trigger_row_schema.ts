@@ -31,14 +31,15 @@ export const triggerRowSchema = lazySchema(() =>
         event: z.enum(['message']),
         channels: z.array(z.string().max(500)).max(100).optional(),
         users: z.array(z.string().max(500)).max(100).optional(),
+        bots: z.array(z.string().max(500)).max(100).optional(),
         messageFilter: z.string().max(1000).optional(),
       })
       .refine(
-        ({ channels, users, messageFilter }) =>
-          [...(channels ?? []), ...(users ?? []), messageFilter ?? ''].some(
+        ({ channels, users, bots, messageFilter }) =>
+          [...(channels ?? []), ...(users ?? []), ...(bots ?? []), messageFilter ?? ''].some(
             (value) => value.trim() !== ''
           ),
-        { message: 'A Slack trigger needs at least one of channels, users or messageFilter' }
+        { message: 'A Slack trigger needs at least one of channels, users, bots or messageFilter' }
       ),
   ])
 );

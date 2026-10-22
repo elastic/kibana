@@ -62,6 +62,7 @@ const HANDWRITTEN_RISKS: ReadonlyMap<string, StepRisk> = new Map(
     'cases.getCasesByAlertId': SAFE,
     'cases.deleteCases': DESTRUCTIVE,
     'cases.deleteObservable': DESTRUCTIVE,
+    'cases.deleteAttachments': DESTRUCTIVE,
     'cases.bulkDeleteObservables': DESTRUCTIVE,
   })
 );

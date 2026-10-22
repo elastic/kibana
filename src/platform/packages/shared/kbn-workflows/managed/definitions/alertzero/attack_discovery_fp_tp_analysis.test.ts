@@ -36,7 +36,7 @@ interface YamlStep {
   with?: Record<string, unknown>;
   'on-failure'?: { continue?: boolean; retry?: Record<string, unknown> };
   'agent-id'?: string;
-  'connector-id-by-feature'?: string;
+  'connector-id-by-feature'?: string | string[];
   'create-conversation'?: boolean;
   'plugin-id'?: string;
   'aggregate-by'?: string;
@@ -525,6 +525,22 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(stepIn('load_alerts')?.with?.ignore_unavailable).toBeUndefined();
     });
 
+    it.each(['load_attack_discovery', 'load_alerts', 'load_entities', 'load_events'] as const)(
+      'projects %s so the template payload stays inside the gateway cap',
+      (name) => {
+        expect(stepIn(name)?.with?._source).toEqual(expect.any(Array));
+      }
+    );
+
+    it('keeps the alert fields the workflow expressions read', () => {
+      expect(stepIn('load_alerts')?.with?._source).toEqual(
+        expect.arrayContaining(['host.id', 'user.name'])
+      );
+      expect(stepIn('load_attack_discovery')?.with?._source).toEqual(
+        expect.arrayContaining(['@timestamp', 'kibana.alert.attack_discovery.alert_ids'])
+      );
+    });
+
     it.each(['load_entities', 'load_events'] as const)(
       'continues when optional source %s fails',
       (name) => {
@@ -546,8 +562,11 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(overrides?.tools).toEqual([]);
     });
 
-    it('routes the agent through the AlertZero frontier feature', () => {
-      expect(analyze?.['connector-id-by-feature']).toBe('alertzero_frontier');
+    it('prefers a saved template-row model, then the AlertZero frontier feature', () => {
+      expect(analyze?.['connector-id-by-feature']).toEqual([
+        'alertzero_template_models',
+        'alertzero_frontier',
+      ]);
     });
 
     it('uses the thin agent', () => {
@@ -621,6 +640,8 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
           };
         };
       };
+
+      expect((analyze?.with?.schema as { required: string[] }).required).not.toContain('claims');
 
       expect(schema.properties.claims.properties.alert_link.properties.field.enum).toEqual([
         'user.name',
