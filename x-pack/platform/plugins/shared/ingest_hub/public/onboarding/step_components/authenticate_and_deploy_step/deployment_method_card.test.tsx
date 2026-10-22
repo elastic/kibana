@@ -85,6 +85,48 @@ describe('DeploymentMethodCard', () => {
     });
   });
 
+  describe('switchResetsSettings', () => {
+    it('asks for confirmation before any switch, saying the settings are reset', () => {
+      const { onChange } = renderCard({ switchResetsSettings: true });
+      fireEvent.click(input('agent_based'));
+      expect(onChange).not.toHaveBeenCalled();
+      expect(screen.getByTestId('confirmDeploymentMethodModal-resetSettings')).toHaveTextContent(
+        'resets the agent policy settings'
+      );
+      expect(
+        screen.queryByTestId('confirmDeploymentMethodModal-removedServicesCallout')
+      ).not.toBeInTheDocument();
+    });
+
+    it('applies the switch after the confirmation', () => {
+      const { onChange } = renderCard({ switchResetsSettings: true });
+      fireEvent.click(input('agent_based'));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      expect(onChange).toHaveBeenCalledWith('agent_based');
+    });
+
+    it('keeps the current method when the confirmation is cancelled', () => {
+      const { onChange } = renderCard({ switchResetsSettings: true });
+      fireEvent.click(input('agent_based'));
+      fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('shows both warnings when services would also be removed', () => {
+      renderCard({
+        switchResetsSettings: true,
+        unsupportedServices: {
+          agent_based: [{ id: 'cloudtrail_otel', name: 'AWS CloudTrail' } as AwsServiceMatrixEntry],
+        },
+      });
+      fireEvent.click(input('agent_based'));
+      expect(screen.getByTestId('confirmDeploymentMethodModal-resetSettings')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('confirmDeploymentMethodModal-removedServicesCallout')
+      ).toHaveTextContent('AWS CloudTrail');
+    });
+  });
+
   describe('availableMethods', () => {
     it('only renders the listed methods', () => {
       renderCard({ selectedMethod: 'agent_based', availableMethods: ['agent_based'] });

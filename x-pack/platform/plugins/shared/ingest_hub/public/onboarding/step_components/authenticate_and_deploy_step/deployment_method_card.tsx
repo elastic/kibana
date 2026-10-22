@@ -58,6 +58,11 @@ interface DeploymentMethodCardProps {
   availableMethods?: DeploymentMethod[];
   /** Selected services that choosing a method would remove from the selection. */
   unsupportedServices?: Partial<Record<DeploymentMethod, AwsServiceMatrixEntry[]>>;
+  /**
+   * True when changing the method would discard settings the user has entered (the agent policy
+   * name and options): switching asks for confirmation instead of applying straight away.
+   */
+  switchResetsSettings?: boolean;
 }
 
 export function DeploymentMethodCard({
@@ -67,6 +72,7 @@ export function DeploymentMethodCard({
   disabled = false,
   availableMethods,
   unsupportedServices,
+  switchResetsSettings = false,
 }: DeploymentMethodCardProps) {
   const confirmModalTitleId = useGeneratedHtmlId();
   const [pendingMethod, setPendingMethod] = useState<DeploymentMethod | null>(null);
@@ -86,8 +92,9 @@ export function DeploymentMethodCard({
 
   const handleSelect = (method: DeploymentMethod) => {
     if (cardsDisabled || method === selectedOption.value) return;
-    // Ask before dropping services from the selection; apply anything else straight away.
-    if ((unsupportedServices?.[method] ?? []).length > 0) {
+    // Ask before dropping services from the selection or discarding settings; apply anything else
+    // straight away.
+    if (switchResetsSettings || (unsupportedServices?.[method] ?? []).length > 0) {
       setPendingMethod(method);
       return;
     }
@@ -152,26 +159,36 @@ export function DeploymentMethodCard({
           )}
           data-test-subj="confirmDeploymentMethodModal"
         >
-          <KbnWarningCallout
-            announceOnMount
-            title={i18n.translate(
-              'xpack.ingestHub.authenticateAndDeployStep.confirmDeploymentMethodModal.removedServicesCallout.title',
-              { defaultMessage: 'Services will be removed' }
-            )}
-            text={
-              <p>
-                <FormattedMessage
-                  id="xpack.ingestHub.authenticateAndDeployStep.confirmDeploymentMethodModal.removedServicesCallout.body"
-                  defaultMessage="{services} can't be deployed by this method. Changing the method removes {count, plural, one {it} other {them}} from your selection."
-                  values={{
-                    services: <strong>{removedServiceNames.join(', ')}</strong>,
-                    count: removedServiceNames.length,
-                  }}
-                />
-              </p>
-            }
-            data-test-subj="confirmDeploymentMethodModal-removedServicesCallout"
-          />
+          {switchResetsSettings && (
+            <p data-test-subj="confirmDeploymentMethodModal-resetSettings">
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.confirmDeploymentMethodModal.resetSettings"
+                defaultMessage="Changing the method resets the agent policy settings you entered."
+              />
+            </p>
+          )}
+          {removedServiceNames.length > 0 && (
+            <KbnWarningCallout
+              announceOnMount
+              title={i18n.translate(
+                'xpack.ingestHub.authenticateAndDeployStep.confirmDeploymentMethodModal.removedServicesCallout.title',
+                { defaultMessage: 'Services will be removed' }
+              )}
+              text={
+                <p>
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.confirmDeploymentMethodModal.removedServicesCallout.body"
+                    defaultMessage="{services} can't be deployed by this method. Changing the method removes {count, plural, one {it} other {them}} from your selection."
+                    values={{
+                      services: <strong>{removedServiceNames.join(', ')}</strong>,
+                      count: removedServiceNames.length,
+                    }}
+                  />
+                </p>
+              }
+              data-test-subj="confirmDeploymentMethodModal-removedServicesCallout"
+            />
+          )}
         </EuiConfirmModal>
       )}
     </section>

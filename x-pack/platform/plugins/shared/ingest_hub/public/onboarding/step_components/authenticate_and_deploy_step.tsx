@@ -116,6 +116,13 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     [ecfOnlyServices]
   );
 
+  // Switching the method resets the agent policy name and options (see setDeploymentMethod), so
+  // when the user has entered some, the card asks before switching.
+  const switchResetsSettings =
+    !!authenticateAndDeployStep?.agentPolicyId ||
+    !!authenticateAndDeployStep?.agentPolicyName ||
+    authenticateAndDeployStep?.withSysMonitoring !== undefined;
+
   const handleDeploymentMethodChange = useCallback(
     (method: DeploymentMethod) => {
       setDeploymentMethod(method);
@@ -677,6 +684,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         onChange={handleDeploymentMethodChange}
         availableMethods={isSelfManaged ? SELF_MANAGED_DEPLOYMENT_METHODS : undefined}
         unsupportedServices={unsupportedServices}
+        switchResetsSettings={switchResetsSettings}
         locked={isSelfManaged || ((allAgentBasedOnly || allEcfOnly) && !isMethodLocked)}
         disabled={isMethodLocked}
       />
