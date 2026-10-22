@@ -49,16 +49,22 @@ export class CloudUrlsService {
       performance_url: performanceUrl,
       projects_url: projectsUrl,
       create_project_url: createProjectUrl,
+      organization_id: organizationId,
     } = this.config;
 
-    const fullCloudDeploymentsUrl = getFullCloudUrl(baseUrl, deploymentsUrl);
+    const fullCloudDeploymentsUrl = getFullCloudUrl(baseUrl, deploymentsUrl, organizationId);
+    // No target organization: consumers append paths and query strings to the deployment URL.
     const fullCloudDeploymentUrl = getFullCloudUrl(baseUrl, deploymentUrl);
-    const fullCloudCreateDeploymentUrl = getFullCloudUrl(baseUrl, createDeploymentUrl);
-    const fullCloudProfileUrl = getFullCloudUrl(baseUrl, profileUrl);
-    const fullCloudOrganizationUrl = getFullCloudUrl(baseUrl, organizationUrl);
-    const fullCloudPerformanceUrl = getFullCloudUrl(baseUrl, performanceUrl);
-    const fullCloudProjectsUrl = getFullCloudUrl(baseUrl, projectsUrl);
-    const fullCloudCreateProjectUrl = getFullCloudUrl(baseUrl, createProjectUrl);
+    const fullCloudCreateDeploymentUrl = getFullCloudUrl(
+      baseUrl,
+      createDeploymentUrl,
+      organizationId
+    );
+    const fullCloudProfileUrl = getFullCloudUrl(baseUrl, profileUrl, organizationId);
+    const fullCloudOrganizationUrl = getFullCloudUrl(baseUrl, organizationUrl, organizationId);
+    const fullCloudPerformanceUrl = getFullCloudUrl(baseUrl, performanceUrl, organizationId);
+    const fullCloudProjectsUrl = getFullCloudUrl(baseUrl, projectsUrl, organizationId);
+    const fullCloudCreateProjectUrl = getFullCloudUrl(baseUrl, createProjectUrl, organizationId);
     const fullCloudSnapshotsUrl = `${fullCloudDeploymentUrl}/${CLOUD_SNAPSHOTS_PATH}`;
 
     return {
@@ -93,12 +99,16 @@ export class CloudUrlsService {
     // https://github.com/elastic/kibana-team/issues/4343
     const showBillingUrl = userRoles.some((role) => CLOUD_BILLING_ROLES.includes(role));
     const conditionalFullCloudBillingUrl = showBillingUrl
-      ? getFullCloudUrl(this.config.base_url, this.config.billing_url)
+      ? getFullCloudUrl(this.config.base_url, this.config.billing_url, this.config.organization_id)
       : undefined;
 
     const hasManageSecurity = Boolean(coreStart.application.capabilities.users?.save);
     const conditionalFullCloudUsersAndRolesUrl = hasManageSecurity
-      ? getFullCloudUrl(this.config.base_url, this.config.users_and_roles_url)
+      ? getFullCloudUrl(
+          this.config.base_url,
+          this.config.users_and_roles_url,
+          this.config.organization_id
+        )
       : undefined;
 
     const showSearchPowerUrl =

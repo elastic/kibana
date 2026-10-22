@@ -5,12 +5,23 @@
  * 2.0.
  */
 
-export function getFullCloudUrl(baseUrl: string | undefined, dirPath: string | undefined) {
-  if (baseUrl && dirPath) {
-    return `${baseUrl}${dirPath}`;
+/**
+ * Builds a Cloud UI URL. When `organizationId` is set, Cloud UI opens that organization instead of
+ * the one the user visited last.
+ */
+export function getFullCloudUrl(
+  baseUrl: string | undefined,
+  dirPath: string | undefined,
+  organizationId?: string
+) {
+  if (!baseUrl || !dirPath) {
+    return '';
   }
 
-  return '';
+  const url = `${baseUrl}${dirPath}`;
+  return organizationId
+    ? `${url}#uTargetOrganizationId=${encodeURIComponent(organizationId)}`
+    : url;
 }
 
 /**
