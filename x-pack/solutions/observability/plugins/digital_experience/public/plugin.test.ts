@@ -70,7 +70,7 @@ describe('DigitalExperiencePlugin', () => {
     const { app } = setup({ show: true });
 
     expect(app.id).toBe('digital_experience');
-    expect(app.title).toBe('Digital Experience');
+    expect(app.title).toBe('Digital experience');
   });
 
   it.each([
@@ -120,7 +120,7 @@ describe('DigitalExperiencePlugin', () => {
     expect(sections).toHaveLength(expectedSections);
     if (show) {
       expect(sections[0]).toMatchObject({
-        label: 'Digital Experience',
+        label: 'Digital experience',
         entries: [expect.objectContaining({ app: 'digital_experience', path: '/' })],
       });
     }

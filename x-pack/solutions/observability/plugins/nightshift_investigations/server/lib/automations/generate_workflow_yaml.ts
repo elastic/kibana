@@ -6,6 +6,7 @@
  */
 
 import { stringify } from 'yaml';
+import { IF_CONDITION_MAX_LENGTH } from '@kbn/workflows';
 import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID } from '../../../common';
 import { parsePresetSchedule } from '../../../common/automation_schedule';
 import type { InvestigationNotificationDestination } from '../../../common';
@@ -44,7 +45,7 @@ const SLACK_THREAD = {
 // See MAX_PROMPT_TEMPLATE_LENGTH: the template and this text share the step's message limit.
 export const SLACK_MESSAGE_TEXT_LIMIT = 4000;
 
-const SLACK_MESSAGE_PROMPT = `Slack message from {{ event.sender }} in channel {{ event.channel }}:\n\n{{ event.text | truncate: ${SLACK_MESSAGE_TEXT_LIMIT} }}`;
+const SLACK_MESSAGE_PROMPT = `Slack message from {{ event.botName | default: event.sender | default: event.botId }} in channel {{ event.channel }}:\n\n{{ event.text | truncate: ${SLACK_MESSAGE_TEXT_LIMIT} }}`;
 
 type AlertRow = Extract<NightshiftTriggerRow, { kind: 'alert' }>;
 type SlackRow = Extract<NightshiftTriggerRow, { kind: 'slack' }>;
@@ -57,10 +58,16 @@ const OVERLAP_POLICY_TO_STRATEGY: Record<OverlapPolicy, string> = {
 };
 
 /** Generates a workflow document from an automation, serializing user input safely. */
-export function generateWorkflowYaml(
-  automationId: string,
-  automation: NightshiftAutomationAttributes
-): string {
+export function generateWorkflowYaml({
+  automationId,
+  automation,
+  serviceAccountId,
+}: {
+  automationId: string;
+  automation: NightshiftAutomationAttributes;
+  /** The account the automation runs as (`settings.run_as`); unbound when omitted. */
+  serviceAccountId?: string;
+}): string {
   const alertRows = automation.trigger.rows.filter((row): row is AlertRow => row.kind === 'alert');
   const slackRows = automation.trigger.rows.filter(isSlackRow);
   const schedule = automation.trigger.rows.find((row) => row.kind === 'schedule');
@@ -90,6 +97,7 @@ export function generateWorkflowYaml(
     enabled: automation.isEnabled,
     tags: ['nightshift', 'automation'],
     settings: {
+      ...(serviceAccountId ? { run_as: serviceAccountId } : {}),
       // The automation starts first and waits for the investigation, so its deadline
       // needs extra time for setup and returning the investigation result.
       ...(automation.runtime.timeoutSeconds !== undefined
@@ -365,9 +373,9 @@ function buildMessage(
  * KQL over the `slack2.message` event payload: the fixed exclusions, then the row filters.
  *
  * `channels` and `users` are matched against `event.channel` and `event.sender`, which are Slack
- * ids, so a channel name never matches. The message filter is a case sensitive contains check, see
- * `buildMessageFilterTerms`. A row with no filters matches every message the exclusions let
- * through.
+ * ids, so a channel name never matches. `bots` are matched by app id, bot id or bot name. The
+ * message filter is a case sensitive contains check, see `buildMessageFilterTerms`. A row with no
+ * filters matches every message the exclusions let through.
  */
 function buildSlackCondition(rows: SlackRow[]): string {
   const exclusions = SLACK_MESSAGE_EXCLUSIONS.join(' and ');
@@ -375,7 +383,12 @@ function buildSlackCondition(rows: SlackRow[]): string {
   if (rowConditions.some((c) => c === '')) return exclusions;
   const rowFilter =
     rowConditions.length === 1 ? rowConditions[0] : rowConditions.map((c) => `(${c})`).join(' or ');
-  return `${exclusions} and (${rowFilter})`;
+  const condition = `${exclusions} and (${rowFilter})`;
+  // The workflow API saves a longer condition as an invalid, disabled workflow without an error.
+  if (condition.length > IF_CONDITION_MAX_LENGTH) {
+    throw new Error('The Slack filters are too long. Remove some channels, users or apps.');
+  }
+  return condition;
 }
 
 function buildSlackRowCondition(row: SlackRow): string {
@@ -391,12 +404,26 @@ function buildSlackRowCondition(row: SlackRow): string {
     parts.push(kqlOneOf('event.sender', users));
   }
 
+  const bots = cleanValues(row.bots);
+  if (bots.length > 0) {
+    parts.push(buildBotCondition(bots));
+  }
+
   const messageFilter = row.messageFilter?.trim();
   if (messageFilter) {
     parts.push(buildMessageFilterTerms(messageFilter));
   }
 
   return parts.join(' and ');
+}
+
+/**
+ * Matches a post from any of the given apps or bots. Each value is compared with the app id, the
+ * bot id and the bot name, so the user can enter whichever one they have.
+ */
+function buildBotCondition(bots: string[]): string {
+  const fields = ['event.appId', 'event.botId', 'event.botName'];
+  return `(${fields.map((field) => kqlOneOf(field, bots)).join(' or ')})`;
 }
 
 /**
