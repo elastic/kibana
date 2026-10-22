@@ -7,7 +7,7 @@
 
 // PROTOTYPE: integration group list items as served by the local registry search endpoint
 // (nginx_group, apache_group), plus a single-schema group: package-spec accepts one schema
-// without `default`.
+// without `default`. Schemas name their package directly, with no version.
 
 import type { PackageListItem } from '../../../../../../../../types';
 
@@ -19,15 +19,9 @@ export const nginxGroupItem = {
   release: 'beta',
   type: 'integration',
   description: 'Collect logs and metrics from Nginx.',
-  requires: {
-    integration: [
-      { package: 'nginx', version: '^3.0.0' },
-      { package: 'nginx_otel_integration', version: '^0.1.0' },
-    ],
-  },
   schemas: {
-    ecs: { integration: 'nginx' },
-    otel: { default: true, integration: 'nginx_otel_integration' },
+    ecs: { package: 'nginx' },
+    otel: { default: true, package: 'nginx_otel' },
   },
 } as unknown as PackageListItem;
 
@@ -39,15 +33,9 @@ export const apacheGroupItem = {
   release: 'beta',
   type: 'integration',
   description: 'Collect logs and metrics from Apache HTTP Server.',
-  requires: {
-    integration: [
-      { package: 'apache', version: '^3.0.0' },
-      { package: 'apache_input_otel', version: '^0.1.0' },
-    ],
-  },
   schemas: {
-    ecs: { integration: 'apache' },
-    otel: { default: true, integration: 'apache_input_otel' },
+    ecs: { package: 'apache' },
+    otel: { default: true, package: 'apache_otel' },
   },
 } as unknown as PackageListItem;
 
@@ -59,6 +47,5 @@ export const singleSchemaGroupItem = {
   release: 'beta',
   type: 'integration',
   description: 'Collect logs and metrics from Nginx with OpenTelemetry.',
-  requires: { integration: [{ package: 'nginx_otel_integration', version: '^0.1.0' }] },
-  schemas: { otel: { integration: 'nginx_otel_integration' } },
+  schemas: { otel: { package: 'nginx_otel' } },
 } as unknown as PackageListItem;

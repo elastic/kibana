@@ -23,15 +23,9 @@ const NGINX_GROUP_FIXTURE: RegistrySearchResult = {
   path: '/package/nginx_group/0.1.0',
   icons: [],
   categories: ['web', 'observability'],
-  requires: {
-    integration: [
-      { package: 'nginx', version: '^3.0.0' },
-      { package: 'nginx_otel_integration', version: '^0.1.0' },
-    ],
-  },
   schemas: {
-    otel: { integration: 'nginx_otel_integration', default: true },
-    ecs: { integration: 'nginx' },
+    otel: { package: 'nginx_otel', default: true },
+    ecs: { package: 'nginx' },
   },
 };
 

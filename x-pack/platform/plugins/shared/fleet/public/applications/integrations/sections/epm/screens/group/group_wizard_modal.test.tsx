@@ -46,14 +46,12 @@ jest.mock('../../../../../../hooks/use_group_package', () => {
         {
           schema: 'otel',
           packageName: 'nginx_otel_integration',
-          versionConstraint: '^0.1.0',
           child: listItem(nginx.nginxOtelPackageInfo),
           isInstalled: false,
         },
         {
           schema: 'ecs',
           packageName: 'nginx',
-          versionConstraint: '^3.0.0',
           child: listItem(nginx.nginxPackageInfo),
           isInstalled: false,
         },

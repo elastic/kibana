@@ -41,15 +41,9 @@ const installed = { installationInfo: { install_status: installationStatuses.Ins
 
 const group = pkg('nginx_group', {
   title: 'Nginx',
-  requires: {
-    integration: [
-      { package: 'nginx', version: '^3.0.0' },
-      { package: 'nginx_otel_integration', version: '^0.1.0' },
-    ],
-  },
   schemas: {
-    otel: { integration: 'nginx_otel_integration', default: true },
-    ecs: { integration: 'nginx' },
+    otel: { package: 'nginx_otel_integration', default: true },
+    ecs: { package: 'nginx' },
   },
 });
 
@@ -112,6 +106,17 @@ describe('applyGroupPackages', () => {
     ]);
   });
 
+  it('skips schemas whose package is not listed, and groups with none listed', () => {
+    const otelOnly = applyGroupPackages({
+      items: [group, pkg('nginx_otel_integration')],
+      ...params,
+    });
+    expect(otelOnly.groupCards.map((c) => c.title)).toEqual(['Nginx']);
+    const none = applyGroupPackages({ items: [group, pkg('redis')], ...params });
+    expect(none.groupCards).toHaveLength(0);
+    expect(none.remainingItems.map((i) => (i as PackageListItem).name)).toEqual(['redis']);
+  });
+
   it('derives installed state from children', () => {
     const items = [group, pkg('nginx', installed), pkg('nginx_otel_integration')];
     expect(getInstalledGroupSchemas(group, items)).toEqual(['ecs']);
@@ -132,15 +137,9 @@ describe('applyGroupPackages', () => {
   it('Apache: group tile, but the OTel content pack and the static Apache collection remain', () => {
     const apacheGroup = pkg('apache_group', {
       title: 'Apache HTTP Server',
-      requires: {
-        integration: [
-          { package: 'apache', version: '^3.0.0' },
-          { package: 'apache_input_otel', version: '^0.1.0' },
-        ],
-      },
       schemas: {
-        otel: { integration: 'apache_input_otel', default: true },
-        ecs: { integration: 'apache' },
+        otel: { package: 'apache_input_otel', default: true },
+        ecs: { package: 'apache' },
       },
     });
     const items = [

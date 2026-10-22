@@ -63,10 +63,16 @@ export const applyGroupPackages = ({
   groupCards: IntegrationCardItem[];
   remainingItems: Array<PackageListItem | CustomIntegration>;
 } => {
-  const groups = items.filter(isEprPackage).filter(isGroupPackage);
-  if (!groups.length) return { groupCards: [], remainingItems: items };
+  const allGroups = items.filter(isEprPackage).filter(isGroupPackage);
+  if (!allGroups.length) return { groupCards: [], remainingItems: items };
 
-  const groupNames = new Set(groups.map((g) => g.name));
+  // Groups are never listed as packages. A group gets a tile only when at least one of its
+  // schemas' packages is listed (compatible with this stack).
+  const groupNames = new Set(allGroups.map((g) => g.name));
+  const listedNames = new Set(items.filter(isEprPackage).map((item) => item.name));
+  const groups = allGroups.filter((g) =>
+    getGroupSchemaChildren(g).some((c) => listedNames.has(c.package))
+  );
   const childNames = new Set(
     groups.flatMap((g) => getGroupSchemaChildren(g).map((c) => c.package))
   );

@@ -43,18 +43,16 @@ export interface PackageRequires {
   content?: PackageDependency[];
   /** Prototype: typed so integration group tiles can hide a child's input package deps. */
   input?: PackageDependency[];
-  /** Integration groups only (prototype): child integrations, with version ranges, the schemas resolve to. */
-  integration?: PackageDependency[];
 }
 
-/** Prototype: one schema of an integration group. `integration` names a `requires.integration` entry. */
+/** Prototype: one schema of an integration group. `package` names the child package, no version. */
 export interface PackageSchema {
-  integration: string;
+  package: string;
   /** Exactly one schema per group should set this. */
   default?: boolean;
 }
 
-/** Prototype: integration group schema map, e.g. { otel: { integration: 'nginx_otel_integration', default: true }, ecs: { integration: 'nginx' } }. */
+/** Prototype: integration group schema map, e.g. { otel: { package: 'nginx_otel', default: true }, ecs: { package: 'nginx' } }. */
 export type PackageSchemas = Record<string, PackageSchema>;
 
 // Based on https://github.com/elastic/package-spec/blob/master/versions/1/manifest.spec.yml#L8

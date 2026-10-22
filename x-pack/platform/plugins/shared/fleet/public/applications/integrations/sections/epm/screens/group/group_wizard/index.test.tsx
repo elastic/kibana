@@ -79,7 +79,6 @@ const listItem = (info: PackageInfo) =>
 const option = (schema: string, info: PackageInfo): GroupSchemaOption => ({
   schema,
   packageName: info.name,
-  versionConstraint: '*',
   child: listItem(info),
   isInstalled: false,
 });

@@ -22,6 +22,10 @@ import { isAdvancedVar } from '../../../../../../fleet/sections/agent_policy/cre
 import { nginxOtelPackageInfo, nginxPackageInfo } from './__fixtures__/nginx';
 import { apacheInputOtelPackageInfo, apachePackageInfo } from './__fixtures__/apache';
 import {
+  apacheOtelIntegrationPackageInfo,
+  nginxOtelIntegrationPackageInfo,
+} from './__fixtures__/otel_integrations';
+import {
   getGroupDefaultSchema,
   getGroupSchemaChildren,
 } from '../../../../../../../../common/services';
@@ -147,6 +151,32 @@ describe('group wizard model', () => {
     });
   });
 
+  // PROTOTYPE: package structure design - self-contained OTel integrations, inline otelcol streams.
+  describe('Nginx OTel (nginx_otel 1.0.0, self-contained integration)', () => {
+    const model = buildSchemaModel(nginxOtelIntegrationPackageInfo);
+
+    it('reads one otelcol input with all three streams, same targets as the composable one', () => {
+      expect(model.inputs.map((i) => [i.key, i.type])).toEqual([['nginx-otelcol', 'otelcol']]);
+      expect(model.streams.map((s) => getTargetDataStreamPattern(s))).toEqual([
+        'logs-nginx.access.otel-*',
+        'logs-nginx.error.otel-*',
+        'metrics-nginxreceiver.otel-*',
+      ]);
+      expect(visibleVars(streamBy(model, 'nginxreceiver'))).toEqual([
+        'endpoint',
+        'collection_interval',
+      ]);
+    });
+
+    it('Apache OTel integration has the input package settings', () => {
+      const apache = buildSchemaModel(apacheOtelIntegrationPackageInfo);
+      expect(apache.streams.map((s) => getTargetDataStreamPattern(s))).toEqual([
+        'metrics-apachereceiver.otel-*',
+      ]);
+      expect(streamBy(apache, 'apachereceiver').vars.map((v) => v.name)).toContain('endpoint');
+    });
+  });
+
   describe('steps (install order)', () => {
     const model = buildSchemaModel(nginxPackageInfo);
     it('collect -> settings per selected signal -> review -> detect', () => {
@@ -221,7 +251,7 @@ describe('group wizard model', () => {
 
     it('single-schema group without `default`', () => {
       expect(getGroupSchemaChildren(singleSchemaGroupItem)).toEqual([
-        { schema: 'otel', package: 'nginx_otel_integration', version: '^0.1.0' },
+        { schema: 'otel', package: 'nginx_otel' },
       ]);
       expect(getGroupDefaultSchema(singleSchemaGroupItem)).toBe('otel');
       // Security prefers ECS, but this group has no ECS schema.
