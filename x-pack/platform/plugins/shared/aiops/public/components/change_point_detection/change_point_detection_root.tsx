@@ -66,7 +66,6 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
 }) => {
   const datePickerDeps: DatePickerDependencies = {
     ...pick(appContextValue, [
-      'application',
       'data',
       'http',
       'notifications',

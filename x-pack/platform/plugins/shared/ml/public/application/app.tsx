@@ -135,7 +135,6 @@ export const App: FC<AppProps> = ({
   const startServices = pick(coreStart, 'analytics', 'i18n', 'theme', 'userProfile', 'chrome');
   const datePickerDeps: DatePickerDependencies = {
     ...pick(services, [
-      'application',
       'data',
       'http',
       'notifications',

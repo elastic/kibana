@@ -95,7 +95,6 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
   const startServices = pick(coreStart, 'analytics', 'i18n', 'theme', 'userProfile');
   const datePickerDeps = {
     ...pick(services, [
-      'application',
       'data',
       'http',
       'notifications',

@@ -76,7 +76,6 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
 
   const datePickerDeps: DatePickerDependencies = {
     ...pick(appContextValue, [
-      'application',
       'data',
       'http',
       'notifications',

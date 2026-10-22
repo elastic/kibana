@@ -110,16 +110,7 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
   }, [coreStart, pluginStart]);
 
   const datePickerDeps = {
-    ...pick(deps, [
-      'application',
-      'data',
-      'http',
-      'notifications',
-      'theme',
-      'uiSettings',
-      'userProfile',
-      'i18n',
-    ]),
+    ...pick(deps, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'userProfile', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
   };
 

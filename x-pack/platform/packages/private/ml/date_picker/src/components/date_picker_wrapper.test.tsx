@@ -91,7 +91,6 @@ const mockContextFactory = (addWarning: jest.Mock<void, []>) => {
     notifications: {
       toasts: { addWarning },
     },
-    application: { capabilities: {} },
     http: { basePath: { prepend: jest.fn((path: string) => path) } },
     uiSettings: {
       get: jest.fn().mockReturnValue([

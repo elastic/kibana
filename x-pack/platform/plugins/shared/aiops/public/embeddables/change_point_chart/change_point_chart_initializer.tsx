@@ -108,7 +108,6 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
 
   const datePickerDeps: DatePickerDependencies = {
     ...pick(appContextValue, [
-      'application',
       'data',
       'http',
       'notifications',

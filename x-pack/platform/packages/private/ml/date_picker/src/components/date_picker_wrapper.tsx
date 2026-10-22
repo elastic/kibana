@@ -128,7 +128,6 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
     theme,
     i18n: i18nStart,
     http,
-    application,
     notifications,
   } = useDatePickerContext();
 
@@ -409,9 +408,6 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
             inputDateFormats={[dateFormat]}
             timeZone={timeZoneName}
             prependBasePath={http.basePath.prepend}
-            canAccessAdvancedSettings={
-              (application.capabilities.advancedSettings?.save as boolean | undefined) ?? false
-            }
           />
         </EuiFlexItem>
         {showRefresh === true || !isTimeRangeSelectorEnabled ? null : (
