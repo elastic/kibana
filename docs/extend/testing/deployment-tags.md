@@ -158,12 +158,12 @@ Tags follow this shape:
 
 - `@limit/<only|except>-<attribute>`
 
-The only attribute today is `fips`: Kibana runs in [FIPS mode](../contributing/ci-and-build/debugging-fips-test-failures.md). On CI, that's the case in the daily FIPS pipeline and in pull requests labeled `ci:enable-fips-140-2-agent` or `ci:enable-fips-140-3-agent`.
+These are the available tags:
 
-| Helper                   | Use when the test…                                         |
-| ------------------------ | ---------------------------------------------------------- |
-| `tags.limit.only.fips`   | is designed for FIPS mode (skipped everywhere else)        |
-| `tags.limit.except.fips` | is relevant everywhere except in FIPS mode (skipped there) |
+| Helper                   | Use when the test…                                                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `tags.limit.only.fips`   | is designed for [FIPS mode](../contributing/ci-and-build/debugging-fips-test-failures.md) (skipped everywhere else) |
+| `tags.limit.except.fips` | is relevant everywhere except in FIPS mode (skipped there)                                                          |
 
 If a test would need more `except` tags than there are environments it actually applies to, it's an `only` test.
 
