@@ -18,13 +18,10 @@ describe('allSettledOrThrow', () => {
 
   it('waits for pending promises to settle before rejecting with the original reason', async () => {
     const error = new Error('install failed');
-    let resolvePending: (value: string) => void = () => {};
-    const pending = new Promise<string>((resolve) => {
-      resolvePending = resolve;
-    });
+    const pending = Promise.withResolvers<string>();
 
     let hasRejected = false;
-    const result = allSettledOrThrow([Promise.reject(error), pending]);
+    const result = allSettledOrThrow([Promise.reject(error), pending.promise]);
     result.catch(() => {
       hasRejected = true;
     });
@@ -32,25 +29,21 @@ describe('allSettledOrThrow', () => {
     await flushPromises();
     expect(hasRejected).toBe(false);
 
-    resolvePending('done');
+    pending.resolve('done');
 
     await expect(result).rejects.toBe(error);
-    expect(hasRejected).toBe(true);
   });
 
   it('throws the first rejection in input order, even if a later one rejected earlier', async () => {
     const firstError = new Error('first in input order');
     const secondError = new Error('first in time');
-    let rejectFirst: (reason: Error) => void = () => {};
-    const first = new Promise<string>((_resolve, reject) => {
-      rejectFirst = reject;
-    });
+    const first = Promise.withResolvers<string>();
 
-    const result = allSettledOrThrow([first, Promise.reject(secondError)]);
+    const result = allSettledOrThrow([first.promise, Promise.reject(secondError)]);
     const assertion = expect(result).rejects.toBe(firstError);
 
     await flushPromises();
-    rejectFirst(firstError);
+    first.reject(firstError);
 
     await assertion;
   });

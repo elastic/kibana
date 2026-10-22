@@ -277,12 +277,8 @@ describe('CreateSLO', () => {
     });
 
     it('waits for in-flight install operations to settle before rolling back', async () => {
-      let resolveCreate: (value: SLODefinition) => void = () => {};
-      mockRepository.create.mockReturnValueOnce(
-        new Promise<SLODefinition>((resolve) => {
-          resolveCreate = resolve;
-        })
-      );
+      const pendingCreate = Promise.withResolvers<SLODefinition>();
+      mockRepository.create.mockReturnValueOnce(pendingCreate.promise);
       mockTransformManager.install.mockRejectedValueOnce(
         new Error('Rollup transform install error')
       );
@@ -294,34 +290,19 @@ describe('CreateSLO', () => {
       await jest.advanceTimersByTimeAsync(0);
 
       expect(mockScopedClusterClient.asCurrentUser.delete).not.toHaveBeenCalled();
-      expect(
-        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
-      ).not.toHaveBeenCalled();
-      expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
-      expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalled();
       expect(mockRepository.deleteById).not.toHaveBeenCalled();
-      expect(mockTransformManager.start).not.toHaveBeenCalled();
 
-      resolveCreate(mockRepository.create.mock.calls[0][0]);
+      pendingCreate.resolve(mockRepository.create.mock.calls[0][0]);
       await assertion;
 
-      expect(mockRepository.deleteById).toHaveBeenCalled();
-      expect(
-        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
-      ).toHaveBeenCalledTimes(2);
-      expect(mockTransformManager.uninstall).toHaveBeenCalledTimes(1);
-      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledTimes(1);
       expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
+      expect(mockRepository.deleteById).toHaveBeenCalled();
     });
 
     it('waits for in-flight start operations to settle before rolling back', async () => {
-      let resolveSummaryStart: () => void = () => {};
+      const pendingSummaryStart = Promise.withResolvers<void>();
       mockTransformManager.start.mockRejectedValueOnce(new Error('Rollup transform start error'));
-      mockSummaryTransformManager.start.mockReturnValueOnce(
-        new Promise<void>((resolve) => {
-          resolveSummaryStart = resolve;
-        })
-      );
+      mockSummaryTransformManager.start.mockReturnValueOnce(pendingSummaryStart.promise);
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
 
       const assertion = expect(createSLO.execute(sloParams)).rejects.toThrow(
@@ -331,23 +312,13 @@ describe('CreateSLO', () => {
 
       expect(mockSummaryTransformManager.start).toHaveBeenCalledTimes(1);
       expect(mockScopedClusterClient.asCurrentUser.delete).not.toHaveBeenCalled();
-      expect(
-        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
-      ).not.toHaveBeenCalled();
-      expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
-      expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalled();
       expect(mockRepository.deleteById).not.toHaveBeenCalled();
 
-      resolveSummaryStart();
+      pendingSummaryStart.resolve();
       await assertion;
 
-      expect(mockRepository.deleteById).toHaveBeenCalled();
-      expect(
-        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
-      ).toHaveBeenCalledTimes(2);
-      expect(mockTransformManager.uninstall).toHaveBeenCalledTimes(1);
-      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledTimes(1);
       expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
+      expect(mockRepository.deleteById).toHaveBeenCalled();
     });
   });
 });

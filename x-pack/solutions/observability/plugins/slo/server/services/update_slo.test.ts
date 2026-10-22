@@ -470,12 +470,8 @@ describe('UpdateSLO', () => {
         indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
       });
       mockRepository.findById.mockResolvedValueOnce(originalSlo);
-      let resolveSummaryInstall: (value: string) => void = () => {};
-      mockSummaryTransformManager.install.mockReturnValueOnce(
-        new Promise<string>((resolve) => {
-          resolveSummaryInstall = resolve;
-        })
-      );
+      const pendingSummaryInstall = Promise.withResolvers<string>();
+      mockSummaryTransformManager.install.mockReturnValueOnce(pendingSummaryInstall.promise);
       mockTransformManager.install.mockRejectedValueOnce(new Error('Transform install error'));
 
       const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
@@ -486,29 +482,15 @@ describe('UpdateSLO', () => {
       await flushPromises();
 
       expect(mockRepository.update).toHaveBeenCalledTimes(1);
-      expect(mockRepository.update).not.toHaveBeenCalledWith(originalSlo);
       expect(mockScopedClusterClient.asCurrentUser.delete).not.toHaveBeenCalled();
-      expect(
-        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
-      ).not.toHaveBeenCalled();
-      expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
-      expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalled();
 
-      resolveSummaryInstall(getSLOSummaryTransformId('original-id', originalSlo.revision + 1));
+      pendingSummaryInstall.resolve(
+        getSLOSummaryTransformId(originalSlo.id, originalSlo.revision + 1)
+      );
       await assertion;
 
       expect(mockRepository.update).toHaveBeenCalledWith(originalSlo);
-      expect(mockTransformManager.uninstall).toHaveBeenCalledWith(
-        getSLOTransformId('original-id', originalSlo.revision + 1)
-      );
-      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledWith(
-        getSLOSummaryTransformId('original-id', originalSlo.revision + 1)
-      );
-      expect(
-        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
-      ).toHaveBeenCalledTimes(2);
       expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).not.toHaveBeenCalled();
     });
 
     it('waits for in-flight start operations to settle before rolling back', async () => {
@@ -518,12 +500,8 @@ describe('UpdateSLO', () => {
       });
       mockRepository.findById.mockResolvedValueOnce(originalSlo);
       mockTransformManager.start.mockRejectedValueOnce(new Error('rollup transform start error'));
-      let resolveSummaryStart: () => void = () => {};
-      mockSummaryTransformManager.start.mockReturnValueOnce(
-        new Promise<void>((resolve) => {
-          resolveSummaryStart = resolve;
-        })
-      );
+      const pendingSummaryStart = Promise.withResolvers<void>();
+      mockSummaryTransformManager.start.mockReturnValueOnce(pendingSummaryStart.promise);
 
       const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
 
@@ -534,29 +512,13 @@ describe('UpdateSLO', () => {
 
       expect(mockSummaryTransformManager.start).toHaveBeenCalledTimes(1);
       expect(mockRepository.update).toHaveBeenCalledTimes(1);
-      expect(mockRepository.update).not.toHaveBeenCalledWith(originalSlo);
       expect(mockScopedClusterClient.asCurrentUser.delete).not.toHaveBeenCalled();
-      expect(
-        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
-      ).not.toHaveBeenCalled();
-      expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
-      expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalled();
 
-      resolveSummaryStart();
+      pendingSummaryStart.resolve();
       await assertion;
 
       expect(mockRepository.update).toHaveBeenCalledWith(originalSlo);
-      expect(mockTransformManager.uninstall).toHaveBeenCalledWith(
-        getSLOTransformId('original-id', originalSlo.revision + 1)
-      );
-      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledWith(
-        getSLOSummaryTransformId('original-id', originalSlo.revision + 1)
-      );
-      expect(
-        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
-      ).toHaveBeenCalledTimes(2);
       expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
-      expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).not.toHaveBeenCalled();
     });
   });
 

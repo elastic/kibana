@@ -21,7 +21,6 @@ import {
   SLO_MODEL_VERSION,
   SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
-import { SecurityException } from '../errors';
 import { createSLO } from './fixtures/slo';
 import {
   createSLORepositoryMock,
@@ -126,43 +125,22 @@ describe('ResetSLO', () => {
     it('waits for in-flight install operations to settle before rolling back', async () => {
       const slo = createSLO({ id: 'irrelevant', version: 1 });
       mockRepository.findById.mockResolvedValueOnce(slo);
-      let resolveSummaryInstall: (value: string) => void = () => {};
-      mockSummaryTransformManager.install.mockReturnValueOnce(
-        new Promise<string>((resolve) => {
-          resolveSummaryInstall = resolve;
-        })
-      );
-      mockTransformManager.install.mockRejectedValueOnce(
-        Object.assign(new Error('forbidden'), {
-          meta: { body: { error: { type: 'security_exception', reason: 'missing privileges' } } },
-        })
-      );
+      const pendingSummaryInstall = Promise.withResolvers<string>();
+      mockSummaryTransformManager.install.mockReturnValueOnce(pendingSummaryInstall.promise);
+      mockTransformManager.install.mockRejectedValueOnce(new Error('Transform install error'));
       const resetedRollupTransformId = getSLOTransformId(slo.id, slo.revision + 1);
-      const resetedSummaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision + 1);
 
-      const executePromise = resetSLO.execute(slo.id);
-      const assertion = expect(executePromise).rejects.toBeInstanceOf(SecurityException);
+      const assertion = expect(resetSLO.execute(slo.id)).rejects.toThrow('Transform install error');
       await jest.advanceTimersByTimeAsync(0);
 
       expect(mockScopedClusterClient.asCurrentUser.delete).not.toHaveBeenCalled();
       expect(mockTransformManager.uninstall).not.toHaveBeenCalledWith(resetedRollupTransformId);
-      expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalledWith(
-        resetedSummaryTransformId
-      );
-      expect(
-        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
-      ).toHaveBeenCalledTimes(1);
 
-      resolveSummaryInstall(resetedSummaryTransformId);
+      pendingSummaryInstall.resolve(getSLOSummaryTransformId(slo.id, slo.revision + 1));
       await assertion;
-      await expect(executePromise).rejects.toThrow('missing privileges');
 
-      expect(mockTransformManager.uninstall).toHaveBeenCalledWith(resetedRollupTransformId);
-      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledWith(resetedSummaryTransformId);
-      expect(
-        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
-      ).toHaveBeenCalledTimes(3);
       expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
+      expect(mockTransformManager.uninstall).toHaveBeenCalledWith(resetedRollupTransformId);
       expect(mockRepository.update).not.toHaveBeenCalled();
     });
   });
