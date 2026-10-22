@@ -558,14 +558,31 @@ describe('useAgentDetection', () => {
       expect(requestedIds().flat()).toEqual(AGENTS(250).map(({ id }) => id));
     });
 
-    it('stops at the first batch that has an agent with data', async () => {
-      mockSendIncomingData.mockResolvedValue({ data: { items: [{ a3: { data: true } }] } });
+    it('asks about every batch even when an early one has data', async () => {
+      mockSendIncomingData.mockImplementation(async ({ agentsIds }) => ({
+        data: { items: agentsIds.includes('a3') ? [{ a3: { data: true } }] : [] },
+      }));
+      setup({ agents: AGENTS(250) });
+
+      await mockUseQuery.mock.calls[0][0].queryFn();
+
+      expect(requestedIds().map((ids) => ids.length)).toEqual([100, 100, 50]);
+    });
+
+    it('keeps the agents with data from different batches, so every instance is answered', async () => {
+      // Instances sharing a package share one request, and each needs its own agents answered.
+      mockSendIncomingData.mockImplementation(async ({ agentsIds }) => ({
+        data: {
+          items: ['a3', 'a230']
+            .filter((id) => agentsIds.includes(id))
+            .map((id) => ({ [id]: { data: true } })),
+        },
+      }));
       setup({ agents: AGENTS(250) });
 
       const result = await mockUseQuery.mock.calls[0][0].queryFn();
 
-      expect(requestedIds()).toHaveLength(1);
-      expect(result).toEqual({ 'aws@4.0.0': ['a3'] });
+      expect(result).toEqual({ 'aws@4.0.0': ['a3', 'a230'] });
     });
 
     it('finds data in a later batch', async () => {

@@ -243,17 +243,16 @@ export function useAgentDetection({
     queryFn: async () => {
       const entries = await Promise.all(
         dataRequests.map(async ({ key, pkgName, pkgVersion, agentIds }) => {
-          const withData: string[] = [];
-          // One agent with data answers for the instance, so stop at the first batch that has one.
-          for (const batch of toBatches(agentIds, AGENT_IDS_PER_REQUEST)) {
-            const { data } = await sendGetAgentIncomingData({
-              agentsIds: batch,
-              pkgName,
-              pkgVersion,
-            });
-            withData.push(...extractAgentIdsWithData(data?.items ?? []));
-            if (withData.length > 0) break;
-          }
+          // A request covers every instance of the package, and each instance needs its own agents
+          // answered, so every batch is asked about, not just until one has data.
+          const responses = await Promise.all(
+            toBatches(agentIds, AGENT_IDS_PER_REQUEST).map((batch) =>
+              sendGetAgentIncomingData({ agentsIds: batch, pkgName, pkgVersion })
+            )
+          );
+          const withData = responses.flatMap(({ data }) =>
+            extractAgentIdsWithData(data?.items ?? [])
+          );
           return [key, withData] as const;
         })
       );
