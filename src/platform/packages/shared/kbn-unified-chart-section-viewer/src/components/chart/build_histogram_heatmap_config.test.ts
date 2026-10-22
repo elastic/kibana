@@ -52,27 +52,40 @@ describe('buildHistogramHeatmapConfig', () => {
     });
   });
 
-  it('tints the series color from the panel background', () => {
+  it('keeps a visible series color and deepens a pale one on a light panel', () => {
     const pale = cellColors('#A6EDEA', backgroundColor);
-    const dim = cellColors('#1B3A6B', '#111217');
     const blue = cellColors(seriesColor, backgroundColor);
     const orange = cellColors('#F5A700', backgroundColor);
 
-    for (const [colors, color, background] of [
-      [pale, '#A6EDEA', backgroundColor],
-      [dim, '#1B3A6B', '#111217'],
-      [blue, seriesColor, backgroundColor],
-    ] as const) {
-      expect(colors).toHaveLength(LENS_HEATMAP_DEFAULT_COLOR_STEPS);
-      expect(colors[colors.length - 1].toLowerCase()).toBe(color.toLowerCase());
-      expect(colors[0].toLowerCase()).not.toBe(background.toLowerCase());
-      expect(colors[0].toLowerCase()).not.toBe(color.toLowerCase());
-      expect(contrast(colors[0], background)).toBeLessThan(
-        contrast(colors[colors.length - 1], background)
-      );
-    }
+    expect(blue).toHaveLength(LENS_HEATMAP_DEFAULT_COLOR_STEPS);
+    expect(blue[blue.length - 1].toLowerCase()).toBe(seriesColor.toLowerCase());
+    expect(contrast(blue[0], backgroundColor)).toBeGreaterThan(1.2);
+    expect(contrast(blue[0], backgroundColor)).toBeLessThan(1.5);
+    expect(contrast(blue[0], backgroundColor)).toBeLessThan(
+      contrast(blue[blue.length - 1], backgroundColor)
+    );
+
+    expect(pale[pale.length - 1].toLowerCase()).not.toBe('#a6edea');
+    expect(contrast(pale[pale.length - 1], backgroundColor)).toBeGreaterThanOrEqual(2.2);
+    expect(contrast(pale[pale.length - 1], backgroundColor)).toBeLessThan(2.5);
+    expect(contrast(pale[0], backgroundColor)).toBeLessThan(
+      contrast(pale[pale.length - 1], backgroundColor)
+    );
 
     expect(blue[0]).not.toBe(orange[0]);
     expect(blue[blue.length - 1]).not.toBe(orange[orange.length - 1]);
+  });
+
+  it('lifts a dim series color on a dark panel', () => {
+    const background = '#111217';
+    const colors = cellColors('#1B3A6B', background);
+
+    expect(colors).toHaveLength(LENS_HEATMAP_DEFAULT_COLOR_STEPS);
+    expect(colors[colors.length - 1].toLowerCase()).not.toBe('#1b3a6b');
+    expect(contrast(colors[colors.length - 1], background)).toBeGreaterThanOrEqual(2.8);
+    expect(contrast(colors[0], background)).toBeGreaterThan(1.3);
+    expect(contrast(colors[0], background)).toBeLessThan(
+      contrast(colors[colors.length - 1], background)
+    );
   });
 });
