@@ -41,7 +41,8 @@
       {{#priorities}}
       <li class="priority">
         <span class="rank">{{rank}}</span>
-        <div>
+        <div class="head">
+        <div class="who">
           <div class="name">{{name}}</div>
           <div class="meta">{{meta}}</div>
         </div>
@@ -50,6 +51,7 @@
           {{#criticality}}<span class="pill"><span class="dot" data-level="{{key}}"></span>{{text}}</span>{{/criticality}}
           {{#watchlists}}<span class="pill watchlist" title="Watchlist: {{.}}">{{.}}</span>{{/watchlists}}
           {{#moreWatchlists}}<span class="pill">+{{.}} more</span>{{/moreWatchlists}}
+        </div>
         </div>
         <p class="prose">{{assessment}}</p>
         <p class="prose why">{{whyFirst}}</p>

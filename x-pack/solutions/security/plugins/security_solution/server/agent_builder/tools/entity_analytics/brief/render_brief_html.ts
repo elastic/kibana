@@ -16,15 +16,13 @@ import { estimateBriefHeight } from './estimate_brief_height';
 import { buildRiskHistoryContext } from './risk_history_chart';
 import type { BriefViewModel } from './view_model';
 import {
+  MAX_WATCHLIST_PILLS,
   NO_PRIORITIES_LINE,
   getNotes,
   getShownCounts,
   getTitleParts,
   hasPrioritiesSection,
 } from './view_model';
-
-/** The watchlists shown as pills, and the rest counted. */
-const MAX_WATCHLIST_PILLS = 3;
 
 const loadFiles = once(() => ({
   template: fs.readFileSync(path.join(__dirname, 'brief.mustache.html'), 'utf8'),

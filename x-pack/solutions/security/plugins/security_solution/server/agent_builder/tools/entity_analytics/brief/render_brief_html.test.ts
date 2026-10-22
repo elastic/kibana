@@ -142,6 +142,23 @@ describe('renderBriefHtml', () => {
     expect(html).toContain('+2 more');
   });
 
+  it('keeps a long watchlist name whole in the pill title, which the stylesheet clips, and makes room for pills that wrap under the title', () => {
+    const withWatchlists = (watchlists: string[]) => ({
+      ...fixtureViewModel,
+      priorities: [{ ...fixtureViewModel.priorities[0], watchlists }],
+    });
+    const longName = 'w'.repeat(100);
+
+    expect(renderBriefHtml(withWatchlists([longName])).html).toContain(
+      `title="Watchlist: ${longName}"`
+    );
+    expect(renderBriefHtml(withWatchlists([longName])).html).toContain('.watchlist{');
+    // Three pills of 31 characters don't fit beside the title: they take a second row under it.
+    expect(
+      renderBriefHtml(withWatchlists(['a', 'b', 'c'].map((letter) => letter.repeat(31)))).height
+    ).toBeGreaterThan(renderBriefHtml(withWatchlists(['Privileged User'])).height + 30);
+  });
+
   it("heads the card with the model's title and puts the scope line under it, or heads it with the scope", () => {
     const withTitle = renderBriefHtml({
       ...fixtureViewModel,

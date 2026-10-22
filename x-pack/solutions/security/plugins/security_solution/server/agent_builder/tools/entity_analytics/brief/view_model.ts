@@ -27,6 +27,8 @@ import type { VerifiedBrief } from './verify_draft';
 import { JOB_MENTION_PATTERN, MENTION_PATTERN, RULE_MENTION_PATTERN } from './verify_draft';
 
 export const QUIET_LINE = 'Nothing in this view is flagged as needing attention.';
+/** The watchlists shown as pills, and the rest counted. */
+export const MAX_WATCHLIST_PILLS = 3;
 export const NO_PRIORITIES_LINE = 'No entity in this view has enough evidence to prioritize.';
 
 const RiskHistory = lazySchema(() =>
