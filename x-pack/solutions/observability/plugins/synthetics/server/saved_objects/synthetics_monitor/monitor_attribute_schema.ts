@@ -52,7 +52,7 @@ const geoSchema = loose({
 
 const locationSchema = loose({
   id: storedString(),
-  label: storedString(),
+  label: schema.maybe(storedString()),
   isServiceManaged: schema.maybe(schema.boolean()),
   isInvalid: schema.maybe(schema.boolean()),
   url: schema.maybe(storedString()),
