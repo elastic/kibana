@@ -20,7 +20,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { buildKiApiWriter, restoreKi, softDeleteKi, updateKi } from '../ai_indices/ki_write';
-import { kiConflictError, kiDeletedError, kiNotFoundError } from '../step_types/helpers';
+import { KiConflictError, KiDeletedError, KiNotFoundError } from '../ai_indices/errors';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { registerAiIndexRoutes } from './ai_indices';
 import {
@@ -1501,7 +1501,7 @@ describe('ai indices routes', () => {
 
     it('returns 404 when the KI does not exist', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
-      jest.mocked(updateKi).mockRejectedValue(kiNotFoundError('customer_support', 'missing'));
+      jest.mocked(updateKi).mockRejectedValue(new KiNotFoundError('customer_support', 'missing'));
 
       await callRoute('PATCH', AI_INDEX_KI_BY_ID_PATH, {
         params: { aiIndexId: 'customer_support', kiId: 'missing' },
@@ -1509,7 +1509,7 @@ describe('ai indices routes', () => {
       });
 
       expect(response.notFound).toHaveBeenCalledWith({
-        body: { message: kiNotFoundError('customer_support', 'missing').message },
+        body: { message: new KiNotFoundError('customer_support', 'missing').message },
       });
       expect(analyticsService.reportKiWrite).toHaveBeenCalledWith(
         expect.objectContaining({ outcome: 'failure', errorType: 'NotFoundError' })
@@ -1518,7 +1518,7 @@ describe('ai indices routes', () => {
 
     it('returns 409 when the KI is soft-deleted', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
-      jest.mocked(updateKi).mockRejectedValue(kiDeletedError('customer_support', 'ki-1'));
+      jest.mocked(updateKi).mockRejectedValue(new KiDeletedError('customer_support', 'ki-1'));
 
       await callRoute('PATCH', AI_INDEX_KI_BY_ID_PATH, {
         params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
@@ -1526,7 +1526,7 @@ describe('ai indices routes', () => {
       });
 
       expect(response.conflict).toHaveBeenCalledWith({
-        body: { message: kiDeletedError('customer_support', 'ki-1').message },
+        body: { message: new KiDeletedError('customer_support', 'ki-1').message },
       });
       expect(analyticsService.reportKiWrite).toHaveBeenCalledWith(
         expect.objectContaining({ outcome: 'failure', errorType: 'ConflictError' })
@@ -1598,27 +1598,27 @@ describe('ai indices routes', () => {
 
     it('returns 404 when the KI does not exist', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
-      jest.mocked(softDeleteKi).mockRejectedValue(kiNotFoundError('customer_support', 'missing'));
+      jest.mocked(softDeleteKi).mockRejectedValue(new KiNotFoundError('customer_support', 'missing'));
 
       await callRoute('DELETE', AI_INDEX_KI_BY_ID_PATH, {
         params: { aiIndexId: 'customer_support', kiId: 'missing' },
       });
 
       expect(response.notFound).toHaveBeenCalledWith({
-        body: { message: kiNotFoundError('customer_support', 'missing').message },
+        body: { message: new KiNotFoundError('customer_support', 'missing').message },
       });
     });
 
     it('returns 409 on concurrent modification', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
-      jest.mocked(softDeleteKi).mockRejectedValue(kiConflictError('customer_support', 'ki-1'));
+      jest.mocked(softDeleteKi).mockRejectedValue(new KiConflictError('customer_support', 'ki-1'));
 
       await callRoute('DELETE', AI_INDEX_KI_BY_ID_PATH, {
         params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
       });
 
       expect(response.conflict).toHaveBeenCalledWith({
-        body: { message: kiConflictError('customer_support', 'ki-1').message },
+        body: { message: new KiConflictError('customer_support', 'ki-1').message },
       });
     });
   });
@@ -1687,14 +1687,14 @@ describe('ai indices routes', () => {
 
     it('returns 404 when the KI does not exist', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
-      jest.mocked(restoreKi).mockRejectedValue(kiNotFoundError('customer_support', 'missing'));
+      jest.mocked(restoreKi).mockRejectedValue(new KiNotFoundError('customer_support', 'missing'));
 
       await callRoute('POST', AI_INDEX_KI_RESTORE_PATH, {
         params: { aiIndexId: 'customer_support', kiId: 'missing' },
       });
 
       expect(response.notFound).toHaveBeenCalledWith({
-        body: { message: kiNotFoundError('customer_support', 'missing').message },
+        body: { message: new KiNotFoundError('customer_support', 'missing').message },
       });
     });
   });

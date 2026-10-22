@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
-import { appendKiRevision, writeKiRevision, type KiRevision, type StoredKi } from './helpers';
-import { mockKiWriter } from './test_utils';
+import { appendKiRevision, writeKiRevision, type KiRevision, type StoredKi } from './ki_revision';
+import { mockKiWriter } from '../step_types/test_utils';
 
 const dest: AiIndexDest = { type: 'data_stream', value: 'ai-index-ds-my-ai-index' };
 const aiIndexId = 'my-ai-index';

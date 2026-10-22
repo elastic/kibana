@@ -8,13 +8,13 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import type { UpdateKiBody } from '../../common/http_api/knowledge_indicators';
+import { KiDeletedError } from './errors';
 import {
-  isKiDeleted,
-  kiDeletedError,
   getKiRevision,
+  isKiDeleted,
   writeKiRevision,
   type KiWriter,
-} from '../step_types/helpers';
+} from './ki_revision';
 
 export type KiApiWriterAction = 'update' | 'delete';
 
@@ -47,7 +47,7 @@ export const updateKi = async (
     backingIndex,
   });
   if (isKiDeleted(revision.source)) {
-    throw kiDeletedError(aiIndexId, kiId, 'restore the deleted KI before updating it');
+    throw new KiDeletedError(aiIndexId, kiId, 'restore the deleted KI before updating it');
   }
 
   const now = new Date().toISOString();

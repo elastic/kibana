@@ -19,7 +19,6 @@ import type { RouteSecurity } from '@kbn/core-http-server';
 import { isResponseError } from '@kbn/es-errors';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
-import { ExecutionError } from '@kbn/workflows/server';
 import type { DeleteWorkflowsApi } from '../types';
 import {
   AI_INDEX_API_VERSION,
@@ -67,7 +66,10 @@ import {
   InvalidConnectorSourceError,
   InvalidEsqlSourceError,
   InvalidAiIndexTraceError,
+  KiConflictError,
+  KiDeletedError,
   KiNotFoundError,
+  KiValidationError,
 } from '../ai_indices/errors';
 import type { AiIndexDataReadServiceApi } from '../ai_indices/data_read_service';
 import type { AiIndexService } from '../ai_indices/service';
@@ -183,20 +185,14 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, log
     error instanceof AiIndexManagedError ||
     error instanceof AiIndexConflictError ||
     error instanceof AiIndexAlreadyExistsError ||
-    error instanceof AiIndexIdConflictError
+    error instanceof AiIndexIdConflictError ||
+    error instanceof KiConflictError ||
+    error instanceof KiDeletedError
   ) {
     return response.conflict({ body: { message: error.message } });
   }
-  if (error instanceof ExecutionError) {
-    if (error.type === 'NotFoundError') {
-      return response.notFound({ body: { message: error.message } });
-    }
-    if (error.type === 'ConflictError') {
-      return response.conflict({ body: { message: error.message } });
-    }
-    if (error.type === 'ValidationError') {
-      return response.badRequest({ body: { message: error.message } });
-    }
+  if (error instanceof KiValidationError) {
+    return response.badRequest({ body: { message: error.message } });
   }
   logger.error(error instanceof Error ? error.stack ?? error.message : String(error));
   const statusCode = isResponseError(error) ? error.statusCode ?? 500 : 500;
