@@ -232,12 +232,12 @@ describe(`${RESOLVE_PROPOSALS_STEP_ID} step wiring`, () => {
       await expect(run(input)).resolves.toMatchObject({ output: { alreadyOpenCount: 2 } });
     });
 
-    it('counts as already open when the proposal covering it is minted here', async () => {
+    it('does not count when the proposal covering it is only being minted here', async () => {
       resolveProposalsMock.mockResolvedValueOnce({
         ...base,
         proposals: [{ ...isolate('agent-a'), subjectKey, proposalId: 'p-1' }],
       });
-      await expect(run(input)).resolves.toMatchObject({ output: { alreadyOpenCount: 1 } });
+      await expect(run(input)).resolves.toMatchObject({ output: { alreadyOpenCount: 0 } });
     });
 
     it('does not count when the covering proposal converged onto another Investigation', async () => {

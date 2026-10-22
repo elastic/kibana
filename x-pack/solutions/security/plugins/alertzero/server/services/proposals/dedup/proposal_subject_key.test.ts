@@ -47,9 +47,9 @@ describe('buildProposalSubjectKey', () => {
       buildProposalSubjectKey({
         subjectId: 'agent-a',
         actionWorkflowId: 'system-security-action-kill-process',
-        processKey: 'entity:ent-4242',
+        processKey: 'entity_id:ent-4242',
       })
-    ).toBe('e7f4d23d-c0a4-57a8-804e-a1cbca13bc1c');
+    ).toBe('d9e71ca7-10a9-5cd4-b5c2-3bfe4fe7ab1b');
   });
 });
 
@@ -102,6 +102,31 @@ describe('buildProposalSubjectKeyFromActionInput', () => {
         actionInput: { endpoint_ids: ['agent-a'], parameters: { entity_id: '4242' } },
       })
     );
+  });
+
+  it('reads an integer-string pid as the same pid, and ignores a non-integer string', () => {
+    const byNumber = buildProposalSubjectKeyFromActionInput({
+      actionWorkflowId: KILL,
+      actionInput: { endpoint_ids: ['agent-a'], parameters: { pid: 4242 } },
+    });
+    expect(
+      buildProposalSubjectKeyFromActionInput({
+        actionWorkflowId: KILL,
+        actionInput: { endpoint_ids: ['agent-a'], parameters: { pid: '4242' } },
+      })
+    ).toBe(byNumber);
+    expect(
+      buildProposalSubjectKeyFromActionInput({
+        actionWorkflowId: KILL,
+        actionInput: { endpoint_ids: ['agent-a'], parameters: { pid: '04242' } },
+      })
+    ).toBe(byNumber);
+    expect(
+      buildProposalSubjectKeyFromActionInput({
+        actionWorkflowId: KILL,
+        actionInput: { endpoint_ids: ['agent-a'], parameters: { pid: 'abc' } },
+      })
+    ).toBe(buildProposalSubjectKey({ subjectId: 'agent-a', actionWorkflowId: KILL }));
   });
 
   it('prefers the entity id when both are present', () => {

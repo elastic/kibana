@@ -160,14 +160,12 @@ export const getResolveProposalsStepDefinition = ({
           },
         });
 
-        // A repeat is open on this Investigation only if a candidate covering it minted a proposal
-        // here or found this Investigation's own live one. One that converged onto another
+        // A repeat is already open on this Investigation only if a candidate covering it found this
+        // Investigation's own live proposal. A proposal minted in this run does not count: it does
+        // not exist yet, so its repeat is not "already open". One that converged onto another
         // Investigation's proposal leaves nothing open here. Nothing counts when the run minted
         // nothing because it could not check what exists.
-        const openHere = new Set([
-          ...resolved.proposals.map(({ subjectKey }) => subjectKey),
-          ...alreadyOpenSubjectKeys,
-        ]);
+        const openHere = new Set(alreadyOpenSubjectKeys);
         const repeatedOpenCount = repeats.filter((coveredBy) =>
           coveredBy.some((subjectKey) => openHere.has(subjectKey))
         ).length;

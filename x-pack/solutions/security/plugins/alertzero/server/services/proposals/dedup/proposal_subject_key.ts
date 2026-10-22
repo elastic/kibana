@@ -43,8 +43,14 @@ const firstString = (value: unknown): string | undefined =>
 const asString = (value: unknown): string | undefined =>
   typeof value === 'string' && value !== '' ? value : undefined;
 
-const asNumber = (value: unknown): number | undefined =>
-  typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+// The agent schema leaves action input open, so a pid can arrive as the string "4242". It is read
+// as the number, so both spellings (and "04242") land on Hunt's `pid:4242`.
+const asPid = (value: unknown): number | undefined => {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : undefined;
+  }
+  return typeof value === 'string' && /^\d+$/.test(value) ? Number(value) : undefined;
+};
 
 /**
  * The subject key for an action read off its own input. Hunt builds the key from its run state
@@ -55,7 +61,7 @@ const asNumber = (value: unknown): number | undefined =>
  *
  * - `endpoint_ids[0]` is the agent id Hunt uses for host and process subjects;
  * - `parameters.entity_id` becomes `entity_id:<id>`, Hunt's process key. `parameters.pid`
- *   becomes `pid:<pid>`; Hunt never proposes on a bare pid, so this only keeps a pid kill
+ *   (a number or an integer string) becomes `pid:<pid>`; Hunt never proposes on a bare pid, so this only keeps a pid kill
  *   apart from an entity kill;
  * - `id_field` + `id_value` become `<kind>:<value>`, with kind the field's first segment
  *   (`user.name` -> `user`), which is how Hunt keys users and services.
@@ -76,7 +82,7 @@ export const buildProposalSubjectKeyFromActionInput = ({
   if (agentId !== undefined) {
     const parameters = (actionInput.parameters ?? {}) as Record<string, unknown>;
     const entityId = asString(parameters.entity_id);
-    const pid = asNumber(parameters.pid);
+    const pid = asPid(parameters.pid);
     const processKey =
       entityId !== undefined
         ? `entity_id:${entityId}`
