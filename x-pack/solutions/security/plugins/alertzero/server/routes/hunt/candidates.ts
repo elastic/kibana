@@ -8,7 +8,11 @@
 import type { CandidatesResponse } from '@kbn/alertzero-common';
 import { API_VERSIONS, CandidatesRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
 import type { KibanaRequest } from '@kbn/core/server';
-import { MAX_PROPOSALS_PAGE_OFFSET, MAX_PROPOSALS_PAGE_SIZE } from '@kbn/proposals-common';
+import {
+  MAX_PROPOSALS_PAGE_OFFSET,
+  MAX_PROPOSALS_PAGE_SIZE,
+  OPEN_PROPOSAL_STATUSES,
+} from '@kbn/proposals-common';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, CANDIDATES_URL } from '../../../common/constants';
@@ -18,14 +22,6 @@ import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
 
 export { CANDIDATES_URL };
-
-/**
- * An "active" Hunt Proposal, per the selection contract: awaiting a decision, or
- * decided and currently running. The remaining statuses (`expired`, `failed`,
- * `no_action`, `succeeded`) are terminal, so a report carrying only those is
- * free to be hunted again.
- */
-const OPEN_PROPOSAL_STATUSES = ['pending', 'executing'] as const;
 
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
 

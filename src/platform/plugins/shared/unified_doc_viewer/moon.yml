@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/test-jest-helpers'
   - '@kbn/discover-utils'
+  - '@kbn/data-source'
   - '@kbn/i18n-react'
   - '@kbn/i18n'
   - '@kbn/unified-doc-viewer'
@@ -80,6 +81,4 @@ fileGroups:
     - server/**/*
     - public/**/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

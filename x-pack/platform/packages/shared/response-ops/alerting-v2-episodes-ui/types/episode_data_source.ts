@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IconType } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { TimeRange } from '@kbn/es-query';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
@@ -19,6 +20,14 @@ import type { EpisodeActionsDeps } from '../actions/create_episode_actions';
 
 export interface EpisodeDataSourceServices {
   http: HttpStart;
+}
+
+export interface EpisodeSearchField {
+  name: string;
+  type: string;
+  esTypes: string[];
+  searchable: boolean;
+  aggregatable: boolean;
 }
 
 interface EpisodeDataSourceBaseParams {
@@ -71,6 +80,7 @@ export type EpisodeFetchErrorSurface = 'list' | 'kpis' | 'histogram';
 export interface SourceActionResult {
   succeeded: number;
   failed: number;
+  unchanged?: number;
   errors?: string[];
 }
 
@@ -96,14 +106,16 @@ export interface SeverityExtension {
 }
 
 export interface EpisodeDataSource {
-  /** Short source label, interpolated into fetch error toast titles (e.g. `v1`). */
   id: string;
+  label: string;
+  icon?: IconType;
   queryKeyPrefix: readonly unknown[];
   fetchEpisodes: (params: FetchSourceEpisodesParams) => Promise<AlertEpisode[]>;
   fetchKpis?: (params: FetchSourceKpisParams) => Promise<EpisodeSourceKpis>;
   fetchHistogram?: (params: FetchSourceHistogramParams) => Promise<EpisodeSourceHistogram>;
   fetchTagOptions?: (params: FetchSourceTagOptionsParams) => Promise<string[]>;
   resolveRules?: (params: ResolveSourceRulesParams) => Promise<RuleResponse[]>;
+  fetchSearchFields?: (params: EpisodeDataSourceBaseParams) => Promise<EpisodeSearchField[]>;
   actionExtensions?: Array<EpisodeActionExtension<any>>;
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
   severityExtensions?: SeverityExtension[];

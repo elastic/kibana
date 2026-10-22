@@ -9,7 +9,8 @@ import { euiSelectors, tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/290729
+test.describe.skip(
   'Annotations List',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

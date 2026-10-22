@@ -362,6 +362,66 @@ describe('AlertConditionStep', () => {
       });
     });
 
+    it('keeps edited group fields when the saved query shows up after the first paint', async () => {
+      const services = createMockServices();
+      const queryClient = createTestQueryClient();
+      const formRef: { current: UseFormReturn<FormValues> | null } = { current: null };
+      const savedQuery: RuleQuery = {
+        base: 'FROM logs-*\n| STATS count = COUNT(*) BY host.name',
+        breach: { segment: '| WHERE count > 100' },
+      };
+
+      const Harness = ({ queryCommitted }: { queryCommitted: boolean }) => {
+        const form = useForm<FormValues>({
+          defaultValues: {
+            ...BASE_COMPOSE_VALUES,
+            grouping: { fields: ['service.name'] },
+            query: savedQuery,
+          },
+        });
+        formRef.current = form;
+        return (
+          <IntlProvider locale="en">
+            <QueryClientProvider client={queryClient}>
+              <FormProvider {...form}>
+                <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
+                  <QueryFieldRules queryCommitted={queryCommitted} />
+                  <AlertConditionStep
+                    state={createState({ queryCommitted })}
+                    dispatch={jest.fn()}
+                    services={services}
+                    isEditing
+                  />
+                </RuleFormProvider>
+              </FormProvider>
+            </QueryClientProvider>
+          </IntlProvider>
+        );
+      };
+
+      const view = render(<Harness queryCommitted={false} />);
+      expect(screen.getByText('service.name')).toBeInTheDocument();
+
+      view.rerender(<Harness queryCommitted={true} />);
+
+      await waitFor(() => {
+        expect(formRef.current?.getValues('grouping')).toEqual({ fields: ['service.name'] });
+      });
+      expect(screen.getByText('service.name')).toBeInTheDocument();
+      expect(screen.queryByText('host.name')).not.toBeInTheDocument();
+
+      act(() => {
+        formRef.current?.setValue('query', {
+          base: 'FROM logs-*\n| STATS count = COUNT(*) BY new.field',
+          breach: { segment: '| WHERE count > 100' },
+        });
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('new.field')).toBeInTheDocument();
+      });
+    });
+
     it('clears group fields when the base query has no STATS BY', async () => {
       renderStep(
         { queryCommitted: true },

@@ -72,7 +72,10 @@ import type { MitreAttackPublicStart } from '@kbn/mitre-attack-plugin/public';
 import type { Logger } from '@kbn/logging';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
-import type { AgenticInvestigationsPublicPluginSetup } from '@kbn/agentic-investigations-plugin/public';
+import type {
+  AgenticInvestigationsPublicPluginSetup,
+  AgenticInvestigationsPublicPluginStart,
+} from '@kbn/agentic-investigations-plugin/public';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type { EsqlPluginSetup } from '@kbn/esql/public';
 import type { ResolverPluginSetup } from './resolver/types';
@@ -187,6 +190,7 @@ export interface StartPlugins {
   inference: InferencePublicStart;
   share?: SharePluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  agenticInvestigations?: AgenticInvestigationsPublicPluginStart;
   mitreAttack?: MitreAttackPublicStart;
   cps?: CPSPluginStart;
   evals?: EvalsPublicStart;

@@ -46,7 +46,6 @@ import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update
 import { createDataSource } from '../../common/data_sources';
 import type { ScopedProfilesManager } from '../context_awareness';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
-import { columnsToColumnsMeta } from '../utils/columns_to_columns_meta';
 
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
@@ -290,9 +289,7 @@ export function initializeFetch({
               esqlApproximation: fetchContext.isApproximate,
             });
             return {
-              columnsMeta: columnsToColumnsMeta(
-                (result.dataSource ?? embeddableEsqlSource).getColumns()
-              ),
+              resultDataSource: result.dataSource ?? embeddableEsqlSource,
               rows: result.records,
               hitCount: result.records.length,
               approximationApplied: result.approximationApplied,
@@ -338,6 +335,7 @@ export function initializeFetch({
               processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
             }),
             hitCount: resp.hits.total as number,
+            resultDataSource: undefined,
             fetchContext,
           };
         } catch (error) {
@@ -358,9 +356,7 @@ export function initializeFetch({
 
       api.fetchWarnings$.next(next.warnings ?? []);
       api.fetchContext$.next(next.fetchContext);
-      if (Object.hasOwn(next, 'columnsMeta')) {
-        stateManager.columnsMeta.next(next.columnsMeta);
-      }
+      stateManager.resultDataSource.next(next.resultDataSource);
       setApproximationApplied(next.approximationApplied);
     });
 

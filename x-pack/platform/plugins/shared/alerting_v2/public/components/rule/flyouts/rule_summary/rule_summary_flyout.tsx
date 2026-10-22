@@ -25,7 +25,6 @@ import { UserCapabilities } from '../../../../services/user_capabilities';
 import { EMPTY_VALUE } from '../../../../utils/rule_display';
 import {
   RuleSummaryAboutSection,
-  RuleSummaryActionPoliciesSection,
   RuleSummaryArtifactsSection,
   RuleSummaryBody,
   RuleSummaryInvestigationSection,
@@ -144,6 +143,11 @@ export const RuleSummaryFlyout = ({
         data-test-subj="ruleSummaryFlyout"
       >
         <Header title={rule.metadata.name} description={updatedAtFormatted}>
+          <Badge color="hollow" data-test-subj="universalRulesBadge">
+            {i18n.translate('xpack.alertingV2.ruleSummaryFlyout.universalRulesBadge', {
+              defaultMessage: 'Universal',
+            })}
+          </Badge>
           <Badge
             color="hollow"
             iconType={RULE_KIND_ICONS[rule.kind] ?? 'dot'}
@@ -209,7 +213,6 @@ export const RuleSummaryFlyout = ({
           <RuleSummaryBody rule={rule}>
             <RuleSummaryAboutSection />
             <RuleSummaryInvestigationSection />
-            <RuleSummaryActionPoliciesSection />
             <RuleSummaryArtifactsSection />
           </RuleSummaryBody>
         </Body>

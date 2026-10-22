@@ -42,6 +42,7 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/workflows-yaml'
   - '@kbn/zod'
+  - '@kbn/std'
   - '@kbn/logging-mocks'
   - '@kbn/event-log-plugin'
   - '@kbn/inference-common'
@@ -73,6 +74,4 @@ fileGroups:
     - '**/*.tsx'
     - '**/*.d.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -1,7 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/293783
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: "Fix Synthetics diagnostics listing agent policies from other spaces"
