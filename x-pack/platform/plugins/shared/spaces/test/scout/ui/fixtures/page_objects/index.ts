@@ -31,7 +31,7 @@ export function extendPageObjects(
 ): SpacesPageObjects {
   return {
     ...pageObjects,
-    spaces: createLazyPageObject(SpacesPage, page),
+    spaces: createLazyPageObject(SpacesPage, page, kbnUrl),
     savedObjectsManagement: createLazyPageObject(SavedObjectsManagementPage, page, kbnUrl),
     copySavedObjectsToSpaceFlyout: createLazyPageObject(CopySavedObjectsToSpaceFlyout, page),
   };
