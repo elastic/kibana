@@ -42,6 +42,7 @@ import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/ser
 import type { ServerlessPluginStart } from '@kbn/serverless/server';
 import type { ObservabilityAgentBuilderPluginSetup } from '@kbn/observability-agent-builder-plugin/server';
 import type { CPSServerSetup } from '@kbn/cps/server';
+import type { EntityInventoryAppServerSetup } from '@kbn/entity-inventory-app-plugin/server';
 
 export interface InfraServerPluginSetupDeps {
   alerting: AlertingServerSetup;
@@ -62,6 +63,7 @@ export interface InfraServerPluginSetupDeps {
   serverless?: ServerlessPluginStart;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginSetup;
   cps?: CPSServerSetup;
+  entityInventoryApp?: EntityInventoryAppServerSetup;
 }
 
 export interface InfraServerPluginStartDeps {

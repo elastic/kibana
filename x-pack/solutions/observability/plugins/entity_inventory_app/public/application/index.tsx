@@ -9,12 +9,15 @@ import { EuiPanel } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-export function renderApp(element: HTMLElement) {
-  ReactDOM.render(
+export function EntityInventoryApp() {
+  return (
     <EuiPanel>
       <h1>Entity Inventory</h1>
-    </EuiPanel>,
-    element
+    </EuiPanel>
   );
+}
+
+export function renderApp(element: HTMLElement) {
+  ReactDOM.render(<EntityInventoryApp />, element);
   return () => ReactDOM.unmountComponentAtNode(element);
 }

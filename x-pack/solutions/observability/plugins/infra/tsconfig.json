@@ -146,6 +146,7 @@
     "@kbn/cps-utils",
     "@kbn/es-query-constants",
     "@kbn/cps",
+    "@kbn/entity-inventory-app-plugin",
     "@kbn/ml-cps-common",
     "@kbn/core-spaces-common",
     "@kbn/scout-oblt",
