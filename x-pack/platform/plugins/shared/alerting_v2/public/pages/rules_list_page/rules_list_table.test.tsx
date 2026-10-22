@@ -506,10 +506,8 @@ describe('RulesListTable', () => {
       expect(locators.rulesLocators.getRedirectUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' });
       expect(viewDetails).toHaveAttribute('href', '/rule-1-details');
       expect(
-        screen
-          .getAllByTestId(/^(viewRuleDetails|runRule|editRule|cloneRule)-rule-1$/)
-          .map((item) => item.getAttribute('data-test-subj'))[0]
-      ).toBe('viewRuleDetails-rule-1');
+        screen.getAllByTestId(/^(viewRuleDetails|runRule|editRule|cloneRule)-rule-1$/)[0]
+      ).toBe(viewDetails);
     });
 
     it('calls onEdit when edit action is clicked', async () => {
