@@ -9,6 +9,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
+      - check
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -28,6 +29,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
+      - check
     timeout_in_minutes: 60
     parallelism: 3
     retry:
@@ -46,6 +48,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
+      - check
     timeout_in_minutes: 60
     parallelism: 7
     retry:
@@ -64,6 +67,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
+      - check
     timeout_in_minutes: 60
     parallelism: 2
     retry:

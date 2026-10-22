@@ -1,5 +1,9 @@
 [
   {
+    "script": ".buildkite/scripts/steps/checks/verify_moon_projects.sh",
+    "mayChangeFiles": true
+  },
+  {
     "script": ".buildkite/scripts/steps/checks/ts_projects.sh",
     "mayChangeFiles": true
   },
@@ -98,10 +102,6 @@
   },
   {
     "script": ".buildkite/scripts/steps/checks/verify_codeowners.sh",
-    "mayChangeFiles": true
-  },
-  {
-    "script": ".buildkite/scripts/steps/checks/verify_moon_projects.sh",
     "mayChangeFiles": true
   },
   {
