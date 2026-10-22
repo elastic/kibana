@@ -70,12 +70,18 @@ export interface ConsistentFailure {
 }
 
 /**
- * Whether the test's runs in one setup end in a consistent failure: its latest settled builds,
- * at least as many as the rule asks, all failed every attempt and the runs before them all
- * passed. Builds not yet settled at the end are left out of the picture; one right before the
- * streak holds it back until it settles. A skipped build ends the streak, as the test was dealt
- * with. The failure is found again on every build while the break lasts, so a build the check
- * missed does not lose it; the caller tells a new break from a known one by the issue it filed.
+ * Finds a break in a test's runs in one setup: the latest builds all failed every attempt, and
+ * the test passed in the builds before.
+ *
+ * Builds are sorted oldest first and each gets a verdict. Pending builds at the end are ignored,
+ * a retry may still change them. The builds before those that are `failed`, back to the first
+ * one that is not, form the streak; it must be at least `consecutiveBuilds` long. The
+ * `cleanRunsBefore` builds before the streak, skipped builds left out, must all be `passed`;
+ * fewer builds are fine, so a new test can break too. A `pending` build right before the streak
+ * fails that check, so the result waits until it settles.
+ *
+ * The same break is found again on every later build while it lasts; callers tell a new break
+ * from a known one by the issue they filed.
  */
 export const findConsistentFailure = (
   runs: readonly BuildRun[],
@@ -85,10 +91,12 @@ export const findConsistentFailure = (
     .sort((a, b) => a.build - b.build)
     .map((run) => ({ run, verdict: verdictOf(run) }));
 
+  // skip the pending builds at the end
   let end = verdicts.length;
   while (end > 0 && verdicts[end - 1].verdict === 'pending') {
     end--;
   }
+  // walk back over the failed builds: that is the streak
   let start = end;
   while (start > 0 && verdicts[start - 1].verdict === 'failed') {
     start--;
@@ -98,6 +106,7 @@ export const findConsistentFailure = (
     return undefined;
   }
 
+  // the builds before the streak must all have passed
   const history = verdicts.slice(0, start).filter(({ verdict }) => verdict !== 'skipped');
   const before = history.slice(Math.max(0, history.length - rule.cleanRunsBefore));
   if (before.some(({ verdict }) => verdict !== 'passed')) {

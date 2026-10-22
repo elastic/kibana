@@ -118,10 +118,15 @@ const chunk = <T>(values: readonly T[], size: number): T[][] =>
   );
 
 /**
- * The given tests' runs per setup and build within the scope. The events only tell that a build
- * settled when a retried job reported the test; the caller settles finished builds and jobs that
- * do not retry on failure. A cut-off result would pass for a shorter history, so this fails
- * rather than return one.
+ * Reads from the Scout test events how each given test did in every build of the pipeline and
+ * branch since `scope.since`. The result has one entry per test and setup (config file and
+ * target), with one `BuildRun` per build: how many of its runs passed, failed every attempt or
+ * recovered on a retry, oldest build first.
+ *
+ * Tests are queried in batches, per execution model, since Playwright and the other frameworks
+ * record outcomes differently. A build is marked settled only when a retried job reported the
+ * test; the caller settles the rest. Throws when a query hits the row limit, as a cut-off history
+ * would pass for a shorter one.
  */
 export const fetchRecentRuns = async (
   es: ESClient,
