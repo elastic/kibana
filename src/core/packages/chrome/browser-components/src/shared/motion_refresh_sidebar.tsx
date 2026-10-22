@@ -419,7 +419,7 @@ export const MotionRefreshSidebar = ({ onClose }: MotionRefreshSidebarProps) => 
   const pageRows: TokenRow[] = [
     { id: 'duration', token: PAGE_ENTER_DURATION, value: PAGE_ENTER_DURATION, use: fadeUseLabel },
     { id: 'easing', token: 'animation.resistance', value: tokens.pageEasing, use: easingUseLabel },
-    { id: 'rise', token: 'size.xs', value: tokens.pageRise, use: pageRiseUseLabel },
+    { id: 'rise', token: '2px', value: tokens.pageRise, use: pageRiseUseLabel },
   ];
 
   return (

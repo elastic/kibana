@@ -67,6 +67,6 @@ export const resolveMotionTokens = (
     calloutDuration: normal,
     calloutEasing: resistance,
     pageEasing: resistance,
-    pageRise: cssToken(euiTheme.size.xs, '4px'),
+    pageRise: '2px',
   };
 };
