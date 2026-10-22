@@ -102,6 +102,34 @@ describe('permissionsPolicyConfig', () => {
     });
   });
 
+  describe('enabled', () => {
+    it('defaults to true', () => {
+      expect(validate({}).enabled).toBe(true);
+    });
+
+    it('can be set to false on its own', () => {
+      expect(validate({ enabled: false }).enabled).toBe(false);
+    });
+
+    it('rejects directives when false, because there is no header to add them to', () => {
+      expect(() => validate({ enabled: false, camera: ['self'] })).toThrow(
+        /cannot use `permissionsPolicy.<directive>` when `permissionsPolicy.enabled` is false/
+      );
+    });
+
+    // `enabled` only switches off the enforced header. Cloud sets `report_to` on every hosted
+    // deployment, so rejecting it here would stop those deployments from disabling the header.
+    it('allows a reporting endpoint when false', () => {
+      expect(() => validate({ enabled: false, report_to: ['endpoint'] })).not.toThrow();
+    });
+
+    it('allows report-only directives when false, because they control a separate header', () => {
+      expect(() =>
+        validate({ enabled: false, report_to: ['endpoint'], report_only: { camera: ['self'] } })
+      ).not.toThrow();
+    });
+  });
+
   describe('report_to', () => {
     it('accepts a single endpoint', () => {
       expect(validate({ report_to: ['violations-endpoint'] }).report_to).toEqual([

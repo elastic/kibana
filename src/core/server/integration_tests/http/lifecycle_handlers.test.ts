@@ -814,6 +814,31 @@ describe('Permissions-Policy header', () => {
     expect(header['permissions-policy']).toBeUndefined();
   });
 
+  it('sends no header when permissionsPolicy.enabled is false', async () => {
+    await startServer({
+      server: { securityResponseHeaders: {} },
+      permissionsPolicy: { enabled: false },
+    });
+    const { header } = await supertest(innerServer.listener).get(testRoute).expect(200);
+    expect(header['permissions-policy']).toBeUndefined();
+  });
+
+  it('still sends the report-only header when permissionsPolicy.enabled is false', async () => {
+    await startServer({
+      server: { securityResponseHeaders: {} },
+      permissionsPolicy: {
+        enabled: false,
+        report_to: ['violations-endpoint'],
+        report_only: { camera: ['self'] },
+      },
+    });
+    const { header } = await supertest(innerServer.listener).get(testRoute).expect(200);
+    expect(header['permissions-policy']).toBeUndefined();
+    expect(header['permissions-policy-report-only']).toEqual(
+      'camera=(self);report-to=violations-endpoint'
+    );
+  });
+
   it('refuses to start when the deprecated policy is combined with a directive', async () => {
     await expect(
       startServer({

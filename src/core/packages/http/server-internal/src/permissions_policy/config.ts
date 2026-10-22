@@ -141,6 +141,9 @@ export type PermissionsPolicyDirectiveSetting = (typeof permissionsPolicyDirecti
 
 const configSchema = schema.object(
   {
+    // Switches off the enforced Permissions-Policy header. The Permissions-Policy-Report-Only
+    // header is controlled by `report_only` and `report_to` alone, and is not affected.
+    enabled: schema.boolean({ defaultValue: true }),
     ...directivesSchema(directiveSchema),
     report_only: schema.maybe(schema.object(directivesSchema(reportOnlyDirectiveSchema))),
     report_to: schema.arrayOf(schema.string({ maxLength: MAX_REPORTING_GROUP_NAME_LENGTH }), {
@@ -151,6 +154,13 @@ const configSchema = schema.object(
   },
   {
     validate: (config) => {
+      if (
+        !config.enabled &&
+        permissionsPolicyDirectiveSettings.some((setting) => config[setting].length)
+      ) {
+        return 'cannot use `permissionsPolicy.<directive>` when `permissionsPolicy.enabled` is false, because the Permissions-Policy header is not sent';
+      }
+
       const hasReportOnlyDirectives = permissionsPolicyDirectiveSettings.some(
         (setting) => config.report_only?.[setting] !== undefined
       );

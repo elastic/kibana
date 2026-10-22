@@ -1021,16 +1021,16 @@ describe('config deprecations', () => {
     );
   });
 
-  it('tells an administrator who disabled the header that it cannot be disabled after 10.0.0', () => {
+  it('points an administrator who disabled the header at permissionsPolicy.enabled', () => {
     const [deprecation] = permissionsPolicyDeprecations({
       securityResponseHeaders: { permissionsPolicy: null },
     });
     expect(deprecation.configPath).toEqual('server.securityResponseHeaders.permissionsPolicy');
-    expect(deprecation.message).toContain('the header cannot be disabled');
+    expect(deprecation.message).toContain('Use "permissionsPolicy.enabled: false" instead');
+    const steps = deprecation.correctiveActions?.manualSteps?.join(' ');
+    expect(steps).toContain('"permissionsPolicy.enabled: false"');
     // Steering a `null` user to the per-directive settings would switch the header back on.
-    expect(deprecation.correctiveActions?.manualSteps?.join(' ')).not.toContain(
-      "permissionsPolicy.camera: ['self']"
-    );
+    expect(steps).not.toContain("permissionsPolicy.camera: ['self']");
   });
 
   it('warns when the wholesale report-only policy is set', () => {
@@ -1041,6 +1041,15 @@ describe('config deprecations', () => {
     expect(deprecation.configPath).toEqual(
       'server.securityResponseHeaders.permissionsPolicyReportOnly'
     );
+  });
+
+  it('tells an administrator who disabled the report-only header that removing it is enough', () => {
+    const [deprecation] = permissionsPolicyDeprecations({
+      securityResponseHeaders: { permissionsPolicyReportOnly: null },
+    });
+    const steps = deprecation.correctiveActions?.manualSteps ?? [];
+    expect(steps).toHaveLength(1);
+    expect(steps[0]).toContain('is not sent unless');
   });
 
   it('emits no permissions policy warning when neither setting is present', () => {

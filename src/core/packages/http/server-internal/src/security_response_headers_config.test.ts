@@ -140,6 +140,38 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
     });
   });
 
+  describe('permissionsPolicy.enabled', () => {
+    it('false sends no Permissions-Policy header', () => {
+      const result = parse(schema.validate({}), permissionsPolicy({ enabled: false }));
+      expect(result.securityResponseHeaders['Permissions-Policy']).toBeUndefined();
+    });
+
+    it('false leaves the Permissions-Policy-Report-Only header alone', () => {
+      const result = parse(
+        schema.validate({}),
+        permissionsPolicy({
+          enabled: false,
+          report_to: ['violations-endpoint'],
+          report_only: { camera: ['self'] },
+        })
+      );
+      expect(result.securityResponseHeaders['Permissions-Policy']).toBeUndefined();
+      expect(result.securityResponseHeaders['Permissions-Policy-Report-Only']).toEqual(
+        'camera=(self);report-to=violations-endpoint'
+      );
+    });
+
+    it('false leaves the deprecated report-only policy alone too', () => {
+      const result = parse(
+        schema.validate({ permissionsPolicyReportOnly: 'camera=()' }),
+        permissionsPolicy({ enabled: false, report_to: ['violations-endpoint'] })
+      );
+      expect(result.securityResponseHeaders['Permissions-Policy-Report-Only']).toEqual(
+        'camera=();report-to=violations-endpoint'
+      );
+    });
+  });
+
   describe('permissionsPolicyReportOnly', () => {
     it('a custom value results in the expected Permissions-Policy-Report-Only header', () => {
       const config = schema.validate({ permissionsPolicyReportOnly: 'display-capture=(self)' });
@@ -249,6 +281,27 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
             report_to: ['violations-endpoint'],
             report_only: { camera: ['self'] },
           })
+        )
+      ).not.toThrow();
+    });
+
+    it('rejects the legacy policy string when the header is disabled', () => {
+      expect(() =>
+        validate(
+          schema.validate({ permissionsPolicy: 'camera=()' }),
+          permissionsPolicy({ enabled: false })
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"\\"server.securityResponseHeaders.permissionsPolicy\\" sets a policy, but \\"permissionsPolicy.enabled\\" is false, which disables the header. Remove \\"server.securityResponseHeaders.permissionsPolicy\\"."`
+      );
+    });
+
+    // Both mean the header is not sent, so a deployment can migrate one step at a time.
+    it('allows a null legacy policy when the header is disabled', () => {
+      expect(() =>
+        validate(
+          schema.validate({ permissionsPolicy: null }),
+          permissionsPolicy({ enabled: false })
         )
       ).not.toThrow();
     });

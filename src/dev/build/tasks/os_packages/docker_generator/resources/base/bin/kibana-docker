@@ -42,6 +42,7 @@ kibana_vars=(
     csp.report_only.object_src
     csp.report_only.connect_src
     permissionsPolicy.report_to
+    permissionsPolicy.enabled
     permissionsPolicy.camera
     permissionsPolicy.display_capture
     permissionsPolicy.fullscreen

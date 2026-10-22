@@ -397,18 +397,18 @@ export const config: ServiceConfigDescriptor<HttpConfigType> = {
       // Only fires when the setting is present. A deprecation that fires on default configuration
       // would break the "one warning by default" assertion in config_deprecation.test.ts.
       if (permissionsPolicy === null) {
-        // `null` switches the header off, and the per-directive settings only add sources to it,
-        // so they cannot express this. Pointing the administrator at them would turn the header
-        // back on, which is the opposite of what they configured.
+        // `null` switches the header off. The per-directive settings only add sources, so they
+        // cannot express that, and pointing the administrator at them would turn the header back
+        // on. `permissionsPolicy.enabled` is the replacement.
         addDeprecation({
           level: 'warning',
           configPath: `${fromPath}.securityResponseHeaders.permissionsPolicy`,
           title: `Setting "${fromPath}.securityResponseHeaders.permissionsPolicy" is deprecated`,
-          message: `"${fromPath}.securityResponseHeaders.permissionsPolicy" is set to null, which disables the Permissions-Policy header. The setting is deprecated and will be removed in 10.0.0. The "permissionsPolicy.<directive>" settings that replace it only add sources to Kibana's built-in policy, so from 10.0.0 the header cannot be disabled.`,
+          message: `"${fromPath}.securityResponseHeaders.permissionsPolicy" is set to null, which disables the Permissions-Policy header. The setting is deprecated and will be removed in 10.0.0. Use "permissionsPolicy.enabled: false" instead.`,
           correctiveActions: {
             manualSteps: [
-              `Confirm that Kibana's built-in permissions policy is acceptable for your deployment, because the header is sent from 10.0.0 onwards.`,
-              `If your deployment requires the Permissions-Policy header to be absent, open an issue at https://github.com/elastic/kibana/issues before 10.0.0.`,
+              `Remove "${fromPath}.securityResponseHeaders.permissionsPolicy" from your Kibana configuration file.`,
+              `Add "permissionsPolicy.enabled: false" to keep the Permissions-Policy header disabled.`,
             ],
           },
         });
@@ -426,17 +426,25 @@ export const config: ServiceConfigDescriptor<HttpConfigType> = {
           },
         });
       }
-      if (cfg?.securityResponseHeaders?.permissionsPolicyReportOnly !== undefined) {
+      const permissionsPolicyReportOnly = cfg?.securityResponseHeaders?.permissionsPolicyReportOnly;
+      if (permissionsPolicyReportOnly !== undefined) {
         addDeprecation({
           level: 'warning',
           configPath: `${fromPath}.securityResponseHeaders.permissionsPolicyReportOnly`,
           title: `Setting "${fromPath}.securityResponseHeaders.permissionsPolicyReportOnly" is deprecated`,
           message: `"${fromPath}.securityResponseHeaders.permissionsPolicyReportOnly" is deprecated and will be removed in 10.0.0.`,
           correctiveActions: {
-            manualSteps: [
-              `Remove "${fromPath}.securityResponseHeaders.permissionsPolicyReportOnly" from your Kibana configuration file.`,
-              `Add the sources you want to report on to the matching "permissionsPolicy.report_only.<directive>" setting, for example "permissionsPolicy.report_only.camera: ['self']".`,
-            ],
+            // The report-only header is only sent when report-only directives are configured, so
+            // removing a `null` value is all it takes to keep it off.
+            manualSteps:
+              permissionsPolicyReportOnly === null
+                ? [
+                    `Remove "${fromPath}.securityResponseHeaders.permissionsPolicyReportOnly" from your Kibana configuration file. The Permissions-Policy-Report-Only header is not sent unless "permissionsPolicy.report_only.<directive>" settings are configured.`,
+                  ]
+                : [
+                    `Remove "${fromPath}.securityResponseHeaders.permissionsPolicyReportOnly" from your Kibana configuration file.`,
+                    `Add the sources you want to report on to the matching "permissionsPolicy.report_only.<directive>" setting, for example "permissionsPolicy.report_only.camera: ['self']".`,
+                  ],
           },
         });
       }
