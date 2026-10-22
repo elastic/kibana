@@ -1893,14 +1893,29 @@ describe('NightshiftInvestigationsClient.getLifecycleSubject()', () => {
     expect(subjectsClient.listByConversationIds).toHaveBeenCalledWith(['inv-1']);
   });
 
-  it('reports a Slack thread as a manual subject, after any other subject', async () => {
+  it('reports a Slack thread as a slack_thread subject', async () => {
     subjectsClient.listByConversationIds.mockResolvedValue([
       makeStoredSubject({ subjectType: 'slack_thread', subjectId: 'slack:T:C:1' }),
     ]);
 
     await expect(makeClient().getLifecycleSubject('inv-1')).resolves.toMatchObject({
-      subject: { type: 'manual', id: 'slack:T:C:1' },
+      subject: { type: 'slack_thread', id: 'slack:T:C:1' },
       triggerType: 'manual',
+    });
+  });
+
+  it('prefers any other subject to a Slack thread recorded before it', async () => {
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      makeStoredSubject({
+        subjectType: 'slack_thread',
+        subjectId: 'slack:T:C:1',
+        createdAt: '2026-08-24T12:00:00.000Z',
+      }),
+      makeStoredSubject({ subjectId: 'alert-1', createdAt: '2026-08-24T13:00:00.000Z' }),
+    ]);
+
+    await expect(makeClient().getLifecycleSubject('inv-1')).resolves.toMatchObject({
+      subject: { type: 'alert', id: 'alert-1' },
     });
   });
 
