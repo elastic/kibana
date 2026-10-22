@@ -64,6 +64,9 @@ const createTool = (
 ) => {
   const getScopedClients = jest.fn().mockResolvedValue({
     getEventSearchClient: jest.fn().mockReturnValue({}),
+    getDetectionClient: jest
+      .fn()
+      .mockResolvedValue({ findByIds: jest.fn().mockResolvedValue({ hits: [] }) }),
     getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
     getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
     sourcesClient: mockSourcesClient(['logs.test', 'logs.batch', 'logs.web']),
@@ -175,17 +178,71 @@ describe('events_write tool', () => {
     };
     const { event_id: _omitted, ...newEventInput } = input;
 
+    it('accepts a new event backed only by an inconclusive result that found rows, rated low', () => {
+      expect(
+        eventsWriteSchema.safeParse({
+          items: [
+            {
+              ...newEventInput,
+              signals: [signalWith('inconclusive')],
+              severity: 'low',
+              confidence: 0.2,
+            },
+          ],
+        }).success
+      ).toBe(true);
+    });
+
     it.each([
-      ['inconclusive evidence', [signalWith('inconclusive')]],
       ['refuting evidence', [signalWith('refutes')]],
       ['a quiet not_checked rule', [quiet]],
-      ['no signals at all', []],
-    ])('rejects a new event backed only by %s', (_label, signals) => {
-      const result = eventsWriteSchema.safeParse({ items: [{ ...newEventInput, signals }] });
+      [
+        'an inconclusive result with no rows',
+        [
+          {
+            ...signalWith('inconclusive'),
+            evidence: { esql_query: 'FROM logs.test', result: 'empty' },
+          },
+        ],
+      ],
+    ])('refuses a new event backed only by %s: nothing points to an error', (_label, signals) => {
+      const result = eventsWriteSchema.safeParse({
+        items: [{ ...newEventInput, signals, severity: 'low', confidence: 0.2 }],
+      });
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues.at(-1)?.message).toContain('at least one confirms signal');
+        expect(result.error.issues.map(({ message }) => message).join(' ')).toContain(
+          'points to an error'
+        );
+      }
+    });
+
+    it.each([
+      ['severity', { severity: 'medium', confidence: 0.2 }, 'severity must be low'],
+      ['confidence', { severity: 'low', confidence: 0.6 }, 'confidence is at most 0.3'],
+    ])(
+      'rejects a new event with nothing confirmed that rates its %s too high',
+      (_label, fields, message) => {
+        const result = eventsWriteSchema.safeParse({
+          items: [{ ...newEventInput, signals: [signalWith('inconclusive')], ...fields }],
+        });
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.error.issues.map(({ message: m }) => m).join(' ')).toContain(message);
+        }
+      }
+    );
+
+    it('rejects a new event with no signals at all', () => {
+      const result = eventsWriteSchema.safeParse({
+        items: [{ ...newEventInput, signals: [] }],
+      });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues.at(-1)?.message).toContain('at least one signal');
       }
     });
 
@@ -270,6 +327,51 @@ describe('events_write tool', () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.error.issues.at(-1)?.message).toContain('cannot include not_checked');
+    }
+  });
+
+  it('names each not_checked signal to remove, by its position and rule', () => {
+    const detection = (ruleUuid: string, verdict: 'confirms' | 'not_checked'): SignalEntry => ({
+      type: 'detection',
+      source_id: 'logs.test',
+      description: 'description',
+      verdict,
+      ...(verdict === 'confirms'
+        ? { evidence: { esql_query: 'FROM logs.test', result: 'found' as const } }
+        : {}),
+      metadata: {
+        rule_uuid: ruleUuid,
+        detection_id: `${ruleUuid}-d`,
+        change_point_type: 'spike',
+        p_value: 0.01,
+      },
+    });
+    const result = eventsWriteSchema.safeParse({
+      items: [
+        {
+          ...input,
+          signals: [
+            detection('rule-1', 'confirms'),
+            detection('rule-2', 'not_checked'),
+            detection('rule-3', 'confirms'),
+            detection('rule-4', 'not_checked'),
+          ],
+        },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const notChecked = result.error.issues.filter(({ message }) =>
+        message.includes('cannot include not_checked')
+      );
+      expect(notChecked.map(({ path }) => path)).toEqual([
+        ['items', 0, 'signals', 1],
+        ['items', 0, 'signals', 3],
+      ]);
+      expect(notChecked[0].message).toContain('rule rule-2');
+      expect(notChecked[1].message).toContain('rule rule-4');
+      expect(notChecked[1].message).toContain('written_rule_uuids');
     }
   });
 
@@ -549,6 +651,85 @@ describe('events_write tool', () => {
         inputs: [expect.objectContaining({ causal_features: causalFeatures })],
       })
     );
+  });
+
+  it('resolves a feature_id whose explicit source_id is another source, through the event sources', async () => {
+    getFeatures.mockResolvedValue({
+      hits: [
+        {
+          id: 'checkout-api',
+          uuid: 'uuid-checkout',
+          source_id: 'logs.batch',
+          type: 'entity',
+          subtype: 'service',
+        },
+      ],
+    });
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      { index: 0, event_uuid: 'u', event_id: 'e', status: 'open', written: true },
+    ]);
+
+    await invokeHandler(
+      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      {
+        items: [
+          {
+            ...input,
+            slugs: ['logs.batch'],
+            causal_features: [
+              { feature_id: 'checkout-api', name: 'Checkout API', source_id: 'logs.copy' },
+            ],
+          },
+        ],
+      },
+      createMockToolContext()
+    );
+
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        inputs: [
+          expect.objectContaining({
+            causal_features: [
+              expect.objectContaining({ feature_id: 'checkout-api', type: 'entity' }),
+            ],
+          }),
+        ],
+      })
+    );
+  });
+
+  it('refuses a feature_id that names no Knowledge Indicator of a source that has some', async () => {
+    getFeatures.mockImplementation((_sourceIds, options) => {
+      const known = {
+        id: 'checkout-api',
+        uuid: 'uuid-checkout',
+        source_id: 'logs.test',
+        type: 'entity',
+        subtype: 'service',
+      };
+      return Promise.resolve({
+        hits: options && ('featureIds' in options || 'id' in options) ? [] : [known],
+      });
+    });
+
+    const result = await invokeHandler(
+      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      {
+        items: [
+          {
+            ...input,
+            causal_features: [
+              { feature_id: 'feature:checkout-api', name: 'Checkout API', source_id: 'logs.test' },
+            ],
+          },
+        ],
+      },
+      createMockToolContext()
+    );
+
+    expect(eventsWriteBulkHandler).not.toHaveBeenCalled();
+    expect(JSON.stringify(result)).toContain('feature:checkout-api');
+    expect(JSON.stringify(result)).toContain('not a Knowledge Indicator id');
   });
 
   it('returns aligned results and tracks each item', async () => {

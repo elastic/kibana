@@ -14,7 +14,12 @@ import {
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { significantEventSchema } from '@kbn/significant-events-schema';
+import {
+  signalInputEntrySchema,
+  significantEventSchema,
+  MAX_ARRAY_LENGTH,
+  UNCONFIRMED_EVENT_MAX_CONFIDENCE,
+} from '@kbn/significant-events-schema';
 import { nightshiftSourceSlugsField } from '@kbn/nightshift-shared';
 import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
@@ -24,9 +29,10 @@ import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
-import { isBreachMemberSignal } from '../../../lib/significant_events/events/event_members';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import {
+  BulkWriteError,
+  createBulkWriteValidationError,
   getBulkWriteToolErrorCode,
   MAX_BULK_WRITE_ITEMS,
   trackTelemetryBestEffort,
@@ -35,6 +41,8 @@ import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '../../agents/discovery/di
 import { eventsWriteBulkHandler, type EventsWriteInput } from './handler';
 import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
 import { assignStoredSourceIds } from '../../utils/stored_source_fields';
+import { fillDetectionMetadata } from './detection_metadata';
+import { hasConfirmingSignal } from './event_facts';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
 
@@ -55,6 +63,13 @@ export const eventsWriteItemSchema = lazySchema(() =>
       conversation_id: true,
     })
     .extend({
+      signals: z
+        .array(signalInputEntrySchema)
+        .max(MAX_ARRAY_LENGTH)
+        .optional()
+        .describe(
+          'Evidence signals associated with this incident record. Each entry represents one alerting rule associated with this event. '
+        ),
       slugs: nightshiftSourceSlugsField(
         'This event covers these sources. Nested signal, causal feature, and blast radius `source_id` values are slugs too. Disabled sources are accepted.'
       ),
@@ -63,7 +78,7 @@ export const eventsWriteItemSchema = lazySchema(() =>
       status: z
         .never({
           error:
-            'status is not an input: it follows from the per-rule verdicts you write. A breach opens or keeps an event active, healthy verdicts for every member start recovering, and only an operator or a close workflow closes it.',
+            'status is not an input: it follows from the per-rule verdicts you write. A breach opens or keeps an event active, healthy verdicts for every member of an active event move it to recovering, and only an operator or a close workflow closes a live event. An event is never born from healthy evidence.',
         })
         .optional(),
       event_id: z
@@ -91,31 +106,60 @@ export const eventsWriteItemSchema = lazySchema(() =>
     .superRefine((item, ctx) => {
       const signals = item.signals ?? [];
       const hasConfirms = signals.some((s) => s.evidence != null && s.verdict === 'confirms');
-      const hasBreachMember = signals.some(isBreachMemberSignal);
-      const hasNotChecked = signals.some((s) => s.verdict === 'not_checked');
 
-      if (hasConfirms && hasNotChecked) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            'A confirms item cannot include not_checked signals; leave each not_checked detection out of the write.',
+      // One issue per offending signal, so a retry knows exactly which entries to remove.
+      if (hasConfirms) {
+        signals.forEach((signal, index) => {
+          if (signal.verdict !== 'not_checked') return;
+          const ruleUuid = signal.metadata?.rule_uuid ?? 'unknown';
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['signals', index],
+            message: `A confirms item cannot include not_checked signals; remove the signal of rule ${ruleUuid} from this item, leave that detection out of the write, and add its rule_uuid to written_rule_uuids.`,
+          });
         });
       }
-      // Only a confirmed breach opens an event. A continuation (it names an event_id) may carry any
-      // verdict: a rule turning healthy (`refutes`) is evidence the status is derived from, so it
-      // must be written, never dropped.
-      if (item.event_id === undefined && !hasBreachMember) {
+      // An event is born only from evidence that points to an error: a confirming signal, an
+      // off-topic row, or an inconclusive result that found rows. Healthy, empty, errored or
+      // unchecked evidence is not an event; it can only join a live one. When nothing on the event
+      // confirms, it is rated low with little confidence; the writer enforces that too, but refusing
+      // it here lets the note state the confidence that is stored.
+      const pointsToError = (signal: (typeof signals)[number]): boolean =>
+        signal.verdict === 'confirms' ||
+        signal.verdict === 'off_topic' ||
+        (signal.verdict === 'inconclusive' && signal.evidence?.result === 'found');
+      if (signals.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message:
-            'A new event must carry at least one confirms signal, or an off_topic signal with an observed error. Events open on a confirmed breach: do not create an event for refutes, inconclusive, or not_checked detections alone. To record that a rule of an existing event is healthy, continue that event with its event_id and the refutes signal.',
+          message: `A ${
+            item.event_id === undefined ? 'new event' : 'continuation'
+          } must carry at least one signal.`,
         });
-      }
-      if (item.event_id !== undefined && signals.length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'A continuation must carry at least one signal.',
-        });
+      } else if (item.event_id === undefined) {
+        if (!signals.some(pointsToError)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['signals'],
+            message:
+              'A new event needs evidence that points to an error: a confirms signal, an off_topic row with a concrete error, or an inconclusive result with found rows. Leave these detections out of the write and add their rule_uuid to written_rule_uuids.',
+          });
+        } else if (!hasConfirmingSignal(signals)) {
+          if (item.severity !== undefined && item.severity !== 'low') {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: ['severity'],
+              message:
+                'No signal in this new event confirms anything, so its severity must be low.',
+            });
+          }
+          if (item.confidence !== undefined && item.confidence > UNCONFIRMED_EVENT_MAX_CONFIDENCE) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: ['confidence'],
+              message: `No signal in this new event confirms anything, so its confidence is at most ${UNCONFIRMED_EVENT_MAX_CONFIDENCE}.`,
+            });
+          }
+        }
       }
     })
 );
@@ -222,15 +266,47 @@ const enrichCausalFeatures = async (
       itemSourceIds: string[]
     ) => {
       if (explicitSourceId !== undefined) {
-        return featuresByReference.get(`${explicitSourceId}:${featureId}`);
+        const explicit = featuresByReference.get(`${explicitSourceId}:${featureId}`);
+        if (explicit) return explicit;
       }
-      // Without an explicit source: an unambiguous match wins; otherwise restrict to the
-      // event's own sources so a shared slug on another source cannot stamp the wrong
+      // Without an explicit source, or when it names a source that does not hold the id (a
+      // duplicate source the agent copied from): an unambiguous match wins; otherwise restrict to
+      // the event's own sources so a shared slug on another source cannot stamp the wrong
       // classification.
       const matches = uniqueHits.filter(({ id, uuid }) => id === featureId || uuid === featureId);
       const scoped = matches.filter(({ source_id: sourceId }) => itemSourceIds.includes(sourceId));
       return (scoped.length === 1 ? scoped : matches.length === 1 ? matches : [])[0];
     };
+
+    // A feature_id that names no Knowledge Indicator of a source that has some cannot be matched by
+    // a later topology search, so it is refused rather than written.
+    const unresolved = [
+      ...new Set(
+        items.flatMap((item) =>
+          [...(item.causal_features ?? []), ...(item.blast_radius ?? [])].flatMap((reference) =>
+            resolveFeature(reference.feature_id, reference.source_id, item.source_ids)
+              ? []
+              : [reference.feature_id]
+          )
+        )
+      ),
+    ];
+    if (unresolved.length > 0) {
+      const { hits: anyFeature } = await kiClient.getFeatures(sourceIds, {
+        limit: 1,
+        includeExcluded: true,
+        includeExpired: true,
+      });
+      if (anyFeature.length > 0) {
+        throw createBulkWriteValidationError(
+          `feature_id ${unresolved
+            .map((id) => JSON.stringify(id))
+            .join(
+              ', '
+            )} is not a Knowledge Indicator id. Copy each feature_id exactly as ki_search returned it (no prefix, no change of case), or leave that node out.`
+        );
+      }
+    }
 
     return items.map((item) => ({
       ...item,
@@ -263,6 +339,7 @@ const enrichCausalFeatures = async (
       }),
     }));
   } catch (error) {
+    if (error instanceof BulkWriteError) throw error;
     const message = error instanceof Error ? error.message : 'Unknown error';
     logger.warn(`Failed to enrich causal features; writing them unenriched: ${message}`);
     return items;
@@ -297,7 +374,9 @@ export function createEventsWriteTool({
 
       **With event_id**: append a version to an existing event. Its status follows the merged
       members' verdicts: a breaching member returns a recovering event to active, while healthy or
-      unjudgeable verdicts keep it recovering. Submit healthy evidence for a member too.
+      unjudgeable verdicts keep it recovering. Submit healthy evidence for a member too. A new event
+      is born only from evidence that points to an error (a confirms signal, an off_topic row, or
+      an inconclusive result with found rows); healthy or empty evidence is not written.
       Signals and topology are merged with prior versions. \`severity\` is your verdict under
       its field contract, decided from the merged confirming signals; the writer stores it as given
       (an inactive event is low) and returns the stored tier. No-op if the stored severity and
@@ -328,14 +407,24 @@ export function createEventsWriteTool({
       const { request } = context;
       let storedItems: EventsWriteInput[] | undefined;
       try {
-        const { getEventSearchClient, getKnowledgeIndicatorClient, licensing, sourcesClient } =
-          await getScopedClients({
-            request,
-          });
+        const {
+          getEventSearchClient,
+          getDetectionClient,
+          getKnowledgeIndicatorClient,
+          licensing,
+          sourcesClient,
+        } = await getScopedClients({
+          request,
+        });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
         const catalog = await loadSourceCatalog(sourcesClient);
-        const resolvedItems = toolParams.items.map((item) => assignStoredSourceIds(catalog, item));
+        const detectionClient = await getDetectionClient();
+        const identifiedItems = await fillDetectionMetadata({
+          items: toolParams.items,
+          findDetections: (detectionIds) => detectionClient.findByIds(detectionIds),
+        });
+        const resolvedItems = identifiedItems.map((item) => assignStoredSourceIds(catalog, item));
         storedItems = resolvedItems;
         const items = await enrichCausalFeatures(
           resolvedItems,

@@ -26,8 +26,8 @@ export const SIGNIFICANT_EVENT_STATUS_OPTIONS = [
 export const significantEventStatusSchema = lazySchema(() =>
   z.enum(SIGNIFICANT_EVENT_STATUS_OPTIONS).describe(dedent`
       "${ALERT_EPISODE_STATUS.ACTIVE}" = a current failure, material degradation, or sensitive-data exposure is confirmed or remains plausibly unverified. A mechanism found at an unchanged background rate (rate-flat inconclusive) is verified as not newly elevated — it is not "plausibly unverified" and must not create a new event;
-      "${ALERT_EPISODE_STATUS.RECOVERING}" = derived, never set by a caller: entered when every member rule was last judged healthy. It stays until a breach in any member returns it to "${ALERT_EPISODE_STATUS.ACTIVE}" in the same episode, an operator deactivates it, or its rule is deleted;
-      "${ALERT_EPISODE_STATUS.INACTIVE}" = the event is no longer active: every confirming signal on it has been re-checked and cleared. A healthy result from one rule never closes signals it did not check; while any confirming signal on the event is unresolved, it stays "${ALERT_EPISODE_STATUS.ACTIVE}". Record the recovery, false-alarm, benign-change, or other assessment rationale in "assessment_note".
+      "${ALERT_EPISODE_STATUS.RECOVERING}" = derived, never set by a caller: entered when every member rule was last judged healthy, from "active" only: an event is never opened "recovering". It stays until a breach in any member returns it to "${ALERT_EPISODE_STATUS.ACTIVE}" in the same episode, an operator deactivates it, or its rule is deleted;
+      "${ALERT_EPISODE_STATUS.INACTIVE}" = the event is no longer active: every confirming signal on it has been re-checked and cleared; an event is never opened "${ALERT_EPISODE_STATUS.INACTIVE}" or "${ALERT_EPISODE_STATUS.RECOVERING}". A healthy result from one rule never closes signals it did not check; while any confirming signal on the event is unresolved, it stays "${ALERT_EPISODE_STATUS.ACTIVE}". Record the recovery, false-alarm, benign-change, or other assessment rationale in "assessment_note".
     `)
 );
 

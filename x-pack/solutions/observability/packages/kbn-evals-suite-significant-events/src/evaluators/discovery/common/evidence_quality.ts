@@ -42,12 +42,12 @@ const EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
 const NARRATIVE_FIELDS_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'narrative_fields_bounded_and_safe',
-    text: `symptom_hypothesis is one sentence, summary is at most three sentences, and assessment_note is at most three sentences. Judge sentence counts, not character counts. ${NO_RAW_SENSITIVE_VALUES_RULE}`,
+    text: `symptom_hypothesis is one sentence, summary is at most three sentences, and assessment_note is at most three sentences. Judge sentence counts, not character counts: a sentence ends at a full stop, question mark or exclamation mark, so clauses joined by a comma, semicolon or "while" are one sentence. Judge only sentence counts and sensitive values here; counts, timestamps, wording and format belong to the other criteria. ${NO_RAW_SENSITIVE_VALUES_RULE}`,
     score: 1,
   },
   {
     id: 'symptom_hypothesis_mechanism',
-    text: `symptom_hypothesis follows its field contract:\n${SYMPTOM_HYPOTHESIS_ROLE_RULE}`,
+    text: `symptom_hypothesis follows its field contract:\n${SYMPTOM_HYPOTHESIS_ROLE_RULE}\nJudge the mechanism against what this event's own signals, causal_features and blast_radius evidence. Do not require a cause, component or propagation that the evidence does not show: an evidenced failure path with no evidenced root cause meets the contract, and naming an unevidenced cause does not.`,
     score: 1,
   },
   {
