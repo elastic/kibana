@@ -22,7 +22,7 @@ import {
 } from '@kbn/security-solution-side-nav';
 import useObservable from 'react-use/lib/useObservable';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { useIsAlertsAndAttacksAlignmentEnabled } from '../../../hooks/use_is_alerts_and_attacks_alignment_enabled';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { type GetSecuritySolutionLinkProps, useGetSecuritySolutionLinkProps } from '../../links';
 import { useNavLinks } from '../../../links/nav_links';
@@ -305,7 +305,9 @@ export const SecuritySideNav: React.FC = () => {
   } = useKibana().services;
 
   const chatExperience = useObservable(client.get$(AI_CHAT_EXPERIENCE_TYPE));
-  const enableAlertsAndAttacksAlignment = useIsAlertsAndAttacksAlignmentEnabled();
+  const enableAlertsAndAttacksAlignment = useIsExperimentalFeatureEnabled(
+    'enableAlertsAndAttacksAlignment'
+  );
   const isAgentBuilderNavAtTop = featureFlags.useBooleanValue(AGENT_BUILDER_NAV_AT_TOP_FLAG, false);
   const items = useSolutionSideNavItems(chatExperience);
   const selectedId = useSelectedId();
