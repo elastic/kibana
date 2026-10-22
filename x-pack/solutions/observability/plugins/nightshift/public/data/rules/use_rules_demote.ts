@@ -28,12 +28,7 @@ export function useRulesDemote({ onSuccess }: UseRulesDemoteParams) {
     mutationFn: async (queryIds) => {
       await demote({ queryIds });
     },
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
-        queryClient.invalidateQueries({ queryKey: DETECTION_OVERVIEW_QUERY_KEY }),
-      ]);
-
+    onSuccess: () => {
       onSuccess?.();
 
       toasts.addSuccess({
@@ -44,6 +39,12 @@ export function useRulesDemote({ onSuccess }: UseRulesDemoteParams) {
       toasts.addError(error, {
         title: BULK_DELETE_ERROR_TOAST_TITLE,
       });
+    },
+    onSettled: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
+        queryClient.invalidateQueries({ queryKey: DETECTION_OVERVIEW_QUERY_KEY }),
+      ]);
     },
   });
 
