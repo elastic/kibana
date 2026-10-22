@@ -110,6 +110,7 @@ export function EpisodeDetailsPage() {
     data: episodeEvents,
     isLoading: isLoadingEpisode,
     isError: isEpisodeError,
+    isDataLoading: isLoadingEpisodeData,
   } = useFetchEpisodeQuery({
     episodeId,
     services: { data, spaces },
@@ -158,8 +159,10 @@ export function EpisodeDetailsPage() {
   const episodeBreadcrumbTitle = episodeRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
   const groupingFields = showRuleDependentUi ? ruleState.rule.grouping?.fields : undefined;
 
+  // The attachment is added once per alert and doesn't update, so it waits for
+  // the action state and the data.
   useAlertAutoAttach(
-    episode,
+    isActionStateLoaded && !isLoadingEpisodeData ? episode : undefined,
     {
       ruleName: episodeRuleName,
       groupingFields,

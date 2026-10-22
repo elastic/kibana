@@ -44,8 +44,9 @@ export const queryKeys = {
   episodeDataAll: () => [...queryKeys.all, 'episode-data'] as const,
   episodeData: (spaceId: string, episodeId: string) =>
     [...queryKeys.episodeDataAll(), spaceId, episodeId] as const,
+  // `batch` keeps a single id list apart from `episodeData`, which caches another shape.
   episodesData: (spaceId: string, episodeIds: string[]) =>
-    [...queryKeys.episodeDataAll(), spaceId, ...episodeIds] as const,
+    [...queryKeys.episodeDataAll(), spaceId, 'batch', ...episodeIds] as const,
   episodeEventsAll: () => [...queryKeys.all, 'episode-events'] as const,
   episodeEvents: (spaceId: string, episodeId: string) =>
     [...queryKeys.episodeEventsAll(), spaceId, episodeId] as const,

@@ -673,6 +673,39 @@ describe('EpisodeDetailsPage', () => {
       );
     });
 
+    it('waits for the alert data before attaching the episode', () => {
+      mockUseFetchEpisodeQuery.mockReturnValue({
+        ...episodeQuery,
+        isDataLoading: true,
+      } as unknown as EpisodeQueryResult);
+
+      renderPage();
+
+      expect(mockUseAlertAutoAttach).toHaveBeenCalled();
+      expect(mockUseAlertAutoAttach).not.toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('waits for the action state before attaching the episode', () => {
+      mockUseFetchEpisodeActions.mockReturnValue({
+        data: undefined,
+        isSuccess: false,
+        isPreviousData: false,
+      } as unknown as ReturnType<typeof useFetchEpisodeActions>);
+
+      renderPage();
+
+      expect(mockUseAlertAutoAttach).toHaveBeenCalled();
+      expect(mockUseAlertAutoAttach).not.toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
     it('omits grouping fields when the rule is not loaded', () => {
       mockUseFetchRule.mockReturnValue({
         ...fetchRuleResult,
