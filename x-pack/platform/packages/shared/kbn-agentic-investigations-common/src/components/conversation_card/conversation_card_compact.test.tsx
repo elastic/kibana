@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { Investigation } from '../../types';
+import { ACTIONS_TRANSLATIONS } from '../actions/translations';
 import { ConversationCardCompact } from './conversation_card_compact';
 
 const investigation: Investigation = {
@@ -96,14 +97,18 @@ describe('ConversationCardCompact', () => {
   });
 
   it('is inert and disables the chat control while the row is unavailable', () => {
-    const { onClickCard } = renderRow({ unavailableReason: 'Needs a privilege' });
+    const { onClickCard } = renderRow({ canOpenInvestigationDetails: false });
 
     fireEvent.click(screen.getByText('Rotate the Stripe key'));
 
     expect(onClickCard).not.toHaveBeenCalled();
     expect(screen.queryByRole('button', { name: 'Rotate the Stripe key' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Open in chat' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Needs a privilege' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', {
+        name: ACTIONS_TRANSLATIONS.tooltips.agentBuilderPrivilegeRequired,
+      })
+    ).toBeDisabled();
   });
 
   it('leaves the keyboard to the nested controls, which the row would otherwise swallow', () => {

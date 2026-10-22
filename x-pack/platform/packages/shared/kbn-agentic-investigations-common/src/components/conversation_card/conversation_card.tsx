@@ -29,8 +29,8 @@ interface ConversationCardProps {
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
-  /** When false the card is inert and the chat control is disabled, with this as its tooltip. */
-  unavailableReason?: string;
+  /** When false the card is inert and its chat control and menu are disabled. Defaults to true. */
+  canOpenInvestigationDetails?: boolean;
   /** URL for this card's chat, so its control renders as a link. */
   chatHref?: string;
   /** When true escalation actions are shown. Requires the manage escalations capability. */
@@ -86,7 +86,7 @@ export const ConversationCard = memo<ConversationCardProps>(
     onClickAction,
     onClickCard,
     onOpenChat,
-    unavailableReason,
+    canOpenInvestigationDetails = true,
     chatHref,
     canManageEscalations,
     canCloseInvestigation,
@@ -95,22 +95,21 @@ export const ConversationCard = memo<ConversationCardProps>(
     renderInFlightStatus,
   }) => {
     const { euiTheme } = useEuiTheme();
-    const isClickable = !unavailableReason;
 
     return (
       <StyledEuiPanel
         paddingSize="none"
-        role={isClickable ? 'button' : undefined}
-        tabIndex={isClickable ? 0 : undefined}
+        role={canOpenInvestigationDetails ? 'button' : undefined}
+        tabIndex={canOpenInvestigationDetails ? 0 : undefined}
         aria-label={investigation.title}
         aria-current={isSelected || undefined}
         borderRadius="none"
         $isSelected={isSelected}
         hasBorder={false}
         hasShadow={false}
-        onClick={isClickable ? () => onClickCard(investigation.id) : undefined}
+        onClick={canOpenInvestigationDetails ? () => onClickCard(investigation.id) : undefined}
         onKeyDown={(event: React.KeyboardEvent) => {
-          if (isClickable && (event.key === 'Enter' || event.key === ' ')) {
+          if (canOpenInvestigationDetails && (event.key === 'Enter' || event.key === ' ')) {
             event.preventDefault();
             onClickCard(investigation.id);
           }
@@ -162,7 +161,7 @@ export const ConversationCard = memo<ConversationCardProps>(
                       onClickAction={onClickAction}
                       onOpenChat={() => onOpenChat(investigation.id)}
                       chatHref={chatHref}
-                      disabledReason={unavailableReason}
+                      canOpenInvestigationDetails={canOpenInvestigationDetails}
                       canManageEscalations={canManageEscalations}
                       canCloseInvestigation={canCloseInvestigation}
                       onCopyLink={onCopyLink}

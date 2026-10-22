@@ -9,7 +9,10 @@ import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { Investigation } from '../../types';
+import { ACTIONS_TRANSLATIONS } from '../actions/translations';
 import { ConversationsActionsGroup } from './actions_group';
+
+const PRIVILEGE_TOOLTIP = ACTIONS_TRANSLATIONS.tooltips.agentBuilderPrivilegeRequired;
 
 const makeInvestigation = (overrides: Partial<Investigation> = {}): Investigation => ({
   id: 'inv-1',
@@ -31,11 +34,11 @@ const renderGroup = (
   {
     withRecommendedAction = true,
     canManageEscalations = false,
-    disabledReason,
+    canOpenInvestigationDetails,
   }: {
     withRecommendedAction?: boolean;
     canManageEscalations?: boolean;
-    disabledReason?: string;
+    canOpenInvestigationDetails?: boolean;
   } = {}
 ) => {
   const onClickRecommendedAction = jest.fn();
@@ -50,7 +53,7 @@ const renderGroup = (
       onCopyLink={jest.fn()}
       onOpenChat={onOpenChat}
       canManageEscalations={canManageEscalations}
-      disabledReason={disabledReason}
+      canOpenInvestigationDetails={canOpenInvestigationDetails}
     />
   );
 
@@ -70,8 +73,8 @@ describe('ConversationsActionsGroup', () => {
     });
 
     it('disables the actions menu and explains why when a reason is given', async () => {
-      renderGroup(makeInvestigation(), { disabledReason: 'Needs a privilege' });
-      const menuButton = screen.getByRole('button', { name: 'Needs a privilege' });
+      renderGroup(makeInvestigation(), { canOpenInvestigationDetails: false });
+      const menuButton = screen.getByRole('button', { name: PRIVILEGE_TOOLTIP });
 
       fireEvent.click(menuButton);
 
@@ -81,7 +84,7 @@ describe('ConversationsActionsGroup', () => {
 
     it('disables opening the chat and explains why when a reason is given', async () => {
       const { onOpenChat } = renderGroup(makeInvestigation(), {
-        disabledReason: 'Needs a privilege',
+        canOpenInvestigationDetails: false,
       });
       const chatButton = screen.getByRole('button', { name: 'Open in chat' });
 
@@ -90,7 +93,7 @@ describe('ConversationsActionsGroup', () => {
 
       expect(chatButton).toBeDisabled();
       expect(onOpenChat).not.toHaveBeenCalled();
-      expect(await screen.findByText('Needs a privilege')).toBeInTheDocument();
+      expect(await screen.findByText(PRIVILEGE_TOOLTIP)).toBeInTheDocument();
     });
 
     it('does not put the recommended action on the card', () => {

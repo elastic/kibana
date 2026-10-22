@@ -26,8 +26,8 @@ export interface ConversationsActionsGroupProps {
    * be able to resolve one; the control still works as a button without it.
    */
   chatHref?: string;
-  /** Disables the chat control and the menu; this is what their tooltips tell the user. */
-  disabledReason?: string;
+  /** When false the chat control and the menu are disabled, with a tooltip naming the privilege. */
+  canOpenInvestigationDetails?: boolean;
   /** When true escalation actions are shown. Requires the manage escalations capability. */
   canManageEscalations?: boolean;
   /**
@@ -51,7 +51,7 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
     onClickAction,
     onOpenChat,
     chatHref,
-    disabledReason,
+    canOpenInvestigationDetails = true,
     canManageEscalations,
     canCloseInvestigation,
     onCopyLink,
@@ -79,10 +79,14 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
             size="s"
             iconType="productAgent"
             withToolTip
-            toolTipContent={disabledReason}
-            isDisabled={Boolean(disabledReason)}
+            toolTipContent={
+              canOpenInvestigationDetails
+                ? undefined
+                : ACTIONS_TRANSLATIONS.tooltips.agentBuilderPrivilegeRequired
+            }
+            isDisabled={!canOpenInvestigationDetails}
             aria-label={ACTIONS_TRANSLATIONS.tooltips.openInChat}
-            href={disabledReason ? undefined : chatHref}
+            href={canOpenInvestigationDetails ? chatHref : undefined}
             onClick={handleChatClick}
             data-test-subj="conversationCardOpenInChat"
           />
@@ -95,7 +99,7 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
             canManageEscalations={canManageEscalations}
             canCloseInvestigation={canCloseInvestigation}
             onCopyLink={onCopyLink}
-            disabledReason={disabledReason}
+            canOpenInvestigationDetails={canOpenInvestigationDetails}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

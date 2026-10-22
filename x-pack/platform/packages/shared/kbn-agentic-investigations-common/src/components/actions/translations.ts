@@ -42,5 +42,12 @@ export const ACTIONS_TRANSLATIONS = Object.freeze({
     openInChat: i18n.translate('xpack.alertzero.baseActions.tooltips.openInChat', {
       defaultMessage: 'Open in chat',
     }),
+    agentBuilderPrivilegeRequired: i18n.translate(
+      'xpack.alertzero.baseActions.tooltips.agentBuilderPrivilegeRequired',
+      {
+        defaultMessage:
+          'You need the Agent Builder Kibana privilege to execute actions and view investigations or chats.',
+      }
+    ),
   },
 });
