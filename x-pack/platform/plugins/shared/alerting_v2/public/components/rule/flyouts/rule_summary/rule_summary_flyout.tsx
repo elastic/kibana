@@ -16,7 +16,6 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { useAlertingLocators } from '../../../../application/locator_context';
 import { useFetchRuleExecutions } from '../../../../hooks/use_fetch_rule_executions';
 import { useRuleAuditMetadata } from '../../../../hooks/use_rule_audit_metadata';
 import { RuleActionsMenu } from '../../../../pages/rules_list_page/rule_actions_menu';
@@ -74,7 +73,6 @@ export const RuleSummaryFlyout = ({
   const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
     | AgentBuilderPluginStart
     | undefined;
-  const { rulesLocators } = useAlertingLocators();
   useRuleAutoAttach(rule, { chrome, agentBuilder });
   const { createdByDisplay, updatedByDisplay, updatedAtFormatted } = useRuleAuditMetadata(rule);
   const canReadExecutionHistory = useService(UserCapabilities).canRead('executionHistory');
@@ -91,7 +89,6 @@ export const RuleSummaryFlyout = ({
   });
   const lastExecution = executionsData?.items[0];
   const [isTakeActionOpen, setIsTakeActionOpen] = useState(false);
-  const detailsHref = rulesLocators.useUrl({ ruleId: rule.id }, undefined, [rule.id]);
 
   const kindLabel = RULE_KIND_LABELS[rule.kind] ?? rule.kind;
   const enabledLabel = rule.enabled
@@ -233,7 +230,7 @@ export const RuleSummaryFlyout = ({
       <RuleActionsMenu
         rule={rule}
         canWrite={canWrite}
-        detailsHref={detailsHref}
+        showViewDetails
         anchorPosition="upRight"
         anchorId={TAKE_ACTION_BUTTON_ID}
         isOpen={isTakeActionOpen}

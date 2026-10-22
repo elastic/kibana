@@ -19,7 +19,44 @@ import {
   EuiWrappingPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getRouterLinkProps } from '@kbn/router-utils';
+import { useAlertingLocators } from '../../application/locator_context';
 import type { RuleApiResponse } from '../../services/rules_api';
+
+interface ViewRuleDetailsItemProps {
+  ruleId: string;
+  onClose: () => void;
+}
+
+/**
+ * Mounted only while the menu is open, so the details URL resolves lazily. Plain left clicks
+ * navigate in-app through the locator; modified clicks fall through to the href.
+ */
+const ViewRuleDetailsItem = ({ ruleId, onClose }: ViewRuleDetailsItemProps) => {
+  const { rulesLocators } = useAlertingLocators();
+  const url = rulesLocators.useUrl({ ruleId }, undefined, [ruleId]);
+  const { href, onClick } = getRouterLinkProps({
+    href: url || undefined,
+    onClick: () => rulesLocators.navigateSync({ ruleId }),
+  });
+
+  return (
+    <EuiContextMenuItem
+      role="menuitem"
+      icon={<EuiIcon type="eye" size="m" aria-hidden={true} />}
+      href={href}
+      onClick={(event) => {
+        onClose();
+        onClick(event);
+      }}
+      data-test-subj={`viewRuleDetails-${ruleId}`}
+    >
+      {i18n.translate('xpack.alertingV2.rulesList.action.viewDetails', {
+        defaultMessage: 'View details',
+      })}
+    </EuiContextMenuItem>
+  );
+};
 
 export interface RuleActionsMenuProps {
   rule: RuleApiResponse;
@@ -33,8 +70,8 @@ export interface RuleActionsMenuProps {
   onRun?: (rule: RuleApiResponse) => void;
   /** When provided, adds a menu entry that opens change history for the rule. */
   onViewChangeHistory?: (rule: RuleApiResponse) => void;
-  /** When provided, adds a leading "View details" read action linking to the rule details page. */
-  detailsHref?: string;
+  /** When true, adds a leading "View details" read action linking to the rule details page. */
+  showViewDetails?: boolean;
   renderButton?: (args: { isOpen: boolean; toggle: () => void }) => React.ReactElement;
   anchorId?: string;
   isOpen?: boolean;
@@ -52,7 +89,7 @@ export const RuleActionsMenu = ({
   onUpdateApiKey,
   onRun,
   onViewChangeHistory,
-  detailsHref,
+  showViewDetails,
   renderButton,
   anchorId,
   isOpen: isOpenProp,
@@ -71,18 +108,8 @@ export const RuleActionsMenu = ({
 
   // Each action is built once and then arranged into separated groups below. `null` entries
   // (unavailable or write-gated actions) are filtered out before rendering.
-  const viewDetailsItem = detailsHref ? (
-    <EuiContextMenuItem
-      key="viewDetails"
-      icon={<EuiIcon type="eye" size="m" aria-hidden={true} />}
-      href={detailsHref}
-      onClick={() => setIsOpen(false)}
-      data-test-subj={`viewRuleDetails-${rule.id}`}
-    >
-      {i18n.translate('xpack.alertingV2.rulesList.action.viewDetails', {
-        defaultMessage: 'View details',
-      })}
-    </EuiContextMenuItem>
+  const viewDetailsItem = showViewDetails ? (
+    <ViewRuleDetailsItem key="viewDetails" ruleId={rule.id} onClose={() => setIsOpen(false)} />
   ) : null;
 
   const viewChangeHistoryItem = onViewChangeHistory ? (
@@ -225,7 +252,8 @@ export const RuleActionsMenu = ({
   const isItem = (item: React.ReactElement | null): item is React.ReactElement => item !== null;
 
   // Order: Run / Edit / Clone | View change history / Update API key | Delete.
-  // View details (flyout) leads the first group; Enable/Disable sits with API key.
+  // View details links to the rule details page and leads the first group.
+  // Enable/Disable sits with API key.
   // margin="xs" matches EuiContextMenu isSeparator so dividers stay visible.
   const groups = [
     [viewDetailsItem, runItem, editItem, cloneItem],

@@ -11,6 +11,8 @@ import { action } from '@storybook/addon-actions';
 import { EuiCallOut, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { createMockChangeHistoryAdapter } from '@kbn/change-history-ui/mocks';
 import { i18n } from '@kbn/i18n';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { MemoryRouter } from 'react-router-dom';
 import {
   AutoOpenChangeHistoryModal,
@@ -18,8 +20,31 @@ import {
   createRuleApiResponseFromHistoryFixtures,
   createRuleChangeHistoryFixtures,
 } from '../../components/rule/modals/change_history';
+import { LocatorProvider, type AlertingV2Locators } from '../../application/locator_context';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { RulesListTable } from './rules_list_table';
+
+const createStoryLocator = <P extends SerializableRecord>(id: string): LocatorPublic<P> => ({
+  id,
+  getLocation: async () => ({ app: 'alerting', path: '/', state: {} }),
+  getUrl: async () => '#',
+  getRedirectUrl: () => '#',
+  navigate: async () => {},
+  navigateSync: action(`${id}.navigateSync`),
+  useUrl: () => '#',
+  telemetry: (state, stats) => stats,
+  inject: (state) => state,
+  extract: (state) => ({ state, references: [] }),
+  migrations: {},
+});
+
+const storyLocators: AlertingV2Locators = {
+  rulesLocators: createStoryLocator('rules'),
+  ruleLibraryLocators: createStoryLocator('ruleLibrary'),
+  episodesLocators: createStoryLocator('episodes'),
+  actionPolicyLocators: createStoryLocator('actionPolicies'),
+  executionHistoryLocators: createStoryLocator('executionHistory'),
+};
 
 const BAD_WEATHER_ID = 'rule-bad-weather';
 const QUIET_SKIES_ID = 'rule-quiet-skies';
@@ -89,65 +114,67 @@ const RulesListChangeHistoryStory = (): JSX.Element => {
 
   return (
     <MemoryRouter>
-      <EuiTitle size="s">
-        <h2>
-          {i18n.translate('xpack.alertingV2.rulesListChangeHistory.story.title', {
-            defaultMessage: 'Rules list — change history',
+      <LocatorProvider locators={storyLocators}>
+        <EuiTitle size="s">
+          <h2>
+            {i18n.translate('xpack.alertingV2.rulesListChangeHistory.story.title', {
+              defaultMessage: 'Rules list — change history',
+            })}
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued">
+          {i18n.translate('xpack.alertingV2.rulesListChangeHistory.story.body', {
+            defaultMessage:
+              'Open a row’s More actions menu and choose View change history. Bad Weather has a full timeline, Quiet Skies has a single create version, and Legacy Pre-versioning shows the empty state.',
           })}
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        {i18n.translate('xpack.alertingV2.rulesListChangeHistory.story.body', {
-          defaultMessage:
-            'Open a row’s More actions menu and choose View change history. Bad Weather has a full timeline, Quiet Skies has a single create version, and Legacy Pre-versioning shows the empty state.',
-        })}
-      </EuiText>
-      <EuiSpacer size="m" />
-      <EuiCallOut size="s" title="Mock adapter — no Kibana server required" iconType="info" />
-      <EuiSpacer size="m" />
-      <RulesListTable
-        items={rules}
-        totalItemCount={rules.length}
-        page={1}
-        perPage={20}
-        search=""
-        hasActiveFilters={false}
-        isLoading={false}
-        canWrite
-        selectedCount={0}
-        isAllSelected={false}
-        isPageSelected={false}
-        isRowSelected={() => false}
-        onSelectRow={noop}
-        onSelectPage={noop}
-        onSelectAll={noop}
-        onClearSelection={noop}
-        onBulkEnable={noop}
-        onBulkDisable={noop}
-        onBulkDelete={noop}
-        onOpenSummary={action('openSummary')}
-        onQuickEdit={action('quickEdit')}
-        onEdit={action('edit')}
-        onClone={action('clone')}
-        onDelete={action('delete')}
-        onToggleEnabled={action('toggleEnabled')}
-        onRun={action('run')}
-        onViewChangeHistory={onViewChangeHistory}
-        onTableChange={noop}
-        onBulkUpdateApiKey={noop}
-        onUpdateApiKey={noop}
-      />
-      {historySession && historyAdapter ? (
-        <RuleChangeHistoryProvider
-          key={`${historySession.rule.id}-${historySession.nonce}`}
-          ruleId={historySession.rule.id}
-          ruleName={historySession.rule.metadata.name}
-          adapter={historyAdapter}
-        >
-          <AutoOpenChangeHistoryModal />
-        </RuleChangeHistoryProvider>
-      ) : null}
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiCallOut size="s" title="Mock adapter — no Kibana server required" iconType="info" />
+        <EuiSpacer size="m" />
+        <RulesListTable
+          items={rules}
+          totalItemCount={rules.length}
+          page={1}
+          perPage={20}
+          search=""
+          hasActiveFilters={false}
+          isLoading={false}
+          canWrite
+          selectedCount={0}
+          isAllSelected={false}
+          isPageSelected={false}
+          isRowSelected={() => false}
+          onSelectRow={noop}
+          onSelectPage={noop}
+          onSelectAll={noop}
+          onClearSelection={noop}
+          onBulkEnable={noop}
+          onBulkDisable={noop}
+          onBulkDelete={noop}
+          onOpenSummary={action('openSummary')}
+          onQuickEdit={action('quickEdit')}
+          onEdit={action('edit')}
+          onClone={action('clone')}
+          onDelete={action('delete')}
+          onToggleEnabled={action('toggleEnabled')}
+          onRun={action('run')}
+          onViewChangeHistory={onViewChangeHistory}
+          onTableChange={noop}
+          onBulkUpdateApiKey={noop}
+          onUpdateApiKey={noop}
+        />
+        {historySession && historyAdapter ? (
+          <RuleChangeHistoryProvider
+            key={`${historySession.rule.id}-${historySession.nonce}`}
+            ruleId={historySession.rule.id}
+            ruleName={historySession.rule.metadata.name}
+            adapter={historyAdapter}
+          >
+            <AutoOpenChangeHistoryModal />
+          </RuleChangeHistoryProvider>
+        ) : null}
+      </LocatorProvider>
     </MemoryRouter>
   );
 };
