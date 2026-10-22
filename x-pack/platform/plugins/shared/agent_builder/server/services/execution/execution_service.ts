@@ -355,7 +355,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       params,
       request,
       conversationClient,
-      spaceId: getCurrentSpaceId({ request, spaces: this.deps.spaces }),
+      spaceId: getCurrentSpaceId({ request }),
     });
 
     const created = conversation.operation === 'CREATE';

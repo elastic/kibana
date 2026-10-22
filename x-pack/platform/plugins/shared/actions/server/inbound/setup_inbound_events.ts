@@ -26,11 +26,6 @@ export interface SetupInboundEventsParams {
   http: HttpServiceSetup;
   getStartServices: CoreSetup['getStartServices'];
   logger: Logger;
-  spaces?: {
-    spacesService: {
-      getSpaceId: (request: KibanaRequest) => string;
-    };
-  };
   inMemoryConnectors: InMemoryConnector[];
   getConnectorEventEmitter: () => ConnectorEventEmitter | undefined;
 }
@@ -48,7 +43,6 @@ export function setupInboundEvents({
   http,
   getStartServices,
   logger,
-  spaces,
   inMemoryConnectors,
   getConnectorEventEmitter,
 }: SetupInboundEventsParams): InboundEventsSetup | undefined {

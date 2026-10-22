@@ -538,6 +538,7 @@ export async function executeGenerationWorkflow({
 
     const startServices = await getStartServices();
     coreStart = startServices.coreStart;
+    const { pluginsStart } = startServices;
 
     // Universal kill-switch backstop for every AD 2.0 generation surface (ad hoc,
     // scheduled, agent-builder run tool, and workflow run-step). When the feature

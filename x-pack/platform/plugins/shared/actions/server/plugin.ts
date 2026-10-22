@@ -519,7 +519,6 @@ export class ActionsPlugin
       http: core.http,
       getStartServices: core.getStartServices,
       logger: this.logger,
-      spaces: this.spaces,
       inMemoryConnectors: this.inMemoryConnectors,
       getConnectorEventEmitter: () => this.connectorEventEmitter,
     });
