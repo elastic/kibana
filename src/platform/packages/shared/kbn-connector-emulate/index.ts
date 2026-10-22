@@ -8,6 +8,8 @@
  */
 
 export { createEmulatorFetch } from './src/fetch/create_emulator_fetch';
+export { combineEmulators, emulatorCredential } from './src/fetch/combine_emulators';
+export type { CombinedEmulator } from './src/fetch/combine_emulators';
 export { createCertificateAuthority } from './src/server/certificate_authority';
 export type { CertificateAuthority, CertificateKeyPair } from './src/server/certificate_authority';
 export { createEmulatorProxy } from './src/server/create_emulator_proxy';
@@ -21,13 +23,11 @@ export type {
   EmulatorCalls,
   EmulatorControl,
   EmulatorControlHandler,
+  EmulatorControlOptions,
 } from './src/server/emulator_control';
 export { createEmulatorMcpHandler } from './src/server/emulator_mcp';
-export type {
-  EmulatorMcpOptions,
-  McpControlEmulator,
-  McpControlRequest,
-} from './src/server/emulator_mcp';
+export type { EmulatorMcpOptions, McpControlRequest } from './src/server/emulator_mcp';
+export type { ControlledEmulator } from './src/server/controlled_emulator';
 export { sampleJsonSchema } from './src/engine/sample_schema';
 export type { SampleJsonSchemaOptions } from './src/engine/sample_schema';
 export type {
