@@ -44,9 +44,6 @@ const isCompleteKevEntry = (vuln: KevVulnerability): boolean =>
  */
 const KEV_RELEVANCE = 0.5;
 
-const KEV_FEED_URL =
-  'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json';
-
 // CISA returns 403 to the default Kibana UA. A browser-style UA is required.
 const BROWSER_USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
@@ -120,9 +117,15 @@ const parseKevVulnerability = (value: unknown): KevVulnerability | undefined => 
   return vuln as KevVulnerability;
 };
 
-const readFeedUrl = (source: SourceHit): string => {
+/**
+ * Catalog-only, like the RSS adapter. This used to fall back to a hardcoded CISA URL,
+ * which meant a KEV row that reconciliation had not disabled yet (or could not disable)
+ * kept fetching after the id left the catalog. With KEV out of the MVP catalog that
+ * fallback would be the one path still pulling vulnerability intel nothing can hunt.
+ */
+const readFeedUrl = (source: SourceHit): string | undefined => {
   const url = resolveCatalogSourceUrl(source._id);
-  return typeof url === 'string' && url.length > 0 ? url : KEV_FEED_URL;
+  return typeof url === 'string' && url.length > 0 ? url : undefined;
 };
 
 const buildKevReport = (
@@ -204,6 +207,10 @@ export const kevAdapter: FetchAdapter = {
     const fetchUrl = fetchUrlForContext(context);
 
     const feedUrl = readFeedUrl(source);
+    if (!feedUrl) {
+      log.warn(`Source ${source._id} has no catalog URL — skipping`);
+      return [];
+    }
     const provenanceUrl = normalizeProvenanceUrl(feedUrl);
     const ingestedAt = now().toISOString();
     const spaceId = source._source.space_id ?? GLOBAL_SPACE_ID;
