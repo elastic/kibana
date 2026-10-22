@@ -11,7 +11,6 @@ import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
-import type { KueryNode } from '@kbn/es-query';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import {
   type LegacyTypeMatch,
