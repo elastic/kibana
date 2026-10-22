@@ -13,7 +13,7 @@ import {
   CLOUD_SNAPSHOTS_PATH,
   SEARCH_POWER_EDITOR_ROLES,
 } from '../common/constants';
-import { getFullCloudUrl, getProjectPageUrl } from '../common/utils';
+import { getFullCloudUrl, getProjectPageUrl, withTargetOrganization } from '../common/utils';
 import type { CloudBasicUrls, CloudPrivilegedUrls } from './types';
 
 /**
@@ -52,33 +52,27 @@ export class CloudUrlsService {
       organization_id: organizationId,
     } = this.config;
 
-    const fullCloudDeploymentsUrl = getFullCloudUrl(baseUrl, deploymentsUrl, organizationId);
-    // No target organization: consumers append paths and query strings to the deployment URL.
+    const withOrganization = (url: string) => withTargetOrganization(url, organizationId);
     const fullCloudDeploymentUrl = getFullCloudUrl(baseUrl, deploymentUrl);
-    const fullCloudCreateDeploymentUrl = getFullCloudUrl(
-      baseUrl,
-      createDeploymentUrl,
-      organizationId
-    );
-    const fullCloudProfileUrl = getFullCloudUrl(baseUrl, profileUrl, organizationId);
-    const fullCloudOrganizationUrl = getFullCloudUrl(baseUrl, organizationUrl, organizationId);
-    const fullCloudPerformanceUrl = getFullCloudUrl(baseUrl, performanceUrl, organizationId);
-    const fullCloudProjectsUrl = getFullCloudUrl(baseUrl, projectsUrl, organizationId);
-    const fullCloudCreateProjectUrl = getFullCloudUrl(baseUrl, createProjectUrl, organizationId);
-    const fullCloudSnapshotsUrl = `${fullCloudDeploymentUrl}/${CLOUD_SNAPSHOTS_PATH}`;
+    const getDeploymentPageUrl = (suffix: string) =>
+      fullCloudDeploymentUrl ? withOrganization(`${fullCloudDeploymentUrl}${suffix}`) : undefined;
 
     return {
       baseUrl,
       kibanaUrl,
-      deploymentsUrl: fullCloudDeploymentsUrl,
-      deploymentUrl: fullCloudDeploymentUrl,
-      createDeploymentUrl: fullCloudCreateDeploymentUrl,
-      profileUrl: fullCloudProfileUrl,
-      organizationUrl: fullCloudOrganizationUrl,
-      snapshotsUrl: fullCloudSnapshotsUrl,
-      performanceUrl: fullCloudPerformanceUrl,
-      projectsUrl: fullCloudProjectsUrl,
-      createProjectUrl: fullCloudCreateProjectUrl,
+      deploymentsUrl: withOrganization(getFullCloudUrl(baseUrl, deploymentsUrl)),
+      deploymentUrl: withOrganization(fullCloudDeploymentUrl),
+      deploymentEditUrl: getDeploymentPageUrl('/edit'),
+      deploymentSecurityUrl: getDeploymentPageUrl('/security'),
+      deploymentUpgradeUrl: getDeploymentPageUrl('?show_upgrade=true'),
+      createDeploymentUrl: withOrganization(getFullCloudUrl(baseUrl, createDeploymentUrl)),
+      // Cloud UI ignores the target organization on user-scoped pages.
+      profileUrl: getFullCloudUrl(baseUrl, profileUrl),
+      organizationUrl: withOrganization(getFullCloudUrl(baseUrl, organizationUrl)),
+      snapshotsUrl: getDeploymentPageUrl(`/${CLOUD_SNAPSHOTS_PATH}`),
+      performanceUrl: withOrganization(getFullCloudUrl(baseUrl, performanceUrl)),
+      projectsUrl: withOrganization(getFullCloudUrl(baseUrl, projectsUrl)),
+      createProjectUrl: withOrganization(getFullCloudUrl(baseUrl, createProjectUrl)),
     };
   }
 
@@ -97,29 +91,31 @@ export class CloudUrlsService {
     // role doesn't reach Kibana on Serverless and was never set on ECH. This matches role names, so on
     // ECH a custom role named `admin` also gets billing links:
     // https://github.com/elastic/kibana-team/issues/4343
+    const { base_url: baseUrl, organization_id: organizationId } = this.config;
     const showBillingUrl = userRoles.some((role) => CLOUD_BILLING_ROLES.includes(role));
     const conditionalFullCloudBillingUrl = showBillingUrl
-      ? getFullCloudUrl(this.config.base_url, this.config.billing_url, this.config.organization_id)
+      ? withTargetOrganization(getFullCloudUrl(baseUrl, this.config.billing_url), organizationId)
       : undefined;
 
     const hasManageSecurity = Boolean(coreStart.application.capabilities.users?.save);
     const conditionalFullCloudUsersAndRolesUrl = hasManageSecurity
-      ? getFullCloudUrl(
-          this.config.base_url,
-          this.config.users_and_roles_url,
-          this.config.organization_id
+      ? withTargetOrganization(
+          getFullCloudUrl(baseUrl, this.config.users_and_roles_url),
+          organizationId
         )
       : undefined;
 
     const showSearchPowerUrl =
       Boolean(this.config.serverless?.project_id) &&
       userRoles.some((role) => SEARCH_POWER_EDITOR_ROLES.includes(role));
-    const conditionalFullCloudSearchPowerUrl = showSearchPowerUrl
+    const searchPowerUrl = showSearchPowerUrl
       ? getProjectPageUrl(
-          getFullCloudUrl(this.config.base_url, this.config.deployment_url),
+          getFullCloudUrl(baseUrl, this.config.deployment_url),
           CLOUD_PROJECT_SEARCH_POWER_QUERY
         )
       : undefined;
+    const conditionalFullCloudSearchPowerUrl =
+      searchPowerUrl && withTargetOrganization(searchPowerUrl, organizationId);
 
     return {
       billingUrl: conditionalFullCloudBillingUrl,

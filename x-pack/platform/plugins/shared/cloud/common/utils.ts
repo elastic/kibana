@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-/**
- * Builds a Cloud UI URL. When `organizationId` is set, Cloud UI opens that organization instead of
- * the one the user visited last.
- */
-export function getFullCloudUrl(
-  baseUrl: string | undefined,
-  dirPath: string | undefined,
-  organizationId?: string
-) {
-  if (!baseUrl || !dirPath) {
-    return '';
+export function getFullCloudUrl(baseUrl: string | undefined, dirPath: string | undefined) {
+  if (baseUrl && dirPath) {
+    return `${baseUrl}${dirPath}`;
   }
 
-  const url = `${baseUrl}${dirPath}`;
-  return organizationId
-    ? `${url}#uTargetOrganizationId=${encodeURIComponent(organizationId)}`
-    : url;
+  return '';
+}
+
+/**
+ * Makes Cloud UI open `organizationId` instead of the organization the user visited last.
+ * The hash must stay last, so append paths and query strings before calling this.
+ */
+export function withTargetOrganization(url: string, organizationId: string | undefined): string {
+  if (!url || !organizationId) {
+    return url;
+  }
+
+  // Cloud navigation breaks when the URL keeps a trailing forward slash before the hash.
+  return `${url.replace(/\/$/, '')}#uTargetOrganizationId=${encodeURIComponent(organizationId)}`;
 }
 
 /**

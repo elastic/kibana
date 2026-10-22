@@ -152,10 +152,8 @@ export class HomePublicPlugin
       if (cloud.isCloudEnabled) {
         tutorials.setVariable('cloud', {
           id: cloud.cloudId,
-          baseUrl: cloud.baseUrl,
-          // Cloud's API already provides the full URLs
-          profileUrl: cloud.profileUrl?.replace(cloud.baseUrl ?? '', ''),
-          deploymentUrl: cloud.deploymentUrl?.replace(cloud.baseUrl ?? '', ''),
+          profileUrl: cloud.profileUrl,
+          deploymentSecurityUrl: cloud.deploymentSecurityUrl,
         });
       }
     }
