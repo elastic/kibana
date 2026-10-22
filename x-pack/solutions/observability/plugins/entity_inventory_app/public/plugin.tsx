@@ -8,6 +8,7 @@
 import React from 'react';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { INFRA_ENTITIES_INVENTORY_EXPERIENCE_KEY } from '../common/ui_settings_keys';
 import type {
   EntityInventoryAppPublicSetup,
   EntityInventoryAppPublicStart,
@@ -44,7 +45,12 @@ export class EntityInventoryAppPlugin
       },
     });
 
-    return {};
+    const showEntityInventory = core.uiSettings.get<boolean>(
+      INFRA_ENTITIES_INVENTORY_EXPERIENCE_KEY,
+      false
+    );
+
+    return { showEntityInventory };
   }
 
   start(

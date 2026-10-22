@@ -13,8 +13,9 @@ export interface EntityInventoryAppSetupDependencies {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityInventoryAppStartDependencies {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface EntityInventoryAppPublicSetup {}
+export interface EntityInventoryAppPublicSetup {
+  showEntityInventory: boolean;
+}
 
 export interface EntityInventoryAppPublicStart {
   getAppComponent: () => React.ComponentType;
