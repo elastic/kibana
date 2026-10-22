@@ -29,7 +29,20 @@ export const investigationRoundInputsSchema = {
     .max(MAX_ROUND_TEXT_LENGTH)
     .describe("The assistant's final response for the round."),
   conversation_id: z.string().max(1024).optional().describe('Conversation the round belongs to.'),
-  round_id: z.string().max(1024).optional().describe('Id of the completed round.'),
+  round_id: z
+    .string()
+    .max(1024)
+    .optional()
+    .describe(
+      'Id or positional/semantic alias (e.g. "0", "-1", "1st", "first", "last", "investigation_start") of the completed round.'
+    ),
+  round_index: z
+    .number()
+    .int()
+    .optional()
+    .describe(
+      'Zero-based sequence index of the round in the conversation (supports negative offsets such as -1 for latest).'
+    ),
   tool_calls: toolCallsSchema.describe(
     'Investigator tool calls from this round. Shows the optimizer what the investigator queried.'
   ),
@@ -55,6 +68,10 @@ export type InvestigationTranscriptStep =
 export interface LoadedInvestigationRound {
   source: 'persisted_round' | 'hook_tool_calls' | 'tool_call_params_only';
   roundId?: string;
+  /** Zero-based position of the round in `conversation.rounds` when resolved from a conversation. */
+  roundIndex?: number;
+  /** Total number of rounds in `conversation.rounds` when resolved from a conversation. */
+  roundCount?: number;
   traceId?: string;
   startedAt?: string;
   /** Interleaved reasoning and tool-call steps normalized from the round or hook fallback. */
@@ -64,6 +81,116 @@ export interface LoadedInvestigationRound {
   /** Merged tool calls + results suitable for legacy callers or `toToolCallSteps`. */
   toolCalls: InvestigationToolCall[];
 }
+
+export interface ResolvedConversationRound<TRound extends { id: string }> {
+  round: TRound;
+  /** Canonical 0-based sequence index (`0 .. roundCount - 1`). */
+  roundIndex: number;
+  /** Total number of rounds in the conversation. */
+  roundCount: number;
+}
+
+const SEMANTIC_ROUND_ALIASES: Record<string, number> = {
+  first: 0,
+  investigation_start: 0,
+  initial: 0,
+  last: -1,
+  latest: -1,
+};
+
+/**
+ * Parses a positional or semantic round alias into a 0-based (or negative from-end) array index.
+ * Supports:
+ * - Semantic names (`"first"`, `"investigation_start"`, `"initial"` -> `0`; `"last"`, `"latest"` -> `-1`)
+ * - 1-based ordinals (`"1st"`, `"2nd"`, `"3rd"`, `"4th"` -> `0`, `1`, `2`, `3`)
+ * - Signed 0-based integer strings (`"0"`, `"1"`, `"-1"`, `"-2"`)
+ */
+export const parseRoundAliasIndex = (alias: string | undefined): number | undefined => {
+  if (!alias) {
+    return undefined;
+  }
+  const normalized = alias.trim().toLowerCase();
+  if (normalized in SEMANTIC_ROUND_ALIASES) {
+    return SEMANTIC_ROUND_ALIASES[normalized];
+  }
+  const ordinalMatch = /^([1-9]\d*)(?:st|nd|rd|th)$/.exec(normalized);
+  if (ordinalMatch) {
+    return Number(ordinalMatch[1]) - 1;
+  }
+  if (/^-?\d+$/.test(normalized)) {
+    return Number(normalized);
+  }
+  return undefined;
+};
+
+/**
+ * Resolves a round from an ordered `conversation.rounds` array by exact UUID `roundId`,
+ * explicit `roundIndex` (`0` = first, `-1` = latest), or positional/semantic `roundId` alias
+ * (`"first"`, `"1st"`, `"last"`, `"latest"`, `"investigation_start"`, `"0"`, `"-1"`).
+ */
+export const resolveConversationRound = <TRound extends { id: string }>(
+  rounds: readonly TRound[],
+  selector: { roundId?: string; roundIndex?: number }
+): ResolvedConversationRound<TRound> | undefined => {
+  const roundCount = rounds.length;
+  if (roundCount === 0) {
+    return undefined;
+  }
+
+  const resolveAtIndex = (rawIndex: number): ResolvedConversationRound<TRound> | undefined => {
+    if (!Number.isInteger(rawIndex)) {
+      return undefined;
+    }
+    const normalizedIndex = rawIndex < 0 ? roundCount + rawIndex : rawIndex;
+    if (normalizedIndex < 0 || normalizedIndex >= roundCount) {
+      return undefined;
+    }
+    return {
+      round: rounds[normalizedIndex],
+      roundIndex: normalizedIndex,
+      roundCount,
+    };
+  };
+
+  if (selector.roundIndex !== undefined) {
+    return resolveAtIndex(selector.roundIndex);
+  }
+
+  if (selector.roundId) {
+    const exactIndex = rounds.findIndex(({ id }) => id === selector.roundId);
+    if (exactIndex !== -1) {
+      return {
+        round: rounds[exactIndex],
+        roundIndex: exactIndex,
+        roundCount,
+      };
+    }
+    const aliasIndex = parseRoundAliasIndex(selector.roundId);
+    if (aliasIndex !== undefined) {
+      return resolveAtIndex(aliasIndex);
+    }
+  }
+
+  return undefined;
+};
+
+/**
+ * Slices an ordered `conversation.rounds` array using standard `Array.prototype.slice(start, end)`
+ * semantics (including negative offsets like `(0, -1)` or `(-1)`) while attaching each round's
+ * canonical 0-based `roundIndex` and `roundCount`.
+ */
+export const sliceConversationRounds = <TRound extends { id: string }>(
+  rounds: readonly TRound[],
+  start?: number,
+  end?: number
+): Array<ResolvedConversationRound<TRound>> =>
+  rounds
+    .map((round, roundIndex) => ({
+      round,
+      roundIndex,
+      roundCount: rounds.length,
+    }))
+    .slice(start, end);
 
 export interface RawRoundResult {
   type?: string;
@@ -222,6 +349,7 @@ export const loadInvestigationRound = async ({
   request,
   conversationId,
   roundId,
+  roundIndex,
   fallbackToolCalls = [],
   fallbackToolResults = [],
   logger,
@@ -231,7 +359,10 @@ export const loadInvestigationRound = async ({
   agentBuilder: AgentBuilderPluginStart | undefined;
   request: KibanaRequest;
   conversationId?: string;
+  /** Exact round UUID or positional/semantic alias (`"0"`, `"-1"`, `"1st"`, `"first"`, `"last"`, `"investigation_start"`). */
   roundId?: string;
+  /** Zero-based sequence index in `conversation.rounds` (supports negative offsets like `-1`). */
+  roundIndex?: number;
   fallbackToolCalls?: readonly InvestigationToolCall[];
   fallbackToolResults?: ReadonlyArray<{ tool_call_id: string; results: unknown[] }>;
   logger: Pick<Logger, 'debug' | 'warn'>;
@@ -239,9 +370,11 @@ export const loadInvestigationRound = async ({
   retryDelaysMs?: readonly number[];
 }): Promise<LoadedInvestigationRound> => {
   const mergedFallbackCalls = withToolResults(fallbackToolCalls, fallbackToolResults);
+  const hasRoundSelector = Boolean(roundId) || roundIndex !== undefined;
 
-  if (agentBuilder?.conversations && conversationId && roundId) {
+  if (agentBuilder?.conversations && conversationId && hasRoundSelector) {
     let lastProblem = '';
+    const selectorLabel = roundId ?? `index:${String(roundIndex)}`;
     for (let attempt = 0; attempt <= retryDelaysMs.length; attempt++) {
       if (attempt > 0) {
         await sleep(retryDelaysMs[attempt - 1], signal);
@@ -252,10 +385,13 @@ export const loadInvestigationRound = async ({
       try {
         const client = await agentBuilder.conversations.getScopedClient({ request });
         const conversation = await client.get(conversationId);
-        const round = conversation.rounds.find(({ id }) => id === roundId);
-        if (round) {
+        const resolved = resolveConversationRound(conversation.rounds, { roundId, roundIndex });
+        if (resolved) {
+          const { round, roundIndex: resolvedIndex, roundCount } = resolved;
           logger.debug(
-            `Investigation round loader read round ${roundId} on attempt ${attempt + 1}`
+            `Investigation round loader read round ${
+              round.id
+            } (index ${resolvedIndex}/${roundCount}) on attempt ${attempt + 1}`
           );
           const rawRoundSteps = round.steps as unknown as RawRoundStep[];
           const steps = stepsFromRound(rawRoundSteps);
@@ -264,6 +400,8 @@ export const loadInvestigationRound = async ({
           return {
             source: 'persisted_round',
             roundId: round.id,
+            roundIndex: resolvedIndex,
+            roundCount,
             traceId,
             startedAt: round.started_at,
             steps,
@@ -279,7 +417,7 @@ export const loadInvestigationRound = async ({
     logger.warn(
       'Investigation round loader could not read the persisted round; using hook tool calls'
     );
-    logger.debug(`Investigation round loader gave up on round ${roundId}: ${lastProblem}`);
+    logger.debug(`Investigation round loader gave up on round ${selectorLabel}: ${lastProblem}`);
   }
 
   const hookSteps = stepsFromToolCalls(mergedFallbackCalls);
