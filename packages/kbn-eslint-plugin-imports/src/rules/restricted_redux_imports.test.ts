@@ -8,7 +8,7 @@
  */
 
 import { RuleTester } from 'eslint';
-import { RestrictedReduxImportsRule } from './restricted_redux_imports';
+import { rules } from '../..';
 
 const tester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
@@ -26,7 +26,7 @@ const options = [
 ];
 
 for (const source of ['redux', 'redux-v4']) {
-  tester.run(`restricted Redux imports (${source})`, RestrictedReduxImportsRule, {
+  tester.run(`restricted Redux imports (${source})`, rules.restricted_redux_imports, {
     valid: [
       { code: `import { combineReducers, applyMiddleware } from '${source}';`, options },
       { code: `import type { Store, Dispatch } from '${source}';`, options },
@@ -52,6 +52,12 @@ for (const source of ['redux', 'redux-v4']) {
       { code: `export { createStore } from '${source}';`, options, errors: 1 },
       { code: `export { legacy_createStore as store } from '${source}';`, options, errors: 1 },
       { code: `import * as redux from '${source}';`, options, errors: 1 },
+      { code: `export * from '${source}';`, options, errors: 1 },
+      {
+        code: `import { createStore, legacy_createStore } from '${source}';`,
+        options,
+        errors: 2,
+      },
     ],
   });
 }

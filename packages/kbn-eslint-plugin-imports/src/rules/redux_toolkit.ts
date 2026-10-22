@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule } from 'eslint';
-import type { CallExpression, Node, FunctionExpression, ArrowFunctionExpression } from 'estree';
+import type { Context, CreateOnceRule, ESTree, VisitorWithHooks } from '@oxlint/plugins';
+
+type Node = ESTree.Node;
+type CallExpression = ESTree.CallExpression;
+type FunctionExpression = Extract<ESTree.Node, { type: 'FunctionExpression' }>;
+type ArrowFunctionExpression = ESTree.ArrowFunctionExpression;
 
 type Callback = FunctionExpression | ArrowFunctionExpression;
 
@@ -16,13 +20,16 @@ const isCallback = (node: Node): node is Callback =>
   node.type === 'FunctionExpression' || node.type === 'ArrowFunctionExpression';
 
 const createListener = (
-  context: Rule.RuleContext,
+  context: Context,
   check: (node: CallExpression, apiName: string) => void
-): Rule.RuleListener => {
-  const sourceCode = context.getSourceCode();
+): VisitorWithHooks => {
   const imports = new Map<string, string>();
   const namespaces = new Set<string>();
   return {
+    before() {
+      imports.clear();
+      namespaces.clear();
+    },
     ImportDeclaration(node) {
       if (!['@reduxjs/toolkit', 'redux-toolkit-v1'].includes(String(node.source.value))) return;
       for (const specifier of node.specifiers) {
@@ -57,7 +64,7 @@ const createListener = (
       }
       if (!name || !local) return;
       // Ignore shadowed imports rather than diagnosing unrelated functions.
-      let scope = sourceCode.getScope(node);
+      let scope = context.sourceCode.getScope(node);
       while (scope) {
         const variable = scope.set.get(local);
         if (variable) {
@@ -75,12 +82,12 @@ const createListener = (
 };
 
 const hasSameBinding = (
-  context: Rule.RuleContext,
+  context: Context,
   callback: Callback,
   node: Node,
   name: string
 ): boolean => {
-  const sourceCode = context.getSourceCode();
+  const { sourceCode } = context;
   const parameter = sourceCode.getScope(callback).set.get(name);
   let scope = sourceCode.getScope(node);
   while (scope) {
@@ -92,10 +99,10 @@ const hasSameBinding = (
   return false;
 };
 
-const walk = (node: Node, context: Rule.RuleContext, visit: (child: Node) => void): void => {
+const walk = (node: Node, context: Context, visit: (child: Node) => void): void => {
   visit(node);
   if (isCallback(node) || node.type === 'FunctionDeclaration') return;
-  for (const key of context.getSourceCode().visitorKeys[node.type] ?? []) {
+  for (const key of context.sourceCode.visitorKeys[node.type] ?? []) {
     const value = Reflect.get(node, key);
     if (Array.isArray(value)) {
       for (const child of value) {
@@ -107,7 +114,7 @@ const walk = (node: Node, context: Rule.RuleContext, visit: (child: Node) => voi
   }
 };
 
-export const NoReduxToolkitMiddlewareSpreadRule: Rule.RuleModule = {
+export const NoReduxToolkitMiddlewareSpreadRule: CreateOnceRule = {
   meta: {
     type: 'problem',
     schema: [],
@@ -116,7 +123,7 @@ export const NoReduxToolkitMiddlewareSpreadRule: Rule.RuleModule = {
         'Preserve middleware tuple typing: use getDefaultMiddleware().concat() or .prepend() instead of spreading it.',
     },
   },
-  create(context) {
+  createOnce(context) {
     return createListener(context, (node, apiName) => {
       if (apiName !== 'configureStore') return;
       const options = node.arguments[0];
@@ -147,7 +154,7 @@ export const NoReduxToolkitMiddlewareSpreadRule: Rule.RuleModule = {
   },
 };
 
-export const NoReduxToolkitStateReassignmentRule: Rule.RuleModule = {
+export const NoReduxToolkitStateReassignmentRule: CreateOnceRule = {
   meta: {
     type: 'problem',
     schema: [],
@@ -156,7 +163,7 @@ export const NoReduxToolkitStateReassignmentRule: Rule.RuleModule = {
         'Reassigning the draft parameter alone does not replace Redux state. Mutate the draft directly or return replacement state.',
     },
   },
-  create(context) {
+  createOnce(context) {
     const checkReducer = (callback: Callback) => {
       const parameter = callback.params[0];
       if (parameter?.type !== 'Identifier' || callback.body.type !== 'BlockStatement') return;

@@ -6,8 +6,14 @@
  */
 
 import { Subject, ReplaySubject } from 'rxjs';
-import { ChatEventType, SELF_AGENT_ID, SubagentMode } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  SELF_AGENT_ID,
+  SubagentMode,
+  internalTools,
+} from '@kbn/agent-builder-common';
 import type {
+  AgentApprovals,
   AutoApprovedApi,
   ChatEvent,
   ConversationRound,
@@ -868,6 +874,8 @@ describe('createSubagentTool', () => {
       parentConversationId,
       childConversationExists = false,
       allowSelf = false,
+      subagentApprovals,
+      discoveryEnabled,
     }: {
       executeSubAgent?: jest.Mock;
       createSubAgent?: jest.Mock;
@@ -875,12 +883,14 @@ describe('createSubagentTool', () => {
       parentConversationId?: string;
       childConversationExists?: boolean;
       allowSelf?: boolean;
+      subagentApprovals?: AgentApprovals;
+      discoveryEnabled?: boolean;
     } = {}) =>
       createSubagentTool({
         ownerAgentId: 'test-agent',
         allowedSubagents: allowSelf
           ? [{ id: SELF_AGENT_ID, description: 'Self.' }]
-          : [{ id: 'test-agent', description: 'Test.' }],
+          : [{ id: 'test-agent', description: 'Test.', approvals: subagentApprovals }],
         executionId: 'parent-exec-id',
         subAgentExecutor: {
           executeSubAgent,
@@ -891,6 +901,7 @@ describe('createSubagentTool', () => {
         subagentTracker,
         parentConversationId,
         conversationExists: jest.fn().mockResolvedValue(childConversationExists),
+        discoveryEnabled,
       });
 
     it('asks the user to confirm the grant before spawning the sub-agent', async () => {
@@ -1173,6 +1184,53 @@ describe('createSubagentTool', () => {
       );
     });
 
+    it("skips the prompt for APIs the sub-agent's own defaults already cover", async () => {
+      const executeSubAgent = jest
+        .fn()
+        .mockResolvedValue({ executionId: 'sub-exec-id', events$: completedEvents$() });
+      const tool = createTool({
+        executeSubAgent,
+        subagentApprovals: { auto_approved_apis: { elasticsearch: ['indices.*'] } },
+      });
+      const { context, prompts } = createMockContext();
+
+      const result = await callHandler(
+        tool,
+        {
+          description: 'x',
+          prompt: 'y',
+          auto_approved_apis: { elasticsearch: ['indices.delete'] },
+        },
+        context
+      );
+
+      expect(prompts.checkConfirmationStatus).not.toHaveBeenCalled();
+      expect(prompts.askForConfirmation).not.toHaveBeenCalled();
+      expect(executeSubAgent).toHaveBeenCalledWith(
+        expect.not.objectContaining({ autoApprovedApis: expect.anything() })
+      );
+      expect(result.results[0].data).toEqual(
+        expect.objectContaining({ destructive_access: 'granted' })
+      );
+    });
+
+    it("prompts only for the APIs the sub-agent's own defaults do not cover", async () => {
+      const tool = createTool({
+        subagentApprovals: { auto_approved_apis: { elasticsearch: ['indices.delete'] } },
+      });
+      const { context, prompts } = createMockContext();
+
+      await callHandler(
+        tool,
+        { description: 'x', prompt: 'y', auto_approved_apis: requestedApis },
+        context
+      );
+
+      const { message } = prompts.askForConfirmation.mock.calls[0][0];
+      expect(message).toContain('Kibana: `alerting.delete-alerting-rule-id`');
+      expect(message).not.toContain('`indices.delete`');
+    });
+
     it('rejects an API identifier that exists on neither backend, without prompting', async () => {
       const executeSubAgent = jest.fn();
       const tool = createTool({ executeSubAgent });
@@ -1197,6 +1255,28 @@ describe('createSubagentTool', () => {
         })
       );
     });
+
+    it.each([true, false])(
+      'points at the discovery tool on an unknown API only when discovery is enabled (%s)',
+      async (discoveryEnabled) => {
+        const tool = createTool({ discoveryEnabled });
+        const { context } = createMockContext();
+
+        const result = await callHandler(
+          tool,
+          {
+            description: 'x',
+            prompt: 'y',
+            auto_approved_apis: { elasticsearch: ['indices.nope'] },
+          },
+          context
+        );
+
+        expect(result.results[0].data.message.includes(internalTools.discoverApis)).toBe(
+          discoveryEnabled
+        );
+      }
+    );
 
     it('does not prompt for a grant when a persistent name is already taken', async () => {
       const createSubAgent = jest.fn();

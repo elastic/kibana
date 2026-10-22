@@ -16,7 +16,7 @@ const mockEvent: SignificantEvent = {
   '@timestamp': new Date().toISOString(),
   event_id: 'evt-1',
   status: 'active',
-  stream_names: ['service-a'],
+  source_ids: ['service-a'],
   title: 'Test significant event',
   summary: 'Something happened',
   severity: 'high',
@@ -202,11 +202,11 @@ describe('SignificantEventItem', () => {
       expect(screen.queryByTestId('nightshiftInvestigationFailedStatus')).not.toBeInTheDocument();
     });
 
-    it('marks a failed run with the failure label even though the run completed', () => {
+    it('marks a run recorded as failed as unavailable, since investigations no longer fail', () => {
       renderItem({ event: investigatedEvent, investigationRunStatus: 'failed' });
 
       expect(screen.getByTestId('nightshiftInvestigationFailedStatus')).toHaveTextContent(
-        'Investigation failed'
+        'Investigation unavailable'
       );
       expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
     });

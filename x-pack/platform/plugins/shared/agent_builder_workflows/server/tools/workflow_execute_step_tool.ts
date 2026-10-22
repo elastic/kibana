@@ -74,6 +74,8 @@ const DESTRUCTIVE_STEP_TYPES = new Set([
   'elasticsearch.indices.delete',
   'cases.deleteCases',
   'cases.deleteObservable',
+  'cases.deleteAttachments',
+  'cases.bulkDeleteObservables',
 ]);
 
 const CONDITION_STEP_TYPES = new Set(['if', 'while']);

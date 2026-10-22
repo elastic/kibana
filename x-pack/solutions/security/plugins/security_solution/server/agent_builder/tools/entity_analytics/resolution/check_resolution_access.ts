@@ -18,16 +18,17 @@ export const checkResolutionAccess = async ({
   request,
   security,
   action,
+  privileges = ENTITY_ANALYTICS_KIBANA_FEATURE_PRIVILEGES,
 }: {
   request: KibanaRequest;
   security: SecurityPluginStart;
   action: string;
+  /** Defaults to the read-level privileges; pass the manage list for routes that need it. */
+  privileges?: readonly string[];
 }): Promise<{ allowed: true } | { allowed: false; result: ErrorResult }> => {
   const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(request);
   const { hasAllRequested } = await checkPrivileges({
-    kibana: ENTITY_ANALYTICS_KIBANA_FEATURE_PRIVILEGES.map((privilege) =>
-      security.authz.actions.api.get(privilege)
-    ),
+    kibana: privileges.map((privilege) => security.authz.actions.api.get(privilege)),
   });
 
   if (hasAllRequested) {
