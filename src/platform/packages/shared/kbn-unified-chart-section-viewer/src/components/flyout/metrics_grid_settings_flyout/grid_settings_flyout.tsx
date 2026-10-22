@@ -44,23 +44,6 @@ import {
 import { getAggregationConfigChanges } from './get_aggregation_config_changes';
 import { getChangedSettings } from './get_changed_settings';
 
-/** Explains the percentile series when the selected visualization cannot use it directly. */
-const getPercentileFallbackHint = (visualization: HistogramVisualization): string | undefined => {
-  switch (visualization) {
-    case 'lnsXY':
-      return undefined;
-    case 'lnsHeatmap':
-      return i18n.translate('metricsExperience.gridSettingsFlyout.percentileFallbackHelpText', {
-        defaultMessage:
-          'Used when dimensions are selected. Distribution cannot be split by them, so histograms show the selected percentile instead.',
-      });
-    default: {
-      const unhandled: never = visualization;
-      return unhandled;
-    }
-  }
-};
-
 const getPercentileFieldLabel = (visualization: HistogramVisualization): string => {
   switch (visualization) {
     case 'lnsXY':
@@ -69,7 +52,7 @@ const getPercentileFieldLabel = (visualization: HistogramVisualization): string 
       });
     case 'lnsHeatmap':
       return i18n.translate('metricsExperience.gridSettingsFlyout.percentileFallbackLabel', {
-        defaultMessage: 'Percentile fallback',
+        defaultMessage: 'Percentile shown when sliced by dimensions',
       });
     default: {
       const unhandled: never = visualization;
@@ -114,19 +97,23 @@ export const GridSettingsFlyout = ({
     FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_HEATMAPS_ENABLED]
   );
   const [draftSettings, setDraftSettings] = useState<MetricsGridSettings>(gridSettings);
-  const percentileFallbackHint = getPercentileFallbackHint(draftSettings.histogramVisualization);
-  const histogramLabel = i18n.translate('metricsExperience.gridSettingsFlyout.histogramLabel', {
-    defaultMessage: 'Percentile',
-  });
+  const histogramLabel = isHeatmapsEnabled
+    ? i18n.translate('metricsExperience.gridSettingsFlyout.percentileTypeLabel', {
+        defaultMessage: 'Percentile',
+      })
+    : i18n.translate('metricsExperience.gridSettingsFlyout.histogramLabel', {
+        defaultMessage: 'Histogram percentile',
+      });
   const histogramDisplayLabel = i18n.translate(
     'metricsExperience.gridSettingsFlyout.histogramDisplayLabel',
     {
       defaultMessage: 'Display',
     }
   );
-  const percentileFieldLabel = isHeatmapsEnabled
-    ? getPercentileFieldLabel(draftSettings.histogramVisualization)
-    : histogramLabel;
+  const percentileFieldLabel =
+    isHeatmapsEnabled && draftSettings.histogramVisualization === 'lnsHeatmap'
+      ? getPercentileFieldLabel(draftSettings.histogramVisualization)
+      : histogramLabel;
 
   const pendingUpdate = useMemo(
     () => getChangedSettings(draftSettings, gridSettings),
@@ -231,7 +218,7 @@ export const GridSettingsFlyout = ({
           <EuiSpacer size="m" />
         </>
       ) : null}
-      <EuiFormRow label={percentileFieldLabel} helpText={percentileFallbackHint}>
+      <EuiFormRow label={percentileFieldLabel}>
         <EuiSuperSelect
           data-test-subj="metricsExperienceGridSettingsHistogramSelect"
           options={HISTOGRAM_OPTIONS}

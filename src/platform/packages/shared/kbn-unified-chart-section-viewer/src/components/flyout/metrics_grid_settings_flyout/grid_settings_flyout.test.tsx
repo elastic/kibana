@@ -250,6 +250,7 @@ describe('GridSettingsFlyout', () => {
     );
 
     expect(histogramSelect.getSelected()).toContain('p95');
+    expect(screen.getByText('Histogram percentile')).toBeInTheDocument();
     expect(
       screen.getByTestId('metricsExperienceGridSettingsAggregationAccordion')
     ).toBeInTheDocument();
