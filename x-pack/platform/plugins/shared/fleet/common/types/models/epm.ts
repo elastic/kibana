@@ -202,7 +202,7 @@ interface RegistryAdditionalProperties {
     };
     /**
      * Package-level columnar readiness for the `logsdb_columnar` index mode (package-spec
-     * 3.7.0). Applies to every `type: logs` data stream of the package unless the data stream
+     * 3.8.0). Applies to every `type: logs` data stream of the package unless the data stream
      * overrides it with its own `elasticsearch.logsdb_columnar`. Absent means not ready.
      */
     logsdb_columnar?: Exclude<LogsdbColumnarReadiness, 'unsupported'>;
@@ -546,7 +546,7 @@ export interface RegistryAgent {
 }
 
 /**
- * Columnar readiness declared by a package (package-spec 3.7.0, `elasticsearch.logsdb_columnar`).
+ * Columnar readiness declared by a package (package-spec 3.8.0, `elasticsearch.logsdb_columnar`).
  *
  * - `opt_in`: compatible; Fleet offers a per-integration opt-in and LogsDB stays in effect until
  *   the user opts in.
@@ -565,7 +565,7 @@ export interface RegistryElasticsearch {
   index_mode?: 'time_series';
   /**
    * Data-stream-level columnar readiness from `data_stream/<ds>/manifest.yml` (package-spec
-   * 3.7.0). Overrides the package-level `elasticsearch.logsdb_columnar` value; absent at both
+   * 3.8.0). Overrides the package-level `elasticsearch.logsdb_columnar` value; absent at both
    * levels means the data stream is not ready for the `logsdb_columnar` index mode.
    * Only meaningful on `type: logs` data streams and only when `index_mode` is unset.
    */

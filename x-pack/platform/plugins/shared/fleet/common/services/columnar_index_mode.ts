@@ -11,7 +11,7 @@ import type { LogsdbColumnarReadiness, RegistryDataStream } from '../types';
  * The Elasticsearch index mode Fleet writes to `settings.index.mode` when a logs data stream is
  * switched to columnar storage. It is not a value a package can put in
  * `elasticsearch.index_mode`; packages declare readiness with `elasticsearch.logsdb_columnar`
- * instead (package-spec 3.7.0).
+ * instead (package-spec 3.8.0).
  */
 export const LOGSDB_COLUMNAR_INDEX_MODE = 'logsdb_columnar';
 
