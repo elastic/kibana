@@ -115,11 +115,7 @@ export const canAccessAlertingV2Rules = (core: CoreStart): boolean => {
   return isAlertingV2Enabled(core) && hasAlertingV2Capability(core, 'rules');
 };
 
-/**
- * Returns whether v1 rules UI should carry a "Classic" badge: the active solution supports
- * Alerting v2 ({@link isAlertingV2AvailableInSolution}) and the user can reach v2 rules
- * ({@link canAccessAlertingV2Rules}).
- */
+/** Returns whether v1 rules UI should carry a "Classic" badge. */
 export const shouldShowClassicRulesBadge = (
   core: CoreStart,
   solutionNavId: string | null | undefined

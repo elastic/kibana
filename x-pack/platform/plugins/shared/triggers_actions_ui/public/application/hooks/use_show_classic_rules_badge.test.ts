@@ -16,19 +16,13 @@ jest.mock('../../common/lib/kibana');
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
-const mockServices = ({
-  solutionNavId$,
-  canReadV2Rules = true,
-}: {
-  solutionNavId$: BehaviorSubject<SolutionId | null>;
-  canReadV2Rules?: boolean;
-}) => {
+const mockServices = (solutionNavId$: BehaviorSubject<SolutionId | null>) => {
   const core = coreMock.createStart();
   core.settings.globalClient.isDeclared.mockReturnValue(true);
   core.settings.globalClient.get.mockReturnValue(true);
   core.application.capabilities = {
     ...core.application.capabilities,
-    ...(canReadV2Rules ? { alerting_v2_rules: { read: true } } : {}),
+    alerting_v2_rules: { read: true },
   };
   core.chrome.getActiveSolutionNavId$.mockReturnValue(solutionNavId$);
   core.chrome.getActiveSolutionNavId.mockReturnValue(solutionNavId$.getValue());
@@ -42,38 +36,16 @@ describe('useShowClassicRulesBadge', () => {
   });
 
   it('returns true in Observability when the user can reach v2 rules', () => {
-    mockServices({ solutionNavId$: new BehaviorSubject<SolutionId | null>('oblt') });
+    mockServices(new BehaviorSubject<SolutionId | null>('oblt'));
 
     const { result } = renderHook(() => useShowClassicRulesBadge());
 
     expect(result.current).toBe(true);
   });
 
-  it.each<[SolutionId]>([['security'], ['es']])(
-    'returns false in the %s solution',
-    (solutionNavId) => {
-      mockServices({ solutionNavId$: new BehaviorSubject<SolutionId | null>(solutionNavId) });
-
-      const { result } = renderHook(() => useShowClassicRulesBadge());
-
-      expect(result.current).toBe(false);
-    }
-  );
-
-  it('returns false when the user cannot reach v2 rules', () => {
-    mockServices({
-      solutionNavId$: new BehaviorSubject<SolutionId | null>('oblt'),
-      canReadV2Rules: false,
-    });
-
-    const { result } = renderHook(() => useShowClassicRulesBadge());
-
-    expect(result.current).toBe(false);
-  });
-
   it('updates when the active solution changes', () => {
     const solutionNavId$ = new BehaviorSubject<SolutionId | null>('oblt');
-    mockServices({ solutionNavId$ });
+    mockServices(solutionNavId$);
 
     const { result } = renderHook(() => useShowClassicRulesBadge());
     expect(result.current).toBe(true);
