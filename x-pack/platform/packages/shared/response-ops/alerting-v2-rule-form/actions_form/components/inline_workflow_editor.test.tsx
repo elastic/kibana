@@ -215,6 +215,22 @@ describe('InlineWorkflowEditor', () => {
       ).toBeInTheDocument();
     });
 
+    it('reports unknown fields', () => {
+      renderStatefulEditor(draft());
+
+      typeParams('to:\n  - user@example.com\nsubject: Hi\nmessage: Body\nfoo: bar\n');
+
+      expect(screen.getByText('Unknown field: foo.')).toBeInTheDocument();
+    });
+
+    it('reports a list field given a string', () => {
+      renderStatefulEditor(draft());
+
+      typeParams('to: user@example.com\nsubject: Hi\nmessage: Body\n');
+
+      expect(screen.getByText('to must be a list of strings.')).toBeInTheDocument();
+    });
+
     it('keeps showing params errors after reverting to the template', () => {
       renderStatefulEditor(draft());
 

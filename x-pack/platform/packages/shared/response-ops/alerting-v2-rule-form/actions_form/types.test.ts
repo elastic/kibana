@@ -13,9 +13,17 @@ const inline = (overrides: Partial<InlineWorkflowActionDraft> = {}): InlineWorkf
   source: 'inline',
   stepType: 'email',
   connectorId: 'email-1',
-  params: 'to: "user@example.com"\nsubject: "Hi"\nmessage: "Body"\n',
+  params: 'to:\n  - "user@example.com"\nsubject: "Hi"\nmessage: "Body"\n',
   ...overrides,
 });
+
+const slack = (overrides: Partial<InlineWorkflowActionDraft> = {}): InlineWorkflowActionDraft =>
+  inline({
+    stepType: 'slack2.sendMessage',
+    connectorId: 'slack-1',
+    params: 'channel: "C123"\ntext: "Hello"\n',
+    ...overrides,
+  });
 
 const existing = (
   overrides: Partial<ExistingWorkflowActionDraft> = {}
@@ -48,7 +56,7 @@ describe('isActionValid', () => {
 
     it('is valid with unquoted YAML values', () => {
       expect(
-        isActionValid(inline({ params: 'to: user@example.com\nsubject: Hi\nmessage: Body\n' }))
+        isActionValid(inline({ params: 'to:\n  - user@example.com\nsubject: Hi\nmessage: Body\n' }))
       ).toBe(true);
     });
 
@@ -56,20 +64,58 @@ describe('isActionValid', () => {
       expect(
         isActionValid(
           inline({
-            params: 'to: ops@example.com\nsubject: Alert\nmessage: "{{ inputs.episodes }}"\n',
+            params: 'to:\n  - ops@example.com\nsubject: Alert\nmessage: "{{ inputs.episodes }}"\n',
           })
         )
       ).toBe(true);
     });
 
     it('is invalid for the untouched (empty) template', () => {
-      expect(isActionValid(inline({ params: 'to: ""\nsubject: ""\nmessage: ""\n' }))).toBe(false);
+      expect(isActionValid(inline({ params: 'to:\n  - ""\nsubject: ""\nmessage: ""\n' }))).toBe(
+        false
+      );
     });
 
     it('is invalid when any field is left empty', () => {
       expect(
-        isActionValid(inline({ params: 'to: user@example.com\nsubject: ""\nmessage: Body\n' }))
+        isActionValid(inline({ params: 'to:\n  - user@example.com\nsubject: ""\nmessage: Body\n' }))
       ).toBe(false);
+    });
+
+    it('is invalid when a list field is given a string', () => {
+      expect(
+        isActionValid(inline({ params: 'to: user@example.com\nsubject: Hi\nmessage: Body\n' }))
+      ).toBe(false);
+    });
+
+    it('is invalid with an unknown field', () => {
+      expect(
+        isActionValid(
+          inline({ params: 'to:\n  - user@example.com\nsubject: Hi\nmessage: Body\nfoo: bar\n' })
+        )
+      ).toBe(false);
+    });
+
+    it('is valid with optional cc and bcc lists', () => {
+      expect(
+        isActionValid(
+          inline({
+            params:
+              'to:\n  - user@example.com\nsubject: Hi\nmessage: Body\ncc:\n  - cc@example.com\nbcc:\n  - bcc@example.com\n',
+          })
+        )
+      ).toBe(true);
+    });
+
+    it('is valid for a complete slack draft', () => {
+      expect(isActionValid(slack())).toBe(true);
+    });
+
+    it.each([
+      ['channel', 'text: Hello\n'],
+      ['text', 'channel: C123\n'],
+    ])('is invalid for a slack draft missing %s', (_, params) => {
+      expect(isActionValid(slack({ params }))).toBe(false);
     });
 
     it('is invalid for empty params', () => {
@@ -91,6 +137,19 @@ describe('validateInlineAction', () => {
     expect(validateInlineAction(inline({ connectorId: null })).connector).toBe(
       'Select a connector.'
     );
+  });
+
+  it('validates slack params against the slack schema', () => {
+    expect(
+      validateInlineAction(slack({ params: 'channel: C123\nthreadTs: "1"\n' })).params
+    ).toEqual(['text is required.', 'Unknown field: threadTs.']);
+  });
+
+  it('reports a list field given a string', () => {
+    expect(
+      validateInlineAction(inline({ params: 'to: a@example.com\nsubject: Hi\nmessage: Body\n' }))
+        .params
+    ).toEqual(['to must be a list of strings.']);
   });
 
   it('names every field left empty', () => {

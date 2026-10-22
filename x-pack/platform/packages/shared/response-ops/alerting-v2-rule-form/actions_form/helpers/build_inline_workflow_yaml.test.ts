@@ -37,7 +37,7 @@ describe('buildInlineWorkflowYaml', () => {
       source: 'inline',
       stepType: 'email',
       connectorId: 'my-email-connector',
-      params: 'to: "ops@example.com"\nsubject: "Alert"\nmessage: "Body"',
+      params: 'to:\n  - "ops@example.com"\nsubject: "Alert"\nmessage: "Body"',
     });
 
     const parsed = parse(yaml);
@@ -49,7 +49,7 @@ describe('buildInlineWorkflowYaml', () => {
       name: 'notify',
       type: 'email',
       'connector-id': 'my-email-connector',
-      with: { to: 'ops@example.com', subject: 'Alert', message: 'Body' },
+      with: { to: ['ops@example.com'], subject: 'Alert', message: 'Body' },
     });
   });
 
@@ -76,20 +76,49 @@ describe('buildInlineWorkflowYaml', () => {
       source: 'inline',
       stepType: 'email',
       connectorId: 'c1',
-      params: 'to: ""\nsubject: ""\nmessage: ""',
+      params: 'to:\n  - ops@example.com\nsubject: Alert\nmessage: Body',
     });
     expect(parse(yaml).name).toMatch(/notification/i);
   });
 
-  it('treats empty params as an empty `with` block', () => {
-    const yaml = buildInlineWorkflowYaml({
-      id: 't4',
-      source: 'inline',
-      stepType: 'email',
-      connectorId: 'c1',
-      params: '',
-    });
-    expect(parse(yaml).steps[0].with).toEqual({});
+  it('throws when params are empty', () => {
+    expect(() =>
+      buildInlineWorkflowYaml({
+        id: 't4',
+        source: 'inline',
+        stepType: 'email',
+        connectorId: 'c1',
+        params: '',
+      })
+    ).toThrow(InvalidInlineWorkflowError);
+  });
+
+  it.each([
+    ['a mandatory field is missing', 'to:\n  - ops@example.com\nsubject: Alert'],
+    ['a list field is a string', 'to: ops@example.com\nsubject: Alert\nmessage: Body'],
+    ['a field is unknown', 'to:\n  - ops@example.com\nsubject: Alert\nmessage: Body\nfoo: bar'],
+  ])('throws with the validation reasons when %s', (_, params) => {
+    expect(() =>
+      buildInlineWorkflowYaml({
+        id: 't4b',
+        source: 'inline',
+        stepType: 'email',
+        connectorId: 'c1',
+        params,
+      })
+    ).toThrow(InvalidInlineWorkflowError);
+  });
+
+  it('includes the validation reasons in the error message', () => {
+    expect(() =>
+      buildInlineWorkflowYaml({
+        id: 't4c',
+        source: 'inline',
+        stepType: 'slack2.sendMessage',
+        connectorId: 'c1',
+        params: 'channel: C1\nfoo: bar',
+      })
+    ).toThrow('text is required. Unknown field: foo.');
   });
 
   it('throws when the params YAML is malformed', () => {
