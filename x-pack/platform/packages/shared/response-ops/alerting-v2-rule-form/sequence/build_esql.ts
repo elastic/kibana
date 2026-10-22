@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleKind } from '@kbn/alerting-v2-schemas';
 import type { SequenceFormValues, SequenceStep } from './form_types';
 import {
   formatLookbackString,
@@ -41,7 +42,7 @@ interface RecoveryTrackingPair {
   ruleIdx?: number;
   ruleId: string;
   ruleIds: string[];
-  kind: 'alert' | 'signal';
+  kind: RuleKind;
   stalenessSeconds: number;
 }
 

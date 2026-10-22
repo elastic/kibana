@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleKind } from '@kbn/alerting-v2-schemas';
 export type HopWindowUnit = 's' | 'm' | 'h' | 'd';
 
 export interface HopWindow {
@@ -31,17 +32,22 @@ export const secondsToHopWindow = (totalSeconds: number): HopWindow => {
 
 export const hopWindowToScheduleString = (w: HopWindow): string => `${w.value}${w.unit}`;
 
-export interface SequenceRule {
+export interface SequenceSubRule {
   ruleId: string;
   ruleName: string;
   groupingFields: string[];
-  kind: 'alert' | 'signal';
+  kind: RuleKind;
   isMissing?: boolean;
+}
+
+export interface RuleKindPair {
+  ruleId: string;
+  kind: RuleKind;
 }
 
 export interface SequenceStep {
   id: string;
-  rules: SequenceRule[];
+  rules: SequenceSubRule[];
   operator: 'and' | 'or';
 }
 
@@ -67,6 +73,12 @@ export const isSequenceValid = (state: SequenceFormValues): boolean => {
   if (state.hopWindows.length !== state.steps.length - 1) return false;
   if (state.steps.some((s) => s.rules.length === 0)) return false;
   if (state.hopWindows.some((w) => w.value <= 0)) return false;
+  if (
+    state.recoveryStepIndices.some((i) => !Number.isInteger(i) || i < 0 || i >= state.steps.length)
+  ) {
+    return false;
+  }
+  if (new Set(state.recoveryStepIndices).size !== state.recoveryStepIndices.length) return false;
   return true;
 };
 

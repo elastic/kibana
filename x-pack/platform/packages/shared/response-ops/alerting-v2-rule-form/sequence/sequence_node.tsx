@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleKind } from '@kbn/alerting-v2-schemas';
 import React, { useMemo, useState } from 'react';
 import {
   EuiButtonGroup,
@@ -41,7 +42,7 @@ export interface SequenceNodeData extends Record<string, unknown> {
   onOperatorChange: (stepId: string, op: 'and' | 'or') => void;
   onDropRule: (
     stepId: string,
-    payload: { id: string; name: string; groupingFields: string[]; kind: 'alert' | 'signal' }
+    payload: { id: string; name: string; groupingFields: string[]; kind: RuleKind }
   ) => void;
   interactive?: boolean;
 }
@@ -108,7 +109,7 @@ export const SequenceNode: React.FC<NodeProps<SequenceNodeType>> = ({ data }) =>
         id: string;
         name: string;
         groupingFields: string[];
-        kind: 'alert' | 'signal';
+        kind: RuleKind;
       };
       data.onDropRule(data.stepId, payload);
     } catch {

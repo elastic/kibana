@@ -37,6 +37,26 @@ import { useCanSaveSequenceRule } from './use_can_save_sequence_rule';
 
 const SIDEBAR_WIDTH_KEY = 'SEQUENCE_BUILDER_SIDEBAR_WIDTH';
 
+const sidebarContentCss = css`
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+`;
+
+const tabsCss = css`
+  padding-inline: 16px;
+`;
+
+const tabPanelCss = css`
+  min-block-size: 0;
+  overflow: auto;
+  padding: 16px 16px 0;
+`;
+
+const footerCss = css`
+  padding: 12px 16px;
+`;
+
 const fullHeightCss = css`
   height: 100%;
   overflow: hidden;
@@ -79,16 +99,8 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
   const canSave = useCanSaveSequenceRule(seqValues, isSaving);
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        inset: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-      }}
-    >
-      <div style={{ flexShrink: 0, padding: '0 16px' }}>
+    <EuiFlexGroup direction="column" gutterSize="none" responsive={false} css={sidebarContentCss}>
+      <EuiFlexItem grow={false} css={tabsCss}>
         <EuiTabs data-test-subj="sequenceBuilderDetailsTabs">
           <EuiTab
             isSelected={selectedTab === 'execution'}
@@ -121,12 +133,9 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
             />
           </EuiTab>
         </EuiTabs>
-      </div>
+      </EuiFlexItem>
 
-      <div
-        role="tabpanel"
-        style={{ flex: 1, overflow: 'auto', minHeight: 0, padding: '16px 16px 0' }}
-      >
+      <EuiFlexItem role="tabpanel" css={tabPanelCss}>
         {selectedTab === 'execution' && <SequenceRuleExecutionStep seqValues={seqValues} />}
         {selectedTab === 'details' && <DetailsAndArtifactsStep />}
         {selectedTab === 'actions' && (
@@ -137,11 +146,11 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
             getActionPolicyEditHref={getActionPolicyEditHref}
           />
         )}
-      </div>
+      </EuiFlexItem>
 
-      <div style={{ flexShrink: 0 }}>
+      <EuiFlexItem grow={false}>
         <EuiHorizontalRule margin="none" />
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" style={{ padding: '12px 16px' }}>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" css={footerCss}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               onClick={onClose}
@@ -169,8 +178,8 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </div>
-    </div>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

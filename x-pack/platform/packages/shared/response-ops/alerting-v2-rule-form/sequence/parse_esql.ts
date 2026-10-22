@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import { Parser, isFunctionExpression, isColumn, isOptionNode } from '@elastic/esql';
+import {
+  Parser,
+  isFunctionExpression,
+  isColumn,
+  isIntegerLiteral,
+  isOptionNode,
+  isStringLiteral,
+  singleItems,
+} from '@elastic/esql';
 import type {
   ESQLCommand,
   ESQLFunction,
   ESQLAstItem,
   ESQLSingleAstItem,
 } from '@elastic/esql/types';
-import type { SequenceFormValues, SequenceStep, HopWindow } from './form_types';
-import { generateStepId, secondsToHopWindow } from './form_types';
+import type { SequenceFormValues, SequenceStep, HopWindow, RuleKindPair } from './form_types';
+import { generateStepId, isSequenceValid, secondsToHopWindow } from './form_types';
 import { RULE_EVENTS_INDEX } from './build_esql';
 
 const getColName = (node: ESQLAstItem): string | null => {
@@ -22,15 +30,13 @@ const getColName = (node: ESQLAstItem): string | null => {
 };
 
 const getStringVal = (node: ESQLAstItem): string | null => {
-  const item = node as any;
-  if (item?.type === 'literal' && typeof item.valueUnquoted === 'string') return item.valueUnquoted;
-  return null;
+  const item = node as ESQLSingleAstItem;
+  return isStringLiteral(item) ? item.valueUnquoted : null;
 };
 
 const getIntVal = (node: ESQLAstItem): number | null => {
-  const item = node as any;
-  if (item?.type === 'literal' && typeof item.value === 'number') return Math.trunc(item.value);
-  return null;
+  const item = node as ESQLSingleAstItem;
+  return isIntegerLiteral(item) ? Math.trunc(item.value) : null;
 };
 
 const asFn = (node: ESQLAstItem): ESQLFunction | null => {
@@ -39,8 +45,8 @@ const asFn = (node: ESQLAstItem): ESQLFunction | null => {
 };
 
 const unwrapSingle = (item: ESQLAstItem): ESQLSingleAstItem => {
-  if (Array.isArray(item) && item.length === 1) return item[0] as ESQLSingleAstItem;
-  return item as ESQLSingleAstItem;
+  const [single] = singleItems([item]);
+  return single;
 };
 
 const flattenBool = (node: ESQLSingleAstItem, op: string): ESQLSingleAstItem[] => {
@@ -59,11 +65,6 @@ const parseEffCol = (name: string): number | null => {
   const m = /^t_(\d+)(?:_eff)?$/.exec(name);
   return m ? parseInt(m[1], 10) : null;
 };
-
-interface RuleKindPair {
-  ruleId: string;
-  kind: 'alert' | 'signal';
-}
 
 const ruleKindPairsFromTCaseCondition = (cond: ESQLSingleAstItem): RuleKindPair[] => {
   const andLeaves = flattenBool(cond, 'and');
@@ -105,7 +106,7 @@ const ruleKindPairsFromTCaseCondition = (cond: ESQLSingleAstItem): RuleKindPair[
       const ruleId = getStringVal(asFn(subRuleIdLeaf)!.args[1]);
       const typeVal = getStringVal(asFn(subTypeLeaf)!.args[1]);
       if (ruleId === null || (typeVal !== 'alert' && typeVal !== 'signal')) return [];
-      return [{ ruleId, kind: typeVal as 'alert' | 'signal' }];
+      return [{ ruleId, kind: typeVal }];
     });
   }
 
@@ -316,9 +317,11 @@ export const parseSequenceEsql = (
     }
   }
 
-  return {
+  const parsed: SequenceFormValues = {
     steps,
     hopWindows,
     recoveryStepIndices,
   };
+
+  return isSequenceValid(parsed) ? parsed : null;
 };
