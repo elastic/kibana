@@ -352,11 +352,7 @@ describe('generateWorkflowYaml', () => {
         subject_id: '{{ event.alert.uuid }}',
         timeout_seconds: 120,
       });
-      expect(slack.with).toMatchObject({
-        subject_type: 'manual',
-        subject_id: '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}',
-        timeout_seconds: 120,
-      });
+      expect(slack.with).toMatchObject({ subject_type: 'slack_thread', timeout_seconds: 120 });
       expect(scheduled.with.message).not.toContain('event.text');
       expect(alert.with.message).not.toContain('event.text');
       expect(slack.with.message).toContain('{{ event.text | truncate: 4000 }}');
@@ -366,6 +362,7 @@ describe('generateWorkflowYaml', () => {
         workspace: '{{ event.workspace }}',
         channel: '{{ event.channel }}',
         thread_ts: '{{ event.messageId }}',
+        external_conversation_id: '{{ event.externalConversationId }}',
       });
       expect(scheduled.with.notificationDestinations).toBeUndefined();
       expect(alert.with.notificationDestinations).toBeUndefined();
@@ -623,43 +620,34 @@ describe('generateWorkflowYaml', () => {
     });
 
     describe('trigger_investigation step', () => {
-      it('investigates a manual subject keyed by the message', () => {
-        const yaml = parse(
-          generateWorkflowYaml({
-            automationId: 'auto-123',
-            automation: slackAutomation(slackRow()),
-          })
-        );
-        expect(yaml.steps[0].with).toMatchObject({
-          subject_type: 'manual',
-          subject_id: '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}',
-          title: 'Test automation',
-        });
-      });
-
-      it("names the message's thread, so a reply in it continues the investigation", () => {
-        const automation = slackAutomation(slackRow());
-        automation.completions = [{ action: 'post_to_slack', targetMode: 'thread' }];
-        const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
-        expect(yaml.steps[0].with.slack_thread).toEqual({
-          workspace: '{{ event.workspace }}',
-          channel: '{{ event.channel }}',
-          thread_ts: '{{ event.messageId }}',
-        });
-      });
-
       it.each<[string, NightshiftAutomationAttributes['completions']]>([
+        ['reports in the thread', [{ action: 'post_to_slack', targetMode: 'thread' }]],
         ['reports nowhere', []],
         [
           'reports in another channel',
           [{ action: 'post_to_slack', targetMode: 'channel', destination: '#prod-alerts' }],
         ],
-      ])('leaves the thread unnamed when the automation %s', (_, completions) => {
-        const automation = slackAutomation(slackRow());
-        automation.completions = completions;
-        const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
-        expect(yaml.steps[0].with.slack_thread).toBeUndefined();
-      });
+      ])(
+        "investigates the message's thread, keyed by the Relay's key, when the automation %s",
+        (_, completions) => {
+          const automation = slackAutomation(slackRow());
+          automation.completions = completions;
+          const { with: input } = parse(
+            generateWorkflowYaml({ automationId: 'auto-123', automation })
+          ).steps[0];
+          expect(input).toMatchObject({
+            subject_type: 'slack_thread',
+            title: 'Test automation',
+            slack_thread: {
+              workspace: '{{ event.workspace }}',
+              channel: '{{ event.channel }}',
+              thread_ts: '{{ event.messageId }}',
+              external_conversation_id: '{{ event.externalConversationId }}',
+            },
+          });
+          expect(input).not.toHaveProperty('subject_id');
+        }
+      );
 
       it('puts the slack message in the prompt after the prompt template', () => {
         const automation = slackAutomation(slackRow());
@@ -707,10 +695,8 @@ describe('generateWorkflowYaml', () => {
           subject_type: 'alert',
           subject_id: '{{ event.alert.uuid }}',
         });
-        expect(slackGuard.steps[0].with).toMatchObject({
-          subject_type: 'manual',
-          subject_id: '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}',
-        });
+        expect(slackGuard.steps[0].with).toMatchObject({ subject_type: 'slack_thread' });
+        expect(slackGuard.steps[0].with).not.toHaveProperty('subject_id');
       });
 
       it('gives every step in a mixed automation a distinct name', () => {

@@ -1062,8 +1062,8 @@ export class NightshiftInvestigationsClient {
 
   /**
    * What lifecycle events attribute the investigation to: its first recorded subject, preferring
-   * the subject types lifecycle triggers carry. A Slack thread is reported as a manual subject,
-   * since that is what it is to the trigger's consumers. Undefined when it has no subject.
+   * any other subject to a Slack thread the investigation also reports in. Undefined when it has
+   * no subject.
    */
   async getLifecycleSubject(investigationId: string): Promise<LifecycleSubject | undefined> {
     const { agenticInvestigations } = this.requireWriteDeps();
@@ -1080,10 +1080,7 @@ export class NightshiftInvestigationsClient {
       return undefined;
     }
     return {
-      subject: {
-        type: first.subjectType === 'slack_thread' ? 'manual' : first.subjectType,
-        id: first.subjectId,
-      },
+      subject: { type: first.subjectType, id: first.subjectId },
       triggerType: first.triggerType ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
       startedAt: first.createdAt,
     };

@@ -29,17 +29,13 @@ const SLACK_MESSAGE_EXCLUSIONS = [
   '(not event.subtype:* or event.subtype:bot_message or event.subtype:file_share)',
 ];
 
-// One investigation per message, so concurrent messages in a channel do not share a subject.
-const SLACK_SUBJECT_ID = '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}';
-
-// The message's thread, which the managed Slack thread workflow looks the investigation up by when
-// someone replies. Only recorded for an automation that already reports in that thread: it makes
-// a reply there report the investigation, which a silent or channel-mode automation does not do.
-// The trigger condition guarantees a workspace.
+// The message's thread, keyed by the Relay's thread key so a later reply or mention in it continues
+// the investigation. Only top-level messages trigger, so each message is its own thread.
 const SLACK_THREAD = {
   workspace: '{{ event.workspace }}',
   channel: '{{ event.channel }}',
   thread_ts: '{{ event.messageId }}',
+  external_conversation_id: '{{ event.externalConversationId }}',
 };
 
 // See MAX_PROMPT_TEMPLATE_LENGTH: the template and this text share the step's message limit.
@@ -276,7 +272,6 @@ function generateSlackWorkflow(
   hasMultipleTriggers: boolean
 ) {
   const notificationDestinations = buildNotificationDestinations(automationId, automation, 'slack');
-  const repliesInMessageThread = notificationDestinations?.some(({ params }) => params.thread_ts);
   const condition = buildSlackCondition(slackRows);
   // One trigger combines all Slack rows so a message matching several rows starts only one run.
   return {
@@ -294,9 +289,8 @@ function generateSlackWorkflow(
         type: 'nightshift.triggerInvestigation',
         with: {
           automation_id: automationId,
-          subject_type: 'manual',
-          subject_id: SLACK_SUBJECT_ID,
-          ...(repliesInMessageThread ? { slack_thread: SLACK_THREAD } : {}),
+          subject_type: 'slack_thread',
+          slack_thread: SLACK_THREAD,
           title: automation.name,
           summary: automation.name,
           trigger_type: 'automatic',

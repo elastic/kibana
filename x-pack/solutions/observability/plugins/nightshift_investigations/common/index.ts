@@ -83,6 +83,8 @@ export interface SlackThreadReference {
   workspace: string;
   channel: string;
   thread_ts: string;
+  /** The Relay's key for the thread, when the event or post came through the Relay. */
+  external_conversation_id?: string;
 }
 
 /**
@@ -99,6 +101,18 @@ export const toSlackThreadKey = ({
   channel: string;
   threadTs: string;
 }): string => ['slack', workspace, channel, threadTs].map(encodeURIComponent).join(':');
+
+/**
+ * The thread's subject id: the Relay's key when given, otherwise the same key built from the
+ * thread's ids.
+ */
+export const toSlackThreadSubjectId = ({
+  workspace,
+  channel,
+  thread_ts: threadTs,
+  external_conversation_id: externalConversationId,
+}: SlackThreadReference): string =>
+  externalConversationId || toSlackThreadKey({ workspace, channel, threadTs });
 
 export interface StartInvestigationResponse {
   /**
