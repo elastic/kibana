@@ -101,8 +101,11 @@ export const BriefViewModel = lazySchema(() =>
 );
 export type BriefViewModel = z.infer<typeof BriefViewModel>;
 
+/** The model writing "rule 1" or "job 1" without the double braces: the reader would see it as written. */
+const BARE_CITATION_PATTERN = /\b([Rr]ule|[Jj]ob)\s+(\d+)\b/;
+
 const TOKEN_PATTERN = new RegExp(
-  [MENTION_PATTERN, RULE_MENTION_PATTERN, JOB_MENTION_PATTERN]
+  [MENTION_PATTERN, RULE_MENTION_PATTERN, JOB_MENTION_PATTERN, BARE_CITATION_PATTERN]
     .map(({ source }) => source)
     .join('|'),
   'g'
@@ -133,18 +136,35 @@ export const buildViewModel = ({
   const { tiles, period, focusTileId, entityFilters = {} } = scope;
   const namesById = new Map(entities.candidates.map(({ id, name }) => [id, name]));
   // Model text is prose: an entity mention becomes the Entity Store's name, and a rule or job mention the
-  // name of that rule or job of the entity the text is about. One that names none is removed.
+  // name of that rule or job of the entity the text is about. One that names none is removed. A bare
+  // "rule 1" or "job 1" that matches one becomes its name too, and is otherwise left as written.
   const withNames = (text: string, entityFacts?: EntityFacts) =>
     text.replace(
       TOKEN_PATTERN,
-      (token, entityId?: string, ruleIndex?: string, jobIndex?: string) => {
+      (
+        token,
+        entityId?: string,
+        ruleIndex?: string,
+        jobIndex?: string,
+        bareKind?: string,
+        bareIndex?: string
+      ) => {
         if (entityId !== undefined) {
           return namesById.get(entityId) ?? entityId;
         }
+        const isBare = bareKind !== undefined;
+        const index = Number(ruleIndex ?? jobIndex ?? bareIndex);
         const named =
-          ruleIndex !== undefined
-            ? entityFacts?.alerts?.rules.find(({ index }) => index === Number(ruleIndex))
-            : entityFacts?.anomalies?.jobs.find(({ index }) => index === Number(jobIndex));
+          ruleIndex !== undefined || bareKind?.toLowerCase() === 'rule'
+            ? entityFacts?.alerts?.rules.find((rule) => rule.index === index)
+            : entityFacts?.anomalies?.jobs.find((job) => job.index === index);
+        if (isBare) {
+          if (!named) {
+            return token;
+          }
+          logger?.debug(`AI brief: replaced the bare "${token}" with the name it cites`);
+          return named.name;
+        }
         if (!named) {
           logger?.debug(`AI brief: removed ${token}, which names no rule or job of the entity`);
         }

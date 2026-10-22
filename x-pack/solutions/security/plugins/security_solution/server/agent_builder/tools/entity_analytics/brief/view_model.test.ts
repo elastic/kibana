@@ -198,6 +198,20 @@ describe('buildViewModel', () => {
       1,
     ],
     [
+      'a bare "rule 1" and "job 1" the entity has become their names',
+      'host:a',
+      'Seen in rule 1 and job 1',
+      'Seen in Credential Dump and Unusual destination IP.',
+      2,
+    ],
+    [
+      'a bare "rule 9" the entity has no rule at is left as written',
+      'host:a',
+      'Seen in rule 9',
+      'Seen in rule 9.',
+      0,
+    ],
+    [
       'a token for a job of the entity becomes the job',
       'host:a',
       'Seen in {{ job 1 }}',
