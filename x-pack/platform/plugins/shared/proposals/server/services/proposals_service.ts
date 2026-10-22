@@ -25,6 +25,7 @@ import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
 import {
   DEFAULT_PROPOSAL_TITLE,
   isTerminal,
+  PROPOSAL_CATEGORY_TODO,
   PROPOSAL_ATTACHMENT_TYPE,
   PROPOSALS_RESUME_CHANNEL,
 } from '@kbn/proposals-common';
@@ -180,6 +181,14 @@ export class ProposalsService {
     // caller always "wins" with an empty string, the action's own metadata is
     // never consulted, and the queue silently drops a proposal it cannot group.
     const category = blankToUndefined(params.category) ?? metadata?.category;
+    // A to-do is offered as "I've applied" alone, so approving one must not run anything: the
+    // click records work the analyst already did, and there is no Decline beside it.
+    if (actionWorkflowId !== undefined && category === PROPOSAL_CATEGORY_TODO) {
+      throw new ProposalInvalidActionInputError(
+        `A "${PROPOSAL_CATEGORY_TODO}" proposal is carried out by the analyst, so it cannot ` +
+          `run action workflow [${actionWorkflowId}]`
+      );
+    }
     const impact = blankToUndefined(params.impact) ?? metadata?.impact ?? 'low';
     // Required on the stored document, so a blank has to resolve to something
     // rather than to an omission: it feeds the queue's secondary sort rank.

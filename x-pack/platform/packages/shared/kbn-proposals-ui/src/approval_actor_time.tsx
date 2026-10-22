@@ -32,7 +32,7 @@ export interface ApprovalActorTimeProps {
    * Leads the caption with the outcome in sentence case ("Approved by …"), for a caption that
    * stands on its own rather than following other header text. Wins over `executed`.
    */
-  outcome?: 'approved' | 'declined' | 'executed';
+  outcome?: 'approved' | 'applied' | 'declined' | 'executed';
 }
 
 const UPDATE_INTERVAL_SECONDS = 1;
@@ -56,7 +56,7 @@ export const ApprovalActorTime = ({
       return (
         <FormattedMessage
           id="xpack.proposals.approvalActorTime.outcomeLabelWithoutTime"
-          defaultMessage="{outcome, select, approved {Approved} declined {Declined} other {Executed}} by {actorName}"
+          defaultMessage="{outcome, select, approved {Approved} applied {Applied} declined {Declined} other {Executed}} by {actorName}"
           values={{ outcome, actorName: <strong>{actorName}</strong> }}
         />
       );
@@ -88,7 +88,7 @@ export const ApprovalActorTime = ({
       }
       defaultMessage={
         outcome
-          ? '{outcome, select, approved {Approved} declined {Declined} other {Executed}} by {actorName} at {time}'
+          ? '{outcome, select, approved {Approved} applied {Applied} declined {Declined} other {Executed}} by {actorName} at {time}'
           : executed
           ? 'executed by {actorName} at {time}'
           : 'by {actorName} at {time}'
