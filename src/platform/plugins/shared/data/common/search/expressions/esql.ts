@@ -130,7 +130,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
       });
 
       // Used for debugging & inside automated tests to simulate a slow query
-      const delayFilter: Filter | undefined = window.ELASTIC_ESQL_DELAY_SECONDS
+      // `window` is not defined when the expression runs on the server
+      const delaySeconds =
+        typeof window !== 'undefined' ? window.ELASTIC_ESQL_DELAY_SECONDS : undefined;
+      const delayFilter: Filter | undefined = delaySeconds
         ? {
             meta: {},
             query: {
@@ -139,7 +142,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                   {
                     name: '*',
                     error_type: 'warning',
-                    stall_time_seconds: window.ELASTIC_ESQL_DELAY_SECONDS,
+                    stall_time_seconds: delaySeconds,
                   },
                 ],
               },
