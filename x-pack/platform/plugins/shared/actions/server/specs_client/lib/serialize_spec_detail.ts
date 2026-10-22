@@ -7,10 +7,12 @@
 
 import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
 import { z } from '@kbn/zod/v4';
+import type { ConnectorSpecDetail } from '../../../common/connector_spec';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
-import type { ServerConnectorSpecDetail } from '../types';
 import type { RegisteredSpec } from './get_registered_spec';
 import { serializeSpecActionSummary, serializeSpecSummary } from './serialize_spec_summary';
+
+export type ServerConnectorSpecDetail = ConnectorSpecDetail & { skill?: string };
 
 export const serializeSpecDetail = (
   registered: RegisteredSpec,

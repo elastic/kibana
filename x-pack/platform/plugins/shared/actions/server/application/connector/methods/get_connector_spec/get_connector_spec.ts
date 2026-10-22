@@ -40,5 +40,6 @@ export async function getConnectorSpecAsJsonSchema({
       ...(description !== undefined ? { description } : {}),
       scope,
     })),
+    detail,
   };
 }

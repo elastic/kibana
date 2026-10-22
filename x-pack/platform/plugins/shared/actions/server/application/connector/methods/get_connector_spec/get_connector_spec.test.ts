@@ -201,6 +201,22 @@ describe('getConnectorSpecAsJsonSchema', () => {
     expect(Array.isArray(result.actions)).toBe(true);
   });
 
+  it('returns the full connector spec detail with action input schemas', async () => {
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.alienvault-otx',
+      configurationUtilities,
+    });
+    expect(result.detail).toHaveProperty('id', '.alienvault-otx');
+    expect(result.detail).toHaveProperty('formSchema', result.schema);
+    expect(result.detail).toHaveProperty('authTypeIds');
+    expect(result.detail).toHaveProperty('availability');
+    expect(result.detail.actions.length).toBe(result.actions.length);
+    for (const action of result.detail.actions) {
+      expect(action).toHaveProperty('inputSchema');
+    }
+  });
+
   it('returns actions with name and isTool fields', async () => {
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),

@@ -11,10 +11,11 @@ import type { ConnectorSpecDetail } from '../../../../common/connector_spec';
 import { getConnectorSpecResponseBodySchemaV1 } from '../../../../common/routes/connector/response';
 import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../_mock_handler_arguments';
+import { actionsClientMock } from '../../../actions_client/actions_client.mock';
+import { actionsConfigMock } from '../../../actions_config.mock';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { getConnectorSpecRoute } from './get_spec';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
-import { specsClientMock } from '../../../specs_client/specs_client.mock';
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
@@ -35,7 +36,7 @@ const formSchema = {
 
 const inputSchema = { type: 'object', properties: {} };
 
-const clientResult: ConnectorSpecDetail = {
+const detail: ConnectorSpecDetail = {
   id: 'test-connector',
   displayName: 'Test Connector',
   description: 'A test connector',
@@ -64,6 +65,30 @@ const clientResult: ConnectorSpecDetail = {
     },
   ],
 };
+
+const getConnectorSpecResult = (overrides: Partial<ConnectorSpecDetail> = {}) => {
+  const merged: ConnectorSpecDetail = { ...detail, ...overrides };
+  return {
+    metadata: {
+      id: merged.id,
+      displayName: merged.displayName,
+      description: merged.description,
+      minimumLicense: merged.minimumLicense,
+      supportedFeatureIds: ['alerting' as const],
+    },
+    schema: merged.formSchema,
+    isTestable: merged.isTestable,
+    actions: merged.actions.map(({ name, isTool, description, scope }) => ({
+      name,
+      isTool,
+      description,
+      scope,
+    })),
+    detail: merged,
+  };
+};
+
+const configurationUtilities = actionsConfigMock.create();
 
 const responseBody = {
   metadata: {
@@ -102,7 +127,7 @@ describe('getConnectorSpecRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getConnectorSpecRoute(router, licenseState);
+    getConnectorSpecRoute(router, licenseState, configurationUtilities);
 
     expect(router.get).toHaveBeenCalledTimes(1);
     const [config] = router.get.mock.calls[0];
@@ -113,7 +138,7 @@ describe('getConnectorSpecRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getConnectorSpecRoute(router, licenseState);
+    getConnectorSpecRoute(router, licenseState, configurationUtilities);
 
     const [config] = router.get.mock.calls[0];
     expect(config.options?.access).toBe('internal');
@@ -123,24 +148,24 @@ describe('getConnectorSpecRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getConnectorSpecRoute(router, licenseState);
+    getConnectorSpecRoute(router, licenseState, configurationUtilities);
 
     const [config] = router.get.mock.calls[0];
     expect(config.security).toEqual(DEFAULT_ACTION_ROUTE_SECURITY);
   });
 
-  it('returns 200 with body from specsClient.get', async () => {
+  it('returns 200 with body from actionsClient.getConnectorSpec', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    const specsClient = specsClientMock.create();
-    specsClient.get.mockResolvedValue(clientResult);
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getConnectorSpec.mockResolvedValue(getConnectorSpecResult());
 
-    getConnectorSpecRoute(router, licenseState);
+    getConnectorSpecRoute(router, licenseState, configurationUtilities);
 
     const [, handler] = router.get.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
-      { specsClient },
+      { actionsClient },
       { params: { id: 'test-connector' } },
       ['ok', 'notFound']
     );
@@ -149,25 +174,25 @@ describe('getConnectorSpecRoute', () => {
 
     expect(result).toEqual({ body: responseBody });
     expect(res.ok).toHaveBeenCalled();
-    expect(specsClient.get).toHaveBeenCalledWith({ id: 'test-connector' });
+    expect(actionsClient.getConnectorSpec).toHaveBeenCalledWith({
+      id: 'test-connector',
+      configurationUtilities,
+    });
     expect(() => getConnectorSpecResponseBodySchemaV1.validate(responseBody)).not.toThrow();
   });
 
   it('maps isTestable false to is_testable false in the response body', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    const specsClient = specsClientMock.create();
-    specsClient.get.mockResolvedValue({
-      ...clientResult,
-      isTestable: false,
-    });
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getConnectorSpec.mockResolvedValue(getConnectorSpecResult({ isTestable: false }));
 
-    getConnectorSpecRoute(router, licenseState);
+    getConnectorSpecRoute(router, licenseState, configurationUtilities);
 
     const [, handler] = router.get.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
-      { specsClient },
+      { actionsClient },
       { params: { id: 'test-connector' } },
       ['ok', 'notFound']
     );
@@ -179,20 +204,20 @@ describe('getConnectorSpecRoute', () => {
     });
   });
 
-  it('propagates Boom notFound from specsClient.get (wrapped by handleLegacyErrors in production)', async () => {
+  it('propagates Boom notFound from actionsClient.getConnectorSpec (wrapped by handleLegacyErrors in production)', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    const specsClient = specsClientMock.create();
-    specsClient.get.mockRejectedValue(
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getConnectorSpec.mockRejectedValue(
       Boom.notFound('Spec for connector type "unknown-connector" not found.')
     );
 
-    getConnectorSpecRoute(router, licenseState);
+    getConnectorSpecRoute(router, licenseState, configurationUtilities);
 
     const [, handler] = router.get.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
-      { specsClient },
+      { actionsClient },
       { params: { id: 'unknown-connector' } },
       ['ok', 'customError']
     );
@@ -210,15 +235,15 @@ describe('getConnectorSpecRoute', () => {
   it('ensures the license allows getting connector spec', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    const specsClient = specsClientMock.create();
-    specsClient.get.mockResolvedValue(clientResult);
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getConnectorSpec.mockResolvedValue(getConnectorSpecResult());
 
-    getConnectorSpecRoute(router, licenseState);
+    getConnectorSpecRoute(router, licenseState, configurationUtilities);
 
     const [, handler] = router.get.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
-      { specsClient },
+      { actionsClient },
       { params: { id: 'test-connector' } },
       ['ok']
     );
@@ -236,7 +261,7 @@ describe('getConnectorSpecRoute', () => {
       throw new Error('License check failed');
     });
 
-    getConnectorSpecRoute(router, licenseState);
+    getConnectorSpecRoute(router, licenseState, configurationUtilities);
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -249,20 +274,20 @@ describe('getConnectorSpecRoute', () => {
     expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
   });
 
-  it('propagates serialization failure from specsClient.get', async () => {
+  it('propagates serialization failure from actionsClient.getConnectorSpec', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    const specsClient = specsClientMock.create();
-    specsClient.get.mockRejectedValue(
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getConnectorSpec.mockRejectedValue(
       new Error('Failed to serialize connector spec: Serialization error')
     );
 
-    getConnectorSpecRoute(router, licenseState);
+    getConnectorSpecRoute(router, licenseState, configurationUtilities);
 
     const [, handler] = router.get.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
-      { specsClient },
+      { actionsClient },
       { params: { id: 'test-connector' } },
       ['ok']
     );
@@ -276,7 +301,7 @@ describe('getConnectorSpecRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getConnectorSpecRoute(router, licenseState);
+    getConnectorSpecRoute(router, licenseState, configurationUtilities);
 
     const [config] = router.get.mock.calls[0];
 
@@ -289,7 +314,7 @@ describe('getConnectorSpecRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getConnectorSpecRoute(router, licenseState);
+    getConnectorSpecRoute(router, licenseState, configurationUtilities);
 
     const [config] = router.get.mock.calls[0];
 

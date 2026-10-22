@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ServerConnectorSpecDetail } from '../../../../../specs_client/types';
+import type { ServerConnectorSpecDetail } from '../../../../../specs_client/lib/serialize_spec_detail';
 import { getConnectorSpecResponseBodySchemaV1 } from '../../../../../../common/routes/connector/response';
 import { transformGetConnectorSpecResponse } from './v1';
 

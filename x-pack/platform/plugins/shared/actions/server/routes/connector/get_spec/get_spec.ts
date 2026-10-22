@@ -17,6 +17,7 @@ import {
 import type { ActionsRequestHandlerContext } from '../../../types';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../../../common';
 import type { ILicenseState } from '../../../lib';
+import type { ActionsConfigurationUtilities } from '../../../actions_config';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 import { transformGetConnectorSpecResponseV1 } from './transforms';
@@ -31,7 +32,8 @@ import { transformGetConnectorSpecResponseV1 } from './transforms';
  */
 export const getConnectorSpecRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  actionsConfigUtils: ActionsConfigurationUtilities
 ) => {
   router.get(
     {
@@ -64,11 +66,15 @@ export const getConnectorSpecRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const specsClient = (await context.actions).getSpecsClient();
+        const actionsClient = (await context.actions).getActionsClient();
         const { id }: GetConnectorSpecParamsV1 = req.params;
-        const specResult = await specsClient.get({ id });
-        const responseBody: GetConnectorSpecResponseV1 =
-          transformGetConnectorSpecResponseV1(specResult);
+        const specResult = await actionsClient.getConnectorSpec({
+          id,
+          configurationUtilities: actionsConfigUtils,
+        });
+        const responseBody: GetConnectorSpecResponseV1 = transformGetConnectorSpecResponseV1(
+          specResult.detail
+        );
         return res.ok({ body: responseBody });
       })
     )
