@@ -14,7 +14,8 @@ import { useWorkflowsApi } from '../../api/use_workflows_api';
 
 const MAX_RETRIES = 3;
 
-const isNotFoundError = (error: unknown): boolean =>
+/** Whether a `useTemplate` error means the slug doesn't exist in the catalog. */
+export const isTemplateNotFoundError = (error: unknown): boolean =>
   isHttpFetchError(error) && error.response?.status === 404;
 
 /**
@@ -29,6 +30,6 @@ export function useTemplate(slug: string | undefined) {
     queryFn: () => api.getTemplate(slug as string),
     enabled: Boolean(slug),
     // An unknown slug won't appear on retry, so fail fast instead of backing off.
-    retry: (failureCount, error) => !isNotFoundError(error) && failureCount < MAX_RETRIES,
+    retry: (failureCount, error) => !isTemplateNotFoundError(error) && failureCount < MAX_RETRIES,
   });
 }
