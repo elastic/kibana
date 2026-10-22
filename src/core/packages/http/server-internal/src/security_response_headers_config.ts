@@ -10,6 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PermissionsPolicyConfigType } from './permissions_policy';
+import { addReportToParameter } from './permissions_policy';
 
 export const securityResponseHeadersSchema = schema.object({
   strictTransportSecurity: schema.oneOf([schema.string(), schema.literal(null)], {
@@ -78,18 +79,21 @@ export function parseRawSecurityResponseHeadersConfig(
     securityResponseHeaders['Referrer-Policy'] = raw.referrerPolicy;
   }
 
-  const reportTo = rawPermissionsPolicyConfig.report_to.length
-    ? `;report-to=${rawPermissionsPolicyConfig.report_to}`
-    : '';
+  // Browsers read `report-to` as a single token, so only the first endpoint was ever used.
+  // Interpolating the whole list joined the names with commas, which split the parameter into
+  // extra members of the policy.
+  const [reportTo] = rawPermissionsPolicyConfig.report_to;
+  const withReportTo = (policy: string) =>
+    reportTo ? addReportToParameter(policy, reportTo) : policy;
 
   if (raw.permissionsPolicy) {
-    securityResponseHeaders['Permissions-Policy'] = `${raw.permissionsPolicy}${reportTo}`;
+    securityResponseHeaders['Permissions-Policy'] = withReportTo(raw.permissionsPolicy);
   }
 
   if (raw.permissionsPolicyReportOnly && reportTo) {
-    securityResponseHeaders[
-      'Permissions-Policy-Report-Only'
-    ] = `${raw.permissionsPolicyReportOnly}${reportTo}`;
+    securityResponseHeaders['Permissions-Policy-Report-Only'] = withReportTo(
+      raw.permissionsPolicyReportOnly
+    );
   }
 
   if (raw.crossOriginOpenerPolicy) {

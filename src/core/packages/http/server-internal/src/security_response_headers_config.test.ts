@@ -95,6 +95,26 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
         'display-capture=(self);report-to=violations-endpoint'
       );
     });
+
+    // `report-to` belongs to each directive. Appended once to the end, it only covered `web-share`,
+    // and browsers dropped violations of every other directive.
+    it('attaches report-to to every directive of the default policy', () => {
+      const config = schema.validate({});
+      const result = parse(config, { report_to: ['violations-endpoint'] });
+      expect(result.securityResponseHeaders['Permissions-Policy']).toEqual(
+        'camera=();report-to=violations-endpoint, display-capture=();report-to=violations-endpoint, fullscreen=(self);report-to=violations-endpoint, geolocation=();report-to=violations-endpoint, microphone=();report-to=violations-endpoint, web-share=();report-to=violations-endpoint'
+      );
+    });
+
+    it('uses only the first reporting endpoint', () => {
+      const config = schema.validate({ permissionsPolicy: 'camera=(), microphone=()' });
+      const result = parse(config, { report_to: ['first', 'second'] });
+      // The whole list used to be interpolated, which serialized as `report-to=first,second` and
+      // turned `second` into a member of the policy.
+      expect(result.securityResponseHeaders['Permissions-Policy']).toEqual(
+        'camera=();report-to=first, microphone=();report-to=first'
+      );
+    });
   });
 
   describe('permissionsPolicyReportOnly', () => {
@@ -103,6 +123,14 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
       const result = parse(config, { report_to: ['violations-endpoint'] });
       expect(result.securityResponseHeaders['Permissions-Policy-Report-Only']).toEqual(
         'display-capture=(self);report-to=violations-endpoint'
+      );
+    });
+
+    it('attaches report-to to every directive of the report-only policy', () => {
+      const config = schema.validate({ permissionsPolicyReportOnly: 'camera=(), microphone=()' });
+      const result = parse(config, { report_to: ['violations-endpoint'] });
+      expect(result.securityResponseHeaders['Permissions-Policy-Report-Only']).toEqual(
+        'camera=();report-to=violations-endpoint, microphone=();report-to=violations-endpoint'
       );
     });
 
