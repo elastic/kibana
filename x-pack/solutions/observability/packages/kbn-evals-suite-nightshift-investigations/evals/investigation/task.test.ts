@@ -20,7 +20,6 @@ const example = {
   input: { question: 'Investigate synthetic timeouts.' },
   metadata: { case_id: 'timeouts' },
 };
-const connector = { id: 'investigation-model' };
 
 const investigation = (overrides: Partial<Investigation> = {}): Investigation => ({
   id: 'investigation',
@@ -89,14 +88,13 @@ it('executes the manual investigation and reads what it recorded from the shared
     )
     .mockResolvedValueOnce(conversation);
 
-  const result = await runInvestigation(fetch, example, connector);
+  const result = await runInvestigation(fetch, example);
 
   expect(fetch).toHaveBeenNthCalledWith(1, '/internal/nightshift/investigations', {
     method: 'POST',
     body: JSON.stringify({
       subject: { type: 'manual' },
       message: example.input.question,
-      connector_id: connector.id,
     }),
   });
   expect(fetch).toHaveBeenNthCalledWith(
@@ -147,7 +145,7 @@ it('keeps multi-megabyte conversation evidence out of the persisted score output
     .mockResolvedValueOnce(investigation({ id: 'large-investigation' }))
     .mockResolvedValueOnce(conversation);
 
-  const output = await runInvestigation(fetch, example, connector);
+  const output = await runInvestigation(fetch, example);
 
   expect(output).not.toHaveProperty('conversation');
   expect(output).toMatchObject({
@@ -178,7 +176,7 @@ it('bounds an oversized report while retaining evidence identifiers', async () =
     )
     .mockResolvedValueOnce({ rounds: [{ trace_id: 'partial-trace', steps: [] }] });
 
-  const output = await runInvestigation(fetch, example, connector);
+  const output = await runInvestigation(fetch, example);
 
   expect(output).toMatchObject({
     investigation_id: 'large-report',
@@ -199,7 +197,7 @@ it('reports an investigation that finished without a conclusion, keeping its evi
     )
     .mockResolvedValueOnce({ rounds: [{ trace_id: 'partial-trace', steps: [] }] });
 
-  const output = await runInvestigation(fetch, example, connector);
+  const output = await runInvestigation(fetch, example);
 
   expect(output).toMatchObject({
     workflow_status: 'complete',
@@ -228,7 +226,7 @@ it('flags a finished investigation whose conversation never finished persisting'
       ],
     });
 
-  expect(await runInvestigation(fetch, example, connector)).toMatchObject({
+  expect(await runInvestigation(fetch, example)).toMatchObject({
     workflow_status: 'complete',
     execution_error: UNPERSISTED_CONVERSATION_ERROR,
     conversation_round_count: 1,
@@ -239,8 +237,7 @@ it('flags a finished investigation whose conversation never finished persisting'
 it('reports an investigation start failure as execution evidence', async () => {
   const output = await runInvestigation(
     jest.fn().mockRejectedValue(new Error('Service unavailable')),
-    example,
-    connector
+    example
   );
   expect(output.execution_error).toBe('Service unavailable');
   expect(output.investigation_id).toBeUndefined();
@@ -249,8 +246,7 @@ it('reports an investigation start failure as execution evidence', async () => {
 it('bounds a start failure even when no investigation was created', async () => {
   const output = await runInvestigation(
     jest.fn().mockRejectedValue(new Error('x'.repeat(6 * 1024 * 1024))),
-    example,
-    connector
+    example
   );
   expect(output.execution_error).toContain('[truncated]');
   expect(Buffer.byteLength(JSON.stringify(output))).toBeLessThan(1024 * 1024);
@@ -271,7 +267,7 @@ it('retains the latest report and conversation when a later poll fails', async (
     .mockRejectedValueOnce(new Error('Polling failed'))
     .mockResolvedValueOnce({ rounds: [{ trace_id: 'partial-trace', steps: [] }] });
 
-  expect(await runInvestigation(fetch, example, connector)).toMatchObject({
+  expect(await runInvestigation(fetch, example)).toMatchObject({
     execution_error: 'Polling failed',
     workflow_status: 'running',
     structured_report: { summary: 'Partial report' },
@@ -291,7 +287,7 @@ it('bounds polling and retains partial conversation evidence when an investigati
       .mockResolvedValueOnce({ investigation_id: 'slow' })
       .mockResolvedValueOnce(investigation({ id: 'slow', in_progress: true }))
       .mockResolvedValueOnce({ rounds: [{ trace_id: 'partial-trace', steps: [] }] });
-    expect(await runInvestigation(fetch, example, connector)).toMatchObject({
+    expect(await runInvestigation(fetch, example)).toMatchObject({
       investigation_id: 'slow',
       workflow_status: 'running',
       traceId: 'partial-trace',
@@ -313,11 +309,25 @@ it('reports an investigation that never appeared', async () => {
       .fn()
       .mockResolvedValueOnce({ investigation_id: 'missing' })
       .mockRejectedValue(notFound());
-    expect(await runInvestigation(fetch, example, connector)).toMatchObject({
+    expect(await runInvestigation(fetch, example)).toMatchObject({
       investigation_id: 'missing',
       execution_error: 'Investigation was not created within 30 minutes',
     });
   } finally {
     clock.mockRestore();
   }
+});
+
+it('starts the investigation on the production default when no model is given', async () => {
+  const fetch = jest.fn().mockRejectedValue(new Error('stop'));
+  await runInvestigation(fetch, example);
+  expect(JSON.parse(fetch.mock.calls[0][1].body)).not.toHaveProperty('connector_id');
+});
+
+it('sends the model override as connector_id', async () => {
+  const fetch = jest.fn().mockRejectedValue(new Error('stop'));
+  await runInvestigation(fetch, example, 'eis-anthropic-claude-5-5-opus');
+  expect(JSON.parse(fetch.mock.calls[0][1].body)).toMatchObject({
+    connector_id: 'eis-anthropic-claude-5-5-opus',
+  });
 });

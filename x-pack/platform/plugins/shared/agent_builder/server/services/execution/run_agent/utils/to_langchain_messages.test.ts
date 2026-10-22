@@ -787,6 +787,39 @@ describe('prepareMessages', () => {
       expect(content).toContain('attachment_id="a-1"');
     });
 
+    it('leaves attachment_context out when the conversation omits it', async () => {
+      const nextInput = makeRoundInput('here is a new attachment', [], {
+        attachment_context: sampleContext,
+      });
+
+      const result = await prepareMessages({
+        conversation: createConversation({ nextInput, omitAttachmentContext: true }),
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].content as string).toBe('here is a new attachment');
+    });
+
+    it('keeps the per-type instructions when the conversation omits attachment_context', async () => {
+      const nextInput = makeRoundInput('here is a new attachment', [], {
+        attachment_context: sampleContext,
+        attachment_refs: [{ attachment_id: 'a-1', version: 1, type: 'esql' }],
+      });
+
+      const result = await prepareMessages({
+        conversation: createConversation({
+          nextInput,
+          omitAttachmentContext: true,
+          attachmentTypes: [{ type: 'esql', description: 'An ES|QL query.' }],
+        }),
+      });
+
+      const content = result[0].content as string;
+      expect(content).not.toContain('attachment_id="a-1"');
+      expect(content).toContain('## ATTACHMENT TYPES');
+      expect(content).toContain('An ES|QL query.');
+    });
+
     it('renders attachment_context on a previous round message but not on the next-input message', async () => {
       const previousRounds = [
         createRound({

@@ -142,6 +142,8 @@ export const getInvestigationAgentType = ({
       },
     ],
     enable_elastic_capabilities: false,
+    // Only the sandbox and proposal tools (plus `set_conversation_metadata`, which records the verdict).
+    enable_internal_tools: false,
     connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
     ...(() => {
       // Decision trees are no longer a separate before-agent hook: they hydrate as a third

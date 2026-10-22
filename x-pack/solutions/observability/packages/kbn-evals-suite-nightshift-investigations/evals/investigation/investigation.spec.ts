@@ -27,12 +27,17 @@ import type { InvestigationTaskOutput } from './types';
 
 const suiteTags = [...tags.stateful.classic, ...tags.serverless.observability.complete];
 
+/** Optional model for the investigations; unset runs the production default. */
+const modelOverride = process.env.NIGHTSHIFT_INVESTIGATION_MODEL?.trim() || undefined;
+const availabilityPath = `/internal/nightshift/investigations/availability${
+  modelOverride ? `?connector_id=${encodeURIComponent(modelOverride)}` : ''
+}`;
+
 evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, () => {
   evaluate(
     'grades investigations with the RCA judges and persists complete agent traces',
     async ({
       executorClient,
-      connector,
       fetch,
       evalsClient,
       traceEsClient,
@@ -57,17 +62,9 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
           5 * 60_000
       );
       await expect
-        .poll(
-          async () =>
-            (
-              await fetch<{ available: boolean }>(
-                `/internal/nightshift/investigations/availability?connector_id=${encodeURIComponent(
-                  connector.id
-                )}`
-              )
-            ).available,
-          { timeout: 60_000 }
-        )
+        .poll(async () => (await fetch<{ available: boolean }>(availabilityPath)).available, {
+          timeout: 60_000,
+        })
         .toBe(true);
       // Availability can turn true while Kibana is still installing the managed workflow after a
       // cold start.
@@ -90,8 +87,8 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
           datasets: [dataset],
           trustUpstreamDataset: Boolean(process.env.NIGHTSHIFT_DATASET_NAME),
           concurrency,
-          metadata: { concurrency },
-          task: (example) => runInvestigation(fetch, example, connector),
+          metadata: { concurrency, investigation_model: modelOverride ?? 'production default' },
+          task: (example) => runInvestigation(fetch, example, modelOverride),
         },
         judges
       );

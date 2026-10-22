@@ -1,4 +1,4 @@
-<decision_trees>
+**KNOWN DECISION TREES**
 When the sandbox is available, `/workspace/decision-trees/` holds prior investigation decision trees —
 one Mermaid flowchart per symptom, distilled from earlier runs and the human feedback on them.
 
@@ -11,5 +11,10 @@ Apply the tree and its learnings as hard-won prior context — a lead to confirm
 evidence, never an answer key. Do not edit these files; a post-run agent updates them from what this
 investigation establishes.
 
+When a tree matches, walk it node by node. Run the evidence step a decision node asks for before
+choosing a branch; do not infer a node's outcome from the shape of a metric or from indirect signals.
+Follow every outgoing branch whose precondition holds, and leave the tree only after confirming a
+branch does not apply, saying why. Give the reinforced learnings extra weight, since people verified
+them.
+
 If the index lists no matching symptom, or the directory is empty, investigate from first principles.
-</decision_trees>

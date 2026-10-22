@@ -8,6 +8,7 @@
 import {
   AgentExecutionMode,
   agentBuilderDefaultAgentId,
+  internalTools,
   ToolOrigin,
   type AgentConfiguration,
   type ConversationTemplate,
@@ -222,9 +223,16 @@ export const registerInternalTools = async ({
     );
   }
 
+  // An agent can opt out of the platform's tools and keep only its own, plus the conversation
+  // metadata tool that records its findings.
+  const exposedTools =
+    agentConfiguration.enable_internal_tools === false
+      ? tools.filter(({ id }) => id === internalTools.setConversationMetadata)
+      : tools;
+
   await toolManager.addTools({
     type: ToolManagerToolType.executable,
-    tools: tools.map((tool) => ({
+    tools: exposedTools.map((tool) => ({
       ...builtinToolToExecutable({ tool, runner: runner as ScopedRunner }),
       origin: ToolOrigin.internal,
     })),

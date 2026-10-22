@@ -107,6 +107,7 @@ const getAgentSystemMessage = async ({
   processedConversation,
   conversationTemplates,
   conversationMetadataWritable,
+  internalToolsEnabled = true,
 }: ResearchAgentPromptParams): Promise<string> => {
   const conversationTemplateId = processedConversation.template_id;
   const conversationMetadata = processedConversation.metadata as
@@ -119,6 +120,16 @@ const getAgentSystemMessage = async ({
     conversationTemplates,
     conversationMetadataWritable
   );
+
+  // An agent without the platform tools gets none of Agent Builder's guidance about them: its own
+  // instructions are the whole prompt, plus the metadata fields it can still write.
+  if (!internalToolsEnabled) {
+    return cleanPrompt(`${customInstructions}
+
+${conversationMetadataSection}
+
+${structuredOutputDescription(outputSchema)}`);
+  }
 
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 

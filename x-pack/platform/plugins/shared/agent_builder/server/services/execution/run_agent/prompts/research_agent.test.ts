@@ -109,6 +109,31 @@ describe('getResearchAgentPrompt', () => {
     );
   });
 
+  it('uses only the agent instructions and metadata fields when internal tools are disabled', async () => {
+    const system = asText(
+      (
+        await getResearchAgentPrompt(
+          makeParams({
+            internalToolsEnabled: false,
+            configuration: { instructions: 'You are the Investigation Agent.', aiIndices: [] },
+            experimentalFeatures: { aiIndices: true, bash: true, skills: true },
+          })
+        )
+      )[0]
+    );
+
+    expect(system).toBe('You are the Investigation Agent.');
+    for (const platformSection of [
+      'TRUST BOUNDARIES',
+      'TOOL SELECTION',
+      'attachment_read',
+      '## DEPLOYMENT',
+      'CUSTOM RENDERING',
+    ]) {
+      expect(system).not.toContain(platformSection);
+    }
+  });
+
   it('renders the deployment section as the last section of the system message', async () => {
     const system = asText((await getResearchAgentPrompt(makeParams()))[0]);
 

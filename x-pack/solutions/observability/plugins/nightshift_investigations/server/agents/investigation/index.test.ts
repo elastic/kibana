@@ -64,6 +64,7 @@ describe('Nightshift investigation agent type', () => {
 
     expect(base).toMatchObject({
       enable_elastic_capabilities: false,
+      enable_internal_tools: false,
       skill_ids: [],
       workflow_ids: ['system-nightshift-sandbox-materialize-workspace'],
       post_execution_workflow_ids: ['system-nightshift-agent-optimize'],

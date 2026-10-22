@@ -217,6 +217,24 @@ describe('mergeAgentConfiguration', () => {
     });
   });
 
+  describe('enable_internal_tools (base floor)', () => {
+    it('uses the base value and ignores the delta', () => {
+      expect(
+        mergeAgentConfiguration(
+          { enable_internal_tools: false },
+          { tools: [], enable_internal_tools: true }
+        ).enable_internal_tools
+      ).toBe(false);
+    });
+
+    it('leaves the delta value when the base is silent', () => {
+      expect(
+        mergeAgentConfiguration({ instructions: 'x' }, { tools: [], enable_internal_tools: false })
+          .enable_internal_tools
+      ).toBe(false);
+    });
+  });
+
   describe('enable_elastic_capabilities (scalar override)', () => {
     it('uses the base value when the delta leaves it unset', () => {
       expect(
