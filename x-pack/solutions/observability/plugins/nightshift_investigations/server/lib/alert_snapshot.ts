@@ -14,10 +14,6 @@ import {
   type SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
-import {
-  OBSERVABILITY_ALERTING_ALERTS_PATH,
-  OBSERVABILITY_ALERTING_BASE_PATH,
-} from '@kbn/deeplinks-observability';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -51,8 +47,6 @@ import {
 } from '../../common';
 
 export const ALERTING_V2_RULE_SO_TYPE = 'alerting_rule';
-
-const OBSERVABILITY_ALERT_DETAILS_PATH = '/app/observability/alerts';
 
 const INVESTIGABLE_RULE_TYPE_IDS = [
   ...OBSERVABILITY_RULE_TYPE_IDS,
@@ -95,33 +89,25 @@ export interface EpisodeLookup {
   esClient: ElasticsearchClient;
   getSoClient: () => SavedObjectsClientContract;
   spaceId: string;
-  basePath: string;
 }
 
 const UNKNOWN = 'unknown';
 
-const buildClassicSnapshot = (alert: Record<string, unknown>, basePath: string): AlertSnapshot => {
-  const snapshot =
-    parseAlertSnapshot(alert) ??
-    alertSnapshotSchema.parse({
-      id: alert[ALERT_UUID],
-      rule_id: alert[ALERT_RULE_UUID] ?? UNKNOWN,
-      rule_name: alert[ALERT_RULE_NAME] ?? UNKNOWN,
-      rule_type_id: alert[ALERT_RULE_TYPE_ID] ?? UNKNOWN,
-      rule_category: alert[ALERT_RULE_CATEGORY] ?? UNKNOWN,
-      status: alert[ALERT_STATUS] ?? UNKNOWN,
-      start: alert[ALERT_START] ?? alert[TIMESTAMP],
-    });
-  return {
-    ...snapshot,
-    url: `${basePath}${OBSERVABILITY_ALERT_DETAILS_PATH}/${encodeURIComponent(snapshot.id)}`,
-  };
-};
+const buildClassicSnapshot = (alert: Record<string, unknown>): AlertSnapshot =>
+  parseAlertSnapshot(alert) ??
+  alertSnapshotSchema.parse({
+    id: alert[ALERT_UUID],
+    rule_id: alert[ALERT_RULE_UUID] ?? UNKNOWN,
+    rule_name: alert[ALERT_RULE_NAME] ?? UNKNOWN,
+    rule_type_id: alert[ALERT_RULE_TYPE_ID] ?? UNKNOWN,
+    rule_category: alert[ALERT_RULE_CATEGORY] ?? UNKNOWN,
+    status: alert[ALERT_STATUS] ?? UNKNOWN,
+    start: alert[ALERT_START] ?? alert[TIMESTAMP],
+  });
 
 const fetchClassicSnapshots = async (
   alertsClient: AlertsClient,
-  alertIds: string[],
-  basePath: string
+  alertIds: string[]
 ): Promise<Map<string, AlertSnapshot>> => {
   const indices = (await alertsClient.getAuthorizedAlertsIndices(INVESTIGABLE_RULE_TYPE_IDS)) ?? [];
   if (!indices.length) {
@@ -137,7 +123,7 @@ const fetchClassicSnapshots = async (
   });
   return new Map(
     hits.flatMap(({ _source: alert }) =>
-      alert ? [[String(alert[ALERT_UUID]), buildClassicSnapshot({ ...alert }, basePath)]] : []
+      alert ? [[String(alert[ALERT_UUID]), buildClassicSnapshot({ ...alert })]] : []
     )
   );
 };
@@ -173,7 +159,7 @@ const isEventsUnavailable = (error: unknown): boolean =>
     (error.statusCode === 400 && /unknown index/i.test(error.message)));
 
 const fetchV2Snapshots = async (
-  { esClient, getSoClient, spaceId, basePath }: EpisodeLookup,
+  { esClient, getSoClient, spaceId }: EpisodeLookup,
   episodeIds: string[]
 ): Promise<Map<string, V2AlertSnapshot>> => {
   const episodeIdValues = episodeIds.map((episodeId) => esql.str(episodeId));
@@ -224,9 +210,6 @@ const fetchV2Snapshots = async (
         data: v2AlertSnapshotSchema.shape.data
           .catch(undefined)
           .parse(typeof dataJson === 'string' ? JSON.parse(dataJson) : undefined),
-        url: `${basePath}${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_ALERTS_PATH}/${encodeURIComponent(
-          String(id)
-        )}`,
       });
       return [snapshot.id, snapshot];
     })
@@ -242,7 +225,7 @@ export const fetchInvestigationAlertSnapshots = async ({
   alertIds: string[];
 }): Promise<InvestigationAlertSnapshot[]> => {
   const ids = [...new Set(alertIds)];
-  const classic = await fetchClassicSnapshots(alertsClient, ids, lookup.basePath);
+  const classic = await fetchClassicSnapshots(alertsClient, ids);
   const unresolved = ids.filter((id) => !classic.has(id));
   const universal = unresolved.length
     ? await fetchV2Snapshots(lookup, unresolved)

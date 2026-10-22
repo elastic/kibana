@@ -36,7 +36,7 @@ const createDefinition = (start: jest.Mock, soClient = savedObjectsClientMock.cr
     .mockReturnValue({ start }) as unknown as GetInvestigationsClient;
   const getAutomationsSoClient = jest.fn().mockReturnValue(soClient);
   const getAlertsClient = jest.fn().mockResolvedValue({});
-  const getEpisodeLookup = jest.fn().mockReturnValue({ spaceId: 'test-space', basePath: '' });
+  const getEpisodeLookup = jest.fn().mockReturnValue({ spaceId: 'test-space' });
   return {
     getAutomationsSoClient,
     getAlertsClient,

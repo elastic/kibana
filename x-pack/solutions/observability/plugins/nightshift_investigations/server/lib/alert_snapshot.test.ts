@@ -94,7 +94,6 @@ describe('fetchInvestigationAlertSnapshots', () => {
     bulkGet,
     getSoClient: jest.fn().mockReturnValue({ bulkGet }),
     spaceId: 'default',
-    basePath: '/base',
   });
 
   const run = (
@@ -108,12 +107,12 @@ describe('fetchInvestigationAlertSnapshots', () => {
       ...lookup,
     } as never);
 
-  it('loads classic alerts in one query and links to the alert details page', async () => {
+  it('loads classic alerts in one query', async () => {
     const alertsClient = makeAlertsClient();
     const lookup = makeLookup();
 
     await expect(run(alertsClient, lookup, ['alert-1', 'alert-1'])).resolves.toEqual([
-      expect.objectContaining({ id: 'alert-1', url: '/base/app/observability/alerts/alert-1' }),
+      expect.objectContaining({ id: 'alert-1' }),
     ]);
     expect(alertsClient.find).toHaveBeenCalledTimes(1);
     expect(lookup.esClient.esql.query).not.toHaveBeenCalled();
@@ -144,7 +143,6 @@ describe('fetchInvestigationAlertSnapshots', () => {
         id: 'episode-1',
         rule_name: 'V2 rule',
         data: { 'host.name': 'h1' },
-        url: '/base/app/observability/alerting/alerts/episode-1',
       }),
       expect.objectContaining({ id: 'alert-1' }),
     ]);

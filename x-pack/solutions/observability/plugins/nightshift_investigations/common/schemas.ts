@@ -180,7 +180,6 @@ export const v2AlertSnapshotSchema = z.object({
   id: z.string().min(1).max(500),
   rule_id: z.string().min(1).max(500),
   rule_name: z.string().min(1).max(500).optional(),
-  url: z.string().max(2000).optional(),
   group_hash: z.string().min(1).max(500),
   /** `episode.status` */
   status: z.string().min(1).max(100),

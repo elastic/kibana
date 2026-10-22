@@ -30,7 +30,7 @@ const getAlertsClient = jest.fn().mockResolvedValue({
   find: jest.fn().mockResolvedValue({ hits: { hits: [{ _source: alert }] } }),
 });
 
-const getEpisodeLookup = jest.fn().mockReturnValue({ basePath: '' });
+const getEpisodeLookup = jest.fn().mockReturnValue({});
 
 beforeEach(() => jest.clearAllMocks());
 
