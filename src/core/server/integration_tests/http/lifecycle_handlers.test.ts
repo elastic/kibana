@@ -738,7 +738,7 @@ describe('core lifecycle handlers with no strict client version check', () => {
 describe('Permissions-Policy header', () => {
   const testRoute = '/permissions_policy/test/route';
   const defaultPolicy =
-    'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()';
+    'camera=(), display-capture=(), fullscreen=(self "https://play.vidyard.com"), geolocation=(self), microphone=(), web-share=()';
 
   let server: HttpService;
   let innerServer: HttpServerSetup['server'];
@@ -780,7 +780,7 @@ describe('Permissions-Policy header', () => {
     });
     const { header } = await supertest(innerServer.listener).get(testRoute).expect(200);
     expect(header['permissions-policy']).toEqual(
-      'camera=(self "https://example.com"), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()'
+      'camera=(self "https://example.com"), display-capture=(), fullscreen=(self "https://play.vidyard.com"), geolocation=(self), microphone=(), web-share=()'
     );
   });
 

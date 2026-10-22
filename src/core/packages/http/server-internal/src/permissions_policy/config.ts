@@ -36,6 +36,10 @@ const validateDirectiveValue = (value: string) => {
   if (ILLEGAL_CHARACTERS.test(value)) {
     return `"${value}" cannot contain quotes, parentheses, commas, semicolons, or whitespace`;
   }
+  // URL parsing decodes a percent-encoded host, so the value would no longer mean what it says.
+  if (value.includes('%')) {
+    return `"${value}" cannot be percent-encoded. Write the origin as plain text, such as https://example.com`;
+  }
   if (BARE_TOKENS.includes(value)) {
     return undefined;
   }
@@ -60,6 +64,11 @@ const validateDirectiveValue = (value: string) => {
   }
   if (url.pathname !== '/' || url.search || url.hash) {
     return `"${value}" must be an origin without a path, query, or fragment`;
+  }
+  // The parsed origin is what gets serialized, and parsing can turn harmless-looking input into
+  // characters that end the quoted string: IDNA maps a fullwidth quote (U+FF02) to `"`, for example.
+  if (ILLEGAL_CHARACTERS.test(url.origin)) {
+    return `"${value}" becomes "${url.origin}" once parsed, which contains quotes, parentheses, commas, semicolons, or whitespace`;
   }
   return undefined;
 };

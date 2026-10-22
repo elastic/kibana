@@ -92,6 +92,32 @@ describe('permissionsPolicyConfig', () => {
         it('rejects an empty value', () => {
           expect(() => validate({ [setting]: [''] })).toThrow(/an empty value is not allowed/);
         });
+
+        // URL parsing decodes a percent-encoded host, so `%22` would become a quote that ends the
+        // serialized string and injects `camera=*` as a policy member of its own.
+        it.each([
+          ['an encoded injection', 'https://a%22%29%2Ccamera=*%2Cx=%28%22b.com'],
+          ['an encoded quote', 'https://a%22b.com'],
+          ['a harmless encoding', 'https://exa%6Dple.com'],
+        ])('rejects a percent-encoded origin: %s', (_, value) => {
+          expect(() => validate({ [setting]: [value] })).toThrow(/cannot be percent-encoded/);
+        });
+
+        // IDNA maps fullwidth punctuation to ASCII, so this injects without any `%`. Only checking
+        // the parsed origin catches it.
+        it('rejects an origin that parses into characters that end the quoted string', () => {
+          expect(() =>
+            validate({
+              [setting]: ['https://a\uFF02\uFF09\uFF0Ccamera=*\uFF0Cx=\uFF08\uFF02b.com'],
+            })
+          ).toThrow(/once parsed, which contains quotes/);
+        });
+
+        it('accepts an internationalized domain name, which parses to punycode', () => {
+          expect(validate({ [setting]: ['https://b\u00FCcher.example'] })[setting]).toEqual([
+            'https://b\u00FCcher.example',
+          ]);
+        });
       });
     }
 

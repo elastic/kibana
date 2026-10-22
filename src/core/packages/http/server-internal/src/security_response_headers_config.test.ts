@@ -15,7 +15,7 @@ import {
 import { permissionsPolicyConfig } from './permissions_policy';
 
 const DEFAULT_POLICY =
-  'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()';
+  'camera=(), display-capture=(), fullscreen=(self "https://play.vidyard.com"), geolocation=(self), microphone=(), web-share=()';
 
 const permissionsPolicy = (overrides: Record<string, unknown> = {}) =>
   permissionsPolicyConfig.schema.validate(overrides);
@@ -28,7 +28,7 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
     expect(result.securityResponseHeaders).toMatchInlineSnapshot(`
       Object {
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Permissions-Policy": "camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()",
+        "Permissions-Policy": "camera=(), display-capture=(), fullscreen=(self \\"https://play.vidyard.com\\"), geolocation=(self), microphone=(), web-share=()",
         "Referrer-Policy": "strict-origin-when-cross-origin",
         "X-Content-Type-Options": "nosniff",
       }
@@ -121,7 +121,7 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
       const config = schema.validate({});
       const result = parse(config, permissionsPolicy({ camera: ['self', 'https://example.com'] }));
       expect(result.securityResponseHeaders['Permissions-Policy']).toEqual(
-        'camera=(self "https://example.com"), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()'
+        'camera=(self "https://example.com"), display-capture=(), fullscreen=(self "https://play.vidyard.com"), geolocation=(self), microphone=(), web-share=()'
       );
     });
 
@@ -129,7 +129,7 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
       const config = schema.validate({});
       const result = parse(config, permissionsPolicy({ report_to: ['violations-endpoint'] }));
       expect(result.securityResponseHeaders['Permissions-Policy']).toEqual(
-        'camera=();report-to=violations-endpoint, display-capture=();report-to=violations-endpoint, fullscreen=(self);report-to=violations-endpoint, geolocation=();report-to=violations-endpoint, microphone=();report-to=violations-endpoint, web-share=();report-to=violations-endpoint'
+        'camera=();report-to=violations-endpoint, display-capture=();report-to=violations-endpoint, fullscreen=(self "https://play.vidyard.com");report-to=violations-endpoint, geolocation=(self);report-to=violations-endpoint, microphone=();report-to=violations-endpoint, web-share=();report-to=violations-endpoint'
       );
     });
 

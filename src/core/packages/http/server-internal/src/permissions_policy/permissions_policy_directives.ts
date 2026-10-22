@@ -19,14 +19,15 @@ export type PermissionsPolicyDirectiveName =
   | 'web-share';
 
 /**
- * The default directive rules that are always applied. Insertion order is the serialization order,
- * and reproduces the policy Kibana has sent since 8.x.
+ * The default directive rules that are always applied. Insertion order is the serialization order.
  */
 export const defaultRules: Record<PermissionsPolicyDirectiveName, string[]> = {
   camera: [],
   'display-capture': [],
-  fullscreen: ['self'],
-  geolocation: [],
+  // Security Solution embeds Vidyard videos, whose fullscreen toggle needs the origin allowed here.
+  fullscreen: ['self', 'https://play.vidyard.com'],
+  // Maps' "Browser location" starting view and the Canvas `location()` function both ask for it.
+  geolocation: ['self'],
   microphone: [],
   'web-share': [],
 };
@@ -58,7 +59,8 @@ const normalizeDirectiveValue = (value: string) => {
   if (value.startsWith('"') && value.endsWith('"')) {
     return value;
   }
-  // The parsed origin is ASCII (an IDN host becomes punycode), so it is always a valid header value.
+  // Validation rejects any value whose parsed origin contains a character that would end the
+  // quoted string, so the origin can be quoted as-is. An IDN host becomes punycode.
   return `"${new URL(value).origin}"`;
 };
 
