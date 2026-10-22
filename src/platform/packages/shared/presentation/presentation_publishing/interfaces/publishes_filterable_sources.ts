@@ -12,6 +12,8 @@ import type { PublishingSubject } from '../publishing_subject';
 
 /**
  * This API publishes the sources (data views or ES|QL datasets) that its filters and queries apply to.
+ * A container publishes the union of its children's `dataViews$` and `filterableSources$`, so filter UI
+ * reads this list only. Code that needs a real `DataView` reads `dataViews$` only.
  */
 export interface PublishesFilterableSources {
   filterableSources$: PublishingSubject<FilterableSource[] | undefined>;

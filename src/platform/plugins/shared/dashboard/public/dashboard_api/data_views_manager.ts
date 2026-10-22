@@ -30,22 +30,7 @@ export function initializeDataViewsManager(
 
   const filterableSources$ = new BehaviorSubject<FilterableSource[] | undefined>([]);
 
-  const dataViewsSubscription = combineCompatibleChildrenApis<PublishesDataViews, DataView[]>(
-    { children$ },
-    'dataViews$',
-    apiPublishesDataViews,
-    []
-  )
-    .pipe(
-      switchMap(async (childDataViews) => {
-        return uniqBy(childDataViews, 'id');
-      })
-    )
-    .subscribe((nextDataViews) => {
-      dataViews$.next(nextDataViews);
-    });
-
-  const filterableSourcesSubscription = combineLatest([
+  const subscription = combineLatest([
     combineCompatibleChildrenApis<PublishesDataViews, DataView[]>(
       { children$ },
       'dataViews$',
@@ -58,9 +43,17 @@ export function initializeDataViewsManager(
       apiPublishesFilterableSources,
       []
     ),
-  ]).subscribe(([childDataViews, childSources]) => {
-    filterableSources$.next(uniqBy<FilterableSource>([...childDataViews, ...childSources], 'id'));
-  });
+  ])
+    .pipe(
+      switchMap(async ([childDataViews, childSources]) => ({
+        dataViews: uniqBy(childDataViews, 'id'),
+        filterableSources: uniqBy<FilterableSource>([...childDataViews, ...childSources], 'id'),
+      }))
+    )
+    .subscribe(({ dataViews, filterableSources }) => {
+      dataViews$.next(dataViews);
+      filterableSources$.next(filterableSources);
+    });
 
   return {
     api: {
@@ -68,8 +61,7 @@ export function initializeDataViewsManager(
       filterableSources$,
     },
     cleanup: () => {
-      dataViewsSubscription.unsubscribe();
-      filterableSourcesSubscription.unsubscribe();
+      subscription.unsubscribe();
     },
   };
 }
