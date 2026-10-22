@@ -105,7 +105,8 @@ const actionPolicyChangedEventSchema: EventTypeOpts<ActionPolicyChangedEbtData>[
   snoozed: {
     type: 'boolean',
     _meta: {
-      description: 'Whether the action policy has a snooze set.',
+      description:
+        'Whether the action policy was snoozed at the time of the operation. An expired snooze is not reported as snoozed.',
       optional: false,
     },
   },
@@ -140,7 +141,15 @@ const buildActionPolicyFields = (
   policy: ActionPolicyResponse,
   spaceId: string
 ): Omit<ActionPolicyChangedEbtData, 'origin'> => {
-  const { id, created_at: createdAt, enabled, destinations, grouping, throttle } = policy;
+  const {
+    id,
+    created_at: createdAt,
+    enabled,
+    destinations,
+    grouping,
+    throttle,
+    snoozed_until: snoozedUntil,
+  } = policy;
 
   return {
     action_policy_id: id,
@@ -151,7 +160,7 @@ const buildActionPolicyFields = (
     matcher_type: getMatcherType(policy),
     ...(grouping ? { grouping_mode: grouping.mode } : {}),
     ...(throttle ? { throttle_strategy: throttle.strategy } : {}),
-    snoozed: Boolean(policy.snoozed_until),
+    snoozed: snoozedUntil != null && new Date(snoozedUntil).getTime() > Date.now(),
   };
 };
 

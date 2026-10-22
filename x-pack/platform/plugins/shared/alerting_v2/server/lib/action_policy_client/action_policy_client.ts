@@ -212,7 +212,7 @@ export class ActionPolicyClient {
   /**
    * Reports a change for policies written by a bulk operation. The policies are read back with
    * their stored state, and a failed read is logged rather than thrown because the write has
-   * already happened.
+   * already happened. Callers do not await it, so the read does not delay the bulk response.
    */
   private async reportBulkActionPolicyChange(
     operation: ActionPolicyOperation,
@@ -617,7 +617,7 @@ export class ActionPolicyClient {
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
     await this.licenseService.assertActionPoliciesLicense();
     const { response, succeededIds } = await this.executeBulkUpdate(ids, { enabled: true });
-    await this.reportBulkActionPolicyChange('enabled', succeededIds);
+    void this.reportBulkActionPolicyChange('enabled', succeededIds);
     return response;
   }
 
@@ -625,7 +625,7 @@ export class ActionPolicyClient {
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
     const { response, succeededIds } = await this.executeBulkUpdate(ids, { enabled: false });
-    await this.reportBulkActionPolicyChange('disabled', succeededIds);
+    void this.reportBulkActionPolicyChange('disabled', succeededIds);
     return response;
   }
 

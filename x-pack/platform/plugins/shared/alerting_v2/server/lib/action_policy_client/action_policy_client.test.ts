@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { setImmediate as realSetImmediate } from 'timers';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
@@ -3817,6 +3818,9 @@ describe('ActionPolicyClient', () => {
     });
 
     describe('bulk operations', () => {
+      /* Bulk enable and disable report without awaiting the read-back; the global timers are faked. */
+      const flushPromises = () => new Promise<void>((resolve) => realSetImmediate(resolve));
+
       const bulkUpdateResult = (id: string) => ({
         id,
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
@@ -3844,6 +3848,7 @@ describe('ActionPolicyClient', () => {
         });
 
         await client.bulkEnableActionPolicies({ ids: ['policy-1', 'policy-2', 'policy-3'] });
+        await flushPromises();
 
         expect(mockSavedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
         expect(mockSavedObjectsClient.bulkGet.mock.calls[0][0]).toEqual([
@@ -3872,11 +3877,41 @@ describe('ActionPolicyClient', () => {
         });
 
         await client.bulkDisableActionPolicies({ ids: ['policy-1'] });
+        await flushPromises();
 
         expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
         expect(ebtService.reportEvent).toHaveBeenCalledWith(
           'alerting_v2_action_policy_disabled',
           reportedPayload('policy-1', { enabled: false })
+        );
+      });
+
+      it('returns the bulk result before the follow-up read resolves', async () => {
+        let resolveRead: (value: {
+          saved_objects: Array<ReturnType<typeof storedPolicy>>;
+        }) => void = () => {};
+        mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+          saved_objects: [bulkUpdateResult('policy-1')],
+        });
+        mockSavedObjectsClient.bulkGet.mockReturnValueOnce(
+          new Promise((resolve) => {
+            resolveRead = resolve;
+          })
+        );
+
+        await expect(client.bulkEnableActionPolicies({ ids: ['policy-1'] })).resolves.toEqual({
+          affected_count: 1,
+          errors: [],
+        });
+        expect(ebtService.reportEvent).not.toHaveBeenCalled();
+
+        resolveRead({ saved_objects: [storedPolicy('policy-1')] });
+        await flushPromises();
+
+        expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
+        expect(ebtService.reportEvent).toHaveBeenCalledWith(
+          'alerting_v2_action_policy_enabled',
+          reportedPayload('policy-1')
         );
       });
 
@@ -3901,6 +3936,7 @@ describe('ActionPolicyClient', () => {
           affected_count: 1,
           errors: [],
         });
+        await flushPromises();
 
         expect(ebtService.reportEvent).not.toHaveBeenCalled();
         expect(mockLogger.warn).toHaveBeenCalledWith(

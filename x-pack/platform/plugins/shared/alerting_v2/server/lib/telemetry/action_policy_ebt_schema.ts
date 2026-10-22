@@ -92,7 +92,11 @@ export const actionPolicyChangedTelemetryDataSchema = lazySchema(() =>
       .describe(
         'The throttle strategy the policy sets. Absent when the policy sets no throttle, in which case the strategy defaults to `on_status_change` for `per_alert` grouping and `time_interval` otherwise.'
       ),
-    snoozed: z.boolean().describe('Whether the action policy has a snooze set.'),
+    snoozed: z
+      .boolean()
+      .describe(
+        'Whether the action policy was snoozed at the time of the operation. An expired snooze is not reported as snoozed.'
+      ),
     origin: ruleChangedEventOriginSchema.describe('Where the change came from.'),
   })
 );

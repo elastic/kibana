@@ -149,10 +149,27 @@ describe('buildActionPolicyChangedEventData', () => {
     ).not.toHaveProperty('throttle_strategy');
   });
 
-  it('reports snoozed when snoozed_until is present', () => {
-    const snoozed = createActionPolicyResponse({ snoozed_until: '2030-01-01T00:00:00.000Z' });
+  describe('snoozed', () => {
+    beforeAll(() => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-06-01T00:00:00.000Z'));
+    });
 
-    expect(buildActionPolicyChangedEventData(snoozed, apiUserOrigin, SPACE_ID).snoozed).toBe(true);
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
+    it.each<[string, ActionPolicyResponse['snoozed_until'], boolean]>([
+      ['is true when snoozed_until is in the future', '2026-06-01T00:00:00.001Z', true],
+      ['is false when snoozed_until has expired', '2026-05-31T23:59:59.999Z', false],
+      ['is false when snoozed_until is now', '2026-06-01T00:00:00.000Z', false],
+      ['is false when snoozed_until is absent', undefined, false],
+    ])('%s', (_description, snoozedUntil, expected) => {
+      const policy = createActionPolicyResponse({ snoozed_until: snoozedUntil });
+
+      expect(buildActionPolicyChangedEventData(policy, apiUserOrigin, SPACE_ID).snoozed).toBe(
+        expected
+      );
+    });
   });
 
   it('counts the destinations', () => {
