@@ -10,7 +10,8 @@
     "lever_map.ts",
     "mem_summary.ts",
     "parity.ts",
-    "../../x-pack/platform/plugins/private/workload_isolation_research/server/capability_kit/worker_core/reconstruct_config.node_test.ts"
+    "../../x-pack/platform/plugins/private/workload_isolation_research/server/capability_kit/worker_core/reconstruct_config.node_test.ts",
+    "../../x-pack/platform/plugins/private/workload_isolation_research/server/t7w/resume_schedule.node_test.ts"
   ],
   "exclude": ["target/**/*"]
 }
