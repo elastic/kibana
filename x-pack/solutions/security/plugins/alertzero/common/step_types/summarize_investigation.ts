@@ -24,7 +24,7 @@ const inputSchema = z.object({
 const outputSchema = z.object({
   skipped: z.boolean().describe('True when no summary was written.'),
   reason: z
-    .enum(['template', 'empty', 'incomplete'])
+    .enum(['template', 'empty', 'no_connector', 'incomplete'])
     .optional()
     .describe('Why the step wrote nothing.'),
   summary: z.string().optional().describe('Reading written to metadata.summary.'),
@@ -42,7 +42,7 @@ export const summarizeInvestigationStepCommonDefinition: CommonStepDefinition<
     'xpack.alertzero.workflows.steps.summarizeInvestigation.description',
     {
       defaultMessage:
-        'Reads journal notes, comments, and added attachments, then writes the investigation summary.',
+        'Reads journal notes, comments, added attachments, and proposal content, then writes the investigation summary.',
     }
   ),
   category: StepCategory.KibanaSecurity,

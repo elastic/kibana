@@ -59,6 +59,29 @@ describe('resolveScopedModel', () => {
     });
   });
 
+  it('passes the chat model options to the model it builds', async () => {
+    mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({
+      endpoints: [{ connectorId: 'tier-connector' }],
+    });
+    const chatModelOptions = { telemetryMetadata: { pluginId: 'test_plugin' } };
+
+    await resolveScopedModel({
+      inference: mockInference as never,
+      searchInferenceEndpoints: mockSearchInferenceEndpoints as never,
+      featureId,
+      request: mockRequest,
+      uiSettingsClient: mockUiSettingsClient as never,
+      logger,
+      chatModelOptions,
+    });
+
+    expect(mockInference.getChatModel).toHaveBeenCalledWith({
+      request: mockRequest,
+      connectorId: 'tier-connector',
+      chatModelOptions,
+    });
+  });
+
   it('resolves via tier connector when available', async () => {
     mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({
       endpoints: [{ connectorId: 'tier-connector' }],
