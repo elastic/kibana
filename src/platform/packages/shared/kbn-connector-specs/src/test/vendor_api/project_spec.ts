@@ -102,10 +102,25 @@ export const normalizeSpecNode = (value: unknown, isNameMap = false): unknown =>
   return result;
 };
 
-const pickPaths = (paths: unknown, operations: readonly ProjectedOperation[]): JsonObject => {
+// A Path Item `$ref` to another path item in the document, whose fields the entry's own override.
+const resolvePathItem = (document: OpenApiDocument, item: unknown): unknown => {
+  if (!isJsonObject(item) || typeof item.$ref !== 'string') {
+    return item;
+  }
+  const { $ref: ref, ...own } = item;
+  const pointer = localRefToPointer(ref);
+  const referenced = pointer === undefined ? undefined : getAtTokens(document, toTokens(pointer));
+  return isJsonObject(referenced) ? { ...referenced, ...own } : item;
+};
+
+const pickPaths = (
+  document: OpenApiDocument,
+  operations: readonly ProjectedOperation[]
+): JsonObject => {
+  const { paths } = document;
   const picked: JsonObject = {};
   for (const { method, path } of operations) {
-    const item = isJsonObject(paths) ? paths[path] : undefined;
+    const item = resolvePathItem(document, isJsonObject(paths) ? paths[path] : undefined);
     if (isJsonObject(item) && isJsonObject(item[method])) {
       const kept = isJsonObject(picked[path])
         ? (picked[path] as JsonObject)
@@ -139,14 +154,14 @@ export const projectSpec = (
   refs: readonly string[] = []
 ): OpenApiDocument => {
   const document = source.swagger === '2.0' ? convertSwagger2(source) : source;
-  const { openapi, jsonSchemaDialect, info, servers, security, paths } = document;
+  const { openapi, jsonSchemaDialect, info, servers, security } = document;
   const projected = normalizeSpecNode({
     openapi,
     ...(jsonSchemaDialect === undefined ? {} : { jsonSchemaDialect }),
     info: { title: isJsonObject(info) ? info.title : undefined },
     ...(servers === undefined ? {} : { servers }),
     ...(security === undefined ? {} : { security }),
-    paths: pickPaths(paths, operations),
+    paths: pickPaths(document, operations),
   }) as JsonObject;
 
   const kept = new Set<string>();
