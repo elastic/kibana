@@ -157,6 +157,14 @@ export const getProposalTone = (proposal: ApprovalProposal): 'primary' | 'danger
   return impact === 'high' || impact === 'critical' ? 'danger' : 'primary';
 };
 
+/**
+ * Whether the proposal's own deadline is in the past. A proposal can be settled as expired before
+ * it — the workflow failed or ran out of attempts — so "expired" alone does not mean it timed out.
+ * `false` when there is no deadline to compare against.
+ */
+export const hasDeadlinePassed = (proposal: Pick<ApprovalProposal, 'expiresAt'>): boolean =>
+  proposal.expiresAt !== undefined && new Date(proposal.expiresAt).getTime() <= Date.now();
+
 /** Replaced by a newer proposal, by a retry or a revision. */
 export const isProposalReplaced = (proposal: ApprovalProposal): boolean =>
   proposal.supersededBy !== undefined || proposal.status === 'superseded';

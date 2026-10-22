@@ -21,6 +21,7 @@ import {
   getApprovalOutcomeBadge,
   getSubmittingPhase,
   isProposalReplaced,
+  hasDeadlinePassed,
   getProposalCaption,
   ProposalCaption,
   getProposalDecision,
@@ -217,7 +218,11 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     const expiredReason = isExpired
       ? isProposalReplaced(proposal)
         ? DETAILS_FLYOUT_LABELS.proposedAction.expiredReplacedCaption
-        : proposal.rationale || DETAILS_FLYOUT_LABELS.proposedAction.expiredTimedOutCaption
+        : proposal.rationale ||
+          // Settled before its deadline (a failed workflow, say), so it did not time out.
+          (proposal.expiresAt && !hasDeadlinePassed(proposal)
+            ? DETAILS_FLYOUT_LABELS.proposedAction.expiredGenericCaption
+            : DETAILS_FLYOUT_LABELS.proposedAction.expiredTimedOutCaption)
       : undefined;
 
     // Nothing to say about the action itself: the caption says so, in a disabled colour, rather

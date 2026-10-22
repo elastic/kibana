@@ -122,6 +122,10 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
       'xpack.alertzero.detailsFlyout.proposedAction.expiredReplaced',
       { defaultMessage: 'Replaced by a newer proposal' }
     ),
+    expiredGenericCaption: i18n.translate(
+      'xpack.alertzero.detailsFlyout.proposedAction.expiredGeneric',
+      { defaultMessage: 'Can no longer be actioned' }
+    ),
     retryTooltip: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.retryTooltip', {
       defaultMessage: 'Retry applying',
     }),

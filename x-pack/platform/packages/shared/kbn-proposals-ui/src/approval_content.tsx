@@ -321,7 +321,9 @@ export const ApprovalContent = memo<ApprovalContentProps>(
         />
 
         <ApprovalContentBody
-          mode={displayMode}
+          // A user who loses the permission mid-decline has no Cancel to come back with, so the body
+          // returns to its view mode and shows the proposal again.
+          mode={isRestricted ? 'view' : displayMode}
           comment={proposal.comment}
           banner={banner}
           bannerSuffix={bannerSuffix}

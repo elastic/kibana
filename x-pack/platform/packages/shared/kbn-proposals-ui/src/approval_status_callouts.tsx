@@ -11,7 +11,7 @@ import { EuiCallOut, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import moment from 'moment';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import { InlineCalloutTitle } from './inline_callout_title';
-import { DATE_TIME_FORMAT } from './proposal_helpers';
+import { DATE_TIME_FORMAT, hasDeadlinePassed } from './proposal_helpers';
 
 interface ApprovalStatusCalloutsProps {
   /** Only shown while still pending — a decided proposal's outcome banner already covers it. */
@@ -104,6 +104,7 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
     isReplaced = false,
     'data-test-subj': dataTestSubj,
   }) => {
+    const deadlinePassed = hasDeadlinePassed({ expiresAt });
     const testSubj = (suffix: string) => (dataTestSubj ? `${dataTestSubj}-${suffix}` : undefined);
 
     return (
@@ -159,7 +160,7 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
           <StatusCallout
             color="warning"
             title={
-              expiresAt && !isReplaced
+              expiresAt && deadlinePassed && !isReplaced
                 ? APPROVAL_MODAL_TRANSLATIONS.expiredCalloutTitleOn(formatDeadline(expiresAt))
                 : APPROVAL_MODAL_TRANSLATIONS.expiredCalloutTitle
             }
@@ -169,6 +170,9 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
                 ? APPROVAL_MODAL_TRANSLATIONS.replacedCalloutDescription
                 : expiredReason
                 ? APPROVAL_MODAL_TRANSLATIONS.expiredCalloutDescriptionWithReason(expiredReason)
+                : expiresAt && !deadlinePassed
+                ? // Settled before its deadline (a failed workflow, say), so it did not time out.
+                  APPROVAL_MODAL_TRANSLATIONS.expiredCalloutDescriptionGeneric
                 : APPROVAL_MODAL_TRANSLATIONS.expiredCalloutDescription
             }
             data-test-subj={testSubj('expired')}

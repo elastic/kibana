@@ -26,6 +26,7 @@ export {
   getProposalTone,
   isProposalExpired,
   isProposalReplaced,
+  hasDeadlinePassed,
 } from './src/proposal_helpers';
 export type {
   ApprovalProposal,

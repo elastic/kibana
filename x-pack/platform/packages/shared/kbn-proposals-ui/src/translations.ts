@@ -148,6 +148,10 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
       defaultMessage: 'This proposal can no longer be actioned. {reason}',
       values: { reason },
     }),
+  expiredCalloutDescriptionGeneric: i18n.translate(
+    'xpack.proposals.approvalModal.expiredCalloutDescriptionGeneric',
+    { defaultMessage: 'This proposal can no longer be actioned.' }
+  ),
   expiredCalloutDescription: i18n.translate(
     'xpack.proposals.approvalModal.expiredCalloutDescription',
     {
