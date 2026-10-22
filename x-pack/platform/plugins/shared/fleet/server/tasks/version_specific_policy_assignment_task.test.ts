@@ -187,8 +187,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       if (!request.aggs?.base_policy_ids) {
         return {};
       }
-      const requestedPolicyIds: string[] =
-        request.query.bool.should[1].bool.filter[0].terms.policy_base_id;
+      const requestedPolicyIds: string[] = request.query.bool.should[1].terms.policy_base_id;
       return {
         aggregations: {
           base_policy_ids: {
@@ -575,6 +574,46 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       expect(mockAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
     });
 
+    it('Should move an agent on an old variant to the matching variant, whenever it upgraded', async () => {
+      const agentPolicies = [
+        { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
+      ] as AgentPolicy[];
+
+      // upgraded to 9.5 long ago, still on the 9.4 variant
+      const agents = [
+        {
+          id: 'agent-1',
+          policy_id: 'policy-1#9.4',
+          policy_revision: 5,
+          agent: { version: '9.5.1' },
+          upgraded_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+        },
+      ] as Agent[];
+
+      mockAgentPolicyService.fetchAllAgentPolicies =
+        getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
+      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+      mockedGetAgentsByKuery.mockResolvedValue({ total: 1, agents, page: 1, perPage: 1 });
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+
+      await runTask();
+
+      expect(mockedGetAgentsByKuery.mock.calls[0][2].kuery).not.toContain('upgraded_at');
+      expect(mockedFetchAllAgentsByKuery.mock.calls[0][2].kuery).not.toContain('upgraded_at');
+      expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalledWith(
+        expect.anything(),
+        ['policy-1'],
+        undefined,
+        expect.objectContaining({ agentVersions: ['9.5'], spaceId: '*' })
+      );
+      expect(mockedReassignAgents).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ agentIds: ['agent-1'] }),
+        'policy-1#9.5'
+      );
+    });
+
     it('Should NOT reassign agents on versioned policy with outdated revision - fleet-server handles updates', async () => {
       const agentPolicies = [
         {
@@ -803,13 +842,13 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         expect(onPolicy).toEqual({
           terms: { policy_id: ['policy-1', 'policy-2', 'policy-1#sentinel', 'policy-2#sentinel'] },
         });
-        // a variant of the policies that was recently upgraded
-        expect(onVariant.bool.filter[0]).toEqual({
-          terms: { policy_base_id: ['policy-1', 'policy-2'] },
+        // a variant of the policies, whenever the agent upgraded
+        expect(onVariant).toEqual({ terms: { policy_base_id: ['policy-1', 'policy-2'] } });
+        // agents without policy_base_id are found by their policy_id, whenever they upgraded
+        expect(withoutBaseId).toEqual({
+          bool: { must_not: [{ exists: { field: 'policy_base_id' } }] },
         });
-        expect(onVariant.bool.filter[1].range.upgraded_at.gte).toEqual(expect.any(String));
-        // agents without policy_base_id are found by their policy_id
-        expect(withoutBaseId.bool.must_not).toEqual([{ exists: { field: 'policy_base_id' } }]);
+        expect(JSON.stringify(request.query)).not.toContain('upgraded_at');
       });
 
       it('only looks at the agent policies that have agents', async () => {

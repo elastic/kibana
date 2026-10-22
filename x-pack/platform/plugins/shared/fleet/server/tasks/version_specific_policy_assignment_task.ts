@@ -78,8 +78,6 @@ const NOT_OPAMP_COLLECTOR_ES_FILTER = [{ term: { type: AGENT_TYPE_OPAMP } }];
 // selected) is moved in batches, with a pause point between them for the abort signal.
 const REASSIGN_BATCHSIZE = 1000;
 const MAX_CONCURRENT_REASSIGNMENTS = 5;
-// Time window to look for recently upgraded agents
-const RECENTLY_UPGRADED_WINDOW_MINUTES = 30;
 // Upper bound on the number of distinct version-specific policy ids we inspect for orphaned agents
 // in a single run. Far above any realistic deployment; a safety valve against unbounded aggregations.
 const MAX_VERSION_SPECIFIC_POLICY_BUCKETS = 10000;
@@ -619,7 +617,8 @@ export class VersionSpecificPolicyAssignmentTask {
    * Which of the given agent policies have agents that `findAgentsNeedingVersionSpecificPolicies` may
    * find, with one search for all of them. Same agents as its query, so that it can skip the others:
    * - active agents on the policy or on its `#sentinel` copy
-   * - active agents on a variant that were recently upgraded
+   * - active agents on a variant, whenever they upgraded: one that runs another minor version than the
+   *   one of its variant is moved to the matching variant
    *
    * Agents without `policy_base_id` (enrolled by an older fleet-server) are matched through their
    * `policy_id`, so that a missing field never hides an agent. Those can be of any agent policy, so
@@ -636,7 +635,6 @@ export class VersionSpecificPolicyAssignmentTask {
     }
     const sentinelPolicyIds = agentPolicyIds.map(getSentinelVersionPolicyId);
     const parentPolicyIds = [...agentPolicyIds, ...sentinelPolicyIds];
-    const recentlyUpgradedTime = this.getRecentlyUpgradedTime();
 
     const response = await esClient.search<
       unknown,
@@ -657,22 +655,9 @@ export class VersionSpecificPolicyAssignmentTask {
           should: [
             // on the policy or on its `#sentinel` copy
             { terms: { policy_id: parentPolicyIds } },
-            // on a variant that was recently upgraded: matched by the base policy id, or
-            // for agents without it, by any `policy_id` of an agent that was recently upgraded
-            {
-              bool: {
-                filter: [
-                  { terms: { policy_base_id: agentPolicyIds } },
-                  { range: { upgraded_at: { gte: recentlyUpgradedTime } } },
-                ],
-              },
-            },
-            {
-              bool: {
-                filter: [{ range: { upgraded_at: { gte: recentlyUpgradedTime } } }],
-                must_not: [{ exists: { field: 'policy_base_id' } }],
-              },
-            },
+            // on a variant: matched by the base policy id, or for agents without it, by any `policy_id`
+            { terms: { policy_base_id: agentPolicyIds } },
+            { bool: { must_not: [{ exists: { field: 'policy_base_id' } }] } },
           ],
           minimum_should_match: 1,
         },
@@ -706,16 +691,13 @@ export class VersionSpecificPolicyAssignmentTask {
     return new Set([...found].filter((policyId) => policyIds.has(policyId)));
   }
 
-  private getRecentlyUpgradedTime(): string {
-    return new Date(Date.now() - RECENTLY_UPGRADED_WINDOW_MINUTES * 60 * 1000).toISOString();
-  }
-
   /**
    * Find agents that need to be assigned/reassigned to version-specific policies
    *
    * Criteria:
    * 1. Agents on parent policy (newly enrolled) that need versioned policy
-   * 2. Agents on versioned policy but upgraded to a different version (recently upgraded)
+   * 2. Agents on a versioned policy whose minor version differs from the one of the agent, whenever
+   *    the agent upgraded
    *
    * Note: Agents already on the correct versioned policy but with outdated revisions
    * do NOT need reassignment - they will receive policy updates automatically through
@@ -731,9 +713,8 @@ export class VersionSpecificPolicyAssignmentTask {
 
     // Build the kuery to find agents needing reassignment:
     // 1. Agents on the parent policy (not a versioned policy)
-    // 2. Agents that were recently upgraded
-    // 3. Agents on versioned policy with mismatched version or outdated revision
-    const recentlyUpgradedTime = this.getRecentlyUpgradedTime();
+    // 2. Agents on any versioned policy derived from this parent: the ones that run another minor version
+    //    than the one of their variant are moved by the check below, whenever they upgraded
 
     // Query 1: Agents on parent policy (newly enrolled or need initial assignment), or on its
     // `#sentinel` copy (the policy had no version conditions before and agents were moved to `#sentinel`)
@@ -741,12 +722,9 @@ export class VersionSpecificPolicyAssignmentTask {
       getSentinelVersionPolicyId(agentPolicyId)
     )}")`;
 
-    // Query 2: Agents on any versioned policy derived from this parent that:
-    //   - Were recently upgraded (version might have changed)
-    //   - May need to move to a different versioned policy
-    const versionedPolicyKuery = `${buildAgentVersionVariantsKueryFragment(
-      agentPolicyId
-    )} AND upgraded_at >= "${recentlyUpgradedTime}"`;
+    // Query 2: Agents on any versioned policy derived from this parent, they may need to move to a
+    // different versioned policy
+    const versionedPolicyKuery = buildAgentVersionVariantsKueryFragment(agentPolicyId);
 
     // Note: We intentionally do NOT query for agents with outdated policy revisions.
     // Agents already on the correct versioned policy will receive updated revisions
