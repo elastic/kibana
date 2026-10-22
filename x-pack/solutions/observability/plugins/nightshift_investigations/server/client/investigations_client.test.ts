@@ -1159,6 +1159,53 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     expect(conversations.create).not.toHaveBeenCalled();
   });
 
+  it.each(['c0', 'none', undefined])(
+    'defers an omitted target to the pending investigation binding %p',
+    async (target) => {
+      subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-pending' });
+      const client = makeClient({
+        telemetryConfig: { ...telemetryConfig, telemetry_connector_id: 'legacy' },
+      });
+
+      await expect(
+        client.start({
+          subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: 'automatic',
+          context: { alerts: [makeAlert('alert-1')] },
+        })
+      ).resolves.toEqual({ investigation_id: 'inv-pending' });
+
+      const inputs = runInputs();
+      expect(inputs.telemetry_target).toBeUndefined();
+      expect(conversations.create).not.toHaveBeenCalled();
+
+      // The first run creates the conversation before this queued follow-up is ensured.
+      withConversations(
+        makeConversation({
+          id: 'inv-pending',
+          telemetryTarget: target,
+          workflowExecutionIds: ['exec-original'],
+        })
+      );
+      mockManagement.getWorkflowExecution.mockResolvedValue({
+        id: 'exec-1',
+        workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+        status: ExecutionStatus.RUNNING,
+        context: { inputs },
+      });
+
+      await expect(client.ensureOrCreate('inv-pending', 'exec-1')).resolves.toBe('inv-pending');
+      expect(conversations.create).not.toHaveBeenCalled();
+      expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-pending', {
+        workflow_execution_ids: ['exec-original', 'exec-1'],
+      });
+      const expectedConnectorId = target === 'none' ? undefined : target ?? 'legacy';
+      expect((await client.getTelemetryTarget('inv-pending')).connectorId).toBe(
+        expectedConnectorId
+      );
+    }
+  );
+
   it('rejects changing a matched investigation target before launching its follow-up', async () => {
     agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
     withConversations(makeConversation({ id: 'inv-1', telemetryTarget: 'c0' }));
