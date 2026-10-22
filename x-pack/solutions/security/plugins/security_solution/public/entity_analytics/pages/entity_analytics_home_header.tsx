@@ -22,38 +22,67 @@ const SETTINGS_LABEL = i18n.translate(
   { defaultMessage: 'Settings' }
 );
 
+const PRODUCT_TOUR_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.homePage.productTourMenuItemLabel',
+  { defaultMessage: 'Product tour' }
+);
+
 export const ENTITY_ANALYTICS_HOME_MANAGEMENT_MENU_ITEM_TEST_ID =
   'entityAnalyticsHomeSettingsMenuItem';
+export const ENTITY_ANALYTICS_HOME_PRODUCT_TOUR_MENU_ITEM_TEST_ID =
+  'entityAnalyticsHomeProductTourMenuItem';
 
-export const EntityAnalyticsHomeHeader = React.memo(() => {
-  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
-  const { docLinks } = useKibana().services;
+export interface EntityAnalyticsHomeHeaderProps {
+  /** Adds a Product tour menu item that starts the page tour. */
+  onStartTour?: () => void;
+}
 
-  const menu = useMemo<AppHeaderMenu>(
-    () => ({
-      items: [
-        {
-          id: 'entityAnalyticsSettings',
-          label: SETTINGS_LABEL,
-          iconType: 'gear' as const,
-          href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.entityAnalyticsManagement }),
-          overflow: true,
-          order: 1,
-          testId: ENTITY_ANALYTICS_HOME_MANAGEMENT_MENU_ITEM_TEST_ID,
-        },
-      ],
-    }),
-    [getSecuritySolutionUrl]
-  );
+export const EntityAnalyticsHomeHeader = React.memo(
+  ({ onStartTour }: EntityAnalyticsHomeHeaderProps) => {
+    const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+    const { docLinks } = useKibana().services;
 
-  return (
-    <SecurityAppHeader
-      title={PAGE_TITLE}
-      menu={menu}
-      spacing="largeBleed"
-      docLink={docLinks.links.securitySolution.entityAnalytics.entityRiskScoring}
-    />
-  );
-});
+    const menu = useMemo<AppHeaderMenu>(
+      () => ({
+        items: [
+          {
+            id: 'entityAnalyticsSettings',
+            label: SETTINGS_LABEL,
+            iconType: 'gear' as const,
+            href: getSecuritySolutionUrl({
+              deepLinkId: SecurityPageName.entityAnalyticsManagement,
+            }),
+            overflow: true,
+            order: 1,
+            testId: ENTITY_ANALYTICS_HOME_MANAGEMENT_MENU_ITEM_TEST_ID,
+          },
+          ...(onStartTour
+            ? [
+                {
+                  id: 'entityAnalyticsProductTour',
+                  label: PRODUCT_TOUR_LABEL,
+                  iconType: 'bulb' as const,
+                  run: onStartTour,
+                  overflow: true,
+                  order: 2,
+                  testId: ENTITY_ANALYTICS_HOME_PRODUCT_TOUR_MENU_ITEM_TEST_ID,
+                },
+              ]
+            : []),
+        ],
+      }),
+      [getSecuritySolutionUrl, onStartTour]
+    );
+
+    return (
+      <SecurityAppHeader
+        title={PAGE_TITLE}
+        menu={menu}
+        spacing="largeBleed"
+        docLink={docLinks.links.securitySolution.entityAnalytics.entityRiskScoring}
+      />
+    );
+  }
+);
 
 EntityAnalyticsHomeHeader.displayName = 'EntityAnalyticsHomeHeader';
