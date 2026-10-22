@@ -155,7 +155,14 @@ export const registerDashboardAppIntegration = ({
     .pipe(debounceTime(MANUAL_CHANGES_DEBOUNCE_MS))
     .subscribe(() => {
       addAttachmentFromDashboard();
-      syncPanelPointerLabels({ agentBuilder, api, pointers: state.panelPointers });
+      syncPanelPointerLabels({
+        agentBuilder,
+        api,
+        dashboardAttachmentId: state.attachments?.find(
+          ({ origin }) => origin === api.savedObjectId$.getValue()
+        )?.id,
+        pointers: state.panelPointers,
+      });
     });
 
   return () => {

@@ -10,6 +10,7 @@ import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-c
 import {
   DASHBOARD_PANEL_ATTACHMENT_TYPE,
   findPanelById,
+  type DashboardPanelAttachmentData,
   isDashboardAttachment,
   isDashboardPanelAttachment,
 } from '@kbn/agent-builder-dashboards-common';
@@ -89,13 +90,14 @@ export const createAttachmentPanelResolver = ({
  * latest persisted version, so changes made earlier in the same tool call are not reflected.
  */
 const resolveDashboardPanelPointer = (
-  pointer: VersionedAttachment,
+  pointer: VersionedAttachment<
+    typeof DASHBOARD_PANEL_ATTACHMENT_TYPE,
+    DashboardPanelAttachmentData
+  >,
   attachments: AttachmentStateManager,
   fail: (error: string) => PanelContentAttempt
 ): PanelContentAttempt => {
-  const pointerData = getLatestVersion(pointer)?.data as
-    | { dashboard_attachment_id: string; panel_id: string }
-    | undefined;
+  const pointerData = getLatestVersion(pointer)?.data;
   if (!pointerData) {
     return fail(`Panel pointer "${pointer.id}" has no readable data.`);
   }

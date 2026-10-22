@@ -61,12 +61,12 @@ export const getLensConfigLabel = (config: UnknownRecord): string | undefined =>
     case 'waffle':
       return firstColumnLabel(config.metrics);
     case 'gauge':
-    case 'tagcloud':
+    case 'tag_cloud':
     case 'heatmap':
     case 'region_map':
       return columnLabel(config.metric);
-    case 'datatable':
-      return firstColumnLabel(config.metrics) ?? firstColumnLabel(config.columns);
+    case 'data_table':
+      return firstColumnLabel(config.metrics) ?? firstColumnLabel(config.rows);
     default:
       return undefined;
   }

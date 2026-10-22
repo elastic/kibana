@@ -19,6 +19,8 @@ import {
 
 interface RefreshDashboardPanelPointersParams {
   attachments: AttachmentStateManager;
+  /** The dashboard attachment the upsert edited; pointers to other dashboards are left alone. */
+  dashboardAttachmentId: string;
   /** Ids the upsert reported as updated; only pointers to these panels can need a new label. */
   updatedIds: readonly string[];
   dashboardData: DashboardAttachmentData;
@@ -33,6 +35,7 @@ interface RefreshDashboardPanelPointersParams {
  */
 export const refreshDashboardPanelPointers = async ({
   attachments,
+  dashboardAttachmentId,
   updatedIds,
   dashboardData,
   logger,
@@ -48,7 +51,13 @@ export const refreshDashboardPanelPointers = async ({
     const label = panel
       ? getPanelLabel(panel)?.slice(0, DASHBOARD_PANEL_LABEL_MAX_LENGTH)
       : undefined;
-    if (!panel || !latestVersion || !label || label === latestVersion.data.label) {
+    if (
+      !panel ||
+      !latestVersion ||
+      latestVersion.data.dashboard_attachment_id !== dashboardAttachmentId ||
+      !label ||
+      label === latestVersion.data.label
+    ) {
       continue;
     }
 

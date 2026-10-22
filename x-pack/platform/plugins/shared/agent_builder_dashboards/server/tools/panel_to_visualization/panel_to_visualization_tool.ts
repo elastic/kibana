@@ -162,10 +162,11 @@ Supports ES|QL Lens panels and custom panels.`,
     }
 
     const title = getPanelLabel(panel) ?? pointerData.label;
+    const dashboardName = dashboardData.title
+      ? `dashboard "${dashboardData.title}"`
+      : 'a dashboard';
     const query = (
-      title
-        ? `Panel "${title}" from dashboard "${dashboardData.title}"`
-        : `Panel from dashboard "${dashboardData.title}"`
+      title ? `Panel "${title}" from ${dashboardName}` : `Panel from ${dashboardName}`
     ).slice(0, MAX_QUERY_LENGTH);
 
     let visualizationData: VisualizationAttachmentData;

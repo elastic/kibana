@@ -40,24 +40,33 @@ const getPanelLabels = (api: DashboardApi): Map<string, string> => {
  * Keeps panel pointer pills in step with panels the user renames on the dashboard, or whose
  * chart measure changes while the panel is untitled. Re-adding a pointer under its own id replaces
  * it, mirroring how the dashboard attachment itself is synced. Pointers to panels with no
- * derivable name, or to removed panels, are left alone.
+ * derivable name, to removed panels, or to other dashboards are left alone, and pills the user
+ * removed are not re-added.
  */
 export const syncPanelPointerLabels = ({
   agentBuilder,
   api,
+  dashboardAttachmentId,
   pointers,
 }: {
   agentBuilder: Pick<AgentBuilderPluginStart, 'addAttachment'>;
   api: DashboardApi;
+  /** The conversation's attachment linked to this dashboard; pointers to other dashboards are left alone. */
+  dashboardAttachmentId: string | undefined;
   pointers: DashboardPanelPointer[] | undefined;
 }): void => {
-  if (!pointers?.length) {
+  const linkedPointers = pointers?.filter(
+    (pointer) =>
+      pointer.active !== false &&
+      getLatestVersion(pointer)?.data.dashboard_attachment_id === dashboardAttachmentId
+  );
+  if (!dashboardAttachmentId || !linkedPointers?.length) {
     return;
   }
 
   const labelByPanelId = getPanelLabels(api);
 
-  for (const pointer of pointers) {
+  for (const pointer of linkedPointers) {
     const data = getLatestVersion(pointer)?.data;
     const label = data ? labelByPanelId.get(data.panel_id) : undefined;
     if (!data || !label || label === data.label) {

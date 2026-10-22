@@ -298,6 +298,7 @@ Panel positions and sizes are set automatically after the changes are applied, a
         if (!isNewDashboard) {
           await refreshDashboardPanelPointers({
             attachments,
+            dashboardAttachmentId,
             updatedIds: updated,
             dashboardData,
             logger,

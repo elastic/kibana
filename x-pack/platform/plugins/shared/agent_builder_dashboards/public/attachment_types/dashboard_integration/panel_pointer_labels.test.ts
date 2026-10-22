@@ -15,7 +15,13 @@ import { syncPanelPointerLabels, type DashboardPanelPointer } from './panel_poin
 
 const grid = { x: 0, y: 0, w: 24, h: 15 };
 
-const createPointer = (panelId: string, label: string): DashboardPanelPointer => ({
+const dashboardAttachmentId = 'dashboard-attachment-1';
+
+const createPointer = (
+  panelId: string,
+  label: string,
+  pointerDashboardAttachmentId = dashboardAttachmentId
+): DashboardPanelPointer => ({
   id: getDashboardPanelAttachmentId(panelId),
   type: DASHBOARD_PANEL_ATTACHMENT_TYPE,
   current_version: 1,
@@ -25,7 +31,7 @@ const createPointer = (panelId: string, label: string): DashboardPanelPointer =>
       created_at: new Date().toISOString(),
       content_hash: 'hash',
       data: {
-        dashboard_attachment_id: 'dashboard-attachment-1',
+        dashboard_attachment_id: pointerDashboardAttachmentId,
         panel_id: panelId,
         label,
         panel_type: LENS_EMBEDDABLE_TYPE,
@@ -56,6 +62,7 @@ describe('syncPanelPointerLabels', () => {
   it('re-adds a pointer whose panel was renamed', () => {
     syncPanelPointerLabels({
       agentBuilder: { addAttachment },
+      dashboardAttachmentId,
       api: createApi([lensPanel('panel-1', 'New title')]),
       pointers: [createPointer('panel-1', 'Old title')],
     });
@@ -71,6 +78,7 @@ describe('syncPanelPointerLabels', () => {
   it('derives the label of an untitled metric panel from its primary metric', () => {
     syncPanelPointerLabels({
       agentBuilder: { addAttachment },
+      dashboardAttachmentId,
       api: createApi([
         {
           type: LENS_EMBEDDABLE_TYPE,
@@ -90,6 +98,7 @@ describe('syncPanelPointerLabels', () => {
   it('finds panels inside sections', () => {
     syncPanelPointerLabels({
       agentBuilder: { addAttachment },
+      dashboardAttachmentId,
       api: createApi([
         {
           id: 'section-1',
@@ -114,8 +123,23 @@ describe('syncPanelPointerLabels', () => {
     ['the panel has no title', [lensPanel('panel-1')], [createPointer('panel-1', 'Old title')]],
     ['the panel was removed', [], [createPointer('panel-1', 'Old title')]],
     ['there are no pointers', [lensPanel('panel-1', 'New title')], []],
+    [
+      'the pointer was removed by the user',
+      [lensPanel('panel-1', 'New title')],
+      [{ ...createPointer('panel-1', 'Old title'), active: false }],
+    ],
+    [
+      'the pointer names another dashboard',
+      [lensPanel('panel-1', 'New title')],
+      [createPointer('panel-1', 'Old title', 'other-dashboard')],
+    ],
   ])('does nothing when %s', (_case, panels, pointers) => {
-    syncPanelPointerLabels({ agentBuilder: { addAttachment }, api: createApi(panels), pointers });
+    syncPanelPointerLabels({
+      agentBuilder: { addAttachment },
+      dashboardAttachmentId,
+      api: createApi(panels),
+      pointers,
+    });
 
     expect(addAttachment).not.toHaveBeenCalled();
   });
@@ -125,6 +149,7 @@ describe('syncPanelPointerLabels', () => {
 
     syncPanelPointerLabels({
       agentBuilder: { addAttachment },
+      dashboardAttachmentId,
       api: { getSerializedState } as unknown as DashboardApi,
       pointers: undefined,
     });

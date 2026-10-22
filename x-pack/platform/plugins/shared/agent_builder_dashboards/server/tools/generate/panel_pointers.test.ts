@@ -70,6 +70,7 @@ describe('refreshDashboardPanelPointers', () => {
 
     await refreshDashboardPanelPointers({
       attachments,
+      dashboardAttachmentId: 'dashboard-attachment-1',
       updatedIds: ['panel-1'],
       dashboardData: dashboardData('New title'),
       logger,
@@ -87,6 +88,7 @@ describe('refreshDashboardPanelPointers', () => {
 
     await refreshDashboardPanelPointers({
       attachments,
+      dashboardAttachmentId: 'dashboard-attachment-1',
       updatedIds: ['panel-1'],
       dashboardData: {
         title: 'Dashboard',
@@ -114,6 +116,7 @@ describe('refreshDashboardPanelPointers', () => {
 
     await refreshDashboardPanelPointers({
       attachments,
+      dashboardAttachmentId: 'dashboard-attachment-1',
       updatedIds: [],
       dashboardData: dashboardData('New title'),
       logger,
@@ -133,6 +136,7 @@ describe('refreshDashboardPanelPointers', () => {
 
     await refreshDashboardPanelPointers({
       attachments,
+      dashboardAttachmentId: 'dashboard-attachment-1',
       updatedIds: ['panel-1'],
       dashboardData: dashboardData(title),
       logger,
@@ -146,6 +150,7 @@ describe('refreshDashboardPanelPointers', () => {
 
     await refreshDashboardPanelPointers({
       attachments,
+      dashboardAttachmentId: 'dashboard-attachment-1',
       updatedIds: ['panel-1'],
       dashboardData: { title: 'Dashboard', panels: [] },
       logger,
@@ -161,6 +166,7 @@ describe('refreshDashboardPanelPointers', () => {
     await expect(
       refreshDashboardPanelPointers({
         attachments,
+        dashboardAttachmentId: 'dashboard-attachment-1',
         updatedIds: ['panel-1'],
         dashboardData: dashboardData('New title'),
         logger,

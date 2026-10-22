@@ -53,15 +53,15 @@ describe('getLensConfigLabel', () => {
       'Bytes',
     ],
     ['gauge: single metric', { type: 'gauge', metric: { column: 'CPU %' } }, 'CPU %'],
-    ['tagcloud: single metric', { type: 'tagcloud', metric: { column: 'Count' } }, 'Count'],
+    ['tag_cloud: single metric', { type: 'tag_cloud', metric: { column: 'Count' } }, 'Count'],
     [
-      'datatable: first metric',
-      { type: 'datatable', metrics: [{ column: 'Avg bytes' }] },
+      'data_table: first metric',
+      { type: 'data_table', metrics: [{ column: 'Avg bytes' }] },
       'Avg bytes',
     ],
     [
-      'datatable: first column when there are no metrics',
-      { type: 'datatable', columns: [{ column: 'host' }] },
+      'data_table: first row when there are no metrics',
+      { type: 'data_table', rows: [{ column: 'host' }] },
       'host',
     ],
   ])('derives a label for %s', (_case, config, expected) => {
