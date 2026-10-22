@@ -16,6 +16,7 @@ import {
 } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { ALL_PROJECT_ROUTING, LOCAL_PROJECT_ROUTING } from '../../common/project_routings';
+import type { SLODefinition } from '../domain/models';
 import { CreateSLO } from './create_slo';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import { createAPMTransactionErrorRateIndicator, createSLOParams } from './fixtures/slo';
@@ -273,6 +274,80 @@ describe('CreateSLO', () => {
         mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
       ).toHaveBeenCalledTimes(2);
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
+    });
+
+    it('waits for in-flight install operations to settle before rolling back', async () => {
+      let resolveCreate: (value: SLODefinition) => void = () => {};
+      mockRepository.create.mockReturnValueOnce(
+        new Promise<SLODefinition>((resolve) => {
+          resolveCreate = resolve;
+        })
+      );
+      mockTransformManager.install.mockRejectedValueOnce(
+        new Error('Rollup transform install error')
+      );
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      const assertion = expect(createSLO.execute(sloParams)).rejects.toThrow(
+        'Rollup transform install error'
+      );
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(mockScopedClusterClient.asCurrentUser.delete).not.toHaveBeenCalled();
+      expect(
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+      ).not.toHaveBeenCalled();
+      expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
+      expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalled();
+      expect(mockRepository.deleteById).not.toHaveBeenCalled();
+      expect(mockTransformManager.start).not.toHaveBeenCalled();
+
+      resolveCreate(mockRepository.create.mock.calls[0][0]);
+      await assertion;
+
+      expect(mockRepository.deleteById).toHaveBeenCalled();
+      expect(
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+      ).toHaveBeenCalledTimes(2);
+      expect(mockTransformManager.uninstall).toHaveBeenCalledTimes(1);
+      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
+    });
+
+    it('waits for in-flight start operations to settle before rolling back', async () => {
+      let resolveSummaryStart: () => void = () => {};
+      mockTransformManager.start.mockRejectedValueOnce(new Error('Rollup transform start error'));
+      mockSummaryTransformManager.start.mockReturnValueOnce(
+        new Promise<void>((resolve) => {
+          resolveSummaryStart = resolve;
+        })
+      );
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      const assertion = expect(createSLO.execute(sloParams)).rejects.toThrow(
+        'Rollup transform start error'
+      );
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(mockSummaryTransformManager.start).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.asCurrentUser.delete).not.toHaveBeenCalled();
+      expect(
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+      ).not.toHaveBeenCalled();
+      expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
+      expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalled();
+      expect(mockRepository.deleteById).not.toHaveBeenCalled();
+
+      resolveSummaryStart();
+      await assertion;
+
+      expect(mockRepository.deleteById).toHaveBeenCalled();
+      expect(
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+      ).toHaveBeenCalledTimes(2);
+      expect(mockTransformManager.uninstall).toHaveBeenCalledTimes(1);
+      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -21,6 +21,7 @@ import {
   SLO_MODEL_VERSION,
   SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
+import { SecurityException } from '../errors';
 import { createSLO } from './fixtures/slo';
 import {
   createSLORepositoryMock,
@@ -108,6 +109,61 @@ describe('ResetSLO', () => {
       await expect(resetSLO.execute(slo.id)).rejects.toThrow(
         "Missing ['read', 'view_index_metadata'] privileges on the source index [metrics-apm*]"
       );
+    });
+  });
+
+  describe('when resource installation fails', () => {
+    beforeEach(() => {
+      mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+        application: {},
+        cluster: {},
+        has_all_requested: true,
+        index: {},
+        username: 'some-user',
+      });
+    });
+
+    it('waits for in-flight install operations to settle before rolling back', async () => {
+      const slo = createSLO({ id: 'irrelevant', version: 1 });
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      let resolveSummaryInstall: (value: string) => void = () => {};
+      mockSummaryTransformManager.install.mockReturnValueOnce(
+        new Promise<string>((resolve) => {
+          resolveSummaryInstall = resolve;
+        })
+      );
+      mockTransformManager.install.mockRejectedValueOnce(
+        Object.assign(new Error('forbidden'), {
+          meta: { body: { error: { type: 'security_exception', reason: 'missing privileges' } } },
+        })
+      );
+      const resetedRollupTransformId = getSLOTransformId(slo.id, slo.revision + 1);
+      const resetedSummaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision + 1);
+
+      const executePromise = resetSLO.execute(slo.id);
+      const assertion = expect(executePromise).rejects.toBeInstanceOf(SecurityException);
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(mockScopedClusterClient.asCurrentUser.delete).not.toHaveBeenCalled();
+      expect(mockTransformManager.uninstall).not.toHaveBeenCalledWith(resetedRollupTransformId);
+      expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalledWith(
+        resetedSummaryTransformId
+      );
+      expect(
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+      ).toHaveBeenCalledTimes(1);
+
+      resolveSummaryInstall(resetedSummaryTransformId);
+      await assertion;
+      await expect(executePromise).rejects.toThrow('missing privileges');
+
+      expect(mockTransformManager.uninstall).toHaveBeenCalledWith(resetedRollupTransformId);
+      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledWith(resetedSummaryTransformId);
+      expect(
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+      ).toHaveBeenCalledTimes(3);
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
+      expect(mockRepository.update).not.toHaveBeenCalled();
     });
   });
 
