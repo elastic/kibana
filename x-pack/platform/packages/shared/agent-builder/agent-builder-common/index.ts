@@ -169,6 +169,7 @@ export type { TimeRange } from './attachments';
 export {
   agentBuilderDefaultAgentId,
   agentBuilderDefaultAiIndexId,
+  kiRetrievalSkillId,
   AgentType,
   chatAgentTypeId,
   AgentAccessControlMode,
@@ -512,6 +513,9 @@ export {
   type ValidConversationEventType,
   assertValidConversationEventType,
   type ConversationAddEventInput,
+  type ChatCallbackEventResponse,
+  type ChatCallbackFailureResponse,
+  type ChatCallbackResponse,
 } from './chat';
 export {
   type PublicSkillDefinition,
