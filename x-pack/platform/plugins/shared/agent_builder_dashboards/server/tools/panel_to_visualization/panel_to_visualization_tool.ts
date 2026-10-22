@@ -205,16 +205,22 @@ Supports ES|QL Lens panels and custom panels.`,
       return errorResult(error instanceof Error ? error.message : String(error), panelAttachmentId);
     }
 
+    // The copy renders with the dashboard's time range, not whatever range the chat happens to have.
+    const timeRange = dashboardData.time_range
+      ? { time_range: { from: dashboardData.time_range.from, to: dashboardData.time_range.to } }
+      : {};
+
     try {
       const attachment = await attachments.add({
         type: VISUALIZATION_ATTACHMENT_TYPE,
-        data: visualization.attachmentData,
+        data: { ...visualization.attachmentData, ...timeRange },
         description: `Visualization: ${query.slice(0, 50)}`,
       });
       logger.debug(`Copied panel "${panelId}" into visualization attachment ${attachment.id}`);
 
       const resultData: VisualizationResultData = {
         ...visualization.resultData,
+        ...timeRange,
         attachment_id: attachment.id,
         version: attachment.current_version ?? 1,
       };

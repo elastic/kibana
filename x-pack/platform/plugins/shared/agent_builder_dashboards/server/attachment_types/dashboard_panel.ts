@@ -58,7 +58,7 @@ const formatDashboardPanelAttachment = ({
   }(panelId: "${panelId}", type: ${panelType}) on the dashboard attachment "${dashboardAttachmentId}".
 Whatever the user asks for while this is attached is about this panel: apply it to the panel through \`${
     dashboardTools.generateDashboard
-  }\` (load the dashboards skill first); do not answer with the content in chat or create a standalone visualization.
+  }\` (load the dashboards skill first); do not answer with the content in chat or author a new visualization for it (to only show it inline, see below).
 Read the panel's current configuration from that dashboard attachment; this pointer holds none.
 Edit it with \`${
     dashboardTools.generateDashboard
