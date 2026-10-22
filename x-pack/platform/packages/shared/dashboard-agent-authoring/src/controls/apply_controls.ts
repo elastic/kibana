@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import {
   ControlValuesSource,
   DEFAULT_DSL_OPTIONS_LIST_STATE,
@@ -28,39 +27,15 @@ const buildStoredControl = (control: ControlInput, id: string): DashboardPinnedP
     return { type, id, width, grow, config: { ...DEFAULT_TIME_SLIDER_STATE } };
   }
 
-  if (type === OPTIONS_LIST_CONTROL) {
-    const { field_name, index, title } = control;
-    const config = {
-      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
-      ...(title !== undefined ? { title } : {}),
-      values_source: ControlValuesSource.ESQL,
-      esql_query: `FROM ${index} | STATS BY ${formatEsqlIdentifier(field_name)}`,
-    } satisfies Extract<DashboardPinnedPanel, { type: typeof OPTIONS_LIST_CONTROL }>['config'];
-
-    return {
-      type,
-      id,
-      width,
-      grow,
-      config,
-    };
-  }
-
   const { field_name, index, title } = control;
-  const config = {
-    ...DEFAULT_RANGE_SLIDER_STATE,
+  const esqlConfig = {
     ...(title !== undefined ? { title } : {}),
-    values_source: ControlValuesSource.ESQL,
+    values_source: ControlValuesSource.ESQL as const,
     esql_query: `FROM ${index} | STATS BY ${formatEsqlIdentifier(field_name)}`,
-  } satisfies Extract<DashboardPinnedPanel, { type: typeof RANGE_SLIDER_CONTROL }>['config'];
-
-  return {
-    type,
-    id,
-    width,
-    grow,
-    config,
   };
+  return type === OPTIONS_LIST_CONTROL
+    ? { type, id, width, grow, config: { ...DEFAULT_DSL_OPTIONS_LIST_STATE, ...esqlConfig } }
+    : { type, id, width, grow, config: { ...DEFAULT_RANGE_SLIDER_STATE, ...esqlConfig } };
 };
 
 /** Replaces existing controls in place and appends new ones. */
