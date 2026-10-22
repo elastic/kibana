@@ -258,9 +258,11 @@ describe('buildHuntNarrative', () => {
       ctx
     );
 
-    // Efficient is unavailable too, but Tier 2 has no consumer for it, so it is not blamed.
-    expect(narrative).toContain('no model was available for the Balanced and Frontier tiers');
+    // Efficient and Balanced are unavailable too, but Tier 2 has no consumer for either, so
+    // neither is blamed.
+    expect(narrative).toContain('no model was available for the Frontier tier');
     expect(narrative).not.toContain('Efficient');
+    expect(narrative).not.toContain('Balanced');
   });
 
   it('explains every Tier 2 skip reason in plain words under the Tier 2 heading', () => {
@@ -277,6 +279,43 @@ describe('buildHuntNarrative', () => {
     expect(skipped('no_tier2_targets')).toContain(
       'no index could be chosen for it: the report matched no dataset, Tier 1 hit no index, and no index in the default data view carries process telemetry'
     );
+  });
+
+  it('narrates an unenriched report as terminal, without claiming anything was searched', () => {
+    const pending = result({
+      status: 'tier1_only',
+      index_patterns: [],
+      tier2_targets: [],
+      tier2_target_sources: [],
+      tier1: tier1({ status: 'no_searchable_terms' }),
+      tier2_skipped_reason: 'extraction_pending',
+      completeness: 'incomplete_retryable',
+      completed_successfully: false,
+      incomplete: [{ reason: 'extraction_pending', detail: 'not enriched' }],
+    });
+    const narrative = buildHuntNarrative(pending, ctx);
+    const headline = buildHuntHeadline(pending);
+
+    expect(narrative).toContain('Hunt Watch did not hunt this report yet');
+    expect(narrative).toContain('not been enriched yet');
+    expect(headline).toContain('hunt skipped, the report has not been enriched yet');
+    for (const text of [narrative, headline]) {
+      expect(text).not.toContain('What was searched');
+      expect(text).not.toContain('Tier 1 had nothing to search');
+      expect(text).not.toContain('not visible in this space');
+    }
+  });
+
+  it('renders the coordinator own coverage gaps on a non-terminal run', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        completeness: 'incomplete_final',
+        incomplete: [{ reason: 'nothing_searched', detail: 'D' }],
+      }),
+      ctx
+    );
+
+    expect(narrative).toContain('- nothing searched: D');
   });
 
   it('carries the Tier 2 failure message when Tier 2 threw', () => {

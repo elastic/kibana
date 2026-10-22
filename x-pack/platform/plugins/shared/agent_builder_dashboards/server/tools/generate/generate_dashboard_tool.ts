@@ -19,6 +19,7 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 
 import {
+  arrangeDashboardLayout,
   executeDashboardOperations,
   getErrorMessage,
   hasValidCreateMetadataOperations,
@@ -33,6 +34,7 @@ import {
 import { retrieveLatestVersion } from './attachment_state';
 import { createAttachmentPanelResolver } from './resolvers/attachment_panel_resolver';
 import { createControlFieldCapabilitiesResolver } from './resolvers/control_field_capabilities_resolver';
+import { createLayoutArranger } from './layout_arranger';
 import { createPanelResolver } from './resolvers/panel_resolver';
 import { applyDefaultDashboardTimeRange } from './time_range';
 
@@ -53,7 +55,17 @@ const generateDashboardSchema = z.object({
     .describe(
       '(optional) The id of the dashboard attachment to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
     ),
-  operations: z.array(dashboardOperationSchema).min(1),
+  operations: z
+    .array(dashboardOperationSchema)
+    .describe('Operations applied in order. May be empty when only `layout` is set.'),
+  layout: z
+    .string()
+    .min(1)
+    .max(1000)
+    .optional()
+    .describe(
+      'The user\'s own arrangement or size request, in plain words, e.g. "make the table full width". Omit it otherwise: new, moved, and removed panels and sections are placed and sized automatically from the operations, so do not describe where your changes go.'
+    ),
 });
 
 /**
@@ -61,7 +73,7 @@ const generateDashboardSchema = z.object({
  *
  * The full dashboard payload lives in the dashboard attachment (referenced by
  * id); the LLM only ever sees this slim summary, so it never has to re-emit the
- * heavy payload into a follow-up tool call.
+ * heavy payload into a follow-up tool call. Grids let it report where the layout step put panels.
  *
  * `authoringNotesByPanelId` holds the one-sentence note describing every chart
  * authored in this run, keyed by panel id. Panels that were not authored now
@@ -78,8 +90,8 @@ const summarizeDashboard = (
       return {
         id: widget.id,
         title: widget.title,
-        collapsed: widget.collapsed,
-        grid: widget.grid,
+        y: widget.grid.y,
+        ...(widget.collapsed ? { collapsed: true } : {}),
         panels: widget.panels.map((panel) => ({
           type: panel.type,
           id: panel.id,
@@ -131,13 +143,15 @@ Use operations[] to:
 1. set metadata
 2. add panels generated from a natural-language query (\`source: "request"\`; pick the engine with "renderer": Lens (default), Vega, or custom content for HTML-based layouts that Lens and Vega cannot express), by-value panels (\`source: "config"\`: markdown or ML anomaly panels), or existing visualization attachments by id (\`source: "attachment"\`)
 3. edit existing Lens, Vega, custom content, markdown, or ML anomaly panel content
-4. update panel layouts without changing content
+4. move panels between sections
 5. add / remove sections, including inline section panels during add_section
 6. remove panels
-7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)`,
+7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)
+
+Panel positions and sizes are set automatically after the operations run; \`layout\` only carries the user's own arrangement request, and the summary shows the resulting \`grid\` of every panel.`,
     schema: generateDashboardSchema,
     handler: async (
-      { dashboardAttachmentId: previousAttachmentId, operations },
+      { dashboardAttachmentId: previousAttachmentId, operations, layout },
       { logger, attachments, events, esClient, modelProvider }
     ) => {
       try {
@@ -151,7 +165,7 @@ Use operations[] to:
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
         const {
-          dashboardData: generatedDashboardData,
+          dashboardData: validatedDashboardData,
           failures,
           panelAuthoringNotes,
         } = await executeDashboardOperations({
@@ -170,6 +184,19 @@ Use operations[] to:
           }),
           validator: await getDashboardValidator(),
         });
+
+        // The arranger checks its own output and writes only grids, so the result is not validated again.
+        const { dashboardData: generatedDashboardData, failure: layoutFailure } =
+          await arrangeDashboardLayout({
+            originalPanels: latestVersion?.data.panels ?? [],
+            dashboardData: validatedDashboardData,
+            instructions: layout,
+            arrangeLayout: createLayoutArranger({ modelProvider }),
+            logger,
+          });
+        if (layoutFailure) {
+          failures.push(layoutFailure);
+        }
 
         const toDashboardResult = (
           dashboardData: DashboardAttachmentData,
