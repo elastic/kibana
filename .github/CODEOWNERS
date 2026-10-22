@@ -3960,7 +3960,7 @@ pnpm-workspace.yaml @elastic/kibana-operations
 /**/scout_*/.meta/**
 /**/scout_*/*/.meta/**
 
-# ES3 must never start ML nodes on startup (https://github.com/elastic/kibana-team/issues/4111)
+# Checks to ensure ML models are not deployed
 /x-pack/platform/test/serverless/api_integration/test_suites/ml/ @elastic/search-ml-ux
 /x-pack/solutions/*/test/serverless/api_integration/test_suites/ml/ @elastic/search-ml-ux
 /x-pack/solutions/search/test/serverless/functional/test_suites/ml/trained_models_list.ts @elastic/search-ml-ux
