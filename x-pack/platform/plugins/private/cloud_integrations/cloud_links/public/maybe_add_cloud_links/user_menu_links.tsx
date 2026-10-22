@@ -37,6 +37,7 @@ export const createUserMenuLinks = async ({
       iconType: 'user',
       href: profileUrl,
       isExternal: true,
+      dataTestSubj: 'userMenuLink__profile',
       order: 100,
       setAsProfile: true,
     });
@@ -64,6 +65,7 @@ export const createUserMenuLinks = async ({
       iconType: 'users',
       href: organizationUrl,
       isExternal: true,
+      dataTestSubj: 'userMenuLink__organization',
       order: 300,
     });
   }

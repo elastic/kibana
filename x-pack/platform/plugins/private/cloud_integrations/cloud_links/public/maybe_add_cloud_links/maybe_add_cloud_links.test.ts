@@ -69,6 +69,7 @@ describe('maybeAddCloudLinks', () => {
         order: 100,
         setAsProfile: true,
         isExternal: true,
+        dataTestSubj: 'userMenuLink__profile',
       },
       {
         href: 'billing-url',
@@ -84,6 +85,7 @@ describe('maybeAddCloudLinks', () => {
         label: 'Organization',
         order: 300,
         isExternal: true,
+        dataTestSubj: 'userMenuLink__organization',
       },
       expect.any(Object),
       expect.any(Object),
@@ -160,6 +162,7 @@ describe('maybeAddCloudLinks', () => {
         order: 100,
         setAsProfile: true,
         isExternal: true,
+        dataTestSubj: 'userMenuLink__profile',
       },
       {
         href: 'billing-url',
@@ -175,6 +178,7 @@ describe('maybeAddCloudLinks', () => {
         label: 'Organization',
         order: 300,
         isExternal: true,
+        dataTestSubj: 'userMenuLink__organization',
       },
       expect.any(Object),
       expect.any(Object),
