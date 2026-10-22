@@ -24,13 +24,6 @@ export const ES_NOPASSWORD_P12_PATH = resolve(__dirname, '../certs/elasticsearch
 export const KBN_KEY_PATH = resolve(__dirname, '../certs/kibana.key');
 export const KBN_CERT_PATH = resolve(__dirname, '../certs/kibana.crt');
 export const KBN_P12_PATH = resolve(__dirname, '../certs/kibana.p12');
-/**
- * Kibana's certificate for a local Serverless *observability* project. UIAM identifies Kibana by
- * the project type in its client certificate, and `kibana.crt` declares an Elasticsearch project,
- * so an observability project needs this one to act on its own service accounts.
- */
-export const KBN_OBSERVABILITY_KEY_PATH = resolve(__dirname, '../certs/kibana_observability.key');
-export const KBN_OBSERVABILITY_CERT_PATH = resolve(__dirname, '../certs/kibana_observability.crt');
 export const KBN_P12_PASSWORD = 'storepass';
 export const FLEET_SERVER_KEY_PATH = resolve(__dirname, '../certs/fleet_server.key');
 export const FLEET_SERVER_CERT_PATH = resolve(__dirname, '../certs/fleet_server.crt');
@@ -40,3 +33,38 @@ export const RELAY_KEY_PATH = resolve(__dirname, '../certs/relay.key');
 export const RELAY_CERT_PATH = resolve(__dirname, '../certs/relay.crt');
 export const RELAY_P12_PATH = resolve(__dirname, '../certs/relay.p12');
 export const RELAY_P12_PASSWORD = 'storepass';
+
+/** Serverless project types, as `xpack.cloud.serverless.project_type` names them. */
+export type KbnServerlessProjectType = 'search' | 'observability' | 'security' | 'vectordb';
+
+export interface KbnServerlessUiamCert {
+  readonly certPath: string;
+  readonly keyPath: string;
+}
+
+const serverlessUiamCert = (projectType: KbnServerlessProjectType): KbnServerlessUiamCert => ({
+  certPath: resolve(__dirname, `../certs/kibana_serverless_${projectType}.crt`),
+  keyPath: resolve(__dirname, `../certs/kibana_serverless_${projectType}.key`),
+});
+
+/**
+ * Kibana's UIAM client certificate for each local Serverless project type. UIAM reads the project
+ * type from the certificate, so Kibana must present the one matching its project.
+ */
+export const KBN_SERVERLESS_UIAM_CERTS: Readonly<
+  Record<KbnServerlessProjectType, KbnServerlessUiamCert>
+> = {
+  search: serverlessUiamCert('search'),
+  observability: serverlessUiamCert('observability'),
+  security: serverlessUiamCert('security'),
+  vectordb: serverlessUiamCert('vectordb'),
+};
+
+const isKbnServerlessProjectType = (
+  projectType: string | undefined
+): projectType is KbnServerlessProjectType =>
+  projectType !== undefined && Object.hasOwn(KBN_SERVERLESS_UIAM_CERTS, projectType);
+
+/** Returns Kibana's UIAM client certificate for a local Serverless project, defaulting to search. */
+export const getKbnServerlessUiamCert = (projectType?: string): KbnServerlessUiamCert =>
+  KBN_SERVERLESS_UIAM_CERTS[isKbnServerlessProjectType(projectType) ? projectType : 'search'];
