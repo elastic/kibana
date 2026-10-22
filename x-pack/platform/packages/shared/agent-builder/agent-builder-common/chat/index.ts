@@ -27,6 +27,7 @@ export {
   CHAT_MESSAGE_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
   CONVERSATION_ID_MAX_LENGTH,
+  USER_MESSAGE_AUTHOR_NAME_MAX_LENGTH,
   CONVERSATION_METADATA_KEY_MAX_LENGTH,
   MODEL_CONTEXT_MAX_LENGTH,
   WORKFLOW_CONTEXT_MAX_NAMESPACES,
@@ -52,6 +53,7 @@ export {
   type Conversation,
   type ConversationOrigin,
   type ConversationRoundAuthor,
+  type ConversationRoundAuthorDecoration,
   type ConversationRoundOrigin,
   type ConversationInternalState,
   type TodoItem,
@@ -240,6 +242,7 @@ export {
   type ConversationEventInput,
   type ConversationEvent,
   type EventActor,
+  getEventActorDisplayName,
   type BaseTimelineEventInput,
   type BaseTimelineEvent,
   type UserMessageEventData,
@@ -313,3 +316,8 @@ export {
   assertValidConversationEventType,
   type ConversationAddEventInput,
 } from './timeline_events';
+export type {
+  ChatCallbackEventResponse,
+  ChatCallbackFailureResponse,
+  ChatCallbackResponse,
+} from './callback';

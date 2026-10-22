@@ -97,12 +97,8 @@ export interface Workspace {
   expandSelecteds: (targetOptions: TargetOptions) => {};
   deleteSelection: () => void;
   blocklistSelection: () => void;
-  selectAll: () => void;
   selectNone: () => void;
-  selectInvert: () => void;
-  selectNeighbours: () => void;
   deselectNode: (node: WorkspaceNode) => void;
-  colorSelected: (color: string) => void;
   groupSelections: (node: WorkspaceNode | undefined) => void;
   ungroup: (node: WorkspaceNode | undefined) => void;
   callElasticsearch: (request: any) => void;

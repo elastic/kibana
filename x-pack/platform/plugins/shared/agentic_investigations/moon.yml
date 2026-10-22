@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/agent-builder-server'
   - '@kbn/es-query'
+  - '@kbn/entity-store'
   - '@kbn/agent-builder-platform-plugin'
   - '@kbn/agent-builder-browser'
   - '@kbn/core-http-browser'
@@ -71,6 +72,4 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}
