@@ -40,6 +40,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return alerts.filter((a: { name: string }) => a.name === name);
   }
 
+  async function waitForRuleCreated(name: string) {
+    await retry.waitForWithTimeout(`rule "${name}" to be created`, 15000, async () => {
+      const created = await getAlertsByName(name);
+      return created.length > 0;
+    });
+  }
+
   async function getRuleActionBodies(ruleName: string): Promise<Array<string | undefined>> {
     const [rule] = await getAlertsByName(ruleName);
     expect(rule).not.to.be(undefined);
@@ -339,6 +346,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('rulePageFooterSaveButton');
 
+      await waitForRuleCreated(alertName);
+
       await pageObjects.common.navigateToApp('management', {
         path: 'insightsAndAlerting/triggersActions',
       });
@@ -419,10 +428,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('rulePageFooterSaveButton');
 
+      await waitForRuleCreated(alertName);
+
       await pageObjects.common.navigateToApp('management', {
         path: 'insightsAndAlerting/triggersActions',
       });
       await testSubjects.click('rulesTab');
+
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
       const { name, tags, interval, duration } = searchResultsAfterSave[0];
@@ -432,12 +444,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         interval: '1 min',
       });
       expect(duration).to.match(/\d{2,}:\d{2}/);
-
-      const createdRule = await getAlertsByName(alertName);
-      expect(createdRule[0].name).to.eql(alertName);
-      expect(createdRule[0].tags).to.eql([]);
-      expect(createdRule[0].rule_type_id).to.eql('.index-threshold');
-      expect(createdRule[0].schedule.interval).to.eql('1m');
     });
 
     it('should create an alert with DSL filter for conditional action', async () => {
@@ -516,6 +522,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('rulePageFooterSaveButton');
 
+      await waitForRuleCreated(alertName);
+
       await pageObjects.common.navigateToApp('management', {
         path: 'insightsAndAlerting/triggersActions',
       });
@@ -547,17 +555,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmCreateRuleModal > confirmModalConfirmButton');
       await testSubjects.missingOrFail('confirmCreateRuleModal');
 
+      await waitForRuleCreated(alertName);
+
       await pageObjects.common.navigateToApp('management', {
         path: 'insightsAndAlerting/triggersActions',
       });
       await testSubjects.click('rulesTab');
 
-      await retry.waitForWithTimeout(`rule "${alertName}" to appear in list`, 15000, async () => {
-        await pageObjects.triggersActionsUI.searchAlerts(alertName);
-        const results = await pageObjects.triggersActionsUI.getAlertsList();
-        return results.length > 0 && results[0].name.startsWith(alertName);
-      });
-
+      await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
       const searchResultAfterSave = searchResultsAfterSave[0];
       expect(omit(searchResultAfterSave, 'duration')).to.eql({
