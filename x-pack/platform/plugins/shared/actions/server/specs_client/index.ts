@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { IngestPipelinesAPIProvider } from './api';
-export { IngestPipelinesFixturesProvider } from './fixtures';
+export { SpecsClient } from './specs_client';
+export type { ISpecsClient, SpecsClientOpts, GetSpecParams } from './types';

@@ -4,3 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+module.exports = {
+  preset: '@kbn/jest/jest_node',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/private/ml/kbn-evals-suite-ml'],
+};
