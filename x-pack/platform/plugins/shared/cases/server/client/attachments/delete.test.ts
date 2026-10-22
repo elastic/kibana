@@ -100,6 +100,43 @@ describe('delete', () => {
 
       expect(clientArgs.services.attachmentService.bulkDelete).not.toHaveBeenCalled();
     });
+
+    describe('attachmentsDeleted event', () => {
+      it('emits the event with the alert references of the deleted alert attachment', async () => {
+        clientArgs.services.attachmentService.getter.bulkGetForDeletion.mockResolvedValue([
+          toAttachmentForDeletion(mockCaseComments[3], 'mock-id-4'),
+        ]);
+
+        await deleteComment({ caseID: 'mock-id-4', savedObjectId: 'mock-comment-4' }, clientArgs);
+
+        expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledTimes(1);
+        expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+          clientArgs.request,
+          {
+            caseId: 'mock-id-4',
+            ids: ['mock-comment-4'],
+            attachmentType: 'alert',
+            owner: 'securitySolution',
+            alertIds: ['test-id'],
+            alertIndices: ['test-index'],
+          }
+        );
+      });
+
+      it('emits the event without alert references for a comment attachment', async () => {
+        await deleteComment({ caseID: 'mock-id-1', savedObjectId: 'mock-comment-1' }, clientArgs);
+
+        expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+          clientArgs.request,
+          {
+            caseId: 'mock-id-1',
+            ids: ['mock-comment-1'],
+            attachmentType: 'user',
+            owner: 'securitySolution',
+          }
+        );
+      });
+    });
   });
 
   describe('deleteAll', () => {

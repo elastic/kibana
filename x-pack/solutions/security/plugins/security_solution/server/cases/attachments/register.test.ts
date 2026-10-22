@@ -38,7 +38,7 @@ const formatZodIssues = (issues: Array<{ path: PropertyKey[]; message: string }>
 describe('registerCaseAttachments', () => {
   const experimentalFeatures: ExperimentalFeatures = {
     entityAttachmentsEnabled: false,
-    attackAttachmentsEnabled: false,
+    attackAttachments: false,
   } as ExperimentalFeatures;
 
   const deps = { getStartServices: jest.fn(), logger: loggerMock.create() };
@@ -131,7 +131,7 @@ describe('registerCaseAttachments', () => {
       framework,
       {
         ...experimentalFeatures,
-        attackAttachmentsEnabled: true,
+        attackAttachments: true,
       } as ExperimentalFeatures,
       deps
     );
@@ -178,7 +178,7 @@ describe('registerCaseAttachments', () => {
       // name the flag rather than read as a generic type mismatch.
       expect(
         result.error.issues.map((issue: { message: string }) => issue.message).join('; ')
-      ).toContain('attackAttachmentsEnabled');
+      ).toContain('attackAttachments');
     }
   });
 
