@@ -21,7 +21,7 @@ import {
   withoutTooltips,
   withResults,
 } from './results';
-import { hardenVegaSpec, isSpecObject, setOwn, type SpecObject, stripSpec } from './spec';
+import { hardenBuiltSpec, isSpecObject, setOwn, type SpecObject, stripSpec } from './spec';
 import { vegaConfig, vegaLiteConfig, type VegaTheme } from './theme';
 
 export type VegaMode = 'vega' | 'vega-lite';
@@ -98,9 +98,9 @@ export const toVegaSpec = (
       config: vegaLiteConfig(theme),
       logger: silentLogger(log),
     });
-    return hardenVegaSpec(compiled as unknown as SpecObject);
+    return hardenBuiltSpec(compiled as unknown as SpecObject);
   }
-  return hardenVegaSpec({
+  return hardenBuiltSpec({
     ...safe,
     width,
     height,
@@ -109,13 +109,10 @@ export const toVegaSpec = (
   });
 };
 
-/**
- * A headless view of a copy of `vegaSpec`, which Vega's parser would otherwise
- * mutate. `ast: true` plus the interpreter: no expression reaches `new Function`.
- */
-export const createVegaView = (vegaSpec: SpecObject, log: VegaLog = { errors: [], warnings: [] }) =>
+/** A headless view of the spec `json` serializes. */
+const viewOfJson = (json: string, log: VegaLog) =>
   new View(
-    parse(JSON.parse(JSON.stringify(vegaSpec)) as SpecObject, undefined, {
+    parse(JSON.parse(json) as SpecObject, undefined, {
       ast: true,
     }),
     {
@@ -125,6 +122,13 @@ export const createVegaView = (vegaSpec: SpecObject, log: VegaLog = { errors: []
       logger: silentLogger(log),
     }
   );
+
+/**
+ * A headless view of a copy of `vegaSpec`, which Vega's parser would otherwise
+ * mutate. `ast: true` plus the interpreter: no expression reaches `new Function`.
+ */
+export const createVegaView = (vegaSpec: SpecObject, log: VegaLog = { errors: [], warnings: [] }) =>
+  viewOfJson(JSON.stringify(vegaSpec), log);
 
 /** Passes enough for autosize to re-run on the size the first pass measured. */
 const MAX_PASSES = 4;
@@ -213,9 +217,8 @@ const ESCAPED = /<a[\s>]|<image\b[^>]*href="[^"]|<script|<foreignObject|url\((?!
 /** Ids Vega numbers from process-wide counters: gradients, patterns, and clip paths. */
 const DEF_ID = /(id="|url\(#)((?:p_)?gradient_\d+|clip\d+)/g;
 
-/** A short, stable hash, so a chart's def ids depend only on its spec. */
-const specHash = (spec: SpecObject): string => {
-  const json = JSON.stringify(spec);
+/** A short, stable hash of a spec's JSON, so a chart's def ids depend only on its spec. */
+const specHash = (json: string): string => {
   let hash = 5381;
   for (let index = 0; index < json.length; index += 1) {
     hash = (hash * 33 + json.charCodeAt(index)) % 4294967296;
@@ -279,25 +282,26 @@ const drawView = (view: View, log: VegaLog): string => {
   return markup;
 };
 
+/** `markup` drawn at `width` × `height`, its drawing scaled into its `viewBox`. */
+const sized = (markup: string, { width, height }: { width: number; height: number }) =>
+  markup.replace(
+    /^<svg([^>]*?) width="[^"]*" height="[^"]*"/,
+    `<svg$1 width="${width}" height="${height}"`
+  );
+
 export const renderVegaSvg = (
   vegaSpec: SpecObject,
   { width, height }: { width: number; height: number }
 ): VegaSvg => {
   const log: VegaLog = { errors: [], warnings: [] };
-  const idPrefix = `isomer-vega-${specHash(vegaSpec)}-`;
+  const json = JSON.stringify(vegaSpec);
+  const idPrefix = `isomer-vega-${specHash(json)}-`;
   // A tooltip only shows on hover, which a static drawing never has.
-  const view = createVegaView(withoutTooltips(vegaSpec), log);
+  const drawn = withoutTooltips(vegaSpec);
+  const view = viewOfJson(drawn === vegaSpec ? json : JSON.stringify(drawn), log);
   try {
     const markup = drawView(view, log);
-    return {
-      svg: markup
-        .replace(
-          /^<svg([^>]*?) width="[^"]*" height="[^"]*"/,
-          `<svg$1 width="${width}" height="${height}"`
-        )
-        .replace(DEF_ID, `$1${idPrefix}$2`),
-      log,
-    };
+    return { svg: sized(markup, { width, height }).replace(DEF_ID, `$1${idPrefix}$2`), log };
   } finally {
     view.finalize();
   }
@@ -323,7 +327,8 @@ export const pruneVegaResults = <T extends VegaChartInput>(
     results: results.map((result, index) => ({ ...result, values: resultMarker(index) })),
   };
   try {
-    for (const theme of themes) {
+    // Each recording run draws the full results, so its SVG is the full drawing the pruned one must match.
+    const fullSvgs = themes.map((theme) => {
       const log: VegaLog = { errors: [], warnings: [] };
       const compiled = withoutTooltips(toVegaSpec(marked, theme, log));
       const found = replaceMarkers(compiled, (index) =>
@@ -342,11 +347,11 @@ export const pruneVegaResults = <T extends VegaChartInput>(
         logger: silentLogger(log),
       });
       try {
-        drawView(view, log);
+        return sized(drawView(view, log), input);
       } finally {
         view.finalize();
       }
-    }
+    });
     const pruned = {
       ...input,
       results: results.map((result, index) => ({
@@ -354,12 +359,11 @@ export const pruneVegaResults = <T extends VegaChartInput>(
         values: pruneToReads(result.values, records[index]!),
       })),
     };
-    for (const theme of themes) {
-      const full = renderVegaSvg(toVegaSpec(input, theme), input).svg;
-      const kept = renderVegaSvg(toVegaSpec(pruned, theme), input).svg;
-      if (comparable(full) !== comparable(kept)) return input;
-    }
-    return pruned;
+    const same = themes.every(
+      (theme, index) =>
+        comparable(renderVegaSvg(toVegaSpec(pruned, theme), input).svg) === fullSvgs[index]
+    );
+    return same ? pruned : input;
   } catch {
     return input;
   }

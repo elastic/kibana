@@ -118,6 +118,16 @@ describe('stripSpec', () => {
     expect(({} as { polluted?: boolean }).polluted).toBeUndefined();
     expect(Object.keys(stripped)).toContain('__proto__');
   });
+
+  it('keeps a __proto__ key in inline rows as data, in a fresh copy of the rows', () => {
+    const spec = JSON.parse(
+      '{"data": [{"name": "t", "values": [{"__proto__": {"polluted": true}, "a": 1}]}]}'
+    ) as SpecObject;
+    const [row] = ((stripSpec(spec).data as SpecObject[])[0].values as SpecObject[]) ?? [];
+    expect(Object.getPrototypeOf(row)).toBe(Object.prototype);
+    expect(Object.keys(row)).toEqual(['__proto__', 'a']);
+    expect(row).not.toBe(((spec.data as SpecObject[])[0].values as SpecObject[])[0]);
+  });
 });
 
 describe('hardenVegaSpec', () => {
