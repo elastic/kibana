@@ -318,6 +318,7 @@
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
     "@kbn/core-security-server",
+    "@kbn/css-utils",
     "@kbn/custom-content-common",
     "@kbn/custom-content-renderer",
   ]
