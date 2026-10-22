@@ -144,29 +144,6 @@ describe('SubjectView', () => {
     expect(screen.getByTestId('investigationSubjectTitle')).toHaveTextContent('CPU high');
   });
 
-  it('links a significant event to the Significant Events app, opened in place', async () => {
-    const { services, navigate } = createShare();
-    renderView(
-      { ...base, subjectType: 'significant_event', subjectId: 'event-1', summary: 'Errors' },
-      services
-    );
-
-    await waitFor(() =>
-      expect(screen.getByTestId('investigationSubject-significant_event').tagName).toBe('A')
-    );
-    const row = screen.getByTestId('investigationSubject-significant_event');
-    expect(row).toHaveAttribute(
-      'href',
-      '/located/SIGNIFICANT_EVENTS_APP_LOCATOR?{"tab":"significant_events","selectedEvent":"event-1"}'
-    );
-
-    fireEvent.click(row, { metaKey: true });
-    expect(navigate).not.toHaveBeenCalled();
-
-    fireEvent.click(row);
-    expect(navigate).toHaveBeenCalledWith({ tab: 'significant_events', selectedEvent: 'event-1' });
-  });
-
   it('renders a significant event and a question by their summary, without a link', () => {
     renderView({
       ...base,
@@ -353,7 +330,7 @@ describe('createSubjectAttachmentRenderer', () => {
       <EuiProvider>
         <I18nProvider>
           <SubjectContent
-            document={{ ...base, subjectType: 'significant_event', subjectId: 'event-1' }}
+            document={{ ...base, subjectType: 'alert', subjectId: 'alert-1' }}
             variant="inline"
           />
         </I18nProvider>
@@ -361,9 +338,9 @@ describe('createSubjectAttachmentRenderer', () => {
     );
 
     await waitFor(() =>
-      expect(screen.getByTestId('investigationSubject-significant_event')).toHaveAttribute(
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute(
         'href',
-        '/located/SIGNIFICANT_EVENTS_APP_LOCATOR?{"tab":"significant_events","selectedEvent":"event-1"}'
+        '/located/ALERTS_LOCATOR?{"alertId":"alert-1"}'
       )
     );
   });

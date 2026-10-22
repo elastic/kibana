@@ -23,7 +23,7 @@ export interface AgenticInvestigationsPublicSetupDependencies {
 export interface AgenticInvestigationsPublicStartDependencies {
   agentBuilder?: AgentBuilderPluginStart;
   proposals?: ProposalsPublicPluginStart;
-  /** Locators that link investigation subjects (alerts, significant events) to their pages. */
+  /** Locators that link alert subjects to their details pages. */
   share?: SharePluginStart;
 }
 
