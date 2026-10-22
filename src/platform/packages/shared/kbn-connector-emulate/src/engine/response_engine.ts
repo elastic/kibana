@@ -55,6 +55,8 @@ export interface RejectedResponse {
   /** `METHOD /path` as the fixture or recording names it. */
   readonly operation: string;
   readonly violations: readonly Violation[];
+  /** Set by `combineEmulators`: the connector whose fixture or recording it is. */
+  readonly connector?: string;
 }
 
 export interface ResponseEngineOptions {

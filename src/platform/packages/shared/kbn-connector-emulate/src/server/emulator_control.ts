@@ -23,6 +23,19 @@ export interface EmulatorCalls {
 /** Answers requests to the control endpoints; the proxy hands it requests under `CONTROL_PATH`. */
 export type EmulatorControlHandler = (request: Request) => Promise<Response>;
 
+/** What the control endpoints serve: an emulator, or several combined by `combineEmulators`. */
+export interface ControlledEmulator extends Pick<Emulator, 'calls' | 'operations'> {
+  /** Empties the calls of `connector`, or all calls. */
+  readonly reset: (connector?: string) => void;
+  /** Set for combined emulators: the connectors `?connector=` can scope the endpoints to. */
+  readonly connectors?: readonly string[];
+}
+
+export interface EmulatorControlOptions {
+  /** Scopes every endpoint to one connector of an emulator combined by `combineEmulators`. */
+  readonly connector?: string;
+}
+
 /** Reads and resets a running emulator through its control endpoints. */
 export interface EmulatorControl {
   /** The calls the emulator received, from index `since` (default 0) on. */
@@ -42,36 +55,67 @@ export const isControlPath = (path: string): boolean =>
 
 /**
  * Serves an emulator's control endpoints: `GET /_mock/calls?since=<n>`, `POST /_mock/reset` and
- * `GET /_mock/operations`, all as JSON. They are for local test runs and take no credentials.
+ * `GET /_mock/operations`, all as JSON. For emulators combined by `combineEmulators`, each takes
+ * `?connector=<id>` to see or reset only that connector's calls and operations. They are for
+ * local test runs and take no credentials.
  */
 export const createEmulatorControlHandler = ({
   calls,
   operations,
   reset,
-}: Pick<Emulator, 'calls' | 'operations' | 'reset'>): EmulatorControlHandler => {
-  const routes: Record<string, { method: string; answer: (url: URL) => Response }> = {
+  connectors,
+}: ControlledEmulator): EmulatorControlHandler => {
+  const byConnector = <T extends { readonly connector?: string }>(
+    items: readonly T[],
+    connector: string | undefined
+  ): readonly T[] =>
+    connector === undefined ? items : items.filter((item) => item.connector === connector);
+
+  const routes: Record<
+    string,
+    { method: string; answer: (request: { url: URL; connector?: string }) => Response }
+  > = {
     [`${CONTROL_PATH}/calls`]: {
       method: 'GET',
-      answer: ({ searchParams }) => {
+      answer: ({ url: { searchParams }, connector }) => {
         const since = Number(searchParams.get('since') ?? 0);
         if (!Number.isSafeInteger(since) || since < 0) {
           return problem(400, 'Invalid since', 'since must be a non-negative integer');
         }
-        const body: EmulatorCalls = { calls: calls.slice(since), total: calls.length };
+        const scoped = byConnector(calls, connector);
+        const body: EmulatorCalls = { calls: scoped.slice(since), total: scoped.length };
         return Response.json(body);
       },
     },
     [`${CONTROL_PATH}/reset`]: {
       method: 'POST',
-      answer: () => {
-        reset();
+      answer: ({ connector }) => {
+        reset(connector);
         return new Response(null, { status: 204 });
       },
     },
     [`${CONTROL_PATH}/operations`]: {
       method: 'GET',
-      answer: () => Response.json({ operations }),
+      answer: ({ connector }) => Response.json({ operations: byConnector(operations, connector) }),
     },
+  };
+
+  // Rejects ?connector= for a single emulator, and connectors it doesn't combine.
+  const connectorProblem = (connector: string): Response | undefined => {
+    if (!connectors) {
+      return problem(
+        400,
+        'Not a combined emulator',
+        `connector=${connector}: the emulator serves one connector; omit the connector parameter`
+      );
+    }
+    if (!connectors.includes(connector)) {
+      return problem(
+        400,
+        'Unknown connector',
+        `connector=${connector}: the emulator serves ${connectors.join(', ')}`
+      );
+    }
   };
 
   return async (request) => {
@@ -89,7 +133,9 @@ export const createEmulatorControlHandler = ({
         allow: route.method,
       });
     }
-    return route.answer(url);
+    const connector = url.searchParams.get('connector') ?? undefined;
+    const invalid = connector === undefined ? undefined : connectorProblem(connector);
+    return invalid ?? route.answer({ url, connector });
   };
 };
 
@@ -103,10 +149,20 @@ const send = async (url: URL, method: string): Promise<Response> => {
 
 /**
  * Returns a client for the control endpoints of an emulator served by `createEmulatorProxy` at
- * `proxyUrl`, e.g. for a Scout or FTR test that drives Kibana against the emulator.
+ * `proxyUrl`, e.g. for a Scout or FTR test that drives Kibana against the emulator. With
+ * `connector`, it sees and resets only that connector's calls of a combined emulator.
  */
-export const createEmulatorControl = (proxyUrl: string | URL): EmulatorControl => {
-  const endpoint = (path: string) => new URL(`${CONTROL_PATH}/${path}`, proxyUrl);
+export const createEmulatorControl = (
+  proxyUrl: string | URL,
+  { connector }: EmulatorControlOptions = {}
+): EmulatorControl => {
+  const endpoint = (path: string) => {
+    const url = new URL(`${CONTROL_PATH}/${path}`, proxyUrl);
+    if (connector !== undefined) {
+      url.searchParams.set('connector', connector);
+    }
+    return url;
+  };
   return {
     calls: async (since = 0) => {
       const url = endpoint('calls');
