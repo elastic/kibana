@@ -8,7 +8,7 @@
 import type { ActionMetadata } from '@kbn/workflows';
 import { actionCategorySchema, actionImpactSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { MAX_CHARTS_SUMMARY_BUCKETS } from './constants';
+import { MAX_CHARTS_SUMMARY_BUCKETS, PROPOSAL_CATEGORY_TODO } from './constants';
 
 /**
  * What a human concluded. Absent until someone decides, which is what makes
@@ -415,6 +415,16 @@ export interface ProposalChartsSummaryResponse {
  */
 export const isAwaitingDecision = (proposal: Pick<Proposal, 'status'>): boolean =>
   proposal.status === 'pending';
+
+/**
+ * A to-do for a human: something the analyst carries out themselves, so approving it records that
+ * they did. Decision surfaces present it as "I've applied" rather than Approve/Decline, and as
+ * "Applied" once marked. Keyed on the category rather than on the absence of an action, so a
+ * producer states it explicitly, and a proposal without an action that still asks for permission
+ * (to run an analysis, say) keeps Approve/Decline.
+ */
+export const isTodoProposal = (proposal: Pick<Proposal, 'category'>): boolean =>
+  proposal.category === PROPOSAL_CATEGORY_TODO;
 
 /**
  * Approved, but the action it triggers has not finished running yet — `executing`, or briefly

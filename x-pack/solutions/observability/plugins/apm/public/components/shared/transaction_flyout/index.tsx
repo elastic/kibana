@@ -5,35 +5,25 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiHorizontalRule,
-  EuiSkeletonText,
-  EuiPortal,
-  EuiSpacer,
-  EuiTabbedContent,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
+import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import React from 'react';
-import { TransactionMetadata } from '../metadata_table/transaction_metadata';
-import { getSpanLinksTabContent } from '../span_links/span_links_tab_content';
-import { getGenAiTabContent } from '../genai_tab/get_genai_tab_content';
-import { useGenAiData } from '../genai_tab/use_genai_data';
-import { TRANSACTION_FLYOUT_EBT_ELEMENTS } from './ebt_constants';
-import { TransactionSummary } from '../summary/transaction_summary';
-import { TransactionActionMenu } from '../transaction_action_menu/transaction_action_menu';
-import { FlyoutTopLevelProperties } from './flyout_top_level_properties';
-import { ResponsiveFlyout } from '../responsive_flyout';
-import type { SpanLinksCount } from '../span_links';
-import { DroppedSpansWarning } from './dropped_spans_warning';
-import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import type { SpanLinksCount } from '../span_links';
+import { TRANSACTION_FLYOUT_EBT_ELEMENTS } from './ebt_constants';
+import { useTransactionFlyoutFooterMenu } from './footer/use_transaction_flyout_footer_menu';
+import { useDroppedSpansCallout } from './use_dropped_spans_callout';
+import {
+  TRANSACTION_DETAILS_LABEL,
+  useTransactionFlyoutHeader,
+} from './use_transaction_flyout_header';
+import { useTransactionFlyoutTabs } from './use_transaction_flyout_tabs';
+
+const INVESTIGATE_LABEL = i18n.translate('xpack.apm.transactionActionMenu.actionsButtonLabel', {
+  defaultMessage: 'Investigate',
+});
 
 interface Props {
   transactionId: string;
@@ -58,7 +48,7 @@ export function TransactionFlyout({
   start,
   end,
 }: Props) {
-  const { data: transaction, status } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/traces/{traceId}/transactions/{transactionId}', {
         params: { path: { traceId, transactionId }, query: { start, end } },
@@ -67,127 +57,66 @@ export function TransactionFlyout({
     [traceId, transactionId, start, end]
   );
 
-  const isLoading = isPending(status);
+  // The fetcher keeps the previous document while the next one loads; gate on the status so a
+  // switch between waterfall items never shows the previous transaction.
+  const isTransactionLoading = isPending(status);
+  const transaction = isTransactionLoading ? undefined : data;
 
-  const transactionDetailsTitle = i18n.translate(
-    'xpack.apm.transactionDetails.transFlyout.transactionDetailsTitle',
-    {
-      defaultMessage: 'Transaction details',
-    }
-  );
-
-  return (
-    <EuiPortal>
-      <ResponsiveFlyout
-        onClose={onClose}
-        ownFocus={true}
-        maxWidth={false}
-        aria-label={transactionDetailsTitle}
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiTitle>
-                <h2>{transactionDetailsTitle}</h2>
-              </EuiTitle>
-            </EuiFlexItem>
-
-            {transaction && (
-              <EuiFlexItem grow={false}>
-                <TransactionActionMenu isLoading={false} transaction={transaction} />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <EuiSkeletonText isLoading={isLoading}>
-            {transaction && (
-              <TransactionFlyoutBody
-                transaction={transaction!}
-                errorCount={errorCount}
-                rootTransactionDuration={rootTransactionDuration}
-                spanLinksCount={spanLinksCount}
-                flyoutDetailTab={flyoutDetailTab}
-              />
-            )}
-          </EuiSkeletonText>
-        </EuiFlyoutBody>
-      </ResponsiveFlyout>
-    </EuiPortal>
-  );
-}
-
-function TransactionFlyoutBody({
-  transaction,
-  errorCount,
-  rootTransactionDuration,
-  spanLinksCount,
-  flyoutDetailTab,
-}: {
-  transaction: Transaction;
-  errorCount: number;
-  rootTransactionDuration?: number;
-  spanLinksCount: SpanLinksCount;
-  flyoutDetailTab?: string;
-}) {
-  const spanLinksTabContent = getSpanLinksTabContent({
-    spanLinksCount,
-    traceId: transaction.trace?.id,
-    spanId: transaction.transaction?.id,
-    processorEvent: ProcessorEvent.transaction,
+  const { metaBlocks, infoBlocks, badges } = useTransactionFlyoutHeader({
+    transaction,
+    errorCount,
+    rootTransactionDuration,
   });
-
-  const { metadata, isMetadataLoading, isGenAiSpan, genAi } = useGenAiData({
-    processorEvent: ProcessorEvent.transaction,
-    id: transaction.transaction?.id,
-    timestamp: transaction['@timestamp'],
+  const tabs = useTransactionFlyoutTabs({ transaction, spanLinksCount });
+  const droppedSpansCallout = useDroppedSpansCallout(transaction);
+  const { panels, isLoading, hasActions, customLinkFlyout } = useTransactionFlyoutFooterMenu({
+    transaction,
+    isTransactionLoading,
   });
-
-  const { core } = useApmPluginContext();
-
-  const genAiTabContent = getGenAiTabContent({
-    isGenAiSpan,
-    genAi,
-    ebt: { element: TRANSACTION_FLYOUT_EBT_ELEMENTS.TABS },
-    reportEvent: core.analytics.reportEvent,
-    resourceId: transaction.transaction?.id,
-  });
-
-  const tabs = [
-    {
-      id: 'metadata',
-      name: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
-        defaultMessage: 'Metadata',
-      }),
-      content: (
-        <>
-          <EuiSpacer size="m" />
-          <TransactionMetadata
-            transaction={transaction}
-            prefetchedMetadata={{ metadata, isLoading: isMetadataLoading }}
-          />
-        </>
-      ),
-    },
-    ...(genAiTabContent ? [genAiTabContent] : []),
-    ...(spanLinksTabContent ? [spanLinksTabContent] : []),
-  ];
-
-  const initialTab = tabs.find(({ id }) => id === flyoutDetailTab) ?? tabs[0];
 
   return (
     <>
-      <FlyoutTopLevelProperties transaction={transaction} />
-      <EuiSpacer size="m" />
-      <TransactionSummary
-        transaction={transaction}
-        totalDuration={rootTransactionDuration}
-        errorCount={errorCount}
-        coldStartBadge={transaction.faas?.coldstart}
-      />
-      <EuiHorizontalRule margin="m" />
-      <DroppedSpansWarning transactionDoc={transaction} />
-      <EuiTabbedContent initialSelectedTab={initialTab} tabs={tabs} />
+      <FlyoutTemplate
+        data-test-subj="transactionFlyout"
+        onClose={onClose}
+        ownFocus
+        size="m"
+        tabs={tabs.map(({ tab }) => tab)}
+        defaultSelectedTabId={flyoutDetailTab}
+        tabBarProps={{ 'data-test-subj': 'transactionFlyoutTabs' }}
+      >
+        <FlyoutTemplate.Header
+          title={TRANSACTION_DETAILS_LABEL}
+          data-test-subj="transactionFlyoutHeader"
+        >
+          {metaBlocks}
+          {infoBlocks}
+          {badges}
+        </FlyoutTemplate.Header>
+        <FlyoutTemplate.Body>
+          {droppedSpansCallout}
+          {isTransactionLoading ? <EuiSkeletonText isLoading /> : null}
+          {tabs.map(({ tab, panel }) => (
+            <FlyoutTemplate.Body.TabPanel key={tab.id} tabId={tab.id}>
+              {panel}
+            </FlyoutTemplate.Body.TabPanel>
+          ))}
+        </FlyoutTemplate.Body>
+        <FlyoutTemplate.Footer>
+          <FlyoutTemplate.Footer.PrimaryActionMenu
+            label={INVESTIGATE_LABEL}
+            panels={panels}
+            isLoading={isLoading}
+            isDisabled={!hasActions}
+            data-test-subj="transactionFlyoutActionsButton"
+            {...getEbtProps({
+              action: EBT_CLICK_ACTIONS.OPEN_ACTIONS,
+              element: TRANSACTION_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
+            })}
+          />
+        </FlyoutTemplate.Footer>
+      </FlyoutTemplate>
+      {customLinkFlyout}
     </>
   );
 }
