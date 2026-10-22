@@ -35,7 +35,6 @@ import {
 } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { attachmentChangesToEvents } from '@kbn/agent-builder-server/attachments';
-import type { CallbackConversationResolution } from '@kbn/agent-builder-server/callbacks';
 import type {
   AbortExecutionOptions,
   AbortExecutionResult,
@@ -819,65 +818,64 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   }> {
     const validatedParams = await this.validateAttachments(params, request);
     const receivedAt = new Date();
-    const { origin, conversationId } = validatedParams;
+    const { origin, conversationId, agentId } = validatedParams;
 
-    const resolution = await this.resolveConversation({
+    const resolved = await this.resolveConversation({
       conversationId,
+      agentId,
       origin,
       spaceId,
       request,
       conversationClient,
     });
+    const resolvedParams = { ...validatedParams, agentId: resolved.agentId };
 
     const conversation = await getConversation({
-      agentId: validatedParams.agentId ?? agentBuilderDefaultAgentId,
-      conversationId: resolution?.conversationId,
-      autoCreateConversationWithId: validatedParams.autoCreateConversationWithId,
+      agentId: resolved.agentId,
+      conversationId: resolved.conversationId,
+      autoCreateConversationWithId: resolvedParams.autoCreateConversationWithId,
       conversationClient,
-      accessControl: validatedParams.accessControl,
-      readOnly: validatedParams.readOnly,
+      accessControl: resolvedParams.accessControl,
+      readOnly: resolvedParams.readOnly,
       origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
-      subagentCreation: validatedParams.subagentCreation,
+      subagentCreation: resolvedParams.subagentCreation,
     });
 
-    return {
-      validatedParams: resolution?.agentId
-        ? { ...validatedParams, agentId: resolution.agentId }
-        : validatedParams,
-      conversation,
-      receivedAt,
-    };
+    return { validatedParams: resolvedParams, conversation, receivedAt };
   }
 
   /**
-   * The conversation an execution continues, and the agent it runs on when a resolver names one:
-   * the conversation it names, else the one its origin continues. `undefined` starts a new conversation.
+   * The conversation an execution continues and the agent it runs on: the ones it names, else the
+   * ones its origin resolves to. No conversation id starts a new conversation.
    */
   private async resolveConversation({
     conversationId,
+    agentId = agentBuilderDefaultAgentId,
     origin,
     spaceId,
     request,
     conversationClient,
   }: {
     conversationId?: string;
+    agentId?: string;
     origin?: ExecutionConversationOrigin;
     spaceId: string;
     request: KibanaRequest;
     conversationClient: ConversationClient;
-  }): Promise<CallbackConversationResolution | undefined> {
-    if (conversationId) {
-      return { conversationId };
+  }): Promise<{ conversationId?: string; agentId: string }> {
+    if (conversationId || !origin) {
+      return { conversationId, agentId };
     }
 
-    if (!origin) {
-      return undefined;
-    }
-
-    return this.deps.callbackDeliveryService.resolveConversation(
+    const resolution = await this.deps.callbackDeliveryService.resolveConversation(
       { origin, spaceId, request },
       conversationClient
     );
+
+    return {
+      conversationId: resolution?.conversationId,
+      agentId: resolution?.agentId ?? agentId,
+    };
   }
 
   private async writeUserMessage({
