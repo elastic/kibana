@@ -186,4 +186,31 @@ describe('projectSpec', () => {
     });
     expect(projected.components).not.toHaveProperty('schemas.Other');
   });
+
+  it('keeps operations a path inherits through a Path Item $ref', () => {
+    const referencing = {
+      openapi: '3.1.0',
+      info: { title: 'Things', version: '1' },
+      paths: { '/things': { $ref: '#/components/pathItems/Things' } },
+      components: {
+        pathItems: {
+          Things: {
+            get: { responses: { '200': ok({ $ref: '#/components/schemas/Thing' }) } },
+            delete: { responses: { '204': { description: 'deleted' } } },
+          },
+        },
+        schemas: { Thing: { type: 'object' } },
+      },
+    };
+
+    const projected = projectSpec(referencing, [{ method: 'get', path: '/things' }]);
+
+    expect(projected.paths).toEqual({
+      '/things': {
+        get: { responses: { '200': okProjected({ $ref: '#/components/schemas/Thing' }) } },
+      },
+    });
+    expect(projected.components).toEqual({ schemas: { Thing: { type: 'object' } } });
+    expect(loadContractOperations(projected)).toHaveLength(1);
+  });
 });
