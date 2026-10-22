@@ -34,7 +34,7 @@ import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/err
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
-import { resolveRuleEventOrigin } from '../event_origin/rule_event_origin';
+import { resolveEventOrigin } from '../event_origin/event_origin';
 import type { RuleEventOrigin } from '../event_origin/origin_schemas';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
@@ -240,8 +240,8 @@ export class RulesClient {
   }
 
   /** Channel and app for a rule-change event. */
-  private resolveRuleEventOrigin(): RuleEventOrigin {
-    return resolveRuleEventOrigin(this.request, this.rulesClientOptions);
+  private resolveEventOrigin(): RuleEventOrigin {
+    return resolveEventOrigin(this.request, this.rulesClientOptions);
   }
 
   /**
@@ -708,7 +708,7 @@ export class RulesClient {
       references: persisted.references,
     });
     this.ruleEventPublisher.emitRuleCreated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveEventOrigin() },
     ]);
     return rule;
   }
@@ -771,7 +771,7 @@ export class RulesClient {
         ruleId: rule.id,
         spaceId,
         rule,
-        origin: this.resolveRuleEventOrigin(),
+        origin: this.resolveEventOrigin(),
       });
     }
 
@@ -846,7 +846,7 @@ export class RulesClient {
     });
 
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveEventOrigin() },
     ]);
 
     return rule;
@@ -916,7 +916,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleDeleted(this.eventContext, [
-      { ruleId: id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
+      { ruleId: id, spaceId: this.spaceId, rule, origin: this.resolveEventOrigin() },
     ]);
   }
 
@@ -1014,7 +1014,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleEnabled(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveEventOrigin() },
     ]);
     return rule;
   }
@@ -1054,7 +1054,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleDisabled(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveEventOrigin() },
     ]);
     return rule;
   }
@@ -1265,9 +1265,9 @@ export class RulesClient {
                 attrs: { ...doc.attrs, version: this.getNextVersion(doc.attrs.version) },
                 references: doc.references,
               }),
-              origin: this.resolveRuleEventOrigin(),
+              origin: this.resolveEventOrigin(),
             }
-          : { ruleId: result.id, spaceId, origin: this.resolveRuleEventOrigin() }
+          : { ruleId: result.id, spaceId, origin: this.resolveEventOrigin() }
       );
     }
 
@@ -1392,7 +1392,7 @@ export class RulesClient {
           ruleId: rule.id,
           spaceId,
           rule,
-          origin: this.resolveRuleEventOrigin(),
+          origin: this.resolveEventOrigin(),
         });
       }
 
@@ -1478,7 +1478,7 @@ export class RulesClient {
           ruleId: rule.id,
           spaceId,
           rule,
-          origin: this.resolveRuleEventOrigin(),
+          origin: this.resolveEventOrigin(),
         });
       }
     }
@@ -1607,7 +1607,7 @@ export class RulesClient {
         ruleId: rule.id,
         spaceId,
         rule,
-        origin: this.resolveRuleEventOrigin(),
+        origin: this.resolveEventOrigin(),
       });
     }
 
@@ -1924,7 +1924,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveEventOrigin() },
     ]);
     return { rule, created: false };
   }

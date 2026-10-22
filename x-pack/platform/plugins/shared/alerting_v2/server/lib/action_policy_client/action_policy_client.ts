@@ -22,6 +22,8 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { Request } from '@kbn/core-di-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
@@ -39,6 +41,7 @@ import {
   getInvalidActionPolicyDataMessage,
 } from '../errors/action_policy_error_messages';
 import { EncryptedSavedObjectsClientToken } from '../dispatcher/steps/dispatch_step_tokens';
+import { EventOriginToken, type EventOrigin } from '../event_origin/token';
 import { PolicyMatcher } from '../dispatcher/state';
 import { ActionPolicySavedObjectServiceScopedToken } from '../services/action_policy_saved_object_service/tokens';
 import type { ActionPolicySavedObjectServiceContract } from '../services/action_policy_saved_object_service/types';
@@ -50,7 +53,16 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
+import type { EbtServiceContract } from '../services/ebt_service/ebt_service';
+import { EbtServiceToken } from '../services/ebt_service/tokens';
+import {
+  ACTION_POLICY_EBT_EVENT_TYPE_BY_OPERATION,
+  buildActionPolicyChangedEventData,
+  type ActionPolicyOperation,
+} from '../telemetry/action_policy_ebt_event';
+import { resolveEventOrigin } from '../event_origin/event_origin';
 import { buildSoSearch } from '../build_so_search';
+import { savedObjectNamespacesToSpaceId } from '../space_id_to_namespace';
 import { applyPatch } from '../apply_patch';
 import { buildActionPolicySoFilter } from './build_action_policy_filter';
 import { groupRoutingTags } from './group_routing_tags';
@@ -156,9 +168,73 @@ export class ActionPolicyClient {
     @inject(ActionPolicyNamespaceToken)
     private readonly namespace: string | undefined,
     @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract,
-    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
+    @inject(Request) private readonly request: KibanaRequest,
+    @inject(EventOriginToken) private readonly actor: EventOrigin,
+    @inject(EbtServiceToken) private readonly ebtService: EbtServiceContract
   ) {
     this.logger = loggerService.forSubsystem('actionPolicyClient');
+  }
+
+  /**
+   * Reports one telemetry event per policy. The origin is resolved here so reads never pay for it.
+   * Call only after the write succeeded. A failure is logged rather than thrown because the write
+   * has already happened.
+   */
+  private reportActionPolicyChanged(
+    operation: ActionPolicyOperation,
+    policies: ActionPolicyResponse[]
+  ): void {
+    if (policies.length === 0) {
+      return;
+    }
+
+    try {
+      const origin = { actor: this.actor, ...resolveEventOrigin(this.request) };
+      const eventType = ACTION_POLICY_EBT_EVENT_TYPE_BY_OPERATION[operation];
+      const spaceId = savedObjectNamespacesToSpaceId(this.namespace ? [this.namespace] : undefined);
+
+      for (const policy of policies) {
+        this.ebtService.reportEvent(
+          eventType,
+          buildActionPolicyChangedEventData(policy, origin, spaceId)
+        );
+      }
+    } catch (error) {
+      this.logger.warn({
+        message: `Failed to build the ${operation} telemetry event`,
+        code: ALERTING_LOG_CODES.TELEMETRY_EBT_REPORT_FAILED,
+        error,
+      });
+    }
+  }
+
+  /**
+   * Reports a change for policies written by a bulk operation. The policies are read back with
+   * their stored state, and a failed read is logged rather than thrown because the write has
+   * already happened. Callers do not await it, so the read does not delay the bulk response.
+   */
+  private async reportBulkActionPolicyChange(
+    operation: ActionPolicyOperation,
+    ids: string[]
+  ): Promise<void> {
+    if (ids.length === 0) {
+      return;
+    }
+
+    try {
+      this.reportActionPolicyChanged(operation, await this.getActionPolicies({ ids }));
+    } catch (error) {
+      this.logTelemetryReadFailure(operation, error);
+    }
+  }
+
+  private logTelemetryReadFailure(operation: ActionPolicyOperation, error: unknown): void {
+    this.logger.warn({
+      message: `Failed to read action policies for the ${operation} telemetry event`,
+      code: ALERTING_LOG_CODES.TELEMETRY_EBT_REPORT_FAILED,
+      error,
+    });
   }
 
   /**
@@ -275,16 +351,12 @@ export class ActionPolicyClient {
       updatedAt: now,
     });
 
+    let id: string;
     try {
-      const { id } = await this.actionPolicySavedObjectService.create({
+      ({ id } = await this.actionPolicySavedObjectService.create({
         attrs: attributes,
         id: params.options?.id,
-      });
-
-      return transformActionPolicySoAttributesToApiResponse({
-        id,
-        attributes,
-      });
+      }));
     } catch (e) {
       this.markApiKeysForInvalidation(attributes.apiKey, false, params.options?.id);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
@@ -296,6 +368,10 @@ export class ActionPolicyClient {
       }
       throw e;
     }
+
+    const policy = transformActionPolicySoAttributesToApiResponse({ id, attributes });
+    this.reportActionPolicyChanged('created', [policy]);
+    return policy;
   }
 
   public async getActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
@@ -382,10 +458,12 @@ export class ActionPolicyClient {
 
     this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, params.options.id);
 
-    return transformActionPolicySoAttributesToApiResponse({
+    const policy = transformActionPolicySoAttributesToApiResponse({
       id: params.options.id,
       attributes: nextAttrs,
     });
+    this.reportActionPolicyChanged('updated', [policy]);
+    return policy;
   }
 
   public async findActionPolicies(
@@ -471,11 +549,15 @@ export class ActionPolicyClient {
 
   public async enableActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
     await this.licenseService.assertActionPoliciesLicense();
-    return this.updatePolicyState(id, { enabled: true });
+    const policy = await this.updatePolicyState(id, { enabled: true });
+    this.reportActionPolicyChanged('enabled', [policy]);
+    return policy;
   }
 
   public async disableActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
-    return this.updatePolicyState(id, { enabled: false });
+    const policy = await this.updatePolicyState(id, { enabled: false });
+    this.reportActionPolicyChanged('disabled', [policy]);
+    return policy;
   }
 
   public async snoozeActionPolicy({
@@ -534,13 +616,17 @@ export class ActionPolicyClient {
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
     await this.licenseService.assertActionPoliciesLicense();
-    return this.executeBulkUpdate(ids, { enabled: true });
+    const { response, succeededIds } = await this.executeBulkUpdate(ids, { enabled: true });
+    void this.reportBulkActionPolicyChange('enabled', succeededIds);
+    return response;
   }
 
   public async bulkDisableActionPolicies({
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
-    return this.executeBulkUpdate(ids, { enabled: false });
+    const { response, succeededIds } = await this.executeBulkUpdate(ids, { enabled: false });
+    void this.reportBulkActionPolicyChange('disabled', succeededIds);
+    return response;
   }
 
   public async bulkSnoozeActionPolicies({
@@ -548,13 +634,15 @@ export class ActionPolicyClient {
     snoozedUntil,
   }: BulkSnoozeActionPoliciesParams): Promise<BulkResponse> {
     validateDateString(snoozedUntil);
-    return this.executeBulkUpdate(ids, { snoozedUntil });
+    const { response } = await this.executeBulkUpdate(ids, { snoozedUntil });
+    return response;
   }
 
   public async bulkUnsnoozeActionPolicies({
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
-    return this.executeBulkUpdate(ids, { snoozedUntil: null });
+    const { response } = await this.executeBulkUpdate(ids, { snoozedUntil: null });
+    return response;
   }
 
   /**
@@ -583,6 +671,7 @@ export class ActionPolicyClient {
     const blockedIds = new Set(invalidationErrors.map(({ id }) => id));
 
     const idsToDelete = ids.filter((id) => !blockedIds.has(id));
+    const policiesToDelete = await this.getPoliciesForDeleteTelemetry(idsToDelete);
     const deleteResults =
       idsToDelete.length > 0
         ? await this.actionPolicySavedObjectService.bulkDelete({ ids: idsToDelete })
@@ -590,6 +679,7 @@ export class ActionPolicyClient {
 
     let affectedCount = 0;
     const divergedIds: string[] = [];
+    const deletedIds = new Set<string>();
 
     for (const result of deleteResults) {
       if ('error' in result) {
@@ -600,13 +690,32 @@ export class ActionPolicyClient {
         continue;
       }
       affectedCount += 1;
+      deletedIds.add(result.id);
     }
 
     if (divergedIds.length > 0) {
       this.logDivergedApiKeyInvalidation(divergedIds);
     }
 
+    this.reportActionPolicyChanged(
+      'deleted',
+      policiesToDelete.filter(({ id }) => deletedIds.has(id))
+    );
+
     return { affected_count: affectedCount, errors };
+  }
+
+  /**
+   * Reads the policies about to be deleted, because their fields are gone afterwards. A failed
+   * read is logged and the delete carries on without a telemetry event.
+   */
+  private async getPoliciesForDeleteTelemetry(ids: string[]): Promise<ActionPolicyResponse[]> {
+    try {
+      return await this.getActionPolicies({ ids });
+    } catch (error) {
+      this.logTelemetryReadFailure('deleted', error);
+      return [];
+    }
   }
 
   public async bulkUpdateActionPoliciesApiKey({
@@ -641,14 +750,15 @@ export class ActionPolicyClient {
    * Shared executor for the state-mutating by-ID bulk endpoints (enable /
    * disable / snooze / unsnooze). Applies the same `stateUpdate` to every
    * targeted policy in a single SO `bulkUpdate`, stamps audit metadata, and
-   * maps per-object SO failures to the canonical bulk-error shape.
+   * maps per-object SO failures to the canonical bulk-error shape. `succeededIds` lists the
+   * policies that were written, for callers that report them.
    */
   private async executeBulkUpdate(
     ids: string[],
     stateUpdate: PartiallyUpdateableActionPolicyAttributes
-  ): Promise<BulkResponse> {
+  ): Promise<{ response: BulkResponse; succeededIds: string[] }> {
     if (ids.length === 0) {
-      return { affected_count: 0, errors: [] };
+      return { response: { affected_count: 0, errors: [] }, succeededIds: [] };
     }
 
     const actor = await this.userService.getCurrentActor();
@@ -666,17 +776,20 @@ export class ActionPolicyClient {
     const updateResults = await this.actionPolicySavedObjectService.bulkUpdate({ objects });
 
     const errors: ActionPolicyBulkError[] = [];
-    let affectedCount = 0;
+    const succeededIds: string[] = [];
 
     for (const result of updateResults) {
       if ('error' in result) {
         errors.push(toActionPolicyBulkError(result.id, result.error));
         continue;
       }
-      affectedCount += 1;
+      succeededIds.push(result.id);
     }
 
-    return { affected_count: affectedCount, errors };
+    return {
+      response: { affected_count: succeededIds.length, errors },
+      succeededIds,
+    };
   }
 
   private mapSortField(sortField?: string): string | undefined {
@@ -699,12 +812,7 @@ export class ActionPolicyClient {
    * failure, the delete is abandoned rather than orphaning a live credential.
    */
   public async deleteActionPolicy({ id }: { id: string }): Promise<void> {
-    if (!(await this.actionPolicyExists({ id }))) {
-      throw Boom.notFound(getActionPolicyNotFoundMessage(id), {
-        code: ALERTING_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
-        details: { action_policy_id: id },
-      });
-    }
+    const { attrs } = await this.getExistingActionPolicy(id);
 
     const auth = await this.getDecryptedAuth(id);
     const { invalidatedIds, errors } = await this.queueApiKeysForInvalidation([{ id, auth }]);
@@ -725,6 +833,10 @@ export class ActionPolicyClient {
       }
       throw e;
     }
+
+    this.reportActionPolicyChanged('deleted', [
+      transformActionPolicySoAttributesToApiResponse({ id, attributes: attrs }),
+    ]);
   }
 
   /**
@@ -973,12 +1085,12 @@ export class ActionPolicyClient {
 
     this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, id);
 
-    return {
-      policy: transformActionPolicySoAttributesToApiResponse({
-        id,
-        attributes: replacementAttrs,
-      }),
-      created: false,
-    };
+    const policy = transformActionPolicySoAttributesToApiResponse({
+      id,
+      attributes: replacementAttrs,
+    });
+    this.reportActionPolicyChanged('updated', [policy]);
+
+    return { policy, created: false };
   }
 }
