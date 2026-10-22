@@ -9,4 +9,12 @@
 
 export { assertTopicName, defineTopic } from './src/topic';
 export type { Topic } from './src/topic';
-export type { PubSubSetup } from './src/contracts';
+export type {
+  PubSubEvent,
+  PubSubHandler,
+  PubSubSetup,
+  PubSubStart,
+  PubSubPublishResult,
+  PubSubSubscription,
+  PubSubEventInit,
+} from './src/contracts';

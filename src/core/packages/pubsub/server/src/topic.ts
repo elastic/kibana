@@ -63,7 +63,10 @@ export const assertTopicName = (name: string): void => {
  * ```
  *
  * A type argument is required. `Topic` defaults to `never` data, so a name-only topic
- * (`Topic<never, 'orders'>`) cannot be published on.
+ * (`Topic<never, 'orders'>`) cannot be published on. The type is not checked for JSON safety;
+ * event data is delivered as a JSON round trip, and in development mode `publish` rejects data
+ * that would not survive it (`Date`, `Map`, `Set`, class instances, `NaN`, `undefined` array
+ * items, ...).
  */
 export const defineTopic = <TTopic extends Topic<unknown, string> = never>(
   name: [TTopic] extends [never] ? never : TTopic['name']
