@@ -19,13 +19,6 @@ export const API_ENGINE_NON_MKI_TAG = [
 
 export const UI_TAG = [...tags.stateful.all, ...tags.serverless.observability.complete];
 
-// For specs that drive Agent Builder through the LLM proxy. The proxy listens on the runner's
-// loopback, which a Cloud Kibana cannot reach, so these run on local deployments only.
-export const LLM_PROXY_UI_TAG = [
-  ...getPlaywrightTagsFor('stateful', 'classic', 'local'),
-  ...getPlaywrightTagsFor('serverless', 'observability_complete', 'local'),
-];
-
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
