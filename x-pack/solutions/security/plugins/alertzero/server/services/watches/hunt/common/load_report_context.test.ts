@@ -430,6 +430,50 @@ describe('loadReportHuntContext', () => {
     });
   });
 
+  describe('whether extraction has finished', () => {
+    const withMethod = (lineage?: unknown) =>
+      respond([
+        { ...reportHit, _source: { ...reportHit._source, ...(lineage ? { lineage } : {}) } },
+      ]);
+
+    it('asks the index for the extraction method', async () => {
+      await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _source: expect.arrayContaining(['lineage.extraction_method']),
+        })
+      );
+    });
+
+    it.each([
+      ['absent', undefined],
+      ['blank', { extraction_method: '   ' }],
+      ['pending', { extraction_method: 'pending' }],
+      ['padded pending', { extraction_method: ' pending ' }],
+    ])('is pending when the method is %s', async (_label, lineage) => {
+      esClient.search.mockResolvedValue(withMethod(lineage));
+      const context = await loadReportHuntContext({
+        esClient,
+        spaceId: 'hunt-a',
+        reportId: 'rpt-1',
+      });
+      expect(context?.extraction_pending).toBe(true);
+    });
+
+    it.each(['workflow_v4', 'workflow_v4_rejected', 'kev', 'text_indicator_list'])(
+      'is not pending when the method is %s',
+      async (extraction_method) => {
+        esClient.search.mockResolvedValue(withMethod({ extraction_method }));
+        const context = await loadReportHuntContext({
+          esClient,
+          spaceId: 'hunt-a',
+          reportId: 'rpt-1',
+        });
+        expect(context?.extraction_pending).toBe(false);
+      }
+    );
+  });
+
   it('scopes the lookup to the acting space', async () => {
     await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
     const query = (esClient.search as unknown as jest.Mock).mock.calls[0][0].query;
