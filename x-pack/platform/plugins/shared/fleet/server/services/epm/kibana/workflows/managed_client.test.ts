@@ -49,7 +49,7 @@ describe('managed workflows client', () => {
       const ready = jest
         .fn()
         .mockReturnValue(new Promise<void>((resolve) => (markReady = resolve)));
-      const client = { ready };
+      const client = { isWorkflowsAvailable: true, ready };
 
       const started = startManagedWorkflowsClient({
         workflowsExtensions: createStart(jest.fn().mockResolvedValue(client)),
@@ -62,7 +62,7 @@ describe('managed workflows client', () => {
     });
 
     it('initializes the client for the fleet plugin', async () => {
-      const init = jest.fn().mockResolvedValue({ ready: jest.fn() });
+      const init = jest.fn().mockResolvedValue({ isWorkflowsAvailable: true, ready: jest.fn() });
 
       await startManagedWorkflowsClient({
         workflowsExtensions: createStart(init),
@@ -87,6 +87,18 @@ describe('managed workflows client', () => {
         })
       ).resolves.toBeUndefined();
       expect(init).not.toHaveBeenCalled();
+    });
+
+    it('keeps the client when Workflows is not available, since availability can change', async () => {
+      const client = { isWorkflowsAvailable: false, ready: jest.fn().mockResolvedValue(undefined) };
+
+      await expect(
+        startManagedWorkflowsClient({
+          workflowsExtensions: createStart(jest.fn().mockResolvedValue(client)),
+          workflowsManagement,
+          logger,
+        })
+      ).resolves.toBe(client);
     });
 
     it('resolves to undefined when none is returned', async () => {
@@ -114,7 +126,10 @@ describe('managed workflows client', () => {
     });
 
     it('logs and resolves to undefined when the client never becomes ready', async () => {
-      const client = { ready: jest.fn().mockRejectedValue(new Error('not ready')) };
+      const client = {
+        isWorkflowsAvailable: true,
+        ready: jest.fn().mockRejectedValue(new Error('not ready')),
+      };
 
       await expect(
         startManagedWorkflowsClient({

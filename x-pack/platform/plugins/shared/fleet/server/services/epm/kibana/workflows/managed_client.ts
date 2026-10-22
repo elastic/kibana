@@ -28,6 +28,9 @@ export const registerWorkflowAssetsOwner = ({
  * if it is unavailable or failed.
  * Without the workflows management plugin the extensions plugin only provides a noop client whose
  * calls fail, so no client is created.
+ * The client is kept even when Workflows is currently not available (license or
+ * `workflowsManagement.available`): `isWorkflowsAvailable` follows license changes, so callers
+ * check it on every use (see `appContextService.getManagedWorkflowsClient`).
  */
 export const startManagedWorkflowsClient = async ({
   workflowsExtensions,

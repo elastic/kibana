@@ -372,8 +372,10 @@ class AppContextService {
   }
 
   /**
-   * Resolves once the client initialization settles; `undefined` if it failed, never started
-   * or did not settle within `MANAGED_WORKFLOWS_CLIENT_INIT_TIMEOUT_MS`.
+   * Resolves once the client initialization settles; `undefined` if it failed, never started,
+   * did not settle within `MANAGED_WORKFLOWS_CLIENT_INIT_TIMEOUT_MS`, or Workflows is not
+   * currently available (license or config). Availability is checked on every call, as it
+   * can change after the client was created.
    */
   public async getManagedWorkflowsClient(): Promise<ManagedWorkflowsClient | undefined> {
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -386,6 +388,10 @@ class AppContextService {
         this.logger?.warn(
           `Managed workflows client did not initialize within ${MANAGED_WORKFLOWS_CLIENT_INIT_TIMEOUT_MS}ms`
         );
+        return undefined;
+      }
+      if (result && !result.isWorkflowsAvailable) {
+        this.logger?.debug('Workflows is not available, managed workflows client not provided');
         return undefined;
       }
       return result;

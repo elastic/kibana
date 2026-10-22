@@ -9,7 +9,7 @@ import type { ManagedWorkflowsClient } from './app_context';
 import { appContextService } from './app_context';
 
 describe('getManagedWorkflowsClient', () => {
-  const client = {} as ManagedWorkflowsClient;
+  const client = { isWorkflowsAvailable: true } as ManagedWorkflowsClient;
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -23,6 +23,19 @@ describe('getManagedWorkflowsClient', () => {
     appContextService.setManagedWorkflowsClientInit(Promise.resolve(client));
 
     await expect(appContextService.getManagedWorkflowsClient()).resolves.toBe(client);
+  });
+
+  it('returns undefined while Workflows is not available and the client once it is', async () => {
+    const reactiveClient = { isWorkflowsAvailable: false } as ManagedWorkflowsClient;
+    appContextService.setManagedWorkflowsClientInit(Promise.resolve(reactiveClient));
+
+    await expect(appContextService.getManagedWorkflowsClient()).resolves.toBeUndefined();
+
+    reactiveClient.isWorkflowsAvailable = true;
+    await expect(appContextService.getManagedWorkflowsClient()).resolves.toBe(reactiveClient);
+
+    reactiveClient.isWorkflowsAvailable = false;
+    await expect(appContextService.getManagedWorkflowsClient()).resolves.toBeUndefined();
   });
 
   it('returns undefined when the initialization never settles', async () => {
