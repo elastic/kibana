@@ -233,7 +233,7 @@ describe('registerPatternTesterRoute', () => {
     const { handler } = setup();
     jest
       .spyOn(RegexWorkerService.prototype, 'run')
-      .mockRejectedValueOnce(new Error('Regex anonymization task timed out'));
+      .mockRejectedValueOnce(new Error('Anonymization patterns timed out after 15s'));
 
     const response = await callHandler(handler, {
       input: { contact: 'x' },

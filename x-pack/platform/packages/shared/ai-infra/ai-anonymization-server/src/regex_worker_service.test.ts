@@ -89,7 +89,22 @@ describe('RegexWorkerService', () => {
         records: [{ content: longA }],
         rules: [backTrackingRule],
       })
-    ).rejects.toThrow('Regex anonymization task timed out');
+    ).rejects.toThrow(/Anonymization patterns timed out after \d+s/);
+  });
+  it('keeps serving other requests on the same pool after one task times out', async () => {
+    regexWorker = new RegexWorkerService(createTestConfig(), logger);
+    const pool = (regexWorker as any).worker;
+    const destroy = jest.spyOn(pool, 'destroy');
+    jest
+      .spyOn(pool, 'run')
+      .mockRejectedValueOnce(Object.assign(new Error('aborted'), { name: 'AbortError' }));
+
+    await expect(regexWorker.run(taskPayload)).rejects.toThrow(/timed out after/);
+    const result = await regexWorker.run(taskPayload);
+
+    expect(result).toHaveLength(1);
+    expect(destroy).not.toHaveBeenCalled();
+    expect((regexWorker as any).worker).toBe(pool);
   });
   it('runs task synchronously when worker is disabled', async () => {
     regexWorker = new RegexWorkerService(createTestConfig({ enabled: false }), logger);
