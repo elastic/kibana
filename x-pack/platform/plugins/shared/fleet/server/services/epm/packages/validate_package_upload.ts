@@ -27,7 +27,6 @@ import { appContextService } from '../../app_context';
 import { airGappedUtils } from '../airgapped';
 import { getPathParts } from '../archive';
 import { isTopLevelPipeline } from '../elasticsearch/ingest_pipeline/helpers';
-import { isRemoteIndexExpression } from '../elasticsearch/transform/ccs_transform_source';
 import {
   getDestinationIndexAliases,
   isTransform,
@@ -149,6 +148,24 @@ function assertNoForbiddenArchiveAssets(paths: string[]): void {
     }
   }
 }
+
+/**
+ * Whether an index expression targets a remote cluster (`<cluster>:<index>`). Mirrors ES
+ * `RemoteClusterAware#isRemoteIndexName`: index names cannot contain `:`, so outside date math
+ * (always wrapped in `<...>`) the first `:` is the cluster separator unless it starts a `::`
+ * data-stream selector.
+ */
+const isRemoteIndexExpression = (indexExpression: string): boolean => {
+  if (
+    indexExpression.length === 0 ||
+    indexExpression.startsWith('<') ||
+    indexExpression.startsWith('-<')
+  ) {
+    return false;
+  }
+  const separatorIndex = indexExpression.indexOf(':');
+  return separatorIndex > 0 && !indexExpression.startsWith('::', separatorIndex);
+};
 
 /**
  * Reduce an index expression to the bare index/alias patterns so a prefix check cannot be
