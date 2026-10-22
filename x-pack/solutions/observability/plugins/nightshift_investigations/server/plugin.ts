@@ -722,6 +722,10 @@ export class NightshiftInvestigationsPlugin
         const client = await this.managedWorkflowsClient;
         return client ? client.getInstalledWorkflowState(workflowId, spaceId) : null;
       },
+      listInstalledWorkflowStates: async () => {
+        const client = await this.managedWorkflowsClient;
+        return client ? client.listInstalledWorkflowStates() : [];
+      },
       spaces: this.spaces,
       isServerless: this.ctx.env.packageInfo.buildFlavor === 'serverless',
       logger: this.logger.get('service_account'),

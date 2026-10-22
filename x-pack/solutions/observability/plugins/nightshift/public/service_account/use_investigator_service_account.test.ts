@@ -11,6 +11,7 @@ const status = (overrides: Record<string, unknown> = {}) => ({
   serviceAccountsEnabled: true,
   canModifyBoundWorkflows: true,
   serviceAccountId: 'kibana/nightshift_agent',
+  knownServiceAccountIds: null,
   role: 'nightshift_agent',
   bound: true,
   serviceAccounts: [
