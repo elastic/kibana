@@ -11,7 +11,7 @@ import { EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AppHeader, AppHeaderLoading } from '@kbn/app-header';
 
-import { fullWidthContentCss, WithoutHeaderLayout } from '../../../components/layouts';
+import { resultsContentCss, WithoutHeaderLayout } from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useHistoryBack } from '../../../common/hooks/use_history_back';
@@ -76,7 +76,7 @@ const LiveQueryDetailsPageComponent = () => {
         <>
           <AppHeaderLoading back={historyBack} />
           <WithoutHeaderLayout restrictWidth={false}>
-            <div css={fullWidthContentCss}>
+            <div css={resultsContentCss}>
               <div data-test-subj="query-details-loading">
                 <EuiSpacer size="l" />
                 <EuiSkeletonText lines={5} />
@@ -98,8 +98,9 @@ const LiveQueryDetailsPageComponent = () => {
             onSaveQuery={onSaveQuery}
           />
           <WithoutHeaderLayout restrictWidth={false}>
-            <div css={fullWidthContentCss}>
+            <div css={resultsContentCss}>
               <ResultTabs
+                hasPanel={false}
                 actionId={query.action_id}
                 liveQueryActionId={actionId}
                 agentIds={data.agents}
@@ -123,7 +124,7 @@ const LiveQueryDetailsPageComponent = () => {
             showAddIntegrations
           />
           <WithoutHeaderLayout restrictWidth={false}>
-            <div css={fullWidthContentCss}>
+            <div css={resultsContentCss}>
               <div css={tableWrapperCss}>
                 <PackQueriesStatusTable
                   actionId={actionId}

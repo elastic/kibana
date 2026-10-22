@@ -15,7 +15,7 @@ import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
 import { useHistoryBack } from '../../common/hooks/use_history_back';
 import { useRouterNavigate, useKibana } from '../../common/lib/kibana';
 import { pagePathGetters } from '../../common/page_paths';
-import { fullWidthContentCss, WithoutHeaderLayout } from '../../components/layouts';
+import { resultsContentCss, WithoutHeaderLayout } from '../../components/layouts';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import {
   useScheduledExecutionDetails,
@@ -154,7 +154,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
       <>
         <AppHeaderLoading back={historyBack} />
         <WithoutHeaderLayout restrictWidth={false}>
-          <div css={fullWidthContentCss}>
+          <div css={resultsContentCss}>
             <EuiSpacer size="l" />
             <EuiSkeletonText lines={5} />
           </div>
@@ -173,7 +173,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
           showAddIntegrations
         />
         <WithoutHeaderLayout restrictWidth={false}>
-          <div css={fullWidthContentCss}>
+          <div css={resultsContentCss}>
             <EuiSpacer size="l" />
             {errorPrompt}
           </div>
@@ -192,7 +192,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
           showAddIntegrations
         />
         <WithoutHeaderLayout restrictWidth={false}>
-          <div css={fullWidthContentCss}>{emptyPrompt}</div>
+          <div css={resultsContentCss}>{emptyPrompt}</div>
         </WithoutHeaderLayout>
       </>
     );
@@ -216,8 +216,9 @@ const ScheduledExecutionDetailsPageComponent = () => {
         viewInMode={viewInWindow.mode}
       />
       <WithoutHeaderLayout restrictWidth={false}>
-        <div css={fullWidthContentCss}>
+        <div css={resultsContentCss}>
           <ResultTabs
+            hasPanel={false}
             actionId={firstQueryData.action_id}
             startDate={data?.timestamp}
             failedAgentsCount={firstQueryData.failed ?? 0}

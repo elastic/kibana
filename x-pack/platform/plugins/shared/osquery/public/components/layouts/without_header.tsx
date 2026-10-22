@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import { EuiPage, EuiPageBody } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 
 export const pageCss = ({ euiTheme }: UseEuiTheme) => ({
@@ -32,10 +32,7 @@ export const WithoutHeaderLayout: React.FC<Props> = ({ restrictWidth, children }
   <Fragment>
     <EuiPage css={pageCss} restrictWidth={restrictWidth === false ? false : restrictWidth || 1200}>
       <EuiPageBody>
-        <div css={contentCss}>
-          <EuiSpacer size="m" />
-          {children}
-        </div>
+        <div css={contentCss}>{children}</div>
       </EuiPageBody>
     </EuiPage>
   </Fragment>
