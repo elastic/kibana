@@ -429,8 +429,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.32.0
-        version: 4.32.0(monaco-editor@0.56.0)
+        specifier: 4.33.0
+        version: 4.33.0(monaco-editor@0.56.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -5199,9 +5199,9 @@ importers:
       '@kbn/connector-cli':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-connector-cli
-      '@kbn/connector-contract-mock':
+      '@kbn/connector-emulate':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-connector-contract-mock
+        version: link:src/platform/packages/shared/kbn-connector-emulate
       '@kbn/content-list-docs':
         specifier: workspace:*
         version: link:src/platform/packages/shared/content-management/content_list/kbn-content-list-docs
@@ -7991,7 +7991,7 @@ importers:
 
   src/platform/packages/shared/kbn-connector-cli: {}
 
-  src/platform/packages/shared/kbn-connector-contract-mock: {}
+  src/platform/packages/shared/kbn-connector-emulate: {}
 
   src/platform/packages/shared/kbn-connector-schemas: {}
 
@@ -11191,8 +11191,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.32.0':
-    resolution: {integrity: sha512-mweMdeQyPngTjqP9SQU5X64/naSVjJxprNuUNFeBjujyE33ppzZX+R7zR4b38DaBzkWZ+cmD2hvVY0Rf6RgYag==}
+  '@elastic/monaco-esql@4.33.0':
+    resolution: {integrity: sha512-S+ceGgCwEOougTdYvykdeGUWq5dBGrXcc2Ul2Cw/mLRUV0ElYZycpnPcjoOsdhpwJZdoetcuZG4QLnm1N4RHZw==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -27952,7 +27952,7 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.32.0(monaco-editor@0.56.0)':
+  '@elastic/monaco-esql@4.33.0(monaco-editor@0.56.0)':
     dependencies:
       '@elastic/esql-definitions': 4.33.0
       monaco-editor: 0.56.0
