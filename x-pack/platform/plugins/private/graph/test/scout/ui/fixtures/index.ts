@@ -78,16 +78,18 @@ export const spaceTest = spaceBaseTest.extend<
       pageObjects,
       page,
       kbnUrl,
+      scoutSpace,
     }: {
       pageObjects: GraphParallelTestFixtures['pageObjects'];
       page: GraphParallelTestFixtures['page'];
       kbnUrl: KibanaUrl;
+      scoutSpace: ScoutParallelWorkerFixtures['scoutSpace'];
     },
     use: (pageObjects: GraphParallelTestFixtures['pageObjects']) => Promise<void>
   ) => {
     await use({
       ...pageObjects,
-      graph: createLazyPageObject(GraphPage, page, kbnUrl),
+      graph: createLazyPageObject(GraphPage, page, kbnUrl, scoutSpace.id),
       graphListing: createLazyPageObject(GraphListingPage, page),
     });
   },

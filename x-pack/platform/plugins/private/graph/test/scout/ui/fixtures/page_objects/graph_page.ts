@@ -74,7 +74,12 @@ export class GraphPage {
   private readonly drilldownsSettingsTab: Locator;
   private readonly addDrilldownButton: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl,
+    // Parallel runs scope each worker to its own space; single-thread runs use the default space.
+    private readonly spaceId?: string
+  ) {
     this.contentList = new ContentListWrapper(page);
     this.appMenu = new AppMenu(page);
     this.createGraphPromptButton = this.page.getByTestId('graphCreateGraphPromptButton');
@@ -134,14 +139,18 @@ export class GraphPage {
   }
 
   // Gate on `domcontentloaded`: Kibana's bundle graph defers `load` past app mount.
-  async goto() {
-    await this.page.goto(this.kbnUrl.app('graph'), { waitUntil: 'domcontentloaded' });
-  }
-
-  async gotoInSpace(spaceId: string) {
+  private async gotoGraphApp(spaceId?: string) {
     await this.page.goto(this.kbnUrl.app('graph', { space: spaceId }), {
       waitUntil: 'domcontentloaded',
     });
+  }
+
+  async goto() {
+    await this.gotoGraphApp(this.spaceId);
+  }
+
+  async gotoInSpace(spaceId: string) {
+    await this.gotoGraphApp(spaceId);
   }
 
   async waitForListing() {
