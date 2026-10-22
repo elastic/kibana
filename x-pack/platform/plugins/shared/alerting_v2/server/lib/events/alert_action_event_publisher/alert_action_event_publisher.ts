@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { inject, injectable } from 'inversify';
 import type { AlertActionDocument } from '../../../resources/datastreams/alert_actions';
-import { toEventOrigin } from '../../event_origin/rule_event_origin';
+import { toEventOrigin } from '../../event_origin/event_origin';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import {
   LoggerServiceToken,

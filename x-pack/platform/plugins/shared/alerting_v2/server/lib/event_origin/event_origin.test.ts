@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { resolveRuleEventOrigin, toEventOrigin } from './rule_event_origin';
+import { resolveRuleEventOrigin, toEventOrigin } from './event_origin';
 
 const UI_HEADERS = {
   'kbn-version': '9.0.0',

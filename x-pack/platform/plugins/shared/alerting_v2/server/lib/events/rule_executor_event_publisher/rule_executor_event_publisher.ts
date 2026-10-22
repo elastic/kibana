@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { Request } from '@kbn/core-di-server';
 import { inject, injectable } from 'inversify';
 import type { RuleEventActor } from '../../event_origin/origin_schemas';
-import { toEventOrigin } from '../../event_origin/rule_event_origin';
+import { toEventOrigin } from '../../event_origin/event_origin';
 import { RuleEventActorToken } from '../../event_origin/token';
 import {
   AlertingDomainEventBusToken,

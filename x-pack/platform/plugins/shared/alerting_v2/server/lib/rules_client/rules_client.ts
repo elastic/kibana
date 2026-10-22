@@ -35,7 +35,7 @@ import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import type { RuleEventActor } from '../event_origin/origin_schemas';
-import { toEventOrigin } from '../event_origin/rule_event_origin';
+import { toEventOrigin } from '../event_origin/event_origin';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 import {
