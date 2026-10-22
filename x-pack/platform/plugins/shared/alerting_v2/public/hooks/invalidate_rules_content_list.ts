@@ -6,7 +6,7 @@
  */
 
 import { contentListKeys, contentListQueryClient } from '@kbn/content-list-provider';
-import { RULES_CONTENT_LIST_ID } from '../constants';
+import { RULES_CONTENT_LIST_ID, RULE_TEMPLATES_CONTENT_LIST_ID } from '../constants';
 import { ruleKeys } from './query_key_factory';
 
 /**
@@ -36,6 +36,16 @@ export const invalidateRulesListView = (): Promise<void> =>
 export const invalidateRulesTagsFacet = (): Promise<void> =>
   contentListQueryClient.invalidateQueries({ queryKey: ruleKeys.allTags() });
 
-/** Invalidates both the rules list and the tags facet. */
+/** Invalidates the rule library list, whose per-template rule counts change with the rules. */
+export const invalidateRuleTemplatesListView = (): Promise<void> =>
+  contentListQueryClient.invalidateQueries({
+    queryKey: contentListKeys.all(RULE_TEMPLATES_CONTENT_LIST_ID),
+  });
+
+/** Invalidates the rules list, the tags facet and the rule counts shown in the rule library. */
 export const invalidateRulesContentList = (): Promise<void> =>
-  Promise.all([invalidateRulesListView(), invalidateRulesTagsFacet()]).then(() => undefined);
+  Promise.all([
+    invalidateRulesListView(),
+    invalidateRulesTagsFacet(),
+    invalidateRuleTemplatesListView(),
+  ]).then(() => undefined);

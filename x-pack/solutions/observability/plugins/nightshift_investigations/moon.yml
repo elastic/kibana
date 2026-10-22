@@ -51,6 +51,7 @@ dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/rule-registry-plugin'
   - '@kbn/actions-plugin'
+  - '@kbn/alerting-plugin'
   - '@kbn/sandbox-plugin'
   - '@kbn/context-engine-plugin'
   - '@kbn/inference-common'
@@ -82,6 +83,4 @@ fileGroups:
     - integration_tests/**/*
     - test/scout*/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}
