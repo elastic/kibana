@@ -9,6 +9,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ExpandWildcard, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { castArray } from 'lodash';
 import type { QueryDslQueryContainer } from '../../../common/types';
 import { convertEsError } from './errors';
 
@@ -54,6 +55,14 @@ interface FieldCapsApiParams {
   abortSignal?: AbortSignal;
   projectRouting?: string;
 }
+
+// Extracts the alias from a "no such remote cluster: [alias]" root cause
+const getMissingRemoteCluster = (error: {
+  body?: { error?: { root_cause?: Array<{ type?: string; reason?: string }> } };
+}) =>
+  error.body?.error?.root_cause
+    ?.find((cause) => cause.type === 'no_such_remote_cluster_exception')
+    ?.reason?.match(/\[(.+)\]$/)?.[1];
 
 /**
  *  Call the fieldCaps API for a list of indices.
@@ -108,14 +117,19 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     ) {
       return { body: { indices: [], fields: {} } };
     }
-    // ES ignores allow_no_indices for a non-existing remote cluster
-    if (
-      fieldCapsOptions.allow_no_indices &&
-      error.body?.error?.root_cause?.some(
-        (cause: { type?: string }) => cause.type === 'no_such_remote_cluster_exception'
-      )
-    ) {
-      return { body: { indices: [], fields: {} } };
+    // ES fails the whole request for a non-existing remote cluster, so retry without its patterns
+    const missingRemoteCluster = getMissingRemoteCluster(error);
+    if (missingRemoteCluster) {
+      const patterns = castArray(indices).flatMap((pattern) => pattern.split(','));
+      const remainingPatterns = patterns.filter(
+        (pattern) => !pattern.replace(/^-/, '').startsWith(`${missingRemoteCluster}:`)
+      );
+      if (remainingPatterns.length > 0 && remainingPatterns.length < patterns.length) {
+        return callFieldCapsApi({ ...params, indices: remainingPatterns });
+      }
+      if (fieldCapsOptions.allow_no_indices) {
+        return { body: { indices: [], fields: {} } };
+      }
     }
     throw convertEsError(indices, error);
   }

@@ -64,7 +64,9 @@ apiTest.describe(
     apiTest(
       'can retrieve a data view with allowNoIndex targeting a non-existing remote cluster',
       async ({ apiClient }) => {
+        const id = `test-id-${Date.now()}-${Math.random()}`;
         const title = `non_existing_cluster:logs-${Date.now()}-*`;
+        createdIds.push(id);
 
         const createResponse = await apiClient.post(DATA_VIEW_PATH, {
           headers: {
@@ -74,6 +76,7 @@ apiTest.describe(
           responseType: 'json',
           body: {
             [SERVICE_KEY]: {
+              id,
               title,
               allowNoIndex: true,
             },
@@ -81,10 +84,8 @@ apiTest.describe(
         });
 
         expect(createResponse).toHaveStatusCode(200);
-        const createdId = createResponse.body[SERVICE_KEY].id;
-        createdIds.push(createdId);
 
-        const getResponse = await apiClient.get(`${DATA_VIEW_PATH}/${createdId}`, {
+        const getResponse = await apiClient.get(`${DATA_VIEW_PATH}/${id}`, {
           headers: {
             ...COMMON_HEADERS,
             ...adminApiCredentials.apiKeyHeader,

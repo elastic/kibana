@@ -302,6 +302,28 @@ apiTest.describe(
       }
     );
 
+    apiTest(
+      'returns fields of the existing indices when the pattern also targets a non-existing remote cluster',
+      async ({ apiClient }) => {
+        const response = await apiClient.get(
+          `${FIELDS_FOR_WILDCARD_PATH}?pattern=basic_index,non_existing_cluster:logs-*`,
+          {
+            headers: {
+              ...INTERNAL_COMMON_HEADERS,
+              ...adminApiCredentials.apiKeyHeader,
+            },
+            responseType: 'json',
+          }
+        );
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual({
+          fields: testFields,
+          indices: ['basic_index'],
+        });
+      }
+    );
+
     apiTest('returns nested field metadata', async ({ apiClient }) => {
       const response = await apiClient.get(`${FIELDS_FOR_WILDCARD_PATH}?pattern=basic_index`, {
         headers: {
