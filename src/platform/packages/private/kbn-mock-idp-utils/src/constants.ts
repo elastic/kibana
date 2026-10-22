@@ -18,6 +18,8 @@ export const MOCK_IDP_SP_BASE_URL = `http://localhost:5601`;
 
 // These are the values that dev UIAM service is configured with (openssl rand 32 | base64).
 export const MOCK_IDP_UIAM_SIGNING_SECRET = 'MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=';
+// UIAM signs OAuth access and refresh tokens with a separate key set, picked by the `kid` JWT header.
+export const MOCK_IDP_UIAM_OAUTH_SIGNING_SECRET = 'Rp4KzWmYvL8nXsT2cBqF6dUhJoE0gN5aI3HwPyCjOlZ=';
 export const MOCK_IDP_UIAM_SHARED_SECRET = 'Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=';
 // A gateway-supplied secret, distinct from Kibana's own MOCK_IDP_UIAM_SHARED_SECRET. UIAM accepts
 // both, so a passing test does not by itself prove the inbound value was relayed rather than
