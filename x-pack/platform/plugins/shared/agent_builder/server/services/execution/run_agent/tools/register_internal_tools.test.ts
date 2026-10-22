@@ -11,6 +11,7 @@ import type { AgentHandlerContext } from '@kbn/agent-builder-server';
 import { resolveAllowedSubagents } from '../../../agents/utils/resolve_allowed_subagents';
 import { registerInternalTools, type RegisterInternalToolsParams } from './register_internal_tools';
 import { createSubagentTool } from './run_subagent';
+import { createExecuteDynamicTool } from './execute_dynamic_tool';
 
 jest.mock('../../../agents/utils/resolve_allowed_subagents', () => ({
   resolveAllowedSubagents: jest.fn(),
@@ -31,6 +32,9 @@ jest.mock('./ask_user_question', () => ({
   createAskUserQuestionTool: () => ({ id: 'ask_user_question' }),
 }));
 jest.mock('./load_skill', () => ({ createLoadSkillTool: () => ({ id: 'load_skill' }) }));
+jest.mock('./execute_dynamic_tool', () => ({
+  createExecuteDynamicTool: jest.fn(() => ({ id: 'execute_dynamic_tool' })),
+}));
 jest.mock('./api', () => ({
   createDiscoverApisTool: () => ({ id: 'discover_apis' }),
   createDescribeApiTool: () => ({ id: 'describe_api' }),
@@ -58,6 +62,7 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
       todos: false,
       bash: false,
       apiDiscovery: false,
+      dynamicTools: false,
     },
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: false },
@@ -172,4 +177,39 @@ describe('registerInternalTools - subagents', () => {
       );
     }
   );
+});
+
+describe('registerInternalTools - execute_dynamic_tool', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    resolveAllowedSubagentsMock.mockResolvedValue([]);
+  });
+
+  it('is not registered when the dynamicTools flag is off', async () => {
+    const { context, toolManager } = createContext();
+
+    await register(context, []);
+
+    expect(addedToolIds(toolManager)).not.toContain('execute_dynamic_tool');
+    expect(createExecuteDynamicTool).not.toHaveBeenCalled();
+  });
+
+  it('is registered with the tool manager when the dynamicTools flag is on', async () => {
+    const { context, toolManager } = createContext({
+      experimentalFeatures: {
+        skills: false,
+        aiIndices: false,
+        relevantSkills: false,
+        todos: false,
+        bash: false,
+        apiDiscovery: false,
+        dynamicTools: true,
+      },
+    });
+
+    await register(context, []);
+
+    expect(addedToolIds(toolManager)).toContain('execute_dynamic_tool');
+    expect(createExecuteDynamicTool).toHaveBeenCalledWith({ toolManager });
+  });
 });

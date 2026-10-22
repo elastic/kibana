@@ -126,6 +126,7 @@ export const internalTools = {
   describeApi: 'describe_api',
   describeApiType: 'describe_api_type',
   executeApi: 'execute_api',
+  executeDynamicTool: 'execute_dynamic_tool',
 };
 
 export const isAttachmentTool = (toolName: string) =>
