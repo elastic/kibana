@@ -20,6 +20,9 @@ import {
 import { isAgentStepAction, isToolResultAction, isValidateAction } from '../actions';
 import type { StateType } from '../state';
 
+const SUPERSEDED_YAML_NOTE =
+  'Superseded by a later edit. The latest tool result has the current workflow YAML.';
+
 /**
  * Reconstruct the LangChain message list from the graph state's actions.
  *
@@ -35,9 +38,6 @@ import type { StateType } from '../state';
  *        - validate(false) → HumanMessage with the failure prompt (re-prompts the agent)
  *        - validate(true)  → no message; the loop is about to terminate
  */
-const SUPERSEDED_YAML_NOTE =
-  'Superseded by a later edit. The latest tool result has the current workflow YAML.';
-
 export const buildMessagesFromActions = (state: StateType): BaseMessage[] => {
   const messages: BaseMessage[] = [];
 

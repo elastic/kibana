@@ -55,7 +55,7 @@ ${formatConnectorsBlock(prefetched.connectors)}
 - Pick the editing approach from the task:
  - New workflow (no \`<workflow-to-edit>\` block): emit the entire workflow in one \`set_yaml\` call.
  - Existing workflow (a \`<workflow-to-edit>\` block is present): use \`insert_step\` / \`modify_step\` / \`modify_step_property\` / \`delete_step\`. These tools find steps by name at any depth (inside \`if\`, \`else\`, \`foreach\`), change only the target step, and keep YAML comments.
- - Do not use \`set_yaml\` on an existing workflow unless the user asks to rewrite most of it. It re-emits the whole file, drops comments, and on large workflows it can run longer than the time limit for one response.
+ - Do not use \`set_yaml\` on an existing workflow unless the user asks to rewrite most of it. It re-emits the whole file, often loses YAML comments, and on large workflows it can run longer than the time limit for one response.
  - Make one focused edit per tool call. To change only part of a step, prefer \`modify_step_property\` over \`modify_step\`.
 
 - The default trigger type is \`manual\` if the user has not asked for anything else.
