@@ -6,7 +6,7 @@
  */
 
 import React, { type PropsWithChildren } from 'react';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { QueryClientProvider, useQuery as _useQuery } from '@kbn/react-query';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
@@ -28,31 +28,25 @@ jest.mock('@kbn/react-query', () => {
 describe('useGetEndpointPendingActionsSummary hook', () => {
   let wrapper: React.FC<PropsWithChildren>;
   let http: AppContextTestRender['coreStart']['http'];
-  let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
 
   beforeEach(() => {
     const testContext = createAppRootMockRenderer();
     const { queryClient } = testContext;
 
     http = testContext.coreStart.http;
-    apiMocks = responseActionsHttpMocks(http);
+    responseActionsHttpMocks(http);
 
     // Bare QueryClientProvider instead of the full `AppRootProvider`, whose mount starved the event loop under parallel CI load.
     wrapper = ({ children }) =>
       React.createElement(QueryClientProvider, { client: queryClient }, children);
   });
 
-  it('should call the proper API', async () => {
-    const { result } = renderHook(() => useGetEndpointPendingActionsSummary(['123', '456']), {
-      wrapper,
-    });
+  it('should call the proper API', () => {
+    renderHook(() => useGetEndpointPendingActionsSummary(['123', '456']), { wrapper });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(apiMocks.responseProvider.agentPendingActionsSummary).toHaveBeenCalledWith({
-      path: `${ACTION_STATUS_ROUTE}`,
-      query: { agent_ids: ['123', '456'] },
+    expect(http.get).toHaveBeenCalledWith(ACTION_STATUS_ROUTE, {
       version: '2023-10-31',
+      query: { agent_ids: ['123', '456'] },
     });
   });
 
