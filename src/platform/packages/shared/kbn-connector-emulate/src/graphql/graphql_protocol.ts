@@ -10,6 +10,7 @@
 import type {
   DocumentNode,
   FragmentDefinitionNode,
+  GraphQLField,
   GraphQLSchema,
   OperationDefinitionNode,
   SelectionSetNode,
@@ -24,11 +25,15 @@ import {
 } from 'graphql';
 import type {
   ContractProtocol,
+  ContractProtocolOptions,
   ContractRequest,
   NamedOperation,
   ProtocolExchange,
   Violation,
 } from '../contract/types';
+import { selectNamedResponses } from '../engine/named_responses';
+import type { StoredResponse } from '../engine/response_engine';
+import { checkGraphQLValue, resolveStoredType } from './check_graphql_value';
 import { sampleGraphQLValue } from './sample_graphql_value';
 
 /** A vendor's GraphQL schema and the endpoints that serve it. */
@@ -164,16 +169,66 @@ const buildCachedSchema = (sdl: string): GraphQLSchema => {
   return schema;
 };
 
+type RootField = GraphQLField<unknown, unknown>;
+
+// Each root field of the query and mutation types, by operation name such as `query boards`.
+const declareOperations = (schema: GraphQLSchema): Map<string, RootField> => {
+  const operations = new Map<string, RootField>();
+  const roots = [
+    ['query', schema.getQueryType()],
+    ['mutation', schema.getMutationType()],
+  ] as const;
+  for (const [kind, type] of roots) {
+    for (const field of Object.values(type?.getFields() ?? {})) {
+      operations.set(`${kind} ${field.name}`, field);
+    }
+  }
+  return operations;
+};
+
+// A stored response is the vendor's body for a document selecting only that root field, unaliased.
+const readStoredData = ({ body }: StoredResponse): Record<string, unknown> | undefined =>
+  isRecord(body) && isRecord(body.data) ? body.data : undefined;
+
+const checkStoredResponse =
+  (schema: GraphQLSchema, operations: ReadonlyMap<string, RootField>) =>
+  (name: string, response: StoredResponse): Violation[] => {
+    const field = operations.get(name);
+    if (!field) {
+      return [];
+    }
+    const path = ['body', 'data', field.name];
+    const data = readStoredData(response);
+    if (!data || !(field.name in data)) {
+      return [violation(path, 'required', `The response has no data for ${field.name}`)];
+    }
+    return checkGraphQLValue(schema, field.type, data[field.name], path);
+  };
+
 /**
  * Answers GraphQL requests at the spec's endpoints. Each root field a request selects is an
  * operation, e.g. `query boards`. Documents that don't parse or validate against the schema,
  * and variables that don't coerce to their declared types, get 400; valid requests execute
- * against the schema with sampled values, so responses always match the selection set.
+ * against the schema, so responses always match the selection set. A root field with a fixture
+ * or recording resolves from its stored value, sampling the selected fields the value lacks;
+ * other fields are sampled.
  */
-export const createGraphQLProtocol = (spec: GraphQLSpec, source?: string): ContractProtocol => {
+export const createGraphQLProtocol = (
+  spec: GraphQLSpec,
+  { source, responses = [] }: ContractProtocolOptions = {}
+): ContractProtocol => {
   const schema = buildCachedSchema(spec.sdl);
+  const declared = declareOperations(schema);
+  const operationNames = new Set(declared.keys());
+  const { served, rejected: rejectedResponses } = selectNamedResponses(responses, {
+    source,
+    operations: operationNames,
+    check: checkStoredResponse(schema, declared),
+  });
   return {
     endpoints: spec.endpoints.map((endpoint) => toEndpoint(new URL(endpoint))),
+    operations: operationNames,
+    rejectedResponses,
     handle: async (request) => {
       if (request.method !== 'get' && request.method !== 'post') {
         return rejected(
@@ -212,15 +267,31 @@ export const createGraphQLProtocol = (spec: GraphQLSpec, source?: string): Contr
           violation(['method'], 'method', `A ${operation.operation} must be sent with POST`),
         ]);
       }
+      // The response keys (aliases) of the root fields resolved from a stored response.
+      const fromStored = new Set<string>();
       // Schemas such as monday.com's declare @defer and @stream, which plain `execute` refuses.
       const result = await experimentalExecuteIncrementally({
         schema,
         document,
         operationName: params.operationName,
         variableValues: params.variables,
-        fieldResolver: (_source, _args, _context, { returnType }) => sampleGraphQLValue(returnType),
-        typeResolver: (_value, _context, info, abstractType) =>
-          info.schema.getPossibleTypes(abstractType)[0]?.name,
+        fieldResolver: (parent, _args, _context, info) => {
+          const { fieldName, returnType, path } = info;
+          if (path.prev === undefined) {
+            const stored = served.get(`${info.operation.operation} ${fieldName}`);
+            if (!stored) {
+              return sampleGraphQLValue(returnType);
+            }
+            fromStored.add(String(path.key));
+            return readStoredData(stored.response)?.[fieldName];
+          }
+          // Sampled objects are empty, so only stored values have fields of their own.
+          return isRecord(parent) && Object.hasOwn(parent, fieldName)
+            ? parent[fieldName]
+            : sampleGraphQLValue(returnType);
+        },
+        typeResolver: (value, _context, info, abstractType) =>
+          resolveStoredType(info.schema, abstractType, value)?.name,
       });
       if ('initialResult' in result) {
         return {
@@ -233,19 +304,34 @@ export const createGraphQLProtocol = (spec: GraphQLSpec, source?: string): Contr
           requestViolations: [],
         };
       }
-      // Resolvers only sample, so every error is the request's: variables or arguments that
-      // don't coerce to their types.
-      if (result.errors?.length) {
-        return rejected(operations, toViolations(result.errors, ['body', 'variables'], 'coercion'));
+      // Sampled values always fit the schema, so errors outside stored root fields are the
+      // request's: variables or arguments that don't coerce to their types. Errors inside them
+      // are a fixture breaking the spec, answered as a vendor would, with partial data.
+      const errors = result.errors ?? [];
+      const isStoredError = ({ path }: GraphQLError) =>
+        path !== undefined && fromStored.has(String(path[0]));
+      const requestErrors = errors.filter((error) => !isStoredError(error));
+      if (requestErrors.length > 0) {
+        return rejected(operations, toViolations(requestErrors, ['body', 'variables'], 'coercion'));
       }
+      const responseViolations = errors.map(({ message, path = [] }) =>
+        violation(['body', 'data', ...path.map(String)], 'response', message)
+      );
       return {
         response: {
           statusCode: 200,
           headers: { 'content-type': 'application/json' },
-          body: { data: result.data },
+          body:
+            errors.length > 0
+              ? {
+                  data: result.data,
+                  errors: errors.map(({ message, path }) => ({ message, path })),
+                }
+              : { data: result.data },
         },
         operations,
         requestViolations: [],
+        responseViolations,
       };
     },
   };

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -14,6 +15,22 @@ from urllib.parse import quote
 WriteAction = Literal["create", "comment", "reopen_comment", "ask"]
 UNKNOWN_ANSWER = "Unknown"
 FILED_VIA = "Filed via file-bug"
+FILED_MARKER = "<!-- filed-via: file-bug v1 -->"
+KIBANA_REPO = "elastic/kibana"
+SECURITY_TEAM_REPO = "elastic/security-team"
+ALLOWED_REPOS = frozenset({KIBANA_REPO, SECURITY_TEAM_REPO})
+READ_ONLY_GH = (("search", "issues"), ("search", "prs"), ("label", "list"))
+
+
+def require_allowed_repo(repo: str) -> None:
+    """Refuse an empty or unknown repo; FILE_BUG_EXTRA_REPOS (comma list) allows a scratch repo."""
+    extra = {name.strip().lower() for name in os.environ.get("FILE_BUG_EXTRA_REPOS", "").split(",")}
+    allowed = {name.lower() for name in ALLOWED_REPOS} | (extra - {""})
+    if not repo or repo.strip().lower() not in allowed:
+        raise ValueError(
+            f"--repo must be one of {sorted(ALLOWED_REPOS)} (got {repo!r}); "
+            "state the repo literally in every command"
+        )
 MAX_TITLE_LEN = 140
 SOURCE_EXPLORATORY_TESTER = "exploratory-tester"
 TESTER_SOURCE_LABEL = "sec-eng-prod:exploratory-tester"
@@ -61,6 +78,79 @@ _SENSITIVE_WORD_RE = re.compile(
     r"\bnda\b|\bcustomer\s+(?:name|id|org|organization)\b|\bour customer\b",
     re.I,
 )
+# High precision: a hit here gates the public repo. Word-list terms live in the hint below.
+_SECURITY_RE = re.compile(
+    r"\bCVE-\d{4}-\d{4,}\b"
+    r"|-----BEGIN [A-Z ]*PRIVATE KEY-----"
+    r"|\b(?:Bearer|ApiKey)\s+(?=[A-Za-z0-9+/=_.-]*\d)[A-Za-z0-9+/=_.-]{20,}"
+    r"|\bAKIA[0-9A-Z]{16}\b"
+    r"|\bAuthorization:\s*Basic\s+[A-Za-z0-9+/]{12,}={0,2}"
+    r"|\bcurl\b[^\n]*\s(?:-u|--user)\s+[^\s:]+:(?!\*|<|\$|(?i:(?:undefined|null|none|redacted|changeme|example|password|secret)\b))[^\s]{4,}"
+    r"|\b[a-z][a-z0-9+.-]*://[^\s/:@*<]+:(?!\*|<|\$|(?i:(?:undefined|null|none|redacted|changeme|example|password|secret)\b))[^\s/@]{4,}@"
+    r"|\b(?:password|passwd|secret|api[_-]?key|token)\s*[:=]\s*"
+    r"(?!\$|(?:undefined|null|none|redacted|changeme|example)\b)"
+    r"(?=[^\s'\"]*\d)[^\s'\"*]{8,}",
+    re.I,
+)
+# Soft: common Security Solution UI wording too. Never gates; it prompts a re-read for a signal.
+_SECURITY_HINT_RE = re.compile(
+    r"\b(?:auth(?:entication|orization)?\s+bypass|privilege\s+escalation|"
+    r"remote\s+code\s+execution|sql\s+injection|cross[\s-]site\s+scripting|"
+    r"xss|rce|csrf|ssrf|exploit(?:able)?|vulnerab(?:le|ility|ilities))\b",
+    re.I,
+)
+_MEDIA_EXT = r"(?:png|jpe?g|gif|webp|mp4|webm|mov)"
+_MEDIA_REF_RE = re.compile(
+    r"!\[[^\]]*\]\([^)]+\)|<video\b|^\s*(?:screenshot|recording|video)s?\s*:"
+    rf"|(?:\$SESSION_DIR/|~/|\.{{1,2}}/|/)[^\s()<>\"'`]*\.{_MEDIA_EXT}\b",
+    re.I | re.M,
+)
+# A bare path in prose; repro snippets (inline or fenced code) are input, not attachments.
+_LOCAL_MEDIA_BARE_RE = re.compile(
+    r"(?<![\w/:.-])(?:\$SESSION_DIR/|~/|\.{1,2}/|/[^\s()<>\"'`/]+/|[A-Za-z]:\\)[^\s()<>\"'`]*"
+    rf"\.{_MEDIA_EXT}\b",
+    re.I | re.M,
+)
+# An explicit attachment reference whose target is not an http(s) URL (relative paths too).
+# A labelled line is checked even when the filename is in backticks; image and video tags are
+# checked outside code only, so a repro snippet containing one is not an attachment.
+_LOCAL_MEDIA_LABEL_RE = re.compile(
+    rf"^\s*(?:screenshot|recording|video)s?\s*:\s*(?!https?://|!\[|<video)[^\s]*\.{_MEDIA_EXT}\b",
+    re.I | re.M,
+)
+_LOCAL_MEDIA_EMBED_RE = re.compile(
+    rf"!\[[^\]]*\]\((?!https?://)[^)]*\.{_MEDIA_EXT}\)"
+    rf"|<video[^>]*\bsrc=\"(?!https?://)[^\"]*\.{_MEDIA_EXT}\"",
+    re.I | re.M,
+)
+_FENCE_RE = re.compile(r"```.*?```", re.S)
+# A code span delimited by two or more backticks may contain single backticks (CommonMark).
+_MULTI_TICK_SPAN_RE = re.compile(r"(`{2,})(?!`).+?(?<!`)\1(?!`)", re.S)
+# Backticks inside an image destination are literal URL characters, not a code span.
+_LOCAL_MEDIA_TICKED_EMBED_RE = re.compile(
+    rf"!\[[^\]]*\]\(\s*`+(?!https?://)[^)`]*\.{_MEDIA_EXT}`*\s*\)", re.I
+)
+
+
+def _local_media(body: str) -> str | None:
+    outside_code = _without_code(body)
+    match = (
+        _LOCAL_MEDIA_LABEL_RE.search(_FENCE_RE.sub("", body).replace("`", ""))
+        or _LOCAL_MEDIA_EMBED_RE.search(outside_code)
+        or _LOCAL_MEDIA_TICKED_EMBED_RE.search(_MULTI_TICK_SPAN_RE.sub("", _FENCE_RE.sub("", body)))
+        or _LOCAL_MEDIA_BARE_RE.search(outside_code)
+    )
+    return match.group(0) if match else None
+
+
+_CODE_RE = re.compile(r"```.*?```|`[^`\n]*`", re.S)
+
+
+def _without_code(text: str) -> str:
+    """Drop fenced and inline code: repro snippets there are input, not attachments."""
+    return _CODE_RE.sub("", text)
+
+
 _TITLE_FORMAT_RE = re.compile(r"^\[.+?\] \[Bug\] .+")
 _STACK_RELEASE_RE = re.compile(r"^v?(\d+)\.(\d+)(?:\.(\d+))?$")
 _WIP_RE = re.compile(
@@ -212,6 +302,66 @@ def with_source_labels(
 
 def with_create_labels(labels: list) -> list[str]:
     return _unique_labels(list(CREATE_LABELS), labels)
+
+
+def search_queries(token: str | None, words: str, screen: str | None = None) -> list[str]:
+    """Query set for the duplicate search.
+
+    GitHub's default search returns nothing when an identifier is ANDed with other
+    words and no in:title / in:body qualifier is present, so every identifier-plus-words
+    query is qualified, and the bare identifier is also run on its own. Plain words are run
+    unqualified too (they match across title and body) as well as split by field.
+    """
+    token = (token or "").strip()
+    words = " ".join((words or "").split())
+    screen = " ".join((screen or "").split())
+    if token.startswith("-") or " " in token:
+        raise ValueError("--token must be a single identifier that does not start with '-'")
+    if not token and not words and not screen:
+        raise ValueError("search needs --token or --words")
+    queries: list[str] = []
+    if token:
+        queries.append(token)
+        if words:
+            queries += [f"{token} {words} in:title", f"{token} {words} in:body"]
+    for plain in dict.fromkeys(text for text in (words, screen) if text):
+        queries += [plain, f"{plain} in:title", f"{plain} in:body"]
+    return list(dict.fromkeys(queries))
+
+
+def run_search(
+    *,
+    repo: str,
+    token: str | None,
+    words: str,
+    screen: str | None = None,
+    run_gh: GhRunner | None = None,
+) -> tuple[list[IssueMatch], list[dict]]:
+    """Run every query on issues (open and closed) and open PRs; a gh failure is an error, never `[]`."""
+    run_gh = run_gh or _default_run_gh
+    queries = search_queries(token, words, screen)
+    found: dict[int, IssueMatch] = {}
+    ran: list[dict] = []
+    for kind in ("issues", "prs"):
+        fields = "number,state,title,body" + (",isDraft" if kind == "prs" else "")
+        for query in queries:
+            argv = ["gh", "search", kind, "--repo", repo, "--limit", "20", "--json", fields]
+            if kind == "prs":
+                argv += ["--state", "open"]
+            argv.append(query)
+            result = run_gh(argv)
+            if result.get("returncode"):
+                detail = str(result.get("stderr") or "").strip() or "no stderr"
+                raise RuntimeError(f"gh search {kind} failed for {query!r}: {detail}")
+            try:
+                payload = json.loads(str(result.get("stdout") or "[]"))
+            except json.JSONDecodeError as error:
+                raise RuntimeError(f"gh search {kind} returned invalid JSON for {query!r}: {error}") from error
+            matches = parse_search_results(payload)
+            ran.append({"kind": kind, "query": query, "matches": len(matches)})
+            for match in matches:
+                found.setdefault(match.number, match)
+    return list(found.values()), ran
 
 
 def decide_write_path(matches: list[IssueMatch]) -> WritePath:
@@ -967,11 +1117,30 @@ def _finding_with_body_answers(finding: dict, body: str) -> dict:
     return merged
 
 
-def with_filed_stamp(body: str) -> str:
-    text = body.rstrip()
-    if FILED_VIA in _visible_text(text):
-        return f"{text}\n"
-    return f"{text}\n\n{FILED_VIA}\n"
+_MARKER_RE = re.compile(r"[ \t]*<!-- filed-via: file-bug v1\b[^>]*-->[ \t]*\n?")
+_META_VALUE_RE = re.compile(r"[A-Za-z0-9._:/+-]{1,60}")
+
+
+def filed_marker(meta: dict[str, str] | None = None) -> str:
+    """The hidden marker, optionally with `key=value` fields (agent, model, run)."""
+    fields = []
+    for key, value in (meta or {}).items():
+        value = str(value or "").strip()
+        if value and _META_VALUE_RE.fullmatch(value):
+            fields.append(f"{key}={value}")
+    return "<!-- filed-via: file-bug v1" + "".join(f" {f}" for f in fields) + " -->"
+
+
+def with_filed_stamp(body: str, meta: dict[str, str] | None = None) -> str:
+    """Append the visible stamp and the hidden marker, each only once.
+
+    The marker lets tooling find skill-filed tickets; agents never add it by hand.
+    An existing marker is replaced, so `write` can enrich the plain one `render-body` added.
+    """
+    text = _MARKER_RE.sub("", body).rstrip()
+    if FILED_VIA not in _visible_text(text):
+        text = f"{text}\n\n{FILED_VIA}"
+    return f"{text}\n{filed_marker(meta)}\n"
 
 
 def scan_wip(*texts: object) -> list[str]:
@@ -993,7 +1162,20 @@ def scan_sensitive(*texts: object) -> list[str]:
         hits.append("case_id")
     if _SENSITIVE_WORD_RE.search(blob):
         hits.append("customer_or_nda")
+    if _SECURITY_RE.search(blob):
+        hits.append("security_issue")
     return hits
+
+
+def scan_security_hints(*texts: object) -> list[str]:
+    """Soft signal only: security wording that is also common Security Solution UI text."""
+    blob = "\n".join(str(text) for text in texts if text)
+    return ["security_hint"] if _SECURITY_HINT_RE.search(blob) else []
+
+
+def has_media(*texts: object) -> bool:
+    """True when a draft embeds or references a screenshot or recording."""
+    return bool(_MEDIA_REF_RE.search("\n".join(str(text) for text in texts if text)))
 
 
 def check_draft(
@@ -1005,9 +1187,18 @@ def check_draft(
     labels: list | None = None,
     wip_ok: bool = False,
     sensitive_ok: bool = False,
+    repo: str = KIBANA_REPO,
+    security_ok: bool = False,
+    media_ok: bool = False,
+    action: str | None = None,
 ) -> list[str]:
     merged = _finding_with_body_answers(finding, body)
-    gaps = list(pack_gaps(merged, config))
+    mode = action or ("create" if title is not None else "comment")
+    # A comment/reopen without a finding adds to an existing issue that already holds the
+    # template answers, so only the sensitive/security/WIP/media gates apply to it.
+    gaps = [] if mode == "comment" and not finding else list(pack_gaps(merged, config))
+    if mode == "create" and title is None:
+        gaps.append("title")
     if title is not None:
         if len(title) > MAX_TITLE_LEN or not _TITLE_FORMAT_RE.match(title):
             gaps.append("title")
@@ -1022,8 +1213,13 @@ def check_draft(
     if is_tester_finding(finding, config) and title is not None:
         if TESTER_SOURCE_LABEL not in [str(label) for label in (labels or [])]:
             gaps.append("tester_label")
+    hits = scan_sensitive(body, json.dumps(merged), title or "")
     if not sensitive_ok:
-        gaps.extend(f"sensitive:{hit}" for hit in scan_sensitive(body, json.dumps(merged)))
+        gaps.extend(f"sensitive:{hit}" for hit in hits if hit != "security_issue")
+    if "security_issue" in hits and not security_ok and repo.lower() != SECURITY_TEAM_REPO:
+        gaps.append("security_issue:file_in_security_team")
+    if not media_ok and has_media(body):
+        gaps.append("media_review")
     if not wip_ok and not merged.get("file_despite_wip"):
         gaps.extend(scan_wip(body, json.dumps(merged)))
     return gaps
@@ -1412,6 +1608,7 @@ def upload_evidence(
     run_gh: GhRunner | None = None,
 ) -> UploadResult:
     """Upload evidence to user-attachments, compressing a rejected video once."""
+    require_allowed_repo(repo)
     repo_id = repository_id
     if repo_id is None:
         repo_id = _repository_id(repo, run_gh or _default_run_gh)
@@ -1459,6 +1656,15 @@ class PartialWrite(Exception):
 
 
 def _default_run_gh(argv: list) -> dict:
+    override = os.environ.get("FILE_BUG_GH")
+    if override and argv and argv[0] == "gh":
+        if tuple(argv[1:3]) not in READ_ONLY_GH:
+            return {
+                "returncode": 1,
+                "stdout": "",
+                "stderr": "blocked: FILE_BUG_GH is set (eval mode), so only read commands run",
+            }
+        argv = [*shlex.split(override), *argv[1:]]
     completed = subprocess.run(
         argv,
         check=False,
@@ -1586,9 +1792,12 @@ def write_github(
     number: int | None,
     finding: dict | None = None,
     config: dict | None = None,
+    security_ok: bool = False,
+    marker_meta: dict[str, str] | None = None,
     run_gh: GhRunner = _default_run_gh,
 ) -> dict:
     """Run the `gh` write for `action`, never retrying a create that already failed."""
+    require_allowed_repo(repo)
     if action == "ask":
         raise ValueError("action 'ask' must be resolved by the caller before writing")
     if action == "create":
@@ -1596,6 +1805,27 @@ def write_github(
             raise ValueError("action 'create' needs a title")
     elif number is None:
         raise ValueError(f"action {action!r} needs an issue number")
+    if (
+        repo.lower() == KIBANA_REPO
+        and not security_ok
+        and "security_issue" in scan_sensitive(body, title or "")
+    ):
+        where = (
+            f"file it in {SECURITY_TEAM_REPO}"
+            if action == "create"
+            else "do not post it on a public issue"
+        )
+        raise ValueError(
+            f"text looks security-sensitive (key, token or CVE): {where}, "
+            "or pass --security-ok if the human confirmed it is a false positive"
+        )
+
+    local_media = _local_media(body)
+    if local_media:
+        raise ValueError(
+            f"body still references a local file ({local_media}): run `upload`, "
+            "then `embed-uploads`, and write the embedded body"
+        )
 
     labels = with_source_labels(labels, finding or {}, config)
     if action == "create":
@@ -1603,7 +1833,7 @@ def write_github(
     workdir = Path(tempfile.mkdtemp(prefix="file_bug_body_"))
     try:
         body_file = workdir / "body.md"
-        body_file.write_text(with_filed_stamp(body), encoding="utf-8")
+        body_file.write_text(with_filed_stamp(body, marker_meta), encoding="utf-8")
         if action == "create":
             url = _gh_create(
                 repo=repo,
