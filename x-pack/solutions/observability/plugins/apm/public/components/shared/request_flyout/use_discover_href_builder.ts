@@ -8,7 +8,6 @@
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useCallback } from 'react';
 import { useApmIndexSettingsContext } from '../../../context/apm_index_settings/use_apm_index_settings_context';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { getESQLQuery, type ESQLQueryParams } from '../links/discover_links/get_esql_query';
 import { useRequestFlyoutContext } from './request_flyout_context';
@@ -19,9 +18,9 @@ import { useRequestFlyoutContext } from './request_flyout_context';
  * until the APM index settings are loaded.
  */
 export function useDiscoverHrefBuilder() {
-  const { share } = useApmPluginContext();
   const { indexSettings = [], indexSettingsStatus } = useApmIndexSettingsContext();
   const {
+    deps: { share },
     filters: { rangeFrom, rangeTo },
   } = useRequestFlyoutContext();
 

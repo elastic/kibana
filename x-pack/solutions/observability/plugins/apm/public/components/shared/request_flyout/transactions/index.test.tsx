@@ -10,6 +10,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { RequestFlyoutChildProvider } from '../request_flyout_child';
 import { RequestFlyoutContextProvider } from '../request_flyout_context';
 import type { RequestFlyoutContextValue } from '../request_flyout_context';
+import { TEST_CONTEXT } from '../test_utils';
 import { RequestFlyoutTransactions } from '.';
 
 // ---------------------------------------------------------------------------
@@ -26,7 +27,7 @@ jest.mock('./use_request_flyout_transactions', () => ({
 // ---------------------------------------------------------------------------
 
 const BASE_CONTEXT: RequestFlyoutContextValue = {
-  deps: { core: {} as any },
+  deps: TEST_CONTEXT.deps,
   connection: {
     sourceServiceName: 'frontend',
     sourceLabel: 'frontend',

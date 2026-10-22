@@ -17,6 +17,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType } from '../../../common/document_type';
 import {
+  AT_TIMESTAMP,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
@@ -85,7 +86,7 @@ function getServiceMapDependencyNodeInfoForTimeRange({
 
     // Rollup search: always used for throughput + failed transaction rate.
     // Also used for avg latency.
-    const rollupResponse = await apmEventClient.search('get_service_map_dependency_node_stats', {
+    const rollupSearch = apmEventClient.search('get_service_map_dependency_node_stats', {
       apm: {
         events: [ProcessorEvent.metric],
       },
@@ -103,7 +104,7 @@ function getServiceMapDependencyNodeInfoForTimeRange({
         ...subAggs,
         timeseries: {
           date_histogram: {
-            field: '@timestamp',
+            field: AT_TIMESTAMP,
             fixed_interval: intervalString,
             min_doc_count: 0,
             extended_bounds: { min: startWithOffset, max: endWithOffset },
@@ -112,6 +113,41 @@ function getServiceMapDependencyNodeInfoForTimeRange({
         },
       },
     });
+
+    const isPercentile =
+      latencyAggregationType === LatencyAggregationType.p95 ||
+      latencyAggregationType === LatencyAggregationType.p99;
+
+    // p95/p99 latency needs the raw span documents: percentiles cannot be computed from the
+    // pre-aggregated rollup, so both requests run in parallel.
+    const percentileSearch = isPercentile
+      ? apmEventClient.search('get_service_map_dependency_node_stats_percentile', {
+          apm: {
+            events: [ProcessorEvent.span],
+          },
+          track_total_hits: false,
+          size: 0,
+          query: {
+            bool: {
+              filter: connectionFilter,
+            },
+          },
+          aggs: {
+            ...getLatencyAggregation(latencyAggregationType, SPAN_DURATION),
+            timeseries: {
+              date_histogram: {
+                field: AT_TIMESTAMP,
+                fixed_interval: intervalString,
+                min_doc_count: 0,
+                extended_bounds: { min: startWithOffset, max: endWithOffset },
+              },
+              aggs: getLatencyAggregation(latencyAggregationType, SPAN_DURATION),
+            },
+          },
+        })
+      : undefined;
+
+    const [rollupResponse, spanResponse] = await Promise.all([rollupSearch, percentileSearch]);
 
     const count = rollupResponse.aggregations?.count.value ?? 0;
     const latencySum = rollupResponse.aggregations?.latency_sum.value ?? 0;
@@ -149,38 +185,7 @@ function getServiceMapDependencyNodeInfoForTimeRange({
             : null,
       }));
 
-    if (
-      latencyAggregationType === LatencyAggregationType.p95 ||
-      latencyAggregationType === LatencyAggregationType.p99
-    ) {
-      const spanResponse = await apmEventClient.search(
-        'get_service_map_dependency_node_stats_percentile',
-        {
-          apm: {
-            events: [ProcessorEvent.span],
-          },
-          track_total_hits: false,
-          size: 0,
-          query: {
-            bool: {
-              filter: connectionFilter,
-            },
-          },
-          aggs: {
-            ...getLatencyAggregation(latencyAggregationType, SPAN_DURATION),
-            timeseries: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: intervalString,
-                min_doc_count: 0,
-                extended_bounds: { min: startWithOffset, max: endWithOffset },
-              },
-              aggs: getLatencyAggregation(latencyAggregationType, SPAN_DURATION),
-            },
-          },
-        }
-      );
-
+    if (isPercentile && spanResponse) {
       latencyValue = spanResponse.aggregations?.latency
         ? getLatencyValue({
             latencyAggregationType,

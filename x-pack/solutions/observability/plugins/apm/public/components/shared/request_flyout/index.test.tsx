@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RequestFlyout } from '.';
 
@@ -26,7 +27,10 @@ jest.mock('./request_flyout_content', () => ({
   RequestFlyoutContent: () => <div data-test-subj="requestFlyoutContent" />,
 }));
 
-const deps = { core: { uiSettings: {} } as unknown as CoreStart };
+const deps = {
+  core: { uiSettings: {} } as unknown as CoreStart,
+  share: {} as unknown as SharePublicStart,
+};
 const baseProps = {
   deps,
   environment: 'production' as const,

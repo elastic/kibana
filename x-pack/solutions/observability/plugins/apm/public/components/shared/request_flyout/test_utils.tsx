@@ -8,13 +8,14 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { RequestFlyoutChildProvider } from './request_flyout_child';
 import { RequestFlyoutContextProvider } from './request_flyout_context';
 import type { RequestFlyoutContextValue } from './request_flyout_context';
 import type { RequestFlyoutChild } from './request_flyout_child';
 
 export const TEST_CONTEXT: RequestFlyoutContextValue = {
-  deps: { core: {} as unknown as CoreStart },
+  deps: { core: {} as unknown as CoreStart, share: {} as unknown as SharePublicStart },
   connection: {
     sourceServiceName: 'frontend',
     sourceLabel: 'frontend',

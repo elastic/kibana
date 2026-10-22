@@ -6,6 +6,7 @@
  */
 
 import { expectParseError, expectParseSuccess } from '@kbn/zod-helpers/v4';
+import { MAX_CONNECTION_RESOURCES } from './connection_params';
 import { serviceMapRoute } from './service_map';
 import { serviceMapDependencyNodeRoute } from './dependency_node';
 import { serviceMapServiceBadgesRoute } from './service_badges';
@@ -228,6 +229,36 @@ describe('serviceMapConnectionFailedCallsRoute params', () => {
     expectParseError(
       serviceMapConnectionFailedCallsRoute.params!.safeParse({
         query: { ...connectionQuery, dependencies: [] },
+      })
+    );
+  });
+
+  it('accepts as many dependencies as a connection can have', () => {
+    expectParseSuccess(
+      serviceMapConnectionFailedCallsRoute.params!.safeParse({
+        query: {
+          ...connectionQuery,
+          dependencies: Array.from({ length: MAX_CONNECTION_RESOURCES }, (_, i) => `api-${i}`),
+        },
+      })
+    );
+  });
+
+  it('rejects more dependencies than a connection can have', () => {
+    expectParseError(
+      serviceMapConnectionFailedCallsRoute.params!.safeParse({
+        query: {
+          ...connectionQuery,
+          dependencies: Array.from({ length: MAX_CONNECTION_RESOURCES + 1 }, (_, i) => `api-${i}`),
+        },
+      })
+    );
+  });
+
+  it('rejects a dependency that is too long', () => {
+    expectParseError(
+      serviceMapConnectionFailedCallsRoute.params!.safeParse({
+        query: { ...connectionQuery, dependencies: 'a'.repeat(513) },
       })
     );
   });

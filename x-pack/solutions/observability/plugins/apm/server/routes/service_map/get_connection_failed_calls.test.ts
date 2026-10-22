@@ -228,6 +228,22 @@ describe('getConnectionFailedCalls', () => {
       expect(buckets[0]).toMatchObject({ topError: 'gRPC UNAVAILABLE', topErrorGroupId: null });
     });
 
+    it.each([
+      [6, 'ALREADY_EXISTS'],
+      [9, 'FAILED_PRECONDITION'],
+      [15, 'DATA_LOSS'],
+    ])('names the gRPC status %i', async (grpcCode, name) => {
+      const { search, options } = setup();
+      search
+        .mockResolvedValueOnce(failedSpansResponse([{ spanId: 'span-1', grpcCode }]))
+        .mockResolvedValueOnce(totalCallsResponse(10))
+        .mockResolvedValueOnce(topErrorResponse());
+
+      const { buckets } = await getConnectionFailedCalls(options());
+
+      expect(buckets[0]).toMatchObject({ topError: `gRPC ${name}` });
+    });
+
     it('has no top error when nothing explains the failure', async () => {
       const { search, options } = setup();
       search

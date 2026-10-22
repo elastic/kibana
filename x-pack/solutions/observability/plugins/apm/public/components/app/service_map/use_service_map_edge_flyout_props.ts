@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_CONNECTION_RESOURCES } from '@kbn/apm-api-shared';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
 import { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
@@ -53,7 +54,11 @@ export function useServiceMapEdgeFlyoutProps({
             values: { count: groupedResources.length, type: spanSubtype ?? spanType ?? '' },
           })
           .replace(/\s+/g, ' '),
-        dependencies: groupedResources.map(({ resource }) => resource),
+        // The routes take a bounded list of resources: the metrics cover the first ones of a very
+        // large group.
+        dependencies: groupedResources
+          .slice(0, MAX_CONNECTION_RESOURCES)
+          .map(({ resource }) => resource),
         groupedResources,
       };
     }
@@ -85,7 +90,11 @@ export function useServiceMapEdgeFlyoutProps({
 
     // A service → service edge can cover several resources; a service → dependency edge is its
     // own dependency.
-    const dependencies = resources?.length ? resources : dependencyName ? [dependencyName] : [];
+    const dependencies = resources?.length
+      ? resources.slice(0, MAX_CONNECTION_RESOURCES)
+      : dependencyName
+      ? [dependencyName]
+      : [];
 
     return {
       sourceServiceName,

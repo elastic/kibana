@@ -24,7 +24,7 @@ export interface RequestFlyoutFilters {
 /** Plugin services of the host (the APM app, or an embeddable) the flyout renders in. */
 export interface RequestFlyoutDeps {
   core: CoreStart;
-  share?: SharePublicStart;
+  share: SharePublicStart;
   lens?: LensPublicStart;
   dataViews?: DataViewsPublicPluginStart;
 }

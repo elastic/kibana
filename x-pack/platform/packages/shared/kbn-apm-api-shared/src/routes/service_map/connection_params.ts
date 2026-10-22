@@ -6,12 +6,19 @@
  */
 import { lazySchema, z } from '@kbn/zod/v4';
 
+/** Caps of the resources of a connection: they travel in the query string and reach an ES `terms` filter. */
+export const MAX_CONNECTION_RESOURCES = 100;
+const MAX_RESOURCE_LENGTH = 512;
+
 /**
  * `span.destination.service.resource` values of a connection. A query string with a single
  * value arrives as a string, so it is normalized to an array.
  */
 export const connectionDependenciesSchema = lazySchema(() =>
   z
-    .union([z.string(), z.array(z.string())])
+    .union([
+      z.string().max(MAX_RESOURCE_LENGTH),
+      z.array(z.string().max(MAX_RESOURCE_LENGTH)).max(MAX_CONNECTION_RESOURCES),
+    ])
     .transform((dependencies) => (Array.isArray(dependencies) ? dependencies : [dependencies]))
 );

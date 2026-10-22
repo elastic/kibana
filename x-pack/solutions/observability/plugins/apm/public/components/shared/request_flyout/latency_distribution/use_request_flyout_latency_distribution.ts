@@ -58,10 +58,15 @@ export function useRequestFlyoutLatencyDistribution() {
 
   const hasData = Array.isArray(overallLatencyHistogram) && overallLatencyHistogram.length > 0;
 
-  // Failed-spans fetch: uses durationMin/durationMax from the first fetch to align bucket sizes.
+  // Failed-spans fetch: uses durationMin/durationMax of the first fetch, once it is done, to align
+  // the bucket sizes.
   const { data: errorHistogramData = {} } = useRequestFlyoutFetcher(
     (callApmApi) => {
-      if (!overallLatencyData.durationMin || !overallLatencyData.durationMax) {
+      if (
+        overallLatencyStatus !== FETCH_STATUS.SUCCESS ||
+        !overallLatencyData.durationMin ||
+        !overallLatencyData.durationMax
+      ) {
         return;
       }
       return callApmApi('POST /internal/apm/latency/overall_distribution/spans', {
@@ -88,6 +93,7 @@ export function useRequestFlyoutLatencyDistribution() {
       environment,
       start,
       end,
+      overallLatencyStatus,
       overallLatencyData.durationMin,
       overallLatencyData.durationMax,
     ]

@@ -18,6 +18,7 @@ export const serviceMapRouteDefinitions = {
   connectionFailedCalls: serviceMapConnectionFailedCallsRoute,
 };
 
+export { MAX_CONNECTION_RESOURCES } from './connection_params';
 export type { ServiceMapRouteResponse } from './service_map';
 export type { ServiceMapServiceDependencyInfoResponse } from './dependency_node';
 export type { ServiceSloStatsResponse, ServiceMapServiceBadgesResponse } from './service_badges';

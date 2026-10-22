@@ -100,8 +100,8 @@ export function useKeyboardNavigation({
         event.preventDefault();
         onPopoverClose();
         setScreenReaderAnnouncement(
-          i18n.translate('xpack.apm.serviceMap.flyoutClosed', {
-            defaultMessage: 'Flyout closed',
+          i18n.translate('xpack.apm.serviceMap.popoverClosed', {
+            defaultMessage: 'Popover closed',
           })
         );
         return;
