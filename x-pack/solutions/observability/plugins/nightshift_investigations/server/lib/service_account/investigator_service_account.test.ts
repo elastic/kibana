@@ -17,59 +17,74 @@ import { createInvestigatorServiceAccountService } from './investigator_service_
 
 const request = {} as KibanaRequest;
 const SPACE_ID = 'obs';
-const AGENT_ACCOUNT = 'kibana/nightshift_agent';
+// Serverless (UIAM) assigns opaque ids; nothing may derive them from the account names.
+const AGENT_ACCOUNT = 'uiam-sa-7f3c2a';
+const AUTOMATIONS_ACCOUNT = 'uiam-sa-91be04';
+const IDS = { agent: AGENT_ACCOUNT, automations: AUTOMATIONS_ACCOUNT };
+const ENTRY_POINT_ID = `${NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID}-${SPACE_ID}`;
 
 const setup = ({
   serviceAccountsEnabled = true,
   canManageSecurity = true,
   isServerless = false,
-  createError,
   spaceExists = true,
   runAs = AGENT_ACCOUNT,
+  enabled = true,
   installError,
 }: {
   serviceAccountsEnabled?: boolean;
   canManageSecurity?: boolean;
   isServerless?: boolean;
-  createError?: Error;
   spaceExists?: boolean;
   runAs?: string;
+  enabled?: boolean;
   installError?: Error;
 } = {}) => {
   const esClient = {
     security: {
       hasPrivileges: jest.fn().mockResolvedValue({ has_all_requested: canManageSecurity }),
-      putRole: jest.fn(),
     },
   };
   const serviceAccounts = {
     isEnabled: jest.fn(() => serviceAccountsEnabled),
-    create: createError
-      ? jest.fn().mockRejectedValue(createError)
-      : jest.fn(async (_req: unknown, { name }: { name: string }) => ({ id: `kibana/${name}` })),
+    create: jest.fn(),
   };
   const core = {
     security: { serviceAccounts },
     elasticsearch: { client: { asScoped: () => ({ asCurrentUser: esClient }) } },
   } as unknown as CoreStart;
+  const state = { enabled, runAs };
   const managedWorkflows = {
     install: installError
       ? jest.fn().mockRejectedValue(installError)
       : jest.fn().mockResolvedValue(undefined),
     uninstall: jest.fn().mockResolvedValue(undefined),
-    getWorkflowStatus: jest.fn().mockResolvedValue({ installed: true, enabled: true }),
+    getWorkflowStatus: jest.fn(async () => ({ installed: true, enabled: state.enabled })),
   };
   const workflowsExtensions = {
     getClient: jest.fn().mockResolvedValue({ managedWorkflows }),
   } as unknown as WorkflowsExtensionsServerPluginStart;
-  const getWorkflow = jest.fn().mockResolvedValue({
-    enabled: true,
+  const getWorkflow = jest.fn(async () => ({
+    enabled: state.enabled,
     valid: true,
-    definition: { settings: { run_as: runAs } },
+    definition: { settings: { run_as: state.runAs } },
+  }));
+  const updateWorkflow = jest.fn(async (_id: string, { enabled: next }: { enabled: boolean }) => {
+    state.enabled = next;
   });
   const workflowsManagement = {
-    management: { getWorkflow },
+    management: { getWorkflow, updateWorkflow },
   } as unknown as WorkflowsServerPluginSetup;
+  const getInstalledWorkflowState = jest.fn(async () => ({
+    workflowId: ENTRY_POINT_ID,
+    spaceId: SPACE_ID,
+    definitionId: NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
+    templateValues: {
+      serviceAccountId: AGENT_ACCOUNT,
+      automationsServiceAccountId: AUTOMATIONS_ACCOUNT,
+    },
+    documentVersion: 1,
+  }));
   const getSpace = spaceExists
     ? jest.fn().mockResolvedValue({ id: SPACE_ID })
     : jest.fn().mockRejectedValue(Boom.notFound());
@@ -81,54 +96,56 @@ const setup = ({
     core,
     workflowsExtensions,
     workflowsManagement,
+    getInstalledWorkflowState,
     spaces,
     isServerless,
     logger: loggingSystemMock.createLogger(),
   });
-  return {
-    service,
-    esClient,
-    serviceAccounts,
-    managedWorkflows,
-    getWorkflow,
-  };
+  return { service, esClient, serviceAccounts, managedWorkflows, getWorkflow, updateWorkflow };
 };
 
 describe('createInvestigatorServiceAccountService', () => {
-  it('creates the Nightshift accounts with their built-in roles, then binds the workflows to the agent', async () => {
-    const { service, esClient, serviceAccounts, managedWorkflows } = setup();
+  it('binds the workflows to the accounts it is given, and keeps the automations account on the entry point', async () => {
+    const { service, serviceAccounts, managedWorkflows } = setup();
 
-    const status = await service.enable(request, SPACE_ID);
+    const status = await service.enable(request, SPACE_ID, IDS);
 
-    // Roles ship with Elasticsearch; Nightshift never writes them.
-    expect(esClient.security.putRole).not.toHaveBeenCalled();
-    expect(serviceAccounts.create.mock.calls.map(([, params]) => params)).toEqual([
-      expect.objectContaining({ name: 'nightshift_agent', roles: ['nightshift_agent'] }),
-      expect.objectContaining({
-        name: 'nightshift_automations',
-        roles: ['nightshift_automations'],
-      }),
-    ]);
+    // The caller finds or creates the accounts; setup only binds them.
+    expect(serviceAccounts.create).not.toHaveBeenCalled();
     expect(managedWorkflows.install.mock.calls.map(([, id]) => id)).toEqual([
       ...BOUND_WORKFLOW_IDS,
     ]);
-    for (const [, , options] of managedWorkflows.install.mock.calls) {
+    for (const [, id, options] of managedWorkflows.install.mock.calls) {
       expect(options).toEqual({
         spaceId: SPACE_ID,
         workflowIdSuffix: SPACE_ID,
-        values: { serviceAccountId: AGENT_ACCOUNT },
+        values:
+          id === NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID
+            ? { serviceAccountId: AGENT_ACCOUNT, automationsServiceAccountId: AUTOMATIONS_ACCOUNT }
+            : { serviceAccountId: AGENT_ACCOUNT },
       });
     }
     expect(status).toEqual(
       expect.objectContaining({
         serviceAccountId: AGENT_ACCOUNT,
         role: 'nightshift_agent',
-        workflowId: `${NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID}-${SPACE_ID}`,
+        workflowId: ENTRY_POINT_ID,
         installed: true,
+        enabled: true,
         bound: true,
       })
     );
+    expect(status.serviceAccounts).toEqual([
+      { kind: 'agent', name: 'nightshift_agent', id: AGENT_ACCOUNT, role: 'nightshift_agent' },
+      {
+        kind: 'automations',
+        name: 'nightshift_automations',
+        id: AUTOMATIONS_ACCOUNT,
+        role: 'nightshift_automations',
+      },
+    ]);
     expect(status.boundWorkflows).toHaveLength(BOUND_WORKFLOW_IDS.length);
+    expect(status.boundWorkflows.every(({ bound }) => bound)).toBe(true);
   });
 
   it('installs the entry point last, so a failed setup leaves the space reading as not set up', () => {
@@ -137,56 +154,50 @@ describe('createInvestigatorServiceAccountService', () => {
     );
   });
 
-  it('gives accounts the predefined roles on Serverless', async () => {
-    const { service, serviceAccounts } = setup({ isServerless: true });
+  it('reports the predefined role names on Serverless', async () => {
+    const status = await setup({ isServerless: true }).service.getStatus(request, SPACE_ID);
 
-    const status = await service.enable(request, SPACE_ID);
-
-    expect(serviceAccounts.create.mock.calls.map(([, { roles }]) => roles)).toEqual([
-      ['_nightshift_agent'],
-      ['_nightshift_automations'],
-    ]);
     expect(status.role).toBe('_nightshift_agent');
+    expect(status.serviceAccounts.map(({ role }) => role)).toEqual([
+      '_nightshift_agent',
+      '_nightshift_automations',
+    ]);
   });
 
-  it('reuses accounts an earlier setup created', async () => {
-    const { service, managedWorkflows } = setup({ createError: Boom.conflict('exists') });
+  it('turns a disabled entry point back on', async () => {
+    const { service, updateWorkflow } = setup({ enabled: false });
 
-    await expect(service.enable(request, SPACE_ID)).resolves.toMatchObject({ bound: true });
-    expect(managedWorkflows.install).toHaveBeenCalledTimes(BOUND_WORKFLOW_IDS.length);
-  });
-
-  it('fails on other account creation errors', async () => {
-    const { service, managedWorkflows } = setup({ createError: new Error('boom') });
-
-    await expect(service.enable(request, SPACE_ID)).rejects.toThrow('boom');
-    expect(managedWorkflows.install).not.toHaveBeenCalled();
+    await expect(service.enable(request, SPACE_ID, IDS)).resolves.toMatchObject({ enabled: true });
+    expect(updateWorkflow).toHaveBeenCalledWith(
+      ENTRY_POINT_ID,
+      { enabled: true },
+      SPACE_ID,
+      request
+    );
   });
 
   it('refuses callers without manage_security before writing anything', async () => {
-    const { service, serviceAccounts, managedWorkflows } = setup({ canManageSecurity: false });
+    const { service, managedWorkflows } = setup({ canManageSecurity: false });
 
-    await expect(service.enable(request, SPACE_ID)).rejects.toMatchObject({
+    await expect(service.enable(request, SPACE_ID, IDS)).rejects.toMatchObject({
       output: { statusCode: 403 },
     });
-    expect(serviceAccounts.create).not.toHaveBeenCalled();
     expect(managedWorkflows.install).not.toHaveBeenCalled();
   });
 
   it('refuses a space that does not exist before writing anything', async () => {
-    const { service, serviceAccounts, managedWorkflows } = setup({ spaceExists: false });
+    const { service, managedWorkflows } = setup({ spaceExists: false });
 
-    await expect(service.enable(request, SPACE_ID)).rejects.toMatchObject({
+    await expect(service.enable(request, SPACE_ID, IDS)).rejects.toMatchObject({
       output: { statusCode: 404 },
     });
-    expect(serviceAccounts.create).not.toHaveBeenCalled();
     expect(managedWorkflows.install).not.toHaveBeenCalled();
   });
 
   it('refuses when service accounts are disabled', async () => {
     const { service } = setup({ serviceAccountsEnabled: false });
 
-    await expect(service.enable(request, SPACE_ID)).rejects.toMatchObject({
+    await expect(service.enable(request, SPACE_ID, IDS)).rejects.toMatchObject({
       output: { statusCode: 400 },
     });
   });
@@ -194,16 +205,18 @@ describe('createInvestigatorServiceAccountService', () => {
   it('names the workflow whose install failed', async () => {
     const { service, managedWorkflows } = setup({ installError: new Error('boom') });
 
-    await expect(service.enable(request, SPACE_ID)).rejects.toThrow(
+    await expect(service.enable(request, SPACE_ID, IDS)).rejects.toThrow(
       `Installing workflow [${BOUND_WORKFLOW_IDS[0]}] failed`
     );
     expect(managedWorkflows.install).toHaveBeenCalledTimes(1);
   });
 
-  it('fails when a workflow did not end up bound to the agent account', async () => {
-    const { service } = setup({ runAs: 'kibana/someone_else' });
+  it('fails when a workflow did not end up bound to the given agent account', async () => {
+    const { service } = setup({ runAs: 'uiam-sa-someone-else' });
 
-    await expect(service.enable(request, SPACE_ID)).rejects.toThrow(/runs as kibana\/someone_else/);
+    await expect(service.enable(request, SPACE_ID, IDS)).rejects.toThrow(
+      /runs as uiam-sa-someone-else/
+    );
   });
 
   it('runs concurrent setups of one space one after another', async () => {
@@ -216,19 +229,19 @@ describe('createInvestigatorServiceAccountService', () => {
       active--;
     });
 
-    await Promise.all([service.enable(request, SPACE_ID), service.enable(request, SPACE_ID)]);
+    await Promise.all([
+      service.enable(request, SPACE_ID, IDS),
+      service.enable(request, SPACE_ID, IDS),
+    ]);
 
     expect(maxActive).toBe(1);
     expect(managedWorkflows.install).toHaveBeenCalledTimes(2 * BOUND_WORKFLOW_IDS.length);
   });
 
-  it('reports an entry point bound to another account as not bound', async () => {
-    const { service } = setup({ runAs: 'kibana/someone_else' });
-
-    await expect(service.getStatus(request, SPACE_ID)).resolves.toMatchObject({
-      installed: true,
-      bound: false,
-    });
+  it('reads the space account from its entry point', async () => {
+    await expect(
+      setup({ runAs: 'kibana/nightshift_agent' }).service.getStatus(request, SPACE_ID)
+    ).resolves.toMatchObject({ serviceAccountId: 'kibana/nightshift_agent', bound: true });
   });
 
   it('reports whether the caller may modify bound workflows', async () => {
@@ -240,14 +253,13 @@ describe('createInvestigatorServiceAccountService', () => {
     ).resolves.toMatchObject({ canModifyBoundWorkflows: false });
   });
 
-  it('uninstalls every bound workflow on disable, entry point first, and keeps the accounts', async () => {
-    const { service, managedWorkflows, serviceAccounts } = setup();
+  it('uninstalls every bound workflow on disable, entry point first', async () => {
+    const { service, managedWorkflows } = setup();
 
     await service.disable(request, SPACE_ID);
 
     expect(managedWorkflows.uninstall.mock.calls.map(([, id]) => id)).toEqual(
       [...BOUND_WORKFLOW_IDS].reverse()
     );
-    expect(serviceAccounts.create).not.toHaveBeenCalled();
   });
 });

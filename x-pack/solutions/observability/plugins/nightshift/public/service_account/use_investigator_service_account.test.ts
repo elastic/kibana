@@ -16,11 +16,13 @@ const status = (overrides: Record<string, unknown> = {}) => ({
   serviceAccounts: [
     {
       kind: 'agent' as const,
+      name: 'nightshift_agent',
       id: 'kibana/nightshift_agent',
       role: 'nightshift_agent',
     },
     {
       kind: 'automations' as const,
+      name: 'nightshift_automations',
       id: 'kibana/nightshift_automations',
       role: 'nightshift_automations',
     },
