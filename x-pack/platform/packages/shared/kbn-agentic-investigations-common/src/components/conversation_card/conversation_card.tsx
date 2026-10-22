@@ -162,7 +162,7 @@ export const ConversationCard = memo<ConversationCardProps>(
                       onClickAction={onClickAction}
                       onOpenChat={() => onOpenChat(investigation.id)}
                       chatHref={chatHref}
-                      chatDisabledReason={unavailableReason}
+                      disabledReason={unavailableReason}
                       canManageEscalations={canManageEscalations}
                       canCloseInvestigation={canCloseInvestigation}
                       onCopyLink={onCopyLink}

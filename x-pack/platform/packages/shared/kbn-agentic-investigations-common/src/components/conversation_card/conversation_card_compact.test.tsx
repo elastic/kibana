@@ -103,6 +103,7 @@ describe('ConversationCardCompact', () => {
     expect(onClickCard).not.toHaveBeenCalled();
     expect(screen.queryByRole('button', { name: 'Rotate the Stripe key' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Open in chat' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Needs a privilege' })).toBeDisabled();
   });
 
   it('leaves the keyboard to the nested controls, which the row would otherwise swallow', () => {

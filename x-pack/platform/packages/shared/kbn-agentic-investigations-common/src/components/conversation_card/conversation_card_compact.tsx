@@ -166,7 +166,7 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
                   onClickAction={onClickAction}
                   onOpenChat={() => onOpenChat(investigation.id)}
                   chatHref={chatHref}
-                  chatDisabledReason={unavailableReason}
+                  disabledReason={unavailableReason}
                   onCopyLink={onCopyLink}
                 />
               </EuiFlexItem>

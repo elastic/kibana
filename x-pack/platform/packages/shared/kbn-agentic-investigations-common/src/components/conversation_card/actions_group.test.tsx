@@ -31,11 +31,11 @@ const renderGroup = (
   {
     withRecommendedAction = true,
     canManageEscalations = false,
-    chatDisabledReason,
+    disabledReason,
   }: {
     withRecommendedAction?: boolean;
     canManageEscalations?: boolean;
-    chatDisabledReason?: string;
+    disabledReason?: string;
   } = {}
 ) => {
   const onClickRecommendedAction = jest.fn();
@@ -50,7 +50,7 @@ const renderGroup = (
       onCopyLink={jest.fn()}
       onOpenChat={onOpenChat}
       canManageEscalations={canManageEscalations}
-      chatDisabledReason={chatDisabledReason}
+      disabledReason={disabledReason}
     />
   );
 
@@ -69,9 +69,19 @@ describe('ConversationsActionsGroup', () => {
       expect(onOpenChat).toHaveBeenCalled();
     });
 
+    it('disables the actions menu and explains why when a reason is given', async () => {
+      renderGroup(makeInvestigation(), { disabledReason: 'Needs a privilege' });
+      const menuButton = screen.getByRole('button', { name: 'Needs a privilege' });
+
+      fireEvent.click(menuButton);
+
+      expect(menuButton).toBeDisabled();
+      expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+    });
+
     it('disables opening the chat and explains why when a reason is given', async () => {
       const { onOpenChat } = renderGroup(makeInvestigation(), {
-        chatDisabledReason: 'Needs a privilege',
+        disabledReason: 'Needs a privilege',
       });
       const chatButton = screen.getByRole('button', { name: 'Open in chat' });
 

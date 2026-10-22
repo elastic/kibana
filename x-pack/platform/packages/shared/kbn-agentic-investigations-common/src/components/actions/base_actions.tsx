@@ -92,6 +92,8 @@ export interface BaseActionsProps {
   canCloseInvestigation?: boolean;
   /** Always offered, including on a decided investigation, so the menu is never empty. */
   onCopyLink: (id: Investigation['id']) => void;
+  /** Disables the menu trigger; the tooltip tells the user why. */
+  disabledReason?: string;
   'data-test-subj'?: string;
 }
 
@@ -104,6 +106,7 @@ export const BaseActions = memo<BaseActionsProps>(
     canManageEscalations = false,
     canCloseInvestigation = false,
     onCopyLink,
+    disabledReason,
     'data-test-subj': dataTestSubj,
   }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -117,6 +120,7 @@ export const BaseActions = memo<BaseActionsProps>(
         fill
         iconType="chevronSingleDown"
         iconSide="right"
+        isDisabled={Boolean(disabledReason)}
         onClick={handleToggle}
         data-test-subj={dataTestSubj ? `${dataTestSubj}-button` : undefined}
       >
@@ -126,7 +130,8 @@ export const BaseActions = memo<BaseActionsProps>(
       <ActionButton
         data-test-subj={dataTestSubj ? `${dataTestSubj}-button` : undefined}
         iconType="boxesVertical"
-        tooltipContent={ACTIONS_TRANSLATIONS.tooltips.openMenu}
+        tooltipContent={disabledReason ?? ACTIONS_TRANSLATIONS.tooltips.openMenu}
+        isDisabled={Boolean(disabledReason)}
         onClick={handleToggle}
       />
     );

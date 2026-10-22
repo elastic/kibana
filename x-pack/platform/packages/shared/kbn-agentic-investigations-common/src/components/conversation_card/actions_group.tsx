@@ -26,8 +26,8 @@ export interface ConversationsActionsGroupProps {
    * be able to resolve one; the control still works as a button without it.
    */
   chatHref?: string;
-  /** Disables the chat control; `chatDisabledReason` is what the tooltip tells the user. */
-  chatDisabledReason?: string;
+  /** Disables the chat control and the menu; this is what their tooltips tell the user. */
+  disabledReason?: string;
   /** When true escalation actions are shown. Requires the manage escalations capability. */
   canManageEscalations?: boolean;
   /**
@@ -51,7 +51,7 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
     onClickAction,
     onOpenChat,
     chatHref,
-    chatDisabledReason,
+    disabledReason,
     canManageEscalations,
     canCloseInvestigation,
     onCopyLink,
@@ -79,10 +79,10 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
             size="s"
             iconType="productAgent"
             withToolTip
-            toolTipContent={chatDisabledReason}
-            isDisabled={Boolean(chatDisabledReason)}
+            toolTipContent={disabledReason}
+            isDisabled={Boolean(disabledReason)}
             aria-label={ACTIONS_TRANSLATIONS.tooltips.openInChat}
-            href={chatDisabledReason ? undefined : chatHref}
+            href={disabledReason ? undefined : chatHref}
             onClick={handleChatClick}
             data-test-subj="conversationCardOpenInChat"
           />
@@ -95,6 +95,7 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
             canManageEscalations={canManageEscalations}
             canCloseInvestigation={canCloseInvestigation}
             onCopyLink={onCopyLink}
+            disabledReason={disabledReason}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

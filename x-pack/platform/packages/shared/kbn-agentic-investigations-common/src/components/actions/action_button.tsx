@@ -15,6 +15,7 @@ export const ActionButton = memo(
     onClick,
     tooltipContent,
     href,
+    isDisabled = false,
     'data-test-subj': dataTestSubj,
   }: {
     iconType: string;
@@ -26,6 +27,7 @@ export const ActionButton = memo(
      * The click is still handled by `onClick` so in-app routing is preserved.
      */
     href?: string;
+    isDisabled?: boolean;
     'data-test-subj'?: string;
   }) => {
     return (
@@ -35,7 +37,8 @@ export const ActionButton = memo(
           aria-label={tooltipContent}
           iconType={iconType}
           color="text"
-          href={href}
+          href={isDisabled ? undefined : href}
+          isDisabled={isDisabled}
           data-test-subj={dataTestSubj}
           onClick={createCardLinkClickHandler(onClick)}
         />
