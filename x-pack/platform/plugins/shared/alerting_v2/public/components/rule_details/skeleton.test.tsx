@@ -8,12 +8,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
-import { ListPageTestProviders } from '../../test_utils/test_providers';
+import { createMockLocators, ListPageTestProviders } from '../../test_utils/test_providers';
 import { Skeleton } from './skeleton';
 
-const renderSkeleton = () =>
+const renderSkeleton = (locators = createMockLocators()) =>
   render(
-    <ListPageTestProviders>
+    <ListPageTestProviders locators={locators}>
       <Skeleton />
     </ListPageTestProviders>
   );
@@ -25,8 +25,11 @@ describe('Skeleton', () => {
   });
 
   it('renders the app header loading placeholder with a back link to the rules list', () => {
-    renderSkeleton();
+    const locators = createMockLocators();
+    renderSkeleton(locators);
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.skeleton)).toBeInTheDocument();
+    expect(locators.rulesLocators.useUrl).toHaveBeenCalledWith({});
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAccessibleName('Back to Rules');
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
       'href',
       '/mock-locator-url'

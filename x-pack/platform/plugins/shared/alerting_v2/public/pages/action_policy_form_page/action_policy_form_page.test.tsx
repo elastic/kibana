@@ -202,7 +202,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const TEST_SUBJ = {
-  pageTitle: APP_HEADER_TEST_SUBJECTS.title,
+  title: APP_HEADER_TEST_SUBJECTS.title,
   backLink: APP_HEADER_TEST_SUBJECTS.back,
   cancelButton: 'cancelButton',
   submitButton: 'submitButton',
@@ -265,9 +265,12 @@ describe('ActionPolicyFormPage', () => {
     it('renders create title and save button', () => {
       renderPage();
 
-      expect(screen.getByTestId(TEST_SUBJ.pageTitle)).toHaveTextContent('Create action policy');
+      expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Create action policy');
+      expect(mockLocators.actionPolicyLocators.useUrl).toHaveBeenCalledWith({ page: 'list' });
+      expect(screen.getByTestId(TEST_SUBJ.backLink)).toHaveAccessibleName(
+        'Back to Action Policies'
+      );
       expect(screen.getByTestId(TEST_SUBJ.backLink)).toHaveAttribute('href', '/mock-locator-url');
-      expect(screen.queryByTestId('returnButton')).toBeNull();
       expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Create policy');
       expect(screen.queryByTestId('actionPoliciesLicenseCallout')).toBeNull();
     });
@@ -456,7 +459,7 @@ describe('ActionPolicyFormPage', () => {
 
       renderPage();
 
-      expect(screen.getByTestId(TEST_SUBJ.pageTitle)).toHaveTextContent('Edit action policy');
+      expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Edit action policy');
       expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Update policy');
     });
 
@@ -471,8 +474,10 @@ describe('ActionPolicyFormPage', () => {
       renderPage();
 
       expect(screen.getByTestId(TEST_SUBJ.loadingSpinner)).toBeInTheDocument();
-      expect(screen.getByTestId(TEST_SUBJ.pageTitle)).toHaveTextContent('Edit action policy');
-      expect(screen.getByTestId(TEST_SUBJ.backLink)).toBeInTheDocument();
+      expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Edit action policy');
+      expect(screen.getByTestId(TEST_SUBJ.backLink)).toHaveAccessibleName(
+        'Back to Action Policies'
+      );
     });
 
     it('shows error callout when fetch fails', () => {
@@ -485,8 +490,10 @@ describe('ActionPolicyFormPage', () => {
 
       renderPage();
 
-      expect(screen.getByTestId(TEST_SUBJ.pageTitle)).toHaveTextContent('Edit action policy');
-      expect(screen.getByTestId(TEST_SUBJ.backLink)).toBeInTheDocument();
+      expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Edit action policy');
+      expect(screen.getByTestId(TEST_SUBJ.backLink)).toHaveAccessibleName(
+        'Back to Action Policies'
+      );
       expect(screen.getByTestId(TEST_SUBJ.fetchErrorCallout)).toBeInTheDocument();
       expect(screen.getByText('Not found')).toBeInTheDocument();
     });
