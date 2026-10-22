@@ -19,6 +19,7 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   useEuiTheme,
+  useResizeObserver,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -104,9 +105,13 @@ const ColumnName = ({ name, tip }: { name: string; tip: string }) => {
   return (
     <span css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.xs }}>
       {name}
+      {/* Without a color, the icon takes the header's, including its sort button's on hover. */}
       <EuiIconTip
         type="info"
-        color="subdued"
+        size="s"
+        // A flex anchor sizes to the icon, so the name's flex alignment centers it. The default
+        // inline-block anchor gets a line box from the inherited font, which offsets the icon.
+        display="flex"
         content={tip}
         aria-label={tip}
         disableScreenReaderOutput
@@ -158,6 +163,10 @@ const PEAK_COST_NAME = (
 // The size bars' width, in rem, so the column fits it whatever the text size around it.
 const SIZE_BAR_WIDTH = '5rem';
 
+// The table width, in pixels, from which the size bars' column leaves enough room for most names on
+// one line beside the other columns.
+const SIZE_BARS_MIN_TABLE_WIDTH = 1050;
+
 // The size bars' column has no visible header, as the bars sit beside the sizes they chart.
 const SIZE_BAR_NAME = (
   <EuiScreenReaderOnly>
@@ -187,7 +196,7 @@ const SizeBar = ({ bytes, maxBytes, isOutranked }: SizeBarProps) => {
       value={bytes}
       max={maxBytes > 0 ? maxBytes : 1}
       size="s"
-      color={isOutranked ? euiTheme.colors.textDisabled : 'primary'}
+      color={isOutranked ? euiTheme.colors.textDisabled : 'accentSecondary'}
       css={{ inlineSize: SIZE_BAR_WIDTH }}
     />
   );
@@ -216,6 +225,12 @@ interface MatchedTableProps {
  */
 export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTableProps) => {
   const { euiTheme } = useEuiTheme();
+  // The size bars only add a glance at the sizes beside them, so a narrower table gives their space
+  // to the other columns. The table's width decides, rather than the screen's, since Kibana's
+  // navigation takes more or less of the screen.
+  const [tableWrapper, setTableWrapper] = useState<HTMLDivElement | null>(null);
+  const { width: tableWidth } = useResizeObserver(tableWrapper, 'width');
+  const showsSizeBars = tableWidth >= SIZE_BARS_MIN_TABLE_WIDTH;
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<MatchStatus>();
   const isDataStreams = type === 'data_streams';
@@ -316,17 +331,20 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
       dataType: 'number',
       render: formatSize,
     },
-    // Each size's bar, in a column of its own beside the right-aligned sizes. Cards on narrow
-    // screens list the sizes alone.
-    {
-      name: SIZE_BAR_NAME,
-      // The bar's width, and the cell's padding on either side.
-      width: `calc(${SIZE_BAR_WIDTH} + ${euiTheme.size.base})`,
-      mobileOptions: { show: false },
-      render: ({ size_in_bytes: bytes, outrankedBy }: MatchedRow) => (
-        <SizeBar bytes={bytes} maxBytes={maxBytes} isOutranked={outrankedBy !== undefined} />
-      ),
-    },
+    // Each size's bar, in a column of its own beside the right-aligned sizes, when the table is wide
+    // enough to spare it.
+    ...(showsSizeBars
+      ? [
+          {
+            name: SIZE_BAR_NAME,
+            // The bar's width, and the cell's padding on either side.
+            width: `calc(${SIZE_BAR_WIDTH} + ${euiTheme.size.base})`,
+            render: ({ size_in_bytes: bytes, outrankedBy }: MatchedRow) => (
+              <SizeBar bytes={bytes} maxBytes={maxBytes} isOutranked={outrankedBy !== undefined} />
+            ),
+          },
+        ]
+      : []),
     ...(profile
       ? [
           {
@@ -401,28 +419,30 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
           <EuiSpacer size="s" />
         </>
       )}
-      <EuiInMemoryTable
-        tableCaption={i18n.translate('xpack.boost.matchedTable.caption', {
-          defaultMessage: 'Indices or data streams this rule matches',
-        })}
-        items={items}
-        columns={columns}
-        sorting={{ sort: { field: 'name', direction: 'asc' } }}
-        pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
-        noItemsMessage={
-          matched.length === 0
-            ? i18n.translate('xpack.boost.matchedTable.noMatches', {
-                defaultMessage: 'This rule matches nothing yet.',
-              })
-            : isDataStreams
-            ? i18n.translate('xpack.boost.matchedTable.noDataStreamsFound', {
-                defaultMessage: 'No data streams match your search or filter.',
-              })
-            : i18n.translate('xpack.boost.matchedTable.noIndicesFound', {
-                defaultMessage: 'No indices match your search or filter.',
-              })
-        }
-      />
+      <div ref={setTableWrapper}>
+        <EuiInMemoryTable
+          tableCaption={i18n.translate('xpack.boost.matchedTable.caption', {
+            defaultMessage: 'Indices or data streams this rule matches',
+          })}
+          items={items}
+          columns={columns}
+          sorting={{ sort: { field: 'name', direction: 'asc' } }}
+          pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
+          noItemsMessage={
+            matched.length === 0
+              ? i18n.translate('xpack.boost.matchedTable.noMatches', {
+                  defaultMessage: 'This rule matches nothing yet.',
+                })
+              : isDataStreams
+              ? i18n.translate('xpack.boost.matchedTable.noDataStreamsFound', {
+                  defaultMessage: 'No data streams match your search or filter.',
+                })
+              : i18n.translate('xpack.boost.matchedTable.noIndicesFound', {
+                  defaultMessage: 'No indices match your search or filter.',
+                })
+          }
+        />
+      </div>
     </DetailsSection>
   );
 };

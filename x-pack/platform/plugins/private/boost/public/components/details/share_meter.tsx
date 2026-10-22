@@ -75,7 +75,8 @@ export const ShareMeter = ({
       // An empty project still draws an empty meter.
       max={total > 0 ? total : 1}
       size="s"
-      color="primary"
+      // Teal, which sets the bars apart from the blue of links and buttons.
+      color="accentSecondary"
       aria-hidden={true}
     />
   </div>

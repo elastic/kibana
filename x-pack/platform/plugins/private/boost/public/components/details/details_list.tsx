@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { EuiDescriptionList, EuiIconTip, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiDescriptionList, EuiIconTip, EuiText } from '@elastic/eui';
 
 export interface DetailsListItem {
   title: string;
@@ -17,28 +17,28 @@ export interface DetailsListItem {
 }
 
 /** Labeled values on a details page, beside each other on wide screens and stacked on narrow ones. */
-export const DetailsList = ({ items }: { items: readonly DetailsListItem[] }) => {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <EuiDescriptionList
-      type="responsiveColumn"
-      compressed
-      columnWidths={[2, 3]}
-      rowGutterSize="m"
-      listItems={items.map(({ title, tip, description }) => ({
-        title: tip ? (
-          <span css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.xs }}>
-            {title}
-            {/* Without a color, the icon takes its title's. */}
-            <EuiIconTip type="info" content={tip} aria-label={title} />
-          </span>
-        ) : (
-          title
-        ),
-        // The compressed list's descriptions are a size smaller than its titles, so they're set
-        // to the titles' size.
-        description: <EuiText size="s">{description}</EuiText>,
-      }))}
-    />
-  );
-};
+export const DetailsList = ({ items }: { items: readonly DetailsListItem[] }) => (
+  <EuiDescriptionList
+    type="responsiveColumn"
+    compressed
+    columnWidths={[2, 3]}
+    rowGutterSize="m"
+    listItems={items.map(({ title, tip, description }) => ({
+      title: tip ? (
+        <>
+          {/* The icon follows the title inline, joined to its last word by a no-break space, so
+                a title that wraps takes the icon with it. Without a color, the icon takes the
+                title's. */}
+          {title}
+          {'\u00a0'}
+          <EuiIconTip type="info" content={tip} aria-label={title} />
+        </>
+      ) : (
+        title
+      ),
+      // The compressed list's descriptions are a size smaller than its titles, so they're set
+      // to the titles' size.
+      description: <EuiText size="s">{description}</EuiText>,
+    }))}
+  />
+);
