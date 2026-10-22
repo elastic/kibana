@@ -10,8 +10,8 @@ import type { Logger } from '@kbn/core/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { QueryLink } from '@kbn/significant-events-schema';
-import type { DetectionStrategyId, EngineConfig, StrategyRulesState } from '../../../common';
-import { DETECTION_STRATEGY_IDS } from '../../../common';
+import type { SignalStrategyId, EngineConfig, StrategyRulesState } from '../../../common';
+import { SIGNAL_STRATEGY_IDS } from '../../../common';
 import type { EngineRulesRecord, OwnedRule } from '../domain';
 import { getErrorMessage } from '../errors';
 import { ENGINE_RULE_TAG, STRATEGY_TAG_PREFIX } from '../strategies/rule_definitions';
@@ -49,7 +49,7 @@ export function computeRulesInputsHash({
   cpsEnabled: boolean;
 }): string {
   const inputs = {
-    modes: DETECTION_STRATEGY_IDS.filter((id) => STRATEGIES[id].desiredRules).map((id) => [
+    modes: SIGNAL_STRATEGY_IDS.filter((id) => STRATEGIES[id].desiredRules).map((id) => [
       id,
       config.strategies[id].mode === 'off',
     ]),
@@ -77,8 +77,8 @@ export function computeRulesInputsHash({
 /** Every rule the engine owns in the space, whatever state it is in, with its strategy. */
 async function findOwnedRules(
   rulesClient: RulesClientApi
-): Promise<Map<string, DetectionStrategyId | undefined>> {
-  const rules = new Map<string, DetectionStrategyId | undefined>();
+): Promise<Map<string, SignalStrategyId | undefined>> {
+  const rules = new Map<string, SignalStrategyId | undefined>();
   let page = 1;
   // Paged: a space with many sources owns more rules than one page holds.
   while (true) {
@@ -92,7 +92,7 @@ async function findOwnedRules(
       const strategy = tag?.slice(STRATEGY_TAG_PREFIX.length);
       rules.set(
         rule.id,
-        DETECTION_STRATEGY_IDS.find((id) => id === strategy)
+        SIGNAL_STRATEGY_IDS.find((id) => id === strategy)
       );
     });
     if (response.items.length < FIND_PAGE_SIZE || rules.size >= response.total) {
@@ -123,18 +123,16 @@ export async function reconcileRules({
   logger: Logger;
 }): Promise<EngineRulesRecord> {
   const reconciledAt = new Date().toISOString();
-  const ruleStrategies = DETECTION_STRATEGY_IDS.filter((id) => STRATEGIES[id].desiredRules);
+  const ruleStrategies = SIGNAL_STRATEGY_IDS.filter((id) => STRATEGIES[id].desiredRules);
   const perStrategy = new Map<
-    DetectionStrategyId,
+    SignalStrategyId,
     { desired: DesiredRule[]; state: StrategyRulesState }
   >(
     await Promise.all(
       ruleStrategies.map(
         async (
           strategy
-        ): Promise<
-          [DetectionStrategyId, { desired: DesiredRule[]; state: StrategyRulesState }]
-        > => {
+        ): Promise<[SignalStrategyId, { desired: DesiredRule[]; state: StrategyRulesState }]> => {
           const state: StrategyRulesState = {
             strategy,
             owned_rules: 0,

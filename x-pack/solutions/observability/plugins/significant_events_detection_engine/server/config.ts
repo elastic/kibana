@@ -29,13 +29,13 @@ const configSchema = schema.object({
     maxCatchUp: schema.duration({ defaultValue: '2h' }),
     /** Most rows one run reads from `.rule-events`; the rest wait for the next run. */
     maxRuleEventRows: schema.number({ defaultValue: 200_000, min: 1_000, max: 2_000_000 }),
-    /** Most detections that reach discovery in one run, strongest first. */
-    maxDetectionsPerRun: schema.number({ defaultValue: 2_000, min: 10, max: 50_000 }),
-    /** Detections that waited for the agent budget, kept for the next run. */
-    maxPendingDetections: schema.number({ defaultValue: 500, min: 0, max: 10_000 }),
+    /** Most signals that reach triage in one run, strongest first. */
+    maxSignalsPerRun: schema.number({ defaultValue: 2_000, min: 10, max: 50_000 }),
+    /** Signals that waited for the agent budget, kept for the next run. */
+    maxPendingSignals: schema.number({ defaultValue: 500, min: 0, max: 10_000 }),
   }),
   agent: schema.object({
-    /** One discovery call never takes longer than this. */
+    /** One triage call never takes longer than this. */
     timeout: schema.duration({ defaultValue: '90s' }),
   }),
   rules: schema.object({

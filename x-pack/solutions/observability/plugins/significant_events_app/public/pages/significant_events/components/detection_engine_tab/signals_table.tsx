@@ -20,36 +20,36 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  DETECTION_OUTCOMES,
-  DETECTION_STRATEGY_IDS,
-  type DetectionOutcome,
-  type DetectionStrategyId,
-  type EngineDetection,
+  SIGNAL_OUTCOMES,
+  SIGNAL_STRATEGY_IDS,
+  type SignalOutcome,
+  type SignalStrategyId,
+  type EngineSignal,
 } from '@kbn/significant-events-detection-engine-plugin/common';
 import React, { useState } from 'react';
-import { useDetectionEngineDetections } from '../../../../hooks/use_detection_engine_detections';
+import { useDetectionEngineSignals } from '../../../../hooks/use_detection_engine_signals';
 import { formatValue } from './format';
 import { OUTCOME_COLORS, OUTCOME_LABELS, STRATEGY_ICONS, STRATEGY_LABELS } from './labels';
 
 const ALL = '__all__';
 
-interface IDetectionsTableProps {
+interface ISignalsTableProps {
   onOpenEvent: (eventId: string) => void;
 }
 
 /**
- * Every detection in the common format, with what the pipeline did with it. This is where "why
+ * Every signal in the common format, with what the pipeline did with it. This is where "why
  * did this not become an event?" gets its answer.
  */
-export function DetectionsTable({ onOpenEvent }: IDetectionsTableProps) {
-  const [strategy, setStrategy] = useState<DetectionStrategyId | undefined>();
-  const [outcome, setOutcome] = useState<DetectionOutcome | undefined>();
-  const { data, isLoading } = useDetectionEngineDetections({ strategy, outcome });
+export function SignalsTable({ onOpenEvent }: ISignalsTableProps) {
+  const [strategy, setStrategy] = useState<SignalStrategyId | undefined>();
+  const [outcome, setOutcome] = useState<SignalOutcome | undefined>();
+  const { data, isLoading } = useDetectionEngineSignals({ strategy, outcome });
 
-  const columns: Array<EuiBasicTableColumn<EngineDetection>> = [
+  const columns: Array<EuiBasicTableColumn<EngineSignal>> = [
     {
       field: 'bucket_start',
-      name: i18n.translate('xpack.significantEventsApp.detectionEngine.detections.bucket', {
+      name: i18n.translate('xpack.significantEventsApp.detectionEngine.signals.bucket', {
         defaultMessage: 'Minute',
       }),
       width: '100px',
@@ -57,17 +57,17 @@ export function DetectionsTable({ onOpenEvent }: IDetectionsTableProps) {
     },
     {
       field: 'title',
-      name: i18n.translate('xpack.significantEventsApp.detectionEngine.detections.what', {
+      name: i18n.translate('xpack.significantEventsApp.detectionEngine.signals.what', {
         defaultMessage: 'What looks off',
       }),
-      render: (title: string, detection: EngineDetection) => (
+      render: (title: string, signal: EngineSignal) => (
         <div>
-          <EuiIcon type={STRATEGY_ICONS[detection.strategy]} aria-hidden={true} /> {title}
+          <EuiIcon type={STRATEGY_ICONS[signal.strategy]} aria-hidden={true} /> {title}
           <EuiText size="xs" color="subdued">
-            {STRATEGY_LABELS[detection.strategy]} · {detection.service} ·{' '}
-            {i18n.translate('xpack.significantEventsApp.detectionEngine.detections.importance', {
+            {STRATEGY_LABELS[signal.strategy]} · {signal.service} ·{' '}
+            {i18n.translate('xpack.significantEventsApp.detectionEngine.signals.importance', {
               defaultMessage: 'importance {importance}',
-              values: { importance: detection.importance },
+              values: { importance: signal.importance },
             })}
           </EuiText>
         </div>
@@ -75,28 +75,28 @@ export function DetectionsTable({ onOpenEvent }: IDetectionsTableProps) {
     },
     {
       field: 'baseline',
-      name: i18n.translate('xpack.significantEventsApp.detectionEngine.detections.baseline', {
+      name: i18n.translate('xpack.significantEventsApp.detectionEngine.signals.baseline', {
         defaultMessage: 'Value vs normal',
       }),
       width: '220px',
-      render: (baseline: EngineDetection['baseline'], detection: EngineDetection) => (
+      render: (baseline: EngineSignal['baseline'], signal: EngineSignal) => (
         <EuiText size="xs">
-          {i18n.translate('xpack.significantEventsApp.detectionEngine.detections.valueVsNormal', {
+          {i18n.translate('xpack.significantEventsApp.detectionEngine.signals.valueVsNormal', {
             defaultMessage:
               '{value}; normal up to {threshold} (median {median}, {samples} minutes)',
             values: {
-              value: formatValue(detection.value, detection.unit),
+              value: formatValue(signal.value, signal.unit),
               median:
-                baseline.median === undefined ? '-' : formatValue(baseline.median, detection.unit),
+                baseline.median === undefined ? '-' : formatValue(baseline.median, signal.unit),
               threshold:
                 baseline.threshold === undefined
                   ? '-'
-                  : formatValue(baseline.threshold, detection.unit),
+                  : formatValue(baseline.threshold, signal.unit),
               samples: baseline.samples,
             },
           })}
           {baseline.excludedSamples > 0 &&
-            i18n.translate('xpack.significantEventsApp.detectionEngine.detections.excluded', {
+            i18n.translate('xpack.significantEventsApp.detectionEngine.signals.excluded', {
               defaultMessage: '; {excluded} minutes left out while an event was open',
               values: { excluded: baseline.excludedSamples },
             })}
@@ -105,21 +105,21 @@ export function DetectionsTable({ onOpenEvent }: IDetectionsTableProps) {
     },
     {
       field: 'outcome',
-      name: i18n.translate('xpack.significantEventsApp.detectionEngine.detections.outcome', {
+      name: i18n.translate('xpack.significantEventsApp.detectionEngine.signals.outcome', {
         defaultMessage: 'Outcome',
       }),
-      render: (value: DetectionOutcome, detection: EngineDetection) => (
+      render: (value: SignalOutcome, signal: EngineSignal) => (
         <div>
           <EuiBadge color={OUTCOME_COLORS[value]}>{OUTCOME_LABELS[value]}</EuiBadge>
           <EuiText size="xs" color="subdued">
-            {detection.outcome_reason}
+            {signal.outcome_reason}
           </EuiText>
-          {detection.event_id && (
+          {signal.event_id && (
             <EuiLink
               data-test-subj="significantEventsAppColumnsOpenEventLink"
-              onClick={() => onOpenEvent(detection.event_id!)}
+              onClick={() => onOpenEvent(signal.event_id!)}
             >
-              {i18n.translate('xpack.significantEventsApp.detectionEngine.detections.openEvent', {
+              {i18n.translate('xpack.significantEventsApp.detectionEngine.signals.openEvent', {
                 defaultMessage: 'Open event',
               })}
             </EuiLink>
@@ -135,34 +135,26 @@ export function DetectionsTable({ onOpenEvent }: IDetectionsTableProps) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             display="rowCompressed"
-            label={i18n.translate(
-              'xpack.significantEventsApp.detectionEngine.detections.strategy',
-              {
-                defaultMessage: 'Strategy',
-              }
-            )}
+            label={i18n.translate('xpack.significantEventsApp.detectionEngine.signals.strategy', {
+              defaultMessage: 'Strategy',
+            })}
           >
             <EuiSelect
-              data-test-subj="significantEventsAppDetectionsTableSelect"
+              data-test-subj="significantEventsAppSignalsTableSelect"
               compressed
               value={strategy ?? ALL}
               options={[
                 {
                   value: ALL,
-                  text: i18n.translate(
-                    'xpack.significantEventsApp.detectionEngine.detections.all',
-                    {
-                      defaultMessage: 'All',
-                    }
-                  ),
+                  text: i18n.translate('xpack.significantEventsApp.detectionEngine.signals.all', {
+                    defaultMessage: 'All',
+                  }),
                 },
-                ...DETECTION_STRATEGY_IDS.map((id) => ({ value: id, text: STRATEGY_LABELS[id] })),
+                ...SIGNAL_STRATEGY_IDS.map((id) => ({ value: id, text: STRATEGY_LABELS[id] })),
               ]}
               onChange={(event) =>
                 setStrategy(
-                  event.target.value === ALL
-                    ? undefined
-                    : (event.target.value as DetectionStrategyId)
+                  event.target.value === ALL ? undefined : (event.target.value as SignalStrategyId)
                 )
               }
             />
@@ -172,7 +164,7 @@ export function DetectionsTable({ onOpenEvent }: IDetectionsTableProps) {
           <EuiFormRow
             display="rowCompressed"
             label={i18n.translate(
-              'xpack.significantEventsApp.detectionEngine.detections.outcomeFilter',
+              'xpack.significantEventsApp.detectionEngine.signals.outcomeFilter',
               {
                 defaultMessage: 'Outcome',
               }
@@ -186,17 +178,17 @@ export function DetectionsTable({ onOpenEvent }: IDetectionsTableProps) {
                 {
                   value: ALL,
                   text: i18n.translate(
-                    'xpack.significantEventsApp.detectionEngine.detections.allOutcomes',
+                    'xpack.significantEventsApp.detectionEngine.signals.allOutcomes',
                     {
                       defaultMessage: 'All',
                     }
                   ),
                 },
-                ...DETECTION_OUTCOMES.map((id) => ({ value: id, text: OUTCOME_LABELS[id] })),
+                ...SIGNAL_OUTCOMES.map((id) => ({ value: id, text: OUTCOME_LABELS[id] })),
               ]}
               onChange={(event) =>
                 setOutcome(
-                  event.target.value === ALL ? undefined : (event.target.value as DetectionOutcome)
+                  event.target.value === ALL ? undefined : (event.target.value as SignalOutcome)
                 )
               }
             />
@@ -205,14 +197,11 @@ export function DetectionsTable({ onOpenEvent }: IDetectionsTableProps) {
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiBasicTable
-        data-test-subj="detectionEngineDetectionsTable"
-        tableCaption={i18n.translate(
-          'xpack.significantEventsApp.detectionEngine.detections.caption',
-          {
-            defaultMessage: 'Detections and what the pipeline did with each',
-          }
-        )}
-        items={data?.detections ?? []}
+        data-test-subj="detectionEngineSignalsTable"
+        tableCaption={i18n.translate('xpack.significantEventsApp.detectionEngine.signals.caption', {
+          defaultMessage: 'Signals and what the pipeline did with each',
+        })}
+        items={data?.signals ?? []}
         columns={columns}
         loading={isLoading}
       />

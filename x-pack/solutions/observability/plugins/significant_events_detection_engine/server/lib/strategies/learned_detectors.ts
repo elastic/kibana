@@ -22,7 +22,7 @@ import { buildSignalRule } from './rule_definitions';
 import { latestRowPerKey } from './rule_events_reader';
 import type {
   DesiredRules,
-  IDetectionStrategy,
+  ISignalStrategy,
   ReplayContext,
   RunningDetector,
   StrategyContext,
@@ -32,7 +32,7 @@ import type {
 const STRATEGY_NAME = 'Learned detectors';
 /** One `COUNT(*) WHERE` per detector; past this a source gets a second rule. */
 const MAX_DETECTORS_PER_RULE = 50;
-/** Same cadence as the health checks and KI rules, so a learned detector is as fast. */
+/** Same cadence as the health checks and known failure queries, so a learned detector is as fast. */
 const RULE_EVERY = '1m';
 const RULE_LOOKBACK = '4m';
 const RULE_CLOSED_BUCKETS = 3;
@@ -234,7 +234,7 @@ async function evaluateReplay(context: ReplayContext): Promise<StrategyEvaluatio
  * a trial until it passes its acceptance criteria, so a new one never raises before it proved it
  * would have been right.
  */
-export const learnedDetectorsStrategy: IDetectionStrategy = {
+export const learnedDetectorsStrategy: ISignalStrategy = {
   descriptor: {
     id: 'learned_detectors',
     name: STRATEGY_NAME,

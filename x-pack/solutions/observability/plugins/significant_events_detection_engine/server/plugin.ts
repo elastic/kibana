@@ -16,10 +16,9 @@ import { registerRoutes } from '@kbn/server-route-repository';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { DETECTION_ENGINE_PLUGIN_ID } from '../common';
 import type { DetectionEngineConfig } from './config';
-import {
-  createDiscoveryAgentInstaller,
-  registerDiscoveryAgentType,
-} from './lib/agent/discovery_agent_type';
+import { createCaseRegistry } from './lib/agent/case_registry';
+import { createTriageAgentInstaller, registerTriageAgentType } from './lib/agent/triage_agent_type';
+import { registerEventSearchTool } from './lib/agent/event_search_tool';
 import {
   createEngineScopeFactory,
   toEngineLimits,
@@ -29,7 +28,7 @@ import { getErrorMessage } from './lib/errors';
 import { createAutoRunScheduler, type IAutoRunScheduler } from './lib/scheduler/auto_run';
 import {
   activityDataStream,
-  detectionsDataStream,
+  signalsDataStream,
   observationsDataStream,
   runsDataStream,
 } from './lib/storage/data_streams';
@@ -45,7 +44,7 @@ interface StartServices {
 /**
  * The Significant Events detection engine. It owns no UI: the Significant Events app reads and
  * drives it through its internal HTTP API. Strategies run as Alerting v2 rules, the schedule is
- * a managed workflow, and the discovery step is an Agent Builder agent.
+ * a managed workflow, and the triage step is an Agent Builder agent.
  */
 export class DetectionEnginePlugin
   implements Plugin<void, void, DetectionEngineSetupDependencies, DetectionEngineStartDependencies>
@@ -53,6 +52,7 @@ export class DetectionEnginePlugin
   private readonly logger: Logger;
   private readonly config: DetectionEngineConfig;
   private readonly isDev: boolean;
+  private readonly caseRegistry = createCaseRegistry();
   private resolveStart!: (services: StartServices) => void;
   private readonly startServices = new Promise<StartServices>((resolve) => {
     this.resolveStart = resolve;
@@ -71,11 +71,12 @@ export class DetectionEnginePlugin
   ): void {
     this.setupPlugins = plugins;
     core.dataStreams.registerDataStream(observationsDataStream);
-    core.dataStreams.registerDataStream(detectionsDataStream);
+    core.dataStreams.registerDataStream(signalsDataStream);
     core.dataStreams.registerDataStream(activityDataStream);
     core.dataStreams.registerDataStream(runsDataStream);
     if (plugins.agentBuilder) {
-      registerDiscoveryAgentType(plugins.agentBuilder);
+      registerTriageAgentType(plugins.agentBuilder);
+      registerEventSearchTool({ agentBuilder: plugins.agentBuilder, registry: this.caseRegistry });
     }
     plugins.workflowsExtensions?.registerManagedWorkflowOwner(DETECTION_ENGINE_PLUGIN_ID);
 
@@ -113,11 +114,12 @@ export class DetectionEnginePlugin
           logger: this.logger.get('storage'),
         }),
         agentInstaller: plugins.agentBuilder
-          ? createDiscoveryAgentInstaller({
+          ? createTriageAgentInstaller({
               agentBuilder: plugins.agentBuilder,
               logger: this.logger.get('agent'),
             })
           : undefined,
+        caseRegistry: this.caseRegistry,
       }),
       scheduler: createAutoRunScheduler({
         getManagedClient: () => managedClient,

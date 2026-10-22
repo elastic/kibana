@@ -18,8 +18,8 @@ export const MINUTE_MS = 60_000;
 export const HOUR_MS = 60 * MINUTE_MS;
 export const DAY_MS = 24 * HOUR_MS;
 
-/** Id of the Agent Builder profile the engine runs its discovery step with. */
-export const DETECTION_ENGINE_DISCOVERY_AGENT_ID = 'significant-events.detection-engine-discovery';
+/** Id of the Agent Builder profile the engine runs its triage step with. */
+export const DETECTION_ENGINE_TRIAGE_AGENT_ID = 'significant-events.detection-engine-triage';
 
 /** Id of the managed workflow that runs the engine on a schedule, before the per-space suffix. */
 export const DETECTION_ENGINE_SCHEDULER_WORKFLOW_ID = 'system-significant-events-detection-engine';

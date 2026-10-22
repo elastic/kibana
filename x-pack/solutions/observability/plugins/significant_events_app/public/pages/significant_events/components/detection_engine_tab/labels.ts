@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type {
   ActivityStep,
-  DetectionOutcome,
-  DetectionStrategyId,
+  SignalOutcome,
+  SignalStrategyId,
   DismissalReason,
   EngineEventStatus,
   EvidenceVerdict,
@@ -17,10 +17,13 @@ import type {
   StrategyMode,
 } from '@kbn/significant-events-detection-engine-plugin/common';
 
-export const STRATEGY_LABELS: Record<DetectionStrategyId, string> = {
-  ki_rules: i18n.translate('xpack.significantEventsApp.detectionEngine.strategy.kiRules', {
-    defaultMessage: 'Rules from KIs',
-  }),
+export const STRATEGY_LABELS: Record<SignalStrategyId, string> = {
+  known_failure_queries: i18n.translate(
+    'xpack.significantEventsApp.detectionEngine.strategy.knownFailureQueries',
+    {
+      defaultMessage: 'Known failure queries',
+    }
+  ),
   health_checks: i18n.translate(
     'xpack.significantEventsApp.detectionEngine.strategy.healthChecks',
     {
@@ -47,8 +50,8 @@ export const STRATEGY_LABELS: Record<DetectionStrategyId, string> = {
   ),
 };
 
-export const STRATEGY_ICONS: Record<DetectionStrategyId, string> = {
-  ki_rules: 'bullseye',
+export const STRATEGY_ICONS: Record<SignalStrategyId, string> = {
+  known_failure_queries: 'bullseye',
   health_checks: 'heart',
   customer_alerts: 'bell',
   new_log_patterns: 'sparkles',
@@ -85,8 +88,8 @@ export const STATUS_COLORS: Record<EngineEventStatus, string> = {
   inactive: 'subdued',
 };
 
-/** What happened to a detection, in words. Every detection gets one, including the quiet ones. */
-export const OUTCOME_LABELS: Record<DetectionOutcome, string> = {
+/** What happened to a signal, in words. Every signal gets one, including the quiet ones. */
+export const OUTCOME_LABELS: Record<SignalOutcome, string> = {
   background: i18n.translate('xpack.significantEventsApp.detectionEngine.outcome.background', {
     defaultMessage: 'Within normal',
   }),
@@ -125,7 +128,7 @@ export const OUTCOME_LABELS: Record<DetectionOutcome, string> = {
   }),
 };
 
-export const OUTCOME_COLORS: Record<DetectionOutcome, string> = {
+export const OUTCOME_COLORS: Record<SignalOutcome, string> = {
   background: 'default',
   warming_up: 'default',
   trial_would_raise: 'accent',
@@ -276,6 +279,12 @@ export const CLOSE_REASON_LABELS: Record<EventCloseReason, string> = {
   dismissed: i18n.translate('xpack.significantEventsApp.detectionEngine.closeReason.dismissed', {
     defaultMessage: 'dismissed',
   }),
+  evidence_gone: i18n.translate(
+    'xpack.significantEventsApp.detectionEngine.closeReason.evidenceGone',
+    {
+      defaultMessage: 'closed when its evidence was gone',
+    }
+  ),
 };
 
 /** What each health check reports on, keyed by the check's part of the fingerprint. */

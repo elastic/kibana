@@ -197,7 +197,7 @@ export const AGENT_BUILDER_AGENT_TYPES = [
   `${internalNamespaces.platformNightshift}.investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.decision-tree-reinforcement-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
-  `${internalNamespaces.platformSignificantEvents}.detection-engine-discovery-type`,
+  `${internalNamespaces.platformSignificantEvents}.detection-engine-triage-type`,
   `${internalNamespaces.security}.alertzero-type`,
   `${internalNamespaces.platformSignificantEvents}.feature-identification-type`,
   `${internalNamespaces.platformSignificantEvents}.ki-query-generation-type`,

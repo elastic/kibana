@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { BaselinePolicy, BaselineSummary, EngineConfig } from '../../../common';
+import type {
+  AlertFiringHistory,
+  BaselinePolicy,
+  BaselineSummary,
+  EngineConfig,
+} from '../../../common';
 
 /** MAD scaled to estimate a standard deviation for normally distributed values. */
 const MAD_SCALE = 1.4826;
@@ -21,6 +26,42 @@ const MIN_DELTA_BY_UNIT: Record<string, number> = {
   drop: 0.5,
 };
 const DEFAULT_MIN_DELTA = 1;
+
+/** More episodes than this in an hour and the alert flaps. */
+const FLAPPING_EPISODES_PER_HOUR = 3;
+/** Active on this many of the last seven days and the alert fires every day. */
+const DAILY_ACTIVE_DAYS = 5;
+
+/**
+ * Judges a customer alert by how often it fires, not by its value: its rule already decided the
+ * value is off. An alert that flaps or fires every day is background, so it never opens an
+ * event or holds one open; one that fires rarely is above normal.
+ */
+export function judgeAlertFiring(firing: AlertFiringHistory): BaselineSummary {
+  const base = { samples: 0, excludedSamples: 0, firing };
+  if (firing.flapping) {
+    return { ...base, decision: 'background', reason: 'Kibana marks the alert as flapping' };
+  }
+  if (firing.episodes_last_hour >= FLAPPING_EPISODES_PER_HOUR) {
+    return {
+      ...base,
+      decision: 'background',
+      reason: `it started ${firing.episodes_last_hour} times in the last hour, so it flaps`,
+    };
+  }
+  if (firing.days_active_last_week >= DAILY_ACTIVE_DAYS) {
+    return {
+      ...base,
+      decision: 'background',
+      reason: `it fired on ${firing.days_active_last_week} of the last 7 days`,
+    };
+  }
+  return {
+    ...base,
+    decision: 'above_normal',
+    reason: `it fires rarely: ${firing.episodes_last_hour} start(s) in the last hour, active on ${firing.days_active_last_week} of the last 7 days`,
+  };
+}
 
 function median(values: number[]): number {
   const sorted = [...values].sort((a, b) => a - b);
@@ -39,7 +80,7 @@ function isInsideWindows(
 }
 
 /**
- * The baseline check. Compares a detection with its own history, in code, so the answer is the
+ * The baseline check. Compares a signal with its own history, in code, so the answer is the
  * same on every run. Buckets in which an event for this series was open are left out, so a long
  * incident never becomes the new normal.
  */
@@ -50,15 +91,21 @@ export function checkBaseline({
   history,
   excludeWindows,
   settings,
+  firing,
 }: {
   value: number;
   unit: string;
   policy: BaselinePolicy;
+  /** How often a customer alert fired; the `firing_frequency` policy judges only this. */
+  firing?: AlertFiringHistory;
   history: Array<{ bucket_start: string; value: number }>;
   excludeWindows: Array<{ from: string; to?: string }>;
   settings: EngineConfig['baseline'];
 }): BaselineSummary {
-  if (policy === 'skip') {
+  if (policy === 'firing_frequency' && firing) {
+    return judgeAlertFiring(firing);
+  }
+  if (policy === 'skip' || policy === 'firing_frequency') {
     return { decision: 'skipped', samples: 0, excludedSamples: 0 };
   }
 
@@ -88,7 +135,17 @@ export function checkBaseline({
   const values = kept.map((sample) => sample.value);
   const center = median(values);
   const mad = median(values.map((sample) => Math.abs(sample - center)));
-  const threshold = center + Math.max(settings.mad_k * MAD_SCALE * mad, minDelta);
+  // A sparse count has a median and MAD of zero while it still matches a few lines most minutes;
+  // its spread grows with its mean, as for any count, so the floor follows the mean.
+  const mean = values.reduce((sum, sample) => sum + sample, 0) / values.length;
+  const countFloor =
+    unit === 'count' && (settings.count_noise_k ?? 0) > 0
+      ? mean + settings.count_noise_k * Math.sqrt(mean + 1)
+      : 0;
+  const threshold = Math.max(
+    center + Math.max(settings.mad_k * MAD_SCALE * mad, minDelta),
+    countFloor
+  );
 
   return {
     decision: value > threshold ? 'above_normal' : 'background',

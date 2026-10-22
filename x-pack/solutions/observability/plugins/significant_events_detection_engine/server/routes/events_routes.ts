@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type {
   ActivityEntry,
-  EngineDetection,
+  EngineSignal,
   EngineEvent,
   EngineEventDetailsResponse,
   EngineServicesResponse,
@@ -19,8 +19,8 @@ import type {
 import {
   ACTIVITY_STEPS,
   DETECTION_ENGINE_API_BASE_PATH,
-  DETECTION_OUTCOMES,
-  DETECTION_STRATEGY_IDS,
+  SIGNAL_OUTCOMES,
+  SIGNAL_STRATEGY_IDS,
   DISMISSAL_REASONS,
   ENGINE_EVENT_STATUSES,
 } from '../../common';
@@ -83,11 +83,11 @@ const eventRoute = createRoute({
     if (!found) {
       throw new DetectionEngineError(`Event ${params.path.id} not found`, 404);
     }
-    const [detections, activity] = await Promise.all([
-      scope.storage.records.listDetections({ eventId: params.path.id, size: 500 }),
+    const [signals, activity] = await Promise.all([
+      scope.storage.records.listSignals({ eventId: params.path.id, size: 500 }),
       scope.storage.records.listActivity({ eventId: params.path.id, size: 500 }),
     ]);
-    return { event: found.event, detections: detections.items, activity: activity.items };
+    return { event: found.event, signals: signals.items, activity: activity.items };
   },
 });
 
@@ -172,15 +172,15 @@ const verifyRoute = createRoute({
   },
 });
 
-const detectionsRoute = createRoute({
-  endpoint: `GET ${DETECTION_ENGINE_API_BASE_PATH}/detections`,
-  options: { access: 'internal', summary: 'List detection engine detections, newest first' },
+const signalsRoute = createRoute({
+  endpoint: `GET ${DETECTION_ENGINE_API_BASE_PATH}/signals`,
+  options: { access: 'internal', summary: 'List detection engine signals, newest first' },
   security: READ,
   params: z.object({
     query: z
       .object({
-        strategy: z.enum(DETECTION_STRATEGY_IDS).optional(),
-        outcome: z.enum(DETECTION_OUTCOMES).optional(),
+        strategy: z.enum(SIGNAL_STRATEGY_IDS).optional(),
+        outcome: z.enum(SIGNAL_OUTCOMES).optional(),
         ...pageQuery,
       })
       .optional(),
@@ -189,17 +189,17 @@ const detectionsRoute = createRoute({
     request,
     params,
     getStartServices,
-  }): Promise<{ detections: EngineDetection[]; next_cursor?: string }> => {
+  }): Promise<{ signals: EngineSignal[]; next_cursor?: string }> => {
     const { createScope } = await getStartServices();
     const scope = await createScope(request);
     const query = params?.query;
-    const page = await scope.storage.records.listDetections({
+    const page = await scope.storage.records.listSignals({
       strategy: query?.strategy,
       outcome: query?.outcome,
       size: query?.size ?? DEFAULT_PAGE_SIZE * 5,
       cursor: query?.cursor,
     });
-    return { detections: page.items, next_cursor: page.next_cursor };
+    return { signals: page.items, next_cursor: page.next_cursor };
   },
 });
 
@@ -253,7 +253,7 @@ export const eventsRoutes = {
   ...dismissRoute,
   ...closeRoute,
   ...verifyRoute,
-  ...detectionsRoute,
+  ...signalsRoute,
   ...activityRoute,
   ...servicesRoute,
 };

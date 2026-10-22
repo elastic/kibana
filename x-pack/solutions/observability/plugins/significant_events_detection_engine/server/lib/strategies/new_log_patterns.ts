@@ -25,7 +25,7 @@ import { buildSignalRule } from './rule_definitions';
 import { latestRowPerKey } from './rule_events_reader';
 import type {
   DesiredRules,
-  IDetectionStrategy,
+  ISignalStrategy,
   ReplayContext,
   StrategyContext,
   StrategyEvaluation,
@@ -187,7 +187,7 @@ ${statsPipeline(shape.service)}
  * in the last few minutes. The riskiest strategy, because logs change with every release, so it
  * starts in trial mode.
  */
-export const newLogPatternsStrategy: IDetectionStrategy = {
+export const newLogPatternsStrategy: ISignalStrategy = {
   descriptor: {
     id: 'new_log_patterns',
     name: STRATEGY_NAME,

@@ -13,7 +13,7 @@ import type {
   EngineRulesState,
   EngineServicesResponse,
 } from '../../../common';
-import { DETECTION_STRATEGY_IDS, HOUR_MS, MINUTE_MS } from '../../../common';
+import { SIGNAL_STRATEGY_IDS, HOUR_MS, MINUTE_MS } from '../../../common';
 import { emptyLedger, resolveModelKey, toPricePerMillion } from '../cost/cost';
 import type { IEngineScope } from '../engine/engine_scope';
 import { createRunKnowledge } from '../engine/knowledge';
@@ -80,7 +80,7 @@ export function engineHealth({
   return { status: reasons.length > 0 ? 'degraded' : 'healthy', reasons };
 }
 
-/** Everything the detection page shows at a glance. */
+/** Everything the signal page shows at a glance. */
 export async function buildOverview(scope: IEngineScope): Promise<EngineOverviewResponse> {
   const { storage } = scope;
   const now = Date.now();
@@ -94,7 +94,7 @@ export async function buildOverview(scope: IEngineScope): Promise<EngineOverview
     progress,
     counts,
     openedToday,
-    detectionsLastHour,
+    signalsLastHour,
     ledger,
     prices,
     autoRun,
@@ -106,7 +106,7 @@ export async function buildOverview(scope: IEngineScope): Promise<EngineOverview
     storage.state.get('progress'),
     storage.events.counts(),
     storage.events.countCreatedSince(dayStart.toISOString()),
-    storage.records.countDetections(new Date(now - HOUR_MS).toISOString()),
+    storage.records.countSignals(new Date(now - HOUR_MS).toISOString()),
     storage.state.get('cost'),
     scope.getPrices(),
     storage.state.get('auto_run'),
@@ -127,7 +127,7 @@ export async function buildOverview(scope: IEngineScope): Promise<EngineOverview
   const rulesRecord = rules ?? EMPTY_RULES_RECORD;
 
   // Lag of the slowest live strategy, beyond the settle delay it waits for by design.
-  const lags = DETECTION_STRATEGY_IDS.filter((id) => config.strategies[id].mode !== 'off').flatMap(
+  const lags = SIGNAL_STRATEGY_IDS.filter((id) => config.strategies[id].mode !== 'off').flatMap(
     (id) => {
       const watermark = currentProgress.watermarks[id];
       return watermark
@@ -148,7 +148,7 @@ export async function buildOverview(scope: IEngineScope): Promise<EngineOverview
 
   return {
     config,
-    strategies: DETECTION_STRATEGY_IDS.map((id) => ({
+    strategies: SIGNAL_STRATEGY_IDS.map((id) => ({
       ...STRATEGIES[id].descriptor,
       config: config.strategies[id],
       scorecard: scorecards[id],
@@ -162,7 +162,7 @@ export async function buildOverview(scope: IEngineScope): Promise<EngineOverview
     counts: {
       open_events: counts.open,
       events: counts.events,
-      detections_last_hour: detectionsLastHour,
+      signals_last_hour: signalsLastHour,
     },
     cost: {
       ledger: currentLedger,
@@ -207,7 +207,7 @@ export async function listServices(scope: IEngineScope): Promise<EngineServicesR
     return {
       service,
       watched_by: measured?.strategies ?? [],
-      detections_last_hour: measured?.detections ?? 0,
+      signals_last_hour: measured?.signals ?? 0,
       open_events: serviceEvents.length,
       last_event_title: serviceEvents[0]?.title,
       last_event_id: serviceEvents[0]?.event_id,

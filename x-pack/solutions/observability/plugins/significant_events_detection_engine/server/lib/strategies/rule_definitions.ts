@@ -9,14 +9,13 @@ import { createHash } from 'crypto';
 import { v5 as uuidv5 } from 'uuid';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
-import type { DetectionStrategyId } from '../../../common';
+import type { SignalStrategyId } from '../../../common';
 import type { DesiredRule } from './types';
 
 /** Every rule the engine owns carries this tag; reconciliation only ever touches these. */
 export const ENGINE_RULE_TAG = 'detection_engine:managed';
 export const STRATEGY_TAG_PREFIX = 'detection_engine:strategy:';
-export const strategyRuleTag = (strategy: DetectionStrategyId) =>
-  `${STRATEGY_TAG_PREFIX}${strategy}`;
+export const strategyRuleTag = (strategy: SignalStrategyId) => `${STRATEGY_TAG_PREFIX}${strategy}`;
 // Deliberately not `nightshift:source:<id>`: Significant Events deletes rules with that tag
 // that do not back one of its KIs.
 export const sourceRuleTag = (sourceId: string) => `detection_engine:source:${sourceId}`;
@@ -36,7 +35,7 @@ export function computeRuleId({
   query,
 }: {
   spaceId: string;
-  strategy: DetectionStrategyId;
+  strategy: SignalStrategyId;
   sourceId: string;
   query: string;
 }): string {
@@ -62,7 +61,7 @@ export function buildSignalRule({
   cpsEnabled,
 }: {
   spaceId: string;
-  strategy: DetectionStrategyId;
+  strategy: SignalStrategyId;
   strategyName: string;
   source: NightshiftSource;
   query: string;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DetectionStrategyId } from './strategies';
+import type { SignalStrategyId } from './strategies';
 
 /** Pipeline steps that write to the activity log. */
 export const ACTIVITY_STEPS = [
@@ -33,9 +33,9 @@ export interface ActivityEntry {
   step: ActivityStep;
   action: string;
   message: string;
-  strategy?: DetectionStrategyId;
+  strategy?: SignalStrategyId;
   service?: string;
-  detection_id?: string;
+  signal_id?: string;
   event_id?: string;
   details?: Record<string, unknown>;
 }

@@ -7,8 +7,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
-import type { ActivityEntry, DetectionStrategyId, ReplaySummary } from '../../../common';
-import { BUCKET_MS, DETECTION_STRATEGY_IDS, MINUTE_MS } from '../../../common';
+import type { ActivityEntry, SignalStrategyId, ReplaySummary } from '../../../common';
+import { BUCKET_MS, SIGNAL_STRATEGY_IDS, MINUTE_MS } from '../../../common';
 import type { TaggedObservation } from '../domain';
 import { getErrorMessage } from '../errors';
 import { checkBaseline, fillSparseHistory } from '../pipeline/baseline';
@@ -47,7 +47,7 @@ export async function replayEngine(
   const runId = `replay-${uuidv4()}`;
   const abortSignal = signal ?? new AbortController().signal;
   const knowledge = createRunKnowledge({ scope, sources });
-  const strategies = DETECTION_STRATEGY_IDS.filter(
+  const strategies = SIGNAL_STRATEGY_IDS.filter(
     (id) => config.strategies[id].mode !== 'off' && STRATEGIES[id].replay
   );
   const slices = Array.from({ length: Math.ceil((to - from) / SLICE_MS) }, (_, index) => ({
@@ -138,7 +138,7 @@ export async function replayEngine(
     return groups;
   }, new Map<string, TaggedObservation[]>());
 
-  const perStrategy = new Map<DetectionStrategyId, { aboveNormal: number; wouldOpen: number }>();
+  const perStrategy = new Map<SignalStrategyId, { aboveNormal: number; wouldOpen: number }>();
   bySeries.forEach((series, fingerprint) => {
     const sorted = [...series].sort((a, b) => a.bucket_start - b.bucket_start);
     const strategy = sorted[0].strategy;

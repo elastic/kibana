@@ -400,14 +400,14 @@ export async function judgeTrial({
   now?: number;
 }): Promise<CandidateTrial> {
   const trial = candidate.trial!;
-  const detections = await scope.storage.records.findDetections({
+  const signals = await scope.storage.records.findSignals({
     fingerprints: [learnedFingerprint(candidate.detector!.detector_id)],
     outcomes: ['trial_would_raise'],
     since: trial.started_at,
   });
-  const minutes = [
-    ...new Set(detections.map((detection) => Date.parse(detection.bucket_start))),
-  ].sort((a, b) => a - b);
+  const minutes = [...new Set(signals.map((signal) => Date.parse(signal.bucket_start)))].sort(
+    (a, b) => a - b
+  );
   // Minutes closer than the quiet period belong to one open, as the state machine would keep it.
   const opens = minutes.reduce<SimulatedOpen[]>((runs, minute) => {
     const last = runs[runs.length - 1];
@@ -428,7 +428,7 @@ export async function judgeTrial({
   return {
     ...trial,
     judged_at: new Date(now).toISOString(),
-    would_raise: detections.length,
+    would_raise: signals.length,
     would_open: opens.length,
     caught: score.caught.map((item) => item.incident_id),
     false_opens: score.false_opens,

@@ -100,8 +100,8 @@ export function ServicesPanel({ services, dependencies, onOpenEvent }: IServices
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued">
                     {i18n.translate('xpack.significantEventsApp.detectionEngine.services.line', {
-                      defaultMessage: '{checks} checks · {detections} detections/h',
-                      values: { checks, detections: summary.detections_last_hour },
+                      defaultMessage: '{checks} checks · {signals} signals/h',
+                      values: { checks, signals: summary.signals_last_hour },
                     })}
                   </EuiText>
                 </EuiFlexItem>

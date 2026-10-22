@@ -39,6 +39,10 @@ const BASELINE_POLICY_LABELS: Record<StrategyRow['baselinePolicy'], string> = {
   skip: i18n.translate('xpack.significantEventsApp.detectionEngine.strategies.skip', {
     defaultMessage: "Skipped: the customer's rule decided",
   }),
+  firing_frequency: i18n.translate(
+    'xpack.significantEventsApp.detectionEngine.strategies.firingFrequency',
+    { defaultMessage: 'How often it fires: flapping or daily alerts are background' }
+  ),
 };
 
 interface IStrategiesTableProps {
@@ -146,9 +150,9 @@ export function StrategiesTable({ overview, actions }: IStrategiesTableProps) {
           </strong>
           {i18n.translate('xpack.significantEventsApp.detectionEngine.strategies.scorecardBody', {
             defaultMessage:
-              '{detections} detections, {above} above normal, {trial} would raise in trial, {opened} events opened, {dismissed} dismissed, {verifier} verifier failures',
+              '{signals} signals, {above} above normal, {trial} would raise in trial, {opened} events opened, {dismissed} dismissed, {verifier} verifier failures',
             values: {
-              detections: scorecard.detections,
+              signals: scorecard.signals,
               above: scorecard.above_normal,
               trial: scorecard.would_raise_in_trial,
               opened: scorecard.events_opened,
@@ -202,7 +206,7 @@ export function StrategiesTable({ overview, actions }: IStrategiesTableProps) {
         data-test-subj="detectionEngineStrategiesTable"
         tableCaption={i18n.translate(
           'xpack.significantEventsApp.detectionEngine.strategies.caption',
-          { defaultMessage: 'Detection strategies' }
+          { defaultMessage: 'Signal strategies' }
         )}
         items={overview.strategies}
         columns={columns}

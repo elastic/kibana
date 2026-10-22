@@ -20,7 +20,7 @@ import type {
 import {
   AUTONOMY_LEVELS,
   DETECTION_ENGINE_API_BASE_PATH,
-  DETECTION_STRATEGY_IDS,
+  SIGNAL_STRATEGY_IDS,
   LEARNING_CAPABILITIES,
   STRATEGY_MODES,
 } from '../../common';
@@ -31,7 +31,7 @@ import { learningDue, runLearning } from '../lib/learning/learning_loop';
 import { buildOverview } from '../lib/overview/overview';
 import { ensureRules } from '../lib/rules/ensure_rules';
 import { withConfigDefaults } from '../lib/storage/engine_storage';
-import { abortSignalOf, createRoute } from './create_route';
+import { LONG_RUN_IDLE_SOCKET_MS, abortSignalOf, createRoute } from './create_route';
 
 /** What rule reconciliation reads from knowledge. */
 const knowledgeFor = (knowledge: ReturnType<typeof createRunKnowledge>) => ({
@@ -49,7 +49,7 @@ const MANAGE = { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage]
 const configUpdateSchema = z.object({
   strategies: z
     .partialRecord(
-      z.enum(DETECTION_STRATEGY_IDS),
+      z.enum(SIGNAL_STRATEGY_IDS),
       z.object({ mode: z.enum(STRATEGY_MODES), daily_cap: z.number().int().min(0).max(1000) })
     )
     .optional(),
@@ -64,6 +64,7 @@ const configUpdateSchema = z.object({
       min_samples: z.number().int().min(3).max(100).optional(),
       history_buckets: z.number().int().min(10).max(100).optional(),
       mad_k: z.number().min(1).max(10).optional(),
+      count_noise_k: z.number().min(0).max(10).optional(),
     })
     .optional(),
   quiet_period_buckets: z.number().int().min(1).max(60).optional(),
@@ -77,6 +78,18 @@ const configUpdateSchema = z.object({
   max_agent_calls_per_run: z.number().int().min(0).max(100).optional(),
   max_agent_calls_per_day: z.number().int().min(0).max(100_000).optional(),
   publish_to_alerting_v2: z.boolean().optional(),
+  triage: z
+    .object({
+      event_search: z.boolean().optional(),
+      source_scoped_dependencies: z.boolean().optional(),
+      request_path_dependencies: z.boolean().optional(),
+      evidence_named_joins: z.boolean().optional(),
+      verifier_closes: z.boolean().optional(),
+      regroup_recurrences: z.boolean().optional(),
+      alert_firing_frequency: z.boolean().optional(),
+      rule_entity_connector_id: z.string().max(255).optional(),
+    })
+    .optional(),
   learning: z
     .object({
       autonomy: z.partialRecord(z.enum(LEARNING_CAPABILITIES), z.enum(AUTONOMY_LEVELS)).optional(),
@@ -143,6 +156,7 @@ const updateConfigRoute = createRoute({
       strategies: { ...current.strategies, ...body.strategies },
       agent: body.agent ?? current.agent,
       baseline: { ...current.baseline, ...body.baseline },
+      triage: { ...current.triage, ...body.triage },
       learning: {
         ...current.learning,
         ...body.learning,
@@ -156,7 +170,7 @@ const updateConfigRoute = createRoute({
     });
 
     const now = new Date().toISOString();
-    const changedStrategies = DETECTION_STRATEGY_IDS.filter(
+    const changedStrategies = SIGNAL_STRATEGY_IDS.filter(
       (id) =>
         current.strategies[id].mode !== next.strategies[id].mode ||
         current.strategies[id].daily_cap !== next.strategies[id].daily_cap
@@ -179,7 +193,7 @@ const updateConfigRoute = createRoute({
               '@timestamp': now,
               step: 'agent' as const,
               action: 'configured',
-              message: `Discovery agent set to ${body.agent.kind}${
+              message: `Triage agent set to ${body.agent.kind}${
                 body.agent.connector_id ? ` (${body.agent.connector_id})` : ''
               }.`,
             },
@@ -207,6 +221,7 @@ const runRoute = createRoute({
   options: {
     access: 'internal',
     summary: 'Run the detection engine now over the minutes that settled since its last run',
+    timeout: { idleSocket: LONG_RUN_IDLE_SOCKET_MS },
   },
   security: MANAGE,
   params: z.object({
@@ -238,6 +253,7 @@ const tickRoute = createRoute({
   options: {
     access: 'internal',
     summary: 'The scheduled run, called every minute by the engine managed workflow',
+    timeout: { idleSocket: LONG_RUN_IDLE_SOCKET_MS },
   },
   security: MANAGE,
   params: z.object({ body: z.object({}).passthrough().nullish() }),
@@ -246,7 +262,7 @@ const tickRoute = createRoute({
     const scope = await createScope(request);
     const startedAt = Date.now();
     const summary = await runEngine(scope, { trigger: 'schedule', signal: abortSignalOf(request) });
-    // Learning runs after the detection it learns from, and only with time left over: it gives
+    // Learning runs after the signal it learns from, and only with time left over: it gives
     // way to live detection by construction.
     const config = await scope.storage.getConfig();
     const left = startedAt + scope.limits.timeBudgetMs - Date.now();
@@ -280,7 +296,11 @@ const autoRunRoute = createRoute({
 
 const replayRoute = createRoute({
   endpoint: `POST ${DETECTION_ENGINE_API_BASE_PATH}/_replay`,
-  options: { access: 'internal', summary: 'Replay strategies over past minutes' },
+  options: {
+    access: 'internal',
+    summary: 'Replay strategies over past minutes',
+    timeout: { idleSocket: LONG_RUN_IDLE_SOCKET_MS },
+  },
   security: MANAGE,
   params: z.object({
     body: z.object({
@@ -289,12 +309,15 @@ const replayRoute = createRoute({
         .int()
         .min(5)
         .max(24 * 60),
+      /** Replays the minutes before this time instead of before now, to seed a backtest. */
+      now: isoDateTime().optional(),
     }),
   }),
   handler: async ({ request, params, getStartServices }): Promise<ReplaySummary> => {
     const { createScope } = await getStartServices();
     return replayEngine(await createScope(request), {
       minutes: params.body.minutes,
+      now: params.body.now ? Date.parse(params.body.now) : undefined,
       signal: abortSignalOf(request),
     });
   },

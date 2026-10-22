@@ -6,18 +6,18 @@
  */
 
 import type {
-  DetectionStrategyId,
+  SignalStrategyId,
   EngineConfig,
   EngineEvent,
   StrategyProposal,
   StrategyScorecard,
 } from '../../../common';
-import { DAY_MS, DETECTION_STRATEGY_IDS } from '../../../common';
+import { DAY_MS, SIGNAL_STRATEGY_IDS } from '../../../common';
 import type { IEngineStorage } from '../storage/engine_storage';
 import { listIncidents } from './incidents';
 import { createMemory, kiIdOf, type NewMemoryNote } from './memory';
 
-/** A trial strategy needs this many would-raise detections before promotion is proposed. */
+/** A trial strategy needs this many would-raise signals before promotion is proposed. */
 const MIN_TRIAL_EVIDENCE = 1;
 /** A live strategy whose events are dismissed this often is proposed back to trial. */
 const DISMISSAL_RATE_FOR_ROLLBACK = 0.5;
@@ -42,22 +42,22 @@ function median(values: number[]): number | undefined {
  */
 export async function scoreStrategies(
   storage: IEngineStorage
-): Promise<Record<DetectionStrategyId, StrategyScorecard>> {
-  const [detections, events, verifierFailures, incidents, watched] = await Promise.all([
-    storage.records.detectionCounts(),
+): Promise<Record<SignalStrategyId, StrategyScorecard>> {
+  const [signals, events, verifierFailures, incidents, watched] = await Promise.all([
+    storage.records.signalCounts(),
     storage.events.strategyStats(),
     storage.records.verifierFailures(),
     listIncidents(storage.state),
     storage.records.serviceActivity(new Date(Date.now() - DAY_MS).toISOString()),
   ]);
-  const watchedBy = (strategy: DetectionStrategyId) =>
+  const watchedBy = (strategy: SignalStrategyId) =>
     new Set(
       watched
         .filter((item) => item.strategies.some((entry) => entry.strategy === strategy))
         .map((item) => item.service)
     );
   return Object.fromEntries(
-    DETECTION_STRATEGY_IDS.map((strategy) => {
+    SIGNAL_STRATEGY_IDS.map((strategy) => {
       const caught = incidents.filter(
         (incident) => incident.label === 'confirmed' && incident.strategies.includes(strategy)
       );
@@ -72,9 +72,9 @@ export async function scoreStrategies(
         strategy,
         {
           strategy,
-          detections: detections[strategy]?.detections ?? 0,
-          above_normal: detections[strategy]?.above_normal ?? 0,
-          would_raise_in_trial: detections[strategy]?.would_raise_in_trial ?? 0,
+          signals: signals[strategy]?.signals ?? 0,
+          above_normal: signals[strategy]?.above_normal ?? 0,
+          would_raise_in_trial: signals[strategy]?.would_raise_in_trial ?? 0,
           events_opened: events[strategy]?.opened ?? 0,
           events_dismissed: dismissed,
           verifier_failures: failures,
@@ -93,7 +93,7 @@ export async function scoreStrategies(
         },
       ];
     })
-  ) as Record<DetectionStrategyId, StrategyScorecard>;
+  ) as Record<SignalStrategyId, StrategyScorecard>;
 }
 
 /**
@@ -105,9 +105,9 @@ export function proposeStrategyChanges({
   scorecards,
 }: {
   config: EngineConfig;
-  scorecards: Record<DetectionStrategyId, StrategyScorecard>;
+  scorecards: Record<SignalStrategyId, StrategyScorecard>;
 }): StrategyProposal[] {
-  return DETECTION_STRATEGY_IDS.flatMap((strategy): StrategyProposal[] => {
+  return SIGNAL_STRATEGY_IDS.flatMap((strategy): StrategyProposal[] => {
     const mode = config.strategies[strategy].mode;
     const score = scorecards[strategy];
     if (mode === 'trial' && score.would_raise_in_trial >= MIN_TRIAL_EVIDENCE) {
@@ -117,7 +117,7 @@ export function proposeStrategyChanges({
           strategy,
           change: { mode: 'live' },
           title: 'Turn on with its daily cap',
-          evidence: `In trial it would have raised ${score.would_raise_in_trial} detection(s) past the baseline check. Going live keeps the daily cap of ${config.strategies[strategy].daily_cap} new events.`,
+          evidence: `In trial it would have raised ${score.would_raise_in_trial} signal(s) past the baseline check. Going live keeps the daily cap of ${config.strategies[strategy].daily_cap} new events.`,
         },
       ];
     }

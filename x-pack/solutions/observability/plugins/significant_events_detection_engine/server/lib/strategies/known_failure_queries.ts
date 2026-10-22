@@ -26,13 +26,13 @@ import { buildSignalRule } from './rule_definitions';
 import { latestRowPerKey, type RuleEventRow } from './rule_events_reader';
 import type {
   DesiredRules,
-  IDetectionStrategy,
+  ISignalStrategy,
   ReplayContext,
   StrategyContext,
   StrategyEvaluation,
 } from './types';
 
-const STRATEGY_NAME = 'Rules from KIs';
+const STRATEGY_NAME = 'Known failure queries';
 const DEFAULT_IMPORTANCE = 50;
 /** One `COUNT(*) WHERE` per KI; past this a source gets a second rule rather than a wider one. */
 const MAX_KIS_PER_RULE = 50;
@@ -275,7 +275,7 @@ async function evaluateLive(context: StrategyContext): Promise<StrategyEvaluatio
         return groups;
       }, new Map<number, RuleEventRow[]>());
       const active = await context.records.recentSeries({
-        strategy: 'ki_rules',
+        strategy: 'known_failure_queries',
         fingerprintPrefix: `ki:${source.id}:`,
         since: new Date(context.from - ACTIVE_WINDOW_MS).toISOString(),
         activeOnly: true,
@@ -313,6 +313,14 @@ async function evaluateReplay(context: ReplayContext): Promise<StrategyEvaluatio
     context.sources.map(async (source): Promise<StrategyEvaluation> => {
       try {
         const { valid, skipped, byService } = await countableKis({ context, source, links });
+        const active = context.records
+          ? await context.records.recentSeries({
+              strategy: 'known_failure_queries',
+              fingerprintPrefix: `ki:${source.id}:`,
+              since: new Date(context.from - ACTIVE_WINDOW_MS).toISOString(),
+              activeOnly: true,
+            })
+          : [];
         const perChunk = await Promise.all(
           chunked(valid, MAX_KIS_PER_RULE).map(async (chunk) => {
             const { rows } = await queryRows({
@@ -338,8 +346,9 @@ ${countPipeline(chunk, byService)}
                       toNumber(row[countColumn(index)]),
                     ])
                 ),
-              // Replay has no stored series to keep at zero; the heartbeat covers baselines.
-              active: [],
+              // Without stored series (seeding baselines) the heartbeat covers zeros; in the
+              // pipeline, series that matched recently are kept at zero as live, so they recover.
+              active,
             });
           })
         );
@@ -362,15 +371,15 @@ ${countPipeline(chunk, byService)}
 }
 
 /**
- * Rules from KIs. Every match query learned for a source is counted, promoted or not: one
+ * Known failure queries: today, the KI match queries. Every match query learned for a source is counted, promoted or not: one
  * Alerting v2 rule per source counts all of them per service and minute, so a KI watches from
  * the moment it is learned. Each KI and service is its own series, so one KI matching two
- * unrelated services raises two detections, and the baseline check judges each against its
+ * unrelated services raises two signals, and the baseline check judges each against its
  * own normal.
  */
-export const kiRulesStrategy: IDetectionStrategy = {
+export const knownFailureQueriesStrategy: ISignalStrategy = {
   descriptor: {
-    id: 'ki_rules',
+    id: 'known_failure_queries',
     name: STRATEGY_NAME,
     watches:
       'Every match KI query of the enabled sources, counted per service and minute by one rule per source',
@@ -397,7 +406,7 @@ export const kiRulesStrategy: IDetectionStrategy = {
           const rules = chunked(valid, MAX_KIS_PER_RULE).map((chunk) => ({
             ...buildSignalRule({
               spaceId: context.spaceId,
-              strategy: 'ki_rules',
+              strategy: 'known_failure_queries',
               strategyName: STRATEGY_NAME,
               source,
               query: `FROM ${source.view_name}

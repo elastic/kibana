@@ -10,10 +10,10 @@ import type { EngineEvent, EvidenceResult } from '../../../common';
 import { getErrorMessage } from '../errors';
 import { queryRows, type EsqlRow } from '../esql';
 import type { JoinProposal } from '../pipeline/join_proposals';
-import type { AgentCase, CaseDetection, CaseEvidence } from './types';
+import type { AgentCase, CaseSignal, CaseEvidence } from './types';
 
 /** Rows per evidence item the agent sees; enough to judge, small enough to bound tokens. */
-const ROWS_PER_EVIDENCE = 5;
+export const ROWS_PER_EVIDENCE = 5;
 const MAX_EVENT_EVIDENCE = 2;
 
 /** Longest cell value the agent sees; a stack trace in one log line would crowd out the case. */
@@ -56,14 +56,14 @@ export async function runEvidence({
 }
 
 /**
- * Prepares the bounded case for one detection: its evidence, evidence of the event it may join,
+ * Prepares the bounded case for one signal: its evidence, evidence of the event it may join,
  * customer alerts on related services, and memory notes.
  */
 export async function buildCase({
   dataEsClient,
   signal,
   kind,
-  detection,
+  caseSignal,
   evidenceQuery,
   event,
   proposal,
@@ -71,11 +71,15 @@ export async function buildCase({
   relatedServices,
   memory,
   investigationPages,
+  sourceTitle,
+  signalEvidence,
 }: {
+  /** The signal's evidence when code already ran it, so it is not queried twice. */
+  signalEvidence?: { result: EvidenceResult; rows: EsqlRow[]; error?: string };
   dataEsClient: ElasticsearchClient;
   signal: AbortSignal;
   kind: AgentCase['kind'];
-  detection: CaseDetection;
+  caseSignal: CaseSignal;
   evidenceQuery: string;
   event?: EngineEvent;
   proposal?: JoinProposal;
@@ -83,16 +87,18 @@ export async function buildCase({
   relatedServices: string[];
   memory: string[];
   investigationPages: AgentCase['investigation_context'];
+  /** The title of a source, by id; the agent reads titles, not ids. */
+  sourceTitle: (sourceId: string | undefined) => string | undefined;
 }): Promise<AgentCase> {
   const sources = [
     {
-      fingerprint: detection.fingerprint,
-      title: detection.title,
-      unit: detection.unit,
+      fingerprint: caseSignal.fingerprint,
+      title: caseSignal.title,
+      unit: caseSignal.unit,
       query: evidenceQuery,
     },
     ...(event?.members ?? [])
-      .filter((member) => member.fingerprint !== detection.fingerprint)
+      .filter((member) => member.fingerprint !== caseSignal.fingerprint)
       .slice(0, MAX_EVENT_EVIDENCE)
       .map((member) => ({
         fingerprint: member.fingerprint,
@@ -104,13 +110,13 @@ export async function buildCase({
 
   const evidence = await Promise.all(
     sources.map(async (source, index): Promise<CaseEvidence> => {
-      const { result, rows, error } = await runEvidence({
-        esClient: dataEsClient,
-        query: source.query,
-        signal,
-      });
+      const { result, rows, error } =
+        index === 0 && signalEvidence
+          ? signalEvidence
+          : await runEvidence({ esClient: dataEsClient, query: source.query, signal });
       return {
         id: `E${index + 1}`,
+        ...(kind === 'reopen' && index > 0 ? { earlier_episode: true } : {}),
         ...source,
         result,
         rows: rows.slice(0, ROWS_PER_EVIDENCE).map(trimRow),
@@ -119,11 +125,16 @@ export async function buildCase({
     })
   );
 
-  const watchedServices = new Set([detection.service, ...relatedServices]);
+  // Only the alerts on the case's own entities: the signal's, its related ones and the event's.
+  const watchedServices = new Set([
+    caseSignal.service,
+    ...relatedServices,
+    ...(event?.services ?? []),
+  ]);
 
   return {
     kind,
-    detection,
+    signal: caseSignal,
     event: event
       ? {
           event_id: event.event_id,
@@ -135,6 +146,7 @@ export async function buildCase({
           members: event.members.map((member) => ({
             title: member.title,
             service: member.service,
+            source: sourceTitle(member.source_id),
             strategy: member.strategy,
             importance: member.importance,
           })),

@@ -22,6 +22,8 @@ export const EVENT_INPUTS = [
   'unknown',
   'operator_close',
   'dismiss',
+  /** The Verifier re-ran the evidence, found nothing, and no member is firing. */
+  'evidence_gone',
 ] as const;
 export type EventInput = (typeof EVENT_INPUTS)[number];
 
@@ -45,6 +47,7 @@ const TRANSITIONS: Record<EngineEventStatus, Record<EventInput, Transition>> = {
     unknown: { to: 'active' },
     operator_close: { to: 'inactive', closeReason: 'operator' },
     dismiss: { to: 'inactive', closeReason: 'dismissed' },
+    evidence_gone: { to: 'recovering' },
   },
   recovering: {
     member_firing: { to: 'active' },
@@ -53,6 +56,9 @@ const TRANSITIONS: Record<EngineEventStatus, Record<EventInput, Transition>> = {
     unknown: { to: 'recovering' },
     operator_close: { to: 'inactive', closeReason: 'operator' },
     dismiss: { to: 'inactive', closeReason: 'dismissed' },
+    // A second miss in a row: nothing shows the problem, so the event closes on its own even
+    // when a member cannot be evaluated to prove recovery.
+    evidence_gone: { to: 'inactive', closeReason: 'evidence_gone' },
   },
   inactive: {
     member_firing: { to: 'active', reopens: true },
@@ -61,6 +67,7 @@ const TRANSITIONS: Record<EngineEventStatus, Record<EventInput, Transition>> = {
     unknown: { to: 'inactive' },
     operator_close: { to: 'inactive' },
     dismiss: { to: 'inactive', closeReason: 'dismissed' },
+    evidence_gone: { to: 'inactive' },
   },
 };
 

@@ -10,6 +10,7 @@ import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { EngineConfig } from '../../../common';
 import { DEFAULT_ENGINE_CONFIG } from '../../../common';
 import { createEventsStore, type IEventsStore } from './events_store';
+import { withCurrentConfigNames } from './legacy_names';
 import type { IManagedIndexInstaller } from './managed_index';
 import { createRecordsStore, type IRecordsStore } from './records_store';
 import { createStateStore, type IStateStore } from './state_store';
@@ -34,13 +35,15 @@ export interface IEngineStorage {
 }
 
 /** Merges a stored config over the defaults, so a config saved by an older build gains new fields. */
-export function withConfigDefaults(stored: Partial<EngineConfig> | undefined): EngineConfig {
+export function withConfigDefaults(storedConfig: Partial<EngineConfig> | undefined): EngineConfig {
+  const stored = withCurrentConfigNames(storedConfig);
   return {
     ...DEFAULT_ENGINE_CONFIG,
     ...stored,
     strategies: { ...DEFAULT_ENGINE_CONFIG.strategies, ...stored?.strategies },
     agent: { ...DEFAULT_ENGINE_CONFIG.agent, ...stored?.agent },
     baseline: { ...DEFAULT_ENGINE_CONFIG.baseline, ...stored?.baseline },
+    triage: { ...DEFAULT_ENGINE_CONFIG.triage, ...stored?.triage },
     learning: {
       ...DEFAULT_ENGINE_CONFIG.learning,
       ...stored?.learning,
@@ -89,7 +92,10 @@ export function createEngineStorage({
             'auto_run',
             'rules',
             'lease',
-            ...(includeLearning ? [] : (['memory_notes', 'incident', 'candidate'] as const)),
+            // Knowledge too: what topology and customer rules showed holds across a reset.
+            ...(includeLearning
+              ? []
+              : (['memory_notes', 'incident', 'candidate', 'topology', 'customer_rule'] as const)),
           ],
         }),
       ]);

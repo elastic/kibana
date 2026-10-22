@@ -8,7 +8,7 @@
 import type { ActivityEntry } from './activity';
 import type { EngineConfig } from './config';
 import type { EngineCostSummary } from './cost';
-import type { EngineDetection } from './detections';
+import type { EngineSignal } from './signals';
 import type { EngineEvent } from './events';
 import type {
   LabelledIncident,
@@ -20,8 +20,8 @@ import type {
 } from './learning';
 import type { EngineProgress, EngineRunSummary } from './runs';
 import type {
-  DetectionStrategyDescriptor,
-  DetectionStrategyId,
+  SignalStrategyDescriptor,
+  SignalStrategyId,
   EngineRulesState,
   StrategyConfig,
   StrategyProposal,
@@ -39,7 +39,7 @@ export interface EngineAutoRunState {
 }
 
 /** One strategy as the page shows it. */
-export interface StrategyOverview extends DetectionStrategyDescriptor {
+export interface StrategyOverview extends SignalStrategyDescriptor {
   config: StrategyConfig;
   scorecard: StrategyScorecard;
   opened_today: number;
@@ -54,7 +54,7 @@ export interface EngineOverviewResponse {
   progress: EngineProgress;
   /** How far the slowest live strategy is behind real time, in milliseconds. */
   lag_ms?: number;
-  counts: { open_events: number; events: number; detections_last_hour: number };
+  counts: { open_events: number; events: number; signals_last_hour: number };
   cost: EngineCostSummary;
   auto_run: EngineAutoRunState;
   rules: EngineRulesState;
@@ -85,8 +85,8 @@ export interface LearningOverviewResponse {
 
 export interface ServiceSummary {
   service: string;
-  watched_by: Array<{ strategy: DetectionStrategyId; series: number }>;
-  detections_last_hour: number;
+  watched_by: Array<{ strategy: SignalStrategyId; series: number }>;
+  signals_last_hour: number;
   open_events: number;
   last_event_title?: string;
   last_event_id?: string;
@@ -112,7 +112,7 @@ export interface EnginePage<TItem> {
 
 export interface EngineEventDetailsResponse {
   event: EngineEvent;
-  detections: EngineDetection[];
+  signals: EngineSignal[];
   activity: ActivityEntry[];
 }
 
@@ -145,7 +145,7 @@ export interface ReplaySummary {
   from: string;
   to: string;
   strategies: Array<{
-    strategy: DetectionStrategyId;
+    strategy: SignalStrategyId;
     observations: number;
     looked_off: number;
     above_normal: number;

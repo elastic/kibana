@@ -9,8 +9,9 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { QueryLink } from '@kbn/significant-events-schema';
-import type { DetectionStrategyDescriptor, LearnedDetector, StrategyMode } from '../../../common';
+import type { SignalStrategyDescriptor, LearnedDetector, StrategyMode } from '../../../common';
 import type { OwnedRule, StrategyObservation } from '../domain';
+import type { CustomerRuleDefinition, ICustomerRuleKnowledge } from '../knowledge/customer_rules';
 import type { IRecordsStore } from '../storage/records_store';
 import type { IRuleEventsReader } from './rule_events_reader';
 
@@ -50,12 +51,22 @@ export interface StrategyContext extends BaseStrategyContext {
   records: IRecordsStore;
   /** Most rows to read from `.rule-events` in this evaluation. */
   maxRows: number;
+  /** Which entity each customer rule watches, for alerts that do not say. */
+  customerRules?: ICustomerRuleKnowledge;
+  /** Definitions of the customer's own Alerting v2 rules, by id, for their alerts' entities. */
+  customerV2Rules?: (ids: string[]) => Promise<Map<string, CustomerRuleDefinition>>;
 }
 
 /** A replay over past buckets [from, to), run with direct queries because rules never backfill. */
 export interface ReplayContext extends BaseStrategyContext {
   from: number;
   to: number;
+  /**
+   * Past observations, when the replay is part of the engine's pipeline (a backtest or minutes
+   * older than a rule's live window): series that matched recently are then reported at zero
+   * in quiet minutes, as live, so a member can prove recovery.
+   */
+  records?: IRecordsStore;
 }
 
 /** What a strategy reports for one evaluation. */
@@ -99,11 +110,11 @@ export interface DesiredRules {
 }
 
 /**
- * A detection strategy: one way of finding that something may be wrong. It watches data or
- * alerts and reports what looks off. It never decides whether a detection becomes an event.
+ * A signal strategy: one way of finding that something may be wrong. It watches data or
+ * alerts and reports what looks off. It never decides whether a signal becomes an event.
  */
-export interface IDetectionStrategy {
-  descriptor: DetectionStrategyDescriptor;
+export interface ISignalStrategy {
+  descriptor: SignalStrategyDescriptor;
   /** Reports an observation for every series it evaluated in every bucket of [from, to). */
   evaluate(context: StrategyContext): Promise<StrategyEvaluation>;
   /** Evaluates past buckets directly, to seed baselines and to trial the strategy. */

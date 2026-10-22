@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
-  DetectionOutcome,
+  SignalOutcome,
   EngineRunSummary,
 } from '@kbn/significant-events-detection-engine-plugin/common';
 import React from 'react';
@@ -130,7 +130,7 @@ function Legend() {
   );
 }
 
-const IDENTITY_OUTCOMES: DetectionOutcome[] = [
+const IDENTITY_OUTCOMES: SignalOutcome[] = [
   'new_event',
   'joined',
   'continued',
@@ -218,7 +218,7 @@ export function PipelineSummary({ run }: IPipelineSummaryProps) {
           owner={i18n.translate(
             'xpack.significantEventsApp.detectionEngine.pipeline.strategiesOwner',
             {
-              defaultMessage: 'Detection strategies check each series',
+              defaultMessage: 'Signal strategies check each series',
             }
           )}
           value={observations}
@@ -282,18 +282,15 @@ export function PipelineSummary({ run }: IPipelineSummaryProps) {
         </Stage>
         <Arrow />
         <Stage
-          testId="detectionEngineStageDiscovery"
+          testId="detectionEngineStageTriage"
           icon="link"
           tone="code"
-          title={i18n.translate('xpack.significantEventsApp.detectionEngine.pipeline.discovery', {
+          title={i18n.translate('xpack.significantEventsApp.detectionEngine.pipeline.triage', {
             defaultMessage: '3. Same problem?',
           })}
-          owner={i18n.translate(
-            'xpack.significantEventsApp.detectionEngine.pipeline.discoveryOwner',
-            {
-              defaultMessage: 'Identity and join proposals',
-            }
-          )}
+          owner={i18n.translate('xpack.significantEventsApp.detectionEngine.pipeline.triageOwner', {
+            defaultMessage: 'Identity and join proposals',
+          })}
           value={identityCount}
         >
           {IDENTITY_OUTCOMES.filter((outcome) => run.outcomes[outcome])

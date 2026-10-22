@@ -13,9 +13,9 @@ import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   ActivityEntry,
   ActivityStep,
-  DetectionOutcome,
-  DetectionStrategyId,
-  EngineDetection,
+  SignalOutcome,
+  SignalStrategyId,
+  EngineSignal,
   EngineObservation,
   EnginePage,
   EngineRunSummary,
@@ -24,15 +24,15 @@ import { withRetry } from '../retry';
 import { decodeCursor, encodeCursor } from './cursor';
 import {
   ACTIVITY_DATA_STREAM,
-  DETECTIONS_DATA_STREAM,
+  SIGNALS_DATA_STREAM,
   OBSERVATIONS_DATA_STREAM,
   RUNS_DATA_STREAM,
   type activityMappings,
-  type detectionsMappings,
+  type signalsMappings,
   type observationsMappings,
   type runsMappings,
   type StoredActivity,
-  type StoredDetection,
+  type StoredSignal,
   type StoredObservation,
   type StoredRun,
 } from './data_streams';
@@ -43,13 +43,13 @@ const HISTORY_SERIES_CHUNK = 500;
 const MAX_SAMPLES_PER_SERIES = 100;
 const WRITE_CHUNK = 5_000;
 /**
- * Series that only feed other checks and never become detections: traffic feeds the silence
+ * Series that only feed other checks and never become signals: traffic feeds the silence
  * check, and KI heartbeats (stored under the source's name) tell a quiet KI from a missing rule.
  */
 const INTERNAL_SERIES_PREFIXES = ['health:traffic:', 'ki_watch:'];
 /** Samples one series read returns: three days of minutes for a handful of series. */
 const MAX_SERIES_SAMPLES = 10_000;
-const MAX_FOUND_DETECTIONS = 5_000;
+const MAX_FOUND_SIGNALS = 5_000;
 
 /** One past value of a series. */
 export interface HistorySample {
@@ -69,13 +69,13 @@ export interface HistoryRequest {
 }
 
 /** Counts per strategy, read from what the engine recorded. */
-export interface DetectionCounts {
-  detections: number;
+export interface SignalCounts {
+  signals: number;
   above_normal: number;
   would_raise_in_trial: number;
 }
 
-/** The engine's append-only records of one space: observations, detections, activity, runs. */
+/** The engine's append-only records of one space: observations, signals, activity, runs. */
 export interface IRecordsStore {
   writeObservations(docs: Array<Omit<EngineObservation, '@timestamp'>>): Promise<void>;
   /**
@@ -90,7 +90,7 @@ export interface IRecordsStore {
   }): Promise<Map<string, HistorySample[]>>;
   /** Series a strategy evaluated since a time, with their service. */
   recentSeries(params: {
-    strategy: DetectionStrategyId;
+    strategy: SignalStrategyId;
     fingerprintPrefix: string;
     since: string;
     /**
@@ -110,23 +110,23 @@ export interface IRecordsStore {
     fingerprintPrefix: string;
     since: string;
   }): Promise<Array<{ fingerprint: string; minutes: number; nonZero: number }>>;
-  writeDetections(docs: EngineDetection[]): Promise<void>;
-  /** Detections of some series since a time, oldest first; for judging a trial. */
-  findDetections(params: {
+  writeSignals(docs: EngineSignal[]): Promise<void>;
+  /** Signals of some series since a time, oldest first; for judging a trial. */
+  findSignals(params: {
     fingerprints: string[];
-    outcomes?: DetectionOutcome[];
+    outcomes?: SignalOutcome[];
     since: string;
     size?: number;
-  }): Promise<EngineDetection[]>;
-  listDetections(params: {
-    strategy?: DetectionStrategyId;
-    outcome?: DetectionOutcome;
+  }): Promise<EngineSignal[]>;
+  listSignals(params: {
+    strategy?: SignalStrategyId;
+    outcome?: SignalOutcome;
     eventId?: string;
     size: number;
     cursor?: string;
-  }): Promise<EnginePage<EngineDetection>>;
-  countDetections(since: string): Promise<number>;
-  detectionCounts(since?: string): Promise<Partial<Record<DetectionStrategyId, DetectionCounts>>>;
+  }): Promise<EnginePage<EngineSignal>>;
+  countSignals(since: string): Promise<number>;
+  signalCounts(since?: string): Promise<Partial<Record<SignalStrategyId, SignalCounts>>>;
   appendActivity(entries: ActivityEntry[]): Promise<void>;
   listActivity(params: {
     eventId?: string;
@@ -139,12 +139,12 @@ export interface IRecordsStore {
   verifierFailures(): Promise<Map<string, number>>;
   writeRun(run: EngineRunSummary): Promise<void>;
   listRuns(params: { size: number; cursor?: string }): Promise<EnginePage<EngineRunSummary>>;
-  /** Series and detections per service over a recent window. */
+  /** Series and signals per service over a recent window. */
   serviceActivity(since: string): Promise<
     Array<{
       service: string;
-      strategies: Array<{ strategy: DetectionStrategyId; series: number }>;
-      detections: number;
+      strategies: Array<{ strategy: SignalStrategyId; series: number }>;
+      signals: number;
     }>
   >;
   clear(): Promise<void>;
@@ -188,10 +188,8 @@ export function createRecordsStore({
     dataStreams.initializeClient<typeof observationsMappings, StoredObservation>(
       OBSERVATIONS_DATA_STREAM
     );
-  const detections = () =>
-    dataStreams.initializeClient<typeof detectionsMappings, StoredDetection>(
-      DETECTIONS_DATA_STREAM
-    );
+  const signals = () =>
+    dataStreams.initializeClient<typeof signalsMappings, StoredSignal>(SIGNALS_DATA_STREAM);
   const activity = () =>
     dataStreams.initializeClient<typeof activityMappings, StoredActivity>(ACTIVITY_DATA_STREAM);
   const runs = () => dataStreams.initializeClient<typeof runsMappings, StoredRun>(RUNS_DATA_STREAM);
@@ -420,11 +418,11 @@ export function createRecordsStore({
       }));
     },
 
-    async findDetections({ fingerprints, outcomes, since, size = MAX_FOUND_DETECTIONS }) {
+    async findSignals({ fingerprints, outcomes, since, size = MAX_FOUND_SIGNALS }) {
       if (fingerprints.length === 0) {
         return [];
       }
-      const client = await detections();
+      const client = await signals();
       const response = await client.search({
         space,
         size,
@@ -440,29 +438,29 @@ export function createRecordsStore({
         sort: [{ '@timestamp': 'asc' }],
       });
       return response.hits.hits.flatMap((hit) =>
-        hit._source ? [hit._source as EngineDetection] : []
+        hit._source ? [hit._source as EngineSignal] : []
       );
     },
 
-    async writeDetections(docs) {
+    async writeSignals(docs) {
       if (docs.length === 0) {
         return;
       }
-      const client = await detections();
+      const client = await signals();
       for (const batch of chunk(docs, WRITE_CHUNK)) {
         // Sequential for the same reason as observations.
         const response = await withRetry(() =>
           client.create({
             space,
-            documents: batch.map((doc) => ({ _id: doc.detection_id, ...doc })),
+            documents: batch.map((doc) => ({ _id: doc.signal_id, ...doc })),
           })
         );
-        assertBulkOk(response, 'detections');
+        assertBulkOk(response, 'signals');
       }
     },
 
-    async listDetections({ strategy, outcome, eventId, size, cursor }) {
-      const client = await detections();
+    async listSignals({ strategy, outcome, eventId, size, cursor }) {
+      const client = await signals();
       const filter: estypes.QueryDslQueryContainer[] = [];
       if (strategy) {
         filter.push({ term: { strategy } });
@@ -477,19 +475,19 @@ export function createRecordsStore({
         space,
         size: size + 1,
         query: { bool: { filter } },
-        sort: [{ '@timestamp': 'desc' }, { detection_id: 'asc' }],
+        sort: [{ '@timestamp': 'desc' }, { signal_id: 'asc' }],
         search_after: decodeCursor(cursor),
       });
       const hits = response.hits.hits;
       const page = hits.slice(0, size);
       return {
-        items: page.flatMap((hit) => (hit._source ? [hit._source as EngineDetection] : [])),
+        items: page.flatMap((hit) => (hit._source ? [hit._source as EngineSignal] : [])),
         next_cursor: hits.length > size ? encodeCursor(page[page.length - 1]?.sort) : undefined,
       };
     },
 
-    async countDetections(since) {
-      const client = await detections();
+    async countSignals(since) {
+      const client = await signals();
       const response = await client.search({
         space,
         size: 0,
@@ -500,8 +498,8 @@ export function createRecordsStore({
       return typeof total === 'number' ? total : total?.value ?? 0;
     },
 
-    async detectionCounts(since) {
-      const client = await detections();
+    async signalCounts(since) {
+      const client = await signals();
       const response = await client.search({
         space,
         size: 0,
@@ -537,7 +535,7 @@ export function createRecordsStore({
         buckets.map((bucket) => [
           bucket.key,
           {
-            detections: bucket.doc_count,
+            signals: bucket.doc_count,
             above_normal: bucket.above_normal.doc_count,
             would_raise_in_trial: bucket.trial.doc_count,
           },
@@ -644,10 +642,7 @@ export function createRecordsStore({
     },
 
     async serviceActivity(since) {
-      const [observationsClient, detectionsClient] = await Promise.all([
-        observations(),
-        detections(),
-      ]);
+      const [observationsClient, signalsClient] = await Promise.all([observations(), signals()]);
       const [series, found] = await Promise.all([
         observationsClient.search({
           space,
@@ -672,7 +667,7 @@ export function createRecordsStore({
             },
           },
         }),
-        detectionsClient.search({
+        signalsClient.search({
           space,
           size: 0,
           query: { bool: { filter: [{ range: { '@timestamp': { gte: since } } }] } },
@@ -690,7 +685,7 @@ export function createRecordsStore({
               }
             | undefined
         )?.buckets ?? [];
-      const detectionCounts = new Map(
+      const signalCounts = new Map(
         (
           (
             aggregation(found, 'services') as
@@ -701,17 +696,17 @@ export function createRecordsStore({
       );
       const services = new Set([
         ...serviceBuckets.map((bucket) => bucket.key),
-        ...detectionCounts.keys(),
+        ...signalCounts.keys(),
       ]);
       return [...services].map((service) => ({
         service,
         strategies: (
           serviceBuckets.find((bucket) => bucket.key === service)?.strategies.buckets ?? []
         ).map((bucket) => ({
-          strategy: bucket.key as DetectionStrategyId,
+          strategy: bucket.key as SignalStrategyId,
           series: bucket.series.value,
         })),
-        detections: detectionCounts.get(service) ?? 0,
+        signals: signalCounts.get(service) ?? 0,
       }));
     },
 
@@ -719,7 +714,7 @@ export function createRecordsStore({
       await esClient.deleteByQuery({
         index: [
           OBSERVATIONS_DATA_STREAM,
-          DETECTIONS_DATA_STREAM,
+          SIGNALS_DATA_STREAM,
           ACTIVITY_DATA_STREAM,
           RUNS_DATA_STREAM,
         ],

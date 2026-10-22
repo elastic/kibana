@@ -39,13 +39,6 @@ export function validateAnswer(agentCase: AgentCase, answer: AgentAnswer): Valid
     return { ok: false, reason: `unknown verdict "${badVerdict.verdict}"` };
   }
 
-  if (agentCase.join_proposal && !answer.join_decision) {
-    return {
-      ok: false,
-      reason: 'a join was proposed but the answer neither confirms nor vetoes it',
-    };
-  }
-
   const corrections: string[] = [];
 
   // A verdict that the evidence cannot support is corrected, not trusted.
@@ -82,7 +75,6 @@ export function validateAnswer(agentCase: AgentCase, answer: AgentAnswer): Valid
     ok: true,
     answer: {
       ...answer,
-      join_decision: agentCase.join_proposal ? answer.join_decision : undefined,
       verdicts: [...verdicts, ...missing],
     },
     corrections,

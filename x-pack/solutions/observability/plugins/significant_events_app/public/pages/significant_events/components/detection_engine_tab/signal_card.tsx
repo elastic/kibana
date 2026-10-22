@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type {
   AssessmentVerdict,
-  EngineDetection,
+  EngineSignal,
   EventMember,
   EventOpenWindow,
   SeriesSample,
@@ -38,44 +38,44 @@ import {
 } from './labels';
 import { SignalChart } from './signal_chart';
 
-/** The detection that first put this signal above normal in the latest open window. */
-function firstDetectionOf({
-  detections,
+/** The signal that first put this signal above normal in the latest open window. */
+function firstSignalOf({
+  signals,
   fingerprint,
   window,
 }: {
-  detections: EngineDetection[];
+  signals: EngineSignal[];
   fingerprint: string;
   window: EventOpenWindow;
-}): EngineDetection | undefined {
-  return detections
+}): EngineSignal | undefined {
+  return signals
     .filter(
-      (detection) =>
-        detection.fingerprint === fingerprint &&
-        detection.bucket_start >= window.from &&
-        detection.baseline.decision !== 'background' &&
-        detection.baseline.decision !== 'warming_up'
+      (signal) =>
+        signal.fingerprint === fingerprint &&
+        signal.bucket_start >= window.from &&
+        signal.baseline.decision !== 'background' &&
+        signal.baseline.decision !== 'warming_up'
     )
     .sort((a, b) => a.bucket_start.localeCompare(b.bucket_start))[0];
 }
 
 /** How the figures compared with normal, in one sentence. */
-function describeDetection({
-  detection,
+function describeSignal({
+  signal,
   member,
 }: {
-  detection: EngineDetection | undefined;
+  signal: EngineSignal | undefined;
   member: EventMember;
 }): string {
-  if (!detection) {
-    return i18n.translate('xpack.significantEventsApp.detectionEngine.signal.noDetection', {
+  if (!signal) {
+    return i18n.translate('xpack.significantEventsApp.detectionEngine.signal.noSignal', {
       defaultMessage: 'First seen at {time}.',
       values: { time: formatTime(member.first_seen) },
     });
   }
-  const { baseline } = detection;
-  const value = formatValue(detection.value, detection.unit);
-  const time = formatTime(detection.bucket_start);
+  const { baseline } = signal;
+  const value = formatValue(signal.value, signal.unit);
+  const time = formatTime(signal.bucket_start);
   if (baseline.decision === 'skipped') {
     return i18n.translate('xpack.significantEventsApp.detectionEngine.signal.skipped', {
       defaultMessage:
@@ -96,9 +96,9 @@ function describeDetection({
     values: {
       time,
       value,
-      threshold: formatValue(baseline.threshold, detection.unit),
+      threshold: formatValue(baseline.threshold, signal.unit),
       samples: baseline.samples,
-      median: baseline.median === undefined ? '-' : formatValue(baseline.median, detection.unit),
+      median: baseline.median === undefined ? '-' : formatValue(baseline.median, signal.unit),
       excluded:
         baseline.excludedSamples > 0
           ? i18n.translate('xpack.significantEventsApp.detectionEngine.signal.excluded', {
@@ -115,7 +115,7 @@ interface ISignalCardProps {
   member: EventMember;
   strategy?: StrategyOverview;
   verdict?: AssessmentVerdict;
-  detections: EngineDetection[];
+  signals: EngineSignal[];
   window: EventOpenWindow;
   series?: { from: string; to: string; samples: SeriesSample[] };
   discoverHref?: string;
@@ -127,12 +127,12 @@ export function SignalCard({
   member,
   strategy,
   verdict,
-  detections,
+  signals,
   window,
   series,
   discoverHref,
 }: ISignalCardProps) {
-  const detection = firstDetectionOf({ detections, fingerprint: member.fingerprint, window });
+  const signal = firstSignalOf({ signals, fingerprint: member.fingerprint, window });
   const ruleText = signalRuleText({
     fingerprint: member.fingerprint,
     reportsWhen: strategy?.reportsWhen,
@@ -193,13 +193,13 @@ export function SignalCard({
             })}
           </strong>{' '}
           {ruleText ? `${ruleText}. ` : ''}
-          {isFromEarlierOccurrence && !detection
+          {isFromEarlierOccurrence && !signal
             ? i18n.translate('xpack.significantEventsApp.detectionEngine.signal.earlier', {
                 defaultMessage:
                   'Last above normal at {time}, in an earlier occurrence of this event; it stayed quiet in this one.',
                 values: { time: formatTime(member.last_seen) },
               })
-            : describeDetection({ detection, member })}
+            : describeSignal({ signal, member })}
         </p>
       </EuiText>
       <EuiText size="xs" color="subdued">
@@ -221,7 +221,7 @@ export function SignalCard({
           strategy={member.strategy}
           samples={series.samples}
           unit={member.unit}
-          threshold={detection?.baseline.threshold ?? member.threshold}
+          threshold={signal?.baseline.threshold ?? member.threshold}
           from={series.from}
           to={series.to}
           openFrom={window.from}

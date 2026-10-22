@@ -10,7 +10,7 @@ import type { MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
 import type {
   ActivityEntry,
-  EngineDetection,
+  EngineSignal,
   EngineObservation,
   EngineRunSummary,
 } from '../../../common';
@@ -23,9 +23,13 @@ const timestamp = mappings.date({ format: 'strict_date_optional_time' });
  * retention, and core stamps the space on every document.
  */
 export const OBSERVATIONS_DATA_STREAM = '.significant_events-detection_engine-observations';
-export const DETECTIONS_DATA_STREAM = '.significant_events-detection_engine-detections';
-export const ACTIVITY_DATA_STREAM = '.significant_events-detection_engine-activity';
-export const RUNS_DATA_STREAM = '.significant_events-detection_engine-runs';
+export const SIGNALS_DATA_STREAM = '.significant_events-detection_engine-signals';
+// Renamed with `detection_id` -> `signal_id`: the Kibana system user may create these streams but
+// not change their mappings, so a renamed field gets a new stream instead of a mapping update.
+// A new name must not start with an old one: each template matches `<name>*` at the same
+// priority, and Elasticsearch refuses a template whose pattern overlaps one still installed.
+export const ACTIVITY_DATA_STREAM = '.significant_events-detection_engine-run_activity';
+export const RUNS_DATA_STREAM = '.significant_events-detection_engine-run_summaries';
 
 export const observationsMappings = {
   dynamic: false,
@@ -42,11 +46,11 @@ export const observationsMappings = {
   },
 } satisfies MappingsDefinition;
 
-export const detectionsMappings = {
+export const signalsMappings = {
   dynamic: false,
   properties: {
     '@timestamp': timestamp,
-    detection_id: mappings.keyword(),
+    signal_id: mappings.keyword(),
     run_id: mappings.keyword(),
     strategy: mappings.keyword(),
     mode: mappings.keyword(),
@@ -72,7 +76,7 @@ export const activityMappings = {
     action: mappings.keyword(),
     strategy: mappings.keyword(),
     service: mappings.keyword(),
-    detection_id: mappings.keyword(),
+    signal_id: mappings.keyword(),
     event_id: mappings.keyword(),
     message: mappings.text(),
   },
@@ -85,13 +89,13 @@ export const runsMappings = {
     run_id: mappings.keyword(),
     trigger: mappings.keyword(),
     skip_reason: mappings.keyword(),
-    detections: mappings.long(),
+    signals: mappings.long(),
     open_events: mappings.long(),
   },
 } satisfies MappingsDefinition;
 
 export type StoredObservation = EngineObservation & Record<string, unknown>;
-export type StoredDetection = EngineDetection & Record<string, unknown>;
+export type StoredSignal = EngineSignal & Record<string, unknown>;
 export type StoredActivity = ActivityEntry & Record<string, unknown>;
 export type StoredRun = EngineRunSummary & { '@timestamp': string } & Record<string, unknown>;
 
@@ -111,17 +115,14 @@ export const observationsDataStream: DataStreamDefinition<
   },
 };
 
-export const detectionsDataStream: DataStreamDefinition<
-  typeof detectionsMappings,
-  StoredDetection
-> = {
-  name: DETECTIONS_DATA_STREAM,
+export const signalsDataStream: DataStreamDefinition<typeof signalsMappings, StoredSignal> = {
+  name: SIGNALS_DATA_STREAM,
   version: 1,
   hidden: true,
   template: {
     priority: 500,
     lifecycle: { data_retention: '30d' },
-    mappings: detectionsMappings,
+    mappings: signalsMappings,
   },
 };
 

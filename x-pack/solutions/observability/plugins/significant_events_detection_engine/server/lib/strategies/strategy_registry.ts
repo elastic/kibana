@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { DetectionStrategyId } from '../../../common';
+import type { SignalStrategyId } from '../../../common';
 import { customerAlertsStrategy } from './customer_alerts';
 import { healthChecksStrategy } from './health_checks';
-import { kiRulesStrategy } from './ki_rules';
+import { knownFailureQueriesStrategy } from './known_failure_queries';
 import { learnedDetectorsStrategy } from './learned_detectors';
 import { newLogPatternsStrategy } from './new_log_patterns';
-import type { IDetectionStrategy } from './types';
+import type { ISignalStrategy } from './types';
 
 /**
- * Every strategy the engine knows. Adding a strategy means adding it here; discovery and the
- * event lifecycle do not change, because they read only the common detection format.
+ * Every strategy the engine knows. Adding a strategy means adding it here; triage and the
+ * event lifecycle do not change, because they read only the common signal format.
  */
-export const STRATEGIES: Record<DetectionStrategyId, IDetectionStrategy> = {
-  ki_rules: kiRulesStrategy,
+export const STRATEGIES: Record<SignalStrategyId, ISignalStrategy> = {
+  known_failure_queries: knownFailureQueriesStrategy,
   health_checks: healthChecksStrategy,
   customer_alerts: customerAlertsStrategy,
   new_log_patterns: newLogPatternsStrategy,

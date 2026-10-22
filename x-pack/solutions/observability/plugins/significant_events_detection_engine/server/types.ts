@@ -17,7 +17,7 @@ import type {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
 export interface DetectionEngineSetupDependencies {
-  /** Hosts the discovery agent; without it only the heuristic agent runs. */
+  /** Hosts the triage agent; without it only the heuristic agent runs. */
   agentBuilder?: AgentBuilderPluginSetup;
   /** Owns the managed workflow that schedules the engine. */
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { DetectionStrategyId, EngineConfig, EngineProgress } from '../../../common';
-import { BUCKET_MS, DETECTION_STRATEGY_IDS, MINUTE_MS } from '../../../common';
+import type { SignalStrategyId, EngineConfig, EngineProgress } from '../../../common';
+import { BUCKET_MS, SIGNAL_STRATEGY_IDS, MINUTE_MS } from '../../../common';
 import { STRATEGIES } from '../strategies/strategy_registry';
 import type { EngineLimits } from './engine_scope';
 
 /** The buckets [from, to) one strategy evaluates in a run. */
 export interface StrategyWindow {
-  strategy: DetectionStrategyId;
+  strategy: SignalStrategyId;
   from: number;
   to: number;
   /** Minutes jumped over because the engine was further behind than it catches up. */
@@ -45,9 +45,9 @@ export function planWindows({
    * End of the last minute every rule of a strategy has provably run after, for strategies
    * whose rules write on every run. It can settle a minute before `settleMs` has passed.
    */
-  settledByRules?: Partial<Record<DetectionStrategyId, number>>;
+  settledByRules?: Partial<Record<SignalStrategyId, number>>;
 }): StrategyWindow[] {
-  return DETECTION_STRATEGY_IDS.filter((strategy) => config.strategies[strategy].mode !== 'off')
+  return SIGNAL_STRATEGY_IDS.filter((strategy) => config.strategies[strategy].mode !== 'off')
     .map((strategy): StrategyWindow => {
       const { descriptor } = STRATEGIES[strategy];
       if (only) {

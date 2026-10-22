@@ -22,7 +22,7 @@ import {
 import { EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
-  DetectionStrategyId,
+  SignalStrategyId,
   SeriesSample,
 } from '@kbn/significant-events-detection-engine-plugin/common';
 import React from 'react';
@@ -35,7 +35,10 @@ const CHART_HEIGHT_PX = 120;
  * These strategies store a minute only when something matched, or as a zero while the series
  * is recently active, so a missing minute between two samples means zero, not "not measured".
  */
-const SPARSE_STRATEGIES: readonly DetectionStrategyId[] = ['ki_rules', 'new_log_patterns'];
+const SPARSE_STRATEGIES: readonly SignalStrategyId[] = [
+  'known_failure_queries',
+  'new_log_patterns',
+];
 
 /** Samples as chart points, with the zero minutes of sparse series filled in. */
 function toPoints({
@@ -44,7 +47,7 @@ function toPoints({
   from,
 }: {
   samples: SeriesSample[];
-  strategy: DetectionStrategyId;
+  strategy: SignalStrategyId;
   from: number;
 }): Array<{ x: number; y: number }> {
   const measured = new Map(
@@ -64,7 +67,7 @@ function toPoints({
 
 interface ISignalChartProps {
   id: string;
-  strategy: DetectionStrategyId;
+  strategy: SignalStrategyId;
   samples: SeriesSample[];
   unit: string;
   threshold?: number;

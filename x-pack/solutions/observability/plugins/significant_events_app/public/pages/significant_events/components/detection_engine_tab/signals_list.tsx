@@ -13,23 +13,23 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EngineDetection } from '@kbn/significant-events-detection-engine-plugin/common';
+import type { EngineSignal } from '@kbn/significant-events-detection-engine-plugin/common';
 import React from 'react';
 import { formatTime, formatValue } from './format';
 import { OUTCOME_COLORS, OUTCOME_LABELS, STRATEGY_ICONS, STRATEGY_LABELS } from './labels';
 
 const PAGE_SIZE = 20;
 
-interface IDetectionsListProps {
-  detections: EngineDetection[];
+interface ISignalsListProps {
+  signals: EngineSignal[];
 }
 
-/** Every detection of one event, minute by minute, with what the engine did with it. */
-export function DetectionsList({ detections }: IDetectionsListProps) {
-  const columns: Array<EuiBasicTableColumn<EngineDetection>> = [
+/** Every signal of one event, minute by minute, with what the engine did with it. */
+export function SignalsList({ signals }: ISignalsListProps) {
+  const columns: Array<EuiBasicTableColumn<EngineSignal>> = [
     {
       field: 'bucket_start',
-      name: i18n.translate('xpack.significantEventsApp.detectionEngine.detectionsList.minute', {
+      name: i18n.translate('xpack.significantEventsApp.detectionEngine.signalsList.minute', {
         defaultMessage: 'Minute',
       }),
       width: '90px',
@@ -38,14 +38,14 @@ export function DetectionsList({ detections }: IDetectionsListProps) {
     },
     {
       field: 'title',
-      name: i18n.translate('xpack.significantEventsApp.detectionEngine.detectionsList.signal', {
+      name: i18n.translate('xpack.significantEventsApp.detectionEngine.signalsList.signal', {
         defaultMessage: 'Signal',
       }),
-      render: (title: string, detection: EngineDetection) => (
+      render: (title: string, signal: EngineSignal) => (
         <EuiText size="xs">
           <EuiIcon
-            type={STRATEGY_ICONS[detection.strategy]}
-            aria-label={STRATEGY_LABELS[detection.strategy]}
+            type={STRATEGY_ICONS[signal.strategy]}
+            aria-label={STRATEGY_LABELS[signal.strategy]}
           />{' '}
           {title}
         </EuiText>
@@ -53,27 +53,27 @@ export function DetectionsList({ detections }: IDetectionsListProps) {
     },
     {
       field: 'value',
-      name: i18n.translate('xpack.significantEventsApp.detectionEngine.detectionsList.value', {
+      name: i18n.translate('xpack.significantEventsApp.detectionEngine.signalsList.value', {
         defaultMessage: 'Value / normal up to',
       }),
       width: '150px',
-      render: (value: number, detection: EngineDetection) => (
+      render: (value: number, signal: EngineSignal) => (
         <EuiText size="xs">
-          {formatValue(value, detection.unit)}
-          {detection.baseline.threshold !== undefined &&
-            ` / ${formatValue(detection.baseline.threshold, detection.unit)}`}
+          {formatValue(value, signal.unit)}
+          {signal.baseline.threshold !== undefined &&
+            ` / ${formatValue(signal.baseline.threshold, signal.unit)}`}
         </EuiText>
       ),
     },
     {
       field: 'outcome',
-      name: i18n.translate('xpack.significantEventsApp.detectionEngine.detectionsList.outcome', {
+      name: i18n.translate('xpack.significantEventsApp.detectionEngine.signalsList.outcome', {
         defaultMessage: 'What the engine did',
       }),
-      render: (outcome: EngineDetection['outcome'], detection: EngineDetection) => (
+      render: (outcome: EngineSignal['outcome'], signal: EngineSignal) => (
         <EuiText size="xs">
           <EuiBadge color={OUTCOME_COLORS[outcome]}>{OUTCOME_LABELS[outcome]}</EuiBadge>{' '}
-          {detection.outcome_reason}
+          {signal.outcome_reason}
         </EuiText>
       ),
     },
@@ -81,14 +81,14 @@ export function DetectionsList({ detections }: IDetectionsListProps) {
 
   return (
     <EuiInMemoryTable
-      data-test-subj="detectionEngineEventDetections"
+      data-test-subj="detectionEngineEventSignals"
       tableCaption={i18n.translate(
-        'xpack.significantEventsApp.detectionEngine.detectionsList.caption',
-        { defaultMessage: 'Detections behind this event' }
+        'xpack.significantEventsApp.detectionEngine.signalsList.caption',
+        { defaultMessage: 'Signals behind this event' }
       )}
       compressed
-      items={detections}
-      itemId="detection_id"
+      items={signals}
+      itemId="signal_id"
       columns={columns}
       pagination={{ pageSize: PAGE_SIZE, showPerPageOptions: false }}
       sorting={{ sort: { field: 'bucket_start', direction: 'desc' } }}

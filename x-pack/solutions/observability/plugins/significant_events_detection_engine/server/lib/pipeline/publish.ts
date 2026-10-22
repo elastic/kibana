@@ -22,7 +22,8 @@ function truncate(text: string, length: number): string {
 /** Maps a member to a Significant Events signal, keeping verdict and evidence consistent. */
 function toSignal(member: EventMember): Signal {
   const metadata = {
-    detection_id: member.latest_detection_id,
+    // Significant Events' own schema still names the engine's signal a detection.
+    detection_id: member.latest_signal_id,
     rule_uuid: member.fingerprint,
     rule_name: truncate(member.title, 255),
     // The engine does not run change-point detection; a drop is the closest type for silence.

@@ -27,7 +27,7 @@ import { proposeFromPerson } from '../lib/learning/propose';
 import { createRunKnowledge } from '../lib/engine/knowledge';
 import { proposeKiChanges } from '../lib/learning/ki_quality';
 import { confirmEvent } from '../lib/operator/operator_actions';
-import { abortSignalOf, createRoute } from './create_route';
+import { LONG_RUN_IDLE_SOCKET_MS, abortSignalOf, createRoute } from './create_route';
 
 const READ = { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read] } };
 const MANAGE = { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } };
@@ -92,7 +92,11 @@ const learningRoute = createRoute({
 
 const learnRoute = createRoute({
   endpoint: `POST ${DETECTION_ENGINE_API_BASE_PATH}/learning/_run`,
-  options: { access: 'internal', summary: 'Run one learning pass now' },
+  options: {
+    access: 'internal',
+    summary: 'Run one learning pass now',
+    timeout: { idleSocket: LONG_RUN_IDLE_SOCKET_MS },
+  },
   security: MANAGE,
   params: z.object({}),
   handler: async ({ request, getStartServices }): Promise<LearningRunSummary> => {

@@ -26,7 +26,7 @@ import { buildSignalRule } from './rule_definitions';
 import { latestRowPerKey } from './rule_events_reader';
 import type {
   DesiredRules,
-  IDetectionStrategy,
+  ISignalStrategy,
   ReplayContext,
   StrategyContext,
   StrategyEvaluation,
@@ -499,7 +499,7 @@ ${statsPipeline(shape)}
  * baseline check only finds "more than normal", so a drop in traffic becomes a value that grows
  * when things get worse.
  */
-export const healthChecksStrategy: IDetectionStrategy = {
+export const healthChecksStrategy: ISignalStrategy = {
   descriptor: {
     id: 'health_checks',
     name: STRATEGY_NAME,

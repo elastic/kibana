@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type {
-  DetectionStrategyId,
+  SignalStrategyId,
   DismissalReason,
   EngineEvent,
   IncidentOrigin,
@@ -22,9 +22,9 @@ const FALSE_POSITIVE_REASONS: readonly DismissalReason[] = [
   'expected_behavior',
   'not_actionable',
 ];
-/** Without an end, an incident is taken to last this long when matching detections to it. */
+/** Without an end, an incident is taken to last this long when matching signals to it. */
 export const DEFAULT_INCIDENT_MINUTES = 30;
-/** A detection this long before an incident's start still counts as catching it. */
+/** A signal this long before an incident's start still counts as catching it. */
 export const EARLY_MATCH_MS = 2 * MINUTE_MS;
 
 /**
@@ -137,7 +137,7 @@ export async function labelMissed({
   from: string;
   to?: string;
   description: string;
-  strategies?: DetectionStrategyId[];
+  strategies?: SignalStrategyId[];
 }): Promise<LabelledIncident> {
   const incident: LabelledIncident = {
     incident_id: uuidv4(),
@@ -159,7 +159,7 @@ export async function listIncidents(state: IStateStore): Promise<LabelledInciden
   return state.list('incident');
 }
 
-/** The window a detection must fall in to count as catching the incident. */
+/** The window a signal must fall in to count as catching the incident. */
 export function incidentWindow(incident: LabelledIncident): { from: number; to: number } {
   const from = Date.parse(incident.from);
   return {

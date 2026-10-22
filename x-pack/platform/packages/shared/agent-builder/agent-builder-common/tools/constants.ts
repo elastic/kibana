@@ -80,6 +80,7 @@ export const platformSignificantEventsTools = {
   updateEventStatus: `${internalNamespaces.platformSignificantEvents}.event_status_update`,
   eventsWrite: `${internalNamespaces.platformSignificantEvents}.events_write`,
   attachInvestigation: `${internalNamespaces.platformStreams}.sig_events.event_investigation_attach`,
+  detectionEngineEventSearch: `${internalNamespaces.platformSignificantEvents}.detection_engine_event_search`,
 } as const;
 
 /** AI-index tools, registered by the Context Engine Agent Builder plugin. */

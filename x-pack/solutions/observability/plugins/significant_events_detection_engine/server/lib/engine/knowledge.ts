@@ -82,7 +82,11 @@ export function createRunKnowledge({
               .then((client) => client.getFeatures(sourceIds, { type: ['dependency'] }))
               .then(async ({ hits }) => {
                 const observed = (await scope.storage.state.get('topology'))?.edges ?? [];
-                const seen = new Set(observed.map((edge) => `${edge.source}->${edge.target}`));
+                const key = (edge: Dependency) =>
+                  `${edge.kind ?? 'calls'}:${edge.source_id ?? ''}:${edge.source}->${edge.target}`;
+                const seen = new Set(
+                  observed.flatMap((edge) => [key(edge), key({ ...edge, source_id: undefined })])
+                );
                 const fromKis = hits.flatMap((feature) => {
                   const { source, target } = feature.properties as {
                     source?: unknown;
@@ -94,21 +98,27 @@ export function createRunKnowledge({
                   const trusted =
                     confidence === undefined ||
                     confidence >= MIN_KI_DEPENDENCY_CONFIDENCE ||
-                    seen.has(`${source}->${target}`);
+                    seen.has(
+                      key({
+                        source: String(source),
+                        target: String(target),
+                        source_id: feature.source_id,
+                      })
+                    );
                   return typeof source === 'string' && typeof target === 'string' && trusted
-                    ? [{ source, target }]
+                    ? [{ source, target, source_id: feature.source_id }]
                     : [];
                 });
                 return [
                   ...fromKis,
                   ...observed
-                    .filter(
-                      (edge) =>
-                        !fromKis.some(
-                          (item) => item.source === edge.source && item.target === edge.target
-                        )
-                    )
-                    .map(({ source, target }) => ({ source, target })),
+                    .filter((edge) => !fromKis.some((item) => key(item) === key(edge)))
+                    .map(({ source, target, source_id: sourceId, kind }) => ({
+                      source,
+                      target,
+                      source_id: sourceId,
+                      kind,
+                    })),
                 ];
               })
               .catch((error) => {

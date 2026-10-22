@@ -8,27 +8,29 @@
 import { v4 as uuidv4 } from 'uuid';
 import type {
   BaselineDecision,
-  DetectionStrategyId,
+  BaselinePolicy,
+  SignalStrategyId,
   EngineConfig,
   EngineProgress,
   EngineRunSummary,
 } from '../../../common';
-import { BUCKET_MS, DETECTION_STRATEGY_IDS, HOUR_MS, MINUTE_MS } from '../../../common';
+import { BUCKET_MS, SIGNAL_STRATEGY_IDS, HOUR_MS, MINUTE_MS } from '../../../common';
 import type { OwnedRule, TaggedObservation } from '../domain';
 import { getErrorMessage } from '../errors';
 import { RunAbortedError } from '../run_aborted_error';
-import { checkBaseline, fillSparseHistory } from '../pipeline/baseline';
+import { checkBaseline, fillSparseHistory, judgeAlertFiring } from '../pipeline/baseline';
 import { recordRunCost } from '../cost/record_cost';
 import { EMPTY_RULES_RECORD, ensureRules } from '../rules/ensure_rules';
 import type { HistorySample } from '../storage/records_store';
 import { acquireRunLease } from '../storage/run_lease';
 import { STRATEGIES } from '../strategies/strategy_registry';
 import { createAgentRunner } from './agent_runner';
-import { createDiscoveryStep, type FiringAlert } from './discovery_step';
+import { createTriageStep, type FiringAlert } from './triage_step';
 import type { IEngineScope } from './engine_scope';
 import { evaluateStrategies } from './evaluate_strategies';
 import { createEventWorkingSet } from './event_working_set';
 import { createRunKnowledge } from './knowledge';
+import { createCustomerRuleKnowledge } from '../knowledge/customer_rules';
 import { applyLifecycle } from './lifecycle_step';
 import { persistAndPublish } from './persist_step';
 import { planWindows, type StrategyWindow } from './plan_windows';
@@ -36,6 +38,7 @@ import { createRunRecorder, type IRunRecorder } from './run_recorder';
 import { verifyRecentEvents } from './verifier_step';
 import type { InvestigationPage } from '../learning/investigation_knowledge';
 import { createMemory } from '../learning/memory';
+import { withCurrentStrategyKeys } from '../storage/legacy_names';
 
 /** The baseline reads at least this far back, so a long incident still leaves normal samples. */
 const HISTORY_LOOKBACK_MS = 6 * HOUR_MS;
@@ -47,7 +50,7 @@ const RECENTLY_CLOSED_EVENTS = 50;
 const INGEST_GRACE_MS = 20_000;
 /** How far back the engine looks for proof that a rule ran. */
 const RULE_WRITES_LOOKBACK_MS = 5 * MINUTE_MS;
-/** A detection that waited this long for budget describes a moment that has passed. */
+/** A signal that waited this long for budget describes a moment that has passed. */
 const MAX_PENDING_AGE_MS = HOUR_MS;
 
 export const EMPTY_PROGRESS: EngineProgress = { watermarks: {}, consecutive_failures: 0 };
@@ -72,7 +75,7 @@ export interface RunEngineOptions {
 /**
  * One engine run in one space. It takes the space's lease, evaluates every strategy over the
  * minutes that settled since it last ran, and walks those minutes in order: baseline check,
- * identity, joins and the agent for each detection, then status for every open event. It stops
+ * identity, joins and the agent for each signal, then status for every open event. It stops
  * starting new minutes when its time budget runs out, and saves how far each strategy got, so
  * the next run continues exactly there.
  */
@@ -101,7 +104,11 @@ export async function runEngine(
   const abort = new AbortController();
   const onAbort = () => abort.abort(new RunAbortedError('The request that started the run ended'));
   signal?.addEventListener('abort', onAbort, { once: true });
-  const progress = (await storage.state.get('progress')) ?? EMPTY_PROGRESS;
+  const storedProgress = (await storage.state.get('progress')) ?? EMPTY_PROGRESS;
+  const progress: EngineProgress = {
+    ...storedProgress,
+    watermarks: withCurrentStrategyKeys(storedProgress.watermarks) ?? {},
+  };
 
   try {
     const summary = await executeRun({
@@ -217,7 +224,7 @@ async function executeRun({
         ? { bucketEnd: Math.floor(evaluationNow / BUCKET_MS) * BUCKET_MS }
         : undefined,
   });
-  const pending = (storedPending?.detections ?? []).filter(
+  const pending = (storedPending?.signals ?? []).filter(
     (item) => Date.now() - Date.parse(item.queued_at) < MAX_PENDING_AGE_MS
   );
 
@@ -252,6 +259,20 @@ async function executeRun({
     signal,
     backtest: trigger === 'backtest',
     now: evaluationNow,
+    customerRules: createCustomerRuleKnowledge({
+      state: storage.state,
+      knownServices: async () =>
+        (
+          await storage.records.serviceActivity(new Date(evaluationNow - HOUR_MS).toISOString())
+        )
+          // A customer alert's entity can be a rule name; only the data's services are entities.
+          .filter((item) => item.strategies.some((entry) => entry.strategy !== 'customer_alerts'))
+          .map((item) => item.service),
+      model: ruleEntityModel({ scope, config }),
+      maxModelCalls: MAX_RULE_ENTITY_MODEL_CALLS,
+      logger: scope.logger,
+      signal,
+    }),
   });
   summary.strategies = evaluation.summaries;
   await storage.records.writeObservations(
@@ -270,8 +291,8 @@ async function executeRun({
   const visible = evaluation.observations.filter((observation) => !observation.internal);
   const firing = visible.filter((observation) => observation.looks_off);
 
-  // 2. What discovery needs: open events, events owning a firing series, recent closes.
-  const [open, owners, recent, dependencies, createdToday, ledger] = await Promise.all([
+  // 2. What triage needs: open events, events owning a firing series, recent closes.
+  const [open, owners, recent, knownDependencies, createdToday, ledger] = await Promise.all([
     storage.events.listOpen(MAX_OPEN_EVENTS),
     storage.events.findByFingerprints([
       ...firing.map((observation) => observation.fingerprint),
@@ -290,6 +311,13 @@ async function executeRun({
     });
   }
   const events = createEventWorkingSet([...open.events, ...owners, ...recent]);
+  const learned = config.triage.request_path_dependencies
+    ? knownDependencies
+    : knownDependencies.filter((dependency) => dependency.kind !== 'shared_requests');
+  // Off: every dependency links its services wherever they were seen, as before scoping.
+  const dependencies = config.triage.source_scoped_dependencies
+    ? learned
+    : learned.map(({ source, target, kind }) => ({ source, target, kind }));
 
   const today = new Date(evaluationNow).toISOString().slice(0, 10);
   const agent = createAgentRunner({
@@ -304,41 +332,46 @@ async function executeRun({
   const memory = createMemory(storage.state);
   const thresholds = await knowledge.getThresholds();
   const pagesCache = new Map<string, Promise<InvestigationPage[]>>();
-  // One read per set of services and run: several detections of one service share it.
+  // One read per set of services and run: several signals of one service share it.
   const pagesFor = (services: string[]) => {
     const key = [...services].sort().join('|');
     const cached = pagesCache.get(key) ?? scope.investigations.pagesFor(services);
     pagesCache.set(key, cached);
     return cached;
   };
-  const discovery = createDiscoveryStep({
+  const triage = createTriageStep({
     scope,
     config,
     recorder,
     events,
     dependencies,
     agent,
-    openedToday: new Map(Object.entries(createdToday)) as Map<DetectionStrategyId, number>,
+    openedToday: new Map(Object.entries(createdToday)) as Map<SignalStrategyId, number>,
     memoryFor: (keys) => memory.recall(keys),
     pagesFor,
     signal,
-    maxPending: limits.maxPendingDetections,
-    maxDetections: limits.maxDetectionsPerRun,
+    maxPending: limits.maxPendingSignals,
+    maxSignals: limits.maxSignalsPerRun,
+    sourceTitles: new Map(sources.map((source) => [source.id, source.title])),
   });
 
-  // 3. Detections that waited for budget go first: they are the oldest.
+  // Customer alerts are read once per run and describe now, while other strategies report
+  // minutes that settled earlier: matching them by minute would never pair them.
+  const firingAlerts = firingAlertsOf({ observations: visible, config });
+
+  // 3. Signals that waited for budget go first: they are the oldest.
   for (const item of pending) {
-    // Sequential: each decision can open an event the next detection joins.
-    await discovery.process({
+    // Sequential: each decision can open an event the next signal joins.
+    await triage.process({
       observation: item.observation,
       baseline: item.baseline,
-      firingAlerts: [],
+      firingAlerts,
       fromPending: item,
     });
   }
 
-  // 4. Minute by minute, oldest first: the baseline check, discovery, then status.
-  // With only waiting detections to retry there is no window; nothing older than now is read.
+  // 4. Minute by minute, oldest first: the baseline check, triage, then status.
+  // With only waiting signals to retry there is no window; nothing older than now is read.
   const earliest =
     windows.length > 0
       ? Math.min(...windows.map((window) => window.from))
@@ -391,9 +424,10 @@ async function executeRun({
       history,
       runSeries,
       events,
-      discovery,
+      triage,
       recorder,
       thresholds,
+      firingAlerts,
     });
     processedUpTo = bucketStart + BUCKET_MS;
     if (events.dirty().some(({ change }) => change === 'changed')) {
@@ -420,20 +454,22 @@ async function executeRun({
     events,
     latestObservations: latestPerFingerprint(visible),
     before: earliest,
+    processedUpTo,
+    feedsStateMachine: config.triage.verifier_closes,
     recorder,
     signal,
   });
   // 6. Persist and hand off what is left: facts, status changes and the verifier's findings.
   await flush();
-  await storage.records.writeDetections(
-    recorder.detections().map((detection) =>
-      detection.event_id && conflicted.has(detection.event_id)
+  await storage.records.writeSignals(
+    recorder.signals().map((recorded) =>
+      recorded.event_id && conflicted.has(recorded.event_id)
         ? {
-            ...detection,
+            ...recorded,
             outcome: 'conflict' as const,
-            outcome_reason: `${detection.outcome_reason} Not applied: the event changed while the run worked on it; the next run re-evaluates.`,
+            outcome_reason: `${recorded.outcome_reason} Not applied: the event changed while the run worked on it; the next run re-evaluates.`,
           }
-        : detection
+        : recorded
     )
   );
 
@@ -484,8 +520,8 @@ async function executeRun({
     step: 'run',
     action: 'finished',
     message: `Run over ${summary.bucket_start} - ${summary.bucket_end}: ${
-      summary.detections
-    } detections, ${summary.agent.calls} agent call(s), ${
+      summary.signals
+    } signals, ${summary.agent.calls} agent call(s), ${
       summary.transitions.length
     } status change(s), ${summary.open_events} open event(s)${
       summary.conflicts ? `, ${summary.conflicts} conflict(s)` : ''
@@ -495,7 +531,7 @@ async function executeRun({
   await Promise.all([
     storage.records.appendActivity(recorder.activity()),
     storage.records.writeRun(summary),
-    storage.state.put('pending', { detections: discovery.pending() }),
+    storage.state.put('pending', { signals: triage.pending() }),
     storage.state.put('last_run', summary),
     storage.state.put('progress', {
       watermarks,
@@ -524,8 +560,8 @@ async function settledByRuleWrites({
   owned: OwnedRule[];
   now: number;
   signal: AbortSignal;
-}): Promise<Partial<Record<DetectionStrategyId, number>>> {
-  const strategies = DETECTION_STRATEGY_IDS.filter(
+}): Promise<Partial<Record<SignalStrategyId, number>>> {
+  const strategies = SIGNAL_STRATEGY_IDS.filter(
     (id) => config.strategies[id].mode !== 'off' && STRATEGIES[id].descriptor.writesEveryRun
   );
   const rules = owned.filter((rule) => strategies.includes(rule.strategy));
@@ -570,9 +606,9 @@ function logCooldowns({
 }): void {
   const continued = new Set(
     recorder
-      .detections()
-      .filter((detection) => detection.outcome === 'continued' && detection.event_id)
-      .map((detection) => detection.event_id!)
+      .signals()
+      .filter((signal) => signal.outcome === 'continued' && signal.event_id)
+      .map((signal) => signal.event_id!)
   );
   events
     .dirty()
@@ -596,6 +632,47 @@ function logCooldowns({
 function bucketsOf(window: StrategyWindow): number[] {
   const count = Math.max(0, Math.floor((window.to - window.from) / BUCKET_MS));
   return Array.from({ length: count }, (_, index) => window.from + index * BUCKET_MS);
+}
+
+/** Customer rules one run may have a model read; the rest are read on later runs. */
+const MAX_RULE_ENTITY_MODEL_CALLS = 5;
+
+/** The low-cost model that reads customer rules, when one is configured. */
+function ruleEntityModel({ scope, config }: { scope: IEngineScope; config: EngineConfig }) {
+  const connectorId = config.triage.rule_entity_connector_id ?? config.agent.connector_id;
+  return connectorId ? { inferenceClient: scope.inferenceClient, connectorId } : undefined;
+}
+
+/**
+ * The baseline policy a strategy runs with. Customer alerts fall back to skipping the check when
+ * judging them by how often they fire is switched off.
+ */
+function policyOf(policy: BaselinePolicy, config: EngineConfig): BaselinePolicy {
+  return policy === 'firing_frequency' && !config.triage.alert_firing_frequency ? 'skip' : policy;
+}
+
+/** Customer alerts firing in the run that are not background: flapping and daily alerts are left out. */
+function firingAlertsOf({
+  observations,
+  config,
+}: {
+  observations: TaggedObservation[];
+  config: EngineConfig;
+}): FiringAlert[] {
+  const latest = latestPerFingerprint(
+    observations.filter(
+      (observation) => observation.strategy === 'customer_alerts' && observation.looks_off
+    )
+  );
+  return [...latest.values()]
+    .filter(
+      (observation) =>
+        policyOf(STRATEGIES.customer_alerts.descriptor.baselinePolicy, config) !==
+          'firing_frequency' ||
+        !observation.firing_history ||
+        judgeAlertFiring(observation.firing_history).decision !== 'background'
+    )
+    .map((observation) => ({ title: observation.title, service: observation.service }));
 }
 
 function groupByFingerprint(observations: TaggedObservation[]): Map<string, TaggedObservation[]> {
@@ -668,10 +745,13 @@ async function processBucket({
   history,
   runSeries,
   events,
-  discovery,
+  triage,
   recorder,
   thresholds,
+  firingAlerts,
 }: {
+  /** Customer alerts firing anywhere in the run, which a case lists for its own entities. */
+  firingAlerts: FiringAlert[];
   bucketStart: number;
   config: EngineConfig;
   visible: TaggedObservation[];
@@ -679,20 +759,17 @@ async function processBucket({
   history: Map<string, HistorySample[]>;
   runSeries: Map<string, TaggedObservation[]>;
   events: ReturnType<typeof createEventWorkingSet>;
-  discovery: ReturnType<typeof createDiscoveryStep>;
+  triage: ReturnType<typeof createTriageStep>;
   recorder: IRunRecorder;
   /** Learned per-series `mad_k` values that passed the evolution path. */
   thresholds: Map<string, number>;
 }): Promise<void> {
   const inBucket = visible.filter((observation) => observation.bucket_start === bucketStart);
   const firing = inBucket.filter((observation) => observation.looks_off).sort(byImportance);
-  const firingAlerts: FiringAlert[] = firing
-    .filter((observation) => observation.strategy === 'customer_alerts')
-    .map((observation) => ({ title: observation.title, service: observation.service }));
   const gates = new Map<string, BaselineDecision>();
 
   for (const observation of firing) {
-    // Sequential: each decision can open an event the next detection may join.
+    // Sequential: each decision can open an event the next signal may join.
     const { descriptor } = STRATEGIES[observation.strategy];
     const owner = events.ownerOf(observation.fingerprint);
     const pastOf = (fingerprint: string) => [
@@ -708,7 +785,8 @@ async function processBucket({
     const baseline = checkBaseline({
       value: observation.value,
       unit: observation.unit,
-      policy: descriptor.baselinePolicy,
+      policy: policyOf(descriptor.baselinePolicy, config),
+      firing: observation.firing_history,
       history: observation.heartbeat
         ? fillSparseHistory({ samples: own, heartbeat: pastOf(observation.heartbeat) })
         : own,
@@ -721,9 +799,9 @@ async function processBucket({
     recorder.countBaseline(baseline.decision);
     gates.set(observation.fingerprint, baseline.decision);
     if (baseline.decision === 'background' || baseline.decision === 'warming_up') {
-      discovery.recordBelowNormal({ observation, baseline });
+      triage.recordBelowNormal({ observation, baseline });
     } else {
-      await discovery.process({ observation, baseline, firingAlerts });
+      await triage.process({ observation, baseline, firingAlerts });
     }
   }
 

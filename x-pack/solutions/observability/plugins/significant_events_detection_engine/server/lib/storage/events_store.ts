@@ -8,15 +8,11 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { mappings } from '@kbn/es-mappings';
-import type {
-  DetectionStrategyId,
-  EngineEvent,
-  EngineEventStatus,
-  EnginePage,
-} from '../../../common';
+import type { SignalStrategyId, EngineEvent, EngineEventStatus, EnginePage } from '../../../common';
 import { OPEN_EVENT_STATUSES } from '../../../common';
 import type { DocVersion } from '../domain';
 import { decodeCursor, encodeCursor } from './cursor';
+import { withCurrentEventNames } from './legacy_names';
 import type { IManagedIndexInstaller, ManagedIndexDefinition } from './managed_index';
 
 export const EVENTS_INDEX: ManagedIndexDefinition = {
@@ -83,10 +79,10 @@ export interface IEventsStore {
   /** Events whose last publication failed, oldest first. */
   findPendingPublication(limit: number): Promise<VersionedEvent[]>;
   /** New events per origin strategy since a time, for the daily caps. */
-  countCreatedSince(since: string): Promise<Partial<Record<DetectionStrategyId, number>>>;
+  countCreatedSince(since: string): Promise<Partial<Record<SignalStrategyId, number>>>;
   /** Events each strategy opened, and how many of those people dismissed. */
   strategyStats(): Promise<
-    Partial<Record<DetectionStrategyId, { opened: number; dismissed: number }>>
+    Partial<Record<SignalStrategyId, { opened: number; dismissed: number }>>
   >;
   /** Counts of all and of open events. */
   counts(): Promise<{ events: number; open: number }>;
@@ -115,7 +111,12 @@ export function createEventsStore({
 
   const toVersioned = (hit: estypes.SearchHit<EngineEvent>): VersionedEvent[] =>
     hit._source && hit._seq_no !== undefined && hit._primary_term !== undefined
-      ? [{ event: hit._source, version: { seq_no: hit._seq_no, primary_term: hit._primary_term } }]
+      ? [
+          {
+            event: withCurrentEventNames(hit._source),
+            version: { seq_no: hit._seq_no, primary_term: hit._primary_term },
+          },
+        ]
       : [];
 
   const search = async (request: Omit<estypes.SearchRequest, 'index'>) => {
@@ -149,7 +150,7 @@ export function createEventsStore({
       const hits = response.hits.hits;
       const page = hits.slice(0, size);
       return {
-        items: page.flatMap((hit) => (hit._source ? [hit._source] : [])),
+        items: page.flatMap((hit) => (hit._source ? [withCurrentEventNames(hit._source)] : [])),
         next_cursor: hits.length > size ? encodeCursor(page[page.length - 1]?.sort) : undefined,
       };
     },

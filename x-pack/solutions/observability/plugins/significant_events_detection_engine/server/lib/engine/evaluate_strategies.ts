@@ -13,6 +13,7 @@ import type { OwnedRule, TaggedObservation } from '../domain';
 import { getErrorMessage } from '../errors';
 import { STRATEGIES } from '../strategies/strategy_registry';
 import type { RunningDetector } from '../strategies/types';
+import type { ICustomerRuleKnowledge } from '../knowledge/customer_rules';
 import type { IEngineScope } from './engine_scope';
 import type { StrategyWindow } from './plan_windows';
 import type { IRunRecorder } from './run_recorder';
@@ -43,7 +44,10 @@ export async function evaluateStrategies({
   signal,
   backtest = false,
   now,
+  customerRules,
 }: {
+  /** Knowledge from customer rules, for the customer alerts strategy. */
+  customerRules?: ICustomerRuleKnowledge;
   scope: IEngineScope;
   config: EngineConfig;
   windows: StrategyWindow[];
@@ -83,6 +87,7 @@ export async function evaluateStrategies({
           to,
           signal,
           logger: scope.logger,
+          records: scope.storage.records,
         });
         const liveContext = (from: number) => ({
           ...replayContext(from, window.to),
@@ -91,6 +96,22 @@ export async function evaluateStrategies({
           ownedRules: ownedRules.filter((rule) => rule.strategy === window.strategy),
           records: scope.storage.records,
           maxRows: rowsPerStrategy,
+          customerRules,
+          customerV2Rules: async (ids: string[]) => {
+            const rules = ids.length > 0 ? await (await scope.getRulesClient()).getRules(ids) : [];
+            return new Map(
+              rules.map((rule) => [
+                rule.id,
+                {
+                  rule_uuid: rule.id,
+                  name: rule.metadata.name,
+                  rule_type_id: `alerting_v2.${rule.kind}`,
+                  tags: rule.metadata.tags ?? [],
+                  parameters: { query: rule.query, grouping: rule.grouping },
+                },
+              ])
+            );
+          },
         });
         // Minutes older than the rule's live window may have no rule output at all, because
         // the platform was down or late; they are evaluated directly, from the data itself.

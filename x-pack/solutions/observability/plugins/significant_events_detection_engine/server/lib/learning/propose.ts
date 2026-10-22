@@ -369,7 +369,7 @@ export async function proposeFromMissedIncidents(
 
 /**
  * A higher `mad_k` for a series people dismissed again and again. The value is the smallest
- * that puts every dismissed value under the threshold, from the baseline each detection saw;
+ * that puts every dismissed value under the threshold, from the baseline each signal saw;
  * the replay then checks it keeps every real incident.
  */
 export async function proposeFromDismissals(
@@ -392,7 +392,7 @@ export async function proposeFromDismissals(
     if (member.strategy === 'learned_detectors' || member.strategy === 'customer_alerts') {
       continue;
     }
-    const detections = await context.scope.storage.records.findDetections({
+    const signals = await context.scope.storage.records.findSignals({
       fingerprints: [fingerprint],
       since: new Date(
         Math.min(
@@ -400,13 +400,13 @@ export async function proposeFromDismissals(
         )
       ).toISOString(),
     });
-    const dismissedDetections = detections.filter((detection) =>
-      events.some((event) => event.event_id === detection.event_id)
+    const dismissedSignals = signals.filter((signal) =>
+      events.some((event) => event.event_id === signal.event_id)
     );
-    const needed = dismissedDetections.flatMap((detection) => {
-      const { median, mad } = detection.baseline;
+    const needed = dismissedSignals.flatMap((signal) => {
+      const { median, mad } = signal.baseline;
       return median !== undefined && mad !== undefined && mad > 0
-        ? [(detection.value - median) / (MAD_SCALE * mad)]
+        ? [(signal.value - median) / (MAD_SCALE * mad)]
         : [];
     });
     if (needed.length === 0) {

@@ -247,7 +247,7 @@ export function EngineHeader({ overview, actions }: IEngineHeaderProps) {
             <div style={{ width: 340 }}>
               <EuiFormRow
                 label={i18n.translate('xpack.significantEventsApp.detectionEngine.agentLabel', {
-                  defaultMessage: 'Discovery agent',
+                  defaultMessage: 'Triage agent',
                 })}
                 helpText={
                   cost.current_price
@@ -381,7 +381,7 @@ export function EngineHeader({ overview, actions }: IEngineHeaderProps) {
         >
           {i18n.translate('xpack.significantEventsApp.detectionEngine.resetBody', {
             defaultMessage:
-              'Deletes what the engine produced in this space: observations, detections, events, activity and runs, so baselines start again. Settings, Auto-run, the rules it owns, the cost counter and what people taught it (labels, memory notes, learned detectors) stay, and events already published to Alerting v2 stay there.',
+              'Deletes what the engine produced in this space: observations, signals, events, activity and runs, so baselines start again. Settings, Auto-run, the rules it owns, the cost counter and what people taught it (labels, memory notes, learned detectors) stay, and events already published to Alerting v2 stay there.',
           })}
         </EuiConfirmModal>
       )}

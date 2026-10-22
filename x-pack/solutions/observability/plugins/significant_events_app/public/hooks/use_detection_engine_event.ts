@@ -14,7 +14,7 @@ import {
   DETECTION_ENGINE_REFETCH_INTERVAL_MS,
 } from './detection_engine_query_keys';
 
-/** One event with its detections and activity trail. */
+/** One event with its signals and activity trail. */
 export function useDetectionEngineEvent(eventId: string | undefined) {
   const client = useKibana().dependencies.start.significantEventsDetectionEngine.repositoryClient;
   const onError = useFetchErrorToast();

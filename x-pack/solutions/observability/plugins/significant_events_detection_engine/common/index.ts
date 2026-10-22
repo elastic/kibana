@@ -23,7 +23,7 @@ export type {
   EngineHealth,
   LearningOverviewResponse,
 } from './api';
-export type { EngineAgentKind, EngineConfig, EngineConfigUpdate } from './config';
+export type { EngineAgentKind, EngineConfig, EngineConfigUpdate, TriageConfig } from './config';
 export { DEFAULT_ENGINE_CONFIG } from './config';
 export {
   DETECTION_ENGINE_PLUGIN_ID,
@@ -32,18 +32,19 @@ export {
   MINUTE_MS,
   HOUR_MS,
   DAY_MS,
-  DETECTION_ENGINE_DISCOVERY_AGENT_ID,
+  DETECTION_ENGINE_TRIAGE_AGENT_ID,
   DETECTION_ENGINE_SCHEDULER_WORKFLOW_ID,
 } from './constants';
 export type { ModelPricePerMillion, CostTotals, EngineCostLedger, EngineCostSummary } from './cost';
 export type {
+  AlertFiringHistory,
   BaselineDecision,
-  DetectionOutcome,
+  SignalOutcome,
   BaselineSummary,
   EngineObservation,
-  EngineDetection,
-} from './detections';
-export { DETECTION_OUTCOMES } from './detections';
+  EngineSignal,
+} from './signals';
+export { SIGNAL_OUTCOMES } from './signals';
 export type {
   EngineSeverity,
   EngineEventStatus,
@@ -69,18 +70,18 @@ export {
 } from './events';
 export type { StrategyRunSummary, RunSkipReason, EngineRunSummary, EngineProgress } from './runs';
 export type {
-  DetectionStrategyId,
+  SignalStrategyId,
   StrategyMode,
   BaselinePolicy,
   StrategyRunner,
-  DetectionStrategyDescriptor,
+  SignalStrategyDescriptor,
   StrategyConfig,
   StrategyProposal,
   StrategyScorecard,
   StrategyRulesState,
   EngineRulesState,
 } from './strategies';
-export { DETECTION_STRATEGY_IDS, STRATEGY_MODES } from './strategies';
+export { SIGNAL_STRATEGY_IDS, STRATEGY_MODES } from './strategies';
 export type {
   AutonomyLevel,
   LearningCapability,

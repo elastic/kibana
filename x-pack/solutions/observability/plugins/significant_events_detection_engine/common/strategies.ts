@@ -5,28 +5,33 @@
  * 2.0.
  */
 
-/** Ids of the detection strategies the engine ships. */
-export const DETECTION_STRATEGY_IDS = [
-  'ki_rules',
+/** Ids of the signal strategies the engine ships. */
+export const SIGNAL_STRATEGY_IDS = [
+  'known_failure_queries',
   'health_checks',
   'customer_alerts',
   'new_log_patterns',
   'learned_detectors',
 ] as const;
-export type DetectionStrategyId = (typeof DETECTION_STRATEGY_IDS)[number];
+export type SignalStrategyId = (typeof SIGNAL_STRATEGY_IDS)[number];
 
 /** Off runs nothing; trial records what it would raise without raising; live raises events. */
 export const STRATEGY_MODES = ['off', 'trial', 'live'] as const;
 export type StrategyMode = (typeof STRATEGY_MODES)[number];
 
-/** How a strategy's detections go through the baseline check. */
+/** How a strategy's signals go through the baseline check. */
 export type BaselinePolicy =
   /** Compare with the series' own stored history. */
   | 'own_history'
-  /** The detection is new by definition, so its history counts as zero. */
+  /** The signal is new by definition, so its history counts as zero. */
   | 'implicit_zero'
   /** The customer's own rule already decided; the check is skipped. */
-  | 'skip';
+  | 'skip'
+  /**
+   * The customer's own rule already decided the value is off, so the check asks how often the
+   * alert fires instead: an alert that flaps or fires every day is background.
+   */
+  | 'firing_frequency';
 
 /**
  * Where a strategy runs. Rule-backed strategies are Alerting v2 signal rules that the platform
@@ -36,12 +41,12 @@ export type BaselinePolicy =
 export type StrategyRunner = 'alerting_v2_rule' | 'direct';
 
 /** Static description of a strategy, shown in the UI. */
-export interface DetectionStrategyDescriptor {
-  id: DetectionStrategyId;
+export interface SignalStrategyDescriptor {
+  id: SignalStrategyId;
   name: string;
   /** What it watches. */
   watches: string;
-  /** When it reports a detection. */
+  /** When it reports a signal. */
   reportsWhen: string;
   baselinePolicy: BaselinePolicy;
   runner: StrategyRunner;
@@ -80,7 +85,7 @@ export interface StrategyConfig {
 /** A change the learning loop proposes; a person accepts or ignores it. */
 export interface StrategyProposal {
   id: string;
-  strategy: DetectionStrategyId;
+  strategy: SignalStrategyId;
   change: { mode: StrategyMode };
   title: string;
   evidence: string;
@@ -88,8 +93,8 @@ export interface StrategyProposal {
 
 /** How a strategy has performed, from recorded outcomes and labelled incidents. */
 export interface StrategyScorecard {
-  strategy: DetectionStrategyId;
-  detections: number;
+  strategy: SignalStrategyId;
+  signals: number;
   above_normal: number;
   would_raise_in_trial: number;
   events_opened: number;
@@ -107,10 +112,10 @@ export interface StrategyScorecard {
 
 /** The Alerting v2 rules one strategy runs on, as last reconciled. */
 export interface StrategyRulesState {
-  strategy: DetectionStrategyId;
+  strategy: SignalStrategyId;
   /** Rules the engine owns for this strategy. Zero for strategies that read other rules. */
   owned_rules: number;
-  /** Rules this strategy reads, owned or not (KI rules are owned by Significant Events). */
+  /** Rules this strategy reads, owned or not (the known failure query rules are owned by Significant Events). */
   watched_rules: number;
   /** Sources skipped because they lack a field the strategy needs, with the reason. */
   skipped_sources: Array<{ source_id: string; reason: string }>;

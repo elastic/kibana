@@ -19,9 +19,10 @@ import type { EngineConfig } from '../../../common';
 import type { DetectionEngineConfig } from '../../config';
 import type { DetectionEngineStartDependencies } from '../../types';
 import { createAgentBuilderAgent } from '../agent/agent_builder_agent';
-import type { IDiscoveryAgentInstaller } from '../agent/discovery_agent_type';
+import type { ICaseRegistry } from '../agent/case_registry';
+import type { ITriageAgentInstaller } from '../agent/triage_agent_type';
 import { createHeuristicAgent } from '../agent/heuristic_agent';
-import type { IDiscoveryAgent } from '../agent/types';
+import type { ITriageAgent } from '../agent/types';
 import { DetectionEngineError } from '../errors';
 import {
   createInvestigationKnowledge,
@@ -41,8 +42,8 @@ export interface EngineLimits {
   maxBucketsPerRun: number;
   maxCatchUpMs: number;
   maxRuleEventRows: number;
-  maxDetectionsPerRun: number;
-  maxPendingDetections: number;
+  maxSignalsPerRun: number;
+  maxPendingSignals: number;
   agentTimeoutMs: number;
   reconcileIntervalMs: number;
 }
@@ -57,8 +58,8 @@ export function toEngineLimits(config: DetectionEngineConfig): EngineLimits {
     maxBucketsPerRun: config.run.maxBucketsPerRun,
     maxCatchUpMs: config.run.maxCatchUp.asMilliseconds(),
     maxRuleEventRows: config.run.maxRuleEventRows,
-    maxDetectionsPerRun: config.run.maxDetectionsPerRun,
-    maxPendingDetections: config.run.maxPendingDetections,
+    maxSignalsPerRun: config.run.maxSignalsPerRun,
+    maxPendingSignals: config.run.maxPendingSignals,
     agentTimeoutMs: config.agent.timeout.asMilliseconds(),
     reconcileIntervalMs: config.rules.reconcileInterval.asMilliseconds(),
   };
@@ -93,7 +94,7 @@ export interface IEngineScope {
   /** What investigations learned in this space, read-only. */
   investigations: IInvestigationKnowledge;
   /** The agent the settings ask for; the heuristic when Agent Builder is not available. */
-  createAgent(config: EngineConfig): IDiscoveryAgent;
+  createAgent(config: EngineConfig): ITriageAgent;
 }
 
 /** What the plugin builds once, at start, to create scopes from. */
@@ -103,7 +104,9 @@ export interface EngineScopeFactoryDeps {
   logger: Logger;
   limits: EngineLimits;
   installer: IManagedIndexInstaller;
-  agentInstaller?: IDiscoveryAgentInstaller;
+  agentInstaller?: ITriageAgentInstaller;
+  /** Shared with the event search tool, which finds a case's open events through it. */
+  caseRegistry: ICaseRegistry;
 }
 
 export type CreateEngineScope = (request: KibanaRequest) => Promise<IEngineScope>;
@@ -116,6 +119,7 @@ export function createEngineScopeFactory({
   limits,
   installer,
   agentInstaller,
+  caseRegistry,
 }: EngineScopeFactoryDeps): CreateEngineScope {
   const internalEsClient = core.elasticsearch.client.asInternalUser;
 
@@ -174,6 +178,7 @@ export function createEngineScopeFactory({
           return createAgentBuilderAgent({
             agentBuilder,
             installer: agentInstaller,
+            caseRegistry,
             request,
             spaceId,
             connectorId: config.agent.connector_id,

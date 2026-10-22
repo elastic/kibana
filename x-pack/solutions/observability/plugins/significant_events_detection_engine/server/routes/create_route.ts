@@ -55,6 +55,13 @@ export const createRoute: CreateServerRouteFactory<DetectionEngineRouteResources
       }),
   });
 
+/**
+ * Kibana closes a socket that sends nothing for `server.socketTimeout`, 120s by default, which
+ * aborts the run through {@link abortSignalOf}. Runs can take longer than that, so the routes
+ * that run the engine stay open as long as the scheduler's workflow timeout and the run lease.
+ */
+export const LONG_RUN_IDLE_SOCKET_MS = 5 * 60_000;
+
 /** Aborts when the client goes away, so a closed page or a timed-out workflow stops the work. */
 export function abortSignalOf(request: KibanaRequest): AbortSignal {
   const controller = new AbortController();

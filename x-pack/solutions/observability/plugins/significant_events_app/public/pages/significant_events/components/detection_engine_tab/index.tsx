@@ -21,7 +21,7 @@ import { useDetectionEngineEvents } from '../../../../hooks/use_detection_engine
 import { useDetectionEngineOverview } from '../../../../hooks/use_detection_engine_overview';
 import { useDetectionEngineServices } from '../../../../hooks/use_detection_engine_services';
 import { ActivityLog } from './activity_log';
-import { DetectionsTable } from './detections_table';
+import { SignalsTable } from './signals_table';
 import { EngineHeader } from './engine_header';
 import { EngineKpis } from './engine_kpis';
 import { EventFlyout } from './event_flyout';
@@ -32,7 +32,7 @@ import { PipelineSummary } from './pipeline_summary';
 import { ServicesPanel } from './services_panel';
 import { StrategiesTable } from './strategies_table';
 
-type InnerTab = 'events' | 'strategies' | 'learning' | 'detections' | 'activity';
+type InnerTab = 'events' | 'strategies' | 'learning' | 'signals' | 'activity';
 
 /**
  * Prototype of the detection engine architecture. Status, last run and services stay in view
@@ -73,9 +73,9 @@ export function DetectionEngineTab() {
       }),
     },
     {
-      id: 'detections',
-      label: i18n.translate('xpack.significantEventsApp.detectionEngine.tabs.detections', {
-        defaultMessage: 'Every detection',
+      id: 'signals',
+      label: i18n.translate('xpack.significantEventsApp.detectionEngine.tabs.signals', {
+        defaultMessage: 'Every signal',
       }),
     },
     {
@@ -132,7 +132,7 @@ export function DetectionEngineTab() {
               services={(servicesData?.services ?? []).map((item) => item.service)}
             />
           )}
-          {innerTab === 'detections' && <DetectionsTable onOpenEvent={setOpenEventId} />}
+          {innerTab === 'signals' && <SignalsTable onOpenEvent={setOpenEventId} />}
           {innerTab === 'activity' && <ActivityLog onOpenEvent={setOpenEventId} />}
         </EuiFlexItem>
         <EuiFlexItem grow={1} style={{ minWidth: 280 }}>

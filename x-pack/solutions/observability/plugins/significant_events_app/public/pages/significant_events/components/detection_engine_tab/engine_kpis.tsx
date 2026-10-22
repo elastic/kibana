@@ -73,10 +73,10 @@ export function EngineKpis({ overview, events }: IEngineKpisProps) {
       color: 'default',
     },
     {
-      id: 'detections',
-      title: String(counts.detections_last_hour),
-      description: i18n.translate('xpack.significantEventsApp.detectionEngine.kpi.detections', {
-        defaultMessage: 'Detections in the last hour',
+      id: 'signals',
+      title: String(counts.signals_last_hour),
+      description: i18n.translate('xpack.significantEventsApp.detectionEngine.kpi.signals', {
+        defaultMessage: 'Signals in the last hour',
       }),
       color: 'default',
     },

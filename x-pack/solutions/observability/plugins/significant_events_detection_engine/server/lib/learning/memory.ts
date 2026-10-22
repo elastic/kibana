@@ -14,7 +14,7 @@ const MAX_NOTES_PER_KEY = 10;
 /** Notes one case shows the agent; enough to remember, small enough to bound tokens. */
 const MAX_NOTES_PER_CASE = 8;
 
-/** The memory one detection's case reads: its series, its KI on any service, its service. */
+/** The memory one signal's case reads: its series, its KI on any service, its service. */
 export interface MemoryKeys {
   fingerprints: string[];
   services: string[];

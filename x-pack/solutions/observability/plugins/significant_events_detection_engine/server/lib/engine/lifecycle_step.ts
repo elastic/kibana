@@ -7,18 +7,65 @@
 
 import type {
   BaselineDecision,
-  DetectionStrategyId,
+  SignalStrategyId,
   EngineConfig,
   EngineEvent,
 } from '../../../common';
 import { BUCKET_MS } from '../../../common';
 import type { TaggedObservation } from '../domain';
-import { deriveEventInput, nextEventStatus } from '../pipeline/state_machine';
+import { deriveEventInput, type EventInput, nextEventStatus } from '../pipeline/state_machine';
 import { STRATEGIES } from '../strategies/strategy_registry';
 import type { IEventWorkingSet } from './event_working_set';
 import type { IRunRecorder } from './run_recorder';
 
 type MemberHealth = 'firing' | 'healthy' | 'unknown';
+
+/**
+ * Sends one input to the state machine for an event and stores the result: the status it
+ * returns, the close fields when it closes, and the transition in the run's record.
+ */
+export function transitionEvent({
+  event,
+  input,
+  at,
+  events,
+  recorder,
+}: {
+  /** The event with any facts of this step already applied. */
+  event: EngineEvent;
+  input: EventInput;
+  /** When the transition happens, in data time. */
+  at: string;
+  events: IEventWorkingSet;
+  recorder: IRunRecorder;
+}): void {
+  const transition = nextEventStatus(event.status, input);
+  if (transition.to === event.status) {
+    events.set(event, 'facts');
+    return;
+  }
+  const next: EngineEvent = { ...event, status: transition.to, updated_at: at };
+  if (transition.to === 'inactive') {
+    next.closed_at = at;
+    next.close_reason = transition.closeReason;
+    next.verification = undefined;
+    next.open_windows = event.open_windows.map((window, index) =>
+      index === event.open_windows.length - 1 ? { ...window, to: at } : window
+    );
+  }
+  events.set(next, 'changed');
+  recorder.summary.transitions.push({
+    event_id: event.event_id,
+    from: event.status,
+    to: transition.to,
+  });
+  recorder.log({
+    step: 'state',
+    action: `${event.status}_to_${transition.to}`,
+    event_id: event.event_id,
+    message: `"${event.title}": ${event.status} -> ${transition.to} (${input.replace(/_/g, ' ')}).`,
+  });
+}
 
 /**
  * Updates every open event for one bucket. A member's health only moves when its own strategy
@@ -38,7 +85,7 @@ export function applyLifecycle({
   config: EngineConfig;
   events: IEventWorkingSet;
   /** Strategies that evaluated this bucket without failing. */
-  evaluatedStrategies: Set<DetectionStrategyId>;
+  evaluatedStrategies: Set<SignalStrategyId>;
   /** This bucket's observations, by series. */
   observations: Map<string, TaggedObservation>;
   /** This bucket's baseline decisions, by series. */
@@ -95,40 +142,12 @@ export function applyLifecycle({
         };
       });
 
-      const input = deriveEventInput({ members, quietPeriodBuckets: config.quiet_period_buckets });
-      const transition = nextEventStatus(event.status, input);
-      const next: EngineEvent = {
-        ...event,
-        members: members.map((item) => item.member),
-        status: transition.to,
-      };
-      if (transition.to === event.status) {
-        events.set(next, 'facts');
-        return;
-      }
-      next.updated_at = bucketEndIso;
-      if (transition.to === 'inactive') {
-        next.closed_at = bucketEndIso;
-        next.close_reason = transition.closeReason;
-        next.verification = undefined;
-        next.open_windows = event.open_windows.map((window, index) =>
-          index === event.open_windows.length - 1 ? { ...window, to: bucketEndIso } : window
-        );
-      }
-      events.set(next, 'changed');
-      recorder.summary.transitions.push({
-        event_id: event.event_id,
-        from: event.status,
-        to: transition.to,
-      });
-      recorder.log({
-        step: 'state',
-        action: `${event.status}_to_${transition.to}`,
-        event_id: event.event_id,
-        message: `"${event.title}": ${event.status} -> ${transition.to} (${input.replace(
-          /_/g,
-          ' '
-        )}).`,
+      transitionEvent({
+        event: { ...event, members: members.map((item) => item.member) },
+        input: deriveEventInput({ members, quietPeriodBuckets: config.quiet_period_buckets }),
+        at: bucketEndIso,
+        events,
+        recorder,
       });
     });
 }

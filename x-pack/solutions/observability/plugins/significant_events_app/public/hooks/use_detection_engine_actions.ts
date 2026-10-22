@@ -84,10 +84,10 @@ function describeRun(result: unknown): string {
   }
   return i18n.translate('xpack.significantEventsApp.detectionEngine.runToast', {
     defaultMessage:
-      'Evaluated up to {bucket}: {detections} detections, {calls} agent calls, {transitions} status changes, {open} open events.',
+      'Evaluated up to {bucket}: {signals} signals, {calls} agent calls, {transitions} status changes, {open} open events.',
     values: {
       bucket: summary.bucket_end ? new Date(summary.bucket_end).toLocaleTimeString() : '-',
-      detections: summary.detections,
+      signals: summary.signals,
       calls: summary.agent.calls,
       transitions: summary.transitions.length,
       open: summary.open_events,

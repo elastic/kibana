@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DetectionStrategyId } from './strategies';
+import type { SignalStrategyId } from './strategies';
 
 /** Severity of a significant event, matching Significant Events' own values. */
 export const ENGINE_SEVERITIES = ['critical', 'high', 'medium', 'low'] as const;
@@ -28,13 +28,13 @@ export type EvidenceResult = 'found' | 'empty' | 'error';
 /** Which agent judged an event. */
 export type AgentKind = 'heuristic' | 'agent_builder';
 
-/** One member detection series of an event. */
+/** One member signal series of an event. */
 export interface EventMember {
   fingerprint: string;
-  strategy: DetectionStrategyId;
+  strategy: SignalStrategyId;
   service: string;
   title: string;
-  latest_detection_id: string;
+  latest_signal_id: string;
   value: number;
   peak_value: number;
   threshold?: number;
@@ -78,7 +78,8 @@ export interface EventAssessment {
 /** Result of re-running an event's evidence after it opened or closed. */
 export interface EventVerification {
   at: string;
-  trigger: 'opened' | 'closed' | 'manual';
+  /** `recheck`: an open event whose evidence did not hold, checked again. */
+  trigger: 'opened' | 'recheck' | 'closed' | 'manual';
   holds: boolean;
   details: string;
 }
@@ -100,7 +101,8 @@ export interface EventDismissal {
   values: Record<string, number>;
 }
 
-export type EventCloseReason = 'recovered' | 'operator' | 'dismissed';
+/** `evidence_gone`: the Verifier re-ran the evidence twice and nothing showed the problem. */
+export type EventCloseReason = 'recovered' | 'operator' | 'dismissed' | 'evidence_gone';
 
 /**
  * One time an event was open. `from` is data time, the first minute that was above normal; the
@@ -128,7 +130,7 @@ export interface EngineEvent {
   services: string[];
   members: EventMember[];
   /** Strategy charged for the daily cap; fixed when the event first opens. */
-  origin_strategy: DetectionStrategyId;
+  origin_strategy: SignalStrategyId;
   /** How many times this problem opened. A repeat continues the same event. */
   episode: number;
   created_at: string;

@@ -7,7 +7,8 @@
 
 import type { AgentKind, EngineConfig } from '../../../common';
 import { createHeuristicAgent } from '../agent/heuristic_agent';
-import type { AgentAnswer, AgentCase, AgentUsage, IDiscoveryAgent } from '../agent/types';
+import type { IOpenEventSearch } from '../agent/open_event_search';
+import type { AgentAnswer, AgentCase, AgentUsage, ITriageAgent } from '../agent/types';
 import { validateAnswer } from '../agent/validate_answer';
 import { getErrorMessage } from '../errors';
 import type { IRunRecorder } from './run_recorder';
@@ -31,7 +32,11 @@ export interface IAgentRunner {
     agentKind: AgentKind;
     corrections: string[];
   }>;
-  assess(agentCase: AgentCase): Promise<{
+  /** `openEvents` lets an agent that can search join any open event, not only the proposed one. */
+  assess(
+    agentCase: AgentCase,
+    options?: { openEvents?: IOpenEventSearch }
+  ): Promise<{
     answer: AgentAnswer;
     agentKind: AgentKind;
     corrections: string[];
@@ -59,7 +64,7 @@ export function createAgentRunner({
   agentTimeoutMs,
   signal,
 }: {
-  agent: IDiscoveryAgent;
+  agent: ITriageAgent;
   config: EngineConfig;
   /** Model calls already made today in this space, from the cost ledger. */
   modelCallsToday: number;
@@ -77,7 +82,7 @@ export function createAgentRunner({
   // agent a minute and a half before the run ends, and defer everything after.
   let slowestCallMs = INITIAL_CALL_RESERVE_MS;
 
-  const activeAgent = (): IDiscoveryAgent => {
+  const activeAgent = (): ITriageAgent => {
     if (!agent.usesModel || modelCallsToday + modelCalls < config.max_agent_calls_per_day) {
       return agent;
     }
@@ -123,7 +128,7 @@ export function createAgentRunner({
       return undefined;
     },
 
-    async assess(agentCase) {
+    async assess(agentCase, options) {
       summary.agent.calls += 1;
       const current = activeAgent();
       const subject = agentCase.event?.event_id;
@@ -137,7 +142,10 @@ export function createAgentRunner({
           signal,
           AbortSignal.timeout(Math.max(1, Math.min(agentTimeoutMs, deadline - started))),
         ]);
-        const { answer: raw, usage } = await current.assess(agentCase, { signal: callSignal });
+        const { answer: raw, usage } = await current.assess(agentCase, {
+          signal: callSignal,
+          openEvents: options?.openEvents,
+        });
         if (current.usesModel) {
           slowestCallMs = Math.max(slowestCallMs, Date.now() - started);
         }

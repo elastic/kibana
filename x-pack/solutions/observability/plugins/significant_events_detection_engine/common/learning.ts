@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DetectionStrategyId, StrategyMode } from './strategies';
+import type { SignalStrategyId, StrategyMode } from './strategies';
 
 /** How far the engine may go on its own, per capability. */
 export const AUTONOMY_LEVELS = ['off', 'suggest', 'act'] as const;
@@ -42,10 +42,10 @@ export interface LabelledIncident {
   origin: IncidentOrigin;
   /** The event the label came from, for confirmed and false-positive labels. */
   event_id?: string;
-  /** The series of that event, so a later replay can tell which detections it covers. */
+  /** The series of that event, so a later replay can tell which signals it covers. */
   fingerprints: string[];
-  /** Strategies whose detections were in the event. */
-  strategies: DetectionStrategyId[];
+  /** Strategies whose signals were in the event. */
+  strategies: SignalStrategyId[];
   /** For a confirmed label, how many minutes after `from` the engine raised it. */
   warning_minutes?: number;
   created_at: string;
@@ -219,7 +219,7 @@ export interface StrategyCandidate {
   /** What the change is expected to do, in words. */
   hypothesis: string;
   /** One change at a time per scope. */
-  scope: { service: string; source_id?: string; strategy: DetectionStrategyId };
+  scope: { service: string; source_id?: string; strategy: SignalStrategyId };
   origin: CandidateOrigin;
   stage: CandidateStage;
   created_at: string;

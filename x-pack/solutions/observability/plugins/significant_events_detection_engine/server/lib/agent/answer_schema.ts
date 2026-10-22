@@ -18,12 +18,16 @@ export const ANSWER_JSON_SCHEMA: Record<string, unknown> = {
   additionalProperties: false,
   required: ['verdicts', 'severity', 'title', 'summary'],
   properties: {
-    join_decision: {
+    join_event_id: {
       type: 'string',
-      enum: ['confirm', 'veto'],
-      description: 'Only when the case has a join_proposal.',
+      description:
+        'The open event this signal belongs to: the join_proposal event or one the event search returned. In a reopen case, the closed event when this is its problem coming back. Omit to open a new event.',
     },
-    join_reason: { type: 'string', description: 'Why the join was confirmed or vetoed.' },
+    join_reason: {
+      type: 'string',
+      description:
+        'Why the signal joins or reopens that event, or why it is a different problem than the proposed or closed event.',
+    },
     verdicts: {
       type: 'array',
       items: {
@@ -49,7 +53,7 @@ export const ANSWER_JSON_SCHEMA: Record<string, unknown> = {
  */
 const answerSchema = lazySchema(() =>
   z.object({
-    join_decision: z.enum(['confirm', 'veto']).optional(),
+    join_event_id: z.string().max(64).optional(),
     join_reason: z.string().max(MAX_TEXT_LENGTH).optional(),
     verdicts: z
       .array(

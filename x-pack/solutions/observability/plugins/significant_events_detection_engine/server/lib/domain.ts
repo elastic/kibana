@@ -6,8 +6,9 @@
  */
 
 import type {
+  AlertFiringHistory,
   BaselineSummary,
-  DetectionStrategyId,
+  SignalStrategyId,
   EngineAutoRunState,
   EngineConfig,
   EngineCostLedger,
@@ -20,6 +21,7 @@ import type {
   MemoryScope,
   StrategyCandidate,
 } from '../../common';
+import type { CustomerRuleEntity } from './knowledge/customer_rules';
 import type { ObservedTopology } from './learning/topology';
 
 /**
@@ -33,7 +35,7 @@ export interface StrategyObservation {
   bucket_start: number;
   value: number;
   unit: string;
-  /** The strategy's own trigger. Only these become detections. */
+  /** The strategy's own trigger. Only these become signals. */
   looks_off: boolean;
   title: string;
   description: string;
@@ -45,7 +47,7 @@ export interface StrategyObservation {
   /** When the problem started, if the strategy knows better than the bucket start. */
   since?: string;
   /**
-   * Recorded for other checks to read, never a detection on its own; the traffic series that
+   * Recorded for other checks to read, never a signal on its own; the traffic series that
    * the silence check compares with is one.
    */
   internal?: boolean;
@@ -59,14 +61,16 @@ export interface StrategyObservation {
    * engine wrote that has not proved itself yet. It records what it would raise, nothing more.
    */
   trial?: boolean;
+  /** For customer alerts: how often the alert fired, which the baseline check judges. */
+  firing_history?: AlertFiringHistory;
 }
 
 export interface TaggedObservation extends StrategyObservation {
-  strategy: DetectionStrategyId;
+  strategy: SignalStrategyId;
 }
 
-/** A detection that passed the baseline check but waited for agent budget. */
-export interface PendingDetection {
+/** A signal that passed the baseline check but waited for agent budget. */
+export interface PendingSignal {
   observation: TaggedObservation;
   baseline: BaselineSummary;
   queued_at: string;
@@ -76,7 +80,7 @@ export interface PendingDetection {
 /** An Alerting v2 rule the engine created and owns. */
 export interface OwnedRule {
   rule_id: string;
-  strategy: DetectionStrategyId;
+  strategy: SignalStrategyId;
   source_id: string;
   name: string;
   /** Copied from the rule definition; see `DesiredRule.meta`. */
@@ -110,10 +114,12 @@ export interface StateDocs {
   learning_run: LearningRunSummary;
   /** Dependencies the engine observed in the data. */
   topology: ObservedTopology;
+  /** Knowledge from one customer rule, keyed by the rule's id: the entity it watches. */
+  customer_rule: CustomerRuleEntity;
   cost: EngineCostLedger;
   auto_run: EngineAutoRunState;
   rules: EngineRulesRecord;
-  pending: { detections: PendingDetection[] };
+  pending: { signals: PendingSignal[] };
   lease: RunLease;
 }
 export type StateKind = keyof StateDocs;

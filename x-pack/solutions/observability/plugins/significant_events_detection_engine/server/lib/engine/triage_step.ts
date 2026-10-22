@@ -9,22 +9,29 @@ import { v4 as uuidv4 } from 'uuid';
 import type {
   AgentKind,
   BaselineSummary,
-  DetectionOutcome,
-  DetectionStrategyId,
+  SignalOutcome,
+  SignalStrategyId,
   EngineConfig,
-  EngineDetection,
+  EngineSignal,
   EngineEvent,
   EngineSeverity,
   EventMember,
 } from '../../../common';
 import { BUCKET_MS, OPEN_EVENT_STATUSES } from '../../../common';
-import { buildCase } from '../agent/build_case';
-import type { AgentAnswer, AgentCase, CaseDetection } from '../agent/types';
+import { buildCase, ROWS_PER_EVIDENCE, runEvidence } from '../agent/build_case';
+import { mentions } from '../agent/mentions';
+import { createOpenEventSearch, type IOpenEventSearch } from '../agent/open_event_search';
+import type { AgentAnswer, AgentCase, CaseSignal } from '../agent/types';
 import { guardSeverity } from '../agent/validate_answer';
-import type { PendingDetection, TaggedObservation } from '../domain';
+import type { PendingSignal, TaggedObservation } from '../domain';
 import type { InvestigationPage } from '../learning/investigation_knowledge';
 import type { MemoryKeys } from '../learning/memory';
-import { type Dependency, type JoinProposal, proposeJoins } from '../pipeline/join_proposals';
+import {
+  type Dependency,
+  dependenciesFor,
+  type JoinProposal,
+  proposeJoins,
+} from '../pipeline/join_proposals';
 import { nextEventStatus } from '../pipeline/state_machine';
 import { STRATEGIES } from '../strategies/strategy_registry';
 import type { IAgentRunner } from './agent_runner';
@@ -53,10 +60,18 @@ function formatMeasure(value: number, unit: string): string {
 const isOpen = (event: EngineEvent | undefined): boolean =>
   event !== undefined && OPEN_EVENT_STATUSES.includes(event.status);
 
-function relatedServicesOf(service: string, dependencies: Dependency[]): string[] {
+function relatedServicesOf({
+  service,
+  sourceId,
+  dependencies,
+}: {
+  service: string;
+  sourceId?: string;
+  dependencies: Dependency[];
+}): string[] {
   return [
     ...new Set(
-      dependencies.flatMap((dependency) => {
+      dependenciesFor(dependencies, sourceId).flatMap((dependency) => {
         if (dependency.source === service) {
           return [dependency.target];
         }
@@ -71,13 +86,13 @@ function relatedServicesOf(service: string, dependencies: Dependency[]): string[
 
 function toMember({
   observation,
-  detectionId,
+  signalId,
   threshold,
   at,
   joinReason,
 }: {
   observation: TaggedObservation;
-  detectionId: string;
+  signalId: string;
   threshold?: number;
   at: string;
   joinReason: string;
@@ -87,7 +102,7 @@ function toMember({
     strategy: observation.strategy,
     service: observation.service,
     title: observation.title,
-    latest_detection_id: detectionId,
+    latest_signal_id: signalId,
     value: observation.value,
     peak_value: observation.value,
     threshold,
@@ -124,40 +139,40 @@ function applyVerdicts(event: EngineEvent, agentCase: AgentCase, answer: AgentAn
   };
 }
 
-/** Customer alerts firing in a bucket, which every case lists next to its detection. */
+/** Customer alerts firing in a bucket, which every case lists next to its signal. */
 export interface FiringAlert {
   title: string;
   service: string;
 }
 
-/** The decisions after the baseline check, one detection at a time. */
-export interface IDiscoveryStep {
+/** The decisions after the baseline check, one signal at a time. */
+export interface ITriageStep {
   /**
-   * Decides what one detection does: continue, reopen, join, open, or nothing. The baseline
-   * check already ran; `pending` detections come back here on a later run with their baseline.
+   * Decides what one signal does: continue, reopen, join, open, or nothing. The baseline
+   * check already ran; `pending` signals come back here on a later run with their baseline.
    */
   process(params: {
     observation: TaggedObservation;
     baseline: BaselineSummary;
     firingAlerts: FiringAlert[];
-    fromPending?: PendingDetection;
+    fromPending?: PendingSignal;
   }): Promise<void>;
-  /** Records a detection the baseline check stopped. */
+  /** Records a signal the baseline check stopped. */
   recordBelowNormal(params: { observation: TaggedObservation; baseline: BaselineSummary }): void;
-  /** Detections that waited for budget, to retry on the next run. */
-  pending(): PendingDetection[];
+  /** Signals that waited for budget, to retry on the next run. */
+  pending(): PendingSignal[];
 }
 
-/** Gives up on a detection that waited for budget this many runs. */
+/** Gives up on a signal that waited for budget this many runs. */
 const MAX_PENDING_ATTEMPTS = 5;
 
 /**
  * Code decides everything it can compute: identity, the dismissal hold, join proposals, the daily
- * cap and status. The agent checks evidence, rates severity, explains, and confirms or vetoes
- * joins. Detections are handled one at a time on purpose: each decision can open an event the
- * next detection may join.
+ * cap and status. The agent checks evidence, rates severity, explains, and decides which open
+ * event a signal joins: code's proposal, one the agent found with its event search, or none. Signals are handled one at a time on purpose: each decision can open an event the
+ * next signal may join.
  */
-export function createDiscoveryStep({
+export function createTriageStep({
   scope,
   config,
   recorder,
@@ -169,7 +184,8 @@ export function createDiscoveryStep({
   pagesFor,
   signal,
   maxPending,
-  maxDetections,
+  maxSignals,
+  sourceTitles,
 }: {
   scope: IEngineScope;
   config: EngineConfig;
@@ -178,36 +194,42 @@ export function createDiscoveryStep({
   dependencies: Dependency[];
   agent: IAgentRunner;
   /** New events per origin strategy today, for the daily caps. Updated as events open. */
-  openedToday: Map<DetectionStrategyId, number>;
+  openedToday: Map<SignalStrategyId, number>;
   memoryFor: (keys: MemoryKeys) => Promise<string[]>;
   /** What investigations learned about these services; context for the agent, never a label. */
   pagesFor: (services: string[]) => Promise<InvestigationPage[]>;
   signal: AbortSignal;
   maxPending: number;
-  maxDetections: number;
-}): IDiscoveryStep {
+  maxSignals: number;
+  /** Source titles by id, so the agent can tell systems apart. */
+  sourceTitles: Map<string, string>;
+}): ITriageStep {
   const { summary } = recorder;
-  const queued: PendingDetection[] = [];
+  const queued: PendingSignal[] = [];
+  // Live: an event a signal opened earlier in this run is one the next signal can join.
+  const sourceTitle = (sourceId: string | undefined) =>
+    sourceId === undefined ? undefined : sourceTitles.get(sourceId);
+  const openEventSearch = createOpenEventSearch({ openEvents: () => events.open(), sourceTitle });
   let aboveNormal = 0;
 
   const record = ({
     observation,
     baseline,
-    detectionId,
+    signalId,
     outcome,
     reason,
     eventId,
   }: {
     observation: TaggedObservation;
     baseline: BaselineSummary;
-    detectionId: string;
-    outcome: DetectionOutcome;
+    signalId: string;
+    outcome: SignalOutcome;
     reason: string;
     eventId?: string;
   }) => {
     const at = new Date(observation.bucket_start).toISOString();
-    const detection: EngineDetection = {
-      detection_id: detectionId,
+    const recorded: EngineSignal = {
+      signal_id: signalId,
       '@timestamp': new Date(observation.bucket_start + BUCKET_MS).toISOString(),
       run_id: recorder.runId,
       strategy: observation.strategy,
@@ -230,21 +252,21 @@ export function createDiscoveryStep({
       outcome_reason: reason,
       event_id: eventId,
     };
-    recorder.recordDetection(detection);
+    recorder.recordSignal(recorded);
   };
 
   const defer = ({
     observation,
     baseline,
-    detectionId,
+    signalId,
     reason,
     fromPending,
   }: {
     observation: TaggedObservation;
     baseline: BaselineSummary;
-    detectionId: string;
+    signalId: string;
     reason: string;
-    fromPending?: PendingDetection;
+    fromPending?: PendingSignal;
   }) => {
     const attempts = (fromPending?.attempts ?? 0) + 1;
     const keep = attempts < MAX_PENDING_ATTEMPTS && queued.length < maxPending;
@@ -259,7 +281,7 @@ export function createDiscoveryStep({
     record({
       observation,
       baseline,
-      detectionId,
+      signalId,
       outcome: 'deferred',
       reason: keep
         ? `${reason}; retried on the next run.`
@@ -270,7 +292,7 @@ export function createDiscoveryStep({
       action: keep ? 'deferred' : 'dropped',
       strategy: observation.strategy,
       service: observation.service,
-      detection_id: detectionId,
+      signal_id: signalId,
       message: `${observation.title}: ${reason}${
         keep ? ', waiting for the next run' : ', dropped'
       }.`,
@@ -324,10 +346,12 @@ export function createDiscoveryStep({
 
     recordBelowNormal({ observation, baseline }) {
       const owner = events.ownerOf(observation.fingerprint);
-      const detectionId = uuidv4();
+      const signalId = uuidv4();
       const reason =
         baseline.decision === 'warming_up'
           ? `Warming up: ${baseline.samples} of ${config.baseline.min_samples} samples needed.`
+          : baseline.reason
+          ? `Background: ${baseline.reason}.`
           : `Within normal: ${formatMeasure(observation.value, observation.unit)} is not above ${
               baseline.threshold === undefined
                 ? 'its threshold'
@@ -336,7 +360,7 @@ export function createDiscoveryStep({
       record({
         observation,
         baseline,
-        detectionId,
+        signalId,
         outcome: baseline.decision === 'warming_up' ? 'warming_up' : 'background',
         reason,
         eventId: owner && isOpen(owner) ? owner.event_id : undefined,
@@ -346,7 +370,7 @@ export function createDiscoveryStep({
         action: baseline.decision,
         strategy: observation.strategy,
         service: observation.service,
-        detection_id: detectionId,
+        signal_id: signalId,
         message: `${observation.title}: ${reason}`,
       });
     },
@@ -354,7 +378,7 @@ export function createDiscoveryStep({
     async process({ observation, baseline, firingAlerts, fromPending }) {
       const strategyConfig = config.strategies[observation.strategy];
       const descriptor = STRATEGIES[observation.strategy].descriptor;
-      const detectionId = uuidv4();
+      const signalId = uuidv4();
       const at = new Date(observation.bucket_start).toISOString();
       const bucketEndIso = new Date(observation.bucket_start + BUCKET_MS).toISOString();
       const owner = events.ownerOf(observation.fingerprint);
@@ -365,10 +389,12 @@ export function createDiscoveryStep({
           action: baseline.decision,
           strategy: observation.strategy,
           service: observation.service,
-          detection_id: detectionId,
+          signal_id: signalId,
           message:
             baseline.decision === 'skipped'
               ? `${observation.title}: the customer's rule already decided; baseline check skipped.`
+              : baseline.reason
+              ? `${observation.title}: above normal, ${baseline.reason}.`
               : `${observation.title}: above normal, ${formatMeasure(
                   observation.value,
                   observation.unit
@@ -385,7 +411,7 @@ export function createDiscoveryStep({
         record({
           observation,
           baseline,
-          detectionId,
+          signalId,
           outcome: 'trial_would_raise',
           reason: 'Trial run: recorded what it would raise, raised nothing.',
         });
@@ -394,8 +420,8 @@ export function createDiscoveryStep({
           action: 'would_raise',
           strategy: observation.strategy,
           service: observation.service,
-          detection_id: detectionId,
-          message: `Trial: ${observation.title} would have gone to discovery.`,
+          signal_id: signalId,
+          message: `Trial: ${observation.title} would have gone to triage.`,
         });
         return;
       }
@@ -414,7 +440,7 @@ export function createDiscoveryStep({
                     title: observation.title,
                     peak_value: Math.max(member.peak_value, observation.value),
                     threshold: baseline.threshold,
-                    latest_detection_id: detectionId,
+                    latest_signal_id: signalId,
                     evidence_esql: observation.evidence_esql,
                     last_seen: at > member.last_seen ? at : member.last_seen,
                   }
@@ -426,7 +452,7 @@ export function createDiscoveryStep({
         record({
           observation,
           baseline,
-          detectionId,
+          signalId,
           outcome: 'continued',
           reason: `Continues event "${owner.title}".`,
           eventId: owner.event_id,
@@ -436,7 +462,7 @@ export function createDiscoveryStep({
           action: 'continued',
           strategy: observation.strategy,
           service: observation.service,
-          detection_id: detectionId,
+          signal_id: signalId,
           event_id: owner.event_id,
           message: `${observation.title} continues the open event "${owner.title}".`,
         });
@@ -454,7 +480,7 @@ export function createDiscoveryStep({
           record({
             observation,
             baseline,
-            detectionId,
+            signalId,
             outcome: 'held_by_dismissal',
             reason: `Dismissed as ${owner.dismissal.reason}; ${formatMeasure(
               observation.value,
@@ -471,7 +497,7 @@ export function createDiscoveryStep({
             action: 'held_by_dismissal',
             strategy: observation.strategy,
             service: observation.service,
-            detection_id: detectionId,
+            signal_id: signalId,
             event_id: owner.event_id,
             message: `${observation.title} matches dismissed event "${owner.title}"; held until the problem gets worse.`,
           });
@@ -480,21 +506,21 @@ export function createDiscoveryStep({
       }
 
       aboveNormal += 1;
-      if (aboveNormal > maxDetections) {
+      if (aboveNormal > maxSignals) {
         defer({
           observation,
           baseline,
-          detectionId,
+          signalId,
           fromPending,
-          reason: `More than ${maxDetections} detections reached discovery in this run`,
+          reason: `More than ${maxSignals} signals reached triage in this run`,
         });
         return;
       }
       // Out of model budget in this run, the heuristic decides now rather than a minute later.
       const busy = agent.unavailable();
-      const assess = (agentCase: AgentCase) => {
+      const assess = (agentCase: AgentCase, openEvents?: IOpenEventSearch) => {
         if (!busy) {
-          return agent.assess(agentCase);
+          return agent.assess(agentCase, { openEvents });
         }
         const reason =
           busy === 'run_budget'
@@ -505,17 +531,22 @@ export function createDiscoveryStep({
           action: 'heuristic_when_busy',
           strategy: observation.strategy,
           service: observation.service,
-          detection_id: detectionId,
+          signal_id: signalId,
           message: `${observation.title}: ${reason}, so the heuristic agent decided now instead of deferring to the next run.`,
         });
         return agent.assessWithoutModel(agentCase, reason);
       };
 
-      const relatedServices = relatedServicesOf(observation.service, dependencies);
-      const caseDetection: CaseDetection = {
+      const relatedServices = relatedServicesOf({
+        service: observation.service,
+        sourceId: observation.source_id,
+        dependencies,
+      });
+      const caseSignal: CaseSignal = {
         fingerprint: observation.fingerprint,
         strategy: observation.strategy,
         service: observation.service,
+        source: sourceTitle(observation.source_id),
         title: observation.title,
         description: observation.description,
         value: observation.value,
@@ -524,43 +555,45 @@ export function createDiscoveryStep({
         importance: observation.importance,
       };
 
-      // Join proposals, in code, for open events this detection may belong to.
+      // Join proposals, in code, for open events this signal may belong to.
+      const candidates = events.open().filter((event) => event.event_id !== owner?.event_id);
+      // The signal's rows are read once, here, when code also looks for services they name.
+      const ownEvidence =
+        config.triage.evidence_named_joins && candidates.length > 0
+          ? await runEvidence({
+              esClient: scope.dataEsClient,
+              query: observation.evidence_esql,
+              signal,
+            })
+          : undefined;
+      const shownRows = ownEvidence?.rows.slice(0, ROWS_PER_EVIDENCE) ?? [];
       const proposal: JoinProposal | undefined = proposeJoins({
         service: observation.service,
+        sourceId: observation.source_id,
         at,
-        openEvents: events.open().filter((event) => event.event_id !== owner?.event_id),
+        openEvents: candidates,
         dependencies,
         joinWindowMinutes: config.join_window_minutes,
+        namedServices: [...new Set(candidates.flatMap((event) => event.services))].filter(
+          (service) => service !== observation.service && mentions(shownRows, service)
+        ),
       })[0];
 
       /** Reopens the closed event that owns this series, as a new episode of it. */
       const reopen = async (
         closed: EngineEvent,
-        assessed?: {
+        {
+          agentCase,
+          answer,
+          agentKind,
+          corrections,
+        }: {
           agentCase: AgentCase;
           answer: AgentAnswer;
           agentKind: AgentKind;
           corrections: string[];
         }
       ) => {
-        const agentCase =
-          assessed?.agentCase ??
-          (await buildCase({
-            dataEsClient: scope.dataEsClient,
-            signal,
-            kind: 'reopen',
-            detection: caseDetection,
-            evidenceQuery: observation.evidence_esql,
-            event: closed,
-            firingAlerts,
-            relatedServices,
-            memory: await memoryFor({
-              fingerprints: closed.members.map((member) => member.fingerprint),
-              services: closed.services,
-            }),
-            investigationPages: await pagesFor(closed.services),
-          }));
-        const { answer, agentKind, corrections } = assessed ?? (await assess(agentCase));
         const transition = nextEventStatus(closed.status, 'member_firing');
         const reopened = recordAssessment({
           event: {
@@ -583,7 +616,7 @@ export function createDiscoveryStep({
                     ...member,
                     value: observation.value,
                     peak_value: Math.max(member.peak_value, observation.value),
-                    latest_detection_id: detectionId,
+                    latest_signal_id: signalId,
                     evidence_esql: observation.evidence_esql,
                     healthy: false,
                     healthy_streak: 0,
@@ -607,7 +640,7 @@ export function createDiscoveryStep({
         record({
           observation,
           baseline,
-          detectionId,
+          signalId,
           outcome: 'reopened',
           reason: closed.dismissal
             ? `Worse than when dismissed; reopened as episode ${reopened.episode}.`
@@ -619,56 +652,98 @@ export function createDiscoveryStep({
           action: 'reopened',
           strategy: observation.strategy,
           service: observation.service,
-          detection_id: detectionId,
+          signal_id: signalId,
           event_id: closed.event_id,
           message: `Reopened "${reopened.title}" (episode ${reopened.episode}): ${observation.title}.`,
         });
       };
 
-      // A closed event's problem is back. When another event is already open for what may be
-      // the same incident, grouping is decided again for this episode, so a split made the
-      // first time does not repeat on every recurrence; otherwise the event reopens.
-      if (owner && !proposal) {
-        await reopen(owner);
-        return;
-      }
-
+      // A closed event's series is firing again. Grouping is decided again for this episode:
+      // when another event is open for what may be the same incident, code proposes it; when
+      // not, the agent decides whether this is the closed event's problem coming back or a
+      // different one, so an event's old story is never carried into a new incident.
+      const reopenCase = owner !== undefined && !proposal;
       const agentCase = await buildCase({
         dataEsClient: scope.dataEsClient,
         signal,
-        kind: proposal ? 'join' : 'new_event',
-        detection: caseDetection,
+        kind: reopenCase ? 'reopen' : proposal ? 'join' : 'new_event',
+        caseSignal,
         evidenceQuery: observation.evidence_esql,
-        event: proposal?.event,
+        event: reopenCase ? owner : proposal?.event,
         proposal,
         firingAlerts,
         relatedServices,
+        // A recurrence reads what was learned about its whole closed event.
         memory: await memoryFor({
-          fingerprints: [observation.fingerprint],
-          services: [observation.service],
+          fingerprints: reopenCase
+            ? owner!.members.map((member) => member.fingerprint)
+            : [observation.fingerprint],
+          services: reopenCase ? owner!.services : [observation.service],
         }),
-        investigationPages: await pagesFor([observation.service]),
+        investigationPages: await pagesFor(reopenCase ? owner!.services : [observation.service]),
+        sourceTitle,
+        signalEvidence: ownEvidence,
       });
-      const { answer, agentKind, corrections } = await assess(agentCase);
+      const assessed = await assess(
+        agentCase,
+        // A reopen case is about one closed event; there is nothing to search for.
+        config.triage.event_search && !reopenCase ? openEventSearch : undefined
+      );
+      const { answer, agentKind } = assessed;
+      // In a reopen case, naming the closed event means it is the same problem coming back.
+      const sameProblem =
+        reopenCase &&
+        (answer.join_event_id === owner!.event_id || !config.triage.regroup_recurrences);
+      const chosen =
+        answer.join_event_id === undefined || reopenCase
+          ? undefined
+          : events.get(answer.join_event_id);
+      // The agent may name only an open event; a closed or unknown id opens a new event instead.
+      const target = chosen && isOpen(chosen) ? chosen : undefined;
+      const corrections =
+        !reopenCase && answer.join_event_id !== undefined && !target
+          ? [
+              ...assessed.corrections,
+              `The agent chose event ${answer.join_event_id}, which is not open; it did not join.`,
+            ]
+          : assessed.corrections;
+      const joinsProposal = target !== undefined && target.event_id === proposal?.event.event_id;
+      const joinReason = joinsProposal
+        ? proposal!.reason
+        : answer.join_reason ?? 'the agent found it part of this open event';
 
-      if (proposal) {
+      if (proposal || target) {
+        const action = joinsProposal
+          ? 'confirmed'
+          : target
+          ? proposal
+            ? 'redirected'
+            : 'found'
+          : 'vetoed';
+        const outcomeText = joinsProposal
+          ? 'the agent confirmed'
+          : target
+          ? `the agent joined "${target.title}" instead`
+          : 'the agent vetoed';
         recorder.log({
           step: 'join',
-          action: answer.join_decision === 'confirm' ? 'confirmed' : 'vetoed',
+          action,
           strategy: observation.strategy,
           service: observation.service,
-          detection_id: detectionId,
-          event_id: proposal.event.event_id,
-          message: `Code proposed joining "${proposal.event.title}" (${
-            proposal.reason
-          }); the agent ${answer.join_decision === 'confirm' ? 'confirmed' : 'vetoed'}. ${
-            answer.join_reason ?? ''
-          }`.trim(),
+          signal_id: signalId,
+          event_id: target?.event_id ?? proposal?.event.event_id,
+          message: (proposal
+            ? `Code proposed joining "${proposal.event.title}" (${
+                proposal.reason
+              }); ${outcomeText}. ${answer.join_reason ?? ''}`
+            : `The agent joined "${target!.title}", which code did not propose. ${
+                answer.join_reason ?? ''
+              }`
+          ).trim(),
         });
       }
 
-      if (proposal && answer.join_decision === 'confirm') {
-        const target = events.get(proposal.event.event_id) ?? proposal.event;
+      if (target) {
         const joined = recordAssessment({
           event: {
             ...target,
@@ -678,10 +753,10 @@ export function createDiscoveryStep({
               ...target.members,
               toMember({
                 observation,
-                detectionId,
+                signalId,
                 threshold: baseline.threshold,
                 at,
-                joinReason: proposal.reason,
+                joinReason,
               }),
             ],
           },
@@ -698,26 +773,21 @@ export function createDiscoveryStep({
         record({
           observation,
           baseline,
-          detectionId,
+          signalId,
           outcome: 'joined',
-          reason: `Joined "${target.title}": ${proposal.reason}.`,
+          reason: `Joined "${target.title}": ${joinReason}.`,
           eventId: target.event_id,
         });
         return;
       }
 
-      // The agent vetoed regrouping a recurrence: it reopens its own event, with this answer.
-      if (owner) {
-        await reopen(owner, { agentCase, answer, agentKind, corrections });
-        return;
-      }
-
+      // Checked before any reopen: evidence that shows a healthy system raises nothing, new or old.
       const ownVerdict = answer.verdicts.find((verdict) => verdict.evidence_id === 'E1')?.verdict;
       if (ownVerdict === 'refutes') {
         record({
           observation,
           baseline,
-          detectionId,
+          signalId,
           outcome: 'refuted',
           reason: 'The agent found the evidence shows a healthy system; no event.',
         });
@@ -726,10 +796,32 @@ export function createDiscoveryStep({
           action: 'refuted',
           strategy: observation.strategy,
           service: observation.service,
-          detection_id: detectionId,
+          signal_id: signalId,
           message: `${observation.title}: evidence refutes it, so code raised no event.`,
         });
         return;
+      }
+
+      // The same problem is back, or the agent vetoed regrouping a recurrence: its own event
+      // reopens, with this answer.
+      if (owner && (sameProblem || !reopenCase)) {
+        await reopen(owner, { agentCase, answer, agentKind, corrections });
+        return;
+      }
+      if (owner) {
+        recorder.log({
+          step: 'identity',
+          action: 'regrouped',
+          strategy: observation.strategy,
+          service: observation.service,
+          signal_id: signalId,
+          event_id: owner.event_id,
+          message: `${observation.title} belonged to the closed event "${
+            owner.title
+          }", but the agent found a different problem; it opens a new event. ${
+            answer.join_reason ?? ''
+          }`.trim(),
+        });
       }
 
       const charged = openedToday.get(observation.strategy) ?? 0;
@@ -737,7 +829,7 @@ export function createDiscoveryStep({
         record({
           observation,
           baseline,
-          detectionId,
+          signalId,
           outcome: 'capped',
           reason: `Daily cap of ${strategyConfig.daily_cap} new events reached for this strategy.`,
         });
@@ -746,7 +838,7 @@ export function createDiscoveryStep({
           action: 'capped',
           strategy: observation.strategy,
           service: observation.service,
-          detection_id: detectionId,
+          signal_id: signalId,
           message: `${observation.title}: ${descriptor.name} reached its daily cap of ${strategyConfig.daily_cap}.`,
         });
         return;
@@ -765,10 +857,10 @@ export function createDiscoveryStep({
           members: [
             toMember({
               observation,
-              detectionId,
+              signalId,
               threshold: baseline.threshold,
               at,
-              joinReason: 'first detection',
+              joinReason: 'first signal',
             }),
           ],
           origin_strategy: observation.strategy,
@@ -791,10 +883,12 @@ export function createDiscoveryStep({
       record({
         observation,
         baseline,
-        detectionId,
+        signalId,
         outcome: 'new_event',
         reason: proposal
           ? `The agent vetoed joining "${proposal.event.title}"; opened a new event.`
+          : owner
+          ? `A different problem than the closed event "${owner.title}"; opened a new event.`
           : 'Opened a new event.',
         eventId,
       });
@@ -803,7 +897,7 @@ export function createDiscoveryStep({
         action: 'opened',
         strategy: observation.strategy,
         service: observation.service,
-        detection_id: detectionId,
+        signal_id: signalId,
         event_id: eventId,
         message: `Opened "${created.title}" (${created.severity}).`,
       });

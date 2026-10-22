@@ -8,24 +8,24 @@
 import type {
   ActivityEntry,
   BaselineDecision,
-  DetectionOutcome,
-  EngineDetection,
+  SignalOutcome,
+  EngineSignal,
   EngineRunSummary,
 } from '../../../common';
 
 /** An activity entry before the recorder stamps the run and the time. */
 export type ActivityInput = Omit<ActivityEntry, '@timestamp' | 'run_id'>;
 
-/** Collects what one run did, for the activity log, the detections record and its summary. */
+/** Collects what one run did, for the activity log, the signals record and its summary. */
 export interface IRunRecorder {
   readonly runId: string;
   readonly summary: EngineRunSummary;
   log(entry: ActivityInput): void;
-  /** Records the one outcome a detection gets, and counts it. */
-  recordDetection(detection: EngineDetection): void;
+  /** Records the one outcome a signal gets, and counts it. */
+  recordSignal(signal: EngineSignal): void;
   countBaseline(decision: BaselineDecision): void;
   activity(): ActivityEntry[];
-  detections(): EngineDetection[];
+  signals(): EngineSignal[];
 }
 
 function emptyBaselineCounts(): Record<BaselineDecision, number> {
@@ -42,14 +42,14 @@ export function createRunRecorder({
   startedAt: string;
 }): IRunRecorder {
   const entries: ActivityEntry[] = [];
-  const detections: EngineDetection[] = [];
+  const signals: EngineSignal[] = [];
   const summary: EngineRunSummary = {
     run_id: runId,
     trigger,
     started_at: startedAt,
     finished_at: startedAt,
     strategies: [],
-    detections: 0,
+    signals: 0,
     baseline: emptyBaselineCounts(),
     outcomes: {},
     agent: { calls: 0, cooldown_skips: 0, rejected_answers: 0, failures: 0, tokens: 0 },
@@ -64,16 +64,16 @@ export function createRunRecorder({
     log(entry) {
       entries.push({ ...entry, run_id: runId, '@timestamp': new Date().toISOString() });
     },
-    recordDetection(detection) {
-      detections.push(detection);
-      const outcome: DetectionOutcome = detection.outcome;
+    recordSignal(signal) {
+      signals.push(signal);
+      const outcome: SignalOutcome = signal.outcome;
       summary.outcomes[outcome] = (summary.outcomes[outcome] ?? 0) + 1;
-      summary.detections = detections.length;
+      summary.signals = signals.length;
     },
     countBaseline(decision) {
       summary.baseline[decision] += 1;
     },
     activity: () => entries,
-    detections: () => detections,
+    signals: () => signals,
   };
 }

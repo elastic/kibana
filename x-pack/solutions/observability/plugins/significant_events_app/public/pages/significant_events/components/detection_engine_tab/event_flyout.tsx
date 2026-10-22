@@ -47,7 +47,7 @@ import type { IDetectionEngineActions } from '../../../../hooks/use_detection_en
 import { useKibana } from '../../../../hooks/use_kibana';
 import { buildDiscoverParams } from '../../../../util/discover_helpers';
 import { SIGNIFICANT_EVENT_SEVERITY } from '../severity_badge/severity_badge';
-import { DetectionsList } from './detections_list';
+import { SignalsList } from './signals_list';
 import { describeStatus, latestWindow, reactionOf } from './event_reaction';
 import { EventTimeline } from './event_timeline';
 import { formatDuration, formatTime } from './format';
@@ -476,7 +476,7 @@ export function EventFlyout({
                       verdict={event.assessment?.verdicts.find(
                         (item) => item.fingerprint === member.fingerprint
                       )}
-                      detections={data.detections}
+                      signals={data.signals}
                       window={window}
                       series={
                         seriesData && samples
@@ -493,18 +493,18 @@ export function EventFlyout({
             <EventTimeline activity={data.activity} episode={event.episode} />
             <EuiSpacer size="m" />
             <EuiAccordion
-              id="detectionEngineEventDetections"
+              id="detectionEngineEventSignals"
               buttonContent={
                 <EuiText size="s">
-                  {i18n.translate('xpack.significantEventsApp.detectionEngine.flyout.detections', {
-                    defaultMessage: 'Every detection behind it ({count})',
-                    values: { count: data.detections.length },
+                  {i18n.translate('xpack.significantEventsApp.detectionEngine.flyout.signals', {
+                    defaultMessage: 'Every signal behind it ({count})',
+                    values: { count: data.signals.length },
                   })}
                 </EuiText>
               }
               paddingSize="s"
             >
-              <DetectionsList detections={data.detections} />
+              <SignalsList signals={data.signals} />
             </EuiAccordion>
           </>
         )}

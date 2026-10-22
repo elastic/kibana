@@ -6,12 +6,13 @@
  */
 
 import type { NightshiftSource } from '@kbn/nightshift-shared';
-import { DAY_MS, HOUR_MS } from '../../../common';
+import { BUCKET_MS, DAY_MS, HOUR_MS } from '../../../common';
 import type { IEngineScope } from '../engine/engine_scope';
 import { getErrorMessage } from '../errors';
 import { esqlString, field, listColumns, queryRows, timeRangeWhere, toNumber } from '../esql';
 import { mapWithConcurrency } from '../concurrency';
 import { messageFieldOf } from './detector_author';
+import { requestTokens } from '../agent/mentions';
 
 /** How far back mentions are counted. */
 const TOPOLOGY_WINDOW_MS = HOUR_MS;
@@ -20,6 +21,12 @@ const MIN_MENTIONS = 20;
 /** Topology changes slowly; it is recomputed at most this often. */
 export const TOPOLOGY_REFRESH_MS = HOUR_MS;
 const QUERY_CONCURRENCY = 3;
+/** Lines read per source, from one settled minute, to find services that serve the same requests. */
+const SHARED_REQUEST_SAMPLE_LINES = 10_000;
+/** Distinct requests two services must share in that minute to sit on one call path. */
+const MIN_SHARED_REQUESTS = 10;
+/** A token on more lines than this is not one request but a run, a host or a tenant. */
+const MAX_LINES_PER_REQUEST = 20;
 
 /** An edge not seen again for this long is forgotten; a service may name another only when it fails. */
 const EDGE_TTL_MS = 7 * DAY_MS;
@@ -28,6 +35,16 @@ const EDGE_TTL_MS = 7 * DAY_MS;
 export interface ObservedDependency {
   source: string;
   target: string;
+  /**
+   * `calls`: the source's logs name the target. `shared_requests`: both logged the same request
+   * or trace ids, so they sit on one call path, direction unknown.
+   */
+  kind?: 'calls' | 'shared_requests';
+  /**
+   * The Nightshift source whose logs showed the call. Two systems can each have a service with
+   * the same name, so an edge only links services seen in the same source.
+   */
+  source_id?: string;
   /** Mentions in the window it was last seen in. */
   mentions: number;
   first_seen: string;
@@ -95,13 +112,22 @@ export async function observeTopology({
             (row): ObservedDependency => ({
               source: String(row.service),
               target,
+              source_id: source.id,
               mentions: toNumber(row.mentions),
               first_seen: nowIso,
               last_seen: nowIso,
             })
           );
         });
-        return counted.flat();
+        const shared = await observeSharedRequests({
+          scope,
+          source,
+          columns,
+          messageField,
+          now,
+          signal,
+        });
+        return [...counted.flat(), ...shared];
       } catch (error) {
         notes.push(`Topology on ${source.title}: ${getErrorMessage(error)}`);
         return [];
@@ -112,7 +138,8 @@ export async function observeTopology({
   const seen = perSource
     .flat()
     .filter((edge) => known.has(edge.source) && edge.source !== edge.target);
-  const key = (edge: ObservedDependency) => `${edge.source}->${edge.target}`;
+  const key = (edge: ObservedDependency) =>
+    `${edge.kind ?? 'calls'}:${edge.source_id ?? ''}:${edge.source}->${edge.target}`;
   const earlier = new Map((previous?.edges ?? []).map((edge) => [key(edge), edge]));
   const edges = [
     ...seen.map((edge) => ({
@@ -133,4 +160,82 @@ export async function observeTopology({
     },
     notes,
   };
+}
+
+/**
+ * Services that logged the same request or trace ids in one settled minute sit on one call
+ * path. Logs that never name their dependency still carry the ids that tie a request together,
+ * which is what traces would show.
+ */
+async function observeSharedRequests({
+  scope,
+  source,
+  columns,
+  messageField,
+  now,
+  signal,
+}: {
+  scope: IEngineScope;
+  source: NightshiftSource;
+  columns: string[];
+  messageField: string;
+  now: number;
+  signal: AbortSignal;
+}): Promise<ObservedDependency[]> {
+  const minute = Math.floor(now / BUCKET_MS) * BUCKET_MS - 2 * BUCKET_MS;
+  const keep = [
+    'service.name',
+    messageField,
+    ...['trace.id', 'trace_id'].filter((name) => columns.includes(name)),
+  ];
+  const { rows } = await queryRows({
+    esClient: scope.dataEsClient,
+    query: `FROM ${source.view_name}
+| WHERE ${timeRangeWhere(minute, minute + BUCKET_MS)}
+| KEEP ${keep.map(field).join(', ')}
+| LIMIT ${SHARED_REQUEST_SAMPLE_LINES}`,
+    signal,
+    timeoutMs: 60_000,
+  });
+  const tokens = requestTokens(rows);
+  const byToken = rows.reduce((found, row, index) => {
+    const service = String(row['service.name'] ?? '');
+    if (!service) {
+      return found;
+    }
+    new Set(tokens[index]).forEach((token) => {
+      const entry = found.get(token) ?? { lines: 0, services: new Set<string>() };
+      entry.lines += 1;
+      entry.services.add(service);
+      found.set(token, entry);
+    });
+    return found;
+  }, new Map<string, { lines: number; services: Set<string> }>());
+  const pairs = [...byToken.values()]
+    .filter((entry) => entry.lines <= MAX_LINES_PER_REQUEST && entry.services.size > 1)
+    .flatMap((entry) => {
+      const services = [...entry.services].sort();
+      return services.flatMap((left, index) =>
+        services.slice(index + 1).map((right) => `${left}\u0000${right}`)
+      );
+    })
+    .reduce(
+      (count, pair) => count.set(pair, (count.get(pair) ?? 0) + 1),
+      new Map<string, number>()
+    );
+  const nowIso = new Date(now).toISOString();
+  return [...pairs]
+    .filter(([, shared]) => shared >= MIN_SHARED_REQUESTS)
+    .map(([pair, shared]): ObservedDependency => {
+      const [left, right] = pair.split('\u0000');
+      return {
+        source: left,
+        target: right,
+        kind: 'shared_requests',
+        source_id: source.id,
+        mentions: shared,
+        first_seen: nowIso,
+        last_seen: nowIso,
+      };
+    });
 }

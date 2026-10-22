@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { DetectionStrategyId, StrategyMode } from './strategies';
+import type { SignalStrategyId, StrategyMode } from './strategies';
 
 /** Outcome of the baseline check. */
 export type BaselineDecision = 'above_normal' | 'background' | 'warming_up' | 'skipped';
 
-/** What the pipeline did with one detection. Every detection gets exactly one. */
-export const DETECTION_OUTCOMES = [
+/** What the pipeline did with one signal. Every signal gets exactly one. */
+export const SIGNAL_OUTCOMES = [
   'background',
   'warming_up',
   'trial_would_raise',
@@ -25,11 +25,25 @@ export const DETECTION_OUTCOMES = [
   'deferred',
   'conflict',
 ] as const;
-export type DetectionOutcome = (typeof DETECTION_OUTCOMES)[number];
+export type SignalOutcome = (typeof SIGNAL_OUTCOMES)[number];
 
 /** Summary of the history the baseline check compared with. */
+/** How often a customer alert fired, which the baseline check judges customer alerts by. */
+export interface AlertFiringHistory {
+  /** Kibana marked the alert as flapping. */
+  flapping: boolean;
+  /** Episodes of this rule and instance that started in the last hour, the current one included. */
+  episodes_last_hour: number;
+  /** Days of the last seven, today left out, on which it was active at some point. */
+  days_active_last_week: number;
+}
+
 export interface BaselineSummary {
   decision: BaselineDecision;
+  /** Why, in words, when the decision is not a comparison with a threshold. */
+  reason?: string;
+  /** For customer alerts: how often the alert fired. */
+  firing?: AlertFiringHistory;
   samples: number;
   /** Samples left out because an event for this series was open at the time. */
   excludedSamples: number;
@@ -45,7 +59,7 @@ export interface BaselineSummary {
 export interface EngineObservation {
   '@timestamp': string;
   run_id: string;
-  strategy: DetectionStrategyId;
+  strategy: SignalStrategyId;
   fingerprint: string;
   service: string;
   bucket_start: string;
@@ -55,15 +69,15 @@ export interface EngineObservation {
 }
 
 /**
- * The common detection format. Every strategy reports in this shape, and discovery reads only
- * this shape, so a new strategy plugs in without changing discovery.
+ * The common signal format. Every strategy reports in this shape, and triage reads only
+ * this shape, so a new strategy plugs in without changing triage.
  */
-export interface EngineDetection {
-  detection_id: string;
+export interface EngineSignal {
+  signal_id: string;
   '@timestamp': string;
   run_id: string;
   /** Which strategy found it. */
-  strategy: DetectionStrategyId;
+  strategy: SignalStrategyId;
   /** The strategy's mode when it reported. */
   mode: StrategyMode;
   /** Stable identity of the watched series; the same problem always has the same fingerprint. */
@@ -87,7 +101,7 @@ export interface EngineDetection {
   /** The Alerting v2 rule that produced the evaluation, for rule-backed strategies. */
   rule_id?: string;
   baseline: BaselineSummary;
-  outcome: DetectionOutcome;
+  outcome: SignalOutcome;
   outcome_reason: string;
   event_id?: string;
 }

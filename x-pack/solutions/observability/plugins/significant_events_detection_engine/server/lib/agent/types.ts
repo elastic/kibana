@@ -7,17 +7,23 @@
 
 import type {
   AgentKind,
-  DetectionStrategyId,
+  SignalStrategyId,
   EngineEventStatus,
   EngineSeverity,
   EvidenceResult,
   EvidenceVerdict,
 } from '../../../common';
 import type { EsqlRow } from '../esql';
+import type { IOpenEventSearch } from './open_event_search';
 
 /** One piece of evidence, with an id the agent must cite. */
 export interface CaseEvidence {
   id: string;
+  /**
+   * In a reopen case, the closed event's own evidence: rows from its earlier episode, which say
+   * what that problem was, not what is happening now.
+   */
+  earlier_episode?: boolean;
   fingerprint: string;
   title: string;
   unit: string;
@@ -27,10 +33,12 @@ export interface CaseEvidence {
   error?: string;
 }
 
-export interface CaseDetection {
+export interface CaseSignal {
   fingerprint: string;
-  strategy: DetectionStrategyId;
+  strategy: SignalStrategyId;
   service: string;
+  /** The source the signal came from, by title: services in different sources are different systems. */
+  source?: string;
   title: string;
   description: string;
   value: number;
@@ -44,9 +52,12 @@ export interface CaseDetection {
  * anything else, and an answer citing evidence the case does not hold is rejected.
  */
 export interface AgentCase {
-  /** New: no event exists. Join: code proposes an open event. Reopen: a closed event's problem is back. */
+  /**
+   * New: no event exists. Join: code proposes an open event. Reopen: a closed event's series is
+   * firing again; the agent decides whether it is the same problem or a different one.
+   */
   kind: 'new_event' | 'join' | 'reopen';
-  detection: CaseDetection;
+  signal: CaseSignal;
   event?: {
     event_id: string;
     title: string;
@@ -57,7 +68,8 @@ export interface AgentCase {
     members: Array<{
       title: string;
       service: string;
-      strategy: DetectionStrategyId;
+      source?: string;
+      strategy: SignalStrategyId;
       importance: number;
     }>;
   };
@@ -83,7 +95,11 @@ export interface AgentCase {
 
 /** The one shape the agent answers in. It reports facts and judgments, never a status. */
 export interface AgentAnswer {
-  join_decision?: 'confirm' | 'veto';
+  /**
+   * The open event the signal joins, the proposed one or one the agent found; in a reopen case,
+   * the closed event when this is its problem coming back.
+   */
+  join_event_id?: string;
   join_reason?: string;
   verdicts: Array<{ evidence_id: string; verdict: EvidenceVerdict; note: string }>;
   severity: EngineSeverity;
@@ -108,10 +124,17 @@ export interface AgentAssessment {
   usage?: AgentUsage;
 }
 
-/** The discovery agent: one bounded step per case. */
-export interface IDiscoveryAgent {
+/** The triage agent: one bounded step per case. */
+export interface ITriageAgent {
   kind: AgentKind;
   /** True when every call spends model tokens, so the daily model budget applies. */
   usesModel: boolean;
-  assess(agentCase: AgentCase, options: { signal: AbortSignal }): Promise<AgentAssessment>;
+  /**
+   * Assesses one case. With `openEvents`, an agent that can search may join the signal to
+   * any open event it finds, not only the one code proposed.
+   */
+  assess(
+    agentCase: AgentCase,
+    options: { signal: AbortSignal; openEvents?: IOpenEventSearch }
+  ): Promise<AgentAssessment>;
 }

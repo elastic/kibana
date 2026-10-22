@@ -6,12 +6,13 @@
  */
 
 import type { EngineSeverity, EvidenceVerdict } from '../../../common';
-import type { AgentAnswer, AgentCase, CaseEvidence, IDiscoveryAgent } from './types';
+import { mentions, sharedIds } from './mentions';
+import type { AgentAnswer, AgentCase, CaseEvidence, ITriageAgent } from './types';
 
 /** Joins across a dependency are confirmed only when the symptoms are this close in time. */
 const DEPENDENCY_JOIN_MAX_MINUTES = 30;
 /**
- * A joining detection this much more important than everything in the event leads its text: a
+ * A joining signal this much more important than everything in the event leads its text: a
  * service going silent must not hide inside an event about routine rejections.
  */
 const ESCALATION_MARGIN = 15;
@@ -48,19 +49,10 @@ function verdictFor(evidence: CaseEvidence): { verdict: EvidenceVerdict; note: s
   };
 }
 
-function mentions(rows: CaseEvidence['rows'], service: string): boolean {
-  const pattern = new RegExp(`\\b${service.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
-  return rows.some((row) =>
-    Object.entries(row).some(
-      ([column, value]) => column !== 'service.name' && pattern.test(String(value))
-    )
-  );
-}
-
 /**
  * A dependency alone does not make two symptoms one problem. Confirm only when the evidence
- * links them: the new detection's rows name a service in the event ("Call to payments failed"),
- * or the event's rows name the new detection's service.
+ * links them: the new signal's rows name a service in the event ("Call to payments failed"),
+ * or the event's rows name the new signal's service.
  */
 function evidenceLinksServices(agentCase: AgentCase): boolean {
   const [own, ...eventEvidence] = agentCase.evidence;
@@ -77,16 +69,20 @@ function evidenceLinksServices(agentCase: AgentCase): boolean {
   const ownLinks =
     own !== undefined && eventServices.some((service) => mentions(own.rows, service));
   const eventLinks = eventEvidence.some((evidence) =>
-    mentions(evidence.rows, agentCase.detection.service)
+    mentions(evidence.rows, agentCase.signal.service)
   );
-  return ownLinks || eventLinks;
+  // The same request or trace id in both services' rows links them, named or not.
+  const sameRequest =
+    own !== undefined &&
+    eventEvidence.some((evidence) => sharedIds(own.rows, evidence.rows).length > 0);
+  return ownLinks || eventLinks || sameRequest;
 }
 
 /**
- * A deterministic stand-in for the discovery agent. It answers in the same shape as the model,
+ * A deterministic stand-in for the triage agent. It answers in the same shape as the model,
  * so the pipeline around it is the same, and runs with no connector and no cost.
  */
-export function createHeuristicAgent(): IDiscoveryAgent {
+export function createHeuristicAgent(): ITriageAgent {
   return {
     kind: 'heuristic',
     usesModel: false,
@@ -112,7 +108,7 @@ function assessHeuristically(agentCase: AgentCase): AgentAnswer {
       (linked && proposal.minutes_apart <= DEPENDENCY_JOIN_MAX_MINUTES));
 
   const importance = Math.max(
-    agentCase.detection.importance,
+    agentCase.signal.importance,
     ...agentCase.firing_customer_alerts.map(() => 75)
   );
   const baseSeverity = severityFromImportance(importance);
@@ -129,17 +125,23 @@ function assessHeuristically(agentCase: AgentCase): AgentAnswer {
     : raised;
 
   const confirming = verdicts.filter((verdict) => verdict.verdict === 'confirms').length;
-  const { detection } = agentCase;
+  const { signal } = agentCase;
   const eventImportance = Math.max(
     0,
     ...(agentCase.event?.members ?? []).map((member) => member.importance)
   );
-  const escalates = detection.importance >= eventImportance + ESCALATION_MARGIN;
+  const escalates = signal.importance >= eventImportance + ESCALATION_MARGIN;
   const keepEventText =
     agentCase.event && (joinConfirmed || agentCase.kind === 'reopen') && !escalates;
 
   return {
-    join_decision: proposal ? (joinConfirmed ? 'confirm' : 'veto') : undefined,
+    // A recurrence is the same problem for the heuristic: it cannot tell two causes apart.
+    join_event_id:
+      agentCase.kind === 'reopen'
+        ? agentCase.event?.event_id
+        : proposal && joinConfirmed
+        ? proposal.event_id
+        : undefined,
     join_reason: proposal
       ? joinConfirmed
         ? `Confirmed: ${proposal.reason}, ${Math.round(proposal.minutes_apart)} min apart.`
@@ -151,10 +153,10 @@ function assessHeuristically(agentCase: AgentCase): AgentAnswer {
       : undefined,
     verdicts,
     severity,
-    title: keepEventText ? agentCase.event!.title : detection.title,
+    title: keepEventText ? agentCase.event!.title : signal.title,
     summary: keepEventText
-      ? `${agentCase.event!.summary} Also: ${detection.title} (${detection.service}).`
-      : `${detection.title} on ${detection.service}. ${detection.description} ${confirming} of ${
+      ? `${agentCase.event!.summary} Also: ${signal.title} (${signal.service}).`
+      : `${signal.title} on ${signal.service}. ${signal.description} ${confirming} of ${
           verdicts.length
         } evidence check(s) confirm it.${
           agentCase.firing_customer_alerts.length > 0

@@ -6,14 +6,14 @@
  */
 
 import type { LearningConfig } from './learning';
-import type { DetectionStrategyId, StrategyConfig } from './strategies';
+import type { SignalStrategyId, StrategyConfig } from './strategies';
 
-/** Which discovery agent the engine asks. */
+/** Which triage agent the engine asks. */
 export type EngineAgentKind = 'heuristic' | 'agent_builder';
 
 /** Engine settings per space. */
 export interface EngineConfig {
-  strategies: Record<DetectionStrategyId, StrategyConfig>;
+  strategies: Record<SignalStrategyId, StrategyConfig>;
   agent: {
     kind: EngineAgentKind;
     /** Model connector for the Agent Builder agent; the space default is used when absent. */
@@ -26,6 +26,12 @@ export interface EngineConfig {
     history_buckets: number;
     /** Threshold is median + k x scaled MAD. */
     mad_k: number;
+    /**
+     * For counts, the threshold is at least mean + k x sqrt(mean + 1): a count's spread grows
+     * with its mean, so a series that matches a few lines a minute is not above normal at the
+     * first busier minute. 0 turns the floor off.
+     */
+    count_noise_k: number;
   };
   /** Open events whose latest signal is this recent can receive join proposals. */
   join_window_minutes: number;
@@ -41,11 +47,46 @@ export interface EngineConfig {
   publish_to_alerting_v2: boolean;
   /** The learning loop: how far it may act, and the bar new candidates must pass. */
   learning: LearningConfig;
+  /** Parts of triage that can be switched off, so the evals can measure what each one adds. */
+  triage: TriageConfig;
+}
+
+/** Triage behaviours with a switch. Each is on by default; off restores the earlier behaviour. */
+export interface TriageConfig {
+  /** The AI step can search every open event; off, it only confirms or vetoes code's proposal. */
+  event_search: boolean;
+  /** A dependency links only services seen in the source it was learned from. */
+  source_scoped_dependencies: boolean;
+  /**
+   * Services the topology saw logging the same request or trace ids count as dependencies.
+   * Off, only dependencies from KIs and from logs that name another service count.
+   */
+  request_path_dependencies: boolean;
+  /**
+   * Code proposes joining an open event that holds a service the signal's own evidence rows
+   * name, in the same source, even when no dependency is known.
+   */
+  evidence_named_joins: boolean;
+  /** The Verifier tells the state machine when an open event's evidence is gone. */
+  verifier_closes: boolean;
+  /**
+   * A closed event's series firing again is grouped again: the agent decides whether it is the
+   * same problem, which reopens the event, or a different one, which opens a new event. Off,
+   * the closed event always reopens.
+   */
+  regroup_recurrences: boolean;
+  /** Customer alerts are judged by how often they fire: flapping or daily alerts are background. */
+  alert_firing_frequency: boolean;
+  /**
+   * A low-cost model that reads a customer rule once to find the entity it watches, when the
+   * rule's own definition does not say. Without it, such rules keep their name as their entity.
+   */
+  rule_entity_connector_id?: string;
 }
 
 /** Settings a person can change through the API; strategies merge field by field. */
 export interface EngineConfigUpdate {
-  strategies?: Partial<Record<DetectionStrategyId, StrategyConfig>>;
+  strategies?: Partial<Record<SignalStrategyId, StrategyConfig>>;
   agent?: EngineConfig['agent'];
   baseline?: Partial<EngineConfig['baseline']>;
   join_window_minutes?: number;
@@ -61,11 +102,12 @@ export interface EngineConfigUpdate {
     replay_hours?: number;
     max_model_calls_per_pass?: number;
   };
+  triage?: Partial<TriageConfig>;
 }
 
 export const DEFAULT_ENGINE_CONFIG: EngineConfig = {
   strategies: {
-    ki_rules: { mode: 'live', daily_cap: 10 },
+    known_failure_queries: { mode: 'live', daily_cap: 10 },
     health_checks: { mode: 'live', daily_cap: 10 },
     customer_alerts: { mode: 'live', daily_cap: 20 },
     // The riskiest strategy starts as a trial, as the evolution path requires.
@@ -75,7 +117,7 @@ export const DEFAULT_ENGINE_CONFIG: EngineConfig = {
     learned_detectors: { mode: 'live', daily_cap: 5 },
   },
   agent: { kind: 'heuristic' },
-  baseline: { min_samples: 10, history_buckets: 60, mad_k: 3 },
+  baseline: { min_samples: 10, history_buckets: 60, mad_k: 3, count_noise_k: 3 },
   join_window_minutes: 60,
   quiet_period_buckets: 2,
   worse_margin: 0.25,
@@ -95,5 +137,14 @@ export const DEFAULT_ENGINE_CONFIG: EngineConfig = {
     },
     replay_hours: 24,
     max_model_calls_per_pass: 4,
+  },
+  triage: {
+    event_search: true,
+    source_scoped_dependencies: true,
+    request_path_dependencies: true,
+    evidence_named_joins: true,
+    verifier_closes: true,
+    regroup_recurrences: true,
+    alert_firing_frequency: true,
   },
 };

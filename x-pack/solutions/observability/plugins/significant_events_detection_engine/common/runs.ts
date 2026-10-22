@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { BaselineDecision, DetectionOutcome } from './detections';
+import type { BaselineDecision, SignalOutcome } from './signals';
 import type { EngineEventStatus } from './events';
-import type { DetectionStrategyId, StrategyMode } from './strategies';
+import type { SignalStrategyId, StrategyMode } from './strategies';
 
 /** Per-strategy result of one run. */
 export interface StrategyRunSummary {
-  strategy: DetectionStrategyId;
+  strategy: SignalStrategyId;
   mode: StrategyMode;
   /** Buckets this run evaluated for the strategy, oldest first. */
   buckets: number;
@@ -46,9 +46,9 @@ export interface EngineRunSummary {
   /** True when the run stopped early to stay inside its time budget. */
   budget_exhausted?: boolean;
   strategies: StrategyRunSummary[];
-  detections: number;
+  signals: number;
   baseline: Record<BaselineDecision, number>;
-  outcomes: Partial<Record<DetectionOutcome, number>>;
+  outcomes: Partial<Record<SignalOutcome, number>>;
   agent: {
     calls: number;
     cooldown_skips: number;
@@ -74,7 +74,7 @@ export interface EngineRunSummary {
 /** Where each strategy has got to, and how far behind real time the engine is. */
 export interface EngineProgress {
   /** End of the last evaluated bucket, per strategy. */
-  watermarks: Partial<Record<DetectionStrategyId, string>>;
+  watermarks: Partial<Record<SignalStrategyId, string>>;
   last_run_at?: string;
   last_success_at?: string;
   consecutive_failures: number;
