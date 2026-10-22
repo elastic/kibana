@@ -732,6 +732,22 @@ Paths are the spec's path templates, relative to its server URL. Fixtures are se
 
 It logs every request with its status, where the response came from (`[fixture]` or `[recording]`), and the violations of failed ones. Tests read and reset the calls through the control endpoints on the proxy's own origin (`GET /_mock/calls`, `POST /_mock/reset`, `GET /_mock/operations`, or `createEmulatorControl` from `@kbn/connector-emulate`). On startup it prints the Kibana settings to use: `xpack.actions.proxyUrl` pointing at the proxy, and `xpack.actions.customHostSettings` entries that trust its CA for the vendor hosts in the specs. Vendor hosts that come from connector config, such as a tenant's subdomain, need the CA trusted for every host instead, by starting Kibana with `NODE_EXTRA_CA_CERTS=data/connector_emulate/ca.crt`. The CA is created there on first use and reused afterwards, so Kibana keeps trusting it when the mock restarts.
 
+#### Several connectors in one Kibana
+
+One proxy can serve several connectors, so one Kibana runs all their tests:
+
+```bash
+node scripts/connector_emulate --connector outlook,one_drive
+# Every connector with a vendor_api/manifest.json
+node scripts/connector_emulate --all
+# Run fixtures and recordings name their connector
+node scripts/connector_emulate --connector outlook,one_drive --fixtures outlook=scenarios/empty_inbox.json
+```
+
+Each connector is answered from its own specs, overlay, fixtures and recordings. A request goes to the connector whose credential it carries: `emulate-<id>`, e.g. `emulate-one_drive`, as an API key, token, Basic auth user or password, OAuth client ID, or a claim of a JWT assertion. The tokens its token URLs issue carry the credential too, so OAuth connectors only need it as their client ID. Other requests go to the first connector whose specs match the URL. Vendor hosts that several connectors call, such as `graph.microsoft.com`, are listed on startup: give those connectors the credential so they get their own responses.
+
+The control endpoints take `?connector=<id>` (`createEmulatorControl(proxyUrl, { connector })`) to see or reset only that connector's calls, so tests running in parallel don't read or clear each other's. Start Kibana with `NODE_EXTRA_CA_CERTS` rather than the printed `customHostSettings`, which list every vendor host. To compare the committed snapshots with the latest vendor specs, run one proxy and one Kibana per `--spec`, as Kibana has one `xpack.actions.proxyUrl`.
+
 ## Related Documentation
 
 - [Connector Spec](./src/connector_spec.ts) - Full API reference
