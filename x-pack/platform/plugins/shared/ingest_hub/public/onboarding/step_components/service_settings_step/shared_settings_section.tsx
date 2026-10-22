@@ -13,7 +13,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -99,9 +98,8 @@ export function SharedSettingsSection({
         isInvalid={descriptionTouched && !!descriptionError}
         error={descriptionError}
       >
-        <EuiTextArea
+        <EuiFieldText
           fullWidth
-          rows={2}
           value={description}
           maxLength={MAX_DESCRIPTION_LENGTH + 1}
           onChange={(e) => {
