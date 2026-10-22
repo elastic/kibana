@@ -94,4 +94,11 @@ describe('bulk action request schemas reject KQL on credential fields in the `ag
   it.each(bulkSchemas)('%s still allows an array of agent IDs', (_name, schema, extra) => {
     expect(() => schema.body.validate({ agents: ['agent-1', 'agent-2'], ...extra })).not.toThrow();
   });
+
+  it.each(bulkSchemas)('%s bounds the length of the agents input', (_name, schema, extra) => {
+    expect(() =>
+      schema.body.validate({ agents: `status:${'a'.repeat(1_000_000)}`, ...extra })
+    ).toThrow();
+    expect(() => schema.body.validate({ agents: ['a'.repeat(513)], ...extra })).toThrow();
+  });
 });
