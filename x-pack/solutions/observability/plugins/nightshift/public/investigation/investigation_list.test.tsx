@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
-import { InvestigationList } from './investigation_list';
+import { InvestigationList, type InvestigationListHandle } from './investigation_list';
+import { SECTION_EXPANSION_STORAGE_KEY } from './use_investigation_section_expansion';
 
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
@@ -54,14 +55,37 @@ const makeSection = (
   ...overrides,
 });
 
-const renderSections = (sections: InvestigationSectionState[]) =>
+const renderSections = (
+  sections: InvestigationSectionState[],
+  ref?: React.RefObject<InvestigationListHandle>
+) =>
   render(
     <I18nProvider>
-      <InvestigationList sections={sections} />
+      <InvestigationList ref={ref} sections={sections} />
     </I18nProvider>
   );
 
+/** EUI makes the accordion arrow the keyboard control; it carries the expanded state. */
+const getToggleControl = (id: string): HTMLElement => {
+  const control = document.querySelector<HTMLElement>(
+    `[aria-controls="nightshiftInvestigationSection-${id}-accordion"][aria-expanded]`
+  );
+  if (control == null) {
+    throw new Error(`No toggle control for section ${id}`);
+  }
+  return control;
+};
+
+// jsdom does not implement it, and scrolling to a section is how a severity tile works.
+const scrollIntoView = jest.fn();
+Element.prototype.scrollIntoView = scrollIntoView;
+
 describe('InvestigationList', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    scrollIntoView.mockClear();
+  });
+
   it('keeps skeletons visible while a section is loading', () => {
     renderSections([makeSection('critical', { isInitialLoading: true }), makeSection('high')]);
 
@@ -101,15 +125,77 @@ describe('InvestigationList', () => {
     expect(screen.queryByTestId('nightshiftInvestigationSection-critical')).not.toBeInTheDocument();
   });
 
-  it('renders in progress first and not rated last', () => {
+  it('renders the sections in the order given: in progress first, closed last', () => {
     renderSections([
       makeSection('in-progress', { investigations: [investigation], total: 1 }),
       makeSection('critical', { investigations: [investigation], total: 1 }),
       makeSection('not-rated', { investigations: [investigation], total: 1 }),
+      makeSection('closed', { investigations: [investigation], total: 1 }),
     ]);
 
     const titles = screen.getAllByRole('heading').map((heading) => heading.textContent);
-    expect(titles).toEqual(['In progress', 'Critical', 'Not rated']);
+    expect(titles).toEqual(['In progress', 'Critical', 'Not rated', 'Closed']);
+  });
+
+  it('starts every section expanded except closed', () => {
+    renderSections([
+      makeSection('critical', { investigations: [investigation], total: 1 }),
+      makeSection('not-rated', { investigations: [investigation], total: 1 }),
+      makeSection('closed', { investigations: [investigation], total: 1 }),
+    ]);
+
+    expect(getToggleControl('critical')).toHaveAttribute('aria-expanded', 'true');
+    expect(getToggleControl('not-rated')).toHaveAttribute('aria-expanded', 'true');
+    expect(getToggleControl('closed')).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('remembers a toggle across reloads through local storage', () => {
+    const sections = [
+      makeSection('critical', { investigations: [investigation], total: 1 }),
+      makeSection('closed', { investigations: [investigation], total: 1 }),
+    ];
+    const { unmount } = renderSections(sections);
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionToggle-critical'));
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionToggle-closed'));
+
+    expect(getToggleControl('critical')).toHaveAttribute('aria-expanded', 'false');
+    expect(getToggleControl('closed')).toHaveAttribute('aria-expanded', 'true');
+    expect(JSON.parse(window.localStorage.getItem(SECTION_EXPANSION_STORAGE_KEY) ?? '{}')).toEqual({
+      critical: false,
+      closed: true,
+    });
+    unmount();
+
+    renderSections(sections);
+
+    expect(getToggleControl('critical')).toHaveAttribute('aria-expanded', 'false');
+    expect(getToggleControl('closed')).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('ignores a malformed stored preference', () => {
+    window.localStorage.setItem(SECTION_EXPANSION_STORAGE_KEY, '["critical"]');
+    renderSections([makeSection('critical', { investigations: [investigation], total: 1 })]);
+
+    expect(getToggleControl('critical')).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('expands a collapsed section before scrolling to it', () => {
+    window.localStorage.setItem(SECTION_EXPANSION_STORAGE_KEY, JSON.stringify({ high: false }));
+    const ref = React.createRef<InvestigationListHandle>();
+    renderSections([makeSection('high', { investigations: [investigation], total: 1 })], ref);
+
+    expect(getToggleControl('high')).toHaveAttribute('aria-expanded', 'false');
+
+    let scrolled: boolean | undefined;
+    act(() => {
+      scrolled = ref.current?.scrollToSeverity('high');
+    });
+
+    expect(scrolled).toBe(true);
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(getToggleControl('high')).toHaveAttribute('aria-expanded', 'true');
+    expect(ref.current?.scrollToSeverity('critical')).toBe(false);
   });
 
   it('renders each investigation as the shared investigation card', () => {

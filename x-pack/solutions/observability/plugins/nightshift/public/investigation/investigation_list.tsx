@@ -17,6 +17,7 @@ import {
   InvestigationSection,
   isInvestigationSectionVisible,
 } from './investigation_section';
+import { useInvestigationSectionExpansion } from './use_investigation_section_expansion';
 
 export interface InvestigationListHandle {
   /** Scrolls to a tier's section, reporting `false` when the list is not rendering one. */
@@ -36,20 +37,27 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
   ): React.ReactElement {
     const { euiTheme } = useEuiTheme();
     const visibleSections = sections.filter(isInvestigationSectionVisible);
+    const expansion = useInvestigationSectionExpansion();
 
-    useImperativeHandle(ref, () => ({
-      scrollToSeverity: (severity: Severity) => {
-        const section = document.getElementById(getInvestigationSectionAnchorId(severity));
-        if (section == null) {
-          return false;
-        }
-        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        // Scrolling alone leaves keyboard and screen reader users where they were, so move focus
-        // to the section too. `preventScroll` keeps the smooth scroll above from being cut short.
-        section.focus({ preventScroll: true });
-        return true;
-      },
-    }));
+    useImperativeHandle(
+      ref,
+      () => ({
+        scrollToSeverity: (severity: Severity) => {
+          const section = document.getElementById(getInvestigationSectionAnchorId(severity));
+          if (section == null) {
+            return false;
+          }
+          // A jump to a collapsed section would land on a lone heading, so open it first.
+          expansion.expand(severity);
+          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // Scrolling alone leaves keyboard and screen reader users where they were, so move focus
+          // to the section too. `preventScroll` keeps the smooth scroll above from being cut short.
+          section.focus({ preventScroll: true });
+          return true;
+        },
+      }),
+      [expansion]
+    );
 
     if (visibleSections.length === 0) {
       return (
@@ -86,6 +94,8 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
               error={section.error}
               onShowMore={section.fetchNextPage}
               onRetry={section.refetch}
+              isExpanded={expansion.isExpanded(section.id)}
+              onToggle={() => expansion.toggle(section.id)}
               selectedInvestigationId={selectedInvestigationId}
               onInvestigationClick={onInvestigationClick}
             />

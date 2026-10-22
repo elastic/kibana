@@ -8,6 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import { useInfiniteQuery } from '@kbn/react-query';
 import type {
+  InvestigationMetadataStatus,
   InvestigationSeverityFilterValue,
   InvestigationSummary,
   ListInvestigationsResponse,
@@ -22,7 +23,8 @@ import { useKibana } from './use_kibana';
 
 export const NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY = ['nightshift.investigations'] as const;
 
-const INVESTIGATIONS_PAGE_SIZE = 10;
+/** Rows a section loads per "Show more". */
+export const INVESTIGATIONS_PAGE_SIZE = 10;
 
 /**
  * The shared list API cannot filter on `in_progress`, so the in-progress section reads this many
@@ -36,6 +38,8 @@ const SECTION_STALE_TIME_MS = 30_000;
 export interface FetchInvestigationsParams {
   /** True: only investigations an agent is working on; false: the rest. */
   inProgress: boolean;
+  /** Ignored for the in-progress section, which is open by definition. */
+  status?: InvestigationMetadataStatus;
   severities?: InvestigationSeverityFilterValue[];
   query?: string;
   /**
@@ -86,6 +90,7 @@ export const getInvestigationsNextPageParam = ({
 /** One landing section's investigations from the shared investigations list API, page by page. */
 export const useFetchInvestigations = ({
   inProgress,
+  status,
   severities,
   query,
   refetchInterval = false,
@@ -103,7 +108,14 @@ export const useFetchInvestigations = ({
     isPreviousData,
     refetch,
   } = useInfiniteQuery<ListInvestigationsResponse, Error>({
-    queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'section', inProgress, severities, query],
+    queryKey: [
+      ...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY,
+      'section',
+      inProgress,
+      status,
+      severities,
+      query,
+    ],
     // The list API belongs to agenticInvestigations, an optional dependency.
     enabled: agenticInvestigations != null,
     queryFn: async ({ pageParam, signal }) =>
@@ -117,6 +129,7 @@ export const useFetchInvestigations = ({
             : {
                 page: typeof pageParam === 'number' ? pageParam : 1,
                 per_page: INVESTIGATIONS_PAGE_SIZE,
+                ...(status ? { status } : {}),
               }),
           ...(severities?.length ? { severity: severities } : {}),
           ...(query ? { query } : {}),

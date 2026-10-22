@@ -108,20 +108,26 @@ describe('useInvestigationSections', () => {
     );
   });
 
-  it('fetches in progress, then each severity tier, then the investigations without a severity', () => {
+  it('fetches in progress, each open severity tier, the open ones without a severity, then the closed ones', () => {
     const { result } = renderSections('checkout');
 
     expect(
       mockUseFetchInvestigations.mock.calls
-        .slice(0, 6)
-        .map(([{ inProgress, severities, query }]) => ({ inProgress, severities, query }))
+        .slice(0, 7)
+        .map(([{ inProgress, status, severities, query }]) => ({
+          inProgress,
+          status,
+          severities,
+          query,
+        }))
     ).toEqual([
-      { inProgress: true, severities: undefined, query: 'checkout' },
-      { inProgress: false, severities: ['critical'], query: 'checkout' },
-      { inProgress: false, severities: ['high'], query: 'checkout' },
-      { inProgress: false, severities: ['medium'], query: 'checkout' },
-      { inProgress: false, severities: ['low'], query: 'checkout' },
-      { inProgress: false, severities: ['none'], query: 'checkout' },
+      { inProgress: true, status: undefined, severities: undefined, query: 'checkout' },
+      { inProgress: false, status: 'open', severities: ['critical'], query: 'checkout' },
+      { inProgress: false, status: 'open', severities: ['high'], query: 'checkout' },
+      { inProgress: false, status: 'open', severities: ['medium'], query: 'checkout' },
+      { inProgress: false, status: 'open', severities: ['low'], query: 'checkout' },
+      { inProgress: false, status: 'open', severities: ['none'], query: 'checkout' },
+      { inProgress: false, status: 'closed', severities: undefined, query: 'checkout' },
     ]);
     expect(result.current.sections.map(({ id }) => id)).toEqual([
       'in-progress',
@@ -130,6 +136,7 @@ describe('useInvestigationSections', () => {
       'medium',
       'low',
       'not-rated',
+      'closed',
     ]);
   });
 
@@ -146,7 +153,7 @@ describe('useInvestigationSections', () => {
     );
     expect(httpGet).toHaveBeenCalledWith(
       '/internal/investigations/investigations/_severity_counts',
-      expect.objectContaining({ query: { query: 'checkout' }, version: '1' })
+      expect.objectContaining({ query: { status: 'open', query: 'checkout' }, version: '1' })
     );
   });
 
@@ -155,8 +162,8 @@ describe('useInvestigationSections', () => {
 
     expect(result.current.hasActiveInvestigations).toBe(true);
     expect(
-      mockUseFetchInvestigations.mock.calls.slice(0, 6).map(([params]) => params.refetchInterval)
-    ).toEqual([5_000, undefined, undefined, undefined, undefined, undefined]);
+      mockUseFetchInvestigations.mock.calls.slice(0, 7).map(([params]) => params.refetchInterval)
+    ).toEqual([5_000, undefined, undefined, undefined, undefined, undefined, undefined]);
   });
 
   it('refetches the other sections when work leaves the in-progress section', () => {
