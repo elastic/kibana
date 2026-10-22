@@ -93,7 +93,6 @@ export const useFetchSameRuleEpisodesQuery = ({
           ).print('basic')
         : buildRelatedAlertEpisodesEsqlQuery(spaceId, relatedScope, exId).print('basic');
       return fetchRelatedEpisodes({
-        spaceId,
         abortSignal: signal,
         pageSize,
         query,

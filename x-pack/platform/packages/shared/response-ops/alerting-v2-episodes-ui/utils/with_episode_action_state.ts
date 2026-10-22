@@ -8,6 +8,19 @@
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeGroupAction, EpisodeActionState } from '../types/action';
 
+/**
+ * Tells whether an action state query has loaded the data for its current
+ * key. A failed query, or one still showing the data of a previous key, has
+ * not: its data can't be read as "no actions".
+ */
+export const isEpisodeActionStateLoaded = ({
+  isSuccess,
+  isPreviousData,
+}: {
+  isSuccess: boolean;
+  isPreviousData: boolean;
+}): boolean => isSuccess && !isPreviousData;
+
 const toAckAction = (value: string | null | undefined): AlertEpisode['last_ack_action'] =>
   value === 'ack' || value === 'unack' ? value : null;
 

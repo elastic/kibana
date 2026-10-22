@@ -12,6 +12,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchEpisodeEventDataQuery } from './use_fetch_episode_event_data_query';
+import { useFetchEpisodeQuery } from './use_fetch_episode_query';
 
 jest.mock('../utils/run_esql_async_search');
 
@@ -40,7 +41,7 @@ const mockResponses = ({
   episodeData,
   episode,
 }: {
-  episodeData: ReturnType<typeof mockDataResponse>;
+  episodeData: ReturnType<typeof mockDataResponse> | Promise<never>;
   episode: ReturnType<typeof mockEpisodeResponse>;
 }) =>
   mockRunEsqlAsyncSearch.mockImplementation(async ({ params }) =>
@@ -78,7 +79,7 @@ describe('useFetchEpisodeEventDataQuery', () => {
         }),
       { wrapper }
     );
-    expect(result.current.fetchStatus).toBe('idle');
+    expect(result.current.data).toBeUndefined();
     expect(mockRunEsqlAsyncSearch).not.toHaveBeenCalled();
   });
 
@@ -92,7 +93,7 @@ describe('useFetchEpisodeEventDataQuery', () => {
 
     const { result } = renderEventDataHook();
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     const dataRequest = buildEpisodeDataRequest(DEFAULT_SPACE_ID, 'ep-1');
     expect(mockRunEsqlAsyncSearch).toHaveBeenCalledWith(
@@ -129,7 +130,7 @@ describe('useFetchEpisodeEventDataQuery', () => {
 
     const { result } = renderEventDataHook();
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.data).toEqual({
       data: rawData,
       dataTimestamp,
@@ -145,7 +146,7 @@ describe('useFetchEpisodeEventDataQuery', () => {
 
     const { result } = renderEventDataHook();
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.data).toBeNull();
   });
 
@@ -157,7 +158,43 @@ describe('useFetchEpisodeEventDataQuery', () => {
 
     const { result } = renderEventDataHook();
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.data).toBeNull();
+  });
+
+  it('reports an error when the data lookup fails', async () => {
+    mockResponses({
+      episodeData: Promise.reject(new Error('boom')),
+      episode: mockEpisodeResponse('2026-04-29T10:00:00.000Z'),
+    });
+
+    const { result } = renderEventDataHook();
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.data).toBeUndefined();
+  });
+
+  it('shares the requests of the episode query', async () => {
+    mockResponses({
+      episodeData: mockDataResponse('{}', '2026-04-29T10:00:00.000Z'),
+      episode: mockEpisodeResponse('2026-04-29T10:00:00.000Z'),
+    });
+
+    const { result } = renderHook(
+      () => ({
+        episode: useFetchEpisodeQuery({
+          episodeId: 'ep-1',
+          services: { data, spaces: mockSpaces },
+        }),
+        eventData: useFetchEpisodeEventDataQuery({
+          episodeId: 'ep-1',
+          services: { data, spaces: mockSpaces },
+        }),
+      }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.eventData.isLoading).toBe(false));
+    expect(mockRunEsqlAsyncSearch).toHaveBeenCalledTimes(2);
   });
 });

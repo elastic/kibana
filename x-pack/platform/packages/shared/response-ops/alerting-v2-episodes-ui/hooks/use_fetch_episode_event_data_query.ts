@@ -5,18 +5,11 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { useQuery } from '@kbn/react-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import {
-  buildEpisodeDataRequest,
-  buildEpisodeQuery,
-  rowsFromEsql,
-} from '@kbn/alerting-v2-common-queries';
-import { QUERY_STALE_TIME } from '../constants';
-import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
-import { queryKeys } from '../query_keys';
-import { useSpaceId } from './use_space_id';
+import { useFetchEpisodeDataQuery } from './use_fetch_episode_data_query';
+import { useFetchEpisodeQuery } from './use_fetch_episode_query';
 
 export interface UseFetchEpisodeEventDataQueryOptions {
   episodeId: string | undefined;
@@ -36,61 +29,55 @@ export interface EpisodeEventData {
   isStale: boolean;
 }
 
+export interface UseFetchEpisodeEventDataQueryResult {
+  /** `null` when no event with non-empty data is available yet. */
+  data: EpisodeEventData | null | undefined;
+  isLoading: boolean;
+  isError: boolean;
+}
+
+const parseEventData = (episodeData: string | null): Record<string, unknown> | null => {
+  if (!episodeData) return null;
+  try {
+    return JSON.parse(episodeData) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+};
+
 /**
- * Fetches the alert `data` object from the latest non-empty event for an episode,
- * along with the timestamp of that event and a flag indicating whether a more
- * recent event without data exists. Returns `null` when no event with non-empty
- * data is available yet. Only the event with the data has its `_source` parsed:
- * the latest event timestamp comes from the episode row, which reads indexed
- * fields only.
+ * Derives the alert `data` object from the latest non-empty event for an
+ * episode, along with the timestamp of that event and a flag indicating
+ * whether a more recent event without data exists. It reuses the episode data
+ * and episode row queries, so it adds no requests of its own.
  */
 export const useFetchEpisodeEventDataQuery = ({
   episodeId,
   services,
-}: UseFetchEpisodeEventDataQueryOptions) => {
-  const { data } = services;
-  const spaceId = useSpaceId(services.spaces);
-
-  return useQuery({
-    queryKey: queryKeys.episodeEventData(spaceId, episodeId ?? ''),
-    queryFn: async ({ signal }): Promise<EpisodeEventData | null> => {
-      const dataRequest = buildEpisodeDataRequest(spaceId, episodeId!);
-      const episodeQuery = buildEpisodeQuery(spaceId, episodeId!);
-      const [rawData, rawEpisode] = await Promise.all([
-        runEsqlAsyncSearch({
-          data,
-          params: {
-            query: dataRequest.query.print('basic'),
-            filter: dataRequest.filter,
-            time_zone: 'UTC',
-          },
-          abortSignal: signal,
-        }),
-        runEsqlAsyncSearch({
-          data,
-          params: { query: episodeQuery.print('basic'), time_zone: 'UTC' },
-          abortSignal: signal,
-        }),
-      ]);
-      const [dataRow] = rowsFromEsql(dataRequest.query, rawData);
-      if (!dataRow?.episode_data) return null;
-
-      let parsed: Record<string, unknown>;
-      try {
-        parsed = JSON.parse(dataRow.episode_data) as Record<string, unknown>;
-      } catch {
-        return null;
-      }
-
-      const [episodeRow] = rowsFromEsql(episodeQuery, rawEpisode);
-      const lastEventTimestamp = episodeRow?.last_timestamp;
-      return {
-        data: parsed,
-        dataTimestamp: dataRow['@timestamp'],
-        isStale: Boolean(lastEventTimestamp && lastEventTimestamp !== dataRow['@timestamp']),
-      };
-    },
-    enabled: Boolean(episodeId),
-    staleTime: QUERY_STALE_TIME,
+}: UseFetchEpisodeEventDataQueryOptions): UseFetchEpisodeEventDataQueryResult => {
+  const dataQuery = useFetchEpisodeDataQuery({ episodeId, services });
+  const { data: episode, isLoading: isLoadingEpisode } = useFetchEpisodeQuery({
+    episodeId,
+    services,
   });
+
+  const dataRow = dataQuery.data;
+  const lastEventTimestamp = episode?.last_timestamp;
+  const eventData = useMemo((): EpisodeEventData | null | undefined => {
+    if (dataRow === undefined) return undefined;
+    const parsed = parseEventData(dataRow?.episode_data ?? null);
+    if (!dataRow || !parsed) return null;
+    return {
+      data: parsed,
+      dataTimestamp: dataRow['@timestamp'],
+      isStale: Boolean(lastEventTimestamp && lastEventTimestamp !== dataRow['@timestamp']),
+    };
+  }, [dataRow, lastEventTimestamp]);
+
+  return {
+    data: eventData,
+    // The stale flag needs the episode row, so wait for both.
+    isLoading: dataQuery.isLoading || isLoadingEpisode,
+    isError: dataQuery.isError,
+  };
 };

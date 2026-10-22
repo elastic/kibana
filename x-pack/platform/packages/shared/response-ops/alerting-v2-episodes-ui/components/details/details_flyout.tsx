@@ -179,6 +179,7 @@ export const AlertEpisodeDetailsFlyout = ({
     severity,
     episodeAction,
     groupAction,
+    isActionStateLoaded,
     isFlapping,
   } = useEpisodeDetailsHeaderData({ episodeId, groupHash, services });
   const { label: systemLabel, icon: systemIcon } = useEpisodeSource(sourceId);
@@ -192,7 +193,11 @@ export const AlertEpisodeDetailsFlyout = ({
   // Related episodes are matched by rule or external source. Until the episode loads the
   // section renders its own loading or error state, so the panel stays.
   const showRelated = !episode || Boolean(episode['rule.id']) || connectorSource !== undefined;
-  const episodes = useMemo(() => (episode ? [episode] : []), [episode]);
+  // The actions depend on the action state, so they wait for it to load.
+  const episodes = useMemo(
+    () => (episode && isActionStateLoaded ? [episode] : []),
+    [episode, isActionStateLoaded]
+  );
   const compatibleActions = useMemo(
     () => (actions && episodes.length ? actions.filter((a) => a.isCompatible({ episodes })) : []),
     [actions, episodes]

@@ -43,13 +43,15 @@ const mockDataResponse = (episodeData: string) => ({
 
 const EMPTY_RESPONSE = { columns: [], values: [] };
 
+type MockResponse = ReturnType<typeof mockEpisodeResponse> | typeof EMPTY_RESPONSE;
+
 // Answers each of the two parallel requests by its query.
 const mockResponses = ({
   episode,
   episodeData,
 }: {
-  episode: ReturnType<typeof mockEpisodeResponse> | typeof EMPTY_RESPONSE;
-  episodeData: ReturnType<typeof mockDataResponse> | typeof EMPTY_RESPONSE;
+  episode: MockResponse;
+  episodeData: MockResponse | ReturnType<typeof mockDataResponse> | Promise<never>;
 }) =>
   runEsqlAsyncSearchMock.mockImplementation(async ({ params }) =>
     String(params.query).includes('JSON_EXTRACT') ? episodeData : episode
@@ -77,11 +79,11 @@ describe('useFetchEpisodeQuery', () => {
       { wrapper }
     );
 
-    expect(result.current.fetchStatus).toBe('idle');
+    expect(result.current.data).toBeUndefined();
     expect(runEsqlAsyncSearchMock).not.toHaveBeenCalled();
   });
 
-  it('loads the episode row and its latest data in parallel', async () => {
+  it('loads the episode row and its latest data with two requests', async () => {
     const episodeId = 'ep-1';
     mockResponses({
       episode: mockEpisodeResponse(episodeId),
@@ -97,7 +99,7 @@ describe('useFetchEpisodeQuery', () => {
       { wrapper }
     );
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.data?.episode_data).toBe('{"host":"web-01"}'));
 
     const dataRequest = buildEpisodeDataRequest(DEFAULT_SPACE_ID, episodeId);
     expect(runEsqlAsyncSearchMock).toHaveBeenCalledTimes(2);
@@ -140,7 +142,7 @@ describe('useFetchEpisodeQuery', () => {
       { wrapper }
     );
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.isDataLoading).toBe(false));
     expect(result.current.data?.episode_data).toBeNull();
   });
 
@@ -156,7 +158,45 @@ describe('useFetchEpisodeQuery', () => {
       { wrapper }
     );
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.isError).toBe(false);
     expect(result.current.data).toBeUndefined();
+  });
+
+  it('returns the episode row without waiting for the data', async () => {
+    mockResponses({ episode: mockEpisodeResponse('ep-1'), episodeData: new Promise(() => {}) });
+
+    const { result } = renderHook(
+      () =>
+        useFetchEpisodeQuery({
+          episodeId: 'ep-1',
+          services: { data, spaces: mockSpaces },
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.isDataLoading).toBe(true);
+    expect(result.current.data).toMatchObject({ 'episode.id': 'ep-1', episode_data: null });
+  });
+
+  it('keeps the episode row when the data lookup fails', async () => {
+    mockResponses({
+      episode: mockEpisodeResponse('ep-1'),
+      episodeData: Promise.reject(new Error('boom')),
+    });
+
+    const { result } = renderHook(
+      () =>
+        useFetchEpisodeQuery({
+          episodeId: 'ep-1',
+          services: { data, spaces: mockSpaces },
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isDataError).toBe(true));
+    expect(result.current.isError).toBe(false);
+    expect(result.current.data).toMatchObject({ 'episode.id': 'ep-1', episode_data: null });
   });
 });

@@ -119,6 +119,7 @@ const baseHeaderData = {
   severity: null,
   episodeAction: undefined,
   groupAction: undefined,
+  isActionStateLoaded: true,
   isFlapping: false,
 };
 
@@ -548,6 +549,54 @@ describe('AlertEpisodeDetailsFlyout', () => {
 
     expect(screen.getByText('Snoozed by')).toBeInTheDocument();
     expect(screen.getByText('user-snoozer')).toBeInTheDocument();
+  });
+
+  describe('while the action state loads', () => {
+    const mockAckAction = {
+      id: 'ACK',
+      order: 10,
+      displayName: 'Acknowledge',
+      iconType: 'check',
+      isCompatible: () => true,
+      execute: jest.fn(),
+    } as unknown as EpisodeAction;
+
+    it('holds back the take action items until the action state loads', () => {
+      mockUseEpisodeDetailsHeaderData.mockReturnValue({
+        ...baseHeaderData,
+        episode: mockEpisode,
+        isActionStateLoaded: false,
+      });
+
+      const { rerender } = render(
+        <AlertEpisodeDetailsFlyout {...baseProps} actions={[mockAckAction]} />,
+        { wrapper: Wrapper }
+      );
+      fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton'));
+
+      expect(screen.queryByTestId('alertingV2EpisodeTakeAction-ACK')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alertingV2EpisodeTakeAction-viewDetails')).toBeInTheDocument();
+
+      mockUseEpisodeDetailsHeaderData.mockReturnValue({ ...baseHeaderData, episode: mockEpisode });
+      rerender(<AlertEpisodeDetailsFlyout {...baseProps} actions={[mockAckAction]} />);
+
+      expect(screen.getByTestId('alertingV2EpisodeTakeAction-ACK')).toBeInTheDocument();
+    });
+
+    it('shows the plain assignee until the action state loads', () => {
+      mockUseEpisodeDetailsHeaderData.mockReturnValue({
+        ...baseHeaderData,
+        episode: mockEpisode,
+        isActionStateLoaded: false,
+      });
+
+      render(<AlertEpisodeDetailsFlyout {...baseProps} actions={[mockEditAssigneeAction]} />, {
+        wrapper: Wrapper,
+      });
+
+      expect(screen.queryByTestId('assigneeInlineControlStub')).not.toBeInTheDocument();
+      expect(mockRenderInlineControl).not.toHaveBeenCalled();
+    });
   });
 
   describe('assignee header value', () => {

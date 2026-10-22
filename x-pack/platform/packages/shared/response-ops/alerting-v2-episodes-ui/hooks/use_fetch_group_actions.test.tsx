@@ -10,7 +10,8 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { fetchGroupActions } from '../apis/fetch_group_actions';
 import type { GroupActionRow } from '../queries/group_actions_query';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
-import { useFetchGroupActions } from './use_fetch_group_actions';
+import type { AlertEpisodeGroupAction } from '../types/action';
+import { getGroupAction, getGroupActionKey, useFetchGroupActions } from './use_fetch_group_actions';
 
 jest.mock('../apis/fetch_group_actions');
 
@@ -113,5 +114,43 @@ describe('useFetchGroupActions', () => {
     await waitFor(() => expect(result.current.data?.size).toBe(2));
     expect(result.current.data?.get('r1:dup')?.lastSnoozeAction).toBe('snooze');
     expect(result.current.data?.get('r2:dup')?.lastDeactivateAction).toBe('deactivate');
+  });
+});
+
+describe('getGroupAction', () => {
+  const mockGroupAction = (ruleId: string | null): AlertEpisodeGroupAction => ({
+    groupHash: 'gh-1',
+    ruleId,
+    lastDeactivateAction: null,
+    lastSnoozeAction: 'snooze',
+    snoozedUntil: null,
+    lastSnoozeActor: null,
+    lastDeactivateActor: null,
+  });
+
+  it('returns the actions of the rule', () => {
+    const mockMap = new Map([
+      [getGroupActionKey('rule-a', 'gh-1'), mockGroupAction('rule-a')],
+      [getGroupActionKey(null, 'gh-1'), mockGroupAction(null)],
+    ]);
+
+    expect(getGroupAction(mockMap, 'rule-a', 'gh-1')?.ruleId).toBe('rule-a');
+  });
+
+  it("doesn't return the actions of another rule on the same group hash", () => {
+    const mockMap = new Map([[getGroupActionKey('rule-a', 'gh-1'), mockGroupAction('rule-a')]]);
+
+    expect(getGroupAction(mockMap, 'rule-b', 'gh-1')).toBeUndefined();
+  });
+
+  it('falls back to the actions without a rule', () => {
+    const mockMap = new Map([[getGroupActionKey(null, 'gh-1'), mockGroupAction(null)]]);
+
+    expect(getGroupAction(mockMap, 'rule-b', 'gh-1')?.ruleId).toBeNull();
+    expect(getGroupAction(mockMap, undefined, 'gh-1')?.ruleId).toBeNull();
+  });
+
+  it('returns undefined without a map', () => {
+    expect(getGroupAction(undefined, 'rule-a', 'gh-1')).toBeUndefined();
   });
 });

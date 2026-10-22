@@ -13,6 +13,7 @@ import type {
   EpisodeEventsEsqlRow,
   SeriesSnoozeEsqlRow,
 } from '@kbn/alerting-v2-common-queries';
+import { EPISODE_DATA_FILTER } from '@kbn/alerting-v2-common-queries';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { EpisodesClient } from './episodes_client';
 
@@ -140,7 +141,7 @@ describe('EpisodesClient', () => {
       const dataCall = queryService.executeQueryRows.mock.calls.find(([{ query }]) =>
         query.includes('JSON_EXTRACT')
       );
-      expect(dataCall?.[0]).toMatchObject({ filter: { exists: { field: 'data' } } });
+      expect(dataCall?.[0]).toMatchObject({ filter: EPISODE_DATA_FILTER });
     });
 
     it('returns empty action columns when the episode has no actions', async () => {

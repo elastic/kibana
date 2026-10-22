@@ -11,6 +11,7 @@ import {
   buildEpisodesDataRequest,
   buildEpisodeQuery,
   buildSeriesSnoozeQuery,
+  EPISODE_DATA_FILTER,
   EPISODE_EVENTS_FIELDS,
 } from './episode_query';
 
@@ -87,9 +88,13 @@ describe('buildEpisodeDataRequest', () => {
     expect(queryString.indexOf('JSON_EXTRACT')).toBeGreaterThan(queryString.indexOf('LIMIT 1'));
   });
 
-  it('comes with a filter that skips the events without data', () => {
-    expect(buildEpisodeDataRequest(SPACE_ID, 'ep-1').filter).toEqual({
-      exists: { field: 'data' },
+  it('comes with a filter that skips the events without data, but keeps the breached ones', () => {
+    expect(buildEpisodeDataRequest(SPACE_ID, 'ep-1').filter).toEqual(EPISODE_DATA_FILTER);
+    expect(EPISODE_DATA_FILTER).toEqual({
+      bool: {
+        should: [{ term: { status: 'breached' } }, { exists: { field: 'data' } }],
+        minimum_should_match: 1,
+      },
     });
   });
 });
@@ -103,7 +108,7 @@ describe('buildEpisodesDataRequest', () => {
     expect(queryString).toContain('SORT @timestamp DESC | LIMIT 1 BY `episode.id`');
     expect(queryString.indexOf('JSON_EXTRACT')).toBeGreaterThan(queryString.indexOf('LIMIT 1 BY'));
     expect(queryString).toContain('KEEP `episode.id`, episode_data');
-    expect(filter).toEqual({ exists: { field: 'data' } });
+    expect(filter).toEqual(EPISODE_DATA_FILTER);
   });
 });
 

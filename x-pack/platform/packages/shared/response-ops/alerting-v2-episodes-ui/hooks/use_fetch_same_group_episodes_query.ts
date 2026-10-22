@@ -69,7 +69,6 @@ export const useFetchSameGroupEpisodesQuery = ({
     ),
     queryFn: ({ signal }) =>
       fetchRelatedEpisodes({
-        spaceId,
         abortSignal: signal,
         pageSize,
         query: buildSameGroupRelatedAlertEpisodesEsqlQuery(

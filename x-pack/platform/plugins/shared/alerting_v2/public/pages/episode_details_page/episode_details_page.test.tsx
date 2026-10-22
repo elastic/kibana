@@ -240,6 +240,8 @@ beforeEach(() => {
         },
       ],
     ]),
+    isSuccess: true,
+    isPreviousData: false,
   } as ReturnType<typeof useFetchEpisodeActions>);
   mockUseFetchGroupActions.mockReturnValue({
     data: new Map([
@@ -257,6 +259,8 @@ beforeEach(() => {
         },
       ],
     ]),
+    isSuccess: true,
+    isPreviousData: false,
   } as unknown as ReturnType<typeof useFetchGroupActions>);
   mockCreateEpisodeActions.mockReturnValue([
     {
@@ -373,6 +377,8 @@ describe('EpisodeDetailsPage', () => {
           },
         ],
       ]),
+      isSuccess: true,
+      isPreviousData: false,
     } as unknown as ReturnType<typeof useFetchGroupActions>);
 
     renderPage();
@@ -399,6 +405,8 @@ describe('EpisodeDetailsPage', () => {
           },
         ],
       ]),
+      isSuccess: true,
+      isPreviousData: false,
     } as unknown as ReturnType<typeof useFetchGroupActions>);
 
     renderPage();
@@ -482,6 +490,36 @@ describe('EpisodeDetailsPage', () => {
     expect(
       screen.getByTestId('episodeActionsBar-overflow-ALERTING_V2_EDIT_EPISODE_TAGS')
     ).toBeInTheDocument();
+  });
+
+  it('holds back the app header menu actions until the action state loads', async () => {
+    mockUseFetchEpisodeActions.mockReturnValue({
+      data: undefined,
+      isSuccess: false,
+      isPreviousData: false,
+    } as unknown as ReturnType<typeof useFetchEpisodeActions>);
+
+    renderPage();
+    await openAppMenuOverflow();
+
+    expect(
+      screen.queryByTestId('episodeActionsBar-primary-ALERTING_V2_ACK_EPISODE')
+    ).not.toBeInTheDocument();
+  });
+
+  it("doesn't read the actions of the previous alert as the current ones", async () => {
+    mockUseFetchGroupActions.mockReturnValue({
+      data: new Map(),
+      isSuccess: true,
+      isPreviousData: true,
+    } as unknown as ReturnType<typeof useFetchGroupActions>);
+
+    renderPage();
+    await openAppMenuOverflow();
+
+    expect(
+      screen.queryByTestId('episodeActionsBar-primary-ALERTING_V2_ACK_EPISODE')
+    ).not.toBeInTheDocument();
   });
 
   it('runs an app header menu action when clicked', async () => {

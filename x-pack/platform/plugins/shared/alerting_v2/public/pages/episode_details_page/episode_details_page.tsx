@@ -37,7 +37,10 @@ import {
 } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
 import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
 import { useEpisodeFlapping } from '@kbn/alerting-v2-episodes-ui/hooks/use_episode_flapping';
-import { withEpisodeActionState } from '@kbn/alerting-v2-episodes-ui/utils/with_episode_action_state';
+import {
+  isEpisodeActionStateLoaded,
+  withEpisodeActionState,
+} from '@kbn/alerting-v2-episodes-ui/utils/with_episode_action_state';
 import { isRuleLoaded } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
@@ -117,15 +120,21 @@ export function EpisodeDetailsPage() {
 
   const { ruleState } = useFetchRule({ id: ruleId, http });
 
-  const { data: episodeActionsMap } = useFetchEpisodeActions({
+  const episodeActionsQuery = useFetchEpisodeActions({
     episodeIds: episodeId ? [episodeId] : [],
     services: { expressions: services.expressions, spaces: services.spaces },
   });
+  const { data: episodeActionsMap } = episodeActionsQuery;
 
-  const { data: groupActionsMap } = useFetchGroupActions({
+  const groupActionsQuery = useFetchGroupActions({
     groupHashes: groupHash ? [groupHash] : [],
     services: { expressions: services.expressions, spaces: services.spaces },
   });
+  const { data: groupActionsMap } = groupActionsQuery;
+  // The actions depend on the action state, so they wait for it to load.
+  const isActionStateLoaded =
+    isEpisodeActionStateLoaded(episodeActionsQuery) &&
+    (!groupHash || isEpisodeActionStateLoaded(groupActionsQuery));
 
   const { isFlapping } = useEpisodeFlapping({
     episodeId,
@@ -254,7 +263,7 @@ export function EpisodeDetailsPage() {
   );
 
   const applicableActions = useMemo(() => {
-    if (!episode) {
+    if (!episode || !isActionStateLoaded) {
       return [];
     }
     const episodes = [episode];
@@ -262,7 +271,7 @@ export function EpisodeDetailsPage() {
       (action) =>
         action.isCompatible({ episodes }) || Boolean(action.showWhenDisabled?.({ episodes }))
     );
-  }, [episodeActions, episode]);
+  }, [episodeActions, episode, isActionStateLoaded]);
 
   const headerTabs = useMemo(
     () =>

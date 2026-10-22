@@ -15,7 +15,10 @@ import { useFetchEpisodeActions } from './use_fetch_episode_actions';
 import { getGroupAction, useFetchGroupActions } from './use_fetch_group_actions';
 import { useFetchRule } from './use_fetch_rule';
 import { useEpisodeFlapping } from './use_episode_flapping';
-import { withEpisodeActionState } from '../utils/with_episode_action_state';
+import {
+  isEpisodeActionStateLoaded,
+  withEpisodeActionState,
+} from '../utils/with_episode_action_state';
 
 export interface UseEpisodeDetailsHeaderDataOptions {
   episodeId: string;
@@ -32,6 +35,12 @@ export interface EpisodeDetailsHeaderData {
   severity: string | undefined | null;
   episodeAction: EpisodeActionState | undefined;
   groupAction: AlertEpisodeGroupAction | undefined;
+  /**
+   * `true` once the action state (ack, assignee, tags, snooze) of this episode
+   * has loaded. Until then the episode has no action columns, so the actions
+   * would be picked for the wrong state.
+   */
+  isActionStateLoaded: boolean;
   isFlapping: boolean;
 }
 
@@ -48,16 +57,15 @@ export const useEpisodeDetailsHeaderData = ({
 
   const ruleId = episode?.['rule.id'];
 
-  const { data: episodeActionsMap, isLoading: isLoadingEpisodeActions } = useFetchEpisodeActions({
-    episodeIds: [episodeId],
-    services,
-  });
+  const episodeActionsQuery = useFetchEpisodeActions({ episodeIds: [episodeId], services });
+  const { data: episodeActionsMap, isLoading: isLoadingEpisodeActions } = episodeActionsQuery;
 
   const resolvedGroupHash = groupHash ?? episode?.group_hash;
-  const { data: groupActionsMap, isLoading: isLoadingGroupActions } = useFetchGroupActions({
+  const groupActionsQuery = useFetchGroupActions({
     groupHashes: resolvedGroupHash ? [resolvedGroupHash] : [],
     services,
   });
+  const { data: groupActionsMap, isLoading: isLoadingGroupActions } = groupActionsQuery;
 
   const { ruleState } = useFetchRule({ id: ruleId, http: services.http });
 
@@ -75,6 +83,10 @@ export const useEpisodeDetailsHeaderData = ({
     [episode, episodeAction, groupAction]
   );
 
+  const isActionStateLoaded =
+    isEpisodeActionStateLoaded(episodeActionsQuery) &&
+    (!resolvedGroupHash || isEpisodeActionStateLoaded(groupActionsQuery));
+
   const isLoading =
     isLoadingEpisode ||
     isLoadingEpisodeActions ||
@@ -89,6 +101,7 @@ export const useEpisodeDetailsHeaderData = ({
     severity,
     episodeAction,
     groupAction,
+    isActionStateLoaded,
     isFlapping,
   };
 };

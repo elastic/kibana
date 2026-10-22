@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ComposerQuery } from '@elastic/esql';
 import { esql } from '@elastic/esql';
 import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
@@ -81,8 +82,18 @@ export const buildEpisodeQuery = (
 /**
  * The DSL filter that must go with the episode data queries: it skips the
  * events without data, including the empty `{}` one, which indexes no values.
+ * Breached events always pass, since their data can hold only `null` values,
+ * which index nothing either.
+ * This also picks breached events with empty data, which the engine writes
+ * while a value is between the breach and recovery thresholds. We'll handle
+ * that case separately.
  */
-export const EPISODE_DATA_FILTER = { exists: { field: 'data' } } as const;
+export const EPISODE_DATA_FILTER: estypes.QueryDslQueryContainer = {
+  bool: {
+    should: [{ term: { status: 'breached' } }, { exists: { field: 'data' } }],
+    minimum_should_match: 1,
+  },
+};
 
 /**
  * Raw ES|QL response shape of the episode data lookup.
