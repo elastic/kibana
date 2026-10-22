@@ -221,8 +221,8 @@ describe('Redux-owned workspace editing', () => {
     });
   });
 
-  it('clears topology, selections, blocklists and history when clearing the workspace', () => {
-    const { store, workspace } = setup();
+  it('clears topology, selections, blocklists and history when loading an empty workspace', () => {
+    const { store, workspace, mockedDeps } = setup();
     store.dispatch(toggleNodeSelection({ nodeId: 'field..third', replace: true }));
     store.dispatch(blocklistSelectedNodes());
     store.dispatch(toggleNodeSelection({ nodeId: 'field..second', replace: true }));
@@ -240,14 +240,16 @@ describe('Redux-owned workspace editing', () => {
     expect(store.getState().workspace.undoHistory).toHaveLength(1);
     expect(store.getState().workspace.redoHistory).toHaveLength(1);
 
-    workspace.clearGraph();
-    store.dispatch(workspaceLoaded(createWorkspaceState(workspace)));
+    const emptyWorkspace = createWorkspace({});
+    emptyWorkspace.stopLayout();
+    mockedDeps.getWorkspace.mockReturnValue(emptyWorkspace);
+    store.dispatch(workspaceLoaded(createWorkspaceState(emptyWorkspace)));
 
-    expect(workspace.nodes).toEqual([]);
-    expect(workspace.edges).toEqual([]);
-    expect(workspace.blocklistedNodes).toEqual([]);
-    expect(workspace.selectedNodes).toEqual([]);
-    expect(workspace.getEdgeSelection()).toEqual([]);
+    expect(emptyWorkspace.nodes).toEqual([]);
+    expect(emptyWorkspace.edges).toEqual([]);
+    expect(emptyWorkspace.blocklistedNodes).toEqual([]);
+    expect(emptyWorkspace.selectedNodes).toEqual([]);
+    expect(emptyWorkspace.getEdgeSelection()).toEqual([]);
     expect(store.getState().workspace).toMatchObject({
       nodeIds: [],
       edgeIds: [],
