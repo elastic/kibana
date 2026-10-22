@@ -8,6 +8,7 @@
 import { z } from '@elastic/isomer-sdk';
 
 import { crossRefine, statedRefine } from './cross_field';
+import { dateTimeFormat } from './intl';
 import { labelText } from './text';
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -142,7 +143,7 @@ export const formatTime = (
   value: string,
   { timeZone, granularity }: { timeZone: string; granularity: Granularity }
 ): string =>
-  new Intl.DateTimeFormat('en-US', {
+  dateTimeFormat('en-US', {
     ...PARTS[granularity],
     hourCycle: 'h23',
     timeZone: ISO_DATE.test(value) ? 'UTC' : timeZone,
@@ -185,7 +186,7 @@ const FIXED_MS: Partial<Record<TimeInterval['unit'], number>> = {
 /** The wall clock in `timeZone` at `instant`, as if it were UTC. */
 const wallClock = (instant: number, timeZone: string): number => {
   const parts = Object.fromEntries(
-    new Intl.DateTimeFormat('en-US', {
+    dateTimeFormat('en-US', {
       timeZone,
       hourCycle: 'h23',
       year: 'numeric',
