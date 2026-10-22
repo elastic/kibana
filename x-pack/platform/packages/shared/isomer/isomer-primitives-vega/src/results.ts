@@ -85,16 +85,18 @@ const ROWS = new Set(['values', 'datasets']);
 
 /**
  * A compiled spec without `tooltip` encodings. A tooltip only shows on hover, so a static drawing never draws one,
- * and its expression would otherwise read data the drawing doesn't.
+ * and its expression would otherwise read data the drawing doesn't. `spec` itself when it has none.
  */
 export const withoutTooltips = (spec: SpecObject): SpecObject => {
+  let removed = false;
   const visit = (value: unknown, key: string | undefined): unknown => {
     if (Array.isArray(value)) return value.map((item) => visit(item, undefined));
     if (!isSpecObject(value)) return value;
     const copy: SpecObject = {};
     for (const [childKey, child] of Object.entries(value)) {
-      if (key === 'encode' && isSpecObject(child)) {
+      if (key === 'encode' && isSpecObject(child) && 'tooltip' in child) {
         const { tooltip: _tooltip, ...set } = child;
+        removed = true;
         setOwn(copy, childKey, set);
       } else {
         setOwn(copy, childKey, ROWS.has(childKey) ? child : visit(child, childKey));
@@ -102,7 +104,8 @@ export const withoutTooltips = (spec: SpecObject): SpecObject => {
     }
     return copy;
   };
-  return visit(spec, undefined) as SpecObject;
+  const copy = visit(spec, undefined) as SpecObject;
+  return removed ? copy : spec;
 };
 
 /** What a run read of a value: everything under it, or these keys. */

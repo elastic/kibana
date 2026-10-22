@@ -44,14 +44,23 @@ const isKeywordCursor = (value: unknown): boolean =>
       typeof value.value === 'string' &&
       CURSOR_KEYWORD.test(value.value);
 
-/** Assigns as an own property, so a JSON `__proto__` key stays data instead of setting the prototype. */
-export const setOwn = (target: SpecObject, key: string, value: unknown) =>
-  Object.defineProperty(target, key, {
-    value,
-    enumerable: true,
-    writable: true,
-    configurable: true,
-  });
+/**
+ * Assigns as an own property, so a JSON `__proto__` key stays data instead of setting the prototype. Only that key
+ * reaches a setter on a plain object, so every other key assigns directly, which is far faster on large rows.
+ */
+export const setOwn = (target: SpecObject, key: string, value: unknown) => {
+  if (key === '__proto__') {
+    Object.defineProperty(target, key, {
+      value,
+      enumerable: true,
+      writable: true,
+      configurable: true,
+    });
+  } else {
+    target[key] = value;
+  }
+  return target;
+};
 
 /** A fresh copy of inline rows, which Vega tags in place as it ingests them. */
 const copyData = (value: unknown): unknown => {
@@ -78,14 +87,17 @@ const walk = (
   path: Path,
   depth: number,
   report: (issue: SpecIssue) => void,
-  parentKey: string | undefined
+  parentKey: string | undefined,
+  rows: (value: unknown) => unknown = copyData
 ): unknown => {
   if (depth > MAX_SPEC_DEPTH) {
     report({ path, message: DEPTH_MESSAGE });
     return undefined;
   }
   if (Array.isArray(value)) {
-    return value.map((item, index) => walk(item, [...path, index], depth + 1, report, undefined));
+    return value.map((item, index) =>
+      walk(item, [...path, index], depth + 1, report, undefined, rows)
+    );
   }
   if (!isSpecObject(value)) {
     return value;
@@ -111,7 +123,7 @@ const walk = (
     setOwn(
       result,
       key,
-      INLINE_DATA_KEYS.has(key) ? copyData(child) : walk(child, childPath, depth + 1, report, key)
+      INLINE_DATA_KEYS.has(key) ? rows(child) : walk(child, childPath, depth + 1, report, key, rows)
     );
   }
   return result;
@@ -131,13 +143,7 @@ export const specIssues = (spec: SpecObject): SpecIssue[] => {
 export const stripSpec = (spec: SpecObject): SpecObject =>
   walk(spec, [], 0, () => undefined, undefined) as SpecObject;
 
-/**
- * A compiled Vega spec as it may run: {@link stripSpec}ped, with event streams
- * barred from selecting elements outside the chart by CSS selector, and the
- * cursor kept off the page's `body`.
- */
-export const hardenVegaSpec = (spec: SpecObject): SpecObject => {
-  const safe = stripSpec(spec);
+const hardenStripped = (safe: SpecObject): SpecObject => {
   const config = isSpecObject(safe.config) ? safe.config : {};
   const events = isSpecObject(config.events) ? config.events : {};
   return {
@@ -148,3 +154,26 @@ export const hardenVegaSpec = (spec: SpecObject): SpecObject => {
     },
   };
 };
+
+/**
+ * A compiled Vega spec as it may run: {@link stripSpec}ped, with event streams
+ * barred from selecting elements outside the chart by CSS selector, and the
+ * cursor kept off the page's `body`.
+ */
+export const hardenVegaSpec = (spec: SpecObject): SpecObject => hardenStripped(stripSpec(spec));
+
+/**
+ * {@link hardenVegaSpec} for a spec built from one this module already stripped, such as Vega-Lite's compilation of
+ * it: stripped again, but its rows, already copied, are shared rather than copied twice.
+ */
+export const hardenBuiltSpec = (spec: SpecObject): SpecObject =>
+  hardenStripped(
+    walk(
+      spec,
+      [],
+      0,
+      () => undefined,
+      undefined,
+      (rows) => rows
+    ) as SpecObject
+  );

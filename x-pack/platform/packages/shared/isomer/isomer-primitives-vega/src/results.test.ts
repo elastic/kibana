@@ -13,7 +13,7 @@ import { vegaSpecs } from './corpus/vega.fixtures';
 import { vegaLiteSpecs } from './corpus/vega_lite.fixtures';
 import { createVegaPack } from './pack';
 import { pruneVegaResults, renderVegaSvg, toVegaSpec, type VegaChartInput } from './render';
-import type { VegaResult } from './results';
+import { type VegaResult, withoutTooltips } from './results';
 import { isSpecObject, type SpecObject } from './spec';
 import { vegaDarkTheme, vegaLightTheme } from './theme';
 
@@ -229,5 +229,18 @@ describe('vega results', () => {
         expect(svgOf(pruned)).toBe(svgOf(input));
       }
     );
+  });
+});
+
+describe('withoutTooltips', () => {
+  it('drops tooltip encodings from a copy', () => {
+    const spec = { marks: [{ encode: { update: { x: { value: 1 }, tooltip: { field: 'a' } } } }] };
+    expect(withoutTooltips(spec)).toEqual({ marks: [{ encode: { update: { x: { value: 1 } } } }] });
+    expect(spec.marks[0].encode.update.tooltip).toEqual({ field: 'a' });
+  });
+
+  it('returns a spec without tooltips as it is', () => {
+    const spec = { marks: [{ encode: { update: { x: { value: 1 } } } }] };
+    expect(withoutTooltips(spec)).toBe(spec);
   });
 });
