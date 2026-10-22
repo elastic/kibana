@@ -13,6 +13,7 @@ import {
   ALERTING_V2_ENABLED_SETTING_ID,
   RULE_AUTHORING_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
+import { linkRuleToActionPolicyTool } from '../tools/link_routing_tag';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { manageRuleTool } from '../tools/manage_rule';
 import {
@@ -183,6 +184,20 @@ If the rule's kind is \`signal\`, follow **Notifications Require Alert Kind** in
 
 If the user agrees, load the \`${ACTION_POLICY_AUTHORING_SKILL_ID}\` skill via \`filestore.read\` (path: \`skills/platform/alerting/${ACTION_POLICY_AUTHORING_SKILL_ID}/SKILL.md\`). Do **not** compose action policies or notification workflows from this skill.
 
+## Linking a Rule to an Existing Action Policy
+
+When the user wants this rule associated with an action policy already in the conversation, call \`${
+      ALERTING_TOOL_IDS.linkRuleToActionPolicy
+    }\` with the rule attachment id and the action policy attachment id. The tool writes one routing tag onto the rule's \`routing_tags\` and the policy's \`matcher.tags\`.
+
+Do not compose the action policy from this skill. Notification setup still loads \`${ACTION_POLICY_AUTHORING_SKILL_ID}\`. Catch-all and expression-only policies are not linked with this tool.
+
+After the tool returns, render both attachments with the ids and versions from the result:
+\`<render_attachment id="{ruleAttachment.id}" version="{ruleAttachment.version}"/>\`
+\`<render_attachment id="{actionPolicyAttachment.id}" version="{actionPolicyAttachment.version}"/>\`
+
+When \`rule_saved\` is false, name \`routing_tag\` and state both that the rule is unsaved and that the policy matches no alerts until the rule carrying that tag is saved. Do not block the policy on saving the rule.
+
 ---
 
 ## When to Load References
@@ -204,5 +219,5 @@ When the user asks what happens if data stops arriving (missing metrics, heartbe
 
 ### Notifications
 When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md).`,
-    getInlineTools: () => [manageRuleTool(deps)],
+    getInlineTools: () => [manageRuleTool(deps), linkRuleToActionPolicyTool(deps)],
   });
