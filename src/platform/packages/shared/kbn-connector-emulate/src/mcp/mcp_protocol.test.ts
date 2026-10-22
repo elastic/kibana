@@ -235,6 +235,64 @@ describe('MCP specs', () => {
     ]);
   });
 
+  it('reports calls the SDK rejects before they reach the tool', async () => {
+    const { fetch: mockFetch, calls } = createEmulatorFetch({ specs: [spec] });
+
+    const response = await mockFetch(
+      ENDPOINT,
+      post(
+        {},
+        {
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'tools/call',
+          params: { name: 'get_me', arguments: [] },
+        }
+      )
+    );
+
+    expect((await response.json()).error).toEqual(expect.objectContaining({ code: -32603 }));
+    expect(calls).toEqual([
+      expect.objectContaining({
+        operation: 'tools/call get_me',
+        requestViolations: [expect.objectContaining({ path: ['body'], code: 'request' })],
+      }),
+    ]);
+  });
+
+  it('reports sampled results that break the output schema, as examples can', async () => {
+    const mock = createEmulatorFetch({
+      specs: [
+        {
+          ...spec,
+          tools: [
+            {
+              name: 'get_me',
+              inputSchema: { type: 'object' },
+              outputSchema: {
+                type: 'object',
+                properties: { id: { type: 'integer', example: 'one' } },
+                required: ['id'],
+              },
+            },
+          ],
+        },
+      ],
+    });
+    const client = await connect(mock);
+
+    await client.callTool({ name: 'get_me', arguments: {} });
+    await client.close();
+
+    expect(mock.calls.find(({ operation }) => operation === 'tools/call get_me')).toEqual(
+      expect.objectContaining({
+        responseViolations: [
+          expect.objectContaining({ path: ['body', 'structuredContent', 'id'] }),
+        ],
+      })
+    );
+  });
+
   const post = (headers: Record<string, string>, body: unknown) => ({
     method: 'POST',
     headers: {
@@ -250,6 +308,7 @@ describe('MCP specs', () => {
     ['an Accept header without event streams', { accept: 'application/json' }, LIST, 406, 'accept'],
     ['a body that is not JSON', { 'content-type': 'text/plain' }, LIST, 415, 'content-type'],
     ['a message that is not JSON-RPC', {}, { id: 1, method: 'tools/list' }, 400, undefined],
+    ['a batch that repeats a request id', {}, [LIST, LIST], 400, undefined],
   ])('reports requests with %s', async (_, headers, body, status, header) => {
     const { fetch: mockFetch, calls } = createEmulatorFetch({ specs: [spec] });
 
@@ -301,6 +360,11 @@ describe('MCP specs', () => {
         recordings: [
           {
             exchanges: [
+              // Tool errors come with HTTP 200; they are skipped like HTTP errors.
+              stored('tools/call get_me', {
+                content: [{ type: 'text', text: 'Bad credentials' }],
+                isError: true,
+              }),
               stored('tools/call get_me', result({ login: 'octocat' })),
               stored('tools/call get_me', result({ login: 'octocat', id: 1 })),
               stored('tools/call create_issue', { content: 'Created' }),
@@ -320,11 +384,13 @@ describe('MCP specs', () => {
         {
           source: 'recording',
           operation: 'tools/call get_me',
+          spec: 'mcp',
           violations: [expect.objectContaining({ path: ['body', 'structuredContent'] })],
         },
         {
           source: 'recording',
           operation: 'tools/call create_issue',
+          spec: 'mcp',
           violations: [expect.objectContaining({ path: ['body'], code: 'result' })],
         },
         {
@@ -351,6 +417,25 @@ describe('MCP specs', () => {
         expect.objectContaining({
           responseViolations: [
             expect.objectContaining({ path: ['body', 'structuredContent', 'login'] }),
+          ],
+        })
+      );
+    });
+
+    it('reports results without the structuredContent an object output schema requires', async () => {
+      const mock = createEmulatorFetch({
+        specs: [spec],
+        fixtures: [stored('tools/call get_me', { content: [{ type: 'text', text: '{}' }] })],
+      });
+      const client = await connect(mock);
+
+      await client.callTool({ name: 'get_me', arguments: {} });
+      await client.close();
+
+      expect(mock.calls.find(({ operation }) => operation === 'tools/call get_me')).toEqual(
+        expect.objectContaining({
+          responseViolations: [
+            expect.objectContaining({ path: ['body', 'structuredContent'], code: 'required' }),
           ],
         })
       );
