@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { type InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
 import type { EisInferenceEndpoint } from '../../common/types';
-import { isModelUnavailableUnderRegionPolicy } from './is_model_unavailable_under_region_policy';
+import {
+  isConnectorUnavailableUnderRegionPolicy,
+  isModelUnavailableUnderRegionPolicy,
+} from './is_unavailable_under_region_policy';
 
 const MODEL_ID = 'test-model';
 
@@ -66,5 +70,38 @@ describe('isModelUnavailableUnderRegionPolicy', () => {
         MODEL_ID
       )
     ).toBe(false);
+  });
+});
+
+const createConnector = (overrides: Partial<InferenceConnector> = {}): InferenceConnector => ({
+  type: InferenceConnectorType.Inference,
+  name: 'Claude Sonnet',
+  connectorId: 'ep-1',
+  config: {},
+  capabilities: {},
+  isInferenceEndpoint: true,
+  isPreconfigured: true,
+  ...overrides,
+});
+
+describe('isConnectorUnavailableUnderRegionPolicy', () => {
+  it('returns false when metadata is missing', () => {
+    expect(isConnectorUnavailableUnderRegionPolicy(createConnector())).toBe(false);
+  });
+
+  it('returns false when denied_by_region_policy is false', () => {
+    expect(
+      isConnectorUnavailableUnderRegionPolicy(
+        createConnector({ metadata: { denied_by_region_policy: false } })
+      )
+    ).toBe(false);
+  });
+
+  it('returns true when denied_by_region_policy is true', () => {
+    expect(
+      isConnectorUnavailableUnderRegionPolicy(
+        createConnector({ metadata: { denied_by_region_policy: true } })
+      )
+    ).toBe(true);
   });
 });

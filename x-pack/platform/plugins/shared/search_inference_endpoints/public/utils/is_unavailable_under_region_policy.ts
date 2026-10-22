@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { InferenceConnector } from '@kbn/inference-common';
 import type { EisInferenceEndpoint } from '../../common/types';
 import { getModelId } from './get_model_id';
 
@@ -15,3 +16,6 @@ export const isModelUnavailableUnderRegionPolicy = (
   endpoints
     .filter((endpoint) => getModelId(endpoint) === modelId)
     .some((endpoint) => endpoint.metadata?.denied_by_region_policy === true);
+
+export const isConnectorUnavailableUnderRegionPolicy = (connector: InferenceConnector): boolean =>
+  connector.metadata?.denied_by_region_policy === true;
