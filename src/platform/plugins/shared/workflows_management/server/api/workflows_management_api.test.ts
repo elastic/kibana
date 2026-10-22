@@ -2679,6 +2679,7 @@ steps:
       expect(mockWorkflowsService.getWaitingStepExecutionId).not.toHaveBeenCalled();
       expect(mockWorkflowsService.markStepAsResponded).toHaveBeenCalledWith(
         'step-exec-1',
+        'run-1',
         mockRequest,
         'agent_builder',
         'default'
@@ -2704,6 +2705,7 @@ steps:
       );
       expect(mockWorkflowsService.markStepAsResponded).toHaveBeenCalledWith(
         'step-exec-9',
+        'run-1',
         mockRequest,
         undefined,
         'default'

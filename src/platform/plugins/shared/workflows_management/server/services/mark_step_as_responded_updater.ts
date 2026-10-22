@@ -19,6 +19,7 @@ const SETTLED_STEP_STATUSES: readonly string[] = TerminalExecutionStatuses;
 
 export const MARK_STEP_AS_RESPONDED_SOURCE_FIELDS = [
   'spaceId',
+  'workflowRunId',
   'finishedAt',
   'status',
   'hitl',
@@ -52,10 +53,15 @@ const stripHitlTokenFieldsFromInput = (input: JsonValue | undefined): JsonValue 
 
 export const createMarkStepAsRespondedUpdater = (
   audit: MarkStepAsRespondedAudit,
-  spaceId: string
+  spaceId: string,
+  executionId: string
 ): ((current: MarkStepAsRespondedCurrent) => Partial<EsWorkflowStepExecution> | 'noop') => {
   return (current) => {
     if (current.spaceId !== spaceId) {
+      return 'noop';
+    }
+    // The caller was authorised against `executionId` only, so a step of another run must not be claimed.
+    if (current.workflowRunId !== executionId) {
       return 'noop';
     }
     if (current.finishedAt != null) {
