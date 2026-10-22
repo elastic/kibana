@@ -17,8 +17,6 @@
  * under the License.
  */
 
-
-const RESTRICTED_GLOBALS = require('./restricted_globals');
 const RESTRICTED_MODULES = { paths: ['gulp-util'] };
 
 module.exports = {
@@ -58,41 +56,23 @@ module.exports = {
       rules: {
         camelcase: [ 'error', { properties: 'never', allow: ['^UNSAFE_'] } ],
         'consistent-return': 'off',
-        eqeqeq: [ 'error', 'allow-null' ],
-        'new-cap': [ 'error', { capIsNewExceptions: [ 'Private' ] } ],
-        'no-bitwise': 'off',
-        'no-global-assign': 'error',
-        'no-irregular-whitespace': 'error',
-        'no-loop-func': 'error',
         'no-multi-str': 'off',
-        'no-nested-ternary': 'error',
         'no-new': 'off',
         'no-path-concat': 'off',
-        'no-proto': 'error',
-        'no-redeclare': 'error',
-        'no-restricted-globals': ['error', ...RESTRICTED_GLOBALS],
         'no-restricted-imports': [2, RESTRICTED_MODULES],
         'no-restricted-modules': [2, RESTRICTED_MODULES],
         'no-return-assign': 'off',
-        'no-sequences': 'error',
         'no-shadow': 'off',
         'no-undef': 'error',
         'no-underscore-dangle': 'off',
         'no-unsanitized/method': 'error',
         'no-unsanitized/property': 'error',
         'no-unused-expressions': 'off',
-        'no-use-before-define': [ 'error', 'nofunc' ],
-        'no-var': 'error',
-        'one-var': [ 'error', 'never' ],
-        'prefer-const': 'error',
         strict: [ 'error', 'never' ],
-        'valid-typeof': 'error',
         yoda: 'off',
 
         'mocha/handle-done-callback': 'error',
         'mocha/no-exclusive-tests': 'error',
-
-        'prefer-object-spread': 'error',
       }
     },
   ]

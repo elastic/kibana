@@ -74,18 +74,9 @@ module.exports = {
           // ##
           // Replacing old @typescript-eslint/ban-types
           '@typescript-eslint/no-unsafe-function-type': 'off',
-          '@typescript-eslint/no-wrapper-object-types': 'off',
           '@typescript-eslint/no-empty-object-type': 'off',
           // ##
           camelcase: 'off',
-          "@typescript-eslint/consistent-type-imports": [
-            "error",
-            {
-              "prefer": "type-imports",
-              "disallowTypeAnnotations": false,
-              "fixStyle": "separate-type-imports"
-            }
-          ],
           '@typescript-eslint/naming-convention': [
             'error',
             {
@@ -167,48 +158,25 @@ module.exports = {
               modifiers: ['requiresQuotes'],
             },
           ],
-          '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
           '@typescript-eslint/member-ordering': [
             'error',
             {
               default: ['public-static-field', 'static-field', 'instance-field'],
             },
           ],
-          '@typescript-eslint/no-shadow': 'error',
           // rely on typescript
           'no-undef': 'off',
 
-          '@typescript-eslint/triple-slash-reference': [
-            'error',
-            {
-              path: 'never',
-              types: 'never',
-              lib: 'never',
-            },
-          ],
           '@typescript-eslint/no-var-requires': 'error',
-          eqeqeq: ['error', 'always', { null: 'ignore' }],
           'import/order': [
             'error',
             {
               groups: [['external', 'builtin'], 'internal', ['parent', 'sibling', 'index']],
             },
           ],
-          'max-classes-per-file': ['error', 1],
-          'no-bitwise': 'error',
-          'no-console': 'error',
-          'no-throw-literal': 'error',
           'no-undef-init': 'error',
-          'no-unsafe-finally': 'error',
           'no-unsanitized/property': 'error',
           'no-unused-expressions': 'off',
-          '@typescript-eslint/no-unused-expressions': ["error", { "allowTaggedTemplates": true }],
-          'no-var': 'error',
-          'object-shorthand': 'error',
-          'one-var': ['error', 'never'],
-          'prefer-const': 'error',
-          'prefer-rest-params': 'error',
-          radix: 'error',
           'spaced-comment': [
             'error',
             'always',
