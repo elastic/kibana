@@ -15,10 +15,10 @@ import {
   ALERTZERO_HUNT_WORKFLOW,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW,
 } from '.';
-import { ALERTZERO_JOURNAL_NOTE_WORKFLOW } from './journal_note';
-import { createWorkflowLiquidEngine } from '../../../common/utils';
-import { WorkflowGraph } from '../../../graph';
-import type { WorkflowYaml } from '../../../spec/schema';
+import { createWorkflowLiquidEngine } from '../../../../common/utils';
+import { WorkflowGraph } from '../../../../graph';
+import type { WorkflowYaml } from '../../../../spec/schema';
+import { ALERTZERO_JOURNAL_NOTE_WORKFLOW } from '../journal_note';
 
 // Route-path and cross-package id checks (including the SYSTEM_SECURITY_HUNT_*
 // cross-check) live in the alertzero PLUGIN's own hunt_children_contract.test.ts, not
