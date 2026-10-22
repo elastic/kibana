@@ -16,11 +16,11 @@ const MAX_ATTEMPTS = 5;
  * Should only be used to wrap operations that are idempotent and can be safely executed more than once.
  */
 export const retryTransientEsErrors = async <T>(
-  esCall: () => Promise<T>,
+  esCall: (attempt: number) => Promise<T>,
   { logger, attempt = 0 }: { logger?: Logger; attempt?: number } = {}
 ): Promise<T> => {
   try {
-    return await esCall();
+    return await esCall(attempt);
   } catch (e) {
     if (attempt < MAX_ATTEMPTS && isRetryableEsClientError(e)) {
       const retryCount = attempt + 1;
@@ -37,5 +37,22 @@ export const retryTransientEsErrors = async <T>(
     }
 
     throw e;
+  }
+};
+
+/**
+ * Treats "already exists" as success on retries, since a previous attempt may have created the resource before timing out client-side.
+ */
+export const ignoreAlreadyExistsOnRetry = async <T>(
+  attempt: number,
+  esCall: () => Promise<T>
+): Promise<T | undefined> => {
+  try {
+    return await esCall();
+  } catch (err) {
+    if (attempt > 0 && err.meta?.body?.error?.type === 'resource_already_exists_exception') {
+      return undefined;
+    }
+    throw err;
   }
 };

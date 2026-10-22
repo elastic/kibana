@@ -9,8 +9,9 @@ jest.mock('timers/promises');
 import { setTimeout } from 'timers/promises';
 import { loggerMock } from '@kbn/logging-mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
-import { retryTransientEsErrors } from './retry';
+import { ignoreAlreadyExistsOnRetry, retryTransientEsErrors } from './retry';
 
 const setTimeoutMock = setTimeout as jest.Mock<
   ReturnType<typeof setTimeout>,
@@ -58,6 +59,17 @@ describe('retryTransientErrors', () => {
     expect(esCallMock).toHaveBeenCalledTimes(5);
   });
 
+  it('passes the attempt index to the operation', async () => {
+    const esCallMock = jest
+      .fn()
+      .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+      .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+      .mockResolvedValue('success');
+
+    await retryTransientEsErrors(esCallMock);
+    expect(esCallMock.mock.calls).toEqual([[0], [1], [2]]);
+  });
+
   it('retries each supported error type', async () => {
     const errors = [
       new EsErrors.NoLivingConnectionsError('no living connection', {
@@ -83,5 +95,50 @@ describe('retryTransientErrors', () => {
     const esCallMock = jest.fn().mockRejectedValueOnce(error).mockResolvedValue('success');
     await expect(retryTransientEsErrors(esCallMock)).rejects.toThrow(error);
     expect(esCallMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('ignoreAlreadyExistsOnRetry', () => {
+  const alreadyExistsError = new EsErrors.ResponseError(
+    elasticsearchClientMock.createApiResponse({
+      statusCode: 400,
+      body: {
+        error: {
+          type: 'resource_already_exists_exception',
+          reason: 'Transform with id [slo-id-1] already exists',
+        },
+      },
+    })
+  );
+  const upgradingError = new EsErrors.ResponseError(
+    elasticsearchClientMock.createApiResponse({
+      statusCode: 409,
+      body: {
+        error: {
+          type: 'status_exception',
+          reason: 'Cannot create new Transform while the Transform feature is upgrading.',
+        },
+      },
+    })
+  );
+
+  it('resolves when the resource already exists on a retry', async () => {
+    const esCallMock = jest.fn().mockRejectedValue(alreadyExistsError);
+    await expect(ignoreAlreadyExistsOnRetry(1, esCallMock)).resolves.toBeUndefined();
+  });
+
+  it('rejects when the resource already exists on the first attempt', async () => {
+    const esCallMock = jest.fn().mockRejectedValue(alreadyExistsError);
+    await expect(ignoreAlreadyExistsOnRetry(0, esCallMock)).rejects.toBe(alreadyExistsError);
+  });
+
+  it('rejects other errors on a retry', async () => {
+    const esCallMock = jest.fn().mockRejectedValue(upgradingError);
+    await expect(ignoreAlreadyExistsOnRetry(1, esCallMock)).rejects.toBe(upgradingError);
+  });
+
+  it('resolves with the operation result on success', async () => {
+    const esCallMock = jest.fn().mockResolvedValue('success');
+    await expect(ignoreAlreadyExistsOnRetry(0, esCallMock)).resolves.toEqual('success');
   });
 });

@@ -20,6 +20,7 @@ import {
   SLI_DESTINATION_INDEX_PATTERN,
   SLO_MODEL_VERSION,
   SUMMARY_DESTINATION_INDEX_PATTERN,
+  SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
 import { createSLO } from './fixtures/slo';
 import {
@@ -140,6 +141,10 @@ describe('ResetSLO', () => {
       await assertion;
 
       expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledWith(
+        expect.objectContaining({ index: SUMMARY_TEMP_INDEX_NAME }),
+        { ignore: [404] }
+      );
       expect(mockTransformManager.uninstall).toHaveBeenCalledWith(resetedRollupTransformId);
       expect(mockRepository.update).not.toHaveBeenCalled();
     });

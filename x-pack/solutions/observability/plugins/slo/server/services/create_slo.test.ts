@@ -15,6 +15,7 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
+import { SUMMARY_TEMP_INDEX_NAME } from '../../common/constants';
 import { ALL_PROJECT_ROUTING, LOCAL_PROJECT_ROUTING } from '../../common/project_routings';
 import type { SLODefinition } from '../domain/models';
 import { CreateSLO } from './create_slo';
@@ -242,6 +243,10 @@ describe('CreateSLO', () => {
 
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledTimes(1);
       expect(mockTransformManager.uninstall).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledWith(
+        expect.objectContaining({ index: SUMMARY_TEMP_INDEX_NAME }),
+        { ignore: [404] }
+      );
     });
 
     it('rollbacks completed operations when summary transform install fails', async () => {

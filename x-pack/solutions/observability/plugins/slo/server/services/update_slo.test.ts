@@ -22,6 +22,7 @@ import {
   SLI_DESTINATION_INDEX_PATTERN,
   SLO_RESOURCES_VERSION,
   SUMMARY_DESTINATION_INDEX_PATTERN,
+  SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
 import type { SLODefinition } from '../domain/models';
 import { fiveMinute, oneMinute } from './fixtures/duration';
@@ -440,6 +441,10 @@ describe('UpdateSLO', () => {
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
       expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalled();
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledWith(
+        expect.objectContaining({ index: SUMMARY_TEMP_INDEX_NAME }),
+        { ignore: [404] }
+      );
     });
 
     it('restores the previous SLO definition and rollback succeeded operations until the summary transform start operation fails', async () => {
