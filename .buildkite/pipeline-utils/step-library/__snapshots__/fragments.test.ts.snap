@@ -201,10 +201,9 @@ exports[`pull_request fragments pull_request/base 1`] = `
       "agents": {
         "buildDirectory": "/dev/shm/bk",
         "diskSizeGb": 50,
-        "diskType": "hyperdisk-balanced",
         "image": "family/kibana-minimal-ubuntu-2604",
-        "machineType": "c4d-standard-16",
-        "zones": "us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d",
+        "machineType": "n2d-custom-16-32768",
+        "zones": "us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c",
       },
       "command": ".buildkite/scripts/steps/build_kibana.sh",
       "if": "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
@@ -224,7 +223,7 @@ exports[`pull_request fragments pull_request/base 1`] = `
       "agents": {
         "machineType": "n2d-standard-8",
         "preemptible": true,
-        "spotZones": "us-central1-b,us-central1-c,us-central1-f",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,europe-west2-a,europe-west2-b,europe-west2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c",
       },
       "command": ".buildkite/scripts/steps/quick_checks.sh",
       "env": {
@@ -246,7 +245,7 @@ exports[`pull_request fragments pull_request/base 1`] = `
       "agents": {
         "machineType": "n2d-standard-2",
         "preemptible": true,
-        "spotZones": "us-central1-b,us-central1-c,us-central1-f",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,europe-west2-a,europe-west2-b,europe-west2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c",
       },
       "command": ".buildkite/scripts/steps/checks.sh",
       "env": {
@@ -358,7 +357,7 @@ exports[`pull_request fragments pull_request/base 1`] = `
             "no_cone": true,
             "paths": [
               "/.buildkite/",
-              "/.node-version",
+              "/.nvmrc",
               "/package.json",
               "/tsconfig.base.json",
               "/versions.json",
@@ -391,6 +390,7 @@ exports[`pull_request fragments pull_request/base 1`] = `
     {
       "agents": {
         "machineType": "n2d-standard-8",
+        "zones": "us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c",
       },
       "command": ".buildkite/scripts/steps/test/scout/test_run_builder.sh",
       "env": {
@@ -570,7 +570,7 @@ exports[`pull_request fragments pull_request/check_oas_snapshot 1`] = `
       "agents": {
         "machineType": "n2d-standard-2",
         "preemptible": true,
-        "spotZones": "us-central1-b,us-central1-c,us-central1-f",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,europe-west2-a,europe-west2-b,europe-west2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c",
       },
       "command": ".buildkite/scripts/steps/checks/capture_oas_snapshot.sh",
       "depends_on": [
@@ -982,7 +982,7 @@ exports[`pull_request fragments pull_request/post_build 1`] = `
             "cleanup_sparse_state": true,
             "paths": [
               ".buildkite",
-              ".node-version",
+              ".nvmrc",
               "package.json",
               "tsconfig.base.json",
               "versions.json",

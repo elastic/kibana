@@ -622,6 +622,16 @@ describe('server/investigation_round', () => {
           command: 'grep -e error -ecache /workspace/memories/redis-pool-exhaustion.md',
         })
       ).toBe(true);
+      expect(
+        isSeededWorkspaceAccess(SANDBOX_BASH_TOOL_ID, {
+          command: 'rg redis',
+        })
+      ).toBe(true);
+      expect(
+        isSeededWorkspaceAccess(SANDBOX_BASH_TOOL_ID, {
+          command: 'grep -R redis .',
+        })
+      ).toBe(true);
 
       // Executable Python heredoc reading a seeded file (including open(Path(...))) vs write-only heredoc
       expect(
@@ -691,6 +701,25 @@ describe('server/investigation_round', () => {
             command: "cat <<'EOF' > unwritten-service.md\n# Service\nEOF",
           },
           results: [{ type: 'other', data: { stdout: '', exit_code: 0 } }],
+        },
+        {
+          type: 'tool_call',
+          tool_id: SANDBOX_BASH_TOOL_ID,
+          params: {
+            command:
+              'ls -l /workspace/memories/metadata-only.md && test -f /workspace/memories/metadata-only.md',
+          },
+          results: [{ type: 'other', data: { stdout: '...', exit_code: 0 } }],
+        },
+        {
+          type: 'tool_call',
+          tool_id: SANDBOX_STR_REPLACE_TOOL_ID,
+          params: {
+            file_path: '/workspace/memories/str-replaced-without-reading.md',
+            old_str: 'a',
+            new_str: 'b',
+          },
+          results: [{ type: 'other', data: 'replaced' }],
         },
         {
           type: 'tool_call',

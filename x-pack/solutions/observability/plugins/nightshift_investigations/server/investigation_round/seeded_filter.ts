@@ -100,6 +100,31 @@ export const matchesFilePathForKinds = (
   return false;
 };
 
+const matchesOrContainsSeededForKinds = (
+  rawPath: string,
+  kinds: ReadonlySet<SeededWorkspaceKind>,
+  baseDir = '/workspace'
+): boolean => {
+  if (matchesFilePathForKinds(rawPath, kinds, baseDir)) {
+    return true;
+  }
+  const resolved = Path.posix.resolve(baseDir, rawPath);
+  const prefix = resolved === '/' ? '/' : `${resolved}/`;
+  if (kinds.has('env_docs') && SEEDED_ENV_FILES.some((envFile) => envFile.startsWith(prefix))) {
+    return true;
+  }
+  for (const kind of ['cortex', 'memories', 'decision_trees'] as const) {
+    if (!kinds.has(kind)) {
+      continue;
+    }
+    const root = SEEDED_ROOT_BY_KIND[kind];
+    if (root.startsWith(prefix)) {
+      return true;
+    }
+  }
+  return false;
+};
+
 const BASH_URL_RE = /\bhttps?:\/\/[^\s'")]+/gi;
 const BASH_CD_RE = /^\s*cd\s+(?:'([^']+)'|"([^"]+)"|([^\s'";|&()<>]+))/;
 const HEREDOC_OPEN_RE = /<<-?\s*['"]?([A-Za-z0-9_]+)['"]?/;
@@ -459,14 +484,14 @@ const checkDirOrSearchSegment = (
       findPaths.push(arg);
     }
     if (findPaths.length > 0) {
-      return findPaths.some((p) => matchesFilePathForKinds(p, kindSet, cwd));
+      return findPaths.some((p) => matchesOrContainsSeededForKinds(p, kindSet, cwd));
     }
-    return matchesFilePathForKinds(cwd, kindSet);
+    return matchesOrContainsSeededForKinds(cwd, kindSet);
   }
 
   const isGrepOrRg = verb === 'grep' || verb === 'egrep' || verb === 'fgrep' || verb === 'rg';
   let hasExplicitPatternFlag = false;
-  let isRecursive = verb === 'rg';
+  let isRecursive = verb === 'rg' || verb === 'tree' || verb === 'du';
   let optionsEnded = false;
   const positional: string[] = [];
 
@@ -531,12 +556,13 @@ const checkDirOrSearchSegment = (
     positional.push(arg);
   }
 
+  const matchTarget = isRecursive ? matchesOrContainsSeededForKinds : matchesFilePathForKinds;
   const pathOperands = isGrepOrRg && !hasExplicitPatternFlag ? positional.slice(1) : positional;
   if (pathOperands.length > 0) {
-    return pathOperands.some((op) => op !== '-' && matchesFilePathForKinds(op, kindSet, cwd));
+    return pathOperands.some((op) => op !== '-' && matchTarget(op, kindSet, cwd));
   }
 
-  return (pipelineIndex === 0 || isRecursive) && matchesFilePathForKinds(cwd, kindSet);
+  return (pipelineIndex === 0 || isRecursive) && matchTarget(cwd, kindSet);
 };
 
 const isCandidateSeededToken = (
