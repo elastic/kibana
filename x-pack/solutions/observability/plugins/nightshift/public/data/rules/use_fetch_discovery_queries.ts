@@ -25,6 +25,7 @@ export interface SignificantEventQueryRow {
   occurrences: Array<{ x: number; y: number }>;
   change_points: QueryWithOccurrences['change_points'];
   rule_backed: boolean;
+  rule_enabled?: boolean;
 }
 
 export interface QueriesTableFetchResult {
@@ -94,6 +95,7 @@ export const useFetchDiscoveryQueries = (
           occurrences,
           change_points,
           rule_uuid: _ruleUuid,
+          rule_enabled,
           source_id,
           rule_backed,
           ...rest
@@ -109,6 +111,7 @@ export const useFetchDiscoveryQueries = (
             })
           ),
           rule_backed,
+          rule_enabled,
         };
       }),
     };

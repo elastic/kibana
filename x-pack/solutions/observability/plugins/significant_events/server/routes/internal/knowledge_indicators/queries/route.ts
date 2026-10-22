@@ -457,7 +457,8 @@ const getDiscoveryQueriesRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Read paginated significant-event queries for the discovery table',
-    description: 'Returns significant-event queries as table rows, with server-side pagination.',
+    description:
+      'Returns significant-event queries as table rows, with server-side pagination and backing rule enabled states.',
   },
   security: {
     authz: {
@@ -496,7 +497,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
       scopedClients.sourcesClient
     );
 
-    const [kiClient, { alertsReader }] = await Promise.all([
+    const [kiClient, { alertsReader, rulesClient }] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
       scopedClients.getSignificantEventsAlertingContext(),
     ]);
@@ -523,14 +524,23 @@ const getDiscoveryQueriesRoute = createServerRoute({
       logger,
     });
 
-    const occurrences = await computeOccurrences(
-      { ruleIds: pageRuleIds, from, to, bucketSize, spaceId, alertsReader },
-      { esClient }
-    );
+    const [occurrences, enabledStates] = await Promise.all([
+      computeOccurrences(
+        { ruleIds: pageRuleIds, from, to, bucketSize, spaceId, alertsReader },
+        { esClient }
+      ),
+      rulesClient.findRuleEnabledStates(pageRuleIds).catch((error: Error) => {
+        logger.warn(`Failed to read backing rule enabled states: ${error.message}`);
+        return undefined;
+      }),
+    ]);
     const queryOccurrences: QueryOccurrences = { queryLinks: pageLinks, ...occurrences };
-    const queriesPage = pageLinks.map((queryLink) =>
-      toQueryWithOccurrences({ queryLink, queryOccurrences })
-    );
+    const queriesPage = pageLinks.map((queryLink) => {
+      const row = toQueryWithOccurrences({ queryLink, queryOccurrences });
+      return enabledStates && row.rule_backed
+        ? { ...row, rule_enabled: enabledStates.get(queryLink.rule_id) ?? false }
+        : row;
+    });
 
     return { queries: queriesPage, page, perPage, total };
   },

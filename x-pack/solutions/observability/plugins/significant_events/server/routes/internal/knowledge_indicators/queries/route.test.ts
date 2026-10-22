@@ -419,10 +419,12 @@ describe('getDiscoveryQueriesRoute source resolution', () => {
     per_page: 100,
   });
   const kiClient = {};
+  const findRuleEnabledStates = jest.fn().mockResolvedValue(new Map<string, boolean>());
   const assertReadable = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    findRuleEnabledStates.mockResolvedValue(new Map<string, boolean>());
     assertReadable.mockResolvedValue(undefined);
     list.mockResolvedValue({
       sources: [{ id: 'logs.a' }, { id: 'logs.b' }],
@@ -447,7 +449,10 @@ describe('getDiscoveryQueriesRoute source resolution', () => {
         licensing: {},
         scopedClusterClient: { asCurrentUser: {} },
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
-        getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ alertsReader: {} }),
+        getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({
+          alertsReader: {},
+          rulesClient: { findRuleEnabledStates },
+        }),
       }),
       getSpaceId: jest.fn().mockResolvedValue('default'),
       server: makeServer(),
@@ -533,6 +538,23 @@ describe('getDiscoveryQueriesRoute source resolution', () => {
       expect.objectContaining({ sourceIds: ['logs.a'] }),
       expect.anything()
     );
+  });
+  it('reports enabled states for live rules and false for missing rules', async () => {
+    mockFetchQueryLinks.mockResolvedValue([makeQueryLink('q1', 80), makeQueryLink('q2', 60)]);
+    findRuleEnabledStates.mockResolvedValue(new Map([['rule-q1', true]]));
+    const result = await discoveryQueriesRoute.handler(
+      makeDiscoveryHandlerParams(discoveryBaseQuery)
+    );
+    expect(findRuleEnabledStates).toHaveBeenCalledWith(['rule-q1', 'rule-q2']);
+    expect(result.queries.map(({ rule_enabled }) => rule_enabled)).toEqual([true, false]);
+  });
+
+  it('returns the list without enabled states if the lookup fails', async () => {
+    findRuleEnabledStates.mockRejectedValue(new Error('no permission'));
+    const params = makeDiscoveryHandlerParams(discoveryBaseQuery);
+    const result = await discoveryQueriesRoute.handler(params);
+    expect(result.queries[0]).not.toHaveProperty('rule_enabled');
+    expect(params.logger.warn).toHaveBeenCalled();
   });
 });
 
