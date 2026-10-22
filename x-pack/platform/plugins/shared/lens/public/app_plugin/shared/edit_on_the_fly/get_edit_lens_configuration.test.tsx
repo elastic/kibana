@@ -21,7 +21,6 @@ describe('Lens flyout', () => {
   const updaterFn = jest.fn();
   beforeEach(() => {
     store = makeConfigureStore(mockStoreDeps(), undefined, updatingMiddleware(updaterFn));
-    store.dispatch = jest.fn(store.dispatch);
   });
   afterEach(() => {
     jest.clearAllMocks();
@@ -29,6 +28,18 @@ describe('Lens flyout', () => {
 
   describe('updatingMiddleware for the Lens flyout', () => {
     test('updater is not run on store creation', () => {
+      expect(updaterFn).not.toHaveBeenCalled();
+    });
+
+    test('updater is not run without an active datasource', () => {
+      store.dispatch(setState({ activeDatasourceId: null }));
+      expect(updaterFn).not.toHaveBeenCalled();
+    });
+
+    test('updater is not run without an active visualization', () => {
+      store.dispatch(
+        setState({ visualization: { activeId: null, state: null, selectedLayerId: null } })
+      );
       expect(updaterFn).not.toHaveBeenCalled();
     });
 

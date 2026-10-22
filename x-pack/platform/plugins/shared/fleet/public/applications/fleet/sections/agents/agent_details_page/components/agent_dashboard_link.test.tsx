@@ -245,6 +245,40 @@ describe('AgentDashboardLink', () => {
     ).toBeTruthy();
   });
 
+  it('should disable the metrics button for an agentless agent, even if the policy has metrics monitoring', async () => {
+    mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
+      isLoading: false,
+      data: {
+        item: {
+          status: 'installed',
+        },
+      },
+    } as ReturnType<typeof useGetPackageInfoByKeyQuery>);
+    const testRenderer = createFleetTestRendererMock();
+
+    const result = testRenderer.render(
+      <AgentDashboardLink
+        agent={
+          {
+            id: 'agent-id-123',
+          } as unknown as Agent
+        }
+        agentPolicy={
+          {
+            monitoring_enabled: ['logs', 'metrics'],
+            is_managed: false,
+            supports_agentless: true,
+          } as unknown as AgentPolicy
+        }
+      />
+    );
+
+    expect(result.queryByText('View more agent metrics')).not.toBeInTheDocument();
+    expect(
+      result.getByTestId('agentDetails.enableMetricsButton').hasAttribute('disabled')
+    ).toBeTruthy();
+  });
+
   it('should use the otel_collector_internal_telemetry package for OPAMP agents', () => {
     mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
       isLoading: false,

@@ -14,6 +14,7 @@ import {
   groupEndpointsByModel,
   getProviderOptions,
   filterGroupedModels,
+  isTemplateRequiredEisEndpoint,
   TASK_TYPE_CATEGORY,
   TASK_TYPE_DISPLAY_NAME,
   MODEL_TYPE_FILTERS,
@@ -40,6 +41,18 @@ const makeGroupedModel = (overrides: Partial<GroupedModel> = {}): GroupedModel =
   categories: ['Embedding'],
   endpoints: [],
   ...overrides,
+});
+
+describe('isTemplateRequiredEisEndpoint', () => {
+  it('is true only when templates.policy is required', () => {
+    expect(
+      isTemplateRequiredEisEndpoint({
+        metadata: { capabilities: { templates: { policy: 'required' } } },
+      })
+    ).toBe(true);
+    expect(isTemplateRequiredEisEndpoint({ metadata: { capabilities: {} } })).toBe(false);
+    expect(isTemplateRequiredEisEndpoint({})).toBe(false);
+  });
 });
 
 describe('utils', () => {
