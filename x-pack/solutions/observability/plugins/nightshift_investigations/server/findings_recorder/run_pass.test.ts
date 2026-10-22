@@ -16,7 +16,8 @@ const output = {
   summary: 'Checkout errors rose after the 01:00 deploy.',
   verdict: 'The deploy doubled DB latency.',
   severity: 'high',
-  impact: { summary: 'Checkout failed for 10 minutes.', entities: [{ name: 'checkout' }] },
+  impact_summary: 'Checkout failed for 10 minutes.',
+  impact_entities: [{ name: 'checkout' }],
   hypotheses: [
     {
       candidate: 'Bad deploy',
@@ -96,7 +97,7 @@ describe('runFindingsPass', () => {
     // One entity is not the entity form, so the list is cleared and the summary stands alone.
     expect(writer.setImpact).toHaveBeenCalledWith({
       conversationId: 'c1',
-      summary: output.impact.summary,
+      summary: output.impact_summary,
       entities: [],
     });
   });

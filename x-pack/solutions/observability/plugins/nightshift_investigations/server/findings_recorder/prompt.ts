@@ -24,6 +24,8 @@ export const FINDINGS_RECORDER_SYSTEM_PROMPT = `You keep the written record of a
 
 Use only what the transcript shows. Do not invent services, numbers, timings or causes. When the evidence is thin, say so and keep confidence low.
 
+Every value is plain text: no markdown, no line breaks and no double quotes inside any value (use single quotes when you must quote something).
+
 Be concise. The summary is two to four sentences, the verdict one or two, each hypothesis reason at most two sentences, and at most eight hypotheses. Merge near-duplicates instead of listing them separately.
 
 ## The record

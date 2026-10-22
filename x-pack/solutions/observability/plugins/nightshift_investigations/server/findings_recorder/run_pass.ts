@@ -168,14 +168,14 @@ export const runFindingsPass = async (
           hypotheses: limitToOneConfirmed(output.hypotheses),
         }),
     ]);
-    if (output.impact) {
-      const { summary, entities = [] } = output.impact;
+    if (output.impact_summary) {
+      const { impact_summary: impactSummary, impact_entities: entities = [] } = output;
       writes.push([
         'impact',
         () =>
           writer.setImpact({
             conversationId,
-            summary,
+            summary: impactSummary,
             // The entity form is only for two or more entities affected in different ways.
             entities:
               entities.length >= 2

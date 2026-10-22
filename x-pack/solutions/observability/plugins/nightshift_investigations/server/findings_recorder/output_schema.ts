@@ -31,19 +31,15 @@ export const findingsOutputSchema = lazySchema(() => {
     summary: z.string().min(1).max(MAX_METADATA_TEXT_LENGTH),
     verdict: z.string().max(MAX_METADATA_TEXT_LENGTH).optional(),
     severity: z.enum(FINDINGS_SEVERITIES).optional(),
-    impact: z
-      .object({
-        summary: z.string().min(1).max(MAX_EVIDENCE_TEXT_LENGTH),
-        entities: z
-          .array(
-            z.object({
-              name: z.string().min(1).max(MAX_ENTITY_NAME_LENGTH),
-              type: z.string().min(1).max(MAX_ENTITY_ID_LENGTH).optional(),
-            })
-          )
-          .max(MAX_IMPACT_TOOL_ENTITIES)
-          .optional(),
-      })
+    impact_summary: z.string().min(1).max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
+    impact_entities: z
+      .array(
+        z.object({
+          name: z.string().min(1).max(MAX_ENTITY_NAME_LENGTH),
+          type: z.string().min(1).max(MAX_ENTITY_ID_LENGTH).optional(),
+        })
+      )
+      .max(MAX_IMPACT_TOOL_ENTITIES)
       .optional(),
     hypotheses: z.array(hypothesisSchema).max(MAX_HYPOTHESES),
   });
@@ -59,7 +55,7 @@ export const FINDINGS_JSON_SCHEMA = {
       type: 'string',
       maxLength: 800,
       description:
-        'What happened, as far as the evidence shows: what deviated, when and where, and the current leading explanation. Two to four sentences.',
+        'What happened, as far as the evidence shows: what deviated, when and where, and the current leading explanation. Two to four plain sentences.',
     },
     verdict: {
       type: 'string',
@@ -72,32 +68,25 @@ export const FINDINGS_JSON_SCHEMA = {
       enum: FINDINGS_SEVERITIES,
       description: 'Severity of the situation investigated, decided from what was confirmed.',
     },
-    impact: {
-      type: 'object',
-      description: 'Who or what was affected, when the evidence shows it.',
-      properties: {
-        summary: {
-          type: 'string',
-          maxLength: 500,
-          description:
-            'The business consequence in one or two plain sentences: who or what was affected, how badly, for how long, how broadly, with measured numbers.',
+    impact_summary: {
+      type: 'string',
+      maxLength: 500,
+      description:
+        'The business consequence in one or two plain sentences: who or what was affected, how badly, for how long, how broadly, with measured numbers. Omit when the evidence shows no impact yet.',
+    },
+    impact_entities: {
+      type: 'array',
+      maxItems: 5,
+      description:
+        'Only when two or more services or components were affected in different ways, grouped at service level.',
+      items: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          type: { type: 'string', description: 'For example service, host or database.' },
         },
-        entities: {
-          type: 'array',
-          maxItems: 5,
-          description:
-            'Only when two or more services or components were affected in different ways, grouped at service level.',
-          items: {
-            type: 'object',
-            properties: {
-              name: { type: 'string' },
-              type: { type: 'string', description: 'For example service, host or database.' },
-            },
-            required: ['name'],
-          },
-        },
+        required: ['name'],
       },
-      required: ['summary'],
     },
     hypotheses: {
       type: 'array',
