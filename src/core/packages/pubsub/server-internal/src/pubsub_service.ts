@@ -18,6 +18,7 @@ import {
   type Topic,
 } from '@kbn/core-pubsub-server';
 import { scopeConsumerName } from './consumer_name';
+import { findJsonRoundTripMismatch } from './json_round_trip';
 import type { InternalPubSubSetup, InternalPubSubStart } from './internal_contracts';
 
 type Phase = 'created' | 'setup' | 'started' | 'stopped';
@@ -56,10 +57,13 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
   /** Topic name to the plugin that registered it. Kept for diagnostics; it does not restrict publishing. */
   private readonly topics = new Map<string, string>();
   private readonly subscriptions: Subscription[] = [];
+  /** In dev mode, data that does not survive the JSON round trip is rejected instead of delivered mangled. */
+  private readonly checkJsonRoundTrip: boolean;
   private phase: Phase = 'created';
 
   constructor(coreContext: CoreContext) {
     this.logger = coreContext.logger.get('pubsub');
+    this.checkJsonRoundTrip = coreContext.env.mode.dev;
   }
 
   public setup(): InternalPubSubSetup {
@@ -119,6 +123,9 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
 
     this.assertEventId(init.id);
     const serializedData = this.serializeData(init.data);
+    if (this.checkJsonRoundTrip) {
+      this.assertJsonRoundTrip(topic.name, init.data, serializedData);
+    }
 
     const event: AcceptedEvent = {
       id: init.id,
@@ -266,6 +273,23 @@ export class PubSubService implements CoreService<InternalPubSubSetup, InternalP
     }
 
     return serialized;
+  }
+
+  /**
+   * Consumers get `JSON.parse(serialized)`, so anything the type system let through that JSON
+   * cannot represent (`Date`, `Map`, class instances, `NaN`, `undefined` array items, ...) would
+   * arrive as something else. Dev mode fails the publish and names the offending path; production
+   * delivers what JSON produced.
+   */
+  private assertJsonRoundTrip(topic: string, data: unknown, serialized: string): void {
+    const found = findJsonRoundTripMismatch(data, JSON.parse(serialized));
+    if (found) {
+      throw new Error(
+        `Pubsub event data on topic "${topic}" does not survive the JSON round trip: ${found}. ` +
+          'Use only plain objects, arrays, strings, finite numbers, booleans and null. ' +
+          'This check only runs in development mode.'
+      );
+    }
   }
 
   /** `JSON.stringify` throws on cycles and BigInt, and returns `undefined` for non-JSON values. */

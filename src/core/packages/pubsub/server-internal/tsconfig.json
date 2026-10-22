@@ -7,6 +7,7 @@
   "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/config-mocks",
     "@kbn/core-base-server-internal",
     "@kbn/core-base-server-mocks",
     "@kbn/core-pubsub-server",

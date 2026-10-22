@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-core'
   sourceRoot: src/core/packages/pubsub/server-internal
 dependsOn:
+  - '@kbn/config-mocks'
   - '@kbn/core-base-server-internal'
   - '@kbn/core-base-server-mocks'
   - '@kbn/core-pubsub-server'

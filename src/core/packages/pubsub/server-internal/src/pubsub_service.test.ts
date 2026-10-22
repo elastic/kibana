@@ -8,6 +8,7 @@
  */
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
 import { defineTopic } from '@kbn/core-pubsub-server';
 import type { PubSubEvent, PubSubEventInit } from '@kbn/core-pubsub-server';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -538,5 +539,55 @@ describe('PubSubEvent shape', () => {
 
     expect(received[0].data).toEqual({ secret: 'json' });
     expect('tags' in received[0].data).toBe(false);
+  });
+});
+
+describe('JSON round-trip check', () => {
+  interface Loose {
+    secret: string;
+    createdAt: Date;
+  }
+
+  const createHarness = (dev: boolean) => {
+    const env = createTestEnv({ envOptions: getEnvOptions({ cliArgs: { dev } }) });
+    const service = new PubSubService(mockCoreContext.create({ env }));
+    const setup = service.setup();
+    const topic = defineTopic<Loose>('orders');
+    setup.registerTopic(PLUGIN, topic);
+    const received: Array<PubSubEvent<Loose>> = [];
+    setup.subscribe(PLUGIN, topic, {
+      consumer: 'sync',
+      handler: (event) => {
+        received.push(event);
+      },
+    });
+    return { service, topic, received };
+  };
+
+  it('in development, rejects data that would arrive mangled and names the path', async () => {
+    const { service, topic, received } = createHarness(true);
+    const { publish } = service.start();
+
+    await expect(
+      publish(PLUGIN, topic, { id: nextId(), data: { secret: 'dev', createdAt: new Date(0) } })
+    ).rejects.toThrow(
+      'Pubsub event data on topic "orders" does not survive the JSON round trip: ' +
+        'data.createdAt is an instance of Date and arrives as a string.'
+    );
+    await flushDispatch();
+    expect(received).toHaveLength(0);
+  });
+
+  it('in production, delivers whatever JSON produced', async () => {
+    const { service, topic, received } = createHarness(false);
+    const { publish } = service.start();
+
+    await publish(PLUGIN, topic, {
+      id: nextId(),
+      data: { secret: 'prod', createdAt: new Date(0) },
+    });
+    await flushDispatch();
+
+    expect(received[0].data).toEqual({ secret: 'prod', createdAt: '1970-01-01T00:00:00.000Z' });
   });
 });
