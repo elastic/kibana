@@ -107,6 +107,15 @@ function ConnectedConnectorCard({
         icon={model?.iconClass ?? 'plugs'}
         title={connector.name}
         description={model?.actionTypeTitle ?? connector.connector_type_id}
+        badge={
+          connector.enabled ? undefined : (
+            <EuiBadge color="hollow" data-test-subj={`nightshiftConnectorOff-${connector.id}`}>
+              {i18n.translate('xpack.nightshift.connectedConnectors.offBadge', {
+                defaultMessage: 'Off',
+              })}
+            </EuiBadge>
+          )
+        }
         data-test-subj={`nightshiftConnectedConnectorCard-${connector.id}`}
         action={{
           label: i18n.translate('xpack.nightshift.connectedConnectors.editButton', {

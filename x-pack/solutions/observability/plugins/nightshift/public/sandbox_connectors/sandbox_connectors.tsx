@@ -16,11 +16,13 @@ import {
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
+  EuiSwitch,
   EuiText,
   EuiToolTip,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
 import { useKibana } from '../hooks/use_kibana';
 import {
@@ -28,6 +30,7 @@ import {
   useRefreshSandboxConnectors,
 } from './use_fetch_sandbox_connectors';
 import { useDeleteConnector } from './use_delete_connector';
+import { useSetSandboxConnectorEnabled } from './use_set_sandbox_connector_enabled';
 import { useEditConnector } from './use_edit_connector';
 import { SandboxConnectorsError } from './sandbox_connectors_error';
 
@@ -104,7 +107,9 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
   const { data, error, isLoading, refetch } = useFetchSandboxConnectors();
   const { canEdit, openEdit, editFlyout } = useEditConnector();
   const { requestDelete, confirmModal } = useDeleteConnector();
+  const setEnabled = useSetSandboxConnectorEnabled();
   const canDelete = application.capabilities.actions?.delete === true;
+  const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
 
   const columns = useMemo((): Array<EuiBasicTableColumn<SandboxConnector>> => {
     const modelOf = (typeId: string) => (registry?.has(typeId) ? registry.get(typeId) : undefined);
@@ -152,14 +157,51 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
         name: i18n.translate('xpack.nightshift.sandboxConnectors.typeColumn', {
           defaultMessage: 'Type',
         }),
+        width: '26%',
         render: (typeId: string) => modelOf(typeId)?.actionTypeTitle ?? typeId,
+      },
+      {
+        field: 'enabled',
+        name: i18n.translate('xpack.nightshift.sandboxConnectors.enabledColumn', {
+          defaultMessage: 'Enabled',
+        }),
+        width: '12%',
+        render: (enabled: boolean, connector) => (
+          <EuiSwitch
+            compressed
+            showLabel={false}
+            label={
+              enabled
+                ? i18n.translate('xpack.nightshift.sandboxConnectors.switchOn', {
+                    defaultMessage: 'On',
+                  })
+                : i18n.translate('xpack.nightshift.sandboxConnectors.switchOff', {
+                    defaultMessage: 'Off',
+                  })
+            }
+            checked={enabled}
+            disabled={!canManage || setEnabled.isPending}
+            onChange={(event) => setEnabled.mutate({ connector, enabled: event.target.checked })}
+            aria-label={
+              enabled
+                ? i18n.translate('xpack.nightshift.sandboxConnectors.disableSwitch', {
+                    defaultMessage: 'Disable {name} for Nightshift',
+                    values: { name: connector.name },
+                  })
+                : i18n.translate('xpack.nightshift.sandboxConnectors.enableSwitch', {
+                    defaultMessage: 'Enable {name} for Nightshift',
+                    values: { name: connector.name },
+                  })
+            }
+            data-test-subj={`nightshiftConnectorEnabled-${connector.id}`}
+          />
+        ),
       },
       {
         name: i18n.translate('xpack.nightshift.sandboxConnectors.actionsColumn', {
           defaultMessage: 'Actions',
         }),
-        width: '96px',
-        align: 'right',
+        width: '12%',
         render: (connector: SandboxConnector) => {
           const deleteLabel = i18n.translate('xpack.nightshift.sandboxConnectors.deleteAction', {
             defaultMessage: 'Delete {name}',
@@ -187,7 +229,7 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
         },
       },
     ];
-  }, [canDelete, canEdit, openEdit, registry, requestDelete]);
+  }, [canDelete, canEdit, canManage, openEdit, registry, requestDelete, setEnabled]);
 
   if (isLoading) return <EuiLoadingSpinner size="m" />;
   if (error) return <SandboxConnectorsError onRetry={() => refetch()} />;

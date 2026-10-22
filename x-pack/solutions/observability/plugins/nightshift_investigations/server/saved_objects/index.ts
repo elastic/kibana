@@ -19,3 +19,9 @@ export {
   nightshiftAutomationBudgetSavedObjectType,
   NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE,
 } from './automation_budget_saved_object';
+export {
+  nightshiftSandboxConnectorSettingsSavedObjectType,
+  NIGHTSHIFT_SANDBOX_CONNECTOR_SETTINGS_SO_TYPE,
+  NIGHTSHIFT_SANDBOX_CONNECTOR_SETTINGS_SO_ID,
+  type NightshiftSandboxConnectorSettingsAttributes,
+} from './sandbox_connector_settings_saved_object';

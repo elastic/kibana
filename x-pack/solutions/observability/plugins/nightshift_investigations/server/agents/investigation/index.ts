@@ -127,7 +127,9 @@ const resolveConnectorIds = async ({
   const telemetryIds = telemetryConnectorId ? [telemetryConnectorId] : [];
   try {
     const connectors = await listSandboxConnectors(ctx.request);
-    return [...new Set([...telemetryIds, ...connectors.map(({ id }) => id)])];
+    const disabled = new Set(connectors.filter(({ enabled }) => !enabled).map(({ id }) => id));
+    const enabledIds = connectors.filter(({ enabled }) => enabled).map(({ id }) => id);
+    return [...new Set([...telemetryIds.filter((id) => !disabled.has(id)), ...enabledIds])];
   } catch (error) {
     logger?.warn(`Failed to list sandbox connectors for space "${ctx.spaceId}": ${error.message}`);
     return telemetryIds;

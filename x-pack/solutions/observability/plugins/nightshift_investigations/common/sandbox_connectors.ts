@@ -13,8 +13,15 @@ export const SANDBOX_CONNECTORS_API_PATH = '/internal/nightshift/sandbox_connect
 export type SandboxConnector = Pick<
   ConnectorResponse,
   'id' | 'name' | 'connector_type_id' | 'is_preconfigured'
->;
+> & {
+  enabled: boolean;
+};
 
 export interface GetSandboxConnectorsResponse {
   connectors: SandboxConnector[];
+}
+
+export interface PutSandboxConnectorEnabledResponse {
+  id: string;
+  enabled: boolean;
 }

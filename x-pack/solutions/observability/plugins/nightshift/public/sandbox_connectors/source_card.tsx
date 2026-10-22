@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -32,6 +32,7 @@ export function SourceCard({
   title,
   description,
   connected = false,
+  badge,
   action,
   'data-test-subj': dataTestSubj,
 }: {
@@ -39,6 +40,7 @@ export function SourceCard({
   title: string;
   description?: string;
   connected?: boolean;
+  badge?: ReactNode;
   action: SourceCardAction;
   'data-test-subj'?: string;
 }): React.ReactElement {
@@ -67,6 +69,11 @@ export function SourceCard({
   `;
   const titleStyles = css`
     font-weight: ${euiTheme.font.weight.semiBold};
+  `;
+  const titleRowStyles = css`
+    display: flex;
+    align-items: center;
+    gap: ${euiTheme.size.s};
   `;
   const descriptionStyles = css`
     display: -webkit-box;
@@ -106,9 +113,12 @@ export function SourceCard({
         <EuiIcon type={connected ? 'check' : icon} size="m" aria-hidden={true} />
       </div>
       <div>
-        <EuiText size="s">
-          <p css={titleStyles}>{title}</p>
-        </EuiText>
+        <div css={titleRowStyles}>
+          <EuiText size="s">
+            <p css={titleStyles}>{title}</p>
+          </EuiText>
+          {badge}
+        </div>
         {description ? (
           <EuiText size="xs" color="subdued">
             <p css={descriptionStyles}>{description}</p>

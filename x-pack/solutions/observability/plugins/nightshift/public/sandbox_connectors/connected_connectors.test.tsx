@@ -27,6 +27,7 @@ const connector = (id: string, is_preconfigured = false): SandboxConnector => ({
   name: `Connector ${id}`,
   connector_type_id: '.github',
   is_preconfigured,
+  enabled: true,
 });
 
 const forbiddenError = (): Error =>
@@ -131,6 +132,13 @@ describe('ConnectedConnectors', () => {
     expect(getEditConnectorFlyout).toHaveBeenCalledWith(
       expect.objectContaining({ connector: expect.objectContaining({ id: 'github' }) })
     );
+  });
+
+  it('marks a connector an admin switched off', async () => {
+    setup({ connectors: [{ ...connector('github'), enabled: false }, connector('telemetry')] });
+
+    expect(await screen.findByTestId('nightshiftConnectorOff-github')).toHaveTextContent('Off');
+    expect(screen.queryByTestId('nightshiftConnectorOff-telemetry')).not.toBeInTheDocument();
   });
 
   it('locks edit for preconfigured connectors', async () => {

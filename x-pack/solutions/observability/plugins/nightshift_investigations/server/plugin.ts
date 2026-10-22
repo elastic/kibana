@@ -84,6 +84,7 @@ import {
 import { createSandboxToolAvailability } from './tools/sandbox_bash/sandbox_tool_availability';
 import {
   nightshiftCustomContextSavedObjectType,
+  nightshiftSandboxConnectorSettingsSavedObjectType,
   nightshiftAutomationSavedObjectType,
   nightshiftAutomationBudgetSavedObjectType,
   NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE,
@@ -92,6 +93,7 @@ import {
 import { createOnboardingClient } from './onboarding/onboarding_client';
 import { createListSandboxConnectors } from './lib/list_sandbox_connectors';
 import { createCustomContextClient } from './custom_context';
+import { createSandboxConnectorSettingsClient } from './sandbox_connectors';
 import type {
   InvestigationQuotaCallback,
   NightshiftInvestigationsServerSetup,
@@ -174,6 +176,7 @@ export class NightshiftInvestigationsPlugin
     core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
     core.savedObjects.registerType(nightshiftAutomationBudgetSavedObjectType);
     core.savedObjects.registerType(nightshiftCustomContextSavedObjectType);
+    core.savedObjects.registerType(nightshiftSandboxConnectorSettingsSavedObjectType);
 
     const customContextClient = createCustomContextClient({
       getDeps: () => ({
@@ -193,8 +196,13 @@ export class NightshiftInvestigationsPlugin
       logger: this.logger.get('onboarding'),
     });
 
+    const sandboxConnectorSettingsClient = createSandboxConnectorSettingsClient({
+      getDeps: () => ({ savedObjects: this.savedObjects, spaces: this.spaces }),
+    });
+
     const listSandboxConnectors = createListSandboxConnectors({
       getActions: () => this.actionsStart,
+      getDisabledConnectorIds: sandboxConnectorSettingsClient.getDisabledConnectorIds,
       logger: this.logger.get('sandbox_connectors'),
     });
 
@@ -456,6 +464,7 @@ export class NightshiftInvestigationsPlugin
           getWorkflowsManagement: () => this.workflowsManagement,
           isCortexEnabled: () => this.cortexEnabled,
           listSandboxConnectors,
+          sandboxConnectorSettingsClient,
           customContextClient,
           onboardingClient,
           getCortexPageStore: (request: KibanaRequest) => {

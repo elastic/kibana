@@ -218,9 +218,10 @@ describe('Nightshift investigation agent type', () => {
     };
 
     it('allow-lists the sandbox connectors on every resolve, telemetry first', async () => {
-      const listSandboxConnectors = jest
-        .fn()
-        .mockResolvedValue([{ id: 'github' }, { id: 'datadog' }]);
+      const listSandboxConnectors = jest.fn().mockResolvedValue([
+        { id: 'github', enabled: true },
+        { id: 'datadog', enabled: true },
+      ]);
 
       const base = await resolveBase(listSandboxConnectors, {
         telemetryConnectorId: 'elasticsearch-telemetry',
@@ -232,15 +233,33 @@ describe('Nightshift investigation agent type', () => {
 
     it('lists the telemetry connector once when the lister returns it too', async () => {
       const base = await resolveBase(
-        jest.fn().mockResolvedValue([{ id: 'elasticsearch-telemetry' }, { id: 'github' }]),
+        jest.fn().mockResolvedValue([
+          { id: 'elasticsearch-telemetry', enabled: true },
+          { id: 'github', enabled: true },
+        ]),
         { telemetryConnectorId: 'elasticsearch-telemetry' }
       );
 
       expect(base.connector_ids).toEqual(['elasticsearch-telemetry', 'github']);
     });
 
+    it('leaves out the connectors an admin switched off, the telemetry one included', async () => {
+      const base = await resolveBase(
+        jest.fn().mockResolvedValue([
+          { id: 'elasticsearch-telemetry', enabled: false },
+          { id: 'github', enabled: false },
+          { id: 'datadog', enabled: true },
+        ]),
+        { telemetryConnectorId: 'elasticsearch-telemetry' }
+      );
+
+      expect(base.connector_ids).toEqual(['datadog']);
+    });
+
     it('keeps the rest of the base configuration untouched', async () => {
-      const base = await resolveBase(jest.fn().mockResolvedValue([{ id: 'github' }]));
+      const base = await resolveBase(
+        jest.fn().mockResolvedValue([{ id: 'github', enabled: true }])
+      );
 
       const staticConfiguration = staticBase(
         getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true, ...ALL_PLUGINS })
@@ -268,7 +287,7 @@ describe('Nightshift investigation agent type', () => {
         cortexEnabled: true,
         ...ALL_PLUGINS,
         telemetryConnectorId: 'elasticsearch-telemetry',
-        listSandboxConnectors: jest.fn().mockResolvedValue([{ id: 'github' }]),
+        listSandboxConnectors: jest.fn().mockResolvedValue([{ id: 'github', enabled: true }]),
       });
 
       // Static: nothing to resolve per run, and the telemetry connector is the whole list.
@@ -281,7 +300,7 @@ describe('Nightshift investigation agent type', () => {
         cortexEnabled: true,
         ...ALL_PLUGINS,
         telemetryConnectorId: 'elasticsearch-telemetry',
-        listSandboxConnectors: jest.fn().mockResolvedValue([{ id: 'github' }]),
+        listSandboxConnectors: jest.fn().mockResolvedValue([{ id: 'github', enabled: true }]),
         getCustomContextInstructions: jest.fn().mockResolvedValue('**USER CONTEXT**'),
       });
       if (typeof type.baseConfiguration !== 'function') {

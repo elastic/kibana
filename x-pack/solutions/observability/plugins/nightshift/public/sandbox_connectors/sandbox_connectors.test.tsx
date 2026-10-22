@@ -31,6 +31,7 @@ const connector = (id: string, is_preconfigured = false): SandboxConnector => ({
   name: `Connector ${id}`,
   connector_type_id: '.http',
   is_preconfigured,
+  enabled: true,
 });
 
 const forbiddenError = (): Error =>
@@ -44,17 +45,28 @@ const setup = ({
   connectors,
   fetchError,
   capabilities = { show: true, save: true, delete: true },
+  canManage = true,
   withTriggersActionsUi = true,
   ui = <SandboxConnectorsTable />,
 }: {
   connectors: SandboxConnector[];
   fetchError?: Error;
   capabilities?: { show?: boolean; save?: boolean; delete?: boolean };
+  canManage?: boolean;
   withTriggersActionsUi?: boolean;
   ui?: React.ReactElement;
 }) => {
-  const fetch = jest.fn().mockResolvedValue({ connectors });
+  const fetch = jest.fn(
+    async (
+      endpoint: string,
+      { params }: { params?: { body?: { enabled: boolean }; path?: { id: string } } } = {}
+    ) =>
+      endpoint.startsWith('PUT')
+        ? { id: params?.path?.id, enabled: params?.body?.enabled }
+        : { connectors }
+  );
   if (fetchError) fetch.mockRejectedValueOnce(fetchError);
+  const addSuccess = jest.fn();
   const getAddConnectorFlyout = jest.fn(() => <div data-test-subj="addConnectorFlyoutStub" />);
   const getEditConnectorFlyout = jest.fn(() => <div data-test-subj="editConnectorFlyoutStub" />);
   const http = { delete: jest.fn().mockResolvedValue({}) };
@@ -62,9 +74,12 @@ const setup = ({
   mockUseKibana.mockReturnValue({
     services: {
       http,
-      notifications: { toasts: { addError: jest.fn() } },
+      notifications: { toasts: { addError: jest.fn(), addSuccess } },
       application: {
-        capabilities: { actions: capabilities },
+        capabilities: {
+          actions: capabilities,
+          nightshift: { show: true, manage: canManage, configure: canManage },
+        },
         getUrlForApp: (app: string, { path }: { path: string }) => `/app/${app}${path}`,
       },
       nightshiftInvestigations: { investigationsClient: { fetch } },
@@ -86,7 +101,7 @@ const setup = ({
       <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
     </I18nProvider>
   );
-  return { fetch, http, getAddConnectorFlyout, getEditConnectorFlyout };
+  return { fetch, http, addSuccess, getAddConnectorFlyout, getEditConnectorFlyout };
 };
 
 describe('SandboxConnectorsTable', () => {
@@ -124,6 +139,32 @@ describe('SandboxConnectorsTable', () => {
 
     await waitFor(() => expect(http.delete).toHaveBeenCalledWith('/api/actions/connector/github'));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+  });
+
+  it('switches a connector off for Nightshift and confirms with a toast', async () => {
+    const { fetch, addSuccess } = setup({ connectors: [connector('github')] });
+
+    const toggle = await screen.findByTestId('nightshiftConnectorEnabled-github');
+    expect(toggle).toBeChecked();
+    fireEvent.click(toggle);
+
+    await waitFor(() =>
+      expect(fetch).toHaveBeenCalledWith(
+        'PUT /internal/nightshift/sandbox_connectors/{id}/enabled',
+        expect.objectContaining({ params: { path: { id: 'github' }, body: { enabled: false } } })
+      )
+    );
+    await waitFor(() =>
+      expect(addSuccess).toHaveBeenCalledWith({ title: 'Connector github disabled' })
+    );
+  });
+
+  it('shows a switched-off connector unchecked and locks the switch without the manage privilege', async () => {
+    setup({ connectors: [{ ...connector('github'), enabled: false }], canManage: false });
+
+    const toggle = await screen.findByTestId('nightshiftConnectorEnabled-github');
+    expect(toggle).not.toBeChecked();
+    expect(toggle).toBeDisabled();
   });
 
   it('locks delete for preconfigured connectors', async () => {
