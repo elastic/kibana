@@ -173,7 +173,7 @@ Before saving the draft to `.agents/tmp/`, review every scenario in the test pla
 - [ ] Footer is present at the end of the file with the correct model identifier and today's date
 - [ ] **Verbosity invariants hold across levels.** Same scenario count, same priorities, same set of ⚠️ entries in *Known Limitations*, same *Out of scope* reasons, same always-evaluated coverage decisions as would be produced at any other level. Verbosity is prose-density-only. See [Verbosity levels § Non-negotiable constraint](#non-negotiable-constraint).
 - [ ] **Level-appropriate prose sections.** `Overview` and `Feature Background` render at the length prescribed for `VERBOSITY_LEVEL`. `Assumptions` under `lean` uses the compact inline form (or the *See Known Limitations* one-liner when no bullet was confirmed); under `detailed` every confirmed value carries a provenance suffix.
-- [ ] **Verbosity marker present.** `<!-- verbosity: <level> -->` is at the top of the draft file, together with `<!-- tokens: … -->` when tokens is captured.
+- [ ] **Verbosity marker present.** `<!-- verbosity: <level> -->` is at the top of the draft file, together with `<!-- tokens: … -->` and `<!-- cost: … -->` when they were captured.
 
 If any item fails, fix the scenario before saving. If fixing requires information that is not available, apply the Core rule: stop and ask the user.
 
@@ -237,25 +237,28 @@ Every test plan draft must end with this footer. Replace `[model-identifier — 
 
 ## Token usage marker
 
-Records the token count of the run that produced the current test plan comment. Two artifacts, one source of truth:
+Records the token count and the estimated cost of the agent session that produced the current test plan comment. Each one has two artifacts, one source of truth:
 
 - A machine-readable HTML comment marker in the published GitHub comment.
 - A human-readable line rendered in the chat after the Sources Summary.
 
-Both are produced from `x-pack/solutions/security/plugins/security_solution/.agents/scripts/session-token-usage.py`. If the script exits non-zero — non-Claude-Code harness, missing transcript, or transcript without `usage` blocks — both artifacts fall back to their "not available" form.
+All four come from a single call to `x-pack/solutions/security/plugins/security_solution/.agents/scripts/session-token-usage.py --with-cost`, so tokens and cost always describe the same moment. When the output has no `input=` line — non-Claude-Code harness, missing transcript, or transcript without `usage` blocks — both values fall back to their "not available" form. When only the `usd=` line is missing — a model with no price in `model_prices.json` — only the cost falls back.
+
+**What is measured.** The script reads the Claude Code session transcript and counts each API response once. It runs right after the draft is saved, so the totals cover the session **until the draft was saved**, including writing it. If the same chat did other work before invoking the skill, or ran the skill more than once, all of it is included; a fresh chat gives a figure for this run alone. What comes after is not included: the response that runs the script (Claude Code writes it to the transcript only after the command returns), the edit that adds the markers, and the closing chat messages — in measured runs, about a tenth of the session cost. Every `generate` or `update` replaces both markers with the current session's values; they are never added to the values of earlier runs.
 
 ### Comment marker format
 
-At draft-save time the top markers are `verbosity` and then `tokens`. At publish time, `scripts/publish_test_plan.sh` adds the two publish markers above them (see *Final marker order* below). Step 4 does not invoke the token script or change this marker's value — its presence is set at draft-save time, and its absence is a legitimate signal that the generation ran on a harness without a session transcript.
+Once the draft is saved and the markers are added, the top markers are `verbosity`, then `tokens`, then `cost`. At publish time, `scripts/publish_test_plan.sh` adds the two publish markers above them (see *Final marker order* below). Step 4 does not invoke the token script or change these markers' values — their presence is set at draft-save time, and their absence is a legitimate signal that the generation ran on a harness without a session transcript.
 
 ```
 <!-- tokens: input=X output=Y cache_create=W cache_read=Z total=T -->
+<!-- cost: usd=N.NNNN pricing=YYYY-MM-DD -->
 ```
 
-- Field order matches the script output (`input`, `output`, `cache_create`, `cache_read`, `total`).
-- Values are non-negative integers (raw token counts, no thousand separators).
-- **Absence is meaningful** — if the marker is missing from a published comment, the generation run had no measurable token usage available.
-- **Refreshed on each publish.** Always reflects the current run; no historical delta.
+- Tokens field order matches the script output (`input`, `output`, `cache_create`, `cache_read`, `total`). Values are non-negative integers (raw token counts, no thousand separators).
+- `usd` is the estimated cost in US dollars with four decimals; `pricing` is the date the price list in `model_prices.json` was last checked.
+- **The cost is an estimate at API list price**, not what anyone was billed (subscriptions and discounts are ignored). The prices are copied from [gh-aw's `models.json`](https://github.com/github/gh-aw/blob/main/actions/setup/js/models.json) and the formula follows gh-aw's `computeInferenceCostUSD`; 1-hour cache writes are billed at twice the input price, as Anthropic does.
+- **Absence is meaningful** — if a marker is missing from a published comment, that value was not measurable for the generation run.
 
 Final marker order in the published comment after Step 4 publish:
 ```
@@ -263,27 +266,30 @@ Final marker order in the published comment after Step 4 publish:
 <!-- generated-by: <model-identifier> -->
 <!-- verbosity: <lean | standard | detailed> -->
 <!-- tokens: input=… output=… cache_create=… cache_read=… total=… -->
+<!-- cost: usd=… pricing=… -->
 ```
 
-`scripts/publish_test_plan.sh` writes this block from the draft's markers and its `--model` flag; nobody edits the order by hand. The verbosity marker is always present (see [Verbosity levels § Draft-save marker](#verbosity-levels)); the tokens marker may be absent (see *Absence is meaningful* above).
+`scripts/publish_test_plan.sh` writes this block from the draft's markers and its `--model` flag; nobody edits the order by hand. The verbosity marker is always present (see [Verbosity levels § Draft-save marker](#verbosity-levels)); the tokens and cost markers may be absent (see *Absence is meaningful* above).
 
 ### Chat line format
 
-Rendered right after the Sources Summary and Issue Clarity Assessment blocks in [`SKILL.md` Step 3 sub-step 8](../SKILL.md#saving-the-draft) for generate mode, and [`mode-update.md` Step 8](mode-update.md) for update mode.
+Rendered right after the Sources Summary and Issue Clarity Assessment blocks in [`SKILL.md` Step 3 sub-step 8](../SKILL.md#saving-the-draft) for generate mode, and [`mode-update.md` Step 8](mode-update.md) for update mode. The token line comes first, then the cost line.
 
 **On script success:**
 ```
 **Token usage:** input=X, output=Y, cache_create=W, cache_read=Z, **total=T**
+**Estimated cost:** $0.98 (list price as of 2026-10-21)
 ```
 
-Note: commas between fields, bold on the `**Token usage:**` label and on the `**total=T**` tail. Field order matches the marker.
+Note: commas between token fields, bold on the `**Token usage:**` label and on the `**total=T**` tail. Field order matches the marker. The cost is the marker's `usd` rounded to two decimals, and the date is its `pricing` value.
 
 **On script failure (fallback):**
 ```
 **Token usage:** not available for this session
+**Estimated cost:** not available for this session
 ```
 
-Never emit `total=0` — this string is the only valid fallback.
+Each line falls back on its own: the token line can succeed while the cost line falls back. Never emit `total=0` or `$0.00` — these strings are the only valid fallbacks.
 
 ---
 

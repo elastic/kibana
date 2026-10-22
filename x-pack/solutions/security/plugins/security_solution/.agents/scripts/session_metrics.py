@@ -6,7 +6,8 @@ from __future__ import annotations
 import json
 import math
 import os
-from dataclasses import dataclass
+import re
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -17,6 +18,10 @@ TOKEN_FIELDS = (
     "cache_creation_input_tokens",
     "cache_read_input_tokens",
 )
+SYNTHETIC_MODEL = "<synthetic>"
+MODEL_PRICES_PATH = Path(__file__).resolve().parent / "model_prices.json"
+CACHE_WRITE_1H_INPUT_MULTIPLIER = 2
+PRICE_FIELDS = ("input", "output", "cache_read", "cache_write")
 ALLOWED_SCOPES = frozenset(("orchestrator", "worker"))
 ALLOWED_ARTIFACT_KINDS = frozenset(
     (
@@ -73,6 +78,20 @@ class TokenTotals:
 
 
 @dataclass(frozen=True)
+class ModelUsage:
+    totals: TokenTotals = TokenTotals()
+    cache_write_1h_tokens: int = 0
+
+    def __add__(self, other: "ModelUsage") -> "ModelUsage":
+        return ModelUsage(
+            totals=self.totals + other.totals,
+            cache_write_1h_tokens=(
+                self.cache_write_1h_tokens + other.cache_write_1h_tokens
+            ),
+        )
+
+
+@dataclass(frozen=True)
 class TranscriptResult:
     source: str
     scope: str
@@ -80,6 +99,22 @@ class TranscriptResult:
     totals: TokenTotals | None
     usage_blocks: int
     name: str | None = None
+    usage_by_model: Mapping[str | None, ModelUsage] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class ModelPrice:
+    input: float
+    output: float
+    cache_read: float
+    cache_write: float
+
+
+@dataclass(frozen=True)
+class PriceCatalog:
+    source: str
+    checked: str
+    models: Mapping[str, ModelPrice]
 
 
 @dataclass(frozen=True)
@@ -132,18 +167,56 @@ def _extract_usage(obj: Any) -> dict[str, Any] | None:
     return usage if isinstance(usage, dict) else None
 
 
+def _message_field(obj: dict[str, Any], key: str) -> str | None:
+    message = obj.get("message")
+    if not isinstance(message, dict):
+        return None
+    value = message.get(key)
+    return value if isinstance(value, str) and value else None
+
+
+def _usage_block(usage: dict[str, Any]) -> ModelUsage | None:
+    values = {
+        token_field: _as_non_negative_integer(usage.get(token_field))
+        for token_field in TOKEN_FIELDS
+    }
+    if not any(value is not None for value in values.values()):
+        return None
+
+    totals = TokenTotals(
+        input_tokens=values["input_tokens"] or 0,
+        output_tokens=values["output_tokens"] or 0,
+        cache_creation_input_tokens=values["cache_creation_input_tokens"] or 0,
+        cache_read_input_tokens=values["cache_read_input_tokens"] or 0,
+    )
+    cache_creation = usage.get("cache_creation")
+    cache_write_1h = (
+        _as_non_negative_integer(cache_creation.get("ephemeral_1h_input_tokens"))
+        if isinstance(cache_creation, dict)
+        else None
+    )
+    return ModelUsage(
+        totals=totals,
+        cache_write_1h_tokens=min(
+            cache_write_1h or 0, totals.cache_creation_input_tokens
+        ),
+    )
+
+
 def parse_transcript(
     path: Path,
     scope: str = "orchestrator",
     name: str | None = None,
 ) -> TranscriptResult:
-    """Parse supported JSONL usage blocks from one transcript."""
+    """Parse JSONL usage blocks from one transcript, counting each API response once."""
     source = str(path)
     if not path.is_file():
         return TranscriptResult(source, scope, "missing", None, 0, name)
 
-    totals = TokenTotals()
-    usage_blocks = 0
+    # Claude Code writes one line per content block of a response and repeats the
+    # response usage on each of them; the last line carries the final counts.
+    blocks_by_message: dict[str, tuple[str | None, ModelUsage]] = {}
+    blocks_without_id: list[tuple[str | None, ModelUsage]] = []
 
     try:
         with path.open(encoding="utf-8") as transcript:
@@ -159,29 +232,138 @@ def parse_transcript(
                 usage = _extract_usage(obj)
                 if usage is None:
                     continue
-
-                values = {
-                    field: _as_non_negative_integer(usage.get(field))
-                    for field in TOKEN_FIELDS
-                }
-                if not any(value is not None for value in values.values()):
+                model = _message_field(obj, "model")
+                if model == SYNTHETIC_MODEL:
+                    continue
+                block = _usage_block(usage)
+                if block is None:
                     continue
 
-                usage_blocks += 1
-                totals += TokenTotals(
-                    input_tokens=values["input_tokens"] or 0,
-                    output_tokens=values["output_tokens"] or 0,
-                    cache_creation_input_tokens=(
-                        values["cache_creation_input_tokens"] or 0
-                    ),
-                    cache_read_input_tokens=values["cache_read_input_tokens"] or 0,
-                )
+                message_id = _message_field(obj, "id")
+                if message_id is None:
+                    blocks_without_id.append((model, block))
+                else:
+                    blocks_by_message[message_id] = (model, block)
     except OSError:
         return TranscriptResult(source, scope, "unreadable", None, 0, name)
 
-    if usage_blocks == 0:
+    blocks = [*blocks_by_message.values(), *blocks_without_id]
+    if not blocks:
         return TranscriptResult(source, scope, "empty", None, 0, name)
-    return TranscriptResult(source, scope, "available", totals, usage_blocks, name)
+
+    totals = TokenTotals()
+    usage_by_model: dict[str | None, ModelUsage] = {}
+    for model, block in blocks:
+        totals += block.totals
+        usage_by_model[model] = usage_by_model.get(model, ModelUsage()) + block
+    return TranscriptResult(
+        source, scope, "available", totals, len(blocks), name, usage_by_model
+    )
+
+
+def load_price_catalog(path: Path = MODEL_PRICES_PATH) -> PriceCatalog:
+    """Load the per-token USD price catalog."""
+    try:
+        with path.open(encoding="utf-8") as catalog_file:
+            raw = json.load(catalog_file)
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"Unable to read price catalog: {path}") from exc
+
+    if not isinstance(raw, dict) or not isinstance(raw.get("models"), dict):
+        raise ValueError("Price catalog must be an object with a models map")
+    source = raw.get("source")
+    checked = raw.get("checked")
+    if not isinstance(source, str) or not isinstance(checked, str):
+        raise ValueError("Price catalog source and checked must be strings")
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", checked):
+        raise ValueError("Price catalog checked must be a YYYY-MM-DD date")
+
+    models: dict[str, ModelPrice] = {}
+    for model, prices in raw["models"].items():
+        if not isinstance(prices, dict):
+            raise ValueError(f"Price catalog entry must be an object: {model}")
+        values = {price_field: prices.get(price_field) for price_field in PRICE_FIELDS}
+        for price_field in ("input", "output"):
+            if _as_price(values[price_field]) is None:
+                raise ValueError(f"Price catalog entry needs {price_field}: {model}")
+        input_price = _as_price(values["input"]) or 0.0
+        models[model] = ModelPrice(
+            input=input_price,
+            output=_as_price(values["output"]) or 0.0,
+            cache_read=_price_or(values["cache_read"], input_price),
+            cache_write=_price_or(values["cache_write"], input_price),
+        )
+    return PriceCatalog(source=source, checked=checked, models=models)
+
+
+def _as_price(value: Any) -> float | None:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    if not math.isfinite(value) or value < 0:
+        return None
+    return float(value)
+
+
+def _price_or(value: Any, fallback: float) -> float:
+    price = _as_price(value)
+    return fallback if price is None or price == 0 else price
+
+
+def _comparable_model_id(model: str) -> str:
+    return re.sub(r"[._]+", "-", model.strip().lower())
+
+
+def find_model_price(catalog: PriceCatalog, model: str) -> ModelPrice | None:
+    """Match a model by exact id, then by the longest catalog id it starts with."""
+    comparable = _comparable_model_id(model)
+    if not comparable:
+        return None
+
+    best: ModelPrice | None = None
+    best_length = -1
+    for catalog_model, price in catalog.models.items():
+        comparable_catalog_model = _comparable_model_id(catalog_model)
+        if comparable_catalog_model == comparable:
+            return price
+        if (
+            comparable.startswith(comparable_catalog_model)
+            and len(comparable_catalog_model) > best_length
+        ):
+            best = price
+            best_length = len(comparable_catalog_model)
+    return best
+
+
+def estimate_cost_usd(
+    usage_by_model: Mapping[str | None, ModelUsage],
+    catalog: PriceCatalog,
+) -> float | None:
+    """Return the list-price cost in USD, or None when any model has no price."""
+    if not usage_by_model:
+        return None
+
+    cost = 0.0
+    for model, usage in usage_by_model.items():
+        price = find_model_price(catalog, model) if model else None
+        if price is None:
+            return None
+        totals = usage.totals
+        cache_write_5m = totals.cache_creation_input_tokens - usage.cache_write_1h_tokens
+        cost += (
+            totals.input_tokens * price.input
+            + totals.output_tokens * price.output
+            + totals.cache_read_input_tokens * price.cache_read
+            + cache_write_5m * price.cache_write
+            + usage.cache_write_1h_tokens
+            * price.input
+            * CACHE_WRITE_1H_INPUT_MULTIPLIER
+        )
+    return cost
+
+
+def format_cost(cost_usd: float, catalog: PriceCatalog) -> str:
+    """Render the one-line cost format used by the test plan cost marker."""
+    return f"usd={cost_usd:.4f} pricing={catalog.checked}"
 
 
 def format_legacy_usage(totals: TokenTotals) -> str:

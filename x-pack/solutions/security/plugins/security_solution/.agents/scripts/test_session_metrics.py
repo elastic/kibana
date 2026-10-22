@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import math
 import os
@@ -14,12 +16,55 @@ EXPLORATORY_TESTER_DIR = SCRIPT_DIR.parent / "skills" / "exploratory-tester"
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from session_metrics import (  # noqa: E402
+    MODEL_PRICES_PATH,
+    ModelPrice,
+    PriceCatalog,
     TokenTotals,
     build_session_metrics,
+    estimate_cost_usd,
+    find_model_price,
+    format_cost,
     format_legacy_usage,
+    load_price_catalog,
     parse_transcript,
     render_json_metrics,
     resolve_transcript,
+)
+
+
+def usage_line(
+    message_id: str | None,
+    model: str | None,
+    output_tokens: int,
+    cache_write_1h: int = 0,
+) -> str:
+    message: dict[str, object] = {
+        "usage": {
+            "input_tokens": 2,
+            "output_tokens": output_tokens,
+            "cache_creation_input_tokens": 100,
+            "cache_read_input_tokens": 1000,
+            "cache_creation": {
+                "ephemeral_5m_input_tokens": 100 - cache_write_1h,
+                "ephemeral_1h_input_tokens": cache_write_1h,
+            },
+        }
+    }
+    if message_id is not None:
+        message["id"] = message_id
+    if model is not None:
+        message["model"] = model
+    return json.dumps({"type": "assistant", "message": message}) + "\n"
+
+
+CATALOG = PriceCatalog(
+    source="test",
+    checked="2026-10-21",
+    models={
+        "claude-sonnet-5": ModelPrice(2e-6, 1e-5, 2e-7, 2.5e-6),
+        "claude-sonnet-5-5": ModelPrice(2e-6, 1e-5, 1e-7, 2.5e-6),
+        "claude-fable-5.1": ModelPrice(1e-5, 5e-5, 2.5e-7, 1.25e-5),
+    },
 )
 
 
@@ -80,6 +125,41 @@ class SessionMetricsParserTests(unittest.TestCase):
 
             self.assertEqual(result.status, "available")
             self.assertEqual(result.totals, TokenTotals(0, 0, 0, 4))
+
+    def test_parse_transcript_counts_each_response_once(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            transcript = Path(raw_dir) / "session.jsonl"
+            transcript.write_text(
+                usage_line("msg_1", "claude-sonnet-5-5", 5)
+                + usage_line("msg_1", "claude-sonnet-5-5", 40)
+                + usage_line("msg_2", "claude-sonnet-5-5", 7)
+                + usage_line("msg_3", "<synthetic>", 0),
+                encoding="utf-8",
+            )
+
+            result = parse_transcript(transcript)
+
+            self.assertEqual(result.usage_blocks, 2)
+            self.assertEqual(result.totals, TokenTotals(4, 47, 200, 2000))
+            self.assertEqual(list(result.usage_by_model), ["claude-sonnet-5-5"])
+
+    def test_parse_transcript_keeps_usage_per_model(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            transcript = Path(raw_dir) / "session.jsonl"
+            transcript.write_text(
+                usage_line("msg_1", "claude-sonnet-5-5", 10, cache_write_1h=60)
+                + usage_line("msg_2", "claude-sonnet-5", 20),
+                encoding="utf-8",
+            )
+
+            usage_by_model = parse_transcript(transcript).usage_by_model
+
+            self.assertEqual(
+                usage_by_model["claude-sonnet-5-5"].cache_write_1h_tokens, 60
+            )
+            self.assertEqual(
+                usage_by_model["claude-sonnet-5"].totals.output_tokens, 20
+            )
 
     def test_parse_transcript_reports_empty_and_missing_sources(self):
         with tempfile.TemporaryDirectory() as raw_dir:
@@ -411,6 +491,103 @@ class SessionMetricsParserTests(unittest.TestCase):
             self.assertEqual(metrics["tokens"]["status"], "not_available")
             self.assertEqual(metrics["payload_bytes"]["status"], "not_available")
             self.assertEqual(metrics["sources"][0]["status"], "missing")
+
+    def test_find_model_price_matches_exact_then_longest_prefix(self):
+        self.assertEqual(
+            find_model_price(CATALOG, "claude-sonnet-5-5-medium"),
+            CATALOG.models["claude-sonnet-5-5"],
+        )
+        self.assertEqual(
+            find_model_price(CATALOG, "Claude-Fable-5-1"),
+            CATALOG.models["claude-fable-5.1"],
+        )
+        self.assertIsNone(find_model_price(CATALOG, "gemini-3-pro"))
+
+    def test_estimate_cost_bills_one_hour_cache_writes_at_twice_input(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            transcript = Path(raw_dir) / "session.jsonl"
+            transcript.write_text(
+                usage_line("msg_1", "claude-sonnet-5-5", 10, cache_write_1h=60)
+                + usage_line("msg_2", "claude-sonnet-5", 20),
+                encoding="utf-8",
+            )
+
+            cost = estimate_cost_usd(parse_transcript(transcript).usage_by_model, CATALOG)
+
+            sonnet_5_5 = 2 * 2e-6 + 10 * 1e-5 + 1000 * 1e-7 + 40 * 2.5e-6 + 60 * 4e-6
+            sonnet_5 = 2 * 2e-6 + 20 * 1e-5 + 1000 * 2e-7 + 100 * 2.5e-6
+            self.assertAlmostEqual(cost, sonnet_5_5 + sonnet_5)
+            self.assertEqual(format_cost(0.12345, CATALOG), "usd=0.1235 pricing=2026-10-21")
+
+    def test_estimate_cost_is_unavailable_when_a_model_has_no_price(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            unknown = Path(raw_dir) / "unknown.jsonl"
+            unknown.write_text(
+                usage_line("msg_1", "claude-sonnet-5-5", 10)
+                + usage_line("msg_2", "gemini-3-pro", 10),
+                encoding="utf-8",
+            )
+            no_model = Path(raw_dir) / "no_model.jsonl"
+            no_model.write_text(usage_line("msg_1", None, 10), encoding="utf-8")
+
+            for transcript in (unknown, no_model):
+                usage_by_model = parse_transcript(transcript).usage_by_model
+                self.assertIsNone(estimate_cost_usd(usage_by_model, CATALOG))
+            self.assertIsNone(estimate_cost_usd({}, CATALOG))
+
+    def test_price_catalog_in_the_repo_is_valid(self):
+        catalog = load_price_catalog(MODEL_PRICES_PATH)
+
+        self.assertRegex(catalog.checked, r"^\d{4}-\d{2}-\d{2}$")
+        self.assertIn("gh-aw", catalog.source)
+        self.assertIsNotNone(find_model_price(catalog, "claude-sonnet-5-5"))
+
+    def test_invalid_price_catalog_is_rejected(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            catalog = Path(raw_dir) / "prices.json"
+            catalog.write_text(
+                json.dumps(
+                    {
+                        "source": "test",
+                        "checked": "2026-10-21",
+                        "models": {"m": {"input": -1, "output": 1}},
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with self.assertRaises(ValueError):
+                load_price_catalog(catalog)
+
+    def test_with_cost_prints_tokens_and_cost_from_one_read(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            priced = Path(raw_dir) / "priced.jsonl"
+            priced.write_text(
+                usage_line("msg_1", "claude-sonnet-5-5", 10), encoding="utf-8"
+            )
+            unpriced = Path(raw_dir) / "unpriced.jsonl"
+            unpriced.write_text(
+                usage_line("msg_1", "gemini-3-pro", 10), encoding="utf-8"
+            )
+
+            result = self.run_script("--with-cost", str(priced))
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertRegex(
+                result.stdout,
+                r"^input=2 output=10 cache_create=100 cache_read=1000 total=1112\n"
+                r"usd=\d+\.\d{4} pricing=\d{4}-\d{2}-\d{2}\n$",
+            )
+
+            result = self.run_script("--with-cost", str(unpriced))
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(
+                result.stdout,
+                "input=2 output=10 cache_create=100 cache_read=1000 total=1112\n",
+            )
+
+            missing = self.run_script("--with-cost", str(Path(raw_dir) / "missing.jsonl"))
+            self.assertEqual(missing.returncode, 1)
+            self.assertEqual(missing.stdout, "")
 
     def test_report_contract_keeps_metrics_separate_from_findings(self):
         report_template = (
