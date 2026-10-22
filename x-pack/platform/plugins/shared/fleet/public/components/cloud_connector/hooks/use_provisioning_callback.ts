@@ -26,9 +26,11 @@ export const PROVISIONING_CALLBACK_POLL_TIMEOUT_MS = 10 * 60 * 1000;
 /** Extra time to wait when the deadline finds the stack's report still being applied. */
 export const PROVISIONING_CALLBACK_RECEIVING_GRACE_MS = 60 * 1000;
 
+/** `receiving`: the stack has reported and the server is creating the identity. */
 export type ProvisioningCallbackClientStatus =
   | 'idle'
   | 'pending'
+  | 'receiving'
   | 'received'
   | 'expired'
   | 'error';
@@ -175,6 +177,7 @@ export const useProvisioningCallback = ({
       const item = data?.item;
       if (item?.status === 'receiving') {
         // The stack reported first and its identity is being made; the poll picks it up.
+        setStatus('receiving');
         return 'created';
       }
       stopPolling();
@@ -253,6 +256,11 @@ export const useProvisioningCallback = ({
           receivedIdRef.current = id;
           setCreated(toCreated(data.item));
           setStatus('received');
+        } else if (data.item.status === 'receiving') {
+          setStatus('receiving');
+        } else if (data.item.status === 'pending') {
+          // A report the server gave up on hands the record back; the stack may try again.
+          setStatus('pending');
         }
       }, PROVISIONING_CALLBACK_POLL_INTERVAL_MS);
     },
@@ -274,7 +282,7 @@ export const useProvisioningCallback = ({
     } else if (outcome === 'created' && activeIdRef.current === id && !timerRef.current) {
       // The report is being applied and nothing is polling any more (the deadline had passed
       // and its cancel failed). Watch for the identity a little longer.
-      setStatus('pending');
+      setStatus('receiving');
       startPolling(
         id,
         new Date(Date.now() + PROVISIONING_CALLBACK_RECEIVING_GRACE_MS).toISOString()

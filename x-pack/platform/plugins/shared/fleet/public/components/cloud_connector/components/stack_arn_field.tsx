@@ -19,7 +19,7 @@ export interface StackArnFieldProps {
   value: string;
   /** Receives the raw input value; callers decide whether and when to trim it. */
   onChange: (value: string) => void;
-  disabled?: boolean;
+  readOnly?: boolean;
   'data-test-subj': string;
 }
 
@@ -27,7 +27,7 @@ export interface StackArnFieldProps {
 export const StackArnField: React.FC<StackArnFieldProps> = ({
   value,
   onChange,
-  disabled,
+  readOnly,
   'data-test-subj': dataTestSubj,
 }) => {
   const isInvalid = isStackArnInvalid(value);
@@ -44,7 +44,7 @@ export const StackArnField: React.FC<StackArnFieldProps> = ({
         fullWidth
         value={value}
         isInvalid={isInvalid}
-        disabled={disabled}
+        readOnly={readOnly}
         onChange={(e) => onChange(e.target.value)}
         data-test-subj={dataTestSubj}
       />

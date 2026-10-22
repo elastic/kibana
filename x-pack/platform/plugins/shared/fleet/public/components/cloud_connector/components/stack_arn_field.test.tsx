@@ -17,29 +17,29 @@ const ERROR_TEXT = /Enter a CloudFormation stack ARN/;
 
 describe('StackArnField', () => {
   const renderField = (
-    props: { value?: string; onChange?: (value: string) => void; disabled?: boolean } = {}
+    props: { value?: string; onChange?: (value: string) => void; readOnly?: boolean } = {}
   ) =>
     render(
       <I18nProvider>
         <StackArnField
           value={props.value ?? ''}
           onChange={props.onChange ?? jest.fn()}
-          disabled={props.disabled}
+          readOnly={props.readOnly}
           data-test-subj={TEST_SUBJ}
         />
       </I18nProvider>
     );
 
-  it('is editable by default and locked when disabled', () => {
+  it('is editable by default and read-only when asked', () => {
     const { rerender } = renderField();
-    expect(screen.getByTestId(TEST_SUBJ)).toBeEnabled();
+    expect(screen.getByTestId(TEST_SUBJ)).not.toHaveAttribute('readonly');
 
     rerender(
       <I18nProvider>
-        <StackArnField value="" onChange={jest.fn()} disabled data-test-subj={TEST_SUBJ} />
+        <StackArnField value="" onChange={jest.fn()} readOnly data-test-subj={TEST_SUBJ} />
       </I18nProvider>
     );
-    expect(screen.getByTestId(TEST_SUBJ)).toBeDisabled();
+    expect(screen.getByTestId(TEST_SUBJ)).toHaveAttribute('readonly');
   });
 
   it('shows no error for an empty or valid value', () => {

@@ -196,23 +196,22 @@ describe('AwsIdentityFederationSetup', () => {
     await user.type(screen.getByTestId('awsIdentityFederationSetup-roleArn'), NEW_ROLE_ARN);
   };
 
-  const MANUAL_ENTRY_TEST_SUBJS = [
-    'awsIdentityFederationSetup-stackArn',
-    'awsIdentityFederationSetup-roleArn',
-    'awsIdentityFederationSetup-createButton',
-  ];
-
   /** The ARN fields can be typed in; Create is only held back by its own validation. */
   const expectManualEntryUnlocked = () => {
-    expect(screen.getByTestId('awsIdentityFederationSetup-stackArn')).toBeEnabled();
-    expect(screen.getByTestId('awsIdentityFederationSetup-roleArn')).toBeEnabled();
+    expect(screen.getByTestId('awsIdentityFederationSetup-stackArn')).not.toHaveAttribute(
+      'readonly'
+    );
+    expect(screen.getByTestId('awsIdentityFederationSetup-roleArn')).not.toHaveAttribute(
+      'readonly'
+    );
     expect(screen.getByTestId('awsIdentityFederationSetup-createButton')).toBeInTheDocument();
   };
 
+  /** The ARN fields only show values; Create cannot be pressed. */
   const expectManualEntryLocked = () => {
-    for (const testSubj of MANUAL_ENTRY_TEST_SUBJS) {
-      expect(screen.getByTestId(testSubj)).toBeDisabled();
-    }
+    expect(screen.getByTestId('awsIdentityFederationSetup-stackArn')).toHaveAttribute('readonly');
+    expect(screen.getByTestId('awsIdentityFederationSetup-roleArn')).toHaveAttribute('readonly');
+    expect(screen.getByTestId('awsIdentityFederationSetup-createButton')).toBeDisabled();
   };
 
   beforeEach(() => {
@@ -701,8 +700,26 @@ describe('AwsIdentityFederationSetup', () => {
       mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
       renderSetup({ cloud, integrations });
 
-      expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toBeInTheDocument();
+      expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toHaveTextContent(
+        'Creating the CloudFormation stack'
+      );
       expect(screen.getByTestId('awsIdentityFederationSetup-callbackSpinner')).toBeInTheDocument();
+    });
+
+    it('says it is creating the identity, without the manual link, once the report is being applied', () => {
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'receiving' }));
+      renderSetup({ cloud, integrations });
+
+      expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toHaveTextContent(
+        'Creating the federated identity'
+      );
+      expect(screen.getByTestId('awsIdentityFederationSetup-callbackSpinner')).toBeInTheDocument();
+      // Too late to take over by hand: the identity is already being made.
+      expect(
+        screen.queryByTestId('awsIdentityFederationSetup-enterManually')
+      ).not.toBeInTheDocument();
+      expectManualEntryLocked();
+      expect(screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')).toBeDisabled();
     });
 
     it.each(['idle', 'received', 'expired', 'error'] as const)(
@@ -732,12 +749,12 @@ describe('AwsIdentityFederationSetup', () => {
       rerender(setupElement({ cloud, integrations }));
 
       expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toHaveTextContent(
-        'create the federated identity my-identity'
+        'federated identity my-identity is created'
       );
       // Renaming afterwards does not change what the stack reports.
       await user.type(screen.getByTestId('awsIdentityFederationSetup-connectorName'), '-2');
       expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toHaveTextContent(
-        'create the federated identity my-identity.'
+        'federated identity my-identity is created'
       );
     });
 
@@ -852,6 +869,60 @@ describe('AwsIdentityFederationSetup', () => {
       expect(screen.getByTestId('awsIdentityFederationSetup-stackArn')).toHaveValue(
         VALID_STACK_ARN
       );
+    });
+
+    it('keeps the reported ARNs read-only after the stack reported, so they cannot be re-created', async () => {
+      const user = userEvent.setup();
+      mockUseProvisioningCallback.mockReturnValue(
+        callbackState({
+          status: 'received',
+          created: {
+            id: 'cc-1',
+            name: 'my-identity',
+            role_arn: REPORTED_ROLE_ARN,
+            stack_arn: VALID_STACK_ARN,
+          },
+        })
+      );
+      renderSetup({ cloud, integrations });
+
+      await user.click(screen.getByRole('tab', { name: 'New Identity' }));
+      expectManualEntryLocked();
+      expect(screen.getByTestId('awsIdentityFederationSetup-roleArn')).toHaveValue(
+        REPORTED_ROLE_ARN
+      );
+      expect(
+        screen.queryByTestId('awsIdentityFederationSetup-callbackSpinner')
+      ).not.toBeInTheDocument();
+    });
+
+    it('clears the shown ARNs when launching again', async () => {
+      const user = userEvent.setup();
+      mockUseProvisioningCallback.mockReturnValue(
+        callbackState({
+          status: 'received',
+          created: {
+            id: 'cc-1',
+            name: 'my-identity',
+            role_arn: REPORTED_ROLE_ARN,
+            stack_arn: VALID_STACK_ARN,
+          },
+        })
+      );
+      renderSetup({ cloud, integrations });
+      await user.click(screen.getByRole('tab', { name: 'New Identity' }));
+      expect(screen.getByTestId('awsIdentityFederationSetup-roleArn')).toHaveValue(
+        REPORTED_ROLE_ARN
+      );
+
+      await typeIdentityName(user);
+      const { getLaunchStackParams } = mockUseCloudConnectorTemplate.mock.lastCall![0];
+      await act(async () => {
+        await getLaunchStackParams?.(RENDERED_IAC_CONFIRM);
+      });
+
+      expect(screen.getByTestId('awsIdentityFederationSetup-roleArn')).toHaveValue('');
+      expect(screen.getByTestId('awsIdentityFederationSetup-stackArn')).toHaveValue('');
     });
 
     it('offers to enter the ARNs by hand while waiting, which retires the record', async () => {

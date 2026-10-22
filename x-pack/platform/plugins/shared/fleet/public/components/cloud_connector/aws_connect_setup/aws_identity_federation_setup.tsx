@@ -162,7 +162,11 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   const [launchedName, setLaunchedName] = useState('');
   // True while a manual Create or the manual-entry link is retiring the pending record.
   const [isHandingOff, setIsHandingOff] = useState(false);
-  const isWaiting = callbackStatus === 'pending';
+  // Waiting on the stack, or on the server making the identity from its report.
+  const isWaiting = callbackStatus === 'pending' || callbackStatus === 'receiving';
+  // The ARN fields only show values while the form waits, and afterwards, when they hold what
+  // the stack reported and the identity already exists.
+  const isManualEntryLocked = isWaiting || callbackStatus === 'received';
 
   const hasSetInitialTab = useRef(false);
   useEffect(() => {
@@ -204,6 +208,9 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   const getLaunchStackParams = useCallback(
     (iac: CloudConnectorIacState | undefined) => {
       setLaunchedName(connectorName.trim());
+      // The fields will show what this launch's stack reports.
+      setRoleArn('');
+      setStackArn('');
       return startCallback({
         connectorName,
         accountType,
@@ -342,7 +349,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   // store a keyless identity and the late render's template details would land after the tab
   // switch, on nothing. Wait for it to settle; a failed render fails open once it does.
   const isCreateDisabled =
-    isWaiting ||
+    isManualEntryLocked ||
     isGeneratingTemplate ||
     !roleArn ||
     !!getCloudConnectorNameError(connectorName) ||
@@ -447,7 +454,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
             data-test-subj="awsIdentityFederationSetup-launchCloudFormation"
             errorCalloutTestSubj="awsIdentityFederationSetup-templateError"
           />
-          {callbackStatus === 'pending' && (
+          {isWaiting && (
             <>
               <EuiSpacer size="m" />
               <EuiFlexGroup
@@ -464,24 +471,34 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText size="s" color="subdued">
-                    <FormattedMessage
-                      id="xpack.fleet.cloudConnector.provisioningCallback.pendingHint"
-                      defaultMessage="Waiting for CloudFormation to create the federated identity {name}. Keep this page open; the identity is selected here as soon as the stack reports back."
-                      values={{ name: <strong>{launchedName}</strong> }}
-                    />
+                    {callbackStatus === 'receiving' ? (
+                      <FormattedMessage
+                        id="xpack.fleet.cloudConnector.provisioningCallback.creatingIdentityHint"
+                        defaultMessage="Creating the federated identity {name} from what the stack reported."
+                        values={{ name: <strong>{launchedName}</strong> }}
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.fleet.cloudConnector.provisioningCallback.creatingStackHint"
+                        defaultMessage="Creating the CloudFormation stack. Keep this page open; the federated identity {name} is created and selected here as soon as the stack reports back."
+                        values={{ name: <strong>{launchedName}</strong> }}
+                      />
+                    )}
                   </EuiText>
-                  <EuiButtonEmpty
-                    size="xs"
-                    flush="left"
-                    onClick={handleEnterManually}
-                    isDisabled={isHandingOff}
-                    data-test-subj="awsIdentityFederationSetup-enterManually"
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.cloudConnector.provisioningCallback.enterManually"
-                      defaultMessage="Enter the ARNs manually instead"
-                    />
-                  </EuiButtonEmpty>
+                  {callbackStatus === 'pending' && (
+                    <EuiButtonEmpty
+                      size="xs"
+                      flush="left"
+                      onClick={handleEnterManually}
+                      isDisabled={isHandingOff}
+                      data-test-subj="awsIdentityFederationSetup-enterManually"
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.cloudConnector.provisioningCallback.enterManually"
+                        defaultMessage="Enter the ARNs manually instead"
+                      />
+                    </EuiButtonEmpty>
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             </>
@@ -507,7 +524,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
           <StackArnField
             value={stackArn}
             onChange={setStackArn}
-            disabled={isWaiting}
+            readOnly={isManualEntryLocked}
             data-test-subj="awsIdentityFederationSetup-stackArn"
           />
           <EuiSpacer size="m" />
@@ -529,7 +546,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
               fullWidth
               value={roleArn}
               isInvalid={roleArnInvalid}
-              disabled={isWaiting}
+              readOnly={isManualEntryLocked}
               onChange={(e) => setRoleArn(e.target.value)}
               data-test-subj="awsIdentityFederationSetup-roleArn"
             />

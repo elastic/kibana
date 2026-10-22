@@ -161,6 +161,40 @@ describe('useProvisioningCallback', () => {
     expect(mockedCreate).toHaveBeenCalledWith({ provider: 'aws' });
   });
 
+  it('reports receiving while the server applies the report, then received', async () => {
+    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+    await act(async () => {
+      await result.current.start({});
+    });
+
+    // The report arrived; the server is creating the identity.
+    mockedGet.mockResolvedValue({
+      data: { item: pendingItem('cb-1', { status: 'receiving', ...RECEIVED_VALUES }) },
+      error: null,
+    } as any);
+    await poll();
+    expect(result.current.status).toBe('receiving');
+    expect(result.current.created).toBeUndefined();
+
+    // A report the server had to give up on puts the record back to pending.
+    mockedGet.mockResolvedValue({ data: { item: pendingItem('cb-1') }, error: null } as any);
+    await poll();
+    expect(result.current.status).toBe('pending');
+
+    mockedGet.mockResolvedValue({
+      data: {
+        item: pendingItem('cb-1', {
+          status: 'received',
+          ...RECEIVED_VALUES,
+          cloud_connector_id: 'cc-1',
+        }),
+      },
+      error: null,
+    } as any);
+    await poll();
+    expect(result.current.status).toBe('received');
+  });
+
   it('polls while pending and exposes the created connector once received', async () => {
     const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
     await act(async () => {
@@ -276,7 +310,7 @@ describe('useProvisioningCallback', () => {
       } as any);
 
       const result = await startAndPassDeadline();
-      expect(result.current.status).toBe('pending');
+      expect(result.current.status).toBe('receiving');
       await poll();
       expect(mockedGet).toHaveBeenCalledTimes(1);
 
@@ -327,7 +361,7 @@ describe('useProvisioningCallback', () => {
         outcome = await result.current.cancel();
       });
       expect(outcome).toBe('created');
-      expect(result.current.status).toBe('pending');
+      expect(result.current.status).toBe('receiving');
 
       mockedGet.mockResolvedValue({
         data: {
@@ -530,7 +564,7 @@ describe('useProvisioningCallback', () => {
       const { result, outcome } = await startAndCancel();
 
       expect(outcome).toBe('created');
-      expect(result.current.status).toBe('pending');
+      expect(result.current.status).toBe('receiving');
       await poll();
       expect(mockedGet).toHaveBeenCalledWith('cb-1');
     });
