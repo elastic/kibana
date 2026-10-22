@@ -158,7 +158,7 @@ Tags follow this shape:
 
 - `@limit/<only|except>-<attribute>`
 
-The only attribute today is `fips`, meaning Kibana runs in [FIPS mode](../contributing/ci-and-build/debugging-fips-test-failures.md).
+The only attribute today is `fips`: Kibana runs in [FIPS mode](../contributing/ci-and-build/debugging-fips-test-failures.md). On CI, that's the case in the daily FIPS pipeline and in pull requests labeled `ci:enable-fips-140-2-agent` or `ci:enable-fips-140-3-agent`.
 
 | Helper                   | Use when the test…                                         |
 | ------------------------ | ---------------------------------------------------------- |
@@ -192,7 +192,7 @@ Scout rejects a suite that has only limit tags, or that combines `only` and `exc
 1. Tag the suite with a limit tag.
 2. Make sure the run declares its target attributes, so Scout can skip the suites whose limit tags don't apply. Scout never detects attributes on its own; with none declared, suites with a `limit.only` tag are skipped and suites with a `limit.except` tag run.
 
-On CI, attributes are declared automatically from the build: `fips` whenever a build runs in FIPS mode, that is, in the daily FIPS pipeline and in pull requests labeled `ci:enable-fips-140-2-agent` or `ci:enable-fips-140-3-agent`. Locally, pass them to `scout run-tests` with `--targetAttribute` (see [Run tests](./run-scout-tests.md#scout-run-tests-target-attributes)).
+On CI, attributes are declared automatically from the build. Locally, pass them to `scout run-tests` with `--targetAttribute` (see [Run tests](./run-scout-tests.md#scout-run-tests-target-attributes)).
 
 ::::::{note}
 Use tags to **include** suites where they make sense, instead of skipping suites after the fact.
