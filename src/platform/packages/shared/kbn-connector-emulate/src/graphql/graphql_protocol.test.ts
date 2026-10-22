@@ -134,6 +134,23 @@ describe('GraphQL specs', () => {
     expect(calls.map(({ operation }) => operation)).toEqual(['query boards', 'query node']);
   });
 
+  it('leaves out root fields that @skip or @include drop', async () => {
+    const { fetch: mockFetch, calls } = createEmulatorFetch({ specs: [spec] });
+
+    const response = await post(mockFetch, {
+      query: `query Roots($skipBoards: Boolean!, $withNode: Boolean!) {
+        boards @skip(if: $skipBoards) { id }
+        ...Node @include(if: $withNode)
+        board(id: "1") { id }
+      }
+      fragment Node on Query { node(id: "1") { id } }`,
+      variables: { skipBoards: true, withNode: false },
+    });
+
+    expect(await response.json()).toEqual({ data: { board: { id: 'string' } } });
+    expect(calls.map(({ operation }) => operation)).toEqual(['query board']);
+  });
+
   it('rejects documents that break the schema, and still records the operations', async () => {
     const { fetch: mockFetch, calls } = createEmulatorFetch({ specs: [spec] });
 
@@ -289,6 +306,8 @@ describe('GraphQL specs', () => {
               stored('query board', { data: { board: { name: 'Old', state: 'deleted' } } }),
               stored('query board', { data: {} }),
               stored('query board', { errors: [{ message: 'Not found' }] }, 404),
+              // GraphQL errors usually come with HTTP 200; they are skipped like HTTP errors.
+              stored('query board', { data: { board: null }, errors: [{ message: 'Not found' }] }),
               stored('query board', { data: { board: { name: 'Roadmap' } } }),
               stored('query sprints', { data: { sprints: [] } }),
               {
@@ -303,17 +322,18 @@ describe('GraphQL specs', () => {
       const response = await post(mockFetch, { query: '{ board(id: "1") { name } }' });
 
       expect(await response.json()).toEqual({ data: { board: { name: 'Roadmap' } } });
-      const rejected = (operation: string, path: string[], code: string) => ({
+      const rejected = (operation: string, path: string[], code: string, specName?: string) => ({
         source: 'recording',
         operation,
+        ...(specName === undefined ? {} : { spec: specName }),
         violations: [expect.objectContaining({ path, code })],
       });
       expect(rejectedResponses).toEqual([
-        rejected('query board', ['body', 'data', 'board', 'title'], 'undeclared'),
-        rejected('query board', ['body', 'data', 'board', 'state'], 'type'),
-        rejected('query board', ['body', 'data', 'board'], 'required'),
+        rejected('query board', ['body', 'data', 'board', 'title'], 'undeclared', 'monday'),
+        rejected('query board', ['body', 'data', 'board', 'state'], 'type', 'monday'),
+        rejected('query board', ['body', 'data', 'board'], 'required', 'monday'),
         rejected('query sprints', [], 'operation'),
-        rejected('query board', [], 'operation'),
+        rejected('query board', [], 'operation', 'jira'),
       ]);
     });
 

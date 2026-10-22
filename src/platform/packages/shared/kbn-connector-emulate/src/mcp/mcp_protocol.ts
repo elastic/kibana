@@ -8,12 +8,18 @@
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import type { CallToolResult, JSONRPCMessage, RequestId } from '@modelcontextprotocol/sdk/types.js';
+import type {
+  CallToolResult,
+  JSONRPCMessage,
+  JSONRPCRequest,
+  RequestId,
+} from '@modelcontextprotocol/sdk/types.js';
 import { CfWorkerJsonSchemaValidator } from '@modelcontextprotocol/sdk/validation/cfworker-provider.js';
 import {
   CallToolRequestSchema,
   CallToolResultSchema,
   ErrorCode,
+  isJSONRPCErrorResponse,
   isJSONRPCRequest,
   JSONRPCMessageSchema,
   ListToolsRequestSchema,
@@ -151,7 +157,13 @@ const readMessages = ({
   if (candidates.length === 0 || parsed.some(({ success }) => !success)) {
     return transportError(400, -32600, ['body'], 'The body is not a JSON-RPC message or batch');
   }
-  return { messages: parsed.flatMap(({ data }) => (data ? [data] : [])), batch };
+  const messages = parsed.flatMap(({ data }) => (data ? [data] : []));
+  // Replies are matched to requests by id, so a batch can't reuse one.
+  const ids = messages.filter(isJSONRPCRequest).map(({ id }) => id);
+  if (new Set(ids).size < ids.length) {
+    return transportError(400, -32600, ['body'], 'The batch repeats a request id');
+  }
+  return { messages, batch };
 };
 
 interface LoadedTool {
@@ -225,11 +237,31 @@ const findViolations = (
   return [...found, ...findUndeclared(tool, name, args, path)];
 };
 
-// `structuredContent` must be an object, though servers such as GitHub's declare arrays.
-const toResult = ({ outputSchema }: McpTool) => {
+const checkOutput = (loaded: LoadedTool, value: unknown): Violation[] => {
+  const { tool, outputSpec } = loaded;
+  if (!outputSpec || !tool.outputSchema) {
+    return [];
+  }
+  return validateValue({ spec: outputSpec }, { pointer: '', schema: tool.outputSchema }, value, {
+    path: ['body', 'structuredContent'],
+    subject: `Result of ${tool.name}`,
+    direction: 'response',
+  });
+};
+
+// `structuredContent` must be an object, though servers such as GitHub's declare arrays, so
+// results of those tools carry their value as text only.
+const declaresArray = ({ outputSchema }: McpTool): boolean => outputSchema?.type === 'array';
+
+// Samples can break the schema where its examples do, so they are checked like stored results.
+const toResult = (loaded: LoadedTool): { result: CallToolResult; violations: Violation[] } => {
+  const { outputSchema } = loaded.tool;
   const value = outputSchema ? sampleJsonSchema(outputSchema) : {};
   const content = [{ type: 'text' as const, text: JSON.stringify(value) }];
-  return outputSchema && isRecord(value) ? { content, structuredContent: value } : { content };
+  return {
+    result: outputSchema && isRecord(value) ? { content, structuredContent: value } : { content },
+    violations: checkOutput(loaded, value),
+  };
 };
 
 const TOOL_CALL = 'tools/call ';
@@ -245,22 +277,26 @@ const readStoredResult = (
     return { violations: [{ path: ['body'], code: 'result', message }] };
   }
   const { data: result } = parsed;
-  const outputSchema = loaded?.tool.outputSchema;
-  if (!loaded?.outputSpec || !outputSchema || result.structuredContent === undefined) {
+  // Error results report a failure in their content, without the declared output.
+  if (!loaded?.tool.outputSchema || result.isError) {
     return { result, violations: [] };
   }
-  const violations = validateValue(
-    { spec: loaded.outputSpec },
-    { pointer: '', schema: outputSchema },
-    result.structuredContent,
-    {
-      path: ['body', 'structuredContent'],
-      subject: `Result of ${loaded.tool.name}`,
-      direction: 'response',
+  if (result.structuredContent === undefined) {
+    if (declaresArray(loaded.tool)) {
+      return { result, violations: [] };
     }
-  );
-  return { result, violations };
+    // SDK clients reject such results once they have listed the tool.
+    const message = `Result of ${loaded.tool.name} has no structuredContent, which its outputSchema requires`;
+    return {
+      result,
+      violations: [{ path: ['body', 'structuredContent'], code: 'required', message }],
+    };
+  }
+  return { result, violations: checkOutput(loaded, result.structuredContent) };
 };
+
+const isErrorResult = ({ body }: StoredResponse): boolean =>
+  isRecord(body) && body.isError === true;
 
 /**
  * Answers MCP's Streamable HTTP transport at the spec's endpoints, as a stateless server
@@ -282,6 +318,7 @@ export const createMcpProtocol = (
     operations: operationNames,
     check: (name, response) =>
       readStoredResult(response, loadedTools.get(name.slice(TOOL_CALL.length))).violations,
+    isError: isErrorResult,
   });
 
   const answer = async (
@@ -303,11 +340,10 @@ export const createMcpProtocol = (
         throw new McpError(ErrorCode.InvalidParams, found.map(({ message }) => message).join('; '));
       }
       const stored = served.get(`${TOOL_CALL}${params.name}`);
-      if (!stored) {
-        return toResult(loaded.tool);
-      }
-      // Only fixtures can break the spec here; recordings that do aren't served.
-      const { result, violations: broken } = readStoredResult(stored.response, loaded);
+      // Only samples and fixtures can break the spec here; recordings that do aren't served.
+      const { result, violations: broken } = stored
+        ? readStoredResult(stored.response, loaded)
+        : toResult(loaded);
       resultViolations.set(requestId, broken);
       if (!result) {
         throw new McpError(
@@ -352,8 +388,19 @@ export const createMcpProtocol = (
       const violations = new Map<RequestId, Violation[]>();
       const resultViolations = new Map<RequestId, Violation[]>();
       const replies = await answer(messages, violations, resultViolations);
+      const errors = new Map(
+        replies.filter(isJSONRPCErrorResponse).map(({ id, error }) => [id, error] as const)
+      );
+      // The SDK answers requests that break the protocol's own schemas, such as arguments that
+      // aren't an object, with an error before any handler runs.
+      const rejectedBySdk = ({ id }: JSONRPCRequest): Violation[] => {
+        const error = errors.get(id);
+        return error && !resultViolations.has(id)
+          ? [{ path: ['body'], code: 'request', message: error.message }]
+          : [];
+      };
       const requestViolations = messages.flatMap((message) =>
-        isJSONRPCRequest(message) ? violations.get(message.id) ?? [] : []
+        isJSONRPCRequest(message) ? violations.get(message.id) ?? rejectedBySdk(message) : []
       );
       const responseViolations = messages.flatMap((message) =>
         isJSONRPCRequest(message) ? resultViolations.get(message.id) ?? [] : []
