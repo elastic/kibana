@@ -20,17 +20,6 @@ import {
   withKiWriteTelemetry,
 } from './helpers';
 import type { VerifyKi } from './verify_ki';
-import type { KiVerificationSummary } from '../ki_verification';
-
-const toKiVerificationRecord = (
-  { passed, results }: KiVerificationSummary,
-  verifiedAt: string
-) => ({
-  passed,
-  verified_at: verifiedAt,
-  failed_verifier_ids: results.filter((result) => !result.passed).map(({ verifier }) => verifier),
-  results,
-});
 
 export const getCreateKiStepDefinition = ({
   getAiIndexService,
@@ -47,13 +36,7 @@ export const getCreateKiStepDefinition = ({
       const spaceId = context.contextManager.getContext().workflow.spaceId;
       await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
 
-      const {
-        ai_index_id: aiIndexId,
-        ki_id: kiId,
-        verifiers,
-        on_verification_failure: onVerificationFailure = 'write_as_failed',
-        refresh = false,
-      } = context.input;
+      const { ai_index_id: aiIndexId, ki_id: kiId, verifiers, refresh = false } = context.input;
       const ki = omitNullKiAttributes(context.input.ki);
       return withKiWriteTelemetry<CreateKiOutput>({
         action: 'create',
@@ -66,10 +49,7 @@ export const getCreateKiStepDefinition = ({
           const verification = verifiers
             ? await verifyKi({ context, ki, verifiers, aiIndexId })
             : undefined;
-          const verificationFailed = verification !== undefined && !verification.passed;
-          if (verificationFailed && onVerificationFailure === 'skip') {
-            return { output: { verification } };
-          }
+          const verificationFailed = verification?.passed === false;
 
           const { dest, managed } = await resolveOrCreateAiIndex(
             getAiIndexService,
@@ -94,7 +74,6 @@ export const getCreateKiStepDefinition = ({
                 governance: {
                   provenance: { created_by: writer, updated_by: writer },
                   ...(verificationFailed && { lifecycle: { status: 'verification_failed' } }),
-                  ...(verification && { verification: toKiVerificationRecord(verification, now) }),
                 },
               },
               // Data streams only accept `create`.

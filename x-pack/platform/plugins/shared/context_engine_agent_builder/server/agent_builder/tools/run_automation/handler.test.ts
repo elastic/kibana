@@ -277,9 +277,6 @@ describe('runAutomationHandler', () => {
           stepExecutions: [
             createKi({ id: 'pilot/a' }),
             createKi({ id: 'pilot/b', verification: { passed: true } }),
-            // Failed verification, skipped: the step completes but writes nothing.
-            createKi({ verification: { passed: false } }),
-            // Failed verification, written as verification_failed.
             createKi({ id: 'pilot/c', verification: { passed: false } }),
             createKi({}, 'failed'),
             {
@@ -299,7 +296,7 @@ describe('runAutomationHandler', () => {
           expect.objectContaining({ includeOutput: true, request })
         );
         expect(result.kisWritten).toBe(2);
-        expect(result.kisFailedVerification).toBe(2);
+        expect(result.kisFailedVerification).toBe(1);
       });
 
       it('omits the count rather than failing when the execution cannot be read', async () => {

@@ -15,8 +15,6 @@ import { VerifyKiOutputSchema, kiVerifiersSchema } from './verify_ki_step';
 
 export const CREATE_KI_STEP_ID = 'context-engine.createKi' as const;
 
-export const KI_VERIFICATION_FAILURE_ACTIONS = ['skip', 'write_as_failed'] as const;
-
 export const createKiInputSchema = z.object({
   ai_index_id: aiIndexIdSchema,
   ki_id: kiIdSchema
@@ -28,13 +26,7 @@ export const createKiInputSchema = z.object({
   verifiers: kiVerifiersSchema
     .optional()
     .describe(
-      'Optional verifiers to run before writing, in order: built-in verifier ids and custom verifier workflows (`workflow_id`). When any fails, `on_verification_failure` decides what happens.'
-    ),
-  on_verification_failure: z
-    .enum(KI_VERIFICATION_FAILURE_ACTIONS)
-    .optional()
-    .describe(
-      'What to do with a KI that fails verification: `write_as_failed` (default) writes it with lifecycle status `verification_failed`, replacing any existing KI with the same id, out of search but visible in the AI index; `skip` writes nothing and leaves any existing KI with the same id untouched.'
+      'Optional verifiers to run before writing, in order: built-in verifier ids and custom verifier workflows (`workflow_id`). When any fails, the KI is written with lifecycle status `verification_failed`, out of search but visible in the AI index.'
     ),
   refresh: z
     .boolean()
@@ -45,12 +37,7 @@ export const createKiInputSchema = z.object({
 });
 
 export const createKiOutputSchema = z.object({
-  id: z
-    .string()
-    .optional()
-    .describe(
-      'The id of the created knowledge indicator; absent when verification failed and the write was skipped'
-    ),
+  id: z.string().describe('The id of the created knowledge indicator'),
   verification: VerifyKiOutputSchema.optional().describe(
     'Verifier results; present when `verifiers` was given'
   ),
@@ -81,9 +68,8 @@ export const createKiStepCommonDefinition: CommonStepDefinition<
         'store derived from its id. Pass ki_id to set a stable id; re-runs with the same id ' +
         'replace the KI on an index and append a new revision on a data stream. Pass verifiers to ' +
         'run KI verifiers before writing: when any fails, the KI is written with lifecycle status ' +
-        'verification_failed so it stays out of search but visible in the AI index, unless ' +
-        'on_verification_failure is skip, which writes nothing and leaves the output without an id. ' +
-        'Either way verification.results names the failing verifiers. The write is not refreshed ' +
+        'verification_failed so it stays out of search but visible in the AI index, and ' +
+        'verification.results names the failing verifiers. The write is not refreshed ' +
         'unless refresh is true, so set it when a later step in the same run reads the KI back. ' +
         'The step returns the id of the created KI, which can be used by later steps to update ' +
         'or delete it.',

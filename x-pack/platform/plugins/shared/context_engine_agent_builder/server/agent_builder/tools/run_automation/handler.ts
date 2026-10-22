@@ -31,7 +31,7 @@ export interface RunAutomationHandlerResult extends RunAutomationResult {
   pilotSize?: number;
   /** Active KIs the run wrote, present when the call waited and the run completed. */
   kisWritten?: number;
-  /** KIs that failed verification, skipped or written as `verification_failed`. */
+  /** KIs the run wrote as `verification_failed`. */
   kisFailedVerification?: number;
   /** Deep link to the workflow execution in the Workflows app, when the run started. */
   workflowUrl?: string;
@@ -57,9 +57,8 @@ const failedVerification = (output: Record<string, unknown>): boolean =>
   isRecord(output.verification) && output.verification.passed === false;
 
 /**
- * KIs a finished run wrote: completed createKi steps that returned an id and passed verification.
- * A KI that fails verification also completes its step; it carries an id only when written as
- * `verification_failed`, so those are counted separately.
+ * KIs a finished run wrote: completed createKi steps that returned an id, split by whether they
+ * passed verification.
  */
 const countCreateKiOutputs = async ({
   workflowsManagement,
