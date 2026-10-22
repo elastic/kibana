@@ -311,7 +311,11 @@ describe('NightshiftInvestigationsClient.start()', () => {
       expect.objectContaining({
         agentId: 'nightshift.investigation',
         templateId: 'investigation',
-        metadata: { telemetry_target: 'c0', workflow_execution_ids: ['exec-123'] },
+        metadata: {
+          severity: 'medium',
+          telemetry_target: 'c0',
+          workflow_execution_ids: ['exec-123'],
+        },
       })
     );
     expect(getConnectorById).toHaveBeenCalledWith(
@@ -1499,7 +1503,11 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       expect(conversations.create).toHaveBeenCalledWith(
         expect.objectContaining({
           agentId: 'nightshift.investigation',
-          metadata: { telemetry_target: target, workflow_execution_ids: ['exec-1'] },
+          metadata: {
+            severity: 'medium',
+            telemetry_target: target,
+            workflow_execution_ids: ['exec-1'],
+          },
           templateId: 'investigation',
         })
       );
@@ -1555,7 +1563,11 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       expect(conversations.create).toHaveBeenCalledWith(
         expect.objectContaining({
           agentId: 'nightshift.investigation',
-          metadata: { telemetry_target: target, workflow_execution_ids: ['exec-1'] },
+          metadata: {
+            severity: 'medium',
+            telemetry_target: target,
+            workflow_execution_ids: ['exec-1'],
+          },
         })
       );
     }
@@ -1583,7 +1595,11 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(conversations.create).toHaveBeenCalledWith(
       expect.objectContaining({
         agentId: 'nightshift.investigation',
-        metadata: { telemetry_target: 'c0', workflow_execution_ids: ['exec-1'] },
+        metadata: {
+          severity: 'medium',
+          telemetry_target: 'c0',
+          workflow_execution_ids: ['exec-1'],
+        },
       })
     );
   });
