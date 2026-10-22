@@ -940,13 +940,12 @@ export const INVALID_ROLE_ARN_MESSAGE = i18n.translate(
 );
 
 /**
- * True for a non-empty value that is not an IAM role ARN; whitespace is ignored so a pasted value
- * is judged as it will be saved. Same rule as the connector API's `role_arn`.
+ * True for a non-empty value that is not an IAM role ARN once trimmed, so a pasted value is judged
+ * as it will be saved; a whitespace-only value is invalid since it would be saved as empty. Same
+ * rule as the connector API's `role_arn`.
  */
-export const isRoleArnInvalid = (roleArn: string | undefined): boolean => {
-  const trimmed = roleArn?.trim() ?? '';
-  return trimmed !== '' && !isIamRoleArn(trimmed);
-};
+export const isRoleArnInvalid = (roleArn: string | undefined): boolean =>
+  !!roleArn && !isIamRoleArn(roleArn.trim());
 
 /** Read-only link to the deployed stack; needs no render. */
 export const getAwsStackConsoleUrl = (deploymentId: string | undefined): string | undefined => {

@@ -609,6 +609,18 @@ describe('useCloudConnectorSetup', () => {
       expect(mockUpdatePolicy).toHaveBeenCalledWith(expect.objectContaining({ isValid: false }));
     });
 
+    it('should set isValid to false when the role ARN is whitespace only', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(mockPolicy, mockUpdatePolicy, mockPackageInfo)
+      );
+
+      act(() => {
+        result.current.updatePolicyWithNewCredentials({ roleArn: '   ', name: 'connector' });
+      });
+
+      expect(mockUpdatePolicy).toHaveBeenCalledWith(expect.objectContaining({ isValid: false }));
+    });
+
     it('should leave an empty role ARN to the required-field validation', () => {
       const { result } = renderHook(() =>
         useCloudConnectorSetup(mockPolicy, mockUpdatePolicy, mockPackageInfo)

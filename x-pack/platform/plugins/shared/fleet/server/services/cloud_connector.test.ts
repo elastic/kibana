@@ -1931,6 +1931,7 @@ describe('CloudConnectorService', () => {
         ['arn:aws:iam::123:role/TestRole', 'a short account id'],
         ['arn:aws:cloudformation:us-east-1:123456789012:stack/s/u', 'a stack ARN'],
         [' arn:aws:iam::123456789012:role/TestRole', 'surrounding whitespace'],
+        ['   ', 'whitespace only'],
       ])('should throw error when role_arn is %p (%s)', (roleArn) => {
         const invalidRequest: CreateCloudConnectorRequest = {
           name: 'test-connector',

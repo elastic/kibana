@@ -1758,7 +1758,10 @@ describe('isRoleArnInvalid', () => {
   it('returns false for an empty or undefined value', () => {
     expect(isRoleArnInvalid(undefined)).toBe(false);
     expect(isRoleArnInvalid('')).toBe(false);
-    expect(isRoleArnInvalid('   ')).toBe(false);
+  });
+
+  it('returns true for a whitespace-only value, which would be saved as empty', () => {
+    expect(isRoleArnInvalid('   ')).toBe(true);
   });
 
   it.each([
