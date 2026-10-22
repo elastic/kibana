@@ -264,7 +264,7 @@ describe('processConverseResponse', () => {
     ]);
   });
 
-  it('counts cache read and write tokens in the prompt total and exposes cache reads as cached', async () => {
+  it('counts cache read and write tokens in the prompt total and exposes them as cached and cacheWrite', async () => {
     const response = createResponse({
       output: {
         message: {
@@ -285,7 +285,7 @@ describe('processConverseResponse', () => {
 
     expect(result[1]).toEqual({
       type: 'chatCompletionTokenCount',
-      tokens: { prompt: 130, completion: 5, total: 135, cached: 100 },
+      tokens: { prompt: 130, completion: 5, total: 135, cached: 100, cacheWrite: 20 },
     });
   });
 
