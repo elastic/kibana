@@ -232,8 +232,8 @@ describe('Discover topnav component', () => {
     async (actionId) => {
       const { toolkit, props } = await setup();
       const dataViewList = Promise.withResolvers<void>();
-      const loadInitialDataViewListSpy = jest
-        .spyOn(internalStateActions, 'loadInitialDataViewList')
+      const loadDataViewListOnceSpy = jest
+        .spyOn(internalStateActions, 'loadDataViewListOnce')
         .mockReturnValue(() => dataViewList.promise);
 
       try {
@@ -260,7 +260,7 @@ describe('Discover topnav component', () => {
 
         expect(await screen.findByTestId('savedObjectSaveModal')).toBeVisible();
       } finally {
-        loadInitialDataViewListSpy.mockRestore();
+        loadDataViewListOnceSpy.mockRestore();
       }
     }
   );
