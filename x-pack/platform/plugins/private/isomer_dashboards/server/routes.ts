@@ -22,7 +22,7 @@ import {
 } from '@kbn/isomer-primitives-dashboard';
 import { borealisLight } from '@kbn/isomer-theme';
 
-import { API_BASE, type DashboardLayout, PAGE_WIDTH, VIEW_BASE } from '../common';
+import { API_BASE, type DashboardLayout, DRAW_MAX_BYTES, PAGE_WIDTH, VIEW_BASE } from '../common';
 import type { IsomerDashboardsStartDeps } from './types';
 import { toDashboardComposition } from './to_composition';
 
@@ -50,6 +50,15 @@ const pdfBody = schema.object({
   layout: layoutSchema('grid'),
   width: widthSchema,
   controls: controlsSchema,
+});
+// A composition from the composition route, gzipped by the flyout; DRAW_MAX_BYTES bounds it.
+const drawBody = schema.object({
+  composition: schema.recordOf(schema.string({ maxLength: 100 }), schema.any()),
+  hints: schema.maybe(schema.recordOf(schema.string({ maxLength: 1000 }), schema.any())),
+  layout: layoutSchema('grid'),
+  width: widthSchema,
+  format: schema.oneOf([schema.literal('png'), schema.literal('pdf')]),
+  title: schema.maybe(schema.string({ maxLength: 1000 })),
 });
 const viewQuery = schema.object({
   from: schema.maybe(time),
@@ -89,6 +98,30 @@ const fileName = (title: string) =>
 const notFound = (error: unknown) =>
   (error as { output?: { statusCode?: number } })?.output?.statusCode === 404 ||
   /not found|not exist/i.test(String((error as Error)?.message));
+
+/** How a dashboard's composition draws: on Kibana's page at the layout's width, each chart at its panel's body. */
+const drawOptions = ({
+  layout,
+  width,
+  hints,
+}: {
+  layout: DashboardLayout;
+  width?: number;
+  hints: Record<string, Record<string, unknown>>;
+}): DrawOptions => {
+  const page = width ?? PAGE_WIDTH[layout];
+  return {
+    width: page,
+    frame: DASHBOARD_FRAME,
+    sizeFor: dashboardChartSize(page - 2 * DASHBOARD_PAGE_PADDING) as DrawOptions['sizeFor'],
+    hintFor: (node) => {
+      const hint = node.id === undefined ? undefined : hints[node.id];
+      return hint
+        ? (engineHintFromLens(hint, node as never) as Record<string, unknown>)
+        : undefined;
+    },
+  };
+};
 
 /** Registers the demo's routes: a dashboard as a PDF, and as an HTML view. */
 export const registerRoutes = (
@@ -171,18 +204,13 @@ export const registerRoutes = (
         return error ? `${error.path}: ${error.message}` : undefined;
       },
     });
-    const options: DrawOptions = {
-      width: page,
-      frame: DASHBOARD_FRAME,
-      sizeFor: dashboardChartSize(gridWidth) as DrawOptions['sizeFor'],
-      hintFor: (node) => {
-        const hint = node.id === undefined ? undefined : hints[node.id];
-        return hint
-          ? (engineHintFromLens(hint, node as never) as Record<string, unknown>)
-          : undefined;
-      },
+    return {
+      drawing,
+      converted,
+      composition,
+      hints,
+      options: drawOptions({ layout, width, hints }),
     };
-    return { drawing, converted, composition, hints, options };
   };
 
   router.post(
@@ -272,6 +300,60 @@ export const registerRoutes = (
               statusCode: 500,
               body: { message: String((error as Error)?.message ?? error) },
             });
+      }
+    }
+  );
+
+  // Draws a composition the composition route made, so the PDF is the page the flyout previewed. It reads
+  // nothing: the composition carries its data, and the drawing fetches no resource.
+  router.post(
+    {
+      path: `${API_BASE}/draw`,
+      security: {
+        authz: { enabled: false, reason: 'Draws the posted composition; reads no data.' },
+      },
+      options: { access: 'internal', body: { maxBytes: DRAW_MAX_BYTES } },
+      validate: { body: drawBody },
+    },
+    async (_context, request, response) => {
+      const { composition, hints, layout, width, format, title } = request.body as TypeOf<
+        typeof drawBody
+      >;
+      const [, { isomer }] = await getStartServices();
+      try {
+        const drawing = await isomer.getDrawing();
+        const [error] = drawing.runtime.validate(composition as never).errors;
+        if (error) {
+          return response.badRequest({
+            body: { message: `Invalid composition: ${error.path}: ${error.message}` },
+          });
+        }
+        const options = drawOptions({
+          layout,
+          ...(width ? { width } : {}),
+          hints: (hints ?? {}) as Record<string, Record<string, unknown>>,
+        });
+        if (format === 'png') {
+          return response.ok({
+            body: await drawing.drawPng(composition as never, options),
+            headers: { 'content-type': 'image/png' },
+          });
+        }
+        return response.ok({
+          body: await drawing.drawPdf(composition as never, {
+            ...options,
+            metadata: { title: title ?? 'Dashboard', creator: 'Kibana (Isomer)' },
+          }),
+          headers: {
+            'content-type': 'application/pdf',
+            'content-disposition': `attachment; filename="${fileName(title ?? '')}"`,
+          },
+        });
+      } catch (error) {
+        return response.customError({
+          statusCode: 500,
+          body: { message: String((error as Error)?.message ?? error) },
+        });
       }
     }
   );
