@@ -58,7 +58,7 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
     isUnavailableForMethod,
   } = useServicesStep({ onContinue });
 
-  const { detectAndReviewStep } = useOnboardingFlow();
+  const { detectAndReviewStep, defaultDataFormat } = useOnboardingFlow();
   const unavailableForMethodReason = i18n.translate(
     'xpack.ingestHub.servicesStep.ecfOnlyDisabledTooltip',
     {
@@ -80,6 +80,7 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
         dataFormat={dataFormat}
         onChange={setDataFormat}
         disabled={isFormatDisabled}
+        recommendedFormat={defaultDataFormat}
       />
       <EuiSpacer size="xl" />
       <EuiTitle size="m">

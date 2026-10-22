@@ -26,7 +26,6 @@ interface DataSchemaOption {
   value: DataFormat;
   name: string;
   description: string;
-  isRecommended?: boolean;
 }
 
 const DATA_SCHEMA_OPTIONS: DataSchemaOption[] = [
@@ -38,7 +37,6 @@ const DATA_SCHEMA_OPTIONS: DataSchemaOption[] = [
     description: i18n.translate('xpack.ingestHub.servicesStep.dataSchema.otel.description', {
       defaultMessage: 'OpenTelemetry semantic conventions.',
     }),
-    isRecommended: true,
   },
   {
     value: 'ecs',
@@ -55,9 +53,16 @@ interface DataSchemaSectionProps {
   dataFormat: DataFormat;
   onChange: (format: DataFormat) => void;
   disabled: boolean;
+  /** The schema to mark as recommended: the default one for the solution. */
+  recommendedFormat: DataFormat;
 }
 
-export function DataSchemaSection({ dataFormat, onChange, disabled }: DataSchemaSectionProps) {
+export function DataSchemaSection({
+  dataFormat,
+  onChange,
+  disabled,
+  recommendedFormat,
+}: DataSchemaSectionProps) {
   const radioGroupName = useGeneratedHtmlId({ prefix: 'dataSchema' });
 
   const cards = (
@@ -79,7 +84,7 @@ export function DataSchemaSection({ dataFormat, onChange, disabled }: DataSchema
                   <EuiFlexItem grow={false}>
                     <strong>{option.name}</strong>
                   </EuiFlexItem>
-                  {option.isRecommended && (
+                  {option.value === recommendedFormat && (
                     <EuiFlexItem grow={false}>
                       <EuiBadge color="hollow">
                         <FormattedMessage

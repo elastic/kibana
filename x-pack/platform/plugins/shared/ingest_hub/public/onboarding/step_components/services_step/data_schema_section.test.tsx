@@ -15,7 +15,13 @@ function renderSection(props: Partial<React.ComponentProps<typeof DataSchemaSect
   const onChange = jest.fn();
   render(
     <I18nProvider>
-      <DataSchemaSection dataFormat="ecs" onChange={onChange} disabled={false} {...props} />
+      <DataSchemaSection
+        dataFormat="ecs"
+        onChange={onChange}
+        disabled={false}
+        recommendedFormat="otel"
+        {...props}
+      />
     </I18nProvider>
   );
   return { onChange };
@@ -29,6 +35,14 @@ describe('DataSchemaSection', () => {
     const recommended = screen.getAllByText('Recommended');
     expect(recommended).toHaveLength(1);
     expect(recommended[0].closest('.euiCheckableCard')?.textContent).toContain('OpenTelemetry');
+  });
+
+  it('marks the ECS card as recommended when that is the default format', () => {
+    renderSection({ recommendedFormat: 'ecs' });
+    const recommended = screen.getAllByText('Recommended');
+    expect(recommended).toHaveLength(1);
+    expect(recommended[0].closest('.euiCheckableCard')?.textContent).toContain('ECS');
+    expect(recommended[0].closest('.euiCheckableCard')?.textContent).not.toContain('OpenTelemetry');
   });
 
   it('shows the note about changing the schema after installation', () => {
