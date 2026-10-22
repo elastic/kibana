@@ -412,8 +412,19 @@ export class RuleEventsClient {
     if (options.ruleUuids?.length) {
       query = query.where`${ruleUuidsIntersects(options.ruleUuids)}`;
     }
-    if (options.topologyFeatureIds?.length) {
-      query = query.where`${topologyFeatureIdsIntersects(options.topologyFeatureIds)}`;
+    const selectedEntities = options.topologyFeatureIds?.length
+      ? topologyFeatureIdsIntersects(options.topologyFeatureIds)
+      : undefined;
+    const unassignedEntities = options.unassignedEntityIds?.length
+      ? esql.exp`NOT (${topologyFeatureIdsIntersects(options.unassignedEntityIds)})`
+      : undefined;
+    const entityFilter =
+      selectedEntities && unassignedEntities
+        ? esql.exp`(${selectedEntities}) OR (${unassignedEntities})`
+        : selectedEntities ?? unassignedEntities;
+    // An empty live-entity set makes every event unassigned, including selected slugs.
+    if (entityFilter && options.unassignedEntityIds?.length !== 0) {
+      query = query.where`${entityFilter}`;
     }
     if (options.investigationStates?.length) {
       query = withInvestigationState(query).where`${esql.col(
@@ -516,6 +527,46 @@ export class RuleEventsClient {
     ]);
 
     return { severity, status, investigation };
+  }
+
+  async countActiveEventsByEntity(
+    options: Pick<RuleEventsCurrentStateSearchOptions, 'from' | 'to'>,
+    entityIds: string[]
+  ): Promise<{ entities: Record<string, number>; unassigned: number }> {
+    const { esClient } = this.clients;
+    const base = this.buildLatestByCurrentStateQuery({ ...options, status: ['active'] });
+    // CASE preserves events whose causal features or blast radius is absent.
+    const entitiesQuery = base.pipe`EVAL a = FIELD_EXTRACT(data, "causal_features.feature_id"), b = FIELD_EXTRACT(data, "blast_radius.feature_id")`
+      .pipe`EVAL fid = MV_DEDUPE(CASE(a IS NULL, b, b IS NULL, a, MV_APPEND(a, b)))`
+      .pipe`MV_EXPAND fid`;
+    try {
+      const [rows, unassigned] = await Promise.all([
+        entityIds.length
+          ? queryEsql({
+              esClient,
+              query: entitiesQuery.where`fid IN (${entityIds.map((id) => esql.str(id))})`
+                .pipe`STATS n = COUNT(*) BY fid`,
+            }).then((response) => esqlToObjects<{ fid: string; n: number }>(response))
+          : [],
+        executeCountQuery({
+          esClient,
+          query: this.buildLatestByCurrentStateQuery({
+            ...options,
+            status: ['active'],
+            unassignedEntityIds: entityIds,
+          }).pipe`STATS total = COUNT(*)`,
+        }),
+      ]);
+      return {
+        entities: Object.fromEntries(rows.map(({ fid, n }) => [fid, n])),
+        unassigned,
+      };
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return { entities: {}, unassigned: 0 };
+      }
+      throw error;
+    }
   }
 
   async findLatestByCurrentStateBatch(

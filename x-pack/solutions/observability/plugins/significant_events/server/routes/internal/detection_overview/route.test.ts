@@ -44,6 +44,7 @@ describe('GET /internal/significant_events/detection/_overview', () => {
           assertReadable,
         },
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          getFeatures: jest.fn().mockResolvedValue({ hits: [] }),
           countFeatures,
           countUnbackedQueries,
           countRuleBackedQueries,
@@ -64,7 +65,7 @@ describe('GET /internal/significant_events/detection/_overview', () => {
       perPage: 1,
     });
     expect(response).toEqual({
-      sources: 2,
+      entities: 0,
       knowledge_indicators: 15,
       active_rules: 7,
       detections: 5,
