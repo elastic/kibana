@@ -152,7 +152,7 @@ For the authoritative list (and the exact tag strings), see `src/platform/packag
 
 ## Limit tags [scout-deployment-tags-limit]
 
-Limit tags **narrow** a deployment tag selection based on an attribute of the environment the tests run in. They never replace deployment tags: a suite still needs at least one deployment tag to be discovered at all.
+Limit tags filter tests by **target attributes**: properties of the environment a run executes in that the deployment target doesn't capture, such as Kibana running in FIPS mode. They are a separate concept from deployment tags and complement them rather than replace them: a suite still needs at least one deployment tag to be discovered at all.
 
 Tags follow this shape:
 
