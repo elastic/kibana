@@ -12,6 +12,7 @@ import { z } from '@elastic/isomer-sdk';
 import { glyph } from '../theme/glyph';
 
 import { crossRefine } from './cross_field';
+import { numberFormat } from './intl';
 import { labelText } from './text';
 
 const LOCALE = 'en-US';
@@ -147,12 +148,12 @@ const printNumber = (input: number, format: ValueFormat | undefined): string => 
   const { style = 'number', precision, compact, currency, unit } = format ?? {};
   switch (style) {
     case 'percent':
-      return new Intl.NumberFormat(LOCALE, {
+      return numberFormat(LOCALE, {
         style: 'percent',
         ...digits(precision, 1),
       }).format(value);
     case 'currency':
-      return new Intl.NumberFormat(LOCALE, {
+      return numberFormat(LOCALE, {
         style: 'currency',
         currency,
         ...(compact
@@ -166,18 +167,15 @@ const printNumber = (input: number, format: ValueFormat | undefined): string => 
         value,
         BYTE_UNITS.map((name) => [name, 1024] as const)
       );
-      return withUnit(new Intl.NumberFormat(LOCALE, digits(precision, 1)).format(amount), byteUnit);
+      return withUnit(numberFormat(LOCALE, digits(precision, 1)).format(amount), byteUnit);
     }
     case 'duration': {
       const ms = format?.durationUnit === 's' ? value * 1000 : value;
       const [amount, durationUnit] = scaled(ms, DURATION_STEPS);
-      return withUnit(
-        new Intl.NumberFormat(LOCALE, digits(precision, 1)).format(amount),
-        durationUnit
-      );
+      return withUnit(numberFormat(LOCALE, digits(precision, 1)).format(amount), durationUnit);
     }
     default: {
-      const number = new Intl.NumberFormat(LOCALE, {
+      const number = numberFormat(LOCALE, {
         ...(compact ? { notation: 'compact' } : {}),
         ...digits(precision, 2),
       }).format(value);
