@@ -3,7 +3,6 @@ steps:
     key: agent-builder-smoke-tests
     depends_on:
       - build
-      - check
     steps:
       - label: '🔍 Discover EIS Models'
         command: .buildkite/scripts/steps/test/discover_eis_models.sh

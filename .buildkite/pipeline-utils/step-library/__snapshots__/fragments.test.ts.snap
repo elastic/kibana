@@ -32,7 +32,6 @@ exports[`pull_request fragments pull_request/agent_builder_smoke_tests 1`] = `
     {
       "depends_on": [
         "build",
-        "check",
       ],
       "group": "Agent Builder Smoke Tests",
       "key": "agent-builder-smoke-tests",
@@ -117,7 +116,6 @@ exports[`pull_request fragments pull_request/ai_infra_gen_ai 1`] = `
     {
       "depends_on": [
         "build",
-        "check",
       ],
       "group": "AppEx AI-Infra genAI tests",
       "key": "ai-infra-gen-ai",
@@ -344,7 +342,7 @@ exports[`pull_request fragments pull_request/base 1`] = `
       },
       "command": ".buildkite/scripts/steps/test/pick_test_group_run_order.sh",
       "env": {
-        "FTR_CONFIGS_DEPS": "build,check",
+        "FTR_CONFIGS_DEPS": "build",
         "FTR_CONFIGS_SCRIPT": ".buildkite/scripts/steps/test/ftr_configs.sh",
         "FTR_TEST_CHANNELS": "ci-on-commit",
         "JEST_INTEGRATION_SCRIPT": ".buildkite/scripts/steps/test/jest_integration.sh",
@@ -398,7 +396,7 @@ exports[`pull_request fragments pull_request/base 1`] = `
       "env": {
         "SCOUT_TEST_CHANNELS": "ci-on-commit",
         "SCOUT_TEST_DISTRIBUTION_STRATEGY": "lanes",
-        "SCOUT_TEST_LANES_GROUP_DEPS": "build_scout_tests,build,check",
+        "SCOUT_TEST_LANES_GROUP_DEPS": "build_scout_tests,build",
         "SCOUT_TEST_LANE_ESTIMATED_SETUP_MINUTES": 5,
         "SCOUT_TEST_LANE_TARGET_RUNTIME_MINUTES": 23,
         "SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS": 300,
@@ -819,7 +817,6 @@ exports[`pull_request fragments pull_request/fleet_cypress 1`] = `
       "command": ".buildkite/scripts/steps/functional/fleet_cypress.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "fleet-cypress",
       "label": "Fleet Cypress Tests",
@@ -1062,7 +1059,6 @@ exports[`pull_request fragments pull_request/response_ops 1`] = `
       "command": ".buildkite/scripts/steps/functional/response_ops.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "response-ops",
       "label": "Rules, Alerts and Exceptions ResponseOps Cypress Tests on Security Solution",
@@ -1097,7 +1093,6 @@ exports[`pull_request fragments pull_request/response_ops_cases 1`] = `
       "command": ".buildkite/scripts/steps/functional/response_ops_cases.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "response-ops-cases",
       "label": "Cases Cypress Tests on Security Solution",
@@ -1131,7 +1126,6 @@ exports[`pull_request fragments pull_request/scout_fleet_real_agent 1`] = `
       "command": ".buildkite/scripts/steps/test/scout_fleet_real_agent.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "scout-fleet-real-agent",
       "label": "Scout Fleet Real Agent",
@@ -1165,7 +1159,6 @@ exports[`pull_request fragments pull_request/security_solution/ai_assistant 1`] 
       "command": ".buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
       "key": "security-serverless-ai-assistant",
@@ -1194,7 +1187,6 @@ exports[`pull_request fragments pull_request/security_solution/ai_assistant 1`] 
       "command": ".buildkite/scripts/steps/functional/security_solution_ai_assistant.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "security-ai-assistant",
       "label": "AI Assistant - Security Solution Cypress Tests",
@@ -1229,7 +1221,6 @@ exports[`pull_request fragments pull_request/security_solution/ai4dsoc 1`] = `
       "command": ".buildkite/scripts/steps/functional/security_serverless_ai4dsoc.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
       "key": "security-serverless-ai4dsoc",
@@ -1265,7 +1256,6 @@ exports[`pull_request fragments pull_request/security_solution/asset_inventory 1
       "command": ".buildkite/scripts/steps/functional/asset_inventory.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "asset-inventory",
       "label": "Asset Inventory Cypress Tests",
@@ -1293,7 +1283,6 @@ exports[`pull_request fragments pull_request/security_solution/asset_inventory 1
       "command": ".buildkite/scripts/steps/functional/asset_inventory.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
       "key": "asset-inventory-serverless",
@@ -1329,7 +1318,6 @@ exports[`pull_request fragments pull_request/security_solution/cloud_security_po
       "command": ".buildkite/scripts/steps/functional/cloud_security_posture.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "cloud-security-posture",
       "label": "Cloud Security Posture Cypress Tests",
@@ -1357,7 +1345,6 @@ exports[`pull_request fragments pull_request/security_solution/cloud_security_po
       "command": ".buildkite/scripts/steps/functional/cloud_security_posture_serverless.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
       "key": "cloud-security-posture-serverless",
@@ -1393,7 +1380,6 @@ exports[`pull_request fragments pull_request/security_solution/cspm_agentless_sc
       "command": ".buildkite/scripts/steps/test/cspm_agentless_scout.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "cspm-agentless-scout",
       "label": "CSPM Agentless Scout E2E Tests",
@@ -1428,7 +1414,6 @@ exports[`pull_request fragments pull_request/security_solution/cypress_burn 1`] 
       "command": ".buildkite/scripts/steps/functional/defend_workflows_burn.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "defend-workflows-burn",
       "label": "[Soft fail] Defend Workflows Cypress Tests, burning changed specs",
@@ -1449,7 +1434,6 @@ exports[`pull_request fragments pull_request/security_solution/cypress_burn 1`] 
       "command": ".buildkite/scripts/steps/functional/defend_workflows_serverless_burn.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
       "key": "defend-workflows-serverless-burn",
@@ -1470,7 +1454,6 @@ exports[`pull_request fragments pull_request/security_solution/cypress_burn 1`] 
       "command": ".buildkite/scripts/steps/functional/security_solution_burn.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "security-solution-burn",
       "label": "[Soft fail] Security Solution Cypress tests, burning changed specs",
@@ -1490,7 +1473,6 @@ exports[`pull_request fragments pull_request/security_solution/cypress_burn 1`] 
       "command": ".buildkite/scripts/steps/functional/osquery_cypress_burn.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "osquery-cypress-burn",
       "label": "[Soft fail] Osquery Cypress Tests, burning changed specs",
@@ -1517,7 +1499,6 @@ exports[`pull_request fragments pull_request/security_solution/defend_workflows 
       "command": ".buildkite/scripts/steps/functional/defend_workflows.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "defend-workflows",
       "label": "Defend Workflows Cypress Tests",
@@ -1546,7 +1527,6 @@ exports[`pull_request fragments pull_request/security_solution/defend_workflows 
       "command": ".buildkite/scripts/steps/functional/defend_workflows_serverless.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
       "key": "defend-workflows-serverless",
@@ -1582,7 +1562,6 @@ exports[`pull_request fragments pull_request/security_solution/detection_engine 
       "command": ".buildkite/scripts/steps/functional/security_serverless_detection_engine.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
       "key": "security-serverless-detection-engine",
@@ -1611,7 +1590,6 @@ exports[`pull_request fragments pull_request/security_solution/detection_engine 
       "command": ".buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
       "key": "security-serverless-detection-engine-exceptions",
@@ -1640,7 +1618,6 @@ exports[`pull_request fragments pull_request/security_solution/detection_engine 
       "command": ".buildkite/scripts/steps/functional/security_solution_detection_engine.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "security-detection-engine",
       "label": "Detection Engine - Security Solution Cypress Tests",
@@ -1668,7 +1645,6 @@ exports[`pull_request fragments pull_request/security_solution/detection_engine 
       "command": ".buildkite/scripts/steps/functional/security_solution_detection_engine_exceptions.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "security-detection-engine-exceptions",
       "label": "Detection Engine - Exceptions - Security Solution Cypress Tests",
@@ -1703,7 +1679,6 @@ exports[`pull_request fragments pull_request/security_solution/entity_analytics 
       "command": ".buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
       "key": "security-serverless-entity-analytics",
@@ -1732,7 +1707,6 @@ exports[`pull_request fragments pull_request/security_solution/entity_analytics 
       "command": ".buildkite/scripts/steps/functional/security_solution_entity_analytics.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "security-entity-analytics",
       "label": "Entity Analytics - Security Solution Cypress Tests",
@@ -1767,7 +1741,6 @@ exports[`pull_request fragments pull_request/security_solution/explore 1`] = `
       "command": ".buildkite/scripts/steps/functional/security_solution_explore.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "security-explore",
       "label": "Explore - Security Solution Cypress Tests",
@@ -1795,7 +1768,6 @@ exports[`pull_request fragments pull_request/security_solution/explore 1`] = `
       "command": ".buildkite/scripts/steps/functional/security_serverless_explore.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
       "key": "security-serverless-explore",
@@ -1825,7 +1797,6 @@ exports[`pull_request fragments pull_request/security_solution/gen_ai_evals 1`] 
     {
       "depends_on": [
         "build",
-        "check",
       ],
       "group": "Security Solution Gen AI",
       "key": "security-solution-gen-ai",
@@ -1877,7 +1848,6 @@ exports[`pull_request fragments pull_request/security_solution/investigations 1`
       "command": ".buildkite/scripts/steps/functional/security_solution_investigations.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "security-investigations",
       "label": "Investigations - Security Solution Cypress Tests",
@@ -1905,7 +1875,6 @@ exports[`pull_request fragments pull_request/security_solution/investigations 1`
       "command": ".buildkite/scripts/steps/functional/security_serverless_investigations.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
       "key": "security-serverless-investigations",
@@ -1941,7 +1910,6 @@ exports[`pull_request fragments pull_request/security_solution/osquery_cypress 1
       "command": ".buildkite/scripts/steps/functional/osquery_cypress.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "osquery-cypress",
       "label": "Osquery Cypress Tests",
@@ -1969,7 +1937,6 @@ exports[`pull_request fragments pull_request/security_solution/osquery_cypress 1
       "command": ".buildkite/scripts/steps/functional/security_serverless_osquery.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
       "key": "osquery-serverless",
@@ -2005,7 +1972,6 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
       "command": ".buildkite/scripts/steps/functional/security_serverless_rule_management.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
       "key": "security-serverless-rule-management",
@@ -2034,7 +2000,6 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
       "command": ".buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_customization.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
       "key": "security-serverless-rule-management-prebuilt-customization",
@@ -2063,7 +2028,6 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
       "command": ".buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_installation.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
       "key": "security-serverless-rule-management-prebuilt-installation",
@@ -2092,7 +2056,6 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
       "command": ".buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_management.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
       "key": "security-serverless-rule-management-prebuilt-management",
@@ -2121,7 +2084,6 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
       "command": ".buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_upgrade.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "if": "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'",
       "key": "security-serverless-rule-management-prebuilt-upgrade",
@@ -2150,7 +2112,6 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
       "command": ".buildkite/scripts/steps/functional/security_solution_rule_management.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "security-rule-management",
       "label": "Rule Management - Security Solution Cypress Tests",
@@ -2178,7 +2139,6 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
       "command": ".buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_customization.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "security-rule-management-prebuilt-customization",
       "label": "Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests",
@@ -2206,7 +2166,6 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
       "command": ".buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_installation.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "security-rule-management-prebuilt-installation",
       "label": "Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests",
@@ -2234,7 +2193,6 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
       "command": ".buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_management.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "security-rule-management-prebuilt-management",
       "label": "Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests",
@@ -2262,7 +2220,6 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
       "command": ".buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_upgrade.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "security-rule-management-prebuilt-upgrade",
       "label": "Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests",
@@ -2298,7 +2255,6 @@ exports[`pull_request fragments pull_request/security_solution/scout_edr_real_fl
       "command": ".buildkite/scripts/steps/test/scout_edr_real_fleet.sh stateful",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "scout-edr-real-fleet-ech",
       "label": "Scout EDR Real Fleet - ECH",
@@ -2326,7 +2282,6 @@ exports[`pull_request fragments pull_request/security_solution/scout_edr_real_fl
       "command": ".buildkite/scripts/steps/test/scout_edr_real_fleet.sh serverless",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "scout-edr-real-fleet-serverless",
       "label": "Scout EDR Real Fleet - Serverless",
@@ -2491,7 +2446,6 @@ exports[`pull_request fragments pull_request/workflows_oom_testing 1`] = `
       "command": ".buildkite/scripts/steps/test/scout/workflows_oom_testing.sh",
       "depends_on": [
         "build",
-        "check",
       ],
       "key": "workflows-oom-testing",
       "label": "Workflow Schema OOM Prevention",

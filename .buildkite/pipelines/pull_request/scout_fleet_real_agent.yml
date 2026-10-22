@@ -8,7 +8,6 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - check
     # One stack with a Docker Fleet Server and Docker Elastic Agents.
     timeout_in_minutes: 60
     retry:

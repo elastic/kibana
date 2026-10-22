@@ -15,7 +15,7 @@ AUTOFIX_EXIT_CODE=0
 EXIT_CODE=0
 
 # Run the fast fix-producing steps first (tsproj, moon, oxlint, lint) and auto-commit
-# any changes immediately before spending up to 20 minutes on affected jest and tsc.
+# any changes immediately before running affected jest and tsc.
 node scripts/check --scope branch --only tsproj,moon,oxlint,lint || AUTOFIX_EXIT_CODE=$?
 
 if [[ $AUTOFIX_EXIT_CODE -ne 0 ]]; then
@@ -41,4 +41,3 @@ if [[ "$FAILED" == "true" ]]; then
     ":warning: **\`node scripts/check.js\` failed.** Run \`node scripts/check.js\` locally before pushing to catch these issues early."
   exit 1
 fi
-
