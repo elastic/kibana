@@ -16,7 +16,10 @@ import {
 
 import type { AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
-import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../common/constants';
+import {
+  ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER,
+  ES_CLIENT_AUTHENTICATION_HEADER,
+} from '../../../common/constants';
 import { getDetailedErrorMessage } from '../../errors';
 import { ROUTE_TAG_ACCEPT_JWT, ROUTE_TAG_ACCEPT_UIAM_OAUTH } from '../../routes/tags';
 import { getRequestSpacePrefix } from '../../uiam';
@@ -81,6 +84,8 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
 
   /**
    * Performs request authentication using provided `Authorization` HTTP headers.
+   * This provider has no session to reauthenticate and always honors incoming HTTP credentials.
+   * Authenticator sends session reauthentication options only to the provider that owns the session.
    * @param request Request instance.
    */
   public async authenticate(request: KibanaRequest) {
@@ -135,6 +140,18 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
             `Ensure that the route is defined with the "${ROUTE_TAG_ACCEPT_JWT}" tag.`
         );
         return AuthenticationResult.notHandled();
+      }
+
+      if (
+        user.authentication_realm.type === JWT_REALM_TYPE &&
+        !isUiamBearerCredential(authorizationHeader)
+      ) {
+        // Core's stored credential must include the JWT's client authentication as well as its token.
+        // Later grants read that snapshot rather than the original inbound headers.
+        const clientAuthentication = request.headers[ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER];
+        if (typeof clientAuthentication === 'string') {
+          authHeaders[ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER] = clientAuthentication;
+        }
       }
 
       return AuthenticationResult.succeeded(

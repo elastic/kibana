@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
-import type { AuthenticationProviderOptions } from './base';
+import type { AuthenticationOptions, AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../../errors';
 import type { SessionValue } from '../../session_management';
@@ -151,21 +151,28 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
 
   /**
    * Performs request authentication.
+   * With `options.reauthenticate`, use the supplied session instead of Core's forwarded Authorization
+   * header and validate with Elasticsearch even on minimal-authentication routes. Request headers stay unchanged.
    * @param request Request instance.
    * @param session Optional session object associated with the provider.
+   * @param [options] Explicit session reauthentication controls.
    */
-  public async authenticate(request: KibanaRequest, session?: SessionValue | null) {
+  public async authenticate(
+    request: KibanaRequest,
+    session?: SessionValue | null,
+    options?: AuthenticationOptions
+  ) {
     this.logger.debug(
       `Trying to authenticate user request to ${request.url.pathname}${request.url.search}.`
     );
 
-    if (HTTPAuthorizationHeader.parseFromRequest(request) != null) {
+    if (!options?.reauthenticate && HTTPAuthorizationHeader.parseFromRequest(request) != null) {
       this.logger.debug('Cannot authenticate requests with `Authorization` header.');
       return AuthenticationResult.notHandled();
     }
 
     if (session || canStartNewSession(request)) {
-      return this.authenticateViaAuthorizationHeader(request, session);
+      return this.authenticateViaAuthorizationHeader(request, session, options);
     }
 
     return AuthenticationResult.notHandled();
@@ -202,16 +209,18 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
    * Tries to authenticate user request via configured credentials encoded into `Authorization` header.
    * @param request Request instance.
    * @param session Session previously stored by the provider.
+   * @param [options] Reauthentication options forwarded to full backend credential validation.
    */
   private async authenticateViaAuthorizationHeader(
     request: KibanaRequest,
-    session?: SessionValue | null
+    session?: SessionValue | null,
+    options?: AuthenticationOptions
   ) {
     const authHeaders = this.httpAuthorizationHeader
       ? { authorization: this.httpAuthorizationHeader.toString() }
       : ({} as Record<string, string>);
     try {
-      const user = await this.getUser(request, authHeaders, session ?? undefined);
+      const user = await this.getUser(request, authHeaders, session ?? undefined, options);
       this.logger.debug(
         `Request to ${request.url.pathname}${request.url.search} has been authenticated.`
       );

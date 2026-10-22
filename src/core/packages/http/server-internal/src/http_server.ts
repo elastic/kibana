@@ -972,7 +972,8 @@ export class HttpServer {
           }
 
           if (requestHeaders) {
-            this.authRequestHeaders.set(req, requestHeaders);
+            // Each raw request owns its header generation, even when a provider reuses its result.
+            this.authRequestHeaders.set(req, { ...requestHeaders });
             // we mutate headers only for the backward compatibility with the legacy platform.
             // where some plugin read directly from headers to identify whether a user is authenticated.
             Object.assign(req.headers, requestHeaders);
@@ -992,6 +993,8 @@ export class HttpServer {
       const authResponseHeaders = this.authResponseHeaders.get(request);
       return t.next({ headers: authResponseHeaders });
     });
+
+    return { get: this.authRequestHeaders.get, set: this.authRequestHeaders.set };
   }
 
   public getRouters({ pluginId }: GetRoutersOptions = {}): {

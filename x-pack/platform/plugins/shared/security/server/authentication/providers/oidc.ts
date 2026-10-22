@@ -11,7 +11,11 @@ import type from 'type-detect';
 import type { KibanaRequest } from '@kbn/core/server';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
-import type { AuthenticationProviderOptions, AuthenticationProviderSpecificOptions } from './base';
+import type {
+  AuthenticationOptions,
+  AuthenticationProviderOptions,
+  AuthenticationProviderSpecificOptions,
+} from './base';
 import { BaseAuthenticationProvider } from './base';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
@@ -172,15 +176,22 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider<Provi
 
   /**
    * Performs OpenID Connect request authentication.
+   * With `options.reauthenticate`, use the supplied session instead of Core's forwarded Authorization
+   * header and validate with Elasticsearch even on minimal-authentication routes. Request headers stay unchanged.
    * @param request Request instance.
    * @param [session] Optional session object associated with the provider.
+   * @param [options] Explicit session reauthentication controls.
    */
-  public async authenticate(request: KibanaRequest, session?: SessionValue<ProviderState> | null) {
+  public async authenticate(
+    request: KibanaRequest,
+    session?: SessionValue<ProviderState> | null,
+    options?: AuthenticationOptions
+  ) {
     this.logger.debug(
       `Trying to authenticate user request to ${request.url.pathname}${request.url.search}.`
     );
 
-    if (HTTPAuthorizationHeader.parseFromRequest(request) != null) {
+    if (!options?.reauthenticate && HTTPAuthorizationHeader.parseFromRequest(request) != null) {
       this.logger.debug('Cannot authenticate requests with `Authorization` header.');
       return AuthenticationResult.notHandled();
     }
@@ -195,7 +206,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider<Provi
 
     let authenticationResult = AuthenticationResult.notHandled();
     if (session) {
-      authenticationResult = await this.authenticateViaState(request, session);
+      authenticationResult = await this.authenticateViaState(request, session, options);
       if (
         authenticationResult.failed() &&
         Tokens.isAccessTokenExpiredError(authenticationResult.error)
@@ -341,8 +352,13 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider<Provi
    * forwarded to Elasticsearch backend.
    * @param request Request instance.
    * @param session Session value previously stored by the provider.
+   * @param [options] Reauthentication options forwarded to full backend credential validation.
    */
-  private async authenticateViaState(request: KibanaRequest, session: SessionValue<ProviderState>) {
+  private async authenticateViaState(
+    request: KibanaRequest,
+    session: SessionValue<ProviderState>,
+    options?: AuthenticationOptions
+  ) {
     this.logger.debug('Trying to authenticate via state.');
 
     if (!session.state?.accessToken) {
@@ -354,7 +370,7 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider<Provi
       authorization: new HTTPAuthorizationHeader('Bearer', session.state.accessToken).toString(),
     };
     try {
-      const user = await this.getUser(request, authHeaders, session);
+      const user = await this.getUser(request, authHeaders, session, options);
 
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });

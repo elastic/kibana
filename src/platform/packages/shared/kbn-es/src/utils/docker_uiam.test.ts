@@ -111,6 +111,25 @@ describe('#getUiamContainers()', () => {
 
     expect(UIAM_CONTAINERS.map(ephemeralExpirationParam)).toEqual([undefined, undefined]);
   });
+
+  test('configures short session access tokens only on the main UIAM container', () => {
+    const containers = getUiamContainers({ includeOAuth: true, accessTokenExpiration: 'PT1M' });
+    expect(
+      containers.map((container) =>
+        container.params.find((param) => param.startsWith('uiam.tokens.access.expiration='))
+      )
+    ).toEqual([undefined, 'uiam.tokens.access.expiration=PT1M', undefined]);
+    expect(getUiamContainers()[1].params).not.toContain('uiam.tokens.access.expiration=PT1M');
+  });
+
+  test.each(['PT10S', 'PT0M', 'bad', '1m'])(
+    'rejects unsupported session token lifetime %s before starting containers',
+    (accessTokenExpiration) => {
+      expect(() => getUiamContainers({ accessTokenExpiration })).toThrow(
+        'expected an ISO-8601 duration of at least PT1M'
+      );
+    }
+  );
 });
 
 describe(`#runUiamContainer()`, () => {

@@ -658,6 +658,22 @@ node scripts/scout start-server --arch <arch> --domain <domain>
 
 This command is useful for manual testing or running tests via an IDE.
 
+#### Session credential recovery tests
+
+The Security plugin's `scout_session_credentials` suite tests session renewal through scoped Elasticsearch clients and API-key grants.
+Its `session_credentials` config set uses a 15-second native ES token lifetime on stateful deployments.
+On local serverless, it uses short initial UIAM sessions and sets `esServerlessOptions.uiamAccessTokenExpiration` to `PT1M` for refreshed tokens.
+This setting accepts an ISO-8601 duration of at least one minute and leaves the default UIAM lifetime unchanged when absent.
+
+The suite covers concurrent calls, late failures from cached clients, multiple expiry cycles, and external credentials accompanied by a session cookie.
+It verifies both native ES and direct UIAM grants on serverless.
+These tests require local control of token lifetimes and do not run against Cloud deployments.
+
+```bash
+node scripts/scout run-tests --arch stateful --domain classic --config x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/playwright.config.ts
+node scripts/scout run-tests --arch serverless --domain search --config x-pack/platform/plugins/shared/security/test/scout_session_credentials/api/playwright.config.ts
+```
+
 #### Cross Project Search (CPS) Support
 
 Scout supports testing Cross Project Search by starting a second ("linked") Elasticsearch cluster alongside the origin. The linked cluster runs on a separate port, shares the same UIAM identity provider as the origin, and is intended exclusively for **reading data from** -- it has no Kibana instance.
