@@ -140,7 +140,7 @@ describe('ki_feature_similarity_search tool', () => {
     expect(findFeaturesAcrossSources).toHaveBeenCalledWith(
       ['id-logs-test'],
       'tech-x Tech X some technology',
-      { featureType: 'technology', searchMode: 'semantic', limit: 100 }
+      { featureType: 'technology', searchMode: 'semantic' }
     );
   });
 

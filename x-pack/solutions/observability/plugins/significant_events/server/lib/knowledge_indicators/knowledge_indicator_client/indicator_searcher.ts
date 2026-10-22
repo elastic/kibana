@@ -7,6 +7,7 @@
 
 import { BasicPrettyPrinter, esql, type ComposerQuery } from '@elastic/esql';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import type {
   Feature,
   KnowledgeIndicator,
@@ -442,13 +443,25 @@ export class IndicatorSearcher {
     build: (semanticMinScore: number) => ComposerQuery
   ): Promise<RankedIndicatorRow[]> {
     const filter = latestRevisionIds ? { ids: { values: latestRevisionIds } } : undefined;
-    const rankedRows = esqlToObjects<RankedIndicatorRow>(
-      await queryEsql({
-        esClient: this.esClient,
-        query: build(this.config.semantic_min_score),
-        filter,
-      })
-    );
+    const rankedResponse = await queryEsql({
+      esClient: this.esClient,
+      query: build(this.config.semantic_min_score),
+      filter,
+    }).catch((error) => {
+      // The cross-source path ranks before any revision read, so this is where a not-yet-created
+      // data stream surfaces.
+      if (isEsqlUnknownIndexError(error)) {
+        this.logger.debug(
+          `KnowledgeIndicator ${mode} search: data stream not created yet; returning no ranked rows`
+        );
+        return undefined;
+      }
+      throw error;
+    });
+    if (!rankedResponse) {
+      return [];
+    }
+    const rankedRows = esqlToObjects<RankedIndicatorRow>(rankedResponse);
     if (mode === 'keyword' || rankedRows.some((row) => row[RANK_LABEL_COLUMN] === SEMANTIC_LABEL)) {
       return rankedRows.slice(0, limit);
     }

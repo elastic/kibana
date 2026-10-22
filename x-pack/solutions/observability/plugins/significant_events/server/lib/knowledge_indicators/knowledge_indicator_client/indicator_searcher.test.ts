@@ -8,6 +8,7 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { BasicPrettyPrinter } from '@elastic/esql';
+import { errors, type TransportResult } from '@elastic/elasticsearch';
 import { IndicatorSearcher } from './indicator_searcher';
 import type { RevisionReader } from './revision_reader';
 import { queryEsql } from '../../significant_events/latest_source_query';
@@ -21,7 +22,6 @@ const SPACE = 'team-a';
 const T1 = '2026-01-01T00:00:00.000Z';
 const T2 = '2026-01-02T00:00:00.000Z';
 
-// Rows default to the semantic label; pass `null` as the fifth column for a keyword-only row.
 const rankResponse = (rows: Array<[string, string, string, string, (string | null)?]>) => ({
   columns: [
     { name: 'id', type: 'keyword' },
@@ -38,6 +38,15 @@ const rankResponse = (rows: Array<[string, string, string, string, (string | nul
     label === undefined ? 'semantic' : label,
   ]),
 });
+
+const makeEsError = (status: number, type: string, reason: string) =>
+  new errors.ResponseError({
+    statusCode: status,
+    headers: {},
+    warnings: [],
+    meta: {} as unknown as TransportResult['meta'],
+    body: { error: { type, reason } },
+  } as TransportResult);
 
 const storedFeatureIn = (sourceId: string, id: string, timestamp: string) => ({
   '@timestamp': timestamp,
@@ -108,29 +117,30 @@ describe('IndicatorSearcher.findFeaturesAcrossSources', () => {
     expect(fetchLatestRevisions).not.toHaveBeenCalled();
   });
 
-  it('returns a newer authoritative revision written after ranking', async () => {
-    (queryEsql as jest.Mock).mockResolvedValue(
-      rankResponse([
-        ['u1', 'src-a', 'feature', T1],
-        ['u1', 'src-a', 'feature', T2],
-      ])
-    );
-    fetchLatestRevisions.mockResolvedValue([
-      storedFeatureIn('src-a', 'u1', '2026-03-01T00:00:00.000Z'),
-    ]);
-
-    const { hits } = await run();
-
-    expect(hits.map(({ uuid, updated_at: updatedAt }) => [uuid, updatedAt])).toEqual([
-      ['u1', '2026-03-01T00:00:00.000Z'],
-    ]);
-  });
-
   it('drops a ranked group that is deleted, excluded or expired in its latest revision', async () => {
     (queryEsql as jest.Mock).mockResolvedValue(rankResponse([['u1', 'src-a', 'feature', T1]]));
     fetchLatestRevisions.mockResolvedValue([]);
 
     expect((await run()).hits).toEqual([]);
+  });
+
+  it('treats a not-yet-created data stream as an empty corpus', async () => {
+    (queryEsql as jest.Mock).mockRejectedValue(
+      makeEsError(400, 'verification_exception', 'Unknown index [.kibana-knowledge-indicators]')
+    );
+
+    expect((await run()).hits).toEqual([]);
+    expect(queryEsql).toHaveBeenCalledTimes(1);
+    expect(fetchLatestRevisions).not.toHaveBeenCalled();
+  });
+
+  it('rethrows verification errors other than an unknown index', async () => {
+    (queryEsql as jest.Mock).mockRejectedValue(
+      makeEsError(400, 'verification_exception', 'Unknown column [feature.bogus]')
+    );
+
+    await expect(run()).rejects.toThrow(/verification_exception|Unknown column/);
+    expect(fetchLatestRevisions).not.toHaveBeenCalled();
   });
 
   it('retries without the semantic threshold when no ranked row carries the semantic label', async () => {

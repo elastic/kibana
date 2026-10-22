@@ -63,6 +63,23 @@ describe('findSimilarFeatures', () => {
     expect(getFeatureSourcesBySlug).not.toHaveBeenCalled();
   });
 
+  it('searches without a per-copy limit', async () => {
+    const findFeaturesAcrossSources = jest.fn().mockResolvedValue({ hits: [] });
+
+    await findSimilarFeatures({
+      kiClient: { findFeaturesAcrossSources, getFeatureSourcesBySlug: jest.fn() },
+      sourceIds: ['id-logs'],
+      currentSourceId: 'id-logs',
+      getSourceSlug: (id) => id,
+      args,
+    });
+
+    expect(findFeaturesAcrossSources).toHaveBeenCalledWith(['id-logs'], 'redis Redis cache', {
+      featureType: 'technology',
+      searchMode: 'semantic',
+    });
+  });
+
   it('completes sources from the exact slug lookup', async () => {
     const result = await search(
       [makeFeature({ id: 'redis', source_id: 'id-cart' })],

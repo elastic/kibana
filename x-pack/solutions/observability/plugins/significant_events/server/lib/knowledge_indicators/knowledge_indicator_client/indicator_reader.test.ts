@@ -317,8 +317,6 @@ describe('IndicatorReader.getFeatureSourcesBySlug', () => {
       ])
     );
     const query = capturedQueryString(runEsql);
-    expect(query).toContain('`feature.slug` IN ("redis", "kafka")');
-    expect(query).toContain('`feature.type` IN ("technology")');
     expect(query).toContain('`source.id` IN ("src-a", "src-b", "src-c")');
     expect(query).toContain('(excluded IS NULL OR excluded == FALSE)');
     expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);

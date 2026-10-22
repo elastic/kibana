@@ -47,7 +47,6 @@ export interface FeatureSimilarityGroup {
 export type SourceSlugResolver = (sourceId: string) => string;
 
 const MAX_SIMILAR_FEATURES = 5;
-const SEARCH_PREFETCH_LIMIT = 100;
 
 const toTime = (value?: string): number => {
   const time = value ? Date.parse(value) : NaN;
@@ -102,10 +101,11 @@ export const findSimilarFeatures = async ({
   getSourceSlug,
   args,
 }: FindSimilarFeaturesScope & { args: FeatureCandidate }): Promise<SimilarFeatureHit[]> => {
+  // No limit: ranked rows are per-source copies, so a prefix of them may hold only a few slugs.
   const { hits } = await kiClient.findFeaturesAcrossSources(
     sourceIds,
     `${args.candidate_id} ${args.title} ${args.description}`.trim(),
-    { featureType: args.type, searchMode: 'semantic', limit: SEARCH_PREFETCH_LIMIT }
+    { featureType: args.type, searchMode: 'semantic' }
   );
 
   const similar = collapseBySlug(hits, currentSourceId, getSourceSlug).slice(
