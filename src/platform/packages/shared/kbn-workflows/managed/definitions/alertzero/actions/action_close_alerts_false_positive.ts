@@ -18,10 +18,10 @@ export const ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID =
   'system-alertzero-action-close-alerts-fp';
 
 export const ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
+  version: 2,
   yaml: ACTION_CLOSE_ALERTS_FALSE_POSITIVE_YAML,
 } as const satisfies ManagedWorkflowDefinition;
