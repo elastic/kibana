@@ -880,6 +880,10 @@ export function fromAPItoLensState(config: MetricConfig): MetricAttributesWithou
   // For ES|QL metric charts with trendlines, create the trendline text-based layer.
   // buildDatasourceStates only creates the main layer; the trendline needs its own
   // layer with a BUCKET() time-bucketing query.
+  //
+  // If the query has no time field, skip the layer only — keep the visualization
+  // trendline accessors. Lens hydration rebuilds the layer after DataViews provide
+  // timeField. Clearing accessors here would drop the sparkline for good.
   const trendlineLayerId = (visualization as MetricVisualizationState).trendlineLayerId;
   const mainLayer = layers.textBased?.layers?.[DEFAULT_LAYER_ID];
   if (trendlineLayerId && isEsqlLayerWithIndex(mainLayer)) {
