@@ -16,7 +16,7 @@ import {
 } from '@kbn/presentation-publishing';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { getEsqlControls } from '@kbn/esql-utils';
+import { getEsqlControls } from '@kbn/esql-controls-utils';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';

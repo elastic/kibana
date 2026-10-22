@@ -172,7 +172,7 @@ export interface SampleOptions {
    * arrays and the last `enum` value, ignoring examples and defaults.
    */
   readonly boundary?: boolean;
-  /** Leaves out optional properties at every depth. */
+  /** Leaves out optional properties at every depth, skipping object and array examples. */
   readonly requiredOnly?: boolean;
 }
 
@@ -195,10 +195,12 @@ export const sampleSchema = (
     if (typeof node.$ref === 'string') {
       return sample(resolve(node, document), refToPointer(node.$ref), depth + 1);
     }
+    // Object and array examples may include optional properties, which `requiredOnly` omits.
     const candidates = boundary
       ? []
       : [...(Array.isArray(node.examples) ? node.examples : []), node.example, node.default].filter(
-          (value) => value !== undefined
+          (value) =>
+            value !== undefined && !(requiredOnly && (isRecord(value) || Array.isArray(value)))
         );
     const example = candidates.find(
       (value) => at === undefined || !conforms || conforms({ pointer: at, schema: node }, value)

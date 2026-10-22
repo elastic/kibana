@@ -44,6 +44,10 @@ export interface SlackAppStatusResponse {
   error?: string;
   /** Present once the install has registered a workspace (`pending_confirmation` and `connected`). */
   workspace?: SlackAppWorkspace;
+  /** Username of the admin who started the install; present with `workspace` when the request had one. */
+  createdBy?: string;
+  /** ISO timestamp of when the install started; present with `workspace`. */
+  createdAt?: string;
 }
 
 export interface SlackAppConfirmResponse {
