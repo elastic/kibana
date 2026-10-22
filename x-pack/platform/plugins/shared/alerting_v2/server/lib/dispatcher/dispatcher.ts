@@ -276,6 +276,7 @@ export class DispatcherService implements DispatcherServiceContract {
             spaceId: alert.space_id,
           })
         ),
+        refresh: 'wait_for',
       });
     } catch (writeErr) {
       const err = isError(writeErr) ? writeErr : new Error(String(writeErr));

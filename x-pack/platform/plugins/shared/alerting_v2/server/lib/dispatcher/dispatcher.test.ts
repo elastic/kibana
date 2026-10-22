@@ -306,7 +306,7 @@ describe('DispatcherService', () => {
 
       expect(storageEsClient.bulk).toHaveBeenCalledWith({
         operations: expect.any(Array),
-        refresh: false,
+        refresh: 'wait_for',
       });
 
       const [{ operations }] = storageEsClient.bulk.mock.calls[0];
@@ -1283,6 +1283,7 @@ describe('DispatcherService', () => {
       // Terminal unmatched records must have been bulk-indexed
       expect(escapeMockEsClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
+          refresh: 'wait_for',
           operations: expect.arrayContaining([
             expect.objectContaining({ create: expect.any(Object) }),
             expect.objectContaining({

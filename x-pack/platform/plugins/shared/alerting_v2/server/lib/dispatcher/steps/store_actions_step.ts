@@ -116,9 +116,12 @@ export class StoreActionsStep implements DispatcherStep {
       return action;
     });
 
+    // These rows are the dedup ledger `last_fired` reads, so the next tick re-dispatches the
+    // same series unless `refresh: 'wait_for'` makes them searchable before this returns.
     await this.storageService.bulkIndexDocs<AlertActionDocument>({
       index: ALERT_ACTIONS_DATA_STREAM,
       docs: [...alertActions, ...notifiedActions],
+      refresh: 'wait_for',
     });
 
     return { type: 'continue', data: { recordedAlerts: alertActions.length } };

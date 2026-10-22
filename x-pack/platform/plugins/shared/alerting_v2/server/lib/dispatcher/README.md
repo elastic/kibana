@@ -58,7 +58,7 @@ windowStart = eventWatermark − OVERLAP_WINDOW_MINUTES
 windowEnd   = min(windowStart + MAX_WINDOW_MINUTES, startedAt − SETTLE_BUFFER_SECONDS)
 ```
 
-The window caps **event** rows only. Action rows are not upper-bounded, so `last_fired` still sees records `StoreActionsStep` just wrote (ES sets their `@timestamp` at ingest, i.e. after the settle buffer).
+The window caps **event** rows only. Action rows are not upper-bounded, so the window filter does not *exclude* records `StoreActionsStep` just wrote (ES sets their `@timestamp` at ingest, i.e. after the settle buffer). Not being excluded is not the same as being searchable, so `StoreActionsStep` writes with `refresh: 'wait_for'`: without it the next tick's `last_fired` can still read `NULL` for a series that was just dispatched, and dispatch it again.
 
 `eventWatermark` is a **content-addressed** progress marker — it advances only after alerts in the window have received `.alert-actions` records, never based on wall-clock alone:
 

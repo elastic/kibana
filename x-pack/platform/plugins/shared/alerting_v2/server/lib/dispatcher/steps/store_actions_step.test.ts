@@ -99,6 +99,7 @@ describe('StoreActionsStep', () => {
           space_id: 'default',
         },
       ],
+      refresh: 'wait_for',
     });
   });
 
@@ -193,6 +194,7 @@ describe('StoreActionsStep', () => {
           space_id: 'default',
         },
       ],
+      refresh: 'wait_for',
     });
   });
 
@@ -501,6 +503,7 @@ describe('StoreActionsStep', () => {
           space_id: 'default',
         },
       ],
+      refresh: 'wait_for',
     });
   });
 

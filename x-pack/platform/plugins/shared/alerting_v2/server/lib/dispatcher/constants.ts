@@ -9,7 +9,9 @@
  * How far behind the persisted watermark each scan re-reads. Re-reads are
  * free: the INLINE STATS dedup in `getDispatchableAlertEventsQuery`
  * (queries.ts:38-39) drops already-recorded alerts server-side before
- * LIMIT. `@timestamp` is set by ES at ingest, so the gap between when it's set
+ * LIMIT — which only holds because `StoreActionsStep` writes those action
+ * rows with `refresh: 'wait_for'`.
+ * `@timestamp` is set by ES at ingest, so the gap between when it's set
  * and searchability is bounded by the refresh interval and covered by the
  * settle buffer; the overlap is slack for anything else (e.g. a paused
  * dispatcher), not a correctness constant.
