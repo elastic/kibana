@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import { usesDecisionTrees } from '../agents/agent_policy';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
 import { toolCallsSchema } from './tool_calls_schema';
@@ -74,7 +74,7 @@ export const decisionTreePrepareStepDefinition = ({
 
       // Only the Nightshift investigator's rounds feed the decision trees: this workflow is its
       // post-execution hook, and another agent's round must not rewrite the trees.
-      if (agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
+      if (!usesDecisionTrees(agentId)) {
         return skippedOutput;
       }
 

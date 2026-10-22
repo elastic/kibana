@@ -12,7 +12,7 @@ import type { CoreStart, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { MAX_KEYWORD_LENGTH } from '../../common';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import { usesKnowledge } from '../agents/agent_policy';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { runMemoryOptimize } from '../memory/register_memory';
 import type { NightshiftTelemetryClient } from '../telemetry';
@@ -113,8 +113,8 @@ export const memoryOptimizeStepDefinition = ({
         return { output: { status: 'ok' as const, skipped: true } };
       }
 
-      // Same policy as materialize: Memory is only for the Nightshift investigator.
-      if (context.input.agent_id?.trim() !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
+      // Same policy as materialize: Memory is only for the Nightshift knowledge agents.
+      if (!usesKnowledge(context.input.agent_id)) {
         context.logger.info('Skipped memory optimize for missing or unsupported agent');
         return { output: { status: 'ok' as const, skipped: true } };
       }
@@ -195,9 +195,9 @@ export const memoryOptimizeStepDefinition = ({
         );
       }
 
-      if (!summary && context.input.agent_id === NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
+      if (!summary) {
         telemetry.reportSemanticMemoryOptimized({
-          agent_id: context.input.agent_id,
+          agent_id: context.input.agent_id ?? 'unknown',
           ...(context.input.conversation_id
             ? { conversation_id: context.input.conversation_id }
             : {}),

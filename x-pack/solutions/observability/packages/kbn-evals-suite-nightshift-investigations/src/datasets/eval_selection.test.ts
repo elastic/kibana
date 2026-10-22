@@ -19,6 +19,7 @@ describe('resolveEvalSelection', () => {
       expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: value })).toEqual({
         runSmoke: true,
         runInvestigations: true,
+        runConnectorProbes: false,
         smokeDatasetsRequest: undefined,
         fellBackToSmoke: false,
       });
@@ -28,6 +29,7 @@ describe('resolveEvalSelection', () => {
       expect(resolveEvalSelection({})).toEqual({
         runSmoke: true,
         runInvestigations: false,
+        runConnectorProbes: false,
         smokeDatasetsRequest: undefined,
         fellBackToSmoke: true,
       });
@@ -48,6 +50,7 @@ describe('resolveEvalSelection', () => {
     expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'trace-only' })).toEqual({
       runSmoke: false,
       runInvestigations: true,
+      runConnectorProbes: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: false,
     });
@@ -57,6 +60,7 @@ describe('resolveEvalSelection', () => {
     expect(resolveEvalSelection({ NIGHTSHIFT_DATASETS: ' synthetic-smoke ' })).toEqual({
       runSmoke: true,
       runInvestigations: false,
+      runConnectorProbes: false,
       smokeDatasetsRequest: 'synthetic-smoke',
       fellBackToSmoke: false,
     });
@@ -68,9 +72,34 @@ describe('resolveEvalSelection', () => {
     ).toEqual({
       runSmoke: true,
       runInvestigations: true,
+      runConnectorProbes: false,
       smokeDatasetsRequest: 'synthetic-smoke',
       fellBackToSmoke: false,
     });
+  });
+
+  it('runs only the connector probes for connector-probe', () => {
+    expect(
+      resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'connector-probe' })
+    ).toEqual({
+      runSmoke: false,
+      runInvestigations: false,
+      runConnectorProbes: true,
+      smokeDatasetsRequest: undefined,
+      fellBackToSmoke: false,
+    });
+  });
+
+  it('never selects the connector probes for all', () => {
+    expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'all' })).toMatchObject({
+      runConnectorProbes: false,
+    });
+  });
+
+  it('rejects connector-probe without credentials', () => {
+    expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASETS: 'connector-probe' })).toThrow(
+      'NIGHTSHIFT_DATASETS=connector-probe selects connector-probe'
+    );
   });
 
   it.each(['trace-only', 'synthetic-smoke,trace-only'])(

@@ -27,6 +27,7 @@ import {
 } from '@kbn/significant-events-schema';
 import type { StartInvestigationRequest } from '../../common';
 import { freeFormContextSchema } from '../../common/schemas';
+import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import {
   InvalidInvestigationContextError,
@@ -39,12 +40,18 @@ import { NightshiftInvestigationsClient } from './investigations_client';
 jest.mock('../lib/install_investigation_agent', () => ({
   installInvestigationAgent: jest.fn().mockResolvedValue(undefined),
 }));
+jest.mock('../lib/install_assistant_agent', () => ({
+  installAssistantAgent: jest.fn().mockResolvedValue(undefined),
+}));
 
 const mockNewInvestigationId = jest.fn(() => 'inv-new');
 jest.mock('uuid', () => ({ ...jest.requireActual('uuid'), v4: () => mockNewInvestigationId() }));
 
 const installInvestigationAgentMock = installInvestigationAgent as jest.MockedFunction<
   typeof installInvestigationAgent
+>;
+const installAssistantAgentMock = installAssistantAgent as jest.MockedFunction<
+  typeof installAssistantAgent
 >;
 
 const SPACE_ID = 'test-space';
@@ -349,6 +356,48 @@ describe('NightshiftInvestigationsClient.start()', () => {
       'nightshift-investigations'
     );
     expect(result).toEqual({ investigation_id: 'inv-new' });
+    expect(installAssistantAgentMock).not.toHaveBeenCalled();
+  });
+
+  it('installs the assistant in the investigation space when it is enabled', async () => {
+    mockManagement.getWorkflow.mockResolvedValue({
+      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      enabled: true,
+      valid: true,
+      definition: { steps: [] },
+    });
+    mockManagement.runWorkflow.mockResolvedValue('exec-manual');
+
+    await makeClient({ assistantEnabled: true }).start({
+      subject: { type: 'manual', id: 'manual' },
+      trigger_type: 'manual',
+      message: 'Why did payment timeouts increase?',
+    });
+
+    expect(installAssistantAgentMock).toHaveBeenCalledWith({
+      agentBuilder: mockAgentBuilder,
+      spaceId: SPACE_ID,
+      availability: mockAgentAvailability,
+    });
+  });
+
+  it('starts the investigation when installing the assistant fails', async () => {
+    installAssistantAgentMock.mockRejectedValueOnce(new Error('assistant install failed'));
+    mockManagement.getWorkflow.mockResolvedValue({
+      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      enabled: true,
+      valid: true,
+      definition: { steps: [] },
+    });
+    mockManagement.runWorkflow.mockResolvedValue('exec-manual');
+
+    await expect(
+      makeClient({ assistantEnabled: true }).start({
+        subject: { type: 'manual', id: 'manual' },
+        trigger_type: 'manual',
+        message: 'Why did payment timeouts increase?',
+      })
+    ).resolves.toEqual({ investigation_id: 'inv-new' });
   });
 
   it('applies a per-run timeout without mutating the installed investigation workflow', async () => {
