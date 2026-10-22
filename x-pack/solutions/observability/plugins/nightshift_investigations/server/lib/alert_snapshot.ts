@@ -6,10 +6,20 @@
  */
 
 import Boom from '@hapi/boom';
+import { esql } from '@elastic/esql';
 import { isResponseError } from '@kbn/es-errors';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { buildBulkEpisodeQuery, rowsFromEsql } from '@kbn/alerting-v2-common-queries';
+import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import {
+  EPISODE_EVENTS_FIELDS,
+  EVENTS_SERIES_ID_EVAL,
+  addEpisodeSummaryStats,
+  asTypedEsqlQuery,
+  buildEpisodesDataRequest,
+  rowsFromEsql,
+  type EpisodeEventsEsqlRow,
+} from '@kbn/alerting-v2-common-queries';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import {
@@ -148,29 +158,47 @@ const isEventsUnavailable = (error: unknown): boolean =>
     error.statusCode === 404 ||
     (error.statusCode === 400 && /unknown index/i.test(error.message)));
 
+const buildEpisodesSummaryQuery = (spaceId: string, episodeIds: string[]) => {
+  const query = esql.from(ALERT_EVENTS_DATA_STREAM).where`space_id == ${spaceId}`
+    .where`episode.id IN (${episodeIds.map((episodeId) => esql.str(episodeId))})`
+    .where`type == "alert"`;
+  addEpisodeSummaryStats(query);
+  query.pipe(EVENTS_SERIES_ID_EVAL);
+  return asTypedEsqlQuery<EpisodeEventsEsqlRow>(query.keep(...EPISODE_EVENTS_FIELDS));
+};
+
 const fetchV2Snapshots = async (
   { esClient, getRulesClient, spaceId }: EpisodeLookup,
   episodeIds: string[]
 ): Promise<Map<string, V2AlertSnapshot>> => {
-  const episodeQuery = buildBulkEpisodeQuery(spaceId, episodeIds);
+  const summaryQuery = buildEpisodesSummaryQuery(spaceId, episodeIds);
+  const { query: dataQuery, filter } = buildEpisodesDataRequest(spaceId, episodeIds);
 
-  const response = await esClient.esql
-    .query({ query: episodeQuery.print('basic') })
-    .catch((error) => {
-      if (isEventsUnavailable(error)) return undefined;
-      throw error;
-    });
-  if (!response) {
+  const [summaryResponse, dataResponse] = await Promise.all([
+    esClient.esql.query({ query: summaryQuery.print('basic') }),
+    esClient.esql.query({ query: dataQuery.print('basic'), filter }),
+  ]).catch((error) => {
+    if (isEventsUnavailable(error)) return [];
+    throw error;
+  });
+  if (!summaryResponse || !dataResponse) {
     return new Map();
   }
 
-  const episodes = rowsFromEsql(episodeQuery, response as ESQLSearchResponse);
+  const episodes = rowsFromEsql(summaryQuery, summaryResponse as ESQLSearchResponse);
+  const dataByEpisode = new Map(
+    rowsFromEsql(dataQuery, dataResponse as ESQLSearchResponse).map((row) => [
+      row['episode.id'],
+      row.episode_data,
+    ])
+  );
   const ruleNames = await fetchRuleNames(getRulesClient, [
     ...new Set(episodes.map((episode) => episode['rule.id'])),
   ]);
 
   return new Map(
     episodes.map((episode) => {
+      const episodeData = dataByEpisode.get(episode['episode.id']);
       const snapshot = v2AlertSnapshotSchema.parse({
         alert_version: 'v2',
         id: episode['episode.id'],
@@ -184,7 +212,7 @@ const fetchV2Snapshots = async (
         source: episode.source ?? undefined,
         data: v2AlertSnapshotSchema.shape.data
           .catch(undefined)
-          .parse(episode.episode_data ? JSON.parse(episode.episode_data) : undefined),
+          .parse(episodeData ? JSON.parse(episodeData) : undefined),
       });
       return [snapshot.id, snapshot];
     })

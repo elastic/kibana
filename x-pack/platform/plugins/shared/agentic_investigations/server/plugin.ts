@@ -41,6 +41,7 @@ import { HypothesesService } from './hypotheses/services/hypotheses_service';
 import { createSetHypothesesTool } from './hypotheses/tools/set_hypotheses_tool';
 import { EscalationsService } from './escalations/services/escalations_service';
 import { registerEscalationConversationEvents } from './escalations/conversation_events';
+import { registerInvestigationConversationEvents } from './investigations/conversation_events';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
 import { AssignmentsService } from './assignments/assignments_service';
 import { InvestigationStatusService } from './investigations/services/investigation_status_service';
@@ -102,6 +103,7 @@ export class AgenticInvestigationsPlugin
     this.workflowsManagement = workflowsManagement?.management;
     registerFeatures({ features, escalationsEnabled: this.escalationsEnabled });
 
+    registerInvestigationConversationEvents(agentBuilder);
     if (this.escalationsEnabled) {
       registerEscalationConversationEvents(agentBuilder);
     }

@@ -78,20 +78,26 @@ describe('fetchInvestigationAlertSnapshots', () => {
     queryError,
     columns = [] as string[],
     rows = [] as unknown[][],
+    episodeData = {} as Record<string, string>,
   }: {
     getRule?: jest.Mock;
     queryError?: Error;
     columns?: string[];
     rows?: unknown[][];
+    episodeData?: Record<string, string>;
   } = {}) => ({
     esClient: {
       esql: {
         query: queryError
           ? jest.fn().mockRejectedValue(queryError)
-          : jest.fn().mockResolvedValue({
-              columns: columns.map((name) => ({ name })),
-              values: rows,
-            }),
+          : jest.fn(async ({ filter }: { filter?: unknown }) =>
+              filter
+                ? {
+                    columns: [{ name: 'episode.id' }, { name: 'episode_data' }],
+                    values: Object.entries(episodeData),
+                  }
+                : { columns: columns.map((name) => ({ name })), values: rows }
+            ),
       },
     },
     getRule,
@@ -132,7 +138,6 @@ describe('fetchInvestigationAlertSnapshots', () => {
         'episode.status',
         'rule.id',
         'group_hash',
-        'episode_data',
       ],
       rows: [
         [
@@ -142,9 +147,9 @@ describe('fetchInvestigationAlertSnapshots', () => {
           'active',
           'v2-rule',
           'hash',
-          '{"host.name":"h1"}',
         ],
       ],
+      episodeData: { 'episode-1': '{"host.name":"h1"}' },
     });
 
     const snapshots = await run(alertsClient, lookup, ['episode-1', 'alert-1']);
@@ -160,7 +165,7 @@ describe('fetchInvestigationAlertSnapshots', () => {
       }),
       expect.objectContaining({ id: 'alert-1' }),
     ]);
-    expect(lookup.esClient.esql.query).toHaveBeenCalledTimes(1);
+    expect(lookup.esClient.esql.query).toHaveBeenCalledTimes(2);
   });
 
   it('leaves the rule name unset when the user cannot read the rule', async () => {
