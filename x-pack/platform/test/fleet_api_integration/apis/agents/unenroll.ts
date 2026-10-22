@@ -295,7 +295,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('/agents/{agent_id}/unenroll should fail for an agentless agent, also with force', async () => {
+      it('/agents/{agent_id}/unenroll should fail for an agentless agent by default', async () => {
         await supertest
           .post(`/api/fleet/agents/agent1/unenroll`)
           .set('kbn-xsrf', 'xxx')
@@ -303,21 +303,47 @@ export default function (providerContext: FtrProviderContext) {
         await supertest
           .post(`/api/fleet/agents/agent1/unenroll`)
           .set('kbn-xsrf', 'xxx')
-          .send({ force: true })
+          .send({ revoke: true })
           .expect(400);
 
         await expectAgentNotUnenrolled('agent1');
       });
 
-      it('/agents/bulk_unenroll should not unenroll agentless agents, also with force', async () => {
+      it('/agents/{agent_id}/unenroll { force: true, revoke: true } should unenroll an agentless agent', async () => {
+        await supertest
+          .post(`/api/fleet/agents/agent1/unenroll`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ force: true, revoke: true })
+          .expect(200);
+
+        const agentDoc = await getAgentDoc('agent1');
+        expect(agentDoc?.active).to.be(false);
+        expect(agentDoc?.unenrolled_at).to.be.a('string');
+      });
+
+      it('/agents/bulk_unenroll should not unenroll agentless agents by default', async () => {
         await supertest
           .post(`/api/fleet/agents/bulk_unenroll`)
           .set('kbn-xsrf', 'xxx')
-          .send({ agents: ['agent1', 'agent2'], force: true })
+          .send({ agents: ['agent1', 'agent2'] })
           .expect(200);
 
         await expectAgentNotUnenrolled('agent1');
         await expectAgentNotUnenrolled('agent2');
+      });
+
+      it('/agents/bulk_unenroll { force: true, revoke: true } should unenroll agentless agents', async () => {
+        await supertest
+          .post(`/api/fleet/agents/bulk_unenroll`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ agents: ['agent1', 'agent2'], force: true, revoke: true })
+          .expect(200);
+
+        for (const agentId of ['agent1', 'agent2']) {
+          const agentDoc = await getAgentDoc(agentId);
+          expect(agentDoc?.active).to.be(false);
+          expect(agentDoc?.unenrolled_at).to.be.a('string');
+        }
       });
 
       it('should unenroll the agents of an agentless policy when the policy is deleted (skipAgentlessValidation)', async () => {

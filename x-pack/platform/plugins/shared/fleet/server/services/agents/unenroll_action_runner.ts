@@ -81,8 +81,12 @@ export async function unenrollBatch(
 
   // And which are allowed to unenroll
   const agentsToUpdate = givenAgents.reduce<Agent[]>((agents, agent) => {
-    // force skips the unenrolled/hosted validations, but never the agentless one
-    if (!options.skipAgentlessValidation && isAgentlessAgent(restrictions, agent)) {
+    // force skips all the validations: escape hatch, for example to remove orphaned agentless agents
+    if (
+      !options.skipAgentlessValidation &&
+      !options.force &&
+      isAgentlessAgent(restrictions, agent)
+    ) {
       outgoingErrors[agent.id] = new AgentlessAgentRestrictionError(
         `Cannot unenroll managed integration agent ${agent.id}`
       );

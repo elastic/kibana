@@ -73,9 +73,10 @@ export async function unenrollAgent(
   }
 ) {
   await getAgentById(esClient, soClient, agentId); // throw 404 if agent not in namespace
-  // force skips the hosted validation, but never the agentless one
+  // force skips the hosted and agentless validations: escape hatch, for example to remove an
+  // orphaned agentless agent
   await unenrollAgentIsAllowed(soClient, esClient, agentId, {
-    skipAgentlessValidation: options?.skipAgentlessValidation,
+    skipAgentlessValidation: options?.skipAgentlessValidation || options?.force,
     skipHostedValidation: options?.force,
   });
   if (options?.revoke) {
