@@ -183,9 +183,10 @@ Scout rejects a suite that has only limit tags, or that combines `only` and `exc
 
 ### How limits are applied [scout-deployment-tags-limit-attributes]
 
-Attributes are never auto-detected: the test run declares them, and Scout skips every suite whose limit tags don't match the declaration. With no attribute declared, `only` suites are skipped and `except` suites run.
+Scout doesn't detect FIPS mode on its own; it has to be declared when the tests run. If nothing is declared, Scout assumes Kibana is **not** in FIPS mode: `tags.limit.only.fips` suites are skipped and `tags.limit.except.fips` suites run.
 
-CI declares `fips` whenever a build runs in FIPS mode, that is, in the daily FIPS pipeline and in pull requests labeled `ci:enable-fips-140-2-agent` or `ci:enable-fips-140-3-agent`. To declare it locally, pass `--targetAttribute fips` to `scout run-tests` (see [Run tests](./run-scout-tests.md#scout-run-tests-target-attributes)).
+- **On CI**, `fips` is declared automatically whenever a build runs in FIPS mode: the daily FIPS pipeline, and pull requests labeled `ci:enable-fips-140-2-agent` or `ci:enable-fips-140-3-agent`.
+- **Locally**, pass `--targetAttribute fips` to `scout run-tests` when your Kibana runs in FIPS mode (see [Run tests](./run-scout-tests.md#scout-run-tests-target-attributes)).
 
 ::::::{note}
 Use tags to **include** suites where they make sense, instead of skipping suites after the fact.
