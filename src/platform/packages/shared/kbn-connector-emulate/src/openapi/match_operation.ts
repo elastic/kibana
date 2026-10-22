@@ -60,13 +60,22 @@ const compileServer = (server: OperationServer): ServerPrefix => ({
 const toMatchTarget = ({ relative }: ServerPrefix, url: URL): string =>
   relative ? url.pathname : `${url.origin}${url.pathname}`;
 
-/** Returns whether a request URL, without query string, is the whole of a server-style URL template. */
-export const compileUrlMatcher = (server: OperationServer): ((url: URL) => boolean) => {
-  const pattern: ServerPrefix = {
-    regExp: new RegExp(`^${compileServerTemplate(server)}/?$`, 'i'),
-    relative: server.url.startsWith('/'),
-  };
-  return (url) => pattern.regExp.test(toMatchTarget(pattern, url));
+const ORIGIN = /^([a-z][a-z\d+.-]*:\/\/[^/]*)(.*)$/i;
+
+/**
+ * Returns whether a request URL, without query string, is the whole of a server-style URL
+ * template. Only the origin is matched case-insensitively, since paths are case-sensitive.
+ */
+export const compileUrlMatcher = ({ url, variables }: OperationServer): ((url: URL) => boolean) => {
+  const [, origin, path = url] = ORIGIN.exec(url) ?? [];
+  const originRegExp =
+    origin === undefined
+      ? undefined
+      : new RegExp(`^${compileServerTemplate({ url: origin, variables })}$`, 'i');
+  const pathRegExp = new RegExp(`^${compileServerTemplate({ url: path, variables })}/?$`);
+  return (request) =>
+    (originRegExp === undefined || originRegExp.test(request.origin)) &&
+    pathRegExp.test(request.pathname);
 };
 
 const compileRoute = (operation: ContractOperation): Route => {

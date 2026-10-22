@@ -199,6 +199,27 @@ describe('token endpoints', () => {
       expect(await statusOf(mockFetch, 'https://anywhere.example.com/oauth/token')).toBe(200);
     });
 
+    it('resolves token URLs against servers with a port variable', async () => {
+      const ported = withServers(
+        [{ url: 'https://api.example.com:{port}/v1', variables: { port: { default: '8443' } } }],
+        '/oauth/token'
+      );
+      const { fetch: mockFetch } = createEmulatorFetch({ specs: [ported] });
+
+      expect(await statusOf(mockFetch, 'https://api.example.com:8443/oauth/token')).toBe(200);
+    });
+
+    it('matches hosts but not paths case-insensitively', async () => {
+      const mixedCase = withServers(
+        [{ url: 'https://API.example.com/v1' }],
+        'https://Auth.example.com/OAuth/Token'
+      );
+      const { fetch: mockFetch } = createEmulatorFetch({ specs: [mixedCase] });
+
+      expect(await statusOf(mockFetch, 'https://auth.example.com/OAuth/Token')).toBe(200);
+      expect(await statusOf(mockFetch, 'https://auth.example.com/oauth/token')).toBe(404);
+    });
+
     it('throws on token URLs that cannot be parsed', () => {
       const invalid = withServers([{ url: 'https://api.example.com' }], 'https://exa mple.com/t');
 

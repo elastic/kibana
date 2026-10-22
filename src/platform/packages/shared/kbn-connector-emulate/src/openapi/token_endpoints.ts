@@ -38,33 +38,49 @@ const GRANT_PARAMETERS: Readonly<Record<string, readonly string[]>> = {
 export type TokenEndpoints = (url: URL) => ReadonlySet<string> | undefined;
 
 const ABSOLUTE_URL = /^[a-z][a-z\d+.-]*:/i;
-// Relative servers such as `/v1`, and specs without servers, resolve against this origin, which
-// is then dropped so the token URL matches on the path only, as relative servers do.
-const RELATIVE_ORIGIN = 'https://relative.invalid';
-const TEMPLATE_VARIABLE = /\{([^}]+)\}/g;
-const PLACEHOLDER = /tokenvar(\d+)x/g;
+const ORIGIN = /^([a-z][a-z\d+.-]*:\/\/[^/?#]*)(.*)$/i;
+const TEMPLATE_VARIABLE = /\{[^}]+\}/g;
 // OpenAPI's default when a spec declares no servers.
 const DEFAULT_SERVER: OperationServer = { url: '/', variables: {} };
 
-// Resolves a token URL against a server as a URL reference (RFC 3986), keeping the template
-// variables of both, e.g. `{subdomain}` in a host, which `URL` would otherwise mangle or reject.
+const withoutQuery = (url: string): string => url.replace(/[?#].*$/, '');
+
+// RFC 3986 section 5.2.4.
+const removeDotSegments = (path: string): string => {
+  const output: string[] = [];
+  for (const segment of path.split('/')) {
+    if (segment === '..') {
+      if (output.length > 1) {
+        output.pop();
+      }
+    } else if (segment !== '.') {
+      output.push(segment);
+    }
+  }
+  return output.join('/');
+};
+
+// Resolves a token URL against a server as a URL reference (RFC 3986) on the templates
+// themselves, since `URL` rejects or mangles variables such as `{subdomain}` or `{port}`. Throws
+// when the token URL isn't a URL, checked with each variable as `0`, which any component accepts.
 const resolveTokenUrl = (
   url: string,
   { url: base, variables }: OperationServer
 ): OperationServer => {
-  const names: string[] = [];
-  const mask = (template: string) =>
-    template.replace(TEMPLATE_VARIABLE, (_, name: string) => `tokenvar${names.push(name) - 1}x`);
-  const masked = mask(base);
-  const maskedBase = ABSOLUTE_URL.test(masked)
-    ? masked
-    : `${RELATIVE_ORIGIN}${masked.startsWith('/') ? '' : '/'}${masked}`;
-  const { origin, pathname } = new URL(mask(url), maskedBase);
-  const resolved = origin === RELATIVE_ORIGIN ? pathname : `${origin}${pathname}`;
-  return {
-    url: resolved.replace(PLACEHOLDER, (_, index: string) => `{${names[Number(index)]}}`),
-    variables,
-  };
+  new URL(url.replace(TEMPLATE_VARIABLE, '0'), 'https://relative.invalid');
+  if (ABSOLUTE_URL.test(url)) {
+    return { url: withoutQuery(url), variables };
+  }
+  // Relative servers such as `/v1` have no origin, and their token URLs match on the path only.
+  const [, origin = '', basePath = base] = ORIGIN.exec(base) ?? [];
+  if (url.startsWith('//')) {
+    const [scheme = 'https'] = origin.split(':');
+    return { url: withoutQuery(`${scheme}:${url}`), variables };
+  }
+  const path = url.startsWith('/')
+    ? url
+    : `${withoutQuery(basePath || '/').replace(/[^/]*$/, '')}${url}`;
+  return { url: `${origin}${removeDotSegments(withoutQuery(path))}`, variables };
 };
 
 const uniqueServers = (operations: readonly ContractOperation[]): OperationServer[] => {
@@ -83,7 +99,12 @@ export const findTokenEndpoints = (operations: readonly ContractOperation[]): To
   const operationsBySpec = new Map<OpenApiDocument, ContractOperation[]>();
   for (const operation of operations) {
     const { document } = operation.spec;
-    operationsBySpec.set(document, [...(operationsBySpec.get(document) ?? []), operation]);
+    const specOperations = operationsBySpec.get(document);
+    if (specOperations) {
+      specOperations.push(operation);
+    } else {
+      operationsBySpec.set(document, [operation]);
+    }
   }
   for (const [document, specOperations] of operationsBySpec) {
     const servers = uniqueServers(specOperations);
