@@ -8,11 +8,14 @@
 import type { CandidatesResponse } from '@kbn/alertzero-common';
 import { API_VERSIONS, CandidatesRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
 import type { KibanaRequest } from '@kbn/core/server';
-import { MAX_PROPOSALS_PAGE_OFFSET, MAX_PROPOSALS_PAGE_SIZE } from '@kbn/proposals-common';
+import {
+  MAX_PROPOSALS_PAGE_OFFSET,
+  MAX_PROPOSALS_PAGE_SIZE,
+  OPEN_PROPOSAL_STATUSES,
+} from '@kbn/proposals-common';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, CANDIDATES_URL } from '../../../common/constants';
-import { OPEN_PROPOSAL_STATUSES } from '../../../common/proposals/open_statuses';
 import { buildCandidateQuery } from '../../services/watches/hunt/common/build_candidate_query';
 import type { OpenProposalConversationIdsReader } from '../../services/watches/hunt/common/build_candidate_query';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';

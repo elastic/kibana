@@ -417,11 +417,11 @@ importers:
         specifier: 1.1.2
         version: 1.1.2
       '@elastic/isomer-runtime':
-        specifier: 0.3.0
-        version: 0.3.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
+        specifier: 0.4.0
+        version: 0.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
       '@elastic/isomer-sdk':
-        specifier: 0.3.0
-        version: 0.3.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
+        specifier: 0.4.0
+        version: 0.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
       '@elastic/kibana-d3-color':
         specifier: 2.0.1
         version: 2.0.1
@@ -429,8 +429,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.32.0
-        version: 4.32.0(monaco-editor@0.56.0)
+        specifier: 4.33.0
+        version: 4.33.0(monaco-editor@0.56.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -2519,6 +2519,9 @@ importers:
       '@kbn/isomer':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/isomer/isomer
+      '@kbn/isomer-components':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/isomer/isomer-components
       '@kbn/isomer-theme':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/isomer/isomer-theme
@@ -4944,8 +4947,8 @@ importers:
         specifier: 1.2.2
         version: 1.2.2(typescript-fsa@3.0.0)
       undici:
-        specifier: 7.29.1
-        version: 7.29.1
+        specifier: 7.30.1
+        version: 7.30.1
       unidiff:
         specifier: 1.0.4
         version: 1.0.4
@@ -5199,9 +5202,9 @@ importers:
       '@kbn/connector-cli':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-connector-cli
-      '@kbn/connector-contract-mock':
+      '@kbn/connector-emulate':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-connector-contract-mock
+        version: link:src/platform/packages/shared/kbn-connector-emulate
       '@kbn/content-list-docs':
         specifier: workspace:*
         version: link:src/platform/packages/shared/content-management/content_list/kbn-content-list-docs
@@ -5498,7 +5501,7 @@ importers:
         version: link:packages/kbn-eslint-plugin-telemetry
       '@kbn/esql-resource-browser-storybook-config':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-resource-browser/.storybook
+        version: link:src/platform/packages/shared/kbn-esql-resource-browser-storybook-config
       '@kbn/esql-scripts':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-esql-scripts
@@ -5555,7 +5558,7 @@ importers:
         version: link:x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks
       '@kbn/evals-suite-ml':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/ml/evals
+        version: link:x-pack/platform/packages/private/ml/kbn-evals-suite-ml
       '@kbn/evals-suite-nightshift-investigations':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations
@@ -7991,7 +7994,7 @@ importers:
 
   src/platform/packages/shared/kbn-connector-cli: {}
 
-  src/platform/packages/shared/kbn-connector-contract-mock: {}
+  src/platform/packages/shared/kbn-connector-emulate: {}
 
   src/platform/packages/shared/kbn-connector-schemas: {}
 
@@ -8103,7 +8106,7 @@ importers:
 
   src/platform/packages/shared/kbn-esql-resource-browser: {}
 
-  src/platform/packages/shared/kbn-esql-resource-browser/.storybook: {}
+  src/platform/packages/shared/kbn-esql-resource-browser-storybook-config: {}
 
   src/platform/packages/shared/kbn-eval-kql: {}
 
@@ -8919,6 +8922,8 @@ importers:
 
   x-pack/platform/packages/private/ml/json_schemas: {}
 
+  x-pack/platform/packages/private/ml/kbn-evals-suite-ml: {}
+
   x-pack/platform/packages/private/ml/local_storage: {}
 
   x-pack/platform/packages/private/ml/nested_property: {}
@@ -9032,6 +9037,8 @@ importers:
   x-pack/platform/packages/shared/ingest-pipelines: {}
 
   x-pack/platform/packages/shared/isomer/isomer: {}
+
+  x-pack/platform/packages/shared/isomer/isomer-components: {}
 
   x-pack/platform/packages/shared/isomer/isomer-theme: {}
 
@@ -9452,8 +9459,6 @@ importers:
   x-pack/platform/plugins/shared/maps: {}
 
   x-pack/platform/plugins/shared/ml: {}
-
-  x-pack/platform/plugins/shared/ml/evals: {}
 
   x-pack/platform/plugins/shared/notification_center: {}
 
@@ -11160,16 +11165,16 @@ packages:
   '@elastic/filesaver@1.1.2':
     resolution: {integrity: sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==}
 
-  '@elastic/isomer-runtime@0.3.0':
-    resolution: {integrity: sha512-OdnczFtTj7JmY3/LlOcYiGdWtZgkBidmTjRQKIwCtgZPE5t8bW7oLbebrw+EEk6j8tVvGzal0RAl8Oo3YWodBg==}
+  '@elastic/isomer-runtime@0.4.0':
+    resolution: {integrity: sha512-4joLm1LFziM+OGUwQmpCb6QL/X7jw5K1xWiL+9I14QWamnPJbX/eVfb7Wc428pq/HMnL7INwhYQqaucOXIeNBw==}
     engines: {node: '>=22.13.0'}
     peerDependencies:
       react: '>=18 <20'
       react-dom: '>=18 <20'
       zod: 4.6.5
 
-  '@elastic/isomer-sdk@0.3.0':
-    resolution: {integrity: sha512-tsxK2u8pNvrfSdRaWcM/lD235AcISdT/6rEabl3oIQ1nPcPgqAPiCMzN58+qRPxreWbkgTSxLaZjv+Hx+yXJfw==}
+  '@elastic/isomer-sdk@0.4.0':
+    resolution: {integrity: sha512-HLz1hxKb1/rc2XfBSRTli4jGNd4ROjv6yP7HkRKaXoakhH3r6zgCGZVAl0dpW5CAA2KbDRRphgwcI44bdVbUig==}
     engines: {node: '>=22.13.0'}
     peerDependencies:
       react: '>=18 <20'
@@ -11191,8 +11196,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.32.0':
-    resolution: {integrity: sha512-mweMdeQyPngTjqP9SQU5X64/naSVjJxprNuUNFeBjujyE33ppzZX+R7zR4b38DaBzkWZ+cmD2hvVY0Rf6RgYag==}
+  '@elastic/monaco-esql@4.33.0':
+    resolution: {integrity: sha512-S+ceGgCwEOougTdYvykdeGUWq5dBGrXcc2Ul2Cw/mLRUV0ElYZycpnPcjoOsdhpwJZdoetcuZG4QLnm1N4RHZw==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -25137,8 +25142,8 @@ packages:
     resolution: {integrity: sha512-R+RODBqp6i2pPflGdq+xIOUkl+RNfGgHwoinecKu/JCuf2uO06cOKoDbI2P7Dn6KcswdKwrczbU6IYJ6K8X+wg==}
     engines: {node: '>=18.17'}
 
-  undici@7.29.1:
-    resolution: {integrity: sha512-RYONW2MeafgYlkVOKYKkA/Ag7BmXqgIWCa8t1m0JcxrQg9pI9lEqRhAOruOBCbAohOa/gkCF+iPi9hrgvTzu6Q==}
+  undici@7.30.1:
+    resolution: {integrity: sha512-03KrMbjIFDWQR5RNPrSw3bd1r12JpyFQl9/yxjUbJtqkjmllqC5lFjZh6ujeuJCKr8EOQvRW872Oy/az+nLYxg==}
     engines: {node: '>=20.18.1'}
 
   unherit@1.1.3:
@@ -27915,16 +27920,16 @@ snapshots:
 
   '@elastic/filesaver@1.1.2': {}
 
-  '@elastic/isomer-runtime@0.3.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
+  '@elastic/isomer-runtime@0.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
     dependencies:
-      '@elastic/isomer-sdk': 0.3.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
+      '@elastic/isomer-sdk': 0.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       zod: 4.6.5
     transitivePeerDependencies:
       - supports-color
 
-  '@elastic/isomer-sdk@0.3.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
+  '@elastic/isomer-sdk@0.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
     dependencies:
       acorn: 8.18.0
       mdast-util-from-markdown: 2.0.3(supports-color@10.2.2)
@@ -27952,7 +27957,7 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.32.0(monaco-editor@0.56.0)':
+  '@elastic/monaco-esql@4.33.0(monaco-editor@0.56.0)':
     dependencies:
       '@elastic/esql-definitions': 4.33.0
       monaco-editor: 0.56.0
@@ -28137,7 +28142,7 @@ snapshots:
       ms: 2.1.3
       secure-json-parse: 4.1.0
       tslib: 2.8.1
-      undici: 7.29.1
+      undici: 7.30.1
     transitivePeerDependencies:
       - supports-color
 
@@ -39174,7 +39179,7 @@ snapshots:
       sprintf-js: 1.1.3
       sql.js: 1.14.2
       turndown: 7.2.4
-      undici: 7.29.1
+      undici: 7.30.1
       yaml: 2.9.1
     optionalDependencies:
       '@mongodb-js/zstd': 7.0.0
@@ -44446,7 +44451,7 @@ snapshots:
 
   undici@6.29.0: {}
 
-  undici@7.29.1: {}
+  undici@7.30.1: {}
 
   unherit@1.1.3:
     dependencies:
