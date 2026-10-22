@@ -338,7 +338,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       core,
       logger,
       experimentalFeatures,
-      this.pluginContext.env.packageInfo.version
+      this.pluginContext.env.packageInfo.version,
+      plugins.ml
     ).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });

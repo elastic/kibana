@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { ExperimentalFeatures } from '../../../common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { createRuleAttachmentType } from './rule';
@@ -37,7 +38,8 @@ export const registerAttachments = async (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
   experimentalFeatures: ExperimentalFeatures,
-  kibanaVersion: string
+  kibanaVersion: string,
+  ml?: MlPluginSetup
 ) => {
   agentBuilder.attachments.registerType(createAlertAttachmentType());
   agentBuilder.attachments.registerType(createBulkAlertsAttachmentType(core, logger));
@@ -49,6 +51,7 @@ export const registerAttachments = async (
       logger,
       experimentalFeatures,
       kibanaVersion,
+      ml,
     })
   );
   agentBuilder.attachments.registerType(createEntityGraphAttachmentType());

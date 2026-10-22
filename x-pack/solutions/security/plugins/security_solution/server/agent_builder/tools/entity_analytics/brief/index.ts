@@ -23,6 +23,7 @@
  */
 export { generateBrief } from './generate_brief';
 export { describeScopeForAgent } from './describe_scope';
+export type { BriefJobService } from './types';
 export {
   ATTACHMENT_AGENT_DESCRIPTION,
   BRIEF_RESULT_INSTRUCTIONS,

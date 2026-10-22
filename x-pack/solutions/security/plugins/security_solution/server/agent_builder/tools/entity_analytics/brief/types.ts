@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import type { Entity, EntityRiskLevels } from '@kbn/entity-store/common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
@@ -73,6 +74,11 @@ export interface EntityFacts {
   firstSeen?: string;
 }
 
+/** Reads the installed machine learning jobs of the request's space. */
+export interface BriefJobService {
+  jobsSummary: () => Promise<MlSummaryJob[]>;
+}
+
 export interface GenerateBriefParams {
   scope: EntityAnalyticsScope;
   /** The request's space, never the attachment's. */
@@ -84,6 +90,8 @@ export interface GenerateBriefParams {
   attachments: AttachmentStateManager;
   /** Reads the names of the watchlists the entities are on. */
   watchlistConfigClient: WatchlistConfigClient;
+  /** Reads the installed Security jobs the anomalies come from. Absent without the ML plugin: the brief then has no anomalies. */
+  jobService?: BriefJobService;
   /** For the risk-history charts. Absent when risk score history is disabled. */
   riskScoreDataClient?: RiskScoreDataClient;
   abortSignal?: AbortSignal;

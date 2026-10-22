@@ -6,6 +6,7 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import {
   createToolHandlerContext,
@@ -72,5 +73,62 @@ describe('createGenerateBriefTool', () => {
       },
     });
     expect(generateBrief).not.toHaveBeenCalled();
+  });
+
+  describe('the ML job service the brief reads anomalies through', () => {
+    const generateBriefMock = jest.mocked(generateBrief);
+    const run = async (ml?: MlPluginSetup) => {
+      mockCheckPrivileges.mockResolvedValueOnce({ hasAllRequested: true });
+      generateBriefMock.mockResolvedValueOnce({
+        html: '<p></p>',
+        height: 300,
+        viewModel: { summary: 'Summary.', priorities: [] },
+        priorityCount: 0,
+      } as unknown as Awaited<ReturnType<typeof generateBrief>>);
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      (context.attachments.add as jest.Mock).mockResolvedValueOnce({
+        id: 'attachment-1',
+        current_version: 1,
+      });
+      await createGenerateBriefTool({
+        core: mockCore,
+        logger: mockLogger,
+        experimentalFeatures: {} as ExperimentalFeatures,
+        kibanaVersion: '9.6.0',
+        ml,
+        attachmentId: 'view',
+        scope: { period: '7d', capturedAt: '2026-10-14T12:00:00.000Z', tiles: {} },
+      }).handler({}, context);
+      return { context, jobService: generateBriefMock.mock.calls[0][0].jobService };
+    };
+    const mlWith = (jobsSummary: jest.Mock) =>
+      ({
+        jobServiceProvider: jest.fn().mockReturnValue({ jobsSummary }),
+      } as unknown as MlPluginSetup);
+
+    it('gives the brief no job service without the ML plugin', async () => {
+      expect((await run()).jobService).toBeUndefined();
+    });
+
+    it("reads the jobs for the request's space through the job service", async () => {
+      const jobsSummary = jest.fn().mockResolvedValue([{ id: 'job-1' }]);
+      const ml = mlWith(jobsSummary);
+      const { context, jobService } = await run(ml);
+
+      await expect(jobService?.jobsSummary()).resolves.toEqual([{ id: 'job-1' }]);
+      expect(ml.jobServiceProvider).toHaveBeenCalledWith(mockRequest, context.savedObjectsClient);
+    });
+
+    it('reads the job list with a fake request when ML rejects the real one', async () => {
+      const jobsSummary = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('Insufficient privileges to access feature'))
+        .mockResolvedValueOnce([{ id: 'job-1' }]);
+      const ml = mlWith(jobsSummary);
+      const { jobService } = await run(ml);
+
+      await expect(jobService?.jobsSummary()).resolves.toEqual([{ id: 'job-1' }]);
+      expect(jest.mocked(ml.jobServiceProvider).mock.calls[1][0]).not.toBe(mockRequest);
+    });
   });
 });

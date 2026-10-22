@@ -48,6 +48,7 @@ apiTest.describe(
     let llmProxy: LlmProxy;
     const createdIndexSpaces: string[] = [];
     const conversationIds: string[] = [];
+    const spaceConversationIds: string[] = [];
     // A user who can read only the other space's entities, in that space only.
     let spaceUserHeaders: Record<string, string>;
     let spaceConnectorId: string;
@@ -115,6 +116,11 @@ apiTest.describe(
     apiTest.afterAll(async ({ apiClient, apiServices, esClient }) => {
       for (const conversationId of conversationIds) {
         await apiClient.delete(`api/agent_builder/conversations/${conversationId}`, { headers });
+      }
+      for (const conversationId of spaceConversationIds) {
+        await apiClient.delete(`s/${SPACE_ID}/api/agent_builder/conversations/${conversationId}`, {
+          headers: spaceUserHeaders,
+        });
       }
       await cleanupLeadGenerationConnector({ apiServices, connectorId, llmProxy });
       await cleanupLeadGenerationConnector({
@@ -237,6 +243,7 @@ apiTest.describe(
         }
       );
       expect(response).toHaveStatusCode(200);
+      spaceConversationIds.push(response.body.conversation_id);
       await spaceLlmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       const [submitRequest] = getSubmitBriefRequests(spaceLlmProxy);

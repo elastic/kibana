@@ -45,6 +45,7 @@ export const generateBrief = async ({
   inferenceClient,
   attachments,
   watchlistConfigClient,
+  jobService,
   riskScoreDataClient,
   abortSignal,
   logger,
@@ -57,9 +58,12 @@ export const generateBrief = async ({
     return { ...renderBriefHtml(viewModel), viewModel, priorityCount: 0 };
   }
 
-  const [{ alertsByEntityId, isFailed: alertsFailed }, anomaliesByEntityId] = await Promise.all([
+  const [
+    { alertsByEntityId, isFailed: alertsFailed },
+    { anomaliesByEntityId, isFailed: anomaliesFailed },
+  ] = await Promise.all([
     readAlertRules({ candidates, scope, spaceId, esClient, logger }),
-    readAnomalies({ candidates, scope, esClient, logger }),
+    readAnomalies({ candidates, scope, jobService, esClient, logger }),
   ]);
   const watchlistNamesById = await readWatchlistNames(watchlistConfigClient, logger);
   const facts = buildFacts(
@@ -99,6 +103,7 @@ export const generateBrief = async ({
     verified,
     riskHistory,
     alertsFailed,
+    anomaliesFailed,
     logger,
   });
 

@@ -6,6 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
@@ -13,11 +14,13 @@ import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import type { BuiltinAttachmentBoundedTool } from '@kbn/agent-builder-server/attachments';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { isInferenceError } from '@kbn/inference-common';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { ExperimentalFeatures } from '../../../../common';
 import type { EntityAnalyticsScope } from '../../../../common/entity_analytics/ai_brief/scope';
 import { WatchlistConfigClient } from '../../../lib/entity_analytics/watchlists/management/watchlist_config';
 import { RiskScoreDataClient } from '../../../lib/entity_analytics/risk_score/risk_score_data_client';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
+import type { BriefJobService } from './brief';
 import {
   BRIEF_RESULT_INSTRUCTIONS,
   generateBrief,
@@ -36,11 +39,35 @@ const ENTITY_READ_FAILED_MESSAGE = "Entity details couldn't be read, so no brief
 const MODEL_FAILED_MESSAGE = 'The AI model call failed, so no brief was generated.';
 const FAILED_MESSAGE = "The brief couldn't be generated. Try again.";
 
+/**
+ * The installed ML jobs of the request's space, through the ML plugin's job service, which keeps to the
+ * space the saved objects client is scoped to. ML rejects an agent request that it can't check privileges
+ * for, so the job list falls back to the request the Security ML jobs skill uses. Only the job list: the
+ * anomaly records are read as the user.
+ */
+const getJobService = (
+  ml: MlPluginSetup,
+  request: KibanaRequest,
+  savedObjectsClient: SavedObjectsClientContract
+): BriefJobService => ({
+  jobsSummary: async () => {
+    try {
+      return await ml.jobServiceProvider(request, savedObjectsClient).jobsSummary();
+    } catch {
+      return await ml
+        .jobServiceProvider(Object.create(null) as KibanaRequest, savedObjectsClient)
+        .jobsSummary();
+    }
+  },
+});
+
 export interface BriefToolDeps {
   core: SecuritySolutionPluginCoreSetupDependencies;
   logger: Logger;
   experimentalFeatures: ExperimentalFeatures;
   kibanaVersion: string;
+  /** Absent when the ML plugin is disabled: the brief then has no anomalies. */
+  ml?: MlPluginSetup;
 }
 
 /**
@@ -52,6 +79,7 @@ export const createGenerateBriefTool = ({
   logger,
   experimentalFeatures,
   kibanaVersion,
+  ml,
   attachmentId,
   scope,
 }: BriefToolDeps & {
@@ -97,6 +125,7 @@ export const createGenerateBriefTool = ({
           namespace: spaceId,
           logger,
         }),
+        jobService: ml && getJobService(ml, request, savedObjectsClient),
         riskScoreDataClient: experimentalFeatures.riskScoreHistoryEnabled
           ? new RiskScoreDataClient({
               logger,

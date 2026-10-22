@@ -246,6 +246,10 @@ describe('buildViewModel', () => {
     expect(logger.debug).toHaveBeenCalledTimes(removed);
   });
 
+  it('notes that the anomalies could not be read', () => {
+    expect(build({ anomaliesFailed: true }).notes).toContain("Anomaly details couldn't be read.");
+  });
+
   it('notes that the alerts could not be read', () => {
     expect(build({ alertsFailed: true }).notes).toContain("Alert details couldn't be read.");
   });

@@ -120,6 +120,7 @@ export const buildViewModel = ({
   verified,
   riskHistory,
   alertsFailed = false,
+  anomaliesFailed = false,
   logger,
 }: {
   scope: EntityAnalyticsScope;
@@ -131,6 +132,8 @@ export const buildViewModel = ({
   riskHistory?: { entityId: string; history: BriefRiskHistory };
   /** The alerts couldn't be read, so no priority has rules. */
   alertsFailed?: boolean;
+  /** The anomalies couldn't be read, so no priority has them. */
+  anomaliesFailed?: boolean;
   logger?: Logger;
 }): BriefViewModel => {
   const { tiles, period, focusTileId, entityFilters = {} } = scope;
@@ -189,7 +192,7 @@ export const buildViewModel = ({
       ),
       sample: describeSample(scope, entities),
     },
-    notes: buildNotes(scope, entities, alertsFailed),
+    notes: buildNotes(scope, entities, alertsFailed, anomaliesFailed),
     title: verified?.title,
     summary: verified ? verified.summary && withNames(verified.summary) : describeQuietView(scope),
     counts: SIGNAL_CARD_IDS.flatMap((tileId) => {
@@ -232,7 +235,8 @@ export const buildViewModel = ({
 const buildNotes = (
   scope: EntityAnalyticsScope,
   entities: CandidateEntities,
-  alertsFailed: boolean
+  alertsFailed: boolean,
+  anomaliesFailed: boolean
 ): string[] => {
   const unavailableTitles = SIGNAL_CARD_IDS.flatMap((tileId) => {
     const tile = scope.tiles[tileId];
@@ -250,6 +254,7 @@ const buildNotes = (
       ? `Not checked, because the data couldn't be read: ${unavailableTitles.join(', ')}.`
       : undefined,
     alertsFailed ? "Alert details couldn't be read." : undefined,
+    anomaliesFailed ? "Anomaly details couldn't be read." : undefined,
   ]);
 };
 

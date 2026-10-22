@@ -10,7 +10,7 @@ import type { EntityAnalyticsScope } from '../../../../../common/entity_analytic
 import { isSecurityJob } from '../../../../../common/machine_learning/is_security_job';
 import { getPeriodStart } from './describe_scope';
 import { buildRecordFilters } from './match_candidate_records';
-import type { BriefCandidate, EntityAnomalies } from './types';
+import type { BriefCandidate, BriefJobService, EntityAnomalies } from './types';
 
 /** The machine learning jobs' results, as the Entities with anomalies tile reads them. */
 const ANOMALY_INDICES = '.ml-anomalies-shared*';
@@ -33,28 +33,31 @@ interface AnomaliesByCandidate {
 /**
  * The anomaly records of each candidate in the captured period, how many jobs raised them, and the named
  * jobs with the highest record score, as the Entities with anomalies tile counts them: the records of the
- * installed Security jobs. An
- * anomaly record carries no entity id, so a record is matched on the identity fields of the candidate's and
- * its members' records. A user who can't read the jobs or the results has no anomalies, never a failed brief.
+ * installed Security jobs. An anomaly record carries no entity id, so a record is matched on the identity
+ * fields of the candidate's and its members' records. The jobs are read through the ML plugin's service,
+ * which follows the request's space, and the records as the user. A user who can't read them has no
+ * anomalies and `isFailed`, never a failed brief.
  */
 export const readAnomalies = async ({
   candidates,
   scope,
+  jobService,
   esClient,
   logger,
 }: {
   candidates: BriefCandidate[];
   scope: EntityAnalyticsScope;
+  jobService?: BriefJobService;
   esClient: ElasticsearchClient;
   logger: Logger;
-}): Promise<Record<string, EntityAnomalies>> => {
-  if (candidates.length === 0) {
-    return {};
+}): Promise<{ anomaliesByEntityId: Record<string, EntityAnomalies>; isFailed: boolean }> => {
+  if (!jobService || candidates.length === 0) {
+    return { anomaliesByEntityId: {}, isFailed: false };
   }
   try {
-    const { jobIds, nameByJobId } = await readSecurityJobs(esClient);
+    const { jobIds, nameByJobId } = await readSecurityJobs(jobService);
     if (jobIds.length === 0) {
-      return {};
+      return { anomaliesByEntityId: {}, isFailed: false };
     }
     const response = await esClient.search<unknown, AnomaliesByCandidate>({
       index: ANOMALY_INDICES,
@@ -95,34 +98,32 @@ export const readAnomalies = async ({
         },
       },
     });
-    return toAnomaliesByCandidateId(response.aggregations, nameByJobId);
+    return {
+      anomaliesByEntityId: toAnomaliesByCandidateId(response.aggregations, nameByJobId),
+      isFailed: false,
+    };
   } catch (error) {
     logger.debug(`AI brief: no anomalies: ${error.message}`);
-    return {};
+    return { anomaliesByEntityId: {}, isFailed: true };
   }
 };
 
 /**
- * The installed jobs of the Security groups, as the page picks them, and the names of those the page names:
- * a job without a display name is counted but never cited, because its id and description don't read as a name.
+ * The installed jobs of the Security groups in the request's space, as the page picks them, and the names
+ * of those the page names: a job without a display name is counted but never cited, because its id and
+ * description don't read as a name.
  */
 export const readSecurityJobs = async (
-  esClient: ElasticsearchClient
+  jobService: BriefJobService
 ): Promise<{ jobIds: string[]; nameByJobId: Map<string, string> }> => {
-  const { jobs } = await esClient.ml.getJobs(
-    { allow_no_match: true },
-    {
-      querystring: {
-        filter_path: 'jobs.job_id,jobs.groups,jobs.custom_settings.security_app_display_name',
-      },
-    }
-  );
-  const securityJobs = jobs.filter(({ groups = [] }) => isSecurityJob({ groups }));
+  const securityJobs = (await jobService.jobsSummary()).filter(isSecurityJob);
   return {
-    jobIds: securityJobs.map(({ job_id: id }) => id),
+    jobIds: securityJobs.map(({ id }) => id),
     nameByJobId: new Map(
-      securityJobs.flatMap(({ job_id: id, custom_settings: settings }) =>
-        settings?.security_app_display_name ? [[id, settings.security_app_display_name]] : []
+      securityJobs.flatMap(({ id, customSettings }) =>
+        customSettings?.security_app_display_name
+          ? [[id, customSettings.security_app_display_name]]
+          : []
       )
     ),
   };
