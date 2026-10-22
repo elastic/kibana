@@ -119,6 +119,8 @@ export {
   type BaselineDecision,
   SKIP_REASONS,
   type SkipReason,
+  NEEDS_AGENT_REASONS,
+  type NeedsAgentReason,
   baselineObservationSchema,
   type BaselineObservation,
   blastRadiusEntrySchema,
