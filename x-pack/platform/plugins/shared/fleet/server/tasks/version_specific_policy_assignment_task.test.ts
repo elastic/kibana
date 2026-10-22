@@ -850,6 +850,10 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         // the versions of the agents are read per policy id, not the agents
         expect(request.aggs.policy_ids.terms.field).toBe('policy_id');
         expect(request.aggs.policy_ids.aggs.agent_versions.terms.field).toBe('agent.version');
+        // the buckets stay below the default `search.max_buckets`, or the search fails instead of truncating
+        const { size: policyIdsSize } = request.aggs.policy_ids.terms;
+        const { size: versionsSize } = request.aggs.policy_ids.aggs.agent_versions.terms;
+        expect(policyIdsSize * (1 + versionsSize)).toBeLessThanOrEqual(65536);
         // agents that are inactive by timeout are active in the stored field, like in the agent queries
         expect(request.query.bool.filter).toEqual([{ term: { active: true } }]);
         // OpAMP collectors are never moved between policies

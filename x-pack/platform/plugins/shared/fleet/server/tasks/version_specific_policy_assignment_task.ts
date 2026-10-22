@@ -93,9 +93,12 @@ const ORPHAN_SWEEP_INTERVAL_MS = 10 * 60 * 1000;
 // Upper bound of the distinct `policy_id`s of agents that the candidate query reads: the agent policies of a page
 // with their `#sentinel` copies and variants, and the policies of agents without `policy_base_id`: none once the
 // startup backfill has run, only the agents of an older fleet-server in a mixed version rollout.
-const MAX_POLICY_IDS_OF_AGENTS = 10000;
-// Upper bound of the distinct agent versions read per `policy_id`, far above the versions of a fleet.
-const MAX_AGENT_VERSIONS_PER_POLICY_ID = 100;
+const MAX_POLICY_IDS_OF_AGENTS = 5000;
+// Upper bound of the distinct agent versions read per `policy_id`: the patch versions of one minor version and
+// of the few others that are mismatched. A variant with more is read with all its agents.
+// The two bounds keep the nested aggregation, `MAX_POLICY_IDS_OF_AGENTS * (1 + MAX_AGENT_VERSIONS_PER_POLICY_ID)`
+// buckets, below the default `search.max_buckets` of 65536, which would fail the search instead of truncating.
+const MAX_AGENT_VERSIONS_PER_POLICY_ID = 10;
 
 interface VersionSpecificPolicyAssignmentTaskState {
   lastSweepAt?: string;
