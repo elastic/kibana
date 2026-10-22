@@ -30,7 +30,7 @@ export const registerCaseAttachments = (
   attachmentFramework.registerAttachment(
     getAttackAttachmentType({
       ...deps,
-      isAttachEnabled: experimentalFeatures.attackAttachmentsEnabled,
+      isAttachEnabled: experimentalFeatures.attackAttachments,
     })
   );
   attachmentFramework.registerAttachment(getTimelineAttachmentType());

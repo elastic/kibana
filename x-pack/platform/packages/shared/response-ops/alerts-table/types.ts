@@ -726,6 +726,7 @@ export type BulkActionGroupId =
   | 'status'
   | 'assignees'
   | 'cases'
+  | 'caseRemoval'
   | 'tags'
   | 'timeline'
   | 'custom'

@@ -8,6 +8,8 @@
  */
 
 import React from 'react';
+import { EuiIllustration, useEuiTheme } from '@elastic/eui';
+import { inlineAssistance } from '@elastic/eui-illustrations';
 import { ContentListEmptyState } from '@kbn/content-list';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -25,34 +27,45 @@ export interface EmptyPromptProps {
  * `ContentListEmptyState` that injects the Lens-specific copy and CTA so the
  * existing translation IDs are preserved.
  */
-export const EmptyPrompt = ({ onCreateClick }: EmptyPromptProps) => (
-  <ContentListEmptyState
-    iconType="flag"
-    title={
-      <h2>
-        <FormattedMessage
-          id="eventAnnotationListing.tableList.emptyPrompt.title"
-          defaultMessage="Create your first annotation in Lens"
-        />
-      </h2>
-    }
-    body={
-      <p>
-        <FormattedMessage
-          id="eventAnnotationListing.tableList.emptyPrompt.body"
-          defaultMessage="You can create and save annotations for use across multiple visualizations in the Lens editor."
-        />
-      </p>
-    }
-    primaryAction={{
-      label: (
-        <FormattedMessage
-          id="eventAnnotationListing.tableList.emptyPrompt.cta"
-          defaultMessage="Create annotation in Lens"
-        />
-      ),
-      onClick: onCreateClick,
-      iconType: 'lensApp',
-    }}
-  />
-);
+export const EmptyPrompt = ({ onCreateClick }: EmptyPromptProps) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div css={{ paddingBlockStart: euiTheme.size.l }}>
+      <ContentListEmptyState
+        icon={
+          <EuiIllustration
+            type={inlineAssistance}
+            alt=""
+            fullWidth={false}
+            css={{ inlineSize: euiTheme.base * 8 }}
+          />
+        }
+        title={
+          <h2>
+            <FormattedMessage
+              id="eventAnnotationListing.tableList.emptyPrompt.title"
+              defaultMessage="Create your first annotation in Lens"
+            />
+          </h2>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="eventAnnotationListing.tableList.emptyPrompt.body"
+              defaultMessage="You can create and save annotations for use across multiple visualizations in the Lens editor."
+            />
+          </p>
+        }
+        primaryAction={{
+          label: (
+            <FormattedMessage
+              id="eventAnnotationListing.tableList.emptyPrompt.cta"
+              defaultMessage="Create annotation in Lens"
+            />
+          ),
+          onClick: onCreateClick,
+        }}
+      />
+    </div>
+  );
+};
