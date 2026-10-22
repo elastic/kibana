@@ -9,7 +9,10 @@ export {
   extractResultSummary,
   investigationRoundInputsSchema,
   loadInvestigationRound,
+  parseRoundAliasIndex,
+  resolveConversationRound,
   ROUND_READ_RETRY_DELAYS_MS,
+  sliceConversationRounds,
   stepsFromRound,
   stepsFromToolCalls,
   withToolResults,
@@ -17,6 +20,7 @@ export {
   type LoadedInvestigationRound,
   type RawRoundResult,
   type RawRoundStep,
+  type ResolvedConversationRound,
 } from './round_loader';
 
 export {
