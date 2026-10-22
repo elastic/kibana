@@ -149,6 +149,30 @@ describe('rssAdapter', () => {
     expect(requested).not.toContain('https://acme.example/2');
   });
 
+  it('resolves the UK NCSC news feed URL and keeps every entry', async () => {
+    const feed = FEED_BODY.replace(
+      'https://acme.example/1',
+      'https://www.ncsc.gov.uk/news/example-advisory'
+    ).replace('https://acme.example/2', 'https://www.ncsc.gov.uk/news/example');
+    const fetchMock = jest.fn().mockResolvedValue(okResponse(feed));
+
+    const reports = await rssAdapter.run(
+      {
+        _id: 'rss:uk-ncsc',
+        _source: { adapter_type: 'rss', name: 'UK National Cyber Security Centre' },
+      },
+      buildContext(fetchMock)
+    );
+
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      'https://www.ncsc.gov.uk/api/1/services/v1/news-rss-feed.xml'
+    );
+    expect(reports.map(({ content }) => content.article_url)).toEqual([
+      'https://www.ncsc.gov.uk/news/example-advisory',
+      'https://www.ncsc.gov.uk/news/example',
+    ]);
+  });
+
   it('removes credentials from entry provenance', async () => {
     const feed = FEED_BODY.replace(
       'https://acme.example/1',
