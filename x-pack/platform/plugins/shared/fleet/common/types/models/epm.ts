@@ -438,9 +438,28 @@ export type RegistrySearchResult = Pick<
   | 'discovery'
   | 'deprecated'
   | 'group'
-  | 'schemas'
-  | 'requires' // PROTOTYPE: integration group child versions, and hiding a child's input/content deps
 >;
+
+/**
+ * PROTOTYPE: integration group from the package registry `GET /groups` (fed by a taxonomy file in
+ * the integrations repo). One tile per technology; each schema names the package that implements
+ * it, with no version (the latest compatible version is used). Groups aren't packages.
+ */
+export interface IntegrationGroupSchema {
+  package: string;
+  /** Exactly one schema per group should set this. */
+  default?: boolean;
+}
+
+export interface IntegrationGroup {
+  name: string;
+  title: string;
+  description?: string;
+  /** Member package whose first icon the tile uses. */
+  icon?: string;
+  /** e.g. { otel: { package: 'nginx_otel', default: true }, ecs: { package: 'nginx' } } */
+  schemas: Record<string, IntegrationGroupSchema>;
+}
 
 // from /categories
 // https://github.com/elastic/package-registry/blob/master/docs/api/categories.json

@@ -12,7 +12,7 @@ import React from 'react';
 import { act, fireEvent, waitFor, within } from '@testing-library/react';
 
 import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
-import type { PackageInfo, PackageListItem } from '../../../../../../../types';
+import type { IntegrationGroup, PackageInfo, PackageListItem } from '../../../../../../../types';
 import type { GroupSchemaOption } from '../../../../../../../hooks/use_group_package';
 import { of } from 'rxjs';
 
@@ -26,7 +26,7 @@ import {
 
 import { nginxOtelPackageInfo, nginxPackageInfo } from './__fixtures__/nginx';
 import { apacheInputOtelPackageInfo, apachePackageInfo } from './__fixtures__/apache';
-import { apacheGroupItem, nginxGroupItem, singleSchemaGroupItem } from './__fixtures__/groups';
+import { apacheGroup, nginxGroup, singleSchemaGroup } from './__fixtures__/groups';
 import { nginxOtelIntegrationPackageInfo } from './__fixtures__/otel_integrations';
 
 import { buildSchemaModel, getTargetDataset } from './model';
@@ -104,7 +104,7 @@ describe('GroupOnboardingWizard', () => {
 
   let renderer: ReturnType<typeof createIntegrationsTestRendererMock>;
   const renderWizard = (
-    group: PackageListItem,
+    group: IntegrationGroup,
     options: GroupSchemaOption[],
     projectType?: string,
     host: Partial<React.ComponentProps<typeof GroupOnboardingWizard>> = {}
@@ -127,7 +127,7 @@ describe('GroupOnboardingWizard', () => {
     });
 
   it('Nginx: install order, fields from package metadata, schema switch keeps name + policy', async () => {
-    const result = renderWizard(nginxGroupItem, [
+    const result = renderWizard(nginxGroup, [
       option('otel', nginxOtelPackageInfo),
       option('ecs', nginxPackageInfo),
     ]);
@@ -204,7 +204,7 @@ describe('GroupOnboardingWizard', () => {
   });
 
   it('zero signals: settings steps skipped, review offers "Install assets only"', async () => {
-    const result = renderWizard(nginxGroupItem, [
+    const result = renderWizard(nginxGroup, [
       option('otel', nginxOtelPackageInfo),
       option('ecs', nginxPackageInfo),
     ]);
@@ -226,7 +226,7 @@ describe('GroupOnboardingWizard', () => {
 
   it('default schema follows the solution: Security -> ECS', async () => {
     const result = renderWizard(
-      nginxGroupItem,
+      nginxGroup,
       [option('otel', nginxOtelPackageInfo), option('ecs', nginxPackageInfo)],
       'security'
     );
@@ -238,13 +238,13 @@ describe('GroupOnboardingWizard', () => {
   });
 
   it('single-schema group: no schema choice', async () => {
-    const result = renderWizard(singleSchemaGroupItem, [option('otel', nginxOtelPackageInfo)]);
+    const result = renderWizard(singleSchemaGroup, [option('otel', nginxOtelPackageInfo)]);
     await waitFor(() => expect(result.getByTestId('groupWizardSignal-logs')).toBeInTheDocument());
     expect(result.queryByTestId('groupWizardSchemaChoice')).not.toBeInTheDocument();
   });
 
   it('Apache: same code, OTel input package child with metrics only', async () => {
-    const result = renderWizard(apacheGroupItem, [
+    const result = renderWizard(apacheGroup, [
       option('otel', apacheInputOtelPackageInfo),
       option('ecs', apachePackageInfo),
     ]);
@@ -333,7 +333,7 @@ describe('GroupOnboardingWizard', () => {
   });
 
   it('page host: step lives in the URL', async () => {
-    const result = renderWizard(nginxGroupItem, [
+    const result = renderWizard(nginxGroup, [
       option('otel', nginxOtelPackageInfo),
       option('ecs', nginxPackageInfo),
     ]);
@@ -347,7 +347,7 @@ describe('GroupOnboardingWizard', () => {
     const onExit = jest.fn();
     const onSaved = jest.fn();
     const result = renderWizard(
-      nginxGroupItem,
+      nginxGroup,
       [option('otel', nginxOtelPackageInfo), option('ecs', nginxPackageInfo)],
       undefined,
       { stepState: 'local', layout: 'embedded', exitLabel: 'Back to Streams', onExit, onSaved }
@@ -396,7 +396,7 @@ describe('GroupOnboardingWizard', () => {
     });
 
     const toReview = async () => {
-      const result = renderWizard(nginxGroupItem, [
+      const result = renderWizard(nginxGroup, [
         option('otel', nginxOtelIntegrationPackageInfo),
         option('ecs', nginxPackageInfo),
       ]);

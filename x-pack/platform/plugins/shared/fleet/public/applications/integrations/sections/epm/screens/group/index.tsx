@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-// PROTOTYPE: integration group page. Every group (package with `schemas`) gets the generic
-// onboarding wizard, driven by its child integrations' package metadata. No per-group code.
+// PROTOTYPE: integration group page. Every group (registry `GET /groups`) gets the generic
+// onboarding wizard, driven by its member packages' metadata. No per-group code.
 // The route is a thin host: full page, step in the URL, exits to the integration (done) or to
 // browse (cancel). The browse tile opens the same wizard in a modal (group_wizard_modal.tsx).
 // The create-package-policy page keeps its `?group=<name>` schema toggle for direct links.
@@ -20,7 +20,7 @@ import { INTEGRATIONS_PLUGIN_ID } from '../../../../constants';
 import { useBreadcrumbs, useLink, useStartServices } from '../../../../hooks';
 import { useGroupPackage } from '../../../../../../hooks/use_group_package';
 import type { GroupSchemaOption } from '../../../../../../hooks/use_group_package';
-import type { PackageListItem } from '../../../../../../types';
+import type { IntegrationGroup } from '../../../../../../types';
 
 import type { GroupWizardExitResult } from './group_wizard';
 import { GroupOnboardingWizard } from './group_wizard';
@@ -28,7 +28,7 @@ import { GroupOnboardingWizard } from './group_wizard';
 export { GroupSchemaToggle } from './schema_toggle';
 export { GroupWizardModal, useGroupWizardModal } from './group_wizard_modal';
 
-const GroupWizardRoute: React.FC<{ group: PackageListItem; options: GroupSchemaOption[] }> = ({
+const GroupWizardRoute: React.FC<{ group: IntegrationGroup; options: GroupSchemaOption[] }> = ({
   group,
   options,
 }) => {
@@ -59,14 +59,9 @@ export const GroupPackagePage: React.FC = () => {
   const { group, options, isLoading } = useGroupPackage(groupName);
 
   if (isLoading) return <EuiSkeletonText lines={6} />;
-  if (group && options.some((o) => o.child)) {
-    return (
-      <GroupWizardRoute
-        group={group}
-        // Schemas whose child isn't in the registry can't be offered.
-        options={options.filter((o) => o.child)}
-      />
-    );
+  // Schemas whose package isn't in the registry (for this stack) are already left out.
+  if (group && options.length) {
+    return <GroupWizardRoute group={group} options={options} />;
   }
   return (
     <EuiCallOut

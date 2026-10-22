@@ -21,6 +21,7 @@ import type {
   GetInfoResponse,
   InstallPackageResponse,
   GetCategoriesResponse,
+  GetIntegrationGroupsResponse,
   GetPackagesResponse,
   GetLimitedPackagesResponse,
   BulkInstallPackageInfo,
@@ -72,6 +73,7 @@ import { KibanaSavedObjectType } from '../../types';
 import {
   bulkInstallPackages,
   getCategories,
+  getIntegrationGroups,
   getPackages,
   getInstalledPackages,
   getPackageInfo,
@@ -151,6 +153,16 @@ export const getCategoriesHandler: FleetRequestHandler<
   const body: GetCategoriesResponse = {
     items,
   };
+  return response.ok({ body, headers: { ...CACHE_CONTROL_10_MINUTES_HEADER } });
+};
+
+// PROTOTYPE: integration groups from the package registry
+export const getIntegrationGroupsHandler: FleetRequestHandler = async (
+  context,
+  request,
+  response
+) => {
+  const body: GetIntegrationGroupsResponse = { items: await getIntegrationGroups() };
   return response.ok({ body, headers: { ...CACHE_CONTROL_10_MINUTES_HEADER } });
 };
 

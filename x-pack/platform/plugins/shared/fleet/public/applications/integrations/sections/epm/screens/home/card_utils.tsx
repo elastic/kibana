@@ -80,7 +80,7 @@ export interface IntegrationCardItem {
   installStatus?: EpmPackageInstallStatus;
   integration: string;
   isCollectionCard?: boolean;
-  /** PROTOTYPE: tile of an integration group (package with `schemas`). */
+  /** PROTOTYPE: tile of an integration group (package registry `GET /groups`). */
   isIntegrationGroupCard?: boolean;
   groupMembers?: IntegrationCardItem[];
   searchableContent?: string;

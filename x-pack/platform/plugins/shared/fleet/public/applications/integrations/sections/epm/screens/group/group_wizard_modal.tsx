@@ -25,11 +25,11 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { PackageIcon } from '../../../../../../components';
 import { useGroupPackage } from '../../../../../../hooks/use_group_package';
 import type { IntegrationCardItem } from '../home/card_utils';
 
 import { GroupOnboardingWizard } from './group_wizard';
+import { GroupIcon } from './group_icon';
 
 /**
  * PROTOTYPE: group tiles open the wizard in a modal instead of navigating, regardless of
@@ -43,7 +43,6 @@ export const GroupWizardModal: React.FC<{ groupName: string; onClose: () => void
 }) => {
   const titleId = useGeneratedHtmlId();
   const { group, options, isLoading } = useGroupPackage(groupName);
-  const available = options.filter((o) => o.child);
 
   return (
     <EuiModal
@@ -59,12 +58,7 @@ export const GroupWizardModal: React.FC<{ groupName: string; onClose: () => void
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             {group && (
               <EuiFlexItem grow={false}>
-                <PackageIcon
-                  packageName={group.name}
-                  version={group.version}
-                  icons={group.icons}
-                  size="l"
-                />
+                <GroupIcon group={group} options={options} size="l" />
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
@@ -86,10 +80,10 @@ export const GroupWizardModal: React.FC<{ groupName: string; onClose: () => void
       <EuiModalBody>
         {isLoading ? (
           <EuiSkeletonText lines={6} />
-        ) : group && available.length ? (
+        ) : group && options.length ? (
           <GroupOnboardingWizard
             group={group}
-            options={available}
+            options={options}
             stepState="local"
             layout="embedded"
             exitLabel="Done"

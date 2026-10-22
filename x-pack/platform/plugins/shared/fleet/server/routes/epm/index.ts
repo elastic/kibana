@@ -96,6 +96,7 @@ import { genericErrorResponse } from '../schema/errors';
 
 import {
   getCategoriesHandler,
+  getIntegrationGroupsHandler,
   getListHandler,
   getInstalledListHandler,
   getLimitedListHandler,
@@ -207,6 +208,19 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       getCategoriesHandler
+    );
+
+  // PROTOTYPE: integration groups (package registry `GET /groups`)
+  router.versioned
+    .get({
+      path: EPM_API_ROUTES.GROUPS_PATTERN,
+      security: READ_PACKAGE_INFO_SECURITY,
+      access: 'internal',
+      summary: `Get integration groups`,
+    })
+    .addVersion(
+      { version: API_VERSIONS.internal.v1, validate: false },
+      getIntegrationGroupsHandler
     );
 
   router.versioned

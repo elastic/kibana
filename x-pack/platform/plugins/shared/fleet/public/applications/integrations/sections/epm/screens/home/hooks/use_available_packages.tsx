@@ -14,6 +14,7 @@ import type { IntegrationPreferenceType } from '../../../components/integration_
 import { useAgentless } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import {
   useAuthz,
+  useGetIntegrationGroupsQuery,
   useGetPackagesQuery,
   useGetCategoriesQuery,
   useGetAppendCustomIntegrationsQuery,
@@ -199,6 +200,8 @@ export const useAvailablePackages = ({
     isLoading: isLoadingAllPackages,
     error: eprPackageLoadingError,
   } = useGetPackagesQuery({ prerelease: prereleaseIntegrationsEnabled });
+  // PROTOTYPE: integration groups from the registry. A failed request means no groups.
+  const { data: integrationGroups } = useGetIntegrationGroupsQuery();
 
   // Remove Kubernetes package granularity
   if (eprPackages?.items) {
@@ -238,9 +241,10 @@ export const useAvailablePackages = ({
   // All cards before any filter (no agentless filter, no category filter).
   // Used by useBrowseIntegrationHook which applies both filters from the live URL.
   const allCards: IntegrationCardItem[] = useMemo(() => {
-    // PROTOTYPE: integration groups (with `schemas`) get one tile each; their children are hidden.
+    // PROTOTYPE: integration groups get one tile each; their member packages are hidden.
     const { groupCards, remainingItems: eprAndCustomPackages } = applyGroupPackages({
       items: [...mergedEprPackages, ...(appendCustomIntegrations || [])],
+      groups: integrationGroups?.items ?? [],
       getHref,
       getAbsolutePath,
       addBasePath,
@@ -288,6 +292,7 @@ export const useAvailablePackages = ({
     enableIntegrationCollectionTiles,
     getAbsolutePath,
     getHref,
+    integrationGroups?.items,
     mergedEprPackages,
     packageVerificationKeyId,
   ]);

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-// PROTOTYPE: collapse integration groups (packages with `schemas`) and their child integrations
-// into one tile each.
+// PROTOTYPE: one tile per integration group (registry `GET /groups`), member packages hidden.
+// The tile takes title and description from the group and the icon from its `icon` member.
 
 import React from 'react';
 import { EuiBadge, EuiFlexItem, EuiSpacer } from '@elastic/eui';
@@ -14,21 +14,25 @@ import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
 import { installationStatuses } from '../../../../../../../../common/constants';
 import {
+  getGroupMemberNames,
   getGroupSchemaChildren,
   getSchemaLabel,
-  isGroupPackage,
-} from '../../../../../../../../common/services/group_packages';
-import type { PackageListItem } from '../../../../../types';
+} from '../../../../../../../../common/services/integration_groups';
+import type { IntegrationGroup, PackageListItem } from '../../../../../types';
 import type { StaticPage, DynamicPage, DynamicPagePathValues } from '../../../../../constants';
+import {
+  getGroupIconPackage,
+  getGroupSchemaOptions,
+} from '../../../../../../../hooks/use_group_package';
 import { mapToCard } from '../card_utils';
 import type { IntegrationCardItem } from '../card_utils';
 
 const isEprPackage = (item: PackageListItem | CustomIntegration): item is PackageListItem =>
   item.type !== 'ui_link';
 
-/** Schemas whose child integration is installed, e.g. ['ecs', 'otel']. Derived, never stored. */
+/** Schemas whose member package is installed, e.g. ['ecs', 'otel']. Derived, never stored. */
 export const getInstalledGroupSchemas = (
-  group: PackageListItem,
+  group: IntegrationGroup,
   allItems: Array<PackageListItem | CustomIntegration>
 ): string[] => {
   const installedNames = new Set(
@@ -46,16 +50,27 @@ export const getInstalledGroupSchemas = (
   ];
 };
 
+// The tile's name is the group's, so point the member's icons at the member package by absolute
+// `path` (no `src`), which the icon hook resolves without using the tile's package name.
+const toAbsoluteIcons = (pkg: PackageListItem): IntegrationCardItem['icons'] =>
+  (pkg.icons ?? []).map((icon) => ({
+    ...icon,
+    src: '',
+    path: ('path' in icon && icon.path) || `/package/${pkg.name}/${pkg.version}${icon.src}`,
+  }));
+
 export const getGroupInstalledLabel = (schemas: string[]) =>
   schemas.length ? `Installed, ${schemas.map(getSchemaLabel).join(' + ')}` : undefined;
 
 export const applyGroupPackages = ({
   items,
+  groups,
   getHref,
   getAbsolutePath,
   addBasePath,
 }: {
   items: Array<PackageListItem | CustomIntegration>;
+  groups: IntegrationGroup[];
   getHref: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => string;
   getAbsolutePath: (path: string) => string;
   addBasePath: (url: string) => string;
@@ -63,46 +78,27 @@ export const applyGroupPackages = ({
   groupCards: IntegrationCardItem[];
   remainingItems: Array<PackageListItem | CustomIntegration>;
 } => {
-  const allGroups = items.filter(isEprPackage).filter(isGroupPackage);
-  if (!allGroups.length) return { groupCards: [], remainingItems: items };
-
-  // Groups are never listed as packages. A group gets a tile only when at least one of its
-  // schemas' packages is listed (compatible with this stack).
-  const groupNames = new Set(allGroups.map((g) => g.name));
-  const listedNames = new Set(items.filter(isEprPackage).map((item) => item.name));
-  const groups = allGroups.filter((g) =>
-    getGroupSchemaChildren(g).some((c) => listedNames.has(c.package))
-  );
-  const childNames = new Set(
-    groups.flatMap((g) => getGroupSchemaChildren(g).map((c) => c.package))
-  );
-  // Also hide the children's own input/content deps (e.g. nginx_otel_input, nginx_otel), but only
-  // when nothing outside the groups' children requires them, so shared ones like filelog_otel stay.
-  const getDepNames = (item: PackageListItem) =>
-    [...(item.requires?.input ?? []), ...(item.requires?.content ?? [])].map((d) => d.package);
   const eprItems = items.filter(isEprPackage);
-  const depsOfChildren = new Set(
-    eprItems.filter((item) => childNames.has(item.name)).flatMap(getDepNames)
-  );
-  const depsOfOthers = new Set(
-    eprItems.filter((item) => !childNames.has(item.name)).flatMap(getDepNames)
-  );
-  depsOfChildren.forEach((name) => {
-    if (!depsOfOthers.has(name)) childNames.add(name);
-  });
+  // A schema whose package isn't listed (not compatible with this stack) is skipped; a group with
+  // no listed member gets no tile.
+  const listedGroups = groups.filter((g) => getGroupSchemaOptions(g, eprItems).length > 0);
+  if (!listedGroups.length) return { groupCards: [], remainingItems: items };
 
-  const remainingItems = items.filter(
-    (item) => !isEprPackage(item) || (!groupNames.has(item.name) && !childNames.has(item.name))
-  );
+  const memberNames = getGroupMemberNames(listedGroups);
+  const remainingItems = items.filter((item) => !isEprPackage(item) || !memberNames.has(item.name));
 
-  const groupCards = groups.map((group): IntegrationCardItem => {
-    const card = mapToCard({ getAbsolutePath, getHref, item: group, addBasePath });
-    const installedSchemas = getInstalledGroupSchemas(group, items);
-    const installedLabel = getGroupInstalledLabel(installedSchemas);
-    const ownChildNames = new Set(getGroupSchemaChildren(group).map((c) => c.package));
-    const children = items.filter(isEprPackage).filter((item) => ownChildNames.has(item.name));
+  const groupCards = listedGroups.map((group): IntegrationCardItem => {
+    const options = getGroupSchemaOptions(group, eprItems);
+    const iconPackage = getGroupIconPackage(group, eprItems) ?? options[0].child;
+    const card = mapToCard({ getAbsolutePath, getHref, item: iconPackage, addBasePath });
+    const installedLabel = getGroupInstalledLabel(getInstalledGroupSchemas(group, items));
     return {
       ...card,
+      id: `group:${group.name}`,
+      name: group.name,
+      title: group.title,
+      description: group.description ?? card.description,
+      icons: toAbsoluteIcons(iconPackage),
       url: getHref('integration_group', { groupName: group.name }),
       isIntegrationGroupCard: true,
       release: undefined,
@@ -110,7 +106,7 @@ export const applyGroupPackages = ({
       searchableContent: [
         group.name,
         group.title,
-        ...children.flatMap((c) => [c.name, c.title]),
+        ...options.flatMap((o) => [o.child.name, o.child.title]),
       ].join(' '),
       extraLabelsBadges: [
         ...(card.extraLabelsBadges ?? []),

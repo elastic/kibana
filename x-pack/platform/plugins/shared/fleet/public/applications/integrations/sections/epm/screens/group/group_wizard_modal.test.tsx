@@ -16,7 +16,7 @@ import { sendGetPackageInfoByKeyForRq } from '../../../../../../hooks';
 import type { IntegrationCardItem } from '../home/card_utils';
 
 import { nginxOtelPackageInfo, nginxPackageInfo } from './group_wizard/__fixtures__/nginx';
-import { nginxGroupItem } from './group_wizard/__fixtures__/groups';
+import { nginxGroup } from './group_wizard/__fixtures__/groups';
 import { GROUP_TILE_OPENS_MODAL, useGroupWizardModal } from './group_wizard_modal';
 
 jest.mock('../../../../../../services/use_yaml', () => ({ useYaml: () => require('yaml') }));
@@ -35,9 +35,10 @@ jest.mock('../../../../../../hooks/use_group_package', () => {
     id: info.name,
     release: 'beta',
   });
-  const { nginxGroupItem: group } = jest.requireActual('./group_wizard/__fixtures__/groups');
+  const { nginxGroup: group } = jest.requireActual('./group_wizard/__fixtures__/groups');
   const nginx = jest.requireActual('./group_wizard/__fixtures__/nginx');
   return {
+    ...jest.requireActual('../../../../../../hooks/use_group_package'),
     useGroupPackage: () => ({
       isLoading: false,
       group,
@@ -89,7 +90,7 @@ describe('group tile -> wizard modal', () => {
   it('opens the wizard embedded in a modal, other tiles untouched', async () => {
     expect(GROUP_TILE_OPENS_MODAL).toBe(true);
     const cards = [
-      { id: 'epr:nginx_group', name: 'nginx_group', title: 'Nginx', isIntegrationGroupCard: true },
+      { id: 'group:nginx', name: 'nginx', title: 'Nginx', isIntegrationGroupCard: true },
       { id: 'epr:redis', name: 'redis', title: 'Redis' },
     ] as IntegrationCardItem[];
     const renderer = createIntegrationsTestRendererMock();
@@ -97,10 +98,10 @@ describe('group tile -> wizard modal', () => {
     expect(result.queryByTestId('groupWizardModal')).not.toBeInTheDocument();
 
     act(() => {
-      fireEvent.click(result.getByTestId('card-nginx_group'));
+      fireEvent.click(result.getByTestId('card-nginx'));
     });
     await waitFor(() => expect(result.getByTestId('groupWizardModal')).toBeInTheDocument());
-    expect(result.getByTestId('groupWizardModal')).toHaveTextContent(nginxGroupItem.title);
+    expect(result.getByTestId('groupWizardModal')).toHaveTextContent(nginxGroup.title);
     await waitFor(() => expect(result.getByTestId('groupWizardSignal-logs')).toBeInTheDocument());
     // Embedded: the host owns the header, the wizard doesn't render its page header
     expect(result.queryByTestId('groupWizardBack')).not.toBeInTheDocument();

@@ -11,6 +11,7 @@ import type { PackageSpecIcon } from '../models/package_spec';
 import type {
   AssetReference,
   CategorySummaryList,
+  IntegrationGroup,
   PackageList,
   PackageInfo,
   PackageUsageStats,
@@ -33,6 +34,11 @@ export interface GetCategoriesRequest {
 
 export interface GetCategoriesResponse {
   items: CategorySummaryList;
+}
+
+// PROTOTYPE: integration groups
+export interface GetIntegrationGroupsResponse {
+  items: IntegrationGroup[];
 }
 
 export interface GetPackagesRequest {

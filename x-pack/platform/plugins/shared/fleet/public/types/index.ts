@@ -127,6 +127,8 @@ export type {
   ServiceName,
   GetCategoriesRequest,
   GetCategoriesResponse,
+  GetIntegrationGroupsResponse,
+  IntegrationGroup,
   GetVerificationKeyIdResponse,
   GetPackagesRequest,
   GetPackagesResponse,

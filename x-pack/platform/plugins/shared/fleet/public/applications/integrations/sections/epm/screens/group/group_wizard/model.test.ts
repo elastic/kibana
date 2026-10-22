@@ -31,7 +31,7 @@ import {
 } from '../../../../../../../../common/services';
 import { SetupTechnology } from '../../../../../../../../common/types';
 
-import { nginxGroupItem, singleSchemaGroupItem } from './__fixtures__/groups';
+import { nginxGroup, singleSchemaGroup } from './__fixtures__/groups';
 import type { SchemaModel, SchemaState, WizardStream } from './model';
 import {
   getAgentInputErrors,
@@ -238,9 +238,7 @@ describe('group wizard model', () => {
   });
 
   describe('default schema', () => {
-    const { schemas } = nginxGroupItem as unknown as {
-      schemas: Record<string, { default?: boolean }>;
-    };
+    const { schemas } = nginxGroup;
     it('by solution when the group has that schema, else manifest default', () => {
       expect(resolveDefaultSchema(schemas, 'oblt')).toBe('otel');
       expect(resolveDefaultSchema(schemas, 'observability')).toBe('otel');
@@ -251,10 +249,10 @@ describe('group wizard model', () => {
     });
 
     it('single-schema group without `default`', () => {
-      expect(getGroupSchemaChildren(singleSchemaGroupItem)).toEqual([
+      expect(getGroupSchemaChildren(singleSchemaGroup)).toEqual([
         { schema: 'otel', package: 'nginx_otel' },
       ]);
-      expect(getGroupDefaultSchema(singleSchemaGroupItem)).toBe('otel');
+      expect(getGroupDefaultSchema(singleSchemaGroup)).toBe('otel');
       // Security prefers ECS, but this group has no ECS schema.
       expect(resolveDefaultSchema({ otel: {} }, 'security')).toBe('otel');
       expect(resolveDefaultSchema({ ecs: {}, otel: {} }, undefined)).toBe('ecs');

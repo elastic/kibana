@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// PROTOTYPE: generic onboarding wizard for any integration group (package with `schemas`), after
+// PROTOTYPE: generic onboarding wizard for any integration group (registry `GET /groups`), after
 // the design team's Ingest Workbench prototype. Steps follow the design's install order (hub
 // Design direction 3.4): what to collect (schema + signals) -> how (deployment method, hidden with
 // a single method) -> settings per selected signal -> review (save) -> detect and review -> exit.
@@ -38,9 +38,9 @@ import {
 
 import type {
   AgentPolicy,
+  IntegrationGroup,
   NewAgentPolicy,
   PackageInfo,
-  PackageListItem,
 } from '../../../../../../../types';
 import {
   sendGetPackageInfoByKeyForRq,
@@ -52,7 +52,7 @@ import {
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
 import { incrementPolicyName } from '../../../../../../../services';
 import type { GroupSchemaOption } from '../../../../../../../hooks/use_group_package';
-import { PackageIcon } from '../../../../../../../components';
+import { GroupIcon } from '../group_icon';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
 import { validationHasErrors } from '../../../../../../../../common/services';
 import { SetupTechnology } from '../../../../../../../../common/types';
@@ -137,7 +137,7 @@ export interface GroupWizardHostProps {
 }
 
 interface WizardProps extends GroupWizardHostProps {
-  group: PackageListItem;
+  group: IntegrationGroup;
   options: GroupSchemaOption[];
 }
 
@@ -354,6 +354,7 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({
     <GroupWizardBody
       key={schema}
       group={group}
+      options={options}
       schema={schema}
       defaultSchema={defaultSchema}
       schemaChoices={schemaChoices}
@@ -420,7 +421,8 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({
 };
 
 interface BodyProps {
-  group: PackageListItem;
+  group: IntegrationGroup;
+  options: GroupSchemaOption[];
   schema: string;
   defaultSchema?: string;
   schemaChoices: SchemaChoice[];
@@ -622,9 +624,7 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
   const savedAgentPolicyId =
     saved?.type === 'packagePolicy' ? saved.policy.policy_ids?.[0] : undefined;
 
-  const groupIcon = (
-    <PackageIcon packageName={group.name} version={group.version} icons={group.icons} size="m" />
-  );
+  const groupIcon = <GroupIcon group={group} options={props.options} size="m" />;
 
   const agentPolicySection = (
     <AgentPolicySection

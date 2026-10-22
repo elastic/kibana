@@ -98,7 +98,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
     // Read window.location directly: this layout is also rendered outside a router.
     const groupName =
       new URLSearchParams(window.location.search).get(GROUP_QUERYPARAM) ?? undefined;
-    const { group } = useGroupPackage(isAdd ? groupName : undefined);
+    const { group, iconPackage: groupIconPackage } = useGroupPackage(isAdd ? groupName : undefined);
 
     const pageTitle = useMemo(() => {
       if ((isAdd || isEdit || isUpgrade) && packageInfo) {
@@ -137,11 +137,11 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
         return (
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
-              {group ? (
+              {groupIconPackage ? (
                 <PackageIcon
-                  packageName={group.name}
-                  version={group.version}
-                  icons={group.icons}
+                  packageName={groupIconPackage.name}
+                  version={groupIconPackage.version}
+                  icons={groupIconPackage.icons}
                   size="xl"
                 />
               ) : (
@@ -222,6 +222,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
       integrationInfo?.title,
       packageInfo,
       group,
+      groupIconPackage,
       defaultPolicyData?.name,
       isAdd,
       isEdit,

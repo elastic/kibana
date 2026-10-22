@@ -58,6 +58,7 @@ import type {
   EpmPackageAdditions,
   GetCategoriesRequest,
   GetPackagesRequest,
+  IntegrationGroup,
 } from '../../../../common/types';
 import type { Installation, PackageInfo, PackagePolicySOAttributes } from '../../../types';
 import {
@@ -70,7 +71,7 @@ import {
 import { appContextService } from '../..';
 import { dataStreamService } from '../../data_streams';
 import * as Registry from '../registry';
-import { withGroupPackagesFixture } from '../registry/group_packages_fixture';
+import { INTEGRATION_GROUPS_FIXTURE } from '../registry/integration_groups_fixture';
 import type { PackageAsset } from '../archive/storage';
 import { getEsPackage, packageAssetToArchiveEntry } from '../archive/storage';
 import { normalizeKuery } from '../../saved_object';
@@ -113,6 +114,14 @@ export async function getCategories(options: GetCategoriesRequest['query']) {
   return Registry.fetchCategories(options);
 }
 
+/** PROTOTYPE: integration groups from the registry, or the fixture behind a flag when it has none. */
+export async function getIntegrationGroups(): Promise<IntegrationGroup[]> {
+  const groups = await Registry.fetchGroups();
+  return appContextService.getExperimentalFeatures().integrationGroupsFixture && !groups.length
+    ? INTEGRATION_GROUPS_FIXTURE
+    : groups;
+}
+
 export async function getPackages(
   options: {
     savedObjectsClient: SavedObjectsClientContract;
@@ -127,11 +136,7 @@ export async function getPackages(
     prerelease = false,
   } = options;
 
-  const registryItems = await Registry.fetchList({ category, prerelease }).then((rawItems) => {
-    // PROTOTYPE: to use real registry groups, drop this line (groups are detected by `schemas`).
-    const items = appContextService.getExperimentalFeatures().groupPackagesFixture
-      ? withGroupPackagesFixture(rawItems)
-      : rawItems;
+  const registryItems = await Registry.fetchList({ category, prerelease }).then((items) => {
     return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }, { id: item.name })
     );

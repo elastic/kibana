@@ -29,6 +29,8 @@ jest.mock(
 jest.mock('../../../../../hooks', () => ({
   useAuthz: () => mockUseAuthz(),
   useGetPackagesQuery: (params: any) => mockUseGetPackagesQuery(params),
+  // PROTOTYPE: integration groups (none here)
+  useGetIntegrationGroupsQuery: () => ({ data: { items: [] } }),
   useGetCategoriesQuery: (params: any) => mockUseGetCategoriesQuery(params),
   useGetAppendCustomIntegrationsQuery: () => mockUseGetAppendCustomIntegrationsQuery(),
   useGetReplacementCustomIntegrationsQuery: () => mockUseGetReplacementCustomIntegrationsQuery(),
