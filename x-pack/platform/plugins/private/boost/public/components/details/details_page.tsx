@@ -143,7 +143,7 @@ export const DetailsBand = ({
   return (
     <div
       css={{
-        paddingBlock: euiTheme.size.base,
+        paddingBlock: euiTheme.size.l,
         borderBlockEnd: hasDivider ? euiTheme.border.thin : undefined,
       }}
       data-test-subj={dataTestSubj}
@@ -174,13 +174,11 @@ export const DetailsSplitBand = ({ start, end }: DetailsSplitBandProps) => {
         [narrow]: { gridTemplateColumns: '1fr' },
       }}
     >
-      <div css={{ paddingBlock: euiTheme.size.base, paddingInlineEnd: euiTheme.size.base }}>
-        {start}
-      </div>
+      <div css={{ paddingBlock: euiTheme.size.l, paddingInlineEnd: euiTheme.size.l }}>{start}</div>
       <div
         css={{
-          paddingBlock: euiTheme.size.base,
-          paddingInlineStart: euiTheme.size.base,
+          paddingBlock: euiTheme.size.l,
+          paddingInlineStart: euiTheme.size.l,
           borderInlineStart: euiTheme.border.thin,
           [narrow]: {
             paddingInlineStart: 0,
