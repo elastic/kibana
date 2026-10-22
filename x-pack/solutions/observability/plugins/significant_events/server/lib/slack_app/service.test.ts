@@ -185,8 +185,6 @@ describe('SlackAppService', () => {
         })
       );
 
-      // Read-only, least-privilege: direct ES read on observability signals only (queried as
-      // this key), everything else (Streams, Significant Events, connectors) via Kibana features.
       const { kibana_role_descriptors: descriptors } = grantAsInternalUser.mock.calls[0][1];
       expect(descriptors.nightshift_relay_agent_builder).toEqual({
         elasticsearch: {
@@ -196,6 +194,14 @@ describe('SlackAppService', () => {
               names: ['traces-*', 'logs-*', 'metrics-*', 'apm-*'],
               privileges: ['read', 'view_index_metadata'],
             },
+            {
+              names: [
+                'ai-index-idx-nightshift-cortex',
+                'ai-index-idx-nightshift-semantic-memory',
+                'ai-index-idx-nightshift-decision-trees',
+              ],
+              privileges: ['read', 'view_index_metadata', 'write', 'auto_configure'],
+            },
           ],
           run_as: [],
         },
@@ -204,8 +210,7 @@ describe('SlackAppService', () => {
             spaces: ['*'],
             feature: {
               nightshift: ['minimal_all'],
-              streams: ['read'],
-              agentBuilder: ['read'],
+              agentBuilder: ['minimal_all'],
               actions: ['read'],
               workflowsManagement: ['read'],
             },

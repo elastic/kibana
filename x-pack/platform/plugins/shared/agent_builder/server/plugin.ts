@@ -324,6 +324,10 @@ export class AgentBuilderPlugin
           this.conversationUpdatedOptIns.push(optIn);
         },
       },
+      callbacks: {
+        registerConversationResolver: serviceSetups.callbacks.registerConversationResolver,
+        registerTransport: serviceSetups.callbacks.registerTransport,
+      },
       topSnippets: this.config.topSnippets,
     };
   }

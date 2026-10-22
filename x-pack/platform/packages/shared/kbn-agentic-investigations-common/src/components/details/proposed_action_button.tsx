@@ -20,6 +20,7 @@ import {
   type ApprovalActorTimeProps,
   getApprovalOutcomeBadge,
   getProposalCaption,
+  ProposalCaption,
   getProposalDecision,
   ProposedActionStatusBadge,
   type ApprovalPhase,
@@ -151,7 +152,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
 
     const badge = getApprovalOutcomeBadge(approvalPhase) ?? PENDING_BADGE;
 
-    const pendingCaption = getProposalCaption(proposal);
+    const pendingCaption = getProposalCaption(proposal) && <ProposalCaption proposal={proposal} />;
 
     // A decision with no `actorName` is a terminal state nobody actually decided (expired,
     // chiefly) — the badge label alone ("Expired") already says what happened, so this only adds

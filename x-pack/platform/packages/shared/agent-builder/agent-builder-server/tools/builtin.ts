@@ -71,6 +71,11 @@ export type ToolAvailabilityResult = AvailabilityResult;
 export type ToolAvailabilityHandler = AvailabilityHandler;
 export type ToolAvailabilityConfig = AvailabilityConfig;
 
+/**
+ * Request-scoped context passed to {@link DynamicSchemaBuiltinToolDefinition.getSchema}.
+ */
+export type ToolSchemaContext = AvailabilityContext;
+
 export type ToolPolicyConfirmationDefinition = Omit<ConfirmPromptDefinition, 'id'>;
 
 export interface BuiltInToolConfirmationContext<
@@ -179,6 +184,22 @@ export interface BuiltinToolDefinition<
 }
 
 /**
+ * Built-in tool whose input schema is resolved for each request, e.g. for parameter defaults
+ * that depend on the current space's settings.
+ */
+export type DynamicSchemaBuiltinToolDefinition<
+  RunInput extends ZodObject<any> = ZodObject<any>,
+  TResult extends ToolResult = ToolResult
+> = Omit<BuiltinToolDefinition<RunInput, TResult>, 'schema'> & {
+  /**
+   * Resolves the tool's input schema, used when exposing the tool to agents and MCP clients
+   * and when validating its input. Called on every tool call and listing, so implementations
+   * should return cached schema instances rather than building new ones.
+   */
+  getSchema: (context: ToolSchemaContext) => MaybePromise<RunInput>;
+};
+
+/**
  * Tool definition for internal agent-runner tools (bash, sleep, etc.) that use
  * BuiltinToolDefinition but are never exposed via the MCP server.
  * Omits annotations since these tools bypass MCP registration.
@@ -200,6 +221,7 @@ export type StaticToolRegistration<
   TResult extends ToolResult = ToolResult
 > =
   | BuiltinToolDefinition<RunInput, TResult>
+  | DynamicSchemaBuiltinToolDefinition<RunInput, TResult>
   | StaticEsqlTool
   | StaticIndexSearchTool
   | StaticWorkflowTool;
