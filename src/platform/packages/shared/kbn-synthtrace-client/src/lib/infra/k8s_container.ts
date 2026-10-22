@@ -22,8 +22,17 @@ interface K8sContainerDocument extends Fields {
   'container.runtime'?: string;
   'host.name': string;
   'host.hostname': string;
+  'host.ip'?: string;
+  'host.os.name'?: string;
+  'host.os.version'?: string;
+  'host.os.platform'?: string;
+  'host.os.kernel'?: string;
   'cloud.provider'?: string;
   'cloud.instance.id'?: string;
+  'cloud.instance.name'?: string;
+  'cloud.availability_zone'?: string;
+  'cloud.machine.type'?: string;
+  'cloud.project.id'?: string;
   'cloud.image.id'?: string;
   'event.dataset'?: string;
   'event.module'?: string;

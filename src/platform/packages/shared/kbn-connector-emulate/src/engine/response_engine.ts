@@ -57,6 +57,8 @@ export interface RejectedResponse {
   readonly source: 'fixture' | 'recording';
   /** `METHOD /path`, or the operation's name, as the fixture or recording names it. */
   readonly operation: string;
+  /** With named specs, the spec that contradicts it. */
+  readonly spec?: string;
   readonly violations: readonly Violation[];
 }
 
@@ -145,7 +147,12 @@ export const createResponseEngine = (
     const key = toOperationKey(ref);
     const matched = findOperations(ref);
     if (matched.length === 0) {
-      rejected.push({ source: origin, operation: key, violations: [NOT_IN_SPEC] });
+      rejected.push({
+        source: origin,
+        operation: key,
+        ...(ref.source === undefined ? {} : { spec: ref.source }),
+        violations: [NOT_IN_SPEC],
+      });
       return;
     }
     const contractResponse = toContractResponse(response);
@@ -154,7 +161,13 @@ export const createResponseEngine = (
       const violations =
         origin === 'recording' ? validateResponse(operation, contractResponse) : [];
       if (violations.length > 0) {
-        rejected.push({ source: origin, operation: key, violations });
+        const { source } = operation.spec;
+        rejected.push({
+          source: origin,
+          operation: key,
+          ...(source === undefined ? {} : { spec: source }),
+          violations,
+        });
       } else {
         if (origin === 'fixture') {
           withFixture.add(operation);

@@ -261,15 +261,15 @@ export const createEmulatorFetch = ({
       return response;
     }
     const routed = contract.route(request);
-    const grants = tokenEndpoints.get(`${request.url.origin}${request.url.pathname}`);
-    if (!('operation' in routed) && grants) {
-      const response = respondToTokenRequest(grants, request);
+    const grants = 'operation' in routed ? undefined : tokenEndpoints(request.url);
+    if (grants) {
+      const { response, violations } = respondToTokenRequest(grants, request);
       calls.push({
         request: description,
         operation: 'OAuth token',
         token: true,
         status: response.statusCode,
-        requestViolations: [],
+        requestViolations: violations,
         responseViolations: [],
       });
       return response;
