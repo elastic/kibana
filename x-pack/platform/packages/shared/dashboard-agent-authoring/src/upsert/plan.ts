@@ -8,7 +8,7 @@
 import { upperFirst } from 'lodash';
 import { validate as isUuid } from 'uuid';
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
-import type { DashboardIndex } from '../dashboard_state';
+import { getIndexedIds, type DashboardIndex } from '../dashboard_state';
 import { DASHBOARD_FAILURE_TYPES } from '../failure_types';
 import type { PlannedControl } from '../controls';
 import { planPanelContent, type PanelContentSource } from '../panels';
@@ -69,6 +69,8 @@ export interface UpsertPlan {
   panels: PlannedPanel[];
   controls: PlannedControl[];
   removals: PlannedRemovals;
+  /** Ids of the panels, sections, and controls the dashboard has or the call names. */
+  reservedIds: ReadonlySet<string>;
   failures: DashboardFailure[];
 }
 
@@ -426,17 +428,25 @@ export const planUpsert = ({
   original: DashboardIndex;
   upsert: DashboardUpsert;
 }): UpsertPlan => {
+  const {
+    title,
+    description,
+    time_range: timeRange,
+    sections = [],
+    panels = [],
+    controls = [],
+    remove = [],
+  } = upsert;
   const validItems = rejectInvalidItems(original, upsert);
   const placement = planRemovals({
     original,
-    requestedPanels: upsert.panels ?? [],
+    requestedPanels: panels,
     validPanels: validItems.panels,
     removedIds: validItems.removedIds,
     conflictingIds: validItems.conflictingIds,
   });
   const plannedPanels = planPanels({ original, panels: placement.panels });
 
-  const { title, description, time_range: timeRange } = upsert;
   return {
     metadata: { title, description, time_range: timeRange },
     sectionUpdates: validItems.sectionUpdates,
@@ -444,6 +454,11 @@ export const planUpsert = ({
     panels: plannedPanels.panels,
     controls: validItems.controls,
     removals: placement.removals,
+    reservedIds: new Set([
+      ...getIndexedIds(original),
+      ...[...sections, ...panels, ...controls].flatMap(({ id }) => id ?? []),
+      ...remove,
+    ]),
     failures: [...validItems.failures, ...placement.failures, ...plannedPanels.failures],
   };
 };

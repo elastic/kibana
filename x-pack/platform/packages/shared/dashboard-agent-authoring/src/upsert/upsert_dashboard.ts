@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import { reportUnderPlannedIdentifiers } from '../controls';
-import { getIndexedIds, indexDashboard } from '../dashboard_state';
+import { indexDashboard } from '../dashboard_state';
 import type { ResolvePanelContent } from '../panels';
 import type { ResolveAttachmentPanel, ResolveControlFieldCapabilities } from '../types';
 import type { PanelAuthoringNote } from '../resolve_panel';
@@ -71,13 +71,7 @@ export const executeDashboardUpsert = async ({
     controls: plan.controls,
     existingControls: originalDashboardData.pinned_panels ?? [],
     removedControlIds: plan.removals.controlIds,
-    takenIds: [
-      ...getIndexedIds(original),
-      ...[...(upsert.sections ?? []), ...(upsert.panels ?? []), ...(upsert.controls ?? [])].flatMap(
-        ({ id }) => id ?? []
-      ),
-      ...(upsert.remove ?? []),
-    ],
+    takenIds: plan.reservedIds,
     projectRouting: originalDashboardData.project_routing,
     resolvers: { resolvePanelContent, resolveAttachmentPanel, resolveControlFieldCapabilities },
     logger,
