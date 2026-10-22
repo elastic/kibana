@@ -242,7 +242,7 @@ export async function fetchSampleDocuments({
           ),
           { index, samplingTimeoutMs }
         ),
-    ]);
+      ]);
 
     const { documents, bucketCounts } = mergeDocuments(
       [
