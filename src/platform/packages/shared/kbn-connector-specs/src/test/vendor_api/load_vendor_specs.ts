@@ -9,11 +9,7 @@
 
 import fs from 'fs/promises';
 import path from 'path';
-import type {
-  OpenApiDocument,
-  OverlayDocument,
-  PaginatedOperation,
-} from '@kbn/connector-emulate';
+import type { OpenApiDocument, OverlayDocument, PaginatedOperation } from '@kbn/connector-emulate';
 import { applyOverlay } from '@kbn/connector-emulate';
 import { loadVendorSpec } from './load_vendor_spec';
 import type { VendorApiManifest } from './manifest';
