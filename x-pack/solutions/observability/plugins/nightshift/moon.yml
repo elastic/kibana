@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/esql'
   - '@kbn/esql-utils'
   - '@kbn/features-plugin'
+  - '@kbn/flyout-template'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/inference-common'
@@ -99,6 +100,4 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

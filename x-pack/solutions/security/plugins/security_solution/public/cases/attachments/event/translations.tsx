@@ -29,6 +29,21 @@ export const NO_EVENTS_TITLE = i18n.translate('xpack.securitySolution.caseEvents
   defaultMessage: 'No Events Found',
 });
 
+export const SELECTED_EVENTS = (count: number) =>
+  i18n.translate('xpack.securitySolution.caseEvents.selectedEvents', {
+    defaultMessage: '{count} selected',
+    values: { count },
+  });
+
+export const REMOVE_EVENTS = i18n.translate('xpack.securitySolution.caseEvents.removeEvents', {
+  defaultMessage: 'Remove',
+});
+
+export const SELECT_ALL_EVENTS = i18n.translate(
+  'xpack.securitySolution.caseEvents.selectAllEvents',
+  { defaultMessage: 'Select all events on this page' }
+);
+
 export const EVENT_COMMENT_LABEL_TITLE = i18n.translate(
   'xpack.securitySolution.cases.eventAttachment.eventCommentLabelTitle',
   {
@@ -60,6 +75,12 @@ export const REMOVED_EVENTS_LABEL_TITLE = (eventCount: number) =>
   i18n.translate('xpack.securitySolution.cases.eventAttachment.removedEventsLabelTitle', {
     defaultMessage: 'removed {eventCount, plural, =1 {event} other {{eventCount} events}}',
     values: { eventCount },
+  });
+
+export const EVENTS_COUNT = (count: number) =>
+  i18n.translate('xpack.securitySolution.cases.eventAttachment.eventsCount', {
+    defaultMessage: '{count, plural, one {# event} other {# events}}',
+    values: { count },
   });
 
 export const DELETE_EVENTS_SUCCESS_TOAST = (totalEvents: number) =>

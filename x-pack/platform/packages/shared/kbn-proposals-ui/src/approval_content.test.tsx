@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ApprovalContent, type ApprovalContentProps } from './approval_content';
+import { DATE_TIME_FORMAT } from './proposal_helpers';
 import type { ApprovalProposal } from './types';
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -224,22 +226,19 @@ describe('ApprovalContent', () => {
         expiresAt,
       },
     });
-    // Computed the same way the implementation does, rather than a hardcoded guess: the exact
-    // rendering of `toLocaleString` depends on the environment's locale/ICU data.
-    const formattedDeadline = new Date(expiresAt).toLocaleString(undefined, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    });
+    const formattedDeadline = moment(expiresAt).format(DATE_TIME_FORMAT);
     expect(
-      screen.getByText(`Configure • Reversible • Critical impact • Expires ${formattedDeadline}`)
+      screen.getByText(`Configure • Reversible • Critical impact • Expires on ${formattedDeadline}`)
     ).toBeInTheDocument();
   });
 
-  it('shows Expired in the caption instead of the deadline once it has passed', () => {
-    renderContent({
-      proposal: { ...baseProposal, status: 'expired', expiresAt: '2024-01-05T17:00:00.000Z' },
-    });
-    expect(screen.getByText('Critical impact • Expired')).toBeInTheDocument();
+  it('shows the expiry date and time in the caption after the deadline', () => {
+    const expiresAt = '2024-01-05T17:00:00.000Z';
+    renderContent({ proposal: { ...baseProposal, status: 'expired', expiresAt } });
+    const formattedDeadline = moment(expiresAt).format(DATE_TIME_FORMAT);
+    expect(
+      screen.getByText(`Critical impact • Expired on ${formattedDeadline}`)
+    ).toBeInTheDocument();
   });
 
   it('renders the comment', () => {
