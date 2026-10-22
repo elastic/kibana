@@ -24,12 +24,24 @@ const REPORTING_INDICES = '.reporting-*,.kibana-reporting*';
 // To update them, run the test with `--update-snapshots` and commit the written images.
 const MAX_DIFF_PIXEL_RATIO = 0.03;
 
-/** Generates a PNG report from the dashboard export menu and returns the downloaded file. */
-const generatePngReport = async (page: ScoutPage) => {
+const GENERATE_ROUTE = '/internal/reporting/generate/';
+
+/**
+ * Generates a PNG report from the dashboard export menu and returns the downloaded file.
+ * The ID of the generated job is pushed to `generatedJobIds` so cleanup can target only this suite's reports.
+ */
+const generatePngReport = async (page: ScoutPage, generatedJobIds: string[]) => {
   await page.testSubj.click('exportTopNavButton');
   await page.testSubj.click('exportMenuItem-PNG');
   await expect(page.testSubj.locator('exportItemDetailsFlyout')).toBeVisible();
+
+  const generateResponsePromise = page.waitForResponse(
+    (response) => response.url().includes(GENERATE_ROUTE) && response.request().method() === 'POST'
+  );
   await page.testSubj.click('generateReportButton');
+  const generateResponse = await generateResponsePromise;
+  const { job } = await generateResponse.json();
+  generatedJobIds.push(job.id);
 
   const downloadButton = page.testSubj.locator('downloadCompletedReportButton');
   await expect(downloadButton).toBeVisible({ timeout: 120_000 });
@@ -47,6 +59,7 @@ test.describe(
   },
   () => {
     let prevDefaultIndex: string | number | boolean | undefined;
+    const generatedJobIds: string[] = [];
 
     test.beforeAll(async ({ kbnClient, esArchiver, uiSettings }) => {
       prevDefaultIndex = await kbnClient.uiSettings.get('defaultIndex');
@@ -65,14 +78,16 @@ test.describe(
     });
 
     test.afterAll(async ({ kbnClient, esClient, uiSettings }) => {
-      await esClient.deleteByQuery({
-        index: REPORTING_INDICES,
-        query: { match_all: {} },
-        conflicts: 'proceed',
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        refresh: true,
-      });
+      if (generatedJobIds.length > 0) {
+        await esClient.deleteByQuery({
+          index: REPORTING_INDICES,
+          query: { ids: { values: generatedJobIds } },
+          conflicts: 'proceed',
+          ignore_unavailable: true,
+          allow_no_indices: true,
+          refresh: true,
+        });
+      }
       await kbnClient.savedObjects.cleanStandardList();
       if (prevDefaultIndex !== undefined) {
         await uiSettings.set({ defaultIndex: prevDefaultIndex });
@@ -86,7 +101,7 @@ test.describe(
       pageObjects,
     }) => {
       await pageObjects.dashboard.openDashboardWithId(MAP_EMBEDDABLE_EXAMPLE_DASHBOARD_ID);
-      const report = await generatePngReport(page);
+      const report = await generatePngReport(page, generatedJobIds);
       expect(report).toMatchSnapshot('example-map-report.png', {
         maxDiffPixelRatio: MAX_DIFF_PIXEL_RATIO,
       });
