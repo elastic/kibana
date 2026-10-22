@@ -31,8 +31,7 @@ import {
 // it again. Stored attributes use the project body ceiling so that recreate
 // still accepts a monitor the project route already saved.
 const storedString = () => schema.string({ maxLength: MAX_MONITOR_PAYLOAD_BYTES });
-const stringArray = () =>
-  schema.arrayOf(storedString(), { maxSize: MAX_MONITOR_PAYLOAD_BYTES });
+const stringArray = () => schema.arrayOf(storedString(), { maxSize: MAX_MONITOR_PAYLOAD_BYTES });
 
 const literals = (values: readonly string[]) =>
   schema.oneOf(values.map((value) => schema.literal(value)) as [Type<string>]);
