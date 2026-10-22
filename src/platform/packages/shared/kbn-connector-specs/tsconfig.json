@@ -27,5 +27,6 @@
     "@kbn/std",
     "@kbn/logging-mocks",
     "@kbn/repo-info",
+    "@kbn/connector-emulate",
   ]
 }
