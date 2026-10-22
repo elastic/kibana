@@ -14,6 +14,7 @@ import {
 } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
+const APP_BOOT_TIMEOUT = 45_000;
 const LISTING_TIMEOUT = 20_000;
 
 export class GraphPage {
@@ -132,12 +133,15 @@ export class GraphPage {
     this.vennSmallTerm2 = this.page.getByTestId('graphVennSmallTerm2');
   }
 
+  // Gate on `domcontentloaded`: Kibana's bundle graph defers `load` past app mount.
   async goto() {
-    await this.page.gotoApp('graph');
+    await this.page.goto(this.kbnUrl.app('graph'), { waitUntil: 'domcontentloaded' });
   }
 
   async gotoInSpace(spaceId: string) {
-    await this.page.goto(this.kbnUrl.app('graph', { space: spaceId }));
+    await this.page.goto(this.kbnUrl.app('graph', { space: spaceId }), {
+      waitUntil: 'domcontentloaded',
+    });
   }
 
   async waitForListing() {
@@ -145,7 +149,7 @@ export class GraphPage {
     // both or Playwright strict mode fails when the empty listing is ready.
     await this.emptyState
       .or(this.contentList.searchBox)
-      .waitFor({ state: 'visible', timeout: LISTING_TIMEOUT });
+      .waitFor({ state: 'visible', timeout: APP_BOOT_TIMEOUT });
   }
 
   async clickCreateGraph() {
