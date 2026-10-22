@@ -12,7 +12,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiHorizontalRule,
   EuiFlyout,
   EuiFlyoutHeader,
@@ -26,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constants/alert_delete';
+import { RulesSettingsCallout } from './rules_settings_callout';
 import { RulesSettingsForm } from './rules_settings_form';
 import { useRulesSettingsForm } from './use_rules_settings_form';
 
@@ -93,12 +93,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
           padding: ${euiTheme.size.base} ${euiTheme.size.l};
         `}
       >
-        <EuiCallOut
-          size="m"
-          title={i18n.translate('xpack.triggersActionsUI.rulesSettings.flyout.calloutMessage', {
-            defaultMessage: 'Applies to all Classic rules within the current space',
-          })}
-        />
+        <RulesSettingsCallout />
       </div>
       <EuiFlyoutBody>
         <RulesSettingsForm form={form} alertDeleteCategoryIds={alertDeleteCategoryIds} />
