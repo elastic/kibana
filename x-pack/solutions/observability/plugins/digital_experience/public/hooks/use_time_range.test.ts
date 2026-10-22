@@ -102,6 +102,22 @@ describe('useSyncTimeRange', () => {
     expect(setTime).toHaveBeenCalledWith({ from: 'now-7d', to: 'now' });
   });
 
+  it('rewrites a URL in another form to the one links use (sorted, encoded)', () => {
+    const rangeFrom = '2021-01-18T12:00:00.000Z';
+    mockRoute(
+      { rangeFrom, rangeTo: 'now', sourceFilter: 'otel' },
+      `?sourceFilter=otel&rangeFrom=${rangeFrom}&rangeTo=now`
+    );
+
+    renderHook(() => useSyncTimeRange());
+
+    expect(replace).toHaveBeenCalledWith(
+      expect.objectContaining({
+        search: 'rangeFrom=2021-01-18T12%3A00%3A00.000Z&rangeTo=now&sourceFilter=otel',
+      })
+    );
+  });
+
   it('keeps an invalid range out of the timefilter', () => {
     mockRoute({ rangeFrom: 'foo', rangeTo: 'now' }, '?rangeFrom=foo&rangeTo=now');
 

@@ -18,9 +18,9 @@ export interface TimeRange {
   rangeTo: string;
 }
 
-// Unsorted, so the other params keep their order like in the typed router's links.
+// Sorted like the typed router's links, so a breadcrumb to this page matches the URL exactly.
 const withTimeRange = (search: string, timeRange: TimeRange): string =>
-  qs.stringify({ ...qs.parse(search), ...timeRange }, { sort: false });
+  qs.stringify({ ...qs.parse(search), ...timeRange });
 
 /** Whether both bounds parse as dates, e.g. `now-15m` or an ISO date, unlike `rangeFrom=foo`. */
 export const isValidTimeRange = ({ rangeFrom, rangeTo }: TimeRange): boolean => {
@@ -72,9 +72,12 @@ export const useSyncTimeRange = (): void => {
   const location = useLocation();
   const { timeRange, isTimeRangeInUrl } = useTimeRange();
 
+  // Also rewrites a URL in another form (e.g. unencoded `:` in dates) to the one links use, so the
+  // breadcrumb to the current page matches it and no back button shows.
   useEffect(() => {
-    if (!isTimeRangeInUrl) {
-      history.replace({ ...location, search: withTimeRange(location.search, timeRange) });
+    const search = withTimeRange(location.search, timeRange);
+    if (!isTimeRangeInUrl || location.search.replace(/^\?/, '') !== search) {
+      history.replace({ ...location, search });
     }
   }, [history, location, timeRange, isTimeRangeInUrl]);
 

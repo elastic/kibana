@@ -7,4 +7,6 @@
 
 export const APPLICATIONS_LIST_EBT_ELEMENTS = {
   APPLICATION_LINK: 'digitalExperienceApplicationLink',
+  DOCS_LINK: 'digitalExperienceApplicationsDocsLink',
+  CLASSIC_DATA_HINT: 'digitalExperienceClassicDataHint',
 } as const;
