@@ -36,7 +36,7 @@ test.describe('Integration tile navigation', { tag: tags.stateful.classic }, () 
 
     await integrationHome.navigateTo();
     await integrationHome.waitForPageToLoad();
-    await integrationHome.scrollToIntegration(pkgName);
+    await integrationHome.searchForIntegration(pkgName);
     await integrationHome.clickIntegrationCard(pkgName);
 
     await expect(page).toHaveURL(
@@ -55,7 +55,7 @@ test.describe('Integration tile navigation', { tag: tags.stateful.classic }, () 
 
     await integrationHome.navigateTo();
     await integrationHome.waitForPageToLoad();
-    await integrationHome.scrollToIntegration(pkgName);
+    await integrationHome.searchForIntegration(pkgName);
     await integrationHome.clickIntegrationCard(pkgName);
 
     await expect(page).toHaveURL(

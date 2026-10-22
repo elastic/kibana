@@ -136,6 +136,59 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
     });
   });
 
+  it('hides a template-only connector from a feature that sends messages', async () => {
+    const messages = inferenceConnector('messages');
+    const templateOnly = {
+      ...inferenceConnector('daybreak'),
+      metadata: { capabilities: { templates: { policy: 'required' as const } } },
+    };
+    getForFeature.mockResolvedValue({
+      endpoints: [],
+      warnings: [],
+      soEntryFound: false,
+    });
+    getConnectorList.mockResolvedValue([messages, templateOnly]);
+    registerRoute();
+
+    await mockRouter.callRoute({ query: { featureId: 'my_feature' } });
+
+    expect(mockRouter.response.ok).toHaveBeenCalledWith({
+      body: {
+        connectors: [messages],
+        soEntryFound: false,
+      },
+    });
+  });
+
+  it('lists only template connectors when the feature opts in', async () => {
+    const messages = inferenceConnector('gemini');
+    const templateOnly = {
+      ...inferenceConnector('daybreak'),
+      metadata: { capabilities: { templates: { policy: 'required' as const } } },
+    };
+    getForFeature.mockResolvedValue({
+      endpoints: [],
+      warnings: [],
+      soEntryFound: false,
+    });
+    getConnectorList.mockResolvedValue([messages, templateOnly]);
+    registerRoute({}, {
+      get: jest.fn(() => ({
+        featureId: 'alertzero_template_models',
+        allowTemplateRequiredModels: true,
+      })),
+    } as unknown as InferenceFeatureRegistry);
+
+    await mockRouter.callRoute({ query: { featureId: 'alertzero_template_models' } });
+
+    expect(mockRouter.response.ok).toHaveBeenCalledWith({
+      body: {
+        connectors: [templateOnly],
+        soEntryFound: false,
+      },
+    });
+  });
+
   it('returns the catalog alone when there are no recommendations or SO override', async () => {
     const a = inferenceConnector('a');
     const b = inferenceConnector('b');
