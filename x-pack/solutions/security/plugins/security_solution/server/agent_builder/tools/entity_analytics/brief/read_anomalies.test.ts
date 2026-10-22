@@ -11,7 +11,7 @@ import type { BriefCandidate } from './types';
 import {
   buildJobsAggregation,
   readAnomalies,
-  readSecurityJobNames,
+  readSecurityJobs,
   toAnomaliesByCandidateId,
 } from './read_anomalies';
 
@@ -50,65 +50,69 @@ const esClientOf = ({
   } as unknown as ElasticsearchClient);
 
 describe('toAnomaliesByCandidateId', () => {
+  const jobs = (buckets: Array<[string, number]>) => ({
+    top: { buckets: buckets.map(([key, value]) => ({ key, highestScore: { value } })) },
+  });
+
   it.each([
     ['no aggregations, as when the results index is missing', undefined, {}],
     [
-      'the jobs of each candidate, and no entry for a candidate without records',
+      'the named job and the number of jobs of each candidate, and no entry for a candidate without records',
       {
         byCandidate: {
           buckets: {
             'user:a': {
               doc_count: 7,
-              jobs: {
-                buckets: [
-                  { key: 'high_bytes_written_to_external_device', highestScore: { value: 91.6 } },
-                  { key: 'high_sent_bytes_destination_ip', highestScore: { value: 50 } },
-                ],
-              },
+              jobCount: { value: 3 },
+              jobs: jobs([['high_bytes_written', 91.6]]),
             },
-            'host:b': { doc_count: 0, jobs: { buckets: [] } },
+            'host:b': { doc_count: 0, jobCount: { value: 0 }, jobs: jobs([]) },
           },
         },
       },
       {
         'user:a': {
           count: 7,
-          jobs: [
-            { index: 1, name: 'Detects bytes written to a device.', score: 92 },
-            { index: 2, name: 'high_sent_bytes_destination_ip', score: 50 },
-          ],
+          jobCount: 3,
+          jobs: [{ index: 1, name: 'Unusual device writes', score: 92 }],
         },
       },
+    ],
+    [
+      'a count of jobs and no cited job when none of them is named',
+      {
+        byCandidate: {
+          buckets: { 'user:a': { doc_count: 4, jobCount: { value: 2 }, jobs: jobs([]) } },
+        },
+      },
+      { 'user:a': { count: 4, jobCount: 2, jobs: [] } },
     ],
   ])('returns %s', (_description, aggregations, expected) => {
     expect(
       toAnomaliesByCandidateId(
         aggregations,
-        new Map([['high_bytes_written_to_external_device', 'Detects bytes written to a device.']])
+        new Map([['high_bytes_written', 'Unusual device writes']])
       )
     ).toEqual(expected);
   });
 });
 
-describe('readSecurityJobNames', () => {
-  it('keeps the jobs of the Security groups, named by their display name, else their description, else their id', async () => {
+describe('readSecurityJobs', () => {
+  it('keeps the jobs of the Security groups, and names only those with a display name', async () => {
     const esClient = esClientOf({
       jobs: [
         job('ded_high_sent_bytes', 'Detects data exfiltration.'),
         job('rare_process', 'Detects rare processes.', ['security'], 'Unusual process'),
         job('legacy_job', '', ['siem']),
-        job('observability_job', 'Detects slow requests.', ['apm']),
+        job('observability_job', 'Detects slow requests.', ['apm'], 'Slow requests'),
         job('ungrouped_job', '', []),
       ],
     });
 
-    await expect(readSecurityJobNames(esClient)).resolves.toEqual(
-      new Map([
-        ['ded_high_sent_bytes', 'Detects data exfiltration'],
-        ['rare_process', 'Unusual process'],
-        ['legacy_job', 'legacy_job'],
-      ])
-    );
+    await expect(readSecurityJobs(esClient)).resolves.toEqual({
+      jobIds: ['ded_high_sent_bytes', 'rare_process', 'legacy_job'],
+      nameByJobId: new Map([['rare_process', 'Unusual process']]),
+    });
   });
 });
 
@@ -128,6 +132,7 @@ describe('readAnomalies', () => {
     expect(JSON.stringify(query)).toContain('{"term":{"result_type":"record"}}');
     expect(JSON.stringify(query)).toContain('{"term":{"is_interim":false}}');
     expect(JSON.stringify(query)).toContain('{"terms":{"job_id":["high_sent_bytes"]}}');
+    expect(aggs.byCandidate.aggs.jobCount).toEqual({ cardinality: { field: 'job_id' } });
     expect(JSON.stringify(query)).toContain('"@timestamp":{"gte":"2026-10-07T12:00:00.000Z"');
     expect(JSON.stringify(aggs.byCandidate.filters.filters['host:web-01'])).toContain(
       '{"term":{"host.name":"web-01"}}'
@@ -167,11 +172,12 @@ describe('readAnomalies', () => {
 });
 
 describe('buildJobsAggregation', () => {
-  it('takes the job with the highest record score', () => {
-    const { terms, aggs } = buildJobsAggregation();
+  it('takes the named job with the highest record score', () => {
+    const { filter, aggs } = buildJobsAggregation(['rare_process']);
 
-    expect(terms.size).toBe(1);
-    expect(terms.order).toEqual({ highestScore: 'desc' });
-    expect(aggs.highestScore.max.field).toBe('record_score');
+    expect(filter).toEqual({ terms: { job_id: ['rare_process'] } });
+    expect(aggs.top.terms.size).toBe(1);
+    expect(aggs.top.terms.order).toEqual({ highestScore: 'desc' });
+    expect(aggs.top.aggs.highestScore.max.field).toBe('record_score');
   });
 });

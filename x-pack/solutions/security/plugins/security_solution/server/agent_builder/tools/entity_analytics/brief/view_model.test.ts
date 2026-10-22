@@ -71,7 +71,8 @@ const facts: EntityFacts[] = [
     },
     anomalies: {
       count: 4,
-      jobs: [{ index: 1, name: 'high_sent_bytes_destination_ip', score: 75 }],
+      jobCount: 2,
+      jobs: [{ index: 1, name: 'Unusual destination IP', score: 75 }],
     },
     firstSeen: '5 days ago',
   },
@@ -200,7 +201,7 @@ describe('buildViewModel', () => {
       'a token for a job of the entity becomes the job',
       'host:a',
       'Seen in {{ job 1 }}',
-      'Seen in high_sent_bytes_destination_ip.',
+      'Seen in Unusual destination IP.',
       0,
     ],
     [

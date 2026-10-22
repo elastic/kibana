@@ -46,7 +46,9 @@ export interface EntityAlerts {
 /** The anomaly records of an entity, or of its resolution group, in the captured period. */
 export interface EntityAnomalies {
   count: number;
-  /** The job with the highest record score, which the model cites by index, by its display name or description. */
+  /** How many distinct jobs raised them, named or not. */
+  jobCount: number;
+  /** The named job with the highest record score, which the model cites by index. A job without a display name is only counted. */
   jobs: Array<{ index: number; name: string; score: number }>;
 }
 

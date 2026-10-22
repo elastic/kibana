@@ -23,15 +23,17 @@ interface AnomaliesByCandidate {
       string,
       {
         doc_count: number;
-        jobs: { buckets: Array<{ key: string; highestScore: { value: number } }> };
+        jobCount: { value: number };
+        jobs: { top: { buckets: Array<{ key: string; highestScore: { value: number } }> } };
       }
     >;
   };
 }
 
 /**
- * The anomaly records of each candidate in the captured period, and the jobs with the highest record
- * score, as the Entities with anomalies tile counts them: the records of the installed Security jobs. An
+ * The anomaly records of each candidate in the captured period, how many jobs raised them, and the named
+ * jobs with the highest record score, as the Entities with anomalies tile counts them: the records of the
+ * installed Security jobs. An
  * anomaly record carries no entity id, so a record is matched on the identity fields of the candidate's and
  * its members' records. A user who can't read the jobs or the results has no anomalies, never a failed brief.
  */
@@ -50,8 +52,8 @@ export const readAnomalies = async ({
     return {};
   }
   try {
-    const nameByJobId = await readSecurityJobNames(esClient);
-    if (nameByJobId.size === 0) {
+    const { jobIds, nameByJobId } = await readSecurityJobs(esClient);
+    if (jobIds.length === 0) {
       return {};
     }
     const response = await esClient.search<unknown, AnomaliesByCandidate>({
@@ -63,7 +65,7 @@ export const readAnomalies = async ({
           filter: [
             { term: { result_type: 'record' } },
             { term: { is_interim: false } },
-            { terms: { job_id: [...nameByJobId.keys()] } },
+            { terms: { job_id: jobIds } },
             { range: { record_score: { gte: 1 } } },
             {
               range: {
@@ -86,7 +88,10 @@ export const readAnomalies = async ({
               ])
             ),
           },
-          aggs: { jobs: buildJobsAggregation() },
+          aggs: {
+            jobCount: { cardinality: { field: 'job_id' } },
+            jobs: buildJobsAggregation([...nameByJobId.keys()]),
+          },
         },
       },
     });
@@ -98,40 +103,44 @@ export const readAnomalies = async ({
 };
 
 /**
- * The installed jobs of the Security groups, as the page picks them, by what the reader sees: the
- * description without its full stop, or the id without one.
+ * The installed jobs of the Security groups, as the page picks them, and the names of those the page names:
+ * a job without a display name is counted but never cited, because its id and description don't read as a name.
  */
-export const readSecurityJobNames = async (
+export const readSecurityJobs = async (
   esClient: ElasticsearchClient
-): Promise<Map<string, string>> => {
+): Promise<{ jobIds: string[]; nameByJobId: Map<string, string> }> => {
   const { jobs } = await esClient.ml.getJobs(
     { allow_no_match: true },
     {
       querystring: {
-        filter_path:
-          'jobs.job_id,jobs.description,jobs.groups,jobs.custom_settings.security_app_display_name',
+        filter_path: 'jobs.job_id,jobs.groups,jobs.custom_settings.security_app_display_name',
       },
     }
   );
-  return new Map(
-    jobs
-      .filter(({ groups = [] }) => isSecurityJob({ groups }))
-      // A description is a sentence, and the name sits inside one.
-      .map(({ job_id: id, description, custom_settings: settings }) => [
-        id,
-        settings?.security_app_display_name || description?.replace(/\.$/, '') || id,
-      ])
-  );
+  const securityJobs = jobs.filter(({ groups = [] }) => isSecurityJob({ groups }));
+  return {
+    jobIds: securityJobs.map(({ job_id: id }) => id),
+    nameByJobId: new Map(
+      securityJobs.flatMap(({ job_id: id, custom_settings: settings }) =>
+        settings?.security_app_display_name ? [[id, settings.security_app_display_name]] : []
+      )
+    ),
+  };
 };
 
-/** The jobs with the highest record score first. */
-export const buildJobsAggregation = () => ({
-  terms: {
-    field: 'job_id',
-    size: MAX_JOBS_PER_ENTITY,
-    order: { highestScore: 'desc' as const },
+/** The named jobs with the highest record score first. */
+export const buildJobsAggregation = (namedJobIds: string[]) => ({
+  filter: { terms: { job_id: namedJobIds } },
+  aggs: {
+    top: {
+      terms: {
+        field: 'job_id',
+        size: MAX_JOBS_PER_ENTITY,
+        order: { highestScore: 'desc' as const },
+      },
+      aggs: { highestScore: { max: { field: 'record_score' } } },
+    },
   },
-  aggs: { highestScore: { max: { field: 'record_score' } } },
 });
 
 /** The candidates that have anomaly records, with their jobs. */
@@ -147,11 +156,13 @@ export const toAnomaliesByCandidateId = (
               id,
               {
                 count: bucket.doc_count,
-                jobs: bucket.jobs.buckets.map(({ key, highestScore }, index) => ({
-                  index: index + 1,
-                  name: nameByJobId.get(key) ?? key,
-                  score: Math.round(highestScore.value),
-                })),
+                jobCount: bucket.jobCount.value,
+                jobs: bucket.jobs.top.buckets.flatMap(({ key, highestScore }, index) => {
+                  const name = nameByJobId.get(key);
+                  return name
+                    ? [{ index: index + 1, name, score: Math.round(highestScore.value) }]
+                    : [];
+                }),
               },
             ],
           ]
