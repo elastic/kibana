@@ -39,6 +39,18 @@ jest.mock('@kbn/workflows-ui', () => ({
   },
 }));
 
+jest.mock('./template_not_found_page', () => ({
+  TemplateNotFoundPage: ({ onBackToLibrary }: { onBackToLibrary: () => void }) => (
+    <div data-test-subj="workflowLibraryTemplateNotFoundPage">
+      <button
+        type="button"
+        data-test-subj="workflowLibraryTemplateNotFoundBackButton"
+        onClick={onBackToLibrary}
+      />
+    </div>
+  ),
+}));
+
 jest.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => ({
   useSetWorkflowsBreadcrumbs: () => mockSetWorkflowsBreadcrumbs,
 }));
