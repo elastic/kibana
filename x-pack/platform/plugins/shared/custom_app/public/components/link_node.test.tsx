@@ -94,8 +94,12 @@ describe('LinkNode', () => {
     'is left to the browser, to open in another tab, when it is clicked %s',
     async (_how, init) => {
       await renderApp(documentWith({ to: { type: 'app', app: 'dashboards' } }), noData);
+      // The browser would go to the address, which a test page cannot.
+      const stopNavigation = (event: Event) => event.preventDefault();
+      document.addEventListener('click', stopNavigation);
 
       fireEvent.click(screen.getByRole('link', { name: 'Open it' }), init);
+      document.removeEventListener('click', stopNavigation);
 
       expect(navigateToApp).not.toHaveBeenCalled();
     }

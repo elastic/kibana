@@ -55,6 +55,17 @@ describe('CustomAppPlugin', () => {
     expect(CUSTOM_APP_APPLICATION_ID).toBe('customApp');
   });
 
+  it('is in the side navigation, which opens the list of apps, as well as in search', () => {
+    const { core } = setup();
+
+    expect(core.application.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Custom apps',
+        visibleIn: expect.arrayContaining(['classicSideNav', 'projectSideNav', 'globalSearch']),
+      })
+    );
+  });
+
   describe('the library', () => {
     it('lists custom apps in "Add from library", under the saved object type of an app', () => {
       const { embeddable } = setup();

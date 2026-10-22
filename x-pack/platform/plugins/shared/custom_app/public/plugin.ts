@@ -52,7 +52,8 @@ export class CustomAppPlugin implements Plugin<void, void, SetupDeps, StartDeps>
       euiIconType: 'apps',
       category: DEFAULT_APP_CATEGORIES.kibana,
       order: 9050,
-      visibleIn: ['globalSearch'],
+      // In the side navigation, which takes people to the list of apps, and in search.
+      visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
       async mount(params) {
         const [coreStart] = await core.getStartServices();
         const { renderApp } = await import('./application/mount');
