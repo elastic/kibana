@@ -389,7 +389,7 @@ AlertZero is not live. A new required extra or schedule key that has a default i
 - Nesting routes under `/app/security` or importing Security page wrappers
 - Pixel-perfect Throughline CSS port
 - Implementing Workflows / Activity / Performance / Guardrails data
-- No `.kibana-threat-intel-hunt-findings` index / Intelligence Hub findings queue
+- No `.kibana-threat-intel-hunt-findings` index / hunt findings queue
 - No AlertZero create or delete surface for custom watches
 
 ## Development
