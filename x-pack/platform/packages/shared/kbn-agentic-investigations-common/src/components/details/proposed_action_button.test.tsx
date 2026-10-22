@@ -323,6 +323,33 @@ describe('ProposedActionButton', () => {
       expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
     });
 
+    describe('relative to its deadline', () => {
+      beforeEach(() => {
+        jest.useFakeTimers().setSystemTime(new Date('2026-10-22T12:00:00.000Z'));
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('does not say it timed out when settled before its deadline', () => {
+        renderButton({
+          proposal: { ...expiredProposal, expiresAt: '2026-10-23T12:00:00.000Z' },
+        });
+
+        expect(screen.getByText('Can no longer be actioned')).toBeInTheDocument();
+        expect(screen.queryByText('Decision timed out')).not.toBeInTheDocument();
+      });
+
+      it('says it timed out once the deadline has passed', () => {
+        renderButton({
+          proposal: { ...expiredProposal, expiresAt: '2026-10-21T12:00:00.000Z' },
+        });
+
+        expect(screen.getByText('Decision timed out')).toBeInTheDocument();
+      });
+    });
+
     it('is still clickable, opening a read-only modal with no actions to take', () => {
       renderButton({ proposal: expiredProposal });
 

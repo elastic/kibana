@@ -377,6 +377,50 @@ describe('ApprovalContent', () => {
     expect(screen.getByTestId('approvalContent-expired')).toHaveTextContent(reason);
   });
 
+  it('shows the proposal again, and drops the decline form, when readOnly turns on mid-decline', () => {
+    const onDismiss = jest.fn();
+    const { rerender } = renderContent({ onDismiss });
+    fireEvent.click(screen.getByTestId('approvalContent-dismiss'));
+    expect(screen.getByTestId('approvalContent-decline-form')).toBeInTheDocument();
+    expect(screen.queryByText('Isolate the compromised host.')).not.toBeInTheDocument();
+
+    rerender(<ApprovalContent {...baseProps} onDismiss={onDismiss} readOnly />);
+
+    expect(screen.queryByTestId('approvalContent-decline-form')).not.toBeInTheDocument();
+    expect(screen.getByText('Isolate the compromised host.')).toBeInTheDocument();
+  });
+
+  describe('a proposal settled as expired', () => {
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-22T12:00:00.000Z'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('does not claim it timed out when settled before its deadline', () => {
+      renderContent({
+        proposal: { ...baseProposal, status: 'expired', expiresAt: '2026-10-23T12:00:00.000Z' },
+      });
+
+      const callout = screen.getByTestId('approvalContent-expired');
+      expect(callout).toHaveTextContent('Expired • This proposal can no longer be actioned.');
+      expect(callout).not.toHaveTextContent('Expired on');
+      expect(callout).not.toHaveTextContent("wasn't decided in time");
+    });
+
+    it('says when it expired, and that nobody decided in time, once the deadline has passed', () => {
+      renderContent({
+        proposal: { ...baseProposal, status: 'expired', expiresAt: '2026-10-21T12:00:00.000Z' },
+      });
+
+      const callout = screen.getByTestId('approvalContent-expired');
+      expect(callout).toHaveTextContent('Expired on');
+      expect(callout).toHaveTextContent("wasn't decided in time");
+    });
+  });
+
   it('renders always-allow checkbox when alwaysAllow is supplied', () => {
     renderContent({
       alwaysAllow: {
