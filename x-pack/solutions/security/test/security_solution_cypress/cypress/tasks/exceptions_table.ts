@@ -250,7 +250,11 @@ export const validateSharedListLinkedRules = (
   );
   cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU).click();
   linkedRulesNames.forEach((ruleName) => {
-    cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM).contains(ruleName);
+    cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM)
+      .contains(ruleName)
+      .closest('a')
+      .should('have.attr', 'href')
+      .and('include', '/rules/id/');
   });
 };
 
