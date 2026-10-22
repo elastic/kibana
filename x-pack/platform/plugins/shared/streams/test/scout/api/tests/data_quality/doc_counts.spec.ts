@@ -8,12 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { streamsApiTest as apiTest } from '../../fixtures';
-import {
-  METERING_REFRESH_TIMEOUT_MS,
-  getDocCounts,
-  getStreamCounts,
-  lastHourRange,
-} from '../../lib/doc_counts';
+import { METERING_REFRESH_TIMEOUT_MS, getStreamCounts, lastHourRange } from '../../lib/doc_counts';
 
 const ROOT = 'logs.otel';
 const PREFIX = `${ROOT}.dcounts`;
@@ -122,12 +117,17 @@ apiTest.describe('Doc counts - total and ingestion', { tag: tags.deploymentAgnos
     async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsReadOnly();
 
-      const response = await getDocCounts(apiClient, cookieHeader, 'ingestion', {
-        start: 0,
-        end: 1,
+      const result = await getStreamCounts(
+        apiClient,
+        cookieHeader,
+        'ingestion',
+        { start: 0, end: 1 },
+        [STREAM_1, STREAM_2]
+      );
+      expect(result).toStrictEqual({
+        statusCode: 200,
+        counts: { [STREAM_1]: undefined, [STREAM_2]: undefined },
       });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toStrictEqual([]);
     }
   );
 
