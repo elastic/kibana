@@ -4,7 +4,7 @@ navigation_title: Authentication overview
 
 # Authentication in Scout [scout-auth]
 
-This article goes through how authentication is set up in Scout and which fixtures your tests can use to authenticate into the stack. For lower-level practical details, see [Browser authentication](./browser-auth.md) and [Authentication in API tests](./api-auth.md).
+This article goes through how authentication is set up in Scout and which fixtures your tests can use to authenticate into the stack. For higher-level practical details, see [Browser authentication](./browser-auth.md) and [Authentication in API tests](./api-auth.md).
 
 ## Default setup [scout-auth-default-setup]
 
@@ -23,7 +23,12 @@ The serverless files are copied from `elasticsearch-controller`, so a role chang
 
 ## How SAML users get their roles [scout-auth-why-saml]
 
-In Cloud, users log in through an IdP, and Elasticsearch role mappings turn the groups in the SAML assertion into roles. Scout follows the same path: when a test asks for role `viewer`, Scout creates a SAML response signed with the mock IdP certificate for a generated user, with `viewer` in the `groups` attribute, and posts it to Kibana. Elasticsearch validates the assertion and maps the group to the `viewer` role, Kibana returns a session cookie, and Scout caches it per role and Playwright worker. When a test fails, Playwright retries it on a new worker with a newly created session.
+In Cloud, users log in through an IdP, and Elasticsearch role mappings turn the groups in the SAML assertion into roles. Scout follows the same path. When a test asks for role `viewer`:
+
+1. Scout creates a SAML response signed with the mock IdP certificate for a generated user, with `viewer` in the `groups` attribute, and posts it to Kibana.
+2. Elasticsearch validates the assertion and maps the group to the `viewer` role.
+3. Kibana returns a session cookie.
+4. Scout caches the cookie per role and Playwright worker. When a test fails, Playwright retries it on a new worker with a newly created session.
 
 Locally the browser redirect to the IdP is skipped. What tests share with real users is the realm, the role mapping, and the authorization checks. On Cloud runs the same calls perform a real SAML login with pre-provisioned users, so test code does not change.
 
