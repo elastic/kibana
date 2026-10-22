@@ -125,12 +125,13 @@ const probeQuery = (expression: string): string =>
   `FROM ${JSON.stringify(expression)} METADATA _id, _index\n| LIMIT 0`;
 
 /** The mapped columns of one index expression, or undefined when it resolves to nothing. */
-const probeColumns = async (
+export const probeColumns = async (
   esClient: ElasticsearchClient,
-  expression: string
+  expression: string,
+  options?: { requestTimeout?: number }
 ): Promise<string[] | undefined> => {
   try {
-    const probe = await esClient.esql.query({ query: probeQuery(expression) });
+    const probe = await esClient.esql.query({ query: probeQuery(expression) }, options);
     return (probe as unknown as ESQLSearchResponse).columns.map(({ name }) => name);
   } catch (error) {
     if (isEsqlUnknownIndexError(error)) {
@@ -150,21 +151,16 @@ const getRowsSort = (query: string | undefined, hasTimestampColumn: boolean): st
 };
 
 /**
- * One row per KI: the latest revision by `@timestamp` for each logical id.
+ * Keeps only the latest revision by `@timestamp` for each logical id.
  * On an index dest the same id may exist in several backing indices, so those are distinct KIs.
  * Documents without a timestamp sort first, and `_id` breaks timestamp ties.
  */
-const currentKisQuery = (
+export const latestRevisionPipeline = (
   dest: AiIndexDest,
-  sources: string[],
-  has: (field: KiListField) => boolean,
-  lifecycleStatuses?: KiLifecycleStatus[],
-  query?: string
-): string => {
+  has: (field: 'id' | '@timestamp') => boolean
+): string[] => {
   const key = dest.type === 'data_stream' ? 'id' : '_index, id';
-  const metadata = query !== undefined ? 'METADATA _id, _index, _score' : 'METADATA _id, _index';
   return [
-    `FROM ${fromSources(sources)} ${metadata}`,
     has('id') ? 'EVAL id = COALESCE(id, _id)' : 'EVAL id = _id',
     ...(has('@timestamp')
       ? [
@@ -175,6 +171,22 @@ const currentKisQuery = (
           'WHERE _id == latest_doc',
         ]
       : []),
+  ];
+};
+
+/** One row per KI, filtered by lifecycle status. */
+const currentKisQuery = (
+  dest: AiIndexDest,
+  sources: string[],
+  has: (field: KiListField) => boolean,
+  lifecycleStatuses?: KiLifecycleStatus[],
+  query?: string
+): string =>
+  [
+    `FROM ${fromSources(sources)} ${
+      query !== undefined ? 'METADATA _id, _index, _score' : 'METADATA _id, _index'
+    }`,
+    ...latestRevisionPipeline(dest, has),
     lifecycleStatusEvalClause(has),
     ...lifecycleFilterClause(lifecycleStatuses),
     ...searchFilterClause(has, query),
@@ -183,7 +195,6 @@ const currentKisQuery = (
     ...(has('updated_at') ? [] : ['EVAL updated_at = TO_STRING(NULL)']),
     ...(has('expires_at') ? [] : ['EVAL expires_at = TO_STRING(NULL)']),
   ].join('\n| ');
-};
 
 export const getKis = async (
   esClient: ElasticsearchClient,
