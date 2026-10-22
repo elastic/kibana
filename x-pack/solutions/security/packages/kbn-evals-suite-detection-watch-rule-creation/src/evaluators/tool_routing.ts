@@ -8,6 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '@kbn/evals';
+import { toHashedId } from '@kbn/agent-builder-server';
 import { DRAFT_STEP_ID, RULE_CREATION_TOOL_ID } from '../constants';
 import type { RuleCreationResult } from '../rule_creation_client';
 
@@ -56,7 +57,12 @@ export const extractConversationId = (
   return typeof id === 'string' ? id : undefined;
 };
 
-/** Join clauses tried, in order, to reach a run's agent tool spans. */
+/**
+ * Join clauses tried, in order, to reach a run's agent tool spans.
+ *
+ * Agent Builder exports `gen_ai.conversation.id` hashed unless `agentBuilder:tracing:includeRealIds`
+ * is on (default off), while the step output carries the real id, so both forms are matched.
+ */
 export const toolSpanJoinClauses = ({
   traceId,
   conversationId,
@@ -69,7 +75,9 @@ export const toolSpanJoinClauses = ({
     ? [
         {
           name: 'gen_ai.conversation.id',
-          where: `attributes.gen_ai.conversation.id == "${conversationId}"`,
+          where: `attributes.gen_ai.conversation.id IN ("${conversationId}", "${toHashedId(
+            conversationId
+          )}")`,
         },
       ]
     : []),
@@ -176,19 +184,35 @@ export function createToolRoutingEvaluator({
  * about whether Agent Builder exported the tool spans the evaluator counts. Asserting the
  * weaker property armed the evaluators on a run that had no agent output at all
  * (measured: build 459, where 6 of 25 runs produced no rule yet setup passed).
+ *
+ * Spans are exported asynchronously (batch processor, then ES ingest), so they can trail the
+ * workflow's terminal state by tens of seconds. This is a bounded readiness wait, not a relaxed
+ * assertion: the same clauses are polled and the same error is thrown when none reaches a span
+ * within `timeoutMs`. Zero spans still fail.
  */
+export const SPAN_READINESS_TIMEOUT_MS = 90_000;
+export const SPAN_READINESS_POLL_MS = 5_000;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export const assertToolSpansReachable = async ({
   traceEsClient,
   probe,
   log,
+  timeoutMs = SPAN_READINESS_TIMEOUT_MS,
+  pollIntervalMs = SPAN_READINESS_POLL_MS,
 }: {
   traceEsClient: EsClient;
   probe: RuleCreationResult;
   log: ToolingLog;
-}): Promise<void> => {
+  timeoutMs?: number;
+  pollIntervalMs?: number;
+}): Promise<'reachable' | 'skipped'> => {
   if (probe.skipped) {
-    log.info('Trace reachability probe was declined by the quality gate — skipping span check');
-    return;
+    // A declined probe made no tool call, so it proves nothing about tracing. Report it as
+    // unproven; callers must not treat this as "trace evaluators armed".
+    log.warning('Trace reachability probe was declined by the quality gate — span check not run');
+    return 'skipped';
   }
 
   const clauses = toolSpanJoinClauses({
@@ -196,28 +220,78 @@ export const assertToolSpansReachable = async ({
     conversationId: extractConversationId(probe),
   });
 
-  for (const clause of clauses) {
-    try {
-      const response = (await traceEsClient.esql.query({
-        query: `FROM traces-*\n| WHERE ${clause.where} AND ${LLM_ISSUED_TOOL_SPAN}\n| STATS tool_spans = COUNT(*)`,
-      })) as unknown as EsqlResponse;
-      if (Number(response.values?.[0]?.[0] ?? 0) > 0) {
-        log.info(`Tool spans reachable via ${clause.name}`);
-        return;
+  const deadline = Date.now() + timeoutMs;
+  for (let attempt = 1; ; attempt++) {
+    for (const clause of clauses) {
+      try {
+        const response = (await traceEsClient.esql.query({
+          query: `FROM traces-*\n| WHERE ${clause.where} AND ${LLM_ISSUED_TOOL_SPAN}\n| STATS tool_spans = COUNT(*)`,
+        })) as unknown as EsqlResponse;
+        if (Number(response.values?.[0]?.[0] ?? 0) > 0) {
+          log.info(`Tool spans reachable via ${clause.name} (attempt ${attempt})`);
+          return 'reachable';
+        }
+      } catch (error) {
+        log.debug(
+          `Reachability probe on ${clause.name} failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
       }
-    } catch (error) {
-      log.debug(
-        `Reachability probe on ${clause.name} failed: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
     }
+    if (clauses.length === 0 || Date.now() + pollIntervalMs > deadline) break;
+    log.debug(`No tool spans yet (attempt ${attempt}); retrying in ${pollIntervalMs}ms`);
+    await sleep(pollIntervalMs);
   }
 
   throw new Error(
     `No agent TOOL spans are reachable for the setup probe (tried: ${
       clauses.map((c) => c.name).join(', ') || 'no join keys at all'
-    }). Trace-based evaluators would score N/A on every example and the suite would still ` +
+    }, waited ${timeoutMs}ms). Trace-based evaluators would score N/A on every example and the suite would still ` +
       'report a pass. Check that Agent Builder spans are exported to TRACING_ES_URL.'
+  );
+};
+
+/**
+ * Runs the reachability probe on each candidate gap in turn until one is NOT declined by the
+ * quality gate, then asserts its tool spans are reachable. A declined probe proves nothing about
+ * tracing, so when every candidate is declined this THROWS rather than reporting the trace
+ * evaluators armed (they would score N/A and the suite would still pass).
+ */
+export const armTraceEvaluators = async <TInput>({
+  inputs,
+  runProbe,
+  traceEsClient,
+  log,
+  timeoutMs,
+  pollIntervalMs,
+}: {
+  inputs: TInput[];
+  runProbe: (input: TInput) => Promise<RuleCreationResult>;
+  traceEsClient: EsClient;
+  log: ToolingLog;
+  timeoutMs?: number;
+  pollIntervalMs?: number;
+}): Promise<RuleCreationResult> => {
+  for (const [index, input] of inputs.entries()) {
+    const probe = await runProbe(input);
+    const outcome = await assertToolSpansReachable({
+      traceEsClient,
+      probe,
+      log,
+      timeoutMs,
+      pollIntervalMs,
+    });
+    if (outcome === 'reachable') return probe;
+    log.warning(
+      `Reachability probe ${index + 1}/${inputs.length} was declined (${
+        probe.skipReason ?? 'no reason given'
+      })`
+    );
+  }
+  throw new Error(
+    `All ${inputs.length} trace reachability probes were declined by the quality gate, so tool ` +
+      'span reachability was never verified. Trace-based evaluators (Tool Routing, Trajectory: *) ' +
+      'are unarmed and would score N/A while the suite reports a pass.'
   );
 };
