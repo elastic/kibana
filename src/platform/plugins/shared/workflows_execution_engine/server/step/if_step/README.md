@@ -139,7 +139,7 @@ alert fields from changing the condition. Consequences:
 
 - A `*` in an interpolated value matches a literal `*`, not a wildcard. Write the wildcard in the condition itself: `host: {{ prefix }}*`.
 - An empty value is the empty string.
-- `{% echo %}` and `{% cycle %}` are not available in conditions.
+- `{% echo %}`, `{% cycle %}` and `{% capture %}` are not available in conditions. Use `{% assign %}` to store a value.
 
 To splice a value in as KQL on purpose, end the output with the `raw` filter, for example
 `condition: "{{ clause | raw }}"`. Only do this with values you control.

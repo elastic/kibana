@@ -22,10 +22,10 @@ interface WorkflowTemplatingEngineOptions {
 }
 
 /**
- * Tags that write a variable without going through `outputEscape`, which would let a value reach
- * a KQL condition unescaped.
+ * Tags that would let a value reach a KQL condition unescaped (`echo`, `cycle`) or encoded twice
+ * (`capture` encodes its body, and the captured variable is encoded again when it is output).
  */
-const KQL_CONDITION_UNSUPPORTED_TAGS = ['echo', 'cycle'];
+const KQL_CONDITION_UNSUPPORTED_TAGS = ['echo', 'cycle', 'capture'];
 
 export class WorkflowTemplatingEngine {
   /**

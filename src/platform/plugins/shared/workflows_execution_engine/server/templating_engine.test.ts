@@ -992,6 +992,12 @@ describe('WorkflowTemplatingEngine', () => {
       ).toBe(true);
     });
 
+    it('encodes a value stored with assign once', () => {
+      const condition = '{% assign copy = inputs.guess %}consts.secret: {{ copy }}';
+      expect(evaluate(condition, secretContext('s3'))).toBe(true);
+      expect(evaluate(condition, secretContext('wrong or consts.secret: s3'))).toBe(false);
+    });
+
     it('lets `| raw` splice the value in as KQL', () => {
       expect(
         evaluate(
@@ -1012,12 +1018,13 @@ describe('WorkflowTemplatingEngine', () => {
       expect(templatingEngine.renderCondition(undefined, {})).toBeUndefined();
     });
 
-    it.each(['{% echo inputs.guess %}', '{% cycle inputs.guess %}'])(
-      'rejects %s, which would write the value unescaped',
-      (template) => {
-        expect(() => templatingEngine.renderCondition(template, secretContext('x'))).toThrow();
-      }
-    );
+    it.each([
+      '{% echo inputs.guess %}',
+      '{% cycle inputs.guess %}',
+      '{% capture copy %}{{ inputs.guess }}{% endcapture %}consts.secret: {{ copy }}',
+    ])('rejects %s, which would write the value unescaped or encode it twice', (template) => {
+      expect(() => templatingEngine.renderCondition(template, secretContext('x'))).toThrow();
+    });
 
     it('does not change how render escapes values', () => {
       expect(

@@ -27,7 +27,8 @@ const TOKEN_SUFFIX = '_';
 const TOKEN_PATTERN = /__wftpl_([0-9a-f]*)_/g;
 
 const textEncoder = new TextEncoder();
-const textDecoder = new TextDecoder();
+// Keep a leading U+FEFF: by default the decoder would drop it as a byte order mark.
+const textDecoder = new TextDecoder('utf-8', { ignoreBOM: true });
 
 const stringifyTemplateValue = (value: unknown): string => {
   if (value === null || value === undefined) {

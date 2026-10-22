@@ -27,6 +27,7 @@ describe('kql template values', () => {
       ['KQL syntax', 'a or b: (c) "d" * \\ not e'],
       ['newline', 'line1\nline2'],
       ['unicode', 'žółć 🚀'],
+      ['leading byte order mark', '\uFEFFabc'],
       ['token lookalike', '__wftpl_61_'],
     ])('round-trips %s', (_name, value) => {
       const token = encodeKqlTemplateValue(value);
@@ -68,6 +69,12 @@ describe('kql template values', () => {
     ])('treats injected value %p as a literal (match: %p)', (guess, expected) => {
       expect(evaluateTemplate((encode) => `consts.secret: ${encode(guess)}`, context)).toBe(
         expected
+      );
+    });
+
+    it('does not treat a value with a leading byte order mark as its stripped text', () => {
+      expect(evaluateTemplate((encode) => `consts.secret: ${encode('\uFEFFs3')}`, context)).toBe(
+        false
       );
     });
 
