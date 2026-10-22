@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -43,12 +43,16 @@ import {
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import type {
+  HashiCorpVaultConfig,
+  HashiCorpVaultSecrets,
+  SecretConnectionStatus,
+  SecretConnectionTestResult,
   SecretProviderType,
   VaultAuthMethod,
-  SecretConnectionStatus,
 } from '../../../../../../common/runtime_types';
 import { SECRET_PROVIDER_HASHICORP_VAULT } from '../../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
+import { testSecretConnection } from '../../../state/settings/api';
 
 // Selectable secret-provider backends. Only HashiCorp Vault is implemented today;
 // adding a provider means adding an option here and a matching field section below.
@@ -103,6 +107,27 @@ const toForm = (c: SecretConnectionStatus): FormState => ({
   hasSecret: c.hasSecret ?? false,
 });
 
+/** Splits the form into the non-secret config and the secrets for the active auth method. */
+const toConnectionPayload = (
+  form: FormState
+): { config: HashiCorpVaultConfig; secrets: HashiCorpVaultSecrets } => {
+  const isToken = form.authMethod === 'token';
+  return {
+    config: {
+      address: form.address.trim(),
+      authMethod: form.authMethod,
+      namespace: form.namespace.trim() || undefined,
+      kvMount: form.kvMount.trim() || undefined,
+      tlsSkipVerify: form.tlsSkipVerify,
+      ...(!isToken && { roleId: form.roleId.trim() }),
+    },
+    // Blank = keep the stored value (handled server-side).
+    secrets: isToken
+      ? { token: form.token || undefined }
+      : { secretId: form.secretId || undefined },
+  };
+};
+
 export const SecretConnectionPanel = () => {
   const { http, notifications, application } = useKibana<ClientPluginsStart>().services;
   const canManage = (application?.capabilities.uptime.canManageSecretConnections ??
@@ -112,14 +137,24 @@ export const SecretConnectionPanel = () => {
   const [editing, setEditing] = useState<FormState | null>(null);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
-  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const [testResult, setTestResult] = useState<SecretConnectionTestResult | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const accordionId = useGeneratedHtmlId({ prefix: 'secretConnections' });
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'secretConnectionFlyout' });
 
-  const closeFlyout = () => {
+  // Bumped whenever the form changes or the flyout closes, so a pending test's response
+  // (made against the old values) is dropped instead of shown.
+  const testRequestId = useRef(0);
+
+  const invalidateTest = () => {
+    testRequestId.current += 1;
+    setTesting(false);
     setTestResult(null);
+  };
+
+  const closeFlyout = () => {
+    invalidateTest();
     setEditing(null);
   };
 
@@ -139,8 +174,8 @@ export const SecretConnectionPanel = () => {
   }, [load]);
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) => {
-    // A field change invalidates any prior test result.
-    if (testResult) setTestResult(null);
+    // A field change invalidates any prior or pending test result.
+    invalidateTest();
     setEditing((f) => (f ? { ...f, [key]: value } : f));
   };
 
@@ -148,39 +183,23 @@ export const SecretConnectionPanel = () => {
     if (!editing) return;
     setTesting(true);
     setTestResult(null);
+    testRequestId.current += 1;
+    const requestId = testRequestId.current;
     try {
-      const config: Record<string, unknown> = {
-        address: editing.address.trim(),
-        authMethod: editing.authMethod,
-        namespace: editing.namespace.trim() || undefined,
-        kvMount: editing.kvMount.trim() || undefined,
-        tlsSkipVerify: editing.tlsSkipVerify,
-      };
-      const secrets: Record<string, unknown> = {};
-      if (editing.authMethod === 'token') {
-        if (editing.token) secrets.token = editing.token;
-      } else {
-        config.roleId = editing.roleId.trim();
-        if (editing.secretId) secrets.secretId = editing.secretId;
-      }
-      const res = await http.post<{ ok: boolean; message: string }>(
-        `${SYNTHETICS_API_URLS.SECRET_CONNECTION}/_test`,
-        {
-          body: JSON.stringify({
-            // Existing connection: let the server fall back to the stored secret
-            // when the secret field is left blank.
-            name: editing.isNew ? undefined : editing.name.trim(),
-            type: editing.type,
-            config,
-            secrets,
-          }),
-        }
-      );
-      setTestResult(res);
+      const result = await testSecretConnection({
+        // Existing connection: let the server fall back to the stored secret
+        // when the secret field is left blank.
+        name: editing.isNew ? undefined : editing.name.trim(),
+        type: editing.type,
+        ...toConnectionPayload(editing),
+      });
+      if (requestId === testRequestId.current) setTestResult(result);
     } catch (e) {
-      setTestResult({ ok: false, message: (e as Error)?.message ?? 'Test failed' });
+      if (requestId === testRequestId.current) {
+        setTestResult({ ok: false, message: (e as Error)?.message ?? 'Test failed' });
+      }
     } finally {
-      setTesting(false);
+      if (requestId === testRequestId.current) setTesting(false);
     }
   };
 
@@ -188,27 +207,10 @@ export const SecretConnectionPanel = () => {
     if (!editing) return;
     setSaving(true);
     try {
-      // Provider-specific, non-secret settings.
-      const config: Record<string, unknown> = {
-        address: editing.address.trim(),
-        authMethod: editing.authMethod,
-        namespace: editing.namespace.trim() || undefined,
-        kvMount: editing.kvMount.trim() || undefined,
-        tlsSkipVerify: editing.tlsSkipVerify,
-      };
-      // Provider-specific secrets. Blank = keep the stored value (handled server-side).
-      const secrets: Record<string, unknown> = {};
-      if (editing.authMethod === 'token') {
-        if (editing.token) secrets.token = editing.token;
-      } else {
-        config.roleId = editing.roleId.trim();
-        if (editing.secretId) secrets.secretId = editing.secretId;
-      }
       const body = {
         name: editing.name.trim(),
         type: editing.type,
-        config,
-        secrets,
+        ...toConnectionPayload(editing),
       };
       await http.put(SYNTHETICS_API_URLS.SECRET_CONNECTION, { body: JSON.stringify(body) });
       notifications?.toasts.addSuccess(SAVED_TOAST);

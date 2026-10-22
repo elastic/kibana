@@ -9,9 +9,10 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type {
+  SecretConnectionStatus,
+  SecretConnectionTestResult,
   SecretProviderType,
   SyntheticsSecretConnection,
-  SecretConnectionStatus,
 } from '../../../../common/runtime_types';
 import { SECRET_PROVIDER_HASHICORP_VAULT } from '../../../../common/runtime_types';
 import { syntheticsSecretConnectionType } from '../../../../common/types/saved_objects';
@@ -33,7 +34,6 @@ import { isCredentialSensitiveChange, SECRET_REENTRY_REQUIRED_MESSAGE } from './
 import { getAllowedHosts, hostNotAllowedMessage, isAddressHostAllowed } from './address_guard';
 import type { SaveBody, TestBody } from './schemas';
 import { SaveBodySchema, TestBodySchema } from './schemas';
-import type { TestResult } from './vault_client';
 import { testHashiCorpVault } from './vault_client';
 
 /** GET: list all Vault connections (secret-free). */
@@ -171,7 +171,7 @@ export const deleteSecretConnectionRoute: SyntheticsRestApiRouteFactory<
 });
 
 /** POST /_test: check reachability + auth from Kibana. Never persists anything. */
-export const testSecretConnectionRoute: SyntheticsRestApiRouteFactory<TestResult> = () => ({
+export const testSecretConnectionRoute: SyntheticsRestApiRouteFactory<SecretConnectionTestResult> = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.SECRET_CONNECTION + '/_test',
   validate: { body: TestBodySchema },
@@ -207,14 +207,9 @@ export const testSecretConnectionRoute: SyntheticsRestApiRouteFactory<TestResult
       }
     }
 
-    return testHashiCorpVault({
-      address,
-      authMethod,
-      namespace,
-      tlsSkipVerify,
-      roleId,
-      token,
-      secretId,
-    });
+    return testHashiCorpVault(
+      { address, authMethod, namespace, tlsSkipVerify, roleId, token, secretId },
+      server.logger
+    );
   }),
 });

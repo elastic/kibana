@@ -5,164 +5,181 @@
  * 2.0.
  */
 
-import { request as httpsRequest } from 'https';
-import { request as httpRequest } from 'http';
+import type { Logger } from '@kbn/core/server';
+import { Agent, fetch as undiciFetch } from 'undici';
+import type {
+  HashiCorpVaultConfig,
+  HashiCorpVaultSecrets,
+  SecretConnectionTestResult,
+} from '../../../../common/runtime_types';
 import { guardedLookup } from './address_guard';
 
-export interface TestResult {
-  ok: boolean;
-  message: string;
-}
-
 // Bounds for a response from a caller-controlled endpoint: a Vault reply is a small JSON
-// document, and the socket timeout alone doesn't stop a server that keeps streaming.
-const MAX_RESPONSE_BYTES = 1024 * 1024;
-const REQUEST_DEADLINE_MS = 15000;
+// document, and the socket timeouts alone don't stop a server that keeps streaming.
+export const MAX_RESPONSE_BYTES = 1024 * 1024;
+export const REQUEST_DEADLINE_MS = 15000;
+const SOCKET_TIMEOUT_MS = 8000;
 
-const errText = (e: unknown): string => (e instanceof Error ? e.message : String(e));
+const HEALTH_PATH = '/v1/sys/health';
+// Report a standby, sealed or uninitialized Vault as reachable instead of via a status code.
+const HEALTH_QUERY = new URLSearchParams({
+  standbyok: 'true',
+  perfstandbyok: 'true',
+  sealedok: 'true',
+  uninitcode: '200',
+}).toString();
+const TOKEN_LOOKUP_PATH = '/v1/auth/token/lookup-self';
+const APPROLE_LOGIN_PATH = '/v1/auth/approle/login';
 
-interface VaultHttpResponse {
+const NOT_VAULT_MESSAGE = 'The address did not respond like a Vault server.';
+const UNREACHABLE_MESSAGE = 'Could not reach the Vault address.';
+const AUTH_ERROR_MESSAGE = 'Could not authenticate with Vault.';
+
+type VaultTestInput = Pick<
+  HashiCorpVaultConfig,
+  'address' | 'authMethod' | 'namespace' | 'tlsSkipVerify' | 'roleId'
+> &
+  HashiCorpVaultSecrets;
+
+interface VaultResponse {
   status: number;
-  body: Record<string, unknown>;
+  ok: boolean;
+  // Undefined unless the body was a JSON object, so a proxy's HTML page can't pass for Vault.
+  body?: Record<string, unknown>;
 }
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const readCappedText = async (body: ReadableStream<Uint8Array> | null): Promise<string> => {
+  if (!body) return '';
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  let text = '';
+  let received = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    received += value.byteLength;
+    if (received > MAX_RESPONSE_BYTES) {
+      await reader.cancel();
+      throw new Error('response too large');
+    }
+    text += decoder.decode(value, { stream: true });
+  }
+  return text + decoder.decode();
+};
+
+const parseJsonObject = (text: string): Record<string, unknown> | undefined => {
+  try {
+    const parsed: unknown = JSON.parse(text);
+    return isRecord(parsed) ? parsed : undefined;
+  } catch (e) {
+    return undefined;
+  }
+};
 
 /**
- * Minimal Vault HTTP call using Node's http(s) client — there is no official Node
- * Vault client, and new Kibana code must use fetch/node http rather than axios.
- * Resolves on any HTTP status (a sealed/standby Vault is still "reachable"); only
- * transport failures reject.
+ * Resolves on any HTTP status (a sealed or standby Vault is still reachable); only
+ * transport failures reject. Redirects are not followed, so a reply can't steer the
+ * request to a host the allow-list and address guard never saw.
  */
-const vaultHttp = (
-  urlStr: string,
-  opts: {
-    method?: string;
-    headers?: Record<string, string>;
-    body?: string;
-    tlsSkipVerify?: boolean;
-  }
-): Promise<VaultHttpResponse> =>
-  new Promise((resolve, reject) => {
-    let url: URL;
-    try {
-      url = new URL(urlStr);
-    } catch (e) {
-      reject(new Error('invalid Vault address'));
-      return;
-    }
-    const isHttps = url.protocol === 'https:';
-    const doRequest = isHttps ? httpsRequest : httpRequest;
-    const req = doRequest(
-      url,
-      {
-        method: opts.method ?? 'GET',
-        headers: {
-          ...(opts.body ? { 'Content-Type': 'application/json' } : {}),
-          ...opts.headers,
-        },
-        timeout: 8000,
-        lookup: guardedLookup,
-        ...(isHttps && opts.tlsSkipVerify ? { rejectUnauthorized: false } : {}),
+const callVault = async (
+  agent: Agent,
+  url: string,
+  init: { method?: string; headers?: Record<string, string>; body?: string }
+): Promise<VaultResponse> => {
+  const controller = new AbortController();
+  const deadline = setTimeout(() => controller.abort(), REQUEST_DEADLINE_MS);
+  try {
+    const response = await undiciFetch(url, {
+      method: init.method ?? 'GET',
+      headers: {
+        ...(init.body ? { 'Content-Type': 'application/json' } : {}),
+        ...init.headers,
       },
-      (res) => {
-        let data = '';
-        res.on('data', (chunk) => {
-          data += chunk;
-          if (data.length > MAX_RESPONSE_BYTES) {
-            req.destroy(new Error('response too large'));
-          }
-        });
-        res.on('end', () => {
-          clearTimeout(deadline);
-          let body: Record<string, unknown> = {};
-          try {
-            body = data ? JSON.parse(data) : {};
-          } catch (e) {
-            body = {};
-          }
-          resolve({ status: res.statusCode ?? 0, body });
-        });
-      }
-    );
-    const deadline = setTimeout(
-      () => req.destroy(new Error('request deadline exceeded')),
-      REQUEST_DEADLINE_MS
-    );
-    req.on('error', (e) => {
-      clearTimeout(deadline);
-      reject(e);
+      body: init.body,
+      dispatcher: agent,
+      redirect: 'manual',
+      signal: controller.signal,
     });
-    req.on('timeout', () => req.destroy(new Error('request timed out')));
-    if (opts.body) req.write(opts.body);
-    req.end();
-  });
+    const text = await readCappedText(response.body);
+    return { status: response.status, ok: response.ok, body: parseJsonObject(text) };
+  } finally {
+    clearTimeout(deadline);
+  }
+};
 
 /**
  * Verifies Kibana can reach the Vault address and authenticate with the given
  * credentials. This checks reachability *from Kibana*; the agent (Heartbeat)
  * resolves from its own network at runtime, which may differ. Secrets are never
- * returned or logged — only a pass/fail plus the Vault version.
+ * returned or logged — only a pass/fail plus the Vault version. Failure details
+ * are logged, not returned, since the address is caller-controlled.
  */
-export const testHashiCorpVault = async (c: {
-  address: string;
-  authMethod: 'token' | 'approle';
-  namespace?: string;
-  tlsSkipVerify?: boolean;
-  roleId?: string;
-  token?: string;
-  secretId?: string;
-}): Promise<TestResult> => {
-  if (!c.address) return { ok: false, message: 'Vault address is required' };
+export const testHashiCorpVault = async (
+  input: VaultTestInput,
+  logger: Logger
+): Promise<SecretConnectionTestResult> => {
+  const { address, authMethod, namespace, tlsSkipVerify, roleId, token, secretId } = input;
+  if (!address) return { ok: false, message: 'Vault address is required' };
 
-  const base = c.address.replace(/\/+$/, '');
-  const nsHeader: Record<string, string> = c.namespace ? { 'X-Vault-Namespace': c.namespace } : {};
-  const call = (path: string, opts: Parameters<typeof vaultHttp>[1] = {}) =>
-    vaultHttp(`${base}${path}`, {
-      ...opts,
-      tlsSkipVerify: c.tlsSkipVerify,
-      headers: { ...nsHeader, ...opts.headers },
+  const base = address.replace(/\/+$/, '');
+  const namespaceHeader: Record<string, string> = namespace
+    ? { 'X-Vault-Namespace': namespace }
+    : {};
+  const agent = new Agent({
+    connect: { lookup: guardedLookup, rejectUnauthorized: !tlsSkipVerify },
+    headersTimeout: SOCKET_TIMEOUT_MS,
+    bodyTimeout: SOCKET_TIMEOUT_MS,
+  });
+  const call = (path: string, init: Parameters<typeof callVault>[2] = {}) =>
+    callVault(agent, `${base}${path}`, {
+      ...init,
+      headers: { ...namespaceHeader, ...init.headers },
     });
 
-  // 1) Reachability + version (unauthenticated health endpoint).
-  let versionNote = '';
   try {
-    const health = await call(
-      '/v1/sys/health?standbyok=true&perfstandbyok=true&sealedok=true&uninitcode=200'
-    );
-    const version = health.body?.version;
-    if (typeof version === 'string') versionNote = ` (Vault ${version})`;
-  } catch (e) {
-    return { ok: false, message: `Could not reach ${base}: ${errText(e)}` };
-  }
+    // 1) Reachability + version (unauthenticated health endpoint).
+    let versionNote = '';
+    try {
+      const health = await call(`${HEALTH_PATH}?${HEALTH_QUERY}`);
+      if (!health.body) return { ok: false, message: NOT_VAULT_MESSAGE };
+      const { version } = health.body;
+      if (typeof version === 'string') versionNote = ` (Vault ${version})`;
+    } catch (e) {
+      logger.warn(`Vault connection test could not reach ${base}: ${e}`);
+      return { ok: false, message: UNREACHABLE_MESSAGE };
+    }
 
-  // 2) Authenticate with the configured method.
-  try {
-    if (c.authMethod === 'token') {
-      if (!c.token) return { ok: false, message: 'Token auth requires a token' };
-      const res = await call('/v1/auth/token/lookup-self', {
-        headers: { 'X-Vault-Token': c.token },
+    // 2) Authenticate with the configured method.
+    try {
+      if (authMethod === 'token') {
+        if (!token) return { ok: false, message: 'Token auth requires a token' };
+        const res = await call(TOKEN_LOOKUP_PATH, { headers: { 'X-Vault-Token': token } });
+        return res.ok && isRecord(res.body?.data)
+          ? { ok: true, message: `Token authenticated${versionNote}.` }
+          : { ok: false, message: `Token rejected (HTTP ${res.status})${versionNote}.` };
+      }
+
+      if (!roleId || !secretId) {
+        return { ok: false, message: 'AppRole auth requires role_id and secret_id' };
+      }
+      const res = await call(APPROLE_LOGIN_PATH, {
+        method: 'POST',
+        body: JSON.stringify({ role_id: roleId, secret_id: secretId }),
       });
-      return res.status >= 200 && res.status < 300
-        ? { ok: true, message: `Token authenticated${versionNote}.` }
-        : { ok: false, message: `Token rejected (HTTP ${res.status})${versionNote}.` };
+      const auth = res.body?.auth;
+      if (res.ok && isRecord(auth) && typeof auth.client_token === 'string') {
+        return { ok: true, message: `AppRole authenticated${versionNote}.` };
+      }
+      logger.debug(`Vault AppRole login failed with HTTP ${res.status} at ${base}`);
+      return { ok: false, message: `AppRole login failed (HTTP ${res.status})${versionNote}.` };
+    } catch (e) {
+      logger.warn(`Vault connection test authentication error at ${base}: ${e}`);
+      return { ok: false, message: AUTH_ERROR_MESSAGE };
     }
-
-    if (!c.roleId || !c.secretId) {
-      return { ok: false, message: 'AppRole auth requires role_id and secret_id' };
-    }
-    const res = await call('/v1/auth/approle/login', {
-      method: 'POST',
-      body: JSON.stringify({ role_id: c.roleId, secret_id: c.secretId }),
-    });
-    const auth = res.body?.auth as { client_token?: string } | undefined;
-    if (res.status >= 200 && res.status < 300 && auth?.client_token) {
-      return { ok: true, message: `AppRole authenticated${versionNote}.` };
-    }
-    const errs = Array.isArray(res.body?.errors) ? (res.body.errors as string[]).join('; ') : '';
-    return {
-      ok: false,
-      message: `AppRole login failed (HTTP ${res.status})${errs ? `: ${errs}` : ''}${versionNote}.`,
-    };
-  } catch (e) {
-    return { ok: false, message: `Authentication error: ${errText(e)}` };
+  } finally {
+    await agent.close();
   }
 };

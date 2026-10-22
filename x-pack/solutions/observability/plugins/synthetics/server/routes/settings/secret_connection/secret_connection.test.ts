@@ -74,6 +74,7 @@ const setup = ({
     },
     server: {
       config: { secretConnections: { allowedHosts: ['*'], ...secretConnections } },
+      logger: { warn: jest.fn(), debug: jest.fn() },
       encryptedSavedObjects: {
         getClient: (options?: { includedHiddenTypes?: string[] }) =>
           encryptedClient(options?.includedHiddenTypes),
@@ -117,7 +118,8 @@ describe('secret connection routes', () => {
       await runTest(routeContext);
 
       expect(testHashiCorpVault).toHaveBeenCalledWith(
-        expect.objectContaining({ address: storedConfig.address, token: 'stored-token' })
+        expect.objectContaining({ address: storedConfig.address, token: 'stored-token' }),
+        routeContext.server.logger
       );
     });
 
