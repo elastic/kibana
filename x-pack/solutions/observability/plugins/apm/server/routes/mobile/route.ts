@@ -39,12 +39,13 @@ const mobileFiltersRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { kuery, environment, start, end, transactionType } = params.query;
+    const { kuery, environment, start, end, transactionType, errorType } = params.query;
 
     const filters = await getMobileFilters({
       kuery,
       environment,
       transactionType,
+      errorType,
       start,
       end,
       serviceName,

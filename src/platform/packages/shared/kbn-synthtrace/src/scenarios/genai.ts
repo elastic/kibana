@@ -505,6 +505,63 @@ const PARTIAL_INPUT_MESSAGES = [
 ];
 
 // ---------------------------------------------------------------------------
+// Service 11: Reasoning part fixture
+// A single serialized array in the OTel `parts` schema, as sent by OpenRouter's
+// Elastic Observability broadcast. The `reasoning` part must render as plain text
+// inside a collapsed accordion, not as raw JSON. Kept under the 1024-char
+// ignore_above limit so the field stays indexed.
+// ---------------------------------------------------------------------------
+
+const REASONING_OUTPUT_MESSAGES = [
+  JSON.stringify([
+    {
+      role: 'assistant',
+      parts: [
+        {
+          type: 'reasoning',
+          content:
+            'Here\'s a thinking process:\n\n1. **Analyze User Input:** The user asks whether perception changes if it rains, in the context of 15°C in Rome in January.\n\n2. **Core Question:** How does rain affect the perceived coldness of 15°C?\n\n3. **Relevant Knowledge:**\n - Rain increases heat loss via convection and evaporation\n - Wind often accompanies rain\n - "Feels like" temperature\n\n4. **Response Plan:** Confirm that rain changes perception, explain why, compare dry and rainy 15°C, give practical advice.',
+        },
+        {
+          type: 'text',
+          content:
+            'Yes, rain changes perception noticeably and usually makes 15°C feel colder.\n\n**Why it happens:**\n- Water conducts heat away from your body faster than air.\n- Evaporation from wet skin and clothing adds extra cooling.\n\nPack a waterproof, wind-resistant layer.',
+        },
+      ],
+      finish_reason: 'stop',
+    },
+  ]),
+];
+
+// ---------------------------------------------------------------------------
+// Service 12: Markdown reasoning fixture
+// Same `parts` schema, but the reasoning content uses rich markdown (heading, bold,
+// lists, table, code block, blockquote) to verify how formatting is rendered. Kept
+// under the 1024-char ignore_above limit so the field stays indexed.
+// ---------------------------------------------------------------------------
+
+const REASONING_MARKDOWN_OUTPUT_MESSAGES = [
+  JSON.stringify([
+    {
+      role: 'assistant',
+      parts: [
+        {
+          type: 'reasoning',
+          content:
+            '## Plan\n\nThe user wants to **compare two sorting approaches**. Steps:\n\n1. Pick candidates: `sorted()` and `list.sort()`\n2. Compare in-place vs copy\n3. Show a snippet\n\n| Approach | In place | Returns |\n|----------|----------|---------|\n| `sorted()` | no | new list |\n| `list.sort()` | yes | `None` |\n\n```python\nnums = [3, 1, 2]\nprint(sorted(nums))  # [1, 2, 3]\nnums.sort()\n```\n\n> Note: both are stable, so equal keys keep their order.\n\n- Keep the answer short\n- Mention *key=* for custom ordering',
+        },
+        {
+          type: 'text',
+          content:
+            'Use `sorted()` when you need a new list and `list.sort()` to sort in place. Both are stable and accept `key=`.',
+        },
+      ],
+      finish_reason: 'stop',
+    },
+  ]),
+];
+
+// ---------------------------------------------------------------------------
 // Scenario
 // ---------------------------------------------------------------------------
 
@@ -1085,6 +1142,101 @@ const scenario: Scenario<ApmOtelFields> = async () => {
         );
 
       // =================================================================
+      // Service 11: Reasoning output — OpenRouter-style `reasoning` part
+      // followed by a `text` part. The reasoning must render as text in a
+      // collapsed accordion.
+      // =================================================================
+      const reasoningInstance = apm
+        .otelService({
+          name: 'genai-reasoning-service',
+          namespace: ENVIRONMENT,
+          sdkLanguage: 'python',
+          sdkName: 'opentelemetry',
+          distro: 'elastic',
+        })
+        .instance('reasoning-instance-1');
+
+      const reasoningSpans = range
+        .interval('14s')
+        .rate(1)
+        .generator((timestamp) =>
+          reasoningInstance
+            .span({ name: 'POST /v1/chat/completions', kind: 'Server' })
+            .overrides({
+              'attributes.http.request.method': 'POST',
+              'attributes.url.path': '/v1/chat/completions',
+              'attributes.http.response.status_code': 200,
+              'attributes.gen_ai.operation.name': 'chat',
+              'attributes.gen_ai.system': 'openrouter',
+              'attributes.gen_ai.provider.name': 'openrouter',
+              'attributes.gen_ai.request.model': 'nvidia/nemotron-3.5-lightning:free',
+              'attributes.gen_ai.response.model': 'nvidia/nemotron-3.5-lightning:free',
+              'attributes.gen_ai.usage.input_tokens': 42,
+              'attributes.gen_ai.usage.output_tokens': 380,
+              'attributes.gen_ai.response.id': 'gen-reasoning-001',
+              'attributes.gen_ai.response.finish_reasons': ['stop'],
+              'attributes.gen_ai.conversation.id': 'conv-reasoning-001',
+              'attributes.gen_ai.input.messages': [
+                JSON.stringify({
+                  role: 'user',
+                  content: 'Does perception change if it rains?',
+                }),
+              ],
+              'attributes.gen_ai.output.messages': REASONING_OUTPUT_MESSAGES,
+            })
+            .timestamp(timestamp)
+            .duration(4200)
+            .success()
+        );
+
+      // =================================================================
+      // Service 12: Reasoning output with rich markdown — checks how
+      // formatting inside the collapsed reasoning accordion is rendered.
+      // =================================================================
+      const reasoningMarkdownInstance = apm
+        .otelService({
+          name: 'genai-reasoning-markdown-service',
+          namespace: ENVIRONMENT,
+          sdkLanguage: 'python',
+          sdkName: 'opentelemetry',
+          distro: 'elastic',
+        })
+        .instance('reasoning-markdown-instance-1');
+
+      const reasoningMarkdownSpans = range
+        .interval('15s')
+        .rate(1)
+        .generator((timestamp) =>
+          reasoningMarkdownInstance
+            .span({ name: 'POST /v1/chat/completions', kind: 'Server' })
+            .overrides({
+              'attributes.http.request.method': 'POST',
+              'attributes.url.path': '/v1/chat/completions',
+              'attributes.http.response.status_code': 200,
+              'attributes.gen_ai.operation.name': 'chat',
+              'attributes.gen_ai.system': 'openrouter',
+              'attributes.gen_ai.provider.name': 'openrouter',
+              'attributes.gen_ai.request.model': 'nvidia/nemotron-3.5-lightning:free',
+              'attributes.gen_ai.response.model': 'nvidia/nemotron-3.5-lightning:free',
+              'attributes.gen_ai.usage.input_tokens': 38,
+              'attributes.gen_ai.usage.output_tokens': 410,
+              'attributes.gen_ai.response.id': 'gen-reasoning-md-001',
+              'attributes.gen_ai.response.finish_reasons': ['stop'],
+              'attributes.gen_ai.conversation.id': 'conv-reasoning-md-001',
+              'attributes.gen_ai.input.messages': [
+                JSON.stringify({
+                  role: 'user',
+                  content: 'What is the difference between sorted() and list.sort() in Python?',
+                }),
+              ],
+              'attributes.gen_ai.output.messages': REASONING_MARKDOWN_OUTPUT_MESSAGES,
+            })
+            .timestamp(timestamp)
+            .duration(4800)
+            .success()
+        );
+
+      // =================================================================
       // Service 8: Non-GenAI HTTP service — GenAI tab must NOT appear.
       // =================================================================
       const regularInstance = apm
@@ -1126,6 +1278,8 @@ const scenario: Scenario<ApmOtelFields> = async () => {
           maxlenSpans,
           overlimitSpans,
           partialSpans,
+          reasoningSpans,
+          reasoningMarkdownSpans,
           regularSpans,
         ]),
       ];
