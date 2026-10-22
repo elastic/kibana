@@ -193,6 +193,8 @@ const ProjectDefaultPanel = ({
             </span>
           )
         }
+        // A step down from the default, so the values don't overpower the page.
+        titleSize="m"
         data-test-subj={`boostProjectDefaultValue-${type}`}
       >
         <EuiSpacer size="xs" />
