@@ -21,7 +21,8 @@
     "@kbn/licensing-types",
     "@kbn/licensing-plugin",
     "@kbn/core-test-helpers-kbn-server",
-    "@kbn/repo-info"
+    "@kbn/repo-info",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

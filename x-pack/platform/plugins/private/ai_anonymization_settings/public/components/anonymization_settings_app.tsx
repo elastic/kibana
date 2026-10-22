@@ -15,6 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
@@ -45,6 +46,8 @@ export const AnonymizationSettingsApp: React.FC<AnonymizationSettingsAppProps> =
     services: { application },
   } = useKibana();
   const canEditAdvancedSettings = Boolean(application.capabilities.advancedSettings?.save);
+  // The tester endpoint needs the same privilege as editing, so read-only users do not see it.
+  const isTesterAvailable = isPatternTesterEnabled && canEditAdvancedSettings;
 
   const {
     isLoading,
@@ -99,7 +102,7 @@ export const AnonymizationSettingsApp: React.FC<AnonymizationSettingsAppProps> =
       onClick: () => setSelectedTab('custom'),
       'data-test-subj': 'aiAnonymizationSettingsTab-custom',
     },
-    ...(isPatternTesterEnabled
+    ...(isTesterAvailable
       ? [
           {
             id: 'tester',
@@ -147,6 +150,22 @@ export const AnonymizationSettingsApp: React.FC<AnonymizationSettingsAppProps> =
     <div data-test-subj="aiAnonymizationSettingsPage">
       <AppHeader title={pageTitle} spacing="bleed" tabs={tabs} badges={[techPreviewBadge]} />
       <EuiPageSection paddingSize="l">
+        {!canEditAdvancedSettings && (
+          <>
+            <KbnInfoCallout
+              title={i18n.translate('xpack.aiAnonymizationSettings.readOnlyCallout.title', {
+                defaultMessage: 'Read-only access',
+              })}
+              text={i18n.translate('xpack.aiAnonymizationSettings.readOnlyCallout.text', {
+                defaultMessage:
+                  'You can view these settings but not change them. Changing them requires the Advanced Settings "All" privilege.',
+              })}
+              size="s"
+              data-test-subj="aiAnonymizationSettingsReadOnlyCallout"
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiText size="s">{maskingEnabledLabel}</EuiText>
@@ -181,7 +200,7 @@ export const AnonymizationSettingsApp: React.FC<AnonymizationSettingsAppProps> =
                 patterns={builtInPatterns}
                 onToggle={setRuleEnabled}
                 isSavingEnabled={canEditAdvancedSettings}
-                isPatternTesterEnabled={isPatternTesterEnabled}
+                isPatternTesterEnabled={isTesterAvailable}
               />
             )}
             {selectedTab === 'custom' && (
@@ -200,7 +219,7 @@ export const AnonymizationSettingsApp: React.FC<AnonymizationSettingsAppProps> =
                 isSavingEnabled={canEditAdvancedSettings}
               />
             )}
-            {selectedTab === 'tester' && isPatternTesterEnabled && (
+            {selectedTab === 'tester' && isTesterAvailable && (
               <PatternTesterTab enabledRules={enabledRules} />
             )}
             {selectedTab === 'settings' && (
@@ -220,7 +239,7 @@ export const AnonymizationSettingsApp: React.FC<AnonymizationSettingsAppProps> =
         <PatternFlyout
           pattern={flyoutPattern}
           enabledRules={enabledRules}
-          isPatternTesterEnabled={isPatternTesterEnabled}
+          isPatternTesterEnabled={isTesterAvailable}
           onSave={handleSavePattern}
           onClose={closeFlyout}
         />

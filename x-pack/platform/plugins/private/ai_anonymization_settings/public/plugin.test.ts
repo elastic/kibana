@@ -40,6 +40,9 @@ describe('AiAnonymizationSettingsPlugin', () => {
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
       advancedSettings: advancedSettings ?? {},
+      // `show` stands for access to the Advanced Settings page, which the "Read" privilege grants
+      // through the management capability and not through `advancedSettings.show`.
+      management: { kibana: { settings: advancedSettings?.show === true } },
       actions,
     };
     coreStart.uiSettings.isDeclared.mockReturnValue(isSettingRegistered);
@@ -54,17 +57,22 @@ describe('AiAnonymizationSettingsPlugin', () => {
     expect(app.enable).not.toHaveBeenCalled();
   });
 
-  it('enables the page for users who can save advanced settings, which the tester and saves need', () => {
+  // GenAI Settings is visible with read access, and a user who can read the other AI settings must
+  // be able to see what is masked; the page disables editing on its own for users who cannot save.
+  it.each([
+    ['can save advanced settings', { show: true, save: true }],
+    ['has read-only access to advanced settings', { show: true, save: false }],
+  ])('enables the page for a user who %s', (_, advancedSettings) => {
     const { plugin, app } = setupPlugin();
 
-    startWith(plugin, { show: true, save: true });
+    startWith(plugin, advancedSettings);
 
     expect(app.enable).toHaveBeenCalledTimes(1);
   });
 
   it.each([
-    ['read-only access to advanced settings', { show: true, save: false }],
     ['no advanced settings privilege', {}],
+    ['advanced settings hidden', { show: false, save: false }],
   ])('keeps the page disabled for a user with %s', (_, advancedSettings) => {
     const { plugin, app } = setupPlugin();
 

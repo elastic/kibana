@@ -26,6 +26,16 @@ Named-entity-recognition (NER) rule support still exists in the underlying schem
 (`@kbn/ai-anonymization-server`) but is intentionally not surfaced anywhere on
 this page.
 
+## Access
+
+- **Seeing the page** needs the Advanced Settings **Read** (or All) privilege, the Connectors
+  privilege (`show` and `execute`) and an Enterprise license. The Read privilege grants no
+  `advancedSettings.show` UI capability, so the page checks the management capability
+  `management.kibana.settings` instead.
+- **Changing anything** needs Advanced Settings **All** (`advancedSettings.save`). Without it the
+  page is read-only and says so, and the Pattern tester tab is hidden because its endpoint needs
+  `manage_advanced_settings`.
+
 ## Limitations
 
 - **Masks are pseudonyms, not encryption.** Without the per-space salt (not available in this mode),
