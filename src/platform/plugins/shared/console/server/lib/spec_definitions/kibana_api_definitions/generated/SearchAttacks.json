@@ -10,8 +10,8 @@
     "data_autocomplete_rules": {
       "_source": {
         "__one_of": [
-          "true",
-          "false"
+          true,
+          false
         ]
       },
       "aggs": {},

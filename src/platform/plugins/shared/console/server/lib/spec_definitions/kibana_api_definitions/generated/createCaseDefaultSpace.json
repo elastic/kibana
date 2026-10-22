@@ -35,8 +35,8 @@
           },
           "value": {
             "__one_of": [
-              "true",
-              "false"
+              true,
+              false
             ]
           }
         }

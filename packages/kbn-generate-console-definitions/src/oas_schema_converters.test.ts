@@ -101,6 +101,17 @@ describe('convertBodyRules', () => {
     });
   });
 
+  it('keeps booleans of a oneOf as booleans', () => {
+    expect(
+      convertBodyRules(doc, {
+        type: 'object',
+        properties: {
+          value: { oneOf: [{ type: 'string' }, { type: 'boolean' }] },
+        },
+      })
+    ).toEqual({ value: { __one_of: [true, false] } });
+  });
+
   it('merges allOf members and the union of oneOf alternatives', () => {
     expect(
       convertBodyRules(doc, {

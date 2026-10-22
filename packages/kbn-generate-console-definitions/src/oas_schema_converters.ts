@@ -163,6 +163,26 @@ const collectProperties = (
   );
 };
 
+// Like `enumValues`, but a body is JSON so booleans stay booleans instead of becoming strings.
+const bodyEnumValues = (
+  doc: OasDocument,
+  schema: OasSchema | undefined,
+  depth = 0
+): Array<string | boolean> => {
+  const resolved = resolveSchema(doc, schema);
+  if (depth > MAX_REF_HOPS) {
+    return [];
+  }
+  if (resolved.type === 'boolean') {
+    return [true, false];
+  }
+  const members = [...(resolved.oneOf ?? []), ...(resolved.anyOf ?? [])];
+  if (members.length > 0 && !resolved.enum) {
+    return [...new Set(members.flatMap((member) => bodyEnumValues(doc, member, depth + 1)))];
+  }
+  return enumValues(doc, resolved);
+};
+
 const convertBodySchema = (
   doc: OasDocument,
   schema: OasSchema | undefined,
@@ -198,7 +218,7 @@ const convertBodySchema = (
     const item = convertBodySchema(doc, resolved.items, depth, nextSeenRefs);
     return item === '' ? [] : [item];
   }
-  const values = enumValues(doc, resolved);
+  const values = bodyEnumValues(doc, resolved);
   return values.length > 0 ? { __one_of: values } : '';
 };
 

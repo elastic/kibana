@@ -45,63 +45,63 @@
           "field": "",
           "contains": {
             "__one_of": [
-              "true",
-              "false"
+              true,
+              false
             ]
           },
           "endsWith": {
             "__one_of": [
-              "true",
-              "false"
+              true,
+              false
             ]
           },
           "eq": {
             "__one_of": [
-              "true",
-              "false"
+              true,
+              false
             ]
           },
           "gt": {
             "__one_of": [
-              "true",
-              "false"
+              true,
+              false
             ]
           },
           "gte": {
             "__one_of": [
-              "true",
-              "false"
+              true,
+              false
             ]
           },
           "includes": {
             "__one_of": [
-              "true",
-              "false"
+              true,
+              false
             ]
           },
           "lt": {
             "__one_of": [
-              "true",
-              "false"
+              true,
+              false
             ]
           },
           "lte": {
             "__one_of": [
-              "true",
-              "false"
+              true,
+              false
             ]
           },
           "neq": {
             "__one_of": [
-              "true",
-              "false"
+              true,
+              false
             ]
           },
           "range": {},
           "startsWith": {
             "__one_of": [
-              "true",
-              "false"
+              true,
+              false
             ]
           }
         },
@@ -125,63 +125,63 @@
             "field": "",
             "contains": {
               "__one_of": [
-                "true",
-                "false"
+                true,
+                false
               ]
             },
             "endsWith": {
               "__one_of": [
-                "true",
-                "false"
+                true,
+                false
               ]
             },
             "eq": {
               "__one_of": [
-                "true",
-                "false"
+                true,
+                false
               ]
             },
             "gt": {
               "__one_of": [
-                "true",
-                "false"
+                true,
+                false
               ]
             },
             "gte": {
               "__one_of": [
-                "true",
-                "false"
+                true,
+                false
               ]
             },
             "includes": {
               "__one_of": [
-                "true",
-                "false"
+                true,
+                false
               ]
             },
             "lt": {
               "__one_of": [
-                "true",
-                "false"
+                true,
+                false
               ]
             },
             "lte": {
               "__one_of": [
-                "true",
-                "false"
+                true,
+                false
               ]
             },
             "neq": {
               "__one_of": [
-                "true",
-                "false"
+                true,
+                false
               ]
             },
             "range": {},
             "startsWith": {
               "__one_of": [
-                "true",
-                "false"
+                true,
+                false
               ]
             }
           }
@@ -206,63 +206,63 @@
             "field": "",
             "contains": {
               "__one_of": [
-                "true",
-                "false"
+                true,
+                false
               ]
             },
             "endsWith": {
               "__one_of": [
-                "true",
-                "false"
+                true,
+                false
               ]
             },
             "eq": {
               "__one_of": [
-                "true",
-                "false"
+                true,
+                false
               ]
             },
             "gt": {
               "__one_of": [
-                "true",
-                "false"
+                true,
+                false
               ]
             },
             "gte": {
               "__one_of": [
-                "true",
-                "false"
+                true,
+                false
               ]
             },
             "includes": {
               "__one_of": [
-                "true",
-                "false"
+                true,
+                false
               ]
             },
             "lt": {
               "__one_of": [
-                "true",
-                "false"
+                true,
+                false
               ]
             },
             "lte": {
               "__one_of": [
-                "true",
-                "false"
+                true,
+                false
               ]
             },
             "neq": {
               "__one_of": [
-                "true",
-                "false"
+                true,
+                false
               ]
             },
             "range": {},
             "startsWith": {
               "__one_of": [
-                "true",
-                "false"
+                true,
+                false
               ]
             }
           }
@@ -276,88 +276,88 @@
         "field": "",
         "contains": {
           "__one_of": [
-            "true",
-            "false"
+            true,
+            false
           ]
         },
         "endsWith": {
           "__one_of": [
-            "true",
-            "false"
+            true,
+            false
           ]
         },
         "eq": {
           "__one_of": [
-            "true",
-            "false"
+            true,
+            false
           ]
         },
         "gt": {
           "__one_of": [
-            "true",
-            "false"
+            true,
+            false
           ]
         },
         "gte": {
           "__one_of": [
-            "true",
-            "false"
+            true,
+            false
           ]
         },
         "includes": {
           "__one_of": [
-            "true",
-            "false"
+            true,
+            false
           ]
         },
         "lt": {
           "__one_of": [
-            "true",
-            "false"
+            true,
+            false
           ]
         },
         "lte": {
           "__one_of": [
-            "true",
-            "false"
+            true,
+            false
           ]
         },
         "neq": {
           "__one_of": [
-            "true",
-            "false"
+            true,
+            false
           ]
         },
         "range": {
           "gt": {
             "__one_of": [
-              "true",
-              "false"
+              true,
+              false
             ]
           },
           "gte": {
             "__one_of": [
-              "true",
-              "false"
+              true,
+              false
             ]
           },
           "lt": {
             "__one_of": [
-              "true",
-              "false"
+              true,
+              false
             ]
           },
           "lte": {
             "__one_of": [
-              "true",
-              "false"
+              true,
+              false
             ]
           }
         },
         "startsWith": {
           "__one_of": [
-            "true",
-            "false"
+            true,
+            false
           ]
         }
       }
