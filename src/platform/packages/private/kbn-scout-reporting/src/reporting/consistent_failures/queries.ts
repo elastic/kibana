@@ -109,8 +109,10 @@ const chunk = <T>(values: readonly T[], size: number): T[][] =>
   );
 
 /**
- * The given tests' runs per setup and build within the scope. A cut-off result would pass for a
- * shorter history, so this fails rather than return one.
+ * The given tests' runs per setup and build within the scope. The events only tell that a build
+ * settled when a retried job reported the test; the caller settles finished builds and jobs that
+ * do not retry on failure. A cut-off result would pass for a shorter history, so this fails
+ * rather than return one.
  */
 export const fetchRecentRuns = async (
   es: ESClient,
@@ -149,7 +151,7 @@ export const fetchRecentRuns = async (
       failed: row.failed,
       recovered: row.recovered,
       skipped: row.skipped,
-      retried: (row.retries ?? 0) > 0,
+      settled: (row.retries ?? 0) > 0,
     });
     bySetup.set(key, entry);
   }

@@ -86,7 +86,7 @@ describe('buildRecentRunsQuery', () => {
 });
 
 describe('fetchRecentRuns', () => {
-  it('returns each test and setup with its runs per build, oldest first', async () => {
+  it('returns each test and setup with its runs per build, oldest first, settled by a retry', async () => {
     const { client } = mockEs([
       row({ build: 3, passed: 0, failed: 2, retries: 1, commit: 'ccc' }),
       row({ build: 1 }),
@@ -107,9 +107,9 @@ describe('fetchRecentRuns', () => {
           targetType: 'local',
         },
         runs: [
-          expect.objectContaining({ build: 1, passed: 1, retried: false, commit: 'abc' }),
-          expect.objectContaining({ build: 2, failed: 1, retried: false }),
-          expect.objectContaining({ build: 3, failed: 2, retried: true, commit: 'ccc' }),
+          expect.objectContaining({ build: 1, passed: 1, settled: false, commit: 'abc' }),
+          expect.objectContaining({ build: 2, failed: 1, settled: false }),
+          expect.objectContaining({ build: 3, failed: 2, settled: true, commit: 'ccc' }),
         ],
       },
       {
@@ -127,7 +127,7 @@ describe('fetchRecentRuns', () => {
       failed: 0,
       recovered: 0,
       skipped: 0,
-      retried: false,
+      settled: false,
     });
   });
 

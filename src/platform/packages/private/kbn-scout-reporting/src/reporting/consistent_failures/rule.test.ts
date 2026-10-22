@@ -16,18 +16,18 @@ const run = (build: number, overrides: Partial<BuildRun> = {}): BuildRun => ({
   failed: 0,
   recovered: 0,
   skipped: 0,
-  retried: false,
+  settled: false,
   ...overrides,
 });
 
 const passed = (build: number) => run(build, { passed: 1 });
 /** Both the job and its retry reported a failure. */
-const failed = (build: number) => run(build, { failed: 2, retried: true });
+const failed = (build: number) => run(build, { failed: 2, settled: true });
 /** The job reported a failure, its retry has not reported yet. */
 const pending = (build: number) => run(build, { failed: 1 });
 /** Failed, then passed on a retry: in the run for Playwright, of the job for the rest. */
 const recoveredInRun = (build: number) => run(build, { recovered: 1 });
-const recoveredOnRetry = (build: number) => run(build, { failed: 1, passed: 1, retried: true });
+const recoveredOnRetry = (build: number) => run(build, { failed: 1, passed: 1, settled: true });
 const skipped = (build: number) => run(build, { skipped: 1 });
 
 const passes = (from: number, count: number) =>
@@ -43,8 +43,8 @@ describe('verdictOf', () => {
     expect(verdictOf(skipped(1))).toBe('skipped');
   });
 
-  it('counts a failure that a retried job confirmed as failed even when the counts say one', () => {
-    expect(verdictOf(run(1, { failed: 1, retried: true }))).toBe('failed');
+  it('takes a single failed attempt as failed once the build is settled', () => {
+    expect(verdictOf(run(1, { failed: 1, settled: true }))).toBe('failed');
   });
 });
 
@@ -68,7 +68,7 @@ describe('findConsistentFailure', () => {
     ).toBeUndefined();
   });
 
-  it('leaves a build still awaiting its retry out of the picture', () => {
+  it('leaves a build not yet settled out of the picture', () => {
     const history = passes(1, 20);
 
     expect(findConsistentFailure([...history, failed(21), pending(22)])).toBeUndefined();
@@ -78,7 +78,7 @@ describe('findConsistentFailure', () => {
     });
   });
 
-  it('waits for the retry of a build in the middle of the streak', () => {
+  it('waits for a build in the middle of the streak to settle', () => {
     expect(findConsistentFailure([...passes(1, 20), pending(21), failed(22)])).toBeUndefined();
   });
 

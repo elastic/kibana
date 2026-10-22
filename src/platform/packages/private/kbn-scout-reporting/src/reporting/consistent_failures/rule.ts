@@ -20,15 +20,18 @@ export interface BuildRun {
   /** Runs that failed, then passed on an in-run retry. */
   recovered: number;
   skipped: number;
-  /** Whether a retried job reported the test, so no further attempt is coming. */
-  retried: boolean;
+  /**
+   * Whether no further attempt can report the test: a retried job already did, the build has
+   * finished, or the job does not retry on failure.
+   */
+  settled: boolean;
 }
 
 export type BuildVerdict = 'passed' | 'recovered' | 'failed' | 'pending' | 'skipped';
 
 /**
- * What one build says about the test. A build whose only attempt failed is pending until its
- * retry reports: the retry decides whether the test failed every attempt or recovered.
+ * What one build says about the test. A build whose only attempt failed is pending until it
+ * settles: a retry may still decide whether the test failed every attempt or recovered.
  */
 export const verdictOf = (run: BuildRun): BuildVerdict => {
   if (run.passed > 0) {
@@ -38,7 +41,7 @@ export const verdictOf = (run: BuildRun): BuildVerdict => {
     return 'recovered';
   }
   if (run.failed > 0) {
-    return run.retried ? 'failed' : 'pending';
+    return run.settled ? 'failed' : 'pending';
   }
   return 'skipped';
 };
@@ -68,9 +71,9 @@ export interface ConsistentFailure {
 
 /**
  * Whether the test's runs in one setup end in a consistent failure: its latest settled builds
- * all failed every attempt and the runs before them all passed. Builds still awaiting a retry at
- * the end are left out of the picture; one in the middle of the streak breaks it until its retry
- * reports. A skipped build breaks the streak too, as the test was dealt with.
+ * all failed every attempt and the runs before them all passed. Builds not yet settled at the end
+ * are left out of the picture; one in the middle of the streak breaks it until it settles. A
+ * skipped build breaks the streak too, as the test was dealt with.
  */
 export const findConsistentFailure = (
   runs: readonly BuildRun[],
