@@ -169,6 +169,16 @@ describe('useBulkActionItems', () => {
       expect(result.current.panels.length).toBeGreaterThan(0);
     });
 
+    it('should mark the document workflow runs as bulk', () => {
+      renderUseBulkActionItems({
+        data: [{ _id: 'mockEventId', _index: 'test-index', data: [], ecs: { _id: 'mockEventId' } }],
+      });
+
+      expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
+        expect.objectContaining({ isBulk: true })
+      );
+    });
+
     it('should not include workflow menu items when useRunDocumentWorkflowPanel returns empty', () => {
       mockUseRunDocumentWorkflowPanel.mockReturnValue({
         runWorkflowMenuItem: [],

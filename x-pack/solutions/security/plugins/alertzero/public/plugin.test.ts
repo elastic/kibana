@@ -24,6 +24,8 @@ import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
 import type { AlertZeroClientConfig } from './types';
 import { AlertZeroPublicPlugin } from './plugin';
 
+jest.mock('./application', () => ({ renderApp: jest.fn(() => jest.fn()) }));
+
 const createLicensing = () => ({
   ...licensingMock.createStart(),
   license$: new BehaviorSubject(
@@ -269,6 +271,66 @@ describe('AlertZeroPublicPlugin workflow step registration', () => {
     const { registerStepDefinition } = setupPlugin(false);
 
     expect(registerStepDefinition).not.toHaveBeenCalled();
+  });
+});
+
+describe('AlertZeroPublicPlugin UI telemetry registration', () => {
+  const setupPlugin = (enabled: boolean) => {
+    const plugin = new AlertZeroPublicPlugin(createContext(createConfig({ enabled })));
+    const coreSetup = coreMock.createSetup();
+    coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}] as never);
+
+    plugin.setup(
+      coreSetup as never,
+      {
+        workflowsExtensions: { registerStepDefinition: jest.fn() },
+      } as never
+    );
+
+    const registeredEventTypes = () =>
+      (coreSetup.analytics.registerEventType as jest.Mock).mock.calls.map(
+        ([{ eventType }]) => eventType
+      );
+    const mount = async () => {
+      const [[{ mount: mountApp }]] = (coreSetup.application.register as jest.Mock).mock.calls;
+      await mountApp({} as never);
+    };
+
+    return { mount, registeredEventTypes };
+  };
+
+  it('registers no UI event in setup, which keeps their schemas out of the page-load bundle', () => {
+    const { registeredEventTypes } = setupPlugin(true);
+
+    expect(registeredEventTypes()).toEqual([]);
+  });
+
+  it('registers the four AlertZero UI events when the app first mounts', async () => {
+    const { mount, registeredEventTypes } = setupPlugin(true);
+
+    await mount();
+
+    expect(registeredEventTypes()).toEqual([
+      'alertzero_ui_home_opened',
+      'alertzero_ui_queue_filtered',
+      'alertzero_ui_brief_card_clicked',
+      'alertzero_ui_error_shown',
+    ]);
+  });
+
+  it('registers them once, however often the app mounts', async () => {
+    const { mount, registeredEventTypes } = setupPlugin(true);
+
+    await mount();
+    await mount();
+
+    expect(registeredEventTypes()).toHaveLength(4);
+  });
+
+  it('registers no UI event when the deployment kill switch is off', () => {
+    const { registeredEventTypes } = setupPlugin(false);
+
+    expect(registeredEventTypes()).toEqual([]);
   });
 });
 

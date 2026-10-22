@@ -22,7 +22,7 @@ import {
 import { MEMORY_WORKSPACE_ROOT } from '../memory/materialize';
 import { isCanonicalMemoryId, slugFromMemoryId, toMemoryKiId } from '../memory/page_store';
 import { SANDBOX_BASH_TOOL_ID } from '../tools/sandbox_bash/tool';
-import { SANDBOX_WRITE_FILE_TOOL_ID } from '../tools/sandbox_bash/write_file_tool';
+import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import {
   stepsFromRound,
   type InvestigationTranscriptStep,
@@ -61,7 +61,7 @@ const BASH_QUOTED_STRING_RE = /'[^']*'|"(?:[^"\\]|\\.)*"/g;
 const BASH_UNQUOTED_STDOUT_REDIRECT_RE = /(?:^|[^\d&>])(?:1|&)?>>?\|?\s*(?!&)(?!\/dev\/stdout\b)/;
 const SCRIPT_INTERPRETER_VERBS = new Set<string>(['python', 'python3', 'node', 'perl', 'ruby']);
 
-// Commands whose arguments are never read and printed as file contents to stdout.
+// Commands whose arguments are never read and printed as file contents to stdout (including metadata-only/existence checks).
 const NON_FILE_READING_VERBS = new Set<string>([
   'echo',
   'printf',
@@ -90,6 +90,23 @@ const NON_FILE_READING_VERBS = new Set<string>([
   'pkill',
   'curl',
   'wget',
+  'ls',
+  'stat',
+  'file',
+  'test',
+  '[',
+  '[[',
+  'find',
+  'du',
+  'wc',
+  'md5sum',
+  'sha1sum',
+  'sha256sum',
+  'cksum',
+  'basename',
+  'dirname',
+  'realpath',
+  'readlink',
 ]);
 
 interface MutableReads {
@@ -264,7 +281,7 @@ export const extractWorkspaceReads = (
     const filePath = params.file_path ?? params.path;
     if (FILE_TOOL_IDS.has(toolId) && typeof filePath === 'string') {
       recordResolvedFilePath(filePath, acc, {
-        allowCortexAndMemory: toolId !== SANDBOX_WRITE_FILE_TOOL_ID,
+        allowCortexAndMemory: toolId === SANDBOX_VIEW_FILE_TOOL_ID,
       });
       continue;
     }
