@@ -23,6 +23,8 @@ import {
   isSeededWorkspaceAccess,
   loadInvestigationRound,
   OMITTED_SEEDED_RESULT_REASON,
+  resolveConversationRound,
+  sliceConversationRounds,
   stepsFromRound,
   withToolResults,
 } from '.';
@@ -99,6 +101,8 @@ describe('server/investigation_round', () => {
       expect(getConversation).toHaveBeenCalledTimes(2);
       expect(loaded.source).toBe('persisted_round');
       expect(loaded.roundId).toBe('round-1');
+      expect(loaded.roundIndex).toBe(0);
+      expect(loaded.roundCount).toBe(1);
       expect(loaded.traceId).toBe('trace-fg-1');
       expect(loaded.steps).toEqual([
         { kind: 'reasoning', text: 'Checking checkout latency' },
@@ -185,11 +189,105 @@ describe('server/investigation_round', () => {
         response: 'root cause found',
         conversation_id: 'conv-1',
         round_id: 'round-1',
+        round_index: -1,
         tool_calls: JSON.stringify([{ tool_id: 't1', tool_call_id: 'c1', params: {} }]),
         tool_results: JSON.stringify([{ tool_call_id: 'c1', results: [] }]),
       });
       expect(parsed.tool_calls).toHaveLength(1);
       expect(parsed.tool_results).toHaveLength(1);
+      expect(parsed.round_index).toBe(-1);
+    });
+
+    it('resolves rounds by ordered sequence index, positional/semantic alias, and supports array slicing', async () => {
+      const rounds = [
+        {
+          id: 'round-uuid-0',
+          trace_id: 'trace-0',
+          started_at: '2026-10-20T00:00:00.000Z',
+          steps: [{ type: 'reasoning', reasoning: 'Initial investigation turn' }],
+        },
+        {
+          id: 'round-uuid-1',
+          trace_id: 'trace-1',
+          started_at: '2026-10-20T00:05:00.000Z',
+          steps: [{ type: 'reasoning', reasoning: 'Follow-up turn' }],
+        },
+        {
+          id: 'round-uuid-2',
+          trace_id: 'trace-2',
+          started_at: '2026-10-20T00:10:00.000Z',
+          steps: [{ type: 'reasoning', reasoning: 'Alert outcome causal analysis turn' }],
+        },
+      ];
+
+      expect(resolveConversationRound(rounds, { roundId: '1st' })).toMatchObject({
+        round: { id: 'round-uuid-0' },
+        roundIndex: 0,
+        roundCount: 3,
+      });
+      expect(resolveConversationRound(rounds, { roundId: 'investigation_start' })).toMatchObject({
+        round: { id: 'round-uuid-0' },
+        roundIndex: 0,
+      });
+      expect(resolveConversationRound(rounds, { roundId: '2nd' })).toMatchObject({
+        round: { id: 'round-uuid-1' },
+        roundIndex: 1,
+      });
+      expect(resolveConversationRound(rounds, { roundId: '-1' })).toMatchObject({
+        round: { id: 'round-uuid-2' },
+        roundIndex: 2,
+      });
+      expect(resolveConversationRound(rounds, { roundId: 'latest' })).toMatchObject({
+        round: { id: 'round-uuid-2' },
+        roundIndex: 2,
+      });
+      expect(resolveConversationRound(rounds, { roundIndex: -2 })).toMatchObject({
+        round: { id: 'round-uuid-1' },
+        roundIndex: 1,
+      });
+
+      // Slicing (e.g. initial rounds before the final follow-up `0..-1`, or just the last round `-1`)
+      expect(sliceConversationRounds(rounds, 0, -1).map((r) => [r.roundIndex, r.round.id])).toEqual(
+        [
+          [0, 'round-uuid-0'],
+          [1, 'round-uuid-1'],
+        ]
+      );
+      expect(sliceConversationRounds(rounds, -1).map((r) => [r.roundIndex, r.round.id])).toEqual([
+        [2, 'round-uuid-2'],
+      ]);
+
+      const agentBuilder = {
+        conversations: {
+          getScopedClient: jest.fn().mockResolvedValue({
+            get: jest.fn().mockResolvedValue({ id: 'conv-1', rounds }),
+          }),
+        },
+      } as unknown as AgentBuilderPluginStart;
+
+      const latestLoaded = await loadInvestigationRound({
+        agentBuilder,
+        request,
+        conversationId: 'conv-1',
+        roundIndex: -1,
+        logger,
+        retryDelaysMs: [],
+      });
+      expect(latestLoaded.roundId).toBe('round-uuid-2');
+      expect(latestLoaded.roundIndex).toBe(2);
+      expect(latestLoaded.roundCount).toBe(3);
+
+      const firstByAlias = await loadInvestigationRound({
+        agentBuilder,
+        request,
+        conversationId: 'conv-1',
+        roundId: '1st',
+        logger,
+        retryDelaysMs: [],
+      });
+      expect(firstByAlias.roundId).toBe('round-uuid-0');
+      expect(firstByAlias.roundIndex).toBe(0);
+      expect(firstByAlias.roundCount).toBe(3);
     });
   });
 
@@ -517,6 +615,11 @@ describe('server/investigation_round', () => {
       expect(
         isSeededWorkspaceAccess(SANDBOX_BASH_TOOL_ID, {
           command: 'grep -efoo /workspace/memories/redis-pool-exhaustion.md',
+        })
+      ).toBe(true);
+      expect(
+        isSeededWorkspaceAccess(SANDBOX_BASH_TOOL_ID, {
+          command: 'grep -e error -ecache /workspace/memories/redis-pool-exhaustion.md',
         })
       ).toBe(true);
 

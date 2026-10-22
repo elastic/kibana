@@ -477,46 +477,53 @@ const checkDirOrSearchSegment = (
       continue;
     }
     if (!optionsEnded && arg.startsWith('-') && arg !== '-') {
-      const isAttachedShortE = isGrepOrRg && !arg.startsWith('--') && /^-[a-zA-Z]*e.+$/.test(arg);
-      const isBundledTrailingE =
-        isGrepOrRg && !arg.startsWith('--') && /^-[a-zA-Z]{2,}$/.test(arg) && arg.endsWith('e');
-      if (
-        arg === '-e' ||
-        arg === '--regexp' ||
-        arg.startsWith('--regexp=') ||
-        isAttachedShortE ||
-        isBundledTrailingE
-      ) {
-        hasExplicitPatternFlag = true;
+      if (arg.startsWith('--')) {
+        if (arg === '--regexp' || arg.startsWith('--regexp=')) {
+          hasExplicitPatternFlag = true;
+        }
+        if (arg === '--file' || arg.startsWith('--file=')) {
+          hasExplicitPatternFlag = true;
+          const fileArg = arg.includes('=') ? arg.slice(arg.indexOf('=') + 1) : args[i + 1];
+          if (fileArg && fileArg !== '-' && matchesFilePathForKinds(fileArg, kindSet, cwd)) {
+            return true;
+          }
+        }
+        if (arg === '--recursive') {
+          isRecursive = true;
+        }
+        if (SEARCH_VALUE_FLAGS.has(arg)) {
+          i += 1;
+        }
+        continue;
       }
 
-      const isAttachedShortF = isGrepOrRg && !arg.startsWith('--') && /^-[a-zA-Z]*f.+$/.test(arg);
-      const isBundledTrailingF =
-        isGrepOrRg && !arg.startsWith('--') && /^-[a-zA-Z]{2,}$/.test(arg) && arg.endsWith('f');
+      const cluster = arg.slice(1);
+      const firstEFIdx = isGrepOrRg ? cluster.search(/[ef]/) : -1;
+      const flagPrefix = firstEFIdx !== -1 ? cluster.slice(0, firstEFIdx) : cluster;
       if (
-        arg === '-f' ||
-        arg === '--file' ||
-        arg.startsWith('--file=') ||
-        isAttachedShortF ||
-        isBundledTrailingF
-      ) {
-        hasExplicitPatternFlag = true;
-        const fileArg = arg.includes('=')
-          ? arg.slice(arg.indexOf('=') + 1)
-          : isAttachedShortF
-          ? arg.slice(arg.indexOf('f') + 1)
-          : args[i + 1];
-        if (fileArg && fileArg !== '-' && matchesFilePathForKinds(fileArg, kindSet, cwd)) {
-          return true;
-        }
-      }
-      if (
-        arg === '--recursive' ||
-        (/^-[a-zA-Z]+$/.test(arg) && (arg.includes('r') || arg.includes('R')))
+        /^[a-zA-Z]+$/.test(flagPrefix) &&
+        (flagPrefix.includes('r') || flagPrefix.includes('R'))
       ) {
         isRecursive = true;
       }
-      if (SEARCH_VALUE_FLAGS.has(arg) || isBundledTrailingE || isBundledTrailingF) {
+
+      if (firstEFIdx !== -1 && /^[a-zA-Z]*$/.test(flagPrefix)) {
+        hasExplicitPatternFlag = true;
+        const flagChar = cluster[firstEFIdx];
+        const attachedVal = cluster.slice(firstEFIdx + 1);
+        if (flagChar === 'f') {
+          const fileArg = attachedVal.length > 0 ? attachedVal : args[i + 1];
+          if (fileArg && fileArg !== '-' && matchesFilePathForKinds(fileArg, kindSet, cwd)) {
+            return true;
+          }
+        }
+        if (attachedVal.length === 0) {
+          i += 1;
+        }
+        continue;
+      }
+
+      if (SEARCH_VALUE_FLAGS.has(arg)) {
         i += 1;
       }
       continue;
