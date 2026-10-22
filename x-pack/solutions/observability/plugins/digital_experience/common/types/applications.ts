@@ -1,0 +1,70 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/** `otel` is EDOT Browser data, `classic` is data written by the RUM agent. */
+export type ApplicationSource = 'otel' | 'classic';
+
+/** Share of samples per rating, each between 0 and 1; the three add up to 1. */
+export interface VitalRatings {
+  good: number;
+  needsImprovement: number;
+  poor: number;
+}
+
+/** A web vital measured in milliseconds (LCP, INP, FCP, TTFB). */
+export interface DurationVital {
+  /** 75th percentile in milliseconds, `null` without samples. */
+  p75Ms: number | null;
+  sampleCount: number;
+  /** `null` without samples. */
+  ratings: VitalRatings | null;
+}
+
+/** A web vital measured as a unitless score (CLS). */
+export interface ScoreVital {
+  /** 75th percentile, `null` without samples. */
+  p75: number | null;
+  sampleCount: number;
+  /** `null` without samples. */
+  ratings: VitalRatings | null;
+}
+
+/** One application of one source, over the requested time range and environment. */
+export interface ApplicationSummary {
+  serviceName: string;
+  source: ApplicationSource;
+  /** Environments the application reported in the time range; empty when none is set. */
+  environments: string[];
+  pageLoads: { count: number };
+  webVitals: {
+    lcp: DurationVital;
+    inp: DurationVital;
+    cls: ScoreVital;
+    fcp: DurationVital;
+    ttfb: DurationVital;
+  };
+  jsErrors: {
+    count: number;
+    /** Errors per page load, `null` without page loads. */
+    perPageLoad: number | null;
+  };
+  httpRequests: {
+    /** Requests with a known outcome. */
+    count: number;
+    failedCount: number;
+    /** `failedCount / count` between 0 and 1, `null` without requests. */
+    failedRatio: number | null;
+  };
+  /** Time of the latest document in the range (ISO 8601), `null` when unknown. */
+  lastSeen: string | null;
+}
+
+export interface ApplicationsResponse {
+  applications: ApplicationSummary[];
+  /** Every environment in the time range, whatever the `environment` filter, for the picker. */
+  environments: string[];
+}
