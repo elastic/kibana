@@ -30,7 +30,7 @@ const upsertSectionSchema = z.object({
 
 const upsertPanelSchema = z.object({
   id: idSchema.describe(
-    'Panel id. An existing panel id updates that panel; a new id creates a panel with this id. Use a short readable slug for new panels, e.g. "error-rate-trend". List each panel once; to move and edit a panel, set `section` and `content` in the same item.'
+    'Panel id. An existing panel id updates that panel; a new id creates a panel with this id. Use a short readable slug for new panels, e.g. "error-rate-trend". List each panel once; to move and edit a panel, set `section` and `content` in the same item. Ids are handles that never change: read panel titles for what a panel shows.'
   ),
   section: idSchema
     .nullable()
