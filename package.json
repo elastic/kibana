@@ -628,6 +628,7 @@
     "@kbn/dashboards-selector": "workspace:*",
     "@kbn/data-federation-plugin": "workspace:*",
     "@kbn/data-forge": "workspace:*",
+    "@kbn/data-grid": "workspace:*",
     "@kbn/data-grid-in-table-search": "workspace:*",
     "@kbn/data-lifecycle-phases": "workspace:*",
     "@kbn/data-plugin": "workspace:*",
