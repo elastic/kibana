@@ -278,7 +278,7 @@ describe('Outputs secrets', () => {
         esClient: esClientMock,
       });
 
-      expect(result.secretsToDelete).toEqual([{ id: 'pass' }]);
+      expect(result.secretsToDelete).toEqual([{ id: 'pass', path: 'secrets.password' }]);
     });
 
     it('should delete secret if type changed from remote es to kafka', async () => {
@@ -310,7 +310,7 @@ describe('Outputs secrets', () => {
         esClient: esClientMock,
       });
 
-      expect(result.secretsToDelete).toEqual([{ id: 'token' }]);
+      expect(result.secretsToDelete).toEqual([{ id: 'token', path: 'secrets.service_token' }]);
     });
 
     it('should delete secret if secret is undefined in update', async () => {
@@ -343,7 +343,7 @@ describe('Outputs secrets', () => {
         esClient: esClientMock,
       });
 
-      expect(result.secretsToDelete).toEqual([{ id: 'ssl-key-token' }]);
+      expect(result.secretsToDelete).toEqual([{ id: 'ssl-key-token', path: 'secrets.ssl.key' }]);
     });
 
     it('should delete OTLP key_pem secret when replaced by tpm credentials', async () => {
@@ -377,7 +377,9 @@ describe('Outputs secrets', () => {
         esClient: esClientMock,
       });
 
-      expect(result.secretsToDelete).toEqual([{ id: 'old-key-pem-id' }]);
+      expect(result.secretsToDelete).toEqual([
+        { id: 'old-key-pem-id', path: 'secrets.otlp_exporter.tls.key_pem' },
+      ]);
       expect(result.secretReferences).toEqual([
         { id: expect.anything() },
         { id: expect.anything() },

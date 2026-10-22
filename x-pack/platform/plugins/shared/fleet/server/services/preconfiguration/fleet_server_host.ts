@@ -193,6 +193,8 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
       await fleetServerHostService.update(soClient, esClient, id, data, {
         fromPreconfiguration: true,
         secretHashes,
+        // the Kibana config file declares the whole host: a secret it no longer names is removed
+        declaresAllSecrets: true,
       });
       await agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, id, {
         isDefault: data.is_default,

@@ -6,7 +6,7 @@
  */
 
 import type { SecretFieldDefinition } from './preserve';
-import { withSavedSecrets } from './preserve';
+import { omitNullSecrets, withSavedSecrets } from './preserve';
 
 const SSL_KEY: SecretFieldDefinition = {
   secretPath: 'secrets.ssl.key',
@@ -196,5 +196,34 @@ describe('withSavedSecrets', () => {
 
     expect(secrets?.ssl.key).toEqual(original.secrets.ssl.key);
     expect(secrets?.ssl.key).not.toBe(original.secrets.ssl.key);
+  });
+});
+
+describe('omitNullSecrets', () => {
+  it('removes a secret cleared by an update', () => {
+    expect(
+      omitNullSecrets({
+        name: 'output',
+        secrets: { ssl: { key: null }, service_token: { id: 'secret-1' } },
+      })
+    ).toEqual({ name: 'output', secrets: { service_token: { id: 'secret-1' } } });
+  });
+
+  it('removes the secrets of an object left without any', () => {
+    expect(omitNullSecrets({ name: 'output', secrets: { ssl: { key: null } } })).toEqual({
+      name: 'output',
+    });
+  });
+
+  it('keeps an object that has no secrets as it is', () => {
+    const attributes: { name: string; secrets?: unknown } = { name: 'output' };
+
+    expect(omitNullSecrets(attributes)).toBe(attributes);
+  });
+
+  it('keeps the secrets of an object that has no cleared one as they are', () => {
+    const attributes = { secrets: { ssl: { key: { id: 'secret-1' } } } };
+
+    expect(omitNullSecrets(attributes)).toEqual(attributes);
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep, get, has, unset } from 'lodash';
+import { cloneDeep, get, has, isEmpty, isPlainObject, unset } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
 /**
@@ -87,4 +87,34 @@ export function withSavedSecrets<T extends object>(opts: {
   });
 
   return result;
+}
+
+/** Removes the `null` values of an object, and the objects they leave empty. */
+const withoutNulls = (value: unknown): unknown => {
+  if (!isPlainObject(value)) {
+    return value;
+  }
+  const kept = Object.entries(value as Record<string, unknown>)
+    .filter(([, nested]) => nested !== null && nested !== undefined)
+    .map(([key, nested]) => [key, withoutNulls(nested)] as const)
+    // an object left empty by a removed secret is removed too
+    .filter(([, nested]) => !(isPlainObject(nested) && isEmpty(nested)));
+
+  return Object.fromEntries(kept);
+};
+
+/**
+ * Removes the secrets an update cleared with a `null` (see `withClearedSecretReferences`) from the
+ * attributes of a saved object, so a removed credential is not part of it. An object left without
+ * any secret is as if it never had one.
+ */
+export function omitNullSecrets<T extends { secrets?: unknown }>(attributes: T): T {
+  if (!isPlainObject(attributes.secrets)) {
+    return attributes;
+  }
+
+  const secrets = withoutNulls(attributes.secrets);
+  const { secrets: _secrets, ...otherAttributes } = attributes;
+
+  return (isEmpty(secrets) ? otherAttributes : { ...otherAttributes, secrets }) as T;
 }

@@ -52,7 +52,7 @@ import {
   isSecretStorageEnabled,
 } from './secrets';
 import { FLEET_SERVER_HOST_SECRET_FIELDS } from './secrets/fleet_server_hosts';
-import { withSavedSecrets } from './secrets/preserve';
+import { omitNullSecrets, withSavedSecrets } from './secrets/preserve';
 
 /** The SSL credentials of a Fleet Server host that can be stored as a secret. */
 const FLEET_SERVER_HOST_SSL_SECRET_KEYS = ['key', 'es_key', 'agent_key'] as const;
@@ -82,7 +82,8 @@ function ensureNoDuplicateSecrets(
 function savedObjectToFleetServerHost(
   so: SavedObject<FleetServerHostSOAttributes>
 ): FleetServerHost {
-  const { ssl, proxy_id: proxyId, ...attributes } = so.attributes;
+  // the references of the secrets an update removed are kept as `null` by the saved object update
+  const { ssl, proxy_id: proxyId, ...attributes } = omitNullSecrets(so.attributes);
 
   return {
     id: so.id,
@@ -391,7 +392,15 @@ class FleetServerHostService {
     esClient: ElasticsearchClient,
     id: string,
     data: Partial<FleetServerHost>,
-    options?: { fromPreconfiguration?: boolean; secretHashes?: Record<string, any> }
+    options?: {
+      fromPreconfiguration?: boolean;
+      secretHashes?: Record<string, any>;
+      /**
+       * The payload declares the whole host, so the secrets it leaves out are removed rather than
+       * kept. Set by preconfiguration, for which the Kibana config file is authoritative.
+       */
+      declaresAllSecrets?: boolean;
+    }
   ) {
     let secretsToDelete: SecretReference[] = [];
 
@@ -454,7 +463,7 @@ class FleetServerHostService {
     }
 
     const secretStorageEnabled = await isSecretStorageEnabled(esClient, soClient);
-    if (secretStorageEnabled) {
+    if (secretStorageEnabled && !options?.declaresAllSecrets) {
       // an update that does not touch a credential kept as a secret keeps it, and a plain text
       // value for such a credential is stored as a secret too. Applied after the checks above, so
       // that they still see the payload the caller sent.

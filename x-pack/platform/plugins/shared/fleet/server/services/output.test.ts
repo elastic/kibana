@@ -5400,6 +5400,68 @@ describe('Output Service', () => {
         });
       });
 
+      describe('a preconfigured update declares every secret', () => {
+        it('removes a secret the Kibana config file no longer declares', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-logstash-output-with-ssl',
+            {
+              name: 'n',
+              type: 'logstash',
+              hosts: ['test.fr:443'],
+              ssl: { certificate: 'CERT' },
+              is_preconfigured: true,
+            } as any,
+            { fromPreconfiguration: true, declaresAllSecrets: true }
+          );
+
+          // the saved secrets are not kept: the config file is authoritative
+          expect(sentSecrets().secrets).toBeUndefined();
+        });
+
+        it('stores a plain text value as plain text, as the config file declares it', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-logstash-output-with-ssl',
+            {
+              name: 'n',
+              type: 'logstash',
+              hosts: ['test.fr:443'],
+              ssl: { key: 'PLAIN_KEY' },
+              is_preconfigured: true,
+            } as any,
+            { fromPreconfiguration: true, declaresAllSecrets: true }
+          );
+
+          expect(sentSecrets().secrets).toBeUndefined();
+          expect(soClient.update).toHaveBeenCalledWith(
+            expect.anything(),
+            outputIdToUuid('existing-logstash-output-with-ssl'),
+            expect.objectContaining({ ssl: JSON.stringify({ key: 'PLAIN_KEY' }) })
+          );
+        });
+
+        it('keeps the saved secrets for an internal partial update', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-logstash-output-with-ssl',
+            { is_preconfigured: false },
+            { fromPreconfiguration: true }
+          );
+
+          expect(sentSecrets().secrets).toEqual({ ssl: { key: { id: 'wnES3pUBqsj3cVixODPG' } } });
+        });
+      });
+
       describe('an update that clears the credential removes it', () => {
         it('lets an explicit null ssl remove the stored key', async () => {
           const soClient = getMockedSoClient({});

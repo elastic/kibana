@@ -10,7 +10,13 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { NewFleetServerHost, FleetServerHost, SOSecretPath } from '../../../common/types';
 import type { SecretReference } from '../../types';
 
-import { deleteSOSecrets, extractAndWriteSOSecrets, extractAndUpdateSOSecrets } from './common';
+import {
+  deleteSOSecrets,
+  extractAndWriteSOSecrets,
+  extractAndUpdateSOSecrets,
+  withClearedSecretReferences,
+} from './common';
+import type { DeletedSOSecret } from './common';
 import type { SecretFieldDefinition } from './preserve';
 
 /**
@@ -53,7 +59,7 @@ export async function extractAndUpdateFleetServerHostsSecrets(opts: {
 }): Promise<{
   fleetServerHostUpdate: Partial<NewFleetServerHost>;
   secretReferences: SecretReference[];
-  secretsToDelete: SecretReference[];
+  secretsToDelete: DeletedSOSecret[];
 }> {
   const { oldFleetServerHost, fleetServerHostUpdate, esClient, secretHashes } = opts;
   const oldSecretPaths = getFleetServerHostsSecretPaths(oldFleetServerHost);
@@ -66,7 +72,12 @@ export async function extractAndUpdateFleetServerHostsSecrets(opts: {
     secretHashes,
   });
   return {
-    fleetServerHostUpdate: secretsRes.updatedSoObject,
+    // a deleted secret has its reference removed too, or the host would point at a secret that no
+    // longer exists
+    fleetServerHostUpdate: withClearedSecretReferences(
+      secretsRes.updatedSoObject,
+      secretsRes.secretsToDelete
+    ),
     secretReferences: secretsRes.secretReferences,
     secretsToDelete: secretsRes.secretsToDelete,
   };
