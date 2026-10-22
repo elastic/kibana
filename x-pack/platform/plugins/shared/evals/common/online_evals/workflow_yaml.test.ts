@@ -103,9 +103,38 @@ describe('online eval workflow yaml', () => {
       'max-delay': '1m',
       jitter: true,
     };
-    for (const step of evaluateEach.steps as Array<Record<string, unknown>>) {
+    const loopSteps = evaluateEach.steps as Array<Record<string, unknown>>;
+    for (const step of loopSteps.filter(({ name }) => name === 'evaluate' || name === 'persist')) {
       expect(step['on-failure']).toEqual({ retry: expectedRetry });
     }
+  });
+
+  it('fails the run when traces were sampled but none was persisted', () => {
+    const parsed = parseYamlToJSONWithoutValidation(buildOnlineEvalWorkflowYaml(getConfig()));
+    if (!parsed.success) {
+      throw new Error('Expected the generated workflow to be valid YAML');
+    }
+
+    const steps = (parsed.json as { steps: Array<Record<string, unknown>> }).steps;
+    const [, evaluateEach, guard] = steps;
+    expect((evaluateEach.steps as Array<Record<string, unknown>>).at(-1)).toEqual({
+      name: 'mark_persisted',
+      type: 'data.set',
+      with: { any_trace_persisted: true },
+    });
+    expect(guard).toEqual({
+      name: 'fail_if_every_trace_failed',
+      type: 'if',
+      condition:
+        '${{ steps.sample_traces.output.values.size > 0 and variables.any_trace_persisted != true }}',
+      steps: [
+        {
+          name: 'fail_run',
+          type: 'workflow.fail',
+          with: { message: 'Every sampled trace failed to evaluate or persist' },
+        },
+      ],
+    });
   });
 
   it('does not parse workflows that still use raw kibana.request steps', () => {

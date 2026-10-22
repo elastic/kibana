@@ -51,6 +51,14 @@ const buildStepOnFailure = () => ({
 // A trace whose retries are exhausted is skipped rather than failing the whole run.
 const ITERATION_ON_FAILURE = { continue: true };
 
+// Skipping failed traces would otherwise report a run as successful even when every trace failed
+// (for example a deleted connector), so each persisted trace sets a flag that a final step checks.
+const MARK_PERSISTED_STEP_NAME = 'mark_persisted';
+const FAIL_IF_EVERY_TRACE_FAILED_STEP_NAME = 'fail_if_every_trace_failed';
+const EVERY_TRACE_FAILED_CONDITION =
+  '${{ steps.sample_traces.output.values.size > 0 and variables.any_trace_persisted != true }}';
+const EVERY_TRACE_FAILED_MESSAGE = 'Every sampled trace failed to evaluate or persist';
+
 const WINDOW_AND_LAG_REGEX =
   /\|\s*WHERE\s+@timestamp\s*>=\s*NOW\(\)\s*-\s*(\d+)m\s+AND\s+@timestamp\s*<\s*NOW\(\)\s*-\s*(\d+)m/i;
 const LIMIT_REGEX = /\|\s*LIMIT\s+(\d+)/i;
@@ -290,6 +298,23 @@ export const buildOnlineEvalWorkflowYaml = (config: OnlineEvalWorkflowConfig): s
               errors: EVALUATE_ERRORS_TEMPLATE,
             },
             'on-failure': buildStepOnFailure(),
+          },
+          {
+            name: MARK_PERSISTED_STEP_NAME,
+            type: 'data.set',
+            with: { any_trace_persisted: true },
+          },
+        ],
+      },
+      {
+        name: FAIL_IF_EVERY_TRACE_FAILED_STEP_NAME,
+        type: 'if',
+        condition: EVERY_TRACE_FAILED_CONDITION,
+        steps: [
+          {
+            name: 'fail_run',
+            type: 'workflow.fail',
+            with: { message: EVERY_TRACE_FAILED_MESSAGE },
           },
         ],
       },
