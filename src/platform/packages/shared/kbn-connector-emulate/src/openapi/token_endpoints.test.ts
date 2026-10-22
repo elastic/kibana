@@ -91,6 +91,9 @@ describe('token endpoints', () => {
 
     expect(actual).toBe(status);
     expect(body.error).toEqual(expect.any(String));
+    expect(calls[0].requestViolations).toEqual([
+      expect.objectContaining({ code: body.error, message: body.error_description }),
+    ]);
   });
 
   it('accepts client credentials in a Basic header', async () => {
@@ -133,6 +136,96 @@ describe('token endpoints', () => {
 
     it('rejects an assertion that is not a JWT', async () => {
       expect((await exchange('not-a-jwt')).body.error).toBe('invalid_grant');
+    });
+  });
+
+  describe('servers', () => {
+    const withServers = (servers: unknown[], tokenUrl: string) => ({
+      ...spec,
+      servers,
+      components: {
+        securitySchemes: {
+          oauth: { type: 'oauth2', flows: { clientCredentials: { tokenUrl, scopes: {} } } },
+        },
+      },
+    });
+    const statusOf = async (mockFetch: typeof fetch, url: string) =>
+      (
+        await mockFetch(url, {
+          method: 'POST',
+          headers: FORM,
+          body: 'grant_type=client_credentials&client_id=id',
+        })
+      ).status;
+
+    it('resolves relative token URLs against templated servers', async () => {
+      const zendesk = withServers(
+        [
+          {
+            url: 'https://{subdomain}.zendesk.com/api/v2',
+            variables: { subdomain: { default: 'example' } },
+          },
+        ],
+        '/oauth/tokens'
+      );
+      const { fetch: mockFetch } = createEmulatorFetch({ specs: [zendesk] });
+
+      expect(await statusOf(mockFetch, 'https://acme.zendesk.com/oauth/tokens')).toBe(200);
+      expect(await statusOf(mockFetch, 'https://acme.zendesk.com/api/v2/oauth/tokens')).toBe(404);
+    });
+
+    it('resolves relative token URLs against every server', async () => {
+      const staged = withServers(
+        [{ url: 'https://api.example.com/v1' }, { url: 'https://staging.example.com/v1' }],
+        '/oauth/token'
+      );
+      const { fetch: mockFetch } = createEmulatorFetch({ specs: [staged] });
+
+      expect(await statusOf(mockFetch, 'https://api.example.com/oauth/token')).toBe(200);
+      expect(await statusOf(mockFetch, 'https://staging.example.com/oauth/token')).toBe(200);
+    });
+
+    it('keeps absolute token URLs of specs with relative servers', async () => {
+      const relative = withServers([{ url: '/v1' }], 'https://auth.example.com/oauth/token');
+      const { fetch: mockFetch } = createEmulatorFetch({ specs: [relative] });
+
+      expect(await statusOf(mockFetch, 'https://auth.example.com/oauth/token')).toBe(200);
+    });
+
+    it('matches relative token URLs of relative servers on any host', async () => {
+      const relative = withServers([{ url: '/v1' }], 'oauth/token');
+      const { fetch: mockFetch } = createEmulatorFetch({ specs: [relative] });
+
+      expect(await statusOf(mockFetch, 'https://anywhere.example.com/oauth/token')).toBe(200);
+    });
+
+    it('resolves token URLs against servers with a port variable', async () => {
+      const ported = withServers(
+        [{ url: 'https://api.example.com:{port}/v1', variables: { port: { default: '8443' } } }],
+        '/oauth/token'
+      );
+      const { fetch: mockFetch } = createEmulatorFetch({ specs: [ported] });
+
+      expect(await statusOf(mockFetch, 'https://api.example.com:8443/oauth/token')).toBe(200);
+    });
+
+    it('matches hosts but not paths case-insensitively', async () => {
+      const mixedCase = withServers(
+        [{ url: 'https://API.example.com/v1' }],
+        'https://Auth.example.com/OAuth/Token'
+      );
+      const { fetch: mockFetch } = createEmulatorFetch({ specs: [mixedCase] });
+
+      expect(await statusOf(mockFetch, 'https://auth.example.com/OAuth/Token')).toBe(200);
+      expect(await statusOf(mockFetch, 'https://auth.example.com/oauth/token')).toBe(404);
+    });
+
+    it('throws on token URLs that cannot be parsed', () => {
+      const invalid = withServers([{ url: 'https://api.example.com' }], 'https://exa mple.com/t');
+
+      expect(() => createEmulatorFetch({ specs: [invalid] })).toThrow(
+        'The tokenUrl of the clientCredentials flow of security scheme oauth "https://exa mple.com/t" is not a valid URL'
+      );
     });
   });
 });

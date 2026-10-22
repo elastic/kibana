@@ -80,7 +80,7 @@ describe('LibraryTemplateDetailPage', () => {
     rerender(<LibraryTemplateDetailPage {...routeProps('second-template')} />);
 
     expect(mockSetWorkflowsBreadcrumbs).toHaveBeenLastCalledWith([
-      { text: 'Template Library', href: '/app/workflows/library' },
+      { text: 'Template library', href: '/app/workflows/library' },
     ]);
   });
 

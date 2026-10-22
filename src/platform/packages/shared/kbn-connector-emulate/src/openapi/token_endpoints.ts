@@ -8,8 +8,9 @@
  */
 
 import type { ContractRequest, ContractResponse } from '../contract/types';
+import { compileUrlMatcher } from './match_operation';
 import { isRecord } from './schema_walk';
-import type { ContractOperation } from './types';
+import type { ContractOperation, OpenApiDocument, OperationServer, Violation } from './types';
 
 // The mock accepts any token, so the issued ones are fixed.
 const ACCESS_TOKEN = 'contract-mock-access-token';
@@ -33,35 +34,102 @@ const GRANT_PARAMETERS: Readonly<Record<string, readonly string[]>> = {
   [JWT_BEARER]: ['assertion'],
 };
 
-/** Grant types accepted per token URL, without query string. */
-export type TokenEndpoints = ReadonlyMap<string, ReadonlySet<string>>;
+/** Grant types accepted at the token URLs a request URL matches, if any. */
+export type TokenEndpoints = (url: URL) => ReadonlySet<string> | undefined;
 
-const toEndpoint = (url: unknown, base: string): string | undefined => {
-  if (typeof url !== 'string') {
-    return undefined;
+const ABSOLUTE_URL = /^[a-z][a-z\d+.-]*:/i;
+const ORIGIN = /^([a-z][a-z\d+.-]*:\/\/[^/?#]*)(.*)$/i;
+const TEMPLATE_VARIABLE = /\{[^}]+\}/g;
+// OpenAPI's default when a spec declares no servers.
+const DEFAULT_SERVER: OperationServer = { url: '/', variables: {} };
+
+const withoutQuery = (url: string): string => url.replace(/[?#].*$/, '');
+
+// RFC 3986 section 5.2.4.
+const removeDotSegments = (path: string): string => {
+  const output: string[] = [];
+  for (const segment of path.split('/')) {
+    if (segment === '..') {
+      if (output.length > 1) {
+        output.pop();
+      }
+    } else if (segment !== '.') {
+      output.push(segment);
+    }
   }
-  try {
-    const { origin, pathname } = new URL(url, base);
-    return `${origin}${pathname}`;
-  } catch {
-    return undefined;
-  }
+  return output.join('/');
 };
 
-/** Collects the token and refresh URLs of the OAuth 2 flows declared by the operations' specs. */
+// Resolves a token URL against a server as a URL reference (RFC 3986) on the templates
+// themselves, since `URL` rejects or mangles variables such as `{subdomain}` or `{port}`. Throws
+// when the token URL isn't a URL, checked with each variable as `0`, which any component accepts.
+const resolveTokenUrl = (
+  url: string,
+  { url: base, variables }: OperationServer
+): OperationServer => {
+  new URL(url.replace(TEMPLATE_VARIABLE, '0'), 'https://relative.invalid');
+  if (ABSOLUTE_URL.test(url)) {
+    return { url: withoutQuery(url), variables };
+  }
+  // Relative servers such as `/v1` have no origin, and their token URLs match on the path only.
+  const [, origin = '', basePath = base] = ORIGIN.exec(base) ?? [];
+  if (url.startsWith('//')) {
+    const [scheme = 'https'] = origin.split(':');
+    return { url: withoutQuery(`${scheme}:${url}`), variables };
+  }
+  const path = url.startsWith('/')
+    ? url
+    : `${withoutQuery(basePath || '/').replace(/[^/]*$/, '')}${url}`;
+  return { url: `${origin}${removeDotSegments(withoutQuery(path))}`, variables };
+};
+
+const uniqueServers = (operations: readonly ContractOperation[]): OperationServer[] => {
+  const servers = operations.flatMap(({ servers: declared }) =>
+    declared.length > 0 ? declared : [DEFAULT_SERVER]
+  );
+  return [...new Map(servers.map((server) => [JSON.stringify(server), server])).values()];
+};
+
+/**
+ * Collects the token and refresh URLs of the OAuth 2 flows declared by the operations' specs.
+ * Relative ones resolve against every server of the spec. Throws on URLs that can't be parsed.
+ */
 export const findTokenEndpoints = (operations: readonly ContractOperation[]): TokenEndpoints => {
-  const endpoints = new Map<string, Set<string>>();
-  const add = (url: string | undefined, grant: string) => {
-    if (url) {
-      endpoints.set(url, new Set([...(endpoints.get(url) ?? []), grant]));
+  const endpoints = new Map<string, { matches: (url: URL) => boolean; grants: Set<string> }>();
+  const operationsBySpec = new Map<OpenApiDocument, ContractOperation[]>();
+  for (const operation of operations) {
+    const { document } = operation.spec;
+    const specOperations = operationsBySpec.get(document);
+    if (specOperations) {
+      specOperations.push(operation);
+    } else {
+      operationsBySpec.set(document, [operation]);
     }
-  };
-  const specs = new Map(operations.map((operation) => [operation.spec.document, operation]));
-  for (const [document, { servers }] of specs) {
-    // Relative token URLs resolve against the API's server.
-    const base = servers[0]?.url ?? 'https://localhost/';
+  }
+  for (const [document, specOperations] of operationsBySpec) {
+    const servers = uniqueServers(specOperations);
+    const add = (url: unknown, grant: string, describe: () => string) => {
+      if (typeof url !== 'string') {
+        return;
+      }
+      for (const server of servers) {
+        let endpoint: OperationServer;
+        try {
+          endpoint = resolveTokenUrl(url, server);
+        } catch {
+          throw new Error(`${describe()} ${JSON.stringify(url)} is not a valid URL`);
+        }
+        const key = JSON.stringify(endpoint);
+        const existing = endpoints.get(key);
+        if (existing) {
+          existing.grants.add(grant);
+        } else {
+          endpoints.set(key, { matches: compileUrlMatcher(endpoint), grants: new Set([grant]) });
+        }
+      }
+    };
     const { securitySchemes } = isRecord(document.components) ? document.components : {};
-    for (const scheme of Object.values(isRecord(securitySchemes) ? securitySchemes : {})) {
+    for (const [name, scheme] of Object.entries(isRecord(securitySchemes) ? securitySchemes : {})) {
       if (!isRecord(scheme) || scheme.type !== 'oauth2' || !isRecord(scheme.flows)) {
         continue;
       }
@@ -69,22 +137,54 @@ export const findTokenEndpoints = (operations: readonly ContractOperation[]): To
         if (!isRecord(settings)) {
           continue;
         }
+        const describe = (field: string) => () =>
+          `The ${field} of the ${flow} flow of security scheme ${name}`;
         if (flow in FLOW_GRANTS) {
-          add(toEndpoint(settings.tokenUrl, base), FLOW_GRANTS[flow]);
+          add(settings.tokenUrl, FLOW_GRANTS[flow], describe('tokenUrl'));
           // OpenAPI has no flow for it, but token URLs commonly accept it too.
-          add(toEndpoint(settings.tokenUrl, base), JWT_BEARER);
+          add(settings.tokenUrl, JWT_BEARER, describe('tokenUrl'));
         }
-        add(toEndpoint(settings.refreshUrl ?? settings.tokenUrl, base), 'refresh_token');
+        const refreshField = settings.refreshUrl === undefined ? 'tokenUrl' : 'refreshUrl';
+        add(settings[refreshField], 'refresh_token', describe(refreshField));
       }
     }
   }
-  return endpoints;
+  const list = [...endpoints.values()];
+  return (url) => {
+    const grants = list
+      .filter(({ matches }) => matches(url))
+      .flatMap(({ grants: set }) => [...set]);
+    return grants.length > 0 ? new Set(grants) : undefined;
+  };
 };
 
-const oauthError = (statusCode: number, error: string, description: string): ContractResponse => ({
-  statusCode,
-  headers: { 'content-type': 'application/json' },
-  body: { error, error_description: description },
+/** A token URL's response, with the OAuth error of a rejected request as a violation. */
+export interface TokenExchange {
+  readonly response: ContractResponse;
+  readonly violations: readonly Violation[];
+}
+
+const oauthError = (
+  statusCode: number,
+  error: string,
+  description: string,
+  path: readonly string[]
+): TokenExchange => ({
+  response: {
+    statusCode,
+    headers: { 'content-type': 'application/json' },
+    body: { error, error_description: description },
+  },
+  violations: [{ path, code: error, message: description }],
+});
+
+const issued = (body: Record<string, unknown>): TokenExchange => ({
+  response: {
+    statusCode: 200,
+    headers: { 'content-type': 'application/json', 'cache-control': 'no-store' },
+    body,
+  },
+  violations: [],
 });
 
 const hasClientCredentials = (form: URLSearchParams, authorization: string | undefined) =>
@@ -108,55 +208,56 @@ const jwtClaims = (jwt: string): Record<string, unknown> | undefined => {
 export const respondToTokenRequest = (
   grants: ReadonlySet<string>,
   { method, headers, body }: ContractRequest
-): ContractResponse => {
+): TokenExchange => {
   if (method !== 'post') {
-    return oauthError(405, 'invalid_request', 'Token requests must use POST');
+    return oauthError(405, 'invalid_request', 'Token requests must use POST', ['method']);
   }
   if (!/^application\/x-www-form-urlencoded/i.test(headers['content-type'] ?? '')) {
     return oauthError(
       400,
       'invalid_request',
-      'Token requests must be sent as application/x-www-form-urlencoded'
+      'Token requests must be sent as application/x-www-form-urlencoded',
+      ['header', 'content-type']
     );
   }
   const form = new URLSearchParams(typeof body === 'string' ? body : '');
   const grant = form.get('grant_type') ?? '';
   if (!grants.has(grant)) {
     const accepted = [...grants].join(', ');
-    return oauthError(400, 'unsupported_grant_type', `Expected grant_type ${accepted}`);
+    return oauthError(400, 'unsupported_grant_type', `Expected grant_type ${accepted}`, [
+      'body',
+      'grant_type',
+    ]);
   }
   const missing = (GRANT_PARAMETERS[grant] ?? []).filter((name) => !form.get(name));
   if (missing.length > 0) {
-    return oauthError(400, 'invalid_request', `Missing ${missing.join(', ')}`);
+    return oauthError(400, 'invalid_request', `Missing ${missing.join(', ')}`, [
+      'body',
+      missing[0],
+    ]);
   }
   if (grant === 'client_credentials' && !hasClientCredentials(form, headers.authorization)) {
-    return oauthError(401, 'invalid_client', 'Expected client_id or Basic client authentication');
+    return oauthError(401, 'invalid_client', 'Expected client_id or Basic client authentication', [
+      'security',
+    ]);
   }
   if (grant === JWT_BEARER) {
     const claims = jwtClaims(form.get('assertion') ?? '');
     if (!claims) {
-      return oauthError(400, 'invalid_grant', 'The assertion is not a JWT');
+      return oauthError(400, 'invalid_grant', 'The assertion is not a JWT', ['body', 'assertion']);
     }
     // Google issues an ID token instead when the assertion asks for one.
-    const issued =
+    const token =
       typeof claims.target_audience === 'string'
         ? { id_token: ID_TOKEN }
         : { access_token: ACCESS_TOKEN, token_type: 'Bearer' };
-    return {
-      statusCode: 200,
-      headers: { 'content-type': 'application/json', 'cache-control': 'no-store' },
-      body: { ...issued, expires_in: 3600 },
-    };
+    return issued({ ...token, expires_in: 3600 });
   }
-  return {
-    statusCode: 200,
-    headers: { 'content-type': 'application/json', 'cache-control': 'no-store' },
-    body: {
-      access_token: ACCESS_TOKEN,
-      token_type: 'Bearer',
-      expires_in: 3600,
-      ...(grant === 'client_credentials' ? {} : { refresh_token: REFRESH_TOKEN }),
-      ...(form.get('scope') ? { scope: form.get('scope') } : {}),
-    },
-  };
+  return issued({
+    access_token: ACCESS_TOKEN,
+    token_type: 'Bearer',
+    expires_in: 3600,
+    ...(grant === 'client_credentials' ? {} : { refresh_token: REFRESH_TOKEN }),
+    ...(form.get('scope') ? { scope: form.get('scope') } : {}),
+  });
 };

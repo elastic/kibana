@@ -36,6 +36,7 @@ export interface EmulatorNamedOperation {
 export type EmulatorOperation = EmulatorHttpOperation | EmulatorNamedOperation;
 
 export interface LoadedProtocol {
+  readonly source?: string;
   readonly protocol: EmulatorNamedOperation['protocol'];
   readonly instance: ContractProtocol;
 }
