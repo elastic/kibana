@@ -18,6 +18,7 @@ project:
   sourceRoot: src/core/packages/logging/common-internal
 dependsOn:
   - '@kbn/logging'
+  - '@kbn/std'
 tags:
   - shared-common
   - package

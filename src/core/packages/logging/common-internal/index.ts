@@ -9,6 +9,7 @@
 
 export {
   PatternLayout,
+  toEcsLog,
   DateConversion,
   LoggerConversion,
   MessageConversion,
