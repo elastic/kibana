@@ -20,8 +20,6 @@ export type {
   AgenticInvestigationsPublicPluginSetup,
   AgenticInvestigationsPublicPluginStart,
 } from './types';
-export type { SubjectHrefResolver } from './subjects/attachments/subject_href';
-export type { SubjectRowData as InvestigationSubjectLinkTarget } from './subjects/attachments/subject_title';
 
 export {
   useAssignEscalation,

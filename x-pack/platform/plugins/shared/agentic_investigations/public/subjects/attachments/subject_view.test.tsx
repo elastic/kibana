@@ -7,12 +7,13 @@
 
 import React from 'react';
 import moment from 'moment';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSubject } from '../../../common/subjects/subject';
 import { createSubjectAttachmentRenderer } from './subject_attachment_definition';
-import { SubjectLinksContext, type SubjectHrefResolver, type SubjectLinks } from './subject_href';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { SubjectLinkServices } from './subject_link';
 import type { SubjectRowData } from './subject_title';
 import { SubjectList, SubjectView } from './subject_view';
 
@@ -23,19 +24,34 @@ const base = {
   createdAt: '2026-07-28T14:00:00.000Z',
 };
 
-const renderView = (subject: InvestigationSubject, subjectLinks: SubjectLinks = {}) =>
+const renderView = (subject: InvestigationSubject, services: SubjectLinkServices = {}) =>
   render(
     <EuiProvider>
       <I18nProvider>
-        <SubjectLinksContext.Provider value={subjectLinks}>
+        <KibanaContextProvider services={services}>
           <SubjectView document={subject} variant="details" />
-        </SubjectLinksContext.Provider>
+        </KibanaContextProvider>
       </I18nProvider>
     </EuiProvider>
   );
 
-const resolveSubjectHref: SubjectHrefResolver = ({ type, id }) =>
-  type === 'manual' ? undefined : `/app/solution/${type}/${id}`;
+/** A `share` whose locators resolve to `/located/<id>?<params>`. */
+const createShare = () => {
+  const navigate = jest.fn().mockResolvedValue(undefined);
+  const services = {
+    share: {
+      url: {
+        locators: {
+          get: (locatorId: string) => ({
+            getUrl: async (params: object) => `/located/${locatorId}?${JSON.stringify(params)}`,
+            navigate,
+          }),
+        },
+      },
+    },
+  } as unknown as SubjectLinkServices;
+  return { services, navigate };
+};
 
 describe('SubjectView', () => {
   it('renders an alert as one compact row that links to the alert URL', () => {
@@ -85,19 +101,8 @@ describe('SubjectView', () => {
     expect(screen.getByTestId('investigationSubjectTitle')).toHaveTextContent('alert-1');
   });
 
-  it('links an alert without a URL where the solution resolves it', () => {
-    renderView(
-      { ...base, subjectType: 'alert', subjectId: 'alert-1', snapshot: { rule_name: 'Latency' } },
-      { resolveSubjectHref }
-    );
-
-    const row = screen.getByTestId('investigationSubject-alert');
-    expect(row.tagName).toBe('A');
-    expect(row).toHaveAttribute('href', '/app/solution/alert/alert-1');
-    expect(row).not.toHaveAttribute('target');
-  });
-
-  it("prefers the solution's link over an alert's own URL", () => {
+  it("links an alert to its details page through the alerts locator, over the alert's own URL", async () => {
+    const { services } = createShare();
     renderView(
       {
         ...base,
@@ -105,69 +110,40 @@ describe('SubjectView', () => {
         subjectId: 'alert-1',
         snapshot: { rule_name: 'Latency', url: '/app/discover#/view/1' },
       },
-      { resolveSubjectHref }
+      services
     );
 
-    expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute(
-      'href',
-      '/app/solution/alert/alert-1'
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute(
+        'href',
+        '/located/ALERTS_LOCATOR?{"alertId":"alert-1"}'
+      )
     );
+    const row = screen.getByTestId('investigationSubject-alert');
+    expect(row).not.toHaveAttribute('target');
   });
 
-  it('opens a Kibana link in place, and leaves modified clicks to the browser', () => {
-    const navigateToUrl = jest.fn().mockResolvedValue(undefined);
+  it('links a significant event to the Significant Events app, opened in place', async () => {
+    const { services, navigate } = createShare();
     renderView(
       { ...base, subjectType: 'significant_event', subjectId: 'event-1', summary: 'Errors' },
-      { resolveSubjectHref, navigateToUrl }
+      services
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-significant_event').tagName).toBe('A')
     );
     const row = screen.getByTestId('investigationSubject-significant_event');
+    expect(row).toHaveAttribute(
+      'href',
+      '/located/SIGNIFICANT_EVENTS_APP_LOCATOR?{"tab":"significant_events","selectedEvent":"event-1"}'
+    );
 
     fireEvent.click(row, { metaKey: true });
-    expect(navigateToUrl).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
 
     fireEvent.click(row);
-    expect(navigateToUrl).toHaveBeenCalledWith('/app/solution/significant_event/event-1');
-  });
-
-  it('opens a Slack thread in a new tab rather than in place', () => {
-    const navigateToUrl = jest.fn();
-    renderView(
-      {
-        ...base,
-        subjectType: 'slack_thread',
-        subjectId: 't-1',
-        slack: { channel: 'oncall', thread_ts: '1', permalink: 'https://x.slack.com/p1' },
-      },
-      { navigateToUrl }
-    );
-
-    fireEvent.click(screen.getByTestId('investigationSubject-slack_thread'));
-    expect(navigateToUrl).not.toHaveBeenCalled();
-  });
-
-  it('links a significant event where the solution resolves it', () => {
-    renderView(
-      {
-        ...base,
-        subjectType: 'significant_event',
-        subjectId: 'event-1',
-        summary: 'Checkout errors spiked',
-      },
-      { resolveSubjectHref }
-    );
-
-    const row = screen.getByTestId('investigationSubject-significant_event');
-    expect(row.tagName).toBe('A');
-    expect(row).toHaveAttribute('href', '/app/solution/significant_event/event-1');
-  });
-
-  it('does not link a resolved URL that is not a path or http(s) URL', () => {
-    renderView(
-      { ...base, subjectType: 'significant_event', subjectId: 'event-1', summary: 'Errors' },
-      { resolveSubjectHref: () => 'data:text/html,hello' }
-    );
-
-    expect(screen.getByTestId('investigationSubject-significant_event').tagName).toBe('DIV');
+    expect(navigate).toHaveBeenCalledWith({ tab: 'significant_events', selectedEvent: 'event-1' });
   });
 
   it('renders a significant event and a question by their summary, without a link', () => {
@@ -347,10 +323,10 @@ describe('createSubjectAttachmentRenderer', () => {
     expect(getLabel({ ...base, subjectType: 'manual', subjectId: 'q' })).toBe('Question');
   });
 
-  it('links the loaded content where the resolver says', async () => {
-    const SubjectContent = await createSubjectAttachmentRenderer({
-      resolveSubjectHref,
-    }).loadContent();
+  it("links the loaded content through the plugin's locators", async () => {
+    const SubjectContent = await createSubjectAttachmentRenderer(
+      createShare().services
+    ).loadContent();
 
     render(
       <EuiProvider>
@@ -363,9 +339,11 @@ describe('createSubjectAttachmentRenderer', () => {
       </EuiProvider>
     );
 
-    expect(screen.getByTestId('investigationSubject-significant_event')).toHaveAttribute(
-      'href',
-      '/app/solution/significant_event/event-1'
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-significant_event')).toHaveAttribute(
+        'href',
+        '/located/SIGNIFICANT_EVENTS_APP_LOCATOR?{"tab":"significant_events","selectedEvent":"event-1"}'
+      )
     );
   });
 });

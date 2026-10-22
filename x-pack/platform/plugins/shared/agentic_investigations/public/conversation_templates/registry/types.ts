@@ -14,7 +14,6 @@ import type {
   RenderStatus,
 } from '@kbn/agentic-investigations-common';
 import type { AgenticInvestigationsPublicStartDependencies, ImpactEntityOpener } from '../../types';
-import type { SubjectLinks } from '../../subjects/attachments/subject_href';
 
 export type TemplateStartDependencies = AgenticInvestigationsPublicStartDependencies & {
   agentBuilder: AgentBuilderPluginStart;
@@ -45,8 +44,6 @@ export interface TemplateRegistrationContext {
   renderStatus: RenderStatus;
   /** Read at render time: a solution registers the opener from its own start, after this plugin's. */
   getImpactEntityOpener: () => ImpactEntityOpener | undefined;
-  /** Links subjects to the pages solutions registered for them, opened inside Kibana. */
-  subjectLinks: SubjectLinks;
 }
 
 /** A conversation template whose details flyout UI this plugin registers with Agent Builder. */

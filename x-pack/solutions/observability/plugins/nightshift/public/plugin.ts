@@ -110,7 +110,6 @@ export class NightshiftPlugin
           return;
         }
         this.availabilitySubscription = startNightshiftServices({
-          coreStart,
           pluginsStart,
           appUpdater$: this.appUpdater$,
           context: this.context,

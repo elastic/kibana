@@ -13,8 +13,8 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { ComponentType } from 'react';
 import type { ProposalsPublicPluginStart } from '@kbn/proposals-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { InvestigationCardProps } from './conversation_templates/templates/investigation/card';
-import type { SubjectHrefResolver } from './subjects/attachments/subject_href';
 
 export interface AgenticInvestigationsPublicSetupDependencies {
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
@@ -23,6 +23,8 @@ export interface AgenticInvestigationsPublicSetupDependencies {
 export interface AgenticInvestigationsPublicStartDependencies {
   agentBuilder?: AgentBuilderPluginStart;
   proposals?: ProposalsPublicPluginStart;
+  /** Locators that link investigation subjects (alerts, significant events) to their pages. */
+  share?: SharePluginStart;
 }
 
 /** The part of `xpack.agenticInvestigations` exposed to the browser. */
@@ -44,12 +46,6 @@ export interface AgenticInvestigationsPublicPluginStart {
    * plugin's start, so the overview reads it when a row is clicked rather than at registration.
    */
   registerImpactEntityOpener: (opener: ImpactEntityOpener) => void;
-  /**
-   * Registers where subjects the solution owns open, for subjects that carry no link themselves
-   * (an alert without `kibana.alert.url`, a significant event). Resolvers are asked in
-   * registration order; the first link wins. Read when a subject renders.
-   */
-  registerSubjectHrefResolver: (resolver: SubjectHrefResolver) => void;
   /**
    * The investigation card the `investigation` template's brief card renders, for a solution
    * that lists investigations from the query API itself. Loaded on first render.
