@@ -80,6 +80,7 @@ import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import type { EntityViewMode } from '../../../common/entity_analytics/entity_store/resolution_group';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
+import { GenerateAiBriefButton } from '../components/home/ai_brief/generate_ai_brief_button';
 import { useKibana } from '../../common/lib/kibana';
 import { APP_ID, SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { ENTITY_PROMPT } from '../../agent_builder/components/prompts';
@@ -913,6 +914,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: alertsTrend,
         isLoading: alertBasedLoading,
+        entityIds: severeAlertsEntityIds,
+        isUnavailable: Boolean(alertBasedError),
         noDataMessage: !canReadAlerts
           ? NO_ALERTS_ACCESS_MESSAGE
           : alertBasedTimedOut
@@ -946,6 +949,9 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: anomaliesHistoryMissing,
         trend: anomaliesTrend,
         isLoading: anomaliesLoading,
+        entityIds: anomaliesEntityIds,
+        // Without ML jobs the tile shows 0, which isn't a real count.
+        isUnavailable: Boolean(anomaliesError) || anomaliesMissingJobs,
         noDataMessage: !canReadAnomalies
           ? NO_ANOMALIES_ACCESS_MESSAGE
           : anomaliesTimedOut
@@ -984,6 +990,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: riskMoversHistoryMissing,
         trend: riskMoversTrend,
         isLoading: riskMoversLoading,
+        entityIds: riskMoversEntityIds,
+        isUnavailable: Boolean(riskMoversError),
         noDataMessage: !canReadRisk
           ? NO_RISK_ACCESS_MESSAGE
           : riskMoversTimedOut
@@ -1021,6 +1029,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: newlyHCHistoryMissing,
         trend: newlyHCTrend,
         isLoading: newlyHCLoading,
+        entityIds: newlyHCEntityIds,
+        isUnavailable: Boolean(newlyHCError),
         noDataMessage: !canReadRisk
           ? NO_RISK_ACCESS_MESSAGE
           : newlyHCTimedOut
@@ -1060,6 +1070,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: watchlistedTrend,
         isLoading: alertBasedLoading,
+        entityIds: watchlistedEntityIds,
+        isUnavailable: Boolean(alertBasedError),
         noDataMessage: !canReadAlerts
           ? NO_ALERTS_ACCESS_MESSAGE
           : alertBasedTimedOut
@@ -1089,6 +1101,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: newEntityHistoryMissing,
         trend: newEntityTrend,
         isLoading: newEntityLoading,
+        entityIds: newEntityEntityIds,
+        isUnavailable: Boolean(newEntityError),
         noDataMessage: newEntityTimedOut ? TILE_TIMEOUT_MESSAGE : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
@@ -1106,6 +1120,17 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
       },
     ],
     [
+      severeAlertsEntityIds,
+      anomaliesEntityIds,
+      riskMoversEntityIds,
+      newlyHCEntityIds,
+      watchlistedEntityIds,
+      newEntityEntityIds,
+      alertBasedError,
+      anomaliesError,
+      riskMoversError,
+      newlyHCError,
+      newEntityError,
       canReadAlerts,
       canReadAnomalies,
       canReadRisk,
@@ -1292,6 +1317,14 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
             `}
           >
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <GenerateAiBriefButton
+                  cards={signalCards}
+                  timeRange={timeRange}
+                  entityFilters={entityFilters}
+                  focusTileId={activeTile ?? undefined}
+                />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <HuntWithAiButton />
               </EuiFlexItem>
