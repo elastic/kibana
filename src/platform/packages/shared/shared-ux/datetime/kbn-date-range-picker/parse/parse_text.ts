@@ -8,6 +8,7 @@
  */
 
 import dateMath from '@elastic/datemath';
+import { getTimeRangeResolution } from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
@@ -424,9 +425,6 @@ function dateStringToDate(
   return null;
 }
 
-const usesMilliseconds = (bound: DateString): boolean =>
-  bound.startsWith('now') && bound.includes('ms');
-
 /**
  * Builds a complete {@link TimeRange} from start/end datemath strings,
  * resolving dates, types, and offsets automatically.
@@ -440,21 +438,21 @@ function buildRange(
 ): TimeRange {
   const startType = dateStringToType(start);
   const endType = dateStringToType(end);
-  // Anchor both bounds to the same instant. Truncate to the last whole second
-  // unless a bound uses milliseconds, where the sub-second part is meaningful.
-  const keepMilliseconds = usesMilliseconds(start) || usesMilliseconds(end);
+  // Anchor both bounds to the same instant, rounded down to the time range resolution
+  // unless a bound uses a finer unit, where the extra precision is meaningful.
+  const resolution = getTimeRangeResolution(start, end);
   const now = moment();
-  const forceNow = (keepMilliseconds ? now : now.startOf('second')).toDate();
+  const forceNow = (resolution ? now.startOf(resolution) : now).toDate();
   const endDate = dateStringToDate(end, formats, { roundUp: true, forceNow });
   const range: TimeRange = {
     value: text,
     start,
     end,
     startDate: dateStringToDate(start, formats, { forceNow }),
-    // Rounding up (`/d`, `/h`, ...) lands on `.999`; end on the last whole second instead.
+    // Rounding up (`/d`, `/h`, ...) lands on `.999`; end on the last whole unit instead.
     endDate:
-      endDate && endType !== DATE_TYPE_ABSOLUTE && !keepMilliseconds
-        ? moment(endDate).startOf('second').toDate()
+      endDate && endType !== DATE_TYPE_ABSOLUTE && resolution
+        ? moment(endDate).startOf(resolution).toDate()
         : endDate,
     type: [startType, endType],
     isNaturalLanguage,

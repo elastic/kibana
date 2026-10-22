@@ -21,10 +21,7 @@ import { getTime, getRelativeTime } from '../../../common';
 import type { TimeHistoryContract } from './time_history';
 import type { AutoRefreshDoneFn } from './lib/auto_refresh_loop';
 import { createAutoRefreshLoop } from './lib/auto_refresh_loop';
-import {
-  calculateWholeSecondBounds,
-  getWholeSecondAbsoluteTimeRange,
-} from './lib/whole_second_bounds';
+import { calculateRoundedBounds, getRoundedAbsoluteTimeRange } from './lib/rounded_bounds';
 import type { TimefilterHook } from './use_timefilter';
 import { createUseTimefilterHook } from './use_timefilter';
 
@@ -133,7 +130,7 @@ export class Timefilter {
    * Same as {@link getTime}, but also converts relative time range to absolute time range
    */
   public getAbsoluteTime() {
-    return getWholeSecondAbsoluteTimeRange(this._time, this.nowProvider.get());
+    return getRoundedAbsoluteTimeRange(this._time, this.nowProvider.get());
   }
 
   /** Sets the time (moment input is stored as ISO strings) and emits when it changes. */
@@ -227,7 +224,7 @@ export class Timefilter {
    */
   public createFilter = (indexPattern: DataView, timeRange?: TimeRange) => {
     const forceNow = this.nowProvider.get();
-    const absoluteTimeRange = getWholeSecondAbsoluteTimeRange(timeRange ?? this._time, forceNow);
+    const absoluteTimeRange = getRoundedAbsoluteTimeRange(timeRange ?? this._time, forceNow);
     return getTime(indexPattern, absoluteTimeRange, { forceNow });
   };
 
@@ -250,7 +247,7 @@ export class Timefilter {
   }
 
   public calculateBounds(timeRange: TimeRange): TimeRangeBounds {
-    return calculateWholeSecondBounds(timeRange, this.nowProvider.get());
+    return calculateRoundedBounds(timeRange, this.nowProvider.get());
   }
 
   public getActiveBounds(): TimeRangeBounds | undefined {

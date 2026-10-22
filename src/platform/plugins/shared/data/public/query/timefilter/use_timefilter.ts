@@ -13,7 +13,7 @@ import { BehaviorSubject, Subject, combineLatest, map, share, skip } from 'rxjs'
 import { cloneDeep } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 import type { Timefilter } from './timefilter';
-import { getWholeSecondAbsoluteTimeRange } from './lib/whole_second_bounds';
+import { getRoundedAbsoluteTimeRange } from './lib/rounded_bounds';
 import type { NowProviderInternalContract } from '../../now_provider';
 
 type TimeStateChange = 'initial' | 'shift' | 'override';
@@ -30,7 +30,7 @@ export interface TimefilterHook {
 }
 
 function materializeTimeRange(timeRange: TimeRange, forceNow: Date): TimeState {
-  const asAbsolute = getWholeSecondAbsoluteTimeRange(timeRange, forceNow);
+  const asAbsolute = getRoundedAbsoluteTimeRange(timeRange, forceNow);
   const start = new Date(asAbsolute.from);
   const end = new Date(asAbsolute.to);
 

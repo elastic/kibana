@@ -8,9 +8,9 @@
  */
 
 import moment from 'moment';
-import { calculateWholeSecondBounds, getWholeSecondAbsoluteTimeRange } from './whole_second_bounds';
+import { calculateRoundedBounds, getRoundedAbsoluteTimeRange } from './rounded_bounds';
 
-describe('whole second bounds', () => {
+describe('rounded bounds', () => {
   const now = new Date('2026-10-22T12:34:56.789Z');
 
   beforeAll(() => {
@@ -21,27 +21,27 @@ describe('whole second bounds', () => {
     moment.tz.setDefault('Browser');
   });
 
-  describe('calculateWholeSecondBounds', () => {
+  describe('calculateRoundedBounds', () => {
     test('truncates "now" to the last whole second', () => {
-      const { min, max } = calculateWholeSecondBounds({ from: 'now-15m', to: 'now' }, now);
+      const { min, max } = calculateRoundedBounds({ from: 'now-15m', to: 'now' }, now);
       expect(min?.toISOString()).toBe('2026-10-22T12:19:56.000Z');
       expect(max?.toISOString()).toBe('2026-10-22T12:34:56.000Z');
     });
 
     test('ends rounded-up relative bounds on the last whole second', () => {
-      const { min, max } = calculateWholeSecondBounds({ from: 'now/d', to: 'now/d' }, now);
+      const { min, max } = calculateRoundedBounds({ from: 'now/d', to: 'now/d' }, now);
       expect(min?.toISOString()).toBe('2026-10-22T00:00:00.000Z');
       expect(max?.toISOString()).toBe('2026-10-22T23:59:59.000Z');
     });
 
     test('keeps milliseconds when a bound uses the ms unit', () => {
-      const { min, max } = calculateWholeSecondBounds({ from: 'now-500ms', to: 'now/d' }, now);
+      const { min, max } = calculateRoundedBounds({ from: 'now-500ms', to: 'now/d' }, now);
       expect(min?.toISOString()).toBe('2026-10-22T12:34:56.289Z');
       expect(max?.toISOString()).toBe('2026-10-22T23:59:59.999Z');
     });
 
     test('keeps millisecond precision on absolute bounds', () => {
-      const { min, max } = calculateWholeSecondBounds(
+      const { min, max } = calculateRoundedBounds(
         { from: '2026-10-21T01:02:03.456Z', to: '2026-10-21T04:05:06.789Z' },
         now
       );
@@ -50,22 +50,22 @@ describe('whole second bounds', () => {
     });
 
     test('returns undefined bounds for empty input', () => {
-      const { min, max } = calculateWholeSecondBounds({ from: '', to: '' }, now);
+      const { min, max } = calculateRoundedBounds({ from: '', to: '' }, now);
       expect(min).toBeUndefined();
       expect(max).toBeUndefined();
     });
   });
 
-  describe('getWholeSecondAbsoluteTimeRange', () => {
+  describe('getRoundedAbsoluteTimeRange', () => {
     test('converts relative bounds to whole-second ISO strings', () => {
-      expect(getWholeSecondAbsoluteTimeRange({ from: 'now-15m', to: 'now/d' }, now)).toEqual({
+      expect(getRoundedAbsoluteTimeRange({ from: 'now-15m', to: 'now/d' }, now)).toEqual({
         from: '2026-10-22T12:19:56.000Z',
         to: '2026-10-22T23:59:59.000Z',
       });
     });
 
     test('falls back to the input when bounds cannot be resolved', () => {
-      expect(getWholeSecondAbsoluteTimeRange({ from: '', to: 'now' }, now)).toEqual({
+      expect(getRoundedAbsoluteTimeRange({ from: '', to: 'now' }, now)).toEqual({
         from: '',
         to: '2026-10-22T12:34:56.000Z',
       });
