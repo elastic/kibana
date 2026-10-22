@@ -6,6 +6,7 @@
  */
 
 import {
+  createHttpServiceAccountsApi,
   ensureNightshiftServiceAccounts,
   NightshiftServiceAccountSetupError,
   type ListedServiceAccount,
@@ -163,5 +164,37 @@ describe('ensureNightshiftServiceAccounts', () => {
     await expect(ensureNightshiftServiceAccounts(api, { isServerless: false })).rejects.toThrow(
       'boom'
     );
+  });
+});
+
+describe('createHttpServiceAccountsApi', () => {
+  it('lists, reads roles and creates accounts through the security APIs', async () => {
+    const request = jest.fn(async (path: string, { method }: { method: string }) => {
+      if (path.startsWith('/api/security/role/')) {
+        if (path.endsWith('_nightshift_automations')) {
+          throw Object.assign(new Error('Not Found'), { status: 404 });
+        }
+        return {};
+      }
+      return method === 'GET' ? { serviceAccounts: [] } : { id: 'uiam-1' };
+    });
+    const api = createHttpServiceAccountsApi({
+      request: request as Parameters<typeof createHttpServiceAccountsApi>[0]['request'],
+      getStatus: (error) => (error as { status?: number }).status,
+    });
+
+    await expect(api.listServiceAccounts({ limit: 100 })).resolves.toEqual({
+      serviceAccounts: [],
+    });
+    await expect(api.roleExists('_nightshift_agent')).resolves.toBe(true);
+    await expect(api.roleExists('_nightshift_automations')).resolves.toBe(false);
+    await expect(
+      api.createServiceAccount({ name: 'nightshift_agent', description: 'd', roles: ['r'] })
+    ).resolves.toEqual({ id: 'uiam-1' });
+    expect(request).toHaveBeenLastCalledWith('/internal/security/service_account', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'nightshift_agent', description: 'd', roles: ['r'] }),
+    });
+    expect(api.isConflict({ status: 409 })).toBe(true);
   });
 });

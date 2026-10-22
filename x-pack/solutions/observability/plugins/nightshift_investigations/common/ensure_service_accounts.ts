@@ -54,6 +54,48 @@ export interface NightshiftServiceAccountsApi {
   isConflict: (error: unknown) => boolean;
 }
 
+/**
+ * {@link NightshiftServiceAccountsApi} over a Kibana HTTP client, for tests and evals that set a
+ * space up through the API. `request` resolves to the response body and rejects on an error
+ * status, which `getStatus` reads.
+ */
+export const createHttpServiceAccountsApi = ({
+  request,
+  getStatus,
+}: {
+  request: <T>(
+    path: string,
+    options: {
+      method: 'GET' | 'POST';
+      query?: Record<string, string | number>;
+      body?: string;
+      version?: string;
+    }
+  ) => Promise<T>;
+  getStatus: (error: unknown) => number | undefined;
+}): NightshiftServiceAccountsApi => ({
+  listServiceAccounts: (query) =>
+    request<ListedServiceAccountsPage>(SECURITY_SERVICE_ACCOUNT_URL, { method: 'GET', query }),
+  roleExists: async (roleName) => {
+    try {
+      await request(getSecurityRoleUrl(roleName), {
+        method: 'GET',
+        version: SECURITY_ROLE_API_VERSION,
+      });
+      return true;
+    } catch (error) {
+      if (getStatus(error) === 404) return false;
+      throw error;
+    }
+  },
+  createServiceAccount: (params) =>
+    request<{ id: string }>(SECURITY_SERVICE_ACCOUNT_URL, {
+      method: 'POST',
+      body: JSON.stringify(params),
+    }),
+  isConflict: (error) => getStatus(error) === 409,
+});
+
 export type NightshiftServiceAccountSetupErrorCode =
   /** The deployment lacks the role the account must hold. */
   | 'role_missing'
