@@ -81,6 +81,7 @@ export function OnboardingShell() {
     awsServiceMatrixError,
     refetchAwsServiceMatrix,
     isDataFormatResolved,
+    detectAndReviewStep,
   } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
@@ -118,6 +119,13 @@ export function OnboardingShell() {
     const prevStep = ONBOARDING_STEPS[currentStepIndex - 1];
     return () => history.push({ ...history.location, hash: `#${prevStep.id}` });
   }, [currentStepIndex, history]);
+
+  // Once something is deployed (resumed with ?deploymentId=, or deployed in this session), leaving
+  // only drops the unsaved changes: the policies stay in Fleet.
+  const hasDeployment =
+    new URLSearchParams(location.search).has('deploymentId') ||
+    Object.keys(detectAndReviewStep.serviceStatuses).length > 0 ||
+    Object.keys(detectAndReviewStep.policyIdsByInstance).length > 0;
 
   const handleCancelFlow = useCallback(() => {
     const returnUrl = getReturnUrl(integrationId);
@@ -236,27 +244,48 @@ export function OnboardingShell() {
         <EuiConfirmModal
           aria-labelledby={cancelModalTitleId}
           titleProps={{ id: cancelModalTitleId }}
-          title={i18n.translate('xpack.ingestHub.onboardingShell.cancelModal.title', {
-            defaultMessage: 'Cancel onboarding?',
-          })}
+          title={
+            hasDeployment
+              ? i18n.translate('xpack.ingestHub.onboardingShell.cancelModal.deployedTitle', {
+                  defaultMessage: 'Leave onboarding?',
+                })
+              : i18n.translate('xpack.ingestHub.onboardingShell.cancelModal.title', {
+                  defaultMessage: 'Cancel onboarding?',
+                })
+          }
           onCancel={() => setIsCancelModalOpen(false)}
           onConfirm={handleCancelFlow}
           cancelButtonText={i18n.translate(
             'xpack.ingestHub.onboardingShell.cancelModal.keepEditingButton',
             { defaultMessage: 'Keep editing' }
           )}
-          confirmButtonText={i18n.translate(
-            'xpack.ingestHub.onboardingShell.cancelModal.cancelOnboardingButton',
-            { defaultMessage: 'Cancel onboarding' }
-          )}
-          buttonColor="danger"
+          confirmButtonText={
+            hasDeployment
+              ? i18n.translate('xpack.ingestHub.onboardingShell.cancelModal.leaveButton', {
+                  defaultMessage: 'Leave onboarding',
+                })
+              : i18n.translate(
+                  'xpack.ingestHub.onboardingShell.cancelModal.cancelOnboardingButton',
+                  {
+                    defaultMessage: 'Cancel onboarding',
+                  }
+                )
+          }
+          buttonColor={hasDeployment ? 'primary' : 'danger'}
           data-test-subj="onboardingCancelModal"
         >
           <p>
-            <FormattedMessage
-              id="xpack.ingestHub.onboardingShell.cancelModal.body"
-              defaultMessage="Your changes will be lost if you cancel the flow."
-            />
+            {hasDeployment ? (
+              <FormattedMessage
+                id="xpack.ingestHub.onboardingShell.cancelModal.deployedBody"
+                defaultMessage="Your deployed services stay in place. Changes you have not deployed will be lost."
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.ingestHub.onboardingShell.cancelModal.body"
+                defaultMessage="Your changes will be lost if you cancel the flow."
+              />
+            )}
           </p>
         </EuiConfirmModal>
       )}

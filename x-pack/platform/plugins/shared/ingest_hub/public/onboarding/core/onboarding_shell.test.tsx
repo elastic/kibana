@@ -291,6 +291,25 @@ describe('OnboardingShell — cancelling the flow from the first step', () => {
     expect(navigateToApp).not.toHaveBeenCalled();
   });
 
+  it('says the deployed services stay when the flow is resumed with ?deploymentId=', () => {
+    renderAt('/aws?deploymentId=dep-1#services');
+    fireEvent.click(screen.getByTestId('servicesStep-back'));
+
+    const modal = screen.getByTestId('onboardingCancelModal');
+    expect(modal).toHaveTextContent('Leave onboarding?');
+    expect(modal).toHaveTextContent('Your deployed services stay in place.');
+    expect(modal).not.toHaveTextContent('Your changes will be lost if you cancel the flow.');
+    expect(screen.getByTestId('confirmModalConfirmButton')).toHaveTextContent('Leave onboarding');
+  });
+
+  it('keeps the plain wording while nothing is deployed', () => {
+    renderAt('/aws#services');
+    fireEvent.click(screen.getByTestId('servicesStep-back'));
+
+    expect(screen.getByTestId('onboardingCancelModal')).toHaveTextContent('Cancel onboarding?');
+    expect(screen.getByTestId('confirmModalConfirmButton')).toHaveTextContent('Cancel onboarding');
+  });
+
   it('stays in the flow when the user keeps editing', () => {
     renderAt('/aws#services');
     fireEvent.click(screen.getByTestId('servicesStep-back'));
