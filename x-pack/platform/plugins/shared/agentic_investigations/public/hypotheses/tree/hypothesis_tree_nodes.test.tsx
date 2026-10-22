@@ -144,44 +144,6 @@ describe('HypothesisTreeNode', () => {
     expect(link).toHaveAttribute('target', '_blank');
   });
 
-  it('links a significant event trigger through its locator, opened in place', async () => {
-    const actions = { onSelectAction: jest.fn(), onSelectNode: jest.fn() };
-    const navigate = jest.fn().mockResolvedValue(undefined);
-    const services = {
-      share: {
-        url: {
-          locators: {
-            get: (locatorId: string) => ({
-              getUrl: async () => `/located/${locatorId}`,
-              navigate,
-            }),
-          },
-        },
-      },
-    } as unknown as SubjectLinkServices;
-    renderNode(
-      {
-        kind: 'trigger',
-        title: 'Checkout errors spiked',
-        subjects: [
-          { type: 'significant_event', id: 'se-1', summary: 'Checkout errors', created_at: 'x' },
-        ],
-        ...flags,
-      },
-      actions,
-      services
-    );
-
-    const link = await screen.findByTestId('investigationHypothesisTreeTriggerLink');
-    expect(link).toHaveTextContent('View significant event');
-    expect(link).toHaveAttribute('href', '/located/SIGNIFICANT_EVENTS_APP_LOCATOR');
-    expect(link).not.toHaveAttribute('target');
-
-    fireEvent.click(link);
-    expect(navigate).toHaveBeenCalledWith({ tab: 'significant_events', selectedEvent: 'se-1' });
-    expect(actions.onSelectNode).not.toHaveBeenCalled();
-  });
-
   it('does not link a subject without a link', () => {
     renderNode({
       kind: 'trigger',

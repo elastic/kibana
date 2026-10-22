@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type { ProposalConfidence } from '@kbn/proposals-common';
 import type { HypothesisStatus } from '../../../common/hypotheses/hypotheses';
-import type { InvestigationSubjectType } from '../../../common/subjects/subject';
 import { HYPOTHESIS_STATUS_LABELS } from '../attachments/translations';
 
 export const HYPOTHESIS_TREE_TITLE = i18n.translate(
@@ -105,19 +104,11 @@ export const INVESTIGATING_LABEL = i18n.translate(
   }
 );
 
-/** The trigger node's link label, by the type of the subject it opens. */
-export const OPEN_SUBJECT_LABELS: Record<InvestigationSubjectType, string> = {
-  alert: i18n.translate('xpack.agenticInvestigations.hypothesisTree.node.viewAlert', {
-    defaultMessage: 'View alert',
-  }),
-  significant_event: i18n.translate(
-    'xpack.agenticInvestigations.hypothesisTree.node.viewSignificantEvent',
-    { defaultMessage: 'View significant event' }
-  ),
-  manual: i18n.translate('xpack.agenticInvestigations.hypothesisTree.node.viewQuestion', {
-    defaultMessage: 'View question',
-  }),
-  slack_thread: i18n.translate('xpack.agenticInvestigations.hypothesisTree.node.openSlackThread', {
-    defaultMessage: 'Open in Slack',
-  }),
-};
+export const VIEW_ALERT_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.hypothesisTree.node.viewAlert',
+  { defaultMessage: 'View alert' }
+);
+export const OPEN_SLACK_THREAD_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.hypothesisTree.node.openSlackThread',
+  { defaultMessage: 'Open in Slack' }
+);

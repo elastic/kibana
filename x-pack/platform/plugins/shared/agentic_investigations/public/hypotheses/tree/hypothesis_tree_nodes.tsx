@@ -33,8 +33,9 @@ import { HYPOTHESIS_TREE_NODE_WIDTH } from './layout_hypothesis_graph';
 import { ProposalStatusBadge } from './proposal_status_badge';
 import {
   NODE_LABELS,
-  OPEN_SUBJECT_LABELS,
+  OPEN_SLACK_THREAD_LABEL,
   PROPOSAL_CONFIDENCE_LABELS,
+  VIEW_ALERT_LABEL,
   actionsCountLabel,
   hypothesesCountLabel,
   hypothesisStatusCountLabel,
@@ -499,7 +500,7 @@ const HypothesisTreeNodeComponent = ({
                   {rest.length > 0 && ` · ${moreSubjectsLabel(rest.length)}`}
                 </EuiText>
               )}
-              {first && href && (
+              {href && (
                 <EuiText size="xs">
                   <EuiLink
                     href={href}
@@ -512,7 +513,7 @@ const HypothesisTreeNodeComponent = ({
                       onTriggerLinkClick?.(event);
                     }}
                   >
-                    {OPEN_SUBJECT_LABELS[first.type]}
+                    {isSlack ? OPEN_SLACK_THREAD_LABEL : VIEW_ALERT_LABEL}
                   </EuiLink>
                 </EuiText>
               )}

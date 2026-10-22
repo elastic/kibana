@@ -36,14 +36,8 @@ describe('getSubjectLocatorTarget', () => {
     );
   });
 
-  it('opens a significant event in the Significant Events app', () => {
-    expect(getSubjectLocatorTarget({ type: 'significant_event', id: 'se-1' })).toEqual({
-      locatorId: 'SIGNIFICANT_EVENTS_APP_LOCATOR',
-      params: { tab: 'significant_events', selectedEvent: 'se-1' },
-    });
-  });
-
-  it('has no page for questions and Slack threads', () => {
+  it('has no page for significant events, questions and Slack threads', () => {
+    expect(getSubjectLocatorTarget({ type: 'significant_event', id: 'se-1' })).toBeUndefined();
     expect(getSubjectLocatorTarget({ type: 'manual', id: 'q-1' })).toBeUndefined();
     expect(getSubjectLocatorTarget({ type: 'slack_thread', id: 't-1' })).toBeUndefined();
   });

@@ -8,11 +8,7 @@
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ALERTING_V2_EPISODES_LOCATOR } from '@kbn/alerting-v2-constants';
-import {
-  ALERTS_LOCATOR_ID,
-  createObservabilityAlertingV2Host,
-  SIGNIFICANT_EVENTS_APP_LOCATOR_ID,
-} from '@kbn/deeplinks-observability';
+import { ALERTS_LOCATOR_ID, createObservabilityAlertingV2Host } from '@kbn/deeplinks-observability';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -42,7 +38,7 @@ export type SubjectLocatorInput = Pick<SubjectRowData, 'type' | 'id'> & {
 /**
  * The page a subject opens, as a locator and its params, from the subject's type and id: an
  * alert's details page (a classic alert by its `kibana.alert.uuid`, an alerting v2 alert by its
- * episode id), or a significant event in the Significant Events app.
+ * episode id).
  */
 export const getSubjectLocatorTarget = ({
   type,
@@ -57,12 +53,6 @@ export const getSubjectLocatorTarget = ({
   }
   if (type === 'alert') {
     return { locatorId: ALERTS_LOCATOR_ID, params: { alertId: id } };
-  }
-  if (type === 'significant_event') {
-    return {
-      locatorId: SIGNIFICANT_EVENTS_APP_LOCATOR_ID,
-      params: { tab: 'significant_events', selectedEvent: id },
-    };
   }
   return undefined;
 };
@@ -108,7 +98,8 @@ export interface SubjectLink {
 
 /**
  * Where a click on a subject goes: the page its locator resolves to, else the link it carries.
- * Subjects without either (a question, a Slack thread without a permalink) do not link.
+ * Subjects without either (a significant event, a question, a Slack thread without a permalink)
+ * do not link.
  */
 export const useSubjectLink = (subject: SubjectRowData | undefined): SubjectLink => {
   const { share } = useKibana<SubjectLinkServices>().services;
