@@ -7,14 +7,11 @@
 
 import Boom from '@hapi/boom';
 import { ToolType } from '@kbn/agent-builder-common';
+import { i18n } from '@kbn/i18n';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/core/server';
 import { nightshiftSourceSlugField, updateSourceRequestSchema } from '@kbn/nightshift-shared';
 import { lazySchema, z } from '@kbn/zod/v4';
 import dedent from 'dedent';
-import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
-import type { GetScopedClients } from '../../../routes/types';
-import type { SignificantEventsServer } from '../../../types';
 import { resolveSource } from '../../utils/resolve_source_slugs';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import {
@@ -23,7 +20,9 @@ import {
 } from '../sources/onboarding_paused';
 import { runSourceTool } from '../sources/run_source_tool';
 import { SOURCE_ESQL_RULES } from '../sources/source_esql_rules';
+import type { MaintenanceStateReader, SourceToolDeps } from '../sources/source_tool_deps';
 import { toSourceSummary } from '../sources/source_summary';
+import { formatSourceToolError } from '../sources/source_tool_error';
 import { SIGNIFICANT_EVENTS_SOURCE_UPDATE_TOOL_ID } from '../tool_ids';
 
 const sourceUpdateSchema = lazySchema(() => {
@@ -45,16 +44,20 @@ const sourceUpdateSchema = lazySchema(() => {
   });
 });
 
+const withoutUndefined = <TValue>(
+  fields: Record<string, TValue | undefined>
+): Record<string, TValue> =>
+  Object.fromEntries(
+    Object.entries(fields).filter((entry): entry is [string, TValue] => entry[1] !== undefined)
+  );
+
 export const createSourceUpdateTool = ({
   getScopedClients,
   server,
   logger,
   maintenanceService,
-}: {
-  getScopedClients: GetScopedClients;
-  server: SignificantEventsServer;
-  logger: Logger;
-  maintenanceService: Pick<SignificantEventsMaintenanceService, 'getState'>;
+}: SourceToolDeps & {
+  maintenanceService: MaintenanceStateReader;
 }): BuiltinToolDefinition<typeof sourceUpdateSchema> => ({
   id: SIGNIFICANT_EVENTS_SOURCE_UPDATE_TOOL_ID,
   type: ToolType.builtin,
@@ -65,13 +68,15 @@ export const createSourceUpdateTool = ({
     A new query is validated and run as the current user, so the user needs read access to the
     indices it targets. An invalid query returns an error that says why, and nothing is changed.
 
-    Returns the updated source. ${ONBOARDING_PAUSED_DESCRIPTION}
+    Returns the updated source. ${ONBOARDING_PAUSED_DESCRIPTION} When other fields are changed together
+    with \`enabled\` and only setting \`enabled\` fails, the other changes are kept and
+    \`enabled_change_failed\` says why. Tell the user which part did not apply.
   `,
   annotations: {
     title: 'Update Nightshift Source',
     readOnlyHint: false,
     destructiveHint: false,
-    idempotentHint: true,
+    idempotentHint: false,
     openWorldHint: false,
   },
   schema: sourceUpdateSchema,
@@ -79,15 +84,35 @@ export const createSourceUpdateTool = ({
   confirmation: {
     askUser: 'always',
     getConfirmation: async ({ toolParams: { source, ...changes } }) => {
-      const changeList = Object.entries(changes)
-        .filter(([, value]) => value !== undefined)
+      const changeList = Object.entries(withoutUndefined(changes))
         .map(([field, value]) => `${field}: ${JSON.stringify(value)}`)
         .join(', ');
       return {
-        title: 'Update Nightshift Source',
-        message: `Update source "${source}" (${changeList})?`,
-        confirm_text: 'Update',
-        cancel_text: 'Cancel',
+        title: i18n.translate(
+          'xpack.significantEvents.agentBuilder.tools.sourceUpdate.confirmation.title',
+          {
+            defaultMessage: 'Update Nightshift Source',
+          }
+        ),
+        message: i18n.translate(
+          'xpack.significantEvents.agentBuilder.tools.sourceUpdate.confirmation.message',
+          {
+            defaultMessage: 'Update source "{source}" ({changeList})?',
+            values: { source, changeList },
+          }
+        ),
+        confirm_text: i18n.translate(
+          'xpack.significantEvents.agentBuilder.tools.sourceUpdate.confirmation.confirm',
+          {
+            defaultMessage: 'Update',
+          }
+        ),
+        cancel_text: i18n.translate(
+          'xpack.significantEvents.agentBuilder.tools.sourceUpdate.confirmation.cancel',
+          {
+            defaultMessage: 'Cancel',
+          }
+        ),
       };
     },
   },
@@ -101,9 +126,7 @@ export const createSourceUpdateTool = ({
       server,
       logger,
       run: async ({ sourcesClient }) => {
-        const changedFields = Object.fromEntries(
-          Object.entries(changes).filter(([, value]) => value !== undefined)
-        );
+        const changedFields = withoutUndefined(changes);
         const hasContentChanges = Object.keys(changedFields).length > 0;
         if (!hasContentChanges && enabled === undefined) {
           throw Boom.badRequest('Nothing to update: pass at least one field to change');
@@ -119,12 +142,29 @@ export const createSourceUpdateTool = ({
             updateSourceRequestSchema.parse({ ...current, ...changedFields })
           );
         }
+        let enabledChangeFailed: { requested: boolean; message: string } | undefined;
         if (enabled !== undefined) {
-          updated = await sourcesClient.setEnabled(current.id, enabled);
+          try {
+            updated = await sourcesClient.setEnabled(current.id, enabled);
+          } catch (error) {
+            if (!hasContentChanges) {
+              throw error;
+            }
+            // The other changes are saved already, so report them rather than a plain failure.
+            const reason = formatSourceToolError(error);
+            logger.error(
+              `Failed to update source ${current.id}: setting enabled failed: ${reason}`
+            );
+            enabledChangeFailed = {
+              requested: enabled,
+              message: `The other changes were saved, but setting enabled to ${enabled} failed: ${reason}. The enabled state of the source is unknown and the \`enabled\` value in this result may be out of date. Call source_get to check it.`,
+            };
+          }
         }
 
         return {
           ...toSourceSummary(updated),
+          ...(enabledChangeFailed && { enabled_change_failed: enabledChangeFailed }),
           ...(await getOnboardingPausedFlag({ maintenanceService, request })),
         };
       },

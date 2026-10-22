@@ -7,15 +7,13 @@
 
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/core/server';
 import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
 import { lazySchema, z } from '@kbn/zod/v4';
 import dedent from 'dedent';
-import type { GetScopedClients } from '../../../routes/types';
-import type { SignificantEventsServer } from '../../../types';
 import { resolveSource } from '../../utils/resolve_source_slugs';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { runSourceTool } from '../sources/run_source_tool';
+import type { SourceToolDeps } from '../sources/source_tool_deps';
 import { toSourceSummary } from '../sources/source_summary';
 import { SIGNIFICANT_EVENTS_SOURCE_GET_TOOL_ID } from '../tool_ids';
 
@@ -29,11 +27,7 @@ export const createSourceGetTool = ({
   getScopedClients,
   server,
   logger,
-}: {
-  getScopedClients: GetScopedClients;
-  server: SignificantEventsServer;
-  logger: Logger;
-}): BuiltinToolDefinition<typeof sourceGetSchema> => ({
+}: SourceToolDeps): BuiltinToolDefinition<typeof sourceGetSchema> => ({
   id: SIGNIFICANT_EVENTS_SOURCE_GET_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`

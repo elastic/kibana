@@ -42,7 +42,7 @@ describe('source_delete tool', () => {
     });
 
   beforeEach(() => {
-    (assertSignificantEventsAccess as jest.Mock).mockReset().mockResolvedValue(undefined);
+    jest.mocked(assertSignificantEventsAccess).mockReset().mockResolvedValue(undefined);
   });
 
   it('deletes the source found by slug', async () => {

@@ -114,10 +114,10 @@ describe('registerAgentBuilderTools', () => {
       const availability = 'availability' in tool ? tool.availability : undefined;
       expect(availability).toBeDefined();
 
-      (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+      jest.mocked(assertSignificantEventsAccess).mockResolvedValue(undefined);
       expect(await availability?.handler(availabilityContext)).toEqual({ status: 'available' });
 
-      (assertSignificantEventsAccess as jest.Mock).mockRejectedValue(new Error('feature disabled'));
+      jest.mocked(assertSignificantEventsAccess).mockRejectedValue(new Error('feature disabled'));
       expect(await availability?.handler(availabilityContext)).toEqual({
         status: 'unavailable',
         reason: 'feature disabled',

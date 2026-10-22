@@ -48,7 +48,7 @@ describe('source_get tool', () => {
   };
 
   beforeEach(() => {
-    (assertSignificantEventsAccess as jest.Mock).mockReset().mockResolvedValue(undefined);
+    jest.mocked(assertSignificantEventsAccess).mockReset().mockResolvedValue(undefined);
   });
 
   it('returns a source found by slug with the health of its view', async () => {

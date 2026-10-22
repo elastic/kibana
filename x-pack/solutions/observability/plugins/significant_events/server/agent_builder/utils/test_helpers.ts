@@ -14,6 +14,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { ZodObject } from '@kbn/zod/v4';
 import type { z } from '@kbn/zod/v4';
@@ -21,6 +22,7 @@ import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { KnowledgeIndicatorClient } from '../../lib/knowledge_indicators';
 import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/types';
 import type { SignificantEventsServer } from '../../types';
+import type { SourceToolDeps } from '../tools/sources/source_tool_deps';
 
 /**
  * Subset of RouteHandlerScopedClients that tools actually use.
@@ -163,8 +165,8 @@ export const createSourceToolDeps = ({
   sourcesClient,
 }: {
   featurePrivilege: NightshiftFeaturePrivilege;
-  sourcesClient: object;
-}) => ({
+  sourcesClient: Partial<SourcesClient>;
+}): SourceToolDeps => ({
   getScopedClients: jest.fn().mockResolvedValue({ licensing: {}, sourcesClient }),
   server: createSignificantEventsServer({ featurePrivilege }),
   logger: loggingSystemMock.createLogger(),

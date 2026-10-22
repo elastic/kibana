@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import type { OtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
-import type { GetScopedClients } from '../../../routes/types';
 import {
   assertCanManageSignificantEvents,
   assertCanReadSignificantEvents,
 } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
-import type { SignificantEventsServer } from '../../../types';
+import type { SourceToolDeps } from './source_tool_deps';
 import { formatSourceToolError } from './source_tool_error';
 
 const PRIVILEGE_ASSERTIONS = {
@@ -23,11 +23,7 @@ const PRIVILEGE_ASSERTIONS = {
   manage: assertCanManageSignificantEvents,
 };
 
-/**
- * What every source tool does around its own work: checks that the feature is accessible and that
- * the caller holds the privilege, runs `run`, and turns any failure into an error result that
- * names the `action` and carries a message the agent can relay.
- */
+/** Runs `run` after the access and privilege checks, turning any failure into an error result for the agent. */
 export const runSourceTool = async ({
   action,
   privilege,
@@ -36,15 +32,12 @@ export const runSourceTool = async ({
   server,
   logger,
   run,
-}: {
+}: SourceToolDeps & {
   /** What the tool does, as it reads in "Failed to <action>: <reason>". */
   action: string;
   privilege: keyof typeof PRIVILEGE_ASSERTIONS;
   request: KibanaRequest;
-  getScopedClients: GetScopedClients;
-  server: SignificantEventsServer;
-  logger: Logger;
-  run: (params: { sourcesClient: SourcesClient }) => Promise<Record<string, unknown>>;
+  run: (params: { sourcesClient: SourcesClient }) => Promise<OtherResult['data']>;
 }): Promise<ToolHandlerStandardReturn> => {
   try {
     const { licensing, sourcesClient } = await getScopedClients({ request });

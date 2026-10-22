@@ -6,16 +6,15 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
+import { i18n } from '@kbn/i18n';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/core/server';
 import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
 import { lazySchema, z } from '@kbn/zod/v4';
 import dedent from 'dedent';
-import type { GetScopedClients } from '../../../routes/types';
-import type { SignificantEventsServer } from '../../../types';
 import { resolveSource } from '../../utils/resolve_source_slugs';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { runSourceTool } from '../sources/run_source_tool';
+import type { SourceToolDeps } from '../sources/source_tool_deps';
 import { SIGNIFICANT_EVENTS_SOURCE_DELETE_TOOL_ID } from '../tool_ids';
 
 const sourceDeleteSchema = lazySchema(() =>
@@ -28,11 +27,7 @@ export const createSourceDeleteTool = ({
   getScopedClients,
   server,
   logger,
-}: {
-  getScopedClients: GetScopedClients;
-  server: SignificantEventsServer;
-  logger: Logger;
-}): BuiltinToolDefinition<typeof sourceDeleteSchema> => ({
+}: SourceToolDeps): BuiltinToolDefinition<typeof sourceDeleteSchema> => ({
   id: SIGNIFICANT_EVENTS_SOURCE_DELETE_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
@@ -47,7 +42,7 @@ export const createSourceDeleteTool = ({
     title: 'Delete Nightshift Source',
     readOnlyHint: false,
     destructiveHint: true,
-    idempotentHint: true,
+    idempotentHint: false,
     openWorldHint: false,
   },
   schema: sourceDeleteSchema,
@@ -55,10 +50,32 @@ export const createSourceDeleteTool = ({
   confirmation: {
     askUser: 'always',
     getConfirmation: async ({ toolParams: { source } }) => ({
-      title: 'Delete Nightshift Source',
-      message: `Delete source "${source}"? Its view, Knowledge Indicators and rules are removed too, and any running onboarding is cancelled. This cannot be undone.`,
-      confirm_text: 'Delete',
-      cancel_text: 'Cancel',
+      title: i18n.translate(
+        'xpack.significantEvents.agentBuilder.tools.sourceDelete.confirmation.title',
+        {
+          defaultMessage: 'Delete Nightshift Source',
+        }
+      ),
+      message: i18n.translate(
+        'xpack.significantEvents.agentBuilder.tools.sourceDelete.confirmation.message',
+        {
+          defaultMessage:
+            'Delete source "{source}"? Its view, Knowledge Indicators and rules are removed too, and any running onboarding is cancelled. This cannot be undone.',
+          values: { source },
+        }
+      ),
+      confirm_text: i18n.translate(
+        'xpack.significantEvents.agentBuilder.tools.sourceDelete.confirmation.confirm',
+        {
+          defaultMessage: 'Delete',
+        }
+      ),
+      cancel_text: i18n.translate(
+        'xpack.significantEvents.agentBuilder.tools.sourceDelete.confirmation.cancel',
+        {
+          defaultMessage: 'Cancel',
+        }
+      ),
     }),
   },
   availability: createSignificantEventsAvailability({ server, logger }),

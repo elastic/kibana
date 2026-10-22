@@ -11,7 +11,7 @@ import {
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
   type SignificantEventsWorkflowStatus,
 } from '@kbn/significant-events-schema';
-import type { ApiClientFixture, EsClient, KbnClient } from '@kbn/scout-oblt';
+import type { ApiClientFixture, ApiClientResponse, EsClient, KbnClient } from '@kbn/scout-oblt';
 import { COMMON_API_HEADERS, PUBLIC_API_HEADERS } from './constants';
 
 export const RULE_EVENTS_INDEX = '.rule-events';
@@ -70,7 +70,7 @@ export const executeTool = (
   headers: Record<string, string>,
   toolId: string,
   toolParams: object
-) =>
+): Promise<ApiClientResponse> =>
   apiClient.post(TOOL_EXECUTE_ENDPOINT, {
     headers,
     body: { tool_id: toolId, tool_params: toolParams },

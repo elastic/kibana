@@ -6,14 +6,11 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
+import { i18n } from '@kbn/i18n';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/core/server';
 import { createSourceRequestSchema } from '@kbn/nightshift-shared';
 import { lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
-import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
-import type { GetScopedClients } from '../../../routes/types';
-import type { SignificantEventsServer } from '../../../types';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import {
   getOnboardingPausedFlag,
@@ -21,6 +18,7 @@ import {
 } from '../sources/onboarding_paused';
 import { runSourceTool } from '../sources/run_source_tool';
 import { SOURCE_ESQL_RULES } from '../sources/source_esql_rules';
+import type { MaintenanceStateReader, SourceToolDeps } from '../sources/source_tool_deps';
 import { toSourceSummary } from '../sources/source_summary';
 import { SIGNIFICANT_EVENTS_SOURCE_CREATE_TOOL_ID } from '../tool_ids';
 
@@ -41,11 +39,8 @@ export const createSourceCreateTool = ({
   server,
   logger,
   maintenanceService,
-}: {
-  getScopedClients: GetScopedClients;
-  server: SignificantEventsServer;
-  logger: Logger;
-  maintenanceService: Pick<SignificantEventsMaintenanceService, 'getState'>;
+}: SourceToolDeps & {
+  maintenanceService: MaintenanceStateReader;
 }): BuiltinToolDefinition<typeof sourceCreateSchema> => ({
   id: SIGNIFICANT_EVENTS_SOURCE_CREATE_TOOL_ID,
   type: ToolType.builtin,
@@ -69,10 +64,31 @@ export const createSourceCreateTool = ({
   confirmation: {
     askUser: 'always',
     getConfirmation: async ({ toolParams: { title, esql } }) => ({
-      title: 'Create Nightshift Source',
-      message: `Create source "${title}" with query: ${esql}?`,
-      confirm_text: 'Create',
-      cancel_text: 'Cancel',
+      title: i18n.translate(
+        'xpack.significantEvents.agentBuilder.tools.sourceCreate.confirmation.title',
+        {
+          defaultMessage: 'Create Nightshift Source',
+        }
+      ),
+      message: i18n.translate(
+        'xpack.significantEvents.agentBuilder.tools.sourceCreate.confirmation.message',
+        {
+          defaultMessage: 'Create source "{title}" with query: {esql}?',
+          values: { title, esql },
+        }
+      ),
+      confirm_text: i18n.translate(
+        'xpack.significantEvents.agentBuilder.tools.sourceCreate.confirmation.confirm',
+        {
+          defaultMessage: 'Create',
+        }
+      ),
+      cancel_text: i18n.translate(
+        'xpack.significantEvents.agentBuilder.tools.sourceCreate.confirmation.cancel',
+        {
+          defaultMessage: 'Cancel',
+        }
+      ),
     }),
   },
   availability: createSignificantEventsAvailability({ server, logger }),

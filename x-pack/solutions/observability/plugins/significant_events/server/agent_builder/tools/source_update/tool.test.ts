@@ -52,7 +52,7 @@ describe('source_update tool', () => {
     });
 
   beforeEach(() => {
-    (assertSignificantEventsAccess as jest.Mock).mockReset().mockResolvedValue(undefined);
+    jest.mocked(assertSignificantEventsAccess).mockReset().mockResolvedValue(undefined);
   });
 
   it('changes only the given fields and keeps the rest', async () => {
@@ -78,6 +78,52 @@ describe('source_update tool', () => {
         {
           type: 'other',
           data: expect.objectContaining({ title: 'Checkout v2', enabled: false }),
+        },
+      ],
+    });
+  });
+
+  it('keeps the saved changes and reports the failure when only setting enabled fails', async () => {
+    const renamed = { ...checkout, title: 'Checkout v2' };
+    const update = jest.fn().mockResolvedValue(renamed);
+    const setEnabled = jest.fn().mockRejectedValue(new Error('rules could not be aligned'));
+
+    const result = await createTool({ update, setEnabled }).handler(
+      { source: 'checkout', title: 'Checkout v2', enabled: false },
+      createMockToolContext()
+    );
+
+    expect(result).toEqual({
+      results: [
+        {
+          type: 'other',
+          data: expect.objectContaining({
+            title: 'Checkout v2',
+            enabled_change_failed: {
+              requested: false,
+              message: expect.stringContaining('The other changes were saved'),
+            },
+          }),
+        },
+      ],
+    });
+  });
+
+  it('returns an error when setting enabled fails and nothing else was changed', async () => {
+    const update = jest.fn();
+    const setEnabled = jest.fn().mockRejectedValue(new Error('rules could not be aligned'));
+
+    const result = await createTool({ update, setEnabled }).handler(
+      { source: 'checkout', enabled: false },
+      createMockToolContext()
+    );
+
+    expect(update).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      results: [
+        {
+          type: 'error',
+          data: { message: expect.stringContaining('Failed to update source') },
         },
       ],
     });

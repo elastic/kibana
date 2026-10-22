@@ -31,7 +31,7 @@ describe('source_list tool', () => {
     });
 
   beforeEach(() => {
-    (assertSignificantEventsAccess as jest.Mock).mockReset().mockResolvedValue(undefined);
+    jest.mocked(assertSignificantEventsAccess).mockReset().mockResolvedValue(undefined);
   });
 
   it('lists every source of the space, whatever its enabled state', async () => {

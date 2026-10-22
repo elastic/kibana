@@ -44,7 +44,7 @@ describe('source_create tool', () => {
     });
 
   beforeEach(() => {
-    (assertSignificantEventsAccess as jest.Mock).mockReset().mockResolvedValue(undefined);
+    jest.mocked(assertSignificantEventsAccess).mockReset().mockResolvedValue(undefined);
   });
 
   it('creates the source and flags a paused space', async () => {
