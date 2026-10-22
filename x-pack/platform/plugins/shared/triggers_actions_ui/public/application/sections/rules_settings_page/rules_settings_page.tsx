@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { AppHeader, type AppHeaderBadge } from '@kbn/app-header';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
@@ -53,6 +53,7 @@ const CLASSIC_RULES_ONLY_BADGE: AppHeaderBadge = {
  */
 export const RulesSettingsPageContainer = () => {
   const history = useHistory();
+  const location = useLocation<{ returnPath?: string }>();
   const {
     chrome: { docTitle },
     docLinks,
@@ -64,7 +65,7 @@ export const RulesSettingsPageContainer = () => {
 
   const form = useRulesSettingsForm({
     enabled: true,
-    onClose: () => history.push('/'),
+    onClose: () => history.push(location.state?.returnPath || '/'),
   });
   const { isSaveDisabled, onSave, onCancel } = form;
 

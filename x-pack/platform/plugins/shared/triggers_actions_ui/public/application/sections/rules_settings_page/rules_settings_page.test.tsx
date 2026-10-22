@@ -88,8 +88,10 @@ const mockFlappingSetting: RulesSettingsFlapping = {
   updatedAt: new Date().toISOString(),
 };
 
-const renderPage = () => {
-  const history = createMemoryHistory({ initialEntries: ['/settings'] });
+const renderPage = (returnPath?: string) => {
+  const history = createMemoryHistory({
+    initialEntries: [{ pathname: '/settings', state: returnPath ? { returnPath } : undefined }],
+  });
   render(
     <IntlProvider locale="en">
       <QueryClientProvider client={queryClient}>
@@ -214,5 +216,24 @@ describe('RulesSettingsPageContainer', () => {
 
     expect(updateFlappingSettingsMock).not.toHaveBeenCalled();
     expect(history.location.pathname).toBe('/');
+  });
+
+  it('returns to the page it was opened from on Cancel', async () => {
+    const history = renderPage('/logs');
+    await screen.findByTestId('rulesSettingsFlappingSection');
+
+    await userEvent.click(screen.getByTestId('rulesSettingsPageCancelButton'));
+
+    expect(history.location.pathname).toBe('/logs');
+  });
+
+  it('returns to the page it was opened from after saving', async () => {
+    const history = renderPage('/logs');
+    await screen.findByTestId('rulesSettingsFlappingSection');
+
+    fireEvent.change(screen.getByTestId('lookBackWindowRangeInput'), { target: { value: 20 } });
+    await userEvent.click(screen.getByTestId('rulesSettingsPageSaveButton'));
+
+    await waitFor(() => expect(history.location.pathname).toBe('/logs'));
   });
 });

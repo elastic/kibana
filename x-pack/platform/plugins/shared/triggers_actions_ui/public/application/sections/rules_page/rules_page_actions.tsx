@@ -82,7 +82,11 @@ export const RulesPageActionsProvider = ({ children }: PropsWithChildren) => {
   );
 
   const openCreateRuleModal = useCallback(() => setIsRuleTypeModalVisible(true), []);
-  const navigateToSettings = useCallback(() => history.push(routeToSettings), [history]);
+  const navigateToSettings = useCallback(() => {
+    const { pathname, search, hash } = locationRef.current;
+    const returnPath = `${pathname}${search}${hash}` || '/';
+    history.push({ pathname: routeToSettings, state: { returnPath } });
+  }, [history]);
 
   const actions = useMemo<RulesPageActions>(
     () => ({

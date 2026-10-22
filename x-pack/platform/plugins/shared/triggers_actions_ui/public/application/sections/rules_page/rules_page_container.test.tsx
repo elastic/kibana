@@ -234,6 +234,17 @@ describe('rulesPage', () => {
       fireEvent.click(await screen.findByTestId('rulesSettingsLink'));
       expect(await screen.findByTestId('rulesSettingsPage')).toBeInTheDocument();
       expect(history.location.pathname).toBe('/settings');
+      expect(history.location.state).toEqual({ returnPath: '/' });
+    });
+
+    it('remembers the Logs page when opening settings from it', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/logs'] });
+      renderRulesPage(history);
+
+      await openAppMenuOverflow();
+      fireEvent.click(await screen.findByTestId('rulesSettingsLink'));
+      expect(await screen.findByTestId('rulesSettingsPage')).toBeInTheDocument();
+      expect(history.location.state).toEqual({ returnPath: '/logs' });
     });
   });
 

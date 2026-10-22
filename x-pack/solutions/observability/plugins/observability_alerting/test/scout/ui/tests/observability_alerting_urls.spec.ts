@@ -424,10 +424,10 @@ test.describe(
         await expectObservabilityHost(page, OBS_V1_SETTINGS_URL_RE);
       });
 
-      await test.step('cancel settings and return to the observability rules list', async () => {
+      await test.step('cancel settings and return to observability logs', async () => {
         await rules.cancelSettingsPage();
         await expect(rules.settingsPage).toBeHidden();
-        await expectObservabilityHost(page, OBS_V1_LIST_URL_RE);
+        await expectObservabilityHost(page, OBS_V1_LOGS_URL_RE);
       });
     });
 
