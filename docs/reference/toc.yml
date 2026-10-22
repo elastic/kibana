@@ -1,3 +1,5 @@
+suppress:
+  - DeepLinkingVirtualFile
 project: 'Kibana reference'
 toc:
   - file: index.md
