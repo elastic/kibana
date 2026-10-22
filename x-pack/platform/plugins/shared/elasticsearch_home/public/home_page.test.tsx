@@ -74,17 +74,20 @@ const emptyStats = {
 describe('HomePage', () => {
   const renderHomePage = ({
     isInTrial = false,
+    isServerlessEnabled = false,
     canMonitorAllIndices = true,
     hasIndexManagement = true,
     config = {},
   }: {
     isInTrial?: boolean;
+    isServerlessEnabled?: boolean;
     canMonitorAllIndices?: boolean;
     hasIndexManagement?: boolean;
     config?: object;
   } = {}) => {
     const cloud = cloudMock.createStart();
     cloud.isInTrial.mockReturnValue(isInTrial);
+    cloud.isServerlessEnabled = isServerlessEnabled;
 
     const application = applicationServiceMock.createStartContract();
     application.capabilities = {
@@ -178,10 +181,16 @@ describe('HomePage', () => {
   });
 
   describe('the trial badge', () => {
-    it('is shown while the project is in trial', () => {
+    it('is shown while a Cloud Hosted deployment is in trial', () => {
       renderHomePage({ isInTrial: true });
 
       expect(screen.getByTestId('trialUsageBadge')).toBeInTheDocument();
+    });
+
+    it('is hidden on Serverless, which shows the trial badge in the header', () => {
+      renderHomePage({ isInTrial: true, isServerlessEnabled: true });
+
+      expect(screen.queryByTestId('trialUsageBadge')).not.toBeInTheDocument();
     });
 
     it('is hidden outside of a trial', () => {

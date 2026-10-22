@@ -48,12 +48,10 @@ dependsOn:
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/i18n'
   - '@kbn/core-saved-objects-server'
-  - '@kbn/core-security-common'
-  - '@kbn/es-query'
-  - '@kbn/task-manager-plugin'
   - '@kbn/rule-data-utils'
   - '@kbn/rule-registry-plugin'
   - '@kbn/actions-plugin'
+  - '@kbn/alerting-plugin'
   - '@kbn/sandbox-plugin'
   - '@kbn/context-engine-plugin'
   - '@kbn/inference-common'
@@ -68,6 +66,9 @@ dependsOn:
   - '@kbn/agentic-investigations-plugin'
   - '@kbn/proposals-plugin'
   - '@kbn/proposals-common'
+  - '@kbn/core-security-common'
+  - '@kbn/eval-kql'
+  - '@kbn/rrule'
 tags:
   - plugin
   - prod
@@ -82,6 +83,4 @@ fileGroups:
     - integration_tests/**/*
     - test/scout*/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -6,7 +6,6 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
@@ -26,6 +25,12 @@ export interface InferenceFeatureConfig {
   isTechPreview?: boolean;
   isBeta?: boolean;
   ignoreGlobalDefault?: boolean;
+  /**
+   * When true, the feature's model list contains only endpoints whose
+   * `capabilities.templates.policy` is `required`. Other features keep those
+   * endpoints hidden.
+   */
+  allowTemplateRequiredModels?: boolean;
   visibilityCondition?: {
     key: string;
     value: string | number | boolean | null;
@@ -89,7 +94,6 @@ export interface SearchInferenceEndpointsPluginStart {
 }
 
 export interface SearchInferenceEndpointsPluginStartDependencies {
-  actions: ActionsPluginStartContract;
   inference: InferenceServerStart;
 }
 

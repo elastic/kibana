@@ -5,7 +5,9 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
+import uuid
 from pathlib import Path
 
 sys.dont_write_bytecode = True
@@ -29,6 +31,8 @@ from file_bug import (  # noqa: E402
     pack_gaps,
     parse_search_results,
     render_bug_body,
+    run_search,
+    scan_security_hints,
     scan_sensitive,
     scan_wip,
     upload_evidence,
@@ -101,6 +105,28 @@ def _cmd_decide(args: argparse.Namespace) -> int:
             "action": path.action,
             "number": path.number,
             "candidates": [_match_payload(match) for match in path.candidates],
+        },
+        EXIT_ASK if path.action == "ask" else EXIT_OK,
+    )
+
+
+def _cmd_search(args: argparse.Namespace) -> int:
+    try:
+        matches, queries = run_search(
+            repo=args.repo,
+            token=_optional(args.token),
+            words=args.words or "",
+            screen=_optional(args.screen),
+        )
+    except (ValueError, RuntimeError) as error:
+        return _fail(str(error))
+    path = decide_write_path(matches)
+    return _emit(
+        {
+            "action": path.action,
+            "number": path.number,
+            "candidates": [_match_payload(match) for match in path.candidates],
+            "queries": queries,
         },
         EXIT_ASK if path.action == "ask" else EXIT_OK,
     )
@@ -227,6 +253,73 @@ def _cmd_from_findings(args: argparse.Namespace) -> int:
     return _emit(finding)
 
 
+_PARSE_FINDINGS = (
+    Path(__file__).resolve().parents[2] / "exploratory-tester" / "scripts" / "parse-findings.py"
+)
+
+
+def _cmd_prepare(args: argparse.Namespace) -> int:
+    session = Path(args.session_dir)
+    parsed = subprocess.run(
+        [sys.executable, str(_PARSE_FINDINGS), "--session-dir", str(session)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if parsed.returncode:
+        return _fail(f"parse-findings failed: {(parsed.stderr or parsed.stdout).strip()}")
+    records = [
+        json.loads(line)
+        for line in (session / "findings.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    try:
+        finding = finding_from_jsonl(records, index=args.index, title=_optional(args.title))
+    except ValueError as error:
+        return _fail(str(error), EXIT_ASK)
+    config_path = session / "config.json"
+    config = json.loads(config_path.read_text(encoding="utf-8")) if config_path.exists() else {}
+    out = Path(args.out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    finding_path = out / "finding.json"
+    body_path = out / "body.md"
+    finding_path.write_text(json.dumps(finding), encoding="utf-8")
+    body_path.write_text(render_bug_body(finding, config), encoding="utf-8")
+    gaps = pack_gaps(finding, config)
+    deployment = infer_deployment(finding, config)
+    release = infer_release_label(finding, config)
+    hits = scan_sensitive(json.dumps(finding))
+    sensitive = [hit for hit in hits if hit != "security_issue"]
+    security = {
+        "issue": "security_issue" in hits,
+        "hints": scan_security_hints(json.dumps(finding)),
+    }
+    needs_input = bool(
+        gaps or deployment.status == "ask" or release.status == "ask" or sensitive
+    )
+    return _emit(
+        {
+            "finding": str(finding_path),
+            "body": str(body_path),
+            "config": str(config_path) if config_path.exists() else None,
+            "pack_gaps": gaps,
+            "deployment": {
+                "status": deployment.status,
+                "label": deployment.label,
+                "hint": deployment.hint,
+            },
+            "release": {
+                "status": release.status,
+                "label": release.label,
+                "hint": release.hint,
+            },
+            "sensitive": sensitive,
+            "security": security,
+        },
+        EXIT_ASK if needs_input else EXIT_OK,
+    )
+
+
 def _cmd_check_pack(args: argparse.Namespace) -> int:
     finding = _read_json(args.finding)
     config = _read_json(args.config) if args.config else {}
@@ -239,6 +332,23 @@ def _cmd_check_pack(args: argparse.Namespace) -> int:
     )
 
 
+GAP_HELP = (
+    ("sensitive:", "Human confirms the flagged text is UI wording, not a customer ID; then pass --sensitive-ok."),
+    ("security_issue:", "File in elastic/security-team, or the human confirms it is not a vulnerability or secret (--security-ok). --sensitive-ok never unlocks this."),
+    ("wip_or_limitation", "Ask the human whether to file anyway; only on 'file anyway' pass --wip-ok."),
+    ("media_review", "Human confirms every screenshot/recording is clean; then pass --media-ok."),
+)
+
+
+def _gap_help(gaps: list[str]) -> dict[str, str]:
+    return {
+        gap: text
+        for gap in gaps
+        for prefix, text in GAP_HELP
+        if gap.startswith(prefix)
+    }
+
+
 def _cmd_check_draft(args: argparse.Namespace) -> int:
     finding = _read_json(args.finding) if args.finding else {}
     config = _read_json(args.config) if args.config else {}
@@ -247,17 +357,30 @@ def _cmd_check_draft(args: argparse.Namespace) -> int:
     body = _read_text(args.body)
     labels = [name.strip() for name in (args.labels or "").split(",") if name.strip()]
     labels.extend(str(name).strip() for name in (args.label or []) if str(name).strip())
+    title = _optional(args.title)
+    action = args.action or ("create" if title else None)
+    if action is None:
+        return _fail("pass --title for a create check, or --action comment for a comment/reopen")
     gaps = check_draft(
         body=body,
-        title=_optional(args.title),
+        title=title,
         finding=finding,
         config=config,
         labels=labels or None,
         wip_ok=bool(args.wip_ok),
         sensitive_ok=bool(args.sensitive_ok),
+        repo=args.repo,
+        security_ok=bool(args.security_ok),
+        media_ok=bool(args.media_ok),
+        action=action,
     )
     return _emit(
-        {"fileable": not gaps, "gaps": gaps},
+        {
+            "fileable": not gaps,
+            "gaps": gaps,
+            "help": _gap_help(gaps),
+            "hints": scan_security_hints(body, title or "", json.dumps(finding)),
+        },
         EXIT_ASK if gaps else EXIT_OK,
     )
 
@@ -287,7 +410,7 @@ def _cmd_scan_sensitive(args: argparse.Namespace) -> int:
         texts.append(args.text)
     hits = scan_sensitive(*texts)
     return _emit(
-        {"hits": hits},
+        {"hits": hits, "hints": scan_security_hints(*texts)},
         EXIT_ASK if hits else EXIT_OK,
     )
 
@@ -322,6 +445,12 @@ def _cmd_write(args: argparse.Namespace) -> int:
             number=args.number,
             finding=finding if isinstance(finding, dict) else {},
             config=config if isinstance(config, dict) else {},
+            security_ok=bool(args.security_ok),
+            marker_meta={
+                "agent": args.agent or "",
+                "model": args.model or "",
+                "run": uuid.uuid4().hex[:12],
+            },
         )
     except CreateFailed as error:
         return _fail(str(error))
@@ -368,12 +497,14 @@ def _cmd_upload(args: argparse.Namespace) -> int:
 def _uploaded_pairs(payload: object) -> list:
     entries = payload.get("uploaded", payload) if isinstance(payload, dict) else payload
     if not isinstance(entries, list):
-        return []
-    return [
-        (str(entry["path"]), str(entry["url"]))
-        for entry in entries
-        if isinstance(entry, dict)
-    ]
+        raise ValueError('embed-uploads --map must be a list or {"uploaded": [...]}')
+    for entry in entries:
+        if not isinstance(entry, dict) or "path" not in entry or "url" not in entry:
+            raise ValueError(
+                'each embed-uploads --map entry must be {"path": ..., "url": ...} '
+                "(use the output of `upload`)"
+            )
+    return [(str(entry["path"]), str(entry["url"])) for entry in entries]
 
 
 def _cmd_embed_uploads(args: argparse.Namespace) -> int:
@@ -401,6 +532,35 @@ def _build_parser() -> argparse.ArgumentParser:
         help='JSON file holding {"matches": [...]}, or - to read stdin',
     )
     decide.set_defaults(handler=_cmd_decide)
+
+    search = subparsers.add_parser(
+        "search",
+        help="Run the full duplicate search (issues + open PRs, split in:title/in:body) and decide",
+        description=(
+            "Runs the token alone, token plus words with in:title and in:body, and plain-language "
+            "words split in:title / in:body, on issues and open PRs, then decides. Exit 0 create, "
+            "2 ask (candidates), 1 on any gh failure (never treated as an empty result)."
+        ),
+    )
+    search.add_argument("--repo", required=True)
+    search.add_argument("--token", default=None, help="Distinctive identifier, e.g. an error name")
+    search.add_argument("--words", default="", help="Other distinctive words")
+    search.add_argument("--screen", default=None, help="Plain-language screen or control words")
+    search.set_defaults(handler=_cmd_search)
+
+    prepare = subparsers.add_parser(
+        "prepare",
+        help="Path B: parse-findings, pick one finding, check-pack, infer-*, scan-sensitive, render-body",
+        description=(
+            "Runs the Path B collect pipeline and writes finding.json and body.md to --out-dir. "
+            "Exit 2 when something needs the human (pack gaps, deployment/release ask, sensitive hits)."
+        ),
+    )
+    prepare.add_argument("--session-dir", required=True)
+    prepare.add_argument("--out-dir", required=True)
+    prepare.add_argument("--title", default=None)
+    prepare.add_argument("--index", type=int, default=None, help="1-based index into fileable findings")
+    prepare.set_defaults(handler=_cmd_prepare)
 
     labels = subparsers.add_parser("validate-labels", help="Keep only labels that exist")
     labels.add_argument("--labels", required=True, help="Comma-separated label names")
@@ -494,6 +654,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Repeatable label, same as write --label",
     )
     draft.add_argument(
+        "--action",
+        choices=("create", "comment"),
+        default=None,
+        help="create (needs --title) or comment (comment/reopen); required when --title is omitted",
+    )
+    draft.add_argument(
         "--wip-ok",
         action="store_true",
         help="Human said file anyway after a draft/WIP or known-limitation hit",
@@ -502,6 +668,21 @@ def _build_parser() -> argparse.ArgumentParser:
         "--sensitive-ok",
         action="store_true",
         help="Human confirmed flagged Cases UI text / similar is not a customer ID",
+    )
+    draft.add_argument(
+        "--repo",
+        default="elastic/kibana",
+        help="Target repo; a security_issue hit is a gap unless this is elastic/security-team",
+    )
+    draft.add_argument(
+        "--security-ok",
+        action="store_true",
+        help="Human confirmed a security_issue hit is not a vulnerability or secret",
+    )
+    draft.add_argument(
+        "--media-ok",
+        action="store_true",
+        help="Human confirmed every screenshot/recording has no real customer or host data",
     )
     draft.set_defaults(handler=_cmd_check_draft)
 
@@ -514,7 +695,7 @@ def _build_parser() -> argparse.ArgumentParser:
     wip.set_defaults(handler=_cmd_scan_wip)
 
     sensitive = subparsers.add_parser(
-        "scan-sensitive", help="Flag emails, case IDs, NDA/customer wording"
+        "scan-sensitive", help="Flag emails, case IDs, NDA/customer wording, security_issue"
     )
     sensitive.add_argument("--finding", default=None)
     sensitive.add_argument("--body", default=None)
@@ -542,6 +723,13 @@ def _build_parser() -> argparse.ArgumentParser:
     write.add_argument("--number", type=int, default=None, help="Issue number to comment on")
     write.add_argument("--finding", default=None, help="Finding JSON; Path B stamps the tester label")
     write.add_argument("--config", default=None)
+    write.add_argument("--agent", default=None, help="Agent running the skill (claude-code, codex, cursor), for the hidden marker")
+    write.add_argument("--model", default=None, help="Model name, for the hidden marker")
+    write.add_argument(
+        "--security-ok",
+        action="store_true",
+        help="Human confirmed a security_issue hit is not a vulnerability; allows elastic/kibana",
+    )
     write.set_defaults(handler=_cmd_write)
 
     upload = subparsers.add_parser("upload", help="Upload evidence to user-attachments")

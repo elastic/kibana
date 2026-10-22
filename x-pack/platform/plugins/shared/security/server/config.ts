@@ -323,7 +323,10 @@ export const ConfigSchema = schema.object({
   }),
 
   serviceAccounts: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: offeringBasedSchema({
+      serverless: schema.boolean({ defaultValue: false }),
+      traditional: schema.boolean({ defaultValue: true }),
+    }),
     requestLifetime: schema.duration({
       defaultValue: '10m',
       validate(value) {
