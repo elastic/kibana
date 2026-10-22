@@ -19,7 +19,7 @@ import { fetchMitreEntities } from '../api/fetch_mitre_entities';
 // The managed route returns 503 when population has not finished; other errors are permanent.
 const isServiceUnavailable = (error: unknown): boolean => {
   const httpError = error as IHttpFetchError<{ statusCode?: number }>;
-  return httpError?.body?.statusCode === 503;
+  return httpError?.response?.status === 503 || httpError?.body?.statusCode === 503;
 };
 
 const MAX_RETRIES = 3;
