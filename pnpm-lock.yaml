@@ -4182,14 +4182,14 @@ importers:
         specifier: 1.5.5
         version: 1.5.5(@aws-sdk/credential-provider-node@3.972.70)(@langchain/core@1.2.3(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@smithy/signature-v4@5.7.4)(ws@8.22.0)
       '@launchdarkly/js-client-sdk':
-        specifier: 4.10.4
-        version: 4.10.4
+        specifier: 4.11.2
+        version: 4.11.2
       '@launchdarkly/node-server-sdk':
-        specifier: 9.13.8
-        version: 9.13.8(supports-color@10.2.2)
+        specifier: 9.14.3
+        version: 9.14.3(supports-color@10.2.2)
       '@launchdarkly/openfeature-node-server':
-        specifier: 2.0.7
-        version: 2.0.7(@launchdarkly/node-server-sdk@9.13.8(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+        specifier: 2.0.11
+        version: 2.0.11(@launchdarkly/node-server-sdk@9.14.3(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@loaders.gl/core':
         specifier: 3.4.7
         version: 3.4.7
@@ -4225,7 +4225,7 @@ importers:
         version: 1.12.0
       '@openfeature/launchdarkly-client-provider':
         specifier: 0.4.0
-        version: 0.4.0(@launchdarkly/js-client-sdk@4.10.4)(@openfeature/web-sdk@1.10.0(@openfeature/core@1.12.0))
+        version: 0.4.0(@launchdarkly/js-client-sdk@4.11.2)(@openfeature/web-sdk@1.10.0(@openfeature/core@1.12.0))
       '@openfeature/server-sdk':
         specifier: 1.23.0
         version: 1.23.0(@openfeature/core@1.12.0)
@@ -12560,28 +12560,28 @@ packages:
     peerDependencies:
       '@langchain/core': 1.2.3
 
-  '@launchdarkly/js-client-sdk-common@1.32.2':
-    resolution: {integrity: sha512-1m5cI3lVbuXmrP74Nz+1+ZUV8qEPGZzvUYpvoynowdweWX5EEuUK3vHtqC9umhSe2Z/Ujxy/vcmPgH3Q+5BHQA==}
+  '@launchdarkly/js-client-sdk-common@1.32.5':
+    resolution: {integrity: sha512-NrgHgztMHaxrw58/3QV+vFfCRy1K/yW8gikAClRQz4Y2+anpeURiKVmD4lBbkxet+IfBIZ7Fxcl42+xXJ01t2Q==}
 
-  '@launchdarkly/js-client-sdk@4.10.4':
-    resolution: {integrity: sha512-n1gvH/Or8/M2bR2HNqyLKrZ7x7lJOQx7WOaWnSibqf9hmtauE169HgtbtdMoUA9s22Z5MvSmNF6eBCJbetHlKA==}
+  '@launchdarkly/js-client-sdk@4.11.2':
+    resolution: {integrity: sha512-BDOb0U5xCT+cBcXLD97T9OlK7YgRfGFH4zDW0hXO6Zxkr3RjBs6OBd3NXM+RTb8jizEWIsvuU+b2dUSKNLFtaQ==}
 
-  '@launchdarkly/js-sdk-common@2.27.0':
-    resolution: {integrity: sha512-Av+eVK5QXQ41leDGi1JS+rzOGvz4ViRgVw8P8vg9h6Q+IwP4UkW/swA7ZU6+05k4cUs9LuGUg8oW+mR7weCVFg==}
+  '@launchdarkly/js-sdk-common@2.29.0':
+    resolution: {integrity: sha512-WBW4ajbfJO6RGEB4Ax44d7/6jl/HhZOi61dNnCJ3HdHS5znwGV1eh8dUnRFISiIfnodWbpDRaVv4fG8QdKeFWw==}
 
-  '@launchdarkly/js-server-sdk-common@2.21.6':
-    resolution: {integrity: sha512-WyfcBG1oun5cgvZSTUzpFZFtgBd0uk9WVolt0sQTcYfBA0nS6A1bhdgGtM8FjdCq+6ZRKQeiwvjkQdVoHLrvBw==}
+  '@launchdarkly/js-server-sdk-common@2.24.0':
+    resolution: {integrity: sha512-htPGkkvxiurlOoyNG6oKywg+dC/OV3uEt+Qg0QX2MVgK7VtAw24q1aXIFxItdJ+dS0IMLKbiOho1MQqKAS2btA==}
 
-  '@launchdarkly/node-server-sdk@9.13.8':
-    resolution: {integrity: sha512-E4grvdy7TKYvG3RqjrpCNoH2O1XWmTU0YDIm4UMBCXfM2Hf7w10aPGWM/tqtyViBiODmc36Pf3ILntZJYpaWlA==}
+  '@launchdarkly/node-server-sdk@9.14.3':
+    resolution: {integrity: sha512-d0UbbtBqW5g+XjFNKv/JksQKr37B8cMG+ASyg0RlD/Af7YcSoqNScMto2oXHc8LQ9y6aiCd8VDoANgyWMhJ4cA==}
 
-  '@launchdarkly/openfeature-js-server-common@2.0.3':
-    resolution: {integrity: sha512-EIGgztosblBCkDDPiYJ1ke8BnHQz+9D+qHHyr58TRv+4JLpU/3O9zwMQMooUXw2nHWdYphcxI62Rb3AoS2IjFQ==}
+  '@launchdarkly/openfeature-js-server-common@2.0.6':
+    resolution: {integrity: sha512-1zXgkEyChB5OO43WGIIi4TaeMATqVOFYLkv+dijlLGlZIUyRgAZdfbWCr8Ssz+Jeq6aZ/cXOtub7SuEEHSxKjQ==}
     peerDependencies:
       '@openfeature/server-sdk': ^1.16.0
 
-  '@launchdarkly/openfeature-node-server@2.0.7':
-    resolution: {integrity: sha512-wwDm4yiGdl35aLzKZXDkcmKQfr90ZUadsu1zB1LoeQCfhbUvjaWmmi5deUmPpYI5LxP/rmvbo7dB5DM9cIBBUA==}
+  '@launchdarkly/openfeature-node-server@2.0.11':
+    resolution: {integrity: sha512-z949UpCpv3CHxq0URY5cTbfLAVZT1aoU1yQI+3Cr6SPplZ1i+ZIW0+amPUBc/jhXCr7Nzjh/rrWwl1jKIPigWQ==}
     engines: {node: '>=20'}
     peerDependencies:
       '@launchdarkly/node-server-sdk': ^9.0.0
@@ -20883,8 +20883,8 @@ packages:
   launch-editor@2.14.2:
     resolution: {integrity: sha512-NHJEb30MGBCkmZXLZwz25t37QR4aY03ZzPYUJXOJaOa92uWwExI9SBQUuIznBYc1xkD7cJNGX7oc3Nl3sq2kQQ==}
 
-  launchdarkly-eventsource@2.2.0:
-    resolution: {integrity: sha512-u38fYlLSq/m6oFz0MS1/76Sj2xzlYhTKZ+sf/vju6PA86PMc6fPlY5k8CdU79edLXjNwsvIQTDvDNy3llDqB8A==}
+  launchdarkly-eventsource@2.3.0:
+    resolution: {integrity: sha512-q0uiciHQVFJLhVwE0/mJzBCiuw6mkBv9kB414IlHTZE1VEoU8pkwt9P2n6w6vyT7rDlA6xZm2LSTjdMBigqbjQ==}
     engines: {node: '>=0.12.0'}
 
   lazy-ass@2.0.3:
@@ -29698,38 +29698,38 @@ snapshots:
       '@langchain/core': 1.2.3(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0)
       js-tiktoken: 1.0.21
 
-  '@launchdarkly/js-client-sdk-common@1.32.2':
+  '@launchdarkly/js-client-sdk-common@1.32.5':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.27.0
+      '@launchdarkly/js-sdk-common': 2.29.0
 
-  '@launchdarkly/js-client-sdk@4.10.4':
+  '@launchdarkly/js-client-sdk@4.11.2':
     dependencies:
-      '@launchdarkly/js-client-sdk-common': 1.32.2
+      '@launchdarkly/js-client-sdk-common': 1.32.5
 
-  '@launchdarkly/js-sdk-common@2.27.0': {}
+  '@launchdarkly/js-sdk-common@2.29.0': {}
 
-  '@launchdarkly/js-server-sdk-common@2.21.6':
+  '@launchdarkly/js-server-sdk-common@2.24.0':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.27.0
+      '@launchdarkly/js-sdk-common': 2.29.0
       semver: 7.5.4
 
-  '@launchdarkly/node-server-sdk@9.13.8(supports-color@10.2.2)':
+  '@launchdarkly/node-server-sdk@9.14.3(supports-color@10.2.2)':
     dependencies:
-      '@launchdarkly/js-server-sdk-common': 2.21.6
+      '@launchdarkly/js-server-sdk-common': 2.24.0
       https-proxy-agent: 7.0.6(supports-color@10.2.2)
-      launchdarkly-eventsource: 2.2.0
+      launchdarkly-eventsource: 2.3.0
     transitivePeerDependencies:
       - supports-color
 
-  '@launchdarkly/openfeature-js-server-common@2.0.3(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-js-server-common@2.0.6(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.27.0
+      '@launchdarkly/js-sdk-common': 2.29.0
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
-  '@launchdarkly/openfeature-node-server@2.0.7(@launchdarkly/node-server-sdk@9.13.8(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-node-server@2.0.11(@launchdarkly/node-server-sdk@9.14.3(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/node-server-sdk': 9.13.8(supports-color@10.2.2)
-      '@launchdarkly/openfeature-js-server-common': 2.0.3(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+      '@launchdarkly/node-server-sdk': 9.14.3(supports-color@10.2.2)
+      '@launchdarkly/openfeature-js-server-common': 2.0.6(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
   '@leichtgewicht/ip-codec@2.0.5':
@@ -30218,9 +30218,9 @@ snapshots:
 
   '@openfeature/core@1.12.0': {}
 
-  '@openfeature/launchdarkly-client-provider@0.4.0(@launchdarkly/js-client-sdk@4.10.4)(@openfeature/web-sdk@1.10.0(@openfeature/core@1.12.0))':
+  '@openfeature/launchdarkly-client-provider@0.4.0(@launchdarkly/js-client-sdk@4.11.2)(@openfeature/web-sdk@1.10.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/js-client-sdk': 4.10.4
+      '@launchdarkly/js-client-sdk': 4.11.2
       '@openfeature/web-sdk': 1.10.0(@openfeature/core@1.12.0)
       lodash.isempty: 4.4.0
 
@@ -39338,7 +39338,7 @@ snapshots:
       picocolors: 1.1.1
       shell-quote: 1.11.0
 
-  launchdarkly-eventsource@2.2.0: {}
+  launchdarkly-eventsource@2.3.0: {}
 
   lazy-ass@2.0.3: {}
 
