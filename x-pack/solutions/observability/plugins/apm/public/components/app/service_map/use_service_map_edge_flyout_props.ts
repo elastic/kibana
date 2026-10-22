@@ -36,8 +36,7 @@ export function useServiceMapEdgeFlyoutProps({
       selectedEdgeForFlyout.data ?? {};
     const groupedConnections = selectedEdgeForFlyout.data?.groupedConnections;
 
-    // Edge to an "N resources" node: its source is the service node, and the resources come from
-    // the grouped node.
+    // Edge to an "N resources" node: the source is the service node itself.
     if (isGrouped && groupedConnections?.length) {
       const groupedResources = groupedConnections.map((connection) => ({
         resource: connection[SPAN_DESTINATION_SERVICE_RESOURCE] ?? connection.label,
@@ -54,8 +53,7 @@ export function useServiceMapEdgeFlyoutProps({
             values: { count: groupedResources.length, type: spanSubtype ?? spanType ?? '' },
           })
           .replace(/\s+/g, ' '),
-        // The routes take a bounded list of resources: the metrics cover the first ones of a very
-        // large group.
+        // The routes cap the resources: a very large group is trimmed to the first ones.
         dependencies: groupedResources
           .slice(0, MAX_CONNECTION_RESOURCES)
           .map(({ resource }) => resource),
@@ -78,8 +76,7 @@ export function useServiceMapEdgeFlyoutProps({
         targetLabel ?? targetServiceName ?? dependencyName ?? selectedEdgeForFlyout.target,
     };
 
-    // The metrics are the ones of the exit spans of a service: edges from a queue, or from a group
-    // of resources, have none.
+    // Edges from a queue, or from a group of resources, have no exit spans to measure.
     if (isGrouped || isMessagingExitSpan(sourceData)) {
       return labels;
     }
@@ -88,8 +85,6 @@ export function useServiceMapEdgeFlyoutProps({
       return null;
     }
 
-    // A service → service edge can cover several resources; a service → dependency edge is its
-    // own dependency.
     const dependencies = resources?.length
       ? resources.slice(0, MAX_CONNECTION_RESOURCES)
       : dependencyName

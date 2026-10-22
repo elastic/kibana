@@ -29,14 +29,12 @@ export interface ConnectionTransactionGroup {
   failedCallRate: number | null;
   /** This group's share of total exit span time for the connection, 0-1. */
   timeConsumedPct: number | null;
-  /** True when the calls of the connection were capped and the oldest ones are left out. */
-  isSampled: boolean;
 }
 
 export interface ConnectionTransactionsResponse {
   transactionGroups: ConnectionTransactionGroup[];
-  /** True when the target has more calls than the cap and the oldest ones are left out. */
-  isMaxTransactionsReached: boolean;
+  /** True when the calls of the connection were capped and the oldest ones are left out. */
+  isSampled: boolean;
 }
 
 export const serviceMapConnectionTransactionsRoute = defineRoute<ConnectionTransactionsResponse>()({

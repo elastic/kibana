@@ -10,19 +10,14 @@ import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
 import { useRequestFlyoutFetcher } from '../use_request_flyout_fetcher';
 import { useRequestFlyoutContext } from '../request_flyout_context';
 
-/**
- * The operations (exit spans grouped by name) of the source service on the dependency of the
- * connection. They are scoped to the source service: what it calls on the dependency, not what
- * every caller of the dependency calls.
- */
+/** The operations of the source service on the dependency: its exit spans, grouped by name. */
 export function useRequestFlyoutOperations() {
   const {
     connection: { sourceServiceName, dependencyName, dependencies },
     filters: { environment, start, end },
   } = useRequestFlyoutContext();
 
-  // The operations route takes a single dependency: the target of the edge, or the first of its
-  // resources.
+  // The operations route takes a single dependency.
   const resolvedDependencyName = dependencyName ?? dependencies[0];
 
   const { data, status } = useRequestFlyoutFetcher(

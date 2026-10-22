@@ -84,13 +84,12 @@ function getGroupedConnections(
  */
 function createGroupedNode(
   group: GroupInfo,
-  nodesById: Map<string, ServiceMapNode>
+  nodesById: Map<string, ServiceMapNode>,
+  groupedConnections: GroupedNodeData['groupedConnections']
 ): ServiceMapNode {
   const firstTarget = nodesById.get(group.targets[0]);
   const firstData =
     firstTarget && isDependencyNodeData(firstTarget.data) ? firstTarget.data : undefined;
-
-  const groupedConnections = getGroupedConnections(group, nodesById);
 
   const groupedData: GroupedNodeData = {
     id: group.id,
@@ -119,10 +118,9 @@ function createGroupedNode(
  */
 function createIncomingGroupedEdges(
   group: GroupInfo,
-  nodesById: Map<string, ServiceMapNode>
+  groupedConnections: GroupedNodeData['groupedConnections']
 ): ServiceMapEdge[] {
   // The request flyout lists the grouped resources of the edge.
-  const groupedConnections = getGroupedConnections(group, nodesById);
   return group.sources.map((source) => ({
     id: `${source}~>${group.id}`,
     source,
@@ -204,9 +202,16 @@ export function groupResourceNodes(
     (e) => !groupedEdgeIds.has(getEdgeId(e.source, e.target)) && !groupedNodeIds.has(e.source)
   );
 
-  // Create grouped nodes and edges
-  const groupedNodes = groups.map((g) => createGroupedNode(g, nodesById));
-  const incomingGroupedEdges = groups.flatMap((g) => createIncomingGroupedEdges(g, nodesById));
+  // Create grouped nodes and edges; the node and its incoming edges share one connections array
+  const connectionsByGroup = new Map(
+    groups.map((g) => [g.id, getGroupedConnections(g, nodesById)])
+  );
+  const groupedNodes = groups.map((g) =>
+    createGroupedNode(g, nodesById, connectionsByGroup.get(g.id)!)
+  );
+  const incomingGroupedEdges = groups.flatMap((g) =>
+    createIncomingGroupedEdges(g, connectionsByGroup.get(g.id)!)
+  );
   const outgoingGroupedEdges = createOutgoingGroupedEdges(groups, edges, groupedNodeIds);
 
   return {

@@ -15,46 +15,24 @@ export interface GroupedResource {
   spanSubtype?: string;
 }
 
-/**
- * All the data identifying a single connection in the service map.
- * Derived from ServiceMapEdgeData by useServiceMapEdgeFlyoutProps.
- */
+/** The connection of a service map edge, as the request flyout needs it. */
 export interface RequestFlyoutConnection {
-  /** service.name of the source (caller) service. */
   sourceServiceName: string;
-  /** Display label for the source end of the edge (= service.name or a label override). */
   sourceLabel: string;
-  /** Display label for the target end of the edge. */
   targetLabel: string;
-  /**
-   * span.destination.service.resource values that this edge represents.
-   * A single service→service edge can cover multiple resources.
-   */
+  /** span.destination.service.resource values of the edge; a service → service edge can cover several. */
   dependencies: string[];
-  /**
-   * For service→service edges: service.name of the target (callee) service.
-   * When present the transactions of the connection are joined on the parent span of the
-   * target's entry transactions instead of the resource.
-   */
+  /** service.name of the target of a service → service edge. */
   targetServiceName?: string;
-  /** The dependency of a service→dependency edge (its span.destination.service.resource). */
+  /** span.destination.service.resource of a service → dependency edge. */
   dependencyName?: string;
-  /**
-   * The resources behind a grouped edge (e.g. 6 redis instances). The flyout lists them and each
-   * one opens a child flyout scoped to that resource.
-   */
+  /** The resources behind a grouped edge; each one opens a child flyout scoped to it. */
   groupedResources?: GroupedResource[];
-  /**
-   * Metrics that came with the map (the AI Agent map), shown when the edge has no resource to
-   * fetch metrics for.
-   */
+  /** Metrics that came with the map (AI Agent map), for edges without resources to fetch them for. */
   payloadMetrics?: EdgePayloadMetrics;
 }
 
-/**
- * An edge without per-connection metrics (the source is a messaging queue, or a group of
- * resources): the flyout only explains it.
- */
+/** An edge without per-connection metrics (messaging queue source, outgoing grouped edge). */
 export interface RequestFlyoutNoMetricsConnection {
   sourceLabel: string;
   targetLabel: string;

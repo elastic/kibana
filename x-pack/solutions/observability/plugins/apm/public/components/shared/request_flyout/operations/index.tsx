@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiBasicTable, type EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, type EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DependencyOperation } from '@kbn/apm-api-shared';
-import React from 'react';
-import {
-  asMillisecondDuration,
-  asPercent,
-  asTransactionRate,
-} from '../../../../../common/utils/formatters';
-import { APM_EBT_ACTIONS } from '../../../app/ebt_constants';
-import { ImpactBar } from '../../impact_bar';
+import React, { useMemo } from 'react';
 import { REQUEST_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { ExpandableNameCell } from '../expandable_name_cell';
 import { useRequestFlyoutChild } from '../request_flyout_child';
 import { useRequestFlyoutContext } from '../request_flyout_context';
-import { RowActionsMenu } from '../row_actions_menu';
+import {
+  getAvgTimeColumn,
+  getCallRateColumn,
+  getFailureRateColumn,
+  getTimeConsumedColumn,
+  getTypeColumn,
+  getViewTracesColumn,
+} from '../table_columns';
 import { useDiscoverHrefBuilder } from '../use_discover_href_builder';
 import { useTablePagination } from '../use_table_pagination';
 import { useRequestFlyoutOperations } from './use_request_flyout_operations';
@@ -40,113 +40,48 @@ export function RequestFlyoutOperations() {
   const { pageItems, pagination, onTableChange } = useTablePagination(items);
   const getDiscoverHref = useDiscoverHrefBuilder();
 
-  const columns: Array<EuiBasicTableColumn<DependencyOperation>> = [
-    {
-      field: 'spanName',
-      width: '38%',
-      name: i18n.translate('xpack.apm.requestFlyout.operations.column.name', {
-        defaultMessage: 'Name',
-      }),
-      render: (spanName: string) => {
-        if (!dependencyName) {
-          return spanName;
-        }
-        const child = { kind: 'operation' as const, spanName, dependencyName };
-        return (
-          <ExpandableNameCell
-            data-test-subj="requestFlyoutOperationNameLink"
-            ebtElement={REQUEST_FLYOUT_EBT_ELEMENTS.OPERATION_NAME}
-            name={spanName}
-            isExpanded={isChildSelected(child)}
-            onToggle={() => toggleChild(child)}
-          />
-        );
+  const columns: Array<EuiBasicTableColumn<DependencyOperation>> = useMemo(
+    () => [
+      {
+        field: 'spanName',
+        width: '38%',
+        name: i18n.translate('xpack.apm.requestFlyout.operations.column.name', {
+          defaultMessage: 'Name',
+        }),
+        render: (spanName: string) => {
+          if (!dependencyName) {
+            return spanName;
+          }
+          const child = { kind: 'operation' as const, spanName, dependencyName };
+          return (
+            <ExpandableNameCell
+              data-test-subj="requestFlyoutOperationNameLink"
+              ebtElement={REQUEST_FLYOUT_EBT_ELEMENTS.OPERATION_NAME}
+              name={spanName}
+              isExpanded={isChildSelected(child)}
+              onToggle={() => toggleChild(child)}
+            />
+          );
+        },
       },
-    },
-    {
-      field: 'spanType',
-      width: '14%',
-      name: i18n.translate('xpack.apm.requestFlyout.operations.column.type', {
-        defaultMessage: 'Type',
+      getTypeColumn('spanType'),
+      getAvgTimeColumn('latency'),
+      getCallRateColumn('throughput'),
+      getFailureRateColumn('failureRate'),
+      getTimeConsumedColumn('impact'),
+      getViewTracesColumn({
+        getRowId: ({ spanName }) => `requestFlyoutOperationActions-${spanName}`,
+        getHref: ({ spanName }) =>
+          getDiscoverHref({
+            serviceName: sourceServiceName,
+            spanName,
+            environment,
+            sortDirection: 'DESC',
+          }),
       }),
-      render: (spanType: string | undefined) =>
-        spanType ? <EuiBadge color="hollow">{spanType}</EuiBadge> : '—',
-    },
-    {
-      field: 'latency',
-      name: i18n.translate('xpack.apm.requestFlyout.operations.column.avgTime', {
-        defaultMessage: 'Avg time',
-      }),
-      align: 'right' as const,
-      render: (value: number | null) => (value == null ? '—' : asMillisecondDuration(value)),
-    },
-    {
-      field: 'throughput',
-      name: i18n.translate('xpack.apm.requestFlyout.operations.column.calls', {
-        defaultMessage: 'Calls',
-      }),
-      align: 'right' as const,
-      render: (value: number) => asTransactionRate(value),
-    },
-    {
-      field: 'failureRate',
-      name: i18n.translate('xpack.apm.requestFlyout.operations.column.failed', {
-        defaultMessage: 'Failed',
-      }),
-      align: 'right' as const,
-      render: (value: number | null) => (value == null ? '—' : asPercent(value, 1)),
-    },
-    {
-      field: 'impact',
-      name: i18n.translate('xpack.apm.requestFlyout.operations.column.timeConsumed', {
-        defaultMessage: 'Time consumed',
-      }),
-      align: 'right' as const,
-      render: (value: number) => <ImpactBar value={value} size="m" />,
-    },
-    {
-      name: i18n.translate('xpack.apm.requestFlyout.operations.column.actions', {
-        defaultMessage: 'Actions',
-      }),
-      align: 'right' as const,
-      render: ({ spanName }: DependencyOperation) => {
-        const href = getDiscoverHref({
-          serviceName: sourceServiceName,
-          spanName,
-          environment,
-          sortDirection: 'DESC',
-        });
-        if (!href) {
-          return null;
-        }
-        return (
-          <RowActionsMenu
-            id={`requestFlyoutOperationActions-${spanName}`}
-            actions={[
-              {
-                id: 'operationActions',
-                actions: [
-                  {
-                    id: 'viewInDiscover',
-                    name: i18n.translate(
-                      'xpack.apm.requestFlyout.operations.action.viewInDiscover',
-                      { defaultMessage: 'View traces in Discover' }
-                    ),
-                    icon: 'discoverApp',
-                    href,
-                    ebt: {
-                      action: APM_EBT_ACTIONS.EXPLORE_TRACES,
-                      element: REQUEST_FLYOUT_EBT_ELEMENTS.ROW_ACTIONS_MENU,
-                    },
-                  },
-                ],
-              },
-            ]}
-          />
-        );
-      },
-    },
-  ];
+    ],
+    [dependencyName, isChildSelected, toggleChild, getDiscoverHref, sourceServiceName, environment]
+  );
 
   return (
     <section data-test-subj="requestFlyoutSection-operations">

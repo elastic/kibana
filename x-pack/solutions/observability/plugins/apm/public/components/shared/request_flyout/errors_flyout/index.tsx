@@ -51,11 +51,7 @@ type SelectedChild =
 
 /**
  * Errors of the service that failed, opened from the top error of a failed calls bucket: the APM
- * error groups (by error.grouping_key) and the error logs, like the errors page. An APM error
- * group opens its content in a child flyout, an error log opens its document.
- *
- * The components of the errors page read route params and throw outside their routes, so this is
- * built from route-free pieces.
+ * error groups and the error logs, like the errors page, built from its route-free pieces.
  */
 export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props) {
   const {

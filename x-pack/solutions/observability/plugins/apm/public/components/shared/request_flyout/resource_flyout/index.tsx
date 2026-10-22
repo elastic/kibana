@@ -16,11 +16,7 @@ interface Props {
   onClose: () => void;
 }
 
-/**
- * Flyout of one resource of a grouped edge: the content of a service → dependency flyout, scoped
- * to that resource. Its own child flyouts (operation, errors) start a new session, because EUI
- * allows one main and one child flyout per session.
- */
+/** Flyout of one resource of a grouped edge: a service → dependency flyout scoped to it. */
 export function RequestFlyoutResourceFlyout({ resource, historyKey, onClose }: Props) {
   const {
     deps,
@@ -28,7 +24,7 @@ export function RequestFlyoutResourceFlyout({ resource, historyKey, onClose }: P
     connection: { sourceServiceName, sourceLabel },
   } = useRequestFlyoutContext();
 
-  // Memoized on what it is made of: the data hooks refetch when `dependencies` changes identity.
+  // The data hooks refetch when `dependencies` changes identity.
   const value = useMemo(() => {
     const connection: RequestFlyoutConnection = {
       sourceServiceName,

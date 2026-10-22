@@ -15,11 +15,8 @@ import { getTopResources } from './get_top_resources';
 export const MAX_RESOURCES_SHOWN = 10;
 
 /**
- * The resources of a grouped edge with their stats, most time consumed first.
- *
- * The stats come from the dependencies of the source service, narrowed to the group on the
- * client. The route also returns timeseries, which this table does not use: one bucket keeps
- * them small.
+ * The resources of a grouped edge with their stats, most time consumed first. The dependencies
+ * route is narrowed to the group on the client; `numBuckets: 1` keeps its unused timeseries small.
  */
 export function useRequestFlyoutResources() {
   const {

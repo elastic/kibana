@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import {
   routeDefinitions,
   type ServiceMapRouteResponse,
@@ -16,6 +15,7 @@ import {
 } from '@kbn/apm-api-shared';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import type { BoolQuery } from '@kbn/es-query';
+import Boom from '@hapi/boom';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage } from '../../../common/service_map/utils';
 import { notifyFeatureUsage } from '../../feature';
@@ -31,6 +31,24 @@ import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_no
 import { getServiceMapServiceBadges } from './get_service_map_service_badges';
 import { getConnectionTransactions } from './get_connection_transactions';
 import { getConnectionFailedCalls } from './get_connection_failed_calls';
+import type { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
+
+/** The service map requires the feature to be enabled and a platinum license. */
+async function assertServiceMapAccess({
+  config,
+  context,
+}: Pick<APMRouteHandlerResources, 'config' | 'context'>): Promise<
+  Awaited<APMRouteHandlerResources['context']['licensing']>
+> {
+  if (!config.serviceMapEnabled) {
+    throw Boom.notFound();
+  }
+  const licensingContext = await context.licensing;
+  if (!isActivePlatinumLicense(licensingContext.license)) {
+    throw Boom.forbidden(invalidLicenseMessage);
+  }
+  return licensingContext;
+}
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: routeDefinitions.serviceMap.serviceMap.endpoint,
@@ -38,14 +56,7 @@ const serviceMapRoute = createApmServerRoute({
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceMapRouteResponse> => {
     const { config, context, params, logger } = resources;
-    if (!config.serviceMapEnabled) {
-      throw Boom.notFound();
-    }
-
-    const licensingContext = await context.licensing;
-    if (!isActivePlatinumLicense(licensingContext.license)) {
-      throw Boom.forbidden(invalidLicenseMessage);
-    }
+    const licensingContext = await assertServiceMapAccess(resources);
 
     notifyFeatureUsage({
       licensingPlugin: licensingContext,
@@ -104,15 +115,9 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
   params: routeDefinitions.serviceMap.dependencyNode.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceMapServiceDependencyInfoResponse> => {
-    const { config, context, params } = resources;
+    const { params } = resources;
 
-    if (!config.serviceMapEnabled) {
-      throw Boom.notFound();
-    }
-    const licensingContext = await context.licensing;
-    if (!isActivePlatinumLicense(licensingContext.license)) {
-      throw Boom.forbidden(invalidLicenseMessage);
-    }
+    await assertServiceMapAccess(resources);
     const apmEventClient = await getApmEventClient(resources);
 
     const {
@@ -145,15 +150,9 @@ const serviceMapServiceBadgesRoute = createApmServerRoute({
   params: routeDefinitions.serviceMap.serviceBadges.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceMapServiceBadgesResponse> => {
-    const { config, context, params } = resources;
+    const { params } = resources;
 
-    if (!config.serviceMapEnabled) {
-      throw Boom.notFound();
-    }
-    const licensingContext = await context.licensing;
-    if (!isActivePlatinumLicense(licensingContext.license)) {
-      throw Boom.forbidden(invalidLicenseMessage);
-    }
+    await assertServiceMapAccess(resources);
 
     const {
       query: { environment, start, end, kuery },
@@ -182,15 +181,9 @@ const serviceMapConnectionTransactionsRoute = createApmServerRoute({
   params: routeDefinitions.serviceMap.connectionTransactions.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ConnectionTransactionsResponse> => {
-    const { config, context, params } = resources;
+    const { params } = resources;
 
-    if (!config.serviceMapEnabled) {
-      throw Boom.notFound();
-    }
-    const licensingContext = await context.licensing;
-    if (!isActivePlatinumLicense(licensingContext.license)) {
-      throw Boom.forbidden(invalidLicenseMessage);
-    }
+    await assertServiceMapAccess(resources);
     const apmEventClient = await getApmEventClient(resources);
 
     const {
@@ -214,15 +207,9 @@ const serviceMapConnectionFailedCallsRoute = createApmServerRoute({
   params: routeDefinitions.serviceMap.connectionFailedCalls.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ConnectionFailedCallsResponse> => {
-    const { config, context, params } = resources;
+    const { params } = resources;
 
-    if (!config.serviceMapEnabled) {
-      throw Boom.notFound();
-    }
-    const licensingContext = await context.licensing;
-    if (!isActivePlatinumLicense(licensingContext.license)) {
-      throw Boom.forbidden(invalidLicenseMessage);
-    }
+    await assertServiceMapAccess(resources);
     const apmEventClient = await getApmEventClient(resources);
 
     const {

@@ -13,9 +13,8 @@ import { getESQLQuery, type ESQLQueryParams } from '../links/discover_links/get_
 import { useRequestFlyoutContext } from './request_flyout_context';
 
 /**
- * Builds the Discover link of a table row: the traces of the row in the time range of the flyout.
- * Unlike `useDiscoverHref` it builds one link per call, for tables. The links are not available
- * until the APM index settings are loaded.
+ * Builds the Discover link of a table row. Unlike `useDiscoverHref` it builds one link per call;
+ * the links are not available until the APM index settings are loaded.
  */
 export function useDiscoverHrefBuilder() {
   const { indexSettings = [], indexSettingsStatus } = useApmIndexSettingsContext();

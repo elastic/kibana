@@ -11,16 +11,9 @@ import { useRequestFlyoutFetcher } from '../use_request_flyout_fetcher';
 import { useRequestFlyoutContext } from '../request_flyout_context';
 
 /**
- * The failed calls of the connection, by where they failed.
- *
- * For service → dependency edges there is a single `dependency` bucket. For service → service
- * edges there are up to three:
- * - `caller`: the request never reached the target (timeout, connection error);
- * - `server`: the target received the request and failed (5xx, gRPC INTERNAL);
- * - `client`: the target answered with a client error (4xx, gRPC INVALID_ARGUMENT).
- *
- * The calls are the exit spans to the resources of the connection: without resources (an edge
- * whose destination is unknown) there is nothing to look for, and `isApplicable` is false.
+ * The failed calls of the connection by where they failed: one `dependency` bucket for a
+ * service → dependency edge; `caller` / `server` / `client` buckets for a service → service edge.
+ * Without resources there is nothing to look for, and `isApplicable` is false.
  */
 export function useRequestFlyoutFailedCalls() {
   const {
@@ -28,8 +21,7 @@ export function useRequestFlyoutFailedCalls() {
     filters: { environment, start, end },
   } = useRequestFlyoutContext();
 
-  // A service → dependency edge is about its own dependency; a service → service edge may reach
-  // the target through several resources.
+  // A service → service edge may reach the target through several resources.
   const resources = useMemo(
     () => (!targetServiceName && dependencyName ? [dependencyName] : dependencies),
     [targetServiceName, dependencyName, dependencies]

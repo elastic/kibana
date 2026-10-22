@@ -53,7 +53,6 @@ const SAMPLE_ITEMS = [
     callRate: 5,
     failedCallRate: 0.01,
     timeConsumedPct: 0.6,
-    isSampled: false,
   },
   {
     name: 'POST /api/orders',
@@ -63,7 +62,6 @@ const SAMPLE_ITEMS = [
     callRate: 2,
     failedCallRate: 0.05,
     timeConsumedPct: 0.4,
-    isSampled: false,
   },
 ];
 
@@ -95,7 +93,7 @@ describe('RequestFlyoutTransactions', () => {
       items: SAMPLE_ITEMS,
       isLoading: false,
       hasError: false,
-      isMaxTransactionsReached: false,
+      isSampled: false,
     });
   });
 
@@ -122,7 +120,7 @@ describe('RequestFlyoutTransactions', () => {
       items: [],
       isLoading: true,
       hasError: false,
-      isMaxTransactionsReached: false,
+      isSampled: false,
     });
 
     renderComponent();
@@ -135,7 +133,7 @@ describe('RequestFlyoutTransactions', () => {
       items: [],
       isLoading: false,
       hasError: true,
-      isMaxTransactionsReached: false,
+      isSampled: false,
     });
 
     renderComponent();
@@ -176,7 +174,7 @@ describe('RequestFlyoutTransactions', () => {
       items: [{ ...SAMPLE_ITEMS[0], name: 'untyped', transactionType: '' }],
       isLoading: false,
       hasError: false,
-      isMaxTransactionsReached: false,
+      isSampled: false,
     });
 
     renderComponent();
@@ -190,7 +188,7 @@ describe('RequestFlyoutTransactions', () => {
       items: SAMPLE_ITEMS,
       isLoading: false,
       hasError: false,
-      isMaxTransactionsReached: true,
+      isSampled: true,
     });
 
     renderComponent();

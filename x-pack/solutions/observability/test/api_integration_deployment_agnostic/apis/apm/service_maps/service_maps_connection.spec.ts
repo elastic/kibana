@@ -35,7 +35,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(response.status).toBe(200);
-        expect(response.body).toEqual({ transactionGroups: [], isMaxTransactionsReached: false });
+        expect(response.body).toEqual({ transactionGroups: [], isSampled: false });
       });
 
       it('returns no failed calls', async () => {
@@ -119,7 +119,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'GET /nodejs/adTag',
         ]);
         expect(response.body.transactionGroups[0].callCount).toBeGreaterThan(0);
-        expect(response.body.isMaxTransactionsReached).toBe(false);
+        expect(response.body.isSampled).toBe(false);
       });
 
       it('does not attribute the calls of other services to the edge', async () => {

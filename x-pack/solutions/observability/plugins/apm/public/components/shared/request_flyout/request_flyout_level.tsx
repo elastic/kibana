@@ -29,12 +29,9 @@ interface RequestFlyoutLevelProps {
 }
 
 /**
- * A flyout of the request flyout system: the key metrics and the tables of a connection, with
- * the child flyouts of their rows. It is the flyout of an edge and, scoped to one resource, the
- * flyout of a resource of a grouped edge. Each level owns one child flyout slot.
- *
- * The template only recognizes zones and parts that are direct children of `<FlyoutTemplate>`,
- * so the tree is authored here and not in sub-components.
+ * A level of the request flyout system: the flyout of an edge, or of one resource of a grouped
+ * edge. Each level owns one child flyout slot. The template only recognizes zones that are its
+ * direct JSX children, so the tree is authored here.
  */
 export function RequestFlyoutLevel({
   title,

@@ -66,8 +66,7 @@ export function RequestFlyoutBody() {
           <EuiSpacer size="m" />
           <RequestFlyoutLatencyDistribution />
         </>
-      ) : // The metrics are the ones of the exit spans to the resources of the connection. Without
-      // resources, only the metrics that came with the map (the AI Agent map) can be shown.
+      ) : // Without resources there are no metrics to fetch: show the ones that came with the map.
       hasEdgePayloadMetrics(connection.payloadMetrics) ? (
         <EdgePayloadMetricsList metrics={connection.payloadMetrics} />
       ) : (
@@ -82,13 +81,10 @@ export function RequestFlyoutBody() {
       <EuiSpacer size="m" />
 
       {isGroupedEdge ? (
-        // Grouped edge: only the list of resources. Their operations and failed calls are in the
-        // child flyout of each resource, which keeps the tables small.
+        // The operations and failed calls of a grouped edge live in the flyout of each resource.
         <RequestFlyoutResources />
       ) : (
         <>
-          {/* service → dependency: the operations (what the source calls on the dependency).
-                service → service: the transactions of the source that call the target. */}
           <EuiTitle size="xs">
             <h3
               data-test-subj={

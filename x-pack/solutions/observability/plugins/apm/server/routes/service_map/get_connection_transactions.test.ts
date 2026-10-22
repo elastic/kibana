@@ -43,78 +43,115 @@ function entryTransactionsResponse(parentIds: string[], total = parentIds.length
   };
 }
 
-function exitSpansResponse(
-  groups: Array<{
-    name: string;
-    docCount?: number;
-    avgCallLatency?: number | null;
-    callTime?: number;
-    failedCount?: number;
-    transactionType?: string;
-  }>,
-  totalCallTime?: number
-) {
-  const buckets = groups.map(
-    ({
-      name,
-      docCount = 10,
-      avgCallLatency = 150_000,
-      callTime = docCount * (avgCallLatency ?? 0),
-      failedCount = 1,
-      transactionType = 'request',
-    }) => ({
-      key: name,
-      doc_count: docCount,
-      avg_call_latency: { value: avgCallLatency },
-      call_time: { value: callTime },
-      failed: { doc_count: failedCount },
-      transaction_type: {
-        buckets: transactionType ? [{ key: transactionType, doc_count: docCount }] : [],
-      },
-    })
-  );
+interface ExitSpanFixture {
+  transactionId?: string;
+  durationUs?: number;
+  failed?: boolean;
+}
+
+/** Exit spans of the source: each carries the id of the transaction it belongs to. */
+function exitSpansResponse(spans: ExitSpanFixture[], total = spans.length) {
   return {
-    aggregations: {
-      total_call_time: {
-        value: totalCallTime ?? buckets.reduce((sum, bucket) => sum + bucket.call_time.value, 0),
-      },
-      by_transaction_name: { buckets },
+    hits: {
+      total: { value: total, relation: 'eq' },
+      hits: spans.map(({ transactionId, durationUs = 100_000, failed = false }) => ({
+        fields: {
+          ...(transactionId ? { 'transaction.id': [transactionId] } : {}),
+          'span.duration.us': [durationUs],
+          'event.outcome': [failed ? 'failure' : 'success'],
+        },
+      })),
+    },
+  };
+}
+
+/** The transactions of the source that resolve the names of the calls. */
+function transactionNamesResponse(
+  transactions: Array<{ id: string; name: string; type?: string }>
+) {
+  return {
+    hits: {
+      total: { value: transactions.length, relation: 'eq' },
+      hits: transactions.map(({ id, name, type = 'request' }) => ({
+        fields: {
+          'transaction.id': [id],
+          'transaction.name': [name],
+          ...(type ? { 'transaction.type': [type] } : {}),
+        },
+      })),
     },
   };
 }
 
 describe('getConnectionTransactions', () => {
   describe('service → dependency', () => {
-    it('groups the exit spans of the connection resources by transaction name', async () => {
+    it('groups the exit spans of the connection resources by the name of their transaction', async () => {
       const { search, options } = setup();
-      search.mockResolvedValueOnce(
-        exitSpansResponse([{ name: 'GET /api/cart' }, { name: 'POST /api/checkout' }])
-      );
+      search
+        .mockResolvedValueOnce(
+          exitSpansResponse([
+            { transactionId: 'tx-1' },
+            { transactionId: 'tx-1' },
+            { transactionId: 'tx-2' },
+          ])
+        )
+        .mockResolvedValueOnce(
+          transactionNamesResponse([
+            { id: 'tx-1', name: 'GET /api/cart' },
+            { id: 'tx-2', name: 'POST /api/checkout' },
+          ])
+        );
 
       const result = await getConnectionTransactions(options());
 
-      expect(search).toHaveBeenCalledTimes(1);
-      expect(search.mock.calls[0][0]).toBe('get_connection_transactions_exit_spans');
+      expect(search.mock.calls.map(([name]) => name)).toEqual([
+        'get_connection_transactions_exit_spans',
+        'get_connection_transactions_names',
+      ]);
       expect(result.transactionGroups.map(({ name }) => name)).toEqual([
         'GET /api/cart',
         'POST /api/checkout',
       ]);
-      expect(result.isMaxTransactionsReached).toBe(false);
+      expect(result.isSampled).toBe(false);
     });
 
-    it('scopes the query to the exit spans of the source to the resources', async () => {
+    it('scopes the exit spans to the source and the resources, newest first', async () => {
       const { search, options } = setup();
       search.mockResolvedValueOnce(exitSpansResponse([]));
 
       await getConnectionTransactions(options({ dependencies: ['redis', 'postgresql'] }));
 
-      const { query, apm } = search.mock.calls[0][1];
-      expect(apm.events).toEqual(['span']);
-      expect(query.bool.filter).toEqual(
+      const [, request] = search.mock.calls[0];
+      expect(request).toMatchObject({
+        apm: { events: ['span'] },
+        size: MAX_CONNECTION_IDS,
+        sort: [{ '@timestamp': 'desc' }],
+      });
+      expect(request.query.bool.filter).toEqual(
         expect.arrayContaining([
           { term: { 'service.name': 'serviceA' } },
           { terms: { 'span.destination.service.resource': ['redis', 'postgresql'] } },
-          { exists: { field: 'transaction.name' } },
+        ])
+      );
+    });
+
+    it('resolves the transaction names in the source service, deduplicating the ids', async () => {
+      const { search, options } = setup();
+      search
+        .mockResolvedValueOnce(
+          exitSpansResponse([{ transactionId: 'tx-1' }, { transactionId: 'tx-1' }])
+        )
+        .mockResolvedValueOnce(transactionNamesResponse([{ id: 'tx-1', name: 'GET /a' }]));
+
+      await getConnectionTransactions(options());
+
+      const [name, request] = search.mock.calls[1];
+      expect(name).toBe('get_connection_transactions_names');
+      expect(request.apm.events).toEqual(['transaction']);
+      expect(request.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { term: { 'service.name': 'serviceA' } },
+          { terms: { 'transaction.id': ['tx-1'] } },
         ])
       );
     });
@@ -125,50 +162,53 @@ describe('getConnectionTransactions', () => {
 
       const result = await getConnectionTransactions(options());
 
-      expect(result).toEqual({ transactionGroups: [], isMaxTransactionsReached: false });
+      expect(search).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({ transactionGroups: [], isSampled: false });
     });
 
-    it('computes the metrics of a group from the exit spans', async () => {
+    it('computes the metrics of a group from its exit spans', async () => {
       const { search, options } = setup();
-      search.mockResolvedValueOnce(
-        exitSpansResponse([
-          { name: 'GET /a', docCount: 30, avgCallLatency: 200_000, failedCount: 3, callTime: 600 },
-          { name: 'GET /b', docCount: 10, avgCallLatency: 100_000, failedCount: 0, callTime: 200 },
-        ])
-      );
+      search
+        .mockResolvedValueOnce(
+          exitSpansResponse([
+            { transactionId: 'tx-1', durationUs: 100_000 },
+            { transactionId: 'tx-1', durationUs: 300_000, failed: true },
+            { transactionId: 'tx-2', durationUs: 100_000 },
+          ])
+        )
+        .mockResolvedValueOnce(
+          transactionNamesResponse([
+            { id: 'tx-1', name: 'GET /a' },
+            { id: 'tx-2', name: 'GET /b' },
+          ])
+        );
 
       const { transactionGroups } = await getConnectionTransactions(options());
 
-      expect(transactionGroups[0]).toMatchObject({
+      expect(transactionGroups[0]).toEqual({
         name: 'GET /a',
         transactionType: 'request',
         avgCallLatency: 200_000,
-        callCount: 30,
-        callRate: 2, // 30 calls in 15 minutes
-        failedCallRate: 0.1,
-        timeConsumedPct: 0.75, // 600 of 800
+        callCount: 2,
+        callRate: 2 / 15,
+        failedCallRate: 0.5,
+        timeConsumedPct: 0.8, // 400ms of 500ms
       });
-      expect(transactionGroups[1]).toMatchObject({ callRate: 10 / 15, failedCallRate: 0 });
+      expect(transactionGroups[1]).toMatchObject({ callCount: 1, failedCallRate: 0 });
     });
 
-    it('returns an empty transaction type when the group has none', async () => {
+    it('leaves out the calls whose transaction cannot be resolved', async () => {
       const { search, options } = setup();
-      search.mockResolvedValueOnce(exitSpansResponse([{ name: 'GET /a', transactionType: '' }]));
+      search
+        .mockResolvedValueOnce(
+          exitSpansResponse([{ transactionId: 'tx-1' }, { transactionId: 'tx-unknown' }, {}])
+        )
+        .mockResolvedValueOnce(transactionNamesResponse([{ id: 'tx-1', name: 'GET /a' }]));
 
       const { transactionGroups } = await getConnectionTransactions(options());
 
-      expect(transactionGroups[0].transactionType).toBe('');
-    });
-
-    it('does not report a time share when no call has a duration', async () => {
-      const { search, options } = setup();
-      search.mockResolvedValueOnce(
-        exitSpansResponse([{ name: 'GET /a', callTime: 0 }], /* totalCallTime */ 0)
-      );
-
-      const { transactionGroups } = await getConnectionTransactions(options());
-
-      expect(transactionGroups[0].timeConsumedPct).toBeNull();
+      expect(transactionGroups).toHaveLength(1);
+      expect(transactionGroups[0]).toMatchObject({ name: 'GET /a', callCount: 1 });
     });
   });
 
@@ -177,7 +217,8 @@ describe('getConnectionTransactions', () => {
       const { search, options } = setup();
       search
         .mockResolvedValueOnce(entryTransactionsResponse(['span-1', 'span-2']))
-        .mockResolvedValueOnce(exitSpansResponse([{ name: 'GET /a' }]));
+        .mockResolvedValueOnce(exitSpansResponse([{ transactionId: 'tx-1' }]))
+        .mockResolvedValueOnce(transactionNamesResponse([{ id: 'tx-1', name: 'GET /a' }]));
 
       const result = await getConnectionTransactions(
         options({ targetServiceName: 'serviceB', dependencies: [] })
@@ -186,6 +227,7 @@ describe('getConnectionTransactions', () => {
       expect(search.mock.calls.map(([name]) => name)).toEqual([
         'get_connection_transactions_target_parent_ids',
         'get_connection_transactions_exit_spans',
+        'get_connection_transactions_names',
       ]);
       expect(search.mock.calls[0][1].query.bool.filter).toEqual(
         expect.arrayContaining([
@@ -222,7 +264,7 @@ describe('getConnectionTransactions', () => {
       const result = await getConnectionTransactions(options({ targetServiceName: 'serviceB' }));
 
       expect(search).toHaveBeenCalledTimes(1);
-      expect(result).toEqual({ transactionGroups: [], isMaxTransactionsReached: false });
+      expect(result).toEqual({ transactionGroups: [], isSampled: false });
     });
 
     it('ignores the resources: the parent span decides which calls reach the target', async () => {
@@ -241,40 +283,44 @@ describe('getConnectionTransactions', () => {
     });
   });
 
-  describe('isMaxTransactionsReached', () => {
+  describe('isSampled', () => {
     it('is true when the target has more entry transactions than the cap', async () => {
       const { search, options } = setup();
       search
         .mockResolvedValueOnce(
           entryTransactionsResponse(['span-1'], /* total */ MAX_CONNECTION_IDS + 1)
         )
-        .mockResolvedValueOnce(exitSpansResponse([{ name: 'GET /a' }, { name: 'GET /b' }]));
+        .mockResolvedValueOnce(exitSpansResponse([{ transactionId: 'tx-1' }]))
+        .mockResolvedValueOnce(transactionNamesResponse([{ id: 'tx-1', name: 'GET /a' }]));
 
       const result = await getConnectionTransactions(options({ targetServiceName: 'serviceB' }));
 
-      expect(result.isMaxTransactionsReached).toBe(true);
-      expect(result.transactionGroups.every(({ isSampled }) => isSampled)).toBe(true);
+      expect(result.isSampled).toBe(true);
     });
 
-    it('is false when every entry transaction of the target fits in the cap', async () => {
+    it('is true when the connection has more exit spans than the cap', async () => {
       const { search, options } = setup();
       search
-        .mockResolvedValueOnce(entryTransactionsResponse(['span-1'], MAX_CONNECTION_IDS))
-        .mockResolvedValueOnce(exitSpansResponse([{ name: 'GET /a' }]));
-
-      const result = await getConnectionTransactions(options({ targetServiceName: 'serviceB' }));
-
-      expect(result.isMaxTransactionsReached).toBe(false);
-      expect(result.transactionGroups[0].isSampled).toBe(false);
-    });
-
-    it('is never set for service → dependency edges', async () => {
-      const { search, options } = setup();
-      search.mockResolvedValueOnce(exitSpansResponse([{ name: 'GET /a' }]));
+        .mockResolvedValueOnce(
+          exitSpansResponse([{ transactionId: 'tx-1' }], /* total */ MAX_CONNECTION_IDS + 1)
+        )
+        .mockResolvedValueOnce(transactionNamesResponse([{ id: 'tx-1', name: 'GET /a' }]));
 
       const result = await getConnectionTransactions(options());
 
-      expect(result.isMaxTransactionsReached).toBe(false);
+      expect(result.isSampled).toBe(true);
+    });
+
+    it('is false when every call of the connection fits in the cap', async () => {
+      const { search, options } = setup();
+      search
+        .mockResolvedValueOnce(entryTransactionsResponse(['span-1'], MAX_CONNECTION_IDS))
+        .mockResolvedValueOnce(exitSpansResponse([{ transactionId: 'tx-1' }]))
+        .mockResolvedValueOnce(transactionNamesResponse([{ id: 'tx-1', name: 'GET /a' }]));
+
+      const result = await getConnectionTransactions(options({ targetServiceName: 'serviceB' }));
+
+      expect(result.isSampled).toBe(false);
     });
   });
 });

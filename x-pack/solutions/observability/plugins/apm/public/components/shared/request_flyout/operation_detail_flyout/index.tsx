@@ -25,18 +25,16 @@ import {
   asTransactionRate,
   getDurationFormatter,
 } from '../../../../../common/utils/formatters';
-import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { isPending } from '../../../../hooks/use_fetcher';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { TraceWaterfallFlyout } from '../../../app/transaction_details/waterfall_with_summary/trace_waterfall_flyout';
 import { TransactionTab } from '../../../app/transaction_details/waterfall_with_summary/transaction_tabs';
-import { getTimeZone } from '../../charts/helper/timezone';
-import { TimeseriesChart } from '../../charts/timeseries_chart';
 import { getMaxY, getResponseTimeTickFormatter } from '../../charts/transaction_charts/helper';
-import { CHART_HEIGHT, ChartPanel, HIDE_LEGEND_SETTINGS, useChartsGridCss } from '../chart_panel';
+import { RequestFlyoutChartsGrid } from '../charts_grid';
 import { REQUEST_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { ACTIONS_BUTTON_LABEL, useLinksMenuPanels } from '../footer';
 import { useRequestFlyoutContext } from '../request_flyout_context';
+import { useTablePagination } from '../use_table_pagination';
 import type { RequestFlyoutChildSession } from '../types';
 import { useOperationDetail } from './use_operation_detail';
 
@@ -49,11 +47,8 @@ interface Props {
 }
 
 /**
- * Flyout of an operation (an exit span name) of the source service on a dependency: latency,
- * throughput and failed rate charts, and trace samples that open the trace.
- *
- * It replaces the page of the operation, whose components read route params and throw outside
- * their routes (the service map is not one of them).
+ * Flyout of an operation (an exit span name) of the source service on a dependency: its charts
+ * and trace samples, built from the route-free pieces of the operation page.
  */
 export function RequestFlyoutOperationDetailFlyout({
   spanName,
@@ -68,8 +63,6 @@ export function RequestFlyoutOperationDetailFlyout({
     filters: { environment, start, end, rangeFrom, rangeTo },
   } = useRequestFlyoutContext();
   const { link } = useApmRouter();
-  const chartsGridCss = useChartsGridCss();
-  const timeZone = getTimeZone(core.uiSettings);
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
 
   const {
@@ -84,6 +77,7 @@ export function RequestFlyoutOperationDetailFlyout({
     samplesStatus,
     hasError,
   } = useOperationDetail({ spanName, dependencyName });
+  const { pageItems, pagination, onTableChange } = useTablePagination(spans);
 
   const latencyFormatter = getDurationFormatter(getMaxY(latencySeries));
 
@@ -193,65 +187,38 @@ export function RequestFlyoutOperationDetailFlyout({
             />
           ) : null}
 
-          <ChartPointerEventContextProvider>
-            <div css={chartsGridCss}>
-              <ChartPanel
-                id="requestFlyoutOperationChart-latency"
-                title={i18n.translate('xpack.apm.requestFlyout.operationDetail.latencyTitle', {
+          <RequestFlyoutChartsGrid
+            charts={[
+              {
+                id: 'requestFlyoutOperationLatencyChart',
+                title: i18n.translate('xpack.apm.requestFlyout.operationDetail.latencyTitle', {
                   defaultMessage: 'Latency',
-                })}
-              >
-                <TimeseriesChart
-                  settings={HIDE_LEGEND_SETTINGS}
-                  id="requestFlyoutOperationLatencyChart"
-                  height={CHART_HEIGHT}
-                  fetchStatus={latencyStatus}
-                  timeseries={latencySeries}
-                  yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-                  comparisonEnabled={false}
-                  timeZone={timeZone}
-                  showAnnotations={false}
-                />
-              </ChartPanel>
-              <ChartPanel
-                id="requestFlyoutOperationChart-throughput"
-                title={i18n.translate('xpack.apm.requestFlyout.operationDetail.throughputTitle', {
+                }),
+                fetchStatus: latencyStatus,
+                timeseries: latencySeries,
+                yLabelFormat: getResponseTimeTickFormatter(latencyFormatter),
+              },
+              {
+                id: 'requestFlyoutOperationThroughputChart',
+                title: i18n.translate('xpack.apm.requestFlyout.operationDetail.throughputTitle', {
                   defaultMessage: 'Throughput',
-                })}
-              >
-                <TimeseriesChart
-                  settings={HIDE_LEGEND_SETTINGS}
-                  id="requestFlyoutOperationThroughputChart"
-                  height={CHART_HEIGHT}
-                  fetchStatus={throughputStatus}
-                  timeseries={throughputSeries}
-                  yLabelFormat={(y) => asTransactionRate(y ?? 0)}
-                  comparisonEnabled={false}
-                  timeZone={timeZone}
-                  showAnnotations={false}
-                />
-              </ChartPanel>
-              <ChartPanel
-                id="requestFlyoutOperationChart-failedRate"
-                title={i18n.translate('xpack.apm.requestFlyout.operationDetail.failedRateTitle', {
+                }),
+                fetchStatus: throughputStatus,
+                timeseries: throughputSeries,
+                yLabelFormat: (y) => asTransactionRate(y ?? 0),
+              },
+              {
+                id: 'requestFlyoutOperationErrorRateChart',
+                title: i18n.translate('xpack.apm.requestFlyout.operationDetail.failedRateTitle', {
                   defaultMessage: 'Failed',
-                })}
-              >
-                <TimeseriesChart
-                  settings={HIDE_LEGEND_SETTINGS}
-                  id="requestFlyoutOperationErrorRateChart"
-                  height={CHART_HEIGHT}
-                  fetchStatus={errorRateStatus}
-                  timeseries={errorRateSeries}
-                  yLabelFormat={(y) => asPercent(y || 0, 1)}
-                  yDomain={{ min: 0, max: 1 }}
-                  comparisonEnabled={false}
-                  timeZone={timeZone}
-                  showAnnotations={false}
-                />
-              </ChartPanel>
-            </div>
-          </ChartPointerEventContextProvider>
+                }),
+                fetchStatus: errorRateStatus,
+                timeseries: errorRateSeries,
+                yLabelFormat: (y) => asPercent(y || 0, 1),
+                yDomain: { min: 0, max: 1 },
+              },
+            ]}
+          />
 
           <EuiSpacer size="l" />
           <EuiTitle size="xs">
@@ -264,7 +231,9 @@ export function RequestFlyoutOperationDetailFlyout({
           <EuiSpacer size="s" />
           <EuiBasicTable
             columns={columns}
-            items={spans}
+            items={pageItems}
+            pagination={pagination}
+            onChange={onTableChange}
             loading={isPending(samplesStatus)}
             noItemsMessage={i18n.translate('xpack.apm.requestFlyout.operationDetail.noSamples', {
               defaultMessage: 'No trace samples found for this operation.',

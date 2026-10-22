@@ -49,10 +49,8 @@ interface Props {
 }
 
 /**
- * Child flyout with the content of an APM error group: its samples (paginated), the sample
- * summary and the stack trace / metadata tabs. The errors page renders the same pieces, but its
- * page components read route params and throw outside their routes, so this composes the
- * props-only ones (tab content, summary) and keeps the sample and tab state locally.
+ * Child flyout with the content of an APM error group: its samples, the sample summary and the
+ * stack trace / metadata tabs, composed from the route-free pieces of the errors page.
  */
 export function RequestFlyoutApmErrorGroupFlyout({
   serviceName,

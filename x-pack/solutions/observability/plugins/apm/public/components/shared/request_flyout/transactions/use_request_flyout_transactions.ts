@@ -43,6 +43,6 @@ export function useRequestFlyoutTransactions() {
     items,
     isLoading: isApplicable && isPending(status),
     hasError: status === FETCH_STATUS.FAILURE,
-    isMaxTransactionsReached: data?.isMaxTransactionsReached ?? false,
+    isSampled: data?.isSampled ?? false,
   };
 }

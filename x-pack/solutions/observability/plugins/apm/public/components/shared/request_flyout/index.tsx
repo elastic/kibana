@@ -32,11 +32,8 @@ interface RequestFlyoutProps {
 export type { RequestFlyoutDeps };
 
 /**
- * Flyout of a service map edge: the RED metrics, latency distribution, and the operations or
- * transactions and failed calls of the connection, with child flyouts for the details of a row.
- *
- * The time range and environment are the ones of the map. Its kuery is not applied: the
- * connection is already scoped to the source and the target.
+ * Flyout of a service map edge. The time range and environment are the ones of the map; its kuery
+ * is not applied, the connection is already scoped to the source and the target.
  */
 export function RequestFlyout({
   deps,
