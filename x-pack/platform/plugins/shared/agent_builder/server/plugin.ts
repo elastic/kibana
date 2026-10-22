@@ -384,6 +384,7 @@ export class AgentBuilderPlugin
         airgapped: this.env.airgapped,
       }),
       deductiveRegister: this.config.deductive?.register ?? false,
+      getSmlTypeDefinition: startDeps.agentBuilderSml.getTypeDefinition,
       conversationEventBus: this.conversationEventBus,
     });
 

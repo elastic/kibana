@@ -131,4 +131,5 @@ export interface ServicesStartDeps {
   deploymentInfo: DeploymentInfo;
   /** `xpack.agentBuilder.deductive.register` for this deployment. */
   deductiveRegister: boolean;
+  getSmlTypeDefinition: (typeId: string) => { attachmentType?: string } | undefined;
 }

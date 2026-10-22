@@ -26,18 +26,12 @@ jest.mock('../../../../../../../hooks/use_agent_builder_service', () => ({
   }),
 }));
 
-let mockExperimentalEnabled = true;
-jest.mock('../../../../../../../hooks/use_experimental_features', () => ({
-  useExperimentalFeatures: () => mockExperimentalEnabled,
-}));
-
 describe('usePrefetchSml', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockExperimentalEnabled = true;
   });
 
-  it('prefetches wildcard SML autocomplete when experimental features are enabled', () => {
+  it('prefetches wildcard SML autocomplete', () => {
     const { result } = renderHook(() => usePrefetchSml());
 
     act(() => {
@@ -56,17 +50,6 @@ describe('usePrefetchSml', () => {
       size: SML_SEARCH_DEFAULT_SIZE,
       constraints: undefined,
     });
-  });
-
-  it('does not prefetch when experimental features are disabled', () => {
-    mockExperimentalEnabled = false;
-    const { result } = renderHook(() => usePrefetchSml());
-
-    act(() => {
-      result.current();
-    });
-
-    expect(mockPrefetchQuery).not.toHaveBeenCalled();
   });
 
   it('threads agent-derived constraints into the prefetch call and query key', () => {

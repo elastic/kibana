@@ -88,6 +88,24 @@ export const createSmlAttachTool = ({
           });
         }
 
+        // The item may already be attached, for example by the user referencing it with `#`.
+        const { type, origin } = r.attachment;
+        const existing = attachments
+          .getActive()
+          .find((a) => origin !== undefined && a.type === type && a.origin === origin);
+        if (existing) {
+          return {
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.other,
+            data: {
+              success: true,
+              attachment_id: existing.id,
+              attachment_type: type,
+              message: `Attachment '${existing.id}' of type '${type}' already exists for SML item '${r.entry_id}'; it was not added again`,
+            },
+          };
+        }
+
         const added = await attachments.add(r.attachment, ATTACHMENT_REF_ACTOR.agent);
 
         return {
