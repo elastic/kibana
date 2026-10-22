@@ -393,7 +393,7 @@ describe('Endpoint analysis run', () => {
 
     // `read_ki` continues past zero hits instead of failing, so on a deleted indicator
     // every operand is undefined. It has to evaluate to false rather than throw, or the
-    // run takes the valid branch and spends 15m attaching to an investigation it never
+    // run takes the valid branch and spends 30m attaching to an investigation it never
     // resolved.
     it('rejects an indicator that no longer exists', () => {
       expect(hasRequest(null)).toBe(false);
@@ -502,7 +502,7 @@ describe('Endpoint analysis run', () => {
     });
   });
 
-  // A 15m agent run against an investigation that is gone produces three attachment
+  // A 30m agent run against an investigation that is gone produces three attachment
   // failures that look exactly like a rejected payload. Reading it first turns that into
   // one cheap, named outcome — and does it before the money is spent.
   describe('an investigation that cannot be read', () => {
@@ -696,7 +696,7 @@ describe('Endpoint analysis run', () => {
       expect(stepByName('journal_no_telemetry')?.['on-failure']).toBeUndefined();
       expect(stepByName('journal_invalid_request')?.['on-failure']).toEqual({ continue: true });
       expect(stepByName('journal_analysis_problem')?.['on-failure']).toEqual({ continue: true });
-      // Before the agent, but a rejected note must not skip the 15m run.
+      // Before the agent, but a rejected note must not skip the 30m run.
       expect(stepByName('journal_analysis_started')?.['on-failure']).toEqual({ continue: true });
       expect(stepByName('journal_analysis_started')?.if).toBe(stepByName('forensic_analysis')?.if);
     });
@@ -994,7 +994,7 @@ describe('Endpoint analysis run', () => {
     });
 
     // The case this exists for is a re-dispatch after a failed retirement: the findings
-    // are already attached and the only work left is the write. Paying 15m to rediscover
+    // are already attached and the only work left is the write. Paying 30m to rediscover
     // them is what made a stuck indicator expensive rather than merely repetitive.
     it('skips the agent when this indicator already has both attachments', () => {
       expect(stepByName('list_prior_findings')?.type).toBe('ai.attachment.list');
@@ -1071,7 +1071,7 @@ describe('Endpoint analysis run', () => {
 
     // The forensic skill resolves `logs-endpoint.events.*` only inside the agent, so
     // without a check first a host with no Defend telemetry would spend its one attempt
-    // on a 15m run that can only report nothing. The Hunt Watch worker makes the same
+    // on a 30m run that can only report nothing. The Hunt Watch worker makes the same
     // check (`check_index_scope`) before it selects a report.
     //
     // Anchored on the incident rather than on now, so an old incident is not judged by what
@@ -1216,7 +1216,7 @@ describe('Endpoint analysis run', () => {
 
     // The one step whose failure must not fail the run. Without this the run dies at the
     // agent, `mark_failed` never executes, and the indicator stays `pending` — so the
-    // sweep starts another 15m agent run a minute later, and keeps doing it for the whole
+    // sweep starts another 30m agent run a minute later, and keeps doing it for the whole
     // lookback window. A bad connector or a model outage fails every one of them.
     it('retires an indicator whose analysis failed instead of re-running it every minute', () => {
       expect(stepByName('forensic_analysis')?.['on-failure']).toEqual({ continue: true });
@@ -1535,7 +1535,7 @@ describe('Endpoint analysis run', () => {
     // Without this, `propose: true` and no list at all is valid output. The dispatch
     // step runs only when that list has items, so a missing list attaches the findings
     // and retires the indicator as processed — the containment the analysis just spent
-    // 15m justifying disappears with no failure anywhere to show for it.
+    // 30m justifying disappears with no failure anywhere to show for it.
     it('makes the model state that it proposes nothing rather than stay silent', () => {
       expect(schema?.required).toContain('recommendedActions');
       expect(String(stepByName('forensic_analysis')?.with?.message)).toContain(
