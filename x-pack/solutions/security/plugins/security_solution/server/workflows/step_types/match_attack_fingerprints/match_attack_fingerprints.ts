@@ -67,6 +67,19 @@ const stringField = (raw: Record<string, unknown>, key: string): string => {
   return typeof value === 'string' ? value : '';
 };
 
+const preferFilled = (preferred: string, fallback: string): string =>
+  preferred.length > 0 ? preferred : fallback;
+
+/**
+ * The name on the alert, not the entity id. `host.id` is preferred by the entity id and can be
+ * the same value on unrelated machines, which would group their attacks. A missing name keeps
+ * the id so an alert with no `host.name` or `user.name` can still match.
+ */
+const entityKey = (entity: { id: string; name?: string }): string => {
+  const name = entity.name?.trim();
+  return name !== undefined && name.length > 0 ? name : entity.id;
+};
+
 const stringList = (raw: Record<string, unknown>, key: string): string[] => {
   const value = raw[key];
   if (!Array.isArray(value)) {
@@ -117,6 +130,14 @@ const parseAttack = (raw: Record<string, unknown>): AttackSignals | undefined =>
     alertIds: stringList(raw, 'kibana.alert.attack_discovery.alert_ids'),
     title: stringField(raw, 'kibana.alert.attack_discovery.title'),
     summaryMarkdown: stringField(raw, 'kibana.alert.attack_discovery.summary_markdown'),
+    fingerprintTitle: preferFilled(
+      stringField(raw, 'kibana.alert.attack_discovery.title_with_replacements'),
+      stringField(raw, 'kibana.alert.attack_discovery.title')
+    ),
+    fingerprintSummary: preferFilled(
+      stringField(raw, 'kibana.alert.attack_discovery.summary_markdown_with_replacements'),
+      stringField(raw, 'kibana.alert.attack_discovery.summary_markdown')
+    ),
     tactics: stringList(raw, 'kibana.alert.attack_discovery.mitre_attack_tactics'),
     hostEntityIds: [],
     userEntityIds: [],
@@ -211,12 +232,8 @@ const enrichAttack = async (
 
   return {
     ...attack,
-    hostEntityIds: entities.entities
-      .filter((entity) => entity.type === 'host')
-      .map((entity) => entity.id),
-    userEntityIds: entities.entities
-      .filter((entity) => entity.type === 'user')
-      .map((entity) => entity.id),
+    hostEntityIds: entities.entities.filter((entity) => entity.type === 'host').map(entityKey),
+    userEntityIds: entities.entities.filter((entity) => entity.type === 'user').map(entityKey),
     firstAlertAt: span.first,
     lastAlertAt: span.last,
   };
@@ -348,7 +365,8 @@ const signatureOf = (attack: AttackSignals): string => {
   ).join(' ')} tactic:${uniqueSorted(attack.tactics).join(' ')} alerts:${
     attack.firstAlertAt ?? ''
   }/${attack.lastAlertAt ?? ''}`;
-  return `${line}\n${attack.summaryMarkdown}`.slice(0, CONTENT_MAX);
+  const summary = attack.fingerprintSummary ?? attack.summaryMarkdown;
+  return `${line}\n${summary}`.slice(0, CONTENT_MAX);
 };
 
 const fingerprintDocument = (
@@ -368,7 +386,7 @@ const fingerprintDocument = (
     '@timestamp': now.toISOString(),
     id: documentId,
     type: ATTACK_FINGERPRINT_TYPE,
-    title: attack.title.slice(0, 512),
+    title: (attack.fingerprintTitle ?? attack.title).slice(0, 512),
     tags: [ATTACK_FINGERPRINT_TAG],
     expires_at: expiresAt,
     ...(includeContent ? { content: signatureOf(attack) } : {}),

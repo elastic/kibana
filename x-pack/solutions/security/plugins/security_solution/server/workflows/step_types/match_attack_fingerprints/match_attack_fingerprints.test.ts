@@ -267,6 +267,97 @@ describe('matchAttackFingerprints', () => {
     expect(output.reviews).toEqual([]);
   });
 
+  it('keeps attacks on different host names apart when they share one entity id', async () => {
+    getAlertEntitiesMock.mockImplementation(async ({ alertIds }) => {
+      const host = alertIds.includes('win01-a') ? 'SRVWIN01' : 'SRVWIN02';
+      return {
+        entities: [
+          { id: 'host:shared-host-id', name: host, type: 'host' },
+          {
+            id: 'user:Administrator@shared-host-id@local',
+            name: `Administrator@${host}`,
+            type: 'user',
+          },
+        ],
+        total: 2,
+        truncated: false,
+      };
+    });
+    const { esClient, contextManager, index } = createHarness();
+
+    const output = await matchAttackFingerprints({
+      attacks: [
+        attackDocument(ATTACK_ID, ['win01-a', 'win01-b']),
+        attackDocument(OTHER_ATTACK_ID, ['win02-a', 'win02-b']),
+      ],
+      contextManager,
+      esClient,
+      logger,
+      now: new Date('2026-10-21T12:00:00.000Z'),
+      spaceId: 'default',
+    });
+
+    expect(output.reviews.map((review) => review.attack_discovery_id).sort()).toEqual(
+      [ATTACK_ID, OTHER_ATTACK_ID].sort()
+    );
+    expect(output.attachments).toEqual([]);
+    expect(index).toHaveBeenCalledTimes(2);
+  });
+
+  it('writes the host name and the de-anonymized summary, and leaves the review anonymized', async () => {
+    getAlertEntitiesMock.mockResolvedValue({
+      entities: [
+        { id: 'host:shared-host-id', name: 'SRVWIN01', type: 'host' },
+        {
+          id: 'user:Administrator@shared-host-id@local',
+          name: 'Administrator@SRVWIN01',
+          type: 'user',
+        },
+      ],
+      total: 2,
+      truncated: false,
+    });
+    const { esClient, contextManager, index } = createHarness();
+
+    const output = await matchAttackFingerprints({
+      attacks: [
+        {
+          ...attackDocument(ATTACK_ID, ['a1', 'a2']),
+          'kibana.alert.attack_discovery.title': 'Excel on {{ host.name uuid }}',
+          'kibana.alert.attack_discovery.title_with_replacements': 'Excel on SRVWIN01',
+          'kibana.alert.attack_discovery.summary_markdown':
+            'Excel on {{ host.name uuid }} decoded a file.',
+          'kibana.alert.attack_discovery.summary_markdown_with_replacements':
+            'Excel on SRVWIN01 decoded a file.',
+        },
+      ],
+      contextManager,
+      esClient,
+      logger,
+      now: new Date('2026-10-21T12:00:00.000Z'),
+      spaceId: 'default',
+    });
+
+    expect(output.reviews[0]?.summary_markdown).toBe(
+      'Excel on {{ host.name uuid }} decoded a file.'
+    );
+    expect(index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          title: 'Excel on SRVWIN01',
+          content: expect.stringContaining('host:SRVWIN01'),
+          attributes: expect.objectContaining({
+            host_entity_ids: ['SRVWIN01'],
+            user_entity_ids: ['Administrator@SRVWIN01'],
+          }),
+        }),
+      }),
+      expect.anything()
+    );
+    const written = index.mock.calls[0]?.[0] as { document: { content: string } };
+    expect(written.document.content).toContain('Excel on SRVWIN01 decoded a file.');
+  });
+
   it('returns a review when the content write fails inference and the attribute write succeeds', async () => {
     const index = jest.fn(async (params: { document?: { content?: string } }) => {
       if (params.document?.content !== undefined) {

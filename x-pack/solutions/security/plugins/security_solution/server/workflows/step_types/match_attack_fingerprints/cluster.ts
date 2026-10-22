@@ -36,6 +36,12 @@ export interface AttackSignals extends AttackMatchFields {
   attackId: string;
   title: string;
   summaryMarkdown: string;
+  /**
+   * De-anonymized title and summary for the fingerprint. Reviews keep `title` and
+   * `summaryMarkdown`, which stay anonymized.
+   */
+  fingerprintTitle?: string;
+  fingerprintSummary?: string;
 }
 
 export interface StoredFingerprint extends AttackMatchFields {
