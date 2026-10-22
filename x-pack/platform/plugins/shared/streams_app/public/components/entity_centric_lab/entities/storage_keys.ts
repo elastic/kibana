@@ -25,7 +25,11 @@ export const PAGE_SIZES_STORAGE_KEY = 'entityCentricLab.entitiesPageSizes.v1';
 
 export const PAGE_SIZE_CHANGE_EVENT = 'entity-centric-lab:page-size-changed';
 const VALID_PAGE_SIZES = [10, 25, 50] as const;
-const DEFAULT_PAGE_SIZE = VALID_PAGE_SIZES[0];
+
+/** First-visit / unset per-table page size (user can still pick 50). */
+export const DEFAULT_TABLE_PAGE_SIZE = VALID_PAGE_SIZES[1];
+
+const DEFAULT_PAGE_SIZE = DEFAULT_TABLE_PAGE_SIZE;
 
 const isValidPageSize = (n: number): boolean =>
   (VALID_PAGE_SIZES as readonly number[]).includes(n);
@@ -90,7 +94,7 @@ export const writePageSizes = (sizes: Record<string, number>): void => {
   }
 };
 
-/** Read a single table's page size from the map; falls back to 10. */
+/** Read a single table's page size from the map; falls back to {@link DEFAULT_TABLE_PAGE_SIZE}. */
 export const readPageSizeForTable = (tableKey: string): number =>
   readPageSizes()[tableKey] ?? DEFAULT_PAGE_SIZE;
 

@@ -32,7 +32,7 @@ import {
 } from './entity_centric_lab_integrations';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
-/** Append "(N)" to a left-nav label when a count is available. */
+/** Append "(N)" to a left-nav label — inventoried total lives in the title only. */
 const withNavCount = (label: string, count: number | undefined): string => {
   if (count == null || !Number.isFinite(count)) return label;
   return `${label} (${count.toLocaleString()})`;
@@ -647,12 +647,12 @@ function createNavTree({
     return count > 0 ? count : undefined;
   };
 
-  /** Red alert badge props: count + link that opens the page grouped by Alerts. */
+  /** Alert indicator props: count (for tooltip) + link to filter active alerts. */
   const alertBadgeProps = (path: string, count: number | undefined) =>
     count != null && count > 0
       ? {
           notificationCount: count,
-          notificationHref: toAbsoluteHref(`${path}?groupBy=alerts`),
+          notificationHref: toAbsoluteHref(`${path}?alertsFilter=active`),
         }
       : {};
 
@@ -773,10 +773,7 @@ function createNavTree({
         }),
         categoryCount('middlewares')
       ),
-      ...alertBadgeProps(
-        '/app/streams/entities/middlewares',
-        categoryAlertCount('middlewares')
-      ),
+      ...alertBadgeProps('/app/streams/entities/middlewares', categoryAlertCount('middlewares')),
       getIsActive: categoryGetIsActive('/app/streams/entities/middlewares'),
     },
     {

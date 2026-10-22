@@ -144,8 +144,10 @@ import { EntitiesTagFilters } from './entities_tag_filters';
 import { EntityExtraFilters } from './entity_extra_filters';
 import {
   ALERTS_FILTER_ALL,
+  ALERTS_FILTER_QUERY_PARAM,
   EntityAlertsFilter,
   matchesAlertsFilter,
+  parseAlertsFilterFromSearch,
   type AlertsFilterId,
 } from './entity_alerts_filter';
 import { EntityGroupByControls } from './entity_group_by_controls';
@@ -1674,6 +1676,16 @@ const AllEntitiesViewInner = ({
     if (ids.length === 0) return;
     setGroupBy(ids);
   }, [location.search, setGroupBy]);
+
+  // Left-nav alert bell: `?alertsFilter=active` (and other alert buckets).
+  useEffect(() => {
+    const parsed = parseAlertsFilterFromSearch(location.search);
+    if (!parsed) return;
+    setAlertsFilter(parsed);
+    if (parsed !== ALERTS_FILTER_ALL) {
+      setCategoryTab('inventory');
+    }
+  }, [location.search, setCategoryTab]);
   // Overview is the default landing tab on both the per-category pages
   // and the cross-category `/entities` page. On the cross-category page
   // Overview aggregates every category (see `AllEntitiesOverviewView`),
@@ -2003,7 +2015,15 @@ const AllEntitiesViewInner = ({
     setK8sDeploymentFilter(KUBERNETES_FILTER_ALL);
     setK8sNodeFilter(KUBERNETES_FILTER_ALL);
     setCategoryTypeFilter(CATEGORY_RESOURCE_TYPE_ALL);
-  }, [setActiveTagFilters]);
+    const params = new URLSearchParams(location.search);
+    if (params.has(ALERTS_FILTER_QUERY_PARAM)) {
+      params.delete(ALERTS_FILTER_QUERY_PARAM);
+      history.replace({
+        pathname: location.pathname,
+        search: params.toString() ? `?${params.toString()}` : '',
+      });
+    }
+  }, [setActiveTagFilters, history, location.pathname, location.search]);
 
   // Resolve the clicked entity's `type` and `health` from the dataset so the
   // shared flyout can pick the right kind template (service / host / pod /

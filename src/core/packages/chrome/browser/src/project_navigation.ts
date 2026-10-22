@@ -167,6 +167,12 @@ interface NodeDefinitionBase {
    * (optional) Absolute href opened when the notification badge is clicked.
    */
   notificationHref?: string;
+
+  /**
+   * (optional) Right-aligned inventoried resource count (hollow badge), shown
+   * beside {@link notificationCount} when both are set.
+   */
+  inventoryCount?: number;
 }
 
 /** @public */

@@ -16,6 +16,7 @@ import { css } from '@emotion/react';
 import { SIDE_PANEL_CONTENT_GAP } from '@kbn/core-chrome-layout-constants';
 import type { SecondaryMenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
+import { NavCountBadges } from './nav_count_badges';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { useScrollToActive } from '../../hooks/use_scroll_to_active';
 import {
@@ -42,13 +43,6 @@ export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> 
  * `EuiButton` and `EuiButtonEmpty` are used for consistency with the component library.
  * The only style overrides are making the button labels left-aligned.
  */
-const formatNotificationCount = (count: number): string => (count > 99 ? '99+' : String(count));
-
-const formatNotificationTooltip = (count: number): string =>
-  count === 1
-    ? '1 resource with active alerts'
-    : `${count.toLocaleString()} resources with active alerts`;
-
 export const SecondaryMenuItemComponent = ({
   badgeType,
   children,
@@ -61,7 +55,7 @@ export const SecondaryMenuItemComponent = ({
   isHighlighted,
   isNew = false,
   notificationCount,
-  notificationHref: _notificationHref,
+  notificationHref,
   testSubjPrefix,
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
@@ -108,6 +102,7 @@ export const SecondaryMenuItemComponent = ({
     typeof notificationCount === 'number' &&
     Number.isFinite(notificationCount) &&
     notificationCount > 0;
+  const showNavCounts = showNotification;
 
   const getMaxWidth = () => {
     const isInSidePanel = testSubjPrefix?.includes('sidePanel');
@@ -116,8 +111,8 @@ export const SecondaryMenuItemComponent = ({
     if (isInSidePanel) maxWidth -= SIDE_PANEL_CONTENT_GAP;
     // Secondary item label + badge
     if (isNew || badgeType) maxWidth -= BADGE_SPACING_OFFSET;
-    // Secondary item label + right-aligned notification count
-    if (showNotification) maxWidth -= BADGE_SPACING_OFFSET;
+    // Secondary item label + right-aligned count badge(s)
+    if (showNavCounts) maxWidth -= BADGE_SPACING_OFFSET;
     // Secondary item label + right arrow (More menu)
     if (hasSubmenu) maxWidth -= SUB_MENU_ICON_SPACING_OFFSET;
     return maxWidth;
@@ -155,7 +150,7 @@ export const SecondaryMenuItemComponent = ({
         </span>
         {getBadge()}
       </div>
-      {/* Notification dot disabled for now */}
+      <NavCountBadges notificationCount={notificationCount} notificationHref={notificationHref} />
     </div>
   );
 

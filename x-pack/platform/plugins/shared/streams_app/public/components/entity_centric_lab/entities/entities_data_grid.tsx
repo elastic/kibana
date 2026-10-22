@@ -433,12 +433,8 @@ const isHomogeneousTypeGroup = (category: EntityCategoryId, rows: readonly Entit
   return rows.every((entity) => rowBucketKey(category, entity) === first);
 };
 
-/** Pick a sensible default page size based on how many rows the table has. */
-const smartDefaultPageSize = (rowCount: number): number => {
-  if (rowCount <= 10) return 10;
-  if (rowCount <= 25) return 25;
-  return 50;
-};
+/** Default page size for new tables; cap at 25 (headers are not sticky on scroll). */
+const smartDefaultPageSize = (rowCount: number): number => (rowCount <= 10 ? 10 : 25);
 
 const PROVIDER_LABEL: Record<string, string> = Object.fromEntries(
   CLOUD_PROVIDERS.map((provider) => [provider.id, provider.label])

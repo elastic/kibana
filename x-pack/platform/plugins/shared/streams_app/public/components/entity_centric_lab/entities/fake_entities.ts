@@ -526,6 +526,20 @@ const buildAlerts = (
   return { total, active: 0 }; // all clear
 };
 
+/** Categories kept alert-quiet in the ElasticOn demo (nav + inventory). */
+const NO_ACTIVE_ALERT_CATEGORIES = new Set<EntityCategoryId>(['databases', 'storage']);
+
+const alertsForCategory = (
+  category: EntityCategoryId,
+  name: string,
+  health: EntityHealth
+): { total: number; active: number } | undefined => {
+  const alerts = buildAlerts(name, health);
+  if (!NO_ACTIVE_ALERT_CATEGORIES.has(category)) return alerts;
+  if (!alerts) return alerts;
+  return { total: alerts.total, active: 0 };
+};
+
 // Deterministically seed the extra, category-specific attributes (e.g. a
 // host's OS / cloud provider / detected service) from each filter def's pool,
 // using the same independent-hash scheme as tags so values are stable and
@@ -883,7 +897,7 @@ const buildCloudEntities = (multiplier = 1): Entity[] => {
               name,
               withAvailabilityZone(tags.region, name)
             ),
-            alerts: buildAlerts(name, health),
+            alerts: alertsForCategory(service.targetCategory, name, health),
           });
           index += 1;
         }
@@ -994,7 +1008,7 @@ const buildCategoryEntitiesWithScenario = (
         name,
         buildExtraAttributes(spec.category, spec.category, i)
       ),
-      alerts: buildAlerts(name, health),
+      alerts: alertsForCategory(spec.category, name, health),
     });
   }
   return sortByHealth(entities);

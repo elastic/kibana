@@ -15,6 +15,21 @@ export type AlertsFilterId = 'all' | 'active' | 'no_setup' | 'no_active';
 
 export const ALERTS_FILTER_ALL: AlertsFilterId = 'all';
 
+/** Shareable URL param for left-nav alert bell deep links. */
+export const ALERTS_FILTER_QUERY_PARAM = 'alertsFilter';
+
+const isAlertsFilterId = (value: string): value is AlertsFilterId =>
+  value === 'all' ||
+  value === 'active' ||
+  value === 'no_setup' ||
+  value === 'no_active';
+
+export const parseAlertsFilterFromSearch = (search: string): AlertsFilterId | null => {
+  const raw = new URLSearchParams(search).get(ALERTS_FILTER_QUERY_PARAM);
+  if (!raw || !isAlertsFilterId(raw)) return null;
+  return raw;
+};
+
 const ALERTS_FILTER_OPTIONS: readonly { readonly id: Exclude<AlertsFilterId, 'all'>; readonly label: string }[] =
   [
     {

@@ -44,6 +44,8 @@ export interface SecondaryMenuItem {
   notificationCount?: number;
   /** Optional destination when the notification badge is clicked. */
   notificationHref?: string;
+  /** Optional inventoried resource total (hollow badge). */
+  inventoryCount?: number;
   /** If true, opens link in a new tab with an external icon. */
   isExternal?: boolean;
 }

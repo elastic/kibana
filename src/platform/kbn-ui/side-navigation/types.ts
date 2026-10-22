@@ -47,6 +47,11 @@ export interface SecondaryMenuItem {
    */
   notificationHref?: string;
   /**
+   * (optional) Inventoried resource total (hollow badge). Shown to the left of
+   * {@link notificationCount} when both are present.
+   */
+  inventoryCount?: number;
+  /**
    * (optional) Whether the link opens in a new tab.
    */
   isExternal?: boolean;

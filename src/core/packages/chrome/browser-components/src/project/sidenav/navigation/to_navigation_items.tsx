@@ -168,6 +168,7 @@ export const toNavigationItems = (
         badgeType: child.badgeType,
         notificationCount: child.notificationCount,
         notificationHref: child.notificationHref,
+        inventoryCount: child.inventoryCount,
       };
     };
 

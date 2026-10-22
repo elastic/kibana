@@ -106,14 +106,26 @@ export const EntityGroupByControls = ({
   const [isOpen, setIsOpen] = useState(false);
   const popoverId = useGeneratedHtmlId({ prefix: 'entityCentricLabGroupBy' });
 
-  const selectedLabels = useMemo(
-    () =>
-      groupBy
-        .filter((id) => !lockedFieldIds.includes(id))
-        .map((id) => fields.find((field) => field.id === id)?.label)
-        .filter((label): label is string => Boolean(label)),
-    [groupBy, fields, lockedFieldIds]
-  );
+  // Label lists every effective grouping level, including locked fields
+  // (e.g. Category on a category-scoped page) even though those stay
+  // read-only in the menu.
+  const selectedLabels = useMemo(() => {
+    const orderedIds: GroupByFieldId[] = [];
+    const seen = new Set<GroupByFieldId>();
+    for (const id of lockedFieldIds) {
+      orderedIds.push(id);
+      seen.add(id);
+    }
+    for (const id of groupBy) {
+      if (!seen.has(id)) {
+        orderedIds.push(id);
+        seen.add(id);
+      }
+    }
+    return orderedIds
+      .map((id) => fields.find((field) => field.id === id)?.label)
+      .filter((label): label is string => Boolean(label));
+  }, [groupBy, fields, lockedFieldIds]);
 
   const toggle = (id: GroupByFieldId) => {
     const isSelected = groupBy.includes(id);

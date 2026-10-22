@@ -167,6 +167,7 @@ import {
   GROUP_BY_STORAGE_KEY,
   TAG_FILTERS_STORAGE_KEY,
   VIEW_MODE_STORAGE_KEY,
+  DEFAULT_TABLE_PAGE_SIZE,
   writePageSize,
   writePageSizes,
 } from './storage_keys';
@@ -739,9 +740,9 @@ const canonicalState = (state: SavedViewState) => ({
   // page at the default grouping compare equal and don't spuriously light the
   // "Modified" badge. Order is significant (level 1 vs 2), so don't sort.
   groupBy: [...(state.groupBy && state.groupBy.length > 0 ? state.groupBy : DEFAULT_GROUP_BY)],
-  // Absent page-size == 10 (the default), so a legacy view without pageSize
-  // and a page showing 10 rows compare equal.
-  pageSize: state.pageSize ?? 10,
+  // Absent page-size == {@link DEFAULT_TABLE_PAGE_SIZE}, so a legacy view without
+  // pageSize and a page at the default row count compare equal.
+  pageSize: state.pageSize ?? DEFAULT_TABLE_PAGE_SIZE,
   // Per-table page sizes — absent == empty map (all tables at default).
   // Sort keys so `{ a: 10, b: 25 }` equals `{ b: 25, a: 10 }`.
   pageSizes: Object.fromEntries(
@@ -806,7 +807,7 @@ export const applyViewToStorage = (view: SavedView): void => {
           : DEFAULT_GROUP_BY),
       ])
     );
-    writePageSize(view.state.pageSize ?? 10);
+    writePageSize(view.state.pageSize ?? DEFAULT_TABLE_PAGE_SIZE);
     writePageSizes(view.state.pageSizes ?? {});
   } catch {
     // Same trade-off as the other write helpers: the in-memory copy

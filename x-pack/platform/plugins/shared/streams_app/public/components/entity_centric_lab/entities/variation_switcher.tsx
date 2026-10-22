@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.10';
+export const PROTOTYPE_VERSION = '1.11';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-10-22',
+    summary:
+      'Left-nav inventory counts, alert dots, list defaults, and group-by label polish.',
+    details:
+      'Infrastructure nav shows inventoried totals in category titles and a clickable red dot when a category has active alerts (deep-links to ?alertsFilter=active on Inventory). Default list table page size is 25 for new views. Demo data keeps Databases and Storage free of firing alerts. Group resources by link lists locked levels (e.g. Category, Type on scoped pages). Bump to v1.11.',
+  },
   {
     date: '2026-10-22',
     summary:
