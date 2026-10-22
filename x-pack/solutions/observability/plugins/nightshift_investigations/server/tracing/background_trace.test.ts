@@ -16,7 +16,6 @@ import {
   initInferenceTracerProvider,
   shutdownInferenceTracerProvider,
 } from '@kbn/inference-tracing';
-import { SPACE_ID_BAGGAGE_KEY } from '@kbn/agent-builder-plugin/server';
 import {
   isValidOtelSpanId,
   isValidOtelTraceId,
@@ -24,6 +23,8 @@ import {
   toDeterministicTraceId,
   withNightshiftBackgroundSpan,
 } from './background_trace';
+
+const SPACE_ID_BAGGAGE_KEY = 'agent_builder.space_id';
 
 describe('server/tracing/background_trace', () => {
   let contextManager: AsyncLocalStorageContextManager;
