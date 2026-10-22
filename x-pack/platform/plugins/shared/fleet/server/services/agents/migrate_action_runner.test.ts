@@ -79,8 +79,8 @@ describe('partitionAgentsForMigration', () => {
       variantAgent,
     ]);
     expect(agentsToAction).toHaveLength(0);
-    expect(errors['agent-agentless'].message).toContain('managed integration agent');
-    expect(errors['agent-agentless-variant'].message).toContain('managed integration agent');
+    expect(errors['agent-agentless'].message).toContain('managed agent');
+    expect(errors['agent-agentless-variant'].message).toContain('managed agent');
   });
 
   describe('version-specific variant agents', () => {

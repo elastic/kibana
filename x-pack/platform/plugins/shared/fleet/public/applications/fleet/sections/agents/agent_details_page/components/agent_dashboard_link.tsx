@@ -126,7 +126,7 @@ export const AgentDashboardLink: React.FunctionComponent<{
           agentPolicy.supports_agentless ? (
             <FormattedMessage
               id="xpack.fleet.agentDetails.viewDashboardButton.disabledAgentlessMetricsTooltip"
-              defaultMessage="Agent metrics are not supported for managed integration agents."
+              defaultMessage="Agent metrics are not supported for managed agents."
             />
           ) : (
             <FormattedMessage

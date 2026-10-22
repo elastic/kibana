@@ -154,7 +154,7 @@ describe('hosted agent helpers', () => {
     it('throws for an agentless policy', () => {
       expect(() =>
         throwIfAgentlessAgentPolicy({ supports_agentless: true }, 'Cannot restart agent')
-      ).toThrow(/Cannot restart agent.*managed integration agents are managed by Elastic/);
+      ).toThrow(/Cannot restart agent.*managed agents are managed by Elastic/);
     });
 
     it('does not throw for other policies', () => {
@@ -176,7 +176,7 @@ describe('hosted agent helpers', () => {
 
       await expect(
         throwIfAgentInAgentlessPolicy(soClientMock, { policy_id: 'agentless-policy' }, 'Cannot do')
-      ).rejects.toThrow(/Cannot do.*managed integration agents/);
+      ).rejects.toThrow(/Cannot do.*managed agents/);
       expect(agentPolicyServiceMock.get).toHaveBeenCalledWith(
         soClientMock,
         'agentless-policy',

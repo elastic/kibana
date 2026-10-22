@@ -66,7 +66,7 @@ export async function restartBatch(
       );
     } else if (isAgentlessAgent(restrictions, agent)) {
       errors[agent.id] = new AgentlessAgentRestrictionError(
-        `Cannot restart managed integration agent ${agent.id}`
+        `Cannot restart managed agent ${agent.id}`
       );
     } else if (!isAgentRestartSupported(agent)) {
       errors[agent.id] = new FleetError(

@@ -80,7 +80,7 @@ export async function updateTagsBatch(
     givenAgents,
     errors,
     hostedAgentError,
-    `Cannot modify tags on a managed integration agent`
+    `Cannot modify tags on a managed agent`
   );
   const agentIds = filteredAgents.map((agent) => agent.id);
 

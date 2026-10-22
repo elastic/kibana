@@ -88,7 +88,7 @@ export async function unenrollBatch(
       isAgentlessAgent(restrictions, agent)
     ) {
       outgoingErrors[agent.id] = new AgentlessAgentRestrictionError(
-        `Cannot unenroll managed integration agent ${agent.id}`
+        `Cannot unenroll managed agent ${agent.id}`
       );
     } else if (options.force) {
       agents.push(agent);

@@ -36,7 +36,7 @@ export const postNewAgentActionHandlerBuilder = function (
     await throwIfAgentInAgentlessPolicy(
       soClient,
       agent,
-      `Cannot create an action for managed integration agent ${agent.id}`
+      `Cannot create an action for managed agent ${agent.id}`
     );
 
     const newAgentAction = request.body.action;

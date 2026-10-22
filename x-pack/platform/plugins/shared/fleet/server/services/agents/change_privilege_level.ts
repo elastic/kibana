@@ -41,7 +41,7 @@ export async function changeAgentPrivilegeLevel(
   await throwIfAgentInAgentlessPolicy(
     soClient,
     agent,
-    `Cannot remove root privilege for managed integration agent ${agentId}`
+    `Cannot remove root privilege for managed agent ${agentId}`
   );
 
   // Return fast if agent is already unprivileged.

@@ -73,7 +73,7 @@ export async function bulkChangePrivilegeAgentsBatch(
     async (agent) => {
       if (isAgentlessAgent(restrictions, agent)) {
         errors[agent.id] = new AgentlessAgentRestrictionError(
-          `Cannot remove root privilege for managed integration agent ${agent.id}`
+          `Cannot remove root privilege for managed agent ${agent.id}`
         );
         return;
       }

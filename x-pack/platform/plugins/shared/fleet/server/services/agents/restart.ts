@@ -46,7 +46,7 @@ export async function restartAgent(
         `Cannot restart agent ${agentId} in hosted agent policy ${agentPolicy.id}`
       );
     }
-    throwIfAgentlessAgentPolicy(agentPolicy, `Cannot restart managed integration agent ${agentId}`);
+    throwIfAgentlessAgentPolicy(agentPolicy, `Cannot restart managed agent ${agentId}`);
   }
 
   const currentSpaceId = getCurrentNamespace(soClient);

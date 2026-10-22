@@ -83,7 +83,7 @@ export async function reassignBatch(
       errors[agent.id] = new AgentlessAgentRestrictionError(
         `Cannot reassign agent ${agent.id} ${
           isAgentlessAgent(restrictions, agent) ? 'from' : 'to'
-        } managed integration agent policy`
+        } managed agent policy`
       );
     } else {
       agents.push(agent);

@@ -329,7 +329,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
               content={
                 <FormattedMessage
                   id="xpack.fleet.requestDiagnostics.agentlessNotSupportedTooltip"
-                  defaultMessage="Requesting agent diagnostics is not supported for managed integration agents."
+                  defaultMessage="Requesting agent diagnostics is not supported for managed agents."
                 />
               }
             >

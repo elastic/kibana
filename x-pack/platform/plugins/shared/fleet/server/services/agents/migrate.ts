@@ -57,7 +57,7 @@ export async function migrateSingleAgent(
   if (agentPolicy?.is_protected) {
     throw new FleetUnauthorizedError(`Agent is protected and cannot be migrated`);
   }
-  throwIfAgentlessAgentPolicy(agentPolicy, `Cannot migrate managed integration agent ${agentId}`);
+  throwIfAgentlessAgentPolicy(agentPolicy, `Cannot migrate managed agent ${agentId}`);
   if (agent.components?.some((c) => c.type === 'fleet-server')) {
     throw new FleetUnauthorizedError(`Fleet server agents cannot be migrated`);
   }

@@ -56,7 +56,7 @@ export async function partitionAgentsForMigration(
   agents.forEach((agent: Agent) => {
     if (agent.policy_base_id && agentlessPolicyIdSet.has(agent.policy_base_id)) {
       errors[agent.id] = new AgentlessAgentRestrictionError(
-        `Cannot migrate managed integration agent ${agent.id}`
+        `Cannot migrate managed agent ${agent.id}`
       );
     } else if (
       agent.policy_base_id &&

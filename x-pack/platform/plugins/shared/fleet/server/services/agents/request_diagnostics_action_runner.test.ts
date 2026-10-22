@@ -76,6 +76,6 @@ describe('requestDiagnosticsBatch', () => {
     );
     const errors = mockCreateErrorActionResults.mock.calls[0][2];
     expect(Object.keys(errors)).toEqual(['agentless-1']);
-    expect(errors['agentless-1'].message).toContain('managed integration agent');
+    expect(errors['agentless-1'].message).toContain('managed agent');
   });
 });

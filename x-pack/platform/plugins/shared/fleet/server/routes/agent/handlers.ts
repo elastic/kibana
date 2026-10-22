@@ -183,7 +183,7 @@ export const updateAgentHandler: FleetRequestHandler<
     await throwIfAgentInAgentlessPolicy(
       soClient,
       agent,
-      `Cannot update managed integration agent ${request.params.agentId}`
+      `Cannot update managed agent ${request.params.agentId}`
     );
 
     await AgentService.updateAgent(esClient, request.params.agentId, partialAgent);
