@@ -16,6 +16,7 @@ import { getActionDetailsById } from '../../../../../endpoint/services/actions';
 import { GET_RESPONSE_ACTION_STATUS_TOOL_ID } from '../..';
 import {
   insufficientPrivilegesResult,
+  licenseTierRequiredResult,
   responseActionErrorResult,
   GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS,
   summarizeActionErrors,
@@ -67,6 +68,13 @@ export const getResponseActionStatusTool = (
           return insufficientPrivilegesResult('canReadSecuritySolution');
         }
         if (!authz.canAccessEndpointActionsLogManagement) {
+          // `canAccessEndpointActionsLogManagement` is conjunctioned with
+          // `isPlatinumPlusLicense` in `calculateEndpointAuthz`, so below
+          // Platinum the license, not the role, is what withholds it —
+          // same split as the dispatch gate in `dispatch_action.ts`.
+          if (!endpointAppContextService.getLicenseService().isPlatinumPlus()) {
+            return licenseTierRequiredResult('canAccessEndpointActionsLogManagement', 'platinum');
+          }
           return insufficientPrivilegesResult('canAccessEndpointActionsLogManagement');
         }
 

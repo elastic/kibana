@@ -14,7 +14,11 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
 import type { EndpointAuthz } from '../../../../../../common/endpoint/types/authz';
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
-import { responseActionErrorResult, insufficientPrivilegesResult } from '../types';
+import {
+  licenseTierRequiredResult,
+  responseActionErrorResult,
+  insufficientPrivilegesResult,
+} from '../types';
 import { createEndpointLookupService, type ResolvedEndpoint } from './endpoint_lookup';
 import {
   resolveDispatchTarget,
@@ -43,6 +47,28 @@ export type DispatchPrivilege = Extract<
   keyof EndpointAuthz,
   'canIsolateHost' | 'canUnIsolateHost' | 'canWriteScanOperations' | 'canGetRunningProcesses'
 >;
+
+/**
+ * The license tier `calculateEndpointAuthz` conjunctions each dispatch
+ * privilege with (`authz.ts`: `canIsolateHost: ... && isPlatinumPlusLicense`,
+ * `canWriteScanOperations` / `canGetRunningProcesses`: `... &&
+ * isEnterpriseLicense`). `canUnIsolateHost` is deliberately ungated there — a
+ * license lapse must never leave a host isolated with no way to release it —
+ * so it maps to no tier.
+ *
+ * When `authz[privilege]` is false on a deployment already at the required
+ * tier, the role is what is missing; below it, the license is. Only the second
+ * case is reported as `license_tier_required`.
+ */
+export const DISPATCH_PRIVILEGE_LICENSE_TIERS: Record<
+  DispatchPrivilege,
+  'platinum' | 'enterprise' | undefined
+> = {
+  canIsolateHost: 'platinum',
+  canUnIsolateHost: undefined,
+  canWriteScanOperations: 'enterprise',
+  canGetRunningProcesses: 'enterprise',
+};
 
 export interface DispatchRequest {
   action: DispatchActionName;
@@ -136,6 +162,37 @@ const resolveTarget = (request: DispatchRequest): Promise<ResolvedDispatchTarget
     request.action,
     request.params
   );
+
+/**
+ * Distinguishes a missing role privilege from a license-tier limit when
+ * `authz[privilege]` is false, without re-deriving `calculateEndpointAuthz`'s
+ * conjunctions here: the privilege flag already folds both in, so the license
+ * service is only consulted when the flag is false to decide which of the two
+ * refusal shapes to return. `undefined` means the privilege has no license
+ * conjunction, so the license is never the explanation.
+ */
+const privilegeRefusal = (
+  endpointAppContextService: EndpointAppContextService,
+  privilege: DispatchPrivilege | 'canReadSecuritySolution'
+):
+  | { kind: 'privilege'; privilege: string }
+  | { kind: 'license'; privilege: DispatchPrivilege; tier: 'platinum' | 'enterprise' } => {
+  if (privilege !== 'canReadSecuritySolution') {
+    const requiredTier = DISPATCH_PRIVILEGE_LICENSE_TIERS[privilege];
+    if (requiredTier) {
+      const licenseService = endpointAppContextService.getLicenseService();
+      const atTier =
+        requiredTier === 'platinum'
+          ? licenseService.isPlatinumPlus()
+          : licenseService.isEnterprise();
+      if (!atTier) {
+        return { kind: 'license', privilege, tier: requiredTier };
+      }
+    }
+  }
+
+  return { kind: 'privilege', privilege };
+};
 
 /**
  * A hostname that disagrees with every hostname the supplied agent id is known
@@ -272,6 +329,14 @@ export const describeDispatchTargetForConfirmation = async (
       };
     }
     if (!authz[requiredPrivilege]) {
+      const refusal = privilegeRefusal(endpointAppContextService, requiredPrivilege);
+      if (refusal.kind === 'license') {
+        const tierName = refusal.tier === 'platinum' ? 'Platinum' : 'Enterprise';
+        return {
+          kind: 'blocked',
+          message: `This deployment's license tier does not include '${requiredPrivilege}' (requires ${tierName} or higher), so this action will be refused regardless of role. Ask an administrator about upgrading the Elastic license; nothing you can grant will enable it here.`,
+        };
+      }
       return {
         kind: 'blocked',
         message: `You do not have the '${requiredPrivilege}' endpoint privilege, so this action will be refused. Ask an administrator to grant it, or perform the action from the Security UI.`,
@@ -329,7 +394,10 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
     return { kind: 'result', result: insufficientPrivilegesResult('canReadSecuritySolution') };
   }
   if (!authz[requiredPrivilege]) {
-    return { kind: 'result', result: insufficientPrivilegesResult(requiredPrivilege) };
+    const refusal = privilegeRefusal(endpointAppContextService, requiredPrivilege);
+    return refusal.kind === 'license'
+      ? { kind: 'result', result: licenseTierRequiredResult(refusal.privilege, refusal.tier) }
+      : { kind: 'result', result: insufficientPrivilegesResult(refusal.privilege) };
   }
 
   const target = await resolveTarget(request);

@@ -145,6 +145,7 @@ export const RUNNING_PROCESSES_MAX_RESULT_TOKENS = 30_000;
 export type ResponseActionErrorType =
   | 'insufficient_privileges'
   | 'invalid_argument'
+  | 'license_tier_required'
   | 'unknown_error';
 
 /**
@@ -188,6 +189,27 @@ export function insufficientPrivilegesResult(privilege: string) {
     'insufficient_privileges',
     `Insufficient privileges: this action requires the '${privilege}' endpoint privilege. Ask an administrator to grant it, or perform the action from the Security UI.`,
     { privilege }
+  );
+}
+
+/**
+ * Standard tool result returned when the license tier, not the caller's role,
+ * is what withholds the privilege. In `calculateEndpointAuthz` several
+ * response-action privileges are conjunctioned with a license check
+ * (`canIsolateHost: ... && isPlatinumPlusLicense`, `canWriteScanOperations` /
+ * `canGetRunningProcesses`: `... && isEnterpriseLicense`), so below that tier
+ * the flag is false even for a superuser. Reporting that as
+ * `insufficient_privileges` sends the analyst to an administrator for a grant
+ * that cannot exist — only a license upgrade changes the answer, and the
+ * Security UI enforces the same gate, so neither half of the usual
+ * "ask an administrator / use the Security UI" advice applies.
+ */
+export function licenseTierRequiredResult(privilege: string, tier: 'platinum' | 'enterprise') {
+  const tierName = tier === 'platinum' ? 'Platinum' : 'Enterprise';
+  return responseActionErrorResult(
+    'license_tier_required',
+    `License limit: the '${privilege}' capability requires a ${tierName} license or higher, and this deployment's license tier does not include it. No role grant can supply it — an administrator would need to upgrade the Elastic license. Nothing was dispatched.`,
+    { privilege, requiredLicenseTier: tier }
   );
 }
 

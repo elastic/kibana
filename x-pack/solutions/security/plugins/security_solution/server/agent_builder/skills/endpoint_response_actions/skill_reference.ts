@@ -25,6 +25,7 @@ export const ENDPOINT_RESPONSE_ACTIONS_REFERENCE = `## Error Handling Reference
 | Action still pending | \`status: pending\` + action ID | Report it is still in flight; offer to re-check with \`get_response_action_status\` |
 | Action expired | \`status: failed\` + \`isExpired: true\` | Report that the action expired before the host responded, not that the command failed; direct the analyst to re-issue it from the Response Actions UI |
 | Insufficient privileges | \`error: insufficient_privileges\` | Tell analyst which privilege is missing; suggest Security UI |
+| License tier too low | \`error: license_tier_required\` (+ \`privilege\`, \`requiredLicenseTier\`) | Tell analyst the deployment's Elastic license tier does not include this capability and a role grant cannot fix it; an administrator would need to upgrade the license. Do NOT suggest the Security UI (it enforces the same limit) and do not offer the action again this conversation |
 | Page out of range | \`error: invalid_argument\` | Narrow the request with \`hostNameFilter\` instead of paging further |
 | Unexpected failure | \`error: unknown_error\` | Report the message; do not retry blindly |
 | Failure after dispatch | \`error: unknown_error\` + \`actionMayHaveBeenSent: true\` | The action may already have been sent. Do NOT call the write tool again; check \`get_response_action_status\` / Response Actions history for the host first |

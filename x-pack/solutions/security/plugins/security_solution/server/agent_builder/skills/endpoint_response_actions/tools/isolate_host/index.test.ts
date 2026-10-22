@@ -168,6 +168,64 @@ describe('isolateHostTool', () => {
       expect(mockResponseActionsClient.isolate).not.toHaveBeenCalled();
     });
 
+    it('reports license_tier_required, not a grant, when Platinum is what withholds canIsolateHost', async () => {
+      mockEndpointAppContextService.getEndpointAuthz = jest
+        .fn()
+        .mockResolvedValue(getEndpointAuthzInitialStateMock({ canIsolateHost: false }));
+      // `calculateEndpointAuthz` conjunctions the flag with the license, so
+      // a superuser below Platinum still sees false; the mock defaults to
+      // Platinum+, so flipping it to false makes the license the explanation.
+      mockEndpointAppContextService.getLicenseService = jest.fn(
+        () =>
+          ({
+            isPlatinumPlus: () => false,
+            isEnterprise: () => false,
+          } as unknown as ReturnType<EndpointAppContextService['getLicenseService']>)
+      ) as unknown as EndpointAppContextService['getLicenseService'];
+
+      const mockResponseActionsClient = { isolate: jest.fn() };
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => mockResponseActionsClient
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      const result = await tool.handler({ hostName: 'my-host' }, mockContext);
+
+      const results = assertStandardReturn(result);
+      expect(results[0].type).toBe(ToolResultType.error);
+      const data = results[0].data as Record<string, unknown>;
+      expect(data.error).toBe('license_tier_required');
+      expect(data.privilege).toBe('canIsolateHost');
+      expect(data.requiredLicenseTier).toBe('platinum');
+      expect((data.message as string).includes('license')).toBe(true);
+      expect(mockResponseActionsClient.isolate).not.toHaveBeenCalled();
+    });
+
+    it('tells the confirmation card the license tier blocks isolation, before any card the analyst could approve', async () => {
+      mockEndpointAppContextService.getEndpointAuthz = jest
+        .fn()
+        .mockResolvedValue(getEndpointAuthzInitialStateMock({ canIsolateHost: false }));
+      mockEndpointAppContextService.getLicenseService = jest.fn(
+        () =>
+          ({
+            isPlatinumPlus: () => false,
+            isEnterprise: () => false,
+          } as unknown as ReturnType<EndpointAppContextService['getLicenseService']>)
+      ) as unknown as EndpointAppContextService['getLicenseService'];
+
+      const card = await tool.confirmation?.getConfirmation?.({
+        toolParams: { hostName: 'my-host' },
+        context: mockContext,
+      });
+
+      expect(card?.message).toContain('This action will be refused');
+      expect(card?.message).toContain('license tier');
+      expect(card?.message).not.toContain('Ask an administrator to grant');
+      // A refused card must record a refusal, never a confirmed target.
+      expect(toolCallState.value).toEqual(
+        expect.objectContaining({ kind: 'refused', action: 'isolate' })
+      );
+    });
+
     it('returns found: false with reason endpoint_not_found when no agent matches', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({ agents: [] }),

@@ -8,6 +8,7 @@
 import {
   endpointNotFoundData,
   insufficientPrivilegesResult,
+  licenseTierRequiredResult,
   resolveAgentTypeFromPackages,
   responseActionErrorResult,
   summarizeActionHosts,
@@ -58,6 +59,24 @@ describe('response action error helpers', () => {
         privilege: 'canIsolateHost',
       })
     );
+  });
+
+  it('licenseTierRequiredResult reports the tier, not a grant, as the fix', () => {
+    const result = licenseTierRequiredResult('canWriteScanOperations', 'enterprise');
+
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({
+        error: 'license_tier_required',
+        privilege: 'canWriteScanOperations',
+        requiredLicenseTier: 'enterprise',
+      })
+    );
+    // The whole point of the split: a privilege grant cannot satisfy a license
+    // gate, so the message must not send the analyst looking for one.
+    const message = (result.results[0].data as { message: string }).message;
+    expect(message).not.toContain('Ask an administrator to grant');
+    expect(message).not.toContain('Security UI');
   });
 
   it('endpointNotFoundData reports a hostname miss without fabricating host state', () => {

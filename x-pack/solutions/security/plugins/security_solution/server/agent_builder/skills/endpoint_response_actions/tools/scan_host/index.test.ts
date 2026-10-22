@@ -246,6 +246,38 @@ describe('scanHostTool', () => {
     expect(mockResponseActionsClient.scan).not.toHaveBeenCalled();
   });
 
+  it('reports license_tier_required when Enterprise is what withholds canWriteScanOperations', async () => {
+    // Below Enterprise the license conjunction in `calculateEndpointAuthz`
+    // withholds the flag even from a superuser; the refusal must say so
+    // instead of sending the analyst after a role grant.
+    service.getEndpointAuthz = jest
+      .fn()
+      .mockResolvedValue(getEndpointAuthzInitialStateMock({ canWriteScanOperations: false }));
+    service.getLicenseService = jest.fn(
+      () =>
+        ({
+          isPlatinumPlus: () => true,
+          isEnterprise: () => false,
+        } as unknown as ReturnType<EndpointAppContextService['getLicenseService']>)
+    ) as unknown as EndpointAppContextService['getLicenseService'];
+
+    const mockResponseActionsClient = { scan: jest.fn() };
+    service.getInternalResponseActionsClient = jest.fn(
+      () => mockResponseActionsClient
+    ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+    const tool = scanHostTool(service);
+    const result = await tool.handler({ hostName: 'my-host', path: '/tmp' }, mockContext);
+
+    const results = assertStandardReturn(result);
+    expect(results[0].type).toBe(ToolResultType.error);
+    const denialData = results[0].data as Record<string, unknown>;
+    expect(denialData.error).toBe('license_tier_required');
+    expect(denialData.privilege).toBe('canWriteScanOperations');
+    expect(denialData.requiredLicenseTier).toBe('enterprise');
+    expect(mockResponseActionsClient.scan).not.toHaveBeenCalled();
+  });
+
   it('returns found: false with reason endpoint_not_found when no agent matches', async () => {
     const mockAgentService = { listAgents: jest.fn().mockResolvedValue({ agents: [] }) };
     service.getInternalFleetServices = jest.fn(() => ({
