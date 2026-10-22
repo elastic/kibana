@@ -304,3 +304,17 @@ export const assertWritableDest = (aiIndexId: string, dest: AiIndexDest): void =
     });
   }
 };
+
+export {
+  appendKiRevision,
+  findKiRevision,
+  getKiRevision,
+  hardDeleteKiRevision,
+  isKiDeleted,
+  mergeKiDoc,
+  writeKiRevision,
+  type KiRevision,
+  type KiRevisionChanges,
+  type KiWriter,
+  type StoredKi,
+} from '../ai_indices/ki_revision';

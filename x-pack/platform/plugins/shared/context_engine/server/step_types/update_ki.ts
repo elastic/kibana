@@ -6,19 +6,10 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { isResponseError } from '@kbn/es-errors';
 import { updateKiStepCommonDefinition } from '../../common/step_types/update_ki';
 import { omitNullKiAttributes } from '../../common/step_types/ki';
-import {
-  KiConflictError,
-  KiDeletedError,
-  KiNotFoundError,
-} from '../ai_indices/errors';
-import {
-  appendKiRevision,
-  findKiRevision,
-  isKiDeleted,
-} from '../ai_indices/ki_revision';
+import { KiDeletedError, KiNotFoundError } from '../ai_indices/errors';
+import { findKiRevision, isKiDeleted, writeKiRevision } from '../ai_indices/ki_revision';
 import type { KiStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
@@ -89,47 +80,18 @@ export const getUpdateKiStepDefinition = ({
               governance: { provenance: { updated_by: writer }, ...(lifecycle && { lifecycle }) },
             };
 
-            if (dest.type === 'data_stream') {
-              await appendKiRevision({
-                esClient,
-                destValue: dest.value,
-                kiId,
-                source: revision.source,
-                changes,
-                refresh,
-                abortSignal: context.abortSignal,
-              });
-              return { output: { id: kiId, result: 'updated' as const } };
-            }
+            const { result } = await writeKiRevision({
+              esClient,
+              aiIndexId,
+              dest,
+              kiId,
+              revision,
+              changes,
+              refresh,
+              abortSignal: context.abortSignal,
+            });
 
-            const response = await esClient
-              .update(
-                {
-                  index: revision.index,
-                  id: revision.documentId,
-                  doc: changes,
-                  if_seq_no: revision.seqNo,
-                  if_primary_term: revision.primaryTerm,
-                  ...(refresh && { refresh: 'wait_for' as const }),
-                },
-                { signal: context.abortSignal }
-              )
-              .catch((error) => {
-                if (isResponseError(error) && error.statusCode === 404) {
-                  throw new KiNotFoundError(aiIndexId, kiId);
-                }
-                if (isResponseError(error) && error.statusCode === 409) {
-                  throw new KiConflictError(aiIndexId, kiId);
-                }
-                throw error;
-              });
-
-            return {
-              output: {
-                id: kiId,
-                result: response.result === 'noop' ? ('noop' as const) : ('updated' as const),
-              },
-            };
+            return { output: { id: kiId, result } };
           },
         });
       } catch (error) {

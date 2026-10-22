@@ -6,10 +6,14 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { isResponseError } from '@kbn/es-errors';
 import { deleteKiStepCommonDefinition } from '../../common/step_types/delete_ki';
 import { KiNotFoundError } from '../ai_indices/errors';
-import { appendKiRevision, findKiRevision, isKiDeleted } from '../ai_indices/ki_revision';
+import {
+  findKiRevision,
+  hardDeleteKiRevision,
+  isKiDeleted,
+  writeKiRevision,
+} from '../ai_indices/ki_revision';
 import type { KiStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
@@ -64,11 +68,12 @@ export const getDeleteKiStepDefinition = ({
                 throw new KiNotFoundError(aiIndexId, kiId);
               }
               const now = new Date().toISOString();
-              await appendKiRevision({
+              await writeKiRevision({
                 esClient,
-                destValue: dest.value,
+                aiIndexId,
+                dest,
                 kiId,
-                source: revision.source,
+                revision,
                 changes: {
                   updated_at: now,
                   governance: {
@@ -84,21 +89,14 @@ export const getDeleteKiStepDefinition = ({
               return { output: { id: kiId } };
             }
 
-            await esClient
-              .delete(
-                {
-                  index: revision.index,
-                  id: revision.documentId,
-                  ...(refresh && { refresh: 'wait_for' as const }),
-                },
-                { signal: context.abortSignal }
-              )
-              .catch((error) => {
-                if (isResponseError(error) && error.statusCode === 404) {
-                  throw new KiNotFoundError(aiIndexId, kiId);
-                }
-                throw error;
-              });
+            await hardDeleteKiRevision({
+              esClient,
+              aiIndexId,
+              kiId,
+              revision,
+              refresh,
+              abortSignal: context.abortSignal,
+            });
 
             return { output: { id: kiId } };
           },

@@ -238,3 +238,36 @@ export const writeKiRevision = async ({
 
   return { result: response.result === 'noop' ? 'noop' : 'updated' };
 };
+
+/** Hard-deletes an index-backed KI document. Data-stream KIs use lifecycle tombstones instead. */
+export const hardDeleteKiRevision = async ({
+  esClient,
+  aiIndexId,
+  kiId,
+  revision,
+  refresh = false,
+  abortSignal,
+}: {
+  esClient: ElasticsearchClient;
+  aiIndexId: string;
+  kiId: string;
+  revision: KiRevision;
+  refresh?: boolean;
+  abortSignal?: AbortSignal;
+}): Promise<void> => {
+  await esClient
+    .delete(
+      {
+        index: revision.index,
+        id: revision.documentId,
+        ...(refresh && { refresh: 'wait_for' as const }),
+      },
+      { signal: abortSignal }
+    )
+    .catch((error) => {
+      if (isResponseError(error) && error.statusCode === 404) {
+        throw new KiNotFoundError(aiIndexId, kiId);
+      }
+      throw error;
+    });
+};
