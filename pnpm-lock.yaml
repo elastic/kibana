@@ -429,8 +429,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.32.0
-        version: 4.32.0(monaco-editor@0.56.0)
+        specifier: 4.33.0
+        version: 4.33.0(monaco-editor@0.56.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -2519,6 +2519,9 @@ importers:
       '@kbn/isomer':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/isomer/isomer
+      '@kbn/isomer-components':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/isomer/isomer-components
       '@kbn/isomer-theme':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/isomer/isomer-theme
@@ -5199,9 +5202,9 @@ importers:
       '@kbn/connector-cli':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-connector-cli
-      '@kbn/connector-contract-mock':
+      '@kbn/connector-emulate':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-connector-contract-mock
+        version: link:src/platform/packages/shared/kbn-connector-emulate
       '@kbn/content-list-docs':
         specifier: workspace:*
         version: link:src/platform/packages/shared/content-management/content_list/kbn-content-list-docs
@@ -5498,7 +5501,7 @@ importers:
         version: link:packages/kbn-eslint-plugin-telemetry
       '@kbn/esql-resource-browser-storybook-config':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-resource-browser/.storybook
+        version: link:src/platform/packages/shared/kbn-esql-resource-browser-storybook-config
       '@kbn/esql-scripts':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-esql-scripts
@@ -5555,7 +5558,7 @@ importers:
         version: link:x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks
       '@kbn/evals-suite-ml':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/ml/evals
+        version: link:x-pack/platform/packages/private/ml/kbn-evals-suite-ml
       '@kbn/evals-suite-nightshift-investigations':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations
@@ -7991,7 +7994,7 @@ importers:
 
   src/platform/packages/shared/kbn-connector-cli: {}
 
-  src/platform/packages/shared/kbn-connector-contract-mock: {}
+  src/platform/packages/shared/kbn-connector-emulate: {}
 
   src/platform/packages/shared/kbn-connector-schemas: {}
 
@@ -8103,7 +8106,7 @@ importers:
 
   src/platform/packages/shared/kbn-esql-resource-browser: {}
 
-  src/platform/packages/shared/kbn-esql-resource-browser/.storybook: {}
+  src/platform/packages/shared/kbn-esql-resource-browser-storybook-config: {}
 
   src/platform/packages/shared/kbn-eval-kql: {}
 
@@ -8919,6 +8922,8 @@ importers:
 
   x-pack/platform/packages/private/ml/json_schemas: {}
 
+  x-pack/platform/packages/private/ml/kbn-evals-suite-ml: {}
+
   x-pack/platform/packages/private/ml/local_storage: {}
 
   x-pack/platform/packages/private/ml/nested_property: {}
@@ -9032,6 +9037,8 @@ importers:
   x-pack/platform/packages/shared/ingest-pipelines: {}
 
   x-pack/platform/packages/shared/isomer/isomer: {}
+
+  x-pack/platform/packages/shared/isomer/isomer-components: {}
 
   x-pack/platform/packages/shared/isomer/isomer-theme: {}
 
@@ -9452,8 +9459,6 @@ importers:
   x-pack/platform/plugins/shared/maps: {}
 
   x-pack/platform/plugins/shared/ml: {}
-
-  x-pack/platform/plugins/shared/ml/evals: {}
 
   x-pack/platform/plugins/shared/notification_center: {}
 
@@ -11191,8 +11196,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.32.0':
-    resolution: {integrity: sha512-mweMdeQyPngTjqP9SQU5X64/naSVjJxprNuUNFeBjujyE33ppzZX+R7zR4b38DaBzkWZ+cmD2hvVY0Rf6RgYag==}
+  '@elastic/monaco-esql@4.33.0':
+    resolution: {integrity: sha512-S+ceGgCwEOougTdYvykdeGUWq5dBGrXcc2Ul2Cw/mLRUV0ElYZycpnPcjoOsdhpwJZdoetcuZG4QLnm1N4RHZw==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -27952,7 +27957,7 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.32.0(monaco-editor@0.56.0)':
+  '@elastic/monaco-esql@4.33.0(monaco-editor@0.56.0)':
     dependencies:
       '@elastic/esql-definitions': 4.33.0
       monaco-editor: 0.56.0
