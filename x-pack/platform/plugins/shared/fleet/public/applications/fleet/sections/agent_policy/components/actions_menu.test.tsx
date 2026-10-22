@@ -206,7 +206,7 @@ describe('AgentPolicyActionMenu', () => {
       });
     });
 
-    it('is disabled when agent policy support agentless  is true', async () => {
+    it('does not offer to delete the policy when agent policy support agentless is true', async () => {
       const testRenderer = createFleetTestRendererMock();
       const agentlessPolicy: AgentPolicy = {
         ...baseAgentPolicy,
@@ -235,8 +235,8 @@ describe('AgentPolicyActionMenu', () => {
       const agentActionsButton = result.getByTestId('agentActionsBtn');
       await userEvent.click(agentActionsButton);
 
-      const deleteButton = result.getByTestId('agentPolicyActionMenuDeleteButton');
-      expect(deleteButton).not.toHaveAttribute('disabled');
+      expect(result.queryByTestId('agentPolicyActionMenuDeleteButton')).not.toBeInTheDocument();
+      expect(result.getByText('View policy')).toBeInTheDocument();
     });
   });
 

@@ -1779,8 +1779,12 @@ describe('Attack Discovery worker chain', () => {
         expect(JSON.stringify(readback?.with)).toContain('steps.escalation_gate.output.proposalId');
       });
 
-      it('calls the versioned internal proposals route', () => {
-        expect(JSON.stringify(readback?.with)).toContain('/internal/proposals/');
+      // Raw kibana.request is sent verbatim. An unprefixed path 404s in a named
+      // space, and the journal then falls back to "unspecified".
+      it('reads the proposal in the executing space', () => {
+        expect(JSON.stringify(readback?.with)).toContain(
+          '/s/{{ workflow.spaceId }}/internal/proposals/{{ steps.escalation_gate.output.proposalId }}'
+        );
       });
 
       // The two axes are what separate a decline from a lapse, so the read-back is no

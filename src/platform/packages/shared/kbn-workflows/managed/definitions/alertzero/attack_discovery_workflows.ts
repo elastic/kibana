@@ -65,11 +65,12 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
  *
  * Version 10 carries the telemetry report steps.
  *
- * Version 11 journals `related_investigation_id` when a closed false positive
- * matched on entities only, so the new review links back to it.
+ * Version 11 space-scopes the proposal read-back so a named space records who decided and why.
  *
- * Version 12 tags and acknowledges `sibling_alert_ids` with the review's own
- * alerts when the verdict escalates, so a later run skips the whole batch.
+ * Version 12 journals `related_investigation_id` when a closed false positive
+ * matched on entities only, and tags and acknowledges `sibling_alert_ids` with
+ * the review's own alerts when the verdict escalates, so a later run skips the
+ * whole batch.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
   billable: false,
