@@ -39,7 +39,7 @@ export class ActionPolicyFormPage {
 
   constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
     this.container = this.page.testSubj.locator('actionPolicyFormPage');
-    this.pageTitle = this.container.getByTestId('pageTitle');
+    this.pageTitle = this.container.getByTestId('appHeaderTitle');
     this.nameInput = this.container.getByTestId('nameInput');
     this.advancedMatchingToggle = this.container.getByTestId('advancedMatchingAccordionToggle');
     this.matcherInput = this.container.getByTestId('matcherInput');

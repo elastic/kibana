@@ -10,6 +10,8 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { ActionPolicyFormPage } from './action_policy_form_page';
 import { useActionPolicyAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
@@ -200,7 +202,8 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const TEST_SUBJ = {
-  pageTitle: 'pageTitle',
+  pageTitle: APP_HEADER_TEST_SUBJECTS.title,
+  backLink: APP_HEADER_TEST_SUBJECTS.back,
   cancelButton: 'cancelButton',
   submitButton: 'submitButton',
   nameInput: 'nameInput',
@@ -227,9 +230,11 @@ const EXISTING_POLICY: ActionPolicyResponse = {
 const renderPage = () => {
   return render(
     <MockLocatorProvider locators={mockLocators}>
-      <I18nProvider>
-        <ActionPolicyFormPage />
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <ActionPolicyFormPage />
+        </I18nProvider>
+      </MockAppHeaderProvider>
     </MockLocatorProvider>
   );
 };
@@ -261,6 +266,8 @@ describe('ActionPolicyFormPage', () => {
       renderPage();
 
       expect(screen.getByTestId(TEST_SUBJ.pageTitle)).toHaveTextContent('Create action policy');
+      expect(screen.getByTestId(TEST_SUBJ.backLink)).toHaveAttribute('href', '/mock-locator-url');
+      expect(screen.queryByTestId('returnButton')).toBeNull();
       expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Create policy');
       expect(screen.queryByTestId('actionPoliciesLicenseCallout')).toBeNull();
     });
@@ -464,6 +471,8 @@ describe('ActionPolicyFormPage', () => {
       renderPage();
 
       expect(screen.getByTestId(TEST_SUBJ.loadingSpinner)).toBeInTheDocument();
+      expect(screen.getByTestId(TEST_SUBJ.pageTitle)).toHaveTextContent('Edit action policy');
+      expect(screen.getByTestId(TEST_SUBJ.backLink)).toBeInTheDocument();
     });
 
     it('shows error callout when fetch fails', () => {
@@ -476,6 +485,8 @@ describe('ActionPolicyFormPage', () => {
 
       renderPage();
 
+      expect(screen.getByTestId(TEST_SUBJ.pageTitle)).toHaveTextContent('Edit action policy');
+      expect(screen.getByTestId(TEST_SUBJ.backLink)).toBeInTheDocument();
       expect(screen.getByTestId(TEST_SUBJ.fetchErrorCallout)).toBeInTheDocument();
       expect(screen.getByText('Not found')).toBeInTheDocument();
     });
