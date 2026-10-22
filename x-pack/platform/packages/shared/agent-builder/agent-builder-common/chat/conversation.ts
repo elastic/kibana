@@ -605,6 +605,9 @@ export interface ConversationRoundAuthor {
   type?: UserPrincipalType;
 }
 
+/** The display-only part of an author a writer may supply. */
+export type ConversationRoundAuthorDecoration = Pick<ConversationRoundAuthor, 'full_name'>;
+
 export const getConversationRoundAuthorDisplayName = (
   author?: Pick<ConversationRoundAuthor, 'id' | 'username' | 'full_name'>
 ): string | undefined => {
@@ -761,6 +764,9 @@ export const CONVERSATION_TITLE_MAX_LENGTH = 500;
  * Conversation ids are UUIDs, so this should be more than enough.
  */
 export const CONVERSATION_ID_MAX_LENGTH = 256;
+
+/** Maximum length of the display name a workflow may record on a user message it writes. */
+export const USER_MESSAGE_AUTHOR_NAME_MAX_LENGTH = 256;
 
 /** Maximum accepted length for a conversation metadata key */
 export const CONVERSATION_METADATA_KEY_MAX_LENGTH = 256;
