@@ -34,7 +34,8 @@ import {
   getFilterInOutPairDisabledWarning,
 } from './table_cell_actions';
 import type { UseTableFiltersCallbacksReturn } from './table_filters';
-import { useRestorableRef } from './table';
+import { useRestorableRef } from './restorable_state';
+import { GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE } from './table_grid_constants';
 
 function getGridProps(
   gridStyle?: EuiDataGridStyle
@@ -80,9 +81,6 @@ export interface TableGridProps {
 
 const MIN_NAME_COLUMN_WIDTH = 150;
 const MAX_NAME_COLUMN_WIDTH = 350;
-
-export const GRID_COLUMN_FIELD_NAME = 'name';
-export const GRID_COLUMN_FIELD_VALUE = 'value';
 
 export function TableGrid({
   id,

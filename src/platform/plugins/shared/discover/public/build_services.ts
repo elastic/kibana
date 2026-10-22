@@ -78,7 +78,9 @@ import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
 import {
   CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
+  DEFAULT_KBN_DATA_GRID_ENABLED,
   IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
+  KBN_DATA_GRID_ENABLED_FEATURE_FLAG_KEY,
   SESSION_HTTP_API_ENABLED_FEATURE_FLAG_KEY,
 } from './constants';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
@@ -105,6 +107,7 @@ export interface UrlTracker {
 export interface DiscoverFeatureFlags {
   getCascadeLayoutEnabled: () => boolean;
   getIsEsqlDefault: () => boolean;
+  getKbnDataGridEnabled: () => boolean;
 }
 
 export interface DiscoverServices {
@@ -250,6 +253,12 @@ export const buildServices = ({
       getCascadeLayoutEnabled: () =>
         readBooleanFlag(core, CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, true),
       getIsEsqlDefault: () => readBooleanFlag(core, IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, true),
+      getKbnDataGridEnabled: () =>
+        readBooleanFlag(
+          core,
+          KBN_DATA_GRID_ENABLED_FEATURE_FLAG_KEY,
+          DEFAULT_KBN_DATA_GRID_ENABLED
+        ),
     },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,
