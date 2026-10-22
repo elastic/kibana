@@ -7,6 +7,7 @@
 
 import type { EsqlQueryRequest, FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { timeoutSignal } from '@kbn/std';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { ProbeStatus } from '@kbn/significant-events-schema';
 import { canCompileMatchMetric } from '../lib/significant_events/rules/can_compile_match_metric';
@@ -93,16 +94,18 @@ export const runStoredQuery = async ({
   const remainingMs = deadlineAt - startedAt;
   if (remainingMs <= 0) return finish('timeout');
 
-  const timeoutSignal = AbortSignal.timeout(Math.min(timeoutMs, remainingMs));
+  const deadline = timeoutSignal(Math.min(timeoutMs, remainingMs));
   try {
     const response = await esClient.esql.query(toRequest({ query, tail, window }), {
-      signal: AbortSignal.any([abortSignal, timeoutSignal]),
+      signal: AbortSignal.any([abortSignal, deadline]),
     });
     return finish('ok', response.values);
   } catch {
     if (abortSignal.aborted) return finish('aborted');
-    if (timeoutSignal.aborted) return finish('timeout');
+    if (deadline.aborted) return finish('timeout');
     return finish('error');
+  } finally {
+    deadline.dispose();
   }
 };
 

@@ -10,6 +10,7 @@
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
+import { timeoutSignal } from '@kbn/std';
 import { EventEmitter, once } from 'events';
 import { setTimeout as delay } from 'timers/promises';
 import type { Compiler, Stats } from '@rspack/core';
@@ -101,10 +102,15 @@ describe('Rspack watch ignores', () => {
 
         for (const file of [entry, manifest]) {
           const buildCount = builds.length;
-          const rebuilt = once(events, 'build', { signal: AbortSignal.timeout(10_000) });
-          Fs.appendFileSync(file, '\n// source edit');
-          await rebuilt;
-          expect(builds).toHaveLength(buildCount + 1);
+          const deadline = timeoutSignal(10_000);
+          try {
+            const rebuilt = once(events, 'build', { signal: deadline });
+            Fs.appendFileSync(file, '\n// source edit');
+            await rebuilt;
+            expect(builds).toHaveLength(buildCount + 1);
+          } finally {
+            deadline.dispose();
+          }
         }
         expect(builds.every((stats) => !stats.hasErrors())).toBe(true);
       } finally {

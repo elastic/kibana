@@ -43,10 +43,14 @@ describe('timeoutSignal', () => {
 
   it('does not abort after dispose', async () => {
     const signal = timeoutSignal(20);
-    signal.dispose();
-    signal.dispose();
-    await new Promise((resolve) => setTimeout(resolve, 40));
-    expect(signal.aborted).toBe(false);
+    try {
+      signal.dispose();
+      signal.dispose();
+      await new Promise((resolve) => setTimeout(resolve, 40));
+      expect(signal.aborted).toBe(false);
+    } finally {
+      signal.dispose();
+    }
   });
 
   it('clears the timer when dispose runs before the deadline', async () => {
@@ -89,5 +93,20 @@ describe('timeoutSignal', () => {
     expect(() => rejectDelay(Number.NaN)).toThrow(RangeError);
     expect(() => rejectDelay(Number.POSITIVE_INFINITY)).toThrow(RangeError);
     expect(() => rejectDelay(JSON.parse('"10"'))).toThrow(TypeError);
+  });
+
+  it('rejects delays Node would clamp to 1ms', () => {
+    const rejectDelay = (delay: number) => {
+      const signal = timeoutSignal(delay);
+      try {
+        return signal.aborted;
+      } finally {
+        signal.dispose();
+      }
+    };
+
+    expect(() => rejectDelay(2 ** 31)).toThrow(RangeError);
+    expect(() => rejectDelay(2 ** 32 - 1)).toThrow(RangeError);
+    expect(rejectDelay(2 ** 31 - 1)).toBe(false);
   });
 });

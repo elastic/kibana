@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const MAX_TIMEOUT_MS = 2 ** 32 - 1;
+// Node clamps a setTimeout delay above 2 ** 31 - 1 to 1ms and warns.
+const MAX_TIMEOUT_MS = 2 ** 31 - 1;
 
 export interface TimeoutAbortSignal extends AbortSignal, Disposable {
   /**

@@ -28,6 +28,17 @@ import type { RouteDependencies } from '../types';
  */
 const CLOUD_STACK_VERSIONS_TIMEOUT_MS = 5_000;
 const CLOUD_STACK_VERSIONS_OVERALL_TIMEOUT_MS = 30_000;
+// Response forbids a body for these statuses. 304 is also not a payload we inspect.
+const STATUSES_WITHOUT_BODY = new Set([101, 204, 205, 304]);
+
+/**
+ * Successful payloads and the 400/404 bodies we inspect need to be buffered while the
+ * deadline is still active. Other non-OK statuses are only checked for their status code.
+ */
+const shouldBufferResponseBody = (status: number): boolean => {
+  if (STATUSES_WITHOUT_BODY.has(status)) return false;
+  return (status >= 200 && status < 300) || status === 400 || status === 404;
+};
 
 const abortSignalAny = (signals: AbortSignal[]): AbortSignal => {
   const any = (AbortSignal as unknown as { any?: (s: AbortSignal[]) => AbortSignal }).any;
@@ -114,6 +125,11 @@ const fetchCloudStackVersionsApi = async (
       headers: { accept: 'application/json' },
       signal,
     });
+    if (!shouldBufferResponseBody(response.status)) {
+      await response.body?.cancel();
+      return response;
+    }
+
     // Buffer the body before disposing the deadline so a slow download still aborts.
     const body = new TextDecoder().decode(await response.arrayBuffer());
     return new Response(body, {
