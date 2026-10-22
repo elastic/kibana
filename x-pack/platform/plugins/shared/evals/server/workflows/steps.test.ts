@@ -96,6 +96,29 @@ describe('ai.evals.evaluateTrace step', () => {
       getHandler(EvaluateTraceStepId)(buildContext(evaluateInput, callKibanaApi))
     ).rejects.toThrow(/every evaluator failed for trace/);
   });
+
+  it('does not throw when every evaluator only lacks evidence, since a retry cannot help', async () => {
+    const evidenceUnmetResult = {
+      ...errorResult,
+      error: { code: 'evidence_unmet', message: 'Evaluator evidence requirements not met' },
+    };
+    const callKibanaApi = jest.fn().mockResolvedValue({
+      status: 200,
+      headers: {},
+      body: { results: [evidenceUnmetResult] },
+    });
+
+    const result = await getHandler(EvaluateTraceStepId)(
+      buildContext(evaluateInput, callKibanaApi)
+    );
+
+    expect(result).toEqual({
+      output: {
+        results: [],
+        errors: ['Evaluator "groundedness" failed: Evaluator evidence requirements not met'],
+      },
+    });
+  });
 });
 
 describe('ai.evals.persistOnlineScores step', () => {

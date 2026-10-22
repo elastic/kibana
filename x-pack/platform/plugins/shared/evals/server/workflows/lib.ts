@@ -103,6 +103,8 @@ export const runTask = async (
 export interface EvaluateTraceResult {
   results: EvaluatorResult[];
   errors: string[];
+  /** Whether any failure could succeed on a retry; unmet evidence is a property of the trace. */
+  hasRetriableErrors: boolean;
 }
 
 /** Grades a single trace against the configured evaluators via `POST /_evaluate`. */
@@ -153,17 +155,19 @@ export const evaluateTrace = async (
       })),
     }));
 
-  const errors = allResults
-    .filter((result) => result.status === 'error')
-    .map((result) => {
-      const message = `Evaluator "${result.evaluator?.name ?? 'unknown'}" failed: ${
-        result.error?.message ?? 'unknown error'
-      }`;
-      runtime.logger.warn(message);
-      return message;
-    });
+  const failedResults = allResults.filter((result) => result.status === 'error');
+  const errors = failedResults.map((result) => {
+    const message = `Evaluator "${result.evaluator?.name ?? 'unknown'}" failed: ${
+      result.error?.message ?? 'unknown error'
+    }`;
+    runtime.logger.warn(message);
+    return message;
+  });
+  const hasRetriableErrors = failedResults.some(
+    (result) => result.error?.code !== 'evidence_unmet'
+  );
 
-  return { results, errors };
+  return { results, errors, hasRetriableErrors };
 };
 
 /** Persists a batch of score documents via `POST /scores`, stamped with the workflow's space. */

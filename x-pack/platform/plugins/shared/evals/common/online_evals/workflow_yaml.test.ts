@@ -97,6 +97,7 @@ describe('online eval workflow yaml', () => {
 
     const expectedRetry = {
       'max-attempts': 3,
+      condition: '${{ error.details.status != 400 and error.details.status != 403 }}',
       delay: '5s',
       strategy: 'exponential',
       'max-delay': '1m',
