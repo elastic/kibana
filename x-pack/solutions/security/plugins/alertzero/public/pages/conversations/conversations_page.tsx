@@ -131,13 +131,15 @@ const POLLED_QUERY_KEYS = [
   queryKeys.proposals.closed(),
   queryKeys.proposals.closedCount(),
   queryKeys.proposals.chartsSummaryAll(),
-  impactPillsQueryKeys.proposals(),
 ];
+
+/** Pills load a page at a time and re-rank as a whole, so a poll refreshes every loaded page. */
+const POLLED_ALL_PAGES_QUERY_KEYS = [impactPillsQueryKeys.proposals()];
 
 const ConversationsPageContent: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const queryClient = useQueryClient();
-  useQueuePolling(POLLED_QUERY_KEYS);
+  useQueuePolling(POLLED_QUERY_KEYS, POLLED_ALL_PAGES_QUERY_KEYS);
   const impactPills = useProposalImpactPills({
     origin: ALERTZERO_PROPOSAL_ORIGIN,
     categories: OPEN_PROPOSAL_CATEGORIES,

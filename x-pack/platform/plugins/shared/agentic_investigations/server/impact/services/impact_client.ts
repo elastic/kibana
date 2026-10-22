@@ -17,8 +17,8 @@ import type { ImpactService } from './impact_service';
 /**
  * In-process impact reads. The space and the principal both come from the
  * request, so a caller cannot supply another space or skip the investigations
- * read privilege (read or manage). The read-by-conversation methods leave out the impact of a
- * conversation the caller cannot read, as if it had none.
+ * read privilege (read or manage). Impact of a conversation the caller cannot read is left out, as
+ * if it had none.
  */
 export interface ImpactReadClient {
   listByConversationIds: (conversationIds: string[]) => Promise<Impact[]>;
@@ -32,7 +32,8 @@ export interface ImpactReadClient {
   ) => Promise<Map<string, Array<Pick<ImpactEntity, 'id' | 'type' | 'name'>>>>;
   /**
    * Conversations whose impact lists the entity, for filtering a list by an Impact pill. Bounded
-   * by {@link MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS}.
+   * by {@link MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS}; conversations the caller cannot read
+   * are left out.
    */
   searchConversationIdsByEntityId: (entityId: string) => Promise<string[]>;
 }
@@ -46,8 +47,7 @@ export interface ImpactClientDeps {
 
 /**
  * Builds a request-scoped reader. The privilege check runs before any search. The impact index
- * (read as the internal user) is only read for conversations the caller can read, except by
- * `searchConversationIdsByEntityId`.
+ * (read as the internal user) is only read for conversations the caller can read.
  */
 export const createImpactClient =
   ({ getImpactService, getSpaceId, privileges, getConversationClient }: ImpactClientDeps) =>
@@ -105,7 +105,7 @@ export const createImpactClient =
       getEntitiesByConversationId,
       searchConversationIdsByEntityId: async (entityId) => {
         await privileges.assertCanRead(request);
-        return getImpactService()
+        const conversationIds = await getImpactService()
           .getDocumentService()
           .searchConversationIds({
             spaceId: getSpaceId(request),
@@ -116,6 +116,7 @@ export const createImpactClient =
               },
             ],
           });
+        return filterReadableConversationIds(await getConversationClient(request), conversationIds);
       },
     };
   };

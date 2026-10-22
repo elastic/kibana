@@ -27,6 +27,8 @@ export interface PagedImpactPills {
   canShowMore: boolean;
   /** The most pills the server lists. */
   reachLimit: number;
+  /** A request failed: the loaded pills stay, and no way to ask for more is offered. */
+  loadFailed: boolean;
   isLoadingMore: boolean;
   showMore: () => void;
   /** Present once more than the first page has loaded. */

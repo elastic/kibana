@@ -32,6 +32,7 @@ const paged = (
   remaining: 0,
   canShowMore: true,
   reachLimit: 10_000,
+  loadFailed: false,
   isLoadingMore: false,
   showMore: jest.fn(),
   ...overrides,
@@ -146,6 +147,15 @@ describe('Impact', () => {
       expect(note).toHaveAttribute('tabindex', '0');
       fireEvent.click(note);
       expect(showMore).not.toHaveBeenCalled();
+    });
+
+    it('leaves the +n pill out when a request failed, keeping the loaded pills', () => {
+      renderImpact({
+        impact: paged([{ entityId: 'host-1', count: 1 }], { remaining: 5, loadFailed: true }),
+      });
+
+      expect(screen.queryByTestId(IMPACT_OVERFLOW_TEST_SUBJ)).not.toBeInTheDocument();
+      expect(pillLabels()).toEqual(['host-1']);
     });
 
     it('does not ask for another page while one is loading', () => {

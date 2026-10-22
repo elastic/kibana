@@ -139,7 +139,16 @@ const PillBadge: React.FC<PillBadgeProps> = ({
 };
 
 export const Impact: React.FC<ImpactProps> = ({
-  impact: { pills, remaining, canShowMore, reachLimit, isLoadingMore, showMore, showFewer },
+  impact: {
+    pills,
+    remaining,
+    canShowMore,
+    reachLimit,
+    loadFailed,
+    isLoadingMore,
+    showMore,
+    showFewer,
+  },
   entityFilter,
   selectedPill,
   onEntityFilterChange,
@@ -198,7 +207,7 @@ export const Impact: React.FC<ImpactProps> = ({
       >
         {pills.map(renderPill)}
         {pinnedPill && renderPill(pinnedPill)}
-        {remaining > 0 && (
+        {remaining > 0 && !loadFailed && (
           <EuiFlexItem grow={false} css={pillItemStyles} data-test-subj={IMPACT_OVERFLOW_TEST_SUBJ}>
             {canShowMore ? (
               <PillBadge

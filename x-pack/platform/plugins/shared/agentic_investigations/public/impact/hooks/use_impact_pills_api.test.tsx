@@ -205,6 +205,22 @@ describe('paging', () => {
     expect(result.current.canShowMore).toBe(false);
   });
 
+  it('flags a failed request and keeps the pills it has', async () => {
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(() => useProposalImpactPills(params), { wrapper: Wrapper });
+    await waitFor(() => expect(result.current.pills).toHaveLength(2));
+    expect(result.current.loadFailed).toBe(false);
+    // A 4xx is not retried, so the failure surfaces at once.
+    http.get.mockRejectedValue(
+      Object.assign(new Error('bad request'), { request: {}, response: { status: 400 } })
+    );
+
+    act(() => result.current.showMore());
+
+    await waitFor(() => expect(result.current.loadFailed).toBe(true));
+    expect(result.current.pills).toHaveLength(2);
+  });
+
   it('asks for no further page once the server has sent everything', async () => {
     const { Wrapper } = createWrapper();
     http.get.mockReset().mockResolvedValue(onlyPage);

@@ -40,12 +40,13 @@ import { EscalationsOpenNote } from './escalations_open_note';
 import { EscalationsEmptyBanner } from './escalations_empty_banner';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
 
-const POLLED_QUERY_KEYS = [escalationQueryKeys.lists(), impactPillsQueryKeys.escalations()];
+const POLLED_QUERY_KEYS = [escalationQueryKeys.lists()];
+const POLLED_ALL_PAGES_QUERY_KEYS = [impactPillsQueryKeys.escalations()];
 
 export const EscalationsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   useAlertZeroDocTitle(ESCALATIONS_PAGE_INFO.pageTitle);
-  useQueuePolling(POLLED_QUERY_KEYS);
+  useQueuePolling(POLLED_QUERY_KEYS, POLLED_ALL_PAGES_QUERY_KEYS);
 
   // Capability check: only render the assignee picker when the user can manage escalations.
   const { manageEscalations: canManage } = useAlertZeroInvestigationsCapabilities();

@@ -202,14 +202,13 @@ describe('createImpactClient', () => {
   });
 
   describe('searchConversationIdsByEntityId', () => {
-    it('should search the request space for the entity id without filtering by conversation access', async () => {
-      const { client, searchConversationIds, assertCanRead, bulkGet } = createClient({
+    it('should search the request space for the entity id and keep only readable conversations', async () => {
+      const { client, searchConversationIds, assertCanRead } = createClient({
         searchConversationIds: jest.fn().mockResolvedValue(['c1', 'private']),
         bulkGet: bulkGetReturning(['c1']),
       });
 
-      expect(await client.searchConversationIdsByEntityId('host-1')).toEqual(['c1', 'private']);
-      expect(bulkGet).not.toHaveBeenCalled();
+      expect(await client.searchConversationIdsByEntityId('host-1')).toEqual(['c1']);
 
       expect(assertCanRead).toHaveBeenCalledWith(request);
       expect(searchConversationIds).toHaveBeenCalledWith(
