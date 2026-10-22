@@ -12,7 +12,6 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButton,
-  EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
   EuiSpacer,
@@ -44,6 +43,7 @@ import {
   DetailsSplitBand,
 } from '../details/details_page';
 import { DetailsList } from '../details/details_list';
+import { TitleWithTip } from '../details/title_with_tip';
 import { ShareMeter, ShareMeterGroup } from '../details/share_meter';
 import { DetailsLink } from '../details_link';
 import { EmptyCell } from '../empty_cell';
@@ -106,14 +106,7 @@ const DataStreamsSettings = ({ profile }: { profile: DataStreamsBoostProfile }) 
         defaultMessage: 'Phase',
       }),
       render: (id: PeriodRow['id']) => (
-        <span>
-          {PERIOD_LABELS[id].title} {/* Without a color, the icon takes its phase name's. */}
-          <EuiIconTip
-            type="info"
-            content={PERIOD_LABELS[id].description}
-            aria-label={PERIOD_LABELS[id].title}
-          />
-        </span>
+        <TitleWithTip title={PERIOD_LABELS[id].title} tip={PERIOD_LABELS[id].description} />
       ),
     },
     {
@@ -138,6 +131,8 @@ const DataStreamsSettings = ({ profile }: { profile: DataStreamsBoostProfile }) 
         defaultMessage: 'Boost for each phase of data',
       })}
       compressed
+      // Columns size to their content, so a phase name stays on one line with its icon.
+      tableLayout="auto"
       items={[
         { id: 'recent', period: profile.recent },
         { id: 'standard', period: profile.standard },

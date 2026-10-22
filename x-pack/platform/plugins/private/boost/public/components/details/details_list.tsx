@@ -7,7 +7,8 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { EuiDescriptionList, EuiIconTip, EuiText } from '@elastic/eui';
+import { EuiDescriptionList, EuiText } from '@elastic/eui';
+import { TitleWithTip } from './title_with_tip';
 
 export interface DetailsListItem {
   title: string;
@@ -24,18 +25,7 @@ export const DetailsList = ({ items }: { items: readonly DetailsListItem[] }) =>
     columnWidths={[2, 3]}
     rowGutterSize="m"
     listItems={items.map(({ title, tip, description }) => ({
-      title: tip ? (
-        <>
-          {/* The icon follows the title inline, joined to its last word by a no-break space, so
-                a title that wraps takes the icon with it. Without a color, the icon takes the
-                title's. */}
-          {title}
-          {'\u00a0'}
-          <EuiIconTip type="info" content={tip} aria-label={title} />
-        </>
-      ) : (
-        title
-      ),
+      title: tip ? <TitleWithTip title={title} tip={tip} /> : title,
       // The compressed list's descriptions are a size smaller than its titles, so they're set
       // to the titles' size.
       description: <EuiText size="s">{description}</EuiText>,
