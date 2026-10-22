@@ -117,6 +117,7 @@ export const listPrebuiltPacksRoute = (router: IRouter, osqueryContext: OsqueryA
         for (const row of rows) {
           copiesByAssetId.set(row.asset_id, (copiesByAssetId.get(row.asset_id) ?? 0) + 1);
         }
+
         const data = rows.filter((row) => copiesByAssetId.get(row.asset_id) === 1);
 
         data.sort((a, b) => a.name.localeCompare(b.name));
