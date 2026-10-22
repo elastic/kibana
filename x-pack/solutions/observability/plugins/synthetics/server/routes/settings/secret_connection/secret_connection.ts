@@ -171,7 +171,9 @@ export const deleteSecretConnectionRoute: SyntheticsRestApiRouteFactory<
 });
 
 /** POST /_test: check reachability + auth from Kibana. Never persists anything. */
-export const testSecretConnectionRoute: SyntheticsRestApiRouteFactory<SecretConnectionTestResult> = () => ({
+export const testSecretConnectionRoute: SyntheticsRestApiRouteFactory<
+  SecretConnectionTestResult
+> = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.SECRET_CONNECTION + '/_test',
   validate: { body: TestBodySchema },

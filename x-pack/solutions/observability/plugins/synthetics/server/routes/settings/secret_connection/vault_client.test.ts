@@ -22,7 +22,9 @@ const encoder = new TextEncoder();
 
 /** A fetch Response stand-in whose body streams the given chunks. */
 const vaultResponse = (status: number, body: string | string[] = '') => {
-  const chunks = (Array.isArray(body) ? body : [body]).filter(Boolean).map((c) => encoder.encode(c));
+  const chunks = (Array.isArray(body) ? body : [body])
+    .filter(Boolean)
+    .map((c) => encoder.encode(c));
   return {
     status,
     ok: status >= 200 && status < 300,
@@ -52,11 +54,14 @@ describe('testHashiCorpVault', () => {
 
   describe('token auth', () => {
     it('authenticates a valid token and reports the Vault version', async () => {
-      fetchMock.mockResolvedValueOnce(health()).mockResolvedValueOnce(
-        jsonResponse(200, { data: { id: 'tok' } })
-      );
+      fetchMock
+        .mockResolvedValueOnce(health())
+        .mockResolvedValueOnce(jsonResponse(200, { data: { id: 'tok' } }));
 
-      const result = await testHashiCorpVault({ address, authMethod: 'token', token: 'tok' }, logger);
+      const result = await testHashiCorpVault(
+        { address, authMethod: 'token', token: 'tok' },
+        logger
+      );
 
       expect(result).toEqual({ ok: true, message: 'Token authenticated (Vault 1.15.0).' });
       const [healthUrl] = fetchMock.mock.calls[0];
@@ -90,7 +95,10 @@ describe('testHashiCorpVault', () => {
         .mockResolvedValueOnce(health())
         .mockResolvedValueOnce(jsonResponse(403, { errors: ['permission denied'] }));
 
-      const result = await testHashiCorpVault({ address, authMethod: 'token', token: 'bad' }, logger);
+      const result = await testHashiCorpVault(
+        { address, authMethod: 'token', token: 'bad' },
+        logger
+      );
 
       expect(result).toEqual({ ok: false, message: 'Token rejected (HTTP 403) (Vault 1.15.0).' });
     });
@@ -98,7 +106,10 @@ describe('testHashiCorpVault', () => {
     it('does not accept a 200 lookup without data', async () => {
       fetchMock.mockResolvedValueOnce(health()).mockResolvedValueOnce(jsonResponse(200, {}));
 
-      const result = await testHashiCorpVault({ address, authMethod: 'token', token: 'tok' }, logger);
+      const result = await testHashiCorpVault(
+        { address, authMethod: 'token', token: 'tok' },
+        logger
+      );
 
       expect(result.ok).toBe(false);
     });
@@ -174,7 +185,10 @@ describe('testHashiCorpVault', () => {
     it('does not report success when a non-Vault server answers 200 with HTML', async () => {
       fetchMock.mockResolvedValue(vaultResponse(200, '<html>login</html>'));
 
-      const result = await testHashiCorpVault({ address, authMethod: 'token', token: 'tok' }, logger);
+      const result = await testHashiCorpVault(
+        { address, authMethod: 'token', token: 'tok' },
+        logger
+      );
 
       expect(result).toEqual({
         ok: false,
@@ -187,7 +201,10 @@ describe('testHashiCorpVault', () => {
       const chunk = 'a'.repeat(MAX_RESPONSE_BYTES / 2 + 1);
       fetchMock.mockResolvedValueOnce(vaultResponse(200, [chunk, chunk]));
 
-      const result = await testHashiCorpVault({ address, authMethod: 'token', token: 'tok' }, logger);
+      const result = await testHashiCorpVault(
+        { address, authMethod: 'token', token: 'tok' },
+        logger
+      );
 
       expect(result).toEqual({ ok: false, message: 'Could not reach the Vault address.' });
     });
@@ -257,7 +274,10 @@ describe('testHashiCorpVault', () => {
     it('returns a generic message and logs the cause when the address is unreachable', async () => {
       fetchMock.mockRejectedValueOnce(new TypeError('fetch failed'));
 
-      const result = await testHashiCorpVault({ address, authMethod: 'token', token: 'tok' }, logger);
+      const result = await testHashiCorpVault(
+        { address, authMethod: 'token', token: 'tok' },
+        logger
+      );
 
       expect(result).toEqual({ ok: false, message: 'Could not reach the Vault address.' });
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('fetch failed'));
@@ -268,7 +288,10 @@ describe('testHashiCorpVault', () => {
         .mockResolvedValueOnce(health())
         .mockRejectedValueOnce(new Error('ECONNRESET 10.0.0.5'));
 
-      const result = await testHashiCorpVault({ address, authMethod: 'token', token: 'tok' }, logger);
+      const result = await testHashiCorpVault(
+        { address, authMethod: 'token', token: 'tok' },
+        logger
+      );
 
       expect(result).toEqual({ ok: false, message: 'Could not authenticate with Vault.' });
       expect(result.message).not.toContain('10.0.0.5');
