@@ -549,8 +549,8 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
       });
     }
 
-    // openSidebarConversation is {undefined} when already in the sidebar
-    if (openSidebarConversation) {
+    // Offer this only outside the sidebar, where the conversation is not already open
+    if (openSidebarConversation && !isSidebar) {
       buttons.push({
         label: 'Continue in sidebar',
         icon: 'comment',
@@ -602,7 +602,7 @@ The `getActionButtons` params include flags to customize behavior per viewport:
 - **`isCanvas`** - `true` when rendered in the canvas flyout (expanded view)
 - **`openCanvas`** - Callback to open canvas mode; `undefined` when already in canvas
 - **`closeCanvas`** - Callback to dismiss the canvas; `undefined` when not in canvas
-- **`openSidebarConversation`** - Callback to open the agent builder sidebar with the current conversation loaded; `undefined` when already in the sidebar
+- **`openSidebarConversation`** - Callback to open the agent builder sidebar with the current conversation loaded
 
 #### Canvas flyout width
 
