@@ -74,11 +74,6 @@ export const parseInlineParams = (
     return { errors: [paramsNotAMap()] };
   }
 
-  const values = new Map(Object.entries(parsed));
-  if (values.size === 0) {
-    return { errors: [paramsNotAMap()] };
-  }
-
   const result = definition.paramsSchema.safeParse(parsed);
   if (result.success) {
     return { params: result.data, errors: [] };
@@ -88,10 +83,11 @@ export const parseInlineParams = (
     if (issue.code === 'unrecognized_keys') {
       return unknownFields(issue.keys);
     }
-    const [field] = issue.path.map(String);
-    const isMissing = values.get(field) == null;
+    const field = String(issue.path[0]);
+    const isMissing = Reflect.get(parsed, field) == null;
     if (issue.code === 'invalid_type' && !isMissing) {
-      return issue.expected === 'array' ? fieldMustBeStringList(field) : fieldMustBeString(field);
+      const isList = issue.expected === 'array' || issue.path.length > 1;
+      return isList ? fieldMustBeStringList(field) : fieldMustBeString(field);
     }
     return fieldRequired(field);
   });

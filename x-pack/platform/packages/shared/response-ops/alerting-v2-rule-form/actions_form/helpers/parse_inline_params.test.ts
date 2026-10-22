@@ -53,7 +53,6 @@ describe('parseInlineParams', () => {
       ['empty params', ''],
       ['a list', '- a\n- b\n'],
       ['a scalar', 'hello\n'],
-      ['an empty map', '{}\n'],
     ])('reports %s as not a map', (_, params) => {
       expect(parseInlineParams(email, params).errors).toEqual([
         'Parameters must be a YAML map of field names to values.',
@@ -62,51 +61,45 @@ describe('parseInlineParams', () => {
   });
 
   describe('schema errors', () => {
-    it('names every blank field of the untouched email template', () => {
-      expect(parseInlineParams(email, email.paramsTemplate).errors).toEqual([
-        "'to' is required.",
-        "'subject' is required.",
-        "'message' is required.",
-      ]);
-    });
-
-    it('names every blank field of the untouched slack template', () => {
-      expect(parseInlineParams(slack, slack.paramsTemplate).errors).toEqual([
-        "'channel' is required.",
-        "'text' is required.",
-      ]);
-    });
-
-    it('reports missing and null fields as required', () => {
-      expect(parseInlineParams(email, 'to:\nsubject: Hi\n').errors).toEqual([
-        "'to' is required.",
-        "'message' is required.",
-      ]);
-    });
-
-    it('reports an empty list as required', () => {
-      expect(parseInlineParams(email, 'to: []\nsubject: Hi\nmessage: Body\n').errors).toEqual([
-        "'to' is required.",
-      ]);
-    });
-
-    it('reports a blank optional list entry once', () => {
-      expect(
-        parseInlineParams(email, 'to: [a@b.com]\nsubject: Hi\nmessage: Body\ncc: ["", " "]\n')
-          .errors
-      ).toEqual(["'cc' is required."]);
-    });
-
-    it('reports a string where a list is expected', () => {
-      expect(
-        parseInlineParams(email, 'to: a@example.com\nsubject: Hi\nmessage: Body\n').errors
-      ).toEqual(["'to' must be a list of strings."]);
-    });
-
-    it('reports a list or number where a string is expected', () => {
-      expect(parseInlineParams(email, 'to: [a@b.com]\nsubject: [Hi]\nmessage: 5\n').errors).toEqual(
-        ["'subject' must be a string.", "'message' must be a string."]
+    it.each([
+      ['the untouched email template', email, email.paramsTemplate, ['to', 'subject', 'message']],
+      ['the untouched slack template', slack, slack.paramsTemplate, ['channel', 'text']],
+      ['an empty map', email, '{}\n', ['to', 'subject', 'message']],
+    ])('names every mandatory field of %s', (_, definition, params, fields) => {
+      expect(parseInlineParams(definition, params).errors).toEqual(
+        fields.map((field) => `'${field}' is required.`)
       );
+    });
+
+    it.each([
+      [
+        'a missing or null field',
+        'to:\nsubject: Hi\n',
+        ["'to' is required.", "'message' is required."],
+      ],
+      ['an empty list', 'to: []\nsubject: Hi\nmessage: Body\n', ["'to' is required."]],
+      [
+        'blank optional list entries (once)',
+        'to: [a@b.com]\nsubject: Hi\nmessage: Body\ncc: ["", " "]\n',
+        ["'cc' is required."],
+      ],
+      [
+        'a string where a list is expected',
+        'to: a@example.com\nsubject: Hi\nmessage: Body\n',
+        ["'to' must be a list of strings."],
+      ],
+      [
+        'a non-string list entry',
+        'to: [a@b.com]\nsubject: Hi\nmessage: Body\ncc: [1]\n',
+        ["'cc' must be a list of strings."],
+      ],
+      [
+        'a list or number where a string is expected',
+        'to: [a@b.com]\nsubject: [Hi]\nmessage: 5\n',
+        ["'subject' must be a string.", "'message' must be a string."],
+      ],
+    ])('reports %s', (_, params, errors) => {
+      expect(parseInlineParams(email, params).errors).toEqual(errors);
     });
 
     it('reports unknown fields', () => {
