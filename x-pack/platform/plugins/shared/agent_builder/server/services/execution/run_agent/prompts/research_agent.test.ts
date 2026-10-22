@@ -37,7 +37,7 @@ describe('getResearchAgentPrompt', () => {
             } as any),
         }),
       },
-      configuration: { instructions: '', aiIndices: [] },
+      configuration: { instructions: '', rawSystemPrompt: false, aiIndices: [] },
       spaceId: 'default',
       deployment: { environment: 'self_managed', version: '9.3.0', airgapped: false },
       skills: [],
@@ -97,6 +97,16 @@ describe('getResearchAgentPrompt', () => {
       expect(system).toContain('- `owner` (TEXT): _not yet set_');
       expect(system).not.toContain('set_conversation_metadata');
     });
+  });
+
+  it('uses the agent instructions as the whole system message for a raw system prompt', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        configuration: { instructions: 'Only this.', rawSystemPrompt: true, aiIndices: [] },
+      })
+    );
+
+    expect(messages[0]).toEqual(['system', 'Only this.']);
   });
 
   it('does not render the current date in the system message and forwards conversationTimestamp', async () => {

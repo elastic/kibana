@@ -12,6 +12,8 @@ import { INVESTIGATION_TOOL_IDS } from '../agents/investigation';
 import { CORTEX_WORKSPACE_ROOT } from '../cortex/materialize';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { DECISION_TREE_WORKSPACE_ROOT } from '../decision_trees/materialize';
+import { REPLY_USER_TOOL_ID } from '../tools/reply_user/tool';
+import { TIME_CONVERTER_TOOL_ID } from '../tools/time_converter/tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../tools/sandbox_bash/write_file_tool';
 
@@ -69,6 +71,8 @@ const NON_EVIDENCE_TOOL_IDS = new Set<string>([
   // The agent records its findings with these; they are conclusions, not evidence.
   ...INVESTIGATION_TOOL_IDS,
   PROPOSALS_CREATE_TOOL_ID,
+  REPLY_USER_TOOL_ID,
+  TIME_CONVERTER_TOOL_ID,
   internalTools.writeTodos,
   internalTools.listFiles,
   internalTools.loadSkill,

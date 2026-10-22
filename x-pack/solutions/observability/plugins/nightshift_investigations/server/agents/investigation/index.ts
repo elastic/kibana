@@ -16,7 +16,6 @@ import {
   SET_HYPOTHESES_TOOL_ID,
   SET_IMPACT_TOOL_ID,
 } from '@kbn/agentic-investigations-plugin/common';
-import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
 import {
   NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
@@ -24,6 +23,8 @@ import {
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
 import instructions from './instructions/investigator.md.text';
 import decisionTreesSection from './instructions/decision_trees.text';
+import { REPLY_USER_TOOL_ID } from '../../tools/reply_user/tool';
+import { TIME_CONVERTER_TOOL_ID } from '../../tools/time_converter/tool';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
@@ -39,11 +40,7 @@ export const SANDBOX_TOOL_IDS = [
   SANDBOX_WRITE_FILE_TOOL_ID,
 ] as const;
 
-/**
- * The agentic investigations tools the agent records its findings with.
- * `set_conversation_metadata` (summary, verdict, severity) is not listed: Agent Builder adds it to
- * every run on a template conversation, which every investigation is.
- */
+/** The agentic investigations tools earlier versions of the agent recorded findings with. */
 export const INVESTIGATION_TOOL_IDS = [SET_IMPACT_TOOL_ID, SET_HYPOTHESES_TOOL_ID] as const;
 
 export const INVESTIGATION_AGENT_NAME = 'Nightshift Investigator';
@@ -51,13 +48,15 @@ export const INVESTIGATION_AGENT_DESCRIPTION =
   'Answers an arbitrary investigation question by reasoning from cluster telemetry it queries ' +
   'inside a sandbox and, when Cortex is enabled, records what it learns in the Nightshift Cortex wiki.';
 
-/** Interpolated only when hydrate will actually write `/workspace/decision-trees/`. */
-const DECISION_TREES_LOAD_STEP =
-  ' Also check `/workspace/decision-trees/monitors.md` for a prior decision tree matching this symptom — see <decision_trees>.';
-
-const SEMANTIC_MEMORY_LOAD_STEP = ` Also inspect this turn's Semantic Memory paths from
-<system_update>, or /workspace/memories/.index.json when present. Treat memories as historical
-observations and verify them against current telemetry before relying on them.`;
+const SEMANTIC_MEMORY_SECTION = `
+**USING MEMORIES**
+Memories are observations from past tasks — they help steer your investigation but reflect a point in time and may no longer be current.
+- Inspect this turn's Semantic Memory paths from <system_update>, or \`/workspace/memories/.index.json\` when present.
+- Independently verify memory claims against live connector APIs before including them in your reply.
+- Use them to guide where you look, but confirm the details are still accurate.
+- When you cannot confirm a memory claim, note it as a past observation (e.g. 'previously observed that…') so the user knows it needs confirmation.
+- Pay attention to memory age — old memories are more likely to be stale.
+`;
 
 const fillContextInstructions = ({
   includeDecisionTrees,
@@ -67,11 +66,10 @@ const fillContextInstructions = ({
   includeMemory: boolean;
 }): string =>
   instructions
-    .replace('{{decision_trees_load_step}}', includeDecisionTrees ? DECISION_TREES_LOAD_STEP : '')
-    .replace('{{semantic_memory_load_step}}', includeMemory ? SEMANTIC_MEMORY_LOAD_STEP : '')
+    .replace('{{semantic_memory_section}}', includeMemory ? SEMANTIC_MEMORY_SECTION : '')
     .replace(
       '{{decision_trees_section}}',
-      includeDecisionTrees ? `\n${decisionTreesSection.trimEnd()}\n` : ''
+      includeDecisionTrees ? `${decisionTreesSection.trimEnd()}\n` : ''
     );
 
 interface InvestigationAgentTypeOptions {
@@ -79,10 +77,6 @@ interface InvestigationAgentTypeOptions {
   cortexEnabled: boolean;
   memoryEnabled?: boolean;
   decisionTreesEnabled?: boolean;
-  /** The agentic investigations plugin is enabled, so its tools are registered. */
-  investigationToolsEnabled: boolean;
-  /** The proposals plugin is enabled, so `proposals.create` is registered. */
-  proposalsEnabled: boolean;
   telemetryConnectorId?: string;
   /** Resolves the space's custom context block, appended to the instructions on every run. */
   getCustomContextInstructions?: (ctx: AgentConfigContext) => Promise<string>;
@@ -112,7 +106,7 @@ const appendCustomContext = async ({
 
 /**
  * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
- * standalone prompt and no Elastic tools. Telemetry is reached through `telemetryConnectorId` as
+ * standalone prompt, the sandbox tools, `time_converter_tool` and `reply_user`. Telemetry is reached through `telemetryConnectorId` as
  * described in `/workspace/elastic.md`.
  */
 export const getInvestigationAgentType = ({
@@ -120,8 +114,6 @@ export const getInvestigationAgentType = ({
   cortexEnabled,
   memoryEnabled = false,
   decisionTreesEnabled = false,
-  investigationToolsEnabled,
-  proposalsEnabled,
   telemetryConnectorId,
   getCustomContextInstructions,
   logger,
@@ -135,13 +127,17 @@ export const getInvestigationAgentType = ({
     tools: [
       {
         tool_ids: [
-          ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
-          ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),
           ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
+          TIME_CONVERTER_TOOL_ID,
+          REPLY_USER_TOOL_ID,
         ],
       },
     ],
     enable_elastic_capabilities: false,
+    // Only the tools listed above: none of Agent Builder's internal file, API, todo or metadata tools.
+    disable_internal_tools: true,
+    // The investigator's own prompt, without Agent Builder's generic system prompt around it.
+    raw_system_prompt: true,
     connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
     ...(() => {
       // Decision trees are no longer a separate before-agent hook: they hydrate as a third
@@ -189,8 +185,6 @@ export const registerInvestigationAgentType = (
     cortexEnabled,
     memoryEnabled = false,
     decisionTreesEnabled = false,
-    investigationToolsEnabled,
-    proposalsEnabled,
     telemetryConnectorId,
     getCustomContextInstructions,
     logger,
@@ -202,8 +196,6 @@ export const registerInvestigationAgentType = (
       cortexEnabled,
       memoryEnabled,
       decisionTreesEnabled,
-      investigationToolsEnabled,
-      proposalsEnabled,
       telemetryConnectorId,
       getCustomContextInstructions,
       logger,

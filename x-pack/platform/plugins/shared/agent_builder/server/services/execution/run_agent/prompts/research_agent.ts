@@ -96,7 +96,7 @@ ${fieldLines}
 };
 
 const getAgentSystemMessage = async ({
-  configuration: { instructions: customInstructions, aiIndexCatalog },
+  configuration: { instructions: customInstructions, aiIndexCatalog, rawSystemPrompt },
   outputSchema,
   skills,
   spaceId,
@@ -108,6 +108,10 @@ const getAgentSystemMessage = async ({
   conversationTemplates,
   conversationMetadataWritable,
 }: ResearchAgentPromptParams): Promise<string> => {
+  if (rawSystemPrompt) {
+    return customInstructions;
+  }
+
   const conversationTemplateId = processedConversation.template_id;
   const conversationMetadata = processedConversation.metadata as
     | Record<string, SerializedMetadataValue>

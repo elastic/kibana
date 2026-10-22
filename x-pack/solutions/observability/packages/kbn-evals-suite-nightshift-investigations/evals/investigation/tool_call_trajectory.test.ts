@@ -7,7 +7,7 @@
 
 import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
 import type { ConversationRound, ConversationRoundStep } from '@kbn/agent-builder-common';
-import { extractToolCallTrajectory } from './tool_call_trajectory';
+import { extractReplyUserResponse, extractToolCallTrajectory } from './tool_call_trajectory';
 
 let nextId = 0;
 
@@ -85,5 +85,22 @@ describe('extractToolCallTrajectory', () => {
       { steps: [toolCallStep('tool_b', {}, { text: 'second' })] },
     ]);
     expect(trajectory.map((step) => step.tool_id)).toEqual(['tool_a', 'tool_b']);
+  });
+});
+
+describe('extractReplyUserResponse', () => {
+  it('returns undefined when the agent never replied', () => {
+    expect(extractReplyUserResponse(roundsOf([]))).toBeUndefined();
+  });
+
+  it('returns the response of the last reply_user call', () => {
+    const response = extractReplyUserResponse(
+      roundsOf([
+        toolCallStep('reply_user', { response: 'first' }, { response: 'first' }),
+        toolCallStep('nightshift_sandbox_bash', { command: 'ls' }, { stdout: '' }),
+        toolCallStep('reply_user', { response: 'Root cause: bad deploy' }, { response: 'x' }),
+      ])
+    );
+    expect(response).toBe('Root cause: bad deploy');
   });
 });

@@ -28,6 +28,7 @@ export const resolveConfiguration = async (
 ): Promise<ResolvedConfiguration> => {
   const base: ResolvedConfiguration = {
     instructions: configuration.instructions ?? '',
+    rawSystemPrompt: configuration.raw_system_prompt ?? false,
     aiIndices: configuration.ai_indices ?? [],
   };
 

@@ -71,6 +71,8 @@ import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/reg
 import { registerInvestigationAgentType } from './agents/investigation';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
 import { createDecisionTreeTools } from './tools/decision_tree';
+import { createReplyUserTool } from './tools/reply_user/tool';
+import { createTimeConverterTool } from './tools/time_converter/tool';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
 import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_tool';
@@ -242,13 +244,13 @@ export class NightshiftInvestigationsPlugin
         cortexEnabled: this.cortexEnabled,
         memoryEnabled: this.memoryEnabled,
         decisionTreesEnabled: this.decisionTreesEnabled,
-        investigationToolsEnabled: Boolean(plugins.agenticInvestigations),
-        proposalsEnabled: Boolean(plugins.proposals),
         telemetryConnectorId,
         getCustomContextInstructions: ({ request, spaceId }) =>
           customContextClient.getInstructions(request, spaceId),
         logger: this.logger.get('custom_context'),
       });
+      plugins.agentBuilder.tools.register(createReplyUserTool());
+      plugins.agentBuilder.tools.register(createTimeConverterTool());
       if (this.decisionTreesEnabled) {
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
       }

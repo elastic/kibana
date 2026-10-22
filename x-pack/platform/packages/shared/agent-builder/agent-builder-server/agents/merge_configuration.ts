@@ -63,6 +63,7 @@ const mergeToolSelections = (base: ToolSelection[], delta: ToolSelection[]): Too
  * - tools / skill_ids / plugin_ids / workflow_ids / post_execution_workflow_ids / connector_ids / ai_indices / subagent_ids: union, base-first,
  *   deduplicated. A base that sets `connector_ids: []` pins the floor to "no connectors".
  * - enable_elastic_capabilities: the delta overrides the base when set.
+ * - disable_internal_tools / raw_system_prompt: a base that sets one pins the floor, so the delta cannot undo it.
  */
 export const mergeAgentConfiguration = (
   base: AgentBaseConfiguration | undefined,
@@ -106,6 +107,12 @@ export const mergeAgentConfiguration = (
   if (base.enable_elastic_capabilities !== undefined) {
     result.enable_elastic_capabilities =
       delta.enable_elastic_capabilities ?? base.enable_elastic_capabilities;
+  }
+  if (base.disable_internal_tools !== undefined) {
+    result.disable_internal_tools = base.disable_internal_tools || delta.disable_internal_tools;
+  }
+  if (base.raw_system_prompt !== undefined) {
+    result.raw_system_prompt = base.raw_system_prompt || delta.raw_system_prompt;
   }
 
   return result;
