@@ -45,12 +45,18 @@ export class FindingsCoordinator {
     return state;
   }
 
-  private guardFor(state: ConversationState, signal: AbortSignal): PassGuard {
+  private guardFor(
+    state: ConversationState,
+    signal: AbortSignal,
+    { ignoreAbort = false }: { ignoreAbort?: boolean } = {}
+  ): PassGuard {
     const ticket = state.nextTicket++;
     return {
       signal,
       claimWrite: () => {
-        if (signal.aborted || ticket < state.lastWrittenTicket) return false;
+        // The final pass is the newest, so its own timeout stops the model call but must not
+        // stop it recording the fallback. A live pass that was aborted is stale: it must not write.
+        if ((signal.aborted && !ignoreAbort) || ticket < state.lastWrittenTicket) return false;
         state.lastWrittenTicket = ticket;
         return true;
       },
@@ -120,7 +126,7 @@ export class FindingsCoordinator {
     const timer = setTimeout(() => abort.abort(), timeoutMs);
     timer.unref?.();
     try {
-      return await run(this.guardFor(state, abort.signal));
+      return await run(this.guardFor(state, abort.signal, { ignoreAbort: true }));
     } finally {
       clearTimeout(timer);
       this.states.delete(conversationId);

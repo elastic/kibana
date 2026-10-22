@@ -43,6 +43,7 @@ export interface FindingsPassParams {
 }
 
 const MAX_METADATA_TEXT_LENGTH = 10_000;
+const FALLBACK_SUMMARY_CHARS = 1_000;
 
 /** Keeps the first confirmed hypothesis: at most one may be the root cause. */
 export const limitToOneConfirmed = (hypotheses: FindingsOutput['hypotheses']): Hypothesis[] => {
@@ -115,6 +116,8 @@ export const runFindingsPass = async (
       system: FINDINGS_RECORDER_SYSTEM_PROMPT,
       input: buildRecorderInput({ digest: buildDigest({ steps }), current, question, answer }),
       schema: FINDINGS_JSON_SCHEMA as never,
+      // A truncated or malformed structured answer is the usual failure: ask again.
+      retry: { onValidationError: 2 },
     });
     const parsed = findingsOutputSchema.safeParse(response.output);
     if (!parsed.success) {
@@ -145,7 +148,12 @@ export const runFindingsPass = async (
       'metadata',
       () =>
         conversations.patchMetadata(conversationId, {
-          ...(output?.summary ? { summary: output.summary } : {}),
+          ...(output?.summary
+            ? { summary: output.summary }
+            : // A final pass without a record replaces an early live summary with the answer.
+            final && answer
+            ? { summary: answer.slice(0, FALLBACK_SUMMARY_CHARS) }
+            : {}),
           ...(output?.severity ? { severity: output.severity } : {}),
           ...(verdict ? { verdict } : {}),
         }),

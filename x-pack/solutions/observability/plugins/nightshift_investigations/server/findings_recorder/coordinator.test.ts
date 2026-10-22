@@ -121,6 +121,42 @@ describe('FindingsCoordinator', () => {
     await expect(final).resolves.toBe(false);
   });
 
+  it('lets the final pass record its fallback after its own timeout, but not a stale live pass', async () => {
+    jest.useFakeTimers();
+    try {
+      const coordinator = new FindingsCoordinator();
+      let finalClaim: boolean | undefined;
+      const final = coordinator.runFinal({
+        conversationId: 'c1',
+        timeoutMs: 100,
+        run: async (guard) => {
+          jest.advanceTimersByTime(101);
+          expect(guard.signal.aborted).toBe(true);
+          finalClaim = guard.claimWrite();
+        },
+      });
+      await final;
+      expect(finalClaim).toBe(true);
+
+      const exec = new AbortController();
+      let liveClaim: boolean | undefined;
+      coordinator.startLive({
+        conversationId: 'c2',
+        executionSignal: exec.signal,
+        timeoutMs: 100,
+        run: async (guard) => {
+          jest.advanceTimersByTime(101);
+          liveClaim = guard.claimWrite();
+        },
+      });
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(liveClaim).toBe(false);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('aborts a live pass with its execution and after its timeout', async () => {
     jest.useFakeTimers();
     try {

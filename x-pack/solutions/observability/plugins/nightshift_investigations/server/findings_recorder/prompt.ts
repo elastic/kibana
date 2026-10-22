@@ -24,6 +24,8 @@ export const FINDINGS_RECORDER_SYSTEM_PROMPT = `You keep the written record of a
 
 Use only what the transcript shows. Do not invent services, numbers, timings or causes. When the evidence is thin, say so and keep confidence low.
 
+Be concise. The summary is two to four sentences, the verdict one or two, each hypothesis reason at most two sentences, and at most eight hypotheses. Merge near-duplicates instead of listing them separately.
+
 ## The record
 
 The record is shown to people on the investigation overview, on its card, and in notifications. These are the fields you fill in:

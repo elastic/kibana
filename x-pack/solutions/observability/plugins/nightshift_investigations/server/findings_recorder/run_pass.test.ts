@@ -130,8 +130,20 @@ describe('runFindingsPass', () => {
       answer: 'Root cause: deploy',
     });
 
-    expect(patchMetadata).toHaveBeenCalledWith('c1', { verdict: 'Root cause: deploy' });
+    // The answer also replaces any early live summary, which would otherwise read "just started".
+    expect(patchMetadata).toHaveBeenCalledWith('c1', {
+      summary: 'Root cause: deploy',
+      verdict: 'Root cause: deploy',
+    });
     expect(writer.setHypotheses).not.toHaveBeenCalled();
+  });
+
+  it('asks the model again when its structured answer is malformed', async () => {
+    const { deps, outputFn } = setup();
+
+    await runFindingsPass(deps, { request, conversationId: 'c1', steps, guard });
+
+    expect(outputFn.mock.calls[0][0].retry).toEqual({ onValidationError: 2 });
   });
 
   it('writes nothing from a live pass whose output is unusable', async () => {

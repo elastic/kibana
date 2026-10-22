@@ -57,11 +57,13 @@ export const FINDINGS_JSON_SCHEMA = {
   properties: {
     summary: {
       type: 'string',
+      maxLength: 800,
       description:
-        'What happened, as far as the evidence shows: what deviated, when and where, and the current leading explanation. A few sentences of markdown.',
+        'What happened, as far as the evidence shows: what deviated, when and where, and the current leading explanation. Two to four sentences.',
     },
     verdict: {
       type: 'string',
+      maxLength: 600,
       description:
         'Only when the agent has given its final answer: the conclusion in one or two sentences, with the root cause and the mechanism. Omit while the investigation is still running.',
     },
@@ -76,11 +78,13 @@ export const FINDINGS_JSON_SCHEMA = {
       properties: {
         summary: {
           type: 'string',
+          maxLength: 500,
           description:
             'The business consequence in one or two plain sentences: who or what was affected, how badly, for how long, how broadly, with measured numbers.',
         },
         entities: {
           type: 'array',
+          maxItems: 5,
           description:
             'Only when two or more services or components were affected in different ways, grouped at service level.',
           items: {
@@ -97,6 +101,7 @@ export const FINDINGS_JSON_SCHEMA = {
     },
     hypotheses: {
       type: 'array',
+      maxItems: 8,
       description:
         'Every candidate cause considered so far, each with its own confidence and status. A snapshot: it replaces the stored list.',
       items: {
@@ -107,6 +112,7 @@ export const FINDINGS_JSON_SCHEMA = {
           status: { type: 'string', enum: HYPOTHESIS_STATUSES },
           reason: {
             type: 'string',
+            maxLength: 300,
             description:
               'Why it was dismissed or confirmed, or the current reasoning while investigating. Markdown.',
           },
