@@ -967,9 +967,8 @@ export const registerAiIndexRoutes = ({
         const { index: backingIndex } = request.query;
         const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
-          // Restore has no dedicated KiWriteAction (would need a new EBT event type); report it under 'update'.
           const { output } = await withKiWriteTelemetry({
-            action: 'update',
+            action: 'restore',
             aiIndexId,
             analyticsService,
             logger,

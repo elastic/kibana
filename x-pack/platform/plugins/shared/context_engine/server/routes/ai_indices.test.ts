@@ -1690,7 +1690,7 @@ describe('ai indices routes', () => {
       );
       expect(analyticsService.reportKiWrite).toHaveBeenCalledWith(
         expect.objectContaining({
-          action: 'update',
+          action: 'restore',
           aiIndexId: 'customer_support',
           outcome: 'success',
         })

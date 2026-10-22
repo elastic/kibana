@@ -72,6 +72,7 @@ const KI_WRITE_SUCCESS_VERB: Record<KiWriteAction, string> = {
   create: 'created in',
   update: 'updated in',
   delete: 'deleted from',
+  restore: 'restored in',
 };
 
 /**
