@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { useGeneratedHtmlId } from '@elastic/eui';
+import { FlyoutTemplate } from '@kbn/flyout-template';
 import React, { useMemo } from 'react';
 import type { Environment } from '../../../../common/environment_rt';
 import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { ResponsiveFlyout } from '../responsive_flyout';
-import { RequestFlyoutHeader } from './header';
 import { RequestFlyoutNoMetricsMessage } from './no_metrics_message';
-import { RequestFlyoutContent } from './request_flyout_content';
+import { RequestFlyoutLevel } from './request_flyout_level';
 import { RequestFlyoutContextProvider, type RequestFlyoutDeps } from './request_flyout_context';
 import {
   hasMetrics,
@@ -48,7 +46,6 @@ export function RequestFlyout({
   rangeTo,
   onClose,
 }: RequestFlyoutProps) {
-  const titleId = useGeneratedHtmlId({ prefix: 'requestFlyoutTitle' });
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const filters = useMemo(
@@ -65,29 +62,23 @@ export function RequestFlyout({
 
   const title = `${connection.sourceLabel} → ${connection.targetLabel}`;
 
-  const flyout = (
-    <ResponsiveFlyout
-      data-test-subj="requestFlyout"
-      flyoutMenuDisplayMode="always"
-      onClose={onClose}
-      ownFocus={false}
-      size="m"
-      session="start"
-      historyKey={historyKey}
-      flyoutMenuProps={{ title }}
-      aria-labelledby={titleId}
-    >
-      <RequestFlyoutHeader title={title} titleId={titleId} />
-      {contextValue ? (
-        <RequestFlyoutContent childSession="inherit" historyKey={historyKey} />
-      ) : (
-        <RequestFlyoutNoMetricsMessage />
-      )}
-    </ResponsiveFlyout>
-  );
-
   if (!contextValue) {
-    return flyout;
+    return (
+      <FlyoutTemplate
+        data-test-subj="requestFlyout"
+        onClose={onClose}
+        ownFocus={false}
+        size="m"
+        minWidth={660}
+        session="start"
+        historyKey={historyKey}
+      >
+        <FlyoutTemplate.Header title={title} />
+        <FlyoutTemplate.Body>
+          <RequestFlyoutNoMetricsMessage />
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
   }
 
   return (
@@ -99,7 +90,15 @@ export function RequestFlyout({
         kuery=""
         useSpanName={false}
       >
-        {flyout}
+        <RequestFlyoutLevel
+          data-test-subj="requestFlyout"
+          title={title}
+          onClose={onClose}
+          session="start"
+          size="m"
+          childSession="inherit"
+          historyKey={historyKey}
+        />
       </TimeRangeMetadataContextProvider>
     </RequestFlyoutContextProvider>
   );

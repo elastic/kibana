@@ -6,15 +6,11 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import type { ActionGroups } from '../../actions_context_menu';
+import { renderHook } from '@testing-library/react';
 import { RequestFlyoutContextProvider } from '../request_flyout_context';
 import type { RequestFlyoutContextValue } from '../request_flyout_context';
-import { RequestFlyoutFooter } from '.';
-
-// ---------------------------------------------------------------------------
-// Module mocks
-// ---------------------------------------------------------------------------
+import { TEST_CONTEXT } from '../test_utils';
+import { useLinksMenuPanels, useRequestFlyoutFooterMenu } from '.';
 
 const mockLink = jest.fn();
 jest.mock('../../../../hooks/use_apm_router', () => ({
@@ -26,195 +22,93 @@ jest.mock('../../links/discover_links/use_discover_href', () => ({
   useDiscoverHref: (...args: unknown[]) => mockUseDiscoverHref(...args),
 }));
 
-// ActionsContextMenu — capture the actions prop so we can inspect it, and
-// render the button slot so the "Actions" button lands in the DOM.
-const mockActionsContextMenu = jest.fn();
-jest.mock('../../actions_context_menu', () => ({
-  ActionsContextMenu: ({ actions, button }: { actions: ActionGroups; button: React.ReactNode }) => {
-    mockActionsContextMenu({ actions });
-    return (
-      <div data-test-subj="actionsContextMenuMock">
-        {button}
-        {actions.flatMap((group) =>
-          group.actions.map((action) => (
-            <a
-              key={action.id}
-              data-test-subj={`actionsMenuItem-${action.id}`}
-              href={(action as any).href}
-            >
-              {action.name}
-            </a>
-          ))
-        )}
-      </div>
-    );
-  },
-}));
-
-// EuiFlyoutFooter — render children directly so we can see them in the DOM.
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-  return {
-    ...original,
-    EuiFlyoutFooter: ({ children }: { children: React.ReactNode }) => (
-      <div data-test-subj="euiFlyoutFooter">{children}</div>
+function renderMenu(connection: Partial<RequestFlyoutContextValue['connection']> = {}) {
+  const value = { ...TEST_CONTEXT, connection: { ...TEST_CONTEXT.connection, ...connection } };
+  return renderHook(() => useRequestFlyoutFooterMenu(), {
+    wrapper: ({ children }: { children: React.ReactNode }) => (
+      <RequestFlyoutContextProvider value={value}>{children}</RequestFlyoutContextProvider>
     ),
-    useGeneratedHtmlId: () => 'test-html-id',
-  };
-});
-
-// ebt helpers — no-op in unit tests.
-jest.mock('@kbn/ebt-click', () => ({
-  EBT_CLICK_ACTIONS: { OPEN_ACTIONS: 'open_actions', OPEN_IN_APM: 'open_in_apm' },
-  getEbtProps: () => ({}),
-}));
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-const BASE_CONTEXT: RequestFlyoutContextValue = {
-  deps: { core: {} as any },
-  connection: {
-    sourceServiceName: 'frontend',
-    sourceLabel: 'frontend',
-    targetLabel: 'backend',
-    dependencies: [],
-  },
-  filters: {
-    environment: 'ENVIRONMENT_ALL',
-    start: '2024-01-01T00:00:00.000Z',
-    end: '2024-01-01T01:00:00.000Z',
-    rangeFrom: 'now-1h',
-    rangeTo: 'now',
-  },
-};
-
-function renderComponent(contextOverrides: Partial<RequestFlyoutContextValue> = {}) {
-  const ctx: RequestFlyoutContextValue = {
-    ...BASE_CONTEXT,
-    ...contextOverrides,
-    connection: {
-      ...BASE_CONTEXT.connection,
-      ...contextOverrides.connection,
-    },
-  };
-  return render(
-    <RequestFlyoutContextProvider value={ctx}>
-      <RequestFlyoutFooter />
-    </RequestFlyoutContextProvider>
-  );
+  }).result.current;
 }
 
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
+const itemNames = (panels: ReturnType<typeof renderMenu>) =>
+  panels.flatMap(({ items }) => items.map((item) => ('name' in item ? item.name : undefined)));
 
-describe('RequestFlyoutFooter', () => {
+describe('useRequestFlyoutFooterMenu', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockLink.mockReturnValue('/dependencies/overview?dependencyName=db');
-    mockUseDiscoverHref.mockReturnValue('/discover?traces');
-  });
-
-  it('renders the Actions button', () => {
-    renderComponent();
-
-    expect(screen.getByTestId('requestFlyoutActionsButton')).toBeInTheDocument();
-    expect(screen.getByTestId('requestFlyoutActionsButton')).toHaveTextContent('Actions');
-  });
-
-  it('Actions button is disabled when there is no dependencyName and no discoverHref', () => {
-    mockUseDiscoverHref.mockReturnValue(undefined);
-    mockLink.mockReturnValue(undefined);
-
-    renderComponent({
-      connection: {
-        ...BASE_CONTEXT.connection,
-        dependencyName: undefined,
-      },
-    });
-
-    const button = screen.getByTestId('requestFlyoutActionsButton');
-    expect(button).toBeDisabled();
-  });
-
-  it('Actions button is enabled when discoverHref is available', () => {
-    mockUseDiscoverHref.mockReturnValue('/discover?traces');
-
-    renderComponent({
-      connection: {
-        ...BASE_CONTEXT.connection,
-        dependencyName: undefined,
-      },
-    });
-
-    const button = screen.getByTestId('requestFlyoutActionsButton');
-    expect(button).not.toBeDisabled();
-  });
-
-  it('includes "Open in APM" menu item when dependencyName is set', () => {
     mockLink.mockReturnValue('/dependencies/overview?dependencyName=postgresql');
-
-    renderComponent({
-      connection: {
-        ...BASE_CONTEXT.connection,
-        dependencyName: 'postgresql',
-      },
-    });
-
-    expect(screen.getByTestId('actionsMenuItem-openInApm')).toBeInTheDocument();
-    expect(screen.getByTestId('actionsMenuItem-openInApm')).toHaveTextContent('Open in APM');
-  });
-
-  it('does not include "Open in APM" menu item when dependencyName is not set', () => {
-    renderComponent({
-      connection: {
-        ...BASE_CONTEXT.connection,
-        dependencyName: undefined,
-      },
-    });
-
-    expect(screen.queryByTestId('actionsMenuItem-openInApm')).not.toBeInTheDocument();
-  });
-
-  it('includes "Explore traces in Discover" menu item when discoverHref is available', () => {
     mockUseDiscoverHref.mockReturnValue('/discover?traces');
+  });
 
-    renderComponent();
+  it('offers the dependency in APM and its traces in Discover', () => {
+    const panels = renderMenu({ dependencyName: 'postgresql' });
 
-    expect(screen.getByTestId('actionsMenuItem-exploreTraces')).toBeInTheDocument();
-    expect(screen.getByTestId('actionsMenuItem-exploreTraces')).toHaveTextContent(
-      'Explore traces in Discover'
+    expect(itemNames(panels)).toEqual(['Open in APM', 'Explore traces in Discover']);
+  });
+
+  it('links to the dependency overview scoped to the source service', () => {
+    renderMenu({ dependencyName: 'postgresql' });
+
+    expect(mockLink).toHaveBeenCalledWith(
+      '/dependencies/overview',
+      expect.objectContaining({
+        query: expect.objectContaining({
+          dependencyName: 'postgresql',
+          kuery: 'service.name:"frontend"',
+        }),
+      })
     );
   });
 
-  it('does not include "Explore traces in Discover" when discoverHref is undefined', () => {
-    mockUseDiscoverHref.mockReturnValue(undefined);
-    mockLink.mockReturnValue('/dependencies/overview?dependencyName=postgresql');
+  it('does not offer "Open in APM" without a dependency name', () => {
+    const panels = renderMenu({ dependencyName: undefined });
 
-    renderComponent({
-      connection: {
-        ...BASE_CONTEXT.connection,
-        dependencyName: 'postgresql',
-      },
-    });
-
-    expect(screen.queryByTestId('actionsMenuItem-exploreTraces')).not.toBeInTheDocument();
+    expect(itemNames(panels)).toEqual(['Explore traces in Discover']);
   });
 
-  it('passes no action groups to ActionsContextMenu when nothing is available', () => {
+  it('does not offer "Explore traces in Discover" without a Discover link', () => {
     mockUseDiscoverHref.mockReturnValue(undefined);
-    mockLink.mockReturnValue(undefined);
 
-    renderComponent({
-      connection: {
-        ...BASE_CONTEXT.connection,
-        dependencyName: undefined,
+    const panels = renderMenu({ dependencyName: 'postgresql' });
+
+    expect(itemNames(panels)).toEqual(['Open in APM']);
+  });
+
+  it('has no panels, so no footer, when nothing is available', () => {
+    mockUseDiscoverHref.mockReturnValue(undefined);
+
+    expect(renderMenu({ dependencyName: undefined })).toEqual([]);
+  });
+});
+
+describe('useLinksMenuPanels', () => {
+  it('turns links into the items of one panel, with test subjects from the prefix', () => {
+    const actions = [{ id: 'open', name: 'Open page', href: '/page' }];
+
+    const { result } = renderHook(() => useLinksMenuPanels(actions, 'myMenu'));
+
+    expect(result.current).toEqual([
+      {
+        id: 0,
+        items: [
+          expect.objectContaining({
+            name: 'Open page',
+            href: '/page',
+            'data-test-subj': 'myMenuItem-open',
+          }),
+        ],
       },
-    });
+    ]);
+  });
 
-    const [call] = mockActionsContextMenu.mock.calls;
-    expect(call[0].actions).toHaveLength(0);
+  it('keeps the same panels while the actions do not change', () => {
+    const actions = [{ id: 'open', name: 'Open page', href: '/page' }];
+
+    const { result, rerender } = renderHook(() => useLinksMenuPanels(actions, 'myMenu'));
+    const first = result.current;
+    rerender();
+
+    expect(result.current).toBe(first);
   });
 });

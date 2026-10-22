@@ -8,14 +8,11 @@
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiFlyout,
-  EuiFlyoutBody,
   EuiSpacer,
-  EuiText,
   EuiTitle,
-  useGeneratedHtmlId,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
+import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { FailedCallBucket } from '@kbn/apm-api-shared';
@@ -65,7 +62,6 @@ export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props
     connection: { sourceServiceName, targetServiceName },
     filters: { environment, start, end, rangeFrom, rangeTo },
   } = useRequestFlyoutContext();
-  const titleId = useGeneratedHtmlId({ prefix: 'requestFlyoutErrorsTitle' });
 
   // Server failures belong to the target service, the others to the source.
   const serviceName =
@@ -203,104 +199,99 @@ export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props
   const title = bucket.topError ?? serviceName;
 
   return (
-    <EuiFlyout
-      data-test-subj="requestFlyoutErrorsFlyout"
-      onClose={onClose}
-      ownFocus={false}
-      // Not `fill`: EUI rejects a `fill` child (an APM error group or a document) under a `fill`
-      // parent.
-      size="m"
-      paddingSize="m"
-      // A session of its own: this flyout opens a child, and EUI allows only one main and one
-      // child flyout per session, so it cannot be a child itself.
-      session="start"
-      historyKey={historyKey}
-      flyoutMenuDisplayMode="always"
-      flyoutMenuProps={{ title: serviceName }}
-      aria-labelledby={titleId}
-    >
-      <EuiFlyoutBody>
-        <EuiTitle size="s">
-          <h2 id={titleId}>{title}</h2>
-        </EuiTitle>
-        <EuiText size="s" color="subdued">
-          {i18n.translate('xpack.apm.requestFlyout.errors.subtitle', {
+    <>
+      <FlyoutTemplate
+        data-test-subj="requestFlyoutErrorsFlyout"
+        onClose={onClose}
+        ownFocus={false}
+        // Not `fill`: EUI rejects a `fill` child (an APM error group or a document) under a `fill`
+        // parent.
+        size="m"
+        // A session of its own: this flyout opens a child, and EUI allows only one main and one
+        // child flyout per session, so it cannot be a child itself.
+        session="start"
+        historyKey={historyKey}
+      >
+        <FlyoutTemplate.Header
+          title={title}
+          description={i18n.translate('xpack.apm.requestFlyout.errors.subtitle', {
             defaultMessage: 'Errors of {service}',
             values: { service: serviceName },
           })}
-        </EuiText>
-
-        <EuiSpacer size="l" />
-        <EuiTitle size="xs">
-          <h3>
-            {i18n.translate('xpack.apm.requestFlyout.errors.apm.title', {
-              defaultMessage: 'APM errors',
+        />
+        <FlyoutTemplate.Body>
+          <EuiSpacer size="l" />
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate('xpack.apm.requestFlyout.errors.apm.title', {
+                defaultMessage: 'APM errors',
+              })}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiBasicTable
+            columns={apmColumns}
+            items={apmGroups}
+            loading={isPending(apmStatus)}
+            error={
+              apmStatus === FETCH_STATUS.FAILURE
+                ? i18n.translate('xpack.apm.requestFlyout.errors.apm.errorLabel', {
+                    defaultMessage: 'Unable to load the APM errors.',
+                  })
+                : undefined
+            }
+            noItemsMessage={i18n.translate('xpack.apm.requestFlyout.errors.apm.noData', {
+              defaultMessage: 'No APM errors found in this time range.',
             })}
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiBasicTable
-          columns={apmColumns}
-          items={apmGroups}
-          loading={isPending(apmStatus)}
-          error={
-            apmStatus === FETCH_STATUS.FAILURE
-              ? i18n.translate('xpack.apm.requestFlyout.errors.apm.errorLabel', {
-                  defaultMessage: 'Unable to load the APM errors.',
-                })
-              : undefined
-          }
-          noItemsMessage={i18n.translate('xpack.apm.requestFlyout.errors.apm.noData', {
-            defaultMessage: 'No APM errors found in this time range.',
-          })}
-          rowProps={({ groupId }) => ({
-            'data-test-subj':
-              groupId === bucket.topErrorGroupId
-                ? 'requestFlyoutTopErrorGroupRow'
-                : 'requestFlyoutApmErrorGroupRow',
-          })}
-          tableCaption={i18n.translate('xpack.apm.requestFlyout.errors.apm.caption', {
-            defaultMessage: 'APM error groups',
-          })}
-        />
-
-        <EuiSpacer size="l" />
-        <EuiTitle size="xs">
-          <h3>
-            {i18n.translate('xpack.apm.requestFlyout.errors.logs.title', {
-              defaultMessage: 'Errors from logs',
+            rowProps={({ groupId }) => ({
+              'data-test-subj':
+                groupId === bucket.topErrorGroupId
+                  ? 'requestFlyoutTopErrorGroupRow'
+                  : 'requestFlyoutApmErrorGroupRow',
             })}
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <KbnInfoCallout
-          size="s"
-          title={i18n.translate('xpack.apm.requestFlyout.errors.logs.groupingNote', {
-            defaultMessage:
-              'Log errors are grouped by type and message, among the most recent log errors.',
-          })}
-        />
-        <EuiSpacer size="s" />
-        <EuiBasicTable
-          columns={logColumns}
-          items={logGroups}
-          loading={logsLoading}
-          error={
-            logsStatus === FETCH_STATUS.FAILURE
-              ? i18n.translate('xpack.apm.requestFlyout.errors.logs.errorLabel', {
-                  defaultMessage: 'Unable to load the error logs.',
-                })
-              : undefined
-          }
-          noItemsMessage={i18n.translate('xpack.apm.requestFlyout.errors.logs.noData', {
-            defaultMessage: 'No error logs found in this time range.',
-          })}
-          rowProps={() => ({ 'data-test-subj': 'requestFlyoutLogErrorGroupRow' })}
-          tableCaption={i18n.translate('xpack.apm.requestFlyout.errors.logs.caption', {
-            defaultMessage: 'Error logs grouped by type and message',
-          })}
-        />
-      </EuiFlyoutBody>
+            tableCaption={i18n.translate('xpack.apm.requestFlyout.errors.apm.caption', {
+              defaultMessage: 'APM error groups',
+            })}
+          />
+
+          <EuiSpacer size="l" />
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate('xpack.apm.requestFlyout.errors.logs.title', {
+                defaultMessage: 'Errors from logs',
+              })}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <KbnInfoCallout
+            size="s"
+            title={i18n.translate('xpack.apm.requestFlyout.errors.logs.groupingNote', {
+              defaultMessage:
+                'Log errors are grouped by type and message, among the most recent log errors.',
+            })}
+          />
+          <EuiSpacer size="s" />
+          <EuiBasicTable
+            columns={logColumns}
+            items={logGroups}
+            loading={logsLoading}
+            error={
+              logsStatus === FETCH_STATUS.FAILURE
+                ? i18n.translate('xpack.apm.requestFlyout.errors.logs.errorLabel', {
+                    defaultMessage: 'Unable to load the error logs.',
+                  })
+                : undefined
+            }
+            noItemsMessage={i18n.translate('xpack.apm.requestFlyout.errors.logs.noData', {
+              defaultMessage: 'No error logs found in this time range.',
+            })}
+            rowProps={() => ({ 'data-test-subj': 'requestFlyoutLogErrorGroupRow' })}
+            tableCaption={i18n.translate('xpack.apm.requestFlyout.errors.logs.caption', {
+              defaultMessage: 'Error logs grouped by type and message',
+            })}
+          />
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
 
       {selected?.kind === 'apm' && (
         <RequestFlyoutApmErrorGroupFlyout
@@ -328,6 +319,6 @@ export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props
           historyKey={historyKey}
         />
       )}
-    </EuiFlyout>
+    </>
   );
 }

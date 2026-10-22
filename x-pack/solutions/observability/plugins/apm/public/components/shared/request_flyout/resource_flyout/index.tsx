@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlyout, EuiFlyoutHeader, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { RequestFlyoutContent } from '../request_flyout_content';
+import { RequestFlyoutLevel } from '../request_flyout_level';
 import { RequestFlyoutContextProvider, useRequestFlyoutContext } from '../request_flyout_context';
 import type { RequestFlyoutConnection } from '../types';
 
@@ -28,7 +27,6 @@ export function RequestFlyoutResourceFlyout({ resource, historyKey, onClose }: P
     filters,
     connection: { sourceServiceName, sourceLabel },
   } = useRequestFlyoutContext();
-  const titleId = useGeneratedHtmlId({ prefix: 'requestFlyoutResourceTitle' });
 
   // Memoized on what it is made of: the data hooks refetch when `dependencies` changes identity.
   const value = useMemo(() => {
@@ -46,24 +44,17 @@ export function RequestFlyoutResourceFlyout({ resource, historyKey, onClose }: P
 
   return (
     <RequestFlyoutContextProvider value={value}>
-      <EuiFlyout
+      <RequestFlyoutLevel
         data-test-subj="requestFlyoutResourceFlyout"
+        title={title}
         onClose={onClose}
-        ownFocus={false}
-        size="fill"
         session="inherit"
+        size="fill"
+        // Its own child flyouts start a new session: EUI allows one main and one child flyout
+        // per session.
+        childSession="start"
         historyKey={historyKey}
-        flyoutMenuDisplayMode="always"
-        flyoutMenuProps={{ title }}
-        aria-labelledby={titleId}
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="s">
-            <h2 id={titleId}>{title}</h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <RequestFlyoutContent childSession="start" historyKey={historyKey} />
-      </EuiFlyout>
+      />
     </RequestFlyoutContextProvider>
   );
 }

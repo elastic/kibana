@@ -73,7 +73,7 @@ export class ServiceMapPage {
       'apmDependencyContentsDependencyDetailsButton'
     );
     this.requestFlyout = page.testSubj.locator('requestFlyout');
-    this.requestFlyoutTitle = page.testSubj.locator('requestFlyoutTitle');
+    this.requestFlyoutTitle = page.testSubj.locator('requestFlyoutHeader');
     this.serviceMapOptionsPanel = page.testSubj.locator('serviceMapOptionsPanel');
     this.serviceMapHideControlsButton = page.testSubj.locator('serviceMapHideControlsButton');
     this.serviceMapShowControlsButton = page.testSubj.locator('serviceMapShowControlsButton');

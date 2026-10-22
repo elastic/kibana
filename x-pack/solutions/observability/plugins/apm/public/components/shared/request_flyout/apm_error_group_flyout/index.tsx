@@ -11,25 +11,19 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiLink,
   EuiPagination,
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
   EuiTab,
   EuiTabs,
-  EuiText,
   EuiTitle,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
+import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import { Timestamp } from '@kbn/apm-ui-shared';
-import { KbnWarningCallout } from '@kbn/ui-callout';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import {
   ENVIRONMENT_NOT_DEFINED,
@@ -43,6 +37,7 @@ import { ErrorSampleDetailTabContent } from '../../../app/error_group_details/er
 import { getTabs } from '../../../app/error_group_details/error_sampler/error_tabs';
 import { SampleSummary } from '../../../app/error_group_details/error_sampler/sample_summary';
 import { REQUEST_FLYOUT_EBT_ACTIONS, REQUEST_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
+import { ACTIONS_BUTTON_LABEL, useLinksMenuPanels } from '../footer';
 import { useRequestFlyoutContext } from '../request_flyout_context';
 
 interface Props {
@@ -70,7 +65,6 @@ export function RequestFlyoutApmErrorGroupFlyout({
     filters: { environment, start, end, rangeFrom, rangeTo },
   } = useRequestFlyoutContext();
   const { link } = useApmRouter();
-  const titleId = useGeneratedHtmlId({ prefix: 'requestFlyoutApmErrorGroupTitle' });
 
   const [samplePage, setSamplePage] = useState(0);
   const [activeTabKey, setActiveTabKey] = useState<string | undefined>();
@@ -132,34 +126,44 @@ export function RequestFlyoutApmErrorGroupFlyout({
     },
   });
 
+  const menuActions = useMemo(
+    () => [
+      {
+        id: 'openErrorGroupPage',
+        name: i18n.translate('xpack.apm.requestFlyout.apmErrorGroup.openPage', {
+          defaultMessage: 'Open error group page',
+        }),
+        href: errorPageHref,
+        ebt: {
+          action: EBT_CLICK_ACTIONS.OPEN_IN_APM,
+          element: REQUEST_FLYOUT_EBT_ELEMENTS.DETAIL_LINK,
+        },
+      },
+    ],
+    [errorPageHref]
+  );
+  const panels = useLinksMenuPanels(menuActions, 'requestFlyoutApmErrorGroupActionsMenu');
+
   return (
-    <EuiFlyout
+    <FlyoutTemplate
       data-test-subj="requestFlyoutApmErrorGroupFlyout"
       onClose={onClose}
       ownFocus={false}
       size="fill"
-      paddingSize="m"
       session="inherit"
       historyKey={historyKey}
-      flyoutMenuDisplayMode="always"
-      flyoutMenuProps={{ title: groupName }}
-      aria-labelledby={titleId}
     >
-      <EuiFlyoutBody>
-        <EuiTitle size="s">
-          <h2 id={titleId}>{groupName}</h2>
-        </EuiTitle>
-        <EuiText size="s" color="subdued">
-          {i18n.translate('xpack.apm.requestFlyout.apmErrorGroup.subtitle', {
-            defaultMessage: 'APM error group of {service}',
-            values: { service: serviceName },
-          })}
-        </EuiText>
-        <EuiSpacer size="m" />
-
+      <FlyoutTemplate.Header
+        title={groupName}
+        description={i18n.translate('xpack.apm.requestFlyout.apmErrorGroup.subtitle', {
+          defaultMessage: 'APM error group of {service}',
+          values: { service: serviceName },
+        })}
+      />
+      <FlyoutTemplate.Body>
         {hasError ? (
-          <KbnWarningCallout
-            size="s"
+          <FlyoutTemplate.Body.Callout
+            level="warning"
             data-test-subj="requestFlyoutApmErrorGroupError"
             title={i18n.translate('xpack.apm.requestFlyout.apmErrorGroup.errorTitle', {
               defaultMessage: 'Unable to load this error group',
@@ -284,21 +288,18 @@ export function RequestFlyoutApmErrorGroupFlyout({
             )}
           </EuiPanel>
         )}
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiLink
-          href={errorPageHref}
-          data-test-subj="requestFlyoutApmErrorGroupOpenPage"
+      </FlyoutTemplate.Body>
+      <FlyoutTemplate.Footer>
+        <FlyoutTemplate.Footer.PrimaryActionMenu
+          label={ACTIONS_BUTTON_LABEL}
+          panels={panels}
+          data-test-subj="requestFlyoutApmErrorGroupActionsButton"
           {...getEbtProps({
-            action: EBT_CLICK_ACTIONS.OPEN_IN_APM,
-            element: REQUEST_FLYOUT_EBT_ELEMENTS.DETAIL_LINK,
+            action: EBT_CLICK_ACTIONS.OPEN_ACTIONS,
+            element: REQUEST_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
           })}
-        >
-          {i18n.translate('xpack.apm.requestFlyout.apmErrorGroup.openPage', {
-            defaultMessage: 'Open error group page',
-          })}
-        </EuiLink>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+        />
+      </FlyoutTemplate.Footer>
+    </FlyoutTemplate>
   );
 }

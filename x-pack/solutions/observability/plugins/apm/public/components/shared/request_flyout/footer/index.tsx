@@ -5,19 +5,52 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
-import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
+import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import { escapeKuery } from '@kbn/es-query';
+import type { FlyoutFooterMenuPanel } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
-import { ActionsContextMenu, type ActionGroups } from '../../actions_context_menu';
-import { useDiscoverHref } from '../../links/discover_links/use_discover_href';
+import { useMemo } from 'react';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { APM_EBT_ACTIONS } from '../../../app/ebt_constants';
+import {
+  getFlyoutFooterMenuItem,
+  type FlyoutFooterMenuAction,
+} from '../../flyout_footer_menu/get_flyout_footer_menu_item';
+import { useDiscoverHref } from '../../links/discover_links/use_discover_href';
 import { REQUEST_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { useRequestFlyoutContext } from '../request_flyout_context';
 
-export function RequestFlyoutFooter() {
+export const REQUEST_FLYOUT_ACTIONS_MENU_PREFIX = 'requestFlyoutActionsMenu';
+
+export const ACTIONS_BUTTON_LABEL = i18n.translate(
+  'xpack.apm.requestFlyout.footer.actionsButtonLabel',
+  { defaultMessage: 'Actions' }
+);
+
+/**
+ * The panels of a footer "Actions" menu (`Footer.PrimaryActionMenu`) made of links. Memoize the
+ * actions: the menu loses its keyboard focus when it gets new panels on every render.
+ */
+export function useLinksMenuPanels(
+  actions: FlyoutFooterMenuAction[],
+  dataTestSubjPrefix: string
+): FlyoutFooterMenuPanel[] {
+  return useMemo(
+    () =>
+      actions.length === 0
+        ? []
+        : [
+            {
+              id: 0,
+              items: actions.map((action) => getFlyoutFooterMenuItem(action, dataTestSubjPrefix)),
+            },
+          ],
+    [actions, dataTestSubjPrefix]
+  );
+}
+
+/** The "Actions" menu of the request flyout: its dependency in APM, and its traces in Discover. */
+export function useRequestFlyoutFooterMenu() {
   const {
     connection: { sourceServiceName, dependencyName },
     filters: { environment, rangeFrom, rangeTo },
@@ -51,76 +84,41 @@ export function RequestFlyoutFooter() {
       })
     : undefined;
 
-  const actionGroups = useMemo(() => {
-    const groups: ActionGroups = [];
-    const actions = [];
-
-    if (dependencyOverviewHref) {
-      actions.push({
-        id: 'openInApm',
-        name: i18n.translate('xpack.apm.requestFlyout.footer.openInApmLabel', {
-          defaultMessage: 'Open in APM',
-        }),
-        icon: 'apmApp',
-        href: dependencyOverviewHref,
-        ebt: {
-          action: EBT_CLICK_ACTIONS.OPEN_IN_APM,
-          element: REQUEST_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
-        },
-      });
-    }
-
-    if (discoverHref) {
-      actions.push({
-        id: 'exploreTraces',
-        name: i18n.translate('xpack.apm.requestFlyout.footer.openInDiscoverLabel', {
-          defaultMessage: 'Explore traces in Discover',
-        }),
-        icon: 'productDiscover',
-        href: discoverHref,
-        ebt: {
-          action: APM_EBT_ACTIONS.EXPLORE_TRACES,
-          element: REQUEST_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
-        },
-      });
-    }
-
-    if (actions.length > 0) {
-      groups.push({ id: 'main', actions });
-    }
-
-    return groups;
-  }, [dependencyOverviewHref, discoverHref]);
-
-  return (
-    <EuiFlyoutFooter>
-      <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <ActionsContextMenu
-            id="service-map-request-flyout-actions-menu"
-            dataTestSubjPrefix="requestFlyoutActionsMenu"
-            actions={actionGroups}
-            button={
-              <EuiButton
-                fill
-                size="s"
-                iconType="chevronSingleDown"
-                iconSide="right"
-                disabled={actionGroups.length === 0}
-                data-test-subj="requestFlyoutActionsButton"
-                {...getEbtProps({
-                  action: EBT_CLICK_ACTIONS.OPEN_ACTIONS,
-                  element: REQUEST_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
-                })}
-              >
-                {i18n.translate('xpack.apm.requestFlyout.footer.actionsButtonLabel', {
-                  defaultMessage: 'Actions',
-                })}
-              </EuiButton>
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlyoutFooter>
+  const actions = useMemo<FlyoutFooterMenuAction[]>(
+    () => [
+      ...(dependencyOverviewHref
+        ? [
+            {
+              id: 'openInApm',
+              name: i18n.translate('xpack.apm.requestFlyout.footer.openInApmLabel', {
+                defaultMessage: 'Open in APM',
+              }),
+              href: dependencyOverviewHref,
+              ebt: {
+                action: EBT_CLICK_ACTIONS.OPEN_IN_APM,
+                element: REQUEST_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
+              },
+            },
+          ]
+        : []),
+      ...(discoverHref
+        ? [
+            {
+              id: 'exploreTraces',
+              name: i18n.translate('xpack.apm.requestFlyout.footer.openInDiscoverLabel', {
+                defaultMessage: 'Explore traces in Discover',
+              }),
+              href: discoverHref,
+              ebt: {
+                action: APM_EBT_ACTIONS.EXPLORE_TRACES,
+                element: REQUEST_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
+              },
+            },
+          ]
+        : []),
+    ],
+    [dependencyOverviewHref, discoverHref]
   );
+
+  return useLinksMenuPanels(actions, REQUEST_FLYOUT_ACTIONS_MENU_PREFIX);
 }

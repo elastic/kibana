@@ -18,13 +18,10 @@ jest.mock('../../../hooks/use_time_range', () => ({
 jest.mock('../../../context/time_range_metadata/time_range_metadata_context', () => ({
   TimeRangeMetadataContextProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
-jest.mock('../responsive_flyout', () => ({
-  ResponsiveFlyout: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="requestFlyout">{children}</div>
+jest.mock('./request_flyout_level', () => ({
+  RequestFlyoutLevel: ({ title }: { title: string }) => (
+    <div data-test-subj="requestFlyoutLevel">{title}</div>
   ),
-}));
-jest.mock('./request_flyout_content', () => ({
-  RequestFlyoutContent: () => <div data-test-subj="requestFlyoutContent" />,
 }));
 
 const deps = {
@@ -53,8 +50,7 @@ describe('RequestFlyout', () => {
       />
     );
 
-    expect(screen.getByText('frontend → postgresql')).toBeInTheDocument();
-    expect(screen.getByTestId('requestFlyoutContent')).toBeInTheDocument();
+    expect(screen.getByTestId('requestFlyoutLevel')).toHaveTextContent('frontend → postgresql');
   });
 
   it('shows the no metrics message for a connection without metrics', () => {
@@ -68,6 +64,6 @@ describe('RequestFlyout', () => {
     );
 
     expect(screen.getByTestId('requestFlyoutNoMetricsMessage')).toBeInTheDocument();
-    expect(screen.queryByTestId('requestFlyoutContent')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('requestFlyoutLevel')).not.toBeInTheDocument();
   });
 });

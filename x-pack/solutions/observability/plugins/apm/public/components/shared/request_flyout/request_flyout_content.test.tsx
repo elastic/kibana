@@ -8,10 +8,9 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderInRequestFlyout } from './test_utils';
-import { RequestFlyoutContent } from './request_flyout_content';
+import { RequestFlyoutBody } from './request_flyout_content';
 
 jest.mock('./failed_calls', () => ({ RequestFlyoutFailedCalls: () => <div>failed calls</div> }));
-jest.mock('./footer', () => ({ RequestFlyoutFooter: () => <div>footer</div> }));
 jest.mock('./latency_distribution', () => ({
   RequestFlyoutLatencyDistribution: () => <div>latency distribution</div>,
 }));
@@ -20,8 +19,7 @@ jest.mock('./red_metrics', () => ({ RequestFlyoutRedMetrics: () => <div>red metr
 jest.mock('./resources', () => ({ RequestFlyoutResources: () => <div>resources</div> }));
 jest.mock('./transactions', () => ({ RequestFlyoutTransactions: () => <div>transactions</div> }));
 
-const historyKey = Symbol('test');
-const content = <RequestFlyoutContent childSession="start" historyKey={historyKey} />;
+const content = <RequestFlyoutBody />;
 
 const connection = {
   sourceServiceName: 'frontend',

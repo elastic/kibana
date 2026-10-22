@@ -8,22 +8,17 @@
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiLink,
   EuiSpacer,
-  EuiText,
   EuiTitle,
-  useGeneratedHtmlId,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
+import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import type { DependencySpan } from '@kbn/apm-api-shared';
 import { Timestamp } from '@kbn/apm-ui-shared';
-import { KbnWarningCallout } from '@kbn/ui-callout';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   asMillisecondDuration,
   asPercent,
@@ -40,6 +35,7 @@ import { TimeseriesChart } from '../../charts/timeseries_chart';
 import { getMaxY, getResponseTimeTickFormatter } from '../../charts/transaction_charts/helper';
 import { CHART_HEIGHT, ChartPanel, HIDE_LEGEND_SETTINGS, useChartsGridCss } from '../chart_panel';
 import { REQUEST_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
+import { ACTIONS_BUTTON_LABEL, useLinksMenuPanels } from '../footer';
 import { useRequestFlyoutContext } from '../request_flyout_context';
 import type { RequestFlyoutChildSession } from '../types';
 import { useOperationDetail } from './use_operation_detail';
@@ -72,7 +68,6 @@ export function RequestFlyoutOperationDetailFlyout({
     filters: { environment, start, end, rangeFrom, rangeTo },
   } = useRequestFlyoutContext();
   const { link } = useApmRouter();
-  const titleId = useGeneratedHtmlId({ prefix: 'requestFlyoutOperationTitle' });
   const chartsGridCss = useChartsGridCss();
   const timeZone = getTimeZone(core.uiSettings);
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
@@ -106,6 +101,24 @@ export function RequestFlyoutOperationDetailFlyout({
       showCriticalPath: false,
     },
   });
+
+  const menuActions = useMemo(
+    () => [
+      {
+        id: 'openOperationPage',
+        name: i18n.translate('xpack.apm.requestFlyout.operationDetail.openPage', {
+          defaultMessage: 'Open operation page',
+        }),
+        href: operationPageHref,
+        ebt: {
+          action: EBT_CLICK_ACTIONS.OPEN_IN_APM,
+          element: REQUEST_FLYOUT_EBT_ELEMENTS.DETAIL_LINK,
+        },
+      },
+    ],
+    [operationPageHref]
+  );
+  const panels = useLinksMenuPanels(menuActions, 'requestFlyoutOperationActionsMenu');
 
   const columns: Array<EuiBasicTableColumn<DependencySpan>> = [
     {
@@ -154,42 +167,31 @@ export function RequestFlyoutOperationDetailFlyout({
 
   return (
     <>
-      <EuiFlyout
+      <FlyoutTemplate
         data-test-subj="requestFlyoutOperationDetail"
         onClose={onClose}
         ownFocus={false}
         size="fill"
-        paddingSize="m"
         session={session}
         historyKey={historyKey}
-        flyoutMenuDisplayMode="always"
-        flyoutMenuProps={{ title: spanName }}
-        aria-labelledby={titleId}
       >
-        <EuiFlyoutBody>
-          <EuiTitle size="s">
-            <h2 id={titleId}>{spanName}</h2>
-          </EuiTitle>
-          <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.apm.requestFlyout.operationDetail.subtitle', {
-              defaultMessage: '{dependency} · calls from {service}',
-              values: { dependency: dependencyName, service: sourceServiceName },
-            })}
-          </EuiText>
-          <EuiSpacer size="m" />
-
-          {hasError && (
-            <>
-              <KbnWarningCallout
-                size="s"
-                data-test-subj="requestFlyoutOperationDetailError"
-                title={i18n.translate('xpack.apm.requestFlyout.operationDetail.errorTitle', {
-                  defaultMessage: 'Unable to load the details of this operation',
-                })}
-              />
-              <EuiSpacer size="m" />
-            </>
-          )}
+        <FlyoutTemplate.Header
+          title={spanName}
+          description={i18n.translate('xpack.apm.requestFlyout.operationDetail.subtitle', {
+            defaultMessage: '{dependency} · calls from {service}',
+            values: { dependency: dependencyName, service: sourceServiceName },
+          })}
+        />
+        <FlyoutTemplate.Body>
+          {hasError ? (
+            <FlyoutTemplate.Body.Callout
+              level="warning"
+              data-test-subj="requestFlyoutOperationDetailError"
+              title={i18n.translate('xpack.apm.requestFlyout.operationDetail.errorTitle', {
+                defaultMessage: 'Unable to load the details of this operation',
+              })}
+            />
+          ) : null}
 
           <ChartPointerEventContextProvider>
             <div css={chartsGridCss}>
@@ -272,22 +274,19 @@ export function RequestFlyoutOperationDetailFlyout({
             })}
             data-test-subj="requestFlyoutOperationSamples"
           />
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiLink
-            href={operationPageHref}
-            data-test-subj="requestFlyoutOperationOpenPage"
+        </FlyoutTemplate.Body>
+        <FlyoutTemplate.Footer>
+          <FlyoutTemplate.Footer.PrimaryActionMenu
+            label={ACTIONS_BUTTON_LABEL}
+            panels={panels}
+            data-test-subj="requestFlyoutOperationActionsButton"
             {...getEbtProps({
-              action: EBT_CLICK_ACTIONS.OPEN_IN_APM,
-              element: REQUEST_FLYOUT_EBT_ELEMENTS.DETAIL_LINK,
+              action: EBT_CLICK_ACTIONS.OPEN_ACTIONS,
+              element: REQUEST_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
             })}
-          >
-            {i18n.translate('xpack.apm.requestFlyout.operationDetail.openPage', {
-              defaultMessage: 'Open operation page',
-            })}
-          </EuiLink>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
+          />
+        </FlyoutTemplate.Footer>
+      </FlyoutTemplate>
 
       {selectedTraceId && (
         <TraceWaterfallFlyout
