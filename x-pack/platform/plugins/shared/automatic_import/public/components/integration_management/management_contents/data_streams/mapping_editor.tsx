@@ -9,7 +9,6 @@ import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButtonIcon,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -23,11 +22,13 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type {
+  ApprovedFieldType,
   FieldMapping,
   FieldTypeCompatibility,
-  FieldTypeEditState,
+  DataStreamEditState,
   FieldTypeError,
   FieldTypeIssue,
   FieldTypeOverride,
@@ -38,46 +39,46 @@ import {
   getFieldValue,
   isSupportedFieldType,
 } from '../../../../../common';
-import { useUpdateDataStreamFieldTypes } from '../../../../common';
 import { EDIT_PIPELINE_FLYOUT, TABLE_COLUMN_HEADERS } from './translations';
 import { flattenPipelineObject, getIconFromType, unwrapPipelineDocument } from './utils';
 
 interface MappingRow extends FieldMapping {
   value: string;
-  values: unknown[];
   effectiveType: string;
-  isPersisted: boolean;
+  /** The field is in the field mapping, not only in the sample document. */
+  isMapped: boolean;
+  isUnsaved: boolean;
   pendingType?: string;
   /** Set when a saved edit changed this field's type. */
   originalType?: string;
+  /** The field's type in an approved version. */
+  approvedType?: string;
   /** The pending type looks incompatible, or the last Save failed. Does not block Save. */
   validationError?: string;
-  /** Doesn't block Save. */
   warning?: string;
 }
 
 interface UseMappingEditorProps {
-  integrationId: string;
   dataStreamId: string;
-  version: string;
   fieldMappings?: FieldMapping[];
+  savedFieldMappings?: FieldMapping[];
   fieldTypeOverrides?: FieldTypeOverride[];
+  approvedFieldTypes?: ApprovedFieldType[];
+  isDataStreamApproved: boolean;
   documents: Array<Record<string, unknown>>;
   activeDocument: number;
+  pendingTypes: Record<string, string>;
+  serverErrors: Record<string, FieldTypeError>;
+  stageType: (fieldName: string, type: string) => void;
 }
 
 interface MappingEditorProps {
   editor: MappingEditorState;
-  editState: FieldTypeEditState;
+  editState: DataStreamEditState;
 }
 
-const getEditStateNotice = (editState: FieldTypeEditState): string => {
+const getEditStateNotice = (editState: DataStreamEditState): string => {
   switch (editState) {
-    case 'locked':
-      return i18n.translate('xpack.automaticImport.mappingEditor.readOnlyNotice', {
-        defaultMessage:
-          'Field types are locked because this data stream is already part of an approved and installed package. Newly added data streams stay editable until they are approved.',
-      });
     case 'reanalyzing':
       return i18n.translate('xpack.automaticImport.mappingEditor.reanalyzingNotice', {
         defaultMessage:
@@ -105,7 +106,7 @@ const TYPE_SELECT_PANEL_MIN_WIDTH = 300;
 // Field column absorbing the leftover width.
 const TYPE_COLUMN_WIDTH = '200px';
 
-const getIssueDescription = (issue: FieldTypeIssue | undefined, type: string): string => {
+const getIssueDescription = (issue: string | undefined, type: string): string => {
   switch (issue) {
     case 'object_value':
       return i18n.translate('xpack.automaticImport.mappingEditor.issue.objectValue', {
@@ -137,6 +138,38 @@ const getIssueDescription = (issue: FieldTypeIssue | undefined, type: string): s
       return i18n.translate('xpack.automaticImport.mappingEditor.issue.notIp', {
         defaultMessage: 'Values are not IP addresses.',
       });
+    case 'not_date':
+      return i18n.translate('xpack.automaticImport.mappingEditor.issue.notDate', {
+        defaultMessage: 'Values are not ISO 8601 dates or epoch milliseconds.',
+      });
+    case 'convert_failed':
+      return i18n.translate('xpack.automaticImport.mappingEditor.issue.convertFailed', {
+        defaultMessage: 'The generated convert processor could not convert values to {type}.',
+        values: { type },
+      });
+    case 'convert_unsupported':
+      return i18n.translate('xpack.automaticImport.mappingEditor.issue.convertUnsupported', {
+        defaultMessage:
+          'Values were not converted to {type}. Check any conditions added to the generated convert processor.',
+        values: { type },
+      });
+    case 'duplicate_generated_processor':
+      return i18n.translate('xpack.automaticImport.mappingEditor.issue.duplicateProcessor', {
+        defaultMessage: 'The ingest pipeline has more than one generated processor for this field.',
+      });
+    case 'invalid_convert_type':
+      return i18n.translate('xpack.automaticImport.mappingEditor.issue.invalidConvertType', {
+        defaultMessage: 'The generated processor for this field has an unsupported convert type.',
+      });
+    case 'unsupported_generated_processor':
+      return i18n.translate('xpack.automaticImport.mappingEditor.issue.unsupportedProcessor', {
+        defaultMessage:
+          'This generated processor can’t change the type of this field. Remove it from the ingest pipeline.',
+      });
+    case 'approved_field_locked':
+      return i18n.translate('xpack.automaticImport.mappingEditor.issue.approvedFieldLocked', {
+        defaultMessage: 'Changing the type of this field could break data that is already indexed.',
+      });
     default:
       return i18n.translate('xpack.automaticImport.mappingEditor.issue.unknown', {
         defaultMessage: 'Values can’t be stored as {type}.',
@@ -155,13 +188,34 @@ const formatCompatibilityMessage = (
     values: { description: getIssueDescription(issue, type), failingDocuments, totalDocuments },
   });
 
-const formatServerError = (type: string, error: FieldTypeError): string =>
-  formatCompatibilityMessage(type, {
-    status: 'certain_failure',
-    issue: error.issue as FieldTypeIssue | undefined,
-    failingDocuments: error.failing_documents,
-    totalDocuments: error.total_documents,
+/** Formats a field type error returned by the server. */
+export const formatServerError = (
+  type: string,
+  {
+    issue,
+    failing_documents: failingDocuments,
+    total_documents: totalDocuments,
+    approved_type: approvedType,
+  }: FieldTypeError
+): string => {
+  if (issue === 'approved_field_locked') return getIssueDescription(issue, approvedType ?? type);
+
+  const checkedType = approvedType ?? type;
+  const message =
+    failingDocuments === undefined || totalDocuments === undefined
+      ? getIssueDescription(issue, checkedType)
+      : formatCompatibilityMessage(checkedType, {
+          status: 'certain_failure',
+          issue: issue as FieldTypeIssue | undefined,
+          failingDocuments,
+          totalDocuments,
+        });
+  if (approvedType === undefined) return message;
+  return i18n.translate('xpack.automaticImport.mappingEditor.approvedTypeNote', {
+    defaultMessage: '{message} It is {approvedType} in an approved version.',
+    values: { message, approvedType },
   });
+};
 
 const getTypeOptions = (type: string, originalType?: string): string[] => {
   const unsupportedTypes = [type, originalType].filter(
@@ -232,15 +286,18 @@ const mergeDocumentAndMappings = (
 };
 
 export const useMappingEditor = ({
-  integrationId,
   dataStreamId,
-  version,
   fieldMappings,
+  savedFieldMappings,
   fieldTypeOverrides,
+  approvedFieldTypes,
+  isDataStreamApproved,
   documents,
   activeDocument,
+  pendingTypes,
+  serverErrors,
+  stageType,
 }: UseMappingEditorProps) => {
-  const { updateDataStreamFieldTypesMutation } = useUpdateDataStreamFieldTypes();
   const unwrappedDocuments = useMemo(
     () =>
       documents
@@ -257,29 +314,33 @@ export const useMappingEditor = ({
     () => new Map((fieldTypeOverrides ?? []).map(({ name, original_type: type }) => [name, type])),
     [fieldTypeOverrides]
   );
-  const [pendingTypes, setPendingTypes] = useState<Record<string, string>>({});
-  const [serverErrors, setServerErrors] = useState<Record<string, FieldTypeError>>({});
+  const savedTypes = useMemo(
+    () => new Map((savedFieldMappings ?? []).map(({ name, type }) => [name, type])),
+    [savedFieldMappings]
+  );
+  const approvedTypes = useMemo(
+    () => new Map((approvedFieldTypes ?? []).map(({ name, type }) => [name, type])),
+    [approvedFieldTypes]
+  );
   const [inlineEditingField, setInlineEditingField] = useState<string | null>(null);
 
   useEffect(() => {
-    setPendingTypes({});
-    setServerErrors({});
     setInlineEditingField(null);
-  }, [dataStreamId]);
-
-  useEffect(() => {
-    setInlineEditingField(null);
-  }, [activeDocument]);
+  }, [dataStreamId, activeDocument]);
 
   const rows = useMemo<MappingRow[]>(() => {
     return sourceMappings.map((mapping) => {
       const pendingType = pendingTypes[mapping.name];
-      const values = unwrappedDocuments.map((document) => getFieldValue(document, mapping.name));
       const compatibility = pendingType
-        ? getFieldTypeCompatibility(pendingType, values)
+        ? getFieldTypeCompatibility(
+            pendingType,
+            unwrappedDocuments.map((document) => getFieldValue(document, mapping.name))
+          )
         : undefined;
       const serverError = serverErrors[mapping.name];
       const displayedType = pendingType ?? mapping.type;
+      const savedType = savedTypes.get(mapping.name);
+      const approvedType = mapping.is_ecs ? undefined : approvedTypes.get(mapping.name);
 
       let validationError: string | undefined;
       let warning: string | undefined;
@@ -296,97 +357,55 @@ export const useMappingEditor = ({
       return {
         ...mapping,
         effectiveType: displayedType,
-        isPersisted: Boolean(fieldMappings?.some(({ name }) => name === mapping.name)),
+        isMapped: Boolean(fieldMappings?.some(({ name }) => name === mapping.name)),
+        isUnsaved: savedType !== undefined && savedType !== displayedType,
         value: formatValue(getFieldValue(currentDocument ?? {}, mapping.name)),
-        values,
         originalType: originalTypes.get(mapping.name),
+        ...(approvedType ? { approvedType } : {}),
         ...(pendingType ? { pendingType } : {}),
         ...(validationError ? { validationError } : {}),
         ...(warning ? { warning } : {}),
       };
     });
   }, [
+    approvedTypes,
     currentDocument,
     fieldMappings,
     originalTypes,
     pendingTypes,
+    savedTypes,
     serverErrors,
     sourceMappings,
     unwrappedDocuments,
   ]);
 
-  const isDirty = Object.keys(pendingTypes).length > 0;
   const serverErrorNames = useMemo(() => Object.keys(serverErrors), [serverErrors]);
-
-  const stageType = useCallback(
-    (fieldName: string, nextType: string) => {
-      setServerErrors(({ [fieldName]: _cleared, ...remaining }) => remaining);
-      setPendingTypes((current) => {
-        const savedType = sourceMappings.find(({ name }) => name === fieldName)?.type;
-        if (nextType === savedType) {
-          const { [fieldName]: _removed, ...remaining } = current;
-          return remaining;
-        }
-        return { ...current, [fieldName]: nextType };
-      });
-    },
-    [sourceMappings]
-  );
-
-  /** Resolves to true when the changes were saved. */
-  const save = async (): Promise<boolean> => {
-    const changes = Object.entries(pendingTypes).flatMap(([name, type]) =>
-      isSupportedFieldType(type) || type === originalTypes.get(name) ? [{ name, type }] : []
-    );
-    if (changes.length === 0) return false;
-
-    try {
-      const response = await updateDataStreamFieldTypesMutation.mutateAsync({
-        integrationId,
-        dataStreamId,
-        changes,
-        version,
-      });
-      if (response.status === 'failure') {
-        setServerErrors(Object.fromEntries(response.errors.map((error) => [error.name, error])));
-        return false;
-      }
-      setPendingTypes({});
-      setServerErrors({});
-      setInlineEditingField(null);
-      return true;
-    } catch (_error) {
-      // The mutation hook already shows an error toast.
-      return false;
-    }
-  };
-
-  const discardChanges = () => {
-    setPendingTypes({});
-    setServerErrors({});
-    setInlineEditingField(null);
-  };
 
   return {
     rows,
-    isDirty,
     serverErrorNames,
-    isSaving: updateDataStreamFieldTypesMutation.isLoading,
     inlineEditingField,
     setInlineEditingField,
     stageType,
-    save,
-    discardChanges,
+    isDataStreamApproved,
   };
 };
 
 export type MappingEditorState = ReturnType<typeof useMappingEditor>;
 
 export const MappingEditor = ({
-  editor: { rows, inlineEditingField, setInlineEditingField, stageType, serverErrorNames },
+  editor: {
+    rows,
+    inlineEditingField,
+    setInlineEditingField,
+    stageType,
+    serverErrorNames,
+    isDataStreamApproved,
+  },
   editState,
 }: MappingEditorProps) => {
   const isEditable = editState === 'editable';
+  const canEditTypes = isEditable && !isDataStreamApproved;
   // Controlled because the table resets to the first page whenever `items` changes,
   // which happens on every staged type change.
   const [{ pageIndex, pageSize }, setPage] = useState({ pageIndex: 0, pageSize: 10 });
@@ -419,8 +438,11 @@ export const MappingEditor = ({
     setPage({ pageIndex: page.index, pageSize: page.size });
   };
 
+  const canEditRow = (row: MappingRow) =>
+    canEditTypes && row.isMapped && !row.is_ecs && row.type !== 'group';
+
   const renderEditButton = (row: MappingRow) => {
-    if (!isEditable || !row.isPersisted || row.is_ecs || row.type === 'group') return null;
+    if (!canEditRow(row)) return null;
 
     return (
       <EuiToolTip
@@ -480,11 +502,7 @@ export const MappingEditor = ({
   };
 
   const renderType = (row: MappingRow) => {
-    if (
-      isEditable &&
-      row.isPersisted &&
-      (inlineEditingField === row.name || Boolean(row.validationError))
-    ) {
+    if (canEditRow(row) && (inlineEditingField === row.name || Boolean(row.validationError))) {
       return renderTypeSelect(row);
     }
 
@@ -498,7 +516,7 @@ export const MappingEditor = ({
             <FieldTypeDisplay type={displayedType} />
           </EuiFlexItem>
           {editButton && <EuiFlexItem grow={false}>{editButton}</EuiFlexItem>}
-          {row.pendingType && (
+          {row.isUnsaved && (
             <EuiFlexItem grow={false}>
               <EuiBadge color="warning">
                 {i18n.translate('xpack.automaticImport.mappingEditor.unsavedChangesBadge', {
@@ -508,6 +526,11 @@ export const MappingEditor = ({
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
+        {row.validationError && (
+          <EuiText size="xs" color="danger" data-test-subj={`mappingEditorError-${row.name}`}>
+            {row.validationError}
+          </EuiText>
+        )}
         {row.warning && (
           <EuiText size="xs" color="warning" data-test-subj={`mappingEditorWarning-${row.name}`}>
             {row.warning}
@@ -528,6 +551,18 @@ export const MappingEditor = ({
     {
       field: 'effectiveType',
       name: TABLE_COLUMN_HEADERS.type,
+      ...(canEditTypes
+        ? {
+            nameTooltip: {
+              content: i18n.translate('xpack.automaticImport.mappingEditor.typeColumnTooltip', {
+                defaultMessage:
+                  'Non-ECS field types can be edited until the data stream is approved.',
+              }),
+              icon: 'info',
+              iconProps: { 'data-test-subj': 'mappingEditorTypeHeaderTip' },
+            },
+          }
+        : {}),
       width: TYPE_COLUMN_WIDTH,
       sortable: true,
       render: (_type: string, row: MappingRow) => renderType(row),
@@ -550,13 +585,6 @@ export const MappingEditor = ({
 
   return (
     <>
-      <EuiText size="s" color="subdued">
-        {i18n.translate('xpack.automaticImport.mappingEditor.mappingGuidance', {
-          defaultMessage:
-            'Field types control the generated mappings. They do not change values produced by the ingest pipeline.',
-        })}
-      </EuiText>
-      <EuiSpacer size="m" />
       {!isEditable && (
         <>
           <EuiText size="s" color="subdued" data-test-subj="mappingEditorReadOnlyNotice">
@@ -567,13 +595,11 @@ export const MappingEditor = ({
       )}
       {serverErrorNames.length > 0 && (
         <>
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             title={i18n.translate('xpack.automaticImport.mappingEditor.serverErrorsTitle', {
               defaultMessage: 'Some field types could not be saved',
             })}
-            color="danger"
-            iconType="error"
             data-test-subj="mappingEditorServerErrors"
           >
             <p>
@@ -583,7 +609,7 @@ export const MappingEditor = ({
                 values={{ fieldNames: i18n.formatList('conjunction', serverErrorNames) }}
               />
             </p>
-          </EuiCallOut>
+          </KbnDangerCallout>
           <EuiSpacer size="m" />
         </>
       )}

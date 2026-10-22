@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render as rtlRender, screen, within, fireEvent } from '@testing-library/react';
+import React, { useEffect } from 'react';
+import {
+  act,
+  render as rtlRender,
+  screen,
+  within,
+  fireEvent,
+  waitFor,
+} from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
 import { EditPipelineFlyout } from './edit_pipeline_flyout';
@@ -14,10 +21,54 @@ import type { DataStreamResponse, DataStreamResults } from '../../../../../commo
 
 const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: I18nProvider });
 
+const mockSetModelMarkers = jest.fn();
+const mockRevealLine = jest.fn();
+const mockEditorValue = { current: '' };
+const mockEditorText = { current: '' };
+const mockEditor = {
+  getModel: () => ({
+    getLineCount: () => mockEditorText.current.split('\n').length,
+    getLineFirstNonWhitespaceColumn: () => 1,
+    getLineMaxColumn: () => 80,
+    isDisposed: () => false,
+  }),
+  revealLineInCenter: mockRevealLine,
+  setPosition: jest.fn(),
+  focus: jest.fn(),
+};
+
+const MockEditorMount = ({ value, onMount }: { value: string; onMount: () => void }) => {
+  mockEditorText.current = value;
+  useEffect(() => {
+    onMount();
+  }, [onMount]);
+  return null;
+};
+
 jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: jest.fn(({ value, onChange }) => (
+  XJSON_LANG_ID: 'xjson',
+  monaco: {
+    editor: { setModelMarkers: (...args: unknown[]) => mockSetModelMarkers(...args) },
+    MarkerSeverity: { Error: 8 },
+  },
+  CodeEditor: jest.fn(({ value, onChange, editorDidMount }) => (
     <div>
+      <MockEditorMount value={value} onMount={() => editorDidMount?.(mockEditor)} />
       <div data-test-subj="code-editor">{value}</div>
+      <button
+        type="button"
+        data-test-subj="code-editor-set"
+        onClick={() => onChange?.(mockEditorValue.current)}
+      >
+        {'Set editor value'}
+      </button>
+      <button
+        type="button"
+        data-test-subj="code-editor-invalid"
+        onClick={() => onChange?.('{ "processors": [')}
+      >
+        {'Make editor value invalid'}
+      </button>
       <button
         type="button"
         data-test-subj="code-editor-change"
@@ -55,20 +106,13 @@ jest.mock('@kbn/code-editor', () => ({
 }));
 
 const mockUseGetDataStreamResults = jest.fn();
-const mockMutateAsync = jest.fn();
-const mockSaveFieldTypes = jest.fn();
+const mockApplyEdits = jest.fn();
 jest.mock('../../../../common', () => ({
   useGetDataStreamResults: (integrationId: string, dataStreamId: string) =>
     mockUseGetDataStreamResults(integrationId, dataStreamId),
-  useUpdateDataStreamPipeline: () => ({
-    updateDataStreamPipelineMutation: {
-      mutateAsync: mockMutateAsync,
-      isLoading: false,
-    },
-  }),
-  useUpdateDataStreamFieldTypes: () => ({
-    updateDataStreamFieldTypesMutation: {
-      mutateAsync: mockSaveFieldTypes,
+  useApplyDataStreamEdits: () => ({
+    applyDataStreamEditsMutation: {
+      mutateAsync: mockApplyEdits,
       isLoading: false,
     },
   }),
@@ -145,6 +189,8 @@ const createMockResults = (overrides: Partial<DataStreamResults> = {}): DataStre
     { name: 'test.nested.inner', type: 'keyword', is_ecs: false },
   ],
   field_type_overrides: [],
+  approved_field_types: [],
+  data_stream_approved: false,
   version: 'WzEsMV0=',
   ...overrides,
 });
@@ -154,13 +200,16 @@ describe('EditPipelineFlyout', () => {
     integrationId: 'integration-123',
     dataStream: createMockDataStream(),
     onClose: jest.fn(),
-    fieldTypeEditState: 'editable' as const,
+    editState: 'editable' as const,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockMutateAsync.mockResolvedValue(createMockResults());
-    mockSaveFieldTypes.mockResolvedValue({ status: 'saved', ...createMockResults() });
+    mockApplyEdits.mockImplementation(async ({ dryRun }: { dryRun: boolean }) => ({
+      status: dryRun ? 'preview' : 'saved',
+      dropped_field_types: [],
+      ...createMockResults(),
+    }));
     mockReportCodeEditorCopyClicked.mockClear();
     mockUIState.selectedPipelineTab = 'table';
     mockUseGetDataStreamResults.mockReturnValue({
@@ -410,7 +459,8 @@ describe('EditPipelineFlyout', () => {
       const tableTab = screen.getByRole('tab', { name: 'Table' });
       await userEvent.click(tableTab);
 
-      expect(mockSelectPipelineTab).toHaveBeenCalledWith('table');
+      await waitFor(() => expect(mockSelectPipelineTab).toHaveBeenCalledWith('table'));
+      expect(mockApplyEdits).not.toHaveBeenCalled();
     });
 
     it('shows separate field, type, and value columns', () => {
@@ -446,19 +496,22 @@ describe('EditPipelineFlyout', () => {
 
       await userEvent.click(screen.getByTestId('mappingEditorApplyButton'));
 
-      expect(mockSaveFieldTypes).toHaveBeenCalledWith({
+      expect(mockApplyEdits).toHaveBeenCalledWith({
         integrationId: 'integration-123',
         dataStreamId: 'ds-1',
         version: 'WzEsMV0=',
+        ingestPipeline: expect.stringContaining('"processors"'),
         changes: [{ name: 'test.number', type: 'integer' }],
+        dryRun: false,
+        acknowledgeBreakingChanges: false,
       });
       expect(onClose).toHaveBeenCalledTimes(1);
     });
 
     it('marks rows that failed the server check and keeps save enabled', async () => {
-      mockSaveFieldTypes.mockResolvedValue({
+      mockApplyEdits.mockResolvedValue({
         status: 'failure',
-        errors: [
+        field_errors: [
           {
             name: 'test.number',
             issue: 'out_of_range',
@@ -507,9 +560,9 @@ describe('EditPipelineFlyout', () => {
         error: null,
         refetch: jest.fn(),
       });
-      mockSaveFieldTypes.mockResolvedValue({
+      mockApplyEdits.mockResolvedValue({
         status: 'failure',
-        errors: [
+        field_errors: [
           {
             name: failingField,
             issue: 'out_of_range',
@@ -629,32 +682,96 @@ describe('EditPipelineFlyout', () => {
       ).toBeInTheDocument();
     });
 
-    it('keeps field types read-only for a data stream included in the last approved package', () => {
-      render(<EditPipelineFlyout {...defaultProps} fieldTypeEditState="locked" />);
+    it('explains when field types can be edited in the Type column header', () => {
+      render(<EditPipelineFlyout {...defaultProps} />);
 
-      expect(screen.getByTestId('mappingEditorReadOnlyNotice')).toHaveTextContent(
-        'already part of an approved and installed package'
+      expect(
+        within(screen.getByRole('columnheader', { name: /Type/ })).getByTestId(
+          'mappingEditorTypeHeaderTip'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('keeps every field type read-only once the data stream is approved', () => {
+      mockUseGetDataStreamResults.mockReturnValue({
+        data: createMockResults({
+          approved_field_types: [{ name: 'test.field', type: 'keyword' }],
+          data_stream_approved: true,
+        }),
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: jest.fn(),
+      });
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      expect(screen.queryByTestId('editPipelineFlyoutApprovedNotice')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mappingEditorTypeHeaderTip')).not.toBeInTheDocument();
+      expect(screen.queryAllByTestId(/^mappingEditorEditType-/)).toHaveLength(0);
+      expect(screen.queryAllByTestId(/^mappingEditorApprovedType-/)).toHaveLength(0);
+      expect(screen.getByTestId('mappingEditorFooter')).toBeInTheDocument();
+    });
+
+    it('shows why an approved field failed without offering a type select', async () => {
+      mockUseGetDataStreamResults.mockReturnValue({
+        data: createMockResults({
+          approved_field_types: [{ name: 'test.number', type: 'long' }],
+          data_stream_approved: true,
+        }),
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: jest.fn(),
+      });
+      mockApplyEdits.mockImplementationOnce(
+        async ({ ingestPipeline }: { ingestPipeline: string }) => ({
+          status: 'preview',
+          dropped_field_types: [],
+          ...createMockResults({ ingest_pipeline: JSON.parse(ingestPipeline) }),
+        })
       );
-      expect(screen.queryByTestId('mappingEditorEditType-test.field')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('mappingEditorEditType-test.number')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('mappingEditorApplyButton')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('mappingEditorFooter')).not.toBeInTheDocument();
+      mockUIState.selectedPipelineTab = 'pipeline';
+      const { rerender } = render(<EditPipelineFlyout {...defaultProps} />);
+
+      await userEvent.click(screen.getByTestId('code-editor-change'));
+      await userEvent.click(screen.getByRole('tab', { name: 'Table' }));
+      await waitFor(() => expect(mockSelectPipelineTab).toHaveBeenCalledWith('table'));
+      mockUIState.selectedPipelineTab = 'table';
+      rerender(<EditPipelineFlyout {...defaultProps} />);
+
+      mockApplyEdits.mockResolvedValue({
+        status: 'failure',
+        field_errors: [
+          {
+            name: 'test.number',
+            issue: 'not_numeric',
+            failing_documents: 1,
+            total_documents: 2,
+            approved_type: 'long',
+          },
+        ],
+      });
+      await userEvent.click(screen.getByTestId('mappingEditorApplyButton'));
+
+      expect(await screen.findByTestId('mappingEditorError-test.number')).toHaveTextContent(
+        'Values are not numbers. Affects 1 of 2 sample documents. It is long in an approved version.'
+      );
+      expect(
+        screen.queryByTestId('mappingEditorInlineTypeSelect-test.number')
+      ).not.toBeInTheDocument();
     });
 
     it.each([
       ['loading', 'Checking whether field types can be edited'],
       ['error', 'edit status could not be loaded'],
       ['reanalyzing', 'Analysis is in progress'],
-    ] as const)(
-      'keeps field types read-only while edit state is %s',
-      (fieldTypeEditState, text) => {
-        render(<EditPipelineFlyout {...defaultProps} fieldTypeEditState={fieldTypeEditState} />);
+    ] as const)('keeps field types read-only while edit state is %s', (editState, text) => {
+      render(<EditPipelineFlyout {...defaultProps} editState={editState} />);
 
-        expect(screen.getByTestId('mappingEditorReadOnlyNotice')).toHaveTextContent(text);
-        expect(screen.queryByTestId('mappingEditorEditType-test.field')).not.toBeInTheDocument();
-        expect(screen.queryByTestId('mappingEditorFooter')).not.toBeInTheDocument();
-      }
-    );
+      expect(screen.getByTestId('mappingEditorReadOnlyNotice')).toHaveTextContent(text);
+      expect(screen.queryByTestId('mappingEditorEditType-test.field')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mappingEditorFooter')).not.toBeInTheDocument();
+    });
   });
 
   describe('pipeline tab', () => {
@@ -732,11 +849,14 @@ describe('EditPipelineFlyout', () => {
       const saveButton = screen.getByTestId('editPipelineFlyoutSaveButton');
       await userEvent.click(saveButton);
 
-      expect(mockMutateAsync).toHaveBeenCalledWith({
+      expect(mockApplyEdits).toHaveBeenCalledWith({
         integrationId: 'integration-123',
         dataStreamId: 'ds-1',
         version: 'WzEsMV0=',
-        ingestPipeline: expect.stringContaining('"processors"'),
+        ingestPipeline: expect.stringContaining('"updated"'),
+        changes: [],
+        dryRun: false,
+        acknowledgeBreakingChanges: false,
       });
       expect(onClose).toHaveBeenCalledTimes(1);
     });
@@ -774,40 +894,435 @@ describe('EditPipelineFlyout', () => {
       );
     });
 
-    it('disables pipeline save when the table has unsaved type edits', async () => {
+    it('adds a generated convert processor when switching to the pipeline tab', async () => {
       const { rerender } = render(<EditPipelineFlyout {...defaultProps} />);
 
       await userEvent.click(screen.getByTestId('mappingEditorEditType-test.number'));
       await userEvent.click(screen.getByTestId('mappingEditorInlineTypeSelect-test.number'));
-      await userEvent.click(screen.getByTestId('mappingEditorTypeOption-integer'));
+      await userEvent.click(screen.getByTestId('mappingEditorTypeOption-keyword'));
+      await userEvent.click(screen.getByRole('tab', { name: 'Ingest pipeline' }));
 
+      expect(mockSelectPipelineTab).toHaveBeenCalledWith('pipeline');
       mockUIState.selectedPipelineTab = 'pipeline';
       rerender(<EditPipelineFlyout {...defaultProps} />);
 
-      expect(screen.getByTestId('editPipelineFlyoutOtherTabWarning')).toHaveTextContent(
-        'Table tab'
-      );
-      expect(screen.getByTestId('editPipelineFlyoutSaveButton')).toBeDisabled();
+      const editor = screen.getByTestId('code-editor');
+      expect(editor).toHaveTextContent('automatic_import_field_type:test.number');
+      expect(editor).toHaveTextContent('"type": "string"');
+      expect(screen.getByTestId('editPipelineFlyoutSaveButton')).toBeEnabled();
+      expect(mockApplyEdits).not.toHaveBeenCalled();
     });
 
-    it('disables table save when the pipeline has unsaved edits', async () => {
+    it('previews pipeline edits before switching to the table tab', async () => {
+      mockUIState.selectedPipelineTab = 'pipeline';
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      await userEvent.click(screen.getByTestId('code-editor-change'));
+      await userEvent.click(screen.getByRole('tab', { name: 'Table' }));
+
+      await waitFor(() => expect(mockSelectPipelineTab).toHaveBeenCalledWith('table'));
+      expect(mockApplyEdits).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ingestPipeline: expect.stringContaining('"updated"'),
+          changes: [],
+          dryRun: true,
+        })
+      );
+    });
+
+    it('stays on the pipeline tab when the edited pipeline fails on more samples', async () => {
+      mockApplyEdits.mockResolvedValue({
+        status: 'failure',
+        field_errors: [],
+        pipeline_errors: {
+          failed_samples: 2,
+          baseline_failed_samples: 0,
+          error_groups: [{ error: 'field [x] not present', count: 2, example_sample: '{}' }],
+        },
+      });
+      mockUIState.selectedPipelineTab = 'pipeline';
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      await userEvent.click(screen.getByTestId('code-editor-change'));
+      await userEvent.click(screen.getByRole('tab', { name: 'Table' }));
+
+      expect(await screen.findByTestId('editPipelineFlyoutPipelineErrors')).toHaveTextContent(
+        'field [x] not present (2 samples)'
+      );
+      expect(mockSelectPipelineTab).not.toHaveBeenCalled();
+    });
+
+    it('lists field type errors from the preview on the pipeline tab', async () => {
+      mockApplyEdits.mockResolvedValue({
+        status: 'failure',
+        field_errors: [{ name: 'test.number', issue: 'duplicate_generated_processor' }],
+      });
+      mockUIState.selectedPipelineTab = 'pipeline';
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      await userEvent.click(screen.getByTestId('code-editor-change'));
+      await userEvent.click(screen.getByRole('tab', { name: 'Table' }));
+
+      expect(await screen.findByTestId('editPipelineFlyoutFieldErrors')).toHaveTextContent(
+        'test.number: The ingest pipeline has more than one generated processor for this field.'
+      );
+      expect(mockSelectPipelineTab).not.toHaveBeenCalled();
+    });
+
+    it('keeps invalid JSON on the pipeline tab without calling the server', async () => {
+      mockUIState.selectedPipelineTab = 'pipeline';
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      await userEvent.click(screen.getByTestId('code-editor-invalid'));
+      await userEvent.click(screen.getByRole('tab', { name: 'Table' }));
+
+      expect(await screen.findByTestId('editPipelineFlyoutApplyError')).toHaveTextContent(
+        'Invalid ingest pipeline JSON'
+      );
+      expect(mockApplyEdits).not.toHaveBeenCalled();
+      expect(mockSelectPipelineTab).not.toHaveBeenCalled();
+    });
+
+    describe('when typing stops', () => {
+      const TAGGED_PIPELINE = JSON.stringify(
+        { processors: [{ set: { field: 'x', value: 'y', tag: 'set_x' } }] },
+        null,
+        2
+      );
+      const regression = {
+        status: 'failure',
+        field_errors: [],
+        pipeline_errors: {
+          failed_samples: 2,
+          baseline_failed_samples: 0,
+          error_groups: [
+            {
+              error: 'field [x] not present',
+              count: 2,
+              example_sample: '{}',
+              processor_tag: 'set_x',
+            },
+          ],
+        },
+      };
+      const stopTyping = async () => {
+        await act(async () => {
+          jest.advanceTimersByTime(800);
+        });
+      };
+
+      beforeEach(() => {
+        jest.useFakeTimers();
+        mockUIState.selectedPipelineTab = 'pipeline';
+        mockEditorValue.current = TAGGED_PIPELINE;
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('checks the pipeline and shows its errors above the editor', async () => {
+        mockApplyEdits.mockResolvedValue(regression);
+        render(<EditPipelineFlyout {...defaultProps} />);
+
+        fireEvent.click(screen.getByTestId('code-editor-set'));
+        expect(mockApplyEdits).not.toHaveBeenCalled();
+        await stopTyping();
+
+        expect(mockApplyEdits).toHaveBeenCalledWith(
+          expect.objectContaining({ ingestPipeline: TAGGED_PIPELINE, dryRun: true })
+        );
+        expect(screen.getByRole('tabpanel')).toContainElement(
+          screen.getByTestId('editPipelineFlyoutPipelineErrors')
+        );
+        expect(screen.getByTestId('code-editor')).toHaveTextContent('set_x');
+        expect(mockSelectPipelineTab).not.toHaveBeenCalled();
+      });
+
+      it('marks the failing processor and jumps to its line', async () => {
+        mockApplyEdits.mockResolvedValue(regression);
+        render(<EditPipelineFlyout {...defaultProps} />);
+
+        fireEvent.click(screen.getByTestId('code-editor-set'));
+        await stopTyping();
+
+        expect(mockSetModelMarkers).toHaveBeenLastCalledWith(
+          expect.anything(),
+          'automaticImportPipeline',
+          [
+            expect.objectContaining({
+              startLineNumber: 7,
+              message: 'field [x] not present (2 samples)',
+            }),
+          ]
+        );
+        fireEvent.click(screen.getByRole('button', { name: 'Go to line 7' }));
+        expect(mockRevealLine).toHaveBeenCalledWith(7);
+      });
+
+      it('clears the errors once the pipeline is fixed', async () => {
+        mockApplyEdits.mockResolvedValueOnce(regression);
+        render(<EditPipelineFlyout {...defaultProps} />);
+
+        fireEvent.click(screen.getByTestId('code-editor-set'));
+        await stopTyping();
+        expect(screen.getByTestId('editPipelineFlyoutPipelineErrors')).toBeInTheDocument();
+
+        fireEvent.click(screen.getByTestId('code-editor-change'));
+        await stopTyping();
+
+        expect(screen.queryByTestId('editPipelineFlyoutPipelineErrors')).not.toBeInTheDocument();
+        expect(mockSetModelMarkers).toHaveBeenLastCalledWith(
+          expect.anything(),
+          'automaticImportPipeline',
+          []
+        );
+      });
+
+      it('ignores a check that finishes after newer typing', async () => {
+        let resolveFirstCheck: (value: unknown) => void = () => {};
+        mockApplyEdits.mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              resolveFirstCheck = resolve;
+            })
+        );
+        render(<EditPipelineFlyout {...defaultProps} />);
+
+        fireEvent.click(screen.getByTestId('code-editor-set'));
+        await stopTyping();
+        expect(screen.getByTestId('editPipelineFlyoutChecking')).toBeInTheDocument();
+
+        fireEvent.click(screen.getByTestId('code-editor-change'));
+        await act(async () => {
+          resolveFirstCheck(regression);
+        });
+
+        expect(screen.queryByTestId('editPipelineFlyoutPipelineErrors')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('editPipelineFlyoutChecking')).not.toBeInTheDocument();
+      });
+
+      it('does not check a read-only pipeline', async () => {
+        render(<EditPipelineFlyout {...defaultProps} editState="reanalyzing" />);
+        await stopTyping();
+
+        expect(mockApplyEdits).not.toHaveBeenCalled();
+      });
+    });
+
+    it('reads a hand-added generated processor as a type change', async () => {
+      mockUIState.selectedPipelineTab = 'pipeline';
+      mockEditorValue.current = JSON.stringify({
+        processors: [
+          {
+            convert: {
+              tag: 'automatic_import_field_type:test.field',
+              field: 'test.field',
+              type: 'long',
+            },
+          },
+        ],
+      });
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      await userEvent.click(screen.getByTestId('code-editor-set'));
+      await userEvent.click(screen.getByRole('tab', { name: 'Table' }));
+
+      await waitFor(() =>
+        expect(mockApplyEdits).toHaveBeenCalledWith(
+          expect.objectContaining({ changes: [{ name: 'test.field', type: 'long' }], dryRun: true })
+        )
+      );
+    });
+
+    it('saves against the version the edits started from after a refetch', async () => {
       mockUIState.selectedPipelineTab = 'pipeline';
       const { rerender } = render(<EditPipelineFlyout {...defaultProps} />);
 
       await userEvent.click(screen.getByTestId('code-editor-change'));
-
-      mockUIState.selectedPipelineTab = 'table';
+      mockUseGetDataStreamResults.mockReturnValue({
+        data: createMockResults({ version: 'WzIsMV0=' }),
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: jest.fn(),
+      });
       rerender(<EditPipelineFlyout {...defaultProps} />);
+      await userEvent.click(screen.getByTestId('editPipelineFlyoutSaveButton'));
 
-      expect(screen.getByTestId('editPipelineFlyoutOtherTabWarning')).toHaveTextContent(
-        'Ingest pipeline tab'
+      expect(mockApplyEdits).toHaveBeenLastCalledWith(
+        expect.objectContaining({ dryRun: false, version: 'WzEsMV0=' })
       );
+    });
 
-      await userEvent.click(screen.getByTestId('mappingEditorEditType-test.number'));
-      await userEvent.click(screen.getByTestId('mappingEditorInlineTypeSelect-test.number'));
-      await userEvent.click(screen.getByTestId('mappingEditorTypeOption-integer'));
+    it('uses the refetched version when there are no edits yet', async () => {
+      mockUIState.selectedPipelineTab = 'pipeline';
+      const { rerender } = render(<EditPipelineFlyout {...defaultProps} />);
 
-      expect(screen.getByTestId('mappingEditorApplyButton')).toBeDisabled();
+      mockUseGetDataStreamResults.mockReturnValue({
+        data: createMockResults({ version: 'WzIsMV0=' }),
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: jest.fn(),
+      });
+      rerender(<EditPipelineFlyout {...defaultProps} />);
+      await userEvent.click(screen.getByTestId('code-editor-change'));
+      await userEvent.click(screen.getByTestId('editPipelineFlyoutSaveButton'));
+
+      expect(mockApplyEdits).toHaveBeenLastCalledWith(
+        expect.objectContaining({ dryRun: false, version: 'WzIsMV0=' })
+      );
+    });
+
+    it('shows a read-only pipeline while the data stream is reanalyzing', () => {
+      mockUIState.selectedPipelineTab = 'pipeline';
+      render(<EditPipelineFlyout {...defaultProps} editState="reanalyzing" />);
+
+      expect(screen.queryByTestId('code-editor')).not.toBeInTheDocument();
+      expect(screen.getByTestId('editPipelineFlyoutReadOnlyPipeline')).toHaveTextContent(
+        'test_value'
+      );
+      expect(screen.getByTestId('editPipelineFlyoutReadOnlyNotice')).toHaveTextContent(
+        'ready for review'
+      );
+      expect(screen.queryByTestId('mappingEditorFooter')).not.toBeInTheDocument();
+    });
+
+    it('keeps the pipeline editable after approval', () => {
+      mockUIState.selectedPipelineTab = 'pipeline';
+      mockUseGetDataStreamResults.mockReturnValue({
+        data: createMockResults({
+          approved_field_types: [{ name: 'test.field', type: 'keyword' }],
+          data_stream_approved: true,
+        }),
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: jest.fn(),
+      });
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      expect(screen.getByTestId('code-editor')).toBeInTheDocument();
+      expect(screen.queryByTestId('editPipelineFlyoutApprovedNotice')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mappingEditorFooter')).toBeInTheDocument();
+    });
+
+    describe('when the pipeline stops producing approved fields', () => {
+      const removedFields = ['test.number'];
+
+      beforeEach(() => {
+        mockUIState.selectedPipelineTab = 'pipeline';
+        mockUseGetDataStreamResults.mockReturnValue({
+          data: createMockResults({
+            approved_field_types: [{ name: 'test.number', type: 'long' }],
+            data_stream_approved: true,
+          }),
+          isLoading: false,
+          isError: false,
+          error: null,
+          refetch: jest.fn(),
+        });
+        mockApplyEdits.mockImplementation(
+          async ({
+            dryRun,
+            acknowledgeBreakingChanges,
+          }: {
+            dryRun: boolean;
+            acknowledgeBreakingChanges?: boolean;
+          }) => {
+            if (dryRun) {
+              return {
+                status: 'preview',
+                dropped_field_types: [],
+                removed_approved_fields: removedFields,
+                ...createMockResults(),
+              };
+            }
+            if (!acknowledgeBreakingChanges) {
+              return {
+                status: 'failure',
+                field_errors: [],
+                removed_approved_fields: removedFields,
+              };
+            }
+            return {
+              status: 'saved',
+              dropped_field_types: [],
+              removed_approved_fields: removedFields,
+              ...createMockResults(),
+            };
+          }
+        );
+      });
+
+      it('warns about the removed fields on the pipeline tab, not the table', async () => {
+        const { rerender } = render(<EditPipelineFlyout {...defaultProps} />);
+
+        await userEvent.click(screen.getByTestId('code-editor-change'));
+        await userEvent.click(screen.getByRole('tab', { name: 'Table' }));
+        await waitFor(() => expect(mockSelectPipelineTab).toHaveBeenCalledWith('table'));
+        mockUIState.selectedPipelineTab = 'table';
+        rerender(<EditPipelineFlyout {...defaultProps} />);
+
+        expect(screen.queryByTestId('editPipelineFlyoutBreakingChanges')).not.toBeInTheDocument();
+
+        await userEvent.click(screen.getByRole('tab', { name: 'Ingest pipeline' }));
+        mockUIState.selectedPipelineTab = 'pipeline';
+        rerender(<EditPipelineFlyout {...defaultProps} />);
+
+        const callout = screen.getByTestId('editPipelineFlyoutBreakingChanges');
+        expect(callout).toHaveTextContent('This could introduce breaking changes');
+        expect(callout).toHaveTextContent('test.number were in an approved version');
+      });
+
+      it('asks for confirmation before saving and resends with the acknowledgement', async () => {
+        const onClose = jest.fn();
+        render(<EditPipelineFlyout {...defaultProps} onClose={onClose} />);
+
+        await userEvent.click(screen.getByTestId('code-editor-change'));
+        await userEvent.click(screen.getByTestId('editPipelineFlyoutSaveButton'));
+
+        const modal = await screen.findByTestId('editPipelineFlyoutBreakingChangesModal');
+        expect(modal).toHaveTextContent('Save changes that could break existing data?');
+        expect(modal).toHaveTextContent('test.number');
+        expect(onClose).not.toHaveBeenCalled();
+
+        await userEvent.click(within(modal).getByRole('button', { name: 'Save anyway' }));
+
+        expect(mockApplyEdits).toHaveBeenLastCalledWith(
+          expect.objectContaining({ dryRun: false, acknowledgeBreakingChanges: true })
+        );
+        expect(onClose).toHaveBeenCalledTimes(1);
+      });
+
+      it('keeps the draft when the confirmation is cancelled', async () => {
+        const onClose = jest.fn();
+        render(<EditPipelineFlyout {...defaultProps} onClose={onClose} />);
+
+        await userEvent.click(screen.getByTestId('code-editor-change'));
+        await userEvent.click(screen.getByTestId('editPipelineFlyoutSaveButton'));
+        const modal = await screen.findByTestId('editPipelineFlyoutBreakingChangesModal');
+
+        await userEvent.click(within(modal).getByRole('button', { name: 'Cancel' }));
+
+        expect(
+          screen.queryByTestId('editPipelineFlyoutBreakingChangesModal')
+        ).not.toBeInTheDocument();
+        expect(screen.getByTestId('code-editor')).toHaveTextContent('"updated"');
+        expect(mockApplyEdits).toHaveBeenCalledTimes(1);
+        expect(onClose).not.toHaveBeenCalled();
+      });
+    });
+
+    it('does not sync drafts when switching tabs on a read-only data stream', async () => {
+      mockUIState.selectedPipelineTab = 'pipeline';
+      render(<EditPipelineFlyout {...defaultProps} editState="reanalyzing" />);
+
+      await userEvent.click(screen.getByRole('tab', { name: 'Table' }));
+
+      await waitFor(() => expect(mockSelectPipelineTab).toHaveBeenCalledWith('table'));
+      expect(mockApplyEdits).not.toHaveBeenCalled();
     });
 
     it('does not overwrite unsaved pipeline JSON when results refetch', async () => {

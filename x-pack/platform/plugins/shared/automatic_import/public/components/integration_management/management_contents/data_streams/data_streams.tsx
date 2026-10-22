@@ -19,7 +19,7 @@ import { useUIState } from '../../contexts';
 import { CreateDataStreamFlyout } from './create_data_stream_flyout';
 import * as i18n from './translations';
 import { useGetIntegrationById, isValidNameFormat, startsWithLetter } from '../../../../common';
-import { getFieldTypeEditState } from '../../../../../common';
+import { getDataStreamEditState } from '../../../../../common';
 import { meetsMinLength, normalizeTitleName } from '../../../../common/lib/helper_functions';
 import { DataStreamsTable } from './data_streams_table/data_steams_table';
 import { EditPipelineFlyout } from './edit_pipeline_flyout';
@@ -50,8 +50,8 @@ export const DataStreams = React.memo<{
   const hasDataStreams = (integration?.dataStreams?.length ?? 0) > 0;
 
   const isCreateIntegrationPage = !integrationId;
-  const fieldTypeEditState = selectedDataStream
-    ? getFieldTypeEditState({
+  const editState = selectedDataStream
+    ? getDataStreamEditState({
         integration,
         dataStream: selectedDataStream,
         isLoading: isIntegrationLoading,
@@ -161,7 +161,7 @@ export const DataStreams = React.memo<{
           integrationId={integrationId}
           dataStream={selectedDataStream}
           onClose={closeEditPipelineFlyout}
-          fieldTypeEditState={fieldTypeEditState}
+          editState={editState}
         />
       )}
     </>

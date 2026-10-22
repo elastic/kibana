@@ -59,6 +59,7 @@ dependsOn:
   - '@kbn/elastic-assistant'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/ingest-pipelines-plugin'
+  - '@kbn/ui-callout'
   - '@kbn/code-editor'
   - '@kbn/monaco'
   - '@kbn/scout'

@@ -9,7 +9,7 @@ import React from 'react';
 import { UIStateProvider } from '../integration_management/contexts';
 import { EditPipelineFlyout } from '../integration_management/management_contents/data_streams/edit_pipeline_flyout';
 import { useGetIntegrationById } from '../../common';
-import { getFieldTypeEditState } from '../../../common';
+import { getDataStreamEditState } from '../../../common';
 import type { DataStreamResultsFlyoutProps } from './types';
 
 const DataStreamResultsFlyoutContent = ({
@@ -22,7 +22,7 @@ const DataStreamResultsFlyoutContent = ({
     isLoading: isIntegrationLoading,
     isError: isIntegrationError,
   } = useGetIntegrationById(integrationId);
-  const fieldTypeEditState = getFieldTypeEditState({
+  const editState = getDataStreamEditState({
     integration,
     dataStream,
     isLoading: isIntegrationLoading,
@@ -34,7 +34,7 @@ const DataStreamResultsFlyoutContent = ({
       integrationId={integrationId}
       dataStream={dataStream}
       onClose={onClose}
-      fieldTypeEditState={fieldTypeEditState}
+      editState={editState}
     />
   );
 };

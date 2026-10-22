@@ -101,8 +101,14 @@ export const fieldTypeOverrideSchema = schema.object({
   original_type: schema.string({ minLength: 1, maxLength: MAX_FIELD_TYPE_LENGTH }),
 });
 
+export const approvedFieldTypeSchema = schema.object({
+  name: schema.string({ minLength: 1, maxLength: MAX_FIELD_NAME_LENGTH }),
+  type: schema.string({ minLength: 1, maxLength: MAX_FIELD_TYPE_LENGTH }),
+});
+
 export const dataStreamSchemaV2 = dataStreamSchemaV1.extends({
   field_type_overrides: schema.maybe(
     schema.arrayOf(fieldTypeOverrideSchema, { maxSize: MAX_FIELD_TYPE_OVERRIDES })
   ),
+  approved_field_types: schema.maybe(schema.arrayOf(approvedFieldTypeSchema, { maxSize: 10000 })),
 });

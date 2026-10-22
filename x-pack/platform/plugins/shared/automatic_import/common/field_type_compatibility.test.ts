@@ -38,8 +38,28 @@ describe('getFieldTypeCompatibility', () => {
     expect(getFieldTypeCompatibility('float', ['1.5', 2]).status).toBe('compatible');
   });
 
-  it('does not check dates', () => {
-    expect(getFieldTypeCompatibility('date', ['March 5']).status).toBe('compatible');
+  it('accepts dates in the default strict_date_optional_time or epoch_millis format', () => {
+    expect(
+      getFieldTypeCompatibility('date', [
+        '2024-03-05',
+        '2024-03-05T10:15:30Z',
+        '2024-03-05T10:15:30.123456789+02:00',
+        '1709633730000',
+        1709633730000,
+      ]).status
+    ).toBe('compatible');
+    expect(getFieldTypeCompatibility('date_nanos', ['2024-03-05T10:15']).status).toBe('compatible');
+  });
+
+  it('reports dates Elasticsearch cannot parse with the default format', () => {
+    expect(getFieldTypeCompatibility('date', ['March 5', '2024-03-05'])).toEqual({
+      status: 'certain_failure',
+      issue: 'not_date',
+      failingDocuments: 1,
+      totalDocuments: 2,
+    });
+    expect(getFieldTypeCompatibility('date', ['2024-03-05 10:15:30']).issue).toBe('not_date');
+    expect(getFieldTypeCompatibility('date', [true]).issue).toBe('not_date');
   });
 
   it('reports out-of-range values for byte as a certain failure', () => {

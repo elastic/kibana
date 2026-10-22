@@ -9,6 +9,7 @@ import {
   applyFieldTypeOverrides,
   collectRuleErrors,
   mergeFieldTypeChanges,
+  refreshFieldTypeOverrides,
 } from './field_type_overrides';
 import { InvalidFieldTypeChangeError } from '../../errors';
 
@@ -21,7 +22,7 @@ describe('field type overrides', () => {
             { name: 'size', type: 'byte', original_type: 'long' },
             { name: 'label', type: 'date', original_type: 'keyword' },
           ],
-          [{ size: 300, label: 'March 5' }, { size: 1 }]
+          [{ size: 300, label: '2024-03-05' }, { size: 1 }]
         )
       ).toEqual([
         { name: 'size', issue: 'out_of_range', failing_documents: 1, total_documents: 2 },
@@ -51,8 +52,48 @@ describe('field type overrides', () => {
     });
   });
 
+  describe('refreshFieldTypeOverrides', () => {
+    it('refreshes original types and drops edits for missing, ECS, and object fields', () => {
+      expect(
+        refreshFieldTypeOverrides(
+          [
+            { name: 'port', type: 'keyword', is_ecs: false },
+            { name: 'bytes', type: 'long', is_ecs: false },
+            { name: 'size', type: 'keyword', is_ecs: false },
+            { name: 'source.ip', type: 'ip', is_ecs: true },
+            { name: 'vendor', type: 'group', is_ecs: false },
+          ],
+          [
+            { name: 'port', type: 'long', original_type: 'keyword' },
+            { name: 'bytes', type: 'keyword', original_type: 'keyword' },
+            { name: 'size', type: 'long', original_type: 'double' },
+            { name: 'source.ip', type: 'keyword', original_type: 'ip' },
+            { name: 'vendor', type: 'keyword', original_type: 'group' },
+            { name: 'gone', type: 'long', original_type: 'keyword' },
+          ]
+        )
+      ).toEqual({
+        overrides: [
+          { name: 'port', type: 'long', original_type: 'keyword' },
+          { name: 'bytes', type: 'keyword', original_type: 'long' },
+          { name: 'size', type: 'long', original_type: 'keyword' },
+        ],
+        dropped: ['source.ip', 'vendor', 'gone'],
+      });
+    });
+
+    it('removes edits the pipeline now produces on its own', () => {
+      expect(
+        refreshFieldTypeOverrides(
+          [{ name: 'port', type: 'long', is_ecs: false }],
+          [{ name: 'port', type: 'long', original_type: 'keyword' }]
+        )
+      ).toEqual({ overrides: [], dropped: [] });
+    });
+  });
+
   describe('applyFieldTypeOverrides', () => {
-    it('applies edits and preserves persisted conditional fields absent from samples', () => {
+    it('applies edits and skips ECS fields and fields absent from the mappings', () => {
       expect(
         applyFieldTypeOverrides(
           [
@@ -63,23 +104,14 @@ describe('field type overrides', () => {
             { name: 'port', type: 'long', original_type: 'keyword' },
             { name: 'source.ip', type: 'keyword', original_type: 'ip' },
             { name: 'gone', type: 'long', original_type: 'keyword' },
-          ],
-          [],
-          [
-            { name: 'gone', type: 'keyword', is_ecs: false },
-            { name: 'removed', type: 'keyword', is_ecs: false },
           ]
         )
       ).toEqual({
         fieldMapping: [
           { name: 'port', type: 'long', is_ecs: false },
           { name: 'source.ip', type: 'ip', is_ecs: true },
-          { name: 'gone', type: 'long', is_ecs: false },
         ],
-        overrides: [
-          { name: 'port', type: 'long', original_type: 'keyword' },
-          { name: 'gone', type: 'long', original_type: 'keyword' },
-        ],
+        overrides: [{ name: 'port', type: 'long', original_type: 'keyword' }],
       });
     });
 

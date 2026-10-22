@@ -70,6 +70,19 @@ export const FieldTypeOverride = lazySchema(() =>
 );
 export type FieldTypeOverride = z.infer<typeof FieldTypeOverride>;
 
+/**
+ * A field that shipped in an approved version. Its type can't change.
+ */
+export const ApprovedFieldType = lazySchema(() =>
+  z
+    .object({
+      name: z.string().min(1).max(1024),
+      type: z.string().min(1).max(1024),
+    })
+    .strict()
+);
+export type ApprovedFieldType = z.infer<typeof ApprovedFieldType>;
+
 export const DataStreamResults = lazySchema(() =>
   z
     .object({
@@ -77,53 +90,135 @@ export const DataStreamResults = lazySchema(() =>
       results: z.array(z.object({}).catchall(z.unknown())).max(100),
       field_mapping: z.array(FieldMapping).max(10000),
       field_type_overrides: z.array(FieldTypeOverride).max(1000),
+      approved_field_types: z.array(ApprovedFieldType).max(10000),
+      /**
+       * The data stream is part of the last approved version, so its field types can't be edited.
+       */
+      data_stream_approved: z
+        .boolean()
+        .describe(
+          "The data stream is part of the last approved version, so its field types can't be edited."
+        ),
       version: z.string().min(1).max(1024),
     })
     .strict()
 );
 export type DataStreamResults = z.infer<typeof DataStreamResults>;
 
-export const UpdateFieldTypesSavedResponse = lazySchema(() =>
+/**
+ * Fields from an approved version that the edited pipeline no longer produces for the sample documents. Saving them is a possible breaking change and needs `acknowledge_breaking_changes`.
+ */
+export const RemovedApprovedFields = lazySchema(() => z.array(z.string()).max(10000));
+export type RemovedApprovedFields = z.infer<typeof RemovedApprovedFields>;
+
+export const DataStreamEditsResult = lazySchema(() =>
   z
     .object({
-      status: z.literal('saved'),
+      /**
+       * saved when the edits were stored, preview for a dry run.
+       */
+      status: z
+        .enum(['saved', 'preview'])
+        .describe('saved when the edits were stored, preview for a dry run.'),
       ingest_pipeline: z.object({}).catchall(z.unknown()),
       results: z.array(z.object({}).catchall(z.unknown())).max(100),
       field_mapping: z.array(FieldMapping).max(10000),
       field_type_overrides: z.array(FieldTypeOverride).max(1000),
+      approved_field_types: z.array(ApprovedFieldType).max(10000),
+      /**
+       * The data stream is part of the last approved version, so its field types can't be edited.
+       */
+      data_stream_approved: z
+        .boolean()
+        .describe(
+          "The data stream is part of the last approved version, so its field types can't be edited."
+        ),
+      /**
+       * Fields whose type edits were removed because the pipeline no longer produces them.
+       */
+      dropped_field_types: z
+        .array(z.string())
+        .max(1000)
+        .describe(
+          'Fields whose type edits were removed because the pipeline no longer produces them.'
+        ),
+      removed_approved_fields: RemovedApprovedFields,
       version: z.string().min(1).max(1024),
     })
     .strict()
 );
-export type UpdateFieldTypesSavedResponse = z.infer<typeof UpdateFieldTypesSavedResponse>;
+export type DataStreamEditsResult = z.infer<typeof DataStreamEditsResult>;
 
 export const FieldTypeError = lazySchema(() =>
   z
     .object({
       name: z.string(),
       /**
-       * A known rule that failed, such as out_of_range or object_value.
+       * A known rule that failed, such as out_of_range, object_value, or convert_failed.
        */
       issue: z
         .string()
         .optional()
-        .describe('A known rule that failed, such as out_of_range or object_value.'),
-      failing_documents: z.number().int(),
-      total_documents: z.number().int(),
+        .describe(
+          'A known rule that failed, such as out_of_range, object_value, or convert_failed.'
+        ),
+      failing_documents: z.number().int().optional(),
+      total_documents: z.number().int().optional(),
+      /**
+       * The field's type in an approved version, when the error comes from keeping it.
+       */
+      approved_type: z
+        .string()
+        .optional()
+        .describe("The field's type in an approved version, when the error comes from keeping it."),
     })
     .strict()
 );
 export type FieldTypeError = z.infer<typeof FieldTypeError>;
 
-export const UpdateFieldTypesFailureResponse = lazySchema(() =>
+export const PipelineErrorGroup = lazySchema(() =>
   z
     .object({
-      status: z.literal('failure'),
-      errors: z.array(FieldTypeError).max(1000),
+      error: z.string(),
+      count: z.number().int(),
+      example_sample: z.string(),
+      /**
+       * The tag of the processor that failed on the example sample, when it has one.
+       */
+      processor_tag: z
+        .string()
+        .optional()
+        .describe('The tag of the processor that failed on the example sample, when it has one.'),
     })
     .strict()
 );
-export type UpdateFieldTypesFailureResponse = z.infer<typeof UpdateFieldTypesFailureResponse>;
+export type PipelineErrorGroup = z.infer<typeof PipelineErrorGroup>;
+
+/**
+ * Set when more samples fail with the edited pipeline than with the saved one.
+ */
+export const PipelineErrors = lazySchema(() =>
+  z
+    .object({
+      failed_samples: z.number().int(),
+      baseline_failed_samples: z.number().int(),
+      error_groups: z.array(PipelineErrorGroup).max(100),
+    })
+    .strict()
+);
+export type PipelineErrors = z.infer<typeof PipelineErrors>;
+
+export const DataStreamEditsFailure = lazySchema(() =>
+  z
+    .object({
+      status: z.literal('failure'),
+      field_errors: z.array(FieldTypeError).max(1000),
+      pipeline_errors: PipelineErrors.optional(),
+      removed_approved_fields: RemovedApprovedFields.optional(),
+    })
+    .strict()
+);
+export type DataStreamEditsFailure = z.infer<typeof DataStreamEditsFailure>;
 
 export const FieldTypeChange = lazySchema(() =>
   z
@@ -143,6 +238,83 @@ export const FieldTypeChange = lazySchema(() =>
     .strict()
 );
 export type FieldTypeChange = z.infer<typeof FieldTypeChange>;
+
+export const ApplyDataStreamEditsRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The integration identifier
+     */
+    integration_id: SafeIdentifier.describe('The integration identifier'),
+    /**
+     * The data stream identifier
+     */
+    data_stream_id: SafeIdentifier.describe('The data stream identifier'),
+  })
+);
+export type ApplyDataStreamEditsRequestParams = z.infer<typeof ApplyDataStreamEditsRequestParams>;
+export type ApplyDataStreamEditsRequestParamsInput = z.input<
+  typeof ApplyDataStreamEditsRequestParams
+>;
+
+export const ApplyDataStreamEditsRequestBody = lazySchema(() =>
+  z
+    .object({
+      /**
+       * JSON string (max 10MiB) or pipeline object. When an object, `processors` is capped at 10000 entries.
+       */
+      ingest_pipeline: z
+        .union([
+          z.string().max(10485760),
+          z
+            .object({
+              processors: z.array(z.object({}).catchall(z.unknown())).max(10000).optional(),
+            })
+            .catchall(z.unknown()),
+        ])
+        .describe(
+          'JSON string (max 10MiB) or pipeline object. When an object, `processors` is capped at 10000 entries.'
+        ),
+      /**
+       * Field type changes. Setting a field back to its original type removes the change.
+       */
+      changes: z
+        .array(FieldTypeChange)
+        .max(1000)
+        .optional()
+        .describe(
+          'Field type changes. Setting a field back to its original type removes the change.'
+        ),
+      /**
+       * Saved Object version returned by the latest results request.
+       */
+      version: z
+        .string()
+        .min(1)
+        .max(1024)
+        .describe('Saved Object version returned by the latest results request.'),
+      /**
+       * Returns the result without saving it.
+       */
+      dry_run: z.boolean().optional().describe('Returns the result without saving it.'),
+      /**
+       * Saves even when the pipeline no longer produces fields from an approved version. Without it, such a save fails and returns `removed_approved_fields`.
+       */
+      acknowledge_breaking_changes: z
+        .boolean()
+        .optional()
+        .describe(
+          'Saves even when the pipeline no longer produces fields from an approved version. Without it, such a save fails and returns `removed_approved_fields`.'
+        ),
+    })
+    .strict()
+);
+export type ApplyDataStreamEditsRequestBody = z.infer<typeof ApplyDataStreamEditsRequestBody>;
+export type ApplyDataStreamEditsRequestBodyInput = z.input<typeof ApplyDataStreamEditsRequestBody>;
+
+export const ApplyDataStreamEditsResponse = lazySchema(() =>
+  z.union([DataStreamEditsResult, DataStreamEditsFailure])
+);
+export type ApplyDataStreamEditsResponse = z.infer<typeof ApplyDataStreamEditsResponse>;
 
 export const DeleteDataStreamRequestParams = lazySchema(() =>
   z.object({
@@ -246,119 +418,6 @@ export type StopAutoImportDataStreamRequestParams = z.infer<
 export type StopAutoImportDataStreamRequestParamsInput = z.input<
   typeof StopAutoImportDataStreamRequestParams
 >;
-
-export const UpdateDataStreamFieldTypesRequestParams = lazySchema(() =>
-  z.object({
-    /**
-     * The integration identifier
-     */
-    integration_id: SafeIdentifier.describe('The integration identifier'),
-    /**
-     * The data stream identifier
-     */
-    data_stream_id: SafeIdentifier.describe('The data stream identifier'),
-  })
-);
-export type UpdateDataStreamFieldTypesRequestParams = z.infer<
-  typeof UpdateDataStreamFieldTypesRequestParams
->;
-export type UpdateDataStreamFieldTypesRequestParamsInput = z.input<
-  typeof UpdateDataStreamFieldTypesRequestParams
->;
-
-export const UpdateDataStreamFieldTypesRequestBody = lazySchema(() =>
-  z
-    .object({
-      /**
-       * Field type changes. Setting a field back to its original type removes the change.
-       */
-      changes: z
-        .array(FieldTypeChange)
-        .min(1)
-        .max(100)
-        .describe(
-          'Field type changes. Setting a field back to its original type removes the change.'
-        ),
-      /**
-       * Saved Object version returned by the latest results request.
-       */
-      version: z
-        .string()
-        .min(1)
-        .max(1024)
-        .describe('Saved Object version returned by the latest results request.'),
-    })
-    .strict()
-);
-export type UpdateDataStreamFieldTypesRequestBody = z.infer<
-  typeof UpdateDataStreamFieldTypesRequestBody
->;
-export type UpdateDataStreamFieldTypesRequestBodyInput = z.input<
-  typeof UpdateDataStreamFieldTypesRequestBody
->;
-
-export const UpdateDataStreamFieldTypesResponse = lazySchema(() =>
-  z.union([UpdateFieldTypesSavedResponse, UpdateFieldTypesFailureResponse])
-);
-export type UpdateDataStreamFieldTypesResponse = z.infer<typeof UpdateDataStreamFieldTypesResponse>;
-
-export const UpdateDataStreamPipelineRequestParams = lazySchema(() =>
-  z.object({
-    /**
-     * The integration identifier
-     */
-    integration_id: SafeIdentifier.describe('The integration identifier'),
-    /**
-     * The data stream identifier
-     */
-    data_stream_id: SafeIdentifier.describe('The data stream identifier'),
-  })
-);
-export type UpdateDataStreamPipelineRequestParams = z.infer<
-  typeof UpdateDataStreamPipelineRequestParams
->;
-export type UpdateDataStreamPipelineRequestParamsInput = z.input<
-  typeof UpdateDataStreamPipelineRequestParams
->;
-
-export const UpdateDataStreamPipelineRequestBody = lazySchema(() =>
-  z
-    .object({
-      /**
-       * JSON string (max 10MiB) or pipeline object. When an object, `processors` is capped at 10000 entries.
-       */
-      ingest_pipeline: z
-        .union([
-          z.string().max(10485760),
-          z
-            .object({
-              processors: z.array(z.object({}).catchall(z.unknown())).max(10000).optional(),
-            })
-            .catchall(z.unknown()),
-        ])
-        .describe(
-          'JSON string (max 10MiB) or pipeline object. When an object, `processors` is capped at 10000 entries.'
-        ),
-      /**
-       * Saved Object version returned by the latest results request.
-       */
-      version: z
-        .string()
-        .min(1)
-        .max(1024)
-        .describe('Saved Object version returned by the latest results request.'),
-    })
-    .strict()
-);
-export type UpdateDataStreamPipelineRequestBody = z.infer<
-  typeof UpdateDataStreamPipelineRequestBody
->;
-export type UpdateDataStreamPipelineRequestBodyInput = z.input<
-  typeof UpdateDataStreamPipelineRequestBody
->;
-
-export const UpdateDataStreamPipelineResponse = lazySchema(() => DataStreamResults);
-export type UpdateDataStreamPipelineResponse = z.infer<typeof UpdateDataStreamPipelineResponse>;
 
 export const UploadSamplesToDataStreamRequestParams = lazySchema(() =>
   z.object({

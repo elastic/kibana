@@ -11,7 +11,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { registerDataStreamRoutes } from './data_stream_routes';
 import type { AutomaticImportPluginRequestHandlerContext } from '../types';
 import { UPLOAD_SAMPLES_MAX_REQUEST_BYTES } from '../../common';
-import { FieldTypesLockedError, InvalidFieldTypeChangeError } from '../errors';
+import { InvalidFieldTypeChangeError } from '../errors';
 
 describe('Data stream routes - upload samples', () => {
   const uploadPath =
@@ -244,9 +244,9 @@ describe('Data stream routes - upload samples', () => {
   });
 });
 
-describe('Data stream routes - update field types', () => {
-  const fieldTypesPath =
-    '/api/automatic_import/integrations/{integration_id}/data_streams/{data_stream_id}/field_types';
+describe('Data stream routes - apply edits', () => {
+  const editsPath =
+    '/api/automatic_import/integrations/{integration_id}/data_streams/{data_stream_id}/edits';
   let routeHandler: (
     context: AutomaticImportPluginRequestHandlerContext,
     request: unknown,
@@ -257,18 +257,22 @@ describe('Data stream routes - update field types', () => {
     security?: { authz?: { requiredPrivileges?: string[] } };
   }
   let routeConfig: RouteConfig;
-  let mockUpdateDataStreamFieldTypes: jest.Mock;
+  let mockApplyDataStreamEdits: jest.Mock;
   let mockResponse: { ok: jest.Mock; custom: jest.Mock };
 
   const request = {
     params: { integration_id: 'int_1', data_stream_id: 'ds_1' },
-    body: { changes: [{ name: 'port', type: 'long' }], version: 'WzEsMV0=' },
+    body: {
+      ingest_pipeline: { processors: [] },
+      changes: [{ name: 'port', type: 'long' }],
+      version: 'WzEsMV0=',
+    },
   };
 
   const createMockContext = (): AutomaticImportPluginRequestHandlerContext =>
     ({
       automaticImport: Promise.resolve({
-        automaticImportService: { updateDataStreamFieldTypes: mockUpdateDataStreamFieldTypes },
+        automaticImportService: { applyDataStreamEdits: mockApplyDataStreamEdits },
         esClient: {},
         fieldsMetadataClient: {},
         isAvailable: () => true,
@@ -276,7 +280,7 @@ describe('Data stream routes - update field types', () => {
     } as unknown as AutomaticImportPluginRequestHandlerContext);
 
   beforeEach(() => {
-    mockUpdateDataStreamFieldTypes = jest.fn();
+    mockApplyDataStreamEdits = jest.fn();
     mockResponse = {
       ok: jest.fn().mockReturnValue({}),
       custom: jest.fn().mockReturnValue({}),
@@ -293,7 +297,7 @@ describe('Data stream routes - update field types', () => {
           addVersion: jest
             .fn()
             .mockImplementation((_versionConfig: unknown, handler: typeof routeHandler) => {
-              if (config.path === fieldTypesPath) {
+              if (config.path === editsPath) {
                 routeConfig = config;
                 routeHandler = handler;
               }
@@ -316,33 +320,61 @@ describe('Data stream routes - update field types', () => {
   it('returns the service result, including field failures, with 200', async () => {
     const failure = {
       status: 'failure',
-      errors: [{ name: 'port', issue: 'out_of_range', failing_documents: 1, total_documents: 2 }],
+      field_errors: [
+        { name: 'port', issue: 'out_of_range', failing_documents: 1, total_documents: 2 },
+      ],
     };
-    mockUpdateDataStreamFieldTypes.mockResolvedValue(failure);
+    mockApplyDataStreamEdits.mockResolvedValue(failure);
 
     await routeHandler(createMockContext(), request, mockResponse);
 
-    expect(mockUpdateDataStreamFieldTypes).toHaveBeenCalledWith(
+    expect(mockApplyDataStreamEdits).toHaveBeenCalledWith(
       expect.objectContaining({
         integrationId: 'int_1',
         dataStreamId: 'ds_1',
+        ingestPipeline: { processors: [] },
         changes: [{ name: 'port', type: 'long' }],
         version: 'WzEsMV0=',
+        dryRun: false,
+        acknowledgeBreakingChanges: false,
       })
     );
     expect(mockResponse.ok).toHaveBeenCalledWith({ body: failure });
   });
 
-  it('returns 409 when field types are locked', async () => {
-    mockUpdateDataStreamFieldTypes.mockRejectedValue(new FieldTypesLockedError('locked'));
+  it('passes acknowledge_breaking_changes through', async () => {
+    mockApplyDataStreamEdits.mockResolvedValue({ status: 'saved' });
 
-    await routeHandler(createMockContext(), request, mockResponse);
+    await routeHandler(
+      createMockContext(),
+      { ...request, body: { ...request.body, acknowledge_breaking_changes: true } },
+      mockResponse
+    );
 
-    expect(mockResponse.custom).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 409 }));
+    expect(mockApplyDataStreamEdits).toHaveBeenCalledWith(
+      expect.objectContaining({ acknowledgeBreakingChanges: true })
+    );
+  });
+
+  it('defaults changes to none and passes dry_run through', async () => {
+    mockApplyDataStreamEdits.mockResolvedValue({ status: 'preview' });
+
+    await routeHandler(
+      createMockContext(),
+      {
+        ...request,
+        body: { ingest_pipeline: '{"processors":[]}', version: 'WzEsMV0=', dry_run: true },
+      },
+      mockResponse
+    );
+
+    expect(mockApplyDataStreamEdits).toHaveBeenCalledWith(
+      expect.objectContaining({ changes: [], dryRun: true })
+    );
   });
 
   it('returns 409 when the saved object version is stale', async () => {
-    mockUpdateDataStreamFieldTypes.mockRejectedValue(
+    mockApplyDataStreamEdits.mockRejectedValue(
       SavedObjectsErrorHelpers.createConflictError('automatic-import-data-stream', 'ds_1')
     );
 
@@ -352,109 +384,33 @@ describe('Data stream routes - update field types', () => {
   });
 
   it('returns 400 for invalid changes', async () => {
-    mockUpdateDataStreamFieldTypes.mockRejectedValue(new InvalidFieldTypeChangeError('ecs'));
+    mockApplyDataStreamEdits.mockRejectedValue(new InvalidFieldTypeChangeError('ecs'));
 
     await routeHandler(createMockContext(), request, mockResponse);
 
     expect(mockResponse.custom).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 400 }));
   });
 
-  it('returns 403 when Elasticsearch denies mapping validation', async () => {
-    mockUpdateDataStreamFieldTypes.mockRejectedValue(
-      new Error('security_exception: action is unauthorized for user')
+  it('returns 400 with the reason for invalid pipelines', async () => {
+    mockApplyDataStreamEdits.mockRejectedValue(
+      new Error('Invalid ingest pipeline: unknown processor type [nope]')
     );
 
     await routeHandler(createMockContext(), request, mockResponse);
 
-    expect(mockResponse.custom).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 403 }));
-  });
-});
-
-describe('Data stream routes - update pipeline', () => {
-  const pipelinePath =
-    '/api/automatic_import/integrations/{integration_id}/data_streams/{data_stream_id}';
-  let routeHandler: (
-    context: AutomaticImportPluginRequestHandlerContext,
-    request: unknown,
-    response: unknown
-  ) => Promise<unknown>;
-  let mockUpdateDataStreamPipeline: jest.Mock;
-  let mockResponse: { ok: jest.Mock; custom: jest.Mock };
-
-  const request = {
-    params: { integration_id: 'int_1', data_stream_id: 'ds_1' },
-    body: { ingest_pipeline: { processors: [] }, version: 'WzEsMV0=' },
-  };
-
-  const createMockContext = (): AutomaticImportPluginRequestHandlerContext =>
-    ({
-      automaticImport: Promise.resolve({
-        automaticImportService: { updateDataStreamPipeline: mockUpdateDataStreamPipeline },
-        esClient: {},
-        fieldsMetadataClient: {},
-        isAvailable: () => true,
-      }),
-    } as unknown as AutomaticImportPluginRequestHandlerContext);
-
-  beforeEach(() => {
-    mockUpdateDataStreamPipeline = jest.fn();
-    mockResponse = {
-      ok: jest.fn().mockReturnValue({}),
-      custom: jest.fn().mockReturnValue({}),
-    };
-
-    const noopRoute = jest.fn().mockReturnValue({ addVersion: jest.fn() });
-    const mockRouter = {
-      versioned: {
-        post: noopRoute,
-        delete: noopRoute,
-        get: noopRoute,
-        put: noopRoute,
-        patch: jest.fn().mockImplementation((config: { path: string }) => ({
-          addVersion: jest
-            .fn()
-            .mockImplementation((_versionConfig: unknown, handler: typeof routeHandler) => {
-              if (config.path === pipelinePath) {
-                routeHandler = handler;
-              }
-            }),
-        })),
-      },
-    };
-
-    registerDataStreamRoutes(
-      mockRouter as unknown as IRouter<AutomaticImportPluginRequestHandlerContext>,
-      loggingSystemMock.create().get()
+    const [[{ statusCode, body }]] = mockResponse.custom.mock.calls;
+    expect(statusCode).toBe(400);
+    expect(JSON.parse(body.toString()).message).toBe(
+      'Invalid ingest pipeline: unknown processor type [nope]'
     );
-    expect(routeHandler).toBeDefined();
-  });
-
-  it('returns 400 when stored field type overrides no longer validate', async () => {
-    mockUpdateDataStreamPipeline.mockRejectedValue(
-      new InvalidFieldTypeChangeError('Field type overrides are no longer valid for: port')
-    );
-
-    await routeHandler!(createMockContext(), request, mockResponse);
-
-    expect(mockResponse.custom).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 400 }));
-  });
-
-  it('returns 409 when the saved object version is stale', async () => {
-    mockUpdateDataStreamPipeline.mockRejectedValue(
-      SavedObjectsErrorHelpers.createConflictError('automatic-import-data-stream', 'ds_1')
-    );
-
-    await routeHandler!(createMockContext(), request, mockResponse);
-
-    expect(mockResponse.custom).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 409 }));
   });
 
   it('returns 403 when Elasticsearch denies pipeline or mapping simulation', async () => {
-    mockUpdateDataStreamPipeline.mockRejectedValue(
+    mockApplyDataStreamEdits.mockRejectedValue(
       new Error('security_exception: action is unauthorized for user')
     );
 
-    await routeHandler!(createMockContext(), request, mockResponse);
+    await routeHandler(createMockContext(), request, mockResponse);
 
     expect(mockResponse.custom).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 403 }));
   });

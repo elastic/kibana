@@ -16,7 +16,7 @@ import type {
   DataStreamResults,
   FieldTypeChange,
   UploadSamplesToDataStreamResponse,
-  UpdateDataStreamFieldTypesResponse,
+  ApplyDataStreamEditsResponse,
 } from '../../../common/model/api/data_streams/data_stream.gen';
 import type { DataStream, OriginalSource } from '../../../common/model/common_attributes.gen';
 import { getLangSmithOptions } from './lang_smith';
@@ -253,54 +253,40 @@ export const getDataStreamResults = async ({
     }
   );
 
-export interface UpdateDataStreamPipelineRequest {
+export interface ApplyDataStreamEditsRequest {
   integrationId: string;
   dataStreamId: string;
   ingestPipeline: string;
+  changes: FieldTypeChange[];
   version: string;
+  dryRun: boolean;
+  acknowledgeBreakingChanges?: boolean;
 }
 
-export const updateDataStreamPipeline = async ({
+export const applyDataStreamEdits = async ({
   http,
   abortSignal,
   integrationId,
   dataStreamId,
   ingestPipeline,
-  version,
-}: RequestDeps & UpdateDataStreamPipelineRequest): Promise<GetDataStreamResultsResponse> =>
-  http.patch<GetDataStreamResultsResponse>(
-    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
-      integrationId
-    )}/data_streams/${encodeURIComponent(dataStreamId)}`,
-    {
-      version: '1',
-      body: JSON.stringify({ ingest_pipeline: ingestPipeline, version }),
-      signal: abortSignal,
-    }
-  );
-
-export interface UpdateDataStreamFieldTypesRequest {
-  integrationId: string;
-  dataStreamId: string;
-  changes: FieldTypeChange[];
-  version: string;
-}
-
-export const updateDataStreamFieldTypes = async ({
-  http,
-  abortSignal,
-  integrationId,
-  dataStreamId,
   changes,
   version,
-}: RequestDeps & UpdateDataStreamFieldTypesRequest): Promise<UpdateDataStreamFieldTypesResponse> =>
-  http.put<UpdateDataStreamFieldTypesResponse>(
+  dryRun,
+  acknowledgeBreakingChanges = false,
+}: RequestDeps & ApplyDataStreamEditsRequest): Promise<ApplyDataStreamEditsResponse> =>
+  http.put<ApplyDataStreamEditsResponse>(
     `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
       integrationId
-    )}/data_streams/${encodeURIComponent(dataStreamId)}/field_types`,
+    )}/data_streams/${encodeURIComponent(dataStreamId)}/edits`,
     {
       version: '1',
-      body: JSON.stringify({ changes, version }),
+      body: JSON.stringify({
+        ingest_pipeline: ingestPipeline,
+        changes,
+        version,
+        dry_run: dryRun,
+        acknowledge_breaking_changes: acknowledgeBreakingChanges,
+      }),
       signal: abortSignal,
     }
   );

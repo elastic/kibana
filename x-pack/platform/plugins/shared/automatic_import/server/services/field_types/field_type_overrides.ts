@@ -94,31 +94,39 @@ export const mergeFieldTypeChanges = (
 };
 
 /**
- * Applies stored field type edits to regenerated field mappings. Edited fields and their edits
- * remain when the current samples omit a conditional field; other persisted fields follow the
- * regenerated mappings. Edits for fields that are now ECS fields are dropped. Reverted fields keep their original type even when documents infer something else.
+ * Re-bases stored field type edits on the mappings inferred from the pipeline without its generated
+ * processors. The original type is refreshed, edits that now match the inferred type are removed,
+ * and edits for fields the pipeline no longer produces (or that became ECS fields) are dropped.
+ */
+export const refreshFieldTypeOverrides = (
+  fieldMapping: FieldMappingEntry[],
+  overrides: FieldTypeOverride[]
+): { overrides: FieldTypeOverride[]; dropped: string[] } => {
+  const mappingByName = new Map(fieldMapping.map((mapping) => [mapping.name, mapping]));
+  const dropped: string[] = [];
+  const refreshed = overrides.flatMap((override) => {
+    const mapping = mappingByName.get(override.name);
+    if (!mapping || mapping.is_ecs || mapping.type === 'group') {
+      dropped.push(override.name);
+      return [];
+    }
+    if (mapping.type === override.type) return [];
+    return [{ ...override, original_type: mapping.type }];
+  });
+  return { overrides: refreshed, dropped };
+};
+
+/**
+ * Applies field type edits to regenerated field mappings. Edits for fields that are now ECS fields
+ * are dropped. Reverted fields keep their original type even when documents infer something else.
  */
 export const applyFieldTypeOverrides = (
   fieldMapping: FieldMappingEntry[],
   overrides: FieldTypeOverride[] | undefined,
-  reverted: Array<{ name: string; originalType: string }> = [],
-  persistedFieldMapping: FieldMappingEntry[] = []
+  reverted: Array<{ name: string; originalType: string }> = []
 ): { fieldMapping: FieldMappingEntry[]; overrides: FieldTypeOverride[] } => {
-  const mergedMappings = new Map(fieldMapping.map((mapping) => [mapping.name, mapping] as const));
-  const editedNames = new Set([
-    ...(overrides ?? []).map(({ name }) => name),
-    ...reverted.map(({ name }) => name),
-  ]);
-  for (const mapping of persistedFieldMapping) {
-    if (editedNames.has(mapping.name) && !mergedMappings.has(mapping.name)) {
-      mergedMappings.set(mapping.name, mapping);
-    }
-  }
-  const completeFieldMapping = [...mergedMappings.values()];
   const editableFields = new Map(
-    completeFieldMapping
-      .filter(({ is_ecs: isEcs }) => !isEcs)
-      .map((mapping) => [mapping.name, mapping])
+    fieldMapping.filter(({ is_ecs: isEcs }) => !isEcs).map((mapping) => [mapping.name, mapping])
   );
   const keptOverrides = (overrides ?? []).filter(({ name }) => editableFields.has(name));
   const typeByName = new Map(keptOverrides.map(({ name, type }) => [name, type]));
@@ -129,7 +137,7 @@ export const applyFieldTypeOverrides = (
   );
 
   return {
-    fieldMapping: completeFieldMapping.map((mapping) => {
+    fieldMapping: fieldMapping.map((mapping) => {
       if (mapping.is_ecs) return mapping;
       const overrideType = typeByName.get(mapping.name);
       if (overrideType) return { ...mapping, type: overrideType };

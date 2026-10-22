@@ -42,19 +42,31 @@ export {
   DeleteDataStreamRequestParams,
   ReanalyzeDataStreamRequestParams,
   ReanalyzeDataStreamRequestBody,
-  UpdateDataStreamPipelineRequestBody,
-  UpdateDataStreamFieldTypesRequestBody,
-  UpdateDataStreamFieldTypesRequestParams,
+  ApplyDataStreamEditsRequestBody,
+  ApplyDataStreamEditsRequestParams,
 } from './model/api/data_streams/data_stream.gen';
 
 export type {
+  ApplyDataStreamEditsResponse,
+  ApprovedFieldType,
+  DataStreamEditsFailure,
+  DataStreamEditsResult,
   DataStreamResults,
   FieldMapping,
   FieldTypeChange,
   FieldTypeError,
   FieldTypeOverride,
-  UpdateDataStreamFieldTypesResponse,
+  PipelineErrors,
 } from './model/api/data_streams/data_stream.gen';
+
+export {
+  getConvertType,
+  getFieldTypeProcessorTag,
+  readBackFieldTypeProcessors,
+  stripFieldTypeProcessors,
+  syncFieldTypeProcessors,
+} from './field_type_processors';
+export type { FieldTypeEdit, PipelineDefinition } from './field_type_processors';
 
 export {
   SUPPORTED_FIELD_TYPES,
@@ -109,8 +121,8 @@ export {
 
 export { MAX_STRING_LENGTH } from './constants';
 
-export { canEditDataStreamFieldTypes, getFieldTypeEditState } from './can_edit_field_types';
-export type { FieldTypeEditState } from './can_edit_field_types';
+export { getDataStreamEditState } from './data_stream_edit_state';
+export type { DataStreamEditState } from './data_stream_edit_state';
 
 export {
   DATA_STREAM_PHASES,

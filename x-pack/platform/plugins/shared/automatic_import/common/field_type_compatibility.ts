@@ -42,7 +42,8 @@ export type FieldTypeIssue =
   | 'negative_value'
   | 'not_numeric'
   | 'not_boolean'
-  | 'not_ip';
+  | 'not_ip'
+  | 'not_date';
 
 export interface FieldTypeCompatibility {
   status: 'compatible' | 'certain_failure';
@@ -75,6 +76,17 @@ const IPV6_PATTERN = /^[0-9a-fA-F:.]+(%[\w.]+)?$/;
 
 const isIp = (value: string): boolean =>
   IPV4_PATTERN.test(value) || (value.includes(':') && IPV6_PATTERN.test(value));
+
+// The default date mapping format: `strict_date_optional_time||epoch_millis`.
+const STRICT_DATE_OPTIONAL_TIME_PATTERN =
+  /^\d{4}(-\d{2}(-\d{2}(T\d{2}(:\d{2}(:\d{2}([.,]\d{1,9})?)?)?(Z|[+-]\d{2}(:?\d{2})?)?)?)?)?$/;
+const EPOCH_MILLIS_PATTERN = /^-?\d+(\.\d+)?$/;
+
+const isDate = (value: unknown): boolean => {
+  if (typeof value === 'number') return Number.isFinite(value);
+  if (typeof value !== 'string') return false;
+  return STRICT_DATE_OPTIONAL_TIME_PATTERN.test(value) || EPOCH_MILLIS_PATTERN.test(value);
+};
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -125,6 +137,10 @@ const findValueIssue = (type: string, value: unknown): ValueIssue => {
 
   if (type === 'ip') {
     return typeof value === 'string' && isIp(value) ? undefined : 'not_ip';
+  }
+
+  if (type === 'date' || type === 'date_nanos') {
+    return isDate(value) ? undefined : 'not_date';
   }
 
   return undefined;

@@ -481,44 +481,43 @@ describe('data stream utils', () => {
 
   describe('getFlyoutFooterState', () => {
     const base = {
-      mappingDirty: false,
-      mappingSaving: false,
-      pipelineDirty: false,
-      pipelineSaving: false,
+      isDirty: false,
+      isBusy: false,
       pipelineText: '{ "processors": [] }',
-      isSaving: false,
-      showPipelineWarning: false,
-      showTableWarning: false,
     };
 
-    it('enables save on the table tab only when mappings are dirty and the pipeline is clean', () => {
-      expect(getFlyoutFooterState({ ...base, isTableTab: true, mappingDirty: true })).toEqual({
+    it('enables save and reset on either tab when the draft is dirty', () => {
+      expect(getFlyoutFooterState({ ...base, isTableTab: true, isDirty: true })).toEqual({
         isResetDisabled: false,
         isSaveDisabled: false,
         saveTestSubj: 'mappingEditorApplyButton',
       });
-    });
-
-    it('disables table save when the pipeline has unsaved changes', () => {
-      const state = getFlyoutFooterState({
-        ...base,
-        isTableTab: true,
-        mappingDirty: true,
-        pipelineDirty: true,
-        showPipelineWarning: true,
-      });
-      expect(state.isResetDisabled).toBe(false);
-      expect(state.isSaveDisabled).toBe(true);
-      expect(state.saveTestSubj).toBe('mappingEditorApplyButton');
-      expect(state.warning).toBeDefined();
-    });
-
-    it('enables save on the pipeline tab only when the pipeline is dirty and mappings are clean', () => {
-      expect(getFlyoutFooterState({ ...base, isTableTab: false, pipelineDirty: true })).toEqual({
+      expect(getFlyoutFooterState({ ...base, isTableTab: false, isDirty: true })).toEqual({
         isResetDisabled: false,
         isSaveDisabled: false,
         saveTestSubj: 'editPipelineFlyoutSaveButton',
       });
+    });
+
+    it('disables save and reset when the draft is clean or a request is running', () => {
+      expect(getFlyoutFooterState({ ...base, isTableTab: true })).toMatchObject({
+        isResetDisabled: true,
+        isSaveDisabled: true,
+      });
+      expect(
+        getFlyoutFooterState({ ...base, isTableTab: false, isDirty: true, isBusy: true })
+      ).toMatchObject({ isResetDisabled: true, isSaveDisabled: true });
+    });
+
+    it('disables save when the pipeline text is empty', () => {
+      const state = getFlyoutFooterState({
+        ...base,
+        isTableTab: false,
+        isDirty: true,
+        pipelineText: '  ',
+      });
+      expect(state.isSaveDisabled).toBe(true);
+      expect(state.isResetDisabled).toBe(false);
     });
   });
 });

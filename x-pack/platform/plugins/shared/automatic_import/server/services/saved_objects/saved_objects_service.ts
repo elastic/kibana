@@ -24,6 +24,7 @@ import type {
   IntegrationAttributes,
   DataStreamAttributes,
   FieldTypeOverride,
+  ApprovedFieldType,
 } from './schemas/types';
 import {
   DATA_STREAM_SAVED_OBJECT_TYPE,
@@ -54,6 +55,8 @@ export interface UpdateDataStreamParams {
   fieldMapping?: FieldMappingEntry[];
   /** Only used when `ingestPipeline` is set; omitting it clears stored field type edits. */
   fieldTypeOverrides?: FieldTypeOverride[];
+  /** Left unchanged when omitted. */
+  approvedFieldTypes?: ApprovedFieldType[];
   status: keyof typeof TASK_STATUSES;
 }
 
@@ -565,6 +568,23 @@ export class AutomaticImportSavedObjectService {
     }
   }
 
+  /** Stores the field types that an approval shipped for a data stream. */
+  public async updateDataStreamApprovedFieldTypes(
+    dataStreamId: string,
+    integrationId: string,
+    approvedFieldTypes: ApprovedFieldType[]
+  ): Promise<void> {
+    const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
+    const updatedAttributes: Partial<DataStreamAttributes> = {
+      approved_field_types: approvedFieldTypes,
+    };
+    await this.savedObjectsClient.update(
+      DATA_STREAM_SAVED_OBJECT_TYPE,
+      compositeId,
+      updatedAttributes
+    );
+  }
+
   /**
    * Updates only the phase of a data stream's job_info.
    * @param dataStreamId - The ID of the data stream
@@ -653,6 +673,7 @@ export class AutomaticImportSavedObjectService {
           job_type: jobType,
           status: TASK_STATUSES.pending,
         },
+        approved_field_types: [],
       };
 
       await this.savedObjectsClient.update(
@@ -684,6 +705,7 @@ export class AutomaticImportSavedObjectService {
       pipelineDocs,
       fieldMapping,
       fieldTypeOverrides,
+      approvedFieldTypes,
       status,
     } = updateDataStreamParams;
 
@@ -717,6 +739,7 @@ export class AutomaticImportSavedObjectService {
         ...dataStream.attributes,
         // Reanalysis omits edits and intentionally resets them with the generated results.
         ...(ingestPipeline ? { field_type_overrides: fieldTypeOverrides ?? [] } : {}),
+        ...(approvedFieldTypes ? { approved_field_types: approvedFieldTypes } : {}),
         result: updatedResult,
         job_info: {
           ...dataStream.attributes.job_info,

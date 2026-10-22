@@ -18,12 +18,11 @@ import {
   ReanalyzeDataStreamRequestParams,
   ReanalyzeDataStreamRequestBody,
   UploadSamplesToDataStreamRequestBody,
-  UpdateDataStreamPipelineRequestBody,
-  UpdateDataStreamFieldTypesRequestBody,
-  UpdateDataStreamFieldTypesRequestParams,
+  ApplyDataStreamEditsRequestBody,
+  ApplyDataStreamEditsRequestParams,
   UPLOAD_SAMPLES_MAX_REQUEST_BYTES,
 } from '../../common';
-import { FieldTypesLockedError, InvalidFieldTypeChangeError } from '../errors';
+import { InvalidFieldTypeChangeError } from '../errors';
 
 export const registerDataStreamRoutes = (
   router: IRouter<AutomaticImportPluginRequestHandlerContext>,
@@ -31,8 +30,7 @@ export const registerDataStreamRoutes = (
 ) => {
   uploadSamplesRoute(router, logger);
   deleteDataStreamRoute(router, logger);
-  updateDataStreamPipelineRoute(router, logger);
-  updateDataStreamFieldTypesRoute(router, logger);
+  applyDataStreamEditsRoute(router, logger);
   getDataStreamResultsRoute(router, logger);
   reanalyzeDataStreamRoute(router, logger);
 };
@@ -174,99 +172,14 @@ const deleteDataStreamRoute = (
       })
     );
 
-const updateDataStreamPipelineRoute = (
-  router: IRouter<AutomaticImportPluginRequestHandlerContext>,
-  logger: Logger
-) =>
-  router.versioned
-    .patch({
-      access: 'internal',
-      path: '/api/automatic_import/integrations/{integration_id}/data_streams/{data_stream_id}',
-      security: {
-        authz: {
-          requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.MANAGE}`],
-        },
-      },
-    })
-    .addVersion(
-      {
-        version: '1',
-        validate: {
-          request: {
-            params: buildRouteValidationWithZod(DeleteDataStreamRequestParams),
-            body: buildRouteValidationWithZod(UpdateDataStreamPipelineRequestBody),
-          },
-        },
-      },
-      withAvailability(async (context, request, response) => {
-        try {
-          const automaticImport = await context.automaticImport;
-          const automaticImportService = automaticImport.automaticImportService;
-          const { integration_id: integrationId, data_stream_id: dataStreamId } = request.params;
-          const { ingest_pipeline: ingestPipeline, version } = request.body;
-
-          const updatedResults = await automaticImportService.updateDataStreamPipeline({
-            integrationId,
-            dataStreamId,
-            ingestPipeline,
-            version,
-            esClient: automaticImport.esClient,
-            fieldsMetadataClient: automaticImport.fieldsMetadataClient,
-          });
-
-          return response.ok({ body: updatedResults });
-        } catch (err) {
-          logger.error(`updateDataStreamPipelineRoute: Caught error: ${err}`);
-          const automaticImportResponse = buildAutomaticImportResponse(response);
-
-          if (err instanceof InvalidFieldTypeChangeError) {
-            return automaticImportResponse.error({ statusCode: 400, body: err.message });
-          }
-          if (SavedObjectsErrorHelpers.isConflictError(err)) {
-            return automaticImportResponse.error({
-              statusCode: 409,
-              body: 'The data stream changed after it was opened. Reload and try again.',
-            });
-          }
-          if (isSecurityExceptionError(err)) {
-            return automaticImportResponse.error({
-              statusCode: 403,
-              body: 'Missing required Elasticsearch privileges. This action requires the manage_ingest_pipelines and manage_index_templates cluster privileges.',
-            });
-          }
-          const rawMessage = err instanceof Error ? err.message : String(err);
-
-          if (rawMessage.includes('Invalid ingest pipeline')) {
-            return automaticImportResponse.error({
-              statusCode: 400,
-              body: 'Invalid ingest pipeline',
-            });
-          }
-          if (rawMessage.includes('No samples found')) {
-            return automaticImportResponse.error({
-              statusCode: 400,
-              body: 'No samples found for data stream',
-            });
-          }
-          if (rawMessage.includes('Unexpected token')) {
-            return automaticImportResponse.error({
-              statusCode: 400,
-              body: 'Invalid JSON in pipeline definition',
-            });
-          }
-          return automaticImportResponse.error({ statusCode: 500 });
-        }
-      })
-    );
-
-const updateDataStreamFieldTypesRoute = (
+const applyDataStreamEditsRoute = (
   router: IRouter<AutomaticImportPluginRequestHandlerContext>,
   logger: Logger
 ) =>
   router.versioned
     .put({
       access: 'internal',
-      path: '/api/automatic_import/integrations/{integration_id}/data_streams/{data_stream_id}/field_types',
+      path: '/api/automatic_import/integrations/{integration_id}/data_streams/{data_stream_id}/edits',
       security: {
         authz: {
           requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.MANAGE}`],
@@ -278,8 +191,8 @@ const updateDataStreamFieldTypesRoute = (
         version: '1',
         validate: {
           request: {
-            params: buildRouteValidationWithZod(UpdateDataStreamFieldTypesRequestParams),
-            body: buildRouteValidationWithZod(UpdateDataStreamFieldTypesRequestBody),
+            params: buildRouteValidationWithZod(ApplyDataStreamEditsRequestParams),
+            body: buildRouteValidationWithZod(ApplyDataStreamEditsRequestBody),
           },
         },
       },
@@ -288,25 +201,31 @@ const updateDataStreamFieldTypesRoute = (
           const automaticImport = await context.automaticImport;
           const automaticImportService = automaticImport.automaticImportService;
           const { integration_id: integrationId, data_stream_id: dataStreamId } = request.params;
-          const { changes, version } = request.body;
+          const {
+            ingest_pipeline: ingestPipeline,
+            changes = [],
+            version,
+            dry_run: dryRun = false,
+            acknowledge_breaking_changes: acknowledgeBreakingChanges = false,
+          } = request.body;
 
-          const result = await automaticImportService.updateDataStreamFieldTypes({
+          const result = await automaticImportService.applyDataStreamEdits({
             integrationId,
             dataStreamId,
+            ingestPipeline,
             changes,
             version,
+            dryRun,
+            acknowledgeBreakingChanges,
             esClient: automaticImport.esClient,
             fieldsMetadataClient: automaticImport.fieldsMetadataClient,
           });
 
           return response.ok({ body: result });
         } catch (err) {
-          logger.error(`updateDataStreamFieldTypesRoute: Caught error: ${err}`);
+          logger.error(`applyDataStreamEditsRoute: Caught error: ${err}`);
           const automaticImportResponse = buildAutomaticImportResponse(response);
 
-          if (err instanceof FieldTypesLockedError) {
-            return automaticImportResponse.error({ statusCode: 409, body: err.message });
-          }
           if (SavedObjectsErrorHelpers.isConflictError(err)) {
             return automaticImportResponse.error({
               statusCode: 409,

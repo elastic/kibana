@@ -8,7 +8,6 @@
 import type { EuiTokenProps } from '@elastic/eui';
 import ipaddr from 'ipaddr.js';
 import { mergeObjectElements } from '../../../../../common';
-import * as i18n from './translations';
 
 const TYPE_TO_ICON_MAP: Record<string, EuiTokenProps['iconType']> = {
   string: 'tokenString',
@@ -157,66 +156,25 @@ export const flattenPipelineObject = (
   return result;
 };
 
-export interface FlyoutFooterWarning {
-  title: string;
-  description: string;
-}
-
 export interface FlyoutFooterState {
   isResetDisabled: boolean;
   isSaveDisabled: boolean;
   saveTestSubj: string;
-  warning?: FlyoutFooterWarning;
 }
 
+/** Save and Reset apply to the field types and the ingest pipeline together. */
 export const getFlyoutFooterState = ({
   isTableTab,
-  mappingDirty,
-  mappingSaving,
-  pipelineDirty,
-  pipelineSaving,
+  isDirty,
+  isBusy,
   pipelineText,
-  isSaving,
-  showPipelineWarning,
-  showTableWarning,
 }: {
   isTableTab: boolean;
-  mappingDirty: boolean;
-  mappingSaving: boolean;
-  pipelineDirty: boolean;
-  pipelineSaving: boolean;
+  isDirty: boolean;
+  isBusy: boolean;
   pipelineText: string;
-  isSaving: boolean;
-  showPipelineWarning: boolean;
-  showTableWarning: boolean;
-}): FlyoutFooterState => {
-  const isResetDisabled = isSaving || !(isTableTab ? mappingDirty : pipelineDirty);
-  const isSaveDisabled = isTableTab
-    ? !mappingDirty || mappingSaving || pipelineDirty
-    : !pipelineDirty || pipelineSaving || mappingDirty || !pipelineText.trim();
-  const saveTestSubj = isTableTab ? 'mappingEditorApplyButton' : 'editPipelineFlyoutSaveButton';
-
-  if (showPipelineWarning) {
-    return {
-      isResetDisabled,
-      isSaveDisabled,
-      saveTestSubj,
-      warning: {
-        title: i18n.EDIT_PIPELINE_FLYOUT.unsavedPipelineChangesTitle,
-        description: i18n.EDIT_PIPELINE_FLYOUT.unsavedPipelineChangesDescription,
-      },
-    };
-  }
-  if (showTableWarning) {
-    return {
-      isResetDisabled,
-      isSaveDisabled,
-      saveTestSubj,
-      warning: {
-        title: i18n.EDIT_PIPELINE_FLYOUT.unsavedTableChangesTitle,
-        description: i18n.EDIT_PIPELINE_FLYOUT.unsavedTableChangesDescription,
-      },
-    };
-  }
-  return { isResetDisabled, isSaveDisabled, saveTestSubj };
-};
+}): FlyoutFooterState => ({
+  isResetDisabled: isBusy || !isDirty,
+  isSaveDisabled: isBusy || !isDirty || !pipelineText.trim(),
+  saveTestSubj: isTableTab ? 'mappingEditorApplyButton' : 'editPipelineFlyoutSaveButton',
+});

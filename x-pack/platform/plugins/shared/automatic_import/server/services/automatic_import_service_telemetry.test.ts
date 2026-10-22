@@ -204,11 +204,13 @@ describe('AutomaticImportSetupService', () => {
         { data_stream_id: 'ds-2', job_info: { status: 'completed' } },
       ]);
       const mockUpdateIntegration = jest.fn().mockResolvedValue({});
+      const mockUpdateApprovedFieldTypes = jest.fn().mockResolvedValue(undefined);
 
       asPrivate(service).savedObjectService = {
         getIntegration: mockGetIntegration,
         getAllDataStreams: mockGetAllDataStreams,
         updateIntegration: mockUpdateIntegration,
+        updateDataStreamApprovedFieldTypes: mockUpdateApprovedFieldTypes,
       } as unknown as AutomaticImportSavedObjectService;
 
       await service.approveIntegration({
@@ -244,6 +246,8 @@ describe('AutomaticImportSetupService', () => {
       ]);
 
       expect(mockUpdateIntegration.mock.calls[0]).toHaveLength(2);
+      expect(mockUpdateApprovedFieldTypes).toHaveBeenCalledWith('ds-1', 'integration-123', []);
+      expect(mockUpdateApprovedFieldTypes).toHaveBeenCalledWith('ds-2', 'integration-123', []);
     });
 
     it('should prepend changelog entry on subsequent approvals', async () => {
@@ -265,11 +269,13 @@ describe('AutomaticImportSetupService', () => {
         { data_stream_id: 'ds-2', job_info: { status: 'completed' } },
       ]);
       const mockUpdateIntegration = jest.fn().mockResolvedValue({});
+      const mockUpdateApprovedFieldTypes = jest.fn().mockResolvedValue(undefined);
 
       asPrivate(service).savedObjectService = {
         getIntegration: mockGetIntegration,
         getAllDataStreams: mockGetAllDataStreams,
         updateIntegration: mockUpdateIntegration,
+        updateDataStreamApprovedFieldTypes: mockUpdateApprovedFieldTypes,
       } as unknown as AutomaticImportSavedObjectService;
 
       await service.approveIntegration({
@@ -775,11 +781,17 @@ describe('AutomaticImportSetupService', () => {
   });
 
   describe('getDataStreamResults', () => {
+    const notApproved = {
+      getIntegration: jest.fn().mockResolvedValue({ metadata: {} }),
+      getAllDataStreams: jest.fn().mockResolvedValue([]),
+    };
+
     it('returns ingest_pipeline as JSON string and results when completed', async () => {
       const mockGetDataStream = jest.fn().mockResolvedValue({
         version: 'WzEsMV0=',
         attributes: {
           job_info: { status: 'completed' },
+          approved_field_types: [],
           result: {
             ingest_pipeline: { processors: [] },
             pipeline_docs: [{ a: 1 }],
@@ -788,6 +800,7 @@ describe('AutomaticImportSetupService', () => {
       });
 
       asPrivate(service).savedObjectService = {
+        ...notApproved,
         getDataStream: mockGetDataStream,
       } as unknown as AutomaticImportSavedObjectService;
 
@@ -801,6 +814,7 @@ describe('AutomaticImportSetupService', () => {
         version: 'WzEsMV0=',
         attributes: {
           job_info: { status: 'completed' },
+          approved_field_types: [],
           result: {
             ingest_pipeline: { processors: [] },
             pipeline_docs: [
@@ -813,6 +827,7 @@ describe('AutomaticImportSetupService', () => {
       });
 
       asPrivate(service).savedObjectService = {
+        ...notApproved,
         getDataStream: mockGetDataStream,
       } as unknown as AutomaticImportSavedObjectService;
 
@@ -865,11 +880,13 @@ describe('AutomaticImportSetupService', () => {
         version: 'WzEsMV0=',
         attributes: {
           job_info: { status: 'completed' },
+          approved_field_types: [],
           result: { pipeline_docs: [{ a: 1 }] },
         },
       });
 
       asPrivate(service).savedObjectService = {
+        ...notApproved,
         getDataStream: mockGetDataStream,
       } as unknown as AutomaticImportSavedObjectService;
 
@@ -877,6 +894,8 @@ describe('AutomaticImportSetupService', () => {
         ingest_pipeline: {},
         field_mapping: [],
         field_type_overrides: [],
+        approved_field_types: [],
+        data_stream_approved: false,
         results: [{ a: 1 }],
         version: 'WzEsMV0=',
       });

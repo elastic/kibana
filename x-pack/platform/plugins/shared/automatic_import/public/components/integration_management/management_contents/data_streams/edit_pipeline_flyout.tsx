@@ -6,12 +6,14 @@
  */
 
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
-import type { DataStreamResponse, FieldTypeEditState } from '../../../../../common';
+import { KbnInfoCallout } from '@kbn/ui-callout';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { DataStreamResponse, DataStreamEditState } from '../../../../../common';
 import { useGetDataStreamResults } from '../../../../common';
 import { useUIState } from '../../contexts';
-import { useMappingEditor } from './mapping_editor';
+import { formatServerError, useMappingEditor } from './mapping_editor';
 import {
+  BreakingChangesConfirmModal,
   CloseConfirmModal,
   EditPipelineFlyoutFooter,
   FlyoutStatusCallouts,
@@ -19,17 +21,16 @@ import {
   PipelineEditorPanel,
   TablePanel,
 } from './edit_pipeline_flyout_parts';
-import { usePipelineEditor } from './use_pipeline_editor';
+import * as i18n from './translations';
+import { useDataStreamDraft } from './use_data_stream_draft';
 import { getFlyoutFooterState } from './utils';
 
 interface EditPipelineFlyoutProps {
   integrationId: string;
   dataStream: DataStreamResponse;
   onClose: () => void;
-  fieldTypeEditState: FieldTypeEditState;
+  editState: DataStreamEditState;
 }
-
-const EMPTY_DOCUMENTS: Array<Record<string, unknown>> = [];
 
 const usePagedDocuments = (resultCount: number | undefined) => {
   const [activeDocument, setActiveDocument] = useState(0);
@@ -48,79 +49,101 @@ export const EditPipelineFlyout = ({
   integrationId,
   dataStream,
   onClose,
-  fieldTypeEditState,
+  editState,
 }: EditPipelineFlyoutProps) => {
-  const fieldTypesAreEditable = fieldTypeEditState === 'editable';
+  const isEditable = editState === 'editable';
   const [isCloseConfirmVisible, setIsCloseConfirmVisible] = useState(false);
   const { selectedPipelineTab, selectPipelineTab } = useUIState();
   const { data, isLoading, isError, error } = useGetDataStreamResults(
     integrationId,
     dataStream.dataStreamId
   );
-  const { activeDocument, setActiveDocument, pageCount } = usePagedDocuments(data?.results?.length);
-  const pipelineEditor = usePipelineEditor({
+  const draft = useDataStreamDraft({
     integrationId,
     dataStreamId: dataStream.dataStreamId,
-    ingestPipeline: data?.ingest_pipeline,
-    version: data?.version ?? '',
+    data,
+    isEditable,
   });
+  const { activeDocument, setActiveDocument, pageCount } = usePagedDocuments(
+    draft.documents.length
+  );
   const mappingEditor = useMappingEditor({
-    integrationId,
     dataStreamId: dataStream.dataStreamId,
-    version: data?.version ?? '',
-    fieldMappings: data?.field_mapping,
-    fieldTypeOverrides: data?.field_type_overrides,
-    documents: data?.results ?? EMPTY_DOCUMENTS,
+    fieldMappings: draft.fieldMappings,
+    savedFieldMappings: draft.savedFieldMappings,
+    fieldTypeOverrides: draft.fieldTypeOverrides,
+    approvedFieldTypes: draft.approvedFieldTypes,
+    isDataStreamApproved: draft.isDataStreamApproved,
+    documents: draft.documents,
     activeDocument,
+    pendingTypes: draft.pendingTypes,
+    serverErrors: draft.fieldErrors,
+    stageType: draft.stageType,
   });
 
-  const isSaving = mappingEditor.isSaving || pipelineEditor.isSaving;
-  const hasUnsavedChanges = pipelineEditor.hasUnsavedChanges || mappingEditor.isDirty;
-  const isTableVisible = !isLoading && !isError && selectedPipelineTab === 'table';
-  const isEditorVisible =
-    !isLoading && !isError && selectedPipelineTab === 'pipeline' && Boolean(data?.ingest_pipeline);
+  const isBusy = draft.isSaving || draft.isSyncing;
   const isTableTab = selectedPipelineTab === 'table';
+  const isTableVisible = !isLoading && !isError && isTableTab;
+  const isEditorVisible = !isLoading && !isError && !isTableTab && Boolean(data?.ingest_pipeline);
   const footerState = getFlyoutFooterState({
     isTableTab,
-    mappingDirty: mappingEditor.isDirty,
-    mappingSaving: mappingEditor.isSaving,
-    pipelineDirty: pipelineEditor.hasUnsavedChanges,
-    pipelineSaving: pipelineEditor.isSaving,
-    pipelineText: pipelineEditor.pipelineText,
-    isSaving,
-    showPipelineWarning: isTableVisible && pipelineEditor.hasUnsavedChanges,
-    showTableWarning: isEditorVisible && mappingEditor.isDirty,
+    isDirty: draft.isDirty,
+    isBusy,
+    pipelineText: draft.pipelineText,
   });
 
+  const pipelineFieldErrors = useMemo(
+    () =>
+      Object.values(draft.fieldErrors).map((fieldError) => {
+        const type =
+          draft.pendingTypes[fieldError.name] ??
+          draft.fieldMappings?.find(({ name }) => name === fieldError.name)?.type ??
+          '';
+        return { name: fieldError.name, message: formatServerError(type, fieldError) };
+      }),
+    [draft.fieldErrors, draft.fieldMappings, draft.pendingTypes]
+  );
+
   const handleFlyoutClose = useCallback(() => {
-    if (isSaving) return;
-    if (hasUnsavedChanges) {
+    if (isBusy) return;
+    if (draft.isDirty) {
       setIsCloseConfirmVisible(true);
       return;
     }
     onClose();
-  }, [hasUnsavedChanges, isSaving, onClose]);
+  }, [draft.isDirty, isBusy, onClose]);
+
+  const handleSelectTable = useCallback(async () => {
+    if (await draft.syncToTable()) selectPipelineTab('table');
+  }, [draft, selectPipelineTab]);
+
+  const handleSelectPipeline = useCallback(() => {
+    draft.syncToPipeline();
+    selectPipelineTab('pipeline');
+  }, [draft, selectPipelineTab]);
 
   const handleFooterSave = useCallback(async () => {
-    const saved = isTableTab ? await mappingEditor.save() : await pipelineEditor.save();
-    if (saved) onClose();
-  }, [isTableTab, mappingEditor, onClose, pipelineEditor]);
+    if (await draft.save(!isTableTab)) onClose();
+  }, [draft, isTableTab, onClose]);
 
-  const handleFooterReset = useCallback(() => {
-    if (isTableTab) {
-      mappingEditor.discardChanges();
-      return;
-    }
-    pipelineEditor.reset();
-  }, [isTableTab, mappingEditor, pipelineEditor]);
+  const handleConfirmBreakingChanges = useCallback(async () => {
+    if (await draft.save(!isTableTab, true)) onClose();
+  }, [draft, isTableTab, onClose]);
 
   const handleDiscardAndClose = useCallback(() => {
-    if (isSaving) return;
+    if (isBusy) return;
     setIsCloseConfirmVisible(false);
     onClose();
-  }, [isSaving, onClose]);
+  }, [isBusy, onClose]);
 
-  const showFooter = (isTableVisible && fieldTypesAreEditable) || isEditorVisible;
+  const showFooter = isEditable && (isTableVisible || isEditorVisible);
+  const pipelineNotice = isEditable ? undefined : (
+    <KbnInfoCallout
+      size="s"
+      title={i18n.EDIT_PIPELINE_FLYOUT.notEditableNotice}
+      data-test-subj="editPipelineFlyoutReadOnlyNotice"
+    />
+  );
 
   return (
     <EuiFlyout
@@ -137,20 +160,29 @@ export const EditPipelineFlyout = ({
 
         <FlyoutTabs
           isTableTab={isTableTab}
-          isSaving={isSaving}
+          isBusy={isBusy}
           integrationId={integrationId}
           dataStreamId={dataStream.dataStreamId}
-          onSelectTable={() => selectPipelineTab('table')}
-          onSelectPipeline={() => selectPipelineTab('pipeline')}
+          onSelectTable={handleSelectTable}
+          onSelectPipeline={handleSelectPipeline}
         />
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
         {isCloseConfirmVisible && (
           <CloseConfirmModal
-            isSaving={isSaving}
+            isSaving={isBusy}
             onCancel={() => setIsCloseConfirmVisible(false)}
             onConfirm={handleDiscardAndClose}
+          />
+        )}
+
+        {draft.pendingBreakingChanges.length > 0 && (
+          <BreakingChangesConfirmModal
+            fieldNames={draft.pendingBreakingChanges}
+            isSaving={draft.isSaving}
+            onCancel={draft.cancelBreakingChanges}
+            onConfirm={handleConfirmBreakingChanges}
           />
         )}
 
@@ -158,7 +190,7 @@ export const EditPipelineFlyout = ({
           isLoading={isLoading}
           isError={isError}
           errorMessage={error?.message}
-          saveError={!isTableTab ? pipelineEditor.saveError : null}
+          pipelineErrors={isTableTab ? draft.pipelineErrors : undefined}
         />
 
         {isTableVisible && (
@@ -167,7 +199,8 @@ export const EditPipelineFlyout = ({
             activeDocument={activeDocument}
             onPageClick={setActiveDocument}
             mappingEditor={mappingEditor}
-            fieldTypeEditState={fieldTypeEditState}
+            editState={editState}
+            droppedFieldTypes={draft.droppedFieldTypes}
           />
         )}
 
@@ -175,19 +208,24 @@ export const EditPipelineFlyout = ({
           <PipelineEditorPanel
             integrationId={integrationId}
             dataStreamId={dataStream.dataStreamId}
-            value={pipelineEditor.pipelineText}
-            onChange={(value) => {
-              pipelineEditor.setPipelineText(value);
-              pipelineEditor.clearSaveError();
-            }}
+            value={draft.pipelineText}
+            onChange={draft.setPipelineText}
+            readOnly={!isEditable}
+            isBusy={isBusy}
+            notice={pipelineNotice}
+            pipelineError={draft.pipelineError}
+            pipelineErrors={draft.pipelineErrors}
+            fieldErrors={pipelineFieldErrors}
+            removedApprovedFields={draft.removedApprovedFields}
+            isChecking={draft.isChecking}
           />
         )}
       </EuiFlyoutBody>
       {showFooter && (
         <EditPipelineFlyoutFooter
           {...footerState}
-          isSaving={isSaving}
-          onReset={handleFooterReset}
+          isSaving={draft.isSaving}
+          onReset={draft.reset}
           onSave={handleFooterSave}
         />
       )}

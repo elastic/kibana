@@ -243,14 +243,6 @@ export const IntegrationResponse = lazySchema(() =>
      * The status of the integration
      */
     status: TaskStatus.describe('The status of the integration'),
-    /**
-     * Data stream IDs included in the most recently approved package.
-     */
-    lastApprovedDataStreamIds: z
-      .array(SafeIdentifier)
-      .max(100)
-      .optional()
-      .describe('Data stream IDs included in the most recently approved package.'),
   })
 );
 export type IntegrationResponse = z.infer<typeof IntegrationResponse>;
