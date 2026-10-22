@@ -111,7 +111,18 @@ export const createEmulatorProxy = ({
   const handle =
     (resolveTarget: (request: IncomingMessage) => URL | undefined) =>
     async (request: IncomingMessage, response: ServerResponse): Promise<void> => {
-      const target = resolveTarget(request);
+      let target: URL | undefined;
+      try {
+        target = resolveTarget(request);
+      } catch (error) {
+        sendError(
+          response,
+          400,
+          'Invalid request target',
+          `${request.method} ${request.url}: ${error}`
+        );
+        return;
+      }
       if (!target) {
         sendError(
           response,
