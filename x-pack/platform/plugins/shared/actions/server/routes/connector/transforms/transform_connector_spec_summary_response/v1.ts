@@ -9,10 +9,7 @@ import type {
   ConnectorSpecActionSummary,
   ConnectorSpecSummary,
 } from '../../../../../common/connector_spec';
-import type {
-  ConnectorSpecActionSummaryResponseV1,
-  ConnectorSpecSummaryResponseV1,
-} from '../../../../../common/routes/connector/response';
+import type { ConnectorSpecActionSummaryResponseV1 } from '../../../../../common/routes/connector/response';
 
 export const transformConnectorSpecActionSummaryResponse = (
   action: ConnectorSpecActionSummary
@@ -23,9 +20,7 @@ export const transformConnectorSpecActionSummaryResponse = (
   scope: action.scope,
 });
 
-export const transformConnectorSpecSummaryResponse = (
-  summary: ConnectorSpecSummary
-): ConnectorSpecSummaryResponseV1 => ({
+export const transformConnectorSpecSummaryResponse = (summary: ConnectorSpecSummary) => ({
   id: summary.id,
   display_name: summary.displayName,
   description: summary.description,

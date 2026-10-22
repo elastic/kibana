@@ -19,7 +19,6 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     });
 
     loadTestFile(require.resolve('./get_connector_spec'));
-    loadTestFile(require.resolve('./get_all_connector_specs'));
 
     // Connector types A-P (first ~15 alphabetically)
     loadTestFile(require.resolve('./connector_types/bedrock'));
