@@ -105,18 +105,18 @@ const EstimateValue = ({ end, vcus, savedVcus }: EstimateValueProps) => (
   <div data-test-subj={`boostCostEstimate-${end}`}>
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiText size="s">
+        <EuiText size="xs">
           {end === 'atRest' ? (
             <FormattedMessage
               id="xpack.boost.costEstimate.atRestValue"
               defaultMessage="{cost} at rest"
-              values={{ cost: <strong>{formatCost(vcus)}</strong> }}
+              values={{ cost: formatCost(vcus) }}
             />
           ) : (
             <FormattedMessage
               id="xpack.boost.costEstimate.atPeakValue"
               defaultMessage="{cost} at peak"
-              values={{ cost: <strong>{formatCost(vcus)}</strong> }}
+              values={{ cost: formatCost(vcus) }}
             />
           )}
         </EuiText>
