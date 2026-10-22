@@ -60,6 +60,7 @@ import {
 } from '../../../common/proposals/list';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { useQueuePolling } from '../../hooks/use_queue_polling';
+import { useSettlingProposalsPolling } from '../../hooks/use_settling_proposals_polling';
 import { queryKeys } from '../../query_keys';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
@@ -151,6 +152,7 @@ const ConversationsPageContent: React.FC = () => {
     proposalsById,
     investigations: conversations,
   } = useQueueSections(effectiveEntityFilter);
+  useSettlingProposalsPolling(proposalsById.values());
 
   // When the flyout's status toggle changes status (isolated QueryClient), bump the signal
   // so this page's QueryClient invalidates its proposal queries and the queue refreshes.
@@ -158,7 +160,6 @@ const ConversationsPageContent: React.FC = () => {
     void queryClient.invalidateQueries({ queryKey: platformQueryKeys.proposals.all });
   });
 
-  // FIXME: use hook methods to keep in-flight states
   const { mutateAsync: approveDecision } = useApproveProposal();
   const { mutateAsync: dismissDecision } = useDismissProposal();
   const dropDecided = useDropDecidedProposal(effectiveEntityFilter);
@@ -300,7 +301,9 @@ const ConversationsPageContent: React.FC = () => {
   const assignInvestigation = useAssignInvestigation();
 
   const renderInFlightStatus = useCallback(
-    ({ id }: Investigation) => <InFlightProposalBadge proposalId={id} />,
+    ({ id, isProposalSettling }: Investigation) => (
+      <InFlightProposalBadge proposalId={id} isProposalSettling={isProposalSettling} />
+    ),
     []
   );
 
@@ -331,19 +334,20 @@ const ConversationsPageContent: React.FC = () => {
     [notifications, reportQueueToastError]
   );
 
-  // Stays open on success rather than closing: the approval modal itself shows the resulting
-  // "Applied" state, so the analyst sees the outcome before dismissing it themselves.
+  // The modal stays open after success. It shows the "Applied" state, so the analyst sees the
+  // result before they close it.
   const confirmApproval = useCallback(
     async (proposal: ProposalItem) => {
       try {
+        // Do not drop the row from the queue. An approved proposal stays in its category while its
+        // action runs. The approve mutation already refetched the recorded decision.
         await approveDecision({ id: proposal.id, body: { actionInput: proposal.actionInput } });
-        void dropDecided(proposal.id);
       } catch (err) {
         onDecisionError(err);
         throw err;
       }
     },
-    [approveDecision, dropDecided, onDecisionError]
+    [approveDecision, onDecisionError]
   );
 
   // The approval modal collects its own decline reason inline now, so this is a direct mutation
@@ -447,13 +451,10 @@ const ConversationsPageContent: React.FC = () => {
     ? proposalsById.get(selectedIdForRecommendedAction)
     : undefined;
 
-  // `useDropDecidedProposal` removes a just-decided proposal from the open-bucket cache
-  // `proposalsById` is built from, before the analyst has necessarily seen the approval modal
-  // reflect it. Without this, `InvestigationActionModals` would unmount the modal the instant
-  // the row leaves the queue, right when `Applying`/`Applied` is shown.
-  // `useProposal` keeps refreshing the single record independently of that eviction (including
-  // through the settling window), so the sticky fallback below stays live rather than frozen
-  // pre-decision.
+  // `useDropDecidedProposal` removes a declined proposal from the open-bucket cache that
+  // `proposalsById` reads. Without a fallback, `InvestigationActionModals` would close the modal
+  // when the row leaves the queue, before the analyst sees the result.
+  // `useProposal` keeps the single record fresh, so the sticky copy below is never old.
   const [stickySelectedProposal, setStickySelectedProposal] = useState<ProposalItem | undefined>(
     undefined
   );

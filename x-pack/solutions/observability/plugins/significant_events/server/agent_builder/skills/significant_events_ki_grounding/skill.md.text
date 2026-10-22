@@ -108,8 +108,10 @@ use `off_topic` only when it matches neither.
 - entity: `{ type: "entity", subtype, feature_id, name, source_id? }`
 - infrastructure: `{ type: "infrastructure", subtype, feature_id, title?, workloads, source_id? }`
 
-Copy classification verbatim from each fetched KI: `subtype` on every entry and `type` on cause
-entries. Blast-radius `type` remains the row-shape label listed above.
+`feature_id` is the fetched KI's `feature.id` (or a matched query's `features[].id`), copied exactly. If a
+feature name is provided, use it only to locate the fetched feature, then copy that feature's `id`.
+Copy classification verbatim from each fetched KI:
+`subtype` on every entry and `type` on cause entries. Blast-radius `type` remains the row-shape label listed above.
 
 </topology_entry_shapes>
 
@@ -137,9 +139,14 @@ Always set `slugs`: feature IDs are unique only within a source.
 - No referenced feature IDs, including when no query matched → omit `feature_ids`, and set `slugs`
   to all distinct batch `source_id` values.
 
-Stop after page 1, unless `feature_ids` was passed, the response has `has_more: true`, and one or
-more requested IDs are missing. Only then request `next_page` once with identical filters. Never
-paginate the fallback search.
+A referenced ID is a topology node only if this search returned it. When a matched query has none of
+its IDs in the result, make the one extra call instead of paginating: identical filters, `feature_ids`
+omitted, `slugs` set to all distinct batch `source_id` values. The query KI's
+other authored fields can only resolve an entity against features that were fetched.
+
+Otherwise stop after page 1, unless `feature_ids` was passed, the response has `has_more: true`, and
+one or more requested IDs are missing. Only then request `next_page` once with identical filters.
+Never paginate the fallback search.
 
 `per_page` is a cap. Referenced feature IDs seed the topology; dependency endpoints and their
 matching entity identity fields are expanded from the returned topology in Step 6. Never make another
@@ -242,15 +249,21 @@ confirmation query, or the shared deduplicated execution. `<output_format>` defi
 
 ### Step 6: Consolidate Causal Features and Blast Radius
 
-Build one topology graph for the batch. `query.features[]` seeds the graph; it never limits it.
+Build one topology graph for the batch. `query.features[]` seeds the graph; it never limits it. The
+query KI is authoritative for which entity a rule concerns: the found row is supporting evidence, and
+the fallback only when the KI identifies none.
 Evaluate every fetched `dependency`, `entity`, and `infrastructure` KI once. Do not issue another KI
 search.
 
 1. **Activate paths.** Only `confirms` signals activate paths. If no signal is `confirms`, emit empty
    `causal_features` and `blast_radius` and skip the remaining sub-steps. For each confirming signal:
-   - Match the failed service or component named in the found row to a fetched dependency's
-     `source`. A matching `target`, shared technology, or another signal's affected service does not
-     activate a path.
+   - Identify the failed entity or infrastructure from the query KI first: `query.features[]`, then
+     any value its predicate pins to a field that identifies an entity (e.g: a service, host, pod, database,
+     or queue), matched exactly and uniquely to a fetched feature's `feature.id`
+     or `properties.name`. Use its title and description only to disambiguate. Use the component
+     named in the found row only when the KI identifies none, or to corroborate. Match the result to
+     a fetched dependency's `source`. A matching `target`, shared technology, or another signal's
+     affected service does not activate a path.
    - After that source match, if the dependency's fetched `evidence`, `description`, or `meta`
      documents a connection, timeout, refusal, or protocol failure, activate the path, even when the
      row does not repeat the target and the dependency is absent from `query.features[]`.
@@ -269,8 +282,9 @@ search.
    that entity as causal, and keep the dependency as blast radius. If several entities match
    `<store-technology>` without attribution, select no target and use `<source>` as the causal fallback.
 
-2. **Build `causal_features`.** Add the entity or infrastructure that a confirming row identifies as
-   failed. Otherwise, for an activated path with a confirmed source match, add the uniquely attributed
+2. **Build `causal_features`.** Add the entity or infrastructure that the query KI identifies as
+   failed, with a confirming row as corroboration or, when the KI identifies none, as the identity.
+   Otherwise, for an activated path with a confirmed source match, add the uniquely attributed
    fetched target. If no target resolves, add the path's fetched source. Do not invent targets.
 3. **Build `blast_radius`.** Add every dependency edge in an active path. Add the confirmed source
    entity when the signal shows it affected and it is not already in `causal_features`. Add any other

@@ -287,21 +287,30 @@ export const useDismissProposal = () => {
  * Takes the `QueryClient` to track it on, since the surface that closes (the flyout's status
  * toggle) can run in a different client than the one the cards read `Declining` from. Defaults
  * to the one in context.
+ *
+ * `afterDecision` runs once the decision is recorded. The tracker stays open until it finishes.
+ * Use it to refresh the data first, so the row never reads old data after "Declining" ends.
  */
 export const useSettleDeclinedProposal = () => {
   const { services } = useKibana();
   const contextClient = useQueryClient();
 
   return useCallback(
-    async (id: string, queryClient: QueryClient = contextClient): Promise<void> => {
+    async (
+      id: string,
+      queryClient: QueryClient = contextClient,
+      afterDecision?: () => Promise<void>
+    ): Promise<void> => {
       // Built on the cache rather than through a `MutationObserver`: an observer stays attached
       // to the mutation it started, which keeps it out of garbage collection for the life of a
       // long-lived shared client. Nothing observes this one, so it is removed once settled.
       const mutationCache = queryClient.getMutationCache();
       const mutation = mutationCache.build(queryClient, {
         mutationKey: mutationKeys.proposals.decline,
-        mutationFn: ({ id: proposalId }: { id: string }): Promise<void> =>
-          waitForDecision(services.http!, proposalId),
+        mutationFn: async ({ id: proposalId }: { id: string }): Promise<void> => {
+          await waitForDecision(services.http!, proposalId);
+          await afterDecision?.();
+        },
         variables: { id },
       });
       try {

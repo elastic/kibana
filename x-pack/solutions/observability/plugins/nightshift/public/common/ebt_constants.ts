@@ -31,6 +31,7 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   OPEN_CUSTOM_CONTEXT: 'openCustomContext',
   OPEN_DETECTION_ENGINE_CONFIRMATION: 'openDetectionEngineConfirmation',
   OPEN_IN_CHAT: 'openInChat',
+  OPEN_RESET_CONFIRMATION: 'openResetConfirmation',
   OPEN_START_INVESTIGATION: 'openStartInvestigation',
   PAUSE_DETECTION_ENGINE: 'pauseDetectionEngine',
   RESET_TUNING_DOCUMENT: 'resetTuningDocument',

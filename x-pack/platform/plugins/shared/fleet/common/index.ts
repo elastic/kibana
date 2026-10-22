@@ -123,6 +123,7 @@ export {
   removeVersionSuffixFromPolicyId,
   buildPolicyIdOrVariantsKuery,
   buildPolicyIdsOrVariantsKuery,
+  buildPolicyBaseIdWithFallbackKuery,
   buildPolicyBaseIdsWithFallbackKuery,
   extractAgentIdsWithData,
   getIncompatibleIntegrations,
