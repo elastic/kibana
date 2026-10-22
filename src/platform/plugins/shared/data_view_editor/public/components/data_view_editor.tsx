@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { DataViewEditorLazy } from './data_view_editor_lazy';
 import type { DataViewEditorContext, DataViewEditorProps } from '../types';
@@ -29,8 +29,12 @@ export const DataViewEditor = ({
   isDuplicating,
   getDataViewHelpText,
 }: DataViewEditorPropsWithServices) => {
-  const { Provider: KibanaReactContextProvider } =
-    createKibanaReactContext<DataViewEditorContext>(services);
+  // `createKibanaReactContext` returns a new Provider component type on every call, so it has to be
+  // memoized, otherwise every re-render remounts the flyout and resets the form to its defaults.
+  const { Provider: KibanaReactContextProvider } = useMemo(
+    () => createKibanaReactContext<DataViewEditorContext>(services),
+    [services]
+  );
 
   return (
     <KibanaReactContextProvider>

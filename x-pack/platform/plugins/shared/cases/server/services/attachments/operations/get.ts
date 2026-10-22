@@ -13,6 +13,8 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import {
+  type LegacyTypeMatch,
+  toLegacyTypeMatches,
   toUnifiedAttachmentType,
   UNIFIED_ALERT_TYPES_ARRAY,
   getAttachmentTypeFromAttributes,
@@ -32,12 +34,15 @@ import {
 import {
   COMMENT_ATTACHMENT_TYPE,
   FILE_ATTACHMENT_TYPE,
+  LEGACY_ALERT_TYPE,
+  LEGACY_EVENT_TYPE,
   LEGACY_EXTERNAL_REFERENCE_TYPE,
   LEGACY_FILE_ATTACHMENT_TYPE,
   SECURITY_ATTACK_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
 } from '../../../../common/constants/attachments';
 import { NodeBuilderOperators, buildFilter, combineFilters } from '../../../client/utils';
+import { commentsMatchFilter } from '../../../client/attachments/type_filter';
 import type {
   AttachmentTotals,
   DocumentAttachmentAttributesV2,
@@ -45,6 +50,7 @@ import type {
 import {
   AttachmentType,
   DocumentAttachmentAttributesRtV2,
+  ExternalReferenceStorageType,
   UnifiedAttachmentAttributesRt,
 } from '../../../../common/types/domain';
 import type {
@@ -54,7 +60,10 @@ import type {
   BulkOptionalAttributes,
   EventIdsAggsResult,
   GetAllAlertsAttachToCaseArgs as GetAllDocumentsAttachedToCaseArgs,
+  CasesWithOwnerOfAttachment,
   GetAttachmentArgs,
+  GetCaseIdsByAttachmentIdsAggs,
+  GetCaseIdsByAttachmentIdsArgs,
   GetUnifiedAttachmentsByTypesArgs,
   MixSavedObjectResponse,
   OptionalAttributes,
@@ -71,12 +80,45 @@ import {
 } from '../../so_references';
 import type { AttachmentSavedObjectType } from '../../user_actions/types';
 import { partitionByCaseAssociation } from '../../../common/partitioning';
-import { getCaseReferenceId } from '../../../common/references';
+import { findReferenceId, getCaseReferenceId } from '../../../common/references';
+import { getExternalReferenceStorage } from '../../../common/attachments/storage_type';
+import { EXTERNAL_REFERENCE_REF_NAME } from '../../../common/constants';
 import {
   decodeAttachmentSavedObject,
   toUnifiedAttributes,
   type ModeTransformedAttributes,
 } from './utils';
+
+/** The field each legacy `cases-comments` type keeps the id of what it attaches in. */
+const LEGACY_ATTACHMENT_ID_FIELDS: Readonly<Record<string, string>> = {
+  [LEGACY_ALERT_TYPE]: 'alertId',
+  [LEGACY_EVENT_TYPE]: 'eventId',
+  [LEGACY_EXTERNAL_REFERENCE_TYPE]: 'externalReferenceId',
+};
+
+/** The saved object type a legacy external reference attaches, when it attaches one. */
+const getReferencedSoType = ({ type, values }: LegacyTypeMatch): string | undefined => {
+  const [externalReferenceTypeId] = values ?? [];
+  if (type !== LEGACY_EXTERNAL_REFERENCE_TYPE || externalReferenceTypeId == null) return;
+  const storage = getExternalReferenceStorage(externalReferenceTypeId);
+  return storage.type === ExternalReferenceStorageType.savedObject ? storage.soType : undefined;
+};
+
+/** Joins the cases of the same attachment id read from several saved object types. */
+const mergeCasesOfAttachments = (
+  casesOfAttachments: CasesWithOwnerOfAttachment[]
+): CasesWithOwnerOfAttachment[] => {
+  const byAttachmentId = new Map<string, Map<string, string>>();
+  for (const { attachmentId, cases } of casesOfAttachments) {
+    const ownerByCaseId = byAttachmentId.get(attachmentId) ?? new Map<string, string>();
+    for (const { id, owner } of cases) ownerByCaseId.set(id, owner);
+    byAttachmentId.set(attachmentId, ownerByCaseId);
+  }
+  return [...byAttachmentId].map(([attachmentId, ownerByCaseId]) => ({
+    attachmentId,
+    cases: [...ownerByCaseId].map(([id, owner]) => ({ id, owner })),
+  }));
+};
 
 export class AttachmentGetter {
   constructor(private readonly context: ServiceContext) {}
@@ -521,6 +563,190 @@ export class AttachmentGetter {
     }
 
     return decoded;
+  }
+
+  /**
+   * The cases each attachment id is attached to, with their owners. Attachment ids in no case are
+   * left out. Reads `cases-attachments`, and the `cases-comments` rows of the type's legacy form,
+   * if it has one that stores the id.
+   */
+  public async getCaseIdsByAttachmentIds({
+    type,
+    attachmentIds: requestedIds,
+    unifiedFilter,
+    legacyFilter,
+  }: GetCaseIdsByAttachmentIdsArgs): Promise<CasesWithOwnerOfAttachment[]> {
+    const attachmentIds = [...new Set(requestedIds)];
+    try {
+      this.context.log.debug(
+        `Attempting to GET cases for attachment ids ${attachmentIds.join(', ')}`
+      );
+
+      const legacyMatches = toLegacyTypeMatches(type).filter((match) =>
+        Object.hasOwn(LEGACY_ATTACHMENT_ID_FIELDS, match.type)
+      );
+      const responses = await Promise.all([
+        this.findCasesOfAttachmentIds({
+          soType: CASE_ATTACHMENT_SAVED_OBJECT,
+          idField: 'attachmentId',
+          attachmentIds,
+          filter: combineFilters([
+            buildFilter({
+              filters: [type],
+              field: 'type',
+              operator: 'or',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+            }),
+            unifiedFilter,
+          ]),
+        }),
+        ...legacyMatches.map((match) => {
+          const legacyMatchFilter = combineFilters([commentsMatchFilter(match), legacyFilter]);
+          const referencedSoType = getReferencedSoType(match);
+          return referencedSoType
+            ? this.findCasesOfReferencedIds({
+                referencedSoType,
+                attachmentIds,
+                filter: legacyMatchFilter,
+              })
+            : this.findCasesOfAttachmentIds({
+                soType: CASE_COMMENT_SAVED_OBJECT,
+                idField: LEGACY_ATTACHMENT_ID_FIELDS[match.type],
+                attachmentIds,
+                filter: legacyMatchFilter,
+              });
+        }),
+      ]);
+
+      return mergeCasesOfAttachments(responses.flat());
+    } catch (error) {
+      this.context.log.error(
+        `Error on GET cases for attachment ids ${attachmentIds.join(', ')}: ${error}`
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Legacy rows that store what they attach as a saved object keep its id only in their
+   * references, which a find can't filter or aggregate on, so their rows are read.
+   */
+  private async findCasesOfReferencedIds({
+    referencedSoType,
+    attachmentIds,
+    filter,
+  }: {
+    referencedSoType: string;
+    attachmentIds: string[];
+    filter?: KueryNode;
+  }): Promise<CasesWithOwnerOfAttachment[]> {
+    const finder = this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<{
+      owner: string;
+    }>({
+      type: CASE_COMMENT_SAVED_OBJECT,
+      hasReference: attachmentIds.map((id) => ({ type: referencedSoType, id })),
+      fields: ['owner'],
+      filter,
+      perPage: MAX_DOCS_PER_PAGE,
+    });
+
+    const casesOfAttachments: CasesWithOwnerOfAttachment[] = [];
+    for await (const { saved_objects: attachments } of finder.find()) {
+      for (const { references, attributes } of attachments) {
+        const attachmentId = findReferenceId(
+          EXTERNAL_REFERENCE_REF_NAME,
+          referencedSoType,
+          references
+        );
+        const caseId = getCaseReferenceId(references);
+        if (attachmentId != null && caseId != null) {
+          casesOfAttachments.push({
+            attachmentId,
+            cases: [{ id: caseId, owner: attributes.owner }],
+          });
+        }
+      }
+    }
+    return casesOfAttachments;
+  }
+
+  private async findCasesOfAttachmentIds({
+    soType,
+    idField,
+    attachmentIds,
+    filter,
+  }: {
+    soType: typeof CASE_ATTACHMENT_SAVED_OBJECT | typeof CASE_COMMENT_SAVED_OBJECT;
+    idField: string;
+    attachmentIds: string[];
+    filter?: KueryNode;
+  }): Promise<CasesWithOwnerOfAttachment[]> {
+    const attributes = `${soType}.attributes`;
+    const response = await this.context.unsecuredSavedObjectsClient.find<
+      unknown,
+      GetCaseIdsByAttachmentIdsAggs
+    >({
+      type: soType,
+      page: 1,
+      perPage: 0,
+      aggs: {
+        attachmentIds: {
+          terms: {
+            field: `${attributes}.${idField}`,
+            size: attachmentIds.length,
+            // An attachment can hold many ids; its other ids must not take the requested ones' buckets.
+            include: attachmentIds,
+          },
+          aggs: {
+            references: {
+              nested: { path: `${soType}.references` },
+              aggregations: {
+                // Saved-object-backed attachments also reference their target, e.g. a dashboard.
+                cases: {
+                  filter: { term: { [`${soType}.references.type`]: CASE_SAVED_OBJECT } },
+                  aggregations: {
+                    caseIds: {
+                      terms: {
+                        field: `${soType}.references.id`,
+                        // Caps the cases of each attachment id; ES leaves the rest out silently, so
+                        // more than this is an error rather than a partial list.
+                        size: MAX_DOCS_PER_PAGE,
+                      },
+                      aggregations: {
+                        // An attachment has its case's owner, so the case is authorized without reading it.
+                        attachment: {
+                          reverse_nested: {},
+                          aggregations: {
+                            owner: { terms: { field: `${attributes}.owner`, size: 1 } },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      filter: combineFilters([
+        buildFilter({ filters: attachmentIds, field: idField, operator: 'or', type: soType }),
+        filter,
+      ]),
+    });
+
+    return (response.aggregations?.attachmentIds.buckets ?? []).map(({ key, references }) => {
+      const { buckets, sum_other_doc_count: casesLeftOut } = references.cases.caseIds;
+      if (casesLeftOut > 0) {
+        throw new Error(`Attachment id ${key} is in more than ${MAX_DOCS_PER_PAGE} cases`);
+      }
+      return {
+        attachmentId: key,
+        cases: buckets.flatMap(({ key: id, attachment }) =>
+          attachment.owner.buckets.map(({ key: owner }) => ({ id, owner }))
+        ),
+      };
+    });
   }
 
   /**
