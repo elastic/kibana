@@ -12,7 +12,7 @@ export function isSlackResponseUrl(url: string): boolean {
 }
 
 export function buildHitlSlackConfirmationText(params: {
-  kind: unknown;
+  kind?: unknown;
   approved?: unknown;
   slackUserId?: unknown;
   alreadyResponded?: boolean;
