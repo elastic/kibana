@@ -135,6 +135,54 @@ describe('AddModelPopover', () => {
     expect(screen.getByText('OpenAI GPT-4o-mini')).toBeInTheDocument();
   });
 
+  it('omits endpoints that accept only a prompt template', () => {
+    mockUseConnectors.mockReturnValue({
+      data: [
+        ...mockConnectors,
+        createConnector({
+          connectorId: 'ep-template-only',
+          name: 'Cyber template model',
+          metadata: { capabilities: { templates: { policy: 'required' } } },
+        }),
+      ],
+    });
+
+    render(
+      <Wrapper>
+        <AddModelPopover existingEndpointIds={[]} onAdd={onAdd} />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('add-model-button'));
+
+    expect(screen.queryByText('Cyber template model')).not.toBeInTheDocument();
+    expect(screen.getByText('OpenAI GPT-4o')).toBeInTheDocument();
+  });
+
+  it('lists only template endpoints when the feature opts in', () => {
+    mockUseConnectors.mockReturnValue({
+      data: [
+        ...mockConnectors,
+        createConnector({
+          connectorId: 'ep-template-only',
+          name: 'Cyber template model',
+          metadata: { capabilities: { templates: { policy: 'required' } } },
+        }),
+      ],
+    });
+
+    render(
+      <Wrapper>
+        <AddModelPopover existingEndpointIds={[]} onAdd={onAdd} allowTemplateRequiredModels />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('add-model-button'));
+
+    expect(screen.getByText('Cyber template model')).toBeInTheDocument();
+    expect(screen.queryByText('OpenAI GPT-4o')).not.toBeInTheDocument();
+  });
+
   it('lists all connectors returned by useConnectors (stack OpenAI, Bedrock, Gemini, and chat_completion endpoints)', () => {
     render(
       <Wrapper>
