@@ -224,9 +224,7 @@ export const bundleSpec = async (
         $ref: base === rootUrl ? ref : `#${toPointer(target.tokens)}`,
       };
     }
-    const componentRef = isPathItem(trail)
-      ? undefined
-      : await componentRefFor(target, ref, trail);
+    const componentRef = isPathItem(trail) ? undefined : await componentRefFor(target, ref, trail);
     if (componentRef === undefined) {
       // Inlined where it stands; the node's own fields take precedence over the referenced ones.
       const referenced = await bundle(await resolve(target, ref, trail), target.url, trail);
