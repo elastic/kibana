@@ -1,5 +1,5 @@
 {
-  "sha1": "2e1aad4099d5572ebf23897b8a9d7d52da932fc1",
+  "sha1": "2dfb32c6cdea98af42eb8f40a1b95225f022753a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -155,6 +155,32 @@
         "file": "src/platform/plugins/shared/home/test/scout/ui/tests/sample_data.spec.ts",
         "line": 46,
         "column": 78
+      }
+    },
+    {
+      "id": "300d8ea163050e4-f5371c5b9edda8e",
+      "title": "Kibana chrome and solution cards solution cards open their overview page without a11y violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/home/test/scout/ui/tests/solution_cards_and_nav.spec.ts",
+        "line": 29,
+        "column": 20
+      }
+    },
+    {
+      "id": "300d8ea163050e4-6e43a9a775afed5",
+      "title": "Kibana chrome and solution cards side navigation and global search have no a11y violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/home/test/scout/ui/tests/solution_cards_and_nav.spec.ts",
+        "line": 52,
+        "column": 5
       }
     }
   ]
