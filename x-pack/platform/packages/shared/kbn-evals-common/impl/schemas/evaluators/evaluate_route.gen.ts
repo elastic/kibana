@@ -18,11 +18,48 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 import { EvaluationSubject, Model, Direction } from '../common_attributes.gen';
 
+/**
+ * When set, successful scores are emitted as OTel `gen_ai.evaluation.result` events attached to the evaluated trace, and evaluators that already emitted results for this monitor and trace are skipped before they run.
+ */
+export const EvaluateEmitOptions = lazySchema(() =>
+  z.object({
+    monitor: z.object({
+      id: z.string().max(1024),
+      name: z.string().max(256),
+    }),
+  })
+);
+export type EvaluateEmitOptions = z.infer<typeof EvaluateEmitOptions>;
+
+export const EvaluateEmission = lazySchema(() =>
+  z.object({
+    /**
+     * Number of evaluation events emitted.
+     */
+    emitted: z.number().int().describe('Number of evaluation events emitted.'),
+    /**
+     * Evaluators (`name@version`) that were not run because they already emitted results for this monitor and trace. They are absent from `results`.
+     */
+    skipped_evaluators: z
+      .array(z.string())
+      .describe(
+        'Evaluators (`name@version`) that were not run because they already emitted results for this monitor and trace. They are absent from `results`.'
+      ),
+  })
+);
+export type EvaluateEmission = z.infer<typeof EvaluateEmission>;
+
 export const EvaluateResultEvaluator = lazySchema(() =>
   z.object({
     name: z.string().max(256),
     version: z.string().max(64),
     kind: z.enum(['llm', 'code']),
+    trace_id: z
+      .string()
+      .min(32)
+      .max(32)
+      .regex(/^[0-9a-f]{32}$/)
+      .optional(),
     /**
      * Whether a higher score is an improvement (`maximize`), a lower score is an improvement (`minimize`), or the score cannot be compared across arms at all (`neutral`).
      */
@@ -90,6 +127,7 @@ export const EvaluateRequestBody = lazySchema(() =>
       )
       .min(1)
       .max(20),
+    emit: EvaluateEmitOptions.optional(),
   })
 );
 export type EvaluateRequestBody = z.infer<typeof EvaluateRequestBody>;
@@ -98,6 +136,7 @@ export type EvaluateRequestBodyInput = z.input<typeof EvaluateRequestBody>;
 export const EvaluateResponse = lazySchema(() =>
   z.object({
     results: z.array(EvaluateResult),
+    emission: EvaluateEmission.optional(),
   })
 );
 export type EvaluateResponse = z.infer<typeof EvaluateResponse>;

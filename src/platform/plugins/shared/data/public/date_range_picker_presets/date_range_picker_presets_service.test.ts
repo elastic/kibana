@@ -56,11 +56,11 @@ const setup = () => {
  * `savePreset`/`deletePreset` is visible to a later `getPresets$()` subscription.
  */
 const withInMemoryStorage = ({ userStorage }: ReturnType<typeof setup>['core']) => {
-  const stored$ = new BehaviorSubject<unknown>(DEFAULT_STORED_PRESETS);
+  const stored$ = new BehaviorSubject<StoredPresets>(DEFAULT_STORED_PRESETS);
 
   userStorage.get.mockImplementation(async () => stored$.getValue());
   userStorage.get$.mockReturnValue(stored$.asObservable());
-  userStorage.set.mockImplementation(async (_key, value) => {
+  userStorage.set.mockImplementation(async (_key: string, value: StoredPresets) => {
     stored$.next(value);
     return value;
   });

@@ -12,6 +12,7 @@ import { httpServiceMock } from '@kbn/core/server/mocks';
 import {
   API_VERSIONS,
   EVALS_EVALUATE_URL,
+  EVALS_EVENTS_LOGS_INDEX_PATTERN,
   EvaluateRequestBody,
   type EvaluateResponse,
 } from '@kbn/evals-common';
@@ -25,6 +26,7 @@ import type { EvaluatorDefinition, EvaluatorRegistry } from '../../evaluators/ty
 import { awaitTraceReady, TraceReadinessError } from '../../evaluators/trace_readiness';
 import type { EvidenceRound, InstrumentationProfile } from '../../evaluators/evidence/types';
 import { withEvaluatorNameBaggage } from '../../evaluators/evaluator_tracing_context';
+import { getCurrentTraceId, withEvalsEvaluatorSpan } from '../../task_providers/tracing';
 import { registerEvaluateRoute } from './evaluate';
 import {
   buildClaudeCodeApiResponseDoc,
@@ -42,9 +44,17 @@ jest.mock('../../evaluators/trace_readiness', () => ({
 jest.mock('../../evaluators/evaluator_tracing_context', () => ({
   withEvaluatorNameBaggage: jest.fn((_: string, fn: () => unknown) => fn()),
 }));
+jest.mock('../../task_providers/tracing', () => ({
+  getCurrentTraceId: jest.fn(),
+  withEvalsEvaluatorSpan: jest.fn((_: string, run: () => Promise<unknown>) => run()),
+}));
 const awaitTraceReadyMock = awaitTraceReady as jest.MockedFunction<typeof awaitTraceReady>;
 const withEvaluatorNameBaggageMock = withEvaluatorNameBaggage as jest.MockedFunction<
   typeof withEvaluatorNameBaggage
+>;
+const getCurrentTraceIdMock = getCurrentTraceId as jest.MockedFunction<typeof getCurrentTraceId>;
+const withEvalsEvaluatorSpanMock = withEvalsEvaluatorSpan as jest.MockedFunction<
+  typeof withEvalsEvaluatorSpan
 >;
 const DEFAULT_ROUND = {
   input: { message: 'default input' },
@@ -145,6 +155,7 @@ describe('POST /internal/evals/_evaluate', () => {
 
   beforeEach(() => {
     awaitTraceReadyMock.mockResolvedValue(buildReadyResult(DEFAULT_ROUND));
+    getCurrentTraceIdMock.mockReturnValue(undefined);
   });
 
   afterEach(() => {
@@ -326,6 +337,67 @@ describe('POST /internal/evals/_evaluate', () => {
       'correctness',
       expect.any(Function)
     );
+  });
+
+  it('captures a trace id for llm evaluators without wrapping code evaluators', async () => {
+    const judgeTraceId = '1234567890abcdef1234567890abcdef';
+    getCurrentTraceIdMock.mockReturnValue(judgeTraceId);
+    const groundedness = buildEvaluator({ name: 'groundedness', kind: 'llm' });
+    const latency = buildEvaluator({
+      name: 'latency',
+      kind: 'code',
+      evaluate: jest.fn().mockResolvedValue({ scores: [{ name: 'latency', score: 42 }] }),
+    });
+    const { handler } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([groundedness, latency]),
+      inferenceStart: {
+        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+      } as unknown as InferenceServerStart,
+    });
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: { traces: [{ trace_id: CLAUDE_TRACE_ID }] },
+          evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }, { name: 'latency' }],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload.results[0].evaluator.trace_id).toBe(judgeTraceId);
+    expect(response.payload.results[1].evaluator).not.toHaveProperty('trace_id');
+    expect(withEvalsEvaluatorSpanMock).toHaveBeenCalledTimes(1);
+    expect(withEvalsEvaluatorSpanMock).toHaveBeenCalledWith('groundedness', expect.any(Function));
+    expect(getCurrentTraceIdMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('omits the llm evaluator trace id when tracing is disabled', async () => {
+    const groundedness = buildEvaluator({ name: 'groundedness', kind: 'llm' });
+    const { handler } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([groundedness]),
+      inferenceStart: {
+        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+      } as unknown as InferenceServerStart,
+    });
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: { traces: [{ trace_id: CLAUDE_TRACE_ID }] },
+          evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload.results[0].evaluator).not.toHaveProperty('trace_id');
+    expect(withEvalsEvaluatorSpanMock).toHaveBeenCalledTimes(1);
+    expect(getCurrentTraceIdMock).toHaveBeenCalledTimes(1);
   });
 
   it('uses otel-genai-attributes mapping when requested', async () => {
@@ -1218,5 +1290,309 @@ describe('POST /internal/evals/_evaluate', () => {
       message: 'Trace abc123 is not ready: no documents indexed in traces-* or logs-* yet',
     });
     expect(groundedness.evaluate).not.toHaveBeenCalled();
+  });
+
+  describe('emit', () => {
+    const MONITOR = { id: 'workflow-1', name: '[online-eval] Monitor' };
+    const ROOT_SPAN_ID = 'b7ad6b7169203331';
+    const FALLBACK_SPAN_ID = 'a1b2c3d4e5f60718';
+
+    interface EmitSearchRequest {
+      index?: string;
+      query?: { bool?: { must_not?: unknown[] } };
+    }
+
+    const buildEmitSearch = ({
+      emittedEvaluators = [],
+      emittedTotal,
+      rootSpanId = ROOT_SPAN_ID,
+      earliestSpanId,
+    }: {
+      emittedEvaluators?: Array<{ name: string; version: string }>;
+      emittedTotal?: number;
+      rootSpanId?: string;
+      earliestSpanId?: string;
+    } = {}) =>
+      jest.fn().mockImplementation(async (request: EmitSearchRequest) => {
+        if (request.index === EVALS_EVENTS_LOGS_INDEX_PATTERN) {
+          const response = withHits(
+            emittedEvaluators.map(({ name, version }) => ({
+              attributes: {
+                'kibana.evals.evaluator.name': name,
+                'kibana.evals.evaluator.version': version,
+              },
+            }))
+          );
+          return emittedTotal === undefined
+            ? response
+            : { hits: { ...response.hits, total: { value: emittedTotal, relation: 'gte' } } };
+        }
+        if (request.index === 'traces-*') {
+          const isRootQuery = Boolean(request.query?.bool?.must_not);
+          const spanId = isRootQuery ? rootSpanId : earliestSpanId;
+          return withHits(spanId ? [{ span_id: spanId }] : []);
+        }
+        return withHits([]);
+      });
+
+    const buildEmitContext = (search: jest.Mock, emit: jest.Mock) =>
+      ({
+        core: Promise.resolve({
+          elasticsearch: { client: { asInternalUser: { search } } },
+        }),
+        evals: Promise.resolve({ evaluationEventsEmitter: { emit } }),
+      } as const);
+
+    const setupEmit = () => {
+      const groundedness = buildEvaluator({ name: 'groundedness', kind: 'llm' });
+      const latency = buildEvaluator({
+        name: 'latency',
+        kind: 'code',
+        evaluate: jest.fn().mockResolvedValue({ scores: [{ name: 'latency', score: 42 }] }),
+      });
+      const { handler, logger } = setup({
+        evaluatorRegistry: buildEvaluatorRegistry([groundedness, latency]),
+        inferenceStart: {
+          getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+        } as unknown as InferenceServerStart,
+      });
+      const request = {
+        body: {
+          subject: { traces: [{ trace_id: CLAUDE_TRACE_ID }] },
+          evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }, { name: 'latency' }],
+          emit: { monitor: MONITOR },
+        },
+      } as unknown as Parameters<typeof handler>[1];
+
+      return { handler, logger, request, groundedness, latency };
+    };
+
+    it('does not search for or emit events when emit is absent', async () => {
+      const { handler, groundedness } = setupEmit();
+      const search = buildEmitSearch();
+
+      const response = await handler(
+        buildContext(search) as unknown as Parameters<typeof handler>[0],
+        {
+          body: {
+            subject: { traces: [{ trace_id: CLAUDE_TRACE_ID }] },
+            evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }],
+          },
+        } as unknown as Parameters<typeof handler>[1],
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.payload).not.toHaveProperty('emission');
+      expect(groundedness.evaluate).toHaveBeenCalledTimes(1);
+      expect(search).not.toHaveBeenCalledWith(
+        expect.objectContaining({ index: EVALS_EVENTS_LOGS_INDEX_PATTERN })
+      );
+    });
+
+    it('skips already-emitted evaluators before running them and emits the rest on the root span', async () => {
+      const { handler, request, groundedness, latency } = setupEmit();
+      const search = buildEmitSearch({
+        emittedEvaluators: [{ name: 'groundedness', version: '1.0.0' }],
+      });
+      const emit = jest.fn().mockResolvedValue({ emitted: 1 });
+
+      const response = await handler(
+        buildEmitContext(search, emit) as unknown as Parameters<typeof handler>[0],
+        request,
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(200);
+      expect(groundedness.evaluate).not.toHaveBeenCalled();
+      expect(latency.evaluate).toHaveBeenCalledTimes(1);
+      expect(response.payload.results).toHaveLength(1);
+      expect(response.payload.results[0].evaluator.name).toBe('latency');
+      expect(response.payload.emission).toEqual({
+        emitted: 1,
+        skipped_evaluators: ['groundedness@1.0.0'],
+      });
+      expect(emit).toHaveBeenCalledWith({
+        spaceId: 'default',
+        monitor: MONITOR,
+        traceId: CLAUDE_TRACE_ID,
+        spanId: ROOT_SPAN_ID,
+        connectorIdByEvaluator: new Map(),
+        results: response.payload.results,
+      });
+    });
+
+    it('passes each llm evaluator connector to the emitter', async () => {
+      const { handler, request } = setupEmit();
+      const emit = jest.fn().mockResolvedValue({ emitted: 2 });
+
+      const response = await handler(
+        buildEmitContext(buildEmitSearch(), emit) as unknown as Parameters<typeof handler>[0],
+        request,
+        kibanaResponseFactory
+      );
+
+      expect(response.payload.emission).toEqual({ emitted: 2, skipped_evaluators: [] });
+      expect(emit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connectorIdByEvaluator: new Map([['groundedness', 'connector-1']]),
+        })
+      );
+    });
+
+    it('returns without evaluating when every evaluator already emitted', async () => {
+      const { handler, request, groundedness, latency } = setupEmit();
+      const search = buildEmitSearch({
+        emittedEvaluators: [
+          { name: 'groundedness', version: '1.0.0' },
+          { name: 'latency', version: '1.0.0' },
+        ],
+      });
+      const emit = jest.fn();
+
+      const response = await handler(
+        buildEmitContext(search, emit) as unknown as Parameters<typeof handler>[0],
+        request,
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({
+        results: [],
+        emission: { emitted: 0, skipped_evaluators: ['groundedness@1.0.0', 'latency@1.0.0'] },
+      });
+      expect(awaitTraceReadyMock).not.toHaveBeenCalled();
+      expect(groundedness.evaluate).not.toHaveBeenCalled();
+      expect(latency.evaluate).not.toHaveBeenCalled();
+      expect(emit).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the earliest span when the root span is not stored', async () => {
+      const { handler, request } = setupEmit();
+      const emit = jest.fn().mockResolvedValue({ emitted: 2 });
+
+      await handler(
+        buildEmitContext(
+          buildEmitSearch({ rootSpanId: '', earliestSpanId: FALLBACK_SPAN_ID }),
+          emit
+        ) as unknown as Parameters<typeof handler>[0],
+        request,
+        kibanaResponseFactory
+      );
+
+      expect(emit).toHaveBeenCalledWith(expect.objectContaining({ spanId: FALLBACK_SPAN_ID }));
+    });
+
+    it('returns 500 when no span can anchor the events', async () => {
+      const { handler, request, logger } = setupEmit();
+      const emit = jest.fn();
+
+      const response = await handler(
+        buildEmitContext(buildEmitSearch({ rootSpanId: '' }), emit) as unknown as Parameters<
+          typeof handler
+        >[0],
+        request,
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(500);
+      expect(response.payload).toEqual({ message: 'Failed to store evaluation events' });
+      expect(emit).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        `Failed to emit evaluation events for trace ${CLAUDE_TRACE_ID}: No span found in trace ${CLAUDE_TRACE_ID} to attach evaluation events to`
+      );
+    });
+
+    it('returns 500 without leaking the exporter error when the emitter fails', async () => {
+      const { handler, request, logger } = setupEmit();
+      const emit = jest.fn().mockRejectedValue(new Error('export to http://collector failed'));
+
+      const response = await handler(
+        buildEmitContext(buildEmitSearch(), emit) as unknown as Parameters<typeof handler>[0],
+        request,
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(500);
+      expect(response.payload).toEqual({ message: 'Failed to store evaluation events' });
+      expect(logger.error).toHaveBeenCalledWith(
+        `Failed to emit evaluation events for trace ${CLAUDE_TRACE_ID}: export to http://collector failed`
+      );
+    });
+
+    it('returns 500 without evaluating when too many emitted events match to deduplicate', async () => {
+      const { handler, request, logger, groundedness, latency } = setupEmit();
+      const emit = jest.fn();
+
+      const response = await handler(
+        buildEmitContext(buildEmitSearch({ emittedTotal: 1001 }), emit) as unknown as Parameters<
+          typeof handler
+        >[0],
+        request,
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(500);
+      expect(response.payload).toEqual({ message: 'Failed to store evaluation events' });
+      expect(groundedness.evaluate).not.toHaveBeenCalled();
+      expect(latency.evaluate).not.toHaveBeenCalled();
+      expect(emit).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalled();
+    });
+
+    it('does not emit evaluator errors', async () => {
+      const { handler, request, groundedness } = setupEmit();
+      (groundedness.evaluate as jest.Mock).mockRejectedValue(new Error('judge failed'));
+      const emit = jest.fn().mockResolvedValue({ emitted: 1 });
+
+      const response = await handler(
+        buildEmitContext(buildEmitSearch(), emit) as unknown as Parameters<typeof handler>[0],
+        request,
+        kibanaResponseFactory
+      );
+
+      expect(response.payload.results.map(({ status }: { status: string }) => status)).toEqual([
+        'error',
+        'ok',
+      ]);
+      expect(emit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          results: [
+            expect.objectContaining({ evaluator: expect.objectContaining({ name: 'latency' }) }),
+          ],
+        })
+      );
+    });
+
+    it('returns 400 when emit is combined with an invalid trace id', async () => {
+      const { handler, groundedness } = setupEmit();
+      const emit = jest.fn();
+
+      const response = await handler(
+        buildEmitContext(buildEmitSearch(), emit) as unknown as Parameters<typeof handler>[0],
+        {
+          body: {
+            subject: { traces: [{ trace_id: 'not-a-trace-id' }] },
+            evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }],
+            emit: { monitor: MONITOR },
+          },
+        } as unknown as Parameters<typeof handler>[1],
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(400);
+      expect(groundedness.evaluate).not.toHaveBeenCalled();
+      expect(emit).not.toHaveBeenCalled();
+    });
+
+    it('accepts the emit block at the request boundary', () => {
+      const parsed = EvaluateRequestBody.safeParse({
+        subject: { traces: [{ trace_id: CLAUDE_TRACE_ID }] },
+        evaluators: [{ name: 'latency' }],
+        emit: { monitor: MONITOR },
+      });
+
+      expect(parsed.success).toBe(true);
+    });
   });
 });

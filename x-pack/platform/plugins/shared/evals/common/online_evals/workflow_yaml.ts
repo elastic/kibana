@@ -6,6 +6,7 @@
  */
 
 import { parseYamlToJSONWithoutValidation, stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
+import type { OnlineEvalResultSink } from '@kbn/evals-common';
 
 export const ONLINE_EVAL_WORKFLOW_TAG = 'evals-online';
 const ONLINE_EVAL_NAME_PREFIX = '[online-eval] ';
@@ -17,15 +18,21 @@ const PERSIST_STEP_NAME = 'persist';
 
 const SAMPLE_TRACES_OUTPUT_VALUES_TEMPLATE = '{{ steps.sample_traces.output.values }}';
 const TRACE_ID_TEMPLATE = '{{ foreach.item[1] }}';
+// Earlier `otel_events` builds sampled the root span id and posted results to a separate
+// events route. Parsing that shape keeps those monitors visible so an edit can upgrade them.
+const LEGACY_SPAN_ID_TEMPLATE = '{{ foreach.item[2] }}';
 const CONNECTOR_ID_TEMPLATE = '{{ consts.connector_id }}';
 const WORKFLOW_ID_TEMPLATE = '{{ workflow.id }}';
 const WORKFLOW_NAME_TEMPLATE = '{{ workflow.name }}';
+const MONITOR_TEMPLATE = { id: '{{ workflow.id }}', name: '{{ workflow.name }}' } as const;
 // `kibana.request` paths are sent as Kibana-root paths, so the workflow space must be
 // explicit for the evals routes to resolve evaluators and stamp scores in that space.
 // Keep module-level values plain literals: computed values make the bundler keep this module
 // in the plugin's page-load bundle through the `common` barrel.
 const EVALUATE_PATH = '/s/{{ workflow.spaceId }}/internal/evals/_evaluate';
-const PERSIST_PATH = '/s/{{ workflow.spaceId }}/internal/evals/online_scores';
+const DATA_STREAM_PERSIST_PATH = '/s/{{ workflow.spaceId }}/internal/evals/online_scores';
+const LEGACY_OTEL_EVENTS_PERSIST_PATH =
+  '/s/{{ workflow.spaceId }}/internal/evals/online_evaluation_events';
 // `${{ ... }}` (not `{{ ... }}`) is required here: the workflow templating engine
 // stringifies plain `{{ }}` interpolations, which would turn this array into a
 // string and fail `IngestOnlineScoresRequestBody`'s `results: array` validation.
@@ -38,6 +45,8 @@ const WINDOW_AND_LAG_REGEX =
 const LIMIT_REGEX = /\|\s*LIMIT\s+(\d+)/i;
 const FROM_REGEX = /^FROM\s+(.+)$/i;
 const WHERE_PREFIX_REGEX = /^\|\s*WHERE\s+/i;
+const LEGACY_OTEL_EVENTS_STATS_REGEX =
+  /^\|\s*STATS\s+latest\s*=\s*MAX\(@timestamp\)\s+BY\s+trace_id\s*,\s*span_id$/i;
 // Matches the trace-filter line across all generations of the sample query so
 // workflows created by older builds keep parsing (and the line is never
 // misread as the user's extra WHERE filter):
@@ -60,6 +69,7 @@ export interface OnlineEvalWorkflowEvaluatorConfig {
 
 export interface OnlineEvalWorkflowConfig {
   name: string;
+  resultSink: OnlineEvalResultSink;
   indexPattern: string;
   extraEsqlWhere?: string;
   windowMinutes: number;
@@ -100,7 +110,8 @@ const buildEsqlQuery = ({
 };
 
 const parseEsqlQuery = (
-  query: string
+  query: string,
+  requireLegacySpanIdStats: boolean
 ): Pick<
   OnlineEvalWorkflowConfig,
   'indexPattern' | 'extraEsqlWhere' | 'windowMinutes' | 'lagMinutes' | 'maxTracesPerRun'
@@ -114,8 +125,15 @@ const parseEsqlQuery = (
   const windowAndLagLine = lines.find((line) => WINDOW_AND_LAG_REGEX.test(line));
   const traceFilterLine = lines.find((line) => TRACE_FILTER_REGEX.test(line));
   const limitLine = lines.find((line) => LIMIT_REGEX.test(line));
+  const legacyStatsLine = lines.find((line) => LEGACY_OTEL_EVENTS_STATS_REGEX.test(line));
 
-  if (!fromLine || !windowAndLagLine || !traceFilterLine || !limitLine) {
+  if (
+    !fromLine ||
+    !windowAndLagLine ||
+    !traceFilterLine ||
+    !limitLine ||
+    (requireLegacySpanIdStats && !legacyStatsLine)
+  ) {
     return null;
   }
 
@@ -199,9 +217,69 @@ const getNamedStep = (steps: unknown, expectedName: string): WorkflowStep | null
   return toWorkflowStep(maybeStep);
 };
 
+const isMonitorTemplate = (value: unknown): boolean => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  const monitor = value as Record<string, unknown>;
+  return monitor.id === WORKFLOW_ID_TEMPLATE && monitor.name === WORKFLOW_NAME_TEMPLATE;
+};
+
+/**
+ * Derives the result sink from the evaluate step's `emit` block or, failing that, the
+ * persist step. Returns `null` when neither matches a shape this builder produces.
+ */
+const parseResultSink = (
+  evaluateEmit: unknown,
+  persistStep: WorkflowStep | null
+): { resultSink: OnlineEvalResultSink; isLegacy: boolean } | null => {
+  if (evaluateEmit !== undefined) {
+    const emitsForMonitor =
+      Boolean(evaluateEmit) &&
+      typeof evaluateEmit === 'object' &&
+      isMonitorTemplate((evaluateEmit as { monitor?: unknown }).monitor);
+    return emitsForMonitor && !persistStep ? { resultSink: 'otel_events', isLegacy: false } : null;
+  }
+
+  if (!persistStep || persistStep.type !== 'kibana.request') {
+    return null;
+  }
+
+  const persistStepWith =
+    persistStep.with && typeof persistStep.with === 'object'
+      ? (persistStep.with as Record<string, unknown>)
+      : null;
+  if (!persistStepWith || persistStepWith.method !== 'POST') {
+    return null;
+  }
+
+  const isLegacy = persistStepWith.path === LEGACY_OTEL_EVENTS_PERSIST_PATH;
+  if (!isLegacy && persistStepWith.path !== DATA_STREAM_PERSIST_PATH) {
+    return null;
+  }
+
+  const persistStepBody =
+    persistStepWith.body && typeof persistStepWith.body === 'object'
+      ? (persistStepWith.body as Record<string, unknown>)
+      : null;
+  if (
+    !persistStepBody ||
+    !isMonitorTemplate(persistStepBody.monitor) ||
+    persistStepBody.trace_id !== TRACE_ID_TEMPLATE ||
+    (isLegacy && persistStepBody.span_id !== LEGACY_SPAN_ID_TEMPLATE) ||
+    persistStepBody.connector_id !== CONNECTOR_ID_TEMPLATE ||
+    persistStepBody.results !== EVALUATE_RESULTS_TEMPLATE
+  ) {
+    return null;
+  }
+
+  return { resultSink: isLegacy ? 'otel_events' : 'data_stream', isLegacy };
+};
+
 export const buildOnlineEvalWorkflowYaml = (config: OnlineEvalWorkflowConfig): string => {
   const {
     name,
+    resultSink,
     indexPattern,
     extraEsqlWhere,
     windowMinutes,
@@ -262,31 +340,35 @@ export const buildOnlineEvalWorkflowYaml = (config: OnlineEvalWorkflowConfig): s
                   ...(evaluator.version ? { version: evaluator.version } : {}),
                   connector_id: CONNECTOR_ID_TEMPLATE,
                 })),
+                // `_evaluate` emits the results as OTel evaluation events itself, so this
+                // sink has no persist step.
+                ...(resultSink === 'otel_events' ? { emit: { monitor: MONITOR_TEMPLATE } } : {}),
               },
             },
           },
-          {
-            name: PERSIST_STEP_NAME,
-            type: 'kibana.request',
-            with: {
-              method: 'POST',
-              path: PERSIST_PATH,
-              headers: {
-                'kbn-xsrf': 'true',
-                'elastic-api-version': '1',
-                'x-elastic-internal-origin': 'kibana',
-              },
-              body: {
-                monitor: {
-                  id: WORKFLOW_ID_TEMPLATE,
-                  name: WORKFLOW_NAME_TEMPLATE,
+          ...(resultSink === 'data_stream'
+            ? [
+                {
+                  name: PERSIST_STEP_NAME,
+                  type: 'kibana.request',
+                  with: {
+                    method: 'POST',
+                    path: DATA_STREAM_PERSIST_PATH,
+                    headers: {
+                      'kbn-xsrf': 'true',
+                      'elastic-api-version': '1',
+                      'x-elastic-internal-origin': 'kibana',
+                    },
+                    body: {
+                      monitor: MONITOR_TEMPLATE,
+                      trace_id: TRACE_ID_TEMPLATE,
+                      connector_id: CONNECTOR_ID_TEMPLATE,
+                      results: EVALUATE_RESULTS_TEMPLATE,
+                    },
+                  },
                 },
-                trace_id: TRACE_ID_TEMPLATE,
-                connector_id: CONNECTOR_ID_TEMPLATE,
-                results: EVALUATE_RESULTS_TEMPLATE,
-              },
-            },
-          },
+              ]
+            : []),
         ],
       },
     ],
@@ -345,11 +427,6 @@ export const parseOnlineEvalWorkflowYaml = (yaml: string): OnlineEvalWorkflowCon
       ? (sampleTracesStep.with as { query?: unknown }).query
       : undefined;
   if (typeof sampleTracesQuery !== 'string') {
-    return undefined;
-  }
-
-  const parsedEsqlQuery = parseEsqlQuery(sampleTracesQuery);
-  if (!parsedEsqlQuery) {
     return undefined;
   }
 
@@ -418,47 +495,23 @@ export const parseOnlineEvalWorkflowYaml = (yaml: string): OnlineEvalWorkflowCon
     });
   }
 
-  const persistStep = getNamedStep(evaluateEachStep.steps, PERSIST_STEP_NAME);
-  if (!persistStep || persistStep.type !== 'kibana.request') {
+  const resultSinkMatch = parseResultSink(
+    evaluateStepBody?.emit,
+    getNamedStep(evaluateEachStep.steps, PERSIST_STEP_NAME)
+  );
+  if (!resultSinkMatch) {
     return undefined;
   }
+  const { resultSink, isLegacy } = resultSinkMatch;
 
-  const persistStepWith =
-    persistStep.with && typeof persistStep.with === 'object'
-      ? (persistStep.with as Record<string, unknown>)
-      : null;
-
-  if (
-    !persistStepWith ||
-    persistStepWith.method !== 'POST' ||
-    persistStepWith.path !== PERSIST_PATH
-  ) {
-    return undefined;
-  }
-
-  const persistStepBody =
-    persistStepWith.body && typeof persistStepWith.body === 'object'
-      ? (persistStepWith.body as Record<string, unknown>)
-      : null;
-
-  const persistStepMonitor =
-    persistStepBody?.monitor && typeof persistStepBody.monitor === 'object'
-      ? (persistStepBody.monitor as Record<string, unknown>)
-      : null;
-  if (
-    !persistStepBody ||
-    !persistStepMonitor ||
-    persistStepMonitor.id !== WORKFLOW_ID_TEMPLATE ||
-    persistStepMonitor.name !== WORKFLOW_NAME_TEMPLATE ||
-    persistStepBody.trace_id !== TRACE_ID_TEMPLATE ||
-    persistStepBody.connector_id !== CONNECTOR_ID_TEMPLATE ||
-    persistStepBody.results !== EVALUATE_RESULTS_TEMPLATE
-  ) {
+  const parsedEsqlQuery = parseEsqlQuery(sampleTracesQuery, isLegacy);
+  if (!parsedEsqlQuery) {
     return undefined;
   }
 
   return {
     name: parsedName,
+    resultSink,
     indexPattern: parsedEsqlQuery.indexPattern,
     ...(parsedEsqlQuery.extraEsqlWhere ? { extraEsqlWhere: parsedEsqlQuery.extraEsqlWhere } : {}),
     windowMinutes: parsedEsqlQuery.windowMinutes,

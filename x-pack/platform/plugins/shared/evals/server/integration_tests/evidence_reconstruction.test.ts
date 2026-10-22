@@ -27,6 +27,8 @@ import {
 } from '@kbn/evals-common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { tracing } from '@elastic/opentelemetry-node/sdk';
+import { ElasticsearchOtlpExporter } from '@kbn/tracing';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { createEvaluatorRegistry } from '../evaluators/registry';
@@ -39,11 +41,14 @@ import { registerEvaluateRoute } from '../routes/evaluators/evaluate';
 import { registerResolveInstrumentationRoute } from '../routes/evaluators/resolve_instrumentation';
 import { registerValidateRoute } from '../routes/evaluators/validate';
 import { registerGetTraceEvidenceRoute } from '../routes/traces/get_trace_evidence';
+import { EvaluationEventsEmitter } from '../online_evals/evaluation_events_emitter';
 
 const logger = loggingSystemMock.createLogger();
 const LOGS_INDEX = 'logs-evals-evidence-reconstruction-it';
 const LOGS_BACKING_INDEX = 'evals-logs-evidence-reconstruction-it';
 const TRACES_INDEX = 'traces-evals-evidence-reconstruction-it';
+const EVALUATION_LOGS_DATA_STREAM = 'logs-evals.otel-default';
+const EVALUATION_TRACES_DATA_STREAM = 'traces-evals.otel-default';
 
 const ELASTIC_CONVENTION_TRACE_ID = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 const OTEL_EVENTS_TRACE_ID = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
@@ -69,6 +74,11 @@ const groundednessJudgeResponse: GroundednessAnalysis = {
 };
 
 const cleanupEvidenceIndices = async (esClient: ElasticsearchClient) => {
+  await Promise.all(
+    [EVALUATION_LOGS_DATA_STREAM, EVALUATION_TRACES_DATA_STREAM].map((name) =>
+      esClient.indices.deleteDataStream({ name }).catch(() => {})
+    )
+  );
   await esClient.indices
     .deleteAlias({
       index: LOGS_BACKING_INDEX,
@@ -670,6 +680,89 @@ describe('trace evidence reconstruction integration', () => {
       })
     );
   });
+
+  it.each([
+    {
+      profile: 'elastic-inference' as const,
+      traceId: ELASTIC_CONVENTION_TRACE_ID,
+      spanId: '1111111111111111',
+    },
+    {
+      profile: 'otel-genai-attributes' as const,
+      traceId: OTEL_ATTRIBUTES_TRACE_ID,
+      spanId: '2222222222222222',
+    },
+  ])(
+    'ignores evaluation spans and events for $profile evidence',
+    async ({ profile, traceId, spanId }) => {
+      const traceAccessor = createTraceAccessor({ esClient, traceId });
+      const readinessOptions = {
+        retries: 1,
+        minTimeout: 1,
+        maxTimeout: 1,
+        stabilityWindowMs: 0,
+      };
+      const evidenceBefore = await normalizeEvidence(
+        traceAccessor,
+        getInstrumentationProfile(profile)
+      );
+      const readinessBefore = await awaitTraceReady(
+        traceAccessor,
+        { mode: 'stable', profile },
+        logger,
+        readinessOptions
+      );
+      const emitter = new EvaluationEventsEmitter(
+        new tracing.SimpleSpanProcessor(new ElasticsearchOtlpExporter(esClient))
+      );
+
+      try {
+        await emitter.emit({
+          spaceId: 'default',
+          monitor: { id: `monitor-${profile}`, name: `${profile} monitor` },
+          traceId,
+          spanId,
+          connectorIdByEvaluator: new Map([['groundedness', 'connector-1']]),
+          results: [
+            {
+              status: 'ok',
+              evaluator: {
+                name: 'groundedness',
+                version: '1.0.0',
+                kind: 'llm',
+              },
+              scores: [
+                {
+                  name: 'groundedness',
+                  score: 1,
+                  label: 'pass',
+                },
+              ],
+            },
+          ],
+        });
+        await esClient.indices.refresh({
+          index: [EVALUATION_LOGS_DATA_STREAM, EVALUATION_TRACES_DATA_STREAM],
+        });
+
+        const evidenceAfter = await normalizeEvidence(
+          traceAccessor,
+          getInstrumentationProfile(profile)
+        );
+        const readinessAfter = await awaitTraceReady(
+          traceAccessor,
+          { mode: 'stable', profile },
+          logger,
+          readinessOptions
+        );
+
+        expect(evidenceAfter).toEqual(evidenceBefore);
+        expect(readinessAfter.readiness).toBe(readinessBefore.readiness);
+      } finally {
+        await emitter.shutdown();
+      }
+    }
+  );
 
   it('evaluates groundedness and code evaluators without unmapped-field search failures', async () => {
     const { evaluateHandler } = setupRoutes();

@@ -1,0 +1,122 @@
+openapi: 3.0.0
+info:
+  title: List Online Evaluation Events API endpoint
+  version: '1'
+paths:
+  /internal/evals/online_evaluation_events:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: ListOnlineEvaluationEvents
+      description: List online evaluation events for a monitor
+      summary: List online evaluation events
+      tags:
+        - Evals API
+      parameters:
+        - in: query
+          name: monitor_id
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 1
+        - in: query
+          name: per_page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - total
+                  - data
+                properties:
+                  total:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - '@timestamp'
+                        - monitor
+                        - trace_id
+                        - evaluator
+                        - score
+                      properties:
+                        '@timestamp':
+                          type: string
+                          format: date-time
+                        monitor:
+                          type: object
+                          required:
+                            - id
+                            - name
+                          properties:
+                            id:
+                              type: string
+                              maxLength: 1024
+                            name:
+                              type: string
+                              maxLength: 256
+                        trace_id:
+                          type: string
+                          maxLength: 256
+                        connector_id:
+                          type: string
+                          maxLength: 256
+                        evaluator:
+                          type: object
+                          required:
+                            - name
+                            - version
+                            - kind
+                          properties:
+                            name:
+                              type: string
+                              maxLength: 256
+                            version:
+                              type: string
+                              maxLength: 64
+                            kind:
+                              type: string
+                              enum:
+                                - llm
+                                - code
+                            trace_id:
+                              type: string
+                              minLength: 32
+                              maxLength: 32
+                              pattern: '^[0-9a-f]{32}$'
+                        score:
+                          type: object
+                          required:
+                            - name
+                          properties:
+                            name:
+                              type: string
+                              maxLength: 256
+                            value:
+                              type: number
+                              nullable: true
+                            label:
+                              type: string
+                              maxLength: 1024
+                            explanation:
+                              type: string
+                              maxLength: 8192

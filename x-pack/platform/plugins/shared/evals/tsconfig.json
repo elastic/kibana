@@ -40,6 +40,7 @@
     "@kbn/es-mappings",
     "@kbn/inference-common",
     "@kbn/inference-tracing",
+    "@kbn/tracing",
     "@kbn/zod",
     "@kbn/evals-runner",
     "@kbn/workflows",
@@ -56,6 +57,6 @@
     "@kbn/std",
     "@kbn/repo-info",
     "@kbn/ui-callout",
-    "@kbn/core-http-browser-mocks"
+    "@kbn/core-http-browser-mocks",
   ]
 }

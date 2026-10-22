@@ -40,6 +40,8 @@ import { onlineScoresDataStreamDefinition } from './storage/scores/online_scores
 import { createTaskProviderRegistry } from './task_providers/registry';
 import type { TaskProviderRegistry } from './task_providers/types';
 import { registerEvalsWorkflowSteps } from './workflows';
+import { EvaluationEventsEmitter } from './online_evals/evaluation_events_emitter';
+import { createEvaluationEventsProcessors } from './online_evals/create_evaluation_events_processors';
 
 export class EvalsPlugin
   implements
@@ -54,6 +56,7 @@ export class EvalsPlugin
   private evaluatorDefinitionService?: EvaluatorDefinitionService;
   private taskProviderRegistry?: TaskProviderRegistry;
   private onlineScoreService?: OnlineScoreService;
+  private evaluationEventsEmitter?: EvaluationEventsEmitter;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
@@ -99,7 +102,8 @@ export class EvalsPlugin
           !this.evaluationScoreService ||
           !this.onlineScoreService ||
           !this.evaluatorDefinitionService ||
-          !this.evaluatorRegistry
+          !this.evaluatorRegistry ||
+          !this.evaluationEventsEmitter
         ) {
           throw new Error('Evals storage services have not been initialized');
         }
@@ -110,6 +114,7 @@ export class EvalsPlugin
           onlineScoreService: this.onlineScoreService,
           evaluatorDefinitionService: this.evaluatorDefinitionService,
           evaluatorRegistry: this.evaluatorRegistry,
+          evaluationEventsEmitter: this.evaluationEventsEmitter,
         };
       }
     );
@@ -257,6 +262,12 @@ export class EvalsPlugin
       evaluatorRegistry.isBuiltIn
     );
     this.onlineScoreService = new OnlineScoreService(this.logger, coreStart.dataStreams);
+    this.evaluationEventsEmitter = new EvaluationEventsEmitter(
+      ...createEvaluationEventsProcessors({
+        exporters: this.config.onlineEvals.exporters,
+        esClient: coreStart.elasticsearch.client.asInternalUser,
+      })
+    );
 
     return {
       datasetService: this.datasetService,
@@ -285,5 +296,8 @@ export class EvalsPlugin
     };
   }
 
-  stop() {}
+  async stop(): Promise<void> {
+    await this.evaluationEventsEmitter?.shutdown();
+    this.evaluationEventsEmitter = undefined;
+  }
 }

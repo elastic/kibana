@@ -51,6 +51,7 @@ dependsOn:
   - '@kbn/es-mappings'
   - '@kbn/inference-common'
   - '@kbn/inference-tracing'
+  - '@kbn/tracing'
   - '@kbn/zod'
   - '@kbn/evals-runner'
   - '@kbn/workflows'

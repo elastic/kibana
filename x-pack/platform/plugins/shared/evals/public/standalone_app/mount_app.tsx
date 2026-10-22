@@ -14,12 +14,14 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { EvalsStartDependencies } from '../types';
+import type { EvalsPublicConfig } from '../plugin';
 import { EvalsApp } from '../application';
 import { APP_TITLE } from '../translations';
 
 interface MountAppParams {
   coreStart: CoreStart;
   startDeps: EvalsStartDependencies;
+  evalsConfig: EvalsPublicConfig;
   element: HTMLElement;
   history: AppMountParameters['history'];
 }
@@ -27,6 +29,7 @@ interface MountAppParams {
 export const mountStandaloneApp = async ({
   coreStart,
   startDeps,
+  evalsConfig,
   element,
   history,
 }: MountAppParams) => {
@@ -57,7 +60,7 @@ export const mountStandaloneApp = async ({
   const App = () => (
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
-        <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
+        <KibanaContextProvider services={{ ...coreStart, ...startDeps, evalsConfig }}>
           <RedirectAppLinks coreStart={coreStart}>
             <KibanaPageTemplate panelled restrictWidth={false}>
               <KibanaPageTemplate.Section>

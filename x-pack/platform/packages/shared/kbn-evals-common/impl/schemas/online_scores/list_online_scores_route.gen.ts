@@ -42,6 +42,12 @@ export const ListOnlineScoresResponse = lazySchema(() =>
           name: z.string().max(256),
           version: z.string().max(64),
           kind: z.enum(['llm', 'code']),
+          trace_id: z
+            .string()
+            .min(32)
+            .max(32)
+            .regex(/^[0-9a-f]{32}$/)
+            .optional(),
         }),
         score: z.object({
           name: z.string().max(256),

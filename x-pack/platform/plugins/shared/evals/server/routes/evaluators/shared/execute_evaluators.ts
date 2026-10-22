@@ -22,6 +22,7 @@ import { createTraceAccessor } from '../../../evaluators/trace_accessor';
 import { awaitTraceReady, TraceReadinessError } from '../../../evaluators/trace_readiness';
 import type { EvaluatorDefinition } from '../../../evaluators/types';
 import { resolveConnectorModel } from '../../../lib/resolve_connector_model';
+import { getCurrentTraceId, withEvalsEvaluatorSpan } from '../../../task_providers/tracing';
 
 export class EvaluationExecutionError extends Error {
   constructor(message: string, public readonly responseType: 'badRequest' | 'notFound') {
@@ -206,19 +207,32 @@ export const executeEvaluators = async ({
         definition.kind === 'llm' && connectorId
           ? await getInferenceClient(connectorId)
           : undefined;
-      const result = await withEvaluatorNameBaggage(definition.name, () =>
+      const evaluate = () =>
         definition.evaluate({
           trace: traceAccessor,
           round,
           referenceData: parsedReferenceData.get(definition),
           inferenceClient,
           log: logger,
-        })
-      );
+        });
+      const { result, evaluatorTraceId } = await withEvaluatorNameBaggage(definition.name, () => {
+        if (definition.kind !== 'llm') {
+          return evaluate().then((evaluationResult) => ({
+            result: evaluationResult,
+            evaluatorTraceId: undefined,
+          }));
+        }
+
+        return withEvalsEvaluatorSpan(definition.name, async () => ({
+          result: await evaluate(),
+          evaluatorTraceId: getCurrentTraceId(),
+        }));
+      });
+      const evaluator = await describeEvaluator(definition, connectorId);
 
       results.push({
         status: 'ok',
-        evaluator: await describeEvaluator(definition, connectorId),
+        evaluator: evaluatorTraceId ? { ...evaluator, trace_id: evaluatorTraceId } : evaluator,
         scores: result.scores,
       });
     } catch (error) {

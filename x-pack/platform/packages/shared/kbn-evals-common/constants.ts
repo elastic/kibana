@@ -34,6 +34,9 @@ export const EVALS_EXPERIMENT_EXAMPLE_DETAILS_URL =
 export const EVALS_EXAMPLE_SCORES_URL =
   `${EVALS_INTERNAL_URL}/examples/{exampleId}/scores` as const;
 export const EVALS_ONLINE_SCORES_URL = `${EVALS_INTERNAL_URL}/online_scores` as const;
+export const EVALS_ONLINE_EVALUATION_EVENTS_URL =
+  `${EVALS_INTERNAL_URL}/online_evaluation_events` as const;
+export type OnlineEvalResultSink = 'data_stream' | 'otel_events';
 export const EVALS_TRACE_URL = `${EVALS_INTERNAL_URL}/traces/{traceId}` as const;
 export const EVALS_TRACE_EVIDENCE_URL = `${EVALS_TRACE_URL}/evidence` as const;
 export const EVALS_RESOLVE_INSTRUMENTATION_URL =
@@ -66,6 +69,28 @@ export const EvaluationIndices = {
 
 export const TRACES_INDEX_PATTERN = 'traces-*' as const;
 export const LOGS_INDEX_PATTERN = 'logs-*' as const;
+export const GEN_AI_EVALUATION_RESULT_EVENT = 'gen_ai.evaluation.result' as const;
+export const EVALS_EVENTS_DATASET = 'evals' as const;
+export const EVALS_EVENTS_LOGS_INDEX_PATTERN = 'logs-evals.otel-*' as const;
+export const EVALS_EVALUATION_EVENT_ATTRIBUTE_KEYS = {
+  EVALUATION_NAME: 'gen_ai.evaluation.name',
+  SCORE_VALUE: 'gen_ai.evaluation.score.value',
+  SCORE_LABEL: 'gen_ai.evaluation.score.label',
+  EXPLANATION: 'gen_ai.evaluation.explanation',
+  MONITOR_ID: 'kibana.evals.monitor.id',
+  MONITOR_NAME: 'kibana.evals.monitor.name',
+  SPACE_ID: 'kibana.evals.space_id',
+  CONNECTOR_ID: 'kibana.evals.connector_id',
+  EVALUATOR_NAME: 'kibana.evals.evaluator.name',
+  EVALUATOR_VERSION: 'kibana.evals.evaluator.version',
+  EVALUATOR_KIND: 'kibana.evals.evaluator.kind',
+  EVALUATOR_DIRECTION: 'kibana.evals.evaluator.direction',
+  EVALUATOR_MODEL_ID: 'kibana.evals.evaluator.model.id',
+  EVALUATOR_MODEL_FAMILY: 'kibana.evals.evaluator.model.family',
+  EVALUATOR_MODEL_PROVIDER: 'kibana.evals.evaluator.model.provider',
+  EVALUATOR_TRACE_ID: 'kibana.evals.evaluator.trace_id',
+  SCORE_METADATA: 'kibana.evals.score.metadata',
+} as const;
 export const EVALS_EVIDENCE_LOG_EVENT_NAMES = {
   OTEL_GENAI_USER_MESSAGE: 'gen_ai.user.message',
   OTEL_GENAI_CHOICE: 'gen_ai.choice',

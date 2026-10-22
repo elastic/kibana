@@ -38,13 +38,15 @@ import { buildOnlineEvalWorkflowYaml } from '../../../common/online_evals/workfl
 import { ConnectorSelector, type ConnectorSelectorOption } from '../shared/connector_selector';
 import { EvaluatorSelector, type SelectedEvaluator } from '../shared/evaluator_selector';
 import { WorkflowYamlPreview } from '../workflow_yaml_preview';
+import type { EvalsPublicConfig } from '../../plugin';
 
 /** Online evaluations grade live traces, so nothing can supply an example's reference data. */
 const requiresReferenceData = (evaluator: ListEvaluatorsResponse['evaluators'][number]): boolean =>
   Boolean(evaluator.reference_data_schema?.required);
 
 export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => {
-  const { services } = useKibana();
+  const { services } = useKibana<{ evalsConfig: EvalsPublicConfig }>();
+  const { resultSink } = services.evalsConfig.onlineEvals;
   const createOnlineEvalWorkflow = useCreateOnlineEvalWorkflow();
   const {
     data: evaluatorsData,
@@ -115,6 +117,7 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
 
     return buildOnlineEvalWorkflowYaml({
       name: name.trim(),
+      resultSink,
       indexPattern: indexPattern.trim(),
       ...(extraEsqlWhere.trim() ? { extraEsqlWhere: extraEsqlWhere.trim() } : {}),
       windowMinutes,
@@ -135,6 +138,7 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
     lagMinutes,
     maxTracesPerRun,
     name,
+    resultSink,
     selectedConnectorId,
     selectedEvaluators,
     windowMinutes,

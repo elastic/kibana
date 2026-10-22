@@ -58,6 +58,7 @@ const buildWorkflow = (
   yaml: 'version: "1"',
   parsedConfig: {
     name: 'quality monitor',
+    resultSink: 'data_stream',
     indexPattern: 'traces-agent_builder.otel-default',
     windowMinutes: 60,
     lagMinutes: 15,
