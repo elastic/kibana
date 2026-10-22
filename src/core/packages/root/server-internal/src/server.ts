@@ -40,6 +40,7 @@ import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
 import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
 import { DataStreamsService } from '@kbn/core-data-streams-server-internal';
+import { PubSubService } from '@kbn/core-pubsub-server-internal';
 import {
   CoreRouteHandlerContext,
   PrebootCoreRouteHandlerContext,
@@ -116,6 +117,7 @@ export class Server {
   private readonly userProfile: UserProfileService;
   private readonly injection: CoreInjectionService;
   private readonly dataStreams: DataStreamsService;
+  private readonly pubsub: PubSubService;
   private readonly userStorage: UserStorageService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
@@ -180,6 +182,7 @@ export class Server {
     this.security = new SecurityService(core);
     this.userProfile = new UserProfileService(core);
     this.dataStreams = new DataStreamsService(core);
+    this.pubsub = new PubSubService(core);
     this.userStorage = new UserStorageService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
@@ -377,6 +380,7 @@ export class Server {
     });
 
     const dataStreamsSetup = await this.dataStreams.setup();
+    const pubsubSetup = this.pubsub.setup();
 
     const metricsSetup = await this.metrics.setup({
       http: httpSetup,
@@ -485,6 +489,7 @@ export class Server {
       userProfile: userProfileSetup,
       injection: injectionSetup,
       dataStreams: dataStreamsSetup,
+      pubsub: pubsubSetup,
       userStorage: userStorageSetup,
     };
 
@@ -642,6 +647,7 @@ export class Server {
     });
 
     const featureFlagsStart = this.featureFlags.start();
+    this.pubsub.start();
 
     const pricingStart = this.pricing.start();
 
@@ -707,6 +713,7 @@ export class Server {
     this.security.stop();
     this.userProfile.stop();
     this.userStorage.stop();
+    this.pubsub.stop();
   }
 
   private async ensureValidConfiguration() {
