@@ -166,6 +166,7 @@ describe('readCurrentRunState', () => {
     enrolled: true as const,
     agentId: 'agent-1',
     capabilities: ['isolation'],
+    capabilitiesSource: 'reported' as const,
   });
   const rehydrateProcessSelectors = async () => [];
 
@@ -726,7 +727,7 @@ describe('readCurrentRunState', () => {
     });
   });
 
-  it('threads endpoint capabilities from the enrollment resolver onto the host, [] when unenrolled', async () => {
+  it('threads endpoint capabilities and their source from the enrollment resolver onto the host, none when unenrolled', async () => {
     const state = await readCurrentRunState({
       attachments: [sseAttachment({})],
       reportId,
@@ -735,7 +736,35 @@ describe('readCurrentRunState', () => {
       rehydrateProcessSelectors,
     });
     expect(state?.hosts).toEqual([
-      { name: 'host-a', enrolled: true, agentId: 'agent-1', capabilities: ['isolation'] },
+      {
+        name: 'host-a',
+        enrolled: true,
+        agentId: 'agent-1',
+        capabilities: ['isolation'],
+        capabilitiesSource: 'reported',
+      },
+    ]);
+
+    const unavailable = await readCurrentRunState({
+      attachments: [sseAttachment({})],
+      reportId,
+      runId,
+      resolveHostEnrollment: async () => ({
+        enrolled: true as const,
+        agentId: 'agent-1',
+        capabilities: [],
+        capabilitiesSource: 'unavailable' as const,
+      }),
+      rehydrateProcessSelectors,
+    });
+    expect(unavailable?.hosts).toEqual([
+      {
+        name: 'host-a',
+        enrolled: true,
+        agentId: 'agent-1',
+        capabilities: [],
+        capabilitiesSource: 'unavailable',
+      },
     ]);
 
     const unenrolled = await readCurrentRunState({
