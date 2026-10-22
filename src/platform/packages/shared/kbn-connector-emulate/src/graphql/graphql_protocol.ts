@@ -224,6 +224,7 @@ export const createGraphQLProtocol = (
     source,
     operations: operationNames,
     check: checkStoredResponse(schema, declared),
+    isError: ({ body }) => isRecord(body) && Array.isArray(body.errors) && body.errors.length > 0,
   });
   return {
     endpoints: spec.endpoints.map((endpoint) => toEndpoint(new URL(endpoint))),
@@ -269,6 +270,8 @@ export const createGraphQLProtocol = (
       }
       // The response keys (aliases) of the root fields resolved from a stored response.
       const fromStored = new Set<string>();
+      // The root fields executed, which leaves out those that @skip or @include drop.
+      const executed = new Set<string>();
       // Schemas such as monday.com's declare @defer and @stream, which plain `execute` refuses.
       const result = await experimentalExecuteIncrementally({
         schema,
@@ -278,7 +281,9 @@ export const createGraphQLProtocol = (
         fieldResolver: (parent, _args, _context, info) => {
           const { fieldName, returnType, path } = info;
           if (path.prev === undefined) {
-            const stored = served.get(`${info.operation.operation} ${fieldName}`);
+            const name = `${info.operation.operation} ${fieldName}`;
+            executed.add(name);
+            const stored = served.get(name);
             if (!stored) {
               return sampleGraphQLValue(returnType);
             }
@@ -329,7 +334,7 @@ export const createGraphQLProtocol = (
                 }
               : { data: result.data },
         },
-        operations,
+        operations: operations.filter(({ name }) => executed.has(name)),
         requestViolations: [],
         responseViolations,
       };
