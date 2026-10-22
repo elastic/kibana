@@ -10,6 +10,7 @@ import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import React, { useMemo } from 'react';
 import { DATASET_QUALITY_ALL_SIGNALS_ID } from '../../../common/constants';
 import type { DatasetQualityController } from '../../controller/dataset_quality';
+import { useDatasetQualityState } from '../../hooks/use_dataset_quality_state';
 import SummaryPanelProvider from '../../hooks/use_summary_panel';
 import type { ITelemetryClient } from '../../services/telemetry';
 import type { DatasetQualityStartDeps } from '../../types';
@@ -66,8 +67,17 @@ export const DatasetQuality = ({
 };
 
 function DatasetQualityContent() {
+  // Surfaces the gate `EmptyStateWrapper` reads, so a consumer can tell "the user may not
+  // see any data set" apart from "we don't know yet" without inspecting the rendered branch.
+  const { statsLoading } = useDatasetQualityState();
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="l">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="l"
+      data-test-subj="datasetQualityPage"
+      data-privileges-resolved={!statsLoading}
+    >
       <Header />
       <EuiFlexItem grow={false}>
         <Warnings />
