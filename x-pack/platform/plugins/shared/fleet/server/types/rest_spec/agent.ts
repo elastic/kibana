@@ -101,8 +101,8 @@ export const PostAgentUnenrollRequestSchema = {
 export const PostBulkAgentUnenrollRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([
-      schema.arrayOf(schema.string()),
-      schema.string({ validate: validateAgentsKueryField }),
+      schema.arrayOf(schema.string({ maxLength: 512 })),
+      schema.string({ maxLength: 1_000_000, validate: validateAgentsKueryField }),
     ]),
     force: schema.maybe(schema.boolean()),
     revoke: schema.maybe(schema.boolean()),
@@ -134,8 +134,8 @@ export const PostAgentUpgradeRequestSchema = {
 export const PostBulkAgentUpgradeRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([
-      schema.arrayOf(schema.string()),
-      schema.string({ validate: validateAgentsKueryField }),
+      schema.arrayOf(schema.string({ maxLength: 512 })),
+      schema.string({ maxLength: 1_000_000, validate: validateAgentsKueryField }),
     ]),
     source_uri: schema.maybe(schema.string()),
     version: schema.string({ validate: validateVersion }),
@@ -190,8 +190,8 @@ export const PostRequestDiagnosticsActionRequestSchema = {
 export const PostBulkRequestDiagnosticsActionRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([
-      schema.arrayOf(schema.string()),
-      schema.string({ validate: validateAgentsKueryField }),
+      schema.arrayOf(schema.string({ maxLength: 512 })),
+      schema.string({ maxLength: 1_000_000, validate: validateAgentsKueryField }),
     ]),
     batchSize: schema.maybe(schema.number()),
     additional_metrics: schema.maybe(
@@ -223,8 +223,8 @@ export const PostBulkAgentReassignRequestSchema = {
   body: schema.object({
     policy_id: schema.string(),
     agents: schema.oneOf([
-      schema.arrayOf(schema.string()),
-      schema.string({ validate: validateAgentsKueryField }),
+      schema.arrayOf(schema.string({ maxLength: 512 })),
+      schema.string({ maxLength: 1_000_000, validate: validateAgentsKueryField }),
     ]),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
@@ -250,8 +250,8 @@ export const UpdateAgentRequestSchema = {
 export const PostBulkUpdateAgentTagsRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([
-      schema.arrayOf(schema.string()),
-      schema.string({ validate: validateAgentsKueryField }),
+      schema.arrayOf(schema.string({ maxLength: 512 })),
+      schema.string({ maxLength: 1_000_000, validate: validateAgentsKueryField }),
     ]),
     tagsToAdd: schema.maybe(schema.arrayOf(schema.string())),
     tagsToRemove: schema.maybe(schema.arrayOf(schema.string())),
