@@ -183,7 +183,30 @@ describe('createEmulatorFetch', () => {
       });
 
       expect(rejectedResponses).toEqual([
-        expect.objectContaining({ source: 'fixture', operation: 'GET /items' }),
+        expect.objectContaining({ source: 'fixture', operation: 'GET /items', spec: 'v2' }),
+      ]);
+    });
+
+    it('names the spec a recording contradicts', () => {
+      const listOf = (schema: object) => ({
+        description: 'ok',
+        content: { 'application/json': { schema: { type: 'array', items: schema } } },
+      });
+      const strict = {
+        ...spec,
+        paths: {
+          '/items': {
+            get: { responses: { '200': listOf({ ...item, required: ['name', 'id'] }) } },
+          },
+        },
+      };
+      const { rejectedResponses } = createEmulatorFetch({
+        specs: { v1: spec, v2: strict },
+        recordings: [{ exchanges: [fixture()] }],
+      });
+
+      expect(rejectedResponses).toEqual([
+        expect.objectContaining({ source: 'recording', operation: 'GET /items', spec: 'v2' }),
       ]);
     });
   });

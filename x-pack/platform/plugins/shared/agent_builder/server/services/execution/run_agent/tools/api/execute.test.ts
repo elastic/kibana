@@ -324,7 +324,7 @@ describe('createExecuteApiTool', () => {
       expect(tool.description).toContain(internalTools.describeApi);
     });
 
-    it('spells out the identifier format instead of the discovery tool on an unknown API', async () => {
+    it('tells the model not to guess another identifier on an unknown API', async () => {
       esLoadApi.mockRejectedValue(new UnknownApiError('nope'));
 
       const tool = createExecuteApiTool({ selfClient, discoveryEnabled: false });
@@ -337,7 +337,7 @@ describe('createExecuteApiTool', () => {
       const data = result.results[0].data as ErrorResultData;
       expect(data.message).not.toContain(internalTools.discoverApis);
       expect(data.message).toContain('no API named "nope"');
-      expect(data.message).toContain('namespace.name');
+      expect(data.message).toContain('Do not retry with another identifier');
     });
   });
 
