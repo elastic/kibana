@@ -107,6 +107,10 @@ import type {
   NightshiftInvestigationsStartDeps,
 } from './types';
 
+type ManagedWorkflowsClient = Awaited<
+  ReturnType<WorkflowsExtensionsServerPluginStart['initManagedWorkflowsClient']>
+>;
+
 export class NightshiftInvestigationsPlugin
   implements
     Plugin<
@@ -138,6 +142,8 @@ export class NightshiftInvestigationsPlugin
   private security?: CoreStart['security'];
   private coreStart?: CoreStart;
   private investigatorServiceAccountService?: InvestigatorServiceAccountService;
+  /** The managed workflows client of this plugin, shared by startup installs and setup. */
+  private managedWorkflowsClient?: Promise<ManagedWorkflowsClient>;
   private notificationRoutingService?: InvestigationAttachmentDocService<StoredNotificationRouting>;
   private investigationAvailability?: AvailabilityConfig;
   private cortexEnabled = false;
@@ -589,7 +595,10 @@ export class NightshiftInvestigationsPlugin
     }
 
     if (plugins.workflowsExtensions) {
-      this.installManagedWorkflows(plugins.workflowsExtensions).catch((err) => {
+      this.managedWorkflowsClient = plugins.workflowsExtensions.initManagedWorkflowsClient(
+        NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
+      );
+      this.installManagedWorkflows(this.managedWorkflowsClient).catch((err) => {
         this.logger.error(
           `Failed to install nightshift investigations managed workflows: ${err.message}`
         );
@@ -701,6 +710,10 @@ export class NightshiftInvestigationsPlugin
       core: this.coreStart,
       workflowsExtensions: this.workflowsExtensionsStart,
       workflowsManagement: this.workflowsManagement,
+      getInstalledWorkflowState: async (workflowId, spaceId) => {
+        const client = await this.managedWorkflowsClient;
+        return client ? client.getInstalledWorkflowState(workflowId, spaceId) : null;
+      },
       spaces: this.spaces,
       isServerless: this.ctx.env.packageInfo.buildFlavor === 'serverless',
       logger: this.logger.get('service_account'),
@@ -759,11 +772,9 @@ export class NightshiftInvestigationsPlugin
    * platform can reconcile (prune orphans / apply upgrades) for this plugin's workflows.
    */
   private async installManagedWorkflows(
-    workflowsExtensions: WorkflowsExtensionsServerPluginStart
+    managedWorkflowsClient: Promise<ManagedWorkflowsClient>
   ): Promise<void> {
-    const client = await workflowsExtensions.initManagedWorkflowsClient(
-      NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
-    );
+    const client = await managedWorkflowsClient;
     await installInvestigationWorkflow({ client });
     await client.install(NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,

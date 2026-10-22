@@ -8,6 +8,8 @@
 import React from 'react';
 import {
   EuiBadge,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,7 +31,40 @@ export const InvestigationIdentitySection = () => {
 
   const renderStatus = () => {
     if (status.isLoading) return <EuiLoadingSpinner size="m" />;
-    if (!status.data) return null;
+    if (!status.data) {
+      return (
+        <EuiCallOut
+          announceOnMount
+          size="s"
+          color="danger"
+          iconType="warning"
+          title={i18n.translate('xpack.nightshift.settings.serviceAccount.errorTitle', {
+            defaultMessage: 'Could not read the service account setup of this space',
+          })}
+          data-test-subj="nightshiftServiceAccountError"
+        >
+          {status.error?.message && <p>{status.error.message}</p>}
+          <EuiButtonEmpty
+            size="xs"
+            flush="left"
+            iconType="refresh"
+            onClick={() => status.refetch()}
+            data-test-subj="nightshiftServiceAccountRetry"
+          >
+            {i18n.translate('xpack.nightshift.settings.serviceAccount.retry', {
+              defaultMessage: 'Try again',
+            })}
+          </EuiButtonEmpty>
+        </EuiCallOut>
+      );
+    }
+    const [agent, ...otherAccounts] = status.data.serviceAccounts;
+    const renderAccount = ({ name, id }: { name: string; id: string | null }) => (
+      <>
+        <EuiCode>{name}</EuiCode>
+        {id && <> ({id})</>}
+      </>
+    );
     return (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexItem grow={false}>
@@ -53,8 +88,8 @@ export const InvestigationIdentitySection = () => {
               id="xpack.nightshift.settings.serviceAccount.account"
               defaultMessage="Account: {account} · Role: {role}"
               values={{
-                account: <EuiCode>{status.data.serviceAccountId}</EuiCode>,
-                role: <EuiCode>{status.data.role}</EuiCode>,
+                account: renderAccount(agent),
+                role: <EuiCode>{agent.role}</EuiCode>,
               }}
             />
           </EuiText>
@@ -66,14 +101,12 @@ export const InvestigationIdentitySection = () => {
                 id="xpack.nightshift.settings.serviceAccount.otherAccounts"
                 defaultMessage="Other Nightshift accounts: {accounts}"
                 values={{
-                  accounts: status.data.serviceAccounts
-                    .filter(({ kind }) => kind !== 'agent')
-                    .map(({ id, role }, index) => (
-                      <React.Fragment key={id}>
-                        {index > 0 && ', '}
-                        <EuiCode>{id}</EuiCode> ({role})
-                      </React.Fragment>
-                    )),
+                  accounts: otherAccounts.map((account, index) => (
+                    <React.Fragment key={account.kind}>
+                      {index > 0 && ', '}
+                      {renderAccount(account)} · <EuiCode>{account.role}</EuiCode>
+                    </React.Fragment>
+                  )),
                 }}
               />
             </EuiText>
