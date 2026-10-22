@@ -12,12 +12,8 @@ import { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { useCallback, useMemo, useRef } from 'react';
 import type { MutableRefObject } from 'react';
-import {
-  AiPromptFeature,
-  AiReviewAction,
-  type ESQLEditorTelemetryService,
-  type OnAiPromptResolved,
-} from '../telemetry/telemetry_service';
+import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
+import type { AiProposal } from '../telemetry/redact_generated_query';
 import type { VisorNlResultHandler } from '../types';
 import { useReplaceReview } from './use_replace_review';
 import type { ReviewState } from './use_replace_review';
@@ -29,7 +25,6 @@ interface UseVisorNlToEsqlParams {
   onSubmit: (query: string) => void;
   onAfterInsert?: () => void;
   telemetryService?: ESQLEditorTelemetryService;
-  onPromptResolved?: OnAiPromptResolved;
 }
 
 export const useVisorNlToEsql = ({
@@ -38,50 +33,40 @@ export const useVisorNlToEsql = ({
   onSubmit,
   onAfterInsert,
   telemetryService,
-  onPromptResolved,
 }: UseVisorNlToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
-  const generatedContentRef = useRef<string>('');
+  // The proposal under review; its query is the full generated content.
+  const proposalRef = useRef<AiProposal | undefined>(undefined);
   const reviewRef = useRef<Parameters<VisorNlResultHandler>[1] | undefined>(undefined);
   const isSupersedingRef = useRef(false);
 
-  const resolvePrompt = useCallback(
-    (outcome: AiReviewAction) => {
-      if (!reviewRef.current) return;
-      onPromptResolved?.({
-        feature: AiPromptFeature.VISOR_NL,
-        prompt: reviewRef.current.prompt,
-        generatedQuery: generatedContentRef.current,
-        outcome,
-      });
-    },
-    [onPromptResolved]
-  );
-
   const onAfterAccept = useCallback(
     ({ generatedLineStart, generatedLineEnd }: ReviewState) => {
+      const proposal = proposalRef.current;
+      if (!proposal) return;
       telemetryService?.trackVisorNlReviewed({
         action: AiReviewAction.ACCEPT,
         linesChanged: generatedLineEnd - generatedLineStart + 1,
+        proposal,
       });
-      resolvePrompt(AiReviewAction.ACCEPT);
-      onSubmit(generatedContentRef.current);
+      onSubmit(proposal.query);
       reviewRef.current?.onAccept();
     },
-    [onSubmit, telemetryService, resolvePrompt]
+    [onSubmit, telemetryService]
   );
 
   const onAfterReject = useCallback(
     ({ generatedLineStart, generatedLineEnd }: ReviewState) => {
-      if (isSupersedingRef.current) return;
+      const proposal = proposalRef.current;
+      if (isSupersedingRef.current || !proposal) return;
       telemetryService?.trackVisorNlReviewed({
         action: AiReviewAction.REJECT,
         linesChanged: generatedLineEnd - generatedLineStart + 1,
+        proposal,
       });
-      resolvePrompt(AiReviewAction.REJECT);
       reviewRef.current?.onReject?.();
     },
-    [telemetryService, resolvePrompt]
+    [telemetryService]
   );
 
   const rejectAction = useMemo(
@@ -122,11 +107,11 @@ export const useVisorNlToEsql = ({
       reject();
       isSupersedingRef.current = false;
 
-      generatedContentRef.current = generatedContent;
       reviewRef.current = review;
 
       const plan = getVisorNlInsertPlan(model.getValue().split('\n'), generatedContent.split('\n'));
       if (!plan) return;
+      proposalRef.current = { prompt: review.prompt, query: generatedContent, ...plan.generated };
 
       if (plan.insert) {
         const { lastChangedOriginalLine } = plan.review;

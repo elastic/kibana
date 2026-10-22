@@ -51,6 +51,7 @@ describe('getVisorNlInsertPlan', () => {
         generatedLineEnd: 2,
       },
       insert: { isLastLine: true, text: '\nFROM metrics' },
+      generated: { generatedLineStart: 1, generatedLineEnd: 1 },
     });
     expect(applyInsertAndReject(original, generated)).toBe(original);
   });
@@ -68,6 +69,7 @@ describe('getVisorNlInsertPlan', () => {
         generatedLineEnd: 3,
       },
       insert: { isLastLine: false, text: '| WHERE y\n' },
+      generated: { generatedLineStart: 2, generatedLineEnd: 2 },
     });
     expect(applyInsertAndReject(original, generated)).toBe(original);
   });
@@ -85,6 +87,7 @@ describe('getVisorNlInsertPlan', () => {
         generatedLineEnd: 2,
       },
       insert: null,
+      generated: { generatedLineStart: 2, generatedLineEnd: 1 },
     });
     expect(applyInsertAndReject(original, generated)).toBe(original);
   });

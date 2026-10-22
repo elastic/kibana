@@ -11,9 +11,6 @@ import type { AnalyticsServiceStart } from '@kbn/core/server';
 import {
   ESQLEditorTelemetryService,
   AiReviewAction,
-  AiPromptFeature,
-  AiQueryExecutionStatus,
-  AiQueryValidationStatus,
   ResourceBrowserType,
   ResourceBrowserOpenedFrom,
   ViewSelectedSource,
@@ -32,13 +29,23 @@ import {
   ESQL_COMMENT_TO_ESQL_REVIEWED,
   ESQL_FIX_WITH_AI_SUBMITTED,
   ESQL_FIX_WITH_AI_REVIEWED,
-  ESQL_AI_PROMPT_RESOLVED,
 } from './events_registration';
 import { reportEsqlError } from '../report_error';
 
 jest.mock('../report_error', () => ({
   reportEsqlError: jest.fn(),
 }));
+
+const proposal = {
+  prompt: 'show me the logs for john.smith@example.com',
+  query: 'FROM logs | WHERE user.email == "john.smith@example.com" | LIMIT 10',
+  generatedLineStart: 1,
+  generatedLineEnd: 1,
+};
+const proposalEventData = {
+  prompt: 'show me the logs for [EMAIL]',
+  generated_query: 'FROM logs | WHERE user.email == ? | LIMIT 10',
+};
 
 describe('ESQLEditorTelemetryService', () => {
   let mockAnalytics: jest.Mocked<AnalyticsServiceStart>;
@@ -290,11 +297,26 @@ describe('ESQLEditorTelemetryService', () => {
 
   describe('trackVisorNlReviewed', () => {
     it.each([AiReviewAction.ACCEPT, AiReviewAction.REJECT])('tracks a %s action', (action) => {
-      telemetryService.trackVisorNlReviewed({ action, linesChanged: 3 });
+      telemetryService.trackVisorNlReviewed({ action, linesChanged: 3, proposal });
 
       expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_VISOR_NL_REVIEWED, {
         action,
         lines_changed: 3,
+        ...proposalEventData,
+      });
+    });
+
+    it('omits generated_query when the query does not parse', () => {
+      telemetryService.trackVisorNlReviewed({
+        action: AiReviewAction.ACCEPT,
+        linesChanged: 1,
+        proposal: { ...proposal, query: 'FROM logs | WHERE' },
+      });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_VISOR_NL_REVIEWED, {
+        action: AiReviewAction.ACCEPT,
+        lines_changed: 1,
+        prompt: proposalEventData.prompt,
       });
     });
   });
@@ -304,11 +326,13 @@ describe('ESQLEditorTelemetryService', () => {
       telemetryService.trackCommentToEsqlReviewed({
         action: AiReviewAction.ACCEPT,
         linesGenerated: 4,
+        proposal,
       });
 
       expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_COMMENT_TO_ESQL_REVIEWED, {
         action: AiReviewAction.ACCEPT,
         lines_generated: 4,
+        ...proposalEventData,
       });
     });
 
@@ -316,11 +340,13 @@ describe('ESQLEditorTelemetryService', () => {
       telemetryService.trackCommentToEsqlReviewed({
         action: AiReviewAction.REJECT,
         linesGenerated: 2,
+        proposal,
       });
 
       expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_COMMENT_TO_ESQL_REVIEWED, {
         action: AiReviewAction.REJECT,
         lines_generated: 2,
+        ...proposalEventData,
       });
     });
   });
@@ -381,42 +407,30 @@ describe('ESQLEditorTelemetryService', () => {
 
   describe('trackFixWithAiReviewed', () => {
     it('tracks an accept action', () => {
-      telemetryService.trackFixWithAiReviewed({ action: AiReviewAction.ACCEPT, linesChanged: 3 });
+      telemetryService.trackFixWithAiReviewed({
+        action: AiReviewAction.ACCEPT,
+        linesChanged: 3,
+        proposal,
+      });
 
       expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_FIX_WITH_AI_REVIEWED, {
         action: AiReviewAction.ACCEPT,
         lines_changed: 3,
+        ...proposalEventData,
       });
     });
 
     it('tracks a reject action', () => {
-      telemetryService.trackFixWithAiReviewed({ action: AiReviewAction.REJECT, linesChanged: 1 });
+      telemetryService.trackFixWithAiReviewed({
+        action: AiReviewAction.REJECT,
+        linesChanged: 1,
+        proposal,
+      });
 
       expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_FIX_WITH_AI_REVIEWED, {
         action: AiReviewAction.REJECT,
         lines_changed: 1,
-      });
-    });
-  });
-
-  describe('trackAiPromptResolved', () => {
-    it('reports the prompt, the generated query and the statuses', () => {
-      telemetryService.trackAiPromptResolved({
-        feature: AiPromptFeature.VISOR_NL,
-        prompt: 'show me the logs from [EMAIL]',
-        generatedQuery: 'FROM logs | WHERE user == "[EMAIL]"',
-        validationStatus: AiQueryValidationStatus.SUCCESS,
-        outcome: AiReviewAction.ACCEPT,
-        executionStatus: AiQueryExecutionStatus.ERROR,
-      });
-
-      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_AI_PROMPT_RESOLVED, {
-        feature: 'visor_nl',
-        prompt: 'show me the logs from [EMAIL]',
-        generated_query: 'FROM logs | WHERE user == "[EMAIL]"',
-        validation_status: 'success',
-        outcome: 'accept',
-        execution_status: 'error',
+        ...proposalEventData,
       });
     });
   });

@@ -14,12 +14,8 @@ import type { MutableRefObject } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SUGGEST_FIX_ROUTE, FIX_WITH_AI_COMMAND_ID } from '@kbn/esql-types';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
-import {
-  AiPromptFeature,
-  AiReviewAction,
-  type ESQLEditorTelemetryService,
-  type OnAiPromptResolved,
-} from '../telemetry/telemetry_service';
+import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
+import type { AiProposal } from '../telemetry/redact_generated_query';
 import { GENERATING_HINT_CLASS } from '../editor_ai.styles';
 import { findChangedRegion } from './utils';
 import { useReplaceReview } from '../comment_to_esql/use_replace_review';
@@ -75,7 +71,6 @@ interface UseSuggestFixParams {
   // Runs the query once a fix is kept.
   onSubmit: (query: string) => void;
   telemetryService?: ESQLEditorTelemetryService;
-  onPromptResolved?: OnAiPromptResolved;
   onAfterInsert?: () => void;
 }
 
@@ -87,7 +82,6 @@ export const useSuggestFix = ({
   isEnabled,
   onSubmit,
   telemetryService,
-  onPromptResolved,
   onAfterInsert,
 }: UseSuggestFixParams) => {
   const { euiTheme } = useEuiTheme();
@@ -96,7 +90,8 @@ export const useSuggestFix = ({
     undefined
   );
   const abortControllerRef = useRef<AbortController | undefined>(undefined);
-  const pendingFixRef = useRef<{ errorMessage: string; fixedQuery: string } | undefined>(undefined);
+  // The fix under review; its query is the full LLM output.
+  const proposalRef = useRef<AiProposal | undefined>(undefined);
 
   const clearGeneratingDecoration = useCallback(() => {
     generatingDecorationsRef.current?.clear();
@@ -122,24 +117,12 @@ export const useSuggestFix = ({
   );
 
   const trackFixReview = useCallback(
-    (action: AiReviewAction, linesChanged: number) =>
-      telemetryService?.trackFixWithAiReviewed({ action, linesChanged }),
-    [telemetryService]
-  );
-
-  const resolveFix = useCallback(
-    (outcome: AiReviewAction, acceptedQuery?: string) => {
-      const pendingFix = pendingFixRef.current;
-      pendingFixRef.current = undefined;
-      if (!pendingFix) return;
-      onPromptResolved?.({
-        feature: AiPromptFeature.FIX_WITH_AI,
-        prompt: pendingFix.errorMessage,
-        generatedQuery: acceptedQuery ?? pendingFix.fixedQuery,
-        outcome,
-      });
+    (action: AiReviewAction, linesChanged: number) => {
+      const proposal = proposalRef.current;
+      if (!proposal) return;
+      telemetryService?.trackFixWithAiReviewed({ action, linesChanged, proposal });
     },
-    [onPromptResolved]
+    [telemetryService]
   );
 
   const {
@@ -161,13 +144,10 @@ export const useSuggestFix = ({
     editSourceId: 'esql-suggest-fix',
     onAfterAccept: (state, acceptedQuery) => {
       trackFixReview(AiReviewAction.ACCEPT, state.generatedLineEnd - state.generatedLineStart + 1);
-      resolveFix(AiReviewAction.ACCEPT, acceptedQuery);
       onSubmit(acceptedQuery);
     },
-    onAfterReject: (state) => {
-      trackFixReview(AiReviewAction.REJECT, state.generatedLineEnd - state.generatedLineStart + 1);
-      resolveFix(AiReviewAction.REJECT);
-    },
+    onAfterReject: (state) =>
+      trackFixReview(AiReviewAction.REJECT, state.generatedLineEnd - state.generatedLineStart + 1),
   });
 
   const runSuggestFix = useCallback(
@@ -264,7 +244,12 @@ export const useSuggestFix = ({
           generatedLineEnd - generatedLineStart + 1
         );
 
-        pendingFixRef.current = { errorMessage, fixedQuery };
+        proposalRef.current = {
+          prompt: errorMessage,
+          query: fixedQuery,
+          generatedLineStart: prefixLen + 1,
+          generatedLineEnd: fixedLines.length - suffixLen,
+        };
         showReview({
           firstChangedOriginalLine,
           lastChangedOriginalLine,

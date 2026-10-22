@@ -21,6 +21,7 @@ import {
   missingSortBeforeLimit,
 } from '@kbn/esql-utils/src/utils/query_parsing_helpers';
 import type { DataSourceSelectionChange } from '@kbn/esql-resource-browser';
+import { DEFAULT_BUILTIN_REGEX_RULES } from '@kbn/ai-anonymization-common';
 import {
   ESQL_CONTROL_CANCELLED,
   ESQL_CONTROL_FLYOUT_OPENED,
@@ -42,8 +43,8 @@ import {
   ESQL_COMMENT_TO_ESQL_REVIEWED,
   ESQL_FIX_WITH_AI_SUBMITTED,
   ESQL_FIX_WITH_AI_REVIEWED,
-  ESQL_AI_PROMPT_RESOLVED,
 } from './events_registration';
+import { redactGeneratedQuery, type AiProposal } from './redact_generated_query';
 import type { IndexEditorCommandArgs } from '../lookup_join/use_lookup_index_editor';
 import { COMMAND_ID as LOOKUP_INDEX_EDITOR_COMMAND } from '../lookup_join/use_lookup_index_editor';
 import { reportEsqlError } from '../report_error';
@@ -53,41 +54,23 @@ export enum AiReviewAction {
   REJECT = 'reject',
 }
 
-export enum AiPromptFeature {
-  VISOR_NL = 'visor_nl',
-  COMMENT_TO_ESQL = 'comment_to_esql',
-  FIX_WITH_AI = 'fix_with_ai',
-}
+// The shared built-in rules (email, IP, host name); their matching code is server-only.
+const PROMPT_MASKING_RULES = DEFAULT_BUILTIN_REGEX_RULES.filter(({ enabled }) => enabled);
 
-export enum AiQueryValidationStatus {
-  SUCCESS = 'success',
-  WARNING = 'warning',
-  ERROR = 'error',
-}
+const maskPrompt = (prompt: string) =>
+  PROMPT_MASKING_RULES.reduce(
+    (text, { pattern, entityClass }) => text.replace(new RegExp(pattern, 'g'), `[${entityClass}]`),
+    prompt
+  );
 
-export enum AiQueryExecutionStatus {
-  SUCCESS = 'success',
-  ERROR = 'error',
-  NOT_RUN = 'not_run',
-  UNKNOWN = 'unknown',
-}
-
-/** An AI proposal the user kept or undid. */
-export interface AiPromptResolution {
-  feature: AiPromptFeature;
-  /** The user's prompt, or the error message that triggered a Fix with AI. */
-  prompt: string;
-  /** The query as it would run after accepting the proposal. */
-  generatedQuery: string;
-  outcome: AiReviewAction;
-}
-
-export interface AiPromptResolvedProps extends AiPromptResolution {
-  validationStatus: AiQueryValidationStatus;
-  executionStatus: AiQueryExecutionStatus;
-}
-
-export type OnAiPromptResolved = (resolution: AiPromptResolution) => void;
+/** The proposal fields shared by the AI review events. */
+const aiProposalEventData = (proposal: AiProposal) => {
+  const generatedQuery = redactGeneratedQuery(proposal);
+  return {
+    prompt: maskPrompt(proposal.prompt),
+    ...(generatedQuery !== undefined ? { generated_query: generatedQuery } : {}),
+  };
+};
 
 export enum ResourceBrowserType {
   DATA_SOURCES = 'data_sources',
@@ -376,10 +359,15 @@ export class ESQLEditorTelemetryService {
     });
   }
 
-  public trackVisorNlReviewed(params: { action: AiReviewAction; linesChanged: number }) {
+  public trackVisorNlReviewed(params: {
+    action: AiReviewAction;
+    linesChanged: number;
+    proposal: AiProposal;
+  }) {
     this._reportEvent(ESQL_VISOR_NL_REVIEWED, {
       action: params.action,
       lines_changed: params.linesChanged,
+      ...aiProposalEventData(params.proposal),
     });
   }
 
@@ -405,10 +393,15 @@ export class ESQLEditorTelemetryService {
     });
   }
 
-  public trackCommentToEsqlReviewed(params: { action: AiReviewAction; linesGenerated: number }) {
+  public trackCommentToEsqlReviewed(params: {
+    action: AiReviewAction;
+    linesGenerated: number;
+    proposal: AiProposal;
+  }) {
     this._reportEvent(ESQL_COMMENT_TO_ESQL_REVIEWED, {
       action: params.action,
       lines_generated: params.linesGenerated,
+      ...aiProposalEventData(params.proposal),
     });
   }
 
@@ -430,22 +423,15 @@ export class ESQLEditorTelemetryService {
     });
   }
 
-  public trackFixWithAiReviewed(params: { action: AiReviewAction; linesChanged: number }) {
+  public trackFixWithAiReviewed(params: {
+    action: AiReviewAction;
+    linesChanged: number;
+    proposal: AiProposal;
+  }) {
     this._reportEvent(ESQL_FIX_WITH_AI_REVIEWED, {
       action: params.action,
       lines_changed: params.linesChanged,
-    });
-  }
-
-  /** Expects `prompt` and `generatedQuery` to be anonymized by the caller. */
-  public trackAiPromptResolved(params: AiPromptResolvedProps) {
-    this._reportEvent(ESQL_AI_PROMPT_RESOLVED, {
-      feature: params.feature,
-      prompt: params.prompt,
-      generated_query: params.generatedQuery,
-      validation_status: params.validationStatus,
-      outcome: params.outcome,
-      execution_status: params.executionStatus,
+      ...aiProposalEventData(params.proposal),
     });
   }
 }

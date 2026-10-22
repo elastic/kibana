@@ -14,12 +14,7 @@ import type { MutableRefObject } from 'react';
 import { i18n } from '@kbn/i18n';
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
-import {
-  AiPromptFeature,
-  AiReviewAction,
-  type ESQLEditorTelemetryService,
-  type OnAiPromptResolved,
-} from '../telemetry/telemetry_service';
+import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 import { ReviewActionsWidget } from './review_actions_widget';
 import { CODE_ADDED_CLASS, GENERATING_HINT_CLASS, LINE_REPLACED_CLASS } from '../editor_ai.styles';
 
@@ -55,7 +50,6 @@ interface UseCommentToEsqlParams {
   // "Generating..." decoration during the LLM call. Populated by useGhostLineHint.
   clearGhostHintRef?: MutableRefObject<() => void>;
   telemetryService?: ESQLEditorTelemetryService;
-  onPromptResolved?: OnAiPromptResolved;
   // When set, generation auto-accepts: removes the comment line, keeps generated code, and calls this callback with the final query instead of showing the review UI.
   autoAcceptCallbackRef?: MutableRefObject<((finalQuery: string) => void) | undefined>;
   onAfterInsert?: () => void;
@@ -70,7 +64,6 @@ export const useCommentToEsql = ({
   onSubmit,
   clearGhostHintRef,
   telemetryService,
-  onPromptResolved,
   autoAcceptCallbackRef,
   onAfterInsert,
 }: UseCommentToEsqlParams) => {
@@ -149,17 +142,6 @@ export const useCommentToEsql = ({
     abortInFlight();
   }, [clearCommentAnchor, clearGeneratingDecoration, abortInFlight]);
 
-  const resolvePrompt = useCallback(
-    (outcome: AiReviewAction, prompt: string, generatedQuery: string) =>
-      onPromptResolved?.({
-        feature: AiPromptFeature.COMMENT_TO_ESQL,
-        prompt,
-        generatedQuery,
-        outcome,
-      }),
-    [onPromptResolved]
-  );
-
   // Keeps the generated code and runs the query; false if no review is pending
   // (an in-flight generation is left alone in that case).
   const acceptChange = useCallback(() => {
@@ -177,11 +159,6 @@ export const useCommentToEsql = ({
 
     const { replacedLineNumber, generatedLineStart, generatedLineEnd, prompt } = state;
 
-    telemetryService?.trackCommentToEsqlReviewed({
-      action: AiReviewAction.ACCEPT,
-      linesGenerated: generatedLineEnd - generatedLineStart + 1,
-    });
-
     if (replacedLineNumber) {
       const lineContent = model.getLineContent(replacedLineNumber);
       const isLastLine = replacedLineNumber === model.getLineCount();
@@ -198,11 +175,16 @@ export const useCommentToEsql = ({
       ]);
     }
 
+    // The replaced line sits after the generated lines, so removing it keeps their range.
     const acceptedQuery = model.getValue();
-    resolvePrompt(AiReviewAction.ACCEPT, prompt, acceptedQuery);
+    telemetryService?.trackCommentToEsqlReviewed({
+      action: AiReviewAction.ACCEPT,
+      linesGenerated: generatedLineEnd - generatedLineStart + 1,
+      proposal: { prompt, query: acceptedQuery, generatedLineStart, generatedLineEnd },
+    });
     onSubmit(acceptedQuery);
     return true;
-  }, [editorRef, editorModel, cleanup, telemetryService, resolvePrompt, onSubmit]);
+  }, [editorRef, editorModel, cleanup, telemetryService, onSubmit]);
 
   const rejectChange = useCallback(() => {
     const editor = editorRef.current;
@@ -216,16 +198,17 @@ export const useCommentToEsql = ({
     telemetryService?.trackCommentToEsqlReviewed({
       action: AiReviewAction.REJECT,
       linesGenerated: generatedLineEnd - generatedLineStart + 1,
+      proposal: {
+        prompt,
+        // The query as it would have run: everything but the replaced comment line.
+        query: model
+          .getLinesContent()
+          .filter((_, index) => index + 1 !== replacedLineNumber)
+          .join('\n'),
+        generatedLineStart,
+        generatedLineEnd,
+      },
     });
-    // The query as it would have run: everything but the replaced comment line.
-    resolvePrompt(
-      AiReviewAction.REJECT,
-      prompt,
-      model
-        .getLinesContent()
-        .filter((_, index) => index + 1 !== replacedLineNumber)
-        .join('\n')
-    );
 
     editor.executeEdits('nl-to-esql-reject', [
       {
@@ -233,7 +216,7 @@ export const useCommentToEsql = ({
         text: null,
       },
     ]);
-  }, [editorRef, editorModel, cleanup, telemetryService, resolvePrompt]);
+  }, [editorRef, editorModel, cleanup, telemetryService]);
 
   const showReview = useCallback(
     (state: CommentReviewState) => {

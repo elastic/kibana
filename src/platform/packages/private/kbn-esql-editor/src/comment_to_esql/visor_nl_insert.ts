@@ -13,6 +13,8 @@ export interface VisorNlInsertPlan {
   review: ReviewState;
   // Null when the generated query only deletes original lines.
   insert: { isLastLine: boolean; text: string } | null;
+  // The changed lines within the generated query itself (1-based, inclusive).
+  generated: { generatedLineStart: number; generatedLineEnd: number };
 }
 
 /** Insert text and review ranges that Undo can apply to restore the original query. */
@@ -50,5 +52,9 @@ export const getVisorNlInsertPlan = (
       generatedLineEnd: lastChangedOriginalLine + genChangedLines.length,
     },
     insert,
+    generated: {
+      generatedLineStart: prefixLen + 1,
+      generatedLineEnd: generatedLines.length - suffixLen,
+    },
   };
 };
