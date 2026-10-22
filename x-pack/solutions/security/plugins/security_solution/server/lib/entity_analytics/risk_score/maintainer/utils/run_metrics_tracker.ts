@@ -32,6 +32,8 @@ export interface RunMetrics {
   entitiesCreateSkipped: number;
   /** Missing scores rejected by EUID/field validation or bulk creation. */
   entitiesCreateFailed: number;
+  /** Base scores left out of the entity store write because the store already held them. */
+  scoresUnchangedInStoreBase: number;
 }
 
 const METRIC_KEYS: ReadonlyArray<keyof RunMetrics> = [
@@ -52,6 +54,7 @@ const METRIC_KEYS: ReadonlyArray<keyof RunMetrics> = [
   'entitiesCreated',
   'entitiesCreateSkipped',
   'entitiesCreateFailed',
+  'scoresUnchangedInStoreBase',
 ];
 
 const emptyMetrics = (): RunMetrics => ({
@@ -72,6 +75,7 @@ const emptyMetrics = (): RunMetrics => ({
   entitiesCreated: 0,
   entitiesCreateSkipped: 0,
   entitiesCreateFailed: 0,
+  scoresUnchangedInStoreBase: 0,
 });
 
 const scoresWrittenRiskIndexTotal = (metrics: RunMetrics): number =>
@@ -124,6 +128,7 @@ export const createRunMetricsTracker = () => {
         entitiesCreated: number;
         entityCreationsSkipped: number;
         entityCreationsFailed: number;
+        scoresUnchangedInStore: number;
       }
     ) => {
       target.scoresWrittenRiskIndexBase = summary.scoresWrittenRiskIndex;
@@ -136,6 +141,7 @@ export const createRunMetricsTracker = () => {
       target.entitiesCreated = summary.entitiesCreated;
       target.entitiesCreateSkipped = summary.entityCreationsSkipped;
       target.entitiesCreateFailed = summary.entityCreationsFailed;
+      target.scoresUnchangedInStoreBase = summary.scoresUnchangedInStore;
     },
 
     recordResolution: (target: RunMetrics, result: StepResult) => {

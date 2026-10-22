@@ -40,6 +40,10 @@ interface RunResolutionScoringParams {
   targetEntityIds?: string[];
   alertFilters: QueryDslQueryContainer[];
   refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
+  /** `false` skips waiting for an entity store refresh on each page; the caller refreshes once. */
+  entityStoreRefresh?: Parameters<typeof persistScoresToEntityStore>[0]['refresh'];
+  /** Splits each page's entity store write into this many bulk requests, sent at the same time. */
+  entityStoreWriteChunks?: number;
   /** When true, populate `scores` in the result. Omit for full-population runs. */
   collectScores?: boolean;
   /** Collects each page's step times; pass one in to read them after the stage. */
@@ -64,6 +68,8 @@ export const runResolutionScoringStep = async ({
   targetEntityIds,
   alertFilters,
   refresh,
+  entityStoreRefresh,
+  entityStoreWriteChunks,
   collectScores,
   pageTimings = createPageStepTimings(),
 }: RunResolutionScoringParams): Promise<ResolutionStepResult> => {
@@ -87,14 +93,19 @@ export const runResolutionScoringStep = async ({
       refresh,
       pageTimings,
     });
-    const { docsWritten, errorsCount } = await pageTimings.time('storeWrite', () =>
-      persistScoresToEntityStore({
-        crudClient,
-        logger: runLogger,
-        entityType,
-        scores,
-        enabled: idBasedRiskScoringEnabled,
-      })
+    const { docsWritten, errorsCount } = await pageTimings.time(
+      'storeWrite',
+      () =>
+        persistScoresToEntityStore({
+          crudClient,
+          logger: runLogger,
+          entityType,
+          scores,
+          enabled: idBasedRiskScoringEnabled,
+          refresh: entityStoreRefresh,
+          parallelChunks: entityStoreWriteChunks,
+        }),
+      (result) => result.tookMs
     );
     scoresWrittenRiskIndex += docsWrittenRiskIndex;
     scoresWrittenEntityStore += docsWritten;

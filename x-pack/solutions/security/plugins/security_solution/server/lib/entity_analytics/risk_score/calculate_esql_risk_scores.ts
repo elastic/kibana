@@ -583,7 +583,12 @@ export const getBaseScoreESQL = (
   bounds: { lower?: string; upper?: string },
   sampleSize: number,
   pageSize: number,
-  index: string
+  index: string,
+  /**
+   * When given, each score row also carries these fields from the entity's store document, joined
+   * on `entity.id`. The first four columns stay as they are without the join.
+   */
+  entityStoreLookup?: { index: string; fields: string[] }
 ): string => {
   const definition = getBuiltInEntityDefinition(entityType);
   const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(definition);
@@ -655,6 +660,13 @@ export const getBaseScoreESQL = (
         BY entity_id
     | SORT scores DESC
     | LIMIT ${pageSize}
+    ${
+      entityStoreLookup
+        ? `| RENAME entity_id AS entity.id
+    | LOOKUP JOIN ${entityStoreLookup.index} ON entity.id
+    | KEEP alert_count, scores, risk_inputs, entity.id, ${entityStoreLookup.fields.join(', ')}`
+        : ''
+    }
   `;
 
   return query;

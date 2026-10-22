@@ -46,10 +46,16 @@ export const persistRiskScoresToEntityStore = async ({
   crudClient,
   logger,
   scores,
+  refresh,
+  parallelChunks = 1,
 }: {
-  crudClient: EntityUpdateClient;
+  crudClient: Pick<EntityUpdateClient, 'bulkUpdateEntity'>;
   logger: Pick<Logger, 'debug' | 'warn'>;
   scores: Partial<Record<EntityType, EntityRiskScoreRecord[]>>;
+  /** The bulk update waits for a refresh unless this is `false`. */
+  refresh?: 'wait_for' | false;
+  /** Splits the write into this many bulk requests, sent at the same time. */
+  parallelChunks?: number;
 }) => {
   const allObjects: BulkObject[] = [];
   for (const [entityType, entityScores] of Object.entries(scores)) {
@@ -61,13 +67,29 @@ export const persistRiskScoresToEntityStore = async ({
   }
 
   if (allObjects.length === 0) {
-    return { docsWritten: 0, unexpectedErrors: [] };
+    return { docsWritten: 0, unexpectedErrors: [], tookMs: 0 };
   }
 
-  const errors = await crudClient.bulkUpdateEntity({
-    objects: allObjects,
-    force: true,
-  });
+  const chunkSize = Math.ceil(allObjects.length / Math.max(1, parallelChunks));
+  const chunks = Array.from({ length: Math.ceil(allObjects.length / chunkSize) }, (_, index) =>
+    allObjects.slice(index * chunkSize, (index + 1) * chunkSize)
+  );
+  // Elasticsearch's own time, summed over the chunks.
+  let tookMs = 0;
+  const errors = (
+    await Promise.all(
+      chunks.map((objects) =>
+        crudClient.bulkUpdateEntity({
+          objects,
+          force: true,
+          refresh,
+          onTook: (took) => {
+            tookMs += took;
+          },
+        })
+      )
+    )
+  ).flat();
 
   const missingEntityErrors = errors.filter(isMissingEntityUpdateError);
   const unexpectedErrors = errors.filter((error) => !isMissingEntityUpdateError(error));
@@ -87,6 +109,7 @@ export const persistRiskScoresToEntityStore = async ({
   return {
     docsWritten: allObjects.length - errors.length,
     unexpectedErrors: unexpectedErrors.map((e) => `[${e._id}] ${e.reason}`),
+    tookMs,
   };
 };
 

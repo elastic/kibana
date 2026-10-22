@@ -55,6 +55,8 @@ export interface ScoredEntityPage {
   entityIds: string[];
   scores: EntityRiskScoreRecord[];
   entities: Map<string, RiskScoreModifierEntity>;
+  /** IDs of scored entities whose store document already holds the same score. */
+  unchangedInStore?: Set<string>;
 }
 
 /** Common summary fields returned by scorer modules. */

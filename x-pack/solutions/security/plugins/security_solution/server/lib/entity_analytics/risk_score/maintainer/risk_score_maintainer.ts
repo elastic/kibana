@@ -580,6 +580,9 @@ const executeEntityTypeRun = async ({
           idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
           createMissingEntities: runConfig.createMissingEntitiesEnabled,
           writer: runConfig.writer,
+          entityStoreRefresh: false,
+          skipUnchangedStoreWrites: true,
+          entityStoreWriteChunks: 5,
           pageTimings: basePageTimings,
         }),
     });
@@ -655,6 +658,8 @@ const executeEntityTypeRun = async ({
             idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
             writer: runConfig.writer,
             alertFilters,
+            entityStoreRefresh: false,
+            entityStoreWriteChunks: 5,
             pageTimings: resolutionPageTimings,
           }),
       });
@@ -717,6 +722,17 @@ const executeEntityTypeRun = async ({
     // zero out scores that were just written in this run.
     const { alias: riskScoreAlias } = getIndexPatternDataStream(runContext.namespace);
     await runContext.esClient.indices.refresh({ index: riskScoreAlias });
+    // Base and resolution write to the entity store without waiting for a refresh on every page,
+    // so one refresh here makes this run's scores searchable.
+    try {
+      await runContext.esClient.indices.refresh({ index: await crudClient.latestIndexName() });
+    } catch (error) {
+      runLogger.warn(
+        `Failed to refresh the entity store after scoring: ${telemetryReporter.getErrorMessage(
+          error
+        )}`
+      );
+    }
 
     // Stage 3: reset stale positive scores not touched in this run.
     if (runConfig.configuration.enableResetToZero !== false) {

@@ -53,21 +53,29 @@ export const persistScoresToEntityStore = async ({
   entityType,
   scores,
   enabled,
+  refresh,
+  parallelChunks,
 }: {
   crudClient: EntityUpdateClient;
   logger: ScopedLogger;
   entityType: EntityType;
   scores: EntityRiskScoreRecord[];
   enabled: boolean;
-}): Promise<{ docsWritten: number; errorsCount: number }> => {
+  /** The write waits for a refresh unless this is `false`. */
+  refresh?: 'wait_for' | false;
+  /** Splits the write into this many bulk requests, sent at the same time. */
+  parallelChunks?: number;
+}): Promise<{ docsWritten: number; errorsCount: number; tookMs: number }> => {
   if (!enabled) {
-    return { docsWritten: 0, errorsCount: 0 };
+    return { docsWritten: 0, errorsCount: 0, tookMs: 0 };
   }
 
-  const { docsWritten, unexpectedErrors } = await persistRiskScoresToEntityStore({
+  const { docsWritten, unexpectedErrors, tookMs } = await persistRiskScoresToEntityStore({
     crudClient,
     logger,
     scores: { [entityType]: scores },
+    refresh,
+    parallelChunks,
   });
   if (unexpectedErrors.length > 0) {
     logger.warn(
@@ -76,5 +84,5 @@ export const persistScoresToEntityStore = async ({
       )}`
     );
   }
-  return { docsWritten, errorsCount: unexpectedErrors.length };
+  return { docsWritten, errorsCount: unexpectedErrors.length, tookMs };
 };
