@@ -59,7 +59,6 @@
     "@kbn/ingest-pipelines-plugin",
     "@kbn/ui-callout",
     "@kbn/code-editor",
-    "@kbn/monaco",
     "@kbn/scout",
     "@kbn/core-analytics-browser",
     "@kbn/inference-common",
