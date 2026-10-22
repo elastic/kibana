@@ -44,6 +44,46 @@ describe('normalizedReportSchema', () => {
 
     expect(normalizedReportSchema.parse(report).source.url).toBeUndefined();
   });
+
+  // The `text_indicator_list` adapter is gone, but reports it wrote are still in
+  // `.kibana-threat-reports` and the promote task still reads them, so the schema has
+  // to keep accepting its source type, extraction method, and per-IOC block fields.
+  it('still parses a historical text_indicator_list report', () => {
+    const report = buildTitleOnlyReport();
+    report.source = {
+      type: 'text_indicator_list',
+      name: 'Retired indicator list',
+      url: 'https://example.test/indicators.txt',
+      adapter_id: 'text_indicator_list:text_indicator_list:retired',
+    };
+    report.lineage = {
+      ingested_at: '2026-09-01T00:00:00.000Z',
+      extraction_method: 'text_indicator_list',
+      extracted_at: '2026-09-01T00:00:00.000Z',
+      source_doc_ref: { index: 'maltrail:trail', id: 'indicators' },
+    };
+    report.extracted = {
+      iocs: [
+        {
+          type: 'ip',
+          value: '192.0.2.10',
+          tier: 'discriminating',
+          tier_heuristic: 'discriminating',
+          tier_basis: 'maltrail_indicator_list',
+          reference: 'https://example.test/writeup',
+          block_index: 0,
+        },
+      ],
+    };
+
+    const parsed = normalizedReportSchema.parse(report);
+
+    expect(parsed.lineage.extraction_method).toBe('text_indicator_list');
+    expect(parsed.extracted?.iocs?.[0]).toMatchObject({
+      reference: 'https://example.test/writeup',
+      block_index: 0,
+    });
+  });
 });
 
 describe('sourceHitSchema', () => {

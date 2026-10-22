@@ -20,7 +20,13 @@ import {
   ATTACK_DISCOVERY_GRAPH_RUN_NAME,
   ATTACK_DISCOVERY_TAG,
   getDefaultAttackDiscoveryGraph,
+  resolveAttackDiscoveryTemplateCompletion,
 } from '.';
+import {
+  attackDiscoveryTemplateOmissionMessage,
+  capAttackDiscoveryTemplateCount,
+  takeAttackDiscoveryTemplateAlerts,
+} from './template_completion';
 import { getLlmType } from '../../lib/helpers/get_llm_type';
 import { throwIfErrorCountsExceeded } from './throw_if_error_counts_exceeded';
 
@@ -110,6 +116,33 @@ export const invokeAttackDiscoveryGraphWithAlerts = async ({
     },
   });
 
+  const completeWithTemplate = await resolveAttackDiscoveryTemplateCompletion({
+    inferenceClient: isInferenceEndpoint ? inferenceClient : undefined,
+    connectorId,
+    logger,
+    timeout: connectorTimeout,
+  });
+
+  // Cap before the graph retrieves or reports coverage. The completion also
+  // clamps, and this keeps `alertsContextCount` equal to the alerts analyzed.
+  let alertsForGraph = alerts;
+  let sizeForGraph = size;
+  if (completeWithTemplate) {
+    const requestedSize = sizeForGraph;
+    sizeForGraph = capAttackDiscoveryTemplateCount(sizeForGraph) ?? sizeForGraph;
+    if (alerts.length > 0) {
+      const limited = takeAttackDiscoveryTemplateAlerts(alerts);
+      alertsForGraph = limited.alerts;
+      if (limited.omitted > 0) {
+        logger.warn(attackDiscoveryTemplateOmissionMessage(limited.omitted, alerts.length));
+      }
+    } else if (requestedSize != null && sizeForGraph < requestedSize) {
+      logger.warn(
+        attackDiscoveryTemplateOmissionMessage(requestedSize - sizeForGraph, requestedSize)
+      );
+    }
+  }
+
   const graph = getDefaultAttackDiscoveryGraph({
     alertsIndexPattern,
     anonymizationFields,
@@ -123,8 +156,9 @@ export const invokeAttackDiscoveryGraphWithAlerts = async ({
     },
     prompts,
     replacements,
-    size,
+    size: sizeForGraph,
     start,
+    ...(completeWithTemplate ? { completeWithTemplate } : {}),
   });
 
   logger.debug(() => `Invoking Attack Discovery graph with ${alerts.length} pre-retrieved alerts`);
@@ -141,7 +175,7 @@ export const invokeAttackDiscoveryGraphWithAlerts = async ({
 
   const result: AttackDiscoveryGraphState = await graph.invoke(
     {
-      anonymizedDocuments: alerts,
+      anonymizedDocuments: alertsForGraph,
       ...(promptWithAdditionalContext != null ? { prompt: promptWithAdditionalContext } : {}),
       replacements,
     },

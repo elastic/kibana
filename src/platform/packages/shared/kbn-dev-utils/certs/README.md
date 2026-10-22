@@ -15,6 +15,8 @@ Certificates and keys are provided in multiple formats. These can be used by oth
 * `elasticsearch.key` -- A PEM-formatted [PKCS #1](https://tools.ietf.org/html/rfc8017) private key for Elasticsearch.
 * `kibana.crt` -- A PEM-formatted X.509 certificate and public key for Kibana.
 * `kibana.key` -- A PEM-formatted PKCS #1 private key for Kibana.
+* `kibana_serverless_<projectType>.crt` -- A PEM-formatted X.509 certificate and public key Kibana presents to UIAM on a local Serverless project of that type (`search`, `observability`, `security`, `vectordb`).
+* `kibana_serverless_<projectType>.key` -- A PEM-formatted PKCS #8 private key for that certificate.
 * `relay.crt` -- A PEM-formatted X.509 certificate and public key for the Relay service.
 * `relay.key` -- A PEM-formatted PKCS #1 private key for the Relay service.
 
@@ -28,6 +30,25 @@ The password used for both of these is "storepass". Other copies are also provid
 
 * `elasticsearch_emptypassword.p12` -- The same PKCS #12 key store, encrypted with an empty password.
 * `elasticsearch_nopassword.p12` -- The same PKCS #12 key store, not encrypted with a password.
+
+## Kibana's Serverless UIAM identity
+
+UIAM reads Kibana's organization, project and **project type** from the client certificate Kibana
+presents, in a SAN of the form
+`EIDENT.<projectId>.project.<uiamProjectType>.type.<organizationId>.organization`.
+
+When the certificate names another project type than the one Kibana acts for, UIAM refuses it:
+listing service accounts comes back empty, reading one answers 403, and assuming one is denied with
+"Subject is not in organization service account assumable-by list". So there is one certificate per
+Serverless project type, and `src/cli/serve/serve.js` picks the one matching
+`xpack.cloud.serverless.project_type` (`getKbnServerlessUiamCert` in `src/certs.ts`):
+
+| `project_type` | Certificate | UIAM project type in the SAN |
+|---|---|---|
+| `search` | `kibana_serverless_search.crt` | `elasticsearch` |
+| `observability` | `kibana_serverless_observability.crt` | `observability` |
+| `security` | `kibana_serverless_security.crt` | `security` |
+| `vectordb` | `kibana_serverless_vectordb.crt` | `vectordb` |
 
 ## Certificate generation
 
@@ -144,3 +165,29 @@ openssl pkcs12 -in relay.p12 -nocerts -passin pass:"storepass" -passout pass:"ke
 # Extract the PEM-formatted X.509 certificate for the Relay service
 openssl pkcs12 -in relay.p12 -out relay.crt -clcerts -passin pass:"storepass" -passout pass:
 ```
+
+### Kibana's Serverless UIAM certificates
+
+`kibana_serverless_<projectType>.crt` is issued from the same CA, with Kibana's SANs and the UIAM
+project type in the `EIDENT` SAN. Extract the CA from `ca.p12` (generated above) to `ca.crt` and
+`ca.key`, then run, for example for a security project:
+
+```
+PROJECT_TYPE=security        # the file name: search, observability, security or vectordb
+UIAM_PROJECT_TYPE=security   # the SAN: elasticsearch for search, otherwise the same
+
+# The SANs of kibana.crt, with the project's UIAM project type
+cat > kibana_serverless_$PROJECT_TYPE.cnf <<XEOF
+basicConstraints=CA:FALSE
+subjectAltName=DNS:es01,DNS:es02,DNS:es03,DNS:localhost,DNS:host.docker.internal,DNS:kb-kb-uiam.project-abcdef12345678901234567890123456.kb.local,DNS:EIDENT.abcdef12345678901234567890123456.project.$UIAM_PROJECT_TYPE.type.org1234567890.organization
+XEOF
+
+# Generate the key and a certificate signing request
+openssl req -newkey rsa:2048 -nodes -keyout kibana_serverless_$PROJECT_TYPE.key -subj "/CN=kibana" -out kibana_serverless_$PROJECT_TYPE.csr
+
+# Sign it with the CA, valid for 50 years
+openssl x509 -req -in kibana_serverless_$PROJECT_TYPE.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out kibana_serverless_$PROJECT_TYPE.crt -days 18250 -sha256 -extfile kibana_serverless_$PROJECT_TYPE.cnf
+```
+
+The project and organization ids are the local Serverless ones from `@kbn/mock-idp-utils`, the same
+as in `kibana.crt`.

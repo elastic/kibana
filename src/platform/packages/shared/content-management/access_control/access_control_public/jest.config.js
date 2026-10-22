@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../../../..',
   roots: [
     '<rootDir>/src/platform/packages/shared/content-management/access_control/access_control_public',
