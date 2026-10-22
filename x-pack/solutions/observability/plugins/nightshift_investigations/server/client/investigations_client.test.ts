@@ -1031,7 +1031,7 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
       expect.objectContaining({
         id: 'inv-new',
         templateId: 'investigation',
-        metadata: { workflow_execution_ids: ['exec-1'] },
+        metadata: { severity: 'medium', workflow_execution_ids: ['exec-1'] },
       })
     );
     expect(conversations.patchMetadata).not.toHaveBeenCalled();
@@ -1330,9 +1330,13 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       agentId: 'nightshift.investigation',
       templateId: 'investigation',
       accessControl: { access_mode: 'public' },
-      // The run is recorded in the creating write, so the investigation reads as in progress
-      // from the moment it exists.
-      metadata: { workflow_execution_ids: ['exec-1'] },
+      metadata: {
+        // Starts at medium; the agent re-rates it when it concludes.
+        severity: 'medium',
+        // The run is recorded in the creating write, so the investigation reads as in progress
+        // from the moment it exists.
+        workflow_execution_ids: ['exec-1'],
+      },
     });
     // A conversation this call created holds no subjects yet.
     expect(subjectsClient.listByConversationIds).not.toHaveBeenCalled();
@@ -1790,6 +1794,8 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
       id: 'inv-new',
       agentId: 'nightshift.investigation',
       templateId: 'investigation',
+      // Starts at medium; the agent re-rates it when it concludes.
+      metadata: { severity: 'medium' },
       accessControl: { access_mode: 'public' },
     });
     expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-new', [
@@ -1893,14 +1899,29 @@ describe('NightshiftInvestigationsClient.getLifecycleSubject()', () => {
     expect(subjectsClient.listByConversationIds).toHaveBeenCalledWith(['inv-1']);
   });
 
-  it('reports a Slack thread as a manual subject, after any other subject', async () => {
+  it('reports a Slack thread as a slack_thread subject', async () => {
     subjectsClient.listByConversationIds.mockResolvedValue([
       makeStoredSubject({ subjectType: 'slack_thread', subjectId: 'slack:T:C:1' }),
     ]);
 
     await expect(makeClient().getLifecycleSubject('inv-1')).resolves.toMatchObject({
-      subject: { type: 'manual', id: 'slack:T:C:1' },
+      subject: { type: 'slack_thread', id: 'slack:T:C:1' },
       triggerType: 'manual',
+    });
+  });
+
+  it('prefers any other subject to a Slack thread recorded before it', async () => {
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      makeStoredSubject({
+        subjectType: 'slack_thread',
+        subjectId: 'slack:T:C:1',
+        createdAt: '2026-08-24T12:00:00.000Z',
+      }),
+      makeStoredSubject({ subjectId: 'alert-1', createdAt: '2026-08-24T13:00:00.000Z' }),
+    ]);
+
+    await expect(makeClient().getLifecycleSubject('inv-1')).resolves.toMatchObject({
+      subject: { type: 'alert', id: 'alert-1' },
     });
   });
 

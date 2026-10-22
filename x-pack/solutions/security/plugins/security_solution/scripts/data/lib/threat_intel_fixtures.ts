@@ -118,7 +118,7 @@ export interface PackTiScenario {
   /**
    * Browsable https article URL written into RSS `<channel>/<item><link>`.
    * Becomes report `source.url` after mustard ingestion; must be http(s) so
-   * Intelligence Hub's `isBrowsableReportUrl` renders the external link.
+   * the report links out to a real article.
    */
   articleUrl: string;
   /**
@@ -1363,7 +1363,7 @@ export const buildPackRssReportItemsForScenario = buildPackHistoricReportItemsFo
  * Builds an inline `data:text/html` article for directly seeded (non-RSS) reports.
  * These fixtures have no real server to host the content, so the article body is
  * embedded in the URL. RSS-ingested reports use `scenario.articleUrl` (http/https)
- * as `source.url` instead and will show a browsable link in Intelligence Hub.
+ * as `source.url` instead and link out to a browsable article.
  */
 export const buildPackArticleDataUrl = (
   scenario: PackTiScenario,
