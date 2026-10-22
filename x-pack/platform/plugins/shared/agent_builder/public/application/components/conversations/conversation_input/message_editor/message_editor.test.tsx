@@ -184,6 +184,22 @@ describe('MessageEditor', () => {
     expect(editor).toHaveAttribute('aria-disabled', 'true');
   });
 
+  it('renders as a plain text editor when enabled', () => {
+    const { messageEditor } = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    expect(screen.getByTestId('messageEditor')).toHaveAttribute(
+      'contentEditable',
+      'plaintext-only'
+    );
+  });
+
   it('does not submit form during IME composition', () => {
     const { messageEditor } = createMockMessageEditor();
     render(
@@ -340,7 +356,7 @@ describe('MessageEditor', () => {
     expect(screen.getByTestId('commandMenuPopover-content')).toBeInTheDocument();
   });
 
-  it('preserves line breaks when pasting plain text', () => {
+  it('leaves plain text paste to the browser so it stays in the native undo history', () => {
     const { messageEditor } = createMockMessageEditor();
     render(
       <MessageEditor
@@ -351,33 +367,16 @@ describe('MessageEditor', () => {
     );
 
     const editor = screen.getByTestId('messageEditor');
+    const text = ['first line', '', 'third line'].join('\n');
 
-    editor.focus();
-    const range = document.createRange();
-    range.setStart(editor, 0);
-    range.collapse(true);
-    const sel = window.getSelection()!;
-    sel.removeAllRanges();
-    sel.addRange(range);
-
-    const text = [
-      'Create ES|QL SIEM detection rule (name, description, data sources, detection logic, severity, risk score, schedule, tags, and MITRE ATT&CK mappings) using dedicated detection rule creation tool. Always render inline the latest version of the rule attachment.',
-      '',
-      'You can review and edit everything before enabling the rule. ',
-      'Desired behavior or activity to detect:',
-      '',
-      '==== YOUR DESCRIPTION HERE====',
-    ].join('\n');
-
-    fireEvent.paste(editor, {
+    const notPrevented = fireEvent.paste(editor, {
       clipboardData: {
         getData: (type: string) => (type === 'text/plain' ? text : ''),
       },
     });
 
-    expect(editor.querySelectorAll('br').length).toBe(5);
-    expect(editor.textContent).toContain('Create ES|QL SIEM detection rule');
-    expect(editor.textContent).toContain('==== YOUR DESCRIPTION HERE====');
+    expect(notPrevented).toBe(true);
+    expect(editor.innerHTML).toBe('');
   });
 
   it('preserves a valid command badge when pasting HTML', () => {
@@ -582,29 +581,6 @@ describe('MessageEditor', () => {
     expect(chip.getAttribute('data-uploading')).toBeNull();
   });
 
-  it('re-syncs the uploading state of chips from uploadingNames on input', () => {
-    const { messageEditor } = createMockMessageEditor();
-    render(
-      <MessageEditor
-        messageEditor={messageEditor}
-        onSubmit={mockOnSubmit}
-        uploadingNames={new Set(['uploading.png'])}
-        data-test-subj="messageEditor"
-      />
-    );
-
-    const editor = screen.getByTestId('messageEditor');
-    const uploadingChip = createImagePlaceholderElement('uploading.png');
-    const doneChip = createImagePlaceholderElement('done.png');
-    doneChip.setAttribute('data-uploading', 'true');
-    editor.append(uploadingChip, doneChip);
-
-    fireEvent.input(editor);
-
-    expect(uploadingChip.getAttribute('data-uploading')).toBe('true');
-    expect(doneChip.getAttribute('data-uploading')).toBeNull();
-  });
-
   it('pasting an image inserts a trailing non-breaking space and places the caret after it', () => {
     const onPasteFile = jest.fn().mockReturnValue('screenshot.png');
     const { messageEditor } = createMockMessageEditor();
@@ -674,7 +650,7 @@ describe('MessageEditor', () => {
     expect(editor.querySelector('[data-image-placeholder]')).toBeNull();
   });
 
-  it('plain-text paste still works when an image paste handler is registered', () => {
+  it('leaves plain-text paste to the browser when an image paste handler is registered', () => {
     const onPasteFile = jest.fn();
     const { messageEditor } = createMockMessageEditor();
     render(
@@ -694,7 +670,7 @@ describe('MessageEditor', () => {
     window.getSelection()!.removeAllRanges();
     window.getSelection()!.addRange(range);
 
-    fireEvent.paste(editor, {
+    const notPrevented = fireEvent.paste(editor, {
       clipboardData: {
         getData: (type: string) => (type === 'text/plain' ? 'hello world' : ''),
         items: [],
@@ -702,115 +678,7 @@ describe('MessageEditor', () => {
     });
 
     expect(onPasteFile).not.toHaveBeenCalled();
-    expect(editor.textContent).toContain('hello world');
-  });
-
-  describe('native undo step via execCommand', () => {
-    const originalExecCommand = Object.getOwnPropertyDescriptor(document, 'execCommand');
-
-    const setup = () => {
-      const onPasteFile = jest.fn().mockReturnValue('screenshot.png');
-      const { messageEditor } = createMockMessageEditor();
-      render(
-        <MessageEditor
-          messageEditor={messageEditor}
-          onSubmit={mockOnSubmit}
-          onPasteFile={onPasteFile}
-          data-test-subj="messageEditor"
-        />
-      );
-      const editor = screen.getByTestId('messageEditor');
-      editor.focus();
-      const range = document.createRange();
-      range.setStart(editor, 0);
-      range.collapse(true);
-      window.getSelection()!.removeAllRanges();
-      window.getSelection()!.addRange(range);
-      return editor;
-    };
-
-    const mockExecCommand = (result: boolean) => {
-      const execCommand = jest.fn().mockReturnValue(result);
-      Object.defineProperty(document, 'execCommand', { value: execCommand, configurable: true });
-      return execCommand;
-    };
-
-    afterEach(() => {
-      if (originalExecCommand) {
-        Object.defineProperty(document, 'execCommand', originalExecCommand);
-      } else {
-        delete (document as unknown as Record<string, unknown>).execCommand;
-      }
-    });
-
-    it('inserts pasted text with a single insertHTML command', () => {
-      const editor = setup();
-      const execCommand = mockExecCommand(true);
-
-      fireEvent.paste(editor, {
-        clipboardData: {
-          getData: (type: string) => (type === 'text/plain' ? 'line 1\nline 2' : ''),
-          items: [],
-        },
-      });
-
-      expect(execCommand).toHaveBeenCalledTimes(1);
-      expect(execCommand).toHaveBeenCalledWith('insertHTML', false, 'line 1<br>line 2');
-    });
-
-    it('inserts a pasted image chip and trailing space with a single insertHTML command', () => {
-      const editor = setup();
-      const execCommand = mockExecCommand(true);
-      const pngFile = new File([new Uint8Array(4)], 'screenshot.png', { type: 'image/png' });
-
-      fireEvent.paste(editor, {
-        clipboardData: {
-          getData: jest.fn().mockReturnValue(''),
-          items: [{ kind: 'file', type: 'image/png', getAsFile: () => pngFile }],
-        },
-      });
-
-      expect(execCommand).toHaveBeenCalledTimes(1);
-      const [command, , html] = execCommand.mock.calls[0];
-      expect(command).toBe('insertHTML');
-      expect(html).toContain('data-image-placeholder="true"');
-      expect(html).toContain('data-uploading="true"');
-      expect(html.endsWith('&nbsp;')).toBe(true);
-    });
-
-    it('falls back to Range insertion when execCommand returns false', () => {
-      const editor = setup();
-      const execCommand = mockExecCommand(false);
-
-      fireEvent.paste(editor, {
-        clipboardData: {
-          getData: (type: string) => (type === 'text/plain' ? 'hello world' : ''),
-          items: [],
-        },
-      });
-
-      expect(execCommand).toHaveBeenCalledTimes(1);
-      expect(editor.textContent).toContain('hello world');
-    });
-
-    it('falls back to Range insertion for the image chip when execCommand returns false', () => {
-      const editor = setup();
-      const execCommand = mockExecCommand(false);
-      const pngFile = new File([new Uint8Array(4)], 'screenshot.png', { type: 'image/png' });
-
-      fireEvent.paste(editor, {
-        clipboardData: {
-          getData: jest.fn().mockReturnValue(''),
-          items: [{ kind: 'file', type: 'image/png', getAsFile: () => pngFile }],
-        },
-      });
-
-      expect(execCommand).toHaveBeenCalledTimes(1);
-      const chip = editor.querySelector('[data-image-placeholder]') as HTMLElement;
-      expect(chip).not.toBeNull();
-      expect(chip.getAttribute('data-uploading')).toBe('true');
-      expect(chip.nextSibling?.textContent).toBe(NON_BREAKING_SPACE);
-    });
+    expect(notPrevented).toBe(true);
   });
 
   it('clicking the cross icon removes the chip and fires onChange and onAfterInput', () => {

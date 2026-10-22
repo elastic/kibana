@@ -112,36 +112,10 @@ export const getSelectionRange = (): Range | undefined => {
 };
 
 /**
- * Inserts a copy of `node` at the caret via the browser's native editing command.
- * Returns `false` when the command is unavailable (e.g. jsdom) or fails.
+ * Replaces the current selection with `node` and places the cursor after it.
+ * Used by paste handling to insert content at the caret position.
  */
-export const insertHtmlAtCursor = (node: Node): boolean => {
-  if (typeof document.execCommand !== 'function') {
-    return false;
-  }
-  const container = document.createElement('div');
-  container.appendChild(node.cloneNode(true));
-  // execCommand is the only way to record the insertion as a single native undo step
-  const inserted = document.execCommand('insertHTML', false, container.innerHTML);
-  if (!inserted) {
-    return false;
-  }
-
-  // Chrome can leave the caret inside a non-editable badge, where typing is lost
-  const sel = window.getSelection();
-  const { anchorNode } = sel ?? {};
-  const anchorElement = anchorNode instanceof Element ? anchorNode : anchorNode?.parentElement;
-  const lockedElement = anchorElement?.closest('[contenteditable="false"]');
-  if (sel && lockedElement) {
-    placeCursorAfter(lockedElement, sel);
-  }
-  return true;
-};
-
-/**
- * Replaces the current selection with `node` using DOM Range APIs and places the cursor after it.
- */
-export const insertNodeWithRange = (node: Node): void => {
+export const insertNodeAtCursor = (node: Node): void => {
   const sel = window.getSelection();
   if (!sel || sel.rangeCount === 0) {
     return;
@@ -152,21 +126,6 @@ export const insertNodeWithRange = (node: Node): void => {
   range.collapse(false);
   sel.removeAllRanges();
   sel.addRange(range);
-};
-
-/**
- * Replaces the current selection with `node` and places the cursor after it.
- * Used by paste handling to insert content at the caret position.
- */
-export const insertNodeAtCursor = (node: Node): void => {
-  const sel = window.getSelection();
-  if (!sel || sel.rangeCount === 0) {
-    return;
-  }
-  if (insertHtmlAtCursor(node)) {
-    return;
-  }
-  insertNodeWithRange(node);
 };
 
 /**
