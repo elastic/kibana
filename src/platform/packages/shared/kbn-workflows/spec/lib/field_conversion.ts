@@ -469,12 +469,10 @@ const hasPropertyDefault = (
   if (!propertySchema || typeof propertySchema !== 'object') {
     return false;
   }
-  if (propertySchema.default !== undefined) {
-    return true;
-  }
-  return propertySchema.$ref
-    ? resolveRef(propertySchema.$ref, rootSchema)?.default !== undefined
-    : false;
+  const resolvedSchema = propertySchema.$ref
+    ? resolveRef(propertySchema.$ref, rootSchema) ?? propertySchema
+    : propertySchema;
+  return resolvedSchema.default !== undefined;
 };
 
 /**

@@ -829,6 +829,27 @@ describe('omitRequiredWithDefaults', () => {
     expect(omitRequiredWithDefaults(schema).required).toEqual([]);
   });
 
+  it('ignores a $ref sibling default when the resolved definition has none', () => {
+    const schema = {
+      type: 'object',
+      properties: { level: { $ref: '#/definitions/level', default: 'low' } },
+      required: ['level'],
+      definitions: { level: { type: 'string' } },
+    } as JsonModelSchemaType;
+
+    expect(omitRequiredWithDefaults(schema).required).toEqual(['level']);
+  });
+
+  it('uses the $ref sibling default when the reference cannot be resolved', () => {
+    const schema = {
+      type: 'object',
+      properties: { level: { $ref: '#/definitions/missing', default: 'low' } },
+      required: ['level'],
+    } as JsonModelSchemaType;
+
+    expect(omitRequiredWithDefaults(schema).required).toEqual([]);
+  });
+
   it('returns the schema unchanged when nothing is required', () => {
     const schema = {
       type: 'object',
