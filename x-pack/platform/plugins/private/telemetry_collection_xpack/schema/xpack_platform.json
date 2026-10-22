@@ -11271,6 +11271,206 @@
         }
       }
     },
+    "context_engine": {
+      "properties": {
+        "ai_indices": {
+          "properties": {
+            "user": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of user-created AI indices across all spaces"
+              }
+            },
+            "managed": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of managed AI index entries across all spaces; one per space the managed AI index is bootstrapped in"
+              }
+            }
+          }
+        },
+        "kis": {
+          "properties": {
+            "user": {
+              "properties": {
+                "active": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of active, unexpired KIs in user-created AI indices"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Most active, unexpired KIs in one user-created AI index"
+                      }
+                    },
+                    "min": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Fewest active, unexpired KIs in one user-created AI index"
+                      }
+                    },
+                    "avg": {
+                      "type": "float",
+                      "_meta": {
+                        "description": "Average active, unexpired KIs per user-created AI index"
+                      }
+                    }
+                  }
+                },
+                "expired": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of active KIs past their expires_at in user-created AI indices"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Most active KIs past their expires_at in one user-created AI index"
+                      }
+                    },
+                    "min": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Fewest active KIs past their expires_at in one user-created AI index"
+                      }
+                    },
+                    "avg": {
+                      "type": "float",
+                      "_meta": {
+                        "description": "Average active KIs past their expires_at per user-created AI index"
+                      }
+                    }
+                  }
+                },
+                "deleted": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of KIs with lifecycle status deleted in user-created AI indices"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Most KIs with lifecycle status deleted in one user-created AI index"
+                      }
+                    },
+                    "min": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Fewest KIs with lifecycle status deleted in one user-created AI index"
+                      }
+                    },
+                    "avg": {
+                      "type": "float",
+                      "_meta": {
+                        "description": "Average KIs with lifecycle status deleted per user-created AI index"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "managed": {
+              "properties": {
+                "active": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of active, unexpired KIs in managed AI indices"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Most active, unexpired KIs in one managed AI index"
+                      }
+                    },
+                    "min": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Fewest active, unexpired KIs in one managed AI index"
+                      }
+                    },
+                    "avg": {
+                      "type": "float",
+                      "_meta": {
+                        "description": "Average active, unexpired KIs per managed AI index"
+                      }
+                    }
+                  }
+                },
+                "expired": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of active KIs past their expires_at in managed AI indices"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Most active KIs past their expires_at in one managed AI index"
+                      }
+                    },
+                    "min": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Fewest active KIs past their expires_at in one managed AI index"
+                      }
+                    },
+                    "avg": {
+                      "type": "float",
+                      "_meta": {
+                        "description": "Average active KIs past their expires_at per managed AI index"
+                      }
+                    }
+                  }
+                },
+                "deleted": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of KIs with lifecycle status deleted in managed AI indices"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Most KIs with lifecycle status deleted in one managed AI index"
+                      }
+                    },
+                    "min": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Fewest KIs with lifecycle status deleted in one managed AI index"
+                      }
+                    },
+                    "avg": {
+                      "type": "float",
+                      "_meta": {
+                        "description": "Average KIs with lifecycle status deleted per managed AI index"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "discoverEnhanced": {
       "properties": {
         "exploreDataInChartActionEnabled": {
