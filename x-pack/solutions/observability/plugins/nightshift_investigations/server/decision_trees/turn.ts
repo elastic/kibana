@@ -40,16 +40,19 @@ export const buildReinforcementPrompt = ({
   learnings,
   connectorNames,
   response,
+  causalConfirmed,
 }: {
   trees: DecisionTreeSummary[];
   learnings: LearningRecord[];
   connectorNames: string[];
   response: string;
+  /** Decided by the caller, for example with the causal check. Falls back to the text match. */
+  causalConfirmed?: boolean;
 }): { message: string; turnKind: DecisionTreeTurnKind } => {
   const turnKind = deriveTurnKind(trees);
   const script = selectTurnScript({
     turnKind,
-    causalConfirmed: deriveCausalConfirmed(response),
+    causalConfirmed: causalConfirmed ?? deriveCausalConfirmed(response),
     // True only when the investigator read at least one tree file this round. Callers must pass
     // that accessed subset — not every tree in the index.
     hasExistingTrees: trees.length > 0,

@@ -471,7 +471,7 @@ export const isAllowedBuiltinAttachment = (
  * This is a manually maintained list of all cycle hooks registered in Agent Builder.
  * The intention is to force a code review from the Agent Builder team when any team adds a new cycle hook.
  */
-export const AGENT_BUILDER_CYCLE_HOOKS = [] as const;
+export const AGENT_BUILDER_CYCLE_HOOKS = ['nightshift.findings_recorder'] as const;
 
 export type AgentBuilderCycleHook = (typeof AGENT_BUILDER_CYCLE_HOOKS)[number];
 

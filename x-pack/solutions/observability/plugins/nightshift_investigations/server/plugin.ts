@@ -69,6 +69,7 @@ import { setupNightshiftTelemetry } from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
+import { registerFindingsRecorder } from './findings_recorder';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
 import { createDecisionTreeTools } from './tools/decision_tree';
 import { createReplyUserTool } from './tools/reply_user/tool';
@@ -249,6 +250,23 @@ export class NightshiftInvestigationsPlugin
           customContextClient.getInstructions(request, spaceId),
         logger: this.logger.get('custom_context'),
       });
+      if (plugins.agenticInvestigations) {
+        // Records summary, severity, hypotheses and impact from outside the agent, so the
+        // investigator needs no recording tools. Every dependency is read lazily: hooks are
+        // registered in setup() but only run once the plugin has started.
+        registerFindingsRecorder({
+          agentBuilder: plugins.agentBuilder,
+          deps: {
+            getAgentBuilder: () => this.agentBuilder,
+            getInference: () => this.inference,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
+            getAgenticInvestigations: () => this.agenticInvestigations,
+            logger: this.logger.get('findings_recorder'),
+          },
+          logger: this.logger.get('findings_recorder'),
+        });
+      }
       plugins.agentBuilder.tools.register(createReplyUserTool());
       plugins.agentBuilder.tools.register(createTimeConverterTool());
       if (this.decisionTreesEnabled) {
@@ -448,6 +466,10 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreePrepareStepDefinition({
             getTelemetryConnectorId: () => this.ctx.config.get().sandbox?.telemetry_connector_id,
+            getAgentBuilder: () => this.agentBuilder,
+            getInference: () => this.inference,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
           })

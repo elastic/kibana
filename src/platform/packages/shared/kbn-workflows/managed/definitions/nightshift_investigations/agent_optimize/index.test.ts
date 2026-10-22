@@ -144,7 +144,7 @@ describe('nightshift agent optimize workflow', () => {
         type: 'nightshift.decisionTreeReinforce',
       }),
     ]);
-    expect(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW.version).toBe(3);
+    expect(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW.version).toBe(4);
   });
 
   // A parallel branch has no per-branch timeout: it inherits `branch-timeout`. Reinforcement
