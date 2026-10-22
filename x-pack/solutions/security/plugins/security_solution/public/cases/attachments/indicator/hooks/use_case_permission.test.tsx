@@ -22,7 +22,6 @@ const mockCanUseCases = jest.fn();
 
 const getProviderComponent =
   (mockedServices: unknown) =>
-  // eslint-disable-next-line react/display-name
   ({ children }: { children: ReactNode }) =>
     (
       <TestProvidersComponent>

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
-
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import {
   CONNECTOR_ID as MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,

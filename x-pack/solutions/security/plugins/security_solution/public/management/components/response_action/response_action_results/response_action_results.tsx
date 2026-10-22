@@ -61,7 +61,6 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
 
     return (
       <EuiText data-test-subj={getTestId()} size={textSize}>
-        {/* eslint-disable-next-line complexity */}
         {agents.map((hostAgentId, index) => {
           const agentActionState = getAgentActionState(action, hostAgentId);
           const hostName = action.hosts[hostAgentId]?.name ?? hostAgentId;

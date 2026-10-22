@@ -186,7 +186,6 @@ export class NodesFactory {
     return this.createGenericStepNode(stepExecutionRuntime);
   }
 
-  // eslint-disable-next-line complexity
   private createGenericStepNode(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
     const node = stepExecutionRuntime.node;
     const stepLogger = stepExecutionRuntime.stepLogger;

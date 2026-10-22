@@ -317,7 +317,6 @@ export class EndpointMetadataService {
    * @param _endpointPackagePolicy
    * @internal
    */
-  // eslint-disable-next-line complexity
   private async enrichHostMetadata(
     endpointMetadata: HostMetadata,
     /**

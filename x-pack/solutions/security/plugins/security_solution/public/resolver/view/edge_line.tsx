@@ -55,7 +55,6 @@ const StyledElapsedTime = styled.div<StyledElapsedTime>`
 /**
  * A placeholder line segment view that connects process nodes.
  */
-// eslint-disable-next-line react/display-name
 export const EdgeLine = React.memo(
   ({
     className,

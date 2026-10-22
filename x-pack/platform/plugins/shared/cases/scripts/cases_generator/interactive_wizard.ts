@@ -111,7 +111,6 @@ function shellQuote(value: string): string {
 // the interactive choices the user just made, suppressing flags that match
 // defaults. Printed at the end of the wizard so the user can recreate the
 // run later without going through the prompts again.
-// eslint-disable-next-line complexity -- one branch per CLI flag; flat is clearer than abstracted here
 function buildShorthandCommand(config: GeneratorConfig, fieldTypesAllOf?: string[]): string {
   const parts: string[] = ['node x-pack/platform/plugins/shared/cases/scripts/generate_cases.js'];
   const push = (flag: string, value: string) => parts.push(`  --${flag} ${shellQuote(value)}`);

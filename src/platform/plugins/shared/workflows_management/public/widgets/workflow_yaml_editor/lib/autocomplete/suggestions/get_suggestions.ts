@@ -82,7 +82,6 @@ function createAdjustedRangeForType(
  * Handles suggestions based on match type
  */
 // event complex switch/case statement is good readable and maintainable
-// eslint-disable-next-line complexity
 async function handleMatchTypeSuggestions(
   autocompleteContext: ExtendedAutocompleteContext
 ): Promise<monaco.languages.CompletionItem[] | null> {

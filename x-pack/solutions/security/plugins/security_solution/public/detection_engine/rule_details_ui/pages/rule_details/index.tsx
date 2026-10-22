@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
 // TODO: Disabling complexity is temporary till this component is refactored as part of lists UI integration
 
 import type { EuiResizeObserverProps } from '@elastic/eui';

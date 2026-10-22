@@ -47,7 +47,6 @@ const nodeDetailError = i18n.translate('xpack.securitySolution.resolver.panel.no
   defaultMessage: 'Node details were unable to be retrieved',
 });
 
-// eslint-disable-next-line react/display-name
 export const NodeDetail = memo(function ({
   id,
   nodeID,
@@ -100,7 +99,6 @@ export interface NodeDetailsTableView {
  * A description list view of all the Metadata that goes with a particular process event, like:
  * Created, PID, User/Domain, etc.
  */
-// eslint-disable-next-line react/display-name
 export const NodeDetailView = memo(function ({
   id,
   processEvent,

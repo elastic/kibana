@@ -28,7 +28,6 @@ export const getTriggerTypeIconType = (triggerType: string): EuiIconType => {
 };
 
 // Switch has good readability as it is
-// eslint-disable-next-line complexity
 export const getStepIconType = (type: string): IconType => {
   // Strip a leading dot so callers can pass the raw step/connector type
   // (e.g. ".slack", ".email") without a separate normalization step.

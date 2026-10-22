@@ -10,7 +10,6 @@ import * as i18n from './translations';
 /**
  * This helper function returns a humanized name for non-grouped diffable fields
  */
-// eslint-disable-next-line complexity
 export const getHumanizedFieldName = (fieldName: string) => {
   switch (fieldName) {
     // About section fields

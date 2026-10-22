@@ -16,7 +16,6 @@ jest.mock('../attack_discovery/upgrade_actions', () => ({
 
 jest.mock('@kbn/shared-ux-page-kibana-template', () => {
   const KibanaPageTemplate = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
-  // eslint-disable-next-line react/display-name
   KibanaPageTemplate.Section = ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
   );

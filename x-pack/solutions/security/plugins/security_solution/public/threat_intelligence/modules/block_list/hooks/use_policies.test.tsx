@@ -11,7 +11,7 @@ import { QueryClient, QueryClientProvider, useQuery } from '@kbn/react-query';
 
 const createWrapper = () => {
   const queryClient = new QueryClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return ({ children }: { children: any }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );

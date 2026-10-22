@@ -18,7 +18,6 @@ const KIBANA_STEP_META_KEYS = new Set(['use_server_info', 'use_localhost', 'debu
  * Builds a Kibana HTTP request from connector definitions
  * This is shared between the execution engine and the YAML editor copy functionality
  */
-// eslint-disable-next-line complexity
 export function buildKibanaRequest(
   actionType: string,
   params: Record<string, unknown>,

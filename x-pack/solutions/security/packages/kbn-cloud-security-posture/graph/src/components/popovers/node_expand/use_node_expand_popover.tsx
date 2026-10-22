@@ -141,7 +141,6 @@ export const useNodeExpandPopover = ({
 
   // PopoverComponent is a memoized component that renders the GraphNodeExpandPopover
   // It handles the display of the popover and the actions that can be performed on the node
-  // eslint-disable-next-line react/display-name
   const PopoverComponent = memo(() => (
     <ListGraphPopover
       isOpen={state.isOpen}

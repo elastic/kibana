@@ -38,7 +38,6 @@ const createStartServicesMock = (): CoreStart => {
 export const createKibanaContextProviderMock = () => {
   const services = createStartServicesMock();
 
-  // eslint-disable-next-line react/display-name
   return ({ children }: { children: React.ReactNode }) =>
     React.createElement(KibanaContextProvider, { services }, children);
 };

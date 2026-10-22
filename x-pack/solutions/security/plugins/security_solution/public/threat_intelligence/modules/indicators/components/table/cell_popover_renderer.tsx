@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiPopoverTitle } from '@elastic/eui';
 import React from 'react';

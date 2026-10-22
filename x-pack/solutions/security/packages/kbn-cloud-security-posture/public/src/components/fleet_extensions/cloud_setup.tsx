@@ -71,7 +71,6 @@ interface CloudIntegrationSetupProps {
 }
 
 const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
-  // eslint-disable-next-line complexity
   ({
     cloud,
     defaultSetupTechnology,

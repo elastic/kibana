@@ -22,7 +22,6 @@ export interface CreateMarkersAndDecorationsOptions {
   omitMarkersForOwners?: readonly string[];
 }
 
-// eslint-disable-next-line complexity
 export function createMarkersAndDecorations(
   validationResults: YamlValidationResult[],
   options?: CreateMarkersAndDecorationsOptions

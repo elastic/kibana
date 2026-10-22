@@ -36,7 +36,6 @@ const createWrapper = (agentBuilderService?: AgentBuilderPluginStart) => {
     agentBuilder: agentBuilderService ?? undefined,
   };
 
-  // eslint-disable-next-line react/display-name
   return ({ children }: { children: React.ReactNode }) => (
     <TestProviders startServices={startServices}>{children}</TestProviders>
   );

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
-
 import React, { useCallback, useState } from 'react';
 import {
   EuiButton,

@@ -130,7 +130,6 @@ const shouldSkipAddAlertSuppressionBulkAction = (
   return action.value.group_by.every((field) => alertSuppression?.groupBy?.includes(field));
 };
 
-// eslint-disable-next-line complexity
 const applyBulkActionEditToRuleParams = (
   existingRuleParams: RuleAlertType['params'],
   action: BulkActionEditForRuleParams

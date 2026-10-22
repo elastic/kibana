@@ -18,7 +18,6 @@ import { userSelectedResolverNode } from '../store/actions';
  * A Submenu that displays a collection of "pills" for each related event
  * category it has events for.
  */
-// eslint-disable-next-line react/display-name
 export const NodeSubMenuComponents = React.memo(
   ({
     id,

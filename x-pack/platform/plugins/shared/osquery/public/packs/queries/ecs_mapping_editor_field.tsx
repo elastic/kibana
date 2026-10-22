@@ -722,7 +722,6 @@ interface OsqueryColumn {
   index?: boolean;
 }
 
-// eslint-disable-next-line react/display-name
 export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEditorFieldProps) => {
   const ecsSchemaOptions = useEcsSchemaOptions();
   const { data: osquerySchemaData } = useOsquerySchema();

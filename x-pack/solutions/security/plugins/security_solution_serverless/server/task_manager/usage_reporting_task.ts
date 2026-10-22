@@ -120,7 +120,6 @@ export class SecurityUsageReportingTask {
     }
   };
 
-  // eslint-disable-next-line complexity
   private runTask = async (
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup,

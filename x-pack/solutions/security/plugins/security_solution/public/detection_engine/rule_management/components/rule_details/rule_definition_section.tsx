@@ -518,7 +518,6 @@ interface PrepareDefinitionSectionListItemsProps {
   isSuppressionEnabled: boolean;
 }
 
-// eslint-disable-next-line complexity
 const prepareDefinitionSectionListItems = ({
   rule,
   isInteractive,

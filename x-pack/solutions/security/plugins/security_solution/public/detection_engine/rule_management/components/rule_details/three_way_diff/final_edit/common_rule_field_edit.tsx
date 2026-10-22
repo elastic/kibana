@@ -92,7 +92,6 @@ interface CommonRuleFieldEditProps {
   fieldName: UpgradeableCommonFields;
 }
 
-/* eslint-disable-next-line complexity */
 export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
   switch (fieldName) {
     case 'building_block':

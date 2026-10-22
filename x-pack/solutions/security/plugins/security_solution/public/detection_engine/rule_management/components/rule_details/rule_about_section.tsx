@@ -279,7 +279,6 @@ interface PrepareAboutSectionListItemsProps {
   hideDescription?: boolean;
 }
 
-// eslint-disable-next-line complexity
 const prepareAboutSectionListItems = ({
   rule,
   hideName,

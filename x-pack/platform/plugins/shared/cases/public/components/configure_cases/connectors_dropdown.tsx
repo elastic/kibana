@@ -31,7 +31,6 @@ export interface Props {
 }
 
 const suspendedComponentWithProps = (ComponentToSuspend: React.ComponentType) => {
-  // eslint-disable-next-line react/display-name
   return (props: Record<string, unknown>) => (
     <Suspense fallback={<EuiLoadingSpinner size={'m'} />}>
       <ComponentToSuspend {...props} />

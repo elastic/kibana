@@ -56,7 +56,6 @@ jest.mock('@kbn/agentic-investigations-common', () => {
   const actual = jest.requireActual('@kbn/agentic-investigations-common');
   return {
     ...actual,
-    // eslint-disable-next-line react/display-name
     AssignToUsers: ({
       conversationId,
       onChange,
