@@ -23,8 +23,8 @@ import { createProposalPrivilegesChecker } from './services/check_proposal_privi
 import type { ProposalPrivilegesChecker } from './services/check_proposal_privileges';
 import { createProposalUserResolver } from './services/resolve_proposal_user';
 import type { ResolveProposalUser } from './services/resolve_proposal_user';
-import { createWorkerNameResolver } from './services/resolve_worker_name';
-import type { ResolveWorkerName } from './services/resolve_worker_name';
+import { createWorkerUserResolver } from './services/resolve_worker_user';
+import type { ResolveWorkerUser } from './services/resolve_worker_user';
 import { registerProposalAttachment } from './attachments';
 import { reviseProposalTool } from './agent_builder/tools/revise_proposal_tool';
 import { createProposalManagementSkill } from './agent_builder/skills/proposal_management';
@@ -55,7 +55,7 @@ export class ProposalsPlugin
   private proposalPrivileges?: ProposalPrivilegesChecker;
   private spaces?: ProposalsStartDependencies['spaces'];
   private resolveUser?: ResolveProposalUser;
-  private resolveWorkerName?: ResolveWorkerName;
+  private resolveWorkerUser?: ResolveWorkerUser;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -111,7 +111,7 @@ export class ProposalsPlugin
       workflowsExtensions,
       getProposalsService: () => this.requireProposalsService(),
       resolveUser: (request) => this.requireUserResolver()(request),
-      resolveWorkerName: (params) => this.requireWorkerNameResolver()(params),
+      resolveWorkerUser: (params) => this.requireWorkerUserResolver()(params),
       // Steps register during setup but only run once Kibana has started, so
       // the authorization service is resolved per call rather than captured
       // here — `security.authz` does not exist yet.
@@ -136,7 +136,7 @@ export class ProposalsPlugin
       security: coreStart.security,
       logger: this.logger,
     });
-    this.resolveWorkerName = createWorkerNameResolver({
+    this.resolveWorkerUser = createWorkerUserResolver({
       security: coreStart.security,
       getWorkflowsApi: () => this.requireWorkflowsApi(),
       logger: this.logger,
@@ -227,11 +227,11 @@ export class ProposalsPlugin
     return this.resolveUser;
   }
 
-  private requireWorkerNameResolver(): ResolveWorkerName {
-    if (!this.resolveWorkerName) {
-      throw new Error('Worker names are not available until the proposals plugin has started');
+  private requireWorkerUserResolver(): ResolveWorkerUser {
+    if (!this.resolveWorkerUser) {
+      throw new Error('Worker users are not available until the proposals plugin has started');
     }
-    return this.resolveWorkerName;
+    return this.resolveWorkerUser;
   }
 
   stop() {}

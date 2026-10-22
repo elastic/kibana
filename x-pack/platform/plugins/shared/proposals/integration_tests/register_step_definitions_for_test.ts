@@ -38,19 +38,19 @@ export const registerStepDefinitionsForTest = ({
   // the workflow carries from the gate output — the same degradation a resume
   // by an API key takes.
   const resolveUser = async () => undefined;
-  const resolveWorkerName = async () => undefined;
+  const resolveWorkerUser = async () => undefined;
 
   const definitions = [
     getCreateProposalStepDefinition({
       getProposalsService,
       resolveUser,
-      resolveWorkerName,
+      resolveWorkerUser,
       privileges,
     }),
     getUpdateProposalStepDefinition({
       getProposalsService,
       resolveUser,
-      resolveWorkerName,
+      resolveWorkerUser,
       privileges,
     }),
     getSettleIncompleteProposalStepDefinition({ getProposalsService }),

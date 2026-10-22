@@ -9,7 +9,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { updateProposalStepCommonDefinition } from '@kbn/proposals-common';
 import type { ProposalsService } from '../services/proposals_service';
 import type { ResolveProposalUser } from '../services/resolve_proposal_user';
-import type { ResolveWorkerName } from '../services/resolve_worker_name';
+import type { ResolveWorkerUser } from '../services/resolve_worker_user';
 import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
 import { parseStepInput } from './parse_step_input';
 import { resolveStepUser } from './resolve_step_user';
@@ -18,12 +18,12 @@ import { toStepError } from './to_step_error';
 export const getUpdateProposalStepDefinition = ({
   getProposalsService,
   resolveUser,
-  resolveWorkerName,
+  resolveWorkerUser,
   privileges,
 }: {
   getProposalsService: () => ProposalsService;
   resolveUser: ResolveProposalUser;
-  resolveWorkerName: ResolveWorkerName;
+  resolveWorkerUser: ResolveWorkerUser;
   privileges: ProposalPrivilegesChecker;
 }) =>
   createServerStepDefinition({
@@ -41,20 +41,25 @@ export const getUpdateProposalStepDefinition = ({
         // so the request is the better attribution when it yields anything.
         // It does not on every surface — an external resume runs under the
         // workflow runner — which is why the gate's own `respondedBy` is the
-        // fallback rather than the other way round.
+        // fallback rather than the other way round. A blank `decidedBy` means
+        // nobody answered the gate, so the Worker running it auto-approved;
+        // only then is the Worker the decider.
         const decidedBy =
-          input.decision !== undefined
-            ? (await resolveStepUser({
+          input.decision === undefined
+            ? undefined
+            : input.decidedBy
+            ? (await resolveUser(request)) ?? {
+                username: input.decidedBy,
+                fullName: null,
+                email: null,
+              }
+            : await resolveStepUser({
                 request,
                 executionId: workflowContext.execution.id,
                 spaceId,
                 resolveUser,
-                resolveWorkerName,
-              })) ??
-              (input.decidedBy
-                ? { username: input.decidedBy, fullName: null, email: null }
-                : undefined)
-            : undefined;
+                resolveWorkerUser,
+              });
 
         const proposal = await getProposalsService().update(
           {

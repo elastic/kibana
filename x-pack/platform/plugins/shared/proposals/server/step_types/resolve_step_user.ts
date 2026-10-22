@@ -8,26 +8,20 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ProposalUser } from '@kbn/proposals-common';
 import type { ResolveProposalUser } from '../services/resolve_proposal_user';
-import type { ResolveWorkerName } from '../services/resolve_worker_name';
+import type { ResolveWorkerUser } from '../services/resolve_worker_user';
 
-/** The acting user, named after the Worker when the account has no full name of its own. */
+/** The acting user: the Worker when a service account is acting, otherwise whoever the request names. */
 export const resolveStepUser = async ({
   request,
   executionId,
   spaceId,
   resolveUser,
-  resolveWorkerName,
+  resolveWorkerUser,
 }: {
   request: KibanaRequest;
   executionId: string;
   spaceId: string;
   resolveUser: ResolveProposalUser;
-  resolveWorkerName: ResolveWorkerName;
-}): Promise<ProposalUser | undefined> => {
-  const user = await resolveUser(request);
-  if (!user || user.fullName) {
-    return user;
-  }
-  const fullName = await resolveWorkerName({ executionId, spaceId, request });
-  return fullName ? { ...user, fullName } : user;
-};
+  resolveWorkerUser: ResolveWorkerUser;
+}): Promise<ProposalUser | undefined> =>
+  (await resolveWorkerUser({ executionId, spaceId, request })) ?? resolveUser(request);

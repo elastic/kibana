@@ -7,20 +7,25 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { createWorkerNameResolver } from './resolve_worker_name';
+import { createWorkerUserResolver } from './resolve_worker_user';
 
 const request = httpServerMock.createKibanaRequest();
 const params = { executionId: 'gate-exec', spaceId: 'default', request };
+const SERVICE_ACCOUNT_ID = 'kibana/alertzero_alert_triage';
 
 const createDeps = () => {
   const security = {
-    authc: { getPrincipal: jest.fn().mockReturnValue({ type: 'service_account' }) },
+    authc: {
+      getPrincipal: jest
+        .fn()
+        .mockReturnValue({ type: 'service_account', serviceAccountId: SERVICE_ACCOUNT_ID }),
+    },
   };
   const workflowsApi = { getWorkflowExecution: jest.fn(), getWorkflow: jest.fn() };
   return {
     security,
     workflowsApi,
-    resolve: createWorkerNameResolver({
+    resolve: createWorkerUserResolver({
       security: security as never,
       getWorkflowsApi: () => workflowsApi as never,
       logger: loggerMock.create(),
@@ -28,7 +33,7 @@ const createDeps = () => {
   };
 };
 
-describe('createWorkerNameResolver', () => {
+describe('createWorkerUserResolver', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -49,7 +54,11 @@ describe('createWorkerNameResolver', () => {
     });
     workflowsApi.getWorkflow.mockResolvedValue({ name: 'Alert Triage' });
 
-    await expect(resolve(params)).resolves.toBe('Alert Triage');
+    await expect(resolve(params)).resolves.toEqual({
+      username: SERVICE_ACCOUNT_ID,
+      fullName: 'Alert Triage worker',
+      email: null,
+    });
     expect(workflowsApi.getWorkflowExecution).toHaveBeenCalledWith('gate-exec', 'default', {
       request,
       omitStepExecutions: true,
@@ -61,7 +70,7 @@ describe('createWorkerNameResolver', () => {
     );
   });
 
-  it('should not name a principal that is not a service account', async () => {
+  it('should not resolve a principal that is not a service account', async () => {
     const { security, workflowsApi, resolve } = createDeps();
     security.authc.getPrincipal.mockReturnValue({ type: 'user', username: 'analyst' });
 
@@ -74,28 +83,40 @@ describe('createWorkerNameResolver', () => {
     ['the execution has no chain', { context: {} }],
     ['the chain is empty', { context: { executionChain: [] } }],
     ['the root hop has no workflow id', { context: { executionChain: [{ executionId: 'x' }] } }],
-  ])('should resolve nothing when %s', async (_, execution) => {
+  ])('should keep the account id as the username when %s', async (_, execution) => {
     const { workflowsApi, resolve } = createDeps();
     workflowsApi.getWorkflowExecution.mockResolvedValue(execution);
 
-    await expect(resolve(params)).resolves.toBeUndefined();
+    await expect(resolve(params)).resolves.toEqual({
+      username: SERVICE_ACCOUNT_ID,
+      fullName: null,
+      email: null,
+    });
     expect(workflowsApi.getWorkflow).not.toHaveBeenCalled();
   });
 
-  it('should resolve nothing when the root workflow no longer exists', async () => {
+  it('should keep the account id as the username when the root workflow no longer exists', async () => {
     const { workflowsApi, resolve } = createDeps();
     workflowsApi.getWorkflowExecution.mockResolvedValue({
       context: { executionChain: [{ workflowId: 'gone' }] },
     });
     workflowsApi.getWorkflow.mockResolvedValue(null);
 
-    await expect(resolve(params)).resolves.toBeUndefined();
+    await expect(resolve(params)).resolves.toEqual({
+      username: SERVICE_ACCOUNT_ID,
+      fullName: null,
+      email: null,
+    });
   });
 
-  it('should resolve nothing rather than fail when a lookup throws', async () => {
+  it('should keep the account id as the username rather than fail when a lookup throws', async () => {
     const { workflowsApi, resolve } = createDeps();
     workflowsApi.getWorkflowExecution.mockRejectedValue(new Error('index unavailable'));
 
-    await expect(resolve(params)).resolves.toBeUndefined();
+    await expect(resolve(params)).resolves.toEqual({
+      username: SERVICE_ACCOUNT_ID,
+      fullName: null,
+      email: null,
+    });
   });
 });

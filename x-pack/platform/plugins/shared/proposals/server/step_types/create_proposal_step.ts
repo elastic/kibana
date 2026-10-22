@@ -10,7 +10,7 @@ import { createProposalStepCommonDefinition } from '@kbn/proposals-common';
 import { resolveExpiresAt } from './resolve_expires_at';
 import type { ProposalsService } from '../services/proposals_service';
 import type { ResolveProposalUser } from '../services/resolve_proposal_user';
-import type { ResolveWorkerName } from '../services/resolve_worker_name';
+import type { ResolveWorkerUser } from '../services/resolve_worker_user';
 import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
 import { parseStepInput } from './parse_step_input';
 import { resolveStepUser } from './resolve_step_user';
@@ -24,12 +24,12 @@ import { toStepError } from './to_step_error';
 export const getCreateProposalStepDefinition = ({
   getProposalsService,
   resolveUser,
-  resolveWorkerName,
+  resolveWorkerUser,
   privileges,
 }: {
   getProposalsService: () => ProposalsService;
   resolveUser: ResolveProposalUser;
-  resolveWorkerName: ResolveWorkerName;
+  resolveWorkerUser: ResolveWorkerUser;
   privileges: ProposalPrivilegesChecker;
 }) =>
   createServerStepDefinition({
@@ -54,7 +54,7 @@ export const getCreateProposalStepDefinition = ({
           executionId: workflowExecutionId,
           spaceId,
           resolveUser,
-          resolveWorkerName,
+          resolveWorkerUser,
         });
 
         const proposal = await getProposalsService().create(
