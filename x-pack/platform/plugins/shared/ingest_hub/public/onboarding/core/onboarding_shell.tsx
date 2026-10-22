@@ -42,41 +42,6 @@ import {
   DetectAndReviewStep,
 } from '../step_components';
 
-// The page content is a column, so the step can be stretched to the height of the page and its
-// footer pushed to the bottom. EuiFlexGroup grows by default, which would spread any free space
-// between the sections of the page, so only the step container is allowed to grow.
-const stepLayoutCss = css`
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-
-  && > * {
-    flex-grow: 0;
-  }
-
-  && > [data-test-subj='onboardingStepContainer'] {
-    flex-grow: 1;
-  }
-`;
-
-// Every step renders one root element with a `onboardingStep-*` test subject. It fills the
-// container, and its children keep their natural height so that the free space ends up between
-// the content and the footer (see StepFooter).
-const stepFillCss = css`
-  display: flex;
-  flex-direction: column;
-
-  && > [data-test-subj^='onboardingStep-'] {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-  }
-
-  && > [data-test-subj^='onboardingStep-'] > * {
-    flex-grow: 0;
-  }
-`;
-
 const DOWNSTREAM_OF_SERVICES_STEP_IDS = ONBOARDING_STEPS.slice(1).map((s) => s.id);
 
 export interface StepComponentProps {
@@ -197,14 +162,7 @@ export function OnboardingShell() {
     // `grow` would make the page at least 100vh high, which is taller than the viewport under
     // Kibana's fixed header, so the page would scroll even when the step is short.
     <EuiPageTemplate grow={false} data-test-subj="onboardingShell">
-      {/* The content is a column that fills the page, so the step's footer can sit at the bottom
-          even when the step is short (see StepFooter). */}
-      <EuiPageTemplate.Section
-        grow
-        paddingSize="m"
-        restrictWidth
-        contentProps={{ css: stepLayoutCss }}
-      >
+      <EuiPageTemplate.Section paddingSize="m" restrictWidth>
         {/* The title and the stepper stay at the top while the step scrolls underneath. The offset
             keeps them below Kibana's fixed header. */}
         <div
@@ -271,11 +229,7 @@ export function OnboardingShell() {
             <EuiLoadingSpinner size="xl" />
           </EuiFlexGroup>
         ) : (
-          CurrentStepComponent && (
-            <div css={stepFillCss} data-test-subj="onboardingStepContainer">
-              <CurrentStepComponent onContinue={onContinue} onBack={onBack} />
-            </div>
-          )
+          CurrentStepComponent && <CurrentStepComponent onContinue={onContinue} onBack={onBack} />
         )}
       </EuiPageTemplate.Section>
       {isCancelModalOpen && (

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiBottomBar, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface StepFooterProps {
@@ -17,34 +17,28 @@ interface StepFooterProps {
 }
 
 /**
- * Back / forward actions that stay in the same place whatever the height of the step content.
- *
- * Render it as the last child of the step. The shell makes the step a column that fills the page,
- * so `margin-top: auto` pushes the footer down when the content is short, and `sticky` keeps it
- * at the bottom of the viewport when the content is taller than the screen.
+ * Back / forward actions in a bottom bar fixed to the bottom of the viewport, so they stay in the
+ * same place whatever the height of the step content. Render it as the last child of the step.
  */
 export function StepFooter({ onBack, children }: StepFooterProps) {
   const { euiTheme } = useEuiTheme();
 
   return (
     <>
-      <EuiSpacer size="l" />
+      {/* The bar is fixed, so it does not take any room in the page: keep the end of the step from
+          being hidden behind it. */}
       <div
-        data-test-subj="onboardingStepFooter"
+        aria-hidden
         css={css`
-          position: sticky;
-          bottom: 0;
-          z-index: 1;
-          margin-top: auto;
-          padding: ${euiTheme.size.base} 0;
-          background-color: ${euiTheme.colors.backgroundBasePlain};
-          border-top: ${euiTheme.border.thin};
+          height: ${euiTheme.size.xxxxl};
         `}
-      >
+      />
+      <EuiBottomBar paddingSize="s" data-test-subj="onboardingStepFooter">
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             {onBack && (
               <EuiButtonEmpty
+                color="text"
                 iconType="chevronSingleLeft"
                 iconSide="left"
                 onClick={onBack}
@@ -59,7 +53,7 @@ export function StepFooter({ onBack, children }: StepFooterProps) {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{children}</EuiFlexItem>
         </EuiFlexGroup>
-      </div>
+      </EuiBottomBar>
     </>
   );
 }
