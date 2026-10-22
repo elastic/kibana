@@ -21,14 +21,22 @@ const SPACE = 'team-a';
 const T1 = '2026-01-01T00:00:00.000Z';
 const T2 = '2026-01-02T00:00:00.000Z';
 
-const rankResponse = (rows: Array<[string, string, string, string]>) => ({
+// Rows default to the semantic label; pass `null` as the fifth column for a keyword-only row.
+const rankResponse = (rows: Array<[string, string, string, string, (string | null)?]>) => ({
   columns: [
     { name: 'id', type: 'keyword' },
     { name: 'source.id', type: 'keyword' },
     { name: 'type', type: 'keyword' },
     { name: '@timestamp', type: 'date' },
+    { name: 'label', type: 'keyword' },
   ],
-  values: rows,
+  values: rows.map(([id, sourceId, type, timestamp, label]) => [
+    id,
+    sourceId,
+    type,
+    timestamp,
+    label === undefined ? 'semantic' : label,
+  ]),
 });
 
 const storedFeatureIn = (sourceId: string, id: string, timestamp: string) => ({
@@ -123,6 +131,43 @@ describe('IndicatorSearcher.findFeaturesAcrossSources', () => {
     fetchLatestRevisions.mockResolvedValue([]);
 
     expect((await run()).hits).toEqual([]);
+  });
+
+  it('retries without the semantic threshold when no ranked row carries the semantic label', async () => {
+    const thresholdSearcher = new IndicatorSearcher(
+      elasticsearchServiceMock.createElasticsearchClient(),
+      loggingSystemMock.createLogger(),
+      { semantic_min_score: 0.1, rrf_rank_constant: 60 },
+      { fetchLatestRevisions } as unknown as RevisionReader,
+      SPACE
+    );
+    (queryEsql as jest.Mock)
+      .mockResolvedValueOnce(rankResponse([['u1', 'src-a', 'feature', T1, null]]))
+      .mockResolvedValueOnce(
+        rankResponse([
+          ['u2', 'src-b', 'feature', T1],
+          ['u1', 'src-a', 'feature', T1, null],
+        ])
+      );
+    fetchLatestRevisions.mockResolvedValue([
+      storedFeatureIn('src-a', 'u1', T1),
+      storedFeatureIn('src-b', 'u2', T1),
+    ]);
+
+    const { hits } = await thresholdSearcher.findFeaturesAcrossSources(
+      ['src-a', 'src-b'],
+      'redis cache',
+      { featureType: 'technology', searchMode: 'semantic' }
+    );
+
+    expect(queryEsql).toHaveBeenCalledTimes(2);
+    const [{ query: first, filter: firstFilter }] = (queryEsql as jest.Mock).mock.calls[0];
+    const [{ query: second }] = (queryEsql as jest.Mock).mock.calls[1];
+    expect(first.print('basic')).toContain('WHERE _score >= 0.1');
+    expect(second.print('basic')).toContain('WHERE _score >= 0');
+    expect(second.print('basic')).not.toContain('WHERE _score >= 0.1');
+    expect(firstFilter).toBeUndefined();
+    expect(hits.map(({ uuid }) => uuid)).toEqual(['u2', 'u1']);
   });
 
   it('applies the caller limit in rank order', async () => {

@@ -5,35 +5,20 @@
  * 2.0.
  */
 
-import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import {
-  INDEX_MANAGEMENT_LOCATOR_ID,
-  type IndexManagementLocatorParams,
-} from '@kbn/index-management-shared-types';
-import { getEbtProps } from '@kbn/ebt-click';
-import { i18n } from '@kbn/i18n';
-import { useLocatorUrl } from '@kbn/share-plugin/public';
-import { useMemo, useState } from 'react';
-import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
-import { isIndexPattern } from '../../../../../common/ai_index_dest';
+import { useCallback, useState } from 'react';
 import { DEFAULT_KI_PAGE_SIZE, MAX_KI_PAGE_SIZE } from '../../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
+import type { KiLifecycleStatus } from '../../../../../common/step_types/ki';
 import { useListKi } from '../../../hooks/use_list_ki';
-import { useKibana } from '../../../hooks/use_kibana';
-import {
-  ALL_TYPE_FILTER,
-  getDiscoverEsqlQuery,
-  getIndexManagementLocatorParams,
-  getListKiTypeFilterLabel,
-  type ListKiTypeFilter,
-} from './list_ki_helpers';
+import { ALL_TYPE_FILTER, type ListKiTypeFilter } from './list_ki_helpers';
 
-export const useListKiPanel = ({ id: aiIndexId, dest }: GetAiIndexResponse) => {
-  const {
-    services: { share, application },
-  } = useKibana();
-
+export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
   const [typeFilter, setTypeFilter] = useState<ListKiTypeFilter>(ALL_TYPE_FILTER);
+  const [statusFilter, setStatusFilter] = useState<KiLifecycleStatus>('active');
+  // What the search box currently displays, updated on every keystroke.
+  const [searchText, setSearchText] = useState('');
+  // The last string that was actually fetched; only changes via submitSearch.
+  const [submittedQuery, setSubmittedQuery] = useState('');
   const [size, setSize] = useState(DEFAULT_KI_PAGE_SIZE);
 
   const onTypeFilterChange = (filter: ListKiTypeFilter) => {
@@ -41,76 +26,58 @@ export const useListKiPanel = ({ id: aiIndexId, dest }: GetAiIndexResponse) => {
     setSize(DEFAULT_KI_PAGE_SIZE);
   };
 
+  const onStatusFilterChange = (status: KiLifecycleStatus) => {
+    setStatusFilter(status);
+    setSize(DEFAULT_KI_PAGE_SIZE);
+  };
+
+  const submitSearch = useCallback(
+    (value: string) => {
+      const trimmed = value.trim();
+      setSearchText(trimmed);
+      if (trimmed === submittedQuery) {
+        return;
+      }
+      setSubmittedQuery(trimmed);
+      setSize(DEFAULT_KI_PAGE_SIZE);
+    },
+    [submittedQuery]
+  );
+
+  const onSearchSubmitClick = useCallback(
+    () => submitSearch(searchText),
+    [submitSearch, searchText]
+  );
+
   const { kis, total, summary, isLoading, isFetching, error } = useListKi({
     aiIndexId,
     size,
     type: typeFilter.kind === 'type' ? typeFilter.value : undefined,
+    query: submittedQuery.length > 0 ? submittedQuery : undefined,
+    lifecycleStatus: [statusFilter],
   });
-
-  const typeFilterOptions = useMemo(
-    () =>
-      [{ type: ALL_TYPE_FILTER.value, count: summary.total }, ...summary.countsByType].map(
-        ({ type, count }) => ({
-          id: type,
-          label: i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.filterType', {
-            defaultMessage: '{typeLabel} ({count})',
-            values: { typeLabel: getListKiTypeFilterLabel(type), count },
-          }),
-          'data-test-subj': `contextListKiFilter-${type}`,
-          ...getEbtProps({
-            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
-            action: CONTEXT_ENGINE_UI_EBT.action.listKi.FILTER_TYPE,
-          }),
-        })
-      ),
-    [summary.total, summary.countsByType]
-  );
 
   const loadMore = () =>
     setSize((current) => Math.min(current + DEFAULT_KI_PAGE_SIZE, MAX_KI_PAGE_SIZE));
 
-  const canOpenDiscover = application.capabilities.discover_v2?.show === true;
-  const discoverHref = useMemo(() => {
-    if (!canOpenDiscover) {
-      return undefined;
-    }
-    const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
-    return locator?.getRedirectUrl({
-      timeRange: { from: 'now-90d', to: 'now' },
-      query: { esql: getDiscoverEsqlQuery(dest.value) },
-    });
-  }, [canOpenDiscover, dest.value, share?.url?.locators]);
-
-  const canOpenIndexManagement = application.capabilities.index_management?.monitor === true;
-  const canLinkToIndexManagement = canOpenIndexManagement && !isIndexPattern(dest.value);
-  const indexManagementLocator = canLinkToIndexManagement
-    ? share.url.locators.get<IndexManagementLocatorParams>(INDEX_MANAGEMENT_LOCATOR_ID)
-    : undefined;
-  const indexManagementUrl = useLocatorUrl(
-    indexManagementLocator,
-    canLinkToIndexManagement
-      ? getIndexManagementLocatorParams(dest)
-      : { page: 'index_details' as const, indexName: '' },
-    undefined,
-    [dest, canLinkToIndexManagement]
-  );
-  const indexManagementHref =
-    canLinkToIndexManagement && indexManagementUrl ? indexManagementUrl : undefined;
-
   return {
     aiIndexId,
     typeFilter,
-    typeFilterOptions,
+    summary,
     onTypeFilterChange,
+    statusFilter,
+    onStatusFilterChange,
+    searchText,
+    submittedQuery,
+    onSearchTextChange: setSearchText,
+    onSearchSubmit: submitSearch,
     kis,
     total,
     size,
     isLoading,
     isFetching,
     error,
-    discoverHref,
-    indexManagementHref,
-    destValue: dest.value,
     loadMore,
+    onSearchSubmitClick,
   };
 };

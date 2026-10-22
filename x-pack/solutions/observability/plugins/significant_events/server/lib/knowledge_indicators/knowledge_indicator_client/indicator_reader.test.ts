@@ -31,13 +31,14 @@ const SOURCE = 'logs-app';
 
 function makeReader(): {
   reader: IndicatorReader;
+  revisionReader: RevisionReader;
   runEsql: jest.Mock;
 } {
   const runEsql = executeAndDecodeSource as jest.Mock;
   const logger = loggerMock.create();
   const revisionReader = new RevisionReader({} as ElasticsearchClient, logger, SPACE);
   const reader = new IndicatorReader(revisionReader);
-  return { reader, runEsql };
+  return { reader, revisionReader, runEsql };
 }
 
 function createQueryDoc(
@@ -151,6 +152,17 @@ describe('IndicatorReader overview counts', () => {
 });
 
 describe('IndicatorReader space scoping', () => {
+  it('retains the Elasticsearch IDs of the selected latest revisions', async () => {
+    const { revisionReader, runEsql } = makeReader();
+    const doc = createQueryDoc();
+    runEsql.mockResolvedValueOnce({ hits: [doc], esIds: ['latest-es-id'] });
+
+    await expect(revisionReader.fetchLatestRevisionEntries()).resolves.toEqual([
+      { esId: 'latest-es-id', doc },
+    ]);
+    expect(capturedQueryString(runEsql)).toContain('KEEP _id, _source');
+  });
+
   it('filters every read by the client space with no IS NULL fallback', async () => {
     const { reader, runEsql } = makeReader();
     runEsql.mockResolvedValueOnce({ hits: [] });

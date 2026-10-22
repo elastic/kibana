@@ -64,12 +64,19 @@ import type { RuleUnbackedFilter } from './types';
 const SEARCH_SIZE_LIMIT = 10_000;
 const CROSS_SOURCE_RANK_LIMIT = 300;
 const QUERY_FEATURE_ID = 'query.features.id';
+// `FUSE` preserves this label only when the semantic branch contributes the row.
+const RANK_LABEL_COLUMN = 'label';
+const SEMANTIC_LABEL = 'semantic';
+// Semantic rank one ties keyword rank one and beats every other keyword-only row, so it is always
+// within the top two of an equal-weight RRF page; a page of one can cut it and fool the tie gate.
+const MIN_TIE_GATE_PAGE = 2;
 
 type RankedIndicatorRow = Record<string, unknown> & {
   id?: string;
   'source.id'?: string;
   type?: KnowledgeIndicatorType;
   '@timestamp'?: string;
+  [RANK_LABEL_COLUMN]?: string | null;
 };
 
 interface KeywordClause {
@@ -194,23 +201,28 @@ export class IndicatorSearcher {
       inSpace(this.space)
     );
 
-    const query = this.buildRankQuery(
+    // Latest-per-group is folded into the rank query itself, so no `ids` filter is needed.
+    const rankedRows = await this.rankWithTieFallback(
       mode,
-      rankWhere,
-      queryText,
-      [KI_TYPE_FEATURE],
       CROSS_SOURCE_RANK_LIMIT,
-      {
-        latestPerGroupWhere: combineWhere(
-          IS_NOT_DELETED,
-          IS_NOT_EXCLUDED,
-          IS_NOT_EXPIRED,
-          inPredicate(FEATURE_TYPE, [featureType])
-        ),
-      }
-    );
-    const rankedRows = esqlToObjects<RankedIndicatorRow>(
-      await queryEsql({ esClient: this.esClient, query })
+      undefined,
+      (semanticMinScore) =>
+        this.buildRankQuery(
+          mode,
+          rankWhere,
+          queryText,
+          [KI_TYPE_FEATURE],
+          CROSS_SOURCE_RANK_LIMIT,
+          semanticMinScore,
+          {
+            latestPerGroupWhere: combineWhere(
+              IS_NOT_DELETED,
+              IS_NOT_EXCLUDED,
+              IS_NOT_EXPIRED,
+              inPredicate(FEATURE_TYPE, [featureType])
+            ),
+          }
+        )
     );
 
     const rankedKeys = new Set<string>();
@@ -345,31 +357,39 @@ export class IndicatorSearcher {
       ruleBackedFilter
     );
 
-    const docs = await this.revisionReader.fetchLatestRevisions(where, postGroupingWhere);
+    const latestRevisions = await this.revisionReader.fetchLatestRevisionEntries(
+      where,
+      postGroupingWhere
+    );
+    const docs = latestRevisions.map(({ doc }) => doc);
     const docById = new Map(docs.map((d) => [`${d['source.id']}:${d.type}:${d.id}`, d]));
 
-    // Phase 2: rank via ES|QL on the latest doc subset. We re-issue a query
-    // constrained by the (source.id, type, id) tuples from phase 1.
     if (docById.size === 0) {
       return { hits: [] };
     }
 
-    const ids = Array.from(new Set(docs.map((d) => d.id)));
+    const latestRevisionIds = latestRevisions.map(({ esId }) => esId);
     const limit = options.limit ?? SEARCH_SIZE_LIMIT;
     // `buildRankQuery` issues its own FROM and bypasses `RevisionReader`, so the space
     // filter has to be re-applied here.
     const phase2Where = andWhere(
-      combineWhere(
-        inPredicate(ID, ids),
-        inPredicate(SOURCE_ID, sourceIds),
-        inPredicate(TYPE, options.types ?? [])
-      ),
+      combineWhere(inPredicate(SOURCE_ID, sourceIds), inPredicate(TYPE, options.types ?? [])),
       inSpace(this.space)
     );
 
-    const query = this.buildRankQuery(mode, phase2Where, queryText, options.types ?? [], limit);
-    const rankedRows = esqlToObjects<RankedIndicatorRow>(
-      await queryEsql({ esClient: this.esClient, query })
+    const rankedRows = await this.rankWithTieFallback(
+      mode,
+      limit,
+      latestRevisionIds,
+      (semanticMinScore) =>
+        this.buildRankQuery(
+          mode,
+          phase2Where,
+          queryText,
+          options.types ?? [],
+          limit,
+          semanticMinScore
+        )
     );
 
     // Walk the ranked rows and surface each group once, in rank order. A row
@@ -410,14 +430,49 @@ export class IndicatorSearcher {
     return { hits };
   }
 
+  /**
+   * Retries when minmax collapses an all-tied semantic branch to zero. The hybrid query over-fetches
+   * to `MIN_TIE_GATE_PAGE` rows for the gate; the page is trimmed to `limit` here.
+   * Replace the retry once https://github.com/elastic/elasticsearch/issues/135543 is resolved.
+   */
+  private async rankWithTieFallback(
+    mode: SearchMode,
+    limit: number,
+    latestRevisionIds: string[] | undefined,
+    build: (semanticMinScore: number) => ComposerQuery
+  ): Promise<RankedIndicatorRow[]> {
+    const filter = latestRevisionIds ? { ids: { values: latestRevisionIds } } : undefined;
+    const rankedRows = esqlToObjects<RankedIndicatorRow>(
+      await queryEsql({
+        esClient: this.esClient,
+        query: build(this.config.semantic_min_score),
+        filter,
+      })
+    );
+    if (mode === 'keyword' || rankedRows.some((row) => row[RANK_LABEL_COLUMN] === SEMANTIC_LABEL)) {
+      return rankedRows.slice(0, limit);
+    }
+    this.logger.debug(
+      `KnowledgeIndicator ${mode} search: semantic branch contributed no rows above ${this.config.semantic_min_score}; retrying without the threshold`
+    );
+    const retriedRows = esqlToObjects<RankedIndicatorRow>(
+      await queryEsql({ esClient: this.esClient, query: build(0), filter })
+    );
+    return retriedRows.slice(0, limit);
+  }
+
   private buildRankQuery(
     mode: SearchMode,
     where: LatestSourceWhereCondition,
     queryText: string,
     types: KnowledgeIndicatorType[],
     limit: number,
+    semanticMinScore: number,
     options: { latestPerGroupWhere?: LatestSourceWhereCondition } = {}
   ): ComposerQuery {
+    const label = esql.col(RANK_LABEL_COLUMN);
+    const semanticLabel = esql.str(SEMANTIC_LABEL);
+
     let rankQuery = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_score', '_id', '_index'])
       .where`${where}`;
     if (options.latestPerGroupWhere) {
@@ -430,11 +485,10 @@ export class IndicatorSearcher {
             WHERE MATCH(${esql.col(SEARCH_EMBEDDING)}, ${{ q: queryText }})
             | SORT _score DESC
             | LIMIT ${limit}
-          )`.pipe`FUSE LINEAR WITH {"normalizer":"minmax"}`
-        .where`_score >= ${this.config.semantic_min_score}`
-        .pipe`KEEP _id, _index, _score, ${rankGroupKeyColumns()}`.pipe`SORT _score DESC`.limit(
-        limit
-      );
+          )`.pipe`EVAL ${label} = ${semanticLabel}`.pipe`FUSE LINEAR WITH {"normalizer":"minmax"}`
+        .where`_score >= ${semanticMinScore}`
+        .pipe`KEEP _id, _index, _score, ${label}, ${rankGroupKeyColumns()}`
+        .pipe`SORT _score DESC`.limit(limit);
     }
 
     const keyword = this.buildKeywordExpressions(queryText, types);
@@ -450,10 +504,10 @@ export class IndicatorSearcher {
             WHERE MATCH(${esql.col(SEARCH_EMBEDDING)}, ${{ q: queryText }})
             | SORT _score DESC
             | LIMIT ${limit}
-            | EVAL label = "semantic"
-            | FUSE LINEAR GROUP BY label WITH {"normalizer":"minmax"}
-            | WHERE _score >= ${this.config.semantic_min_score}
-            | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
+            | EVAL ${label} = ${semanticLabel}
+            | FUSE LINEAR GROUP BY ${label} WITH {"normalizer":"minmax"}
+            | WHERE _score >= ${semanticMinScore}
+            | KEEP _id, _index, _score, ${label}, ${rankGroupKeyColumns()}
             | SORT _score DESC
             | LIMIT ${limit}
           )
@@ -466,7 +520,9 @@ export class IndicatorSearcher {
             | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
           )
       `.pipe`FUSE RRF WITH {"rank_constant":${this.config.rrf_rank_constant}}`
-      .pipe`SORT _score DESC`.pipe`KEEP ${rankGroupKeyColumns()}, _score`.limit(limit);
+      .pipe`SORT _score DESC`.pipe`KEEP ${rankGroupKeyColumns()}, _score, ${label}`.limit(
+      Math.max(limit, MIN_TIE_GATE_PAGE)
+    );
   }
 
   private buildKeywordExpressions(
