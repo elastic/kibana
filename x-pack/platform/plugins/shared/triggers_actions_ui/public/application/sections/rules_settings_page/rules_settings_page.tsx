@@ -27,6 +27,8 @@ const ALERT_DELETE_CATEGORY_IDS: AlertDeleteCategoryIds[] = [
   'securitySolution',
 ];
 
+const SETTINGS_CONTENT_MAX_WIDTH = 900;
+
 const SETTINGS_PAGE_TITLE = i18n.translate('xpack.triggersActionsUI.rulesSettingsPage.pageTitle', {
   defaultMessage: 'Settings',
 });
@@ -80,8 +82,8 @@ export const RulesSettingsPageContainer = () => {
         back={{ href: rulesListHref, label: BACK_TO_RULES_LABEL }}
         docLink={docLinks.links.alerting.guide}
       />
-      <KibanaPageTemplate.Section grow={false} paddingSize="none">
-        <EuiSpacer size="s" />
+      <KibanaPageTemplate.Section grow={false} paddingSize="none" restrictWidth={SETTINGS_CONTENT_MAX_WIDTH}>
+        <EuiSpacer size="l" />
         <RulesSettingsCallout />
         <EuiSpacer size="l" />
         <RulesSettingsForm form={form} alertDeleteCategoryIds={ALERT_DELETE_CATEGORY_IDS} />
