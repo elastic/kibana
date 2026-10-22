@@ -1336,14 +1336,13 @@ describe('ai indices routes', () => {
       expect(esSearch).toHaveBeenCalledWith(
         expect.objectContaining({
           index: aiIndexItem.dest.value,
-          query: {
-            bool: {
-              filter: [kiIdQuery('ki-1')],
-            },
-          },
+          query: kiIdQuery('ki-1'),
           // A data stream dest fetches the tie window of newest revisions.
           size: 10,
-        })
+          seq_no_primary_term: true,
+          _source: true,
+        }),
+        { signal: undefined }
       );
       expect(response.ok).toHaveBeenCalledWith({
         body: {

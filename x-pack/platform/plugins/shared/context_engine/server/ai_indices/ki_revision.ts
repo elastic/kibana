@@ -10,7 +10,7 @@ import { isResponseError } from '@kbn/es-errors';
 import type { KiLifecycleStatus } from '../../common/step_types/ki';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { KiConflictError, KiNotFoundError, KiValidationError } from './errors';
-import { REVISION_TIE_WINDOW, kiIdQuery, pickCurrentRevision } from './ki_get';
+import { findKiHits, pickCurrentRevision } from './ki_get';
 
 /** A writer as recorded under `governance.provenance`. */
 export interface KiWriter {
@@ -119,33 +119,15 @@ export const findKiRevision = async ({
   /** Fetches the full `_source` for an index-type dest instead of just `id`/`governance`. */
   includeSource?: boolean;
 }): Promise<KiRevision | undefined> => {
-  const isDataStream = dest.type === 'data_stream';
-  const useBackingIndexFilter = !isDataStream && backingIndex !== undefined;
-  const resolveNewestRevision = isDataStream || useBackingIndexFilter;
-  const searchSize = resolveNewestRevision ? REVISION_TIE_WINDOW : 2;
-  const response = await esClient.search<StoredKi>(
-    {
-      index: dest.value,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      query: useBackingIndexFilter
-        ? {
-            bool: {
-              filter: [kiIdQuery(kiId), { term: { _index: backingIndex } }],
-            },
-          }
-        : kiIdQuery(kiId),
-      ...(resolveNewestRevision && {
-        sort: [{ '@timestamp': { order: 'desc' as const, unmapped_type: 'date' as const } }],
-      }),
-      size: searchSize,
-      seq_no_primary_term: true,
-      _source: isDataStream || includeSource ? true : ['id', 'governance'],
-    },
-    { signal: abortSignal }
-  );
+  const { hits, resolveNewestRevision } = await findKiHits<StoredKi>({
+    esClient,
+    dest,
+    kiId,
+    backingIndex,
+    includeSource,
+    abortSignal,
+  });
 
-  const { hits } = response.hits;
   if (!resolveNewestRevision && hits.length > 1) {
     throw new KiValidationError(
       `KI '${kiId}' is ambiguous in AI index '${aiIndexId}': it exists in multiple backing indices`
