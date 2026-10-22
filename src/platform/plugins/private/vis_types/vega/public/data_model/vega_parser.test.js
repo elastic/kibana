@@ -198,6 +198,7 @@ describe(`VegaParser._setDefaultColors`, () => {
         rule: { stroke: VegaThemeColors.borealis.light.default },
         shape: { stroke: VegaThemeColors.borealis.light.default },
         symbol: { fill: VegaThemeColors.borealis.light.default },
+        text: { fill: VegaThemeColors.borealis.light.text },
         trail: { fill: VegaThemeColors.borealis.light.default },
         view: { stroke: null },
         style: {

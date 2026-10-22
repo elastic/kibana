@@ -5,6 +5,8 @@
  * 2.0.
  */
 import { faker } from '@faker-js/faker';
+import type { CoreTheme } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { ReloadReason } from './data_loader';
 import { loadEmbeddableData } from './data_loader';
 import {
@@ -151,6 +153,16 @@ async function expectRerenderOnDataLoader(
 
   // wait for all rendering to complete before cleanup
   cleanup();
+}
+
+const lightTheme: CoreTheme = { darkMode: false, name: 'borealis' };
+
+function createCoreStartWithTheme(theme$: BehaviorSubject<CoreTheme>) {
+  const coreStart = coreMock.createStart();
+  return {
+    ...coreStart,
+    theme: { ...coreStart.theme, theme$: theme$.asObservable(), getTheme: () => theme$.getValue() },
+  };
 }
 
 function waitForValue(
@@ -785,5 +797,70 @@ describe('Data Loader', () => {
         },
       }
     );
+  });
+
+  it('should rebuild the expression when dark mode changes', async () => {
+    const theme$ = new BehaviorSubject<CoreTheme>(lightTheme);
+    const documentToExpression = jest.fn().mockResolvedValue({ ast: 'expression_string' });
+    await expectRerenderOnDataLoader(
+      async () => {
+        theme$.next({ ...lightTheme, darkMode: true });
+        return 'theme';
+      },
+      undefined,
+      {
+        servicesOverrides: { coreStart: createCoreStartWithTheme(theme$), documentToExpression },
+      }
+    );
+    await waitFor(() => expect(documentToExpression).toHaveBeenCalledTimes(2));
+  });
+
+  it('should not re-render when the theme emits an unchanged dark mode', async () => {
+    const theme$ = new BehaviorSubject<CoreTheme>(lightTheme);
+    await expectRerenderOnDataLoader(
+      async () => {
+        theme$.next({ ...lightTheme });
+        return false;
+      },
+      undefined,
+      { servicesOverrides: { coreStart: createCoreStartWithTheme(theme$) } }
+    );
+  });
+
+  it('should not re-render on a dark mode change after cleanup', async () => {
+    const theme$ = new BehaviorSubject<CoreTheme>(lightTheme);
+    const runtimeState: LensRuntimeState = { attributes: getLensAttributesMock() };
+    const parentApi = {
+      ...createUnifiedSearchApi(),
+      searchSessionId$: new BehaviorSubject<string>(''),
+      esqlVariables$: new BehaviorSubject<ESQLControlVariable[] | undefined>([]),
+    };
+    const internalApi = getLensInternalApiMock({
+      attributes$: new BehaviorSubject(runtimeState.attributes),
+    });
+    const services = {
+      ...makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
+        visOverrides: { id: 'lnsXY' },
+        dataOverrides: { id: 'formBased' },
+      }),
+      documentToExpression: jest.fn().mockResolvedValue({ ast: 'expression_string' }),
+      coreStart: createCoreStartWithTheme(theme$),
+    };
+    const { cleanup } = loadEmbeddableData(
+      faker.string.uuid(),
+      jest.fn(() => runtimeState),
+      { ...getLensApiMock(), parentApi },
+      parentApi,
+      internalApi,
+      services
+    );
+    jest.advanceTimersByTime(100);
+    await waitFor(() => expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(1));
+
+    cleanup();
+    theme$.next({ ...lightTheme, darkMode: true });
+    jest.advanceTimersByTime(200);
+
+    expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(1);
   });
 });

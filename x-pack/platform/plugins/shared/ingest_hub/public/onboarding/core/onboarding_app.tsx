@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
+import useObservable from 'react-use/lib/useObservable';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { Router, Route } from '@kbn/shared-ux-router';
@@ -188,6 +190,14 @@ export function getCloudService(
   return { ...cloudSetup, ...cloudStart };
 }
 
+function StyledComponentsThemeProvider({
+  theme,
+  children,
+}: PropsWithChildren<{ theme: CoreStart['theme'] }>) {
+  const { darkMode } = useObservable(theme.theme$, theme.getTheme());
+  return <EuiThemeProvider darkMode={darkMode}>{children}</EuiThemeProvider>;
+}
+
 export async function renderOnboardingApp(
   coreStart: CoreStart,
   params: AppMountParameters,
@@ -237,7 +247,7 @@ export async function renderOnboardingApp(
       // Without it, styled-components receives undefined theme and throws at render time.
       // Fleet's own app root adds this provider for the same reason; we mirror it here.
       // See: fleet/public/applications/fleet/app.tsx lines 219-221.
-      <EuiThemeProvider darkMode={coreStart.theme.getTheme().darkMode}>
+      <StyledComponentsThemeProvider theme={coreStart.theme}>
         {/* authz must be part of the Kibana context so that Fleet's useAuthz() hook can read it
             when AgentEnrollmentFlyout is rendered. Without it, authz.fleet.readAgentPolicies throws.
             See: fleet/public/hooks/use_authz.ts */}
@@ -276,7 +286,7 @@ export async function renderOnboardingApp(
             </FleetStatusProvider>
           </QueryClientProvider>
         </KibanaContextProvider>
-      </EuiThemeProvider>
+      </StyledComponentsThemeProvider>
     )
   );
   return () => root.unmount();
