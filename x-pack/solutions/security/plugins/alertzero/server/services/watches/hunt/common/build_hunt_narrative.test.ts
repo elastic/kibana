@@ -281,6 +281,43 @@ describe('buildHuntNarrative', () => {
     );
   });
 
+  it('narrates an unenriched report as terminal, without claiming anything was searched', () => {
+    const pending = result({
+      status: 'tier1_only',
+      index_patterns: [],
+      tier2_targets: [],
+      tier2_target_sources: [],
+      tier1: tier1({ status: 'no_searchable_terms' }),
+      tier2_skipped_reason: 'extraction_pending',
+      completeness: 'incomplete_retryable',
+      completed_successfully: false,
+      incomplete: [{ reason: 'extraction_pending', detail: 'not enriched' }],
+    });
+    const narrative = buildHuntNarrative(pending, ctx);
+    const headline = buildHuntHeadline(pending);
+
+    expect(narrative).toContain('Hunt Watch did not hunt this report yet');
+    expect(narrative).toContain('not been enriched yet');
+    expect(headline).toContain('hunt skipped, the report has not been enriched yet');
+    for (const text of [narrative, headline]) {
+      expect(text).not.toContain('What was searched');
+      expect(text).not.toContain('Tier 1 had nothing to search');
+      expect(text).not.toContain('not visible in this space');
+    }
+  });
+
+  it('renders the coordinator own coverage gaps on a non-terminal run', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        completeness: 'incomplete_final',
+        incomplete: [{ reason: 'nothing_searched', detail: 'D' }],
+      }),
+      ctx
+    );
+
+    expect(narrative).toContain('- nothing searched: D');
+  });
+
   it('carries the Tier 2 failure message when Tier 2 threw', () => {
     const narrative = buildHuntNarrative(
       result({
