@@ -82,7 +82,12 @@ export const RulesSettingsPageContainer = () => {
         back={{ href: rulesListHref, label: BACK_TO_RULES_LABEL }}
         docLink={docLinks.links.alerting.guide}
       />
-      <KibanaPageTemplate.Section grow={false} paddingSize="none" restrictWidth={SETTINGS_CONTENT_MAX_WIDTH}>
+      <KibanaPageTemplate.Section
+        grow={false}
+        paddingSize="none"
+        restrictWidth={SETTINGS_CONTENT_MAX_WIDTH}
+        data-test-subj="rulesSettingsPage"
+      >
         <EuiSpacer size="l" />
         <RulesSettingsCallout />
         <EuiSpacer size="l" />
