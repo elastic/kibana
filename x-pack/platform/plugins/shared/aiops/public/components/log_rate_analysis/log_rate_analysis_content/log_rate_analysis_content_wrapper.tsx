@@ -83,7 +83,6 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
     ...pick(appContextValue, [
       'application',
       'data',
-      'featureFlags',
       'http',
       'notifications',
       'theme',

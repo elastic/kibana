@@ -87,7 +87,6 @@ const appDependencies: AppDependencies = {
   data: dataStart,
   dataViews: dataViewsStart,
   docLinks: coreStart.docLinks,
-  featureFlags: coreStart.featureFlags,
   i18n: coreStart.i18n,
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   notifications: coreStart.notifications,

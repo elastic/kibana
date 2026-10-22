@@ -54,7 +54,6 @@ export async function showCategorizeFlyout(
         ...pick(appContextValue, [
           'application',
           'data',
-          'featureFlags',
           'http',
           'notifications',
           'theme',

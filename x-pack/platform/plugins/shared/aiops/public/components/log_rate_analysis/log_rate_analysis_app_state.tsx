@@ -78,7 +78,6 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
     ...pick(appContextValue, [
       'application',
       'data',
-      'featureFlags',
       'http',
       'notifications',
       'theme',

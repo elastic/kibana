@@ -43,7 +43,6 @@ export async function mountManagementSection(
     uiSettings,
     settings,
     notifications,
-    featureFlags,
   } = core;
   const {
     data,
@@ -78,7 +77,6 @@ export async function mountManagementSection(
     dataViewEditor,
     dataViews,
     docLinks,
-    featureFlags,
     http,
     i18n,
     notifications,

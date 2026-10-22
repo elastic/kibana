@@ -225,7 +225,6 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
                 'application',
                 'data',
                 'executionContext',
-                'featureFlags',
                 'charts',
                 'fieldFormats',
                 'http',

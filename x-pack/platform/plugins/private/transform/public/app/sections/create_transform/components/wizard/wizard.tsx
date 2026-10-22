@@ -447,7 +447,6 @@ export const Wizard: FC<WizardProps> = React.memo(
       ...pick(appDependencies, [
         'application',
         'data',
-        'featureFlags',
         'http',
         'notifications',
         'theme',

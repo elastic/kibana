@@ -193,7 +193,6 @@ export function LogRateAnalysis({ alert, dataView, services }: AlertDetailsLogRa
                 'application',
                 'data',
                 'executionContext',
-                'featureFlags',
                 'charts',
                 'fieldFormats',
                 'http',

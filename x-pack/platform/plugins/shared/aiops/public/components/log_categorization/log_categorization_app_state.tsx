@@ -70,7 +70,6 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
     ...pick(appContextValue, [
       'application',
       'data',
-      'featureFlags',
       'http',
       'notifications',
       'theme',

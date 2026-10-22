@@ -353,7 +353,6 @@ export const IndexDataVisualizer: FC<Props> = ({
     ...pick(services, [
       'application',
       'data',
-      'featureFlags',
       'http',
       'notifications',
       'theme',

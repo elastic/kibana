@@ -110,7 +110,6 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
     ...pick(deps, [
       'application',
       'data',
-      'featureFlags',
       'http',
       'notifications',
       'theme',

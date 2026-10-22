@@ -10,14 +10,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Subscription, map } from 'rxjs';
 import { debounce } from 'lodash';
 
-import type { OnRefreshProps, OnTimeChangeProps } from '@elastic/eui';
+import type { OnRefreshProps } from '@elastic/eui';
 import {
-  useIsWithinMaxBreakpoint,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSuperDatePicker,
-  type EuiSuperDatePickerProps,
   EuiSuperUpdateButton,
   EuiToolTip,
 } from '@elastic/eui';
@@ -25,13 +22,12 @@ import {
 import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { TimeHistoryContract } from '@kbn/data-plugin/public';
 import { useUrlState } from '@kbn/ml-url-state';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useObservable } from '@kbn/use-observable';
 import {
-  DATE_RANGE_PICKER_FEATURE_FLAG,
   DateRangePicker,
+  type DateRangePickerProps,
   type AutoRefreshIntervalUnit,
   type AutoRefreshSettings,
   type DateRangePickerOnChangeProps,
@@ -45,9 +41,6 @@ import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
 const DEFAULT_REFRESH_INTERVAL_MS = 5000;
 
-const DATE_RANGE_PICKER_PRESETS_PERSISTENCE_FEATURE_FLAG =
-  'unifiedSearch.dateRangePickerPresetsPersistenceEnabled';
-
 const DEFAULT_DATE_RANGE_PICKER_SETTINGS: DateRangePickerSettings = {
   roundRelativeTime: false,
   timePrecision: 'none',
@@ -56,33 +49,9 @@ const DEFAULT_DATE_RANGE_PICKER_SETTINGS: DateRangePickerSettings = {
 const toPresetItems = (ranges: TimeRange[]): PresetItem[] =>
   ranges.map(({ from, to }) => ({ start: from, end: to }));
 
-interface TimePickerQuickRange {
-  from: string;
-  to: string;
-  display: string;
-}
-
-interface Duration {
-  start: string;
-  end: string;
-}
-
 interface RefreshInterval {
   pause: boolean;
   value: number;
-}
-
-function getRecentlyUsedRangesFactory(timeHistory: TimeHistoryContract) {
-  return function (): Duration[] {
-    return (
-      timeHistory.get()?.map(({ from, to }: TimeRange) => {
-        return {
-          start: from,
-          end: to,
-        };
-      }) ?? []
-    );
-  };
 }
 
 function updateLastRefresh(timeRange?: OnRefreshProps) {
@@ -94,7 +63,7 @@ function updateLastRefresh(timeRange?: OnRefreshProps) {
  */
 interface DatePickerWrapperProps {
   /**
-   * Boolean flag to be passed on to `EuiSuperDatePicker`.
+   * Boolean flag to only allow controlling auto-refresh, without a time range.
    */
   isAutoRefreshOnly?: boolean;
   /**
@@ -106,9 +75,9 @@ interface DatePickerWrapperProps {
    */
   showRefresh?: boolean;
   /**
-   * Width setting to be passed on to `EuiSuperDatePicker`
+   * Width setting to be passed on to `DateRangePicker`
    */
-  width?: EuiSuperDatePickerProps['width'];
+  width?: DateRangePickerProps['width'];
   /**
    * Boolean flag to disable the date picker
    */
@@ -119,7 +88,7 @@ interface DatePickerWrapperProps {
   needsUpdate?: boolean;
   /**
    * Callback function that gets called
-   * when EuiSuperDatePicker's 'Refresh'|'Update' button is clicked
+   * when the 'Refresh'|'Update' button is clicked
    */
   onRefresh?: () => void;
   /**
@@ -155,31 +124,17 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
     data,
     notifications: { toasts },
     uiSettings: config,
-    uiSettingsKeys,
     userProfile,
     theme,
     i18n: i18nStart,
     http,
     application,
-    featureFlags,
     notifications,
   } = useDatePickerContext();
-
-  const isDateRangePickerEnabled = featureFlags.useBooleanValue(
-    DATE_RANGE_PICKER_FEATURE_FLAG,
-    true
-  );
-  const isPresetsPersistenceEnabled = featureFlags.useBooleanValue(
-    DATE_RANGE_PICKER_PRESETS_PERSISTENCE_FEATURE_FLAG,
-    true
-  );
-
-  const isWithinLBreakpoint = useIsWithinMaxBreakpoint('l');
 
   const { timefilter, history } = data.query.timefilter;
 
   const [globalState, setGlobalState] = useUrlState('_g');
-  const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(history);
 
   const timeFilterRefreshInterval = useRefreshIntervalUpdates();
   const time = useTimeRangeUpdates();
@@ -218,7 +173,6 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
     [setGlobalState]
   );
 
-  const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges());
   const [isAutoRefreshSelectorEnabled, setIsAutoRefreshSelectorEnabled] = useState(
     timefilter.isAutoRefreshSelectorEnabled()
   );
@@ -280,19 +234,6 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
 
   const dateFormat = config.get('dateFormat');
   const timeZoneName = config.get('dateFormat:tz');
-  const timePickerQuickRanges = config.get<TimePickerQuickRange[]>(
-    uiSettingsKeys.TIMEPICKER_QUICK_RANGES
-  );
-
-  const commonlyUsedRanges = useMemo(
-    () =>
-      timePickerQuickRanges.map(({ from, to, display }) => ({
-        start: from,
-        end: to,
-        label: display,
-      })),
-    [timePickerQuickRanges]
-  );
 
   useEffect(() => {
     const subscriptions = new Subscription();
@@ -314,15 +255,13 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
   }, []);
 
   const updateTimeFilter = useCallback(
-    ({ start, end }: OnTimeChangeProps) => {
-      setRecentlyUsedRanges(getRecentlyUsedRanges());
+    ({ start, end }: { start: string; end: string }) => {
       setGlobalState('time', {
         from: start,
         to: end,
         ...(start === 'now' || end === 'now' ? { ts: Date.now() } : {}),
       });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [setGlobalState]
   );
 
@@ -350,7 +289,7 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
   }, [onRefresh]);
   const dateRangePickerPresets = useDateRangePickerPresets({
     service: data.dateRangePickerPresets,
-    persistenceEnabled: isDateRangePickerEnabled && isPresetsPersistenceEnabled,
+    persistenceEnabled: true,
     notifications,
   });
 
@@ -428,7 +367,7 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
     ({ start, end, isInvalid }: DateRangePickerOnChangeProps) => {
       setIsDateRangeInvalid(isInvalid);
       if (isInvalid) return;
-      updateTimeFilter({ start, end, isQuickSelection: false, isInvalid });
+      updateTimeFilter({ start, end });
     },
     [updateTimeFilter]
   );
@@ -439,7 +378,7 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
 
   // The new picker has no built-in update button, so keep the picker and the button on one row
   // regardless of the layout of the parent container.
-  const datePicker = isDateRangePickerEnabled ? (
+  const datePicker = (
     <EuiFlexItem>
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
         <EuiFlexItem>
@@ -490,36 +429,6 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </EuiFlexItem>
-  ) : (
-    <EuiFlexItem>
-      <EuiSuperDatePicker
-        isLoading={isLoading}
-        start={time.from}
-        end={time.to}
-        isPaused={refreshInterval.pause}
-        isAutoRefreshOnly={!isTimeRangeSelectorEnabled || isAutoRefreshOnly}
-        refreshInterval={refreshInterval.value || DEFAULT_REFRESH_INTERVAL_MS}
-        onTimeChange={updateTimeFilter}
-        onRefresh={handleRefresh}
-        onRefreshChange={updateInterval}
-        recentlyUsedRanges={recentlyUsedRanges}
-        dateFormat={dateFormat}
-        commonlyUsedRanges={commonlyUsedRanges}
-        isDisabled={isDisabled}
-        updateButtonProps={{
-          iconOnly: isWithinLBreakpoint,
-          fill: false,
-          ...(needsUpdate ? { needsUpdate } : {}),
-        }}
-        width={width}
-        showTimeWindowButtons={{
-          showZoomIn: true,
-        }}
-        timeZoneDisplayProps={{
-          timeZone: timeZoneName,
-        }}
-      />
     </EuiFlexItem>
   );
 

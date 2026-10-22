@@ -97,7 +97,6 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
     ...pick(services, [
       'application',
       'data',
-      'featureFlags',
       'http',
       'notifications',
       'i18n',

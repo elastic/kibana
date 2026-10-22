@@ -141,7 +141,6 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   const datePickerDeps: DatePickerDependencies = {
     ...pick(coreStart, [
       'application',
-      'featureFlags',
       'http',
       'notifications',
       'theme',

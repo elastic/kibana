@@ -113,7 +113,6 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
     ...pick(deps, [
       'application',
       'data',
-      'featureFlags',
       'http',
       'notifications',
       'theme',

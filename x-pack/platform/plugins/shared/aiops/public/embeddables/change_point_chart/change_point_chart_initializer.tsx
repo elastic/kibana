@@ -110,7 +110,6 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
     ...pick(appContextValue, [
       'application',
       'data',
-      'featureFlags',
       'http',
       'notifications',
       'theme',

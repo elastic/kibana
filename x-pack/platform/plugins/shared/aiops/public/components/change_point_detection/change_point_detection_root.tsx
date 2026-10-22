@@ -68,7 +68,6 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
     ...pick(appContextValue, [
       'application',
       'data',
-      'featureFlags',
       'http',
       'notifications',
       'theme',

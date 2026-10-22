@@ -137,7 +137,6 @@ export const App: FC<AppProps> = ({
     ...pick(services, [
       'application',
       'data',
-      'featureFlags',
       'http',
       'notifications',
       'theme',

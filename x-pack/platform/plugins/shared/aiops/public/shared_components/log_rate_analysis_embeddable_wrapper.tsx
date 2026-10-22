@@ -108,7 +108,6 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
     ...pick(deps, [
       'application',
       'data',
-      'featureFlags',
       'http',
       'notifications',
       'theme',

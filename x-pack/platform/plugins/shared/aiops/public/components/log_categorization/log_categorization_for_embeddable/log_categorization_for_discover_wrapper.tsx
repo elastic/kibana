@@ -37,7 +37,6 @@ export const LogCategorizationDiscoverWrapper: FC<LogCategorizationEmbeddableWra
     ...pick(appContextValue, [
       'application',
       'data',
-      'featureFlags',
       'http',
       'notifications',
       'theme',

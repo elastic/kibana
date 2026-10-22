@@ -169,7 +169,6 @@ const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
       ...pick(servicesWithOverrides, [
         'application',
         'data',
-        'featureFlags',
         'http',
         'notifications',
         'theme',
