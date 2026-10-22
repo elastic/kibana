@@ -25,10 +25,15 @@ const notFound = Object.assign(new Error('Not Found'), {
   response: { status: 404 },
 });
 
-const renderSetUp = () => {
+const renderSetUp = (known?: { agent: string; automations: string }) => {
   const queryClient = new QueryClient({
     defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
   });
+  if (known) {
+    queryClient.setQueryData(['nightshift.investigatorServiceAccount'], {
+      knownServiceAccountIds: known,
+    });
+  }
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
@@ -99,5 +104,26 @@ describe('useSetUpNightshiftServiceAccount', () => {
     expect(addError.mock.calls[0][0].message).toContain('_nightshift_agent');
     expect(create).not.toHaveBeenCalled();
     expect(investigationsFetch).not.toHaveBeenCalled();
+  });
+
+  it('reuses the accounts another space is set up with, without listing or creating', async () => {
+    const { result } = renderSetUp({ agent: 'uiam-agent-1', automations: 'uiam-automations-2' });
+
+    act(() => result.current.mutate());
+
+    await waitFor(() => expect(investigationsFetch).toHaveBeenCalled());
+    expect(httpGet).not.toHaveBeenCalled();
+    expect(create).not.toHaveBeenCalled();
+    expect(investigationsFetch).toHaveBeenCalledWith(
+      'POST /internal/nightshift/investigations/service_account/_enable',
+      {
+        signal: null,
+        params: {
+          body: {
+            serviceAccountIds: { agent: 'uiam-agent-1', automations: 'uiam-automations-2' },
+          },
+        },
+      }
+    );
   });
 });

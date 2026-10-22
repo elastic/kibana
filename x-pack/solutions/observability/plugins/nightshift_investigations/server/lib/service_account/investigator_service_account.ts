@@ -47,6 +47,8 @@ interface Deps {
   workflowsManagement?: WorkflowsServerPluginSetup;
   /** Reads the template values a bound workflow was installed with. */
   getInstalledWorkflowState?: PluginScopedManagedWorkflows['getInstalledWorkflowState'];
+  /** Reads them across spaces, to reuse the accounts a space is already set up with. */
+  listInstalledWorkflowStates?: PluginScopedManagedWorkflows['listInstalledWorkflowStates'];
   spaces?: SpacesPluginStart;
   /** Automations are hidden saved objects; this client can read and write them. */
   getAutomationsSoClient?: (request: KibanaRequest, spaceId: string) => SavedObjectsClientContract;
@@ -86,6 +88,7 @@ export const createInvestigatorServiceAccountService = ({
   workflowsExtensions,
   workflowsManagement,
   getInstalledWorkflowState,
+  listInstalledWorkflowStates,
   spaces,
   getAutomationsSoClient,
   isServerless,
@@ -100,6 +103,36 @@ export const createInvestigatorServiceAccountService = ({
       id: ids[kind] ?? null,
       role: getNightshiftRoleName(kind, { isServerless }),
     }));
+
+  const readIdsFrom = (
+    templateValues: Record<string, unknown> | null | undefined
+  ): NightshiftServiceAccountIds | undefined => {
+    const agent = templateValues?.serviceAccountId;
+    const automations = templateValues?.[AUTOMATIONS_SERVICE_ACCOUNT_ID_VALUE];
+    return typeof agent === 'string' && agent && typeof automations === 'string' && automations
+      ? { agent, automations }
+      : undefined;
+  };
+
+  /**
+   * The accounts this deployment is already set up with, read from any space's entry point. The
+   * accounts are shared by every space, so setting a second space up reuses them rather than
+   * looking them up again. Undefined until the first space is set up.
+   */
+  const getKnownServiceAccountIds = async (): Promise<NightshiftServiceAccountIds | undefined> => {
+    if (!listInstalledWorkflowStates) return undefined;
+    try {
+      const states = await listInstalledWorkflowStates();
+      for (const state of states) {
+        if (state.definitionId !== NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID) continue;
+        const ids = readIdsFrom(state.templateValues);
+        if (ids) return ids;
+      }
+    } catch (error) {
+      logger.debug(`Could not read the Nightshift service accounts of this deployment: ${error}`);
+    }
+    return undefined;
+  };
 
   /** The automations account the space was set up with, from its entry point's template values. */
   const readAutomationsServiceAccountId = async (spaceId: string): Promise<string | undefined> => {
@@ -174,14 +207,17 @@ export const createInvestigatorServiceAccountService = ({
       ...workflow,
       bound: agentServiceAccountId !== null && workflow.runAs === agentServiceAccountId,
     }));
-    const [canModifyBoundWorkflows, automationsServiceAccountId] = await Promise.all([
-      canManageSecurity(request).catch(() => false),
-      agentServiceAccountId ? readAutomationsServiceAccountId(spaceId) : undefined,
-    ]);
+    const [canModifyBoundWorkflows, automationsServiceAccountId, knownServiceAccountIds] =
+      await Promise.all([
+        canManageSecurity(request).catch(() => false),
+        agentServiceAccountId ? readAutomationsServiceAccountId(spaceId) : undefined,
+        getKnownServiceAccountIds(),
+      ]);
     return {
       canModifyBoundWorkflows,
       serviceAccountsEnabled: core.security.serviceAccounts.isEnabled(),
       serviceAccountId: agentServiceAccountId,
+      knownServiceAccountIds: knownServiceAccountIds ?? null,
       role: getNightshiftRoleName('agent', { isServerless }),
       workflowId: getBoundInvestigationWorkflowId(spaceId),
       installed: entryPoint.installed,
@@ -388,7 +424,7 @@ export const createInvestigatorServiceAccountService = ({
   const runEnable = async (
     request: KibanaRequest,
     spaceId: string,
-    serviceAccountIds: NightshiftServiceAccountIds
+    requestedServiceAccountIds: NightshiftServiceAccountIds | undefined
   ): Promise<InvestigatorServiceAccountStatus> => {
     if (!core.security.serviceAccounts.isEnabled()) {
       throw Boom.badRequest(
@@ -401,6 +437,14 @@ export const createInvestigatorServiceAccountService = ({
       );
     }
     await assertSpaceExists(request, spaceId);
+    // The accounts are shared by every space, so a caller may leave them out and get the ones an
+    // earlier setup used. Only the first setup of a deployment has to name them.
+    const serviceAccountIds = requestedServiceAccountIds ?? (await getKnownServiceAccountIds());
+    if (!serviceAccountIds) {
+      throw Boom.badRequest(
+        'No Nightshift service accounts are set up in this deployment yet. Pass the ids of the accounts to run as.'
+      );
+    }
 
     await installBoundWorkflows(request, spaceId, serviceAccountIds);
     await bindAutomations(request, spaceId, serviceAccountIds.automations);
@@ -420,12 +464,12 @@ export const createInvestigatorServiceAccountService = ({
    * Sets up a space with the caller's privileges, bound to the given accounts. Binding a workflow
    * requires the caller to hold `manage_security`; the workflows plugin enforces that too.
    * Idempotent: running it again repairs a space whose workflows were removed, disabled or bound to
-   * another account.
+   * another account. The ids may be left out once another space is set up: the accounts are shared.
    */
   const enable = (
     request: KibanaRequest,
     spaceId: string,
-    serviceAccountIds: NightshiftServiceAccountIds
+    serviceAccountIds?: NightshiftServiceAccountIds
   ): Promise<InvestigatorServiceAccountStatus> => {
     const previous = queues.get(spaceId) ?? Promise.resolve();
     const run = previous
