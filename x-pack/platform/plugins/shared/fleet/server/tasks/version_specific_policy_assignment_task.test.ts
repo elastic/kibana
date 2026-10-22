@@ -171,35 +171,46 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
   };
 
   // The search of phase 1 that tells which agent policies have agents to look at (one per page of
-  // agent policies). By default every agent policy of the page has some: pass the ids to limit them.
+  // agent policies). By default every agent policy of the page has agents on its plain policy id: pass
+  // the ids to limit them. `agentVersionsByPolicyId` are other policy ids of agents, e.g. variants, with
+  // the versions of their agents.
   const mockCandidateAgentPolicies = async ({
     policyIdsWithCandidates,
-    policyIdsOfAgentsWithoutPolicyBaseId = [],
-    otherAgentsWithoutPolicyBaseId = 0,
+    agentVersionsByPolicyId = {},
+    otherPolicyIdsOfAgents = 0,
+    otherAgentVersions = 0,
   }: {
     policyIdsWithCandidates?: string[];
-    policyIdsOfAgentsWithoutPolicyBaseId?: string[];
-    otherAgentsWithoutPolicyBaseId?: number;
+    agentVersionsByPolicyId?: Record<string, string[]>;
+    otherPolicyIdsOfAgents?: number;
+    otherAgentVersions?: number;
   } = {}) => {
     const [coreStart] = await mockCore.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser as any;
+    const toBucket = (key: string, versions: string[]) => ({
+      key,
+      agent_versions: {
+        buckets: versions.map((version) => ({ key: version })),
+        sum_other_doc_count: otherAgentVersions,
+      },
+    });
     esClient.search.mockImplementation(async (request: any) => {
-      if (!request.aggs?.base_policy_ids) {
+      if (!request.aggs?.policy_ids) {
         return {};
       }
       const requestedPolicyIds: string[] = request.query.bool.should[1].terms.policy_base_id;
       return {
         aggregations: {
-          base_policy_ids: {
-            buckets: requestedPolicyIds
-              .filter((id) => !policyIdsWithCandidates || policyIdsWithCandidates.includes(id))
-              .map((key) => ({ key })),
-          },
-          without_policy_base_id: {
-            policy_ids: {
-              buckets: policyIdsOfAgentsWithoutPolicyBaseId.map((key) => ({ key })),
-              sum_other_doc_count: otherAgentsWithoutPolicyBaseId,
-            },
+          policy_ids: {
+            buckets: [
+              ...requestedPolicyIds
+                .filter((id) => !policyIdsWithCandidates || policyIdsWithCandidates.includes(id))
+                .map((id) => toBucket(id, ['8.18.0'])),
+              ...Object.entries(agentVersionsByPolicyId).map(([id, versions]) =>
+                toBucket(id, versions)
+              ),
+            ],
+            sum_other_doc_count: otherPolicyIdsOfAgents,
           },
         },
       };
@@ -595,9 +606,16 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
       mockedGetAgentsByKuery.mockResolvedValue({ total: 1, agents, page: 1, perPage: 1 });
       mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+      await mockCandidateAgentPolicies({
+        policyIdsWithCandidates: [],
+        agentVersionsByPolicyId: { 'policy-1#9.4': ['9.5.1'] },
+      });
 
       await runTask();
 
+      expect(mockedGetAgentsByKuery.mock.calls[0][2].kuery).toContain(
+        '(policy_id:"policy-1#9.4" and agent.version:("9.5.1"))'
+      );
       expect(mockedGetAgentsByKuery.mock.calls[0][2].kuery).not.toContain('upgraded_at');
       expect(mockedFetchAllAgentsByKuery.mock.calls[0][2].kuery).not.toContain('upgraded_at');
       expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalledWith(
@@ -823,16 +841,15 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         await runTask();
 
         const candidateSearches = esClient.search.mock.calls.filter(
-          ([request]: any) => request.aggs?.base_policy_ids
+          ([request]: any) => request.aggs?.policy_ids
         );
         expect(candidateSearches).toHaveLength(1);
         const [[request]] = candidateSearches;
         expect(request.index).toBe('.fleet-agents');
         expect(request.size).toBe(0);
-        expect(request.aggs.base_policy_ids.terms).toEqual({
-          field: 'policy_base_id',
-          size: 2,
-        });
+        // the versions of the agents are read per policy id, not the agents
+        expect(request.aggs.policy_ids.terms.field).toBe('policy_id');
+        expect(request.aggs.policy_ids.aggs.agent_versions.terms.field).toBe('agent.version');
         // agents that are inactive by timeout are active in the stored field, like in the agent queries
         expect(request.query.bool.filter).toEqual([{ term: { active: true } }]);
         // OpAMP collectors are never moved between policies
@@ -876,21 +893,10 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         expect(mockAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
       });
 
-      it('finds the agent policy of agents without policy_base_id by their policy_id, also on #sentinel', async () => {
+      it('does not query the agents on a variant that all run the version of the variant', async () => {
         await mockCandidateAgentPolicies({
           policyIdsWithCandidates: [],
-          policyIdsOfAgentsWithoutPolicyBaseId: ['policy-1', 'policy-2#sentinel'],
-        });
-
-        await runTask();
-
-        expect(policyIdsQueried().flat().sort()).toEqual(['policy-1', 'policy-2']);
-      });
-
-      it('ignores agents of other agent policies', async () => {
-        await mockCandidateAgentPolicies({
-          policyIdsWithCandidates: [],
-          policyIdsOfAgentsWithoutPolicyBaseId: ['another-policy', 'another-policy#9.4'],
+          agentVersionsByPolicyId: { 'policy-1#9.4': ['9.4.0', '9.4.2'] },
         });
 
         await runTask();
@@ -898,16 +904,86 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         expect(mockedGetAgentsByKuery).not.toHaveBeenCalled();
       });
 
-      it('looks at all the agent policies of the page when the agents without policy_base_id are truncated', async () => {
+      it('queries only the agents that run another version than the one of their variant', async () => {
         await mockCandidateAgentPolicies({
           policyIdsWithCandidates: [],
-          policyIdsOfAgentsWithoutPolicyBaseId: ['another-policy'],
-          otherAgentsWithoutPolicyBaseId: 5,
+          agentVersionsByPolicyId: {
+            'policy-1#9.4': ['9.4.2', '9.5.0', '9.5.1'],
+            'policy-1#9.3': ['9.3.1'],
+          },
+        });
+
+        await runTask();
+
+        expect(mockedGetAgentsByKuery).toHaveBeenCalledTimes(1);
+        const { kuery } = mockedGetAgentsByKuery.mock.calls[0][2];
+        expect(kuery).toContain(
+          '(policy_id:"policy-1#9.4" and agent.version:("9.5.0" or "9.5.1"))'
+        );
+        expect(kuery).not.toContain('policy-1#9.3');
+        expect(kuery).not.toContain('upgraded_at');
+      });
+
+      it('queries all the agents of a variant when their versions were truncated', async () => {
+        await mockCandidateAgentPolicies({
+          policyIdsWithCandidates: [],
+          agentVersionsByPolicyId: { 'policy-1#9.4': ['9.4.2'] },
+          otherAgentVersions: 5,
+        });
+
+        await runTask();
+
+        const { kuery } = mockedGetAgentsByKuery.mock.calls[0][2];
+        expect(kuery).toContain('policy_id:"policy-1#9.4"');
+        expect(kuery).not.toContain('agent.version');
+      });
+
+      it('finds the agent policy of agents without policy_base_id by their policy_id, also on #sentinel', async () => {
+        await mockCandidateAgentPolicies({
+          policyIdsWithCandidates: [],
+          agentVersionsByPolicyId: { 'policy-1': ['8.18.0'], 'policy-2#sentinel': ['8.18.0'] },
         });
 
         await runTask();
 
         expect(policyIdsQueried().flat().sort()).toEqual(['policy-1', 'policy-2']);
+      });
+
+      it('finds the agent policy of agents without policy_base_id on a mismatched variant', async () => {
+        await mockCandidateAgentPolicies({
+          policyIdsWithCandidates: [],
+          agentVersionsByPolicyId: { 'policy-2#9.4': ['9.5.0'] },
+        });
+
+        await runTask();
+
+        expect(policyIdsQueried().flat()).toEqual(['policy-2']);
+      });
+
+      it('ignores agents of other agent policies', async () => {
+        await mockCandidateAgentPolicies({
+          policyIdsWithCandidates: [],
+          agentVersionsByPolicyId: {
+            'another-policy': ['8.18.0'],
+            'another-policy#9.4': ['9.5.0'],
+          },
+        });
+
+        await runTask();
+
+        expect(mockedGetAgentsByKuery).not.toHaveBeenCalled();
+      });
+
+      it('looks at all the agents of the variants of all the agent policies of the page when the policy ids of the agents are truncated', async () => {
+        await mockCandidateAgentPolicies({
+          policyIdsWithCandidates: [],
+          otherPolicyIdsOfAgents: 5,
+        });
+
+        await runTask();
+
+        expect(policyIdsQueried().flat().sort()).toEqual(['policy-1', 'policy-2']);
+        expect(mockedGetAgentsByKuery.mock.calls[0][2].kuery).toContain('policy-1#*');
       });
     });
 
