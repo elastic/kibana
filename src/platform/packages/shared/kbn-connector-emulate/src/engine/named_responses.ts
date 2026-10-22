@@ -53,7 +53,8 @@ export const collectNamedResponses = (
 /**
  * Picks the response a protocol's spec answers each of its operations with: the fixture, else
  * the first recording `check` finds no violations in. Recordings that break the spec are
- * returned in `rejected`; responses for other specs or for operations the spec lacks are skipped.
+ * returned in `rejected`; responses for other specs or for operations the spec lacks are skipped,
+ * and so are recordings `isError` finds a protocol error in, as recorded HTTP errors are.
  */
 export const selectNamedResponses = (
   responses: readonly NamedResponse[],
@@ -61,10 +62,13 @@ export const selectNamedResponses = (
     source,
     operations,
     check,
+    isError,
   }: {
     readonly source?: string;
     readonly operations: ReadonlySet<string>;
     readonly check: (name: string, response: StoredResponse) => Violation[];
+    /** Whether a response reports a failure though its HTTP status is a success. */
+    readonly isError: (response: StoredResponse) => boolean;
   }
 ): NamedResponseSelection => {
   const served = new Map<string, NamedResponse>();
@@ -74,10 +78,18 @@ export const selectNamedResponses = (
     if (!appliesTo(operation, source) || !operations.has(operation.name)) {
       continue;
     }
+    if (origin === 'recording' && isError(response)) {
+      continue;
+    }
     // Fixtures are deliberate overrides; their violations show up in `calls` when served.
     const violations = origin === 'recording' ? check(operation.name, response) : [];
     if (violations.length > 0) {
-      rejected.push({ source: origin, operation: operation.name, violations });
+      rejected.push({
+        source: origin,
+        operation: operation.name,
+        ...(source === undefined ? {} : { spec: source }),
+        violations,
+      });
     } else if (!served.has(operation.name)) {
       served.set(operation.name, entry);
     }
@@ -100,5 +112,6 @@ export const rejectUnknownNamedResponses = (
     .map(({ origin, operation }) => ({
       source: origin,
       operation: operation.name,
+      ...(operation.source === undefined ? {} : { spec: operation.source }),
       violations: [NOT_IN_SPEC],
     }));
