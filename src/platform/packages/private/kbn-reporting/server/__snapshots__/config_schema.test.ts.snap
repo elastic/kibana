@@ -22,6 +22,9 @@ Object {
   },
   "enabled": true,
   "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "experimental": Object {
+    "serverRender": false,
+  },
   "export_types": Object {
     "csv": Object {
       "enabled": true,
@@ -78,6 +81,9 @@ Object {
     "useByteOrderMarkEncoding": false,
   },
   "enabled": true,
+  "experimental": Object {
+    "serverRender": false,
+  },
   "export_types": Object {
     "csv": Object {
       "enabled": true,

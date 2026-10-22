@@ -47,6 +47,8 @@ export interface ClientConfigType {
     csv: { enabled: boolean };
   };
   statefulSettings: { enabled: boolean };
+  /** Mirrors the server's `experimental` config block (`@kbn/reporting-server-render`'s README); exposed to the browser so the share menu can gate its prototype entries on the same flag the export types themselves are gated on. */
+  experimental?: { serverRender: boolean };
 }
 
 export type ReportingCSVSharingDataLocatorParams = Array<

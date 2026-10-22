@@ -109,6 +109,26 @@ it(`ignores errors which don't have a response, for example network connectivity
   expect(sessionExpired.logout).not.toHaveBeenCalled();
 });
 
+it(`does not throw when called with a response error that has no request (e.g. the first interceptor in the chain receiving a rejection without a .request)`, async () => {
+  const http = setupHttp('/foo');
+  const sessionExpired = new SessionExpired(application, `${http.basePath}/logout`, tenant);
+  const interceptor = new UnauthorizedResponseHttpInterceptor(sessionExpired, http.anonymousPaths);
+
+  expect(() =>
+    interceptor.responseError(
+      {
+        request: undefined as unknown as Request,
+        response: undefined,
+        body: null,
+        error: new Error('boom'),
+        fetchOptions: { path: '/foo-api' },
+      },
+      { halt: jest.fn(), halted: false }
+    )
+  ).not.toThrow();
+  expect(sessionExpired.logout).not.toHaveBeenCalled();
+});
+
 it(`ignores requests which omit credentials`, async () => {
   const http = setupHttp('/foo');
   const sessionExpired = new SessionExpired(application, `${http.basePath}/logout`, tenant);

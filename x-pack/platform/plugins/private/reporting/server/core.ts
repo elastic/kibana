@@ -34,6 +34,7 @@ import type { ReportingHealthInfo, ReportingServerInfo } from '@kbn/reporting-co
 import { CsvSearchSourceExportType, CsvV2ExportType } from '@kbn/reporting-export-types-csv';
 import { PdfExportType, PdfV1ExportType } from '@kbn/reporting-export-types-pdf';
 import { PngExportType } from '@kbn/reporting-export-types-png';
+import { ServerRenderPdfExportType, ServerRenderPngExportType } from '@kbn/reporting-server-render';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import type { ExportType, ScheduleType } from '@kbn/reporting-server';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
@@ -290,6 +291,18 @@ export class ReportingCore {
 
     if (png.enabled) {
       exportTypes.push(new PngExportType(this.core, this.config, this.logger, this.context));
+    }
+
+    // Prototype Chromium-free render path (`@kbn/reporting-server-render`); off by default
+    // everywhere, including serverless. See that package's README coverage matrix for what
+    // is and is not proven yet behind this flag.
+    if (this.config.experimental?.serverRender) {
+      exportTypes.push(
+        new ServerRenderPdfExportType(this.core, this.config, this.logger, this.context)
+      );
+      exportTypes.push(
+        new ServerRenderPngExportType(this.core, this.config, this.logger, this.context)
+      );
     }
 
     return exportTypes;

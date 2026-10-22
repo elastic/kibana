@@ -29,7 +29,15 @@ export class UnauthorizedResponseHttpInterceptor implements HttpInterceptor {
 
     // if the request was omitting credentials it's to an anonymous endpoint
     // (for example to login) and we don't wish to ever redirect
-    if (httpErrorResponse.request.credentials === 'omit') {
+    //
+    // `request` is typed as always-defined, but `interceptResponse` (packages/core-http-browser-internal)
+    // can legitimately call `responseError` with `request: undefined` -- e.g. when the rejection
+    // reaching the *first* interceptor in the chain isn't an `HttpFetchError` carrying its own
+    // `.request` (and there's no prior interceptor's resolved response to fall back to either).
+    // Guard rather than throw: an unhandled `TypeError` here crashes this request's whole
+    // response-interception chain, which can leave whatever awaited it (e.g. a dashboard panel's
+    // search) stuck without ever reaching its own error/complete state.
+    if (httpErrorResponse.request?.credentials === 'omit') {
       return;
     }
 

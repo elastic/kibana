@@ -149,6 +149,13 @@ const SettingsSchema = schema.object({
   }),
 });
 
+const ExperimentalSchema = schema.object({
+  // Gates the prototype Chromium-free `printablePdfServer`/`pngServer` export types
+  // (`@kbn/reporting-server-render`). See that package's README for the coverage matrix
+  // and viability write-up this flag is for; off by default everywhere.
+  serverRender: schema.boolean({ defaultValue: false }),
+});
+
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   kibanaServer: KibanaServerSchema,
@@ -160,4 +167,5 @@ export const ConfigSchema = schema.object({
   poll: PollSchema,
   export_types: ExportTypeSchema,
   statefulSettings: SettingsSchema,
+  experimental: ExperimentalSchema,
 });

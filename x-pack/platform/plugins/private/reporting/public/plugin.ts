@@ -33,6 +33,7 @@ import {
   reportingCsvExportShareIntegration,
   reportingPDFExportShareIntegration,
   reportingPNGExportShareIntegration,
+  reportingPDFServerExportShareIntegration,
 } from '@kbn/reporting-public/share';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
@@ -279,6 +280,22 @@ export class ReportingPublicPlugin
             apiClient,
             startServices$,
             isExperimental: isScreenCaptureExportExperimental,
+          }),
+          isOnDemandExportAvailable
+        )
+      );
+
+      // The first real UI entry point for `@kbn/reporting-server-render`'s Chromium-free
+      // `printablePdfServer` export type (see that package's README). Server-side-gated
+      // registration of the export type itself (`core.ts`) already prevents submitting a
+      // job for it when the flag is off; this additionally keeps the Share menu entry from
+      // appearing in that case, so a user is never offered an option that would 404.
+      shareSetup.registerShareIntegration<ExportShare>(
+        withAvailabilityGate(
+          reportingPDFServerExportShareIntegration({
+            apiClient,
+            startServices$,
+            isServerRenderEnabled: Boolean(this.config.experimental?.serverRender),
           }),
           isOnDemandExportAvailable
         )

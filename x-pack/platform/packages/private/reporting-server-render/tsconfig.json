@@ -1,0 +1,25 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/isomer",
+    "@kbn/isomer-theme",
+    "@kbn/core",
+    "@kbn/logging",
+    "@kbn/reporting-server",
+    "@kbn/reporting-common",
+    "@kbn/expressions-plugin",
+    "@kbn/expression-xy-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/licensing-types",
+    "@kbn/repo-info"
+  ]
+}

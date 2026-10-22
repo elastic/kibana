@@ -15,6 +15,10 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
     poll: true,
     export_types: true,
     statefulSettings: true,
+    // Lets the public plugin gate the `printablePdfServer`/`pngServer` share-menu entries
+    // on the same flag the server already gates the export types themselves on
+    // (`@kbn/reporting-server-render`'s README).
+    experimental: true,
   },
   schema: ConfigSchema,
   deprecations: ({ unused }) => [
