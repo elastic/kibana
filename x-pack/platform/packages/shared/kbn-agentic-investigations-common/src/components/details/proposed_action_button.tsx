@@ -123,6 +123,10 @@ const rowStyles = ({ euiTheme }: UseEuiTheme) => ({
     ${euiTextTruncate()}
   `,
   // The tooltip anchor must stretch like the button it wraps, or the grid collapses to content.
+  // 8px between the badge and the retry icon beside it.
+  rowWithRetry: css`
+    padding-inline-end: ${euiTheme.size.s};
+  `,
   retry: css`
     margin-inline-end: ${euiTheme.size.base};
   `,
@@ -278,7 +282,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
           status: badge.label,
         })}
         data-test-subj={dataTestSubj}
-        css={styles.row}
+        css={[styles.row, isRetry && styles.rowWithRetry]}
         onClick={openModal}
       >
         <span css={styles.text}>

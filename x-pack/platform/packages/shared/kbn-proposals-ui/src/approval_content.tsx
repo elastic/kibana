@@ -283,10 +283,11 @@ export const ApprovalContent = memo<ApprovalContentProps>(
             actorName={decision.actorName}
             at={decision.decidedAt}
             isUnknown={decision.isActorUnknown}
+            isPrecise
           />
         </>
       ) : !isReplaced && isSubmitting && since && approvalPhase !== 'approving' ? (
-        <ApprovalActorTime actorName={actorName} at={since} />
+        <ApprovalActorTime actorName={actorName} at={since} isPrecise />
       ) : (
         getProposalCaption(proposal, {
           includeRiskDetails: !isReplaced && !isFailedDecision && !isRetry,

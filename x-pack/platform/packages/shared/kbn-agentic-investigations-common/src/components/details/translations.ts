@@ -112,7 +112,7 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     }),
     noFailureReasonCaption: i18n.translate(
       'xpack.alertzero.detailsFlyout.proposedAction.noFailureReason',
-      { defaultMessage: 'No failure reason provided' }
+      { defaultMessage: 'No reason found' }
     ),
     expiredTimedOutCaption: i18n.translate(
       'xpack.alertzero.detailsFlyout.proposedAction.expiredTimedOut',

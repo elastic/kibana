@@ -22,6 +22,8 @@ export interface ApprovalActorTimeProps {
   at?: string;
   /** The name is a fallback for an unknown decider, shown in the disabled text colour. */
   isUnknown?: boolean;
+  /** The exact date and time instead of "3 sec ago", for where there is room for it (the modal). */
+  isPrecise?: boolean;
 }
 
 /** Abbreviated on purpose ("3 sec ago"), which react-intl's relative-time formatter cannot do. */
@@ -76,7 +78,12 @@ const useNow = (at: string | undefined): number => {
  * outcome itself (applied, declined, failed…) is the badge's to say. A tooltip on the time shows
  * the full date and time.
  */
-export const ApprovalActorTime = ({ actorName, at, isUnknown = false }: ApprovalActorTimeProps) => {
+export const ApprovalActorTime = ({
+  actorName,
+  at,
+  isUnknown = false,
+  isPrecise = false,
+}: ApprovalActorTimeProps) => {
   const { euiTheme } = useEuiTheme();
   const now = useNow(at);
   const name = (
@@ -93,9 +100,13 @@ export const ApprovalActorTime = ({ actorName, at, isUnknown = false }: Approval
     <>
       {name}
       {' • '}
-      <EuiToolTip content={moment(at).format(DATE_TIME_FORMAT)}>
-        <span tabIndex={0}>{formatAgo(at, now)}</span>
-      </EuiToolTip>
+      {isPrecise ? (
+        moment(at).format(DATE_TIME_FORMAT)
+      ) : (
+        <EuiToolTip content={moment(at).format(DATE_TIME_FORMAT)}>
+          <span tabIndex={0}>{formatAgo(at, now)}</span>
+        </EuiToolTip>
+      )}
     </>
   );
 };
