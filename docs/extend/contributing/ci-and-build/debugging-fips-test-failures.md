@@ -47,6 +47,8 @@ It is imperative to skip only the tests that are affected by FIPS overrides. If 
 
 This will still allow the test to run as part of regular CI, but will skip the test in the FIPS pipeline.
 
+For Scout tests, add `tags.limit.except.fips` next to the suite's deployment tags instead. See [Limit tags](../../testing/deployment-tags.md#scout-deployment-tags-limit).
+
 PRs for these test skips on `main` should be backported to the `8.19` branch as well.
 
 ### Failed tests due to FIPS/OpenSSL errors
