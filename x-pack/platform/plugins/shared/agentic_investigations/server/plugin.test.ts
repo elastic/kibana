@@ -251,22 +251,25 @@ describe('AgenticInvestigationsPlugin', () => {
       ).not.toMatch(/proposals/i);
     });
 
-    it('registers the escalation timeline event types', () => {
+    it('registers the investigation and escalation timeline event types', () => {
       const { agentBuilder } = setupPlugin();
 
       expect(
         agentBuilder.conversationEvents.register.mock.calls.map(([definition]) => definition.type)
       ).toEqual([
+        'investigation_severity_changed',
         'escalation_created_from_investigation',
         'escalation_investigation_linked',
         'escalation_attachments_synced',
       ]);
     });
 
-    it('registers no escalation timeline event types when escalations are disabled', () => {
+    it('registers only the investigation timeline event types when escalations are disabled', () => {
       const { agentBuilder } = setupPlugin({ escalationsEnabled: false });
 
-      expect(agentBuilder.conversationEvents.register).not.toHaveBeenCalled();
+      expect(
+        agentBuilder.conversationEvents.register.mock.calls.map(([definition]) => definition.type)
+      ).toEqual(['investigation_severity_changed']);
     });
 
     it('registers the HTTP routes for every entity', () => {

@@ -40,6 +40,11 @@ export interface ConversationDetailsFlyoutHeaderProps {
    */
   liveStateNode?: React.ReactNode;
   /**
+   * Optional pre-rendered interactive severity picker from the consuming plugin. When present it
+   * is shown in the header blocks, and the severity badge under the title is left out.
+   */
+  severityNode?: React.ReactNode;
+  /**
    * Optional pre-rendered title from the consuming plugin, for example one that names an
    * investigation Agent Builder has not titled yet. Falls back to the investigation's title.
    */
@@ -55,6 +60,7 @@ export const ConversationDetailsFlyoutHeader = ({
   assigneesNode,
   statusNode,
   liveStateNode,
+  severityNode,
   titleNode,
 }: ConversationDetailsFlyoutHeaderProps) => {
   const { title, createdAt, severity } = investigation;
@@ -70,7 +76,7 @@ export const ConversationDetailsFlyoutHeader = ({
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
             {/* A live state node renders the severity itself, from fresher data. */}
-            {severity && liveStateNode === undefined && (
+            {severity && liveStateNode === undefined && severityNode === undefined && (
               <EuiFlexItem grow={false}>
                 <EuiBadge
                   color={BADGE_COLORS[severity] ?? 'hollow'}
@@ -101,6 +107,7 @@ export const ConversationDetailsFlyoutHeader = ({
         status={investigation.status}
         statusNode={statusNode}
         assigneesNode={assigneesNode}
+        severityNode={severityNode}
       />
     </>
   );

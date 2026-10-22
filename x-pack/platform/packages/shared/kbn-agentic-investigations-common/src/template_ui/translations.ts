@@ -21,6 +21,9 @@ export const TEMPLATE_UI_LABELS = Object.freeze({
   status: i18n.translate('xpack.alertzero.templateUi.status', {
     defaultMessage: 'Status',
   }),
+  severity: i18n.translate('xpack.alertzero.templateUi.severity', {
+    defaultMessage: 'Severity',
+  }),
   assignees: i18n.translate('xpack.alertzero.templateUi.assignees', {
     defaultMessage: 'Assignees',
   }),
