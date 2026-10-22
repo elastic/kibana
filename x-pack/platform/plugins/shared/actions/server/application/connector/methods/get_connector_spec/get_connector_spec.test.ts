@@ -257,6 +257,7 @@ describe('getConnectorSpecAsJsonSchema', () => {
     expect(result).toHaveProperty('isTestable', true);
     expect(result.actions).toHaveLength(1);
     expect(actionTypeRegistry.getSpec).toHaveBeenCalledWith('.catalog-only');
+    expect(actionTypeRegistry.getSpec).toHaveBeenCalledTimes(1);
   });
 
   it('rejects with 404 for a classic connector type without a spec', async () => {

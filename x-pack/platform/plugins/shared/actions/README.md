@@ -241,10 +241,6 @@ const actionsClient = server.plugins.actions.getActionsClientWithRequest(request
 
 Once you have a scoped ActionsClient you can generate an action by calling either the `enqueueExecution` which will schedule the action to run later or the `execute` apis which will run it immediately and return the result respectively.
 
-### Accessing a SpecsClient
-
-`getSpecsClientWithRequest(request)` returns a request-scoped SpecsClient that enforces `get` authorization and audits failures. Use `getAll({ featureId })` for lightweight summaries of spec-backed types, and `get({ id })` for the form schema, skill, and action input schemas. Unknown ids and classic (non-spec) types throw a 404.
-
 ### actionsClient.enqueueExecution(options)
 
 This api schedules a task which will run the action using the current user scope at the soonest opportunity.

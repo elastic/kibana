@@ -126,8 +126,6 @@ import { SubActionConnector } from './sub_action_framework/sub_action_connector'
 import { CaseConnector } from './sub_action_framework/case';
 import type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 import { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
-import type { ISpecsClient } from './specs_client';
-import { SpecsClient } from './specs_client';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 import { createSystemConnectors } from './create_system_actions';
 import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_task';
@@ -227,9 +225,6 @@ export interface PluginStartContract {
   inMemoryConnectors: InMemoryConnector[];
 
   getUnsecuredActionsClient(): IUnsecuredActionsClient;
-
-  /** Request-scoped SpecsClient that enforces `get` authorization and audits failures. */
-  getSpecsClientWithRequest(request: KibanaRequest): ISpecsClient;
 
   renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
     actionTypeId: string,
@@ -775,15 +770,6 @@ export class ActionsPlugin
       });
     };
 
-    const getSpecsClientWithRequest = (request: KibanaRequest): ISpecsClient => {
-      return new SpecsClient({
-        actionTypeRegistry: actionTypeRegistry!,
-        configurationUtilities: actionsConfigUtils,
-        authorization: instantiateAuthorization(request),
-        auditLogger: this.security?.audit.asScoped(request),
-      });
-    };
-
     const secureGetActionsClientWithRequest = (request: KibanaRequest) =>
       getActionsClientWithRequest(request);
 
@@ -931,7 +917,6 @@ export class ActionsPlugin
       getActionsClientWithRequest: secureGetActionsClientWithRequest,
       getActionsClientWithRequestInSpace,
       getUnsecuredActionsClient,
-      getSpecsClientWithRequest,
       inMemoryConnectors: this.inMemoryConnectors,
       renderActionParameterTemplates: (...args) =>
         renderActionParameterTemplates(this.logger, actionTypeRegistry, ...args),
