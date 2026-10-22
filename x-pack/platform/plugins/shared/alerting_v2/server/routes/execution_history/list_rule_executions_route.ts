@@ -32,6 +32,7 @@ import { listRuleExecutionsOasExamples } from './list_rule_executions_oas_exampl
 
 export const toListRuleExecutionsArgs = ({
   rule_ids: ruleIds,
+  search,
   outcomes,
   from: from,
   to: to,
@@ -44,6 +45,7 @@ export const toListRuleExecutionsArgs = ({
   assertAllFieldsMapped(rest);
   return {
     ruleIds,
+    search,
     outcomes,
     from,
     to,
@@ -88,6 +90,7 @@ export const toListRuleExecutionsResponse = ({
   total,
   page,
   perPage,
+  searchMatches,
   ...rest
 }: ListRuleExecutionsResult): Complete<ListRuleExecutionsResponse> => {
   assertAllFieldsMapped(rest);
@@ -96,6 +99,9 @@ export const toListRuleExecutionsResponse = ({
     total,
     page,
     per_page: perPage,
+    search_matches: searchMatches
+      ? { rules: searchMatches.rules, is_truncated: searchMatches.isTruncated }
+      : undefined,
   };
 };
 
@@ -110,6 +116,7 @@ export class ListRuleExecutionsRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'List rule executions',
     description: 'Get a paginated list of rule execution events.',
     oasOperationObject: listRuleExecutionsOasExamples,

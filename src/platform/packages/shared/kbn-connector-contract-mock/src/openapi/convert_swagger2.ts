@@ -96,6 +96,9 @@ const toParameter = (parameter: Node): Node => {
     in: location,
     required,
     description,
+    ...(parameter['x-ms-skip-url-encoding'] === undefined
+      ? {}
+      : { 'x-ms-skip-url-encoding': parameter['x-ms-skip-url-encoding'] }),
     schema: toSchema(parameter),
     ...(serialization && (location === 'query' || serialization.style === undefined)
       ? { style: serialization.style, explode: serialization.explode }
@@ -103,9 +106,19 @@ const toParameter = (parameter: Node): Node => {
   };
 };
 
-const toContent = (mediaTypes: readonly string[], schema: unknown): Node =>
+// Swagger 2.0 response `examples` map media types to example values.
+const toContent = (mediaTypes: readonly string[], schema: unknown, examples?: unknown): Node =>
   Object.fromEntries(
-    mediaTypes.map((mediaType) => [mediaType, isRecord(schema) ? { schema } : {}])
+    mediaTypes.map((mediaType) => {
+      const example = isRecord(examples) ? examples[mediaType] : undefined;
+      return [
+        mediaType,
+        {
+          ...(isRecord(schema) ? { schema } : {}),
+          ...(example === undefined ? {} : { example }),
+        },
+      ];
+    })
   );
 
 // Swagger 2.0 sends form fields as `formData` parameters; OpenAPI 3.0 as one object schema.
@@ -128,7 +141,9 @@ const toFormBody = (fields: readonly Node[], consumes: readonly string[]): Node 
 
 const toResponse = (response: Node, produces: readonly string[]): Node => ({
   description: response.description ?? '',
-  ...(response.schema === undefined ? {} : { content: toContent(produces, response.schema) }),
+  ...(response.schema === undefined
+    ? {}
+    : { content: toContent(produces, response.schema, response.examples) }),
   ...(isRecord(response.headers)
     ? {
         headers: Object.fromEntries(

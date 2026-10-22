@@ -56,26 +56,23 @@ export const createEditTagsAction = (
     });
     if (tags == null) return;
 
-    try {
-      await executeCompositeAction<{ tags: string[] }>({
-        episodes,
-        nativeExecute: (eps, http) =>
-          bulkTagEpisodeActions(
-            http,
-            eps.map(
-              (ep): BulkTagEpisodeActionItem => ({
-                alert_id: ep['episode.id'],
-                tags,
-              })
-            )
-          ),
-        extension,
-        extensionContext: { tags },
-        deps,
-      });
-      onSuccess?.();
-    } catch {
-      deps.notifications.toasts.addDanger(i18n.BULK_ERROR_TOAST);
-    }
+    await executeCompositeAction<{ tags: string[] }>({
+      episodes,
+      nativeExecute: (eps, http) =>
+        bulkTagEpisodeActions(
+          http,
+          eps.map(
+            (ep): BulkTagEpisodeActionItem => ({
+              alert_id: ep['episode.id'],
+              tags,
+            })
+          )
+        ),
+      extension,
+      extensionContext: { tags },
+      actionName: i18n.EDIT_TAGS,
+      onSuccess,
+      deps,
+    });
   },
 });

@@ -23,15 +23,20 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
 import { isTriggerType } from '@kbn/workflows';
-import { useWorkflows, useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import {
+  useWorkflows,
+  useWorkflowsCapabilities,
+  type WorkflowsCreateRouteState,
+} from '@kbn/workflows-ui';
 import { ExportReferencesModal } from './export_references_modal';
 import { useEventDrivenExecutionStatus } from './use_event_driven_execution_status';
 import { useExportWithReferences } from './use_export_with_references';
 import { WorkflowListTable } from './workflow_list_table';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
 import { PLUGIN_ID } from '../../../../common';
-import { WorkflowsEmptyState } from '../../../components';
+import { AgenticFirstEmptyStateLive } from '../../../components';
 import { WorkflowsEmptyStateReadOnly } from '../../../components/workflows_empty_state/workflows_empty_state';
+import { WorkflowsPageName } from '../../../deep_links';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
@@ -45,10 +50,9 @@ import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../constants';
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
   setSearch: (search: WorkflowsSearchParams) => void;
-  onCreateWorkflow?: () => void;
 }
 
-export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
+export function WorkflowList({ search, setSearch }: WorkflowListProps) {
   const { page = 1, size = WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } = search;
   const { application, notifications } = useKibana().services;
   const location = useLocation();
@@ -317,16 +321,39 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
 
   // Show empty state if no workflows exist and no filters are applied
   if (shouldShowWorkflowsEmptyState(workflows, search)) {
-    return (
-      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '60vh' }}>
-        <EuiFlexItem grow={false}>
-          {canCreateWorkflow ? (
-            <WorkflowsEmptyState onCreateWorkflow={onCreateWorkflow} />
-          ) : (
+    if (!canCreateWorkflow) {
+      return (
+        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '60vh' }}>
+          <EuiFlexItem grow={false}>
             <WorkflowsEmptyStateReadOnly />
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+    return (
+      <AgenticFirstEmptyStateLive
+        onSubmitPrompt={(message, attachments) =>
+          application.navigateToApp(PLUGIN_ID, {
+            path: '/create',
+            state: {
+              initialAgentMessage: message,
+              initialAgentAttachments: attachments,
+            } satisfies WorkflowsCreateRouteState,
+          })
+        }
+        onStartManually={() =>
+          application.navigateToApp(PLUGIN_ID, { path: '/create?startBlank=true' })
+        }
+        onSelectTemplate={(template) =>
+          application.navigateToApp(PLUGIN_ID, {
+            deepLinkId: WorkflowsPageName.library,
+            path: template.slug,
+          })
+        }
+        onExploreLibrary={() =>
+          application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library })
+        }
+      />
     );
   }
 

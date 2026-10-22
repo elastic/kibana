@@ -10,12 +10,13 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
+  LensHeatmapConfig,
   LensLegendConfig,
   LensSeriesLayer,
   LensYBoundsConfig,
 } from '@kbn/lens-embeddable-utils';
 import { useBoolean } from '@kbn/react-hooks';
-import React, { useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { useLensProps } from './hooks/use_lens_props';
 import type { LensWrapperProps } from './lens_wrapper';
@@ -39,6 +40,8 @@ export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
     yBounds?: LensYBoundsConfig;
     legend?: LensLegendConfig;
     yAxisTitle?: string;
+    /** Lens heatmap. When set, the chart is not an XY series chart. */
+    heatmapConfig?: LensHeatmapConfig;
     isLoading?: boolean;
     error?: Error;
     userMessages?: EmbeddableComponentProps['userMessages'];
@@ -67,6 +70,7 @@ export const Chart = ({
   yBounds,
   legend,
   yAxisTitle,
+  heatmapConfig,
   extraDisabledActions,
   quickActionIds,
   isLoading = false,
@@ -95,10 +99,24 @@ export const Chart = ({
     yBounds,
     legend,
     yAxisTitle,
+    heatmapConfig,
     error,
     userMessages,
     profileId,
   });
+
+  const handleFilter = useCallback<NonNullable<ChartProps['onFilter']>>(
+    (event) => {
+      // A cell click would filter the histogram field by the bucket start, and ES|QL cannot
+      // compare a histogram to a number. Brushing still uses onBrushEnd.
+      if (heatmapConfig) {
+        event.preventDefault();
+        return;
+      }
+      onFilter?.(event);
+    },
+    [heatmapConfig, onFilter]
+  );
 
   return (
     <div
@@ -117,7 +135,7 @@ export const Chart = ({
             lensProps={lensProps}
             services={services}
             onBrushEnd={onBrushEnd}
-            onFilter={onFilter}
+            onFilter={handleFilter}
             abortController={fetchParams.abortController}
             onViewDetails={onViewDetails}
             onCopyToDashboard={toggleSaveModalVisible}

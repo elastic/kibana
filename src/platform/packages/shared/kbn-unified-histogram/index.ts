@@ -13,6 +13,7 @@ export type {
   UnifiedHistogramAdapters,
   UnifiedHistogramVisContext,
   UnifiedHistogramFetchParamsExternal,
+  UnifiedHistogramLensActionsOptions,
 } from './types';
 export { UnifiedHistogramFetchStatus, UnifiedHistogramExternalVisContextStatus } from './types';
 

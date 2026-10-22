@@ -122,6 +122,7 @@ describe('bulkScheduleWorkflow', () => {
     const initializerContext = coreMock.createPluginInitializerContext({
       logging: { console: false },
       eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+      storage: { source: 'plain_index', dataRetention: '90d' },
     });
     plugin = new WorkflowsExecutionEnginePlugin(initializerContext);
 
@@ -136,6 +137,8 @@ describe('bulkScheduleWorkflow', () => {
     mockIsWorkflowEnabledRealtime.mockReset().mockResolvedValue(true);
     mockDiscardUnstartedExecution.mockReset().mockResolvedValue(undefined);
     taskManager = taskManagerMock.createStart();
+    taskManager.schedule.mockImplementation(async (task) => task as any);
+    taskManager.bulkSchedule.mockImplementation(async (tasks) => tasks as any);
     pluginStart = plugin.start(coreStart, {
       taskManager,
       actions: {} as any,

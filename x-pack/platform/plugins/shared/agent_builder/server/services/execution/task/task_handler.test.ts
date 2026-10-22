@@ -133,10 +133,12 @@ describe('TaskHandler event streaming and finalization', () => {
       surfacesService,
     } as never);
 
+  const fakeRequest = httpServerMock.createKibanaRequest();
+
   const run = () =>
     createHandler().run({
       executionId: 'execution-1',
-      fakeRequest: httpServerMock.createKibanaRequest(),
+      fakeRequest,
     });
 
   /**
@@ -182,6 +184,7 @@ describe('TaskHandler event streaming and finalization', () => {
     expect(deliverCallbackEventsMock).toHaveBeenCalledWith({
       execution,
       events$: expect.anything(),
+      request: fakeRequest,
       callbackDeliveryService,
       surfacesService,
       logger: expect.anything(),

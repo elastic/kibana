@@ -130,9 +130,9 @@ describe('runCortexOptimize', () => {
     { tool_id: 'nightshift_sandbox_bash', params: { command: 'esql "FROM logs-* | LIMIT 5"' } },
     { tool_id: 'nightshift_sandbox_view_file', params: { file_path: '/workspace/elastic.md' } },
   ];
-  const progressReport: InvestigationToolCall = {
-    tool_id: 'platform.streams.investigation_progress_report',
-    params: { step: 'triage' },
+  const recordHypotheses: InvestigationToolCall = {
+    tool_id: 'agentic_investigations.set_hypotheses',
+    params: { hypotheses: [] },
   };
 
   const run = (
@@ -231,14 +231,14 @@ describe('runCortexOptimize', () => {
 
   it('passes only sandbox tool calls to the optimizer', async () => {
     await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
-      calls: [progressReport, ...toolCalls, progressReport],
+      calls: [recordHypotheses, ...toolCalls, recordHypotheses],
     });
     expect(optimizeCortex).toHaveBeenCalledWith(expect.objectContaining({ toolCalls }));
   });
 
   it('does not count non-sandbox tool calls towards the minimum', async () => {
     await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
-      calls: [...toolCalls.slice(0, 2), progressReport, progressReport],
+      calls: [...toolCalls.slice(0, 2), recordHypotheses, recordHypotheses],
     });
     expect(optimizeCortex).not.toHaveBeenCalled();
   });

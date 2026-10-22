@@ -198,7 +198,13 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<Ba
     params: any
   ): Promise<any> {
     const maxResponseBytes = this.getMaxResponseBytes();
-    const transportOptions = maxResponseBytes > 0 ? { maxResponseSize: maxResponseBytes } : {};
+    const stepTimeoutMs = this.stepExecutionRuntime.getStepTimeoutMs();
+    // Without a step timeout, Kibana's `elasticsearch.requestTimeout` applies.
+    const transportOptions = {
+      signal: this.stepExecutionRuntime.abortController.signal,
+      ...(stepTimeoutMs !== undefined ? { requestTimeout: stepTimeoutMs } : {}),
+      ...(maxResponseBytes > 0 ? { maxResponseSize: maxResponseBytes } : {}),
+    };
 
     // Support both raw API format and connector-driven syntax
     if (params.request) {

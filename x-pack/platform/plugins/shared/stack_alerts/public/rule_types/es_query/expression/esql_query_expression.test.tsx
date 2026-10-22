@@ -13,6 +13,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { EsqlQueryExpression, getTimeFilter } from './esql_query_expression';
 import type { EsQueryRuleParams } from '../types';
 import { SearchType } from '../types';
@@ -59,14 +60,20 @@ jest.mock('@kbn/esql-utils', () => {
     getESQLResults: jest.fn().mockResolvedValue({}),
     getIndexPattern: jest.fn(),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
-    getESQLAdHocDataview: jest.fn().mockResolvedValue({
-      timeFieldName: '@timestamp',
-      getIndexPattern: jest.fn().mockReturnValue('*'),
-    }),
+    getESQLTimeField: jest.fn().mockResolvedValue('@timestamp'),
+    getEsqlSourceColumns: jest.fn().mockResolvedValue([]),
+    getSourceCommandQueryFromESQLQuery: jest.fn((esql: string) => esql),
     formatESQLColumns: jest.fn().mockReturnValue([]),
     getProjectRoutingFromEsqlQuery: jest.fn().mockReturnValue(undefined),
   };
 });
+
+const mockHttp = httpServiceMock.createStartContract();
+const mockServices = { http: mockHttp, isServerless: false, uiSettings: { get: jest.fn() } };
+jest.mock('../util', () => ({
+  ...jest.requireActual('../util'),
+  useTriggerUiActionServices: () => mockServices,
+}));
 
 const esqlUtilsMock = jest.requireMock('@kbn/esql-utils');
 const triggersActionsCommonMock = jest.requireMock('@kbn/triggers-actions-ui-plugin/public/common');
@@ -79,9 +86,9 @@ const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
 const dataMock = dataPluginMock.createStartContract();
 const dataViewMock = dataViewPluginMocks.createStartContract();
 
-const defaultFieldSpecs = [
-  { name: '@timestamp', type: 'date', searchable: true, aggregatable: true, isMapped: true },
-  { name: 'event.ingested', type: 'date', searchable: true, aggregatable: true, isMapped: true },
+const defaultSourceColumns = [
+  { name: '@timestamp', type: 'date' },
+  { name: 'event.ingested', type: 'date' },
 ];
 
 const unifiedSearchMock = unifiedSearchPluginMock.createStartContract();
@@ -112,18 +119,15 @@ describe('EsqlQueryRuleTypeExpression', () => {
     global.Date.now = jest.fn(() => fakeNow.getTime());
 
     esqlUtilsMock.getESQLResults.mockResolvedValue({});
-    esqlUtilsMock.getESQLAdHocDataview.mockResolvedValue({
-      timeFieldName: '@timestamp',
-      getIndexPattern: jest.fn().mockReturnValue('*'),
-    });
+    esqlUtilsMock.getESQLTimeField.mockResolvedValue('@timestamp');
+    esqlUtilsMock.getEsqlSourceColumns.mockResolvedValue(defaultSourceColumns);
+    esqlUtilsMock.getSourceCommandQueryFromESQLQuery.mockImplementation((esql: string) => esql);
     esqlUtilsMock.getProjectRoutingFromEsqlQuery.mockReturnValue(undefined);
 
     triggersActionsCommonMock.getTimeFieldOptions.mockReturnValue([
       { value: '@timestamp', text: '@timestamp' },
       { value: 'event.ingested', text: 'event.ingested' },
     ]);
-
-    dataViewMock.getFieldsForWildcard = jest.fn().mockResolvedValue(defaultFieldSpecs);
   });
 
   test('should render EsqlQueryRuleTypeExpression with chosen time field', async () => {
@@ -159,7 +163,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
     expect(timeFieldText).toBeInTheDocument();
   });
 
-  test('should pass projectRouting to getFieldsForWildcard when query contains SET project_routing', async () => {
+  test('should pass projectRouting to the source columns and time field lookups when query contains SET project_routing', async () => {
     const mockProjectRouting = '_alias:my-project-id';
     getProjectRoutingFromEsqlQuery.mockReturnValue(mockProjectRouting);
 
@@ -192,17 +196,16 @@ describe('EsqlQueryRuleTypeExpression', () => {
       );
     });
 
-    await waitFor(() => expect(dataViewMock.getFieldsForWildcard).toHaveBeenCalled());
-    expect(dataViewMock.getFieldsForWildcard).toHaveBeenCalledWith(
-      expect.objectContaining({
-        pattern: '*',
-        allowNoIndex: true,
-        projectRouting: mockProjectRouting,
-      })
+    await waitFor(() => expect(esqlUtilsMock.getEsqlSourceColumns).toHaveBeenCalled());
+    expect(esqlUtilsMock.getEsqlSourceColumns).toHaveBeenCalledWith(
+      expect.objectContaining({ http: mockHttp, projectRouting: mockProjectRouting })
+    );
+    expect(esqlUtilsMock.getESQLTimeField).toHaveBeenCalledWith(
+      expect.objectContaining({ http: mockHttp, projectRouting: mockProjectRouting })
     );
   });
 
-  test('should not pass projectRouting to getFieldsForWildcard when query has no SET project_routing', async () => {
+  test('should not pass projectRouting to the source columns lookup when query has no SET project_routing', async () => {
     getProjectRoutingFromEsqlQuery.mockReturnValue(undefined);
 
     await act(async () => {
@@ -232,18 +235,116 @@ describe('EsqlQueryRuleTypeExpression', () => {
       );
     });
 
-    await waitFor(() => expect(dataViewMock.getFieldsForWildcard).toHaveBeenCalled());
-    expect(dataViewMock.getFieldsForWildcard).toHaveBeenCalledWith(
-      expect.objectContaining({
-        pattern: '*',
-        allowNoIndex: true,
-      })
+    await waitFor(() => expect(esqlUtilsMock.getEsqlSourceColumns).toHaveBeenCalled());
+    expect(esqlUtilsMock.getEsqlSourceColumns).toHaveBeenCalledWith(
+      expect.objectContaining({ esqlQuery: 'FROM my_index', projectRouting: undefined })
     );
-    expect(dataViewMock.getFieldsForWildcard).toHaveBeenCalledWith(
-      expect.not.objectContaining({
-        projectRouting: expect.anything(),
-      })
+  });
+
+  test('should load time field options from the source columns of federated datasets', async () => {
+    const { getTimeFieldOptions: actualGetTimeFieldOptions } = jest.requireActual(
+      '@kbn/triggers-actions-ui-plugin/public/common'
     );
+    triggersActionsCommonMock.getTimeFieldOptions.mockImplementation(actualGetTimeFieldOptions);
+    esqlUtilsMock.getSourceCommandQueryFromESQLQuery.mockReturnValue('FROM my_dataset');
+    esqlUtilsMock.getESQLTimeField.mockResolvedValue(undefined);
+    esqlUtilsMock.getEsqlSourceColumns.mockResolvedValue([
+      { name: 'event_time', type: 'date_nanos' },
+      { name: 'message', type: 'keyword' },
+    ]);
+    const mockSetRuleParams = jest.fn();
+
+    await act(async () => {
+      render(
+        <EsqlQueryExpression
+          unifiedSearch={unifiedSearchMock}
+          ruleInterval="1m"
+          ruleThrottle="1m"
+          alertNotifyWhen="onThrottleInterval"
+          ruleParams={{
+            ...defaultEsqlQueryExpressionParams,
+            timeField: 'event_time',
+            esqlQuery: { esql: 'FROM my_dataset | KEEP message' },
+          }}
+          setRuleParams={mockSetRuleParams}
+          setRuleProperty={() => {}}
+          errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
+          data={dataMock}
+          dataViews={dataViewMock}
+          defaultActionGroupId=""
+          actionGroups={[]}
+          charts={chartsStartMock}
+          onChangeMetaData={() => {}}
+        />,
+        {
+          wrapper: AppWrapper,
+        }
+      );
+    });
+
+    expect(await screen.findByRole('option', { name: 'event_time' })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'message' })).not.toBeInTheDocument();
+    expect(esqlUtilsMock.getEsqlSourceColumns).toHaveBeenCalledWith(
+      expect.objectContaining({ esqlQuery: 'FROM my_dataset' })
+    );
+    expect(mockSetRuleParams).not.toHaveBeenCalledWith('timeField', undefined);
+  });
+
+  test.each([
+    [
+      'preselects the detected time field on a new rule',
+      '',
+      '@timestamp',
+      [['timeField', '@timestamp']],
+    ],
+    ['keeps the current time field if still available', 'event.ingested', '@timestamp', []],
+    [
+      'switches to the detected time field if the current one is gone',
+      'gone',
+      '@timestamp',
+      [['timeField', '@timestamp']],
+    ],
+    [
+      'clears the time field if neither is available',
+      'gone',
+      'missing',
+      [['timeField', undefined]],
+    ],
+  ])('%s', async (_, currentTimeField, detectedTimeField, expectedTimeFieldCalls) => {
+    esqlUtilsMock.getESQLTimeField.mockResolvedValue(detectedTimeField);
+    const mockSetRuleParams = jest.fn();
+
+    await act(async () => {
+      render(
+        <EsqlQueryExpression
+          unifiedSearch={unifiedSearchMock}
+          ruleInterval="1m"
+          ruleThrottle="1m"
+          alertNotifyWhen="onThrottleInterval"
+          ruleParams={{
+            ...defaultEsqlQueryExpressionParams,
+            timeField: currentTimeField,
+            esqlQuery: { esql: 'FROM my_index' },
+          }}
+          setRuleParams={mockSetRuleParams}
+          setRuleProperty={() => {}}
+          errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
+          data={dataMock}
+          dataViews={dataViewMock}
+          defaultActionGroupId=""
+          actionGroups={[]}
+          charts={chartsStartMock}
+          onChangeMetaData={() => {}}
+        />,
+        {
+          wrapper: AppWrapper,
+        }
+      );
+    });
+
+    await waitFor(() => expect(esqlUtilsMock.getEsqlSourceColumns).toHaveBeenCalled());
+    const timeFieldCalls = mockSetRuleParams.mock.calls.filter(([param]) => param === 'timeField');
+    expect(timeFieldCalls).toEqual(expectedTimeFieldCalls);
   });
 
   it('should render EsqlQueryRuleTypeExpression with expected components', () => {

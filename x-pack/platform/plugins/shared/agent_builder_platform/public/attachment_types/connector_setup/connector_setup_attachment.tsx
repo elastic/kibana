@@ -33,6 +33,7 @@ const CONNECTORS_MANAGE_PATH = '/manage/connectors';
 interface ConnectorSetupDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   application: CoreStart['application'];
+  notifications: CoreStart['notifications'];
 }
 
 const getDisplayName = (attachment: ConnectorSetupAttachment) =>
@@ -64,7 +65,7 @@ const ConnectorSetupInline: React.FC<AttachmentRenderProps<ConnectorSetupAttachm
               {i18n.translate(
                 'xpack.agentBuilderPlatform.attachments.connectorSetup.inlineConnected',
                 {
-                  defaultMessage: 'Connected — the agent can now use {displayName}.',
+                  defaultMessage: 'Connected — {displayName} is set up.',
                   values: { displayName },
                 }
               )}
@@ -82,7 +83,7 @@ const ConnectorSetupCanvas: React.FC<
     callbacks: CanvasRenderCallbacks;
   }
 > = ({ attachment, deps, callbacks }) => {
-  const { triggersActionsUi } = deps;
+  const { triggersActionsUi, notifications } = deps;
   const { registerActionButtons, updateOrigin, closeCanvas } = callbacks;
   const { connector_type: connectorType, suggested_name: suggestedName } = attachment.data;
 
@@ -99,13 +100,23 @@ const ConnectorSetupCanvas: React.FC<
       const created = await handleRef.current.submit();
       if (created) {
         // `useCreateConnector` (inside the form) already shows the success toast.
-        await updateOrigin(created.id);
+        const originResponse = await updateOrigin(created.id);
+        const [warning] = originResponse?.warnings ?? [];
+        if (warning) {
+          notifications.toasts.addWarning({
+            title: i18n.translate(
+              'xpack.agentBuilderPlatform.attachments.connectorSetup.notAddedToAgentTitle',
+              { defaultMessage: 'Connector created, but not added to the agent' }
+            ),
+            text: warning,
+          });
+        }
         closeCanvas();
       }
     } finally {
       setIsSaving(false);
     }
-  }, [updateOrigin, closeCanvas]);
+  }, [updateOrigin, closeCanvas, notifications]);
 
   // Re-register the Save button whenever validity/saving changes so its
   // disabled state mirrors the form.

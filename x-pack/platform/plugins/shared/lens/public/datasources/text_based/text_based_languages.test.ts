@@ -1722,6 +1722,46 @@ describe('Textbased Data Source', () => {
     });
   });
 
+  describe('#getDatasourceInfo', () => {
+    const state = {
+      layers: {
+        a: {
+          index: 'foo',
+          query: { esql: 'FROM foo' },
+          columns: [
+            { columnId: 'col1', fieldName: 'bytes', meta: { type: 'number' } },
+            { columnId: 'col2', fieldName: 'source', meta: { type: 'string' } },
+          ],
+        },
+      },
+    } as unknown as TextBasedPrivateState;
+
+    it('describes the columns of the ES|QL layers without creating a DataView', async () => {
+      const dataViews = dataViewPluginMocks.createStartContract();
+
+      const info = await TextBasedDatasource.getDatasourceInfo(state, [], dataViews);
+
+      expect(dataViews.create).not.toHaveBeenCalled();
+      expect(info).toHaveLength(1);
+      expect(info[0].layerId).toBe('a');
+      expect(info[0].dataView).toBeUndefined();
+      expect(info[0].columns).toHaveLength(2);
+    });
+
+    it('identifies the columns by their columnId', async () => {
+      const info = await TextBasedDatasource.getDatasourceInfo(state);
+
+      expect(info[0].columns.map(({ id }) => id)).toEqual(['col1', 'col2']);
+      expect(info[0].columns.map(({ role }) => role)).toEqual(['metric', 'split']);
+    });
+
+    it('does not need the data views service', async () => {
+      const info = await TextBasedDatasource.getDatasourceInfo(state);
+
+      expect(info).toHaveLength(1);
+    });
+  });
+
   describe('#getRenderEventCounters', () => {
     it('should return correct counter for esql query', () => {
       const state = {

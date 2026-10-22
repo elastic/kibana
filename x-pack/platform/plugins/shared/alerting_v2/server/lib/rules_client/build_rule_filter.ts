@@ -34,6 +34,7 @@ export const buildRuleSoFilter = createSoFilterBuilder({
     'metadata.description': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.description`,
     'metadata.tags': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`,
     'metadata.routing_tags': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.routing_tags`,
+    'metadata.template.id': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.template.id`,
   },
 });
 

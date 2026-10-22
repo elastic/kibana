@@ -22,7 +22,7 @@ import { shiftTwinToNow } from './shift_timestamps';
 import type { FpTpGold, FpTpTwin, FpTpWorld } from './types';
 
 export type FpTpLiveKbnRequest = (options: {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   path: string;
   body?: unknown;
   version?: string;
@@ -67,14 +67,17 @@ const ENTITY_STORE_POLL_INTERVAL_MS = 2_000;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const assertBulkOk = (label: string, result: { errors?: boolean; items?: unknown[] }): void => {
+export const assertBulkOk = (
+  label: string,
+  result: { errors?: boolean; items?: unknown[] }
+): void => {
   if (result.errors !== true) {
     return;
   }
   throw new Error(`${label} bulk had item errors: ${JSON.stringify(result.items)}`);
 };
 
-const kbnErrorMessage = (body: unknown): string => {
+export const kbnErrorMessage = (body: unknown): string => {
   if (typeof body === 'object' && body !== null && 'message' in body) {
     const message = (body as { message?: unknown }).message;
     if (typeof message === 'string') {
@@ -238,7 +241,10 @@ export const ensureFpTpSeedPrerequisites = async (
     : async () => undefined;
 };
 
-const deleteEntity = async (kbnRequest: FpTpLiveKbnRequest, entityId: string): Promise<void> => {
+export const deleteEntity = async (
+  kbnRequest: FpTpLiveKbnRequest,
+  entityId: string
+): Promise<void> => {
   const response = await kbnRequest({
     method: 'DELETE',
     path: '/api/security/entity_store/entities/',
@@ -254,7 +260,7 @@ const deleteEntity = async (kbnRequest: FpTpLiveKbnRequest, entityId: string): P
   }
 };
 
-const createEntity = async (
+export const createEntity = async (
   kbnRequest: FpTpLiveKbnRequest,
   request: FpTpEntityCrudRequest
 ): Promise<void> => {
@@ -280,15 +286,16 @@ const createEntity = async (
   }
 };
 
-const writeIdentityFields = async (
+export const writeIdentityFields = async (
   esClient: EsClient,
-  request: FpTpEntityCrudRequest
+  request: FpTpEntityCrudRequest,
+  readAlias: string = FP_TP_ENTITY_READ_ALIAS
 ): Promise<void> => {
   if (request.identityFields === undefined) {
     return;
   }
   const { updated } = await esClient.updateByQuery({
-    index: FP_TP_ENTITY_READ_ALIAS,
+    index: readAlias,
     refresh: true,
     query: { term: { 'entity.id': request.entityId } },
     script: {
@@ -329,7 +336,7 @@ const deleteBySeedLabel = async (esClient: EsClient, index: string): Promise<voi
  * so a seed-label deleteByQuery leaves the previous twin's events in place.
  * Data streams also reject overwrite (`create` only), so leftover ids 409.
  */
-const deleteDocumentsById = async (
+export const deleteDocumentsById = async (
   esClient: EsClient,
   documents: ReadonlyArray<{ index: string; id: string }>
 ): Promise<void> => {
@@ -377,16 +384,17 @@ export const cleanupManualSeedLive = async (
 const ENTITIES_ON_HOSTS_PAGE_SIZE = 100;
 
 /** Also removes entities the Entity Store built from the seeded events itself. */
-const deleteEntitiesOnHosts = async (
+export const deleteEntitiesOnHosts = async (
   esClient: EsClient,
   kbnRequest: FpTpLiveKbnRequest,
-  hostIds: readonly string[]
+  hostIds: readonly string[],
+  readAlias: string = FP_TP_ENTITY_READ_ALIAS
 ): Promise<void> => {
   if (hostIds.length === 0) {
     return;
   }
   const response = await esClient.search<{ entity?: { id?: string } }>({
-    index: FP_TP_ENTITY_READ_ALIAS,
+    index: readAlias,
     ignore_unavailable: true,
     size: ENTITIES_ON_HOSTS_PAGE_SIZE,
     _source: ['entity.id'],

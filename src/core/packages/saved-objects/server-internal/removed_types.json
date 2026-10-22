@@ -19,6 +19,7 @@
   "investigation",
   "maps-telemetry",
   "ml-telemetry",
+  "nightshift-investigation",
   "osquery-usage-metric",
   "search_playground",
   "server",

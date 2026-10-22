@@ -12,7 +12,11 @@ import type { PreconfiguredOutput } from '../../../common/types';
 import type { Output } from '../../types';
 import * as agentPolicy from '../agent_policy';
 import { outputService } from '../output';
-import { checkKafkaOAuth2Allowed, checkOtlpOutputAllowed } from '../outputs/helpers';
+import {
+  checkKafkaKerberosAllowed,
+  checkKafkaOAuth2Allowed,
+  checkOtlpOutputAllowed,
+} from '../outputs/helpers';
 
 import {
   SERVERLESS_DEFAULT_OUTPUT_ID,
@@ -38,6 +42,9 @@ jest.mock('../outputs/helpers');
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
 const mockedCheckKafkaOAuth2Allowed = checkKafkaOAuth2Allowed as jest.MockedFunction<
   typeof checkKafkaOAuth2Allowed
+>;
+const mockedCheckKafkaKerberosAllowed = checkKafkaKerberosAllowed as jest.MockedFunction<
+  typeof checkKafkaKerberosAllowed
 >;
 
 const mockedCheckOtlpOutputAllowed = checkOtlpOutputAllowed as jest.MockedFunction<
@@ -97,6 +104,7 @@ describe('Outputs preconfiguration', () => {
     mockedOutputService.getDefaultDataOutputId.mockReset();
     mockedCheckOtlpOutputAllowed.mockResolvedValue({ result: true });
     mockedCheckKafkaOAuth2Allowed.mockResolvedValue({ result: true });
+    mockedCheckKafkaKerberosAllowed.mockResolvedValue({ result: true });
     mockedOutputService.getDefaultESHosts.mockReturnValue(['http://default-es:9200']);
     const keyHash = (await hashSecret('secretKey')) as string;
     const passwordHash = (await hashSecret('secretPassword')) as string;
@@ -266,6 +274,22 @@ describe('Outputs preconfiguration', () => {
           auth_type: 'oauth2',
           oauth2: { client_id: 'my-client', token_url: 'https://idp.example.com/oauth2/token' },
           secrets: { oauth2: { client_secret: { id: '654', hash: clientSecretHash } } },
+        },
+        {
+          id: 'existing-kafka-output-kerberos-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Kafka Output Kerberos 1',
+          type: 'kafka',
+          hosts: ['kafka.co:80'],
+          is_preconfigured: true,
+          auth_type: 'kerberos',
+          kerberos: {
+            auth_type: 'keytab',
+            config_path: '/etc/krb5.conf',
+            keytab: '/etc/kafka.keytab',
+            realm: 'EXAMPLE.COM',
+          },
         },
         {
           id: 'existing-kafka-output-with-nested-secrets-1',
@@ -1542,6 +1566,82 @@ describe('Outputs preconfiguration', () => {
       expect(mockedOutputService.create).not.toHaveBeenCalled();
       expect(mockedOutputService.update).not.toHaveBeenCalled();
       expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
+    });
+
+    describe('kafka output with Kerberos authentication', () => {
+      const kerberos = {
+        auth_type: 'keytab',
+        config_path: '/etc/krb5.conf',
+        keytab: '/etc/kafka.keytab',
+        realm: 'EXAMPLE.COM',
+      };
+      const kerberosOutput = (fields: Record<string, unknown> = {}) =>
+        ({
+          id: 'non-existing-kafka-output-kerberos-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Kafka Output Kerberos 1',
+          type: 'kafka',
+          hosts: ['kafka.co:80'],
+          auth_type: 'kerberos',
+          kerberos,
+          ...fields,
+        } as any);
+
+      it('should create the output when Kerberos is allowed', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [kerberosOutput()]);
+
+        expect(mockedCheckKafkaKerberosAllowed).toHaveBeenCalledWith(
+          esClient,
+          soClient,
+          expect.objectContaining({ kerberos: expect.any(Object) })
+        );
+        expect(mockedOutputService.create).toHaveBeenCalledWith(
+          soClient,
+          esClient,
+          expect.objectContaining({ auth_type: 'kerberos' }),
+          expect.objectContaining({ id: 'non-existing-kafka-output-kerberos-1' })
+        );
+      });
+
+      it('should not update an existing output when its Kerberos settings did not change', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          kerberosOutput({ id: 'existing-kafka-output-kerberos-1' }),
+        ]);
+
+        expect(mockedOutputService.update).not.toHaveBeenCalled();
+      });
+
+      it('should update an existing output when a Kerberos setting changed', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          kerberosOutput({
+            id: 'existing-kafka-output-kerberos-1',
+            kerberos: { ...kerberos, realm: 'OTHER.COM' },
+          }),
+        ]);
+
+        expect(mockedOutputService.update).toHaveBeenCalled();
+      });
+
+      it('should skip the output, without failing, when Kerberos is not allowed', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        mockedCheckKafkaKerberosAllowed.mockResolvedValue({
+          result: false,
+          error: 'Kerberos authentication of Kafka outputs is not enabled',
+        });
+
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [kerberosOutput()]);
+
+        expect(mockedOutputService.create).not.toHaveBeenCalled();
+        expect(mockedCheckKafkaOAuth2Allowed).not.toHaveBeenCalled();
+      });
     });
 
     describe('kafka output with OAuth2 authentication', () => {

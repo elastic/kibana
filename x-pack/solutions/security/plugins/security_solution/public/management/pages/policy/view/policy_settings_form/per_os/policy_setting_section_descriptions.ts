@@ -50,7 +50,7 @@ export const POLICY_SETTING_SECTION_DESCRIPTIONS = Object.freeze({
     'xpack.securitySolution.endpoint.policy.details.attackSurfaceReductionDescription',
     {
       defaultMessage:
-        'Limit the ways attackers can compromise your endpoints by reducing exposure to common attack techniques. Enable credential hardening to prevent unauthorized access to system credentials on Windows.',
+        'Limit the ways attackers can compromise your endpoints by reducing exposure to common attack techniques. Credential hardening options protect Windows system credentials from unauthorized access.',
     }
   ),
   eventCollection: i18n.translate(
@@ -58,6 +58,13 @@ export const POLICY_SETTING_SECTION_DESCRIPTIONS = Object.freeze({
     {
       defaultMessage:
         'Select which system events to collect for monitoring and analysis. Selecting more event types increases visibility but may impact performance — enable only what you use and require.',
+    }
+  ),
+  aiDataCollection: i18n.translate(
+    'xpack.securitySolution.endpoint.policy.details.aiDataCollectionDescription',
+    {
+      defaultMessage:
+        'Identify AI tools and add that context to events that Elastic Defend collects from them. This improves visibility into AI activity on your hosts.',
     }
   ),
 });

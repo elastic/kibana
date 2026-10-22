@@ -17,6 +17,8 @@ import {
 } from '.';
 import { ALERTZERO_JOURNAL_NOTE_WORKFLOW } from './journal_note';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
+import { WorkflowGraph } from '../../../graph';
+import type { WorkflowYaml } from '../../../spec/schema';
 
 // Route-path and cross-package id checks (including the SYSTEM_SECURITY_HUNT_*
 // cross-check) live in the alertzero PLUGIN's own hunt_children_contract.test.ts, not
@@ -317,7 +319,9 @@ describe('Hunt Watch worker chain', () => {
       expect(
         evaluateExpression(resultVariables().result_report_intent_targets as string, {
           steps: {
-            run_hunt_coordinator: { output: value ? { report_intent_targets: value } : undefined },
+            read_hunt_result: value
+              ? { output: { data: { result: { report_intent_targets: value } } } }
+              : undefined,
           },
         })
       ).toEqual(expected);
@@ -326,14 +330,16 @@ describe('Hunt Watch worker chain', () => {
     it('reads behaviors as an empty array when Tier 2 never ran', () => {
       expect(
         evaluateExpression(resultVariables().result_behaviors as string, {
-          steps: { run_hunt_coordinator: { output: { report_intent_targets: [] } } },
+          steps: {
+            read_hunt_result: { output: { data: { result: { report_intent_targets: [] } } } },
+          },
         })
       ).toEqual([]);
     });
 
     const behaviorsOutput = (behaviors: unknown[]) =>
       evaluateExpression(resultVariables().result_behaviors as string, {
-        steps: { run_hunt_coordinator: { output: { tier2: { behaviors } } } },
+        steps: { read_hunt_result: { output: { data: { result: { tier2: { behaviors } } } } } },
       });
     const executedBehavior = (technique_id: string) => ({
       technique_id,
@@ -582,10 +588,122 @@ describe('Hunt Watch worker chain', () => {
     });
   });
 
+  // Polled `state` is the sentinel (not "start answered"); give-up / failed → failed, not partial.
+  describe('hunt — result status from the polled envelope', () => {
+    const variables = stepIn(huntSteps, 'resolve_result_status')?.with as Record<string, string>;
+    const liquid = createWorkflowLiquidEngine();
+    const render = (template: string, readOutput: unknown): string =>
+      liquid
+        .parseAndRenderSync(template, {
+          inputs: { investigationConversationId: 'conv-1' },
+          execution: { id: 'exec-1' },
+          steps: {
+            run_hunt_coordinator: {
+              output: { run_id: 'run-1', state: 'running', result_attachment_id: 'att-1' },
+            },
+            ...(readOutput === undefined ? {} : { read_hunt_result: { output: readOutput } }),
+          },
+        })
+        .trim();
+    const status = (readOutput: unknown) => render(variables.result_status, readOutput);
+    const reason = (readOutput: unknown) => render(variables.result_reason, readOutput);
+
+    const LIMIT_REASON =
+      'Hunt coordinator did not finish before the hunt child stopped polling (60 reads, 10s apart); see hunt execution exec-1.';
+
+    it('is success with no reason for a completed, complete run', () => {
+      const completed = { data: { state: 'completed', result: { completeness: 'complete' } } };
+      expect(status(completed)).toBe('success');
+      expect(reason(completed)).toBe('');
+    });
+
+    it('is partial for a completed run that was incomplete but retryable', () => {
+      const completed = {
+        data: {
+          state: 'completed',
+          result: { completeness: 'incomplete_retryable', message: 'Tier 2 timed out' },
+        },
+      };
+      expect(status(completed)).toBe('partial');
+      expect(reason(completed)).toContain('incomplete but retryable (Tier 2 timed out)');
+    });
+
+    it('is failed with the fixed limit reason when the poll ends on a run still running', () => {
+      const running = { data: { state: 'running' } };
+      expect(status(running)).toBe('failed');
+      expect(reason(running)).toBe(LIMIT_REASON);
+    });
+
+    it('is failed with the fixed limit reason when every read failed and nothing was ever read', () => {
+      expect(status(undefined)).toBe('failed');
+      expect(reason(undefined)).toBe(LIMIT_REASON);
+    });
+
+    it('is failed with the envelope message when the run reported failure', () => {
+      const failed = { data: { state: 'failed', error: { message: 'Hunt coordinator failed' } } };
+      expect(status(failed)).toBe('failed');
+      expect(reason(failed)).toBe('Hunt coordinator failed');
+    });
+
+    it('still names the missing Investigation first, before any envelope state', () => {
+      const rendered = liquid
+        .parseAndRenderSync(variables.result_reason, {
+          inputs: { investigationConversationId: '' },
+          execution: { id: 'exec-1' },
+          steps: {},
+        })
+        .trim();
+      expect(rendered).toContain('no Investigation available');
+    });
+
+    it('still quotes the start error when the start call itself failed', () => {
+      const rendered = liquid
+        .parseAndRenderSync(variables.result_reason, {
+          inputs: { investigationConversationId: 'conv-1' },
+          execution: { id: 'exec-1' },
+          steps: { run_hunt_coordinator: { error: { message: 'HTTP 500: {"message":"x"}' } } },
+        })
+        .trim();
+      expect(rendered).toBe('HTTP 500: {"message":"x"}');
+    });
+  });
+
+  // The contract test compares YAML fields. This builds the engine's execution graph, so the
+  // poll loop's constructs (while + max-iterations + timeout around a nested if) are known to
+  // compile, and the loop is wired to exit by `continue` rather than fail when it hits the limit.
+  describe('hunt — poll loop as the engine compiles it', () => {
+    const graph = WorkflowGraph.fromWorkflowDefinition(hunt as unknown as WorkflowYaml);
+
+    it('exits the poll by continue at 60 reads, backstopped by a 12 minute timeout zone', () => {
+      expect(graph.getNode('exitWhile_poll_hunt_coordinator')).toMatchObject({
+        type: 'exit-while',
+        maxIterations: 60,
+        onLimit: 'continue',
+      });
+      expect(graph.getNode('enterTimeoutZone_poll_hunt_coordinator')).toMatchObject({
+        type: 'enter-timeout-zone',
+        timeout: '12m',
+        stepType: 'step_level_timeout',
+      });
+    });
+
+    // `if_poll_hunt_coordinator` is the guard the step's own `if:` compiles to.
+    it('keeps the read, the running check, and the delay inside the loop body', () => {
+      expect([...graph.getInnerStepIds('poll_hunt_coordinator')].sort()).toEqual([
+        'if_poll_hunt_coordinator',
+        'poll_delay',
+        'read_hunt_result',
+        'wait_if_running',
+      ]);
+    });
+  });
+
   describe('hunt — attach_impact', () => {
     const attachImpact = stepIn(huntSteps, 'attach_impact');
     const coordinatorOutput = (impactedEntities: unknown) => ({
-      steps: { run_hunt_coordinator: { output: { impacted_entities: impactedEntities } } },
+      steps: {
+        read_hunt_result: { output: { data: { result: { impacted_entities: impactedEntities } } } },
+      },
     });
 
     // Over HTTP, not the `investigations.attachImpact` step: impact is owner-only, and the
@@ -599,7 +717,7 @@ describe('Hunt Watch worker chain', () => {
       );
       expect(attachImpact?.with?.body).toEqual({
         conversationId: '{{ inputs.investigationConversationId }}',
-        entities: '${{ steps.run_hunt_coordinator.output.impacted_entities }}',
+        entities: '${{ steps.read_hunt_result.output.data.result.impacted_entities }}',
       });
       expect(JSON.stringify(hunt)).not.toContain('investigations.attachImpact');
     });
@@ -648,7 +766,7 @@ describe('Hunt Watch worker chain', () => {
       it('counts the entities this run recorded', () => {
         const message = render({
           steps: {
-            run_hunt_coordinator: { output: hitOutput(twoEntities) },
+            read_hunt_result: { output: { data: { result: hitOutput(twoEntities) } } },
             attach_impact: { output: { id: 'impact-1', entities: twoEntities } },
           },
         });
@@ -665,7 +783,7 @@ describe('Hunt Watch worker chain', () => {
       ])('explains an HTTP %s by its status', (status, expected) => {
         const message = render({
           steps: {
-            run_hunt_coordinator: { output: hitOutput(twoEntities) },
+            read_hunt_result: { output: { data: { result: hitOutput(twoEntities) } } },
             attach_impact: {
               error: { type: 'Error', message: `HTTP ${status}: {"message":"internal detail"}` },
             },
@@ -679,14 +797,16 @@ describe('Hunt Watch worker chain', () => {
 
       it('says why nothing was recorded when the hit named no host or user', () => {
         const message = render({
-          steps: { run_hunt_coordinator: { output: hitOutput([]) } },
+          steps: { read_hunt_result: { output: { data: { result: hitOutput([]) } } } },
         });
         expect(message).toContain('_No impact recorded: the confirmed hits name no host or user._');
       });
 
       it('adds no impact line to a run that confirmed nothing', () => {
         const message = render({
-          steps: { run_hunt_coordinator: { output: { narrative: 'Narrative.' } } },
+          steps: {
+            read_hunt_result: { output: { data: { result: { narrative: 'Narrative.' } } } },
+          },
         });
         expect(message.trim()).toBe('Narrative.');
       });
@@ -823,15 +943,10 @@ describe('Hunt Watch worker chain', () => {
       const gate = (overrides: {
         fetched?: Record<string, unknown> | undefined;
         spaceId?: string;
-        /** The criticality this finding asks for, when it asks for one. */
-        wanted?: string;
       }) => ({
         inputs: {
           conversationId: 'conv-1',
           title: 'Isolate host A',
-          ...(overrides.wanted === undefined
-            ? {}
-            : { actionInput: { id_value: 'dev-user', criticality_level: overrides.wanted } }),
         },
         workflow: { spaceId: overrides.spaceId ?? 'default' },
         steps:
@@ -877,74 +992,6 @@ describe('Hunt Watch worker chain', () => {
         expect(note).toContain('(/app/alertzero?selectedConversationId=conv-other)');
         expect(note).toContain('no second Proposal was created');
         expect(note).toContain('stays open until an analyst closes it');
-      });
-
-      describe('whether the winner covers the finding', () => {
-        // Winning the id is not covering the finding: two findings for one subject share a target
-        // but not necessarily a criticality, and a critical report asks for more than the rest.
-        const noteFor = (wanted: string | undefined, won: string | undefined) =>
-          liquid
-            .parseAndRenderSync(
-              lostRaceWith.lost_race_note,
-              gate({
-                wanted,
-                fetched: {
-                  conversationId: 'conv-other',
-                  ...(won === undefined ? {} : { actionInput: { criticality_level: won } }),
-                },
-              })
-            )
-            .trim();
-        const covered = (note: string) => note.includes('this finding is covered by that one');
-
-        it('says it is covered when the winner asks for the same level', () => {
-          expect(covered(noteFor('high_impact', 'high_impact'))).toBe(true);
-        });
-
-        it('says it is covered when the winner asks for more', () => {
-          expect(covered(noteFor('high_impact', 'extreme_impact'))).toBe(true);
-        });
-
-        it('does not say it is covered when the winner asks for less, and says what was not proposed', () => {
-          const note = noteFor('extreme_impact', 'high_impact');
-
-          expect(covered(note)).toBe(false);
-          expect(note).toContain(
-            'it asks for high_impact where this finding asks for extreme_impact'
-          );
-          expect(note).toContain('the level this finding asks for was not proposed');
-          expect(note).toContain('A manual run targeting this report proposes it');
-          // Still points at the winner, and still says the Investigation stays open.
-          expect(note).toContain('(/app/alertzero?selectedConversationId=conv-other)');
-          expect(note).toContain('stays open until an analyst closes it');
-        });
-
-        it.each([
-          ['low_impact', 'medium_impact'],
-          ['medium_impact', 'high_impact'],
-          ['high_impact', 'extreme_impact'],
-        ])('ranks %s below %s', (weaker, stronger) => {
-          expect(covered(noteFor(stronger, weaker))).toBe(false);
-          expect(covered(noteFor(weaker, stronger))).toBe(true);
-        });
-
-        it('is covered when this finding asks for no level, as the recommendation does not', () => {
-          expect(covered(noteFor(undefined, 'high_impact'))).toBe(true);
-          expect(covered(noteFor(undefined, undefined))).toBe(true);
-        });
-
-        it('is not covered when the winner asks for no level and this finding does', () => {
-          const note = noteFor('high_impact', undefined);
-
-          expect(covered(note)).toBe(false);
-          expect(note).toContain('it asks for no level where this finding asks for high_impact');
-        });
-
-        it('is covered only by the same level when it does not know the level, rather than guessing', () => {
-          expect(covered(noteFor('custom_impact', 'custom_impact'))).toBe(true);
-          expect(covered(noteFor('custom_impact', 'extreme_impact'))).toBe(false);
-          expect(covered(noteFor('extreme_impact', 'custom_impact'))).toBe(false);
-        });
       });
 
       it('links the space the Investigation is in', () => {

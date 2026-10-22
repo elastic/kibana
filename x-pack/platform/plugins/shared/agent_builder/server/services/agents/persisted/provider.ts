@@ -11,8 +11,10 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import {
   agentBuilderDefaultAgentId,
+  chatAgentTypeId,
   createBadRequestError,
   isAgentNotFoundError,
+  SYSTEM_USER_ID,
 } from '@kbn/agent-builder-common';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { GetAgentOptions, WritableAgentProvider, AgentProviderFn } from '../agent_source';
@@ -30,6 +32,7 @@ export const createPersistedProviderFn = (opts: {
   toolsService: ToolsServiceStart;
   logger: Logger;
   availabilityByAgentId: Map<string, AgentAvailabilityConfig>;
+  hiddenByAgentId: Map<string, boolean>;
 }): AgentProviderFn<false> => {
   const availabilityCache = new AgentAvailabilityCache();
   return ({ request, space }) => {
@@ -56,6 +59,7 @@ const createPersistedProvider = async ({
   toolsService,
   logger,
   availabilityByAgentId,
+  hiddenByAgentId,
   availabilityCache,
 }: {
   space: string;
@@ -65,6 +69,7 @@ const createPersistedProvider = async ({
   toolsService: ToolsServiceStart;
   logger: Logger;
   availabilityByAgentId: Map<string, AgentAvailabilityConfig>;
+  hiddenByAgentId: Map<string, boolean>;
   availabilityCache: AgentAvailabilityCache;
 }): Promise<WritableAgentProvider> => {
   const client = await createClient({
@@ -91,11 +96,21 @@ const createPersistedProvider = async ({
       const access = opts?.access ?? 'read';
       try {
         const definition = await client.getWithAccess(agentId, access);
-        return toInternalDefinition({ definition, availabilityByAgentId, availabilityCache });
+        return toInternalDefinition({
+          definition,
+          availabilityByAgentId,
+          hiddenByAgentId,
+          availabilityCache,
+        });
       } catch (e) {
         if (agentId === agentBuilderDefaultAgentId && isAgentNotFoundError(e)) {
           const definition = await ensureDefaultAgent(client);
-          return toInternalDefinition({ definition, availabilityByAgentId, availabilityCache });
+          return toInternalDefinition({
+            definition,
+            availabilityByAgentId,
+            hiddenByAgentId,
+            availabilityCache,
+          });
         }
         throw e;
       }
@@ -110,7 +125,12 @@ const createPersistedProvider = async ({
       }
 
       return definitions.map((definition) =>
-        toInternalDefinition({ definition, availabilityByAgentId, availabilityCache })
+        toInternalDefinition({
+          definition,
+          availabilityByAgentId,
+          hiddenByAgentId,
+          availabilityCache,
+        })
       );
     },
     getIds: async (opts) => {
@@ -128,11 +148,21 @@ const createPersistedProvider = async ({
         throw createBadRequestError('The default agent cannot be manually created');
       }
       const definition = await client.create(createRequest);
-      return toInternalDefinition({ definition, availabilityByAgentId, availabilityCache });
+      return toInternalDefinition({
+        definition,
+        availabilityByAgentId,
+        hiddenByAgentId,
+        availabilityCache,
+      });
     },
     update: async (agentId, update) => {
       const definition = await client.update(agentId, update);
-      return toInternalDefinition({ definition, availabilityByAgentId, availabilityCache });
+      return toInternalDefinition({
+        definition,
+        availabilityByAgentId,
+        hiddenByAgentId,
+        availabilityCache,
+      });
     },
     delete: (agentId: string) => {
       return client.delete({ id: agentId });
@@ -150,14 +180,25 @@ const createPersistedProvider = async ({
 export const toInternalDefinition = ({
   definition,
   availabilityByAgentId,
+  hiddenByAgentId,
   availabilityCache,
 }: {
   definition: PersistedAgentDefinitionWithPermissions;
   availabilityByAgentId: Map<string, AgentAvailabilityConfig>;
+  hiddenByAgentId: Map<string, boolean>;
   availabilityCache: AgentAvailabilityCache;
 }): InternalAgentDefinition => {
+  const type = definition.type ?? chatAgentTypeId;
+  const isSystemCreated = definition.created_by?.username === SYSTEM_USER_ID;
   return {
     ...definition,
+    // System-installed non-chat agents (Nightshift, SigEvents, AlertZero…) are hidden by default.
+    // Chat-typed system agents (e.g. the default elastic-ai-agent) remain visible.
+    // An `ensure` caller can override the default for its own agent id.
+    hidden:
+      definition.hidden ??
+      hiddenByAgentId.get(definition.id) ??
+      (isSystemCreated && type !== chatAgentTypeId),
     readonly: false,
     isAvailable: async (ctx) => {
       const availability = availabilityByAgentId.get(definition.id);

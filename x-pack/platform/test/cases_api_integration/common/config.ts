@@ -32,7 +32,7 @@ interface CreateTestConfigOptions {
 
 // Registers the unified `security.entity` and `security.attack` attachment types so the
 // cases attachment tests exercise them (both are gated behind these experimental flags).
-const DEFAULT_EXPERIMENTAL_FEATURES = ['entityAttachmentsEnabled', 'attackAttachmentsEnabled'];
+const DEFAULT_EXPERIMENTAL_FEATURES = ['entityAttachmentsEnabled', 'attackAttachments'];
 
 const enabledActionTypes = [
   '.cases',

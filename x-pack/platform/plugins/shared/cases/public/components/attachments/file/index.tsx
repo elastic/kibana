@@ -150,6 +150,7 @@ export const getFileAttachmentType = () =>
     getCreationActivity: getFileCreationActivity,
     getRemovalActivity: getFileRemovalActivity,
     getAttachmentList: () => ({ children: CaseViewFiles }),
+    getCountLabel: ({ count }) => i18n.FILES_COUNT(count),
     schema: FileAttachmentPayloadSchema,
     // File attachments reference uploaded files by id; workflow authors can't
     // produce that id from YAML, so file is excluded from workflow steps.

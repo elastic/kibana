@@ -14,6 +14,7 @@ export type {
   AgentFormattedAttachment,
   AttachmentFormatContext,
   AttachmentResolveContext,
+  AttachmentOriginUpdatedContext,
   AttachmentValidateContext,
   SurfaceComposition,
   SurfaceNode,

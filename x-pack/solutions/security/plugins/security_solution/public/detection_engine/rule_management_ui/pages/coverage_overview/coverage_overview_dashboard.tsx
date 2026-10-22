@@ -4,44 +4,69 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiText,
+} from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
+import { THREAT_FRAMEWORK_NAME } from '@kbn/security-mitre-attack-common';
 import { CoverageOverviewLink } from '../../../../common/components/links_to_docs';
 import { HeaderPage } from '../../../../common/components/header_page';
 
 import * as i18n from './translations';
-import { CoverageOverviewTacticPanel } from './tactic_panel';
-import { CoverageOverviewMitreTechniquePanelPopover } from './technique_panel_popover';
+import { CoverageOverviewMatrix } from './coverage_overview_matrix';
 import { CoverageOverviewFiltersPanel } from './filters_panel';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 import { CoverageOverviewInvalidMitreRulesCallout } from './invalid_mitre_rules_callout';
+import { useAvailableMitreFrameworks } from '../../../../common/hooks/mitre/use_available_mitre_frameworks';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-
-const CoverageOverviewHeaderComponent = () => (
-  <HeaderPage
-    title={i18n.COVERAGE_OVERVIEW_DASHBOARD_TITLE}
-    subtitle={
-      <EuiText color="subdued" size="s">
-        <span>{i18n.CoverageOverviewDashboardInformation}</span> <CoverageOverviewLink />
-      </EuiText>
-    }
-  />
-);
-
-const CoverageOverviewHeader = React.memo(CoverageOverviewHeaderComponent);
 
 const CoverageOverviewDashboardComponent = () => {
   const {
-    state: { data, isLoading, isMitreError },
+    state: { framework, isLoading, isMitreError },
+    actions: { setFramework },
   } = useCoverageOverviewDashboardContext();
   const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
     'mitreAttackUpdatesUIEnabled'
   );
+  const availableFrameworks = useAvailableMitreFrameworks();
+  const frameworkLabel = THREAT_FRAMEWORK_NAME[framework];
 
   return (
     <>
-      <CoverageOverviewHeader />
+      <HeaderPage
+        title={i18n.COVERAGE_OVERVIEW_DASHBOARD_TITLE}
+        subtitle={
+          <EuiText color="subdued" size="s">
+            <span>{i18n.CoverageOverviewDashboardInformation(frameworkLabel)}</span>{' '}
+            <CoverageOverviewLink />
+          </EuiText>
+        }
+      />
+      {availableFrameworks.length > 1 && (
+        <div data-test-subj="coverageOverviewFrameworkTabs">
+          <EuiTabs size="m">
+            {availableFrameworks.map((tabFramework) => (
+              <EuiTab
+                key={tabFramework}
+                isSelected={framework === tabFramework}
+                onClick={() => setFramework(tabFramework)}
+                data-test-subj={`coverageOverviewFrameworkTab-${tabFramework}`}
+              >
+                {THREAT_FRAMEWORK_NAME[tabFramework]}
+              </EuiTab>
+            ))}
+          </EuiTabs>
+        </div>
+      )}
+      <EuiSpacer size="m" />
       {isMitreAttackUpdatesUIEnabled && <CoverageOverviewInvalidMitreRulesCallout />}
       <CoverageOverviewFiltersPanel />
       <EuiSpacer />
@@ -54,37 +79,13 @@ const CoverageOverviewDashboardComponent = () => {
       ) : isMitreError ? (
         <KbnDangerCallout
           announceOnMount
-          title={i18n.COVERAGE_OVERVIEW_MITRE_ERROR_TITLE}
+          title={i18n.COVERAGE_OVERVIEW_MITRE_ERROR_TITLE(frameworkLabel)}
           data-test-subj="coverageOverviewMitreErrorCallout"
         >
-          <p>{i18n.COVERAGE_OVERVIEW_MITRE_ERROR_BODY}</p>
+          <p>{i18n.COVERAGE_OVERVIEW_MITRE_ERROR_BODY(frameworkLabel)}</p>
         </KbnDangerCallout>
       ) : (
-        <EuiFlexGroup
-          gutterSize="m"
-          className="eui-xScroll"
-          tabIndex={0}
-          data-test-subj="coverageOverviewMatrix"
-        >
-          {data?.mitreTactics.map((tactic) => (
-            <EuiFlexGroup
-              data-test-subj={`coverageOverviewTacticGroup-${tactic.id}`}
-              direction="column"
-              key={tactic.id}
-              gutterSize="s"
-            >
-              <EuiFlexItem grow={false}>
-                <CoverageOverviewTacticPanel tactic={tactic} />
-              </EuiFlexItem>
-
-              {tactic.techniques.map((technique, techniqueKey) => (
-                <EuiFlexItem grow={false} key={`${technique.id}-${techniqueKey}`}>
-                  <CoverageOverviewMitreTechniquePanelPopover technique={technique} />
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          ))}
-        </EuiFlexGroup>
+        <CoverageOverviewMatrix />
       )}
     </>
   );

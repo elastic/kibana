@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import { durationSchema, queryIntSchema } from './common';
 import { bulkByIdsSchema } from './bulk_operation_schema';
 import {
@@ -31,26 +31,30 @@ import {
  * The set of supported action policy destination types. Single source of truth
  * for the destination discriminator and any filter that targets destination type.
  */
-export const actionPolicyDestinationTypeSchema = z
-  .enum(['workflow'])
-  .describe('Supported action policy destination types.');
+export const actionPolicyDestinationTypeSchema = lazySchema(() =>
+  z.enum(['workflow']).describe('Supported action policy destination types.')
+);
 
 export type ActionPolicyDestinationType = z.infer<typeof actionPolicyDestinationTypeSchema>;
 
-const workflowActionPolicyDestinationSchema = z
-  .object({
-    type: z
-      .literal(actionPolicyDestinationTypeSchema.enum.workflow)
-      .describe('The destination type.'),
-    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The workflow identifier.'),
-  })
-  .strict()
-  .meta({ id: 'alerting_workflow_action_policy_destination' });
+const workflowActionPolicyDestinationSchema = lazySchema(() =>
+  z
+    .object({
+      type: z
+        .literal(actionPolicyDestinationTypeSchema.enum.workflow)
+        .describe('The destination type.'),
+      id: z.string().min(1).max(ID_MAX_LENGTH).describe('The workflow identifier.'),
+    })
+    .strict()
+    .meta({ id: 'alerting_workflow_action_policy_destination' })
+);
 
-export const actionPolicyDestinationSchema = z
-  .discriminatedUnion('type', [workflowActionPolicyDestinationSchema])
-  .describe('An action policy destination configuration.')
-  .meta({ id: 'alerting_action_policy_destination' });
+export const actionPolicyDestinationSchema = lazySchema(() =>
+  z
+    .discriminatedUnion('type', [workflowActionPolicyDestinationSchema])
+    .describe('An action policy destination configuration.')
+    .meta({ id: 'alerting_action_policy_destination' })
+);
 
 const GROUPING_MODE_COPY = {
   per_alert: 'one notification per alert lifecycle (default).',
@@ -58,27 +62,31 @@ const GROUPING_MODE_COPY = {
   per_field: 'group by the specified `fields`.',
 } as const;
 
-export const groupingModeSchema = z
-  .union([
-    z.literal('per_alert').describe(GROUPING_MODE_COPY.per_alert),
-    z.literal('all').describe(GROUPING_MODE_COPY.all),
-    z.literal('per_field').describe(GROUPING_MODE_COPY.per_field),
-  ])
-  .describe(
-    'The grouping mode: per_alert groups by alert lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.'
-  )
-  .meta({ id: 'alerting_action_policy_grouping_mode' });
+export const groupingModeSchema = lazySchema(() =>
+  z
+    .union([
+      z.literal('per_alert').describe(GROUPING_MODE_COPY.per_alert),
+      z.literal('all').describe(GROUPING_MODE_COPY.all),
+      z.literal('per_field').describe(GROUPING_MODE_COPY.per_field),
+    ])
+    .describe(
+      'The grouping mode: per_alert groups by alert lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.'
+    )
+    .meta({ id: 'alerting_action_policy_grouping_mode' })
+);
 
 export type GroupingMode = z.infer<typeof groupingModeSchema>;
 
 const GROUPING_FIELDS_DESCRIPTION =
   'The fields alerts are grouped by. At least one is required, and no other mode accepts them.';
 
-const groupingFieldsSchema = z
-  .array(z.string().max(MAX_FIELD_NAME_LENGTH).trim().min(1))
-  .min(1)
-  .max(MAX_GROUPING_FIELDS)
-  .describe(GROUPING_FIELDS_DESCRIPTION);
+const groupingFieldsSchema = lazySchema(() =>
+  z
+    .array(z.string().max(MAX_FIELD_NAME_LENGTH).trim().min(1))
+    .min(1)
+    .max(MAX_GROUPING_FIELDS)
+    .describe(GROUPING_FIELDS_DESCRIPTION)
+);
 
 const fieldlessGroupingSchema = <M extends Exclude<GroupingMode, 'per_field'>>(mode: M) =>
   z
@@ -92,17 +100,19 @@ const fieldlessGroupingSchema = <M extends Exclude<GroupingMode, 'per_field'>>(m
  * by `fields` and is the only mode that reads them, which is why they are required there and are
  * not a key the others accept. Replaced whole on PATCH, like every union.
  */
-export const actionPolicyGroupingSchema = z
-  .discriminatedUnion('mode', [
-    fieldlessGroupingSchema('per_alert'),
-    fieldlessGroupingSchema('all'),
-    z
-      .object({ mode: z.literal('per_field'), fields: groupingFieldsSchema })
-      .strict()
-      .describe(GROUPING_MODE_COPY.per_field)
-      .meta({ id: 'alerting_action_policy_grouping_per_field' }),
-  ])
-  .meta({ id: 'alerting_action_policy_grouping' });
+export const actionPolicyGroupingSchema = lazySchema(() =>
+  z
+    .discriminatedUnion('mode', [
+      fieldlessGroupingSchema('per_alert'),
+      fieldlessGroupingSchema('all'),
+      z
+        .object({ mode: z.literal('per_field'), fields: groupingFieldsSchema })
+        .strict()
+        .describe(GROUPING_MODE_COPY.per_field)
+        .meta({ id: 'alerting_action_policy_grouping_per_field' }),
+    ])
+    .meta({ id: 'alerting_action_policy_grouping' })
+);
 
 export type ActionPolicyGrouping = z.infer<typeof actionPolicyGroupingSchema>;
 
@@ -114,14 +124,16 @@ const THROTTLE_STRATEGY_COPY = {
   every_time: 'notify on every evaluation cycle (high volume).',
 } as const;
 
-export const throttleStrategySchema = z
-  .union([
-    z.literal('on_status_change').describe(THROTTLE_STRATEGY_COPY.on_status_change),
-    z.literal('per_status_interval').describe(THROTTLE_STRATEGY_COPY.per_status_interval),
-    z.literal('time_interval').describe(THROTTLE_STRATEGY_COPY.time_interval),
-    z.literal('every_time').describe(THROTTLE_STRATEGY_COPY.every_time),
-  ])
-  .describe('The throttle strategy that controls how often notifications are sent.');
+export const throttleStrategySchema = lazySchema(() =>
+  z
+    .union([
+      z.literal('on_status_change').describe(THROTTLE_STRATEGY_COPY.on_status_change),
+      z.literal('per_status_interval').describe(THROTTLE_STRATEGY_COPY.per_status_interval),
+      z.literal('time_interval').describe(THROTTLE_STRATEGY_COPY.time_interval),
+      z.literal('every_time').describe(THROTTLE_STRATEGY_COPY.every_time),
+    ])
+    .describe('The throttle strategy that controls how often notifications are sent.')
+);
 
 export type ThrottleStrategy = z.infer<typeof throttleStrategySchema>;
 
@@ -170,14 +182,16 @@ const intervallessThrottleSchema = <S extends Exclude<ThrottleStrategy, Interval
  * is required by the scheduled strategies and is not a key the others accept. Replaced whole on
  * PATCH, like every union — a partial variant could never validate.
  */
-export const throttleSchema = z
-  .discriminatedUnion('strategy', [
-    intervallessThrottleSchema('on_status_change'),
-    intervalThrottleSchema('per_status_interval'),
-    intervalThrottleSchema('time_interval'),
-    intervallessThrottleSchema('every_time'),
-  ])
-  .meta({ id: 'alerting_action_policy_throttle' });
+export const throttleSchema = lazySchema(() =>
+  z
+    .discriminatedUnion('strategy', [
+      intervallessThrottleSchema('on_status_change'),
+      intervalThrottleSchema('per_status_interval'),
+      intervalThrottleSchema('time_interval'),
+      intervallessThrottleSchema('every_time'),
+    ])
+    .meta({ id: 'alerting_action_policy_throttle' })
+);
 
 export type Throttle = z.infer<typeof throttleSchema>;
 
@@ -208,14 +222,16 @@ const validateGroupingModeAndStrategy = ({ value: data, issues }: ValidationPayl
 
 export type ActionPolicyDestination = z.infer<typeof actionPolicyDestinationSchema>;
 
-export const snoozeActionPolicyBodySchema = z
-  .object({
-    snoozed_until: isoDateTime().describe(
-      'The ISO datetime until which the action policy should be snoozed.'
-    ),
-  })
-  .strict()
-  .meta({ id: 'alerting_snooze_action_policy_request' });
+export const snoozeActionPolicyBodySchema = lazySchema(() =>
+  z
+    .object({
+      snoozed_until: isoDateTime().describe(
+        'The ISO datetime until which the action policy should be snoozed.'
+      ),
+    })
+    .strict()
+    .meta({ id: 'alerting_snooze_action_policy_request' })
+);
 
 export type SnoozeActionPolicyBody = z.infer<typeof snoozeActionPolicyBodySchema>;
 
@@ -224,23 +240,22 @@ export type SnoozeActionPolicyBody = z.infer<typeof snoozeActionPolicyBodySchema
  * by-ID bulk body (`ids`, 1..MAX_BULK_ITEMS) and adds the snooze expiry so
  * every action policy in the batch is snoozed until the same instant.
  */
-export const bulkSnoozeActionPoliciesBodySchema = bulkByIdsSchema
-  .extend({
-    snoozed_until: isoDateTime().describe(
-      'The ISO datetime until which the targeted action policies should be snoozed.'
-    ),
-  })
-  .strict()
-  .meta({ id: 'alerting_bulk_snooze_action_policies_request' });
+export const bulkSnoozeActionPoliciesBodySchema = lazySchema(() =>
+  bulkByIdsSchema
+    .extend({
+      snoozed_until: isoDateTime().describe(
+        'The ISO datetime until which the targeted action policies should be snoozed.'
+      ),
+    })
+    .strict()
+    .meta({ id: 'alerting_bulk_snooze_action_policies_request' })
+);
 
 export type BulkSnoozeActionPoliciesBody = z.infer<typeof bulkSnoozeActionPoliciesBodySchema>;
 
-const actionPolicyNameSchema = z
-  .string()
-  .max(MAX_NAME_LENGTH)
-  .trim()
-  .min(1)
-  .describe('The name of the action policy.');
+const actionPolicyNameSchema = lazySchema(() =>
+  z.string().max(MAX_NAME_LENGTH).trim().min(1).describe('The name of the action policy.')
+);
 
 const ACTION_POLICY_DESCRIPTION_DESCRIPTION =
   'A description of the action policy. Absent when the policy has none; send `null` on PATCH to clear it.';
@@ -251,31 +266,37 @@ const GROUPING_DESCRIPTION =
 const THROTTLE_DESCRIPTION =
   'The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it. The strategy decides the rest of the block, so a PATCH replaces it whole: send the complete strategy variant rather than a single field.';
 
-const actionPolicyDescriptionSchema = z
-  .string()
-  .max(MAX_DESCRIPTION_LENGTH)
-  .trim()
-  .min(1)
-  .describe(ACTION_POLICY_DESCRIPTION_DESCRIPTION);
+const actionPolicyDescriptionSchema = lazySchema(() =>
+  z
+    .string()
+    .max(MAX_DESCRIPTION_LENGTH)
+    .trim()
+    .min(1)
+    .describe(ACTION_POLICY_DESCRIPTION_DESCRIPTION)
+);
 
-const createActionPolicyDataBaseSchema = z
-  .object({
-    name: actionPolicyNameSchema,
-    description: actionPolicyDescriptionSchema.optional(),
-    destinations: z
-      .array(actionPolicyDestinationSchema)
-      .min(1, 'At least one destination must be provided')
-      .max(ACTION_POLICY_MAX_DESTINATIONS)
-      .describe('The list of destinations. At least one is required.'),
-    matcher: policyMatcherSchema.optional().describe(POLICY_MATCHER_DESCRIPTION),
-    grouping: actionPolicyGroupingSchema.optional().describe(GROUPING_DESCRIPTION),
-    throttle: throttleSchema.optional().describe(THROTTLE_DESCRIPTION),
-  })
-  .strict();
+const createActionPolicyDataBaseSchema = lazySchema(() =>
+  z
+    .object({
+      name: actionPolicyNameSchema,
+      description: actionPolicyDescriptionSchema.optional(),
+      destinations: z
+        .array(actionPolicyDestinationSchema)
+        .min(1, 'At least one destination must be provided')
+        .max(ACTION_POLICY_MAX_DESTINATIONS)
+        .describe('The list of destinations. At least one is required.'),
+      matcher: policyMatcherSchema.optional().describe(POLICY_MATCHER_DESCRIPTION),
+      grouping: actionPolicyGroupingSchema.optional().describe(GROUPING_DESCRIPTION),
+      throttle: throttleSchema.optional().describe(THROTTLE_DESCRIPTION),
+    })
+    .strict()
+);
 
-export const createActionPolicyDataSchema = createActionPolicyDataBaseSchema
-  .check(validateGroupingModeAndStrategy)
-  .meta({ id: 'alerting_new_action_policy' });
+export const createActionPolicyDataSchema = lazySchema(() =>
+  createActionPolicyDataBaseSchema
+    .check(validateGroupingModeAndStrategy)
+    .meta({ id: 'alerting_new_action_policy' })
+);
 
 export type CreateActionPolicyData = z.infer<typeof createActionPolicyDataSchema>;
 export type CreateActionPolicyDataInput = z.input<typeof createActionPolicyDataSchema>;
@@ -285,9 +306,11 @@ export type CreateActionPolicyDataInput = z.input<typeof createActionPolicyDataS
  * data, unchanged. Lifecycle state is not part of any write body — a replace creates the policy
  * enabled and otherwise preserves the stored value, and `_enable`/`_disable` own the transition.
  */
-export const putActionPolicyDataSchema = createActionPolicyDataBaseSchema
-  .check(validateGroupingModeAndStrategy)
-  .meta({ id: 'alerting_put_action_policy' });
+export const putActionPolicyDataSchema = lazySchema(() =>
+  createActionPolicyDataBaseSchema
+    .check(validateGroupingModeAndStrategy)
+    .meta({ id: 'alerting_put_action_policy' })
+);
 
 export type PutActionPolicyData = z.infer<typeof putActionPolicyDataSchema>;
 export type PutActionPolicyDataInput = z.input<typeof putActionPolicyDataSchema>;
@@ -300,65 +323,71 @@ export type PutActionPolicyDataInput = z.input<typeof putActionPolicyDataSchema>
  * Cross-field checks are deliberately absent — a sparse delta cannot satisfy them. The merged
  * document is validated against {@link createActionPolicyDataSchema} instead.
  */
-export const updateActionPolicyDataSchema = z
-  .object({
-    name: actionPolicyNameSchema.optional(),
-    description: actionPolicyDescriptionSchema.nullable().optional(),
-    destinations: z
-      .array(actionPolicyDestinationSchema)
-      .min(1, 'At least one destination must be provided')
-      .max(ACTION_POLICY_MAX_DESTINATIONS)
-      .optional()
-      .describe('The list of destinations. At least one is required.'),
-    matcher: policyMatcherPatchSchema
-      .nullable()
-      .optional()
-      .describe(POLICY_MATCHER_PATCH_DESCRIPTION),
-    grouping: actionPolicyGroupingSchema.nullable().optional().describe(GROUPING_DESCRIPTION),
-    throttle: throttleSchema.nullable().optional().describe(THROTTLE_DESCRIPTION),
-  })
-  .strict()
-  .meta({ id: 'alerting_update_action_policy' });
+export const updateActionPolicyDataSchema = lazySchema(() =>
+  z
+    .object({
+      name: actionPolicyNameSchema.optional(),
+      description: actionPolicyDescriptionSchema.nullable().optional(),
+      destinations: z
+        .array(actionPolicyDestinationSchema)
+        .min(1, 'At least one destination must be provided')
+        .max(ACTION_POLICY_MAX_DESTINATIONS)
+        .optional()
+        .describe('The list of destinations. At least one is required.'),
+      matcher: policyMatcherPatchSchema
+        .nullable()
+        .optional()
+        .describe(POLICY_MATCHER_PATCH_DESCRIPTION),
+      grouping: actionPolicyGroupingSchema.nullable().optional().describe(GROUPING_DESCRIPTION),
+      throttle: throttleSchema.nullable().optional().describe(THROTTLE_DESCRIPTION),
+    })
+    .strict()
+    .meta({ id: 'alerting_update_action_policy' })
+);
 
 export type UpdateActionPolicyData = z.infer<typeof updateActionPolicyDataSchema>;
 
 /** Sort field for the find action policies (list) API. */
-export const findActionPoliciesSortFieldSchema = z
-  .enum(['name', 'created_at', 'updated_at'])
-  .describe('The available fields to sort action policies by.');
+export const findActionPoliciesSortFieldSchema = lazySchema(() =>
+  z
+    .enum(['name', 'created_at', 'updated_at'])
+    .describe('The available fields to sort action policies by.')
+);
 export type FindActionPoliciesSortField = z.infer<typeof findActionPoliciesSortFieldSchema>;
 
 /** Query parameters for the find action policies (list) API. */
-export const findActionPoliciesRequestSchema = z
-  .object({
-    page: queryIntSchema({ min: 1, max: FIND_MAX_RESULT_WINDOW })
-      .optional()
-      .describe('The page number to return. Defaults to 1.'),
-    per_page: queryIntSchema({ min: 1, max: MAX_PER_PAGE })
-      .optional()
-      .describe('The number of action policies to return per page. Defaults to 20.'),
-    filter: z
-      .string()
-      .max(MAX_KQL_LENGTH)
-      .optional()
-      .describe(
-        'A KQL filter to apply to the action policies. Supported fields: id, name, description, enabled.'
-      ),
-    search: z
-      .string()
-      .min(1)
-      .max(256)
-      .optional()
-      .describe('A text string to search across action policy fields.'),
-    sort_field: findActionPoliciesSortFieldSchema
-      .optional()
-      .describe('The field to sort action policies by.'),
-    sort_order: z.enum(['asc', 'desc']).optional().describe('The sort direction.'),
-  })
-  .strict()
-  .refine(
-    ({ page = 1, per_page = FIND_DEFAULT_PER_PAGE }) => page * per_page <= FIND_MAX_RESULT_WINDOW,
-    { message: `page * per_page cannot exceed ${FIND_MAX_RESULT_WINDOW}.`, path: ['page'] }
-  );
+export const findActionPoliciesRequestSchema = lazySchema(() =>
+  z
+    .object({
+      page: queryIntSchema({ min: 1, max: FIND_MAX_RESULT_WINDOW })
+        .optional()
+        .describe('The page number to return. Defaults to 1.'),
+      per_page: queryIntSchema({ min: 1, max: MAX_PER_PAGE })
+        .optional()
+        .describe('The number of action policies to return per page. Defaults to 20.'),
+      filter: z
+        .string()
+        .max(MAX_KQL_LENGTH)
+        .optional()
+        .describe(
+          'A KQL filter to apply to the action policies. Supported fields: id, name, description, enabled.'
+        ),
+      search: z
+        .string()
+        .min(1)
+        .max(256)
+        .optional()
+        .describe('A text string to search across action policy fields.'),
+      sort_field: findActionPoliciesSortFieldSchema
+        .optional()
+        .describe('The field to sort action policies by.'),
+      sort_order: z.enum(['asc', 'desc']).optional().describe('The sort direction.'),
+    })
+    .strict()
+    .refine(
+      ({ page = 1, per_page = FIND_DEFAULT_PER_PAGE }) => page * per_page <= FIND_MAX_RESULT_WINDOW,
+      { message: `page * per_page cannot exceed ${FIND_MAX_RESULT_WINDOW}.`, path: ['page'] }
+    )
+);
 
 export type FindActionPoliciesRequest = z.infer<typeof findActionPoliciesRequestSchema>;

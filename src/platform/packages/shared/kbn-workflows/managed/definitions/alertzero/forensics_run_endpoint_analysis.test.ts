@@ -12,8 +12,11 @@ import {
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW,
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
 } from '.';
-import { ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID } from './create_proposal';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './forensics_endpoint_analysis.yaml';
+import {
+  ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW,
+  ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
+} from './forensics_proposal_gate';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 interface YamlStep {
@@ -649,28 +652,38 @@ describe('Endpoint analysis run', () => {
     });
 
     // `system-alertzero-journal-note` bounds `message` at 8000 characters and rejects a
-    // longer one whole. The note prefixes the assessment, and the longer prefix is
-    // "Rationale for ending investigation: " (36 characters), so the schema cap
-    // stays under that.
+    // longer one whole. The note prefixes the assessment, and a blank line keeps the
+    // first markdown block on its own line. The schema cap stays under that bound
+    // for either label.
     it('caps the assessment at the length a journal note can carry', () => {
       const schema = stepByName('forensic_analysis')?.with?.schema as {
         properties?: { rationale?: { maxLength?: number } };
       };
       const journal = stepByName('journal_rationale');
       const rationaleCap = schema?.properties?.rationale?.maxLength ?? 0;
-      const longerPrefix = 'Rationale for ending investigation: ';
+      const message = (journal?.with as { inputs?: { message?: string } })?.inputs?.message ?? '';
+      const rendered = (propose: boolean) =>
+        liquid.parseAndRenderSync(message, {
+          steps: {
+            forensic_analysis: {
+              output: { structured_output: { propose, rationale: 'x'.repeat(rationaleCap) } },
+            },
+          },
+        });
 
       expect(rationaleCap).toBe(7900);
-      expect(rationaleCap + longerPrefix.length).toBeLessThanOrEqual(JOURNAL_MESSAGE_MAX_LENGTH);
       expect(journal?.type).toBe('workflow.execute');
       expect((journal?.with as { 'workflow-id'?: string })?.['workflow-id']).toBe(
         'system-alertzero-journal-note'
       );
-      const message = (journal?.with as { inputs?: { message?: string } })?.inputs?.message ?? '';
       expect(message).toContain('{{ steps.forensic_analysis.output.structured_output.rationale }}');
       expect(message).toContain('Rationale for proposed actions');
       expect(message).toContain('Rationale for ending investigation');
       expect(message).toContain('steps.forensic_analysis.output.structured_output.propose == true');
+      expect(rendered(true).startsWith('# Rationale for proposed actions\n\n')).toBe(true);
+      expect(rendered(false).startsWith('# Rationale for ending investigation\n\n')).toBe(true);
+      expect(rendered(true).length).toBeLessThanOrEqual(JOURNAL_MESSAGE_MAX_LENGTH);
+      expect(rendered(false).length).toBeLessThanOrEqual(JOURNAL_MESSAGE_MAX_LENGTH);
     });
 
     // The three notes before the agent are the only record of why this run stopped.
@@ -765,12 +778,33 @@ describe('Endpoint analysis run', () => {
     it('requires an assessment with something in it', () => {
       const schema = stepByName('forensic_analysis')?.with?.schema as {
         required?: string[];
-        properties?: { rationale?: { minLength?: number } };
+        properties?: { rationale?: { minLength?: number; description?: string } };
       };
 
       expect(schema?.required).toContain('rationale');
       expect(schema?.properties?.rationale?.minLength).toBeGreaterThan(0);
       expect(stepByName('journal_rationale')?.if).toContain('rationale != blank');
+    });
+
+    // The journal renders this note as markdown. The sentences stay in the same
+    // controlled language coverage, rule creation, and rule tuning ask for.
+    it('asks for the assessment as markdown in simplified technical English', () => {
+      const message = String(stepByName('forensic_analysis')?.with?.message);
+      const schema = stepByName('forensic_analysis')?.with?.schema as {
+        properties?: { rationale?: { description?: string } };
+      };
+
+      expect(message).toContain(
+        'Write `rationale` as markdown, in ASD-STE100 Simplified Technical English.'
+      );
+      expect(message).toContain('`## Affected hosts`');
+      expect(message).toContain('`## Data gaps`');
+      expect(message).toContain('Do not list the actions.');
+      expect(message).not.toContain('`## Recommended actions`');
+      expect(schema?.properties?.rationale?.description).toContain(
+        'markdown in ASD-STE100 Simplified Technical English'
+      );
+      expect(schema?.properties?.rationale?.description).not.toContain('`## Recommended actions`');
     });
 
     // `attach_timeline` and `attach_iocs` hand these payloads straight to attachment
@@ -1270,9 +1304,9 @@ describe('Endpoint analysis run', () => {
       };
       const inputs = proposeAction?.inputs;
 
-      // The bridge, not the gate: it owns `origin`, so containment proposals
-      // land in the queue AlertZero actually reads.
-      expect(proposeAction?.['workflow-id']).toBe(ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID);
+      // The forensics gate wraps the bridge, so `origin` is still stamped there and
+      // containment proposals land in the queue AlertZero actually reads.
+      expect(proposeAction?.['workflow-id']).toBe(ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID);
       expect(inputs?.confidence).toBe("{{ foreach.item.confidence | default: '' }}");
       // A missing title stores the action's own name, so two isolates of different
       // hosts share one queue label. The prompt tells the model to name the target.
@@ -1402,6 +1436,105 @@ describe('Endpoint analysis run', () => {
       expect(evaluate(gate, when(true, true, 0))).toBe(false);
       expect(evaluate(gate, when(false, true))).toBe(false);
       expect(evaluate(gate, when(true, false))).toBe(false);
+    });
+
+    // The investigation used to stay open after the last containment decision. The
+    // gate closes it once every proposal on the investigation is settled, so each
+    // dispatch goes through the gate (still async: this run must not park on the
+    // approval window) and tells it which investigation to close and how many
+    // proposals to wait for.
+    describe('closes the investigation once every proposal is decided', () => {
+      const gate = parse(ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW.yaml) as {
+        triggers?: Array<{
+          inputs?: {
+            required?: string[];
+            properties?: Record<string, unknown>;
+            additionalProperties?: boolean;
+          };
+        }>;
+      };
+      const dispatch = stepByName('propose_action');
+      const inputs = (dispatch?.with as { inputs?: Record<string, unknown> })?.inputs ?? {};
+
+      it('dispatches the gate asynchronously by its registered id', () => {
+        expect(dispatch?.type).toBe('workflow.executeAsync');
+        expect((dispatch?.with as { 'workflow-id'?: string })?.['workflow-id']).toBe(
+          ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW.id
+        );
+      });
+
+      // The gate's own declared trigger schema is what the dispatch is checked against,
+      // not a copy of it, so a change to either side fails here rather than at runtime.
+      it('satisfies the gate trigger schema', () => {
+        const gateInputs = gate.triggers?.[0]?.inputs;
+        const provided = Object.keys(inputs);
+        const declared = Object.keys(gateInputs?.properties ?? {});
+
+        expect((gateInputs?.required ?? []).filter((key) => !provided.includes(key))).toEqual([]);
+        expect(gateInputs?.additionalProperties).toBe(false);
+        expect(provided.filter((key) => !declared.includes(key))).toEqual([]);
+      });
+
+      it('closes the investigation it proposed on', () => {
+        expect(inputs.investigationConversationId).toBe(inputs.conversationId);
+        expect(inputs.closureSummary).toBeUndefined();
+      });
+
+      // The barrier counts every proposal on the investigation, and this one already
+      // holds at least the approved handoff that requested the analysis. A barrier of
+      // just this run's actions would be met before the siblings finished queueing.
+      it('baselines the creation barrier on the proposals already there', () => {
+        const count = stepByName('count_existing_proposals');
+        expect(count?.type).toBe('kibana.request');
+        expect(count?.with).toMatchObject({
+          method: 'GET',
+          path: '/s/{{ workflow.spaceId }}/internal/proposals',
+          headers: { 'elastic-api-version': '1' },
+          query: {
+            conversationId: '{{ steps.resolve_request.output.investigation_id }}',
+            size: 1,
+          },
+        });
+        expect(count?.['on-failure']).toEqual({ continue: true });
+        expect(count?.if).toBe(stepByName('propose_actions')?.if);
+
+        const names = allSteps.map(({ name }) => name);
+        expect(names.indexOf('count_existing_proposals')).toBeLessThan(
+          names.indexOf('resolve_expected_proposals')
+        );
+        expect(names.indexOf('resolve_expected_proposals')).toBeLessThan(
+          names.indexOf('propose_actions')
+        );
+
+        expect(inputs.expectedProposalCount).toBe(
+          '${{ steps.resolve_expected_proposals.output.count }}'
+        );
+        const expected = String(stepByName('resolve_expected_proposals')?.with?.count);
+        const when = (total: number | undefined, recommended: number) => ({
+          steps: {
+            count_existing_proposals: total === undefined ? { error: {} } : { output: { total } },
+            forensic_analysis: {
+              output: {
+                structured_output: {
+                  recommendedActions: Array.from({ length: recommended }, () => ({})),
+                },
+              },
+            },
+          },
+        });
+        expect(evaluate(expected, when(1, 2))).toBe(3);
+        expect(evaluate(expected, when(0, 2))).toBe(2);
+        // A failed count falls back to this run's own actions rather than blocking.
+        expect(evaluate(expected, when(undefined, 2))).toBe(2);
+      });
+
+      it('tells the analyst the investigation will close on the last decision', () => {
+        const message = String(
+          (stepByName('journal_proposals_queued')?.with as { inputs?: { message?: string } })
+            ?.inputs?.message
+        );
+        expect(message).toContain('closes once every proposal');
+      });
     });
 
     // A rejected dispatch used to be swallowed, and the findings alone then closed

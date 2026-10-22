@@ -6,6 +6,7 @@
  */
 
 import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import type { MobileErrorType } from '@kbn/apm-types';
 import {
   DEVICE_MODEL_IDENTIFIER,
   HOST_OS_VERSION,
@@ -17,12 +18,14 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { mobileErrorTypeQuery } from './mobile_error_type_query';
 
 export async function getDeviceOSApp({
   kuery,
   apmEventClient,
   serviceName,
   transactionType,
+  errorType,
   environment,
   start,
   end,
@@ -32,6 +35,7 @@ export async function getDeviceOSApp({
   apmEventClient: APMEventClient;
   serviceName: string;
   transactionType?: string;
+  errorType?: MobileErrorType;
   environment: string;
   start: number;
   end: number;
@@ -41,7 +45,7 @@ export async function getDeviceOSApp({
     apm: {
       sources: [
         {
-          documentType: ApmDocumentType.TransactionEvent,
+          documentType: errorType ? ApmDocumentType.ErrorEvent : ApmDocumentType.TransactionEvent,
           rollupInterval: RollupInterval.None,
         },
       ],
@@ -52,7 +56,11 @@ export async function getDeviceOSApp({
       bool: {
         filter: [
           ...termQuery(SERVICE_NAME, serviceName),
-          ...termQuery(TRANSACTION_TYPE, transactionType),
+          // The transactionType filter is only relevant for transaction documents;
+          // error documents are scoped by error.type instead.
+          ...(errorType
+            ? mobileErrorTypeQuery(errorType)
+            : termQuery(TRANSACTION_TYPE, transactionType)),
           ...rangeQuery(start, end),
           ...environmentQuery(environment),
           ...kqlQuery(kuery),

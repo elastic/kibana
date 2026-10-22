@@ -227,12 +227,27 @@ const createClient = (apiClient: ApiClientFixture, sessions: IRoleSessions) => {
     },
     /** Deletes the query together with its backing rule. */
     async deleteQuery(queryId: string) {
-      const response = await apiClient.post('internal/streams/queries/_bulk_delete', {
-        headers: await internalHeaders(),
-        body: { queryIds: [queryId] },
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(200);
+      // Each Kibana node picks up the flag override on its own poll, so one that hasn't yet answers 403.
+      let response: { statusCode: number; body: { failed: number } } | undefined;
+      await expect
+        .poll(
+          async () => {
+            response = await apiClient.post<{ failed: number }>(
+              'internal/streams/queries/_bulk_delete',
+              {
+                headers: await internalHeaders(),
+                body: { queryIds: [queryId] },
+                responseType: 'json',
+              }
+            );
+            return response.statusCode;
+          },
+          { ...POLL_OPTIONS, message: 'deleting the query reaches a node that has the flag on' }
+        )
+        .toBe(200);
+      if (response === undefined) {
+        throw new Error('the query delete never ran');
+      }
       expect(response.body.failed).toBe(0);
     },
   };

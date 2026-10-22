@@ -13,7 +13,10 @@ import { SIGNIFICANT_EVENTS_TAB } from '../../../../../common';
 import { useSignificantEventsAppParams } from '../../../../hooks/use_significant_events_app_params';
 import { useSignificantEventsAppRouter } from '../../../../hooks/use_significant_events_app_router';
 
-export const DEFAULT_SIGNIFICANT_EVENT_STATUS_FILTER: SignificantEventStatus[] = ['active'];
+export const DEFAULT_SIGNIFICANT_EVENT_STATUS_FILTER: SignificantEventStatus[] = [
+  'active',
+  'recovering',
+];
 export const DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER: Severity[] = ['critical', 'high'];
 
 export interface SignificantEventsFilters {

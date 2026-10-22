@@ -110,6 +110,7 @@ describe('user-interactive task priority', () => {
 
     const initializerContext = coreMock.createPluginInitializerContext({
       logging: { console: false },
+      storage: { source: 'plain_index', dataRetention: '90d' },
       eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
     });
     const plugin = new WorkflowsExecutionEnginePlugin(initializerContext);
@@ -123,7 +124,8 @@ describe('user-interactive task priority', () => {
 
     const coreStart = coreMock.createStart();
     taskManager = taskManagerMock.createStart();
-    taskManager.schedule.mockResolvedValue({ id: 'scheduled-task' } as any);
+    taskManager.schedule.mockImplementation(async (task) => task as any);
+    taskManager.bulkSchedule.mockImplementation(async (tasks) => tasks as any);
     taskManager.ensureScheduled.mockResolvedValue({ id: 'scheduled-task' } as any);
     taskManager.runSoon.mockResolvedValue({ id: 'scheduled-task', conflict: false } as any);
     pluginStart = plugin.start(coreStart, {

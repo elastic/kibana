@@ -35,6 +35,7 @@ const SUBSCHEMA_KEYWORDS = [
 const SUBSCHEMA_MAP_KEYWORDS = [
   '$defs',
   'definitions',
+  'dependencies',
   'dependentSchemas',
   'patternProperties',
   'properties',
@@ -79,6 +80,10 @@ export const walkSchema = (
     }
   }
 };
+
+/** Formats an operation as `METHOD /path` for error messages. */
+export const describeOperation = ({ method, path }: ContractOperation): string =>
+  `${method.toUpperCase()} ${path}`;
 
 /** Lists the parameter, body and response schemas of an operation. */
 export const getOperationSchemas = ({

@@ -21,6 +21,7 @@ export const EA_EXECUTION_CONTEXT_NAMES = {
   ASSET_CRITICALITY_ECS_MIGRATION: buildEaName('asset_criticality_ecs_migration'),
   ASSET_CRITICALITY_MIGRATION: buildEaName('asset_criticality_migration'),
   RISK_SCORE_MIGRATION: buildEaName('risk_score_migration'),
+  ALERT_ENTITY_ID_BACKFILL: buildEaName('alert_entity_id_backfill'),
 } as const;
 
 export type EaExecutionContextName =

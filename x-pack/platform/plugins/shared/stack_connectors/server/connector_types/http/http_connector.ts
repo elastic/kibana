@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import { pipe } from 'fp-ts/pipeable';
 import { getOrElse, map } from 'fp-ts/Option';
 
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { getProxySettings } from '@kbn/actions-utils';
 import {
@@ -19,7 +20,13 @@ import {
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
-import type { ActionParamsType } from '@kbn/connector-schemas/http';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
+import type {
+  ActionParamsType,
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+} from '@kbn/connector-schemas/http';
 import {
   CONNECTOR_ID,
   CONNECTOR_ID_SYSTEM,
@@ -43,7 +50,11 @@ import type { Result } from '../lib/result_type';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import { processBufferResponse, type ResponseBuffer } from '../lib/process_buffer_response';
 import { isOk, promiseResult } from '../lib/result_type';
-import { getAxiosConfig } from './get_axios_config';
+import {
+  getAxiosConfig,
+  getClientCredentialsAccessToken,
+  getPasswordAccessToken,
+} from './get_axios_config';
 import { ensureUriAllowed, validateConnectorTypeConfig } from './validations';
 import {
   errorResultRequestFailed,
@@ -78,6 +89,10 @@ const connectorTypeDefinition: Omit<HttpConnectorType, 'id' | 'validate'> = {
 export const getConnectorType = (): HttpConnectorType => ({
   id: CONNECTOR_ID,
   ...connectorTypeDefinition,
+  // Stack connector: sandbox injection uses config.authType plus secretHeaders
+  // rather than connector-spec auth type defs.
+  isSandboxCapable,
+  getSandboxAuthHeaders,
   validate: {
     config: {
       schema: ConfigSchema,
@@ -134,6 +149,112 @@ export const getSystemConnectorType = (): HttpConnectorType => ({
 });
 
 // Helper functions
+
+/** Normalizes secretHeaders from an object or the JSON string preconfigured connectors store. */
+function normalizeSecretHeaders(secretHeaders: unknown): Record<string, string> {
+  let record = secretHeaders;
+  if (typeof record === 'string') {
+    try {
+      record = JSON.parse(record);
+    } catch {
+      return {};
+    }
+  }
+  if (!record || typeof record !== 'object' || Array.isArray(record)) {
+    return {};
+  }
+
+  const headers: Record<string, string> = {};
+  for (const [key, value] of Object.entries(record)) {
+    if (typeof value === 'string') {
+      headers[key] = value;
+    }
+  }
+  return headers;
+}
+
+interface SandboxAuthHeadersOptions {
+  config: Record<string, unknown>;
+  secrets: Record<string, unknown>;
+  connectorId: string;
+  connectorTokenClient?: ConnectorTokenClientContract;
+  configurationUtilities: ActionsConfigurationUtilities;
+  logger: Logger;
+}
+
+// Works from config alone for persisted connectors because secrets are not decrypted when
+// listing them. Secrets are only populated for preconfigured connectors.
+function isSandboxCapable({
+  config,
+}: {
+  config: Record<string, unknown>;
+  secrets?: Record<string, unknown>;
+}): boolean {
+  const { hasAuth, authType } = config;
+  // No auth is still sandbox capable: callers may supply Authorization through
+  // secretHeaders, which getSandboxAuthHeaders merges.
+  if (hasAuth === false) return true;
+  // The config schema defaults a missing authType to basic auth.
+  return (
+    authType == null ||
+    authType === AuthType.Basic ||
+    authType === AuthType.OAuth2ClientCredentials ||
+    authType === AuthType.OAuth2Password
+  );
+}
+
+async function getSandboxAuthHeaders(
+  options: SandboxAuthHeadersOptions
+): Promise<Record<string, string>> {
+  const { secrets } = options;
+  const authHeaders = await getAuthTypeHeaders(options);
+  // secretHeaders go last so a user supplied Authorization wins. The generic merge in
+  // getSandboxCredentials collapses differing key case afterwards.
+  return { ...authHeaders, ...normalizeSecretHeaders(secrets.secretHeaders) };
+}
+
+async function getAuthTypeHeaders({
+  config,
+  secrets,
+  connectorId,
+  connectorTokenClient,
+  configurationUtilities,
+  logger,
+}: SandboxAuthHeadersOptions): Promise<Record<string, string>> {
+  const { hasAuth, authType } = config;
+  if (hasAuth === false) return {};
+
+  if (authType === AuthType.OAuth2ClientCredentials || authType === AuthType.OAuth2Password) {
+    const getAccessToken =
+      authType === AuthType.OAuth2ClientCredentials
+        ? getClientCredentialsAccessToken
+        : getPasswordAccessToken;
+    let accessToken;
+    try {
+      accessToken = await getAccessToken({
+        connectorId,
+        // Config and secrets were validated against the connector schemas by the caller.
+        config: config as ConnectorTypeConfigType,
+        secrets: secrets as ConnectorTypeSecretsType,
+        connectorTokenClient,
+        configurationUtilities,
+        logger,
+      });
+    } catch (error) {
+      throw new Error(`Unable to retrieve/refresh the access token: ${error.message}`);
+    }
+    if (!accessToken) {
+      throw new Error('Unable to retrieve new access token');
+    }
+    // The token already includes its scheme (for example "Bearer <token>"), as in get_axios_config.
+    return { Authorization: accessToken };
+  }
+
+  if (authType != null && authType !== AuthType.Basic) return {};
+  const { user, password } = secrets;
+  if (typeof user !== 'string' || typeof password !== 'string') return {};
+  return getBasicAuthHeader({ username: user, password });
+}
 
 function renderParameterTemplates(
   logger: Logger,

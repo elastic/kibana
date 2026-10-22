@@ -177,11 +177,17 @@ export const parseUnitPutBody = ({
 };
 
 /**
- * Checks Kibana-only `ui_metadata` and `secrets` after the distributor accepts the unit.
+ * Checks the unit is an object and checks Kibana-only `ui_metadata` and `secrets`,
+ * before credential references are scanned and the distributor validates the unit.
  */
 export const assertUnitPutEnvelope = (
   parsed: ParsedUnitPutBody
 ): Pick<ParsedUnitPutBody, 'ui_metadata' | 'secrets'> => {
+  // Only the shape needed to scan references. Semantic validation stays with the distributor.
+  if (!isRecord(parsed.unit)) {
+    throw new StatusError('Invalid Streams unit: the unit must be an object.', 400);
+  }
+
   const envelope: Pick<ParsedUnitPutBody, 'ui_metadata' | 'secrets'> = {};
 
   if (parsed.ui_metadata !== undefined) {

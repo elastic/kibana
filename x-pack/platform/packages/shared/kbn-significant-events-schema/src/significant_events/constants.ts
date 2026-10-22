@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import dedent from 'dedent';
+
 export const MAX_SHORT_STRING_LENGTH = 255;
 export const MAX_MEDIUM_STRING_LENGTH = 512;
 export const MAX_ID_LENGTH = 255;
@@ -12,10 +14,6 @@ export const MAX_RULE_NAME_LENGTH = 255;
 export const MAX_TITLE_LENGTH = 512;
 export const MAX_TEXT_LENGTH = 10_000;
 export const MAX_ARRAY_LENGTH = 100;
-export const MAX_SIGNAL_DESCRIPTION_LENGTH = 500;
-export const MAX_SYMPTOM_HYPOTHESIS_LENGTH = 300;
-export const MAX_SUMMARY_LENGTH = 600;
-export const MAX_ASSESSMENT_NOTE_LENGTH = 400;
 
 /**
  * Stable source identifier for Significant Event alert documents in `.rule-events`.
@@ -28,12 +26,34 @@ export const MAX_ASSESSMENT_NOTE_LENGTH = 400;
 export const SIGNIFICANT_EVENTS_ALERT_SOURCE = 'elastic.significant_events' as const;
 export const MAX_TIMESTAMP_LENGTH = 64;
 
-export const SYMPTOM_HYPOTHESIS_ROLE_RULE =
-  'This is the causal explanation, not the observed-state report. Use current evidence and selected causal_features to support the mechanism; use blast_radius only to explain evidenced propagation. When verification is healthy, empty, or off-topic, state that no failure mechanism is confirmed; do not infer traffic, throughput, instability, or another mechanism from the detection alone.';
-export const SUMMARY_ROLE_RULE =
-  'This is the discovery observation, not a root-cause explanation. Do not assert a causal mechanism or inferred cascade; that belongs in symptom_hypothesis. Preserve the decisive technical signature when one is present, including the normalized error type or code, operation, protocol, endpoint, port, and non-sensitive address when relevant to the observed condition. Include an evidence-supported component or dependency path from query KI context or resolved feature metadata when it helps an operator understand the observed failure, but describe it as observed context rather than a proven cause. When no failure signature is observed, lead with the concise observed success, health, or off-topic signature and identify the anomaly as an unconfirmed rate or volume observation. State the outcome, not the investigation: prefer "No matching failure signature was observed" over "The verification returned no rows."';
-export const ASSESSMENT_NOTE_ROLE_RULE =
-  'State the assessment decision and the evidence, severity rationale, confidence, or uncertainty that determined it; detailed decision reasoning is useful. Do not merely copy the summary, symptom_hypothesis, or signal description, and do not narrate investigation steps or detection metadata. It may reference the decisive technical signature when needed to justify the lifecycle decision. For severity, name the rung that decided the tier and the measured figures that put it there, reading every signal rather than the strongest one (a share of log lines is not a share of attempts); say which rung condition the evidence meets. A figure that could not be measured is a caveat to record, never the reason for a lower tier. For medium, say what the evidence left unsettled or unmeasured; for low, whether it recovered or was never an issue. Prefer "<confirmed failure>; <measured breadth> meets the <tier> condition" over a restatement of the log row.';
+/**
+ * Content contracts for the free-text narrative fields: the single source of truth for what each
+ * field holds. They feed the tool schema descriptions and the eval judge; the discovery prompt
+ * refers to the field descriptions and never embeds these strings. Bounded by sentences, not characters.
+ */
+export const SYMPTOM_HYPOTHESIS_ROLE_RULE = dedent`
+  Reader: the on-call engineer who needs the mechanism, not the symptoms. This is the causal explanation, not the observed-state report.
+  One plain sentence: the deepest evidence-supported failing component or dependency, its concrete failure signature, and how it reaches the affected operation. For an event grouping several detections, the same sentence names the earliest abnormal rule and how the others follow along grounded edges.
+  Sources: confirming signal descriptions first; causal_features and matched KI context support the mechanism; blast_radius only explains evidenced propagation. Name a service, dependency, or causal link only when a confirming row or a topology edge with that source and target shows it. Rows outrank topology.
+  Not here: the observed failures and their share (summary); severity or confidence reasoning (assessment_note).
+  When verification is healthy, empty, or off-topic, state that no failure mechanism is confirmed; do not infer traffic, throughput, instability, or another mechanism from the detection alone.
+`;
+
+export const SUMMARY_ROLE_RULE = dedent`
+  Reader: the operator scanning the event list. This is what was observed and how far it reaches, not why. At most three sentences.
+  Sentence 1: the observed failure — the normalized error signature (error type or code, operation, protocol, endpoint, port, and non-sensitive address when relevant) and the affected component or dependency path. When no failure signature is observed, state the observed success, health, or off-topic signature instead and identify the anomaly as an unconfirmed rate or volume observation.
+  Sentences 2–3: whether impact is confirmed, possible, or not established (possible impact is conditional and scoped); onset and current or recovery state; magnitude only when measured, copied as the percentage P% from the "N of M (P%)" figure in the signal descriptions with its one decimal place and the scope that figure names (for example log lines), never with the N of M counts, never recomputed over a filtered subset, and never presented as a share of attempts when it is a share of log lines.
+  Sources: confirming signal descriptions. Matched query KI descriptions or resolved feature metadata may name the component or dependency path, described as observed context rather than a proven cause.
+  Not here: any causal mechanism or inferred cascade, including because/so/propagates wording (symptom_hypothesis); severity or confidence reasoning (assessment_note); actions, urgency language, p_value or severity_score; how the evidence was collected. State the outcome, not the investigation: "No matching failure signature was observed", never "The verification returned no rows."
+`;
+
+export const ASSESSMENT_NOTE_ROLE_RULE = dedent`
+  Reader: the operator deciding whether to trust the severity and confidence. This is judgement, not a recap. At most three short sentences.
+  Sentence 1: the severity rung that decided the tier and the measured figures that put it there, reading every signal rather than the strongest one (a share of log lines is not a share of attempts). For medium, say what the evidence left unsettled or unmeasured; for low, whether it recovered or was never an issue. For an inactive or recovering event, give the recovery, false-alarm, or benign-change rationale instead. Prefer "<confirmed failure>; <measured breadth> meets the <tier> condition" over restating the log row.
+  Sentence 2: what was ruled out or left unverified. A figure that could not be measured is a caveat recorded here, never the reason for a lower tier.
+  Sentence 3: why this confidence, with confidence displayed as percentage P% rounded to one decimal place.
+  Not here: the observed failure or impact (summary), the mechanism (symptom_hypothesis), signal descriptions, investigation steps, or detection metadata.
+`;
 
 /** Shared narrative-field rule: never let evidence-derived text reproduce a raw sensitive value. */
 export const NO_RAW_SENSITIVE_VALUES_RULE =

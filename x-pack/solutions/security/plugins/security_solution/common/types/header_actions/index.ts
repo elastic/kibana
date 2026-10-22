@@ -99,6 +99,8 @@ export interface ActionProps {
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
   onEventDetailsPanelOpened: () => void;
+  /** Adds a "Remove from case" item to the row's more actions menu. */
+  onRemoveFromCase?: (eventId: string) => void;
   onRowSelected: OnRowSelected;
   onRuleChange?: () => void;
   refetch?: () => void;

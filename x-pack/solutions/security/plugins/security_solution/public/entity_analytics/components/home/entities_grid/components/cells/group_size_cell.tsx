@@ -19,6 +19,11 @@ const cellTruncateCss = css`
   flex: 1;
 `;
 
+const cellContainerCss = css`
+  display: flex;
+  overflow: hidden;
+`;
+
 export const GroupSizeCell = memo(
   ({
     value,
@@ -30,12 +35,7 @@ export const GroupSizeCell = memo(
     onGroupSizeClick?: (row: Row) => void;
   }) =>
     onGroupSizeClick ? (
-      <div
-        css={css`
-          display: flex;
-          overflow: hidden;
-        `}
-      >
+      <div css={cellContainerCss}>
         <EuiLink onClick={() => onGroupSizeClick(row)} css={cellTruncateCss}>
           {String(value ?? '—')}
         </EuiLink>

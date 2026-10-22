@@ -39,6 +39,7 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
   const logger = loggingSystemMock.createLogger();
   const conversationClient = { create: jest.fn(), get: jest.fn() };
   const getScopedClient = jest.fn().mockResolvedValue(conversationClient);
+  const reportTelemetryEvent = jest.fn().mockReturnValue(true);
 
   registerFindOrCreateInvestigationRoute({
     router: router as unknown as RouteDependencies['router'],
@@ -48,6 +49,7 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
       ({ getScopedClient } as unknown as ReturnType<
         RouteDependencies['getAgentBuilderConversations']
       >),
+    reportTelemetryEvent,
   } as unknown as RouteDependencies);
 
   const asInternalUser = { search: jest.fn() };
@@ -71,6 +73,7 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
     getScopedClient,
     conversationClient,
     logger,
+    reportTelemetryEvent,
   };
 };
 
@@ -108,6 +111,34 @@ describe('registerFindOrCreateInvestigationRoute', () => {
 
     expect(response.notFound).toHaveBeenCalled();
     expect(runFindOrCreateInvestigationMock).not.toHaveBeenCalled();
+  });
+
+  it('reports a reopen as the Hunt Worker reopening its own Investigation', async () => {
+    const { handler, context, reportTelemetryEvent } = makeDeps({ spaceId: 'hunt-space' });
+
+    await handler(context, requestFor(), httpServerMock.createResponseFactory());
+    const { onReopened } = runFindOrCreateInvestigationMock.mock.calls[0][1];
+    onReopened?.('3f1c2b4a-5d6e-5f70-8a9b-0c1d2e3f4a5b');
+
+    expect(reportTelemetryEvent.mock.calls).toEqual([
+      [
+        'alertzero_worker_investigation_reopened',
+        {
+          investigation_id: '3f1c2b4a-5d6e-5f70-8a9b-0c1d2e3f4a5b',
+          is_default_space: false,
+          watch_tag: 'watch-hunt',
+          worker_id: 'system-security-hunt-continuous-threat-hunt',
+        },
+      ],
+    ]);
+  });
+
+  it('reports nothing when the find-or-create reopened nothing', async () => {
+    const { handler, context, reportTelemetryEvent } = makeDeps();
+
+    await handler(context, requestFor(), httpServerMock.createResponseFactory());
+
+    expect(reportTelemetryEvent).not.toHaveBeenCalled();
   });
 
   it('runs against the request space, not the default one', async () => {

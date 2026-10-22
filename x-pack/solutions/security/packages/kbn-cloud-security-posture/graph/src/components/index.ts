@@ -33,6 +33,13 @@ export type {
   RelationshipNodeViewModel,
   NodeProps,
 } from './types';
+export type {
+  GraphTelemetryEvent,
+  GraphTelemetryHandler,
+  GraphNodeType,
+  GraphNodeAction,
+  GraphToggleState,
+} from './graph_telemetry';
 export {
   isEntityNode,
   getNodeDocumentMode,

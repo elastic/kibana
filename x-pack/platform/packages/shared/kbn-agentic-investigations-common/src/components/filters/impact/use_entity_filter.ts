@@ -6,20 +6,16 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import type { ImpactFilterable } from './entity_ids';
-import { impactPills } from './impact_pills';
+import type { ImpactPill } from './impact_pills';
 
 /**
- * Selected Impact pill for a queue page. `items` are every loaded row that feeds the pills.
- * A poll or a collapsed section can drop the selected entity from them, so the selection
- * clears itself once its pill is gone.
+ * Selected Impact pill for a queue page. `pills` are the entities across the whole queue.
+ * A poll can drop the selected entity from them, so the selection clears itself once its pill
+ * is gone.
  */
-export const useEntityFilter = (items: readonly ImpactFilterable[]) => {
+export const useEntityFilter = (pills: readonly ImpactPill[]) => {
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
-  const availableEntityIds = useMemo(
-    () => new Set(impactPills(items).map((pill) => pill.entityId)),
-    [items]
-  );
+  const availableEntityIds = useMemo(() => new Set(pills.map((pill) => pill.entityId)), [pills]);
   const entityFilter =
     selectedEntityId !== null && availableEntityIds.has(selectedEntityId) ? selectedEntityId : null;
 

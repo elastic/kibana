@@ -10,6 +10,20 @@ import type { ImpactPill } from './impact_pills';
 /** Collapsed Impact shows at most this many rows; the rest hides behind `+n`. */
 export const MAX_PILL_ROWS = 2;
 
+/** Each `+n` click reveals this many more rows, so a huge Impact never opens as one wall of pills. */
+export const ROWS_PER_EXPAND = 3;
+
+/** Rows to show after `expansions` clicks on `+n`. */
+export const rowsAfterExpansions = (expansions: number): number =>
+  MAX_PILL_ROWS + expansions * ROWS_PER_EXPAND;
+
+export interface VisiblePillsOptions {
+  /** Row budget for the pills and their trailing controls. Defaults to the collapsed budget. */
+  maxRows?: number;
+  /** Reserve room for the "show fewer" control that sits beside `+n` once expanded. */
+  collapseControl?: boolean;
+}
+
 /**
  * Which pills the collapsed row shows: the first `prefixCount` in order, plus
  * the selected pill appended at the end when it falls past that prefix.
@@ -54,22 +68,31 @@ export const countRows = (
   return rows;
 };
 
-const fitsInMaxRows = (measurements: PillMeasurements, visible: VisiblePills): boolean => {
+const fitsInMaxRows = (
+  measurements: PillMeasurements,
+  visible: VisiblePills,
+  { maxRows = MAX_PILL_ROWS, collapseControl = false }: VisiblePillsOptions
+): boolean => {
   const { pillWidths, overflowWidth, containerWidth, gap } = measurements;
   // Filtering keeps index order, so a pinned pill lands last, right before `+n`.
   const shown = pillWidths.filter((_, index) => isVisibleIndex(index, visible));
-  const widths = shown.length < pillWidths.length ? [...shown, overflowWidth] : shown;
-  return countRows(widths, containerWidth, gap) <= MAX_PILL_ROWS;
+  const widths = shown.length < pillWidths.length ? [...shown, overflowWidth] : [...shown];
+  if (collapseControl) {
+    // The icon-only "show fewer" pill has the same footprint as a short `+n` pill.
+    widths.push(overflowWidth);
+  }
+  return countRows(widths, containerWidth, gap) <= maxRows;
 };
 
-/** Largest `prefixCount` for the given pin that fits, with `+n`, in `MAX_PILL_ROWS`. */
+/** Largest `prefixCount` for the given pin that fits, with `+n`, in the row budget. */
 const largestFittingPrefix = (
   measurements: PillMeasurements,
   pinnedIndex: number | null,
-  from: number
+  from: number,
+  options: VisiblePillsOptions
 ): number => {
   for (let candidate = from; candidate > 0; candidate -= 1) {
-    if (fitsInMaxRows(measurements, { prefixCount: candidate, pinnedIndex })) {
+    if (fitsInMaxRows(measurements, { prefixCount: candidate, pinnedIndex }, options)) {
       return candidate;
     }
   }
@@ -78,21 +101,22 @@ const largestFittingPrefix = (
 
 /**
  * Largest prefix of `pills` that, together with the `+n` pill, fits in
- * `MAX_PILL_ROWS`. A selected pill past that prefix is pinned at the end of
+ * the row budget (`MAX_PILL_ROWS` unless `options.maxRows` says otherwise). A selected pill past that prefix is pinned at the end of
  * the row instead, shortening the prefix as needed, so the active filter
  * is always visible and clearable.
  */
 export const findVisiblePills = (
   measurements: PillMeasurements,
   pills: readonly ImpactPill[],
-  entityFilter: string | null
+  entityFilter: string | null,
+  options: VisiblePillsOptions = {}
 ): VisiblePills => {
   const total = pills.length;
   if (total === 0) {
     return { prefixCount: 0, pinnedIndex: null };
   }
 
-  const prefixCount = largestFittingPrefix(measurements, null, total);
+  const prefixCount = largestFittingPrefix(measurements, null, total, options);
   const selectedIndex = entityFilter
     ? pills.findIndex((pill) => pill.entityId === entityFilter)
     : -1;
@@ -101,7 +125,7 @@ export const findVisiblePills = (
   }
 
   return {
-    prefixCount: largestFittingPrefix(measurements, selectedIndex, prefixCount),
+    prefixCount: largestFittingPrefix(measurements, selectedIndex, prefixCount, options),
     pinnedIndex: selectedIndex,
   };
 };

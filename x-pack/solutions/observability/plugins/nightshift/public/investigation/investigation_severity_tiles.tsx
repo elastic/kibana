@@ -29,8 +29,8 @@ import { SEVERITY_TILE_ICON, SEVERITY_TILE_ICON_COLORS } from '../common/severit
 type SeverityTileState = 'muted' | 'interactive';
 
 interface SeverityTileStateStyles {
-  /** `EuiPanel`'s `color` prop, since the two states differ in panel fill as well as in CSS. */
-  panelColor: EuiPanelProps['color'];
+  /** `EuiPanel`'s `color` prop when a state needs a filled panel; omit for border-only. */
+  panelColor?: EuiPanelProps['color'];
   panel?: SerializedStyles;
   count?: SerializedStyles;
 }
@@ -69,7 +69,7 @@ const getSeverityTileStyles = (
         {
           muted: css`
             ${iconBoxBase}
-            background: ${euiTheme.colors.backgroundBaseSubdued};
+            background: ${euiTheme.colors.backgroundBaseDisabled};
             color: ${euiTheme.colors.textDisabled};
           `,
           interactive: css`
@@ -97,15 +97,15 @@ const getSeverityTileStyles = (
       font-weight: ${euiTheme.font.weight.medium};
     `,
     byState: {
+      // Empty tiles: border only, no panel fill; count/icon stay muted.
       muted: {
-        panelColor: 'subdued',
+        panelColor: 'transparent',
         count: css`
-          color: ${euiTheme.colors.textSubdued};
+          color: ${euiTheme.colors.textDisabled};
         `,
       },
       // Clickable EuiPanel defaults to hover shadow `m`; use `xs` for a lighter lift.
       interactive: {
-        panelColor: undefined,
         panel: css`
           &&:hover,
           &&:focus,

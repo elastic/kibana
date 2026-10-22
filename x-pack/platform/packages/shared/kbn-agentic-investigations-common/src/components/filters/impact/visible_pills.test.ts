@@ -6,7 +6,7 @@
  */
 
 import type { ImpactPill } from './impact_pills';
-import { countRows, findVisiblePills, isVisibleIndex } from './visible_pills';
+import { countRows, findVisiblePills, isVisibleIndex, rowsAfterExpansions } from './visible_pills';
 import type { PillMeasurements } from './visible_pills';
 
 const pills = (count: number): ImpactPill[] =>
@@ -73,6 +73,27 @@ describe('findVisiblePills', () => {
       prefixCount: 5,
       pinnedIndex: null,
     });
+  });
+
+  it('reveals three more rows per expansion', () => {
+    expect([0, 1, 2, 3].map(rowsAfterExpansions)).toEqual([2, 5, 8, 11]);
+  });
+
+  it('fills a larger row budget, keeping room for +n and the collapse control', () => {
+    // Four rows of three pills, then two pills, "+n" and the collapse control.
+    expect(
+      findVisiblePills(measure(40), pills(40), null, {
+        maxRows: rowsAfterExpansions(1),
+        collapseControl: true,
+      })
+    ).toEqual({ prefixCount: 14, pinnedIndex: null });
+    // Two pills per line: the collapse control costs the last line a pill.
+    const narrow = measure(40, { containerWidth: 300 });
+    const rows = { maxRows: rowsAfterExpansions(1) };
+    expect(findVisiblePills(narrow, pills(40), null, rows).prefixCount).toBe(10);
+    expect(
+      findVisiblePills(narrow, pills(40), null, { ...rows, collapseControl: true }).prefixCount
+    ).toBe(9);
   });
 
   it('pins a selected pill past the cut and shrinks the prefix to make room', () => {

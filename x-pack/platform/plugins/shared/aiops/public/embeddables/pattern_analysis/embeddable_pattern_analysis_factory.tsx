@@ -56,7 +56,7 @@ export const getPatternAnalysisEmbeddableFactory = (
         patternAnalysisControlsComparators,
       } = initializePatternAnalysisControls(runtimeState);
 
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
       const initialDataViewId =
@@ -151,7 +151,9 @@ export const getPatternAnalysisEmbeddableFactory = (
       const PatternAnalysisComponent = getPatternAnalysisComponent(coreStart, pluginStart);
 
       const onLoading = (v: boolean) => dataLoading$.next(v);
-      const onRenderComplete = () => dataLoading$.next(false);
+      const onRenderComplete = () => {
+        dataLoading$.next(false);
+      };
       const onError = (error: Error) => blockingError$.next(error);
 
       return {
@@ -199,9 +201,9 @@ export const getPatternAnalysisEmbeddableFactory = (
           const embeddingOrigin = apiHasExecutionContext(parentApi)
             ? parentApi.executionContext.type
             : undefined;
-
           return (
             <PatternAnalysisComponent
+              parentApi={parentApi}
               filtersApi={filtersApi}
               dataViewId={dataViewId ?? ''}
               fieldName={fieldName}

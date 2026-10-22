@@ -21,6 +21,7 @@ const makeRouteClass = () =>
     pathSuffix: '_bulk_assign',
     summary: 'Bulk assign alert episodes',
     bodySchema: bulkAssignEpisodeActionBodySchema,
+    availability: { stability: 'stable', since: '9.7.0' },
   });
 
 describe('createBulkEpisodeActionRouteForType', () => {
@@ -30,6 +31,7 @@ describe('createBulkEpisodeActionRouteForType', () => {
     expect(RouteClass.method).toBe('post');
     expect(RouteClass.path).toBe('/api/alerting/v2/alerts/_bulk_assign');
     expect(RouteClass.options?.summary).toBe('Bulk assign alert episodes');
+    expect(RouteClass.options?.availability).toEqual({ stability: 'stable', since: '9.7.0' });
     expect(RouteClass.validate).toBeDefined();
     expect(RouteClass.validate).toEqual(
       expect.objectContaining({

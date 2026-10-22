@@ -14,7 +14,12 @@ import { useRelayAppBindings, useBindChannel, useUnbindChannel } from './use_rel
 
 // Mock the hooks that depend on Kibana context — keep the component under test
 // isolated so we can drive its UI purely through controlled bindings.
-jest.mock('./use_relay_app_bindings');
+jest.mock('./use_relay_app_bindings', () => ({
+  ...jest.requireActual('./use_relay_app_bindings'),
+  useRelayAppBindings: jest.fn(),
+  useBindChannel: jest.fn(),
+  useUnbindChannel: jest.fn(),
+}));
 const mockDisconnectWorkspace = jest.fn().mockResolvedValue(undefined);
 const mockConnectWorkspace = jest.fn().mockResolvedValue(undefined);
 const mockConfirmWorkspace = jest.fn().mockResolvedValue(undefined);

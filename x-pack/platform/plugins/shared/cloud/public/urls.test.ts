@@ -6,7 +6,6 @@
  */
 
 import { coreMock, securityServiceMock } from '@kbn/core/public/mocks';
-import { CLOUD_USER_BILLING_ADMIN_ROLE } from '../common/constants';
 import type { CloudConfigType } from '.';
 import { CloudUrlsService } from './urls';
 
@@ -84,13 +83,17 @@ describe('Cloud Plugin URLs Service', () => {
     });
   });
 
-  it.each(['superuser', 'admin', 'developer'])(
+  it.each([
+    ['superuser', 'https://cloud.elastic.co/billing/'],
+    ['admin', 'https://cloud.elastic.co/billing/'],
+    ['developer', undefined],
+  ])(
     'exposes privileged Search Power URL in Serverless when user has the %s role',
-    async (role) => {
+    async (role, billingUrl) => {
       const { urls } = setupServiceWithRolesAndCapabilities([role], {}, serverlessConfig);
 
       await expect(urls.getPrivilegedUrls()).resolves.toEqual({
-        billingUrl: undefined,
+        billingUrl,
         usersAndRolesUrl: undefined,
         searchPowerUrl:
           'https://cloud.elastic.co/projects/vectordb/abc123?tab=settings&edit=search_power',
@@ -129,19 +132,19 @@ describe('Cloud Plugin URLs Service', () => {
     );
   });
 
-  it('exposes privileged billing URL', async () => {
-    const { urls } = setupServiceWithRolesAndCapabilities([
-      CLOUD_USER_BILLING_ADMIN_ROLE,
-      'other_role',
-    ]);
+  it.each(['superuser', 'admin'])(
+    'exposes privileged billing URL when user has the %s role',
+    async (role) => {
+      const { urls } = setupServiceWithRolesAndCapabilities([role, 'other_role']);
 
-    await expect(urls.getPrivilegedUrls()).resolves.toEqual({
-      billingUrl: 'https://cloud.elastic.co/billing/',
-      usersAndRolesUrl: undefined,
-    });
-  });
+      await expect(urls.getPrivilegedUrls()).resolves.toEqual({
+        billingUrl: 'https://cloud.elastic.co/billing/',
+        usersAndRolesUrl: undefined,
+      });
+    }
+  );
 
-  it('does not expose privileged billing URL if user does not have billing admin role', async () => {
+  it('does not expose privileged billing URL if user does not have an admin role', async () => {
     const { urls } = setupServiceWithRolesAndCapabilities(['other_role']);
 
     await expect(urls.getPrivilegedUrls()).resolves.toEqual({
@@ -169,7 +172,7 @@ describe('Cloud Plugin URLs Service', () => {
   });
 
   it('exposes both privileged URLs when user has both privileges', async () => {
-    const { urls } = setupServiceWithRolesAndCapabilities([CLOUD_USER_BILLING_ADMIN_ROLE], {
+    const { urls } = setupServiceWithRolesAndCapabilities(['admin'], {
       users: { save: true },
     });
 

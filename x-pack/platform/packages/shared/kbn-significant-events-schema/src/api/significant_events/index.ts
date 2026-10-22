@@ -11,6 +11,7 @@ import {
   esqlQuerySchema,
   queryFeatureSchema,
   queryTypeSchema,
+  significantEventTypeSchema,
   type StreamQuery,
 } from '../../queries';
 import {
@@ -18,7 +19,7 @@ import {
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
 } from '../../significant_events/constants';
-import type { ChangePointType } from '../../significant_events/detections';
+import type { ChangePointType, DetectionSkip } from '../../significant_events/detections';
 import type { SignificantEventResponse } from '../../significant_events/events';
 
 type ChangePointsValue = Partial<{
@@ -54,6 +55,7 @@ export const generatedSignificantEventQuerySchema = lazySchema(() =>
     type: queryTypeSchema,
     title: z.string().max(MAX_TITLE_LENGTH),
     esql: esqlQuerySchema,
+    category: significantEventTypeSchema.optional(),
     severity_score: z.number().min(0).max(100),
     description: z.string().max(MAX_TEXT_LENGTH),
     evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
@@ -78,11 +80,15 @@ interface LifecycleDetection {
   source_id?: string;
   change_point_type: ChangePointType;
   '@timestamp': string;
+  /** Set when the classifier closed this detection of the event's rule without the agent. */
+  skip?: DetectionSkip;
 }
 
 interface EventLifecycleResponse {
   detections: LifecycleDetection[];
   events: SignificantEventResponse[];
+  /** Set when the event has more skipped detections than the response carries. */
+  skipped_truncated?: boolean;
 }
 
 export type {

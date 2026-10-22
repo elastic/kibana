@@ -411,7 +411,7 @@ Removes a privileged user from monitoring by their document ID.
       .query(props.query);
   },
   /**
-   * Returns time-bucketed anomaly counts and tactic distribution for a given entity.
+   * Returns time-bucketed anomaly counts and tactic distribution for a given entity. In `resolved` mode the entity's resolution group is combined.
    */
   getAnomalyOverview(props: GetAnomalyOverviewProps, kibanaSpace: string = 'default') {
     return supertest
@@ -430,7 +430,7 @@ Removes a privileged user from monitoring by their document ID.
       .send(props.body as object);
   },
   /**
-   * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity.
+   * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity. In `resolved` mode the entity's resolution group is combined.
    */
   getAnomalySummary(props: GetAnomalySummaryProps, kibanaSpace: string = 'default') {
     return supertest

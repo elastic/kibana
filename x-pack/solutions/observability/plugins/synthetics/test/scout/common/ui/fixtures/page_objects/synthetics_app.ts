@@ -91,7 +91,7 @@ export class SyntheticsAppPage {
     await this.ensureIsOnMonitorConfigPage();
     await this.page.testSubj.click('syntheticsMonitorConfigSubmitButton');
     const msg = isUpdate ? 'Monitor updated successfully.' : 'Monitor added successfully.';
-    await expect(this.page.getByText(msg)).toBeVisible();
+    await expect(this.page.testSubj.locator('globalToastList').getByText(msg)).toBeVisible();
     await this.page.testSubj.locator('toastCloseButton').click();
   }
 
@@ -292,8 +292,8 @@ export class SyntheticsAppPage {
 
   async deleteMonitor(monitorName: string) {
     const monitorRow = await this.getMonitorRowLocator(monitorName);
-    await monitorRow.locator('[data-test-subj="euiCollapsedItemActionsButton"]').click();
-    await this.page.testSubj.click('syntheticsMonitorDeleteAction');
+    await monitorRow.hover();
+    await monitorRow.locator('[data-test-subj="syntheticsMonitorDeleteAction"]').click();
     await expect(this.page.testSubj.locator('confirmModalTitleText')).toBeVisible();
     await this.page.testSubj.click('confirmModalConfirmButton');
   }

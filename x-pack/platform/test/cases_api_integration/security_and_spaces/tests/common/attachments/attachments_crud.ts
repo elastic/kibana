@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { Case } from '@kbn/cases-plugin/common/types/domain';
+import { MAX_ATTACHMENT_JSON_LENGTH } from '@kbn/cases-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { postCaseReq, getPostCaseRequest } from '../../../../common/lib/mock';
@@ -31,6 +32,10 @@ const unifiedCommentReq = {
   data: { content: 'This is a cool comment' },
   owner: 'securitySolutionFixture',
 };
+
+// The comment schema also rejects this, so the assertion pins the route's serialized-size check.
+const oversizedData = { content: 'a'.repeat(MAX_ATTACHMENT_JSON_LENGTH) };
+const dataTooLargeMessage = `The data field is too large. The maximum serialized length is ${MAX_ATTACHMENT_JSON_LENGTH}.`;
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -73,6 +78,38 @@ export default ({ getService }: FtrProviderContext): void => {
         } as unknown as typeof unifiedCommentReq,
         expectedHttpCode: 400,
       });
+    });
+
+    it('should reject an attachment with oversized data', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+
+      const response = (await addAttachmentV2({
+        supertest,
+        caseId: postedCase.id,
+        params: { ...unifiedCommentReq, data: oversizedData },
+        expectedHttpCode: 400,
+      })) as unknown as { message: string };
+
+      expect(response.message).to.contain(dataTooLargeMessage);
+    });
+
+    it('should reject a replace with oversized data', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const created = await addAttachmentV2({
+        supertest,
+        caseId: postedCase.id,
+        params: unifiedCommentReq,
+      });
+
+      const response = (await updateAttachmentV2({
+        supertest,
+        caseId: postedCase.id,
+        attachmentId: created.id,
+        req: { ...unifiedCommentReq, version: created.version, data: oversizedData },
+        expectedHttpCode: 400,
+      })) as unknown as { message: string };
+
+      expect(response.message).to.contain(dataTooLargeMessage);
     });
 
     describe('rbac', () => {

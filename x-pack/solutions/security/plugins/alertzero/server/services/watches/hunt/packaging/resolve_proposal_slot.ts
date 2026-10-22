@@ -9,7 +9,6 @@ import { get, isEqual } from 'lodash';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { ProposalNotFoundError } from '@kbn/proposals-plugin/server';
-import { ASSET_CRITICALITY_LEVELS } from '../../../../../common/proposals/asset_criticality';
 import { buildHuntProposalId } from '../common/hunt_proposal_id';
 import { isTransientError, retryTransient } from './retry_transient';
 
@@ -27,41 +26,14 @@ type ProposalReader = Pick<
 const MAX_GENERATIONS = 50;
 
 /**
- * Where an action's input says what it acts on: the agent, the process, or the user or service.
- * Everything else in the input (a reason, a comment, a criticality level) can be revised freely
- * without the Proposal being about something else.
+ * Where an action's input says what it acts on: the agent or the process. Everything else in
+ * the input (a reason, a comment) can be revised freely without the Proposal being about
+ * something else.
  */
-const TARGET_PATHS = ['endpoint_ids', 'parameters.entity_id', 'id_field', 'id_value'] as const;
-
-/** Typed wide so a level read from an action input can be looked up without a cast at each use. */
-const LEVELS: readonly unknown[] = ASSET_CRITICALITY_LEVELS;
+const TARGET_PATHS = ['endpoint_ids', 'parameters.entity_id'] as const;
 
 /**
- * Whether a live Proposal already asks for at least the criticality a finding wants. A stronger
- * finding must not be absorbed by a weaker live Proposal: it would only add a link, and the analyst
- * would approve the lower level. A weaker finding is covered by a stronger Proposal. A level this
- * does not know is covered only by the same level, rather than guessed at. The levels, and their
- * order, are `ASSET_CRITICALITY_LEVELS`: the same list the producer's two levels come from.
- */
-const coversCriticality = (
-  wanted: Record<string, unknown> | undefined,
-  live: Record<string, unknown> | undefined
-): boolean => {
-  const wantedLevel = get(wanted, 'criticality_level');
-  if (wantedLevel === undefined) {
-    return true;
-  }
-  const liveLevel = get(live, 'criticality_level');
-  const wantedRank = LEVELS.indexOf(wantedLevel);
-  const liveRank = LEVELS.indexOf(liveLevel);
-  return wantedRank === -1 || liveRank === -1
-    ? isEqual(liveLevel, wantedLevel)
-    : liveRank >= wantedRank;
-};
-
-/**
- * Whether a live Proposal still holds the subject a finding is about: it acts on the same target
- * and asks for at least the same criticality.
+ * Whether a live Proposal still holds the subject a finding is about: it acts on the same target.
  *
  * The target matters because `revise()` merges new action input over the old without touching the
  * chain, so a Proposal created for host A can be revised to target host B and still sit under host
@@ -76,7 +48,7 @@ const holdsSubject = (
   TARGET_PATHS.every((path) => {
     const wantedValue = get(wanted, path);
     return wantedValue === undefined || isEqual(get(live, path), wantedValue);
-  }) && coversCriticality(wanted, live);
+  });
 
 /** What a finding wants to propose, as far as finding its slot needs to know it. */
 export interface WantedProposal {
@@ -128,8 +100,8 @@ export type ResolveProposalSlot = (wanted: WantedProposal) => Promise<ProposalSl
  *
  * A `pending` Proposal past its deadline counts as settled even if its gate has not recorded the
  * expiry yet: converging a new finding onto something about to expire would lose it. A live one
- * that has been revised to act on something else, or that asks for a weaker criticality than the
- * finding, no longer holds the subject either: see {@link holdsSubject}. Nor does one whose owner
+ * that has been revised to act on something else no longer holds the subject either: see
+ * {@link holdsSubject}. Nor does one whose owner
  * Investigation has been closed: a Proposal on a closed Investigation is one the analyst cannot
  * see, so converging onto it would hide the finding. A finding then gets a Proposal of its own.
  *

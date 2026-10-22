@@ -7,6 +7,9 @@
 
 import type { TimeRange } from '../../entities_grid/common';
 import { buildLookback, getRiskScoreIndex } from '../../entities_grid/queries/esql';
+import { buildRiskLevelHistoryBranch } from './risk_history';
+import { buildPreviousNewlyHighCriticalQuery } from './risk_previous_period';
+import type { TilePeriod } from './tile_period';
 
 /**
  * Builds an ES|QL query that counts entities that crossed into High or Critical risk
@@ -36,40 +39,43 @@ import { buildLookback, getRiskScoreIndex } from '../../entities_grid/queries/es
  *   - current_level_num >= 3  (is High or Critical right now)
  *   - boundary_level_num IS NULL OR current_level_num > boundary_level_num  (had no level at the
  *     boundary, or a lower one: Low or Moderate to High or Critical, or High to Critical)
+ *
+ * `period` 'previous' builds the same tile for the range right before the selected one, for the
+ * period-over-period delta (see risk_previous_period.ts); the default 'current' is unchanged.
  */
-
-/** Width of the boundary window: covers at least one hourly scoring run. */
-const BOUNDARY_WINDOW_HOURS = 2;
 
 export const buildNewlyHighCriticalCountQuery = (
   spaceId: string,
   entitiesIndexName: string,
   timeRange: TimeRange = '24h',
-  entityFilterClauses: string[] = []
+  entityFilterClauses: string[] = [],
+  period: TilePeriod = 'current'
 ): string => {
+  if (period === 'previous') {
+    return buildPreviousNewlyHighCriticalQuery(
+      spaceId,
+      entitiesIndexName,
+      timeRange,
+      entityFilterClauses
+    );
+  }
   const index = getRiskScoreIndex(spaceId);
   const boundary = buildLookback(timeRange);
   return [
     `SET unmapped_fields="nullify";`,
     'FROM (',
     // Boundary levels from the risk score docs.
-    `  FROM ${index}`,
-    `  | WHERE @timestamp >= ${boundary} - ${BOUNDARY_WINDOW_HOURS} hours AND @timestamp <= ${boundary}`,
-    `  | EVAL entity_euid = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)`,
-    `  | EVAL risk_level = COALESCE(host.risk.calculated_level, user.risk.calculated_level, service.risk.calculated_level)`,
-    `  | WHERE entity_euid IS NOT NULL`,
-    // Nested single-condition CASEs: ES|QL evaluates a multi-condition CASE one row at a time.
-    `  | EVAL level_low = CASE(risk_level == "Low", 1, 0),`,
-    `         level_moderate = CASE(risk_level == "Moderate", 2, level_low),`,
-    `         level_high = CASE(risk_level == "High", 3, level_moderate),`,
-    `         level_num = CASE(risk_level == "Critical", 4, level_high)`,
-    `  | STATS boundary_level_num = LAST(level_num, @timestamp) BY entity_euid`,
-    `  | RENAME entity_euid AS \`entity.id\``,
+    ...buildRiskLevelHistoryBranch(index, boundary, 'boundary_level_num'),
     '), (',
     // Current levels from the entity docs: only High and Critical can qualify.
     `  FROM ${entitiesIndexName}`,
-    `  | WHERE entity.risk.calculated_level IN ("High", "Critical")`,
-    `  | EVAL current_level_num = CASE(entity.risk.calculated_level == "Critical", 4, 3)`,
+    // Aliases are left out: the group is judged by its main entity, which holds the group's level.
+    `  | WHERE \`entity.relationships.resolution.resolved_to\` IS NULL`,
+    `    AND (entity.risk.calculated_level IN ("High", "Critical") OR \`entity.relationships.resolution.risk.calculated_level\` IN ("High", "Critical"))`,
+    // The group's level if the entity has one, else its own.
+    `  | EVAL current_level = COALESCE(\`entity.relationships.resolution.risk.calculated_level\`, entity.risk.calculated_level)`,
+    `  | WHERE current_level IN ("High", "Critical")`,
+    `  | EVAL current_level_num = CASE(current_level == "Critical", 4, 3)`,
     `  | KEEP \`entity.id\`, current_level_num`,
     ')',
     `| STATS boundary_level_num = MAX(boundary_level_num),`,
@@ -80,6 +86,9 @@ export const buildNewlyHighCriticalCountQuery = (
     `| WHERE entity.name IS NOT NULL`,
     ...entityFilterClauses,
     `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
-    `| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)`,
+    // One row per resolved entity, because several ids can resolve to the same one. A plain COUNT of
+    // those rows is exact; COUNT_DISTINCT would only estimate, and is approximate above about 3,000.
+    `| STATS BY effective_id`,
+    `| STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)`,
   ].join('\n');
 };

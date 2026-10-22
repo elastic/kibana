@@ -23,6 +23,12 @@ import { isConnectorDeprecated } from '../../lib';
 import type { HookServices, RawAction } from '../../../../types';
 import { tryCatch } from '../../../../lib';
 import { invokePostCreateListeners } from '../../../../lib/invoke_lifecycle_listeners';
+import {
+  getConnectorAuthType,
+  getConnectorCreateErrorType,
+  recordConnectorCreate,
+  toBoundedLabel,
+} from '../../../../lib/connector_metrics';
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
 import { ensureNotKibanaManagedAuthType } from '../../../../lib/ensure_not_kibana_managed_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
@@ -37,7 +43,27 @@ import {
   resolveCreateInboundEventsEnabled,
 } from '../../../../inbound/inbound_events_enabled';
 
-export async function create({
+export async function create(params: ConnectorCreateParams): Promise<Connector> {
+  const { actionTypeId, config, secrets } = params.action;
+  const authType = getConnectorAuthType({ config, secrets });
+
+  try {
+    const connector = await createConnector(params);
+    recordConnectorCreate({ connectorType: actionTypeId, authType });
+    return connector;
+  } catch (error) {
+    // A failed request can carry values that were never validated, so unregistered ones are not used as labels.
+    const { actionTypeRegistry, authTypeRegistry } = params.context;
+    recordConnectorCreate({
+      connectorType: toBoundedLabel(actionTypeId, actionTypeRegistry.has(actionTypeId)),
+      authType: toBoundedLabel(authType, authType === 'none' || authTypeRegistry.has(authType)),
+      errorType: getConnectorCreateErrorType(error),
+    });
+    throw error;
+  }
+}
+
+async function createConnector({
   context,
   action: {
     actionTypeId,

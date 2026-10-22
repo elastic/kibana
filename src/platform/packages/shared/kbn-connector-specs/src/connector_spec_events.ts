@@ -30,6 +30,10 @@ export interface ConnectorIngressContext {
   readonly connectorTypeId: string;
   readonly config: Record<string, unknown>;
   readonly rawBody: unknown;
+  /**
+   * Query parameters other than the ingest token, copied after that token is verified.
+   */
+  readonly query?: Readonly<Record<string, string>>;
   /** Request headers named in `ConnectorSpecEvents.headers`. */
   readonly headers?: Readonly<Record<string, string | string[] | undefined>>;
 }

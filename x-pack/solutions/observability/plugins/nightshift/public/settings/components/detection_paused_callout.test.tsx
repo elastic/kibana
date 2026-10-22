@@ -9,14 +9,14 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MAINTENANCE_FEATURE_FLAG_ACTOR } from '@kbn/significant-events-plugin/common';
-import type { useMaintenanceStatus } from '../hooks/use_significant_events_maintenance';
+import type { useMaintenanceStatus } from '../../data/maintenance/use_significant_events_maintenance';
 import { DetectionPausedCallout } from './detection_paused_callout';
 
 let mockMaintenanceStatus: Pick<ReturnType<typeof useMaintenanceStatus>, 'data'> = {
   data: undefined,
 };
 
-jest.mock('../hooks/use_significant_events_maintenance', () => ({
+jest.mock('../../data/maintenance/use_significant_events_maintenance', () => ({
   useMaintenanceStatus: () => mockMaintenanceStatus,
 }));
 

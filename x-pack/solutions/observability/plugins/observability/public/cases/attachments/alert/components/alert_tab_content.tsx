@@ -8,15 +8,20 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt } from '@elastic/eui';
 import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
+import { getRemoveFromCaseActions } from '@kbn/cases-plugin/public';
 import { getManualAlertIds } from '@kbn/cases-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { BulkActionsPanelConfig } from '@kbn/response-ops-alerts-table/types';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
 import { observabilityAlertFeatureIds } from '../../../../../common/constants';
 import { useKibana } from '../../../../utils/kibana_react';
 import { ObservabilityAlertsTable } from '../../../..';
-import { ALERTS_EMPTY_DESCRIPTION } from '../translations';
+import { ALERTS_EMPTY_DESCRIPTION, REMOVE_FROM_CASE } from '../translations';
 
-export function AlertTabContent({ caseData }: CommonAttachmentListViewProps) {
+export const REMOVE_OBSERVABILITY_ALERTS_FROM_CASE_TEST_ID =
+  'remove-observability-alerts-from-case';
+
+export function AlertTabContent({ caseData, onRemove }: CommonAttachmentListViewProps) {
   const { data, http, notifications, fieldFormats, application, licensing, cases, settings } =
     useKibana().services;
 
@@ -44,6 +49,21 @@ export function AlertTabContent({ caseData }: CommonAttachmentListViewProps) {
     [data, http, notifications, fieldFormats, application, licensing, cases, settings]
   );
 
+  const removeActions = useMemo(
+    () =>
+      getRemoveFromCaseActions({
+        onRemove,
+        key: REMOVE_OBSERVABILITY_ALERTS_FROM_CASE_TEST_ID,
+        label: REMOVE_FROM_CASE,
+      }),
+    [onRemove]
+  );
+
+  // Not memoized: the alerts table appends its default bulk actions to this panel in place.
+  const removeBulkActions: BulkActionsPanelConfig[] | undefined = removeActions && [
+    { id: 0, items: [removeActions.bulkAction] },
+  ];
+
   if (alertIdsQuery.ids?.values?.length === 0) {
     return (
       <EuiFlexGroup>
@@ -69,6 +89,8 @@ export function AlertTabContent({ caseData }: CommonAttachmentListViewProps) {
         query={alertIdsQuery}
         showAlertStatusWithFlapping
         services={alertsTableServices}
+        additionalBulkActions={removeBulkActions}
+        onRemoveFromCase={removeActions?.onRemoveFromCase}
       />
     </EuiFlexItem>
   );

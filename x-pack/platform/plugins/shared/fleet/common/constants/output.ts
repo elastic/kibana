@@ -105,6 +105,12 @@ export const kafkaOAuth2SignatureAlgorithm = {
 // Elastic Agent supports OAUTHBEARER for the Kafka output from this version.
 export const KAFKA_OAUTH2_MINIMUM_FLEET_SERVER_VERSION = '9.6.0';
 
+// How the agent authenticates to the Kerberos server: with a keytab file or with a password.
+export const kafkaKerberosAuthType = {
+  Keytab: 'keytab',
+  Password: 'password',
+} as const;
+
 export const kafkaPartitionType = {
   Random: 'random',
   RoundRobin: 'round_robin',

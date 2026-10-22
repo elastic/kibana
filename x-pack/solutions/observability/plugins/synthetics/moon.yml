@@ -143,6 +143,7 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/app-header'
   - '@kbn/app-menu'
+  - '@kbn/config'
 tags:
   - plugin
   - prod
@@ -160,6 +161,4 @@ fileGroups:
     - test/scout_synthetics_agent_e2e/**/*
     - test/scenarios/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

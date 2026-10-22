@@ -124,6 +124,16 @@ export const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => c
   .react-flow__edge.streamsUnitConnection.updating {
     cursor: grabbing;
   }
+
+  .react-flow__edges {
+    z-index: 1;
+  }
+  .react-flow__nodes {
+    z-index: 3;
+  }
+  .react-flow__edgelabel-renderer {
+    z-index: 2;
+  }
 `;
 
 /**
@@ -234,7 +244,7 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
   connectionLineType = ConnectionLineType.SmoothStep,
   connectionLineStyle,
   connectionRadius = 24,
-  reconnectRadius = 36,
+  reconnectRadius = 6,
   edgesReconnectable = false,
   onNodeClick,
   onNodeContextMenu,
@@ -264,20 +274,23 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
         return;
       }
       const nodeElement = (event.target as HTMLElement).closest('.react-flow__node');
-      const focusedId = nodeElement?.getAttribute('data-id');
-      const focusVisible = nodeElement ? nodeElement.matches(':focus-visible') : false;
-      if (!focusedId || !focusVisible) {
+      const focusedNodeId = nodeElement?.getAttribute('data-id');
+      const nodeFocusVisible = nodeElement ? nodeElement.matches(':focus-visible') : false;
+
+      if (!focusedNodeId || !nodeFocusVisible) {
         return;
       }
-      const changes = nodes
-        .filter((node) => node.selected !== (node.id === focusedId))
+
+      const nodeChanges = nodes
+        .filter((node) => node.selected !== (node.id === focusedNodeId))
         .map<NodeSelectionChange>((node) => ({
           id: node.id,
           type: 'select',
-          selected: node.id === focusedId,
+          selected: node.id === focusedNodeId,
         }));
-      if (changes.length > 0) {
-        onNodesChange(changes);
+
+      if (nodeChanges.length > 0) {
+        onNodesChange(nodeChanges);
       }
     },
     [nodes, onNodesChange]

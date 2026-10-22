@@ -13,6 +13,7 @@ import type { Evaluator } from '@kbn/evals';
 import { buildModelFromConnector } from '@kbn/evals';
 import type { EvalConnector } from '@kbn/evals';
 import type { InvestigationExample, InvestigationTaskOutput } from '../types';
+import { NO_CONCLUSION_ERROR } from '../task';
 import {
   AntiLeakageJudgePrompt,
   CauseCompletenessJudgePrompt,
@@ -20,6 +21,7 @@ import {
   GoalPassJudgePrompt,
   TruthfulnessJudgePrompt,
 } from './prompts';
+import type { JudgeInputs } from './scoring';
 import {
   buildJudgeInputs,
   clampUnitScore,
@@ -44,6 +46,18 @@ interface JudgeDeps {
 }
 
 const scoreTool = { function: 'score' } as ToolChoice;
+
+/**
+ * An execution error that leaves nothing to grade. A run that only failed to record its verdict
+ * still recorded hypotheses, so it is graded on those and labelled `no_verdict`.
+ */
+const fatalExecutionError = ({ executionError }: JudgeInputs): string | undefined =>
+  executionError === NO_CONCLUSION_ERROR ? undefined : executionError;
+
+const NO_VERDICT_PREFIX = 'No verdict was recorded; graded the recorded hypotheses. ';
+
+const NO_TRAJECTORY_EXPLANATION =
+  'No tool-call trajectory was captured for this run, so what the agent accessed cannot be judged.';
 
 /** Model attribution matching the built-in `evaluators` fixture (`toScoreModel(...)`). */
 const getModelFactory = (evaluationConnector: EvalConnector) => () => {
@@ -98,16 +112,18 @@ export const createGoalPassEvaluator = (deps: JudgeDeps): InvestigationEvaluator
   getModel: getModelFactory(deps.evaluationConnector),
   evaluate: async ({ input, output, expected, metadata }) => {
     const judge = buildJudgeInputs(input, output, expected, metadata);
-    if (judge.executionError || !judge.answer) {
+    const executionError = fatalExecutionError(judge);
+    if (executionError || !judge.answer) {
       return {
         score: 0,
         label: 'fail',
-        explanation: judge.executionError
-          ? `Execution error before goal evaluation: ${judge.executionError}`
+        explanation: executionError
+          ? `Execution error before goal evaluation: ${executionError}`
           : 'Investigation produced no answer to evaluate.',
         metadata: { raw_score: null, passed: false },
       };
     }
+    const noVerdict = Boolean(judge.executionError);
     if (!judge.reference) {
       return {
         score: null,
@@ -129,8 +145,8 @@ export const createGoalPassEvaluator = (deps: JudgeDeps): InvestigationEvaluator
     return {
       score: normalizeGoalScore(rawScore),
       label: passed ? 'pass' : 'fail',
-      explanation: summary,
-      metadata: { raw_score: rawScore, passed },
+      explanation: noVerdict ? `${NO_VERDICT_PREFIX}${summary}` : summary,
+      metadata: { raw_score: rawScore, passed, no_verdict: noVerdict },
     };
   },
 });
@@ -183,11 +199,13 @@ export const createAntiLeakageEvaluator = (deps: JudgeDeps): InvestigationEvalua
   getModel: getModelFactory(deps.evaluationConnector),
   evaluate: async ({ input, output, expected, metadata }) => {
     const judge = buildJudgeInputs(input, output, expected, metadata);
-    if (!judge.answer) {
+    if (!judge.answer || !judge.trajectory) {
       return {
         score: null,
         label: 'n/a',
-        explanation: 'Investigation produced no answer to evaluate.',
+        explanation: !judge.answer
+          ? 'Investigation produced no answer to evaluate.'
+          : NO_TRAJECTORY_EXPLANATION,
       };
     }
     const result = await invokeJudge<{ leaked_root_cause: boolean; reasoning: string }>(
@@ -212,16 +230,26 @@ export const createTruthfulnessEvaluator = (deps: JudgeDeps): InvestigationEvalu
   getModel: getModelFactory(deps.evaluationConnector),
   evaluate: async ({ input, output, expected, metadata }) => {
     const judge = buildJudgeInputs(input, output, expected, metadata);
-    if (judge.executionError || !judge.answer) {
+    const executionError = fatalExecutionError(judge);
+    if (executionError || !judge.answer) {
       return {
-        score: judge.executionError ? 0 : null,
-        label: judge.executionError ? 'fail' : 'n/a',
-        explanation: judge.executionError
-          ? `Execution error before truthfulness evaluation: ${judge.executionError}`
+        score: executionError ? 0 : null,
+        label: executionError ? 'fail' : 'n/a',
+        explanation: executionError
+          ? `Execution error before truthfulness evaluation: ${executionError}`
           : 'Investigation produced no answer to evaluate.',
         metadata: { raw_score: null },
       };
     }
+    if (!judge.trajectory) {
+      return {
+        score: null,
+        label: 'n/a',
+        explanation: NO_TRAJECTORY_EXPLANATION,
+        metadata: { raw_score: null },
+      };
+    }
+    const noVerdict = Boolean(judge.executionError);
     const result = await invokeJudge<{
       score: number;
       did_real_work: boolean;
@@ -236,11 +264,12 @@ export const createTruthfulnessEvaluator = (deps: JudgeDeps): InvestigationEvalu
     return {
       score: normalizeTruthfulnessScore(result.score),
       label: result.did_real_work ? 'real_work' : 'no_real_work',
-      explanation: result.summary,
+      explanation: noVerdict ? `${NO_VERDICT_PREFIX}${result.summary}` : result.summary,
       metadata: {
         raw_score: result.score,
         did_real_work: result.did_real_work,
         evidence_source: result.evidence_source,
+        no_verdict: noVerdict,
       },
     };
   },
@@ -255,21 +284,22 @@ export const createDecisionTreeHelpfulnessEvaluator = (
   getModel: getModelFactory(deps.evaluationConnector),
   evaluate: async ({ input, output, expected, metadata }) => {
     const judge = buildJudgeInputs(input, output, expected, metadata);
-    if (judge.executionError || !judge.answer) {
-      return {
-        score: judge.executionError ? 0 : null,
-        label: judge.executionError ? 'fail' : 'n/a',
-        explanation: judge.executionError
-          ? `Execution error before decision tree helpfulness evaluation: ${judge.executionError}`
-          : 'Investigation produced no answer to evaluate.',
-      };
-    }
     if (!judge.hasDecisionTrees) {
       return {
         score: null,
         label: 'n/a',
         explanation: 'Investigation did not open any decision tree.',
         metadata: { contribution_type: 'not_used' },
+      };
+    }
+    const executionError = fatalExecutionError(judge);
+    if (executionError || !judge.answer) {
+      return {
+        score: executionError ? 0 : null,
+        label: executionError ? 'fail' : 'n/a',
+        explanation: executionError
+          ? `Execution error before decision tree helpfulness evaluation: ${executionError}`
+          : 'Investigation produced no answer to evaluate.',
       };
     }
     const result = await invokeJudge<{

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SERVICENOW_COMMENT_MAX_LENGTH } from './hitl_connector_helpers';
 import { sendWaitForInputNotifications } from './send_wait_for_input_notifications';
 
 describe('sendWaitForInputNotifications', () => {
@@ -199,6 +200,253 @@ describe('sendWaitForInputNotifications', () => {
 
     expect(execute.mock.calls[0][0].input.subActionParams.text).toBe(
       'Custom: https://kibana.example/form'
+    );
+  });
+
+  it('posts a Teams channel message with the form link and an optional message override', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        teams: { 'connector-id': 'teams-1', 'team-id': 'team-1', 'channel-id': 'channel-1' },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
+      renderTemplate,
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute).toHaveBeenCalledWith({
+      connectorType: 'microsoft-teams',
+      connectorNameOrId: 'teams-1',
+      input: {
+        subAction: 'sendChannelMessage',
+        subActionParams: {
+          teamId: 'team-1',
+          channelId: 'channel-1',
+          contentType: 'html',
+          content:
+            'Please provide input\n\n<br><a href="https://kibana.example/form">Open form</a>',
+        },
+      },
+      abortController: expect.any(AbortController),
+    });
+
+    execute.mockClear();
+    await sendWaitForInputNotifications({
+      channels: {
+        teams: {
+          'connector-id': 'teams-1',
+          'team-id': 'team-1',
+          'channel-id': 'channel-1',
+          message: 'Respond:\n{{context.hitl.externalFormLink}}',
+        },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
+      renderTemplate: (template) =>
+        template.replace('{{context.hitl.externalFormLink}}', 'https://kibana.example/form'),
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute.mock.calls[0][0].input.subActionParams).toEqual(
+      expect.objectContaining({
+        contentType: 'text',
+        content: 'Respond:\nhttps://kibana.example/form',
+      })
+    );
+  });
+
+  it('renders Teams team-id and channel-id before posting', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        teams: {
+          'connector-id': 'teams-1',
+          'team-id': '{{ inputs.teamId }}',
+          'channel-id': '{{ inputs.channelId }}',
+        },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
+      renderTemplate: (template) =>
+        template
+          .replace('{{ inputs.teamId }}', 'team-from-input')
+          .replace('{{ inputs.channelId }}', '19:channel-from-input@thread.tacv2'),
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute.mock.calls[0][0].input.subActionParams).toEqual(
+      expect.objectContaining({
+        teamId: 'team-from-input',
+        channelId: '19:channel-from-input@thread.tacv2',
+      })
+    );
+  });
+
+  it('adds a ServiceNow comment with the form link and an optional message override', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        servicenow: { 'connector-id': 'snow-1', table: 'incident', 'sys-id': 'abc123' },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
+      renderTemplate,
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute).toHaveBeenCalledWith({
+      connectorType: 'servicenow_search',
+      connectorNameOrId: 'snow-1',
+      input: {
+        subAction: 'addComment',
+        subActionParams: {
+          table: 'incident',
+          sysId: 'abc123',
+          comment:
+            'Please provide input\n\n[code]<a href="https://kibana.example/form">Open form</a>[/code]',
+        },
+      },
+      abortController: expect.any(AbortController),
+    });
+
+    execute.mockClear();
+    await sendWaitForInputNotifications({
+      channels: {
+        servicenow: {
+          'connector-id': 'snow-1',
+          table: 'incident',
+          'sys-id': 'abc123',
+          message: 'Ticket form: {{context.hitl.externalFormLink}}',
+        },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
+      renderTemplate: (template) =>
+        template.replace('{{context.hitl.externalFormLink}}', 'https://kibana.example/form'),
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute.mock.calls[0][0].input.subActionParams.comment).toBe(
+      'Ticket form: https://kibana.example/form'
+    );
+  });
+
+  it('sends a custom ServiceNow message unchanged, including journal HTML', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        servicenow: {
+          'connector-id': 'snow-1',
+          table: 'incident',
+          'sys-id': 'abc123',
+          message:
+            'Host <your_input>\n[code]<a href="{{context.hitl.externalFormLink}}">Open the form</a>[/code]',
+        },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
+      renderTemplate: (template) =>
+        template.replace('{{context.hitl.externalFormLink}}', 'https://kibana.example/form'),
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute.mock.calls[0][0].input.subActionParams.comment).toBe(
+      'Host <your_input>\n[code]<a href="https://kibana.example/form">Open the form</a>[/code]'
+    );
+  });
+
+  it('throws when a custom ServiceNow message exceeds the connector limit', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await expect(
+      sendWaitForInputNotifications({
+        channels: {
+          servicenow: {
+            'connector-id': 'snow-1',
+            table: 'incident',
+            'sys-id': 'abc123',
+            message: 'a'.repeat(SERVICENOW_COMMENT_MAX_LENGTH + 1),
+          },
+        },
+        stepMessage: 'Please provide input',
+        formUrl: 'https://kibana.example/form',
+        kibanaUrl: 'https://kibana.example',
+        renderTemplate,
+        connectorExecutor: { execute } as never,
+        abortController: new AbortController(),
+      })
+    ).rejects.toThrow(
+      `HITL ServiceNow message is ${
+        SERVICENOW_COMMENT_MAX_LENGTH + 1
+      } characters and exceeds the ${SERVICENOW_COMMENT_MAX_LENGTH} character connector limit`
+    );
+    expect(execute).not.toHaveBeenCalled();
+  });
+
+  it('escapes ServiceNow step text outside the Open form anchor', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        servicenow: { 'connector-id': 'snow-1', table: 'incident', 'sys-id': 'abc123' },
+      },
+      stepMessage: 'Ticket for <your_input>',
+      formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
+      renderTemplate,
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute.mock.calls[0][0].input.subActionParams.comment).toBe(
+      'Ticket for \uFF1Cyour_input\uFF1E\n\n[code]<a href="https://kibana.example/form">Open form</a>[/code]'
+    );
+  });
+
+  it('renders ServiceNow table and sys-id before adding the comment', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        servicenow: {
+          'connector-id': 'snow-1',
+          table: '{{ inputs.table }}',
+          'sys-id': '{{ inputs.incident_sys_id }}',
+        },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
+      renderTemplate: (template) =>
+        template
+          .replace('{{ inputs.table }}', 'incident')
+          .replace('{{ inputs.incident_sys_id }}', '8728d657c377cb10f3f11a2ed40131b1'),
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute.mock.calls[0][0].input.subActionParams).toEqual(
+      expect.objectContaining({
+        table: 'incident',
+        sysId: '8728d657c377cb10f3f11a2ed40131b1',
+      })
     );
   });
 

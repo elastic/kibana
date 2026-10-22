@@ -1,5 +1,5 @@
 {
-  "sha1": "bdb7fe96558a8f1be4a6bc192a3808882f911db5",
+  "sha1": "c407b442f6526fe49c70bf03c95d7d21d6268482",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,8 +16,8 @@
       }
     },
     {
-      "id": "a936b84d299b274-d0c0c3b618f758d",
-      "title": "Graph - blocklist shows blocklisted nodes in settings and allows unblocking them",
+      "id": "a936b84d299b274-54668473f78438b",
+      "title": "Graph - blocklist persists a blocklisted node across save and reopen",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -25,8 +25,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/graph/test/scout/ui/parallel_tests/graph_blocklist.spec.ts",
-        "line": 25,
-        "column": 13
+        "line": 26,
+        "column": 33
       }
     },
     {

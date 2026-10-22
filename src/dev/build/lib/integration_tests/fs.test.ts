@@ -11,6 +11,7 @@ import { resolve } from 'path';
 import { chmodSync, statSync } from 'fs';
 
 import del from 'del';
+import * as tar from 'tar';
 
 import {
   mkdirp,
@@ -415,6 +416,29 @@ describe('compressTar()', () => {
 
     expect(await read(resolve(extracted, 'my-custom-root/bar.txt'))).toBe('bar\n');
     expect(await read(resolve(extracted, 'my-custom-root/foo/foo.txt'))).toBe('foo\n');
+  });
+
+  it('writes entry names without a ./ prefix, with a root directory entry when requested', async () => {
+    const listEntries = async (createRootDirectory: boolean) => {
+      const tarPath = resolve(TMP, `names_${createRootDirectory}.tar.gz`);
+      await compressTar({
+        source: resolve(FIXTURES, 'foo_dir'),
+        destination: tarPath,
+        createRootDirectory,
+      });
+      const names: string[] = [];
+      await tar.t({ file: tarPath, onReadEntry: ({ path }) => names.push(path) });
+      return names.sort();
+    };
+
+    expect(await listEntries(false)).toEqual(['.bar', 'bar.txt', 'foo/', 'foo/foo.txt']);
+    expect(await listEntries(true)).toEqual([
+      'foo_dir/',
+      'foo_dir/.bar',
+      'foo_dir/bar.txt',
+      'foo_dir/foo/',
+      'foo_dir/foo/foo.txt',
+    ]);
   });
 
   it('returns accurate file count', async () => {

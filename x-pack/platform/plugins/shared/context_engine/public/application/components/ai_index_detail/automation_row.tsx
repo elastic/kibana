@@ -17,10 +17,14 @@ import {
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState } from 'react';
+import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
+import { RunWorkflowInputsModal, requiresUserSuppliedInputs } from '@kbn/workflows-ui';
+import React, { useCallback, useMemo, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { AiIndexAutomation } from '../../../../common/http_api/ai_indices';
 import { useAutomationRowMenuItems } from '../../hooks/use_automation_row_menu_items';
+import { useRunAutomation } from '../../hooks/use_run_automation';
+import type { WorkflowSummary } from '../../hooks/use_workflow_summaries';
 import { ItemRow } from '../item_row';
 import { ItemRowIcon } from '../item_row_icon';
 import { AutomationDeleteConfirmModal } from './automation_delete_confirm_modal';
@@ -28,41 +32,66 @@ import { WorkflowYamlPreviewFlyout } from './workflow_yaml_preview_flyout';
 
 interface AutomationRowProps {
   automation: AiIndexAutomation;
-  name: string | undefined;
-  enabled: boolean | undefined;
+  workflowSummary?: WorkflowSummary;
   editHref: string;
   isReadOnly: boolean;
-  isDisabled: boolean;
+  isBusy: boolean;
+  canRun: boolean;
   onDelete: () => Promise<boolean>;
 }
 
 export const AutomationRow = ({
   automation,
-  name,
-  enabled,
+  workflowSummary,
   editHref,
   isReadOnly,
-  isDisabled,
+  isBusy,
+  canRun,
   onDelete,
 }: AutomationRowProps) => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const displayName = name ?? automation.value;
+  const [isInputsModalOpen, setIsInputsModalOpen] = useState(false);
+  const { runAutomation, isLoading } = useRunAutomation();
+  const displayName = workflowSummary?.name ?? automation.value;
+  const enabled = workflowSummary?.enabled;
+  const definition = workflowSummary?.definition;
+  const hasWorkflowDefinition = definition != null;
   const actionsAriaLabel = i18n.translate(
     'xpack.contextEngine.aiIndexDetail.automations.actionsAriaLabel',
     { defaultMessage: 'Actions for {name}', values: { name: displayName } }
+  );
+
+  const normalizedInputs = useMemo(() => getInputsFromDefinition(definition), [definition]);
+  const needsManualInputs = useMemo(
+    () => requiresUserSuppliedInputs(normalizedInputs),
+    [normalizedInputs]
   );
 
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
   const openPreview = useCallback(() => setIsPreviewOpen(true), []);
   const openDeleteModal = useCallback(() => setIsDeleteModalOpen(true), []);
 
+  const handleRun = useCallback(() => {
+    if (!hasWorkflowDefinition) {
+      return;
+    }
+    if (needsManualInputs) {
+      setIsInputsModalOpen(true);
+    } else {
+      runAutomation(automation.value);
+    }
+  }, [automation.value, hasWorkflowDefinition, needsManualInputs, runAutomation]);
+
   const menuItems = useAutomationRowMenuItems({
     editHref,
     isReadOnly,
-    isDisabled,
+    isBusy,
+    canRun,
+    isRunDisabled: isBusy || isLoading || enabled === false || !hasWorkflowDefinition,
     onCloseMenu: closeMenu,
+    onRun: handleRun,
     onPreview: openPreview,
     onDelete: openDeleteModal,
   });
@@ -138,6 +167,17 @@ export const AutomationRow = ({
               setIsDeleteModalOpen(false);
             }
           }}
+        />
+      ) : null}
+      {isInputsModalOpen && normalizedInputs ? (
+        <RunWorkflowInputsModal
+          workflowName={displayName}
+          inputs={normalizedInputs}
+          onSubmit={(values) => {
+            setIsInputsModalOpen(false);
+            runAutomation(automation.value, values);
+          }}
+          onCancel={() => setIsInputsModalOpen(false)}
         />
       ) : null}
     </>

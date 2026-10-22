@@ -7,6 +7,7 @@
 
 import {
   CASE_EXTENDED_FIELDS,
+  MAX_CASES_PER_PAGE,
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
   MAX_ASSIGNEES_FILTER_LENGTH,
@@ -45,6 +46,8 @@ import {
   CasesFindResponseRt,
   CasesPatchRequestRt,
   CasesSearchRequestRt,
+  CaseUpdateRequestTemplateRt,
+  SimilarCasesSearchRequestRt,
 } from './v1';
 import { CustomFieldTypes } from '../../domain/custom_field/v1';
 import {
@@ -60,6 +63,7 @@ import {
   CasesFindResponseSchema,
   CasesPatchRequestSchema,
   CasesSearchRequestSchema,
+  CaseUpdateRequestTemplateSchema,
 } from '../../api_zod/case/v1';
 import { CasesStatusRequestSchema, CasesStatusResponseSchema } from '../../api_zod/stats/v1';
 
@@ -723,6 +727,70 @@ describe('CasesSearchRequestRt', () => {
   });
 });
 
+describe('SimilarCasesSearchRequestRt', () => {
+  it('decodes a request without pagination or sort params', () => {
+    expect(SimilarCasesSearchRequestRt.decode({})).toStrictEqual({ _tag: 'Right', right: {} });
+  });
+
+  it('decodes pagination params and keeps them as numbers', () => {
+    expect(SimilarCasesSearchRequestRt.decode({ page: '2', perPage: '25' })).toStrictEqual({
+      _tag: 'Right',
+      right: { page: 2, perPage: 25 },
+    });
+  });
+
+  it('decodes sortField and sortOrder together with pagination params', () => {
+    const request = { page: '1', perPage: '10', sortField: 'createdAt', sortOrder: 'desc' };
+
+    expect(SimilarCasesSearchRequestRt.decode(request)).toStrictEqual({
+      _tag: 'Right',
+      right: { ...request, page: 1, perPage: 10 },
+    });
+  });
+
+  it.each(Object.keys(CasesFindRequestSortFieldsRt.keys))(
+    'succeeds with %s as sortField',
+    (sortField) => {
+      expect(SimilarCasesSearchRequestRt.decode({ sortField })).toStrictEqual({
+        _tag: 'Right',
+        right: { sortField },
+      });
+    }
+  );
+
+  it.each(['asc', 'desc'])('succeeds with %s as sortOrder', (sortOrder) => {
+    expect(SimilarCasesSearchRequestRt.decode({ sortOrder })).toStrictEqual({
+      _tag: 'Right',
+      right: { sortOrder },
+    });
+  });
+
+  it('fails with an unsupported sortField', () => {
+    const query = SimilarCasesSearchRequestRt.decode({ sortField: 'not-a-field' });
+
+    expect(query._tag).toBe('Left');
+    expect(PathReporter.report(query)[0]).toContain('sortField');
+  });
+
+  it('fails with an unsupported sortOrder', () => {
+    const query = SimilarCasesSearchRequestRt.decode({ sortOrder: 'ascending' });
+
+    expect(query._tag).toBe('Left');
+    expect(PathReporter.report(query)[0]).toContain('sortOrder');
+  });
+
+  it('fails when perPage is above the maximum', () => {
+    const query = SimilarCasesSearchRequestRt.decode({
+      page: '1',
+      perPage: String(MAX_CASES_PER_PAGE + 1),
+      sortField: 'createdAt',
+    });
+
+    expect(query._tag).toBe('Left');
+    expect(PathReporter.report(query)[0]).toContain('The provided perPage value is too high');
+  });
+});
+
 describe('Status', () => {
   describe('CasesStatusRequestRt', () => {
     const defaultRequest = {
@@ -1075,6 +1143,76 @@ describe('CasePatchRequestRt', () => {
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual(defaultRequest);
   });
+
+  it('accepts a valid template on update', () => {
+    const request = { ...defaultRequest, template: { id: 'tmpl-1', version: 1 } };
+    expect(PathReporter.report(CasePatchRequestRt.decode(request))).toContain('No errors!');
+  });
+
+  it.each([0, -1, 1.5])(
+    'rejects a template with non-positive-integer version (%p) via CasePatchRequestRt',
+    (version) => {
+      expect(
+        PathReporter.report(
+          CasePatchRequestRt.decode({ ...defaultRequest, template: { id: 'tmpl-1', version } })
+        )
+      ).toContain('The template version must be a positive integer.');
+    }
+  );
+
+  it.each([0, -1, 1.5])(
+    'rejects a template with non-positive-integer version (%p) via CasePatchRequestSchema',
+    (version) => {
+      expect(
+        CasePatchRequestSchema.safeParse({ ...defaultRequest, template: { id: 'tmpl-1', version } })
+          .success
+      ).toBe(false);
+    }
+  );
+});
+
+describe('CaseUpdateRequestTemplateRt', () => {
+  it('accepts a valid template reference', () => {
+    expect(
+      PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1', version: 1 }))
+    ).toContain('No errors!');
+  });
+
+  it('accepts version > 1', () => {
+    expect(
+      PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1', version: 42 }))
+    ).toContain('No errors!');
+  });
+
+  it('rejects version 0', () => {
+    expect(
+      PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1', version: 0 }))
+    ).toContain('The template version must be a positive integer.');
+  });
+
+  it('rejects a negative version', () => {
+    expect(
+      PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1', version: -1 }))
+    ).toContain('The template version must be a positive integer.');
+  });
+
+  it('rejects a non-integer version', () => {
+    expect(
+      PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1', version: 1.5 }))
+    ).toContain('The template version must be a positive integer.');
+  });
+
+  it('rejects a missing version', () => {
+    expect(PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1' }))).not.toContain(
+      'No errors!'
+    );
+  });
+
+  it('rejects a missing id', () => {
+    expect(PathReporter.report(CaseUpdateRequestTemplateRt.decode({ version: 1 }))).not.toContain(
+      'No errors!'
+    );
+  });
 });
 
 describe('CasesPatchRequestRt', () => {
@@ -1311,5 +1449,45 @@ describe('CasesBulkGetResponseRt', () => {
     const result = CasesBulkGetResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual(defaultRequest);
+  });
+});
+
+describe('CaseUpdateRequestTemplateSchema', () => {
+  it('accepts a valid template reference', () => {
+    const result = CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1', version: 1 });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ id: 'tmpl-1', version: 1 });
+  });
+
+  it('accepts version > 1', () => {
+    const result = CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1', version: 42 });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ id: 'tmpl-1', version: 42 });
+  });
+
+  it('rejects version 0', () => {
+    expect(CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1', version: 0 }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects a negative version', () => {
+    expect(CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1', version: -1 }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects a non-integer version', () => {
+    expect(CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1', version: 1.5 }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects a missing version', () => {
+    expect(CaseUpdateRequestTemplateSchema.safeParse({ id: 'tmpl-1' }).success).toBe(false);
+  });
+
+  it('rejects a missing id', () => {
+    expect(CaseUpdateRequestTemplateSchema.safeParse({ version: 1 }).success).toBe(false);
   });
 });

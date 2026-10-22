@@ -86,6 +86,7 @@ export class ListActionPolicyExecutionsRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'List action policy executions',
     description:
       'Get a paginated list of dispatcher summary events for action policies in the current space.',

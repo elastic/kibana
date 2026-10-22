@@ -76,7 +76,16 @@ const exampleCustomMetric = {
 const dataViewMock = dataViewPluginMocks.createStartContract();
 
 describe('Expression', () => {
-  async function setup(currentOptions: AlertContextMeta) {
+  async function setup(
+    currentOptions: AlertContextMeta,
+    options?: {
+      id?: string;
+      initialRuleParams?: Partial<{
+        nodeType: InventoryItemType | undefined;
+        schema: DataSchemaFormat | null;
+      }>;
+    }
+  ) {
     const ruleParams: {
       criteria: unknown[];
       nodeType: InventoryItemType | undefined;
@@ -86,9 +95,11 @@ describe('Expression', () => {
       criteria: [],
       nodeType: undefined,
       filterQueryText: '',
+      ...options?.initialRuleParams,
     };
     const wrapper = mountWithIntl(
       <Expressions
+        id={options?.id}
         ruleInterval="1m"
         ruleThrottle="1m"
         alertNotifyWhen="onThrottleInterval"
@@ -295,6 +306,45 @@ describe('Expression', () => {
       expect(ruleParams.schema).toBe('semconv');
     });
 
+    it('persists the default schema when creating a new host rule without touching the selector', async () => {
+      const { ruleParams } = await setup({ nodeType: 'host' } as AlertContextMeta);
+
+      expect(ruleParams.schema).toBe(DEFAULT_SCHEMA);
+    });
+
+    it('persists the default schema when creating a new pod rule without touching the selector', async () => {
+      const { ruleParams } = await setup({ nodeType: 'pod' } as AlertContextMeta);
+
+      expect(ruleParams.schema).toBe(DEFAULT_SCHEMA);
+    });
+
+    it('defaults the schema when opening an existing rule that has none', async () => {
+      const { ruleParams } = await setup({} as AlertContextMeta, {
+        id: 'existing-rule-id',
+        initialRuleParams: { nodeType: 'host', schema: undefined },
+      });
+
+      expect(ruleParams.schema).toBe(DEFAULT_SCHEMA);
+    });
+
+    it('keeps the stored schema when opening an existing rule', async () => {
+      const { ruleParams } = await setup({} as AlertContextMeta, {
+        id: 'existing-rule-id',
+        initialRuleParams: { nodeType: 'host', schema: 'ecs' },
+      });
+
+      expect(ruleParams.schema).toBe('ecs');
+    });
+
+    it('does not default the schema when opening an existing container rule that has none', async () => {
+      const { ruleParams } = await setup({} as AlertContextMeta, {
+        id: 'existing-rule-id',
+        initialRuleParams: { nodeType: 'container', schema: undefined },
+      });
+
+      expect(ruleParams.schema).toBeUndefined();
+    });
+
     const NON_SCHEMA_AWARE_NODE_TYPES: InventoryItemType[] = [
       'container',
       'awsEC2',
@@ -326,6 +376,81 @@ describe('Expression', () => {
     });
   });
 
+  describe('Node type change', () => {
+    const changeNodeType = async (
+      wrapper: ReturnType<typeof renderShallow>['wrapper'],
+      nodeType: string
+    ) => {
+      await act(async () => {
+        wrapper.find('[data-test-subj="forExpressionSelect"]').simulate('change', nodeType);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+    };
+
+    it('clears the metric when the node type changes', async () => {
+      const { wrapper, params } = renderShallow({ nodeType: 'host' });
+
+      await changeNodeType(wrapper, 'pod');
+
+      expect(params.criteria[0].metric).toBeUndefined();
+    });
+
+    it('clears a custom metric too', async () => {
+      const { wrapper, params } = renderShallow({
+        nodeType: 'host',
+        criteria: [
+          {
+            metric: 'custom',
+            customMetric: exampleCustomMetric,
+            timeSize: 1,
+            timeUnit: 'm',
+            threshold: [10],
+            comparator: COMPARATORS.GREATER_THAN,
+          },
+        ],
+      });
+
+      await changeNodeType(wrapper, 'pod');
+
+      expect(params.criteria[0].metric).toBeUndefined();
+    });
+
+    it('adds a new condition without a metric for non-host node types', () => {
+      const { wrapper, params } = renderShallow({ nodeType: 'pod' });
+
+      wrapper.find('[data-test-subj="infraExpressionsAddConditionButton"]').simulate('click');
+
+      expect(params.criteria).toHaveLength(2);
+      expect(params.criteria[1].metric).toBeUndefined();
+    });
+
+    it('adds a new condition with the default metric for hosts', () => {
+      const { wrapper, params } = renderShallow({ nodeType: 'host' });
+
+      wrapper.find('[data-test-subj="infraExpressionsAddConditionButton"]').simulate('click');
+
+      expect(params.criteria).toHaveLength(2);
+      expect(params.criteria[1].metric).toBe(defaultExpression.metric);
+    });
+
+    it('does not render the preview chart without a metric', () => {
+      const { wrapper } = renderShallow({
+        nodeType: 'pod',
+        criteria: [
+          {
+            timeSize: 1,
+            timeUnit: 'm',
+            threshold: [10],
+            comparator: COMPARATORS.GREATER_THAN,
+            metric: undefined,
+          },
+        ],
+      });
+
+      expect(wrapper.exists('[data-test-subj="preview-chart"]')).toBe(false);
+    });
+  });
+
   describe('using custom metrics', () => {
     it('should prefill the alert using the context metadata', async () => {
       const currentOptions = {
@@ -353,16 +478,22 @@ describe('Expression', () => {
 });
 
 describe('ExpressionRow', () => {
-  async function setup(expression: InventoryMetricConditions) {
+  async function setup(
+    expression: Omit<InventoryMetricConditions, 'metric'> & {
+      metric?: InventoryMetricConditions['metric'];
+    },
+    setRuleParams: () => void = () => {},
+    nodeType: InventoryItemType = 'host'
+  ) {
     const wrapper = mountWithIntl(
       <ExpressionRow
-        nodeType="host"
+        nodeType={nodeType}
         canDelete={false}
         remove={() => {}}
         addExpression={() => {}}
         key={1}
         expressionId={1}
-        setRuleParams={() => {}}
+        setRuleParams={setRuleParams}
         errors={{
           aggField: [],
           timeSizeUnit: [],

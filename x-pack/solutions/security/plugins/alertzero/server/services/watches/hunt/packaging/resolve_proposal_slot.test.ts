@@ -274,11 +274,6 @@ describe('createProposalSlotResolver', () => {
         { endpoint_ids: ['agent-a'], parameters: { entity_id: 'ent-1' } },
         { endpoint_ids: ['agent-a'], parameters: { entity_id: 'ent-2' } },
       ],
-      [
-        'a user',
-        { id_field: 'user.name', id_value: 'dev-user', criticality_level: 'high_impact' },
-        { id_field: 'user.name', id_value: 'other-user', criticality_level: 'high_impact' },
-      ],
     ])('compares what %s is identified by', async (_label, wanted, revisedTo) => {
       const service = createService({ [idAt(0)]: { status: 'pending', actionInput: revisedTo } });
       const { resolve } = resolver(service);
@@ -312,90 +307,6 @@ describe('createProposalSlotResolver', () => {
       await resolve({ subjectKey: SUBJECT, actionInput: forHost('agent-a') });
 
       expect(service.get).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('a live proposal that asks for a weaker criticality than the finding', () => {
-    const asking = (level: string) => ({
-      id_field: 'user.name',
-      id_value: 'dev-user',
-      criticality_level: level,
-    });
-    const liveAt = (level: string) =>
-      createService({ [idAt(0)]: { status: 'pending', actionInput: asking(level) } });
-
-    it('does not absorb a stronger finding: it would only add a link and the analyst would approve the lower level', async () => {
-      // A critical report asks for extreme_impact, any other confirmed finding for high_impact.
-      const { resolve } = resolver(liveAt('high_impact'));
-
-      await expect(
-        resolve({ subjectKey: SUBJECT, actionInput: asking('extreme_impact') })
-      ).resolves.toEqual({ kind: 'mint', proposalId: idAt(1) });
-    });
-
-    it('covers a weaker finding: a stronger proposal already asks for more', async () => {
-      const { resolve } = resolver(liveAt('extreme_impact'));
-
-      await expect(
-        resolve({ subjectKey: SUBJECT, actionInput: asking('high_impact') })
-      ).resolves.toMatchObject({ kind: 'converge' });
-    });
-
-    it('covers a finding that asks for the same level', async () => {
-      const { resolve } = resolver(liveAt('high_impact'));
-
-      await expect(
-        resolve({ subjectKey: SUBJECT, actionInput: asking('high_impact') })
-      ).resolves.toMatchObject({ kind: 'converge' });
-    });
-
-    it.each([
-      ['low_impact', 'medium_impact'],
-      ['medium_impact', 'high_impact'],
-      ['high_impact', 'extreme_impact'],
-    ])('ranks %s below %s', async (live, wanted) => {
-      const { resolve } = resolver(liveAt(live));
-
-      await expect(
-        resolve({ subjectKey: SUBJECT, actionInput: asking(wanted) })
-      ).resolves.toMatchObject({ kind: 'mint' });
-    });
-
-    it('is covered only by the same level when it does not know the level, rather than guessing', async () => {
-      const same = resolver(liveAt('custom_impact'));
-      const other = resolver(liveAt('high_impact'));
-
-      await expect(
-        same.resolve({ subjectKey: SUBJECT, actionInput: asking('custom_impact') })
-      ).resolves.toMatchObject({ kind: 'converge' });
-      await expect(
-        other.resolve({ subjectKey: SUBJECT, actionInput: asking('custom_impact') })
-      ).resolves.toMatchObject({ kind: 'mint' });
-    });
-
-    it('does not hold a finding that asks for a level when the live proposal asks for none', async () => {
-      const service = createService({
-        [idAt(0)]: {
-          status: 'pending',
-          actionInput: { id_field: 'user.name', id_value: 'dev-user' },
-        },
-      });
-      const { resolve } = resolver(service);
-
-      await expect(
-        resolve({ subjectKey: SUBJECT, actionInput: asking('high_impact') })
-      ).resolves.toMatchObject({ kind: 'mint' });
-    });
-
-    it('ignores criticality for a finding that carries none', async () => {
-      const { resolve } = resolver(liveAt('low_impact'));
-
-      await expect(
-        resolve({
-          subjectKey: SUBJECT,
-          actionInput: { id_field: 'user.name', id_value: 'dev-user' },
-        })
-      ).resolves.toMatchObject({ kind: 'converge' });
     });
   });
 

@@ -153,6 +153,7 @@ export const getVisualizationAttachmentType = () =>
       }),
     }),
     getAttachmentList: () => ({ children: LensAttachmentsTab }),
+    getCountLabel: ({ count }) => i18n.VISUALIZATIONS_COUNT(count),
     schema: LensAttachmentPayloadSchema,
     // Workflow authors reference a lens visualization by SO id; the by-value
     // `data.state` arm and the optional `data` snapshot are embeddable bags they

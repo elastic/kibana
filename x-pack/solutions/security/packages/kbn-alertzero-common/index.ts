@@ -26,6 +26,7 @@ export {
   ALERTZERO_INTERNAL_URL,
   ALERTZERO_PLUGIN_NAME,
   ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+  ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
   ALERTZERO_ACTIONS_URL,
   ALERTZERO_INVESTIGATIONS_COUNT_URL,
   ALERTZERO_SCAN_FAILURES_URL,
@@ -94,6 +95,9 @@ export type {
   HuntThreatIntelSupplyWorkflowKey,
   HuntThreatIntelSupplyWorkflowStatus,
   HuntThreatIntelSupplyHardGate,
+  HuntModelTierId,
+  HuntModelTierState,
+  HuntModelTierStatus,
   HuntThreatIntelSupplyStatus,
 } from './constants';
 
@@ -156,6 +160,8 @@ export {
   HuntIncompleteReason,
   HuntIoc,
   HuntIocType,
+  huntResultSchema,
+  isoDatetimeSchema,
   HuntIndexScopeResponse,
   HuntScope,
   HuntScopeResolution,
@@ -171,12 +177,14 @@ export {
   CandidateSkipReason,
   HuntCoordinatorRequestBody,
   HuntCoordinatorResponse,
+  HuntCoordinatorResult,
   HuntCoordinatorStatus,
   FindOrCreateInvestigationRequestBody,
   FindOrCreateInvestigationResponse,
   WriteHuntEvidenceRequestBody,
   WriteHuntEvidenceResponse,
 } from './impl/schemas';
+export type { HuntResult } from './impl/schemas';
 
 export { isWorkerEnableBlocked } from './impl/workers/blocking_reasons';
 
@@ -203,6 +211,8 @@ export {
   getMinBudgetPerHour,
   LOOKBACK_HOURS_DEFAULT,
   LOOKBACK_HOURS_MAX,
+  EXCLUDED_RULE_TAGS_MAX_COUNT,
+  EXCLUDED_RULE_TAG_MAX_LENGTH,
   LOOKBACK_HOURS_MIN,
   ANALYSIS_WINDOW_DAYS_DEFAULT,
   ANALYSIS_WINDOW_DAYS_MAX,
@@ -241,3 +251,12 @@ export type {
   SystemSecurityWorkerCatalogEntry,
   WorkerScheduleUnit,
 } from './constants';
+export {
+  REQUIRED_REPORT_SEMANTIC_FIELDS,
+  THREAT_REPORTS_GET_MAPPING_PARAMS,
+  THREAT_REPORTS_INDEX,
+  getReportEmbeddingEndpointIds,
+  getSemanticTextInferenceId,
+  isReportsIndexManaged,
+} from './threat_intel_mapping';
+export { HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER } from './impl/hunt/usable_report_filter';

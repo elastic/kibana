@@ -259,10 +259,10 @@ export const runPackageReport = async ({
   attachments: VersionedAttachment[] | undefined;
   deps: RunPackageReportDeps;
 }): Promise<PackageReportOutput> => {
-  const expectedId = buildHuntInvestigationConversationId(reportId);
+  const expectedId = buildHuntInvestigationConversationId({ spaceId, reportId });
   if (investigationConversationId !== expectedId) {
     throw new PackageReportIdentityError(
-      `investigationConversationId does not match hunt:report:${reportId} binding`
+      `investigationConversationId does not match hunt:report:${spaceId}|${reportId} binding`
     );
   }
 

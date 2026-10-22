@@ -47,7 +47,8 @@ const renderCallout = (
   riskEngineReadPrivileges: RiskEngineMissingPrivilegesResponse,
   entityEnginePrivileges: EntityAnalyticsPrivileges | undefined,
   leadGenerationPrivileges?: EntityAnalyticsPrivileges,
-  anomalyPrivileges?: EntityAnalyticsPrivileges
+  anomalyPrivileges?: EntityAnalyticsPrivileges,
+  alertsIndexPrivileges?: Record<string, Record<string, boolean>>
 ) =>
   render(
     <TestProviders>
@@ -56,6 +57,7 @@ const renderCallout = (
         entityEnginePrivileges={entityEnginePrivileges}
         leadGenerationPrivileges={leadGenerationPrivileges}
         anomalyPrivileges={anomalyPrivileges}
+        alertsIndexPrivileges={alertsIndexPrivileges}
         id="entity-analytics-home"
       />
     </TestProviders>
@@ -94,6 +96,17 @@ describe('EntityAnalyticsReadPrivilegesCallout', () => {
 
     expect(screen.getByText(CALLOUT_TITLE)).toBeInTheDocument();
     expect(screen.getByText(RISK_ENGINE_PRIVILEGE)).toBeInTheDocument();
+  });
+
+  it('shows callout when the alerts index is missing read privilege', () => {
+    const alertsIndex = '.alerts-security.alerts-default';
+
+    renderCallout(ALL_PRIVILEGES_GRANTED, makeEntityEnginePrivileges({}), undefined, undefined, {
+      [alertsIndex]: { read: false, view_index_metadata: true, write: false },
+    });
+
+    expect(screen.getByText(CALLOUT_TITLE)).toBeInTheDocument();
+    expect(screen.getByText(alertsIndex)).toBeInTheDocument();
   });
 
   it('shows callout when entity store index is missing read privilege', () => {

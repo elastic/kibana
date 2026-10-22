@@ -14,13 +14,7 @@ import {
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import {
-  MAX_ASSESSMENT_NOTE_LENGTH,
-  MAX_SIGNAL_DESCRIPTION_LENGTH,
-  MAX_SUMMARY_LENGTH,
-  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
-  significantEventSchema,
-} from '@kbn/significant-events-schema';
+import { significantEventSchema } from '@kbn/significant-events-schema';
 import { nightshiftSourceSlugsField } from '@kbn/nightshift-shared';
 import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
@@ -30,6 +24,7 @@ import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
+import { isBreachMemberSignal } from '../../../lib/significant_events/events/event_members';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import {
   getBulkWriteToolErrorCode,
@@ -47,7 +42,6 @@ export const eventsWriteItemSchema = lazySchema(() =>
   significantEventSchema
     .pick({
       event_id: true,
-      status: true,
       title: true,
       symptom_hypothesis: true,
       summary: true,
@@ -64,6 +58,14 @@ export const eventsWriteItemSchema = lazySchema(() =>
       slugs: nightshiftSourceSlugsField(
         'This event covers these sources. Nested signal, causal feature, and blast radius `source_id` values are slugs too. Disabled sources are accepted.'
       ),
+      // Rejected (not stripped), so a stale caller trying to close an event fails loudly instead of
+      // having its item written `active`.
+      status: z
+        .never({
+          error:
+            'status is not an input: it follows from the per-rule verdicts you write. A breach opens or keeps an event active, healthy verdicts for every member start recovering, and only an operator or a close workflow closes it.',
+        })
+        .optional(),
       event_id: z
         .string()
         .optional()
@@ -86,60 +88,33 @@ export const eventsWriteItemSchema = lazySchema(() =>
         ),
     })
     .partial({ event_id: true })
-    .refine(
-      (item) =>
-        (item.signals ?? []).every((s) => s.description.length <= MAX_SIGNAL_DESCRIPTION_LENGTH),
-      {
-        message: `Signal descriptions must be at most ${MAX_SIGNAL_DESCRIPTION_LENGTH} characters for agent input`,
-      }
-    )
-    .refine(
-      (item) =>
-        item.symptom_hypothesis === undefined ||
-        item.symptom_hypothesis.length <= MAX_SYMPTOM_HYPOTHESIS_LENGTH,
-      {
-        message: `Symptom hypotheses must be at most ${MAX_SYMPTOM_HYPOTHESIS_LENGTH} characters for agent input`,
-      }
-    )
-    .refine((item) => item.summary.length <= MAX_SUMMARY_LENGTH, {
-      message: `Summaries must be at most ${MAX_SUMMARY_LENGTH} characters for agent input`,
-    })
-    .refine(
-      (item) =>
-        item.assessment_note === undefined ||
-        item.assessment_note.length <= MAX_ASSESSMENT_NOTE_LENGTH,
-      {
-        message: `Assessment notes must be at most ${MAX_ASSESSMENT_NOTE_LENGTH} characters for agent input`,
-      }
-    )
     .superRefine((item, ctx) => {
       const signals = item.signals ?? [];
-      const grounded = signals.filter((s) => s.evidence != null);
-      const hasConfirms = grounded.some((s) => s.verdict === 'confirms');
-      const hasOffTopicObservedError = grounded.some((s) => s.verdict === 'off_topic');
+      const hasConfirms = signals.some((s) => s.evidence != null && s.verdict === 'confirms');
+      const hasBreachMember = signals.some(isBreachMemberSignal);
       const hasNotChecked = signals.some((s) => s.verdict === 'not_checked');
 
       if (hasConfirms && hasNotChecked) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message:
-            'A confirms item cannot include not_checked signals; emit each not_checked detection as its own inactive item.',
+            'A confirms item cannot include not_checked signals; leave each not_checked detection out of the write.',
         });
       }
-      // Continuations inherit prior severity; this cycle's signals may be
-      // inconclusive (telemetry gap, errored query) without a new confirms.
-      if (
-        item.event_id === undefined &&
-        item.status === 'active' &&
-        (item.severity === 'high' || item.severity === 'critical') &&
-        grounded.length > 0 &&
-        !hasConfirms &&
-        !hasOffTopicObservedError
-      ) {
+      // Only a confirmed breach opens an event. A continuation (it names an event_id) may carry any
+      // verdict: a rule turning healthy (`refutes`) is evidence the status is derived from, so it
+      // must be written, never dropped.
+      if (item.event_id === undefined && !hasBreachMember) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message:
-            'An active event at "high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or a non-active status.',
+            'A new event must carry at least one confirms signal, or an off_topic signal with an observed error. Events open on a confirmed breach: do not create an event for refutes, inconclusive, or not_checked detections alone. To record that a rule of an existing event is healthy, continue that event with its event_id and the refutes signal.',
+        });
+      }
+      if (item.event_id !== undefined && signals.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'A continuation must carry at least one signal.',
         });
       }
     })
@@ -170,7 +145,7 @@ const eventsWriteItemsSchema = lazySchema(() =>
     .describe(
       i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
         defaultMessage:
-          'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals.',
+          'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals. A new event must carry a confirms signal (or an off_topic signal with an observed error); a continuation may carry any verdict, including refutes for a rule that turned healthy. Status is not an input: it follows from the verdicts.',
       })
     )
 );
@@ -320,16 +295,17 @@ export function createEventsWriteTool({
 
       Discovery calls must set top-level \`source\` to \`"discovery"\`.
 
-      **With event_id**: append a version to an existing event with the supplied status.
-      Signals and topology are merged with prior versions. \`severity\` is your verdict under its
-      field contract, decided from the merged confirming signals; the writer stores it as given
+      **With event_id**: append a version to an existing event. Its status follows the merged
+      members' verdicts: a breaching member returns a recovering event to active, while healthy or
+      unjudgeable verdicts keep it recovering. Submit healthy evidence for a member too.
+      Signals and topology are merged with prior versions. \`severity\` is your verdict under
+      its field contract, decided from the merged confirming signals; the writer stores it as given
       (an inactive event is low) and returns the stored tier. No-op if the stored severity and
       status are unchanged (written: false, reason: unchanged_outcome). For Discovery writes, a
       completed investigation makes the stored severity authoritative over the newly proposed
-      one. It is preserved unless Discovery marks the event inactive, reactivates an inactive event, or
-      submits a confirmed rule UUID absent from the current event. When no new rule UUIDs are
-      introduced, title and symptom_hypothesis are frozen to the stored values and
-      narrative_preserved: true is returned.
+      one. It is preserved unless Discovery reactivates an inactive event or submits a confirmed
+      rule UUID absent from the current event. When no new rule UUIDs are introduced, title and
+      symptom_hypothesis are frozen to the stored values and narrative_preserved: true is returned.
 
       **Without event_id**: find-or-create. When the item has confirmed rules, scans all
       currently-active events for one that confirms every submitted confirmed rule and shares at
@@ -352,16 +328,10 @@ export function createEventsWriteTool({
       const { request } = context;
       let storedItems: EventsWriteInput[] | undefined;
       try {
-        const {
-          getEventSearchClient,
-          getKnowledgeIndicatorClient,
-          getAlertEventsClient,
-          emitTrigger,
-          licensing,
-          sourcesClient,
-        } = await getScopedClients({
-          request,
-        });
+        const { getEventSearchClient, getKnowledgeIndicatorClient, licensing, sourcesClient } =
+          await getScopedClients({
+            request,
+          });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
         const catalog = await loadSourceCatalog(sourcesClient);
@@ -380,8 +350,6 @@ export function createEventsWriteTool({
           rejectUnknownEventIds:
             getAgentFromRunContext(context.runContext)?.agentId ===
             SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
-          alertEventsClient: await getAlertEventsClient(),
-          emitTrigger,
           logger,
         });
 
@@ -440,7 +408,6 @@ export function createEventsWriteTool({
               telemetry.trackAgentToolEventsWrite({
                 success: false,
                 event_id: input.event_id ?? 'unknown',
-                status: input.status,
                 written: false,
                 source_ids: 'source_ids' in input ? input.source_ids : [],
                 error_message: message,

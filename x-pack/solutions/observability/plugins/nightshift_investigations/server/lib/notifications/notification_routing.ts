@@ -72,6 +72,14 @@ export type NotificationRouting = z.infer<typeof notificationRoutingSchema>;
 export type StoredNotificationRouting = Omit<NotificationRouting, 'id'>;
 export type NotificationDestination = NotificationRouting['destinations'][number];
 
+/**
+ * Whether the destination replies under a message the caller named, such as the Slack message that
+ * triggered an automation, rather than under a thread it starts itself. That thread belongs to the
+ * run started for the message, and the run keeps a single message in it.
+ */
+export const repliesUnderCallerMessage = ({ params }: Pick<NotificationDestination, 'params'>) =>
+  typeof params.thread_ts === 'string' && params.thread_ts.length > 0;
+
 const notificationRoutingStorageSettings = {
   name: '.kibana-nightshift-notification-routing',
   schema: {

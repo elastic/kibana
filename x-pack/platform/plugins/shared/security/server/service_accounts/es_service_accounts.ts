@@ -17,7 +17,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
-import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
+import type { CreateServiceAccountServerParams, ServiceAccount } from '@kbn/core-security-server';
 import { i18n } from '@kbn/i18n';
 import type {
   AuditLogger,
@@ -204,7 +204,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
   async create(
     request: KibanaRequest,
-    params: CreateServiceAccountParams
+    params: CreateServiceAccountServerParams
   ): Promise<ServiceAccount> {
     const auditLogger = this.audit.asScoped(request);
     const cleanup: CreateCleanupReport = {};
@@ -252,7 +252,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    */
   private async createAccount(
     request: KibanaRequest,
-    params: CreateServiceAccountParams,
+    params: CreateServiceAccountServerParams,
     auditLogger: AuditLogger,
     cleanup: CreateCleanupReport
   ): Promise<ServiceAccount> {
@@ -292,10 +292,17 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
 
     const namespace = ES_SERVICE_ACCOUNT_NAMESPACE;
-    const { name, roles, description } = parseCreateServiceAccountParams(
+    const { name, roles, description, platformAssumers } = parseCreateServiceAccountParams(
       params,
       ES_SERVICE_ACCOUNT_ROLE_LIMITS
     );
+    // Elasticsearch service accounts cannot be assumed by anything outside this Kibana. Dropping
+    // the assumers would hand back an account the platform service cannot use.
+    if (platformAssumers?.length) {
+      throw Boom.badRequest(
+        'Cannot create a service account: `platformAssumers` is only supported when service accounts are backed by UIAM'
+      );
+    }
     const serviceAccountId = `${namespace}/${name}`;
 
     const esClient = this.clusterClient.asScoped(request).asCurrentUser;
@@ -386,7 +393,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
-      privilege: 'read_security',
+      privilege: 'manage_security',
       action: 'list service accounts',
     });
 
@@ -448,7 +455,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
-      privilege: 'read_security',
+      privilege: 'manage_security',
       action: 'get a service account',
     });
 
@@ -678,9 +685,9 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    * Two limits worth knowing. An operator who recreates the account and then mints their own
    * token under Kibana's reserved name passes this check, because the name is all Elasticsearch
    * exposes. And a check that cannot be completed falls through to the stored document rather
-   * than calling the account unassumable: `read_security` is enough to read an account's tokens,
-   * so this is a transient failure rather than an authorization one, and one call that did not
-   * land is weaker evidence than the record Kibana holds.
+   * than calling the account unassumable: the caller's `manage_security` covers reading an
+   * account's tokens, so this is a transient failure rather than an authorization one, and one
+   * call that did not land is weaker evidence than the record Kibana holds.
    */
   private async isAssumable(
     esClient: ElasticsearchClient,
@@ -766,60 +773,78 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       throw Boom.badRequest('Invalid Elasticsearch service account ID.');
     }
 
-    try {
-      const credential = await this.credentialStore.getDecrypted(serviceAccountId);
-      if (!credential) {
-        const errorMessage = `Unable to exchange token for service account [${serviceAccountId}]: missing stored credential`;
-        this.logger.error(errorMessage);
-        throw Boom.notFound(errorMessage);
-      }
-      const mismatches = [
-        ['serviceAccountId', serviceAccountId, credential.serviceAccountId],
-        ['namespace', principal.namespace, credential.namespace],
-        ['name', principal.name, credential.name],
-        ['tokenName', ES_SERVICE_ACCOUNT_TOKEN_NAME, credential.tokenName],
-      ]
-        .filter(([, expected, actual]) => expected !== actual)
-        .map(
-          ([field, expected, actual]) =>
-            `${field}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`
-        );
-      if (mismatches.length > 0) {
-        this.logger.error(
-          `Stored credential for service account [${serviceAccountId}] is inconsistent (${mismatches.join(
-            '; '
-          )}).`
-        );
-        throw Boom.forbidden('The stored service account credential is inconsistent.');
-      }
+    // Only the reads are wrapped. The refusals in between are Kibana's own, carry nothing from
+    // upstream, and say why the account cannot be used, which an audit record needs.
+    const credential = await this.wrapExchangeFailure(serviceAccountId, () =>
+      this.credentialStore.getDecrypted(serviceAccountId)
+    );
+    if (!credential) {
+      const errorMessage = `Unable to exchange token for service account [${serviceAccountId}]: missing stored credential`;
+      this.logger.error(errorMessage);
+      throw Boom.notFound(errorMessage);
+    }
+    const mismatches = [
+      ['serviceAccountId', serviceAccountId, credential.serviceAccountId],
+      ['namespace', principal.namespace, credential.namespace],
+      ['name', principal.name, credential.name],
+      ['tokenName', ES_SERVICE_ACCOUNT_TOKEN_NAME, credential.tokenName],
+    ]
+      .filter(([, expected, actual]) => expected !== actual)
+      .map(
+        ([field, expected, actual]) =>
+          `${field}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`
+      );
+    if (mismatches.length > 0) {
+      this.logger.error(
+        `Stored credential for service account [${serviceAccountId}] is inconsistent (${mismatches.join(
+          '; '
+        )}).`
+      );
+      throw Boom.forbidden('The stored service account credential is inconsistent.');
+    }
 
-      // An account deleted and created again keeps its `{namespace}/{name}` id, so a binding left
-      // over from the earlier account would otherwise run as the new one. Both timestamps are
-      // authenticated, and one that does not parse is refused rather than waved through.
-      if (
-        boundAt !== undefined &&
-        !(Date.parse(credential.createdAt) <= Date.parse(boundAt) + BINDING_CLOCK_SKEW_TOLERANCE_MS)
-      ) {
-        this.logger.error(
-          `Refusing to exchange service account [${serviceAccountId}]: its workload was bound at ` +
-            `[${boundAt}], before the account was created at [${credential.createdAt}]. Bind the ` +
-            'workload again to run it as this account.'
-        );
-        throw Boom.forbidden(
-          'The workload was bound to an earlier service account with the same name.'
-        );
-      }
+    // An account deleted and created again keeps its `{namespace}/{name}` id, so a binding left
+    // over from the earlier account would otherwise run as the new one. Both timestamps are
+    // authenticated, and one that does not parse is refused rather than waved through.
+    if (
+      boundAt !== undefined &&
+      !(Date.parse(credential.createdAt) <= Date.parse(boundAt) + BINDING_CLOCK_SKEW_TOLERANCE_MS)
+    ) {
+      this.logger.error(
+        `Refusing to exchange service account [${serviceAccountId}]: its workload was bound at ` +
+          `[${boundAt}], before the account was created at [${credential.createdAt}]. Bind the ` +
+          'workload again to run it as this account.'
+      );
+      throw Boom.forbidden(
+        'The workload was bound to an earlier service account with the same name.'
+      );
+    }
 
+    return await this.wrapExchangeFailure(serviceAccountId, async () => {
       const response = await this.clusterClient.asInternalUser.security.getToken({
         // @ts-expect-error Elasticsearch client types do not yet include the `_user_managed_service_account` grant
         grant_type: '_user_managed_service_account',
         service_account_token: credential.token,
       });
       return response.access_token;
+    });
+  }
+
+  /**
+   * Runs one upstream step of an exchange, and replaces its failure with a
+   * {@link ServiceAccountTokenExchangeError} that says whether to retry.
+   */
+  private async wrapExchangeFailure<T>(
+    serviceAccountId: string,
+    step: () => Promise<T>
+  ): Promise<T> {
+    try {
+      return await step();
     } catch (error) {
       const cause =
         error instanceof Error ? error : new Error('Service account token exchange failed.');
       const retryDelay = getExchangeRetryDelay(cause);
+      const statusCode = getErrorStatusCode(cause);
       // Transport errors can contain the credential, so neither log them nor retain them as a cause.
       this.logger.error(
         `Failed to exchange service account [${serviceAccountId}] for an ephemeral token (${
@@ -828,8 +853,11 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       );
       throw new ServiceAccountTokenExchangeError(
         new Error(`Service account token exchange failed for [${serviceAccountId}].`),
-        retryDelay !== null,
-        retryDelay ?? 0
+        {
+          retryable: retryDelay !== null,
+          retryAfterMs: retryDelay ?? 0,
+          statusCode: typeof statusCode === 'number' ? statusCode : undefined,
+        }
       );
     }
   }

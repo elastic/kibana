@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginInitializerContext } from '@kbn/core/server';
+import { DEFAULT_ALERT_SAMPLE_SIZE } from './lib/entity_analytics/risk_score/constants';
 import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
@@ -184,13 +185,20 @@ export const configSchema = schema.object({
   }),
   entityAnalytics: schema.object({
     riskEngine: schema.object({
-      alertSampleSizePerShard: schema.number({ defaultValue: 10_000 }),
+      alertSampleSizePerShard: schema.number({ defaultValue: DEFAULT_ALERT_SAMPLE_SIZE }),
     }),
     assetCriticality: schema.object({
       csvUpload: schema.object({
         errorRetries: schema.number({ defaultValue: 1 }),
         maxBulkRequestBodySizeBytes: schema.number({ defaultValue: 100_000 }), // 100KB
       }),
+    }),
+    alertEntityIdBackfill: schema.object({
+      /**
+       * Kill switch for the one-off task that stamps `kibana.alert.entity.id` onto alerts written
+       * before the field existed.
+       */
+      enabled: schema.boolean({ defaultValue: true }),
     }),
     entityStore: schema.object({
       syncDelay: schema.duration({ defaultValue: '60s' }),

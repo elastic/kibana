@@ -8,6 +8,7 @@
     "public/**/*",
     "server/**/*",
     ".storybook/**/*",
+    "test/scout_data_federation/api/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
@@ -36,7 +37,8 @@
     "@kbn/esql-language",
     "@kbn/esql-utils",
     "@kbn/usage-collection-plugin",
-    "@kbn/analytics"
+    "@kbn/analytics",
+    "@kbn/scout"
   ],
   "exclude": [
     "target/**/*",

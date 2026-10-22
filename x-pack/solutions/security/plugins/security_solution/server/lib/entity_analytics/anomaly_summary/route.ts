@@ -24,7 +24,7 @@ import {
 } from '../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../types';
 import { withMinimumLicense } from '../utils/with_minimum_license';
-import { checkEntityExists, EntityStoreAccessError } from '../utils/check_entity_exists';
+import { EntityStoreAccessError, getEntityRecords } from '../utils/check_entity_exists';
 import { getEntityAnomalies } from './get_anomaly_details';
 import { DEFAULT_OVERVIEW_LOOKBACK_MS, getEntityAnomalyOverview } from './get_anomaly_overview';
 import { _formatPrivileges, hasReadWritePermissions } from '../utils/check_and_format_privileges';
@@ -108,6 +108,7 @@ export const registerAnomalySummaryRoutes = ({
         try {
           const { entity_id: entityId, entity_type: entityType } = request.params;
           const {
+            mode,
             from,
             to,
             score_ranges: scoreRanges,
@@ -133,18 +134,23 @@ export const registerAnomalySummaryRoutes = ({
           const soClient = core.savedObjects.client;
           const securitySolution = await context.securitySolution;
           const entityStoreCrudClient = securitySolution.getEntityStoreUpdateClient();
-          const entityRecord = await checkEntityExists({
+          // In `resolved` mode this is the whole resolution group, target first.
+          const entityRecords = await getEntityRecords({
             crudClient: entityStoreCrudClient,
             esClient,
             entityId,
             entityType,
+            mode,
           });
-          if (!entityRecord) {
+          if (entityRecords.length === 0) {
             return siemResponse.error({
               statusCode: 404,
               body: `Entity "${entityId}" not found`,
             });
           }
+          const entityIds = entityRecords.flatMap((record) =>
+            record.entity?.id ? [record.entity.id] : []
+          );
 
           if (!ml) {
             logger.warn('ML plugin is unavailable; returning empty anomaly overview.');
@@ -166,9 +172,9 @@ export const registerAnomalySummaryRoutes = ({
 
           const mitreDataClient = securitySolution.getMitreDataClient();
           const overview = await getEntityAnomalyOverview({
-            entityId,
+            entityIds,
             entityType,
-            entityRecord,
+            entityRecords,
             fromMs: from,
             toMs: to,
             scoreRanges,
@@ -224,6 +230,7 @@ export const registerAnomalySummaryRoutes = ({
         try {
           const { entity_id: entityId, entity_type: entityType } = request.params;
           const {
+            mode,
             page = 1,
             page_size: pageSize = 100,
             from,
@@ -254,18 +261,23 @@ export const registerAnomalySummaryRoutes = ({
           const securitySolution = await context.securitySolution;
           const entityStoreCrudClient = securitySolution.getEntityStoreUpdateClient();
 
-          const entityRecord = await checkEntityExists({
+          // In `resolved` mode this is the whole resolution group, target first.
+          const entityRecords = await getEntityRecords({
             crudClient: entityStoreCrudClient,
             esClient,
             entityId,
             entityType,
+            mode,
           });
-          if (!entityRecord) {
+          if (entityRecords.length === 0) {
             return siemResponse.error({
               statusCode: 404,
               body: `Entity "${entityId}" not found`,
             });
           }
+          const entityIds = entityRecords.flatMap((record) =>
+            record.entity?.id ? [record.entity.id] : []
+          );
 
           if (!ml) {
             logger.warn('ML plugin is unavailable; returning empty anomaly summary.');
@@ -283,9 +295,9 @@ export const registerAnomalySummaryRoutes = ({
 
           const mitreDataClient = securitySolution.getMitreDataClient();
           const { anomalies, total } = await getEntityAnomalies({
-            entityId,
+            entityIds,
             entityType,
-            entityRecord,
+            entityRecords,
             esClient,
             fromMs: from,
             toMs: to,

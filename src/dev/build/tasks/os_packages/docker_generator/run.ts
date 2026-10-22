@@ -77,6 +77,7 @@ export async function runDockerGenerator(
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
   let artifactVariant = '';
   if (flags.serverless) artifactVariant = '-serverless';
+  if (flags.cloud && !flags.fips) artifactVariant = '-cloud';
   const artifactPrefix = `kibana${artifactVariant}-${version}-linux`;
   const tarExt = config.getTarZstd() ? 'tar.zst' : 'tar.gz';
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.${tarExt}`;

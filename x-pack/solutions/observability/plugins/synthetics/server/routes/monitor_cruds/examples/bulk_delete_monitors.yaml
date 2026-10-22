@@ -23,3 +23,16 @@ responses:
                 deleted: true
               - id: monitor2-id
                 deleted: true
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/synthetics/monitors/_bulk_delete" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{"ids":["monitor1-id","monitor2-id"]}'
+  - lang: Console
+    source: |
+      POST kbn://api/synthetics/monitors/_bulk_delete
+      {"ids":["monitor1-id","monitor2-id"]}

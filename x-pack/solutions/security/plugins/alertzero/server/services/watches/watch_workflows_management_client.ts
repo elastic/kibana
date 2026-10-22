@@ -60,6 +60,13 @@ export interface WatchWorkflowsManagementClient {
     request: KibanaRequest
   ): Promise<WorkflowExecutionListDto>;
 
+  /** The newest execution of one workflow in any status, so a later success can be told from a failure. */
+  getLatestWorkflowExecution(
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowExecutionListDto['results'][number] | undefined>;
+
   getWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
@@ -153,6 +160,26 @@ export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagem
       },
       spaceId
     );
+  }
+
+  async getLatestWorkflowExecution(
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowExecutionListDto['results'][number] | undefined> {
+    const { results } = await this.management.searchExecutionsView(
+      {
+        request,
+        includeManagedExecutions: true,
+        query: { bool: { filter: [{ term: { workflowId } }] } },
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+        page: 1,
+        size: 1,
+      },
+      spaceId
+    );
+    return results[0];
   }
 
   getWorkflowExecution(

@@ -88,6 +88,7 @@ export const createMockPluginStart = async (
   return {
     analytics: coreSetupMock.analytics,
     esClient: elasticsearchServiceMock.createClusterClient(),
+    featureFlags: coreStartMock.featureFlags,
     savedObjects: {
       getScopedClient: jest.fn().mockReturnValue(savedObjectsClient),
       createInternalRepository: jest.fn().mockReturnValue(savedObjectsClient),

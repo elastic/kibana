@@ -17,7 +17,7 @@ import {
   getAddControlsFailures,
   getAttemptedControls,
   type AttemptedControl,
-  type OperationFailure,
+  type DashboardFailure,
 } from '../extract_dashboard';
 
 export const DASHBOARD_CONTROL_SOURCING_EVALUATOR_NAME = 'Dashboard Control Sourcing';
@@ -49,7 +49,7 @@ const unique = (values: string[]): string[] => [...new Set(values)];
  * Controls the failures cover: the server groups same-message failures as
  * "a, b, c", and a field retried and rejected again is still one failed control.
  */
-const getFailedFields = (failures: OperationFailure[]): string[] =>
+const getFailedFields = (failures: DashboardFailure[]): string[] =>
   unique(
     failures.flatMap(({ identifier }) =>
       identifier.split(',').map((field) => withoutKeyword(field.trim()))
@@ -64,7 +64,7 @@ const getFailedFields = (failures: OperationFailure[]): string[] =>
  */
 const countReplacements = (
   attemptedData: DataControl[],
-  failures: OperationFailure[],
+  failures: DashboardFailure[],
   storedFields: string[]
 ): number => {
   if (failures.length === 0) {
@@ -114,7 +114,7 @@ const checkSourcing = (
   }: {
     storedFields: string[];
     attempted: AttemptedControl[];
-    failures: OperationFailure[];
+    failures: DashboardFailure[];
     message: string;
   }
 ): Check[] => {

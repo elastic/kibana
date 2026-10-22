@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { RequestAdapter, apiHasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import { render, screen, act } from '@testing-library/react';
 import { ChatEventType, TimelineEventType } from '@kbn/agent-builder-common';
 import { customContentEmbeddableFactory } from './custom_content_embeddable';
@@ -30,6 +31,7 @@ const mockApiIsPresentationContainer = apiIsPresentationContainer as jest.Mocked
 let capturedComponentProps:
   | {
       isGenerating?: boolean;
+      requestAdapter?: unknown;
       onGenerateWithChat?: () => void;
       onLoadingChange?: (isLoading: boolean) => void;
     }
@@ -42,6 +44,8 @@ jest.mock('@kbn/custom-content-renderer', () => ({
     generationVersion: number;
     timeRange: { from: string; to: string } | undefined;
     isGenerating?: boolean;
+    isInteractive?: boolean;
+    requestAdapter?: unknown;
     onLoadingChange: (isLoading: boolean) => void;
     onGenerateWithChat?: () => void;
   }) => {
@@ -54,6 +58,7 @@ jest.mock('@kbn/custom-content-renderer', () => ({
         data-generation-version={props.generationVersion}
         data-time-range={props.timeRange ? `${props.timeRange.from}/${props.timeRange.to}` : ''}
         data-is-generating={String(Boolean(props.isGenerating))}
+        data-is-interactive={String(props.isInteractive)}
       />
     );
   },
@@ -245,6 +250,56 @@ describe('customContentEmbeddableFactory', () => {
       expect(screen.getByTestId('mockCustomContentComponent')).toHaveAttribute(
         'data-time-range',
         `${dashboardRange.from}/${dashboardRange.to}`
+      );
+    });
+  });
+
+  describe('inspector', () => {
+    it('exposes the standard Inspect API with a request adapter when the panel has a query', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+
+      expect(apiHasInspectorAdapters(embeddable.api)).toBe(true);
+      expect(embeddable.api.getInspectorAdapters()?.requests).toBeInstanceOf(RequestAdapter);
+    });
+
+    it('offers no Inspect entry for a static panel, which makes no request', async () => {
+      const { embeddable } = await buildEmbeddable({ ...baseState, esql_query: undefined });
+
+      expect(embeddable.api.getInspectorAdapters()).toBeUndefined();
+    });
+
+    it('starts offering Inspect once a query is added', async () => {
+      const { embeddable } = await buildEmbeddable({ ...baseState, esql_query: undefined });
+
+      embeddable.api.applySerializedState({ ...baseState, esql_query: ['FROM logs | LIMIT 1'] });
+
+      expect(embeddable.api.getInspectorAdapters()?.requests).toBeInstanceOf(RequestAdapter);
+    });
+
+    it('hands the same adapter to the renderer that the Inspect API returns', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      expect(capturedComponentProps?.requestAdapter).toBe(
+        embeddable.api.getInspectorAdapters()?.requests
+      );
+    });
+  });
+
+  describe('view mode', () => {
+    const parentWithViewMode = (viewMode: string) => ({ viewMode$: new BehaviorSubject(viewMode) });
+
+    it.each([
+      ['edit', 'true'],
+      ['view', 'true'],
+      ['non-interactive', 'false'],
+    ])('sets isInteractive for the %s view mode', async (viewMode, expected) => {
+      const { embeddable } = await buildEmbeddable(baseState, parentWithViewMode(viewMode));
+      await act(async () => render(<embeddable.Component />));
+
+      expect(screen.getByTestId('mockCustomContentComponent')).toHaveAttribute(
+        'data-is-interactive',
+        expected
       );
     });
   });

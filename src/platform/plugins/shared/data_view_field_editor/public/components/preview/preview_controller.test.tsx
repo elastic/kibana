@@ -10,7 +10,7 @@
 import type { PreviewControllerDependencies } from './preview_controller';
 import { PreviewController } from './preview_controller';
 import type { DebouncedFuncLeading } from 'lodash';
-import type { InternalFieldType } from '../../types';
+import type { Field, InternalFieldType } from '../../types';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { ISearchStart } from '@kbn/data-plugin/public';
@@ -19,30 +19,31 @@ import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/m
 import { createStubDataViewLazy } from '@kbn/data-views-plugin/common/data_views/data_view_lazy.stub';
 
 describe('PreviewController', () => {
+  const coreStartMock = coreMock.createStart();
+  const dataViewMock = dataViewPluginMocks.createStartContract();
+  dataViewMock.updateSavedObject = jest.fn();
+
+  const mockDeps: PreviewControllerDependencies = {
+    search: {
+      search: jest.fn(() => ({
+        toPromise: jest.fn().mockResolvedValue({ rawResponse: { hits: { hits: [] } } }),
+      })),
+    } as unknown as ISearchStart,
+    fieldFormats: fieldFormatsMock,
+    usageCollection: usageCollectionPluginMock.createSetupContract(),
+    notifications: coreStartMock.notifications,
+    dataViews: dataViewMock,
+  };
+
+  // Mock data view with enough properties to pass type checks
+  const mockDataView = createStubDataViewLazy({
+    spec: {
+      id: 'test-index',
+      title: 'test-index',
+    },
+  });
+
   describe('setCustomDocIdToLoad', () => {
-    const coreStartMock = coreMock.createStart();
-    const dataViewMock = dataViewPluginMocks.createStartContract();
-
-    const mockDeps: PreviewControllerDependencies = {
-      search: {
-        search: jest.fn(() => ({
-          toPromise: jest.fn().mockResolvedValue({ rawResponse: { hits: { hits: [] } } }),
-        })),
-      } as unknown as ISearchStart,
-      fieldFormats: fieldFormatsMock,
-      usageCollection: usageCollectionPluginMock.createSetupContract(),
-      notifications: coreStartMock.notifications,
-      dataViews: dataViewMock,
-    };
-
-    // Mock data view with enough properties to pass type checks
-    const mockDataView = createStubDataViewLazy({
-      spec: {
-        id: 'test-index',
-        title: 'test-index',
-      },
-    });
-
     type ControllerWithPrivate = PreviewController & {
       debouncedLoadDocument: DebouncedFuncLeading<(id: string) => Promise<void>>;
     };
@@ -82,6 +83,32 @@ describe('PreviewController', () => {
       expect(state.customId).toBeUndefined();
       expect(state.customDocIdToLoad).toBeNull();
       expect(debouncedLoadDocumentMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('saveField', () => {
+    it('should use the custom label in the success toast', async () => {
+      const onSave = jest.fn();
+      const controller = new PreviewController({
+        deps: mockDeps,
+        dataView: mockDataView,
+        dataViewToUpdate: mockDataView,
+        onSave,
+        fieldTypeToProcess: 'runtime' as InternalFieldType,
+      });
+      const updatedField: Field = {
+        name: 'runtime_field',
+        type: 'keyword',
+        script: { source: "emit('value')" },
+        customLabel: 'Custom label',
+      };
+
+      await controller.saveField(updatedField);
+
+      expect(coreStartMock.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+        "Saved 'Custom label'"
+      );
+      expect(onSave).toHaveBeenCalled();
     });
   });
 });

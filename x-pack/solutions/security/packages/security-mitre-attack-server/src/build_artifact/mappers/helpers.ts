@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StixEntity } from '../types';
+import type { StixEntity, StixSourceName } from '../types';
 
 /** A relationship entity with both endpoints present. */
 type StixRelationship = StixEntity & { source_ref: string; target_ref: string };
@@ -56,19 +56,21 @@ export const buildTacticByShortname = (objects: StixEntity[]): Map<string, StixE
 /**
  * Returns the tactic ID(s) a technique or subtechnique belongs to. MITRE links these through
  * kill_chain_phases, which name tactics by shortname, so each phase is looked up to get its
- * ATT&CK ID:
+ * MITRE ID:
  *
  *   T1003 (technique) kill_chain_phases: ['credential-access'] -> tactic_ids: ['TA0006']
  *
- * Phases from other frameworks are ignored. A phase matching no tactic throws, unless the
- * entity is revoked or deprecated, where a retired tactic reference is expected and skipped.
+ * Only phases whose kill_chain_name matches `sourceName` are considered; phases from other
+ * frameworks are ignored. A phase matching no tactic throws, unless the entity is revoked or
+ * deprecated, where a retired tactic reference is expected and skipped.
  */
 export const resolveTacticIds = (
   stixEntity: StixEntity,
-  tacticByShortname: Map<string, StixEntity>
+  tacticByShortname: Map<string, StixEntity>,
+  sourceName: StixSourceName
 ): string[] => {
   const phases =
-    stixEntity.kill_chain_phases?.filter((phase) => phase.kill_chain_name === 'mitre-attack') ?? [];
+    stixEntity.kill_chain_phases?.filter((phase) => phase.kill_chain_name === sourceName) ?? [];
   if (phases.length === 0) return [];
 
   const ids = phases.flatMap((phase) => {
@@ -82,7 +84,7 @@ export const resolveTacticIds = (
           ` (referenced by STIX entity '${stixEntity.id}')`
       );
     }
-    const mitreReference = getMitreReference(tacticEntity);
+    const mitreReference = getMitreReference(tacticEntity, sourceName);
     return mitreReference != null ? [mitreReference.id] : [];
   });
 
@@ -90,13 +92,14 @@ export const resolveTacticIds = (
 };
 
 /**
- * Returns the ATT&CK IDs of the entities that replace a revoked entity, taken from
+ * Returns the MITRE IDs of the entities that replace a revoked entity, taken from
  * its 'revoked-by' relationships. Undefined when there are none.
  */
 export const resolveSupersededBy = (
   stixId: string,
   entityById: Map<string, StixEntity>,
-  revokedByTargetRefs: Map<string, string[]>
+  revokedByTargetRefs: Map<string, string[]>,
+  sourceName: StixSourceName
 ): string[] | undefined => {
   const targetRefs = revokedByTargetRefs.get(stixId);
   if (!targetRefs || targetRefs.length === 0) return undefined;
@@ -104,7 +107,7 @@ export const resolveSupersededBy = (
   const ids = targetRefs.flatMap((targetStixId) => {
     const targetEntity = entityById.get(targetStixId);
     if (targetEntity == null) return [];
-    const mitreReference = getMitreReference(targetEntity);
+    const mitreReference = getMitreReference(targetEntity, sourceName);
     return mitreReference != null ? [mitreReference.id] : [];
   });
 
@@ -125,14 +128,17 @@ const normalizeThreatReference = (reference: string): string => {
 };
 
 /**
- * Returns the ATT&CK ID and normalized URL from an entity's 'mitre-attack' external
- * reference, or null when it has none (such entities are skipped during the build).
+ * Returns the MITRE ID and normalized URL from the entity's external reference whose
+ * source_name equals `sourceName`, or null when it has none (such entities are skipped
+ * during the build). Matching is exact, so an ATLAS technique's secondary 'mitre-attack'
+ * reference is never picked up when building the ATLAS framework.
  */
 export const getMitreReference = (
-  stixEntity: StixEntity
+  stixEntity: StixEntity,
+  sourceName: StixSourceName
 ): { id: string; reference: string } | null => {
   const mitreRef = stixEntity.external_references?.find(
-    (externalRef) => externalRef.source_name === 'mitre-attack'
+    (externalRef) => externalRef.source_name === sourceName
   );
   if (mitreRef == null || !mitreRef.external_id || !mitreRef.url) {
     return null;

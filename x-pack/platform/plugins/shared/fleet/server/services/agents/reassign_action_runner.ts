@@ -9,7 +9,11 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 
-import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import {
+  AgentAlreadyAssignedError,
+  AgentReassignmentError,
+  HostedAgentPolicyRestrictionRelatedError,
+} from '../../errors';
 
 import { appContextService } from '../app_context';
 
@@ -58,7 +62,7 @@ export async function reassignBatch(
 
   const agentsToUpdate = givenAgents.reduce<Agent[]>((agents, agent) => {
     if (agent.policy_id === options.newAgentPolicyId) {
-      errors[agent.id] = new AgentReassignmentError(
+      errors[agent.id] = new AgentAlreadyAssignedError(
         `Agent ${agent.id} is already assigned to agent policy ${options.newAgentPolicyId}`
       );
     } else if (isHostedAgent(hostedPolicies, agent)) {
@@ -76,6 +80,10 @@ export async function reassignBatch(
     appContextService
       .getLogger()
       .debug('No agents to update, skipping agent update and action creation');
+    const errorList = Object.values(errors);
+    if (errorList.length > 0 && errorList.every((e) => e instanceof AgentAlreadyAssignedError)) {
+      throw new AgentAlreadyAssignedError('No agents to reassign, all agents are already assigned');
+    }
     throw new AgentReassignmentError('No agents to reassign, already assigned or hosted agents');
   }
 

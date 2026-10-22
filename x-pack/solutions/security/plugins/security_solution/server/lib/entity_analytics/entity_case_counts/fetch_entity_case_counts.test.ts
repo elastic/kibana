@@ -98,6 +98,96 @@ describe('fetchEntityCaseCounts', () => {
     ]);
   });
 
+  describe('for a group', () => {
+    it('counts the distinct cases of the entity and its members, a shared case once', async () => {
+      const repository = buildRepository({
+        'host:head': ['shared', 'own'],
+        'host:alias-1': ['shared', 'alias-1-only'],
+        'host:alias-2': ['alias-2-only'],
+      });
+      const casesClient = buildCasesClient({
+        shared: CaseStatuses.open,
+        own: CaseStatuses.open,
+        'alias-1-only': CaseStatuses.open,
+        'alias-2-only': CaseStatuses['in-progress'],
+      });
+
+      const counts = await fetchEntityCaseCounts(
+        repository,
+        casesClient,
+        'default',
+        ['host:head'],
+        {
+          'host:head': ['host:alias-1', 'host:alias-2'],
+        }
+      );
+
+      expect(counts).toEqual(new Map([['host:head', 4]]));
+    });
+
+    it('counts the cases of the members of an entity that has none of its own', async () => {
+      const repository = buildRepository({ 'host:alias': ['case'] });
+      const casesClient = buildCasesClient({ case: CaseStatuses.open });
+
+      const counts = await fetchEntityCaseCounts(
+        repository,
+        casesClient,
+        'default',
+        ['host:head'],
+        {
+          'host:head': ['host:alias'],
+        }
+      );
+
+      expect(counts).toEqual(new Map([['host:head', 1]]));
+    });
+
+    it('does not count the closed cases of the members', async () => {
+      const repository = buildRepository({ 'host:head': ['open'], 'host:alias': ['closed'] });
+      const casesClient = buildCasesClient({
+        open: CaseStatuses.open,
+        closed: CaseStatuses.closed,
+      });
+
+      const counts = await fetchEntityCaseCounts(
+        repository,
+        casesClient,
+        'default',
+        ['host:head'],
+        {
+          'host:head': ['host:alias'],
+        }
+      );
+
+      expect(counts).toEqual(new Map([['host:head', 1]]));
+    });
+
+    it('reads the cases of the entities and of all the members in one query', async () => {
+      const repository = buildRepository({});
+      const casesClient = buildCasesClient({});
+
+      await fetchEntityCaseCounts(repository, casesClient, 'default', ['host:a', 'host:b'], {
+        'host:a': ['host:a1'],
+        'host:b': ['host:b1', 'host:b2'],
+      });
+
+      expect(repository.find).toHaveBeenCalledTimes(1);
+      const [{ aggs }] = repository.find.mock.calls[0];
+      expect(aggs?.by_entity).toMatchObject({ terms: { size: 5 } });
+    });
+
+    it('counts an entity without members as before', async () => {
+      const repository = buildRepository({ 'host:a': ['case'], 'host:b': ['case'] });
+      const casesClient = buildCasesClient({ case: CaseStatuses.open });
+
+      const counts = await fetchEntityCaseCounts(repository, casesClient, 'default', ['host:a'], {
+        'host:other': ['host:b'],
+      });
+
+      expect(counts).toEqual(new Map([['host:a', 1]]));
+    });
+  });
+
   it('reads nothing without entity ids', async () => {
     const repository = buildRepository({});
     const casesClient = buildCasesClient({});

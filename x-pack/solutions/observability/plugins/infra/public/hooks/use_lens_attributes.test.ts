@@ -60,6 +60,7 @@ describe('useLensAttributes hook', () => {
         ],
       },
     ],
+    areaFill: 'solid',
     title: 'Injected Normalized Load',
     dataset: {
       index: 'mock-id',

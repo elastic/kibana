@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { act, fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import type { DataSource } from '../../../../common';
@@ -103,9 +103,11 @@ describe('DataSourceSelect', () => {
     expect(getByTestId('createDatasetDataSourceAuthenticationCallout')).toHaveTextContent(
       createDatasetWizardStrings.dataSourceAuthenticationCalloutTitle
     );
-    expect(getByTestId('createDatasetDataSourceAuthenticationLearnMore')).toHaveAttribute(
-      'href',
-      'https://example.com/grant-read-access'
-    );
+    // scoped to the visible content, which excludes `announceOnMount`'s screen reader copy
+    expect(
+      within(getByTestId('createDatasetDataSourceAuthenticationCallout__content')).getByTestId(
+        'createDatasetDataSourceAuthenticationLearnMore'
+      )
+    ).toHaveAttribute('href', 'https://example.com/grant-read-access');
   });
 });

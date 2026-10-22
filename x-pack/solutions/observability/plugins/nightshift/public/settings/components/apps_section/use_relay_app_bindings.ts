@@ -13,7 +13,7 @@ import type {
   SlackAppUnbindChannelResponse,
   SlackChannelBinding,
 } from '@kbn/significant-events-plugin/common';
-import { buildPath } from '@kbn/core-http-browser';
+import { buildPath, type HttpStart } from '@kbn/core-http-browser';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getFormattedError } from '../../../common/errors';
 
@@ -28,6 +28,19 @@ export const RELAY_APP_BINDINGS_PAGE_SIZE = 10;
 
 /** Stable reference for the loading/empty state so the table `items` prop stays referentially equal. */
 const EMPTY_BINDINGS: SlackChannelBinding[] = [];
+
+// Connected channels only change via bind/unbind in this UI (which invalidate these
+// queries), so cached results stay fresh and revisiting one avoids a redundant fetch.
+const BINDINGS_QUERY_OPTIONS = { retry: false, staleTime: 30_000 } as const;
+
+const fetchBindingsPage = (
+  http: HttpStart,
+  { perPage, cursor, signal }: { perPage: number; cursor?: string; signal?: AbortSignal }
+): Promise<SlackAppBindingsResponse> =>
+  http.get<SlackAppBindingsResponse>(BINDINGS_ROUTE, {
+    query: { perPage, ...(cursor ? { cursor } : {}) },
+    signal,
+  });
 
 export interface UseRelayAppBindings {
   bindings: SlackChannelBinding[];
@@ -51,12 +64,9 @@ export function useRelayAppBindings(enabled: boolean, cursor?: string): UseRelay
   const query = useQuery<SlackAppBindingsResponse, Error>({
     queryKey: [...RELAY_APP_BINDINGS_QUERY_KEY, cursor ?? null],
     queryFn: ({ signal }) =>
-      http.get<SlackAppBindingsResponse>(BINDINGS_ROUTE, {
-        query: { perPage: RELAY_APP_BINDINGS_PAGE_SIZE, ...(cursor ? { cursor } : {}) },
-        signal,
-      }),
+      fetchBindingsPage(http, { perPage: RELAY_APP_BINDINGS_PAGE_SIZE, cursor, signal }),
+    ...BINDINGS_QUERY_OPTIONS,
     enabled,
-    retry: false,
     keepPreviousData: true,
     onError: (error) => {
       notifications.toasts.addError(getFormattedError(error), {
@@ -65,9 +75,6 @@ export function useRelayAppBindings(enabled: boolean, cursor?: string): UseRelay
         }),
       });
     },
-    // Connected channels only change via bind/unbind in this UI (which invalidate this
-    // query), so cached pages stay fresh and paging back to one avoids a redundant fetch.
-    staleTime: 30_000,
   });
 
   return {
@@ -77,6 +84,65 @@ export function useRelayAppBindings(enabled: boolean, cursor?: string): UseRelay
     nextCursor: query.data?.nextCursor,
   };
 }
+
+/** Largest page the bindings route accepts. */
+const ALL_BINDINGS_PAGE_SIZE = 200;
+// Bounds the walk if the Relay keeps returning a cursor.
+const ALL_BINDINGS_MAX_PAGES = 10;
+
+export interface UseAllRelayAppBindings {
+  bindings: SlackChannelBinding[];
+  isLoading: boolean;
+  isError: boolean;
+  /** False when the page bound was hit before the Relay ran out of pages. */
+  isComplete: boolean;
+}
+
+/** Every Slack channel connected to this deployment, for pickers that need the full list. */
+export function useAllRelayAppBindings(): UseAllRelayAppBindings {
+  const {
+    services: { http },
+  } = useKibana();
+
+  const query = useQuery({
+    queryKey: [...RELAY_APP_BINDINGS_QUERY_KEY, 'all'],
+    queryFn: async ({ signal }) => {
+      const bindings: SlackChannelBinding[] = [];
+      let cursor: string | undefined;
+      for (let page = 0; page < ALL_BINDINGS_MAX_PAGES; page++) {
+        const response = await fetchBindingsPage(http, {
+          perPage: ALL_BINDINGS_PAGE_SIZE,
+          cursor,
+          signal,
+        });
+        bindings.push(...response.bindings.filter(({ channel }) => channel != null));
+        cursor = response.nextCursor;
+        if (!cursor) break;
+      }
+      bindings.sort((left, right) =>
+        formatChannelLabel(left).localeCompare(formatChannelLabel(right))
+      );
+      return { bindings, isComplete: !cursor };
+    },
+    ...BINDINGS_QUERY_OPTIONS,
+  });
+
+  return {
+    bindings: query.data?.bindings ?? EMPTY_BINDINGS,
+    isLoading: query.isLoading,
+    isError: query.isError,
+    isComplete: query.data?.isComplete ?? true,
+  };
+}
+
+export const formatChannelLabel = (binding: SlackChannelBinding): string =>
+  binding.displayName != null ? `#${binding.displayName}` : binding.channel ?? '';
+
+/** Label for a stored channel value; a value that is not a connected channel id is kept as is. */
+export const formatChannelValue = (value: string, bindings: SlackChannelBinding[]): string => {
+  const binding = bindings.find(({ channel }) => channel === value);
+  return binding ? formatChannelLabel(binding) : value;
+};
 
 export interface UseBindChannel {
   bind: (channelId: string) => Promise<void>;

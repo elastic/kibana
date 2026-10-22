@@ -22,10 +22,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SlackChannelBinding } from '@kbn/significant-events-plugin/common';
-import { useRelayAppBindings, useBindChannel, useUnbindChannel } from './use_relay_app_bindings';
-
-const channelLabel = (binding: SlackChannelBinding) =>
-  binding.displayName != null ? `#${binding.displayName}` : binding.channel ?? '';
+import {
+  formatChannelLabel,
+  useRelayAppBindings,
+  useBindChannel,
+  useUnbindChannel,
+} from './use_relay_app_bindings';
 
 interface SlackConnectionBindingsProps {
   canEdit: boolean;
@@ -92,7 +94,7 @@ export function SlackConnectionBindings({ canEdit }: SlackConnectionBindingsProp
           defaultMessage: 'Channel',
         }),
         render: (_: unknown, binding: SlackChannelBinding) => (
-          <EuiText size="s">{channelLabel(binding)}</EuiText>
+          <EuiText size="s">{formatChannelLabel(binding)}</EuiText>
         ),
       },
       {
@@ -271,7 +273,7 @@ function BindingActionCell({ binding, canEdit, onDisconnected }: BindingActionCe
   const [confirmOpen, setConfirmOpen] = useState(false);
   const modalTitleId = useGeneratedHtmlId();
 
-  const channelName = channelLabel(binding);
+  const channelName = formatChannelLabel(binding);
 
   return (
     <>

@@ -88,6 +88,7 @@ const isClientUserError = (error: unknown, clientType: ClientTypeSpec<unknown>):
 };
 
 export const generateExecutorFunction = ({
+  connectorTypeId,
   actions,
   getAxiosInstanceWithAuth,
   getCredential,
@@ -98,6 +99,7 @@ export const generateExecutorFunction = ({
   clientTypes = defaultClientTypes,
   getJwtSigner,
 }: {
+  connectorTypeId?: string;
   actions: ConnectorSpec['actions'];
   getJwtSigner?: (connectorId: string) => ActionContext['signJwt'];
   getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
@@ -130,6 +132,7 @@ export const generateExecutorFunction = ({
 
     const axiosInstance = await getAxiosInstanceWithAuth({
       connectorId,
+      connectorTypeId,
       connectorTokenClient,
       additionalHeaders: globalAuthHeaders,
       secrets,
@@ -233,6 +236,7 @@ export const generateExecutorFunction = ({
               platform,
               credential: getCredential({
                 connectorId,
+                connectorTypeId,
                 secrets,
                 connectorTokenClient,
                 authMode,

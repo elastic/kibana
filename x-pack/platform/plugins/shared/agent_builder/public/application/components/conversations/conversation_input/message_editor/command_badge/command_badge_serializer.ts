@@ -110,10 +110,11 @@ export const deserializeInputSegments = (text: string): ContentSegment[] => {
       const commandDefinition = getCommandDefinitionByScheme(scheme);
 
       if (commandDefinition) {
-        const { id: commandId, sequence } = commandDefinition;
-        const label = displayText.startsWith(sequence)
-          ? displayText.slice(sequence.length)
-          : displayText;
+        const { id: commandId, sequence, legacySequences = [] } = commandDefinition;
+        const prefix = [sequence, ...legacySequences].find((candidate) =>
+          displayText.startsWith(candidate)
+        );
+        const label = prefix ? displayText.slice(prefix.length) : displayText;
 
         const metadata: CommandBadgeData['metadata'] = {};
         if (queryString) {

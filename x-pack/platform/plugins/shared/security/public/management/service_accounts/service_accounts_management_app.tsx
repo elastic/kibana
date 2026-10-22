@@ -130,7 +130,7 @@ export const serviceAccountsManagementApp = Object.freeze({
                         assertNever(outcome);
                     }
                   }}
-                  onDeleteError={(error, errorTitle) => {
+                  onError={(error, errorTitle) => {
                     coreStart.notifications.toasts.addError(error, { title: errorTitle });
                   }}
                 />

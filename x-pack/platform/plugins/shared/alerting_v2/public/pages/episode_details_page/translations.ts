@@ -25,7 +25,7 @@ export const OVERVIEW_TAB_TITLE = i18n.translate(
 export const METADATA_TAB_TITLE = i18n.translate(
   'xpack.alertingV2.episodeDetails.mainTabMetadata',
   {
-    defaultMessage: 'Metadata',
+    defaultMessage: 'Data container',
   }
 );
 

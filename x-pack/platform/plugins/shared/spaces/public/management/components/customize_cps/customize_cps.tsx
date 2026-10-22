@@ -16,8 +16,7 @@ import {
   EuiToolTip,
   EuiWrappingPopover,
 } from '@elastic/eui';
-import { type FC, useCallback, useMemo, useRef, useState } from 'react';
-import React from 'react';
+import React, { type FC, useCallback, useMemo, useRef, useState } from 'react';
 
 import type { CPSPluginStart } from '@kbn/cps/public';
 import { type HeaderContextMenuItemProps, ProjectPickerContent } from '@kbn/cps-utils';

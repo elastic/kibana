@@ -117,8 +117,6 @@ export const ADD_ELASTIC_RULES_TABLE = '[data-test-subj="add-prebuilt-rules-tabl
 
 export const RULES_ROW = '.euiTableRow';
 
-export const SEVERITY = '[data-test-subj="severity"]';
-
 export const CREATE_NEW_RULE_BTN = '[data-test-subj="create-new-rule"]';
 
 export const ENABLE_RULE_TOGGLE = '[data-test-subj="ruleSwitch"]';

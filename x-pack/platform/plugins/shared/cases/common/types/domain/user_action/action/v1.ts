@@ -32,6 +32,7 @@ export const UserActionTypes = {
   extended_fields: 'extended_fields',
   template: 'template',
   workflow: 'workflow',
+  bulkAttachments: 'bulkAttachments',
 } as const;
 
 type UserActionActionTypeKeys = keyof typeof UserActionTypes;

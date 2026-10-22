@@ -234,6 +234,7 @@ const PerOsMemoryProtectionRow = memo<PerOsMemoryProtectionRowProps>(
             onChange={onChange}
             mode={mode}
             protection="memory_protection"
+            os={os}
             data-test-subj={getTestId('notifyUser')}
           />
         )}

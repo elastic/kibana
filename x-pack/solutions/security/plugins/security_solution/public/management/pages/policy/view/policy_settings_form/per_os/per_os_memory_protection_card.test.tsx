@@ -55,6 +55,7 @@ describe('PerOsMemoryProtectionCard', () => {
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    mockedContext.setExperimentalFlag({ customYaraSignaturesEnabled: false });
     policy = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
       .config.policy.value;
     props = {

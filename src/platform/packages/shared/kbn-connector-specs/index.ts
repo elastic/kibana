@@ -24,6 +24,7 @@ export {
 } from './src/auth_types/oauth_client_credentials_private_key_jwt';
 
 export { getConnectorSpec } from './src/get_connector_spec';
+export { getSandboxSupportedAuthTypeIds } from './src/get_sandbox_supported_auth_type_ids';
 export {
   connectorSpecHasEvents,
   connectorTypeHasInboundEvents,

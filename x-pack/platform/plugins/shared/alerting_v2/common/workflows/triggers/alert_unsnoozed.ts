@@ -7,12 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import type { z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { alertActionEnvelopeSchema } from './alert_action_envelope';
 
 export const ALERT_UNSNOOZED_TRIGGER_ID = 'alerting.actions.alertUnsnoozed' as const;
 
-export const alertUnsnoozedPayloadSchema = alertActionEnvelopeSchema.extend({});
+export const alertUnsnoozedPayloadSchema = lazySchema(() => alertActionEnvelopeSchema.extend({}));
 
 export type AlertUnsnoozedPayload = z.infer<typeof alertUnsnoozedPayloadSchema>;
 

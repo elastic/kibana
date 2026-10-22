@@ -2,7 +2,9 @@
 
 # Scout hook for the nightshift-investigations eval suite (`scoutHook` in evals.suites.json).
 #
-# Reads the evals config JSON on stdin and prints `{"env": {...}}`. The sandbox API key, `url` and
+# Reads this suite's config JSON on stdin and prints `{"env": {...}}`. In CI and with the dev-vault
+# profile that is the suite's own `nightshift` Vault secret (`vaultSecret`), not the general evals
+# config; a file profile passes its config.<profile>.json. The sandbox API key, `url` and
 # optional mTLS file paths (`ssl`) come from the config's `sandbox` block, falling back to SANDBOX_*
 # already exported in the shell (e.g. a self-hosted sandbox). The shared sandbox needs only `apiKey`
 # and `url`: it authenticates by API key over plain TLS.

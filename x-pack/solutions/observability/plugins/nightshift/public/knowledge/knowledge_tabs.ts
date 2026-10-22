@@ -8,12 +8,20 @@
 import { i18n } from '@kbn/i18n';
 import type { FeatureAvailability } from './feature_availability';
 
-export const KNOWLEDGE_TAB_IDS = ['cortex', 'memory', 'decision_trees'] as const;
+export const KNOWLEDGE_TAB_IDS = [
+  'knowledge_indicators',
+  'cortex',
+  'memory',
+  'decision_trees',
+] as const;
 
 export type KnowledgeTabId = (typeof KNOWLEDGE_TAB_IDS)[number];
 export type KnowledgeTabsAvailability = Record<KnowledgeTabId, FeatureAvailability>;
 
 export const KNOWLEDGE_TAB_LABELS: Record<KnowledgeTabId, string> = {
+  knowledge_indicators: i18n.translate('xpack.nightshift.knowledgePage.tabs.knowledgeIndicators', {
+    defaultMessage: 'Knowledge Indicators',
+  }),
   cortex: i18n.translate('xpack.nightshift.knowledgePage.tabs.cortex', {
     defaultMessage: 'Cortex',
   }),
@@ -32,9 +40,13 @@ export const getVisibleKnowledgeTabs = (
   availability: KnowledgeTabsAvailability
 ): KnowledgeTabId[] => KNOWLEDGE_TAB_IDS.filter((id) => availability[id].isEnabled);
 
-export const isAnyKnowledgeTabLoading = (availability: KnowledgeTabsAvailability): boolean =>
-  KNOWLEDGE_TAB_IDS.some((id) => availability[id].isLoading);
-
-// TODO(#1792): remove once the Knowledge Indicators tab lands; it is always available.
-export const isKnowledgeMenuItemVisible = (availability: KnowledgeTabsAvailability): boolean =>
-  !isAnyKnowledgeTabLoading(availability) && getVisibleKnowledgeTabs(availability).length > 0;
+/** Waits on a loading tab only if no earlier tab is enabled. */
+export const getDefaultKnowledgeTab = (
+  availability: KnowledgeTabsAvailability
+): KnowledgeTabId | 'loading' | undefined => {
+  for (const id of KNOWLEDGE_TAB_IDS) {
+    if (availability[id].isEnabled) return id;
+    if (availability[id].isLoading) return 'loading';
+  }
+  return undefined;
+};

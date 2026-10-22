@@ -89,6 +89,9 @@ export const NumberCustomFieldConfigurationRt = rt.intersection([
   ),
 ]);
 
+/**
+ * @deprecated Custom fields are superseded by the field library and the case `extended_fields`.
+ */
 export const CustomFieldsConfigurationRt = limitedArraySchema({
   codec: rt.union([
     TextCustomFieldConfigurationRt,
@@ -175,6 +178,10 @@ export const TemplateConfigurationRt = rt.intersection([
   ),
 ]);
 
+/**
+ * @deprecated Configuration-embedded templates are superseded by the case templates system
+ * (`GET /api/cases/templates`); their fields are applied via the case `extended_fields`.
+ */
 export const TemplatesConfigurationRt = limitedArraySchema({
   codec: TemplateConfigurationRt,
   min: 0,

@@ -8,9 +8,9 @@
 import type { CoreSetup } from '@kbn/core/public';
 import type { CloudConfigType } from '.';
 import {
+  CLOUD_BILLING_ROLES,
   CLOUD_PROJECT_SEARCH_POWER_QUERY,
   CLOUD_SNAPSHOTS_PATH,
-  CLOUD_USER_BILLING_ADMIN_ROLE,
   SEARCH_POWER_EDITOR_ROLES,
 } from '../common/constants';
 import { getFullCloudUrl, getProjectPageUrl } from '../common/utils';
@@ -87,7 +87,11 @@ export class CloudUrlsService {
     const coreStart = await this.getCoreStart();
 
     const userRoles = await this.getCurrentUserRoles(coreStart);
-    const showBillingUrl = userRoles.includes(CLOUD_USER_BILLING_ADMIN_ROLE);
+    // TODO: treat admins as billing admins until we can check billing access. The `_ec_billing_admin`
+    // role doesn't reach Kibana on Serverless and was never set on ECH. This matches role names, so on
+    // ECH a custom role named `admin` also gets billing links:
+    // https://github.com/elastic/kibana-team/issues/4343
+    const showBillingUrl = userRoles.some((role) => CLOUD_BILLING_ROLES.includes(role));
     const conditionalFullCloudBillingUrl = showBillingUrl
       ? getFullCloudUrl(this.config.base_url, this.config.billing_url)
       : undefined;

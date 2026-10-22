@@ -1,5 +1,5 @@
 {
-  "sha1": "ea5cc864790b27a781d234c4a00d558097ac1c4b",
+  "sha1": "466274a198f90c3ed6f5c0a0c9985e736ef4e258",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -117,6 +117,20 @@
       }
     },
     {
+      "id": "5e800d3dd5cbcb7-09b040f0d26e117",
+      "title": "Vector DB home page opens Console, sample data and file upload from the add data links",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home.spec.ts",
+        "line": 87,
+        "column": 38
+      }
+    },
+    {
       "id": "5e800d3dd5cbcb7-9020bb1c8a3eef3",
       "title": "Vector DB home page shows the agent skills prompt for building in an IDE",
       "expectedStatus": "passed",
@@ -126,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/home.spec.ts",
-        "line": 91,
-        "column": 19
+        "line": 109,
+        "column": 77
       }
     },
     {
@@ -215,8 +229,8 @@
       }
     },
     {
-      "id": "f7c4c2f98ad15a4-17ff825fb7eac34",
-      "title": "Vector DB onboarding paths offers both embedding paths alongside the project connection details",
+      "id": "f7c4c2f98ad15a4-f39e7859db7163a",
+      "title": "Vector DB onboarding paths shows the embedding paths, project connection details and setup options",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-vectordb",
@@ -229,6 +243,20 @@
       }
     },
     {
+      "id": "f7c4c2f98ad15a4-0a16f94297f59ec",
+      "title": "Vector DB onboarding paths opens the Elastic AI Agent in the sidebar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding_paths.spec.ts",
+        "line": 33,
+        "column": 13
+      }
+    },
+    {
       "id": "f7c4c2f98ad15a4-e5aad347a2613ce",
       "title": "Vector DB onboarding paths walks the generate embeddings path through to the home page",
       "expectedStatus": "passed",
@@ -238,8 +266,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding_paths.spec.ts",
-        "line": 30,
-        "column": 32
+        "line": 37,
+        "column": 20
       }
     },
     {
@@ -252,8 +280,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/vectordb/plugins/serverless_vectordb/test/scout/ui/parallel_tests/onboarding_paths.spec.ts",
-        "line": 54,
-        "column": 22
+        "line": 60,
+        "column": 13
       }
     }
   ]

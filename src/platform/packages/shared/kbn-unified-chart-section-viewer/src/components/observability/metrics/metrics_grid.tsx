@@ -34,6 +34,7 @@ import {
   getAggregationLabel,
   getMetricUniqueKey,
 } from '../../../common/utils';
+import type { HistogramBoundsByMetricKey } from './hooks/use_fetch_histogram_bounds';
 import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -43,6 +44,7 @@ import {
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { useFetchExemplars } from './hooks/use_fetch_exemplars';
+import { useHistogramHeatmap } from './hooks/use_histogram_heatmap';
 
 const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
 
@@ -108,7 +110,12 @@ export type MetricsGridProps = Pick<
    * fetches that should pause while hidden (exemplars) need this flag explicitly.
    */
   isComponentVisible: boolean;
+  /** Min/max fetched for the visible histogram charts. Empty until the heatmaps flag is on. */
+  histogramBounds?: HistogramBoundsByMetricKey;
+  histogramBoundsLoading?: boolean;
 };
+
+const EMPTY_HISTOGRAM_BOUNDS: HistogramBoundsByMetricKey = new Map();
 
 const getItemKey = (metricItem: ParsedMetricItem, index: number) => {
   return `${metricItem.metricName}-${index}`;
@@ -130,6 +137,8 @@ export const MetricsGrid = ({
   getDescription,
   isTabSelected,
   isComponentVisible,
+  histogramBounds = EMPTY_HISTOGRAM_BOUNDS,
+  histogramBoundsLoading = false,
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -279,6 +288,8 @@ export const MetricsGrid = ({
                   gridSettings={gridSettings}
                   onMetricExplored={onMetricExplored}
                   isComponentVisible={isComponentVisible}
+                  histogramBounds={histogramBounds}
+                  histogramBoundsLoading={histogramBoundsLoading}
                 />
               </EuiFlexItem>
             );
@@ -322,6 +333,8 @@ interface ChartItemProps
   gridSettings: MetricsGridSettings;
   onMetricExplored?: (metricUniqueKey: string) => void;
   isComponentVisible: boolean;
+  histogramBounds: HistogramBoundsByMetricKey;
+  histogramBoundsLoading: boolean;
 }
 
 const ChartItem = React.memo(
@@ -352,6 +365,8 @@ const ChartItem = React.memo(
     gridSettings,
     onMetricExplored,
     isComponentVisible,
+    histogramBounds,
+    histogramBoundsLoading,
   }: ChartItemProps) => {
     const { euiTheme } = useEuiTheme();
     const colorPalette = useMemo(
@@ -391,7 +406,20 @@ const ChartItem = React.memo(
     // TODO(kibana#289722): feed `exemplars` into useChartLayers as a points layer.
     void exemplars;
 
+    const { shouldRenderHistogram, boundsError, distributionQuery, heatmapConfig } =
+      useHistogramHeatmap({
+        metricItem,
+        applicableDimensions,
+        histogramBounds,
+        histogramBoundsLoading,
+        whereStatements,
+        originalSource: userSource,
+      });
+
     const esqlQuery = useMemo(() => {
+      if (shouldRenderHistogram) {
+        return distributionQuery ?? '';
+      }
       const fieldType = firstNonNullable(metricItem.fieldTypes);
       const isSupported = fieldType !== 'unsigned_long';
       return isSupported
@@ -403,7 +431,15 @@ const ChartItem = React.memo(
             gridSettings,
           })
         : '';
-    }, [metricItem, applicableDimensions, whereStatements, userSource, gridSettings]);
+    }, [
+      shouldRenderHistogram,
+      distributionQuery,
+      metricItem,
+      applicableDimensions,
+      whereStatements,
+      userSource,
+      gridSettings,
+    ]);
 
     const yAxisTitle = useMemo(() => {
       const instrument = firstNonNullable(metricItem.metricTypes);
@@ -454,8 +490,11 @@ const ChartItem = React.memo(
           onViewDetails={handleViewDetailsCallback}
           title={metricItem.metricName}
           description={description}
-          chartLayers={chartLayers}
-          yAxisTitle={yAxisTitle}
+          chartLayers={shouldRenderHistogram ? [] : chartLayers}
+          yAxisTitle={shouldRenderHistogram ? undefined : yAxisTitle}
+          heatmapConfig={heatmapConfig}
+          isLoading={shouldRenderHistogram && histogramBoundsLoading}
+          error={shouldRenderHistogram ? boundsError : undefined}
           syncCursor
           syncTooltips={false}
           titleHighlight={titleHighlight}

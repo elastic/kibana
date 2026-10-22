@@ -19,11 +19,14 @@ export const removeControlsOperation = defineOperation({
   }),
   handler: ({ dashboardData, operation }) => {
     const idsToRemove = new Set(operation.control_ids);
-    return {
-      ...dashboardData,
-      pinned_panels: (dashboardData.pinned_panels ?? []).filter(
-        (control) => !idsToRemove.has((control as { id?: string }).id ?? '')
-      ),
-    };
+    const existingControls = dashboardData.pinned_panels ?? [];
+    const remainingControls = existingControls.filter(
+      (control) => !idsToRemove.has((control as { id?: string }).id ?? '')
+    );
+    if (remainingControls.length === existingControls.length) {
+      return dashboardData;
+    }
+
+    return { ...dashboardData, pinned_panels: remainingControls };
   },
 });

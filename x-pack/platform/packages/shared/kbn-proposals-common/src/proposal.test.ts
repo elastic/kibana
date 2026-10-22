@@ -6,7 +6,14 @@
  */
 
 import { MAX_CHARTS_SUMMARY_BUCKETS } from './constants';
-import { isProposalSettling, proposalChartsSummaryQuerySchema } from './proposal';
+import {
+  isProposalSettling,
+  isTerminal,
+  OPEN_PROPOSAL_STATUSES,
+  proposalChartsSummaryQuerySchema,
+  proposalStatusSchema,
+  SETTLED_PROPOSAL_STATUSES,
+} from './proposal';
 import { reviseProposalResponseSchema } from './revision';
 
 describe('proposalChartsSummaryQuerySchema', () => {
@@ -71,6 +78,41 @@ describe('isProposalSettling', () => {
   it('reads false for a proposal nobody has decided yet', () => {
     expect(isProposalSettling({ decision: undefined, status: 'pending' })).toBe(false);
   });
+});
+
+describe('isTerminal', () => {
+  it.each(['succeeded', 'failed', 'expired', 'no_action', 'superseded'] as const)(
+    'treats %s as settled',
+    (status) => {
+      expect(isTerminal(status)).toBe(true);
+    }
+  );
+
+  it.each(['pending', 'executing'] as const)('treats %s as still open', (status) => {
+    expect(isTerminal(status)).toBe(false);
+  });
+});
+
+describe('proposal status groups', () => {
+  it('lists the open and settled statuses', () => {
+    expect(OPEN_PROPOSAL_STATUSES).toEqual(['pending', 'executing']);
+    expect(SETTLED_PROPOSAL_STATUSES).toEqual(['succeeded', 'failed', 'expired', 'no_action']);
+  });
+
+  it('never puts a status in both groups', () => {
+    expect(OPEN_PROPOSAL_STATUSES.filter((s) => SETTLED_PROPOSAL_STATUSES.includes(s))).toEqual([]);
+  });
+
+  it('keeps `superseded` out of both groups because its successor represents it', () => {
+    expect([...OPEN_PROPOSAL_STATUSES, ...SETTLED_PROPOSAL_STATUSES]).not.toContain('superseded');
+  });
+
+  it.each(proposalStatusSchema.options)(
+    'agrees with isTerminal about %s: terminal unless open',
+    (status) => {
+      expect(isTerminal(status)).toBe(!OPEN_PROPOSAL_STATUSES.includes(status));
+    }
+  );
 });
 
 describe('reviseProposalResponseSchema', () => {

@@ -6,13 +6,9 @@
  */
 
 import { startInvestigationRoute } from './start_investigation';
-import { getInvestigationRoute } from './get_investigation';
 import { emitLifecycleEventRoute } from './emit_lifecycle_event';
 import { ensureInvestigationRoute } from './ensure_investigation';
 import { findOrCreateSlackThreadInvestigationRoute } from './find_or_create_slack_thread_investigation';
-import { listInvestigationsRoute } from './list_investigations';
-import { updateInvestigationRoute } from './update_investigation';
-import { followInvestigationRoute } from './follow_investigation';
 import { getInvestigationAvailabilityRoute } from './get_investigation_availability';
 import { listCortexPagesRoute } from './list_cortex_pages';
 import { getCortexPageRoute } from './get_cortex_page';
@@ -21,6 +17,7 @@ import { archiveCortexPageRoute } from './archive_cortex_page';
 import { getCortexAvailabilityRoute } from './get_cortex_availability';
 import { sandboxSecretsRoutes } from './sandbox_secrets';
 import { customContextRoutes } from './custom_context';
+import { onboardingRoutes } from './onboarding';
 import { getDecisionTreesAvailabilityRoute } from './get_decision_trees_availability';
 import { listDecisionTreesRoute } from './list_decision_trees';
 import { getDecisionTreeRoute } from './get_decision_tree';
@@ -43,13 +40,9 @@ import { getMemoryLineageRoute } from './get_memory_lineage';
 
 export const nightshiftInvestigationsRouteRepository = {
   ...startInvestigationRoute,
-  ...getInvestigationRoute,
   ...emitLifecycleEventRoute,
   ...ensureInvestigationRoute,
   ...findOrCreateSlackThreadInvestigationRoute,
-  ...listInvestigationsRoute,
-  ...updateInvestigationRoute,
-  ...followInvestigationRoute,
   ...getInvestigationAvailabilityRoute,
   ...listCortexPagesRoute,
   ...getCortexPageRoute,
@@ -59,6 +52,7 @@ export const nightshiftInvestigationsRouteRepository = {
   ...getCortexAvailabilityRoute,
   ...sandboxSecretsRoutes,
   ...customContextRoutes,
+  ...onboardingRoutes,
   ...getDecisionTreesAvailabilityRoute,
   ...listDecisionTreesRoute,
   ...getDecisionTreeRoute,

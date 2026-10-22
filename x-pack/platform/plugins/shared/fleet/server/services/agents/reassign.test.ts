@@ -6,7 +6,11 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 
-import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import {
+  AgentAlreadyAssignedError,
+  AgentReassignmentError,
+  HostedAgentPolicyRestrictionRelatedError,
+} from '../../errors';
 
 import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
@@ -140,6 +144,36 @@ describe('reassignAgent', () => {
           'Cannot reassign an agent from hosted agent policy hosted-agent-policy in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
       });
       expect(calledWithActionResults.operations?.[1]).toEqual(expectedObject);
+    });
+
+    it('throws AgentAlreadyAssignedError when all agents are already assigned to the policy', async () => {
+      const { soClient, esClient, agentInRegularDoc, regularAgentPolicySO } = mocks;
+
+      esClient.search.mockResponse({ hits: { hits: [agentInRegularDoc] } } as any);
+
+      await expect(
+        reassignAgents(
+          soClient,
+          esClient,
+          { agentIds: [agentInRegularDoc._id] },
+          regularAgentPolicySO.id
+        )
+      ).rejects.toThrow(AgentAlreadyAssignedError);
+    });
+
+    it('throws AgentReassignmentError, not AgentAlreadyAssignedError, when the agents are hosted', async () => {
+      const { soClient, esClient, agentInHostedDoc, regularAgentPolicySO2 } = mocks;
+
+      esClient.search.mockResponse({ hits: { hits: [agentInHostedDoc] } } as any);
+
+      const error = await reassignAgents(
+        soClient,
+        esClient,
+        { agentIds: [agentInHostedDoc._id] },
+        regularAgentPolicySO2.id
+      ).catch((e) => e);
+      expect(error).toBeInstanceOf(AgentReassignmentError);
+      expect(error).not.toBeInstanceOf(AgentAlreadyAssignedError);
     });
 
     it('should report errors from ES agent update call', async () => {

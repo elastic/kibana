@@ -65,6 +65,21 @@ const maintenanceSummarySchemaV2 = maintenanceSummarySchemaV1.extends({
   deleted: schema.maybe(maintenanceDeletedCountsSchemaV2),
 });
 
+/**
+ * Reset no longer touches investigations, so the count is optional from version 4 on. It can't
+ * be removed in this version: nodes still on version 3 validate documents against a schema that
+ * requires it, so a document without it would fail on them during a rolling upgrade. The store
+ * keeps writing 0 until every supported node reads version 4; a later version can then stop
+ * writing it and drop it.
+ */
+const maintenanceDeletedCountsSchemaV4 = maintenanceDeletedCountsSchemaV2.extends({
+  investigations: schema.maybe(schema.number()),
+});
+
+const maintenanceSummarySchemaV4 = maintenanceSummarySchemaV1.extends({
+  deleted: schema.maybe(maintenanceDeletedCountsSchemaV4),
+});
+
 const disabledWorkflowSchemaV1 = schema.object({
   id: schema.string(),
   // Kept so the model-version 3 schema stays unchanged. Reads ignore it: a document is per space.
@@ -111,8 +126,12 @@ const maintenanceStateAttributesV3 = schema.object({
   pausedSettings: schema.maybe(pausedFeatureSettingsSchemaV1),
 });
 
+const maintenanceStateAttributesV4 = maintenanceStateAttributesV3.extends({
+  lastSummary: schema.maybe(maintenanceSummarySchemaV4),
+});
+
 export type SignificantEventsMaintenanceStateAttributes = TypeOf<
-  typeof maintenanceStateAttributesV3
+  typeof maintenanceStateAttributesV4
 >;
 
 /**
@@ -169,6 +188,13 @@ export const getSignificantEventsMaintenanceStateSavedObjectType = (): SavedObje
       schemas: {
         forwardCompatibility: maintenanceStateAttributesV3.extends({}, { unknowns: 'ignore' }),
         create: maintenanceStateAttributesV3,
+      },
+    },
+    '4': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: maintenanceStateAttributesV4.extends({}, { unknowns: 'ignore' }),
+        create: maintenanceStateAttributesV4,
       },
     },
   },

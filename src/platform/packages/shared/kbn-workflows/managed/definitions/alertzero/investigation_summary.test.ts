@@ -18,9 +18,9 @@ describe('AlertZero investigation summary workflow', () => {
     steps: Array<{ type: string }>;
   };
 
-  it('ships disabled and only matches journal notes, comments, and new attachments', () => {
+  it('ships enabled and only matches journal notes, comments, and new attachments', () => {
     expect(ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW.billable).toBe(false);
-    expect(definition.enabled).toBe(false);
+    expect(definition.enabled).toBe(true);
     expect(definition.triggers[0].type).toBe('ai.conversation.updated');
     const condition = definition.triggers[0].on.condition;
     expect(condition).toContain('event.templateId: "investigation"');

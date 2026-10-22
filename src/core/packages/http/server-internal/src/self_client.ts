@@ -54,6 +54,13 @@ export type SelfClientUiamAttestationGetter = (
   outboundAuthorization: string | null
 ) => string | undefined;
 
+/**
+ * Returns whether `value` is Kibana's own UIAM client authentication, as opposed to one relayed
+ * by an upstream caller.
+ * @internal
+ */
+export type SelfClientOwnClientAuthenticationCheck = (value: string) => boolean;
+
 export const SELF_CALL_RECURSION_ERROR =
   'Refusing Kibana self HTTP call because a self call cannot issue another self call.';
 export const SELF_CALL_MTLS_ERROR =
@@ -80,6 +87,9 @@ interface HttpSelfClientParams {
   readonly log: Logger;
   readonly target: 'auto' | 'local';
   readonly getUiamAttestationGetter?: () => SelfClientUiamAttestationGetter | undefined;
+  readonly getOwnClientAuthenticationCheck?: () =>
+    | SelfClientOwnClientAuthenticationCheck
+    | undefined;
   readonly getUnauthorizedErrorHandler?: () => HttpSelfUnauthorizedErrorHandler | undefined;
 }
 
@@ -138,7 +148,8 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
           redirect: 'manual',
           dispatcher: this.dispatcherProvider.get(
             new URL(outbound.url),
-            this.getEffectiveTarget(options.target)
+            this.getEffectiveTarget(options.target),
+            options.headersTimeout
           ),
         };
         return followSameOriginRedirects(outbound, fetchInit, maxRedirects);
@@ -385,7 +396,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     const authHeaders = this.request.isFakeRequest
       ? getFakeRequestAuthHeaders(this.request)
       : this.params.authRequestHeaders.get(this.request);
-    addHeaders(headers, authHeaders);
+    addHeaders(headers, this.withoutOwnClientAuthentication(authHeaders));
     if (options.forwardRequestHeaders) {
       addHeaders(headers, getForwardedRequestHeaders(this.request));
     }
@@ -411,7 +422,8 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     }
 
     const getAttestation = this.params.getUiamAttestationGetter?.();
-    if (getAttestation) {
+    // Client authentication that survives stripping was relayed, and the receiver gives it priority.
+    if (getAttestation && !headers.has(ES_CLIENT_AUTHENTICATION_HEADER)) {
       const attestation = getAttestation(this.request, headers.get('authorization'));
       if (attestation) {
         headers.set(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER, attestation);
@@ -419,6 +431,25 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     }
 
     return headers;
+  }
+
+  private withoutOwnClientAuthentication(authHeaders?: AuthHeaders): AuthHeaders | undefined {
+    const isOwnClientAuthentication = this.params.getOwnClientAuthenticationCheck?.();
+    if (!authHeaders || !isOwnClientAuthentication) {
+      return authHeaders;
+    }
+
+    const entries = Object.entries(authHeaders).flatMap(([name, value]) => {
+      if (name.toLowerCase() !== ES_CLIENT_AUTHENTICATION_HEADER) {
+        return [[name, value]];
+      }
+      const kept = (Array.isArray(value) ? value : [value]).filter(
+        (entry) => !isOwnClientAuthentication(entry)
+      );
+      return kept.length ? [[name, kept]] : [];
+    });
+
+    return Object.fromEntries(entries) as AuthHeaders;
   }
 
   /**
@@ -526,8 +557,7 @@ const selfUnauthorizedToolkit: HttpSelfUnauthorizedErrorHandlerToolkit = {
 /**
  * Core-owned headers a retry overlay must not be able to set. Deliberately narrower than
  * {@link isProtectedHeader}: overriding `authorization` is the whole point of a retry. The UIAM
- * shared secret headers are denied outright — they belong to the Elasticsearch client and must
- * never leave this process on a self call.
+ * shared secret headers are denied outright: only the request's own auth headers may supply them.
  */
 const isRetryOverridableHeader = (name: string): boolean => {
   const lowerName = name.toLowerCase();
@@ -803,6 +833,15 @@ const validateFetchArguments = <TRequestBody>(
 
   if (options.rawResponse && !options.asResponse) {
     throw new Error('Invalid self HTTP options, rawResponse = true requires asResponse = true.');
+  }
+
+  if (
+    options.headersTimeout !== undefined &&
+    (!Number.isInteger(options.headersTimeout) || options.headersTimeout < 0)
+  ) {
+    throw new Error(
+      'Invalid self HTTP options, headersTimeout must be a positive integer or zero.'
+    );
   }
 
   const invalidHeaders = Object.keys(options.headers ?? {}).filter(isProtectedHeader);

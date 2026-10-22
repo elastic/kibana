@@ -281,7 +281,7 @@ describe('manageActionPolicyTool', () => {
       ]);
     });
 
-    it('surfaces a workflowDiagnostics warning when inputs.payload has no $ref, without failing the call', async () => {
+    it('returns an error result when inputs.payload has no $ref and set_destinations is used', async () => {
       const deps = createDeps();
       deps.getWorkflowClient = jest.fn(() => ({
         getWorkflow: jest.fn().mockResolvedValue({
@@ -309,16 +309,11 @@ describe('manageActionPolicyTool', () => {
       const { results } = result as {
         results: Array<{
           type: string;
-          data?: {
-            workflowDiagnostics?: Array<{ destinationId: string; source: string; message: string }>;
-          };
+          data?: { message?: string };
         }>;
       };
-      expect(results[0].type).toBe(ToolResultType.other);
-      expect(results[0].data?.workflowDiagnostics).toEqual([
-        expect.objectContaining({ destinationId: 'wf-1', source: 'structural' }),
-      ]);
-      expect(ctx.attachments.add).toHaveBeenCalled();
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect(results[0].data?.message).toContain('does not declare `inputs.payload`');
     });
 
     it('surfaces variable-ref errors from validateWorkflow as workflowDiagnostics warnings', async () => {

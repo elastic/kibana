@@ -11,10 +11,63 @@ import {
   buildEvalRunArgs,
   buildEvalRunEnv,
   evalRunFlags,
+  loadScoutHookConfig,
   readConcurrencyFlag,
 } from './run_helpers';
+import { loadVaultConfig, readSuiteSecretFromDevVault } from './profiles';
+
+jest.mock('./profiles', () => ({
+  ...jest.requireActual('./profiles'),
+  loadVaultConfig: jest.fn(),
+  readSuiteSecretFromDevVault: jest.fn(),
+}));
+
+const mockedLoadVaultConfig = jest.mocked(loadVaultConfig);
+const mockedReadSuiteSecret = jest.mocked(readSuiteSecretFromDevVault);
 
 const readFlags = (argv: string[]): FlagsReader => new FlagsReader(getFlags(argv, evalRunFlags));
+
+describe('loadScoutHookConfig', () => {
+  const generalConfig = {
+    evaluationsKbn: { url: 'https://kbn.example' },
+    sandbox: { apiKey: 'from-general' },
+  };
+  const suiteSecret = { sandbox: { apiKey: 'from-suite-secret' } };
+
+  beforeEach(() => {
+    mockedLoadVaultConfig.mockReset().mockReturnValue(generalConfig);
+    mockedReadSuiteSecret.mockReset().mockReturnValue(suiteSecret);
+  });
+
+  it("gives the hook the suite's own secret with the dev-vault profile", () => {
+    expect(loadScoutHookConfig('/repo', 'dev-vault', { vaultSecret: 'nightshift' })).toBe(
+      suiteSecret
+    );
+    expect(mockedReadSuiteSecret).toHaveBeenCalledWith('nightshift');
+    expect(mockedLoadVaultConfig).not.toHaveBeenCalled();
+  });
+
+  it('gives the hook an empty config when the suite secret cannot be read', () => {
+    mockedReadSuiteSecret.mockReturnValue(undefined);
+
+    expect(loadScoutHookConfig('/repo', 'dev-vault', { vaultSecret: 'nightshift' })).toEqual({});
+    expect(mockedLoadVaultConfig).not.toHaveBeenCalled();
+  });
+
+  it('keeps passing the profile JSON for a file profile, even with a vaultSecret', () => {
+    expect(loadScoutHookConfig('/repo', 'local', { vaultSecret: 'nightshift' })).toBe(
+      generalConfig
+    );
+    expect(mockedLoadVaultConfig).toHaveBeenCalledWith('/repo', 'local');
+    expect(mockedReadSuiteSecret).not.toHaveBeenCalled();
+  });
+
+  it('passes the general dev-vault config to suites without a vaultSecret', () => {
+    expect(loadScoutHookConfig('/repo', 'dev-vault', {})).toBe(generalConfig);
+    expect(mockedLoadVaultConfig).toHaveBeenCalledWith('/repo', 'dev-vault');
+    expect(mockedReadSuiteSecret).not.toHaveBeenCalled();
+  });
+});
 
 describe('readConcurrencyFlag', () => {
   it('is undefined when --concurrency is not passed', () => {

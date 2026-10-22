@@ -1,0 +1,36 @@
+{
+  "sha1": "26d935069783262b3831c65879d8bc996d1f4add",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "161829e45eb7a24-164e7c978968e04",
+      "title": "Entity analytics new home page - Privileges shows the no-access screen without read access to the entity store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/tests/new_home_page_privileges.spec.ts",
+        "line": 72,
+        "column": 11
+      }
+    },
+    {
+      "id": "161829e45eb7a24-d9597e6312e8610",
+      "title": "Entity analytics new home page - Privileges leaves out alerts and anomalies, and says why, without read access to them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/tests/new_home_page_privileges.spec.ts",
+        "line": 80,
+        "column": 9
+      }
+    }
+  ]
+}

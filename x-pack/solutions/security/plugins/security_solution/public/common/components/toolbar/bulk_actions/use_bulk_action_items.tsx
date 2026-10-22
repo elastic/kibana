@@ -256,6 +256,7 @@ export const useBulkActionItems = ({
   const { runWorkflowMenuItem, runDocumentWorkflowPanel } = useRunDocumentWorkflowPanel({
     documents: workflowDocuments,
     closePopover: closePopover ?? noop,
+    isBulk: true,
   });
 
   const statusItems = useMemo<BulkActionMenuItem[]>(() => {

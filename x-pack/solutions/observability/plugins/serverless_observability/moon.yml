@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/significant-events-plugin'
   - '@kbn/nightshift-shared'
   - '@kbn/navigation-plugin'
+  - '@kbn/profiling-plugin'
 tags:
   - plugin
   - prod
@@ -58,6 +59,4 @@ fileGroups:
     - server/**/*.ts
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

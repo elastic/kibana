@@ -58,6 +58,31 @@ export const InputSchema = z.object({
    */
   message: z.string().describe('The user input message to send to the agent.'),
   /**
+   * EIS prompt template id. Used only when the resolved connector's
+   * `capabilities.templates.policy` is `required`. Otherwise the step ignores
+   * these fields and runs the agent with `message`. The id starts with a dot.
+   */
+  template_id: z
+    .string()
+    .max(128)
+    .optional()
+    .describe(
+      'Pinned EIS prompt template id, including the leading dot. Sent instead of the message when the connector requires templates.'
+    ),
+  template_version: z
+    .number()
+    .int()
+    .positive()
+    .max(1_000_000)
+    .optional()
+    .describe(
+      'Pinned EIS prompt template version. Required with template_id when the connector requires templates.'
+    ),
+  template_variables: z
+    .record(z.string(), z.unknown())
+    .optional()
+    .describe('Variables for template_id. Ignored when the connector does not require a template.'),
+  /**
    * Optional attachments to provide to the agent.
    */
   attachments: z
@@ -256,14 +281,16 @@ export const ConfigSchema = z
         'The inference endpoint ID to use. Mutually exclusive with `connector-id`; defaults apply when both are omitted.'
       ),
     /**
-     * Model Management > Feature settings feature id to resolve the connector from.
-     * Mutually exclusive with `connector-id` and `inference-id`.
+     * Model Management feature id, or a priority list of them.
+     * A single id is mutually exclusive with `connector-id` and `inference-id`.
+     * In a list, an unregistered id is skipped. A listed feature conflicts with
+     * an explicit connector only when it resolves one.
      */
     'connector-id-by-feature': z
-      .string()
+      .union([z.string().max(255), z.array(z.string().max(255)).max(8)])
       .optional()
       .describe(
-        'The Model Management feature id whose configured connector should be used. Mutually exclusive with `connector-id` and `inference-id`.'
+        'A Model Management feature id, or an ordered list of them. An id that is not registered is skipped. Each id contributes a connector only when one is configured for it; otherwise the next id is tried. A configured connector is mutually exclusive with `connector-id` and `inference-id`. A list where every id misses is not a conflict.'
       ),
     /**
      * When true, create/persist a conversation and associate it with the executing user.
@@ -354,7 +381,13 @@ export const ConfigSchema = z
   .superRefine((cfg, ctx) => {
     const connector = normalizeOptionalConnectorOrInferenceParam(cfg['connector-id']);
     const inference = normalizeOptionalConnectorOrInferenceParam(cfg['inference-id']);
-    const connectorByFeature = normalizeOptionalStringParam(cfg['connector-id-by-feature']);
+    // A list may sit beside connector-id. Whether an id conflicts is decided at
+    // runtime, and only when that feature actually resolves a connector.
+    const connectorByFeatureRaw = cfg['connector-id-by-feature'];
+    const connectorByFeature =
+      typeof connectorByFeatureRaw === 'string'
+        ? normalizeOptionalStringParam(connectorByFeatureRaw)
+        : undefined;
     if (connector !== undefined && inference !== undefined) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

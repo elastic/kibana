@@ -22,7 +22,6 @@ export const TSDB_SCENARIO_DOCUMENT_COUNT = 100;
 export interface TsdbScenarioContext {
   page: ScoutTestFixtures['page'];
   pageObjects: LensPageObjects;
-  tsdbScenario: TsdbScenario;
 }
 
 export const sumFirstNValues = (count: number, bars: Array<{ y: number }> | undefined): number =>
@@ -91,20 +90,21 @@ export interface TsdbHelper {
   ) => Promise<TsdbScenarioSetup>;
 }
 
-export interface TsdbScenario {
-  setup: (
-    initialIndex: string,
-    indexes: TsdbScenarioIndex[],
-    timeRange: TsdbScenarioTimeRange
-  ) => Promise<{ expectedDocumentCountBeforeRollover: number }>;
-}
-
-export interface LensUiTestFixtures extends LensTestFixtures {
-  tsdbScenario: TsdbScenario;
-}
+export type LensUiTestFixtures = LensTestFixtures;
 
 export interface LensUiWorkerFixtures extends ScoutWorkerFixtures {
   tsdbHelper: TsdbHelper;
+}
+
+type TsdbStreamScenarioFixtures = Pick<
+  LensUiWorkerFixtures,
+  'apiServices' | 'tsdbHelper' | 'uiSettings'
+>;
+
+export interface TsdbStreamScenario {
+  setup: (fixtures: TsdbStreamScenarioFixtures) => Promise<void>;
+  cleanup: () => Promise<void>;
+  readonly expectedDocumentCountBeforeRollover: number;
 }
 
 const DOWNSAMPLE_RETRY_TIMEOUT = 15_000;
@@ -255,12 +255,87 @@ const getTsdbMapping = ({
 });
 
 /**
- * Non-parallel counterpart of `spaceTest`, for suites that need a clean, dedicated ES state.
- * Also the single source of the `tsdbHelper`/`tsdbScenario` fixtures used by the TSDB specs;
- * kept here (rather than duplicated in `./index.ts`) so `export *` doesn't have to pick between
- * two same-named `test` exports.
+ * Provisions one TSDB scenario's Elasticsearch and Kibana state, to be driven from
+ * `beforeAll`/`afterAll` so that those hooks' own timeouts cover it instead of the test timeout.
  */
-export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
+export const createTsdbStreamScenario = ({
+  baseStream,
+  baseStreamKind,
+  indexes,
+  timeRange,
+}: {
+  baseStream: string;
+  baseStreamKind: 'upgraded' | 'downgraded';
+  indexes: TsdbScenarioIndex[];
+  timeRange: TsdbScenarioTimeRange;
+}): TsdbStreamScenario => {
+  let cleanupActions: Array<() => Promise<void>> = [];
+  let expectedDocumentCountBeforeRollover = 0;
+
+  const cleanup = async (): Promise<void> => {
+    const actions = [...cleanupActions].reverse();
+    cleanupActions = [];
+    await runCleanupActions(`TSDB scenario for "${baseStream}"`, actions);
+  };
+
+  const setup = async ({
+    apiServices,
+    tsdbHelper,
+    uiSettings,
+  }: TsdbStreamScenarioFixtures): Promise<void> => {
+    try {
+      const baseStreamHandle =
+        baseStreamKind === 'upgraded'
+          ? await tsdbHelper.createUpgradedStream(baseStream, timeRange)
+          : await tsdbHelper.createDowngradedStream(baseStream, timeRange);
+      cleanupActions.push(baseStreamHandle.cleanup);
+
+      const scenario = await tsdbHelper.setupScenario(
+        baseStream,
+        indexes,
+        timeRange.beforeRollover
+      );
+      cleanupActions.push(scenario.cleanup);
+      expectedDocumentCountBeforeRollover = scenario.expectedDocumentCountBeforeRollover;
+
+      const { data: dataView } = await apiServices.dataViews.create({
+        title: scenario.dataViewTitle,
+        timeFieldName: '@timestamp',
+      });
+      cleanupActions.push(async () => {
+        await apiServices.dataViews.delete(dataView.id);
+      });
+
+      cleanupActions.push(async () =>
+        uiSettings.unset('dateFormat:tz', 'defaultIndex', 'timepicker:timeDefaults')
+      );
+      await uiSettings.set({
+        'dateFormat:tz': 'UTC',
+        defaultIndex: dataView.id,
+        'timepicker:timeDefaults': JSON.stringify(timeRange.picker),
+      });
+    } catch (error) {
+      await cleanup();
+      throw error;
+    }
+  };
+
+  return {
+    setup,
+    cleanup,
+    get expectedDocumentCountBeforeRollover() {
+      return expectedDocumentCountBeforeRollover;
+    },
+  };
+};
+
+/**
+ * Non-parallel counterpart of `spaceTest`, for suites that need a clean, dedicated ES state.
+ * Also the single source of the `tsdbHelper` fixture used by the TSDB specs; kept here (rather
+ * than duplicated in `./index.ts`) so `export *` doesn't have to pick between two same-named
+ * `test` exports.
+ */
+export const test = lensTest.extend<{}, LensUiWorkerFixtures>({
   tsdbHelper: [
     async ({ esClient, log }, use) => {
       const deleteDataStream = async (stream: string): Promise<void> => {
@@ -566,49 +641,4 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
-  tsdbScenario: async ({ apiServices, tsdbHelper, uiSettings }, use) => {
-    const dataViewIds: string[] = [];
-    const scenarioCleanups: Array<() => Promise<void>> = [];
-
-    const setup: TsdbScenario['setup'] = async (initialIndex, indexes, timeRange) => {
-      const scenario = await tsdbHelper.setupScenario(
-        initialIndex,
-        indexes,
-        timeRange.beforeRollover
-      );
-      try {
-        const { data: dataView } = await apiServices.dataViews.create({
-          title: scenario.dataViewTitle,
-          timeFieldName: '@timestamp',
-        });
-        dataViewIds.push(dataView.id);
-        scenarioCleanups.push(scenario.cleanup);
-        await uiSettings.set({
-          'dateFormat:tz': 'UTC',
-          defaultIndex: dataView.id,
-          'timepicker:timeDefaults': JSON.stringify(timeRange.picker),
-        });
-        return {
-          expectedDocumentCountBeforeRollover: scenario.expectedDocumentCountBeforeRollover,
-        };
-      } catch (error) {
-        await scenario.cleanup();
-        throw error;
-      }
-    };
-
-    try {
-      await use({ setup });
-    } finally {
-      await runCleanupActions('TSDB scenario fixture', [
-        ...dataViewIds.map((dataViewId) => async () => {
-          await apiServices.dataViews.delete(dataViewId);
-        }),
-        async () => {
-          await uiSettings.unset('dateFormat:tz', 'defaultIndex', 'timepicker:timeDefaults');
-        },
-        ...[...scenarioCleanups].reverse(),
-      ]);
-    }
-  },
 });

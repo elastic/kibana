@@ -27,6 +27,12 @@ describe('buildEpisodeQuery', () => {
     expect(groupHashFilterIndex).toBeLessThan(firstInlineStatsIndex);
   });
 
+  it('keys the aggregations by series ID', () => {
+    const queryString = buildEpisodeQuery(SPACE_ID, 'ep-1', GROUP_HASH).print('basic');
+    expect(queryString).toMatch(/INLINE STATS last_snooze_action[^|]*BY series_id/);
+    expect(queryString).toMatch(/KEEP [^|]*\bseries_id\b/);
+  });
+
   it('limits to 1 row', () => {
     const queryString = buildEpisodeQuery(SPACE_ID, 'ep-1', GROUP_HASH).print('basic');
     expect(queryString).toContain('LIMIT 1');

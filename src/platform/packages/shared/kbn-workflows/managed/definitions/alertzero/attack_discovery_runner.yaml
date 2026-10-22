@@ -272,6 +272,68 @@ steps:
                 autonomy: "${{ inputs.autonomy }}"
                 parent_run_id: "{{ execution.id }}"
 
+  # Telemetry: Attack Discovery's own run event (alerts, batches, attacks), once every batch has
+  # dispatched, before `emit_result` ends the run.
+  - name: report_run_completed
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: ad_worker_run_completed
+      alerts_analyzed: "${{ steps.run_generation.output.alerts_analyzed | default: 0 }}"
+      batches_total: "${{ steps.run_generation.output.batches_total | default: 0 }}"
+      batches_failed: "${{ steps.run_generation.output.batches_failed | default: 0 }}"
+      attacks_generated: "${{ steps.run_generation.output.discoveries_generated | default: 0 }}"
+      attacks_persisted: "${{ steps.resolve_fanout.output.attack_count | default: 0 }}"
+      run_outcome: |-
+        {%- assign batches_total = steps.run_generation.output.batches_total | default: 0 -%}
+        {%- assign batches_failed = steps.run_generation.output.batches_failed | default: 0 -%}
+        {%- assign generated = steps.run_generation.output.discoveries_generated | default: 0 -%}
+        {%- assign persisted = steps.resolve_fanout.output.attack_count | default: 0 -%}
+        {%- if batches_total == 0 -%}
+        empty_no_alerts
+        {%- elsif batches_failed >= batches_total -%}
+        failed_all_batches
+        {%- elsif batches_failed > 0 -%}
+        degraded_partial
+        {%- elsif persisted > 0 -%}
+        produced
+        {%- elsif generated > 0 -%}
+        empty_all_duplicates
+        {%- else -%}
+        empty_no_attacks
+        {%- endif -%}
+
+  # The same run as the shared `worker_run_completed` every Worker sends, so runs compare across
+  # Workers. The items are generation batches, which the run waits for, so none is in flight;
+  # alerts and attacks are on the event above.
+  - name: report_worker_run_completed
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: worker_run_completed
+      candidates_found: "${{ steps.run_generation.output.batches_total | default: 0 }}"
+      items_dispatched: "${{ steps.run_generation.output.batches_total | default: 0 }}"
+      items_failed: "${{ steps.run_generation.output.batches_failed | default: 0 }}"
+      items_in_flight: 0
+      degraded_reason: "{% if steps.run_generation.output.batches_failed > 0 %}dependency_unavailable{% else %}none{% endif %}"
+      run_outcome: |-
+        {%- assign batches_total = steps.run_generation.output.batches_total | default: 0 -%}
+        {%- assign batches_failed = steps.run_generation.output.batches_failed | default: 0 -%}
+        {%- assign persisted = steps.resolve_fanout.output.attack_count | default: 0 -%}
+        {%- if batches_total == 0 -%}
+        empty_nothing_pending
+        {%- elsif batches_failed >= batches_total -%}
+        failed_all_items
+        {%- elsif batches_failed > 0 -%}
+        degraded_partial
+        {%- elsif persisted > 0 -%}
+        produced
+        {%- else -%}
+        empty_nothing_found
+        {%- endif -%}
+
   # Every batch has dispatched. This is not a fan-in: the reviews are still running
   # on their own executions, and this run reports only what it did itself.
   - name: emit_result

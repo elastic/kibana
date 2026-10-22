@@ -189,9 +189,22 @@ export const AlertEpisodeDetailsFlyout = ({
   const sourceIcon = connectorSource ? ConnectorIconsMap.get(`.${connectorSource}`) : systemIcon;
 
   const showRuleDependentTabs = isRuleLoaded(ruleState);
+  // Related episodes are matched by rule or external source. Until the episode loads the
+  // section renders its own loading or error state, so the panel stays.
+  const showRelated = !episode || Boolean(episode['rule.id']) || connectorSource !== undefined;
   const episodes = useMemo(() => (episode ? [episode] : []), [episode]);
   const compatibleActions = useMemo(
     () => (actions && episodes.length ? actions.filter((a) => a.isCompatible({ episodes })) : []),
+    [actions, episodes]
+  );
+  const menuActions = useMemo(
+    () =>
+      actions && episodes.length
+        ? actions.filter(
+            (action) =>
+              action.isCompatible({ episodes }) || Boolean(action.showWhenDisabled?.({ episodes }))
+          )
+        : [],
     [actions, episodes]
   );
 
@@ -459,36 +472,41 @@ export const AlertEpisodeDetailsFlyout = ({
                 </EuiFlexGroup>
               </FlyoutAccordion>
 
-              <FlyoutAccordion
-                title={i18n.FLYOUT_ACCORDION_INVESTIGATION}
-                initialIsOpen
-                hasBorder={false}
-                data-test-subj="alertingV2EpisodeFlyoutAccordionInvestigation"
-              >
-                <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
-                  {/* No rule means no runbook, so the panel goes too. */}
-                  {showRuleDependentTabs && (
-                    <EuiPanel hasBorder paddingSize="m">
-                      <AlertEpisodeRunbookSection
-                        episodeId={episodeId}
-                        services={services}
-                        compressed
-                        showTitle
-                        onShowFullGuide={() => setIsRunbookOpen(true)}
-                      />
-                    </EuiPanel>
-                  )}
-                  <EuiPanel hasBorder paddingSize="m">
-                    <AlertEpisodesRelatedSection
-                      episodeId={episodeId}
-                      services={services}
-                      getEpisodeDetailsHref={getEpisodeDetailsHref}
-                      showHeading
-                      compressed
-                    />
-                  </EuiPanel>
-                </EuiFlexGroup>
-              </FlyoutAccordion>
+              {(showRuleDependentTabs || showRelated) && (
+                <FlyoutAccordion
+                  title={i18n.FLYOUT_ACCORDION_INVESTIGATION}
+                  initialIsOpen
+                  hasBorder={false}
+                  data-test-subj="alertingV2EpisodeFlyoutAccordionInvestigation"
+                >
+                  <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+                    {/* No rule means no runbook, so the panel goes too. */}
+                    {showRuleDependentTabs && (
+                      <EuiPanel hasBorder paddingSize="m">
+                        <AlertEpisodeRunbookSection
+                          episodeId={episodeId}
+                          services={services}
+                          compressed
+                          showTitle
+                          onShowFullGuide={() => setIsRunbookOpen(true)}
+                        />
+                      </EuiPanel>
+                    )}
+                    {/* No rule or source means nothing to relate by, so the panel goes too. */}
+                    {showRelated && (
+                      <EuiPanel hasBorder paddingSize="m">
+                        <AlertEpisodesRelatedSection
+                          episodeId={episodeId}
+                          services={services}
+                          getEpisodeDetailsHref={getEpisodeDetailsHref}
+                          showHeading
+                          compressed
+                        />
+                      </EuiPanel>
+                    )}
+                  </EuiFlexGroup>
+                </FlyoutAccordion>
+              )}
 
               <FlyoutAccordion
                 title={i18n.FLYOUT_ACCORDION_RULE}
@@ -512,7 +530,8 @@ export const AlertEpisodeDetailsFlyout = ({
           <FlyoutTemplate.Body.TabPanel tabId="timeline">
             <AlertEpisodeTimelineSection
               episodeId={episodeId}
-              groupHash={groupHash}
+              seriesId={episode ? episode.series_id ?? null : undefined}
+              groupHash={episode?.group_hash}
               services={services}
             />
           </FlyoutTemplate.Body.TabPanel>
@@ -591,7 +610,7 @@ export const AlertEpisodeDetailsFlyout = ({
           anchor={menuAnchorRef.current}
           isOpen={isMenuOpen}
           onClose={() => setIsMenuOpen(false)}
-          actions={compatibleActions}
+          actions={menuActions}
           episodes={episodes}
           viewDetailsHref={getEpisodeDetailsHref(episodeId)}
           onSuccess={invalidateEpisodeQueries}

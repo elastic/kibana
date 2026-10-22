@@ -44,6 +44,7 @@ interface CreateClientOptions {
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
   resolveConnectorId?: (connectorId: string) => Promise<string>;
+  shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
 }
 
 interface BoundCreateClientOptions extends CreateClientOptions {
@@ -72,6 +73,7 @@ export function createClient(
     isDefaultConnectorOnly,
     getDefaultConnectorId,
     resolveConnectorId,
+    shouldStreamInferenceEndpoint,
   } = options;
   const client = createInferenceClient({
     request,
@@ -90,6 +92,7 @@ export function createClient(
     isDefaultConnectorOnly,
     getDefaultConnectorId,
     resolveConnectorId,
+    shouldStreamInferenceEndpoint,
   });
   if ('bindTo' in options) {
     return bindClient(client, options.bindTo);
@@ -112,7 +115,8 @@ interface CreateClientWithoutRequestOptions {
  * but no HTTP request context.
  *
  * Internally wraps the actionsClient in an actions-like object so that the underlying
- * createInferenceClient can resolve connectors. Anonymization is not available.
+ * createInferenceClient can resolve connectors. Anonymization is not available, and
+ * inference endpoints always stream since the per-space streaming setting cannot be read.
  */
 export const createClientWithoutRequest = ({
   actionsClient,

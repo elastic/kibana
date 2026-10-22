@@ -342,13 +342,14 @@ describe('proposals.createProposal step', () => {
     expect(result.output?.alwaysGate).toBe(true);
   });
 
-  it.each([
-    ['autonomy-dependent', { name: 'Create rule', approvalPolicy: 'autonomy-dependent' }],
-    ['no declared policy', { name: 'Create rule' }],
-  ])('should leave alwaysGate false for an action with %s', async (_label, action) => {
-    // Only `always-gate` overrides the caller; a resolved action that declares
-    // anything else leaves the decision to the autonomy already resolved.
-    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending', action });
+  it('should leave alwaysGate false for an autonomy-dependent action', async () => {
+    // Only `always-gate` overrides the caller; an autonomy-dependent action
+    // leaves the decision to the autonomy already resolved.
+    const create = jest.fn().mockResolvedValue({
+      id: 'p',
+      status: 'pending',
+      action: { name: 'Create rule', approvalPolicy: 'autonomy-dependent' },
+    });
     const { definition } = createDefinition(create);
 
     const result = await definition.handler(

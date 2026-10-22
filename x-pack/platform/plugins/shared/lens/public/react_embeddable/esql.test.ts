@@ -115,4 +115,51 @@ describe('ES|QL attributes creation', () => {
     const attributes = await loadESQLAttributes(getServices());
     expect(attributes).not.toBeUndefined();
   });
+
+  it('prefers a main result that lands while the fallback is still loading', async () => {
+    jest.useFakeTimers();
+    let resolveIndex: (indexName: string) => void = () => {};
+    const indexSpy = jest.spyOn(esqlUtils, 'getIndexForESQLQuery').mockReturnValue(
+      new Promise((resolve) => {
+        resolveIndex = resolve;
+      })
+    );
+    mockCreateEsqlAdHocDataView.mockImplementation(({ query }) => {
+      if (query === 'ROW x = 1') {
+        return new Promise(() => {});
+      }
+      return Promise.resolve(dataViewMock);
+    });
+    jest.spyOn(esqlUtils, 'getESQLQueryColumns').mockResolvedValue([]);
+    jest.spyOn(suggestionModule, 'suggestionsApi').mockReturnValue([
+      {
+        title: 'Main',
+        visualizationId: 'lnsXY',
+        datasourceId: 'formBased',
+        datasourceState: {},
+        visualizationState: {},
+        columns: 1,
+        score: 1,
+        previewIcon: 'icon',
+        changeType: 'initial',
+        keptLayerIds: [],
+      },
+    ]);
+
+    try {
+      const attributesPromise = loadESQLAttributes(getServices());
+      await jest.advanceTimersByTimeAsync(5001);
+      resolveIndex('index');
+      const attributes = await attributesPromise;
+
+      expect(attributes).not.toBeUndefined();
+      expect(mockCreateEsqlAdHocDataView).toHaveBeenCalledWith(
+        expect.objectContaining({ query: expect.stringContaining('FROM index') })
+      );
+    } finally {
+      indexSpy.mockRestore();
+      mockCreateEsqlAdHocDataView.mockReset();
+      jest.useRealTimers();
+    }
+  });
 });

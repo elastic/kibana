@@ -81,6 +81,52 @@ describe('detection marker routes', () => {
     ).toBe(false);
   });
 
+  it('accepts the classifier outcome on a processed marker and drops unknown keys from it', () => {
+    const bodySchema = markProcessedRoute.params.shape.body;
+    const parsed = bodySchema.safeParse({
+      detection_ids: ['d-1'],
+      processed_by: 'exec-1',
+      skip: {
+        reason: 'still_breaching',
+        event_id: 'event-1',
+        probe_status: 'ok',
+        baseline: { decision: 'background', value: 150, samples: 60, median: 122.5 },
+        decision: 'skip',
+        rule_uuid: 'rule-1',
+      },
+    });
+
+    expect(parsed.success).toBe(true);
+    expect(parsed.data?.skip).toEqual({
+      reason: 'still_breaching',
+      event_id: 'event-1',
+      probe_status: 'ok',
+      baseline: { decision: 'background', value: 150, samples: 60, median: 122.5 },
+    });
+  });
+
+  it('refuses a processed marker whose skip reason is not a skip reason', () => {
+    const bodySchema = markProcessedRoute.params.shape.body;
+    expect(
+      bodySchema.safeParse({
+        detection_ids: ['d-1'],
+        processed_by: 'exec-1',
+        skip: { reason: 'state_changed', event_id: 'event-1' },
+      }).success
+    ).toBe(false);
+  });
+
+  it.each([undefined, ''])('refuses a skip whose event_id is %p', (eventId) => {
+    const bodySchema = markProcessedRoute.params.shape.body;
+    expect(
+      bodySchema.safeParse({
+        detection_ids: ['d-1'],
+        processed_by: 'exec-1',
+        skip: { reason: 'still_breaching', event_id: eventId },
+      }).success
+    ).toBe(false);
+  });
+
   it('bound the number of rules marked scanned per request', () => {
     const bodySchema = markScannedRoute.params.shape.body;
     expect(bodySchema.safeParse({ rule_uuids: ['rule-1'], scanned_by: 'exec-1' }).success).toBe(

@@ -12,45 +12,103 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type {
+  ChatCompletionReasoningEffort,
+  ConnectorTelemetryMetadata,
+  InferenceConnector,
+} from '@kbn/inference-common';
+import { getSupportedReasoningEffortLevels } from '@kbn/inference-common';
+import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import { createAgentNotFoundError, isAgentNotFoundError } from '@kbn/agent-builder-common';
+import type { ModelProvider } from '@kbn/agent-builder-server/runner';
 import type { AgentRegistry, AgentsServiceStart } from '../../agents';
 import { createModelProvider } from '../runner/model_provider';
 import { resolveExecutionConnectorId } from './resolve_execution_connector_id';
 
-const getAgentInferenceFeatureId = async ({
+export interface ResolvedServices {
+  modelProvider: ModelProvider;
+  selectedConnectorId: string;
+  reasoningLevel?: ChatCompletionReasoningEffort;
+}
+
+const getAgentConfiguration = async ({
   agentRegistry,
   agentId,
-  connectorId,
 }: {
   agentRegistry: AgentRegistry;
   agentId: string;
-  connectorId?: string;
-}): Promise<string | undefined> => {
-  const notFoundError = () =>
-    createAgentNotFoundError({
-      agentId,
-      customMessage: `Agent "${agentId}" not found or not available`,
-    });
-
-  if (connectorId !== undefined) {
-    if (!(await agentRegistry.has(agentId))) {
-      throw notFoundError();
-    }
-    return undefined;
-  }
-
+}): Promise<AgentConfiguration> => {
   try {
-    const agent = await agentRegistry.get(agentId);
-    return agent.configuration.inference_feature_id;
+    const { configuration } = await agentRegistry.get(agentId);
+    return configuration;
   } catch (error) {
-    throw isAgentNotFoundError(error) ? notFoundError() : error;
+    throw isAgentNotFoundError(error)
+      ? createAgentNotFoundError({
+          agentId,
+          customMessage: `Agent "${agentId}" not found or not available`,
+        })
+      : error;
   }
 };
 
+const resolveAgentReasoningLevel = async ({
+  agentId,
+  reasoningLevel,
+  connectorId,
+  connector,
+  request,
+  inference,
+  logger,
+}: {
+  agentId: string;
+  reasoningLevel?: ChatCompletionReasoningEffort;
+  connectorId: string;
+  connector?: InferenceConnector;
+  request: KibanaRequest;
+  inference: InferenceServerStart;
+  logger: Logger;
+}): Promise<ChatCompletionReasoningEffort | undefined> => {
+  if (reasoningLevel === undefined) {
+    return undefined;
+  }
+
+  // Resolution failures are left to the runner, which records them against the execution.
+  const resolvedConnector =
+    connector ?? (await inference.getConnectorById(connectorId, request).catch(() => undefined));
+  const supportedLevels = resolvedConnector
+    ? getSupportedReasoningEffortLevels(resolvedConnector)
+    : undefined;
+
+  if (supportedLevels === undefined || supportedLevels.includes(reasoningLevel)) {
+    return reasoningLevel;
+  }
+
+  logger.warn(
+    `Reasoning level "${reasoningLevel}" declared by agent "${agentId}" is not supported by model "${
+      resolvedConnector?.name
+    }" (${connectorId}), running without a reasoning level. Supported levels: ${supportedLevels.join(
+      ', '
+    )}.`
+  );
+  return undefined;
+};
+
+/**
+ * Resolves the model provider an agent execution runs with.
+ *
+ * @param connectorId - Connector requested by the caller. When set, the agent's inference feature
+ * is ignored.
+ * @param reasoningLevel - Reasoning level requested by the caller. When set, it overrides the
+ * agent's default `reasoning_level`.
+ * @returns The model provider, the selected connector and the reasoning level the run uses.
+ * @throws {AgentBuilderError} with code `agentNotFound` when the agent does not exist or the
+ * caller cannot access it.
+ * @throws {Error} when no connector is available.
+ */
 export const resolveServices = async ({
   agentId,
   connectorId,
+  reasoningLevel,
   telemetryMetadata,
   request,
   logger,
@@ -63,6 +121,7 @@ export const resolveServices = async ({
 }: {
   agentId: string;
   connectorId?: string;
+  reasoningLevel?: ChatCompletionReasoningEffort;
   telemetryMetadata?: ConnectorTelemetryMetadata;
   request: KibanaRequest;
   logger: Logger;
@@ -72,15 +131,17 @@ export const resolveServices = async ({
   spaces?: SpacesPluginStart;
   security: SecurityServiceStart;
   elasticsearch: ElasticsearchServiceStart;
-}) => {
+}): Promise<ResolvedServices> => {
   const agentRegistry = await agentService.getRegistry({ request });
-  const inferenceFeatureId = await getAgentInferenceFeatureId({
-    agentRegistry,
-    agentId,
-    connectorId,
-  });
+  const { inference_feature_id: agentInferenceFeatureId, reasoning_level: agentReasoningLevel } =
+    await getAgentConfiguration({ agentRegistry, agentId });
+  const inferenceFeatureId = connectorId === undefined ? agentInferenceFeatureId : undefined;
 
-  const { connectorId: selectedConnectorId, source } = await resolveExecutionConnectorId({
+  const {
+    connectorId: selectedConnectorId,
+    connector,
+    source,
+  } = await resolveExecutionConnectorId({
     connectorId,
     inferenceFeatureId,
     request,
@@ -97,6 +158,18 @@ export const resolveServices = async ({
     throw new Error('No connector available for chat execution');
   }
 
+  const resolvedReasoningLevel =
+    reasoningLevel ??
+    (await resolveAgentReasoningLevel({
+      agentId,
+      reasoningLevel: agentReasoningLevel,
+      connectorId: selectedConnectorId,
+      connector,
+      request,
+      inference,
+      logger,
+    }));
+
   const modelProvider = createModelProvider({
     inference,
     request,
@@ -112,5 +185,6 @@ export const resolveServices = async ({
   return {
     modelProvider,
     selectedConnectorId,
+    ...(resolvedReasoningLevel !== undefined ? { reasoningLevel: resolvedReasoningLevel } : {}),
   };
 };

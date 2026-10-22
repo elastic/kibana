@@ -221,7 +221,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
             label: i18n.translate('xpack.idxMgmt.indexDetails.openInDiscoverMenuLabel', {
               defaultMessage: 'Open in Discover',
             }),
-            iconType: 'discoverApp' as const,
+            iconType: 'productDiscover' as const,
             run: () => {
               discoverLocator.navigate({ dataViewSpec: { title: index.name } });
             },

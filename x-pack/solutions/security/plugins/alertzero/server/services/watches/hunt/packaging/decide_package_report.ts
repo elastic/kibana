@@ -9,10 +9,6 @@ import { v5 as uuidv5 } from 'uuid';
 import type { ActionCatalogEntry, ActionSubjectKind } from '@kbn/alertzero-common';
 import type { JsonSchema } from '@kbn/workflows';
 import {
-  CONFIRMED_FINDING_CRITICALITY,
-  CRITICAL_FINDING_CRITICALITY,
-} from '../../../../../common/proposals/asset_criticality';
-import {
   MAX_SUMMARY_BULLETS_CHARS,
   MAX_SUMMARY_PROPOSAL_BULLETS,
 } from '../../../../../common/step_types/package_report';
@@ -55,14 +51,13 @@ const PACKAGEABLE_CATEGORIES = ['respond', 'investigate'];
 const HUNT_PROPOSAL_SUBJECT_UUID_NAMESPACE = 'a3c7e91f-4b2d-5e68-9c1a-8f0d6b3e5a72';
 
 /**
- * What is being proposed: the action, and the host, process, user or service it acts on. Not
+ * What is being proposed: the action, and the host or process it acts on. Not
  * which Investigation raised it, so two Investigations that reach the same host share a key and
  * their Proposals converge (see `buildHuntProposalId`). Hashing the Investigation in would let
  * only a rerun of the same Investigation collide.
  *
- * `subjectId` is the agent id for host and process subjects (the material is unchanged
- * from when this slot was called `endpointId`) and `<kind>:<value>` for identities, which
- * cannot collide with an agent id.
+ * `subjectId` is the agent id of the host (the material is unchanged from when this slot was
+ * called `endpointId`).
  */
 export const buildProposalSubjectKey = ({
   subjectId,
@@ -80,8 +75,8 @@ export const buildProposalSubjectKey = ({
 };
 
 /**
- * Every subject packaging could act on, in a stable order: each host, then its processes,
- * then users, then services. Unreachable hosts stay in the list; callers filter.
+ * Every subject packaging could act on, in a stable order: each host, then its processes.
+ * Unreachable hosts stay in the list; callers filter.
  */
 export const collectSubjects = (state: CurrentRunState): Subject[] => {
   const subjects: Subject[] = [];
@@ -102,26 +97,11 @@ export const collectSubjects = (state: CurrentRunState): Subject[] => {
       }
     }
   }
-  for (const user of state.users) {
-    subjects.push({ kind: 'user', value: user, reachable: true });
-  }
-  for (const service of state.services) {
-    subjects.push({ kind: 'service', value: service, reachable: true });
-  }
   return subjects;
 };
 
 /** Stable id for the key material's second slot; undefined for a host with no agent id. */
-const subjectId = (subject: Subject): string | undefined => {
-  switch (subject.kind) {
-    case 'host':
-    case 'process':
-      return subject.host.agentId;
-    case 'user':
-    case 'service':
-      return `${subject.kind}:${subject.value}`;
-  }
-};
+const subjectId = (subject: Subject): string | undefined => subject.host.agentId;
 
 /**
  * Input keys each subject kind can supply. An action whose `required` keys fall outside its
@@ -130,8 +110,6 @@ const subjectId = (subject: Subject): string | undefined => {
 const SUPPLIED_KEYS: Record<SubjectKind, readonly string[]> = {
   host: ['endpoint_ids'],
   process: ['endpoint_ids', 'parameters'],
-  user: ['id_field', 'id_value', 'criticality_level'],
-  service: ['id_field', 'id_value', 'criticality_level'],
 };
 
 /**
@@ -217,21 +195,11 @@ export const canFillRespondAction = ({
   if (!schemaRequiredKeys(schema).every((key) => supplied.includes(key))) {
     return false;
   }
-  if (subject.kind === 'host' || subject.kind === 'process') {
-    if (!schemaHasProperty(schema, 'endpoint_ids')) {
-      return false;
-    }
+  if (!schemaHasProperty(schema, 'endpoint_ids')) {
+    return false;
   }
   if (subject.kind === 'process') {
     return subject.processSelector.entityId !== undefined;
-  }
-  if (subject.kind === 'user' || subject.kind === 'service') {
-    // Asset Criticality's Elasticsearch document _id is `${id_field}:${id_value}` verbatim
-    // (AssetCriticalityDataClient.createId), and Elasticsearch rejects an _id over 512 UTF-8
-    // bytes. `subject.value` is allowed up to 2048 *characters* (matching the SSE entity cap),
-    // so an overlong identity must fall back to the recommendation rather than mint an action
-    // that fails its write after an analyst has already approved it.
-    return Buffer.byteLength(`${subject.kind}.name:${subject.value}`, 'utf8') <= 512;
   }
   return true;
 };
@@ -240,49 +208,27 @@ export const canFillRespondAction = ({
 export const buildActionInput = ({
   entry,
   subject,
-  state,
 }: {
   entry: ActionCatalogEntry;
   subject: Subject;
-  state: CurrentRunState;
 }): Record<string, unknown> | undefined => {
   if (!canFillRespondAction({ entry, subject })) {
     return undefined;
   }
   const schema = actionInputSchema(entry);
-  switch (subject.kind) {
-    case 'host':
-    case 'process': {
-      const agentId = subject.host.agentId;
-      if (agentId === undefined) {
-        return undefined;
-      }
-      const actionInput: Record<string, unknown> = { endpoint_ids: [agentId] };
-      if (subject.kind === 'process' && needsProcessParameters(schema)) {
-        // `canFillRespondAction` above already guarantees `processSelector.entityId` is set.
-        // Memory dump's request schema also takes `type`; only process dumps are proposed.
-        const scope =
-          DEFEND_ACTION_KINDS[entry.workflowId] === 'memory_dump' ? { type: 'process' } : {};
-        actionInput.parameters = { ...scope, entity_id: subject.processSelector.entityId };
-      }
-      return actionInput;
-    }
-    case 'user':
-    case 'service': {
-      const actionInput: Record<string, unknown> = {
-        id_field: `${subject.kind}.name`,
-        id_value: subject.value,
-      };
-      if (schemaHasProperty(schema, 'criticality_level')) {
-        // A confirmed finding marks the identity high impact; a critical one goes one higher.
-        actionInput.criticality_level =
-          state.severity === 'critical'
-            ? CRITICAL_FINDING_CRITICALITY
-            : CONFIRMED_FINDING_CRITICALITY;
-      }
-      return actionInput;
-    }
+  const agentId = subject.host.agentId;
+  if (agentId === undefined) {
+    return undefined;
   }
+  const actionInput: Record<string, unknown> = { endpoint_ids: [agentId] };
+  if (subject.kind === 'process' && needsProcessParameters(schema)) {
+    // `canFillRespondAction` above already guarantees `processSelector.entityId` is set.
+    // Memory dump's request schema also takes `type`; only process dumps are proposed.
+    const scope =
+      DEFEND_ACTION_KINDS[entry.workflowId] === 'memory_dump' ? { type: 'process' } : {};
+    actionInput.parameters = { ...scope, entity_id: subject.processSelector.entityId };
+  }
+  return actionInput;
 };
 
 const MAX_SUMMARY_HOST_NAME_CHARS = 253;
@@ -347,7 +293,6 @@ const buildRecommendationReasonLines = ({
   unenrolledHosts,
   users,
   services,
-  proposedIdentityIds,
   hasIocIndicator,
   hasUnnamedIdentityEntity,
   evidenceOutsideActionable,
@@ -358,8 +303,6 @@ const buildRecommendationReasonLines = ({
   unenrolledHosts: CurrentRunHost[];
   users: string[];
   services: string[];
-  /** `<kind>:<value>` of every identity that got an executable proposal this run. */
-  proposedIdentityIds: Set<string>;
   hasIocIndicator: boolean;
   /** An identity named by a field (`user.email`, `user.id`, `service.id`) this run can't act on. */
   hasUnnamedIdentityEntity: boolean;
@@ -380,30 +323,15 @@ const buildRecommendationReasonLines = ({
       } not enrolled, so no Defend action reaches ${unenrolledHosts.length === 1 ? 'it' : 'them'}.`
     );
   }
-  const isProposed = (kind: 'user' | 'service') => (value: string) =>
-    proposedIdentityIds.has(`${kind}:${value}`);
-  const proposed = {
-    users: users.filter(isProposed('user')),
-    services: services.filter(isProposed('service')),
-  };
-  const unreached = {
-    users: users.filter((u) => !isProposed('user')(u)),
-    services: services.filter((s) => !isProposed('service')(s)),
-  };
-  const proposedCount = proposed.users.length + proposed.services.length;
-  if (proposedCount > 0) {
+  const identityCount = users.length + services.length;
+  if (identityCount > 0) {
     lines.push(
-      `Asset criticality is proposed for ${describeIdentities(proposed)}; revoking ${
-        proposedCount === 1 ? 'its' : 'their'
-      } credentials is manual until an identity provider action exists.`
-    );
-  }
-  const unreachedCount = unreached.users.length + unreached.services.length;
-  if (unreachedCount > 0) {
-    lines.push(
-      `${unreachedCount === 1 ? 'Identity' : 'Identities'} ${describeIdentities(unreached)} ${
-        unreachedCount === 1 ? 'is' : 'are'
-      } implicated; a host action does not reach ${unreachedCount === 1 ? 'it' : 'them'}.`
+      `${identityCount === 1 ? 'Identity' : 'Identities'} ${describeIdentities({
+        users,
+        services,
+      })} ${identityCount === 1 ? 'is' : 'are'} implicated; a host action does not reach ${
+        identityCount === 1 ? 'it' : 'them'
+      }.`
     );
   }
   if (hasIocIndicator || hasUnnamedIdentityEntity) {
@@ -508,7 +436,7 @@ export const decidePackageReport = ({
     ruleLine?: string;
   }): void => {
     const id = subjectId(subject);
-    const actionInput = buildActionInput({ entry, subject, state });
+    const actionInput = buildActionInput({ entry, subject });
     if (id === undefined || !actionInput) {
       // A process-scoped action that cannot be built because the selector has no `entity_id`
       // (a bare pid is never enough to back an executable action) would otherwise vanish
@@ -540,16 +468,13 @@ export const decidePackageReport = ({
       conversationId,
       // Per-subject title so two process-scoped proposals on the same host (e.g.
       // suspend for two different pids) read as distinct, not duplicates.
-      title: buildProposalTitle({ entry, subject, actionInput }),
-      comment: buildProposalComment({ entry, subject, state, actionInput, ruleLine }),
+      title: buildProposalTitle({ entry, subject }),
+      comment: buildProposalComment({ entry, subject, state, ruleLine }),
       category: entry.category ?? 'respond',
       impact: entry.impact,
       actionWorkflowId: entry.workflowId,
       actionInput,
-      // `hostName` stays populated for host and process mints; identity mints carry only `subject`.
-      ...((subject.kind === 'host' || subject.kind === 'process') && {
-        hostName: subject.host.name,
-      }),
+      hostName: subject.host.name,
       subject: { kind: subject.kind, value: subject.value },
     });
   };
@@ -624,8 +549,8 @@ export const decidePackageReport = ({
       }
     }
 
-    // Any other fillable action (identity actions included) keeps the generic fan-out over
-    // every reachable subject its declared kinds accept.
+    // Any other fillable action keeps the generic fan-out over every reachable subject its
+    // declared kinds accept.
     for (const subject of reachable) {
       for (const entry of other) {
         mint({ entry, subject });
@@ -666,13 +591,6 @@ export const decidePackageReport = ({
       unenrolledHosts: unenrolled,
       users: state.users,
       services: state.services,
-      proposedIdentityIds: new Set(
-        proposals.flatMap(({ subject }) =>
-          subject && (subject.kind === 'user' || subject.kind === 'service')
-            ? [`${subject.kind}:${subject.value}`]
-            : []
-        )
-      ),
       hasIocIndicator: state.hasIocIndicator,
       hasUnnamedIdentityEntity: state.hasUnnamedIdentityEntity,
       evidenceOutsideActionable,

@@ -96,6 +96,7 @@ import {
 } from '../common/locators/paths';
 import { registerDataHandler } from './context/has_data_context/data_handler';
 import { getObservabilityAlertsLinkTitle } from './nav/get_alerts_nav_panel';
+import { getClassicNavTopSections } from './nav/get_classic_nav_top_sections';
 import { setInvestigationsClient } from './services/investigations_client';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import type { ObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
@@ -472,19 +473,11 @@ export class Plugin
                       path: link.path ?? '',
                     }));
 
-                  return [
-                    {
-                      label: '',
-                      sortKey: 100,
-                      entries: [
-                        ...overviewLink,
-                        ...alertsLinks,
-                        ...sloLink,
-                        ...casesLink,
-                        ...aiAssistantLink,
-                      ],
-                    },
-                  ];
+                  return getClassicNavTopSections(coreStart, {
+                    overviewLinks: overviewLink,
+                    alertsLinks,
+                    trailingLinks: [...sloLink, ...casesLink, ...aiAssistantLink],
+                  });
                 })
               );
             })
@@ -505,7 +498,7 @@ export class Plugin
               return [
                 {
                   label: '',
-                  sortKey: 101,
+                  sortKey: 103,
                   entries: [
                     {
                       label: i18n.translate('xpack.observability.streamsAppLinkTitle', {
@@ -550,7 +543,7 @@ export class Plugin
       deepLinks,
       updater$: this.appUpdater$,
       pricing: coreStart.pricing,
-      showV1AlertsInGlobalSearch: shouldShowV1ObservabilityAlertsTable(coreStart),
+      showV1Alerts: shouldShowV1ObservabilityAlertsTable(coreStart),
     });
 
     import('./navigation_tree').then(({ createDefinition }) => {

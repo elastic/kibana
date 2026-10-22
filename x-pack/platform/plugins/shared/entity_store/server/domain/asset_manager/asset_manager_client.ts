@@ -504,18 +504,43 @@ export class AssetManagerClient {
         engines,
         { historySnapshot, logsExtraction: logsExtractionConfig, excludedUserNames },
         globalOverrides,
+        dualProcessEnabled,
       ] = await Promise.all([
         this.engineDescriptorClient.getAll(),
         this.globalStateClient.findOrThrow(),
         this.globalStateClient.findLogExtractionOverrides(),
+        this.isDualProcessEnabled(),
       ]);
 
       const status = this.calculateEntityStoreStatus(engines);
+      // Report the config each running process resolves: priority and non-priority for
+      // dual-process types, single for the rest.
+      const isDualProcess = (type: EntityType) =>
+        dualProcessEnabled && hasPriorityExtractionGate(type);
       const logsExtractionConfigByType = Object.fromEntries(
         engines.map((engine) => [
           engine.type,
-          getMergedConfig(engine.type, globalOverrides, engine.logExtractionConfig),
+          getMergedConfig(
+            engine.type,
+            globalOverrides,
+            engine.logExtractionConfig,
+            isDualProcess(engine.type) ? EXTRACTION_MODE.priority : EXTRACTION_MODE.single
+          ),
         ])
+      ) as Partial<Record<EntityType, LogExtractionConfig>>;
+      const nonPriorityLogsExtractionConfigByType = Object.fromEntries(
+        engines
+          .filter(({ type }) => isDualProcess(type))
+          .map((engine) => [
+            engine.type,
+            getMergedConfig(
+              engine.type,
+              globalOverrides,
+              engine.logExtractionConfig,
+              EXTRACTION_MODE.nonPriority,
+              engine.nonPriorityLogExtractionConfig
+            ),
+          ])
       ) as Partial<Record<EntityType, LogExtractionConfig>>;
 
       if (withComponents) {
@@ -528,6 +553,7 @@ export class AssetManagerClient {
           historySnapshot,
           logsExtractionConfig,
           logsExtractionConfigByType,
+          nonPriorityLogsExtractionConfigByType,
           excludedUserNames,
         };
       }
@@ -538,6 +564,7 @@ export class AssetManagerClient {
         historySnapshot,
         logsExtractionConfig,
         logsExtractionConfigByType,
+        nonPriorityLogsExtractionConfigByType,
         excludedUserNames,
       };
     } catch (error) {

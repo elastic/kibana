@@ -50,7 +50,7 @@ const isBoundsEntry = (
 ): entry is readonly [string, HistogramBoundsResult] => entry !== undefined;
 
 /**
- * Fetches one MIN/MAX request per visible histogram chart and keeps only finite ranges where min < max.
+ * Fetches one MIN/MAX request per visible histogram chart and keeps finite bounds, including a point where min equals max.
  */
 export const useFetchHistogramBounds = ({
   enabled,
@@ -199,7 +199,7 @@ export const useFetchHistogramBounds = ({
             row?.[HISTOGRAM_BOUNDS_MIN_COLUMN],
             row?.[HISTOGRAM_BOUNDS_MAX_COLUMN]
           );
-          return bounds ? [boundsQuery.metricKey, bounds] : undefined;
+          return bounds ? [boundsQuery.metricKey, { bounds }] : undefined;
         } catch (error) {
           if (signal.aborted) {
             return undefined;

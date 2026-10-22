@@ -27,11 +27,16 @@ import { UI_POLICY_SECTIONS } from './ui_policy_sections';
 const POLICY_OPERATING_SYSTEMS = new Set<string>(Object.values(PolicyOperatingSystem));
 const GLOBAL_MANIFEST_VERSION = 'global_manifest_version';
 const CUSTOM_YARA_SIGNATURES_LEAF = '.memory_protection.custom_yara_signatures';
+const REGISTRY_CREDENTIAL_HARDENING_ENABLED_PATH =
+  'windows.attack_surface_reduction.registry_credential_hardening.enabled';
+const REGISTRY_CREDENTIAL_HARDENING_DESCENDANTS_PATH =
+  'windows.advanced.kernel.registry_credential_hardening.descendants';
 
 /**
  * Fields the skill must not advertise as freely editable when their product feature is off.
- * Custom YARA signatures are additionally gated by an experimental flag, which the eligibility
- * context covers; this only records the product-feature dimension carried in the registry.
+ * Custom YARA signatures and registry credential hardening are additionally gated by an
+ * experimental flag, which the eligibility context covers; this only records the
+ * product-feature dimension carried in the registry.
  */
 const productFeatureGateFor = (path: string): FieldRegistryProductFeatureGate | undefined => {
   if (path === GLOBAL_MANIFEST_VERSION) {
@@ -42,6 +47,12 @@ const productFeatureGateFor = (path: string): FieldRegistryProductFeatureGate | 
     CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS.has(path)
   ) {
     return ProductFeatureSecurityKey.endpointCustomYaraSignatures;
+  }
+  if (
+    path === REGISTRY_CREDENTIAL_HARDENING_ENABLED_PATH ||
+    path === REGISTRY_CREDENTIAL_HARDENING_DESCENDANTS_PATH
+  ) {
+    return ProductFeatureSecurityKey.endpointRegistryCredentialHardening;
   }
   return undefined;
 };

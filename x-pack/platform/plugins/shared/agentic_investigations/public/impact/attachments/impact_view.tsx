@@ -23,6 +23,7 @@ import {
   GroupedAttachmentList,
   GroupedAttachmentRow,
   impactEntityFlyoutType,
+  ShowMoreFooter,
   type GroupedAttachmentRowAction,
   type ImpactEntityTarget,
 } from '@kbn/agentic-investigations-common';
@@ -130,19 +131,44 @@ const ImpactEntityRow = ({
   );
 };
 
+/** The flyout lists this many entities up front; "Show more" reveals the next batch. */
+const INITIAL_VISIBLE_ENTITIES = 5;
+const ENTITIES_PER_SHOW_MORE = 10;
+
 const EntityList = ({
   entities,
   onOpenEntity,
 }: {
   entities: ImpactContentEntity[];
   onOpenEntity?: (entity: ImpactEntityTarget) => void;
-}) => (
-  <GroupedAttachmentList data-test-subj="investigationImpactEntities">
-    {entities.map((entity) => (
-      <ImpactEntityRow key={entity.id} entity={entity} onOpenEntity={onOpenEntity} />
-    ))}
-  </GroupedAttachmentList>
-);
+}) => {
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_ENTITIES);
+  const hiddenCount = Math.max(0, entities.length - visibleCount);
+
+  return (
+    <GroupedAttachmentList data-test-subj="investigationImpactEntities">
+      {entities.slice(0, visibleCount).map((entity) => (
+        <ImpactEntityRow key={entity.id} entity={entity} onOpenEntity={onOpenEntity} />
+      ))}
+      {/* A row of the same list, like the queue's footer, so it sits inside the box under a rule. */}
+      {hiddenCount > 0 && (
+        <li>
+          <ShowMoreFooter
+            label={i18n.translate(
+              'xpack.agenticInvestigations.impact.attachments.showMoreEntities',
+              {
+                defaultMessage: 'Show more ({count})',
+                values: { count: hiddenCount },
+              }
+            )}
+            onClick={() => setVisibleCount((count) => count + ENTITIES_PER_SHOW_MORE)}
+            data-test-subj="investigationImpactEntitiesShowMore"
+          />
+        </li>
+      )}
+    </GroupedAttachmentList>
+  );
+};
 
 const EntityBadges = ({ entities }: { entities: ImpactContentEntity[] }) => (
   <EuiFlexGroup gutterSize="s" wrap responsive={false} data-test-subj="investigationImpactEntities">

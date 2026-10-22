@@ -114,6 +114,10 @@ export interface OpenTreeNode {
 const isIterationStepType = (stepType: string | undefined): boolean =>
   stepType === 'foreach-iteration' || stepType === 'while-iteration';
 
+/** The engine's `fallback` scope has no step execution of its own. */
+const isFallbackScope = (item: StepExecutionTreeItem): boolean =>
+  item.stepExecutionId == null && item.stepId === 'fallback';
+
 const formatIterationLabel = (n: number): string =>
   i18n.translate('workflows.WorkflowStepExecutionTree.iterationLabel', {
     defaultMessage: 'Iteration #{n}',
@@ -345,6 +349,9 @@ function convertTreeToOpenNodes(
         ) {
           return options.iterationStatusOverrides.get(iterationIndexEarly);
         }
+        return deriveIterationStatus(item, stepExecutionMap);
+      }
+      if (isFallbackScope(item)) {
         return deriveIterationStatus(item, stepExecutionMap);
       }
       return stepExecution?.status ?? item.status ?? undefined;
@@ -624,7 +631,7 @@ function convertTreeToOpenNodes(
       const isRetryParent =
         item.retryAttemptCount != null &&
         item.retryAttemptCount > 0 &&
-        item.children.every((c) => c.isRetryAttempt);
+        item.children.some((c) => c.isRetryAttempt);
 
       if (isRetryParent) {
         // Wait annotations between attempts. Attempt lists that exceed the
@@ -634,7 +641,7 @@ function convertTreeToOpenNodes(
         const configuredDelayMs = isValidDuration(delay) ? parseDuration(delay) : null;
         const nodes: OpenTreeNode[] = [];
         for (let i = 0; i < item.children.length; i++) {
-          if (i > 0) {
+          if (i > 0 && item.children[i].isRetryAttempt) {
             const prevExec = stepExecutionMap.get(item.children[i - 1].stepExecutionId ?? '');
             const nextExec = stepExecutionMap.get(item.children[i].stepExecutionId ?? '');
             const waitMs = computeInterAttemptWaitMs(prevExec, nextExec, configuredDelayMs);
@@ -682,13 +689,15 @@ function convertTreeToOpenNodes(
       if (
         item.retryAttemptCount != null &&
         item.retryAttemptCount > 0 &&
+        !item.isRetryAttempt &&
         item.children.length > 0
       ) {
-        const wall = computeRetryWallTimeMs(item.children, stepExecutionMap);
+        const attempts = item.children.filter((c) => c.isRetryAttempt);
+        const wall = computeRetryWallTimeMs(attempts, stepExecutionMap);
         if (wall != null) return wall;
-        return sumSubtreeExecutionTimeMs([item], stepExecutionMap);
+        return sumSubtreeExecutionTimeMs(attempts, stepExecutionMap);
       }
-      if (isIterationStepType(stepType) && item.children.length > 0) {
+      if ((isIterationStepType(stepType) || isFallbackScope(item)) && item.children.length > 0) {
         return sumSubtreeExecutionTimeMs([item], stepExecutionMap);
       }
       return stepExecution?.executionTimeMs ?? null;
@@ -786,7 +795,7 @@ function convertTreeToOpenNodes(
         isRetryAttempt: item.isRetryAttempt,
         retryAttemptCount: item.isRetryAttempt ? undefined : item.retryAttemptCount,
         retryMaxAttempts,
-        error: errorMessage,
+        error: carriesErrorRegion ? errorMessage : null,
         onViewFailedStepInput:
           status && isDangerousStatus(status) && stepExecution?.id
             ? () => onSelectStepExecution(stepExecution.id)
@@ -827,6 +836,32 @@ function convertTreeToOpenNodes(
     return [node];
   });
 }
+
+const getErrorMessage = (error: StepExecutionTreeRowProps['error']): string | undefined =>
+  typeof error === 'string' ? error : error?.message;
+
+const isNodeExpanded = (
+  node: OpenTreeNode,
+  expandedIds: Set<string>,
+  leafList: boolean
+): boolean => {
+  if (leafList) return false;
+  if (node.row?.onToggleExpand) return Boolean(node.row.isExpanded);
+  return node.children.length > 0 && expandedIds.has(node.id);
+};
+
+const hasVisibleDescendantWithError = (
+  nodes: OpenTreeNode[],
+  message: string,
+  expandedIds: Set<string>,
+  leafList: boolean
+): boolean =>
+  nodes.some(
+    (node) =>
+      getErrorMessage(node.row?.error) === message ||
+      (isNodeExpanded(node, expandedIds, leafList) &&
+        hasVisibleDescendantWithError(node.children, message, expandedIds, leafList))
+  );
 
 const OpenTreeNodes = ({
   nodes,
@@ -897,11 +932,15 @@ const OpenTreeNodes = ({
           ? undefined
           : node.row.onToggleExpand ??
             (hasTreeChildren ? () => onToggleExpand(node.id) : undefined);
-        const isExpanded = leafList
-          ? false
-          : node.row.onToggleExpand
-          ? Boolean(node.row.isExpanded)
-          : hasTreeChildren && expandedIds.has(node.id);
+        const isExpanded = isNodeExpanded(node, expandedIds, leafList);
+        const showChildren = isExpanded && hasTreeChildren;
+        const message = getErrorMessage(node.row.error);
+        // The engine copies a failed step's error onto every enclosing scope
+        // (iteration, foreach, ...); show it once, on the deepest visible row.
+        const isErrorShownBelow =
+          showChildren &&
+          message != null &&
+          hasVisibleDescendantWithError(node.children, message, expandedIds, leafList);
 
         return (
           <div
@@ -912,6 +951,7 @@ const OpenTreeNodes = ({
           >
             <StepExecutionTreeRow
               {...node.row}
+              error={isErrorShownBelow ? null : node.row.error}
               isExpanded={isExpanded}
               onToggleExpand={handleToggle}
               isExpandable={isExpandable}
@@ -923,7 +963,7 @@ const OpenTreeNodes = ({
                   : 'step-execution-tree-item-label'
               }
             />
-            {isExpanded && hasTreeChildren && (
+            {showChildren && (
               <div
                 data-test-subj="workflowStepTreeIndentGuide"
                 css={css`
@@ -1568,7 +1608,7 @@ export const WorkflowStepExecutionTree = ({
       title={
         <h2>
           <FormattedMessage
-            id="workflows.WorkflowStepExecutionTree.errorLoadingStepExecutions"
+            id="workflows.WorkflowStepExecutionTree.errorLoadingExecutionGraph"
             defaultMessage="Error loading execution graph"
           />
         </h2>

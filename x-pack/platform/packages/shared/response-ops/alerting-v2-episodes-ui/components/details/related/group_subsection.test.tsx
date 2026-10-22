@@ -47,6 +47,7 @@ const loadedRuleState: LoadedRuleState = {
 
 const mockRuleProps = {
   ruleState: loadedRuleState,
+  scope: { type: 'rule' as const, ruleId: 'rule-1' },
 };
 const mockGetEpisodeDetailsHref = (id: string) => `/base/${id}`;
 
@@ -135,5 +136,28 @@ describe('RelatedEpisodesGroupSubsection', () => {
 
     expect(screen.getByTestId('alertingV2RelatedEpisodesGroupEmpty')).toBeInTheDocument();
     expect(screen.getByText('No other alerts in this group.')).toBeInTheDocument();
+  });
+
+  it('describes the group by source when the episode has no rule', () => {
+    mockUseFetch.mockReturnValue({ data: [], isLoading: false } as any);
+
+    render(
+      <I18nProvider>
+        <RelatedEpisodesGroupSubsection
+          currentEpisodeId="ep-1"
+          groupHash="gh-1"
+          ruleState={{ status: RuleStateStatus.idle }}
+          scope={{ type: 'source', source: 'zabbix' }}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+        />
+      </I18nProvider>
+    );
+
+    expect(
+      screen.getByText('Other alerts from this source that share the same group as this alert.')
+    ).toBeInTheDocument();
+    expect(mockUseFetch).toHaveBeenCalledWith(
+      expect.objectContaining({ scope: { type: 'source', source: 'zabbix' } })
+    );
   });
 });

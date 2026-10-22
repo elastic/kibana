@@ -10,8 +10,6 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { InferencePublicStart } from '@kbn/inference-plugin/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NightshiftSourcesPublicPluginStart } from '@kbn/nightshift-sources-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SignificantEventsPublicPluginStart } from '@kbn/significant-events-plugin/public';
@@ -28,8 +26,6 @@ export interface SignificantEventsAppStartDependencies {
   cloud?: CloudStart;
   cps?: CPSPluginStart;
   data: DataPublicPluginStart;
-  inference: InferencePublicStart;
-  licensing: LicensingPluginStart;
   nightshiftSources: NightshiftSourcesPublicPluginStart;
   share: SharePluginStart;
   significantEvents: SignificantEventsPublicPluginStart;

@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
+import type { AppHeaderBack } from '@kbn/app-header';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { i18n } from '@kbn/i18n';
@@ -22,13 +23,8 @@ import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSetWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 
-const libraryBreadcrumbLabel = i18n.translate(
-  'workflowsManagement.libraryTemplatePage.libraryBreadcrumb',
-  { defaultMessage: 'Template Library' }
-);
-
-const backToLibraryLabel = i18n.translate('workflowsManagement.libraryTemplatePage.backToLibrary', {
-  defaultMessage: 'Back to library',
+const libraryBreadcrumbLabel = i18n.translate('workflows.libraryTemplatePage.libraryBreadcrumb', {
+  defaultMessage: 'Template library',
 });
 
 type LibraryTemplateDetailPageProps = RouteComponentProps<{ slug: string }>;
@@ -39,7 +35,7 @@ interface TemplateBreadcrumb {
 }
 
 /**
- * Workflow Template Library template detail page (`/app/workflows/library/:slug`).
+ * Workflow Template library template detail page (`/app/workflows/library/:slug`).
  * Fills the available height like the workflow editor so the read-only preview
  * grows with the viewport. The route is always registered (see `routes.tsx`);
  * this page redirects to the workflows list when the library is disabled.
@@ -50,22 +46,17 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
   const { application } = useKibana().services;
   const setWorkflowsBreadcrumbs = useSetWorkflowsBreadcrumbs();
 
-  const goToLibrary = useCallback(() => {
-    application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library });
-  }, [application]);
+  const libraryBack = useMemo<AppHeaderBack>(
+    () => ({
+      label: libraryBreadcrumbLabel,
+      href: application.getUrlForApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library }),
+    }),
+    [application]
+  );
 
   const libraryBreadcrumb = useMemo<ChromeBreadcrumb>(
-    () => ({
-      text: libraryBreadcrumbLabel,
-      href: application.getUrlForApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library }),
-      onClick: (event) => {
-        if (event) {
-          event.preventDefault();
-        }
-        goToLibrary();
-      },
-    }),
-    [application, goToLibrary]
+    () => ({ text: libraryBack.label, href: libraryBack.href }),
+    [libraryBack]
   );
 
   const [templateBreadcrumb, setTemplateBreadcrumb] = useState<TemplateBreadcrumb | undefined>();
@@ -92,18 +83,6 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
     return <Redirect to="/" />;
   }
 
-  const backButton = (
-    <EuiButtonEmpty
-      size="xs"
-      flush="left"
-      iconType="chevronSingleLeft"
-      onClick={goToLibrary}
-      data-test-subj="workflowLibraryTemplateDetailBackButton"
-    >
-      {backToLibraryLabel}
-    </EuiButtonEmpty>
-  );
-
   return (
     <EuiFlexGroup
       direction="column"
@@ -126,7 +105,7 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
           slug={slug}
           onLoaded={handleTemplateLoaded}
           showGraphPreview
-          backButton={backButton}
+          back={libraryBack}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

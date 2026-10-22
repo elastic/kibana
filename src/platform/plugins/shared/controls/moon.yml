@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/css-utils'
   - '@kbn/esql-utils'
+  - '@kbn/esql-controls-utils'
   - '@kbn/esql-browser'
   - '@kbn/search-types'
   - '@kbn/controls-constants'
@@ -65,6 +66,4 @@ fileGroups:
     - server/**/*
     - ./jest_setup.ts
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

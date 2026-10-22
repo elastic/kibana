@@ -547,16 +547,6 @@ export interface TableSuggestionColumn {
   operation: Operation;
 }
 
-export interface DataSourceInfo {
-  layerId: string;
-  dataView?: DataView;
-  columns: Array<{
-    id: string;
-    role: 'split' | 'metric';
-    operation: OperationDescriptor & { type: string; fields?: string[]; filter?: Query };
-  }>;
-}
-
 export interface VisualizationInfo {
   layers: Array<{
     layerId: string;

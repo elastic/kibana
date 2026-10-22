@@ -194,7 +194,7 @@ describe('bulkCreate', () => {
       clientArgs.request,
       expect.objectContaining({
         caseId,
-        attachmentIds: expect.arrayContaining([expect.any(String), expect.any(String)]),
+        ids: expect.arrayContaining([expect.any(String), expect.any(String)]),
         attachmentType: 'comment',
         owner: SECURITY_SOLUTION_OWNER,
       })

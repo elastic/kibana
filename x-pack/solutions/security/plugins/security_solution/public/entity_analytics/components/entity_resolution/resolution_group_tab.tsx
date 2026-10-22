@@ -20,6 +20,7 @@ import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_e
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import type { EntityType as SecurityEntityType } from '../../../../common/entity_analytics/types';
+import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import {
@@ -59,6 +60,11 @@ interface ResolutionGroupTabProps {
     entityId: string;
     entityName: string | undefined;
   }) => void;
+  /**
+   * View mode of the flyout the tab was opened from. In `resolved` mode that flyout shows the whole
+   * group, so the target entity's row stays openable and opens its own single-entity view.
+   */
+  mode?: EntityViewMode;
 }
 
 export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
@@ -66,6 +72,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
   entityType,
   scopeId,
   onShowEntity,
+  mode = 'single',
 }) => {
   const { http } = useKibana().services;
   const { addError } = useAppToasts();
@@ -96,6 +103,8 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
   const [removingEntityId, setRemovingEntityId] = useState<string | undefined>();
 
   const targetEntityId = group?.target ? getEntityId(group.target) : undefined;
+  // In the group view no single entity is "open", so every row (the target included) can be opened.
+  const currentEntityId = mode === 'resolved' ? undefined : entityId;
   const hasGroup = group && group.group_size > 1;
   const resolutionRiskScore = hasGroup ? getResolutionRiskScore(group.target) : undefined;
 
@@ -255,7 +264,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
           targetEntityId={targetEntityId}
           removingEntityId={removingEntityId}
           onEntityNameClick={handleEntityNameClick}
-          currentEntityId={entityId}
+          currentEntityId={currentEntityId}
         />
         <EuiSpacer size="l" />
         <AddEntitiesSection

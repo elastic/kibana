@@ -51,7 +51,8 @@ const TRIGGER_SYNC_TASK_PATH = 'internal/synthetics/trigger_task_run/syncPrivate
  * older than the package policy's: those writes use `bumpRevision: false`, so
  * only the deferred bump can move it past them.
  */
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/298264
+apiTest.describe.skip(
   'ScalablePrivateLocationMaintenanceWindowSync',
   { tag: ['@local-stateful-classic'] },
   () => {

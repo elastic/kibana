@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
 import {
   validateEsqlQuery,
@@ -47,33 +47,39 @@ import { bulkErrorSchema } from './bulk_operation_schema';
 /** Primitives */
 
 // `abort` makes the length cap final so the parser never runs on oversized input.
-export const esqlQuerySchema = z
-  .string()
-  .min(1)
-  .max(MAX_ESQL_QUERY_LENGTH, { abort: true })
-  .superRefine((value, ctx) => {
-    const error = validateEsqlQuery(value);
-    if (error) {
-      ctx.addIssue({ code: 'custom', message: error });
-    }
-  });
+export const esqlQuerySchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(MAX_ESQL_QUERY_LENGTH, { abort: true })
+    .superRefine((value, ctx) => {
+      const error = validateEsqlQuery(value);
+      if (error) {
+        ctx.addIssue({ code: 'custom', message: error });
+      }
+    })
+);
 
 /** Kind */
 
-export const ruleKindSchema = z
-  .union([
-    z
-      .literal('alert')
-      .describe(
-        'Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.'
-      ),
-    z
-      .literal('signal')
-      .describe(
-        'Stores each match as a rule event you can query. Alerts are not created and notifications are not sent.'
-      ),
-  ])
-  .describe('Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).');
+export const ruleKindSchema = lazySchema(() =>
+  z
+    .union([
+      z
+        .literal('alert')
+        .describe(
+          'Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.'
+        ),
+      z
+        .literal('signal')
+        .describe(
+          'Stores each match as a rule event you can query. Alerts are not created and notifications are not sent.'
+        ),
+    ])
+    .describe(
+      'Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).'
+    )
+);
 
 export type RuleKind = z.infer<typeof ruleKindSchema>;
 
@@ -89,76 +95,90 @@ const METADATA_ROUTING_TAGS_DESCRIPTION =
 const METADATA_BUILDER_DESCRIPTION =
   'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL; send `null` on PATCH to clear it.';
 
-const metadataNameSchema = z.string().min(1).max(MAX_NAME_LENGTH);
-const metadataDescriptionSchema = z.string().max(MAX_DESCRIPTION_LENGTH).trim().min(1);
-const metadataTagsSchema = tagsSchema.min(1);
-const metadataRoutingTagsSchema = tagsSchema.min(1);
-const metadataBuilderSchema = z
-  .object({ type: z.string().max(64).trim().min(1).describe('Rule builder type.') })
-  .strict();
+const metadataNameSchema = lazySchema(() => z.string().min(1).max(MAX_NAME_LENGTH));
+const metadataDescriptionSchema = lazySchema(() =>
+  z.string().max(MAX_DESCRIPTION_LENGTH).trim().min(1)
+);
+const metadataTagsSchema = lazySchema(() => tagsSchema.min(1));
+const metadataRoutingTagsSchema = lazySchema(() => tagsSchema.min(1));
+const metadataBuilderSchema = lazySchema(() =>
+  z.object({ type: z.string().max(64).trim().min(1).describe('Rule builder type.') }).strict()
+);
 
-export const metadataSchema = z
-  .object({
-    name: metadataNameSchema.describe(METADATA_NAME_DESCRIPTION),
-    description: metadataDescriptionSchema.optional().describe(METADATA_DESCRIPTION_DESCRIPTION),
-    tags: metadataTagsSchema.optional().describe(METADATA_TAGS_DESCRIPTION),
-    routing_tags: metadataRoutingTagsSchema.optional().describe(METADATA_ROUTING_TAGS_DESCRIPTION),
-    builder: metadataBuilderSchema.optional().describe(METADATA_BUILDER_DESCRIPTION),
-  })
-  .strict()
-  .describe(METADATA_DESCRIPTION)
-  .meta({ id: 'alerting_rule_metadata' });
+export const metadataSchema = lazySchema(() =>
+  z
+    .object({
+      name: metadataNameSchema.describe(METADATA_NAME_DESCRIPTION),
+      description: metadataDescriptionSchema.optional().describe(METADATA_DESCRIPTION_DESCRIPTION),
+      tags: metadataTagsSchema.optional().describe(METADATA_TAGS_DESCRIPTION),
+      routing_tags: metadataRoutingTagsSchema
+        .optional()
+        .describe(METADATA_ROUTING_TAGS_DESCRIPTION),
+      builder: metadataBuilderSchema.optional().describe(METADATA_BUILDER_DESCRIPTION),
+    })
+    .strict()
+    .describe(METADATA_DESCRIPTION)
+    .meta({ id: 'alerting_rule_metadata' })
+);
 
 /** The PATCH counterpart of {@link metadataSchema}: leaves move, and clear, independently. */
-const metadataPatchSchema = z
-  .object({
-    name: metadataNameSchema.optional().describe(METADATA_NAME_DESCRIPTION),
-    description: metadataDescriptionSchema
-      .nullable()
-      .optional()
-      .describe(METADATA_DESCRIPTION_DESCRIPTION),
-    tags: metadataTagsSchema.nullable().optional().describe(METADATA_TAGS_DESCRIPTION),
-    routing_tags: metadataRoutingTagsSchema
-      .nullable()
-      .optional()
-      .describe(METADATA_ROUTING_TAGS_DESCRIPTION),
-    builder: metadataBuilderSchema.nullable().optional().describe(METADATA_BUILDER_DESCRIPTION),
-  })
-  .strict()
-  .meta({ id: 'alerting_rule_metadata_patch', description: METADATA_DESCRIPTION });
+const metadataPatchSchema = lazySchema(() =>
+  z
+    .object({
+      name: metadataNameSchema.optional().describe(METADATA_NAME_DESCRIPTION),
+      description: metadataDescriptionSchema
+        .nullable()
+        .optional()
+        .describe(METADATA_DESCRIPTION_DESCRIPTION),
+      tags: metadataTagsSchema.nullable().optional().describe(METADATA_TAGS_DESCRIPTION),
+      routing_tags: metadataRoutingTagsSchema
+        .nullable()
+        .optional()
+        .describe(METADATA_ROUTING_TAGS_DESCRIPTION),
+      builder: metadataBuilderSchema.nullable().optional().describe(METADATA_BUILDER_DESCRIPTION),
+    })
+    .strict()
+    .meta({ id: 'alerting_rule_metadata_patch', description: METADATA_DESCRIPTION })
+);
 
 /** Schedule (required) */
 
 /** Duration with an additional minimum-interval guard for schedule frequency. */
-export const scheduleEverySchema = durationSchema.superRefine((value, ctx) => {
-  const error = validateMinDuration(value, MIN_SCHEDULE_INTERVAL);
-  if (error) {
-    ctx.addIssue({ code: 'custom', message: error });
-  }
-});
+export const scheduleEverySchema = lazySchema(() =>
+  durationSchema.superRefine((value, ctx) => {
+    const error = validateMinDuration(value, MIN_SCHEDULE_INTERVAL);
+    if (error) {
+      ctx.addIssue({ code: 'custom', message: error });
+    }
+  })
+);
 
 const SCHEDULE_DESCRIPTION = 'Execution schedule configuration.';
 const SCHEDULE_EVERY_DESCRIPTION = 'Execution interval, e.g. 1m, 5m, 1h.';
 const SCHEDULE_LOOKBACK_DESCRIPTION =
   'Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.';
 
-export const scheduleSchema = z
-  .object({
-    every: scheduleEverySchema.describe(SCHEDULE_EVERY_DESCRIPTION),
-    lookback: durationSchema.optional().describe(SCHEDULE_LOOKBACK_DESCRIPTION),
-  })
-  .strict()
-  .describe(SCHEDULE_DESCRIPTION)
-  .meta({ id: 'alerting_rule_schedule' });
+export const scheduleSchema = lazySchema(() =>
+  z
+    .object({
+      every: scheduleEverySchema.describe(SCHEDULE_EVERY_DESCRIPTION),
+      lookback: durationSchema.optional().describe(SCHEDULE_LOOKBACK_DESCRIPTION),
+    })
+    .strict()
+    .describe(SCHEDULE_DESCRIPTION)
+    .meta({ id: 'alerting_rule_schedule' })
+);
 
 /** The PATCH counterpart of {@link scheduleSchema}. */
-const schedulePatchSchema = z
-  .object({
-    every: scheduleEverySchema.optional().describe(SCHEDULE_EVERY_DESCRIPTION),
-    lookback: durationSchema.nullable().optional().describe(SCHEDULE_LOOKBACK_DESCRIPTION),
-  })
-  .strict()
-  .meta({ id: 'alerting_rule_schedule_patch', description: SCHEDULE_DESCRIPTION });
+const schedulePatchSchema = lazySchema(() =>
+  z
+    .object({
+      every: scheduleEverySchema.optional().describe(SCHEDULE_EVERY_DESCRIPTION),
+      lookback: durationSchema.nullable().optional().describe(SCHEDULE_LOOKBACK_DESCRIPTION),
+    })
+    .strict()
+    .meta({ id: 'alerting_rule_schedule_patch', description: SCHEDULE_DESCRIPTION })
+);
 
 /** Query (required) */
 
@@ -170,41 +190,47 @@ const schedulePatchSchema = z
  * read: an unparseable segment composes to bare `base`, which would store a
  * rule where every row matches.
  */
-export const esqlQuerySegmentSchema = z
-  .string()
-  .min(1)
-  .max(MAX_ESQL_QUERY_LENGTH, { abort: true })
-  .refine((s) => s.trim().length > 0, {
-    message: 'Segment must not be whitespace-only',
-    abort: true,
-  })
-  .superRefine((value, ctx) => {
-    const error = validateEsqlQuerySegment(value);
-    if (error) {
-      ctx.addIssue({ code: 'custom', message: error });
-    }
-  });
+export const esqlQuerySegmentSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(MAX_ESQL_QUERY_LENGTH, { abort: true })
+    .refine((s) => s.trim().length > 0, {
+      message: 'Segment must not be whitespace-only',
+      abort: true,
+    })
+    .superRefine((value, ctx) => {
+      const error = validateEsqlQuerySegment(value);
+      if (error) {
+        ctx.addIssue({ code: 'custom', message: error });
+      }
+    })
+);
 
 const BREACH_DESCRIPTION =
   'Optional ES|QL clause appended to `query.base`. If omitted, every row from `query.base` is a match, and a `no_data` strategy other than `ignore` then requires `no_data.query`.';
 const BREACH_SEGMENT_DESCRIPTION =
   "ES|QL clause appended to `query.base`, for example `WHERE avg_cpu > 0.85`. Don't include a `FROM` clause.";
 
-const breachSchema = z
-  .object({
-    segment: esqlQuerySegmentSchema.describe(BREACH_SEGMENT_DESCRIPTION),
-  })
-  .strict()
-  .describe(BREACH_DESCRIPTION)
-  .meta({ id: 'alerting_rule_breach' });
+const breachSchema = lazySchema(() =>
+  z
+    .object({
+      segment: esqlQuerySegmentSchema.describe(BREACH_SEGMENT_DESCRIPTION),
+    })
+    .strict()
+    .describe(BREACH_DESCRIPTION)
+    .meta({ id: 'alerting_rule_breach' })
+);
 
 /** The PATCH counterpart of {@link breachSchema}. */
-const breachPatchSchema = z
-  .object({
-    segment: esqlQuerySegmentSchema.optional().describe(BREACH_SEGMENT_DESCRIPTION),
-  })
-  .strict()
-  .meta({ id: 'alerting_rule_breach_patch', description: BREACH_DESCRIPTION });
+const breachPatchSchema = lazySchema(() =>
+  z
+    .object({
+      segment: esqlQuerySegmentSchema.optional().describe(BREACH_SEGMENT_DESCRIPTION),
+    })
+    .strict()
+    .meta({ id: 'alerting_rule_breach_patch', description: BREACH_DESCRIPTION })
+);
 
 /**
  * Composing re-parses both parts, so it repeats the error of whichever part is
@@ -224,35 +250,39 @@ const QUERY_BASE_DESCRIPTION =
  * The PATCH counterpart of {@link querySchema}. The composed-query check is deliberately absent:
  * a patch may carry `breach` without `base`, so composition is only checkable once merged.
  */
-const queryPatchSchema = z
-  .object({
-    base: esqlQuerySchema.optional().describe(QUERY_BASE_DESCRIPTION),
-    breach: breachPatchSchema.nullable().optional().describe(BREACH_DESCRIPTION),
-  })
-  .strict()
-  .meta({ id: 'alerting_rule_query_patch', description: QUERY_DESCRIPTION });
+const queryPatchSchema = lazySchema(() =>
+  z
+    .object({
+      base: esqlQuerySchema.optional().describe(QUERY_BASE_DESCRIPTION),
+      breach: breachPatchSchema.nullable().optional().describe(BREACH_DESCRIPTION),
+    })
+    .strict()
+    .meta({ id: 'alerting_rule_query_patch', description: QUERY_DESCRIPTION })
+);
 
-export const querySchema = z
-  .object({
-    base: esqlQuerySchema.describe(QUERY_BASE_DESCRIPTION),
-    breach: breachSchema.optional(),
-  })
-  .strict()
-  .check((ctx) => {
-    if (!ctx.value.breach || hasIssueOn(ctx.issues, 'base', 'breach')) return;
+export const querySchema = lazySchema(() =>
+  z
+    .object({
+      base: esqlQuerySchema.describe(QUERY_BASE_DESCRIPTION),
+      breach: breachSchema.optional(),
+    })
+    .strict()
+    .check((ctx) => {
+      if (!ctx.value.breach || hasIssueOn(ctx.issues, 'base', 'breach')) return;
 
-    const breachError = validateComposedEsqlQuery(ctx.value.base, ctx.value.breach.segment);
-    if (breachError) {
-      ctx.issues.push({
-        code: 'custom',
-        path: ['breach', 'segment'],
-        message: breachError,
-        input: ctx.value.breach.segment,
-      });
-    }
-  })
-  .describe(QUERY_DESCRIPTION)
-  .meta({ id: 'alerting_rule_query' });
+      const breachError = validateComposedEsqlQuery(ctx.value.base, ctx.value.breach.segment);
+      if (breachError) {
+        ctx.issues.push({
+          code: 'custom',
+          path: ['breach', 'segment'],
+          message: breachError,
+          input: ctx.value.breach.segment,
+        });
+      }
+    })
+    .describe(QUERY_DESCRIPTION)
+    .meta({ id: 'alerting_rule_query' })
+);
 
 export type Query = z.infer<typeof querySchema>;
 
@@ -261,49 +291,53 @@ export type Query = z.infer<typeof querySchema>;
 const RECOVERY_DESCRIPTION =
   'When an alert recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.';
 
-export const recoveryStrategySchema = z.enum(['no_breach', 'condition', 'query', 'manual']);
+export const recoveryStrategySchema = lazySchema(() =>
+  z.enum(['no_breach', 'condition', 'query', 'manual'])
+);
 export const recoveryStrategy = recoveryStrategySchema.enum;
 export type RecoveryStrategy = z.infer<typeof recoveryStrategySchema>;
 
-export const recoverySchema = z
-  .discriminatedUnion('strategy', [
-    z
-      .object({ strategy: z.literal(recoveryStrategy.no_breach) })
-      .strict()
-      .describe('Recovers the alert when its group no longer appears in the breach results.')
-      .meta({ id: 'alerting_rule_recovery_no_breach' }),
-    z
-      .object({
-        strategy: z.literal(recoveryStrategy.condition),
-        segment: esqlQuerySegmentSchema.describe(
-          "ES|QL clause appended to `query.base`, for example `WHERE avg_cpu < 0.60`. Don't include a `FROM` clause."
-        ),
-      })
-      .strict()
-      .describe(
-        'Recovers the alert when `query.base` plus `segment` returns the group. Requires `query.breach`.'
-      )
-      .meta({ id: 'alerting_rule_recovery_condition' }),
-    z
-      .object({
-        strategy: z.literal(recoveryStrategy.query),
-        query: esqlQuerySchema.describe(
-          'Independent ES|QL query, including its own `FROM` clause. A matching group recovers the alert.'
-        ),
-      })
-      .strict()
-      .describe('Recovers the alert when this separate query returns the group.')
-      .meta({ id: 'alerting_rule_recovery_query' }),
-    z
-      .object({ strategy: z.literal(recoveryStrategy.manual) })
-      .strict()
-      .describe(
-        'Does not recover automatically. Close the alert with a user action. `state_transition.recovering` has no effect.'
-      )
-      .meta({ id: 'alerting_rule_recovery_manual' }),
-  ])
-  .describe(RECOVERY_DESCRIPTION)
-  .meta({ id: 'alerting_rule_recovery' });
+export const recoverySchema = lazySchema(() =>
+  z
+    .discriminatedUnion('strategy', [
+      z
+        .object({ strategy: z.literal(recoveryStrategy.no_breach) })
+        .strict()
+        .describe('Recovers the alert when its group no longer appears in the breach results.')
+        .meta({ id: 'alerting_rule_recovery_no_breach' }),
+      z
+        .object({
+          strategy: z.literal(recoveryStrategy.condition),
+          segment: esqlQuerySegmentSchema.describe(
+            "ES|QL clause appended to `query.base`, for example `WHERE avg_cpu < 0.60`. Don't include a `FROM` clause."
+          ),
+        })
+        .strict()
+        .describe(
+          'Recovers the alert when `query.base` plus `segment` returns the group. Requires `query.breach`.'
+        )
+        .meta({ id: 'alerting_rule_recovery_condition' }),
+      z
+        .object({
+          strategy: z.literal(recoveryStrategy.query),
+          query: esqlQuerySchema.describe(
+            'Independent ES|QL query, including its own `FROM` clause. A matching group recovers the alert.'
+          ),
+        })
+        .strict()
+        .describe('Recovers the alert when this separate query returns the group.')
+        .meta({ id: 'alerting_rule_recovery_query' }),
+      z
+        .object({ strategy: z.literal(recoveryStrategy.manual) })
+        .strict()
+        .describe(
+          'Does not recover automatically. Close the alert with a user action. `state_transition.recovering` has no effect.'
+        )
+        .meta({ id: 'alerting_rule_recovery_manual' }),
+    ])
+    .describe(RECOVERY_DESCRIPTION)
+    .meta({ id: 'alerting_rule_recovery' })
+);
 
 export type Recovery = z.infer<typeof recoverySchema>;
 
@@ -316,7 +350,9 @@ export type Recovery = z.infer<typeof recoverySchema>;
 const NO_DATA_DESCRIPTION =
   'What the rule does when a group has no data. Required when `kind` is `alert`. Not allowed when `kind` is `signal`. Any strategy other than `ignore` requires either `query.breach` or `no_data.query`, so that a group with no data can be told apart from one that stopped breaching.';
 
-export const noDataStrategySchema = z.enum(['ignore', 'keep_last', 'resolve', 'alert']);
+export const noDataStrategySchema = lazySchema(() =>
+  z.enum(['ignore', 'keep_last', 'resolve', 'alert'])
+);
 export const noDataStrategy = noDataStrategySchema.enum;
 export type NoDataStrategy = z.infer<typeof noDataStrategySchema>;
 
@@ -340,30 +376,32 @@ const classifyingNoDataSchema = (
     .describe(description)
     .meta({ id: `alerting_rule_no_data_${strategy}` });
 
-export const noDataSchema = z
-  .discriminatedUnion('strategy', [
-    z
-      .object({ strategy: z.literal(noDataStrategy.ignore) })
-      .strict()
-      .describe(
-        'Does not check whether a group still has data. Missing groups do not produce `no_data` events.'
-      )
-      .meta({ id: 'alerting_rule_no_data_ignore' }),
-    classifyingNoDataSchema(
-      noDataStrategy.keep_last,
-      "Holds the alert's current status when the rule finds no data."
-    ),
-    classifyingNoDataSchema(
-      noDataStrategy.resolve,
-      'Closes the alert the first time the rule finds no data for a group.'
-    ),
-    classifyingNoDataSchema(
-      noDataStrategy.alert,
-      'Marks an existing alert `active` when the rule finds no data. It never opens an alert for a group that has not breached. Not accepted when creating or updating rules.'
-    ),
-  ])
-  .describe(NO_DATA_DESCRIPTION)
-  .meta({ id: 'alerting_rule_no_data' });
+export const noDataSchema = lazySchema(() =>
+  z
+    .discriminatedUnion('strategy', [
+      z
+        .object({ strategy: z.literal(noDataStrategy.ignore) })
+        .strict()
+        .describe(
+          'Does not check whether a group still has data. Missing groups do not produce `no_data` events.'
+        )
+        .meta({ id: 'alerting_rule_no_data_ignore' }),
+      classifyingNoDataSchema(
+        noDataStrategy.keep_last,
+        "Holds the alert's current status when the rule finds no data."
+      ),
+      classifyingNoDataSchema(
+        noDataStrategy.resolve,
+        'Closes the alert the first time the rule finds no data for a group.'
+      ),
+      classifyingNoDataSchema(
+        noDataStrategy.alert,
+        'Marks an existing alert `active` when the rule finds no data. It never opens an alert for a group that has not breached. Not accepted when creating or updating rules.'
+      ),
+    ])
+    .describe(NO_DATA_DESCRIPTION)
+    .meta({ id: 'alerting_rule_no_data' })
+);
 
 export type NoData = z.infer<typeof noDataSchema>;
 
@@ -436,13 +474,15 @@ export const getRootEsqlQuery = (query: ReadableQuery): string => query.base;
 
 /** State transition (optional, alert-only) */
 
-export const stateTransitionOperatorSchema = z.enum(['and', 'or']);
+export const stateTransitionOperatorSchema = lazySchema(() => z.enum(['and', 'or']));
 export type StateTransitionOperator = z.infer<typeof stateTransitionOperatorSchema>;
 
 const STATE_TRANSITION_OPERATOR_DESCRIPTION =
   'When both `count` and `timeframe` are set, `and` requires both and `or` requires either. Allowed only when both fields are present.';
 
-const stateTransitionCountSchema = z.number().int().min(0).max(MAX_CONSECUTIVE_BREACHES);
+const stateTransitionCountSchema = lazySchema(() =>
+  z.number().int().min(0).max(MAX_CONSECUTIVE_BREACHES)
+);
 
 interface StateTransitionPhaseOptions {
   countDescription: string;
@@ -532,36 +572,40 @@ const RECOVERING_PHASE_OPTIONS: StateTransitionPhaseOptions = {
   metaId: 'alerting_rule_state_transition_recovering',
 };
 
-export const stateTransitionSchema = z
-  .object({
-    pending: stateTransitionPhaseSchema(PENDING_PHASE_OPTIONS)
-      .optional()
-      .describe(PENDING_DESCRIPTION),
-    recovering: stateTransitionPhaseSchema(RECOVERING_PHASE_OPTIONS)
-      .optional()
-      .describe(RECOVERING_DESCRIPTION),
-  })
-  .strict()
-  .describe(STATE_TRANSITION_DESCRIPTION)
-  .meta({ id: 'alerting_rule_state_transition' });
+export const stateTransitionSchema = lazySchema(() =>
+  z
+    .object({
+      pending: stateTransitionPhaseSchema(PENDING_PHASE_OPTIONS)
+        .optional()
+        .describe(PENDING_DESCRIPTION),
+      recovering: stateTransitionPhaseSchema(RECOVERING_PHASE_OPTIONS)
+        .optional()
+        .describe(RECOVERING_DESCRIPTION),
+    })
+    .strict()
+    .describe(STATE_TRANSITION_DESCRIPTION)
+    .meta({ id: 'alerting_rule_state_transition' })
+);
 
 /** The PATCH counterpart of {@link stateTransitionSchema}. */
-const stateTransitionPatchSchema = z
-  .object({
-    pending: stateTransitionPhasePatchSchema(PENDING_PHASE_OPTIONS)
-      .nullable()
-      .optional()
-      .describe(PENDING_DESCRIPTION),
-    recovering: stateTransitionPhasePatchSchema(RECOVERING_PHASE_OPTIONS)
-      .nullable()
-      .optional()
-      .describe(RECOVERING_DESCRIPTION),
-  })
-  .strict()
-  .meta({
-    id: 'alerting_rule_state_transition_patch',
-    description: STATE_TRANSITION_DESCRIPTION,
-  });
+const stateTransitionPatchSchema = lazySchema(() =>
+  z
+    .object({
+      pending: stateTransitionPhasePatchSchema(PENDING_PHASE_OPTIONS)
+        .nullable()
+        .optional()
+        .describe(PENDING_DESCRIPTION),
+      recovering: stateTransitionPhasePatchSchema(RECOVERING_PHASE_OPTIONS)
+        .nullable()
+        .optional()
+        .describe(RECOVERING_DESCRIPTION),
+    })
+    .strict()
+    .meta({
+      id: 'alerting_rule_state_transition_patch',
+      description: STATE_TRANSITION_DESCRIPTION,
+    })
+);
 
 export type StateTransition = z.infer<typeof stateTransitionSchema>;
 
@@ -571,88 +615,95 @@ const GROUPING_DESCRIPTION = 'Grouping configuration.';
 const GROUPING_FIELDS_DESCRIPTION =
   'Fields to group alerts by, e.g. ["host.name", "service.name"]. Should match ES|QL GROUP BY fields.';
 
-const groupingFieldsSchema = z
-  .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
-  .min(1)
-  .max(MAX_GROUPING_FIELDS);
+const groupingFieldsSchema = lazySchema(() =>
+  z.array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH)).min(1).max(MAX_GROUPING_FIELDS)
+);
 
-export const groupingSchema = z
-  .object({
-    fields: groupingFieldsSchema.describe(GROUPING_FIELDS_DESCRIPTION),
-  })
-  .strict()
-  .describe(GROUPING_DESCRIPTION)
-  .meta({ id: 'alerting_rule_grouping' });
+export const groupingSchema = lazySchema(() =>
+  z
+    .object({
+      fields: groupingFieldsSchema.describe(GROUPING_FIELDS_DESCRIPTION),
+    })
+    .strict()
+    .describe(GROUPING_DESCRIPTION)
+    .meta({ id: 'alerting_rule_grouping' })
+);
 
 /** The PATCH counterpart of {@link groupingSchema}. */
-const groupingPatchSchema = z
-  .object({
-    fields: groupingFieldsSchema.optional().describe(GROUPING_FIELDS_DESCRIPTION),
-  })
-  .strict()
-  .meta({ id: 'alerting_rule_grouping_patch', description: GROUPING_DESCRIPTION });
+const groupingPatchSchema = lazySchema(() =>
+  z
+    .object({
+      fields: groupingFieldsSchema.optional().describe(GROUPING_FIELDS_DESCRIPTION),
+    })
+    .strict()
+    .meta({ id: 'alerting_rule_grouping_patch', description: GROUPING_DESCRIPTION })
+);
 
 /** Artifacts (optional) */
 
-const artifactSchema = z
-  .object({
-    id: z.string().min(1).max(ID_MAX_LENGTH).describe('Artifact identifier.'),
-    type: z.string().min(1).max(128).describe('Artifact type.'),
-    data: z
-      .record(z.string().min(1).max(MAX_FIELD_NAME_LENGTH), z.unknown())
-      .describe('Structured artifact data.'),
-  })
-  .strict()
-  .check((ctx) => {
-    // Only type-agnostic structures belong here. How large a `data` value may be
-    // depends on the artifact type, which this schema deliberately does not know:
-    // registered types are bounded by their own `dataSchema` (applied server-side,
-    // where the artifact-type registry is available). Unregistered types pass
-    // through with a limit of MAX_ARTIFACT_DATA_LENGTH so a disabled or rolled-back
-    // plugin cannot fail writes.
-    if (Object.keys(ctx.value.data).length > MAX_ARTIFACT_DATA_FIELDS) {
-      ctx.issues.push({
-        code: 'custom',
-        path: ['data'],
-        message: `Artifact data must have at most ${MAX_ARTIFACT_DATA_FIELDS} fields.`,
-        input: ctx.value.data,
-      });
-    }
+const artifactSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().min(1).max(ID_MAX_LENGTH).describe('Artifact identifier.'),
+      type: z.string().min(1).max(128).describe('Artifact type.'),
+      data: z
+        .record(z.string().min(1).max(MAX_FIELD_NAME_LENGTH), z.unknown())
+        .describe('Structured artifact data.'),
+    })
+    .strict()
+    .check((ctx) => {
+      // Only type-agnostic structures belong here. How large a `data` value may be
+      // depends on the artifact type, which this schema deliberately does not know:
+      // registered types are bounded by their own `dataSchema` (applied server-side,
+      // where the artifact-type registry is available). Unregistered types pass
+      // through with a limit of MAX_ARTIFACT_DATA_LENGTH so a disabled or rolled-back
+      // plugin cannot fail writes.
+      if (Object.keys(ctx.value.data).length > MAX_ARTIFACT_DATA_FIELDS) {
+        ctx.issues.push({
+          code: 'custom',
+          path: ['data'],
+          message: `Artifact data must have at most ${MAX_ARTIFACT_DATA_FIELDS} fields.`,
+          input: ctx.value.data,
+        });
+      }
 
-    if (JSON.stringify(ctx.value.data).length > MAX_ARTIFACT_DATA_LENGTH) {
-      ctx.issues.push({
-        code: 'custom',
-        path: ['data'],
-        message: `Artifact data must not exceed ${MAX_ARTIFACT_DATA_LENGTH} characters when serialized.`,
-        input: ctx.value.data,
-      });
-    }
-  })
-  .meta({ id: 'alerting_rule_artifact' });
+      if (JSON.stringify(ctx.value.data).length > MAX_ARTIFACT_DATA_LENGTH) {
+        ctx.issues.push({
+          code: 'custom',
+          path: ['data'],
+          message: `Artifact data must not exceed ${MAX_ARTIFACT_DATA_LENGTH} characters when serialized.`,
+          input: ctx.value.data,
+        });
+      }
+    })
+    .meta({ id: 'alerting_rule_artifact' })
+);
 
 const ARTIFACTS_DESCRIPTION =
   'Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear.';
 
-const artifactsSchema = z
-  .array(artifactSchema)
-  .min(1)
-  .max(100)
-  .check((ctx) => {
-    const seen = new Set<string>();
-    for (let index = 0; index < ctx.value.length; index++) {
-      const id = ctx.value[index].id;
-      if (seen.has(id)) {
-        ctx.issues.push({
-          code: 'custom',
-          path: [index, 'id'],
-          message: `Artifact id "${id}" must be unique within the rule.`,
-          input: id,
-        });
+const artifactsSchema = lazySchema(() =>
+  z
+    .array(artifactSchema)
+    .min(1)
+    .max(100)
+    .check((ctx) => {
+      const seen = new Set<string>();
+      for (let index = 0; index < ctx.value.length; index++) {
+        const id = ctx.value[index].id;
+        if (seen.has(id)) {
+          ctx.issues.push({
+            code: 'custom',
+            path: [index, 'id'],
+            message: `Artifact id "${id}" must be unique within the rule.`,
+            input: id,
+          });
+        }
+        seen.add(id);
       }
-      seen.add(id);
-    }
-  })
-  .describe(ARTIFACTS_DESCRIPTION);
+    })
+    .describe(ARTIFACTS_DESCRIPTION)
+);
 
 /** Create rule API schema */
 
@@ -663,22 +714,24 @@ const TIME_FIELD_DESCRIPTION =
  * for introspection by the immutability classification meta-tests.
  * @internal
  */
-const timeFieldSchema = z.string().min(1).max(MAX_FIELD_NAME_LENGTH);
+const timeFieldSchema = lazySchema(() => z.string().min(1).max(MAX_FIELD_NAME_LENGTH));
 
-export const createRuleDataBaseSchema = z
-  .object({
-    kind: ruleKindSchema,
-    metadata: metadataSchema,
-    time_field: timeFieldSchema.default(DEFAULT_TIME_FIELD).describe(TIME_FIELD_DESCRIPTION),
-    schedule: scheduleSchema,
-    query: querySchema,
-    recovery: recoverySchema.optional(),
-    no_data: noDataSchema.optional(),
-    state_transition: stateTransitionSchema.optional(),
-    grouping: groupingSchema.optional(),
-    artifacts: artifactsSchema.optional(),
-  })
-  .strict();
+export const createRuleDataBaseSchema = lazySchema(() =>
+  z
+    .object({
+      kind: ruleKindSchema,
+      metadata: metadataSchema,
+      time_field: timeFieldSchema.default(DEFAULT_TIME_FIELD).describe(TIME_FIELD_DESCRIPTION),
+      schedule: scheduleSchema,
+      query: querySchema,
+      recovery: recoverySchema.optional(),
+      no_data: noDataSchema.optional(),
+      state_transition: stateTransitionSchema.optional(),
+      grouping: groupingSchema.optional(),
+      artifacts: artifactsSchema.optional(),
+    })
+    .strict()
+);
 
 /** Cross-field validation predicates — shared between the CRUD API and the manage_rule tool. */
 
@@ -855,12 +908,34 @@ const applyCreateRuleRefinements = <T extends z.ZodType<CreateRuleRefinementFiel
       }
     });
 
-export const createRuleDataSchema = applyCreateRuleRefinements(createRuleDataBaseSchema).meta({
-  id: 'alerting_new_rule',
-});
+export const createRuleDataSchema = lazySchema(() =>
+  applyCreateRuleRefinements(createRuleDataBaseSchema).meta({
+    id: 'alerting_new_rule',
+  })
+);
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
+
+/**
+ * Request body schema for `PUT /api/alerting/v2/rules/{id}`. Adds an optional
+ * `enabled` on top of the create-rule data. Left as a plain optional (no
+ * schema-level default) because the meaning of "omitted" differs by outcome:
+ * on create it defaults to `true`, on replace it preserves the existing
+ * stored value — both handled in application code, not here.
+ */
+export const putRuleDataSchema = applyCreateRuleRefinements(
+  createRuleDataBaseSchema.extend({
+    enabled: z
+      .boolean()
+      .optional()
+      .describe(
+        'Whether the rule is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state.'
+      ),
+  })
+).meta({ id: 'alerting_put_rule' });
+
+export type PutRuleData = z.infer<typeof putRuleDataSchema>;
 
 /**
  * Top-level fields of the create-rule schema that cannot be changed after the
@@ -896,24 +971,26 @@ export type ImmutableRuleField = (typeof IMMUTABLE_RULE_FIELDS)[number];
  * reads a single field, and `no_data` is replaced as a unit, so the body always carries enough to
  * decide it.
  */
-export const updateRuleDataSchema = z
-  .object({
-    metadata: metadataPatchSchema.optional().describe(METADATA_DESCRIPTION),
-    time_field: timeFieldSchema.optional().describe(TIME_FIELD_DESCRIPTION),
-    schedule: schedulePatchSchema.optional().describe(SCHEDULE_DESCRIPTION),
-    query: queryPatchSchema.optional().describe(QUERY_DESCRIPTION),
-    recovery: recoverySchema.nullable().optional().describe(RECOVERY_DESCRIPTION),
-    no_data: noDataSchema.nullable().optional().describe(NO_DATA_DESCRIPTION),
-    state_transition: stateTransitionPatchSchema
-      .nullable()
-      .optional()
-      .describe(STATE_TRANSITION_DESCRIPTION),
-    grouping: groupingPatchSchema.nullable().optional().describe(GROUPING_DESCRIPTION),
-    artifacts: artifactsSchema.nullable().optional().describe(ARTIFACTS_DESCRIPTION),
-  })
-  .strict()
-  .refine(isNoDataStrategyWritable, rejectAlertNoDataStrategy)
-  .meta({ id: 'alerting_update_rule' });
+export const updateRuleDataSchema = lazySchema(() =>
+  z
+    .object({
+      metadata: metadataPatchSchema.optional().describe(METADATA_DESCRIPTION),
+      time_field: timeFieldSchema.optional().describe(TIME_FIELD_DESCRIPTION),
+      schedule: schedulePatchSchema.optional().describe(SCHEDULE_DESCRIPTION),
+      query: queryPatchSchema.optional().describe(QUERY_DESCRIPTION),
+      recovery: recoverySchema.nullable().optional().describe(RECOVERY_DESCRIPTION),
+      no_data: noDataSchema.nullable().optional().describe(NO_DATA_DESCRIPTION),
+      state_transition: stateTransitionPatchSchema
+        .nullable()
+        .optional()
+        .describe(STATE_TRANSITION_DESCRIPTION),
+      grouping: groupingPatchSchema.nullable().optional().describe(GROUPING_DESCRIPTION),
+      artifacts: artifactsSchema.nullable().optional().describe(ARTIFACTS_DESCRIPTION),
+    })
+    .strict()
+    .refine(isNoDataStrategyWritable, rejectAlertNoDataStrategy)
+    .meta({ id: 'alerting_update_rule' })
+);
 
 export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
 
@@ -921,138 +998,160 @@ export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
  * Schema for rule response data returned from the API.
  * Extends the base rule schema with server-generated fields.
  */
-export const ruleResponseSchema = createRuleDataBaseSchema
-  .extend({
-    // `template` is server-managed: it is returned but not accepted on write.
-    metadata: metadataSchema
-      .extend({
-        template: z
-          .object({ id: z.string().describe('Id of the rule template.') })
-          .strict()
-          .optional()
-          .describe('The rule template this rule was created from.'),
-      })
-      .describe('Rule metadata.'),
-    id: z.string().describe('Unique rule identifier.'),
-    version: z
-      .number()
-      .int()
-      .min(1)
-      .describe(
-        'Monotonically increasing integer number representing a rule configuration version, incremented on every change. Used on generated rule events as `rule.version`.'
-      ),
-    enabled: z.boolean().describe('Whether the rule is enabled.'),
-    created_by: actorSchema.nullable().describe('Actor who created the rule.'),
-    created_at: isoDateTime().describe('ISO timestamp when the rule was created.'),
-    updated_by: actorSchema.nullable().describe('Actor who last updated the rule.'),
-    updated_at: isoDateTime().describe('ISO timestamp when the rule was last updated.'),
-  })
-  .meta({ id: 'alerting_rule_response' });
+export const ruleResponseSchema = lazySchema(() =>
+  createRuleDataBaseSchema
+    .extend({
+      // `template` is server-managed: it is returned but not accepted on write.
+      metadata: metadataSchema
+        .extend({
+          template: z
+            .object({ id: z.string().describe('Id of the rule template.') })
+            .strict()
+            .optional()
+            .describe('The rule template this rule was created from.'),
+        })
+        .describe('Rule metadata.'),
+      id: z.string().describe('Unique rule identifier.'),
+      version: z
+        .number()
+        .int()
+        .min(1)
+        .describe(
+          'Monotonically increasing integer number representing a rule configuration version, incremented on every change. Used on generated rule events as `rule.version`.'
+        ),
+      enabled: z.boolean().describe('Whether the rule is enabled.'),
+      created_by: actorSchema.nullable().describe('Actor who created the rule.'),
+      created_at: isoDateTime().describe('ISO timestamp when the rule was created.'),
+      updated_by: actorSchema.nullable().describe('Actor who last updated the rule.'),
+      updated_at: isoDateTime().describe('ISO timestamp when the rule was last updated.'),
+    })
+    .meta({ id: 'alerting_rule_response' })
+);
 
 export type RuleResponse = z.infer<typeof ruleResponseSchema>;
 
 /** Sort field for find rules API. */
-export const findRulesSortFieldSchema = z.enum(['kind', 'enabled', 'name']);
+export const findRulesSortFieldSchema = lazySchema(() => z.enum(['kind', 'enabled', 'name']));
 export type FindRulesSortField = z.infer<typeof findRulesSortFieldSchema>;
 
 /** Query parameters for the find rules (list) API. */
-export const findRulesRequestSchema = z
-  .object({
-    page: queryIntSchema({ min: 1, max: FIND_MAX_RESULT_WINDOW })
-      .optional()
-      .describe(
-        `The page number to return. Defaults to 1. \`page * per_page\` cannot exceed ${FIND_MAX_RESULT_WINDOW}.`
-      ),
-    per_page: queryIntSchema({ min: 1, max: MAX_PER_PAGE })
-      .optional()
-      .describe(`The number of rules to return per page. Defaults to ${FIND_DEFAULT_PER_PAGE}.`),
-    filter: z.string().max(MAX_KQL_LENGTH).optional().describe('The filter to apply to the rules.'),
-    sort_field: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
-    sort_order: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
-    search: z
-      .string()
-      .trim()
-      .min(1)
-      .max(MAX_SEARCH_LENGTH)
-      .optional()
-      .describe('A text string to search across rule fields.'),
-  })
-  .strict()
-  .refine(
-    ({ page = 1, per_page = FIND_DEFAULT_PER_PAGE }) => page * per_page <= FIND_MAX_RESULT_WINDOW,
-    { message: `page * per_page cannot exceed ${FIND_MAX_RESULT_WINDOW}.`, path: ['page'] }
-  );
+export const findRulesRequestSchema = lazySchema(() =>
+  z
+    .object({
+      page: queryIntSchema({ min: 1, max: FIND_MAX_RESULT_WINDOW })
+        .optional()
+        .describe(
+          `The page number to return. Defaults to 1. \`page * per_page\` cannot exceed ${FIND_MAX_RESULT_WINDOW}.`
+        ),
+      per_page: queryIntSchema({ min: 1, max: MAX_PER_PAGE })
+        .optional()
+        .describe(`The number of rules to return per page. Defaults to ${FIND_DEFAULT_PER_PAGE}.`),
+      filter: z
+        .string()
+        .max(MAX_KQL_LENGTH)
+        .optional()
+        .describe('The filter to apply to the rules.'),
+      sort_field: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
+      sort_order: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
+      search: z
+        .string()
+        .trim()
+        .min(1)
+        .max(MAX_SEARCH_LENGTH)
+        .optional()
+        .describe('A text string to search across rule fields.'),
+    })
+    .strict()
+    .refine(
+      ({ page = 1, per_page = FIND_DEFAULT_PER_PAGE }) => page * per_page <= FIND_MAX_RESULT_WINDOW,
+      { message: `page * per_page cannot exceed ${FIND_MAX_RESULT_WINDOW}.`, path: ['page'] }
+    )
+);
 
 export type FindRulesRequest = z.infer<typeof findRulesRequestSchema>;
 
 /** Paginated list response schema. */
-export const findRulesResponseSchema = z
-  .object({
-    items: z.array(ruleResponseSchema).describe('The list of rules.'),
-    total: z.number().describe(`The number of rules matching the query. ${ESTIMATED_COUNT_NOTE}`),
-    page: z.number().describe('The current page number.'),
-    per_page: z.number().describe('The number of rules per page.'),
-  })
-  .describe('Paginated list of rules.')
-  .meta({ id: 'alerting_rule_list_response' });
+export const findRulesResponseSchema = lazySchema(() =>
+  z
+    .object({
+      items: z.array(ruleResponseSchema).describe('The list of rules.'),
+      total: z.number().describe(`The number of rules matching the query. ${ESTIMATED_COUNT_NOTE}`),
+      page: z.number().describe('The current page number.'),
+      per_page: z.number().describe('The number of rules per page.'),
+    })
+    .describe('Paginated list of rules.')
+    .meta({ id: 'alerting_rule_list_response' })
+);
 
 export type FindRulesResponse = z.infer<typeof findRulesResponseSchema>;
 
 /** Query parameters for the rule tags API. */
-export const ruleTagsParamsSchema = z
-  .object({
-    search: z
-      .string()
-      .max(256)
-      .optional()
-      .describe('Prefix to filter tags by. Returns all most-used tags when omitted.'),
-    kind: ruleKindSchema.optional().describe('Restrict tags to rules of the given kind.'),
-  })
-  .strict();
+export const ruleTagsParamsSchema = lazySchema(() =>
+  z
+    .object({
+      search: z
+        .string()
+        .max(256)
+        .optional()
+        .describe('Prefix to filter tags by. Returns all most-used tags when omitted.'),
+      kind: ruleKindSchema.optional().describe('Restrict tags to rules of the given kind.'),
+    })
+    .strict()
+);
 
 export type RuleTagsParams = z.infer<typeof ruleTagsParamsSchema>;
 
 /** Rule tags response schema. */
-export const ruleTagsResponseSchema = tagsResponseSchema
-  .describe('All unique tags across rules.')
-  .meta({ id: 'alerting_rule_tags_response' });
+export const ruleTagsResponseSchema = lazySchema(() =>
+  tagsResponseSchema
+    .describe('All unique tags across rules.')
+    .meta({ id: 'alerting_rule_tags_response' })
+);
 
 export type RuleTagsResponse = z.infer<typeof ruleTagsResponseSchema>;
 
 /** Query parameters for the rule routing tags API. */
-export const ruleRoutingTagsParamsSchema = z
-  .object({
-    search: z
-      .string()
-      .max(256)
-      .optional()
-      .describe(
-        'Prefix to filter routing tags by. Returns all most-used routing tags when omitted.'
-      ),
-  })
-  .strict();
+export const ruleRoutingTagsParamsSchema = lazySchema(() =>
+  z
+    .object({
+      search: z
+        .string()
+        .max(256)
+        .optional()
+        .describe(
+          'Prefix to filter routing tags by. Returns all most-used routing tags when omitted.'
+        ),
+    })
+    .strict()
+);
 
 export type RuleRoutingTagsParams = z.infer<typeof ruleRoutingTagsParamsSchema>;
 
 /** Rule routing tags response schema. */
-export const ruleRoutingTagsResponseSchema = tagsResponseSchema
-  .describe('All unique routing tags across rules.')
-  .meta({ id: 'alerting_rule_routing_tags_response' });
+export const ruleRoutingTagsResponseSchema = lazySchema(() =>
+  tagsResponseSchema
+    .describe('All unique routing tags across rules.')
+    .meta({ id: 'alerting_rule_routing_tags_response' })
+);
 
 export type RuleRoutingTagsResponse = z.infer<typeof ruleRoutingTagsResponseSchema>;
 
-export const ruleIdSchema = entityIdSchema.describe(`A rule identifier. ${ENTITY_ID_NOTE}`);
+export const ruleIdSchema = lazySchema(() =>
+  entityIdSchema.describe(`A rule identifier. ${ENTITY_ID_NOTE}`)
+);
 
 /**
  * Response schema for `POST /api/alerting/v2/rules/_bulk_get`.
  */
-export const bulkGetRulesResponseSchema = z
-  .object({
-    items: z
-      .array(ruleResponseSchema)
-      .describe('The requested rules, in the same order as the requested ids.'),
-  })
-  .meta({ id: 'alerting_bulk_get_rules_response' });
+export const bulkGetRulesResponseSchema = lazySchema(() =>
+  z
+    .object({
+      items: z
+        .array(ruleResponseSchema)
+        .describe('The requested rules, in the same order as the requested ids.'),
+    })
+    .meta({ id: 'alerting_bulk_get_rules_response' })
+);
 
 export type BulkGetRulesResponse = z.infer<typeof bulkGetRulesResponseSchema>;
 
@@ -1061,46 +1160,50 @@ export type BulkGetRulesResponse = z.infer<typeof bulkGetRulesResponseSchema>;
  * client-supplied `id` and `enabled` (default true). Disabled rules are saved
  * and do not run until enabled.
  */
-export const bulkCreateRuleItemSchema = applyCreateRuleRefinements(
-  createRuleDataBaseSchema.extend({
-    id: ruleIdSchema
-      .optional()
-      .describe(
-        'Optional rule ID. If omitted, Kibana generates one. IDs in the request must be unique.'
-      ),
-    enabled: z
-      .boolean()
-      .default(true)
-      .describe(
-        'If `true` (default), the rule runs on its schedule after creation. If `false`, the rule is saved but does not run until you enable it.'
-      ),
-  })
-).meta({ id: 'alerting_bulk_create_rule_item' });
+export const bulkCreateRuleItemSchema = lazySchema(() =>
+  applyCreateRuleRefinements(
+    createRuleDataBaseSchema.extend({
+      id: ruleIdSchema
+        .optional()
+        .describe(
+          'Optional rule ID. If omitted, Kibana generates one. IDs in the request must be unique.'
+        ),
+      enabled: z
+        .boolean()
+        .default(true)
+        .describe(
+          'If `true` (default), the rule runs on its schedule after creation. If `false`, the rule is saved but does not run until you enable it.'
+        ),
+    })
+  ).meta({ id: 'alerting_bulk_create_rule_item' })
+);
 
 export type BulkCreateRuleItem = z.infer<typeof bulkCreateRuleItemSchema>;
 
 /**
  * Request body schema for `POST /api/alerting/v2/rules/_bulk_create`.
  */
-export const bulkCreateRulesRequestSchema = z
-  .object({
-    items: z
-      .array(bulkCreateRuleItemSchema)
-      .min(1)
-      .max(MAX_BULK_ITEMS)
-      .describe(`The rules to create. Must contain between 1 and ${MAX_BULK_ITEMS} rules.`),
-  })
-  .strict()
-  .refine(
-    (data) => {
-      const ids = data.items
-        .map((rule) => rule.id)
-        .filter((id): id is string => id != null && id.length > 0);
-      return new Set(ids).size === ids.length;
-    },
-    { message: 'Duplicate rule identifiers in the request.', path: ['items'] }
-  )
-  .meta({ id: 'alerting_bulk_create_rules_request' });
+export const bulkCreateRulesRequestSchema = lazySchema(() =>
+  z
+    .object({
+      items: z
+        .array(bulkCreateRuleItemSchema)
+        .min(1)
+        .max(MAX_BULK_ITEMS)
+        .describe(`The rules to create. Must contain between 1 and ${MAX_BULK_ITEMS} rules.`),
+    })
+    .strict()
+    .refine(
+      (data) => {
+        const ids = data.items
+          .map((rule) => rule.id)
+          .filter((id): id is string => id != null && id.length > 0);
+        return new Set(ids).size === ids.length;
+      },
+      { message: 'Duplicate rule identifiers in the request.', path: ['items'] }
+    )
+    .meta({ id: 'alerting_bulk_create_rules_request' })
+);
 
 export type BulkCreateRulesParams = z.input<typeof bulkCreateRulesRequestSchema>;
 
@@ -1109,17 +1212,19 @@ export type BulkCreateRulesParams = z.input<typeof bulkCreateRulesRequestSchema>
  * Successfully created rules are returned in `items`; per-item failures land
  * in `errors`. HTTP 200 even when some items fail (partial success).
  */
-export const bulkCreateRulesResponseSchema = z
-  .object({
-    items: z
-      .array(ruleResponseSchema)
-      .describe('Rules that were created. Rules listed in `errors` are not included.'),
-    errors: z
-      .array(bulkErrorSchema)
-      .describe(
-        'Errors for rules that could not be created. Each entry includes the rule `id` and the error. Empty when every requested rule was created.'
-      ),
-  })
-  .meta({ id: 'alerting_bulk_create_rules_response' });
+export const bulkCreateRulesResponseSchema = lazySchema(() =>
+  z
+    .object({
+      items: z
+        .array(ruleResponseSchema)
+        .describe('Rules that were created. Rules listed in `errors` are not included.'),
+      errors: z
+        .array(bulkErrorSchema)
+        .describe(
+          'Errors for rules that could not be created. Each entry includes the rule `id` and the error. Empty when every requested rule was created.'
+        ),
+    })
+    .meta({ id: 'alerting_bulk_create_rules_response' })
+);
 
 export type BulkCreateRulesResponse = z.infer<typeof bulkCreateRulesResponseSchema>;

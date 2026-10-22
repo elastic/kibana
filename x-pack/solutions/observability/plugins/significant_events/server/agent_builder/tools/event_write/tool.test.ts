@@ -7,12 +7,7 @@
 
 import type { RunContextStackEntry } from '@kbn/agent-builder-server';
 import type { SignalEntry, SignificantEvent } from '@kbn/significant-events-schema';
-import {
-  MAX_ASSESSMENT_NOTE_LENGTH,
-  MAX_SIGNAL_DESCRIPTION_LENGTH,
-  MAX_SUMMARY_LENGTH,
-  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
-} from '@kbn/significant-events-schema';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -37,14 +32,28 @@ jest.mock('./handler', () => ({
 }));
 
 // The tool takes source slugs; the handler receives the stored source ids.
+const confirmingSignal: SignalEntry = {
+  type: 'detection',
+  source_id: 'logs.test',
+  description: 'Found: error. Impact: requests failed.',
+  verdict: 'confirms',
+  evidence: { esql_query: 'FROM logs.test', result: 'found' },
+  metadata: {
+    rule_uuid: 'rule-input',
+    detection_id: 'detection-input',
+    change_point_type: 'spike',
+    p_value: 0.01,
+  },
+};
+
 const input: Partial<SignificantEvent> & { slugs: string[] } = {
   event_id: 'event-1',
-  status: 'active',
   slugs: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
   severity: 'medium',
   confidence: 0.8,
+  signals: [confirmingSignal],
 };
 
 const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
@@ -138,9 +147,7 @@ describe('events_write tool', () => {
     });
   });
 
-  describe('open high-severity confirms invariant', () => {
-    const highInput = { ...input, severity: 'high' as const };
-    const { event_id: _omittedEventId, ...newEventHigh } = highInput;
+  describe('breaching signal invariant', () => {
     const signalWith = (verdict: string) => ({
       type: 'detection' as const,
       source_id: 'logs.test',
@@ -154,68 +161,80 @@ describe('events_write tool', () => {
         p_value: 0.01,
       },
     });
+    const quiet = {
+      type: 'detection' as const,
+      source_id: 'logs.test',
+      description: 'Rule X: no backed query KI matched this detection.',
+      verdict: 'not_checked' as const,
+      metadata: {
+        rule_uuid: 'rule-2',
+        detection_id: 'detection-2',
+        change_point_type: 'spike' as const,
+        p_value: 0.2,
+      },
+    };
+    const { event_id: _omitted, ...newEventInput } = input;
 
-    it('rejects a new active high item whose grounded signals lack a confirms verdict', () => {
-      const { event_id: _omitted, ...newEventInput } = highInput;
-      const result = eventsWriteSchema.safeParse({
-        items: [{ ...newEventInput, signals: [signalWith('inconclusive')] }],
-      });
+    it.each([
+      ['inconclusive evidence', [signalWith('inconclusive')]],
+      ['refuting evidence', [signalWith('refutes')]],
+      ['a quiet not_checked rule', [quiet]],
+      ['no signals at all', []],
+    ])('rejects a new event backed only by %s', (_label, signals) => {
+      const result = eventsWriteSchema.safeParse({ items: [{ ...newEventInput, signals }] });
+
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues.at(-1)?.message).toContain('requires at least one confirms');
+        expect(result.error.issues.at(-1)?.message).toContain('at least one confirms signal');
       }
     });
 
-    it('accepts an active high continuation (event_id present) with only inconclusive grounded signals', () => {
+    it.each([
+      ['healthy (refutes)', [signalWith('refutes')]],
+      ['inconclusive', [signalWith('inconclusive')]],
+    ])('accepts a continuation carrying only %s evidence', (_label, signals) => {
+      expect(eventsWriteSchema.safeParse({ items: [{ ...input, signals }] }).success).toBe(true);
+    });
+
+    it('rejects a continuation with no signals at all', () => {
+      const result = eventsWriteSchema.safeParse({ items: [{ ...input, signals: [] }] });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues.at(-1)?.message).toContain('at least one signal');
+      }
+    });
+
+    it('accepts an item backed by a confirms signal, new or continuation', () => {
       expect(
         eventsWriteSchema.safeParse({
-          items: [{ ...highInput, signals: [signalWith('inconclusive')] }],
+          items: [{ ...newEventInput, signals: [signalWith('confirms')] }],
         }).success
+      ).toBe(true);
+      expect(
+        eventsWriteSchema.safeParse({ items: [{ ...input, signals: [signalWith('confirms')] }] })
+          .success
       ).toBe(true);
     });
 
-    it('accepts an active high item backed by a confirms signal', () => {
+    it('accepts an item whose only grounded signal is off_topic (observed-error path)', () => {
       expect(
-        eventsWriteSchema.safeParse({
-          items: [{ ...newEventHigh, signals: [signalWith('confirms')] }],
-        }).success
+        eventsWriteSchema.safeParse({ items: [{ ...input, signals: [signalWith('off_topic')] }] })
+          .success
       ).toBe(true);
     });
 
-    it('accepts an active medium item with only inconclusive grounded signals', () => {
-      expect(
-        eventsWriteSchema.safeParse({
-          items: [
-            { ...highInput, severity: 'medium' as const, signals: [signalWith('inconclusive')] },
-          ],
-        }).success
-      ).toBe(true);
-    });
+    it('rejects a status from the caller instead of dropping it, so an attempt to close fails loudly', () => {
+      const result = eventsWriteSchema.safeParse({
+        items: [{ ...input, status: 'inactive' }],
+      });
 
-    it('accepts an active high item whose only grounded signal is off_topic (observed-error path)', () => {
-      expect(
-        eventsWriteSchema.safeParse({
-          items: [{ ...newEventHigh, signals: [signalWith('off_topic')] }],
-        }).success
-      ).toBe(true);
-    });
-
-    it('accepts an active high item whose signals carry no evidence (quiet rules)', () => {
-      const quiet = {
-        type: 'detection' as const,
-        source_id: 'logs.test',
-        description: 'Rule X: no backed query KI matched this detection.',
-        verdict: 'not_checked',
-        metadata: {
-          rule_uuid: 'rule-1',
-          detection_id: 'detection-1',
-          change_point_type: 'spike' as const,
-          p_value: 0.01,
-        },
-      };
-      expect(
-        eventsWriteSchema.safeParse({ items: [{ ...newEventHigh, signals: [quiet] }] }).success
-      ).toBe(true);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues.map(({ message }) => message).join(' ')).toContain(
+          'status is not an input'
+        );
+      }
     });
   });
 
@@ -568,6 +587,23 @@ describe('events_write tool', () => {
     );
   });
 
+  it('sends no status to the writer, which takes it from the lifecycle', async () => {
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      { index: 0, event_id: 'event-1', status: 'active', written: true },
+    ]);
+
+    await invokeHandler(
+      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      { items: [input] },
+      createMockToolContext()
+    );
+
+    const [{ inputs }] = (eventsWriteBulkHandler as jest.Mock).mock.calls[0];
+    expect(inputs).toHaveLength(1);
+    expect(inputs[0]).toMatchObject({ event_id: 'event-1' });
+    expect(inputs[0]).not.toHaveProperty('status');
+  });
+
   it('does not replace successful results when telemetry throws', async () => {
     (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
       {
@@ -620,7 +656,6 @@ describe('events_write tool', () => {
 
 describe('eventsWriteItemSchema', () => {
   const validItem = {
-    status: 'active',
     slugs: ['logs.test'],
     title: 'Test event',
     symptom_hypothesis: 'Requests are delayed because a dependency is timing out.',
@@ -634,8 +669,9 @@ describe('eventsWriteItemSchema', () => {
       {
         type: 'detection',
         source_id: 'logs.test',
-        description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH),
-        verdict: 'not_checked',
+        description: 'x'.repeat(MAX_TEXT_LENGTH),
+        verdict: 'confirms',
+        evidence: { esql_query: 'FROM logs.test', result: 'found' },
         metadata: {
           detection_id: 'det-1',
           rule_uuid: 'rule-1',
@@ -648,6 +684,12 @@ describe('eventsWriteItemSchema', () => {
 
   it('accepts a valid item at the field length boundaries', () => {
     expect(eventsWriteItemSchema.safeParse(validItem).success).toBe(true);
+  });
+
+  it('accepts no status: the server derives it from the verdicts', () => {
+    for (const status of ['active', 'inactive', 'recovering']) {
+      expect(eventsWriteItemSchema.safeParse({ ...validItem, status }).success).toBe(false);
+    }
   });
 
   it('requires the agent to propose a severity', () => {
@@ -673,15 +715,13 @@ describe('eventsWriteItemSchema', () => {
     [
       'signal description',
       {
-        signals: [
-          { ...validItem.signals[0], description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH + 1) },
-        ],
+        signals: [{ ...validItem.signals[0], description: 'x'.repeat(MAX_TEXT_LENGTH + 1) }],
       },
     ],
-    ['symptom_hypothesis', { symptom_hypothesis: 'x'.repeat(MAX_SYMPTOM_HYPOTHESIS_LENGTH + 1) }],
-    ['summary', { summary: 'x'.repeat(MAX_SUMMARY_LENGTH + 1) }],
-    ['assessment_note', { assessment_note: 'x'.repeat(MAX_ASSESSMENT_NOTE_LENGTH + 1) }],
-  ])('rejects %s exceeding the length limit', (_, overrides) => {
+    ['symptom_hypothesis', { symptom_hypothesis: 'x'.repeat(MAX_TEXT_LENGTH + 1) }],
+    ['summary', { summary: 'x'.repeat(MAX_TEXT_LENGTH + 1) }],
+    ['assessment_note', { assessment_note: 'x'.repeat(MAX_TEXT_LENGTH + 1) }],
+  ])('rejects %s exceeding the maximum text length', (_, overrides) => {
     expect(eventsWriteItemSchema.safeParse({ ...validItem, ...overrides }).success).toBe(false);
   });
 });

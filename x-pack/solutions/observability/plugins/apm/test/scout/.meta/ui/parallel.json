@@ -1,5 +1,5 @@
 {
-  "sha1": "6b0e8a5e299010db91e933042bcb5a53561eded2",
+  "sha1": "8bb08a58a916dd1c6934db102c255eced4b24aa3",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1875,7 +1875,7 @@
     {
       "id": "1cf62d6f0470e43-0ab00f544989df5",
       "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-apm-java",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1884,14 +1884,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 243,
         "column": 28
       }
     },
     {
       "id": "1cf62d6f0470e43-17e81ddfc1fc81e",
       "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-apm-nodejs",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1900,14 +1900,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 243,
         "column": 28
       }
     },
     {
       "id": "1cf62d6f0470e43-eb42082faf7f921",
       "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-edot-java",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1916,14 +1916,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 243,
         "column": 28
       }
     },
     {
       "id": "1cf62d6f0470e43-2f1561cf77c2ce4",
       "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-edot-nodejs",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1932,14 +1932,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 243,
         "column": 28
       }
     },
     {
       "id": "1cf62d6f0470e43-5ed2d20b3456188",
       "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-edot-dotnet (v9)",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1948,14 +1948,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 243,
         "column": 28
       }
     },
     {
       "id": "1cf62d6f0470e43-703ea67da9b1846",
       "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-edot-dotnet-lte-v8",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1964,14 +1964,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 243,
         "column": 28
       }
     },
     {
       "id": "1cf62d6f0470e43-91a78811f036116",
       "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-otel_other-java",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1980,14 +1980,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 243,
         "column": 28
       }
     },
     {
       "id": "1cf62d6f0470e43-4111eb38f32ae9a",
       "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-otel_other-nodejs",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1996,14 +1996,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 243,
         "column": 28
       }
     },
     {
       "id": "1cf62d6f0470e43-b635f4d346de101",
       "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-otel_other-dotnet",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2012,14 +2012,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 243,
         "column": 28
       }
     },
     {
       "id": "1cf62d6f0470e43-8c4725fb3f904a9",
       "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-otel_other-go",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2028,14 +2028,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 243,
         "column": 28
       }
     },
     {
       "id": "1cf62d6f0470e43-8aca599734b641a",
       "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-edot-java",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2044,14 +2044,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 243,
         "column": 28
       }
     },
     {
       "id": "1cf62d6f0470e43-dc22de484ac0e17",
       "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-edot-nodejs",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2060,14 +2060,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 243,
         "column": 28
       }
     },
     {
       "id": "1cf62d6f0470e43-7d9ef290b028adb",
       "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-edot-python",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2076,14 +2076,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 243,
         "column": 28
       }
     },
     {
       "id": "1cf62d6f0470e43-fb52a243b4159c6",
       "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-otel_other-java",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2092,14 +2092,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 243,
         "column": 28
       }
     },
     {
       "id": "1cf62d6f0470e43-a197d918d98d10d",
       "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-otel_other-nodejs",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2108,14 +2108,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 243,
         "column": 28
       }
     },
     {
       "id": "1cf62d6f0470e43-a3c8ce45cc39ff5",
       "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-otel_other-python",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2124,14 +2124,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 243,
         "column": 28
       }
     },
     {
       "id": "1cf62d6f0470e43-b116340b7c905db",
       "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-otel_other-go",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -2140,7 +2140,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 243,
         "column": 28
       }
     },

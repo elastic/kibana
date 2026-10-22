@@ -9,12 +9,18 @@ import { useQuery } from '@kbn/react-query';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { queryKeys } from '../../query_keys';
 
-export const useAgentBuilderAgents = () => {
+interface UseAgentBuilderAgentsOptions {
+  includeHidden?: boolean;
+}
+
+export const useAgentBuilderAgents = ({
+  includeHidden = false,
+}: UseAgentBuilderAgentsOptions = {}) => {
   const { agentService } = useAgentBuilderServices();
 
   const { data, isLoading, error, isFetched } = useQuery({
-    queryKey: queryKeys.agentProfiles.all,
-    queryFn: () => agentService.list(),
+    queryKey: [...queryKeys.agentProfiles.all, { includeHidden }],
+    queryFn: () => agentService.list({ includeHidden }),
   });
 
   return { agents: data ?? [], isLoading, error, isFetched };

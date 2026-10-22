@@ -10,7 +10,12 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { Logger } from '@kbn/core/server';
 import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
-import { MAX_ID_LENGTH, MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
+import {
+  MAX_ID_LENGTH,
+  MAX_TEXT_LENGTH,
+  MAX_TITLE_LENGTH,
+  significantEventTypeSchema,
+} from '@kbn/significant-events-schema';
 import {
   createQueryValidationContext,
   QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
@@ -56,9 +61,9 @@ const candidateQuerySchema = lazySchema(() =>
       .describe(
         'A semantically searchable description explaining what the query detects and why it matters. Should be 1-2 sentences that help users find this query when searching by concept or intent.'
       ),
-    category: z
-      .enum(['operational', 'configuration', 'resource_health', 'error', 'security'])
-      .describe('Significant event category the query belongs to.'),
+    category: significantEventTypeSchema.describe(
+      'Significant event category the query belongs to.'
+    ),
     severity_score: z
       .number()
       .min(0)

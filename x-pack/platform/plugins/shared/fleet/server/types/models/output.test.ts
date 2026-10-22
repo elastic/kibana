@@ -139,6 +139,99 @@ describe('Output model', () => {
       });
     });
 
+    describe('KafkaSchema with Kerberos authentication', () => {
+      const kerberosOutput = (fields: Record<string, unknown> = {}) => ({
+        name: 'test-kafka-output',
+        type: 'kafka',
+        hosts: ['kafka.example.com:9092'],
+        auth_type: kafkaAuthType.Kerberos,
+        kerberos: {
+          auth_type: 'password',
+          config_path: '/etc/krb5.conf',
+          username: 'kafka',
+          service_name: 'kafka',
+          realm: 'EXAMPLE.COM',
+          enable_krb5_fast: true,
+        },
+        secrets: { kerberos: { password: 'my-password' } },
+        ...fields,
+      });
+
+      it('should accept the Kerberos settings and secrets', () => {
+        expect(() => schema.object(KafkaSchema).validate(kerberosOutput())).not.toThrow();
+      });
+
+      it('should accept the keytab authentication without a password', () => {
+        expect(() =>
+          schema.object(KafkaSchema).validate(
+            kerberosOutput({
+              kerberos: {
+                auth_type: 'keytab',
+                config_path: '/etc/krb5.conf',
+                keytab: '/etc/kafka.keytab',
+                realm: 'EXAMPLE.COM',
+              },
+              secrets: undefined,
+            })
+          )
+        ).not.toThrow();
+      });
+
+      it('should accept a secret reference as the password', () => {
+        expect(() =>
+          schema
+            .object(KafkaSchema)
+            .validate(kerberosOutput({ secrets: { kerberos: { password: { id: 'secret-id' } } } }))
+        ).not.toThrow();
+      });
+
+      it('should accept null settings, to remove them from an output', () => {
+        expect(() =>
+          schema.object(KafkaSchema).validate(kerberosOutput({ kerberos: null }))
+        ).not.toThrow();
+      });
+
+      it('should reject an unknown authentication type of Kerberos', () => {
+        expect(() =>
+          schema.object(KafkaSchema).validate(
+            kerberosOutput({
+              kerberos: { auth_type: 'token', config_path: '/etc/krb5.conf', realm: 'EXAMPLE.COM' },
+            })
+          )
+        ).toThrow();
+      });
+
+      it('should require the path of the configuration and the realm', () => {
+        expect(() =>
+          schema
+            .object(KafkaSchema)
+            .validate(kerberosOutput({ kerberos: { auth_type: 'keytab', realm: 'EXAMPLE.COM' } }))
+        ).toThrow();
+        expect(() =>
+          schema
+            .object(KafkaSchema)
+            .validate(
+              kerberosOutput({ kerberos: { auth_type: 'keytab', config_path: '/etc/krb5.conf' } })
+            )
+        ).toThrow();
+      });
+
+      it('should not accept a plain-text password next to the settings', () => {
+        expect(() =>
+          schema.object(KafkaSchema).validate(
+            kerberosOutput({
+              kerberos: {
+                auth_type: 'password',
+                config_path: '/etc/krb5.conf',
+                realm: 'EXAMPLE.COM',
+                password: 'plain',
+              },
+            })
+          )
+        ).toThrow();
+      });
+    });
+
     describe('KafkaSchema with OAuth2 authentication', () => {
       const oauth2Output = (fields: Record<string, unknown> = {}) => ({
         name: 'test-kafka-output',

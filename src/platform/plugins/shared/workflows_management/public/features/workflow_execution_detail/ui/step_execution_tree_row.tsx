@@ -143,7 +143,7 @@ export interface StepExecutionTreeRowProps {
   'data-test-subj'?: string;
 }
 
-const notRunLabel = i18n.translate('workflowsManagement.stepExecutionTreeRow.notRun', {
+const notRunLabel = i18n.translate('workflows.stepExecutionTreeRow.notRun', {
   defaultMessage: 'Not run',
 });
 
@@ -250,7 +250,7 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
     const dangerSelectionBorder =
       colorMode === 'LIGHT' ? euiTheme.colors.borderStrongDanger : euiTheme.colors.borderBaseDanger;
 
-    const expandLabel = i18n.translate('workflowsManagement.stepExecutionTreeRow.expandAriaLabel', {
+    const expandLabel = i18n.translate('workflows.stepExecutionTreeRow.expandAriaLabel', {
       defaultMessage: '{expanded, select, true{Collapse} other{Expand}} {stepName}',
       values: { expanded: isExpanded, stepName: stepId },
     });
@@ -284,11 +284,11 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
         return (
           <EuiText size="xs" color="subdued" data-test-subj="workflowStepTreeDuration">
             {durationLabel != null
-              ? i18n.translate('workflowsManagement.stepExecutionTreeRow.iterationRangeMeta', {
+              ? i18n.translate('workflows.stepExecutionTreeRow.iterationRangeMeta', {
                   defaultMessage: '{count} iterations · {duration}',
                   values: { count: iterationCount, duration: durationLabel },
                 })
-              : i18n.translate('workflowsManagement.stepExecutionTreeRow.iterationRangeCountOnly', {
+              : i18n.translate('workflows.stepExecutionTreeRow.iterationRangeCountOnly', {
                   defaultMessage: '{count} iterations',
                   values: { count: iterationCount },
                 })}
@@ -325,11 +325,11 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
       isRetryParent && retryAttemptCount != null ? (
         <EuiBadge color="hollow" iconType="refresh" data-test-subj="workflowStepTreeAttemptsBadge">
           {retryMaxAttempts != null
-            ? i18n.translate('workflowsManagement.stepExecutionTreeRow.attemptsOfMaxBadge', {
+            ? i18n.translate('workflows.stepExecutionTreeRow.attemptsOfMaxBadge', {
                 defaultMessage: '{used} of {max} attempts',
                 values: { used: retryAttemptCount, max: retryMaxAttempts },
               })
-            : i18n.translate('workflowsManagement.stepExecutionTreeRow.attemptsBadge', {
+            : i18n.translate('workflows.stepExecutionTreeRow.attemptsBadge', {
                 defaultMessage: '{n} attempts',
                 values: { n: retryAttemptCount },
               })}

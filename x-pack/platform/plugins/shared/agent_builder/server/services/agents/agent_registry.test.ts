@@ -108,55 +108,47 @@ describe('AgentRegistry', () => {
   });
 
   describe('agent visibility', () => {
-    // built-in agents are always read-only; the managed built-in is the one we hide from `list`
-    const readOnlyManagedAgent = createMockedInternalAgent({
-      id: 'managed-builtin',
-      type: 'investigation',
+    const visibleBuiltin = createMockedInternalAgent({ id: 'visible-builtin', readonly: true });
+    const hiddenBuiltin = createMockedInternalAgent({
+      id: 'hidden-builtin',
       readonly: true,
+      hidden: true,
     });
     const chatAgent = createMockedInternalAgent({ id: 'chat-agent', readonly: false });
-    // the seeded, admin-editable managed agent — must stay visible
-    const editableManagedAgent = createMockedInternalAgent({
-      id: 'nightshift-investigator',
-      type: 'investigation',
-      readonly: false,
-    });
 
     const createVisibilityRegistry = () =>
       createRegistry({
-        types: [investigationType],
-        builtinAgents: [readOnlyManagedAgent],
-        persistedAgents: [chatAgent, editableManagedAgent],
+        builtinAgents: [visibleBuiltin, hiddenBuiltin],
+        persistedAgents: [chatAgent],
       });
 
-    it('hides read-only managed built-ins but shows editable managed agents in list', async () => {
+    it('hides agents with hidden:true from list by default', async () => {
       const agents = await createVisibilityRegistry().list();
 
-      expect(agents.map(({ id }) => id)).toEqual(['chat-agent', 'nightshift-investigator']);
+      expect(agents.map(({ id }) => id)).toEqual(['visible-builtin', 'chat-agent']);
     });
 
-    it('includes read-only managed built-ins in list when includeManaged is true', async () => {
-      const agents = await createVisibilityRegistry().list({ includeManaged: true });
+    it('includes hidden agents in list when includeHidden is true', async () => {
+      const agents = await createVisibilityRegistry().list({ includeHidden: true });
 
       expect(agents.map(({ id }) => id)).toEqual([
-        'managed-builtin',
+        'visible-builtin',
+        'hidden-builtin',
         'chat-agent',
-        'nightshift-investigator',
       ]);
     });
 
-    it('getIds always includes managed agents (it scopes access, not display)', async () => {
+    it('getIds always includes hidden agents (it scopes access, not display)', async () => {
       const registry = createVisibilityRegistry();
 
-      const expected = ['managed-builtin', 'chat-agent', 'nightshift-investigator'];
+      const expected = ['visible-builtin', 'hidden-builtin', 'chat-agent'];
       expect(await registry.getIds()).toEqual(expected);
-      expect(await registry.getIds({ includeManaged: true })).toEqual(expected);
     });
 
-    it('still resolves hidden read-only managed agents by id', async () => {
-      const resolved = await createVisibilityRegistry().get('managed-builtin');
+    it('still resolves hidden agents by id directly', async () => {
+      const resolved = await createVisibilityRegistry().get('hidden-builtin');
 
-      expect(resolved.id).toBe('managed-builtin');
+      expect(resolved.id).toBe('hidden-builtin');
     });
 
     it('excludes unavailable persisted agents from getIds', async () => {

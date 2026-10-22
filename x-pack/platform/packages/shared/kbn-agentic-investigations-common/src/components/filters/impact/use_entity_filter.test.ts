@@ -6,11 +6,12 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import type { ImpactFilterable } from './entity_ids';
+import type { ImpactPill } from './impact_pills';
 import { useEntityFilter } from './use_entity_filter';
 
 describe('useEntityFilter', () => {
-  const items: ImpactFilterable[] = [{ entityIds: ['host-1'] }, { entityIds: ['user-1'] }];
+  const pill = (entityId: string): ImpactPill => ({ entityId, count: 1 });
+  const items = [pill('host-1'), pill('user-1')];
 
   it('starts without a selection', () => {
     const { result } = renderHook(() => useEntityFilter(items));
@@ -26,13 +27,13 @@ describe('useEntityFilter', () => {
     expect(result.current.entityFilter).toBe('host-1');
   });
 
-  it('clears the selection once its entity drops out of the loaded rows', () => {
+  it('clears the selection once its entity drops out of the pills', () => {
     const { result, rerender } = renderHook(({ rows }) => useEntityFilter(rows), {
       initialProps: { rows: items },
     });
     act(() => result.current.setEntityFilter('host-1'));
 
-    rerender({ rows: [{ entityIds: ['user-1'] }] });
+    rerender({ rows: [pill('user-1')] });
 
     expect(result.current.entityFilter).toBeNull();
   });
@@ -42,7 +43,7 @@ describe('useEntityFilter', () => {
       initialProps: { rows: items },
     });
     act(() => result.current.setEntityFilter('host-1'));
-    rerender({ rows: [{ entityIds: ['user-1'] }] });
+    rerender({ rows: [pill('user-1')] });
 
     rerender({ rows: items });
 

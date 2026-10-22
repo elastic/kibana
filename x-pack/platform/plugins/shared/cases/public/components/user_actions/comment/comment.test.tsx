@@ -656,7 +656,8 @@ describe('createCommentUserActionBuilder', () => {
       await waitFor(() => {
         expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
           'alert-comment-id',
-          'Deleted one alert'
+          'Deleted one alert',
+          undefined
         );
       });
     });
@@ -739,7 +740,8 @@ describe('createCommentUserActionBuilder', () => {
       await waitFor(() => {
         expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
           'alert-comment-id',
-          'Deleted 2 alerts'
+          'Deleted 2 alerts',
+          undefined
         );
       });
     });
@@ -1028,7 +1030,8 @@ describe('createCommentUserActionBuilder', () => {
         await waitFor(() => {
           expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
             'persistable-state-comment-id',
-            'Deleted attachment'
+            'Deleted attachment',
+            undefined
           );
         });
       });

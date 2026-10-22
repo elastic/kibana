@@ -259,6 +259,29 @@ describe('AlertingDateRangePicker', () => {
     expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 
+  it('uses a separate callback for manual refresh when provided', async () => {
+    const user = userEvent.setup();
+    const onRefresh = jest.fn();
+    const onManualRefresh = jest.fn();
+    render(
+      <AlertingDateRangePicker
+        from="now-15m"
+        to="now"
+        onChange={mockOnChange}
+        services={services}
+        onRefresh={onRefresh}
+        onManualRefresh={onManualRefresh}
+        data-test-subj="alertingDateRangePicker"
+      />
+    );
+
+    expect(lastPickerProps?.onRefresh).toBe(onRefresh);
+    await user.click(screen.getByTestId('alertingDateRangePicker-refresh'));
+
+    expect(onManualRefresh).toHaveBeenCalledTimes(1);
+    expect(onRefresh).not.toHaveBeenCalled();
+  });
+
   it('shows a loading spinner on the manual refresh button while isLoading', () => {
     const onRefresh = jest.fn();
     render(
@@ -275,6 +298,25 @@ describe('AlertingDateRangePicker', () => {
 
     const refreshButton = screen.getByTestId('alertingDateRangePicker-refresh');
     expect(refreshButton).toHaveAttribute('disabled');
+  });
+
+  it('shows and disables the update button when pending input is invalid', () => {
+    render(
+      <AlertingDateRangePicker
+        from="now-15m"
+        to="now"
+        onChange={mockOnChange}
+        services={services}
+        onRefresh={jest.fn()}
+        needsUpdate
+        isRefreshDisabled
+        refreshTooltip="Fix the query"
+        data-test-subj="alertingDateRangePicker"
+      />
+    );
+
+    expect(screen.getByTestId('alertingDateRangePicker-refresh')).toBeDisabled();
+    expect(screen.getByText('Update')).toBeInTheDocument();
   });
 
   it('shows the EuiSuperDatePicker update button only when onRefresh is provided (feature flag off)', () => {
@@ -309,6 +351,33 @@ describe('AlertingDateRangePicker', () => {
     expect(mockSuperDatePicker).toHaveBeenLastCalledWith(
       expect.objectContaining({ showUpdateButton: 'iconOnly' })
     );
+  });
+
+  it('separates manual refresh from auto-refresh when the feature flag is off', async () => {
+    const user = userEvent.setup();
+    const onRefresh = jest.fn();
+    const onManualRefresh = jest.fn();
+    useNewDateRangePickerFlag = false;
+
+    render(
+      <AlertingDateRangePicker
+        from="now-15m"
+        to="now"
+        onChange={mockOnChange}
+        services={services}
+        onRefresh={onRefresh}
+        onManualRefresh={onManualRefresh}
+        data-test-subj="alertingDateRangePicker"
+      />
+    );
+
+    expect(mockSuperDatePicker).toHaveBeenLastCalledWith(
+      expect.objectContaining({ onRefresh, showUpdateButton: false })
+    );
+    await user.click(screen.getByTestId('alertingDateRangePicker-refresh'));
+
+    expect(onManualRefresh).toHaveBeenCalledTimes(1);
+    expect(onRefresh).not.toHaveBeenCalled();
   });
 
   it('falls back to EuiSuperDatePicker when the feature flag is disabled', () => {

@@ -25,6 +25,8 @@ import type {
   LoggingServiceSetup,
   StatusServiceSetup,
 } from '@kbn/core/server';
+import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
+import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
 import type { AuditEvent, AuditLogger, AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
@@ -61,6 +63,13 @@ interface AuditServiceSetupParams {
     request: KibanaRequest
   ): ReturnType<SecurityPluginSetup['authc']['getCurrentUser']> | undefined;
 
+  /**
+   * Identifies a fake request minted for a service account, without I/O. Fake requests never pass
+   * through the authenticator, so this is the only way their events can name an actor. Defaults to
+   * identifying none.
+   */
+  getFakeRequestPrincipal?(request: KibanaRequest): AuthenticatedPrincipal | null;
+
   getSID(request: KibanaRequest): Promise<string | undefined>;
 
   getSpaceId(
@@ -86,6 +95,7 @@ export class AuditService {
     status,
     isServerless = false,
     getCurrentUser,
+    getFakeRequestPrincipal = () => null,
     getSID,
     getSpaceId,
     recordAuditLoggingUsage,
@@ -190,6 +200,15 @@ export class AuditService {
         }
         const spaceId = getSpaceId(request);
         const user = getCurrentUser(request);
+        // Resolved before the first await. Callers do not await `log`, so a workload can release
+        // its fake request before this resumes, and the registry no longer knows it after that.
+        const principal = user
+          ? getAuthenticatedPrincipal(user)
+          : request.isFakeRequest
+          ? getFakeRequestPrincipal(request)
+          : null;
+        const serviceAccountId =
+          principal?.type === 'service_account' ? principal.serviceAccountId : undefined;
         const sessionId = await getSID(request);
         const forwardedFor = getForwardedFor(request);
         // The request user is the actor. An event may also name who the action was taken on, as
@@ -198,19 +217,23 @@ export class AuditService {
 
         log({
           ...event,
-          user:
-            (user && {
-              id: user.profile_uid,
-              name: user.username,
-              ...(user.email ? { email: user.email } : {}),
-              ...(user.full_name ? { full_name: user.full_name } : {}),
-              ...(includeUserDomain && user.authentication_realm?.name
-                ? { domain: user.authentication_realm.name }
-                : {}),
-              roles: user.roles as string[],
-              ...(target ? { target } : {}),
-            }) ||
-            event.user,
+          user: user
+            ? {
+                // A service account has no user profile, so its id stands in for one.
+                id: user.profile_uid ?? serviceAccountId,
+                name: user.username,
+                ...(user.email ? { email: user.email } : {}),
+                ...(user.full_name ? { full_name: user.full_name } : {}),
+                ...(includeUserDomain && user.authentication_realm?.name
+                  ? { domain: user.authentication_realm.name }
+                  : {}),
+                roles: user.roles as string[],
+                ...(target ? { target } : {}),
+              }
+            : serviceAccountId
+            ? // The registry knows only which account a fake request runs as, not its roles.
+              { id: serviceAccountId, name: serviceAccountId, ...(target ? { target } : {}) }
+            : event.user,
           kibana: {
             space_id: spaceId,
             session_id: sessionId,

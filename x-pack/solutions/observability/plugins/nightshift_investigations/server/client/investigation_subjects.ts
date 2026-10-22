@@ -17,23 +17,31 @@ import type {
   InvestigationSubject as StoredInvestigationSubject,
   InvestigationSubjectKey,
 } from '@kbn/agentic-investigations-plugin/common';
-import type { AlertSnapshot, InvestigationSubject, InvestigationTriggerType } from '../../common';
+import type {
+  AlertSnapshot,
+  InvestigationSubject,
+  InvestigationTriggerType,
+  SlackThreadReference,
+} from '../../common';
 import {
   alertInvestigationContextSchema,
   alertSnapshotSchema,
   DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
   INVESTIGATION_TRIGGER_TYPES,
+  toSlackThreadKey,
 } from '../../common';
 import { buildInvestigationMessage } from './build_investigation_message';
+
+export { toSlackThreadKey };
 
 const MAX_SLACK_FIELD_LENGTH = 256;
 const MAX_SLACK_PERMALINK_LENGTH = 2048;
 
 /**
  * A subject the start path hands to the investigation workflow in `inputs.subjects`, recorded on
- * the investigation by the workflow's `_ensure` step. The workflow runs as the identity that owns
- * the investigation conversation, so every write to it happens there rather than with the start
- * caller's request. Agentic investigations validates these again when it stores them.
+ * the investigation by the workflow's `_ensure` step, which may run concurrently with the start's
+ * creation of the conversation, so subjects are only ever recorded there. Agentic investigations
+ * validates these again when it stores them.
  */
 export const workflowSubjectInputSchema = z.object({
   type: z.enum(INVESTIGATION_SUBJECT_TYPES),
@@ -67,18 +75,22 @@ const isPlaceholderManualSubject = ({ type, id }: Pick<InvestigationSubject, 'ty
 /**
  * The subjects one start records: the named subject and, for an alert investigation, one subject
  * per alert snapshot, each carrying its snapshot. A manual investigation without a subject id is
- * recorded under the investigation's own id, so it never matches another investigation.
+ * recorded under the investigation's own id, so it never matches another investigation. A start
+ * about a Slack thread also records the thread, which is how the Slack thread workflow finds the
+ * investigation when someone replies in it.
  */
 export const toStartSubjects = ({
   subject,
   alerts = [],
   triggerType,
   investigationId,
+  slackThread,
 }: {
   subject: InvestigationSubject;
   alerts?: AlertSnapshot[];
   triggerType: InvestigationTriggerType;
   investigationId: string;
+  slackThread?: SlackThreadReference;
 }): WorkflowSubjectInput[] => {
   const primaryId = isPlaceholderManualSubject(subject) ? investigationId : subject.id;
   const summary = truncateSummary(subject.summary);
@@ -88,9 +100,23 @@ export const toStartSubjects = ({
     triggerType,
     ...(summary ? { summary } : {}),
   };
+  const thread: WorkflowSubjectInput[] = slackThread
+    ? [
+        {
+          type: 'slack_thread',
+          id: toSlackThreadKey({
+            workspace: slackThread.workspace,
+            channel: slackThread.channel,
+            threadTs: slackThread.thread_ts,
+          }),
+          triggerType,
+          slack: { channel: slackThread.channel, thread_ts: slackThread.thread_ts },
+        },
+      ]
+    : [];
 
   if (subject.type !== 'alert') {
-    return [primary];
+    return [primary, ...thread];
   }
 
   const fromAlerts = alerts.map(
@@ -102,7 +128,10 @@ export const toStartSubjects = ({
       ...(snapshot.id === subject.id && summary ? { summary } : {}),
     })
   );
-  return fromAlerts.some(({ id }) => id === subject.id) ? fromAlerts : [primary, ...fromAlerts];
+  return [
+    ...(fromAlerts.some(({ id }) => id === subject.id) ? fromAlerts : [primary, ...fromAlerts]),
+    ...thread,
+  ];
 };
 
 /** The keys a start matches open investigations and claims subjects by. */

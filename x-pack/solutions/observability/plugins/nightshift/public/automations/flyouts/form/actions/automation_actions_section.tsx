@@ -25,8 +25,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import {
+  formatChannelValue,
+  useAllRelayAppBindings,
+} from '../../../../settings/components/apps_section/use_relay_app_bindings';
 import type { SlackActionFormValues, SlackTarget } from '../automation_form_values';
 import { SectionHeader } from '../section_header';
+import { SlackChannelComboBox } from '../slack_channel_combo_box';
 import { SentenceIcon } from '../triggers/pills/sentence';
 
 export const actionLabels = {
@@ -108,6 +113,11 @@ const SlackThreadActionRow = () => {
   );
 };
 
+const ChannelBadge = ({ value }: { value: string }) => {
+  const { bindings } = useAllRelayAppBindings();
+  return <EuiBadge>{formatChannelValue(value, bindings)}</EuiBadge>;
+};
+
 const SlackActionRow = ({
   action,
   onChange,
@@ -152,22 +162,33 @@ const SlackActionRow = ({
               { value: 'channel', text: actionLabels.channel },
               { value: 'self', text: actionLabels.directMessage },
             ]}
-            onChange={(event) => onChange({ ...action, target: event.target.value as SlackTarget })}
+            onChange={(event) =>
+              onChange({ target: event.target.value as SlackTarget, destination: '' })
+            }
           />
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={!readOnly}>
         {readOnly ? (
-          <EuiBadge>{action.destination}</EuiBadge>
+          action.target === 'channel' ? (
+            <ChannelBadge value={action.destination} />
+          ) : (
+            <EuiBadge>{action.destination}</EuiBadge>
+          )
+        ) : action.target === 'channel' ? (
+          <SlackChannelComboBox
+            singleSelection
+            values={action.destination ? [action.destination] : []}
+            onChange={([destination = '']) => onChange({ ...action, destination })}
+            ariaLabel={actionLabels.searchChannels}
+            placeholder={actionLabels.searchChannels}
+            testSubject="automationSlackChannelDestination"
+          />
         ) : (
           <EuiFieldText
             compressed
-            aria-label={
-              action.target === 'channel' ? actionLabels.searchChannels : actionLabels.searchPeople
-            }
-            placeholder={
-              action.target === 'channel' ? actionLabels.searchChannels : actionLabels.searchPeople
-            }
+            aria-label={actionLabels.searchPeople}
+            placeholder={actionLabels.searchPeople}
             value={action.destination}
             onChange={(event) => onChange({ ...action, destination: event.target.value })}
             data-test-subj="automationSlackDestination"

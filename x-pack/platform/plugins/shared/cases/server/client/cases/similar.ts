@@ -15,9 +15,14 @@ import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_typ
 
 import { createCaseError } from '../../common/error';
 import type { CasesClient, CasesClientArgs } from '..';
-import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
+import { flattenCaseSavedObject } from '../../common/utils';
+import {
+  convertSortField,
+  buildFilter,
+  buildObservablesFieldsFilter,
+  combineFilters,
+} from '../utils';
 import { Operations } from '../../authorization';
-import { buildFilter, buildObservablesFieldsFilter, combineFilters } from '../utils';
 import { combineFilterWithAuthorizationFilter } from '../../authorization/utils';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { getAvailableObservableTypesMap } from '../observable_types';
@@ -63,7 +68,7 @@ export const similar = async (
   casesClient: CasesClient
 ): Promise<CasesSimilarResponse> => {
   const {
-    services: { caseService, licensingService },
+    services: { caseService, licensingService, attachmentService },
     logger,
     authorization,
   } = clientArgs;
@@ -128,7 +133,8 @@ export const similar = async (
 
     const cases = await caseService.findCases({
       filter: finalCasesFilter,
-      sortField: defaultSortField,
+      sortField: convertSortField(paramArgs.sortField),
+      sortOrder: paramArgs.sortOrder,
       search: `-"cases:${caseId}"`,
       rootSearchFields: ['_id'],
       page: paramArgs.page,
@@ -142,13 +148,30 @@ export const similar = async (
       }))
     );
 
+    const commentTotals = await attachmentService.getter.getCaseAttatchmentStats({
+      caseIds: cases.saved_objects.map((caseSavedObject) => caseSavedObject.id),
+    });
+
     const res = {
-      cases: cases.saved_objects.map((so) => ({
-        ...flattenCaseSavedObject({ savedObject: so }),
-        similarities: {
-          observables: getSimilarities(retrievedCase, so, availableObservableTypesMap),
-        },
-      })),
+      cases: cases.saved_objects.map((so) => {
+        const { userComments, alerts, events } = commentTotals.get(so.id) ?? {
+          alerts: 0,
+          userComments: 0,
+          events: 0,
+        };
+
+        return {
+          ...flattenCaseSavedObject({
+            savedObject: so,
+            totalComment: userComments,
+            totalAlerts: alerts,
+            totalEvents: events,
+          }),
+          similarities: {
+            observables: getSimilarities(retrievedCase, so, availableObservableTypesMap),
+          },
+        };
+      }),
       page: cases.page,
       per_page: cases.per_page,
       total: cases.total,

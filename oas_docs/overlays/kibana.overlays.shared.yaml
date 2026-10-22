@@ -146,10 +146,26 @@ actions:
       description: >
         Streams is a new and experimental way to manage your data in Kibana (currently experimental - expect changes).
       x-displayName: "Streams"
+  - target: '$.tags[?(@.name=="synthetics")]'
+    description: Change tag description and displayName
+    update:
+      description: Synthetics APIs enable you to check the status of your services and applications.
+      x-displayName: Synthetics
+      externalDocs:
+        description: Synthetic monitoring
+        url: https://www.elastic.co/docs/solutions/observability/synthetics
   - target: '$.tags[?(@.name=="data views")]'
     description: Change displayName
     update:
       x-displayName: "Data views"
+  - target: '$.tags[?(@.name=="data-views-v2")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
+        Use these endpoints to list, retrieve, create, replace, and delete data views with the
+        as-code data view definition.
+      x-displayName: "Data views v2"
   - target: '$.tags[?(@.name=="slo")]'
     description: Change displayName
     update:
@@ -218,6 +234,42 @@ actions:
                   $ref: '../examples/get_spaces_response1.yaml'
                 getSpacesResponseExample2:
                   $ref: '../examples/get_spaces_response2.yaml'
+# Hide query parameters that are only used internally by the Synthetics app
+  - target: "$.paths['/api/synthetics/monitors']['get'].parameters[?(@.description=='For internal use only.')]"
+    description: Hide internal-only Synthetics parameters
+    remove: true
+  - target: "$.paths['/api/synthetics/monitors']['post'].parameters[?(@.description=='For internal use only.')]"
+    description: Hide internal-only Synthetics parameters
+    remove: true
+  - target: "$.paths['/api/synthetics/monitors/{id}']['get'].parameters[?(@.description=='For internal use only.')]"
+    description: Hide internal-only Synthetics parameters
+    remove: true
+  - target: "$.paths['/api/synthetics/monitors/{id}']['put'].parameters[?(@.description=='For internal use only.')]"
+    description: Hide internal-only Synthetics parameters
+    remove: true
+# Hide system-managed Synthetics monitor fields from the request body docs
+  - target: "$.components.schemas.Kibana_HTTP_APIs_httpMonitorFields.properties['__ui','config_id','custom_heartbeat_id','hash','journey_id','origin','original_space','project_id','revision','form_monitor_type','max_attempts','urls','hosts','service','url.port']"
+    description: Hide system-managed fields from httpMonitorFields
+    remove: true
+  - target: "$.components.schemas.Kibana_HTTP_APIs_tcpMonitorFields.properties['__ui','config_id','custom_heartbeat_id','hash','journey_id','origin','original_space','project_id','revision','form_monitor_type','max_attempts','urls','hosts','service','url.port']"
+    description: Hide system-managed fields from tcpMonitorFields
+    remove: true
+  - target: "$.components.schemas.Kibana_HTTP_APIs_icmpMonitorFields.properties['__ui','config_id','custom_heartbeat_id','hash','journey_id','origin','original_space','project_id','revision','form_monitor_type','max_attempts','urls','hosts','service','url.port']"
+    description: Hide system-managed fields from icmpMonitorFields
+    remove: true
+  - target: "$.components.schemas.Kibana_HTTP_APIs_browserMonitorFields.properties['__ui','config_id','custom_heartbeat_id','hash','journey_id','origin','original_space','project_id','revision','form_monitor_type','max_attempts','urls','hosts','service','url.port']"
+    description: Hide system-managed fields from browserMonitorFields
+    remove: true
+  - target: "$.components.schemas.Kibana_HTTP_APIs_apiMonitorFields.properties['__ui','config_id','custom_heartbeat_id','hash','journey_id','origin','original_space','project_id','revision','form_monitor_type','max_attempts','urls','hosts','service','url.port']"
+    description: Hide system-managed fields from apiMonitorFields
+    remove: true
+  - target: "$.components.schemas.Kibana_HTTP_APIs_editMonitorRequest.properties['__ui','config_id','custom_heartbeat_id','hash','journey_id','origin','original_space','project_id','revision','form_monitor_type','max_attempts','urls','hosts','service','url.port']"
+    description: Hide system-managed fields from editMonitorRequest
+    remove: true
+# Hide Elasticsearch field-name aliases from the Synthetics sortField values; the friendly names (name, tags, ...) are the documented ones
+  - target: "$.paths['/api/synthetics/monitors']['get'].parameters[?(@.name=='sortField')].schema.enum[?(@ =~ /[.]keyword$/)]"
+    description: Hide legacy .keyword sort values
+    remove: true
 # Add an introduction to spaces
   - target: '$'
     description: Add an extra page about spaces

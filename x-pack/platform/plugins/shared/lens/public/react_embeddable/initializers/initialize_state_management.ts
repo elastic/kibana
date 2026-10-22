@@ -106,6 +106,8 @@ export function initializeStateManagement(
     },
     reinitializeRuntimeState: (lastSavedRuntimeState: LensRuntimeState) => {
       internalApi.updateAttributes(lastSavedRuntimeState.attributes);
+      // clear error from a previous load
+      internalApi.updateLoadError(lastSavedRuntimeState.loadError);
     },
     cleanup: () => {
       renderCountSubscription.unsubscribe();

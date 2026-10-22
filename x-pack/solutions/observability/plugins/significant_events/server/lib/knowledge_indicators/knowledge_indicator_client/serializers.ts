@@ -129,6 +129,7 @@ export function toStoredQuery({
     query: {
       esql: query.esql.query,
       query_type: derivedType,
+      category: query.category,
       severity_score: query.severity_score,
       rule_backed: ruleBacked,
       rule_id: ruleId,
@@ -181,6 +182,7 @@ export function fromStoredFeature(doc: StoredFeatureKnowledgeIndicator): Feature
 export function fromStoredQuery(doc: StoredQueryKnowledgeIndicator): QueryLink {
   const {
     query_type: type,
+    category,
     rule_backed,
     rule_id,
     esql: esqlQuery,
@@ -201,6 +203,7 @@ export function fromStoredQuery(doc: StoredQueryKnowledgeIndicator): QueryLink {
       title: doc.title,
       description: doc.description,
       esql: { query: esqlQuery },
+      category,
       severity_score,
       features,
       evidence: doc.evidence,

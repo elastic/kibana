@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import type { ApprovalProposal, ApprovalDecision } from './types';
 import type { ApprovalPhase } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import { formatDismissReason } from './dismiss_reason';
+
+/** The format of each full date and time in the proposal UI. The time uses 24 hours: "20 Oct 2026, 14:36". */
+export const DATE_TIME_FORMAT = 'D MMM YYYY, HH:mm';
 
 /** Stored lowercase (`configure`, `respond`, ...); the caption reads it in sentence case. */
 const toSentenceCase = (value: string): string =>
@@ -25,53 +29,68 @@ const impactCaptionPart = (proposal: ApprovalProposal): string | undefined => {
       });
 };
 
-/** `undefined` proposals carry no deadline at all — as opposed to one already past. */
+/** Returns `undefined` when there is no deadline. A past deadline still returns text. */
 const deadlineCaptionPart = (proposal: ApprovalProposal): string | undefined => {
   if (!proposal.expiresAt) {
     return undefined;
   }
+  const deadline = moment(proposal.expiresAt).format(DATE_TIME_FORMAT);
   if (isProposalExpired(proposal)) {
-    return APPROVAL_MODAL_TRANSLATIONS.expiredCaption;
+    return i18n.translate('xpack.proposals.approvalModal.caption.expired', {
+      defaultMessage: 'Expired on {deadline}',
+      values: { deadline },
+    });
   }
-  const deadline = new Date(proposal.expiresAt).toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
   return i18n.translate('xpack.proposals.approvalModal.caption.expires', {
-    defaultMessage: 'Expires {deadline}',
+    defaultMessage: 'Expires on {deadline}',
     values: { deadline },
   });
 };
 
+export interface ProposalCaptionPart {
+  text: string;
+  /** True for the "Irreversible" part, which the UI highlights. */
+  isIrreversible?: boolean;
+}
+
+/** Returns the parts of the caption line, in display order. See {@link getProposalCaption}. */
+export const getProposalCaptionParts = (
+  proposal: ApprovalProposal,
+  { includeRiskDetails = false }: { includeRiskDetails?: boolean } = {}
+): ProposalCaptionPart[] => {
+  const category = proposal.action?.category ?? proposal.category;
+  const isReversible = proposal.action?.reversible;
+  const parts: Array<ProposalCaptionPart | undefined> = [
+    category === undefined ? undefined : { text: toSentenceCase(category) },
+    isReversible === undefined
+      ? undefined
+      : isReversible
+      ? { text: APPROVAL_MODAL_TRANSLATIONS.reversible }
+      : { text: APPROVAL_MODAL_TRANSLATIONS.irreversible, isIrreversible: true },
+    ...(includeRiskDetails
+      ? [impactCaptionPart(proposal), deadlineCaptionPart(proposal)].map((text) =>
+          text === undefined ? undefined : { text }
+        )
+      : []),
+  ];
+  return parts.filter(
+    (part): part is ProposalCaptionPart => part !== undefined && part.text !== ''
+  );
+};
+
 /**
- * The category/reversibility line shown under a proposal's title — in the modal header and the
- * flyout's `ProposedActionButton` row alike, so the two describe the same proposal identically.
- * `undefined` when the proposal carries neither, so a caller can skip the line rather than render
- * an empty one.
+ * Returns the line under a proposal title: its category and whether it is reversible.
+ * Returns `undefined` when the proposal has neither.
  *
- * `includeRiskDetails` adds impact and the decision deadline — the same risk context the modal
- * used to show as its own list section before this became one caption line. Opt-in rather than
- * always on: a whole list of flyout rows repeating both on every line would be noisier than
- * useful, where the one proposal a modal (or the chat card) is actually asking about has the room
- * for it and the analyst needs it to actually decide.
+ * Set `includeRiskDetails` to add the impact and the decision deadline. Use it for one proposal,
+ * such as in the modal. Do not use it for a list of rows, because the repeated text is noisy.
  */
 export const getProposalCaption = (
   proposal: ApprovalProposal,
-  { includeRiskDetails = false }: { includeRiskDetails?: boolean } = {}
+  options: { includeRiskDetails?: boolean } = {}
 ): string | undefined => {
-  const category = proposal.action?.category ?? proposal.category;
-  const reversible = proposal.action?.reversible;
-  const parts = [
-    category === undefined ? undefined : toSentenceCase(category),
-    reversible === undefined
-      ? undefined
-      : reversible
-      ? APPROVAL_MODAL_TRANSLATIONS.reversible
-      : APPROVAL_MODAL_TRANSLATIONS.irreversible,
-    ...(includeRiskDetails ? [impactCaptionPart(proposal), deadlineCaptionPart(proposal)] : []),
-  ].filter((part): part is string => Boolean(part));
-
-  return parts.length > 0 ? parts.join(' • ') : undefined;
+  const parts = getProposalCaptionParts(proposal, options);
+  return parts.length > 0 ? parts.map(({ text }) => text).join(' • ') : undefined;
 };
 
 /**

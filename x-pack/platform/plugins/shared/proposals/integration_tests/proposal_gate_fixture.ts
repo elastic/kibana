@@ -7,7 +7,7 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { CREATE_PROPOSAL_WORKFLOW_ID, getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/test_helpers';
 import type { Proposal, ProposalOrigin } from '@kbn/proposals-common';
@@ -117,6 +117,8 @@ const FIXTURE_ORIGIN = 'alertzero' satisfies ProposalOrigin;
 
 export interface ProposalGateFixture {
   engine: WorkflowRunFixture;
+  /** The service the gate writes through, to read and decide as the routes do. */
+  service: ProposalsService;
   attachedProposalIds: () => string[];
   /** Every proposal written so far, in insertion order. */
   proposals: () => Array<Proposal & { id: string }>;
@@ -175,6 +177,12 @@ export interface ProposalGateFixture {
    * caller-supplied deadline rather than the 72h default.
    */
   timeOutGate: (advanceMs?: number) => Promise<void>;
+  /**
+   * Ends the parked gate as a cancel does, a parent's timeout cascading into it
+   * for instance: the execution is marked cancelled and runs no handler, so
+   * nothing in the workflow settles the record.
+   */
+  cancelGate: () => void;
   /** Flips what `proposals.checkDecidePrivileges` reports. */
   setCanDecide: (canDecide: boolean) => void;
   /** Replaces what the action workflow declares, e.g. to make it `always-gate`. */
@@ -192,9 +200,30 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
     // Supplies the action metadata `create` and `get` resolve. No `triggers`,
     // so the best-effort action-input validation is skipped.
     getWorkflow: jest.fn().mockResolvedValue({
-      definition: { consts: { actionMetadata: { name: 'Create rule', category: 'tune' } } },
+      definition: {
+        consts: {
+          actionMetadata: {
+            name: 'Create rule',
+            category: 'tune',
+            approvalPolicy: 'autonomy-dependent',
+          },
+        },
+      },
     }),
-    getWorkflowExecution: jest.fn(),
+    // Both report the fixture engine's own executions, so a read or a decision
+    // settles a proposal only when its gate really ended.
+    getWorkflowExecution: jest.fn(async (id: string) => {
+      const execution = engine.workflowExecutionRepositoryMock.workflowExecutions.get(id);
+      return execution ? { ...execution, stepExecutions: [] } : null;
+    }),
+    getWorkflowExecutionStatuses: jest.fn(async (ids: string[]) =>
+      ids.flatMap((id) => {
+        const execution = engine.workflowExecutionRepositoryMock.workflowExecutions.get(id);
+        return execution
+          ? [{ id, workflowId: execution.workflowId, status: execution.status }]
+          : [];
+      })
+    ),
     resumeWorkflowExecution: jest.fn(),
   };
 
@@ -244,6 +273,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
 
   return {
     engine,
+    service,
     attachedProposalIds: () => [...attachedProposalIds],
     proposals,
     onlyProposal: () => {
@@ -312,7 +342,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
     /**
      * Goes through the real service, the same path the tool and HTTP route take,
      * so a test can park a gate, revise under it, resume, and assert the revision
-     * rather than the trigger's original input reaches `execute_action`.
+     * rather than the trigger's original input reaches `execute_as_approver`.
      */
     revise: async (overrides: { comment?: string; actionInput?: Record<string, unknown> }) => {
       const [live] = proposals().filter((proposal) => proposal.supersededBy === undefined);
@@ -331,6 +361,11 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
       } finally {
         jest.useRealTimers();
       }
+    },
+    cancelGate: () => {
+      const executions = engine.workflowExecutionRepositoryMock.workflowExecutions;
+      const execution = executions.get('fake_workflow_execution_id')!;
+      executions.set(execution.id, { ...execution, status: ExecutionStatus.CANCELLED });
     },
     setCanDecide: (value) => {
       canDecide = value;

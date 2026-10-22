@@ -11,6 +11,7 @@
 export enum EsqlSettingNames {
   APPROXIMATION = 'approximation',
   COLUMN_METADATA = 'column_metadata',
+  EXEMPLARS = 'exemplars',
   PROJECT_ROUTING = 'project_routing',
   TIME_ZONE = 'time_zone',
   UNMAPPED_FIELDS = 'unmapped_fields',
@@ -40,6 +41,19 @@ const columnMetadata = {
   preview: true,
   snapshotOnly: false,
   ignoreAsSuggestion: false,
+};
+
+const exemplars = {
+  name: EsqlSettingNames.EXEMPLARS,
+  type: ['boolean', 'map_param'],
+  description:
+    'When enabled, the provided `TS ... | STATS` or `PROMQL` query is not executed. Instead, exemplars considered relevant to the query are returned based on heuristics that take the selected metrics and series into account.',
+  serverlessOnly: false,
+  preview: false,
+  snapshotOnly: true,
+  mapParams:
+    "{name='limit', values=[], description='Maximum number of exemplars to return. Without it the default limit of a regular query applies.', type=[integer]}",
+  ignoreAsSuggestion: true,
 };
 
 const projectRouting = {
@@ -100,6 +114,7 @@ const wildcardsMatchViews = {
 export const settings = [
   approximation,
   columnMetadata,
+  exemplars,
   projectRouting,
   timeZone,
   unmappedFields,

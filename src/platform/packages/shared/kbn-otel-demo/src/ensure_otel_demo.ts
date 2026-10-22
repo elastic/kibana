@@ -43,6 +43,8 @@ import {
 } from './demo_registry';
 
 const DATA_DIR = Path.join(REPO_ROOT, 'data', 'demo_environments');
+/** Where the Elasticsearch exporter writes logs that carry no explicit index. */
+const DEFAULT_LOGS_DATA_STREAM = 'logs-generic.otel-default';
 
 /**
  * Stops and removes a demo environment from Kubernetes.
@@ -83,7 +85,7 @@ export interface DeployResult {
   namespace: string;
   kibanaUrl: string;
   elasticsearchHost: string;
-  logsIndex: string;
+  logsIndex?: string;
 }
 
 /**
@@ -94,7 +96,7 @@ export interface DeployResult {
  * @param log - Tooling logger for output
  * @param demoType - Type of demo to deploy (default: 'otel-demo')
  * @param configPath - Optional path to Kibana config file
- * @param logsIndex - Index name for logs (defaults to "logs.otel")
+ * @param logsIndex - Index for container logs; unset routes them to the default logs-generic.otel-default data stream
  * @param version - Demo version (defaults to demo's defaultVersion)
  * @param scenarioIds - Optional list of failure scenario IDs to apply
  * @param forceRebuildImages - If true, rebuilds the custom images
@@ -105,7 +107,7 @@ export async function deployDemo({
   log,
   demoType = 'otel-demo',
   configPath,
-  logsIndex = 'logs',
+  logsIndex,
   version,
   scenarioIds = [],
   codeScenarioId,
@@ -198,20 +200,24 @@ export async function deployDemo({
 
   log.info(`Kibana: ${kibanaUrl}`);
   log.info(`Elasticsearch: ${elasticsearchHost}`);
-  log.info(`Logs index: ${logsIndex}`);
+  log.info(`Logs index: ${logsIndex ?? DEFAULT_LOGS_DATA_STREAM}`);
 
-  await enableStreams({
-    kibanaUrl,
-    username: kibanaCredentials.username,
-    password: kibanaCredentials.password,
-    log,
-  });
+  // A custom logs index is a wired stream (e.g. logs.otel), so Streams must be on for it.
+  if (logsIndex) {
+    await enableStreams({
+      kibanaUrl,
+      username: kibanaCredentials.username,
+      password: kibanaCredentials.password,
+      log,
+    });
+  }
 
   await createDataView({
     kibanaUrl,
     username: kibanaCredentials.username,
     password: kibanaCredentials.password,
     log,
+    ...(logsIndex ? {} : { title: 'logs-*' }),
   });
 
   // Process failure scenarios
@@ -365,7 +371,7 @@ export async function deployDemo({
         );
       }
 
-      log.write(`  ${chalk.bold('Logs Index:')}       ${logsIndex}`);
+      log.write(`  ${chalk.bold('Logs Index:')}       ${logsIndex ?? DEFAULT_LOGS_DATA_STREAM}`);
 
       if (activeScenarios.length > 0) {
         log.write(
@@ -481,7 +487,7 @@ export async function teardownDemo({
  * @param signal - Abort signal for cleanup
  * @param demoType - Type of demo to deploy (default: 'otel-demo')
  * @param configPath - Optional path to Kibana config file
- * @param logsIndex - Index name for logs (defaults to "logs.otel")
+ * @param logsIndex - Index for container logs; unset routes them to the default logs-generic.otel-default data stream
  * @param version - Demo version (defaults to demo's defaultVersion)
  * @param teardown - If true, stops and removes the deployment
  * @param scenarioIds - Optional list of failure scenario IDs to apply
@@ -494,7 +500,7 @@ export async function ensureOtelDemo({
   signal,
   demoType = 'otel-demo',
   configPath,
-  logsIndex = 'logs',
+  logsIndex,
   version,
   teardown = false,
   scenarioIds = [],

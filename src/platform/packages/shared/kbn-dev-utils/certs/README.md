@@ -15,11 +15,14 @@ Certificates and keys are provided in multiple formats. These can be used by oth
 * `elasticsearch.key` -- A PEM-formatted [PKCS #1](https://tools.ietf.org/html/rfc8017) private key for Elasticsearch.
 * `kibana.crt` -- A PEM-formatted X.509 certificate and public key for Kibana.
 * `kibana.key` -- A PEM-formatted PKCS #1 private key for Kibana.
+* `relay.crt` -- A PEM-formatted X.509 certificate and public key for the Relay service.
+* `relay.key` -- A PEM-formatted PKCS #1 private key for the Relay service.
 
 ### PKCS #12
 
 * `elasticsearch.p12` -- A [PKCS #12](https://tools.ietf.org/html/rfc7292) encrypted key store / trust store that contains `ca.crt`, `elasticsearch.crt`, and a [PKCS #8](https://tools.ietf.org/html/rfc5208) encrypted version of `elasticsearch.key`.
 * `kibana.p12` -- A PKCS #12 encrypted key store / trust store that contains `ca.crt`, `kibana.crt`, and a PKCS #8 encrypted version of `kibana.key`.
+* `relay.p12` -- A PKCS #12 encrypted key store / trust store that contains `ca.crt`, `relay.crt`, and a PKCS #8 encrypted version of `relay.key`.
 
 The password used for both of these is "storepass". Other copies are also provided for testing purposes:
 
@@ -70,4 +73,74 @@ openssl pkcs12 -in fleet_server.p12 -nocerts -passin pass:"storepass" -passout p
 
 # Extract the PEM-formatted X.509 certificate for Fleet Server
 openssl pkcs12 -in fleet_server.p12 -out fleet_server.crt -clcerts -passin pass:"storepass" -passout pass:
+```
+
+### Relay service
+
+The Relay certificate is generated with OpenSSL rather than `elasticsearch-certutil`, because it needs a URI
+Subject Alternative Name (`spiffe://relay-service.elastic.co`) and both the `clientAuth` and `serverAuth` extended
+key usages. `certutil` emits neither. It is signed by the same `ca.p12` as every other certificate here, so
+`ca.crt` remains the only trust anchor a dev environment needs.
+
+First extract the CA certificate and key from `ca.p12`:
+
+```
+openssl pkcs12 -in ca.p12 -passin pass:"castorepass" -nokeys -clcerts -out ca_signing.crt
+openssl pkcs12 -in ca.p12 -passin pass:"castorepass" -nocerts -nodes -out ca_signing.key
+```
+
+Then write `relay.cnf`:
+
+```
+[req]
+default_bits       = 2048
+default_md         = sha256
+prompt             = no
+distinguished_name = dn
+req_extensions     = v3_req
+
+[dn]
+CN = relay-service
+O  = Elastic
+
+[v3_req]
+basicConstraints = CA:FALSE
+keyUsage         = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = clientAuth, serverAuth
+subjectAltName   = @alt_names
+
+[alt_names]
+URI.1 = spiffe://relay-service.elastic.co
+DNS.1 = localhost
+
+[v3_ext]
+basicConstraints       = CA:FALSE
+keyUsage               = critical, digitalSignature, keyEncipherment
+extendedKeyUsage       = clientAuth, serverAuth
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid:always
+subjectAltName         = @alt_names
+```
+
+And generate, again valid for 50 years:
+
+```
+# Generate the key and a certificate signing request
+openssl genrsa -out relay_signing.key 2048
+openssl req -new -key relay_signing.key -out relay.csr -config relay.cnf
+
+# Sign it with the CA
+openssl x509 -req -in relay.csr -CA ca_signing.crt -CAkey ca_signing.key -CAcreateserial -out relay_signed.crt -days 18250 -sha256 -extfile relay.cnf -extensions v3_ext
+
+# Build the PKCS #12 keystore, including the CA so the chain is complete
+openssl pkcs12 -export -out relay.p12 -inkey relay_signing.key -in relay_signed.crt -certfile ca_signing.crt -name relay-service -caname ca -passout pass:"storepass" -keypbe AES-256-CBC -certpbe AES-256-CBC -macalg sha256 -iter 10000
+
+# Mark the CA as a trusted certificate entry, matching the other key stores
+keytool -importcert -keystore relay.p12 -storetype PKCS12 -storepass storepass -alias ca -file ca_signing.crt -noprompt
+
+# Extract the PEM-formatted PKCS #1 private key for the Relay service
+openssl pkcs12 -in relay.p12 -nocerts -passin pass:"storepass" -passout pass:"keypass" | openssl rsa -passin pass:keypass -out relay.key -traditional
+
+# Extract the PEM-formatted X.509 certificate for the Relay service
+openssl pkcs12 -in relay.p12 -out relay.crt -clcerts -passin pass:"storepass" -passout pass:
 ```

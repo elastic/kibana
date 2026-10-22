@@ -81,6 +81,7 @@ describe('ThreatQ', () => {
     expect(pending).toEqual([]);
   });
   afterAll(() => {
+    nock.restore();
     nock.enableNetConnect();
     Object.assign(globalThis, originalFetchClasses);
   });

@@ -24,6 +24,7 @@ import {
   type Worker,
 } from '@kbn/alertzero-common';
 import type { CoreStart } from '@kbn/core/public';
+import { buildPath } from '@kbn/core-http-browser';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
@@ -91,10 +92,7 @@ const SEVERITY_ORDER: Readonly<Record<DependencyStatus, number>> = {
   satisfied: 3,
 };
 
-interface Destination {
-  appId: string;
-  path?: string;
-}
+type Destination = { appId: string; path?: string } | { href: string };
 
 interface DependencyMessage {
   id: DependencyId;
@@ -139,7 +137,10 @@ const DestinationButton: React.FC<DestinationButtonProps> = ({ destination, link
   const {
     services: { application },
   } = useKibana<CoreStart>();
-  const href = application.getUrlForApp(destination.appId, { path: destination.path });
+  const href =
+    'href' in destination
+      ? destination.href
+      : application.getUrlForApp(destination.appId, { path: destination.path });
 
   return (
     <EuiButtonEmpty size="s" flush="right" href={href}>
@@ -257,10 +258,19 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
         return;
       }
       const workflowId = THREAT_REPORT_WORKFLOWS[id === 'threatIngest' ? 0 : 1].id;
-      await http.put(`/api/workflows/workflow/${encodeURIComponent(workflowId)}`, {
-        version: '2023-10-31',
-        body: JSON.stringify({ enabled: true }),
-      });
+      // Ingest and enrich are installed once in the default space, so they are addressed there
+      // from every space: the server base path has no `/s/{id}` prefix.
+      await http.put(
+        buildPath('{serverBasePath*}/api/workflows/workflow/{workflowId}', {
+          serverBasePath: http.basePath.serverBasePath,
+          workflowId,
+        }),
+        {
+          prependBasePath: false,
+          version: '2023-10-31',
+          body: JSON.stringify({ enabled: true }),
+        }
+      );
     },
     onSuccess: async (_, id) => {
       notifications.toasts.addSuccess(i18n.dependencyEnabledTitle(enableableDependencyLabel(id)));
@@ -364,10 +374,16 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
             label,
             // A missing row in the Workflows bulk response may also be unreadable. In that
             // case take the user to the list rather than linking to a possibly inaccessible ID.
-            destination:
-              status === 'unknown'
-                ? { appId: WORKFLOWS_APP_ID }
-                : { appId: WORKFLOWS_APP_ID, path: `/${encodeURIComponent(workflow.id)}` },
+            // Ingest and enrich are installed once in the default space, so link there from
+            // every space: the server base path has no `/s/{id}` prefix.
+            destination: {
+              href:
+                status === 'unknown'
+                  ? `${http.basePath.serverBasePath}/app/${WORKFLOWS_APP_ID}`
+                  : `${http.basePath.serverBasePath}/app/${WORKFLOWS_APP_ID}/${encodeURIComponent(
+                      workflow.id
+                    )}`,
+            },
             linkText:
               status === 'unknown' ? i18n.WORKFLOWS_LIST_LINK_TEXT : i18n.THREAT_WORKFLOW_LINK_TEXT,
           };
@@ -384,6 +400,7 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
       );
   }, [
     worker.id,
+    http.basePath.serverBasePath,
     checks.alertAnalysis,
     checks.alertAnalysisWorkflow,
     checks.contextEngine,

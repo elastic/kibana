@@ -6,6 +6,24 @@ description: >
 enabled: true
 settings:
   timeout: '60m'
+  # Fallbacks run after ordinary step errors, not after workflow timeout or cancellation.
+  on-failure:
+    fallback:
+      - name: handle_investigation_failure
+        type: nightshift.handleInvestigationFailure
+        with:
+          investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+          # The failed steps remain available even when the engine omits the fallback's error binding.
+          reason: >-
+            ${{ error.message
+            | default: steps.resolve_model.error.message
+            | default: steps.ensure_investigation_agent.error.message
+            | default: steps.persist_investigation_started.error.message
+            | default: steps.resolve_investigation_sources.error.message
+            | default: steps.investigate.error.message
+            | default: 'Investigation failed' | truncate: 10000 }}
+        on-failure:
+          continue: true
   # One run per investigation at a time, in arrival order, so a follow-up builds on the run
   # before it.
   concurrency:
@@ -131,6 +149,15 @@ steps:
         max-attempts: 3
         delay: 5s
         strategy: exponential
+      # Step-level retries override the workflow-level fallback.
+      fallback:
+        - name: handle_persistence_failure
+          type: nightshift.handleInvestigationFailure
+          with:
+            investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+            reason: "${{ steps.persist_investigation_started.error.message | default: 'Investigation failed' | truncate: 10000 }}"
+          on-failure:
+            continue: true
 
   - name: emit_investigation_started
     type: kibana.request
@@ -197,12 +224,9 @@ steps:
         {% if inputs.context and inputs.context.size > 0 and inputs.context.source != 'alert' %}
         Additional context: {{ inputs.context | json }}
         {% endif %}
-    on-failure:
-      continue: true
 
   - name: emit_investigation_completed
     type: kibana.request
-    if: '${{ steps.investigate.error == null }}'
     with:
       method: POST
       path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ inputs.investigation_id | default: execution.id }}/lifecycle_events'
@@ -213,38 +237,10 @@ steps:
     on-failure:
       continue: true
 
-  - name: emit_investigation_failed
-    type: kibana.request
-    if: '${{ steps.investigate.error != null }}'
-    with:
-      method: POST
-      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ inputs.investigation_id | default: execution.id }}/lifecycle_events'
-      headers:
-        x-elastic-internal-origin: 'kibana'
-      body:
-        status: 'failed'
-    on-failure:
-      continue: true
-
   - name: notify_completed
     type: nightshift.sendNotifications
-    if: '${{ steps.investigate.error == null }}'
     with:
       investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
       phase: completed
     on-failure:
       continue: true
-
-  - name: notify_failed
-    type: nightshift.sendNotifications
-    if: '${{ steps.investigate.error != null }}'
-    with:
-      investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
-      phase: failed
-      reason: "${{ steps.investigate.error.message | default: 'Investigation failed' | truncate: 10000 }}"
-    on-failure:
-      continue: true
-
-  - name: fail_investigation
-    type: workflow.fail
-    if: '${{ steps.investigate.error != null }}'

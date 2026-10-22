@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { createDecipheriv, randomBytes } from 'crypto';
+import { mkdtemp, rm, writeFile } from 'fs/promises';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -28,7 +32,21 @@ jest.mock('./register_suggestions_inference_features', () => ({
 }));
 jest.mock('./feature_flags', () => ({ registerFeatureFlags: jest.fn() }));
 
+jest.mock('./lib/unit_config/config_distributor_client', () => {
+  const actual = jest.requireActual('./lib/unit_config/config_distributor_client');
+  return { createConfigDistributorClient: jest.fn(actual.createConfigDistributorClient) };
+});
+
+jest.mock('./lib/unit_config/seal_credentials', () => {
+  const actual = jest.requireActual('./lib/unit_config/seal_credentials');
+  return { ...actual, createCredentialPreparer: jest.fn(actual.createCredentialPreparer) };
+});
+
 const { registerStreamsAgentBuilder } = jest.requireMock('./agent_builder/register');
+const { createCredentialPreparer } = jest.requireMock('./lib/unit_config/seal_credentials');
+const { createConfigDistributorClient } = jest.requireMock(
+  './lib/unit_config/config_distributor_client'
+);
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -36,6 +54,7 @@ function getConfig(overrides: Partial<StreamsConfig> = {}): StreamsConfig {
   return {
     canvas: { enabled: false },
     distributor: { ssl: {} },
+    encryptionKey: {},
     preconfigured: { enabled: false, stream_definitions: [] },
     workers: {
       patternExtraction: {
@@ -154,5 +173,82 @@ describe('StreamsPlugin agent builder registration gating', () => {
     await flushPromises();
 
     expect(registerStreamsAgentBuilder).not.toHaveBeenCalled();
+  });
+});
+
+describe('StreamsPlugin credential sealing wiring', () => {
+  const KID = '20261014_101500_a3f19b2c';
+  let dir: string;
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    dir = await mkdtemp(join(tmpdir(), 'streams-plugin-key-'));
+  });
+
+  afterEach(async () => {
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const setupPlugin = (config: StreamsConfig, cloud?: StreamsPluginSetupDependencies['cloud']) => {
+    const plugin = new StreamsPlugin(coreMock.createPluginInitializerContext(config));
+    plugin.setup(coreMock.createSetup(), { ...createPluginsSetup(), cloud });
+    return createConfigDistributorClient.mock.calls[0][0];
+  };
+
+  const registeredPrepareCredentials = (
+    config: StreamsConfig,
+    cloud?: StreamsPluginSetupDependencies['cloud']
+  ) => {
+    setupPlugin(config, cloud);
+    return createCredentialPreparer.mock.results[0]?.value;
+  };
+
+  it('passes the serverless project id as the fallback target id', () => {
+    const { fallbackTargetId } = setupPlugin(getConfig(), {
+      serverless: { projectId: 'abcdef12' },
+    } as StreamsPluginSetupDependencies['cloud']);
+
+    expect(fallbackTargetId).toBe('abcdef12');
+  });
+
+  it('seals with the mounted key when encryptionKey.path is set', async () => {
+    const key = randomBytes(32);
+    await writeFile(join(dir, 'current-kid'), KID);
+    await writeFile(join(dir, `streams-encryption-key.${KID}`), key);
+
+    const prepareCredentials = registeredPrepareCredentials(
+      getConfig({
+        encryptionKey: { path: dir },
+        distributor: { url: 'http://localhost:1', ssl: {} },
+      }),
+      { serverless: { projectId: 'abcdef12' } } as StreamsPluginSetupDependencies['cloud']
+    );
+    const {
+      credentials: [{ name, ciphertext }],
+    } = await prepareCredentials({
+      secrets: { 'es-prod': 's3cret' },
+      previous: { secrets: {}, sealed: [] },
+    });
+
+    const [version, kid, iv, ct] = ciphertext.split('.');
+    const sealed = Buffer.from(ct, 'base64url');
+    const decipher = createDecipheriv('aes-256-gcm', key, Buffer.from(iv, 'base64url'));
+    decipher.setAAD(Buffer.from('abcdef12', 'utf8'));
+    decipher.setAuthTag(sealed.subarray(sealed.length - 16));
+    const plaintext = Buffer.concat([
+      decipher.update(sealed.subarray(0, sealed.length - 16)),
+      decipher.final(),
+    ]).toString('utf8');
+    expect({ version, kid, name, plaintext }).toEqual({
+      version: 'v1',
+      kid: KID,
+      name: 'es-prod',
+      plaintext: 's3cret',
+    });
+  });
+
+  it('registers no preparer when encryptionKey.path is unset', () => {
+    expect(registeredPrepareCredentials(getConfig())).toBeUndefined();
+    expect(createCredentialPreparer).not.toHaveBeenCalled();
   });
 });

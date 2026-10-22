@@ -483,3 +483,12 @@ export const getOnlyConnectorsFilter = () =>
     operator: 'or',
     type: CASE_USER_ACTION_SAVED_OBJECT,
   });
+
+/** Filters the user-action saved object query to workflow user actions only. */
+export const getOnlyWorkflowUserActionsFilter = () =>
+  buildFilter({
+    filters: ['workflow'],
+    field: 'type',
+    operator: 'or',
+    type: CASE_USER_ACTION_SAVED_OBJECT,
+  });

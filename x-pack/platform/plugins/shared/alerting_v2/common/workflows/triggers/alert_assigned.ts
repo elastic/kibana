@@ -6,23 +6,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { alertActionEnvelopeSchema } from './alert_action_envelope';
 
 export const ALERT_ASSIGNED_TRIGGER_ID = 'alerting.actions.alertAssigned' as const;
 
-export const alertAssignedPayloadSchema = alertActionEnvelopeSchema.extend({
-  assigneeUid: z
-    .string()
-    .min(1)
-    .max(256)
-    .describe(
-      i18n.translate('xpack.alertingVTwo.triggers.alertAssigned.schema.assigneeUid', {
-        defaultMessage: 'User-profile uid of the new assignee.',
-      })
-    ),
-});
+export const alertAssignedPayloadSchema = lazySchema(() =>
+  alertActionEnvelopeSchema.extend({
+    assigneeUid: z
+      .string()
+      .min(1)
+      .max(256)
+      .describe(
+        i18n.translate('xpack.alertingVTwo.triggers.alertAssigned.schema.assigneeUid', {
+          defaultMessage: 'User-profile UID of the new assignee.',
+        })
+      ),
+  })
+);
 
 export type AlertAssignedPayload = z.infer<typeof alertAssignedPayloadSchema>;
 

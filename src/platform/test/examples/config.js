@@ -11,7 +11,6 @@ import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { findTestPluginPaths } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { services } from '../plugin_functional/services';
 
 export default async function ({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
@@ -27,10 +26,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./response_stream'),
       require.resolve('./esql_ux_example'),
     ],
-    services: {
-      ...functionalConfig.get('services'),
-      ...services,
-    },
+    services: functionalConfig.get('services'),
     uiSettings: {
       defaults: {
         'accessibility:disableAnimations': true,

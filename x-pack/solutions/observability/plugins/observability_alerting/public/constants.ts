@@ -21,3 +21,6 @@ export const OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID = 'rules-v2';
 export const OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID = 'rule-library';
 export const OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID = 'action-policies';
 export const OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID = 'execution-history';
+
+/** Sorts just before the classic Observability alerts link (order 8001) in the hamburger. */
+export const OBSERVABILITY_ALERTING_ALERTS_ORDER = 8000;

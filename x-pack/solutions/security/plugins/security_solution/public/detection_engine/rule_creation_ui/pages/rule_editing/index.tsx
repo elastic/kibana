@@ -220,7 +220,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   });
   const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule?.type]);
 
-  const { indexPattern, isIndexPatternLoading } = useRuleIndexPattern({
+  const { indexPattern, isIndexPatternLoading, isIndexPatternSettled } = useRuleIndexPattern({
     dataSourceType: defineStepData.dataSourceType,
     index: memoizedIndex,
     dataViewId: defineStepData.dataViewId,
@@ -705,7 +705,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                           onCancel={goToDetailsRule}
                           onSubmit={onSubmit}
                           isLoading={isLoading}
-                          isDisabled={loading}
+                          isDisabled={loading || !isIndexPatternSettled}
                         />
                       </EuiFlexGroup>
                     </MaxWidthEuiFlexItem>

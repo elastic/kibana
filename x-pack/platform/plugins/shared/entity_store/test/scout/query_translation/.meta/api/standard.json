@@ -1,5 +1,5 @@
 {
-  "sha1": "933a18849493bebc25674d5d97fb8a22206d0d61",
+  "sha1": "268329ad843f3ff9c45f4fc51ad7b563ff0ccad7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -501,6 +501,70 @@
       }
     },
     {
+      "id": "45b3d09166622fb-944b14ab14e9370",
+      "title": "DSL query translation user.ts DSL (ingested asset + cloud.provider): single hit for scenario \"asset-cloud-provider-aws-iam-role-entity-id\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
+        "line": 165,
+        "column": 7
+      }
+    },
+    {
+      "id": "45b3d09166622fb-01fb864a8a746c2",
+      "title": "DSL query translation user.ts DSL (ingested asset + cloud.provider): single hit for scenario \"asset-cloud-provider-aws-iam-user-entity-id\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
+        "line": 165,
+        "column": 7
+      }
+    },
+    {
+      "id": "45b3d09166622fb-a083480a55e024c",
+      "title": "DSL query translation user.ts DSL (ingested asset + cloud.provider): single hit for scenario \"asset-cloud-provider-aws-entity-id-over-email\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
+        "line": 165,
+        "column": 7
+      }
+    },
+    {
+      "id": "45b3d09166622fb-04bec837550bcd8",
+      "title": "DSL query translation user.ts DSL (ingested asset + cloud.provider): single hit for scenario \"asset-cloud-provider-aws-local-precedence\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
+        "line": 165,
+        "column": 7
+      }
+    },
+    {
       "id": "45b3d09166622fb-4d27596c0ea424d",
       "title": "DSL query translation should return exactly the mailchimp document when service DSL is built from service.name",
       "expectedStatus": "passed",
@@ -805,6 +869,70 @@
       }
     },
     {
+      "id": "f75da1ce7fab182-05ca0ec9649175a",
+      "title": "ESQL query translation user: ESQL (ingested asset + cloud.provider) matches scenario \"asset-cloud-provider-aws-iam-role-entity-id\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
+        "line": 183,
+        "column": 50
+      }
+    },
+    {
+      "id": "f75da1ce7fab182-bb1398b067d8fc6",
+      "title": "ESQL query translation user: ESQL (ingested asset + cloud.provider) matches scenario \"asset-cloud-provider-aws-iam-user-entity-id\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
+        "line": 183,
+        "column": 50
+      }
+    },
+    {
+      "id": "f75da1ce7fab182-af8b4e272a57c3b",
+      "title": "ESQL query translation user: ESQL (ingested asset + cloud.provider) matches scenario \"asset-cloud-provider-aws-entity-id-over-email\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
+        "line": 183,
+        "column": 50
+      }
+    },
+    {
+      "id": "f75da1ce7fab182-168701940bd4c86",
+      "title": "ESQL query translation user: ESQL (ingested asset + cloud.provider) matches scenario \"asset-cloud-provider-aws-local-precedence\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
+        "line": 183,
+        "column": 50
+      }
+    },
+    {
       "id": "f75da1ce7fab182-7e019146ec34854",
       "title": "ESQL query translation service: ESQL from doc with service.name returns exactly that document",
       "expectedStatus": "passed",
@@ -898,6 +1026,22 @@
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
         "line": 97,
         "column": 22
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-10f46481ce98a25",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for asset-cloud-provider-aws-cloudtrail-event-does-not-create",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 126,
+        "column": 29
       }
     },
     {
@@ -1319,6 +1463,70 @@
     {
       "id": "98daa5f18956b6d-f8aa7d8afc9c0ec",
       "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for asset-cloud-provider-aws-with-host-local",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 140,
+        "column": 7
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-adc499bcad0590b",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for asset-cloud-provider-aws-iam-role-entity-id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 140,
+        "column": 7
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-597be67f59e0b09",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for asset-cloud-provider-aws-iam-user-entity-id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 140,
+        "column": 7
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-58512a89a5ffecd",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for asset-cloud-provider-aws-entity-id-over-email",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 140,
+        "column": 7
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-de2842e390e70c7",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for asset-cloud-provider-aws-local-precedence",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

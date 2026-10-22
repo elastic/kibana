@@ -12,7 +12,9 @@ import { inventoryViewRT } from '../../../inventory_views';
 export const INVENTORY_VIEW_URL = '/api/infra/inventory_views';
 export const INVENTORY_VIEW_URL_ENTITY = `${INVENTORY_VIEW_URL}/{inventoryViewId}`;
 export const getInventoryViewUrl = (inventoryViewId?: string) =>
-  [INVENTORY_VIEW_URL, inventoryViewId].filter(Boolean).join('/');
+  [INVENTORY_VIEW_URL, inventoryViewId && encodeURIComponent(inventoryViewId)]
+    .filter(Boolean)
+    .join('/');
 
 const inventoryViewIdRT = new rt.Type<string, string, unknown>(
   'InventoryViewId',

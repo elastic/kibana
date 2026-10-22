@@ -8,6 +8,7 @@
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   Conversation,
+  ConversationEvent,
   ConversationRound,
   ConversationRoundStep,
   ConversationAttachmentSummary,
@@ -120,6 +121,7 @@ export const fromEsWithoutRounds = (
           },
         }
       : {}),
+    ...(document._source.feedback ? { feedback: document._source.feedback } : {}),
     ...(document._source.metadata ? { metadata: document._source.metadata } : {}),
     ...(document._source.template_id ? { template_id: document._source.template_id } : {}),
     ...(document._source.template_version !== undefined
@@ -279,7 +281,7 @@ export const fromEs = (document: Document, user: CurrentUser): NormalizedConvers
   };
 
   const events =
-    isEventsNative && storedEvents && storedEvents.length > 0
+    isEventsNative && storedEvents != null && storedEvents.length > 0
       ? storedEvents
       : roundsToEvents(conversation);
 
@@ -436,6 +438,9 @@ export const toEs = (
           schema_version: conversation.schema_version,
         }
       : {}),
+    ...(conversation.feedback && Object.keys(conversation.feedback).length > 0
+      ? { feedback: conversation.feedback }
+      : {}),
     // Cast metadata to storage type — the flattened mapping requires string | string[].
     // Deserialized domain values (boolean, number) only exist on read; writes always
     // go through serializeMetadataValue before reaching this converter.
@@ -503,11 +508,13 @@ export const createRequestToEs = ({
   space,
   currentUser,
   creationDate,
+  leadingEvents = [],
 }: {
   conversation: ConversationCreateRequest;
   currentUser: UserIdAndName;
   creationDate: Date;
   space: string;
+  leadingEvents?: ConversationEvent[];
 }): ConversationProperties => {
   // Honor conversation.user override if provided (used for persistent sub-agent
   // creations where ownership is snapshotted from the parent conversation).
@@ -524,10 +531,14 @@ export const createRequestToEs = ({
     rounds: conversation.rounds,
     ...(conversation.origin ? { origin: conversation.origin } : {}),
   };
-  const events =
-    conversation.events && conversation.events.length > 0
+  // `leadingEvents` (the `conversation_created` activity) stay outside the caller-events-else-rounds
+  // choice, so a caller who sent none still gets the rounds projection.
+  const events = [
+    ...leadingEvents,
+    ...(conversation.events && conversation.events.length > 0
       ? conversation.events
-      : roundsToEvents(forEvents);
+      : roundsToEvents(forEvents)),
+  ];
 
   return {
     agent_id: conversation.agent_id,

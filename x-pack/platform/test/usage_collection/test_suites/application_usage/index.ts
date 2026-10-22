@@ -9,6 +9,13 @@ import expect from '@kbn/expect';
 import { applicationUsageSchema } from '@kbn/kibana-usage-collection-plugin/server/collectors/application_usage/schema';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
+// App IDs in the usage schema that are not registered in the Kibana instance this test runs against.
+const SCHEMA_ONLY_APP_IDS: Readonly<Record<string, string>> = {
+  profiling: 'Disabled by default',
+  digital_experience: 'Disabled by default (xpack.digital_experience.enabled: false)',
+  searchPlayground: 'Retained only for historical usage',
+};
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Application Usage', function () {
     const { common } = getPageObjects(['common']);
@@ -28,8 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       try {
         const enabledAppIds = Object.keys(applicationUsageSchema).filter(
-          // Profiling is disabled by default; Playground is retained only for historical usage.
-          (appId) => appId !== 'profiling' && appId !== 'searchPlayground'
+          (appId) => !(appId in SCHEMA_ONLY_APP_IDS)
         );
         expect(enabledAppIds.sort()).to.eql(appIds.sort());
       } catch (err) {

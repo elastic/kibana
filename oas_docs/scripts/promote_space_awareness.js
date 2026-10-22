@@ -85,6 +85,16 @@ run(
     const doc = new Document(oasDoc, { aliasDuplicateObjects: false, schema: 'yaml-1.1' });
     visit(doc, {
       Pair(_key, node) {
+        // Router specs join several accepted media types into one content key, such as
+        // "application/json; text/plain; */*". YAML allows that unquoted, but strict
+        // parsers (YamlDotNet in docs-builder) reject it, so always quote those keys.
+        if (
+          isScalar(node.key) &&
+          typeof node.key.value === 'string' &&
+          node.key.value.includes('; ')
+        ) {
+          node.key.type = 'QUOTE_SINGLE';
+        }
         // Preserve exact formatting of multi-line code samples (x-codeSamples `source`).
         if (
           isScalar(node.key) &&

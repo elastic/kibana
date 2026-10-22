@@ -52,7 +52,7 @@ interface ResumeExecutionButtonProps {
   autoOpen?: boolean;
   /** Step execution document id for the active waitForInput pause; when it changes, re-enable after a prior submit */
   waitingStepExecutionId?: string;
-  /** Shared across header and step-detail instances so one submit disables both. */
+  /** Lifted by the flyout so the submit state resets when the run or its waiting step changes. */
   submitState?: {
     isSubmitting: boolean;
     isSubmitted: boolean;
@@ -157,10 +157,9 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
         });
         await queryClient.invalidateQueries({ queryKey: ['stepExecution', executionId] });
         notifications?.toasts.addSuccess({
-          title: i18n.translate(
-            'workflowsManagement.executionDetail.resumeButton.successNotificationTitle',
-            { defaultMessage: 'Workflow resumed' }
-          ),
+          title: i18n.translate('workflows.executionDetail.resumeButton.successNotificationTitle', {
+            defaultMessage: 'Workflow resumed',
+          }),
         });
         telemetry.reportWorkflowRunResumed({
           workflowExecutionId: executionId,
@@ -175,10 +174,9 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
       } catch (error) {
         const errorObj = error instanceof Error ? error : new Error(String(error));
         notifications?.toasts.addError?.(errorObj, {
-          title: i18n.translate(
-            'workflowsManagement.executionDetail.resumeButton.errorNotificationTitle',
-            { defaultMessage: 'Error resuming workflow' }
-          ),
+          title: i18n.translate('workflows.executionDetail.resumeButton.errorNotificationTitle', {
+            defaultMessage: 'Error resuming workflow',
+          }),
         });
         telemetry.reportWorkflowRunResumed({
           workflowExecutionId: executionId,
@@ -244,7 +242,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
             ) : (
               <EuiText size="s">
                 <FormattedMessage
-                  id="workflowsManagement.executionDetail.approvalButton.defaultMessage"
+                  id="workflows.executionDetail.approvalButton.defaultMessage"
                   defaultMessage="Your approval is required to continue this workflow."
                 />
               </EuiText>
@@ -297,7 +295,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
         >
           <EuiFlexItem>
             <FormattedMessage
-              id="workflowsManagement.executionDetail.resumeButton.calloutText"
+              id="workflows.executionDetail.resumeButton.calloutText"
               defaultMessage="User action is required"
             />
           </EuiFlexItem>
@@ -312,7 +310,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
               data-test-subj="provideActionButton"
             >
               <FormattedMessage
-                id="workflowsManagement.executionDetail.resumeButton.label"
+                id="workflows.executionDetail.resumeButton.label"
                 defaultMessage="Provide action"
               />
             </EuiButton>

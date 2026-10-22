@@ -24,7 +24,7 @@ export const impactStorageSettings = {
       summary: types.text({}),
       evidence: types.object({ enabled: false }),
       // Nested so a filter can match `entities.id` or `entities.featureId` without
-      // scanning a flattened blob. Pill filtering stays client-side for the MVP.
+      // scanning a flattened blob.
       entities: types.nested({
         properties: {
           id: types.keyword({}),

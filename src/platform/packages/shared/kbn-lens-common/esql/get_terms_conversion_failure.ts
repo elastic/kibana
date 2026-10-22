@@ -31,10 +31,11 @@ export interface TermsConversionContext {
 /**
  * Returns the highest-priority conversion failure reason for a terms dimension,
  * or `undefined` when the column is eligible. Check order:
- * 1. Other bucket (default-on; also covers missing values — the UI only enables
+ * 1. Unsupported nesting of Top values and a date histogram — shown before Other
+ *    so charts that cannot convert even with Other off get the structural reason
+ * 2. Other bucket (default-on; also covers missing values — the UI only enables
  *    "Include documents without the selected field" when Other is on, and
  *    toEsAggsFn forces missingBucket = otherBucket && missingBucket)
- * 2. Unsupported nesting of Top values and a date histogram
  * 3. More than two Top values dimensions
  * 4. Multiple fields on one Top values dimension
  * 5. Include / exclude filters
@@ -53,13 +54,13 @@ export const getTermsConversionFailure = (
 ): EsqlConversionFailureReason | undefined => {
   const reasons: EsqlConversionFailureReason[] = [];
 
+  if (hasUnsupportedDateHistogramNesting) {
+    reasons.push('terms_date_histogram_not_supported');
+  }
+
   // unset/false = Other off (UI / toEsAggsFn Boolean).
   if (params.otherBucket === true) {
     reasons.push('terms_other_bucket_not_supported');
-  }
-
-  if (hasUnsupportedDateHistogramNesting) {
-    reasons.push('terms_date_histogram_not_supported');
   }
 
   if (termsBucketCount > MAX_SUPPORTED_TERMS_BUCKETS) {

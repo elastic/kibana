@@ -79,6 +79,29 @@ describe('toStartSubjects', () => {
 
     expect(toSubjectKeys(subjects, 'inv-1')).toEqual([{ type: 'manual', id: 'checkout-latency' }]);
   });
+
+  it('records the Slack thread a start is about, keyed as the Slack thread workflow finds it', () => {
+    const subjects = toStartSubjects({
+      subject: { type: 'manual', id: 'slack:C1:1.1' },
+      triggerType: 'automatic',
+      investigationId: 'inv-1',
+      slackThread: { workspace: 'T1', channel: 'C1', thread_ts: '1.1' },
+    });
+
+    expect(subjects).toEqual([
+      { type: 'manual', id: 'slack:C1:1.1', triggerType: 'automatic' },
+      {
+        type: 'slack_thread',
+        id: 'slack:T1:C1:1.1',
+        triggerType: 'automatic',
+        slack: { channel: 'C1', thread_ts: '1.1' },
+      },
+    ]);
+    expect(toSubjectKeys(subjects, 'inv-1')).toEqual([
+      { type: 'manual', id: 'slack:C1:1.1' },
+      { type: 'slack_thread', id: 'slack:T1:C1:1.1' },
+    ]);
+  });
 });
 
 describe('recoverSubjectsFromInputs', () => {

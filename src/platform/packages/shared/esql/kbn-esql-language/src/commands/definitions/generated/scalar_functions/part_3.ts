@@ -1356,7 +1356,7 @@ const toTextDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.to_text', {
     defaultMessage: 'Converts an input value into text.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {

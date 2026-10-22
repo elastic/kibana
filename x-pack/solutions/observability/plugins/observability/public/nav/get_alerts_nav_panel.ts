@@ -109,6 +109,7 @@ const getRuleManagementSection = (core: CoreStart): PanelOpenerChildDefinition[]
 
   if (canReadV2Rules) {
     rulesChildren.push({ link: obsAlertingLink('rules-v2') });
+    rulesChildren.push({ link: obsAlertingLink('rule-library') });
     rulesChildren.push({ link: obsAlertingLink('rules-v1'), sideNavStatus: 'hidden' });
   } else {
     rulesChildren.push({

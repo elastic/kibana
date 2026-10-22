@@ -66,6 +66,7 @@ import { AssetCriticalityBadge } from '../../../asset_criticality';
 import { RiskInputsUtilityBar } from '../../components/utility_bar';
 import { ActionColumn } from '../../components/action_column';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useNewEntityAnalyticsPage } from '../../../../hooks/use_new_entity_analytics_page';
 import { useResolutionGroup } from '../../../entity_resolution/hooks/use_resolution_group';
 import { getEntityId, getEntityField, getEntityName } from '../../../entity_resolution/helpers';
 import { useStableExpandableFlyoutState } from '../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state';
@@ -80,7 +81,9 @@ export interface RiskInputsTabProps<T extends EntityType> {
   /** Navigates to the alert preview for a risk-input row. */
   onShowAlert: (id: string, indexName: string) => void;
   /** Initial sub-tab to select. Takes precedence over the expandable-flyout URL state. Used by
-   *  the v2 tool flyout which has no expandable-flyout state. */
+   *  the v2 tool flyout which has no expandable-flyout state. With the new entity analytics page
+   *  flag on this is the only view shown (no sub-tab toggle): the right panel's risk summary
+   *  decides whether the entity or the resolution-group score is being explained. */
   subTab?: RiskScoreLeftPanelSubTab;
 }
 
@@ -138,6 +141,11 @@ function isRiskScoreFlyoutPanelProps(
   );
 }
 
+const toFixedView = (subTab: RiskScoreLeftPanelSubTab | undefined): RiskScoreLeftPanelSubTab =>
+  subTab === RiskScoreLeftPanelSubTab.RESOLUTION
+    ? RiskScoreLeftPanelSubTab.RESOLUTION
+    : RiskScoreLeftPanelSubTab.ENTITY;
+
 export const RiskInputsTab = <T extends EntityType>({
   entityType,
   entityName,
@@ -151,6 +159,12 @@ export const RiskInputsTab = <T extends EntityType>({
     ? panels.left.params.path.subTab
     : undefined;
   const subTab = subTabFromState ?? subTabProp;
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
+  // With the new entity analytics page the view is fixed by the caller: the resolution-group score
+  // when the right panel showed the group score, the entity score otherwise. Undefined keeps the
+  // legacy behavior (toggle between both views when a resolution score exists).
+  const fixedView = isNewEntityAnalyticsPage ? toFixedView(subTab) : undefined;
+  const needsResolutionData = fixedView !== RiskScoreLeftPanelSubTab.ENTITY;
 
   // Keeps the expandable-flyout URL state in sync with the user's manual tab
   // toggle so that clicking the same flyout link twice still forces a remount.
@@ -218,16 +232,17 @@ export const RiskInputsTab = <T extends EntityType>({
     skip: entityFilterQuery === undefined,
   });
 
-  const { data: resolutionGroup } = useResolutionGroup(entityId ?? '', {
-    enabled: Boolean(entityId),
-  });
+  const { data: resolutionGroup, isInitialLoading: loadingResolutionGroup } = useResolutionGroup(
+    entityId ?? '',
+    { enabled: Boolean(entityId) && needsResolutionData }
+  );
   const hasRealResolutionGroup = (resolutionGroup?.group_size ?? 0) > 1;
   const resolutionTargetEntityId = useMemo(
     () => (resolutionGroup?.target ? getEntityId(resolutionGroup.target) : undefined),
     [resolutionGroup?.target]
   );
   const shouldFetchResolutionRiskScore =
-    hasRealResolutionGroup && Boolean(resolutionTargetEntityId);
+    needsResolutionData && hasRealResolutionGroup && Boolean(resolutionTargetEntityId);
   const resolutionFilterQuery = useMemo(
     () =>
       shouldFetchResolutionRiskScore && resolutionTargetEntityId
@@ -304,6 +319,7 @@ export const RiskInputsTab = <T extends EntityType>({
       // using subTab as key to force re-render the tab content when the subTab changes
       key={subTab}
       subTab={subTab}
+      fixedView={fixedView}
       entityType={entityType}
       entityName={entityName}
       entityId={entityId}
@@ -311,7 +327,7 @@ export const RiskInputsTab = <T extends EntityType>({
       resolutionRiskScore={resolutionRiskScore}
       hasResolutionScore={hasResolutionScore}
       loadingRiskScore={loadingRiskScore}
-      loadingResolutionRiskScore={loadingResolutionRiskScore}
+      loadingResolutionRiskScore={loadingResolutionRiskScore || loadingResolutionGroup}
       inspectRiskScore={inspectRiskScore}
       inspectResolutionRiskScore={inspectResolutionRiskScore}
       refetch={refetch}
@@ -329,6 +345,8 @@ RiskInputsTab.displayName = 'RiskInputsTab';
 
 interface RiskInputsTabContentProps<T extends EntityType> {
   subTab?: RiskScoreLeftPanelSubTab;
+  /** When set, render only this view with no sub-toggle. Undefined keeps the legacy toggle behavior. */
+  fixedView?: RiskScoreLeftPanelSubTab;
   entityType: T;
   entityName: string;
   entityId: string | undefined;
@@ -351,6 +369,7 @@ interface RiskInputsTabContentProps<T extends EntityType> {
 
 const RiskInputsTabContent = <T extends EntityType>({
   subTab,
+  fixedView,
   entityType,
   entityName,
   entityId,
@@ -381,10 +400,15 @@ const RiskInputsTabContent = <T extends EntityType>({
     !loadingRiskScore && !entityRiskScore && hasResolutionScore
       ? RiskScoreLeftPanelSubTab.RESOLUTION
       : RiskScoreLeftPanelSubTab.ENTITY;
-  const selectedView = userSelectedView ?? defaultView;
+  const selectedView = fixedView ?? userSelectedView ?? defaultView;
+  const showViewToggle = fixedView === undefined && hasResolutionScore;
 
+  // A fixed resolution view stays on the group score even while it is still loading; the legacy
+  // toggle only enters the resolution view once a resolution score is known to exist.
   const isResolutionView =
-    selectedView === RiskScoreLeftPanelSubTab.RESOLUTION && hasResolutionScore;
+    fixedView !== undefined
+      ? fixedView === RiskScoreLeftPanelSubTab.RESOLUTION
+      : selectedView === RiskScoreLeftPanelSubTab.RESOLUTION && hasResolutionScore;
 
   // The resolution-group history lives in the same time-series stream as the
   // entity history, keyed by the resolution target's id with `score_type=resolution`.
@@ -639,7 +663,7 @@ const RiskInputsTabContent = <T extends EntityType>({
 
   return (
     <>
-      {hasResolutionScore && (
+      {showViewToggle && (
         <>
           <EuiButtonGroup
             isFullWidth

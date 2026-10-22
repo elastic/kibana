@@ -155,18 +155,21 @@ test.each([
   [false, false],
   [true, true],
 ])(
-  'shows import dashboard menu item only when dashboard_v2.createNew is %s',
+  'shows create and import dashboard menu items only when dashboard_v2.createNew is %s',
   (createNew, shouldBePresent) => {
     (coreServices.application.capabilities as any).dashboard_v2.createNew = createNew;
     renderDashboardListing();
 
     const appHeaderProps = mockAppHeader.mock.calls[mockAppHeader.mock.calls.length - 1][0];
+    const createItem = appHeaderProps?.menu?.primaryActionItem;
     const importItem = appHeaderProps?.menu?.items?.find(
       (item: { testId: string }) => item.testId === 'dashboardListingImportButton'
     );
     if (shouldBePresent) {
+      expect(createItem).toMatchObject({ testId: 'dashboardListingCreateButton' });
       expect(importItem).toBeDefined();
     } else {
+      expect(createItem).toBeUndefined();
       expect(importItem).toBeUndefined();
     }
   }

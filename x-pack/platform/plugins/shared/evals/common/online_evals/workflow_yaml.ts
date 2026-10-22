@@ -20,6 +20,12 @@ const TRACE_ID_TEMPLATE = '{{ foreach.item[1] }}';
 const CONNECTOR_ID_TEMPLATE = '{{ consts.connector_id }}';
 const WORKFLOW_ID_TEMPLATE = '{{ workflow.id }}';
 const WORKFLOW_NAME_TEMPLATE = '{{ workflow.name }}';
+// `kibana.request` paths are sent as Kibana-root paths, so the workflow space must be
+// explicit for the evals routes to resolve evaluators and stamp scores in that space.
+// Keep module-level values plain literals: computed values make the bundler keep this module
+// in the plugin's page-load bundle through the `common` barrel.
+const EVALUATE_PATH = '/s/{{ workflow.spaceId }}/internal/evals/_evaluate';
+const PERSIST_PATH = '/s/{{ workflow.spaceId }}/internal/evals/online_scores';
 // `${{ ... }}` (not `{{ ... }}`) is required here: the workflow templating engine
 // stringifies plain `{{ }}` interpolations, which would turn this array into a
 // string and fail `IngestOnlineScoresRequestBody`'s `results: array` validation.
@@ -240,7 +246,7 @@ export const buildOnlineEvalWorkflowYaml = (config: OnlineEvalWorkflowConfig): s
             type: 'kibana.request',
             with: {
               method: 'POST',
-              path: '/internal/evals/_evaluate',
+              path: EVALUATE_PATH,
               headers: {
                 'kbn-xsrf': 'true',
                 'elastic-api-version': '1',
@@ -264,7 +270,7 @@ export const buildOnlineEvalWorkflowYaml = (config: OnlineEvalWorkflowConfig): s
             type: 'kibana.request',
             with: {
               method: 'POST',
-              path: '/internal/evals/online_scores',
+              path: PERSIST_PATH,
               headers: {
                 'kbn-xsrf': 'true',
                 'elastic-api-version': '1',
@@ -368,7 +374,7 @@ export const parseOnlineEvalWorkflowYaml = (yaml: string): OnlineEvalWorkflowCon
   if (
     !evaluateStepWith ||
     evaluateStepWith.method !== 'POST' ||
-    evaluateStepWith.path !== '/internal/evals/_evaluate'
+    evaluateStepWith.path !== EVALUATE_PATH
   ) {
     return undefined;
   }
@@ -425,7 +431,7 @@ export const parseOnlineEvalWorkflowYaml = (yaml: string): OnlineEvalWorkflowCon
   if (
     !persistStepWith ||
     persistStepWith.method !== 'POST' ||
-    persistStepWith.path !== '/internal/evals/online_scores'
+    persistStepWith.path !== PERSIST_PATH
   ) {
     return undefined;
   }
