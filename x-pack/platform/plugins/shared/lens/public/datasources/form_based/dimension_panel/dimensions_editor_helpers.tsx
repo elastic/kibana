@@ -28,13 +28,12 @@ import type {
   PercentileRanksIndexPatternColumn,
   TermsIndexPatternColumn,
 } from '@kbn/lens-common';
-import { isColumnOfType } from '@kbn/lens-common';
+import { isColumnOfType, staticValueOperationName } from '@kbn/lens-common';
 import { nonNullable } from '../../../utils';
 import { operationDefinitionMap } from '../operations';
 import { MAX_TERMS_OTHER_ENABLED } from '../operations/definitions/terms/constants';
 
 export const formulaOperationName = 'formula';
-export const staticValueOperationName = 'static_value';
 export const quickFunctionsName = 'quickFunctions';
 export const termsOperationName = 'terms';
 export const optionallySortableOperationNames = ['percentile', 'percentile_ranks'];

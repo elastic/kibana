@@ -31,11 +31,11 @@ import {
 } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
 import type { RangeTypeLens } from '@kbn/lens-common';
+import { isValidNumber } from '@kbn/lens-common';
 import { useDebounceWithOptions } from '../../../../../shared_components';
 import { isValidRange } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
 import { LabelInput } from '../shared_components';
-import { isValidNumber } from '../helpers';
 import { draggablePopoverButtonStyles } from '../styles';
 
 const generateId = htmlIdGenerator();

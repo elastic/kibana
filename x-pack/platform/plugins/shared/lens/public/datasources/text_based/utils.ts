@@ -15,8 +15,7 @@ import type {
   TextBasedLayerColumn,
   TextBasedLayer,
 } from '@kbn/lens-common';
-import { staticValueOperationName } from '../form_based/dimension_panel/dimensions_editor_helpers';
-import { isValidNumber } from '../form_based/operations/definitions/helpers';
+import { staticValueOperationName, isValidNumber } from '@kbn/lens-common';
 
 export const MAX_NUM_OF_COLUMNS = 10;
 

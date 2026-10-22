@@ -26,7 +26,7 @@ import type {
   DatasourceDimensionEditorProps,
   DataType,
 } from '@kbn/lens-common';
-import { DEFAULT_STATIC_VALUE } from '@kbn/lens-common';
+import { DEFAULT_STATIC_VALUE, staticValueOperationName } from '@kbn/lens-common';
 import {
   mergeLayer,
   updateColumnFormat,
@@ -40,7 +40,6 @@ import {
 } from '../utils';
 import type { FormatSelectorProps } from '../../form_based/dimension_panel/format_selector';
 import { FormatSelector } from '../../form_based/dimension_panel/format_selector';
-import { staticValueOperationName } from '../../form_based/dimension_panel/dimensions_editor_helpers';
 import { FieldSelect, type FieldOptionCompatible } from './field_select';
 import { fetchFieldsFromESQLExpression } from './fetch_fields_from_esql_expression';
 
