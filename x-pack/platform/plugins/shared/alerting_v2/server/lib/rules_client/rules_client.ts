@@ -36,6 +36,7 @@ import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { resolveRuleEventOrigin } from '../event_origin/rule_event_origin';
 import type { RuleEventOrigin } from '../event_origin/origin_schemas';
+import { collectRuleUpdatedFields } from '../telemetry/rule_updated_fields';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 import {
@@ -605,6 +606,23 @@ export class RulesClient {
     );
   }
 
+  /** Dotted paths that differ between the stored rule and the rule after the write. */
+  private updatedFieldsFor(
+    id: string,
+    previousAttrs: RuleSavedObjectAttributes,
+    previousReferences: SavedObjectReference[] | undefined,
+    next: RuleResponse
+  ): string[] {
+    return collectRuleUpdatedFields(
+      this.toRuleApiResponse({
+        id,
+        attrs: previousAttrs,
+        references: previousReferences,
+      }),
+      next
+    );
+  }
+
   private async writeRuleAttrs({
     id,
     attrs,
@@ -844,9 +862,16 @@ export class RulesClient {
       attrs: nextAttrs,
       references,
     });
+    const updatedFields = this.updatedFieldsFor(id, existingAttrs, existingReferences, rule);
 
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
+      {
+        ruleId: rule.id,
+        spaceId: this.spaceId,
+        rule,
+        origin: this.resolveRuleEventOrigin(),
+        ...(updatedFields.length > 0 ? { updatedFields } : {}),
+      },
     ]);
 
     return rule;
@@ -1603,11 +1628,18 @@ export class RulesClient {
         attrs: item.attrs,
         references: item.references,
       });
+      const updatedFields = this.updatedFieldsFor(
+        item.id,
+        rotatedCandidates[i].attrs,
+        item.references,
+        rule
+      );
       updatedRules.push({
         ruleId: rule.id,
         spaceId,
         rule,
         origin: this.resolveRuleEventOrigin(),
+        ...(updatedFields.length > 0 ? { updatedFields } : {}),
       });
     }
 
@@ -1923,8 +1955,15 @@ export class RulesClient {
       attrs: nextAttrs,
       references,
     });
+    const updatedFields = this.updatedFieldsFor(id, existingAttrs, existingReferences, rule);
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
+      {
+        ruleId: rule.id,
+        spaceId: this.spaceId,
+        rule,
+        origin: this.resolveRuleEventOrigin(),
+        ...(updatedFields.length > 0 ? { updatedFields } : {}),
+      },
     ]);
     return { rule, created: false };
   }

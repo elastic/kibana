@@ -99,6 +99,24 @@ describe('buildRuleChangedEventData', () => {
     });
   });
 
+  it('includes updated_fields when paths are passed', () => {
+    const data = buildRuleChangedEventData(createRuleResponse(), apiUserOrigin, 'rule-1', [
+      'metadata.name',
+      'schedule',
+    ]);
+
+    expect(data.updated_fields).toEqual(['metadata.name', 'schedule']);
+  });
+
+  it('omits updated_fields when the list is absent or empty', () => {
+    expect(
+      buildRuleChangedEventData(createRuleResponse(), apiUserOrigin, 'rule-1')
+    ).not.toHaveProperty('updated_fields');
+    expect(
+      buildRuleChangedEventData(createRuleResponse(), apiUserOrigin, 'rule-1', [])
+    ).not.toHaveProperty('updated_fields');
+  });
+
   it('includes template_id and builder_type when present', () => {
     const rule = createRuleResponse({
       metadata: { template: { id: 'template-1' }, builder: { type: 'threshold' } },

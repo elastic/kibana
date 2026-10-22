@@ -36,6 +36,11 @@ export interface RuleEventPayload {
   readonly correlationId?: string;
   /** Channel and app derived from the rules client's request. */
   readonly origin: RuleEventOrigin;
+  /**
+   * Dotted paths of rule fields that differ on a rule update.
+   * Present only for `rule.updated`, and only when at least one path differs.
+   */
+  readonly updatedFields?: readonly string[];
 }
 
 /**

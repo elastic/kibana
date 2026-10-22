@@ -35,6 +35,7 @@ export interface EventRule {
   spaceId: string;
   rule?: RuleResponse;
   origin: RuleEventOrigin;
+  updatedFields?: readonly string[];
 }
 
 /**
@@ -101,13 +102,14 @@ export class RuleEventPublisher implements RuleEventPublisherContract {
   }
 
   private toEventPayload(eventRule: EventRule, correlationId?: string): RuleEventPayload {
-    const { ruleId, spaceId, rule, origin } = eventRule;
+    const { ruleId, spaceId, rule, origin, updatedFields } = eventRule;
     return {
       ruleId,
       spaceId,
       origin,
       ...(correlationId ? { correlationId } : {}),
       ...(rule ? { rule } : {}),
+      ...(updatedFields && updatedFields.length > 0 ? { updatedFields } : {}),
     };
   }
 
