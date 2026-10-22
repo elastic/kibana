@@ -55,6 +55,12 @@ export const translations = {
       defaultMessage: 'Actions for {viewName}',
       values: { viewName },
     }),
+  individualItemActionsDisabled: i18n.translate(
+    'xpack.esqlViews.managementPage.individualItemActionsDisabled',
+    {
+      defaultMessage: 'Individual item actions are disabled when rows are being selected.',
+    }
+  ),
   editViewButtonLabel: i18n.translate('xpack.esqlViews.managementPage.editViewButtonLabel', {
     defaultMessage: 'Edit',
   }),

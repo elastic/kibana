@@ -411,28 +411,9 @@ export function getTextBasedDatasource({
       });
 
       const initState = state ?? { layers: {} };
-      const hydratedLayers: typeof initState.layers = {};
-
-      // Validate the layers without a timeField configured at runtime.
-      // The ad-hoc DataView specs are regenerated at initialization (with time field
-      // detection via HTTP), but the persisted layer state may not have a timeField (if comes from the API)
-      // This ensures each layer picks up the correct timeFieldName so that
-      // time-based filtering works correctly for ES|QL visualizations.
-      for (const [layerId, layer] of Object.entries(initState.layers)) {
-        if (layer.timeField || !indexPatterns) {
-          hydratedLayers[layerId] = layer;
-          continue;
-        }
-
-        const matchedIndexPattern = layer.index ? indexPatterns[layer.index] : undefined;
-        hydratedLayers[layerId] = matchedIndexPattern?.timeFieldName
-          ? { ...layer, timeField: matchedIndexPattern.timeFieldName }
-          : layer;
-      }
 
       return {
         ...initState,
-        layers: hydratedLayers,
         indexPatternRefs: refs,
         initialContext: context,
       };
@@ -470,11 +451,15 @@ export function getTextBasedDatasource({
           .filter((c): c is TextBasedLayerColumn => Boolean(c))
           .map((c) => c.fieldName);
 
+        // The source (main) layer is authoritative after a query/index change.
+        // The trendline layer can still hold a previous index's time field.
+        const sourceTimeField = fromLayer.timeField ?? toLayer.timeField;
+
         const groupByColumns = trendlineLayerLinks
           .filter((l) => l.from.groupId === LENS_METRIC_GROUP_ID.BREAKDOWN_BY)
           .map((l) => fromLayer.columns.find((c) => c.columnId === l.from.columnId))
           .filter((c): c is TextBasedLayerColumn => Boolean(c))
-          .filter((c) => c.fieldName !== toLayer.timeField);
+          .filter((c) => c.fieldName !== sourceTimeField);
         const groupByFields = groupByColumns.map((c) => c.fieldName);
 
         // Sync the trendline layer's query from the source layer.
@@ -483,11 +468,11 @@ export function getTextBasedDatasource({
         let updatedQuery = toLayer.query;
         let metricFieldMap = new Map<string, string>();
         let trendlineTimeField: string | undefined;
-        if (fromLayer.query && isOfAggregateQueryType(fromLayer.query) && toLayer.timeField) {
+        if (fromLayer.query && isOfAggregateQueryType(fromLayer.query) && sourceTimeField) {
           try {
             const trendlineQueryResult = buildTrendlineQueryWithMetricFieldMap(
               fromLayer.query.esql,
-              toLayer.timeField,
+              sourceTimeField,
               metricFields,
               groupByFields
             );
@@ -547,8 +532,18 @@ export function getTextBasedDatasource({
           );
         }
 
+        const updatedTimeField = sourceTimeField ?? toLayer.timeField;
+        const updatedIndex = fromLayer.index ?? toLayer.index;
+
         // Skip if nothing changed
-        if (updatedColumns === toLayer.columns && updatedQuery === toLayer.query) continue;
+        if (
+          updatedColumns === toLayer.columns &&
+          updatedQuery === toLayer.query &&
+          updatedTimeField === toLayer.timeField &&
+          updatedIndex === toLayer.index
+        ) {
+          continue;
+        }
 
         newState = {
           ...newState,
@@ -558,6 +553,8 @@ export function getTextBasedDatasource({
               ...toLayer,
               columns: updatedColumns,
               query: updatedQuery,
+              timeField: updatedTimeField,
+              index: updatedIndex,
             },
           },
         };

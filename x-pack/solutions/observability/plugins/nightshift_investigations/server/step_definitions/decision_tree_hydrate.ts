@@ -15,6 +15,7 @@ import { DECISION_TREE_WORKSPACE_ROOT } from '../decision_trees/materialize';
 import { degradeOnWriterFailure } from '../lib/hydrate_notification';
 import { withNightshiftBackgroundSpan } from '../tracing';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
+import { usesDecisionTrees } from '../agents/agent_policy';
 import { withTimeout } from './with_timeout';
 
 /** Caps beforeAgent so a stuck sandbox write cannot stall the reinforcement round. */
@@ -50,6 +51,14 @@ export const decisionTreeHydrateStepDefinition = ({
         .describe(
           'The round message. Reinforcement messages carry an accessed-trees marker; without it every tree is written (investigator hydrate).'
         ),
+      agent_id: z
+        .string()
+        .max(1024)
+        .optional()
+        .describe(
+          'Agent the round belongs to. When set, only the investigator gets trees; the ' +
+            'reinforcement hydrate workflow omits it.'
+        ),
     }),
     outputSchema: z.object({
       sandbox_id: z.string().describe('Sandbox that was hydrated.'),
@@ -71,7 +80,7 @@ export const decisionTreeHydrateStepDefinition = ({
         ),
     }),
     handler: async (context) => {
-      const { sandbox_id: sandboxId, prompt } = context.input;
+      const { sandbox_id: sandboxId, prompt, agent_id: agentId } = context.input;
       const workflowContext = context.contextManager.getContext();
       const { spaceId } = workflowContext.workflow;
       const executionId = workflowContext.execution?.id;
@@ -79,8 +88,15 @@ export const decisionTreeHydrateStepDefinition = ({
 
       // The combined materialize workflow installs with Cortex or Memory, so this step is
       // registered even when the tree feature is off. Fail closed without touching the sandbox.
-      if (isEnabled && !isEnabled()) {
-        context.logger.info(`Skipped decision tree hydrate for sandbox ${sandboxId} (flag off)`);
+      // It is also every knowledge agent's before-agent hook, but only the investigator reads
+      // the trees.
+      const flagOff = Boolean(isEnabled && !isEnabled());
+      if (flagOff || (agentId !== undefined && !usesDecisionTrees(agentId))) {
+        context.logger.info(
+          `Skipped decision tree hydrate for sandbox ${sandboxId} (${
+            flagOff ? 'flag off' : 'agent does not use decision trees'
+          })`
+        );
         return {
           output: {
             sandbox_id: sandboxId,

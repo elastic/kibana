@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ApprovalContent, type ApprovalContentProps } from './approval_content';
+import { DATE_TIME_FORMAT } from './proposal_helpers';
 import type { ApprovalProposal } from './types';
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -23,6 +25,15 @@ const baseProposal: ApprovalProposal = {
   impact: 'critical',
   comment: 'Isolate the compromised host.',
   status: 'pending',
+};
+
+/** The analyst carries it out and marks it as applied. */
+const todoProposal: ApprovalProposal = {
+  title: 'Revert the pool-size config change',
+  impact: 'low',
+  comment: 'Set `connection_pool.max_size` back to 100.',
+  status: 'pending',
+  category: 'todo',
 };
 
 const baseProps: ApprovalContentProps = {
@@ -224,22 +235,19 @@ describe('ApprovalContent', () => {
         expiresAt,
       },
     });
-    // Computed the same way the implementation does, rather than a hardcoded guess: the exact
-    // rendering of `toLocaleString` depends on the environment's locale/ICU data.
-    const formattedDeadline = new Date(expiresAt).toLocaleString(undefined, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    });
+    const formattedDeadline = moment(expiresAt).format(DATE_TIME_FORMAT);
     expect(
-      screen.getByText(`Configure • Reversible • Critical impact • Expires ${formattedDeadline}`)
+      screen.getByText(`Configure • Reversible • Critical impact • Expires on ${formattedDeadline}`)
     ).toBeInTheDocument();
   });
 
-  it('shows Expired in the caption instead of the deadline once it has passed', () => {
-    renderContent({
-      proposal: { ...baseProposal, status: 'expired', expiresAt: '2024-01-05T17:00:00.000Z' },
-    });
-    expect(screen.getByText('Critical impact • Expired')).toBeInTheDocument();
+  it('shows the expiry date and time in the caption after the deadline', () => {
+    const expiresAt = '2024-01-05T17:00:00.000Z';
+    renderContent({ proposal: { ...baseProposal, status: 'expired', expiresAt } });
+    const formattedDeadline = moment(expiresAt).format(DATE_TIME_FORMAT);
+    expect(
+      screen.getByText(`Critical impact • Expired on ${formattedDeadline}`)
+    ).toBeInTheDocument();
   });
 
   it('renders the comment', () => {
@@ -292,6 +300,55 @@ describe('ApprovalContent', () => {
   it('renders the Approve button, labeled the same way regardless of host', () => {
     renderContent();
     expect(screen.getByTestId('approvalContent-confirm')).toHaveTextContent('Approve');
+  });
+
+  describe('to-do proposal', () => {
+    it("offers a single I've applied button instead of Approve and Decline", () => {
+      renderContent({ proposal: todoProposal, secondaryActions: undefined, onDismiss: jest.fn() });
+
+      expect(screen.getByTestId('approvalContent-confirm')).toHaveTextContent("I've applied");
+      expect(screen.queryByText('Approve')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('approvalContent-dismiss')).not.toBeInTheDocument();
+    });
+
+    it("records the application through onApprove when I've applied is clicked", async () => {
+      const onApprove = jest.fn();
+      renderContent({ proposal: todoProposal, onApprove });
+
+      fireEvent.click(screen.getByTestId('approvalContent-confirm'));
+
+      await waitFor(() => expect(onApprove).toHaveBeenCalledTimes(1));
+    });
+
+    it('reads its category as "To do" in the caption', () => {
+      renderContent({ proposal: todoProposal });
+
+      expect(screen.getByText(/^To do/)).toBeInTheDocument();
+    });
+
+    it('keeps Approve and Decline for a proposal without an action in another category', () => {
+      // Lacking an action does not make it a to-do: it may still ask for permission.
+      renderContent({ proposal: { ...todoProposal, category: 'tune' }, onDismiss: jest.fn() });
+
+      expect(screen.getByTestId('approvalContent-confirm')).toHaveTextContent('Approve');
+      expect(screen.getByTestId('approvalContent-dismiss')).toBeInTheDocument();
+    });
+
+    it('shows a to-do marked as applied as Applied, not Approved', () => {
+      renderContent({
+        proposal: {
+          ...todoProposal,
+          decision: 'approved',
+          decidedBy: { fullName: 'Ava', username: 'ava', email: null },
+          decidedAt: '2024-01-01T17:20:00.000Z',
+          status: 'no_action',
+        },
+      });
+
+      expect(screen.getByText('Applied')).toBeInTheDocument();
+      expect(screen.getByText('Marked as applied')).toBeInTheDocument();
+      expect(screen.queryByText('Approved')).not.toBeInTheDocument();
+    });
   });
 
   it('keeps the Approve button primary even for high/critical impact', () => {
