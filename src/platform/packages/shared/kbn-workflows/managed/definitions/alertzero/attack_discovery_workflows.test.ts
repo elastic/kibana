@@ -2179,9 +2179,7 @@ describe('Attack Discovery worker chain', () => {
         unknown
       >;
 
-      expect(tagStep.alert_ids).toBe(
-        '${{ inputs.alert_ids | concat: inputs.sibling_alert_ids }}'
-      );
+      expect(tagStep.alert_ids).toBe('${{ inputs.alert_ids | concat: inputs.sibling_alert_ids }}');
       expect(tagStep.tags_to_add).toEqual(['{{ consts.ad_correlated_tag }}']);
       expect(tagStep.tags_to_remove).toBeUndefined();
     });
