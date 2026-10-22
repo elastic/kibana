@@ -652,6 +652,7 @@ export class NightshiftInvestigationsPlugin
       agentBuilder: this.agentBuilder,
       agenticInvestigations: this.agenticInvestigations,
       agentAvailability: this.getInvestigationAvailability(),
+      assistantEnabled: this.assistantEnabled,
       investigationQuotaCallback: this.investigationQuotaCallback,
       inference: this.inference,
       savedObjects: this.savedObjects,
