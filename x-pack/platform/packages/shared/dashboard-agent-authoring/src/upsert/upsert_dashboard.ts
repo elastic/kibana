@@ -76,6 +76,7 @@ export const executeDashboardUpsert = async ({
       ...[...(upsert.sections ?? []), ...(upsert.panels ?? []), ...(upsert.controls ?? [])].flatMap(
         ({ id }) => id ?? []
       ),
+      ...(upsert.remove ?? []),
     ],
     projectRouting: originalDashboardData.project_routing,
     resolvers: { resolvePanelContent, resolveAttachmentPanel, resolveControlFieldCapabilities },
