@@ -105,6 +105,13 @@ const reportOnlyDirectiveSchema = () => schema.maybe(directiveArraySchema());
  */
 const REPORTING_GROUP_NAME = /^[A-Za-z*][A-Za-z0-9!#$%&'*+\-.^_`|~:/]*$/;
 
+// Group names are short identifiers. 256 matches the bound Kibana uses for identifier strings,
+// such as saved object types, and keeps the header predictable, because the name is repeated
+// on every directive.
+const MAX_REPORTING_GROUP_NAME_LENGTH = 256;
+// Browsers use only the first endpoint, so more than a handful is never meaningful.
+const MAX_REPORTING_GROUP_NAMES = 10;
+
 const validateReportingGroupName = (value: string) => {
   if (!REPORTING_GROUP_NAME.test(value)) {
     return (
@@ -152,10 +159,9 @@ const configSchema = schema.object(
     enabled: schema.boolean({ defaultValue: true }),
     ...directivesSchema(directiveSchema),
     report_only: schema.maybe(schema.object(directivesSchema(reportOnlyDirectiveSchema))),
-    // Only the token grammar is enforced: it rejects exactly the values that corrupt the header.
-    // `report_to` is GA, so anything that serializes correctly keeps working.
-    report_to: schema.arrayOf(schema.string(), {
+    report_to: schema.arrayOf(schema.string({ maxLength: MAX_REPORTING_GROUP_NAME_LENGTH }), {
       defaultValue: [],
+      maxSize: MAX_REPORTING_GROUP_NAMES,
       validate: reportingGroupNameValidator,
     }),
   },
