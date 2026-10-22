@@ -64,10 +64,7 @@ const collectChangedPaths = (
 };
 
 /** Dotted paths whose values differ between two rule responses, in path order. */
-export const collectRuleUpdatedFields = (
-  previous: RuleResponse,
-  next: RuleResponse
-): string[] => {
+export const collectRuleUpdatedFields = (previous: RuleResponse, next: RuleResponse): string[] => {
   const changed: string[] = [];
   collectChangedPaths(previous, next, '', changed);
   return changed;
