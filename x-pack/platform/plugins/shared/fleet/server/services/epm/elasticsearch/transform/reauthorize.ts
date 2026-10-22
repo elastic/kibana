@@ -171,7 +171,8 @@ export async function handleTransformReauthorizeAndStart({
   // privileges or not at all.
   // This does not cover Stack Management > Transforms: its own reauthorize action
   // (`/internal/transform/reauthorize_transforms`) rebinds any transform with a failed privileges
-  // check to the calling transform admin without consulting Fleet's install source.
+  // check to the calling transform admin without consulting Fleet's install source. Tracked in
+  // https://github.com/elastic/kibana/issues/299756.
   const installation = await getInstallation({ savedObjectsClient, pkgName, logger });
   if (!isTrustedInstallSource(installation?.install_source)) {
     throw new FleetUnauthorizedError(
