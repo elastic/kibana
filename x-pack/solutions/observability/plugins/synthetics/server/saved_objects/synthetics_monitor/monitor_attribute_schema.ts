@@ -6,12 +6,7 @@
  */
 
 import { schema, type Type } from '@kbn/config-schema';
-import {
-  MAX_MONITOR_FANOUT_SIZE,
-  MAX_MONITOR_PAYLOAD_BYTES,
-  MAX_PARAM_VALUE_LENGTH,
-  MAX_ROUTE_STRING_LENGTH,
-} from '../../../common/constants/monitor_attribute_limits';
+import { MAX_MONITOR_PAYLOAD_BYTES } from '../../../common/constants/monitor_attribute_limits';
 import { ConfigKey } from '../../../common/constants/monitor_management';
 import {
   CodeEditorMode,
@@ -31,9 +26,13 @@ import {
   AUTH_STRING_MAX,
 } from '../../../common/runtime_types/schemas/monitor_configs';
 
-const shortString = () => schema.string({ maxLength: MAX_ROUTE_STRING_LENGTH });
-const longString = () => schema.string({ maxLength: MAX_PARAM_VALUE_LENGTH });
-const stringArray = () => schema.arrayOf(shortString(), { maxSize: MAX_MONITOR_FANOUT_SIZE });
+// The public monitor route caps strings at 4096 and lists at 1000. A project
+// push does not, and a space change deletes the saved object before creating
+// it again. Stored attributes use the project body ceiling so that recreate
+// still accepts a monitor the project route already saved.
+const storedString = () => schema.string({ maxLength: MAX_MONITOR_PAYLOAD_BYTES });
+const stringArray = () =>
+  schema.arrayOf(storedString(), { maxSize: MAX_MONITOR_PAYLOAD_BYTES });
 
 const literals = (values: readonly string[]) =>
   schema.oneOf(values.map((value) => schema.literal(value)) as [Type<string>]);
@@ -48,34 +47,30 @@ const scheduleSchema = loose({
 });
 
 const geoSchema = loose({
-  lat: schema.maybe(schema.oneOf([shortString(), schema.number(), schema.literal(null)])),
-  lon: schema.maybe(schema.oneOf([shortString(), schema.number(), schema.literal(null)])),
+  lat: schema.maybe(schema.oneOf([storedString(), schema.number(), schema.literal(null)])),
+  lon: schema.maybe(schema.oneOf([storedString(), schema.number(), schema.literal(null)])),
 });
 
 const locationSchema = loose({
-  id: shortString(),
-  label: shortString(),
+  id: storedString(),
+  label: storedString(),
   isServiceManaged: schema.maybe(schema.boolean()),
   isInvalid: schema.maybe(schema.boolean()),
-  url: schema.maybe(shortString()),
+  url: schema.maybe(storedString()),
   geo: schema.maybe(geoSchema),
-  status: schema.maybe(shortString()),
-  agentPolicyId: schema.maybe(shortString()),
+  status: schema.maybe(storedString()),
+  agentPolicyId: schema.maybe(storedString()),
   tags: schema.maybe(stringArray()),
-  namespace: schema.maybe(shortString()),
+  namespace: schema.maybe(storedString()),
   spaces: schema.maybe(stringArray()),
 });
 
 const alertStatusSchema = loose({
   enabled: schema.boolean(),
-  groupBy: schema.maybe(shortString()),
+  groupBy: schema.maybe(storedString()),
 });
 
-const stringRecord = () =>
-  schema.recordOf(
-    schema.string({ maxLength: MAX_ROUTE_STRING_LENGTH }),
-    schema.string({ maxLength: MAX_PARAM_VALUE_LENGTH })
-  );
+const stringRecord = () => schema.recordOf(storedString(), storedString());
 
 const authString = () => schema.string({ maxLength: AUTH_STRING_MAX });
 const authInline = () => schema.string({ maxLength: AUTH_INLINE_CONF_MAX });
@@ -102,19 +97,19 @@ const ntlmSchema = schema.object({
 });
 
 const requestBodySchema = loose({
-  value: longString(),
+  value: storedString(),
   type: literals(Object.values(CodeEditorMode)),
 });
 
 const responseJsonCheckSchema = loose({
-  description: longString(),
-  expression: longString(),
+  description: storedString(),
+  expression: storedString(),
 });
 
 const throttlingValueSchema = loose({
-  download: shortString(),
-  upload: shortString(),
-  latency: shortString(),
+  download: storedString(),
+  upload: storedString(),
+  latency: storedString(),
 });
 
 const metadataSchema = loose({
@@ -122,7 +117,7 @@ const metadataSchema = loose({
   script_source: schema.maybe(
     loose({
       is_generated_script: schema.boolean(),
-      file_name: shortString(),
+      file_name: storedString(),
     })
   ),
 });
@@ -133,104 +128,110 @@ const metadataSchema = loose({
  * create. `forwardCompatibility` is this schema with unknown keys removed.
  */
 export const monitorCreateSchema = schema.object({
-  [ConfigKey.NAME]: shortString(),
+  [ConfigKey.NAME]: storedString(),
   [ConfigKey.MONITOR_TYPE]: literals(Object.values(MonitorTypeEnum)),
   [ConfigKey.ENABLED]: schema.boolean(),
   [ConfigKey.SCHEDULE]: scheduleSchema,
-  [ConfigKey.NAMESPACE]: shortString(),
+  [ConfigKey.NAMESPACE]: storedString(),
   [ConfigKey.TAGS]: stringArray(),
   // A location is a service or private location object. Tests also store a location id string.
   [ConfigKey.LOCATIONS]: schema.maybe(
-    schema.arrayOf(schema.oneOf([shortString(), locationSchema]), {
-      maxSize: MAX_MONITOR_FANOUT_SIZE,
+    schema.arrayOf(schema.oneOf([storedString(), locationSchema]), {
+      maxSize: MAX_MONITOR_PAYLOAD_BYTES,
     })
   ),
-  [ConfigKey.APM_SERVICE_NAME]: schema.maybe(shortString()),
-  [ConfigKey.MONITOR_QUERY_ID]: schema.maybe(shortString()),
-  [ConfigKey.CONFIG_ID]: schema.maybe(shortString()),
+  [ConfigKey.APM_SERVICE_NAME]: schema.maybe(storedString()),
+  [ConfigKey.MONITOR_QUERY_ID]: schema.maybe(storedString()),
+  [ConfigKey.CONFIG_ID]: schema.maybe(storedString()),
   [ConfigKey.MAX_ATTEMPTS]: schema.maybe(schema.number()),
   [ConfigKey.FORM_MONITOR_TYPE]: schema.maybe(literals(Object.values(FormMonitorType))),
   [ConfigKey.TIMEOUT]: schema.maybe(
-    schema.oneOf([shortString(), schema.number(), schema.literal(null)])
+    schema.oneOf([storedString(), schema.number(), schema.literal(null)])
   ),
   [ConfigKey.REVISION]: schema.maybe(schema.number()),
   [ConfigKey.MONITOR_SOURCE_TYPE]: schema.maybe(literals(Object.values(SourceType))),
-  [ConfigKey.CONFIG_HASH]: schema.maybe(shortString()),
-  [ConfigKey.JOURNEY_ID]: schema.maybe(shortString()),
-  [ConfigKey.PROJECT_ID]: schema.maybe(shortString()),
-  [ConfigKey.ORIGINAL_SPACE]: schema.maybe(shortString()),
-  [ConfigKey.CUSTOM_HEARTBEAT_ID]: schema.maybe(shortString()),
+  [ConfigKey.CONFIG_HASH]: schema.maybe(storedString()),
+  [ConfigKey.JOURNEY_ID]: schema.maybe(storedString()),
+  [ConfigKey.PROJECT_ID]: schema.maybe(storedString()),
+  [ConfigKey.ORIGINAL_SPACE]: schema.maybe(storedString()),
+  [ConfigKey.CUSTOM_HEARTBEAT_ID]: schema.maybe(storedString()),
   [ConfigKey.ALERT_CONFIG]: schema.maybe(
     loose({
       status: schema.maybe(alertStatusSchema),
       tls: schema.maybe(alertStatusSchema),
     })
   ),
-  [ConfigKey.PARAMS]: schema.maybe(longString()),
+  [ConfigKey.PARAMS]: schema.maybe(storedString()),
   [ConfigKey.LABELS]: schema.maybe(stringRecord()),
   [ConfigKey.MAINTENANCE_WINDOWS]: schema.maybe(stringArray()),
   [ConfigKey.KIBANA_SPACES]: schema.maybe(stringArray()),
   retest_on_failure: schema.maybe(schema.boolean()),
   [ConfigKey.METADATA]: schema.maybe(metadataSchema),
-  [ConfigKey.HOSTS]: schema.maybe(shortString()),
+  [ConfigKey.HOSTS]: schema.maybe(storedString()),
   [ConfigKey.PORT]: schema.maybe(schema.nullable(schema.number())),
-  [ConfigKey.URLS]: schema.maybe(schema.nullable(shortString())),
-  [ConfigKey.PROXY_URL]: schema.maybe(shortString()),
+  [ConfigKey.URLS]: schema.maybe(schema.nullable(storedString())),
+  [ConfigKey.PROXY_URL]: schema.maybe(storedString()),
   [ConfigKey.PROXY_USE_LOCAL_RESOLVER]: schema.maybe(schema.boolean()),
   [ConfigKey.MODE]: schema.maybe(literals(Object.values(Mode))),
   [ConfigKey.IPV4]: schema.maybe(schema.boolean()),
   [ConfigKey.IPV6]: schema.maybe(schema.boolean()),
-  [ConfigKey.RESPONSE_RECEIVE_CHECK]: schema.maybe(longString()),
-  [ConfigKey.REQUEST_SEND_CHECK]: schema.maybe(longString()),
-  [ConfigKey.MAX_REDIRECTS]: schema.maybe(schema.oneOf([shortString(), schema.number()])),
+  [ConfigKey.RESPONSE_RECEIVE_CHECK]: schema.maybe(storedString()),
+  [ConfigKey.REQUEST_SEND_CHECK]: schema.maybe(storedString()),
+  [ConfigKey.MAX_REDIRECTS]: schema.maybe(schema.oneOf([storedString(), schema.number()])),
   [ConfigKey.RESPONSE_BODY_INDEX]: schema.maybe(literals(Object.values(ResponseBodyIndexPolicy))),
   [ConfigKey.RESPONSE_HEADERS_INDEX]: schema.maybe(schema.boolean()),
   [ConfigKey.RESPONSE_STATUS_CHECK]: schema.maybe(stringArray()),
-  [ConfigKey.REQUEST_METHOD_CHECK]: schema.maybe(shortString()),
-  [ConfigKey.RESPONSE_BODY_MAX_BYTES]: schema.maybe(shortString()),
-  [ConfigKey.PASSWORD]: schema.maybe(longString()),
+  [ConfigKey.REQUEST_METHOD_CHECK]: schema.maybe(storedString()),
+  [ConfigKey.RESPONSE_BODY_MAX_BYTES]: schema.maybe(storedString()),
+  [ConfigKey.PASSWORD]: schema.maybe(storedString()),
   [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: schema.maybe(stringArray()),
   [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: schema.maybe(stringArray()),
   [ConfigKey.RESPONSE_HEADERS_CHECK]: schema.maybe(stringRecord()),
   [ConfigKey.REQUEST_BODY_CHECK]: schema.maybe(requestBodySchema),
   [ConfigKey.REQUEST_HEADERS_CHECK]: schema.maybe(stringRecord()),
-  [ConfigKey.USERNAME]: schema.maybe(longString()),
+  [ConfigKey.USERNAME]: schema.maybe(storedString()),
   [ConfigKey.PROXY_HEADERS]: schema.maybe(stringRecord()),
   [ConfigKey.RESPONSE_JSON_CHECK]: schema.maybe(
-    schema.arrayOf(responseJsonCheckSchema, { maxSize: MAX_MONITOR_FANOUT_SIZE })
+    schema.arrayOf(responseJsonCheckSchema, { maxSize: MAX_MONITOR_PAYLOAD_BYTES })
   ),
   [ConfigKey.KERBEROS]: schema.maybe(kerberosSchema),
   [ConfigKey.NTLM]: schema.maybe(ntlmSchema),
-  [ConfigKey.WAIT]: schema.maybe(shortString()),
-  [ConfigKey.PLAYWRIGHT_OPTIONS]: schema.maybe(longString()),
-  [ConfigKey.TEXT_ASSERTION]: schema.maybe(longString()),
-  [ConfigKey.SOURCE_INLINE]: schema.maybe(longString()),
-  [ConfigKey.SOURCE_PROJECT_CONTENT]: schema.maybe(longString()),
+  [ConfigKey.WAIT]: schema.maybe(storedString()),
+  [ConfigKey.PLAYWRIGHT_OPTIONS]: schema.maybe(storedString()),
+  [ConfigKey.TEXT_ASSERTION]: schema.maybe(storedString()),
+  [ConfigKey.SOURCE_INLINE]: schema.maybe(storedString()),
+  [ConfigKey.SOURCE_PROJECT_CONTENT]: schema.maybe(storedString()),
   [ConfigKey.SCREENSHOTS]: schema.maybe(literals(Object.values(ScreenshotOption))),
-  [ConfigKey.JOURNEY_FILTERS_MATCH]: schema.maybe(shortString()),
+  [ConfigKey.JOURNEY_FILTERS_MATCH]: schema.maybe(storedString()),
   [ConfigKey.JOURNEY_FILTERS_TAGS]: schema.maybe(stringArray()),
   [ConfigKey.IGNORE_HTTPS_ERRORS]: schema.maybe(schema.boolean()),
   [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: schema.maybe(
-    schema.oneOf([longString(), schema.arrayOf(longString(), { maxSize: MAX_MONITOR_FANOUT_SIZE })])
+    schema.oneOf([
+      storedString(),
+      schema.arrayOf(storedString(), { maxSize: MAX_MONITOR_PAYLOAD_BYTES }),
+    ])
   ),
   [ConfigKey.THROTTLING_CONFIG]: schema.maybe(
     loose({
       value: schema.nullable(throttlingValueSchema),
-      label: shortString(),
-      id: shortString(),
+      label: storedString(),
+      id: storedString(),
     })
   ),
   [ConfigKey.SYNTHETICS_ARGS]: schema.maybe(stringArray()),
   [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: schema.maybe(
-    schema.oneOf([longString(), schema.arrayOf(longString(), { maxSize: MAX_MONITOR_FANOUT_SIZE })])
+    schema.oneOf([
+      storedString(),
+      schema.arrayOf(storedString(), { maxSize: MAX_MONITOR_PAYLOAD_BYTES }),
+    ])
   ),
-  [ConfigKey.TLS_CERTIFICATE]: schema.maybe(longString()),
+  [ConfigKey.TLS_CERTIFICATE]: schema.maybe(storedString()),
   [ConfigKey.TLS_VERIFICATION_MODE]: schema.maybe(literals(Object.values(VerificationMode))),
   [ConfigKey.TLS_VERSION]: schema.maybe(
     schema.arrayOf(literals(Object.values(TLSVersion)), { maxSize: 10 })
   ),
-  [ConfigKey.TLS_KEY]: schema.maybe(longString()),
-  [ConfigKey.TLS_KEY_PASSPHRASE]: schema.maybe(longString()),
+  [ConfigKey.TLS_KEY]: schema.maybe(storedString()),
+  [ConfigKey.TLS_KEY_PASSPHRASE]: schema.maybe(storedString()),
   // Secret ConfigKeys are packed into this JSON string before the document is stored.
   secrets: schema.maybe(schema.string({ maxLength: MAX_MONITOR_PAYLOAD_BYTES })),
 });

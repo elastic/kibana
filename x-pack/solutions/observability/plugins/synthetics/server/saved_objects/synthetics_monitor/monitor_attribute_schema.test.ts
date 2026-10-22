@@ -6,7 +6,11 @@
  */
 
 import { omit, pick } from 'lodash';
-import { MAX_PARAM_VALUE_LENGTH } from '../../../common/constants/monitor_attribute_limits';
+import {
+  MAX_MONITOR_FANOUT_SIZE,
+  MAX_PARAM_VALUE_LENGTH,
+  MAX_ROUTE_STRING_LENGTH,
+} from '../../../common/constants/monitor_attribute_limits';
 import { secretKeys } from '../../../common/constants/monitor_management';
 import {
   fullBrowserMonitor,
@@ -58,6 +62,18 @@ describe('monitor attribute schema', () => {
     const stored = withPackedSecrets(fullHttpMonitor());
 
     expect(monitorCreateSchema.validate(stored)).toEqual(stored);
+  });
+
+  it('accepts a name and tag list a project push can already store', () => {
+    const monitor = {
+      ...fullHttpMonitor(),
+      name: 'n'.repeat(MAX_ROUTE_STRING_LENGTH + 1),
+      tags: Array.from({ length: MAX_MONITOR_FANOUT_SIZE + 1 }, (_, index) =>
+        index === 0 ? 't'.repeat(MAX_ROUTE_STRING_LENGTH + 1) : 'tag'
+      ),
+    };
+
+    expect(monitorCreateSchema.validate(monitor)).toEqual(monitor);
   });
 
   it('accepts a secrets string larger than one secret field', () => {
