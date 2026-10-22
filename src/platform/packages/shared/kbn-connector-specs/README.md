@@ -584,6 +584,26 @@ Inputs are parsed with the action's schema first. Auth secrets the test leaves o
 
 Each connector can have a `vendor_api/` folder next to its spec, recording the vendor API it depends on ([#295685](https://github.com/elastic/kibana/issues/295685)). `recordActions` (in `src/test/vendor_api`) produces most of it: it runs every action against the contract mock, with inputs generated from the action's schema (one without and one with optional properties), and records the vendor operations each one calls.
 
+```sh
+# First run: name each vendor spec; YAML or JSON, external $refs are bundled
+node scripts/connector_vendor_api --connector datadog --source v1=https://… --source v2=https://…
+# After changing the connector: record offline against the committed snapshots
+node scripts/connector_vendor_api --connector datadog
+# Pick up vendor changes: fetch every source in manifest.json again
+node scripts/connector_vendor_api --connector datadog --refresh
+# CI: write nothing, fail if anything would change
+node scripts/connector_vendor_api --connector datadog --check
+```
+
+The folder holds:
+
+- `manifest.json`: the sources and the operations each action calls.
+- `snapshots/<source>.openapi.json`: each vendor spec, converted to OpenAPI 3 if needed and cut down to the recorded operations and what they reference. Descriptions, examples and `x-` extensions are dropped so that wording changes don't produce diffs. Snapshots are the vendor's spec as published: the overlay is not applied to them.
+- `overlay.yaml` (optional): an [OpenAPI Overlay](https://spec.openapis.org/overlay/latest.html) correcting the vendor specs, applied whenever they are loaded, including while recording. An action that no longer matches anything is reported, as the vendor may have fixed the spec.
+- `fixtures.json` (optional): see below.
+
+The script fails when a `readOnly` action changes state, a response override breaks the spec, or a request matches no operation and isn't listed in `unmatched`. Requests that break the spec and handler errors are reported as warnings.
+
 ### `manifest.json`
 
 ```json
