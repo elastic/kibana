@@ -11,6 +11,7 @@ import {
   ToolResultType,
 } from '@kbn/agent-builder-common';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
+import { ExecutionStatus } from '@kbn/workflows';
 import { INVESTIGATION_TIMEOUT_MS, UNPERSISTED_CONVERSATION_ERROR, runInvestigation } from './task';
 import { ungradedPlaceholder } from './placeholder';
 
@@ -38,11 +39,61 @@ const investigation = (overrides: Partial<Investigation> = {}): Investigation =>
 
 const notFound = () => Object.assign(new Error('Not Found'), { status: 404 });
 
+const execution = (status: ExecutionStatus, stepExecutions: object[] = []) => ({
+  id: 'execution',
+  status,
+  stepExecutions,
+});
+
+/** A conversation whose metadata names the investigation's workflow execution. */
+const withExecution = <T extends object>(conversation: T) => ({
+  ...conversation,
+  metadata: { workflow_execution_ids: ['execution'] },
+});
+
+interface Routes {
+  start?: unknown[];
+  investigation?: unknown[];
+  conversation?: unknown[];
+  execution?: unknown[];
+}
+
+/**
+ * Answers each API from its own queue of responses, repeating the last one once the queue is
+ * down to it; a queued `Error` is thrown.
+ */
+const routedFetch = (routes: Routes) => {
+  const next = (queue: unknown[] | undefined, path: string) => {
+    if (!queue?.length) throw new Error(`Unexpected request: ${path}`);
+    const response = queue.length > 1 ? queue.shift() : queue[0];
+    if (response instanceof Error) throw response;
+    return response;
+  };
+  return jest.fn().mockImplementation(async (path: string) => {
+    if (path === '/internal/nightshift/investigations') return next(routes.start, path);
+    if (path.startsWith('/internal/investigations/investigations/')) {
+      return next(routes.investigation, path);
+    }
+    if (path.startsWith('/api/agent_builder/conversations/')) {
+      return next(routes.conversation, path);
+    }
+    if (path.startsWith('/api/workflows/executions/')) return next(routes.execution, path);
+    throw new Error(`Unexpected request: ${path}`);
+  });
+};
+
 it('executes the manual investigation and reads what it recorded from the shared API', async () => {
-  const conversation = {
+  const conversation = withExecution({
     rounds: [
       {
         trace_id: ['first-trace', 'agent-trace'],
+        started_at: '2026-01-01T00:00:01.000Z',
+        model_usage: {
+          connector_id: 'investigation-model',
+          llm_calls: 3,
+          input_tokens: 9_000,
+          output_tokens: 700,
+        },
         steps: [
           {
             type: ConversationRoundStepType.toolCall,
@@ -60,14 +111,13 @@ it('executes the manual investigation and reads what it recorded from the shared
         ],
       },
     ],
-  };
-  const fetch = jest
-    .fn()
-    .mockResolvedValueOnce({ investigation_id: 'investigation' })
-    // The run has not created the conversation yet.
-    .mockRejectedValueOnce(notFound())
-    .mockResolvedValueOnce(investigation({ in_progress: true }))
-    .mockResolvedValueOnce(
+  });
+  const fetch = routedFetch({
+    start: [{ investigation_id: 'investigation' }],
+    investigation: [
+      // The run has not created the conversation yet.
+      notFound(),
+      investigation({ in_progress: true }),
       investigation({
         severity: undefined,
         hypotheses: {
@@ -85,9 +135,23 @@ it('executes the manual investigation and reads what it recorded from the shared
             created_at: '2026-01-01T00:05:00.000Z',
           },
         ],
-      } as Partial<Investigation>)
-    )
-    .mockResolvedValueOnce(conversation);
+      } as Partial<Investigation>),
+    ],
+    conversation: [conversation],
+    execution: [
+      execution(ExecutionStatus.COMPLETED, [
+        // The step's timeout wrapper repeats its id.
+        { stepId: 'investigate', stepType: 'step_level_timeout', executionTimeMs: 240_010 },
+        {
+          stepId: 'investigate',
+          stepType: 'ai.agent',
+          startedAt: '2026-01-01T00:00:01.000Z',
+          executionTimeMs: 240_000,
+          usage: { inputTokens: 9_000, cachedTokens: 6_000, outputTokens: 700, totalTokens: 9_700 },
+        },
+      ]),
+    ],
+  });
 
   const result = await runInvestigation(fetch, example, connector);
 
@@ -106,6 +170,9 @@ it('executes the manual investigation and reads what it recorded from the shared
       headers: { 'elastic-api-version': '1' },
     }
   );
+  expect(fetch).toHaveBeenCalledWith('/api/workflows/executions/execution', {
+    headers: { 'elastic-api-version': '2023-10-31' },
+  });
   expect(result).toMatchObject({
     case_id: 'timeouts',
     investigation_id: 'investigation',
@@ -118,9 +185,78 @@ it('executes the manual investigation and reads what it recorded from the shared
       proposals: [{ title: 'Pause the load test', comment: 'Stop it', status: 'pending' }],
     },
     traceId: 'agent-trace',
+    trace_ids: ['first-trace', 'agent-trace'],
     conversation_round_count: 1,
+    run_metrics: {
+      requested_at: expect.any(String),
+      time_to_report_ms: expect.any(Number),
+      agent_steps: [
+        {
+          step_id: 'investigate',
+          started_at: '2026-01-01T00:00:01.000Z',
+          duration_ms: 240_000,
+          input_tokens: 9_000,
+          cached_input_tokens: 6_000,
+          output_tokens: 700,
+        },
+      ],
+      rounds: [{ started_at: '2026-01-01T00:00:01.000Z', llm_calls: 3, tool_calls: 1 }],
+    },
   });
   expect(result.execution_error).toBeUndefined();
+});
+
+it('reads the report only after the workflow finishes, though a pending proposal ended in_progress', async () => {
+  const fetch = routedFetch({
+    start: [{ investigation_id: 'investigation' }],
+    investigation: [
+      // The agent created a proposal and is still recording its verdict.
+      investigation({ metadata: { status: 'open', summary: 'Timeouts rose.' } }),
+      investigation(),
+    ],
+    conversation: [withExecution({ rounds: [{ trace_id: 'agent-trace', steps: [] }] })],
+    execution: [
+      execution(ExecutionStatus.RUNNING),
+      execution(ExecutionStatus.RUNNING),
+      execution(ExecutionStatus.COMPLETED),
+    ],
+  });
+
+  const output = await runInvestigation(fetch, example, connector);
+
+  expect(output).toMatchObject({
+    workflow_status: 'complete',
+    structured_report: { conclusion: 'Synthetic timeouts increased.' },
+    run_metrics: { time_to_report_ms: expect.any(Number), agent_steps: [] },
+  });
+  expect(output.execution_error).toBeUndefined();
+  expect(
+    fetch.mock.calls.filter(([path]) => path.startsWith('/api/workflows/executions/'))
+  ).toHaveLength(3);
+});
+
+it('reports a workflow still running at the deadline without a time to report', async () => {
+  const clock = jest
+    .spyOn(Date, 'now')
+    .mockReturnValueOnce(0)
+    .mockReturnValue(INVESTIGATION_TIMEOUT_MS + 60_000);
+  try {
+    const fetch = routedFetch({
+      start: [{ investigation_id: 'stuck' }],
+      investigation: [investigation({ id: 'stuck' })],
+      conversation: [withExecution({ rounds: [{ trace_id: 'partial-trace', steps: [] }] })],
+      execution: [execution(ExecutionStatus.RUNNING)],
+    });
+    const output = await runInvestigation(fetch, example, connector);
+    expect(output).toMatchObject({
+      workflow_status: 'running',
+      execution_error: 'Investigation workflow was still running after 30 minutes',
+      traceId: 'partial-trace',
+    });
+    expect(output.run_metrics).not.toHaveProperty('time_to_report_ms');
+  } finally {
+    clock.mockRestore();
+  }
 });
 
 it('keeps multi-megabyte conversation evidence out of the persisted score output', async () => {
@@ -141,11 +277,11 @@ it('keeps multi-megabyte conversation evidence out of the persisted score output
     ],
   };
   expect(Buffer.byteLength(JSON.stringify(conversation))).toBeGreaterThan(5 * 1024 * 1024);
-  const fetch = jest
-    .fn()
-    .mockResolvedValueOnce({ investigation_id: 'large-investigation' })
-    .mockResolvedValueOnce(investigation({ id: 'large-investigation' }))
-    .mockResolvedValueOnce(conversation);
+  const fetch = routedFetch({
+    start: [{ investigation_id: 'large-investigation' }],
+    investigation: [investigation({ id: 'large-investigation' })],
+    conversation: [conversation],
+  });
 
   const output = await runInvestigation(fetch, example, connector);
 
@@ -160,10 +296,9 @@ it('keeps multi-megabyte conversation evidence out of the persisted score output
 });
 
 it('bounds an oversized report while retaining evidence identifiers', async () => {
-  const fetch = jest
-    .fn()
-    .mockResolvedValueOnce({ investigation_id: 'large-report' })
-    .mockResolvedValueOnce(
+  const fetch = routedFetch({
+    start: [{ investigation_id: 'large-report' }],
+    investigation: [
       investigation({
         id: 'large-report',
         hypotheses: {
@@ -174,9 +309,10 @@ it('bounds an oversized report while retaining evidence identifiers', async () =
           })),
           created_at: '2026-01-01T00:00:00.000Z',
         },
-      })
-    )
-    .mockResolvedValueOnce({ rounds: [{ trace_id: 'partial-trace', steps: [] }] });
+      }),
+    ],
+    conversation: [{ rounds: [{ trace_id: 'partial-trace', steps: [] }] }],
+  });
 
   const output = await runInvestigation(fetch, example, connector);
 
@@ -191,13 +327,13 @@ it('bounds an oversized report while retaining evidence identifiers', async () =
 });
 
 it('reports an investigation that finished without a conclusion, keeping its evidence', async () => {
-  const fetch = jest
-    .fn()
-    .mockResolvedValueOnce({ investigation_id: 'no-verdict' })
-    .mockResolvedValueOnce(
-      investigation({ id: 'no-verdict', metadata: { status: 'open', summary: 'Partial' } })
-    )
-    .mockResolvedValueOnce({ rounds: [{ trace_id: 'partial-trace', steps: [] }] });
+  const fetch = routedFetch({
+    start: [{ investigation_id: 'no-verdict' }],
+    investigation: [
+      investigation({ id: 'no-verdict', metadata: { status: 'open', summary: 'Partial' } }),
+    ],
+    conversation: [{ rounds: [{ trace_id: 'partial-trace', steps: [] }] }],
+  });
 
   const output = await runInvestigation(fetch, example, connector);
 
@@ -208,6 +344,8 @@ it('reports an investigation that finished without a conclusion, keeping its evi
     conversation_round_count: 1,
     traceId: 'partial-trace',
   });
+  // Without a recorded workflow execution there is nothing to time the report against.
+  expect(output.run_metrics).not.toHaveProperty('time_to_report_ms');
   const placeholder = await ungradedPlaceholder.evaluate({
     input: example.input,
     metadata: example.metadata,
@@ -218,15 +356,17 @@ it('reports an investigation that finished without a conclusion, keeping its evi
 });
 
 it('flags a finished investigation whose conversation never finished persisting', async () => {
-  const fetch = jest
-    .fn()
-    .mockResolvedValueOnce({ investigation_id: 'unpersisted' })
-    .mockResolvedValueOnce(investigation({ id: 'unpersisted' }))
-    .mockResolvedValue({
-      rounds: [
-        { trace_id: 'partial-trace', status: ConversationRoundStatus.inProgress, steps: [] },
-      ],
-    });
+  const fetch = routedFetch({
+    start: [{ investigation_id: 'unpersisted' }],
+    investigation: [investigation({ id: 'unpersisted' })],
+    conversation: [
+      {
+        rounds: [
+          { trace_id: 'partial-trace', status: ConversationRoundStatus.inProgress, steps: [] },
+        ],
+      },
+    ],
+  });
 
   expect(await runInvestigation(fetch, example, connector)).toMatchObject({
     workflow_status: 'complete',
@@ -258,18 +398,18 @@ it('bounds a start failure even when no investigation was created', async () => 
 });
 
 it('retains the latest report and conversation when a later poll fails', async () => {
-  const fetch = jest
-    .fn()
-    .mockResolvedValueOnce({ investigation_id: 'interrupted' })
-    .mockResolvedValueOnce(
+  const fetch = routedFetch({
+    start: [{ investigation_id: 'interrupted' }],
+    investigation: [
       investigation({
         id: 'interrupted',
         in_progress: true,
         metadata: { status: 'open', summary: 'Partial report' },
-      })
-    )
-    .mockRejectedValueOnce(new Error('Polling failed'))
-    .mockResolvedValueOnce({ rounds: [{ trace_id: 'partial-trace', steps: [] }] });
+      }),
+      new Error('Polling failed'),
+    ],
+    conversation: [{ rounds: [{ trace_id: 'partial-trace', steps: [] }] }],
+  });
 
   expect(await runInvestigation(fetch, example, connector)).toMatchObject({
     execution_error: 'Polling failed',
@@ -286,11 +426,11 @@ it('bounds polling and retains partial conversation evidence when an investigati
     .mockReturnValueOnce(0)
     .mockReturnValue(INVESTIGATION_TIMEOUT_MS + 60_000);
   try {
-    const fetch = jest
-      .fn()
-      .mockResolvedValueOnce({ investigation_id: 'slow' })
-      .mockResolvedValueOnce(investigation({ id: 'slow', in_progress: true }))
-      .mockResolvedValueOnce({ rounds: [{ trace_id: 'partial-trace', steps: [] }] });
+    const fetch = routedFetch({
+      start: [{ investigation_id: 'slow' }],
+      investigation: [investigation({ id: 'slow', in_progress: true })],
+      conversation: [{ rounds: [{ trace_id: 'partial-trace', steps: [] }] }],
+    });
     expect(await runInvestigation(fetch, example, connector)).toMatchObject({
       investigation_id: 'slow',
       workflow_status: 'running',
@@ -309,10 +449,10 @@ it('reports an investigation that never appeared', async () => {
     .mockReturnValueOnce(0)
     .mockReturnValue(INVESTIGATION_TIMEOUT_MS + 60_000);
   try {
-    const fetch = jest
-      .fn()
-      .mockResolvedValueOnce({ investigation_id: 'missing' })
-      .mockRejectedValue(notFound());
+    const fetch = routedFetch({
+      start: [{ investigation_id: 'missing' }],
+      investigation: [notFound()],
+    });
     expect(await runInvestigation(fetch, example, connector)).toMatchObject({
       investigation_id: 'missing',
       execution_error: 'Investigation was not created within 30 minutes',

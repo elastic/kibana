@@ -21,6 +21,11 @@ import {
   TRUTHFULNESS_EVALUATOR,
   createInvestigationJudges,
 } from './judges';
+import {
+  createRunMetricEvaluators,
+  RUN_METRIC_EVALUATORS,
+  summarizeRunMetrics,
+} from './run_metrics';
 import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
 import { assertSuccessfulSandboxCommand } from './trace_evidence';
 import type { InvestigationTaskOutput } from './types';
@@ -49,6 +54,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
         evaluationConnector,
         log,
       });
+      const evaluators = [...judges, ...createRunMetricEvaluators()];
       // The evals_nightshift_investigations config set sizes Task Manager for 16 investigations.
       const concurrency = Math.min(16, requestedConcurrency);
       evaluate.setTimeout(
@@ -93,7 +99,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
           metadata: { concurrency },
           task: (example) => runInvestigation(fetch, example, connector),
         },
-        judges
+        evaluators
       );
 
       const runs = Object.values(experiment.runs);
@@ -101,7 +107,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
       expect(new Set(runs.map(({ metadata }) => metadata?.case_id))).toEqual(
         new Set(dataset.examples.map(({ metadata }) => metadata.case_id))
       );
-      const scoresPerRun = judges.length;
+      const scoresPerRun = evaluators.length;
       await expect
         .poll(async () => (await evalsClient.getExperimentScores(experiment.id)).length, {
           timeout: 60_000,
@@ -168,7 +174,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
           expect(persistedOutput).not.toBeNull();
           expect(persistedOutput?.case_id).toBe(output.case_id);
           expect(persistedOutput?.query).toBe(output.query);
-          // All RCA judges scored this run, each in its own evaluation trace.
+          // All RCA judges and run metrics scored this run, each in its own evaluation trace.
           expect(new Set(exampleScores.map((each) => each.evaluator.name))).toEqual(
             new Set([
               GOAL_PASS_EVALUATOR,
@@ -176,9 +182,13 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
               ANTI_LEAKAGE_EVALUATOR,
               TRUTHFULNESS_EVALUATOR,
               DECISION_TREE_HELPFULNESS_EVALUATOR,
+              ...RUN_METRIC_EVALUATORS,
             ])
           );
-          for (const exampleScore of exampleScores) {
+          const judgeScores = exampleScores.filter(
+            (each) => !RUN_METRIC_EVALUATORS.includes(each.evaluator.name)
+          );
+          for (const exampleScore of judgeScores) {
             expect(exampleScore.evaluator.kind).toBe('llm');
             expect(exampleScore.evaluator.direction).toBe('maximize');
             expect(exampleScore.evaluator.trace_id).not.toBe(output.traceId);
@@ -208,12 +218,19 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
         { concurrency }
       );
 
-      const evaluatorTraces = experiment.evaluationRuns
+      log.info(
+        `Run metrics (p50/p95 over runs): ${JSON.stringify(
+          summarizeRunMetrics(runs.map(({ output }) => output as InvestigationTaskOutput))
+        )}`
+      );
+
+      expect(experiment.evaluationRuns).toHaveLength(runs.length * scoresPerRun);
+      const judgeRuns = experiment.evaluationRuns.filter(({ kind }) => kind === 'LLM');
+      expect(judgeRuns).toHaveLength(runs.length * judges.length);
+      const evaluatorTraces = judgeRuns
         .map(({ traceId }) => traceId)
         .filter((traceId): traceId is string => Boolean(traceId));
-      expect(experiment.evaluationRuns).toHaveLength(runs.length * scoresPerRun);
-      expect(experiment.evaluationRuns.every(({ kind }) => kind === 'LLM')).toBe(true);
-      expect(evaluatorTraces).toHaveLength(runs.length * scoresPerRun);
+      expect(evaluatorTraces).toHaveLength(runs.length * judges.length);
       // We do NOT require every evaluator trace to be present in traces-*: a judge that resolves via
       // its fast rule-based path never calls the evaluation model (rca_anti_leakage on clean cases,
       // and goal_pass/rca_cause_completeness abstain when an example has no reference answer), so those
