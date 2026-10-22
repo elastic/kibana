@@ -75,6 +75,9 @@ jest.mock('../../../../../../../../common/services', () => ({
   shouldAddIntegrationFromCatalog: jest.requireActual(
     '../../../../../../../../common/services/package_helpers'
   ).shouldAddIntegrationFromCatalog,
+  getReplacementPackageName: jest.requireActual(
+    '../../../../../../../../common/services/replaced_packages'
+  ).getReplacementPackageName,
   filterPolicyTemplatesTiles: (_behavior: any, topPackage: any, integrations: any[]) => {
     if (integrations.length > 0) {
       return integrations;
@@ -454,6 +457,35 @@ describe('useAvailablePackages', () => {
       // Should show kubernetes as a single package, not split into integrations
       expect(result.current.filteredCards).toHaveLength(1);
       expect(result.current.filteredCards[0].title).toBe('Kubernetes');
+    });
+
+    // PROTOTYPE: package structure design - replaced packages move to their replacement
+    it('should hide packages replaced by another package', () => {
+      const replaced: PackageListItem = {
+        ...mockBasicPackage,
+        id: 'nginx_otel_input',
+        name: 'nginx_otel_input',
+        title: 'NGINX OpenTelemetry Input',
+        deprecated: { description: 'Moved', replaced_by: { package: 'nginx_otel' } },
+      };
+      const deprecatedOnly: PackageListItem = {
+        ...mockBasicPackage,
+        id: 'old_thing',
+        name: 'old_thing',
+        title: 'Old thing',
+        deprecated: { description: 'No longer maintained' },
+      };
+      mockUseGetPackagesQuery.mockReturnValue({
+        data: { items: [replaced, deprecatedOnly] },
+        isLoading: false,
+        error: null,
+      });
+
+      const { result } = renderHook(() =>
+        useAvailablePackages({ prereleaseIntegrationsEnabled: false })
+      );
+
+      expect(result.current.filteredCards.map((c) => c.title)).toEqual(['Old thing']);
     });
   });
 

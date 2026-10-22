@@ -32,6 +32,7 @@ import {
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
   filterPolicyTemplatesTiles,
+  getReplacementPackageName,
   shouldAddIntegrationFromCatalog,
 } from '../../../../../../../../common/services';
 
@@ -213,8 +214,13 @@ export const useAvailablePackages = ({
   }
 
   const eprIntegrationList = useMemo(() => {
+    // PROTOTYPE: packages replaced by another (`deprecated.replaced_by.package`) aren't offered;
+    // Fleet moves existing installs to the replacement.
+    const offeredPackages = (eprPackages?.items || []).filter(
+      (item) => !getReplacementPackageName(item)
+    );
     const filteredPackageList =
-      filterPackageListDeploymentModes(eprPackages?.items || [], isAgentlessEnabled) || [];
+      filterPackageListDeploymentModes(offeredPackages, isAgentlessEnabled) || [];
     const integrations = packageListToIntegrationsList(filteredPackageList);
     return integrations;
   }, [eprPackages?.items, isAgentlessEnabled]);

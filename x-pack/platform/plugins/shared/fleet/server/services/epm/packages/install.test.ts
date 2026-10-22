@@ -137,10 +137,7 @@ jest.mock('./upload_preflight_authz', () => ({
   checkUploadPackageAssetPrivileges: jest.fn(),
 }));
 jest.mock('../../audit_logging');
-jest.mock('./move_replaced_package', () => ({
-  ...jest.requireActual('./move_replaced_package'),
-  moveReplacedPackagePolicies: jest.fn(),
-}));
+jest.mock('./move_replaced_package', () => ({ moveReplacedPackagePolicies: jest.fn() }));
 
 jest.mock('../../utils/agentless', () => {
   return {

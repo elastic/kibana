@@ -37,7 +37,7 @@ import {
   DATA_STREAM_TYPE_VAR_NAME,
   USE_APM_VAR_NAME,
 } from '../../../../common/constants';
-import { packageToPackagePolicy } from '../../../../common/services';
+import { getReplacementPackageName, packageToPackagePolicy } from '../../../../common/services';
 import type {
   Installation,
   NewPackagePolicy,
@@ -56,10 +56,6 @@ import * as Registry from '../registry';
 
 import { getInstallationObject, getPackageInfo } from './get';
 import { installPackage } from './install';
-
-/** The package that replaces this one, from `deprecated.replaced_by.package`. */
-export const getReplacementPackageName = (pkg: Pick<PackageInfo, 'deprecated'>) =>
-  pkg.deprecated?.replaced_by?.package;
 
 // Routing settings of input packages: they decide the target data stream, which is matched, not copied.
 const ROUTING_VARS = new Set([DATASET_VAR_NAME, DATA_STREAM_TYPE_VAR_NAME, USE_APM_VAR_NAME]);

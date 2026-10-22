@@ -31,7 +31,11 @@ import type {
   PackageInstallContext,
   RegistryDataStream,
 } from '../../../../common/types';
-import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
+import {
+  getReplacementPackageName,
+  isPackagePrerelease,
+  getNormalizedDataStreams,
+} from '../../../../common/services';
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 import type {
@@ -112,7 +116,7 @@ export { PACKAGES_TO_INSTALL_WITH_STREAMING } from './streaming_packages';
 import { PACKAGES_TO_INSTALL_WITH_STREAMING } from './streaming_packages';
 import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
 import { mergeIsDependencyOf } from './dependencies';
-import { getReplacementPackageName, moveReplacedPackagePolicies } from './move_replaced_package';
+import { moveReplacedPackagePolicies } from './move_replaced_package';
 
 export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
