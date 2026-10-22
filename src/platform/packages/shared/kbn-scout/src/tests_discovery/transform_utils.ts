@@ -34,7 +34,6 @@ const TARGET_DOMAIN_BY_SERVER_RUN_FLAG: Record<string, ScoutTargetDomain> = {
   '--arch serverless --domain security_complete': 'security_complete',
   '--arch serverless --domain security_essentials': 'security_essentials',
   '--arch serverless --domain security_ease': 'security_ease',
-  '--arch serverless --domain vectordb': 'vectordb',
 };
 
 /**
