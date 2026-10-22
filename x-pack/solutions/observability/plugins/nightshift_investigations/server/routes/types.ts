@@ -31,7 +31,7 @@ export type GetEpisodeLookup = (
   spaceId?: string
 ) => {
   esClient: ElasticsearchClient;
-  soClient: SavedObjectsClientContract;
+  getSoClient: () => SavedObjectsClientContract;
   spaceId: string;
   basePath: string;
 };

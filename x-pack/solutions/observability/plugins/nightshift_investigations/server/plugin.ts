@@ -712,25 +712,22 @@ export class NightshiftInvestigationsPlugin
     this.ruleRegistry?.getRacClientWithRequest(request);
 
   private getEpisodeLookup: GetEpisodeLookup = (request, spaceId) => {
-    if (!this.elasticsearch || !this.savedObjects || !this.http) {
+    const { elasticsearch, savedObjects, http } = this;
+    if (!elasticsearch || !savedObjects || !http) {
       throw new Error('core services are not available — plugin start() has not been called');
     }
     const resolvedSpaceId =
       spaceId ?? this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     return {
-      esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
-      soClient: this.savedObjects
-        .getScopedClient(request, {
-          excludedExtensions: [SECURITY_EXTENSION_ID],
-          includedHiddenTypes: [ALERTING_V2_RULE_SO_TYPE],
-        })
-        .asScopedToNamespace(resolvedSpaceId),
+      esClient: elasticsearch.client.asScoped(request).asCurrentUser,
+      getSoClient: () =>
+        savedObjects
+          .getScopedClient(request, { includedHiddenTypes: [ALERTING_V2_RULE_SO_TYPE] })
+          .asScopedToNamespace(resolvedSpaceId),
       spaceId: resolvedSpaceId,
       basePath: spaceId
-        ? `${this.http.basePath.serverBasePath}${
-            spaceId === DEFAULT_SPACE_ID ? '' : `/s/${spaceId}`
-          }`
-        : this.http.basePath.get(request),
+        ? `${http.basePath.serverBasePath}${spaceId === DEFAULT_SPACE_ID ? '' : `/s/${spaceId}`}`
+        : http.basePath.get(request),
     };
   };
 

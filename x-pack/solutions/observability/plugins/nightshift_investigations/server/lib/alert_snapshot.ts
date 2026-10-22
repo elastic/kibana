@@ -8,7 +8,11 @@
 import Boom from '@hapi/boom';
 import { esql } from '@elastic/esql';
 import { isResponseError } from '@kbn/es-errors';
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  SavedObjectsErrorHelpers,
+  type ElasticsearchClient,
+  type SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import {
   OBSERVABILITY_ALERTING_ALERTS_PATH,
@@ -89,7 +93,7 @@ export const parseAlertSnapshot = (alert: Record<string, unknown>): AlertSnapsho
 
 export interface EpisodeLookup {
   esClient: ElasticsearchClient;
-  soClient: SavedObjectsClientContract;
+  getSoClient: () => SavedObjectsClientContract;
   spaceId: string;
   basePath: string;
 }
@@ -139,12 +143,20 @@ const fetchClassicSnapshots = async (
 };
 
 const fetchRuleNames = async (
-  soClient: SavedObjectsClientContract,
+  getSoClient: () => SavedObjectsClientContract,
   ruleIds: string[]
 ): Promise<Map<string, string>> => {
-  const { saved_objects: rules } = await soClient.bulkGet<{ metadata?: { name?: string } }>(
-    ruleIds.map((id) => ({ type: ALERTING_V2_RULE_SO_TYPE, id }))
-  );
+  if (!ruleIds.length) {
+    return new Map();
+  }
+  const { saved_objects: rules } = await getSoClient()
+    .bulkGet<{ metadata?: { name?: string } }>(
+      ruleIds.map((id) => ({ type: ALERTING_V2_RULE_SO_TYPE, id }))
+    )
+    .catch((error) => {
+      if (SavedObjectsErrorHelpers.isForbiddenError(error)) return { saved_objects: [] };
+      throw error;
+    });
   return new Map(
     rules.flatMap((rule) =>
       'attributes' in rule && rule.attributes.metadata?.name
@@ -161,7 +173,7 @@ const isEventsUnavailable = (error: unknown): boolean =>
     (error.statusCode === 400 && /unknown index/i.test(error.message)));
 
 const fetchV2Snapshots = async (
-  { esClient, soClient, spaceId, basePath }: EpisodeLookup,
+  { esClient, getSoClient, spaceId, basePath }: EpisodeLookup,
   episodeIds: string[]
 ): Promise<Map<string, V2AlertSnapshot>> => {
   const episodeIdValues = episodeIds.map((episodeId) => esql.str(episodeId));
@@ -195,7 +207,7 @@ const fetchV2Snapshots = async (
       columns.flatMap(({ name }, index) => (row[index] === null ? [] : [[name, row[index]]]))
     )
   );
-  const ruleNames = await fetchRuleNames(soClient, [
+  const ruleNames = await fetchRuleNames(getSoClient, [
     ...new Set(rows.flatMap(({ rule_id: ruleId }) => (typeof ruleId === 'string' ? [ruleId] : []))),
   ]);
 

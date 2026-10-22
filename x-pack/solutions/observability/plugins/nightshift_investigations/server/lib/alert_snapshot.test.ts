@@ -7,6 +7,7 @@
 
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { errors } from '@elastic/elasticsearch';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { fetchInvestigationAlertSnapshots, parseAlertSnapshot } from './alert_snapshot';
 
 const alert = {
@@ -73,10 +74,13 @@ describe('fetchInvestigationAlertSnapshots', () => {
   });
 
   const makeLookup = ({
+    bulkGet = jest.fn().mockResolvedValue({
+      saved_objects: [{ id: 'v2-rule', attributes: { metadata: { name: 'V2 rule' } } }],
+    }),
     queryError,
     columns = [] as string[],
     rows = [] as unknown[][],
-  }: { queryError?: Error; columns?: string[]; rows?: unknown[][] } = {}) => ({
+  }: { bulkGet?: jest.Mock; queryError?: Error; columns?: string[]; rows?: unknown[][] } = {}) => ({
     esClient: {
       esql: {
         query: queryError
@@ -87,11 +91,8 @@ describe('fetchInvestigationAlertSnapshots', () => {
             }),
       },
     },
-    soClient: {
-      bulkGet: jest.fn().mockResolvedValue({
-        saved_objects: [{ id: 'v2-rule', attributes: { metadata: { name: 'V2 rule' } } }],
-      }),
-    },
+    bulkGet,
+    getSoClient: jest.fn().mockReturnValue({ bulkGet }),
     spaceId: 'default',
     basePath: '/base',
   });
@@ -116,6 +117,7 @@ describe('fetchInvestigationAlertSnapshots', () => {
     ]);
     expect(alertsClient.find).toHaveBeenCalledTimes(1);
     expect(lookup.esClient.esql.query).not.toHaveBeenCalled();
+    expect(lookup.getSoClient).not.toHaveBeenCalled();
   });
 
   it('resolves ids the alerts index misses as v2 episodes, keeping the requested order', async () => {
@@ -147,6 +149,22 @@ describe('fetchInvestigationAlertSnapshots', () => {
       expect.objectContaining({ id: 'alert-1' }),
     ]);
     expect(lookup.esClient.esql.query).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves the rule name unset when the user cannot read the rule', async () => {
+    const bulkGet = jest
+      .fn()
+      .mockRejectedValue(SavedObjectsErrorHelpers.decorateForbiddenError(new Error('forbidden')));
+    const lookup = makeLookup({
+      bulkGet,
+      columns: ['episode_id', 'start', 'status', 'rule_id', 'group_hash'],
+      rows: [['episode-1', '2026-09-02T10:00:00.000Z', 'active', 'v2-rule', 'hash']],
+    });
+
+    const [snapshot] = await run(makeAlertsClient({ alerts: [] }), lookup, ['episode-1']);
+
+    expect(snapshot).toEqual(expect.objectContaining({ id: 'episode-1' }));
+    expect(snapshot).not.toHaveProperty('rule_name', expect.any(String));
   });
 
   it('lists every id it cannot find in one not found error', async () => {
