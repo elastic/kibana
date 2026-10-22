@@ -632,7 +632,7 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
           forRule={{
             ruleName: draft.name || undefined,
             type,
-            isTypeLocked: false,
+            isProjectDefault: false,
             estimate: estimateWithNewProfile,
             onCreate: onProfileCreate,
           }}

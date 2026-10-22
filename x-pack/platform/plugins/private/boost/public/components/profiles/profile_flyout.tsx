@@ -52,14 +52,20 @@ import { PROFILE_NAME_ERROR_MESSAGES } from './profile_messages';
 import { getCopyName } from '../copy_name';
 import { CostEstimate } from '../cost_estimate';
 
-/** A new profile created from a rule flyout, which shows this form in place of the rule's. */
+/**
+ * A new profile created from a rule's flyout or a project default's, which shows this form in place
+ * of its own.
+ */
 export interface ProfileForRule {
   /** The rule's name, once it has one, to say which rule the profile is for. */
   ruleName?: string;
   /** The rule's current type, which the new profile starts with. */
   type?: BoostProfileType;
-  /** Default rules can't change type, so their new profile can't either. */
-  isTypeLocked: boolean;
+  /**
+   * Whether the profile is for a project default, the profile its default rule uses, rather than a
+   * custom rule. A project default's type can't change, so the profile's can't either.
+   */
+  isProjectDefault: boolean;
   /** Estimates the rule's targets with the new profile, once the rule has some. */
   estimate: (profile: BoostProfileInput) => CostImpact | undefined;
   /** Called once the profile is created, to select it in the rule. */
@@ -243,6 +249,12 @@ export const ProfileFlyoutContent = ({
                   defaultMessage: 'Duplicate boost profile "{name}"',
                   values: { name: duplicateOf.name },
                 })
+              : forRule?.isProjectDefault
+              ? i18n.translate('xpack.boost.profileForm.createForDefaultTitle', {
+                  defaultMessage:
+                    'Create boost profile for the {type, select, indices {indices} other {data streams}} default',
+                  values: { type: draft.type },
+                })
               : forRule?.ruleName
               ? i18n.translate('xpack.boost.profileForm.createForRuleTitle', {
                   defaultMessage: 'Create boost profile for rule "{ruleName}"',
@@ -301,9 +313,9 @@ export const ProfileFlyoutContent = ({
                 defaultMessage: 'Type',
               })}
               description={
-                forRule?.isTypeLocked
-                  ? i18n.translate('xpack.boost.profileForm.lockedTypeDescription', {
-                      defaultMessage: "Matches the default rule's type, which can't change.",
+                forRule?.isProjectDefault
+                  ? i18n.translate('xpack.boost.profileForm.defaultTypeDescription', {
+                      defaultMessage: "Matches the project default it's for, so it can't change.",
                     })
                   : i18n.translate('xpack.boost.profileForm.typeDescription', {
                       defaultMessage: "The type can't be changed after the profile is created.",
@@ -315,7 +327,7 @@ export const ProfileFlyoutContent = ({
                 options={TYPE_OPTIONS}
                 selectedId={draft.type}
                 onChange={(type) => updateDraft({ type })}
-                disabled={isSaving || Boolean(forRule?.isTypeLocked)}
+                disabled={isSaving || Boolean(forRule?.isProjectDefault)}
                 direction="row"
               />
             </FormSection>
@@ -479,9 +491,13 @@ export const ProfileFlyoutContent = ({
                     isLoading={isSaving}
                     data-test-subj="boostProfileSaveAndUse"
                   >
-                    {i18n.translate('xpack.boost.profileForm.saveAndUseButton', {
-                      defaultMessage: 'Save and use in rule',
-                    })}
+                    {forRule.isProjectDefault
+                      ? i18n.translate('xpack.boost.profileForm.saveAndUseAsDefaultButton', {
+                          defaultMessage: 'Save and use as default',
+                        })
+                      : i18n.translate('xpack.boost.profileForm.saveAndUseButton', {
+                          defaultMessage: 'Save and use in rule',
+                        })}
                   </EuiButton>
                 </EuiFlexItem>
               ) : isEditing ? (

@@ -164,9 +164,8 @@ export const ProjectDefaultFlyout = ({ type, onClose }: ProjectDefaultFlyoutProp
       >
         <ProfileFlyoutContent
           forRule={{
-            ruleName,
             type,
-            isTypeLocked: true,
+            isProjectDefault: true,
             estimate: (profile: BoostProfileInput) =>
               estimate(NEW_PROFILE_NAME, [
                 ...profiles,

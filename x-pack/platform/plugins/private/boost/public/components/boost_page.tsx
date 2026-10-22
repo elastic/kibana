@@ -82,7 +82,7 @@ export const BoostPage = () => {
         <ProjectDefaults state={state} canEdit={canEdit} />
         <EuiSpacer size="xl" />
 
-        <EuiTabs>
+        <EuiTabs size="l">
           {tabs.map(({ id, label }) => (
             <EuiTab
               key={id}

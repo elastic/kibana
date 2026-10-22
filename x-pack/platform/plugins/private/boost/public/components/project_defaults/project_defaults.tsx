@@ -8,32 +8,39 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
-  EuiButtonEmpty,
+  EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
+  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiStat,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { DEFAULT_PROFILE_KEYS, DEFAULT_RULE_NAMES } from '../../../common/presets';
 import { getAppliedRules } from '../../../common/resolution';
 import type { BoostProfileType, BoostState } from '../../../common/types';
 import { formatSize } from '../cost_format';
-import { DetailsLink, getRuleDetailsPath } from '../details_link';
+import { getProfileDetailsPath } from '../details_link';
 import { PROFILE_TYPE_LABELS, formatDataSourceCount } from '../format';
 import { DEFAULT_PRESET_OPTIONS } from '../preset_options';
 import { ProjectDefaultFlyout } from './project_default_flyout';
 
 const PROFILE_TYPES: readonly BoostProfileType[] = ['indices', 'data_streams'];
 
-const CUSTOM_PROFILE_LABEL = i18n.translate('xpack.boost.projectDefaults.customProfile', {
-  defaultMessage: 'Custom boost profile',
+// The icons simple mode used for each type.
+const TYPE_ICONS: Readonly<Record<BoostProfileType, string>> = {
+  indices: 'table',
+  data_streams: 'productStreamsClassic',
+};
+
+const CUSTOM_PROFILE_DESCRIPTION = i18n.translate('xpack.boost.projectDefaults.customProfile', {
+  defaultMessage: 'Using a selected custom boost profile.',
 });
 
 interface ProjectDefaultsProps {
@@ -60,15 +67,6 @@ export const ProjectDefaults = ({ state, canEdit }: ProjectDefaultsProps) => {
           })}
         </h2>
       </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.boost.projectDefaults.description', {
-            defaultMessage:
-              'Boost for any index or data stream that no boost rule matches. Each default sets what its default boost rule uses.',
-          })}
-        </p>
-      </EuiText>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="l">
         {PROFILE_TYPES.map((type) => {
@@ -115,8 +113,10 @@ const ProjectDefaultPanel = ({
   appliedSize,
   onEdit,
 }: ProjectDefaultPanelProps) => {
+  const { euiTheme } = useEuiTheme();
   const history = useHistory();
   const preset = DEFAULT_PRESET_OPTIONS[type].find((option) => option.profileName === profileName);
+  const inlineCss = { display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.s };
 
   return (
     <EuiPanel
@@ -133,48 +133,55 @@ const ProjectDefaultPanel = ({
       >
         <EuiFlexItem>
           <EuiStat
-            description={PROFILE_TYPE_LABELS[type]}
-            // A custom profile links to its details; a preset is described below instead.
-            title={preset ? preset.label : <DetailsLink kind="profile" name={profileName} />}
-            titleSize="m"
-            titleElement="p"
-            descriptionElement="h3"
+            description={
+              <span css={inlineCss}>
+                <EuiIcon type={TYPE_ICONS[type]} aria-hidden={true} />
+                {PROFILE_TYPE_LABELS[type]}
+              </span>
+            }
+            title={
+              preset ? (
+                preset.label
+              ) : (
+                // A custom profile's details are a button away, which keeps the large name plain.
+                <span css={inlineCss}>
+                  {profileName}
+                  <EuiButtonIcon
+                    iconType="link"
+                    color="text"
+                    {...reactRouterNavigate(history, getProfileDetailsPath(profileName))}
+                    aria-label={i18n.translate('xpack.boost.projectDefaults.viewProfile', {
+                      defaultMessage: 'View boost profile "{profileName}"',
+                      values: { profileName },
+                    })}
+                    data-test-subj={`boostProjectDefaultProfileLink-${type}`}
+                  />
+                </span>
+              )
+            }
             data-test-subj={`boostProjectDefaultValue-${type}`}
           >
             <EuiSpacer size="xs" />
-            <EuiText size="xs" color="subdued">
-              <p>{preset ? preset.description : CUSTOM_PROFILE_LABEL}</p>
+            <EuiText size="s" color="subdued">
+              <p>{preset ? preset.description : CUSTOM_PROFILE_DESCRIPTION}</p>
             </EuiText>
-            <EuiSpacer size="s" />
-            <EuiText size="xs">
+            <EuiText size="s" color="subdued">
               <p>
-                <FormattedMessage
-                  id="xpack.boost.projectDefaults.appliesTo"
-                  defaultMessage="Applies to {targets} · {size}"
-                  values={{
-                    targets: (
-                      <EuiLink
-                        {...reactRouterNavigate(
-                          history,
-                          getRuleDetailsPath(DEFAULT_RULE_NAMES[type])
-                        )}
-                        data-test-subj={`boostProjectDefaultRule-${type}`}
-                      >
-                        {formatDataSourceCount(type, appliedCount)}
-                      </EuiLink>
-                    ),
+                {i18n.translate('xpack.boost.projectDefaults.appliedTo', {
+                  defaultMessage: '{targets} · {size}',
+                  values: {
+                    targets: formatDataSourceCount(type, appliedCount),
                     size: formatSize(appliedSize),
-                  }}
-                />
+                  },
+                })}
               </p>
             </EuiText>
           </EuiStat>
         </EuiFlexItem>
         {onEdit && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
+            <EuiButton
               size="s"
-              iconType="pencil"
               onClick={onEdit}
               aria-label={i18n.translate('xpack.boost.projectDefaults.editLabel', {
                 defaultMessage: 'Edit the project default for {type}',
@@ -185,7 +192,7 @@ const ProjectDefaultPanel = ({
               {i18n.translate('xpack.boost.projectDefaults.editButton', {
                 defaultMessage: 'Edit',
               })}
-            </EuiButtonEmpty>
+            </EuiButton>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

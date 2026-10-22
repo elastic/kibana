@@ -112,29 +112,26 @@ describe('BoostPage', () => {
 });
 
 describe('Project defaults', () => {
-  it('shows each default, and what it applies to through its default rule', () => {
+  it('shows each default, and what it applies to', () => {
     renderPage();
 
     expect(getPanel('indices')).toHaveTextContent('IndicesPerformant');
-    expect(getPanel('indices')).toHaveTextContent('Applies to 1 index · 2 GB');
-    expect(within(getPanel('indices')).getByRole('link', { name: '1 index' })).toHaveAttribute(
-      'href',
-      '/rules/elastic-default-indices'
-    );
+    expect(getPanel('indices')).toHaveTextContent('1 index · 2 GB');
     expect(getPanel('data_streams')).toHaveTextContent('Data streamsLast 7 days');
-    expect(getPanel('data_streams')).toHaveTextContent('Applies to 1 data stream · 3 GB');
+    expect(getPanel('data_streams')).toHaveTextContent('1 data stream · 3 GB');
   });
 
-  it('shows a custom default as its profile, linked to its details', () => {
+  it('shows a custom default as its profile, with a link to its details', () => {
     mockState = createState({ ...DEFAULT_RULE_PROFILES, indices_profile: catalogSearch.name }, [
       catalogSearch,
     ]);
     renderPage();
 
+    expect(getPanel('indices')).toHaveTextContent('Indicescatalog-search');
     expect(
-      within(getPanel('indices')).getByRole('link', { name: 'catalog-search' })
+      within(getPanel('indices')).getByRole('link', { name: 'View boost profile "catalog-search"' })
     ).toHaveAttribute('href', '/profiles/catalog-search');
-    expect(getPanel('indices')).toHaveTextContent('Custom boost profile');
+    expect(getPanel('indices')).toHaveTextContent('Using a selected custom boost profile.');
   });
 
   it("can't be edited without the privilege to", () => {
@@ -184,6 +181,22 @@ describe('Project defaults', () => {
     expect(mockUpdateDefaultRule).toHaveBeenCalledWith(
       { type: 'indices', profileName: 'catalog-search' },
       expect.anything()
+    );
+  });
+
+  it('creates a custom profile for the default in place, locked to its type', async () => {
+    renderPage();
+    await userEvent.click(screen.getByTestId('boostEditProjectDefault-data_streams'));
+
+    await userEvent.click(screen.getByTestId('boostProjectDefaultCreateProfile'));
+
+    expect(
+      screen.getByRole('heading', { name: 'Create boost profile for the data streams default' })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /^Data streams/ })).toBeChecked();
+    expect(screen.getByRole('radio', { name: /^Indices/ })).toBeDisabled();
+    expect(screen.getByTestId('boostProfileSaveAndUse')).toHaveTextContent(
+      'Save and use as default'
     );
   });
 
