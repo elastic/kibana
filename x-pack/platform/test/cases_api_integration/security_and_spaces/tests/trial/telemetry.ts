@@ -9,11 +9,15 @@ import expect from 'expect';
 import { stringify as yamlStringify } from 'yaml';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import {
+  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
   CASES_URL,
   CASE_TELEMETRY_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
+  CASE_WORKFLOW_ORIGIN_TYPE,
   INTERNAL_FIELD_DEFINITIONS_URL,
   OBSERVABLE_TYPE_IPV4,
+  OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
 import type { CasesTelemetry } from '@kbn/cases-plugin/server/telemetry/types';
 import {
@@ -31,6 +35,11 @@ import {
   createComment,
   bulkCreateAttachments,
   addObservable,
+  createConfiguration,
+  getConfigurationRequest,
+  createWorkflow,
+  deleteWorkflow,
+  runCaseWorkflow,
 } from '../../../common/lib/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { superUser } from '../../../common/lib/authentication/users';
@@ -558,6 +567,205 @@ export default ({ getService }: FtrProviderContext): void => {
             sec: { total: 4, totalGlobal: 2, totalReusable: 2 },
             obs: zeroedScope,
             main: zeroedScope,
+          });
+        });
+      });
+    });
+
+    describe('workflows', () => {
+      const workflowYaml = `
+name: cases-telemetry-workflow-ftr
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: log
+    type: console
+    with:
+      message: "cases telemetry ftr run"
+`.trim();
+
+      let workflowId: string;
+
+      before(async () => {
+        workflowId = await createWorkflow({ supertest, yaml: workflowYaml });
+      });
+
+      after(async () => {
+        // Force-deleting a workflow is rejected with 409 while any of its executions is still
+        // running, and the runs below are still in flight when the suite ends.
+        await retry.try(() => deleteWorkflow({ supertest, workflowId }));
+      });
+
+      /**
+       * Drops the stored snapshot, which `deleteAllCaseItems` leaves behind and the collector
+       * serves verbatim. Without this the retry below can pass on the PREVIOUS run's snapshot
+       * before the task overwrites it, so the assertions would hold even against a broken query.
+       */
+      const deleteTelemetrySnapshot = async () => {
+        await es.deleteByQuery({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          q: `type:${CASE_TELEMETRY_SAVED_OBJECT}`,
+          wait_for_completion: true,
+          refresh: true,
+          conflicts: 'proceed',
+        });
+      };
+
+      it('should report the workflows snapshot', async () => {
+        // Registered owners, so the runs split across the `sec` and `main` scopes.
+        const [detailCase, firstListCase, secondListCase] = await Promise.all([
+          createCase(supertest, getPostCaseRequest({ owner: 'securitySolution' })),
+          createCase(supertest, getPostCaseRequest({ owner: 'cases' })),
+          createCase(supertest, getPostCaseRequest({ owner: 'cases' })),
+        ]);
+
+        const { observables } = await addObservable({
+          supertest,
+          caseId: detailCase.id,
+          params: {
+            observable: { typeKey: OBSERVABLE_TYPE_IPV4.key, value: '10.0.0.1', description: '' },
+          },
+        });
+        const observableId = observables[0].id as string;
+
+        await runCaseWorkflow({
+          supertest,
+          workflowId,
+          params: {
+            caseIds: [detailCase.id],
+            inputs: {},
+            origin: { type: CASE_WORKFLOW_ORIGIN_TYPE, caseId: detailCase.id },
+          },
+        });
+
+        await runCaseWorkflow({
+          supertest,
+          workflowId,
+          params: {
+            caseIds: [detailCase.id],
+            inputs: {},
+            origin: {
+              type: OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+              caseId: detailCase.id,
+              observableId,
+            },
+          },
+        });
+
+        await createComment({
+          supertest,
+          caseId: detailCase.id,
+          params: { ...postCommentAlertReq, owner: 'securitySolution' },
+        });
+
+        await runCaseWorkflow({
+          supertest,
+          workflowId,
+          params: {
+            caseIds: [detailCase.id],
+            inputs: {
+              event: {
+                alertIds: [{ _id: postCommentAlertReq.alertId, _index: postCommentAlertReq.index }],
+              },
+            },
+            origin: {
+              type: ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+              caseId: detailCase.id,
+              attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE,
+              attachmentId: postCommentAlertReq.alertId as string,
+            },
+          },
+        });
+
+        // A cases-list run carries no origin and writes one activity record per case.
+        await runCaseWorkflow({
+          supertest,
+          workflowId,
+          params: { caseIds: [firstListCase.id, secondListCase.id], inputs: {} },
+        });
+
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: { owner: 'securitySolution', workflowTags: ['soc-triage'] },
+          })
+        );
+        // An emptied tag list must not satisfy the `exists` filter.
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: { owner: 'observabilityFixture', workflowTags: [] },
+          })
+        );
+
+        await deleteTelemetrySnapshot();
+        await runTelemetryTask(supertest);
+
+        await retry.try(async () => {
+          const res = await getTelemetry(supertest);
+          const casesTelemetry = getCasesTelemetry(res);
+
+          expect(casesTelemetry.workflows).toBeDefined();
+
+          /**
+           * Asserted ahead of the payload comparison because they are the figures a mocked
+           * client cannot establish: the attributed buckets are only non-zero while
+           * `payload.origin.type` and `payload.origin.attachmentType` are mapped. Without the
+           * mappings every run collapses into `unattributed` and no attachment type is reported.
+           */
+          expect(casesTelemetry.workflows.all.byOriginType.case).toBe(1);
+          expect(casesTelemetry.workflows.all.byAttachmentType.security_alert).toBe(1);
+
+          const emptyOriginTypes = {
+            case: 0,
+            observable: 0,
+            observables: 0,
+            attachment: 0,
+            attachments: 0,
+            unattributed: 0,
+          };
+
+          expect(casesTelemetry.workflows).toEqual({
+            all: {
+              // One activity record per case: 1 + 1 + 1 + 2.
+              runs: { total: 5, daily: 5, weekly: 5, monthly: 5 },
+              totalCasesWithRuns: 3,
+              totalUniqueUsers: 1,
+              byOriginType: {
+                ...emptyOriginTypes,
+                case: 1,
+                observable: 1,
+                attachment: 1,
+                unattributed: 2,
+              },
+              byAttachmentType: { security_alert: 1 },
+              configurationsWithWorkflowTags: 1,
+            },
+            sec: {
+              runs: { total: 3, daily: 3, weekly: 3, monthly: 3 },
+              totalCasesWithRuns: 1,
+              totalUniqueUsers: 1,
+              byOriginType: { ...emptyOriginTypes, case: 1, observable: 1, attachment: 1 },
+              byAttachmentType: { security_alert: 1 },
+              configurationsWithWorkflowTags: 1,
+            },
+            obs: {
+              runs: { total: 0, daily: 0, weekly: 0, monthly: 0 },
+              totalCasesWithRuns: 0,
+              totalUniqueUsers: 0,
+              byOriginType: emptyOriginTypes,
+              byAttachmentType: {},
+              configurationsWithWorkflowTags: 0,
+            },
+            main: {
+              runs: { total: 2, daily: 2, weekly: 2, monthly: 2 },
+              totalCasesWithRuns: 2,
+              totalUniqueUsers: 1,
+              byOriginType: { ...emptyOriginTypes, unattributed: 2 },
+              byAttachmentType: {},
+              configurationsWithWorkflowTags: 0,
+            },
           });
         });
       });

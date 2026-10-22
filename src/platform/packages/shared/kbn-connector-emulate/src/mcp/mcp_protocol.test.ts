@@ -280,4 +280,96 @@ describe('MCP specs', () => {
       expect.objectContaining({ operation: 'GET event stream', protocolMessage: true }),
     ]);
   });
+
+  describe('stored responses', () => {
+    const stored = (name: string, body: unknown) => ({
+      operation: { name },
+      response: { status: 200, body },
+    });
+    const result = (value: Record<string, unknown>) => ({
+      content: [{ type: 'text', text: JSON.stringify(value) }],
+      structuredContent: value,
+    });
+
+    it('answers calls with the first conforming recording, and rejects the others', async () => {
+      const mock = createEmulatorFetch({
+        specs: { mcp: spec },
+        recordings: [
+          {
+            exchanges: [
+              stored('tools/call get_me', result({ login: 'octocat' })),
+              stored('tools/call get_me', result({ login: 'octocat', id: 1 })),
+              stored('tools/call create_issue', { content: 'Created' }),
+              stored('tools/list', { tools: [] }),
+            ],
+          },
+        ],
+      });
+      // Listing the tools first would make the client validate results with Ajv.
+      const client = await connect(mock);
+
+      const answer = await client.callTool({ name: 'get_me', arguments: {} });
+      await client.close();
+
+      expect(answer).toEqual(result({ login: 'octocat', id: 1 }));
+      expect(mock.rejectedResponses).toEqual([
+        {
+          source: 'recording',
+          operation: 'tools/call get_me',
+          violations: [expect.objectContaining({ path: ['body', 'structuredContent'] })],
+        },
+        {
+          source: 'recording',
+          operation: 'tools/call create_issue',
+          violations: [expect.objectContaining({ path: ['body'], code: 'result' })],
+        },
+        {
+          source: 'recording',
+          operation: 'tools/list',
+          violations: [expect.objectContaining({ code: 'operation' })],
+        },
+      ]);
+    });
+
+    it('serves fixtures that break the output schema, and reports them', async () => {
+      const mock = createEmulatorFetch({
+        specs: [spec],
+        fixtures: [stored('tools/call get_me', result({ login: 1, id: 1 }))],
+      });
+      const client = await connect(mock);
+
+      const answer = await client.callTool({ name: 'get_me', arguments: {} });
+      await client.close();
+
+      expect(answer).toEqual(result({ login: 1, id: 1 }));
+      expect(mock.rejectedResponses).toEqual([]);
+      expect(mock.calls.find(({ operation }) => operation === 'tools/call get_me')).toEqual(
+        expect.objectContaining({
+          responseViolations: [
+            expect.objectContaining({ path: ['body', 'structuredContent', 'login'] }),
+          ],
+        })
+      );
+    });
+
+    it('answers fixtures that are not tools/call results with an error', async () => {
+      const mock = createEmulatorFetch({
+        specs: [spec],
+        fixtures: [stored('tools/call create_issue', { content: 'Created' })],
+      });
+      const client = await connect(mock);
+
+      await expect(
+        client.callTool({ name: 'create_issue', arguments: { owner: 'elastic', title: 'Bug' } })
+      ).rejects.toThrow(/not a tools\/call result/);
+      await client.close();
+
+      expect(mock.calls.find(({ operation }) => operation === 'tools/call create_issue')).toEqual(
+        expect.objectContaining({
+          requestViolations: [],
+          responseViolations: [expect.objectContaining({ path: ['body'], code: 'result' })],
+        })
+      );
+    });
+  });
 });

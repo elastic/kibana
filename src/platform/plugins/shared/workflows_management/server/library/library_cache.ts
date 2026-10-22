@@ -18,7 +18,7 @@ export interface LibraryHealth {
 }
 
 /**
- * Owned in-memory state for the Workflow Template Library — the catalog,
+ * Owned in-memory state for the Workflow Template library — the catalog,
  * its resolved per-Kibana-version directory id, lazily-loaded template
  * bodies, and the bookkeeping the fetcher reads to decide whether to
  * refresh and what to surface on `/library/health`.

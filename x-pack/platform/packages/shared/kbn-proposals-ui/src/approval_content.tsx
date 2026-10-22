@@ -27,6 +27,7 @@ import {
   getProposalTone,
   isProposalExpired,
 } from './proposal_helpers';
+import { ProposalCaption } from './proposal_caption';
 import type { ApprovalAction, AlwaysAllowOption, DeclineParams, ApprovalProposal } from './types';
 
 export interface ApprovalContentProps {
@@ -237,10 +238,14 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const bannerSuffix = decision?.reason;
     const isSettledOrTransient = approvalPhase !== 'pending';
 
-    const replacedCaption = isReplaced ? getProposalCaption(proposal) : undefined;
+    const hasReplacedCaption = isReplaced && getProposalCaption(proposal) !== undefined;
     const headerCaption = decision?.actorName ? (
       <>
-        {replacedCaption && `${replacedCaption} • `}
+        {hasReplacedCaption && (
+          <>
+            <ProposalCaption proposal={proposal} /> •{' '}
+          </>
+        )}
         <ApprovalActorTime
           actorName={decision.actorName}
           at={decision.decidedAt}
@@ -250,7 +255,9 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     ) : !isReplaced && isSubmitting && since ? (
       <ApprovalActorTime actorName={actorName} at={since} live />
     ) : (
-      getProposalCaption(proposal, { includeRiskDetails: !isReplaced })
+      getProposalCaption(proposal, { includeRiskDetails: !isReplaced }) && (
+        <ProposalCaption proposal={proposal} includeRiskDetails={!isReplaced} />
+      )
     );
 
     const defaultButtonColor: EuiButtonColor = tone === 'danger' ? 'danger' : 'primary';
