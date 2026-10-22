@@ -13,7 +13,8 @@ import {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { createResolveHookWorkflowId } from './resolve_hook_workflow_id';
 
-const AGENT = 'kibana/nightshift_agent';
+// The space's agent account, as the backend assigned it (an opaque id on Serverless).
+const AGENT = 'uiam-agent-1';
 const ctx = { request: httpServerMock.createKibanaRequest(), spaceId: 'obs' };
 const BOUND_OPTIMIZE = `${NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID}-bound-obs`;
 
@@ -51,8 +52,12 @@ describe('createResolveHookWorkflowId', () => {
     ['service accounts are off', { enabled: false }],
     ['the space has no entry point', { entryPoint: null }],
     [
-      'the entry point is bound to another account',
-      { entryPoint: { enabled: true, definition: { settings: { run_as: 'kibana/other' } } } },
+      'the bound hook runs as another account than the entry point',
+      { entryPoint: { enabled: true, definition: { settings: { run_as: 'uiam-other' } } } },
+    ],
+    [
+      'the entry point is not bound to an account',
+      { entryPoint: { enabled: true, definition: { settings: {} } } },
     ],
     ['the bound hook is missing', { boundHook: null }],
     ['the setup cannot be read', { getWorkflowError: new Error('forbidden') }],

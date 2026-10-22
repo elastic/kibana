@@ -12,7 +12,7 @@ import type { ResolveHookWorkflowId } from '../../agents/investigation';
 import { getBoundHookIdFor } from './bound_workflows';
 import {
   getBoundInvestigationWorkflowId,
-  INVESTIGATOR_SERVICE_ACCOUNT_ID,
+  getEntryPointServiceAccountId,
   isEntryPointReady,
 } from './constants';
 
@@ -46,8 +46,9 @@ export const createResolveHookWorkflowId =
         management.getWorkflow(getBoundInvestigationWorkflowId(spaceId), spaceId, request),
         management.getWorkflow(boundHookWorkflowId, spaceId, request),
       ]);
+      // The hook runs as the space's agent account: the one its entry point is bound to.
       return isEntryPointReady(entryPoint) &&
-        boundHook?.definition?.settings?.run_as === INVESTIGATOR_SERVICE_ACCOUNT_ID
+        boundHook?.definition?.settings?.run_as === getEntryPointServiceAccountId(entryPoint)
         ? boundHookWorkflowId
         : hookWorkflowId;
     } catch (error) {
