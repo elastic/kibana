@@ -88,16 +88,22 @@ export function getTriggerTypeSuggestions(
 
     const isEventDriven = !isTriggerType(triggerType.type);
     const sortPrefix = isEventDriven ? '1_' : '0_';
+    // Event-driven triggers show the display name (connector display name plus
+    // event title, or the registered title). The technical id stays in detail
+    // and filterText so YAML schema suggestions dedupe on the same key.
+    // Built-in triggers keep the id as the label (`alert`, `manual`, `scheduled`).
+    const completionLabel = isEventDriven ? triggerType.label : triggerType.type;
+    const completionDetail = isEventDriven ? triggerType.type : triggerType.label;
     suggestions.push({
-      label: triggerType.type,
+      label: completionLabel,
       kind: triggerType.icon,
       insertText: snippetText,
       insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
       range: extendedRange,
       documentation: triggerType.description,
       filterText: triggerType.type,
-      sortText: `!${sortPrefix}${triggerType.type}`,
-      detail: triggerType.label,
+      sortText: `!${sortPrefix}${completionLabel}`,
+      detail: completionDetail,
       preselect: false,
     });
   });

@@ -143,34 +143,38 @@ describe('get_trigger_type_suggestions', () => {
         ]);
       });
 
-      it('should show technical ids as label with human-readable titles as detail', () => {
+      it('should show display names as label with technical ids as detail', () => {
         const result = getTriggerTypeSuggestions('', mockRange);
 
-        const alertingSuggestion = result.find((s) => s.label === 'alerting.actions.alertAcked');
+        const alertingSuggestion = result.find(
+          (s) => s.filterText === 'alerting.actions.alertAcked'
+        );
         expect(alertingSuggestion).toMatchObject({
-          label: 'alerting.actions.alertAcked',
-          detail: 'Alerting - Alert acknowledged',
+          label: 'Alerting - Alert acknowledged',
+          detail: 'alerting.actions.alertAcked',
           filterText: 'alerting.actions.alertAcked',
         });
 
-        const casesSuggestion = result.find((s) => s.label === 'cases.caseCreated');
+        const casesSuggestion = result.find((s) => s.filterText === 'cases.caseCreated');
         expect(casesSuggestion).toMatchObject({
-          label: 'cases.caseCreated',
-          detail: 'Cases - Case created',
+          label: 'Cases - Case created',
+          detail: 'cases.caseCreated',
+          filterText: 'cases.caseCreated',
         });
       });
 
       it('should filter registered triggers by namespace prefix', () => {
         const result = getTriggerTypeSuggestions('alerting.', mockRange);
 
-        expect(result.map((s) => s.label)).toEqual(['alerting.actions.alertAcked']);
+        expect(result.map((s) => s.label)).toEqual(['Alerting - Alert acknowledged']);
+        expect(result.map((s) => s.filterText)).toEqual(['alerting.actions.alertAcked']);
       });
 
       it('should filter registered triggers by title prefix', () => {
         const result = getTriggerTypeSuggestions('Cases - Case', mockRange);
 
-        expect(result.map((s) => s.label)).toEqual(['cases.caseCreated']);
-        expect(result.map((s) => s.detail)).toEqual(['Cases - Case created']);
+        expect(result.map((s) => s.label)).toEqual(['Cases - Case created']);
+        expect(result.map((s) => s.detail)).toEqual(['cases.caseCreated']);
       });
     });
 
