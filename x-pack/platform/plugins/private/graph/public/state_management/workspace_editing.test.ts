@@ -41,9 +41,9 @@ const createEnvironment = () => {
   });
   const { mockedDeps } = createMockGraphStore({});
   mockedDeps.getWorkspace.mockReturnValue(workspace);
-  mockedDeps.notifyReact.mockImplementation(() => {
-    store.dispatch(workspaceRuntimeChanged(createWorkspaceState(workspace)));
-  });
+  mockedDeps.notifyReact.mockImplementation(() =>
+    store.dispatch(workspaceRuntimeChanged(createWorkspaceState(workspace)))
+  );
   const store: GraphStore = createGraphStore(mockedDeps);
   const graph = {
     nodes: ['first', 'second', 'third'].map((term) => ({
@@ -60,14 +60,14 @@ const createEnvironment = () => {
   workspace.mergeGraph(graph);
   workspace.stopLayout();
   store.dispatch(workspaceLoaded(createWorkspaceState(workspace)));
-  workspace.nodes[0].x = 10;
-  workspace.nodes[0].y = 20;
-  workspace.nodes[1].x = 30;
-  workspace.nodes[1].y = 40;
+  workspace.nodesMap['field..first'].x = 10;
+  workspace.nodesMap['field..first'].y = 20;
+  workspace.nodesMap['field..second'].x = 30;
+  workspace.nodesMap['field..second'].y = 40;
   return { store, workspace, graph, mockedDeps };
 };
 
-describe('Redux-owned workspace editing', () => {
+describe('workspace editing', () => {
   const environments: Array<ReturnType<typeof createEnvironment>> = [];
   const setup = () => {
     const environment = createEnvironment();
@@ -79,22 +79,22 @@ describe('Redux-owned workspace editing', () => {
     environments.length = 0;
   });
 
-  it('applies edits and undo/redo from Redux without using legacy topology or history methods', () => {
+  it('preserves presentation, coordinates and surviving node identities through deletion and undo/redo', () => {
     const { store, workspace } = setup();
     store.dispatch(toggleNodeSelection({ nodeId: 'field..first', replace: true }));
     store.dispatch(toggleEdgeSelection(store.getState().workspace.edgeIds[0]));
-    const originalIcon = workspace.nodes[0].icon;
+    const originalIcon = workspace.nodesMap['field..first'].icon;
     const remainingNode = workspace.nodesMap['field..second'];
     store.dispatch(setNodeLabel({ nodeId: 'field..first', label: 'Custom label' }));
     store.dispatch(colorSelectedNodes('red'));
     store.dispatch(deleteSelectedNodes());
     expect(workspace.nodesMap['field..first']).toBeUndefined();
     expect(workspace.edges).toHaveLength(0);
-    expect(workspace.nodesMap['field..second']).toMatchObject({ x: 30, y: 40 });
     expect(workspace.nodesMap['field..second']).toBe(remainingNode);
+    expect(remainingNode).toMatchObject({ x: 30, y: 40 });
     expect(store.getState().workspace.undoHistory).toHaveLength(1);
 
-    workspace.nodesMap['field..second'].x = 50;
+    remainingNode.x = 50;
     store.dispatch(undoWorkspace());
     expect(workspace.nodesMap['field..first']).toMatchObject({
       x: 10,
@@ -207,7 +207,7 @@ describe('Redux-owned workspace editing', () => {
     expect(workspace.blocklistedNodes).toHaveLength(1);
   });
 
-  it('records response merges and captures settled positions before merge history', () => {
+  it('records response merges and preserves settled positions through merge undo/redo', () => {
     const { store, workspace, graph } = setup();
     workspace.mergeGraph({ nodes: [{ ...graph.nodes[0], term: 'new', label: 'new' }], edges: [] });
     expect(store.getState().workspace.undoHistory).toHaveLength(1);
@@ -286,11 +286,11 @@ describe('Redux-owned workspace editing', () => {
   it('bounds undo history and discards redo after a new edit', () => {
     const { store } = setup();
     for (let index = 0; index < 55; index++) {
-      store.dispatch(
-        index % 2 === 0
-          ? mergeNodes({ parentId: 'field..first', childId: 'field..second' })
-          : ungroupNode('field..first')
-      );
+      if (index % 2 === 0) {
+        store.dispatch(mergeNodes({ parentId: 'field..first', childId: 'field..second' }));
+      } else {
+        store.dispatch(ungroupNode('field..first'));
+      }
     }
     expect(store.getState().workspace.undoHistory).toHaveLength(50);
     store.dispatch(undoWorkspace());
