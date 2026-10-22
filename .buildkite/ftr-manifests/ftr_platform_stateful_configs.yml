@@ -228,7 +228,6 @@ enabled:
   - x-pack/platform/test/functional/apps/maps/group2/config.ts
   - x-pack/platform/test/functional/apps/maps/group3/config.ts
   - x-pack/platform/test/functional/apps/maps/group6/config.ts
-  - x-pack/platform/test/functional/apps/maps/group7/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group1/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group2/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group3/config.ts
@@ -343,7 +342,6 @@ enabled:
   - x-pack/platform/test/api_integration/apis/es/config.ts
   - x-pack/platform/test/api_integration/apis/file_upload/config.ts
   - x-pack/platform/test/api_integration/apis/kibana/config.ts
-  - x-pack/platform/test/api_integration/apis/management/config.ts
   - x-pack/platform/test/api_integration/apis/ml/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts

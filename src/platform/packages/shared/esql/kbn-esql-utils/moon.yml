@@ -27,15 +27,13 @@ dependsOn:
   - '@kbn/field-types'
   - '@kbn/es-types'
   - '@kbn/i18n'
+  - '@kbn/inspector-plugin'
   - '@kbn/datemath'
   - '@kbn/es-query'
   - '@kbn/code-editor'
   - '@kbn/core'
   - '@kbn/index-management-shared-types'
   - '@kbn/licensing-types'
-  - '@kbn/controls-constants'
-  - '@kbn/presentation-publishing'
-  - '@kbn/controls-schemas'
 tags:
   - shared-common
   - package
@@ -48,6 +46,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

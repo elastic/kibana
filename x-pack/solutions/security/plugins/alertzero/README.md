@@ -108,6 +108,9 @@ This is optional. AlertZero's own Watch pages work without it; it only affects w
 | Browser app `/app/alertzero` | Not registered (nav links to `alertzero` / `alertzero:*` are removed by chrome) |
 | Managed workflow **owner** | Not registered (`registerManagedWorkflowOwner` skipped) |
 | Managed workflow initialization | Not called |
+| Telemetry event types (`alertzero_*`, see [`server/telemetry/README.md`](server/telemetry/README.md)) | Not registered (`core.analytics.registerEventType` skipped) |
+| Browser telemetry event types (`alertzero_ui_*`, see [`public/telemetry/README.md`](public/telemetry/README.md)) | Not registered (`core.analytics.registerEventType` skipped in the browser too) |
+| Workflow step `alertzero.reportWorkerOutcome`, the only emitter of the `alertzero_ad_worker_*` run events and the Worker Investigation-close event (see [`server/step_types/report_worker_outcome/README.md`](server/step_types/report_worker_outcome/README.md)) | Not registered, server or browser (`registerStepDefinition` skipped) |
 | Leftover installed Worker documents | Global Workflows orphan cleanup removes docs whose owner is unregistered |
 
 With the kill switch on but the advanced setting off, the Kibana feature privileges *are* registered — `features.registerKibanaFeature` cannot be scoped per space — so the `alertzero` read/write privileges appear in the Roles and Spaces pickers regardless of the per-space toggle.
@@ -292,7 +295,7 @@ Alert Triage no longer runs once per rule execution, and enabling it attaches no
 
 - **Sweep** (`system-security-floor-alert-triage`, per space, concurrency `drop`, max 1): checks Task Manager headroom, reclaims claims whose batch is gone, picks a batch per rule within the budget, claims the alerts with `az:triage_pending`, starts the batches with `workflow.executeAsync`, and records each execution id on that batch's alerts as `az:triage_exec:<id>`. If that tag cannot be stored after retries, the sweep cancels the batch it just started, so the next sweep does not plan the same alerts again while it runs. Every sweep writes `skip_reason` (`none`, `tm_behind`, `tm_unknown`, `live_batches_unreadable`, `in_flight_ceiling`, `nothing_pending`) and its planning numbers to its own execution output, including `aged_out_alerts`, the count of open alerts older than the look-back that were never triaged (`-1` if that count failed).
 - **Batch** (`system-security-floor-alert-triage-batch`, installed once, concurrency `queue`): 4 batches analyse at once per space and the rest wait without holding a Task Manager slot, up to 40 in flight. Each batch opens one Investigation, calls Alert Analysis, writes verdict tags and notes, removes the claim, and hands confident false positives to the closure review as one proposal. `server/alert_triage/batch_concurrency.test.ts` pins the YAML numbers to the planner constants.
-- **Settings:** `scheduleInterval` (default `15m`), `extras.budgetPerHour` (default `1300`) and `extras.lookbackHours` (default `24`), plus the existing confidence floor and autonomy. The look-back is the search window: older alerts are never read or tagged.
+- **Settings:** `scheduleInterval` (default `15m`), `extras.budgetPerHour` (default `1300`), `extras.lookbackHours` (default `24`), `extras.minSeverity` (default `low`, which triages every alert; a higher value keeps lower-severity alerts from ever reaching the Worker), `extras.excludeBuildingBlocks` (default `false`; an EQL sequence's own alert is not a building block, so sequences stay covered) and `extras.excludedRuleTags` (default empty, at most 50 tags; a rule carrying any listed tag is skipped, matched exactly including case), plus the existing confidence floor and autonomy. The look-back is the search window: older alerts are never read or tagged.
 
 **What a cost unit means.** A batch costs 5 units of fixed overhead (the Investigation, the Alert Analysis hop and the review hand-off) plus 1 unit per alert. The hourly budget is scaled to the sweep interval (`floor(budgetPerHour × minutes / 60)`), so changing the interval does not change the hourly total. Units are a planning currency, not tokens or seconds. Each rule gets up to 30 alerts first, then rules are topped up round-robin to 100 until the budget runs out.
 
@@ -386,7 +389,7 @@ AlertZero is not live. A new required extra or schedule key that has a default i
 - Nesting routes under `/app/security` or importing Security page wrappers
 - Pixel-perfect Throughline CSS port
 - Implementing Workflows / Activity / Performance / Guardrails data
-- No `.kibana-threat-intel-hunt-findings` index / Intelligence Hub findings queue
+- No `.kibana-threat-intel-hunt-findings` index / hunt findings queue
 - No AlertZero create or delete surface for custom watches
 
 ## Development

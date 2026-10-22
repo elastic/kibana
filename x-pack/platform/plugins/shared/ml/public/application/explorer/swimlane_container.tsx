@@ -331,6 +331,9 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
           textColor: euiTheme.colors.textSubdued,
           fontSize: parseInt(euiFontSizeXS, 10),
         },
+        // The brush colors branch on `isDarkTheme` and hard-code literals instead of reading
+        // `euiTheme` tokens, so they won't follow theme or token changes. EUI updates
+        // `colorMode` one render before `euiTheme`, so mixing the two can briefly disagree.
         brushMask: {
           visible: showBrush,
           fill: isDarkTheme
@@ -346,14 +349,16 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     };
 
     return theme;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     showSwimlane,
-    swimlaneType,
-    swimlaneData?.fieldName,
+    showYAxis,
+    yAxisWidth,
+    showTimeline,
+    showLegend,
+    showBrush,
+    euiFontSizeXS,
+    euiTheme,
     isDarkTheme,
-    timeBuckets,
-    onCellsSelection,
   ]);
 
   const chartRef = useRef(null);

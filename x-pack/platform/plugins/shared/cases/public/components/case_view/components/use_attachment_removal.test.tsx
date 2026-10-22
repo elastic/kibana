@@ -42,33 +42,100 @@ describe('useAttachmentRemoval', () => {
     expect(result.current.canRemove).toBe(false);
   });
 
-  it('confirms with the count label of the type before removing', async () => {
+  it('confirms with the count label of the type before removing referenced ids', async () => {
     const onSuccess = jest.fn();
     const { result } = renderRemoval();
 
     act(() => {
       result.current.onRemove({
-        getCountLabel: ({ count }) => `${count} files`,
-      })({ savedObjectIds: ['attachment-1', 'attachment-2'] }, { onSuccess });
+        id: 'security.alert',
+        getCountLabel: ({ count }) => `${count} alerts`,
+      })({ attachmentIds: ['alert-1', 'alert-2'] }, { onSuccess });
     });
 
     renderModal(result.current.modal);
-    expect(screen.getByText('Remove 2 files?')).toBeInTheDocument();
+    expect(screen.getByText('Remove 2 alerts?')).toBeInTheDocument();
     expect(mutate).not.toHaveBeenCalled();
 
     await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(mutate).toHaveBeenCalledWith(
-      { request: { ids: ['attachment-1', 'attachment-2'] }, countLabel: '2 files' },
+      {
+        request: { type: 'security.alert', attachmentIds: ['alert-1', 'alert-2'] },
+        countLabel: '2 alerts',
+      },
       { onSuccess }
     );
   });
 
-  it('falls back to the attachments count label', async () => {
+  describe('when the type has related removals', () => {
+    const attackType = {
+      id: 'security.attack',
+      getCountLabel: ({ count }: { count: number }) => `${count} attacks`,
+      getRelatedRemoval: ({ count }: { count: number }) => ({
+        description: `Also remove the alerts of ${count} attacks?`,
+        removeOnlyLabel: 'Remove attacks only',
+        removeWithRelatedLabel: 'Remove attacks and alerts',
+      }),
+    };
+
+    const openModal = () => {
+      const { result } = renderRemoval();
+      act(() => {
+        result.current.onRemove(attackType)({ attachmentIds: ['attack-1', 'attack-2'] });
+      });
+      renderModal(result.current.modal);
+    };
+
+    it('asks whether to remove the related attachments too', () => {
+      openModal();
+
+      expect(screen.getByText('Remove 2 attacks?')).toBeInTheDocument();
+      expect(screen.getByTestId('remove-with-related-modal-description')).toHaveTextContent(
+        'Also remove the alerts of 2 attacks?'
+      );
+      expect(screen.queryByTestId('property-actions-confirm-modal')).toBeNull();
+    });
+
+    it('keeps the related attachments', async () => {
+      openModal();
+
+      await userEvent.click(screen.getByTestId('remove-with-related-modal-remove-only'));
+
+      expect(mutate).toHaveBeenCalledWith(
+        {
+          request: { type: 'security.attack', attachmentIds: ['attack-1', 'attack-2'] },
+          countLabel: '2 attacks',
+          includeRelated: false,
+        },
+        { onSuccess: undefined }
+      );
+    });
+
+    it('removes the related attachments too', async () => {
+      openModal();
+
+      await userEvent.click(screen.getByTestId('remove-with-related-modal-remove-with-related'));
+
+      expect(mutate).toHaveBeenCalledWith(expect.objectContaining({ includeRelated: true }), {
+        onSuccess: undefined,
+      });
+    });
+
+    it('removes nothing when the user cancels', async () => {
+      openModal();
+
+      await userEvent.click(screen.getByTestId('remove-with-related-modal-cancel'));
+
+      expect(mutate).not.toHaveBeenCalled();
+    });
+  });
+
+  it('deletes saved objects by id without sending the type', async () => {
     const { result } = renderRemoval();
 
     act(() => {
-      result.current.onRemove({})({ savedObjectIds: ['attachment-1'] });
+      result.current.onRemove({ id: 'file' })({ savedObjectIds: ['attachment-1'] });
     });
 
     renderModal(result.current.modal);
@@ -86,7 +153,7 @@ describe('useAttachmentRemoval', () => {
     const { result } = renderRemoval();
 
     act(() => {
-      result.current.onRemove({})({ savedObjectIds: ['attachment-1'] });
+      result.current.onRemove({ id: 'file' })({ savedObjectIds: ['attachment-1'] });
     });
 
     renderModal(result.current.modal);
@@ -100,7 +167,7 @@ describe('useAttachmentRemoval', () => {
     const { result } = renderRemoval();
 
     act(() => {
-      result.current.onRemove({})({ savedObjectIds: [] });
+      result.current.onRemove({ id: 'file' })({ savedObjectIds: [] });
     });
 
     expect(result.current.modal).toBeNull();
@@ -113,7 +180,7 @@ describe('useAttachmentRemoval', () => {
     expect(result.current.isRemoving).toBe(true);
 
     act(() => {
-      result.current.onRemove({})({ savedObjectIds: ['attachment-1'] });
+      result.current.onRemove({ id: 'file' })({ savedObjectIds: ['attachment-1'] });
     });
 
     expect(result.current.modal).toBeNull();

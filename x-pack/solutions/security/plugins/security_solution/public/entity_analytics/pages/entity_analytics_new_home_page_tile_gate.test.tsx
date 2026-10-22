@@ -33,6 +33,9 @@ jest.mock('../components/home/needs_attention_tiles/hooks', () => ({
   useRiskMoversCount: jest.fn(),
   useRiskMoversDelta: jest.fn(),
   useRiskTilesSeries: jest.fn(),
+  useTilesLoadTelemetry: jest.fn(),
+  useTilesTimeoutNotice: jest.fn(),
+  TILE_TIMEOUT_MESSAGE: 'Timed out',
 }));
 jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
   useEntityStoreStatus: jest.fn(),
@@ -102,6 +105,9 @@ jest.mock('../components/home/entities_table', () => ({
   EntitiesTableSection: () => null,
 }));
 jest.mock('./entity_analytics_home_header', () => ({ EntityAnalyticsHomeHeader: () => null }));
+jest.mock('../components/home/ai_brief/generate_ai_brief_button', () => ({
+  GenerateAiBriefButton: () => null,
+}));
 jest.mock('./entity_store_disabled_empty_prompt', () => ({
   EntityStoreDisabledEmptyPrompt: () => null,
 }));
@@ -212,7 +218,10 @@ interface TileState {
 const settledTile: TileState = { isCountPending: false, isDeltaLoading: false, reachesBack: true };
 
 /** Mocks every hook of the page from one state per tile; the alert tiles share one hook. */
-const mockTiles = (state: Partial<Record<Tile, Partial<TileState>>> = {}) => {
+const mockTiles = (
+  state: Partial<Record<Tile, Partial<TileState>>> = {},
+  { anomaliesMissingJobs = false }: { anomaliesMissingJobs?: boolean } = {}
+) => {
   const of = (tile: Tile): TileState => ({ ...settledTile, ...state[tile] });
 
   hooks.useAlertBasedTiles.mockReturnValue({
@@ -230,7 +239,10 @@ const mockTiles = (state: Partial<Record<Tile, Partial<TileState>>> = {}) => {
     isMissingIndex: false,
     isCountPending: of(tile).isCountPending,
   });
-  hooks.useEntitiesWithAnomaliesCount.mockReturnValue(count('anomalies'));
+  hooks.useEntitiesWithAnomaliesCount.mockReturnValue({
+    ...count('anomalies'),
+    isMissingJobs: anomaliesMissingJobs,
+  });
   hooks.useNewEntityCount.mockReturnValue(count('newEntity'));
   hooks.useRiskMoversCount.mockReturnValue(count('riskMovers'));
   hooks.useNewlyHighCriticalCount.mockReturnValue(count('newlyHighCritical'));
@@ -350,7 +362,7 @@ describe('EntityAnalyticsNewHomePage: privileges', () => {
   );
 });
 
-describe('EntityAnalyticsNewHomePage: the tiles wait for every count', () => {
+describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockPrivileges();
@@ -372,14 +384,16 @@ describe('EntityAnalyticsNewHomePage: the tiles wait for every count', () => {
   });
 
   it.each(TILES)(
-    'holds all the deltas and sparklines back while the %s count is pending',
+    'holds back only the delta and sparkline of the %s tile while its count is pending',
     (stuck) => {
       mockTiles({ [stuck]: { isCountPending: true } });
       render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
+      // The two risk tiles share one sparkline query, which waits for both counts.
+      const isRisk = (tile: Tile) => tile === 'riskMovers' || tile === 'newlyHighCritical';
       TILES.forEach((tile) => {
-        expect(deltaIsReady(tile)).toBe(false);
-        expect(seriesIsReady(tile)).toBe(false);
+        expect(deltaIsReady(tile)).toBe(tile !== stuck);
+        expect(seriesIsReady(tile)).toBe(!(tile === stuck || (isRisk(tile) && isRisk(stuck))));
       });
     }
   );
@@ -423,5 +437,46 @@ describe('EntityAnalyticsNewHomePage: the tiles wait for every count', () => {
       render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
       expect(seriesReachesBack(tile)).toBeUndefined();
     });
+  });
+
+  describe('when a count times out', () => {
+    it('says so on its tiles, warns once for the page, and reports the timeout', () => {
+      mockTiles();
+      hooks.useAlertBasedTiles.mockReturnValue({
+        severeAlertsCount: 0,
+        severeAlertsEntityIds: [],
+        watchlistedCount: 0,
+        watchlistedEntityIds: [],
+        isLoading: false,
+        isCountPending: false,
+        isTimedOut: true,
+      });
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      const messageOf = (id: SignalCardData['id']) => getCard(id)?.noDataMessage;
+      expect(messageOf('entitiesWithAlerts')).toBe('Timed out');
+      expect(messageOf('watchlisted')).toBe('Timed out');
+      expect(messageOf('newEntity')).toBeUndefined();
+      expect(lastOptions('useTilesTimeoutNotice')).toBe(true);
+      expect(lastOptions('useTilesLoadTelemetry').tiles.alerts.isTimedOut).toBe(true);
+    });
+
+    it('warns for nothing when no count timed out', () => {
+      mockTiles();
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+      expect(lastOptions('useTilesTimeoutNotice')).toBeFalsy();
+    });
+  });
+
+  it('tells the anomalies tile that it needs jobs only when no security ML job is installed', () => {
+    const anomaliesNoDataMessage = () => getCard('entitiesWithAnomalies')?.noDataMessage;
+    mockTiles({}, { anomaliesMissingJobs: true });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+    expect(anomaliesNoDataMessage()).toBe('Requires anomaly detection jobs');
+
+    jest.clearAllMocks();
+    mockTiles({}, { anomaliesMissingJobs: false });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+    expect(anomaliesNoDataMessage()).toBeUndefined();
   });
 });
