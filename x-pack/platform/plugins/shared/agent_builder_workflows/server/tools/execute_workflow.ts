@@ -7,7 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition, ToolHandlerContext } from '@kbn/agent-builder-server';
+import { i18n } from '@kbn/i18n';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -18,6 +19,29 @@ import {
   executeWorkflow,
   hasWorkflowExecutePrivilege,
 } from '@kbn/agent-builder-tools-base/workflows';
+import { confirmToolCall } from './utils/confirm_tool_call';
+import { findUnsafeSteps, getWorkflowSteps, type UnsafeStep } from './utils/step_risk';
+
+/** `execute_api` selectors for the same operations, so one auto-approval covers both tools. */
+const RUN_PERSISTED_WORKFLOW_API = 'workflows.post-workflows-workflow-id-run';
+const RUN_INLINE_WORKFLOW_API = 'workflows.post-workflows-test';
+const MAX_LISTED_STEPS = 10;
+
+const buildConfirmationMessage = (unsafeSteps: UnsafeStep[]): string => {
+  const listed = unsafeSteps
+    .slice(0, MAX_LISTED_STEPS)
+    .map(({ step }) => `- \`${step.stepId}\` (\`${step.stepType}\`)`);
+  if (unsafeSteps.length > MAX_LISTED_STEPS) {
+    listed.push(`- … ${unsafeSteps.length - MAX_LISTED_STEPS} more`);
+  }
+  return [
+    i18n.translate('workflows.agentBuilder.executeWorkflow.confirmation.message', {
+      defaultMessage: 'This workflow has steps that can change data or call external services:',
+    }),
+    '',
+    ...listed,
+  ].join('\n');
+};
 
 const executeWorkflowSchema = z.object({
   workflowId: workflowIdSchema.optional().describe('ID of a persisted workflow to execute.'),
@@ -37,6 +61,64 @@ const executeWorkflowSchema = z.object({
     ),
 });
 
+/** Asks the user to confirm a run that has steps which are not safe. */
+const confirmRun = ({
+  toolContext,
+  workflowApi,
+  yaml,
+  workflowId,
+  name,
+}: {
+  toolContext: ToolHandlerContext;
+  workflowApi: WorkflowsServerPluginSetup['management'];
+  yaml?: string;
+  workflowId?: string;
+  name?: string;
+}) =>
+  confirmToolCall({
+    context: toolContext,
+    toolId: platformCoreTools.executeWorkflow,
+    api: yaml ? RUN_INLINE_WORKFLOW_API : RUN_PERSISTED_WORKFLOW_API,
+    declinedMessage: 'The user declined to run this workflow. Do not retry it.',
+    getPrompt: async () => {
+      const { request, spaceId, interactivity } = toolContext;
+      const persisted =
+        yaml === undefined && workflowId
+          ? await workflowApi.getWorkflow(workflowId, spaceId, request)
+          : undefined;
+      const workflowYaml = yaml ?? persisted?.yaml;
+      // An unknown workflow runs on, so the execution reports the error.
+      const unsafeSteps = workflowYaml
+        ? findUnsafeSteps(getWorkflowSteps(workflowYaml), interactivity)
+        : [];
+      if (unsafeSteps.length === 0) {
+        return undefined;
+      }
+
+      const workflowName = name ?? persisted?.name ?? workflowId;
+      return {
+        title: workflowName
+          ? i18n.translate('workflows.agentBuilder.executeWorkflow.confirmation.title', {
+              defaultMessage: 'Run workflow "{workflowName}"?',
+              values: { workflowName },
+            })
+          : i18n.translate('workflows.agentBuilder.executeWorkflow.confirmation.titleInline', {
+              defaultMessage: 'Run inline workflow?',
+            }),
+        message: buildConfirmationMessage(unsafeSteps),
+        confirm_text: i18n.translate(
+          'workflows.agentBuilder.executeWorkflow.confirmation.confirmText',
+          { defaultMessage: 'Run workflow' }
+        ),
+        cancel_text: i18n.translate(
+          'workflows.agentBuilder.executeWorkflow.confirmation.cancelText',
+          { defaultMessage: 'Cancel' }
+        ),
+        color: unsafeSteps.some(({ risk }) => risk.destructive) ? 'danger' : 'warning',
+      };
+    },
+  });
+
 export const executeWorkflowTool = ({
   workflowsManagement,
   getSecurity,
@@ -55,7 +137,7 @@ Use this tool when:
 — The user asks to run, trigger or execute a workflow.
 — You need to run a workflow you just generated (e.g. via \`generate_workflow\`).
 
-**This tool can perform destructive and irreversible operations** — workflows may include steps that delete Elasticsearch indices or documents, post messages to Slack, make arbitrary HTTP requests, or perform other actions with external side effects. Always review the workflow steps before executing.
+**This tool can perform destructive and irreversible operations** — workflows may include steps that delete Elasticsearch indices or documents, post messages to Slack, make arbitrary HTTP requests, or perform other actions with external side effects. Always review the workflow steps before executing. In a conversation, the user confirms runs that include such steps; if they decline, do not retry.
 
 ## Source — exactly one must be provided
 
@@ -152,6 +234,17 @@ If set to false, or if the workflow does not complete within the timeout, the to
             ),
           ],
         };
+      }
+
+      const confirmation = await confirmRun({
+        toolContext,
+        workflowApi,
+        yaml: resolvedYaml,
+        workflowId: resolvedWorkflowId,
+        name: resolvedName,
+      });
+      if (confirmation) {
+        return confirmation;
       }
 
       const result = resolvedYaml

@@ -28,6 +28,7 @@ waitForCompletion: true
 **Always set `waitForCompletion: true`.** The call waits synchronously for up to ~120s (a fixed wait window in the `execute_workflow` tool — not configurable from here) and then returns the execution. The investigation is recorded as its own conversation whose id is the returned `executionId`; the investigation agent's final reply is a short wrap-up of its findings (see **Presenting results**). Since investigations may take a few minutes, longer runs return a still-running execution, so treat **Checking investigation status** as the expected next step rather than a rare fallback. Present the results in the same turn once they're available.
 
 - Before triggering, briefly tell the user you're starting the investigation and that it may take a few minutes — the agent gathers and correlates logs, traces, and metrics before reaching a conclusion.
+- In a conversation, the user confirms the run in a dialog before the investigation starts. If they cancel, acknowledge it and do not retry.
 - Stay on the tool call until it returns; do not ask the user to come back later, and do not start polling in a loop — call `get_workflow_execution_status` once if needed.
 - If `execute_workflow` returns with a non-terminal execution (it exceeded the ~120s wait window), continue to **Checking investigation status**.
 

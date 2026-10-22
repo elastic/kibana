@@ -21,14 +21,12 @@ import type {
   ToolHandlerPromptReturn,
   ToolHandlerStandardReturn,
 } from '@kbn/agent-builder-server/tools';
-import { ExecutionStatus, type InternalConnectorContract } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowValidationError } from '@kbn/workflows-yaml';
 import {
   registerWorkflowExecuteStepTool,
-  SAFE_STEP_TYPES,
   WORKFLOW_EXECUTE_STEP_TOOL_ID,
 } from './workflow_execute_step_tool';
-import { getAllConnectorsInternal } from '@kbn/workflows-management-plugin/common/schema';
 
 const VALID_WORKFLOW_YAML = `version: '1'
 name: test-workflow
@@ -131,6 +129,8 @@ steps:
 
 interface MockContextOptions {
   executionMode?: AgentExecutionMode;
+  interactive?: boolean;
+  autoApprovedApis?: Array<{ target: 'elasticsearch' | 'kibana'; api: string }>;
   promptStatus?: ConfirmationStatus;
   toolCallId?: string;
 }
@@ -152,6 +152,13 @@ const createMockContext = (yaml?: string, options: MockContextOptions = {}) => {
     // preview path) keep passing. Override with conversation mode to exercise
     // the in-handler HITL gate.
     executionMode: options.executionMode ?? AgentExecutionMode.standalone,
+    interactivity: {
+      enabled:
+        options.interactive ??
+        (options.executionMode ?? AgentExecutionMode.standalone) ===
+          AgentExecutionMode.conversation,
+      auto_approved_apis: options.autoApprovedApis,
+    },
     callContext: {
       toolId: WORKFLOW_EXECUTE_STEP_TOOL_ID,
       toolCallId: options.toolCallId ?? 'tc_default',
@@ -768,6 +775,69 @@ steps:
       expect(result.prompt.title).toContain('elasticsearch.indices.delete');
     });
 
+    it('returns the preview instead of prompting when interactivity is off (ai.agent step)', async () => {
+      const context = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+        interactive: false,
+      });
+      const result = await registeredTool.handler(
+        { stepName: 'send_slack' } as never,
+        context as never
+      );
+
+      expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
+      expect(JSON.stringify(result)).toContain('"blocked":true');
+      expect(mockApi.testStep).not.toHaveBeenCalled();
+    });
+
+    it('runs a destructive step without prompting when the run pre-approved its API', async () => {
+      jest.useRealTimers();
+      mockApi.testStep.mockResolvedValue('exec-run');
+      mockApi.getWorkflowExecution.mockResolvedValue({
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [],
+        error: null,
+        duration: 1,
+      });
+      const context = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+        autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.delete' }],
+      });
+      await registeredTool.handler({ stepName: 'delete_index' } as never, context as never);
+
+      expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
+      expect(mockApi.testStep).toHaveBeenCalled();
+    });
+
+    it('runs index creation without prompting, as execute_api does', async () => {
+      jest.useRealTimers();
+      mockApi.testStep.mockResolvedValue('exec-run');
+      mockApi.getWorkflowExecution.mockResolvedValue({
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [],
+        error: null,
+        duration: 1,
+      });
+      const context = createMockContext(undefined, {
+        executionMode: AgentExecutionMode.conversation,
+      });
+      await registeredTool.handler(
+        {
+          stepName: 'create_index',
+          yaml: `steps:
+  - name: create_index
+    type: elasticsearch.indices.create
+    with:
+      index: test-kir-100
+`,
+        } as never,
+        context as never
+      );
+
+      expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
+      expect(mockApi.testStep).toHaveBeenCalled();
+    });
+
     it('falls back to a generated preview when confirmation_body is omitted', async () => {
       const context = createMockContext(VALID_WORKFLOW_YAML, {
         executionMode: AgentExecutionMode.conversation,
@@ -1033,34 +1103,5 @@ steps:
       expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
       expect(context.prompts.checkConfirmationStatus).not.toHaveBeenCalled();
     });
-  });
-});
-
-describe('SAFE_STEP_TYPES policy', () => {
-  it('keeps connector-backed safe steps aligned with audited connector contracts', () => {
-    const auditedSafeConnectorMethods: Record<string, readonly string[]> = {
-      'elasticsearch.search': ['GET', 'POST'],
-      'elasticsearch.esql.query': ['POST'],
-      'elasticsearch.indices.exists': ['HEAD'],
-      'kibana.getCase': ['GET'],
-      'kibana.streams.list': ['GET'],
-      'kibana.streams.get': ['GET'],
-    };
-
-    const internalConnectors = new Map(
-      getAllConnectorsInternal()
-        .filter((connector): connector is InternalConnectorContract => 'methods' in connector)
-        .map((connector) => [connector.type, connector])
-    );
-
-    const connectorBackedSafeSteps = Array.from(SAFE_STEP_TYPES)
-      .filter((stepType) => internalConnectors.has(stepType))
-      .sort();
-
-    expect(connectorBackedSafeSteps).toEqual(Object.keys(auditedSafeConnectorMethods).sort());
-
-    for (const [stepType, expectedMethods] of Object.entries(auditedSafeConnectorMethods)) {
-      expect(internalConnectors.get(stepType)?.methods).toEqual(expectedMethods);
-    }
   });
 });
