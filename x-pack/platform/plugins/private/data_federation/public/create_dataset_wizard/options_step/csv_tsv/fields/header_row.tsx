@@ -8,7 +8,10 @@
 import React from 'react';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
-import type { DatasetBooleanFormValue } from '../../../create_dataset_form_state';
+import {
+  DEFAULT_HEADER_ROW,
+  type DatasetBooleanFormValue,
+} from '../../../create_dataset_form_state';
 import type { ComboBoxChange } from '../../../components/combo_box_selection_validity';
 import {
   EuiComboBoxNoCustomOption,
@@ -50,7 +53,7 @@ export function HeaderRow({
       onChange={onChange}
       onBlur={onBlur}
       options={OPTIONS}
-      defaultValue="true"
+      defaultValue={DEFAULT_HEADER_ROW}
       isInvalid={isInvalid}
       placeholder={createDatasetWizardStrings.settingsHeaderRowPlaceholder}
       aria-label={createDatasetWizardStrings.settingsHeaderRowLabel}

@@ -18,7 +18,7 @@ const MATCHING_QUERY_CALLOUT_TITLE = i18n.translate(
   'xpack.alertingV2.actionPolicy.affectedRules.tagsAndExpression',
   {
     defaultMessage:
-      'These rules have at least one of the policy tags. The matching query decides which of their alerts this policy handles.',
+      'These rules have at least one of the policy routing tags. The matching query decides which of their alerts this policy handles.',
   }
 );
 

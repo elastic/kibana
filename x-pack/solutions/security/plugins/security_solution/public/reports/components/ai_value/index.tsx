@@ -27,7 +27,7 @@ import { css } from '@emotion/react';
 import { AnnouncementBanner } from '@kbn/announcement-banner';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { useSecuritySolutionLinkProps } from '../../../common/components/links';
-import { useIsAlertsAndAttacksAlignmentEnabled } from '../../../common/hooks/use_is_alerts_and_attacks_alignment_enabled';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import analyticsSpeedAcceleration from './analytics_speed_acceleration.svg';
 import { AIValueReportLayout } from './ai_value_report_layout';
 import { useValueReportData } from '../../hooks/use_value_report_data';
@@ -57,7 +57,9 @@ const AIValueReportContent: React.FC<AIValueReportContentProps> = ({
   const { settings } = useKibana().services;
   const exportContext = useAIValueExportContext();
   const setReportInputForExportContext = exportContext?.setReportInput;
-  const isAlertsAndAttacksAlignmentEnabled = useIsAlertsAndAttacksAlignmentEnabled();
+  const isAlertsAndAttacksAlignmentEnabled = useIsExperimentalFeatureEnabled(
+    'enableAlertsAndAttacksAlignment'
+  );
   const { href: attackDiscoveryHref } = useSecuritySolutionLinkProps({
     deepLinkId: isAlertsAndAttacksAlignmentEnabled
       ? SecurityPageName.attacks

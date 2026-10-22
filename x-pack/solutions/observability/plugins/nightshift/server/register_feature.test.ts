@@ -7,7 +7,7 @@
 
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_API_PRIVILEGES, NIGHTSHIFT_SOURCE_SO_TYPE } from '@kbn/nightshift-shared';
 import { registerNightshiftFeature } from './register_feature';
 
 const getRegisteredFeature = (): KibanaFeatureConfig => {
@@ -23,16 +23,34 @@ describe('registerNightshiftFeature', () => {
     expect(privileges?.all.api).toEqual([
       NIGHTSHIFT_API_PRIVILEGES.read,
       NIGHTSHIFT_API_PRIVILEGES.manage,
+      'read_investigations',
       'manage_investigations',
       'read_proposals',
       'manage_proposals',
     ]);
   });
 
-  it('grants only the proposals read API privilege with `read`', () => {
+  it('grants only the investigations and proposals read API privileges with `read`', () => {
     const { privileges } = getRegisteredFeature();
 
-    expect(privileges?.read.api).toEqual([NIGHTSHIFT_API_PRIVILEGES.read, 'read_proposals']);
+    expect(privileges?.read.api).toEqual([
+      NIGHTSHIFT_API_PRIVILEGES.read,
+      'read_investigations',
+      'read_proposals',
+    ]);
+  });
+
+  it('grants the Alerting v2 rule saved object as all with `all` and as read with `read`', () => {
+    const { privileges } = getRegisteredFeature();
+
+    expect(privileges?.all.savedObject).toEqual({
+      all: [NIGHTSHIFT_SOURCE_SO_TYPE, 'alerting_rule'],
+      read: [],
+    });
+    expect(privileges?.read.savedObject).toEqual({
+      all: [],
+      read: [NIGHTSHIFT_SOURCE_SO_TYPE, 'alerting_rule'],
+    });
   });
 
   it('grants alerts read with both `all` and `read`', () => {

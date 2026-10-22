@@ -14,6 +14,7 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { ESQL_VIEWS_CAPABILITIES, PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { ManagementApp } from './management_app';
 import type { StartDependencies } from './plugin';
+import type { EsqlViewsTelemetryClient } from './telemetry';
 import type { DiscoverEsqlLocatorParams } from './types';
 
 const LazyEsqlEditor = React.lazy(async () => {
@@ -24,22 +25,27 @@ const LazyEsqlEditor = React.lazy(async () => {
 export const mountManagementSection = (
   coreStart: CoreStart,
   { data, share }: StartDependencies,
-  { element, setBreadcrumbs }: ManagementAppMountParams
+  { element, setBreadcrumbs }: ManagementAppMountParams,
+  telemetryClient?: EsqlViewsTelemetryClient
 ) => {
   const { docTitle } = coreStart.chrome;
   docTitle.change(PLUGIN_NAME);
   setBreadcrumbs([{ text: PLUGIN_NAME }]);
 
   const client = createEsqlViewsManagementClient(coreStart.http);
+  // Anything other than an explicit grant, including a stale or missing feature, hides the control.
   const capabilities = coreStart.application.capabilities[PLUGIN_ID];
+  const isGranted = (capability: keyof typeof ESQL_VIEWS_CAPABILITIES) =>
+    capabilities?.[ESQL_VIEWS_CAPABILITIES[capability]] === true;
   const discoverLocator = share.url.locators.get<DiscoverEsqlLocatorParams>(DISCOVER_APP_LOCATOR);
   const isDiscoverAvailable = Boolean(coreStart.application.capabilities.discover_v2?.show);
   const root = createRoot(element);
   root.render(
     coreStart.rendering.addContext(
       <ManagementApp
-        canCreate={capabilities?.[ESQL_VIEWS_CAPABILITIES.create] === true}
-        canEdit={capabilities?.[ESQL_VIEWS_CAPABILITIES.edit] === true}
+        canCreate={isGranted('create')}
+        canEdit={isGranted('edit')}
+        canDelete={isGranted('delete')}
         client={client}
         isDiscoverAvailable={isDiscoverAvailable}
         discoverLocator={discoverLocator}
@@ -50,6 +56,7 @@ export const mountManagementSection = (
           http: coreStart.http,
           search: data.search.search,
         }}
+        telemetryClient={telemetryClient}
         toasts={coreStart.notifications.toasts}
       />
     )

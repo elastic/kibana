@@ -12,15 +12,26 @@ import { CreateAutomationFlyout } from './create_automation_flyout';
 import { useCreateAutomation } from '../../hooks/use_automations';
 
 jest.mock('../../hooks/use_automations', () => ({ useCreateAutomation: jest.fn() }));
+jest.mock('../../../hooks/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
+jest.mock('../../../settings/components/apps_section/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../../../settings/components/apps_section/use_relay_app_bindings'),
+  useAllRelayAppBindings: () => ({
+    bindings: [{ channel: 'C2', displayName: 'oncall', status: 'bound_to_self' }],
+    isLoading: false,
+    isError: false,
+    isComplete: true,
+  }),
+}));
 
 const mockUseCreateAutomation = useCreateAutomation as jest.Mock;
 
 const onClose = jest.fn();
+const onCreated = jest.fn();
 
 const renderFlyout = (props: Partial<React.ComponentProps<typeof CreateAutomationFlyout>> = {}) =>
   render(
     <I18nProvider>
-      <CreateAutomationFlyout onClose={onClose} {...props} />
+      <CreateAutomationFlyout onClose={onClose} onCreated={onCreated} {...props} />
     </I18nProvider>
   );
 
@@ -84,38 +95,43 @@ describe('CreateAutomationFlyout', () => {
           tags: ['oncall'],
           isEnabled: false,
           trigger: { rows: [{ kind: 'alert' }] },
-          execution: { promptTemplate: 'Find the root cause', reasoningMode: 'observe' },
-          completion: {},
+          execution: { promptTemplate: 'Find the root cause', reasoningMode: 'investigate' },
+          completions: [],
           runtime: { dailyDispatchLimit: 20 },
         },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       )
     );
+    mutate.mock.calls[0][1].onSuccess({ id: 'created-1' });
+    expect(onCreated).toHaveBeenCalledWith('created-1');
   });
 
-  it('blocks saving with an invalid custom cron', async () => {
+  it('requires instructions for a scheduled automation', async () => {
     renderFlyout();
-    await addTrigger('Custom cron…');
-
-    expect(screen.getByTestId('submitAutomation')).toBeEnabled();
-    fireEvent.change(screen.getByTestId('automationCronExpression'), {
-      target: { value: 'not a cron' },
+    await addTrigger('Every…');
+    expect(screen.getByTestId('submitAutomation')).toBeDisabled();
+    const instructions = screen.getByTestId('automationInstructions');
+    expect(instructions).toHaveAttribute('maxlength', '5000');
+    fireEvent.change(instructions, {
+      target: { value: 'Review checkout errors over the last hour.' },
     });
+    expect(screen.getByTestId('submitAutomation')).toBeEnabled();
+    fireEvent.change(instructions, { target: { value: '   ' } });
     expect(screen.getByTestId('submitAutomation')).toBeDisabled();
   });
 
-  it('requires the daily trigger limit to be between 1 and 200', async () => {
+  it('requires the daily trigger limit to be between 1 and 50', async () => {
     renderFlyout();
     await addTrigger('Alert triggered');
     const submitButton = screen.getByTestId('submitAutomation');
     const dailyLimit = screen.getByTestId('automationDailyLimit');
 
-    for (const value of ['', '0', '201', '1.5']) {
+    for (const value of ['', '0', '51', '1.5']) {
       fireEvent.change(dailyLimit, { target: { value } });
       expect(submitButton).toBeDisabled();
     }
 
-    fireEvent.change(dailyLimit, { target: { value: '200' } });
+    fireEvent.change(dailyLimit, { target: { value: '50' } });
     expect(submitButton).toBeEnabled();
   });
 
@@ -126,9 +142,11 @@ describe('CreateAutomationFlyout', () => {
     fireEvent.click(await screen.findByTestId('automationAddSlackAction'));
 
     expect(screen.getByTestId('submitAutomation')).toBeDisabled();
-    fireEvent.change(screen.getByTestId('automationSlackDestination'), {
-      target: { value: '#oncall' },
-    });
+    const channelInput = within(screen.getByTestId('automationSlackChannelDestination')).getByRole(
+      'combobox'
+    );
+    fireEvent.change(channelInput, { target: { value: 'oncall' } });
+    fireEvent.click(await screen.findByRole('option', { name: '#oncall' }));
     expect(screen.getByTestId('submitAutomation')).toBeEnabled();
   });
 
@@ -168,15 +186,12 @@ describe('CreateAutomationFlyout', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('enables the automation on save when the switch is on', async () => {
+  it('enables the automation with Save and enable', async () => {
     renderFlyout();
     rename('Alert triage');
     await addTrigger('Alert triggered');
 
-    expect(screen.getByText('Saves as disabled')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('automationEnabledSwitch'));
-    expect(screen.getByText('Enables when saved')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('submitAutomation'));
+    fireEvent.click(screen.getByTestId('submitAndEnableAutomation'));
 
     expect(mutate).toHaveBeenCalledWith(
       expect.objectContaining({ isEnabled: true }),

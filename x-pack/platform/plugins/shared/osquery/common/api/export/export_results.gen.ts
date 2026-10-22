@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 /**
   * The output format for the exported file. Use `ndjson` for streaming newline-delimited JSON (recommended for large exports), `json` for a single JSON array (held in memory; suitable for smaller result sets), or `csv` for a comma-separated values file with a header row derived from the ECS mapping.
@@ -97,10 +97,7 @@ export const ExportNdjsonMetaRow = lazySchema(() =>
         /**
          * ISO 8601 timestamp of when the export was initiated.
          */
-        timestamp: z
-          .string()
-          .datetime()
-          .describe('ISO 8601 timestamp of when the export was initiated.'),
+        timestamp: isoDateTime().describe('ISO 8601 timestamp of when the export was initiated.'),
         /**
          * Username of the Kibana user who triggered the export.
          */
@@ -156,10 +153,7 @@ export const ExportMetadata = lazySchema(() =>
     /**
      * ISO 8601 timestamp of when the export was initiated.
      */
-    timestamp: z
-      .string()
-      .datetime()
-      .describe('ISO 8601 timestamp of when the export was initiated.'),
+    timestamp: isoDateTime().describe('ISO 8601 timestamp of when the export was initiated.'),
     /**
      * Username of the Kibana user who triggered the export.
      */

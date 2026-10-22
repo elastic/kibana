@@ -11,11 +11,11 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 
 /**
- * The two cluster privileges service accounts are gated on. `manage_security` is the one gate on
- * every change to what a service account is or which workloads run as one. `read_security` is
- * enough to look at the directory, matching what Elasticsearch asks of its own read API.
+ * The cluster privilege service accounts are gated on. `manage_security` covers every service
+ * account operation, reads included, because the accounts and the workloads they run are a
+ * security administrator's concern.
  */
-export type ServiceAccountClusterPrivilege = 'manage_security' | 'read_security';
+export type ServiceAccountClusterPrivilege = 'manage_security';
 
 export interface EnsureClusterPrivilegeParams {
   request: KibanaRequest;
@@ -24,12 +24,18 @@ export interface EnsureClusterPrivilegeParams {
   privilege: ServiceAccountClusterPrivilege;
   /** What the caller is attempting, as a verb phrase for the messages, e.g. `create a service account`. */
   action: string;
+  /**
+   * Called with the 403 before it is thrown. The one hook for auditing a refusal: an
+   * authorization refusal is the only failure the service account audit events record, and this
+   * is where it is told apart from every other 403 on the same path.
+   */
+  onRefused?: (error: Boom.Boom) => void;
 }
 
 /**
  * Rejects with a 403 unless the request holds the given cluster privilege. Elasticsearch answers
- * the check from the caller's effective permissions, so a `manage_security` holder passes a
- * `read_security` check without holding that name.
+ * the check from the caller's effective permissions, so a privilege that implies it, such as `all`,
+ * passes too.
  */
 export const ensureClusterPrivilege = async ({
   request,
@@ -37,6 +43,7 @@ export const ensureClusterPrivilege = async ({
   logger,
   privilege,
   action,
+  onRefused,
 }: EnsureClusterPrivilegeParams): Promise<void> => {
   const { hasAllRequested } = await checkPrivilegesWithRequest(request).globally({
     elasticsearch: { cluster: [privilege], index: {} },
@@ -44,6 +51,8 @@ export const ensureClusterPrivilege = async ({
 
   if (!hasAllRequested) {
     logger.warn(`Refused to ${action}: missing \`${privilege}\` cluster privilege`);
-    throw Boom.forbidden(`Cannot ${action}: missing \`${privilege}\` cluster privilege`);
+    const error = Boom.forbidden(`Cannot ${action}: missing \`${privilege}\` cluster privilege`);
+    onRefused?.(error);
+    throw error;
   }
 };

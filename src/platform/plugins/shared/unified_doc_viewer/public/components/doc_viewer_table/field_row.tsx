@@ -9,7 +9,8 @@
 
 import type { ReactNode } from 'react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { columnToFieldBase, type Column, type DataSource } from '@kbn/data-source';
 import type { IgnoredReason } from '@kbn/discover-utils';
 import {
   convertValueToString,
@@ -18,8 +19,8 @@ import {
   isNestedFieldParent,
 } from '@kbn/discover-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { getFieldIconType, getTextBasedColumnIconType } from '@kbn/field-utils';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import { getFieldIconType } from '@kbn/field-utils';
+import { getDataViewFieldOrCreateFromColumn } from '@kbn/data-view-utils';
 
 export class FieldRow {
   readonly name: string;
@@ -27,7 +28,7 @@ export class FieldRow {
   readonly flattenedValue: unknown;
   readonly dataViewField: DataViewField | undefined;
   readonly isPinned: boolean;
-  readonly columnsMeta: DataTableColumnsMeta | undefined;
+  readonly esqlColumn: Column | undefined;
 
   readonly #hit: DataTableRecord;
   readonly #dataView: DataView;
@@ -49,7 +50,7 @@ export class FieldRow {
     dataView,
     fieldFormats,
     isPinned,
-    columnsMeta,
+    dataSource,
   }: {
     name: string;
     displayNameOverride?: string;
@@ -58,7 +59,7 @@ export class FieldRow {
     dataView: DataView;
     fieldFormats: FieldFormatsStart;
     isPinned: boolean;
-    columnsMeta: DataTableColumnsMeta | undefined;
+    dataSource: DataSource | undefined;
   }) {
     this.#hit = hit;
     this.#dataView = dataView;
@@ -69,13 +70,13 @@ export class FieldRow {
     this.name = name;
     this.displayNameOverride = displayNameOverride;
     this.flattenedValue = flattenedValue;
-    this.dataViewField = getDataViewFieldOrCreateFromColumnMeta({
+    this.esqlColumn = dataSource?.kind === 'esql' ? dataSource.getColumn(name) : undefined;
+    this.dataViewField = getDataViewFieldOrCreateFromColumn({
       dataView,
       fieldName: name,
-      columnMeta: columnsMeta?.[name],
+      column: this.esqlColumn,
     });
     this.isPinned = isPinned;
-    this.columnsMeta = columnsMeta;
   }
 
   // format as React node in a lazy way
@@ -103,9 +104,6 @@ export class FieldRow {
         flattenedValue: this.flattenedValue,
         dataTableRecord: this.#hit,
         fieldFormats: this.#fieldFormats,
-        options: {
-          compatibleWithCSV: true,
-        },
       }).formattedString;
       this.#isFormattedAsText = true;
     }
@@ -115,8 +113,8 @@ export class FieldRow {
 
   public get fieldType(): string | undefined {
     if (!this.#fieldType) {
-      const columnMeta = this.columnsMeta?.[this.name];
-      const columnIconType = getTextBasedColumnIconType(columnMeta);
+      const columnIconType =
+        this.esqlColumn && getFieldIconType(columnToFieldBase(this.esqlColumn));
       const fieldType = columnIconType
         ? columnIconType // for text-based results types come separately
         : isNestedFieldParent(this.name, this.#dataView)

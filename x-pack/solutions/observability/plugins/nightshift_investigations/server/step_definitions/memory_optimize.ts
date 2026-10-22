@@ -8,11 +8,11 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { MAX_KEYWORD_LENGTH } from '../../common';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import { usesKnowledge } from '../agents/agent_policy';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { runMemoryOptimize } from '../memory/register_memory';
 import type { NightshiftTelemetryClient } from '../telemetry';
@@ -22,10 +22,7 @@ import { withTimeout } from './with_timeout';
 
 const MAX_ROUND_TEXT_LENGTH = 65_536;
 
-/**
- * Bounds the post-round optimizer. It runs non-blocking, so a stall does not hold up an
- * investigation, but it should not leave a task hanging on a stuck inference call either.
- */
+/** Bounds the non-blocking post-round optimizer so a stuck inference call cannot hang a task. */
 const OPTIMIZE_TIMEOUT_MS = 120_000;
 
 export const memoryOptimizeStepDefinition = ({
@@ -33,7 +30,6 @@ export const memoryOptimizeStepDefinition = ({
   getInference,
   getSavedObjects,
   getUiSettings,
-  getMemoryEsClient,
   logger,
   isEnabled,
   telemetry,
@@ -42,7 +38,6 @@ export const memoryOptimizeStepDefinition = ({
   getInference: () => InferenceServerStart | undefined;
   getSavedObjects: () => CoreStart['savedObjects'] | undefined;
   getUiSettings: () => CoreStart['uiSettings'] | undefined;
-  getMemoryEsClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
   isEnabled?: () => boolean;
   telemetry: NightshiftTelemetryClient;
@@ -118,15 +113,14 @@ export const memoryOptimizeStepDefinition = ({
         return { output: { status: 'ok' as const, skipped: true } };
       }
 
-      // Same policy as materialize: Memory is only for the Nightshift investigator.
-      if (context.input.agent_id?.trim() !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
+      // Same policy as materialize: Memory is only for the Nightshift knowledge agents.
+      if (!usesKnowledge(context.input.agent_id)) {
         context.logger.info('Skipped memory optimize for missing or unsupported agent');
         return { output: { status: 'ok' as const, skipped: true } };
       }
 
       const workflowContext = context.contextManager.getContext();
-      // Workflow execution authorization is the capability boundary. Storage tenancy always comes
-      // from the trusted execution context; no workflow input can select another Space.
+      // Storage tenancy comes from the trusted execution context; no input can select another Space.
       const { spaceId } = workflowContext.workflow;
       const workflowExecutionId = workflowContext.execution.id;
       const sandboxId = context.input.sandbox_id?.trim() ? context.input.sandbox_id : undefined;
@@ -156,7 +150,7 @@ export const memoryOptimizeStepDefinition = ({
               conversationId: context.input.conversation_id,
               roundId: context.input.round_id,
               recalledIds: context.input.recalled_ids ?? [],
-              esClient: await getMemoryEsClient(),
+              esClient: context.contextManager.getScopedEsClient(),
               spaceId,
               signal,
               logger,
@@ -201,9 +195,9 @@ export const memoryOptimizeStepDefinition = ({
         );
       }
 
-      if (!summary && context.input.agent_id === NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
+      if (!summary) {
         telemetry.reportSemanticMemoryOptimized({
-          agent_id: context.input.agent_id,
+          agent_id: context.input.agent_id ?? 'unknown',
           ...(context.input.conversation_id
             ? { conversation_id: context.input.conversation_id }
             : {}),

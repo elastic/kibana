@@ -11,6 +11,8 @@ import type { ConsoleTestSetup } from '../../../mocks';
 import { getConsoleTestSetup } from '../../../mocks';
 import type { CommandArgumentValueSelectorProps } from '../../../types';
 
+jest.setTimeout(30_000); // Costly: every case mounts the whole Console to reach the argument selector
+
 describe('Console: ArgumentSelectorWrapper', () => {
   let testSetup: ConsoleTestSetup;
   let renderResult: ReturnType<ConsoleTestSetup['renderConsole']>;
@@ -21,7 +23,7 @@ describe('Console: ArgumentSelectorWrapper', () => {
     return <span data-test-subj="test-argSelector">{props.valueText}</span>;
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     selectorProps = undefined;
     testSetup = getConsoleTestSetup();
 
@@ -41,14 +43,11 @@ describe('Console: ArgumentSelectorWrapper', () => {
     });
 
     renderResult = testSetup.renderConsole();
-    testSetup.enterCommand('cmd-with-selector --file', { inputOnly: true });
+    await testSetup.enterCommand('cmd-with-selector --file', { inputOnly: true, paste: true });
   });
 
-  it('should pass `requestFocus` and `consoleApi` to the SelectorComponent', async () => {
-    await waitFor(() => {
-      expect(selectorProps).toBeDefined();
-    });
-
+  it('should pass `requestFocus` and `consoleApi` to the SelectorComponent', () => {
+    expect(selectorProps).toBeDefined();
     expect(selectorProps!.requestFocus).toBeInstanceOf(Function);
     expect(selectorProps!.consoleApi).toBeDefined();
     expect(selectorProps!.consoleApi.setInput).toBeInstanceOf(Function);
@@ -56,9 +55,7 @@ describe('Console: ArgumentSelectorWrapper', () => {
   });
 
   it('should return focus to the console input when `requestFocus()` is called', async () => {
-    await waitFor(() => {
-      expect(selectorProps).toBeDefined();
-    });
+    expect(selectorProps).toBeDefined();
 
     act(() => {
       selectorProps!.requestFocus!();
@@ -72,9 +69,7 @@ describe('Console: ArgumentSelectorWrapper', () => {
   });
 
   it('should update the console input when the selector uses `consoleApi.setInput()`', async () => {
-    await waitFor(() => {
-      expect(selectorProps).toBeDefined();
-    });
+    expect(selectorProps).toBeDefined();
 
     act(() => {
       selectorProps!.consoleApi.setInput('isolate');

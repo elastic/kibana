@@ -9,13 +9,23 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseFleetApiConfig = await readConfigFile(require.resolve('./config.base.ts'));
+  const baseConfig = baseFleetApiConfig.getAll();
 
   return {
-    ...baseFleetApiConfig.getAll(),
+    ...baseConfig,
     testFiles: [require.resolve('./apis')],
     junit: {
       reportName: 'X-Pack Fleet API Integration Tests',
     },
     indexRefreshInterval: '1s',
+    kbnTestServer: {
+      ...baseConfig.kbnTestServer,
+      serverArgs: [
+        ...baseConfig.kbnTestServer.serverArgs,
+        // The authentication methods of the Kafka output are behind a feature flag each
+        `--feature_flags.overrides.fleet.enableKafkaOAuth2Auth=true`,
+        `--feature_flags.overrides.fleet.enableKafkaKerberosAuth=true`,
+      ],
+    },
   };
 }

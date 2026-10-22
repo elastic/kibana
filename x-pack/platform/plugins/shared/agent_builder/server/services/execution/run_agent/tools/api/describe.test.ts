@@ -81,6 +81,7 @@ describe('createDescribeApiTool', () => {
           },
         },
         destructive: false,
+        readOnly: false,
       })
     );
 
@@ -111,6 +112,7 @@ describe('createDescribeApiTool', () => {
           properties: { query: { $ref: './_types.json#/$defs/Oversized' } },
         },
         destructive: false,
+        readOnly: true,
       })
     );
 
@@ -143,6 +145,7 @@ describe('createDescribeApiTool', () => {
           },
         },
         destructive: false,
+        readOnly: false,
       })
     );
 
@@ -180,6 +183,7 @@ describe('createDescribeApiTool', () => {
           },
         },
         destructive: true,
+        readOnly: false,
       })
     );
 
@@ -208,6 +212,7 @@ describe('createDescribeApiTool', () => {
           properties: { timeout: { $ref: '../outside.json#/$defs/Duration' } },
         },
         destructive: false,
+        readOnly: false,
       })
     );
 
@@ -234,6 +239,7 @@ describe('createDescribeApiTool', () => {
         method: 'DELETE',
         path: '/{index}',
         destructive: true,
+        readOnly: false,
       })
     );
 
@@ -256,6 +262,7 @@ describe('createDescribeApiTool', () => {
         method: 'GET',
         path: '/',
         destructive: false,
+        readOnly: true,
       })
     );
 
@@ -292,7 +299,7 @@ describe('createDescribeApiTool', () => {
       expect(tool.description).toContain(internalTools.executeApi);
     });
 
-    it('spells out the identifier format instead of the discovery tool on an unknown API', async () => {
+    it('tells the model not to guess another identifier on an unknown API', async () => {
       loadApi.mockRejectedValue(new UnknownApiError('does.not.exist'));
 
       const tool = createDescribeApiTool({ discoveryEnabled: false });
@@ -305,7 +312,7 @@ describe('createDescribeApiTool', () => {
       const data = result.results[0].data as ErrorResultData;
       expect(data.message).not.toContain(internalTools.discoverApis);
       expect(data.message).toContain('no API named "does.not.exist"');
-      expect(data.message).toContain('namespace.name');
+      expect(data.message).toContain('Do not retry with another identifier');
     });
   });
 
