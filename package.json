@@ -864,6 +864,7 @@
     "@kbn/io-ts-utils": "workspace:*",
     "@kbn/ipynb": "workspace:*",
     "@kbn/isomer": "workspace:*",
+    "@kbn/isomer-components": "workspace:*",
     "@kbn/isomer-theme": "workspace:*",
     "@kbn/item-buffer": "workspace:*",
     "@kbn/json-schemas": "workspace:*",
