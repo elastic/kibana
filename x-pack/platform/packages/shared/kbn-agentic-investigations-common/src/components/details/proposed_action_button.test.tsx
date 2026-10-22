@@ -194,6 +194,38 @@ describe('ProposedActionButton', () => {
     expect(screen.queryByTestId('proposedAction-modal-dismiss')).not.toBeInTheDocument();
   });
 
+  describe('a proposal offered again after a failed attempt', () => {
+    const retried = { ...mockProposal, previousExecutionError: 'Timed out waiting for workflow' };
+
+    it('retries by approving, without opening the modal', () => {
+      const onConfirm = jest.fn().mockResolvedValue(undefined);
+      renderButton({ proposal: retried, onConfirm });
+
+      fireEvent.click(screen.getByTestId('proposedAction-retry'));
+
+      expect(onConfirm).toHaveBeenCalledTimes(1);
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('offers no retry to a user who cannot decide', () => {
+      renderButton({ proposal: retried, readOnly: true });
+
+      expect(screen.queryByTestId('proposedAction-retry')).not.toBeInTheDocument();
+    });
+
+    it('offers no retry while an approval is being sent', () => {
+      renderButton({ proposal: retried, isSubmitting: 'applying' });
+
+      expect(screen.queryByTestId('proposedAction-retry')).not.toBeInTheDocument();
+    });
+
+    it('offers no retry once the proposal has been replaced', () => {
+      renderButton({ proposal: { ...retried, status: 'superseded', supersededBy: 'next' } });
+
+      expect(screen.queryByTestId('proposedAction-retry')).not.toBeInTheDocument();
+    });
+  });
+
   describe('a decided proposal', () => {
     const decidedProposal: ApprovalProposal = {
       ...mockProposal,
