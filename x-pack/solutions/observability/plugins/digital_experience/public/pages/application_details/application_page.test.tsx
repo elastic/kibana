@@ -8,14 +8,14 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ApplicationPage } from './application_page';
-import { useKibanaServices } from '../hooks/use_kibana_services';
-import { useRouteBreadcrumb } from '../breadcrumbs/use_route_breadcrumb';
-import { useTimeRange } from '../hooks/use_time_range';
+import { useKibanaServices } from '../../hooks/use_kibana_services';
+import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
+import { useTimeRange } from '../../hooks/use_time_range';
 
-jest.mock('../hooks/use_kibana_services');
-jest.mock('../breadcrumbs/use_route_breadcrumb');
-jest.mock('../hooks/use_time_range', () => ({
-  ...jest.requireActual('../hooks/use_time_range'),
+jest.mock('../../hooks/use_kibana_services');
+jest.mock('../../breadcrumbs/use_route_breadcrumb');
+jest.mock('../../hooks/use_time_range', () => ({
+  ...jest.requireActual('../../hooks/use_time_range'),
   useTimeRange: jest.fn(),
 }));
 
@@ -41,7 +41,7 @@ describe('ApplicationPage', () => {
       ux: { getClassicRumDashboard },
     } as unknown as ReturnType<typeof useKibanaServices>);
 
-    render(<ApplicationPage serviceName="my-app" />);
+    render(<ApplicationPage serviceName="my-app" source="classic" />);
 
     expect(await screen.findByTestId('classicRumDashboard')).toHaveTextContent('my-app');
     expect(useRouteBreadcrumb).toHaveBeenCalledWith([{ text: 'my-app' }, { text: 'Overview' }]);
@@ -54,23 +54,16 @@ describe('ApplicationPage', () => {
     expect(screen.getByTestId('digitalExperienceTab-overview')).toBeInTheDocument();
   });
 
-  it('leaves an invalid time range out, so the dashboard uses the global timefilter', async () => {
-    const ClassicRumDashboard = jest.fn((_props: { timeRange?: object }) => (
-      <div data-test-subj="classicRumDashboard" />
-    ));
+  it('shows the loading state while the Classic RUM dashboard loads', () => {
     useKibanaServicesMock.mockReturnValue({
-      ux: { getClassicRumDashboard: jest.fn().mockResolvedValue(ClassicRumDashboard) },
+      ux: { getClassicRumDashboard: jest.fn(() => new Promise(() => {})) },
     } as unknown as ReturnType<typeof useKibanaServices>);
-    jest.mocked(useTimeRange).mockReturnValue({
-      timeRange: { rangeFrom: 'foo', rangeTo: 'now' },
-      isTimeRangeInUrl: true,
-      setTimeRange,
-    });
 
-    render(<ApplicationPage serviceName="my-app" />);
+    render(<ApplicationPage serviceName="my-app" source="classic" />);
 
-    await screen.findByTestId('classicRumDashboard');
-    expect(ClassicRumDashboard.mock.calls[0][0].timeRange).toBeUndefined();
+    expect(screen.getByTestId('digitalExperienceOverviewLoading')).toHaveTextContent(
+      'Loading the Overview'
+    );
   });
 
   it('renders an empty prompt when the dashboard cannot be loaded', async () => {
@@ -78,7 +71,7 @@ describe('ApplicationPage', () => {
       ux: { getClassicRumDashboard: jest.fn().mockRejectedValue(new Error('chunk failed')) },
     } as unknown as ReturnType<typeof useKibanaServices>);
 
-    render(<ApplicationPage serviceName="my-app" />);
+    render(<ApplicationPage serviceName="my-app" source="classic" />);
 
     expect(await screen.findByTestId('digitalExperienceOverviewEmpty')).toBeInTheDocument();
   });
@@ -86,8 +79,23 @@ describe('ApplicationPage', () => {
   it('renders an empty prompt without the ux plugin, as on serverless', async () => {
     useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
 
-    render(<ApplicationPage serviceName="my-app" />);
+    render(<ApplicationPage serviceName="my-app" source="classic" />);
 
     expect(await screen.findByTestId('digitalExperienceOverviewEmpty')).toBeInTheDocument();
+  });
+
+  it('renders the placeholder for an OTel application without loading the Classic dashboard', async () => {
+    const getClassicRumDashboard = jest.fn();
+    useKibanaServicesMock.mockReturnValue({
+      ux: { getClassicRumDashboard },
+    } as unknown as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source="otel" />);
+
+    expect(
+      await screen.findByTestId('digitalExperienceOtelOverviewPlaceholder')
+    ).toBeInTheDocument();
+    expect(getClassicRumDashboard).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('classicRumDashboard')).not.toBeInTheDocument();
   });
 });

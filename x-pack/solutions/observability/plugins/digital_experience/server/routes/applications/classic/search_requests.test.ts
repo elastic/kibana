@@ -53,4 +53,31 @@ describe('classicSearch', () => {
       terms: { field: 'service.environment', size: 10 },
     });
   });
+
+  it('counts the page loads over time in the selected environment', () => {
+    const { aggs } = classicSearch({ start: 0, end: 60 * 60 * 1000 }).aggs?.inEnvironment as {
+      aggs: Record<string, unknown>;
+    };
+
+    expect(aggs.pageLoadsOverTime).toEqual({
+      filter: {
+        bool: {
+          filter: [
+            { term: { 'processor.event': 'transaction' } },
+            { term: { 'transaction.type': 'page-load' } },
+          ],
+        },
+      },
+      aggs: {
+        histogram: {
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: '60s',
+            min_doc_count: 0,
+            extended_bounds: { min: 0, max: 60 * 60 * 1000 },
+          },
+        },
+      },
+    });
+  });
 });
