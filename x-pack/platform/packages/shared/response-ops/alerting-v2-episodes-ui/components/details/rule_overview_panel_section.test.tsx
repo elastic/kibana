@@ -20,6 +20,15 @@ import {
 import { AlertEpisodeRuleOverviewPanelSection } from './rule_overview_panel_section';
 
 jest.mock('../../utils/run_esql_async_search');
+// The first ES|QL build in a module registry costs ~1.4s locally, which this test would await.
+jest.mock('../../queries/episode_query', () => ({
+  buildEpisodeGroupHashQuery: jest.fn(() => ({
+    print: () => 'FROM .alerts | KEEP group_hash',
+  })),
+  buildEpisodeQuery: jest.fn(() => ({
+    print: () => 'FROM .alerts | STATS BY group_hash',
+  })),
+}));
 
 const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
 
