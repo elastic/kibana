@@ -22,6 +22,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { EuiDataGridRefProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -58,6 +59,16 @@ import {
   getK8sContextValue,
   type K8sContextKey,
 } from './kubernetes_hierarchy';
+import {
+  buildInventoryFilterCellActions,
+  type InventoryCellFilterMode,
+} from './inventory_data_grid_cell_actions';
+import {
+  isK8sInventoryFilterColumn,
+  k8sFilterColumnLabel,
+  resolveK8sCellFilterTarget,
+  type K8sCellFilterTarget,
+} from './k8s_inventory_cell_filter';
 import {
   ENTITY_HEALTH_METRIC_ID,
   ENTITY_ALERTS_METRIC_ID,
@@ -778,6 +789,15 @@ interface Props {
   readonly borderless?: boolean;
   /** Page-level density from Display options (not per-grid). */
   readonly density?: ListDensity;
+  /**
+   * Kubernetes inventory page: Discover-style filter for / filter out on
+   * hierarchy columns (and name on cluster/namespace/node/deployment tables).
+   */
+  readonly onK8sCellFilter?: (args: {
+    readonly entity: Entity;
+    readonly target: K8sCellFilterTarget;
+    readonly mode: InventoryCellFilterMode;
+  }) => void;
 }
 
 /**
@@ -857,7 +877,9 @@ export const EntityDataGridSection = ({
   refreshTick,
   borderless = false,
   density = DEFAULT_LIST_DENSITY,
+  onK8sCellFilter,
 }: Props) => {
+  const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const phase = useVariation('phase') as PhaseVariation;
   const isPhase1 = phase === 'phase1';
   const isHomogeneous = useMemo(() => isHomogeneousTypeGroup(category, rows), [category, rows]);
@@ -925,23 +947,6 @@ export const EntityDataGridSection = ({
   );
   const { euiTheme } = useEuiTheme();
 
-  const gridColumns = useMemo<EuiDataGridColumn[]>(
-    () =>
-      catalog.map((column) => ({
-        id: column.id,
-        displayAsText: column.label,
-        display: (
-          <ColumnHeaderWithInfo
-            columnId={column.id}
-            label={column.label}
-            description={column.description}
-          />
-        ),
-        isSortable: true,
-      })),
-    [catalog]
-  );
-
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([
     { id: 'health', direction: 'asc' },
   ]);
@@ -970,6 +975,53 @@ export const EntityDataGridSection = ({
     return copy;
     // refreshTick re-rolls the synthesized metric readings used by sortValueFor.
   }, [rows, sortingColumns, bucketKey, refreshTick, isPhase1]);
+
+  const gridColumns = useMemo<EuiDataGridColumn[]>(
+    () =>
+      catalog.map((column) => {
+        const columnDef: EuiDataGridColumn = {
+          id: column.id,
+          displayAsText: column.label,
+          display: (
+            <ColumnHeaderWithInfo
+              columnId={column.id}
+              label={column.label}
+              description={column.description}
+            />
+          ),
+          isSortable: true,
+        };
+        if (
+          !onK8sCellFilter ||
+          category !== 'kubernetes' ||
+          !isK8sInventoryFilterColumn(column.id, bucketKey)
+        ) {
+          return columnDef;
+        }
+        const columnLabel = k8sFilterColumnLabel(column.id);
+        return {
+          ...columnDef,
+          cellActions: buildInventoryFilterCellActions({
+            columnId: column.id,
+            columnLabel,
+            getRowValue: (rowIndex) => {
+              const entity = sortedRows[rowIndex];
+              if (!entity) return undefined;
+              return resolveK8sCellFilterTarget(column.id, entity, bucketKey)?.value;
+            },
+            onFilter: (rowIndex, mode) => {
+              const entity = sortedRows[rowIndex];
+              if (!entity) return;
+              const target = resolveK8sCellFilterTarget(column.id, entity, bucketKey);
+              if (!target) return;
+              onK8sCellFilter({ entity, target, mode });
+            },
+            dataGridRef,
+          }),
+        };
+      }),
+    [catalog, onK8sCellFilter, category, bucketKey, sortedRows, dataGridRef]
+  );
 
   const tableKey = bucketKey ?? category;
   const [pageIndex, setPageIndex] = useState(0);
@@ -1097,6 +1149,7 @@ export const EntityDataGridSection = ({
         </>
       )}
       <EuiDataGrid
+        ref={dataGridRef}
         aria-label={i18n.translate('xpack.streams.entityCentricLab.entities.grid.ariaLabel', {
           defaultMessage: '{label} resources',
           values: { label: captionLabel },

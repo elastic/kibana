@@ -38,6 +38,8 @@ import { labThings } from '../lab_terminology';
 import { readPageSizeForTable, writePageSizeForTable } from './storage_keys';
 import { CLOUD_PROVIDERS, type CloudProviderDescriptor } from './cloud_providers';
 import { EntityDataGridSection } from './entities_data_grid';
+import type { InventoryCellFilterMode } from './inventory_data_grid_cell_actions';
+import type { K8sCellFilterTarget } from './k8s_inventory_cell_filter';
 import { DEFAULT_LIST_DENSITY, type ListDensity } from './list_density';
 import {
   ColumnHeaderWithInfo,
@@ -101,6 +103,12 @@ interface Props {
   readonly hideCategoryHeader?: boolean;
   /** Page-level density from Display options (shared by every table). */
   readonly density?: ListDensity;
+  /** K8s category page: filter for / filter out on table cells. */
+  readonly onK8sCellFilter?: (args: {
+    readonly entity: Entity;
+    readonly target: K8sCellFilterTarget;
+    readonly mode: InventoryCellFilterMode;
+  }) => void;
 }
 
 const HEALTH_BADGE_COLOR: Record<EntityHealth, 'success' | 'warning' | 'danger'> = {
@@ -812,6 +820,7 @@ export const EntitiesListView = ({
   customGroupBy,
   hideCategoryHeader = false,
   density = DEFAULT_LIST_DENSITY,
+  onK8sCellFilter,
 }: Props) => {
   const columns = useColumns(onSelectEntity, onSelectEntityAlerts);
   // `undefined` keeps the built-in Category → Type layout; an empty array means
@@ -1245,6 +1254,7 @@ export const EntitiesListView = ({
                 onSelectEntityAlerts={onSelectEntityAlerts}
                 refreshTick={refreshTick}
                 density={density}
+                onK8sCellFilter={onK8sCellFilter}
               />
             ) : (
               <TableSection

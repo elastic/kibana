@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.09';
+export const PROTOTYPE_VERSION = '1.10';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-10-22',
+    summary:
+      'Discover-style filter for / filter out on Kubernetes inventory list grids.',
+    details:
+      'ElasticOn data grids on cluster, namespace, node, and deployment columns (plus name on those resource tables): plus/minus cell actions update page K8s dropdowns or search-bar phrase chips. Wired through Security grouping (default table style) and Default list layout. Bump to v1.10.',
+  },
   {
     date: '2026-10-21',
     summary:

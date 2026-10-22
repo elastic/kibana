@@ -197,6 +197,11 @@ import { MonitoringAssetsView } from './monitoring_assets_view';
 import { SavedViewsBar } from './saved_views_bar';
 import { SaveViewButton } from './save_view_button';
 import { compileEntityKql, entityMatchesFilters } from './entity_kql';
+import {
+  applyK8sInventoryCellFilter,
+  inventoryFiltersMatchNegation,
+  inventoryFiltersMatchPositive,
+} from './k8s_inventory_cell_filter';
 import { useEntityLabDataView } from './use_entity_lab_data_view';
 import { useEntityValueSuggestions } from './use_entity_value_suggestions';
 import { EntityErrorBoundary } from './entity_error_boundary';
@@ -2338,6 +2343,46 @@ const AllEntitiesViewInner = ({
     [k8sClusterNames, syncFlyoutShareParams]
   );
 
+  const handleK8sInventoryCellFilter = useCallback(
+    (args: Parameters<typeof applyK8sInventoryCellFilter>[0]) => {
+      applyK8sInventoryCellFilter({
+        ...args,
+        clusterNames: k8sClusterNames,
+        assignCluster: assignClusterForEntity,
+        setResourceTypeAll: () => setK8sResourceType(KUBERNETES_RESOURCE_TYPE_ALL),
+        setCluster: setK8sClusterFilter,
+        setNamespace: setK8sNamespaceFilter,
+        setDeployment: setK8sDeploymentFilter,
+        setNode: setK8sNodeFilter,
+        filterAll: KUBERNETES_FILTER_ALL,
+        appendLabFilter: (filter) => {
+          setLabFilters((prev) => {
+            const { kqlField, value } = args.target;
+            if (filter.meta?.negate) {
+              if (inventoryFiltersMatchNegation(prev, kqlField, value)) return prev;
+            } else if (inventoryFiltersMatchPositive(prev, kqlField, value)) {
+              return prev;
+            }
+            return [...prev, filter];
+          });
+        },
+        removeLabFilter: (field, value) => {
+          setLabFilters((prev) =>
+            prev.filter(
+              (f) =>
+                !(
+                  f.meta?.negate === true &&
+                  f.meta?.key === field &&
+                  (f.meta.params as { query?: string } | undefined)?.query === value
+                )
+            )
+          );
+        },
+      });
+    },
+    [k8sClusterNames]
+  );
+
   // Clicking a region on the Geomap toggles that region into the shared
   // `region` tag filter — same state the filter chips drive — so the
   // whole page (map + list) narrows to it. Clicking the already-sole
@@ -3394,6 +3439,9 @@ const AllEntitiesViewInner = ({
                     refreshTick={refreshTick}
                     categoryScope={categoryScope}
                     density={listDensity}
+                    onK8sCellFilter={
+                      isElasticOn ? handleK8sInventoryCellFilter : undefined
+                    }
                   />
                 ) : (
                   <EntitiesListView
@@ -3406,6 +3454,9 @@ const AllEntitiesViewInner = ({
                     customGroupBy={customGroupBy}
                     hideCategoryHeader={!!categoryScope}
                     density={listDensity}
+                    onK8sCellFilter={
+                      isElasticOn ? handleK8sInventoryCellFilter : undefined
+                    }
                   />
                 )}
                 </EntityErrorBoundary>
@@ -3610,6 +3661,9 @@ const AllEntitiesViewInner = ({
                     onSelectEntityAlerts={openEntityOnAlertsTab}
                     groupCloudByProvider={false}
                     density={listDensity}
+                    onK8sCellFilter={
+                      isElasticOn ? handleK8sInventoryCellFilter : undefined
+                    }
                   />
                 )}
                 </EntityErrorBoundary>

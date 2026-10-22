@@ -36,6 +36,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Entity, EntityCategoryId } from './fake_entities';
 import { EntityDataGridSection } from './entities_data_grid';
+import type { InventoryCellFilterMode } from './inventory_data_grid_cell_actions';
+import type { K8sCellFilterTarget } from './k8s_inventory_cell_filter';
 import { DEFAULT_LIST_DENSITY, type ListDensity } from './list_density';
 import type { GroupByFieldDef } from './entity_group_by';
 import {
@@ -237,6 +239,7 @@ const ChildAccordion = ({
   onSelectEntityAlerts,
   refreshTick,
   density,
+  onK8sCellFilter,
 }: {
   bucket: GroupBucket;
   parentIndex: number;
@@ -245,6 +248,11 @@ const ChildAccordion = ({
   onSelectEntityAlerts?: (entityName: string) => void;
   refreshTick?: number;
   density: ListDensity;
+  onK8sCellFilter?: (args: {
+    readonly entity: Entity;
+    readonly target: K8sCellFilterTarget;
+    readonly mode: InventoryCellFilterMode;
+  }) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
   const accordionId = useGeneratedHtmlId({
@@ -286,6 +294,7 @@ const ChildAccordion = ({
                 onSelectEntityAlerts={onSelectEntityAlerts}
                 refreshTick={refreshTick}
                 density={density}
+                onK8sCellFilter={onK8sCellFilter}
               />
             </React.Fragment>
           ))}
@@ -300,6 +309,7 @@ const ChildAccordion = ({
           onSelectEntityAlerts={onSelectEntityAlerts}
           refreshTick={refreshTick}
           density={density}
+          onK8sCellFilter={onK8sCellFilter}
         />
       )}
     </EuiAccordion>
@@ -318,6 +328,7 @@ const GroupAccordion = ({
   refreshTick,
   categoryScope,
   density,
+  onK8sCellFilter,
 }: {
   bucket: GroupBucket;
   index: number;
@@ -326,6 +337,11 @@ const GroupAccordion = ({
   refreshTick?: number;
   categoryScope?: EntityCategoryId;
   density: ListDensity;
+  onK8sCellFilter?: (args: {
+    readonly entity: Entity;
+    readonly target: K8sCellFilterTarget;
+    readonly mode: InventoryCellFilterMode;
+  }) => void;
 }) => {
   const accordionId = useGeneratedHtmlId({
     prefix: 'securityGrouping',
@@ -459,6 +475,7 @@ const GroupAccordion = ({
                 onSelectEntityAlerts={onSelectEntityAlerts}
                 refreshTick={refreshTick}
                 density={density}
+                onK8sCellFilter={onK8sCellFilter}
               />
             </React.Fragment>
           ))}
@@ -472,6 +489,7 @@ const GroupAccordion = ({
           onSelectEntityAlerts={onSelectEntityAlerts}
           refreshTick={refreshTick}
           density={density}
+          onK8sCellFilter={onK8sCellFilter}
         />
       )}
     </EuiAccordion>
@@ -496,6 +514,11 @@ interface Props {
   readonly categoryScope?: EntityCategoryId;
   /** Page-level density from Display options (shared by every table). */
   readonly density?: ListDensity;
+  readonly onK8sCellFilter?: (args: {
+    readonly entity: Entity;
+    readonly target: K8sCellFilterTarget;
+    readonly mode: InventoryCellFilterMode;
+  }) => void;
 }
 
 export const SecurityGroupingView = ({
@@ -507,6 +530,7 @@ export const SecurityGroupingView = ({
   refreshTick,
   categoryScope,
   density = DEFAULT_LIST_DENSITY,
+  onK8sCellFilter,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const isUngrouped = activeGroupBy.length === 0;
@@ -544,6 +568,7 @@ export const SecurityGroupingView = ({
         onSelectEntityAlerts={onSelectEntityAlerts}
         refreshTick={refreshTick}
         density={density}
+        onK8sCellFilter={onK8sCellFilter}
       />
     );
   }
@@ -560,6 +585,7 @@ export const SecurityGroupingView = ({
             refreshTick={refreshTick}
             categoryScope={categoryScope}
             density={density}
+            onK8sCellFilter={onK8sCellFilter}
           />
           {index < buckets.length - 1 ? <EuiSpacer size="xs" /> : null}
         </React.Fragment>
