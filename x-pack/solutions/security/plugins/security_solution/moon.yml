@@ -321,6 +321,7 @@ dependsOn:
   - '@kbn/code-editor-mock'
   - '@kbn/test-es-server'
   - '@kbn/core-security-server'
+  - '@kbn/css-utils'
 tags:
   - plugin
   - prod
