@@ -8,14 +8,19 @@
 import expect from '@kbn/expect';
 import { OBSERVABILITY_PROJECT_SETTINGS } from '@kbn/serverless-observability-settings';
 import {
-  isEditorFieldSetting,
-  isGlobalSetting,
-} from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
-import {
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
+  ALERTING_V2_ENABLED_SETTING_ID,
+  DATA_FEDERATION_ENABLED_SETTING_ID,
+  OBSERVABILITY_APM_AWS_LAMBDA_PRICE_FACTOR_ID,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
 } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../ftr_provider_context';
+
+const GLOBAL_SETTINGS: string[] = [
+  ALERTING_V2_ENABLED_SETTING_ID,
+  DATA_FEDERATION_ENABLED_SETTING_ID,
+];
+const EDITOR_SETTINGS: string[] = [OBSERVABILITY_APM_AWS_LAMBDA_PRICE_FACTOR_ID];
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -41,11 +46,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('renders observability settings', () => {
       for (const settingId of OBSERVABILITY_PROJECT_SETTINGS) {
         // Global settings render on the Global Settings tab
-        if (isGlobalSetting(settingId)) {
+        if (GLOBAL_SETTINGS.includes(settingId)) {
           continue;
         }
         // Code editors don't have their test subjects rendered
-        if (isEditorFieldSetting(settingId)) {
+        if (EDITOR_SETTINGS.includes(settingId)) {
           continue;
         }
         // This setting is read only for the time being
