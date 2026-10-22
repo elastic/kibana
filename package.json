@@ -1759,7 +1759,7 @@
     "@kbn/code-editor-mock": "workspace:*",
     "@kbn/code-owners": "workspace:*",
     "@kbn/connector-cli": "workspace:*",
-    "@kbn/connector-contract-mock": "workspace:*",
+    "@kbn/connector-emulate": "workspace:*",
     "@kbn/content-list-docs": "workspace:*",
     "@kbn/content-list-mock-data": "workspace:*",
     "@kbn/content-list-scout": "workspace:*",
