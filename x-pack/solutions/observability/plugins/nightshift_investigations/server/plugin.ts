@@ -252,13 +252,13 @@ export class NightshiftInvestigationsPlugin
         investigationToolsEnabled: Boolean(plugins.agenticInvestigations),
         proposalsEnabled: Boolean(plugins.proposals),
         telemetryConnectorId,
-        telemetryConfig: config.sandbox,
         getCustomContextInstructions: ({ request, spaceId }) =>
           customContextClient.getInstructions(request, spaceId),
         logger: this.logger.get('custom_context'),
       };
       registerInvestigationAgentType(plugins.agentBuilder, {
         ...nightshiftAgentOptions,
+        telemetryConfig: config.sandbox,
         decisionTreesEnabled: this.decisionTreesEnabled,
       });
       if (this.decisionTreesEnabled) {
