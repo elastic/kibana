@@ -77,6 +77,8 @@ spaceTest.describe('Discover ES|QL editor', { tag: tags.deploymentAgnostic }, ()
     async ({ page, pageObjects }) => {
       const { discover, dataGrid, esqlEditor } = pageObjects;
 
+      // The default ES|QL query differs per deployment, so start from a known one.
+      await discover.writeAndSubmitEsqlQuery('from logstash-* | limit 100');
       await expect(dataGrid.getColumnHeader('@timestamp')).toBeVisible();
 
       // Typed into the editor but never submitted through the button: only the real
