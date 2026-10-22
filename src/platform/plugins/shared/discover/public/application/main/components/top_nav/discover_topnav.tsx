@@ -215,12 +215,12 @@ export const DiscoverTopNav = ({
   // The modal needs the data view list to know whether tabs that
   // have not been opened yet are time-based, which decides if "Store time" is offered.
   const onOpenSaveModal = useCallback(async () => {
-    await dispatch(internalStateActions.loadInitialDataViewList());
+    await dispatch(internalStateActions.loadDataViewListOnce());
     dispatch(internalStateActions.openSaveSessionModal({}));
   }, [dispatch]);
 
   const onOpenSaveAsModal = useCallback(async () => {
-    await dispatch(internalStateActions.loadInitialDataViewList());
+    await dispatch(internalStateActions.loadDataViewListOnce());
     dispatch(internalStateActions.openSaveSessionModal({ initialCopyOnSave: true }));
   }, [dispatch]);
 

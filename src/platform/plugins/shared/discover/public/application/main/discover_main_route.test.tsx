@@ -70,7 +70,7 @@ jest.mock('../../context_awareness/hooks/use_root_profile', () => ({
 }));
 
 function getServicesMock(
-  hasESData = true,
+  hasESData: boolean | Promise<boolean> = true,
   hasDataView = true,
   locationState?: MainHistoryLocationState,
   hasESQLDatasets = false
@@ -81,7 +81,6 @@ function getServicesMock(
     hasUserDataView: jest.fn(),
     hasDataView: jest.fn(() => Promise.resolve(hasDataView)),
   };
-  dataViewsMock.defaultDataViewExists = jest.fn(async () => hasDataView);
   dataViewsMock.getDefaultDataView = jest.fn(async () => (hasDataView ? dataViewMock : null));
   dataViewsMock.getIdsWithTitle = jest.fn(async () => (hasDataView ? [dataViewListItem] : []));
   dataViewsMock.create = jest.fn().mockResolvedValue(dataViewMock);
@@ -113,7 +112,7 @@ const setupComponent = ({
   stateStorageContainer,
   dataViewList,
 }: {
-  hasESData?: boolean;
+  hasESData?: boolean | Promise<boolean>;
   hasDataView?: boolean;
   locationState?: MainHistoryLocationState;
   onAppLeave?: AppMountParameters['onAppLeave'];
@@ -283,6 +282,25 @@ describe('DiscoverMainRoute', () => {
     expect(screen.getByTestId('discover-main-app')).toBeVisible();
   });
 
+  test.each<Query | AggregateQuery>([{ language: 'kuery', query: '' }, { esql: 'ROW value = 1' }])(
+    'opens with query %j before the ES data check finishes when data views exist',
+    async (query) => {
+      const stateStorageContainer = await createUrlStateWithQuery(query);
+      const esData = Promise.withResolvers<boolean>();
+
+      setupComponent({ hasESData: esData.promise, stateStorageContainer });
+      await waitForLoad();
+
+      expect(screen.getByTestId('discover-main-app')).toBeVisible();
+
+      await act(async () => {
+        esData.resolve(false);
+      });
+
+      expect(screen.getByTestId('discover-main-app')).toBeVisible();
+    }
+  );
+
   test('renders no data page when hasESData=false & hasDataView=false', async () => {
     setupComponent({ hasESData: false, hasDataView: false });
 
@@ -379,6 +397,7 @@ describe('DiscoverMainRoute', () => {
     await waitForLoad();
 
     expect(screen.getByTestId('discover-main-app')).toBeVisible();
+    expect(discoverServiceMock.dataViews.defaultDataViewExists).not.toHaveBeenCalled();
   });
 
   test('waits for the data view list before opening a classic tab', async () => {

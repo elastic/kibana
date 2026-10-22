@@ -430,8 +430,8 @@ describe('Discover state', () => {
 
       services.dataViews.getIdsWithTitle = jest.fn(async () => []);
 
-      const firstRequest = internalState.dispatch(internalStateActions.loadInitialDataViewList());
-      const secondRequest = internalState.dispatch(internalStateActions.loadInitialDataViewList());
+      const firstRequest = internalState.dispatch(internalStateActions.loadDataViewListOnce());
+      const secondRequest = internalState.dispatch(internalStateActions.loadDataViewListOnce());
 
       expect(secondRequest).toBe(firstRequest);
 

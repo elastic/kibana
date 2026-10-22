@@ -178,7 +178,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
 
   useEffect(() => {
     loadDataAvailability();
-    dispatch(internalStateActions.loadInitialDataViewList());
+    dispatch(internalStateActions.loadDataViewListOnce());
   }, [dispatch, loadDataAvailability]);
 
   useEffect(() => {
@@ -311,18 +311,22 @@ const fetchDataAvailability = async ({
   core,
   dataViews,
 }: DiscoverServices): Promise<DataAvailability> => {
-  const [hasESData, hasDataView, defaultDataViewExists, hasESQLDatasets] = await Promise.all([
-    dataViews.hasData.hasESData().catch(() => false),
-    dataViews.hasData.hasDataView().catch(() => false),
-    dataViews.defaultDataViewExists().catch(() => false),
-    core.http
-      .get<EsqlDatasetsResult>(DATASETS_ROUTE)
-      .then(({ datasets }) => datasets.length > 0)
-      .catch(() => false),
-  ]);
+  const esDataRequest = dataViews.hasData.hasESData().catch(() => false);
+  const esqlDatasetsRequest = core.http
+    .get<EsqlDatasetsResult>(DATASETS_ROUTE)
+    .then(({ datasets }) => datasets.length > 0)
+    .catch(() => false);
+  const hasDataView = await dataViews.hasData.hasDataView().catch(() => false);
+
+  if (hasDataView) {
+    // With a data view, neither onboarding check needs the ES data result.
+    return { hasESData: true, hasDataView };
+  }
+
+  const [hasESData, hasESQLDatasets] = await Promise.all([esDataRequest, esqlDatasetsRequest]);
 
   return {
     hasESData: hasESData || hasESQLDatasets,
-    hasDataView: hasDataView && defaultDataViewExists,
+    hasDataView,
   };
 };
