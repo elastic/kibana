@@ -8,11 +8,7 @@
  */
 
 import type { OpenApiDocument } from '@kbn/connector-emulate';
-import {
-  convertDiscovery,
-  convertSwagger2,
-  isDiscoveryDocument,
-} from '@kbn/connector-emulate';
+import { convertDiscovery, convertSwagger2, isDiscoveryDocument } from '@kbn/connector-emulate';
 import { bundleSpec } from './bundle_spec';
 import { isJsonObject } from './json_pointer';
 import type { ManifestSource } from './manifest';
