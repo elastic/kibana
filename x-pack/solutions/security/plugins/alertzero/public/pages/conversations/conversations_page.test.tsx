@@ -424,11 +424,11 @@ describe('ConversationsPage details flyout', () => {
       expect(agentBuilder.openConversationDetails).not.toHaveBeenCalled();
     });
 
-    it('leaves the card inert and hides its chat control', () => {
+    it('leaves the card inert and disables its chat control', () => {
       const { history } = renderPage('/', { agentBuilderShow: false });
 
       expect(screen.queryByRole('button', { name: proposal.title })).not.toBeInTheDocument();
-      expect(screen.queryByTestId('conversationCardOpenInChat')).not.toBeInTheDocument();
+      expect(screen.getByTestId('conversationCardOpenInChat')).toBeDisabled();
       expect(history.location.search).toBe('');
     });
   });

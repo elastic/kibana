@@ -69,8 +69,8 @@ interface ConversationQueueProps {
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
-  /** When false, cards are inert and their chat control is hidden. Defaults to true. */
-  canOpenInvestigationDetails?: boolean;
+  /** When set, cards are inert and their chat control is disabled with this as its tooltip. */
+  unavailableReason?: string;
   onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
   /** A function, not a value: the URL is per-card and only the caller can resolve it. */
   getChatHref?: (id: Investigation['id']) => string | undefined;
@@ -128,7 +128,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     onClickCard,
     onClickRecommendedAction,
     onOpenChat,
-    canOpenInvestigationDetails = true,
+    unavailableReason,
     getChatHref,
     getOutcomeLabel,
     selectedIds,
@@ -203,7 +203,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
             onClickAction,
             onClickCard,
             onOpenChat,
-            canOpenInvestigationDetails,
+            unavailableReason,
             onClickRecommendedAction,
             chatHref: getChatHref?.(investigation.id),
             canManageEscalations,

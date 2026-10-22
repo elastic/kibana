@@ -58,8 +58,8 @@ interface ConversationCardCompactProps {
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
-  /** When false the card is inert and its chat control is hidden. Defaults to true. */
-  canOpenInvestigationDetails?: boolean;
+  /** When false the card is inert and the chat control is disabled, with this as its tooltip. */
+  unavailableReason?: string;
   chatHref?: string;
   onCopyLink: BaseActionsProps['onCopyLink'];
 }
@@ -77,32 +77,33 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
     onClickAction,
     onClickCard,
     onOpenChat,
-    canOpenInvestigationDetails = true,
+    unavailableReason,
     chatHref,
     onCopyLink,
   }) => {
     const { euiTheme } = useEuiTheme();
+    const isClickable = !unavailableReason;
     const { proposalDecidedAt } = investigation;
 
     return (
       <StyledEuiPanel
         paddingSize="none"
-        role={canOpenInvestigationDetails ? 'button' : undefined}
-        tabIndex={canOpenInvestigationDetails ? 0 : undefined}
+        role={isClickable ? 'button' : undefined}
+        tabIndex={isClickable ? 0 : undefined}
         aria-label={investigation.title}
         aria-current={isSelected || undefined}
         borderRadius="none"
         $isSelected={isSelected}
         hasBorder={false}
         hasShadow={false}
-        onClick={canOpenInvestigationDetails ? () => onClickCard(investigation.id) : undefined}
+        onClick={isClickable ? () => onClickCard(investigation.id) : undefined}
         onKeyDown={(event: React.KeyboardEvent) => {
           // Only the panel itself: the nested controls handle their own keys, and
           // preventDefault here would swallow them.
           if (event.target !== event.currentTarget) {
             return;
           }
-          if (canOpenInvestigationDetails && (event.key === 'Enter' || event.key === ' ')) {
+          if (isClickable && (event.key === 'Enter' || event.key === ' ')) {
             event.preventDefault();
             onClickCard(investigation.id);
           }
@@ -165,7 +166,7 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
                   onClickAction={onClickAction}
                   onOpenChat={() => onOpenChat(investigation.id)}
                   chatHref={chatHref}
-                  canOpenChat={canOpenInvestigationDetails}
+                  chatDisabledReason={unavailableReason}
                   onCopyLink={onCopyLink}
                 />
               </EuiFlexItem>
