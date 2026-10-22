@@ -203,6 +203,16 @@ export {
   assignConversationRequestParamsSchema,
 } from './assignments/assignment';
 export type { AssignConversationRequest } from './assignments/assignment';
+export {
+  ASSIGNEES_CHANGED_EVENT_TYPE,
+  assigneesChangedEventSchema,
+} from './assignments/conversation_events';
+export type { AssigneesChangedEventData } from './assignments/conversation_events';
+export {
+  STATUS_CHANGED_EVENT_TYPE,
+  statusChangedEventSchema,
+} from './investigations/conversation_events';
+export type { StatusChangedEventData } from './investigations/conversation_events';
 
 export type {
   CreateEscalationRequest,

@@ -8,6 +8,8 @@
 import React from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigations-common';
+import { registerAssignmentConversationEventUiDefinitions } from './assignments/conversation_events';
+import { registerStatusConversationEventUiDefinitions } from './investigations/conversation_events';
 import { registerEscalationConversationEventUiDefinitions } from './escalations/conversation_events';
 import { registerImpactAttachmentTypes } from './impact/attachments';
 import { registerSubjectAttachmentTypes } from './subjects/attachments';
@@ -83,6 +85,13 @@ export class AgenticInvestigationsPublicPlugin
     const { agentBuilder } = startDeps;
     if (agentBuilder) {
       registerImpactAttachmentTypes(agentBuilder, () => this.impactEntityOpener);
+      registerAssignmentConversationEventUiDefinitions({
+        conversationEvents: agentBuilder.conversationEvents,
+        core,
+      });
+      registerStatusConversationEventUiDefinitions({
+        conversationEvents: agentBuilder.conversationEvents,
+      });
       if (this.escalationsEnabled) {
         registerEscalationConversationEventUiDefinitions({
           conversationEvents: agentBuilder.conversationEvents,

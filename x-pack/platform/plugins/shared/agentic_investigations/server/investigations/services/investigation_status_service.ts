@@ -9,6 +9,8 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { DismissReason } from '@kbn/proposals-common';
+import { addTimelineEvent } from '../../conversation_events/add_timeline_event';
+import { STATUS_CHANGED_EVENT_TYPE } from '../../../common/investigations/conversation_events';
 import { INVESTIGATION_TEMPLATE_ID } from '../../../common/escalations/constants';
 import { WrongTemplateError } from '../../assignments/assignments_service';
 import type {
@@ -343,6 +345,22 @@ export class InvestigationStatusService {
       { status: body.status },
       { access: 'converse' }
     );
+
+    const previousStatus = conversation.metadata?.status;
+    if (previousStatus !== body.status) {
+      await addTimelineEvent({
+        client,
+        conversationId,
+        type: STATUS_CHANGED_EVENT_TYPE,
+        data: {
+          ...(previousStatus === 'open' || previousStatus === 'closed'
+            ? { from: previousStatus }
+            : {}),
+          to: body.status,
+        },
+        logger: this.logger,
+      });
+    }
 
     return {
       conversation_id: updated.id,

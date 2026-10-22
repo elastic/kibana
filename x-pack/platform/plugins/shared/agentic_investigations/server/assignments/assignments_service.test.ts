@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
   ConversationAccessControlMode,
@@ -40,14 +41,16 @@ const makeClient = (overrides: Record<string, jest.Mock> = {}) => ({
   addAccessControlEntries: jest.fn().mockResolvedValue({}),
   removeAccessControlEntries: jest.fn().mockResolvedValue({}),
   patchMetadata: jest.fn().mockResolvedValue({ conversation: MOCK_CONVERSATION_PUBLIC }),
+  addEvents: jest.fn().mockResolvedValue([]),
   ...overrides,
 });
 
 const makeService = (clientMock: ReturnType<typeof makeClient>) => {
   const getConversationClient = jest.fn().mockResolvedValue(clientMock);
-  return new AssignmentsService({ getConversationClient });
+  return new AssignmentsService({ getConversationClient, logger });
 };
 
+const logger = loggingSystemMock.createLogger();
 const request = httpServerMock.createKibanaRequest();
 
 describe('AssignmentsService.assign', () => {
@@ -350,10 +353,10 @@ describe('AssignmentsService.assign', () => {
     expect(client.removeAccessControlEntries).not.toHaveBeenCalled();
   });
 
-  it('returns the conversation from patchMetadata', async () => {
-    const updatedConv = { ...MOCK_CONVERSATION_PUBLIC, metadata: { assignees: ['user-1'] } };
+  it('returns the conversation re-read after the timeline events are written', async () => {
+    const reread = { ...MOCK_CONVERSATION_PUBLIC, metadata: { assignees: ['user-1'] } };
     const client = makeClient({
-      patchMetadata: jest.fn().mockResolvedValue({ conversation: updatedConv }),
+      get: jest.fn().mockResolvedValueOnce(MOCK_CONVERSATION_PUBLIC).mockResolvedValueOnce(reread),
     });
     const service = makeService(client);
 
@@ -364,6 +367,90 @@ describe('AssignmentsService.assign', () => {
       expectedTemplate: 'escalation',
     });
 
-    expect(result).toBe(updatedConv);
+    expect(result).toBe(reread);
+  });
+
+  it('falls back to the patched conversation when the caller can no longer read it', async () => {
+    const patchedConv = { ...MOCK_CONVERSATION_PUBLIC, metadata: { assignees: [] } };
+    const client = makeClient({
+      get: jest
+        .fn()
+        .mockResolvedValueOnce(MOCK_CONVERSATION_PUBLIC)
+        .mockRejectedValueOnce(new Error('forbidden')),
+      patchMetadata: jest.fn().mockResolvedValue({ conversation: patchedConv }),
+    });
+    const service = makeService(client);
+
+    const result = await service.assign({
+      request,
+      conversationId: 'conv-1',
+      assignees: [],
+      expectedTemplate: 'escalation',
+    });
+
+    expect(result).toBe(patchedConv);
+  });
+
+  it('records the assignee diff on the timeline after patching, before re-reading', async () => {
+    const calls: string[] = [];
+    const client = makeClient({
+      get: jest.fn().mockImplementation(async () => {
+        calls.push('get');
+        return { ...MOCK_CONVERSATION_PUBLIC, metadata: { assignees: ['user-2'] } };
+      }),
+      patchMetadata: jest.fn().mockImplementation(async () => {
+        calls.push('patch');
+        return { conversation: MOCK_CONVERSATION_PUBLIC };
+      }),
+      addEvents: jest.fn().mockImplementation(async () => {
+        calls.push('event');
+        return [];
+      }),
+    });
+
+    await makeService(client).assign({
+      request,
+      conversationId: 'conv-1',
+      assignees: ['user-1'],
+      expectedTemplate: 'escalation',
+    });
+
+    expect(client.addEvents).toHaveBeenCalledWith({
+      conversationId: 'conv-1',
+      events: [{ type: 'assignees_changed', data: { added: ['user-1'], removed: ['user-2'] } }],
+    });
+    expect(calls).toEqual(['get', 'patch', 'event', 'get']);
+  });
+
+  it('writes no event when the assignees did not change', async () => {
+    const client = makeClient({
+      get: jest.fn().mockResolvedValue({
+        ...MOCK_CONVERSATION_PUBLIC,
+        metadata: { assignees: ['user-1'] },
+      }),
+    });
+
+    await makeService(client).assign({
+      request,
+      conversationId: 'conv-1',
+      assignees: ['user-1'],
+      expectedTemplate: 'escalation',
+    });
+
+    expect(client.addEvents).not.toHaveBeenCalled();
+  });
+
+  it('does not fail the assignment when the event cannot be written', async () => {
+    const client = makeClient({ addEvents: jest.fn().mockRejectedValue(new Error('boom')) });
+
+    await expect(
+      makeService(client).assign({
+        request,
+        conversationId: 'conv-1',
+        assignees: ['user-1'],
+        expectedTemplate: 'escalation',
+      })
+    ).resolves.toBeDefined();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('assignees_changed'));
   });
 });

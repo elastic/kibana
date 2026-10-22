@@ -1681,3 +1681,37 @@ describe('EscalationsService.sync', () => {
     await expect(service.sync(request, 'inv-1')).rejects.toThrow(NotAnEscalationError);
   });
 });
+
+describe('EscalationsService.setStatus — timeline events', () => {
+  it('records the status change on the timeline after patching', async () => {
+    const { service, client } = makeService();
+    client.get.mockResolvedValue({
+      ...MOCK_ESCALATION,
+      template_id: ESCALATION_TEMPLATE_ID,
+      metadata: { status: 'closed' },
+    });
+
+    await service.setStatus(request, 'escalation-1', { status: 'open' } as never);
+
+    expect(client.addEvents).toHaveBeenCalledWith({
+      conversationId: 'escalation-1',
+      events: [{ type: 'status_changed', data: { from: 'closed', to: 'open' } }],
+    });
+    expect(client.patchMetadata.mock.invocationCallOrder[0]).toBeLessThan(
+      client.addEvents.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('writes no event when the status did not change', async () => {
+    const { service, client } = makeService();
+    client.get.mockResolvedValue({
+      ...MOCK_ESCALATION,
+      template_id: ESCALATION_TEMPLATE_ID,
+      metadata: { status: 'open' },
+    });
+
+    await service.setStatus(request, 'escalation-1', { status: 'open' } as never);
+
+    expect(client.addEvents).not.toHaveBeenCalled();
+  });
+});
