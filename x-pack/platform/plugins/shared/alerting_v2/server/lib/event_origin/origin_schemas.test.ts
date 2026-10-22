@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  RULE_EVENT_APP_MAX_LENGTH,
-  eventOriginSchema,
-  ruleChangedEventOriginSchema,
-  ruleEventAppSchema,
-  ruleEventOriginSchema,
-} from './origin_schemas';
+import { RULE_EVENT_APP_MAX_LENGTH, eventOriginSchema, ruleEventAppSchema } from './origin_schemas';
 
 describe('ruleEventAppSchema', () => {
   it.each(['discover', 'observabilityAlerting', 'agent_builder', 'app.name:id'])(
@@ -63,50 +57,6 @@ describe('eventOriginSchema', () => {
   it('rejects an app outside the bound', () => {
     expect(
       eventOriginSchema.safeParse({ actor: 'user', channel: 'ui', app: 'not an app' }).success
-    ).toBe(false);
-  });
-});
-
-describe('ruleEventOriginSchema', () => {
-  it('accepts a channel without an app', () => {
-    expect(ruleEventOriginSchema.parse({ channel: 'api' })).toEqual({ channel: 'api' });
-  });
-
-  it('accepts a bounded app', () => {
-    expect(ruleEventOriginSchema.parse({ channel: 'ui', app: 'discover' })).toEqual({
-      channel: 'ui',
-      app: 'discover',
-    });
-  });
-
-  it('rejects an app outside the bound', () => {
-    expect(ruleEventOriginSchema.safeParse({ channel: 'ui', app: 'not an app' }).success).toBe(
-      false
-    );
-  });
-});
-
-describe('ruleChangedEventOriginSchema', () => {
-  it('requires an actor and a channel', () => {
-    expect(ruleChangedEventOriginSchema.parse({ actor: 'user', channel: 'api' })).toEqual({
-      actor: 'user',
-      channel: 'api',
-    });
-  });
-
-  it('accepts a bounded app', () => {
-    expect(
-      ruleChangedEventOriginSchema.parse({
-        actor: 'internal',
-        channel: 'ui',
-        app: 'discover',
-      })
-    ).toEqual({ actor: 'internal', channel: 'ui', app: 'discover' });
-  });
-
-  it('rejects an unknown actor', () => {
-    expect(
-      ruleChangedEventOriginSchema.safeParse({ actor: 'system', channel: 'api' }).success
     ).toBe(false);
   });
 });
