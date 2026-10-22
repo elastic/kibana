@@ -7,7 +7,7 @@
 
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { EventTypeOpts } from '@kbn/core/server';
-import type { RuleChangedEventOrigin } from '../event_origin/origin_schemas';
+import type { EventOrigin } from '../event_origin/origin_schemas';
 import {
   RULE_CREATED_EBT_EVENT_TYPE,
   RULE_DELETED_EBT_EVENT_TYPE,
@@ -146,16 +146,6 @@ export const ruleChangeTelemetryEvents: Array<EventTypeOpts<RuleChangedEbtData>>
     schema: ruleChangedEventSchema,
   }));
 
-const toEventOrigin = ({
-  actor,
-  channel,
-  app,
-}: RuleChangedEventOrigin): RuleChangedEventOrigin => ({
-  actor,
-  channel,
-  ...(app ? { app } : {}),
-});
-
 const updatedFieldsPayload = (
   updatedFields: readonly string[] | undefined
 ): Pick<RuleChangedEbtData, 'updated_fields'> =>
@@ -164,15 +154,14 @@ const updatedFieldsPayload = (
 /** Projects a rule-change telemetry payload. Rule fields are omitted when `rule` is absent. */
 export const buildRuleChangedEventData = (
   rule: RuleResponse | undefined,
-  origin: RuleChangedEventOrigin,
+  origin: EventOrigin,
   ruleId: string,
   updatedFields?: readonly string[]
 ): RuleChangedEbtData => {
-  const eventOrigin = toEventOrigin(origin);
   const fields = updatedFieldsPayload(updatedFields);
 
   if (!rule) {
-    return { rule_id: ruleId, ...fields, origin: eventOrigin };
+    return { rule_id: ruleId, ...fields, origin };
   }
 
   const { kind, enabled, created_at: createdAt, metadata } = rule;
@@ -187,6 +176,6 @@ export const buildRuleChangedEventData = (
     ...(builderType ? { builder_type: builderType } : {}),
     enabled,
     ...fields,
-    origin: eventOrigin,
+    origin,
   };
 };

@@ -12,6 +12,10 @@ describe('stripPolicyIdVersionSuffix', () => {
     expect(stripPolicyIdVersionSuffix('policy-1#9.4')).toBe('policy-1');
   });
 
+  it('strips the sentinel suffix', () => {
+    expect(stripPolicyIdVersionSuffix('policy-1#sentinel')).toBe('policy-1');
+  });
+
   it('strips a multi-digit minor version suffix', () => {
     expect(stripPolicyIdVersionSuffix('policy-1#9.10')).toBe('policy-1');
   });

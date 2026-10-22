@@ -65,6 +65,4 @@ fileGroups:
     - server/**/*
     - public/react_embeddable_system/embeddable_renderer_context.tsx
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

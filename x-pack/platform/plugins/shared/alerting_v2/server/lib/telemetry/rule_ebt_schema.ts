@@ -7,7 +7,7 @@
 
 import { isoDateTime, lazySchema, z } from '@kbn/zod/v4';
 import { ID_MAX_LENGTH, ruleIdSchema, ruleKindSchema } from '@kbn/alerting-v2-schemas';
-import { ruleChangedEventOriginSchema } from '../event_origin/origin_schemas';
+import { eventOriginSchema } from '../event_origin/origin_schemas';
 
 export const RULE_CREATED_EBT_EVENT_TYPE = 'alerting_v2_rule_created' as const;
 export const RULE_UPDATED_EBT_EVENT_TYPE = 'alerting_v2_rule_updated' as const;
@@ -76,7 +76,7 @@ export const ruleChangedTelemetryDataSchema = lazySchema(() =>
       .describe(
         'Dotted paths of rule fields whose values differ on a rule update. A nested object is reported at the leaf that changed; an array is reported as one path. Omitted when none differ, and on create, delete, enable, and disable.'
       ),
-    origin: ruleChangedEventOriginSchema.describe('Where the change came from.'),
+    origin: eventOriginSchema.describe('Where the change came from.'),
   })
 );
 
