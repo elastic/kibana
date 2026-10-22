@@ -612,6 +612,29 @@ describe('DataGrid', () => {
       );
     });
 
+    it('tells the cell actions the 0-based position of their column, like renderCell', async () => {
+      const actionColIndexes: number[] = [];
+      const PositionAction = ({ colIndex, Component }: EuiDataGridColumnCellActionProps) => {
+        actionColIndexes.push(colIndex);
+        return <Component iconType="number" aria-label="Position" />;
+      };
+      const renderCell = jest.fn(({ row }: { row: TestRow }) => row.value);
+      render(
+        <DataGrid
+          {...defaultProps}
+          rows={[mockRows[0]]}
+          columns={[columns[0], { ...columns[1], cellActions: [PositionAction], renderCell }]}
+        />
+      );
+      const valueCell = getCell('valueA');
+      await userEvent.hover(valueCell);
+      await openCellActionsBubble(valueCell);
+
+      expect(renderCell).toHaveBeenCalledWith(expect.objectContaining({ colIndex: 2 }));
+      expect(actionColIndexes.length).toBeGreaterThan(0);
+      expect(new Set(actionColIndexes)).toEqual(new Set([2]));
+    });
+
     it('does not offer to expand cells of a column that is not expandable', async () => {
       render(
         <DataGrid
@@ -861,6 +884,29 @@ describe('DataGrid', () => {
 
       await userEvent.click(within(await openMenu('name')).getByTestId('gridHideColumn'));
       expect(onHideColumn).toHaveBeenCalledWith('name');
+    });
+
+    it('only disables moving past the first and last data column, not the control columns', async () => {
+      const trailingControlColumns: Array<DataGridControlColumn<TestRow>> = [
+        { id: 'trailing', header: 'Trailing', width: 32, renderCell: () => 'trailing' },
+      ];
+      render(
+        <DataGrid
+          {...defaultProps}
+          columns={sortableColumns}
+          trailingControlColumns={trailingControlColumns}
+          onMoveColumn={jest.fn()}
+        />
+      );
+
+      const nameMenu = await openMenu('name');
+      expect(within(nameMenu).getByTestId('gridMoveColumnLeft')).toBeDisabled();
+      expect(within(nameMenu).getByTestId('gridMoveColumnRight')).toBeEnabled();
+      await userEvent.keyboard('{Escape}');
+
+      const valueMenu = await openMenu('value');
+      expect(within(valueMenu).getByTestId('gridMoveColumnLeft')).toBeEnabled();
+      expect(within(valueMenu).getByTestId('gridMoveColumnRight')).toBeDisabled();
     });
 
     it('offers additional actions, and opens the menu with Enter on the header', async () => {

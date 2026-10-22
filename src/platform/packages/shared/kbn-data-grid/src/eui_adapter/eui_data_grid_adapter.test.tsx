@@ -338,6 +338,30 @@ describe('EuiDataGridAdapter', () => {
       expect(document.getElementById('grid')).not.toHaveClass('euiDataGrid--fullScreen');
       expect(onFullScreenChange).toHaveBeenLastCalledWith(false);
     });
+
+    it('leaves full screen with Escape on a focused cell', async () => {
+      render(<EuiDataGridAdapter {...getProps({ id: 'grid' })} />);
+      await userEvent.click(screen.getByTestId('dataGridFullScreenButton'));
+
+      const cell = screen.getByText('alpha').closest<HTMLElement>('[role="gridcell"]')!;
+      act(() => cell.focus());
+      await userEvent.keyboard('{Escape}');
+      expect(document.getElementById('grid')).not.toHaveClass('euiDataGrid--fullScreen');
+    });
+
+    it('stays full screen when Escape is pressed outside of it, e.g. in a flyout', async () => {
+      render(
+        <>
+          <EuiDataGridAdapter {...getProps({ id: 'grid' })} />
+          <button data-test-subj="outside">outside</button>
+        </>
+      );
+      await userEvent.click(screen.getByTestId('dataGridFullScreenButton'));
+
+      act(() => screen.getByTestId('outside').focus());
+      await userEvent.keyboard('{Escape}');
+      expect(document.getElementById('grid')).toHaveClass('euiDataGrid--fullScreen');
+    });
   });
 
   describe('cell popover', () => {
@@ -417,5 +441,16 @@ describe('EuiDataGridAdapter', () => {
     const onColumnResize = jest.fn();
     const { container } = render(<EuiDataGridAdapter {...getProps({ onColumnResize })} />);
     expect(container.querySelectorAll('[role="presentation"]').length).toBeGreaterThan(0);
+  });
+
+  it('reports a reset column, so a consumer that stores the width can drop it', async () => {
+    const onColumnResize = jest.fn();
+    render(<EuiDataGridAdapter {...getProps({ onColumnResize })} />);
+    const resizeHandle = screen
+      .getByTestId('dataGridHeaderCell-count')
+      .querySelector<HTMLElement>('[role="presentation"]')!;
+
+    await userEvent.dblClick(resizeHandle);
+    expect(onColumnResize).toHaveBeenLastCalledWith({ columnId: 'count', width: undefined });
   });
 });

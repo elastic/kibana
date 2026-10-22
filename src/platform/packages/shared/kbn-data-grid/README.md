@@ -81,8 +81,9 @@ The toolbar controls (column selector, sort selector, display options, keyboard 
 and the pagination are exported as building blocks. `EuiDataGridAdapter` puts the grid, the toolbar and
 the pagination together and takes the props of `EuiDataGrid`: columns, `columnVisibility`, control
 columns, `renderCellValue` and `cellContext`, `renderCellPopover`, `sorting`, `pagination`,
-`toolbarVisibility` and `renderCustomToolbar`, `gridStyle`, `rowHeightsOptions`, `onColumnResize`,
-`virtualizationOptions` and the ref methods. A table that describes itself to `EuiDataGrid` can move to
+`toolbarVisibility` and `renderCustomToolbar`, `gridStyle`, `rowHeightsOptions`, `onColumnResize`
+(also called with `width: undefined` when a column is reset), `virtualizationOptions` and the ref
+methods. A table that describes itself to `EuiDataGrid` can move to
 the new grid by swapping the component, the flag decides which one renders:
 
 ```tsx

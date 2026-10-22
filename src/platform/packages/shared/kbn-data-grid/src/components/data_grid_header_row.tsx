@@ -45,12 +45,17 @@ export const DataGridHeaderRow = <TRow,>({
   const { columns, layouts, leading, middle, trailing, startSpacer, endSpacer, totalWidth } =
     slices;
 
+  // Moving a column is limited to the data columns, the control columns stay where they are.
+  const leadingControlCount = columns.findIndex(({ isControl }) => !isControl);
+  const dataColumnCount = columns.filter(({ isControl }) => !isControl).length;
+
   const renderHeaderCell = (columnIndex: number) => (
     <DataGridHeaderCell
       key={columns[columnIndex].id}
       column={columns[columnIndex]}
       columnIndex={columnIndex}
-      columnCount={columns.length}
+      dataColumnIndex={columnIndex - Math.max(leadingControlCount, 0)}
+      dataColumnCount={dataColumnCount}
       layout={layouts[columnIndex]}
       styles={styles}
       isTabStop={columnIndex + 1 === tabStopColIndex}

@@ -118,8 +118,6 @@ interface CellContentProps<TRow> {
   column: DataGridInternalColumn<TRow>;
   row: TRow;
   rowIndex: number;
-  /** 1-based, matching `aria-colindex`. */
-  ariaColIndex: number;
   /** Position of the column among all columns, starting at 0. */
   colIndex: number;
   // Whether the cell is hovered or focused, so the comparatively heavy cell actions only mount for it.
@@ -136,7 +134,6 @@ const CellContent = <TRow,>({
   column,
   row,
   rowIndex,
-  ariaColIndex,
   colIndex,
   isActive,
   anchorRef,
@@ -170,7 +167,7 @@ const CellContent = <TRow,>({
   const actions = useMemo<CellActionsBubbleAction[]>(() => {
     const sharedActionProps = {
       rowIndex,
-      colIndex: ariaColIndex,
+      colIndex,
       columnId,
       isExpanded: false as const,
     };
@@ -207,15 +204,7 @@ const CellContent = <TRow,>({
           ]
         : []),
     ];
-  }, [
-    cellActions,
-    visibleCellActions,
-    isExpandable,
-    ariaColIndex,
-    columnId,
-    onExpandClick,
-    rowIndex,
-  ]);
+  }, [cellActions, visibleCellActions, isExpandable, colIndex, columnId, onExpandClick, rowIndex]);
 
   return (
     <>
@@ -246,7 +235,6 @@ const CellContent = <TRow,>({
           column={column}
           row={row}
           rowIndex={rowIndex}
-          ariaColIndex={ariaColIndex}
           colIndex={colIndex}
           anchorRect={anchorRect}
           anchorRef={anchorRef}
@@ -425,7 +413,6 @@ const DataGridCellComponent = <TRow,>({
           column={column}
           row={row}
           rowIndex={rowIndex}
-          ariaColIndex={colIndex}
           colIndex={colIndex - 1}
           isActive={isHovered || hasFocus}
           anchorRef={cellRef}

@@ -39,8 +39,6 @@ interface CellPopoverProps<TRow> {
   column: DataGridInternalColumn<TRow>;
   row: TRow;
   rowIndex: number;
-  /** 1-based, matching `aria-colindex`. */
-  ariaColIndex: number;
   /** Position of the column among all columns, starting at 0. */
   colIndex: number;
   /** Viewport rect of what opened the popover. */
@@ -60,7 +58,6 @@ export const CellPopover = <TRow,>({
   column,
   row,
   rowIndex,
-  ariaColIndex,
   colIndex,
   anchorRect,
   anchorRef,
@@ -101,7 +98,7 @@ export const CellPopover = <TRow,>({
               <EuiFlexItem key={idx} grow={false}>
                 <Action
                   rowIndex={rowIndex}
-                  colIndex={ariaColIndex}
+                  colIndex={colIndex}
                   columnId={columnId}
                   Component={CellActionPopoverButton}
                   isExpanded

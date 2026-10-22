@@ -28,15 +28,17 @@ import { getLayoutStyle } from './data_grid_cell';
 
 interface HeaderMenuParams<TRow> {
   column: DataGridInternalColumn<TRow>;
-  /** 0-based position among all columns. */
-  columnIndex: number;
-  columnCount: number;
+  /** 0-based position among the data columns, without the control columns. */
+  dataColumnIndex: number;
+  dataColumnCount: number;
   sorting?: DataGridProps<TRow>['sorting'];
   onMoveColumn?: DataGridProps<TRow>['onMoveColumn'];
   onHideColumn?: DataGridProps<TRow>['onHideColumn'];
 }
 
 interface DataGridHeaderCellProps<TRow> extends HeaderMenuParams<TRow> {
+  /** 0-based position among all columns. */
+  columnIndex: number;
   layout: ColumnLayout;
   styles: DataGridStyles;
   isTabStop: boolean;
@@ -89,8 +91,8 @@ const hasHeaderMenu = <TRow,>({
  */
 const getHeaderMenuGroups = <TRow,>({
   column,
-  columnIndex,
-  columnCount,
+  dataColumnIndex,
+  dataColumnCount,
   sorting,
   onMoveColumn,
   onHideColumn,
@@ -150,7 +152,7 @@ const getHeaderMenuGroups = <TRow,>({
       label: i18n.translate('kbnDataGrid.header.moveLeft', { defaultMessage: 'Move left' }),
       iconType: 'chevronSingleLeft',
       onClick: () => onMoveColumn({ columnId: id, direction: 'left' }),
-      isDisabled: columnIndex === 0,
+      isDisabled: dataColumnIndex === 0,
       'data-test-subj': 'gridMoveColumnLeft',
     });
   }
@@ -160,7 +162,7 @@ const getHeaderMenuGroups = <TRow,>({
       label: i18n.translate('kbnDataGrid.header.moveRight', { defaultMessage: 'Move right' }),
       iconType: 'chevronSingleRight',
       onClick: () => onMoveColumn({ columnId: id, direction: 'right' }),
-      isDisabled: columnIndex === columnCount - 1,
+      isDisabled: dataColumnIndex === dataColumnCount - 1,
       'data-test-subj': 'gridMoveColumnRight',
     });
   }
@@ -192,8 +194,8 @@ const HeaderCellMenu = <TRow,>({
   styles,
   setIsOpen,
   column,
-  columnIndex,
-  columnCount,
+  dataColumnIndex,
+  dataColumnCount,
   sorting,
   onMoveColumn,
   onHideColumn,
@@ -205,8 +207,8 @@ const HeaderCellMenu = <TRow,>({
     () =>
       getHeaderMenuGroups({
         column,
-        columnIndex,
-        columnCount,
+        dataColumnIndex,
+        dataColumnCount,
         sorting,
         onMoveColumn,
         onHideColumn,
@@ -224,7 +226,7 @@ const HeaderCellMenu = <TRow,>({
           ...rest,
         }))
       ),
-    [column, columnIndex, columnCount, sorting, onMoveColumn, onHideColumn, setIsOpen]
+    [column, dataColumnIndex, dataColumnCount, sorting, onMoveColumn, onHideColumn, setIsOpen]
   );
 
   return (
@@ -254,7 +256,8 @@ const HeaderCellMenu = <TRow,>({
 const DataGridHeaderCellComponent = <TRow,>({
   column,
   columnIndex,
-  columnCount,
+  dataColumnIndex,
+  dataColumnCount,
   layout,
   styles,
   isTabStop,
@@ -272,8 +275,8 @@ const DataGridHeaderCellComponent = <TRow,>({
   const sortColumn = sorting?.columns.find((sortedColumn) => sortedColumn.id === id);
   const hasMenu = hasHeaderMenu({
     column,
-    columnIndex,
-    columnCount,
+    dataColumnIndex,
+    dataColumnCount,
     sorting,
     onMoveColumn,
     onHideColumn,
@@ -368,8 +371,8 @@ const DataGridHeaderCellComponent = <TRow,>({
       {hasMenu && isMenuOpen && (
         <HeaderCellMenu
           column={column}
-          columnIndex={columnIndex}
-          columnCount={columnCount}
+          dataColumnIndex={dataColumnIndex}
+          dataColumnCount={dataColumnCount}
           sorting={sorting}
           onMoveColumn={onMoveColumn}
           onHideColumn={onHideColumn}

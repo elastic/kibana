@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType, ForwardedRef, ReactNode } from 'react';
+import type { ComponentType, ForwardedRef, KeyboardEvent, ReactNode } from 'react';
 import React, {
   forwardRef,
   useCallback,
@@ -29,14 +29,7 @@ import type {
   EuiDataGridToolBarAdditionalControlsOptions,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiWindowEvent,
-  keys,
-  mathWithUnits,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, keys, mathWithUnits, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { isEqual } from 'lodash';
 import { DataGrid } from '../components/data_grid';
@@ -46,6 +39,7 @@ import { DisplaySelector } from '../toolbar/display_selector';
 import { FullScreenSelector } from '../toolbar/full_screen_selector';
 import { KeyboardShortcuts } from '../toolbar/keyboard_shortcuts';
 import { SortSelector } from '../toolbar/sort_selector';
+import { GRID_CELL_SELECTOR } from '../utils/grid_navigation';
 import type {
   DataGridCellPopoverProps,
   DataGridColumn,
@@ -81,12 +75,16 @@ type SupportedEuiDataGridProps = Pick<
   | 'renderCustomToolbar'
   | 'rowHeightsOptions'
   | 'gridStyle'
-  | 'onColumnResize'
   | 'virtualizationOptions'
   | 'onFullScreenChange'
 >;
 
 export type EuiDataGridAdapterProps = SupportedEuiDataGridProps & {
+  /**
+   * Like the one of `EuiDataGrid`, but called with `width: undefined` when the user resets a column
+   * (double click on its resize handle), so a consumer that stores the widths can drop it.
+   */
+  onColumnResize?: DataGridProps<number>['onColumnResize'];
   /** Number of columns, after the leading control columns, that stay in view while the rest scrolls. */
   stickyColumnCount?: number;
 };
@@ -415,9 +413,7 @@ export const EuiDataGridAdapter = forwardRef(
           const { [columnId]: _dropped, ...rest } = prev;
           return width === undefined ? rest : { ...rest, [columnId]: width };
         });
-        if (width !== undefined) {
-          onColumnResize?.({ columnId, width });
-        }
+        onColumnResize?.({ columnId, width });
       },
       [onColumnResize]
     );
@@ -662,11 +658,23 @@ export const EuiDataGridAdapter = forwardRef(
       },
       [onFullScreenChange]
     );
-    const onKeyDown = useCallback(
-      (event: KeyboardEvent) => {
-        if (isFullScreen && event.key === keys.ESCAPE) {
-          setIsFullScreen(false);
+    // Captured: the grid keeps Escape from bubbling up, so a flyout around it does not close.
+    // Escape leaves full screen from the toolbar or a focused cell or header, but not from cell
+    // content, which uses it itself, nor from popovers and flyouts, which are rendered in portals.
+    const rootRef = useRef<HTMLDivElement>(null);
+    const onKeyDownCapture = useCallback(
+      (event: KeyboardEvent<HTMLDivElement>) => {
+        const { key, target } = event;
+        if (!isFullScreen || key !== keys.ESCAPE || !(target instanceof Element)) {
+          return;
         }
+        const isInPortal = !rootRef.current?.contains(target);
+        const isInCellContent =
+          target.closest('[role="grid"]') && !target.matches(GRID_CELL_SELECTOR);
+        if (isInPortal || isInCellContent) {
+          return;
+        }
+        setIsFullScreen(false);
       },
       [isFullScreen, setIsFullScreen]
     );
@@ -863,14 +871,15 @@ export const EuiDataGridAdapter = forwardRef(
 
     return (
       <div
+        ref={rootRef}
         id={id}
+        onKeyDownCapture={onKeyDownCapture}
         className={['euiDataGrid', isFullScreen ? 'euiDataGrid--fullScreen' : '', className]
           .filter(Boolean)
           .join(' ')}
         data-test-subj={dataTestSubj}
         css={[rootStyles, isFullScreen && fullScreenStyles(euiThemeContext)]}
       >
-        <EuiWindowEvent event="keydown" handler={onKeyDown} />
         {toolbar && <div ref={setToolbarElement}>{toolbar}</div>}
         <div css={gridAreaStyles}>
           <DataGrid<number>
