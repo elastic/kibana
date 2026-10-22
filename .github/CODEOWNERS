@@ -1285,6 +1285,7 @@ x-pack/platform/plugins/shared/inference_endpoint @elastic/search-ml-ux
 x-pack/platform/plugins/shared/inference_workflows @elastic/search-ml-ux
 x-pack/platform/plugins/shared/ingest_hub @elastic/streams-ui
 x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
+x-pack/platform/plugins/shared/isomer @elastic/appex-sharedux
 x-pack/platform/plugins/shared/lens @elastic/kibana-dashboards
 x-pack/platform/plugins/shared/license_management @elastic/kibana-management
 x-pack/platform/plugins/shared/licensing @elastic/kibana-core
