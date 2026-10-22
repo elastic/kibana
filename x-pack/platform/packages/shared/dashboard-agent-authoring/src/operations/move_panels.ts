@@ -13,7 +13,7 @@ import {
   getPlaceholderGrid,
   removePanelsFromDashboard,
 } from '../dashboard_state';
-import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
+import { DASHBOARD_FAILURE_TYPES } from '../failure_types';
 import { defineOperation } from './types';
 
 export const movePanelsOperation = defineOperation({
@@ -46,7 +46,7 @@ export const movePanelsOperation = defineOperation({
 
       if (removedPanels.length === 0) {
         context.failures.push({
-          type: DASHBOARD_OPERATION_FAILURE_TYPES.movePanels,
+          type: DASHBOARD_FAILURE_TYPES.movePanels,
           identifier: panelId,
           error: `Panel "${panelId}" not found.`,
         });
