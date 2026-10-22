@@ -60,7 +60,7 @@ import {
   buildActionPolicyChangedEventData,
   type ActionPolicyOperation,
 } from '../telemetry/action_policy_ebt_event';
-import { resolveRuleEventOrigin } from '../event_origin/rule_event_origin';
+import { resolveEventOrigin } from '../event_origin/event_origin';
 import { buildSoSearch } from '../build_so_search';
 import { savedObjectNamespacesToSpaceId } from '../space_id_to_namespace';
 import { applyPatch } from '../apply_patch';
@@ -190,7 +190,7 @@ export class ActionPolicyClient {
     }
 
     try {
-      const origin = { actor: this.actor, ...resolveRuleEventOrigin(this.request) };
+      const origin = { actor: this.actor, ...resolveEventOrigin(this.request) };
       const eventType = ACTION_POLICY_EBT_EVENT_TYPE_BY_OPERATION[operation];
       const spaceId = savedObjectNamespacesToSpaceId(this.namespace ? [this.namespace] : undefined);
 
