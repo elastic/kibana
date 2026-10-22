@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { Filter } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
 import type { Entity } from './fake_entities';
 import type { BucketKey } from './bucket_metrics';
 import {
@@ -15,7 +13,6 @@ import {
   getK8sContextValue,
   type K8sContextKey,
 } from './kubernetes_hierarchy';
-import type { InventoryCellFilterMode } from './inventory_data_grid_cell_actions';
 
 const NAME_COLUMN_FILTER_BY_BUCKET: Partial<Record<BucketKey, K8sContextKey>> = {
   'kubernetes:clusters': 'cluster',
@@ -74,66 +71,9 @@ export const k8sFilterColumnLabel = (columnId: string): string => {
   return columnId;
 };
 
-export const buildNegatedInventoryFieldFilter = (field: string, value: string): Filter =>
-  ({
-    meta: {
-      alias: null,
-      disabled: false,
-      negate: true,
-      key: field,
-      params: { query: value },
-      type: 'phrase',
-    },
-    query: { match_phrase: { [field]: value } },
-    $state: { store: FilterStateStore.APP_STATE },
-  }) as Filter;
-
-export const buildPositiveInventoryFieldFilter = (field: string, value: string): Filter =>
-  ({
-    meta: {
-      alias: null,
-      disabled: false,
-      negate: false,
-      key: field,
-      params: { query: value },
-      type: 'phrase',
-    },
-    query: { match_phrase: { [field]: value } },
-    $state: { store: FilterStateStore.APP_STATE },
-  }) as Filter;
-
-export const inventoryFiltersMatchNegation = (
-  filters: readonly Filter[],
-  field: string,
-  value: string
-): boolean =>
-  filters.some(
-    (filter) =>
-      filter.meta?.negate === true &&
-      filter.meta?.key === field &&
-      filter.meta?.params &&
-      typeof (filter.meta.params as { query?: unknown }).query === 'string' &&
-      (filter.meta.params as { query: string }).query === value
-  );
-
-export const inventoryFiltersMatchPositive = (
-  filters: readonly Filter[],
-  field: string,
-  value: string
-): boolean =>
-  filters.some(
-    (filter) =>
-      filter.meta?.negate !== true &&
-      filter.meta?.key === field &&
-      filter.meta?.params &&
-      typeof (filter.meta.params as { query?: unknown }).query === 'string' &&
-      (filter.meta.params as { query: string }).query === value
-  );
-
 export type ApplyK8sInventoryCellFilterArgs = {
   readonly entity: Entity;
   readonly target: K8sCellFilterTarget;
-  readonly mode: InventoryCellFilterMode;
   readonly clusterNames: readonly string[];
   readonly assignCluster: (entity: Entity, clusterNames: readonly string[]) => string | undefined;
   readonly setResourceTypeAll: () => void;
@@ -142,15 +82,12 @@ export type ApplyK8sInventoryCellFilterArgs = {
   readonly setDeployment: (value: string) => void;
   readonly setNode: (value: string) => void;
   readonly filterAll: string;
-  readonly appendLabFilter: (filter: Filter) => void;
-  readonly removeLabFilter: (field: string, value: string) => void;
 };
 
-/** Filter for (+) → page dropdowns; filter out (−) → negated search-bar chip. */
+/** Filter for (+) → page K8s facet dropdowns (cluster / namespace / …). */
 export const applyK8sInventoryCellFilter = ({
   entity,
   target,
-  mode,
   clusterNames,
   assignCluster,
   setResourceTypeAll,
@@ -159,18 +96,9 @@ export const applyK8sInventoryCellFilter = ({
   setDeployment,
   setNode,
   filterAll,
-  appendLabFilter,
-  removeLabFilter,
 }: ApplyK8sInventoryCellFilterArgs): void => {
-  const { dimension, value, kqlField } = target;
+  const { dimension, value } = target;
 
-  if (mode === '-') {
-    appendLabFilter(buildNegatedInventoryFieldFilter(kqlField, value));
-    return;
-  }
-
-  removeLabFilter(kqlField, value);
-  appendLabFilter(buildPositiveInventoryFieldFilter(kqlField, value));
   setResourceTypeAll();
 
   const clusterFromEntity =

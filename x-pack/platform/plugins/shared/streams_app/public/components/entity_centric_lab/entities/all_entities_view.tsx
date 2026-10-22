@@ -199,11 +199,7 @@ import { MonitoringAssetsView } from './monitoring_assets_view';
 import { SavedViewsBar } from './saved_views_bar';
 import { SaveViewButton } from './save_view_button';
 import { compileEntityKql, entityMatchesFilters } from './entity_kql';
-import {
-  applyK8sInventoryCellFilter,
-  inventoryFiltersMatchNegation,
-  inventoryFiltersMatchPositive,
-} from './k8s_inventory_cell_filter';
+import { applyK8sInventoryCellFilter } from './k8s_inventory_cell_filter';
 import { useEntityLabDataView } from './use_entity_lab_data_view';
 import { useEntityValueSuggestions } from './use_entity_value_suggestions';
 import { EntityErrorBoundary } from './entity_error_boundary';
@@ -2375,29 +2371,6 @@ const AllEntitiesViewInner = ({
         setDeployment: setK8sDeploymentFilter,
         setNode: setK8sNodeFilter,
         filterAll: KUBERNETES_FILTER_ALL,
-        appendLabFilter: (filter) => {
-          setLabFilters((prev) => {
-            const { kqlField, value } = args.target;
-            if (filter.meta?.negate) {
-              if (inventoryFiltersMatchNegation(prev, kqlField, value)) return prev;
-            } else if (inventoryFiltersMatchPositive(prev, kqlField, value)) {
-              return prev;
-            }
-            return [...prev, filter];
-          });
-        },
-        removeLabFilter: (field, value) => {
-          setLabFilters((prev) =>
-            prev.filter(
-              (f) =>
-                !(
-                  f.meta?.negate === true &&
-                  f.meta?.key === field &&
-                  (f.meta.params as { query?: string } | undefined)?.query === value
-                )
-            )
-          );
-        },
       });
     },
     [k8sClusterNames]

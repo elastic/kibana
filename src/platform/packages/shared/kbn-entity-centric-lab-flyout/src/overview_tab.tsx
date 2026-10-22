@@ -376,7 +376,19 @@ const SummarySubheader = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const GOLDEN_SIGNAL_TILE_HEIGHT = 100;
+type FlyoutDensity = 'compact' | 'normal' | 'expanded';
+
+const goldenSignalTileLayout = (density: FlyoutDensity | undefined) => {
+  switch (density) {
+    case 'expanded':
+      return { height: 88, minWidth: 160, titlePx: 12, valuePx: 20, extraPx: 11, padPx: 6 };
+    case 'normal':
+      return { height: 80, minWidth: 148, titlePx: 11, valuePx: 18, extraPx: 10, padPx: 5 };
+    case 'compact':
+    default:
+      return { height: 72, minWidth: 132, titlePx: 11, valuePx: 16, extraPx: 10, padPx: 4 };
+  }
+};
 
 // Muted severity colours from the EUI primitive *40/*30 palette scale.
 const goldenSignalTileBackground = (
@@ -393,17 +405,27 @@ const goldenSignalTileBackground = (
   }
 };
 
-const GoldenSignalsRow = ({ signals }: { signals: readonly GoldenSignal[] }) => (
-  <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-    {signals.map((signal) => (
-      <EuiFlexItem key={signal.id} style={{ minWidth: 180 }}>
-        <GoldenSignalCard signal={signal} />
-      </EuiFlexItem>
-    ))}
-  </EuiFlexGroup>
-);
+const GoldenSignalsRow = ({ signals }: { signals: readonly GoldenSignal[] }) => {
+  const { density } = useEntityFlyoutServices();
+  const layout = goldenSignalTileLayout(density);
+  return (
+    <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+      {signals.map((signal) => (
+        <EuiFlexItem key={signal.id} style={{ minWidth: layout.minWidth }}>
+          <GoldenSignalCard signal={signal} layout={layout} />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+};
 
-const GoldenSignalCard = ({ signal }: { signal: GoldenSignal }) => {
+const GoldenSignalCard = ({
+  signal,
+  layout,
+}: {
+  signal: GoldenSignal;
+  layout: ReturnType<typeof goldenSignalTileLayout>;
+}) => {
   const { euiTheme } = useEuiTheme();
   const { charts } = useEntityFlyoutServices();
   // Hosting plugin guarantees `charts` is wired through, so the base theme is
@@ -412,8 +434,9 @@ const GoldenSignalCard = ({ signal }: { signal: GoldenSignal }) => {
 
   const datum: MetricDatum = {
     title: signal.label,
-    value: signal.value,
-    valueFormatter: () => formatGoldenSignalValue(signal),
+    // Pre-formatted string so elastic-charts doesn't split digits vs units
+    // (numeric `value` + valueFormatter makes units render larger than digits).
+    value: formatGoldenSignalValue(signal),
     extra: <span>{signal.delta}</span>,
     color: goldenSignalTileBackground(signal.color, euiTheme),
     trend: signal.trend.map((y, x) => ({ x, y })),
@@ -428,10 +451,36 @@ const GoldenSignalCard = ({ signal }: { signal: GoldenSignal }) => {
       aria-label={signal.label}
       css={css`
         position: relative;
-        height: ${GOLDEN_SIGNAL_TILE_HEIGHT}px;
+        height: ${layout.height}px;
         border: ${euiTheme.border.thin};
-        border-radius: ${euiTheme.border.radius.medium};
+        border-radius: ${euiTheme.border.radius.small};
         overflow: hidden;
+
+        .echMetricText {
+          padding: ${layout.padPx}px ${layout.padPx + 2}px !important;
+        }
+        .echMetricText__title {
+          font-size: ${layout.titlePx}px !important;
+          font-weight: ${euiTheme.font.weight.semiBold} !important;
+          line-height: 1.2 !important;
+        }
+        .echMetricText__value {
+          font-size: ${layout.valuePx}px !important;
+          font-weight: ${euiTheme.font.weight.bold} !important;
+          line-height: 1.15 !important;
+        }
+        .echMetricText__extra,
+        .echMetricText__extraBlock .echMetricText__extra {
+          font-weight: ${euiTheme.font.weight.medium} !important;
+        }
+        .echMetricText__part {
+          font-size: inherit !important;
+          font-weight: inherit;
+        }
+        .echMetricText__extraBlock {
+          font-size: ${layout.extraPx}px !important;
+          line-height: 1.2 !important;
+        }
       `}
       data-test-subj={`entityCentricLabGoldenSignalCard-${signal.id}`}
     >
@@ -442,8 +491,8 @@ const GoldenSignalCard = ({ signal }: { signal: GoldenSignal }) => {
       <span
         css={css`
           position: absolute;
-          top: ${euiTheme.size.s};
-          right: ${euiTheme.size.s};
+          top: ${euiTheme.size.xs};
+          right: ${euiTheme.size.xs};
           z-index: 1;
         `}
       >

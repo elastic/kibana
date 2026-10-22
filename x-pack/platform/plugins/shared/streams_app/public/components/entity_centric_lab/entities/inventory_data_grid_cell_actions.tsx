@@ -6,16 +6,14 @@
  */
 
 /**
- * Discover-style filter for / filter out controls on ElasticOn inventory
- * grids — mirrors {@link buildCellActions} in `@kbn/unified-data-table`.
+ * Filter-for control on ElasticOn inventory grids — mirrors Discover's
+ * "Filter for value" cell action.
  */
 
 import type { MutableRefObject } from 'react';
 import React from 'react';
 import type { EuiDataGridColumnCellAction, EuiDataGridRefProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-export type InventoryCellFilterMode = '+' | '-';
 
 const FilterForAction = ({
   Component,
@@ -51,40 +49,6 @@ const FilterForAction = ({
   );
 };
 
-const FilterOutAction = ({
-  Component,
-  columnId,
-  columnLabel,
-  onClick,
-}: {
-  Component: EuiDataGridColumnCellActionProps['Component'];
-  columnId: string;
-  columnLabel: string;
-  onClick: () => void;
-}) => {
-  const buttonTitle = i18n.translate(
-    'xpack.streams.entityCentricLab.entities.grid.filterOutAria',
-    {
-      defaultMessage: 'Filter out this {value}',
-      values: { value: columnLabel || columnId },
-    }
-  );
-
-  return (
-    <Component
-      onClick={onClick}
-      iconType="minusCircle"
-      aria-label={buttonTitle}
-      title={buttonTitle}
-      data-test-subj="filterOutButton"
-    >
-      {i18n.translate('xpack.streams.entityCentricLab.entities.grid.filterOut', {
-        defaultMessage: 'Filter out',
-      })}
-    </Component>
-  );
-};
-
 type EuiDataGridColumnCellActionProps = Parameters<EuiDataGridColumnCellAction>[0];
 
 export const buildInventoryFilterCellActions = ({
@@ -97,7 +61,7 @@ export const buildInventoryFilterCellActions = ({
   columnId: string;
   columnLabel: string;
   getRowValue: (rowIndex: number) => string | undefined;
-  onFilter: (rowIndex: number, mode: InventoryCellFilterMode) => void;
+  onFilter: (rowIndex: number) => void;
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
 }): EuiDataGridColumnCellAction[] => [
   (cellActionProps) => {
@@ -109,22 +73,7 @@ export const buildInventoryFilterCellActions = ({
         columnId={columnId}
         columnLabel={columnLabel}
         onClick={() => {
-          onFilter(cellActionProps.rowIndex, '+');
-          dataGridRef?.current?.closeCellPopover();
-        }}
-      />
-    );
-  },
-  (cellActionProps) => {
-    const value = getRowValue(cellActionProps.rowIndex);
-    if (!value) return null;
-    return (
-      <FilterOutAction
-        Component={cellActionProps.Component}
-        columnId={columnId}
-        columnLabel={columnLabel}
-        onClick={() => {
-          onFilter(cellActionProps.rowIndex, '-');
+          onFilter(cellActionProps.rowIndex);
           dataGridRef?.current?.closeCellPopover();
         }}
       />

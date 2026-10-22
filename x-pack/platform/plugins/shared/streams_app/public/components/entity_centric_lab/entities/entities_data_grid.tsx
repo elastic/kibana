@@ -59,10 +59,7 @@ import {
   getK8sContextValue,
   type K8sContextKey,
 } from './kubernetes_hierarchy';
-import {
-  buildInventoryFilterCellActions,
-  type InventoryCellFilterMode,
-} from './inventory_data_grid_cell_actions';
+import { buildInventoryFilterCellActions } from './inventory_data_grid_cell_actions';
 import {
   isK8sInventoryFilterColumn,
   k8sFilterColumnLabel,
@@ -786,13 +783,12 @@ interface Props {
   /** Page-level density from Display options (not per-grid). */
   readonly density?: ListDensity;
   /**
-   * Kubernetes inventory page: Discover-style filter for / filter out on
-   * hierarchy columns (and name on cluster/namespace/node/deployment tables).
+   * Kubernetes inventory page: filter-for on hierarchy columns (and name on
+   * cluster/namespace/node/deployment tables) via page facet dropdowns.
    */
   readonly onK8sCellFilter?: (args: {
     readonly entity: Entity;
     readonly target: K8sCellFilterTarget;
-    readonly mode: InventoryCellFilterMode;
   }) => void;
 }
 
@@ -1005,12 +1001,12 @@ export const EntityDataGridSection = ({
               if (!entity) return undefined;
               return resolveK8sCellFilterTarget(column.id, entity, bucketKey)?.value;
             },
-            onFilter: (rowIndex, mode) => {
+            onFilter: (rowIndex) => {
               const entity = sortedRows[rowIndex];
               if (!entity) return;
               const target = resolveK8sCellFilterTarget(column.id, entity, bucketKey);
               if (!target) return;
-              onK8sCellFilter({ entity, target, mode });
+              onK8sCellFilter({ entity, target });
             },
             dataGridRef,
           }),

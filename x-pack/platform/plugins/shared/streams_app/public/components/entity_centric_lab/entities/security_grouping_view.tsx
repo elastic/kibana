@@ -36,7 +36,6 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Entity, EntityCategoryId } from './fake_entities';
 import { EntityDataGridSection } from './entities_data_grid';
-import type { InventoryCellFilterMode } from './inventory_data_grid_cell_actions';
 import type { K8sCellFilterTarget } from './k8s_inventory_cell_filter';
 import { DEFAULT_LIST_DENSITY, type ListDensity } from './list_density';
 import type { GroupByFieldDef } from './entity_group_by';
@@ -251,7 +250,6 @@ const ChildAccordion = ({
   onK8sCellFilter?: (args: {
     readonly entity: Entity;
     readonly target: K8sCellFilterTarget;
-    readonly mode: InventoryCellFilterMode;
   }) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -340,7 +338,6 @@ const GroupAccordion = ({
   onK8sCellFilter?: (args: {
     readonly entity: Entity;
     readonly target: K8sCellFilterTarget;
-    readonly mode: InventoryCellFilterMode;
   }) => void;
 }) => {
   const accordionId = useGeneratedHtmlId({
@@ -517,7 +514,6 @@ interface Props {
   readonly onK8sCellFilter?: (args: {
     readonly entity: Entity;
     readonly target: K8sCellFilterTarget;
-    readonly mode: InventoryCellFilterMode;
   }) => void;
 }
 
