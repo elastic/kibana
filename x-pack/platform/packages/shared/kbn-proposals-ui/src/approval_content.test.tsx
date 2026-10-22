@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ApprovalContent, type ApprovalContentProps } from './approval_content';
+import { DATE_TIME_FORMAT } from './proposal_helpers';
 import type { ApprovalProposal } from './types';
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -115,6 +117,46 @@ describe('ApprovalContent', () => {
     expect(screen.getByTestId('approvalContent-confirm')).toBeDisabled();
   });
 
+  it("shows a replaced attempt's own error in a danger callout when its action failed", () => {
+    renderContent({
+      proposal: {
+        ...baseProposal,
+        status: 'failed',
+        decision: 'approved',
+        decidedBy: { username: 'elastic', fullName: null, email: null },
+        decidedAt: '2026-10-09T14:05:00.000Z',
+        supersededBy: 'successor',
+        executionError: 'HTTP 500: host unreachable',
+      },
+    });
+    expect(screen.getByText('This attempt failed to execute the action')).toBeInTheDocument();
+    expect(screen.getByText('HTTP 500: host unreachable')).toBeInTheDocument();
+    expect(screen.getByTestId('approvalContent-failed-attempt')).toHaveClass('euiCallOut--danger');
+    expect(
+      isBefore(
+        screen.getByTestId('approvalContent-failed-attempt'),
+        screen.getByTestId('approvalContent-confirm')
+      )
+    ).toBe(true);
+  });
+
+  it('leaves the error to the outcome banner when a failed proposal was not replaced', () => {
+    renderContent({
+      proposal: {
+        ...baseProposal,
+        status: 'failed',
+        decision: 'approved',
+        decidedBy: { username: 'elastic', fullName: null, email: null },
+        decidedAt: '2026-10-09T14:05:00.000Z',
+        executionError: 'HTTP 500: host unreachable',
+      },
+    });
+    expect(screen.queryByTestId('approvalContent-failed-attempt')).not.toBeInTheDocument();
+    expect(screen.getByTestId('approvalContent-outcome')).toHaveTextContent(
+      'HTTP 500: host unreachable'
+    );
+  });
+
   it('shows no status badge on a replaced revision that was never decided', () => {
     renderContent({ proposal: { ...baseProposal, status: 'superseded', supersededBy: 'next' } });
     expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
@@ -160,7 +202,7 @@ describe('ApprovalContent', () => {
       proposal: {
         ...baseProposal,
         category: 'configure',
-        action: { name: 'Block IP', reversible: true },
+        action: { name: 'Block IP', reversible: true, approvalPolicy: 'always-gate' },
       },
     });
     expect(screen.getByText('Configure • Reversible • Critical impact')).toBeInTheDocument();
@@ -180,26 +222,23 @@ describe('ApprovalContent', () => {
       proposal: {
         ...baseProposal,
         category: 'configure',
-        action: { name: 'Block IP', reversible: true },
+        action: { name: 'Block IP', reversible: true, approvalPolicy: 'always-gate' },
         expiresAt,
       },
     });
-    // Computed the same way the implementation does, rather than a hardcoded guess: the exact
-    // rendering of `toLocaleString` depends on the environment's locale/ICU data.
-    const formattedDeadline = new Date(expiresAt).toLocaleString(undefined, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    });
+    const formattedDeadline = moment(expiresAt).format(DATE_TIME_FORMAT);
     expect(
-      screen.getByText(`Configure • Reversible • Critical impact • Expires ${formattedDeadline}`)
+      screen.getByText(`Configure • Reversible • Critical impact • Expires on ${formattedDeadline}`)
     ).toBeInTheDocument();
   });
 
-  it('shows Expired in the caption instead of the deadline once it has passed', () => {
-    renderContent({
-      proposal: { ...baseProposal, status: 'expired', expiresAt: '2024-01-05T17:00:00.000Z' },
-    });
-    expect(screen.getByText('Critical impact • Expired')).toBeInTheDocument();
+  it('shows the expiry date and time in the caption after the deadline', () => {
+    const expiresAt = '2024-01-05T17:00:00.000Z';
+    renderContent({ proposal: { ...baseProposal, status: 'expired', expiresAt } });
+    const formattedDeadline = moment(expiresAt).format(DATE_TIME_FORMAT);
+    expect(
+      screen.getByText(`Critical impact • Expired on ${formattedDeadline}`)
+    ).toBeInTheDocument();
   });
 
   it('renders the comment', () => {
