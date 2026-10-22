@@ -49,7 +49,7 @@ const ESTIMATED_ROW_HEIGHT = 41;
 const OVERSCAN_ROWS = 5;
 
 const scrollContainerCss = css`
-  max-block-size: 70vh;
+  block-size: 100%;
   overflow: auto;
 `;
 

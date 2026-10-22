@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { sumBy } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
@@ -19,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { GroupSelector } from '@kbn/grouping/src/components/group_selector';
 import { css } from '@emotion/react';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { i18n } from '@kbn/i18n';
 import { isNoneGroup } from '@kbn/grouping';
 import { EntityType, useEntityStoreEuidApi } from '@kbn/entity-store/public';
@@ -80,6 +82,7 @@ import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import type { EntityViewMode } from '../../../common/entity_analytics/entity_store/resolution_group';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
+import { APP_HEADER_SELECTOR, TIMELINE_BAR_SELECTOR } from '../components/home/pinned_bars';
 import { useKibana } from '../../common/lib/kibana';
 import { APP_ID, SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { ENTITY_PROMPT } from '../../agent_builder/components/prompts';
@@ -129,6 +132,32 @@ const GROUP_BY_SETTINGS = { hideCustomFieldOption: false };
 const hiddenCss = css`
   display: none;
 `;
+
+const PINNED_BAR_SELECTORS = [APP_HEADER_SELECTOR, TIMELINE_BAR_SELECTOR];
+
+/**
+ * Height of the bars pinned over the page while it scrolls, which Kibana's content height doesn't
+ * leave out. Measured once the element given the ref mounts, as the header renders only after the
+ * page loads.
+ */
+const usePinnedBarsHeight = (): [number, (element: HTMLElement | null) => void] => {
+  const [element, setElement] = useState<HTMLElement | null>(null);
+  const [height, setHeight] = useState(0);
+  useEffect(() => {
+    if (!element) return;
+    const measure = () =>
+      setHeight(
+        sumBy(
+          PINNED_BAR_SELECTORS,
+          (selector) => document.querySelector(selector)?.getBoundingClientRect().height ?? 0
+        )
+      );
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [element]);
+  return [height, setElement];
+};
 
 const isStoreEntityType = (value: unknown): value is EntityType =>
   EntityType.safeParse(value).success;
@@ -358,6 +387,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   const scopeId = getEntityAnalyticsNewHomeScopeId(timeRange);
 
   const [isGridFullScreen, setIsGridFullScreen] = useState(false);
+  const [pinnedBarsHeight, gridAreaRef] = usePinnedBarsHeight();
 
   const activeColumns = rowsMode === 'individual' ? INDIVIDUAL_ROWS_COLUMNS : RESOLVED_ROWS_COLUMNS;
 
@@ -1155,6 +1185,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   );
 
   const onGroupChange = useCallback((key: string) => {
+    // Grouping unmounts the grid, and EUI doesn't report leaving full screen when it unmounts.
+    if (key !== 'none') setIsGridFullScreen(false);
     setGroupsSelected((prev) => {
       if (key === 'none') return ['none'];
       const cleaned = prev.filter((g) => g !== 'none');
@@ -1235,15 +1267,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
 
   return (
     <>
-      <div className="entityAnalyticsPageHeader" css={isGridFullScreen ? hiddenCss : undefined}>
-        <EntityAnalyticsHomeHeader onStartTour={productTour.startTour} />
-      </div>
+      {/* Unwrapped: a wrapper would stop the header from sticking. */}
+      {!isGridFullScreen && <EntityAnalyticsHomeHeader onStartTour={productTour.startTour} />}
       <SecuritySolutionPageWrapper noPadding data-test-subj="entityAnalyticsNewHomePage">
         <div
           className="entityAnalyticsSearchSection"
           css={[
             css`
               padding-block-start: ${euiTheme.size.s};
+              padding-inline: ${euiTheme.size.base};
               display: flex;
               flex-direction: column;
               height: 100%;
@@ -1286,11 +1318,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
 
           <EuiSpacer size="m" />
 
-          <div
-            css={css`
-              padding-inline: ${euiTheme.size.base};
-            `}
-          >
+          <div>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <HuntWithAiButton />
@@ -1308,10 +1336,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         <EuiSpacer size="m" />
 
         <div
-          css={css`
-            padding-inline: ${euiTheme.size.base};
-            padding-block-end: ${euiTheme.size.base};
-          `}
+          ref={gridAreaRef}
+          css={[
+            css`
+              padding-inline: ${euiTheme.size.base};
+            `,
+            // Scrolled to, the grid fills the view between the pinned bars; groups keep their
+            // natural height.
+            !isGroupSelected && kbnFullBodyHeightCss(`${pinnedBarsHeight}px`),
+          ]}
         >
           <DataViewContext.Provider value={dataViewContextValue}>
             {isGroupSelected ? (
