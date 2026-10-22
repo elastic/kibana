@@ -81,7 +81,17 @@ describe('parseInlineParams', () => {
       [
         'blank optional list entries (once)',
         'to: [a@b.com]\nsubject: Hi\nmessage: Body\ncc: ["", " "]\n',
-        ["'cc' is required."],
+        ["'cc' must not contain empty values."],
+      ],
+      [
+        'blank mandatory list entries (once)',
+        'to: ["", " "]\nsubject: Hi\nmessage: Body\n',
+        ["'to' is required."],
+      ],
+      [
+        'an optional field without a value',
+        'to: [a@b.com]\nsubject: Hi\nmessage: Body\ncc:\n',
+        ["'cc' must be a list of strings."],
       ],
       [
         'a string where a list is expected',
@@ -102,10 +112,16 @@ describe('parseInlineParams', () => {
       expect(parseInlineParams(email, params).errors).toEqual(errors);
     });
 
-    it('reports unknown fields', () => {
+    it('reports an unknown field', () => {
+      expect(
+        parseInlineParams(slack, 'channel: C123\ntext: Hello\nthreadTs: "1"\n').errors
+      ).toEqual(["Unknown field: 'threadTs'."]);
+    });
+
+    it('quotes every unknown field', () => {
       expect(
         parseInlineParams(slack, 'channel: C123\ntext: Hello\nthreadTs: "1"\nblocks: []\n').errors
-      ).toEqual(["Unknown field: 'threadTs, blocks'."]);
+      ).toEqual(["Unknown fields: 'threadTs', 'blocks'."]);
     });
 
     it('does not return params when invalid', () => {

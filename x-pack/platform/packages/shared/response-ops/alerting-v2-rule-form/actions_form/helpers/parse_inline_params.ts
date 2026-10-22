@@ -46,10 +46,20 @@ const fieldMustBeStringList = (field: string): string =>
     }
   );
 
+const fieldMustNotContainEmptyValues = (field: string): string =>
+  i18n.translate(
+    'xpack.responseOps.alertingV2RuleForm.actionForm.validation.fieldMustNotContainEmptyValues',
+    {
+      defaultMessage: "''{field}'' must not contain empty values.",
+      values: { field },
+    }
+  );
+
 const unknownFields = (fields: string[]): string =>
   i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.validation.unknownFields', {
-    defaultMessage: "Unknown field: ''{fields}''.",
-    values: { fields: fields.join(', ') },
+    defaultMessage:
+      '{count, plural, one {Unknown field: {fields}.} other {Unknown fields: {fields}.}}',
+    values: { count: fields.length, fields: fields.map((field) => `'${field}'`).join(', ') },
   });
 
 /**
@@ -84,12 +94,13 @@ export const parseInlineParams = (
       return unknownFields(issue.keys);
     }
     const field = String(issue.path[0]);
-    const isMissing = Reflect.get(parsed, field) == null;
+    const isOptional = definition.paramsSchema.shape[field]?.isOptional() ?? false;
+    const isMissing = Reflect.get(parsed, field) == null && !isOptional;
     if (issue.code === 'invalid_type' && !isMissing) {
       const isList = issue.expected === 'array' || issue.path.length > 1;
       return isList ? fieldMustBeStringList(field) : fieldMustBeString(field);
     }
-    return fieldRequired(field);
+    return isOptional ? fieldMustNotContainEmptyValues(field) : fieldRequired(field);
   });
 
   return { errors: [...new Set(errors)] };

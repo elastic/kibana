@@ -19,7 +19,7 @@ export interface InlineActionStepDefinition {
   connectorTypeId: string;
   connectorTypeSubAction?: ConnectorTypeSubAction;
   paramsTemplate: string;
-  paramsSchema: z.ZodType<Record<string, unknown>>;
+  paramsSchema: z.ZodObject<Record<string, z.ZodType>, z.core.$strict>;
   CustomComponent?: React.ComponentType<{
     value: InlineWorkflowActionDraft;
     onChange: (value: InlineWorkflowActionDraft) => void;
