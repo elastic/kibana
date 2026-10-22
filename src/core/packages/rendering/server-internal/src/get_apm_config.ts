@@ -19,6 +19,8 @@ const OMIT_APM_CONFIG: Array<keyof AgentConfigOptions> = [
   'metricsInterval',
   'captureHeaders',
   'captureBody',
+  'sourceLinesErrorAppFrames',
+  'sourceLinesErrorLibraryFrames',
 ];
 
 export const getApmConfig = (requestPath: string) => {

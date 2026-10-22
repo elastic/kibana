@@ -86,3 +86,36 @@ describe('headers', () => {
     });
   });
 });
+
+describe('source maps', () => {
+  const get = (handler: ReturnType<typeof getHandler>, path: string) =>
+    handler({} as any, { params: { path }, headers: {} } as any, kibanaResponseFactory);
+
+  beforeEach(() => {
+    mockFs({ '/test/abc.js': Buffer.from('test'), '/test/abc.js.map': Buffer.from('{}') });
+  });
+
+  it('are hidden from distributables, in any case', async () => {
+    const handler = getHandler({ sourceMaps: 'hidden' });
+    for (const path of ['/test/abc.js.map', '/test/abc.js.MAP', '/test/abc.js.map.br']) {
+      expect((await get(handler, path)).status).toBe(404);
+    }
+    expect((await get(handler, '/test/abc.js')).options.headers).not.toHaveProperty('sourcemap');
+  });
+
+  it('are served and referenced by distributables when linked', async () => {
+    const handler = getHandler({ sourceMaps: 'linked' });
+    expect((await get(handler, '/test/abc.js.map')).status).toBe(200);
+    expect((await get(handler, '/test/abc.js')).options.headers).toHaveProperty(
+      'sourcemap',
+      'abc.js.map'
+    );
+  });
+
+  it('are served for other bundles and in development', async () => {
+    expect((await get(getHandler(), '/test/abc.js.map')).status).toBe(200);
+    expect(
+      (await get(getHandler({ isDist: false, sourceMaps: 'hidden' }), '/test/abc.js.map')).status
+    ).toBe(200);
+  });
+});

@@ -165,7 +165,6 @@ function getSwcOptions(dist: boolean, hmr: boolean = false) {
       // Use @swc/helpers for smaller output (like @babel/plugin-transform-runtime)
       externalHelpers: true,
     },
-    sourceMaps: !dist,
     inlineSourcesContent: !dist,
   };
 }

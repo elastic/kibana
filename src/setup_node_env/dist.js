@@ -9,3 +9,19 @@
 
 // sources are pre-transpiled during the build, no runtime transpiler needed
 require('./setup_env');
+
+// Kibana's files ship with source maps, only loaded when enabled since they cost memory.
+if (process.env.KBN_ENABLE_SERVER_SOURCE_MAPS === 'true') {
+  var resolveStackTrace = require('./source_maps').createStackTraceResolver(
+    require('@kbn/repo-info').REPO_ROOT
+  );
+  var prepareStackTrace = Error.prepareStackTrace;
+  // Resolves only the frames, since error messages can contain anything.
+  Error.prepareStackTrace = function (error, frames) {
+    var message = prepareStackTrace(error, []);
+    var stack = prepareStackTrace(error, frames);
+    return stack.startsWith(message)
+      ? message + resolveStackTrace(stack.slice(message.length))
+      : stack;
+  };
+}

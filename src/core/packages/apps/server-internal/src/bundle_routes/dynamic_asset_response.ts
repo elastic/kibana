@@ -8,7 +8,8 @@
  */
 
 import { createReadStream } from 'fs';
-import { resolve, extname } from 'path';
+import Fsp from 'fs/promises';
+import { basename, resolve, extname } from 'path';
 import mime from 'mime-types';
 import agent from 'elastic-apm-node';
 
@@ -44,11 +45,14 @@ export const createDynamicAssetHandler = ({
   fileHashCache,
   isDist,
   publicPath,
+  sourceMaps,
 }: {
   bundlesPath: string;
   publicPath: string;
   fileHashCache: IFileHashCache;
   isDist: boolean;
+  /** For bundles whose distributables ship source maps without referencing them. */
+  sourceMaps?: 'hidden' | 'linked';
 }): RequestHandler<{ path: string }, {}, {}> => {
   return async (ctx, req, res) => {
     agent.setTransactionName('GET ?/bundles/?');
@@ -64,6 +68,11 @@ export const createDynamicAssetHandler = ({
         return res.forbidden({
           body: 'EACCES',
         });
+      }
+
+      // Also matches `.MAP` on case-insensitive filesystems, `.map.br` and `.map::$DATA`.
+      if (isDist && sourceMaps === 'hidden' && /\.map(?!\w)/i.test(basename(path))) {
+        return res.notFound();
       }
 
       // we use and manage a file descriptor mostly because
@@ -95,6 +104,13 @@ export const createDynamicAssetHandler = ({
       }
 
       const fileExt = extname(path);
+      // Points devtools to the bundle's source map.
+      if (isDist && sourceMaps === 'linked' && fileExt === '.js') {
+        const sourceMap = `${path}.map`;
+        if (await Fsp.stat(sourceMap).catch(() => null)) {
+          headers.sourcemap = basename(sourceMap);
+        }
+      }
       const contentType = mime.lookup(fileExt);
       const mediaType = mime.contentType(contentType || fileExt);
       headers['content-type'] = mediaType || '';

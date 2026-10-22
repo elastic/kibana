@@ -14,6 +14,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { CreateCdnAssets } from './create_cdn_assets_task';
 import { Build } from '../lib';
 import { getMockConfig } from '../lib/__mocks__/get_config';
+import del from 'del';
 import { copyAll } from '../lib';
 
 jest.mock('../lib');
@@ -67,5 +68,13 @@ describe('CreateCdnAssets', () => {
       resolve(buildSource, 'target/public/bundles'),
       expectedDest
     );
+  });
+
+  it('leaves source maps out of the CDN assets', async () => {
+    await CreateCdnAssets.run(config, log, mockedBuild);
+
+    expect(del).toHaveBeenCalledWith('**/*.map', {
+      cwd: config.resolveFromRepo('build', 'cdn-assets'),
+    });
   });
 });

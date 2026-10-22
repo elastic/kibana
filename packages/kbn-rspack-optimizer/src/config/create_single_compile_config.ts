@@ -209,10 +209,10 @@ export async function createSingleCompileConfig(
   const config: Configuration = {
     name: 'kibana',
     mode: dist ? 'production' : 'development',
-    // No sourcemaps in dist; cheap-module-source-map in dev for original-source
+    // Unreferenced sourcemaps in dist; cheap-module-source-map in dev for original-source
     // quality (maps through SWC back to TypeScript/TSX). Aligns with rspack's
     // new recommended dev default (PR #12934).
-    devtool: dist ? false : 'cheap-module-source-map',
+    devtool: dist ? 'hidden-nosources-source-map' : 'cheap-module-source-map',
     // ES2020 target auto-sets output.environment for modern JS in rspack's
     // generated runtime code (arrow functions, const, destructuring, etc.).
     // Safe because SWC already targets ES2020 and .browserslistrc requires it.
@@ -240,7 +240,9 @@ export async function createSingleCompileConfig(
       clean: !watch,
       uniqueName: 'kibana-bundle',
       pathinfo: false,
-      ...(dist ? {} : { devtoolModuleFilenameTemplate: 'kibana:///[resource-path]' }),
+      devtoolModuleFilenameTemplate: dist
+        ? ({ absoluteResourcePath }) => Path.relative(repoRoot, absoluteResourcePath)
+        : 'kibana:///[resource-path]',
     },
 
     // Only externalize shared deps (npm packages), NOT cross-plugin imports
