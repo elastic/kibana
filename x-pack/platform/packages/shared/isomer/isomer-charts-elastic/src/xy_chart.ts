@@ -40,11 +40,11 @@ type AnnotationTone = ReturnType<typeof resolveXy>['annotations'][number]['tone'
 import { type BaseTheme, kibanaBaseTheme, lensXyTheme } from './theme';
 
 /** Lens's percent-stack format, `0.[00]%`: a share to at most two decimals. */
-const lensPercent = (share: number): string =>
-  new Intl.NumberFormat('en-US', {
-    style: 'percent',
-    maximumFractionDigits: 2,
-  }).format(share);
+const LENS_PERCENT = new Intl.NumberFormat('en-US', {
+  style: 'percent',
+  maximumFractionDigits: 2,
+});
+const lensPercent = (share: number): string => LENS_PERCENT.format(share);
 
 /** Lens shades partial buckets with its dark shade, lighter in the light theme. */
 const ENDZONE_OPACITY = { light: 0.2, dark: 0.6 } as const;
