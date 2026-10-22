@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import type { KibanaRole } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
@@ -185,14 +186,10 @@ const assertEpisodesInboxHappyPath = async (
  * `logs`) is created against a source index, forced with `runSoon`, and waited
  * on until a real observability threshold AAD document appears. A v2 rule (with
  * a tag action) is also created so the combined tag filter can show both sources.
- *
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
  */
 test.describe(
   'Observability Alerting - privilege-based page access',
-  { tag: '@local-stateful-classic' },
+  { tag: tags.stateful.classic },
   () => {
     let v1RuleId: string | undefined;
     let v2RuleId: string | undefined;

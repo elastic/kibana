@@ -15,8 +15,6 @@ import { spaceTest, testData } from '../fixtures';
  * with `savedQueryManagement: all`. Replaces the per-app `shouldAllowSavingQueries`
  * blocks from the FTR (3 `it` blocks across 8 CI lanes) with one consolidated
  * test using `test.step` to keep app setup costs low.
- *
- * Custom-role auth is local-stateful only (no ECH support yet for `loginWithCustomRole`).
  */
 spaceTest.describe('Saved query menu — CRUD (Discover)', { tag: testData.SQM_UI_TAG }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
