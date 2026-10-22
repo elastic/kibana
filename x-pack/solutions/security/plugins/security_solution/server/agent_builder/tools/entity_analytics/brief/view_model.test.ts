@@ -82,6 +82,7 @@ const facts: EntityFacts[] = [
 ];
 
 const verified: VerifiedBrief = {
+  title: 'Alerts spread across hosts',
   summary: '{{ entity.id host:a }} rose sharply',
   recommendation: 'Start with {{ entity.id user:b }}.',
   priorities: [
@@ -130,6 +131,7 @@ describe('buildViewModel', () => {
         focusTileTitle: 'Risk movers',
         entityFilters: ['Risk level: High'],
       },
+      title: 'Alerts spread across hosts',
       summary: 'web_01 rose sharply',
       recommendation: 'Start with jdoe.',
     });

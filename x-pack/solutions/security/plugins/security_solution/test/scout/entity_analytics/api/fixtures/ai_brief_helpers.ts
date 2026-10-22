@@ -91,6 +91,7 @@ export const buildScope = (
 });
 
 export const buildDraft = (entityId: string): BriefDraft => ({
+  title: 'Alerts on a privileged user',
   summary: 'Flagged entities in this view have alerts or newly reached High risk.',
   priorities: [
     {

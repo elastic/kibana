@@ -53,10 +53,13 @@ const describeChange = (delta: number | undefined): { change: string; changeClas
 /** What the template shows: the view model's words and numbers, as the text the card prints. */
 const buildContext = (viewModel: BriefViewModel, css: string) => {
   const { scope, summary, recommendation, priorities } = viewModel;
+  const scopeLine = getTitleParts(viewModel).join(' · ');
+  const captured = moment.utc(scope.capturedAt).format('D MMM YYYY, HH:mm [UTC]');
   return {
     css,
-    title: getTitleParts(viewModel).join(' · '),
-    captured: moment.utc(scope.capturedAt).format('D MMM YYYY, HH:mm [UTC]'),
+    title: viewModel.title ?? scopeLine,
+    // The scope line is the title when the model wrote none, and sits under its title when it did.
+    meta: [...(viewModel.title ? [scopeLine] : []), `Captured ${captured}`].join(' · '),
     notes: getNotes(viewModel),
     summary,
     periodLabel: scope.periodLabel,

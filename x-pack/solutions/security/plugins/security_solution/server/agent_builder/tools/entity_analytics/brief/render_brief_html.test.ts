@@ -142,6 +142,19 @@ describe('renderBriefHtml', () => {
     expect(html).toContain('+2 more');
   });
 
+  it("heads the card with the model's title and puts the scope line under it, or heads it with the scope", () => {
+    const withTitle = renderBriefHtml({
+      ...fixtureViewModel,
+      title: 'Alerts spread across hosts',
+    }).html;
+    expect(withTitle).toContain('<h1>Alerts spread across hosts</h1>');
+    expect(withTitle).toContain('Last 7 days · Captured 20 Oct 2026, 10:53 UTC.');
+
+    const withoutTitle = renderBriefHtml(fixtureViewModel).html;
+    expect(withoutTitle).toContain('<h1>Last 7 days</h1>');
+    expect(withoutTitle).toContain('Captured 20 Oct 2026, 10:53 UTC.');
+  });
+
   it('shows only the counts above zero or changed, and says when there is nothing to compare', () => {
     const { html } = renderBriefHtml(fixtureViewModel);
 

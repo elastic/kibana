@@ -27,6 +27,7 @@ import { BRIEF_PERIOD_LABELS, describeDelta, formatCount } from './describe_scop
 
 export const MAX_PRIORITIES = 3;
 const WORD_LIMITS = {
+  title: 8,
   summary: 40,
   assessment: 20,
   whyFirst: 15,
@@ -47,13 +48,14 @@ export const DRAFT_SYSTEM_PROMPT = `You write a short Entity Analytics brief for
 - The reader sees the page's counts, and beside your text, for each priority: the risk score and level, asset criticality, watchlists, and first seen. The alerts are not shown: your text is where the reader learns about them.
 
 ## Output
+- title: a short headline for the pattern of the period, at most ${WORD_LIMITS.title} words, with no counts and no mention of an entity. Follow the rule on findings below.
 - summary: one or two sentences on the pattern of the period, never the counts the page shows. Never comment on which or how many entities are listed: the brief states its coverage itself. Follow the rule on findings below.
 - priorities: up to ${MAX_PRIORITIES} entities to look at first, most important first. Entities flagged several ways, with high criticality, privilege or high risk usually come first. Use fewer when the data doesn't support ${MAX_PRIORITIES}; never pad. Always include the field.
 - A priority's text sits under the entity's name: never name, mention or refer back to the entity in it ("its alerts", not "this user's alerts").
 - assessment: one sentence, at most ${WORD_LIMITS.assessment} words, on what the evidence looks like taken together. whyFirst: one sentence, at most ${WORD_LIMITS.whyFirst} words, on why that puts the entity ahead of the others. Never repeat what the reader already sees: the risk score, criticality, watchlists or first seen. Name the alert rules through their tokens and give their counts.
 - Cite an alert rule only as {{ rule <index> }}, with the index it has in the alerts of the entity you write about, copied exactly and only inside assessment or whyFirst; the reader sees its name. Never write a rule name yourself.
 - Cite each listed rule at most once. Put it inside the sentence's own grammar, with its count written as a word before it, such as "three {{ rule 1 }} alerts": never in brackets, never as "x3" or ": 3". When otherRuleCount is above zero, say "and N other rules" with that number written as a word, and never calculate it.
-- Findings: the summary, the assessment, whyFirst and the recommendation name what to confirm, never what happened. Words such as "lateral movement", "compromise", "attack", "pivot", "breakout", "coordinated" and "exfiltration" state a finding: never use them in any of them. Say "looks like", "is the shape of" or "worth confirming" instead.
+- Findings: the title, the summary, the assessment, whyFirst and the recommendation name what to confirm, never what happened. Words such as "lateral movement", "compromise", "attack", "pivot", "breakout", "coordinated" and "exfiltration" state a finding: never use them in any of them. Say "looks like", "is the shape of" or "worth confirming" instead.
   Good: assessment "Three {{ rule 1 }} alerts and two other rules on a host first seen this week look like setup worth confirming." whyFirst "The change in behavior, not the volume, is worth checking first."
   Bad: "High impact, on a watchlist and newly seen, with risk score 76 (High)."
 - recommendation: the one step to take first across the whole view, not only for the first priority. It must make sense on its own. Follow the rule on findings below.
@@ -143,6 +145,11 @@ export const BriefDraft = lazySchema(() =>
       )
       .describe(
         `At most ${MAX_PRIORITIES} entities to look at first, most important first. Never pad.`
+      ),
+    title: z
+      .string()
+      .describe(
+        `A headline for the pattern of the period, at most ${WORD_LIMITS.title} words. No counts, no entity mentions.`
       ),
     summary: z
       .string()

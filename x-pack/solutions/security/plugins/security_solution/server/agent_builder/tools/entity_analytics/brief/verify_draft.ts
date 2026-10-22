@@ -16,6 +16,8 @@ export const MENTION_PATTERN = /\{\{\s*entity\.id\s+([^}]+?)\s*\}\}/g;
 export const RULE_MENTION_PATTERN = /\{\{\s*rule\s+(\d+)\s*\}\}/g;
 
 export interface VerifiedBrief {
+  /** Absent without a priority, as the summary. Names no entity. */
+  title?: string;
   /** Absent without a priority: the brief then says there is nothing to prioritize. */
   summary?: string;
   /** Absent without a priority, as the summary. */
@@ -67,6 +69,7 @@ export const verifyDraft = (draft: BriefDraft, facts: EntityFacts[]): VerifiedBr
     (priorities.length > 0 && keepFlaggedMentions(text)) || undefined;
 
   return {
+    title: keepProse(draft.title.replace(MENTION_PATTERN, '')),
     summary: keepProse(draft.summary),
     recommendation: keepProse(draft.recommendation),
     priorities,

@@ -58,6 +58,8 @@ export const BriefViewModel = lazySchema(() =>
     }),
     /** What wasn't found or checked. */
     notes: z.array(z.string()),
+    /** The model's headline, when there was a model call and it found priorities. */
+    title: z.string().optional(),
     summary: z.string().optional(),
     /** The page's counts in its order, for the tiles that could be read. */
     counts: z.array(
@@ -155,6 +157,7 @@ export const buildViewModel = ({
       sample: describeSample(scope, entities),
     },
     notes: buildNotes(scope, entities, alertsFailed),
+    title: verified?.title,
     summary: verified ? verified.summary && withNames(verified.summary) : describeQuietView(scope),
     counts: SIGNAL_CARD_IDS.flatMap((tileId) => {
       const tile = tiles[tileId];

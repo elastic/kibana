@@ -27,6 +27,7 @@ const priority = (entityId: string, assessment = 'Assessed.'): BriefPriority => 
 });
 
 const draft = (priorities: BriefPriority[]): BriefDraft => ({
+  title: 'Alerts on {{ entity.id host:a }} spread',
   summary: 'Summary of {{ entity.id host:a }} and {{ entity.id host:unknown }}.',
   priorities,
   recommendation: 'Review {{ entity.id host:a }} first.',
@@ -62,9 +63,14 @@ describe('verifyDraft', () => {
       },
     ],
     [
-      'has no summary or recommendation without a priority',
+      'removes every entity mention from the title',
+      draft([priority('host:a')]),
+      { title: 'Alerts on  spread' },
+    ],
+    [
+      'has no title, summary or recommendation without a priority',
       draft([priority('host:unknown')]),
-      { summary: undefined, recommendation: undefined, priorities: [] },
+      { title: undefined, summary: undefined, recommendation: undefined, priorities: [] },
     ],
   ])('%s', (_name, input, expected) => {
     expect(verifyDraft(input, facts)).toMatchObject(expected);
