@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import { defineNoMlNodesOnStartupTests } from '@kbn/test-suites-xpack-platform/serverless/api_integration/test_suites/ml/no_ml_nodes_on_startup';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Serverless Search - ML', function () {
-    loadTestFile(require.resolve('./no_ml_nodes_on_startup'));
-  });
+export default function ({ getService }: FtrProviderContext) {
+  defineNoMlNodesOnStartupTests(getService('es'));
 }
