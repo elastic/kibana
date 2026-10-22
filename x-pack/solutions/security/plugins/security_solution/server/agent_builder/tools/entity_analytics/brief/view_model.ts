@@ -24,7 +24,7 @@ import {
 } from './describe_scope';
 import type { CandidateEntities } from './read_entities';
 import type { VerifiedBrief } from './verify_draft';
-import { MENTION_PATTERN, RULE_MENTION_PATTERN } from './verify_draft';
+import { JOB_MENTION_PATTERN, MENTION_PATTERN, RULE_MENTION_PATTERN } from './verify_draft';
 
 export const QUIET_LINE = 'Nothing in this view is flagged as needing attention.';
 export const NO_PRIORITIES_LINE = 'No entity in this view has enough evidence to prioritize.';
@@ -99,7 +99,12 @@ export const BriefViewModel = lazySchema(() =>
 );
 export type BriefViewModel = z.infer<typeof BriefViewModel>;
 
-const TOKEN_PATTERN = new RegExp(`${MENTION_PATTERN.source}|${RULE_MENTION_PATTERN.source}`, 'g');
+const TOKEN_PATTERN = new RegExp(
+  [MENTION_PATTERN, RULE_MENTION_PATTERN, JOB_MENTION_PATTERN]
+    .map(({ source }) => source)
+    .join('|'),
+  'g'
+);
 
 /** Builds the view model from what the pipeline has. `verified` is absent when no model call was made. */
 export const buildViewModel = ({
@@ -125,19 +130,25 @@ export const buildViewModel = ({
 }): BriefViewModel => {
   const { tiles, period, focusTileId, entityFilters = {} } = scope;
   const namesById = new Map(entities.candidates.map(({ id, name }) => [id, name]));
-  // Model text is prose: an entity mention becomes the Entity Store's name, and a rule mention the name
-  // of that rule of the entity the text is about. One that names no rule is removed.
+  // Model text is prose: an entity mention becomes the Entity Store's name, and a rule or job mention the
+  // name of that rule or job of the entity the text is about. One that names none is removed.
   const withNames = (text: string, entityFacts?: EntityFacts) =>
-    text.replace(TOKEN_PATTERN, (token, entityId?: string, ruleIndex?: string) => {
-      if (entityId !== undefined) {
-        return namesById.get(entityId) ?? entityId;
+    text.replace(
+      TOKEN_PATTERN,
+      (token, entityId?: string, ruleIndex?: string, jobIndex?: string) => {
+        if (entityId !== undefined) {
+          return namesById.get(entityId) ?? entityId;
+        }
+        const named =
+          ruleIndex !== undefined
+            ? entityFacts?.alerts?.rules.find(({ index }) => index === Number(ruleIndex))
+            : entityFacts?.anomalies?.jobs.find(({ index }) => index === Number(jobIndex));
+        if (!named) {
+          logger?.debug(`AI brief: removed ${token}, which names no rule or job of the entity`);
+        }
+        return named?.name ?? '';
       }
-      const rule = entityFacts?.alerts?.rules.find(({ index }) => index === Number(ruleIndex));
-      if (!rule) {
-        logger?.debug(`AI brief: removed ${token}, which names no alert rule of the entity`);
-      }
-      return rule?.name ?? '';
-    });
+    );
   const sentence = (text: string, entityFacts: EntityFacts) => {
     const named = withNames(text, entityFacts);
     return /[.!?…]$/.test(named) ? named : `${named}.`;

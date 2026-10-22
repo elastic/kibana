@@ -43,6 +43,13 @@ export interface EntityAlerts {
   rules: Array<{ index: number; name: string; count: number }>;
 }
 
+/** The anomaly records of an entity, or of its resolution group, in the captured period. */
+export interface EntityAnomalies {
+  count: number;
+  /** The job with the highest record score, which the model cites by index, by its display name or description. */
+  jobs: Array<{ index: number; name: string; score: number }>;
+}
+
 /** What the model knows about a candidate. */
 export interface EntityFacts {
   /** The EUID, used in mention tokens. */
@@ -57,6 +64,7 @@ export interface EntityFacts {
   };
   assetCriticality?: string;
   alerts?: EntityAlerts;
+  anomalies?: EntityAnomalies;
   /** The names of the watchlists the entity is on. */
   watchlists?: string[];
   /** Relative to the capture, such as "5 days ago". */

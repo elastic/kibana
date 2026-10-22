@@ -22,6 +22,7 @@ import { buildFacts } from './build_facts';
 import { describeSample, getPeriodStart } from './describe_scope';
 import { draftBrief } from './draft_brief';
 import { readAlertRules } from './read_alert_rules';
+import { readAnomalies } from './read_anomalies';
 import { readWatchlistNames } from './read_watchlist_names';
 import { getCandidateRisk, readEntities } from './read_entities';
 import type { BriefPriority } from './prompts';
@@ -56,15 +57,18 @@ export const generateBrief = async ({
     return { ...renderBriefHtml(viewModel), viewModel, priorityCount: 0 };
   }
 
-  const { alertsByEntityId, isFailed: alertsFailed } = await readAlertRules({
+  const [{ alertsByEntityId, isFailed: alertsFailed }, anomaliesByEntityId] = await Promise.all([
+    readAlertRules({ candidates, scope, spaceId, esClient, logger }),
+    readAnomalies({ candidates, scope, esClient, logger }),
+  ]);
+  const watchlistNamesById = await readWatchlistNames(watchlistConfigClient, logger);
+  const facts = buildFacts(
     candidates,
     scope,
-    spaceId,
-    esClient,
-    logger,
-  });
-  const watchlistNamesById = await readWatchlistNames(watchlistConfigClient, logger);
-  const facts = buildFacts(candidates, scope, alertsByEntityId, watchlistNamesById);
+    alertsByEntityId,
+    anomaliesByEntityId,
+    watchlistNamesById
+  );
   const draft = await draftBrief({
     inferenceClient,
     scope,

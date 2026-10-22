@@ -12,7 +12,7 @@ import {
   getEntityAttributes,
   getEntityLifecycle,
 } from '../../../../lib/entity_analytics/lead_generation/observation_modules/utils';
-import type { BriefCandidate, EntityAlerts, EntityFacts } from './types';
+import type { BriefCandidate, EntityAlerts, EntityAnomalies, EntityFacts } from './types';
 import { formatStoredValue } from './describe_scope';
 import { getCandidateRisk } from './read_entities';
 import { getWatchlistNames } from './read_watchlist_names';
@@ -22,6 +22,7 @@ export const buildFacts = (
   candidates: BriefCandidate[],
   scope: EntityAnalyticsScope,
   alertsByEntityId: Record<string, EntityAlerts> = {},
+  anomaliesByEntityId: Record<string, EntityAnomalies> = {},
   watchlistNamesById = new Map<string, string>()
 ): EntityFacts[] =>
   candidates.map((candidate) => {
@@ -40,6 +41,7 @@ export const buildFacts = (
       risk: risk && { of: risk.of, level: risk.level, score: Math.round(risk.score) },
       assetCriticality: criticality ? formatStoredValue(criticality) : undefined,
       alerts: alertsByEntityId[candidate.id],
+      anomalies: anomaliesByEntityId[candidate.id],
       watchlists: watchlists.length > 0 ? watchlists : undefined,
       // Relative to the capture, so no date or time zone is stated.
       firstSeen: firstSeen ? moment(firstSeen).from(scope.capturedAt) : undefined,

@@ -69,6 +69,10 @@ const facts: EntityFacts[] = [
         { index: 2, name: 'Odd Logon', count: 1 },
       ],
     },
+    anomalies: {
+      count: 4,
+      jobs: [{ index: 1, name: 'high_sent_bytes_destination_ip', score: 75 }],
+    },
     firstSeen: '5 days ago',
   },
   {
@@ -189,6 +193,27 @@ describe('buildViewModel', () => {
       'a token for a rule of another entity is removed',
       'user:b',
       'Seen in {{ rule 1 }}',
+      'Seen in .',
+      1,
+    ],
+    [
+      'a token for a job of the entity becomes the job',
+      'host:a',
+      'Seen in {{ job 1 }}',
+      'Seen in high_sent_bytes_destination_ip.',
+      0,
+    ],
+    [
+      'a token with an index the entity has no job at is removed',
+      'host:a',
+      'Seen in {{ job 9 }}',
+      'Seen in .',
+      1,
+    ],
+    [
+      'a token for a job of another entity is removed',
+      'user:b',
+      'Seen in {{ job 1 }}',
       'Seen in .',
       1,
     ],

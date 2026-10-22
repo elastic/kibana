@@ -15,6 +15,9 @@ export const MENTION_PATTERN = /\{\{\s*entity\.id\s+([^}]+?)\s*\}\}/g;
 /** The model names an alert rule of the entity it writes about by its index in `alerts`. */
 export const RULE_MENTION_PATTERN = /\{\{\s*rule\s+(\d+)\s*\}\}/g;
 
+/** The same for an anomaly job, by its index in `anomalies`. */
+export const JOB_MENTION_PATTERN = /\{\{\s*job\s+(\d+)\s*\}\}/g;
+
 export interface VerifiedBrief {
   /** Absent without a priority, as the summary. Names no entity. */
   title?: string;

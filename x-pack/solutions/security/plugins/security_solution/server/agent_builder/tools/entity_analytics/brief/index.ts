@@ -10,7 +10,8 @@
  * into an HTML brief in seven steps, one file each:
  *
  * 1. `read_entities`: reads the flagged entities from the Entity Store, as the user.
- * 2. `read_alert_rules`: the open alerts of each entity and the rules behind them, as the user.
+ * 2. `read_alert_rules` and `read_anomalies`: the open alerts of each entity and the rules behind them, and
+ *    its anomaly records and their jobs, as the user.
  * 3. `build_facts`: what the model knows about each entity, as data.
  * 4. `draft_brief`: the model writes the summary, priorities and recommendation.
  * 5. `verify_draft`: keeps the draft to the flagged entities.

@@ -41,4 +41,11 @@ describe('buildFacts', () => {
       firstSeen: '5 days ago',
     });
   });
+
+  it('gives each entity its own alerts and anomalies', () => {
+    const anomalies = { count: 2, jobs: [{ index: 1, name: 'high_sent_bytes', score: 75 }] };
+    const [facts] = buildFacts([candidate({})], scope, {}, { 'user:jdoe': anomalies });
+    expect(facts.anomalies).toEqual(anomalies);
+    expect(facts.alerts).toBeUndefined();
+  });
 });

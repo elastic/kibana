@@ -11,19 +11,16 @@ import type {
   QueryDslBoolQuery,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { ALERT_RISK_SCORE, ALERT_RULE_NAME, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 import { ALERT_ENTITY_ID } from '../../../../../common/field_maps/field_names';
 import { getPeriodStart } from './describe_scope';
-import { getBriefEntityType } from './read_entities';
+import { buildRecordFilters } from './match_candidate_records';
 import type { BriefCandidate, EntityAlerts } from './types';
 
 /** The two most important rules are given to the model, and the rest are counted. */
 const MAX_RULES_PER_ENTITY = 2;
-/** The members of a group whose records match its alerts without an entity id. Stamped alerts match every member. */
-const MAX_MEMBERS_MATCHED_BY_RECORD = 20;
 /** Rule names are written by users, so a long one is cut. */
 const MAX_RULE_NAME_LENGTH = 100;
 
@@ -135,28 +132,17 @@ const getEntityIds = ({ id, members = [] }: Pick<BriefCandidate, 'id' | 'members
 ];
 
 /** The alerts of a candidate and its members: stamped with their ids, or without a stamp, by their records. */
-export const buildAlertsFilter = ({
-  id,
-  record,
-  members = [],
-}: BriefCandidate): { bool: QueryDslBoolQuery & { should: QueryDslQueryContainer[] } } => {
-  const recordFilters = [
-    { id, record },
-    ...members.slice(0, MAX_MEMBERS_MATCHED_BY_RECORD),
-  ].flatMap((entity) => {
-    const filter = euid.dsl.getEuidFilterBasedOnEntityRecord(
-      getBuiltInEntityDefinition(getBriefEntityType(entity.record, entity.id)),
-      entity.record
-    );
-    return filter ? [filter] : [];
-  });
+export const buildAlertsFilter = (
+  candidate: BriefCandidate
+): { bool: QueryDslBoolQuery & { should: QueryDslQueryContainer[] } } => {
+  const { id, members } = candidate;
   return {
     bool: {
       should: [
         { terms: { [ALERT_ENTITY_ID]: getEntityIds({ id, members }) } },
         {
           bool: {
-            filter: [{ bool: { should: recordFilters, minimum_should_match: 1 } }],
+            filter: [{ bool: { should: buildRecordFilters(candidate), minimum_should_match: 1 } }],
             must_not: [{ exists: { field: ALERT_ENTITY_ID } }],
           },
         },
