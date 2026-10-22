@@ -74,7 +74,12 @@ const createListener = (
         if (!scope.upper) break;
         scope = scope.upper;
       }
-      if (name === 'configureStore' || name === 'createSlice' || name === 'createReducer') {
+      if (
+        name === 'configureStore' ||
+        name === 'createSlice' ||
+        name === 'createReducer' ||
+        name === 'getDefaultMiddleware'
+      ) {
         check(node, name);
       }
     },
@@ -125,6 +130,12 @@ export const NoReduxToolkitMiddlewareSpreadRule: CreateOnceRule = {
   },
   createOnce(context) {
     return createListener(context, (node, apiName) => {
+      if (apiName === 'getDefaultMiddleware') {
+        if (node.parent.type === 'SpreadElement') {
+          context.report({ node: node.parent, messageId: 'spread' });
+        }
+        return;
+      }
       if (apiName !== 'configureStore') return;
       const options = node.arguments[0];
       if (options?.type !== 'ObjectExpression') return;
@@ -188,7 +199,7 @@ export const NoReduxToolkitStateReassignmentRule: CreateOnceRule = {
       }
     };
     return createListener(context, (node, apiName) => {
-      if (apiName === 'configureStore') return;
+      if (apiName !== 'createSlice' && apiName !== 'createReducer') return;
       const options = node.arguments[0];
       if (options?.type === 'ObjectExpression') {
         for (const property of options.properties) {

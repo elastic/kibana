@@ -23,6 +23,14 @@ for (const source of ['@reduxjs/toolkit', 'redux-toolkit-v1']) {
       store('gDM().concat(custom)'),
       store('gDM().prepend(custom)'),
       store('[...custom]'),
+      `import { getDefaultMiddleware } from '${source}'; const middleware = getDefaultMiddleware().concat(custom);`,
+      `import { getDefaultMiddleware as defaults } from '${source}'; const middleware = defaults().prepend(custom);`,
+      `import { getDefaultMiddleware } from 'other'; const middleware = [...getDefaultMiddleware()];`,
+      `import { getDefaultMiddleware } from '${source}'; function f(getDefaultMiddleware) { return [...getDefaultMiddleware()]; }`,
+      `import { getDefaultMiddleware as defaults } from '${source}'; function f(defaults) { return [...defaults()]; }`,
+      `import * as rtk from '${source}'; function f(rtk) { return [...rtk.getDefaultMiddleware()]; }`,
+      'const middleware = [...getDefaultMiddleware()];',
+      'const middleware = [...rtk.getDefaultMiddleware()];',
       'store({middleware: gDM => [...gDM()]});',
       'rtk.configureStore({middleware: gDM => [...gDM()]});',
       store('{ function nested(gDM) { return [...gDM()]; } return gDM(); }'),
@@ -32,6 +40,18 @@ for (const source of ['@reduxjs/toolkit', 'redux-toolkit-v1']) {
       `import { configureStore as store } from '${source}'; function f(store) { store({middleware: gDM => [...gDM()]}); }`,
     ],
     invalid: [
+      {
+        code: `import { configureStore, getDefaultMiddleware } from '${source}'; const middleware = [...getDefaultMiddleware({serializableCheck: false}), custom]; configureStore({reducer, middleware});`,
+        errors: [{ messageId: 'spread' }],
+      },
+      {
+        code: `import { getDefaultMiddleware as defaults } from '${source}'; const middleware = [...defaults()];`,
+        errors: [{ messageId: 'spread' }],
+      },
+      {
+        code: `import * as rtk from '${source}'; const middleware = [...rtk.getDefaultMiddleware()];`,
+        errors: [{ messageId: 'spread' }],
+      },
       { code: store('[...gDM(), custom]'), errors: [{ messageId: 'spread' }] },
       {
         code: store('{ return [...gDM({serializableCheck: false})]; }'),
