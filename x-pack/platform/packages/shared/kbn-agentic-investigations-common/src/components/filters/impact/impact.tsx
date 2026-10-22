@@ -14,7 +14,6 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiText,
-  EuiTextTruncate,
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
@@ -29,6 +28,10 @@ export const IMPACT_PILLS_TEST_SUBJ = 'alertzeroImpactPills';
 export const IMPACT_PILL_TEST_SUBJ = 'alertzeroImpactPill';
 export const IMPACT_OVERFLOW_TEST_SUBJ = 'alertzeroImpactOverflow';
 export const IMPACT_COLLAPSE_TEST_SUBJ = 'alertzeroImpactCollapse';
+
+/** At this many per row, the first page (10 pills and the `+n` pill) always fits two rows. */
+const PILLS_PER_ROW = 6;
+const MAX_LABEL_WIDTH = 120;
 
 interface ImpactProps {
   impact: PagedImpactPills;
@@ -45,6 +48,8 @@ interface PillBadgeProps {
   ariaLabel: string;
   /** Full name, and the id when they differ, shown on hover. */
   tooltip?: string;
+  /** Lets keyboard users reach a pill that is not a button, so its tooltip shows. */
+  focusable?: boolean;
   onClick?: () => void;
 }
 
@@ -55,11 +60,16 @@ const PillBadge: React.FC<PillBadgeProps> = ({
   iconType,
   ariaLabel,
   tooltip,
+  focusable = false,
   onClick,
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const interactiveProps = onClick ? { onClick, onClickAriaLabel: ariaLabel } : {};
+  const interactiveProps = onClick
+    ? { onClick, onClickAriaLabel: ariaLabel }
+    : focusable
+    ? { role: 'note', tabIndex: 0, 'aria-label': ariaLabel }
+    : {};
   const isIconOnly = label === undefined && iconType !== undefined;
   // Icon-only pills get the same horizontal footprint as a short text pill.
   const padding = isIconOnly ? `${euiTheme.size.xs} ${euiTheme.size.m}` : euiTheme.size.xs;
@@ -69,7 +79,7 @@ const PillBadge: React.FC<PillBadgeProps> = ({
       {...interactiveProps}
       // A labelled pill draws its own 16px icon below; EuiBadge would render it at 12px.
       iconType={isIconOnly ? iconType : undefined}
-      style={{ padding, textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+      style={{ padding, maxWidth: '100%', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
       css={css({
         background: selected
           ? euiTheme.colors.backgroundBaseHighlighted
@@ -83,19 +93,40 @@ const PillBadge: React.FC<PillBadgeProps> = ({
       })}
     >
       {label !== undefined && (
-        <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false} direction="row">
+        <EuiFlexGroup
+          gutterSize="none"
+          alignItems="center"
+          responsive={false}
+          direction="row"
+          css={css({ minWidth: 0 })}
+        >
           {iconType !== undefined && (
-            <EuiFlexItem grow={false} css={css({ padding: `0 ${euiTheme.size.xs}` })}>
+            <EuiFlexItem
+              grow={false}
+              css={css({ padding: `0 ${euiTheme.size.xs}`, flexShrink: 0 })}
+            >
               <EuiIcon type={iconType} size="m" color="subdued" aria-hidden="true" />
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" style={{ padding: `0 ${euiTheme.size.xs}` }}>
-              <EuiTextTruncate text={label} width={120} truncation="end" />
+          <EuiFlexItem
+            grow={false}
+            css={css({ minWidth: 0, maxWidth: MAX_LABEL_WIDTH, flexShrink: 1 })}
+          >
+            <EuiText size="xs" css={css({ minWidth: 0, padding: `0 ${euiTheme.size.xs}` })}>
+              <span
+                css={css({
+                  display: 'block',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                })}
+              >
+                {label}
+              </span>
             </EuiText>
           </EuiFlexItem>
           {count !== undefined && (
-            <EuiFlexItem grow={false} css={css({ paddingLeft: euiTheme.size.xs })}>
+            <EuiFlexItem grow={false} css={css({ paddingLeft: euiTheme.size.xs, flexShrink: 0 })}>
               <EuiBadge color="hollow">{count}</EuiBadge>
             </EuiFlexItem>
           )}
@@ -108,7 +139,7 @@ const PillBadge: React.FC<PillBadgeProps> = ({
 };
 
 export const Impact: React.FC<ImpactProps> = ({
-  impact: { pills, remaining, isLoadingMore, showMore, showFewer },
+  impact: { pills, remaining, canShowMore, reachLimit, isLoadingMore, showMore, showFewer },
   entityFilter,
   selectedPill,
   onEntityFilterChange,
@@ -127,12 +158,17 @@ export const Impact: React.FC<ImpactProps> = ({
   // Items stretch to the row height and center their pill, so the shorter +n
   // pill lines up with the count pills beside it.
   const pillItemStyles = css({ justifyContent: 'center' });
+  const gap = euiTheme.size.s;
+  const pillItemMaxWidthStyles = css({
+    minWidth: 0,
+    maxWidth: `calc((100% - ${PILLS_PER_ROW - 1} * ${gap}) / ${PILLS_PER_ROW})`,
+  });
 
   const renderPill = (pill: ImpactPill) => (
     <EuiFlexItem
       key={pill.entityId}
       grow={false}
-      css={pillItemStyles}
+      css={[pillItemStyles, pillItemMaxWidthStyles]}
       data-test-subj={IMPACT_PILL_TEST_SUBJ}
     >
       <PillBadge
@@ -164,11 +200,20 @@ export const Impact: React.FC<ImpactProps> = ({
         {pinnedPill && renderPill(pinnedPill)}
         {remaining > 0 && (
           <EuiFlexItem grow={false} css={pillItemStyles} data-test-subj={IMPACT_OVERFLOW_TEST_SUBJ}>
-            <PillBadge
-              label={IMPACT_LABELS.showMore(remaining)}
-              ariaLabel={IMPACT_LABELS.showMoreAriaLabel(remaining)}
-              onClick={isLoadingMore ? undefined : showMore}
-            />
+            {canShowMore ? (
+              <PillBadge
+                label={IMPACT_LABELS.showMore(remaining)}
+                ariaLabel={IMPACT_LABELS.showMoreAriaLabel(remaining)}
+                onClick={isLoadingMore ? undefined : showMore}
+              />
+            ) : (
+              <PillBadge
+                label={IMPACT_LABELS.showMore(remaining)}
+                ariaLabel={IMPACT_LABELS.reachLimit(reachLimit, remaining)}
+                tooltip={IMPACT_LABELS.reachLimit(reachLimit, remaining)}
+                focusable
+              />
+            )}
           </EuiFlexItem>
         )}
         {showFewer && (

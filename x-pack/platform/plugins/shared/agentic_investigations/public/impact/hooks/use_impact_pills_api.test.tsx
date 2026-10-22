@@ -136,6 +136,8 @@ describe('paging', () => {
     expect(result.current.total).toBe(5);
     expect(result.current.remaining).toBe(3);
     expect(result.current.showFewer).toBeUndefined();
+    expect(result.current.canShowMore).toBe(true);
+    expect(result.current.reachLimit).toBe(10_000);
   });
 
   it('appends the next page from the offset of what has loaded', async () => {
@@ -199,6 +201,8 @@ describe('paging', () => {
     act(() => result.current.showMore());
 
     expect(http.get).toHaveBeenCalledTimes(2);
+    expect(result.current.remaining).toBeGreaterThan(0);
+    expect(result.current.canShowMore).toBe(false);
   });
 
   it('asks for no further page once the server has sent everything', async () => {

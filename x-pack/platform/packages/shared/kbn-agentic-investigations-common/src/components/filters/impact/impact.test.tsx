@@ -30,6 +30,8 @@ const paged = (
   pills,
   total: pills.length,
   remaining: 0,
+  canShowMore: true,
+  reachLimit: 10_000,
   isLoadingMore: false,
   showMore: jest.fn(),
   ...overrides,
@@ -122,6 +124,28 @@ describe('Impact', () => {
       expect(overflow.getByText('+8482')).toBeInTheDocument();
       fireEvent.click(overflow.getByRole('button', { name: 'Show 8482 more' }));
       expect(showMore).toHaveBeenCalledTimes(1);
+    });
+
+    it('replaces the +n button with an explanation once the server cannot list more', () => {
+      const showMore = jest.fn();
+      renderImpact({
+        impact: paged([{ entityId: 'host-1', count: 1 }], {
+          remaining: 1492,
+          canShowMore: false,
+          reachLimit: 10_000,
+          showMore,
+        }),
+      });
+
+      const overflow = within(screen.getByTestId(IMPACT_OVERFLOW_TEST_SUBJ));
+      expect(overflow.queryByRole('button')).not.toBeInTheDocument();
+      expect(overflow.getByText('+1492')).toBeInTheDocument();
+      const note = overflow.getByRole('note', {
+        name: 'Only the first 10000 entities can be listed; 1492 more are not shown.',
+      });
+      expect(note).toHaveAttribute('tabindex', '0');
+      fireEvent.click(note);
+      expect(showMore).not.toHaveBeenCalled();
     });
 
     it('does not ask for another page while one is loading', () => {

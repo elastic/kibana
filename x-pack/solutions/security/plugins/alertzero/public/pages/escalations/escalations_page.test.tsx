@@ -95,6 +95,8 @@ const pagedPills = (pills: Array<{ entityId: string; count: number }>) => ({
   pills,
   total: pills.length,
   remaining: 0,
+  canShowMore: true,
+  reachLimit: 10_000,
   isLoadingMore: false,
   showMore: jest.fn(),
 });

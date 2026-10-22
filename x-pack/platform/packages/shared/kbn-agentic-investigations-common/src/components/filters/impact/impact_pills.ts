@@ -23,6 +23,10 @@ export interface PagedImpactPills {
   pills: readonly ImpactPill[];
   total: number;
   remaining: number;
+  /** False once the server cannot be asked for more, even if `remaining` is above zero. */
+  canShowMore: boolean;
+  /** The most pills the server lists. */
+  reachLimit: number;
   isLoadingMore: boolean;
   showMore: () => void;
   /** Present once more than the first page has loaded. */

@@ -43,7 +43,7 @@ const useImpactPillsPages = ({
   const { services } = useKibana<CoreStart>();
   const queryClient = useQueryClient();
 
-  const { data, fetchNextPage, isFetchingNextPage } = useInfiniteQuery({
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey,
     queryFn: ({ pageParam }: { pageParam?: number }): Promise<ImpactPillsResponse> =>
       services.http.get<ImpactPillsResponse>(url, {
@@ -80,6 +80,8 @@ const useImpactPillsPages = ({
     pills,
     total: pages[0]?.total ?? 0,
     remaining: pages[pages.length - 1]?.remaining ?? 0,
+    canShowMore: hasNextPage === true,
+    reachLimit: MAX_IMPACT_PILLS_REACH,
     isLoadingMore: isFetchingNextPage,
     showMore,
     ...(pages.length > 1 ? { showFewer } : {}),
