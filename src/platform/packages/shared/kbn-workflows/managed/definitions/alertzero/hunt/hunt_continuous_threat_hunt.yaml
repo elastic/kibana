@@ -29,7 +29,7 @@ consts:
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
     scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
     # Fixed implementation constants, not user-configurable; see HUNT_WORKER_DEFAULTS
-    # in worker_template_values.ts.
+    # in hunt_worker_template.ts.
     tier2When: __WORKER_TIER2_WHEN__
     candidateLimit: __WORKER_CANDIDATE_LIMIT__
     fanOutMax: __WORKER_FAN_OUT_MAX__

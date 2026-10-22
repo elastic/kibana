@@ -14,8 +14,8 @@ import {
   HUNT_THREAT_INTEL_SUPPLY_URL,
   type HuntThreatIntelSupplyStatus,
 } from '@kbn/alertzero-common';
-import { retryOnTransientError } from './retry_on_transient_error';
-import { queryKeys } from '../query_keys';
+import { retryOnTransientError } from '../retry_on_transient_error';
+import { queryKeys } from '../../query_keys';
 
 export const useHuntThreatIntelSupplyStatus = (enabled: boolean) => {
   const { services } = useKibana();

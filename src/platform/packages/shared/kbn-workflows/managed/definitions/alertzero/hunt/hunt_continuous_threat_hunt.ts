@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERTZERO_WORKER_MANAGEMENT } from './constants';
 import HUNT_CONTINUOUS_THREAT_HUNT_YAML from './hunt_continuous_threat_hunt.yaml';
+import { type HuntWorkerTemplateValues, renderHuntWorkerYaml } from './hunt_worker_template';
+import type { ManagedWorkflowDefinition } from '../../../types';
+import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERTZERO_WORKER_MANAGEMENT } from '../constants';
 import {
   CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS,
   upgradeStoredWorkerSettings,
-} from './worker_settings_defaults';
-import { type HuntWorkerTemplateValues, renderHuntWorkerYaml } from './worker_template_values';
-import type { ManagedWorkflowDefinition } from '../../types';
+} from '../worker_settings_defaults';
 
 export const ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID =
   'system-security-hunt-continuous-threat-hunt';

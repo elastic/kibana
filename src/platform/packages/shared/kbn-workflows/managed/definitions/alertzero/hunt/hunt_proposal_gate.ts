@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import HUNT_PROPOSAL_GATE_YAML from './hunt_proposal_gate.yaml';
+import type { ManagedWorkflowDefinition } from '../../../types';
 import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-} from './constants';
-import HUNT_PROPOSAL_GATE_YAML from './hunt_proposal_gate.yaml';
-import type { ManagedWorkflowDefinition } from '../../types';
+} from '../constants';
 
 export const ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID = 'system-security-hunt-proposal-gate';
 
