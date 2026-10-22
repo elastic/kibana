@@ -242,7 +242,7 @@ Records the token count and the estimated cost of the agent session that produce
 - A machine-readable HTML comment marker in the published GitHub comment.
 - A human-readable line rendered in the chat after the Sources Summary.
 
-All four come from a single call to `x-pack/solutions/security/plugins/security_solution/.agents/scripts/session-token-usage.py --with-cost`, so tokens and cost always describe the same moment. When the output has no `input=` line — non-Claude-Code harness, missing transcript, or transcript without `usage` blocks — both values fall back to their "not available" form. When only the `usd=` line is missing — a model with no price in `model_prices.json` — only the cost falls back.
+All four come from a single call to `x-pack/solutions/security/plugins/security_solution/.agents/scripts/session-token-usage.py --with-cost`, so tokens and cost always describe the same moment. When the output has no `input=` line — non-Claude-Code harness, missing transcript, or transcript without `usage` blocks — both values fall back to their "not available" form. When only the `usd=` line is missing — a model with no price in the price list — only the cost falls back.
 
 **What is measured.** The script reads the Claude Code session transcript and counts each API response once. It runs right after the draft is saved, so the totals cover the session **until the draft was saved**, including writing it. If the same chat did other work before invoking the skill, or ran the skill more than once, all of it is included; a fresh chat gives a figure for this run alone. What comes after is not included: the response that runs the script (Claude Code writes it to the transcript only after the command returns), the edit that adds the markers, and the closing chat messages — in measured runs, about a tenth of the session cost. Every `generate` or `update` replaces both markers with the current session's values; they are never added to the values of earlier runs.
 
@@ -256,8 +256,8 @@ Once the draft is saved and the markers are added, the top markers are `verbosit
 ```
 
 - Tokens field order matches the script output (`input`, `output`, `cache_create`, `cache_read`, `total`). Values are non-negative integers (raw token counts, no thousand separators).
-- `usd` is the estimated cost in US dollars with four decimals; `pricing` is the date the price list in `model_prices.json` was last checked.
-- **The cost is an estimate at API list price**, not what anyone was billed (subscriptions and discounts are ignored). The prices are copied from [gh-aw's `models.json`](https://github.com/github/gh-aw/blob/main/actions/setup/js/models.json) and the formula follows gh-aw's `computeInferenceCostUSD`; 1-hour cache writes are billed at twice the input price, as Anthropic does.
+- `usd` is the estimated cost in US dollars with four decimals; `pricing` is the date of the prices used.
+- **The cost is an estimate at API list price**, not what anyone was billed (subscriptions and discounts are ignored). The script downloads the Anthropic prices from [gh-aw's `models.json`](https://github.com/github/gh-aw/blob/main/actions/setup/js/models.json) on every run, so a price fixed there applies from the next run and `pricing` is that day. Without network access, or if the file is invalid, it uses the copy in `.agents/scripts/model_prices.json`, and `pricing` is the date that copy was taken. The formula follows gh-aw's `computeInferenceCostUSD`; 1-hour cache writes are billed at twice the input price, as Anthropic does.
 - **Absence is meaningful** — if a marker is missing from a published comment, that value was not measurable for the generation run.
 
 Final marker order in the published comment after Step 4 publish:

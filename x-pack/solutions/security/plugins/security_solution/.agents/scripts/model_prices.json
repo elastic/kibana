@@ -2,7 +2,7 @@
   "source": "https://github.com/github/gh-aw/blob/27cc912e2d5371f9e30e0b59893e2ff9a759627d/actions/setup/js/models.json",
   "checked": "2026-10-21",
   "unit": "USD per token",
-  "notes": "Anthropic entries copied from gh-aw models.json. cache_write is the 5-minute cache write price; 1-hour cache writes are billed at 2x the input price.",
+  "notes": "Fallback copy of the Anthropic entries in gh-aw models.json, used by session-token-usage.py --with-cost only when the live file cannot be downloaded. cache_write is the 5-minute cache write price; 1-hour cache writes are billed at 2x the input price.",
   "models": {
     "claude-3-5-haiku-20241022": {
       "input": 8.000000000000001E-7,

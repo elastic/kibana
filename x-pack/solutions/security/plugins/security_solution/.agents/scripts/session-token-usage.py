@@ -22,8 +22,8 @@ Exit 0: transcript found, parsed, and contains at least one usage block; totals 
 Exit 1: transcript not found, unreadable, or contains no usage blocks (not Claude Code,
         wrong harness, unrecognised format, or session ended before any exchange) —
         prints nothing; caller should write "not available".
-Exit 2: --json manifest or --with-cost price catalog is invalid (with --with-cost,
-        the token line is still printed).
+Exit 2: --json manifest is invalid, or with --with-cost the prices could not be
+        downloaded and the local copy is invalid (the token line is still printed).
 
 Transcript location:
     ~/.claude/projects/<cwd-slug>/<session-id>.jsonl
@@ -40,10 +40,14 @@ If TRANSCRIPT_PATH is given it overrides the auto-resolved location.
 Structured mode emits versioned JSON and uses explicit unavailable statuses for
 missing transcripts, manifests, payload counters, and artifacts.
 
-The cost uses the prices in model_prices.json (copied from gh-aw's models.json)
-and the rules of gh-aw's computeInferenceCostUSD: exact model id, else longest
-matching prefix; input tokens do not include cache reads; 1-hour cache writes
-are billed at 2x the input price.
+The cost uses the Anthropic prices in gh-aw's models.json, downloaded from its
+main branch on every run (the pricing date is then today). If the download
+fails or the file is invalid, it uses model_prices.json, a copy of those prices
+with its own pricing date. Set MODEL_PRICES_URL to read the prices from another
+URL, or to an empty string to use only the copy. The formula follows gh-aw's
+computeInferenceCostUSD: exact model id, else longest matching prefix; input
+tokens do not include cache reads; 1-hour cache writes are billed at 2x the
+input price.
 
 Consumers:
 - `exploratory-tester`: invoked from Phase 3 (Step 3a) while building the Timing & Cost section.
@@ -55,12 +59,17 @@ Shared across both skills to avoid drift on transcript parsing and edge-case han
 """
 
 import argparse
+import os
 import sys
+from datetime import date
 from pathlib import Path
 
 from session_metrics import (
+    MODEL_PRICES_URL,
+    PriceCatalog,
     build_session_metrics,
     estimate_cost_usd,
+    fetch_price_catalog,
     format_cost,
     format_legacy_usage,
     load_price_catalog,
@@ -79,6 +88,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--manifest", type=Path)
     parser.add_argument("--session-dir", type=Path)
     return parser.parse_args()
+
+
+def resolve_price_catalog() -> PriceCatalog:
+    """Return today's gh-aw prices, or the local copy when they cannot be read."""
+    url = os.environ.get("MODEL_PRICES_URL", MODEL_PRICES_URL)
+    if url:
+        try:
+            return fetch_price_catalog(url, date.today().isoformat())
+        except ValueError as exc:
+            print(f"{exc}; using the local copy.", file=sys.stderr)
+    return load_price_catalog()
 
 
 def main() -> int:
@@ -112,7 +132,7 @@ def main() -> int:
         return 0
 
     try:
-        catalog = load_price_catalog()
+        catalog = resolve_price_catalog()
     except ValueError as exc:
         print(str(exc), file=sys.stderr)
         return 2

@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
 
 
@@ -22,6 +23,7 @@ from session_metrics import (  # noqa: E402
     TokenTotals,
     build_session_metrics,
     estimate_cost_usd,
+    fetch_price_catalog,
     find_model_price,
     format_cost,
     format_legacy_usage,
@@ -67,11 +69,33 @@ CATALOG = PriceCatalog(
     },
 )
 
+GH_AW_MODELS = {
+    "providers": {
+        "anthropic": {
+            "models": {
+                "claude-sonnet-5-5": {
+                    "cost": {
+                        "input": "2e-06",
+                        "output": "1e-05",
+                        "cache_read": "1e-07",
+                        "cache_write": "2.5e-06",
+                    },
+                    "provider_type": "anthropic",
+                }
+            }
+        }
+    }
+}
+
 
 class SessionMetricsParserTests(unittest.TestCase):
-    def run_script(self, *args: str) -> subprocess.CompletedProcess[str]:
+    def run_script(
+        self, *args: str, prices_url: str = ""
+    ) -> subprocess.CompletedProcess[str]:
         environment = os.environ.copy()
         environment.pop("CLAUDE_CODE_SESSION_ID", None)
+        # Tests never reach the network; an empty URL uses only the local copy.
+        environment["MODEL_PRICES_URL"] = prices_url
         return subprocess.run(
             [sys.executable, str(SCRIPT), *args],
             capture_output=True,
@@ -558,6 +582,73 @@ class SessionMetricsParserTests(unittest.TestCase):
 
             with self.assertRaises(ValueError):
                 load_price_catalog(catalog)
+
+    def test_fetch_price_catalog_reads_gh_aw_anthropic_prices(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            models = Path(raw_dir) / "models.json"
+            models.write_text(json.dumps(GH_AW_MODELS), encoding="utf-8")
+            url = models.as_uri()
+
+            catalog = fetch_price_catalog(url, "2026-10-22")
+
+            self.assertEqual(catalog.source, url)
+            self.assertEqual(catalog.checked, "2026-10-22")
+            self.assertEqual(
+                catalog.models,
+                {"claude-sonnet-5-5": ModelPrice(2e-06, 1e-05, 1e-07, 2.5e-06)},
+            )
+
+    def test_fetch_price_catalog_rejects_unreadable_or_unexpected_files(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            no_anthropic = Path(raw_dir) / "no_anthropic.json"
+            no_anthropic.write_text(
+                json.dumps({"providers": {"openai": GH_AW_MODELS["providers"]["anthropic"]}}),
+                encoding="utf-8",
+            )
+            not_json = Path(raw_dir) / "not_json.json"
+            not_json.write_text("<html>", encoding="utf-8")
+            bad_price = Path(raw_dir) / "bad_price.json"
+            bad_price.write_text(
+                json.dumps(
+                    {"providers": {"anthropic": {"models": {"m": {"cost": {"input": "x", "output": "1"}}}}}}
+                ),
+                encoding="utf-8",
+            )
+
+            for path in (Path(raw_dir) / "missing.json", no_anthropic, not_json, bad_price):
+                with self.assertRaises(ValueError):
+                    fetch_price_catalog(path.as_uri(), "2026-10-22")
+
+    def test_with_cost_uses_downloaded_prices_and_falls_back_to_the_copy(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            transcript = Path(raw_dir) / "session.jsonl"
+            transcript.write_text(
+                usage_line("msg_1", "claude-sonnet-5-5", 10), encoding="utf-8"
+            )
+            doubled = json.loads(json.dumps(GH_AW_MODELS))
+            doubled["providers"]["anthropic"]["models"]["claude-sonnet-5-5"]["cost"]["output"] = "1"
+            models = Path(raw_dir) / "models.json"
+            models.write_text(json.dumps(doubled), encoding="utf-8")
+
+            downloaded = self.run_script("--with-cost", str(transcript), prices_url=models.as_uri())
+            self.assertEqual(downloaded.returncode, 0, downloaded.stderr)
+            cost_line = downloaded.stdout.splitlines()[1]
+            self.assertTrue(cost_line.startswith("usd=10.00"), cost_line)
+            self.assertTrue(cost_line.endswith(f"pricing={date.today().isoformat()}"), cost_line)
+
+            copy_checked = load_price_catalog(MODEL_PRICES_PATH).checked
+            missing_url = (Path(raw_dir) / "missing.json").as_uri()
+            fallback = self.run_script("--with-cost", str(transcript), prices_url=missing_url)
+            self.assertEqual(fallback.returncode, 0, fallback.stderr)
+            self.assertTrue(
+                fallback.stdout.splitlines()[1].endswith(f"pricing={copy_checked}"),
+                fallback.stdout,
+            )
+            self.assertIn("using the local copy", fallback.stderr)
+
+            copy_only = self.run_script("--with-cost", str(transcript))
+            self.assertEqual(copy_only.stdout, fallback.stdout)
+            self.assertEqual(copy_only.stderr, "")
 
     def test_with_cost_prints_tokens_and_cost_from_one_read(self):
         with tempfile.TemporaryDirectory() as raw_dir:

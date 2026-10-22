@@ -7,6 +7,7 @@ import json
 import math
 import os
 import re
+import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping
@@ -20,6 +21,11 @@ TOKEN_FIELDS = (
 )
 SYNTHETIC_MODEL = "<synthetic>"
 MODEL_PRICES_PATH = Path(__file__).resolve().parent / "model_prices.json"
+MODEL_PRICES_URL = (
+    "https://raw.githubusercontent.com/github/gh-aw/main/actions/setup/js/models.json"
+)
+FETCH_TIMEOUT_SECONDS = 5
+MAX_REMOTE_CATALOG_BYTES = 1_000_000
 CACHE_WRITE_1H_INPUT_MULTIPLIER = 2
 PRICE_FIELDS = ("input", "output", "cache_read", "cache_write")
 ALLOWED_SCOPES = frozenset(("orchestrator", "worker"))
@@ -262,7 +268,7 @@ def parse_transcript(
 
 
 def load_price_catalog(path: Path = MODEL_PRICES_PATH) -> PriceCatalog:
-    """Load the per-token USD price catalog."""
+    """Load the local copy of the per-token USD price catalog."""
     try:
         with path.open(encoding="utf-8") as catalog_file:
             raw = json.load(catalog_file)
@@ -277,9 +283,40 @@ def load_price_catalog(path: Path = MODEL_PRICES_PATH) -> PriceCatalog:
         raise ValueError("Price catalog source and checked must be strings")
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", checked):
         raise ValueError("Price catalog checked must be a YYYY-MM-DD date")
+    return PriceCatalog(
+        source=source, checked=checked, models=_parse_model_prices(raw["models"])
+    )
 
+
+def fetch_price_catalog(url: str, checked: str) -> PriceCatalog:
+    """Fetch gh-aw's models.json and keep its Anthropic prices."""
+    try:
+        with urllib.request.urlopen(url, timeout=FETCH_TIMEOUT_SECONDS) as response:
+            body = response.read(MAX_REMOTE_CATALOG_BYTES + 1)
+    except (OSError, ValueError) as exc:
+        raise ValueError(f"Unable to fetch price catalog: {url}") from exc
+    if len(body) > MAX_REMOTE_CATALOG_BYTES:
+        raise ValueError(f"Price catalog is too large: {url}")
+    try:
+        raw = json.loads(body)
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise ValueError(f"Price catalog is not valid JSON: {url}") from exc
+
+    providers = raw.get("providers") if isinstance(raw, dict) else None
+    anthropic = providers.get("anthropic") if isinstance(providers, dict) else None
+    models = anthropic.get("models") if isinstance(anthropic, dict) else None
+    if not isinstance(models, dict) or not models:
+        raise ValueError(f"Price catalog has no Anthropic models: {url}")
+    costs = {
+        model: entry.get("cost") if isinstance(entry, dict) else None
+        for model, entry in models.items()
+    }
+    return PriceCatalog(source=url, checked=checked, models=_parse_model_prices(costs))
+
+
+def _parse_model_prices(raw_models: Mapping[str, Any]) -> dict[str, ModelPrice]:
     models: dict[str, ModelPrice] = {}
-    for model, prices in raw["models"].items():
+    for model, prices in raw_models.items():
         if not isinstance(prices, dict):
             raise ValueError(f"Price catalog entry must be an object: {model}")
         values = {price_field: prices.get(price_field) for price_field in PRICE_FIELDS}
@@ -293,10 +330,16 @@ def load_price_catalog(path: Path = MODEL_PRICES_PATH) -> PriceCatalog:
             cache_read=_price_or(values["cache_read"], input_price),
             cache_write=_price_or(values["cache_write"], input_price),
         )
-    return PriceCatalog(source=source, checked=checked, models=models)
+    return models
 
 
 def _as_price(value: Any) -> float | None:
+    # gh-aw's models.json writes prices as decimal strings.
+    if isinstance(value, str):
+        try:
+            value = float(value)
+        except ValueError:
+            return None
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None
     if not math.isfinite(value) or value < 0:
