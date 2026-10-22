@@ -407,10 +407,7 @@ test.describe(
       });
     });
 
-    test('settings from logs stays under Observability Alerting', async ({
-      page,
-      pageObjects,
-    }) => {
+    test('settings from logs stays under Observability Alerting', async ({ page, pageObjects }) => {
       const rules = pageObjects.observabilityClassicRules;
       await rules.goto();
       await expect(rules.rulesList).toBeVisible({ timeout: 30_000 });

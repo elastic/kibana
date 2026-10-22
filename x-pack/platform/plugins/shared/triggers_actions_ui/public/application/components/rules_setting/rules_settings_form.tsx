@@ -48,73 +48,75 @@ export interface RulesSettingsFormProps {
   alertDeleteCategoryIds?: AlertDeleteCategoryIds[];
 }
 
-export const RulesSettingsForm = memo(({ form, alertDeleteCategoryIds }: RulesSettingsFormProps) => {
-  const {
-    application: { capabilities },
-    notifications,
-    isServerless,
-    http,
-  } = useKibana().services;
-  const {
-    rulesSettings: { readAlertDeleteSettingsUI, writeAlertDeleteSettingsUI },
-  } = capabilities;
+export const RulesSettingsForm = memo(
+  ({ form, alertDeleteCategoryIds }: RulesSettingsFormProps) => {
+    const {
+      application: { capabilities },
+      notifications,
+      isServerless,
+      http,
+    } = useKibana().services;
+    const {
+      rulesSettings: { readAlertDeleteSettingsUI, writeAlertDeleteSettingsUI },
+    } = capabilities;
 
-  const {
-    flappingSettings,
-    queryDelaySettings,
-    isLoading,
-    hasFlappingError,
-    hasQueryDelayError,
-    canShowFlappingSettings,
-    canWriteFlappingSettings,
-    canShowQueryDelaySettings,
-    canWriteQueryDelaySettings,
-    canShowAlertDeleteSettings,
-    onSettingChange,
-  } = form;
+    const {
+      flappingSettings,
+      queryDelaySettings,
+      isLoading,
+      hasFlappingError,
+      hasQueryDelayError,
+      canShowFlappingSettings,
+      canWriteFlappingSettings,
+      canShowQueryDelaySettings,
+      canWriteQueryDelaySettings,
+      canShowAlertDeleteSettings,
+      onSettingChange,
+    } = form;
 
-  if (!canShowFlappingSettings && !canShowQueryDelaySettings && !canShowAlertDeleteSettings) {
-    return <RulesSettingsErrorPrompt />;
-  }
-  if (isLoading) {
-    return <CenterJustifiedSpinner />;
-  }
-  const isAlertDeletionSettingsEnabled = getIsExperimentalFeatureEnabled(
-    'alertDeletionSettingsEnabled'
-  );
-  return (
-    <>
-      {flappingSettings && (
-        <RulesSettingsFlappingSection
-          onChange={(key, value) => onSettingChange('flapping', key, value)}
-          settings={flappingSettings}
-          canWrite={canWriteFlappingSettings}
-          canShow={canShowFlappingSettings}
-          hasError={hasFlappingError}
-        />
-      )}
-      {isServerless && queryDelaySettings && (
-        <>
-          <EuiSpacer />
-          <RulesSettingsQueryDelaySection
-            onChange={(key, value) => onSettingChange('queryDelay', key, value)}
-            settings={queryDelaySettings}
-            canWrite={canWriteQueryDelaySettings}
-            canShow={canShowQueryDelaySettings}
-            hasError={hasQueryDelayError}
+    if (!canShowFlappingSettings && !canShowQueryDelaySettings && !canShowAlertDeleteSettings) {
+      return <RulesSettingsErrorPrompt />;
+    }
+    if (isLoading) {
+      return <CenterJustifiedSpinner />;
+    }
+    const isAlertDeletionSettingsEnabled = getIsExperimentalFeatureEnabled(
+      'alertDeletionSettingsEnabled'
+    );
+    return (
+      <>
+        {flappingSettings && (
+          <RulesSettingsFlappingSection
+            onChange={(key, value) => onSettingChange('flapping', key, value)}
+            settings={flappingSettings}
+            canWrite={canWriteFlappingSettings}
+            canShow={canShowFlappingSettings}
+            hasError={hasFlappingError}
           />
-        </>
-      )}
-      {isAlertDeletionSettingsEnabled && readAlertDeleteSettingsUI && alertDeleteCategoryIds && (
-        <>
-          <EuiSpacer />
-          <AlertDeleteDescriptiveFormGroup
-            services={{ http, notifications }}
-            categoryIds={alertDeleteCategoryIds}
-            isDisabled={!writeAlertDeleteSettingsUI}
-          />
-        </>
-      )}
-    </>
-  );
-});
+        )}
+        {isServerless && queryDelaySettings && (
+          <>
+            <EuiSpacer />
+            <RulesSettingsQueryDelaySection
+              onChange={(key, value) => onSettingChange('queryDelay', key, value)}
+              settings={queryDelaySettings}
+              canWrite={canWriteQueryDelaySettings}
+              canShow={canShowQueryDelaySettings}
+              hasError={hasQueryDelayError}
+            />
+          </>
+        )}
+        {isAlertDeletionSettingsEnabled && readAlertDeleteSettingsUI && alertDeleteCategoryIds && (
+          <>
+            <EuiSpacer />
+            <AlertDeleteDescriptiveFormGroup
+              services={{ http, notifications }}
+              categoryIds={alertDeleteCategoryIds}
+              isDisabled={!writeAlertDeleteSettingsUI}
+            />
+          </>
+        )}
+      </>
+    );
+  }
+);
