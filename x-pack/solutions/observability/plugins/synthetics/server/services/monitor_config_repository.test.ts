@@ -474,7 +474,9 @@ describe('MonitorConfigRepository', () => {
         initialNamespaces: nextSpaces,
         references: undefined,
       });
-      expect(monitorCreateSchema.validate(data)).toEqual(data);
+      // Validate what the repository handed to the saved-object client, not the test input.
+      const [, createdAttributes] = soClient.create.mock.calls[0];
+      expect(monitorCreateSchema.validate(createdAttributes)).toEqual(createdAttributes);
     });
   });
 
@@ -799,7 +801,9 @@ describe('MonitorConfigRepository', () => {
           initialNamespaces: nextSpaces,
         },
       ]);
-      expect(monitorCreateSchema.validate(attributes)).toEqual(attributes);
+      const [createdObjects] = soClient.bulkCreate.mock.calls[0];
+      const createdAttributes = createdObjects[0].attributes;
+      expect(monitorCreateSchema.validate(createdAttributes)).toEqual(createdAttributes);
     });
   });
 

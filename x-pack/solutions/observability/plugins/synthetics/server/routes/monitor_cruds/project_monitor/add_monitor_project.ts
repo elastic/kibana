@@ -19,11 +19,11 @@ import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import type { ProjectMonitor } from '../../../../common/runtime_types';
 
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { MAX_MONITOR_PAYLOAD_BYTES } from '../../../../common/constants/monitor_attribute_limits';
 import { ProjectMonitorFormatter } from '../../../synthetics_service/project_monitor/project_monitor_formatter';
 import { getBrowserTimeoutWarningsForProjectMonitors } from '../monitor_warnings';
 import { assertCanPerformMonitorBulkActionInAllSpaces } from '../monitor_locations_utils';
 
+const MAX_PAYLOAD_SIZE = 1048576 * 100; // 50MiB
 const MAX_BROWSER_MONITORS = 250;
 const MAX_LIGHTWEIGHT_MONITORS = 1500;
 
@@ -48,7 +48,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
   },
   options: {
     body: {
-      maxBytes: MAX_MONITOR_PAYLOAD_BYTES,
+      maxBytes: MAX_PAYLOAD_SIZE,
     },
   },
   handler: async (routeContext): Promise<any> => {

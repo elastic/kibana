@@ -33,8 +33,8 @@ export const ModeCodec = z.enum(Mode);
 export const KerberosAuthTypeCodec = z.enum(KerberosAuthType);
 
 // Bounds limit request/policy amplification for nested auth payloads.
-export const AUTH_STRING_MAX = 4096;
-export const AUTH_INLINE_CONF_MAX = 131072; // krb5.conf / keytab content
+const AUTH_STRING_MAX = 4096;
+const AUTH_INLINE_CONF_MAX = 131072; // krb5.conf / keytab content
 const authString = () => z.string().max(AUTH_STRING_MAX);
 const authInlineConf = () => z.string().max(AUTH_INLINE_CONF_MAX);
 

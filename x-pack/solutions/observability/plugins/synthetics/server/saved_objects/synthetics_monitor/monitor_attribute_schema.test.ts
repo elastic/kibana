@@ -6,11 +6,6 @@
  */
 
 import { omit, pick } from 'lodash';
-import {
-  MAX_MONITOR_FANOUT_SIZE,
-  MAX_PARAM_VALUE_LENGTH,
-  MAX_ROUTE_STRING_LENGTH,
-} from '../../../common/constants/monitor_attribute_limits';
 import { ConfigKey, secretKeys } from '../../../common/constants/monitor_management';
 import {
   fullBrowserMonitor,
@@ -18,13 +13,11 @@ import {
   fullIcmpMonitor,
   fullTcpMonitor,
 } from '../../../common/runtime_types/test_helpers/monitor_fixtures';
-import { browserMonitorFixture } from '../../../test/scout/common/fixtures/data/browser_monitor';
-import { httpMonitorFixture } from '../../../test/scout/common/fixtures/data/http_monitor';
-import { icmpMonitorFixture } from '../../../test/scout/monitor_crud/api/fixtures/data/icmp_monitor';
-import { tcpMonitorFixture } from '../../../test/scout/monitor_crud/api/fixtures/data/tcp_monitor';
-import { monitorCreateSchema, monitorForwardCompatibilitySchema } from './monitor_attribute_schema';
-
-const apiMonitorFixture = omit(browserMonitorFixture, ['screenshots', 'throttling']);
+import {
+  MONITOR_ATTRIBUTE_KEYS,
+  monitorCreateSchema,
+  monitorForwardCompatibilitySchema,
+} from './monitor_attribute_schema';
 
 const storedMonitors = {
   http: fullHttpMonitor(),
@@ -44,78 +37,46 @@ const withPackedSecrets = (monitor: Record<string, unknown>) => ({
 });
 
 describe('monitor attribute schema', () => {
+  it('declares every ConfigKey, secrets and retest_on_failure', () => {
+    const declared = Object.keys(monitorCreateSchema.getPropSchemas());
+
+    expect(declared.sort()).toEqual(MONITOR_ATTRIBUTE_KEYS.slice().sort());
+    expect(Object.values(ConfigKey).filter((key) => !declared.includes(key))).toEqual([]);
+    expect(declared).toEqual(expect.arrayContaining(['secrets', 'retest_on_failure']));
+  });
+
   it.each(Object.entries(storedMonitors))('accepts a full %s monitor', (_type, monitor) => {
     expect(monitorCreateSchema.validate(monitor)).toEqual(monitor);
   });
 
-  it.each([
-    ['http', httpMonitorFixture],
-    ['tcp', tcpMonitorFixture],
-    ['icmp', icmpMonitorFixture],
-    ['browser', browserMonitorFixture],
-    ['api', apiMonitorFixture],
-  ])('accepts the %s monitor fixture', (_type, monitor) => {
-    expect(monitorCreateSchema.validate(monitor)).toEqual(monitor);
-  });
+  it.each(Object.entries(storedMonitors))(
+    'accepts a %s monitor after secrets are packed',
+    (_type, monitor) => {
+      const stored = withPackedSecrets(monitor);
 
-  it('accepts a monitor after secret fields are packed into secrets', () => {
-    const stored = withPackedSecrets(fullHttpMonitor());
+      expect(monitorCreateSchema.validate(stored)).toEqual(stored);
+    }
+  );
 
-    expect(monitorCreateSchema.validate(stored)).toEqual(stored);
-  });
-
-  it('accepts a name and tag list a project push can already store', () => {
+  it('does not check values, so a stored document is never rejected for one', () => {
     const monitor = {
       ...fullHttpMonitor(),
-      name: 'n'.repeat(MAX_ROUTE_STRING_LENGTH + 1),
-      tags: Array.from({ length: MAX_MONITOR_FANOUT_SIZE + 1 }, (_, index) =>
-        index === 0 ? 't'.repeat(MAX_ROUTE_STRING_LENGTH + 1) : 'tag'
-      ),
+      name: 'n'.repeat(1_000_000),
+      enabled: { unexpected: true },
+      schedule: 'not an object',
+      tags: null,
     };
 
     expect(monitorCreateSchema.validate(monitor)).toEqual(monitor);
+    expect(monitorForwardCompatibilitySchema.validate(monitor)).toEqual(monitor);
   });
 
-  it('accepts a schedule number longer than the public route cap', () => {
-    const monitor = {
-      ...fullHttpMonitor(),
-      [ConfigKey.SCHEDULE]: {
-        number: '1'.repeat(33),
-        unit: 'm',
-      },
-    };
-
-    expect(monitorCreateSchema.validate(monitor)).toEqual(monitor);
+  it('accepts a monitor that omits keys', () => {
+    expect(monitorCreateSchema.validate({})).toEqual({});
+    expect(monitorForwardCompatibilitySchema.validate({})).toEqual({});
   });
 
-  it('accepts a screenshots value the browser codec already allows', () => {
-    const monitor = {
-      ...fullBrowserMonitor(),
-      screenshots: 'false',
-    };
-
-    expect(monitorCreateSchema.validate(monitor)).toEqual(monitor);
-  });
-
-  it('accepts more TLS versions than the four protocol names', () => {
-    const monitor = {
-      ...fullHttpMonitor(),
-      [ConfigKey.TLS_VERSION]: Array.from({ length: 11 }, () => 'TLSv1.2'),
-    };
-
-    expect(monitorCreateSchema.validate(monitor)).toEqual(monitor);
-  });
-
-  it('accepts a secrets string larger than one secret field', () => {
-    const stored = {
-      ...withPackedSecrets(fullHttpMonitor()),
-      secrets: 'x'.repeat(MAX_PARAM_VALUE_LENGTH * 8 + 1),
-    };
-
-    expect(monitorCreateSchema.validate(stored)).toEqual(stored);
-  });
-
-  it('rejects an attribute this version does not store', () => {
+  it('create rejects an attribute this version does not store', () => {
     expect(() =>
       monitorCreateSchema.validate({
         ...withPackedSecrets(fullHttpMonitor()),
@@ -124,16 +85,7 @@ describe('monitor attribute schema', () => {
     ).toThrow(/schedule_interval_seconds/);
   });
 
-  it('rejects a value of the wrong type', () => {
-    expect(() =>
-      monitorCreateSchema.validate({
-        ...fullIcmpMonitor(),
-        enabled: { bad: true },
-      })
-    ).toThrow(/enabled/);
-  });
-
-  it('drops attributes added by a later version and keeps stored fields', () => {
+  it('forwardCompatibility drops attributes added by a later version and keeps the rest', () => {
     const stored = withPackedSecrets(fullBrowserMonitor());
 
     expect(
@@ -142,5 +94,14 @@ describe('monitor attribute schema', () => {
         schedule_interval_seconds: 600,
       })
     ).toEqual(stored);
+  });
+
+  it('forwardCompatibility keeps nested keys a later version added, so AAD still matches', () => {
+    const stored = {
+      ...fullHttpMonitor(),
+      schedule: { number: '10', unit: 'm', interval_s: 600 },
+    };
+
+    expect(monitorForwardCompatibilitySchema.validate(stored)).toEqual(stored);
   });
 });

@@ -8,23 +8,21 @@
 import type { RouteValidationFunction } from '@kbn/core-http-server';
 import { isZod, z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
-import {
-  MAX_MONITOR_FANOUT_SIZE,
-  MAX_PARAM_VALUE_LENGTH,
-  MAX_ROUTE_STRING_LENGTH,
-} from '../../common/constants/monitor_attribute_limits';
 import { flattenZodIssues, formatZodIssue } from '../../common/runtime_types/schemas/format_errors';
 
-export { MAX_MONITOR_FANOUT_SIZE, MAX_PARAM_VALUE_LENGTH, MAX_ROUTE_STRING_LENGTH };
-
 export const MAX_ROUTE_ID_LENGTH = 1024;
+export const MAX_ROUTE_STRING_LENGTH = 4096;
 export const MAX_DATE_RANGE_LENGTH = 4096;
 // Pre-existing product cap (project-monitor delete, overview trends, bulk reset).
 export const MAX_MONITOR_BATCH_SIZE = 500;
 // Public bulk id lists were unbounded; decrypt finder paginates past perPage 500.
 export const MAX_MONITOR_BULK_SIZE = 10_000;
+// Per-id SO fan-out (bulk update, health); temporary raise from the product 500.
+export const MAX_MONITOR_FANOUT_SIZE = 1000;
 // Param id lists are SO-only, so they can match the public bulk cap.
 export const MAX_PARAM_BULK_SIZE = 10_000;
+// Params hold PEM chains / keys; 10KB 400s those. 1MB is a DoS cap, not a product limit.
+export const MAX_PARAM_VALUE_LENGTH = 1_000_000;
 
 const blankQueryNumberToNaN = (value: unknown) =>
   typeof value === 'string' && value.trim() === '' ? Number.NaN : value;

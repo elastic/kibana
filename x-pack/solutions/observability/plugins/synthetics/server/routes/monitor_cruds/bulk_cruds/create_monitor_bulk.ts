@@ -9,7 +9,6 @@ import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/se
 import path from 'path';
 import { z } from '@kbn/zod';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { MAX_MONITOR_PAYLOAD_BYTES } from '../../../../common/constants/monitor_attribute_limits';
 import type { ServiceLocationErrors } from '../../../../common/runtime_types';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { MAX_MONITOR_FANOUT_SIZE } from '../../zod_query';
@@ -23,6 +22,8 @@ import { MonitorValidationError } from '../monitor_validation';
 import { syncNewMonitorBulk } from './add_monitor_bulk';
 import type { CreateMonitorPayLoad } from '../add_monitor/add_monitor_api';
 import { CreateMonitorBulkAPI } from '../services/create_monitor_bulk_api';
+
+const MAX_BULK_CREATE_REQUEST_BYTES = 100 * 1024 * 1024;
 
 export interface BulkCreateMonitorResultEntry {
   id: string;
@@ -59,7 +60,7 @@ export const createSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
     operationId: 'post-synthetic-monitors-bulk-create',
     oasOperationObject: () => path.join(__dirname, '../examples/bulk_create_monitors.yaml'),
     body: {
-      maxBytes: MAX_MONITOR_PAYLOAD_BYTES,
+      maxBytes: MAX_BULK_CREATE_REQUEST_BYTES,
     },
   },
   handler: async (routeContext) => {
