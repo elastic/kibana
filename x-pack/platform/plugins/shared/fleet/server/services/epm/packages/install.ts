@@ -112,6 +112,7 @@ export { PACKAGES_TO_INSTALL_WITH_STREAMING } from './streaming_packages';
 import { PACKAGES_TO_INSTALL_WITH_STREAMING } from './streaming_packages';
 import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
 import { mergeIsDependencyOf } from './dependencies';
+import { getReplacementPackageName, moveReplacedPackagePolicies } from './move_replaced_package';
 
 export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
@@ -875,6 +876,7 @@ export async function installPackageWithStateMachine(options: {
           pkgName,
           currentVersion: packageInfo.version,
         });
+        await moveIfReplaced({ packageInfo, installType, esClient, logger });
         sendEvent({
           ...telemetryEvent!,
           status: 'success',
@@ -923,6 +925,31 @@ export async function installPackageWithStateMachine(options: {
     };
   } finally {
     span?.end();
+  }
+}
+
+/**
+ * PROTOTYPE: after an upgrade (or reinstall) to a version that says
+ * `deprecated.replaced_by.package`, move its integration policies to the replacement. Fresh
+ * installs have nothing to move. A failed move never fails the upgrade: the old policies stay,
+ * and POST /internal/fleet/epm/packages/{pkgName}/_move_to_replacement can retry it.
+ */
+async function moveIfReplaced({
+  packageInfo,
+  installType,
+  esClient,
+  logger,
+}: {
+  packageInfo: InstallablePackage;
+  installType: InstallType;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}) {
+  if (installType === 'install' || !getReplacementPackageName(packageInfo)) return;
+  try {
+    await moveReplacedPackagePolicies({ pkgName: packageInfo.name, esClient, logger });
+  } catch (error) {
+    logger.error(`Could not move ${packageInfo.name} to its replacement: ${error.message}`);
   }
 }
 

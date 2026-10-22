@@ -49,6 +49,7 @@ import { getBundledPackageByName, getBundledPackageByPkgKey } from './bundled_pa
 import { getInstallationObject, getPackageSavedObjects } from './get';
 import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
 import { setLastUploadInstallCache } from './utils';
+import { moveReplacedPackagePolicies } from './move_replaced_package';
 
 jest.mock('../../data_streams');
 jest.mock('./get');
@@ -136,6 +137,10 @@ jest.mock('./upload_preflight_authz', () => ({
   checkUploadPackageAssetPrivileges: jest.fn(),
 }));
 jest.mock('../../audit_logging');
+jest.mock('./move_replaced_package', () => ({
+  ...jest.requireActual('./move_replaced_package'),
+  moveReplacedPackagePolicies: jest.fn(),
+}));
 
 jest.mock('../../utils/agentless', () => {
   return {
@@ -513,6 +518,54 @@ describe('install', () => {
         packageName: 'apache',
         status: 'success',
         automaticInstall: false,
+      });
+    });
+
+    // PROTOTYPE: moving replaced packages
+    describe('replaced package', () => {
+      const install = async (installedVersion?: string) => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        jest.mocked(Registry.getPackage).mockResolvedValueOnce({
+          packageInfo: {
+            name: 'nginx_otel_input',
+            version: '1.3.0',
+            license: 'basic',
+            deprecated: { description: 'Moved', replaced_by: { package: 'nginx_otel' } },
+          },
+          paths: [],
+        } as any);
+        if (installedVersion) {
+          jest.mocked(getInstallationObject).mockResolvedValueOnce({
+            attributes: { version: installedVersion, installed_kibana: [] },
+          } as any);
+        }
+        jest.mocked(moveReplacedPackagePolicies).mockClear();
+        return installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'nginx_otel_input-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+      };
+
+      it('moves its policies after an upgrade', async () => {
+        await install('1.2.0');
+        expect(moveReplacedPackagePolicies).toHaveBeenCalledWith(
+          expect.objectContaining({ pkgName: 'nginx_otel_input' })
+        );
+      });
+
+      it('does nothing on a fresh install', async () => {
+        await install();
+        expect(moveReplacedPackagePolicies).not.toHaveBeenCalled();
+      });
+
+      it('a failed move does not fail the upgrade', async () => {
+        jest.mocked(moveReplacedPackagePolicies).mockRejectedValueOnce(new Error('boom'));
+        const result = await install('1.2.0');
+        expect(result.error).toBeUndefined();
+        expect(result.status).toBe('installed');
       });
     });
 

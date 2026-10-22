@@ -28,6 +28,7 @@ import type { FleetAuthzRouteConfig } from '../../services/security/types';
 import { EPM_API_ROUTES } from '../../constants';
 import {
   GetCategoriesRequestSchema,
+  MoveToReplacementRequestSchema,
   GetPackagesRequestSchema,
   GetInstalledPackagesRequestSchema,
   GetFileRequestSchema,
@@ -97,6 +98,7 @@ import { genericErrorResponse } from '../schema/errors';
 import {
   getCategoriesHandler,
   getIntegrationGroupsHandler,
+  moveToReplacementHandler,
   getListHandler,
   getInstalledListHandler,
   getLimitedListHandler,
@@ -208,6 +210,22 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       getCategoriesHandler
+    );
+
+  // PROTOTYPE: move a replaced package's integration policies to its replacement
+  router.versioned
+    .post({
+      path: EPM_API_ROUTES.MOVE_TO_REPLACEMENT_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      access: 'internal',
+      summary: `Move a replaced package's integration policies to its replacement`,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: { request: MoveToReplacementRequestSchema },
+      },
+      moveToReplacementHandler
     );
 
   // PROTOTYPE: integration groups (package registry `GET /groups`)

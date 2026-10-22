@@ -40,6 +40,10 @@ import { Details } from './details';
 import { Requirements } from './requirements';
 import { PrereleaseCallout } from './prerelease_callout';
 import { DeprecatedFeaturesCallout, DeprecationCallout } from './deprecation_callout';
+import {
+  MovedPackagesCallout,
+  getMovedPackageNotices,
+} from '../../../components/moved_packages_callout';
 
 interface Props {
   packageInfo: PackageInfo;
@@ -285,6 +289,8 @@ export const OverviewPage: React.FC<Props> = memo(
           <EuiSpacer size="s" />
           <BidirectionalIntegrationsBanner integrationPackageName={packageInfo.name} />
           <CloudPostureThirdPartySupportCallout packageInfo={packageInfo} />
+          {/* PROTOTYPE: integration policies moved here from packages this one replaces */}
+          <MovedPackagesCallout notices={getMovedPackageNotices([packageInfo])} />
           <DeprecationCallout packageInfo={packageInfo} integrationInfo={integrationInfo} />
           <DeprecatedFeaturesCallout packageInfo={packageInfo} />
           <PrereleaseCallout packageInfo={packageInfo} latestGAVersion={latestGAVersion} />

@@ -183,6 +183,8 @@ export const InstallationInfoSchema = schema.object(
     rolled_back: schema.maybe(schema.boolean()),
     is_rollback_ttl_expired: schema.maybe(schema.boolean()),
     skip_kibana_assets: schema.maybe(schema.boolean()),
+    moved_from: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 100 })),
+    moved_to: schema.maybe(schema.any()),
   },
   { meta: { id: 'installation_info' } }
 );
@@ -1071,6 +1073,11 @@ export const InstallPackageFromRegistryRequestSchema = {
       { meta: { id: 'install_package_from_registry_request' } }
     )
   ),
+};
+
+// PROTOTYPE: move a replaced package's integration policies to its replacement
+export const MoveToReplacementRequestSchema = {
+  params: schema.object({ pkgName: schema.string() }),
 };
 
 export const InstallPackageFromRegistryWithoutVersionRequestSchema = {

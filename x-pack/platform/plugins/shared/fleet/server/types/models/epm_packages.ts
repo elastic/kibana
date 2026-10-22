@@ -143,3 +143,34 @@ export const EpmPackagesSchemaV12 = EpmPackagesSchemaV11.extends({
 export const EpmPackagesSchemaV13 = EpmPackagesSchemaV12.extends({
   skip_kibana_assets: schema.maybe(schema.boolean()),
 });
+
+// PROTOTYPE: moving replaced packages, see Installation.moved_from / moved_to
+const MovedPackagePolicySchema = schema.object({
+  name: schema.string(),
+  from_id: schema.string(),
+  to_id: schema.string(),
+  policy_ids: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+  unmapped_vars: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+});
+
+export const EpmPackagesSchemaV14 = EpmPackagesSchemaV13.extends({
+  moved_from: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        package: schema.string(),
+        title: schema.string(),
+        version: schema.string(),
+        moved_at: schema.string(),
+        package_policies: schema.arrayOf(MovedPackagePolicySchema, { maxSize: 10000 }),
+        not_moved: schema.arrayOf(
+          schema.object({ name: schema.string(), id: schema.string(), reason: schema.string() }),
+          { maxSize: 10000 }
+        ),
+      }),
+      { maxSize: 100 }
+    )
+  ),
+  moved_to: schema.maybe(
+    schema.object({ package: schema.string(), version: schema.string(), moved_at: schema.string() })
+  ),
+});

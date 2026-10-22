@@ -42,6 +42,7 @@ import type {
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
+  MoveToReplacementRequestSchema,
   GetPackagesRequestSchema,
   GetInstalledPackagesRequestSchema,
   GetDataStreamsRequestSchema,
@@ -90,6 +91,7 @@ import type { BulkInstallResponse } from '../../services/epm/packages';
 import {
   fleetErrorToResponseOptions,
   FleetError,
+  FleetNotFoundError,
   FleetTooManyRequestsError,
   FleetUnauthorizedError,
 } from '../../errors';
@@ -136,6 +138,7 @@ import { DatasetNamePrefixError } from '../../services/epm/packages/custom_integ
 import { UPLOAD_RETRY_AFTER_MS } from '../../services/epm/packages/install';
 import { getPackagePoliciesCountByPackageName } from '../../services/package_policies/package_policies_aggregation';
 import { getPackageKnowledgeBase } from '../../services/epm/packages';
+import { moveReplacedPackagePolicies } from '../../services/epm/packages/move_replaced_package';
 
 import { getPackagePolicyIdsForCurrentUser } from './bulk_handler';
 
@@ -164,6 +167,24 @@ export const getIntegrationGroupsHandler: FleetRequestHandler = async (
 ) => {
   const body: GetIntegrationGroupsResponse = { items: await getIntegrationGroups() };
   return response.ok({ body, headers: { ...CACHE_CONTROL_10_MINUTES_HEADER } });
+};
+
+// PROTOTYPE: move a replaced package's integration policies to its replacement (also runs on upgrade)
+export const moveToReplacementHandler: FleetRequestHandler<
+  TypeOf<typeof MoveToReplacementRequestSchema.params>
+> = async (context, request, response) => {
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
+  const move = await moveReplacedPackagePolicies({
+    pkgName: request.params.pkgName,
+    esClient,
+    logger: appContextService.getLogger(),
+  });
+  if (!move) {
+    throw new FleetNotFoundError(
+      `${request.params.pkgName} is not installed, or its installed version is not replaced`
+    );
+  }
+  return response.ok({ body: { item: move } });
 };
 
 export const getListHandler: FleetRequestHandler<
@@ -924,6 +945,8 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       namespace_customization_enabled_for: attributes.namespace_customization_enabled_for,
       namespace_customization_settings: attributes.namespace_customization_settings,
       skip_kibana_assets: attributes.skip_kibana_assets,
+      moved_from: attributes.moved_from,
+      moved_to: attributes.moved_to,
     };
 
     return {
