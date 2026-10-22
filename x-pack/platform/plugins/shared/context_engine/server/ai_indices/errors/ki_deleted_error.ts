@@ -11,7 +11,7 @@ export class KiDeletedError extends Error {
     kiId: string,
     recoveryHint: string = 'pass force: true to update it'
   ) {
-    super(`KI '${kiId}' in AI index '${aiIndexId}' has lifecycle status deleted; ${recoveryHint}`);
+    super(`KI '${kiId}' in AI index '${aiIndexId}' is deleted; ${recoveryHint}`);
     this.name = 'KiDeletedError';
   }
 }

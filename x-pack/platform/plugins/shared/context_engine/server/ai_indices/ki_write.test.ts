@@ -8,9 +8,9 @@
 import { errors } from '@elastic/elasticsearch';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ExecutionError } from '@kbn/workflows/server';
 import { kiIdQuery, REVISION_TIE_WINDOW } from './ki_get';
 import { buildKiApiWriter, restoreKi, softDeleteKi, updateKi } from './ki_write';
+import { KiConflictError, KiDeletedError, KiNotFoundError, KiValidationError } from './errors';
 
 const storedKi = { type: 'index_metadata', title: 'logs-* index profile', id: 'ki-1' };
 const deletedKi = { ...storedKi, governance: { lifecycle: { status: 'deleted' } } };
@@ -193,8 +193,7 @@ describe('updateKi', () => {
       writer: apiWriter,
     }).catch((e) => e);
 
-    expect(thrown).toBeInstanceOf(ExecutionError);
-    expect(thrown.type).toBe('NotFoundError');
+    expect(thrown).toBeInstanceOf(KiNotFoundError);
     expect(esClient.update).not.toHaveBeenCalled();
   });
 
@@ -212,8 +211,7 @@ describe('updateKi', () => {
       writer: apiWriter,
     }).catch((e) => e);
 
-    expect(thrown).toBeInstanceOf(ExecutionError);
-    expect(thrown.type).toBe('ConflictError');
+    expect(thrown).toBeInstanceOf(KiConflictError);
   });
 
   it('throws ConflictError when the KI has lifecycle status deleted', async () => {
@@ -230,8 +228,7 @@ describe('updateKi', () => {
       writer: apiWriter,
     }).catch((e) => e);
 
-    expect(thrown).toBeInstanceOf(ExecutionError);
-    expect(thrown.type).toBe('ConflictError');
+    expect(thrown).toBeInstanceOf(KiDeletedError);
     expect(thrown.message).toContain('restore the deleted KI before updating it');
     expect(esClient.update).not.toHaveBeenCalled();
   });
@@ -301,8 +298,7 @@ describe('updateKi', () => {
       writer: apiWriter,
     }).catch((e) => e);
 
-    expect(thrown).toBeInstanceOf(ExecutionError);
-    expect(thrown.type).toBe('ValidationError');
+    expect(thrown).toBeInstanceOf(KiValidationError);
     expect(esClient.update).not.toHaveBeenCalled();
   });
 });
@@ -435,8 +431,7 @@ describe('softDeleteKi', () => {
       writer: deleteWriter,
     }).catch((e) => e);
 
-    expect(thrown).toBeInstanceOf(ExecutionError);
-    expect(thrown.type).toBe('NotFoundError');
+    expect(thrown).toBeInstanceOf(KiNotFoundError);
     expect(esClient.update).not.toHaveBeenCalled();
     expect(esClient.index).not.toHaveBeenCalled();
   });
@@ -572,8 +567,7 @@ describe('restoreKi', () => {
       writer: apiWriter,
     }).catch((e) => e);
 
-    expect(thrown).toBeInstanceOf(ExecutionError);
-    expect(thrown.type).toBe('NotFoundError');
+    expect(thrown).toBeInstanceOf(KiNotFoundError);
     expect(esClient.update).not.toHaveBeenCalled();
     expect(esClient.index).not.toHaveBeenCalled();
   });

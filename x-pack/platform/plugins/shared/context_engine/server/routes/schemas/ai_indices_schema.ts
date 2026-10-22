@@ -367,7 +367,7 @@ export const updateKiQuerySchema = schema.object({
       maxLength: MAX_INDEX_NAME_BYTES,
       meta: {
         description:
-          'Optional: the specific Elasticsearch index that stores this Knowledge Indicator. Only needed to disambiguate when the AI Index destination is a pattern matching more than one physical index; omit it for the common case of a single backing index.',
+          'The backing Elasticsearch index for this Knowledge Indicator. Only needed when the AI index destination matches more than one physical index; omit it otherwise.',
       },
     })
   ),
@@ -377,7 +377,7 @@ export const updateKiBodySchema = schema.object({
   ki: schema.object({
     content: schema.string({
       maxLength: MAX_KI_CONTENT_LENGTH,
-      meta: { description: 'The knowledge content of the Knowledge Indicator.' },
+      meta: { description: 'The content for the Knowledge Indicator.' },
     }),
   }),
 });
@@ -644,7 +644,8 @@ export const updateKiResponseSchema = () =>
     }),
     result: schema.oneOf([schema.literal('updated'), schema.literal('noop')], {
       meta: {
-        description: 'Whether Elasticsearch updated the document or reported no changes (`noop`).',
+        description:
+          'Text describing whether the update changed the Knowledge Indicator (`updated`) or made no change (`noop`).',
       },
     }),
   });
@@ -652,7 +653,10 @@ export const updateKiResponseSchema = () =>
 export const deleteKiResponseSchema = () =>
   schema.object({
     id: schema.string({
-      meta: { description: 'The document ID of the deleted (soft-deleted) Knowledge Indicator.' },
+      meta: {
+        description:
+          'The document ID of the deleted Knowledge Indicator. The document is retained and can be restored.',
+      },
     }),
   });
 

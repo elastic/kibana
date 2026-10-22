@@ -40,7 +40,7 @@ export const storedKi = ({
   content: string;
   status?: 'deleted';
 }) => ({
-  '@timestamp': '2026-09-01T00:00:00.000Z',
+  '@timestamp': new Date(Date.now() - 60_000).toISOString(),
   id,
   type: 'index_metadata',
   title: id,
