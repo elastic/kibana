@@ -152,26 +152,14 @@ const getRemovedGrids = (
   return removed.length > 0 ? { removed } : {};
 };
 
-const QUOTES = ['`', '"', "'"] as const;
-
-const isQuoted = (before = '', after = ''): boolean =>
-  QUOTES.some((quote) => before.endsWith(quote) && after.startsWith(quote));
-
 /**
- * Writes the ids that `instructions` name as short ids, like the rest of the request, since the
- * arranger only sees the short ids. Ids that are plain words, such as "latency", are only written
- * when quoted, so ordinary words like "panel" stay as they are.
+ * Writes the ids that `instructions` name as short ids, like the rest of the request. Ids that are
+ * plain words are left, since they may be words of the instructions.
  */
 const aliasInstructions = (instructions: string, aliasById: ReadonlyMap<string, string>): string =>
   instructions
     .split(/([^\w-]+)/)
-    .map((word, index, parts) => {
-      const alias = aliasById.get(word);
-      if (alias === undefined) {
-        return word;
-      }
-      return /[^A-Za-z]/.test(word) || isQuoted(parts[index - 1], parts[index + 1]) ? alias : word;
-    })
+    .map((word) => (/[^A-Za-z]/.test(word) ? aliasById.get(word) ?? word : word))
     .join('');
 
 /**
