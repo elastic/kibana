@@ -119,7 +119,6 @@ const getAgentSystemMessage = async ({
     conversationTemplates,
     conversationMetadataWritable
   );
-  const catalog = aiIndexCatalog ?? [];
 
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -190,7 +189,7 @@ ${conversationMetadataSection}
 
 ${getAiIndicesInstructions({
   enabled: experimentalFeatures.aiIndices,
-  catalog,
+  catalog: aiIndexCatalog ?? [],
   spaceId,
 })}
 

@@ -11,7 +11,8 @@ import type { AiIndexCatalogEntry } from '../../types';
 
 /**
  * Builds the AI INDICES prompt section from the resolved catalog. Empty when disabled.
- * An empty catalog still renders the section, so the agent knows to look for indices in the space.
+ * An empty catalog still renders the section, so the agent asks the user to assign indices
+ * instead of looking for ones it was not given.
  */
 export const getAiIndicesInstructions = ({
   enabled,
@@ -37,9 +38,11 @@ export const getAiIndicesInstructions = ({
     );
   let catalogSection = '';
   if (catalog.length === 0) {
-    catalogSection = `No AI Indices are assigned to this agent. The \`${kiRetrievalSkillId}\` skill can list the ones you can read in this space.`;
-  } else if (entries.length > 0) {
-    catalogSection = `Available to this agent:\n\n${entries.join('\n')}`;
+    catalogSection = `No AI Indices are assigned to this agent. Do not look for other AI Indices. If one would help, ask the user to assign it to this agent.`;
+  } else {
+    const available =
+      entries.length > 0 ? `Available to this agent:\n\n${entries.join('\n')}\n\n` : '';
+    catalogSection = `${available}Load the \`${kiRetrievalSkillId}\` skill before you work with an AI Index: it carries the AI Index tools and the guidance for using them.`;
   }
 
   return cleanPrompt(`
@@ -50,8 +53,6 @@ An AI Index stores Knowledge Indicators (KIs): context prepared for agents, such
 Search relevant AI Indices before broader retrieval when their KIs may help. If they do not cover the question, continue with other relevant data or tools.
 
 ${catalogSection}
-
-Load the \`${kiRetrievalSkillId}\` skill before you work with an AI Index: it carries the AI Index tools and the guidance for using them.
 
 Query everything else, including a source a KI points you to, with your other data tools, such as \`generate_esql\` and \`execute_esql\`, as you would without AI Indices.
 
