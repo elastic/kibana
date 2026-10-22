@@ -117,7 +117,7 @@ describe('EvaluatorEditorFlyout', () => {
     testMutateAsync.mockResolvedValue({
       result: {
         status: 'ok',
-        evaluator: { name: 'tone-judge', kind: 'llm' },
+        evaluator: { name: 'tone-judge', kind: 'llm', direction: 'maximize' },
         scores: [{ name: 'tone', score: 0.8, explanation: 'Polite and direct.' }],
       },
     });
@@ -168,6 +168,35 @@ describe('EvaluatorEditorFlyout', () => {
 
       expect(await screen.findByText(message)).toBeInTheDocument();
       expect(screen.getByText('Fix the highlighted fields and try again.')).toBeInTheDocument();
+      expect(createMutateAsync).not.toHaveBeenCalled();
+    });
+
+    it('marks every missing required field at once on an empty form', async () => {
+      renderCreate();
+
+      save();
+
+      expect(
+        await screen.findByText('Fix the highlighted fields and try again.')
+      ).toBeInTheDocument();
+      for (const message of [
+        /^Enter at least 2 characters/i,
+        /description of up to 2048/i,
+        /system prompt of up to 32768/i,
+        /evaluation prompt of up to 32768/i,
+        /Name every score/i,
+      ]) {
+        expect(screen.getByText(message)).toBeInTheDocument();
+      }
+      for (const testSubj of [
+        'evalsEvaluatorName',
+        'evalsEvaluatorDescription',
+        'evalsEvaluatorSystemPrompt',
+        'evalsEvaluatorPrompt',
+        'evalsEvaluatorScoreName-0',
+      ]) {
+        expect(screen.getByTestId(testSubj)).toHaveAttribute('aria-invalid', 'true');
+      }
       expect(createMutateAsync).not.toHaveBeenCalled();
     });
 
@@ -250,6 +279,28 @@ describe('EvaluatorEditorFlyout', () => {
       expect(onClose).not.toHaveBeenCalled();
     });
 
+    it('sends a direction for every score, defaulting to higher is better', async () => {
+      renderCreate();
+      fillValidDraft();
+      fireEvent.click(screen.getByTestId('evalsEvaluatorAddScore'));
+      setField('evalsEvaluatorScoreName-1', 'hallucination');
+      setField('evalsEvaluatorScoreDirection-1', 'minimize');
+
+      expect(screen.getByTestId('evalsEvaluatorScoreDirection-0')).toHaveValue('maximize');
+
+      save();
+
+      await waitFor(() => expect(createMutateAsync).toHaveBeenCalled());
+      expect(
+        createMutateAsync.mock.calls[0][0].judge.output.scores.map(
+          ({ name, direction }: { name: string; direction: string }) => ({ name, direction })
+        )
+      ).toEqual([
+        { name: 'tone', direction: 'maximize' },
+        { name: 'hallucination', direction: 'minimize' },
+      ]);
+    });
+
     it('adds and removes score rows', () => {
       renderCreate();
 
@@ -289,6 +340,33 @@ describe('EvaluatorEditorFlyout', () => {
       expect(screen.getByTestId('evalsEvaluatorPrompt')).toHaveValue('Rate {{{agent_response}}}.');
     });
 
+    it("pre-fills each score's direction, reading a score saved without one as higher is better", () => {
+      mockedUseEvaluator.mockReturnValue({
+        data: {
+          evaluator: {
+            name: 'tone-judge',
+            version: '1.0.0',
+            description: 'Rates tone',
+            judge: {
+              ...JUDGE,
+              output: {
+                scores: [
+                  { name: 'tone', type: 'number' },
+                  { name: 'hallucination', type: 'number', direction: 'minimize' },
+                ],
+              },
+            },
+          },
+        },
+        isLoading: false,
+        error: null,
+      } as unknown as ReturnType<typeof useEvaluator>);
+      render(<EvaluatorEditorFlyout mode="edit" evaluatorName="tone-judge" onClose={onClose} />);
+
+      expect(screen.getByTestId('evalsEvaluatorScoreDirection-0')).toHaveValue('maximize');
+      expect(screen.getByTestId('evalsEvaluatorScoreDirection-1')).toHaveValue('minimize');
+    });
+
     it('reports the version it saved', async () => {
       renderEdit();
       setField('evalsEvaluatorDescription', 'Rates tone, strictly');
@@ -297,6 +375,134 @@ describe('EvaluatorEditorFlyout', () => {
 
       await waitFor(() => expect(updateMutateAsync).toHaveBeenCalled());
       expect(mockAddSuccess).toHaveBeenCalledWith('Saved tone-judge as version 1.1.0');
+    });
+
+    it('saves against the version the form was loaded from', async () => {
+      renderEdit();
+      setField('evalsEvaluatorDescription', 'Rates tone, strictly');
+
+      save();
+
+      await waitFor(() => expect(updateMutateAsync).toHaveBeenCalled());
+      expect(updateMutateAsync.mock.calls[0][0].updates.base_version).toBe('1.0.0');
+    });
+
+    it('offers to load the latest version when another edit got there first', async () => {
+      const loaded = {
+        evaluator: {
+          name: 'tone-judge',
+          version: '1.0.0',
+          description: 'Rates tone',
+          judge: JUDGE,
+        },
+      };
+      const latest = {
+        evaluator: {
+          name: 'tone-judge',
+          version: '1.0.1',
+          description: 'Rates tone, as edited in another tab',
+          judge: JUDGE,
+        },
+      };
+      let current = loaded;
+      // Refetching swaps in the version the other edit wrote, as react-query would.
+      const refetch = jest.fn(async () => {
+        current = latest;
+        return { data: latest };
+      });
+      mockedUseEvaluator.mockImplementation(
+        () =>
+          ({
+            data: current,
+            isLoading: false,
+            error: null,
+            refetch,
+          } as unknown as ReturnType<typeof useEvaluator>)
+      );
+      const conflict = Object.assign(new Error('Conflict'), {
+        name: 'HttpFetchError',
+        request: {},
+        response: { status: 409 },
+        body: {
+          message:
+            'Evaluator "tone-judge" changed to version 1.0.1 after this edit started from version 1.0.0. Reload the latest version and apply the edit again.',
+        },
+      });
+      updateMutateAsync.mockRejectedValueOnce(conflict);
+      render(<EvaluatorEditorFlyout mode="edit" evaluatorName="tone-judge" onClose={onClose} />);
+      setField('evalsEvaluatorDescription', 'Rates tone, strictly');
+
+      save();
+
+      const callout = await screen.findByTestId('evalsEvaluatorSubmitError');
+      expect(callout).toHaveTextContent('This evaluator changed while you were editing it');
+      expect(callout).toHaveTextContent('Your changes were not saved as the latest version.');
+      expect(onClose).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByTestId('evalsEvaluatorLoadLatest'));
+
+      // The unsaved edit is replaced by what the other tab wrote.
+      await waitFor(() =>
+        expect(screen.getByTestId('evalsEvaluatorDescription')).toHaveValue(
+          'Rates tone, as edited in another tab'
+        )
+      );
+      expect(refetch).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('evalsEvaluatorSubmitError')).not.toBeInTheDocument();
+
+      // Saving now starts from the version that was just loaded.
+      setField('evalsEvaluatorDescription', 'Rates tone, merged');
+      save();
+      await waitFor(() => expect(updateMutateAsync).toHaveBeenCalledTimes(2));
+      expect(updateMutateAsync.mock.calls[1][0].updates.base_version).toBe('1.0.1');
+    });
+
+    it('keeps the draft and the way back when loading the latest version fails', async () => {
+      const loaded = {
+        evaluator: {
+          name: 'tone-judge',
+          version: '1.0.0',
+          description: 'Rates tone',
+          judge: JUDGE,
+        },
+      };
+      let reloadError: Error | null = null;
+      const refetch = jest.fn(async () => {
+        // A failed refetch keeps the data it already had, as react-query does.
+        reloadError = new Error('Service unavailable');
+        return { data: loaded, error: reloadError };
+      });
+      mockedUseEvaluator.mockImplementation(
+        () =>
+          ({
+            data: loaded,
+            isLoading: false,
+            error: reloadError,
+            refetch,
+          } as unknown as ReturnType<typeof useEvaluator>)
+      );
+      updateMutateAsync.mockRejectedValueOnce(
+        Object.assign(new Error('Conflict'), {
+          name: 'HttpFetchError',
+          request: {},
+          response: { status: 409 },
+          body: { message: 'Evaluator "tone-judge" changed to version 1.0.1.' },
+        })
+      );
+      render(<EvaluatorEditorFlyout mode="edit" evaluatorName="tone-judge" onClose={onClose} />);
+      setField('evalsEvaluatorDescription', 'Rates tone, strictly');
+      save();
+      await screen.findByTestId('evalsEvaluatorSubmitError');
+
+      fireEvent.click(screen.getByTestId('evalsEvaluatorLoadLatest'));
+
+      expect(await screen.findByTestId('evalsEvaluatorLoadLatestError')).toHaveTextContent(
+        'Could not load the latest version: Service unavailable'
+      );
+      // The unsaved edit is still on screen, and so is the action to try again.
+      expect(screen.getByTestId('evalsEvaluatorDescription')).toHaveValue('Rates tone, strictly');
+      expect(screen.getByTestId('evalsEvaluatorLoadLatest')).toBeInTheDocument();
+      expect(screen.queryByTestId('evalsEvaluatorLoadError')).not.toBeInTheDocument();
     });
 
     it('does not claim a version was written when nothing changed', async () => {
@@ -390,6 +596,32 @@ describe('EvaluatorEditorFlyout', () => {
       );
       expect(createMutateAsync).not.toHaveBeenCalled();
       expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it("labels each tested score with its direction, falling back to the evaluator's", async () => {
+      testMutateAsync.mockResolvedValueOnce({
+        result: {
+          status: 'ok',
+          evaluator: { name: 'tone-judge', kind: 'llm', direction: 'maximize' },
+          scores: [
+            { name: 'tone', score: 0.8, explanation: 'Polite.' },
+            { name: 'hallucination', score: 0.1, explanation: 'Grounded.', direction: 'minimize' },
+          ],
+        },
+      });
+      renderCreate();
+      fillValidDraft();
+      chooseConnector();
+      setField('evalsEvaluatorTraceId', TRACE_ID);
+
+      runTest();
+
+      expect(await screen.findByTestId('evalsEvaluatorTestScore-tone')).toHaveTextContent(
+        'Higher is better'
+      );
+      expect(screen.getByTestId('evalsEvaluatorTestScore-hallucination')).toHaveTextContent(
+        'Lower is better'
+      );
     });
 
     it('ignores a recommendation that cannot supply the declared evidence', async () => {

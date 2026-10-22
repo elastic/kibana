@@ -21,7 +21,7 @@ const userSchema = schema.object(
   { unknowns: 'allow' }
 );
 
-const payloadSchema = schema.object(
+export const payloadSchema = schema.object(
   {
     connector: schema.maybe(
       schema.object(

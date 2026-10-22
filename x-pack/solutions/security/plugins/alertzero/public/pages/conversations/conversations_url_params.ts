@@ -9,11 +9,14 @@ import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
 export const SELECTED_CONVERSATION_ID_PARAM = 'selectedConversationId';
+export const SELECTED_PROPOSAL_ID_PARAM = 'selectedProposalId';
 
 export interface ConversationsUrlParams {
   /** Conversation whose details flyout is open, from the URL. */
   selectedConversationId?: string;
-  selectConversation: (id: string) => void;
+  /** Proposal whose card was clicked to open the flyout, from the URL. */
+  selectedProposalId?: string;
+  selectConversation: (id: string, proposalId?: string) => void;
   /** Closes the flyout, leaving a history entry so Back reopens it. */
   clearSelectedConversation: () => void;
 }
@@ -37,6 +40,11 @@ export const useConversationsUrlParams = (): ConversationsUrlParams => {
     [search]
   );
 
+  const selectedProposalId = useMemo(
+    () => new URLSearchParams(search).get(SELECTED_PROPOSAL_ID_PARAM) ?? undefined,
+    [search]
+  );
+
   const navigate = useCallback(
     (mutate: (params: URLSearchParams) => void) => {
       const params = new URLSearchParams(search);
@@ -49,17 +57,30 @@ export const useConversationsUrlParams = (): ConversationsUrlParams => {
   );
 
   const selectConversation = useCallback(
-    (id: string) => navigate((params) => params.set(SELECTED_CONVERSATION_ID_PARAM, id)),
+    (id: string, proposalId?: string) =>
+      navigate((params) => {
+        params.set(SELECTED_CONVERSATION_ID_PARAM, id);
+        if (proposalId) {
+          params.set(SELECTED_PROPOSAL_ID_PARAM, proposalId);
+        } else {
+          params.delete(SELECTED_PROPOSAL_ID_PARAM);
+        }
+      }),
     [navigate]
   );
 
   const clearSelectedConversation = useCallback(
-    () => navigate((params) => params.delete(SELECTED_CONVERSATION_ID_PARAM)),
+    () =>
+      navigate((params) => {
+        params.delete(SELECTED_CONVERSATION_ID_PARAM);
+        params.delete(SELECTED_PROPOSAL_ID_PARAM);
+      }),
     [navigate]
   );
 
   return {
     selectedConversationId,
+    selectedProposalId,
     selectConversation,
     clearSelectedConversation,
   };

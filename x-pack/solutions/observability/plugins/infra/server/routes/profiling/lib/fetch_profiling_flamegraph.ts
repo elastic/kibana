@@ -8,11 +8,11 @@
 import type { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { ProfilingDataAccessPluginStart } from '@kbn/profiling-data-access-plugin/server';
 import type { BaseFlameGraph } from '@kbn/profiling-utils';
-import { kqlQuery } from '@kbn/observability-plugin/server';
 import type { InfraProfilingFlamegraphRequestParams } from '../../../../common/http_api/profiling_api';
+import { getProfilingQuery } from './get_profiling_query';
 
 export async function fetchProfilingFlamegraph(
-  { kuery, from, to }: InfraProfilingFlamegraphRequestParams,
+  { kuery, from, to, schema }: InfraProfilingFlamegraphRequestParams,
   profilingDataAccess: ProfilingDataAccessPluginStart,
   coreRequestContext: CoreRequestHandlerContext
 ): Promise<BaseFlameGraph> {
@@ -23,21 +23,7 @@ export async function fetchProfilingFlamegraph(
     core: coreRequestContext,
     esClient: coreRequestContext.elasticsearch.client.asCurrentUser,
     totalSeconds: endSecs - startSecs,
-    query: {
-      bool: {
-        filter: [
-          ...kqlQuery(kuery),
-          {
-            range: {
-              ['@timestamp']: {
-                gte: String(startSecs),
-                lt: String(endSecs),
-                format: 'epoch_second',
-              },
-            },
-          },
-        ],
-      },
-    },
+    query: getProfilingQuery({ kuery, from, to }),
+    schema,
   });
 }

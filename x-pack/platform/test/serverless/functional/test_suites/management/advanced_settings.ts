@@ -33,6 +33,7 @@ const SPACE_SETTINGS_TAB_TEST_SUBJ = 'settings-tab-space-settings';
 
 const globalSettings = new Set<string>([
   settings.ALERTING_V2_ENABLED_SETTING_ID,
+  settings.DATA_FEDERATION_ENABLED_SETTING_ID,
   settings.CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
   settings.XPACK_CUSTOM_BRANDING_LOGO_ID,
   settings.XPACK_CUSTOM_BRANDING_FAVICON_PNG_ID,

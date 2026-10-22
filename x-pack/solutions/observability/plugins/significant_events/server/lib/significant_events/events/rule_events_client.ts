@@ -8,21 +8,23 @@
 import { esql, type ComposerQuery } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import {
   ALERT_EPISODE_STATUS,
   type AlertEpisodeStatus,
   type AlertEventSeverity,
 } from '@kbn/alerting-v2-schemas';
 import {
-  SEVERITY_OPTIONS,
-  SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
+  SEVERITY_OPTIONS,
   type SignificantEvent,
   type SignificantEventResponse,
   type Severity,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
+import { i18n } from '@kbn/i18n';
 import {
   MAX_DEDUP_SCAN_LIMIT,
   type CommonSearchOptions,
@@ -31,30 +33,51 @@ import {
 import {
   applyLifetimeOverlap,
   applyTimeRange,
+  esqlToObjects,
   executeCountQuery,
   executeEsqlQuery,
+  isIndexNotFoundError,
   pickLatestPerGroup,
+  queryEsql,
 } from '../latest_source_query';
+import {
+  SIGNIFICANT_EVENT_INVESTIGATION_STATES,
+  type SignificantEventsFacets,
+  type SignificantEventsSortField,
+  type SignificantEventsSortOrder,
+} from '../../../../common/events_list';
 import { RULE_EVENTS_INDEX } from '../alerting/rule_events_metric_series';
-import type {
-  EventsFilterOptions,
-  EventsPaginatedSearchOptions,
-  SignificantEventsReadClient,
-} from './event_client';
+import type { EventsFilterOptions, EventsPaginatedSearchOptions } from './types';
+import type { TriggerEmitter } from '../../../workflows/triggers/emit';
+import {
+  decideStatusChange,
+  requestedStatus,
+  type StatusChange,
+  type LifecycleSkipReason,
+} from './lifecycle/lifecycle_controller';
+import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
+import { toRuleEvent } from './to_rule_event';
 
 /** `.rule-events` groups a series of writes by `group_hash`, not `event_id` (unavailable as a column). */
 const GROUP_HASH_FIELD = 'group_hash';
 
+/** Note recorded when an operator changes status without giving a reason. */
+export const operatorFallbackAssessmentNote = (status: 'active' | 'inactive'): string =>
+  i18n.translate('xpack.significantEvents.events.operatorFallbackAssessmentNote', {
+    defaultMessage: 'Manually set to {status} by an operator. No reason was given.',
+    values: { status },
+  });
+
 const isSignificantEventStatus = (status: AlertEpisodeStatus): status is SignificantEventStatus =>
-  SIGNIFICANT_EVENT_STATUS_OPTIONS.some((option) => option === status);
+  (SIGNIFICANT_EVENT_STATUS_OPTIONS as readonly string[]).includes(status);
 
 const isSignificantEventSeverity = (severity: AlertEventSeverity): severity is Severity =>
-  SEVERITY_OPTIONS.some((option) => option === severity);
+  severity === 'critical' || severity === 'high' || severity === 'medium' || severity === 'low';
 
 type RuleEventsCurrentStateSearchOptions = CommonSearchOptions & EventsFilterOptions;
 
 export type RuleEventsBatchSearchOptions = RuleEventsCurrentStateSearchOptions & {
-  // Named `afterGroupHash`, not `afterEventId` like `EventClient`'s equivalent cursor: the keyset
+  // Named `afterGroupHash`, not `afterEventId`: the keyset
   // here is `group_hash` (the only stable per-series column `.rule-events` carries — see
   // `GROUP_HASH_FIELD`), not `event_id`.
   afterGroupHash?: string;
@@ -73,10 +96,10 @@ interface RuleEventSourceRow {
 type RuleEventSourceRowWithCreatedAt = RuleEventSourceRow & { created_at: string };
 
 /**
- * `.rule-events` doesn't guarantee `stream_names` is an array — bridge docs write a scalar
+ * `.rule-events` doesn't guarantee `source_ids` is an array — bridge docs write a scalar
  * string, and the field can be absent. Normalize so callers always get `string[]`.
  */
-const normalizeStreamNames = (value: unknown): string[] => {
+const normalizeSourceIds = (value: unknown): string[] => {
   if (typeof value === 'string') return [value];
   if (Array.isArray(value)) return value.filter((item): item is string => typeof item === 'string');
   return [];
@@ -90,18 +113,13 @@ const decodeSignificantEvent = (row: RuleEventSourceRow): SignificantEvent => {
     SignificantEvent,
     '@timestamp' | 'status' | 'severity'
   >;
-  // Sigevents does not model the full alert lifecycle yet: episode states other than
-  // active/inactive (e.g. pending, recovering) are still ongoing, so they map to `active`.
-  const episodeStatus = row.alert?.status ?? ALERT_EPISODE_STATUS.ACTIVE;
-  // Alerting v2 has an extra `info` level below `low` that Significant Events never writes. A row
-  // carrying `info` (or no severity) comes from another rule source, so it falls back to the
-  // neutral `medium` instead of being hidden as `low` or escalated.
+  const alertStatus = row.alert?.status ?? ALERT_EPISODE_STATUS.ACTIVE;
   const severity = row.severity ?? 'medium';
   return {
     ...data,
-    stream_names: normalizeStreamNames(data.stream_names),
+    source_ids: normalizeSourceIds(data.source_ids),
     '@timestamp': row['@timestamp'],
-    status: isSignificantEventStatus(episodeStatus) ? episodeStatus : 'active',
+    status: isSignificantEventStatus(alertStatus) ? alertStatus : 'active',
     severity: isSignificantEventSeverity(severity) ? severity : 'medium',
   };
 };
@@ -122,8 +140,8 @@ const decodeSignificantEventResponse = (
 const buildBaseQuery = (space: string): ComposerQuery =>
   // `_id` metadata is required by `pickLatestPerGroup`'s tiebreaker (`MAX(_id)` / `WHERE _id ==
   // tiebreaker_id`) — omitting it fails at query time with `Unknown column [_id]` (verified against
-  // a live `.rule-events` cluster). Matches the `['_id', '_source']` convention already used for
-  // `EVENTS_DATA_STREAM` in `latest_source_query.ts`.
+  // a live `.rule-events` cluster). Matches the `['_id', '_source']` convention used in
+  // `latest_source_query.ts`.
   esql.from([RULE_EVENTS_INDEX], ['_id', '_source']).where`space_id == ${esql.str(
     space
   )} AND type == ${esql.str('alert')} AND source == ${esql.str(SIGNIFICANT_EVENTS_ALERT_SOURCE)}`;
@@ -132,7 +150,7 @@ const withDataJsonProjection = (query: ComposerQuery): ComposerQuery =>
   query.pipe`EVAL data_json = JSON_EXTRACT(_source, "$.data")`;
 
 /**
- * Free-text filter mirroring `EventClient`'s `buildWhere`, adapted to `.rule-events`: the searched
+ * Free-text filter over `.rule-events`: the searched
  * fields live in the flattened `data` column, so each lookup goes through `FIELD_EXTRACT` instead
  * of a direct column reference.
  */
@@ -154,11 +172,6 @@ const buildFreeTextWhere = (search: string | undefined): ESQLAstExpression | und
   )})) == TO_LOWER(${esql.str(search)}))`;
 };
 
-const activeStatusWhere = (): ESQLAstExpression =>
-  esql.exp`${esql.col('alert.status')} IN(${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((status) =>
-    esql.str(status)
-  )})`;
-
 const eventIdEquals = (eventId: string): ESQLAstExpression =>
   esql.exp`FIELD_EXTRACT(${esql.col('data')}, ${esql.str('event_id')}) == ${esql.str(eventId)}`;
 
@@ -168,22 +181,22 @@ const eventIdIn = (eventIds: string[]): ESQLAstExpression =>
   )})`;
 
 /**
- * `EventClient`'s `multiValueContainsAnyFilter` equivalent, targeting `FIELD_EXTRACT(data,
- * "stream_names")` instead of a top-level column. `MV_INTERSECTS` works correctly against
+ * Multi-value "contains any" filter targeting `FIELD_EXTRACT(data,
+ * "source_ids")` instead of a top-level column. `MV_INTERSECTS` works correctly against
  * `FIELD_EXTRACT`'s output for array, scalar-string, and absent-field shapes (verified live
  * against `.rule-events` on nightshift-program#1492) — no extra normalization is needed here.
  */
-const streamNamesIntersects = (values: string[]): ESQLAstExpression =>
+const sourceIdsIntersects = (values: string[]): ESQLAstExpression =>
   esql.exp`MV_INTERSECTS(FIELD_EXTRACT(${esql.col('data')}, ${esql.str(
-    'stream_names'
+    'source_ids'
   )}), [${values.map((value) => esql.str(value))}])`;
 
 /**
- * `EventClient`'s `continuationCandidateFilter`'s rule arm, adapted to `.rule-events`: targets
+ * Continuation-candidate rule filter: targets
  * `FIELD_EXTRACT(data, "signals.metadata.rule_uuid")` instead of the top-level `signals` column.
  * `FIELD_EXTRACT` union-flattens leaf values across a nested array — it loses the pairing between
- * a given signal's `rule_uuid` and its other fields (e.g. `verdict`), same as `EventClient`'s own
- * `signals.metadata.rule_uuid` filter, which is a "contains any" match, not a per-signal predicate.
+ * a given signal's `rule_uuid` and its other fields (e.g. `verdict`). The filter is a "contains any" match,
+ * not a per-signal predicate.
  * Verified live against `.rule-events` on nightshift-program#1517.
  */
 const ruleUuidsIntersects = (values: string[]): ESQLAstExpression =>
@@ -192,7 +205,7 @@ const ruleUuidsIntersects = (values: string[]): ESQLAstExpression =>
   )}), [${values.map((value) => esql.str(value))}])`;
 
 /**
- * `EventClient`'s `topologyFeatureFilter`, adapted to `.rule-events`: an event matches when either
+ * Topology feature filter: an event matches when either
  * `causal_features.feature_id` or `blast_radius.feature_id` contains any requested ID, both read
  * through `FIELD_EXTRACT` since they live in the flattened `data` column. Verified live against
  * `.rule-events` on nightshift-program#1517.
@@ -207,44 +220,157 @@ const topologyFeatureIdsIntersects = (values: string[]): ESQLAstExpression => {
   )}), [${literals}]))`;
 };
 
+const INVESTIGATION_STATE_COLUMN = 'investigation_state';
+
 /**
- * Read-only `.rule-events` counterpart to `EventClient`, returned by `EventService.getClient()`
- * when `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ` is enabled. Implements {@link SignificantEventsReadClient}
- * so agent-side read call sites (`event_search`, `event_write`'s dedup scan, `attach_investigation`,
- * SML) can depend on that interface instead of a concrete client. Query strategy (which ES|QL
- * extraction form to use per field) is validated per-shape on nightshift-program#1492 and #1517
- * before this client's output is trusted in production.
+ * Derives `not_started` / `in_progress` / `completed` from the flattened `investigations` entries:
+ * an entry without `completed_at` means a run is still open. Mirrors the browser's
+ * `getInvestigationState` so the filter and the list agree. `FIELD_EXTRACT` drops duplicate
+ * values, so two runs finishing in the same millisecond would read as in progress (verified live).
+ */
+const withInvestigationState = (query: ComposerQuery): ComposerQuery => {
+  const dataCol = esql.col('data');
+  const started = esql.exp`COALESCE(MV_COUNT(FIELD_EXTRACT(${dataCol}, ${esql.str(
+    'investigations.workflow_execution_id'
+  )})), 0)`;
+  const completed = esql.exp`COALESCE(MV_COUNT(FIELD_EXTRACT(${dataCol}, ${esql.str(
+    'investigations.completed_at'
+  )})), 0)`;
+  return query.pipe`EVAL ${esql.col(INVESTIGATION_STATE_COLUMN)} = CASE(${started} == 0, ${esql.str(
+    'not_started'
+  )}, ${completed} < ${started}, ${esql.str('in_progress')}, ${esql.str('completed')})`;
+};
+
+const SORT_RANK_COLUMN = 'sort_rank';
+
+/** Orders the latest revisions for the paginated list; ties fall back to newest first. */
+const applySort = (
+  query: ComposerQuery,
+  sortField: SignificantEventsSortField | undefined,
+  sortOrder: SignificantEventsSortOrder = 'desc'
+): ComposerQuery => {
+  const direction = sortOrder === 'asc' ? 'ASC' : 'DESC';
+  switch (sortField) {
+    case 'created_at':
+      return query.sort(['created_at', direction], ['@timestamp', 'DESC'], ['_id', 'ASC']);
+    case 'severity':
+      return query.pipe`EVAL ${esql.col(SORT_RANK_COLUMN)} = CASE(${esql.col(
+        'severity'
+      )} == ${esql.str('critical')}, 4, ${esql.col('severity')} == ${esql.str(
+        'high'
+      )}, 3, ${esql.col('severity')} == ${esql.str('low')}, 1, 2)`.sort(
+        [SORT_RANK_COLUMN, direction],
+        ['created_at', 'DESC'],
+        ['_id', 'ASC']
+      );
+    case 'status':
+      // A missing alert.status decodes as active (see decodeSignificantEvent).
+      return query.pipe`EVAL ${esql.col(SORT_RANK_COLUMN)} = CASE(${esql.col(
+        'alert.status'
+      )} == ${esql.str(ALERT_EPISODE_STATUS.INACTIVE)}, 1, ${esql.col(
+        'alert.status'
+      )} == ${esql.str(ALERT_EPISODE_STATUS.RECOVERING)}, 2, 3)`.sort(
+        [SORT_RANK_COLUMN, direction],
+        ['created_at', 'DESC'],
+        ['_id', 'ASC']
+      );
+    default:
+      return query.sort(['@timestamp', 'DESC'], ['_id', 'ASC']);
+  }
+};
+
+const countBy = async <Key extends string>({
+  esClient,
+  query,
+  column,
+  keys,
+}: {
+  esClient: ElasticsearchClient;
+  query: ComposerQuery;
+  column: string;
+  keys: readonly Key[];
+}): Promise<Record<Key, number>> => {
+  const counts = Object.fromEntries(keys.map((key) => [key, 0])) as Record<Key, number>;
+  try {
+    const rows = esqlToObjects<Record<string, unknown>>(
+      await queryEsql({
+        esClient,
+        query: query.pipe`STATS count = COUNT(*) BY ${esql.col(column)}`,
+      })
+    );
+    for (const row of rows) {
+      const key = row[column];
+      if (typeof key === 'string' && key in counts) {
+        counts[key as Key] = Number(row.count) || 0;
+      }
+    }
+    return counts;
+  } catch (error) {
+    if (isIndexNotFoundError(error)) {
+      return counts;
+    }
+    throw error;
+  }
+};
+
+export type UpdateEventResult =
+  | { updated: true }
+  /** Not written: another writer got there first (`head`), or the series could not be read back. */
+  | { updated: false; head?: SignificantEvent };
+
+export type UpdateEventStatusResult =
+  | { updated: 1; ignored: 0; status: SignificantEventStatus }
+  | {
+      updated: 0;
+      ignored: 1;
+      status: SignificantEventStatus;
+      reason: LifecycleSkipReason | 'not_found' | 'superseded';
+    };
+
+/**
+ * `.rule-events` client used by agent-side call sites (`event_search`, `event_write`'s dedup scan,
+ * `attach_investigation`, SML): reads, plus `createEvent` / `updateEvent` / `updateEventStatus` to
+ * write versions. Query strategy (which ES|QL extraction form to use per field) is validated
+ * per-shape on nightshift-program#1492 and #1517 before this client's output is trusted in
+ * production.
  *
  * Not implemented here:
  * - `findLatestActive`, topology/continuation search, `attach` — agent/discovery reads (#1517).
- * - Writes (`bulkCreate`) and workflow triggers (`emitTrigger`) — this class is read-only.
  */
-export class RuleEventsClient implements SignificantEventsReadClient {
-  constructor(private readonly clients: { esClient: ElasticsearchClient; space: string }) {}
+export class RuleEventsClient {
+  constructor(
+    private readonly clients: {
+      esClient: ElasticsearchClient;
+      space: string;
+      getAlertEventsClient?: () => Promise<AlertEventsClientApi>;
+      emitTrigger?: TriggerEmitter;
+    }
+  ) {}
 
   private buildLatestByCurrentStateQuery(
     options: RuleEventsCurrentStateSearchOptions
   ): ComposerQuery {
-    // `created_at` reflects the earliest (historical) `@timestamp` for the series, so it must be
-    // computed before any filter narrows the row set.
+    // `created_at` is the earliest `@timestamp` for the series. Compute it across the full lineage
+    // before latest-reduction so a later time bound cannot hide the series' true creation time.
     let query = buildBaseQuery(this.clients.space)
       .pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(GROUP_HASH_FIELD)}`;
 
     query = pickLatestPerGroup(query, GROUP_HASH_FIELD);
 
-    // Free-text search and status/severity run post-latest (against only the current state) so a
-    // stale revision cannot make a closed series look open.
+    // Free-text, lifetime overlap, and status/severity run on the latest revision. Filtering the
+    // lineage first would promote a matching historical write to the returned current state.
     const searchWhere = buildFreeTextWhere(options.search);
     if (searchWhere) {
       query = query.where`${searchWhere}`;
     }
 
-    // The time range selects series active during it, always shown in their current state.
     query = applyLifetimeOverlap({
       query,
       from: options.from,
       to: options.to,
-      activeWhere: activeStatusWhere(),
+      activeWhere: esql.exp`${esql.col(
+        'alert.status'
+      )} IN (${SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.map((status) => esql.str(status))})`,
     });
 
     if (options.status?.length) {
@@ -257,8 +383,8 @@ export class RuleEventsClient implements SignificantEventsReadClient {
         esql.str(severity)
       )})`;
     }
-    if (options.stream?.length) {
-      query = query.where`${streamNamesIntersects(options.stream)}`;
+    if (options.sourceIds?.length) {
+      query = query.where`${sourceIdsIntersects(options.sourceIds)}`;
     }
     if (options.eventIds?.length) {
       query = query.where`${eventIdIn(options.eventIds)}`;
@@ -268,6 +394,11 @@ export class RuleEventsClient implements SignificantEventsReadClient {
     }
     if (options.topologyFeatureIds?.length) {
       query = query.where`${topologyFeatureIdsIntersects(options.topologyFeatureIds)}`;
+    }
+    if (options.investigationStates?.length) {
+      query = withInvestigationState(query).where`${esql.col(
+        INVESTIGATION_STATE_COLUMN
+      )} IN (${options.investigationStates.map((state) => esql.str(state))})`;
     }
 
     return query;
@@ -302,8 +433,11 @@ export class RuleEventsClient implements SignificantEventsReadClient {
     const page = options.page ?? 1;
     const perPage = options.perPage ?? 25;
 
-    const dataQuery = withDataJsonProjection(this.buildLatestByCurrentStateQuery(options))
-      .sort(['@timestamp', 'DESC'], ['_id', 'ASC'])
+    const dataQuery = applySort(
+      withDataJsonProjection(this.buildLatestByCurrentStateQuery(options)),
+      options.sortField,
+      options.sortOrder
+    )
       .limit(page * perPage)
       .keep('_source', 'data_json', 'created_at');
     const countQuery = this.buildLatestByCurrentStateQuery(options)
@@ -329,9 +463,44 @@ export class RuleEventsClient implements SignificantEventsReadClient {
     };
   }
 
+  /** Counts the latest revisions per severity, status and investigation state. */
+  async countFacets(
+    options: RuleEventsCurrentStateSearchOptions
+  ): Promise<SignificantEventsFacets> {
+    const { esClient } = this.clients;
+    const [severity, status, investigation] = await Promise.all([
+      countBy({
+        esClient,
+        query: this.buildLatestByCurrentStateQuery({ ...options, severity: undefined }),
+        column: 'severity',
+        keys: SEVERITY_OPTIONS,
+      }),
+      countBy({
+        esClient,
+        // A missing alert.status decodes as active (see decodeSignificantEvent).
+        query: this.buildLatestByCurrentStateQuery({ ...options, status: undefined })
+          .pipe`EVAL event_status = COALESCE(${esql.col('alert.status')}, ${esql.str(
+          ALERT_EPISODE_STATUS.ACTIVE
+        )})`,
+        column: 'event_status',
+        keys: SIGNIFICANT_EVENT_STATUS_OPTIONS,
+      }),
+      countBy({
+        esClient,
+        query: withInvestigationState(
+          this.buildLatestByCurrentStateQuery({ ...options, investigationStates: undefined })
+        ),
+        column: INVESTIGATION_STATE_COLUMN,
+        keys: SIGNIFICANT_EVENT_INVESTIGATION_STATES,
+      }),
+    ]);
+
+    return { severity, status, investigation };
+  }
+
   async findLatestByCurrentStateBatch(
     options: RuleEventsBatchSearchOptions
-  ): Promise<{ hits: SignificantEventResponse[] }> {
+  ): Promise<{ hits: SignificantEventResponse[]; lastGroupHash?: string }> {
     let query = this.buildLatestByCurrentStateQuery(options);
     if (options.afterGroupHash !== undefined) {
       query = query.where`${esql.col(GROUP_HASH_FIELD)} > ${esql.str(options.afterGroupHash)}`;
@@ -346,22 +515,24 @@ export class RuleEventsClient implements SignificantEventsReadClient {
       fields: ['data_json', 'created_at'],
     });
 
-    return { hits: hits.map(decodeSignificantEventResponse) };
+    return {
+      hits: hits.map(decodeSignificantEventResponse),
+      lastGroupHash: hits.at(-1)?.[GROUP_HASH_FIELD],
+    };
   }
 
   /**
-   * Returns the latest version per `group_hash` for all active events within the given
-   * time range, optionally narrowed to candidate stream/rule identities so the scan stays
-   * proportional to the write batch instead of the whole space. Mirrors `EventClient`'s
-   * `findLatestActive`, but filters on the nested `alert.status` column (via
-   * `SIGNIFICANT_EVENTS_STATUS_MAP`, see `buildLatestByCurrentStateQuery`'s status branch) instead
-   * of a top-level `status` column, and reads `stream_names` / `signals.metadata.rule_uuid`
-   * through `FIELD_EXTRACT` since both live in the flattened `data` column.
+   * Returns the latest version per `group_hash` for all active ("open") events within the given
+   * time range, optionally narrowed to candidate source/rule identities so the scan stays
+   * proportional to the write batch instead of the whole space. Filters on the persisted
+   * `alert.status` column instead of a top-level `status` column, and reads `source_ids` /
+   * `signals.metadata.rule_uuid` through `FIELD_EXTRACT` since both live in the flattened `data`
+   * column.
    *
-   * Capped at MAX_DEDUP_SCAN_LIMIT distinct active events, same bound as `EventClient`.
+   * Capped at MAX_DEDUP_SCAN_LIMIT distinct active events.
    */
   async findLatestActive(
-    options: CommonSearchOptions & { streamNames?: string[]; ruleUuids?: string[] }
+    options: CommonSearchOptions & { sourceIds?: string[]; ruleUuids?: string[] }
   ): Promise<{ hits: SignificantEvent[] }> {
     let query = applyTimeRange({
       query: buildBaseQuery(this.clients.space),
@@ -371,10 +542,12 @@ export class RuleEventsClient implements SignificantEventsReadClient {
 
     query = pickLatestPerGroup(query, GROUP_HASH_FIELD);
 
-    query = query.where`${activeStatusWhere()}`;
+    query = query.where`${esql.col('alert.status')} IN (${SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.map(
+      (status) => esql.str(status)
+    )})`;
 
-    if (options.streamNames?.length) {
-      query = query.where`${streamNamesIntersects(options.streamNames)}`;
+    if (options.sourceIds?.length) {
+      query = query.where`${sourceIdsIntersects(options.sourceIds)}`;
     }
     if (options.ruleUuids?.length) {
       query = query.where`${ruleUuidsIntersects(options.ruleUuids)}`;
@@ -432,5 +605,98 @@ export class RuleEventsClient implements SignificantEventsReadClient {
       if (event.event_id) map.set(event.event_id, event);
     }
     return map;
+  }
+
+  /** Writes the first version of an event; unguarded, as there is no prior version to compare. */
+  async createEvent({ event }: { event: SignificantEvent }): Promise<void> {
+    await this.writeVersion({ event });
+  }
+
+  /** Writes the next version only while `prior` is still the head (best effort, not atomic). */
+  async updateEvent({
+    event,
+    prior,
+  }: {
+    event: SignificantEvent;
+    prior: SignificantEvent;
+  }): Promise<UpdateEventResult> {
+    // A head that cannot be read back is not a version to build on.
+    const head = await this.findLatestByEventId(event.event_id);
+    if (head === undefined || head['@timestamp'] !== prior['@timestamp']) {
+      return { updated: false, head };
+    }
+
+    await this.writeVersion({ event, prior });
+    return { updated: true };
+  }
+
+  /** Applies a status change to one event: the lifecycle controller decides, `updateEvent` writes. */
+  async updateEventStatus({
+    eventId,
+    change,
+    assessmentNote,
+    expectedTimestamp,
+  }: {
+    eventId: string;
+    change: StatusChange;
+    assessmentNote?: string;
+    /** Skips the write when the latest version's `@timestamp` differs (the event changed since). */
+    expectedTimestamp?: string;
+  }): Promise<UpdateEventStatusResult> {
+    const latest = await this.findLatestByEventId(eventId);
+    if (!latest) {
+      return { updated: 0, ignored: 1, status: requestedStatus(change), reason: 'not_found' };
+    }
+    if (expectedTimestamp !== undefined && latest['@timestamp'] !== expectedTimestamp) {
+      return { updated: 0, ignored: 1, status: latest.status, reason: 'superseded' };
+    }
+
+    const decision = decideStatusChange({
+      latest,
+      change,
+      assessmentNote: assessmentNote?.trim()
+        ? assessmentNote
+        : change.kind === 'operator'
+        ? operatorFallbackAssessmentNote(change.status)
+        : undefined,
+      timestamp: new Date().toISOString(),
+    });
+    if (!decision.write) {
+      return { updated: 0, ignored: 1, status: decision.status, reason: decision.reason };
+    }
+
+    const written = await this.updateEvent({ event: decision.event, prior: latest });
+    if (!written.updated) {
+      return {
+        updated: 0,
+        ignored: 1,
+        status: written.head?.status ?? latest.status,
+        reason: 'superseded',
+      };
+    }
+
+    return { updated: 1, ignored: 0, status: decision.event.status };
+  }
+
+  private async writeVersion({
+    event,
+    prior,
+  }: {
+    event: SignificantEvent;
+    prior?: SignificantEvent;
+  }): Promise<void> {
+    const { getAlertEventsClient, emitTrigger } = this.clients;
+    if (!getAlertEventsClient) {
+      throw new Error('RuleEventsClient was created without a writer, so it cannot write events');
+    }
+
+    const alertEventsClient = await getAlertEventsClient();
+    // `createAlertEvent` waits for a refresh, so the new version is readable immediately.
+    await alertEventsClient.createAlertEvent(toRuleEvent(event));
+    emitSignificantEventWriteTriggers({
+      emitTrigger,
+      significantEvent: event,
+      priorSignificantEvent: prior,
+    });
   }
 }

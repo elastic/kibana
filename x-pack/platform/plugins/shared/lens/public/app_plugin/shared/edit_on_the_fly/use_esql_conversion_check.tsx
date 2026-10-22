@@ -24,8 +24,8 @@ import type { CoreStart } from '@kbn/core/public';
 
 import {
   generateEsqlQuery,
+  getFailureTooltipText,
   isEsqlQuerySuccess,
-  esqlConversionFailureReasonMessages,
   type EsqlConversionFailureReason,
   type ColumnRoles,
 } from '@kbn/lens-common';
@@ -46,10 +46,10 @@ interface EsqlConversionSettings {
 }
 
 const getEsqlConversionDisabledSettings = (
-  tooltip: string = esqlConversionFailureReasonMessages.unknown
+  reason: EsqlConversionFailureReason = 'unknown'
 ): EsqlConversionSettings => ({
   isConvertToEsqlButtonDisabled: true,
-  convertToEsqlButtonTooltip: tooltip,
+  convertToEsqlButtonTooltip: getFailureTooltipText(reason),
   convertibleLayers: [],
 });
 
@@ -144,16 +144,12 @@ export const useEsqlConversionCheck = (
 
     // Guard: charts saved to the library
     if (isSavedToLibrary(persistedDoc)) {
-      return getEsqlConversionDisabledSettings(
-        esqlConversionFailureReasonMessages.saved_to_library_not_supported
-      );
+      return getEsqlConversionDisabledSettings('saved_to_library_not_supported');
     }
 
     // Guard: query-based annotations require data views and are not yet supported on ES|QL charts
     if (hasUnsupportedAnnotations(state)) {
-      return getEsqlConversionDisabledSettings(
-        esqlConversionFailureReasonMessages.query_annotations_not_supported
-      );
+      return getEsqlConversionDisabledSettings('query_annotations_not_supported');
     }
 
     // Detect trendline layer from metric visualization state
@@ -179,9 +175,7 @@ export const useEsqlConversionCheck = (
       );
     });
     if (hasNonStaticReferenceLine) {
-      return getEsqlConversionDisabledSettings(
-        esqlConversionFailureReasonMessages.reference_line_not_supported
-      );
+      return getEsqlConversionDisabledSettings('reference_line_not_supported');
     }
 
     // Extract column roles from visualization state for semantic ES|QL column naming
@@ -280,9 +274,7 @@ export const useEsqlConversionCheck = (
     // If a trendline layer exists but failed to convert, disable the button
     // rather than silently dropping the trendline
     if (trendlineLayerId && trendlineResult && !trendlineResult.success) {
-      return getEsqlConversionDisabledSettings(
-        esqlConversionFailureReasonMessages.trendline_not_supported
-      );
+      return getEsqlConversionDisabledSettings('trendline_not_supported');
     }
 
     // Guard: converting only a subset of data layers would leave a form-based data
@@ -292,9 +284,7 @@ export const useEsqlConversionCheck = (
       (layer) => layer.type === layerTypes.DATA && !layer.isConvertibleToEsql
     );
     if (nonConvertibleDataLayer) {
-      return getEsqlConversionDisabledSettings(
-        esqlConversionFailureReasonMessages[nonConvertibleDataLayer.failureReason ?? 'unknown']
-      );
+      return getEsqlConversionDisabledSettings(nonConvertibleDataLayer.failureReason ?? 'unknown');
     }
 
     // Trendline is auto-included in the conversion but not shown in the modal.
@@ -369,7 +359,9 @@ function tryConvertTrendlineLayer(
   coreStart: CoreStart,
   startDependencies: LensPluginStartDependencies,
   columnRoles: ColumnRoles
-): { success: true; layer: ConvertibleLayer } | { success: false; reason?: string } {
+):
+  | { success: true; layer: ConvertibleLayer }
+  | { success: false; reason?: EsqlConversionFailureReason } {
   if (!layer?.columnOrder || !layer?.columns) return { success: false };
 
   // Defensive patching of date_histogram columns for trendline conversion.

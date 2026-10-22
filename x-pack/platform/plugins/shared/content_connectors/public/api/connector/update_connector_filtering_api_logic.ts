@@ -20,7 +20,9 @@ export interface PutConnectorFilteringArgs {
 export type PutConnectorFilteringResponse = FilteringRules;
 
 export const putConnectorFiltering = async ({ connectorId, http }: PutConnectorFilteringArgs) => {
-  const route = `/internal/content_connectors/connectors/${connectorId}/filtering`;
+  const route = `/internal/content_connectors/connectors/${encodeURIComponent(
+    connectorId
+  )}/filtering`;
 
   return await http?.put(route);
 };

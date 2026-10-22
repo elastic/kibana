@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
@@ -127,9 +127,44 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, isDisable
     serializer: formSerializer,
   });
 
-  const { submit, isValid: isFormValid, isSubmitted, getFields, isSubmitting } = form;
+  const {
+    submit,
+    isValid: isFormValid,
+    isSubmitted,
+    getFields,
+    isSubmitting,
+    updateFieldValues,
+  } = form;
 
   const nameFieldConfig = getNameFieldConfig(dataView, field);
+
+  // <ScriptField /> is remounted when switching between <FieldDetail /> and <CompositeEditor />
+  // and loses its value, so we capture the current script before the editors are swapped and
+  // restore it once the new field is mounted (see below). The value is restored rather than
+  // written to the form default value so that the field keeps its original "isModified" baseline.
+  const isCompositeRef = useRef(field?.type === 'composite');
+  const scriptToRestore = useRef<string>();
+
+  const onTypeChange = useCallback(
+    ({ type, script }: FieldFormInternal) => {
+      const isCompositeType = type?.[0].value === 'composite';
+
+      if (isCompositeType === isCompositeRef.current) {
+        return;
+      }
+
+      isCompositeRef.current = isCompositeType;
+      scriptToRestore.current = script?.source;
+
+      if (script?.source?.trim()) {
+        // keep the "Set value" row expanded when switching back to a primitive type
+        updateFieldValues({ __meta__: { isValueVisible: true } }, { runDeserializer: false });
+      }
+    },
+    [updateFieldValues]
+  );
+
+  useFormData<FieldFormInternal>({ form, watch: 'type', onChange: onTypeChange });
 
   const [formData] = useFormData<FieldFormInternal>({ form });
   const isFormModified = useFormIsModified({
@@ -168,6 +203,23 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, isDisable
 
   const isValueVisible = get(formData, '__meta__.isValueVisible');
 
+  const isComposite = updatedType?.[0].value === 'composite';
+  const isScriptFieldMounted = updatedScript !== undefined;
+
+  // Restore the script captured in onTypeChange() once <ScriptField /> has been remounted.
+  // When switching to a primitive type the field is mounted after the "Set value" row expands,
+  // which is why this also depends on the field being mounted.
+  useEffect(() => {
+    const scriptField = getFields()['script.source'];
+
+    if (scriptToRestore.current === undefined || !scriptField) {
+      return;
+    }
+
+    scriptField.setValue(scriptToRestore.current);
+    scriptToRestore.current = undefined;
+  }, [isComposite, isScriptFieldMounted, getFields]);
+
   const resetTypes = useCallback(() => {
     const lastVal = fieldPreview$.getValue();
     // resets the preview history to an empty set
@@ -196,8 +248,6 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, isDisable
       });
 
       subfields$.next(modifiedFields);
-      // necessary to maintain script code when changing types
-      form.updateFieldValues({ ...form.getFormData() });
     });
 
     // first preview value is skipped for saved fields, need to populate for new fields and rerenders
@@ -210,7 +260,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, isDisable
     return () => {
       subChanges.unsubscribe();
     };
-  }, [form, fieldPreview$, subfields$, updatedName]);
+  }, [fieldPreview$, subfields$, updatedName]);
 
   useEffect(() => {
     if (onChange) {

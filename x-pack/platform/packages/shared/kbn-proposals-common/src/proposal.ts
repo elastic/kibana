@@ -262,6 +262,22 @@ export const createProposalRequestSchema = z.object({
   origin: proposalOriginSchema,
   expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
   workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+  /**
+   * The id to create the proposal under, instead of a random one. For a caller
+   * that derives the id from what it is proposing, so that two calls for the same
+   * thing meet at the same id and Elasticsearch's `op_type: 'create'` — not a
+   * check-then-create in application code — decides which one creates it.
+   *
+   * An id that already exists is refused with `ProposalAlreadyExistsError`; the
+   * service reads and returns nothing. What a duplicate means, and whether a
+   * settled proposal should be followed by a new one under another id, is the
+   * caller's to decide.
+   *
+   * The index is shared across spaces and the service does not scope the id, so
+   * the caller must put the space (and its own producer) into whatever the id is
+   * derived from. Omitting `id` mints a random one, exactly as before.
+   */
+  id: z.uuid().optional(),
 });
 export type CreateProposalRequest = z.infer<typeof createProposalRequestSchema>;
 
@@ -328,6 +344,12 @@ export const listProposalsQuerySchema = proposalFiltersSchema.extend({
   category: proposalCategorySchema.optional(),
   /** Bounds the closed queue to a recency window rather than all decided history. */
   decidedWithinHours: z.coerce.number().int().min(1).max(168).optional(),
+  /**
+   * `priority` (the default) ranks by impact, confidence and deadline, for a queue of open
+   * proposals. `newest` orders a conversation's history by when each proposal was decided, with
+   * an undecided one first, so paging stays consistent with the order shown.
+   */
+  order: z.enum(['priority', 'newest']).optional(),
   size: z.coerce.number().int().min(1).max(MAX_PROPOSALS_PAGE_SIZE).default(50),
   from: z.coerce.number().int().min(0).max(MAX_PROPOSALS_PAGE_OFFSET).default(0),
 });
@@ -413,3 +435,39 @@ export const isProposalSettling = (proposal: Pick<Proposal, 'decision' | 'status
  * so this is not a substitute for comparing `expiresAt` to `now`. */
 export const isExpired = (proposal: Pick<Proposal, 'status'>): boolean =>
   proposal.status === 'expired';
+
+/**
+ * Gives the phase of each status. It is a `Record` over every `ProposalStatus`. If you add a
+ * status and do not place it here, the compiler reports an error. The groups below come from this
+ * map, so they cannot drift from it.
+ *
+ * - `open`: can still change. `pending` waits for a decision. `executing` is approved and running.
+ * - `settled`: the result is known. Nothing runs again.
+ * - `replaced`: not decided, but it cannot change. A superseded proposal is not the live
+ *   revision. A caller can still hold its id (a stale workflow variable or a retried step).
+ *   That caller must not revive it through `update()`.
+ */
+const PROPOSAL_STATUS_PHASE = {
+  pending: 'open',
+  executing: 'open',
+  succeeded: 'settled',
+  failed: 'settled',
+  expired: 'settled',
+  no_action: 'settled',
+  superseded: 'replaced',
+} as const satisfies Record<ProposalStatus, 'open' | 'settled' | 'replaced'>;
+
+type ProposalStatusPhase = (typeof PROPOSAL_STATUS_PHASE)[ProposalStatus];
+
+const statusesInPhase = (phase: ProposalStatusPhase): ProposalStatus[] =>
+  proposalStatusSchema.options.filter((status) => PROPOSAL_STATUS_PHASE[status] === phase);
+
+/** Statuses that can still change: waiting for a decision, or approved and running. */
+export const OPEN_PROPOSAL_STATUSES = statusesInPhase('open');
+
+/** Statuses with a known result. `superseded` is not here: its successor represents it. */
+export const SETTLED_PROPOSAL_STATUSES = statusesInPhase('settled');
+
+/** Returns true for a settled or replaced status. Only `pending` and `executing` return false. */
+export const isTerminal = (status: ProposalStatus): boolean =>
+  PROPOSAL_STATUS_PHASE[status] !== 'open';

@@ -7,13 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageTemplate,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useLocation } from 'react-router-dom';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
+import { AppHeader } from '@kbn/app-header';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWorkflowsCapabilities, type WorkflowsCreateRouteState } from '@kbn/workflows-ui';
 import { workflowDefaultYaml } from './workflow_default_yml';
@@ -24,7 +33,10 @@ import { WorkflowDetailLoadingState } from './workflow_detail_loading_state';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import { WorkflowDetailTestStepModal } from './workflow_detail_test_step_modal';
 import { WorkflowNotFoundPage } from './workflow_not_found_page';
+import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import type { WorkflowDetailTab } from '../../../common/lib/telemetry/events/workflows/ui/types';
+import { AgenticFirstEmptyStateLive } from '../../../components';
+import { WorkflowsPageName } from '../../../deep_links';
 import {
   setActiveTab,
   setExecution,
@@ -48,11 +60,15 @@ import { WorkflowExecutionDetail } from '../../../features/workflow_execution_de
 import { WorkflowExecutionListFlyout } from '../../../features/workflow_execution_list/ui/workflow_execution_list_flyout';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list_old';
 import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
+import { useAutoCollapseSideNav } from '../../../hooks/use_auto_collapse_side_nav';
 import { useGlobalExecutionsViewEnabled } from '../../../hooks/use_global_executions_view_enabled';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
-import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import {
+  useWorkflowUrlState,
+  type WorkflowUrlUpdateOptions,
+} from '../../../hooks/use_workflow_url_state';
 import {
   navigateToWorkflowsList,
   type WorkflowDetailRouteState,
@@ -61,9 +77,14 @@ import {
 /**
  * `location.state` the page can arrive with: list-navigation state (back
  * link) and, on `/create`, the cross-app initial-content contract
- * (`WorkflowsCreateRouteState`, e.g. the Template Library's "Remix with AI").
+ * (`WorkflowsCreateRouteState`, e.g. "Remix with AI" or the landing prompt).
  */
 type WorkflowDetailLocationState = WorkflowDetailRouteState & WorkflowsCreateRouteState;
+
+interface PendingAgentPrompt {
+  message: string;
+  attachments: ConversationAttachment[];
+}
 
 const isLoadWorkflowNotFoundError = (error: unknown) =>
   isHttpFetchError(error) && error.response?.status === 404;
@@ -82,6 +103,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const telemetry = useTelemetry();
   const { application } = useKibana().services;
   const location = useLocation<WorkflowDetailLocationState | undefined>();
+  const { euiTheme } = useEuiTheme();
 
   const isReady = !isLoadingWorkflow && !isLoadingConnectors;
 
@@ -93,12 +115,15 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
 
   useWorkflowsBreadcrumbs(workflowName);
 
+  useAutoCollapseSideNav();
+
   const { canExecuteWorkflow, canReadWorkflowExecution } = useWorkflowsCapabilities();
   const isExecutionsViewEnabled = useGlobalExecutionsViewEnabled();
   const {
     activeTab,
     selectedExecutionId,
     setSelectedExecution,
+    updateUrlState,
     setActiveTab: setUrlTab,
     replayExecutionId,
     replayIsTestRun,
@@ -139,7 +164,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const seededRef = useRef(false);
 
   // A navigation can hand `/create` its initial content through history
-  // state (`WorkflowsCreateRouteState`) — e.g. the Template Library's
+  // state (`WorkflowsCreateRouteState`) — e.g. the Template library's
   // "Remix with AI" passes the rendered template. The state travels on the
   // history entry, not the URL, so plain `/create` links and shared URLs
   // fall back to the default YAML. The effect below depends on this value, not
@@ -217,26 +242,86 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Flyout mode uses the executions tab only while a selected run is shown in the editor.
+  // Clearing the selection returns to the editable draft. The sidebar keeps the executions tab.
+  const clearSelectedExecution = useCallback(
+    (options?: WorkflowUrlUpdateOptions) => {
+      if (isExecutionsViewEnabled) {
+        updateUrlState(
+          {
+            tab: 'workflow',
+            executionId: undefined,
+            stepExecutionId: undefined,
+            stepId: undefined,
+          },
+          options
+        );
+        return;
+      }
+      setSelectedExecution(null, options);
+    },
+    [isExecutionsViewEnabled, setSelectedExecution, updateUrlState]
+  );
+
   // Both handlers also close the list, which is local state rather than URL state. They must
   // replace, or Back restores the execution while the list stays shut.
   const onOpenExecutionList = useCallback(() => {
     if (isExecutionListOpen || selectedExecutionId) {
       setIsExecutionListOpen(false);
-      setSelectedExecution(null, { replace: true });
+      clearSelectedExecution({ replace: true });
       return;
     }
     setIsExecutionListOpen(true);
-  }, [isExecutionListOpen, selectedExecutionId, setSelectedExecution]);
+  }, [clearSelectedExecution, isExecutionListOpen, selectedExecutionId]);
 
   const onCloseExecutionList = useCallback(() => {
     setIsExecutionListOpen(false);
-    setSelectedExecution(null, { replace: true });
-  }, [setSelectedExecution]);
+    clearSelectedExecution({ replace: true });
+  }, [clearSelectedExecution]);
+
+  // `/create` starts on the agentic-first landing. `?startBlank=true` ("Start manually"
+  // on the empty list) skips it.
+  const startBlank = new URLSearchParams(location.search).get('startBlank') === 'true';
+  // Prompt from this page's landing or from the empty list (`location.state`).
+  const [pendingPrompt, setPendingPrompt] = useState<PendingAgentPrompt | undefined>(() => {
+    const message = !id ? location.state?.initialAgentMessage : undefined;
+    return message
+      ? { message, attachments: location.state?.initialAgentAttachments ?? [] }
+      : undefined;
+  });
+  // "Remix with AI" arrives with the template YAML, so it skips the landing too.
+  const shouldShowAgenticLandingRef = useRef(false);
+  shouldShowAgenticLandingRef.current = !id && !startBlank && !pendingPrompt && !initialYaml;
+  const [showAgenticLanding, setShowAgenticLanding] = useState(shouldShowAgenticLandingRef.current);
+  // Re-check only when the route switches between `/create` and `/:id`. URL
+  // churn on `/create` (view toggle, run selection) drops the query and the
+  // history state, and must not bring the landing back over the editor.
+  useEffect(() => {
+    setShowAgenticLanding(shouldShowAgenticLandingRef.current);
+  }, [id]);
+  // The sidebar opens only when the user picked AI: a landing prompt or a remix.
+  // "Start manually" goes straight to the editor.
+  const autoOpenAgentChat = !id && Boolean(pendingPrompt || initialYaml);
+
+  const handleLandingSubmit = useCallback(
+    (message: string, attachments: ConversationAttachment[]) => {
+      setPendingPrompt({ message, attachments });
+      setShowAgenticLanding(false);
+    },
+    []
+  );
 
   const onCloseExecutionDetail = useCallback(() => {
     // Clear the selected execution but keep the list open so the user goes back to the list.
-    setSelectedExecution(null);
-  }, [setSelectedExecution]);
+    // Push so Back reopens the run.
+    clearSelectedExecution({ replace: false });
+  }, [clearSelectedExecution]);
+
+  // Close the execution flyouts and open the Workflow tab, where the agent's proposal shows.
+  const onAgentProposalHeld = useCallback(() => {
+    setIsExecutionListOpen(false);
+    setUrlTab('workflow');
+  }, [setUrlTab]);
 
   const onBackToWorkflows = useCallback(() => {
     void navigateToWorkflowsList(application, location.state);
@@ -272,7 +357,9 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     );
   }
 
-  const showExecutionFlyouts = isExecutionsViewEnabled && Boolean(id) && canReadWorkflowExecution;
+  // The list needs a saved workflow id. The detail flyout only needs the selected
+  // execution, including a test run of a workflow that has not been saved yet.
+  const canShowExecutionUi = isExecutionsViewEnabled && canReadWorkflowExecution;
   const sidebarExecutionList =
     !isExecutionsViewEnabled &&
     id &&
@@ -285,6 +372,56 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     !isExecutionsViewEnabled && selectedExecutionId && canReadWorkflowExecution ? (
       <WorkflowExecutionDetail executionId={selectedExecutionId} onClose={onCloseExecutionDetail} />
     ) : null;
+  // A run in the URL (e.g. a draft test run) means the user is past the landing.
+  if (!id && showAgenticLanding && !selectedExecutionId) {
+    return (
+      <EuiPageTemplate
+        offset={0}
+        css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}
+        data-test-subj="newWorkflowPage"
+      >
+        <AppHeader
+          title={i18n.translate('workflows.newWorkflow.title', {
+            defaultMessage: 'New workflow',
+          })}
+          back={{
+            href: application.getUrlForApp(PLUGIN_ID),
+            label: i18n.translate('workflows.newWorkflow.backLinkLabel', {
+              defaultMessage: 'Workflows',
+            }),
+            onClick: (event) => {
+              event.preventDefault();
+              onBackToWorkflows();
+            },
+          }}
+          docLink={WORKFLOWS_DOCUMENTATION_URL}
+          showAddIntegrations
+          spacing="compact"
+        />
+        {/* Full-width content, or centering shrinks the landing to its content. */}
+        <EuiPageTemplate.Section
+          restrictWidth={false}
+          grow
+          alignment="center"
+          contentProps={{ css: { width: '100%' } }}
+        >
+          <AgenticFirstEmptyStateLive
+            onSubmitPrompt={handleLandingSubmit}
+            onStartManually={() => setShowAgenticLanding(false)}
+            onSelectTemplate={(template) =>
+              application.navigateToApp(PLUGIN_ID, {
+                deepLinkId: WorkflowsPageName.library,
+                path: template.slug,
+              })
+            }
+            onExploreLibrary={() =>
+              application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library })
+            }
+          />
+        </EuiPageTemplate.Section>
+      </EuiPageTemplate>
+    );
+  }
 
   const pageContent = (
     <EuiFlexGroup direction="column" gutterSize="none" css={kbnFullBodyHeightCss()}>
@@ -293,7 +430,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           isLoading={isLoadingWorkflow}
           highlightDiff={highlightDiff}
           setHighlightDiff={setHighlightDiff}
-          onOpenExecutionList={showExecutionFlyouts ? onOpenExecutionList : undefined}
+          onOpenExecutionList={canShowExecutionUi && id ? onOpenExecutionList : undefined}
         />
       </EuiFlexItem>
       <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
@@ -302,18 +439,24 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
         ) : (
           <>
             <WorkflowEditorLayout
-              editor={<WorkflowDetailEditor highlightDiff={highlightDiff} />}
+              editor={
+                <WorkflowDetailEditor
+                  highlightDiff={highlightDiff}
+                  onAgentProposalHeld={onAgentProposalHeld}
+                  initialAgentMessage={pendingPrompt?.message}
+                  initialAgentAttachments={pendingPrompt?.attachments}
+                  autoOpenAgentChat={autoOpenAgentChat}
+                />
+              }
               executionList={sidebarExecutionList}
               executionDetail={sidebarExecutionDetail}
             />
-            {showExecutionFlyouts && id && isExecutionListOpen && (
-              <WorkflowExecutionListFlyout
-                workflowId={id}
-                onClose={onCloseExecutionList}
-                isHidden={Boolean(selectedExecutionId)}
-              />
+            {/* Unmount while a run is open. A hidden list flyout keeps EUI's focus trap and
+                moves focus to the skip link. Filters and the highlighted row live in the URL. */}
+            {canShowExecutionUi && id && isExecutionListOpen && !selectedExecutionId && (
+              <WorkflowExecutionListFlyout workflowId={id} onClose={onCloseExecutionList} />
             )}
-            {showExecutionFlyouts && selectedExecutionId && (
+            {canShowExecutionUi && selectedExecutionId && (
               <WorkflowExecutionFlyout
                 executionId={selectedExecutionId}
                 workflowName={workflowName ?? ''}

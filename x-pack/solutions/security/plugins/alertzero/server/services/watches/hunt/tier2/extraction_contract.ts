@@ -5,24 +5,28 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-const candidateBehaviorSchema = z.object({
-  technique_id: z
-    .string()
-    .describe(
-      'Canonical ATT&CK ID (e.g. "T1566.001", "T1059.003"). Use sub-technique IDs ' +
-        'when the text describes a specific variant.'
-    ),
-  evidence_quote: z
-    .string()
-    .describe('Verbatim 1-3 sentence quote from the text that justifies the mapping.'),
-  llm_confidence: z.number().min(0).max(1).describe('0.0-1.0 confidence in this mapping.'),
-});
+const candidateBehaviorSchema = lazySchema(() =>
+  z.object({
+    technique_id: z
+      .string()
+      .describe(
+        'Canonical ATT&CK ID (e.g. "T1566.001", "T1059.003"). Use sub-technique IDs ' +
+          'when the text describes a specific variant.'
+      ),
+    evidence_quote: z
+      .string()
+      .describe('Verbatim 1-3 sentence quote from the text that justifies the mapping.'),
+    llm_confidence: z.number().min(0).max(1).describe('0.0-1.0 confidence in this mapping.'),
+  })
+);
 
-export const huntBehaviorLlmExtractionSchema = z.object({
-  candidates: z.array(candidateBehaviorSchema).default([]),
-});
+export const huntBehaviorLlmExtractionSchema = lazySchema(() =>
+  z.object({
+    candidates: z.array(candidateBehaviorSchema).default([]),
+  })
+);
 
 export const EXTRACTION_PROMPT = `You are a threat intelligence analyst. Extract MITRE ATT&CK technique
 IDs that are *actively described* in the provided report text. Do NOT include techniques merely
@@ -78,7 +82,14 @@ Hard requirements:
   process / command → process.name / process.command_line / process.args;
   cloud API activity → event.action / event.provider / user.name / source.ip;
   packages & network flows → url.* / destination.domain / network.* / event.action.
-- Correlate more than one signal when the report supports it (e.g. process activity AND a
-  known C2 destination) — but never at the cost of the first requirement.
+- Alternatives widen the result, so each one must ground itself: every OR branch, every IN (...) member,
+  and every FORK branch must filter on a verbatim report or IOC artifact. One ungrounded alternative
+  discards the whole query.
+- Negations (!=, NOT, NOT IN, NOT LIKE, …) do not ground a query; a grounded positive predicate
+  must also be present.
+- Do not add generic process-name, path, or message branches that lack a report artifact.
+- Correlate signals by ANDing grounded predicates; never widen with OR alternatives that carry
+  no report artifact.
+- Do not use QSTR or KQL; write explicit field comparisons.
 - KEEP @timestamp, the fields the query filters on, and host.name / user.name when they exist
   in the mappings, so the preview surface shows the evidence.`;

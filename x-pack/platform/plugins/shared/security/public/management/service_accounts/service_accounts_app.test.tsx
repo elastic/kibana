@@ -26,6 +26,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import * as roleSelector from './service_account_role_selector';
 import { ServiceAccountsApp } from './service_accounts_app';
 import type { Role } from '../../../common';
+import type { ServiceAccountDirectoryEntry } from '../../service_accounts';
 
 const availableRoles: Role[] = [
   {
@@ -42,6 +43,7 @@ const availableRoles: Role[] = [
   },
 ];
 const account = { id: 'account-id', name: 'workflow-runner', roles: ['workflow_reader'] };
+const getRoleComboBox = () => screen.getByRole('combobox', { name: 'Set privileges' });
 
 const renderApp = async ({
   canCreate = true,
@@ -49,12 +51,17 @@ const renderApp = async ({
   canCreateRole = true,
   isServerless = false,
   roleOptions = availableRoles,
+  serviceAccounts = [] as ServiceAccountDirectoryEntry[],
 } = {}) => {
   const history = createMemoryHistory({ initialEntries: [pathname] });
-  const list = jest.fn().mockResolvedValue({ serviceAccounts: [] });
+  const list = jest.fn().mockResolvedValue({ serviceAccounts });
   const create = jest.fn().mockResolvedValue(account);
+  const listWorkloads = jest.fn().mockResolvedValue({ workloads: [] });
+  const deleteAccount = jest.fn().mockResolvedValue({ warnings: [] });
   const getRoles = jest.fn().mockResolvedValue(roleOptions);
   const onCreated = jest.fn();
+  const onDeleted = jest.fn();
+  const onError = jest.fn();
   const view = renderWithI18n(
     <EuiProvider>
       <MockAppHeaderProvider>
@@ -62,28 +69,40 @@ const renderApp = async ({
           <ServiceAccountsApp
             isServerless={isServerless}
             canCreate={canCreate}
-            serviceAccountsAPIClient={{ list, create }}
+            serviceAccountsAPIClient={{ list, create, listWorkloads, delete: deleteAccount }}
             rolesAPIClient={{ getRoles }}
             createRoleUrl={canCreateRole ? '/app/management/security/roles/edit' : undefined}
             onCreated={onCreated}
+            onDeleted={onDeleted}
+            onError={onError}
           />
         </Router>
       </MockAppHeaderProvider>
     </EuiProvider>
   );
   await waitForElementToBeRemoved(() => screen.queryByTestId('serviceAccountsLoading'));
-  return { history, list, create, getRoles, onCreated, unmount: view.unmount };
+  return {
+    history,
+    list,
+    create,
+    listWorkloads,
+    deleteAccount,
+    getRoles,
+    onCreated,
+    onDeleted,
+    onError,
+    unmount: view.unmount,
+  };
 };
 
 const fillForm = async () => {
-  await waitFor(() => expect(screen.getByTestId('serviceAccountRolesSelector')).toBeEnabled());
+  await waitFor(() => expect(getRoleComboBox()).toBeEnabled());
   fireEvent.change(screen.getByTestId('serviceAccountNameInput'), {
     target: { value: account.name },
   });
-  fireEvent.click(screen.getByTestId('serviceAccountRolesSelector'));
+  fireEvent.click(getRoleComboBox());
   fireEvent.click(await screen.findByTestId('roleOption-workflow_reader'));
-  fireEvent.click(screen.getByTestId('serviceAccountRolesSelector'));
-  await waitForElementToBeRemoved(() => screen.queryByTestId('roleOption-workflow_reader'));
+  fireEvent.keyDown(getRoleComboBox(), { key: 'Escape' });
 };
 
 describe('ServiceAccountsApp', () => {
@@ -140,7 +159,7 @@ describe('ServiceAccountsApp', () => {
 
   it('requires a valid name and at least one selected role', async () => {
     const { create } = await renderApp();
-    await waitFor(() => expect(screen.getByTestId('serviceAccountRolesSelector')).toBeEnabled());
+    await waitFor(() => expect(getRoleComboBox()).toBeEnabled());
     fireEvent.change(screen.getByTestId('serviceAccountNameInput'), {
       target: { value: '../invalid' },
     });
@@ -149,13 +168,8 @@ describe('ServiceAccountsApp', () => {
 
     expect(screen.getByText(/Enter a name of up to/)).toBeVisible();
     expect(screen.getByText('Select at least one role.')).toBeVisible();
-    expect(screen.getByTestId('serviceAccountRolesSelector')).toHaveAccessibleName(
-      'Set privileges'
-    );
-    expect(screen.getByTestId('serviceAccountRolesSelector')).toHaveAttribute(
-      'aria-invalid',
-      'true'
-    );
+    expect(getRoleComboBox()).toHaveAccessibleName('Set privileges');
+    expect(getRoleComboBox()).toHaveAttribute('aria-invalid', 'true');
     expect(create).not.toHaveBeenCalled();
   });
 
@@ -172,9 +186,9 @@ describe('ServiceAccountsApp', () => {
 
   it('shows custom and built-in roles without preselecting any role', async () => {
     const { getRoles } = await renderApp();
-    await waitFor(() => expect(screen.getByTestId('serviceAccountRolesSelector')).toBeEnabled());
+    await waitFor(() => expect(getRoleComboBox()).toBeEnabled());
     expect(getRoles).toHaveBeenCalledWith({ includeReservedRoles: true });
-    fireEvent.click(screen.getByTestId('serviceAccountRolesSelector'));
+    fireEvent.click(getRoleComboBox());
 
     await waitFor(() => expect(screen.getByText('Custom roles')).toBeVisible());
     expect(screen.getByTestId('roleOption-workflow_reader')).toBeVisible();
@@ -187,20 +201,16 @@ describe('ServiceAccountsApp', () => {
 
   it('selects roles with the keyboard and returns focus when the menu closes', async () => {
     await renderApp();
-    const selector = screen.getByRole('button', { name: 'Set privileges' });
+    const selector = getRoleComboBox();
     await waitFor(() => expect(selector).toBeEnabled());
     act(() => selector.focus());
     await user.keyboard('{ArrowDown}');
-    const list = await screen.findByRole('listbox', { name: 'Select roles' });
-    await waitFor(() => expect(list).toHaveFocus());
+    await screen.findByRole('listbox', { name: 'Choose from the following options' });
     await user.keyboard('{Enter}');
-    expect(screen.getByTestId('roleOption-workflow_reader')).toHaveAttribute(
-      'aria-checked',
-      'true'
-    );
+    expect(screen.getByText('workflow_reader')).toBeVisible();
     await user.keyboard('{Escape}');
     await waitFor(() => expect(selector).toHaveFocus());
-    expect(selector).toHaveTextContent('workflow_reader');
+    expect(screen.getByTestId('serviceAccountRolesSelector')).toHaveTextContent('workflow_reader');
   });
 
   it('retains form values after a server error and allows retrying', async () => {
@@ -346,7 +356,7 @@ describe('ServiceAccountsApp', () => {
         name: `role_${index}`,
       })),
     });
-    const selector = screen.getByTestId('serviceAccountRolesSelector');
+    const selector = getRoleComboBox();
     await waitFor(() => expect(selector).toBeEnabled());
     fireEvent.click(selector);
     await waitFor(() => expect(screen.getByTestId('createServiceAccountRoleLink')).toBeVisible());
@@ -363,11 +373,12 @@ describe('ServiceAccountsApp', () => {
     expect(await screen.findByText(/Remove roles that are no longer available/)).toBeVisible();
     expect(screen.getByTestId('createServiceAccountSubmit')).toBeDisabled();
     expect(create).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByTestId('serviceAccountRolesSelector'));
-    fireEvent.click(await screen.findByTestId('roleOption-workflow_reader'));
-    fireEvent.click(screen.getByTestId('roleOption-viewer'));
-    fireEvent.click(screen.getByTestId('serviceAccountRolesSelector'));
-    await waitForElementToBeRemoved(() => screen.queryByTestId('roleOption-viewer'));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Remove workflow_reader from selection in this group' })
+    );
+    fireEvent.keyDown(getRoleComboBox(), { key: 'ArrowDown' });
+    fireEvent.click(await screen.findByTestId('roleOption-viewer'));
+    fireEvent.keyDown(getRoleComboBox(), { key: 'Escape' });
     expect(screen.getByTestId('createServiceAccountSubmit')).toBeEnabled();
   });
 
@@ -383,7 +394,7 @@ describe('ServiceAccountsApp', () => {
 
     fireEvent.click(screen.getByTestId('refreshServiceAccountRolesButton'));
 
-    await waitFor(() => expect(screen.getByTestId('serviceAccountRolesSelector')).toBeEnabled());
+    await waitFor(() => expect(getRoleComboBox()).toBeEnabled());
     expect(screen.getByTestId('serviceAccountNameInput')).toHaveValue(account.name);
     expect(create).not.toHaveBeenCalled();
   });
@@ -410,7 +421,7 @@ describe('ServiceAccountsApp', () => {
     'explains privileges for the deployment (serverless: %s)',
     async (isServerless) => {
       await renderApp({ isServerless });
-      await waitFor(() => expect(screen.getByTestId('serviceAccountRolesSelector')).toBeEnabled());
+      await waitFor(() => expect(getRoleComboBox()).toBeEnabled());
 
       await user.hover(screen.getByText('About role privileges'));
       if (isServerless) {
@@ -427,10 +438,95 @@ describe('ServiceAccountsApp', () => {
 
   it('hides create-role navigation without permission', async () => {
     await renderApp({ canCreateRole: false });
-    await waitFor(() => expect(screen.getByTestId('serviceAccountRolesSelector')).toBeEnabled());
-    fireEvent.click(screen.getByTestId('serviceAccountRolesSelector'));
+    await waitFor(() => expect(getRoleComboBox()).toBeEnabled());
+    fireEvent.click(getRoleComboBox());
 
     await screen.findByText('Custom roles');
     expect(screen.queryByTestId('createServiceAccountRoleLink')).not.toBeInTheDocument();
+  });
+
+  describe('deleting an account', () => {
+    const directoryEntry: ServiceAccountDirectoryEntry = {
+      id: 'kibana/workflow-runner',
+      name: 'workflow-runner',
+      roles: ['workflow_reader'],
+      enabled: true,
+      assumable: true,
+    };
+
+    it('deletes the account from its row and refreshes the directory', async () => {
+      const { list, listWorkloads, deleteAccount, onDeleted } = await renderApp({
+        pathname: '/',
+        serviceAccounts: [directoryEntry],
+      });
+
+      fireEvent.click(await screen.findByTestId('serviceAccountsDeleteAction'));
+      fireEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() =>
+        expect(onDeleted).toHaveBeenCalledWith(directoryEntry, { status: 'deleted', warnings: [] })
+      );
+      expect(listWorkloads).toHaveBeenCalledWith(directoryEntry.id);
+      expect(deleteAccount).toHaveBeenCalledWith(directoryEntry.id, { force: false });
+      expect(screen.queryByTestId('serviceAccountDeleteConfirmModal')).not.toBeInTheDocument();
+      await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
+    });
+
+    it('refreshes the directory when the account was already deleted elsewhere', async () => {
+      const { list, deleteAccount, onDeleted, onError } = await renderApp({
+        pathname: '/',
+        serviceAccounts: [directoryEntry],
+      });
+      deleteAccount.mockRejectedValueOnce(
+        Object.assign(new Error('Not Found'), {
+          name: 'HttpFetchError',
+          request: {},
+          response: { status: 404 },
+          body: { message: 'Not Found' },
+        })
+      );
+
+      fireEvent.click(await screen.findByTestId('serviceAccountsDeleteAction'));
+      fireEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() =>
+        expect(onDeleted).toHaveBeenCalledWith(directoryEntry, { status: 'already_deleted' })
+      );
+      expect(onError).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('serviceAccountDeleteConfirmModal')).not.toBeInTheDocument();
+      await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
+    });
+
+    it('offers no delete action without the save capability', async () => {
+      await renderApp({ pathname: '/', canCreate: false, serviceAccounts: [directoryEntry] });
+
+      expect(await screen.findByTestId('serviceAccountsTable')).toBeVisible();
+      expect(screen.queryByTestId('serviceAccountsDeleteAction')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('viewing the workloads of an account', () => {
+    it('opens the workloads bound to the account from its row', async () => {
+      const { listWorkloads } = await renderApp({
+        pathname: '/',
+        serviceAccounts: [
+          {
+            id: 'kibana/workflow-runner',
+            name: 'workflow-runner',
+            roles: ['workflow_reader'],
+            enabled: true,
+            assumable: true,
+            workloadCount: 2,
+          },
+        ],
+      });
+
+      fireEvent.click(await screen.findByTestId('serviceAccountViewWorkloads'));
+
+      const modal = await screen.findByTestId('serviceAccountWorkloadsModal');
+      expect(listWorkloads).toHaveBeenCalledWith('kibana/workflow-runner');
+      fireEvent.click(within(modal).getByTestId('serviceAccountWorkloadsModalClose'));
+      expect(screen.queryByTestId('serviceAccountWorkloadsModal')).not.toBeInTheDocument();
+    });
   });
 });
