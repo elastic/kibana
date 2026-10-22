@@ -14,6 +14,8 @@ const normalizePath = (path: string): string => path.replace(/\{[^}]+\}/g, '{}')
 describe('getStepRisk', () => {
   it.each([
     ['console', { safe: true, destructive: false }],
+    ['waitForInput', { safe: true, destructive: false }],
+    ['workflow.execute', { safe: false, destructive: false }],
     ['cases.getCase', { safe: true, destructive: false }],
     ['cases.deleteCases', { safe: false, destructive: true }],
     ['http', { safe: false, destructive: false }],
