@@ -570,6 +570,7 @@ export interface TelemetryFilterListArtifact {
   endpoint_alerts: AllowlistFields;
   exception_lists: AllowlistFields;
   prebuilt_rules_alerts: AllowlistFields;
+  detection_alerts_influencer_allowlist?: string[];
 }
 
 export interface ValueListResponse {

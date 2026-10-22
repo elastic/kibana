@@ -9,6 +9,7 @@ import type { TelemetryEvent } from '../types';
 import { endpointAllowlistFields } from './endpoint_alerts';
 import { exceptionListAllowlistFields } from './exception_lists';
 import { prebuiltRuleAllowlistFields } from './prebuilt_rules_alerts';
+import { detectionAlertsInfluencerAllowlist } from './detection_alerts_influencer_allowlist';
 
 /**
  * Filters out Key/Values not required for downstream analysis
@@ -45,6 +46,7 @@ export class FilterList {
   private _endpointAlerts = endpointAllowlistFields;
   private _exceptionLists = exceptionListAllowlistFields;
   private _prebuiltRulesAlerts = prebuiltRuleAllowlistFields;
+  private _detectionAlertsInfluencerAllowlist = detectionAlertsInfluencerAllowlist;
 
   public get endpointAlerts(): AllowlistFields {
     return this._endpointAlerts;
@@ -70,10 +72,19 @@ export class FilterList {
     this._prebuiltRulesAlerts = list;
   }
 
+  public get detectionAlertsInfluencerAllowlist(): string[] {
+    return this._detectionAlertsInfluencerAllowlist;
+  }
+
+  public set detectionAlertsInfluencerAllowlist(list: string[]) {
+    this._detectionAlertsInfluencerAllowlist = list;
+  }
+
   public resetAllToDefault() {
     this._endpointAlerts = endpointAllowlistFields;
     this._exceptionLists = exceptionListAllowlistFields;
     this._prebuiltRulesAlerts = prebuiltRuleAllowlistFields;
+    this._detectionAlertsInfluencerAllowlist = detectionAlertsInfluencerAllowlist;
   }
 }
 

@@ -28,6 +28,7 @@ import type {
   PrebuiltRuleCustomizations,
   ResponseActionRules,
   ResponseActionsRuleTelemetryTemplate,
+  SearchTypes,
   TelemetryEvent,
   TimeFrame,
   TimelineResult,
@@ -390,6 +391,38 @@ export const processK8sUsernames = (clusterId: string, event: TelemetryEvent): T
   }
 
   return event;
+};
+
+interface InfluencerEntry {
+  influencer_field_name: string;
+  influencer_field_values: SearchTypes[];
+}
+
+const isInfluencerEntry = (value: unknown): value is InfluencerEntry =>
+  isPlainObject(value) && typeof (value as InfluencerEntry).influencer_field_name === 'string';
+
+/**
+ * Builds a copy of an ML alert's `influencers` array, keeping only the entries whose
+ * `influencer_field_name` is in the allowlist. The remaining entries are dropped entirely; retained entries keep
+ * their `influencer_field_values` as-is. Returns undefined when there are no influencers to process.
+ */
+export const buildSanitizedInfluencers = (
+  influencers: SearchTypes,
+  allowlist: string[]
+): InfluencerEntry[] | undefined => {
+  if (!Array.isArray(influencers) || influencers.length === 0) {
+    return undefined;
+  }
+
+  const allowed = new Set(allowlist);
+
+  return influencers
+    .filter(isInfluencerEntry)
+    .filter((entry) => allowed.has(entry.influencer_field_name))
+    .map((entry) => ({
+      influencer_field_name: entry.influencer_field_name,
+      influencer_field_values: entry.influencer_field_values,
+    }));
 };
 
 export const processDetectionRuleCustomizations = (
