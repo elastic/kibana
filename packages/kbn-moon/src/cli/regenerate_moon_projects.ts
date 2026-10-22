@@ -83,9 +83,8 @@ export function regenerateMoonProjects() {
       skip: [],
     };
 
-    const packages: Package[] = filter?.length
-      ? filterPackages(getPackages(REPO_ROOT), filter)
-      : getPackages(REPO_ROOT);
+    const allPackages = getPackages(REPO_ROOT);
+    const packages: Package[] = filter?.length ? filterPackages(allPackages, filter) : allPackages;
     const packageIds = packages.map((pkg) => pkg.name);
 
     const nestedProjects = findNestedProjects(
