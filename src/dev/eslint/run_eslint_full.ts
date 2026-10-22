@@ -7,49 +7,92 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { fork } from 'child_process';
 import Os from 'os';
 
 import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 
-import { eslintBinPath } from './eslint_bin_path';
+// The parent only hands out chunks, so every core gets a worker.
+const workerCount = Os.availableParallelism();
+// Per-file cost varies a lot between directories, so workers pull small chunks from a shared
+// queue instead of getting one fixed batch each; chunks stay contiguous to keep caches warm.
+const chunkSize = 500;
 
-const maxParallelism = Math.max(1, Os.cpus().length - 1);
-// ARG_MAX on macOS is 1MB; cap batch size to stay well under it on low-core machines.
-const maxBatchSize = 4000;
+/** The reply `eslint_worker.js` sends for each chunk. */
+interface ChunkResult {
+  errorCount: number;
+  output: string;
+}
 
 run(
   async ({ log, flags }) => {
-    const bail = !!(flags.bail || false);
+    const bail = !!flags.bail;
+    const workerOptions = { fix: !!flags.fix, cache: !!flags.cache };
 
-    const { batches, files } = getLintableFileBatches(flags._, maxParallelism);
-    log.info(`Found ${files.length} files in ${batches.length} batches to lint.`);
-
-    const eslintArgs = [...(flags.fix ? ['--fix'] : []), flags.cache ? '--cache' : '--no-cache'];
-
-    // ESLint has no cache by default
-    log.info(
-      `Running ESLint with args: ${pretty({
-        args: eslintArgs.concat(flags._),
-        maxParallelism,
-      })}`
-    );
-
-    const lintPromiseThunks = batches.map(
-      (batch, idx) => () =>
-        lintFileBatch({ batch, idx, eslintArgs, batchCount: batches.length, bail, log })
-    );
-    const results = await runBatchedPromises(lintPromiseThunks, maxParallelism);
-
-    const failedBatches = results.filter((result) => !result.success);
-    if (failedBatches.length > 0) {
-      log.error(`Linting errors found ❌`);
-      process.exit(1);
-    } else {
-      log.info('Linting successful ✅');
+    const files = execa
+      .sync('git', ['ls-files', ...flags._], { cwd: REPO_ROOT, encoding: 'utf8' })
+      .stdout.trim()
+      .split('\n')
+      .filter((file) => file.match(/\.(js|mjs|ts|tsx)$/));
+    const chunks: string[][] = [];
+    for (let i = 0; i < files.length; i += chunkSize) {
+      chunks.push(files.slice(i, i + chunkSize));
     }
+    const poolSize = Math.min(workerCount, chunks.length);
+    log.info(
+      `Linting ${files.length} files in ${chunks.length} chunks with ${poolSize} workers`,
+      workerOptions
+    );
+
+    let errorCount = 0;
+    const workerFailures: string[] = [];
+    const runWorker = () =>
+      new Promise<void>((resolve) => {
+        const worker = fork(require.resolve('./eslint_worker'), [JSON.stringify(workerOptions)], {
+          cwd: REPO_ROOT,
+          // Disable CI stats for the workers, to avoid overloading ci-stats
+          env: { ...process.env, CI_STATS_DISABLED: 'true' },
+        });
+        const sendNextChunk = () => {
+          // After a worker fails, the others finish (and write fixes for) their current chunk, then stop.
+          const stop = workerFailures.length > 0 || (bail && errorCount > 0);
+          const chunk = stop ? undefined : chunks.shift();
+          if (chunk) {
+            worker.send(chunk);
+          } else {
+            worker.disconnect();
+          }
+        };
+
+        worker.on('message', (result: ChunkResult) => {
+          errorCount += result.errorCount;
+          if (result.output) {
+            process.stdout.write(result.output);
+          }
+          sendNextChunk();
+        });
+        worker.on('exit', (code, signal) => {
+          if (code !== 0) {
+            workerFailures.push(`ESLint worker exited with ${signal ?? `code ${code}`}`);
+          }
+          resolve();
+        });
+        sendNextChunk();
+      });
+
+    await Promise.all(Array.from({ length: poolSize }, runWorker));
+
+    if (workerFailures.length > 0) {
+      throw createFailError(workerFailures.join('\n'));
+    }
+
+    if (errorCount > 0) {
+      throw createFailError('Linting errors found ❌');
+    }
+    log.success('Linting successful ✅');
   },
   {
     description: 'Run ESLint on all JavaScript/TypeScript files in the repository',
@@ -67,96 +110,3 @@ run(
     },
   }
 );
-
-function getLintableFileBatches(filePatterns: string[], workerCount: number) {
-  const files = execa
-    .sync('git', ['ls-files', ...filePatterns], {
-      cwd: REPO_ROOT,
-      encoding: 'utf8',
-    })
-    .stdout.trim()
-    .split('\n')
-    .filter((file) => file.match(/\.(js|mjs|ts|tsx)$/));
-  const batchSize = Math.min(Math.ceil(files.length / workerCount), maxBatchSize);
-  const batches = [];
-  for (let i = 0; i < files.length; i += batchSize) {
-    batches.push(files.slice(i, i + batchSize));
-  }
-
-  return { batches, files };
-}
-
-async function lintFileBatch({
-  batch,
-  bail,
-  idx,
-  eslintArgs,
-  batchCount,
-  log,
-}: {
-  batch: string[];
-  bail: boolean;
-  idx: number;
-  eslintArgs: string[];
-  batchCount: number;
-  log: ToolingLog;
-}) {
-  log.info(`Running batch ${idx + 1}/${batchCount} with ${batch.length} files...`);
-
-  const timeBefore = Date.now();
-  const args = [eslintBinPath, '--quiet', ...eslintArgs, ...batch];
-  const { stdout, stderr, exitCode } = await execa('node', args, {
-    cwd: REPO_ROOT,
-    env: {
-      // Disable CI stats for individual runs, to avoid overloading ci-stats
-      CI_STATS_DISABLED: 'true',
-    },
-    reject: bail, // Don't throw on non-zero exit code
-  });
-
-  const time = Date.now() - timeBefore;
-  if (exitCode !== 0) {
-    const errorMessage = stderr?.toString() || stdout?.toString();
-    log.error(`Batch ${idx + 1}/${batchCount} failed (${time}ms) ❌: ${errorMessage}`);
-    return {
-      success: false,
-      idx,
-      time,
-      error: errorMessage,
-    };
-  } else {
-    log.info(`Batch ${idx + 1}/${batchCount} success (${time}ms) ✅: ${stdout.toString()}`);
-    return {
-      success: true,
-      idx,
-      time,
-    };
-  }
-}
-
-function runBatchedPromises<T>(
-  promiseCreators: Array<() => Promise<T>>,
-  maxParallel: number
-): Promise<T[]> {
-  const results: T[] = [];
-  let i = 0;
-
-  const next: () => Promise<any> = () => {
-    if (i >= promiseCreators.length) {
-      return Promise.resolve();
-    }
-
-    const promiseCreator = promiseCreators[i++];
-    return Promise.resolve(promiseCreator()).then((result) => {
-      results.push(result);
-      return next();
-    });
-  };
-
-  const tasks = Array.from({ length: maxParallel }, () => next());
-  return Promise.all(tasks).then(() => results);
-}
-
-function pretty(obj: any) {
-  return JSON.stringify(obj, null, 2);
-}
