@@ -232,6 +232,39 @@ describe('RuleTypeModalComponent', () => {
     });
   });
 
+  it('does not render the Classic badge by default', () => {
+    render(
+      <RuleTypeModalComponent
+        onClose={mockOnClose}
+        onSelectRuleType={mockOnSelectRuleType}
+        onSelectTemplate={mockOnSelectTemplate}
+        filteredRuleTypes={[]}
+        registeredRuleTypes={ruleTypes}
+        http={mockHttp}
+        toasts={mockToasts}
+      />
+    );
+
+    expect(screen.queryByTestId('ruleTypeModalClassicBadge')).not.toBeInTheDocument();
+  });
+
+  it('renders the Classic badge when showClassicBadge is true', () => {
+    render(
+      <RuleTypeModalComponent
+        onClose={mockOnClose}
+        onSelectRuleType={mockOnSelectRuleType}
+        onSelectTemplate={mockOnSelectTemplate}
+        filteredRuleTypes={[]}
+        registeredRuleTypes={ruleTypes}
+        http={mockHttp}
+        toasts={mockToasts}
+        showClassicBadge
+      />
+    );
+
+    expect(screen.getByTestId('ruleTypeModalClassicBadge')).toHaveTextContent('Classic');
+  });
+
   it('should call onClose when the close button is clicked', () => {
     render(
       <RuleTypeModalComponent

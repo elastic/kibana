@@ -12,6 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React, { lazy, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import useObservable from 'react-use/lib/useObservable';
+import { shouldShowClassicRulesBadge } from '@kbn/alerting-v2-utils';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import { getCreateRuleFromTemplateRoute, getCreateRuleRoute } from '@kbn/rule-data-utils';
 import { RULES_LOGS_PATH, RULES_PATH } from '../../../common/locators/paths';
@@ -40,7 +42,13 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
     triggersActionsUi: { ruleTypeRegistry, getRulesSettingsLink: RulesSettingsLink },
     serverless,
     cps,
+    chrome,
   } = services;
+  const solutionNavId = useObservable(
+    chrome.getActiveSolutionNavId$(),
+    chrome.getActiveSolutionNavId()
+  );
+  const showClassicBadge = shouldShowClassicRulesBadge(services, solutionNavId);
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
   const [ruleTypeModalVisibility, setRuleTypeModalVisibility] = useState<boolean>(false);
@@ -190,6 +198,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
           registeredRuleTypes={ruleTypeRegistry.list()}
           filteredRuleTypes={filteredRuleTypes}
           cps={cps}
+          showClassicBadge={showClassicBadge}
         />
       )}
     </ObservabilityPageTemplate>

@@ -412,6 +412,7 @@ test.describe(
       await nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK).click();
       await expectPageTitle(pageObjects.chrome.pageTitle, CLASSIC_ALERTS_TITLE);
       await expect(page.testSubj.locator(ALERTS_TABLE_TEST_SUBJECTS.PAGE_WITH_DATA)).toBeVisible();
+      await expect(page.testSubj.locator('classicAlertsBadge')).toBeVisible();
     });
 
     test('reverts to a plain Alerts link that loads the classic alerts page after disabling v2', async ({

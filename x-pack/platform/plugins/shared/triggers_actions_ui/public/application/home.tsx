@@ -31,6 +31,7 @@ import { getCurrentDocTitle } from './lib/doc_title';
 import { HealthCheck } from './components/health_check';
 import { HealthContextProvider } from './context/health_context';
 import { useKibana } from '../common/lib/kibana';
+import { useShowClassicRulesBadge } from './hooks/use_show_classic_rules_badge';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
 const RulesList = lazy(() => import('./sections/rules_list/components/rules_list'));
@@ -57,6 +58,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     cps,
     setBreadcrumbs,
   } = useKibana().services;
+  const showClassicBadge = useShowClassicRulesBadge();
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
     toasts,
@@ -182,6 +184,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           cps={cps}
           registeredRuleTypes={ruleTypeRegistry.list()}
           filteredRuleTypes={[]}
+          showClassicBadge={showClassicBadge}
         />
       )}
     </>

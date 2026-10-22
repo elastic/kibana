@@ -72,6 +72,7 @@ import {
 } from '../../rules_list/translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
+import { useShowClassicRulesBadge } from '../../../hooks/use_show_classic_rules_badge';
 import type { RefreshToken } from './types';
 import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
 
@@ -101,6 +102,14 @@ const DISABLED_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.disabledBadgeLabel',
   { defaultMessage: 'Disabled' }
 );
+
+const CLASSIC_RULES_BADGE: AppHeaderBadge = {
+  label: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.classicRulesBadge', {
+    defaultMessage: 'Classic',
+  }),
+  color: 'hollow',
+  'data-test-subj': 'classicRulesBadge',
+};
 
 export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   rule,
@@ -351,8 +360,10 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   };
 
   const statusColor = getHealthColor(rule.executionStatus.status);
+  const showClassicBadge = useShowClassicRulesBadge();
 
   const badges: AppHeaderBadge[] = [
+    ...(showClassicBadge ? [CLASSIC_RULES_BADGE] : []),
     {
       label:
         rule.executionStatus.status.charAt(0).toUpperCase() + rule.executionStatus.status.slice(1),

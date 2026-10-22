@@ -13,6 +13,7 @@ import {
   isAlertingV2AvailableInSolution,
   isAlertingV2Enabled,
   shouldShowAlertingV2CreateRuleFlyout,
+  shouldShowClassicRulesBadge,
   shouldShowV1ObservabilityAlertsTable,
 } from './is_alerting_v2_enabled';
 
@@ -264,5 +265,47 @@ describe('canAccessAlertingV2Rules', () => {
     core.settings.globalClient.get = <T>(_key: string) => false as T;
 
     expect(canAccessAlertingV2Rules(core)).toBe(false);
+  });
+});
+
+describe('shouldShowClassicRulesBadge', () => {
+  let core: CoreStart;
+
+  beforeEach(() => {
+    core = coreMock.createStart();
+    core.settings.globalClient.isDeclared = () => true;
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+    core.application.capabilities = {
+      ...core.application.capabilities,
+      alerting_v2_rules: {
+        read: true,
+      },
+    };
+  });
+
+  it.each([['oblt'], [null], [undefined]])(
+    'returns true for %s when the user can reach v2 rules',
+    (solutionNavId) => {
+      expect(shouldShowClassicRulesBadge(core, solutionNavId)).toBe(true);
+    }
+  );
+
+  it.each([['security'], ['es']])('returns false for %s', (solutionNavId) => {
+    expect(shouldShowClassicRulesBadge(core, solutionNavId)).toBe(false);
+  });
+
+  it('returns false when alerting v2 rules capabilities are unavailable', () => {
+    const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
+      core.application.capabilities;
+
+    core.application.capabilities = capabilitiesWithoutRules;
+
+    expect(shouldShowClassicRulesBadge(core, 'oblt')).toBe(false);
+  });
+
+  it('returns false when alerting v2 is disabled by the advanced setting', () => {
+    core.settings.globalClient.get = <T>(_key: string) => false as T;
+
+    expect(shouldShowClassicRulesBadge(core, 'oblt')).toBe(false);
   });
 });

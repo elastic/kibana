@@ -90,6 +90,7 @@ import { useLoadActionTypesQuery } from '../../../hooks/use_load_action_types_qu
 import { useLoadConfigQuery } from '../../../hooks/use_load_config_query';
 import { useLoadRuleAggregationsQuery } from '../../../hooks/use_load_rule_aggregations_query';
 import { useLoadRulesQuery } from '../../../hooks/use_load_rules_query';
+import { useShowClassicRulesBadge } from '../../../hooks/use_show_classic_rules_badge';
 
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list_ui_state';
@@ -187,6 +188,7 @@ export const RulesList = ({
   } = kibanaServices;
 
   const { capabilities, navigateToApp } = application;
+  const showClassicBadge = useShowClassicRulesBadge();
 
   useRouteBasedCpsPickerAccess(ProjectRoutingAccess.DISABLED, { application, cps });
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
@@ -1069,6 +1071,7 @@ export const RulesList = ({
             registeredRuleTypes={ruleTypeRegistry.list()}
             filteredRuleTypes={filteredRuleTypes}
             cps={cps}
+            showClassicBadge={showClassicBadge}
           />
         )}
       </EuiPageTemplate.Section>

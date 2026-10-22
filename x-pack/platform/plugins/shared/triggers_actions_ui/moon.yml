@@ -112,6 +112,7 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/alerting-v2-utils'
   - '@kbn/user-profile-components'
+  - '@kbn/core-chrome-browser'
 tags:
   - plugin
   - prod

@@ -14,6 +14,7 @@ import type {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -37,6 +38,7 @@ import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping
 import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_query_delay_section';
 import { useGetQueryDelaySettings } from '../../hooks/use_get_query_delay_settings';
 import { useUpdateRuleSettings } from '../../hooks/use_update_rules_settings';
+import { useShowClassicRulesBadge } from '../../hooks/use_show_classic_rules_badge';
 import { CenterJustifiedSpinner } from '../center_justified_spinner';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 
@@ -107,6 +109,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
     isServerless,
     http,
   } = useKibana().services;
+  const showClassicBadge = useShowClassicRulesBadge();
   const {
     rulesSettings: {
       writeFlappingSettingsUI,
@@ -291,14 +294,28 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
       })}
     >
       <EuiFlyoutHeader>
-        <EuiTitle>
-          <h3>
-            <FormattedMessage
-              id="xpack.triggersActionsUI.rulesSettings.flyout.title"
-              defaultMessage="Settings"
-            />
-          </h3>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h3>
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.rulesSettings.flyout.title"
+                  defaultMessage="Settings"
+                />
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          {showClassicBadge && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow" data-test-subj="rulesSettingsFlyoutClassicBadge">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.rulesSettings.flyout.classicBadge"
+                  defaultMessage="Classic"
+                />
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
         <EuiSpacer size="m" />
       </EuiFlyoutHeader>
       <EuiHorizontalRule margin="none" />

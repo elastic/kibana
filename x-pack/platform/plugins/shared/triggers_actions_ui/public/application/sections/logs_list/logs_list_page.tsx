@@ -23,6 +23,7 @@ import { getRulesPageMenu } from '../rules_page/get_rules_page_menu';
 import { useRulesPageActions } from '../rules_page/rules_page_actions';
 import { RULES_PAGE_MODE, useRulesPageMode } from '../rules_page/use_rules_page_mode';
 import { useLocators } from '../../locator_context';
+import { useShowClassicRulesBadge } from '../../hooks/use_show_classic_rules_badge';
 
 const LogsList = lazy(() => import('../rule_details/components/global_rule_event_log_list'));
 
@@ -54,6 +55,7 @@ export const LogsListContainer = () => {
   const rulesListHref = rules.useUrl({});
   const alertsBackHref = getUrlForApp('observability-overview', { path: '/alerts' });
   const mode = useRulesPageMode();
+  const showClassicBadge = useShowClassicRulesBadge();
 
   useEffect(() => {
     setBreadcrumbs?.([getRulesBreadcrumbWithHref(), getAlertingSectionBreadcrumb('logs')]);
@@ -81,6 +83,7 @@ export const LogsListContainer = () => {
       <LogsListHeader
         backHref={rulesListHref}
         shouldShowSettings={canShowSettings}
+        showClassicBadge={showClassicBadge}
         docLink={docLink}
         onOpenSettings={openSettingsFlyout}
       />

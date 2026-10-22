@@ -16,6 +16,7 @@ import {
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import { useKibana } from '../../../common/lib/kibana';
 import { RulesSettingsFlyout } from '../../components/rules_setting/rules_settings_flyout';
+import { useShowClassicRulesBadge } from '../../hooks/use_show_classic_rules_badge';
 
 const ALERT_DELETE_CATEGORY_IDS = ['management', 'observability', 'securitySolution'] as const;
 
@@ -46,6 +47,7 @@ export const RulesPageActionsProvider = ({ children }: PropsWithChildren) => {
     ruleTypeRegistry,
     cps,
   } = useKibana().services;
+  const showClassicBadge = useShowClassicRulesBadge();
 
   const [isRuleTypeModalVisible, setIsRuleTypeModalVisible] = useState(false);
   const [isSettingsFlyoutVisible, setIsSettingsFlyoutVisible] = useState(false);
@@ -117,6 +119,7 @@ export const RulesPageActionsProvider = ({ children }: PropsWithChildren) => {
           registeredRuleTypes={ruleTypeRegistry.list()}
           filteredRuleTypes={[]}
           cps={cps}
+          showClassicBadge={showClassicBadge}
         />
       )}
       <RulesSettingsFlyout
