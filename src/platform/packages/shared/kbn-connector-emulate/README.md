@@ -44,7 +44,7 @@ const proxy = createEmulatorProxy({ fetch: mock.fetch, certificateAuthority });
 const proxyUrl = await proxy.listen(8080);
 ```
 
-Requests aren't forwarded: the proxy answers each one with `fetch`, so the vendor hosts in connector code and config need no changes. Plain HTTP requests arrive in absolute form (`GET http://vendor.example/path`). HTTPS ones arrive through `CONNECT` tunnels, whose TLS the proxy terminates with a certificate for the requested host, issued on first use by `certificateAuthority`. Requests sent to the proxy as if it were the vendor get **400**, and errors thrown by `fetch` **502**.
+Requests aren't forwarded: the proxy answers each one with `fetch`, so the vendor hosts in connector code and config need no changes. Plain HTTP requests arrive in absolute form (`GET http://vendor.example/path`). HTTPS ones arrive through `CONNECT` tunnels, whose TLS the proxy terminates with a certificate for the requested host, issued on first use by `certificateAuthority`. Requests sent to the proxy as if it were the vendor, or whose URL doesn't parse, get **400**, and errors thrown by `fetch` **502**.
 
 Clients must trust the CA's certificate (`certificateAuthority.cert`, PEM). Kibana's actions plugin trusts it for a vendor host through `xpack.actions.customHostSettings` (`ssl.certificateAuthoritiesData`), or for every host through the `NODE_EXTRA_CA_CERTS` environment variable. `createCertificateAuthority({ cert, key })` loads a CA created earlier, so a Kibana configured to trust it keeps working when the mock restarts.
 
