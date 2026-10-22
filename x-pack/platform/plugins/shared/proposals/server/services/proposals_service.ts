@@ -25,6 +25,7 @@ import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
 import {
   DEFAULT_PROPOSAL_TITLE,
   isTerminal,
+  PROPOSAL_CATEGORY_TODO,
   PROPOSAL_ATTACHMENT_TYPE,
   PROPOSALS_RESUME_CHANNEL,
 } from '@kbn/proposals-common';
@@ -180,6 +181,14 @@ export class ProposalsService {
     // caller always "wins" with an empty string, the action's own metadata is
     // never consulted, and the queue silently drops a proposal it cannot group.
     const category = blankToUndefined(params.category) ?? metadata?.category;
+    // A to-do is offered as "I've applied" alone, so approving one must not run anything: the
+    // click records work the analyst already did, and there is no Decline beside it.
+    if (actionWorkflowId !== undefined && category === PROPOSAL_CATEGORY_TODO) {
+      throw new ProposalInvalidActionInputError(
+        `A "${PROPOSAL_CATEGORY_TODO}" proposal is carried out by the analyst, so it cannot ` +
+          `run action workflow [${actionWorkflowId}]`
+      );
+    }
     const impact = blankToUndefined(params.impact) ?? metadata?.impact ?? 'low';
     // Required on the stored document, so a blank has to resolve to something
     // rather than to an omission: it feeds the queue's secondary sort rank.
@@ -297,16 +306,21 @@ export class ProposalsService {
     });
 
     const current = await this.settleOrphans(
-      response.hits.hits
-        .filter((hit): hit is typeof hit & { _id: string } => hit._id !== undefined)
-        .map((hit) => toProposal(hit._id, hit._source as ProposalDocument)),
+      response.hits.hits.reduce<Proposal[]>((proposals, hit) => {
+        if (hit._id !== undefined) {
+          proposals.push(toProposal(hit._id, hit._source));
+        }
+        return proposals;
+      }, []),
       spaceId,
       request
     );
     // A proposal settled on this read no longer matches the status it was searched by.
-    const matching = query.status
-      ? current.filter(({ status }) => status === query.status)
-      : current;
+    const matching = current.filter(
+      ({ status }) =>
+        (!query.status || status === query.status) &&
+        (!query.statuses || query.statuses.includes(status))
+    );
     const settledAway = current.length - matching.length;
 
     const proposals = await this.withMetadataBatch(matching, spaceId, request);
@@ -1399,6 +1413,7 @@ type QueryFilterList = Array<Record<string, unknown>>;
 /** Filters only in-process callers may use; none is part of the HTTP list contract. */
 export interface InProcessProposalFilters {
   categories?: string[];
+  statuses?: ProposalStatus[];
   conversationIds?: string[];
 }
 
@@ -1432,6 +1447,9 @@ const toFilterClauses = (
   }
   if (filters.categories) {
     filter.push({ terms: { category: filters.categories } });
+  }
+  if (filters.statuses) {
+    filter.push({ terms: { status: filters.statuses } });
   }
   if (filters.conversationIds) {
     filter.push({ terms: { conversationId: filters.conversationIds } });

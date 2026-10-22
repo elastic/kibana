@@ -403,8 +403,11 @@ export class MapsPage {
    * Opens the inspector, switches to the "Map details" view, reads the Mapbox GL
    * style JSON from the mapboxStyleContainer, closes the inspector, and returns the
    * parsed style object.
+   *
+   * @param waitForFocusQuiet - Forwarded to `inspector.close`. Set when the caller acts on the
+   *   page right after, so restored focus can't swallow its keystrokes. Defaults to `false`.
    */
-  async getMapboxStyle(): Promise<Record<string, any>> {
+  async getMapboxStyle(waitForFocusQuiet: boolean = false): Promise<Record<string, any>> {
     await this.inspector.open();
     try {
       // openInspectorView skips the view switch when the chooser is not rendered yet,
@@ -421,7 +424,7 @@ export class MapsPage {
       const json = await container.locator('code').innerText();
       return JSON.parse(json);
     } finally {
-      await this.inspector.close();
+      await this.inspector.close(waitForFocusQuiet);
     }
   }
 
