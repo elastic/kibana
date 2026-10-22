@@ -327,6 +327,9 @@ export class ActionsPlugin
   // discarded when the action returns, so the plugin instance owns the pool.
   private readonly clientLeasePool: LeasePool<unknown>;
   private relayClient?: RelayClientContract;
+  // Serverless projects always report an `enterprise` license, so their trial status comes from
+  // (static) Cloud config; elsewhere the live license is used so trial conversion needs no restart.
+  private isTrial: () => boolean = () => false;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -344,7 +347,14 @@ export class ActionsPlugin
     core: CoreSetup<ActionsPluginsStart, PluginStartContract>,
     plugins: ActionsPluginsSetup
   ): PluginSetupContract {
-    this.licenseState = new LicenseState(plugins.licensing.license$);
+    const licenseState = new LicenseState(plugins.licensing.license$);
+    this.licenseState = licenseState;
+    if (plugins.cloud?.isServerlessEnabled) {
+      const isServerlessTrial = plugins.cloud.serverless.organizationInTrial ?? false;
+      this.isTrial = () => isServerlessTrial;
+    } else {
+      this.isTrial = () => licenseState.isTrial();
+    }
     this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
     if (!this.isESOCanEncrypt) {
@@ -368,7 +378,9 @@ export class ActionsPlugin
 
     // get executions count
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor, this.inMemoryMetrics);
-    const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig);
+    const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig, {
+      isTrial: this.isTrial,
+    });
     this.relayClient = this.actionsConfig.relay
       ? new RelayClient({
           baseUrl: this.actionsConfig.relay.url,
@@ -641,7 +653,9 @@ export class ActionsPlugin
       actionsConfig,
     } = this;
 
-    const actionsConfigUtils = getActionsConfigurationUtilities(actionsConfig);
+    const actionsConfigUtils = getActionsConfigurationUtilities(actionsConfig, {
+      isTrial: this.isTrial,
+    });
 
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
