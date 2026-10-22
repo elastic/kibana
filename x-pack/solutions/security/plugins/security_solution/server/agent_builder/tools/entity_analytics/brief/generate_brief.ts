@@ -22,6 +22,7 @@ import { buildFacts } from './build_facts';
 import { describeSample, getPeriodStart } from './describe_scope';
 import { draftBrief } from './draft_brief';
 import { readAlertRules } from './read_alert_rules';
+import { readWatchlistNames } from './read_watchlist_names';
 import { getCandidateRisk, readEntities } from './read_entities';
 import type { BriefPriority } from './prompts';
 import { renderBriefHtml } from './render_brief_html';
@@ -42,6 +43,7 @@ export const generateBrief = async ({
   esClient,
   inferenceClient,
   attachments,
+  watchlistConfigClient,
   riskScoreDataClient,
   abortSignal,
   logger,
@@ -61,7 +63,8 @@ export const generateBrief = async ({
     esClient,
     logger,
   });
-  const facts = buildFacts(candidates, scope, alertsByEntityId);
+  const watchlistNamesById = await readWatchlistNames(watchlistConfigClient, logger);
+  const facts = buildFacts(candidates, scope, alertsByEntityId, watchlistNamesById);
   const draft = await draftBrief({
     inferenceClient,
     scope,

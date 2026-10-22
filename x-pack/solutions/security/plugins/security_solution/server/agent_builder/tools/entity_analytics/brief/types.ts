@@ -10,6 +10,7 @@ import type { Entity, EntityRiskLevels } from '@kbn/entity-store/common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { GroupMember } from '../../../../lib/entity_analytics/entity_case_counts/fetch_group_member_ids';
+import type { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
 import type { RiskScoreDataClient } from '../../../../lib/entity_analytics/risk_score/risk_score_data_client';
 import type { SignalCardId } from '../../../../../common/entity_analytics/home/constants';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
@@ -55,9 +56,9 @@ export interface EntityFacts {
     score: number;
   };
   assetCriticality?: string;
-  privilegedUser?: true;
   alerts?: EntityAlerts;
-  otherWatchlists?: number;
+  /** The names of the watchlists the entity is on. */
+  watchlists?: string[];
   /** Relative to the capture, such as "5 days ago". */
   firstSeen?: string;
 }
@@ -71,6 +72,8 @@ export interface GenerateBriefParams {
   /** The conversation's default model. */
   inferenceClient: BoundInferenceClient;
   attachments: AttachmentStateManager;
+  /** Reads the names of the watchlists the entities are on. */
+  watchlistConfigClient: WatchlistConfigClient;
   /** For the risk-history charts. Absent when risk score history is disabled. */
   riskScoreDataClient?: RiskScoreDataClient;
   abortSignal?: AbortSignal;

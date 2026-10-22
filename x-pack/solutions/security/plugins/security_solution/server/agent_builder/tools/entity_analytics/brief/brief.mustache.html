@@ -48,7 +48,8 @@
         <div class="pills">
           {{#risk}}<span class="pill {{levelClass}}">Risk {{score}} {{level}}{{#isGroup}} · group{{/isGroup}}</span>{{/risk}}
           {{#criticality}}<span class="pill"><span class="dot" data-level="{{key}}"></span>{{text}}</span>{{/criticality}}
-          {{#watchlist}}<span class="pill watchlist">Watchlist: privileged users</span>{{/watchlist}}
+          {{#watchlists}}<span class="pill watchlist" title="Watchlist: {{.}}">{{.}}</span>{{/watchlists}}
+          {{#moreWatchlists}}<span class="pill">+{{.}} more</span>{{/moreWatchlists}}
         </div>
         <p class="prose">{{assessment}}</p>
         <p class="prose why">{{whyFirst}}</p>

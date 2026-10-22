@@ -83,7 +83,8 @@ export const BriefViewModel = lazySchema(() =>
           .optional(),
         /** As the Entity Store stores it, such as `extreme_impact`. */
         assetCriticality: z.string().optional(),
-        privilegedUser: z.literal(true).optional(),
+        /** The names of the watchlists the entity is on. */
+        watchlists: z.array(z.string()),
         firstSeen: z.string().optional(),
         assessment: z.string(),
         whyFirst: z.string(),
@@ -167,7 +168,7 @@ export const buildViewModel = ({
         if (!entityFacts) {
           return [];
         }
-        const { name, type, flaggedFor, risk, privilegedUser, firstSeen } = entityFacts;
+        const { name, type, flaggedFor, risk, watchlists = [], firstSeen } = entityFacts;
         const candidate = entities.candidates.find(({ id }) => id === entityId);
         return [
           {
@@ -177,7 +178,7 @@ export const buildViewModel = ({
             type,
             risk: risk && { score: risk.score, level: risk.level, of: risk.of },
             assetCriticality: candidate && getAssetCriticality(candidate),
-            privilegedUser,
+            watchlists,
             // As the prompt does: first seen only for an entity flagged as new.
             firstSeen: flaggedFor.includes('newEntity') ? firstSeen : undefined,
             assessment: sentence(assessment, entityFacts),

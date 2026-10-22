@@ -23,6 +23,9 @@ import {
   hasPrioritiesSection,
 } from './view_model';
 
+/** The watchlists shown as pills, and the rest counted. */
+const MAX_WATCHLIST_PILLS = 3;
+
 const loadFiles = once(() => ({
   template: fs.readFileSync(path.join(__dirname, 'brief.mustache.html'), 'utf8'),
   css: fs.readFileSync(path.join(__dirname, 'brief.css'), 'utf8'),
@@ -81,7 +84,8 @@ const buildContext = (viewModel: BriefViewModel, css: string) => {
         text: formatStoredValue(priority.assetCriticality),
         key: priority.assetCriticality,
       },
-      watchlist: priority.privilegedUser,
+      watchlists: priority.watchlists.slice(0, MAX_WATCHLIST_PILLS),
+      moreWatchlists: Math.max(0, priority.watchlists.length - MAX_WATCHLIST_PILLS),
       riskHistory:
         priority.riskHistory &&
         priority.riskHistory.points.length >= 2 &&

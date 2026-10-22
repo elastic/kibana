@@ -43,7 +43,7 @@ const fixtureViewModel: BriefViewModel = {
       type: 'user',
       risk: { score: 76, level: 'High', of: 'resolution group' },
       assetCriticality: 'high_impact',
-      privilegedUser: true,
+      watchlists: ['Privileged User'],
       assessment:
         'Credential and remote access activity on a privileged identity newly at High risk is the shape of account misuse.',
       whyFirst:
@@ -71,6 +71,7 @@ const fixtureViewModel: BriefViewModel = {
       type: 'host',
       risk: { score: 66, level: 'Moderate', of: 'entity' },
       assetCriticality: 'extreme_impact',
+      watchlists: [],
       firstSeen: '2 days ago',
       assessment:
         'A host that appeared this week and is already alerting looks more like a provisioning problem.',
@@ -84,6 +85,7 @@ const fixtureViewModel: BriefViewModel = {
       type: 'host',
       risk: { score: 58, level: 'Moderate', of: 'entity' },
       assetCriticality: 'high_impact',
+      watchlists: [],
       firstSeen: '3 days ago',
       assessment:
         'A new host with alerts of the same kind as the first priority is worth a second look.',
@@ -126,6 +128,18 @@ describe('renderBriefHtml', () => {
 
     expect(html).toContain('<div class="brief">');
     expect(html).toContain('.brief .priority{');
+  });
+
+  it('shows up to three watchlists as pills, and counts the rest', () => {
+    const watchlists = ['One', 'Two', 'Three', 'Four', 'Five'];
+    const { html } = renderBriefHtml({
+      ...fixtureViewModel,
+      priorities: [{ ...fixtureViewModel.priorities[0], watchlists }],
+    });
+
+    expect(html.match(/class="pill watchlist"/g)).toHaveLength(3);
+    expect(html).not.toContain('>Four<');
+    expect(html).toContain('+2 more');
   });
 
   it('shows only the counts above zero or changed, and says when there is nothing to compare', () => {

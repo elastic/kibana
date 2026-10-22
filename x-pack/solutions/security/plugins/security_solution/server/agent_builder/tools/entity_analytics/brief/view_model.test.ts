@@ -76,7 +76,7 @@ const facts: EntityFacts[] = [
     name: 'jdoe',
     type: 'user',
     flaggedFor: ['newEntity'],
-    privilegedUser: true,
+    watchlists: ['Privileged User'],
     firstSeen: '2 days ago',
   },
 ];
@@ -143,7 +143,7 @@ describe('buildViewModel', () => {
       {
         rank: 1,
         name: 'jdoe',
-        privilegedUser: true,
+        watchlists: ['Privileged User'],
         firstSeen: '2 days ago',
         assessment: 'New and privileged.',
         whyFirst: 'Nothing else is.',

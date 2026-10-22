@@ -109,7 +109,8 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
         <div class=\\"pills\\">
           <span class=\\"pill level-high\\">Risk 76 High · group</span>
           <span class=\\"pill\\"><span class=\\"dot\\" data-level=\\"high_impact\\"></span>High impact</span>
-          <span class=\\"pill watchlist\\">Watchlist: privileged users</span>
+          <span class=\\"pill watchlist\\" title=\\"Watchlist: Privileged User\\">Privileged User</span>
+          
         </div>
         <p class=\\"prose\\">Credential and remote access activity on a privileged identity newly at High risk is the shape of account misuse.</p>
         <p class=\\"prose why\\">Privilege and a fresh threshold crossing make it the clearest place to confirm first.</p>
@@ -142,6 +143,7 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
           <span class=\\"pill level-moderate\\">Risk 66 Moderate</span>
           <span class=\\"pill\\"><span class=\\"dot\\" data-level=\\"extreme_impact\\"></span>Extreme impact</span>
           
+          
         </div>
         <p class=\\"prose\\">A host that appeared this week and is already alerting looks more like a provisioning problem.</p>
         <p class=\\"prose why\\">A new asset of this criticality is worth confirming on its own.</p>
@@ -156,6 +158,7 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
         <div class=\\"pills\\">
           <span class=\\"pill level-moderate\\">Risk 58 Moderate</span>
           <span class=\\"pill\\"><span class=\\"dot\\" data-level=\\"high_impact\\"></span>High impact</span>
+          
           
         </div>
         <p class=\\"prose\\">A new host with alerts of the same kind as the first priority is worth a second look.</p>

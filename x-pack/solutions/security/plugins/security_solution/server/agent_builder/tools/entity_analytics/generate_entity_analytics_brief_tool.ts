@@ -15,6 +15,7 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { isInferenceError } from '@kbn/inference-common';
 import type { ExperimentalFeatures } from '../../../../common';
 import type { EntityAnalyticsScope } from '../../../../common/entity_analytics/ai_brief/scope';
+import { WatchlistConfigClient } from '../../../lib/entity_analytics/watchlists/management/watchlist_config';
 import { RiskScoreDataClient } from '../../../lib/entity_analytics/risk_score/risk_score_data_client';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import {
@@ -90,6 +91,12 @@ export const createGenerateBriefTool = ({
         esClient: esClient.asCurrentUser,
         inferenceClient,
         attachments,
+        watchlistConfigClient: new WatchlistConfigClient({
+          soClient: savedObjectsClient,
+          esClient: esClient.asCurrentUser,
+          namespace: spaceId,
+          logger,
+        }),
         riskScoreDataClient: experimentalFeatures.riskScoreHistoryEnabled
           ? new RiskScoreDataClient({
               logger,
