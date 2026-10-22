@@ -140,6 +140,57 @@ describe('createEmulatorFetch', () => {
     expect(valid.status).toBe(201);
   });
 
+  describe('with JSON bodies that are strings', () => {
+    const notes = {
+      ...spec,
+      paths: {
+        '/notes': {
+          get: {
+            responses: {
+              '200': {
+                description: 'ok',
+                content: { 'application/json': { schema: { type: ['string', 'null'] } } },
+              },
+            },
+          },
+          post: {
+            requestBody: { content: { 'application/json': { schema: { type: 'string' } } } },
+            responses: { '204': { description: 'created' } },
+          },
+        },
+      },
+    };
+
+    it('reports request bodies that are not JSON, though the raw text fits the schema', async () => {
+      const { fetch, calls } = createEmulatorFetch({ specs: [notes] });
+      const post = (body: string) =>
+        fetch(`${BASE_URL}/notes`, { method: 'POST', headers: json, body });
+
+      const malformed = await post('hello');
+      const valid = await post('"hello"');
+
+      expect(malformed.status).toBe(422);
+      expect(calls[0].requestViolations).toEqual([
+        expect.objectContaining({ path: ['body'], code: 'syntax' }),
+      ]);
+      expect(valid.status).toBe(204);
+    });
+
+    it.each([
+      ['hello', '"hello"'],
+      [null, 'null'],
+    ])('serializes the JSON response body %j', async (body, text) => {
+      const { fetch } = createEmulatorFetch({
+        specs: [notes],
+        respond: () => ({ statusCode: 200, headers: json, body }),
+      });
+
+      const response = await fetch(`${BASE_URL}/notes`);
+
+      expect(await response.text()).toBe(text);
+    });
+  });
+
   it('records responses that break the spec', async () => {
     const respond: Responder = () => ({ statusCode: 200, headers: json, body: [{ id: 1 }] });
     const { fetch, calls } = createEmulatorFetch({ specs: [spec], respond });

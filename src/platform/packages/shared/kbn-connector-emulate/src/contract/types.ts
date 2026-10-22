@@ -21,6 +21,8 @@ export interface ContractRequest {
   readonly query: Readonly<Record<string, string | string[]>>;
   readonly headers: Readonly<Record<string, string>>;
   readonly body?: unknown;
+  /** Why a body sent as JSON didn't parse; `body` is then its raw text. */
+  readonly bodyError?: string;
 }
 
 export interface ContractResponse {

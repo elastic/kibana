@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coerceValue } from './coerce_value';
+import { coerceValue, wrapFormArrays } from './coerce_value';
 import type { Direction } from './schema_violations';
 import { validateValue } from './schema_violations';
 import type { ContractOperation, MediaTypeContent, Violation } from './types';
@@ -67,9 +67,11 @@ export const validateContent = (
   if (!canValidate(mediaType)) {
     return [];
   }
+  const { document } = operation.spec;
+  const schema = content.schema?.schema;
   const value =
     mediaType === FORM_MEDIA_TYPE && typeof body === 'string'
-      ? coerceValue(toFormFields(body), content.schema?.schema, operation.spec.document)
+      ? coerceValue(wrapFormArrays(toFormFields(body), schema, document), schema, document)
       : body;
   return validateValue(operation, content.schema, value, {
     path: ['body'],

@@ -140,15 +140,19 @@ export const createOperationMatcher = (operations: readonly ContractOperation[])
     if (candidates.length === 0) {
       return { status: 404, message: 'No operation matches the path' };
     }
-    const [best] = candidates
-      .filter(({ route }) => route.operation.method === method.toLowerCase())
-      .sort(
-        (a, b) =>
-          a.route.parameterNames.length - b.route.parameterNames.length ||
-          b.route.literalLength - a.route.literalLength
-      );
+    // The most specific template wins before the method is considered, so a method that
+    // `/items/new` doesn't declare gets 405 rather than falling through to `/items/{id}`.
+    const [mostSpecific] = [...candidates].sort(
+      (a, b) =>
+        a.route.parameterNames.length - b.route.parameterNames.length ||
+        b.route.literalLength - a.route.literalLength
+    );
+    const sameTemplate = candidates.filter(
+      ({ route }) => route.operation.path === mostSpecific.route.operation.path
+    );
+    const best = sameTemplate.find(({ route }) => route.operation.method === method.toLowerCase());
     if (!best) {
-      const allowed = [...new Set(candidates.map(({ route }) => route.operation.method))];
+      const allowed = [...new Set(sameTemplate.map(({ route }) => route.operation.method))];
       return {
         status: 405,
         message: `The path only allows ${allowed.map((name) => name.toUpperCase()).join(', ')}`,

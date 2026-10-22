@@ -167,6 +167,83 @@ describe('convertSwagger2', () => {
     });
   });
 
+  it('leaves instance data such as examples as it is', () => {
+    const converted = convertSwagger2({
+      swagger: '2.0',
+      host: 'api.example.com',
+      paths: {},
+      definitions: {
+        Pet: {
+          type: 'object',
+          properties: { discriminator: { type: 'string' } },
+          example: { discriminator: 'dog' },
+          default: { discriminator: 'cat' },
+        },
+      },
+    });
+
+    expect(converted.components).toMatchObject({
+      schemas: {
+        Pet: {
+          properties: { discriminator: { type: 'string' } },
+          example: { discriminator: 'dog' },
+          default: { discriminator: 'cat' },
+        },
+      },
+    });
+  });
+
+  it('serves operations at the schemes they override', () => {
+    const converted = convertSwagger2({
+      swagger: '2.0',
+      host: 'api.example.com',
+      schemes: ['https'],
+      paths: { '/legacy': { get: { schemes: ['http'], responses: {} } } },
+    });
+
+    expect(converted.paths).toEqual({
+      '/legacy': {
+        get: { servers: [{ url: 'http://api.example.com' }], parameters: [], responses: {} },
+      },
+    });
+  });
+
+  it('keeps the delimiters of path and header arrays that OpenAPI 3 cannot express', () => {
+    const [operation] = loadOperations({
+      swagger: '2.0',
+      host: 'api.example.com',
+      paths: {
+        '/items/{ids}': {
+          get: {
+            parameters: [
+              {
+                name: 'ids',
+                in: 'path',
+                required: true,
+                type: 'array',
+                items: { type: 'integer' },
+                collectionFormat: 'pipes',
+              },
+              {
+                name: 'X-Tags',
+                in: 'header',
+                type: 'array',
+                items: { type: 'string' },
+                collectionFormat: 'ssv',
+              },
+            ],
+            responses: {},
+          },
+        },
+      },
+    });
+
+    expect(operation.parameters).toMatchObject([
+      { name: 'ids', style: 'simple', delimiter: '|' },
+      { name: 'X-Tags', style: 'simple', delimiter: ' ' },
+    ]);
+  });
+
   it('uses the base path as a relative server URL when there is no host', () => {
     expect(convertSwagger2({ swagger: '2.0', basePath: '/api', paths: {} }).servers).toEqual([
       { url: '/api' },

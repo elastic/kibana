@@ -62,13 +62,33 @@ const toSchema = (node: Node): JsonSchema => {
   return schema;
 };
 
+// Keywords whose values are instance data, such as an example with a `discriminator` field.
+const DATA_KEYWORDS = new Set(['example', 'examples', 'default', 'enum', 'const', 'x-example']);
+
+// Keywords whose values map names to schemas or other objects, so their keys aren't keywords.
+const MAP_KEYWORDS = new Set([
+  'properties',
+  'patternProperties',
+  'definitions',
+  'schemas',
+  'securitySchemes',
+  'paths',
+  'responses',
+  'headers',
+  'content',
+]);
+
 // Rewrites schema refs and the schema keywords that differ between Swagger 2.0 and OpenAPI 3.0.
-const convertSchemas = (node: unknown, seen = new WeakSet<object>()): void => {
+const convertSchemas = (node: unknown, seen = new WeakSet<object>(), isMap = false): void => {
   if (typeof node !== 'object' || node === null || seen.has(node)) {
     return;
   }
   seen.add(node);
-  if (isRecord(node)) {
+  if (Array.isArray(node)) {
+    node.forEach((child) => convertSchemas(child, seen));
+    return;
+  }
+  if (isRecord(node) && !isMap) {
     if (typeof node.$ref === 'string') {
       node.$ref = node.$ref.replace(/^#\/definitions\//, '#/components/schemas/');
     }
@@ -82,8 +102,10 @@ const convertSchemas = (node: unknown, seen = new WeakSet<object>()): void => {
       node.discriminator = { propertyName: node.discriminator };
     }
   }
-  for (const child of Array.isArray(node) ? node : Object.values(node)) {
-    convertSchemas(child, seen);
+  for (const [key, child] of Object.entries(node)) {
+    if (isMap || !DATA_KEYWORDS.has(key)) {
+      convertSchemas(child, seen, !isMap && MAP_KEYWORDS.has(key));
+    }
   }
 };
 
@@ -102,6 +124,10 @@ const toParameter = (parameter: Node): Node => {
     schema: toSchema(parameter),
     ...(serialization && (location === 'query' || serialization.style === undefined)
       ? { style: serialization.style, explode: serialization.explode }
+      : {}),
+    // OpenAPI 3 has no delimited styles outside the query string.
+    ...(serialization?.style && location !== 'query'
+      ? { 'x-collection-format': collectionFormat }
       : {}),
   };
 };
@@ -200,12 +226,12 @@ export const convertSwagger2 = (source: OpenApiDocument): OpenApiDocument => {
   const rootConsumes = asStrings(document.consumes) ?? ['application/json'];
   const basePath =
     typeof document.basePath === 'string' ? document.basePath.replace(/\/+$/, '') : '';
-  const servers =
+  const toServers = (schemes: readonly string[]) =>
     typeof document.host === 'string'
-      ? (asStrings(document.schemes) ?? ['https']).map((scheme) => ({
-          url: `${scheme}://${document.host}${basePath}`,
-        }))
+      ? schemes.map((scheme) => ({ url: `${scheme}://${document.host}${basePath}` }))
       : [{ url: basePath || '/' }];
+  const rootSchemes = asStrings(document.schemes) ?? ['https'];
+  const servers = toServers(rootSchemes);
 
   const paths = Object.fromEntries(
     Object.entries(isRecord(document.paths) ? document.paths : {}).map(([path, itemNode]) => {
@@ -226,6 +252,7 @@ export const convertSwagger2 = (source: OpenApiDocument): OpenApiDocument => {
           ),
           ...own,
         ];
+        const schemes = asStrings(operation.schemes);
         const produces = asStrings(operation.produces) ?? rootProduces;
         const consumes = asStrings(operation.consumes) ?? rootConsumes;
         const body = parameters.find((parameter) => parameter.in === 'body');
@@ -240,7 +267,10 @@ export const convertSwagger2 = (source: OpenApiDocument): OpenApiDocument => {
           [
             method,
             {
-              ...omit(operation, ['parameters', 'produces', 'consumes', 'responses']),
+              ...omit(operation, ['parameters', 'produces', 'consumes', 'responses', 'schemes']),
+              ...(schemes && typeof document.host === 'string'
+                ? { servers: toServers(schemes) }
+                : {}),
               parameters: parameters
                 .filter(({ in: location }) => location !== 'body' && location !== 'formData')
                 .map(toParameter),

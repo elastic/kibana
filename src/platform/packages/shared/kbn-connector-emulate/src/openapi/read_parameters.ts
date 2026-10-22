@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coerceValue, getSchemaTypes } from './coerce_value';
+import { coerceValue, getPropertyNames, getSchemaTypes } from './coerce_value';
 import type { ContractOperation, OperationParameter } from './types';
 
 export interface ParameterInput {
@@ -62,11 +62,28 @@ const splitValue = (
   return value;
 };
 
-const readQuery = (
-  { name, style, explode }: OperationParameter,
-  query: ParameterInput['query'],
+/** Whether a query parameter sends an object as one query key per property, `?min=1&max=5`. */
+export const isExplodedFormObject = (
+  { in: location, style, explode }: OperationParameter,
   types: Set<string>
+): boolean =>
+  location === 'query' && style === 'form' && explode && types.has('object') && !types.has('array');
+
+const readExplodedObject = (
+  query: ParameterInput['query'],
+  propertyNames: Set<string>
+): Record<string, string | string[]> | undefined => {
+  const entries = Object.entries(query).filter(([key]) => propertyNames.has(key));
+  return entries.length > 0 ? Object.fromEntries(entries) : undefined;
+};
+
+const readQuery = (
+  parameter: OperationParameter,
+  query: ParameterInput['query'],
+  types: Set<string>,
+  propertyNames: Set<string>
 ): unknown => {
+  const { name, style, explode } = parameter;
   if (style === 'deepObject') {
     const prefix = `${name}[`;
     const entries = Object.entries(query)
@@ -75,6 +92,9 @@ const readQuery = (
     return entries.length > 0 ? Object.fromEntries(entries) : undefined;
   }
   const raw = query[name];
+  if (raw === undefined && isExplodedFormObject(parameter, types)) {
+    return readExplodedObject(query, propertyNames);
+  }
   if (raw === undefined || Array.isArray(raw)) {
     return raw;
   }
@@ -84,7 +104,14 @@ const readQuery = (
   return splitValue(raw, QUERY_DELIMITERS[style] ?? ',', types, false);
 };
 
-const readPath = ({ style, explode }: OperationParameter, value: string, types: Set<string>) => {
+const readPath = (
+  { style, explode, delimiter }: OperationParameter,
+  value: string,
+  types: Set<string>
+) => {
+  if (delimiter !== undefined) {
+    return splitValue(value, delimiter, types, false);
+  }
   if (style === 'label') {
     return splitValue(value.replace(/^\./, ''), explode ? '.' : ',', types, explode);
   }
@@ -107,10 +134,15 @@ const parseCookies = (header = ''): Record<string, string> =>
       .filter(Boolean)
   );
 
-const readRaw = (parameter: OperationParameter, input: ParameterInput, types: Set<string>) => {
+const readRaw = (
+  parameter: OperationParameter,
+  input: ParameterInput,
+  types: Set<string>,
+  propertyNames: Set<string>
+) => {
   const { name, in: location, explode } = parameter;
   if (location === 'query') {
-    return readQuery(parameter, input.query, types);
+    return readQuery(parameter, input.query, types, propertyNames);
   }
   if (location === 'path') {
     const value = input.pathParameters[name];
@@ -124,7 +156,7 @@ const readRaw = (parameter: OperationParameter, input: ParameterInput, types: Se
     return undefined;
   }
   return location === 'header'
-    ? splitValue(value.trim(), /\s*,\s*/, types, explode)
+    ? splitValue(value.trim(), parameter.delimiter ?? /\s*,\s*/, types, explode)
     : splitValue(value, ',', types, false);
 };
 
@@ -139,6 +171,6 @@ export const readParameters = (
   parameters.map((parameter) => {
     const schema = parameter.schema?.schema;
     const types = getSchemaTypes(schema, document);
-    const raw = readRaw(parameter, input, types);
+    const raw = readRaw(parameter, input, types, getPropertyNames(schema, document));
     return { parameter, value: raw === undefined ? undefined : coerceValue(raw, schema, document) };
   });

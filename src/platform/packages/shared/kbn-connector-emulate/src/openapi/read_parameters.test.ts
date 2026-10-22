@@ -161,4 +161,34 @@ describe('readParameters', () => {
       ['a', 'b'],
     ]);
   });
+
+  it('splits path and header arrays by the delimiter Swagger 2.0 declared', () => {
+    const parameters = [
+      { name: 'id', in: 'path', schema: integers, 'x-collection-format': 'pipes' },
+      { name: 'X-Tags', in: 'header', schema: strings, 'x-collection-format': 'ssv' },
+    ];
+
+    expect(
+      read(parameters, { pathParameters: { id: '1|2' }, headers: { 'x-tags': 'a b' } })
+    ).toEqual({
+      'path.id': [1, 2],
+      'header.X-Tags': ['a', 'b'],
+    });
+  });
+
+  it('reads exploded form-style objects from their property keys', () => {
+    const filter = {
+      name: 'filter',
+      in: 'query',
+      schema: {
+        type: 'object',
+        properties: { min: { type: 'integer' }, name: { type: 'string' } },
+      },
+    };
+
+    expect(read([filter], { query: { min: '1', name: 'x', other: 'y' } })).toEqual({
+      'query.filter': { min: 1, name: 'x' },
+    });
+    expect(read([filter], { query: {} })).toEqual({ 'query.filter': undefined });
+  });
 });

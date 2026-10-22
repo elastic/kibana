@@ -109,13 +109,14 @@ const toContractRequest = async (request: Request): Promise<ContractRequest> => 
   // `request.body` undefined even when the request has one.
   const text = await request.text();
   let body: unknown = text || undefined;
+  let bodyError: string | undefined;
   if (text) {
     headers['content-length'] ??= String(Buffer.byteLength(text));
     if (/json/.test(headers['content-type'] ?? '')) {
       try {
         body = JSON.parse(text);
-      } catch {
-        // Left as a string so validation reports it against the JSON schema.
+      } catch (error) {
+        bodyError = error instanceof Error ? error.message : String(error);
       }
     }
   }
@@ -125,6 +126,7 @@ const toContractRequest = async (request: Request): Promise<ContractRequest> => 
     query: toQuery(url.searchParams),
     headers,
     body,
+    ...(bodyError === undefined ? {} : { bodyError }),
   };
 };
 
@@ -188,9 +190,19 @@ const toOperationRef = ({ method, path, spec: { source } }: ContractOperation): 
 // HTTP sends no body with these, though specs such as Jira's declare content for 204 responses.
 const NULL_BODY_STATUSES = new Set([101, 204, 205, 304]);
 
+// JSON bodies are serialized whatever their value, so a JSON string or `null` stays JSON.
+const isJsonContent = (headers: ContractResponse['headers'] = {}): boolean =>
+  Object.entries(headers).some(
+    ([name, value]) => name.toLowerCase() === 'content-type' && /[/+]json\b/i.test(value)
+  );
+
 const toResponse = ({ statusCode, headers, body }: ContractResponse): Response => {
   const payload =
-    body === undefined || body === null || NULL_BODY_STATUSES.has(statusCode)
+    body === undefined || NULL_BODY_STATUSES.has(statusCode)
+      ? null
+      : isJsonContent(headers)
+      ? JSON.stringify(body)
+      : body === null
       ? null
       : typeof body === 'string'
       ? body

@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getPropertyNames, getSchemaTypes } from './coerce_value';
 import type { ParameterInput } from './read_parameters';
-import { readParameters } from './read_parameters';
+import { isExplodedFormObject, readParameters } from './read_parameters';
 import { validateValue } from './schema_violations';
-import type { ContractOperation, Violation } from './types';
+import type { ContractOperation, OperationParameter, Violation } from './types';
 import { validateContent } from './validate_content';
 
 /** The query parameter that selects the page in opaque next-page URLs the mock issues. */
@@ -19,32 +20,63 @@ export const MOCK_PAGE_PARAM = 'contract-mock-page';
 export interface RequestInput extends ParameterInput {
   /** Parsed JSON, or the raw text for other media types. */
   readonly body?: unknown;
+  /** Why a body sent as JSON didn't parse. */
+  readonly bodyError?: string;
 }
 
-const checkParameters = (operation: ContractOperation, input: RequestInput): Violation[] =>
-  readParameters(operation, input).flatMap(
-    ({ parameter: { in: location, name, ...parameter }, value }) => {
-      const path = [location, name];
-      const subject = `Request ${location} parameter ${name}`;
-      if (value === undefined) {
-        return parameter.required
-          ? [{ path, code: 'required', message: `${subject} is required` }]
-          : [];
-      }
-      return validateValue(operation, parameter.schema, value, {
-        path,
-        subject,
-        direction: 'request',
-      });
+// A parameter described by `content` instead of `schema` carries a value serialized as its
+// media type, such as `?filter={"state":"open"}` for JSON.
+const checkContentParameter = (
+  operation: ContractOperation,
+  { content }: OperationParameter,
+  value: unknown,
+  path: string[],
+  subject: string
+): Violation[] => {
+  if (!content?.schema) {
+    return [];
+  }
+  let parsed = value;
+  if (typeof value === 'string' && /[/+]json$/.test(content.mediaType.split(';')[0].trim())) {
+    try {
+      parsed = JSON.parse(value);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      return [{ path, code: 'syntax', message: `${subject} is not JSON: ${reason}` }];
     }
-  );
+  }
+  return validateValue(operation, content.schema, parsed, { path, subject, direction: 'request' });
+};
+
+const checkParameters = (operation: ContractOperation, input: RequestInput): Violation[] =>
+  readParameters(operation, input).flatMap(({ parameter, value }) => {
+    const { in: location, name, required, schema, content } = parameter;
+    const path = [location, name];
+    const subject = `Request ${location} parameter ${name}`;
+    if (value === undefined) {
+      return required ? [{ path, code: 'required', message: `${subject} is required` }] : [];
+    }
+    if (!schema && content) {
+      return checkContentParameter(operation, parameter, value, path, subject);
+    }
+    return validateValue(operation, schema, value, { path, subject, direction: 'request' });
+  });
 
 // Schemas can't express these, but vendors reject such query strings.
 const checkQueryEncoding = (
-  { parameters, security }: ContractOperation,
+  { parameters, security, spec: { document } }: ContractOperation,
   { query }: RequestInput
 ): Violation[] => {
   const declared = parameters.filter((parameter) => parameter.in === 'query');
+  // Exploded form-style objects send each property as its own key, `?min=1&max=5`.
+  const objectProperties = new Set(
+    declared.flatMap((parameter) => {
+      const schema = parameter.schema?.schema;
+      return isExplodedFormObject(parameter, getSchemaTypes(schema, document))
+        ? [...getPropertyNames(schema, document)]
+        : [];
+    })
+  );
   // API keys sent in the query are declared by security schemes, not as parameters.
   const credentials = new Set(
     security
@@ -56,6 +88,7 @@ const checkQueryEncoding = (
       (key) =>
         key !== MOCK_PAGE_PARAM &&
         !credentials.has(key) &&
+        !objectProperties.has(key) &&
         !declared.some(
           ({ name, style }) =>
             key === name || (style === 'deepObject' && key.startsWith(`${name}[`))
@@ -78,7 +111,14 @@ const checkQueryEncoding = (
   return [...undeclared, ...repeated];
 };
 
-const checkBody = (operation: ContractOperation, { headers, body }: RequestInput): Violation[] => {
+const checkBody = (
+  operation: ContractOperation,
+  { headers, body, bodyError }: RequestInput
+): Violation[] => {
+  // Malformed JSON could otherwise pass a string schema as the raw text.
+  if (bodyError !== undefined) {
+    return [{ path: ['body'], code: 'syntax', message: `Request body is not JSON: ${bodyError}` }];
+  }
   const { requestBody } = operation;
   if (!requestBody || requestBody.contents.length === 0) {
     return [];
