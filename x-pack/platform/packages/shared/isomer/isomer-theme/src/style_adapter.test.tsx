@@ -32,7 +32,47 @@ const renderStyles = (scheme?: 'light' | 'dark') => {
   return { className, css: isomerStyleAdapter.renderStyles(collector, scheme ? { scheme } : {}) };
 };
 
+const otherStyles = isomerDistillery.createStyleModule('testOther', ({ css, tokens }) => ({
+  root: css`
+    color: ${tokens.color.text.subdued};
+  `,
+}));
+
+const other = otherStyles.handles.root as unknown as SdkStyleHandle;
+
 describe('isomerStyleAdapter', () => {
+  it('gives a collector each handle once, however often a render resolves it', () => {
+    const collector = isomerStyleAdapter.createCollector({});
+    const useHandles = jest.spyOn(collector, 'useHandles');
+    const first = isomerStyleAdapter.createRenderContext(collector, {});
+    const second = isomerStyleAdapter.createRenderContext(collector, {});
+
+    expect(first.resolveClassName?.(root)).toBe('testNote-root');
+    expect(first.resolveClassName?.(root)).toBe('testNote-root');
+    expect(second.resolveClassName?.(root, other)).toBe('testNote-root testOther-root');
+
+    expect(useHandles.mock.calls.map(([handles]) => handles.map(({ key }) => key))).toEqual([
+      [(root as unknown as { key: string }).key],
+      [(other as unknown as { key: string }).key],
+    ]);
+    const css = isomerStyleAdapter.renderStyles(collector, {});
+    expect(css).toContain('.testNote-root{');
+    expect(css).toContain('.testOther-root{');
+  });
+
+  it('renders the same stylesheet for the same collected styles and scheme, and a new one when they differ', () => {
+    const sheet = (handles: SdkStyleHandle[], scheme?: 'light' | 'dark') => {
+      const collector = isomerStyleAdapter.createCollector({});
+      isomerStyleAdapter.createRenderContext(collector, {}).resolveClassName?.(...handles);
+      return isomerStyleAdapter.renderStyles(collector, scheme ? { scheme } : {});
+    };
+
+    expect(sheet([root])).toBe(sheet([root]));
+    expect(sheet([root, other])).toContain('.testOther-root{');
+    expect(sheet([root])).not.toContain('.testOther-root{');
+    expect(sheet([root], 'dark')).not.toBe(sheet([root]));
+  });
+
   it('emits CSS for the class names a render resolves', () => {
     const { className, css } = renderStyles();
 
