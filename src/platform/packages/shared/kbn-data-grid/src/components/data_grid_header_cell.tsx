@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KeyboardEvent, MouseEvent, TouchEvent } from 'react';
+import type { KeyboardEvent, MouseEvent, PointerEvent, TouchEvent } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiListGroupItemProps } from '@elastic/eui';
 import { EuiHorizontalRule, EuiIcon, EuiListGroup, EuiPopover, keys } from '@elastic/eui';
@@ -40,6 +40,10 @@ interface DataGridHeaderCellProps<TRow> extends HeaderMenuParams<TRow> {
   /** 0-based position among all columns. */
   columnIndex: number;
   layout: ColumnLayout;
+  /** Set when the column can be dragged to reorder it. */
+  onStartDrag?: (columnId: string, event: PointerEvent) => void;
+  /** Whether this column is dragged, or the dragged one would be dropped next to it. */
+  dragState?: 'dragging' | 'dropBefore' | 'dropAfter';
   styles: DataGridStyles;
   isTabStop: boolean;
   isResizing: boolean;
@@ -268,6 +272,8 @@ const DataGridHeaderCellComponent = <TRow,>({
   onHideColumn,
   onStartResize,
   onResetColumnWidth,
+  onStartDrag,
+  dragState,
 }: DataGridHeaderCellProps<TRow>) => {
   const { id, header, displayAsText, isResizable, isControl } = column;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -283,6 +289,21 @@ const DataGridHeaderCellComponent = <TRow,>({
   });
 
   const toggleMenu = useCallback(() => setIsMenuOpen((isOpen) => !isOpen), []);
+
+  const isDraggable = Boolean(onStartDrag) && !isControl;
+  const onPointerDown = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      // The resize handle and the open menu keep their own pointer behavior.
+      if (
+        event.target instanceof Element &&
+        event.target.closest('[data-kbn-data-grid-resize-handle]')
+      ) {
+        return;
+      }
+      onStartDrag?.(id, event);
+    },
+    [onStartDrag, id]
+  );
   const onKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       // Like EuiDataGrid, Enter on the focused header opens its actions.
@@ -340,9 +361,14 @@ const DataGridHeaderCellComponent = <TRow,>({
         layout.sticky?.isEdge && styles.cellStickyEdge,
         isControl && styles.cellNoSelect,
         isControl && styles.cellControl,
+        dragState === 'dragging' && styles.headerCellDragging,
+        dragState === 'dropBefore' && styles.headerCellDropBefore,
+        dragState === 'dropAfter' && styles.headerCellDropAfter,
       ]}
       style={getLayoutStyle(layout)}
       onKeyDown={onKeyDown}
+      onPointerDown={isDraggable ? onPointerDown : undefined}
+      data-drag-state={dragState}
       {...(isMenuOpen && { [CELL_ENTERED_ATTRIBUTE]: '' })}
     >
       {hasMenu ? (
@@ -383,6 +409,7 @@ const DataGridHeaderCellComponent = <TRow,>({
       {isResizable && (
         <div
           role="presentation"
+          data-kbn-data-grid-resize-handle=""
           onMouseDown={(event) => onStartResize(columnIndex, event)}
           onTouchStart={(event) => onStartResize(columnIndex, event)}
           onDoubleClick={() => onResetColumnWidth(columnIndex)}

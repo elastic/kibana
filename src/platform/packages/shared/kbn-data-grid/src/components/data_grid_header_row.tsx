@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MouseEvent, TouchEvent } from 'react';
+import type { MouseEvent, PointerEvent, TouchEvent } from 'react';
 import React from 'react';
 import { DATA_GRID_HEADER_ROW_CLASS } from '../constants';
 import type { DataGridStyles } from '../styles';
+import type { ColumnDragState } from '../hooks/use_column_drag';
 import type { DataGridProps } from '../types';
 import { DataGridHeaderCell } from './data_grid_header_cell';
 import type { DataGridColumnSlices } from './data_grid_row';
@@ -28,7 +29,23 @@ interface DataGridHeaderRowProps<TRow> {
   onHideColumn?: DataGridProps<TRow>['onHideColumn'];
   onStartResize: (columnIndex: number, event: MouseEvent | TouchEvent) => void;
   onResetColumnWidth: (columnIndex: number) => void;
+  /** Set when the data columns can be dragged to reorder them. */
+  onStartDrag?: (columnId: string, event: PointerEvent) => void;
+  dragState?: ColumnDragState;
 }
+
+const getCellDragState = (columnId: string, dragState: ColumnDragState | undefined) => {
+  if (!dragState) {
+    return undefined;
+  }
+  if (dragState.columnId === columnId) {
+    return 'dragging';
+  }
+  if (dragState.dropColumnId !== columnId) {
+    return undefined;
+  }
+  return dragState.dropSide === 'before' ? 'dropBefore' : 'dropAfter';
+};
 
 export const DataGridHeaderRow = <TRow,>({
   slices,
@@ -41,6 +58,8 @@ export const DataGridHeaderRow = <TRow,>({
   onHideColumn,
   onStartResize,
   onResetColumnWidth,
+  onStartDrag,
+  dragState,
 }: DataGridHeaderRowProps<TRow>) => {
   const { columns, layouts, leading, middle, trailing, startSpacer, endSpacer, totalWidth } =
     slices;
@@ -66,6 +85,8 @@ export const DataGridHeaderRow = <TRow,>({
       onHideColumn={onHideColumn}
       onStartResize={onStartResize}
       onResetColumnWidth={onResetColumnWidth}
+      onStartDrag={onStartDrag}
+      dragState={getCellDragState(columns[columnIndex].id, dragState)}
     />
   );
 

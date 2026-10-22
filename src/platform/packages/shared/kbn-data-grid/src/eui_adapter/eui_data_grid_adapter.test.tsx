@@ -8,7 +8,7 @@
  */
 
 import React, { createRef, useEffect } from 'react';
-import { act, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type {
   EuiDataGridCellPopoverElementProps,
@@ -20,6 +20,7 @@ import type {
 } from '@elastic/eui';
 import { CELL_EXPANSION_POPOVER_TEST_SUBJ } from '../constants';
 import type { EuiDataGridAdapterProps, EuiDataGridAdapterRef } from './eui_data_grid_adapter';
+import { mockHeaderLayout } from '../test_utils/mock_header_layout';
 import { EuiDataGridAdapter } from './eui_data_grid_adapter';
 
 const values = [
@@ -163,6 +164,60 @@ describe('EuiDataGridAdapter', () => {
 
     await userEvent.click(within(await openMenu('count')).getByTestId('gridHideColumn'));
     expect(setVisibleColumns).toHaveBeenLastCalledWith(['name']);
+  });
+
+  describe('dragging headers', () => {
+    // Headers laid out next to each other by their column id.
+    const headerRects: Record<string, { left: number; width: number }> = {
+      select: { left: 0, width: 40 },
+      name: { left: 40, width: 200 },
+      count: { left: 240, width: 120 },
+    };
+    let restoreLayout: () => void;
+    beforeAll(() => {
+      restoreLayout = mockHeaderLayout(headerRects);
+    });
+    afterAll(() => restoreLayout());
+
+    const dragNameAfterCount = () => {
+      fireEvent.pointerDown(screen.getByTestId('dataGridHeaderCell-name'), {
+        clientX: 60,
+        button: 0,
+      });
+      fireEvent.pointerMove(document, { clientX: 80 });
+      fireEvent.pointerMove(document, { clientX: 350 });
+      fireEvent.pointerUp(document, { clientX: 350 });
+    };
+
+    it('reorders the visible columns when canDragAndDropColumns is set, keeping unknown ids', () => {
+      const setVisibleColumns = jest.fn();
+      render(
+        <EuiDataGridAdapter
+          {...getProps({
+            columnVisibility: {
+              visibleColumns: ['name', 'missing', 'count'],
+              setVisibleColumns,
+              canDragAndDropColumns: true,
+            },
+          })}
+        />
+      );
+      dragNameAfterCount();
+      expect(setVisibleColumns).toHaveBeenCalledWith(['missing', 'count', 'name']);
+    });
+
+    it('does not reorder by dragging without canDragAndDropColumns, like EuiDataGrid', () => {
+      const setVisibleColumns = jest.fn();
+      render(
+        <EuiDataGridAdapter
+          {...getProps({
+            columnVisibility: { visibleColumns: ['name', 'count'], setVisibleColumns },
+          })}
+        />
+      );
+      dragNameAfterCount();
+      expect(setVisibleColumns).not.toHaveBeenCalled();
+    });
   });
 
   it('adds the additional header actions of a column', async () => {

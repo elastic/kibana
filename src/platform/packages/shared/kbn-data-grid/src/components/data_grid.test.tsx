@@ -34,6 +34,7 @@ import type {
   DataGridRef,
 } from '../types';
 import { getLinesRowHeight } from '../utils/row_height';
+import { mockHeaderLayout } from '../test_utils/mock_header_layout';
 import { DataGrid } from './data_grid';
 
 interface TestRow {
@@ -1020,6 +1021,112 @@ describe('DataGrid', () => {
       expect(onClick).toHaveBeenCalled();
       // Columns without any action have no menu.
       expect(screen.queryByTestId('dataGridHeaderCellActionButton-value')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('reordering columns by dragging their headers', () => {
+    // Headers laid out next to each other by their column id.
+    const headerRects: Record<string, { left: number; width: number }> = {
+      control: { left: 0, width: 32 },
+      name: { left: 32, width: 200 },
+      value: { left: 232, width: 200 },
+    };
+    const sortableColumns: Array<DataGridColumn<TestRow>> = [
+      { ...columns[0], isSortable: true },
+      { ...columns[1], isSortable: true },
+    ];
+    let restoreLayout: () => void;
+    beforeAll(() => {
+      restoreLayout = mockHeaderLayout(headerRects);
+    });
+    afterAll(() => restoreLayout());
+
+    const getHeader = (columnId: string) => screen.getByTestId(`dataGridHeaderCell-${columnId}`);
+    const drag = (columnId: string, toX: number) => {
+      const fromX = headerRects[columnId].left + 20;
+      fireEvent.pointerDown(getHeader(columnId), { clientX: fromX, button: 0 });
+      fireEvent.pointerMove(document, { clientX: fromX + 10 });
+      fireEvent.pointerMove(document, { clientX: toX });
+    };
+
+    it('moves a column to where its header is dropped, without opening its menu', () => {
+      const onReorderColumn = jest.fn();
+      render(
+        <DataGrid
+          {...defaultProps}
+          columns={sortableColumns}
+          sorting={{ columns: [], onSort: jest.fn() }}
+          onReorderColumn={onReorderColumn}
+        />
+      );
+
+      drag('name', 400);
+      expect(getHeader('name')).toHaveAttribute('data-drag-state', 'dragging');
+      expect(getHeader('value')).toHaveAttribute('data-drag-state', 'dropAfter');
+
+      fireEvent.pointerUp(document, { clientX: 400 });
+      fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-name'));
+      expect(onReorderColumn).toHaveBeenCalledWith({ columnId: 'name', toIndex: 1 });
+      expect(screen.queryByTestId('dataGridHeaderCellActionGroup-name')).not.toBeInTheDocument();
+      expect(getHeader('name')).not.toHaveAttribute('data-drag-state');
+    });
+
+    it('moves a column before the one it is dropped on the left half of', () => {
+      const onReorderColumn = jest.fn();
+      render(
+        <DataGrid {...defaultProps} columns={sortableColumns} onReorderColumn={onReorderColumn} />
+      );
+      drag('value', 50);
+      expect(getHeader('name')).toHaveAttribute('data-drag-state', 'dropBefore');
+      fireEvent.pointerUp(document, { clientX: 50 });
+      expect(onReorderColumn).toHaveBeenCalledWith({ columnId: 'value', toIndex: 0 });
+    });
+
+    it('does not move a column dropped where it already is, nor control columns', () => {
+      const onReorderColumn = jest.fn();
+      render(
+        <DataGrid {...defaultProps} columns={sortableColumns} onReorderColumn={onReorderColumn} />
+      );
+      drag('name', 100);
+      fireEvent.pointerUp(document, { clientX: 100 });
+
+      fireEvent.pointerDown(getHeader('control'), { clientX: 10, button: 0 });
+      fireEvent.pointerMove(document, { clientX: 400 });
+      fireEvent.pointerUp(document, { clientX: 400 });
+      expect(onReorderColumn).not.toHaveBeenCalled();
+    });
+
+    it('treats a press without movement as a click, and cancels a drag with Escape', () => {
+      const onReorderColumn = jest.fn();
+      render(
+        <DataGrid {...defaultProps} columns={sortableColumns} onReorderColumn={onReorderColumn} />
+      );
+      fireEvent.pointerDown(getHeader('name'), { clientX: 50, button: 0 });
+      fireEvent.pointerMove(document, { clientX: 52 });
+      fireEvent.pointerUp(document, { clientX: 52 });
+      expect(getHeader('value')).not.toHaveAttribute('data-drag-state');
+
+      drag('name', 400);
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(getHeader('name')).not.toHaveAttribute('data-drag-state');
+      fireEvent.pointerUp(document, { clientX: 400 });
+      expect(onReorderColumn).not.toHaveBeenCalled();
+    });
+
+    it('does not drag with touch or without onReorderColumn', () => {
+      const onReorderColumn = jest.fn();
+      const { rerender } = render(<DataGrid {...defaultProps} columns={sortableColumns} />);
+      drag('name', 400);
+      expect(getHeader('name')).not.toHaveAttribute('data-drag-state');
+      fireEvent.pointerUp(document, { clientX: 400 });
+
+      rerender(
+        <DataGrid {...defaultProps} columns={sortableColumns} onReorderColumn={onReorderColumn} />
+      );
+      fireEvent.pointerDown(getHeader('name'), { clientX: 50, button: 0, pointerType: 'touch' });
+      fireEvent.pointerMove(document, { clientX: 400 });
+      fireEvent.pointerUp(document, { clientX: 400 });
+      expect(onReorderColumn).not.toHaveBeenCalled();
     });
   });
 

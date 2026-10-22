@@ -297,9 +297,9 @@ const gridAreaStyles = css({ flex: '1 1 0', minBlockSize: 0 });
  *
  * Supports: columns (display, width, sorting, header actions, cell actions), leading and trailing
  * control columns, `renderCellValue` (and `cellContext`), `renderCellPopover`, sorting, pagination,
- * `gridStyle` (density), `rowHeightsOptions`, the toolbar (also a custom one), full screen, and the
- * imperative methods. Not supported: in-memory sorting and pagination, `renderCustomGridBody`,
- * footers, column drag and drop in the header.
+ * `gridStyle` (density), `rowHeightsOptions`, the toolbar (also a custom one), full screen, dragging
+ * headers to reorder the columns (`columnVisibility.canDragAndDropColumns`), and the imperative
+ * methods. Not supported: in-memory sorting and pagination, `renderCustomGridBody`, footers.
  */
 export const EuiDataGridAdapter = forwardRef(
   (
@@ -333,7 +333,7 @@ export const EuiDataGridAdapter = forwardRef(
   ) => {
     const euiThemeContext = useEuiTheme();
     const gridRef = useRef<DataGridRef>(null);
-    const { visibleColumns, setVisibleColumns } = columnVisibility;
+    const { visibleColumns, setVisibleColumns, canDragAndDropColumns } = columnVisibility;
 
     /**
      * Rows: a row is its index, the page shows a slice of them.
@@ -375,6 +375,20 @@ export const EuiDataGridAdapter = forwardRef(
         setVisibleColumns(next);
       },
       [visibleColumns, setVisibleColumns]
+    );
+    // `toIndex` counts the columns that are shown: an id in `visibleColumns` without a column stays.
+    const reorderColumn = useCallback(
+      ({ columnId, toIndex }: { columnId: string; toIndex: number }) => {
+        const shownIds = orderedColumns
+          .map(({ id: shownId }) => shownId)
+          .filter((shownId) => shownId !== columnId);
+        const beforeId = shownIds[toIndex];
+        const next = visibleColumns.filter((visibleId) => visibleId !== columnId);
+        const insertAt = beforeId === undefined ? next.length : next.indexOf(beforeId);
+        next.splice(insertAt, 0, columnId);
+        setVisibleColumns(next);
+      },
+      [orderedColumns, visibleColumns, setVisibleColumns]
     );
     const hideColumn = useCallback(
       (columnId: string) =>
@@ -899,6 +913,7 @@ export const EuiDataGridAdapter = forwardRef(
             sorting={sorting}
             onMoveColumn={moveColumn}
             onHideColumn={hideColumn}
+            onReorderColumn={canDragAndDropColumns ? reorderColumn : undefined}
             headerRowHeight="auto"
             stickyColumnCount={stickyColumnCount}
             getCellProps={getCellProps}

@@ -175,6 +175,12 @@ export const componentStyles = {
     overflowWrap: 'anywhere',
   }),
   // A header with a menu: the whole header opens it, so it shows it can be used.
+  // Dragging a header to reorder the columns: the dragged one fades, a line marks where it goes.
+  headerCellDragging: css({ opacity: 0.5 }),
+  headerCellDropBefore: ({ euiTheme }: UseEuiTheme) =>
+    css({ boxShadow: `inset ${euiTheme.border.width.thick} 0 0 ${euiTheme.colors.primary}` }),
+  headerCellDropAfter: ({ euiTheme }: UseEuiTheme) =>
+    css({ boxShadow: `inset -${euiTheme.border.width.thick} 0 0 ${euiTheme.colors.primary}` }),
   headerCellWithMenu: ({ euiTheme }: UseEuiTheme) =>
     css({
       '&:hover': { backgroundColor: euiTheme.colors.backgroundBaseHighlighted },

@@ -43,6 +43,7 @@ visible cells re-render when it changes.
 | `getCellProps({ row, rowIndex, columnId })`, `getRowProps({ row, rowIndex })` | Return `{ css?, className?, 'data-test-subj'? }` for a cell or a row, e.g. a background color. Keep them stable (`useCallback`). |
 | `sorting` | `{ columns: [{ id, direction }], onSort }`. Shows the sort indicator of the columns and the sort actions of the `isSortable` ones. |
 | `onMoveColumn`, `onHideColumn` | Enable the "Move left", "Move right" and "Hide column" actions of the column headers. |
+| `onReorderColumn({ columnId, toIndex })` | Enables reordering the data columns by dragging their headers (with a mouse or pen). `toIndex` is the column's position among the data columns after the move. The columns scroll while the pointer is near their edges, Escape cancels. Keyboard users move columns with the header actions. |
 | `showHeader`, `headerRowHeight` | Render the header row, and how many lines of text it shows (`'auto'` grows). |
 | `gridStyle` | `{ cellPadding, fontSize, border, stripes, rowHover, header }`, like `EuiDataGrid`. Defaults to compact text, horizontal borders, stripes and a hover highlight. |
 | `rowHeight`, `lineHeight` | `'auto'`, or `{ lineCount }` lines of text per row, and the CSS line height of the text. |
@@ -97,7 +98,7 @@ and mark cells.
 
 ## Not supported yet
 
-Trailing control columns in pinned rows, a footer row, column drag and drop in the header, a custom
+Trailing control columns in pinned rows, a footer row, dragging headers on touch screens, a custom
 grid body (`renderCustomGridBody`), in-memory sorting and pagination, a non-interactive mode and a
 render-complete signal. The adapter also leaves out `schemaDetectors`.
 

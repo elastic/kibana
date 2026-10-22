@@ -270,6 +270,11 @@ export interface DataGridProps<TRow> {
   onMoveColumn?: (params: { columnId: string; direction: 'left' | 'right' }) => void;
   /** Enables the "Hide column" action of a column header. */
   onHideColumn?: (columnId: string) => void;
+  /**
+   * Enables reordering the data columns by dragging their headers. `toIndex` is the position of the
+   * column among the data columns (without the control columns) after the move.
+   */
+  onReorderColumn?: (params: { columnId: string; toIndex: number }) => void;
   /** Used to size the scrollbar before rows are measured. Rows grow to fit their content. */
   estimatedRowHeight?: number;
   /**

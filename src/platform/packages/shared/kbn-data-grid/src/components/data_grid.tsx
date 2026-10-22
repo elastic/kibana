@@ -22,6 +22,7 @@ import { OverrideCopiedTabularContent, useEuiTheme, useResizeObserver } from '@e
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { DEFAULT_DATA_GRID_STYLE, DEFAULT_ESTIMATED_ROW_HEIGHT, OVERSCAN } from '../constants';
 import { useColumnSizing } from '../hooks/use_column_sizing';
+import { useColumnDrag } from '../hooks/use_column_drag';
 import { useColumnVirtualization } from '../hooks/use_column_virtualization';
 import { useGridNavigation } from '../hooks/use_grid_navigation';
 import { componentStyles } from '../styles';
@@ -80,6 +81,7 @@ export const DataGrid = <TRow,>({
   sorting,
   onMoveColumn,
   onHideColumn,
+  onReorderColumn,
   estimatedRowHeight: estimatedRowHeightProp,
   columnWidths,
   onColumnResize,
@@ -180,6 +182,7 @@ export const DataGrid = <TRow,>({
     columnWidths,
     onColumnResize,
   });
+  const { dragState, startDrag } = useColumnDrag({ scrollRef, columns, onReorderColumn });
   const columnVirtualization = useColumnVirtualization({
     scrollRef,
     columns,
@@ -471,6 +474,8 @@ export const DataGrid = <TRow,>({
             onHideColumn={onHideColumn}
             onStartResize={startResize}
             onResetColumnWidth={resetColumnWidth}
+            onStartDrag={onReorderColumn ? startDrag : undefined}
+            dragState={dragState}
           />
         )}
         {pinnedRows.length > 0 && (
