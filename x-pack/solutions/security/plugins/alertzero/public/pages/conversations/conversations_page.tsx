@@ -47,6 +47,7 @@ import {
 } from '@kbn/agentic-investigations-plugin/public';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { CoreStart } from '@kbn/core/public';
 import type { DeclineParams } from '@kbn/proposals-ui';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
@@ -549,6 +550,18 @@ const ConversationsPageContent: React.FC = () => {
             })}
           />
         </EuiFlexItem>
+        {!canAccessAgentBuilder && (
+          <EuiFlexItem grow={false}>
+            <KbnWarningCallout
+              announceOnMount
+              size="s"
+              iconType="lock"
+              data-test-subj="alertZeroAgentBuilderPrivilegeCallout"
+            >
+              {AGENT_BUILDER_PRIVILEGE_REQUIRED.callout}
+            </KbnWarningCallout>
+          </EuiFlexItem>
+        )}
         <ScanFailureCallout surface="queue" wrapper={wrapScanFailureCallout} />
         <EuiFlexItem grow={false}>
           <ProposalsTrendChartRow />

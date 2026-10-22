@@ -37,6 +37,10 @@ export const AGENT_BUILDER_PRIVILEGE_REQUIRED = Object.freeze({
     defaultMessage:
       'You need the Agent Builder Kibana privilege to view this investigation. Ask an administrator to update your role.',
   }),
+  callout: i18n.translate('xpack.alertzero.queue.agentBuilderPrivilegeRequired.callout', {
+    defaultMessage:
+      'Some features are unavailable. You need the Agent Builder Kibana privilege to open investigations and chats. Ask an administrator to update your role.',
+  }),
 });
 
 export const IDLE_HEADER = {

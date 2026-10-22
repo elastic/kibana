@@ -424,6 +424,14 @@ describe('ConversationsPage details flyout', () => {
       expect(agentBuilder.openConversationDetails).not.toHaveBeenCalled();
     });
 
+    it('explains which features are unavailable in a callout', () => {
+      renderPage('/', { agentBuilderShow: false });
+
+      expect(screen.getByTestId('alertZeroAgentBuilderPrivilegeCallout')).toHaveTextContent(
+        'You need the Agent Builder Kibana privilege to open investigations and chats'
+      );
+    });
+
     it('leaves the card inert and disables its chat control', () => {
       const { history } = renderPage('/', { agentBuilderShow: false });
 
@@ -431,6 +439,12 @@ describe('ConversationsPage details flyout', () => {
       expect(screen.getByTestId('conversationCardOpenInChat')).toBeDisabled();
       expect(history.location.search).toBe('');
     });
+  });
+
+  it('shows no privilege callout when Agent Builder is accessible', () => {
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertZeroAgentBuilderPrivilegeCallout')).not.toBeInTheDocument();
   });
 
   it('opens nothing with no conversation in the URL', () => {
