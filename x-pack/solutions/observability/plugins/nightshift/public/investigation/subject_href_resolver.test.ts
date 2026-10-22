@@ -23,28 +23,19 @@ describe('createNightshiftSubjectHrefResolver', () => {
     );
   });
 
-  it('opens an alert of an Observability rule type on its alert details page', () => {
+  it('opens any alert on its Observability alert details page', () => {
     const resolve = createResolver();
 
-    expect(
-      resolve({ type: 'alert', id: 'a/1', snapshot: { rule_type_id: 'apm.error_rate' } })
-    ).toBe('/s/space/app/observability-overview/alerts/a%2F1');
+    expect(resolve({ type: 'alert', id: 'a/1' })).toBe(
+      '/s/space/app/observability-overview/alerts/a%2F1'
+    );
     expect(
       resolve({
         type: 'alert',
         id: 'subject-id',
-        snapshot: { id: 'alert-uuid', rule_type_id: 'observability.rules.custom_threshold' },
+        snapshot: { id: 'alert-uuid', rule_type_id: '.es-query', url: '/app/discover#/x' },
       })
     ).toBe('/s/space/app/observability-overview/alerts/alert-uuid');
-  });
-
-  it('does not link an alert of another or an unknown rule type', () => {
-    const resolve = createResolver();
-
-    expect(resolve({ type: 'alert', id: 'a-1', snapshot: { rule_type_id: '.es-query' } })).toBe(
-      undefined
-    );
-    expect(resolve({ type: 'alert', id: 'a-1' })).toBeUndefined();
   });
 
   it('does not link questions or Slack threads', () => {
