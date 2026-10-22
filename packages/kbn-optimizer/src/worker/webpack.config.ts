@@ -217,7 +217,7 @@ export function getWebpackConfig(
                           loaderContext.context || loaderContext.rootContext,
                           Path.resolve(
                             worker.repoRoot,
-                            `src/core/public/styles/core_app/_globals_${theme}.scss`
+                            `src/core/packages/core/public/styles/core_app/_globals_${theme}.scss`
                           )
                         )
                       );
