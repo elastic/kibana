@@ -321,16 +321,18 @@ for (const { name, label, role } of ROLES) {
             title,
             esql: ACCESS_SOURCE_ESQL,
           });
-          expect(createResponse).toHaveStatusCode(200);
-          const created = createResponse.body.results[0];
-          expect(created).toStrictEqual(
-            expect.objectContaining({
-              type: 'other',
-              data: expect.objectContaining({ title, enabled: true }),
-            })
-          );
-          const { id, slug } = created.data;
+          // Read before any assertion, so the source is removed even when one fails.
+          const createdId: string | undefined = createResponse.body.results?.[0]?.data?.id;
           try {
+            expect(createResponse).toHaveStatusCode(200);
+            const created = createResponse.body.results[0];
+            expect(created).toStrictEqual(
+              expect.objectContaining({
+                type: 'other',
+                data: expect.objectContaining({ title, enabled: true }),
+              })
+            );
+            const { id, slug } = created.data;
             const updatedTitle = `${title}-renamed`;
             const updateResponse = await executeTool(
               apiClient,
@@ -372,7 +374,9 @@ for (const { name, label, role } of ROLES) {
             });
             expect(getResponse).toHaveStatusCode(404);
           } finally {
-            await deleteAccessSource({ kbnClient, sourceId: id });
+            if (createdId) {
+              await deleteAccessSource({ kbnClient, sourceId: createdId });
+            }
           }
         }
       );

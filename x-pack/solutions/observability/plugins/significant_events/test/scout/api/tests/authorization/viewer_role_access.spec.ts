@@ -48,6 +48,7 @@ apiTest.describe(
     const eventId = `viewer-access-${uuidv4()}`;
     const ruleUuid = `viewer-access-${uuidv4()}`;
     const featureId = `viewer-access-${uuidv4()}`;
+    const sourceTitle = `viewer-access-${uuidv4()}`;
     let sourceId: string;
     let sourceSlug: string;
     let headers: Record<string, string>;
@@ -59,7 +60,7 @@ apiTest.describe(
       await seedSignificantEvent(esClient, eventId);
       ({ id: sourceId, slug: sourceSlug } = await createAccessSource({
         kbnClient,
-        title: `viewer-access-${uuidv4()}`,
+        title: sourceTitle,
       }));
       await seedDetection({ kbnClient, ruleUuid, sourceId });
       await seedFeature({ kbnClient, sourceId, featureId });
@@ -219,7 +220,7 @@ apiTest.describe(
       'can list and get sources but cannot create, update or delete them from Agent Builder',
       async ({ apiClient }) => {
         const listResponse = await executeTool(apiClient, toolHeaders, SOURCE_LIST_TOOL_ID, {
-          search: 'viewer-access',
+          search: sourceTitle,
         });
         expect(listResponse).toHaveStatusCode(200);
         expect(listResponse.body.results[0].data.sources).toStrictEqual(
