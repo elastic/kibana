@@ -58,6 +58,4 @@ fileGroups:
     - .storybook/**/*
     - test/scout_data_federation/api/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

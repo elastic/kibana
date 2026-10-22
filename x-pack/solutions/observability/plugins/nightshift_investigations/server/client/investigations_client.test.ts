@@ -184,8 +184,21 @@ beforeEach(() => {
   getConnectorById.mockImplementation(async (connectorId: string) => ({ connectorId }));
   withConversations();
   // Like Agent Builder, a conversation created without a title carries the placeholder.
-  conversations.create.mockImplementation(async ({ id, title }: { id: string; title?: string }) =>
-    makeConversation({ id, title: title ?? DEFAULT_CONVERSATION_TITLE })
+  conversations.create.mockImplementation(
+    async ({
+      id,
+      title,
+      metadata,
+    }: {
+      id: string;
+      title?: string;
+      metadata?: { workflow_execution_ids?: string[] };
+    }) =>
+      makeConversation({
+        id,
+        title: title ?? DEFAULT_CONVERSATION_TITLE,
+        workflowExecutionIds: metadata?.workflow_execution_ids,
+      })
   );
   conversations.patchMetadata.mockResolvedValue({ conversation: {}, changedFields: ['status'] });
   subjectsClient.upsertSubjects.mockResolvedValue([]);
@@ -1012,12 +1025,16 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
   it('creates the conversation of a new investigation once the start is accepted, with the run recorded', async () => {
     await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-new' });
 
+    // The run is recorded in the creating write, so the investigation never reads as not in
+    // progress between its creation and a separate metadata patch.
     expect(conversations.create).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'inv-new', templateId: 'investigation' })
+      expect.objectContaining({
+        id: 'inv-new',
+        templateId: 'investigation',
+        metadata: { workflow_execution_ids: ['exec-1'] },
+      })
     );
-    expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-new', {
-      workflow_execution_ids: ['exec-1'],
-    });
+    expect(conversations.patchMetadata).not.toHaveBeenCalled();
     // After the claim and the run, so a denied or failed start creates nothing.
     expect(subjectsClient.claimSubjects.mock.invocationCallOrder[0]).toBeLessThan(
       conversations.create.mock.invocationCallOrder[0]
@@ -1313,14 +1330,14 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       agentId: 'nightshift.investigation',
       templateId: 'investigation',
       accessControl: { access_mode: 'public' },
+      // The run is recorded in the creating write, so the investigation reads as in progress
+      // from the moment it exists.
+      metadata: { workflow_execution_ids: ['exec-1'] },
     });
     // A conversation this call created holds no subjects yet.
     expect(subjectsClient.listByConversationIds).not.toHaveBeenCalled();
     expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
-    // The run is recorded, so the investigation reads as in progress while it runs.
-    expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', {
-      workflow_execution_ids: ['exec-1'],
-    });
+    expect(conversations.patchMetadata).not.toHaveBeenCalled();
   });
 
   it('appends the run to the runs an investigation already records, once', async () => {
@@ -1876,14 +1893,29 @@ describe('NightshiftInvestigationsClient.getLifecycleSubject()', () => {
     expect(subjectsClient.listByConversationIds).toHaveBeenCalledWith(['inv-1']);
   });
 
-  it('reports a Slack thread as a manual subject, after any other subject', async () => {
+  it('reports a Slack thread as a slack_thread subject', async () => {
     subjectsClient.listByConversationIds.mockResolvedValue([
       makeStoredSubject({ subjectType: 'slack_thread', subjectId: 'slack:T:C:1' }),
     ]);
 
     await expect(makeClient().getLifecycleSubject('inv-1')).resolves.toMatchObject({
-      subject: { type: 'manual', id: 'slack:T:C:1' },
+      subject: { type: 'slack_thread', id: 'slack:T:C:1' },
       triggerType: 'manual',
+    });
+  });
+
+  it('prefers any other subject to a Slack thread recorded before it', async () => {
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      makeStoredSubject({
+        subjectType: 'slack_thread',
+        subjectId: 'slack:T:C:1',
+        createdAt: '2026-08-24T12:00:00.000Z',
+      }),
+      makeStoredSubject({ subjectId: 'alert-1', createdAt: '2026-08-24T13:00:00.000Z' }),
+    ]);
+
+    await expect(makeClient().getLifecycleSubject('inv-1')).resolves.toMatchObject({
+      subject: { type: 'alert', id: 'alert-1' },
     });
   });
 

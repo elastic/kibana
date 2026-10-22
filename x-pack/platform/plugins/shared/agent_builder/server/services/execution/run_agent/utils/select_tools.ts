@@ -8,10 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { defaultAgentToolIds } from '@kbn/agent-builder-common';
 import { ToolOrigin, ToolType, filterToolsBySelection } from '@kbn/agent-builder-common';
-import {
-  contextEngineAiIndexTools,
-  contextEngineMemoryTools,
-} from '@kbn/agent-builder-common/tools';
+import { contextEngineMemoryTools } from '@kbn/agent-builder-common/tools';
 import type {
   ToolProvider,
   ExecutableTool,
@@ -83,12 +80,10 @@ export const selectTools = async ({
     runner,
   });
 
+  // The read tools come from the `ki-retrieval` skill, which carries the guidance for using them.
+  // Memory tools have no skill of their own, so they stay static.
   const hasMemoryEnabledAiIndex =
     aiIndexCatalog?.some(({ memoryEnabled }) => memoryEnabled) ?? false;
-  const aiIndexToolIds = [
-    ...Object.values(contextEngineAiIndexTools),
-    ...(hasMemoryEnabledAiIndex ? Object.values(contextEngineMemoryTools) : []),
-  ];
 
   // pick tools from provider (from agent config and attachment-type tools)
   const staticRegistryTools = await pickTools({
@@ -98,8 +93,8 @@ export const selectTools = async ({
       ...(agentConfiguration.enable_elastic_capabilities
         ? [{ tool_ids: defaultAgentToolIds }]
         : []),
-      ...(aiIndicesEnabled && (agentConfiguration.ai_indices?.length ?? 0) > 0
-        ? [{ tool_ids: aiIndexToolIds }]
+      ...(aiIndicesEnabled && hasMemoryEnabledAiIndex
+        ? [{ tool_ids: Object.values(contextEngineMemoryTools) }]
         : []),
     ],
     toolProvider,
