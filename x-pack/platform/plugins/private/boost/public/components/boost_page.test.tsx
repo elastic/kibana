@@ -115,10 +115,14 @@ describe('Project defaults', () => {
   it('shows each default, and what it applies to', () => {
     renderPage();
 
-    expect(getPanel('indices')).toHaveTextContent('IndicesPerformant');
-    expect(getPanel('indices')).toHaveTextContent('1 index · 2 GB');
-    expect(getPanel('data_streams')).toHaveTextContent('Data streamsLast 7 days');
-    expect(getPanel('data_streams')).toHaveTextContent('1 data stream · 3 GB');
+    expect(getPanel('indices')).toHaveTextContent('Performant');
+    expect(screen.getByTestId('boostProjectDefaultCount-indices')).toHaveTextContent('1 index');
+    expect(screen.getByTestId('boostProjectDefaultSize-indices')).toHaveTextContent('2 GB');
+    expect(getPanel('data_streams')).toHaveTextContent('Last 7 days');
+    expect(screen.getByTestId('boostProjectDefaultCount-data_streams')).toHaveTextContent(
+      '1 data stream'
+    );
+    expect(screen.getByTestId('boostProjectDefaultSize-data_streams')).toHaveTextContent('3 GB');
   });
 
   it('shows a custom default as its profile, with a link to its details', () => {
@@ -127,7 +131,9 @@ describe('Project defaults', () => {
     ]);
     renderPage();
 
-    expect(getPanel('indices')).toHaveTextContent('Indicescatalog-search');
+    expect(screen.getByTestId('boostProjectDefaultValue-indices')).toHaveTextContent(
+      'catalog-search'
+    );
     expect(
       within(getPanel('indices')).getByRole('link', { name: 'View boost profile "catalog-search"' })
     ).toHaveAttribute('href', '/profiles/catalog-search');

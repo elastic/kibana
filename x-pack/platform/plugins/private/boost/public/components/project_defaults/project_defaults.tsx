@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
   EuiStat,
@@ -133,10 +134,25 @@ const ProjectDefaultPanel = ({
       >
         <EuiFlexItem>
           <EuiStat
+            // What the default applies to follows its type: how many, and how much data.
             description={
               <span css={inlineCss}>
                 <EuiIcon type={TYPE_ICONS[type]} aria-hidden={true} />
                 {PROFILE_TYPE_LABELS[type]}
+                <EuiNotificationBadge
+                  color="subdued"
+                  size="s"
+                  data-test-subj={`boostProjectDefaultCount-${type}`}
+                >
+                  {formatDataSourceCount(type, appliedCount)}
+                </EuiNotificationBadge>
+                <EuiNotificationBadge
+                  color="subdued"
+                  size="s"
+                  data-test-subj={`boostProjectDefaultSize-${type}`}
+                >
+                  {formatSize(appliedSize)}
+                </EuiNotificationBadge>
               </span>
             }
             title={
@@ -164,17 +180,6 @@ const ProjectDefaultPanel = ({
             <EuiSpacer size="xs" />
             <EuiText size="s" color="subdued">
               <p>{preset ? preset.description : CUSTOM_PROFILE_DESCRIPTION}</p>
-            </EuiText>
-            <EuiText size="s" color="subdued">
-              <p>
-                {i18n.translate('xpack.boost.projectDefaults.appliedTo', {
-                  defaultMessage: '{targets} · {size}',
-                  values: {
-                    targets: formatDataSourceCount(type, appliedCount),
-                    size: formatSize(appliedSize),
-                  },
-                })}
-              </p>
             </EuiText>
           </EuiStat>
         </EuiFlexItem>
