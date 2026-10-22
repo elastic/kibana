@@ -57,13 +57,10 @@ export const MicrosoftTeams: ConnectorSpec = {
   metadata: {
     id: MICROSOFT_TEAMS_CONNECTOR_TYPE_ID,
     displayName: 'Microsoft Teams (v2)',
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.microsoftTeams.metadata.description',
-      {
-        defaultMessage:
-          'Send messages to channels and chats, search conversations, and list teams, channels, and chats in Microsoft Teams',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.microsoftTeams.metadata.description', {
+      defaultMessage:
+        'Send messages to channels and chats, search conversations, and list teams, channels, and chats in Microsoft Teams',
+    }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
@@ -94,12 +91,12 @@ export const MicrosoftTeams: ConnectorSpec = {
             scope: { hidden: true },
             authorizationUrl: {
               label: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.microsoftTeams.auth.oauthAuthCode.authorizationUrl.label',
+                'connectorSpecs.microsoftTeams.auth.oauthAuthCode.authorizationUrl.label',
                 { defaultMessage: 'Authorization URL' }
               ),
               placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize',
               helpText: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.microsoftTeams.auth.oauthAuthCode.authorizationUrl.helpText',
+                'connectorSpecs.microsoftTeams.auth.oauthAuthCode.authorizationUrl.helpText',
                 {
                   defaultMessage:
                     "Replace '{tenant-id}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/authorize",
@@ -108,12 +105,12 @@ export const MicrosoftTeams: ConnectorSpec = {
             },
             tokenUrl: {
               label: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.microsoftTeams.auth.oauthAuthCode.tokenUrl.label',
+                'connectorSpecs.microsoftTeams.auth.oauthAuthCode.tokenUrl.label',
                 { defaultMessage: 'Token URL' }
               ),
               placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
               helpText: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.microsoftTeams.auth.oauthAuthCode.tokenUrl.helpText',
+                'connectorSpecs.microsoftTeams.auth.oauthAuthCode.tokenUrl.helpText',
                 {
                   defaultMessage:
                     "Replace '{tenant-id}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
@@ -132,13 +129,12 @@ export const MicrosoftTeams: ConnectorSpec = {
           meta: {
             scope: { hidden: true },
             tokenUrl: {
-              label: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.microsoftTeams.auth.oauth.tokenUrl.label',
-                { defaultMessage: 'Token URL' }
-              ),
+              label: i18n.translate('connectorSpecs.microsoftTeams.auth.oauth.tokenUrl.label', {
+                defaultMessage: 'Token URL',
+              }),
               placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
               helpText: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.microsoftTeams.auth.oauth.tokenUrl.helpText',
+                'connectorSpecs.microsoftTeams.auth.oauth.tokenUrl.helpText',
                 {
                   defaultMessage:
                     "Replace '{tenant-id}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
@@ -160,12 +156,12 @@ export const MicrosoftTeams: ConnectorSpec = {
             scope: { hidden: true },
             tokenUrl: {
               label: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.microsoftTeams.auth.privateKeyJwt.tokenUrl.label',
+                'connectorSpecs.microsoftTeams.auth.privateKeyJwt.tokenUrl.label',
                 { defaultMessage: 'Token URL' }
               ),
               placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
               helpText: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.microsoftTeams.auth.privateKeyJwt.tokenUrl.helpText',
+                'connectorSpecs.microsoftTeams.auth.privateKeyJwt.tokenUrl.helpText',
                 {
                   defaultMessage:
                     "Replace '{tenant-id}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
@@ -599,12 +595,9 @@ export const MicrosoftTeams: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.microsoftTeams.test.description',
-      {
-        defaultMessage: 'Verifies Microsoft Teams connection by listing joined teams',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.microsoftTeams.test.description', {
+      defaultMessage: 'Verifies Microsoft Teams connection by listing joined teams',
+    }),
     handler: async (ctx) => {
       ctx.log.debug('Microsoft Teams test handler');
       const url = isAppOnlyAuth(ctx.secrets?.authType)

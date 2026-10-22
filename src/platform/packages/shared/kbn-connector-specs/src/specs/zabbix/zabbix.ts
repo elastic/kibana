@@ -150,7 +150,7 @@ export const Zabbix: ConnectorSpec = {
   metadata: {
     id: '.zabbix',
     displayName: 'Zabbix',
-    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.zabbix.metadata.description', {
+    description: i18n.translate('connectorSpecs.zabbix.metadata.description', {
       defaultMessage:
         'Read and triage Zabbix problems and events, manage maintenance windows, and enable or disable hosts and triggers',
     }),
@@ -171,19 +171,13 @@ export const Zabbix: ConnectorSpec = {
         overrides: {
           meta: {
             token: {
-              label: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.zabbix.auth.bearer.token.label',
-                {
-                  defaultMessage: 'API token',
-                }
-              ),
-              helpText: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.zabbix.auth.bearer.token.helpText',
-                {
-                  defaultMessage:
-                    'A Zabbix API token (Users > API tokens in the Zabbix frontend) or a session token from the user.login method. Sent as a Bearer Authorization header, which requires Zabbix 6.4 or later. Use an Admin or Super admin account if this connector will manage maintenance windows or enable/disable hosts and triggers — other actions work with any user type.',
-                }
-              ),
+              label: i18n.translate('connectorSpecs.zabbix.auth.bearer.token.label', {
+                defaultMessage: 'API token',
+              }),
+              helpText: i18n.translate('connectorSpecs.zabbix.auth.bearer.token.helpText', {
+                defaultMessage:
+                  'A Zabbix API token (Users > API tokens in the Zabbix frontend) or a session token from the user.login method. Sent as a Bearer Authorization header, which requires Zabbix 6.4 or later. Use an Admin or Super admin account if this connector will manage maintenance windows or enable/disable hosts and triggers — other actions work with any user type.',
+              }),
             },
           },
         },
@@ -196,16 +190,13 @@ export const Zabbix: ConnectorSpec = {
       baseUrl: UISchemas.url('https://zabbix.example.com')
         .describe('Zabbix frontend base URL')
         .meta({
-          label: i18n.translate('connectorSpecs.kibanaConnectorSpecs.zabbix.config.baseUrl.label', {
+          label: i18n.translate('connectorSpecs.zabbix.config.baseUrl.label', {
             defaultMessage: 'Zabbix URL',
           }),
-          helpText: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.zabbix.config.baseUrl.helpText',
-            {
-              defaultMessage:
-                'The base URL of your self-hosted Zabbix frontend, e.g. https://zabbix.example.com — do not include /api_jsonrpc.php. Must be network-reachable from Kibana.',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.zabbix.config.baseUrl.helpText', {
+            defaultMessage:
+              'The base URL of your self-hosted Zabbix frontend, e.g. https://zabbix.example.com — do not include /api_jsonrpc.php. Must be network-reachable from Kibana.',
+          }),
           validate: { allowedHosts: true },
         }),
     })
@@ -530,7 +521,7 @@ export const Zabbix: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.zabbix.test.description', {
+    description: i18n.translate('connectorSpecs.zabbix.test.description', {
       defaultMessage: 'Verifies the connection by listing a host from Zabbix',
     }),
     handler: async (ctx) => {

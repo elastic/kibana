@@ -99,13 +99,10 @@ export const Buildkite: ConnectorSpec = {
   metadata: {
     id: '.buildkite',
     displayName: 'Buildkite',
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.buildkite.metadata.description',
-      {
-        defaultMessage:
-          'Trigger, observe, retry, and cancel Buildkite builds, unblock deploy gates, and post annotations',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.buildkite.metadata.description', {
+      defaultMessage:
+        'Trigger, observe, retry, and cancel Buildkite builds, unblock deploy gates, and post annotations',
+    }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
@@ -120,19 +117,13 @@ export const Buildkite: ConnectorSpec = {
         overrides: {
           meta: {
             token: {
-              label: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.buildkite.auth.bearer.token.label',
-                {
-                  defaultMessage: 'API Access Token',
-                }
-              ),
-              helpText: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.buildkite.auth.bearer.token.helpText',
-                {
-                  defaultMessage:
-                    'A Buildkite API access token with the read_pipelines, read_builds, write_builds, read_artifacts, and read_build_logs scopes. Create one at buildkite.com/user/api-access-tokens.',
-                }
-              ),
+              label: i18n.translate('connectorSpecs.buildkite.auth.bearer.token.label', {
+                defaultMessage: 'API Access Token',
+              }),
+              helpText: i18n.translate('connectorSpecs.buildkite.auth.bearer.token.helpText', {
+                defaultMessage:
+                  'A Buildkite API access token with the read_pipelines, read_builds, write_builds, read_artifacts, and read_build_logs scopes. Create one at buildkite.com/user/api-access-tokens.',
+              }),
             },
           },
         },
@@ -149,19 +140,13 @@ export const Buildkite: ConnectorSpec = {
           widget: 'text',
           placeholder: BUILDKITE_MCP_SERVER_URL,
           hidden: true,
-          label: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.buildkite.config.serverUrl.label',
-            {
-              defaultMessage: 'MCP Server URL',
-            }
-          ),
-          helpText: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.buildkite.config.serverUrl.helpText',
-            {
-              defaultMessage:
-                "The URL of Buildkite's hosted MCP server (API-token pass-through endpoint).",
-            }
-          ),
+          label: i18n.translate('connectorSpecs.buildkite.config.serverUrl.label', {
+            defaultMessage: 'MCP Server URL',
+          }),
+          helpText: i18n.translate('connectorSpecs.buildkite.config.serverUrl.helpText', {
+            defaultMessage:
+              "The URL of Buildkite's hosted MCP server (API-token pass-through endpoint).",
+          }),
         }),
       orgSlug: z
         .string()
@@ -170,20 +155,14 @@ export const Buildkite: ConnectorSpec = {
         .describe('Your Buildkite organization slug')
         .meta({
           widget: 'text',
-          label: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.buildkite.config.orgSlug.label',
-            {
-              defaultMessage: 'Organization slug',
-            }
-          ),
+          label: i18n.translate('connectorSpecs.buildkite.config.orgSlug.label', {
+            defaultMessage: 'Organization slug',
+          }),
           placeholder: 'my-organization',
-          helpText: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.buildkite.config.orgSlug.helpText',
-            {
-              defaultMessage:
-                'The slug of your Buildkite organization, found in the URL: buildkite.com/your-slug/. Every action in this connector runs against this organization.',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.buildkite.config.orgSlug.helpText', {
+            defaultMessage:
+              'The slug of your Buildkite organization, found in the URL: buildkite.com/your-slug/. Every action in this connector runs against this organization.',
+          }),
         }),
     })
   ),
@@ -590,7 +569,7 @@ export const Buildkite: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.buildkite.test.description', {
+    description: i18n.translate('connectorSpecs.buildkite.test.description', {
       defaultMessage:
         'Verifies the connection to Buildkite by listing pipelines in the configured organization.',
     }),

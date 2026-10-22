@@ -46,12 +46,9 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
   metadata: {
     id: '.google_cloud_storage',
     displayName: 'Google Cloud Storage',
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.googleCloudStorage.metadata.description',
-      {
-        defaultMessage: 'Search and access files in Google Cloud Storage buckets',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.googleCloudStorage.metadata.description', {
+      defaultMessage: 'Search and access files in Google Cloud Storage buckets',
+    }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
@@ -245,12 +242,9 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.googleCloudStorage.test.description',
-      {
-        defaultMessage: 'Verifies Google Cloud Storage connection by calling the GCS API',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.googleCloudStorage.test.description', {
+      defaultMessage: 'Verifies Google Cloud Storage connection by calling the GCS API',
+    }),
     handler: async (ctx) => {
       // A 200 or 400 (missing project id) both prove the token is valid
       await ctx.client.get('https://storage.googleapis.com/storage/v1/b', {

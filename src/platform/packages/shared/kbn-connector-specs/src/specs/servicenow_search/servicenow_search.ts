@@ -86,13 +86,10 @@ export const ServicenowSearch: ConnectorSpec = {
   metadata: {
     id: '.servicenow_search',
     displayName: 'ServiceNow',
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.servicenowSearch.metadata.description',
-      {
-        defaultMessage:
-          'Create, update, and search records, incidents, security incidents, events, and attachments in ServiceNow',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.servicenowSearch.metadata.description', {
+      defaultMessage:
+        'Create, update, and search records, incidents, security incidents, events, and attachments in ServiceNow',
+    }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
@@ -777,12 +774,9 @@ export const ServicenowSearch: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.servicenowSearch.test.description',
-      {
-        defaultMessage: 'Verifies ServiceNow connection by fetching the current user record',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.servicenowSearch.test.description', {
+      defaultMessage: 'Verifies ServiceNow connection by fetching the current user record',
+    }),
     handler: async (ctx) => {
       const { instanceUrl } = ctx.config as { instanceUrl: string };
       // Fetch a minimal record from sys_user — readable by any authenticated user

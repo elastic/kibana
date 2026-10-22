@@ -65,13 +65,10 @@ export const Workday: ConnectorSpec = {
   metadata: {
     id: '.workday',
     displayName: 'Workday',
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.workday.metadata.description',
-      {
-        defaultMessage:
-          'Search workers, browse org charts, retrieve time off, and explore recruiting in Workday',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.workday.metadata.description', {
+      defaultMessage:
+        'Search workers, browse org charts, retrieve time off, and explore recruiting in Workday',
+    }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['agentBuilder'],
@@ -518,7 +515,7 @@ export const Workday: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.workday.test.description', {
+    description: i18n.translate('connectorSpecs.workday.test.description', {
       defaultMessage: 'Verifies Workday connection by listing up to one worker',
     }),
     handler: async (ctx) => {

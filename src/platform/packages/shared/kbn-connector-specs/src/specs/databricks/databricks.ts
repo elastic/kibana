@@ -78,13 +78,10 @@ export const Databricks: ConnectorSpec = {
   metadata: {
     id: '.databricks',
     displayName: 'Databricks',
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.databricks.metadata.description',
-      {
-        defaultMessage:
-          'Execute SQL queries, manage jobs, clusters, and warehouses, and monitor alerts in Databricks',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.databricks.metadata.description', {
+      defaultMessage:
+        'Execute SQL queries, manage jobs, clusters, and warehouses, and monitor alerts in Databricks',
+    }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['agentBuilder'],
@@ -102,7 +99,7 @@ export const Databricks: ConnectorSpec = {
             authorizationUrl: {
               placeholder: 'https://{workspace}.azuredatabricks.net/oidc/v1/authorize',
               helpText: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.databricks.auth.oauth.authorizationUrl.helpText',
+                'connectorSpecs.databricks.auth.oauth.authorizationUrl.helpText',
                 {
                   defaultMessage:
                     "Databricks workspace OAuth authorization URL. Replace '{workspace}' with your Databricks workspace hostname (e.g. adb-1234567890123456.7).",
@@ -111,13 +108,10 @@ export const Databricks: ConnectorSpec = {
             },
             tokenUrl: {
               placeholder: 'https://{workspace}.azuredatabricks.net/oidc/v1/token',
-              helpText: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.databricks.auth.oauth.tokenUrl.helpText',
-                {
-                  defaultMessage:
-                    "Databricks workspace OAuth token endpoint. Replace '{workspace}' with your Databricks workspace hostname.",
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.databricks.auth.oauth.tokenUrl.helpText', {
+                defaultMessage:
+                  "Databricks workspace OAuth token endpoint. Replace '{workspace}' with your Databricks workspace hostname.",
+              }),
             },
             scope: {
               hidden: true,
@@ -129,28 +123,19 @@ export const Databricks: ConnectorSpec = {
         type: 'bearer',
         defaults: {},
         overrides: {
-          label: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.databricks.auth.bearer.label',
-            {
-              defaultMessage: 'Personal access token (PAT)',
-            }
-          ),
+          label: i18n.translate('connectorSpecs.databricks.auth.bearer.label', {
+            defaultMessage: 'Personal access token (PAT)',
+          }),
           meta: {
             token: {
               sensitive: true,
-              label: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.databricks.auth.pat.label',
-                {
-                  defaultMessage: 'Databricks access token',
-                }
-              ),
-              helpText: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.databricks.auth.pat.helpText',
-                {
-                  defaultMessage:
-                    'A Databricks personal access token (PAT). Generate one in the Databricks workspace under User Settings → Developer → Access tokens.',
-                }
-              ),
+              label: i18n.translate('connectorSpecs.databricks.auth.pat.label', {
+                defaultMessage: 'Databricks access token',
+              }),
+              helpText: i18n.translate('connectorSpecs.databricks.auth.pat.helpText', {
+                defaultMessage:
+                  'A Databricks personal access token (PAT). Generate one in the Databricks workspace under User Settings → Developer → Access tokens.',
+              }),
             },
           },
         },
@@ -165,19 +150,13 @@ export const Databricks: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'https://{workspace}.azuredatabricks.net/api/2.0/mcp/sql',
-          label: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.databricks.config.serverUrl.label',
-            {
-              defaultMessage: 'MCP server URL',
-            }
-          ),
-          helpText: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.databricks.config.serverUrl.helpText',
-            {
-              defaultMessage:
-                "The Databricks SQL MCP server URL for your workspace. Replace '{workspace}' with your workspace hostname. ",
-            }
-          ),
+          label: i18n.translate('connectorSpecs.databricks.config.serverUrl.label', {
+            defaultMessage: 'MCP server URL',
+          }),
+          helpText: i18n.translate('connectorSpecs.databricks.config.serverUrl.helpText', {
+            defaultMessage:
+              "The Databricks SQL MCP server URL for your workspace. Replace '{workspace}' with your workspace hostname. ",
+          }),
         }),
     })
   ),
@@ -500,7 +479,7 @@ export const Databricks: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.databricks.test.description', {
+    description: i18n.translate('connectorSpecs.databricks.test.description', {
       defaultMessage:
         'Verifies connection to the Databricks MCP server by listing available tools.',
     }),

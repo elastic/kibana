@@ -43,13 +43,10 @@ export const SharepointServer: ConnectorSpec = {
   metadata: {
     id: '.sharepoint-server',
     displayName: 'SharePoint Server',
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.sharepointServer.metadata.description',
-      {
-        defaultMessage:
-          'Connect to SharePoint Server (on-premises) to search and retrieve site content.',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.sharepointServer.metadata.description', {
+      defaultMessage:
+        'Connect to SharePoint Server (on-premises) to search and retrieve site content.',
+    }),
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
     isTechnicalPreview: true,
@@ -305,12 +302,9 @@ export const SharepointServer: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.sharepointServer.test.description',
-      {
-        defaultMessage: 'Verifies SharePoint Server connection by fetching the site title.',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.sharepointServer.test.description', {
+      defaultMessage: 'Verifies SharePoint Server connection by fetching the site title.',
+    }),
     handler: async (ctx) => {
       ctx.log.debug('SharePoint Server test handler');
       const { siteUrl } = ctx.config as { siteUrl: string };

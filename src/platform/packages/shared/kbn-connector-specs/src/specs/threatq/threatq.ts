@@ -84,10 +84,10 @@ const configSchema = lazySchema(() =>
         );
       }, 'Enter an HTTPS instance URL, optionally ending in /api, without credentials, query parameters, or a fragment.')
       .meta({
-        label: i18n.translate('connectorSpecs.kibanaConnectorSpecs.threatq.config.urlLabel', {
+        label: i18n.translate('connectorSpecs.threatq.config.urlLabel', {
           defaultMessage: 'ThreatQ URL',
         }),
-        helpText: i18n.translate('connectorSpecs.kibanaConnectorSpecs.threatq.config.urlHelpText', {
+        helpText: i18n.translate('connectorSpecs.threatq.config.urlHelpText', {
           defaultMessage:
             'HTTPS URL of your hosted or on-premises ThreatQ instance, for example https://threatq.example.com. The instance must be reachable from Kibana.',
         }),
@@ -98,19 +98,13 @@ const configSchema = lazySchema(() =>
       .max(200)
       .optional()
       .meta({
-        label: i18n.translate(
-          'connectorSpecs.kibanaConnectorSpecs.threatq.config.defaultSourceLabel',
-          {
-            defaultMessage: 'Default source',
-          }
-        ),
-        helpText: i18n.translate(
-          'connectorSpecs.kibanaConnectorSpecs.threatq.config.defaultSourceHelp',
-          {
-            defaultMessage:
-              'Optional source name, for example Elastic Security. Applied to object and attribute writes that accept sources when the action omits them.',
-          }
-        ),
+        label: i18n.translate('connectorSpecs.threatq.config.defaultSourceLabel', {
+          defaultMessage: 'Default source',
+        }),
+        helpText: i18n.translate('connectorSpecs.threatq.config.defaultSourceHelp', {
+          defaultMessage:
+            'Optional source name, for example Elastic Security. Applied to object and attribute writes that accept sources when the action omits them.',
+        }),
       }),
   })
 );
@@ -148,13 +142,10 @@ export const ThreatQ: ConnectorSpec = {
   metadata: {
     id: '.threatq',
     displayName: 'ThreatQ',
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.threatq.metadata.description',
-      {
-        defaultMessage:
-          'Search and enrich ThreatQ intelligence, update indicators, link objects, and run plugin actions',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.threatq.metadata.description', {
+      defaultMessage:
+        'Search and enrich ThreatQ intelligence, update indicators, link objects, and run plugin actions',
+    }),
     minimumLicense: 'gold',
     isTechnicalPreview: true,
     supportedFeatureIds: ['agentBuilder', 'workflows'],
@@ -167,18 +158,15 @@ export const ThreatQ: ConnectorSpec = {
         defaults: { tokenEndpointAuthMethod: 'client_secret_basic', tokenType: 'Bearer' },
         overrides: {
           fields: { tokenUrl: tokenUrlSchema },
-          label: i18n.translate('connectorSpecs.kibanaConnectorSpecs.threatq.auth.oauthLabel', {
+          label: i18n.translate('connectorSpecs.threatq.auth.oauthLabel', {
             defaultMessage: 'OAuth 2.0 API credentials',
           }),
           meta: {
             tokenUrl: {
-              helpText: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.threatq.auth.tokenUrlHelp',
-                {
-                  defaultMessage:
-                    'Your ThreatQ instance URL followed by /api/token. Generate API credentials with the ThreatQ CLI, or contact support for a hosted instance.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.threatq.auth.tokenUrlHelp', {
+                defaultMessage:
+                  'Your ThreatQ instance URL followed by /api/token. Generate API credentials with the ThreatQ CLI, or contact support for a hosted instance.',
+              }),
             },
             scope: { hidden: true },
           },
@@ -189,38 +177,29 @@ export const ThreatQ: ConnectorSpec = {
         defaults: { usernameField: 'email', requestBodyFormat: 'json', tokenType: 'Bearer' },
         overrides: {
           fields: { tokenUrl: tokenUrlSchema },
-          label: i18n.translate('connectorSpecs.kibanaConnectorSpecs.threatq.auth.userLabel', {
+          label: i18n.translate('connectorSpecs.threatq.auth.userLabel', {
             defaultMessage: 'User authentication',
           }),
           meta: {
             tokenUrl: {
-              helpText: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.threatq.auth.userTokenUrlHelp',
-                {
-                  defaultMessage: 'Your ThreatQ instance URL followed by /api/token.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.threatq.auth.userTokenUrlHelp', {
+                defaultMessage: 'Your ThreatQ instance URL followed by /api/token.',
+              }),
             },
             username: {
-              label: i18n.translate('connectorSpecs.kibanaConnectorSpecs.threatq.auth.emailLabel', {
+              label: i18n.translate('connectorSpecs.threatq.auth.emailLabel', {
                 defaultMessage: 'Email',
               }),
             },
             clientId: {
               sensitive: true,
-              label: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.threatq.auth.apiPasswordLabel',
-                {
-                  defaultMessage: 'API password',
-                }
-              ),
-              helpText: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.threatq.auth.apiPasswordHelp',
-                {
-                  defaultMessage:
-                    'The API password from an administrator user profile in ThreatQ. This is separate from an OAuth client ID.',
-                }
-              ),
+              label: i18n.translate('connectorSpecs.threatq.auth.apiPasswordLabel', {
+                defaultMessage: 'API password',
+              }),
+              helpText: i18n.translate('connectorSpecs.threatq.auth.apiPasswordHelp', {
+                defaultMessage:
+                  'The API password from an administrator user profile in ThreatQ. This is separate from an OAuth client ID.',
+              }),
             },
             scope: { hidden: true },
           },
@@ -232,13 +211,10 @@ export const ThreatQ: ConnectorSpec = {
         overrides: {
           meta: {
             token: {
-              helpText: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.threatq.auth.bearerTokenHelpText',
-                {
-                  defaultMessage:
-                    'A ThreatQ access token without the Bearer prefix. Replace it when it expires. OAuth 2.0 API credentials and user authentication renew tokens automatically.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.threatq.auth.bearerTokenHelpText', {
+                defaultMessage:
+                  'A ThreatQ access token without the Bearer prefix. Replace it when it expires. OAuth 2.0 API credentials and user authentication renew tokens automatically.',
+              }),
             },
           },
         },

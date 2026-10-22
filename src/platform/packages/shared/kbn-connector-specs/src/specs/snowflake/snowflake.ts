@@ -152,13 +152,10 @@ export const Snowflake: ConnectorSpec = {
   metadata: {
     id: '.snowflake',
     displayName: 'Snowflake',
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.snowflake.metadata.description',
-      {
-        defaultMessage:
-          'Run SQL, discover databases, schemas, tables, and views, and run semantic searches through Cortex Search in Snowflake',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.snowflake.metadata.description', {
+      defaultMessage:
+        'Run SQL, discover databases, schemas, tables, and views, and run semantic searches through Cortex Search in Snowflake',
+    }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
@@ -174,7 +171,7 @@ export const Snowflake: ConnectorSpec = {
             authorizationUrl: {
               placeholder: 'https://{account}.snowflakecomputing.com/oauth/authorize',
               helpText: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.snowflake.auth.oauth.authorizationUrl.helpText',
+                'connectorSpecs.snowflake.auth.oauth.authorizationUrl.helpText',
                 {
                   defaultMessage:
                     "Snowflake OAuth authorization URL. Replace '{account}' with your Snowflake account identifier.",
@@ -183,16 +180,13 @@ export const Snowflake: ConnectorSpec = {
             },
             tokenUrl: {
               placeholder: 'https://{account}.snowflakecomputing.com/oauth/token-request',
-              helpText: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.snowflake.auth.oauth.tokenUrl.helpText',
-                {
-                  defaultMessage:
-                    'Snowflake OAuth token endpoint. Replace {accountPlaceholder} with your Snowflake account identifier.',
-                  values: {
-                    accountPlaceholder: '{account}',
-                  },
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.snowflake.auth.oauth.tokenUrl.helpText', {
+                defaultMessage:
+                  'Snowflake OAuth token endpoint. Replace {accountPlaceholder} with your Snowflake account identifier.',
+                values: {
+                  accountPlaceholder: '{account}',
+                },
+              }),
             },
             scope: {
               hidden: true,
@@ -204,25 +198,19 @@ export const Snowflake: ConnectorSpec = {
         type: 'bearer',
         defaults: {},
         overrides: {
-          label: i18n.translate('connectorSpecs.kibanaConnectorSpecs.snowflake.auth.bearer.label', {
+          label: i18n.translate('connectorSpecs.snowflake.auth.bearer.label', {
             defaultMessage: 'Programmatic access token (PAT)',
           }),
           meta: {
             token: {
               sensitive: true,
-              label: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.snowflake.auth.pat.label',
-                {
-                  defaultMessage: 'Snowflake access token',
-                }
-              ),
-              helpText: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.snowflake.auth.pat.helpText',
-                {
-                  defaultMessage:
-                    'A Snowflake programmatic access token (PAT) or manually obtained OAuth access token.',
-                }
-              ),
+              label: i18n.translate('connectorSpecs.snowflake.auth.pat.label', {
+                defaultMessage: 'Snowflake access token',
+              }),
+              helpText: i18n.translate('connectorSpecs.snowflake.auth.pat.helpText', {
+                defaultMessage:
+                  'A Snowflake programmatic access token (PAT) or manually obtained OAuth access token.',
+              }),
             },
           },
         },
@@ -243,19 +231,13 @@ export const Snowflake: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'https://<account>.snowflakecomputing.com',
-          label: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.snowflake.config.accountUrl.label',
-            {
-              defaultMessage: 'Snowflake Account URL',
-            }
-          ),
-          helpText: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.snowflake.config.accountUrl.helpText',
-            {
-              defaultMessage:
-                'The base URL for your Snowflake account (e.g. https://myorg-myaccount.snowflakecomputing.com).',
-            }
-          ),
+          label: i18n.translate('connectorSpecs.snowflake.config.accountUrl.label', {
+            defaultMessage: 'Snowflake Account URL',
+          }),
+          helpText: i18n.translate('connectorSpecs.snowflake.config.accountUrl.helpText', {
+            defaultMessage:
+              'The base URL for your Snowflake account (e.g. https://myorg-myaccount.snowflakecomputing.com).',
+          }),
         }),
       warehouse: z
         .string()
@@ -264,19 +246,13 @@ export const Snowflake: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'COMPUTE_WH',
-          label: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.snowflake.config.warehouse.label',
-            {
-              defaultMessage: 'Default Warehouse',
-            }
-          ),
-          helpText: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.snowflake.config.warehouse.helpText',
-            {
-              defaultMessage:
-                'Default warehouse to use when executing statements. Case-sensitive. Can be overridden per request.',
-            }
-          ),
+          label: i18n.translate('connectorSpecs.snowflake.config.warehouse.label', {
+            defaultMessage: 'Default Warehouse',
+          }),
+          helpText: i18n.translate('connectorSpecs.snowflake.config.warehouse.helpText', {
+            defaultMessage:
+              'Default warehouse to use when executing statements. Case-sensitive. Can be overridden per request.',
+          }),
         }),
       database: z
         .string()
@@ -285,19 +261,13 @@ export const Snowflake: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'MY_DATABASE',
-          label: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.snowflake.config.database.label',
-            {
-              defaultMessage: 'Default Database',
-            }
-          ),
-          helpText: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.snowflake.config.database.helpText',
-            {
-              defaultMessage:
-                'Default database to use when executing statements. Case-sensitive. Can be overridden per request.',
-            }
-          ),
+          label: i18n.translate('connectorSpecs.snowflake.config.database.label', {
+            defaultMessage: 'Default Database',
+          }),
+          helpText: i18n.translate('connectorSpecs.snowflake.config.database.helpText', {
+            defaultMessage:
+              'Default database to use when executing statements. Case-sensitive. Can be overridden per request.',
+          }),
         }),
       defaultSchema: z
         .string()
@@ -306,19 +276,13 @@ export const Snowflake: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'PUBLIC',
-          label: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.snowflake.config.schema.label',
-            {
-              defaultMessage: 'Default Schema',
-            }
-          ),
-          helpText: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.snowflake.config.schema.helpText',
-            {
-              defaultMessage:
-                'Default schema to use when executing statements. Case-sensitive. Can be overridden per request.',
-            }
-          ),
+          label: i18n.translate('connectorSpecs.snowflake.config.schema.label', {
+            defaultMessage: 'Default Schema',
+          }),
+          helpText: i18n.translate('connectorSpecs.snowflake.config.schema.helpText', {
+            defaultMessage:
+              'Default schema to use when executing statements. Case-sensitive. Can be overridden per request.',
+          }),
         }),
       role: z
         .string()
@@ -327,16 +291,13 @@ export const Snowflake: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'PUBLIC',
-          label: i18n.translate('connectorSpecs.kibanaConnectorSpecs.snowflake.config.role.label', {
+          label: i18n.translate('connectorSpecs.snowflake.config.role.label', {
             defaultMessage: 'Default Role',
           }),
-          helpText: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.snowflake.config.role.helpText',
-            {
-              defaultMessage:
-                'Default role to use when executing statements. Case-sensitive. Can be overridden per request.',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.snowflake.config.role.helpText', {
+            defaultMessage:
+              'Default role to use when executing statements. Case-sensitive. Can be overridden per request.',
+          }),
         }),
     })
   ),
@@ -582,7 +543,7 @@ export const Snowflake: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.snowflake.test.description', {
+    description: i18n.translate('connectorSpecs.snowflake.test.description', {
       defaultMessage:
         'Verifies connection to Snowflake by executing SELECT CURRENT_VERSION() and returning the result.',
     }),

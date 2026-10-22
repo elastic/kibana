@@ -142,13 +142,10 @@ export const SublimeSecurityConnector: ConnectorSpec = {
   metadata: {
     id: '.sublime_security',
     displayName: 'Sublime Security',
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.sublimeSecurity.metadata.description',
-      {
-        defaultMessage:
-          'Search flagged email, get verdicts, and quarantine, trash, or restore message groups in Sublime Security',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.sublimeSecurity.metadata.description', {
+      defaultMessage:
+        'Search flagged email, get verdicts, and quarantine, trash, or restore message groups in Sublime Security',
+    }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
@@ -160,18 +157,14 @@ export const SublimeSecurityConnector: ConnectorSpec = {
         type: 'bearer',
         defaults: {},
         overrides: {
-          label: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.sublimeSecurity.auth.bearer.label',
-            {
-              defaultMessage: 'API key',
-            }
-          ),
+          label: i18n.translate('connectorSpecs.sublimeSecurity.auth.bearer.label', {
+            defaultMessage: 'API key',
+          }),
           meta: {
             token: {
-              label: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.sublimeSecurity.auth.bearer.tokenLabel',
-                { defaultMessage: 'API key' }
-              ),
+              label: i18n.translate('connectorSpecs.sublimeSecurity.auth.bearer.tokenLabel', {
+                defaultMessage: 'API key',
+              }),
             },
           },
         },
@@ -191,19 +184,13 @@ export const SublimeSecurityConnector: ConnectorSpec = {
           'Sublime Platform API base URL. Shown under Automate > API in the Sublime dashboard'
         )
         .meta({
-          label: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.sublimeSecurity.config.baseUrl',
-            {
-              defaultMessage: 'API base URL',
-            }
-          ),
-          helpText: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.sublimeSecurity.config.baseUrlHelp',
-            {
-              defaultMessage:
-                'Region-specific for Sublime Cloud (for example https://platform.sublime.security or https://eu.platform.sublime.security) or the host of a self-hosted instance. Find it under Automate > API in the Sublime dashboard.',
-            }
-          ),
+          label: i18n.translate('connectorSpecs.sublimeSecurity.config.baseUrl', {
+            defaultMessage: 'API base URL',
+          }),
+          helpText: i18n.translate('connectorSpecs.sublimeSecurity.config.baseUrlHelp', {
+            defaultMessage:
+              'Region-specific for Sublime Cloud (for example https://platform.sublime.security or https://eu.platform.sublime.security) or the host of a self-hosted instance. Find it under Automate > API in the Sublime dashboard.',
+          }),
           placeholder: 'https://platform.sublime.security',
           validate: { allowedHosts: true },
         }),
@@ -580,12 +567,9 @@ Gotchas:
 
   test: {
     enabled: true,
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.sublimeSecurity.test.description',
-      {
-        defaultMessage: 'Verifies the Sublime Security connection by listing one protected mailbox',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.sublimeSecurity.test.description', {
+      defaultMessage: 'Verifies the Sublime Security connection by listing one protected mailbox',
+    }),
     handler: async (ctx) => {
       try {
         await ctx.client.get(`${getBaseUrl(ctx)}/v0/mailboxes`, {

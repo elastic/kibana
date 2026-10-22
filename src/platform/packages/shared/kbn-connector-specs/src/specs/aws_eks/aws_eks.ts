@@ -85,7 +85,7 @@ export const AwsEks: ConnectorSpec = {
   metadata: {
     id: '.aws_eks',
     displayName: 'Amazon EKS',
-    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.awsEks.metadata.description', {
+    description: i18n.translate('connectorSpecs.awsEks.metadata.description', {
       defaultMessage:
         'Discover EKS clusters and node groups, scale node groups, manage cluster access entries, and mint Kubernetes tokens for the Kubernetes connector',
     }),
@@ -110,16 +110,13 @@ export const AwsEks: ConnectorSpec = {
         .describe('Default AWS Region for every action, for example us-east-1')
         .meta({
           widget: 'text',
-          label: i18n.translate('connectorSpecs.kibanaConnectorSpecs.awsEks.config.region.label', {
+          label: i18n.translate('connectorSpecs.awsEks.config.region.label', {
             defaultMessage: 'AWS Region',
           }),
-          helpText: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.awsEks.config.region.helpText',
-            {
-              defaultMessage:
-                'The AWS Region the clusters live in, for example us-east-1 or us-gov-west-1. Actions can override it per call. China and ISO Regions are not supported.',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.awsEks.config.region.helpText', {
+            defaultMessage:
+              'The AWS Region the clusters live in, for example us-east-1 or us-gov-west-1. Actions can override it per call. China and ISO Regions are not supported.',
+          }),
           placeholder: 'us-east-1',
         }),
     })
@@ -381,7 +378,7 @@ export const AwsEks: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.awsEks.test.description', {
+    description: i18n.translate('connectorSpecs.awsEks.test.description', {
       defaultMessage:
         'Verifies the Amazon EKS connection by listing the clusters in the configured Region',
     }),

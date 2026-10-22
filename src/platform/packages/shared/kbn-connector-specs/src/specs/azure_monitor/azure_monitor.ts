@@ -140,13 +140,10 @@ export const AzureMonitor: ConnectorSpec = {
   metadata: {
     id: '.azure_monitor',
     displayName: 'Azure Monitor',
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.azureMonitor.metadata.description',
-      {
-        defaultMessage:
-          'List and triage Azure Monitor alerts, query metrics and logs, and control alert rules',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.azureMonitor.metadata.description', {
+      defaultMessage:
+        'List and triage Azure Monitor alerts, query metrics and logs, and control alert rules',
+    }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['agentBuilder'],
@@ -164,28 +161,19 @@ export const AzureMonitor: ConnectorSpec = {
           meta: {
             scope: { hidden: true },
             tokenUrl: {
-              label: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.azureMonitor.auth.tokenUrl.label',
-                {
-                  defaultMessage: 'Token URL',
-                }
-              ),
+              label: i18n.translate('connectorSpecs.azureMonitor.auth.tokenUrl.label', {
+                defaultMessage: 'Token URL',
+              }),
               placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
-              helpText: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.azureMonitor.auth.tokenUrl.helpText',
-                {
-                  defaultMessage:
-                    "Replace '{tenant-id}' with your Azure AD tenant ID. The app registration (service principal) must have the Monitoring Contributor role on the subscription (Monitoring Reader is enough for read-only actions), and the Log Analytics Reader role on any Log Analytics workspace queried with runLogQuery.",
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.azureMonitor.auth.tokenUrl.helpText', {
+                defaultMessage:
+                  "Replace '{tenant-id}' with your Azure AD tenant ID. The app registration (service principal) must have the Monitoring Contributor role on the subscription (Monitoring Reader is enough for read-only actions), and the Log Analytics Reader role on any Log Analytics workspace queried with runLogQuery.",
+              }),
             },
             clientId: {
-              helpText: i18n.translate(
-                'connectorSpecs.kibanaConnectorSpecs.azureMonitor.auth.clientId.helpText',
-                {
-                  defaultMessage: 'The Application (client) ID of the Azure AD app registration.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.azureMonitor.auth.clientId.helpText', {
+                defaultMessage: 'The Application (client) ID of the Azure AD app registration.',
+              }),
             },
           },
         },
@@ -204,26 +192,20 @@ export const AzureMonitor: ConnectorSpec = {
           'Must be a valid Azure subscription ID (GUID).'
         )
         .describe(
-          i18n.translate('connectorSpecs.kibanaConnectorSpecs.azureMonitor.config.subscriptionId', {
+          i18n.translate('connectorSpecs.azureMonitor.config.subscriptionId', {
             defaultMessage: 'Azure subscription ID',
           })
         )
         .meta({
           widget: 'text',
-          label: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.azureMonitor.config.subscriptionId.label',
-            {
-              defaultMessage: 'Subscription ID',
-            }
-          ),
+          label: i18n.translate('connectorSpecs.azureMonitor.config.subscriptionId.label', {
+            defaultMessage: 'Subscription ID',
+          }),
           placeholder: '00000000-0000-0000-0000-000000000000',
-          helpText: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.azureMonitor.config.subscriptionId.helpText',
-            {
-              defaultMessage:
-                'The Azure subscription that every action in this connector operates against.',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.azureMonitor.config.subscriptionId.helpText', {
+            defaultMessage:
+              'The Azure subscription that every action in this connector operates against.',
+          }),
         }),
     })
   ),
@@ -777,13 +759,10 @@ export const AzureMonitor: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.azureMonitor.test.description',
-      {
-        defaultMessage:
-          'Verifies Azure Monitor connectivity by listing action groups in the subscription',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.azureMonitor.test.description', {
+      defaultMessage:
+        'Verifies Azure Monitor connectivity by listing action groups in the subscription',
+    }),
     handler: async (ctx) => {
       try {
         const response = await ctx.client.get(

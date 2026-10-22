@@ -189,12 +189,9 @@ export const BigQuery: ConnectorSpec = {
   metadata: {
     id: '.bigquery',
     displayName: 'BigQuery',
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.bigQuery.metadata.description',
-      {
-        defaultMessage: 'Run GoogleSQL queries and retrieve results from Google BigQuery',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.bigQuery.metadata.description', {
+      defaultMessage: 'Run GoogleSQL queries and retrieve results from Google BigQuery',
+    }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
@@ -218,12 +215,9 @@ export const BigQuery: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'elastic-edm-prod',
-          label: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.bigQuery.config.projectId.label',
-            {
-              defaultMessage: 'Project ID',
-            }
-          ),
+          label: i18n.translate('connectorSpecs.bigQuery.config.projectId.label', {
+            defaultMessage: 'Project ID',
+          }),
         }),
       location: z
         .string()
@@ -235,12 +229,9 @@ export const BigQuery: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: DEFAULT_LOCATION,
-          label: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.bigQuery.config.location.label',
-            {
-              defaultMessage: 'Default location',
-            }
-          ),
+          label: i18n.translate('connectorSpecs.bigQuery.config.location.label', {
+            defaultMessage: 'Default location',
+          }),
         }),
       maximumBytesBilled: z
         .string()
@@ -251,12 +242,9 @@ export const BigQuery: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: '10000000000',
-          label: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.bigQuery.config.maximumBytesBilled.label',
-            {
-              defaultMessage: 'Maximum bytes billed',
-            }
-          ),
+          label: i18n.translate('connectorSpecs.bigQuery.config.maximumBytesBilled.label', {
+            defaultMessage: 'Maximum bytes billed',
+          }),
         }),
     })
   ),
@@ -344,7 +332,7 @@ export const BigQuery: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.bigQuery.test.description', {
+    description: i18n.translate('connectorSpecs.bigQuery.test.description', {
       defaultMessage:
         'Verifies BigQuery API access by running a lightweight SELECT 1 query in the configured project.',
     }),

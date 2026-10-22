@@ -102,12 +102,9 @@ export const GoogleDriveConnector: ConnectorSpec = {
   metadata: {
     id: '.google_drive',
     displayName: 'Google Drive',
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.googleDrive.metadata.description',
-      {
-        defaultMessage: 'Search and access files and folders in Google Drive',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.googleDrive.metadata.description', {
+      defaultMessage: 'Search and access files and folders in Google Drive',
+    }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
@@ -550,12 +547,9 @@ export const GoogleDriveConnector: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.googleDrive.test.description',
-      {
-        defaultMessage: 'Verifies Google Drive connection by fetching user information',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.googleDrive.test.description', {
+      defaultMessage: 'Verifies Google Drive connection by fetching user information',
+    }),
     handler: async (ctx) => {
       ctx.log.debug('Google Drive test handler');
       await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/about`, {

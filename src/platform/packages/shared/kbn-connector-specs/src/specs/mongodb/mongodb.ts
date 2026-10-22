@@ -183,14 +183,11 @@ export const MongoDBConnector: ConnectorSpec = {
   metadata: {
     id: '.mongodb',
     displayName: 'MongoDB',
-    description: i18n.translate(
-      'connectorSpecs.kibanaConnectorSpecs.mongodb.metadata.description',
-      {
-        defaultMessage:
-          'Query and write to MongoDB collections using find, aggregate, count, and listCollections, ' +
-          'plus insertOne, updateOne, and deleteOne for workflows.',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.mongodb.metadata.description', {
+      defaultMessage:
+        'Query and write to MongoDB collections using find, aggregate, count, and listCollections, ' +
+        'plus insertOne, updateOne, and deleteOne for workflows.',
+    }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     // New connector types can only declare 'agentBuilder' in their introducing PR;
@@ -218,19 +215,16 @@ export const MongoDBConnector: ConnectorSpec = {
         .describe('MongoDB connection URI.')
         .meta({
           widget: 'text',
-          label: i18n.translate('connectorSpecs.kibanaConnectorSpecs.mongodb.config.uri.label', {
+          label: i18n.translate('connectorSpecs.mongodb.config.uri.label', {
             defaultMessage: 'Connection URI',
           }),
-          helpText: i18n.translate(
-            'connectorSpecs.kibanaConnectorSpecs.mongodb.config.uri.helpText',
-            {
-              defaultMessage:
-                'Full MongoDB connection string. Supports mongodb:// and mongodb+srv:// schemes. ' +
-                'Include the database name in the path (e.g. /mydb) to use it as the default for actions. ' +
-                'Credentials are authenticated against the admin database by default; append ' +
-                '?authSource=yourDbName to override.',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.mongodb.config.uri.helpText', {
+            defaultMessage:
+              'Full MongoDB connection string. Supports mongodb:// and mongodb+srv:// schemes. ' +
+              'Include the database name in the path (e.g. /mydb) to use it as the default for actions. ' +
+              'Credentials are authenticated against the admin database by default; append ' +
+              '?authSource=yourDbName to override.',
+          }),
           placeholder: 'mongodb://hostname:27017/mydb',
         }),
     })
@@ -414,7 +408,7 @@ export const MongoDBConnector: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.mongodb.test.description', {
+    description: i18n.translate('connectorSpecs.mongodb.test.description', {
       defaultMessage:
         'Verifies the connection URI and credentials are valid by pinging the MongoDB deployment.',
     }),
