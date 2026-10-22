@@ -10,11 +10,12 @@ import type { Unit } from './unit_repository';
 /**
  * Wires sources to destinations.
  *
- * Each source has its own pipeline. Unconditional wires are that pipeline's
- * `destinations` list, which can name several destinations. Conditional wires
- * are `routes` rules, which cannot share a pipeline with `destinations`. A new
- * wire on a pipeline that already uses routes is stored as a catch-all rule so
- * a later condition can be set on it without changing the connection model.
+ * Each source has its own direct pipeline. Unconditional wires are that
+ * pipeline's `destinations` list, which can name several destinations.
+ * Conditional wires are `routes` rules, which cannot share a pipeline with
+ * `destinations`, so a source that already feeds a routing pipeline gets a
+ * separate direct pipeline for new wires. Wires drawn from a routing rule are
+ * added to that rule.
  */
 
 type UnitPipeline = Unit['unit']['pipelines'][number];
@@ -34,27 +35,13 @@ export interface UnitConnection {
 
 type RouteRule = Extract<PipelineConfig[number], { name: 'routes' }>['value'][number];
 
-const readIdentifiers = (
-  config: PipelineConfig,
-  name: 'sources' | 'destinations' | 'routes'
-): string[] => {
+const readIdentifiers = (config: PipelineConfig, name: 'sources' | 'destinations'): string[] => {
   for (const entry of config) {
     if (entry.name === 'sources' && name === 'sources') {
       return [...entry.value];
     }
     if (entry.name === 'destinations' && name === 'destinations') {
       return [...entry.value];
-    }
-    if (entry.name === 'routes' && name === 'routes') {
-      return entry.value.flatMap((item) => {
-        if ('destinations' in item) {
-          return item.destinations;
-        } else if ('pipelines' in item) {
-          return item.pipelines;
-        } else {
-          return [];
-        }
-      });
     }
   }
   return [];
@@ -103,37 +90,6 @@ const withRoutes = (config: PipelineConfig, routes: readonly RouteRule[]): Pipel
 const routeDestinationIds = (route: RouteRule): readonly string[] =>
   'destinations' in route ? route.destinations : [];
 
-const isCatchAllDestinationRoute = (route: RouteRule): boolean =>
-  route.when === undefined && 'destinations' in route;
-
-/** A catch-all that delegates to child pipelines already consumes every record. */
-const catchAllBlocksDestination = (routes: readonly RouteRule[]): boolean => {
-  const catchAll = routes.find((route) => route.when === undefined);
-  return catchAll !== undefined && !('destinations' in catchAll);
-};
-
-const routesIncludeDestination = (routes: readonly RouteRule[], destinationId: string): boolean =>
-  routes.some((route) => routeDestinationIds(route).includes(destinationId));
-
-const addDestinationToRoutes = (
-  routes: readonly RouteRule[],
-  destinationId: string
-): RouteRule[] => {
-  const catchAllIndex = routes.findIndex(isCatchAllDestinationRoute);
-  if (catchAllIndex === -1) {
-    return [...routes, { destinations: [destinationId] }];
-  }
-  return routes.map((route, index) => {
-    if (index !== catchAllIndex || !('destinations' in route)) {
-      return route;
-    }
-    if (route.destinations.includes(destinationId)) {
-      return route;
-    }
-    return { ...route, destinations: [...route.destinations, destinationId] };
-  });
-};
-
 const removeDestinationFromRoutes = (
   routes: readonly RouteRule[],
   destinationId: string
@@ -158,11 +114,13 @@ const replacePipelines = (unit: Unit, pipelines: Unit['unit']['pipelines']): Uni
   },
 });
 
+/** The pipeline holding a source's unconditional wires. Routing pipelines are left alone. */
 const findSourcePipelineIndex = (pipelines: Unit['unit']['pipelines'], sourceId: string): number =>
-  pipelines.findIndex((pipeline) => readIdentifiers(pipeline.config, 'sources').includes(sourceId));
-
-const findRoutePipelineIndex = (pipelines: Unit['unit']['pipelines'], sourceId: string): number =>
-  pipelines.findIndex((pipeline) => readIdentifiers(pipeline.config, 'routes').includes(sourceId));
+  pipelines.findIndex(
+    (pipeline) =>
+      !pipelineUsesRoutes(pipeline) &&
+      readIdentifiers(pipeline.config, 'sources').includes(sourceId)
+  );
 
 const writePipeline = (unit: Unit, pipelineIndex: number, config: PipelineConfig): Unit => {
   const pipelines = unit.unit.pipelines.flatMap((pipeline, index) => {
@@ -251,7 +209,7 @@ const pushConnection = (
   seen: Set<string>,
   connection: UnitConnection
 ): void => {
-  const key = `${connection.sourceId}\0${connection.destinationId}`;
+  const key = `${connection.sourceId}\0${connection.destinationId}\0${connection.forwarding}`;
   if (seen.has(key)) {
     return;
   }
@@ -294,7 +252,6 @@ export const getUnitConnections = (
       }
     }
   }
-  console.log('nuh', connections);
   return connections;
 };
 
@@ -308,9 +265,7 @@ const telemetryFit = (
   sourceId: string,
   destinationId: string
 ): 'unknown' | 'incompatible' | UnitPipeline['supported_telemetry'] => {
-  const source =
-    unit.unit.sources?.find((item) => item.id === sourceId) ||
-    unit.unit.pipelines?.find((item) => item.id === sourceId);
+  const source = unit.unit.sources?.find((item) => item.id === sourceId);
   const destination = unit.unit.destinations?.find((item) => item.id === destinationId);
   if (!source || !destination) {
     return 'unknown';
@@ -342,8 +297,7 @@ export const canConnectSourceToDestination = (
     return false;
   }
   const pipelineIndex = findSourcePipelineIndex(unit.unit.pipelines, sourceId);
-  const routePipelineIndex = findRoutePipelineIndex(unit.unit.pipelines, sourceId);
-  if (pipelineIndex === -1 || routePipelineIndex === -1) {
+  if (pipelineIndex === -1) {
     return true;
   }
   const pipeline = unit.unit.pipelines[pipelineIndex];
@@ -353,14 +307,13 @@ export const canConnectSourceToDestination = (
       return false;
     }
   }
-  if (pipelineUsesRoutes(pipeline)) {
-    const routes = readRoutes(pipeline.config);
-    return !routesIncludeDestination(routes, destinationId) && !catchAllBlocksDestination(routes);
-  }
   return !readIdentifiers(pipeline.config, 'destinations').includes(destinationId);
 };
 
-/** Adds a destination to the source's own pipeline, creating that pipeline when needed. */
+/**
+ * Adds a destination to the source's own direct pipeline, creating that
+ * pipeline when needed. A routing pipeline the source also feeds is untouched.
+ */
 export const connectSourceToDestination = (
   unit: Unit,
   sourceId: string,
@@ -370,28 +323,13 @@ export const connectSourceToDestination = (
     return unit;
   }
   const pipelineIndex = findSourcePipelineIndex(unit.unit.pipelines, sourceId);
-  const routePipelineIndex = findRoutePipelineIndex(unit.unit.pipelines, sourceId);
-  if (pipelineIndex === -1 || routePipelineIndex === -1) {
-    console.log('guhhhh');
+  if (pipelineIndex === -1) {
     return appendSourcePipeline(unit, sourceId, pipelineTelemetry(unit, sourceId, destinationId), [
       { name: 'destinations', value: [destinationId] },
     ]);
   }
-  const pipeline = unit.unit.pipelines[pipelineIndex] ?? unit.unit.pipelines[routePipelineIndex];
+  const pipeline = unit.unit.pipelines[pipelineIndex];
   const sources = readIdentifiers(pipeline.config, 'sources');
-  const sourceRoutes = readIdentifiers(pipeline.config, 'routes');
-  if (pipelineUsesRoutes(pipeline)) {
-    const routes = addDestinationToRoutes(readRoutes(pipeline.config), destinationId);
-    if (sources.length === 1) {
-      return writePipeline(unit, pipelineIndex, withRoutes(pipeline.config, routes));
-    }
-    return appendSourcePipeline(
-      detachSource(unit, pipelineIndex, sourceId),
-      sourceId,
-      pipeline.supported_telemetry,
-      [...processorEntries(pipeline.config), { name: 'routes', value: routes }]
-    );
-  }
   const destinations = readIdentifiers(pipeline.config, 'destinations');
   if (sources.length === 1) {
     return writePipeline(
@@ -411,7 +349,7 @@ export const connectSourceToDestination = (
   );
 };
 
-/** Drops one drawn line from the source pipeline that owns it. */
+/** Drops one drawn line from the source's direct pipeline. */
 export const disconnectSourceFromDestination = (
   unit: Unit,
   sourceId: string,
@@ -423,23 +361,6 @@ export const disconnectSourceFromDestination = (
   }
   const pipeline = unit.unit.pipelines[pipelineIndex];
   const sources = readIdentifiers(pipeline.config, 'sources');
-  if (pipelineUsesRoutes(pipeline)) {
-    if (!routesIncludeDestination(readRoutes(pipeline.config), destinationId)) {
-      return unit;
-    }
-    const routes = removeDestinationFromRoutes(readRoutes(pipeline.config), destinationId);
-    if (sources.length === 1) {
-      return writePipeline(unit, pipelineIndex, withRoutes(pipeline.config, routes));
-    }
-    const detached = detachSource(unit, pipelineIndex, sourceId);
-    if (routes.length === 0) {
-      return detached;
-    }
-    return appendSourcePipeline(detached, sourceId, pipeline.supported_telemetry, [
-      ...processorEntries(pipeline.config),
-      { name: 'routes', value: routes },
-    ]);
-  }
   const destinations = readIdentifiers(pipeline.config, 'destinations');
   if (!destinations.includes(destinationId)) {
     return unit;
@@ -489,6 +410,154 @@ export const moveUnitConnection = (
     return unit;
   }
   return connectSourceToDestination(released, sourceId, destinationId);
+};
+
+/**
+ * One output of a routing node: a rule in a pipeline's `routes` list, or rule 0
+ * of a routed child pipeline that uses a plain `destinations` list.
+ */
+export interface RouteRuleRef {
+  pipelineId: string;
+  ruleIndex: number;
+}
+
+const findPipelineIndex = (unit: Unit, pipelineId: string): number =>
+  unit.unit.pipelines.findIndex((pipeline) => pipeline.id === pipelineId);
+
+const isRoutedPipeline = (unit: Unit, pipelineId: string): boolean =>
+  unit.unit.pipelines.some((pipeline) =>
+    readRoutes(pipeline.config).some(
+      (route) => 'pipelines' in route && route.pipelines.includes(pipelineId)
+    )
+  );
+
+/** Destination ids a rule forwards to, or undefined when the rule cannot take destinations. */
+const readRuleDestinations = (
+  pipeline: UnitPipeline,
+  ruleIndex: number
+): readonly string[] | undefined => {
+  if (!pipelineUsesRoutes(pipeline)) {
+    return ruleIndex === 0 ? readIdentifiers(pipeline.config, 'destinations') : undefined;
+  }
+  const route = readRoutes(pipeline.config)[ruleIndex];
+  return route && 'destinations' in route ? route.destinations : undefined;
+};
+
+const withRuleDestinations = (
+  pipeline: UnitPipeline,
+  ruleIndex: number,
+  destinations: string[]
+): PipelineConfig => {
+  if (!pipelineUsesRoutes(pipeline)) {
+    return withIdentifiers(pipeline.config, 'destinations', destinations);
+  }
+  return withRoutes(
+    pipeline.config,
+    readRoutes(pipeline.config).flatMap((route, index) => {
+      if (index !== ruleIndex || !('destinations' in route)) {
+        return [route];
+      }
+      return destinations.length > 0 ? [{ ...route, destinations }] : [];
+    })
+  );
+};
+
+const routeFitsDestination = (
+  unit: Unit,
+  pipeline: UnitPipeline,
+  destinationId: string
+): boolean => {
+  const destination = unit.unit.destinations?.find((item) => item.id === destinationId);
+  if (!destination) {
+    return true;
+  }
+  const destinationSignals = new Set(destination.supported_telemetry);
+  return pipeline.supported_telemetry.some((signal) => destinationSignals.has(signal));
+};
+
+export const canConnectRouteToDestination = (
+  unit: Unit,
+  { pipelineId, ruleIndex }: RouteRuleRef,
+  destinationId: string
+): boolean => {
+  const pipeline = unit.unit.pipelines[findPipelineIndex(unit, pipelineId)];
+  if (!pipeline || !routeFitsDestination(unit, pipeline, destinationId)) {
+    return false;
+  }
+  const destinations = readRuleDestinations(pipeline, ruleIndex);
+  return destinations !== undefined && !destinations.includes(destinationId);
+};
+
+/** Adds a destination to one routing rule. */
+export const connectRouteToDestination = (
+  unit: Unit,
+  rule: RouteRuleRef,
+  destinationId: string
+): Unit => {
+  if (!canConnectRouteToDestination(unit, rule, destinationId)) {
+    return unit;
+  }
+  const pipelineIndex = findPipelineIndex(unit, rule.pipelineId);
+  const pipeline = unit.unit.pipelines[pipelineIndex];
+  const destinations = readRuleDestinations(pipeline, rule.ruleIndex) ?? [];
+  return writePipeline(
+    unit,
+    pipelineIndex,
+    withRuleDestinations(pipeline, rule.ruleIndex, [...destinations, destinationId])
+  );
+};
+
+/**
+ * Drops one destination from a routing rule. A rule left with no destinations is
+ * removed. A routed child pipeline keeps its last destination, since dropping
+ * the pipeline would leave its parent route pointing nowhere.
+ */
+export const disconnectRouteFromDestination = (
+  unit: Unit,
+  rule: RouteRuleRef,
+  destinationId: string
+): Unit => {
+  const pipelineIndex = findPipelineIndex(unit, rule.pipelineId);
+  const pipeline = unit.unit.pipelines[pipelineIndex];
+  const destinations = pipeline ? readRuleDestinations(pipeline, rule.ruleIndex) : undefined;
+  if (!pipeline || !destinations?.includes(destinationId)) {
+    return unit;
+  }
+  const config = withRuleDestinations(
+    pipeline,
+    rule.ruleIndex,
+    destinations.filter((id) => id !== destinationId)
+  );
+  if (!pipelineForwards(config) && isRoutedPipeline(unit, rule.pipelineId)) {
+    return unit;
+  }
+  return writePipeline(unit, pipelineIndex, config);
+};
+
+/** Moves a routing rule's line onto another destination or another rule. */
+export const moveRouteConnection = (
+  unit: Unit,
+  {
+    previousRule,
+    previousDestinationId,
+    rule,
+    destinationId,
+  }: {
+    previousRule: RouteRuleRef;
+    previousDestinationId: string;
+    rule: RouteRuleRef;
+    destinationId: string;
+  }
+): Unit => {
+  if (!canConnectRouteToDestination(unit, rule, destinationId)) {
+    return unit;
+  }
+  // Connect first: adding never removes a rule, so both rule indexes stay valid.
+  return disconnectRouteFromDestination(
+    connectRouteToDestination(unit, rule, destinationId),
+    previousRule,
+    previousDestinationId
+  );
 };
 
 /** Drops a deleted component id from pipeline source and destination lists. */

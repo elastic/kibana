@@ -8,14 +8,14 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiBadge,
-  EuiCode,
+  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
   EuiToolTip,
   useEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Position, type NodeProps } from '@xyflow/react';
@@ -25,11 +25,25 @@ import { ROUTING_NODE_WIDTH } from '../canvas_constants';
 import { getNodeCardStyles } from './node_card_styles';
 
 const copyLabel = i18n.translate('xpack.streams.canvas.routingNode.copyBadgeLabel', {
-  defaultMessage: 'Copy',
+  defaultMessage: 'copy',
 });
+
+const getRoutingRowStyle = (euiTheme: UseEuiTheme['euiTheme']) => css`
+  padding-left: ${euiTheme.size.xs};
+  border-top: 2px solid ${euiTheme.border.color};
+  &:first-child {
+    border-top: 0;
+  }
+`;
 
 function RoutingRuleRow({ rule }: { rule: RoutingNodeRule }) {
   const { euiTheme } = useEuiTheme();
+
+  const tooltipContent = (
+    <EuiText size="m">
+      <code>{rule.label}</code>
+    </EuiText>
+  );
 
   return (
     <div
@@ -37,35 +51,35 @@ function RoutingRuleRow({ rule }: { rule: RoutingNodeRule }) {
       // Stretch the row to the card edge so the rule's handle sits on the border.
       css={css`
         position: relative;
-        display: flex;
-        align-items: center;
-        gap: ${euiTheme.size.xs};
-        margin-right: -${euiTheme.size.m};
-        padding-right: ${euiTheme.size.m};
-        min-height: ${euiTheme.size.l};
+        z-index: ${euiTheme.levels.mask};
       `}
     >
-      <EuiToolTip content={rule.label} disableScreenReaderOutput>
-        <EuiCode
-          transparentBackground={rule.isCatchAll}
-          tabIndex={0}
-          css={css`
-            display: block;
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-          `}
-        >
-          {rule.handleId}
-        </EuiCode>
-      </EuiToolTip>
-      {rule.action === 'copy' && <EuiBadge color="hollow">{copyLabel}</EuiBadge>}
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        css={css`
+          padding: ${euiTheme.size.s} ${euiTheme.size.m} ${euiTheme.size.s} ${euiTheme.size.s};
+        `}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={tooltipContent} disableScreenReaderOutput>
+            <EuiText tabIndex={0}>
+              <strong>{rule.handleId}</strong>
+            </EuiText>
+          </EuiToolTip>
+        </EuiFlexItem>
+        {rule.action === 'copy' ? (
+          <EuiFlexItem grow={false}>
+            <EuiText color="subdued">
+              <code>{copyLabel}</code>
+            </EuiText>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
       <ConnectionHandle
         id={rule.handleId}
         type="source"
         position={Position.Right}
-        isConnectable={true}
+        isConnectable={rule.action === 'copy'}
       />
     </div>
   );
@@ -83,7 +97,7 @@ export function RoutingNode({ data, selected, dragging }: NodeProps<RoutingNodeT
         className="nokey"
         hasShadow={false}
         hasBorder
-        paddingSize="m"
+        paddingSize="none"
         data-test-subj="streamsCanvasRoutingNode"
         css={getNodeCardStyles(euiTheme, {
           width: ROUTING_NODE_WIDTH,
@@ -91,29 +105,30 @@ export function RoutingNode({ data, selected, dragging }: NodeProps<RoutingNodeT
           dragging,
         })}
       >
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="branch" size="m" aria-hidden={true} />
-          </EuiFlexItem>
+        <EuiFlexGroup gutterSize="none" alignItems="stretch" responsive={false}>
           <EuiFlexItem
-            grow
+            grow={false}
             css={css`
-              overflow: hidden;
+              padding: ${euiTheme.size.m};
+              border-right: 2px solid ${euiTheme.border.color};
             `}
-          ></EuiFlexItem>
+          >
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="branch" size="m" aria-hidden={true} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <EuiFlexGroup gutterSize="none" direction="column">
+              {data.rules.map((rule) => (
+                <EuiFlexItem css={getRoutingRowStyle(euiTheme)}>
+                  <RoutingRuleRow key={rule.handleId} rule={rule} />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
-        <div
-          css={css`
-            display: flex;
-            flex-direction: column;
-            gap: ${euiTheme.size.xs};
-            margin-top: ${euiTheme.size.s};
-          `}
-        >
-          {data.rules.map((rule) => (
-            <RoutingRuleRow key={rule.handleId} rule={rule} />
-          ))}
-        </div>
       </EuiPanel>
     </>
   );

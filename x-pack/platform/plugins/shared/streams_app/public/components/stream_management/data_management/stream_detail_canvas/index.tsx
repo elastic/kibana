@@ -39,8 +39,6 @@ import {
   configuredRoutingNodeId,
   configuredSourceNodeId,
   readConfiguredDestinationId,
-  readConfiguredRoutingId,
-  readConfiguredSourceId,
   routingRuleHandleId,
 } from './build_unit_connection_edges';
 import {
@@ -105,13 +103,14 @@ import {
   getUnitDestinations,
   withUnitDestinations,
 } from '../../../streams_layout/destinations/destination_models';
+import { removeComponentFromPipelines } from '../../../../services/unit_connections';
 import {
-  canConnectSourceToDestination,
-  connectSourceToDestination,
-  disconnectSourceFromDestination,
-  moveUnitConnection,
-  removeComponentFromPipelines,
-} from '../../../../services/unit_connections';
+  canConnectOrigin,
+  connectOrigin,
+  disconnectOrigin,
+  moveOriginConnection,
+  readConnectionOrigin,
+} from './connection_origin';
 import { getUnitRoutings } from '../../../streams_layout/routing/routing_models';
 import type { RoutingViewModel } from '../../../streams_layout/routing/types';
 import { RoutingFlyout } from '../../../stream_routing_flyout';
@@ -478,41 +477,32 @@ function StreamsCanvasInner() {
 
   const onConnect = useCallback<OnConnect>(
     (connection) => {
-      console.log('CONN', connection);
-      const sourceId = readConfiguredSourceId(connection.source);
+      const origin = readConnectionOrigin(connection.source, connection.sourceHandle);
       const destinationId = readConfiguredDestinationId(connection.target);
-      const routingId = readConfiguredRoutingId(connection.source);
-      const fromId = sourceId || routingId;
-      if (!fromId || !destinationId) {
+      if (!origin || !destinationId) {
         return;
       }
       record();
-      changeUnitConnection(connectSourceToDestination(unitDefinition, fromId, destinationId));
+      changeUnitConnection(connectOrigin(unitDefinition, origin, destinationId));
     },
     [changeUnitConnection, record, unitDefinition]
   );
 
   const onConnectStart = useCallback<OnConnectStart>(
     (_event, params) => {
-      if (params.handleType !== 'source') {
+      const origin =
+        params.handleType === 'source'
+          ? readConnectionOrigin(params.nodeId, params.handleId)
+          : undefined;
+      if (!origin) {
         setConnectionTargetIds(null);
         return;
       }
-      const sourceId = readConfiguredSourceId(params.nodeId);
-      const routingId = readConfiguredRoutingId(params.nodeId);
-      const fromId = sourceId || routingId;
-      if (!fromId) {
-        setConnectionTargetIds(null);
-        return;
-      }
-      console.log('nyah');
       setConnectionTargetIds(
         new Set(
           destinations
             .map((destination) => destination.id)
-            .filter((destinationId) =>
-              canConnectSourceToDestination(unitDefinition, fromId, destinationId)
-            )
+            .filter((destinationId) => canConnectOrigin(unitDefinition, origin, destinationId))
         )
       );
     },
@@ -525,36 +515,31 @@ function StreamsCanvasInner() {
 
   const isValidConnection = useCallback<IsValidConnection>(
     (connection) => {
-      const sourceId = readConfiguredSourceId(connection.source);
+      const origin = readConnectionOrigin(connection.source, connection.sourceHandle);
       const destinationId = readConfiguredDestinationId(connection.target);
-      const routingId = readConfiguredRoutingId(connection.source);
-      const fromId = sourceId || routingId;
-      if (!fromId || !destinationId) {
+      if (!origin || !destinationId) {
         return false;
       }
-      const valid = canConnectSourceToDestination(unitDefinition, fromId, destinationId);
-      console.log('VALID?', connection, valid);
-      return valid;
+      return canConnectOrigin(unitDefinition, origin, destinationId);
     },
     [unitDefinition]
   );
 
   const onReconnect = useCallback<OnReconnect>(
     (oldEdge, connection) => {
-      console.log(oldEdge, connection);
-      const previousSourceId = readConfiguredSourceId(oldEdge.source);
+      const previousOrigin = readConnectionOrigin(oldEdge.source, oldEdge.sourceHandle);
       const previousDestinationId = readConfiguredDestinationId(oldEdge.target);
-      const sourceId = readConfiguredSourceId(connection.source);
+      const origin = readConnectionOrigin(connection.source, connection.sourceHandle);
       const destinationId = readConfiguredDestinationId(connection.target);
-      if (!previousSourceId || !previousDestinationId || !sourceId || !destinationId) {
+      if (!previousOrigin || !previousDestinationId || !origin || !destinationId) {
         return;
       }
       record();
       changeUnitConnection(
-        moveUnitConnection(unitDefinition, {
-          previousSourceId,
+        moveOriginConnection(unitDefinition, {
+          previousOrigin,
           previousDestinationId,
-          sourceId,
+          origin,
           destinationId,
         })
       );
@@ -566,20 +551,17 @@ function StreamsCanvasInner() {
     NonNullable<React.ComponentProps<typeof CanvasShell>['onReconnectEnd']>
   >(
     (_event, edge, _handleType, connectionState) => {
-      console.log(edge, connectionState);
       // Dropping on a handle keeps or moves the line. Releasing on the canvas unhooks it.
       if (connectionState.toHandle) {
         return;
       }
-      const sourceId = readConfiguredSourceId(edge.source);
+      const origin = readConnectionOrigin(edge.source, edge.sourceHandle);
       const destinationId = readConfiguredDestinationId(edge.target);
-      if (!sourceId || !destinationId) {
+      if (!origin || !destinationId) {
         return;
       }
       record();
-      changeUnitConnection(
-        disconnectSourceFromDestination(unitDefinition, sourceId, destinationId)
-      );
+      changeUnitConnection(disconnectOrigin(unitDefinition, origin, destinationId));
     },
     [changeUnitConnection, record, unitDefinition]
   );
@@ -1006,8 +988,8 @@ const buildRoutingNode = (routing: RoutingViewModel): RoutingNode => {
         let label: string;
 
         if (rule.when) {
-          label = i18n.translate('xpack.streams.canvas.routingNode.allDataRuleLabel', {
-            defaultMessage: 'Route when: {condition}',
+          label = i18n.translate('xpack.streams.canvas.routingNode.whenRuleLabel', {
+            defaultMessage: 'Condition: {condition}',
             values: {
               condition: rule.when,
             },
@@ -1023,7 +1005,7 @@ const buildRoutingNode = (routing: RoutingViewModel): RoutingNode => {
         }
 
         return {
-          handleId: routingRuleHandleId(rule.targets),
+          handleId: routingRuleHandleId(rule.index),
           isCatchAll: rule.when === undefined,
           action: rule.action,
           label,

@@ -7,12 +7,13 @@
 
 import { getUnitConnections } from '../../../../services/unit_connections';
 import type { Unit } from '../../../../services/unit_repository';
-import type { RoutingTarget, RoutingViewModel } from '../../../streams_layout/routing/types';
+import type { RoutingViewModel } from '../../../streams_layout/routing/types';
 import { ANIMATED_EDGE_TYPE, type ClassicCanvasEdge } from './types';
 
 const CONFIGURED_SOURCE_PREFIX = 'configured-source-';
 const CONFIGURED_DESTINATION_PREFIX = 'configured-destination-';
 const CONFIGURED_ROUTING_PREFIX = 'configured-routing-';
+const ROUTING_RULE_HANDLE_PREFIX = 'rule-';
 
 export const configuredSourceNodeId = (sourceId: string): string =>
   `${CONFIGURED_SOURCE_PREFIX}${sourceId}`;
@@ -23,8 +24,19 @@ export const configuredDestinationNodeId = (destinationId: string): string =>
 export const configuredRoutingNodeId = (pipelineId: string): string =>
   `${CONFIGURED_ROUTING_PREFIX}${pipelineId}`;
 
-export const routingRuleHandleId = (ruleTargets: RoutingTarget[]): string =>
-  ruleTargets.map((rule) => rule.id).join(', ');
+/**
+ * Rule handles are keyed by rule position so they stay stable as targets change.\
+ */
+export const routingRuleHandleId = (ruleIndex: number): string =>
+  `${ROUTING_RULE_HANDLE_PREFIX}${ruleIndex}`;
+
+export const readRoutingRuleIndex = (handleId: string | null | undefined): number | undefined => {
+  if (!handleId?.startsWith(ROUTING_RULE_HANDLE_PREFIX)) {
+    return undefined;
+  }
+  const index = Number(handleId.slice(ROUTING_RULE_HANDLE_PREFIX.length));
+  return Number.isInteger(index) && index >= 0 ? index : undefined;
+};
 
 export const readConfiguredSourceId = (nodeId: string | null | undefined): string | undefined =>
   nodeId?.startsWith(CONFIGURED_SOURCE_PREFIX)
@@ -66,16 +78,21 @@ export const buildUnitConnectionEdges = (
       data: { unitConnection: true, forwarding },
     }));
 
+/**
+ * Only rule -> destination lines can be moved or unhooked. Lines into a routing
+ * node, and rule -> child pipeline lines, are fixed until routes can be edited.
+ */
 const routingEdge = (
-  edge: Pick<ClassicCanvasEdge, 'id' | 'source' | 'target' | 'sourceHandle'>
+  edge: Pick<ClassicCanvasEdge, 'id' | 'source' | 'target' | 'sourceHandle'>,
+  isEditable: boolean
 ): ClassicCanvasEdge => ({
   ...edge,
   type: ANIMATED_EDGE_TYPE,
-  reconnectable: true,
+  reconnectable: isEditable ? 'target' : false,
   selectable: false,
   deletable: false,
-  className: 'streamsUnitConnection nopan',
-  data: { routing: true },
+  className: isEditable ? 'streamsUnitConnection nopan' : 'streamsRoutingConnection nopan',
+  data: { routing: true, unitConnection: isEditable },
 });
 
 /**
@@ -97,30 +114,36 @@ export const buildRoutingEdges = (
     const inbound = routing.sourceIds
       .filter((sourceId) => sources.has(sourceId))
       .map((sourceId) =>
-        routingEdge({
-          id: `routing-${sourceId}->${routing.id}`,
-          source: configuredSourceNodeId(sourceId),
-          target: routingNodeId,
-        })
+        routingEdge(
+          {
+            id: `routing-${sourceId}->${routing.id}`,
+            source: configuredSourceNodeId(sourceId),
+            target: routingNodeId,
+          },
+          false
+        )
       );
     const outbound = routing.rules.flatMap((rule) =>
-      rule.targets.flatMap(({ kind, id }) => {
+      rule.targets.reduce((out, { kind, id }) => {
         const isOnCanvas = kind === 'destination' ? destinations.has(id) : pipelines.has(id);
-        if (!isOnCanvas) {
-          return [];
-        }
-        return [
-          routingEdge({
-            id: `routing-${routing.id}:${rule.index}->${kind}-${id}`,
-            source: routingNodeId,
-            sourceHandle: routingRuleHandleId(rule.targets),
-            target:
+        if (isOnCanvas) {
+          out.push(
+            routingEdge(
+              {
+                id: `routing-${routing.id}:${rule.index}->${kind}-${id}`,
+                source: routingNodeId,
+                sourceHandle: routingRuleHandleId(rule.index),
+                target:
+                  kind === 'destination'
+                    ? configuredDestinationNodeId(id)
+                    : configuredRoutingNodeId(id),
+              },
               kind === 'destination'
-                ? configuredDestinationNodeId(id)
-                : configuredRoutingNodeId(id),
-          }),
-        ];
-      })
+            )
+          );
+        }
+        return out;
+      }, [] as ClassicCanvasEdge[])
     );
     return [...inbound, ...outbound];
   });

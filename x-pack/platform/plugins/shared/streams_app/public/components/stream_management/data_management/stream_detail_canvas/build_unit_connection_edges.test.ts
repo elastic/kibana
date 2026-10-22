@@ -76,13 +76,21 @@ describe('buildRoutingEdges', () => {
     );
   });
 
-  it('keeps routing edges read-only', () => {
+  it('only lets rule -> destination lines be moved or unhooked', () => {
     const edges = buildRoutingEdges(getUnitRoutings(unit), sourceIds, destinationIds);
 
     expect(new Set(edges.map(({ id }) => id)).size).toBe(edges.length);
+    expect(
+      edges.map(({ target, reconnectable, data }) => [target, reconnectable, data?.unitConnection])
+    ).toEqual([
+      ['configured-routing-p-routed', false, false],
+      ['configured-destination-es-a', 'target', true],
+      ['configured-routing-child', false, false],
+      ['configured-destination-es-b', 'target', true],
+      ['configured-destination-es-c', 'target', true],
+    ]);
     edges.forEach((edge) => {
-      expect(edge).toMatchObject({ reconnectable: false, deletable: false, selectable: false });
-      expect(edge.data).not.toHaveProperty('unitConnection');
+      expect(edge).toMatchObject({ deletable: false, selectable: false });
     });
   });
 

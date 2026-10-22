@@ -67,7 +67,6 @@ describe('routing models', () => {
             index: 0,
             when: 'resource.attributes["env"] == "prod"',
             action: 'copy',
-            processors: ['add-prod-tags'],
             targets: [
               { kind: 'destination', id: 'es-prod' },
               { kind: 'destination', id: 's3-archive' },
@@ -77,7 +76,6 @@ describe('routing models', () => {
             index: 1,
             when: undefined,
             action: undefined,
-            processors: [],
             targets: [{ kind: 'destination', id: 'es-default' }],
           },
         ],
@@ -128,7 +126,6 @@ describe('routing models', () => {
       rules: [
         {
           index: 0,
-          processors: ['enrich'],
           targets: [
             { kind: 'destination', id: 'es-b' },
             { kind: 'destination', id: 'es-c' },
