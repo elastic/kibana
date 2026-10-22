@@ -258,6 +258,7 @@ export class UnenrollInactiveAgentsTask {
 
       const scheduledBatch = await unenrollBatch(soClient, esClient, agentsToSchedule, {
         force: true,
+        skipAgentlessValidation: true,
         actionId,
         startTime,
       });
@@ -374,6 +375,7 @@ export class UnenrollInactiveAgentsTask {
       await unenrollBatch(soClient, esClient, stillInactiveAgents, {
         revoke: true,
         force: true,
+        skipAgentlessValidation: true,
         actionId: action.action_id,
         skipActionCreation: true,
       });

@@ -464,7 +464,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       ],
       [
         'logs an error when the agents are hosted',
-        new AgentReassignmentError('No agents to reassign, already assigned or hosted agents'),
+        new AgentReassignmentError('No agents to reassign, already assigned or managed agents'),
         true,
       ],
       ['logs an error when the reassignment fails', new Error('boom'), true],

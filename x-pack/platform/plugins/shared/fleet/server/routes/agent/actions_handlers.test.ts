@@ -26,7 +26,14 @@ import type {
   PostNewAgentActionResponse,
 } from '../../../common/types/rest_spec';
 
+import { AgentlessAgentRestrictionError } from '../../errors';
+import { throwIfAgentInAgentlessPolicy } from '../../services/agents/hosted_agent';
+
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
+
+jest.mock('../../services/agents/hosted_agent', () => ({
+  throwIfAgentInAgentlessPolicy: jest.fn(),
+}));
 
 describe('test actions handlers schema', () => {
   it('validate that new agent actions schema is valid', async () => {
@@ -53,6 +60,7 @@ describe('test actions handlers', () => {
   let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
 
   beforeEach(() => {
+    jest.mocked(throwIfAgentInAgentlessPolicy).mockReset();
     mockSavedObjectsClient = savedObjectsClientMock.create();
     mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     mockResponse = httpServerMock.createResponseFactory();
@@ -113,5 +121,35 @@ describe('test actions handlers', () => {
       ?.body as unknown as PostNewAgentActionResponse;
 
     expect(expectedAgentActionResponse.item).toEqual(agentAction);
+  });
+
+  it('should not create an action for an agentless agent', async () => {
+    jest
+      .mocked(throwIfAgentInAgentlessPolicy)
+      .mockRejectedValueOnce(new AgentlessAgentRestrictionError('Cannot create an action'));
+    const mockRequest = httpServerMock.createKibanaRequest({
+      body: { action: { type: 'SETTINGS', data: { log_level: 'debug' } } },
+      params: { agentId: 'id' },
+    });
+    const actionsService = {
+      getAgent: jest.fn().mockReturnValueOnce({ id: 'agent' }),
+      createAgentAction: jest.fn(),
+      cancelAgentAction: jest.fn(),
+      getAgentActions: jest.fn(),
+    } as jest.Mocked<ActionsService>;
+
+    await expect(
+      postNewAgentActionHandlerBuilder(actionsService)(
+        {
+          core: {
+            savedObjects: { client: mockSavedObjectsClient },
+            elasticsearch: { client: { asInternalUser: mockElasticsearchClient } },
+          },
+        } as unknown as RequestHandlerContext,
+        mockRequest,
+        mockResponse
+      )
+    ).rejects.toThrow(AgentlessAgentRestrictionError);
+    expect(actionsService.createAgentAction).not.toHaveBeenCalled();
   });
 });
