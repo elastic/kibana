@@ -1544,7 +1544,6 @@ _alertzero_attack_discovery:
   indices:
     - names:
         - ai-index-idx-security-investigations
-        - ai-index-idx-security-attack-fingerprints
       privileges:
         - read
         - view_index_metadata
