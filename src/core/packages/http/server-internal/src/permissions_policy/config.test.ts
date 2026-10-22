@@ -45,9 +45,7 @@ describe('permissionsPolicyConfig', () => {
         });
 
         it('rejects `none`, which is a Content Security Policy keyword', () => {
-          expect(() => validate({ [setting]: ['none'] })).toThrow(
-            /To deny a feature, leave its list empty/
-          );
+          expect(() => validate({ [setting]: ['none'] })).toThrow(/An empty list adds no sources/);
         });
 
         it('rejects `src`, which is valid only in an iframe allow attribute', () => {
@@ -124,7 +122,7 @@ describe('permissionsPolicyConfig', () => {
     it('applies the same validation under `report_only`', () => {
       expect(() =>
         validate({ report_to: ['endpoint'], report_only: { camera: ['none'] } })
-      ).toThrow(/To deny a feature, leave its list empty/);
+      ).toThrow(/An empty list adds no sources/);
     });
   });
 
@@ -190,12 +188,16 @@ describe('permissionsPolicyConfig', () => {
       ]);
     });
 
-    it('rejects an endpoint name that is longer than the maximum', () => {
-      expect(() => validate({ report_to: ['a'.repeat(257)] })).toThrow(/maximum length/);
+    // `report_to` is GA, so a value that serializes correctly must keep working, however long.
+    it('accepts a long endpoint name', () => {
+      const name = 'a'.repeat(300);
+      expect(validate({ report_to: [name] }).report_to).toEqual([name]);
     });
 
-    it('rejects more endpoints than the maximum', () => {
-      expect(() => validate({ report_to: new Array(11).fill('endpoint') })).toThrow(/array size/);
+    // Only the first endpoint is used, and the deprecation below already warns about the rest.
+    it('accepts many endpoints', () => {
+      const names = new Array(11).fill('endpoint');
+      expect(validate({ report_to: names }).report_to).toEqual(names);
     });
   });
 

@@ -44,7 +44,7 @@ const validateDirectiveValue = (value: string) => {
     return undefined;
   }
   if (value === 'none' || value === `'none'`) {
-    return `"none" is a Content Security Policy keyword and is not valid in a permissions policy. To deny a feature, leave its list empty, which is already the default`;
+    return `"none" is a Content Security Policy keyword and is not valid in a permissions policy. An empty list adds no sources`;
   }
   if (value === 'src' || value === `'src'`) {
     return `"src" is valid only in an iframe allow attribute, not in a Permissions-Policy header`;
@@ -105,9 +105,6 @@ const reportOnlyDirectiveSchema = () => schema.maybe(directiveArraySchema());
  */
 const REPORTING_GROUP_NAME = /^[A-Za-z*][A-Za-z0-9!#$%&'*+\-.^_`|~:/]*$/;
 
-const MAX_REPORTING_GROUP_NAME_LENGTH = 256;
-const MAX_REPORTING_GROUP_NAMES = 10;
-
 const validateReportingGroupName = (value: string) => {
   if (!REPORTING_GROUP_NAME.test(value)) {
     return (
@@ -155,9 +152,10 @@ const configSchema = schema.object(
     enabled: schema.boolean({ defaultValue: true }),
     ...directivesSchema(directiveSchema),
     report_only: schema.maybe(schema.object(directivesSchema(reportOnlyDirectiveSchema))),
-    report_to: schema.arrayOf(schema.string({ maxLength: MAX_REPORTING_GROUP_NAME_LENGTH }), {
+    // Only the token grammar is enforced: it rejects exactly the values that corrupt the header.
+    // `report_to` is GA, so anything that serializes correctly keeps working.
+    report_to: schema.arrayOf(schema.string(), {
       defaultValue: [],
-      maxSize: MAX_REPORTING_GROUP_NAMES,
       validate: reportingGroupNameValidator,
     }),
   },
