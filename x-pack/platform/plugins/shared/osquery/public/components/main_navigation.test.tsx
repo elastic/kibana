@@ -14,6 +14,19 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { BehaviorSubject } from 'rxjs';
+
+const OSQUERY_DOC_LINK = 'https://docs.elastic.co/solutions/security/investigate/osquery';
+
+const DEFAULT_OSQUERY_CAPABILITIES = {
+  readLiveQueries: true,
+  writeLiveQueries: true,
+  runSavedQueries: true,
+  readSavedQueries: true,
+  readPacks: true,
+};
+let mockOsqueryCapabilities: Record<string, boolean> = DEFAULT_OSQUERY_CAPABILITIES;
 
 // --- Kibana services ---
 jest.mock('../common/lib/kibana', () => ({
@@ -21,15 +34,17 @@ jest.mock('../common/lib/kibana', () => ({
     services: {
       application: {
         capabilities: {
-          osquery: {
-            writeLiveQueries: true,
-            runSavedQueries: true,
-            readSavedQueries: true,
-            readPacks: true,
-          },
+          osquery: mockOsqueryCapabilities,
         },
         getUrlForApp: () => '/app/integrations/osquery_manager/policies',
         navigateToApp: jest.fn(),
+      },
+      docLinks: {
+        links: {
+          osquery: {
+            guide: OSQUERY_DOC_LINK,
+          },
+        },
       },
     },
   }),
@@ -57,11 +72,13 @@ const PublishTitle = ({ title }: { title: string }) => {
   return null;
 };
 
-const renderNavigation = (path: string, title?: string) =>
+type MockChromeStart = ReturnType<typeof chromeServiceMock.createStartContract>;
+
+const renderNavigation = (path: string, title?: string, chrome?: MockChromeStart) =>
   render(
     <EuiProvider>
       <IntlProvider locale="en">
-        <MockAppHeaderProvider>
+        <MockAppHeaderProvider chrome={chrome}>
           <OsqueryPageHeaderProvider>
             <MemoryRouter initialEntries={[path]}>
               <MainNavigation />
@@ -73,7 +90,21 @@ const renderNavigation = (path: string, title?: string) =>
     </EuiProvider>
   );
 
+// Grants integrations access and a feedback handler so the built-in "Add integrations" /
+// "Feedback" static menu items render alongside our "Documentation" docLink item.
+const createChromeWithStaticItems = (): MockChromeStart => {
+  const chrome = chromeServiceMock.createStartContract();
+  chrome.componentDeps.capabilities.navLinks = { integrations: true };
+  (chrome.help.getFeedbackHandler$ as jest.Mock).mockReturnValue(new BehaviorSubject(() => {}));
+
+  return chrome;
+};
+
 describe('MainNavigation', () => {
+  beforeEach(() => {
+    mockOsqueryCapabilities = DEFAULT_OSQUERY_CAPABILITIES;
+  });
+
   it('should display History, Packs, and Queries tabs', () => {
     renderNavigation('/history');
 
@@ -117,26 +148,42 @@ describe('MainNavigation', () => {
     expect(screen.getByTestId('osqueryRunQueryButton')).toHaveTextContent('Run query');
   });
 
-  it('should show "Manage integration" as a menu item', async () => {
-    renderNavigation('/history');
+  it('should show Documentation, Add integrations and Feedback, but not Manage integration', async () => {
+    renderNavigation('/history', undefined, createChromeWithStaticItems());
 
     await openAppMenuOverflow();
-    expect(screen.getByTestId('osqueryManageIntegrationButton')).toHaveTextContent(
-      'Manage integration'
+    expect(screen.getByTestId('appHeaderMenuDocumentation')).toHaveTextContent('Documentation');
+    expect(screen.getByTestId('appHeaderMenuDocumentation')).toHaveAttribute(
+      'href',
+      OSQUERY_DOC_LINK
     );
+    expect(screen.getByTestId('appHeaderMenuAddIntegrations')).toHaveTextContent(
+      'Add integrations'
+    );
+    expect(screen.getByTestId('appHeaderMenuFeedback')).toHaveTextContent('Feedback');
+    expect(screen.queryByTestId('osqueryManageIntegrationButton')).not.toBeInTheDocument();
+    expect(screen.queryByText('Manage integration')).not.toBeInTheDocument();
   });
 
-  it('should hide the tab strip and title on a details page', async () => {
+  it('should render nothing on the live query details route (the page owns its own header)', () => {
+    const { container } = renderNavigation('/history/abc-123');
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should render nothing on the scheduled execution details route (the page owns its own header)', () => {
+    const { container } = renderNavigation('/history/scheduled/abc-123/1');
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should render a "Query results" header with History back on a results route the user cannot read', () => {
+    mockOsqueryCapabilities = { ...DEFAULT_OSQUERY_CAPABILITIES, readLiveQueries: false };
+
     renderNavigation('/history/abc-123');
 
-    expect(screen.queryAllByRole('tab')).toHaveLength(0);
-    expect(screen.queryByText('Osquery')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('osqueryRunQueryButton')).not.toBeInTheDocument();
     expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('Query results');
     expect(screen.getByTestId('appHeaderBack')).toHaveAttribute('aria-label', 'Back to History');
-
-    await openAppMenuOverflow();
-    expect(screen.getByTestId('osqueryManageIntegrationButton')).toBeInTheDocument();
   });
 
   it('should render the Run query title and History back on /new', () => {
