@@ -51,7 +51,9 @@ interface VaultResponse {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-const readCappedText = async (body: ReadableStream<Uint8Array> | null): Promise<string> => {
+type UndiciResponseBody = Awaited<ReturnType<typeof undiciFetch>>['body'];
+
+const readCappedText = async (body: UndiciResponseBody): Promise<string> => {
   if (!body) return '';
   const reader = body.getReader();
   const decoder = new TextDecoder();
@@ -60,12 +62,13 @@ const readCappedText = async (body: ReadableStream<Uint8Array> | null): Promise<
   for (;;) {
     const { done, value } = await reader.read();
     if (done) break;
-    received += value.byteLength;
+    const chunk: Uint8Array = value;
+    received += chunk.byteLength;
     if (received > MAX_RESPONSE_BYTES) {
       await reader.cancel();
       throw new Error('response too large');
     }
-    text += decoder.decode(value, { stream: true });
+    text += decoder.decode(chunk, { stream: true });
   }
   return text + decoder.decode();
 };
