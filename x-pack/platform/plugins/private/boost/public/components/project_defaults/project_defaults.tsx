@@ -19,6 +19,7 @@ import {
   EuiStat,
   EuiText,
   EuiTitle,
+  useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -115,6 +116,7 @@ const ProjectDefaultPanel = ({
   onEdit,
 }: ProjectDefaultPanelProps) => {
   const { euiTheme } = useEuiTheme();
+  const { lineHeight: labelLineHeight } = useEuiFontSize('s');
   const history = useHistory();
   const preset = DEFAULT_PRESET_OPTIONS[type].find((option) => option.profileName === profileName);
   const inlineCss = { display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.s };
@@ -123,11 +125,17 @@ const ProjectDefaultPanel = ({
     <EuiPanel
       hasBorder
       hasShadow={false}
-      css={{ blockSize: '100%' }}
+      css={{
+        blockSize: '100%',
+        // Centering the label on the edit button sets it below the panel's top padding by half
+        // their difference in height, so the bottom gets the same, keeping the content balanced.
+        paddingBlockEnd: onEdit
+          ? `calc(${euiTheme.size.base} + (${euiTheme.size.xl} - ${labelLineHeight}) / 2)`
+          : undefined,
+      }}
       data-test-subj={`boostProjectDefault-${type}`}
     >
       <EuiStat
-        // What the default applies to follows its type: how many, and how much data.
         description={
           // The label shares a row with the edit button, centered on it.
           <span
@@ -141,20 +149,6 @@ const ProjectDefaultPanel = ({
             <span css={inlineCss}>
               <EuiIcon type={TYPE_ICONS[type]} aria-hidden={true} />
               {PROFILE_TYPE_LABELS[type]}
-              <EuiNotificationBadge
-                color="subdued"
-                size="s"
-                data-test-subj={`boostProjectDefaultCount-${type}`}
-              >
-                {formatDataSourceCount(type, appliedCount)}
-              </EuiNotificationBadge>
-              <EuiNotificationBadge
-                color="subdued"
-                size="s"
-                data-test-subj={`boostProjectDefaultSize-${type}`}
-              >
-                {formatSize(appliedSize)}
-              </EuiNotificationBadge>
             </span>
             {onEdit && (
               <EuiButton
@@ -197,10 +191,28 @@ const ProjectDefaultPanel = ({
         titleSize="m"
         data-test-subj={`boostProjectDefaultValue-${type}`}
       >
-        <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued">
+        <EuiSpacer size="s" />
+        <EuiText size="xs" color="subdued">
           <p>{preset ? preset.description : CUSTOM_PROFILE_DESCRIPTION}</p>
         </EuiText>
+        {/* What the default applies to: how many, and how much data. */}
+        <EuiSpacer size="xs" />
+        <span css={inlineCss}>
+          <EuiNotificationBadge
+            color="subdued"
+            size="s"
+            data-test-subj={`boostProjectDefaultCount-${type}`}
+          >
+            {formatDataSourceCount(type, appliedCount)}
+          </EuiNotificationBadge>
+          <EuiNotificationBadge
+            color="subdued"
+            size="s"
+            data-test-subj={`boostProjectDefaultSize-${type}`}
+          >
+            {formatSize(appliedSize)}
+          </EuiNotificationBadge>
+        </span>
       </EuiStat>
     </EuiPanel>
   );
