@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 
 /**
- * Adds a panel from a visualization attachment the conversation already holds. Carries no panel
+ * Creates a panel from a visualization attachment the conversation already holds. Carries no panel
  * `type`: the attachment's own renderer decides which embeddable it becomes.
  */
 export const attachmentPanelInputSchema = z.object({

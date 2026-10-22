@@ -48,63 +48,35 @@ export type CustomContentPanelResolutionRequest =
   | CustomContentPanelAddRequest
   | CustomContentPanelEditRequest;
 
-/** Adds a new custom content panel. */
-const customContentPanelRequestSchema = z.object({
+/** Creates or edits a custom content panel. */
+const customContentPanelContentSchema = z.object({
   source: z.literal('request'),
   renderer: z
     .literal('custom_content')
     .describe(
-      'Render an HTML/CSS layout generated server-side. A last resort for content Lens and Vega cannot express.'
+      'Render an HTML/CSS layout generated server-side. A last resort for content Lens and Vega cannot express. Required to edit a custom content panel; it is not inferred from the panel.'
     ),
   query: z
     .string()
     .min(1)
     .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
+    .optional()
     .describe(
-      'Natural language description of what to display. The HTML template is generated server-side from it — do not supply markup yourself.'
+      'Natural language description of what to display. The HTML template is generated server-side from it — do not supply markup yourself. Required for new panels; on an existing panel, what to change, preserving layout and design where possible.'
     ),
   esql: z
     .string()
     .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
+    .nullable()
     .optional()
     .describe(
-      'ES|QL query whose result rows feed the template. Omit for static content — it is not generated for you. Build it with the generate_esql tool rather than writing it yourself; the panel fails if Elasticsearch rejects it.'
+      'ES|QL query whose result rows feed the template. Omit for static content — it is not generated for you. Build it with the generate_esql tool rather than writing it yourself; the panel fails if Elasticsearch rejects it. On an existing panel: omit to keep the existing query; pass null to remove it.'
     ),
 });
-
-/** Edits an existing custom content panel by id. */
-const customContentEditPanelRequestSchema = z
-  .object({
-    source: z.literal('request'),
-    renderer: z
-      .literal('custom_content')
-      .describe('Required to edit a custom content panel; it is not inferred from the panel.'),
-    panelId: z.string().max(256).describe('Existing custom content panel id to update.'),
-    query: z
-      .string()
-      .min(1)
-      .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
-      .optional()
-      .describe(
-        'Natural language instruction for what to change. The server refines the existing template, preserving layout and design where possible.'
-      ),
-    esql: z
-      .string()
-      .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
-      .nullable()
-      .optional()
-      .describe(
-        'New ES|QL query. Omit to keep the existing query; pass null to remove it. Build it with the generate_esql tool rather than writing it yourself.'
-      ),
-  })
-  .refine(({ query, esql }) => query !== undefined || esql !== undefined, {
-    message: 'At least one of query or esql must be provided.',
-  });
 
 export const customContentPanelKind = defineRequestPanelKind({
   renderer: 'custom_content',
   embeddableType: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   label: 'custom content',
-  addInputSchema: customContentPanelRequestSchema,
-  editInputSchema: customContentEditPanelRequestSchema,
+  contentSchema: customContentPanelContentSchema,
 });
