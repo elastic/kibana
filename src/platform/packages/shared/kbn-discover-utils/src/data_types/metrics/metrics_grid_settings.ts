@@ -52,7 +52,8 @@ export type HistogramPercentile = (typeof METRICS_GRID_HISTOGRAM_PERCENTILES)[nu
 /**
  * How a histogram metric is drawn. Values match the Lens saved-object
  * `visualizationType` for the same graph. Add a value here to offer another
- * choice. Kept off the public session API until these visualizations are released.
+ * choice. Keep this list aligned with `METRICS_GRID_HISTOGRAM_VISUALIZATIONS`
+ * in `@kbn/discover-session-constants`, which the session API validates.
  */
 export const METRICS_GRID_HISTOGRAM_VISUALIZATIONS = ['lnsXY', 'lnsHeatmap'] as const;
 

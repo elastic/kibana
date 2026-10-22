@@ -8,7 +8,11 @@
  */
 
 import { DiscoverTabType } from '@kbn/discover-session-constants';
-import { METRICS_GRID_SORT_DEFAULTS, isHistogramVisualization } from '@kbn/discover-utils';
+import {
+  METRICS_GRID_SETTINGS_DEFAULTS,
+  METRICS_GRID_SORT_DEFAULTS,
+  isHistogramVisualization,
+} from '@kbn/discover-utils';
 import { createProfileSavedStateTransform } from '../profile_state';
 import { METRICS_STATE_DEF } from '../profile_state_definitions/metrics_grid_profile_state';
 
@@ -21,14 +25,13 @@ export const METRICS_GRID_SAVED_STATE_TRANSFORM = createProfileSavedStateTransfo
     counterAggregation: settings.counterAggregation,
     gaugeAggregation: settings.gaugeAggregation,
     histogramPercentile: settings.histogramPercentile,
-    // Stored for the Discover UI. The public session API omits this until heatmaps are released.
     histogramVisualization: settings.histogramVisualization,
     gridSortField: settings.sortField,
     gridSortDirection: settings.sortDirection,
   }),
-  // Sessions saved before sort was persisted omit the sort fields. Fill in the defaults so a reset
-  // replaces the current sort instead of keeping it. Sessions saved before a visualization was
-  // chosen omit that field; leave it unset so a tab URL value is not replaced with the default.
+  // Sessions saved before sort or a visualization was persisted omit those fields. Fill in the
+  // defaults so Reset replaces the current values instead of keeping them. Tab initialization
+  // applies URL state after this result, so a shared link can still override the default chart.
   fromSavedState: ({ gridSortField, gridSortDirection, histogramVisualization, ...settings }) => {
     const storedVisualization = histogramVisualization as string | undefined;
 
@@ -37,9 +40,10 @@ export const METRICS_GRID_SAVED_STATE_TRANSFORM = createProfileSavedStateTransfo
         ...settings,
         sortField: gridSortField ?? METRICS_GRID_SORT_DEFAULTS.sortField,
         sortDirection: gridSortDirection ?? METRICS_GRID_SORT_DEFAULTS.sortDirection,
-        ...(storedVisualization !== undefined && isHistogramVisualization(storedVisualization)
-          ? { histogramVisualization: storedVisualization }
-          : {}),
+        histogramVisualization:
+          storedVisualization !== undefined && isHistogramVisualization(storedVisualization)
+            ? storedVisualization
+            : METRICS_GRID_SETTINGS_DEFAULTS.histogramVisualization,
       },
     ];
   },

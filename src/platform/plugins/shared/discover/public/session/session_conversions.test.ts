@@ -450,6 +450,7 @@ describe('Discover session conversion and UI preparation', () => {
       counter_aggregation: 'max',
       gauge_aggregation: 'min',
       histogram_percentile: 'p99',
+      histogram_visualization: 'lnsHeatmap',
       grid_sort_field: 'recency',
       grid_sort_direction: 'desc',
     };
@@ -467,6 +468,7 @@ describe('Discover session conversion and UI preparation', () => {
       counterAggregation: 'max',
       gaugeAggregation: 'min',
       histogramPercentile: 'p99',
+      histogramVisualization: 'lnsHeatmap',
       gridSortField: 'recency',
       gridSortDirection: 'desc',
     });
