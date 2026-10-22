@@ -19,8 +19,9 @@ import {
 import { isEsqlLensPanel } from './vis';
 
 /**
- * Error for content that cannot edit the existing panel: it targets another kind, or the panel is
- * a Lens panel not backed by ES|QL. Undefined when the content can edit the panel.
+ * Error for content that cannot edit the existing panel: it targets another kind or is an
+ * attachment, or the panel is a Lens panel not backed by ES|QL or of an unknown type, which are
+ * replaced only after the user confirms. Undefined when the content can edit the panel.
  */
 const getPanelEditError = (
   content: UpsertPanelContent,
@@ -29,24 +30,24 @@ const getPanelEditError = (
   const { id, type } = existingPanel;
   const replaceHint = `To replace it with another kind of panel, remove "${id}" and add the new panel with a new id in the same call.`;
   const confirmReplaceHint = `Tell the user it cannot be edited, and replace it only after they confirm: then remove "${id}" and add the new panel with a new id in the same call.`;
-  if (content.source === 'attachment') {
-    return `Panel "${id}" already exists, and attachments only add new panels. To replace it with the attachment, remove "${id}" and add the attachment with a new id in the same call.`;
-  }
   const renderer = findPanelRenderer(type);
   if (renderer === 'lens' && !isEsqlLensPanel(existingPanel)) {
     return `Panel "${id}" is a Lens panel that is not backed by ES|QL, so it cannot be edited. ${confirmReplaceHint}`;
   }
+  const configPanelType = findConfigPanelType(type);
+  if (!renderer && !configPanelType) {
+    return `Panel "${id}" with type "${type}" cannot be edited. ${confirmReplaceHint}`;
+  }
+  if (content.source === 'attachment') {
+    return `Panel "${id}" already exists, and attachments only add new panels. To replace it with the attachment, remove "${id}" and add the attachment with a new id in the same call.`;
+  }
   if (getEditableEmbeddableTypes(content).includes(type)) {
     return undefined;
   }
-  if (renderer) {
-    return `Panel "${id}" is a ${renderer} panel. Edit it with source: "request", renderer: "${renderer}". ${replaceHint}`;
-  }
-  const configPanelType = findConfigPanelType(type);
   if (configPanelType) {
     return `Panel "${id}" is a ${configPanelType.label} panel. Edit it with source: "config", type: "${configPanelType.type}". ${replaceHint}`;
   }
-  return `Panel "${id}" with type "${type}" cannot be edited. ${confirmReplaceHint}`;
+  return `Panel "${id}" is a ${renderer} panel. Edit it with source: "request", renderer: "${renderer}". ${replaceHint}`;
 };
 
 type ResolutionRequestResult = { request: PanelResolutionRequest } | { error: string };
