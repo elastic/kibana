@@ -24,6 +24,13 @@ export const ES_NOPASSWORD_P12_PATH = resolve(__dirname, '../certs/elasticsearch
 export const KBN_KEY_PATH = resolve(__dirname, '../certs/kibana.key');
 export const KBN_CERT_PATH = resolve(__dirname, '../certs/kibana.crt');
 export const KBN_P12_PATH = resolve(__dirname, '../certs/kibana.p12');
+/**
+ * Kibana's certificate for a local Serverless *observability* project. UIAM identifies Kibana by
+ * the project type in its client certificate, and `kibana.crt` declares an Elasticsearch project,
+ * so an observability project needs this one to act on its own service accounts.
+ */
+export const KBN_OBSERVABILITY_KEY_PATH = resolve(__dirname, '../certs/kibana_observability.key');
+export const KBN_OBSERVABILITY_CERT_PATH = resolve(__dirname, '../certs/kibana_observability.crt');
 export const KBN_P12_PASSWORD = 'storepass';
 export const FLEET_SERVER_KEY_PATH = resolve(__dirname, '../certs/fleet_server.key');
 export const FLEET_SERVER_CERT_PATH = resolve(__dirname, '../certs/fleet_server.crt');

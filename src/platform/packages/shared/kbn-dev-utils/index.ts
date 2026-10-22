@@ -28,6 +28,8 @@ export {
   RELAY_CERT_PATH,
   RELAY_P12_PATH,
   RELAY_P12_PASSWORD,
+  KBN_OBSERVABILITY_KEY_PATH,
+  KBN_OBSERVABILITY_CERT_PATH,
 } from './src/certs';
 export * from './src/dev_service_account';
 export * from './src/axios';

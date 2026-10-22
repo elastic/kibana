@@ -504,12 +504,33 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
   if (opts.uiam !== false && DEV_UTILS_SUPPORTED) {
     // Ensure the key/cert pair is loaded dynamically to exclude it from the production build.
     // eslint-disable-next-line import/no-dynamic-require
-    const { KBN_CERT_PATH, KBN_KEY_PATH } = require(DEV_UTILS_PATH);
+    const {
+      KBN_CERT_PATH,
+      KBN_KEY_PATH,
+      KBN_OBSERVABILITY_CERT_PATH,
+      KBN_OBSERVABILITY_KEY_PATH,
+    } = require(DEV_UTILS_PATH);
+
+    // UIAM reads Kibana's project from the client certificate, and refuses what Kibana does on
+    // behalf of that project when the certificate names another project type: listing service
+    // accounts comes back empty, and assuming one is denied. So the certificate has to match
+    // `xpack.cloud.serverless.project_type`, which the project's config file sets. `kibana.crt`
+    // declares an Elasticsearch project, which covers every project type but observability.
+    const isObservabilityProject =
+      _.get(rawConfig, 'xpack.cloud.serverless.project_type') === 'observability';
 
     console.info('Kibana will be configured to support UIAM.');
     lodashSet(rawConfig, 'xpack.security.uiam.enabled', true);
-    lodashSet(rawConfig, 'xpack.security.uiam.ssl.certificate', KBN_CERT_PATH);
-    lodashSet(rawConfig, 'xpack.security.uiam.ssl.key', KBN_KEY_PATH);
+    lodashSet(
+      rawConfig,
+      'xpack.security.uiam.ssl.certificate',
+      isObservabilityProject ? KBN_OBSERVABILITY_CERT_PATH : KBN_CERT_PATH
+    );
+    lodashSet(
+      rawConfig,
+      'xpack.security.uiam.ssl.key',
+      isObservabilityProject ? KBN_OBSERVABILITY_KEY_PATH : KBN_KEY_PATH
+    );
     lodashSet(rawConfig, 'xpack.security.uiam.ssl.verificationMode', 'none');
     lodashSet(rawConfig, 'mockIdpPlugin.uiam.enabled', true);
 

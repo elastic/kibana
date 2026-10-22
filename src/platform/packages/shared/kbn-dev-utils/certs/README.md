@@ -15,6 +15,8 @@ Certificates and keys are provided in multiple formats. These can be used by oth
 * `elasticsearch.key` -- A PEM-formatted [PKCS #1](https://tools.ietf.org/html/rfc8017) private key for Elasticsearch.
 * `kibana.crt` -- A PEM-formatted X.509 certificate and public key for Kibana.
 * `kibana.key` -- A PEM-formatted PKCS #1 private key for Kibana.
+* `kibana_observability.crt` -- A PEM-formatted X.509 certificate and public key for Kibana on a local Serverless *observability* project.
+* `kibana_observability.key` -- A PEM-formatted PKCS #8 private key for that certificate.
 * `relay.crt` -- A PEM-formatted X.509 certificate and public key for the Relay service.
 * `relay.key` -- A PEM-formatted PKCS #1 private key for the Relay service.
 
@@ -28,6 +30,22 @@ The password used for both of these is "storepass". Other copies are also provid
 
 * `elasticsearch_emptypassword.p12` -- The same PKCS #12 key store, encrypted with an empty password.
 * `elasticsearch_nopassword.p12` -- The same PKCS #12 key store, not encrypted with a password.
+
+## Kibana's UIAM identity
+
+UIAM reads Kibana's organization, project and **project type** from the client certificate Kibana
+presents, in a SAN of the form
+`EIDENT.<projectId>.project.<projectType>.type.<organizationId>.organization`.
+
+`kibana.crt` declares an `elasticsearch` project, so on a local Serverless project of another type
+UIAM treats Kibana as a different project than the one it acts for: listing service accounts comes
+back empty, reading one answers 403, and assuming one is denied with "Subject is not in
+organization service account assumable-by list". `kibana_observability.crt` carries the same
+identity with `observability` as the project type, and `src/cli/serve/serve.js` picks it when
+`xpack.cloud.serverless.project_type` is `observability`.
+
+A project type without its own certificate (`security`, `vectordb`) still has this gap; issue one
+the same way when you need it.
 
 ## Certificate generation
 
@@ -144,3 +162,26 @@ openssl pkcs12 -in relay.p12 -nocerts -passin pass:"storepass" -passout pass:"ke
 # Extract the PEM-formatted X.509 certificate for the Relay service
 openssl pkcs12 -in relay.p12 -out relay.crt -clcerts -passin pass:"storepass" -passout pass:
 ```
+
+### Kibana's observability project certificate
+
+`kibana_observability.crt` was issued from the same CA, with Kibana's SANs and `observability` in
+the project type position. Ask @elastic/kibana-security for `ca.p12` (password `castorepass`), and
+extract its contents to `ca.crt` and `ca.key`:
+
+```
+# The SANs of kibana.crt, with observability as the project type
+cat > kibana_observability.cnf <<'XEOF'
+basicConstraints=CA:FALSE
+subjectAltName=DNS:es01,DNS:es02,DNS:es03,DNS:localhost,DNS:host.docker.internal,DNS:kb-kb-uiam.project-abcdef12345678901234567890123456.kb.local,DNS:EIDENT.abcdef12345678901234567890123456.project.observability.type.org1234567890.organization
+XEOF
+
+# Generate the key and a certificate signing request
+openssl req -newkey rsa:2048 -nodes -keyout kibana_observability.key -subj "/CN=kibana" -out kibana_observability.csr
+
+# Sign it with the CA, valid for 50 years
+openssl x509 -req -in kibana_observability.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out kibana_observability.crt -days 18250 -sha256 -extfile kibana_observability.cnf
+```
+
+The project and organization ids are the local Serverless ones from `@kbn/mock-idp-utils`, the same
+as in `kibana.crt`.
