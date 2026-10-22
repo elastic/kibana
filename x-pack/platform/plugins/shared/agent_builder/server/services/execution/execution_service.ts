@@ -33,7 +33,9 @@ import {
   roundUserMessageEventId,
   normalizeInteractive,
 } from '@kbn/agent-builder-common';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import { parseSmlEntryId } from '@kbn/agent-builder-sml-plugin/server';
 import { attachmentChangesToEvents } from '@kbn/agent-builder-server/attachments';
 import type {
   AbortExecutionOptions,
@@ -90,7 +92,20 @@ export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   spaces?: SpacesPluginStart;
   attachmentsService: AttachmentServiceStart;
   callbackDeliveryService: CallbackDeliveryService;
+  /** Looks up an SML type, to know the attachment type its items attach as. */
+  getSmlTypeDefinition: (typeId: string) => { attachmentType?: string } | undefined;
 }
+
+// Links to the items picked from the chat input's menu: `[label](sml://<url-encoded entry id>)`.
+const SML_LINK_PATTERN = /\]\(sml:\/\/([^)?\s]+)/g;
+
+const decodeLinkId = (id: string): string => {
+  try {
+    return decodeURIComponent(id);
+  } catch {
+    return id;
+  }
+};
 
 export const createAgentExecutionService = (
   deps: AgentExecutionServiceDeps
@@ -942,8 +957,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     params: T,
     request: KibanaRequest
   ): Promise<T> {
+    const referenced = this.getReferencedAttachments(params.nextInput.message);
     const validated = await this.deps.attachmentsService.validateAttachmentInputs(
-      params.nextInput.attachments,
+      referenced.length > 0
+        ? [...(params.nextInput.attachments ?? []), ...referenced]
+        : params.nextInput.attachments,
       request
     );
 
@@ -960,6 +978,19 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         ...(validated ? { attachments: validated } : {}),
       },
     };
+  }
+
+  /** The items linked in the message that can be attached, as by-reference attachment inputs. */
+  private getReferencedAttachments(message: string | undefined): AttachmentInput[] {
+    const inputs = new Map<string, AttachmentInput>();
+    for (const [, encodedId] of (message ?? '').matchAll(SML_LINK_PATTERN)) {
+      const entry = parseSmlEntryId(decodeLinkId(encodedId));
+      const type = entry && this.deps.getSmlTypeDefinition(entry.type)?.attachmentType;
+      if (entry && type) {
+        inputs.set(`${type}:${entry.originId}`, { type, origin: entry.originId });
+      }
+    }
+    return Array.from(inputs.values());
   }
 
   private createExecutionClient(): AgentExecutionClient {

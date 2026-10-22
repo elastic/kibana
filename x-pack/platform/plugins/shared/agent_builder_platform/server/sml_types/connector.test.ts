@@ -31,6 +31,8 @@ const mockFinder = {
 
 const mockSavedObjectsClient = {
   get: jest.fn(),
+  find: jest.fn(),
+  bulkGet: jest.fn(),
   createPointInTimeFinder: jest.fn().mockReturnValue(mockFinder),
 };
 
@@ -399,6 +401,7 @@ describe('connectorSmlType', () => {
 
       expect(result).toEqual({
         type: AttachmentType.connector,
+        origin: 'conn-1',
         data: {
           connector_id: 'conn-1',
           connector_name: 'My MCP Connector',
@@ -436,11 +439,84 @@ describe('connectorSmlType', () => {
 
       expect(result).toEqual({
         type: AttachmentType.connector,
+        origin: 'conn-1',
         data: {
           connector_id: 'conn-1',
           connector_name: 'conn-1',
           connector_type: '.mcp',
         },
+      });
+    });
+  });
+
+  describe('searchByTitle', () => {
+    const connector = (id: string, name: string, actionTypeId = '.github') => ({
+      id,
+      attributes: { name, actionTypeId },
+    });
+
+    const search = async (
+      title: string,
+      constraints?: { connector: { ids?: string[] } },
+      size = 10
+    ) => {
+      const context = {
+        ...createAttachmentContext(),
+        savedObjectsClient: {} as never,
+        hasApiPrivileges: jest.fn(),
+      };
+      return connectorSmlType.searchByTitle!({ title, size, constraints }, context);
+    };
+
+    beforeEach(() => {
+      isChatCallableConnectorType.mockImplementation((type: string) => type !== '.index');
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          connector('c-1', 'Sales GitHub'),
+          connector('c-2', 'Other'),
+          connector('c-3', 'Sales index', '.index'),
+        ],
+      });
+    });
+
+    it('lists the callable connectors whose name matches, as the user, when the agent has no list', async () => {
+      expect(await search('SALES')).toEqual([{ originId: 'c-1', title: 'Sales GitHub' }]);
+
+      expect(mockGetActionSavedObjectsClient).toHaveBeenCalled();
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'action' })
+      );
+    });
+
+    describe('when the agent has a list of connectors', () => {
+      beforeEach(() => {
+        mockSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            connector('c-2', 'Other'),
+            connector('c-1', 'Sales GitHub'),
+            connector('c-3', 'Sales index', '.index'),
+            { id: 'gone', error: { statusCode: 404, message: 'Not found' } },
+          ],
+        });
+      });
+
+      it('reads only those connectors, skipping missing ones and types the agent cannot call', async () => {
+        const ids = ['c-2', 'c-1', 'c-3', 'gone'];
+
+        expect(await search('', { connector: { ids } })).toEqual([
+          { originId: 'c-2', title: 'Other' },
+          { originId: 'c-1', title: 'Sales GitHub' },
+        ]);
+        expect(mockSavedObjectsClient.bulkGet).toHaveBeenCalledWith(
+          ids.map((id) => ({ type: 'action', id, fields: ['name', 'actionTypeId'] }))
+        );
+        expect(mockSavedObjectsClient.find).not.toHaveBeenCalled();
+      });
+
+      it('reads nothing when the agent has no connectors', async () => {
+        expect(await search('', { connector: { ids: [] } })).toEqual([]);
+        expect(mockSavedObjectsClient.bulkGet).not.toHaveBeenCalled();
+        expect(mockSavedObjectsClient.find).not.toHaveBeenCalled();
       });
     });
   });

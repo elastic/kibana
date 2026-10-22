@@ -9,6 +9,7 @@ import React, { createRef } from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { Sml } from './sml';
+import { SML_SEARCH_DEFAULT_SIZE } from '../../../../../../../../services/sml/constants';
 import { CommandId } from '../../types';
 import type { CommandMenuHandle } from '../../types';
 
@@ -314,6 +315,111 @@ describe('Sml', () => {
         label: 'connector/workday_2',
         metadata: {},
       });
+    });
+  });
+
+  it('highlights the slash, and a space after the title, once typed', () => {
+    const marked = (query: string) =>
+      Array.from(
+        renderWithProvider(<Sml query={query} onSelect={jest.fn()} />).container.querySelectorAll(
+          'mark'
+        )
+      ).map((mark) => mark.textContent);
+
+    expect(marked('visualization/')).toContain('/');
+    expect(marked('visualization')).not.toContain('/');
+    expect(marked('visualization/Pacific ')).toContain('Pacific ');
+  });
+
+  describe('Tab and order', () => {
+    const setResults = (...items: Array<[string, string]>) => {
+      mockUseSmlAutocompleteReturn = {
+        results: items.map(([type, title]) => ({
+          id: `${type}:${title}`,
+          type,
+          title,
+          origin_id: title,
+        })),
+        total: items.length,
+        isLoading: false,
+        isError: false,
+        error: null,
+      };
+    };
+
+    const pressTab = (query: string) => {
+      const ref = createRef<CommandMenuHandle>();
+      const onSelect = jest.fn();
+      const onReplaceText = jest.fn();
+      renderWithProvider(
+        <Sml ref={ref} query={query} onSelect={onSelect} onReplaceText={onReplaceText} />
+      );
+      act(() => {
+        ref.current!.handleKeyDown({ key: 'Tab' } as React.KeyboardEvent);
+      });
+      return { onSelect, onReplaceText };
+    };
+
+    it('completes the type, then the title, as far as the matches agree', () => {
+      setResults(
+        ['dashboard', 'dashboard_A'],
+        ['dashboard', 'dashboard_B'],
+        ['dashboard', 'super_A']
+      );
+
+      expect(pressTab('dash').onReplaceText).toHaveBeenCalledWith('dashboard/');
+      expect(pressTab('dashboard/da').onReplaceText).toHaveBeenCalledWith('dashboard/dashboard_');
+    });
+
+    it('does not pick a result when there are several and nothing more to complete', () => {
+      setResults(['dashboard', 'dashboard_A'], ['dashboard', 'dashboard_B']);
+
+      const { onSelect, onReplaceText } = pressTab('dashboard/dashboard_');
+
+      expect(onReplaceText).not.toHaveBeenCalled();
+      expect(onSelect).not.toHaveBeenCalled();
+    });
+
+    it('selects the only result rather than completing its title', () => {
+      setResults(['dashboard', 'Sales overview']);
+
+      const { onSelect, onReplaceText } = pressTab('dashboard/sa');
+
+      expect(onReplaceText).not.toHaveBeenCalled();
+      expect(onSelect).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'dashboard:Sales overview' })
+      );
+    });
+
+    it('only completes the type when a full page may hide other matches', () => {
+      setResults(
+        ...Array.from({ length: SML_SEARCH_DEFAULT_SIZE }, (_, index): [string, string] => [
+          'dashboard',
+          `security_${index}`,
+        ])
+      );
+
+      expect(pressTab('dash').onReplaceText).toHaveBeenCalledWith('dashboard/');
+    });
+
+    it('lists the results alphabetically by type and title, reading numbers as numbers', () => {
+      setResults(
+        ['workflow', 'Notify on-call'],
+        ['dashboard', 'Pods 10'],
+        ['connector', 'zoom'],
+        ['dashboard', 'dashboard_A'],
+        ['dashboard', 'Pods 2']
+      );
+
+      renderWithProvider(<Sml query="/" onSelect={jest.fn()} />);
+
+      expect(screen.getAllByRole('option').map((row) => row.textContent)).toEqual([
+        'connector/zoom',
+        'dashboard/dashboard_A',
+        'dashboard/Pods 2',
+        'dashboard/Pods 10',
+        'workflow/Notify on-call',
+      ]);
     });
   });
 });

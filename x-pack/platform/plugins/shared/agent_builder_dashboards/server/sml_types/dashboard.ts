@@ -66,6 +66,7 @@ export const createDashboardSmlType = ({
   getDashboardClient,
 }: CreateDashboardSmlTypeOptions): SmlTypeDefinition => ({
   id: DASHBOARD_KI_TYPE,
+  attachmentType: DASHBOARD_ATTACHMENT_TYPE,
   fetchFrequency: () => '30m',
 
   async *list(context) {
@@ -108,6 +109,24 @@ export const createDashboardSmlType = ({
   },
 
   getPermissions: () => kibanaPermissions({ kiType: DASHBOARD_KI_TYPE }),
+
+  searchByTitle: async ({ title, size }, { savedObjectsClient }) => {
+    // Drop the operators of the `simple_query_string` search, so typed text is matched literally.
+    const term = title
+      .replace(/[+|\-"*()~\\]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const { saved_objects: dashboards } = await savedObjectsClient.find<{ title?: string }>({
+      type: 'dashboard',
+      fields: ['title'],
+      perPage: size,
+      ...(term ? { search: `${term}*`, searchFields: ['title'] } : {}),
+    });
+    return dashboards.map(({ id, attributes }) => ({
+      originId: id,
+      title: attributes.title ?? id,
+    }));
+  },
 
   toAttachment: async (item, context) => {
     const originId = getSmlOriginId(item);
