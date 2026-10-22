@@ -12,12 +12,9 @@ import type { ActionTypeRegistry } from '../action_type_registry';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
 
-export interface UnsecuredSpecsClientOpts {
+export interface SpecsClientOpts {
   actionTypeRegistry: ActionTypeRegistry;
   configurationUtilities: ActionsConfigurationUtilities;
-}
-
-export interface SpecsClientOpts extends UnsecuredSpecsClientOpts {
   authorization: PublicMethodsOf<ActionsAuthorization>;
   auditLogger?: AuditLogger;
 }

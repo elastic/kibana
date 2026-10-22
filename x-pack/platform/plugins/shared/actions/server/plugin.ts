@@ -127,7 +127,7 @@ import { CaseConnector } from './sub_action_framework/case';
 import type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 import { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 import type { ISpecsClient } from './specs_client';
-import { SpecsClient, UnsecuredSpecsClient } from './specs_client';
+import { SpecsClient } from './specs_client';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 import { createSystemConnectors } from './create_system_actions';
 import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_task';
@@ -230,9 +230,6 @@ export interface PluginStartContract {
 
   /** Request-scoped SpecsClient that enforces `get` authorization and audits failures. */
   getSpecsClientWithRequest(request: KibanaRequest): ISpecsClient;
-
-  /** Server-internal SpecsClient with no request, authorization, or audit logging. */
-  getUnsecuredSpecsClient(): ISpecsClient;
 
   renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
     actionTypeId: string,
@@ -787,13 +784,6 @@ export class ActionsPlugin
       });
     };
 
-    const getUnsecuredSpecsClient = (): ISpecsClient => {
-      return new UnsecuredSpecsClient({
-        actionTypeRegistry: actionTypeRegistry!,
-        configurationUtilities: actionsConfigUtils,
-      });
-    };
-
     const secureGetActionsClientWithRequest = (request: KibanaRequest) =>
       getActionsClientWithRequest(request);
 
@@ -942,7 +932,6 @@ export class ActionsPlugin
       getActionsClientWithRequestInSpace,
       getUnsecuredActionsClient,
       getSpecsClientWithRequest,
-      getUnsecuredSpecsClient,
       inMemoryConnectors: this.inMemoryConnectors,
       renderActionParameterTemplates: (...args) =>
         renderActionParameterTemplates(this.logger, actionTypeRegistry, ...args),

@@ -243,7 +243,7 @@ Once you have a scoped ActionsClient you can generate an action by calling eithe
 
 ### Accessing a SpecsClient
 
-`getSpecsClientWithRequest(request)` returns a request-scoped SpecsClient that enforces `get` authorization and audits failures. `getUnsecuredSpecsClient()` returns a server-internal client with no request, authorization, or audit logging. Use `getAll({ featureId })` for lightweight summaries of spec-backed types, and `get({ id })` for the form schema, skill, and action input schemas. Unknown ids and classic (non-spec) types throw a 404.
+`getSpecsClientWithRequest(request)` returns a request-scoped SpecsClient that enforces `get` authorization and audits failures. Use `getAll({ featureId })` for lightweight summaries of spec-backed types, and `get({ id })` for the form schema, skill, and action input schemas. Unknown ids and classic (non-spec) types throw a 404.
 
 ### actionsClient.enqueueExecution(options)
 

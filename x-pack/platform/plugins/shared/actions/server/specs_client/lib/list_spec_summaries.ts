@@ -7,11 +7,11 @@
 
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { ConnectorSpecSummary } from '../../../common/connector_spec';
-import type { UnsecuredSpecsClientOpts, GetAllSpecsParams } from '../types';
+import type { SpecsClientOpts, GetAllSpecsParams } from '../types';
 import { serializeSpecSummary } from './serialize_spec_summary';
 
 export const listSpecSummaries = (
-  { actionTypeRegistry }: UnsecuredSpecsClientOpts,
+  { actionTypeRegistry }: Pick<SpecsClientOpts, 'actionTypeRegistry'>,
   { featureId }: GetAllSpecsParams = {}
 ): ConnectorSpecSummary[] =>
   actionTypeRegistry.list({ featureId }).flatMap((type) => {

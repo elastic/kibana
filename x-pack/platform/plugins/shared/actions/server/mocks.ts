@@ -62,7 +62,6 @@ const createStartMock = () => {
     getActionsClientWithRequestInSpace: jest.fn().mockResolvedValue(actionsClientMock.create()),
     getUnsecuredActionsClient: jest.fn().mockReturnValue(unsecuredActionsClientMock.create()),
     getSpecsClientWithRequest: jest.fn().mockReturnValue(specsClientMock.create()),
-    getUnsecuredSpecsClient: jest.fn().mockReturnValue(specsClientMock.create()),
     getActionsAuthorizationWithRequest: jest
       .fn()
       .mockReturnValue(actionsAuthorizationMock.create()),

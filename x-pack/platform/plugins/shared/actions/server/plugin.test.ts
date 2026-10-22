@@ -693,7 +693,8 @@ describe('Actions Plugin', () => {
         test: { handler: async () => ({}), enabled: false },
       } as unknown as ConnectorSpec;
 
-      it('exposes getUnsecuredSpecsClient and lists registered spec-backed types', async () => {
+      it('getSpecsClientWithRequest getAll checks authorization and lists registered spec-backed types', async () => {
+        const ensureAuthorizedSpy = jest.spyOn(ActionsAuthorization.prototype, 'ensureAuthorized');
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
         pluginSetup.registerType(serverLogConnectorType);
         pluginSetup.registerType(
@@ -708,8 +709,12 @@ describe('Actions Plugin', () => {
         );
         const pluginStart = await plugin.start(coreStart, pluginsStart);
 
-        const summaries = await pluginStart.getUnsecuredSpecsClient().getAll();
+        const summaries = await pluginStart
+          .getSpecsClientWithRequest(httpServerMock.createKibanaRequest())
+          .getAll();
         expect(summaries.map((summary) => summary.id)).toEqual(['.stub-spec-client']);
+        expect(ensureAuthorizedSpy).toHaveBeenCalledWith({ operation: 'get' });
+        ensureAuthorizedSpy.mockRestore();
       });
 
       it('getSpecsClientWithRequest rejects classic types with 404 and checks authorization', async () => {

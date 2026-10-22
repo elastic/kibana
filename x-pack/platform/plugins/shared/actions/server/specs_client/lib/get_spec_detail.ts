@@ -6,12 +6,15 @@
  */
 
 import type { ConnectorSpecDetail } from '../../../common/connector_spec';
-import type { UnsecuredSpecsClientOpts } from '../types';
+import type { SpecsClientOpts } from '../types';
 import { getRegisteredSpec } from './get_registered_spec';
 import { serializeSpecDetail } from './serialize_spec_detail';
 
 export const getSpecDetail = (
-  { actionTypeRegistry, configurationUtilities }: UnsecuredSpecsClientOpts,
+  {
+    actionTypeRegistry,
+    configurationUtilities,
+  }: Pick<SpecsClientOpts, 'actionTypeRegistry' | 'configurationUtilities'>,
   id: string
 ): ConnectorSpecDetail =>
   serializeSpecDetail(getRegisteredSpec(actionTypeRegistry, id), configurationUtilities);
