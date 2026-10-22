@@ -18,9 +18,11 @@ import { V2_NOOP_ATTACHMENTS_WRITER } from '../writer/attachments';
 import { runReconciliation } from './runner';
 import { runActivityReconciliation } from './activity_runner';
 import { runAttachmentsReconciliation } from './attachments_runner';
+import { runIncrementalIdBackfill } from '../incremental_id_backfill/runner';
 import { sweepDeletedSpaces } from './deleted_spaces_sweep';
 import {
   clampCursorToNotFuture,
+  INCREMENTAL_ID_BACKFILL_TICK_BUDGET_MS,
   registerReconciliationTask,
   resetReconciliationTask,
   RECONCILIATION_TASK_ID,
@@ -30,6 +32,7 @@ import {
 jest.mock('./runner');
 jest.mock('./activity_runner');
 jest.mock('./attachments_runner');
+jest.mock('../incremental_id_backfill/runner');
 jest.mock('./deleted_spaces_sweep');
 const mockRunReconciliation = runReconciliation as jest.MockedFunction<typeof runReconciliation>;
 const mockRunActivityReconciliation = runActivityReconciliation as jest.MockedFunction<
@@ -37,6 +40,9 @@ const mockRunActivityReconciliation = runActivityReconciliation as jest.MockedFu
 >;
 const mockRunAttachmentsReconciliation = runAttachmentsReconciliation as jest.MockedFunction<
   typeof runAttachmentsReconciliation
+>;
+const mockRunIncrementalIdBackfill = runIncrementalIdBackfill as jest.MockedFunction<
+  typeof runIncrementalIdBackfill
 >;
 const mockSweepDeletedSpaces = sweepDeletedSpaces as jest.MockedFunction<typeof sweepDeletedSpaces>;
 
@@ -215,26 +221,33 @@ describe('registerReconciliationTask run()', () => {
   const setupRun = ({
     signal = new AbortController().signal,
     state = {},
+    incrementalIdBackfillEnabled = false,
+    casesWriterEnabled = true,
     deletedSpacesSweepEnabled = true,
   }: {
     signal?: AbortSignal;
     state?: Record<string, unknown>;
+    incrementalIdBackfillEnabled?: boolean;
+    casesWriterEnabled?: boolean;
     deletedSpacesSweepEnabled?: boolean;
   } = {}) => {
     const taskManager = taskManagerMock.createSetup() as unknown as TaskManagerSetupContract;
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const savedObjectsClient = savedObjectsClientMock.create();
 
     registerReconciliationTask({
       taskManager,
       logger,
       getRunnerDeps: async () => ({
-        esClient: elasticsearchServiceMock.createElasticsearchClient(),
+        esClient,
         savedObjectsClient,
         writer: V2_NOOP_WRITER,
         activityWriter: V2_NOOP_ACTIVITY_WRITER,
         attachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
+        casesWriterEnabled,
         deletedSpacesSweepEnabled,
       }),
+      incrementalIdBackfillEnabled,
     });
 
     const registerFn = (taskManager as unknown as { registerTaskDefinitions: jest.Mock })
@@ -255,6 +268,8 @@ describe('registerReconciliationTask run()', () => {
       newLastRunAt: 'ATTACHMENTS_NEW',
       processed: 1,
     });
+    mockRunIncrementalIdBackfill.mockResolvedValue({ repaired: 1, completed: true });
+    mockSweepDeletedSpaces.mockResolvedValue();
   });
 
   afterEach(() => {
@@ -420,5 +435,128 @@ describe('registerReconciliationTask run()', () => {
       attachments_last_run_at: 'ATTACHMENTS_NEW',
     });
     expect(taskRunError).toBeDefined();
+  });
+
+  describe('incremental id backfill', () => {
+    const cursors = {
+      cases_last_run_at: 'CASES_NEW',
+      activity_last_run_at: 'ACTIVITY_NEW',
+      attachments_last_run_at: 'ATTACHMENTS_NEW',
+    };
+
+    it('runs after the three surfaces and marks the backfill completed', async () => {
+      const signal = new AbortController().signal;
+      const { run } = setupRun({ signal, incrementalIdBackfillEnabled: true });
+
+      const { state, taskRunError } = await run();
+
+      expect(mockRunIncrementalIdBackfill).toHaveBeenCalledTimes(1);
+      expect(mockRunIncrementalIdBackfill).toHaveBeenCalledWith(
+        expect.objectContaining({ writer: V2_NOOP_WRITER, logger, signal })
+      );
+      expect(mockRunAttachmentsReconciliation.mock.invocationCallOrder[0]).toBeLessThan(
+        mockRunIncrementalIdBackfill.mock.invocationCallOrder[0]
+      );
+      expect(state).toEqual({ ...cursors, incremental_id_backfill_completed: true });
+      expect(taskRunError).toBeUndefined();
+    });
+
+    it('runs after the deleted-spaces sweep so the sweep keeps its share of the tick', async () => {
+      const { run } = setupRun({ incrementalIdBackfillEnabled: true });
+
+      await run();
+
+      expect(mockSweepDeletedSpaces.mock.invocationCallOrder[0]).toBeLessThan(
+        mockRunIncrementalIdBackfill.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('bounds the backfill to a budget measured from the start of the tick', async () => {
+      const tickStartedAt = 1_700_000_000_000;
+      const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(tickStartedAt);
+      const { run } = setupRun({ incrementalIdBackfillEnabled: true });
+
+      try {
+        await run();
+      } finally {
+        nowSpy.mockRestore();
+      }
+
+      expect(mockRunIncrementalIdBackfill).toHaveBeenCalledWith(
+        expect.objectContaining({
+          deadline: tickStartedAt + INCREMENTAL_ID_BACKFILL_TICK_BUDGET_MS,
+        })
+      );
+    });
+
+    it('leaves the flag unset without an error when the backfill pauses at its budget', async () => {
+      mockRunIncrementalIdBackfill.mockResolvedValue({ repaired: 5, completed: false });
+      const { run } = setupRun({ incrementalIdBackfillEnabled: true });
+
+      const { state, taskRunError } = await run();
+
+      expect(state).toEqual(cursors);
+      expect(taskRunError).toBeUndefined();
+    });
+
+    it('skips the backfill once completed and carries the flag forward', async () => {
+      const { run } = setupRun({
+        incrementalIdBackfillEnabled: true,
+        state: { incremental_id_backfill_completed: true },
+      });
+
+      const { state } = await run();
+
+      expect(mockRunIncrementalIdBackfill).not.toHaveBeenCalled();
+      expect(state).toEqual({ ...cursors, incremental_id_backfill_completed: true });
+    });
+
+    it('skips the backfill when incremental ids are disabled, leaving the flag unset', async () => {
+      const { run } = setupRun({ incrementalIdBackfillEnabled: false });
+
+      const { state } = await run();
+
+      expect(mockRunIncrementalIdBackfill).not.toHaveBeenCalled();
+      expect(state).toEqual(cursors);
+    });
+
+    it('skips the backfill when the cases writer is the no-op, leaving the flag unset', async () => {
+      const { run } = setupRun({ incrementalIdBackfillEnabled: true, casesWriterEnabled: false });
+
+      const { state } = await run();
+
+      expect(mockRunIncrementalIdBackfill).not.toHaveBeenCalled();
+      expect(state).toEqual(cursors);
+    });
+
+    it('skips the backfill when the signal trips during the surface walks', async () => {
+      const controller = new AbortController();
+      mockRunAttachmentsReconciliation.mockImplementation(async () => {
+        controller.abort();
+        return { newLastRunAt: 'ATTACHMENTS_NEW', processed: 1 };
+      });
+      const { run } = setupRun({ signal: controller.signal, incrementalIdBackfillEnabled: true });
+
+      const { state, taskRunError } = await run();
+
+      expect(mockRunIncrementalIdBackfill).not.toHaveBeenCalled();
+      expect(state).toEqual(cursors);
+      expect(taskRunError).toBeUndefined();
+    });
+
+    it('reports a failed backfill via taskRunError, leaves the flag unset, and keeps the surface cursors', async () => {
+      mockRunIncrementalIdBackfill.mockRejectedValue(new Error('backfill boom'));
+      const { run } = setupRun({ incrementalIdBackfillEnabled: true });
+
+      const { state, taskRunError } = await run();
+
+      expect(state).toEqual(cursors);
+      expect(taskRunError).toBeDefined();
+      expect((taskRunError as Error).message).toContain('incremental id backfill');
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('incremental id backfill failed'),
+        expect.objectContaining({ error: expect.any(Error) })
+      );
+    });
   });
 });
