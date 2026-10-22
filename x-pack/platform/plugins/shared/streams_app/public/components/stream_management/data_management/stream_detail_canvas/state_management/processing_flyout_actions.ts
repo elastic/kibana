@@ -11,7 +11,7 @@ import type {
   ProcessingFlyoutInput,
   ProcessingSaveRequest,
 } from '../../../../stream_processing_flyout/state_management/processing_flyout_machine';
-import { getProcessingDiagnostics } from '../../../../stream_processing_flyout/diagnostics';
+import { getProcessingDiagnostics } from '../../../../../services/unit_diagnostics';
 import {
   PROCESSING_DRAFT_FAILURE,
   applyProcessingDraft,
@@ -109,6 +109,22 @@ const draftProcessingSave = (
   return applyProcessingDraft(isolated.unit, slot, processors);
 };
 
+/** The guard and the action of one `processing.save` transition receive the same event. */
+const draftsBySaveEvent = new WeakMap<ProcessingSaveRequest, ProcessingDraftResult>();
+
+const getProcessingDraft = (
+  context: CanvasState,
+  event: ProcessingSaveRequest
+): ProcessingDraftResult => {
+  const cached = draftsBySaveEvent.get(event);
+  if (cached) {
+    return cached;
+  }
+  const result = draftProcessingSave(context, event);
+  draftsBySaveEvent.set(event, result);
+  return result;
+};
+
 /** Stages the drafted unit as the one being saved, remembering what to restore on failure. */
 export const getProcessingSaveUpdate = ({
   context,
@@ -117,7 +133,8 @@ export const getProcessingSaveUpdate = ({
   if (event.type !== 'processing.save') {
     return {};
   }
-  const result = draftProcessingSave(context, event);
+  const result = getProcessingDraft(context, event);
+  // Unreachable: `canApplyProcessingDraft` only lets drafts that applied through.
   if (!result.ok) {
     return {};
   }
@@ -197,7 +214,7 @@ export const isSavingProcessing = ({ context }: CanvasActionArgs): boolean =>
   context.savingComponentIntent === 'processing';
 
 export const canApplyProcessingDraft = ({ context, event }: CanvasActionArgs): boolean =>
-  event.type === 'processing.save' && draftProcessingSave(context, event).ok;
+  event.type === 'processing.save' && getProcessingDraft(context, event).ok;
 
 export const processingSavedToastTitle = i18n.translate(
   'xpack.streams.streamDetailCanvas.processingSavedSuccessTitle',

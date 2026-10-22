@@ -28,7 +28,7 @@ import type {
 } from '@kbn/streams-schema';
 import { useDiscardConfirm } from '../../hooks/use_discard_confirm';
 import { getDefinition, listComponents } from '../../services/component_catalogue';
-import type { UnitSignal } from '../../services/unit_graph';
+import type { UnitSignal } from '../../services/unit_pipeline';
 import type { DraftProcessor } from '../../services/unit_processing';
 import {
   ComponentDefinitionForm,

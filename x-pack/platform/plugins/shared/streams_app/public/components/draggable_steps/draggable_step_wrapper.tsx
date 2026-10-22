@@ -145,8 +145,6 @@ export const DraggableStepWrapper = ({
       setInstruction(null);
     };
 
-    const descendantIds = getDescendantIds?.() ?? [];
-
     const cleanup = combine(
       draggable({
         element: el,
@@ -155,7 +153,7 @@ export const DraggableStepWrapper = ({
           stepId,
           index,
           level,
-          descendantIds: [...descendantIds],
+          descendantIds: [...(getDescendantIds?.() ?? [])],
         }),
       }),
       dropTargetForElements({

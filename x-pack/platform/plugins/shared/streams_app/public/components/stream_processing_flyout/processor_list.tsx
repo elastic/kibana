@@ -10,7 +10,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ComponentCatalogue } from '@kbn/streams-schema';
 import { getDefinition } from '../../services/component_catalogue';
-import { SLOT_POSITION, type UnitSignal } from '../../services/unit_graph';
+import { SLOT_POSITION } from '../../services/unit_graph';
+import type { UnitSignal } from '../../services/unit_pipeline';
 import type { DraftProcessor } from '../../services/unit_processing';
 import type { ComponentReferenceOption } from '../component_definition_form';
 import {
@@ -21,8 +22,8 @@ import {
 import { CreateProcessorButton } from './create_processor_button';
 import { ProcessorCard } from './processor_card';
 import { ProcessorEditor } from './processor_editor';
+import type { ProcessingDiagnostic } from '../../services/unit_diagnostics';
 import type {
-  ProcessingDiagnostic,
   ProcessingStep,
   ProcessingStepPosition,
 } from './state_management/processing_flyout_machine';

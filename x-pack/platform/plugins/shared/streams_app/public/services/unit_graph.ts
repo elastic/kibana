@@ -8,14 +8,13 @@
 import type { Unit } from './unit_repository';
 import {
   PIPELINE_ENTRY,
+  intersectSignals,
   isDelegatingRoute,
-  type PipelineConfig,
-  type PipelineEntryName,
-  type RouteRule,
+  readEntryIds,
+  readRoutes,
   type UnitPipeline,
+  type UnitSignal,
 } from './unit_pipeline';
-
-export type UnitSignal = UnitPipeline['supported_telemetry'][number];
 
 export const PROCESSING_SLOT_KIND = {
   pipeline: 'pipeline',
@@ -109,19 +108,6 @@ export const endpointKey = (endpoint: UnitGraphEndpoint): string =>
     ? `${endpoint.kind}:${processingNodeId(endpoint.ref)}`
     : `${endpoint.kind}:${endpoint.id}`;
 
-const entryValues = (
-  config: PipelineConfig,
-  name: Exclude<PipelineEntryName, typeof PIPELINE_ENTRY.routes>
-): string[] => config.flatMap((entry) => (entry.name === name ? entry.value : []));
-
-const readRoutes = (config: PipelineConfig): RouteRule[] =>
-  config.flatMap((entry) => (entry.name === PIPELINE_ENTRY.routes ? entry.value : []));
-
-const intersectTelemetry = (
-  signals: readonly UnitSignal[],
-  subset: readonly UnitSignal[] | undefined
-): UnitSignal[] => (subset ? signals.filter((signal) => subset.includes(signal)) : [...signals]);
-
 /** Per-telemetry `processors` entries are shown but not edited yet. */
 const isPipelineSlotEditable = (pipeline: UnitPipeline): boolean => {
   const entries = pipeline.config.filter((entry) => entry.name === PIPELINE_ENTRY.processors);
@@ -158,11 +144,18 @@ interface DrawnEdge {
 const pickSlot = (slots: readonly ProcessingNodeRef[]): ProcessingNodeRef | undefined =>
   slots.find(({ kind }) => kind === PROCESSING_SLOT_KIND.route) ?? slots[0];
 
+/**
+ * Walks the unit from every source through its pipelines, routes and
+ * delegations. Without `configuredSourceIds` / `configuredDestinationIds`,
+ * every referenced source and destination is included.
+ */
 export const buildUnitGraph = (
   unit: Unit,
-  configuredSourceIds: ReadonlySet<string>,
-  configuredDestinationIds: ReadonlySet<string>
+  configuredSourceIds?: ReadonlySet<string>,
+  configuredDestinationIds?: ReadonlySet<string>
 ): UnitGraph => {
+  const isShownSource = (id: string) => configuredSourceIds?.has(id) ?? true;
+  const isShownDestination = (id: string) => configuredDestinationIds?.has(id) ?? true;
   const pipelinesById = new Map(unit.unit.pipelines.map((pipeline) => [pipeline.id, pipeline]));
   const nodes = new Map<string, UnitGraphProcessingNode>();
   const edges = new Map<string, DrawnEdge>();
@@ -205,7 +198,7 @@ export const buildUnitGraph = (
       kind: PROCESSING_SLOT_KIND.pipeline,
       pipelineId: pipeline.id,
     };
-    const processorIds = entryValues(pipeline.config, PIPELINE_ENTRY.processors);
+    const processorIds = readEntryIds(pipeline.config, PIPELINE_ENTRY.processors);
 
     let outputs: Upstream[];
     if (processorIds.length > 0) {
@@ -225,8 +218,8 @@ export const buildUnitGraph = (
       }));
     }
 
-    for (const id of entryValues(pipeline.config, PIPELINE_ENTRY.destinations)) {
-      if (configuredDestinationIds.has(id)) {
+    for (const id of readEntryIds(pipeline.config, PIPELINE_ENTRY.destinations)) {
+      if (isShownDestination(id)) {
         connect(outputs, { kind: GRAPH_ENDPOINT_KIND.destination, id });
       }
     }
@@ -242,7 +235,7 @@ export const buildUnitGraph = (
         const endpoint = addNode({
           ref: routeRef,
           processorIds: [...route.processors],
-          telemetry: intersectTelemetry(pipeline.supported_telemetry, route.telemetry),
+          telemetry: intersectSignals(pipeline.supported_telemetry, route.telemetry),
           editable: true,
         });
         connect(
@@ -267,7 +260,7 @@ export const buildUnitGraph = (
         return;
       }
       for (const id of route.destinations) {
-        if (configuredDestinationIds.has(id)) {
+        if (isShownDestination(id)) {
           connect(routeUpstream, { kind: GRAPH_ENDPOINT_KIND.destination, id });
         }
       }
@@ -275,9 +268,7 @@ export const buildUnitGraph = (
   };
 
   for (const pipeline of unit.unit.pipelines) {
-    const sources = entryValues(pipeline.config, PIPELINE_ENTRY.sources).filter((id) =>
-      configuredSourceIds.has(id)
-    );
+    const sources = readEntryIds(pipeline.config, PIPELINE_ENTRY.sources).filter(isShownSource);
     walk(
       pipeline,
       sources.map((id) => ({

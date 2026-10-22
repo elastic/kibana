@@ -72,6 +72,37 @@ export interface StoreUrlStateParams {
   urlState: CanvasUrlInput;
 }
 
+const CLOSE_PROCESSING_FLYOUT = ['stopProcessingFlyout', 'clearProcessingFlyout'] as const;
+
+/** Validating and persisting fail the same way: what is rolled back depends on what was saving. */
+const SAVE_FAILURE_TRANSITIONS = [
+  {
+    guard: 'isSavingProcessing',
+    target: 'saveFailed',
+    actions: ['storeUnitFailure', 'notifyProcessingSaveFailed', 'restoreProcessingRollback'],
+  },
+  {
+    guard: 'isSavingComponentChange',
+    target: 'saveFailed',
+    actions: [
+      'discardCreateHistory',
+      'storeUnitFailure',
+      'rollbackToPersistedUnit',
+      'syncComponentSaveFailure',
+      'notifyUnitFailure',
+    ],
+  },
+  {
+    guard: 'isSavingConnection',
+    target: 'saveFailed',
+    actions: ['storeUnitFailure', 'rollbackToPersistedUnit', 'notifyUnitFailure'],
+  },
+  {
+    target: 'saveFailed',
+    actions: ['storeUnitFailure', 'notifyUnitFailure'],
+  },
+] as const;
+
 export const canvasStateMachine = setup({
   types: {
     input: {} as CanvasUrlInput,
@@ -464,10 +495,10 @@ export const canvasStateMachine = setup({
           ],
         },
         'processing.open': {
-          actions: ['stopProcessingFlyout', 'clearProcessingFlyout', 'openProcessingFlyout'],
+          actions: [...CLOSE_PROCESSING_FLYOUT, 'openProcessingFlyout'],
         },
         'processing.close': {
-          actions: ['stopProcessingFlyout', 'clearProcessingFlyout'],
+          actions: CLOSE_PROCESSING_FLYOUT,
         },
         // Only reached while the unit is loading or saving; the unit states below
         // accept the request when they can persist it.
@@ -564,37 +595,7 @@ export const canvasStateMachine = setup({
                 onDone: {
                   target: 'persisting',
                 },
-                onError: [
-                  {
-                    guard: 'isSavingProcessing',
-                    target: 'saveFailed',
-                    actions: [
-                      'storeUnitFailure',
-                      'notifyProcessingSaveFailed',
-                      'restoreProcessingRollback',
-                    ],
-                  },
-                  {
-                    guard: 'isSavingComponentChange',
-                    target: 'saveFailed',
-                    actions: [
-                      'discardCreateHistory',
-                      'storeUnitFailure',
-                      'rollbackToPersistedUnit',
-                      'syncComponentSaveFailure',
-                      'notifyUnitFailure',
-                    ],
-                  },
-                  {
-                    guard: 'isSavingConnection',
-                    target: 'saveFailed',
-                    actions: ['storeUnitFailure', 'rollbackToPersistedUnit', 'notifyUnitFailure'],
-                  },
-                  {
-                    target: 'saveFailed',
-                    actions: ['storeUnitFailure', 'notifyUnitFailure'],
-                  },
-                ],
+                onError: SAVE_FAILURE_TRANSITIONS,
               },
             },
             persisting: {
@@ -606,13 +607,14 @@ export const canvasStateMachine = setup({
                   {
                     guard: 'isSavingProcessing',
                     target: 'ready',
+                    // Notify while the processing intent is still set.
+                    // storePersistedUnitDefinition clears it.
                     actions: [
                       'syncSavedUnitToOriginator',
                       'syncSavedUnitToPeer',
                       'notifyUnitSaved',
                       'notifyProcessingSaved',
-                      'stopProcessingFlyout',
-                      'clearProcessingFlyout',
+                      ...CLOSE_PROCESSING_FLYOUT,
                       'storePersistedUnitDefinition',
                     ],
                   },
@@ -632,37 +634,7 @@ export const canvasStateMachine = setup({
                     ],
                   },
                 ],
-                onError: [
-                  {
-                    guard: 'isSavingProcessing',
-                    target: 'saveFailed',
-                    actions: [
-                      'storeUnitFailure',
-                      'notifyProcessingSaveFailed',
-                      'restoreProcessingRollback',
-                    ],
-                  },
-                  {
-                    guard: 'isSavingComponentChange',
-                    target: 'saveFailed',
-                    actions: [
-                      'discardCreateHistory',
-                      'storeUnitFailure',
-                      'rollbackToPersistedUnit',
-                      'syncComponentSaveFailure',
-                      'notifyUnitFailure',
-                    ],
-                  },
-                  {
-                    guard: 'isSavingConnection',
-                    target: 'saveFailed',
-                    actions: ['storeUnitFailure', 'rollbackToPersistedUnit', 'notifyUnitFailure'],
-                  },
-                  {
-                    target: 'saveFailed',
-                    actions: ['storeUnitFailure', 'notifyUnitFailure'],
-                  },
-                ],
+                onError: SAVE_FAILURE_TRANSITIONS,
               },
             },
             saveFailed: {

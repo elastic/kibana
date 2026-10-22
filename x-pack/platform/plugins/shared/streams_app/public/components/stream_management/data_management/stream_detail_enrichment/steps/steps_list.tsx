@@ -8,8 +8,8 @@
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import { isConditionBlock } from '@kbn/streamlang';
 import { useSelector } from '@xstate/react';
-import React, { useCallback } from 'react';
-import { DraggableStepWrapper } from '../../../../draggable_steps';
+import React from 'react';
+import { DraggableStepWrapper, useDescendantIdsGetter } from '../../../../draggable_steps';
 import type { StepsProcessingSummaryMap } from '../hooks/use_steps_processing_summary';
 import type { InteractiveModeContext } from '../state_management/interactive_mode_machine';
 import type { RootLevelMap } from '../state_management/stream_enrichment_state_machine/utils';
@@ -38,16 +38,7 @@ export const StepsListItem = (props: StepConfigurationProps) => {
   const stepIndex = stepRefs.findIndex((ref) => ref.id === props.stepRef.id);
 
   const stepId = step.customIdentifier;
-  const getDescendantIds = useCallback(
-    () =>
-      Array.from(
-        collectDescendantStepIds(
-          stepRefs.map((ref) => ref.getSnapshot().context.step),
-          stepId
-        )
-      ),
-    [stepRefs, stepId]
-  );
+  const getDescendantIds = useDescendantIdsGetter(stepRefs, stepId, collectDescendantStepIds);
 
   // Don't wrap with drag-drop if read-only or under edit
   if (props.readOnly || props.stepUnderEdit) {

@@ -8,8 +8,6 @@
 import type { CatalogueChoiceGroup } from '@kbn/streams-schema';
 import type { ObjectValue } from './values';
 
-export type ChoiceSelections = Record<string, string | undefined>;
-
 export const findChoiceGroup = (
   groups: readonly CatalogueChoiceGroup[] | undefined,
   fieldName: string
@@ -30,11 +28,15 @@ export const getSelectedChoice = (
   return group.min_selected === 1 ? group.default_field ?? group.fields[0] : undefined;
 };
 
-export const getChoiceSelections = (
+/** Whether the field is a member of a choice group that has another member selected. */
+export const isUnselectedChoice = (
   groups: readonly CatalogueChoiceGroup[] | undefined,
-  value: ObjectValue
-): ChoiceSelections =>
-  Object.fromEntries((groups ?? []).map((group) => [group.id, getSelectedChoice(group, value)]));
+  value: ObjectValue,
+  fieldName: string
+): boolean => {
+  const group = findChoiceGroup(groups, fieldName);
+  return group !== undefined && getSelectedChoice(group, value) !== fieldName;
+};
 
 /**
  * Drops the values of the group's other fields and marks the chosen one as
@@ -56,13 +58,4 @@ export const applyChoice = (
     next[selected] = initialValue;
   }
   return next;
-};
-
-export const isHiddenByChoice = (
-  groups: readonly CatalogueChoiceGroup[] | undefined,
-  selections: ChoiceSelections,
-  fieldName: string
-): boolean => {
-  const group = findChoiceGroup(groups, fieldName);
-  return group !== undefined && selections[group.id] !== fieldName;
 };

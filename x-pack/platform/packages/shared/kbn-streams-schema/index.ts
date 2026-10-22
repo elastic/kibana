@@ -37,7 +37,6 @@ export type {
   CatalogueComponentStatus,
   CatalogueComponentSummary,
   CatalogueCondition,
-  CatalogueDiagnostic,
   CatalogueEnumField,
   CatalogueEnumOption,
   CatalogueFieldDefinition,

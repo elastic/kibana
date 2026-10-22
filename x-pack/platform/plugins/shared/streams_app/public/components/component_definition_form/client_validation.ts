@@ -13,7 +13,7 @@ import type {
   CatalogueNamedFieldDefinition,
 } from '@kbn/streams-schema';
 import { resolveEnumOptions } from '../../services/component_catalogue';
-import { findChoiceGroup, getSelectedChoice } from './choice_groups';
+import { findChoiceGroup, isUnselectedChoice } from './choice_groups';
 import { isFieldAvailable, isFieldRequired } from './conditions';
 import type { FormContextValues } from './serialize';
 import {
@@ -179,17 +179,17 @@ export const validateObject = (
   errors: FieldErrors = {}
 ): FieldErrors => {
   for (const field of fields) {
-    if (!isFieldAvailable(field, value, context.telemetry)) {
-      continue;
-    }
-    const group = findChoiceGroup(choiceGroups, field.name);
-    const selected = group ? getSelectedChoice(group, value) : undefined;
-    if (group && selected !== field.name) {
+    if (
+      !isFieldAvailable(field, value, context.telemetry) ||
+      isUnselectedChoice(choiceGroups, value, field.name)
+    ) {
       continue;
     }
     const fieldPointer = joinPointer(pointer, field.name);
     const fieldValue = value[field.name];
-    const required = isFieldRequired(field, value, context.telemetry) || group?.min_selected === 1;
+    const required =
+      isFieldRequired(field, value, context.telemetry) ||
+      findChoiceGroup(choiceGroups, field.name)?.min_selected === 1;
     if (required && isEmptyValue(fieldValue)) {
       errors[fieldPointer] = messages.required;
       continue;

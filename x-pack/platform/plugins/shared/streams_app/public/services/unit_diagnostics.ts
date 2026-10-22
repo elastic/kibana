@@ -6,13 +6,15 @@
  */
 
 import { isHttpFetchError } from '@kbn/server-route-repository-client';
-import type { Unit } from '../../services/unit_repository';
-import type { ProcessingDiagnostic } from './state_management/processing_flyout_machine';
+import type { StreamsUnit } from '@kbn/streams-schema';
+import type { Unit } from './unit_repository';
 
-interface RawDiagnostic {
-  code?: unknown;
-  message?: unknown;
-  path?: unknown;
+/** A distributor diagnostic from a failed save, as the processing flyout shows it. */
+export interface ProcessingDiagnostic extends Pick<StreamsUnit.Diagnostic, 'code' | 'message'> {
+  /** Processor the diagnostic was traced back to, when it could be. */
+  processorId?: string;
+  /** Position of that processor in the flyout list, when it belongs to this node. */
+  stepIndex?: number;
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -33,29 +35,32 @@ const traceProcessorId = (text: string, unit: Unit): string | undefined => {
   return index === undefined ? undefined : processors[Number(index)]?.id;
 };
 
-/** Distributor diagnostics from a failed unit save, traced back to processors of `savedUnit`. */
-export const getProcessingDiagnostics = (
-  error: unknown,
-  savedUnit: Unit
-): ProcessingDiagnostic[] => {
+/** The diagnostics the streams unit route returns in the body of a rejected save. */
+const readDiagnostics = (error: unknown): unknown[] => {
   if (!isHttpFetchError(error)) {
     return [];
   }
   const body: unknown = error.body;
   const attributes = isRecord(body) ? body.attributes : undefined;
   const data = isRecord(attributes) ? attributes.data : undefined;
-  const diagnostics = isRecord(data) && Array.isArray(data.diagnostics) ? data.diagnostics : [];
-  return diagnostics.flatMap((diagnostic: RawDiagnostic) => {
+  return isRecord(data) && Array.isArray(data.diagnostics) ? data.diagnostics : [];
+};
+
+/** Distributor diagnostics from a failed unit save, traced back to processors of `savedUnit`. */
+export const getProcessingDiagnostics = (error: unknown, savedUnit: Unit): ProcessingDiagnostic[] =>
+  readDiagnostics(error).flatMap((diagnostic) => {
     if (!isRecord(diagnostic) || typeof diagnostic.message !== 'string') {
       return [];
     }
-    const path = typeof diagnostic.path === 'string' ? diagnostic.path : '';
+    const { code, message, path } = diagnostic;
     return [
       {
-        code: typeof diagnostic.code === 'string' ? diagnostic.code : '',
-        message: diagnostic.message,
-        processorId: traceProcessorId(`${path} ${diagnostic.message}`, savedUnit),
+        code: typeof code === 'string' ? code : '',
+        message,
+        processorId: traceProcessorId(
+          `${typeof path === 'string' ? path : ''} ${message}`,
+          savedUnit
+        ),
       },
     ];
   });
-};

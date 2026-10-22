@@ -14,7 +14,7 @@ import type {
   StreamsUnit,
 } from '@kbn/streams-schema';
 import { resolveEnumOptions } from '../../services/component_catalogue';
-import { findChoiceGroup, getSelectedChoice } from './choice_groups';
+import { findChoiceGroup, isUnselectedChoice } from './choice_groups';
 import { isFieldAvailable, isFieldRequired } from './conditions';
 import { isObjectValue, toFormValue, type FormValue, type ObjectValue } from './values';
 
@@ -61,11 +61,10 @@ const canonicalObject = (
   const result: ObjectValue = {};
   const known = new Set(fields.map(({ name }) => name));
   for (const field of fields) {
-    if (!isFieldAvailable(field, value, telemetry)) {
-      continue;
-    }
-    const group = findChoiceGroup(choiceGroups, field.name);
-    if (group && getSelectedChoice(group, value) !== field.name) {
+    if (
+      !isFieldAvailable(field, value, telemetry) ||
+      isUnselectedChoice(choiceGroups, value, field.name)
+    ) {
       continue;
     }
     const canonical = canonicalValue(field, value[field.name], telemetry);
@@ -158,26 +157,12 @@ export const toConfigEntries = (
   values: ObjectValue,
   scoped: readonly ConfigEntry[],
   telemetry: readonly CatalogueSignal[]
-): ConfigEntry[] => {
-  const entries: ConfigEntry[] = [];
-  const known = new Set<string>();
-  for (const field of fields) {
-    known.add(field.name);
-    if (!isFieldAvailable(field, values, telemetry)) {
-      continue;
-    }
-    const value = canonicalValue(field, values[field.name], telemetry);
-    if (value !== undefined) {
-      entries.push({ name: field.name, value });
-    }
-  }
-  for (const [name, value] of Object.entries(values)) {
-    if (!known.has(name)) {
-      entries.push({ name, value });
-    }
-  }
-  return [...entries, ...scoped];
-};
+): ConfigEntry[] => [
+  ...Object.entries(canonicalObject(fields, undefined, values, telemetry, Object.keys(values))).map(
+    ([name, value]) => ({ name, value })
+  ),
+  ...scoped,
+];
 
 const firstEnumOption = (
   field: CatalogueFieldDefinition,
@@ -217,11 +202,12 @@ export const createInitialObject = (
 ): ObjectValue => {
   const result: ObjectValue = {};
   for (const field of fields) {
-    const group = findChoiceGroup(choiceGroups, field.name);
-    if (group && getSelectedChoice(group, {}) !== field.name) {
+    if (isUnselectedChoice(choiceGroups, {}, field.name)) {
       continue;
     }
-    const preselect = group !== undefined || isFieldRequired(field, result, context.telemetry);
+    const preselect =
+      findChoiceGroup(choiceGroups, field.name) !== undefined ||
+      isFieldRequired(field, result, context.telemetry);
     const value = initialFieldValue(field, context, preselect);
     if (value !== undefined) {
       result[field.name] = value;

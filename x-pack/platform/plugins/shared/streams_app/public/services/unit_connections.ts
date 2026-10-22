@@ -11,19 +11,30 @@ import {
   EDGE_FORWARDING,
   GRAPH_ENDPOINT_KIND,
   PROCESSING_SLOT_KIND,
+  buildUnitGraph,
+  endpointKey,
   type ProcessingNodeRef,
   type UnitEdgeForwarding,
+  type UnitGraph,
+  type UnitGraphEdge,
   type UnitGraphEndpoint,
-  type UnitSignal,
 } from './unit_graph';
 import {
+  DEFAULT_SUPPORTED_TELEMETRY,
   PIPELINE_ENTRY,
+  allocateComponentId,
   isDelegatingRoute,
+  pipelineForwards,
+  pruneUnit,
+  readEntryIds,
+  readRoutes,
+  replaceUnit,
+  usedComponentIds,
   type PipelineConfig,
   type RouteRule,
   type UnitPipeline,
+  type UnitSignal,
 } from './unit_pipeline';
-import { pruneUnit } from './unit_processing';
 
 /**
  * Wires sources and processing to destinations.
@@ -37,9 +48,6 @@ import { pruneUnit } from './unit_processing';
  * pipeline that already uses routes is stored as a catch-all rule so a later
  * condition can be set on it without changing the connection model.
  */
-
-const DEFAULT_SUPPORTED_TELEMETRY = ['logs', 'metrics', 'traces'] as const;
-const PIPELINE_ID_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
 
 /** Where a line starts: a source (unprocessed records) or a processing node (processed records). */
 export type UnitConnectionOrigin = Exclude<
@@ -55,15 +63,6 @@ export interface UnitConnection {
 }
 
 type IdentifierEntryName = typeof PIPELINE_ENTRY.sources | typeof PIPELINE_ENTRY.destinations;
-
-const readIdentifiers = (config: PipelineConfig, name: IdentifierEntryName): string[] => {
-  for (const entry of config) {
-    if (entry.name === name) {
-      return [...entry.value];
-    }
-  }
-  return [];
-};
 
 const withIdentifiers = <Name extends IdentifierEntryName>(
   config: PipelineConfig,
@@ -82,15 +81,6 @@ const withIdentifiers = <Name extends IdentifierEntryName>(
 
 const pipelineUsesRoutes = (pipeline: UnitPipeline): boolean =>
   pipeline.config.some((entry) => entry.name === PIPELINE_ENTRY.routes);
-
-const readRoutes = (config: PipelineConfig): RouteRule[] => {
-  for (const entry of config) {
-    if (entry.name === PIPELINE_ENTRY.routes) {
-      return [...entry.value];
-    }
-  }
-  return [];
-};
 
 const withRoutes = (config: PipelineConfig, routes: readonly RouteRule[]): PipelineConfig => {
   if (routes.length === 0) {
@@ -151,17 +141,8 @@ const removeDestinationFromRoutes = (
     return destinations.length > 0 ? [{ ...route, destinations }] : [];
   });
 
-const pipelineForwards = (config: PipelineConfig): boolean =>
-  readIdentifiers(config, PIPELINE_ENTRY.destinations).length > 0 ||
-  config.some((entry) => entry.name === PIPELINE_ENTRY.routes);
-
-const replacePipelines = (unit: Unit, pipelines: Unit['unit']['pipelines']): Unit => ({
-  ...unit,
-  unit: {
-    ...unit.unit,
-    pipelines,
-  },
-});
+const replacePipelines = (unit: Unit, pipelines: Unit['unit']['pipelines']): Unit =>
+  replaceUnit(unit, { pipelines });
 
 const hasProcessors = (pipeline: UnitPipeline): boolean =>
   pipeline.config.some(
@@ -171,7 +152,7 @@ const hasProcessors = (pipeline: UnitPipeline): boolean =>
 const forwardsDirectlyTo = (pipeline: UnitPipeline, destinationId: string): boolean =>
   pipelineUsesRoutes(pipeline)
     ? routesIncludeDestination(readRoutes(pipeline.config), destinationId)
-    : readIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations).includes(destinationId);
+    : readEntryIds(pipeline.config, PIPELINE_ENTRY.destinations).includes(destinationId);
 
 /**
  * The source pipeline whose lines start at the source: one without processors.
@@ -185,7 +166,7 @@ const findUnprocessedSourcePipelineIndex = (
   pipelines.findIndex(
     (pipeline) =>
       !hasProcessors(pipeline) &&
-      readIdentifiers(pipeline.config, PIPELINE_ENTRY.sources).includes(sourceId) &&
+      readEntryIds(pipeline.config, PIPELINE_ENTRY.sources).includes(sourceId) &&
       (destinationId === undefined || forwardsDirectlyTo(pipeline, destinationId))
   );
 
@@ -213,46 +194,12 @@ const writePipeline = (unit: Unit, pipelineIndex: number, config: PipelineConfig
   return replacePipelines(unit, pipelines);
 };
 
-const usedIds = (unit: Unit): Set<string> => {
-  const ids = new Set<string>();
-  for (const source of unit.unit.sources) {
-    ids.add(source.id);
-  }
-  for (const destination of unit.unit.destinations) {
-    ids.add(destination.id);
-  }
-  for (const processor of unit.unit.processors ?? []) {
-    ids.add(processor.id);
-  }
-  for (const pipeline of unit.unit.pipelines) {
-    ids.add(pipeline.id);
-  }
-  return ids;
-};
+const pipelineIdForSource = (unit: Unit, sourceId: string): string =>
+  allocateComponentId(`p-${sourceId}`, usedComponentIds(unit), { bareFirst: true });
 
-const isFreePipelineId = (id: string, taken: ReadonlySet<string>): boolean =>
-  id.length <= 256 && PIPELINE_ID_PATTERN.test(id) && !taken.has(id);
-
-/** Allocates a pipeline id that does not collide with another component in the unit. */
-const pipelineIdForSource = (unit: Unit, sourceId: string): string => {
-  const taken = usedIds(unit);
-  const root = `p-${sourceId}`;
-  if (isFreePipelineId(root, taken)) {
-    return root;
-  }
-  for (let suffix = 2; suffix < 10000; suffix++) {
-    const tail = `-${suffix}`;
-    const stem = root.slice(0, 256 - tail.length).replace(/-+$/g, '');
-    const candidate = `${stem}${tail}`;
-    if (isFreePipelineId(candidate, taken)) {
-      return candidate;
-    }
-  }
-  return `p-${sourceId.length}`;
-};
-
-const appendSourcePipeline = (
+const insertSourcePipeline = (
   unit: Unit,
+  pipelineId: string,
   sourceId: string,
   supportedTelemetry: UnitPipeline['supported_telemetry'],
   forwarding: PipelineConfig
@@ -260,11 +207,25 @@ const appendSourcePipeline = (
   replacePipelines(unit, [
     ...unit.unit.pipelines,
     {
-      id: pipelineIdForSource(unit, sourceId),
+      id: pipelineId,
       supported_telemetry: [...supportedTelemetry],
       config: [{ name: PIPELINE_ENTRY.sources, value: [sourceId] }, ...forwarding],
     },
   ]);
+
+const appendSourcePipeline = (
+  unit: Unit,
+  sourceId: string,
+  supportedTelemetry: UnitPipeline['supported_telemetry'],
+  forwarding: PipelineConfig
+): Unit =>
+  insertSourcePipeline(
+    unit,
+    pipelineIdForSource(unit, sourceId),
+    sourceId,
+    supportedTelemetry,
+    forwarding
+  );
 
 const detachSource = (unit: Unit, pipelineIndex: number, sourceId: string): Unit => {
   const pipeline = unit.unit.pipelines[pipelineIndex];
@@ -274,102 +235,87 @@ const detachSource = (unit: Unit, pipelineIndex: number, sourceId: string): Unit
     withIdentifiers(
       pipeline.config,
       PIPELINE_ENTRY.sources,
-      readIdentifiers(pipeline.config, PIPELINE_ENTRY.sources).filter((id) => id !== sourceId)
+      readEntryIds(pipeline.config, PIPELINE_ENTRY.sources).filter((id) => id !== sourceId)
     )
   );
 };
 
-const pushConnection = (
-  connections: UnitConnection[],
-  seen: Set<string>,
-  connection: UnitConnection
-): void => {
-  const key = `${connection.sourceId}\0${connection.destinationId}`;
-  if (seen.has(key)) {
-    return;
+interface ReachedDestination {
+  destinationId: string;
+  forwarding: UnitEdgeForwarding;
+}
+
+/**
+ * Follows the unit graph's lines from an endpoint to the destinations they end
+ * at, in drawing order. A path that crosses a route forwards by `route`.
+ */
+const reachabilityOf = (graph: UnitGraph) => {
+  const outgoing = new Map<string, UnitGraphEdge[]>();
+  for (const edge of graph.edges) {
+    const key = endpointKey(edge.source);
+    outgoing.set(key, [...(outgoing.get(key) ?? []), edge]);
   }
-  seen.add(key);
-  connections.push(connection);
+  return (start: UnitConnectionOrigin): ReachedDestination[] => {
+    const reached = new Map<string, UnitEdgeForwarding>();
+    const visited = new Set<string>();
+    const visit = (endpoint: UnitGraphEndpoint, viaRoute: boolean) => {
+      const key = endpointKey(endpoint);
+      if (visited.has(key)) {
+        return;
+      }
+      visited.add(key);
+      for (const { target, forwarding } of outgoing.get(key) ?? []) {
+        const routed = viaRoute || forwarding === EDGE_FORWARDING.route;
+        if (target.kind !== GRAPH_ENDPOINT_KIND.destination) {
+          visit(target, routed);
+        } else if (!reached.has(target.id)) {
+          reached.set(target.id, routed ? EDGE_FORWARDING.route : EDGE_FORWARDING.direct);
+        }
+      }
+    };
+    visit(start, false);
+    return [...reached].map(([destinationId, forwarding]) => ({ destinationId, forwarding }));
+  };
 };
 
-/** Destinations a pipeline forwards to, following route delegation into processing pipelines. */
-const forwardedDestinations = (
-  pipeline: UnitPipeline,
-  pipelinesById: ReadonlyMap<string, UnitPipeline>,
-  forwarding: UnitEdgeForwarding,
-  visiting: ReadonlySet<string>
-): Array<{ destinationId: string; forwarding: UnitEdgeForwarding }> => {
-  if (visiting.has(pipeline.id)) {
-    return [];
-  }
-  const nextVisiting = new Set(visiting).add(pipeline.id);
-  if (!pipelineUsesRoutes(pipeline)) {
-    return readIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations).map((destinationId) => ({
-      destinationId,
-      forwarding,
-    }));
-  }
-  return readRoutes(pipeline.config).flatMap((route) => {
-    if (!isDelegatingRoute(route)) {
-      return route.destinations.map((destinationId) => ({
-        destinationId,
-        forwarding: EDGE_FORWARDING.route,
-      }));
-    }
-    return route.pipelines.flatMap((childId) => {
-      const child = pipelinesById.get(childId);
-      return child
-        ? forwardedDestinations(child, pipelinesById, EDGE_FORWARDING.route, nextVisiting)
-        : [];
-    });
-  });
-};
+const sourceOrigin = (id: string): UnitConnectionOrigin => ({
+  kind: GRAPH_ENDPOINT_KIND.source,
+  id,
+});
 
-/** Source/destination pairs each source pipeline currently forwards, including through delegation. */
+/** Source/destination pairs the unit currently delivers, including through processing and delegation. */
 export const getUnitConnections = (
   unit: Unit,
   configuredSourceIds: ReadonlySet<string>,
   configuredDestinationIds: ReadonlySet<string>
 ): UnitConnection[] => {
-  const seen = new Set<string>();
-  const connections: UnitConnection[] = [];
-  const pipelinesById = new Map(unit.unit.pipelines.map((pipeline) => [pipeline.id, pipeline]));
-  for (const pipeline of unit.unit.pipelines) {
-    const sources = readIdentifiers(pipeline.config, PIPELINE_ENTRY.sources).filter((id) =>
-      configuredSourceIds.has(id)
-    );
-    if (sources.length === 0) {
-      continue;
-    }
-    const destinations = forwardedDestinations(
-      pipeline,
-      pipelinesById,
-      EDGE_FORWARDING.direct,
-      new Set()
-    ).filter(({ destinationId }) => configuredDestinationIds.has(destinationId));
-    for (const sourceId of sources) {
-      for (const { destinationId, forwarding } of destinations) {
-        pushConnection(connections, seen, { sourceId, destinationId, forwarding });
-      }
-    }
-  }
-  return connections;
-};
-
-const pipelineReaches = (unit: Unit, pipeline: UnitPipeline, destinationId: string): boolean => {
-  const pipelinesById = new Map(unit.unit.pipelines.map((item) => [item.id, item]));
-  return forwardedDestinations(pipeline, pipelinesById, EDGE_FORWARDING.direct, new Set()).some(
-    (forwarded) => forwarded.destinationId === destinationId
+  const graph = buildUnitGraph(unit, configuredSourceIds, configuredDestinationIds);
+  const reachedFrom = reachabilityOf(graph);
+  const sourceIds = new Set(
+    graph.edges.flatMap(({ source }) =>
+      source.kind === GRAPH_ENDPOINT_KIND.source ? [source.id] : []
+    )
+  );
+  return [...sourceIds].flatMap((sourceId) =>
+    reachedFrom(sourceOrigin(sourceId)).map(({ destinationId, forwarding }) => ({
+      sourceId,
+      destinationId,
+      forwarding,
+    }))
   );
 };
 
-/** Whether any of the source's pipelines already delivers to the destination, processed or not. */
-const sourceReaches = (unit: Unit, sourceId: string, destinationId: string): boolean =>
-  unit.unit.pipelines.some(
-    (pipeline) =>
-      readIdentifiers(pipeline.config, PIPELINE_ENTRY.sources).includes(sourceId) &&
-      pipelineReaches(unit, pipeline, destinationId)
+/** Whether records from any of the origins already reach the destination, processed or not. */
+const reaches = (
+  unit: Unit,
+  origins: readonly UnitConnectionOrigin[],
+  destinationId: string
+): boolean => {
+  const reachedFrom = reachabilityOf(buildUnitGraph(unit));
+  return origins.some((origin) =>
+    reachedFrom(origin).some((reached) => reached.destinationId === destinationId)
   );
+};
 
 const sharesSignal = (left: readonly UnitSignal[], right: readonly UnitSignal[]): boolean =>
   left.some((signal) => right.includes(signal));
@@ -420,7 +366,10 @@ export const canConnectSourceToDestination = (
   destinationId: string
 ): boolean => {
   const fit = telemetryFit(unit, sourceId, destinationId);
-  if (fit === TELEMETRY_FIT.incompatible || sourceReaches(unit, sourceId, destinationId)) {
+  if (
+    fit === TELEMETRY_FIT.incompatible ||
+    reaches(unit, [sourceOrigin(sourceId)], destinationId)
+  ) {
     return false;
   }
   const pipelineIndex = findUnprocessedSourcePipelineIndex(unit.unit.pipelines, sourceId);
@@ -450,7 +399,7 @@ export const connectSourceToDestination = (
     ]);
   }
   const pipeline = unit.unit.pipelines[pipelineIndex];
-  const sources = readIdentifiers(pipeline.config, PIPELINE_ENTRY.sources);
+  const sources = readEntryIds(pipeline.config, PIPELINE_ENTRY.sources);
   if (pipelineUsesRoutes(pipeline)) {
     const routes = addDestinationToRoutes(readRoutes(pipeline.config), destinationId);
     if (sources.length === 1) {
@@ -463,7 +412,7 @@ export const connectSourceToDestination = (
       [{ name: PIPELINE_ENTRY.routes, value: routes }]
     );
   }
-  const destinations = readIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations);
+  const destinations = readEntryIds(pipeline.config, PIPELINE_ENTRY.destinations);
   if (sources.length === 1) {
     return writePipeline(
       unit,
@@ -497,7 +446,7 @@ export const disconnectSourceFromDestination = (
     return unit;
   }
   const pipeline = unit.unit.pipelines[pipelineIndex];
-  const sources = readIdentifiers(pipeline.config, PIPELINE_ENTRY.sources);
+  const sources = readEntryIds(pipeline.config, PIPELINE_ENTRY.sources);
   if (pipelineUsesRoutes(pipeline)) {
     const routes = removeDestinationFromRoutes(readRoutes(pipeline.config), destinationId);
     if (sources.length === 1) {
@@ -511,7 +460,7 @@ export const disconnectSourceFromDestination = (
       { name: PIPELINE_ENTRY.routes, value: routes },
     ]);
   }
-  const destinations = readIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations);
+  const destinations = readEntryIds(pipeline.config, PIPELINE_ENTRY.destinations);
   if (sources.length === 1) {
     return writePipeline(
       unit,
@@ -553,7 +502,7 @@ export const isolateSourceLine = (
   const released = disconnectSourceFromDestination(unit, sourceId, destinationId);
   const pipelineId = pipelineIdForSource(released, sourceId);
   return {
-    unit: appendSourcePipeline(released, sourceId, pipeline.supported_telemetry, [
+    unit: insertSourcePipeline(released, pipelineId, sourceId, pipeline.supported_telemetry, [
       { name: PIPELINE_ENTRY.destinations, value: [destinationId] },
     ]),
     pipelineId,
@@ -581,9 +530,13 @@ const canConnectProcessingToDestination = (
     return false;
   }
   if (
-    pipelineReaches(unit, pipeline, destinationId) ||
-    readIdentifiers(pipeline.config, PIPELINE_ENTRY.sources).some((sourceId) =>
-      sourceReaches(unit, sourceId, destinationId)
+    reaches(
+      unit,
+      [
+        { kind: GRAPH_ENDPOINT_KIND.processing, ref },
+        ...readEntryIds(pipeline.config, PIPELINE_ENTRY.sources).map(sourceOrigin),
+      ],
+      destinationId
     )
   ) {
     return false;
@@ -608,7 +561,7 @@ const connectProcessingToDestination = (
     pipelineUsesRoutes(pipeline)
       ? withRoutes(config, addDestinationToRoutes(readRoutes(config), destinationId))
       : withIdentifiers(config, PIPELINE_ENTRY.destinations, [
-          ...readIdentifiers(config, PIPELINE_ENTRY.destinations),
+          ...readEntryIds(config, PIPELINE_ENTRY.destinations),
           destinationId,
         ])
   );
@@ -634,7 +587,7 @@ const disconnectProcessingFromDestination = (
       : withIdentifiers(
           config,
           PIPELINE_ENTRY.destinations,
-          readIdentifiers(config, PIPELINE_ENTRY.destinations).filter((id) => id !== destinationId)
+          readEntryIds(config, PIPELINE_ENTRY.destinations).filter((id) => id !== destinationId)
         )
   );
 };

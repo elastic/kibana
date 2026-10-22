@@ -11,8 +11,9 @@ import {
   SLOT_POSITION,
   type ProcessingNodeRef,
   type SlotPosition,
-  type UnitSignal,
 } from '../../../services/unit_graph';
+import type { ProcessingDiagnostic } from '../../../services/unit_diagnostics';
+import type { UnitSignal } from '../../../services/unit_pipeline';
 import type { DraftProcessor, UnitProcessor } from '../../../services/unit_processing';
 
 /** Where a processor created in the flyout joins the slot's list. */
@@ -25,15 +26,6 @@ export interface ProcessingStep {
   key: string;
   processor: DraftProcessor;
   status: ProcessingStepStatus;
-}
-
-export interface ProcessingDiagnostic {
-  code: string;
-  message: string;
-  /** Processor the diagnostic was traced back to, when it could be. */
-  processorId?: string;
-  /** Position of that processor in the flyout list, when it belongs to this node. */
-  stepIndex?: number;
 }
 
 export interface ProcessingFlyoutInput {

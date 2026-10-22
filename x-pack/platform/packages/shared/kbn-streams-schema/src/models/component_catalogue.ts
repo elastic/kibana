@@ -270,14 +270,3 @@ export interface ComponentCatalogue {
   metadata: CatalogueMetadata;
   definitions: CatalogueComponentDefinition[];
 }
-
-export type CatalogueDiagnosticSeverity = 'error' | 'warning' | 'info';
-
-export interface CatalogueDiagnostic {
-  severity: CatalogueDiagnosticSeverity;
-  code: string;
-  message: string;
-  /** JSON pointer into the validated configuration. */
-  path?: string;
-  line?: number;
-}

@@ -23,10 +23,8 @@ import { i18n } from '@kbn/i18n';
 import { DragHandle, useDragHandle } from '../draggable_steps';
 import { ProcessorContextMenu } from './processor_context_menu';
 import { summarizeProcessor } from './processor_summary';
-import type {
-  ProcessingDiagnostic,
-  ProcessingStep,
-} from './state_management/processing_flyout_machine';
+import type { ProcessingDiagnostic } from '../../services/unit_diagnostics';
+import type { ProcessingStep } from './state_management/processing_flyout_machine';
 
 interface ProcessorCardProps {
   step: ProcessingStep;

@@ -7,4 +7,5 @@
 
 export { BlockDisableOverlay } from './block_disable_overlay';
 export { DragHandle, DraggableStepWrapper, useDragHandle } from './draggable_step_wrapper';
+export { useDescendantIdsGetter } from './use_descendant_ids_getter';
 export { useListReorderMonitor } from './use_list_reorder_monitor';

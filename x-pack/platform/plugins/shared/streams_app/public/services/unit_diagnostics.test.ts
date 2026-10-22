@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Unit } from '../../services/unit_repository';
-import { getProcessingDiagnostics } from './diagnostics';
+import type { Unit } from './unit_repository';
+import { getProcessingDiagnostics } from './unit_diagnostics';
 
 const savedUnit: Unit = {
   unit: {
