@@ -249,6 +249,13 @@ export interface LensHeatmapConfigBase {
   xAxis: LensBreakdownConfig;
   legend?: Identity<LensLegendConfig>;
   axisLabel?: { xAxis?: boolean; yAxis?: boolean };
+  /**
+   * Low-to-high cell colors, distributed across the value range.
+   * Omit to keep the default heatmap palette.
+   */
+  palette?: {
+    colors: string[];
+  };
 }
 
 export type LensHeatmapConfig = Identity<LensBaseConfig & LensBaseLayer & LensHeatmapConfigBase>;

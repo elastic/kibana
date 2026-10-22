@@ -1407,6 +1407,7 @@ describe('MetricsGrid', () => {
                 /BUCKET\(latency\.exp, 10, 1, 9\)[\s\S]*SORT bucket DESC/
               ),
             },
+            palette: { colors: expect.any(Array) },
           }),
         }),
         expect.anything()
