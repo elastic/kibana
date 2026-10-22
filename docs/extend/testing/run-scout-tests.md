@@ -92,17 +92,17 @@ All `--testFiles` paths must fall under the same Scout root (for example, `scout
 node scripts/scout run-tests \
   --arch <stateful|serverless> \
   --domain <domain> \
-  --targetAttribute <attribute> \
+  --targetAttribute <attribute> \ <1>
   --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
+
+1. For example `fips`, for a Kibana running in FIPS mode.
 
 `--targetAttribute` is repeatable and accepts comma-separated values. When omitted, Scout reads the `SCOUT_TARGET_ATTRIBUTES` environment variable instead. Without either, Scout assumes the environment has no attributes and skips every `limit.only` suite.
 
 ::::::{note}
 Declaring an attribute doesn't change how Scout starts the servers: it tells Scout what the environment is but doesn't make it so.
 ::::::
-
-Available attributes: `fips` (Kibana runs in FIPS mode).
 
 ### Custom server configuration [scout-run-tests-server-config-set]
 
