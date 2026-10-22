@@ -111,7 +111,7 @@ Investigations are public conversations, and Agent Builder lets anyone who can c
 
 ### Slack threads
 
-`POST /internal/nightshift/investigations/_slack_thread` finds a thread's investigation by its `slack_thread` subject, keyed `team:<T>/channel:<C>/thread:<ts>`. It does not set or read the Agent Builder conversation origin: Agent Builder sets that when the Slack relay calls its callback converse API, and a relay chat about the same thread may carry it.
+`POST /internal/nightshift/investigations/_slack_thread` finds a thread's investigation by its `slack_thread` subject, keyed by the Relay's thread key `slack:<T>:<C>:<ts>`. A Slack-trigger automation records the same subject for the message that started it, taking the key from the event's `externalConversationId`. It does not set or read the Agent Builder conversation origin: Agent Builder sets that when the Slack relay calls its callback converse API, and a relay chat about the same thread may carry it.
 
 With `create`, the route creates the investigation as the identity that runs the Slack workflow. The new investigation has the thread as its subject, claimed so that concurrent creates for one thread agree on one investigation. The thread's status message is recorded on that subject as `slack.status_message_ts`.
 
