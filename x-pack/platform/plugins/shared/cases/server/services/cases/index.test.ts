@@ -2605,6 +2605,36 @@ describe('CasesService', () => {
       });
     });
 
+    describe('getCaseStatuses', () => {
+      it('reads only the status field, as a status name, leaving out cases not found', async () => {
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'case-1',
+              type: CASE_SAVED_OBJECT,
+              references: [],
+              attributes: { status: CasePersistedStatus.CLOSED },
+            },
+            {
+              id: 'case-2',
+              type: CASE_SAVED_OBJECT,
+              references: [],
+              attributes: {},
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+          ],
+        });
+
+        const statuses = await service.getCaseStatuses({ caseIds: ['case-1', 'case-2'] });
+
+        expect(unsecuredSavedObjectsClient.bulkGet).toHaveBeenCalledWith([
+          { type: CASE_SAVED_OBJECT, id: 'case-1', fields: ['status'] },
+          { type: CASE_SAVED_OBJECT, id: 'case-2', fields: ['status'] },
+        ]);
+        expect(statuses).toEqual(new Map([['case-1', CaseStatuses.closed]]));
+      });
+    });
+
     describe('getCases', () => {
       it('decodes correctly', async () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({

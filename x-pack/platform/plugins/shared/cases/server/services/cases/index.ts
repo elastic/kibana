@@ -49,6 +49,7 @@ import type {
   SOWithErrors,
 } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
+import { STATUS_ESMODEL_TO_EXTERNAL } from '../../common/constants';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { buildFilter, combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
@@ -816,6 +817,29 @@ export class CasesService {
       });
     } catch (error) {
       this.log.error(`Error on GET cases ${caseIds.join(', ')}: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * The status of each case found, reading only the status field; cases not found are left out.
+   */
+  public async getCaseStatuses({ caseIds }: GetCasesArgs): Promise<Map<string, CaseStatuses>> {
+    try {
+      this.log.debug(`Attempting to GET the status of cases ${caseIds.join(', ')}`);
+      const { saved_objects: cases } = await this.unsecuredSavedObjectsClient.bulkGet<
+        Pick<CasePersistedAttributes, 'status'>
+      >(caseIds.map((id) => ({ type: CASE_SAVED_OBJECT, id, fields: ['status'] })));
+
+      return new Map(
+        cases.flatMap((theCase): Array<[string, CaseStatuses]> => {
+          if (isSavedObjectErrorResult(theCase)) return [];
+          const status = STATUS_ESMODEL_TO_EXTERNAL[theCase.attributes.status];
+          return status ? [[theCase.id, status]] : [];
+        })
+      );
+    } catch (error) {
+      this.log.error(`Error on GET the status of cases ${caseIds.join(', ')}: ${error}`);
       throw error;
     }
   }
