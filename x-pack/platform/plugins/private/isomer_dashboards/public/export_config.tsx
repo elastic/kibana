@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,11 +16,14 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
+  EuiImage,
+  EuiLoadingChart,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
+import { buildPath } from '@kbn/core-http-browser';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import {
@@ -29,7 +32,7 @@ import {
   useShareTypeContext,
 } from '@kbn/share-plugin/public';
 
-import { API_BASE, type DashboardLayout, VIEW_BASE } from '../common';
+import { API_BASE, type DashboardLayout, DRAW_MAX_BYTES, VIEW_BASE } from '../common';
 
 interface PinnedPanel {
   id?: string;
@@ -52,6 +55,71 @@ const currentControls = (pinned: PinnedPanel[] | undefined) =>
     .flatMap(({ id, uid, type, config }) =>
       id ?? uid ? [{ id: (id ?? uid)!, type, config: config ?? {} }] : []
     );
+
+/** A composition from the composition route, kept with the layout it was made for. */
+interface Spec {
+  composition: Record<string, unknown>;
+  hints: Record<string, unknown>;
+  layout: DashboardLayout;
+}
+
+class TooLargeError extends Error {}
+
+const errorMessage = (e: unknown) =>
+  e instanceof TooLargeError
+    ? i18n.translate('xpack.isomerDashboards.flyout.tooLarge', {
+        defaultMessage:
+          'This dashboard is too large to print from its preview: its composition is over {size} MB.',
+        values: { size: DRAW_MAX_BYTES / 1_000_000 },
+      })
+    : (e as { body?: { message?: string } })?.body?.message ??
+      (e instanceof Error ? e.message : String(e));
+
+/** The body gzipped where the browser can, since compositions carry their data. */
+const gzipped = async (json: string): Promise<{ body: BodyInit; encoding?: string }> => {
+  if (typeof CompressionStream === 'undefined') {
+    return { body: json };
+  }
+  const stream = new Blob([json]).stream().pipeThrough(new CompressionStream('gzip'));
+  return { body: await new Response(stream).blob(), encoding: 'gzip' };
+};
+
+/** Draws a kept composition through the draw route, as a PNG or a PDF. */
+const draw = async (
+  core: CoreStart,
+  { composition, hints, layout }: Spec,
+  format: 'png' | 'pdf',
+  title: string
+): Promise<Blob> => {
+  const json = JSON.stringify({ composition, hints, layout, format, title });
+  if (json.length > DRAW_MAX_BYTES) {
+    throw new TooLargeError();
+  }
+  const { body, encoding } = await gzipped(json);
+  try {
+    // `core.http` sends JSON's content type itself.
+    const { response } = await core.http.post(`${API_BASE}/draw`, {
+      body,
+      ...(encoding ? { headers: { 'content-encoding': encoding } } : {}),
+      asResponse: true,
+      rawResponse: true,
+    });
+    if (!response) {
+      throw new Error('The drawing failed');
+    }
+    return await response.blob();
+  } catch (e) {
+    const response = (e as { response?: Response })?.response;
+    if (response?.status === 413) {
+      throw new TooLargeError();
+    }
+    const message = await response
+      ?.json()
+      .then((parsed: { message?: string }) => parsed.message)
+      .catch(() => undefined);
+    throw message ? new Error(message) : e;
+  }
+};
 
 const LAYOUTS = [
   {
@@ -78,42 +146,78 @@ const IsomerExportFlyout = ({
     'exportDerivatives'
   );
   const { title = 'dashboard', locatorParams } = sharingData as unknown as SharingData;
-  const timeRange = locatorParams?.params?.time_range;
-  const controls = currentControls(locatorParams?.params?.pinned_panels);
+  // Read once: the time range and controls can't change while the flyout is open.
+  const [onScreen] = useState(() => {
+    const timeRange = locatorParams?.params?.time_range;
+    const controls = currentControls(locatorParams?.params?.pinned_panels);
+    return { ...(timeRange ? { timeRange } : {}), ...(controls?.length ? { controls } : {}) };
+  });
   const [layout, setLayout] = useState<DashboardLayout>('grid');
-  const [busy, setBusy] = useState<'pdf' | 'composition'>();
+  const [spec, setSpec] = useState<Spec>();
+  const [preview, setPreview] = useState<string>();
+  const [busy, setBusy] = useState<'preview' | 'pdf'>();
   const [error, setError] = useState<string>();
-  const path = objectId ? `${API_BASE}/${encodeURIComponent(objectId)}` : undefined;
+  const path = objectId ? buildPath(`${API_BASE}/{id}/composition`, { id: objectId }) : undefined;
 
-  /** Downloads what `kind` exports: the PDF, or the composition it draws. */
-  const download = async (kind: 'pdf' | 'composition') => {
+  // The composition is made once per layout; the preview, the PDF and the composition download all use it.
+  useEffect(() => {
     if (!path) {
       return;
     }
-    setBusy(kind);
+    let current = true;
+    let url: string | undefined;
+    setSpec(undefined);
+    setPreview(undefined);
+    setError(undefined);
+    setBusy('preview');
+    (async () => {
+      const made = await core.http.post<Omit<Spec, 'layout'>>(path, {
+        body: JSON.stringify({ layout, ...onScreen }),
+      });
+      if (!current) {
+        return;
+      }
+      const kept = { ...made, layout };
+      setSpec(kept);
+      const png = await draw(core, kept, 'png', title);
+      if (current) {
+        url = URL.createObjectURL(png);
+        setPreview(url);
+      }
+    })()
+      .catch((e) => current && setError(errorMessage(e)))
+      .finally(() => current && setBusy(undefined));
+    return () => {
+      current = false;
+      if (url) {
+        URL.revokeObjectURL(url);
+      }
+    };
+  }, [core, path, layout, onScreen, title]);
+
+  const downloadPdf = async () => {
+    if (!spec) {
+      return;
+    }
+    setBusy('pdf');
     setError(undefined);
     try {
-      const { response } = await core.http.post(`${path}/${kind}`, {
-        body: JSON.stringify({
-          layout,
-          ...(timeRange ? { timeRange } : {}),
-          ...(controls?.length ? { controls } : {}),
-        }),
-        asResponse: true,
-        rawResponse: true,
-      });
-      if (!response?.ok) {
-        throw new Error((await response?.text()) ?? 'The export failed');
-      }
-      downloadFileAs(
-        kind === 'pdf' ? `${title}.pdf` : `${title}.isomer.json`,
-        await response.blob()
-      );
+      downloadFileAs(`${title}.pdf`, await draw(core, spec, 'pdf', title));
       closeFlyout();
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(errorMessage(e));
     } finally {
       setBusy(undefined);
+    }
+  };
+
+  const downloadComposition = () => {
+    if (spec) {
+      const { composition, hints } = spec;
+      downloadFileAs(`${title}.isomer.json`, {
+        content: JSON.stringify({ composition, hints }),
+        type: 'application/json',
+      });
     }
   };
 
@@ -123,8 +227,8 @@ const IsomerExportFlyout = ({
     }
     const query = new URLSearchParams({
       layout: 'stack',
-      ...(timeRange ?? {}),
-      ...(controls?.length ? { controls: JSON.stringify(controls) } : {}),
+      ...(onScreen.timeRange ?? {}),
+      ...(onScreen.controls ? { controls: JSON.stringify(onScreen.controls) } : {}),
     });
     window.open(
       core.http.basePath.prepend(`${VIEW_BASE}/${encodeURIComponent(objectId)}/view?${query}`),
@@ -196,6 +300,37 @@ const IsomerExportFlyout = ({
             <KbnDangerCallout size="s" title={error} />
           </>
         )}
+        {(preview || busy === 'preview') && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiFormRow
+              fullWidth
+              label={i18n.translate('xpack.isomerDashboards.flyout.preview', {
+                defaultMessage: 'Preview',
+              })}
+            >
+              {preview ? (
+                <EuiImage
+                  src={preview}
+                  alt={i18n.translate('xpack.isomerDashboards.flyout.previewAlt', {
+                    defaultMessage: 'The page the PDF prints: {title}',
+                    values: { title },
+                  })}
+                  size="fullWidth"
+                  hasShadow
+                  allowFullScreen
+                  data-test-subj="isomerDashboardsPreview"
+                />
+              ) : (
+                <EuiFlexGroup justifyContent="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingChart size="l" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+            </EuiFormRow>
+          </>
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -213,10 +348,9 @@ const IsomerExportFlyout = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              iconType="editorCodeBlock"
-              onClick={() => download('composition')}
-              isLoading={busy === 'composition'}
-              isDisabled={!path || busy !== undefined}
+              iconType="code"
+              onClick={downloadComposition}
+              isDisabled={!spec}
               data-test-subj="isomerDashboardsDownloadComposition"
             >
               {i18n.translate('xpack.isomerDashboards.flyout.downloadComposition', {
@@ -228,9 +362,9 @@ const IsomerExportFlyout = ({
             <EuiButton
               fill
               iconType="download"
-              onClick={() => download('pdf')}
+              onClick={downloadPdf}
               isLoading={busy === 'pdf'}
-              isDisabled={!path || busy !== undefined}
+              isDisabled={!spec || busy !== undefined}
               data-test-subj="isomerDashboardsDownloadPdf"
             >
               {i18n.translate('xpack.isomerDashboards.flyout.download', {
@@ -244,7 +378,7 @@ const IsomerExportFlyout = ({
   );
 };
 
-/** The share menu entry: a flyout that downloads the PDF or opens the mobile view. */
+/** The share menu entry: a flyout that previews the page, then downloads it as a PDF, or opens the mobile view. */
 export const isomerExportConfig = (core: CoreStart): ExportShareParameters => ({
   label: ({ openFlyout }) => (
     <EuiButtonEmpty size="s" iconType="document" onClick={openFlyout}>
@@ -252,6 +386,6 @@ export const isomerExportConfig = (core: CoreStart): ExportShareParameters => ({
     </EuiButtonEmpty>
   ),
   shouldRender: () => true,
-  flyoutSizing: { size: 's' },
+  flyoutSizing: { size: 'm' },
   flyoutContent: ({ closeFlyout }) => <IsomerExportFlyout core={core} closeFlyout={closeFlyout} />,
 });

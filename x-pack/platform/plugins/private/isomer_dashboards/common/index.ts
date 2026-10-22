@@ -13,3 +13,6 @@ export const VIEW_BASE = '/isomer_dashboards';
 export const PAGE_WIDTH = { grid: 1400, stack: 420, min: 320, max: 2400 } as const;
 
 export type DashboardLayout = 'grid' | 'stack';
+
+/** The largest composition the draw route takes, after the flyout's gzip is undone. */
+export const DRAW_MAX_BYTES = 20_000_000;
