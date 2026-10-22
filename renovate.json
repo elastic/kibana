@@ -1368,8 +1368,8 @@
       "enabled": true
     },
     {
-      "groupName": "borc",
-      "matchDepNames": ["borc"],
+      "groupName": "@jsonjoy.com/json-pack",
+      "matchDepNames": ["@jsonjoy.com/json-pack"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
