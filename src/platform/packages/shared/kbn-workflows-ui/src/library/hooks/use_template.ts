@@ -12,7 +12,7 @@ import { useQuery } from '@kbn/react-query';
 import type { TemplateBody } from '@kbn/workflows-library';
 import { useWorkflowsApi } from '../../api/use_workflows_api';
 
-const MAX_RETRIES = 3;
+export const MAX_RETRIES = 3;
 
 /** Whether a `useTemplate` error means the slug doesn't exist in the catalog. */
 export const isTemplateNotFoundError = (error: unknown): boolean =>

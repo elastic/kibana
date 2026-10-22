@@ -10,7 +10,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useTemplate } from './use_template';
+import { MAX_RETRIES, useTemplate } from './use_template';
 import { createMockWorkflowApi } from '../../api/workflows_api.mock';
 import { testQueryClientConfig } from '../../test_utils';
 
@@ -62,6 +62,7 @@ describe('useTemplate', () => {
     const { result } = renderHook(() => useTemplate('ip-reputation-check'), { wrapper });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
-    expect(mockWorkflowApi.getTemplate).toHaveBeenCalledTimes(4);
+    // The initial attempt plus each retry.
+    expect(mockWorkflowApi.getTemplate).toHaveBeenCalledTimes(MAX_RETRIES + 1);
   });
 });
