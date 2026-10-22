@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer, SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { isNotFoundError } from '@kbn/es-errors';
@@ -229,7 +229,7 @@ const enrichAttack = async (
           `Attack fingerprint alert times failed for ${attack.attackId}: ${errorText(error)}`
         );
       }
-      return {};
+      return { first: undefined, last: undefined };
     }),
   ]);
 
@@ -322,7 +322,7 @@ const searchFingerprints = async (
   try {
     const byId = new Map<string, StoredFingerprint>();
     for (const query of attributeQueries(spaceId, attacks, now)) {
-      let searchAfter: unknown[] | undefined;
+      let searchAfter: SortResults | undefined;
       for (let page = 0; page < SEARCH_PAGE_CAP; page++) {
         const response = await esClient.search(
           {
@@ -346,7 +346,7 @@ const searchFingerprints = async (
         if (hits.length < SEARCH_SIZE) {
           break;
         }
-        const sort = (hits[hits.length - 1] as { sort?: unknown[] }).sort;
+        const sort = hits[hits.length - 1]?.sort;
         if (sort === undefined) {
           break;
         }

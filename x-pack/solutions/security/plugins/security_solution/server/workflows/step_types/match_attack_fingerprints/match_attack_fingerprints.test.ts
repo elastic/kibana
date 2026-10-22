@@ -123,7 +123,9 @@ describe('matchAttackFingerprints', () => {
   it('returns an attachment and does not write when the stored attack shares its alerts', async () => {
     const { esClient, contextManager, index } = createHarness({
       hits: [fingerprintHit()],
-      conversation: { metadata: { status: 'open', verdict: 'Handed off to Forensics Watch' } },
+      conversation: {
+        metadata: { status: 'open', close_reason: '', verdict: 'Handed off to Forensics Watch' },
+      },
     });
 
     const output = await matchAttackFingerprints({
