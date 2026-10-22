@@ -85,18 +85,15 @@ export class RuleTelemetrySubscriber {
     this.#subscriptions = [];
   }
 
-  #reportRuleChanged(event: ReportedRuleEvent, { origin: actor }: AlertingPublisherContext): void {
+  #reportRuleChanged(event: ReportedRuleEvent, { origin }: AlertingPublisherContext): void {
     const { type: operation, payload } = event;
     const eventType = eventTypeByOperation[operation];
     if (eventType === undefined) {
       return;
     }
 
-    const { ruleId, rule, origin } = payload;
+    const { ruleId, rule } = payload;
 
-    this.ebtService.reportEvent(
-      eventType,
-      buildRuleChangedEventData(rule, { ...origin, actor }, ruleId)
-    );
+    this.ebtService.reportEvent(eventType, buildRuleChangedEventData(rule, origin, ruleId));
   }
 }
