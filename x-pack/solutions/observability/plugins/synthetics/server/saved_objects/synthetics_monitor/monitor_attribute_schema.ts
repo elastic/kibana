@@ -38,7 +38,7 @@ const longString = () => schema.string({ maxLength: MAX_PARAM_VALUE_LENGTH });
 const stringArray = () => schema.arrayOf(shortString(), { maxSize: MAX_MONITOR_FANOUT_SIZE });
 
 const literals = (values: readonly string[]) =>
-  schema.oneOf(values.map((value) => schema.literal(value)) as [Type<string>, ...Type<string>[]]);
+  schema.oneOf(values.map((value) => schema.literal(value)) as [Type<string>]);
 
 const loose = <P extends Record<string, Type<unknown>>>(props: P) =>
   schema.object(props, { unknowns: 'allow' });
