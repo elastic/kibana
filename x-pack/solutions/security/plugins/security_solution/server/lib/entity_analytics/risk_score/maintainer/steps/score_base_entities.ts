@@ -27,6 +27,8 @@ import { parseEsqlBaseScoreRow } from './parse_esql_row';
 import { applyScoreModifiersFromEntities } from '../../modifiers/apply_modifiers_from_entities';
 import type { RiskScoreModifierEntity, ScoredEntityPage, StepResult } from './pipeline_types';
 import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
+import type { EsqlPageProfileSummary } from '../utils/esql_page_profile';
+import { shouldProfilePage, summarizeEsqlPage } from '../utils/esql_page_profile';
 import type { ScopedLogger } from '../utils/with_log_context';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
 import { createMissingEntities as runCreateMissingEntities } from './create_missing_entities';
@@ -115,6 +117,7 @@ export const calculateBaseEntityScores = async function* ({
 }: ScoreBaseEntitiesParams): AsyncGenerator<ScoredEntityPage> {
   let afterKey: Record<string, string> | undefined;
   let previousPageUpperBound: string | undefined;
+  let pageNumber = 0;
 
   const stamped = await allAlertsStamped({ esClient, entityType, alertFilters, alertsIndex });
   logger.debug(
@@ -143,7 +146,8 @@ export const calculateBaseEntityScores = async function* ({
     }
 
     afterKey = pageResult.afterKey;
-    const scores = await scorePageFromAlerts({
+    pageNumber += 1;
+    const { scores, profileSummary } = await scorePageFromAlerts({
       esClient,
       entityType,
       bounds: { lower: previousPageUpperBound, upper: pageResult.upperBound },
@@ -152,8 +156,12 @@ export const calculateBaseEntityScores = async function* ({
       alertsIndex,
       alertFilters,
       stamped,
+      profile: shouldProfilePage(pageNumber),
     });
     previousPageUpperBound = pageResult.upperBound;
+    if (profileSummary) {
+      logger.info(`[base][page:${pageNumber}] esql profile ${JSON.stringify(profileSummary)}`);
+    }
 
     if (scores.length > 0) {
       const entities = await fetchEntitiesByIds({
@@ -370,6 +378,7 @@ const scorePageFromAlerts = async ({
   alertsIndex,
   alertFilters,
   stamped,
+  profile,
 }: {
   esClient: ElasticsearchClient;
   entityType: EntityType;
@@ -379,8 +388,10 @@ const scorePageFromAlerts = async ({
   alertsIndex: string;
   alertFilters: QueryDslQueryContainer[];
   stamped: boolean;
-}): Promise<ParsedRiskScore[]> => {
+  profile: boolean;
+}): Promise<{ scores: ParsedRiskScore[]; profileSummary?: EsqlPageProfileSummary }> => {
   const query = getBaseScoreESQL(entityType, bounds, sampleSize, pageSize, alertsIndex);
+  const startedAt = Date.now();
   const esqlResponse = await esClient.esql.query(
     {
       query,
@@ -391,11 +402,15 @@ const scorePageFromAlerts = async ({
             : alertFilters,
         },
       },
+      ...(profile ? { profile: true } : {}),
     },
     { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
   );
 
-  return (esqlResponse.values ?? []).map(parseEsqlBaseScoreRow(alertsIndex, sampleSize));
+  return {
+    scores: (esqlResponse.values ?? []).map(parseEsqlBaseScoreRow(alertsIndex, sampleSize)),
+    profileSummary: profile ? summarizeEsqlPage(esqlResponse, Date.now() - startedAt) : undefined,
+  };
 };
 
 const applyBaseScoreModifiers = ({

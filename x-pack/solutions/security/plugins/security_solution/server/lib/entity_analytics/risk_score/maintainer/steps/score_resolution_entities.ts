@@ -20,6 +20,8 @@ import { MAX_RESOLUTION_TARGETS_PER_PAGE, RISK_SCORING_REQUEST_TIMEOUT } from '.
 import { RESOLUTION_RELATIONSHIP_TYPE } from '../lookup/lookup_types';
 import { applyScoreModifiersFromEntities } from '../../modifiers/apply_modifiers_from_entities';
 import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
+import type { EsqlPageProfileSummary } from '../utils/esql_page_profile';
+import { shouldProfilePage, summarizeEsqlPage } from '../utils/esql_page_profile';
 import { buildResolutionModifierEntity } from './resolution_modifiers';
 import { getResolutionPageMemberFilter } from './resolution_member_filter';
 import { parseEsqlResolutionScoreRow } from './parse_esql_row';
@@ -116,7 +118,7 @@ export const calculateResolutionEntityScores = async function* ({
 
     const pageUpperBound =
       pageResult.resolutionTargetIds[pageResult.resolutionTargetIds.length - 1];
-    const { parsedScores, esqlRows } = await scoreResolutionPage({
+    const { parsedScores, esqlRows, profileSummary } = await scoreResolutionPage({
       esClient,
       entityType,
       resolutionTargetIds: pageResult.resolutionTargetIds,
@@ -133,8 +135,18 @@ export const calculateResolutionEntityScores = async function* ({
       alertsIndex,
       lookupIndex,
       alertFilters: memberFilter ? [...alertFilters, memberFilter] : alertFilters,
+      profile: shouldProfilePage(pagesProcessed),
     });
     previousPageUpperBound = pageUpperBound;
+    if (profileSummary) {
+      logger.info(
+        `[resolution][page:${pagesProcessed}] esql profile ${JSON.stringify({
+          ...profileSummary,
+          members: pageMemberIds.length,
+          memberFilter: memberFilter !== undefined,
+        })}`
+      );
+    }
     logger.debug(
       `[resolution][page:${pagesProcessed}] parsed_scores=${parsedScores.length}, esql_rows=${esqlRows}`
     );
@@ -388,6 +400,7 @@ const scoreResolutionPage = async ({
   alertsIndex,
   lookupIndex,
   alertFilters,
+  profile,
 }: {
   esClient: ElasticsearchClient;
   entityType: EntityType;
@@ -399,7 +412,12 @@ const scoreResolutionPage = async ({
   alertsIndex: string;
   lookupIndex: string;
   alertFilters: QueryDslQueryContainer[];
-}): Promise<{ parsedScores: ParsedResolutionScore[]; esqlRows: number }> => {
+  profile: boolean;
+}): Promise<{
+  parsedScores: ParsedResolutionScore[];
+  esqlRows: number;
+  profileSummary?: EsqlPageProfileSummary;
+}> => {
   const query = bounds
     ? getResolutionScoreESQLByRange(
         entityType,
@@ -418,8 +436,9 @@ const scoreResolutionPage = async ({
         alertsIndex,
         lookupIndex
       );
+  const startedAt = Date.now();
   const esqlResponse = await esClient.esql.query(
-    { query, filter: { bool: { filter: alertFilters } } },
+    { query, filter: { bool: { filter: alertFilters } }, ...(profile ? { profile: true } : {}) },
     { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
   );
   return {
@@ -427,6 +446,7 @@ const scoreResolutionPage = async ({
       parseEsqlResolutionScoreRow(alertsIndex, sampleSize)
     ),
     esqlRows: esqlResponse.values?.length ?? 0,
+    profileSummary: profile ? summarizeEsqlPage(esqlResponse, Date.now() - startedAt) : undefined,
   };
 };
 

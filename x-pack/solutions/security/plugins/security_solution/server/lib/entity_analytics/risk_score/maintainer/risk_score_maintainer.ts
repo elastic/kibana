@@ -50,6 +50,7 @@ import { ensureLookupIndex, getLookupIndexName } from './lookup/lookup_index';
 import { pruneLookupIndex } from './lookup/prune_lookup_index';
 import { runResolutionScoringStep } from './steps/run_resolution_scoring_step';
 import { createRunMetricsTracker } from './utils/run_metrics_tracker';
+import { createRunHealthTracker } from './utils/run_health';
 import { buildLookupIndex } from './steps/build_lookup_index';
 import { DEFAULT_ALERT_SAMPLE_SIZE } from '../constants';
 import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan, wrapTaskRun } from '../../telemetry/traces';
@@ -127,6 +128,7 @@ export const createRiskScoreMaintainer = ({
   const telemetryReporter = createRiskScoreMaintainerTelemetryReporter({
     telemetry,
   });
+  const runHealthTracker = createRunHealthTracker();
 
   return {
     setup: async ({ status }) => {
@@ -196,6 +198,10 @@ export const createRiskScoreMaintainer = ({
           const runNow = new Date().toISOString();
           const maintainerRunStartedAtMs = Date.now();
           const metricsTracker = createRunMetricsTracker();
+          const runHealth = runHealthTracker.start();
+          const logRunHealth = () =>
+            logger.info(`maintainer health ${JSON.stringify(runHealth.stop())}`);
+          let stage0Ms: number | undefined;
           telemetryReporter.clearGlobalSkipReason();
           const phase0LookupStage = telemetryReporter.startPhase0LookupBuildStage({
             namespace: runContext.namespace,
@@ -218,6 +224,8 @@ export const createRiskScoreMaintainer = ({
                   abortSignal: signal,
                 }),
             });
+            stage0Ms = Date.now() - phase0StartedAtMs;
+            runHealth.mark('stage0');
             phase0LookupStage.success({
               lookupRowsWritten: phase0Summary.lookupRowsWritten,
               entitiesIterated: phase0Summary.entitiesIterated,
@@ -228,7 +236,7 @@ export const createRiskScoreMaintainer = ({
             frameworkTelemetry.report(
               buildRiskScorePhase0EntityMaintainerRunSummary({
                 status: 'success',
-                durationMs: Date.now() - phase0StartedAtMs,
+                durationMs: stage0Ms,
                 summary: phase0Summary,
               })
             );
@@ -241,6 +249,7 @@ export const createRiskScoreMaintainer = ({
                 errorKind: 'unexpected',
               })
             );
+            logRunHealth();
             throw error;
           }
           // Entity types are scored in parallel: each run reads alerts independently
@@ -279,6 +288,7 @@ export const createRiskScoreMaintainer = ({
                 const errorMessage = error instanceof Error ? error.message : String(error);
                 logger.error(`Entity type "${entityType}" run failed: ${errorMessage}`);
               }
+              runHealth.mark(entityType);
             })
           );
 
@@ -289,10 +299,12 @@ export const createRiskScoreMaintainer = ({
           const maintainerTotals = metricsTracker.toAggregateSummary({
             namespace: runContext.namespace,
             durationMs: maintainerRunDurationMs,
+            stage0Ms,
             entityTypesProcessed: runConfig.entityTypes.length,
             idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
           });
           logger.info(`maintainer totals ${JSON.stringify(maintainerTotals)}`);
+          logRunHealth();
           return status.state;
         },
       });
@@ -684,6 +696,8 @@ const executeEntityTypeRun = async ({
 
   let baseScoreDistribution: Awaited<ReturnType<typeof getRiskScoreBaseDistribution>>;
   let resolutionScoreDistribution: Awaited<ReturnType<typeof getRiskScoreResolutionDistribution>>;
+  let scoreDistributionsMs: number | undefined;
+  let pruneMs: number | undefined;
 
   if (!skipRemainingStages) {
     // Refresh the risk score data stream so reset-to-zero can see scores written in phases 1 & 2.
@@ -758,6 +772,7 @@ const executeEntityTypeRun = async ({
     // Refresh so the distribution queries see zero-score records written by reset-to-zero above.
     // Wrapped in try/catch: a refresh failure must not abort the run — scoring and reset already
     // completed successfully, and the distributions are optional telemetry.
+    const scoreDistributionsStartedAtMs = Date.now();
     try {
       await runContext.esClient.indices.refresh({ index: riskScoreAlias });
       const distributionQuery = {
@@ -771,6 +786,7 @@ const executeEntityTypeRun = async ({
         getRiskScoreBaseDistribution(distributionQuery),
         getRiskScoreResolutionDistribution(distributionQuery),
       ]);
+      scoreDistributionsMs = Date.now() - scoreDistributionsStartedAtMs;
     } catch (error) {
       runLogger.warn(
         `Failed to refresh before collecting score distributions; distributions will be omitted from the run summary: ${telemetryReporter.getErrorMessage(
@@ -792,6 +808,7 @@ const executeEntityTypeRun = async ({
   if (!skipRemainingStages) {
     // Final cleanup: remove old lookup docs outside the current risk window.
     const riskWindowStart = runConfig.configuration.range?.start ?? 'now-30d';
+    const pruneStartedAtMs = Date.now();
     try {
       const prunedDocs = await pruneLookupIndex({
         esClient: runContext.esClient,
@@ -799,6 +816,7 @@ const executeEntityTypeRun = async ({
         riskWindowStart,
         calculationRunId,
       });
+      pruneMs = Date.now() - pruneStartedAtMs;
       metricsTracker.recordPrune(runMetrics, prunedDocs);
       if (prunedDocs > 0) {
         runLogger.debug(`pruned ${prunedDocs} stale lookup documents`);
@@ -831,11 +849,20 @@ const executeEntityTypeRun = async ({
   );
 
   const entityRunDurationMs = Date.now() - entityRunStartedAtMs;
+  const stageDurationMs = (name: RiskScoreFrameworkStageSummary['name']) =>
+    frameworkTelemetryStages.find((stage) => stage.name === name)?.durationMs;
   const runSummary = metricsTracker.toRunSummary(runMetrics, {
     entityType,
     status: runStatus,
     errorKind: runErrorKind,
     durationMs: entityRunDurationMs,
+    stageDurationsMs: {
+      base: stageDurationMs('base'),
+      resolution: stageDurationMs('resolution'),
+      resetToZero: stageDurationMs('reset_to_zero'),
+      scoreDistributions: scoreDistributionsMs,
+      prune: pruneMs,
+    },
     idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
     namespace: runContext.namespace,
   });

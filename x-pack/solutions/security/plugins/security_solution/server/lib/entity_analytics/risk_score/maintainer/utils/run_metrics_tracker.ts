@@ -92,10 +92,16 @@ interface RunSummaryContext extends SummaryContext {
   status: string;
   errorKind?: string;
   durationMs: number;
+  /** Per-stage wall time for this entity type. Stages that didn't run are left out. */
+  stageDurationsMs?: Partial<
+    Record<'base' | 'resolution' | 'resetToZero' | 'scoreDistributions' | 'prune', number>
+  >;
 }
 
 interface AggregateSummaryContext extends SummaryContext {
   durationMs: number;
+  /** Stage 0 (lookup build) wall time, shared by every entity type in the run. */
+  stage0Ms?: number;
   entityTypesProcessed: number;
 }
 
