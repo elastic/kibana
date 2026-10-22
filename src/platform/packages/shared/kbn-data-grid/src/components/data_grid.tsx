@@ -12,12 +12,13 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { OverrideCopiedTabularContent, useResizeObserver } from '@elastic/eui';
+import { OverrideCopiedTabularContent, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { DEFAULT_DATA_GRID_STYLE, DEFAULT_ESTIMATED_ROW_HEIGHT, OVERSCAN } from '../constants';
 import { useColumnSizing } from '../hooks/use_column_sizing';
@@ -25,6 +26,7 @@ import { useColumnVirtualization } from '../hooks/use_column_virtualization';
 import { useGridNavigation } from '../hooks/use_grid_navigation';
 import { componentStyles } from '../styles';
 import { observeCellContentFocus } from '../utils/cell_content_focus';
+import { getLinesRowHeight } from '../utils/row_height';
 import type {
   DataGridCellKey,
   DataGridColumn,
@@ -78,7 +80,7 @@ export const DataGrid = <TRow,>({
   sorting,
   onMoveColumn,
   onHideColumn,
-  estimatedRowHeight = DEFAULT_ESTIMATED_ROW_HEIGHT,
+  estimatedRowHeight: estimatedRowHeightProp,
   columnWidths,
   onColumnResize,
   initialScrollOffset = 0,
@@ -90,6 +92,7 @@ export const DataGrid = <TRow,>({
   gridRef,
 }: DataGridProps<TRow>) => {
   const styles = useMemoCss(componentStyles);
+  const themeContext = useEuiTheme();
   const { cellPadding, fontSize, border, stripes, rowHover, header } = {
     ...DEFAULT_DATA_GRID_STYLE,
     ...gridStyle,
@@ -105,6 +108,22 @@ export const DataGrid = <TRow,>({
     [lineCount, lineHeight]
   );
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  // Rows with a number of lines have a known height: estimating it keeps the scroll height and
+  // scrolling to a row right before the rows are measured.
+  const estimatedRowHeight = useMemo(
+    () =>
+      estimatedRowHeightProp ??
+      (lineCount === undefined
+        ? DEFAULT_ESTIMATED_ROW_HEIGHT
+        : getLinesRowHeight(themeContext, {
+            lineCount,
+            fontSize,
+            cellPadding,
+            hasBorder: border !== 'none',
+            lineHeight,
+          })),
+    [estimatedRowHeightProp, lineCount, themeContext, fontSize, cellPadding, border, lineHeight]
+  );
 
   // A column that did not change keeps its internal column, so its cells do not render again when
   // the consumer builds the array of columns anew.
@@ -197,6 +216,15 @@ export const DataGrid = <TRow,>({
     scrollMargin: stickyHeight,
     scrollPaddingStart: stickyHeight,
   });
+  // The virtualizer keeps the sizes it estimated: a new estimate, e.g. for another line count, needs
+  // a new measurement.
+  const previousEstimateRef = useRef(estimatedRowHeight);
+  useEffect(() => {
+    if (previousEstimateRef.current !== estimatedRowHeight) {
+      previousEstimateRef.current = estimatedRowHeight;
+      rowVirtualizer.measure();
+    }
+  }, [rowVirtualizer, estimatedRowHeight]);
   const virtualItems = rowVirtualizer.getVirtualItems();
 
   const scrollToVirtualizedRow = useCallback(
@@ -219,13 +247,20 @@ export const DataGrid = <TRow,>({
       scrollToColumn: columnVirtualization.scrollToColumn,
     });
 
-  const onScroll = useCallback(() => {
+  // Reading the scroll metrics forces a layout: read them once per frame, at its start, instead of
+  // on every scroll event, which can come right after the virtualizers rendered.
+  const scrollCallbacksRef = useRef({ onScrollOffsetChange, onScrollInfo });
+  scrollCallbacksRef.current = { onScrollOffsetChange, onScrollInfo };
+  const scrollFrameRef = useRef<number>();
+  const reportScroll = useCallback(() => {
+    scrollFrameRef.current = undefined;
     const element = scrollRef.current;
+    const { onScrollOffsetChange: onOffset, onScrollInfo: onInfo } = scrollCallbacksRef.current;
     if (!element) {
       return;
     }
-    onScrollOffsetChange?.(element.scrollTop);
-    onScrollInfo?.({
+    onOffset?.(element.scrollTop);
+    onInfo?.({
       scrollTop: element.scrollTop,
       scrollLeft: element.scrollLeft,
       scrollHeight: element.scrollHeight,
@@ -233,7 +268,23 @@ export const DataGrid = <TRow,>({
       clientHeight: element.clientHeight,
       clientWidth: element.clientWidth,
     });
-  }, [onScrollOffsetChange, onScrollInfo]);
+  }, []);
+  const hasScrollCallback = Boolean(onScrollOffsetChange || onScrollInfo);
+  const onScroll = useCallback(() => {
+    if (hasScrollCallback && scrollFrameRef.current === undefined) {
+      scrollFrameRef.current = requestAnimationFrame(reportScroll);
+    }
+  }, [hasScrollCallback, reportScroll]);
+  // A layout effect, so the last position is still read from the attached element on unmount.
+  useLayoutEffect(
+    () => () => {
+      if (scrollFrameRef.current !== undefined) {
+        cancelAnimationFrame(scrollFrameRef.current);
+        reportScroll();
+      }
+    },
+    [reportScroll]
+  );
 
   const {
     renderedIndexes,

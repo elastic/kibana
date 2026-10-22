@@ -8,9 +8,18 @@
  */
 
 import React, { createRef, useEffect } from 'react';
-import { fireEvent, act, render, screen, waitFor, within } from '@testing-library/react';
+import {
+  fireEvent,
+  act,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import {
   CELL_ACTIONS_TRIGGER_TEST_SUBJ,
   CELL_EXPAND_BUTTON_TEST_SUBJ,
@@ -24,6 +33,7 @@ import type {
   DataGridProps,
   DataGridRef,
 } from '../types';
+import { getLinesRowHeight } from '../utils/row_height';
 import { DataGrid } from './data_grid';
 
 interface TestRow {
@@ -522,7 +532,7 @@ describe('DataGrid', () => {
   });
 
   describe('rendering', () => {
-    it('only renders the cells of the column that is resized while dragging its handle', async () => {
+    it('does not render cell values again while a column is resized', async () => {
       const renders: Record<string, number> = {};
       const countedColumns: Array<DataGridColumn<TestRow>> = ['a', 'b', 'c'].map((id) => ({
         id,
@@ -545,10 +555,72 @@ describe('DataGrid', () => {
         expect(screen.getByTestId('dataGridHeaderCell-b').style.width).toBe('180px')
       );
 
-      expect(renders.b).toBeGreaterThan(before.b);
+      // Only the cells of the resized column get the new width, no value depends on it.
+      expect(screen.getAllByText(/^b row/)[0].closest('[role="gridcell"]')).toHaveStyle({
+        width: '180px',
+      });
+      expect(renders.b).toBe(before.b);
       expect(renders.a).toBe(before.a);
       expect(renders.c).toBe(before.c);
       fireEvent.mouseUp(document);
+    });
+
+    it('does not render the value of a cell again when it is hovered or focused', async () => {
+      const renderCell = jest.fn(({ row }: { row: TestRow }) => row.value);
+      render(
+        <DataGrid
+          {...defaultProps}
+          rows={[mockRows[0]]}
+          columns={[columns[0], { ...columns[1], renderCell }]}
+        />
+      );
+      const callsAfterFirstRender = renderCell.mock.calls.length;
+      const valueCell = getCell('valueA');
+
+      await userEvent.hover(valueCell);
+      await openCellActionsBubble(valueCell);
+      await userEvent.unhover(valueCell);
+      act(() => valueCell.focus());
+      act(() => valueCell.blur());
+
+      expect(renderCell).toHaveBeenCalledTimes(callsAfterFirstRender);
+    });
+
+    it('estimates the height of rows with a number of lines from the line count', () => {
+      const themeContext = renderHook(() => useEuiTheme()).result.current;
+      const manyRows = Array.from({ length: 200 }, (_, index) => buildRow(`row${index}`, 'v'));
+      // Without a viewport height only the overscan rows render, and they measure 0px: the total
+      // height is the estimate of the other rows.
+      const offsetHeight = jest
+        .spyOn(HTMLElement.prototype, 'offsetHeight', 'get')
+        .mockReturnValue(0);
+      const getEstimatedRowHeight = (container: HTMLElement) => {
+        const totalHeight = parseFloat(
+          container.querySelector<HTMLElement>('[role="grid"] > div:nth-child(2)')!.style.height
+        );
+        const measuredCount = container.querySelectorAll('[role="row"][data-index]').length;
+        return totalHeight / (manyRows.length - measuredCount);
+      };
+      const getExpected = (lineCount: number) =>
+        getLinesRowHeight(themeContext, {
+          lineCount,
+          fontSize: 's',
+          cellPadding: 'l',
+          hasBorder: true,
+        });
+
+      try {
+        const { container, rerender } = render(
+          <DataGrid {...defaultProps} rows={manyRows} rowHeight={{ lineCount: 1 }} />
+        );
+        expect(getEstimatedRowHeight(container)).toBe(getExpected(1));
+
+        rerender(<DataGrid {...defaultProps} rows={manyRows} rowHeight={{ lineCount: 3 }} />);
+        expect(getEstimatedRowHeight(container)).toBe(getExpected(3));
+        expect(getExpected(3)).toBeGreaterThan(getExpected(1));
+      } finally {
+        offsetHeight.mockReturnValue(600);
+      }
     });
 
     it('does not render the cells again when the columns are built anew but did not change', () => {
@@ -737,7 +809,7 @@ describe('DataGrid', () => {
       expect(screen.getByText('name rowA').closest('[role="gridcell"]')).toHaveFocus();
     });
 
-    it('reports the scroll position and size of the grid', () => {
+    it('reports the scroll position and size of the grid once per frame', async () => {
       const onScroll = jest.fn();
       const onScrollOffsetChange = jest.fn();
       render(
@@ -747,9 +819,26 @@ describe('DataGrid', () => {
           onScrollOffsetChange={onScrollOffsetChange}
         />
       );
-      fireEvent.scroll(screen.getByTestId('testGrid'), { target: { scrollTop: 40 } });
-      expect(onScrollOffsetChange).toHaveBeenCalledWith(40);
+      const grid = screen.getByTestId('testGrid');
+      fireEvent.scroll(grid, { target: { scrollTop: 20 } });
+      fireEvent.scroll(grid, { target: { scrollTop: 40 } });
+      // Read at the start of the next frame, not in the scroll event.
+      expect(onScrollOffsetChange).not.toHaveBeenCalled();
+
+      await waitFor(() => expect(onScrollOffsetChange).toHaveBeenCalledWith(40));
+      expect(onScrollOffsetChange).toHaveBeenCalledTimes(1);
+      expect(onScroll).toHaveBeenCalledTimes(1);
       expect(onScroll).toHaveBeenCalledWith(expect.objectContaining({ scrollTop: 40 }));
+    });
+
+    it('reports the last scroll position when it unmounts before the next frame', () => {
+      const onScrollOffsetChange = jest.fn();
+      const { unmount } = render(
+        <DataGrid {...defaultProps} onScrollOffsetChange={onScrollOffsetChange} />
+      );
+      fireEvent.scroll(screen.getByTestId('testGrid'), { target: { scrollTop: 60 } });
+      unmount();
+      expect(onScrollOffsetChange).toHaveBeenCalledWith(60);
     });
   });
 

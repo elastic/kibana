@@ -23,6 +23,7 @@ import type { DataGridStyles } from '../styles';
 import type { ColumnLayout } from '../hooks/use_column_virtualization';
 import type {
   DataGridCellKey,
+  DataGridCellRenderProps,
   DataGridExpandedCell,
   DataGridInternalColumn,
   DataGridProps,
@@ -113,6 +114,20 @@ const CellActionIconButton: typeof EuiButtonIcon = ({
 };
 
 const NO_CELL_ACTIONS: EuiDataGridColumnCellAction[] = [];
+
+type CellValueProps<TRow> = Omit<DataGridCellRenderProps<TRow>, 'isDetails'> & {
+  renderCell: DataGridInternalColumn<TRow>['renderCell'];
+};
+
+const CellValueComponent = <TRow,>({ renderCell, ...props }: CellValueProps<TRow>) => (
+  <>{renderCell({ ...props, isDetails: false })}</>
+);
+
+/**
+ * The value of a cell. Memoized apart from the hover and focus state of the cell, so revealing the
+ * cell actions does not render the value again.
+ */
+const CellValue = memo(CellValueComponent) as typeof CellValueComponent;
 
 interface CellContentProps<TRow> {
   column: DataGridInternalColumn<TRow>;
@@ -209,16 +224,16 @@ const CellContent = <TRow,>({
   return (
     <>
       <div className={DATA_GRID_CELL_CONTENT_CLASS}>
-        {renderCell({
-          row,
-          rowIndex,
-          columnId,
-          colIndex,
-          isDetails: false,
-          setCellProps,
-          isExpandable,
-          isExpanded,
-        })}
+        <CellValue
+          renderCell={renderCell}
+          row={row}
+          rowIndex={rowIndex}
+          columnId={columnId}
+          colIndex={colIndex}
+          setCellProps={setCellProps}
+          isExpandable={isExpandable}
+          isExpanded={isExpanded}
+        />
       </div>
       {/* Separates the cells and rows when a selection is pasted into a spreadsheet. */}
       {isLastCopyColumn ? tabularCopyMarkers.hiddenNewline : tabularCopyMarkers.hiddenTab}
@@ -426,16 +441,16 @@ const DataGridCellComponent = <TRow,>({
         <>
           {tabularCopyMarkers.hiddenNoCopyBoundary}
           <div css={styles.cellControlContent}>
-            {renderCell({
-              row,
-              rowIndex,
-              columnId,
-              colIndex: colIndex - 1,
-              isDetails: false,
-              setCellProps,
-              isExpandable: false,
-              isExpanded: false,
-            })}
+            <CellValue
+              renderCell={renderCell}
+              row={row}
+              rowIndex={rowIndex}
+              columnId={columnId}
+              colIndex={colIndex - 1}
+              setCellProps={setCellProps}
+              isExpandable={false}
+              isExpanded={false}
+            />
           </div>
           {tabularCopyMarkers.hiddenNoCopyBoundary}
         </>
