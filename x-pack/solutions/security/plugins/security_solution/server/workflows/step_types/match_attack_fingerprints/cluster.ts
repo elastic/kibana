@@ -48,6 +48,8 @@ export interface StoredFingerprint extends AttackMatchFields {
   id: string;
   investigationId: string;
   expiresAt?: string;
+  seqNo?: number;
+  primaryTerm?: number;
 }
 
 export interface InvestigationMeta {
@@ -172,19 +174,26 @@ const byTimeThenId = (left: AttackSignals, right: AttackSignals): number => {
 /**
  * Groups attacks from one worker run. The earliest attack in a group is canonical.
  * A phase joins when it continues any member of the group, so A then B then C chain
- * even when C is no longer close to A. Comparison uses `sameRun: true`, so a host
- * with no user can join inside this run.
+ * even when C is no longer close to A. An attack that matches more than one group
+ * merges those groups. Comparison uses `sameRun: true`, so a host with no user can
+ * join inside this run.
  */
 export const clusterNewAttacks = (attacks: readonly AttackSignals[]): AttackSignals[][] => {
   const groups: AttackSignals[][] = [];
   for (const attack of [...attacks].sort(byTimeThenId)) {
-    const group = groups.find((candidate) =>
-      candidate.some((member) => sameAttack(member, attack, true))
+    const hitIndexes = groups.flatMap((candidate, index) =>
+      candidate.some((member) => sameAttack(member, attack, true)) ? [index] : []
     );
-    if (group) {
-      group.push(attack);
-    } else {
+    if (hitIndexes.length === 0) {
       groups.push([attack]);
+    } else {
+      const [keep, ...rest] = hitIndexes;
+      const merged = [...groups[keep], ...rest.flatMap((index) => groups[index]), attack];
+      merged.sort(byTimeThenId);
+      groups[keep] = merged;
+      for (const index of [...rest].sort((left, right) => right - left)) {
+        groups.splice(index, 1);
+      }
     }
   }
   return groups;
@@ -301,10 +310,14 @@ export const journalAlertsRetired = (investigation: InvestigationMeta | undefine
 export const disposition = (
   canonical: AttackSignals,
   stored: StoredFingerprint | undefined,
-  investigation: InvestigationMeta | undefined
+  investigation: InvestigationMeta | undefined,
+  // Members of the same-run group. A match on any member stands: the union of their
+  // alerts can fall under the overlap ratio even though one phase already matched.
+  group: readonly AttackMatchFields[] = [canonical]
 ): Disposition => {
   const freshInvestigationId = investigationIdFromAttackId(canonical.attackId);
-  if (stored === undefined || !sameAttack(canonical, stored, false)) {
+  const matched = stored !== undefined && group.some((member) => sameAttack(member, stored, false));
+  if (!matched || stored === undefined) {
     return {
       kind: 'review',
       investigationId: freshInvestigationId,
@@ -316,7 +329,8 @@ export const disposition = (
 
   const closedFalsePositive =
     investigation?.status === 'closed' && investigation.closeReason === 'false_positive';
-  if (closedFalsePositive && !alertOverlap(canonical.alertIds, stored.alertIds)) {
+  const sharesAlerts = group.some((member) => alertOverlap(member.alertIds, stored.alertIds));
+  if (closedFalsePositive && !sharesAlerts) {
     return {
       kind: 'review_linked',
       investigationId: freshInvestigationId,

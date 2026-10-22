@@ -111,7 +111,10 @@ describe('matchAttackFingerprints', () => {
       expect.objectContaining({
         index: ATTACK_FINGERPRINT_INDEX,
         op_type: 'create',
-        document: expect.objectContaining({ content: expect.stringContaining('host:host-1') }),
+        document: expect.objectContaining({
+          content: expect.stringContaining('host:host-1'),
+          permissions: { kibana: { privileges: [{ space: 'default' }] } },
+        }),
       }),
       expect.anything()
     );
@@ -199,6 +202,62 @@ describe('matchAttackFingerprints', () => {
         index: ATTACK_FINGERPRINT_INDEX,
         id: 'stored-fp',
         doc: expect.objectContaining({ expires_at: '2026-10-22T10:30:00.000Z' }),
+      }),
+      expect.anything()
+    );
+  });
+
+  it('merges a fingerprint again after a version conflict', async () => {
+    const update = jest
+      .fn()
+      .mockRejectedValueOnce({ statusCode: 409, message: 'version_conflict_engine_exception' })
+      .mockResolvedValue({ result: 'updated' });
+    const get = jest.fn().mockResolvedValue({
+      _id: 'stored-fp',
+      _seq_no: 4,
+      _primary_term: 2,
+      _source: {
+        id: 'stored-fp',
+        expires_at: '2026-10-22T12:00:00.000Z',
+        attributes: {
+          investigation_id: '11111111-1111-8111-8111-111111111111',
+          alert_ids: ['a1', 'a2', 'kept'],
+          host_entity_ids: ['host-1'],
+          user_entity_ids: ['user-1'],
+          mitre_attack_tactics: ['TA0008'],
+          first_alert_at: '2026-10-21T04:00:00.000Z',
+          last_alert_at: '2026-10-21T04:30:00.000Z',
+        },
+      },
+    });
+    const { esClient, contextManager } = createHarness({
+      hits: [
+        {
+          ...fingerprintHit({ alert_ids: ['a1', 'a2'] }, '2026-10-21T05:00:00.000Z'),
+          _seq_no: 1,
+          _primary_term: 1,
+        },
+      ],
+      update,
+      get,
+    });
+
+    await matchAttackFingerprints({
+      attacks: [attackDocument(ATTACK_ID, ['r1', 'r2'])],
+      contextManager,
+      esClient,
+      logger,
+      now: new Date('2026-10-21T12:00:00.000Z'),
+      spaceId: 'default',
+    });
+
+    expect(update).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        if_seq_no: 4,
+        if_primary_term: 2,
+        doc: expect.objectContaining({
+          attributes: expect.objectContaining({ alert_ids: ['a1', 'a2', 'kept', 'r1', 'r2'] }),
+        }),
       }),
       expect.anything()
     );
@@ -305,6 +364,47 @@ describe('matchAttackFingerprints', () => {
     );
     expect(output.attachments).toEqual([]);
     expect(index).toHaveBeenCalledTimes(2);
+  });
+
+  it('queries every host when the run has more than one terms batch', async () => {
+    getAlertEntitiesMock.mockImplementation(async ({ alertIds }) => {
+      const host = `host-${alertIds[0]}`;
+      return {
+        entities: [
+          { id: host, name: host, type: 'host' },
+          { id: 'user-1', name: 'user-1', type: 'user' },
+        ],
+        total: 2,
+        truncated: false,
+      };
+    });
+    const { esClient, contextManager, search } = createHarness();
+    const attacks = Array.from({ length: 101 }, (_, index) =>
+      attackDocument(index.toString(16).padStart(64, '0'), [`alert-${index}`])
+    );
+
+    await matchAttackFingerprints({
+      attacks,
+      contextManager,
+      esClient,
+      logger,
+      now: new Date('2026-10-21T12:00:00.000Z'),
+      spaceId: 'default',
+    });
+
+    const hosts = search.mock.calls.flatMap((call) => {
+      const filters = (
+        call[0] as { query?: { bool?: { filter?: Array<Record<string, unknown>> } } }
+      ).query?.bool?.filter;
+      return (filters ?? []).flatMap(
+        (filter) =>
+          (filter.terms as { 'attributes.host_entity_ids'?: string[] } | undefined)?.[
+            'attributes.host_entity_ids'
+          ] ?? []
+      );
+    });
+
+    expect(hosts).toHaveLength(101);
   });
 
   it('writes the host name and the de-anonymized summary, and leaves the review anonymized', async () => {

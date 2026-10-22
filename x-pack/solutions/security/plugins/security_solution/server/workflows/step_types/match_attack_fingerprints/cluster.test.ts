@@ -9,6 +9,7 @@ import type { AttackSignals, StoredFingerprint } from './cluster';
 import {
   alertOverlap,
   bestStoredFingerprint,
+  chainSpan,
   clusterNewAttacks,
   disposition,
   entityMatch,
@@ -279,6 +280,43 @@ describe('clusterNewAttacks', () => {
     expect(clusterNewAttacks([repeat, first])).toHaveLength(1);
   });
 
+  it('merges every group a later attack matches', () => {
+    const at = '2026-10-21T10:00:00.000Z';
+    const left = attack({
+      attackId: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      alertIds: ['1', '2'],
+      hostEntityIds: [],
+      userEntityIds: [],
+      firstAlertAt: at,
+      lastAlertAt: at,
+    });
+    const right = attack({
+      attackId: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+      alertIds: ['3', '4'],
+      hostEntityIds: [],
+      userEntityIds: [],
+      firstAlertAt: at,
+      lastAlertAt: at,
+    });
+    const bridge = attack({
+      attackId: 'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
+      alertIds: ['1', '2', '3', '4'],
+      hostEntityIds: [],
+      userEntityIds: [],
+      firstAlertAt: at,
+      lastAlertAt: at,
+    });
+
+    const groups = clusterNewAttacks([right, bridge, left]);
+
+    expect(groups).toHaveLength(1);
+    expect(groups[0]?.map((member) => member.attackId)).toEqual([
+      left.attackId,
+      right.attackId,
+      bridge.attackId,
+    ]);
+  });
+
   it('returns separate groups when the next repeat is more than 24 hours later', () => {
     const first = attack({
       alertIds: ['a1', 'a2'],
@@ -358,6 +396,34 @@ describe('disposition', () => {
     );
 
     expect(decision.relatedInvestigationId).toBe('closed-fp');
+  });
+
+  it('keeps a stored match when the group union falls under the overlap ratio', () => {
+    const phase = attack({
+      alertIds: ['a', 'b'],
+      hostEntityIds: [],
+      userEntityIds: [],
+    });
+    const sibling = attack({
+      attackId: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+      alertIds: ['a', 'b', 'x', 'y', 'z'],
+      hostEntityIds: [],
+      userEntityIds: [],
+    });
+    const storedFingerprint = stored({
+      alertIds: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'],
+      hostEntityIds: ['other-host'],
+      userEntityIds: ['other-user'],
+    });
+
+    const decision = disposition(
+      chainSpan([phase, sibling]),
+      storedFingerprint,
+      { status: 'open', verdict: '' },
+      [phase, sibling]
+    );
+
+    expect(decision.kind).toBe('attach');
   });
 
   it('returns attach and tags an open in-analysis investigation', () => {

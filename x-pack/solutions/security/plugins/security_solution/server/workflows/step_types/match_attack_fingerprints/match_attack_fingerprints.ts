@@ -35,8 +35,10 @@ export const ATTACK_FINGERPRINT_TYPE = 'security.attack_fingerprint';
 export const ATTACK_FINGERPRINT_TAG = 'consumer:attack-discovery';
 
 const SEARCH_SIZE = 100;
+const SEARCH_PAGE_CAP = 20;
 const ENRICH_CONCURRENCY = 4;
 const TERMS_CAP = 100;
+const EXTEND_ATTEMPTS = 3;
 const CONTENT_MAX = 4000;
 
 export interface MatchReview {
@@ -242,6 +244,8 @@ const enrichAttack = async (
 
 const toStored = (hit: {
   _id?: string;
+  _seq_no?: number;
+  _primary_term?: number;
   _source?: Record<string, unknown>;
 }): StoredFingerprint | undefined => {
   const source = hit._source ?? {};
@@ -263,28 +267,41 @@ const toStored = (hit: {
     lastAlertAt:
       typeof attributes.last_alert_at === 'string' ? attributes.last_alert_at : undefined,
     expiresAt: typeof source.expires_at === 'string' ? source.expires_at : undefined,
+    seqNo: hit._seq_no,
+    primaryTerm: hit._primary_term,
   };
 };
 
-const attributeQuery = (spaceId: string, attacks: readonly AttackSignals[], now: string) => {
-  const hosts = uniqueSorted(attacks.flatMap((item) => item.hostEntityIds)).slice(0, TERMS_CAP);
-  const users = uniqueSorted(attacks.flatMap((item) => item.userEntityIds)).slice(0, TERMS_CAP);
-  const alertIds = uniqueSorted(attacks.flatMap((item) => item.alertIds)).slice(0, TERMS_CAP);
-  const should = [
-    ...(hosts.length > 0 ? [{ terms: { 'attributes.host_entity_ids': hosts } }] : []),
-    ...(users.length > 0 ? [{ terms: { 'attributes.user_entity_ids': users } }] : []),
-    ...(alertIds.length > 0 ? [{ terms: { 'attributes.alert_ids': alertIds } }] : []),
-  ];
-  return {
-    bool: {
-      filter: [
-        { term: { type: ATTACK_FINGERPRINT_TYPE } },
-        { term: { 'attributes.space_id': spaceId } },
-        { range: { expires_at: { gt: now } } },
-      ],
-      ...(should.length > 0 ? { should, minimum_should_match: 1 } : {}),
-    },
-  };
+const chunkTerms = (values: readonly string[]): string[][] => {
+  const chunks: string[][] = [];
+  for (let index = 0; index < values.length; index += TERMS_CAP) {
+    chunks.push(values.slice(index, index + TERMS_CAP));
+  }
+  return chunks;
+};
+
+const attributeQueries = (
+  spaceId: string,
+  attacks: readonly AttackSignals[],
+  now: string
+): QueryDslQueryContainer[] => {
+  const fields = [
+    ['attributes.host_entity_ids', uniqueSorted(attacks.flatMap((item) => item.hostEntityIds))],
+    ['attributes.user_entity_ids', uniqueSorted(attacks.flatMap((item) => item.userEntityIds))],
+    ['attributes.alert_ids', uniqueSorted(attacks.flatMap((item) => item.alertIds))],
+  ] as const;
+  return fields.flatMap(([field, values]) =>
+    chunkTerms(values).map((chunk) => ({
+      bool: {
+        filter: [
+          { term: { type: ATTACK_FINGERPRINT_TYPE } },
+          { term: { 'attributes.space_id': spaceId } },
+          { range: { expires_at: { gt: now } } },
+          { terms: { [field]: chunk } },
+        ],
+      },
+    }))
+  );
 };
 
 const searchFingerprints = async (
@@ -303,21 +320,41 @@ const searchFingerprints = async (
   }
 
   try {
-    const response = await esClient.search(
-      {
-        index: ATTACK_FINGERPRINT_INDEX,
-        ignore_unavailable: true,
-        size: SEARCH_SIZE,
-        sort: [{ expires_at: { order: 'desc' } }],
-        query: attributeQuery(spaceId, attacks, now),
-      },
-      { signal: abortSignal }
-    );
-    const stored = (response.hits?.hits ?? [])
-      .map((hit) => toStored(hit as { _id?: string; _source?: Record<string, unknown> }))
-      .filter((item): item is StoredFingerprint => item !== undefined);
-    if (stored.length > 0) {
-      return stored;
+    const byId = new Map<string, StoredFingerprint>();
+    for (const query of attributeQueries(spaceId, attacks, now)) {
+      let searchAfter: unknown[] | undefined;
+      for (let page = 0; page < SEARCH_PAGE_CAP; page++) {
+        const response = await esClient.search(
+          {
+            index: ATTACK_FINGERPRINT_INDEX,
+            ignore_unavailable: true,
+            seq_no_primary_term: true,
+            size: SEARCH_SIZE,
+            sort: [{ expires_at: { order: 'desc' } }, { id: { order: 'asc' } }],
+            ...(searchAfter === undefined ? {} : { search_after: searchAfter }),
+            query,
+          },
+          { signal: abortSignal }
+        );
+        const hits = response.hits?.hits ?? [];
+        for (const hit of hits) {
+          const stored = toStored(hit as { _id?: string; _source?: Record<string, unknown> });
+          if (stored !== undefined) {
+            byId.set(stored.id, stored);
+          }
+        }
+        if (hits.length < SEARCH_SIZE) {
+          break;
+        }
+        const sort = (hits[hits.length - 1] as { sort?: unknown[] }).sort;
+        if (sort === undefined) {
+          break;
+        }
+        searchAfter = sort;
+      }
+    }
+    if (byId.size > 0) {
+      return [...byId.values()];
     }
   } catch (error) {
     if (!isNotFoundError(error)) {
@@ -333,6 +370,7 @@ const searchFingerprints = async (
       {
         index: ATTACK_FINGERPRINT_INDEX,
         ignore_unavailable: true,
+        seq_no_primary_term: true,
         timeout: '2s',
         size: SEARCH_SIZE,
         query: {
@@ -390,6 +428,8 @@ const fingerprintDocument = (
     title: (attack.fingerprintTitle ?? attack.title).slice(0, 512),
     tags: [ATTACK_FINGERPRINT_TAG],
     expires_at: expiresAt,
+    // Context Engine shows a document with no privileges element in every space.
+    permissions: { kibana: { privileges: [{ space: spaceId }] } },
     ...(includeContent ? { content: signatureOf(attack) } : {}),
     attributes: {
       space_id: spaceId,
@@ -496,9 +536,67 @@ const createFingerprint = async (
   }
 };
 
+const extensionDoc = (current: StoredFingerprint, span: AttackSignals, now: Date) => {
+  const lastMs = span.lastAlertAt === undefined ? Number.NaN : Date.parse(span.lastAlertAt);
+  const expiresAt = new Date(
+    (Number.isNaN(lastMs) ? now.getTime() : lastMs) + FINGERPRINT_TTL_MS
+  ).toISOString();
+  const nextExpires =
+    current.expiresAt !== undefined && current.expiresAt > expiresAt
+      ? current.expiresAt
+      : expiresAt;
+  const firstAlertAt = [current.firstAlertAt, span.firstAlertAt]
+    .filter((value): value is string => value !== undefined && value.length > 0)
+    .sort()[0];
+  const lastAlertAt = [current.lastAlertAt, span.lastAlertAt]
+    .filter((value): value is string => value !== undefined && value.length > 0)
+    .sort()
+    .at(-1);
+  const alertIds = uniqueSorted([...current.alertIds, ...span.alertIds]);
+  return {
+    expires_at: nextExpires,
+    attributes: {
+      alert_ids: alertIds.slice(0, STORED_ALERT_ID_CAP),
+      alert_count: alertIds.length,
+      host_entity_ids: uniqueSorted([...current.hostEntityIds, ...span.hostEntityIds]).slice(
+        0,
+        STORED_ALERT_ID_CAP
+      ),
+      user_entity_ids: uniqueSorted([...current.userEntityIds, ...span.userEntityIds]).slice(
+        0,
+        STORED_ALERT_ID_CAP
+      ),
+      mitre_attack_tactics: uniqueSorted([...current.tactics, ...span.tactics]).slice(
+        0,
+        STORED_ALERT_ID_CAP
+      ),
+      first_alert_at: firstAlertAt ?? '',
+      last_alert_at: lastAlertAt ?? '',
+    },
+  };
+};
+
+const readStoredFingerprint = async (
+  esClient: ElasticsearchClient,
+  id: string,
+  abortSignal: AbortSignal | undefined
+): Promise<StoredFingerprint | undefined> => {
+  const response = await esClient.get(
+    { index: ATTACK_FINGERPRINT_INDEX, id },
+    { signal: abortSignal }
+  );
+  return toStored({
+    _id: response._id,
+    _seq_no: response._seq_no,
+    _primary_term: response._primary_term,
+    _source: response._source as Record<string, unknown> | undefined,
+  });
+};
+
 /**
  * Moves the chain window forward to the latest phase so a later continuation can
- * still find this fingerprint. A failed update still attaches the attack.
+ * still find this fingerprint. A conflicting update is re-read and merged again, so
+ * one extension cannot erase another. A failed update still attaches the attack.
  */
 const extendFingerprint = async (
   esClient: ElasticsearchClient,
@@ -509,54 +607,40 @@ const extendFingerprint = async (
   logger: StepHandlerContext['logger']
 ): Promise<void> => {
   const span = chainSpan(group);
-  const lastMs = span.lastAlertAt === undefined ? Number.NaN : Date.parse(span.lastAlertAt);
-  const expiresAt = new Date(
-    (Number.isNaN(lastMs) ? now.getTime() : lastMs) + FINGERPRINT_TTL_MS
-  ).toISOString();
-  const nextExpires =
-    stored.expiresAt !== undefined && stored.expiresAt > expiresAt ? stored.expiresAt : expiresAt;
-  const firstAlertAt = [stored.firstAlertAt, span.firstAlertAt]
-    .filter((value): value is string => value !== undefined && value.length > 0)
-    .sort()[0];
-  const lastAlertAt = [stored.lastAlertAt, span.lastAlertAt]
-    .filter((value): value is string => value !== undefined && value.length > 0)
-    .sort()
-    .at(-1);
-  const alertIds = uniqueSorted([...stored.alertIds, ...span.alertIds]);
-
-  try {
-    await esClient.update(
-      {
-        index: ATTACK_FINGERPRINT_INDEX,
-        id: stored.id,
-        doc: {
-          expires_at: nextExpires,
-          attributes: {
-            alert_ids: alertIds.slice(0, STORED_ALERT_ID_CAP),
-            alert_count: alertIds.length,
-            host_entity_ids: uniqueSorted([...stored.hostEntityIds, ...span.hostEntityIds]).slice(
-              0,
-              STORED_ALERT_ID_CAP
-            ),
-            user_entity_ids: uniqueSorted([...stored.userEntityIds, ...span.userEntityIds]).slice(
-              0,
-              STORED_ALERT_ID_CAP
-            ),
-            mitre_attack_tactics: uniqueSorted([...stored.tactics, ...span.tactics]).slice(
-              0,
-              STORED_ALERT_ID_CAP
-            ),
-            first_alert_at: firstAlertAt ?? '',
-            last_alert_at: lastAlertAt ?? '',
-          },
+  let current = stored;
+  for (let attempt = 0; attempt < EXTEND_ATTEMPTS; attempt++) {
+    try {
+      await esClient.update(
+        {
+          index: ATTACK_FINGERPRINT_INDEX,
+          id: current.id,
+          ...(current.seqNo !== undefined && current.primaryTerm !== undefined
+            ? { if_seq_no: current.seqNo, if_primary_term: current.primaryTerm }
+            : {}),
+          doc: extensionDoc(current, span, now),
         },
-      },
-      { signal: abortSignal }
-    );
-  } catch (error) {
-    logger.warn(
-      `Attack fingerprint extend failed for ${stored.investigationId}: ${errorText(error)}`
-    );
+        { signal: abortSignal }
+      );
+      return;
+    } catch (error) {
+      const canRetry = isConflict(error) && attempt < EXTEND_ATTEMPTS - 1;
+      if (!canRetry) {
+        logger.warn(
+          `Attack fingerprint extend failed for ${stored.investigationId}: ${errorText(error)}`
+        );
+        return;
+      }
+      const reread = await readStoredFingerprint(esClient, current.id, abortSignal).catch(
+        () => undefined
+      );
+      if (reread === undefined) {
+        logger.warn(
+          `Attack fingerprint extend failed for ${stored.investigationId}: ${errorText(error)}`
+        );
+        return;
+      }
+      current = reread;
+    }
   }
 };
 
@@ -610,14 +694,13 @@ const siblingAlertIds = (group: readonly AttackSignals[]): string[] => {
   const limit = MAX_ALERT_IDS - seen.size;
   for (const member of group.slice(1)) {
     for (const alertId of member.alertIds) {
-      if (seen.has(alertId)) {
-        continue;
+      if (!seen.has(alertId)) {
+        if (ids.length >= limit) {
+          return ids;
+        }
+        seen.add(alertId);
+        ids.push(alertId);
       }
-      if (ids.length >= limit) {
-        return ids;
-      }
-      seen.add(alertId);
-      ids.push(alertId);
     }
   }
   return ids;
@@ -727,7 +810,8 @@ export const matchAttackFingerprints = async ({
     let decision = disposition(
       span,
       match,
-      match === undefined ? undefined : investigations.get(match.investigationId)
+      match === undefined ? undefined : investigations.get(match.investigationId),
+      group
     );
 
     if (decision.kind === 'attach' && match !== undefined) {
