@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
 import type { ApiTarget } from '@kbn/agent-builder-common';
 import { apiSelectorsByTarget } from '@kbn/agent-builder-common/apis/known_apis';
-import { createAuthorNameSchema } from '../workflows/author_name_schema';
+import { authorNameSchema } from '../workflows/author_name_schema';
 import {
   CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
@@ -100,7 +100,7 @@ export const InputSchema = z.object({
     .string()
     .optional()
     .describe('Optional existing conversation ID to continue a previous conversation.'),
-  author_name: createAuthorNameSchema(),
+  author_name: authorNameSchema,
   /**
    * Optional arbitrary key-value tags stored with the underlying agent execution, searchable
    * via the execution service's findExecutions. Lets a caller that doesn't yet know the

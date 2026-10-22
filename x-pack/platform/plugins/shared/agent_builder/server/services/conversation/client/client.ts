@@ -17,6 +17,7 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   ConversationOrigin,
   ConversationRoundAuthor,
+  ConversationRoundAuthorDecoration,
   ConversationUpdatedTriggerEvent,
   ConversationWriteSource,
   FeedbackChipId,
@@ -234,7 +235,7 @@ export interface ConversationClient {
   getUser(): CurrentUser;
   getAuthor(
     originAuthor?: ConversationRoundAuthor,
-    decoration?: Pick<ConversationRoundAuthor, 'full_name'>
+    decoration?: ConversationRoundAuthorDecoration
   ): ConversationRoundAuthor | undefined;
 }
 
@@ -1571,7 +1572,7 @@ class ConversationClientImpl implements ConversationClient {
 
   getAuthor(
     originAuthor?: ConversationRoundAuthor,
-    decoration?: Pick<ConversationRoundAuthor, 'full_name'>
+    decoration?: ConversationRoundAuthorDecoration
   ): ConversationRoundAuthor | undefined {
     if (originAuthor) {
       return originAuthor;

@@ -605,6 +605,9 @@ export interface ConversationRoundAuthor {
   type?: UserPrincipalType;
 }
 
+/** The display-only part of an author a writer may supply. */
+export type ConversationRoundAuthorDecoration = Pick<ConversationRoundAuthor, 'full_name'>;
+
 export const getConversationRoundAuthorDisplayName = (
   author?: Pick<ConversationRoundAuthor, 'id' | 'username' | 'full_name'>
 ): string | undefined => {

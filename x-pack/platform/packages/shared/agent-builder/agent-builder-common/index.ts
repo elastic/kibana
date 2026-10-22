@@ -262,6 +262,7 @@ export {
   type Conversation,
   type ConversationOrigin,
   type ConversationRoundAuthor,
+  type ConversationRoundAuthorDecoration,
   type ConversationRoundOrigin,
   type ConversationWithoutRounds,
   type ConversationAttachmentSummary,

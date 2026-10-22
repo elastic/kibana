@@ -53,6 +53,7 @@ export {
   type Conversation,
   type ConversationOrigin,
   type ConversationRoundAuthor,
+  type ConversationRoundAuthorDecoration,
   type ConversationRoundOrigin,
   type ConversationInternalState,
   type TodoItem,

@@ -10,7 +10,7 @@ import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
 import { CONVERSATION_ID_MAX_LENGTH } from '@kbn/agent-builder-common';
-import { createAuthorNameSchema } from '../author_name_schema';
+import { authorNameSchema } from '../author_name_schema';
 
 export const AddUserMessageStepTypeId = 'ai.conversation.add_user_message';
 
@@ -22,7 +22,7 @@ const InputSchema = z.object({
     .string()
     .refine((value) => value.trim().length > 0, { message: 'message must not be blank' })
     .meta({ description: 'The user message text.' }),
-  author_name: createAuthorNameSchema(),
+  author_name: authorNameSchema,
 });
 
 const OutputSchema = z.object({
@@ -51,7 +51,7 @@ export const addUserMessageStepCommonDefinition: CommonStepDefinition<
       'xpack.agentBuilder.workflowSteps.addUserMessage.documentation.details',
       {
         defaultMessage:
-          'Adds a user message to an existing conversation without running the agent. The message becomes part of the conversation context, so the agent reads it the next time it runs on that conversation, for example from a later `ai.agent` step. The conversation must already exist; create one first with `ai.conversation.create` when needed. To add attachments to the conversation, use `ai.attachment.add`. When the workflow runs as a service account, set `author_name` so the message shows a readable writer name instead of the account id.',
+          'Adds a user message to an existing conversation without running the agent. The message becomes part of the conversation context, so the agent reads it the next time it runs on that conversation, for example from a later `ai.agent` step. The conversation must already exist; create one first with `ai.conversation.create` when needed. To add attachments to the conversation, use `ai.attachment.add`.',
       }
     ),
     examples: [

@@ -17,6 +17,7 @@ import type {
   ConversationRoundOrigin,
   ConversationOrigin,
   ConversationRoundAuthor,
+  ConversationRoundAuthorDecoration,
   ExecutionStatus,
   InteractivityConfig,
   InteractivityConfigInput,
@@ -111,7 +112,7 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
    * principal is a service account, which has no display name on any backend; silently dropped
    * for interactive users. Never affects the actor's `id`, `username` or `type`.
    */
-  author?: Pick<ConversationRoundAuthor, 'full_name'>;
+  author?: ConversationRoundAuthorDecoration;
   /** Callback delivery configuration for this execution. */
   callback?: {
     /** URL to deliver the execution result to. */
