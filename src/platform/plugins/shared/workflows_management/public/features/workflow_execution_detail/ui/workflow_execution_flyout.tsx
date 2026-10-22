@@ -83,7 +83,6 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       [setSelectedStepExecution]
     );
     const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
-    const waitingResume = useWaitingStepResume(executionId, workflowExecution);
     const {
       waitingStepExecutionId,
       waitingStepStartedAt,
@@ -92,7 +91,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       approvalLabels,
       hasResumeError,
       retryResume,
-    } = waitingResume;
+    } = useWaitingStepResume(executionId, workflowExecution);
     const resumeSubmitState = useResumeSubmitState(executionId, waitingStepExecutionId);
 
     const {
@@ -159,8 +158,6 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
               executionId={executionId}
               workflowExecution={workflowExecution}
               childExecutions={childExecutions}
-              waitingResume={waitingResume}
-              resumeSubmitState={resumeSubmitState}
               onSelectStep={setSelectedStepExecutionId}
             />
           )}
