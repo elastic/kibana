@@ -64,6 +64,11 @@ export function CreateDatasetDetailsFields({
     },
   });
 
+  const { field: createdDataSourceNamesField } = useController({
+    name: 'ui.createdDataSourceNames',
+    control,
+  });
+
   const { field: resourceField, fieldState: resourceFieldState } = useController({
     name: 'resource',
     control,
@@ -87,6 +92,10 @@ export function CreateDatasetDetailsFields({
           onChange={dataSourceIdField.onChange}
           onBlur={dataSourceIdField.onBlur}
           loadDataSources={loadDataSources}
+          createdDataSourceNames={createdDataSourceNamesField.value}
+          onDataSourceCreated={(name) =>
+            createdDataSourceNamesField.onChange([...createdDataSourceNamesField.value, name])
+          }
         />
       </EuiFormRow>
       <EuiFormRow
