@@ -31,6 +31,8 @@ const setup = ({
   runAs = AGENT_ACCOUNT,
   enabled = true,
   installError,
+  /** Entry points of other spaces, as the deployment-wide reuse lookup sees them. */
+  installedStates,
 }: {
   serviceAccountsEnabled?: boolean;
   canManageSecurity?: boolean;
@@ -39,6 +41,7 @@ const setup = ({
   runAs?: string;
   enabled?: boolean;
   installError?: Error;
+  installedStates?: Array<{ definitionId: string; templateValues: Record<string, unknown> | null }>;
 } = {}) => {
   const esClient = {
     security: {
@@ -85,6 +88,19 @@ const setup = ({
     },
     documentVersion: 1,
   }));
+  const listInstalledWorkflowStates = jest.fn(async () =>
+    (
+      installedStates ?? [
+        {
+          definitionId: NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
+          templateValues: {
+            serviceAccountId: AGENT_ACCOUNT,
+            automationsServiceAccountId: AUTOMATIONS_ACCOUNT,
+          },
+        },
+      ]
+    ).map((installed) => ({ workflowId: 'wf', spaceId: 'other', documentVersion: 1, ...installed }))
+  );
   const getSpace = spaceExists
     ? jest.fn().mockResolvedValue({ id: SPACE_ID })
     : jest.fn().mockRejectedValue(Boom.notFound());
@@ -97,11 +113,20 @@ const setup = ({
     workflowsExtensions,
     workflowsManagement,
     getInstalledWorkflowState,
+    listInstalledWorkflowStates,
     spaces,
     isServerless,
     logger: loggingSystemMock.createLogger(),
   });
-  return { service, esClient, serviceAccounts, managedWorkflows, getWorkflow, updateWorkflow };
+  return {
+    service,
+    esClient,
+    serviceAccounts,
+    managedWorkflows,
+    getWorkflow,
+    updateWorkflow,
+    listInstalledWorkflowStates,
+  };
 };
 
 describe('createInvestigatorServiceAccountService', () => {
@@ -146,6 +171,33 @@ describe('createInvestigatorServiceAccountService', () => {
     ]);
     expect(status.boundWorkflows).toHaveLength(BOUND_WORKFLOW_IDS.length);
     expect(status.boundWorkflows.every(({ bound }) => bound)).toBe(true);
+  });
+
+  it('reuses the accounts another space is set up with, when the caller names none', async () => {
+    const { service, managedWorkflows } = setup();
+
+    await expect(service.enable(request, SPACE_ID)).resolves.toMatchObject({ bound: true });
+    expect(managedWorkflows.install.mock.calls[0][2]).toMatchObject({
+      values: expect.objectContaining({ serviceAccountId: AGENT_ACCOUNT }),
+    });
+  });
+
+  it('reports the accounts of the deployment, so the caller can reuse them', async () => {
+    await expect(setup().service.getStatus(request, SPACE_ID)).resolves.toMatchObject({
+      knownServiceAccountIds: { agent: AGENT_ACCOUNT, automations: AUTOMATIONS_ACCOUNT },
+    });
+    await expect(
+      setup({ installedStates: [] }).service.getStatus(request, SPACE_ID)
+    ).resolves.toMatchObject({ knownServiceAccountIds: null });
+  });
+
+  it('refuses a first setup that names no accounts', async () => {
+    const { service, managedWorkflows } = setup({ installedStates: [] });
+
+    await expect(service.enable(request, SPACE_ID)).rejects.toMatchObject({
+      output: { statusCode: 400 },
+    });
+    expect(managedWorkflows.install).not.toHaveBeenCalled();
   });
 
   it('installs the entry point last, so a failed setup leaves the space reading as not set up', () => {
