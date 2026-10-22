@@ -360,10 +360,10 @@ describe('disposition', () => {
     expect(decision.relatedInvestigationId).toBe('closed-fp');
   });
 
-  it('returns attach without tagging an open in-analysis investigation', () => {
+  it('returns attach and tags an open in-analysis investigation', () => {
     const decision = disposition(canonical, stored(), { status: 'open', verdict: 'In analysis' });
 
-    expect(decision.tagCorrelatedAlerts).toBe(false);
+    expect(decision.tagCorrelatedAlerts).toBe(true);
   });
 
   it('returns attach and tags a handed-off investigation', () => {

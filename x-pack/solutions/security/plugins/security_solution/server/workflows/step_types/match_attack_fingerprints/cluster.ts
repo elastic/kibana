@@ -274,14 +274,16 @@ export const fingerprintId = (spaceId: string, attack: AttackSignals): string =>
   return createHash('sha256').update(material).digest('hex');
 };
 
+/**
+ * A later run that joins an existing Investigation tags its alerts, including while
+ * that Investigation is still open. A closed false positive stays untagged, and so
+ * does an Investigation this run could not read.
+ */
 export const tagCorrelatedAlerts = (investigation: InvestigationMeta | undefined): boolean => {
   if (investigation === undefined) {
     return false;
   }
-  if ((investigation.verdict ?? '').includes(HANDED_OFF_VERDICT)) {
-    return true;
-  }
-  return investigation.status === 'closed' && investigation.closeReason !== 'false_positive';
+  return !(investigation.status === 'closed' && investigation.closeReason === 'false_positive');
 };
 
 /**

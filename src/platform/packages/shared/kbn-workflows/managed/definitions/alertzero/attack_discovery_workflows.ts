@@ -36,15 +36,18 @@ export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID =
 
 /**
  * Version 6 clusters attacks before the review fan-out and attaches a duplicate
- * to the Investigation that already describes it. The YAML change rolls out
- * through `definitionHash`; the bump is the deliberate signal.
+ * to the Investigation that already describes it.
+ *
+ * Version 7 passes the detection alert ids of those same-run attacks to the
+ * review, which tags them with its own when the verdict escalates. The YAML
+ * change rolls out through `definitionHash`; the bump is the deliberate signal.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 6,
+  version: 7,
   yaml: ATTACK_DISCOVERY_RUNNER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -64,13 +67,16 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
  *
  * Version 11 journals `related_investigation_id` when a closed false positive
  * matched on entities only, so the new review links back to it.
+ *
+ * Version 12 tags and acknowledges `sibling_alert_ids` with the review's own
+ * alerts when the verdict escalates, so a later run skips the whole batch.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 11,
+  version: 12,
   yaml: ATTACK_DISCOVERY_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

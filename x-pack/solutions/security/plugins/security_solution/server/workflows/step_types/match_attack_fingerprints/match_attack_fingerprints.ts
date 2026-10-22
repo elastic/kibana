@@ -45,6 +45,7 @@ export interface MatchReview {
   alert_ids: string[];
   summary_markdown: string;
   related_investigation_id: string;
+  sibling_alert_ids: string[];
 }
 
 export interface MatchAttachment {
@@ -588,13 +589,39 @@ const readInvestigation = async (
   }
 };
 
-const reviewOf = (attack: AttackSignals, relatedInvestigationId: string): MatchReview => ({
+const reviewOf = (
+  attack: AttackSignals,
+  relatedInvestigationId: string,
+  siblingIds: readonly string[]
+): MatchReview => ({
   attack_discovery_id: attack.attackId.slice(0, 512),
   title: attack.title.slice(0, 1024),
   alert_ids: attack.alertIds.slice(0, MAX_ALERT_IDS),
   summary_markdown: attack.summaryMarkdown.slice(0, 8000),
   related_investigation_id: relatedInvestigationId.slice(0, 256),
+  sibling_alert_ids: siblingIds.slice(0, MAX_ALERT_IDS),
 });
+
+// Alert ids the later attacks add. The review tags these with its own when the
+// verdict escalates, and the combined list stays within one tag write.
+const siblingAlertIds = (group: readonly AttackSignals[]): string[] => {
+  const seen = new Set(group[0]?.alertIds.slice(0, MAX_ALERT_IDS) ?? []);
+  const ids: string[] = [];
+  const limit = MAX_ALERT_IDS - seen.size;
+  for (const member of group.slice(1)) {
+    for (const alertId of member.alertIds) {
+      if (seen.has(alertId)) {
+        continue;
+      }
+      if (ids.length >= limit) {
+        return ids;
+      }
+      seen.add(alertId);
+      ids.push(alertId);
+    }
+  }
+  return ids;
+};
 
 const attachmentOf = (
   attack: AttackSignals,
@@ -631,7 +658,9 @@ const applyDecision = (
     return;
   }
 
-  reviews.push(reviewOf(group[0], decision.relatedInvestigationId));
+  // The review tags the later attacks' alerts with its own when the verdict
+  // escalates. A false positive leaves the whole batch untagged.
+  reviews.push(reviewOf(group[0], decision.relatedInvestigationId, siblingAlertIds(group)));
   for (const member of group.slice(1)) {
     attachments.push(attachmentOf(member, decision.investigationId, false, false));
   }

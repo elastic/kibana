@@ -105,6 +105,7 @@ describe('matchAttackFingerprints', () => {
     });
 
     expect(output.reviews.map((review) => review.attack_discovery_id)).toEqual([ATTACK_ID]);
+    expect(output.reviews[0]?.sibling_alert_ids).toEqual([]);
     expect(output.attachments).toEqual([]);
     expect(index).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -165,6 +166,7 @@ describe('matchAttackFingerprints', () => {
     });
 
     expect(output.attachments[0]?.investigation_id).toBe('11111111-1111-8111-8111-111111111111');
+    expect(output.attachments[0]?.tag_correlated_alerts).toBe(true);
     expect(output.reviews).toEqual([]);
     expect(index).not.toHaveBeenCalled();
   });
@@ -238,6 +240,7 @@ describe('matchAttackFingerprints', () => {
     });
 
     expect(output.reviews.map((review) => review.attack_discovery_id)).toEqual([ATTACK_ID]);
+    expect(output.reviews[0]?.sibling_alert_ids).toEqual(['a3']);
     expect(output.attachments[0]?.journal_alerts_retired).toBe(false);
     expect(output.attachments[0]?.tag_correlated_alerts).toBe(false);
     expect(index).toHaveBeenCalledTimes(1);

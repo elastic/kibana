@@ -279,6 +279,10 @@ steps:
                 # Set when this attack shares entities with a closed false-positive
                 # Investigation and does not share its alerts. Empty otherwise.
                 related_investigation_id: "{{ foreach.item.related_investigation_id }}"
+                # Detection alerts on the same-run attacks attached to this
+                # Investigation. The review tags them with its own when the verdict
+                # escalates.
+                sibling_alert_ids: "${{ foreach.item.sibling_alert_ids }}"
                 # `${{ }}` so the editor does not type-check the template source
                 # against the child's enum.
                 autonomy: "${{ inputs.autonomy }}"

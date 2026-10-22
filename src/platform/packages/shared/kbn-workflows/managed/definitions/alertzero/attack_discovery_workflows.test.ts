@@ -539,6 +539,7 @@ describe('Attack Discovery worker chain', () => {
         alert_ids: ['alert-1', 'alert-2'],
         summary_markdown: 'A **summary**',
         related_investigation_id: '',
+        sibling_alert_ids: ['alert-3'],
       };
 
       const render = (template: unknown) =>
@@ -557,6 +558,7 @@ describe('Attack Discovery worker chain', () => {
       it.each([
         ['title', 'Suspicious lateral movement'],
         ['alert_ids', '["alert-1","alert-2"]'],
+        ['sibling_alert_ids', '["alert-3"]'],
         ['summary_markdown', 'A **summary**'],
         ['attack_discovery_id', 'attack-hash-1'],
       ])('resolves %s against a persisted attack document', async (field, expected) => {
@@ -2177,7 +2179,9 @@ describe('Attack Discovery worker chain', () => {
         unknown
       >;
 
-      expect(tagStep.alert_ids).toBe('${{ inputs.alert_ids }}');
+      expect(tagStep.alert_ids).toBe(
+        '${{ inputs.alert_ids | concat: inputs.sibling_alert_ids }}'
+      );
       expect(tagStep.tags_to_add).toEqual(['{{ consts.ad_correlated_tag }}']);
       expect(tagStep.tags_to_remove).toBeUndefined();
     });
@@ -2197,7 +2201,7 @@ describe('Attack Discovery worker chain', () => {
 
       it('targets exactly the correlated alerts', () => {
         expect(queryFilters('acknowledge_correlated_alerts')).toContainEqual({
-          ids: { values: '${{ inputs.alert_ids }}' },
+          ids: { values: '${{ inputs.alert_ids | concat: inputs.sibling_alert_ids }}' },
         });
       });
 
@@ -2226,7 +2230,9 @@ describe('Attack Discovery worker chain', () => {
 
       it('reads back exactly the correlated alerts', () => {
         expect(asWith(verify).index).toBe('.alerts-security.alerts-{{ workflow.spaceId }}');
-        expect(verify?.with?.query).toEqual({ ids: { values: '${{ inputs.alert_ids }}' } });
+        expect(verify?.with?.query).toEqual({
+          ids: { values: '${{ inputs.alert_ids | concat: inputs.sibling_alert_ids }}' },
+        });
       });
 
       it.each([
@@ -2264,6 +2270,14 @@ describe('Attack Discovery worker chain', () => {
         ['closed', 1],
       ])('resolves %s from the read-back', (field, value) => {
         expect(evaluateResolved(field, readBack)).toBe(value);
+      });
+
+      it('counts the sibling attacks in the retirement', () => {
+        expect(
+          evaluateResolved('requested', {
+            inputs: { alert_ids: ['a', 'b'], sibling_alert_ids: ['c'] },
+          })
+        ).toBe(3);
       });
 
       it('marks a failed read-back as unread', () => {
@@ -3499,12 +3513,12 @@ describe('Attack Discovery worker chain', () => {
 
     describe('managed versions', () => {
       // Fixed `yaml` definitions roll out through the hash; the bump is the signal.
-      it('bumps the runner to version 6 for fingerprint matching', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(6);
+      it('bumps the runner to version 7 so the review receives sibling alert ids', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(7);
       });
 
-      it('bumps the review to version 11 for the related-investigation journal', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(11);
+      it('bumps the review to version 12 so it tags the sibling alerts', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(12);
       });
     });
 
