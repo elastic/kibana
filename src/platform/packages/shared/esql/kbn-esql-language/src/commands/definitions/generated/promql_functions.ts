@@ -331,7 +331,7 @@ const ceilDefinition: PromQLFunctionDefinition = {
 const changesDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'changes',
-  description: i18n.translate('kbn-esql-language.promql.definitions.changes', {
+  description: i18n.translate('esqlLanguage.promql.definitions.changes', {
     defaultMessage:
       'Returns the number of times the value changed in each time series in a range vector.',
   }),
@@ -1770,7 +1770,7 @@ const sinhDefinition: PromQLFunctionDefinition = {
 const sortDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.RESULT_ORDERING,
   name: 'sort',
-  description: i18n.translate('kbn-esql-language.promql.definitions.sort', {
+  description: i18n.translate('esqlLanguage.promql.definitions.sort', {
     defaultMessage:
       'Sorts instant-vector series by sample value in ascending order. NaN values are sorted last. Ordering is observable only on instant queries. Range queries return the series in their input order, without applying the requested ordering.',
   }),
@@ -1796,7 +1796,7 @@ const sortDefinition: PromQLFunctionDefinition = {
 const sortDescDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.RESULT_ORDERING,
   name: 'sort_desc',
-  description: i18n.translate('kbn-esql-language.promql.definitions.sort_desc', {
+  description: i18n.translate('esqlLanguage.promql.definitions.sort_desc', {
     defaultMessage:
       'Sorts instant-vector series by sample value in descending order. NaN values are sorted last. Ordering is observable only on instant queries. Range queries return the series in their input order, without applying the requested ordering.',
   }),
