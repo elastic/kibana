@@ -46899,10 +46899,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 1000000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -47049,10 +47051,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 1000000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -47164,10 +47168,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 1000000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -47278,10 +47284,12 @@ paths:
                   anyOf:
                     - items:
                         description: List of collector agent IDs
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
                     - description: KQL query string. Leave empty to target all collectors
+                      maxLength: 1000000
                       type: string
                 dryRun:
                   type: boolean
@@ -47397,10 +47405,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 1000000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -47602,10 +47612,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 1000000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -47717,10 +47729,12 @@ paths:
                   anyOf:
                     - items:
                         description: list of agent IDs
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
                     - description: KQL query string, leave empty to action all agents
+                      maxLength: 1000000
                       type: string
                 batchSize:
                   type: number
@@ -47838,10 +47852,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 1000000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -47960,10 +47976,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 1000000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
