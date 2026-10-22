@@ -12,5 +12,7 @@ describe('matchesIndexPattern', () => {
     expect(matchesIndexPattern('logs-app-default', 'logs-app-default')).toBe(true);
     expect(matchesIndexPattern('logs-nginx-default', 'logs-*-*')).toBe(true);
     expect(matchesIndexPattern('metrics-app-default', 'logs-*-*')).toBe(false);
+    expect(matchesIndexPattern('logs-a-default', 'logs-?-default')).toBe(true);
+    expect(matchesIndexPattern('logs-ab-default', 'logs-?-default')).toBe(false);
   });
 });

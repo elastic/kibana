@@ -67,9 +67,12 @@ export const interpretDestinationApiKeyPrivileges = ({
 export const isOwnedByDestination = ({
   metadata,
   destinationId,
+  unitId,
 }: {
   metadata: Record<string, unknown> | undefined;
   destinationId: string;
+  unitId?: string;
 }): boolean =>
   metadata?.managed_by === STREAMS_DESTINATIONS_MANAGED_BY &&
-  metadata?.streams_destination_id === destinationId;
+  metadata?.streams_destination_id === destinationId &&
+  (unitId === undefined || metadata?.streams_unit_id === unitId);

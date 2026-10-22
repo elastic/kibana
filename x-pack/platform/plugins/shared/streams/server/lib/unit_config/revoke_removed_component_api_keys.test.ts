@@ -73,8 +73,39 @@ describe('revokeRemovedComponentApiKeys', () => {
     });
 
     expect(queryApiKeys).toHaveBeenCalledTimes(2);
+    expect(queryApiKeys.mock.calls[0][0].query.bool.filter).toEqual(
+      expect.arrayContaining([{ term: { 'metadata.streams_destination_id': 'dest-gone' } }])
+    );
+    expect(queryApiKeys.mock.calls[1][0].query.bool.filter).toEqual(
+      expect.arrayContaining([
+        { term: { 'metadata.source_id': 'src-gone' } },
+        { term: { 'metadata.streams_unit_id': 'default' } },
+      ])
+    );
     expect(invalidateApiKey).toHaveBeenCalledWith({ ids: ['dest-key', 'src-key'] });
     expect(result).toEqual({ apiKeysMayRemain: false });
+  });
+
+  it('looks up multiple removed destination ids in one terms query', async () => {
+    const { client, queryApiKeys, invalidateApiKey } = createClient();
+    queryApiKeys.mockResolvedValueOnce({ api_keys: [{ id: 'dest-a-key' }, { id: 'dest-b-key' }] });
+
+    await revokeRemovedComponentApiKeys({
+      client: client as never,
+      logger: { error: jest.fn() } as never,
+      isSecurityEnabled: true,
+      previousUnit: unit([], [{ id: 'dest-keep' }, { id: 'dest-a' }, { id: 'dest-b' }]),
+      nextUnit: unit([], [{ id: 'dest-keep' }]),
+      unitId: 'default',
+    });
+
+    expect(queryApiKeys).toHaveBeenCalledTimes(1);
+    expect(queryApiKeys.mock.calls[0][0].query.bool.filter).toEqual(
+      expect.arrayContaining([
+        { terms: { 'metadata.streams_destination_id': ['dest-a', 'dest-b'] } },
+      ])
+    );
+    expect(invalidateApiKey).toHaveBeenCalledWith({ ids: ['dest-a-key', 'dest-b-key'] });
   });
 
   it('reports that keys may remain when the user can only manage their own API keys', async () => {

@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { STREAMS_DEFAULT_UNIT_ID } from '../../../common/constants';
 import { STREAMS_DESTINATIONS_MANAGED_BY } from '../../routes/internal/streams/destinations/helpers';
 import { STREAMS_SOURCES_MANAGED_BY } from '../../routes/internal/streams/sources/helpers';
 
@@ -57,51 +58,56 @@ export const invalidateApiKeyIds = async ({
   return { invalidatedApiKeys, errorCount };
 };
 
-const componentFilter = ({
-  managedBy,
-  metadataField,
-  componentId,
-}: {
-  managedBy: string;
-  metadataField: string;
-  componentId: string;
-}): QueryDslQueryContainer[] => [
-  { term: { 'metadata.managed_by': managedBy } },
-  { term: { [`metadata.${metadataField}`]: componentId } },
-  { term: { invalidated: false } },
-];
+const idTermsFilter = (field: string, ids: string[]): QueryDslQueryContainer =>
+  ids.length === 1 ? { term: { [field]: ids[0] } } : { terms: { [field]: ids } };
 
 export const findDestinationApiKeyIds = async ({
   client,
-  destinationId,
+  destinationIds,
+  unitId = STREAMS_DEFAULT_UNIT_ID,
 }: {
   client: ElasticsearchClient;
-  destinationId: string;
-}): Promise<string[]> =>
-  queryManagedApiKeyIds({
+  destinationIds: string[];
+  unitId?: string;
+}): Promise<string[]> => {
+  if (destinationIds.length === 0) {
+    return [];
+  }
+
+  return queryManagedApiKeyIds({
     client,
-    filter: componentFilter({
-      managedBy: STREAMS_DESTINATIONS_MANAGED_BY,
-      metadataField: 'streams_destination_id',
-      componentId: destinationId,
-    }),
+    filter: [
+      { term: { 'metadata.managed_by': STREAMS_DESTINATIONS_MANAGED_BY } },
+      idTermsFilter('metadata.streams_destination_id', destinationIds),
+      { term: { invalidated: false } },
+      { term: { 'metadata.streams_unit_id': unitId } },
+    ],
   });
+};
 
 export const findSourceApiKeyIds = async ({
   client,
-  sourceId,
+  sourceIds,
+  unitId = STREAMS_DEFAULT_UNIT_ID,
 }: {
   client: ElasticsearchClient;
-  sourceId: string;
-}): Promise<string[]> =>
-  queryManagedApiKeyIds({
+  sourceIds: string[];
+  unitId?: string;
+}): Promise<string[]> => {
+  if (sourceIds.length === 0) {
+    return [];
+  }
+
+  return queryManagedApiKeyIds({
     client,
-    filter: componentFilter({
-      managedBy: STREAMS_SOURCES_MANAGED_BY,
-      metadataField: 'source_id',
-      componentId: sourceId,
-    }),
+    filter: [
+      { term: { 'metadata.managed_by': STREAMS_SOURCES_MANAGED_BY } },
+      idTermsFilter('metadata.source_id', sourceIds),
+      { term: { invalidated: false } },
+      { term: { 'metadata.streams_unit_id': unitId } },
+    ],
   });
+};
 
 /**
  * Invalidates the API keys of removed sources and destinations, found by their key metadata.
@@ -118,11 +124,13 @@ export const revokeComponentApiKeys = async ({
   logger,
   sourceIds,
   destinationIds,
+  unitId = STREAMS_DEFAULT_UNIT_ID,
 }: {
   client: ElasticsearchClient;
   logger: Logger;
   sourceIds: string[];
   destinationIds: string[];
+  unitId?: string;
 }): Promise<{ apiKeysMayRemain: boolean }> => {
   try {
     const { cluster } = await client.security.hasPrivileges({
@@ -133,11 +141,11 @@ export const revokeComponentApiKeys = async ({
       return { apiKeysMayRemain: true };
     }
 
-    const keyIds = await Promise.all([
-      ...destinationIds.map((destinationId) => findDestinationApiKeyIds({ client, destinationId })),
-      ...sourceIds.map((sourceId) => findSourceApiKeyIds({ client, sourceId })),
+    const [destinationKeyIds, sourceKeyIds] = await Promise.all([
+      findDestinationApiKeyIds({ client, destinationIds, unitId }),
+      findSourceApiKeyIds({ client, sourceIds, unitId }),
     ]);
-    const ids = keyIds.flat();
+    const ids = [...destinationKeyIds, ...sourceKeyIds];
     if (ids.length === 0) {
       return { apiKeysMayRemain: !canManageAllApiKeys };
     }

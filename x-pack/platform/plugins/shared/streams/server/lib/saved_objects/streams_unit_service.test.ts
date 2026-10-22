@@ -171,13 +171,25 @@ describe('StreamsUnitService', () => {
     expect(soClient.get).toHaveBeenCalledWith('streams-ui-metadata', 'default-streams-ui-metadata');
   });
 
-  it('returns an empty unit when the unit does not exist', async () => {
+  it('throws when the unit does not exist', async () => {
     const soClient = createSoClient();
     soClient.get.mockRejectedValue(notFoundError);
 
     const service = createService({ soClient });
 
-    await expect(service.getUnit('default')).resolves.toEqual({
+    await expect(service.getUnit('default')).rejects.toMatchObject({
+      statusCode: 404,
+      message: 'Streams unit [default] not found.',
+    });
+  });
+
+  it('returns an empty unit from getUnitOrEmpty when the unit does not exist', async () => {
+    const soClient = createSoClient();
+    soClient.get.mockRejectedValue(notFoundError);
+
+    const service = createService({ soClient });
+
+    await expect(service.getUnitOrEmpty('default')).resolves.toEqual({
       unit: { sources: [], destinations: [], pipelines: [] },
       ui_metadata: {},
     });

@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useActorRef, useSelector } from '@xstate/react';
 import { i18n } from '@kbn/i18n';
-import type { ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
+import { STREAMS_DEFAULT_UNIT_ID, type ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
 import { createUnitRepository } from '../../../services/unit_repository';
 import { canSubmitDestinationForm } from './destination_form';
@@ -118,7 +118,10 @@ export const useDestinationsTable = (): DestinationsTableController => {
   const tableActorRef = useActorRef(destinationsTableStateMachine, {
     input: {
       toasts,
-      apiKeyGenerationDeps: { streamsRepositoryClient: streams.streamsRepositoryClient },
+      apiKeyGenerationDeps: {
+        streamsRepositoryClient: streams.streamsRepositoryClient,
+        unitId: STREAMS_DEFAULT_UNIT_ID,
+      },
       loadUnitDefinition: unitDefinitionRepository.load,
       persistUnitDefinition: unitDefinitionRepository.persist,
     },

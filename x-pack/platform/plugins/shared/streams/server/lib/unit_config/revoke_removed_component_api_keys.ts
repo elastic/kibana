@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { STREAMS_DEFAULT_UNIT_ID } from '../../../common/constants';
 import { revokeComponentApiKeys } from './managed_api_keys';
 
 interface UnitComponentIds {
@@ -30,12 +31,14 @@ export const revokeRemovedComponentApiKeys = async ({
   isSecurityEnabled,
   previousUnit,
   nextUnit,
+  unitId = STREAMS_DEFAULT_UNIT_ID,
 }: {
   client: ElasticsearchClient;
   logger: Logger;
   isSecurityEnabled: boolean;
   previousUnit?: UnitComponentIds;
   nextUnit: UnitComponentIds;
+  unitId?: string;
 }): Promise<{ apiKeysMayRemain: boolean }> => {
   if (!isSecurityEnabled || !previousUnit) {
     return { apiKeysMayRemain: false };
@@ -56,5 +59,6 @@ export const revokeRemovedComponentApiKeys = async ({
     logger,
     sourceIds,
     destinationIds,
+    unitId,
   });
 };

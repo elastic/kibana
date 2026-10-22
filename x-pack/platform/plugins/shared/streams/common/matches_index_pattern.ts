@@ -6,10 +6,13 @@
  */
 
 /** ES index-pattern glob: `*` is any sequence, `?` is one character. */
-export const matchesIndexPattern = (name: string, pattern: string): boolean => {
+export const indexPatternToRegex = (pattern: string): RegExp => {
   const escaped = pattern
     .replace(/[.+^${}()|[\]\\]/g, '\\$&')
     .replace(/\*/g, '.*')
     .replace(/\?/g, '.');
-  return new RegExp(`^${escaped}$`).test(name);
+  return new RegExp(`^${escaped}$`);
 };
+
+export const matchesIndexPattern = (name: string, pattern: string): boolean =>
+  indexPatternToRegex(pattern).test(name);

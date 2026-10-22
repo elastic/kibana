@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useActorRef, useSelector } from '@xstate/react';
 import { i18n } from '@kbn/i18n';
+import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { SourceApiKeyGenerationDeps } from './source_api_keys';
 import { createSourceEnvironmentLoader, type SourceEnvironmentLoader } from './source_environment';
@@ -198,6 +199,7 @@ export const useSourceApiKeyGenerationDeps = (): SourceApiKeyGenerationDeps => {
   return useMemo(
     () => ({
       streamsRepositoryClient: streams.streamsRepositoryClient,
+      unitId: STREAMS_DEFAULT_UNIT_ID,
     }),
     [streams.streamsRepositoryClient]
   );

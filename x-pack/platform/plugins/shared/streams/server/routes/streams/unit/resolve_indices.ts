@@ -90,7 +90,7 @@ export const resolveUnitIndicesRoute = createServerRoute({
 
     const {
       unit: { destinations },
-    } = await streamsUnitService.getUnit(params.path.id);
+    } = await streamsUnitService.getUnitOrEmpty(params.path.id);
 
     const patternsByDestination = Object.fromEntries(
       destinations.map((destination) => [

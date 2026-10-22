@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import type { StreamsAppStartDependencies } from '../../../types';
 
 export interface DestinationApiKeyServicesDeps {
   streamsRepositoryClient: StreamsAppStartDependencies['streams']['streamsRepositoryClient'];
+  unitId?: string;
 }
 
 export type DestinationApiKeyGenerationDeps = DestinationApiKeyServicesDeps;
@@ -27,13 +29,14 @@ export interface DestinationApiKeyServices {
 
 export const createDestinationApiKeyServices = ({
   streamsRepositoryClient,
+  unitId = STREAMS_DEFAULT_UNIT_ID,
 }: DestinationApiKeyServicesDeps): DestinationApiKeyServices => ({
   generate: async (destinationId, patterns) => {
     const response = await streamsRepositoryClient.fetch(
       'POST /internal/streams/destinations/api_key',
       {
         params: {
-          body: { destinationId, patterns },
+          body: { destinationId, patterns, unitId },
         },
         signal: null,
       }
@@ -49,7 +52,7 @@ export const createDestinationApiKeyServices = ({
   delete: async (destinationId) => {
     await streamsRepositoryClient.fetch('DELETE /internal/streams/destinations/api_key', {
       params: {
-        body: { destinationId },
+        body: { destinationId, unitId },
       },
       signal: null,
     });

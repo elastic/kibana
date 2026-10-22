@@ -8,10 +8,10 @@
 import { errors } from '@elastic/elasticsearch';
 import { resolveUnitIndicesRoute } from './resolve_indices';
 
-const getUnit = jest.fn();
+const getUnitOrEmpty = jest.fn();
 
 jest.mock('../../../lib/saved_objects/streams_unit_service', () => ({
-  StreamsUnitService: jest.fn().mockImplementation(() => ({ getUnit })),
+  StreamsUnitService: jest.fn().mockImplementation(() => ({ getUnitOrEmpty })),
 }));
 
 const route = resolveUnitIndicesRoute['GET /internal/streams/unit/{id}/_resolve_indices'];
@@ -68,7 +68,7 @@ const mixedDestinationUnit = {
 
 describe('GET /internal/streams/unit/{id}/_resolve_indices', () => {
   it('keys resolved indices by destination write patterns', async () => {
-    getUnit.mockResolvedValue({
+    getUnitOrEmpty.mockResolvedValue({
       unit: {
         destinations: [
           {
@@ -143,7 +143,7 @@ describe('GET /internal/streams/unit/{id}/_resolve_indices', () => {
   });
 
   it('lists regular indices without lifecycle alongside data streams', async () => {
-    getUnit.mockResolvedValue(mixedDestinationUnit);
+    getUnitOrEmpty.mockResolvedValue(mixedDestinationUnit);
     const resolveIndex = jest.fn().mockResolvedValue({
       data_streams: [{ name: 'logs-nginx-default' }],
       indices: [{ name: 'logs-regular' }],
@@ -176,7 +176,7 @@ describe('GET /internal/streams/unit/{id}/_resolve_indices', () => {
   });
 
   it('reports data stream lookup failures instead of "not found"', async () => {
-    getUnit.mockResolvedValue(mixedDestinationUnit);
+    getUnitOrEmpty.mockResolvedValue(mixedDestinationUnit);
     const resolveIndex = jest.fn().mockResolvedValue({
       data_streams: [{ name: 'logs-nginx-default' }],
       indices: [],
@@ -195,7 +195,7 @@ describe('GET /internal/streams/unit/{id}/_resolve_indices', () => {
   });
 
   it('reports data streams missing from a 404 lookup as not found', async () => {
-    getUnit.mockResolvedValue(mixedDestinationUnit);
+    getUnitOrEmpty.mockResolvedValue(mixedDestinationUnit);
     const resolveIndex = jest.fn().mockResolvedValue({
       data_streams: [{ name: 'logs-nginx-default' }],
       indices: [],

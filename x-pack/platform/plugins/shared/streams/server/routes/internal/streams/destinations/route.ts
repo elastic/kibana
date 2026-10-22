@@ -8,7 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { streamsUnitIdentifierSchema } from '@kbn/streams-schema';
+import { STREAMS_API_PRIVILEGES, STREAMS_DEFAULT_UNIT_ID } from '../../../../../common/constants';
 import {
   MAX_RESOLVE_INDEX_PATTERN_LENGTH,
   MAX_RESOLVE_INDEX_PATTERNS,
@@ -85,12 +86,13 @@ const createDestinationApiKeyRoute = createServerRoute({
     body: z.object({
       destinationId: destinationIdSchema,
       patterns: patternsSchema,
+      unitId: streamsUnitIdentifierSchema.optional(),
     }),
   }),
   handler: async ({ getScopedClients, request, params }) => {
     const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
     const {
-      body: { destinationId, patterns },
+      body: { destinationId, patterns, unitId = STREAMS_DEFAULT_UNIT_ID },
     } = params;
     const privileges = await getDestinationApiKeyPrivileges({
       scopedClusterClient,
@@ -110,6 +112,7 @@ const createDestinationApiKeyRoute = createServerRoute({
       metadata: {
         managed_by: STREAMS_DESTINATIONS_MANAGED_BY,
         streams_destination_id: destinationId,
+        streams_unit_id: unitId,
       },
     });
 
@@ -138,18 +141,23 @@ const deleteDestinationApiKeysRoute = createServerRoute({
   params: z.object({
     body: z.object({
       destinationId: destinationIdSchema,
+      unitId: streamsUnitIdentifierSchema.optional(),
     }),
   }),
   handler: async ({ getScopedClients, request, params }) => {
     const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
     const {
-      body: { destinationId },
+      body: { destinationId, unitId = STREAMS_DEFAULT_UNIT_ID },
     } = params;
     if (!isSecurityEnabled) {
       return { invalidatedApiKeys: [] };
     }
     const client = scopedClusterClient.asCurrentUser;
-    const ids = await findDestinationApiKeyIds({ client, destinationId });
+    const ids = await findDestinationApiKeyIds({
+      client,
+      destinationIds: [destinationId],
+      unitId,
+    });
     const { invalidatedApiKeys, errorCount } = await invalidateApiKeyIds({ client, ids });
     if (errorCount > 0) {
       throw new StatusError(

@@ -141,7 +141,7 @@ export const putStreamsUnitRoute = createServerRoute({
       canEncrypt,
     });
 
-    const { unit: previousUnit } = await streamsUnitService.getUnit(params.path.id);
+    const { unit: previousUnit } = await streamsUnitService.getUnitOrEmpty(params.path.id);
 
     let apiKeysMayRemain = false;
     const { compiled_config: compiledConfig, ui_metadata_not_persisted: uiMetadataNotPersisted } =
@@ -157,6 +157,7 @@ export const putStreamsUnitRoute = createServerRoute({
             isSecurityEnabled,
             previousUnit,
             nextUnit: parsed.unit,
+            unitId: params.path.id,
           }));
         },
       });
@@ -200,7 +201,7 @@ export const resetStreamsUnitRoute = createServerRoute({
       logger,
     });
 
-    const { unit: previousUnit } = await streamsUnitService.getUnit(params.path.id);
+    const { unit: previousUnit } = await streamsUnitService.getUnitOrEmpty(params.path.id);
 
     await streamsUnitService.resetUnit(params.path.id);
 
@@ -210,6 +211,7 @@ export const resetStreamsUnitRoute = createServerRoute({
       isSecurityEnabled,
       previousUnit,
       nextUnit: {},
+      unitId: params.path.id,
     });
 
     return { acknowledged: true, ...(apiKeysMayRemain ? { api_keys_may_remain: true } : {}) };
