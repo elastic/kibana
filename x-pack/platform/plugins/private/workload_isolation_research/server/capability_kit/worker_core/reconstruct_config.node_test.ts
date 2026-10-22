@@ -242,7 +242,12 @@ test('ISO-looking strings in headers and allowedHosts stay strings', () => {
     return value;
   };
   assert.throws(() => agentConfigSchema.validate(everyIso(agentCaptured), context));
-  const agent = reconstructPluginConfig('agentBuilder', agentConfigSchema, agentCaptured, context) as {
+  const agent = reconstructPluginConfig(
+    'agentBuilder',
+    agentConfigSchema,
+    agentCaptured,
+    context
+  ) as {
     tracing: { exporters: Array<{ headers?: Record<string, string> }> };
   };
   assert.equal(agent.tracing.exporters[0].headers?.['x-test'], 'PT30S');

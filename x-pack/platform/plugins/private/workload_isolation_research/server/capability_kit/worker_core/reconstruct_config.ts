@@ -89,7 +89,9 @@ export const restoreSchemaInput = (value: unknown, schema?: SchemaNode, depth = 
     return out;
   }
   if (kind === 'UnionType' && schema.unionTypes) {
-    const durationOnly = schema.unionTypes.every((alternative) => schemaKind(alternative) === 'DurationType');
+    const durationOnly = schema.unionTypes.every(
+      (alternative) => schemaKind(alternative) === 'DurationType'
+    );
     if (durationOnly && schema.unionTypes[0]) {
       return restoreSchemaInput(value, schema.unionTypes[0], depth + 1);
     }

@@ -87,7 +87,10 @@ const facade = () => {
       return null;
     },
   } as unknown as WorkerContext;
-  const { taskManagerStart } = createDepFacades(snapshot, createPlatformReplica(emptyPlatformReplicas()));
+  const { taskManagerStart } = createDepFacades(
+    snapshot,
+    createPlatformReplica(emptyPlatformReplicas())
+  );
   return {
     tasks,
     calls,
@@ -120,7 +123,10 @@ void test('main and the island both create the resume tasks and accept the immed
   assert.equal(await main.tryRunImmediateResume(resume), true);
   await main.ensureWakeTask(resume);
   assert.equal(mainTasks.size, 2);
-  assert.equal(mainTasks.get(getWorkflowImmediateResumeTaskId('exec-1'))?.params.workflowRunId, 'exec-1');
+  assert.equal(
+    mainTasks.get(getWorkflowImmediateResumeTaskId('exec-1'))?.params.workflowRunId,
+    'exec-1'
+  );
   assert.deepEqual(mainTasks.get(getWorkflowWakeTaskId('exec-1'))?.state, {});
 
   const island = facade();

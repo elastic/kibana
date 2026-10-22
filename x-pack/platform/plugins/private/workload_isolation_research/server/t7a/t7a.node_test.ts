@@ -155,7 +155,10 @@ void test('outbound schedule keeps fake-request authorization that JSON.stringif
     { taskType: string },
     { request: Parameters<typeof HTTPAuthorizationHeader.parseFromRequest>[0] }
   ];
-  assert.equal(HTTPAuthorizationHeader.parseFromRequest(revived[1].request)?.toString(), 'ApiKey abc');
+  assert.equal(
+    HTTPAuthorizationHeader.parseFromRequest(revived[1].request)?.toString(),
+    'ApiKey abc'
+  );
 });
 
 void test('fake-request markers inside task params and state are not revived', () => {
@@ -180,7 +183,10 @@ void test('fake-request markers inside task params and state are not revived', (
   ];
   const revived = reviveTaskManagerArgs('ensureScheduled', args) as [
     { params: typeof marker; state: { n: number; nested: typeof marker } },
-    { request: Parameters<typeof HTTPAuthorizationHeader.parseFromRequest>[0]; cloneApiKey: boolean }
+    {
+      request: Parameters<typeof HTTPAuthorizationHeader.parseFromRequest>[0];
+      cloneApiKey: boolean;
+    }
   ];
   assert.equal(revived[0].params.customerValue, 'keep-me');
   assert.equal(revived[0].params.kind, 't7a-fake-request');
@@ -188,7 +194,10 @@ void test('fake-request markers inside task params and state are not revived', (
   assert.equal(revived[0].state.nested.customerValue, 'keep-me');
   assert.equal(revived[0].state.nested.kind, 't7a-fake-request');
   assert.equal(revived[1].cloneApiKey, true);
-  assert.equal(HTTPAuthorizationHeader.parseFromRequest(revived[1].request)?.toString(), 'ApiKey abc');
+  assert.equal(
+    HTTPAuthorizationHeader.parseFromRequest(revived[1].request)?.toString(),
+    'ApiKey abc'
+  );
 });
 
 void test('a string externalUiam is rejected only when it is the task-manager request', () => {

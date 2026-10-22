@@ -97,7 +97,12 @@ export const reviveTaskManagerArgs = (method: string, args: unknown): unknown[] 
   const index = TASK_MANAGER_REQUEST_ARGUMENT[method];
   if (index === undefined) return args.slice();
   const options = args[index];
-  if (!options || typeof options !== 'object' || Array.isArray(options) || !('request' in options)) {
+  if (
+    !options ||
+    typeof options !== 'object' ||
+    Array.isArray(options) ||
+    !('request' in options)
+  ) {
     return args.slice();
   }
   const request = (options as { request?: unknown }).request;
