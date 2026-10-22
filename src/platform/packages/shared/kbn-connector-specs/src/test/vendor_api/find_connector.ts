@@ -17,7 +17,8 @@ export interface FoundConnector {
 }
 
 const SRC = path.resolve(__dirname, '../..');
-const SPEC_EXPORT = /^export \* from '\.\/(specs\/[^']+)';$/gm;
+// `export * from './specs/…'` and named re-exports such as `export { ThreatQ } from './specs/…'`.
+const SPEC_EXPORT = /^export (?:\*|\{[^}]*\}) from '\.\/(specs\/[^']+)';$/gm;
 
 const isConnectorSpec = (value: unknown): value is ConnectorSpec =>
   typeof value === 'object' &&

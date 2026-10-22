@@ -223,6 +223,36 @@ describe('bundleSpec', () => {
     expect(loadContractOperations(convertSwagger2(bundled))).toHaveLength(1);
   });
 
+  it('bundles external refs next to a $ref, as OpenAPI 3.1 allows', async () => {
+    const document = {
+      openapi: '3.1.0',
+      paths: {
+        '/a': {
+          get: {
+            responses: {
+              '200': ok({
+                $ref: '#/components/schemas/Base',
+                properties: { owner: { $ref: 'owner.yaml' } },
+              }),
+            },
+          },
+        },
+      },
+      components: { schemas: { Base: { type: 'object' } } },
+    };
+    const load = loaderFor({ 'https://example.com/api/owner.yaml': { type: 'string' } });
+
+    const bundled = await bundleSpec(document, { url: ROOT, load });
+
+    expect(bundled.paths).toHaveProperty(['/a', 'get', 'responses', '200'], {
+      ...ok({
+        $ref: '#/components/schemas/Base',
+        properties: { owner: { $ref: '#/components/schemas/owner' } },
+      }),
+    });
+    expect(bundled.components).toHaveProperty(['schemas', 'owner'], { type: 'string' });
+  });
+
   it('leaves documents without external refs as they are', async () => {
     const document = {
       openapi: '3.0.3',
