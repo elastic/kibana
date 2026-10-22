@@ -89,6 +89,7 @@ dependsOn:
   - '@kbn/agent-builder-sml-plugin'
   - '@kbn/server-http-tools'
   - '@kbn/task-manager-plugin'
+  - '@kbn/core-logging-server-mocks'
 tags:
   - plugin
   - prod
