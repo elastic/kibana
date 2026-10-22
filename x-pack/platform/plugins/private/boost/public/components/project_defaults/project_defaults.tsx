@@ -126,81 +126,80 @@ const ProjectDefaultPanel = ({
       css={{ blockSize: '100%' }}
       data-test-subj={`boostProjectDefault-${type}`}
     >
-      <EuiFlexGroup
-        justifyContent="spaceBetween"
-        alignItems="flexStart"
-        gutterSize="s"
-        responsive={false}
-      >
-        <EuiFlexItem>
-          <EuiStat
-            // What the default applies to follows its type: how many, and how much data.
-            description={
-              <span css={inlineCss}>
-                <EuiIcon type={TYPE_ICONS[type]} aria-hidden={true} />
-                {PROFILE_TYPE_LABELS[type]}
-                <EuiNotificationBadge
-                  color="subdued"
-                  size="s"
-                  data-test-subj={`boostProjectDefaultCount-${type}`}
-                >
-                  {formatDataSourceCount(type, appliedCount)}
-                </EuiNotificationBadge>
-                <EuiNotificationBadge
-                  color="subdued"
-                  size="s"
-                  data-test-subj={`boostProjectDefaultSize-${type}`}
-                >
-                  {formatSize(appliedSize)}
-                </EuiNotificationBadge>
-              </span>
-            }
-            title={
-              preset ? (
-                preset.label
-              ) : (
-                // A custom profile's details are a button away, which keeps the large name plain.
-                <span css={inlineCss}>
-                  {profileName}
-                  <EuiButtonIcon
-                    iconType="link"
-                    color="text"
-                    {...reactRouterNavigate(history, getProfileDetailsPath(profileName))}
-                    aria-label={i18n.translate('xpack.boost.projectDefaults.viewProfile', {
-                      defaultMessage: 'View boost profile "{profileName}"',
-                      values: { profileName },
-                    })}
-                    data-test-subj={`boostProjectDefaultProfileLink-${type}`}
-                  />
-                </span>
-              )
-            }
-            data-test-subj={`boostProjectDefaultValue-${type}`}
+      <EuiStat
+        // What the default applies to follows its type: how many, and how much data.
+        description={
+          // The label shares a row with the edit button, centered on it.
+          <span
+            css={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: euiTheme.size.s,
+            }}
           >
-            <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              <p>{preset ? preset.description : CUSTOM_PROFILE_DESCRIPTION}</p>
-            </EuiText>
-          </EuiStat>
-        </EuiFlexItem>
-        {onEdit && (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              onClick={onEdit}
-              aria-label={i18n.translate('xpack.boost.projectDefaults.editLabel', {
-                defaultMessage: 'Edit the project default for {type}',
-                values: { type: PROFILE_TYPE_LABELS[type].toLowerCase() },
-              })}
-              data-test-subj={`boostEditProjectDefault-${type}`}
-            >
-              {i18n.translate('xpack.boost.projectDefaults.editButton', {
-                defaultMessage: 'Edit',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+            <span css={inlineCss}>
+              <EuiIcon type={TYPE_ICONS[type]} aria-hidden={true} />
+              {PROFILE_TYPE_LABELS[type]}
+              <EuiNotificationBadge
+                color="subdued"
+                size="s"
+                data-test-subj={`boostProjectDefaultCount-${type}`}
+              >
+                {formatDataSourceCount(type, appliedCount)}
+              </EuiNotificationBadge>
+              <EuiNotificationBadge
+                color="subdued"
+                size="s"
+                data-test-subj={`boostProjectDefaultSize-${type}`}
+              >
+                {formatSize(appliedSize)}
+              </EuiNotificationBadge>
+            </span>
+            {onEdit && (
+              <EuiButton
+                size="s"
+                onClick={onEdit}
+                aria-label={i18n.translate('xpack.boost.projectDefaults.editLabel', {
+                  defaultMessage: 'Edit the project default for {type}',
+                  values: { type: PROFILE_TYPE_LABELS[type].toLowerCase() },
+                })}
+                data-test-subj={`boostEditProjectDefault-${type}`}
+              >
+                {i18n.translate('xpack.boost.projectDefaults.editButton', {
+                  defaultMessage: 'Edit',
+                })}
+              </EuiButton>
+            )}
+          </span>
+        }
+        title={
+          preset ? (
+            preset.label
+          ) : (
+            // A custom profile's details are a button away, which keeps the large name plain.
+            <span css={inlineCss}>
+              {profileName}
+              <EuiButtonIcon
+                iconType="link"
+                color="text"
+                {...reactRouterNavigate(history, getProfileDetailsPath(profileName))}
+                aria-label={i18n.translate('xpack.boost.projectDefaults.viewProfile', {
+                  defaultMessage: 'View boost profile "{profileName}"',
+                  values: { profileName },
+                })}
+                data-test-subj={`boostProjectDefaultProfileLink-${type}`}
+              />
+            </span>
+          )
+        }
+        data-test-subj={`boostProjectDefaultValue-${type}`}
+      >
+        <EuiSpacer size="xs" />
+        <EuiText size="s" color="subdued">
+          <p>{preset ? preset.description : CUSTOM_PROFILE_DESCRIPTION}</p>
+        </EuiText>
+      </EuiStat>
     </EuiPanel>
   );
 };
