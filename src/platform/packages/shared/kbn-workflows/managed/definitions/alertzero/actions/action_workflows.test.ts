@@ -9,6 +9,7 @@
 
 import { parse } from 'yaml';
 import {
+  ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW,
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW,
   ALERTZERO_ACTION_ENABLE_RULE_WORKFLOW,
   ALERTZERO_ACTION_INSTALL_PREBUILT_RULE_WORKFLOW,
@@ -20,18 +21,25 @@ interface YamlStep {
   name: string;
   type: string;
   if?: string;
+  condition?: string;
   with?: Record<string, unknown>;
+  steps?: YamlStep[];
+  'on-failure'?: { continue?: boolean };
 }
 
 interface ActionInputSchema {
-  properties?: Record<string, Record<string, unknown>>;
+  properties?: Record<string, Record<string, unknown> & { enum?: string[] }>;
   required?: string[];
   additionalProperties?: boolean;
 }
 
 interface ActionYaml {
   tags?: string[];
-  consts?: { actionMetadata?: Record<string, unknown> };
+  consts?: {
+    actionMetadata?: Record<string, unknown>;
+    required_index_privileges?: string[];
+    required_api_privileges?: string[];
+  };
   triggers?: Array<{
     type: string;
     inputs?: {
@@ -241,6 +249,313 @@ describe('AlertZero action workflows', () => {
       const names = yaml.steps.map(({ name }) => name);
       expect(names.indexOf('outcome')).toBeLessThan(names.indexOf('fail_not_applied'));
       expect(names.indexOf('fail_not_applied')).toBeLessThan(names.indexOf('emit_result'));
+    });
+  });
+
+  // Closing an Investigation is the analyst's call in every autonomy mode, and the
+  // approver is not the account that opened the Investigation, so the close has to
+  // go through the status route rather than the owner-only metadata patch.
+  describe('close investigation', () => {
+    const yaml = parsed(ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW.yaml);
+    const metadata = yaml.consts?.actionMetadata;
+    const actionInput = yaml.triggers?.[0]?.inputs?.properties?.actionInput;
+
+    it('is part of the install set and always gates', () => {
+      expect(ALERTZERO_ACTION_WORKFLOW_IDS).toContain(
+        ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW.id
+      );
+      expect(yaml.tags).toContain('action');
+      expect(metadata?.approvalPolicy).toBe('always-gate');
+      expect(metadata?.reversible).toBe(true);
+    });
+
+    it('is a respond action', () => {
+      expect(metadata?.category).toBe('respond');
+    });
+
+    // No host, process or identity field: the proposal dedup keys an input without a
+    // target to the Investigation and the action, which keeps one Close question open
+    // per Investigation at a time.
+    it('takes the Investigation, its attack and the reasons, and names no target', () => {
+      expect(actionInput?.required).toEqual([
+        'investigation_id',
+        'attack_discovery_id',
+        'close_reason',
+        'attack_reason',
+      ]);
+      expect(actionInput?.additionalProperties).toBe(false);
+      const fields = Object.keys(actionInput?.properties ?? {});
+      for (const target of ['endpoint_ids', 'parameters', 'id_field', 'id_value', 'alertIds']) {
+        expect(fields).not.toContain(target);
+      }
+      expect(actionInput?.properties?.close_reason?.enum).toEqual([
+        'false_positive',
+        'benign',
+        'resolved',
+        'duplicate',
+        'other',
+      ]);
+      expect(actionInput?.properties?.attack_reason?.enum).toEqual([
+        'false_positive',
+        'true_positive',
+        'benign_positive',
+        'duplicate',
+        'other',
+      ]);
+    });
+
+    // The action runs as the approver and the status routes write with the approver's
+    // privileges, so an account that cannot close alerts is turned away before anything
+    // is closed, with what to grant, instead of a 403 after the attack is already closed.
+    describe('checks the approving account first', () => {
+      const probe = stepByName(yaml, 'probe_privileges');
+      const resolve = stepByName(yaml, 'resolve_privileges');
+      const gate = stepByName(yaml, 'fail_if_unprivileged');
+      const fail = gate?.steps?.[0];
+      const spaceId = 'default';
+
+      const render = (template: unknown, context: Record<string, unknown>) =>
+        createWorkflowLiquidEngine().parseAndRenderSync(String(template), {
+          workflow: { spaceId },
+          ...context,
+        });
+
+      /** A `_has_privileges` answer, granted everywhere except where `deny` says. */
+      const probeOutput = ({
+        api = [],
+        indices = {},
+      }: {
+        api?: string[];
+        indices?: Record<string, Partial<Record<'index' | 'maintenance', boolean>>>;
+      } = {}) => {
+        const names = [
+          `.alerts-security.attack.discovery.alerts-${spaceId}`,
+          `.adhoc.alerts-security.attack.discovery.alerts-${spaceId}`,
+          `.alerts-security.alerts-${spaceId}`,
+        ];
+        return {
+          application: {
+            'kibana-.kibana': {
+              [`space:${spaceId}`]: {
+                'api:alerts-all': !api.includes('api:alerts-all'),
+                'api:alerts-signal-update-deprecated-privilege': !api.includes(
+                  'api:alerts-signal-update-deprecated-privilege'
+                ),
+              },
+            },
+          },
+          index: Object.fromEntries(
+            names.map((name) => [
+              name,
+              { index: true, maintenance: true, ...(indices[name] ?? {}) },
+            ])
+          ),
+        };
+      };
+
+      const missingFor = (output: unknown) =>
+        render(resolve?.with?.missing, { steps: { probe_privileges: { output } } });
+
+      const fails = (probeStep: Record<string, unknown>, missing: string) =>
+        evaluateExpression(String(gate?.condition), {
+          steps: { probe_privileges: probeStep, resolve_privileges: { output: { missing } } },
+        });
+
+      it('asks Elasticsearch, as the approver, for the exact grants the routes need', () => {
+        const names = yaml.steps.map(({ name }) => name);
+        expect(names.slice(0, 4)).toEqual([
+          'probe_privileges',
+          'resolve_privileges',
+          'fail_if_unprivileged',
+          'close_attack_and_alerts',
+        ]);
+
+        expect(probe?.type).toBe('elasticsearch.request');
+        expect(probe?.with?.method).toBe('POST');
+        expect(probe?.with?.path).toBe('/_security/user/_has_privileges');
+        // Fails closed below rather than failing the run on the probe's own error.
+        expect(probe?.['on-failure']).toEqual({ continue: true });
+
+        expect(yaml.consts?.required_index_privileges).toEqual(['index', 'maintenance']);
+        expect(yaml.consts?.required_api_privileges).toEqual([
+          'api:alerts-all',
+          'api:alerts-signal-update-deprecated-privilege',
+        ]);
+        expect(probe?.with?.body).toEqual({
+          application: [
+            {
+              application: 'kibana-.kibana',
+              privileges: '${{ consts.required_api_privileges }}',
+              resources: ['space:{{ workflow.spaceId }}'],
+            },
+          ],
+          index: [
+            {
+              names: [
+                '.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}',
+                '.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}',
+                '.alerts-security.alerts-{{ workflow.spaceId }}',
+              ],
+              privileges: '${{ consts.required_index_privileges }}',
+            },
+          ],
+        });
+      });
+
+      it('finds nothing missing when everything is granted', () => {
+        expect(missingFor(probeOutput())).toBe('');
+        expect(fails({ output: probeOutput() }, '')).toBe(false);
+      });
+
+      it('accepts either alerts API privilege', () => {
+        expect(missingFor(probeOutput({ api: ['api:alerts-all'] }))).toBe('');
+        expect(
+          missingFor(probeOutput({ api: ['api:alerts-signal-update-deprecated-privilege'] }))
+        ).toBe('');
+      });
+
+      it('names each missing grant', () => {
+        const output = probeOutput({
+          api: ['api:alerts-all', 'api:alerts-signal-update-deprecated-privilege'],
+          indices: {
+            '.alerts-security.alerts-default': { maintenance: false },
+            '.adhoc.alerts-security.attack.discovery.alerts-default': { index: false },
+          },
+        });
+        const missing = missingFor(output);
+
+        expect(missing).toBe(
+          '; the Kibana privilege Security › Alerts: All' +
+            '; the Elasticsearch index privileges `index` and `maintenance` on `.adhoc.alerts-security.attack.discovery.alerts-default`' +
+            '; the Elasticsearch index privileges `index` and `maintenance` on `.alerts-security.alerts-default`'
+        );
+        expect(fails({ output }, missing)).toBe(true);
+      });
+
+      it('fails closed when the probe itself errors', () => {
+        expect(fails({ error: { message: 'HTTP 503: unavailable' } }, '')).toBe(true);
+      });
+
+      it('fails with what the approver needs, before anything is closed', () => {
+        expect(fail?.type).toBe('workflow.fail');
+        const message = (probeStep: Record<string, unknown>, missing: string) =>
+          render(fail?.with?.message, {
+            steps: { probe_privileges: probeStep, resolve_privileges: { output: { missing } } },
+          });
+
+        const missing = missingFor(
+          probeOutput({ indices: { '.alerts-security.alerts-default': { index: false } } })
+        );
+        expect(message({ output: {} }, missing)).toBe(
+          'Nothing was closed: the approving account is missing the Elasticsearch index privileges `index` and `maintenance` on `.alerts-security.alerts-default`. ' +
+            'Closing an Investigation also closes its attack and detection alerts, which needs the Kibana privilege Security › Alerts: All and the Elasticsearch index privileges `index` and `maintenance` on `.alerts-security.alerts-default`, `.alerts-security.attack.discovery.alerts-default` and `.adhoc.alerts-security.attack.discovery.alerts-default`. Ask an administrator to grant them to the account that approves, then approve again.'
+        );
+
+        expect(message({ error: { message: 'HTTP 503: unavailable' } }, '')).toContain(
+          "Nothing was closed: the approving account's privileges could not be checked (HTTP 503: unavailable). Closing an Investigation"
+        );
+      });
+    });
+
+    it('retires the attack and its alerts first, then closes the Investigation over the status route', () => {
+      const names = yaml.steps.map(({ name }) => name);
+      expect(names).toEqual([
+        'probe_privileges',
+        'resolve_privileges',
+        'fail_if_unprivileged',
+        'close_attack_and_alerts',
+        'journal_closed',
+        'close_investigation',
+        'emit_result',
+      ]);
+
+      const retire = stepByName(yaml, 'close_attack_and_alerts');
+      expect(retire?.type).toBe('workflow.execute');
+      // Approver identity, not a service account: see service_account_inheritance.test.ts.
+      expect(retire?.with?.['run-as-mode']).toBeUndefined();
+      // Not continued: a failed close is recorded on the proposal, and the bridge
+      // offers the analyst a fresh card.
+      expect((retire as { 'on-failure'?: unknown })?.['on-failure']).toBeUndefined();
+
+      const close = stepByName(yaml, 'close_investigation');
+      expect(close?.type).toBe('kibana.request');
+      expect(close?.with).toEqual({
+        method: 'PUT',
+        path: '/s/{{ workflow.spaceId }}/internal/investigations/investigations/{{ inputs.actionInput.investigation_id }}/status',
+        headers: {
+          'kbn-xsrf': 'true',
+          'elastic-api-version': '1',
+          'Content-Type': 'application/json',
+        },
+        body: { status: 'closed', expected_proposal_ids: [] },
+      });
+      expect(JSON.stringify(yaml)).not.toContain('ai.conversation.metadata.patch');
+    });
+
+    // The journal lives here, not in the shared child: the child cannot pick an
+    // identity for a child of its own, and this action's identity is whoever
+    // approved. No `run-as-mode`, like every other child call in an action.
+    it('journals what the child read back, as the approver, before closing the Investigation', () => {
+      const note = stepByName(yaml, 'journal_closed');
+      expect(note?.type).toBe('workflow.execute');
+      expect(note?.with?.['workflow-id']).toBe('system-alertzero-journal-note');
+      expect(note?.with?.['run-as-mode']).toBeUndefined();
+      expect((note as { 'on-failure'?: unknown })?.['on-failure']).toEqual({ continue: true });
+
+      const inputs = note?.with?.inputs as { conversation_id: string; message: string };
+      expect(inputs.conversation_id).toBe('{{ inputs.actionInput.investigation_id }}');
+      expect(inputs.message).not.toContain('error');
+
+      const render = (output: Record<string, number | boolean>) =>
+        createWorkflowLiquidEngine().parseAndRenderSync(inputs.message, {
+          inputs: { actionInput: { attack_discovery_id: 'ad-1', attack_reason: 'false_positive' } },
+          execution: { id: 'exec-1' },
+          steps: {
+            close_attack_and_alerts: {
+              output: {
+                attack_found: true,
+                attack_closed: true,
+                alerts_requested: 4,
+                alerts_read: true,
+                alerts_closed: 3,
+                alerts_open: 0,
+                alerts_kept: 1,
+                ...output,
+              },
+            },
+          },
+        });
+
+      expect(render({})).toBe(
+        'Closed the attack as `false_positive`. Closed 3 of its 4 detection alert(s) as `false_positive`. 1 also belong to another open attack and were left as they were.'
+      );
+      expect(render({ alerts_kept: 0, alerts_closed: 4 })).toBe(
+        'Closed the attack as `false_positive`. Closed 4 of its 4 detection alert(s) as `false_positive`.'
+      );
+      expect(render({ alerts_closed: 2, alerts_open: 1 })).toContain(
+        'Still open, because closing them did not land: 1. See execution `exec-1`.'
+      );
+      expect(render({ alerts_read: false })).toContain(
+        'Could not read its 4 detection alert(s) back, so whether they were closed is unknown.'
+      );
+      expect(render({ alerts_requested: 0 })).toBe(
+        'Closed the attack as `false_positive`. It lists no detection alerts.'
+      );
+      expect(render({ attack_closed: false })).toBe(
+        'The attack could not be closed and was left as it was. See execution `exec-1`.'
+      );
+      expect(render({ attack_found: false })).toBe(
+        'No Attack Discovery alert matching `ad-1` was found, so no attack or alerts were closed.'
+      );
+    });
+
+    it('renders the Investigation id into the route path', () => {
+      const close = stepByName(yaml, 'close_investigation');
+      const path = createWorkflowLiquidEngine().parseAndRenderSync(String(close?.with?.path), {
+        workflow: { spaceId: 'sec' },
+        inputs: { actionInput: { investigation_id: 'inv-1' } },
+      });
+      expect(path).toBe('/s/sec/internal/investigations/investigations/inv-1/status');
     });
   });
 });
