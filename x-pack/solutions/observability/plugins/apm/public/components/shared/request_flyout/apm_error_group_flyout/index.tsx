@@ -1,0 +1,303 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  EuiBadge,
+  EuiDescriptionList,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiLink,
+  EuiPagination,
+  EuiPanel,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiText,
+  EuiTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
+import { i18n } from '@kbn/i18n';
+import { Timestamp } from '@kbn/apm-ui-shared';
+import { KbnWarningCallout } from '@kbn/ui-callout';
+import React, { useState } from 'react';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import {
+  ENVIRONMENT_NOT_DEFINED,
+  getEnvironmentLabel,
+} from '../../../../../common/environment_filter_values';
+import { getTimestampUs } from '../../../../../common/utils/get_timestamp_us';
+import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { ErrorSampleDetailTabContent } from '../../../app/error_group_details/error_sampler/error_sample_detail';
+import { getTabs } from '../../../app/error_group_details/error_sampler/error_tabs';
+import { SampleSummary } from '../../../app/error_group_details/error_sampler/sample_summary';
+import { REQUEST_FLYOUT_EBT_ACTIONS, REQUEST_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
+import { useRequestFlyoutContext } from '../request_flyout_context';
+
+interface Props {
+  serviceName: string;
+  groupId: string;
+  groupName: string;
+  historyKey: symbol;
+  onClose: () => void;
+}
+
+/**
+ * Child flyout with the content of an APM error group: its samples (paginated), the sample
+ * summary and the stack trace / metadata tabs. The errors page renders the same pieces, but its
+ * page components read route params and throw outside their routes, so this composes the
+ * props-only ones (tab content, summary) and keeps the sample and tab state locally.
+ */
+export function RequestFlyoutApmErrorGroupFlyout({
+  serviceName,
+  groupId,
+  groupName,
+  historyKey,
+  onClose,
+}: Props) {
+  const {
+    filters: { environment, start, end, rangeFrom, rangeTo },
+  } = useRequestFlyoutContext();
+  const { link } = useApmRouter();
+  const titleId = useGeneratedHtmlId({ prefix: 'requestFlyoutApmErrorGroupTitle' });
+
+  const [samplePage, setSamplePage] = useState(0);
+  const [activeTabKey, setActiveTabKey] = useState<string | undefined>();
+
+  const { data: samples, status: samplesStatus } = useFetcher(
+    (callApmApi) =>
+      callApmApi('GET /internal/apm/services/{serviceName}/errors/{groupId}/samples', {
+        params: {
+          path: { serviceName, groupId },
+          query: { environment, start, end, kuery: '' },
+        },
+      }),
+    [serviceName, groupId, environment, start, end]
+  );
+
+  const errorSampleIds = samples?.errorSampleIds ?? [];
+  const errorId = errorSampleIds[samplePage];
+
+  const { data: errorData, status: errorStatus } = useFetcher(
+    (callApmApi) => {
+      if (!errorId) return;
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}',
+        {
+          params: {
+            path: { serviceName, groupId, errorId },
+            query: { environment, start, end, kuery: '' },
+          },
+        }
+      );
+    },
+    [serviceName, groupId, errorId, environment, start, end]
+  );
+
+  const isLoading = isPending(samplesStatus) || isPending(errorStatus);
+  const hasError = samplesStatus === FETCH_STATUS.FAILURE || errorStatus === FETCH_STATUS.FAILURE;
+  const error = errorData?.error;
+  const transaction = errorData?.transaction;
+
+  const tabs = error ? getTabs(error) : [];
+  const currentTab = tabs.find(({ key }) => key === activeTabKey) ?? tabs[0];
+
+  const exception = error?.error?.exception?.[0];
+  const errorEnvironment =
+    error?.service?.environment ??
+    transaction?.service?.environment ??
+    ENVIRONMENT_NOT_DEFINED.value;
+  const sdkLabel = [error?.agent?.name, error?.agent?.version].filter(Boolean).join(' ');
+
+  const errorPageHref = link('/services/{serviceName}/errors/{groupId}', {
+    path: { serviceName, groupId },
+    query: {
+      environment,
+      rangeFrom,
+      rangeTo,
+      kuery: '',
+      serviceGroup: '',
+      comparisonEnabled: false,
+    },
+  });
+
+  return (
+    <EuiFlyout
+      data-test-subj="requestFlyoutApmErrorGroupFlyout"
+      onClose={onClose}
+      ownFocus={false}
+      size="fill"
+      paddingSize="m"
+      session="inherit"
+      historyKey={historyKey}
+      flyoutMenuDisplayMode="always"
+      flyoutMenuProps={{ title: groupName }}
+      aria-labelledby={titleId}
+    >
+      <EuiFlyoutBody>
+        <EuiTitle size="s">
+          <h2 id={titleId}>{groupName}</h2>
+        </EuiTitle>
+        <EuiText size="s" color="subdued">
+          {i18n.translate('xpack.apm.requestFlyout.apmErrorGroup.subtitle', {
+            defaultMessage: 'APM error group of {service}',
+            values: { service: serviceName },
+          })}
+        </EuiText>
+        <EuiSpacer size="m" />
+
+        {hasError ? (
+          <KbnWarningCallout
+            size="s"
+            data-test-subj="requestFlyoutApmErrorGroupError"
+            title={i18n.translate('xpack.apm.requestFlyout.apmErrorGroup.errorTitle', {
+              defaultMessage: 'Unable to load this error group',
+            })}
+          />
+        ) : !isLoading && !error ? (
+          <EuiEmptyPrompt
+            titleSize="s"
+            title={
+              <div>
+                {i18n.translate('xpack.apm.requestFlyout.apmErrorGroup.sampleNotFound', {
+                  defaultMessage: 'No error samples found for this group',
+                })}
+              </div>
+            }
+          />
+        ) : (
+          <EuiPanel hasBorder>
+            <EuiFlexGroup alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h3>
+                    {i18n.translate('xpack.apm.requestFlyout.apmErrorGroup.sampleTitle', {
+                      defaultMessage: 'Error sample',
+                    })}
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {errorSampleIds.length > 0 && (
+                  <EuiPagination
+                    pageCount={errorSampleIds.length}
+                    activePage={samplePage}
+                    onPageClick={setSamplePage}
+                    aria-label={i18n.translate(
+                      'xpack.apm.requestFlyout.apmErrorGroup.paginationAriaLabel',
+                      { defaultMessage: 'Error sample pages' }
+                    )}
+                    compressed
+                  />
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+
+            {isLoading || !error ? (
+              <EuiSkeletonText lines={4} />
+            ) : (
+              <>
+                <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <Timestamp timestamp={getTimestampUs(error) / 1000} renderMode="tooltip" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">{getEnvironmentLabel(errorEnvironment)}</EuiBadge>
+                  </EuiFlexItem>
+                  {exception?.handled === false && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="warning">
+                        {i18n.translate('xpack.apm.requestFlyout.apmErrorGroup.unhandled', {
+                          defaultMessage: 'Unhandled',
+                        })}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+                <EuiSpacer size="m" />
+                <EuiDescriptionList
+                  type="responsiveColumn"
+                  columnWidths={['32%', '68%']}
+                  listItems={[
+                    {
+                      title: i18n.translate('xpack.apm.requestFlyout.apmErrorGroup.groupId', {
+                        defaultMessage: 'Group ID',
+                      }),
+                      description: groupId,
+                    },
+                    {
+                      title: i18n.translate('xpack.apm.requestFlyout.apmErrorGroup.occurrences', {
+                        defaultMessage: 'Occurrences',
+                      }),
+                      description: String(samples?.occurrencesCount ?? NOT_AVAILABLE_LABEL),
+                    },
+                    {
+                      title: i18n.translate('xpack.apm.requestFlyout.apmErrorGroup.type', {
+                        defaultMessage: 'Type',
+                      }),
+                      description: exception?.type ?? error.error?.type ?? NOT_AVAILABLE_LABEL,
+                    },
+                    {
+                      title: i18n.translate('xpack.apm.requestFlyout.apmErrorGroup.sdk', {
+                        defaultMessage: 'SDK',
+                      }),
+                      description: sdkLabel || NOT_AVAILABLE_LABEL,
+                    },
+                  ]}
+                />
+                <EuiSpacer size="m" />
+                <SampleSummary error={error} />
+                <EuiSpacer size="m" />
+                <EuiTabs size="s">
+                  {tabs.map(({ key, label }) => (
+                    <EuiTab
+                      key={key}
+                      isSelected={currentTab?.key === key}
+                      onClick={() => setActiveTabKey(key)}
+                      {...getEbtProps({
+                        action: REQUEST_FLYOUT_EBT_ACTIONS.VIEW_ERROR_TAB,
+                        element: REQUEST_FLYOUT_EBT_ELEMENTS.ERROR_TABS,
+                        detail: key,
+                      })}
+                    >
+                      {label}
+                    </EuiTab>
+                  ))}
+                </EuiTabs>
+                <EuiSpacer size="m" />
+                {currentTab && (
+                  <ErrorSampleDetailTabContent error={error} currentTab={currentTab} />
+                )}
+              </>
+            )}
+          </EuiPanel>
+        )}
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiLink
+          href={errorPageHref}
+          data-test-subj="requestFlyoutApmErrorGroupOpenPage"
+          {...getEbtProps({
+            action: EBT_CLICK_ACTIONS.OPEN_IN_APM,
+            element: REQUEST_FLYOUT_EBT_ELEMENTS.DETAIL_LINK,
+          })}
+        >
+          {i18n.translate('xpack.apm.requestFlyout.apmErrorGroup.openPage', {
+            defaultMessage: 'Open error group page',
+          })}
+        </EuiLink>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  );
+}
