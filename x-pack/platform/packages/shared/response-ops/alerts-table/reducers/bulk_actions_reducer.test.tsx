@@ -942,18 +942,30 @@ describe('AlertsDataGrid bulk actions', () => {
           });
 
           describe('and the action caps how many alerts it accepts', () => {
-            const renderWithLimitedAction = (alertsCount: number) => {
+            const tenAlertLimit = { max: 10, reason: 'Select up to 10 alerts' };
+
+            const renderWithLimitedAction = ({
+              alertsCount = alerts.length,
+              isAllSelected = true,
+              selectionLimit,
+            }: {
+              alertsCount?: number;
+              isAllSelected?: boolean;
+              selectionLimit: BulkActionsConfig['selectionLimit'];
+            }) => {
               const mockOnClick = jest.fn();
               render(
                 <TestComponent
                   {...dataGridPropsWithBulkActions}
                   initialBulkActionsState={{
                     ...createDefaultBulkActionsState(),
-                    isAllSelected: true,
-                    rowSelection: new Map([
-                      [0, { isLoading: false }],
-                      [1, { isLoading: false }],
-                    ]),
+                    isAllSelected,
+                    rowSelection: isAllSelected
+                      ? new Map([
+                          [0, { isLoading: false }],
+                          [1, { isLoading: false }],
+                        ])
+                      : new Map(),
                   }}
                   renderContext={{ alertsCount }}
                   additionalBulkActions={[
@@ -965,7 +977,7 @@ describe('AlertsDataGrid bulk actions', () => {
                           key: 'limitedBulkAction',
                           'data-test-subj': 'limited-bulk-action',
                           disableOnQuery: false,
-                          selectionLimit: { max: 10, reason: 'Select up to 10 alerts' },
+                          selectionLimit,
                           onClick: mockOnClick,
                         },
                       ],
@@ -977,7 +989,10 @@ describe('AlertsDataGrid bulk actions', () => {
             };
 
             it('disables the action and explains why when every matching alert exceeds the cap', async () => {
-              const { mockOnClick } = renderWithLimitedAction(11);
+              const { mockOnClick } = renderWithLimitedAction({
+                alertsCount: 11,
+                selectionLimit: tenAlertLimit,
+              });
 
               await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
               await waitForEuiPopoverOpen();
@@ -994,7 +1009,47 @@ describe('AlertsDataGrid bulk actions', () => {
             });
 
             it('keeps the action enabled when every matching alert fits the cap', async () => {
-              const { mockOnClick } = renderWithLimitedAction(10);
+              const { mockOnClick } = renderWithLimitedAction({
+                alertsCount: 10,
+                selectionLimit: tenAlertLimit,
+              });
+
+              await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+              await waitForEuiPopoverOpen();
+
+              const action = screen.getByTestId('limited-bulk-action');
+              expect(action).not.toBeDisabled();
+              await userEvent.click(action);
+              expect(mockOnClick).toHaveBeenCalled();
+            });
+
+            it('disables the action when rows selected one by one exceed the cap', async () => {
+              const { mockOnClick } = renderWithLimitedAction({
+                isAllSelected: false,
+                selectionLimit: { max: 1, reason: 'Select up to 1 alert' },
+              });
+
+              const bulkActionsCells = screen.getAllByTestId('bulk-actions-row-cell');
+              await userEvent.click(bulkActionsCells[0]);
+              await userEvent.click(bulkActionsCells[1]);
+
+              await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+              await waitForEuiPopoverOpen();
+
+              const action = screen.getByTestId('limited-bulk-action');
+              expect(action).toBeDisabled();
+              await userEvent.click(action);
+              expect(mockOnClick).not.toHaveBeenCalled();
+
+              fireEvent.mouseOver(action);
+              expect(await screen.findByRole('tooltip')).toHaveTextContent('Select up to 1 alert');
+            });
+
+            it('keeps an action without a cap enabled on a large select all', async () => {
+              const { mockOnClick } = renderWithLimitedAction({
+                alertsCount: 100_000,
+                selectionLimit: undefined,
+              });
 
               await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
               await waitForEuiPopoverOpen();
