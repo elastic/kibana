@@ -1,0 +1,63 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { kibanaRegistry } from '@elastic/schemas/kibana/tools/index.js';
+import { getKibanaConnectors } from '@kbn/workflows';
+import { getStepRisk, KIBANA_STEP_APIS } from './step_risk';
+
+const normalizePath = (path: string): string => path.replace(/\{[^}]+\}/g, '{}');
+
+describe('getStepRisk', () => {
+  it.each([
+    ['console', { safe: true, destructive: false }],
+    ['cases.getCase', { safe: true, destructive: false }],
+    ['cases.deleteCases', { safe: false, destructive: true }],
+    ['http', { safe: false, destructive: false }],
+    ['elasticsearch.request', { safe: false, destructive: false }],
+  ])('classifies %s', (stepType, expected) => {
+    expect(getStepRisk(stepType)).toEqual(expected);
+  });
+
+  it.each([
+    ['elasticsearch.search', true, false, 'search'],
+    ['elasticsearch.indices.create', true, false, 'indices.create'],
+    ['elasticsearch.indices.delete', false, true, 'indices.delete'],
+    ['elasticsearch.index', false, true, 'index'],
+  ])('uses the execute_api registry flag for %s', (stepType, safe, destructive, api) => {
+    expect(getStepRisk(stepType)).toEqual({
+      safe,
+      destructive,
+      api: { target: 'elasticsearch', api },
+    });
+  });
+
+  it.each([
+    ['kibana.getCase', true, 'cases.get-case'],
+    ['kibana.streams.list', true, 'streams.get-streams'],
+    ['kibana.SetAlertsStatus', false, 'security-detections-api.set-alerts-status'],
+    ['kibana.createCase', false, 'cases.create-case'],
+  ])('matches %s to its Kibana registry entry by method and path', (stepType, safe, api) => {
+    expect(getStepRisk(stepType)).toMatchObject({ safe, api: { target: 'kibana', api } });
+  });
+
+  describe('KIBANA_STEP_APIS', () => {
+    const contracts = getKibanaConnectors();
+
+    it('maps every generated kibana step', () => {
+      expect([...KIBANA_STEP_APIS.keys()].sort()).toEqual(contracts.map(({ type }) => type).sort());
+    });
+
+    it.each(contracts.map((contract) => [contract.type, contract] as const))(
+      'maps %s to a registry API with the same method and path',
+      async (stepType, { methods, patterns }) => {
+        const { definition } = await kibanaRegistry.loadApi(KIBANA_STEP_APIS.get(stepType) ?? '');
+        expect(methods).toContain(definition.method.toUpperCase());
+        expect(patterns.map(normalizePath)).toContain(normalizePath(definition.path));
+      }
+    );
+  });
+});
