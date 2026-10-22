@@ -29,6 +29,9 @@ const getPanelEditError = (
   const { id, type } = existingPanel;
   const replaceHint = `To replace it with another kind of panel, remove "${id}" and add the new panel with a new id in the same call.`;
   const confirmReplaceHint = `Tell the user it cannot be edited, and replace it only after they confirm: then remove "${id}" and add the new panel with a new id in the same call.`;
+  if (content.source === 'attachment') {
+    return `Panel "${id}" already exists, and attachments only add new panels. To replace it with the attachment, remove "${id}" and add the attachment with a new id in the same call.`;
+  }
   const renderer = findPanelRenderer(type);
   if (renderer === 'lens' && !isEsqlLensPanel(existingPanel)) {
     return `Panel "${id}" is a Lens panel that is not backed by ES|QL, so it cannot be edited. ${confirmReplaceHint}`;

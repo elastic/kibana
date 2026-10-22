@@ -658,7 +658,7 @@ describe('executeDashboardUpsert', () => {
         },
         kind: 'panel',
         identifier: 'panel-1',
-        error: `Panel "panel-1" is a lens panel. Edit it with source: "request", renderer: "lens". To replace it with another kind of panel, remove "panel-1" and add the new panel with a new id in the same call.`,
+        error: `Panel "panel-1" already exists, and attachments only add new panels. To replace it with the attachment, remove "panel-1" and add the attachment with a new id in the same call.`,
       },
     ])(
       'rejects $name and leaves the dashboard unchanged',
