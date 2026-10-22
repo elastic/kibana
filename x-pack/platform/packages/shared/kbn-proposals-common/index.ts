@@ -44,6 +44,8 @@ export {
   isExpired,
   isProposalSettling,
   isTerminal,
+  OPEN_PROPOSAL_STATUSES,
+  SETTLED_PROPOSAL_STATUSES,
   listProposalsQuerySchema,
   MAX_PROPOSALS_PAGE_OFFSET,
   MAX_PROPOSALS_PAGE_SIZE,
