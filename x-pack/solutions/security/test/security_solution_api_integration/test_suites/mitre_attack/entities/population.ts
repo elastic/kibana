@@ -200,17 +200,15 @@ export default ({ getService }: FtrProviderContext) => {
         await seedMitreEntities(es, loadMitreArtifact());
       });
 
-      it('returns 200 with empty buckets when no saved objects exist (never a 5xx)', async () => {
+      it('returns 503 when no saved objects exist for a canonical enterprise query', async () => {
         await deleteAllMitreEntities(es);
 
-        const { body, status } = await mitreAttackApi.getEntities();
+        const { status } = await mitreAttackApi.getEntities();
 
-        // The plugin's state is already 'ready' from the before() call above,
-        // so ensureInitialized() returns immediately and list() reads the now-empty index.
-        expect(status).to.eql(200);
-        expect(body.tactics).to.eql([]);
-        expect(body.techniques).to.eql([]);
-        expect(body.subtechniques).to.eql([]);
+        // The data client detects the empty canonical enterprise result and throws
+        // MitreDataUnavailableError('population_failed'), which the route maps to 503.
+        // This also triggers background repopulation via reportEmptyWhileReady().
+        expect(status).to.eql(503);
       });
 
       it('serves data for every framework after the index is repopulated with the full artifact via bulk insert', async () => {
