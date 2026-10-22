@@ -18,3 +18,8 @@ export type {
   DataGridProps,
   DataGridRef,
 } from './src/types';
+export {
+  EuiDataGridAdapter,
+  type EuiDataGridAdapterProps,
+  type EuiDataGridAdapterRef,
+} from './src/eui_adapter/eui_data_grid_adapter';
