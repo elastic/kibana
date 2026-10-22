@@ -154,6 +154,25 @@ describe('dependencyOperationsRoute params', () => {
     expectParseSuccess(result);
   });
 
+  it('accepts an optional serviceName to scope the operations to a caller', () => {
+    const result = dependencyOperationsRoute.params!.safeParse({
+      query: {
+        dependencyName: 'postgresql',
+        serviceName: 'opbeans-java',
+        searchServiceDestinationMetrics: 'false',
+        start: '2021-01-01T00:00:00.000Z',
+        end: '2021-01-08T00:00:00.000Z',
+        kuery: '',
+        environment: 'production',
+      },
+    });
+
+    expectParseSuccess(result);
+    if (result.success) {
+      expect(result.data.query.serviceName).toBe('opbeans-java');
+    }
+  });
+
   it('rejects a non-boolean searchServiceDestinationMetrics', () => {
     const result = dependencyOperationsRoute.params!.safeParse({
       query: {

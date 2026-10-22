@@ -11,6 +11,8 @@ import {
   type ServiceMapRouteResponse,
   type ServiceMapServiceBadgesResponse,
   type ServiceMapServiceDependencyInfoResponse,
+  type ConnectionTransactionsResponse,
+  type ConnectionFailedCallsResponse,
 } from '@kbn/apm-api-shared';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import type { BoolQuery } from '@kbn/es-query';
@@ -27,6 +29,8 @@ import { getServiceGroup } from '../service_groups/get_service_group';
 import { getServiceMap } from './get_service_map';
 import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
 import { getServiceMapServiceBadges } from './get_service_map_service_badges';
+import { getConnectionTransactions } from './get_connection_transactions';
+import { getConnectionFailedCalls } from './get_connection_failed_calls';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: routeDefinitions.serviceMap.serviceMap.endpoint,
@@ -112,7 +116,15 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
 
     const {
-      query: { dependencies, sourceServiceName, environment, start, end, offset },
+      query: {
+        dependencies,
+        sourceServiceName,
+        environment,
+        start,
+        end,
+        offset,
+        latencyAggregationType,
+      },
     } = params;
 
     return getServiceMapDependencyNodeInfo({
@@ -123,6 +135,7 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
       end,
       environment,
       offset,
+      latencyAggregationType,
     });
   },
 });
@@ -164,8 +177,74 @@ const serviceMapServiceBadgesRoute = createApmServerRoute({
   },
 });
 
+const serviceMapConnectionTransactionsRoute = createApmServerRoute({
+  endpoint: routeDefinitions.serviceMap.connectionTransactions.endpoint,
+  params: routeDefinitions.serviceMap.connectionTransactions.params,
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<ConnectionTransactionsResponse> => {
+    const { config, context, params } = resources;
+
+    if (!config.serviceMapEnabled) {
+      throw Boom.notFound();
+    }
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
+      throw Boom.forbidden(invalidLicenseMessage);
+    }
+    const apmEventClient = await getApmEventClient(resources);
+
+    const {
+      query: { sourceServiceName, targetServiceName, dependencies, environment, start, end },
+    } = params;
+
+    return getConnectionTransactions({
+      apmEventClient,
+      sourceServiceName,
+      targetServiceName,
+      dependencies,
+      environment,
+      start,
+      end,
+    });
+  },
+});
+
+const serviceMapConnectionFailedCallsRoute = createApmServerRoute({
+  endpoint: routeDefinitions.serviceMap.connectionFailedCalls.endpoint,
+  params: routeDefinitions.serviceMap.connectionFailedCalls.params,
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<ConnectionFailedCallsResponse> => {
+    const { config, context, params } = resources;
+
+    if (!config.serviceMapEnabled) {
+      throw Boom.notFound();
+    }
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
+      throw Boom.forbidden(invalidLicenseMessage);
+    }
+    const apmEventClient = await getApmEventClient(resources);
+
+    const {
+      query: { sourceServiceName, targetServiceName, dependencies, environment, start, end },
+    } = params;
+
+    return getConnectionFailedCalls({
+      apmEventClient,
+      sourceServiceName,
+      targetServiceName,
+      dependencies,
+      environment,
+      start,
+      end,
+    });
+  },
+});
+
 export const serviceMapRouteRepository = {
   ...serviceMapRoute,
   ...serviceMapDependencyNodeRoute,
   ...serviceMapServiceBadgesRoute,
+  ...serviceMapConnectionTransactionsRoute,
+  ...serviceMapConnectionFailedCallsRoute,
 };
