@@ -14,10 +14,15 @@ import {
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import type { ListOnlineScoresResponse } from '@kbn/evals-common';
+import type {
+  ListOnlineEvaluationEventsResponse,
+  ListOnlineScoresResponse,
+} from '@kbn/evals-common';
 import { i18n } from '@kbn/i18n';
 
-type OnlineScoreRow = ListOnlineScoresResponse['data'][number];
+export type OnlineScoreRow =
+  | ListOnlineScoresResponse['data'][number]
+  | ListOnlineEvaluationEventsResponse['data'][number];
 
 const encodeRowIdPart = (value: string): string => `${value.length}:${value}`;
 
@@ -59,11 +64,41 @@ export const OnlineEvalScoresTable: React.FC<OnlineEvalScoresTableProps> = ({
       {
         field: 'trace_id',
         name: i18n.translate('xpack.evals.onlineEvaluations.detail.scoresTable.traceIdColumn', {
-          defaultMessage: 'Trace ID',
+          defaultMessage: 'Evaluated trace',
         }),
         render: (traceId: string) => (
-          <EuiLink onClick={() => onTraceClick(traceId)}>{traceId}</EuiLink>
+          <EuiLink
+            href="#"
+            onClick={(event) => {
+              event.preventDefault();
+              onTraceClick(traceId);
+            }}
+          >
+            {traceId}
+          </EuiLink>
         ),
+      },
+      {
+        name: i18n.translate(
+          'xpack.evals.onlineEvaluations.detail.scoresTable.evaluatorTraceIdColumn',
+          {
+            defaultMessage: 'Evaluator trace',
+          }
+        ),
+        render: (item: OnlineScoreRow) => {
+          const evaluatorTraceId = item.evaluator.trace_id;
+          return evaluatorTraceId ? (
+            <EuiLink
+              href="#"
+              onClick={(event) => {
+                event.preventDefault();
+                onTraceClick(evaluatorTraceId);
+              }}
+            >
+              {evaluatorTraceId}
+            </EuiLink>
+          ) : null;
+        },
       },
       {
         name: i18n.translate('xpack.evals.onlineEvaluations.detail.scoresTable.evaluatorColumn', {

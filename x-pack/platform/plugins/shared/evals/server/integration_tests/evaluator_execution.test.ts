@@ -5,11 +5,18 @@
  * 2.0.
  */
 
+import { node, resources, tracing } from '@elastic/opentelemetry-node/sdk';
+import { context as otelContext, trace } from '@opentelemetry/api';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { BoundInferenceClient } from '@kbn/inference-common';
+import {
+  initInferenceTracerProvider,
+  shutdownInferenceTracerProvider,
+  withChatCompleteSpan,
+} from '@kbn/inference-tracing';
 import { API_VERSIONS, EVALS_EVALUATE_URL } from '@kbn/evals-common';
 import { EVALS_API_PRIVILEGES } from '../../common';
 import { createEvaluatorRegistry } from '../evaluators/registry';
@@ -514,5 +521,94 @@ describe('trace evaluators integration', () => {
     expect(routeConfig.security).toEqual({
       authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
     });
+  });
+
+  it('returns one trace id shared by the judge root and its inference chat span', async () => {
+    const globalExporter = new tracing.InMemorySpanExporter();
+    const inferenceExporter = new tracing.InMemorySpanExporter();
+    const provider = new node.NodeTracerProvider({
+      sampler: new tracing.AlwaysOnSampler(),
+      spanProcessors: [new tracing.SimpleSpanProcessor(globalExporter)],
+    });
+    provider.register();
+    initInferenceTracerProvider({
+      processors: [new tracing.SimpleSpanProcessor(inferenceExporter)],
+      resource: resources.resourceFromAttributes({}),
+    });
+
+    try {
+      const prompt = jest.fn().mockImplementation(() =>
+        withChatCompleteSpan({ messages: [] }, async () => ({
+          content: '',
+          toolCalls: [
+            {
+              toolCallId: 'tone-call',
+              function: {
+                name: 'tone',
+                arguments: {
+                  tone: { score: 0.75, explanation: 'The response is direct and professional.' },
+                },
+              },
+            },
+          ],
+        }))
+      );
+      const persistedEvaluator: EvaluatorDefinitionDocument = {
+        id: 'tone-1.2.0',
+        name: 'tone',
+        version: '1.2.0',
+        kind: 'llm',
+        description: 'Rates professional tone',
+        judge: {
+          prompt: 'Response: {{{agent_response}}}\nRate its professional tone.',
+          system_prompt: 'Judge the response according to the supplied criteria.',
+          evidence: ['response'],
+          output: { scores: [{ name: 'tone', type: 'number' }] },
+        },
+        created_at: '2026-08-19T12:00:00.000Z',
+        updated_at: '2026-08-19T12:00:00.000Z',
+      };
+      const { handler, context: routeContext } = setupRoute({
+        search: createMockSearch({ hasToolEvidence: true }),
+        prompt,
+        persistedEvaluator,
+      });
+
+      const response = await handler(
+        routeContext,
+        {
+          body: {
+            subject: {
+              mode: 'single-turn',
+              traces: [{ trace_id: '1234567890abcdef1234567890abcdef' }],
+            },
+            evaluators: [{ name: 'tone', version: '1.2.0', connector_id: 'connector-1' }],
+          },
+        } as unknown as Parameters<typeof handler>[1],
+        kibanaResponseFactory
+      );
+      await provider.forceFlush();
+
+      expect(response.status).toBe(200);
+      const evaluatorTraceId = response.payload.results[0].evaluator.trace_id;
+      expect(evaluatorTraceId).toEqual(expect.stringMatching(/^[0-9a-f]{32}$/));
+
+      const judgeSpan = globalExporter
+        .getFinishedSpans()
+        .find(({ name }) => name === 'judge · tone');
+      const inferenceSpans = inferenceExporter.getFinishedSpans();
+      const chatSpan = inferenceSpans.find(({ name }) => name === 'chat unknown');
+      expect(judgeSpan?.spanContext().traceId).toBe(evaluatorTraceId);
+      expect(chatSpan?.spanContext().traceId).toBe(evaluatorTraceId);
+      expect(chatSpan?.parentSpanContext?.spanId).toBe(judgeSpan?.spanContext().spanId);
+      expect(inferenceSpans).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'judge · tone' })])
+      );
+    } finally {
+      await shutdownInferenceTracerProvider();
+      await provider.shutdown();
+      trace.disable();
+      otelContext.disable();
+    }
   });
 });

@@ -28,6 +28,7 @@ describe('useUpdateOnlineEvalWorkflow', () => {
 
   const config: OnlineEvalWorkflowConfig = {
     name: 'quality monitor',
+    resultSink: 'data_stream',
     indexPattern: 'traces-*',
     extraEsqlWhere: 'service.name == "chat-service"',
     windowMinutes: 60,
@@ -64,7 +65,7 @@ describe('useUpdateOnlineEvalWorkflow', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) =>
     React.createElement(QueryClientProvider, { client: queryClient }, children);
 
-  it('builds yaml and updates workflow config', async () => {
+  it('keeps a data stream monitor on the online scores path when edited', async () => {
     const workflowId = 'workflow-1';
     const workflowDetail = {
       id: workflowId,
@@ -99,6 +100,8 @@ describe('useUpdateOnlineEvalWorkflow', () => {
       }),
       version: '2023-10-31',
     });
+    expect(expectedYaml).toContain('/s/{{ workflow.spaceId }}/internal/evals/online_scores');
+    expect(expectedYaml).not.toContain('online_evaluation_events');
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);

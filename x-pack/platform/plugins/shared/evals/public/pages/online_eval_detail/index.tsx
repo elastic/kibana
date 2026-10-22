@@ -39,10 +39,16 @@ import { css } from '@emotion/css';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   API_VERSIONS,
+  EVALS_EVALUATION_EVENT_ATTRIBUTE_KEYS,
+  EVALS_EVENTS_LOGS_INDEX_PATTERN,
+  EVALS_ONLINE_EVALUATION_EVENTS_URL,
   EVALS_ONLINE_SCORES_URL,
   EVALS_EVALUATORS_URL,
+  GEN_AI_EVALUATION_RESULT_EVENT,
+  type ListOnlineEvaluationEventsResponse,
   type ListOnlineScoresResponse,
   type ListEvaluatorsResponse,
+  type OnlineEvalResultSink,
 } from '@kbn/evals-common';
 import { LensConfigBuilder, type LensApiConfig } from '@kbn/lens-embeddable-utils';
 import { i18n } from '@kbn/i18n';
@@ -52,7 +58,10 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { useParams, useHistory } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import { useEvalsTraceFetcher } from '../../hooks/use_evals_api';
-import { OnlineEvalScoresTable } from '../../components/online_eval_scores_table';
+import {
+  OnlineEvalScoresTable,
+  type OnlineScoreRow,
+} from '../../components/online_eval_scores_table';
 import {
   useDeleteOnlineEvalWorkflow,
   useOnlineEvalWorkflow,
@@ -135,18 +144,46 @@ const useOnlineEvalDraft = ({
 interface ScoresFilter {
   monitorId: string;
   spaceId: string;
+  resultSink: OnlineEvalResultSink;
 }
 
 const escapeKqlValue = (value: string): string => value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
-const getScoresFilterExpression = ({ monitorId, spaceId }: ScoresFilter): string =>
-  `monitor.id: "${escapeKqlValue(monitorId)}" and space_ids: "${escapeKqlValue(spaceId)}"`;
+const getScoresFilterExpression = ({ monitorId, spaceId, resultSink }: ScoresFilter): string => {
+  if (resultSink === 'otel_events') {
+    return `event_name: "${GEN_AI_EVALUATION_RESULT_EVENT}" and attributes.${
+      EVALS_EVALUATION_EVENT_ATTRIBUTE_KEYS.MONITOR_ID
+    }: "${escapeKqlValue(monitorId)}" and attributes.${
+      EVALS_EVALUATION_EVENT_ATTRIBUTE_KEYS.SPACE_ID
+    }: "${escapeKqlValue(spaceId)}"`;
+  }
+
+  return `monitor.id: "${escapeKqlValue(monitorId)}" and space_ids: "${escapeKqlValue(spaceId)}"`;
+};
+
+const getScoreFields = (resultSink: OnlineEvalResultSink) => {
+  if (resultSink === 'otel_events') {
+    return {
+      name: `attributes.${EVALS_EVALUATION_EVENT_ATTRIBUTE_KEYS.EVALUATION_NAME}`,
+      value: `attributes.${EVALS_EVALUATION_EVENT_ATTRIBUTE_KEYS.SCORE_VALUE}`,
+      label: `attributes.${EVALS_EVALUATION_EVENT_ATTRIBUTE_KEYS.SCORE_LABEL}`,
+    } as const;
+  }
+
+  return {
+    name: 'score.name',
+    value: 'score.value',
+    label: 'score.label',
+  } as const;
+};
 
 const buildAverageScoreByNameLensConfig = ({
   dataViewId,
   ...scoresFilter
-}: ScoresFilter & { dataViewId: string }) =>
-  ({
+}: ScoresFilter & { dataViewId: string }) => {
+  const scoreFields = getScoreFields(scoresFilter.resultSink);
+
+  return {
     type: 'xy',
     title: i18n.translate('xpack.evals.onlineEvaluations.detail.avgScoresPanelTitle', {
       defaultMessage: 'Average score by metric',
@@ -175,7 +212,7 @@ const buildAverageScoreByNameLensConfig = ({
         y: [
           {
             operation: 'average',
-            field: 'score.value',
+            field: scoreFields.value,
             label: i18n.translate('xpack.evals.onlineEvaluations.detail.avgScoreSeriesLabel', {
               defaultMessage: 'Average score',
             }),
@@ -183,18 +220,21 @@ const buildAverageScoreByNameLensConfig = ({
         ],
         breakdown_by: {
           operation: 'terms',
-          fields: ['score.name'],
+          fields: [scoreFields.name],
           limit: 10,
         },
       },
     ],
-  } satisfies LensApiConfig);
+  } satisfies LensApiConfig;
+};
 
 const buildScoreCountByLabelLensConfig = ({
   dataViewId,
   ...scoresFilter
-}: ScoresFilter & { dataViewId: string }) =>
-  ({
+}: ScoresFilter & { dataViewId: string }) => {
+  const scoreFields = getScoreFields(scoresFilter.resultSink);
+
+  return {
     type: 'xy',
     title: i18n.translate('xpack.evals.onlineEvaluations.detail.scoreLabelsPanelTitle', {
       defaultMessage: 'Score label counts over time',
@@ -231,12 +271,13 @@ const buildScoreCountByLabelLensConfig = ({
         ],
         breakdown_by: {
           operation: 'terms',
-          fields: ['score.label'],
+          fields: [scoreFields.label],
           limit: 10,
         },
       },
     ],
-  } satisfies LensApiConfig);
+  } satisfies LensApiConfig;
+};
 
 export const OnlineEvalDetailPage: React.FC = () => {
   const history = useHistory();
@@ -279,22 +320,34 @@ export const OnlineEvalDetailPage: React.FC = () => {
 
   const toggleWorkflow = useToggleOnlineEvalWorkflow();
   const deleteWorkflow = useDeleteOnlineEvalWorkflow();
-  const [scoresData, setScoresData] = useState<ListOnlineScoresResponse['data']>([]);
+  const [scoresData, setScoresData] = useState<OnlineScoreRow[]>([]);
   const [scoresTotal, setScoresTotal] = useState(0);
   const [scoresLoading, setScoresLoading] = useState(true);
   const [scoresError, setScoresError] = useState<Error | null>(null);
+  const resultSink = workflow?.parsedConfig?.resultSink;
+  const usesEvaluationEvents = resultSink === 'otel_events';
+  const hasEvaluationEvents = usesEvaluationEvents && scoresTotal > 0;
 
   React.useEffect(() => {
     let cancelled = false;
+
+    if (!resultSink || (usesEvaluationEvents && !hasEvaluationEvents)) {
+      setDataViewId(null);
+      setDataViewError(null);
+      setIsDataViewLoading(false);
+      return () => {
+        cancelled = true;
+      };
+    }
 
     const createDataView = async () => {
       setIsDataViewLoading(true);
       setDataViewError(null);
       try {
         const createdDataView = await services.dataViews.create({
-          title: ONLINE_SCORES_DATA_VIEW,
+          title: usesEvaluationEvents ? EVALS_EVENTS_LOGS_INDEX_PATTERN : ONLINE_SCORES_DATA_VIEW,
           timeFieldName: ONLINE_SCORES_TIME_FIELD,
-          allowHidden: true,
+          allowHidden: !usesEvaluationEvents,
         });
         if (cancelled) {
           return;
@@ -316,26 +369,36 @@ export const OnlineEvalDetailPage: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [services.dataViews]);
+  }, [hasEvaluationEvents, resultSink, services.dataViews, usesEvaluationEvents]);
 
   React.useEffect(() => {
     let cancelled = false;
 
     const loadScores = async () => {
+      if (!resultSink) {
+        return;
+      }
+
       setScoresLoading(true);
       setScoresError(null);
       try {
-        const response = await services.http.get<ListOnlineScoresResponse>(
-          EVALS_ONLINE_SCORES_URL,
-          {
-            query: {
-              monitor_id: workflowId,
-              page: pageIndex + 1,
-              per_page: SCORES_PER_PAGE,
-            },
-            version: API_VERSIONS.internal.v1,
-          }
-        );
+        const requestOptions = {
+          query: {
+            monitor_id: workflowId,
+            page: pageIndex + 1,
+            per_page: SCORES_PER_PAGE,
+          },
+          version: API_VERSIONS.internal.v1,
+        };
+        const response = usesEvaluationEvents
+          ? await services.http.get<ListOnlineEvaluationEventsResponse>(
+              EVALS_ONLINE_EVALUATION_EVENTS_URL,
+              requestOptions
+            )
+          : await services.http.get<ListOnlineScoresResponse>(
+              EVALS_ONLINE_SCORES_URL,
+              requestOptions
+            );
         if (cancelled) {
           return;
         }
@@ -357,7 +420,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [services.http, workflowId, pageIndex]);
+  }, [pageIndex, resultSink, services.http, usesEvaluationEvents, workflowId]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -464,34 +527,45 @@ export const OnlineEvalDetailPage: React.FC = () => {
   const connectorMissing = hasLlmEvaluatorSelected && !draftState.draft?.connectorId;
 
   const averageScoreAttributes = useMemo(() => {
-    if (!dataViewId || !spaceId) {
+    if (!dataViewId || !spaceId || !resultSink) {
       return null;
     }
 
     try {
       return new LensConfigBuilder(services.dataViews).fromAPIFormat(
-        buildAverageScoreByNameLensConfig({ dataViewId, monitorId: workflowId, spaceId })
+        buildAverageScoreByNameLensConfig({
+          dataViewId,
+          monitorId: workflowId,
+          spaceId,
+          resultSink,
+        })
       );
     } catch {
       return null;
     }
-  }, [dataViewId, services.dataViews, workflowId, spaceId]);
+  }, [dataViewId, resultSink, services.dataViews, workflowId, spaceId]);
 
   const scoreCountAttributes = useMemo(() => {
-    if (!dataViewId || !spaceId) {
+    if (!dataViewId || !spaceId || !resultSink) {
       return null;
     }
 
     try {
       return new LensConfigBuilder(services.dataViews).fromAPIFormat(
-        buildScoreCountByLabelLensConfig({ dataViewId, monitorId: workflowId, spaceId })
+        buildScoreCountByLabelLensConfig({
+          dataViewId,
+          monitorId: workflowId,
+          spaceId,
+          resultSink,
+        })
       );
     } catch {
       return null;
     }
-  }, [dataViewId, services.dataViews, workflowId, spaceId]);
+  }, [dataViewId, resultSink, services.dataViews, workflowId, spaceId]);
 
-  const isPanelsLoading = isDataViewLoading || isSpaceIdLoading;
+  const isPanelsLoading =
+    isDataViewLoading || isSpaceIdLoading || (usesEvaluationEvents && scoresLoading);
 
   const updateErrorMessage = updateWorkflow.error
     ? i18n.translate('xpack.evals.onlineEvaluations.detail.updateWorkflowError', {
@@ -1148,82 +1222,99 @@ export const OnlineEvalDetailPage: React.FC = () => {
             </p>
           </EuiText>
           <EuiSpacer size="m" />
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiFlexItem>
-              <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-                {isPanelsLoading ? (
-                  <EuiText size="s">
-                    <p>
-                      {i18n.translate('xpack.evals.onlineEvaluations.detail.loadingPanelDataView', {
-                        defaultMessage: 'Preparing data view...',
-                      })}
-                    </p>
-                  </EuiText>
-                ) : dataViewError || !averageScoreAttributes ? (
-                  <EuiEmptyPrompt
-                    iconType="warning"
-                    titleSize="xs"
-                    title={
-                      <h3>
+          {usesEvaluationEvents && !scoresLoading && scoresTotal === 0 ? (
+            <EuiEmptyPrompt
+              data-test-subj="onlineEvalNoEvaluationEventsPrompt"
+              titleSize="xs"
+              title={
+                <h3>
+                  {i18n.translate('xpack.evals.onlineEvaluations.detail.noEvaluationEventsYet', {
+                    defaultMessage: 'No evaluation results have been stored for this monitor yet.',
+                  })}
+                </h3>
+              }
+            />
+          ) : (
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <EuiFlexItem>
+                <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+                  {isPanelsLoading ? (
+                    <EuiText size="s">
+                      <p>
                         {i18n.translate(
-                          'xpack.evals.onlineEvaluations.detail.avgScoresLoadErrorTitle',
+                          'xpack.evals.onlineEvaluations.detail.loadingPanelDataView',
                           {
-                            defaultMessage: 'Unable to render score trends',
+                            defaultMessage: 'Preparing data view...',
                           }
                         )}
-                      </h3>
-                    }
-                  />
-                ) : (
-                  <div data-test-subj="onlineEvalAverageScoreTrend">
-                    <services.lens.EmbeddableComponent
-                      id="online-evals-average-score-trend"
-                      attributes={averageScoreAttributes}
-                      timeRange={EMPTY_TIME_RANGE}
-                      style={{ height: 280 }}
+                      </p>
+                    </EuiText>
+                  ) : dataViewError || !averageScoreAttributes ? (
+                    <EuiEmptyPrompt
+                      iconType="warning"
+                      titleSize="xs"
+                      title={
+                        <h3>
+                          {i18n.translate(
+                            'xpack.evals.onlineEvaluations.detail.avgScoresLoadErrorTitle',
+                            {
+                              defaultMessage: 'Unable to render score trends',
+                            }
+                          )}
+                        </h3>
+                      }
                     />
-                  </div>
-                )}
-              </EuiPanel>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-                {isPanelsLoading ? (
-                  <EuiText size="s">
-                    <p>
-                      {i18n.translate('xpack.evals.onlineEvaluations.detail.loadingPanelLabels', {
-                        defaultMessage: 'Preparing score labels panel...',
-                      })}
-                    </p>
-                  </EuiText>
-                ) : dataViewError || !scoreCountAttributes ? (
-                  <EuiEmptyPrompt
-                    iconType="warning"
-                    titleSize="xs"
-                    title={
-                      <h3>
-                        {i18n.translate(
-                          'xpack.evals.onlineEvaluations.detail.scoreLabelsLoadErrorTitle',
-                          {
-                            defaultMessage: 'Unable to render score label counts',
-                          }
-                        )}
-                      </h3>
-                    }
-                  />
-                ) : (
-                  <div data-test-subj="onlineEvalScoreLabelCounts">
-                    <services.lens.EmbeddableComponent
-                      id="online-evals-score-label-counts"
-                      attributes={scoreCountAttributes}
-                      timeRange={EMPTY_TIME_RANGE}
-                      style={{ height: 280 }}
+                  ) : (
+                    <div data-test-subj="onlineEvalAverageScoreTrend">
+                      <services.lens.EmbeddableComponent
+                        id="online-evals-average-score-trend"
+                        attributes={averageScoreAttributes}
+                        timeRange={EMPTY_TIME_RANGE}
+                        style={{ height: 280 }}
+                      />
+                    </div>
+                  )}
+                </EuiPanel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+                  {isPanelsLoading ? (
+                    <EuiText size="s">
+                      <p>
+                        {i18n.translate('xpack.evals.onlineEvaluations.detail.loadingPanelLabels', {
+                          defaultMessage: 'Preparing score labels panel...',
+                        })}
+                      </p>
+                    </EuiText>
+                  ) : dataViewError || !scoreCountAttributes ? (
+                    <EuiEmptyPrompt
+                      iconType="warning"
+                      titleSize="xs"
+                      title={
+                        <h3>
+                          {i18n.translate(
+                            'xpack.evals.onlineEvaluations.detail.scoreLabelsLoadErrorTitle',
+                            {
+                              defaultMessage: 'Unable to render score label counts',
+                            }
+                          )}
+                        </h3>
+                      }
                     />
-                  </div>
-                )}
-              </EuiPanel>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+                  ) : (
+                    <div data-test-subj="onlineEvalScoreLabelCounts">
+                      <services.lens.EmbeddableComponent
+                        id="online-evals-score-label-counts"
+                        attributes={scoreCountAttributes}
+                        timeRange={EMPTY_TIME_RANGE}
+                        style={{ height: 280 }}
+                      />
+                    </div>
+                  )}
+                </EuiPanel>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
         </EuiPanel>
       </EuiPageSection>
       {draftState.hasChanged ? (

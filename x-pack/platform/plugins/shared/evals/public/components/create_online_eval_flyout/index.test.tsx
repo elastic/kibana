@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CreateOnlineEvalFlyout } from '.';
 import { useCreateOnlineEvalWorkflow } from '../../hooks/use_online_eval_workflows';
 import { useEvaluators } from '../../hooks/use_evaluators_api';
@@ -16,6 +17,7 @@ import { parseOnlineEvalWorkflowYaml } from '../../../common/online_evals/workfl
 jest.mock('../../hooks/use_online_eval_workflows');
 jest.mock('../../hooks/use_evaluators_api');
 jest.mock('../../hooks/use_model_connectors');
+jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
 
@@ -84,6 +86,7 @@ jest.mock('@elastic/eui', () => {
 const mockedUseCreateOnlineEvalWorkflow = jest.mocked(useCreateOnlineEvalWorkflow);
 const mockedUseEvaluators = jest.mocked(useEvaluators);
 const mockedUseModelConnectors = jest.mocked(useModelConnectors);
+const mockedUseKibana = jest.mocked(useKibana);
 
 describe('CreateOnlineEvalFlyout', () => {
   const mutateAsync = jest.fn();
@@ -94,6 +97,15 @@ describe('CreateOnlineEvalFlyout', () => {
     mutateAsync.mockReset();
     mutateAsync.mockResolvedValue({ id: 'workflow-1', name: 'nightly monitor' });
     onClose.mockReset();
+
+    mockedUseKibana.mockReturnValue({
+      services: {
+        evalsConfig: {
+          enabled: true,
+          onlineEvals: { resultSink: 'data_stream' },
+        },
+      },
+    } as unknown as ReturnType<typeof useKibana>);
 
     mockedUseCreateOnlineEvalWorkflow.mockReturnValue({
       mutateAsync,
@@ -199,6 +211,7 @@ describe('CreateOnlineEvalFlyout', () => {
 
     expect(parsed).toEqual({
       name: 'nightly monitor',
+      resultSink: 'data_stream',
       indexPattern: 'traces-agent_builder.otel-default',
       windowMinutes: 60,
       lagMinutes: 15,
@@ -209,6 +222,45 @@ describe('CreateOnlineEvalFlyout', () => {
     });
     expect(screen.getByText('Saved workflow "nightly monitor"')).toBeInTheDocument();
     expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('creates and previews an events workflow when configured for otel events', async () => {
+    mockedUseKibana.mockReturnValue({
+      services: {
+        evalsConfig: {
+          enabled: true,
+          onlineEvals: { resultSink: 'otel_events' },
+        },
+      },
+    } as unknown as ReturnType<typeof useKibana>);
+
+    ({ container } = render(<CreateOnlineEvalFlyout onClose={onClose} />));
+    fireEvent.change(getByTestSubj('onlineEvalCreateNameInput'), {
+      target: { value: 'events monitor' },
+    });
+    fireEvent.change(getByTestSubj('onlineEvalCreateEvaluatorsCombo'), {
+      target: { value: 'correctness' },
+    });
+    fireEvent.blur(getByTestSubj('onlineEvalCreateEvaluatorsCombo'), {
+      target: { value: 'correctness' },
+    });
+    fireEvent.change(getByTestSubj('onlineEvalCreateConnectorCombo'), {
+      target: { value: 'connector-allowed' },
+    });
+    fireEvent.blur(getByTestSubj('onlineEvalCreateConnectorCombo'), {
+      target: { value: 'connector-allowed' },
+    });
+
+    fireEvent.click(getByTestSubj('onlineEvalCreateShowYamlToggle'));
+    expect(screen.getByTestId('evalsWorkflowYamlPreview')).toHaveTextContent('emit:');
+
+    fireEvent.click(getByTestSubj('onlineEvalCreateSubmitButton'));
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+    const mutationArg = mutateAsync.mock.calls[0][0] as { yaml: string };
+    expect(mutationArg.yaml).toContain('emit:');
+    expect(mutationArg.yaml).not.toContain('name: persist');
+    expect(parseOnlineEvalWorkflowYaml(mutationArg.yaml)?.resultSink).toBe('otel_events');
   });
 
   it('renders workflow yaml preview when the toggle is enabled', async () => {

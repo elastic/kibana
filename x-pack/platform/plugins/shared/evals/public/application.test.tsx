@@ -16,7 +16,7 @@ jest.mock('./pages/online_evals_list', () => ({
 }));
 
 describe('EvalsApp', () => {
-  it('keeps the online evaluations route available without showing a navigation tab', () => {
+  it('renders the online evaluations route with its navigation tab selected', () => {
     const history = createMemoryHistory({
       initialEntries: ['/online'],
     }) as unknown as ScopedHistory;
@@ -31,6 +31,9 @@ describe('EvalsApp', () => {
     );
 
     expect(screen.getByText('Online evals list')).toBeInTheDocument();
-    expect(screen.queryByRole('tab', { name: 'Online Evaluations' })).not.toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Online Evaluations' })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
   });
 });

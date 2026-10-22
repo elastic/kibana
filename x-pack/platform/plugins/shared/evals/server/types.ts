@@ -20,6 +20,7 @@ import type { EvaluationScoreService } from './storage/scores/evaluation_score_s
 import type { EvaluatorOrigin, EvaluatorRegistry } from './evaluators/types';
 import type { OnlineScoreService } from './storage/scores/online_score_service';
 import type { EvalsTaskProvider } from './task_providers/types';
+import type { EvaluationEventsEmitter } from './online_evals/evaluation_events_emitter';
 
 export interface EvalsPluginSetup {
   enabled: boolean;
@@ -75,6 +76,7 @@ export interface EvalsRouteHandlerContext {
   onlineScoreService: OnlineScoreService;
   evaluatorDefinitionService: EvaluatorDefinitionService;
   evaluatorRegistry: EvaluatorRegistry;
+  evaluationEventsEmitter: EvaluationEventsEmitter;
 }
 
 export type EvalsRequestHandlerContext = CustomRequestHandlerContext<{

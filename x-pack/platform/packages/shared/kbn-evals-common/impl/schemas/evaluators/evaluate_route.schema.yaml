@@ -42,6 +42,8 @@ paths:
                       connector_id:
                         type: string
                         maxLength: 256
+                emit:
+                  $ref: '#/components/schemas/EvaluateEmitOptions'
       responses:
         '200':
           description: Successful response
@@ -56,8 +58,47 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/EvaluateResult'
+                  emission:
+                    $ref: '#/components/schemas/EvaluateEmission'
 components:
   schemas:
+    EvaluateEmitOptions:
+      type: object
+      description: >-
+        When set, successful scores are emitted as OTel `gen_ai.evaluation.result` events
+        attached to the evaluated trace, and evaluators that already emitted results for this
+        monitor and trace are skipped before they run.
+      required:
+        - monitor
+      properties:
+        monitor:
+          type: object
+          required:
+            - id
+            - name
+          properties:
+            id:
+              type: string
+              maxLength: 1024
+            name:
+              type: string
+              maxLength: 256
+    EvaluateEmission:
+      type: object
+      required:
+        - emitted
+        - skipped_evaluators
+      properties:
+        emitted:
+          type: integer
+          description: Number of evaluation events emitted.
+        skipped_evaluators:
+          type: array
+          description: >-
+            Evaluators (`name@version`) that were not run because they already emitted results
+            for this monitor and trace. They are absent from `results`.
+          items:
+            type: string
     EvaluateResult:
       type: object
       required:
@@ -95,6 +136,11 @@ components:
           enum:
             - llm
             - code
+        trace_id:
+          type: string
+          minLength: 32
+          maxLength: 32
+          pattern: '^[0-9a-f]{32}$'
         direction:
           type: string
           enum:

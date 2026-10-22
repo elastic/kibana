@@ -8,6 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { OnlineEvalResultSink } from '@kbn/evals-common';
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { PLUGIN_ID, APP_PATH, EVALS_UI_PRIVILEGES } from '../common';
@@ -30,8 +31,11 @@ const DEFAULT_ADD_TO_DATASET_LABEL = i18n.translate('xpack.evals.addToDatasetAct
 });
 
 /** Browser-exposed subset of the evals config (see `exposeToBrowser` in `server/config.ts`). */
-interface EvalsPublicConfig {
+export interface EvalsPublicConfig {
   enabled: boolean;
+  onlineEvals: {
+    resultSink: OnlineEvalResultSink;
+  };
 }
 
 export class EvalsPublicPlugin
@@ -48,7 +52,9 @@ export class EvalsPublicPlugin
     coreSetup: CoreSetup<EvalsStartDependencies>,
     { management, workflowsExtensions }: EvalsSetupDependencies
   ): EvalsPublicSetup {
-    if (this.config.enabled && workflowsExtensions) {
+    const { config: evalsConfig } = this;
+
+    if (evalsConfig.enabled && workflowsExtensions) {
       registerEvalsPublicWorkflowSteps(workflowsExtensions);
     }
 
@@ -63,7 +69,13 @@ export class EvalsPublicPlugin
       async mount({ element, history }) {
         const { mountStandaloneApp } = await import('./standalone_app/mount_app');
         const [coreStart, startDeps] = await coreSetup.getStartServices();
-        return mountStandaloneApp({ coreStart, startDeps, element, history });
+        return mountStandaloneApp({
+          coreStart,
+          startDeps,
+          evalsConfig,
+          element,
+          history,
+        });
       },
     });
 
@@ -76,7 +88,11 @@ export class EvalsPublicPlugin
         capabilitiesId: PLUGIN_ID,
         mount: async (mountParams) => {
           const { mountManagementSection } = await import('./management_section/mount_section');
-          return mountManagementSection({ core: coreSetup, mountParams });
+          return mountManagementSection({
+            core: coreSetup,
+            evalsConfig,
+            mountParams,
+          });
         },
       });
     }

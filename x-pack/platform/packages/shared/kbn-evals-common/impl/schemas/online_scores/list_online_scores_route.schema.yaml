@@ -97,6 +97,11 @@ paths:
                               enum:
                                 - llm
                                 - code
+                            trace_id:
+                              type: string
+                              minLength: 32
+                              maxLength: 32
+                              pattern: '^[0-9a-f]{32}$'
                         score:
                           type: object
                           required:

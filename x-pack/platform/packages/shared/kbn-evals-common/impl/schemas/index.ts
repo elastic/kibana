@@ -36,6 +36,7 @@ export * from './examples/get_example_scores_route.gen';
 export * from './scores/ingest_scores_route.gen';
 export * from './online_scores/ingest_online_scores_route.gen';
 export * from './online_scores/list_online_scores_route.gen';
+export * from './online_scores/list_online_evaluation_events_route.gen';
 export * from './evaluators/list_evaluators_route.gen';
 export * from './evaluators/create_evaluator_route.gen';
 export * from './evaluators/get_evaluator_route.gen';

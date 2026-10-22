@@ -9,7 +9,11 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router, Route } from '@kbn/shared-ux-router';
-import { API_VERSIONS, EVALS_ONLINE_SCORES_URL } from '@kbn/evals-common';
+import {
+  API_VERSIONS,
+  EVALS_ONLINE_EVALUATION_EVENTS_URL,
+  EVALS_ONLINE_SCORES_URL,
+} from '@kbn/evals-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnlineEvalDetailPage } from '.';
 import {
@@ -69,6 +73,7 @@ const updateMutateAsync = jest.fn();
 
 const parsedConfig = {
   name: 'quality monitor',
+  resultSink: 'data_stream' as const,
   indexPattern: 'traces-agent_builder.otel-default',
   extraEsqlWhere: 'attributes.service.name == "agent"',
   windowMinutes: 60,
@@ -92,6 +97,8 @@ const renderPage = () => {
 
 describe('OnlineEvalDetailPage', () => {
   beforeEach(() => {
+    httpGet.mockReset();
+    dataViewsCreate.mockReset();
     mockedUseKibana.mockReturnValue({
       services: {
         http: { get: httpGet },
@@ -136,7 +143,7 @@ describe('OnlineEvalDetailPage', () => {
       id: 'online-scores-data-view',
     });
     httpGet.mockImplementation(async (url: string) => {
-      if (url === EVALS_ONLINE_SCORES_URL) {
+      if (url === EVALS_ONLINE_SCORES_URL || url === EVALS_ONLINE_EVALUATION_EVENTS_URL) {
         return {
           total: 1,
           data: [
@@ -190,6 +197,132 @@ describe('OnlineEvalDetailPage', () => {
     expect(secondLensProps).toBeDefined();
     expect(firstLensProps.attributes.query.expression).toBe(expectedExpression);
     expect(secondLensProps.attributes.query.expression).toBe(expectedExpression);
+    expect(dataViewsCreate).toHaveBeenCalledWith({
+      title: '.evaluation-online-scores',
+      timeFieldName: '@timestamp',
+      allowHidden: true,
+    });
+    expect(firstLensProps.attributes).toEqual(
+      expect.objectContaining({
+        layers: [
+          expect.objectContaining({
+            y: [expect.objectContaining({ field: 'score.value' })],
+            breakdown_by: expect.objectContaining({ fields: ['score.name'] }),
+          }),
+        ],
+      })
+    );
+    expect(secondLensProps.attributes).toEqual(
+      expect.objectContaining({
+        layers: [
+          expect.objectContaining({
+            breakdown_by: expect.objectContaining({ fields: ['score.label'] }),
+          }),
+        ],
+      })
+    );
+  });
+
+  it('uses the events route and OTel fields for an otel_events monitor', async () => {
+    mockedUseOnlineEvalWorkflow.mockReturnValue({
+      data: {
+        id: 'workflow-1',
+        name: '[online-eval] quality monitor',
+        enabled: true,
+        yaml: 'version: "1"',
+        parsedConfig: { ...parsedConfig, resultSink: 'otel_events' },
+      },
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof useOnlineEvalWorkflow>);
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(lensEmbeddableComponent).toHaveBeenCalledTimes(2);
+    });
+
+    expect(httpGet).toHaveBeenCalledWith(EVALS_ONLINE_EVALUATION_EVENTS_URL, {
+      query: {
+        monitor_id: 'workflow-1',
+        page: 1,
+        per_page: 25,
+      },
+      version: API_VERSIONS.internal.v1,
+    });
+    expect(dataViewsCreate).toHaveBeenCalledWith({
+      title: 'logs-evals.otel-*',
+      timeFieldName: '@timestamp',
+      allowHidden: false,
+    });
+
+    const firstLensProps = lensEmbeddableComponent.mock.calls[0]?.[0] as {
+      attributes: {
+        query: { expression: string };
+        layers: Array<{
+          y: Array<{ field: string }>;
+          breakdown_by: { fields: string[] };
+        }>;
+      };
+    };
+    const secondLensProps = lensEmbeddableComponent.mock.calls[1]?.[0] as {
+      attributes: {
+        query: { expression: string };
+        layers: Array<{ breakdown_by: { fields: string[] } }>;
+      };
+    };
+    const expectedExpression =
+      'event_name: "gen_ai.evaluation.result" and attributes.kibana.evals.monitor.id: "workflow-1" and attributes.kibana.evals.space_id: "space-a"';
+
+    expect(firstLensProps.attributes.query.expression).toBe(expectedExpression);
+    expect(secondLensProps.attributes.query.expression).toBe(expectedExpression);
+    expect(firstLensProps.attributes.layers[0]).toEqual(
+      expect.objectContaining({
+        y: [expect.objectContaining({ field: 'attributes.gen_ai.evaluation.score.value' })],
+        breakdown_by: expect.objectContaining({
+          fields: ['attributes.gen_ai.evaluation.name'],
+        }),
+      })
+    );
+    expect(secondLensProps.attributes.layers[0]).toEqual(
+      expect.objectContaining({
+        breakdown_by: expect.objectContaining({
+          fields: ['attributes.gen_ai.evaluation.score.label'],
+        }),
+      })
+    );
+  });
+
+  it('shows an empty prompt without creating an OTel data view before events exist', async () => {
+    mockedUseOnlineEvalWorkflow.mockReturnValue({
+      data: {
+        id: 'workflow-1',
+        name: '[online-eval] quality monitor',
+        enabled: true,
+        yaml: 'version: "1"',
+        parsedConfig: { ...parsedConfig, resultSink: 'otel_events' },
+      },
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof useOnlineEvalWorkflow>);
+    httpGet.mockImplementation(async (url: string) => {
+      if (url === EVALS_ONLINE_EVALUATION_EVENTS_URL) {
+        return { total: 0, data: [] };
+      }
+
+      return { evaluators: [] };
+    });
+
+    renderPage();
+
+    expect(
+      await screen.findByText('No evaluation results have been stored for this monitor yet.')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('No scores have been indexed yet for this online evaluation.')
+    ).toBeInTheDocument();
+    expect(dataViewsCreate).not.toHaveBeenCalled();
+    expect(lensEmbeddableComponent).not.toHaveBeenCalled();
   });
 
   it('does not render Lens panels until the active space is resolved', async () => {
@@ -271,6 +404,7 @@ describe('OnlineEvalDetailPage', () => {
         workflowId: 'workflow-1',
         config: expect.objectContaining({
           every: '5m',
+          resultSink: 'data_stream',
         }),
       });
     });

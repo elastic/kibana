@@ -16,9 +16,11 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_NAME } from '../../common';
 import { EvalsApp } from '../application';
+import type { EvalsPublicConfig } from '../plugin';
 
 interface MountSectionParams {
   core: CoreSetup;
+  evalsConfig: EvalsPublicConfig;
   mountParams: ManagementAppMountParams;
 }
 
@@ -28,6 +30,7 @@ const aiBreadcrumbLabel = i18n.translate('xpack.evals.stackManagement.breadcrumb
 
 export const mountManagementSection = async ({
   core,
+  evalsConfig,
   mountParams: { element, setBreadcrumbs, history },
 }: MountSectionParams) => {
   const [coreStart, startDeps] = await core.getStartServices();
@@ -47,7 +50,7 @@ export const mountManagementSection = async ({
   const App = () => (
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
-        <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
+        <KibanaContextProvider services={{ ...coreStart, ...startDeps, evalsConfig }}>
           <EvalsApp
             history={history}
             setBreadcrumbs={setBreadcrumbs}

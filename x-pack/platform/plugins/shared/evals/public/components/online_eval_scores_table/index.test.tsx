@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { ListOnlineScoresResponse } from '@kbn/evals-common';
-import { getOnlineScoreRowId } from '.';
+import { getOnlineScoreRowId, OnlineEvalScoresTable } from '.';
 
 type OnlineScoreRow = ListOnlineScoresResponse['data'][number];
 
@@ -38,5 +40,52 @@ describe('getOnlineScoreRowId', () => {
     });
 
     expect(getOnlineScoreRowId(firstRow)).not.toBe(getOnlineScoreRowId(secondRow));
+  });
+});
+
+describe('OnlineEvalScoresTable', () => {
+  it('opens the evaluator trace and labels the evaluated trace separately', () => {
+    const onTraceClick = jest.fn();
+    render(
+      <OnlineEvalScoresTable
+        items={[
+          getRow({
+            evaluator: {
+              name: 'correctness',
+              version: '1.0.0',
+              kind: 'llm',
+              trace_id: 'judge-trace-1',
+            },
+          }),
+        ]}
+        totalItemCount={1}
+        pageIndex={0}
+        pageSize={25}
+        loading={false}
+        onPageChange={jest.fn()}
+        onTraceClick={onTraceClick}
+      />
+    );
+
+    expect(screen.getByText('Evaluated trace')).toBeInTheDocument();
+    expect(screen.getByText('Evaluator trace')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('link', { name: 'judge-trace-1' }));
+    expect(onTraceClick).toHaveBeenCalledWith('judge-trace-1');
+  });
+
+  it('does not render an evaluator trace link when its trace id is missing', () => {
+    render(
+      <OnlineEvalScoresTable
+        items={[getRow()]}
+        totalItemCount={1}
+        pageIndex={0}
+        pageSize={25}
+        loading={false}
+        onPageChange={jest.fn()}
+        onTraceClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getAllByRole('link')).toHaveLength(1);
   });
 });
