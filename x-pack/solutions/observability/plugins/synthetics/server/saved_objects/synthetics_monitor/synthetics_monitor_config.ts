@@ -4,23 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema, type Type } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { monitorConfigMappings } from './monitor_mappings';
+import { monitorCreateSchema, monitorForwardCompatibilitySchema } from './monitor_attribute_schema';
 import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import { ConfigKey, secretKeys } from '../../../common/constants/monitor_management';
-
-const optionalAttribute = (): Type<unknown> => schema.maybe(schema.any());
-
-const monitorAttributeFields: Record<string, Type<unknown>> = {
-  secrets: optionalAttribute(),
-};
-for (const key of Object.values(ConfigKey)) {
-  monitorAttributeFields[key] = optionalAttribute();
-}
-
-const monitorAttributeSchema = schema.object(monitorAttributeFields, { unknowns: 'ignore' });
 
 export const getSyntheticsMonitorConfigSavedObjectType = (): SavedObjectsType => {
   return {
@@ -43,8 +32,8 @@ export const getSyntheticsMonitorConfigSavedObjectType = (): SavedObjectsType =>
       '1': {
         changes: [],
         schemas: {
-          create: monitorAttributeSchema,
-          forwardCompatibility: monitorAttributeSchema,
+          create: monitorCreateSchema,
+          forwardCompatibility: monitorForwardCompatibilitySchema,
         },
       },
     },
