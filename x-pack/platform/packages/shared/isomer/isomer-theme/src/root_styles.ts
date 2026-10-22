@@ -7,6 +7,7 @@
 
 import type { StylesCollector } from '@elastic/distillate';
 import { rule } from '@elastic/distillate';
+import { collectCardStyles } from './card_frame';
 import { ISOMER_ROOT_CLASS, isomerDistillery } from './distillery';
 
 const ROOT_SELECTOR = `.${ISOMER_ROOT_CLASS}`;
@@ -28,7 +29,8 @@ export const rootStyles = isomerDistillery.createStyleModule(
   })
 );
 
-/** Collects the root styles, which no primitive resolves on its own. */
+/** Collects the root styles and the snapshot card's, which no primitive resolves on its own. */
 export const collectRootStyles = (collector: StylesCollector): void => {
   collector.use([rootStyles.handles.root]);
+  collectCardStyles(collector);
 };

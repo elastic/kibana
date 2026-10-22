@@ -10,7 +10,16 @@ import type { PrimitiveNode } from '@elastic/isomer-sdk';
 import { nodeAnchor, z } from '@elastic/isomer-sdk';
 import { fromTextChildren } from '@elastic/isomer-sdk/author';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
-import { componentIcon, definePrimitive, plainText } from '../../lib';
+import {
+  componentIcon,
+  definePrimitive,
+  plainText,
+  BORDER,
+  SIZE,
+  TEXT,
+  snapshotMetrics,
+  textHeight,
+} from '../../lib';
 import { quoteMarkdownRenderer } from './quote_markdown';
 
 const quoteSchema = z.object({
@@ -72,6 +81,10 @@ export const quote = definePrimitive<QuoteNode, typeof quoteSchema>({
       text: 'Two causes overlapped:\na slow database failover,\nand a retry storm.',
     },
   ],
+  metrics: snapshotMetrics<QuoteNode>(
+    'quote',
+    ({ text }) => textHeight(lines(text).join('\n'), TEXT.s, SIZE.m + BORDER.thick) + SIZE.m
+  ),
   renderers: {
     react: (node, { context }) => (
       <blockquote {...nodeAnchor(context, node)} className={classNames(context, handles.root)}>

@@ -12,7 +12,15 @@ import { md } from '@elastic/isomer-sdk/markdown';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
 
-import { componentIcon, definePrimitive, plainText } from '../../lib';
+import {
+  componentIcon,
+  definePrimitive,
+  plainText,
+  SIZE,
+  TEXT,
+  snapshotMetrics,
+  textHeight,
+} from '../../lib';
 import type { ComponentsPackTypes, ComponentsRenderContext } from '../../lib';
 import { imageLabel } from './image_label';
 import { imageSlackRenderer } from './image_slack';
@@ -105,6 +113,11 @@ export const image = definePrimitive<ImageNode, typeof imageSchema>({
   icon,
   // The host resolves the file, which conformance doesn't supply; image.test.tsx covers that.
   examples: [example, { type: 'image', fileId: 'd4e5f6', alt: 'A screenshot of the error' }],
+  // A server snapshot has no file resolver, so the image draws as its name.
+  metrics: snapshotMetrics<ImageNode>(
+    'image',
+    (node) => textHeight(imageLabel(node), TEXT.s) + SIZE.s
+  ),
   renderers: {
     react: imageReactRenderer,
     text: (node) => imageLabel(node),

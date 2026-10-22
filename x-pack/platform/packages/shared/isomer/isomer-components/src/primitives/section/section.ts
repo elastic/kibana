@@ -10,7 +10,17 @@ import { unresolvedBodyNodeSchema, z } from '@elastic/isomer-sdk';
 import { md } from '@elastic/isomer-sdk/markdown';
 import { slackContainer } from '@elastic/isomer-sdk/slack';
 
-import { componentIcon, definePrimitive, oneLine, plainText } from '../../lib';
+import {
+  componentIcon,
+  definePrimitive,
+  oneLine,
+  plainText,
+  SIZE,
+  TEXT,
+  bodyNodeHeight,
+  snapshotMetrics,
+  textHeight,
+} from '../../lib';
 import type { DividerNode } from '../divider';
 import type { MarkdownNode } from '../markdown';
 import type { QuoteNode } from '../quote';
@@ -81,6 +91,12 @@ export const section = definePrimitive<SectionNode, typeof sectionSchema>({
     },
   ],
   children: ({ body }) => body.map((node, index) => ({ node, path: `body[${index}]` })),
+  metrics: snapshotMetrics<SectionNode>('section', ({ title, body }) =>
+    body.reduce(
+      (height, child) => height + bodyNodeHeight(child),
+      SIZE.l + textHeight(oneLine(title), TEXT.m) + SIZE.s
+    )
+  ),
   renderers: {
     react: sectionReactRenderer,
     text: ({ title, body }, { scope }) =>
