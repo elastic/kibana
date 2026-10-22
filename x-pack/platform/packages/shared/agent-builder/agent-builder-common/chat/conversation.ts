@@ -544,16 +544,6 @@ export interface ConversationRoundFeedback {
   comment?: string;
   /** ISO timestamp when the feedback was (most recently) submitted */
   submitted_at: string;
-  /**
-   * Connector ID from the round's model_usage at submission time.
-   * Present whenever model_usage is available on the round.
-   */
-  connector_id?: string;
-  /**
-   * Model identifier. Only populated when the LLM provider returns the model
-   * in its response — many connectors omit it.
-   */
-  model?: string;
 }
 
 /**
@@ -591,8 +581,6 @@ export interface ConversationRound {
   trace_id?: string | string[];
   /** Runtime configuration overrides that were applied to this round */
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
-  /** User feedback for this round, if submitted. */
-  feedback?: ConversationRoundFeedback;
   /**
    * Set when the round's last execution ended without an outcome (failed or aborted). The round
    * is `completed` with an empty `response.message`; the steps completed before the interruption
@@ -616,6 +604,9 @@ export interface ConversationRoundAuthor {
   /** Absent for external authors. */
   type?: UserPrincipalType;
 }
+
+/** The display-only part of an author a writer may supply. */
+export type ConversationRoundAuthorDecoration = Pick<ConversationRoundAuthor, 'full_name'>;
 
 export const getConversationRoundAuthorDisplayName = (
   author?: Pick<ConversationRoundAuthor, 'id' | 'username' | 'full_name'>
@@ -687,6 +678,11 @@ export interface ConnectorModelUsageStats {
    * Model identifier for this connector, if available.
    */
   model?: string;
+  /**
+   * Number of reasoning (thinking) tokens, when reported by the provider.
+   * Subset of `output_tokens`, not additive.
+   */
+  reasoning_tokens?: number;
 }
 
 export interface RoundModelUsageStats {
@@ -720,8 +716,14 @@ export interface RoundModelUsageStats {
    */
   last_call_input_tokens?: number;
   /**
+   * Number of reasoning (thinking) tokens this round, when reported by the provider.
+   * Subset of `output_tokens`, not additive.
+   */
+  reasoning_tokens?: number;
+  /**
    * Per-connector breakdown of the round's LLM usage. When present, the entries sum up to the
-   * top-level `llm_calls`, `input_tokens`, `output_tokens` and `cached_input_tokens`.
+   * top-level `llm_calls`, `input_tokens`, `output_tokens`, `cached_input_tokens` and
+   * `reasoning_tokens`. The last two are only set when at least one entry reports them.
    * Absent on rounds persisted before the breakdown existed.
    */
   connectors?: ConnectorModelUsageStats[];
@@ -762,6 +764,9 @@ export const CONVERSATION_TITLE_MAX_LENGTH = 500;
  * Conversation ids are UUIDs, so this should be more than enough.
  */
 export const CONVERSATION_ID_MAX_LENGTH = 256;
+
+/** Maximum length of the display name a workflow may record on a user message it writes. */
+export const USER_MESSAGE_AUTHOR_NAME_MAX_LENGTH = 256;
 
 /** Maximum accepted length for a conversation metadata key */
 export const CONVERSATION_METADATA_KEY_MAX_LENGTH = 256;
@@ -830,6 +835,8 @@ export interface Conversation {
   events?: ConversationEvent[];
   /** Schema version of the stored events. */
   schema_version?: number;
+  /** Per-execution feedback submitted by the user. Keyed by execution id. */
+  feedback?: Record<string, ConversationRoundFeedback>;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';

@@ -7,8 +7,21 @@
 
 export {
   detectionSchema,
+  detectionSkipSchema,
+  skipMarkerSchema,
+  type SkipMarker,
+  PROBE_STATUSES,
+  type ProbeStatus,
+  type BaselineDecision,
+  SKIP_REASONS,
+  type SkipReason,
+  NEEDS_AGENT_REASONS,
+  type NeedsAgentReason,
+  baselineObservationSchema,
+  type BaselineObservation,
   CHANGE_POINT_TYPES,
   type Detection,
+  type DetectionSkip,
   type ChangePointType,
 } from './detections';
 export {
@@ -50,10 +63,6 @@ export {
   MAX_RULE_NAME_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
-  MAX_SIGNAL_DESCRIPTION_LENGTH,
-  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
-  MAX_SUMMARY_LENGTH,
-  MAX_ASSESSMENT_NOTE_LENGTH,
   ASSESSMENT_NOTE_ROLE_RULE,
   NO_RAW_SENSITIVE_VALUES_RULE,
   SUMMARY_ROLE_RULE,

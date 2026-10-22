@@ -27,6 +27,7 @@ import {
   getProposalTone,
   isProposalExpired,
 } from './proposal_helpers';
+import { ProposalCaption } from './proposal_caption';
 import type { ApprovalAction, AlwaysAllowOption, DeclineParams, ApprovalProposal } from './types';
 
 export interface ApprovalContentProps {
@@ -234,13 +235,17 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const isReplacedFailure = isReplaced && decision?.status === 'failed';
     const badge = getApprovalOutcomeBadge(isReplacedFailure ? 'failed' : approvalPhase);
     const banner = isReplaced ? undefined : getApprovalOutcomeBanner(approvalPhase);
-    const bannerSuffix = decision?.reason ?? banner?.hint;
+    const bannerSuffix = decision?.reason;
     const isSettledOrTransient = approvalPhase !== 'pending';
 
-    const replacedCaption = isReplaced ? getProposalCaption(proposal) : undefined;
+    const hasReplacedCaption = isReplaced && getProposalCaption(proposal) !== undefined;
     const headerCaption = decision?.actorName ? (
       <>
-        {replacedCaption && `${replacedCaption} • `}
+        {hasReplacedCaption && (
+          <>
+            <ProposalCaption proposal={proposal} /> •{' '}
+          </>
+        )}
         <ApprovalActorTime
           actorName={decision.actorName}
           at={decision.decidedAt}
@@ -250,7 +255,9 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     ) : !isReplaced && isSubmitting && since ? (
       <ApprovalActorTime actorName={actorName} at={since} live />
     ) : (
-      getProposalCaption(proposal, { includeRiskDetails: !isReplaced })
+      getProposalCaption(proposal, { includeRiskDetails: !isReplaced }) && (
+        <ProposalCaption proposal={proposal} includeRiskDetails={!isReplaced} />
+      )
     );
 
     const defaultButtonColor: EuiButtonColor = tone === 'danger' ? 'danger' : 'primary';
@@ -291,15 +298,16 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           />
         )}
 
-        {!isReplaced && (
-          <ApprovalStatusCallouts
-            isPending={approvalPhase === 'pending'}
-            previousExecutionError={proposal.previousExecutionError}
-            isExpired={isExpired}
-            expiredReason={proposal.rationale}
-            data-test-subj={dataTestSubj}
-          />
-        )}
+        {/* A replaced card's only callout is why its own attempt failed; the rest belong to the
+            live successor. */}
+        <ApprovalStatusCallouts
+          isPending={!isReplaced && approvalPhase === 'pending'}
+          previousExecutionError={proposal.previousExecutionError}
+          failedAttemptError={isReplacedFailure ? proposal.executionError : undefined}
+          isExpired={!isReplaced && isExpired}
+          expiredReason={proposal.rationale}
+          data-test-subj={dataTestSubj}
+        />
 
         {showDeclineForm && (
           <DeclineReasonForm

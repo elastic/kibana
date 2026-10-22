@@ -64,9 +64,17 @@ describe('getVisualizationAttachmentType', () => {
       getCreationActivity: expect.any(Function),
       getRemovalActivity: expect.any(Function),
       getAttachmentList: expect.any(Function),
+      getCountLabel: expect.any(Function),
       schema: expect.any(Object),
       workflowSchema: expect.any(Object),
     });
+  });
+
+  it('counts visualizations', () => {
+    const lensType = getVisualizationAttachmentType();
+
+    expect(lensType.getCountLabel?.({ count: 1 })).toBe('1 visualization');
+    expect(lensType.getCountLabel?.({ count: 2 })).toBe('2 visualizations');
   });
 
   describe('workflowSchema', () => {

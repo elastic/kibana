@@ -38,6 +38,15 @@ jest.mock('./hooks/use_automations', () => ({
 }));
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('../hooks/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
+jest.mock('../settings/components/apps_section/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../settings/components/apps_section/use_relay_app_bindings'),
+  useAllRelayAppBindings: () => ({
+    bindings: [],
+    isLoading: false,
+    isError: false,
+    isComplete: true,
+  }),
+}));
 jest.mock('./flyouts/create_flyout/create_automation_flyout', () => ({
   CreateAutomationFlyout: () => <div data-test-subj="createAutomationFlyoutStub">new</div>,
 }));
@@ -67,7 +76,7 @@ describe('AutomationsPage', () => {
     mockUseFetchAutomations.mockReturnValue({ data: { automations: [] }, isInitialLoading: false });
     mockUseAutomationsRunsInRange.mockReturnValue([]);
     mockUseAutomationRunsInRange.mockReturnValue({
-      data: { runs: [], total: 0 },
+      data: { runs: [], total: 0, usedToday: 0 },
       isInitialLoading: false,
     });
     mockUseCreateAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
@@ -188,7 +197,7 @@ describe('AutomationsPage', () => {
         id: 'report',
         name: 'Daily report',
         isEnabled: false,
-        trigger: { rows: [{ kind: 'schedule' }] },
+        trigger: { rows: [{ kind: 'schedule', schedulePreset: 'daily', time: '09:00' }] },
         runtime: { dailyDispatchLimit: 5 },
         author: 'Daniel Hughes',
       }),
@@ -212,6 +221,7 @@ describe('AutomationsPage', () => {
         ids.map((id) => ({
           data: {
             total: startedAfter === todayStart.toISOString() ? totals[id].today : totals[id].range,
+            usedToday: totals[id].today,
             runs:
               id === 'triage'
                 ? [
@@ -225,6 +235,7 @@ describe('AutomationsPage', () => {
       mockUseAutomationRunsInRange.mockImplementation((id: string) => ({
         data: {
           total: totals[id].range,
+          usedToday: totals[id].today,
           runs: [{ status: 'completed', startedAt: new Date().toISOString() }],
         },
         isInitialLoading: false,
