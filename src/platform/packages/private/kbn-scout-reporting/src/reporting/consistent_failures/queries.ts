@@ -11,7 +11,7 @@ import type { Client as ESClient } from '@elastic/elasticsearch';
 import { SCOUT_TEST_EVENTS_INDEX_PATTERN } from '@kbn/scout-info';
 import { ESQL_ROW_LIMIT, inList, quoteEsqlString } from '../flaky_tests/esql';
 import { buildExecutionModels } from '../flaky_tests/execution_model';
-import { groupByExecutionModel, runEsql } from '../flaky_tests/queries';
+import { groupByExecutionModel, runEsql, UNKNOWN_SUITE_TITLE } from '../flaky_tests/queries';
 import type { TestFramework } from '../flaky_tests/schema';
 import type { BuildRun } from './rule';
 
@@ -25,6 +25,8 @@ export interface RecentRunsScope {
 /** A config file and Scout target; a build runs a test once per setup. */
 export interface TestSetup {
   configPath?: string;
+  /** What the config runs (`ui-test`, `api-test`, ...), when the events record it. */
+  configCategory?: string;
   targetMode?: string;
   targetType?: string;
 }
@@ -32,19 +34,22 @@ export interface TestSetup {
 /** A test's runs in one setup, one per build, oldest first. */
 export interface TestSetupRuns {
   testId: string;
+  /** Title of the enclosing describe blocks, when the framework reports one. */
+  suiteTitle?: string;
   setup: TestSetup;
   runs: BuildRun[];
 }
 
 /**
- * A busy pipeline runs a test in a setup around 70 times a day, so a few days of history for
- * this many tests, each in a couple of setups, stays under the row limit.
+ * A busy pipeline runs a test in a setup around 70 times a day and a Scout test runs in up to
+ * four setups, so a few days of history for this many tests stays under the row limit.
  */
-const TESTS_PER_QUERY = 10;
+const TESTS_PER_QUERY = 5;
 
 /**
  * Per build, test and setup, how the test's runs went and whether a retried job reported it,
- * for the given tests of one execution model.
+ * for the given tests of one execution model, with the suite title and config category the
+ * events record for them.
  */
 export const buildRecentRunsQuery = (
   scope: RecentRunsScope,
@@ -75,7 +80,9 @@ export const buildRecentRunsQuery = (
       ' retries = MAX(TO_INTEGER(buildkite.retry_count)),' +
       ' last_at = MAX(@timestamp),' +
       ' build_url = MAX(buildkite.build.url),' +
-      ' commit = MAX(buildkite.commit)' +
+      ' commit = MAX(buildkite.commit),' +
+      ' suite_title = MAX(suite.title.keyword),' +
+      ' config_category = MAX(test_run.config.category)' +
       ' BY test.id, test_run.config.file.path, test_run.target.mode, test_run.target.type,' +
       ' buildkite.build.number',
     'RENAME test.id AS test_id,' +
@@ -101,6 +108,8 @@ interface RecentRunRow extends Record<string, unknown> {
   last_at: string;
   build_url: string | null;
   commit: string | null;
+  suite_title: string | null;
+  config_category: string | null;
 }
 
 const chunk = <T>(values: readonly T[], size: number): T[][] =>
@@ -131,17 +140,22 @@ export const fetchRecentRuns = async (
   }
 
   const bySetup = new Map<string, TestSetupRuns>();
-  for (const row of results.flat()) {
+  // oldest build first, so a test moved to another describe block keeps its latest title
+  for (const row of results.flat().sort((a, b) => a.build - b.build)) {
     const key = [row.test_id, row.config_path, row.target_mode, row.target_type].join('\n');
     const entry = bySetup.get(key) ?? {
       testId: row.test_id,
       setup: {
         configPath: row.config_path ?? undefined,
+        configCategory: row.config_category ?? undefined,
         targetMode: row.target_mode ?? undefined,
         targetType: row.target_type ?? undefined,
       },
       runs: [],
     };
+    if (row.suite_title && row.suite_title !== UNKNOWN_SUITE_TITLE) {
+      entry.suiteTitle = row.suite_title;
+    }
     entry.runs.push({
       build: row.build,
       buildUrl: row.build_url ?? undefined,
@@ -154,9 +168,6 @@ export const fetchRecentRuns = async (
       settled: (row.retries ?? 0) > 0,
     });
     bySetup.set(key, entry);
-  }
-  for (const entry of bySetup.values()) {
-    entry.runs.sort((a, b) => a.build - b.build);
   }
   return [...bySetup.values()];
 };

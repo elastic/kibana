@@ -70,10 +70,12 @@ export interface ConsistentFailure {
 }
 
 /**
- * Whether the test's runs in one setup end in a consistent failure: its latest settled builds
- * all failed every attempt and the runs before them all passed. Builds not yet settled at the end
- * are left out of the picture; one in the middle of the streak breaks it until it settles. A
- * skipped build breaks the streak too, as the test was dealt with.
+ * Whether the test's runs in one setup end in a consistent failure: its latest settled builds,
+ * at least as many as the rule asks, all failed every attempt and the runs before them all
+ * passed. Builds not yet settled at the end are left out of the picture; one right before the
+ * streak holds it back until it settles. A skipped build ends the streak, as the test was dealt
+ * with. The failure is found again on every build while the break lasts, so a build the check
+ * missed does not lose it; the caller tells a new break from a known one by the issue it filed.
  */
 export const findConsistentFailure = (
   runs: readonly BuildRun[],
@@ -83,23 +85,20 @@ export const findConsistentFailure = (
     .sort((a, b) => a.build - b.build)
     .map((run) => ({ run, verdict: verdictOf(run) }));
 
-  let settledCount = verdicts.length;
-  while (settledCount > 0 && verdicts[settledCount - 1].verdict === 'pending') {
-    settledCount--;
+  let end = verdicts.length;
+  while (end > 0 && verdicts[end - 1].verdict === 'pending') {
+    end--;
   }
-  const settled = verdicts.slice(0, settledCount);
-
-  const streak = settled.slice(-rule.consecutiveBuilds);
-  if (
-    streak.length < rule.consecutiveBuilds ||
-    streak.some(({ verdict }) => verdict !== 'failed')
-  ) {
+  let start = end;
+  while (start > 0 && verdicts[start - 1].verdict === 'failed') {
+    start--;
+  }
+  const streak = verdicts.slice(start, end);
+  if (streak.length < rule.consecutiveBuilds) {
     return undefined;
   }
 
-  const history = settled
-    .slice(0, -rule.consecutiveBuilds)
-    .filter(({ verdict }) => verdict !== 'skipped');
+  const history = verdicts.slice(0, start).filter(({ verdict }) => verdict !== 'skipped');
   const before = history.slice(Math.max(0, history.length - rule.cleanRunsBefore));
   if (before.some(({ verdict }) => verdict !== 'passed')) {
     return undefined;

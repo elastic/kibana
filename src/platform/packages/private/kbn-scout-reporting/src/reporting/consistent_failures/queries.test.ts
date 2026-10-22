@@ -36,6 +36,8 @@ const row = (overrides: Record<string, unknown>) => ({
   last_at: '2026-10-16T10:00:00.000Z',
   build_url: 'https://buildkite.com/elastic/kibana-on-merge/builds/1',
   commit: 'abc',
+  suite_title: 'Discover',
+  config_category: 'ui-test',
   ...overrides,
 });
 
@@ -78,10 +80,12 @@ describe('buildRecentRunsQuery', () => {
     );
   });
 
-  it('records whether a retried job reported the test', () => {
+  it('records whether a retried job reported the test, and what the test and config are', () => {
     const query = buildRecentRunsQuery(scope, ['ftr'], ['test-1']);
 
     expect(query).toContain('retries = MAX(TO_INTEGER(buildkite.retry_count))');
+    expect(query).toContain('suite_title = MAX(suite.title.keyword)');
+    expect(query).toContain('config_category = MAX(test_run.config.category)');
   });
 });
 
@@ -91,7 +95,13 @@ describe('fetchRecentRuns', () => {
       row({ build: 3, passed: 0, failed: 2, retries: 1, commit: 'ccc' }),
       row({ build: 1 }),
       row({ build: 2, passed: 0, failed: 1, retries: 0 }),
-      row({ build: 1, target_mode: 'serverless-search', config_path: null, target_type: null }),
+      row({
+        build: 1,
+        target_mode: 'serverless-search',
+        config_path: null,
+        target_type: null,
+        config_category: null,
+      }),
     ]);
 
     const runs = await fetchRecentRuns(client, scope, [
@@ -101,8 +111,10 @@ describe('fetchRecentRuns', () => {
     expect(runs).toEqual([
       {
         testId: 'test-1',
+        suiteTitle: 'Discover',
         setup: {
           configPath: 'x-pack/test/scout/ui/playwright.config.ts',
+          configCategory: 'ui-test',
           targetMode: 'stateful-classic',
           targetType: 'local',
         },
@@ -114,7 +126,13 @@ describe('fetchRecentRuns', () => {
       },
       {
         testId: 'test-1',
-        setup: { configPath: undefined, targetMode: 'serverless-search', targetType: undefined },
+        suiteTitle: 'Discover',
+        setup: {
+          configPath: undefined,
+          configCategory: undefined,
+          targetMode: 'serverless-search',
+          targetType: undefined,
+        },
         runs: [expect.objectContaining({ build: 1 })],
       },
     ]);
@@ -131,10 +149,31 @@ describe('fetchRecentRuns', () => {
     });
   });
 
+  it('takes the suite title of the latest build and none when the framework reports none', async () => {
+    const { client } = mockEs([
+      row({ build: 2, suite_title: 'Discover moved' }),
+      row({ build: 1, suite_title: 'Discover' }),
+      row({ test_id: 'test-2', suite_title: 'unknown' }),
+      row({ test_id: 'test-3', suite_title: null }),
+    ]);
+
+    const runs = await fetchRecentRuns(client, scope, [
+      { testId: 'test-1', framework: 'jest' },
+      { testId: 'test-2', framework: 'jest' },
+      { testId: 'test-3', framework: 'jest' },
+    ]);
+
+    expect(runs.map(({ testId, suiteTitle }) => ({ testId, suiteTitle }))).toEqual([
+      { testId: 'test-1', suiteTitle: 'Discover moved' },
+      { testId: 'test-2', suiteTitle: undefined },
+      { testId: 'test-3', suiteTitle: undefined },
+    ]);
+  });
+
   it('queries each execution model on its own and batches the tests', async () => {
     const { client, esql } = mockEs([]);
     const tests = [
-      ...Array.from({ length: 11 }, (_, index) => ({
+      ...Array.from({ length: 6 }, (_, index) => ({
         testId: `pw-${index}`,
         framework: 'playwright' as const,
       })),
@@ -147,7 +186,7 @@ describe('fetchRecentRuns', () => {
     expect(queries).toHaveLength(3);
     expect(queries.filter((query) => query.includes('reporter.type IN ("jest")'))).toHaveLength(1);
     expect(queries.filter((query) => query.includes('"pw-0"'))).toHaveLength(1);
-    expect(queries.filter((query) => query.includes('"pw-10"'))).toHaveLength(1);
+    expect(queries.filter((query) => query.includes('"pw-5"'))).toHaveLength(1);
   });
 
   it('fails rather than return a cut-off history', async () => {

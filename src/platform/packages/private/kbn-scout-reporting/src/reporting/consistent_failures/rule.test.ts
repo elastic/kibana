@@ -78,8 +78,26 @@ describe('findConsistentFailure', () => {
     });
   });
 
-  it('waits for a build in the middle of the streak to settle', () => {
-    expect(findConsistentFailure([...passes(1, 20), pending(21), failed(22)])).toBeUndefined();
+  it('waits for a build right before the failures to settle', () => {
+    const history = passes(1, 20);
+
+    expect(findConsistentFailure([...history, pending(21), failed(22)])).toBeUndefined();
+    expect(
+      findConsistentFailure([...history, pending(21), failed(22), failed(23)])
+    ).toBeUndefined();
+    expect(findConsistentFailure([...history, failed(21), failed(22), failed(23)])).toEqual({
+      failingBuilds: [failed(21), failed(22), failed(23)],
+      lastPassingBuild: passed(20),
+    });
+  });
+
+  it('keeps finding the failure while the break lasts', () => {
+    const runs = [...passes(1, 20), ...Array.from({ length: 5 }, (_, index) => failed(21 + index))];
+
+    expect(findConsistentFailure(runs)).toEqual({
+      failingBuilds: runs.slice(20),
+      lastPassingBuild: passed(20),
+    });
   });
 
   it('is not fooled by a test that recovered on a retry', () => {
