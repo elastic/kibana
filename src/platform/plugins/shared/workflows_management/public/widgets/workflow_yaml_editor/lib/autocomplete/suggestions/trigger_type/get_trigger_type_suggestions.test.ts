@@ -170,6 +170,7 @@ describe('get_trigger_type_suggestions', () => {
         const result = getTriggerTypeSuggestions('Cases - Case', mockRange);
 
         expect(result.map((s) => s.label)).toEqual(['cases.caseCreated']);
+        expect(result.map((s) => s.detail)).toEqual(['Cases - Case created']);
       });
     });
 

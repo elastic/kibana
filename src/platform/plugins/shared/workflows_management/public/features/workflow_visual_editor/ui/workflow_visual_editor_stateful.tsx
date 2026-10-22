@@ -34,6 +34,7 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
+import { getTriggerLabel } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
 
 function toColorMode(euiColorMode: string): ColorMode {
   switch (euiColorMode) {
@@ -56,12 +57,6 @@ interface WorkflowVisualEditorStatefulProps {
   /** Fired when the user pans or zooms; persist to restore on next mount. */
   onViewportChange?: (viewport: Viewport) => void;
 }
-
-const TRIGGER_LABEL: Record<string, string> = {
-  manual: 'Manual',
-  alert: 'Alert',
-  scheduled: 'Scheduled',
-};
 
 /**
  * Glue layer between Redux + plugin services and the read-only graph canvas.
@@ -114,7 +109,24 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   const workflow = definition ?? lastValidRef.current;
 
-  const transformed = useMemo(() => transformWorkflowToGraph(workflow), [workflow]);
+  const transformed = useMemo(() => {
+    const result = transformWorkflowToGraph(workflow);
+    return {
+      ...result,
+      nodes: result.nodes.map((node) => {
+        if (node.type !== 'trigger') {
+          return node;
+        }
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            label: getTriggerLabel(node.data.stepType),
+          },
+        };
+      }),
+    };
+  }, [workflow]);
 
   const flyoutTarget = useMemo<FlyoutTarget | null>(() => {
     if (!selectedStepId) return null;
@@ -135,7 +147,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       return {
         kind: 'trigger',
         triggerType: trigger.type,
-        triggerLabel: TRIGGER_LABEL[trigger.type] ?? trigger.type,
+        triggerLabel: getTriggerLabel(trigger.type),
         yamlSnippet,
       };
     }
