@@ -34,11 +34,9 @@ import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { TokenUsageBreakdown } from '../../../shared/ui/token_usage_badge/token_usage_breakdown';
 import { getStepFieldPathPrefix } from '../lib/get_step_field_path_prefix';
 import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_executions';
-import type { ResumeSubmitState } from '../model/use_resume_submit_state';
 import type { SelectedStepExecution } from '../model/use_selected_step_execution';
 import { useSelectedStepExecution } from '../model/use_selected_step_execution';
 import { useStepAi } from '../model/use_step_ai';
-import type { WaitingStepResume } from '../model/use_waiting_step_resume';
 import {
   approvalLabelsForStepExecution,
   resumeMessageForStepExecution,
@@ -115,121 +113,27 @@ interface StepResumeActionProps {
   detail: SelectedStepExecution;
   selectedStepExecutionId: string;
   executionId: string;
-  workflowExecution: WorkflowExecutionDto | undefined;
-  waitingResume: WaitingStepResume;
-  resumeSubmitState: ResumeSubmitState;
 }
 
-type ResumeKind = 'child' | 'own';
-
-/** Which run, if any, the selected step's resume button resumes. A waiting child step wins. */
-const getResumeKind = ({
+/**
+ * Resume button for a waiting child step. The run's own wait is resumed from the header,
+ * so the step panel only carries child runs.
+ */
+const StepResumeAction = ({
   detail,
   selectedStepExecutionId,
   executionId,
-  waitingStepExecutionId,
-}: {
-  detail: SelectedStepExecution;
-  selectedStepExecutionId: string;
-  executionId: string;
-  waitingStepExecutionId: string | undefined;
-}): ResumeKind | null => {
+}: StepResumeActionProps) => {
+  const { euiTheme } = useEuiTheme();
   const { isPseudoStep, selectedLightStep, activeStepExecution, resolvedExecutionId } = detail;
-  if (isPseudoStep) return null;
 
   const isWaitingForInput =
     selectedLightStep?.status === ExecutionStatus.WAITING_FOR_INPUT ||
     activeStepExecution?.status === ExecutionStatus.WAITING_FOR_INPUT;
   // An injected child step is not the parent run's wait. Resume that child run.
-  if (isWaitingForInput && resolvedExecutionId !== executionId) return 'child';
+  if (isPseudoStep || !isWaitingForInput || resolvedExecutionId === executionId) return null;
 
-  if (Boolean(waitingStepExecutionId) && selectedStepExecutionId === waitingStepExecutionId) {
-    return 'own';
-  }
-  return null;
-};
-
-interface ChildStepResumeButtonProps {
-  detail: SelectedStepExecution;
-  selectedStepExecutionId: string;
-  stepStartedAt: string | undefined;
-}
-
-const ChildStepResumeButton = ({
-  detail,
-  selectedStepExecutionId,
-  stepStartedAt,
-}: ChildStepResumeButtonProps) => {
-  const { selectedLightStep, activeStepExecution, resolvedExecutionId } = detail;
   const selectedStepForResume = activeStepExecution ?? selectedLightStep;
-
-  return (
-    <ResumeExecutionButton
-      executionId={resolvedExecutionId}
-      workflowId={selectedStepForResume?.workflowId}
-      stepStartedAt={stepStartedAt}
-      resumeMessage={resumeMessageForStepExecution(selectedStepForResume ?? undefined)}
-      resumeSchema={resumeSchemaForStepExecution(selectedStepForResume ?? undefined)}
-      approvalLabels={approvalLabelsForStepExecution(selectedStepForResume ?? {})}
-      waitingStepExecutionId={selectedStepExecutionId}
-      submitState={undefined}
-    />
-  );
-};
-
-interface OwnStepResumeButtonProps {
-  selectedStepExecutionId: string;
-  executionId: string;
-  workflowExecution: WorkflowExecutionDto | undefined;
-  waitingResume: WaitingStepResume;
-  resumeSubmitState: ResumeSubmitState;
-  stepStartedAt: string | undefined;
-}
-
-const OwnStepResumeButton = ({
-  selectedStepExecutionId,
-  executionId,
-  workflowExecution,
-  waitingResume,
-  resumeSubmitState,
-  stepStartedAt,
-}: OwnStepResumeButtonProps) => (
-  <ResumeExecutionButton
-    executionId={executionId}
-    workflowId={workflowExecution?.workflowId}
-    stepStartedAt={stepStartedAt}
-    resumeMessage={waitingResume.resumeMessage}
-    resumeSchema={waitingResume.resumeSchema}
-    approvalLabels={waitingResume.approvalLabels}
-    waitingStepExecutionId={selectedStepExecutionId}
-    submitState={resumeSubmitState}
-  />
-);
-
-/** Resume button for the selected step when it is the run's wait, or a waiting child step. */
-const StepResumeAction = ({
-  detail,
-  selectedStepExecutionId,
-  executionId,
-  workflowExecution,
-  waitingResume,
-  resumeSubmitState,
-}: StepResumeActionProps) => {
-  const { euiTheme } = useEuiTheme();
-  const resumeKind = getResumeKind({
-    detail,
-    selectedStepExecutionId,
-    executionId,
-    waitingStepExecutionId: waitingResume.waitingStepExecutionId,
-  });
-
-  if (!resumeKind) return null;
-
-  const { selectedLightStep, activeStepExecution } = detail;
-  const stepStartedAt =
-    selectedLightStep?.startedAt ??
-    activeStepExecution?.startedAt ??
-    waitingResume.waitingStepStartedAt;
 
   return (
     <div
@@ -238,22 +142,15 @@ const StepResumeAction = ({
         paddingBottom: euiTheme.size.m,
       }}
     >
-      {resumeKind === 'child' ? (
-        <ChildStepResumeButton
-          detail={detail}
-          selectedStepExecutionId={selectedStepExecutionId}
-          stepStartedAt={stepStartedAt}
-        />
-      ) : (
-        <OwnStepResumeButton
-          selectedStepExecutionId={selectedStepExecutionId}
-          executionId={executionId}
-          workflowExecution={workflowExecution}
-          waitingResume={waitingResume}
-          resumeSubmitState={resumeSubmitState}
-          stepStartedAt={stepStartedAt}
-        />
-      )}
+      <ResumeExecutionButton
+        executionId={resolvedExecutionId}
+        workflowId={selectedStepForResume?.workflowId}
+        stepStartedAt={selectedLightStep?.startedAt ?? activeStepExecution?.startedAt}
+        resumeMessage={resumeMessageForStepExecution(selectedStepForResume ?? undefined)}
+        resumeSchema={resumeSchemaForStepExecution(selectedStepForResume ?? undefined)}
+        approvalLabels={approvalLabelsForStepExecution(selectedStepForResume ?? {})}
+        waitingStepExecutionId={selectedStepExecutionId}
+      />
     </div>
   );
 };
@@ -324,8 +221,6 @@ interface StepDetailContentProps {
   hasStepError: boolean;
   stepInputFieldPathPrefix: string | undefined;
   stepAi: ReturnType<typeof useStepAi>;
-  waitingResume: WaitingStepResume;
-  resumeSubmitState: ResumeSubmitState;
   onSelectStep: (stepExecutionId: string | null) => void;
 }
 
@@ -414,8 +309,6 @@ const RegularStepDetail = ({
   hasStepError,
   stepInputFieldPathPrefix,
   stepAi,
-  waitingResume,
-  resumeSubmitState,
   onSelectStep,
 }: StepDetailContentProps) => {
   const { isPseudoStep, executionMetadata, activeStepExecution } = detail;
@@ -447,9 +340,6 @@ const RegularStepDetail = ({
         detail={detail}
         selectedStepExecutionId={selectedStepExecutionId}
         executionId={executionId}
-        workflowExecution={workflowExecution}
-        waitingResume={waitingResume}
-        resumeSubmitState={resumeSubmitState}
       />
       <StepDataSection
         key={`input-${selectedStepExecutionId}`}
@@ -500,8 +390,6 @@ interface StepDetailPanelProps {
   executionId: string;
   workflowExecution: WorkflowExecutionDto | undefined;
   childExecutions: ChildWorkflowExecutionsMap;
-  waitingResume: WaitingStepResume;
-  resumeSubmitState: ResumeSubmitState;
   onSelectStep: (stepExecutionId: string | null) => void;
 }
 
@@ -511,8 +399,6 @@ export const StepDetailPanel = ({
   executionId,
   workflowExecution,
   childExecutions,
-  waitingResume,
-  resumeSubmitState,
   onSelectStep,
 }: StepDetailPanelProps) => {
   const { euiTheme } = useEuiTheme();
@@ -612,8 +498,6 @@ export const StepDetailPanel = ({
             hasStepError={hasStepError}
             stepInputFieldPathPrefix={stepInputFieldPathPrefix}
             stepAi={stepAi}
-            waitingResume={waitingResume}
-            resumeSubmitState={resumeSubmitState}
             onSelectStep={onSelectStep}
           />
         )}
