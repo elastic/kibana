@@ -45,7 +45,7 @@ import { EnvironmentFilter } from './components/environment_filter';
 import { PageLoadsChart } from './components/page_loads_chart';
 import { SourceFilter } from './components/source_filter';
 import { TimeRangePicker } from '../../components/time_range_picker';
-import { APPLICATIONS_LIST_EBT_ELEMENTS } from '../../ebt_constants';
+import { APPLICATIONS_LIST_EBT_ELEMENTS, DIGITAL_EXPERIENCE_EBT_ACTIONS } from '../../ebt_constants';
 import { useDigitalExperienceRouter } from '../../hooks/use_digital_experience_router';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useListQuery } from '../../hooks/use_list_query';
@@ -223,15 +223,6 @@ const CLASSIC_DATA_HINT = i18n.translate('xpack.digitalExperience.applications.c
 
 const getRowId = ({ serviceName, source }: ApplicationRow) => `${source}:${serviceName}`;
 
-const classicDataHintEbtProps = getEbtProps({
-  action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
-  element: APPLICATIONS_LIST_EBT_ELEMENTS.CLASSIC_DATA_HINT,
-});
-
-const ebtLinkProps = getEbtProps({
-  action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
-  element: APPLICATIONS_LIST_EBT_ELEMENTS.APPLICATION_LINK,
-});
 
 const APPLICATION_COLUMN = i18n.translate(
   'xpack.digitalExperience.applications.applicationColumn',
@@ -348,7 +339,14 @@ const LoadErrorPrompt = ({ error, onRetry }: { error: Error; onRetry: () => void
     }
     body={<p>{error.message}</p>}
     actions={
-      <EuiButton data-test-subj="digitalExperienceApplicationsRetry" onClick={onRetry}>
+      <EuiButton
+        data-test-subj="digitalExperienceApplicationsRetry"
+        {...getEbtProps({
+          action: DIGITAL_EXPERIENCE_EBT_ACTIONS.RETRY_LOAD,
+          element: APPLICATIONS_LIST_EBT_ELEMENTS.RETRY,
+        })}
+        onClick={onRetry}
+      >
         {i18n.translate('xpack.digitalExperience.applications.retry', {
           defaultMessage: 'Try again',
         })}
@@ -496,7 +494,10 @@ export function ApplicationsListPage() {
           <EuiFlexItem grow={false} css={nameCss}>
             <EuiLink
               data-test-subj="digitalExperienceApplicationLink"
-              {...ebtLinkProps}
+              {...getEbtProps({
+                action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
+                element: APPLICATIONS_LIST_EBT_ELEMENTS.APPLICATION_LINK,
+              })}
               className="eui-textTruncate"
               href={application.getUrlForApp(DIGITAL_EXPERIENCE_FEATURE_ID, {
                 path: router.link('/{serviceName}', {
@@ -519,7 +520,11 @@ export function ApplicationsListPage() {
               <EuiToolTip content={CLASSIC_DATA_HINT}>
                 <EuiBadge
                   data-test-subj="digitalExperienceClassicDataHint"
-                  {...classicDataHintEbtProps}
+                  // Shows the Classic RUM row: it filters the list, it doesn't open the application.
+                  {...getEbtProps({
+                    action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
+                    element: APPLICATIONS_LIST_EBT_ELEMENTS.CLASSIC_DATA_HINT,
+                  })}
                   color="hollow"
                   onClick={() => setSourceFilter(APPLICATION_SOURCE.classic)}
                   onClickAriaLabel={CLASSIC_DATA_HINT}

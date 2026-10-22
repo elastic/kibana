@@ -10,6 +10,8 @@ import { css } from '@emotion/react';
 import { EuiFilterButton, EuiPopover, EuiSelectable, useGeneratedHtmlId } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
+import { DIGITAL_EXPERIENCE_EBT_ACTIONS } from '../../../ebt_constants';
 
 interface FilterOption {
   value: string;
@@ -33,6 +35,7 @@ export function SingleSelectFilter({
   onChange,
   searchable = false,
   isLoading = false,
+  ebtElement,
   'data-test-subj': dataTestSubj,
 }: {
   label: string;
@@ -45,6 +48,8 @@ export function SingleSelectFilter({
   /** Adds a search box above the options, for long lists. */
   searchable?: boolean;
   isLoading?: boolean;
+  /** Names the filter in click telemetry. */
+  ebtElement: string;
   'data-test-subj': string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -78,6 +83,10 @@ export function SingleSelectFilter({
       button={
         <EuiFilterButton
           data-test-subj={dataTestSubj}
+          {...getEbtProps({
+            action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
+            element: ebtElement,
+          })}
           css={buttonCss}
           title={buttonText}
           iconType="chevronSingleDown"

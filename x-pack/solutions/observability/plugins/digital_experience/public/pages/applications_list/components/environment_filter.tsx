@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ENVIRONMENT_ALL_VALUE, getEnvironmentLabel } from '@kbn/apm-types';
+import { APPLICATIONS_LIST_EBT_ELEMENTS } from '../../../ebt_constants';
 import { SingleSelectFilter } from './single_select_filter';
 
 const ENVIRONMENT_LABEL = i18n.translate('xpack.digitalExperience.environmentFilter.label', {
@@ -41,6 +42,7 @@ export function EnvironmentFilter({
   return (
     <SingleSelectFilter
       data-test-subj="digitalExperienceEnvironmentFilter"
+      ebtElement={APPLICATIONS_LIST_EBT_ELEMENTS.ENVIRONMENT_FILTER}
       label={ENVIRONMENT_LABEL}
       options={options}
       selected={selected ?? ENVIRONMENT_ALL_VALUE}

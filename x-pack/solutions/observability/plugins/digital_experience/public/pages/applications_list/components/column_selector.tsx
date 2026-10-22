@@ -16,6 +16,11 @@ import {
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
+import {
+  APPLICATIONS_LIST_EBT_ELEMENTS,
+  DIGITAL_EXPERIENCE_EBT_ACTIONS,
+} from '../../../ebt_constants';
 
 const COLUMNS_LABEL = i18n.translate('xpack.digitalExperience.columnSelector.label', {
   defaultMessage: 'Columns',
@@ -57,6 +62,10 @@ export function ColumnSelector<TColumnId extends string>({
       button={
         <EuiButtonEmpty
           data-test-subj="digitalExperienceColumnSelector"
+          {...getEbtProps({
+            action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SELECT_COLUMNS,
+            element: APPLICATIONS_LIST_EBT_ELEMENTS.COLUMN_SELECTOR,
+          })}
           size="s"
           color="text"
           iconType="table"

@@ -11,6 +11,7 @@ import { APPLICATION_SOURCE } from '../../../../common/application_source';
 import type { ApplicationSource } from '../../../../common/types/applications';
 import { SOURCE_LABELS } from '../../../labels';
 import { applicationSourceRt } from '../../../utils/application_source';
+import { APPLICATIONS_LIST_EBT_ELEMENTS } from '../../../ebt_constants';
 import { SingleSelectFilter } from './single_select_filter';
 
 const SOURCE_LABEL = i18n.translate('xpack.digitalExperience.sourceFilter.label', {
@@ -41,6 +42,7 @@ export function SourceFilter({
   return (
     <SingleSelectFilter
       data-test-subj="digitalExperienceSourceFilter"
+      ebtElement={APPLICATIONS_LIST_EBT_ELEMENTS.SOURCE_FILTER}
       label={SOURCE_LABEL}
       options={OPTIONS}
       selected={selected ?? ALL_SOURCES}
