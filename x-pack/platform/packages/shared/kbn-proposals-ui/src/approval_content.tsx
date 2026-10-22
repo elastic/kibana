@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import moment from 'moment';
 import { type EuiButtonColor, useGeneratedHtmlId } from '@elastic/eui';
 import { isTodoProposal, type DismissReason } from '@kbn/proposals-common';
@@ -48,6 +48,8 @@ export interface ApprovalContentProps {
    * proposal (the flyout row this modal opened from, for instance).
    */
   isSubmitting?: 'applying' | 'declining';
+  /** ISO timestamp the host started the in-flight approve/decline at, if it knows it. */
+  submittedAt?: string;
   /**
    * Who is submitting right now, for the Approving banner's "Requested by". Falls back to a
    * generic "You" when omitted, so a host that has not wired a profile lookup still gets a
@@ -110,6 +112,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     proposal,
     titleId,
     isSubmitting,
+    submittedAt,
     currentActorName,
     alwaysAllow,
     readOnly,
@@ -123,15 +126,21 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const [mode, setMode] = useState<'view' | 'declining'>('view');
     const [dismissReason, setDismissReason] = useState<DismissReason>('no_reason');
     const [rationale, setRationale] = useState('');
-    // When the decision started, for the in-progress banners' "Requested by … at …". Only a caption —
-    // the phase itself reads `isSubmitting` directly. It restarts if this component (re)mounts
-    // mid-submission, so a modal reopened then shows when it was reopened, not the true start.
-    const [since, setSince] = useState<string | undefined>(() =>
-      isSubmitting ? new Date().toISOString() : undefined
-    );
+    // When a decision started, for the in-progress banners' "Name on {time}", as the host knows it
+    // (`submittedAt`) or, failing that, from watching it start here. A modal that opens after the
+    // submission began cannot know the true start, so it shows no time rather than a wrong one.
+    const [watchedStart, setWatchedStart] = useState<string | undefined>(undefined);
+    const previousSubmitting = useRef(isSubmitting);
     useEffect(() => {
-      setSince(isSubmitting ? new Date().toISOString() : undefined);
+      // Only a start seen here counts; mounting while already submitting is not one.
+      if (isSubmitting && !previousSubmitting.current) {
+        setWatchedStart(new Date().toISOString());
+      } else if (!isSubmitting) {
+        setWatchedStart(undefined);
+      }
+      previousSubmitting.current = isSubmitting;
     }, [isSubmitting]);
+    const since = submittedAt ?? watchedStart;
     const isExpired = isProposalExpired(proposal);
     const isReplaced = isProposalReplaced(proposal);
     const displayMode = isReplaced ? 'view' : mode;
@@ -244,7 +253,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const banner = isReplaced ? undefined : getApprovalOutcomeBanner(approvalPhase);
     // A decision in flight has no reason to give yet, only what it is waiting on.
     const startedBy = currentActorName ?? APPROVAL_MODAL_TRANSLATIONS.currentActorFallback;
-    const startedAt = moment(since).format(DATE_TIME_FORMAT);
+    const startedAt = since ? moment(since).format(DATE_TIME_FORMAT) : undefined;
     // A decision still in flight keeps the state's own title (Approving, Declining, Applying), then
     // who asked and when as the description.
     const inFlightDescription =
@@ -254,7 +263,9 @@ export const ApprovalContent = memo<ApprovalContentProps>(
         ? // Approved and running: the request is the saved decision's.
           APPROVAL_MODAL_TRANSLATIONS.whoAndWhenBannerDescription(
             decision?.actorName ?? startedBy,
-            moment(decision?.decidedAt ?? since).format(DATE_TIME_FORMAT)
+            decision?.decidedAt ?? since
+              ? moment(decision?.decidedAt ?? since).format(DATE_TIME_FORMAT)
+              : undefined
           )
         : undefined;
     // A settled decision: who decided it and when, then the reason if there is one.

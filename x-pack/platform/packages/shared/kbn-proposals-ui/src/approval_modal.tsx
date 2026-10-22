@@ -33,6 +33,8 @@ export interface ApprovalModalProps {
    * reopened mid-submission.
    */
   isSubmitting?: 'applying' | 'declining';
+  /** ISO timestamp the host started the in-flight approve/decline at, if it knows it. */
+  submittedAt?: string;
   /** Who's approving, for the "Applying"/"Declining" caption before the server confirms a decider. */
   currentActorName?: string;
   'data-test-subj'?: string;
@@ -60,6 +62,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
     onClose,
     onDismiss,
     isSubmitting,
+    submittedAt,
     currentActorName,
     'data-test-subj': dataTestSubj,
   }) => {
@@ -78,6 +81,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
           proposal={proposal}
           titleId={titleId}
           isSubmitting={isSubmitting}
+          submittedAt={submittedAt}
           currentActorName={currentActorName}
           alwaysAllow={alwaysAllow}
           readOnly={readOnly}

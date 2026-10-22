@@ -516,9 +516,7 @@ describe('ApprovalContent', () => {
 
       // The badge and the outcome banner's own title both say it.
       expect(screen.getAllByText('Approving').length).toBeGreaterThanOrEqual(2);
-      expect(screen.getByTestId('approvalContent-outcome')).toHaveTextContent(
-        /^Approving • Ava on .+$/
-      );
+      expect(screen.getByTestId('approvalContent-outcome')).toHaveTextContent(/^Approving • Ava$/);
       expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
     });
 

@@ -313,6 +313,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
             onClose={closeModal}
             onDismiss={onDismiss}
             isSubmitting={isSubmitting}
+            submittedAt={submittedAt}
             currentActorName={currentActorName}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-modal` : undefined}
           />

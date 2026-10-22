@@ -194,6 +194,28 @@ describe('ProposedActionButton', () => {
     expect(screen.queryByTestId('proposedAction-modal-dismiss')).not.toBeInTheDocument();
   });
 
+  describe('a proposal with a deadline still ahead', () => {
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-22T12:00:00.000Z'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('says Expires soon on the row and in the modal header', () => {
+      renderButton({ proposal: { ...mockProposal, expiresAt: '2026-10-23T12:00:00.000Z' } });
+
+      expect(within(screen.getByTestId('proposedAction')).getByText('Expires soon')).toBeVisible();
+
+      fireEvent.click(screen.getByTestId('proposedAction'));
+
+      expect(
+        within(screen.getByRole('dialog')).getAllByText('Expires soon').length
+      ).toBeGreaterThan(0);
+    });
+  });
+
   describe('a proposal offered again after a failed attempt', () => {
     const retried = { ...mockProposal, previousExecutionError: 'Timed out waiting for workflow' };
 
