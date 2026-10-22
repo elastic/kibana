@@ -186,9 +186,6 @@ export const streamsUnitUpsertRequestSchema = z.object({
  */
 export const MAX_STREAMS_UNIT_STATS_COMPONENTS = 100;
 
-/** The timepicker allows at most one year, so a leap year is the longest range. */
-const MAX_STATS_TIME_RANGE_MS = 366 * 24 * 60 * 60 * 1000;
-
 /**
  * Stats request. A component ref is a discriminated union on `kind`. Adding a kind is
  * adding a member.
@@ -205,14 +202,11 @@ export const streamsUnitStatsFilterSchema = z.strictObject({
    * so the 128 cap is headroom, not a format check.
    */
   config_hash: z.string().min(1).max(128).optional(),
-  /** Absolute range, ISO 8601. Both fields are required when present. At most 366 days. */
+  /** Absolute range, ISO 8601. Both fields are required when present. */
   time_range: z
     .strictObject({ start: z.iso.datetime(), end: z.iso.datetime() })
     .refine(({ start, end }) => Date.parse(start) < Date.parse(end), {
       message: 'time_range.start must be before time_range.end',
-    })
-    .refine(({ start, end }) => Date.parse(end) - Date.parse(start) <= MAX_STATS_TIME_RANGE_MS, {
-      message: 'time_range must not be longer than 366 days',
     })
     .optional(),
 });
@@ -220,13 +214,19 @@ export const streamsUnitStatsFilterSchema = z.strictObject({
 export const streamsUnitStatsRequestSchema = z.strictObject({
   filter: streamsUnitStatsFilterSchema.optional(),
   /**
-   * Lists the unit components to receive stats on. Omit or leave empty to query every
-   * destination and processor in the unit, which is only allowed when the unit has at most
-   * `MAX_STREAMS_UNIT_STATS_COMPONENTS` of them.
+   * Lists the unit components to receive stats on, destinations and processors together, with
+   * no duplicates.
+   * - Omitted: every destination and processor in the unit. This fails with a 400 when the unit
+   *   has more than `MAX_STREAMS_UNIT_STATS_COMPONENTS` of them, so name the components instead.
+   * - An empty array: no components.
+   * - A list: only those components, and nothing from the rest of the unit.
    */
   components: z
     .array(streamsUnitStatsComponentRefSchema)
     .max(MAX_STREAMS_UNIT_STATS_COMPONENTS)
+    .refine((refs) => new Set(refs.map(({ kind, id }) => `${kind}:${id}`)).size === refs.length, {
+      message: 'components must not contain duplicates',
+    })
     .optional(),
 });
 
@@ -235,10 +235,10 @@ export const streamsUnitStatsErrorSchema = z.object({
   reason: z.string(),
 });
 
-/** `null` means no data. `unit` is a UCUM string, for example `s` or `{item}`. */
-const statsValueSchema = z.object({ value: z.number().nullable(), unit: z.string().nullable() });
-/** A rate is always per unit of time. `time_unit` is the UCUM time unit, for example `s`. */
-const statsRateSchema = statsValueSchema.extend({ time_unit: z.string().nullable() });
+/** `value: null` means no data. `unit` is always set: a UCUM string, for example `s` or `{item}`. */
+const statsValueSchema = z.object({ value: z.number().nullable(), unit: z.string() });
+/** A rate is always per unit of time. `time_unit` is always set: the UCUM time unit, for example `s`. */
+const statsRateSchema = statsValueSchema.extend({ time_unit: z.string() });
 
 export const streamsUnitStatsSeriesSchema = z.object({
   bucket_ms: z.number(),
@@ -253,9 +253,12 @@ export const streamsUnitStatsDestinationResultSchema = z.object({
       total: statsValueSchema,
       rate: statsRateSchema,
       series: streamsUnitStatsSeriesSchema,
-      /** Items with a non-success outcome, per second. */
-      failures: z.object({ rate: statsRateSchema }),
     }),
+    /**
+     * Items that failed in this destination, per second: every outcome other than "success".
+     * The destination is the last hop, so each of them is its own failure.
+     */
+    failed: z.object({ rate: statsRateSchema }),
   }),
 });
 
@@ -265,9 +268,13 @@ export const streamsUnitStatsProcessorResultSchema = z.object({
   events: z.object({
     incoming: z.object({
       rate: statsRateSchema,
-      /** Items this processor failed on, per second. Downstream refusals are not counted. */
-      failures: z.object({ rate: statsRateSchema }),
     }),
+    /**
+     * Items that failed in this processor, per second: outcome "failure". Items a downstream
+     * component refused are not counted, they belong to that component. null until
+     * opentelemetry-collector-contrib#52158 is fixed.
+     */
+    failed: z.object({ rate: statsRateSchema }),
   }),
 });
 
