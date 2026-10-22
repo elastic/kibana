@@ -152,8 +152,8 @@ export const createSourceUpdateTool = ({
           throw Boom.badRequest('Nothing to update: pass at least one field to change');
         }
 
-        const current = await resolveSource(sourcesClient, slugOrId);
         const onboardingPaused = await getOnboardingPausedFlag({ maintenanceService, request });
+        const current = await resolveSource(sourcesClient, slugOrId);
         let updated = current;
         if (hasContentChanges) {
           // Parsing keeps exactly the fields an update request carries, so the stored values of a
