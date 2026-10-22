@@ -5,22 +5,11 @@
  * 2.0.
  */
 
-import type { Hypothesis } from '@kbn/agentic-investigations-plugin/common';
-
-/** What is already recorded on the investigation, so a pass builds on it instead of restarting. */
-export interface CurrentFindings {
-  summary?: string;
-  verdict?: string;
-  severity?: string;
-  impactSummary?: string;
-  hypotheses?: Hypothesis[];
-}
-
 /**
  * The recorder's whole system prompt. Deliberately small: it carries only what is needed to fill
  * the investigation record, not Agent Builder's general assistant prompt.
  */
-export const FINDINGS_RECORDER_SYSTEM_PROMPT = `You keep the written record of an SRE investigation that another agent is carrying out. You never investigate and you never call tools. You read what the agent has done so far and update the record.
+export const FINDINGS_RECORDER_SYSTEM_PROMPT = `You keep the written record of an SRE investigation that another agent is carrying out. You never investigate. The conversation shows what the agent has asked for and found so far, and your own earlier records of it. You answer with the updated record.
 
 Use only what the transcript shows. Do not invent services, numbers, timings or causes. When the evidence is thin, say so and keep confidence low.
 
@@ -48,50 +37,12 @@ The record is shown to people on the investigation overview, on its card, and in
 
 ## Updating
 
-You are given the current record. Keep what is still right, correct what the new evidence changed, and add what is new. Do not drop a hypothesis the agent has not ruled out.`;
+Your earlier answers in this conversation are the current record. Keep what is still right, correct what the new evidence changed, and add what is new. Do not drop a hypothesis the agent has not ruled out.`;
 
-const renderCurrent = (current: CurrentFindings): string =>
-  [
-    `Summary: ${current.summary ?? '(none yet)'}`,
-    `Verdict: ${current.verdict ?? '(none yet)'}`,
-    `Severity: ${current.severity ?? '(none yet)'}`,
-    `Impact: ${current.impactSummary ?? '(none yet)'}`,
-    `Hypotheses: ${
-      current.hypotheses?.length
-        ? JSON.stringify(
-            current.hypotheses.map(({ candidate, confidence, status, reason }) => ({
-              candidate,
-              confidence,
-              status,
-              reason,
-            }))
-          )
-        : '(none yet)'
-    }`,
-  ].join('\n');
+/** Asked while the agent is still working. */
+export const LIVE_INSTRUCTION =
+  'The agent is still working. Update the record to match the evidence so far. Leave the verdict out.';
 
-export const buildRecorderInput = ({
-  digest,
-  current,
-  question,
-  answer,
-}: {
-  digest: string;
-  current: CurrentFindings;
-  /** The investigation's question, so the record stays about what was asked. */
-  question?: string;
-  /** The agent's final answer; present only on the final pass. */
-  answer?: string;
-}): string =>
-  [
-    ...(question ? ['## What was asked', question] : []),
-    '## Current record',
-    renderCurrent(current),
-    '## Investigation so far',
-    digest.length > 0 ? digest : '(the agent has not run any tools yet)',
-    ...(answer !== undefined ? ["## The agent's final answer", answer] : []),
-    '## Task',
-    answer !== undefined
-      ? 'The agent has finished. Make the record final: set the verdict from its answer, settle every hypothesis (none left investigating unless the telemetry needed to check it was unavailable), and set severity and impact.'
-      : 'The agent is still working. Update the record to match the evidence so far. Leave the verdict out.',
-  ].join('\n\n');
+/** Asked once the agent has given its final answer. */
+export const FINAL_INSTRUCTION =
+  'The agent has finished. Make the record final: set the verdict from its answer, settle every hypothesis (none left investigating unless the telemetry needed to check it was unavailable), and set severity and impact.';

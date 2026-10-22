@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { RecorderTurn } from './messages';
+
 const MAX_TRACKED_CONVERSATIONS = 500;
 
 interface ConversationState {
@@ -16,6 +18,14 @@ interface ConversationState {
   live?: { done: Promise<void>; abort: AbortController };
   /** Set once the final pass has taken over: no live pass may start or write after it. */
   finalized: boolean;
+  /** The recorder's earlier answers, replayed in its conversation. */
+  turns: RecorderTurn[];
+}
+
+/** What the recorder remembers of one investigation across its passes. */
+export interface RecorderMemory {
+  turns: () => RecorderTurn[];
+  remember: (turn: RecorderTurn) => void;
 }
 
 export interface PassGuard {
@@ -39,7 +49,7 @@ export class FindingsCoordinator {
         const oldest = this.states.keys().next().value;
         if (oldest !== undefined) this.states.delete(oldest);
       }
-      state = { nextTicket: 1, lastWrittenTicket: 0, finalized: false };
+      state = { nextTicket: 1, lastWrittenTicket: 0, finalized: false, turns: [] };
       this.states.set(conversationId, state);
     }
     return state;
@@ -59,6 +69,16 @@ export class FindingsCoordinator {
         if ((signal.aborted && !ignoreAbort) || ticket < state.lastWrittenTicket) return false;
         state.lastWrittenTicket = ticket;
         return true;
+      },
+    };
+  }
+
+  /** The recorder's earlier answers for an investigation, oldest first. */
+  memory(conversationId: string): RecorderMemory {
+    return {
+      turns: () => [...this.state(conversationId).turns],
+      remember: (turn) => {
+        this.state(conversationId).turns.push(turn);
       },
     };
   }

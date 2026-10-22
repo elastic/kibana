@@ -15,10 +15,9 @@ export const FINDINGS_RECORDER_FINAL_TIMEOUT_MS = 60_000;
 /** A live pass is abandoned after this long, so a hung model call cannot pin the guard. */
 export const FINDINGS_RECORDER_LIVE_TIMEOUT_MS = 90_000;
 
-/** The digest handed to the recorder model, in characters. */
-export const DIGEST_MAX_CHARS = 24_000;
-export const DIGEST_REASONING_CHARS = 500;
-export const DIGEST_COMMAND_CHARS = 300;
-export const DIGEST_RESULT_CHARS = 600;
+/** The agent's tool results are clipped before they are replayed to the recorder. */
+export const TOOL_RESULT_MAX_CHARS = 1_500;
+/** The human message that started the investigation. */
+export const QUESTION_MAX_CHARS = 4_000;
 /** The agent's own final answer, which the final pass treats as the verdict source. */
 export const ANSWER_MAX_CHARS = 20_000;

@@ -28,6 +28,7 @@ describe('registerFindingsRecorder', () => {
         run({ signal: new AbortController().signal, claimWrite: () => true })
       ),
       release: jest.fn(),
+      memory: jest.fn(() => ({ turns: () => [], remember: jest.fn() })),
     };
     registerFindingsRecorder({
       agentBuilder: { hooks: { registerCycleHook, register } } as never,

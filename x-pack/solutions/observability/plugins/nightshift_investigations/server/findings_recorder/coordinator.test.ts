@@ -18,6 +18,31 @@ const deferred = () => {
 describe('FindingsCoordinator', () => {
   const execution = () => new AbortController();
 
+  it("remembers the recorder's answers per investigation, oldest first", () => {
+    const coordinator = new FindingsCoordinator();
+    const turn = (n: number) => ({ atGroups: n, final: false, answer: { n } });
+
+    coordinator.memory('a').remember(turn(1));
+    coordinator.memory('a').remember(turn(2));
+    coordinator.memory('b').remember(turn(9));
+
+    expect(coordinator.memory('a').turns()).toEqual([turn(1), turn(2)]);
+    expect(coordinator.memory('b').turns()).toEqual([turn(9)]);
+  });
+
+  it('forgets an investigation once its final pass is done', async () => {
+    const coordinator = new FindingsCoordinator();
+    coordinator.memory('a').remember({ atGroups: 1, final: false, answer: {} });
+
+    await coordinator.runFinal({
+      conversationId: 'a',
+      timeoutMs: 1000,
+      run: async () => undefined,
+    });
+
+    expect(coordinator.memory('a').turns()).toEqual([]);
+  });
+
   it('runs one live pass at a time per investigation', async () => {
     const coordinator = new FindingsCoordinator();
     const gate = deferred();

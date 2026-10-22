@@ -13,14 +13,15 @@ import type { Hypothesis } from '@kbn/agentic-investigations-plugin/common';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import { createOptimizeModel } from '../lib/create_optimize_model';
 import { createInvestigationUsageTelemetry } from '../lib/investigation_usage_telemetry';
-import type { PassGuard } from './coordinator';
-import { buildDigest } from './digest';
-import { FINDINGS_JSON_SCHEMA, findingsOutputSchema, type FindingsOutput } from './output_schema';
+import type { PassGuard, RecorderMemory } from './coordinator';
 import {
-  buildRecorderInput,
-  FINDINGS_RECORDER_SYSTEM_PROMPT,
-  type CurrentFindings,
-} from './prompt';
+  buildRecorderMessages,
+  countTurns,
+  replayedToolNames,
+  STRUCTURED_OUTPUT_TOOL,
+} from './messages';
+import { FINDINGS_JSON_SCHEMA, findingsOutputSchema, type FindingsOutput } from './output_schema';
+import { FINDINGS_RECORDER_SYSTEM_PROMPT } from './prompt';
 
 export interface FindingsPassDeps {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
@@ -36,7 +37,9 @@ export interface FindingsPassParams {
   conversationId: string;
   steps: readonly ConversationRoundStep[];
   guard: PassGuard;
-  /** What the investigation was asked, to keep the record about it. */
+  /** The recorder's earlier answers for this investigation, and where to keep this one. */
+  memory: RecorderMemory;
+  /** The human message that started the investigation. */
   question?: string;
   /** Set on the final pass: the agent's own answer. Its presence makes the pass final. */
   answer?: string;
@@ -44,6 +47,8 @@ export interface FindingsPassParams {
 
 const MAX_METADATA_TEXT_LENGTH = 10_000;
 const FALLBACK_SUMMARY_CHARS = 1_000;
+/** A malformed structured answer is the usual failure, so a pass asks again before giving up. */
+const MAX_ATTEMPTS = 2;
 
 /** Keeps the first confirmed hypothesis: at most one may be the root cause. */
 export const limitToOneConfirmed = (hypotheses: FindingsOutput['hypotheses']): Hypothesis[] => {
@@ -58,37 +63,15 @@ export const limitToOneConfirmed = (hypotheses: FindingsOutput['hypotheses']): H
   });
 };
 
-const readCurrent = async (
-  agenticInvestigations: AgenticInvestigationsPluginStart,
-  request: KibanaRequest,
-  conversationId: string
-): Promise<CurrentFindings> => {
-  try {
-    const investigation = await agenticInvestigations
-      .getInvestigationsClient(request)
-      .get(conversationId);
-    const { summary, verdict, severity } = investigation.metadata;
-    return {
-      summary,
-      verdict,
-      severity,
-      impactSummary: investigation.impact?.summary,
-      hypotheses: investigation.hypotheses?.hypotheses,
-    };
-  } catch {
-    // A first pass finds nothing recorded yet; any other read failure only costs continuity.
-    return {};
-  }
-};
-
 /**
- * One recorder pass: reads what is recorded, asks the model to update it from the investigation
- * so far, and writes the result. Returns whether it wrote. Never throws for a model or write
- * failure; it logs and returns false, because the investigation must not depend on it.
+ * One recorder pass: replays the agent's conversation to the model with its own earlier records
+ * in it, asks for the updated record, and writes the result. Returns whether it wrote. Never
+ * throws for a model or write failure; it logs and returns false, because the investigation must
+ * not depend on it.
  */
 export const runFindingsPass = async (
   deps: FindingsPassDeps,
-  { request, conversationId, steps, guard, question, answer }: FindingsPassParams
+  { request, conversationId, steps, guard, memory, question, answer }: FindingsPassParams
 ): Promise<boolean> => {
   const { logger } = deps;
   const final = answer !== undefined;
@@ -109,26 +92,61 @@ export const runFindingsPass = async (
     });
     if (!model) return false;
 
-    const current = await readCurrent(agenticInvestigations, request, conversationId);
-    const response = await model.inferenceClient.output({
-      id: 'nightshift_findings_recorder',
-      abortSignal: guard.signal,
-      system: FINDINGS_RECORDER_SYSTEM_PROMPT,
-      input: buildRecorderInput({ digest: buildDigest({ steps }), current, question, answer }),
-      schema: FINDINGS_JSON_SCHEMA as never,
-      // A truncated or malformed structured answer is the usual failure: ask again.
-      retry: { onValidationError: 2 },
-    });
-    const parsed = findingsOutputSchema.safeParse(response.output);
-    if (!parsed.success) {
-      logger.warn(`Findings recorder returned an invalid record: ${parsed.error.message}`);
-    } else {
-      output = parsed.data;
+    const messages = buildRecorderMessages({ question, steps, turns: memory.turns(), final });
+    // The agent's tool calls are replayed as they happened, so each tool needs a definition for
+    // the provider to accept them. The recorder never calls them: only the answer tool is forced.
+    const replayed = Object.fromEntries(
+      replayedToolNames(messages).map((name) => [
+        name,
+        {
+          description: 'Called earlier in this conversation.',
+          schema: { type: 'object', properties: {} },
+        },
+      ])
+    );
+    const tools = {
+      ...replayed,
+      [STRUCTURED_OUTPUT_TOOL]: {
+        description:
+          "Use the following schema to respond to the user's request in structured data, so it can be parsed and handled.",
+        schema: FINDINGS_JSON_SCHEMA,
+      },
+    };
+
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS && !output && !guard.signal.aborted; attempt++) {
+      try {
+        const response = (await model.inferenceClient.chatComplete({
+          system: FINDINGS_RECORDER_SYSTEM_PROMPT,
+          messages,
+          tools: tools as never,
+          toolChoice: { function: STRUCTURED_OUTPUT_TOOL } as never,
+          abortSignal: guard.signal,
+        })) as unknown as {
+          toolCalls?: Array<{ function: { name: string; arguments: unknown } }>;
+        };
+        const call = response.toolCalls?.find((c) => c.function.name === STRUCTURED_OUTPUT_TOOL);
+        const parsed = findingsOutputSchema.safeParse(call?.function.arguments);
+        if (parsed.success) {
+          output = parsed.data;
+        } else {
+          logger.warn(
+            `Findings recorder returned an invalid record (attempt ${attempt}): ${parsed.error.message}`
+          );
+        }
+      } catch (error) {
+        if (!guard.signal.aborted) {
+          logger.warn(
+            `Findings recorder pass failed for ${conversationId} (attempt ${attempt}): ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      }
     }
   } catch (error) {
     if (!guard.signal.aborted) {
       logger.warn(
-        `Findings recorder pass failed for ${conversationId}: ${
+        `Findings recorder could not start a pass for ${conversationId}: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
@@ -196,5 +214,14 @@ export const runFindingsPass = async (
       );
     }
   });
-  return results.some((result) => result.status === 'fulfilled');
+  const wrote = results.some((result) => result.status === 'fulfilled');
+  // What the model answered stays in its conversation, so the next pass builds on it.
+  if (wrote && output) {
+    memory.remember({
+      atGroups: countTurns(steps),
+      final,
+      answer: output as Record<string, unknown>,
+    });
+  }
+  return wrote;
 };

@@ -21,7 +21,7 @@ import {
   FINDINGS_RECORDER_FINAL_TIMEOUT_MS,
   FINDINGS_RECORDER_LIVE_TIMEOUT_MS,
 } from './constants';
-import { extractAnswer } from './digest';
+import { extractAnswer } from './messages';
 import { runFindingsPass, type FindingsPassDeps } from './run_pass';
 
 /** Slack above the pass's own abort, so the pass ends first and the hook never times out. */
@@ -56,13 +56,14 @@ export const registerFindingsRecorder = ({
       if (!conversationId) return undefined;
       const question = typeof input?.message === 'string' ? input.message : undefined;
 
+      const memory = coordinator.memory(conversationId);
       return ({ steps }) => {
         coordinator.startLive({
           conversationId,
           executionSignal: abortSignal,
           timeoutMs: FINDINGS_RECORDER_LIVE_TIMEOUT_MS,
           run: (guard) =>
-            runFindingsPass(deps, { request, conversationId, steps, guard, question }),
+            runFindingsPass(deps, { request, conversationId, steps, guard, memory, question }),
         });
       };
     },
@@ -100,6 +101,7 @@ export const registerFindingsRecorder = ({
                   conversationId,
                   steps: round.steps,
                   guard,
+                  memory: coordinator.memory(conversationId),
                   question: round.input?.message,
                   answer,
                 }),
