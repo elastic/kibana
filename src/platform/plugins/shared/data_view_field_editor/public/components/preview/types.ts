@@ -93,6 +93,7 @@ export interface ClusterData {
 // The parameters required to preview the field
 export interface Params {
   name: string | null;
+  customLabel: string | null;
   index: string | null;
   type: RuntimeType | null;
   script: Required<RuntimeField>['script'] | null;
@@ -103,7 +104,10 @@ export interface Params {
 }
 
 export interface FieldPreview {
+  /** Field name (or `<parent>.<subfield>` for composite subfields), also used as the row id */
   key: string;
+  /** Display label of the field, falls back to the key when not set */
+  label?: string;
   value: unknown;
   formattedValue?: ReactNode;
   type?: string;

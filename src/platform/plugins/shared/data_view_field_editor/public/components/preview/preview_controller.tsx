@@ -334,9 +334,13 @@ export class PreviewController {
     this.updateState({ pinnedFields });
   };
 
-  private setDocuments = (documents: EsDocument[]) => {
+  private setDocuments = (
+    documents: EsDocument[],
+    documentSource: PreviewState['documentSource']
+  ) => {
     this.updateState({
       documents,
+      documentSource,
       currentIdx: 0,
       isLoadingDocuments: false,
       isPreviewAvailable: this.getIsPreviewAvailable({ documents }),
@@ -378,15 +382,23 @@ export class PreviewController {
   };
 
   setCustomDocIdToLoad = (customDocIdToLoad: string | null) => {
+    // A blank ID (e.g. only whitespace) cannot be loaded, treat it like leaving custom mode
+    const idToLoad = customDocIdToLoad?.trim() ? customDocIdToLoad : null;
+
     this.updateState({
       customDocIdToLoad,
       customId: customDocIdToLoad ?? undefined,
-      isPreviewAvailable: this.getIsPreviewAvailable({ customDocIdToLoad }),
+      isPreviewAvailable: this.getIsPreviewAvailable({ customDocIdToLoad: idToLoad }),
     });
     // load document if id is present
-    this.setIsFetchingDocument(!!customDocIdToLoad);
-    if (customDocIdToLoad) {
-      this.debouncedLoadDocument(customDocIdToLoad);
+    this.setIsFetchingDocument(idToLoad !== null);
+    if (idToLoad !== null) {
+      this.debouncedLoadDocument(idToLoad);
+    } else {
+      // Clearing the ID: cancel any pending document load so it cannot report an error for a
+      // document the user is no longer asking for, and clear a possible previous fetch error.
+      this.debouncedLoadDocument.cancel();
+      this.setFetchDocError(null);
     }
   };
 
@@ -400,17 +412,11 @@ export class PreviewController {
     customDocIdToLoad?: string | null;
     documents?: EsDocument[];
   }) => {
-    const {
-      isFetchingDocument: existingIsFetchingDocument,
-      customDocIdToLoad: existingCustomDocIdToLoad,
-      documents: existingDocuments,
-    } = this.internalState$.getValue();
+    const { isFetchingDocument, customDocIdToLoad, documents } = this.internalState$.getValue();
 
-    const existing = { existingIsFetchingDocument, existingCustomDocIdToLoad, existingDocuments };
+    const merged = { isFetchingDocument, customDocIdToLoad, documents, ...update };
 
-    const merged = { ...existing, ...update };
-
-    if (!merged.isFetchingDocument && !merged.customDocIdToLoad && merged.documents?.length === 0) {
+    if (!merged.isFetchingDocument && !merged.customDocIdToLoad && merged.documents.length === 0) {
       return false;
     } else {
       return true;
@@ -524,9 +530,12 @@ export class PreviewController {
       throw new Error('The "limit" option must be a number');
     }
 
+    // Leave "custom document" mode before fetching: this cancels any pending single document
+    // load and clears a possible fetch error. The current preview fields are kept while the
+    // documents are being fetched so the previewed field row does not disappear.
+    this.setCustomDocIdToLoad(null);
     this.setLastExecutePainlessRequestParams({ documentId: undefined });
     this.setIsFetchingDocument(true);
-    this.setPreviewResponse({ fields: [], error: null });
 
     const [response, searchError] = await this.deps.search
       .search({
@@ -540,8 +549,13 @@ export class PreviewController {
       .then((res) => [res, null])
       .catch((err) => [null, err]);
 
+    // A custom document ID was entered while the sample documents were being fetched:
+    // discard this response, the single document load owns the state now.
+    if (this.internalState$.getValue().customDocIdToLoad !== null) {
+      return;
+    }
+
     this.setIsFetchingDocument(false);
-    this.setCustomDocIdToLoad(null);
 
     const error: FetchDocError | null = Boolean(searchError)
       ? {
@@ -561,7 +575,7 @@ export class PreviewController {
     this.setFetchDocError(error);
 
     if (error === null) {
-      this.setDocuments(response ? response.rawResponse.hits.hits : []);
+      this.setDocuments(response ? response.rawResponse.hits.hits : [], 'cluster');
     }
   };
 
@@ -589,6 +603,12 @@ export class PreviewController {
       .toPromise()
       .then((res) => [res, null])
       .catch((err) => [null, err]);
+
+    // The document ID changed (or custom mode was left) while this request was in flight:
+    // discard the response, it no longer reflects the requested document.
+    if (this.internalState$.getValue().customDocIdToLoad !== id) {
+      return;
+    }
 
     this.setIsFetchingDocument(false);
 
@@ -624,7 +644,7 @@ export class PreviewController {
     this.setFetchDocError(error);
 
     if (error === null) {
-      this.setDocuments(loadedDocuments);
+      this.setDocuments(loadedDocuments, 'custom');
     } else {
       // Make sure we disable the "Updating..." indicator as we have an error
       // and we won't fetch the preview
@@ -705,13 +725,14 @@ export class PreviewController {
     fieldName: string,
     values: unknown[],
     type: Params['type'],
-    format: Params['format']
+    format: Params['format'],
+    customLabel?: Params['customLabel']
   ) => {
     const value = toPreviewValue(values);
     const formattedValue = this.valueFormatter({ value, type, format });
 
     this.setPreviewResponse({
-      fields: [{ key: fieldName, value, formattedValue }],
+      fields: [{ key: fieldName, label: customLabel ?? undefined, value, formattedValue }],
       error: null,
     });
   };

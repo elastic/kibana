@@ -76,7 +76,7 @@ export interface PreviewListItemProps {
 const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview;
 
 export const PreviewListItem: React.FC<PreviewListItemProps> = ({
-  field: { key, value, formattedValue, isPinned = false },
+  field: { key, label, value, formattedValue, isPinned = false },
   toggleIsPinned,
   hasScriptError,
   isFromScript = false,
@@ -110,7 +110,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
       );
     }
 
-    return key;
+    return label ?? key;
   };
 
   const withTooltip = (content: JSX.Element) => (

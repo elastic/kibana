@@ -34,6 +34,7 @@ const fieldPreviewContext = createContext<Context | undefined>(undefined);
 
 const defaultParams: Params = {
   name: null,
+  customLabel: null,
   index: null,
   script: null,
   document: null,
@@ -95,7 +96,7 @@ export const FieldPreviewProvider: FC<
     documentsSelector
   );
 
-  const { name, document, script, format, type, parentName } = params;
+  const { name, customLabel, document, script, format, type, parentName } = params;
 
   const updateParams: Context['params']['update'] = useCallback((updated) => {
     setParams((prev) => ({ ...prev, ...updated }));
@@ -170,6 +171,7 @@ export const FieldPreviewProvider: FC<
           fields: [
             {
               key: name ?? '',
+              label: customLabel ?? undefined,
               value: '',
               formattedValue: defaultValueFormatter(''),
             },
@@ -189,7 +191,7 @@ export const FieldPreviewProvider: FC<
           );
         } else {
           // the preview also runs before a name is set, so default to the same key as the error case
-          controller.updateSingleFieldPreview(name ?? '', values, type, format);
+          controller.updateSingleFieldPreview(name ?? '', values, type, format, customLabel);
         }
       }
     }
@@ -198,6 +200,7 @@ export const FieldPreviewProvider: FC<
     controller.setIsLoadingPreview(false);
   }, [
     name,
+    customLabel,
     type,
     script,
     parentName,
@@ -248,7 +251,7 @@ export const FieldPreviewProvider: FC<
   }, [currentDocument, updateParams]);
 
   /**
-   * Whenever the name or the format changes we immediately update the preview
+   * Whenever the name, custom label or type changes we immediately update the preview
    */
   useEffect(() => {
     const { previewResponse: prev } = controller.state$.getValue();
@@ -256,30 +259,42 @@ export const FieldPreviewProvider: FC<
 
     let updatedFields: PreviewState['previewResponse']['fields'] = fields.map((field) => {
       let key = name ?? '';
+      // The custom label only applies to the field itself, not to composite subfields
+      let label = customLabel ?? undefined;
 
       if (type === 'composite') {
         // restore initial key segement (the parent name), which was not returned
         const { 1: fieldName } = field.key.split('.');
         key = `${name ?? ''}.${fieldName}`;
+        label = undefined;
       }
 
       return {
         ...field,
         key,
+        label,
       };
     });
 
     // If the user has entered a name but not yet any script we will display
     // the field in the preview with just the name
     if (updatedFields.length === 0 && name !== null) {
-      updatedFields = [{ key: name, value: undefined, formattedValue: undefined, type: undefined }];
+      updatedFields = [
+        {
+          key: name,
+          label: customLabel ?? undefined,
+          value: undefined,
+          formattedValue: undefined,
+          type: undefined,
+        },
+      ];
     }
 
     controller.setPreviewResponse({
       ...prev,
       fields: updatedFields,
     });
-  }, [name, type, parentName, controller]);
+  }, [name, customLabel, type, parentName, controller]);
 
   /**
    * Whenever the format changes we immediately update the preview
