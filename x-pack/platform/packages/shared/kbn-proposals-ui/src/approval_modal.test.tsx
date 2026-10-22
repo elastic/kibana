@@ -71,6 +71,16 @@ describe('ApprovalModal', () => {
     expect(baseProps.onDismiss).not.toHaveBeenCalled();
   });
 
+  it("forwards the host's start time to the content", () => {
+    renderModal({
+      isSubmitting: 'declining',
+      submittedAt: '2026-10-21T12:00:00.000Z',
+      currentActorName: 'Ava',
+    });
+
+    expect(screen.getByRole('dialog')).toHaveTextContent(/Declining • Ava on 2[12] Oct 2026/);
+  });
+
   it('renders the proposal inside a modal dialog', () => {
     renderModal();
     expect(screen.getByRole('dialog')).toBeInTheDocument();

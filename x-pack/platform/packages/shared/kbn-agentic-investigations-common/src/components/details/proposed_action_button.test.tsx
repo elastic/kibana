@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import moment from 'moment';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ApprovalProposal } from '@kbn/proposals-ui';
@@ -192,6 +193,31 @@ describe('ProposedActionButton', () => {
     fireEvent.click(screen.getByTestId('proposedAction'));
 
     expect(screen.queryByTestId('proposedAction-modal-dismiss')).not.toBeInTheDocument();
+  });
+
+  describe('opening the modal while an approval is being sent', () => {
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-10-22T12:00:00.000Z'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    const hhmm = (iso: string) => moment(iso).format('HH:mm');
+
+    it('shows when the approval started, not when the modal was opened', () => {
+      renderButton({ isSubmitting: 'applying', currentActorName: 'Kate Sosedova' });
+      act(() => {
+        jest.advanceTimersByTime(10 * 60 * 1000);
+      });
+
+      fireEvent.click(screen.getByTestId('proposedAction'));
+
+      const banner = within(screen.getByRole('dialog')).getAllByText(/Kate Sosedova on/)[0];
+      expect(banner).toHaveTextContent(hhmm('2026-10-22T12:00:00.000Z'));
+      expect(banner).not.toHaveTextContent(hhmm('2026-10-22T12:10:00.000Z'));
+    });
   });
 
   describe('a proposal with a deadline still ahead', () => {

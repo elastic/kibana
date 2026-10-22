@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ApprovalContent, type ApprovalContentProps } from './approval_content';
+import { DATE_TIME_FORMAT } from './proposal_helpers';
 import type { ApprovalProposal } from './types';
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -518,6 +520,15 @@ describe('ApprovalContent', () => {
       expect(screen.getAllByText('Approving').length).toBeGreaterThanOrEqual(2);
       expect(screen.getByTestId('approvalContent-outcome')).toHaveTextContent(/^Approving • Ava$/);
       expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
+    });
+
+    it('shows the start time the host supplies, not the time the modal opened', () => {
+      const submittedAt = '2026-10-21T12:00:00.000Z';
+      renderContent({ isSubmitting: 'applying', submittedAt, currentActorName: 'Ava' });
+
+      expect(screen.getByTestId('approvalContent-outcome')).toHaveTextContent(
+        `Approving • Ava on ${moment(submittedAt).format(DATE_TIME_FORMAT)}`
+      );
     });
 
     it('keeps showing Approving across an unmount and remount mid-submission, since isSubmitting is sourced externally', () => {
