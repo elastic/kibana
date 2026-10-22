@@ -94,14 +94,17 @@ const writeStorage = (map: StoredSelectionMap): void => {
  * the user last visited) silently falls back to the bucket's default
  * instead of leaving the dropdown showing an unknown value.
  */
+/** Factory defaults for a bucket (ignores localStorage). */
+export const getDefaultBucketSelection = (bucketKey: BucketKey): BucketSelection => ({
+  metricId: getDefaultMetricId(bucketKey),
+  statId: DEFAULT_STAT,
+  coloring: DEFAULT_COLORING,
+});
+
 const hydrate = (bucketKey: BucketKey): BucketSelection => {
   const stored = readStorage()[bucketKey];
   if (!isStoredSelection(stored)) {
-    return {
-      metricId: getDefaultMetricId(bucketKey),
-      statId: DEFAULT_STAT,
-      coloring: DEFAULT_COLORING,
-    };
+    return getDefaultBucketSelection(bucketKey);
   }
   const metric = findMetric(bucketKey, stored.metricId);
   return {

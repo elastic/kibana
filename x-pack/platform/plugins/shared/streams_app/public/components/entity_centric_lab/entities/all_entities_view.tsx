@@ -150,6 +150,7 @@ import {
   parseAlertsFilterFromSearch,
   type AlertsFilterId,
 } from './entity_alerts_filter';
+import { InventorySummaryCards } from './inventory_summary_cards';
 import { EntityGroupByControls } from './entity_group_by_controls';
 import { labThing, labThings, labThingsLabel } from '../lab_terminology';
 import { VariationProvider, useVariation, useVariationContext } from './variation_context';
@@ -1421,6 +1422,8 @@ const AllEntitiesViewInner = ({
   // category filter on the cross-category page.
   const showK8sFilters =
     (!!categoryScope ? categoryScope === 'kubernetes' : categoryFilter === 'kubernetes') && isElasticOn;
+  /** Cell "Filter for" and flyout "Add to filter" — same scope as K8s facet filters. */
+  const enableK8sAddToFilterActions = showK8sFilters;
   const [k8sResourceType, setK8sResourceType] = useState<KubernetesResourceType>(KUBERNETES_RESOURCE_TYPE_ALL);
   const [k8sClusterFilter, setK8sClusterFilter] = useState<string>(KUBERNETES_FILTER_ALL);
   const [k8sNamespaceFilter, setK8sNamespaceFilter] = useState<string>(KUBERNETES_FILTER_ALL);
@@ -1997,6 +2000,25 @@ const AllEntitiesViewInner = ({
     (isElasticOn && alertsFilter !== ALERTS_FILTER_ALL);
 
   // Reset every filter dimension in one click (ElasticOn toolbar).
+  const inventorySummaryScopeKey = categoryScope ?? 'all';
+
+  const handleAlertsFilterChange = useCallback(
+    (next: AlertsFilterId) => {
+      setAlertsFilter(next);
+      const params = new URLSearchParams(location.search);
+      if (next === ALERTS_FILTER_ALL) {
+        params.delete(ALERTS_FILTER_QUERY_PARAM);
+      } else {
+        params.set(ALERTS_FILTER_QUERY_PARAM, next);
+      }
+      history.replace({
+        pathname: location.pathname,
+        search: params.toString() ? `?${params.toString()}` : '',
+      });
+    },
+    [history, location.pathname, location.search]
+  );
+
   const handleClearFilters = useCallback(() => {
     setActiveTagFilters(EMPTY_TAG_FILTERS);
     setActiveExtraFilters(EMPTY_EXTRA_FILTERS);
@@ -3245,7 +3267,7 @@ const AllEntitiesViewInner = ({
                   ) : null}
                   {isElasticOn ? (
                     <EuiFlexItem grow={false}>
-                      <EntityAlertsFilter value={alertsFilter} onChange={setAlertsFilter} />
+                      <EntityAlertsFilter value={alertsFilter} onChange={handleAlertsFilterChange} />
                     </EuiFlexItem>
                   ) : null}
                   {hasActiveFilters ? (
@@ -3265,6 +3287,20 @@ const AllEntitiesViewInner = ({
                   ) : null}
                 </EuiFlexGroup>
                 <EuiSpacer size="s" />
+                {!showOverviewTab && !showAddDataEmptyPrompt ? (
+                  <>
+                    <InventorySummaryCards
+                      entities={filteredEntitiesAfterCategoryType}
+                      thingsLabel={labThingsLabel(isElasticOn)}
+                      scopeKey={inventorySummaryScopeKey}
+                      alertsFilter={alertsFilter}
+                      onAlertsFilterChange={handleAlertsFilterChange}
+                      charts={charts}
+                      density={listDensity}
+                    />
+                    <EuiSpacer size="s" />
+                  </>
+                ) : null}
                 <EuiFlexGroup
                   alignItems="center"
                   gutterSize="s"
@@ -3433,7 +3469,7 @@ const AllEntitiesViewInner = ({
                     categoryScope={categoryScope}
                     density={listDensity}
                     onK8sCellFilter={
-                      isElasticOn ? handleK8sInventoryCellFilter : undefined
+                      enableK8sAddToFilterActions ? handleK8sInventoryCellFilter : undefined
                     }
                   />
                 ) : (
@@ -3448,7 +3484,7 @@ const AllEntitiesViewInner = ({
                     hideCategoryHeader={!!categoryScope}
                     density={listDensity}
                     onK8sCellFilter={
-                      isElasticOn ? handleK8sInventoryCellFilter : undefined
+                      enableK8sAddToFilterActions ? handleK8sInventoryCellFilter : undefined
                     }
                   />
                 )}
@@ -3655,7 +3691,7 @@ const AllEntitiesViewInner = ({
                     groupCloudByProvider={false}
                     density={listDensity}
                     onK8sCellFilter={
-                      isElasticOn ? handleK8sInventoryCellFilter : undefined
+                      enableK8sAddToFilterActions ? handleK8sInventoryCellFilter : undefined
                     }
                   />
                 )}
@@ -3702,7 +3738,7 @@ const AllEntitiesViewInner = ({
             onTabChange={handleFlyoutTabChange}
             onTimeRangeChange={handleFlyoutTimeRangeChange}
             onAddToFilter={
-              showK8sFilters && selectedEntity?.category === 'kubernetes'
+              enableK8sAddToFilterActions && selectedEntity?.category === 'kubernetes'
                 ? () => handleAddToK8sFilter(selectedEntity)
                 : undefined
             }

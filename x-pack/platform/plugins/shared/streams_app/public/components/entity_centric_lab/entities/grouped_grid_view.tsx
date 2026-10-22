@@ -110,7 +110,11 @@ import {
   hexMapLegendDescription,
   hexMapLegendMetricLabel,
 } from './column_header_info';
-import { useBucketMetricSelection, type BucketSelection } from './use_bucket_metric_selection';
+import {
+  getDefaultBucketSelection,
+  useBucketMetricSelection,
+  type BucketSelection,
+} from './use_bucket_metric_selection';
 import {
   UNGROUPED_LABEL,
   groupEntities,
@@ -2121,6 +2125,14 @@ const BucketMetricControlsFlyout = ({
     updateColoring({ type: nextType });
   };
 
+  const handleResetToDefaults = () => {
+    const defaults = getDefaultBucketSelection(bucketKey);
+    userEditedStepsRef.current = false;
+    setDraftMetricId(defaults.metricId);
+    setDraftStatId(defaults.statId);
+    setDraftColoring(defaults.coloring);
+  };
+
   const handleApply = () => {
     let coloringToSave = draftColoring;
     if (draftColoring.mode === 'palette' && draftColoring.type === 'steps') {
@@ -2156,7 +2168,8 @@ const BucketMetricControlsFlyout = ({
     <EuiFlyout
       ownFocus
       onClose={onClose}
-      size="s"
+      size={520}
+      maxWidth={false}
       aria-labelledby={titleId}
       data-test-subj={`entityCentricLabBucketControlsFlyout-${bucketKey}`}
     >
@@ -2492,10 +2505,25 @@ const BucketMetricControlsFlyout = ({
               ) : null}
             </>
           ) : null}
+          <EuiHorizontalRule margin="m" />
+          <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                onClick={handleResetToDefaults}
+                data-test-subj={`entityCentricLabBucketControlsFlyoutReset-${bucketKey}`}
+              >
+                {i18n.translate(
+                  'xpack.streams.entityCentricLab.entities.bucket.controls.flyoutResetDefaults',
+                  { defaultMessage: 'Reset to defaults' }
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="m">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               iconType="cross"
@@ -2508,6 +2536,7 @@ const BucketMetricControlsFlyout = ({
               )}
             </EuiButtonEmpty>
           </EuiFlexItem>
+          <EuiFlexItem grow />
           <EuiFlexItem grow={false}>
             <EuiButton
               fill

@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.12';
+export const PROTOTYPE_VERSION = '1.13';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-10-22',
+    summary:
+      'Inventory summary KPI cards, hex display-options reset, and scoped K8s add-to-filter.',
+    details:
+      'List Inventory tab shows golden-signal-style summary cards (total resources, active alerts, no alert set up) with sparklines, click-to-filter via ?alertsFilter=, and neutral vs danger styling. Hex map Display options flyout is wider with Reset to defaults. Kubernetes grid Filter for and flyout Add to filter only on the K8s category page or All resources when the category filter is Kubernetes. Bump to v1.13.',
+  },
   {
     date: '2026-10-22',
     summary: 'Compact golden signal tiles and K8s filter-for via facet dropdowns.',

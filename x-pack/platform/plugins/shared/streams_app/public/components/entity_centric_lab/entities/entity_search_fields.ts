@@ -8,7 +8,7 @@
 import type { EntityCategoryId } from './fake_entities';
 import { getCategoryExtraFilters } from './fake_entities';
 
-/** True when the inventory is scoped to Kubernetes (category page or filter). */
+/** True on the Kubernetes category page (`/entities/kubernetes`). */
 export const isKubernetesInventoryScope = (
   categoryScope?: EntityCategoryId
 ): boolean => categoryScope === 'kubernetes';
