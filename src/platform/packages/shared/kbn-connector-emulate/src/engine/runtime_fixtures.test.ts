@@ -160,7 +160,7 @@ describe('runtime fixtures', () => {
       { operation: listUsers, response: ok([]) },
     ]);
 
-    runtimeFixtures.clear('getUser');
+    runtimeFixtures.clear({ id: 'getUser' });
     expect((await get('/users/7')).body).toEqual({ id: 0, name: 'string' });
     expect(runtimeFixtures.list()).toEqual([{ operation: listUsers, response: ok([]) }]);
 

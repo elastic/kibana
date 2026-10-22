@@ -17,17 +17,11 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { CfWorkerJsonSchemaValidator } from '@modelcontextprotocol/sdk/validation/cfworker-provider.js';
 import type { ResponseFixture } from '../engine/response_engine';
-import type { Emulator } from '../fetch/create_emulator_fetch';
 import { createExchangeTransport } from '../mcp/exchange_transport';
 import { readMessages, transportErrorResponse } from '../mcp/mcp_protocol';
 import { isRecord } from '../openapi/schema_walk';
 import { checkFixtures } from './check_fixtures';
-
-/** The emulator an MCP control server steers; the same object the control endpoints use. */
-export type McpControlEmulator = Pick<
-  Emulator,
-  'calls' | 'operations' | 'reset' | 'runtimeFixtures' | 'describeOperation'
->;
+import type { ControlledEmulator } from './controlled_emulator';
 
 export interface EmulatorMcpOptions {
   /**
@@ -49,6 +43,11 @@ another page, a value the vendor just added):
    error statuses it doesn't declare (such as 429);
 4. run the action through Kibana, then list_calls to see what it sent and what it got;
 5. clear_fixtures or reset when done.`;
+
+const COMBINED_INSTRUCTIONS = `
+
+The emulator serves several connectors, each with its own vendor specs. Pass \`connector\` to see or
+change only one of them; set_fixtures needs it when several connectors have the operation.`;
 
 const LIMIT = { maxLength: 500 } as const;
 
@@ -205,26 +204,62 @@ const parseBody = (body: string): unknown => {
  * the same emulator, and so the same checks, as the control endpoints.
  */
 export const createEmulatorMcpHandler = (
-  emulator: McpControlEmulator,
+  emulator: ControlledEmulator,
   { exportFixtures }: EmulatorMcpOptions = {}
 ): ((request: Request) => Promise<Response>) => {
-  const tools = exportFixtures ? [...TOOLS, EXPORT_TOOL] : TOOLS;
+  const { connectors } = emulator;
+  // Combined emulators take the connector each tool is about.
+  const withConnector = (tool: Tool): Tool =>
+    connectors
+      ? {
+          ...tool,
+          inputSchema: {
+            ...tool.inputSchema,
+            properties: {
+              ...tool.inputSchema.properties,
+              connector: {
+                type: 'string',
+                enum: [...connectors],
+                description: 'Only this connector',
+              },
+            },
+          },
+        }
+      : tool;
+  const tools = (exportFixtures ? [...TOOLS, EXPORT_TOOL] : TOOLS).map(withConnector);
+  const byConnector = <T extends { readonly connector?: string }>(
+    items: readonly T[],
+    connector: string | undefined
+  ): readonly T[] =>
+    connector === undefined ? items : items.filter((item) => item.connector === connector);
 
   const call = async (name: string, args: Record<string, unknown>): Promise<CallToolResult> => {
+    const connector = text(args.connector);
+    if (connector !== undefined && !connectors?.includes(connector)) {
+      return failed(
+        connectors
+          ? `No connector ${connector}; there are ${connectors.join(', ')}`
+          : 'The emulator serves one connector; leave out connector'
+      );
+    }
     switch (name) {
       case 'list_operations': {
         const search = text(args.search)?.toLowerCase();
+        const operations = byConnector(emulator.operations, connector);
         return ok(
           search === undefined
-            ? emulator.operations
-            : emulator.operations.filter((operation) =>
+            ? operations
+            : operations.filter((operation) =>
                 JSON.stringify(operation).toLowerCase().includes(search)
               )
         );
       }
       case 'describe_operation': {
         const id = text(args.id) ?? '';
-        const description = emulator.describeOperation(id, text(args.source));
+        const description = emulator.describeOperation(id, {
+          source: text(args.source),
+          connector,
+        });
         return description
           ? ok(description)
           : failed(`No OpenAPI operation has the id ${id}; list_operations shows the ids`);
@@ -234,26 +269,27 @@ export const createEmulatorMcpHandler = (
         if ('error' in checked) {
           return failed(checked.error.replace('The body', 'The arguments'));
         }
-        const rejected = emulator.runtimeFixtures.set(checked.fixtures);
+        const rejected = emulator.runtimeFixtures.set(checked.fixtures, { connector });
         return rejected.length > 0
           ? failed("The vendor's spec rejects these fixtures, so none was set:", rejected)
-          : ok({ fixtures: emulator.runtimeFixtures.list() });
+          : ok({ fixtures: emulator.runtimeFixtures.list({ connector }) });
       }
       case 'list_fixtures':
-        return ok({ fixtures: emulator.runtimeFixtures.list() });
+        return ok({ fixtures: emulator.runtimeFixtures.list({ connector }) });
       case 'clear_fixtures':
-        emulator.runtimeFixtures.clear(text(args.id), text(args.source));
-        return ok({ fixtures: emulator.runtimeFixtures.list() });
+        emulator.runtimeFixtures.clear({ id: text(args.id), source: text(args.source), connector });
+        return ok({ fixtures: emulator.runtimeFixtures.list({ connector }) });
       case 'list_calls': {
         const since = typeof args.since === 'number' ? args.since : 0;
-        return ok({ calls: emulator.calls.slice(since), total: emulator.calls.length });
+        const calls = byConnector(emulator.calls, connector);
+        return ok({ calls: calls.slice(since), total: calls.length });
       }
       case 'reset':
-        emulator.reset();
-        return ok({ reset: true });
+        emulator.reset(connector);
+        return ok({ reset: connector ?? true });
       case 'export_fixtures':
         return exportFixtures
-          ? ok({ exportedTo: await exportFixtures(emulator.runtimeFixtures.list()) })
+          ? ok({ exportedTo: await exportFixtures(emulator.runtimeFixtures.list({ connector })) })
           : failed('Exporting fixtures is not available');
       default:
         throw new McpError(ErrorCode.InvalidParams, `Unknown tool ${name}`);
@@ -265,7 +301,7 @@ export const createEmulatorMcpHandler = (
       { name: 'connector-emulator-control', version: '1.0.0' },
       {
         capabilities: { tools: {} },
-        instructions: INSTRUCTIONS,
+        instructions: connectors ? `${INSTRUCTIONS}${COMBINED_INSTRUCTIONS}` : INSTRUCTIONS,
         // The SDK's default Ajv validator compiles schemas to code, which Jest disallows.
         jsonSchemaValidator: new CfWorkerJsonSchemaValidator(),
       }

@@ -8,10 +8,11 @@
  */
 
 import type { RejectedResponse, ResponseFixture } from '../engine/response_engine';
-import type { ContractCall, Emulator } from '../fetch/create_emulator_fetch';
+import type { ContractCall } from '../fetch/create_emulator_fetch';
 import type { OperationDescription } from '../fetch/describe_operation';
 import type { EmulatorOperation } from '../fetch/list_operations';
 import { checkFixtures } from './check_fixtures';
+import type { ControlledEmulator } from './controlled_emulator';
 import type { EmulatorMcpOptions } from './emulator_mcp';
 import { createEmulatorMcpHandler } from './emulator_mcp';
 
@@ -31,6 +32,11 @@ export interface EmulatorCalls {
 /** Answers requests to the control endpoints; the proxy hands it requests under `CONTROL_PATH`. */
 export type EmulatorControlHandler = (request: Request) => Promise<Response>;
 
+export interface EmulatorControlOptions {
+  /** Scopes every endpoint to one connector of an emulator combined by `combineEmulators`. */
+  readonly connector?: string;
+}
+
 /** Reads, resets and steers a running emulator through its control endpoints. */
 export interface EmulatorControl {
   /** The calls the emulator received, from index `since` (default 0) on. */
@@ -40,7 +46,10 @@ export interface EmulatorControl {
   /** The operations the emulator answers. */
   readonly operations: () => Promise<readonly EmulatorOperation[]>;
   /** What an OpenAPI operation accepts and answers, by its `id` as `operations` lists it. */
-  readonly describeOperation: (id: string, source?: string) => Promise<OperationDescription>;
+  readonly describeOperation: (
+    id: string,
+    options?: { readonly source?: string }
+  ) => Promise<OperationDescription>;
   /**
    * Sets runtime fixtures, replacing those of the operations they name. Resolves to the
    * fixtures the spec rejects, in which case none is set.
@@ -51,15 +60,17 @@ export interface EmulatorControl {
   /** The runtime fixtures in effect. */
   readonly getFixtures: () => Promise<readonly ResponseFixture[]>;
   /** Drops the runtime fixtures of one OpenAPI operation, or all of them. */
-  readonly clearFixtures: (id?: string, source?: string) => Promise<void>;
+  readonly clearFixtures: (options?: {
+    readonly id?: string;
+    readonly source?: string;
+  }) => Promise<void>;
 }
 
-type ControlEmulator = Pick<
-  Emulator,
-  'calls' | 'operations' | 'reset' | 'runtimeFixtures' | 'describeOperation'
->;
-
-type Answer = (request: Request, url: URL) => Response | Promise<Response>;
+type Answer = (
+  request: Request,
+  url: URL,
+  connector: string | undefined
+) => Response | Promise<Response>;
 
 const problem = (status: number, title: string, detail: string, headers?: HeadersInit) =>
   Response.json({ title, detail }, { status, headers });
@@ -89,43 +100,55 @@ const optional = (url: URL, name: string): string | undefined =>
  * Serves an emulator's control endpoints, all as JSON: `GET /_mock/calls?since=<n>`,
  * `POST /_mock/reset`, `GET /_mock/operations`, `GET /_mock/operations/<id>`, and
  * `GET`, `PUT` and `DELETE /_mock/fixtures` for runtime fixtures; and an MCP server with tools
- * for the same at `/_mock/mcp`. They are for local test runs and take no credentials.
+ * for the same at `/_mock/mcp`. For emulators combined by `combineEmulators`, each endpoint takes
+ * `?connector=<id>` to see or change only that connector's emulator. They are for local test
+ * runs and take no credentials.
  */
 export const createEmulatorControlHandler = (
-  emulator: ControlEmulator,
+  emulator: ControlledEmulator,
   mcpOptions: EmulatorMcpOptions = {}
 ): EmulatorControlHandler => {
-  const { calls, operations, reset, runtimeFixtures, describeOperation } = emulator;
+  const { calls, operations, reset, connectors, runtimeFixtures, describeOperation } = emulator;
   const mcp = createEmulatorMcpHandler(emulator, mcpOptions);
+  const byConnector = <T extends { readonly connector?: string }>(
+    items: readonly T[],
+    connector: string | undefined
+  ): readonly T[] =>
+    connector === undefined ? items : items.filter((item) => item.connector === connector);
+  const forMcp: Answer = (request) => mcp(request);
+
   const routes: Record<string, Record<string, Answer>> = {
-    [`${CONTROL_PATH}/mcp`]: { POST: mcp, GET: mcp, DELETE: mcp },
+    [`${CONTROL_PATH}/mcp`]: { POST: forMcp, GET: forMcp, DELETE: forMcp },
     [`${CONTROL_PATH}/calls`]: {
-      GET: (_request, { searchParams }) => {
+      GET: (_request, { searchParams }, connector) => {
         const since = Number(searchParams.get('since') ?? 0);
         if (!Number.isSafeInteger(since) || since < 0) {
           return problem(400, 'Invalid since', 'since must be a non-negative integer');
         }
-        const body: EmulatorCalls = { calls: calls.slice(since), total: calls.length };
+        const scoped = byConnector(calls, connector);
+        const body: EmulatorCalls = { calls: scoped.slice(since), total: scoped.length };
         return Response.json(body);
       },
     },
     [`${CONTROL_PATH}/reset`]: {
-      POST: () => {
-        reset();
+      POST: (_request, _url, connector) => {
+        reset(connector);
         return new Response(null, { status: 204 });
       },
     },
     [`${CONTROL_PATH}/operations`]: {
-      GET: () => Response.json({ operations }),
+      GET: (_request, _url, connector) =>
+        Response.json({ operations: byConnector(operations, connector) }),
     },
     [`${CONTROL_PATH}/fixtures`]: {
-      GET: () => Response.json({ fixtures: runtimeFixtures.list() }),
-      PUT: async (request) => {
+      GET: (_request, _url, connector) =>
+        Response.json({ fixtures: runtimeFixtures.list({ connector }) }),
+      PUT: async (request, _url, connector) => {
         const read = await readFixtures(request);
         if ('error' in read) {
           return problem(400, 'Invalid fixtures', read.error);
         }
-        const rejected = runtimeFixtures.set(read.fixtures);
+        const rejected = runtimeFixtures.set(read.fixtures, { connector });
         if (rejected.length > 0) {
           return Response.json(
             {
@@ -136,19 +159,41 @@ export const createEmulatorControlHandler = (
             { status: 400 }
           );
         }
-        return Response.json({ fixtures: runtimeFixtures.list() });
+        return Response.json({ fixtures: runtimeFixtures.list({ connector }) });
       },
-      DELETE: (_request, url) => {
-        runtimeFixtures.clear(optional(url, 'operation'), optional(url, 'source'));
+      DELETE: (_request, url, connector) => {
+        runtimeFixtures.clear({
+          id: optional(url, 'operation'),
+          source: optional(url, 'source'),
+          connector,
+        });
         return new Response(null, { status: 204 });
       },
     },
   };
+  // Rejects ?connector= for a single emulator, and connectors it doesn't combine.
+  const connectorProblem = (connector: string): Response | undefined => {
+    if (!connectors) {
+      return problem(
+        400,
+        'Not a combined emulator',
+        `connector=${connector}: the emulator serves one connector; omit the connector parameter`
+      );
+    }
+    if (!connectors.includes(connector)) {
+      return problem(
+        400,
+        'Unknown connector',
+        `connector=${connector}: the emulator serves ${connectors.join(', ')}`
+      );
+    }
+  };
+
   const operationPrefix = `${CONTROL_PATH}/operations/`;
   const describe: Record<string, Answer> = {
-    GET: (_request, url) => {
+    GET: (_request, url, connector) => {
       const id = decodeURIComponent(url.pathname.slice(operationPrefix.length));
-      const description = describeOperation(id, optional(url, 'source'));
+      const description = describeOperation(id, { source: optional(url, 'source'), connector });
       return description
         ? Response.json(description)
         : problem(404, 'No such operation', `No OpenAPI operation has the id ${id}`);
@@ -177,7 +222,11 @@ export const createEmulatorControlHandler = (
         allow: allowed,
       });
     }
-    return answer(request, url);
+    // The MCP server takes the connector as a tool argument instead.
+    const connector =
+      methods === routes[`${CONTROL_PATH}/mcp`] ? undefined : optional(url, 'connector');
+    const invalid = connector === undefined ? undefined : connectorProblem(connector);
+    return invalid ?? answer(request, url, connector);
   };
 };
 
@@ -196,10 +245,20 @@ const send = async (url: URL, method: string, body?: unknown): Promise<Response>
 
 /**
  * Returns a client for the control endpoints of an emulator served by `createEmulatorProxy` at
- * `proxyUrl`, e.g. for a Scout or FTR test that drives Kibana against the emulator.
+ * `proxyUrl`, e.g. for a Scout or FTR test that drives Kibana against the emulator. With
+ * `connector`, it sees and changes only that connector's emulator of a combined emulator.
  */
-export const createEmulatorControl = (proxyUrl: string | URL): EmulatorControl => {
-  const endpoint = (path: string) => new URL(`${CONTROL_PATH}/${path}`, proxyUrl);
+export const createEmulatorControl = (
+  proxyUrl: string | URL,
+  { connector }: EmulatorControlOptions = {}
+): EmulatorControl => {
+  const endpoint = (path: string) => {
+    const url = new URL(`${CONTROL_PATH}/${path}`, proxyUrl);
+    if (connector !== undefined) {
+      url.searchParams.set('connector', connector);
+    }
+    return url;
+  };
   const withSource = (url: URL, source?: string) => {
     if (source !== undefined) {
       url.searchParams.set('source', source);
@@ -216,7 +275,7 @@ export const createEmulatorControl = (proxyUrl: string | URL): EmulatorControl =
       await send(endpoint('reset'), 'POST');
     },
     operations: async () => (await (await send(endpoint('operations'), 'GET')).json()).operations,
-    describeOperation: async (id, source) =>
+    describeOperation: async (id, { source } = {}) =>
       (
         await send(withSource(endpoint(`operations/${encodeURIComponent(id)}`), source), 'GET')
       ).json(),
@@ -238,7 +297,7 @@ export const createEmulatorControl = (proxyUrl: string | URL): EmulatorControl =
       );
     },
     getFixtures: async () => (await (await send(endpoint('fixtures'), 'GET')).json()).fixtures,
-    clearFixtures: async (id, source) => {
+    clearFixtures: async ({ id, source } = {}) => {
       const url = withSource(endpoint('fixtures'), source);
       if (id !== undefined) {
         url.searchParams.set('operation', id);

@@ -42,6 +42,11 @@ export interface StoredResponse {
 export interface ResponseFixture {
   readonly operation: OperationRef | NamedOperationRef;
   /**
+   * For emulators combined by `combineEmulators`, the connector whose emulator the fixture is
+   * for; other emulators ignore it.
+   */
+  readonly connector?: string;
+  /**
    * For OpenAPI operations, the requests the fixture answers, e.g. `{ path: { id: '42' } }`;
    * without it, every request the operation's other fixtures don't match.
    */
@@ -75,6 +80,8 @@ export interface RejectedResponse {
   /** With named specs, the spec that contradicts it. */
   readonly spec?: string;
   readonly violations: readonly Violation[];
+  /** Set by `combineEmulators`: the connector whose fixture or recording it is. */
+  readonly connector?: string;
 }
 
 export interface ResponseEngineOptions {

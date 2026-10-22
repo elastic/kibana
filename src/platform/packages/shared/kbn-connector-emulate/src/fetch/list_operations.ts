@@ -21,6 +21,8 @@ export interface EmulatorHttpOperation {
   /** The server URLs the operation is served at, with any `{variables}` left in. */
   readonly servers: readonly string[];
   readonly source?: string;
+  /** Set by `combineEmulators`: the connector whose emulator answers the operation. */
+  readonly connector?: string;
 }
 
 /** An operation of a GraphQL or MCP spec the emulator answers, e.g. `query boards`. */
@@ -31,6 +33,8 @@ export interface EmulatorNamedOperation {
   readonly readOnly: boolean;
   readonly endpoints: readonly string[];
   readonly source?: string;
+  /** Set by `combineEmulators`: the connector whose emulator answers the operation. */
+  readonly connector?: string;
 }
 
 export type EmulatorOperation = EmulatorHttpOperation | EmulatorNamedOperation;

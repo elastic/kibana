@@ -69,6 +69,8 @@ export interface ContractCall {
    * (`responder`).
    */
   readonly responseSource?: ResponseOrigin | 'generated' | 'responder';
+  /** Set by `combineEmulators`: the connector whose emulator answered the request. */
+  readonly connector?: string;
   readonly status: number;
   readonly requestViolations: readonly Violation[];
   readonly responseViolations: readonly Violation[];
@@ -108,6 +110,11 @@ export interface EmulatorOptions extends PaginationOptions {
 
 export interface Emulator {
   readonly fetch: typeof fetch;
+  /**
+   * Whether a request with this method and URL is for one of the specs: an operation's path
+   * (with any method), a token URL, or a GraphQL or MCP endpoint. Records no call.
+   */
+  readonly answers: (method: string, url: URL) => boolean;
   readonly calls: ContractCall[];
   /** The operations the specs declare, which is what the emulator answers. */
   readonly operations: readonly EmulatorOperation[];
@@ -123,10 +130,13 @@ export interface Emulator {
     readonly set: (fixtures: readonly ResponseFixture[]) => readonly RejectedResponse[];
     readonly list: () => readonly ResponseFixture[];
     /** Drops the runtime fixtures of the OpenAPI operation with this `id`, or all of them. */
-    readonly clear: (id?: string, source?: string) => void;
+    readonly clear: (options?: { readonly id?: string; readonly source?: string }) => void;
   };
   /** Describes an OpenAPI operation by its `id`, as `operations` lists it, to write a fixture. */
-  readonly describeOperation: (id: string, source?: string) => OperationDescription | undefined;
+  readonly describeOperation: (
+    id: string,
+    options?: { readonly source?: string }
+  ) => OperationDescription | undefined;
   /**
    * Empties `calls`, the responder state and the runtime fixtures, e.g. between tests; `calls`
    * keeps its identity.
@@ -405,16 +415,24 @@ export const createEmulatorFetch = ({
   ];
   return {
     fetch: mockFetch,
+    answers: (method, url) => {
+      if (protocols.has(toEndpoint(url)) || tokenEndpoints(url) !== undefined) {
+        return true;
+      }
+      const routed = contract.route({ method: method.toLowerCase(), url, query: {}, headers: {} });
+      // A 405 means the path is the spec's, only the method isn't.
+      return 'operation' in routed || routed.status === 405;
+    },
     calls,
     operations: listOperations(operations, loadedProtocols),
     rejectedResponses,
     runtimeFixtures: {
       set: engine.runtime.set,
       list: engine.runtime.list,
-      clear: (id, source) =>
+      clear: ({ id, source } = {}) =>
         engine.runtime.clear(id === undefined ? undefined : findById(id, source)),
     },
-    describeOperation: (id, source) => {
+    describeOperation: (id, { source } = {}) => {
       const [operation] = findById(id, source);
       return operation && describeOperation(operation);
     },
