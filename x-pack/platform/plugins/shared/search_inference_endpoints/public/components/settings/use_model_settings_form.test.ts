@@ -179,6 +179,23 @@ describe('useModelSettingsForm', () => {
     ]);
   });
 
+  it('leaves a row empty when it ignores the global default and nothing is recommended', () => {
+    const childWithNoRecommended: InferenceFeatureConfig = {
+      ...childFeature2,
+      recommendedEndpoints: [],
+      ignoreGlobalDefault: true,
+    };
+    mockUseRegisteredFeatures.mockReturnValue({
+      features: [parentFeature, childFeature1, childWithNoRecommended],
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() => useModelSettingsForm());
+
+    expect(result.current.assignments.child_2).toEqual([]);
+    expect(result.current.effectiveRecommendedEndpoints.child_2).toEqual([]);
+  });
+
   it('falls back to parent recommendedEndpoints when parent has them and child has none', () => {
     const parentWithEndpoints: InferenceFeatureConfig = {
       ...parentFeature,

@@ -18,7 +18,12 @@ const commentsFilter = (field: string, values: string[]): KueryNode | undefined 
     type: CASE_COMMENT_SAVED_OBJECT,
   });
 
-const commentsMatchFilter = ({ type, field, values }: LegacyTypeMatch): KueryNode | undefined => {
+/** A `cases-comments` filter for one legacy form of a unified type. */
+export const commentsMatchFilter = ({
+  type,
+  field,
+  values,
+}: LegacyTypeMatch): KueryNode | undefined => {
   const typeFilter = commentsFilter('type', [type]);
   if (field == null || values == null || values.length === 0) {
     return typeFilter;
