@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, renderHook, screen } from '@testing-library/react';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { DroppedSpansWarning } from './dropped_spans_warning';
+import { useDroppedSpansCallout } from './use_dropped_spans_callout';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 jest.mock('../../../context/apm_plugin/use_apm_plugin_context');
@@ -25,7 +24,10 @@ const buildTransaction = (dropped?: number): Transaction =>
     },
   } as Transaction);
 
-describe('DroppedSpansWarning', () => {
+const renderCallout = (transaction?: Transaction) =>
+  renderHook(() => useDroppedSpansCallout(transaction)).result.current;
+
+describe('useDroppedSpansCallout', () => {
   beforeEach(() => {
     mockUseApmPluginContext.mockReturnValue({
       core: {
@@ -41,30 +43,34 @@ describe('DroppedSpansWarning', () => {
   });
 
   it('renders the callout with the dropped count and a docs link when there are dropped spans', () => {
-    render(<DroppedSpansWarning transactionDoc={buildTransaction(5)} />);
+    const callout = renderCallout(buildTransaction(5));
 
-    expect(
-      screen.getByText(/dropped 5 spans or more based on its configuration/)
-    ).toBeInTheDocument();
+    expect(callout?.props.level).toBe('info');
+    expect(callout?.props['data-test-subj']).toBe('transactionFlyoutDroppedSpansCallout');
+    expect(callout?.props.title).toMatch(/dropped 5 spans or more based on its configuration/);
 
+    // A bare `Body.Callout` renders nothing outside the template, so render its link content.
+    render(callout?.props.children);
     const link = screen.getByRole('link', {
       name: 'Learn more about dropped spans.',
     });
     expect(link).toHaveAttribute('href', DROPPED_SPANS_DOC_URL);
+    expect(link).toHaveAttribute(
+      'data-test-subj',
+      'apmDroppedSpansWarningLearnMoreAboutDroppedSpansLink'
+    );
   });
 
   it('does not render when dropped is 0', () => {
-    const { container } = render(<DroppedSpansWarning transactionDoc={buildTransaction(0)} />);
-    expect(container).toBeEmptyDOMElement();
+    expect(renderCallout(buildTransaction(0))).toBeNull();
   });
 
   it('does not render when span_count is missing', () => {
-    const { container } = render(<DroppedSpansWarning transactionDoc={buildTransaction()} />);
-    expect(container).toBeEmptyDOMElement();
+    expect(renderCallout(buildTransaction())).toBeNull();
   });
 
   it('does not render when transaction is missing', () => {
-    const { container } = render(<DroppedSpansWarning transactionDoc={{} as Transaction} />);
-    expect(container).toBeEmptyDOMElement();
+    expect(renderCallout({} as Transaction)).toBeNull();
+    expect(renderCallout(undefined)).toBeNull();
   });
 });
