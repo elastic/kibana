@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 
 import { iacProvisionerService } from '../../services';
 import { provisioningCallbackService } from '../../services/provisioning_callback';
+import { deployProvisioningCallback } from '../../services/provisioning_callback_deploy';
 import {
   buildIacProvisionerIntegrations,
   isBuildError,
@@ -249,9 +250,21 @@ export const createProvisioningCallbackHandler: FleetRequestHandler<
       body: { message: availability.reason ?? 'Kibana cannot be reached at its public URL' },
     });
   }
-  const { spaceId } = await context.fleet;
+  const { spaceId, authz } = await context.fleet;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const { provider, ...identity } = request.body;
+
+  // An attached deployment makes the report create agentless policies as the internal user, so
+  // attaching one needs what the create-agentless-policy API needs: the privilege to write
+  // integration policies.
+  if (identity.onboarding_deployment_id && !authz.integrations.writeIntegrationPolicies) {
+    return response.forbidden({
+      body: {
+        message:
+          'Attaching an onboarding deployment requires the privilege to create integration policies',
+      },
+    });
+  }
 
   // The key is granted for the caller through the security plugin, so they need no
   // `manage_api_key` privilege (unavailable on Serverless). The type is space-agnostic, hence the
@@ -325,6 +338,11 @@ export const receiveProvisioningCallbackHandler: FleetRequestHandler<
 
   switch (result.outcome) {
     case 'received':
+      if (result.item.onboarding_deployment_id && result.item.deploy_status === 'pending') {
+        // The stack only waits a couple of minutes for this answer; the deploy runs after it.
+        // The executor never rejects, so the response cannot be affected.
+        void deployProvisioningCallback(request.params.callbackId);
+      }
       return response.ok({ body: { status: result.item.status } });
     case 'not_found':
       return response.notFound(CALLBACK_NOT_FOUND);

@@ -20,6 +20,7 @@ import { getPackageInfo } from '../../services/epm/packages';
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
 import { isAwsIdentityFederationEnabled } from '../../services/utils/aws_identity_federation';
 import { getProvisioningCallbackAvailability } from '../../services/utils/provisioning_callback_availability';
+import { deployProvisioningCallback } from '../../services/provisioning_callback_deploy';
 import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
 import type { CloudConnectorCallback } from '../../../common/types/models/provisioning_callback';
 import {
@@ -45,6 +46,7 @@ jest.mock('../../services/utils/iac_provisioner');
 jest.mock('../../services/utils/aws_identity_federation');
 jest.mock('../../services/utils/provisioning_callback_availability');
 jest.mock('../../services/telemetry/iac_provisioner_telemetry');
+jest.mock('../../services/provisioning_callback_deploy');
 jest.mock('../../services/provisioning_callback', () => ({
   provisioningCallbackService: {
     create: jest.fn(),
@@ -59,6 +61,7 @@ const mockedGetPackageInfo = jest.mocked(getPackageInfo);
 const mockedIsEnabled = jest.mocked(isIacProvisionerEnabled);
 const mockedIsAwsIdentityFederationEnabled = jest.mocked(isAwsIdentityFederationEnabled);
 const mockedGetAvailability = jest.mocked(getProvisioningCallbackAvailability);
+const mockedDeploy = jest.mocked(deployProvisioningCallback);
 
 const buildContext = () =>
   ({
@@ -489,8 +492,21 @@ const apiKeyUser = (id: string) =>
 const realmUser = () =>
   ({ username: 'elastic', authentication_type: 'realm' } as unknown as AuthenticatedUser);
 
-const buildCallbackContext = (spaceId = 'default') =>
-  ({ fleet: Promise.resolve({ spaceId, internalSoClient: {} }) } as any);
+const buildCallbackContext = (
+  spaceId = 'default',
+  authz: { writeIntegrationPolicies: boolean } = { writeIntegrationPolicies: true }
+) =>
+  ({
+    fleet: Promise.resolve({
+      spaceId,
+      internalSoClient: {},
+      authz: {
+        // Fleet All is deliberately false: the create-agentless-policy route does not need it.
+        fleet: { all: false },
+        integrations: { all: true, writeIntegrationPolicies: authz.writeIntegrationPolicies },
+      },
+    }),
+  } as any);
 
 describe('Provisioning callback handlers', () => {
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
@@ -642,6 +658,38 @@ describe('Provisioning callback handlers', () => {
       expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM, api_key: 'encoded-key' } });
     });
 
+    it('passes an attached onboarding deployment to the record', async () => {
+      getCurrentUser.mockReturnValue(realmUser());
+      mockedService.create.mockResolvedValue({ item: ITEM, apiKey: 'encoded-key' });
+      const request = httpServerMock.createKibanaRequest({
+        body: { provider: 'aws', onboarding_deployment_id: 'dep-1' },
+      });
+
+      await createProvisioningCallbackHandler(buildCallbackContext(), request, response);
+
+      expect(mockedService.create).toHaveBeenCalledWith(
+        soClient,
+        request,
+        expect.objectContaining({ identity: { onboarding_deployment_id: 'dep-1' } })
+      );
+    });
+
+    it('refuses a deployment id without the privilege to write integration policies', async () => {
+      getCurrentUser.mockReturnValue(realmUser());
+      const request = httpServerMock.createKibanaRequest({
+        body: { provider: 'aws', onboarding_deployment_id: 'dep-1' },
+      });
+
+      await createProvisioningCallbackHandler(
+        buildCallbackContext('default', { writeIntegrationPolicies: false }),
+        request,
+        response
+      );
+
+      expect(response.forbidden).toHaveBeenCalled();
+      expect(mockedService.create).not.toHaveBeenCalled();
+    });
+
     it('passes the name, account type and template details to the record', async () => {
       getCurrentUser.mockReturnValue(realmUser());
       mockedService.create.mockResolvedValue({ item: ITEM, apiKey: 'encoded-key' });
@@ -778,6 +826,51 @@ describe('Provisioning callback handlers', () => {
         payload: PAYLOAD,
       });
       expect(response.ok).toHaveBeenCalledWith({ body: { status: 'received' } });
+    });
+
+    it('starts the deploy after answering when the record carries a deployment', async () => {
+      mockedDeploy.mockResolvedValue(undefined);
+      mockedService.receive.mockResolvedValue({
+        outcome: 'received',
+        item: {
+          ...ITEM,
+          status: 'received',
+          onboarding_deployment_id: 'dep-1',
+          deploy_status: 'pending',
+        },
+      });
+
+      await receive(apiKeyUser('key-1'));
+
+      expect(response.ok).toHaveBeenCalledWith({ body: { status: 'received' } });
+      expect(mockedDeploy).toHaveBeenCalledWith('cb-1');
+    });
+
+    it('does not start a deploy for a record without a deployment', async () => {
+      mockedService.receive.mockResolvedValue({
+        outcome: 'received',
+        item: { ...ITEM, status: 'received' },
+      });
+
+      await receive(apiKeyUser('key-1'));
+
+      expect(mockedDeploy).not.toHaveBeenCalled();
+    });
+
+    it('does not start a deploy again for a record already deploying', async () => {
+      mockedService.receive.mockResolvedValue({
+        outcome: 'received',
+        item: {
+          ...ITEM,
+          status: 'received',
+          onboarding_deployment_id: 'dep-1',
+          deploy_status: 'deploying',
+        },
+      });
+
+      await receive(apiKeyUser('key-1'));
+
+      expect(mockedDeploy).not.toHaveBeenCalled();
     });
 
     it('passes no key id when the caller did not authenticate with an API key', async () => {

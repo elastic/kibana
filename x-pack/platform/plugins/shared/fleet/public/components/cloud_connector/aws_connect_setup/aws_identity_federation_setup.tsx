@@ -41,6 +41,7 @@ import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
 import { useCreateCloudConnector } from '../hooks/use_create_cloud_connector';
 import { useProvisioningCallback } from '../hooks/use_provisioning_callback';
+import type { ProvisioningCallbackDeployOutcome } from '../hooks/use_provisioning_callback';
 import { CloudConnectorTabs, type CloudConnectorTab } from '../cloud_connector_tabs';
 import { CloudConnectorSelector } from '../form/cloud_connector_selector';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
@@ -84,6 +85,16 @@ export interface AwsIdentityFederationSetupProps {
    * (the onboarding writes them after Deploy). Readiness still lifts on the launch.
    */
   onIacTemplateRecorded?: (iac: IacRenderedTemplate, launchedFor: IacTemplateLaunchedFor) => void;
+  /**
+   * Ingest hub only. Called at Launch before the callback record is created; returns the
+   * onboarding deployment whose stored integrations the server deploys once the stack reports
+   * back, or undefined to launch without one. A rejection cancels the launch.
+   */
+  onPrepareLaunch?: () => Promise<{ onboardingDeploymentId: string } | undefined>;
+  /** Fired once per launch when the server-side deploy that followed the report has finished. */
+  onDeployOutcome?: (outcome: ProvisioningCallbackDeployOutcome) => void;
+  /** Fired when the form starts or stops waiting on a launched stack, its identity or its deploy. */
+  onWaitingChange?: (isWaiting: boolean) => void;
 }
 
 export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProps> = ({
@@ -99,6 +110,9 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   onReadyChange,
   onConnectorIdChange,
   onIacTemplateRecorded,
+  onPrepareLaunch,
+  onDeployOutcome,
+  onWaitingChange,
 }) => {
   const { isIacProvisionerEnabled } = useIacProvisioner();
   const isAwsIdentityFederationEnabled =
@@ -155,6 +169,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     unavailableReason: callbackUnavailableReason,
     status: callbackStatus,
     created: callbackCreated,
+    deployOutcome: callbackDeployOutcome,
     start: startCallback,
     cancel: cancelCallback,
   } = useProvisioningCallback({ enabled: isAwsIdentityFederationEnabled });
@@ -162,8 +177,12 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   const [launchedName, setLaunchedName] = useState('');
   // True while a manual Create or the manual-entry link is retiring the pending record.
   const [isHandingOff, setIsHandingOff] = useState(false);
-  // Waiting on the stack, or on the server making the identity from its report.
-  const isWaiting = callbackStatus === 'pending' || callbackStatus === 'receiving';
+  // Waiting on the stack, on the server making the identity from its report, or on the server
+  // deploying the integrations of an attached onboarding deployment.
+  const isWaiting =
+    callbackStatus === 'pending' ||
+    callbackStatus === 'receiving' ||
+    callbackStatus === 'deploying';
   // The ARN fields only show values while the form waits, and afterwards, when they hold what
   // the stack reported and the identity already exists.
   const isManualEntryLocked = isWaiting || callbackStatus === 'received';
@@ -206,7 +225,10 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   // The hook's `templateAlreadyCurrent` is not consumed: it only fires when a stored digest is
   // sent, and New Identity never has one.
   const getLaunchStackParams = useCallback(
-    (iac: CloudConnectorIacState | undefined) => {
+    async (iac: CloudConnectorIacState | undefined) => {
+      // The host may attach what to deploy once the stack reports; a failure here cancels the
+      // launch before any record exists.
+      const prepared = await onPrepareLaunch?.();
       setLaunchedName(connectorName.trim());
       // The fields will show what this launch's stack reports.
       setRoleArn('');
@@ -217,9 +239,10 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
         iacKey: iac?.iac_key,
         iacBlueprintId: iac?.iac_blueprint_id,
         iacBlueprintVersion: iac?.iac_blueprint_version,
+        ...(prepared ? { onboardingDeploymentId: prepared.onboardingDeploymentId } : {}),
       });
     },
-    [startCallback, connectorName, accountType]
+    [startCallback, onPrepareLaunch, connectorName, accountType]
   );
   const {
     launchButtonProps,
@@ -251,6 +274,24 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
 
   // Once the wait has ended without an identity, the fields unlock and a hint says so.
   const hasCallbackGivenUp = callbackStatus === 'expired' || callbackStatus === 'error';
+
+  useEffect(() => {
+    onWaitingChange?.(isWaiting);
+  }, [isWaiting, onWaitingChange]);
+  // Unmounting mid-wait (the host switched views) must not leave the host locked.
+  const onWaitingChangeRef = useRef(onWaitingChange);
+  onWaitingChangeRef.current = onWaitingChange;
+  useEffect(() => () => onWaitingChangeRef.current?.(false), []);
+
+  // One outcome per launch; the hook keeps the same object until the next launch.
+  const handledDeployOutcomeRef = useRef<ProvisioningCallbackDeployOutcome | undefined>(undefined);
+  useEffect(() => {
+    if (!callbackDeployOutcome || handledDeployOutcomeRef.current === callbackDeployOutcome) {
+      return;
+    }
+    handledDeployOutcomeRef.current = callbackDeployOutcome;
+    onDeployOutcome?.(callbackDeployOutcome);
+  }, [callbackDeployOutcome, onDeployOutcome]);
 
   const notifyCancelFailed = useCallback(() => {
     notifications?.toasts.addDanger({
@@ -471,7 +512,13 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText size="s" color="subdued">
-                    {callbackStatus === 'receiving' ? (
+                    {callbackStatus === 'deploying' ? (
+                      <FormattedMessage
+                        id="xpack.fleet.cloudConnector.provisioningCallback.deployingHint"
+                        defaultMessage="Deploying integrations for the federated identity {name}."
+                        values={{ name: <strong>{launchedName}</strong> }}
+                      />
+                    ) : callbackStatus === 'receiving' ? (
                       <FormattedMessage
                         id="xpack.fleet.cloudConnector.provisioningCallback.creatingIdentityHint"
                         defaultMessage="Creating the federated identity {name} from what the stack reported."

@@ -332,6 +332,44 @@ describe('AgentlessPoliciesService', () => {
         })
       );
     });
+
+    it('records the given creator on the policies when no request is present', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        soClient,
+        esClient,
+        loggingSystemMock.createLogger()
+      );
+
+      await agentlessPoliciesService.createAgentlessPolicy(
+        {
+          name: 'Test Agentless Policy',
+          namespace: 'default',
+          package: { name: 'agentless_integration', version: '1.0.0' },
+          inputs: {},
+        },
+        undefined,
+        undefined,
+        { createdBy: 'launcher' }
+      );
+
+      expect(jest.mocked(agentPolicyService.create)).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ user: expect.objectContaining({ username: 'launcher' }) })
+      );
+      expect(packagePolicyService.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ user: expect.objectContaining({ username: 'launcher' }) }),
+        undefined,
+        undefined
+      );
+    });
   });
 
   describe('updateAgentlessPolicy', () => {

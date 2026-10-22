@@ -93,6 +93,22 @@ export const CloudOnboardingDeploymentSchemaV2 = schema.object({
   ...SharedFields,
 });
 
+// ── V3: pendingAgentlessPolicies ─────────────────────────────────────────────
+// Agentless-policy requests stored at Launch and replayed by the server when the stack reports
+// back. Not indexed (dynamic: false); the request body is validated by the route, not here.
+export const CloudOnboardingDeploymentSchemaV3 = CloudOnboardingDeploymentSchemaV2.extends({
+  pendingAgentlessPolicies: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        id: schema.string({ minLength: 1, maxLength: 256 }),
+        instanceIds: schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 }),
+        request: schema.object({}, { unknowns: 'allow' }),
+      }),
+      { maxSize: 100 }
+    )
+  ),
+});
+
 // ── V1 ───────────────────────────────────────────────────────────────────────
 export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   provider: ProviderSchema,

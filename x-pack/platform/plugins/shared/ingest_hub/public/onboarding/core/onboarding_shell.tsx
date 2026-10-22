@@ -70,6 +70,7 @@ export function OnboardingShell() {
     refetchAwsServiceMatrix,
     isDataFormatResolved,
   } = useOnboardingFlow();
+  const { isLaunchLocked } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
   useInvalidateDownstreamSteps({
@@ -100,10 +101,11 @@ export function OnboardingShell() {
   }, [currentStepId, currentStepIndex, markStepComplete, history]);
 
   const onBack = useMemo(() => {
-    if (currentStepIndex <= 0) return undefined;
+    // A launched stack is being waited on: the choices it was launched with must not change.
+    if (isLaunchLocked || currentStepIndex <= 0) return undefined;
     const prevStep = ONBOARDING_STEPS[currentStepIndex - 1];
     return () => history.push({ ...history.location, hash: `#${prevStep.id}` });
-  }, [currentStepIndex, history]);
+  }, [isLaunchLocked, currentStepIndex, history]);
 
   const horizontalStepsConfig = useMemo(
     () =>
@@ -117,13 +119,13 @@ export function OnboardingShell() {
             | 'current'
             | 'incomplete',
           onClick:
-            isComplete || isCurrent
+            (isComplete || isCurrent) && !isLaunchLocked
               ? () => history.push({ ...history.location, hash: `#${step.id}` })
               : () => {},
           'data-test-subj': `onboardingStepIndicator-${step.id}`,
         };
       }),
-    [completedSteps, currentStepId, history]
+    [completedSteps, currentStepId, history, isLaunchLocked]
   );
 
   if (!meta || !isValidStep) {

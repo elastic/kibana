@@ -666,4 +666,131 @@ describe('useProvisioningCallback', () => {
 
     expect(mockedGet).not.toHaveBeenCalled();
   });
+
+  describe('deploy stage', () => {
+    const receivedWithDeployment = (
+      deployStatus: 'pending' | 'deploying' | 'deployed' | 'failed',
+      error?: string
+    ) =>
+      pendingItem('cb-1', {
+        status: 'received',
+        ...RECEIVED_VALUES,
+        connector_name: 'my-identity',
+        cloud_connector_id: 'cc-1',
+        onboarding_deployment_id: 'dep-1',
+        deploy_status: deployStatus,
+        ...(error ? { deploy_error: error } : {}),
+      });
+
+    it('sends the onboarding deployment id with the record', async () => {
+      const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+      await act(async () => {
+        await result.current.start({ onboardingDeploymentId: 'dep-1' });
+      });
+
+      expect(mockedCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ onboarding_deployment_id: 'dep-1' })
+      );
+    });
+
+    it('keeps polling as deploying after the identity exists until the deploy finishes', async () => {
+      const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+      await act(async () => {
+        await result.current.start({ onboardingDeploymentId: 'dep-1' });
+      });
+
+      mockedGet.mockResolvedValue({
+        data: { item: receivedWithDeployment('deploying') },
+        error: null,
+      } as any);
+      await poll();
+      expect(result.current.status).toBe('deploying');
+      expect(result.current.created).toEqual({
+        id: 'cc-1',
+        name: 'my-identity',
+        ...RECEIVED_VALUES,
+      });
+      expect(result.current.deployOutcome).toBeUndefined();
+
+      // Still watching.
+      await poll();
+      expect(mockedGet).toHaveBeenCalledTimes(2);
+
+      mockedGet.mockResolvedValue({
+        data: { item: receivedWithDeployment('deployed') },
+        error: null,
+      } as any);
+      await poll();
+      expect(result.current.status).toBe('received');
+      expect(result.current.deployOutcome).toEqual({
+        status: 'deployed',
+        onboardingDeploymentId: 'dep-1',
+      });
+
+      // Polling stops once the deploy finished.
+      await poll();
+      expect(mockedGet).toHaveBeenCalledTimes(3);
+    });
+
+    it('reports a failed deploy with its error', async () => {
+      const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+      await act(async () => {
+        await result.current.start({ onboardingDeploymentId: 'dep-1' });
+      });
+
+      mockedGet.mockResolvedValue({
+        data: { item: receivedWithDeployment('failed', 'boom') },
+        error: null,
+      } as any);
+      await poll();
+
+      expect(result.current.status).toBe('received');
+      expect(result.current.deployOutcome).toEqual({
+        status: 'failed',
+        onboardingDeploymentId: 'dep-1',
+        error: 'boom',
+      });
+    });
+
+    it('the deadline leaves a deploying record alone', async () => {
+      const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+      await act(async () => {
+        await result.current.start({ onboardingDeploymentId: 'dep-1' });
+      });
+      mockedGet.mockResolvedValue({
+        data: { item: receivedWithDeployment('deploying') },
+        error: null,
+      } as any);
+      await poll();
+      expect(result.current.status).toBe('deploying');
+
+      jest.setSystemTime(new Date('2026-10-13T12:00:01.000Z'));
+      await poll();
+
+      expect(mockedDelete).not.toHaveBeenCalled();
+      expect(result.current.status).toBe('deploying');
+      expect(mockedGet).toHaveBeenCalledTimes(2);
+    });
+
+    it('cancel does nothing to a deploying record', async () => {
+      const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+      await act(async () => {
+        await result.current.start({ onboardingDeploymentId: 'dep-1' });
+      });
+      mockedGet.mockResolvedValue({
+        data: { item: receivedWithDeployment('deploying') },
+        error: null,
+      } as any);
+      await poll();
+
+      let outcome: string | undefined;
+      await act(async () => {
+        outcome = await result.current.cancel();
+      });
+
+      expect(outcome).toBe('created');
+      expect(mockedDelete).not.toHaveBeenCalled();
+      expect(result.current.status).toBe('deploying');
+    });
+  });
 });

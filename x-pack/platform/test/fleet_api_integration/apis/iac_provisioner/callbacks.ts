@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import type * as http from 'http';
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
+import { CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES } from '@kbn/fleet-plugin/common/constants';
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupMockServer } from '../agents/helpers/mock_agentless_api';
 import { INTERNAL_ROUTE_HEADERS } from './helpers/fixtures';
 
 const CALLBACKS_PATH = '/internal/fleet/iac_provisioner/callbacks';
@@ -235,6 +239,111 @@ export default function (providerContext: FtrProviderContext) {
         .get(`${CALLBACKS_PATH}/does-not-exist`)
         .set(INTERNAL_ROUTE_HEADERS)
         .expect(404);
+    });
+
+    describe('automatic deploy', () => {
+      let mockAgentlessApi: http.Server;
+
+      before(async () => {
+        // Creating an agentless policy talks to the agentless API; the base config points it at
+        // this port.
+        mockAgentlessApi = await setupMockServer().listen(8089);
+      });
+
+      after(async () => {
+        await mockAgentlessApi.close();
+      });
+
+      const waitForDeployStage = async (callbackId: string) => {
+        for (let attempt = 0; attempt < 90; attempt++) {
+          const { body } = await supertest
+            .get(`${CALLBACKS_PATH}/${callbackId}`)
+            .set(INTERNAL_ROUTE_HEADERS)
+            .expect(200);
+          if (body.item.deploy_status === 'deployed' || body.item.deploy_status === 'failed') {
+            return body.item as {
+              deploy_status: string;
+              deploy_error?: string;
+              cloud_connector_id: string;
+            };
+          }
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+        throw new Error('The deploy stage did not finish in time');
+      };
+
+      it('deploys the stored agentless policies once the stack reports back', async () => {
+        const policyId = uuidv4();
+        const { body: deployment } = await supertest
+          .post(CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.CREATE_PATTERN)
+          .set(PUBLIC_ROUTE_HEADERS)
+          .send({
+            provider: 'aws',
+            mechanisms: ['managed_integration'],
+            services: ['sample'],
+            authMethod: 'identity_federation',
+            pendingAgentlessPolicies: [
+              {
+                id: policyId,
+                instanceIds: ['sample'],
+                request: {
+                  name: `auto-deploy-${Date.now()}`,
+                  namespace: 'default',
+                  package: { name: 'test_agentless', version: '1.0.0' },
+                  inputs: {
+                    'sample-httpjson': {
+                      enabled: true,
+                      vars: { api_key: 'TEST_VALUE_API_KEY' },
+                      streams: {},
+                    },
+                  },
+                },
+              },
+            ],
+          })
+          .expect(200);
+        expect(deployment.item.status).to.be('pending');
+        expect(deployment.item).to.not.have.property('pendingAgentlessPolicies');
+
+        const { item, api_key: apiKey } = await createCallback({
+          connector_name: 'auto-deploy',
+          onboarding_deployment_id: deployment.item.id,
+        });
+        await receive(item.id, apiKey).expect(200);
+
+        const record = await waitForDeployStage(item.id);
+        expect(record.deploy_error).to.be(undefined);
+        expect(record.deploy_status).to.be('deployed');
+
+        const { body: policy } = await supertest
+          .get(`/api/fleet/agentless_policies/${policyId}`)
+          .set(PUBLIC_ROUTE_HEADERS)
+          .expect(200);
+        expect(policy.item.id).to.be(policyId);
+        // The package policy behind it authenticates through the identity the stack created.
+        const { body: packagePolicy } = await supertest
+          .get(`/api/fleet/package_policies/${policyId}`)
+          .set(PUBLIC_ROUTE_HEADERS)
+          .expect(200);
+        expect(packagePolicy.item.cloud_connector_id).to.be(record.cloud_connector_id);
+        expect(packagePolicy.item.created_by).to.be('elastic');
+
+        const { body: finished } = await supertest
+          .get(
+            CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.INFO_PATTERN.replace('{id}', deployment.item.id)
+          )
+          .set(PUBLIC_ROUTE_HEADERS)
+          .expect(200);
+        expect(finished.item.status).to.be('succeeded');
+        expect(finished.item.connectorId).to.be(record.cloud_connector_id);
+        expect(finished.item.packagePolicyIds).to.eql([policyId]);
+        expect(finished.item.policyIdsByInstance).to.eql({ sample: policyId });
+
+        await supertest
+          .delete(`/api/fleet/agentless_policies/${policyId}`)
+          .set(PUBLIC_ROUTE_HEADERS)
+          .expect(200);
+      });
     });
   });
 }

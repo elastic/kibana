@@ -62,6 +62,7 @@ import {
   CloudConnectorSchemaV5,
   CloudOnboardingDeploymentSchemaV1,
   CloudOnboardingDeploymentSchemaV2,
+  CloudOnboardingDeploymentSchemaV3,
   ProvisioningCallbackSchemaV1,
 } from '../types';
 
@@ -2183,6 +2184,18 @@ export const getSavedObjectTypes = (
               { unknowns: 'ignore' }
             ),
             create: CloudOnboardingDeploymentSchemaV2,
+          },
+        },
+        3: {
+          // pendingAgentlessPolicies: requests stored at Launch for the server to replay when the
+          // stack reports back. Not indexed, so no mappings_addition.
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV3.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV3,
           },
         },
       },

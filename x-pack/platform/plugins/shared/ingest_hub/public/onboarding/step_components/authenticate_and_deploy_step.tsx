@@ -79,6 +79,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     updateDetectAndReviewStep,
     removeDeployInstances,
     refetchAwsServiceMatrix,
+    isLaunchLocked,
+    setLaunchLocked,
   } = useOnboardingFlow();
   const { selectedServiceIds, dataFormat } = servicesStep;
   const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
@@ -259,6 +261,9 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     isCleanupOnly,
     storedSecretFields,
     isStoredSecretsLoading,
+    canAutoDeploy,
+    prepareLaunch,
+    applyAutoDeployOutcome,
   } = useDeploy({
     onContinue: () => {},
   });
@@ -285,6 +290,34 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       handleDeploy();
     }
   }, [handleDeploy, failedInstances]);
+
+  // The server deployed after the stack reported back: land where a Deploy click lands. The lock
+  // holds until the outcome is applied, so Deploy cannot be pressed in between: the form reports
+  // the wait over and the outcome in the same commit.
+  const isApplyingOutcomeRef = useRef(false);
+  const handleWaitingChange = useCallback(
+    (isWaiting: boolean) => {
+      if (!isWaiting && isApplyingOutcomeRef.current) {
+        return;
+      }
+      setLaunchLocked(isWaiting);
+    },
+    [setLaunchLocked]
+  );
+  const handleAutoDeployOutcome = useCallback(
+    async (outcome: Parameters<typeof applyAutoDeployOutcome>[0]) => {
+      isApplyingOutcomeRef.current = true;
+      setLaunchLocked(true);
+      try {
+        await applyAutoDeployOutcome(outcome);
+      } finally {
+        isApplyingOutcomeRef.current = false;
+        setLaunchLocked(false);
+      }
+      setDeployAttempted(true);
+    },
+    [applyAutoDeployOutcome, setLaunchLocked]
+  );
 
   const miServiceIds = useMemo(
     () =>
@@ -667,6 +700,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // Agent enrolment is non-blocking, but the deploy itself now happens here on Next.
   // The section stays visible with the error callout if deploy fails.
   const isNextDisabled =
+    isLaunchLocked ||
     hasUnloadedSelectedManifests ||
     hasSelectedManifestError ||
     (showMiSection && !isMiDone) ||
@@ -684,7 +718,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         availableMethods={isSelfManaged ? SELF_MANAGED_DEPLOYMENT_METHODS : undefined}
         unsupportedServices={unsupportedServices}
         locked={isSelfManaged || ((allAgentBasedOnly || allEcfOnly) && !isMethodLocked)}
-        disabled={isMethodLocked}
+        disabled={isMethodLocked || isLaunchLocked === true}
       />
 
       {hasSelectedManifestError && (
@@ -888,6 +922,9 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           isStoredSecretsLoading={isStoredSecretsLoading}
           isDirty={isDirty}
           onReplaceFormDirtyChange={handleReplaceFormDirtyChange}
+          onPrepareLaunch={canAutoDeploy ? prepareLaunch : undefined}
+          onDeployOutcome={handleAutoDeployOutcome}
+          onWaitingChange={handleWaitingChange}
         />
       )}
 
@@ -923,7 +960,12 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           {onBack && (
-            <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
+            <EuiButtonEmpty
+              iconType="chevronSingleLeft"
+              iconSide="left"
+              onClick={onBack}
+              isDisabled={isLaunchLocked}
+            >
               <FormattedMessage
                 id="xpack.ingestHub.authenticateAndDeployStep.backButton"
                 defaultMessage="Back"

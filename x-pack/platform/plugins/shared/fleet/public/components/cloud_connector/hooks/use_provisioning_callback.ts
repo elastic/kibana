@@ -26,14 +26,26 @@ export const PROVISIONING_CALLBACK_POLL_TIMEOUT_MS = 10 * 60 * 1000;
 /** Extra time to wait when the deadline finds the stack's report still being applied. */
 export const PROVISIONING_CALLBACK_RECEIVING_GRACE_MS = 60 * 1000;
 
-/** `receiving`: the stack has reported and the server is creating the identity. */
+/**
+ * `receiving`: the stack has reported and the server is creating the identity. `deploying`: the
+ * identity exists and the server is deploying the integrations of the attached onboarding
+ * deployment; `created` is already set.
+ */
 export type ProvisioningCallbackClientStatus =
   | 'idle'
   | 'pending'
   | 'receiving'
+  | 'deploying'
   | 'received'
   | 'expired'
   | 'error';
+
+/** How the server-side deploy of the attached onboarding deployment ended. */
+export interface ProvisioningCallbackDeployOutcome {
+  status: 'deployed' | 'failed';
+  onboardingDeploymentId: string;
+  error?: string;
+}
 
 /**
  * What `cancel` found. `cancelled`: nothing will arrive, the caller may create by hand.
@@ -57,6 +69,8 @@ export interface CloudConnectorCallbackStartInput {
   iacKey?: string | null;
   iacBlueprintId?: string | null;
   iacBlueprintVersion?: string | null;
+  /** Onboarding deployment whose stored policies the server deploys once the stack reports. */
+  onboardingDeploymentId?: string;
 }
 
 export interface UseProvisioningCallbackResult {
@@ -72,6 +86,8 @@ export interface UseProvisioningCallbackResult {
   status: ProvisioningCallbackClientStatus;
   /** Set when the stack's report has created the cloud connector. */
   created?: CloudConnectorCallbackCreated;
+  /** Set once the deploy that follows the report has finished, when a deployment was attached. */
+  deployOutcome?: ProvisioningCallbackDeployOutcome;
   /**
    * Creates a callback record and returns the stack parameters for the quick-create link.
    * Rejects when the record could not be created: the stack's report is the only way the identity
@@ -119,8 +135,29 @@ const toIdentityBody = (
   if (identity.iacBlueprintVersion !== undefined) {
     body.iac_blueprint_version = identity.iacBlueprintVersion;
   }
+  if (identity.onboardingDeploymentId) {
+    body.onboarding_deployment_id = identity.onboardingDeploymentId;
+  }
   return body;
 };
+
+/** True while a received record still has a deploy running on the server. */
+const isDeployRunning = (item: CloudConnectorCallback): boolean =>
+  !!item.onboarding_deployment_id &&
+  item.deploy_status !== 'deployed' &&
+  item.deploy_status !== 'failed';
+
+const toDeployOutcome = (
+  item: CloudConnectorCallback
+): ProvisioningCallbackDeployOutcome | undefined =>
+  item.onboarding_deployment_id &&
+  (item.deploy_status === 'deployed' || item.deploy_status === 'failed')
+    ? {
+        status: item.deploy_status,
+        onboardingDeploymentId: item.onboarding_deployment_id,
+        ...(item.deploy_error ? { error: item.deploy_error } : {}),
+      }
+    : undefined;
 
 export const useProvisioningCallback = ({
   enabled,
@@ -137,6 +174,11 @@ export const useProvisioningCallback = ({
   const kibanaUrl = availability?.available ? availability.kibana_url : undefined;
   const [status, setStatus] = useState<ProvisioningCallbackClientStatus>('idle');
   const [created, setCreated] = useState<CloudConnectorCallbackCreated | undefined>(undefined);
+  const [deployOutcome, setDeployOutcome] = useState<ProvisioningCallbackDeployOutcome | undefined>(
+    undefined
+  );
+  // The record whose server-side deploy is being watched; the deadline and cancel leave it alone.
+  const deployingIdRef = useRef<string | undefined>(undefined);
   // The record currently being waited on; a poll result for any other id is stale and ignored.
   const activeIdRef = useRef<string | undefined>(undefined);
   // The record whose report was last seen, so a cancel racing with that poll knows the outcome.
@@ -205,7 +247,7 @@ export const useProvisioningCallback = ({
         if (activeIdRef.current !== id) {
           return;
         }
-        if (Date.now() > deadline) {
+        if (Date.now() > deadline && deployingIdRef.current !== id) {
           // The wait is over. Retire the record so a late report cannot create an identity the
           // form no longer watches, and so a manual Create does not have to.
           if (isRetiring) {
@@ -251,10 +293,19 @@ export const useProvisioningCallback = ({
           return;
         }
         if (data.item.status === 'received') {
-          stopPolling();
-          activeIdRef.current = undefined;
           receivedIdRef.current = id;
           setCreated(toCreated(data.item));
+          if (isDeployRunning(data.item)) {
+            // The identity exists; the server is now deploying the integrations. Keep watching,
+            // with no deadline: the deploy cannot be cancelled and always ends.
+            deployingIdRef.current = id;
+            setStatus('deploying');
+            return;
+          }
+          stopPolling();
+          activeIdRef.current = undefined;
+          deployingIdRef.current = undefined;
+          setDeployOutcome(toDeployOutcome(data.item));
           setStatus('received');
         } else if (data.item.status === 'receiving') {
           setStatus('receiving');
@@ -271,6 +322,10 @@ export const useProvisioningCallback = ({
     const id = activeIdRef.current;
     if (!id) {
       return 'cancelled';
+    }
+    if (deployingIdRef.current === id) {
+      // The identity is made and its integrations are being deployed; nothing to retire.
+      return 'created';
     }
     const outcome = await retire(id);
     if (isSuperseded(id)) {
@@ -322,7 +377,9 @@ export const useProvisioningCallback = ({
         return undefined;
       }
       activeIdRef.current = data.item.id;
+      deployingIdRef.current = undefined;
       setCreated(undefined);
+      setDeployOutcome(undefined);
       setStatus('pending');
       startPolling(data.item.id, data.item.expires_at);
 
@@ -360,6 +417,7 @@ export const useProvisioningCallback = ({
     unavailableReason,
     status,
     created,
+    deployOutcome,
     start,
     cancel,
   };

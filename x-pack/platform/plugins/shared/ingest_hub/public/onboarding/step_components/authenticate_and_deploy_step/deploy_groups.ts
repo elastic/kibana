@@ -6,6 +6,7 @@
  */
 
 import { sendCreateAgentlessPolicy, sendGetPackageInfoByKey } from '@kbn/fleet-plugin/public';
+import type { NewAgentlessPolicy } from '@kbn/fleet-plugin/common/types/rest_spec/agentless_policy';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type {
@@ -116,20 +117,27 @@ function buildAgentlessPolicyName(group: DeployGroup): string {
   return `${buildGroupPolicyNameStem(group)}-${Date.now()}`;
 }
 
-export async function deployGroup(
+export interface BuildAgentlessPolicyRequestOptions {
+  namespace: string;
+  globalRegion: string;
+  storedServiceVars: Record<string, ServiceVars>;
+  authenticateAndDeployStep: AuthenticateAndDeployStepState;
+}
+
+/**
+ * Everything `deployGroup` sends for a group, minus the cloud connector: the body the server
+ * replays after a launched stack reports back, once the connector it creates is known. Fetches
+ * the package info, so the version is the one installed when this runs.
+ */
+export async function buildAgentlessPolicyRequest(
   group: DeployGroup,
   {
     namespace,
     globalRegion,
     storedServiceVars,
     authenticateAndDeployStep,
-  }: {
-    namespace: string;
-    globalRegion: string;
-    storedServiceVars: Record<string, ServiceVars>;
-    authenticateAndDeployStep: AuthenticateAndDeployStepState;
-  }
-): Promise<GroupDeployOutcome> {
+  }: BuildAgentlessPolicyRequestOptions
+): Promise<NewAgentlessPolicy> {
   // All members share the same packageName — use the first for pkg info.
   const { service: firstService } = group.members[0];
   const pkgInfoResponse = await sendGetPackageInfoByKey(firstService.packageName);
@@ -183,12 +191,23 @@ export async function deployGroup(
     connectorId ? undefined : authenticateAndDeployStep.existingSecretRefs
   );
 
-  const response = await sendCreateAgentlessPolicy({
+  return {
     name: buildAgentlessPolicyName(group),
     namespace: group.namespace || namespace,
     package: { name: firstService.packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
     inputs,
+  };
+}
+
+export async function deployGroup(
+  group: DeployGroup,
+  options: BuildAgentlessPolicyRequestOptions
+): Promise<GroupDeployOutcome> {
+  const { connectorId } = options.authenticateAndDeployStep;
+  const request = await buildAgentlessPolicyRequest(group, options);
+  const response = await sendCreateAgentlessPolicy({
+    ...request,
     ...(connectorId
       ? {
           cloud_connector: {

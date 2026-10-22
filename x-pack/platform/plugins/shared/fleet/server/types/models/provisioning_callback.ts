@@ -41,4 +41,14 @@ export const ProvisioningCallbackSchemaV1 = schema.object({
   iac_blueprint_id: schema.maybe(schema.nullable(schema.string({ maxLength: 256 }))),
   iac_blueprint_version: schema.maybe(schema.nullable(schema.string({ maxLength: 128 }))),
   cloud_connector_id: schema.maybe(schema.string({ maxLength: 256 })),
+  onboarding_deployment_id: schema.maybe(schema.string({ maxLength: 256 })),
+  deploy_status: schema.maybe(
+    schema.oneOf([
+      schema.literal('pending'),
+      schema.literal('deploying'),
+      schema.literal('deployed'),
+      schema.literal('failed'),
+    ])
+  ),
+  deploy_error: schema.maybe(schema.string({ maxLength: 4096 })),
 });
