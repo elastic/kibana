@@ -12,5 +12,6 @@ describe('getCurrentDocTitle', () => {
     expect(getCurrentDocTitle('home') === 'Rules').toBeTruthy();
     expect(getCurrentDocTitle('connectors') === 'Connectors').toBeTruthy();
     expect(getCurrentDocTitle('rules') === 'Rules').toBeTruthy();
+    expect(getCurrentDocTitle('settings') === 'Settings').toBeTruthy();
   });
 });
