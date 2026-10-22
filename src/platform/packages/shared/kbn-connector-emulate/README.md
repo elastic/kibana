@@ -98,6 +98,33 @@ Its tools are `list_operations` (with a `search`), `describe_operation`, `set_fi
 
 Each call says where its response came from in `responseSource`: `runtime-fixture`, `fixture`, `recording`, `generated` for the spec's examples and samples, or `responder` when a `respond` answered without deferring to the default chain. `createEmulatorFetch({ onCall })` is called with each call as it is recorded, e.g. to log requests as they arrive.
 
+### Several connectors
+
+`combineEmulators` puts several connectors' emulators behind one `fetch`, so one proxy, and one Kibana, can serve them all. Each keeps its own specs, overlay, fixtures and recordings:
+
+```ts
+import { combineEmulators, emulatorCredential } from '@kbn/connector-emulate';
+
+const mock = combineEmulators({
+  outlook: createEmulatorFetch({ specs: outlookSpecs }),
+  one_drive: createEmulatorFetch({ specs: oneDriveSpecs, fixtures }),
+});
+const proxy = createEmulatorProxy({
+  fetch: mock.fetch,
+  certificateAuthority,
+  control: createEmulatorControlHandler(mock),
+});
+
+// The connector's secrets carry its credential, e.g. an API key or OAuth client ID:
+emulatorCredential('one_drive'); // 'emulate-one_drive'
+```
+
+A request goes to the connector whose credential it carries: in any header, in Basic auth, the query, the body, or a claim of a JWT assertion. Token URLs answering a request with the credential issue tokens that carry it too, so later requests with the token reach the same connector. Other requests go to the first connector whose specs match the URL (`emulator.answers(method, url)`), and requests no connector matches get **404**. Connectors that share a vendor host therefore need the credential to get their own responses.
+
+Every call is recorded in the combined `calls` with its `connector`, and `operations` and `rejectedResponses` say whose they are. The control endpoints take `?connector=<id>` to see, reset or list only one connector's (`createEmulatorControl(proxyUrl, { connector })`), so tests running in parallel don't read or clear each other's calls; an unknown connector gets **400**.
+
+Runtime fixtures and `describeOperation` are per connector too. A fixture goes to its `connector` (or the `?connector=` of `PUT /_mock/fixtures`, or `runtimeFixtures.set(fixtures, { connector })`), else to the one connector whose specs have its operation; when several have it, as Outlook and OneDrive both have Graph's `GET /me`, it is rejected until one is named, and when any fixture is rejected none is set on any connector. Listed fixtures carry their `connector`, and `GET /_mock/operations/<id>?connector=<id>` describes one connector's operation (without it, the first connector's that has it). The MCP server's tools take a `connector` argument, listing the connectors in their schemas.
+
 ## GraphQL
 
 GraphQL APIs are specs too: the schema in SDL, and the URLs the vendor serves it at.

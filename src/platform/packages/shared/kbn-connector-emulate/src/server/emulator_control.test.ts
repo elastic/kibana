@@ -8,6 +8,7 @@
  */
 
 import type { OpenApiDocument } from '../openapi';
+import { combineEmulators } from '../fetch/combine_emulators';
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
 import { createEmulatorControlHandler, isControlPath } from './emulator_control';
 
@@ -170,6 +171,123 @@ describe('createEmulatorControlHandler', () => {
 
     expect(response.status).toBe(404);
     expect((await response.json()).detail).toContain('/_mock/calls');
+  });
+});
+
+describe('createEmulatorControlHandler with combined emulators', () => {
+  const vendor = (host: string): OpenApiDocument => ({
+    ...spec,
+    servers: [{ url: `https://${host}/v1` }],
+  });
+  let combined: ReturnType<typeof combineEmulators>;
+  let handle: ReturnType<typeof createEmulatorControlHandler>;
+
+  beforeEach(async () => {
+    combined = combineEmulators({
+      first: createEmulatorFetch({ specs: [vendor('first.example')] }),
+      second: createEmulatorFetch({ specs: [vendor('second.example')] }),
+    });
+    handle = createEmulatorControlHandler(combined);
+    await combined.fetch('https://first.example/v1/items');
+    await combined.fetch('https://second.example/v1/items');
+    await combined.fetch('https://second.example/v1/items');
+  });
+
+  it('answers only one connector’s calls, counted from its first, with ?connector=', async () => {
+    const { calls, total } = await (
+      await handle(control('/_mock/calls?connector=second&since=1'))
+    ).json();
+
+    expect(calls).toEqual([
+      expect.objectContaining({
+        request: 'GET https://second.example/v1/items',
+        connector: 'second',
+      }),
+    ]);
+    expect(total).toBe(2);
+  });
+
+  it('resets and lists only that connector’s calls and operations', async () => {
+    expect((await handle(control('/_mock/reset?connector=first', 'POST'))).status).toBe(204);
+    expect(combined.calls.map(({ connector }) => connector)).toEqual(['second', 'second']);
+
+    const { operations } = await (
+      await handle(control('/_mock/operations?connector=first'))
+    ).json();
+    expect(operations).toEqual([expect.objectContaining({ id: 'listItems', connector: 'first' })]);
+  });
+
+  it('answers 400 naming the connectors to an unknown connector', async () => {
+    const response = await handle(control('/_mock/calls?connector=third'));
+
+    expect(response.status).toBe(400);
+    expect((await response.json()).detail).toBe(
+      'connector=third: the emulator serves first, second'
+    );
+  });
+
+  it('sets, lists and drops one connector’s runtime fixtures with ?connector=', async () => {
+    const fixture = { operation: { method: 'GET', path: '/items' }, response: { status: 429 } };
+
+    const ambiguous = await handle(putJson('/_mock/fixtures', { fixtures: [fixture] }));
+    expect(ambiguous.status).toBe(400);
+    expect((await ambiguous.json()).rejected[0].violations[0].code).toBe('connector');
+
+    const put = await handle(putJson('/_mock/fixtures?connector=second', { fixtures: [fixture] }));
+    expect(await put.json()).toEqual({ fixtures: [{ ...fixture, connector: 'second' }] });
+    expect((await combined.fetch('https://second.example/v1/items')).status).toBe(429);
+    expect((await combined.fetch('https://first.example/v1/items')).status).toBe(200);
+    expect(await (await handle(control('/_mock/fixtures?connector=first'))).json()).toEqual({
+      fixtures: [],
+    });
+
+    await handle(control('/_mock/fixtures?connector=second', 'DELETE'));
+    expect(combined.runtimeFixtures.list()).toEqual([]);
+  });
+
+  it('describes one connector’s operation with ?connector=', async () => {
+    const response = await handle(control('/_mock/operations/listItems?connector=second'));
+
+    expect(await response.json()).toMatchObject({ id: 'listItems', connector: 'second' });
+  });
+
+  it('serves MCP tools that take the connector', async () => {
+    const callTool = async (name: string, args: Record<string, unknown>) => {
+      const response = await handle(
+        new Request(new URL('/_mock/mcp', 'http://emulator.invalid'), {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            accept: 'application/json, text/event-stream',
+          },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'tools/call',
+            params: { name, arguments: args },
+          }),
+        })
+      );
+      return (await response.json()).result;
+    };
+    const fixtures = [{ operation: { method: 'GET', path: '/items' }, response: { status: 503 } }];
+
+    expect((await callTool('set_fixtures', { fixtures })).isError).toBe(true);
+    expect((await callTool('set_fixtures', { fixtures, connector: 'first' })).isError).toBeFalsy();
+    expect((await combined.fetch('https://first.example/v1/items')).status).toBe(503);
+    expect(
+      JSON.parse((await callTool('list_calls', { connector: 'first' })).content[0].text)
+    ).toEqual({
+      calls: [expect.anything(), expect.objectContaining({ status: 503 })],
+      total: 2,
+    });
+    expect((await callTool('reset', { connector: 'third' })).isError).toBe(true);
+  });
+
+  it('answers 400 to ?connector= when the emulator serves one connector', async () => {
+    const single = createEmulatorControlHandler(createEmulatorFetch({ specs: [spec] }));
+
+    expect((await single(control('/_mock/calls?connector=first'))).status).toBe(400);
   });
 });
 
