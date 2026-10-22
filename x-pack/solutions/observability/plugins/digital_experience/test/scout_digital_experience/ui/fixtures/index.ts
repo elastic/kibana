@@ -35,4 +35,4 @@ export const test = baseTest.extend<DigitalExperienceTestFixtures>({
   },
 });
 
-export * as testData from './constants';
+export * as testData from '../../common/fixtures/constants';
