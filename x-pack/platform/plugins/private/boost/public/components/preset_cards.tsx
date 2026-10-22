@@ -61,6 +61,7 @@ export const PresetCards = <TId extends string>({
                 title={label}
                 description={description}
                 badge={isDefault ? <EuiBadge>{DEFAULT_BADGE_LABEL}</EuiBadge> : undefined}
+                isDisabled={disabled}
               />
             }
             checked={selectedId === id}

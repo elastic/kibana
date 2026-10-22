@@ -63,7 +63,7 @@ export interface ProfileForRule {
   type?: BoostProfileType;
   /**
    * Whether the profile is for a project default, the profile its default rule uses, rather than a
-   * custom rule. A project default's type can't change, so the profile's can't either.
+   * custom rule. It takes the default's type, so the form doesn't offer one.
    */
   isProjectDefault: boolean;
   /** Estimates the rule's targets with the new profile, once the rule has some. */
@@ -308,29 +308,26 @@ export const ProfileFlyoutContent = ({
               />
             </EuiFormRow>
 
-            <FormSection
-              title={i18n.translate('xpack.boost.profileForm.typeTitle', {
-                defaultMessage: 'Type',
-              })}
-              description={
-                forRule?.isProjectDefault
-                  ? i18n.translate('xpack.boost.profileForm.defaultTypeDescription', {
-                      defaultMessage: "Matches the project default it's for, so it can't change.",
-                    })
-                  : i18n.translate('xpack.boost.profileForm.typeDescription', {
-                      defaultMessage: "The type can't be changed after the profile is created.",
-                    })
-              }
-            >
-              <PresetCards
-                name="boostProfileType"
-                options={TYPE_OPTIONS}
-                selectedId={draft.type}
-                onChange={(type) => updateDraft({ type })}
-                disabled={isSaving || Boolean(forRule?.isProjectDefault)}
-                direction="row"
-              />
-            </FormSection>
+            {/* A profile for a project default takes the default's type, which the title names. */}
+            {!forRule?.isProjectDefault && (
+              <FormSection
+                title={i18n.translate('xpack.boost.profileForm.typeTitle', {
+                  defaultMessage: 'Type',
+                })}
+                description={i18n.translate('xpack.boost.profileForm.typeDescription', {
+                  defaultMessage: "The type can't be changed after the profile is created.",
+                })}
+              >
+                <PresetCards
+                  name="boostProfileType"
+                  options={TYPE_OPTIONS}
+                  selectedId={draft.type}
+                  onChange={(type) => updateDraft({ type })}
+                  disabled={isSaving}
+                  direction="row"
+                />
+              </FormSection>
+            )}
           </>
         )}
 
@@ -445,7 +442,9 @@ export const ProfileFlyoutContent = ({
                   <EuiCheckableCard
                     id={`${optionsId}-${key}`}
                     checkableType="checkbox"
-                    label={<CardLabel title={title} description={description} />}
+                    label={
+                      <CardLabel title={title} description={description} isDisabled={isSaving} />
+                    }
                     checked={indices[key]}
                     onChange={() => updateDraft({ indices: { ...indices, [key]: !indices[key] } })}
                     disabled={isSaving}

@@ -7,23 +7,25 @@
 
 import React, { useState } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCheckableCard,
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiToolTip,
-  EuiScreenReaderOnly,
-  EuiLink,
   EuiFormRow,
+  EuiLink,
+  EuiScreenReaderOnly,
   EuiSelect,
   EuiText,
+  EuiTextColor,
   EuiTitle,
+  EuiToolTip,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -79,6 +81,7 @@ export const ProjectDefaultFlyout = ({ type, onClose }: ProjectDefaultFlyoutProp
   );
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
   const { mutate: updateDefaultRule, isLoading: isSaving } = useUpdateDefaultRule();
+  const { euiTheme } = useEuiTheme();
 
   if (!state) {
     return null;
@@ -92,6 +95,10 @@ export const ProjectDefaultFlyout = ({ type, onClose }: ProjectDefaultFlyoutProp
     .sort((a, b) => a.name.localeCompare(b.name));
   const isCustom = !presets.some((preset) => preset.profileName === profileName);
   const firstCustomProfile = customProfileName || (customProfiles[0]?.name ?? '');
+  // Nothing to choose until there's a custom profile of this type.
+  const isCustomCardDisabled = isSaving || customProfiles.length === 0;
+  // The profile selector is usable once the custom card is chosen.
+  const isProfileSelectDisabled = isSaving || !isCustom;
   const noCustomProfilesReason =
     customProfiles.length > 0
       ? undefined
@@ -195,27 +202,10 @@ export const ProjectDefaultFlyout = ({ type, onClose }: ProjectDefaultFlyoutProp
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <EuiFormRow
-          labelType="legend"
-          label={i18n.translate('xpack.boost.projectDefaultForm.profileLabel', {
+        <fieldset
+          aria-label={i18n.translate('xpack.boost.projectDefaultForm.profileLabel', {
             defaultMessage: 'Boost profile',
           })}
-          // Here rather than in the custom card, whose title is its radio's label, which can't hold
-          // a button, and which is disabled until there's a custom profile to choose.
-          labelAppend={
-            <EuiText size="xs">
-              <EuiLink
-                onClick={() => setIsCreatingProfile(true)}
-                disabled={isSaving}
-                data-test-subj="boostProjectDefaultCreateProfile"
-              >
-                {i18n.translate('xpack.boost.projectDefaultForm.createProfile', {
-                  defaultMessage: 'Create profile',
-                })}
-              </EuiLink>
-            </EuiText>
-          }
-          fullWidth
         >
           <EuiFlexGroup direction="column" gutterSize="s">
             {presets.map(({ profileName: presetProfileName, label, description, isDefault }) => (
@@ -228,6 +218,7 @@ export const ProjectDefaultFlyout = ({ type, onClose }: ProjectDefaultFlyoutProp
                       title={label}
                       description={description}
                       badge={isDefault ? <EuiBadge>{DEFAULT_BADGE_LABEL}</EuiBadge> : undefined}
+                      isDisabled={isSaving}
                     />
                   }
                   checked={profileName === presetProfileName}
@@ -239,8 +230,8 @@ export const ProjectDefaultFlyout = ({ type, onClose }: ProjectDefaultFlyoutProp
             ))}
             <EuiFlexItem>
               {/* Until there's a custom profile of this type, the card is disabled, and a tooltip
-                  says why. Screen readers read the reason with the description, since a disabled
-                  card can't take the focus that shows the tooltip. */}
+                  says why, on hover or when its "Create profile" link has focus. Screen readers
+                  read the reason with the description. */}
               <EuiToolTip content={noCustomProfilesReason} display="block">
                 <EuiCheckableCard
                   id={`${groupName}-custom`}
@@ -262,34 +253,75 @@ export const ProjectDefaultFlyout = ({ type, onClose }: ProjectDefaultFlyoutProp
                           )}
                         </>
                       }
+                      isDisabled={isCustomCardDisabled}
                     />
                   }
                   checked={isCustom}
                   onChange={() => chooseCustom(firstCustomProfile)}
-                  // Nothing to choose until there's a custom profile of this type.
-                  disabled={isSaving || customProfiles.length === 0}
+                  disabled={isCustomCardDisabled}
                   data-test-subj="boostProjectDefaultCustom"
                 >
-                  {isCustom && (
+                  {/* The card's body, outside its radio's label, so it can hold controls. Creating a
+                      profile stays usable while the card is disabled, since it's what enables it. */}
+                  <EuiFormRow
+                    display="rowCompressed"
+                    label={
+                      // EUI's form label doesn't dim when disabled, so it takes the color the card
+                      // dims its own title to.
+                      <EuiTextColor
+                        color={isProfileSelectDisabled ? euiTheme.colors.disabledText : 'inherit'}
+                      >
+                        {i18n.translate('xpack.boost.projectDefaultForm.customProfileLabel', {
+                          defaultMessage: 'Boost profile',
+                        })}
+                      </EuiTextColor>
+                    }
+                    isDisabled={isProfileSelectDisabled}
+                    labelAppend={
+                      <EuiText size="xs">
+                        <EuiLink
+                          onClick={() => setIsCreatingProfile(true)}
+                          disabled={isSaving}
+                          data-test-subj="boostProjectDefaultCreateProfile"
+                        >
+                          {i18n.translate('xpack.boost.projectDefaultForm.createProfile', {
+                            defaultMessage: 'Create profile',
+                          })}
+                        </EuiLink>
+                      </EuiText>
+                    }
+                    fullWidth
+                  >
                     <EuiSelect
                       compressed
                       fullWidth
-                      aria-label={i18n.translate(
-                        'xpack.boost.projectDefaultForm.customProfileLabel',
-                        { defaultMessage: 'Custom boost profile' }
-                      )}
-                      options={customProfiles.map(({ name }) => ({ value: name, text: name }))}
-                      value={profileName}
+                      // A placeholder, until a profile is chosen, or when there's none to choose.
+                      options={[
+                        {
+                          value: '',
+                          text:
+                            customProfiles.length > 0
+                              ? i18n.translate('xpack.boost.projectDefaultForm.selectProfile', {
+                                  defaultMessage: 'Select a profile',
+                                })
+                              : i18n.translate('xpack.boost.projectDefaultForm.noProfiles', {
+                                  defaultMessage: 'No custom profiles yet',
+                                }),
+                          disabled: true,
+                        },
+                        ...customProfiles.map(({ name }) => ({ value: name, text: name })),
+                      ]}
+                      // While a preset is chosen, the custom profile last chosen stays, disabled.
+                      value={isCustom ? profileName : customProfileName}
                       onChange={({ target: { value } }) => chooseCustom(value)}
-                      disabled={isSaving}
                       data-test-subj="boostProjectDefaultCustomProfile"
                     />
-                  )}
+                  </EuiFormRow>
                 </EuiCheckableCard>
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFormRow>
+        </fieldset>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

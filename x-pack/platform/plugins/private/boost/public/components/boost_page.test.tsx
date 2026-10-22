@@ -179,6 +179,13 @@ describe('Project defaults', () => {
     expect(custom).toHaveAccessibleName(
       'Custom boost profile Use one of your own boost profiles. Create an indices boost profile to use one here.'
     );
+    // Its profile selector stays in view, disabled, saying there's nothing to choose, beside a
+    // way to create one.
+    expect(screen.getByTestId('boostProjectDefaultCustomProfile')).toBeDisabled();
+    expect(screen.getByTestId('boostProjectDefaultCustomProfile')).toHaveDisplayValue(
+      'No custom profiles yet'
+    );
+    expect(screen.getByTestId('boostProjectDefaultCreateProfile')).toBeEnabled();
   });
 
   it('saves a custom profile chosen in the flyout', async () => {
@@ -186,7 +193,14 @@ describe('Project defaults', () => {
     renderPage();
     await userEvent.click(screen.getByTestId('boostEditProjectDefault-indices'));
 
+    // Until the custom card is chosen, its selector is disabled, asking for a profile.
+    expect(screen.getByTestId('boostProjectDefaultCustomProfile')).toBeDisabled();
+    expect(screen.getByTestId('boostProjectDefaultCustomProfile')).toHaveDisplayValue(
+      'Select a profile'
+    );
+
     await userEvent.click(screen.getByTestId('boostProjectDefaultCustom'));
+    expect(screen.getByTestId('boostProjectDefaultCustomProfile')).toBeEnabled();
     expect(screen.getByTestId('boostProjectDefaultCustomProfile')).toHaveValue('catalog-search');
     await userEvent.click(screen.getByTestId('boostProjectDefaultSave'));
 
@@ -196,7 +210,7 @@ describe('Project defaults', () => {
     );
   });
 
-  it('creates a custom profile for the default in place, locked to its type', async () => {
+  it("creates a custom profile for the default in place, of the default's type", async () => {
     renderPage();
     await userEvent.click(screen.getByTestId('boostEditProjectDefault-data_streams'));
 
@@ -205,8 +219,8 @@ describe('Project defaults', () => {
     expect(
       screen.getByRole('heading', { name: 'Create boost profile for the data streams default' })
     ).toBeInTheDocument();
-    expect(screen.getByRole('radio', { name: /^Data streams/ })).toBeChecked();
-    expect(screen.getByRole('radio', { name: /^Indices/ })).toBeDisabled();
+    // It takes the default's type, which the title names, so there's no type to choose.
+    expect(screen.queryByRole('radio', { name: /^Data streams/ })).not.toBeInTheDocument();
     expect(screen.getByTestId('boostProfileSaveAndUse')).toHaveTextContent(
       'Save and use as default'
     );
