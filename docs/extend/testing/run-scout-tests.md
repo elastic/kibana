@@ -99,7 +99,7 @@ node scripts/scout run-tests \
 `--targetAttribute` is repeatable and accepts comma-separated values. When omitted, Scout reads the `SCOUT_TARGET_ATTRIBUTES` environment variable instead. Without either, Scout assumes Kibana is **not** in FIPS mode.
 
 ::::::{note}
-Declaring an attribute doesn't change how Scout starts the servers: `--targetAttribute fips` tells Scout that Kibana runs in FIPS mode; it doesn't enable it.
+Declaring an attribute doesn't change how Scout starts the servers: `--targetAttribute fips` tells Scout that Kibana runs in FIPS mode but doesn't enable it.
 ::::::
 
 ### Custom server configuration [scout-run-tests-server-config-set]

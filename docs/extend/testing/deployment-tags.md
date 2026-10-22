@@ -61,7 +61,7 @@ Pick the narrowest scope that's still correct for the feature under test, as eve
 | A solution feature                               | `tags.stateful.classic` + `tags.serverless.<solution>` (use `.complete` when the solution has tiers)                 |
 | Behavior specific to one serverless project tier | The explicit tier tag, e.g. `tags.serverless.security.essentials` or `tags.serverless.observability.logs_essentials` |
 | Behavior that only exists on stateful            | `tags.stateful.classic` alone                                                                                        |
-| Behavior that depends on FIPS mode               | The deployment tags above plus a [limit tag](#scout-deployment-tags-limit), e.g. `tags.limit.only.fips`              |
+| Behavior that depends on FIPS mode               | The deployment tags above plus a [limit tag](#scout-deployment-tags-limit), for example `tags.limit.only.fips`       |
 
 ::::::{warning}
 Don't reach for `tags.deploymentAgnostic` from a solution module. It runs your test across every solution and is expensive — use explicit per-deployment tags instead. See the [`tags.deploymentAgnostic` note](#scout-deployment-tags-deployment-agnostic).
