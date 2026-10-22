@@ -60,10 +60,7 @@ describe('ProductTour', () => {
     Element.prototype.scrollIntoView = jest.fn();
     window.IntersectionObserver = jest.fn((callback: IntersectionObserverCallback) => {
       reportAnchorInView = (intersectionRatio) =>
-        callback(
-          [{ intersectionRatio } as IntersectionObserverEntry],
-          {} as IntersectionObserver
-        );
+        callback([{ intersectionRatio } as IntersectionObserverEntry], {} as IntersectionObserver);
       return { observe: jest.fn(), disconnect: jest.fn() };
     }) as unknown as typeof IntersectionObserver;
   });

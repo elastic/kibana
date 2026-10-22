@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { sumBy } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
@@ -82,7 +81,7 @@ import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import type { EntityViewMode } from '../../../common/entity_analytics/entity_store/resolution_group';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
-import { APP_HEADER_SELECTOR, TIMELINE_BAR_SELECTOR } from '../components/home/pinned_bars';
+import { usePinnedBarsHeight } from '../components/home/use_pinned_bars_height';
 import { useKibana } from '../../common/lib/kibana';
 import { APP_ID, SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { ENTITY_PROMPT } from '../../agent_builder/components/prompts';
@@ -132,31 +131,6 @@ const GROUP_BY_SETTINGS = { hideCustomFieldOption: false };
 const hiddenCss = css`
   display: none;
 `;
-
-const PINNED_BAR_SELECTORS = [APP_HEADER_SELECTOR, TIMELINE_BAR_SELECTOR];
-
-/**
- * Height of the bars pinned over the page while it scrolls, which Kibana's content height doesn't
- * leave out. Found once the element given the ref mounts, as the header renders only after the
- * page loads, and again on leaving full screen, which unmounts the header. Observed rather than
- * measured once: the timeline bar collapses in full screen and regrows only after it.
- */
-const usePinnedBarsHeight = (
-  isFullScreen: boolean
-): [number, (element: HTMLElement | null) => void] => {
-  const [element, setElement] = useState<HTMLElement | null>(null);
-  const [height, setHeight] = useState(0);
-  useEffect(() => {
-    if (!element || isFullScreen) return;
-    const bars = PINNED_BAR_SELECTORS.flatMap((selector) => document.querySelector(selector) ?? []);
-    const observer = new ResizeObserver(() =>
-      setHeight(sumBy(bars, (bar) => bar.getBoundingClientRect().height))
-    );
-    bars.forEach((bar) => observer.observe(bar));
-    return () => observer.disconnect();
-  }, [element, isFullScreen]);
-  return [height, setElement];
-};
 
 const isStoreEntityType = (value: unknown): value is EntityType =>
   EntityType.safeParse(value).success;

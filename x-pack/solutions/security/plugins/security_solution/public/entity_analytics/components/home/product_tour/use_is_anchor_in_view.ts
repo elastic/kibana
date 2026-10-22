@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { APP_HEADER_SELECTOR, TIMELINE_BAR_SELECTOR } from '../pinned_bars';
+import { APP_HEADER_SELECTOR, TIMELINE_BAR_SELECTOR } from '../use_pinned_bars_height';
 
 /**
  * Whether the anchor is wholly in the part of the view the pinned bars leave visible. A tour
