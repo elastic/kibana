@@ -119,6 +119,11 @@ outputs:
   # Worker's run conclusion message.
   - name: summary
     type: string
+consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Continuous Threat Hunt worker"
+
 steps:
   # No Investigation to package against (the Worker's find_or_create failed)
   # means there is nothing to decide: skip the real packaging call rather than
@@ -229,6 +234,7 @@ steps:
           workflow-id: system-alertzero-journal-note
           run-as-mode: inherit
           inputs:
+            author_name: "{{ consts.author_name }}"
             conversation_id: "{{ inputs.investigationConversationId }}"
             message: "{{ foreach.item.note }}"
 
