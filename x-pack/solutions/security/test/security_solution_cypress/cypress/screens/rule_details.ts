@@ -52,10 +52,6 @@ export const INDEX_PATTERNS_DETAILS = 'Index patterns';
 
 export const INVESTIGATION_FIELDS_DETAILS = 'Custom highlighted fields';
 
-export const INDICATOR_INDEX_PATTERNS = 'Indicator index patterns';
-
-export const INDICATOR_INDEX_QUERY = 'Indicator index query';
-
 export const INDICATOR_MAPPING = 'Indicator mapping';
 
 export const INTEGRATION_LINK = '[data-test-subj="integrationLink"]';
@@ -65,8 +61,6 @@ export const INTEGRATION_STATUS = '[data-test-subj="statusBadge"]';
 export const INVESTIGATION_NOTES_MARKDOWN = 'test markdown';
 
 export const INVESTIGATION_NOTES_TOGGLE = '[data-test-subj="stepAboutDetailsToggle-notes"]';
-
-export const MITRE_ATTACK_DETAILS = 'MITRE ATT&CK';
 
 export const FIELDS_BROWSER_BTN =
   '[data-test-subj="alertsTableIsLoaded"] [data-test-subj="show-field-browser"]';
@@ -79,8 +73,6 @@ export const RULE_NAME_HEADER = '[data-test-subj="header-page-title"]';
 export const RULE_NAME_OVERRIDE_DETAILS = 'Rule name override';
 
 export const RISK_SCORE_DETAILS = 'Risk score';
-
-export const INDICATOR_PREFIX_OVERRIDE = 'Indicator prefix override';
 
 export const REFERENCE_URLS_DETAILS = 'Reference URLs';
 

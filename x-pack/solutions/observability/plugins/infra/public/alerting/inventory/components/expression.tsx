@@ -79,7 +79,10 @@ export interface AlertContextMeta {
   schema?: DataSchemaFormat;
 }
 
-type Criteria = InventoryMetricConditions[];
+type Criteria = Array<
+  Omit<InventoryMetricConditions, 'metric'> & { metric?: InventoryMetricConditions['metric'] }
+>;
+
 export type ExpressionsProps = Omit<
   RuleTypeParamsExpressionProps<
     {
@@ -135,11 +138,12 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
     const exp = ruleParams.criteria?.slice() || [];
     exp.push({
       ...defaultExpression,
+      metric: (ruleParams.nodeType ?? 'host') === 'host' ? defaultExpression.metric : undefined,
       timeSize: timeSize ?? defaultExpression.timeSize,
       timeUnit: timeUnit ?? defaultExpression.timeUnit,
     });
     setRuleParams('criteria', exp);
-  }, [setRuleParams, ruleParams.criteria, timeSize, timeUnit]);
+  }, [setRuleParams, ruleParams.criteria, ruleParams.nodeType, timeSize, timeUnit]);
 
   const removeExpression = useCallback(
     (id: number) => {
@@ -207,8 +211,16 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
       if (!isSchemaSelectableForInventoryRule(nt)) {
         setRuleParams('schema', undefined);
       }
+
+      setRuleParams(
+        'criteria',
+        ruleParams.criteria.map((c) => ({
+          ...c,
+          metric: undefined,
+        }))
+      );
     },
-    [setRuleParams]
+    [setRuleParams, ruleParams.criteria]
   );
 
   const updateSchema = useCallback(
@@ -264,10 +276,8 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
       }
     }
 
-    if (!ruleParams.schema) {
-      if (md && md.schema && canSelectSchema) {
-        setRuleParams('schema', md.schema);
-      }
+    if (!ruleParams.schema && canSelectSchema) {
+      setRuleParams('schema', md?.schema ?? DEFAULT_SCHEMA);
     }
 
     if (ruleParams.criteria && ruleParams.criteria.length) {
@@ -382,16 +392,18 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
               errors={(errors[idx] as IErrorObject) || emptyError}
               expression={e || {}}
             >
-              <ExpressionChart
-                expression={e}
-                kuery={ruleParams.filterQueryText}
-                nodeType={ruleParams.nodeType}
-                sourceId={ruleParams.sourceId}
-                accountId={ruleParams.accountId}
-                region={ruleParams.region}
-                schema={effectiveSchema}
-                data-test-subj="preview-chart"
-              />
+              {e.metric && (
+                <ExpressionChart
+                  expression={{ ...e, metric: e.metric }}
+                  kuery={ruleParams.filterQueryText}
+                  nodeType={ruleParams.nodeType}
+                  sourceId={ruleParams.sourceId}
+                  accountId={ruleParams.accountId}
+                  region={ruleParams.region}
+                  schema={effectiveSchema}
+                  data-test-subj="preview-chart"
+                />
+              )}
             </ExpressionRow>
           );
         })}

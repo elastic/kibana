@@ -423,6 +423,7 @@ describe('registerChatRoutes', () => {
         useTaskManager: true,
         params: expect.objectContaining({
           conversationId: undefined,
+          autoCreateConversationWithId: false,
           origin,
           callback: {
             url: 'https://callback.example.com/events?token=abc',
