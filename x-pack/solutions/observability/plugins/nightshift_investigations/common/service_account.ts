@@ -85,6 +85,11 @@ export interface InvestigatorServiceAccountStatus {
   canModifyBoundWorkflows: boolean;
   /** The agent account investigations run as in this space, or null while it is not set up. */
   serviceAccountId: string | null;
+  /**
+   * The accounts another space of this deployment is already set up with, which setting this space
+   * up reuses. Null until the first space is set up.
+   */
+  knownServiceAccountIds: NightshiftServiceAccountIds | null;
   /** The built-in role the agent account holds. */
   role: string;
   /** The entry point. */
