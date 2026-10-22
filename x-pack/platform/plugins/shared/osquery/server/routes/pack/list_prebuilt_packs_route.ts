@@ -31,10 +31,22 @@ export interface PrebuiltPackListItem {
 }
 
 /**
+ * Fields this route reads. `name` is optional because `packSchemaV1` allows a missing name,
+ * and an import can persist that.
+ */
+interface ListedPrebuiltPack {
+  name?: string;
+  description?: string;
+  queries?: PackSavedObject['queries'];
+}
+
+/**
  * Lists the prebuilt packs loaded in the current space with their `osquery-pack-asset` id and
  * package name; the name is the stable, readable identifier the `osquery.runPack` step stores.
  * The assets status route needs `writePacks`, and the public find route does not expose asset
  * references. Reads the assets first, then only the packs that reference one of them.
+ * An asset with more than one space copy is omitted: resolve returns 409 for it, and the step
+ * stores the package name, so neither copy is a safe picker choice.
  */
 export const listPrebuiltPacksRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -67,7 +79,7 @@ export const listPrebuiltPacksRoute = (router: IRouter, osqueryContext: OsqueryA
         );
         if (assetNameById.size === 0) return response.ok({ body: { data: [] } });
 
-        const found = await spaceScopedClient.find<PackSavedObject>({
+        const found = await spaceScopedClient.find<ListedPrebuiltPack>({
           type: packSavedObjectType,
           hasReference: [...assetNameById.keys()].map((id) => ({
             type: packAssetSavedObjectType,
@@ -79,7 +91,7 @@ export const listPrebuiltPacksRoute = (router: IRouter, osqueryContext: OsqueryA
           fields: ['name', 'description', 'queries'],
         });
 
-        const data: PrebuiltPackListItem[] = found.saved_objects.flatMap((pack) => {
+        const rows: PrebuiltPackListItem[] = found.saved_objects.flatMap((pack) => {
           const assetId = pack.references.find(
             ({ type, id }) => type === packAssetSavedObjectType && assetNameById.has(id)
           )?.id;
@@ -91,7 +103,8 @@ export const listPrebuiltPacksRoute = (router: IRouter, osqueryContext: OsqueryA
               asset_id: assetId,
               asset_name: assetName,
               pack_id: pack.id,
-              name: pack.attributes.name,
+              // A missing pack name must not reach `localeCompare` or the picker label.
+              name: pack.attributes.name ?? assetName,
               ...(pack.attributes.description ? { description: pack.attributes.description } : {}),
               query_count: Array.isArray(pack.attributes.queries)
                 ? pack.attributes.queries.length
@@ -99,6 +112,12 @@ export const listPrebuiltPacksRoute = (router: IRouter, osqueryContext: OsqueryA
             },
           ];
         });
+
+        const copiesByAssetId = new Map<string, number>();
+        for (const row of rows) {
+          copiesByAssetId.set(row.asset_id, (copiesByAssetId.get(row.asset_id) ?? 0) + 1);
+        }
+        const data = rows.filter((row) => copiesByAssetId.get(row.asset_id) === 1);
 
         data.sort((a, b) => a.name.localeCompare(b.name));
 

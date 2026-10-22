@@ -18,7 +18,7 @@ jest.mock('../../utils/get_internal_saved_object_client', () => ({
 
 interface FakePack {
   id: string;
-  attributes: { name: string; description?: string; queries: unknown };
+  attributes: { name?: string; description?: string; queries: unknown };
   references: Array<{ type: string; id: string; name: string }>;
 }
 
@@ -171,6 +171,59 @@ describe('listPrebuiltPacksRoute', () => {
     const response = await run();
 
     expect(response.ok).toHaveBeenCalledWith({ body: { data: [] } });
+  });
+
+  it('uses the asset name when linked packs have no name', async () => {
+    assets = [
+      { id: 'asset-a', attributes: { name: 'alpha' } },
+      { id: 'asset-b', attributes: { name: 'zeta' } },
+    ];
+    packs = [
+      { id: 'copy-a', attributes: { queries: [] }, references: [assetRef('asset-a')] },
+      { id: 'copy-b', attributes: { queries: [] }, references: [assetRef('asset-b')] },
+    ];
+    setupRoute();
+
+    const response = await run();
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        data: [
+          expect.objectContaining({ pack_id: 'copy-a', name: 'alpha', asset_name: 'alpha' }),
+          expect.objectContaining({ pack_id: 'copy-b', name: 'zeta', asset_name: 'zeta' }),
+        ],
+      },
+    });
+  });
+
+  it('omits an asset that has more than one copy in the space', async () => {
+    assets = [
+      { id: 'asset-a', attributes: { name: 'alpha' } },
+      { id: 'asset-b', attributes: { name: 'beta' } },
+    ];
+    packs = [
+      {
+        id: 'copy-a1',
+        attributes: { name: 'alpha-elastic', queries: [] },
+        references: [assetRef('asset-a')],
+      },
+      {
+        id: 'copy-a2',
+        attributes: { name: 'alpha-again', queries: [] },
+        references: [assetRef('asset-a')],
+      },
+      {
+        id: 'copy-b',
+        attributes: { name: 'beta-elastic', queries: [] },
+        references: [assetRef('asset-b')],
+      },
+    ];
+    setupRoute();
+
+    const response = await run();
+
+    const { data } = response.ok.mock.calls[0][0]?.body as { data: Array<{ pack_id: string }> };
+    expect(data.map(({ pack_id: packId }) => packId)).toEqual(['copy-b']);
   });
 
   it('skips an asset without a name', async () => {
