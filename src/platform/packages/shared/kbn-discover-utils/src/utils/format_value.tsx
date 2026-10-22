@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import {
+  ColorFormat,
+  StaticLookupFormat,
+  StringFormat,
+  UrlFormat,
+} from '@kbn/field-formats-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type {
@@ -17,6 +23,7 @@ import type {
   TextContextTypeOptions,
 } from '@kbn/field-formats-plugin/common/types';
 import type { EsHitRecord } from '../types';
+import { truncateFieldValueWithHighlights } from './truncate_field_value';
 
 /** Base parameters for field value formatting functions */
 interface FormatFieldValueBaseParams {
@@ -29,6 +36,11 @@ interface FormatFieldValueBaseParams {
 export interface FormatFieldValueReactParams extends FormatFieldValueBaseParams {
   hit: EsHitRecord;
   options?: ReactContextTypeOptions;
+  /**
+   * When set, the raw value is cut to this many characters before formatting and rendered
+   * with a trailing '…'. Leave unset to render the full value.
+   */
+  maxDisplayLength?: number;
 }
 
 export interface FormatFieldValueTextParams extends FormatFieldValueBaseParams {
@@ -49,6 +61,45 @@ const getFieldFormatter = (
     : dataView.getFormatterForField(field);
 };
 
+const STRING_TRANSFORMS_OF_WHOLE_VALUE = ['base64', 'urlparam', 'short'];
+
+// these formatters derive links, images, decoded text, colors or lookups from the whole value, so a part of it would render wrong
+const canTruncateValue = (formatter: FieldFormat): boolean =>
+  !(formatter instanceof UrlFormat) &&
+  !(formatter instanceof StaticLookupFormat) &&
+  !(
+    formatter instanceof StringFormat &&
+    STRING_TRANSFORMS_OF_WHOLE_VALUE.includes(formatter.param('transform'))
+  ) &&
+  !(formatter instanceof ColorFormat && formatter.param('fieldType') === 'string');
+
+/**
+ * Returns whether a value of the given field can be truncated before formatting without changing its formatted output.
+ */
+export const canTruncateFieldValue = ({
+  fieldFormats,
+  dataView,
+  field,
+}: Omit<FormatFieldValueBaseParams, 'value'>): boolean =>
+  canTruncateValue(getFieldFormatter(fieldFormats, dataView, field));
+
+const convertToReactWithMaxLength = (
+  formatter: FieldFormat,
+  value: unknown,
+  { hit, ...options }: ReactContextTypeOptions & { hit: EsHitRecord },
+  maxDisplayLength: number | undefined
+): ReactNode => {
+  const truncated = truncateFieldValueWithHighlights({
+    value,
+    maxLength: canTruncateValue(formatter) ? maxDisplayLength : undefined,
+    fieldName: options.field?.name,
+    hit,
+  });
+  const formatted = formatter.convertToReact(truncated.value, { ...options, hit: truncated.hit });
+
+  return truncated.isTruncated ? <>{formatted}…</> : formatted;
+};
+
 /**
  * React equivalent of formatFieldValueText. Returns a ReactNode rendered via convertToReact,
  * which is safe to render directly without dangerouslySetInnerHTML.
@@ -62,10 +113,14 @@ export const formatFieldValueReact = ({
   dataView,
   field,
   options,
+  maxDisplayLength,
 }: FormatFieldValueReactParams): ReactNode => {
-  const converterOptions: ReactContextTypeOptions = { ...options, hit, field };
-
-  return getFieldFormatter(fieldFormats, dataView, field).convertToReact(value, converterOptions);
+  return convertToReactWithMaxLength(
+    getFieldFormatter(fieldFormats, dataView, field),
+    value,
+    { ...options, hit, field },
+    maxDisplayLength
+  );
 };
 
 /**
@@ -96,6 +151,11 @@ export interface FormatFieldStringWithHighlightsParams {
   /** The field name for highlight lookup. If dataView is provided, will attempt to get DataViewField from it */
   fieldName?: string;
   options?: ReactContextTypeOptions;
+  /**
+   * When set, the raw value is cut to this many characters before formatting and rendered
+   * with a trailing '…'. Leave unset to render the full value.
+   */
+  maxDisplayLength?: number;
 }
 
 /**
@@ -120,6 +180,7 @@ export const formatFieldStringValueWithHighlights = ({
   dataView,
   fieldName,
   options,
+  maxDisplayLength,
 }: FormatFieldStringWithHighlightsParams): ReactNode => {
   // Pass field name for highlight lookup in hit.highlight.
   // The field may not exist in the data view (e.g., OTel body.text) but highlights should still apply.
@@ -127,9 +188,10 @@ export const formatFieldStringValueWithHighlights = ({
     ? dataView?.fields.getByName(fieldName) ?? { name: fieldName }
     : undefined;
 
-  return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING).convertToReact(value, {
-    ...options,
-    hit,
-    field,
-  });
+  return convertToReactWithMaxLength(
+    fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING),
+    value,
+    { ...options, hit, field },
+    maxDisplayLength
+  );
 };

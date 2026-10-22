@@ -15,7 +15,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { EuiDataGridSetCellProps } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import userEvent from '@testing-library/user-event';
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord, MAX_RENDERED_FIELD_VALUE_LENGTH } from '@kbn/discover-utils';
 import {
   esqlSourceOverridingBytesType,
   createDataViewWithBytesField,
@@ -210,6 +210,58 @@ describe('Unified data table cell rendering', () => {
 
     expect(element).toBeVisible();
     expect(element).toHaveClass('unifiedDataTable__cellValue');
+  });
+
+  it('truncates a long value in the cell but renders it in full in the popover', () => {
+    const longValue = 'y'.repeat(MAX_RENDERED_FIELD_VALUE_LENGTH + 100);
+    const rowsWithLongValue: EsHitRecord[] = [
+      {
+        _id: '1',
+        _index: 'test',
+        _score: 1,
+        _source: { extension: longValue },
+      },
+    ];
+
+    const DataTableCellValue = getRenderCellValueFn({
+      documentsDisplayMode: 'table',
+      closePopover: jest.fn(),
+      dataSource: undefined,
+      dataView: dataViewMock,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+      rows: rowsWithLongValue.map(build),
+      shouldShowFieldHandler: () => false,
+    });
+
+    const { container, unmount } = renderWithI18n(
+      <DataTableCellValue
+        colIndex={0}
+        columnId="extension"
+        isDetails={false}
+        isExpandable={true}
+        isExpanded={false}
+        rowIndex={0}
+        setCellProps={jest.fn()}
+      />
+    );
+
+    expect(container.textContent).toBe(`${'y'.repeat(MAX_RENDERED_FIELD_VALUE_LENGTH)}…`);
+    unmount();
+
+    const { container: popoverContainer } = renderWithI18n(
+      <DataTableCellValue
+        colIndex={0}
+        columnId="extension"
+        isDetails={true}
+        isExpandable={true}
+        isExpanded={false}
+        rowIndex={0}
+        setCellProps={jest.fn()}
+      />
+    );
+
+    expect(popoverContainer.textContent).toBe(longValue);
   });
 
   it('passes isInteractive through to formatFieldValueReact so links can be suppressed when false', () => {
