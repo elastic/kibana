@@ -180,9 +180,7 @@ fileGroups:
     - server/**/*.json
     - public/**/*
     - test/scout/**/*
-    - test/scout_alerting_v2/**/*
+    - test/scout_alerting_v2_custom_config/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-  jest-config:
-    - jest.config.js
 tasks: {}

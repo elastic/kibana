@@ -111,7 +111,7 @@ export const AlertsDetailsTable = memo(
     onShowAlert: (eventId: string, indexName: string, ruleName?: string) => void;
     /**
      * Scope ID of the table or panel that opened this flyout. When the scope has
-     * a registered time-range override in {@link SCOPE_ALERT_TIME_RANGE_OVERRIDES}
+     * a registered time-range override in {@link getScopeFlyoutTimeRange}
      * that window is used for the alerts query instead of the global time range.
      */
     scopeId?: string;
