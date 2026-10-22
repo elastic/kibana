@@ -69,7 +69,7 @@ const richTextLeaf = (leaf: SlackRecord): string | undefined => {
     case 'date':
       return nonEmptyString(leaf.fallback);
     default:
-      return nonEmptyString(leaf.text);
+      return typeof leaf.text === 'string' && leaf.text.length > 0 ? leaf.text : undefined;
   }
 };
 

@@ -195,6 +195,7 @@ describe('readSlackMessageText', () => {
                   { type: 'text', text: ': ' },
                   { type: 'link', url: 'https://example.com/a', text: 'runbook' },
                   { type: 'link', url: 'https://example.com/b' },
+                  { type: 'text', text: ' ' },
                   { type: 'link', text: 'no url' },
                   { type: 'emoji', name: 'fire' },
                   { type: 'date', fallback: ' 2026-10-22' },
@@ -213,7 +214,7 @@ describe('readSlackMessageText', () => {
           },
         ],
       },
-      'Paging <@U1><!subteam^S1> in <#C1><!here>: <https://example.com/a|runbook><https://example.com/b>no url:fire: 2026-10-22\nstep one\nstep two',
+      'Paging <@U1><!subteam^S1> in <#C1><!here>: <https://example.com/a|runbook><https://example.com/b> no url:fire: 2026-10-22\nstep one\nstep two',
     ],
     [
       'blocks and rich text that Slack already flattened into text',
