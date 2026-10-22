@@ -127,13 +127,13 @@ export class EsqlEditor {
   }
 
   /**
-   * Clears the editor and types `query` character by character, firing the per-keystroke
-   * events that auto-suggest listens to (`setQuery` replaces the model value in one go and
-   * doesn't). Targets the default `ESQLEditor` instance.
+   * Clears this editor (and only this one) and types `query` character by character, firing
+   * the per-keystroke events that auto-suggest listens to. `setQuery` replaces the model value
+   * in one go, so it doesn't trigger auto-suggest.
    */
   async typeQuery(query: string): Promise<void> {
     await this.setQuery('');
-    await this.codeEditor.simulateTyping('ESQLEditor', query);
+    await this.codeEditor.simulateTypingByContainer(this.editor, query);
   }
 
   /**
@@ -142,6 +142,11 @@ export class EsqlEditor {
    */
   async focus(): Promise<void> {
     await this.editor.click();
+  }
+
+  /** Removes keyboard focus from the editor input. */
+  async blur(): Promise<void> {
+    await this.input.blur();
   }
 
   /** Clicks the footer button that prettifies the query. */

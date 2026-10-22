@@ -96,6 +96,9 @@ spaceTest.describe('Discover ES|QL editor autocomplete', { tag: '@local-stateful
       await page.keyboard.press('Escape');
       await expect(suggestWidget).toBeHidden();
 
+      // Escape closes the widget but leaves Monaco focused, and clicking an already-focused
+      // editor doesn't fire the focus handler that reopens suggestions, so blur it first.
+      await esqlEditor.blur();
       await esqlEditor.focus();
       await expect(suggestWidget).toBeVisible();
     });
