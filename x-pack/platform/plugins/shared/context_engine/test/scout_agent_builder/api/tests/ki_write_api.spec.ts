@@ -104,7 +104,7 @@ apiTest.describe('context engine KI write API', { tag: tags.stateful.classic }, 
         body: { ki: { content: 'Updated by scout' } },
       });
       expect(patchResponse).toHaveStatusCode(200);
-      expect(patchResponse.body).toStrictEqual({ id: KI_ID, result: 'updated' });
+      expect(patchResponse.body).toStrictEqual({ id: KI_ID, status: 'updated' });
 
       const getActive = await apiClient.get(withQuery(kiPath, { index: DEST_INDEX }), {
         headers: adminInternalHeaders,
@@ -199,7 +199,7 @@ apiTest.describe('context engine KI write API', { tag: tags.stateful.classic }, 
       body: { ki: { content: 'Data stream updated' } },
     });
     expect(patchResponse).toHaveStatusCode(200);
-    expect(patchResponse.body).toStrictEqual({ id: DS_KI_ID, result: 'updated' });
+    expect(patchResponse.body).toStrictEqual({ id: DS_KI_ID, status: 'updated' });
 
     const getResponse = await apiClient.get(withQuery(kiPath, { index: DS_DEST }), {
       headers: adminInternalHeaders,

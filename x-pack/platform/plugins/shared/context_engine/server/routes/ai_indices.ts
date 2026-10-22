@@ -844,7 +844,7 @@ export const registerAiIndexRoutes = ({
             },
           });
           auditLogger.log(kiAuditEvent({ action: AiIndexAuditAction.KI_UPDATE, aiIndexId, kiId }));
-          const body: UpdateKiResponse = output;
+          const body: UpdateKiResponse = { id: output.id, status: output.result };
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(

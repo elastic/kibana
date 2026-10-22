@@ -83,7 +83,7 @@ export interface UpdateKiBody {
 
 export interface UpdateKiResponse {
   id: string;
-  result: 'updated' | 'noop';
+  status: 'updated' | 'noop';
 }
 
 export interface DeleteKiResponse {

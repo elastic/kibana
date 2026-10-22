@@ -642,7 +642,7 @@ export const updateKiResponseSchema = () =>
     id: schema.string({
       meta: { description: 'The document ID of the updated Knowledge Indicator.' },
     }),
-    result: schema.oneOf([schema.literal('updated'), schema.literal('noop')], {
+    status: schema.oneOf([schema.literal('updated'), schema.literal('noop')], {
       meta: {
         description:
           'Text describing whether the update changed the Knowledge Indicator (`updated`) or made no change (`noop`).',

@@ -1502,7 +1502,7 @@ describe('ai indices routes', () => {
         })
       );
       expect(response.ok).toHaveBeenCalledWith({
-        body: { id: 'ki-1', result: 'updated' },
+        body: { id: 'ki-1', status: 'updated' },
       });
     });
 
