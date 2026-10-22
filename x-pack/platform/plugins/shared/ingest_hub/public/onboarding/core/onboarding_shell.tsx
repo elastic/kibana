@@ -194,7 +194,9 @@ export function OnboardingShell() {
   const CurrentStepComponent = STEP_COMPONENTS[currentStepId];
 
   return (
-    <EuiPageTemplate data-test-subj="onboardingShell">
+    // `grow` would make the page at least 100vh high, which is taller than the viewport under
+    // Kibana's fixed header, so the page would scroll even when the step is short.
+    <EuiPageTemplate grow={false} data-test-subj="onboardingShell">
       {/* The content is a column that fills the page, so the step's footer can sit at the bottom
           even when the step is short (see StepFooter). */}
       <EuiPageTemplate.Section
