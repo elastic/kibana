@@ -87,6 +87,13 @@ describe('bulk action request schemas validate the `agents` KQL string', () => {
     expect(() => schema.body.validate({ agents: ['agent-1', 'agent-2'], ...extra })).not.toThrow();
   });
 
+  it.each(bulkSchemas)('%s bounds the length of the agents input', (_name, schema, extra) => {
+    expect(() =>
+      schema.body.validate({ agents: `status:${'a'.repeat(1_000_000)}`, ...extra })
+    ).toThrow();
+    expect(() => schema.body.validate({ agents: ['a'.repeat(513)], ...extra })).toThrow();
+  });
+
   it('rejects fields outside the agent mappings when dryRun is set', () => {
     expect(() =>
       PostBulkRequestDiagnosticsActionRequestSchema.body.validate({
