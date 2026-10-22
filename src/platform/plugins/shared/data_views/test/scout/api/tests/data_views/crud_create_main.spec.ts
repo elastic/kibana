@@ -260,48 +260,45 @@ apiTest.describe(
       createdIds.push(response.body[SERVICE_KEY].id);
     });
 
-    apiTest.describe('with a non-ASCII index name', () => {
-      const NON_ASCII_INDEX = 'makelogs工程-scout';
-
-      apiTest.beforeAll(async ({ esClient }) => {
+    apiTest(
+      'can create a data view matching an index with a non-ASCII name',
+      async ({ apiClient, esClient }) => {
+        const index = `makelogs工程-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
+        const title = `${index}*`;
         await esClient.index({
-          index: NON_ASCII_INDEX,
+          index,
           document: { '@timestamp': new Date().toISOString(), extension: 'jpg' },
           refresh: 'wait_for',
         });
-      });
 
-      apiTest.afterAll(async ({ esClient }) => {
-        await esClient.indices.delete({ index: NON_ASCII_INDEX }, { ignore: [404] });
-      });
-
-      apiTest('can create a data view matching the index', async ({ apiClient }) => {
-        const title = 'makelogs工程-*';
-        const response = await apiClient.post(DATA_VIEW_PATH, {
-          headers: {
-            ...COMMON_HEADERS,
-            ...adminApiCredentials.apiKeyHeader,
-          },
-          responseType: 'json',
-          body: {
-            override: true,
-            [SERVICE_KEY]: {
-              title,
-              fields: {
-                extension: {
-                  name: 'extension',
+        try {
+          const response = await apiClient.post(DATA_VIEW_PATH, {
+            headers: {
+              ...COMMON_HEADERS,
+              ...adminApiCredentials.apiKeyHeader,
+            },
+            responseType: 'json',
+            body: {
+              [SERVICE_KEY]: {
+                title,
+                fields: {
+                  extension: {
+                    name: 'extension',
+                  },
                 },
               },
             },
-          },
-        });
+          });
 
-        expect(response.statusCode).toBe(200);
-        expect(response.body[SERVICE_KEY].title).toBe(title);
-        expect(response.body[SERVICE_KEY].fields.extension.type).toBe('string'); // picked up from index
-        createdIds.push(response.body[SERVICE_KEY].id);
-      });
-    });
+          expect(response.statusCode).toBe(200);
+          createdIds.push(response.body[SERVICE_KEY].id);
+          expect(response.body[SERVICE_KEY].title).toBe(title);
+          expect(response.body[SERVICE_KEY].fields.extension.type).toBe('string'); // picked up from index
+        } finally {
+          await esClient.indices.delete({ index }, { ignore: [404] });
+        }
+      }
+    );
 
     apiTest('can add runtime fields', async ({ apiClient }) => {
       const title = `basic_index*`;
