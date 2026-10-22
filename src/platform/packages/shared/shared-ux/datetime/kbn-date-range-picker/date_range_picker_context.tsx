@@ -137,7 +137,7 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   onSettingsChange: (settings: DateRangePickerSettings) => void;
   /**
    * A valid time zone name from the IANA database, e.g. "America/Los_Angeles".
-   * Displayed informally in the panel footer.
+   * Used for calendar day boundaries and displayed in the panel footer.
    */
   timeZone?: string;
   /** Seconds until the next auto-refresh. While paused, this value is frozen at the last countdown value. `null` when auto-refresh is disabled or the interval is invalid. */

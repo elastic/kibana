@@ -24,10 +24,10 @@ jest.mock('@kbn/date-range-picker-presets', () => ({
 
 import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { render, screen, waitFor, within, act } from '@testing-library/react';
+import { render, screen, waitFor, within, act, fireEvent } from '@testing-library/react';
 import { EMPTY, of } from 'rxjs';
 
-import { QueryBarTopRow, SharingMetaFields } from './query_bar_top_row';
+import { getFirstDayOfWeek, QueryBarTopRow, SharingMetaFields } from './query_bar_top_row';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -60,6 +60,7 @@ const mockTimeHistory = {
   get$: () => EMPTY,
 };
 
+let dateFormatDow = 'Sunday';
 let useNewDateRangePickerFlag = true;
 let usePresetPersistenceFlag = true;
 
@@ -77,6 +78,8 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
       return 'MMM D, YYYY @ HH:mm:ss.SSS';
     case 'dateFormat:tz':
       return 'UTC';
+    case 'dateFormat:dow':
+      return dateFormatDow;
     case UI_SETTINGS.HISTORY_LIMIT:
       return 10;
     case UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS:
@@ -165,6 +168,7 @@ function wrapQueryBarTopRowInContext(
 describe('QueryBarTopRowTopRow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    dateFormatDow = 'Sunday';
     useNewDateRangePickerFlag = true;
     usePresetPersistenceFlag = true;
   });
@@ -1318,6 +1322,43 @@ describe('QueryBarTopRowTopRow', () => {
 
       expect(onRefreshChange).toHaveBeenCalledWith({ isPaused: false, refreshInterval: 5000 });
     });
+  });
+
+  it('starts calendar weeks on the day configured by dateFormat:dow', async () => {
+    dateFormatDow = 'Wednesday';
+
+    render(
+      wrapQueryBarTopRowInContext({
+        isDirty: false,
+        timeHistory: mockTimeHistory,
+      })
+    );
+
+    fireEvent.click(screen.getByTestId('dateRangePickerControlButton'));
+
+    // `data-test-subj` sits on the <li>; the click handler is on the inner <button>.
+    const calendarNavItem = await screen.findByTestId('dateRangePickerCalendarNavItem');
+    fireEvent.click(within(calendarNavItem).getByRole('button'));
+
+    const calendar = await screen.findByTestId('dateRangePickerCalendarScroller');
+
+    // DayPicker renders the weekday row in an `aria-hidden` <thead>, so it is
+    // only reachable with `hidden: true`.
+    const [firstWeekdayHeader] = within(calendar).getAllByRole('columnheader', { hidden: true });
+
+    expect(firstWeekdayHeader).toHaveTextContent('We');
+  });
+});
+
+describe('getFirstDayOfWeek', () => {
+  it('maps weekday names to zero-based indices', () => {
+    expect(getFirstDayOfWeek('Sunday')).toBe(0);
+    expect(getFirstDayOfWeek('Wednesday')).toBe(3);
+    expect(getFirstDayOfWeek('Saturday')).toBe(6);
+  });
+
+  it('returns undefined for an unknown weekday', () => {
+    expect(getFirstDayOfWeek('Something')).toBeUndefined();
   });
 });
 
