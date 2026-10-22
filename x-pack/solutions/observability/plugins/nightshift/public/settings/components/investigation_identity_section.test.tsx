@@ -10,7 +10,12 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { InvestigationIdentitySection } from './investigation_identity_section';
 
-let mockStatus: { isLoading: boolean; data?: Record<string, unknown> };
+let mockStatus: {
+  isLoading: boolean;
+  data?: Record<string, unknown>;
+  error?: Error;
+  refetch?: () => void;
+};
 
 jest.mock('../../service_account/use_investigator_service_account', () => ({
   ...jest.requireActual('../../service_account/use_investigator_service_account'),
@@ -21,15 +26,17 @@ const status = (overrides: Record<string, unknown> = {}) => ({
   isLoading: false,
   data: {
     serviceAccountsEnabled: true,
-    serviceAccountId: 'kibana/nightshift_agent',
-    role: 'nightshift_agent',
+    // Serverless assigns opaque ids.
+    serviceAccountId: 'uiam-agent-1',
+    role: '_nightshift_agent',
     bound: true,
     serviceAccounts: [
-      { kind: 'agent', id: 'kibana/nightshift_agent', role: 'nightshift_agent' },
+      { kind: 'agent', name: 'nightshift_agent', id: 'uiam-agent-1', role: '_nightshift_agent' },
       {
         kind: 'automations',
-        id: 'kibana/nightshift_automations',
-        role: 'nightshift_automations',
+        name: 'nightshift_automations',
+        id: 'uiam-automations-2',
+        role: '_nightshift_automations',
       },
     ],
     boundWorkflows: [],
@@ -53,9 +60,12 @@ describe('InvestigationIdentitySection', () => {
     renderSection();
 
     expect(screen.getByTestId('nightshiftServiceAccountOn')).toBeInTheDocument();
-    expect(screen.getByText('kibana/nightshift_agent')).toBeInTheDocument();
-    expect(screen.getByText('nightshift_agent')).toBeInTheDocument();
-    expect(screen.getByText('kibana/nightshift_automations')).toBeInTheDocument();
+    const section = screen.getByTestId('nightshiftInvestigationIdentitySection');
+    expect(section).toHaveTextContent('nightshift_agent (uiam-agent-1)');
+    expect(section).toHaveTextContent('_nightshift_agent');
+    expect(screen.getByTestId('nightshiftServiceAccountOthers')).toHaveTextContent(
+      'nightshift_automations (uiam-automations-2) · _nightshift_automations'
+    );
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
@@ -64,5 +74,15 @@ describe('InvestigationIdentitySection', () => {
     renderSection();
 
     expect(screen.getByTestId('nightshiftServiceAccountOff')).toBeInTheDocument();
+  });
+
+  it('explains a failed status read and offers a retry', () => {
+    const refetch = jest.fn();
+    mockStatus = { isLoading: false, error: new Error('Forbidden'), refetch };
+    renderSection();
+
+    expect(screen.getByTestId('nightshiftServiceAccountError')).toHaveTextContent('Forbidden');
+    screen.getByTestId('nightshiftServiceAccountRetry').click();
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 });
