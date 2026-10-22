@@ -37,6 +37,7 @@ spaceTest.describe('Console autocomplete', { tag: tags.deploymentAgnostic }, () 
     await pageObjects.console.goto();
     await pageObjects.console.skipTourIfExists();
     await pageObjects.console.clearEditorText();
+    await pageObjects.console.waitForAutocompleteEntitiesLoaded();
   });
 
   spaceTest('suggests inside a request body', async ({ pageObjects }) => {
