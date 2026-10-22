@@ -70,6 +70,8 @@ test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
     const { cloudLinks } = pageObjects;
     await cloudLinks.openUserMenu();
 
+    // URLs come from the mocked `cloud_links` server config set. Configs under `test/scout_*`
+    // are excluded from ECH/MKI runs, so asserting exact values is safe here.
     const externalLinks = [
       {
         link: cloudLinks.profileLink,
