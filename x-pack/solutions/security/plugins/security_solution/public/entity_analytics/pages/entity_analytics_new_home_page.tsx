@@ -1383,12 +1383,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
           </DataViewContext.Provider>
         </div>
       </SecuritySolutionPageWrapper>
-      <ProductTour
-        steps={productTour.steps}
-        currentStep={productTour.currentStep}
-        onNext={productTour.nextStep}
-        onEnd={productTour.endTour}
-      />
+      {/* Full screen hides the tour's anchors; the tour picks up at the same step on exit. */}
+      {!isGridFullScreen && (
+        <ProductTour
+          steps={productTour.steps}
+          currentStep={productTour.currentStep}
+          onNext={productTour.nextStep}
+          onEnd={productTour.endTour}
+        />
+      )}
       <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
     </>
   );
