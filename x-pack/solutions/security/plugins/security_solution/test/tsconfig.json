@@ -30,6 +30,9 @@
     "@kbn/securitysolution-list-constants",
     "@kbn/test-es-server",
     "@kbn/tooling-log",
-    "@kbn/workflows"
+    "@kbn/workflows",
+    "@kbn/agent-builder-common",
+    "@kbn/core",
+    "@kbn/alertzero-common"
   ]
 }

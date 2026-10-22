@@ -320,8 +320,5 @@
     "@kbn/core-security-server",
     "@kbn/custom-content-common",
     "@kbn/custom-content-renderer",
-    "@kbn/data-views-types",
-    "@kbn/response-ops-alerts-apis",
-    "@kbn/maintenance-windows-plugin",
   ]
 }
