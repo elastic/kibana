@@ -7,6 +7,7 @@
 
 import { RE2JS } from 're2js';
 import { DEFAULT_BUILTIN_REGEX_RULES } from './default_builtin_regex_rules';
+import { shouldKeepBuiltInMatch } from './builtin_match_filters';
 
 type Engine = 'native' | 're2';
 
@@ -230,6 +231,26 @@ describe.each(ENGINES)('built-in regex rules on %s', (engine) => {
       expectSpans(id, 'NT AUTHORITY\\SYSTEM', ['AUTHORITY\\SYSTEM']);
     });
 
+    // Escaped forms: JSON strings, Splunk SPL and tool results carry the separator doubled.
+    it.each([
+      ['{"user":"QACORP\\\\jdoe.sentinel"}', ['QACORP\\\\jdoe.sentinel']],
+      ['user="QACORP\\\\jdoe.sentinel" | stats count', ['QACORP\\\\jdoe.sentinel']],
+      ['CORP\\nancy and CORP\\tom', ['CORP\\nancy', 'CORP\\tom']],
+    ])('finds the account in %s', (input, expected) => {
+      expectSpans(id, input, expected);
+    });
+
+    // An upper-case word before an escape sequence is text, not a domain (ES|QL, SQL, SPL).
+    it.each([
+      'WHERE @timestamp >= NOW() - 7 DAYS\\nFROM logs',
+      'SORT count DESC\\n| LIMIT 20',
+      'ES|QL\\n### Findings',
+      'SELECT a FROM t ORDER BY a DESC\\n',
+      'WHERE x IS\\tNULL',
+    ])('does not match the escape sequence in %s', (input) => {
+      expectSpans(id, input, []);
+    });
+
     it.each([
       'C:\\Users\\jon',
       'C:\\Program Files\\x',
@@ -240,6 +261,41 @@ describe.each(ENGINES)('built-in regex rules on %s', (engine) => {
       'regex \\d\\w',
     ])('does not match %s', (input) => {
       expectSpans(id, input, []);
+    });
+  });
+
+  describe('account rule path filter', () => {
+    const accountPatternMatches = (input: string): string[] =>
+      [...input.matchAll(new RegExp(patternFor('builtin-account-login'), 'g'))]
+        .filter(({ index, 0: text }) =>
+          shouldKeepBuiltInMatch(
+            'builtin-account-login',
+            input,
+            index ?? 0,
+            (index ?? 0) + text.length
+          )
+        )
+        .map(([match]) => match);
+
+    it.each([
+      'C:\\WINDOWS\\System32',
+      'C:\\\\WINDOWS\\\\System32',
+      '\\Content.Outlook\\RANDOM\\attachment.hta',
+      '/usr/SHARE\\x',
+    ])('drops path segments in %s', (input) => {
+      expect(accountPatternMatches(input)).toEqual([]);
+    });
+
+    it('keeps an account that follows a space, quote or colon', () => {
+      expect(accountPatternMatches('user: CORP\\jdoe, "QACORP\\\\jdoe"')).toEqual([
+        'CORP\\jdoe',
+        'QACORP\\\\jdoe',
+      ]);
+    });
+
+    it('never filters custom or unknown rules', () => {
+      expect(shouldKeepBuiltInMatch(undefined, 'C:\\A\\b', 3, 6)).toBe(true);
+      expect(shouldKeepBuiltInMatch('builtin-email', 'x', 0, 1)).toBe(true);
     });
   });
 
@@ -274,6 +330,7 @@ describe('built-in regex rules across engines', () => {
     'web-01.prod.example.com DC01.CORP.EXAMPLE.COM foo.test.ts kibana.dev.yml logger.info',
     'api.example.com.internal https://kibana.example.com/app srv.example.es a.b.c.d.e.f.g.com',
     'CORP\\a.mehta C:\\Users\\jon NT AUTHORITY\\SYSTEM line1\\nline2',
+    'QACORP\\\\jdoe SORT count DESC\\n| LIMIT 20 CORP\\nancy C:\\WINDOWS\\System32',
   ];
 
   it.each(BUILT_IN_IDS)('%s matches the same text on native RegExp and RE2', (id) => {

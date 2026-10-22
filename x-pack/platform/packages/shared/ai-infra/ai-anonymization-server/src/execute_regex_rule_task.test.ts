@@ -6,6 +6,7 @@
  */
 
 import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
+import { DEFAULT_BUILTIN_REGEX_RULES } from '@kbn/ai-anonymization-common';
 import { executeRegexRulesTask } from './execute_regex_rule_task';
 
 describe('executeRegexRulesTask', () => {
@@ -167,5 +168,32 @@ describe('executeRegexRulesTask', () => {
     expect(() =>
       executeRegexRulesTask({ rules: [emailRule, brokenRule], records: [{ content: 'a@b.com' }] })
     ).toThrow(/"Broken pattern" has an invalid regular expression/);
+  });
+
+  describe('built-in account rule', () => {
+    const accountRule: RegexAnonymizationRule = {
+      ...(DEFAULT_BUILTIN_REGEX_RULES.find(
+        ({ id }) => id === 'builtin-account-login'
+      ) as RegexAnonymizationRule),
+      enabled: true,
+    };
+    const content =
+      'user="QACORP\\\\jdoe" SORT count DESC\\n| LIMIT 20 in C:\\WINDOWS\\System32 as CORP\\a.mehta';
+
+    it('masks accounts only, not escape sequences or path segments', () => {
+      const matches = executeRegexRulesTask({ rules: [accountRule], records: [{ content }] });
+
+      expect(matches.map(({ matchValue }) => matchValue)).toEqual([
+        'QACORP\\\\jdoe',
+        'CORP\\a.mehta',
+      ]);
+    });
+
+    it('does not filter a custom rule that reuses the same pattern', () => {
+      const { id, builtIn, ...custom } = accountRule;
+      const matches = executeRegexRulesTask({ rules: [custom], records: [{ content }] });
+
+      expect(matches.map(({ matchValue }) => matchValue)).toContain('WINDOWS\\System32');
+    });
   });
 });

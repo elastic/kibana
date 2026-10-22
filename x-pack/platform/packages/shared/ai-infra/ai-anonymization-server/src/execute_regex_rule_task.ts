@@ -6,6 +6,7 @@
  */
 
 import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
+import { shouldKeepBuiltInMatch } from '@kbn/ai-anonymization-common';
 import type { DetectedMatch } from './types';
 
 /**
@@ -65,6 +66,10 @@ export const executeRegexRulesTask = ({
           // Guard against zero-length matches that could cause infinite loops
           if (end <= start) {
             regex.lastIndex = start + 1;
+            continue;
+          }
+
+          if (rule.builtIn && !shouldKeepBuiltInMatch(rule.id, value, start, end)) {
             continue;
           }
 
