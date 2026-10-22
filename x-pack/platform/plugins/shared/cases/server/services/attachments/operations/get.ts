@@ -49,7 +49,6 @@ import type {
 } from '../../../../common/types/domain';
 import { AttachmentType, ExternalReferenceStorageType } from '../../../../common/types/domain';
 import {
-import {
   DocumentAttachmentAttributesSchemaV2,
   UnifiedAttachmentAttributesSchema,
 } from '../../../../common/types/domain/attachment/v2';
