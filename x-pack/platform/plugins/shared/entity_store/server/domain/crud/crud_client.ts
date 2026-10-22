@@ -110,6 +110,13 @@ export interface BulkObjectResponse {
 interface BulkUpdateEntityParams {
   objects: BulkObject[];
   force?: boolean;
+  /**
+   * Defaults to `wait_for`, so callers can read their writes right away. Batch writers that don't
+   * read them back can pass `false` and refresh once when they're done.
+   */
+  refresh?: 'wait_for' | false;
+  /** Receives the time Elasticsearch reports for the bulk request, for callers that time writes. */
+  onTook?: (tookMs: number) => void;
 }
 
 export interface CreateEntityFromSourceRequest {
@@ -157,6 +164,7 @@ export class CRUDClient {
   private readonly esClient: ElasticsearchClient;
   private readonly namespace: string;
   private readonly eventPublisher: WorkflowEventPublisher;
+  private latestIndexNamePromise: Promise<string> | undefined;
 
   constructor(deps: CRUDClientDependencies) {
     this.logger = deps.logger;
@@ -362,8 +370,21 @@ export class CRUDClient {
     }
   }
 
-  public async latestIndexName(): Promise<string> {
-    return resolveLatestEntitiesIndexName(this.esClient, this.namespace);
+  /**
+   * The index this namespace's entities live in: the legacy `security_<namespace>` index until the
+   * migration deletes it, the solution-neutral one after. Resolving it takes several requests, so
+   * each client resolves it once. Clients live for one request, task run or workflow step, so a
+   * migration that lands mid-way only fails `assertInstalled` until the next one.
+   */
+  public latestIndexName(): Promise<string> {
+    this.latestIndexNamePromise ??= resolveLatestEntitiesIndexName(
+      this.esClient,
+      this.namespace
+    ).catch((error) => {
+      this.latestIndexNamePromise = undefined;
+      throw error;
+    });
+    return this.latestIndexNamePromise;
   }
 
   /**
@@ -432,6 +453,8 @@ export class CRUDClient {
   public async bulkUpdateEntity({
     objects,
     force = false,
+    refresh = 'wait_for',
+    onTook,
   }: BulkUpdateEntityParams): Promise<BulkObjectResponse[]> {
     await this.assertInstalled();
 
@@ -465,8 +488,9 @@ export class CRUDClient {
     const resp = await this.esClient.bulk({
       index: await this.latestIndexName(),
       operations,
-      refresh: 'wait_for',
+      refresh,
     });
+    onTook?.(resp.took);
 
     const errors: BulkObjectResponse[] = resp.errors
       ? resp.items
@@ -484,9 +508,13 @@ export class CRUDClient {
       : [];
 
     if (!resp.errors) {
-      this.logger.debug(`Successfully bulk updated ${objects.length} entities`);
+      this.logger.debug(
+        `Successfully bulk updated ${objects.length} entities (took ${resp.took}ms)`
+      );
     } else {
-      this.logger.debug(`Bulk updated ${objects.length} entities with errors`);
+      this.logger.debug(
+        `Bulk updated ${objects.length} entities with errors (took ${resp.took}ms)`
+      );
     }
 
     if (emitTargets.length > 0) {
