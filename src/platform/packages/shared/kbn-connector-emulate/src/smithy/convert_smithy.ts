@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isRecord } from '../openapi/schema_walk';
 import type { JsonSchema, OpenApiDocument } from '../openapi/types';
 import type { Location } from './shape_schema';
 import { createShapeConverter, isRequired } from './shape_schema';
@@ -32,6 +33,11 @@ const REST_JSON = 'aws.protocols#restJson1';
 type ResponseHeaders = Record<string, Node & { readonly required: boolean }>;
 // `application/json` and structured suffixes such as `application/vnd.api+json`.
 const JSON_MEDIA_TYPE = /^application\/(?:[\w.-]+\+)?json$/i;
+const REST_XML = 'aws.protocols#restXml';
+
+// Services whose endpoint rules put a path label in the host: S3 addresses buckets as
+// `{Bucket}.s3.{region}.amazonaws.com` (virtual-hosted) as well as by path.
+const HOST_LABELS: Readonly<Record<string, string>> = { S3: 'Bucket' };
 
 type Node = Record<string, unknown>;
 
@@ -67,17 +73,68 @@ export const convertSmithy = (
 ): OpenApiDocument => {
   const [serviceId, service] = pickService(model, options.service);
   const protocols = protocolsOf(service);
-  if (!protocols.includes(REST_JSON)) {
+  if (!protocols.includes(REST_JSON) && !protocols.includes(REST_XML)) {
     throw new Error(
       `${serviceId} uses ${
         protocols.join(', ') || 'no AWS protocol'
-      }; convertSmithy supports ${REST_JSON}`
+      }; convertSmithy supports ${REST_JSON} and ${REST_XML}`
     );
   }
-  const converter = createShapeConverter(model);
+  const xml = !protocols.includes(REST_JSON);
+  const documentType = xml ? 'application/xml' : 'application/json';
+  // S3 writes errors as a bare `<Error>`, not inside `<ErrorResponse>`.
+  const noErrorWrapping = traitRecord(service.traits, REST_XML)?.noErrorWrapping === true;
+  const serviceNamespace = traitRecord(service.traits, 'smithy.api#xmlNamespace');
+  const converter = createShapeConverter(model, { xml, nonNumericFloats: xml });
   const { components } = converter;
   const endpointPrefix = endpointPrefixOf(serviceId, service);
   const serviceErrors = service.errors ?? [];
+  const awsService = traitRecord(service.traits, 'aws.api#service');
+  const hostLabel = HOST_LABELS[String(awsService?.sdkId)];
+  const [regionalServer] = regionalServers(endpointPrefix);
+
+  // The root element of an XML document: its name and the service's namespace, unless the
+  // shape has its own.
+  const toXmlRoot = (shapeId: string | undefined, schema: JsonSchema): JsonSchema => {
+    if (!xml) {
+      return schema;
+    }
+    const shape = shapeId ? getShape(model, shapeId) : undefined;
+    const xmlName = shape?.traits?.['smithy.api#xmlName'];
+    const namespace = traitRecord(shape?.traits, 'smithy.api#xmlNamespace') ?? serviceNamespace;
+    return {
+      ...schema,
+      xml: {
+        ...(shapeId ? { name: typeof xmlName === 'string' ? xmlName : shapeName(shapeId) } : {}),
+        ...(typeof namespace?.uri === 'string' ? { namespace: namespace.uri } : {}),
+        ...(typeof namespace?.prefix === 'string' ? { prefix: namespace.prefix } : {}),
+      },
+    };
+  };
+
+  // restXml errors: `<ErrorResponse><Error>` with the error's `Type`, `Code` and members, and a
+  // `RequestId` (https://smithy.io/2.0/aws/protocols/aws-restxml-protocol.html).
+  const toXmlError = (target: string, body: Array<[string, MemberShape]>): JsonSchema => {
+    const fields = converter.toObjectSchema(body);
+    const error = {
+      type: 'object',
+      properties: {
+        Type: { type: 'string', enum: ['Sender', 'Receiver'] },
+        Code: { type: 'string', enum: [shapeName(target)] },
+        Message: { type: 'string' },
+        ...(isRecord(fields.properties) ? fields.properties : {}),
+      },
+      required: ['Code', ...(Array.isArray(fields.required) ? fields.required : [])],
+    };
+    return noErrorWrapping
+      ? { ...error, xml: { name: 'Error' } }
+      : {
+          type: 'object',
+          xml: { name: 'ErrorResponse' },
+          properties: { Error: error, RequestId: { type: 'string' } },
+          required: ['Error'],
+        };
+  };
 
   const toParameter = (
     name: string,
@@ -112,7 +169,7 @@ export const convertSmithy = (
         'application/json': { schema: {} },
       };
     }
-    if (target?.type === 'blob' || target?.type === 'string') {
+    if (target?.type === 'blob' || target?.type === 'string' || target?.type === 'enum') {
       return {
         [typeof mediaType === 'string' ? mediaType : 'text/plain']: {
           // JSON bodies are parsed before validation, so the text they hold can be any value.
@@ -123,14 +180,32 @@ export const convertSmithy = (
         },
       };
     }
+    const schema = converter.toSchema(member.target, 'body', member.traits);
+    // The target's own `xml` names the root, unless the member renames it; the wrapper adds
+    // the service's namespace.
+    const memberXmlName = member.traits?.['smithy.api#xmlName'];
+    const root = toXmlRoot(undefined, {});
     return {
-      'application/json': { schema: converter.toSchema(member.target, 'body', member.traits) },
+      [documentType]: {
+        schema:
+          xml && '$ref' in schema
+            ? {
+                allOf: [schema],
+                xml: {
+                  ...(isRecord(root.xml) ? root.xml : {}),
+                  ...(typeof memberXmlName === 'string' ? { name: memberXmlName } : {}),
+                },
+              }
+            : schema,
+      },
     };
   };
 
   const toBodyContent = (
     members: Array<[string, MemberShape]>,
-    componentName: string
+    componentName: string,
+    shapeId?: string,
+    unwrapped = false
   ): Node | undefined => {
     const payload = members.find(([, member]) => bindingOf(member) === 'smithy.api#httpPayload');
     if (payload) {
@@ -140,9 +215,44 @@ export const convertSmithy = (
     if (body.length === 0) {
       return undefined;
     }
-    components[componentName] = converter.toObjectSchema(body);
-    return { 'application/json': { schema: { $ref: `#/components/schemas/${componentName}` } } };
+    // S3's `@s3UnwrappedXmlOutput` operations answer with their one member as the root,
+    // such as GetBucketLocation's `<LocationConstraint>us-west-2</LocationConstraint>`.
+    if (unwrapped && body.length === 1) {
+      const [[memberName, member]] = body;
+      const xmlName = member.traits?.['smithy.api#xmlName'];
+      const schema = converter.toSchema(member.target, 'body', member.traits);
+      return {
+        [documentType]: {
+          schema: {
+            allOf: [schema],
+            xml: {
+              name: typeof xmlName === 'string' ? xmlName : memberName,
+              ...(typeof serviceNamespace?.uri === 'string'
+                ? { namespace: serviceNamespace.uri }
+                : {}),
+            },
+          },
+        },
+      };
+    }
+    components[componentName] = toXmlRoot(shapeId, converter.toObjectSchema(body));
+    return { [documentType]: { schema: { $ref: `#/components/schemas/${componentName}` } } };
   };
+
+  // Query and label bindings don't apply to responses, so those members are in the body.
+  const forResponse = (members: Array<[string, MemberShape]>): Array<[string, MemberShape]> =>
+    members.map(([name, member]) => {
+      const binding = bindingOf(member);
+      if (
+        binding !== 'smithy.api#httpQuery' &&
+        binding !== 'smithy.api#httpQueryParams' &&
+        binding !== 'smithy.api#httpLabel'
+      ) {
+        return [name, member];
+      }
+      const { [binding]: _, ...traits } = member.traits ?? {};
+      return [name, { ...member, traits }];
+    });
 
   const toHeaders = (members: Array<[string, MemberShape]>): ResponseHeaders =>
     Object.fromEntries(
@@ -161,9 +271,11 @@ export const convertSmithy = (
   const toResponse = (
     description: string,
     members: Array<[string, MemberShape]>,
-    componentName: string
+    componentName: string,
+    shapeId?: string,
+    unwrapped = false
   ) => {
-    const content = toBodyContent(members, componentName);
+    const content = toBodyContent(members, componentName, shapeId, unwrapped);
     const headers = toHeaders(members);
     return {
       description,
@@ -176,11 +288,63 @@ export const convertSmithy = (
     id: string,
     operation: Shape,
     http: Record<string, unknown>,
-    greedy: ReadonlySet<string>
+    greedy: ReadonlySet<string>,
+    uri: string
   ) => {
     const name = shapeName(id);
+    // Operations on a host label, such as S3's bucket operations, are also served from a host
+    // with the label in it; the label's value fills the path parameter.
+    // S3 Express's control operations, such as `ListDirectoryBuckets`, have a host of their own.
+    const expressControl =
+      traitRecord(
+        traitRecord(operation.traits, 'smithy.rules#staticContextParams'),
+        'UseS3ExpressControlEndpoint'
+      )?.value === true;
+    // `@endpoint` host prefixes such as `data.` or `{AccountId}.`, whose labels are server
+    // variables here.
+    const hostPrefix = traitRecord(operation.traits, 'smithy.api#endpoint')?.hostPrefix;
+    const prefixedServer =
+      typeof hostPrefix === 'string'
+        ? {
+            url: `https://${hostPrefix}${endpointPrefix}.{region}.amazonaws.com`,
+            variables: Object.fromEntries([
+              ...[...hostPrefix.matchAll(/\{([^}]+)\}/g)].map(([, label]) => [
+                label,
+                { default: 'example' },
+              ]),
+              ['region', { default: 'us-east-1' }],
+            ]),
+          }
+        : undefined;
+    const servers = prefixedServer
+      ? [prefixedServer]
+      : expressControl
+      ? [
+          {
+            url: `https://${endpointPrefix}express-control.{region}.amazonaws.com`,
+            variables: { region: { default: 'us-east-1' } },
+          },
+        ]
+      : hostLabel && uri.startsWith(`/{${hostLabel}}`)
+      ? [
+          // Regional, dual-stack (IPv6) and Transfer Acceleration hosts.
+          ...[
+            `${endpointPrefix}.{region}`,
+            `${endpointPrefix}.dualstack.{region}`,
+            `${endpointPrefix}-accelerate`,
+            `${endpointPrefix}-accelerate.dualstack`,
+          ].map((host) => ({
+            url: `https://{${hostLabel}}.${host}.amazonaws.com`,
+            variables: {
+              [hostLabel]: { default: 'example', 'x-path-parameter': true },
+              ...(host.includes('{region}') ? { region: { default: 'us-east-1' } } : {}),
+            },
+          })),
+          regionalServer,
+        ]
+      : undefined;
     const input = membersOf(model, operation.input?.target);
-    const output = membersOf(model, operation.output?.target);
+    const output = forResponse(membersOf(model, operation.output?.target));
     const parameters = input.flatMap(([memberName, member]): Node[] => {
       const traits = member.traits ?? {};
       switch (bindingOf(member)) {
@@ -208,7 +372,7 @@ export const convertSmithy = (
           return [];
       }
     });
-    const requestContent = toBodyContent(input, `${name}RequestContent`);
+    const requestContent = toBodyContent(input, `${name}RequestContent`, operation.input?.target);
     const requestBody = requestContent && {
       required: input.some(
         ([, member]) =>
@@ -236,9 +400,9 @@ export const convertSmithy = (
         const members = membersOf(model, target);
         const body = members.filter(([, member]) => bindingOf(member) === undefined);
         headersOf.push(toHeaders(members));
-        if (body.length > 0) {
+        if (body.length > 0 || xml) {
           const component = `${shapeName(target)}ResponseContent`;
-          components[component] = converter.toObjectSchema(body);
+          components[component] = xml ? toXmlError(target, body) : converter.toObjectSchema(body);
           schemas.push({ $ref: `#/components/schemas/${component}` });
         }
       }
@@ -272,7 +436,7 @@ export const convertSmithy = (
           ...(schemas.length > 0
             ? {
                 content: {
-                  'application/json': {
+                  [documentType]: {
                     schema: schemas.length === 1 ? schemas[0] : { anyOf: schemas },
                   },
                 },
@@ -282,6 +446,13 @@ export const convertSmithy = (
       ];
     });
 
+    const success = toResponse(
+      `${name} ${status} response`,
+      output,
+      `${name}ResponseContent`,
+      operation.output?.target,
+      hasTrait(operation.traits, 'aws.customizations#s3UnwrappedXmlOutput')
+    );
     const auth = operation.traits?.['smithy.api#auth'];
     return {
       operationId: name,
@@ -290,32 +461,41 @@ export const convertSmithy = (
       parameters,
       ...(requestBody ? { requestBody } : {}),
       responses: {
-        [status]: toResponse(`${name} ${status} response`, output, `${name}ResponseContent`),
+        [status]: success,
+        // An `@httpResponseCode` member lets the operation answer with another 2xx status.
+        ...(output.some(([, member]) => bindingOf(member) === 'smithy.api#httpResponseCode')
+          ? { '2XX': success }
+          : {}),
         ...Object.fromEntries(errorResponses),
       },
       ...(Array.isArray(auth) && auth.length === 0 ? { security: [] } : {}),
+      ...(servers ? { servers } : {}),
+      // S3's `x-id` query parameters only tell SDKs' routers apart; S3 doesn't require them.
+      ...(/[?&]x-id=/.test(uri) ? { 'x-optional-fixed-query': ['x-id'] } : {}),
     };
   };
 
   const paths: Record<string, Node> = {};
   const msPaths: Record<string, Node> = {};
   for (const id of collectOperations(model, serviceId)) {
-    const operation = model.shapes[id];
+    const operation = getShape(model, id);
     const http = traitRecord(operation?.traits, 'smithy.api#http');
     if (!operation || !http || typeof http.uri !== 'string' || typeof http.method !== 'string') {
       continue;
     }
     // `{Key+}` labels may span segments.
     const greedy = new Set<string>();
-    const uri = http.uri.replace(/\{([^{}+]+)\+\}/g, (_, label: string) => {
+    const labeled = http.uri.replace(/\{([^{}+]+)\+\}/g, (_, label: string) => {
       greedy.add(label);
       return `{${label}}`;
     });
+    // Bare query tokens, such as S3's `?tagging`, are sent with an empty value.
+    const uri = labeled.replace(/([?&])([^=&]+)(?=&|$)/g, '$1$2=');
     // URIs such as `/2018-10-31/layers?find=LayerVersion` fix query parameters, which OpenAPI
     // paths can't express; AutoRest's `x-ms-paths` can.
     const target = uri.includes('?') ? msPaths : paths;
     const method = http.method.toLowerCase();
-    target[uri] = { ...target[uri], [method]: toOperation(id, operation, http, greedy) };
+    target[uri] = { ...target[uri], [method]: toOperation(id, operation, http, greedy, uri) };
   }
 
   return {

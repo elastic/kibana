@@ -1,0 +1,191 @@
+{
+ "smithy": "2.0",
+ "shapes": {
+  "aws.protocoltests.restxml.xmlns#NestedWithNamespace": {
+   "type": "structure",
+   "members": {
+    "attrField": {
+     "target": "smithy.api#String",
+     "traits": {
+      "smithy.api#xmlAttribute": {},
+      "smithy.api#xmlName": "xsi:someName"
+     }
+    }
+   }
+  },
+  "aws.protocoltests.restxml.xmlns#RestXmlWithNamespace": {
+   "type": "service",
+   "version": "2019-12-16",
+   "operations": [
+    {
+     "target": "aws.protocoltests.restxml.xmlns#SimpleScalarProperties"
+    }
+   ],
+   "traits": {
+    "aws.api#service": {
+     "sdkId": "Rest Xml Protocol Namespace"
+    },
+    "aws.auth#sigv4": {
+     "name": "restxmlwithnamespace"
+    },
+    "aws.protocols#restXml": {},
+    "smithy.api#title": "Sample Rest Xml Protocol Service With Namespace",
+    "smithy.api#xmlNamespace": {
+     "uri": "https://example.com"
+    }
+   }
+  },
+  "aws.protocoltests.restxml.xmlns#SimpleScalarProperties": {
+   "type": "operation",
+   "input": {
+    "target": "aws.protocoltests.restxml.xmlns#SimpleScalarPropertiesRequest"
+   },
+   "output": {
+    "target": "aws.protocoltests.restxml.xmlns#SimpleScalarPropertiesResponse"
+   },
+   "traits": {
+    "smithy.api#http": {
+     "uri": "/SimpleScalarProperties",
+     "method": "PUT"
+    },
+    "smithy.api#idempotent": {},
+    "smithy.test#httpRequestTests": [
+     {
+      "id": "XmlNamespaceSimpleScalarProperties",
+      "documentation": "Serializes simple scalar properties",
+      "protocol": "aws.protocols#restXml",
+      "method": "PUT",
+      "uri": "/SimpleScalarProperties",
+      "body": "<SimpleScalarPropertiesRequest xmlns=\"https://example.com\">\n    <stringValue>string</stringValue>\n    <trueBooleanValue>true</trueBooleanValue>\n    <falseBooleanValue>false</falseBooleanValue>\n    <byteValue>1</byteValue>\n    <shortValue>2</shortValue>\n    <integerValue>3</integerValue>\n    <longValue>4</longValue>\n    <floatValue>5.5</floatValue>\n    <DoubleDribble>6.5</DoubleDribble>\n    <Nested xmlns:xsi=\"https://example.com\" xsi:someName=\"nestedAttrValue\"></Nested>\n</SimpleScalarPropertiesRequest>\n",
+      "bodyMediaType": "application/xml",
+      "headers": {
+       "Content-Type": "application/xml",
+       "X-Foo": "Foo"
+      },
+      "params": {
+       "foo": "Foo",
+       "stringValue": "string",
+       "trueBooleanValue": true,
+       "falseBooleanValue": false,
+       "byteValue": 1,
+       "shortValue": 2,
+       "integerValue": 3,
+       "longValue": 4,
+       "floatValue": 5.5,
+       "doubleValue": 6.5,
+       "Nested": {
+        "attrField": "nestedAttrValue"
+       }
+      }
+     }
+    ],
+    "smithy.test#httpResponseTests": [
+     {
+      "id": "XmlNamespaceSimpleScalarProperties",
+      "documentation": "Serializes simple scalar properties",
+      "protocol": "aws.protocols#restXml",
+      "code": 200,
+      "body": "<SimpleScalarPropertiesResponse xmlns=\"https://example.com\">\n    <stringValue>string</stringValue>\n    <trueBooleanValue>true</trueBooleanValue>\n    <falseBooleanValue>false</falseBooleanValue>\n    <byteValue>1</byteValue>\n    <shortValue>2</shortValue>\n    <integerValue>3</integerValue>\n    <longValue>4</longValue>\n    <floatValue>5.5</floatValue>\n    <DoubleDribble>6.5</DoubleDribble>\n    <Nested xmlns:xsi=\"https://example.com\" xsi:someName=\"nestedAttrValue\"></Nested>\n</SimpleScalarPropertiesResponse>\n",
+      "bodyMediaType": "application/xml",
+      "headers": {
+       "Content-Type": "application/xml",
+       "X-Foo": "Foo"
+      },
+      "params": {
+       "foo": "Foo",
+       "stringValue": "string",
+       "trueBooleanValue": true,
+       "falseBooleanValue": false,
+       "byteValue": 1,
+       "shortValue": 2,
+       "integerValue": 3,
+       "longValue": 4,
+       "floatValue": 5.5,
+       "doubleValue": 6.5,
+       "Nested": {
+        "attrField": "nestedAttrValue"
+       }
+      }
+     }
+    ]
+   }
+  },
+  "aws.protocoltests.restxml.xmlns#SimpleScalarPropertiesInputOutput": {
+   "type": "structure",
+   "members": {
+    "foo": {
+     "target": "smithy.api#String",
+     "traits": {
+      "smithy.api#httpHeader": "X-Foo"
+     }
+    },
+    "stringValue": {
+     "target": "smithy.api#String"
+    },
+    "trueBooleanValue": {
+     "target": "smithy.api#Boolean"
+    },
+    "falseBooleanValue": {
+     "target": "smithy.api#Boolean"
+    },
+    "byteValue": {
+     "target": "smithy.api#Byte"
+    },
+    "shortValue": {
+     "target": "smithy.api#Short"
+    },
+    "integerValue": {
+     "target": "smithy.api#Integer"
+    },
+    "longValue": {
+     "target": "smithy.api#Long"
+    },
+    "floatValue": {
+     "target": "smithy.api#Float"
+    },
+    "Nested": {
+     "target": "aws.protocoltests.restxml.xmlns#NestedWithNamespace",
+     "traits": {
+      "smithy.api#xmlNamespace": {
+       "prefix": "xsi",
+       "uri": "https://example.com"
+      }
+     }
+    },
+    "doubleValue": {
+     "target": "smithy.api#Double",
+     "traits": {
+      "smithy.api#xmlName": "DoubleDribble"
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#mixin": {}
+   }
+  },
+  "aws.protocoltests.restxml.xmlns#SimpleScalarPropertiesRequest": {
+   "type": "structure",
+   "mixins": [
+    {
+     "target": "aws.protocoltests.restxml.xmlns#SimpleScalarPropertiesInputOutput"
+    }
+   ],
+   "members": {},
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "aws.protocoltests.restxml.xmlns#SimpleScalarPropertiesResponse": {
+   "type": "structure",
+   "mixins": [
+    {
+     "target": "aws.protocoltests.restxml.xmlns#SimpleScalarPropertiesInputOutput"
+    }
+   ],
+   "members": {},
+   "traits": {
+    "smithy.api#output": {}
+   }
+  }
+ }
+}

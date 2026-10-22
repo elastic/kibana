@@ -123,6 +123,45 @@ export const isRequired = (member: MemberShape): boolean =>
   (member.traits?.['smithy.api#default'] === undefined ||
     member.traits['smithy.api#default'] === null);
 
+/** The OpenAPI `xml` object of a schema, as the XML codec reads it. */
+export interface XmlObject {
+  readonly name?: string;
+  readonly namespace?: string;
+  readonly prefix?: string;
+  readonly attribute?: boolean;
+  readonly wrapped?: boolean;
+}
+
+/**
+ * How a map is written in XML (OpenAPI's `xml` can't describe maps): entries of a key and a
+ * value element, inside `entry` elements unless flattened.
+ */
+export interface XmlMap {
+  readonly key: string;
+  readonly value: string;
+  readonly keyNamespace?: string;
+  readonly valueNamespace?: string;
+  readonly flattened?: boolean;
+}
+
+export const XML_MAP = 'x-smithy-xml-map';
+
+export interface ShapeConverterOptions {
+  /**
+   * Describes documents as restXml writes them: OpenAPI `xml` objects for element names,
+   * attributes, namespaces and list wrapping, `x-smithy-xml-map` for maps, and `date-time`
+   * timestamps.
+   */
+  readonly xml?: boolean;
+  /** Whether documents use `@jsonName`, as restJson1 does and awsJson and restXml don't. Defaults to true unless `xml`. */
+  readonly jsonNames?: boolean;
+  /**
+   * Whether floats and doubles also take `"NaN"`, `"Infinity"` and `"-Infinity"`, as AWS's
+   * protocols send them in documents, headers, query strings and labels.
+   */
+  readonly nonNumericFloats?: boolean;
+}
+
 export interface ShapeConverter {
   /** The schema of a shape where it is sent, given the traits of the member that targets it. */
   readonly toSchema: (target: string, location: Location, member?: Traits) => JsonSchema;
@@ -132,34 +171,73 @@ export interface ShapeConverter {
   readonly components: Record<string, JsonSchema>;
 }
 
-export interface ShapeConverterOptions {
-  /** Whether documents use `@jsonName`, as restJson1 does and awsJson doesn't. Defaults to true. */
-  readonly jsonNames?: boolean;
-  /**
-   * Whether float and double members in documents also take `"NaN"`, `"Infinity"` and
-   * `"-Infinity"`, as AWS's JSON protocols send them.
-   */
-  readonly nonNumericFloats?: boolean;
-}
-
 /** Converts Smithy shapes to OpenAPI 3.0 schemas, collecting named shapes as components. */
 export const createShapeConverter = (
   model: SmithyModel,
-  { jsonNames = true, nonNumericFloats = false }: ShapeConverterOptions = {}
+  { xml = false, jsonNames = !xml, nonNumericFloats = false }: ShapeConverterOptions = {}
 ): ShapeConverter => {
   const components: Record<string, JsonSchema> = {};
+  // restXml writes timestamps in documents as date-time strings.
+  const timestampFormats = xml
+    ? { ...DEFAULT_TIMESTAMP_FORMATS, body: 'date-time', payload: 'date-time' }
+    : DEFAULT_TIMESTAMP_FORMATS;
   const nameOf = (name: string, member: MemberShape): string =>
     jsonNames ? jsonName(name, member) : name;
+
+  // The namespace an `@xmlNamespace` trait gives an element.
+  const namespaceOf = (traits: Traits | undefined): Partial<XmlObject> => {
+    const namespace = traitRecord(traits, 'smithy.api#xmlNamespace');
+    return typeof namespace?.uri === 'string'
+      ? {
+          namespace: namespace.uri,
+          ...(typeof namespace.prefix === 'string' ? { prefix: namespace.prefix } : {}),
+        }
+      : {};
+  };
+
+  // Sets `xml` on a schema; a `$ref`'s siblings are ignored, so it is wrapped in `allOf`.
+  const withXml = (schema: JsonSchema, object: Partial<XmlObject>): JsonSchema => {
+    if (Object.keys(object).length === 0) {
+      return schema;
+    }
+    if ('$ref' in schema) {
+      return { allOf: [schema], xml: object };
+    }
+    return { ...schema, xml: { ...(isRecord(schema.xml) ? schema.xml : {}), ...object } };
+  };
+
+  // How a structure member is written: its element name, as an attribute, in a namespace,
+  // and for lists and maps, whether the entries are flattened into the parent.
+  const toXmlProperty = (name: string, member: MemberShape, schema: JsonSchema): JsonSchema => {
+    const traits = member.traits ?? {};
+    const xmlName = traits['smithy.api#xmlName'];
+    const element = typeof xmlName === 'string' ? xmlName : name;
+    const flattened = hasTrait(traits, 'smithy.api#xmlFlattened');
+    const object: Partial<XmlObject> = {
+      ...(element === name ? {} : { name: element }),
+      ...(hasTrait(traits, 'smithy.api#xmlAttribute') ? { attribute: true } : {}),
+      ...namespaceOf(traits),
+    };
+    if (schema.type === 'array' && isRecord(schema.items)) {
+      // Flattened list entries are named after the member, not the list's member.
+      const items = flattened ? withXml(schema.items, { name: element }) : schema.items;
+      return { ...schema, items, xml: { ...object, wrapped: !flattened } };
+    }
+    if (isRecord(schema[XML_MAP])) {
+      return withXml({ ...schema, [XML_MAP]: { ...schema[XML_MAP], flattened } }, object);
+    }
+    return withXml(schema, object);
+  };
 
   const toObjectSchema = (members: ReadonlyArray<[string, MemberShape]>): JsonSchema => {
     const required = members.filter(([, member]) => isRequired(member));
     return {
       type: 'object',
       properties: Object.fromEntries(
-        members.map(([name, member]) => [
-          nameOf(name, member),
-          toSchema(member.target, 'body', member.traits),
-        ])
+        members.map(([name, member]) => {
+          const schema = toSchema(member.target, 'body', member.traits);
+          return [nameOf(name, member), xml ? toXmlProperty(name, member, schema) : schema];
+        })
       ),
       ...(required.length > 0
         ? { required: required.map(([name, member]) => nameOf(name, member)) }
@@ -182,7 +260,9 @@ export const createShapeConverter = (
           oneOf: members.map(([name, member]) => ({
             type: 'object',
             properties: {
-              [nameOf(name, member)]: toSchema(member.target, 'body', member.traits),
+              [nameOf(name, member)]: xml
+                ? toXmlProperty(name, member, toSchema(member.target, 'body', member.traits))
+                : toSchema(member.target, 'body', member.traits),
             },
             required: [nameOf(name, member)],
           })),
@@ -211,10 +291,20 @@ export const createShapeConverter = (
       if (!(name in components)) {
         // Registered first, so recursive shapes refer to it instead of recursing.
         components[name] = {};
+        const xmlName = shape.traits?.['smithy.api#xmlName'];
         components[name] = {
           ...toComponent(shape),
           ...(typeof shape.traits?.['smithy.api#documentation'] === 'string'
             ? { description: shape.traits['smithy.api#documentation'] }
+            : {}),
+          // The element name when the shape is a document's root, such as a payload.
+          ...(xml && (shape.type === 'structure' || shape.type === 'union')
+            ? {
+                xml: {
+                  name: typeof xmlName === 'string' ? xmlName : name,
+                  ...namespaceOf(shape.traits),
+                },
+              }
             : {}),
         };
       }
@@ -240,7 +330,7 @@ export const createShapeConverter = (
         case 'float':
         case 'double': {
           const number = { type: 'number', format: NUMBER_FORMATS[shape.type] };
-          return nonNumericFloats && (location === 'body' || location === 'payload')
+          return nonNumericFloats
             ? { anyOf: [number, { type: 'string', enum: ['NaN', 'Infinity', '-Infinity'] }] }
             : number;
         }
@@ -248,7 +338,7 @@ export const createShapeConverter = (
           return { type: 'number' };
         case 'timestamp':
           return timestampSchema(
-            traits['smithy.api#timestampFormat'] ?? DEFAULT_TIMESTAMP_FORMATS[location]
+            traits['smithy.api#timestampFormat'] ?? timestampFormats[location]
           );
         case 'blob':
           // Documents carry blobs base64-encoded; a payload carries the bytes.
@@ -262,9 +352,17 @@ export const createShapeConverter = (
                 shape.member.traits
               )
             : {};
+          const listItems = hasTrait(traits, 'smithy.api#sparse') ? toNullable(items) : items;
+          const itemName = shape.member?.traits?.['smithy.api#xmlName'];
           return {
             type: 'array',
-            items: hasTrait(traits, 'smithy.api#sparse') ? toNullable(items) : items,
+            // Wrapped list entries are `member` elements unless renamed.
+            items: xml
+              ? withXml(listItems, {
+                  name: typeof itemName === 'string' ? itemName : 'member',
+                  ...namespaceOf(shape.member?.traits),
+                })
+              : listItems,
             ...(shape.type === 'set' || hasTrait(traits, 'smithy.api#uniqueItems')
               ? { uniqueItems: true }
               : {}),
@@ -272,9 +370,25 @@ export const createShapeConverter = (
         }
         case 'map': {
           const value = shape.value ? toSchema(shape.value.target, 'body', shape.value.traits) : {};
+          const keyName = shape.key?.traits?.['smithy.api#xmlName'];
+          const valueName = shape.value?.traits?.['smithy.api#xmlName'];
           return {
             type: 'object',
             additionalProperties: hasTrait(traits, 'smithy.api#sparse') ? toNullable(value) : value,
+            ...(xml
+              ? {
+                  [XML_MAP]: {
+                    key: typeof keyName === 'string' ? keyName : 'key',
+                    value: typeof valueName === 'string' ? valueName : 'value',
+                    ...(namespaceOf(shape.key?.traits).namespace
+                      ? { keyNamespace: namespaceOf(shape.key?.traits).namespace }
+                      : {}),
+                    ...(namespaceOf(shape.value?.traits).namespace
+                      ? { valueNamespace: namespaceOf(shape.value?.traits).namespace }
+                      : {}),
+                  },
+                }
+              : {}),
           };
         }
         default:

@@ -41,6 +41,7 @@ import type { SmithyModel } from '../smithy';
 import { convertSmithy, isSmithyModel } from '../smithy';
 import type { AwsJsonRejection, AwsJsonService } from '../smithy/aws_json';
 import { createAwsJsonService, isAwsJsonModel } from '../smithy/aws_json';
+import { serializeXmlBody } from '../xml/serialize_xml_body';
 
 /** One request the mock received, for assertions in tests. */
 export interface ContractCall {
@@ -342,7 +343,10 @@ export const createEmulatorFetch = ({
       requestViolations,
       responseViolations,
     });
-    return response;
+    // HEAD responses carry the headers of a GET, without its body.
+    return request.method === 'head'
+      ? { ...response, body: undefined }
+      : serializeXmlBody(operation, response);
   };
 
   // AWS JSON RPC services answer every request to their hosts: `POST /` with the operation in
