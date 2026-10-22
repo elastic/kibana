@@ -90,9 +90,8 @@ node -r @kbn/setup-node-env x-pack/solutions/observability/plugins/nightshift_in
 
 Pass `--es-url` and `--auth` for a stack that is not on `http://localhost:9200` with `elastic:changeme`.
 
-On a local Serverless project (`yarn es serverless --projectType observability --productTier complete` and `yarn start --serverless=oblt`) the roles come from Serverless itself, and two more things are needed:
+On a local Serverless project (`yarn es serverless --projectType observability --productTier complete` and `yarn start --serverless=oblt`) the roles come from Serverless itself, and Kibana presents the project type's UIAM certificate (`kibana_serverless_observability.crt`, elastic/kibana#299809), without which UIAM lists no accounts and refuses to let Kibana run as one. One setting is still needed:
 
-- elastic/kibana#299809, which gives Kibana a UIAM identity for an observability project (`kibana_observability.crt`). UIAM reads Kibana's project type from the certificate it presents, and the default one declares an Elasticsearch project, so without that PR UIAM lists no accounts and refuses to let Kibana run as one. Until it merges, check it out alongside this branch.
 - `--server.publicBaseUrl=http://localhost:5601`, so the investigation's `kibana.request` steps reach Kibana instead of a cloud URL that does not resolve locally.
 
 Then enable service accounts and set the space up:
