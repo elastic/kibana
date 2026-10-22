@@ -564,7 +564,6 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       <EuiInMemoryTable
         items={filteredInstances}
         columns={columns}
-        pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
         sorting={true}
         tableLayout="auto"
         tableCaption={i18n.translate('xpack.ingestHub.serviceSettingsStep.table.caption', {
