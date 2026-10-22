@@ -177,6 +177,29 @@ describe('createSmlAttachTool', () => {
     expect(data.message).toContain('already exists');
   });
 
+  it('decodes the entry ids of links, and finds an attachment by the bare origin id', async () => {
+    mockAttachmentsGetActive.mockReturnValue([
+      { id: 'att-existing', type: 'workflow.yaml', origin: 'wf-1' },
+    ]);
+    mockResolveSmlAttachItems.mockResolvedValue([
+      {
+        success: true,
+        entry_id: 'workflow:wf-1',
+        attachment: { type: 'workflow.yaml', data: {}, origin: 'workflow://wf-1' },
+      },
+    ]);
+    const tool = createSmlAttachTool({ getAgentBuilderSml });
+    await tool.handler(
+      { entry_ids: ['workflow%3Awf-1'] },
+      mockContext as unknown as ToolHandlerContext
+    );
+
+    expect(mockResolveSmlAttachItems).toHaveBeenCalledWith(
+      expect.objectContaining({ entryIds: ['workflow:wf-1'] })
+    );
+    expect(mockAttachmentsAdd).not.toHaveBeenCalled();
+  });
+
   it('handles multiple items with mix of success and failure', async () => {
     mockResolveSmlAttachItems.mockResolvedValue([
       { success: false, entry_id: 'denied-entry', message: 'Access denied' },

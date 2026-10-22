@@ -12,6 +12,7 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { decodeSmlLinkId, parseSmlEntryId } from '@kbn/agent-builder-sml-plugin/server';
 import type { SmlToolsOptions } from './types';
 
 const smlAttachSchema = z.object({
@@ -71,7 +72,8 @@ export const createSmlAttachTool = ({
     const { spaceId, savedObjectsClient, request, attachments, esClient, logger } = context;
 
     const resolvedItems = await agentBuilderSml.resolveSmlAttachItems({
-      entryIds,
+      // The entry ids of `sml://` links are URL-encoded.
+      entryIds: entryIds.map(decodeSmlLinkId),
       esClient,
       request,
       spaceId,
@@ -89,10 +91,17 @@ export const createSmlAttachTool = ({
         }
 
         // The item may already be attached, for example by the user referencing it with `#`.
+        // Referenced items have the bare origin id as origin; some types set a `type://id` uri.
         const { type, origin } = r.attachment;
+        const originId = parseSmlEntryId(r.entry_id)?.originId;
         const existing = attachments
           .getActive()
-          .find((a) => origin !== undefined && a.type === type && a.origin === origin);
+          .find(
+            (a) =>
+              a.type === type &&
+              a.origin !== undefined &&
+              (a.origin === origin || a.origin === originId)
+          );
         if (existing) {
           return {
             tool_result_id: getToolResultId(),

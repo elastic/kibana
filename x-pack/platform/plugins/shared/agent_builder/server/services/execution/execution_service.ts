@@ -35,7 +35,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
-import { parseSmlEntryId } from '@kbn/agent-builder-sml-plugin/server';
+import { decodeSmlLinkId, parseSmlEntryId } from '@kbn/agent-builder-sml-plugin/server';
 import { attachmentChangesToEvents } from '@kbn/agent-builder-server/attachments';
 import type {
   AbortExecutionOptions,
@@ -97,14 +97,6 @@ export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
 
 // Links to the items picked from the chat input's menu: `[label](sml://<url-encoded entry id>)`.
 const SML_LINK_PATTERN = /\]\(sml:\/\/([^)?\s]+)/g;
-
-const decodeLinkId = (id: string): string => {
-  try {
-    return decodeURIComponent(id);
-  } catch {
-    return id;
-  }
-};
 
 export const createAgentExecutionService = (
   deps: AgentExecutionServiceDeps
@@ -990,7 +982,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   private getReferencedAttachments(message: string | undefined): AttachmentInput[] {
     const inputs = new Map<string, AttachmentInput>();
     for (const [, encodedId] of (message ?? '').matchAll(SML_LINK_PATTERN)) {
-      const entry = parseSmlEntryId(decodeLinkId(encodedId));
+      const entry = parseSmlEntryId(decodeSmlLinkId(encodedId));
       const type = entry && this.deps.getSmlTypeDefinition(entry.type)?.attachmentType;
       if (entry && type) {
         inputs.set(`${type}:${entry.originId}`, { type, origin: entry.originId });
