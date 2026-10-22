@@ -182,8 +182,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     }
     if (integrationNameError || descriptionError) {
       reasons.push(
-        i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.sharedSettings', {
-          defaultMessage: 'Fix the shared settings',
+        i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.integrationSettings', {
+          defaultMessage: 'Fix the integration settings',
         })
       );
     }

@@ -410,9 +410,9 @@ export interface CloudOnboardingDeploymentSOAttributes {
   serviceVars?: Record<string, Record<string, unknown>>;
   /** Global AWS region from the Service Settings step. Used to re-run deploy on retry and to hydrate the onboarding flow on resume. */
   globalRegion?: string;
-  /** Integration name as entered in the Service Settings step, before any per-package suffix is applied. Used to identify the onboarding session. */
+  /** Integration name as entered in the Service settings step, before any per-package suffix is applied. Used to identify the onboarding session. */
   integrationName?: string;
-  /** Integration description as entered in the Service Settings step. Set on every package policy created by the deploy. */
+  /** Integration description as entered in the Service settings step. Set on every package policy created by the deploy. */
   description?: string;
   /** Data format selected in the Services step: 'ecs' or 'otel'. Used to hydrate the services step on resume so service filtering is consistent. */
   dataFormat?: 'ecs' | 'otel';

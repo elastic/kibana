@@ -96,7 +96,7 @@ export const CloudOnboardingDeploymentSchemaV2 = schema.object({
 });
 
 // ── V3: integrationName + description ────────────────────────────────────────
-// Common integration settings entered in the Service Settings step. Neither field is in
+// Common integration settings entered in the Service settings step. Neither field is in
 // mappings.properties (dynamic: false), so no mapping change is needed.
 export const CloudOnboardingDeploymentSchemaV3 = CloudOnboardingDeploymentSchemaV2.extends({
   integrationName: schema.maybe(

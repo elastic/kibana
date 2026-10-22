@@ -49,13 +49,13 @@ export function SharedSettingsSection({
     <EuiPanel hasShadow={false} hasBorder paddingSize="m" data-test-subj="sharedSettingsSection">
       <EuiTitle size="xs">
         <h3>
-          {i18n.translate('xpack.ingestHub.sharedSettings.title', {
+          {i18n.translate('xpack.ingestHub.integrationSettings.section.title', {
             defaultMessage: 'Integration settings',
           })}{' '}
           <EuiIconTip
             type="info"
             color="subdued"
-            content={i18n.translate('xpack.ingestHub.sharedSettings.titleTooltip', {
+            content={i18n.translate('xpack.ingestHub.integrationSettings.section.titleTooltip', {
               defaultMessage: 'Applies to all selected services',
             })}
           />
@@ -64,7 +64,7 @@ export function SharedSettingsSection({
       <EuiSpacer size="s" />
       <EuiFormRow
         fullWidth
-        label={i18n.translate('xpack.ingestHub.sharedSettings.name.label', {
+        label={i18n.translate('xpack.ingestHub.integrationSettings.section.name.label', {
           defaultMessage: 'Integration name',
         })}
         isInvalid={nameTouched && !!integrationNameError}
@@ -85,12 +85,12 @@ export function SharedSettingsSection({
       </EuiFormRow>
       <EuiFormRow
         fullWidth
-        label={i18n.translate('xpack.ingestHub.sharedSettings.description.label', {
+        label={i18n.translate('xpack.ingestHub.integrationSettings.section.description.label', {
           defaultMessage: 'Description',
         })}
         labelAppend={
           <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.ingestHub.sharedSettings.description.optional', {
+            {i18n.translate('xpack.ingestHub.integrationSettings.section.description.optional', {
               defaultMessage: 'Optional',
             })}
           </EuiText>

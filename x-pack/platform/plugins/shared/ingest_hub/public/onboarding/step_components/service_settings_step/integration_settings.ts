@@ -45,7 +45,7 @@ export const getIntegrationNameError = (name: string): string | undefined => {
   }
   if (trimmed.length > MAX_INTEGRATION_NAME_LENGTH) {
     return i18n.translate('xpack.ingestHub.integrationSettings.name.tooLongError', {
-      defaultMessage: 'The integration name must be {max} characters or fewer.',
+      defaultMessage: 'The integration name must be {max} characters or less.',
       values: { max: MAX_INTEGRATION_NAME_LENGTH },
     });
   }
@@ -54,7 +54,7 @@ export const getIntegrationNameError = (name: string): string | undefined => {
 export const getDescriptionError = (description: string): string | undefined => {
   if (description.length > MAX_DESCRIPTION_LENGTH) {
     return i18n.translate('xpack.ingestHub.integrationSettings.description.tooLongError', {
-      defaultMessage: 'The description must be {max} characters or fewer.',
+      defaultMessage: 'The description must be {max} characters or less.',
       values: { max: MAX_DESCRIPTION_LENGTH },
     });
   }

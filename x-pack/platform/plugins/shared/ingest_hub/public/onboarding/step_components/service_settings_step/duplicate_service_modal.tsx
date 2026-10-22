@@ -124,7 +124,7 @@ export function DuplicateServiceModal({
       })
     : nameTooLong
     ? i18n.translate('xpack.ingestHub.serviceSettingsStep.duplicateModal.name.errorTooLong', {
-        defaultMessage: 'The name must be {max} characters or fewer.',
+        defaultMessage: 'The name must be {max} characters or less.',
         values: { max: MAX_POLICY_NAME_LENGTH },
       })
     : undefined;

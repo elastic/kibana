@@ -139,13 +139,13 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
     schema.string({
       meta: {
         description:
-          'Integration name as entered in the Service Settings step, before any per-package suffix is applied.',
+          'Integration name as entered in the Service settings step, before any per-package suffix is applied.',
       },
     })
   ),
   description: schema.maybe(
     schema.string({
-      meta: { description: 'Integration description from the Service Settings step.' },
+      meta: { description: 'Integration description from the Service settings step.' },
     })
   ),
   dataFormat: schema.maybe(DataFormatSchema),
@@ -252,14 +252,14 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
         maxLength: CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
         meta: {
           description:
-            'Integration name as entered in the Service Settings step, before any per-package suffix is applied.',
+            'Integration name as entered in the Service settings step, before any per-package suffix is applied.',
         },
       })
     ),
     description: schema.maybe(
       schema.string({
         maxLength: 2048,
-        meta: { description: 'Integration description from the Service Settings step.' },
+        meta: { description: 'Integration description from the Service settings step.' },
       })
     ),
     dataFormat: schema.maybe(DataFormatSchema),
@@ -349,7 +349,7 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
           maxLength: 2048,
           meta: {
             description:
-              'Integration description from the Service Settings step. Send null to clear it.',
+              'Integration description from the Service settings step. Send null to clear it.',
           },
         })
       )
