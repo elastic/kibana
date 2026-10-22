@@ -1,10 +1,10 @@
 # Remote telemetry credentials are resolved from the scout hook environment.
 xpack.actions.preconfigured.nightshift-evals-telemetry:
   name: Remote Elasticsearch telemetry
-  actionTypeId: .webhook
+  # `.http` supplies sandbox credentials from secretHeaders; `.webhook` cannot.
+  actionTypeId: .http
   config:
     url: ${NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL}
-    method: post
     hasAuth: false
     authType: null
   secrets:

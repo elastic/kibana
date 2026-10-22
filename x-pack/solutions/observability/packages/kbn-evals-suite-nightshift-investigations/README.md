@@ -301,7 +301,7 @@ NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/private/path/examples.j
   --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
 ```
 
-The committed [`scout/kibana.telemetry.yml`](scout/kibana.telemetry.yml) creates the preconfigured `nightshift-evals-telemetry` webhook with a secret
+The committed [`scout/kibana.telemetry.yml`](scout/kibana.telemetry.yml) creates the preconfigured `nightshift-evals-telemetry` `.http` connector with a secret
 `Authorization` header. The existing credential resolver authorizes connector access and execution,
 checks the agent's allow-list, and exposes the API key only to the requesting sandbox command.
 Remote telemetry and sandbox credentials are supplied through the hook environment.
