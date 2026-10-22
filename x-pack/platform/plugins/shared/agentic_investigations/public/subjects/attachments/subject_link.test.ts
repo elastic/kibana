@@ -15,6 +15,27 @@ describe('getSubjectLocatorTarget', () => {
     });
   });
 
+  it("opens a classic alert's details page when the alert version is v1", () => {
+    expect(
+      getSubjectLocatorTarget({ type: 'alert', id: 'alert-uuid', alertVersion: 'v1' })
+    ).toEqual({
+      locatorId: 'ALERTS_LOCATOR',
+      params: { alertId: 'alert-uuid' },
+    });
+  });
+
+  it("opens an alerting v2 episode's details page in Observability Alerting", () => {
+    expect(getSubjectLocatorTarget({ type: 'alert', id: 'episode-1', alertVersion: 'v2' })).toEqual(
+      {
+        locatorId: 'ALERTING_V2_EPISODES_LOCATOR',
+        params: {
+          episodeId: 'episode-1',
+          host: { app: 'observabilityAlerting', pathPrefix: '/alerts' },
+        },
+      }
+    );
+  });
+
   it('opens a significant event in the Significant Events app', () => {
     expect(getSubjectLocatorTarget({ type: 'significant_event', id: 'se-1' })).toEqual({
       locatorId: 'SIGNIFICANT_EVENTS_APP_LOCATOR',
