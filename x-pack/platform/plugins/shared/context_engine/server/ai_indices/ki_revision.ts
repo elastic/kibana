@@ -9,11 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import type { KiLifecycleStatus } from '../../common/step_types/ki';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
-import {
-  KiConflictError,
-  KiNotFoundError,
-  KiValidationError,
-} from './errors';
+import { KiConflictError, KiNotFoundError, KiValidationError } from './errors';
 import { REVISION_TIE_WINDOW, kiIdQuery, pickCurrentRevision } from './ki_get';
 
 /** A writer as recorded under `governance.provenance`. */

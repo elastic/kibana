@@ -9,12 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import type { UpdateKiBody } from '../../common/http_api/knowledge_indicators';
 import { KiDeletedError } from './errors';
-import {
-  getKiRevision,
-  isKiDeleted,
-  writeKiRevision,
-  type KiWriter,
-} from './ki_revision';
+import { getKiRevision, isKiDeleted, writeKiRevision, type KiWriter } from './ki_revision';
 
 export type KiApiWriterAction = 'update' | 'delete';
 

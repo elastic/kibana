@@ -1639,7 +1639,9 @@ describe('ai indices routes', () => {
 
     it('returns 404 when the KI does not exist', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
-      jest.mocked(softDeleteKi).mockRejectedValue(new KiNotFoundError('customer_support', 'missing'));
+      jest
+        .mocked(softDeleteKi)
+        .mockRejectedValue(new KiNotFoundError('customer_support', 'missing'));
 
       await callRoute('DELETE', AI_INDEX_KI_BY_ID_PATH, {
         params: { aiIndexId: 'customer_support', kiId: 'missing' },
