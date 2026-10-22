@@ -19,7 +19,7 @@ jest.mock('./use_investigator_service_account', () => ({
 const status = (overrides: Record<string, unknown> = {}) => ({
   serviceAccountsEnabled: true,
   canModifyBoundWorkflows: true,
-  serviceAccountId: 'kibana/nightshift_agent',
+  serviceAccountId: null,
   role: 'nightshift_agent',
   bound: false,
   serviceAccounts: [],
@@ -44,7 +44,7 @@ describe('NightshiftSetupPrompt', () => {
     renderPrompt();
 
     expect(screen.getByText('One-time admin setup required for this space')).toBeInTheDocument();
-    expect(screen.getByText('kibana/nightshift_agent')).toBeInTheDocument();
+    expect(screen.getByText('nightshift_agent')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftSetupPrivilegesLink')).toHaveAttribute('target', '_blank');
     fireEvent.click(screen.getByTestId('nightshiftSetUpServiceAccount'));
     expect(mockMutate).toHaveBeenCalledTimes(1);

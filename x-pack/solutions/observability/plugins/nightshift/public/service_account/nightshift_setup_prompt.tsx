@@ -19,10 +19,11 @@ import {
 import { openSourceAi } from '@elastic/eui-illustrations';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { InvestigatorServiceAccountStatus } from '@kbn/nightshift-investigations-plugin/common';
+import {
+  getNightshiftServiceAccountName,
+  type InvestigatorServiceAccountStatus,
+} from '@kbn/nightshift-investigations-plugin/common';
 import { useSetUpNightshiftServiceAccount } from './use_investigator_service_account';
-
-const DEFAULT_ACCOUNT = 'kibana/nightshift_agent';
 
 /** The accounts, roles and privileges `_enable` grants, until product docs exist. */
 export const NIGHTSHIFT_SERVICE_ACCOUNT_PRIVILEGES_HREF =
@@ -40,7 +41,8 @@ export const NightshiftSetupPrompt = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const setUp = useSetUpNightshiftServiceAccount();
-  const account = status?.serviceAccountId ?? DEFAULT_ACCOUNT;
+  // The account is found or created by name; the backend assigns its id on setup.
+  const account = getNightshiftServiceAccountName('agent');
   const serviceAccountsOff = status?.serviceAccountsEnabled === false;
   const canEnable = !serviceAccountsOff && status?.canModifyBoundWorkflows === true;
 

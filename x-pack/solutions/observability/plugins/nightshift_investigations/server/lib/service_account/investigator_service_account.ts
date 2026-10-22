@@ -17,31 +17,36 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import type {
-  InvestigatorServiceAccountStatus,
-  NightshiftBoundWorkflowStatus,
-  NightshiftServiceAccountInfo,
+import {
+  getNightshiftRoleName,
+  getNightshiftServiceAccountName,
+  NIGHTSHIFT_SERVICE_ACCOUNT_KINDS,
+  type InvestigatorServiceAccountStatus,
+  type NightshiftBoundWorkflowStatus,
+  type NightshiftServiceAccountIds,
+  type NightshiftServiceAccountInfo,
 } from '../../../common';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from '../managed_workflows/constants';
 import { BOUND_WORKFLOW_IDS, type BoundWorkflowId } from './bound_workflows';
 import {
+  AUTOMATIONS_SERVICE_ACCOUNT_ID_VALUE,
   getBoundInvestigationWorkflowId,
   isEntryPointReady,
-  getNightshiftRoleName,
-  getNightshiftServiceAccountId,
-  getNightshiftServiceAccountName,
-  INVESTIGATOR_SERVICE_ACCOUNT_ID,
-  NIGHTSHIFT_SERVICE_ACCOUNT_KINDS,
-  type NightshiftServiceAccountKind,
 } from './constants';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import { generateWorkflowYaml } from '../automations/generate_workflow_yaml';
 import type { NightshiftAutomationAttributes } from '../automations/types';
 
+type PluginScopedManagedWorkflows = Awaited<
+  ReturnType<WorkflowsExtensionsServerPluginStart['initManagedWorkflowsClient']>
+>;
+
 interface Deps {
   core: CoreStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   workflowsManagement?: WorkflowsServerPluginSetup;
+  /** Reads the template values a bound workflow was installed with. */
+  getInstalledWorkflowState?: PluginScopedManagedWorkflows['getInstalledWorkflowState'];
   spaces?: SpacesPluginStart;
   /** Automations are hidden saved objects; this client can read and write them. */
   getAutomationsSoClient?: (request: KibanaRequest, spaceId: string) => SavedObjectsClientContract;
@@ -49,11 +54,6 @@ interface Deps {
   isServerless: boolean;
   logger: Logger;
 }
-
-const ACCOUNT_DESCRIPTION: Record<NightshiftServiceAccountKind, string> = {
-  agent: 'Runs Nightshift investigations, their sandbox tools and learning hooks.',
-  automations: 'Runs Nightshift automations, which start investigations.',
-};
 
 const getStatusCode = (error: unknown): number | undefined => {
   if (Boom.isBoom(error)) return error.output.statusCode;
@@ -76,39 +76,44 @@ const readRunAs = (yaml: string | undefined): string | undefined => {
 };
 
 /**
- * Sets Nightshift up in a space: creates the deployment's Nightshift service accounts when they
- * are missing, and installs the space's workflows bound to the agent account. Investigations do
- * not depend on it yet.
+ * Sets Nightshift up in a space: installs the space's workflows bound to the deployment's
+ * Nightshift service accounts. The caller finds or creates the accounts first
+ * (`ensureNightshiftServiceAccounts`) and passes their ids, which only the service accounts backend
+ * assigns. Investigations do not depend on it yet.
  */
 export const createInvestigatorServiceAccountService = ({
   core,
   workflowsExtensions,
   workflowsManagement,
+  getInstalledWorkflowState,
   spaces,
   getAutomationsSoClient,
   isServerless,
   logger,
 }: Deps) => {
-  const getServiceAccounts = (): NightshiftServiceAccountInfo[] =>
+  const getServiceAccounts = (
+    ids: Partial<NightshiftServiceAccountIds>
+  ): NightshiftServiceAccountInfo[] =>
     NIGHTSHIFT_SERVICE_ACCOUNT_KINDS.map((kind) => ({
       kind,
-      id: getNightshiftServiceAccountId(kind),
+      name: getNightshiftServiceAccountName(kind),
+      id: ids[kind] ?? null,
       role: getNightshiftRoleName(kind, { isServerless }),
     }));
 
-  /** Creates the account when missing. A name conflict means it already exists, and is reused. */
-  const ensureServiceAccount = async (
-    request: KibanaRequest,
-    kind: NightshiftServiceAccountKind
-  ): Promise<void> => {
+  /** The automations account the space was set up with, from its entry point's template values. */
+  const readAutomationsServiceAccountId = async (spaceId: string): Promise<string | undefined> => {
+    if (!getInstalledWorkflowState) return undefined;
     try {
-      await core.security.serviceAccounts.create(request, {
-        name: getNightshiftServiceAccountName(kind),
-        description: `${ACCOUNT_DESCRIPTION[kind]} Created by Nightshift.`,
-        roles: [getNightshiftRoleName(kind, { isServerless })],
-      });
+      const state = await getInstalledWorkflowState(
+        getBoundInvestigationWorkflowId(spaceId),
+        spaceId
+      );
+      const id = state?.templateValues?.[AUTOMATIONS_SERVICE_ACCOUNT_ID_VALUE];
+      return typeof id === 'string' && id.length > 0 ? id : undefined;
     } catch (error) {
-      if (getStatusCode(error) !== 409) throw error;
+      logger.debug(`Could not read the Nightshift setup of space [${spaceId}]: ${error}`);
+      return undefined;
     }
   };
 
@@ -126,7 +131,7 @@ export const createInvestigatorServiceAccountService = ({
     request: KibanaRequest,
     spaceId: string,
     id: BoundWorkflowId
-  ): Promise<NightshiftBoundWorkflowStatus> => {
+  ): Promise<Omit<NightshiftBoundWorkflowStatus, 'bound'>> => {
     const client = await workflowsExtensions.getClient(request);
     const status = await client.managedWorkflows.getWorkflowStatus(
       NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER,
@@ -149,7 +154,6 @@ export const createInvestigatorServiceAccountService = ({
       installed: status.installed,
       enabled: status.enabled,
       runAs,
-      bound: runAs === INVESTIGATOR_SERVICE_ACCOUNT_ID,
       valid: workflow?.valid ?? null,
     };
   };
@@ -158,27 +162,38 @@ export const createInvestigatorServiceAccountService = ({
     request: KibanaRequest,
     spaceId: string
   ): Promise<InvestigatorServiceAccountStatus> => {
-    const boundWorkflows = await Promise.all(
+    const workflows = await Promise.all(
       BOUND_WORKFLOW_IDS.map((id) => getBoundWorkflowStatus(request, spaceId, id))
     );
     const entryPoint =
-      boundWorkflows[BOUND_WORKFLOW_IDS.indexOf(NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID)];
-    const canModifyBoundWorkflows = await canManageSecurity(request).catch(() => false);
+      workflows[BOUND_WORKFLOW_IDS.indexOf(NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID)];
+    // The space runs as the account its entry point is bound to; every other bound workflow has
+    // to run as that account too.
+    const agentServiceAccountId = entryPoint.installed ? entryPoint.runAs : null;
+    const boundWorkflows = workflows.map((workflow) => ({
+      ...workflow,
+      bound: agentServiceAccountId !== null && workflow.runAs === agentServiceAccountId,
+    }));
+    const [canModifyBoundWorkflows, automationsServiceAccountId] = await Promise.all([
+      canManageSecurity(request).catch(() => false),
+      agentServiceAccountId ? readAutomationsServiceAccountId(spaceId) : undefined,
+    ]);
     return {
       canModifyBoundWorkflows,
       serviceAccountsEnabled: core.security.serviceAccounts.isEnabled(),
-      serviceAccountId: INVESTIGATOR_SERVICE_ACCOUNT_ID,
+      serviceAccountId: agentServiceAccountId,
       role: getNightshiftRoleName('agent', { isServerless }),
       workflowId: getBoundInvestigationWorkflowId(spaceId),
       installed: entryPoint.installed,
       enabled: entryPoint.enabled,
-      bound: entryPoint.bound,
-      serviceAccounts: getServiceAccounts(),
+      bound: agentServiceAccountId !== null,
+      serviceAccounts: getServiceAccounts({
+        ...(agentServiceAccountId ? { agent: agentServiceAccountId } : {}),
+        ...(automationsServiceAccountId ? { automations: automationsServiceAccountId } : {}),
+      }),
       boundWorkflows,
     };
   };
-
-  const AUTOMATIONS_SERVICE_ACCOUNT_ID = getNightshiftServiceAccountId('automations');
 
   /** Changing or deleting an automation whose workflow is bound to an account needs this. */
   const assertCanModifyBoundAutomations = async (request: KibanaRequest): Promise<void> => {
@@ -190,8 +205,8 @@ export const createInvestigatorServiceAccountService = ({
   };
 
   /**
-   * The account an automation's workflow runs as, `kibana/nightshift_automations`, so automations
-   * keep running whoever created them. Writing a workflow bound to a service account requires
+   * The account an automation's workflow runs as: the automations account the space was set up
+   * with, kept on its entry point. Automations then keep running whoever created them. Writing a workflow bound to a service account requires
    * `manage_security` (the workflows plugin enforces it on every create, update and delete), so
    * this refuses callers without it. Returns undefined when service accounts are off: the workflow
    * then runs as its author, as before.
@@ -204,13 +219,16 @@ export const createInvestigatorServiceAccountService = ({
     const entryPoint = await workflowsManagement?.management
       .getWorkflow(getBoundInvestigationWorkflowId(spaceId), spaceId, request)
       .catch(() => null);
-    if (!isEntryPointReady(entryPoint)) {
+    const automationsServiceAccountId = isEntryPointReady(entryPoint)
+      ? await readAutomationsServiceAccountId(spaceId)
+      : undefined;
+    if (!automationsServiceAccountId) {
       throw Boom.badRequest(
         'Nightshift is not set up in this space. An admin must enable its service accounts before automations can run.'
       );
     }
     await assertCanModifyBoundAutomations(request);
-    return AUTOMATIONS_SERVICE_ACCOUNT_ID;
+    return automationsServiceAccountId;
   };
 
   /**
@@ -218,7 +236,11 @@ export const createInvestigatorServiceAccountService = ({
    * setting the space up, so automations created before setup stop running as their authors. A
    * failure is logged per automation, not fatal.
    */
-  const bindAutomations = async (request: KibanaRequest, spaceId: string): Promise<void> => {
+  const bindAutomations = async (
+    request: KibanaRequest,
+    spaceId: string,
+    automationsServiceAccountId: string
+  ): Promise<void> => {
     if (!getAutomationsSoClient || !workflowsManagement) return;
     const soClient = getAutomationsSoClient(request, spaceId);
     const finder = soClient.createPointInTimeFinder<NightshiftAutomationAttributes>({
@@ -235,14 +257,14 @@ export const createInvestigatorServiceAccountService = ({
               spaceId,
               request
             );
-            if (workflow?.definition?.settings?.run_as === AUTOMATIONS_SERVICE_ACCOUNT_ID) continue;
+            if (workflow?.definition?.settings?.run_as === automationsServiceAccountId) continue;
             await workflowsManagement.management.updateWorkflow(
               attributes.workflowId,
               {
                 yaml: generateWorkflowYaml({
                   automationId: id,
                   automation: attributes,
-                  serviceAccountId: AUTOMATIONS_SERVICE_ACCOUNT_ID,
+                  serviceAccountId: automationsServiceAccountId,
                 }),
               },
               spaceId,
@@ -250,7 +272,7 @@ export const createInvestigatorServiceAccountService = ({
             );
           } catch (error) {
             logger.warn(
-              `Nightshift setup in space [${spaceId}] could not bind automation [${id}] to [${AUTOMATIONS_SERVICE_ACCOUNT_ID}]: ${error}`
+              `Nightshift setup in space [${spaceId}] could not bind automation [${id}] to [${automationsServiceAccountId}]: ${error}`
             );
           }
         }
@@ -272,7 +294,11 @@ export const createInvestigatorServiceAccountService = ({
     }
   };
 
-  const installBoundWorkflows = async (request: KibanaRequest, spaceId: string): Promise<void> => {
+  const installBoundWorkflows = async (
+    request: KibanaRequest,
+    spaceId: string,
+    serviceAccountIds: NightshiftServiceAccountIds
+  ): Promise<void> => {
     // Installing again with a different account (an earlier setup's) rebinds the workflow.
     const client = await workflowsExtensions.getClient(request);
     for (const id of BOUND_WORKFLOW_IDS) {
@@ -283,7 +309,13 @@ export const createInvestigatorServiceAccountService = ({
           {
             spaceId,
             workflowIdSuffix: spaceId,
-            values: { serviceAccountId: INVESTIGATOR_SERVICE_ACCOUNT_ID },
+            values: {
+              serviceAccountId: serviceAccountIds.agent,
+              // Only the entry point keeps the automations account, for automations to run as.
+              ...(id === NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID
+                ? { [AUTOMATIONS_SERVICE_ACCOUNT_ID_VALUE]: serviceAccountIds.automations }
+                : {}),
+            },
           }
         );
       } catch (error) {
@@ -296,7 +328,35 @@ export const createInvestigatorServiceAccountService = ({
     }
   };
 
-  const assertAllBound = (status: InvestigatorServiceAccountStatus, spaceId: string): void => {
+  /**
+   * Turns bound workflows an admin disabled back on. Installing keeps the enabled state of an
+   * installed workflow, so a disabled entry point would otherwise leave the space not set up.
+   */
+  const enableDisabledWorkflows = async (
+    request: KibanaRequest,
+    spaceId: string,
+    status: InvestigatorServiceAccountStatus
+  ): Promise<boolean> => {
+    const disabled = status.boundWorkflows.filter(
+      ({ installed, enabled }) => installed && enabled === false
+    );
+    if (!workflowsManagement || disabled.length === 0) return false;
+    for (const { workflowId } of disabled) {
+      await workflowsManagement.management.updateWorkflow(
+        workflowId,
+        { enabled: true },
+        spaceId,
+        request
+      );
+    }
+    return true;
+  };
+
+  const assertAllBound = (
+    status: InvestigatorServiceAccountStatus,
+    spaceId: string,
+    agentServiceAccountId: string
+  ): void => {
     // A workflow that fails validation here (the Slack thread workflow without the Slack trigger)
     // is reported, not fatal: it starts working once its trigger is registered.
     const invalid = status.boundWorkflows.filter(({ valid }) => valid === false);
@@ -308,20 +368,27 @@ export const createInvestigatorServiceAccountService = ({
       );
     }
     const unbound = status.boundWorkflows.filter(
-      ({ installed, bound, valid }) => !installed || (!bound && valid !== false)
+      ({ installed, runAs, valid }) =>
+        !installed || (runAs !== agentServiceAccountId && valid !== false)
     );
     if (unbound.length > 0) {
       throw Boom.internal(
         `Nightshift setup in space [${spaceId}] did not bind ${unbound
           .map(({ workflowId, runAs }) => `[${workflowId}] (runs as ${runAs ?? 'the caller'})`)
-          .join(', ')} to [${INVESTIGATOR_SERVICE_ACCOUNT_ID}]`
+          .join(', ')} to [${agentServiceAccountId}]`
+      );
+    }
+    if (status.enabled !== true) {
+      throw Boom.internal(
+        `Nightshift setup in space [${spaceId}] left its entry point [${status.workflowId}] disabled`
       );
     }
   };
 
   const runEnable = async (
     request: KibanaRequest,
-    spaceId: string
+    spaceId: string,
+    serviceAccountIds: NightshiftServiceAccountIds
   ): Promise<InvestigatorServiceAccountStatus> => {
     if (!core.security.serviceAccounts.isEnabled()) {
       throw Boom.badRequest(
@@ -335,31 +402,35 @@ export const createInvestigatorServiceAccountService = ({
     }
     await assertSpaceExists(request, spaceId);
 
-    for (const kind of NIGHTSHIFT_SERVICE_ACCOUNT_KINDS) {
-      await ensureServiceAccount(request, kind);
-    }
-    await installBoundWorkflows(request, spaceId);
-    await bindAutomations(request, spaceId);
+    await installBoundWorkflows(request, spaceId, serviceAccountIds);
+    await bindAutomations(request, spaceId, serviceAccountIds.automations);
 
-    const status = await getStatus(request, spaceId);
-    assertAllBound(status, spaceId);
+    let status = await getStatus(request, spaceId);
+    if (await enableDisabledWorkflows(request, spaceId, status)) {
+      status = await getStatus(request, spaceId);
+    }
+    assertAllBound(status, spaceId, serviceAccountIds.agent);
     logger.info(
-      `Nightshift in space [${spaceId}] is set up with service account [${INVESTIGATOR_SERVICE_ACCOUNT_ID}]`
+      `Nightshift in space [${spaceId}] is set up with service accounts [${serviceAccountIds.agent}] and [${serviceAccountIds.automations}]`
     );
     return status;
   };
 
   /**
-   * Sets up a space with the caller's privileges. Binding a workflow requires the caller to hold
-   * `manage_security`; the workflows plugin enforces that too. Idempotent: running it again
-   * repairs a space whose workflows were removed or bound to another account.
+   * Sets up a space with the caller's privileges, bound to the given accounts. Binding a workflow
+   * requires the caller to hold `manage_security`; the workflows plugin enforces that too.
+   * Idempotent: running it again repairs a space whose workflows were removed, disabled or bound to
+   * another account.
    */
   const enable = (
     request: KibanaRequest,
-    spaceId: string
+    spaceId: string,
+    serviceAccountIds: NightshiftServiceAccountIds
   ): Promise<InvestigatorServiceAccountStatus> => {
     const previous = queues.get(spaceId) ?? Promise.resolve();
-    const run = previous.catch(() => undefined).then(() => runEnable(request, spaceId));
+    const run = previous
+      .catch(() => undefined)
+      .then(() => runEnable(request, spaceId, serviceAccountIds));
     queues.set(spaceId, run);
     run
       .catch(() => undefined)

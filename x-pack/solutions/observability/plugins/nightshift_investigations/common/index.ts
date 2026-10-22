@@ -242,11 +242,29 @@ export {
   type InvestigationCompletedTriggerPayload,
   type InvestigationFailedTriggerPayload,
 } from './workflows/triggers';
-export type {
-  InvestigatorServiceAccountStatus,
-  NightshiftBoundWorkflowStatus,
-  NightshiftServiceAccountInfo,
+export {
+  getNightshiftRoleName,
+  getNightshiftServiceAccountName,
+  NIGHTSHIFT_SERVICE_ACCOUNT_KINDS,
+  type EnableInvestigatorServiceAccountBody,
+  type InvestigatorServiceAccountStatus,
+  type NightshiftBoundWorkflowStatus,
+  type NightshiftServiceAccountIds,
+  type NightshiftServiceAccountInfo,
+  type NightshiftServiceAccountKind,
 } from './service_account';
+export {
+  createHttpServiceAccountsApi,
+  ensureNightshiftServiceAccounts,
+  getSecurityRoleUrl,
+  NightshiftServiceAccountSetupError,
+  SECURITY_ROLE_API_VERSION,
+  SECURITY_SERVICE_ACCOUNT_URL,
+  type ListedServiceAccount,
+  type ListedServiceAccountsPage,
+  type NightshiftServiceAccountsApi,
+  type NightshiftServiceAccountSetupErrorCode,
+} from './ensure_service_accounts';
 export {
   ensureNightshiftServiceAccountRoles,
   NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES,

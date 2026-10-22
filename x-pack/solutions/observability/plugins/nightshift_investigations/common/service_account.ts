@@ -5,10 +5,53 @@
  * 2.0.
  */
 
-/** One of the Nightshift service accounts and the built-in role it holds. */
+/**
+ * The Nightshift service accounts. There is one of each per deployment, shared by every space:
+ * - `agent` runs investigations, their sandbox tools and their Agent Builder hooks.
+ * - `automations` runs automation workflows, which start investigations.
+ */
+export type NightshiftServiceAccountKind = 'agent' | 'automations';
+
+export const NIGHTSHIFT_SERVICE_ACCOUNT_KINDS: readonly NightshiftServiceAccountKind[] = [
+  'agent',
+  'automations',
+];
+
+/** The name each account is found and created by. */
+export const getNightshiftServiceAccountName = (kind: NightshiftServiceAccountKind): string =>
+  `nightshift_${kind}`;
+
+/**
+ * The role an account holds. Nightshift never creates or changes these roles. On Serverless they
+ * are elasticsearch-controller predefined roles, whose names must start with `_`. On stateful they
+ * are named like the account and created by whoever sets up the deployment (see the README). The
+ * roles cover every space; the per-space bound workflows decide where an account acts.
+ */
+export const getNightshiftRoleName = (
+  kind: NightshiftServiceAccountKind,
+  { isServerless }: { isServerless: boolean }
+): string => {
+  const name = getNightshiftServiceAccountName(kind);
+  return isServerless ? `_${name}` : name;
+};
+
+/**
+ * The ids of the accounts a space is set up with, as the service accounts backend assigned them:
+ * `kibana/<name>` on stateful, a generated id on Serverless.
+ */
+export type NightshiftServiceAccountIds = Record<NightshiftServiceAccountKind, string>;
+
+/** The body of `POST /internal/nightshift/investigations/service_account/_enable`. */
+export interface EnableInvestigatorServiceAccountBody {
+  serviceAccountIds: NightshiftServiceAccountIds;
+}
+
+/** One of the Nightshift service accounts, the role it holds, and its id in this space. */
 export interface NightshiftServiceAccountInfo {
-  kind: 'agent' | 'automations';
-  id: string;
+  kind: NightshiftServiceAccountKind;
+  name: string;
+  /** Null while the space is not set up. */
+  id: string | null;
   role: string;
 }
 
@@ -20,7 +63,7 @@ export interface NightshiftBoundWorkflowStatus {
   enabled: boolean | null;
   /** The account its `settings.run_as` names, or null when it names none. */
   runAs: string | null;
-  /** Whether `runAs` is the agent account. */
+  /** Whether `runAs` is the space's agent account. */
   bound: boolean;
   /**
    * False when the workflow failed validation, for example the Slack thread workflow on a
@@ -40,8 +83,8 @@ export interface InvestigatorServiceAccountStatus {
    * account requires: setting the space up, and creating, changing or deleting automations.
    */
   canModifyBoundWorkflows: boolean;
-  /** The agent account investigations run as. */
-  serviceAccountId: string;
+  /** The agent account investigations run as in this space, or null while it is not set up. */
+  serviceAccountId: string | null;
   /** The built-in role the agent account holds. */
   role: string;
   /** The entry point. */

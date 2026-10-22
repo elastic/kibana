@@ -79,10 +79,10 @@ it('returns false while service accounts are turned off', async () => {
   expect(getWorkflow).not.toHaveBeenCalled();
 });
 
-it('returns false while the entry point is bound to another account', async () => {
+it('returns false while the entry point is not bound to an account', async () => {
   getWorkflow.mockResolvedValue({
     ...workflow,
-    definition: { settings: { run_as: 'kibana/someone_else' } },
+    definition: { settings: {} },
   });
 
   await expect(isInvestigationInfrastructureAvailable(createDependencies())).resolves.toBe(false);
