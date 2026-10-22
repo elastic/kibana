@@ -10,7 +10,9 @@ from the same read of the transcript:
     input=N output=N cache_create=N cache_read=N total=N
     usd=N.NNNN pricing=YYYY-MM-DD
 The second line is left out when any model in the session has no price, or
-when the cost rounds to 0.0000.
+when the cost rounds to 0.0000. Usage with no model id is left out of the cost
+(with a note on stderr) when it is at most 1% of the session tokens; above
+that, the cost is left out too.
 
 Each API response is counted once: Claude Code repeats a response's usage on
 every transcript line of that response, so lines sharing a message id are
@@ -68,6 +70,7 @@ from session_metrics import (
     MODEL_PRICES_URL,
     PriceCatalog,
     build_session_metrics,
+    drop_small_model_less_usage,
     estimate_cost_usd,
     fetch_price_catalog,
     format_cost,
@@ -136,10 +139,16 @@ def main() -> int:
     except ValueError as exc:
         print(str(exc), file=sys.stderr)
         return 2
-    cost = estimate_cost_usd(result.usage_by_model, catalog)
+    usage_by_model, dropped_tokens = drop_small_model_less_usage(result.usage_by_model)
+    cost = estimate_cost_usd(usage_by_model, catalog)
     if cost is None:
         print("No price for every model in the session; cost left out.", file=sys.stderr)
         return 0
+    if dropped_tokens:
+        print(
+            f"Left {dropped_tokens} tokens with no model id out of the cost.",
+            file=sys.stderr,
+        )
     cost_line = format_cost(cost, catalog)
     if cost_line is None:
         print("Cost rounds to zero; cost left out.", file=sys.stderr)

@@ -21,9 +21,11 @@ sys.path.insert(0, str(SCRIPT_DIR))
 from session_metrics import (  # noqa: E402
     MODEL_PRICES_PATH,
     ModelPrice,
+    ModelUsage,
     PriceCatalog,
     TokenTotals,
     build_session_metrics,
+    drop_small_model_less_usage,
     estimate_cost_usd,
     fetch_price_catalog,
     find_model_price,
@@ -564,6 +566,23 @@ class SessionMetricsParserTests(unittest.TestCase):
                 self.assertIsNone(estimate_cost_usd(usage_by_model, CATALOG))
             self.assertIsNone(estimate_cost_usd({}, CATALOG))
 
+    def test_small_model_less_usage_is_dropped_from_the_cost(self):
+        priced = ModelUsage(TokenTotals(cache_read_input_tokens=99_000))
+        small = {"claude-sonnet-5-5": priced, None: ModelUsage(TokenTotals(input_tokens=1_000))}
+        large = {"claude-sonnet-5-5": priced, None: ModelUsage(TokenTotals(input_tokens=1_001))}
+
+        kept, dropped = drop_small_model_less_usage(small)
+        self.assertEqual(list(kept), ["claude-sonnet-5-5"])
+        self.assertEqual(dropped, 1_000)
+        self.assertAlmostEqual(estimate_cost_usd(kept, CATALOG) or 0, 99_000 * 1e-7)
+
+        kept, dropped = drop_small_model_less_usage(large)
+        self.assertEqual(dropped, 0)
+        self.assertIsNone(estimate_cost_usd(kept, CATALOG))
+
+        only_model_less = {None: ModelUsage(TokenTotals(input_tokens=5))}
+        self.assertEqual(drop_small_model_less_usage(only_model_less), (only_model_less, 0))
+
     def test_price_catalog_in_the_repo_is_valid(self):
         catalog = load_price_catalog(MODEL_PRICES_PATH)
 
@@ -702,6 +721,22 @@ class SessionMetricsParserTests(unittest.TestCase):
                 result.stdout,
                 "input=2 output=10 cache_create=100 cache_read=1000 total=1112\n",
             )
+
+            with_model_less_line = Path(raw_dir) / "with_model_less_line.jsonl"
+            with_model_less_line.write_text(
+                usage_line("msg_1", "claude-sonnet-5-5", 10)
+                + json.dumps({"type": "assistant", "usage": {"input_tokens": 3}})
+                + "\n",
+                encoding="utf-8",
+            )
+            result = self.run_script("--with-cost", str(with_model_less_line))
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertRegex(
+                result.stdout,
+                r"^input=5 output=10 cache_create=100 cache_read=1000 total=1115\n"
+                r"usd=\d+\.\d{4} pricing=\d{4}-\d{2}-\d{2}\n$",
+            )
+            self.assertIn("Left 3 tokens with no model id out of the cost.", result.stderr)
 
             cheap_models = Path(raw_dir) / "cheap_models.json"
             cheap_models.write_text(

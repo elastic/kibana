@@ -28,6 +28,7 @@ MODEL_PRICES_URL = (
 FETCH_TIMEOUT_SECONDS = 2
 MAX_REMOTE_CATALOG_BYTES = 1_000_000
 CACHE_WRITE_1H_INPUT_MULTIPLIER = 2
+MAX_MODEL_LESS_TOKEN_SHARE = 0.01
 ALLOWED_SCOPES = frozenset(("orchestrator", "worker"))
 ALLOWED_ARTIFACT_KINDS = frozenset(
     (
@@ -388,6 +389,21 @@ def find_model_price(catalog: PriceCatalog, model: str) -> ModelPrice | None:
             best = price
             best_length = len(comparable_catalog_model)
     return best
+
+
+def drop_small_model_less_usage(
+    usage_by_model: Mapping[str | None, ModelUsage],
+) -> tuple[Mapping[str | None, ModelUsage], int]:
+    """Drop usage with no model id when it is at most 1% of the session tokens."""
+    model_less = usage_by_model.get(None)
+    if model_less is None:
+        return usage_by_model, 0
+    session_tokens = sum(usage.totals.total for usage in usage_by_model.values())
+    dropped = model_less.totals.total
+    if dropped > session_tokens * MAX_MODEL_LESS_TOKEN_SHARE:
+        return usage_by_model, 0
+    kept = {model: usage for model, usage in usage_by_model.items() if model is not None}
+    return kept, dropped
 
 
 def estimate_cost_usd(
