@@ -211,19 +211,35 @@ export const bundleSpec = async (
     if (!isJsonObject(node)) {
       return node;
     }
-    const { $ref: ref } = node;
-    if (typeof ref === 'string') {
-      const target = toTarget(ref, base);
-      if (target.url === rootUrl) {
-        return base === rootUrl ? { ...node } : { ...node, $ref: `#${toPointer(target.tokens)}` };
-      }
-      const componentRef = isPathItem(trail)
-        ? undefined
-        : await componentRefFor(target, ref, trail);
-      return componentRef === undefined
-        ? bundle(await resolve(target, ref, trail), target.url, trail)
-        : { ...node, $ref: componentRef };
+    const { $ref: ref, ...siblings } = node;
+    if (typeof ref !== 'string') {
+      return bundleEntries(node, base, trail);
     }
+    // OpenAPI 3.1 allows keywords next to `$ref`, which may hold external refs of their own.
+    const bundledSiblings = await bundleEntries(siblings, base, trail);
+    const target = toTarget(ref, base);
+    if (target.url === rootUrl) {
+      return {
+        ...bundledSiblings,
+        $ref: base === rootUrl ? ref : `#${toPointer(target.tokens)}`,
+      };
+    }
+    const componentRef = isPathItem(trail)
+      ? undefined
+      : await componentRefFor(target, ref, trail);
+    if (componentRef === undefined) {
+      // Inlined where it stands; the node's own fields take precedence over the referenced ones.
+      const referenced = await bundle(await resolve(target, ref, trail), target.url, trail);
+      return { ...(isJsonObject(referenced) ? referenced : {}), ...bundledSiblings };
+    }
+    return { ...bundledSiblings, $ref: componentRef };
+  };
+
+  const bundleEntries = async (
+    node: JsonObject,
+    base: string,
+    trail: readonly string[]
+  ): Promise<JsonObject> => {
     const result: JsonObject = {};
     for (const [key, child] of Object.entries(node)) {
       result[key] = await bundle(child, base, [...trail, key]);
