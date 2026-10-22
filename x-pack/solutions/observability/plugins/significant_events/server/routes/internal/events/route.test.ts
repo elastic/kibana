@@ -63,6 +63,56 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
 });
 
 describe('POST /internal/significant_events/events/{id}/investigate', () => {
+  it.each(['completed', 'failed'] as const)(
+    'replaces a %s investigation with a running follow-up',
+    async (outcome) => {
+      const event = {
+        '@timestamp': '2026-01-01T00:00:00.000Z',
+        event_uuid: 'version-1',
+        event_id: 'event-1',
+        status: 'active' as const,
+        source_ids: ['logs.test'],
+        title: 'Test event',
+        summary: 'Test summary',
+        severity: 'medium' as const,
+        confidence: 0.8,
+        investigations: [
+          {
+            workflow_execution_id: 'inv-1',
+            started_at: '2026-01-01T00:00:00.000Z',
+            completed_at: '2026-01-01T00:01:00.000Z',
+            outcome,
+          },
+        ],
+      };
+      const createAlertEvent = jest.fn().mockResolvedValue(undefined);
+      const start = jest.fn().mockResolvedValue({ investigation_id: 'inv-1' });
+      const beforeStart = Date.now();
+
+      const result = await investigateRoute.handler({
+        params: { path: { id: 'event-1' } },
+        request: {},
+        getScopedClients: jest.fn().mockResolvedValue({
+          licensing: {},
+          getEventSearchClient: () => ({ findLatestByEventId: jest.fn().mockResolvedValue(event) }),
+          getAlertEventsClient: () => ({ createAlertEvent }),
+        }),
+        server: { nightshiftInvestigations: { getInvestigationsClient: () => ({ start }) } },
+        logger: { info: jest.fn(), warn: jest.fn() },
+        maintenanceService: makeMaintenanceService(),
+      } as never);
+
+      expect(result).toEqual({ executionId: 'inv-1' });
+      expect(createAlertEvent).toHaveBeenCalledTimes(1);
+      const investigations = createAlertEvent.mock.calls[0][0].data.investigations;
+      expect(investigations).toEqual([
+        { workflow_execution_id: 'inv-1', started_at: expect.any(String) },
+      ]);
+      expect(Date.parse(investigations[0].started_at)).toBeGreaterThanOrEqual(beforeStart);
+      expect(Date.parse(investigations[0].started_at)).toBeLessThanOrEqual(Date.now());
+    }
+  );
+
   it('rejects with 409 while paused before loading the event', async () => {
     const findLatestByEventId = jest.fn();
     const handlerParams = {

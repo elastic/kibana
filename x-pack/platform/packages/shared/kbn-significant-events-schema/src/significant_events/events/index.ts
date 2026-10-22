@@ -66,8 +66,8 @@ export const SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS = [
  * One investigation run attached to this significant event.
  * `workflow_execution_id` holds the investigation id, which is its Agent Builder conversation id;
  * the shared investigations API (`GET /internal/investigations/investigations/{id}`) is the
- * single source of truth for the investigation's content, so this entry intentionally carries no
- * status of its own. Entries written before investigations were conversations hold a workflow
+ * single source of truth for the investigation's content; this entry records the run's timestamps
+ * and terminal outcome. Entries written before investigations were conversations hold a workflow
  * execution id, which that API does not know. The field keeps its name so stored events stay
  * valid.
  */
@@ -83,6 +83,10 @@ export const significantEventInvestigationSchema = lazySchema(() =>
       .describe(
         'When this investigation run finished. Absent while the investigation is still running.'
       ),
+    outcome: z
+      .enum(['completed', 'failed'])
+      .optional()
+      .describe('Terminal outcome of this run. Absent while running or on older attachments.'),
   })
 );
 export type SignificantEventInvestigation = z.infer<typeof significantEventInvestigationSchema>;

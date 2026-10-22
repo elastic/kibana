@@ -131,7 +131,7 @@ describe('useSignificantEventsList', () => {
     const runningEvent = createEvent([
       {
         workflow_execution_id: 'investigation-1',
-        started_at: '2026-10-20T11:05:00.000Z',
+        started_at: new Date().toISOString(),
       },
     ]);
     const completedEvent = createEvent([

@@ -13,7 +13,7 @@ import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from './use_kibana';
 import { NIGHTSHIFT_LANDING_SEVERITIES } from '../common/constants';
 import { SIGNIFICANT_EVENTS_LIST_QUERY_KEY } from '../data/query_keys';
-import { hasRunningInvestigations } from '../components/entities/significant_event/significant_event_status';
+import { hasInvestigationsToPoll } from '../data/significant_events/investigation_state';
 
 /**
  * The paginated envelope the events endpoint returns, flattened across the pages we
@@ -165,7 +165,7 @@ export const useFetchSignificantEvents = (): UseQueryResult<
       return fetchSignificantEvents({ significantEventsRepositoryClient, signal, from, to });
     },
     refetchInterval: (data) =>
-      data?.hits && hasRunningInvestigations(data.hits)
+      data?.hits && hasInvestigationsToPoll(data.hits)
         ? RUNNING_INVESTIGATIONS_REFETCH_INTERVAL_MS
         : false,
   });
