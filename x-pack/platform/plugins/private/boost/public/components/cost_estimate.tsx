@@ -127,7 +127,6 @@ const EstimateValue = ({ end, vcus, savedVcus }: EstimateValueProps) => (
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
-    <EuiSpacer size="xs" />
     <EuiText size="xs" color="subdued">
       {getVcusText(vcus)}
     </EuiText>
@@ -249,7 +248,7 @@ const EstimateContent = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
       <div aria-live="polite">
         {isStale && (
           <EuiScreenReaderOnly>
@@ -264,7 +263,7 @@ const EstimateContent = ({
       </div>
       {periods && (
         <>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
           <DataStreamTimeline
             maxAges={periods.maxAges}
             estimates={periods.estimates}

@@ -571,9 +571,6 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
       label={i18n.translate('xpack.boost.ruleForm.priorityLabel', {
         defaultMessage: 'Priority',
       })}
-      helpText={i18n.translate('xpack.boost.ruleForm.priorityDescription', {
-        defaultMessage: 'Highest number wins.',
-      })}
       fullWidth
     >
       <EuiFieldNumber
@@ -691,17 +688,6 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                 label={i18n.translate('xpack.boost.ruleForm.targetsLabel', {
                   defaultMessage: 'Targets',
                 })}
-                helpText={
-                  !type
-                    ? SELECT_PROFILE_FIRST
-                    : type === 'data_streams'
-                    ? i18n.translate('xpack.boost.ruleForm.dataStreamsAppliesToDescription', {
-                        defaultMessage: 'Enter a name or pattern, or select data streams.',
-                      })
-                    : i18n.translate('xpack.boost.ruleForm.indicesAppliesToDescription', {
-                        defaultMessage: 'Enter a name or pattern, or select indices.',
-                      })
-                }
                 fullWidth
               >
                 {/* A wrapper takes the row's id, so the tooltip keeps its own. The tooltip only
