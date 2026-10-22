@@ -8,13 +8,10 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import type {
-  GetAllConnectorSpecsResponse,
-  GetConnectorSpecResponse,
-} from '@kbn/actions-plugin/common';
-import { INTERNAL_BASE_ACTION_API_PATH } from '../../constants';
+import type { ConnectorTypeResponse, GetConnectorSpecResponse } from '@kbn/actions-plugin/common';
+import { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '../../constants';
 import { transformConnectorSpecDetailResponse } from './transform_connector_spec_detail_response';
-import { transformConnectorSpecSummaryResponse } from './transform_connector_spec_summary_response';
+import { transformConnectorTypeSpecSummary } from './transform_connector_type_spec_summary';
 import type { SpecsClient } from './types';
 
 export const createSpecsClient = ({ http }: { http: HttpSetup }): SpecsClient => ({
@@ -26,13 +23,16 @@ export const createSpecsClient = ({ http }: { http: HttpSetup }): SpecsClient =>
     return transformConnectorSpecDetailResponse(wire);
   },
   async getAll({ featureId, signal } = {}) {
-    const wire = await http.get<GetAllConnectorSpecsResponse>(
-      `${INTERNAL_BASE_ACTION_API_PATH}/connector_types/specs`,
+    const wire = await http.get<ConnectorTypeResponse[]>(
+      `${BASE_ACTION_API_PATH}/connector_types`,
       {
         ...(signal ? { signal } : {}),
         ...(featureId ? { query: { feature_id: featureId } } : {}),
       }
     );
-    return wire.map(transformConnectorSpecSummaryResponse);
+    return wire.flatMap((row) => {
+      const summary = transformConnectorTypeSpecSummary(row);
+      return summary ? [summary] : [];
+    });
   },
 });

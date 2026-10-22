@@ -13,6 +13,7 @@ export type {
   ConnectorAuthStatusResponse,
   ConnectorSpecActionSummaryResponse,
   ConnectorSpecActionDetailResponse,
+  ConnectorTypeResponse,
   GetConnectorSpecResponse,
 } from './types/latest';
 

@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorSpecSummaryResponse } from '@kbn/actions-plugin/common';
-import { transformConnectorSpecSummaryResponse } from './transform_connector_spec_summary_response';
+import {
+  transformConnectorSpecSummaryResponse,
+  type ConnectorSpecSummaryWire,
+} from './transform_connector_spec_summary_response';
 
-const fullWire: ConnectorSpecSummaryResponse = {
+const fullWire: ConnectorSpecSummaryWire = {
   id: 'test-connector',
   display_name: 'Test Connector',
   description: 'A test connector',

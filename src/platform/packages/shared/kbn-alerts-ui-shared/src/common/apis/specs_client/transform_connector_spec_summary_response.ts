@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorSpecSummary } from '@kbn/actions-plugin/common';
+import type { ConnectorSpecActionSummary, ConnectorSpecSummary } from '@kbn/actions-plugin/common';
 import { resolveActionScope } from '@kbn/connector-specs';
 
 interface ConnectorSpecAvailabilityWire {
@@ -17,13 +17,13 @@ interface ConnectorSpecAvailabilityWire {
   is_deprecated?: boolean;
 }
 
-interface ConnectorSpecSummaryWire {
+export interface ConnectorSpecSummaryWire {
   id: string;
   display_name: string;
   description: string;
   icon?: string;
   docs_url?: string;
-  minimum_license: string;
+  minimum_license: ConnectorSpecSummary['minimumLicense'];
   is_technical_preview?: boolean;
   supported_feature_ids: string[];
   availability?: ConnectorSpecAvailabilityWire;
@@ -36,7 +36,7 @@ interface ConnectorSpecSummaryWire {
     name: string;
     description?: string;
     is_tool: boolean;
-    scope?: 'read' | 'write' | 'destroy';
+    scope?: ConnectorSpecActionSummary['scope'];
   }>;
 }
 
@@ -48,7 +48,7 @@ export const transformConnectorSpecSummaryResponse = (
   description: wire.description,
   ...(wire.icon !== undefined ? { icon: wire.icon } : {}),
   ...(wire.docs_url !== undefined ? { docsUrl: wire.docs_url } : {}),
-  minimumLicense: wire.minimum_license as ConnectorSpecSummary['minimumLicense'],
+  minimumLicense: wire.minimum_license,
   isTechnicalPreview: wire.is_technical_preview ?? false,
   supportedFeatureIds: wire.supported_feature_ids,
   availability: {

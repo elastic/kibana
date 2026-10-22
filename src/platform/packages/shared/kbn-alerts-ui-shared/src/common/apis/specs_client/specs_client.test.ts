@@ -8,7 +8,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import type { GetConnectorSpecResponse } from '@kbn/actions-plugin/common';
+import type { ConnectorTypeResponse, GetConnectorSpecResponse } from '@kbn/actions-plugin/common';
 import { createSpecsClient } from './specs_client';
 
 const formSchema = { type: 'object', properties: {} };
@@ -101,37 +101,37 @@ describe('createSpecsClient', () => {
   });
 
   describe('getAll', () => {
-    const summaryWire = {
+    const publicSpecRowWire: ConnectorTypeResponse = {
       id: 'test-connector',
-      display_name: 'Test Connector',
-      description: 'A test connector',
-      minimum_license: 'gold',
-      is_technical_preview: false,
+      name: 'Test Connector',
+      enabled: true,
+      enabled_in_config: true,
+      enabled_in_license: true,
+      minimum_license_required: 'gold',
       supported_feature_ids: ['alerting'],
-      availability: {
-        enabled: true,
-        enabled_in_config: true,
-        enabled_in_license: true,
-        is_deprecated: false,
-      },
-      auth_type_ids: ['basic'],
+      is_system_action_type: false,
+      source: 'spec',
+      is_deprecated: false,
+      description: 'A test connector',
+      is_experimental: false,
       is_testable: true,
+      auth_type_ids: ['basic'],
       has_inbound_events: false,
       is_inbound_only: false,
       is_ears_experimental: false,
-      actions: [{ name: 'ping', is_tool: true, scope: 'read' as const }],
+      actions: [{ name: 'ping', is_tool: true, scope: 'read' }],
     };
 
-    it('calls the specs path with no query when featureId is absent', async () => {
+    it('calls the public connector types path with no query when featureId is absent', async () => {
       const http = httpServiceMock.createStartContract();
-      http.get.mockResolvedValueOnce([summaryWire]);
+      http.get.mockResolvedValueOnce([publicSpecRowWire]);
       const signal = new AbortController().signal;
 
       const result = await createSpecsClient({ http }).getAll({ signal });
 
       expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "/internal/actions/connector_types/specs",
+          "/api/actions/connector_types",
           Object {
             "signal": AbortSignal {},
           },
@@ -163,13 +163,13 @@ describe('createSpecsClient', () => {
 
     it('sends query.feature_id when featureId is present', async () => {
       const http = httpServiceMock.createStartContract();
-      http.get.mockResolvedValueOnce([summaryWire]);
+      http.get.mockResolvedValueOnce([publicSpecRowWire]);
 
       await createSpecsClient({ http }).getAll({ featureId: 'workflows' });
 
       expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "/internal/actions/connector_types/specs",
+          "/api/actions/connector_types",
           Object {
             "query": Object {
               "feature_id": "workflows",
@@ -177,6 +177,21 @@ describe('createSpecsClient', () => {
           },
         ]
       `);
+    });
+
+    it('keeps only spec rows and skips spec rows missing spec-only fields', async () => {
+      const http = httpServiceMock.createStartContract();
+      const { auth_type_ids: _authTypeIds, ...incompleteSpecRow } = publicSpecRowWire;
+      http.get.mockResolvedValueOnce([
+        { ...publicSpecRowWire, id: 'stack.row', source: 'stack' },
+        { ...publicSpecRowWire, id: 'yml.row', source: 'yml' },
+        { ...incompleteSpecRow, id: 'incomplete.row' },
+        publicSpecRowWire,
+      ]);
+
+      const result = await createSpecsClient({ http }).getAll();
+
+      expect(result.map((summary) => summary.id)).toEqual(['test-connector']);
     });
 
     it('passes an empty array through', async () => {
