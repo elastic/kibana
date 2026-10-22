@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../../../common/proposals/origin';
+import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../../common/proposals/origin';
 import { createExistingProposalsCounter } from './check_existing_proposals';
 
 const request = {} as KibanaRequest;
