@@ -68,6 +68,8 @@ const UnavailableValue = ({
 const isModifiedClick = (event: React.MouseEvent): boolean =>
   event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
 
+const themePx = (base: number, units: number): string => `${base * units}px`;
+
 const DataStreamOnlyValue = () => (
   <UnavailableValue
     tooltip={DATA_STREAM_ONLY_TOOLTIP}
@@ -91,14 +93,19 @@ export const DestinationIndicesTable = ({
   const { euiTheme } = useEuiTheme();
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
+  const nameMinWidth = themePx(euiTheme.base, 14);
+  const nameMaxWidth = themePx(euiTheme.base, 22);
+  const documentsMinWidth = themePx(euiTheme.base, 10);
+  const metricMinWidth = themePx(euiTheme.base, 8);
+  const retentionMinWidth = themePx(euiTheme.base, 12);
   const columns = useMemo<Array<EuiBasicTableColumn<ResolvedDestinationIndex>>>(
     () => [
       {
         name: i18n.translate('xpack.streams.destinations.indices.nameColumnLabel', {
           defaultMessage: 'Name',
         }),
-        minWidth: euiTheme.base * 14,
-        maxWidth: euiTheme.base * 22,
+        minWidth: nameMinWidth,
+        maxWidth: nameMaxWidth,
         align: 'left',
         render: (index: ResolvedDestinationIndex) => (
           <EuiLink
@@ -124,7 +131,7 @@ export const DestinationIndicesTable = ({
       },
       {
         name: DOCUMENTS_COLUMN_HEADER,
-        minWidth: euiTheme.base * 10,
+        minWidth: documentsMinWidth,
         align: 'center',
         render: (index: ResolvedDestinationIndex) => (
           <DocumentsColumn
@@ -139,7 +146,7 @@ export const DestinationIndicesTable = ({
       },
       {
         name: INGESTION_COLUMN_HEADER,
-        minWidth: euiTheme.base * 8,
+        minWidth: metricMinWidth,
         align: 'center',
         render: (index: ResolvedDestinationIndex) =>
           index.is_data_stream ? (
@@ -154,7 +161,7 @@ export const DestinationIndicesTable = ({
       },
       {
         name: STORAGE_COLUMN_HEADER,
-        minWidth: euiTheme.base * 8,
+        minWidth: metricMinWidth,
         align: 'center',
         render: (index: ResolvedDestinationIndex) =>
           index.is_data_stream ? (
@@ -169,7 +176,7 @@ export const DestinationIndicesTable = ({
       },
       {
         name: DATA_QUALITY_COLUMN_HEADER,
-        minWidth: euiTheme.base * 8,
+        minWidth: metricMinWidth,
         align: 'center',
         render: (index: ResolvedDestinationIndex) => {
           if (!index.is_data_stream) {
@@ -211,7 +218,7 @@ export const DestinationIndicesTable = ({
         name: (
           <span aria-label={RETENTION_COLUMN_HEADER_ARIA_LABEL}>{RETENTION_COLUMN_HEADER}</span>
         ),
-        minWidth: euiTheme.base * 12,
+        minWidth: retentionMinWidth,
         align: 'center',
         render: (index: ResolvedDestinationIndex) =>
           index.is_data_stream ? (
@@ -225,7 +232,17 @@ export const DestinationIndicesTable = ({
           ),
       },
     ],
-    [euiTheme.base, rangeFrom, rangeTo, router, stats]
+    [
+      documentsMinWidth,
+      metricMinWidth,
+      nameMaxWidth,
+      nameMinWidth,
+      rangeFrom,
+      rangeTo,
+      retentionMinWidth,
+      router,
+      stats,
+    ]
   );
 
   const expandedContentStyles = css`
