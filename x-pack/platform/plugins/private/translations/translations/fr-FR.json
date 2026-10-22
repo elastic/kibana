@@ -2644,8 +2644,6 @@
     "data.search.eql.size.help": "Paramètre de taille de l'API de recherche d'Elasticsearch",
     "data.search.es_search.dataRequest.description": "Cette requête interroge Elasticsearch pour récupérer les données pour la visualisation.",
     "data.search.es_search.dataViewLabel": "Vue de données",
-    "data.search.es_search.documentsProcessedDescription": "Le nombre de documents traités par la requête.",
-    "data.search.es_search.documentsProcessedLabel": "Documents traités",
     "data.search.es_search.hitsDescription": "Le nombre de documents renvoyés par la requête.",
     "data.search.es_search.hitsLabel": "Résultats",
     "data.search.es_search.hitsTotalDescription": "Le nombre de documents correspondant à la requête.",
