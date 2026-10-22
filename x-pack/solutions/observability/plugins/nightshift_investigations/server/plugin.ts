@@ -19,13 +19,12 @@ import type { ZodObject } from '@kbn/zod/v4';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { KibanaRequest } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
-import { ALERTING_V2_RULE_SO_TYPE } from './lib/alert_snapshot';
 import type { NightshiftInvestigationsConfig } from './config';
 import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
@@ -123,6 +122,7 @@ export class NightshiftInvestigationsPlugin
   private inference?: NightshiftInvestigationsStartDeps['inference'];
   private sandboxStart?: NightshiftInvestigationsStartDeps['sandbox'];
   private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
+  private alertingVTwo?: NightshiftInvestigationsStartDeps['alertingVTwo'];
   private elasticsearch?: ElasticsearchServiceStart;
   private savedObjects?: CoreStart['savedObjects'];
   private uiSettings?: CoreStart['uiSettings'];
@@ -546,6 +546,7 @@ export class NightshiftInvestigationsPlugin
     this.inference = plugins.inference;
     this.sandboxStart = plugins.sandbox;
     this.ruleRegistry = plugins.ruleRegistry;
+    this.alertingVTwo = plugins.alertingVTwo;
     this.elasticsearch = coreStart.elasticsearch;
     this.savedObjects = coreStart.savedObjects;
     this.uiSettings = coreStart.uiSettings;
@@ -710,18 +711,17 @@ export class NightshiftInvestigationsPlugin
     this.ruleRegistry?.getRacClientWithRequest(request);
 
   private getEpisodeLookup: GetEpisodeLookup = (request, spaceId) => {
-    const { elasticsearch, savedObjects } = this;
-    if (!elasticsearch || !savedObjects) {
+    const { elasticsearch, alertingVTwo } = this;
+    if (!elasticsearch) {
       throw new Error('core services are not available — plugin start() has not been called');
     }
     const resolvedSpaceId =
       spaceId ?? this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     return {
       esClient: elasticsearch.client.asScoped(request).asCurrentUser,
-      getSoClient: () =>
-        savedObjects
-          .getScopedClient(request, { includedHiddenTypes: [ALERTING_V2_RULE_SO_TYPE] })
-          .asScopedToNamespace(resolvedSpaceId),
+      getRulesClient: alertingVTwo
+        ? () => alertingVTwo.getRulesClientWithRequestInSpace(request, asSpaceId(resolvedSpaceId))
+        : undefined,
       spaceId: resolvedSpaceId,
     };
   };

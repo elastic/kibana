@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -31,7 +32,7 @@ export type GetEpisodeLookup = (
   spaceId?: string
 ) => {
   esClient: ElasticsearchClient;
-  getSoClient: () => SavedObjectsClientContract;
+  getRulesClient?: () => Promise<RulesClientApi>;
   spaceId: string;
 };
 

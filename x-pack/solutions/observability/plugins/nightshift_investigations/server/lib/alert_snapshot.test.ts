@@ -7,7 +7,7 @@
 
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { errors } from '@elastic/elasticsearch';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import Boom from '@hapi/boom';
 import { fetchInvestigationAlertSnapshots, parseAlertSnapshot } from './alert_snapshot';
 
 const alert = {
@@ -74,13 +74,16 @@ describe('fetchInvestigationAlertSnapshots', () => {
   });
 
   const makeLookup = ({
-    bulkGet = jest.fn().mockResolvedValue({
-      saved_objects: [{ id: 'v2-rule', attributes: { metadata: { name: 'V2 rule' } } }],
-    }),
+    getRules = jest.fn().mockResolvedValue([{ id: 'v2-rule', metadata: { name: 'V2 rule' } }]),
     queryError,
     columns = [] as string[],
     rows = [] as unknown[][],
-  }: { bulkGet?: jest.Mock; queryError?: Error; columns?: string[]; rows?: unknown[][] } = {}) => ({
+  }: {
+    getRules?: jest.Mock;
+    queryError?: Error;
+    columns?: string[];
+    rows?: unknown[][];
+  } = {}) => ({
     esClient: {
       esql: {
         query: queryError
@@ -91,8 +94,8 @@ describe('fetchInvestigationAlertSnapshots', () => {
             }),
       },
     },
-    bulkGet,
-    getSoClient: jest.fn().mockReturnValue({ bulkGet }),
+    getRules,
+    getRulesClient: jest.fn().mockResolvedValue({ getRules }),
     spaceId: 'default',
   });
 
@@ -116,17 +119,26 @@ describe('fetchInvestigationAlertSnapshots', () => {
     ]);
     expect(alertsClient.find).toHaveBeenCalledTimes(1);
     expect(lookup.esClient.esql.query).not.toHaveBeenCalled();
-    expect(lookup.getSoClient).not.toHaveBeenCalled();
+    expect(lookup.getRulesClient).not.toHaveBeenCalled();
   });
 
   it('resolves ids the alerts index misses as v2 episodes, keeping the requested order', async () => {
     const alertsClient = makeAlertsClient();
     const lookup = makeLookup({
-      columns: ['episode_id', 'start', 'status', 'rule_id', 'group_hash', 'data_json'],
+      columns: [
+        'episode.id',
+        'first_timestamp',
+        'last_timestamp',
+        'episode.status',
+        'rule.id',
+        'group_hash',
+        'episode_data',
+      ],
       rows: [
         [
           'episode-1',
           '2026-09-02T10:00:00.000Z',
+          '2026-09-02T10:05:00.000Z',
           'active',
           'v2-rule',
           'hash',
@@ -142,6 +154,8 @@ describe('fetchInvestigationAlertSnapshots', () => {
         alert_version: 'v2',
         id: 'episode-1',
         rule_name: 'V2 rule',
+        start: '2026-09-02T10:00:00.000Z',
+        last_event_timestamp: '2026-09-02T10:05:00.000Z',
         data: { 'host.name': 'h1' },
       }),
       expect.objectContaining({ id: 'alert-1' }),
@@ -150,13 +164,26 @@ describe('fetchInvestigationAlertSnapshots', () => {
   });
 
   it('leaves the rule name unset when the user cannot read the rule', async () => {
-    const bulkGet = jest
-      .fn()
-      .mockRejectedValue(SavedObjectsErrorHelpers.decorateForbiddenError(new Error('forbidden')));
     const lookup = makeLookup({
-      bulkGet,
-      columns: ['episode_id', 'start', 'status', 'rule_id', 'group_hash'],
-      rows: [['episode-1', '2026-09-02T10:00:00.000Z', 'active', 'v2-rule', 'hash']],
+      getRules: jest.fn().mockRejectedValue(Boom.forbidden('forbidden')),
+      columns: [
+        'episode.id',
+        'first_timestamp',
+        'last_timestamp',
+        'episode.status',
+        'rule.id',
+        'group_hash',
+      ],
+      rows: [
+        [
+          'episode-1',
+          '2026-09-02T10:00:00.000Z',
+          '2026-09-02T10:05:00.000Z',
+          'active',
+          'v2-rule',
+          'hash',
+        ],
+      ],
     });
 
     const [snapshot] = await run(makeAlertsClient({ alerts: [] }), lookup, ['episode-1']);

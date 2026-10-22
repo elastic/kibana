@@ -8,12 +8,16 @@
 import Boom from '@hapi/boom';
 import { esql } from '@elastic/esql';
 import { isResponseError } from '@kbn/es-errors';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import {
-  SavedObjectsErrorHelpers,
-  type ElasticsearchClient,
-  type SavedObjectsClientContract,
-} from '@kbn/core/server';
-import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+  ALERT_EPISODE_FIELDS,
+  asTypedEsqlQuery,
+  buildEpisodesBaseQuery,
+  rowsFromEsql,
+  type AlertEpisodeEsqlRow,
+} from '@kbn/alerting-v2-common-queries';
+import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -45,8 +49,6 @@ import {
   type AlertSnapshot,
   type V2AlertSnapshot,
 } from '../../common';
-
-export const ALERTING_V2_RULE_SO_TYPE = 'alerting_rule';
 
 const INVESTIGABLE_RULE_TYPE_IDS = [
   ...OBSERVABILITY_RULE_TYPE_IDS,
@@ -87,7 +89,7 @@ export const parseAlertSnapshot = (alert: Record<string, unknown>): AlertSnapsho
 
 export interface EpisodeLookup {
   esClient: ElasticsearchClient;
-  getSoClient: () => SavedObjectsClientContract;
+  getRulesClient?: () => Promise<RulesClientApi>;
   spaceId: string;
 }
 
@@ -129,27 +131,18 @@ const fetchClassicSnapshots = async (
 };
 
 const fetchRuleNames = async (
-  getSoClient: () => SavedObjectsClientContract,
+  getRulesClient: EpisodeLookup['getRulesClient'],
   ruleIds: string[]
 ): Promise<Map<string, string>> => {
-  if (!ruleIds.length) {
+  if (!getRulesClient || !ruleIds.length) {
     return new Map();
   }
-  const { saved_objects: rules } = await getSoClient()
-    .bulkGet<{ metadata?: { name?: string } }>(
-      ruleIds.map((id) => ({ type: ALERTING_V2_RULE_SO_TYPE, id }))
-    )
-    .catch((error) => {
-      if (SavedObjectsErrorHelpers.isForbiddenError(error)) return { saved_objects: [] };
-      throw error;
-    });
-  return new Map(
-    rules.flatMap((rule) =>
-      'attributes' in rule && rule.attributes.metadata?.name
-        ? [[rule.id, rule.attributes.metadata.name]]
-        : []
-    )
-  );
+  const rulesClient = await getRulesClient();
+  const rules = await rulesClient.getRules(ruleIds).catch((error) => {
+    if (Boom.isBoom(error) && [403, 404].includes(error.output.statusCode)) return [];
+    throw error;
+  });
+  return new Map(rules.map(({ id, metadata }) => [id, metadata.name]));
 };
 
 const isEventsUnavailable = (error: unknown): boolean =>
@@ -159,57 +152,45 @@ const isEventsUnavailable = (error: unknown): boolean =>
     (error.statusCode === 400 && /unknown index/i.test(error.message)));
 
 const fetchV2Snapshots = async (
-  { esClient, getSoClient, spaceId }: EpisodeLookup,
+  { esClient, getRulesClient, spaceId }: EpisodeLookup,
   episodeIds: string[]
 ): Promise<Map<string, V2AlertSnapshot>> => {
-  const episodeIdValues = episodeIds.map((episodeId) => esql.str(episodeId));
-  const { query } = esql`
-    FROM ${ALERT_EVENTS_DATA_STREAM} METADATA _source
-    | WHERE type == "alert" AND space_id == ${spaceId} AND episode.id IN (${episodeIdValues})
-    | EVAL data_json = JSON_EXTRACT(_source, "$.data"), episode_id = episode.id
-    | DROP _source
-    | STATS
-        start = MIN(@timestamp),
-        last_event_timestamp = MAX(@timestamp),
-        data_json = LAST(data_json, @timestamp) WHERE data_json != "{}",
-        status = LAST(episode.status, @timestamp),
-        severity = LAST(severity, @timestamp),
-        source = LAST(source, @timestamp),
-        rule_id = LAST(rule.id, @timestamp),
-        group_hash = LAST(group_hash, @timestamp)
-      BY episode_id`.toRequest();
+  const episodeQuery = buildEpisodesBaseQuery(spaceId).where`episode.id IN (${episodeIds.map(
+    (episodeId) => esql.str(episodeId)
+  )})`.keep(...ALERT_EPISODE_FIELDS);
+  const typedQuery = asTypedEsqlQuery<AlertEpisodeEsqlRow>(episodeQuery);
 
-  const response = await esClient.esql.query({ query, drop_null_columns: true }).catch((error) => {
-    if (isEventsUnavailable(error)) return undefined;
-    throw error;
-  });
+  const response = await esClient.esql
+    .query({ query: episodeQuery.print('basic') })
+    .catch((error) => {
+      if (isEventsUnavailable(error)) return undefined;
+      throw error;
+    });
   if (!response) {
     return new Map();
   }
 
-  const { columns, values } = response;
-  const rows = values.map((row) =>
-    Object.fromEntries(
-      columns.flatMap(({ name }, index) => (row[index] === null ? [] : [[name, row[index]]]))
-    )
-  );
-  const ruleNames = await fetchRuleNames(getSoClient, [
-    ...new Set(rows.flatMap(({ rule_id: ruleId }) => (typeof ruleId === 'string' ? [ruleId] : []))),
+  const episodes = rowsFromEsql(typedQuery, response as ESQLSearchResponse);
+  const ruleNames = await fetchRuleNames(getRulesClient, [
+    ...new Set(episodes.map((episode) => episode['rule.id'])),
   ]);
 
   return new Map(
-    rows.map(({ data_json: dataJson, episode_id: id, ...fields }) => {
+    episodes.map((episode) => {
       const snapshot = v2AlertSnapshotSchema.parse({
         alert_version: 'v2',
-        id,
-        ...fields,
-        rule_id: fields.rule_id ?? UNKNOWN,
-        group_hash: fields.group_hash ?? UNKNOWN,
-        status: fields.status ?? UNKNOWN,
-        rule_name: ruleNames.get(String(fields.rule_id)),
+        id: episode['episode.id'],
+        rule_id: episode['rule.id'],
+        rule_name: ruleNames.get(episode['rule.id']),
+        group_hash: episode.group_hash,
+        status: episode['episode.status'],
+        start: episode.first_timestamp,
+        last_event_timestamp: episode.last_timestamp,
+        severity: episode.severity ?? undefined,
+        source: episode.source ?? undefined,
         data: v2AlertSnapshotSchema.shape.data
           .catch(undefined)
-          .parse(typeof dataJson === 'string' ? JSON.parse(dataJson) : undefined),
+          .parse(episode.episode_data ? JSON.parse(episode.episode_data) : undefined),
       });
       return [snapshot.id, snapshot];
     })
