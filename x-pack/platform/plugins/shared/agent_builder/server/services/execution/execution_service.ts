@@ -41,7 +41,6 @@ import type {
   AgentExecutionService,
   AgentExecution,
   ConversationExecutionParams,
-  ExecutionConversationOrigin,
   ExecuteAgentParams,
   ExecuteAgentResult,
   MaybeExecuteAgentResult,
@@ -127,7 +126,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       interactive,
     } = args;
     const executionId = providedExecutionId ?? uuidv4();
-    const agentId = this.requestedAgentId(params);
     const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
     const interactivity = normalizeInteractive(interactive, mode);
     const executionClient = this.createExecutionClient();
@@ -145,7 +143,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       args.mode === AgentExecutionMode.conversation
         ? await this.resolveConversationRequest({
             params: args.params,
-            agentId,
             request,
             conversationClient,
             spaceId,
@@ -155,14 +152,14 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const conversation = resolvedConversation?.conversation;
     const validatedParams = conversationParams ?? (await this.validateAttachments(params, request));
     const receivedAt = resolvedConversation?.receivedAt ?? new Date();
-    const executionAgentId = conversationParams?.agentId ?? agentId;
+    const agentId = conversationParams?.agentId ?? this.requestedAgentId(params);
 
     if (
       params.reasoningLevel !== undefined &&
       !(await this.isIdempotentReplay({ executionClient, executionId, metadata }))
     ) {
       const connector = await this.resolveExecutionConnector({
-        agentId: executionAgentId,
+        agentId,
         connectorId: params.connectorId,
         request,
       });
@@ -179,7 +176,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       execution = await executionClient.create({
         executionMode: mode,
         executionId,
-        agentId: executionAgentId,
+        agentId,
         spaceId,
         owner: {
           id: owner.id,
@@ -295,7 +292,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const result = useScheduledTask
       ? await this.executeWithScheduledTask({
           executionId,
-          agentId: executionAgentId,
+          agentId,
           request,
           requestImmediateClaim,
         })
@@ -355,7 +352,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const conversationClient = await this.deps.conversationService.getScopedClient({ request });
     const { validatedParams, conversation, receivedAt } = await this.resolveConversationRequest({
       params,
-      agentId: this.requestedAgentId(params),
       request,
       conversationClient,
       spaceId: getCurrentSpaceId({ request, spaces: this.deps.spaces }),
@@ -805,13 +801,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
    */
   private async resolveConversationRequest({
     params,
-    agentId,
     request,
     conversationClient,
     spaceId,
   }: {
     params: ConversationExecutionParams;
-    agentId: string;
     request: KibanaRequest;
     conversationClient: ConversationClient;
     spaceId: string;
@@ -822,12 +816,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   }> {
     const validatedParams = await this.validateAttachments(params, request);
     const receivedAt = new Date();
-    const { origin, conversationId } = validatedParams;
+    const { origin } = validatedParams;
 
     const resolved = await this.resolveConversation({
-      conversationId,
-      agentId,
-      origin,
+      params: validatedParams,
       spaceId,
       request,
       conversationClient,
@@ -853,20 +845,19 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
    * ones its origin resolves to. No conversation id starts a new conversation.
    */
   private async resolveConversation({
-    conversationId,
-    agentId,
-    origin,
+    params,
     spaceId,
     request,
     conversationClient,
   }: {
-    conversationId?: string;
-    agentId: string;
-    origin?: ExecutionConversationOrigin;
+    params: ConversationExecutionParams;
     spaceId: string;
     request: KibanaRequest;
     conversationClient: ConversationClient;
   }): Promise<{ conversationId?: string; agentId: string }> {
+    const { conversationId, origin } = params;
+    const agentId = this.requestedAgentId(params);
+
     if (conversationId || !origin) {
       return { conversationId, agentId };
     }
