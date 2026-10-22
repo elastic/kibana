@@ -655,6 +655,8 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_MANAGE_RULE_FAILED: 'AGENT_BUILDER_MANAGE_RULE_FAILED',
   /** `manage_action_policy` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
+  /** `link_rule_to_action_policy` / `link_action_policy_to_rule` failed; returns an error result. */
+  AGENT_BUILDER_LINK_ROUTING_TAG_FAILED: 'AGENT_BUILDER_LINK_ROUTING_TAG_FAILED',
   /** Workflow validation service call failed while checking a destination workflow; diagnostics for that destination are skipped. */
   AGENT_BUILDER_ACTION_POLICY_WORKFLOW_VALIDATION_FAILED:
     'AGENT_BUILDER_ACTION_POLICY_WORKFLOW_VALIDATION_FAILED',

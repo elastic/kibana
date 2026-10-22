@@ -63,14 +63,18 @@ describe('createRuleAuthoringSkill', () => {
     expect(uiSettings.get).not.toHaveBeenCalled();
   });
 
-  it('exposes only the manage rule inline tool', async () => {
+  it('exposes the manage rule and link rule inline tools', async () => {
     const skill = createRuleAuthoringSkill(createDeps());
 
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
     const inlineToolIds = inlineTools.map((tool) => tool.id);
 
-    expect(inlineToolIds).toEqual([ALERTING_TOOL_IDS.manageRule]);
+    expect(inlineToolIds).toEqual([
+      ALERTING_TOOL_IDS.manageRule,
+      ALERTING_TOOL_IDS.linkRuleToActionPolicy,
+    ]);
     expect(inlineToolIds).not.toContain(ALERTING_TOOL_IDS.manageActionPolicy);
+    expect(inlineToolIds).not.toContain(ALERTING_TOOL_IDS.linkActionPolicyToRule);
   });
 
   it('defers notification and action policy setup to the action-policy-authoring skill', () => {
@@ -79,6 +83,7 @@ describe('createRuleAuthoringSkill', () => {
     expect(skill.description).toContain(ACTION_POLICY_AUTHORING_SKILL_ID);
     expect(skill.content).toContain(ACTION_POLICY_AUTHORING_SKILL_ID);
     expect(skill.content).toContain('Would you like to set up email notifications for this rule?');
+    expect(skill.content).toContain(ALERTING_TOOL_IDS.linkRuleToActionPolicy);
     expect(skill.content).not.toContain('Part 2: Action Policies');
     expect(skill.content).not.toContain('Part 3: Default Notification Setup');
   });
