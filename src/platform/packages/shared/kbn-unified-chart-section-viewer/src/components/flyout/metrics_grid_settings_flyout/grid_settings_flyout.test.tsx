@@ -89,7 +89,7 @@ describe('GridSettingsFlyout', () => {
     ).toBeInTheDocument();
     expect(counterSelect.getSelected()).toContain('Sum');
     expect(gaugeSelect.getSelected()).toContain('Average');
-    expect(histogramSelect.getSelected()).toContain('95th percentile');
+    expect(histogramSelect.getSelected()).toContain('p95');
     expect(screen.getByTestId('metricsExperienceGridSettingsDistributionChoice')).toHaveAttribute(
       'aria-pressed',
       'true'
@@ -182,7 +182,7 @@ describe('GridSettingsFlyout', () => {
       />
     );
 
-    expect(histogramSelect.getSelected()).toContain('95th percentile');
+    expect(histogramSelect.getSelected()).toContain('p95');
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsDistributionChoice'));
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsApplyButton'));
 
@@ -239,7 +239,7 @@ describe('GridSettingsFlyout', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('hides the Distribution choice and shows the 95th percentile when heatmaps are disabled', () => {
+  it('hides the Distribution choice and shows p95 when heatmaps are disabled', () => {
     renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
@@ -249,7 +249,7 @@ describe('GridSettingsFlyout', () => {
       { isHeatmapsEnabled: false }
     );
 
-    expect(histogramSelect.getSelected()).toContain('95th percentile');
+    expect(histogramSelect.getSelected()).toContain('p95');
     expect(
       screen.getByTestId('metricsExperienceGridSettingsAggregationAccordion')
     ).toBeInTheDocument();
@@ -275,7 +275,7 @@ describe('GridSettingsFlyout', () => {
       { isHeatmapsEnabled: false }
     );
 
-    expect(histogramSelect.getSelected()).toContain('90th percentile');
+    expect(histogramSelect.getSelected()).toContain('p90');
     expect(
       screen.queryByTestId('metricsExperienceGridSettingsDistributionChoice')
     ).not.toBeInTheDocument();

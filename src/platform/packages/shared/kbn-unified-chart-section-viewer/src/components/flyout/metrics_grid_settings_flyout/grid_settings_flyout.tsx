@@ -65,7 +65,7 @@ const getPercentileFieldLabel = (visualization: HistogramVisualization): string 
   switch (visualization) {
     case 'lnsXY':
       return i18n.translate('metricsExperience.gridSettingsFlyout.percentileTypeLabel', {
-        defaultMessage: 'Percentile type',
+        defaultMessage: 'Percentile',
       });
     case 'lnsHeatmap':
       return i18n.translate('metricsExperience.gridSettingsFlyout.percentileFallbackLabel', {
@@ -116,12 +116,12 @@ export const GridSettingsFlyout = ({
   const [draftSettings, setDraftSettings] = useState<MetricsGridSettings>(gridSettings);
   const percentileFallbackHint = getPercentileFallbackHint(draftSettings.histogramVisualization);
   const histogramLabel = i18n.translate('metricsExperience.gridSettingsFlyout.histogramLabel', {
-    defaultMessage: 'Histogram',
+    defaultMessage: 'Percentile',
   });
   const histogramDisplayLabel = i18n.translate(
     'metricsExperience.gridSettingsFlyout.histogramDisplayLabel',
     {
-      defaultMessage: 'Data display',
+      defaultMessage: 'Display',
     }
   );
   const percentileFieldLabel = isHeatmapsEnabled
