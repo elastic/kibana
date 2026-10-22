@@ -275,9 +275,8 @@ export class DatePicker {
         containerLocator
       );
       // Note: data-date-range stores ISO 8601 strings (e.g. "2025-01-01T00:00:00.000Z"),
-      // not the human-readable format passed as `from`/`to`. Matching it would require
-      // resolving `dateFormat:tz`, which this page object cannot read, so we assert
-      // visibility only to confirm the picker updated.
+      // not the human-readable format passed as `from`/`to`. We assert visibility only
+      // to confirm the picker updated without risking a format-mismatch failure.
       await expect(
         controlButton,
         `Date picker should reflect the updated time range`
