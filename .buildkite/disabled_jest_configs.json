@@ -1,3 +1,4 @@
 [
+  "src/core/packages/core/server/integration_tests/saved_objects/serverless/migrations/jest.integration.config.js",
   "src/platform/packages/private/kbn-workflow-step-schema-cli/integration_tests/jest.integration.config.js"
 ]

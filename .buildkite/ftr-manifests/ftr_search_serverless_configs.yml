@@ -2,7 +2,6 @@ disabled:
   # Base config files, only necessary to inform config finding script
   - x-pack/platform/test/serverless/functional/config.search.base.ts
 
-enabled:
   - x-pack/solutions/search/test/serverless/api_integration/configs/config.ts
   - x-pack/solutions/search/test/serverless/functional/configs/config.ts
   - x-pack/solutions/search/test/serverless/functional/configs/config.search_features.ts
@@ -15,3 +14,5 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/search/config.group8.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group18.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group19.ts
+
+enabled:

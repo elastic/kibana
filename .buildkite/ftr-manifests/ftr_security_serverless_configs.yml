@@ -29,7 +29,6 @@ disabled:
   - x-pack/solutions/security/test/serverless/api_integration/configs/config.feature_flags.ts
   - x-pack/solutions/security/test/serverless/functional/configs/config.feature_flags.ts
 
-enabled:
   - x-pack/solutions/security/test/serverless/api_integration/configs/config.ts
   - x-pack/solutions/security/test/serverless/api_integration/configs/config.graph.ts
   - x-pack/solutions/security/test/serverless/api_integration/configs/config.graph_essentials.ts
@@ -156,3 +155,5 @@ enabled:
   # serverless config files that run deployment-agnostic tests
   - x-pack/platform/test/spaces_api_integration/deployment_agnostic/security_and_spaces/serverless.config.ts
   - x-pack/platform/test/spaces_api_integration/deployment_agnostic/security_and_spaces/serverless.copy_to_space.config.ts
+
+enabled:
