@@ -13,7 +13,7 @@ import { z as z4 } from '@kbn/zod/v4';
 import type { ActionType } from '../../common';
 import type { ActionTypeRegistry } from '../action_type_registry';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
-import type { ActionsConfigurationUtilities } from '../actions_config';
+import { actionsConfigMock } from '../actions_config.mock';
 import { actionsAuthorizationMock } from '../authorization/actions_authorization.mock';
 import { SpecsClient } from './specs_client';
 import type { SpecsClientOpts } from './types';
@@ -63,11 +63,7 @@ const serverLogRow = createActionType('.server-log', {
   source: ACTION_TYPE_SOURCES.stack,
 });
 
-const configurationUtilities = {
-  getWebhookSettings: () => ({ ssl: { pfx: { enabled: true } } }),
-  isEarsEnabled: () => false,
-  isEarsExperimentalEnabled: () => false,
-} as unknown as ActionsConfigurationUtilities;
+const configurationUtilities = actionsConfigMock.create();
 
 const createClient = (opts: Partial<SpecsClientOpts> = {}) =>
   new SpecsClient({

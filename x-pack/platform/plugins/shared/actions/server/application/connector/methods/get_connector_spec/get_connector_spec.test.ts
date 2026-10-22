@@ -213,6 +213,7 @@ describe('getConnectorSpecAsJsonSchema', () => {
       expect(typeof action.name).toBe('string');
       expect(action).toHaveProperty('isTool');
       expect(typeof action.isTool).toBe('boolean');
+      expect(typeof action.scope).toBe('string');
       expect(action).not.toHaveProperty('inputSchema');
     }
   });

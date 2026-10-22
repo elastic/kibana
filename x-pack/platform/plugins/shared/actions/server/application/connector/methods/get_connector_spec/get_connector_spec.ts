@@ -31,7 +31,7 @@ export async function getConnectorSpecAsJsonSchema({
       name,
       isTool,
       ...(description !== undefined ? { description } : {}),
-      ...(scope !== undefined ? { scope } : {}),
+      scope,
     })),
   };
 }
