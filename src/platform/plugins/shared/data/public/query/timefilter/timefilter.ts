@@ -16,12 +16,11 @@ import type { RefreshInterval } from '@kbn/data-service-server';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
 import type { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
 import type { NowProviderInternalContract } from '../../now_provider';
-import { getTime, getRelativeTime } from '../../../common';
+import { calculateBounds, getAbsoluteTimeRange, getTime, getRelativeTime } from '../../../common';
 import type { TimeFilterable } from '../../../common/query/timefilter/get_time';
 import type { TimeHistoryContract } from './time_history';
 import type { AutoRefreshDoneFn } from './lib/auto_refresh_loop';
 import { createAutoRefreshLoop } from './lib/auto_refresh_loop';
-import { calculateRoundedBounds, getRoundedAbsoluteTimeRange } from './lib/rounded_bounds';
 import type { TimefilterHook } from './use_timefilter';
 import { createUseTimefilterHook } from './use_timefilter';
 
@@ -130,7 +129,7 @@ export class Timefilter {
    * Same as {@link getTime}, but also converts relative time range to absolute time range
    */
   public getAbsoluteTime() {
-    return getRoundedAbsoluteTimeRange(this._time, this.nowProvider.get());
+    return getAbsoluteTimeRange(this._time, { forceNow: this.nowProvider.get() });
   }
 
   /** Sets the time (moment input is stored as ISO strings) and emits when it changes. */
@@ -223,9 +222,9 @@ export class Timefilter {
    * One use case is keeping different elements embedded in the same UI in sync.
    */
   public createFilter = (indexPattern: TimeFilterable, timeRange?: TimeRange) => {
-    const forceNow = this.nowProvider.get();
-    const absoluteTimeRange = getRoundedAbsoluteTimeRange(timeRange ?? this._time, forceNow);
-    return getTime(indexPattern, absoluteTimeRange, { forceNow });
+    return getTime(indexPattern, timeRange ? timeRange : this._time, {
+      forceNow: this.nowProvider.get(),
+    });
   };
 
   /**
@@ -247,7 +246,7 @@ export class Timefilter {
   }
 
   public calculateBounds(timeRange: TimeRange): TimeRangeBounds {
-    return calculateRoundedBounds(timeRange, this.nowProvider.get());
+    return calculateBounds(timeRange, { forceNow: this.nowProvider.get() });
   }
 
   public getActiveBounds(): TimeRangeBounds | undefined {

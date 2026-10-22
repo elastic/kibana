@@ -173,7 +173,7 @@ export const TIME_RANGE_RESOLUTION: Unit = 's';
 const isUnit = (token: string): token is Unit => Object.hasOwn(unitsMap, token);
 
 const getRelativeUnits = (value: string): Unit[] => {
-  if (!value.startsWith('now')) return [];
+  if (typeof value !== 'string' || !value.startsWith('now')) return [];
   const tokens: string[] = value.slice(3).match(/ms|[a-zA-Z]/g) ?? [];
   return tokens.filter(isUnit);
 };
