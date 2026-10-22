@@ -63,6 +63,7 @@ import type { StateMachineDefinition, StateMachineStates } from './state_machine
 import { handleState } from './state_machine';
 import { stepCreateAlertingAssets } from './steps/step_create_alerting_assets';
 import { cleanupEsqlViewsStep, stepInstallEsqlViews } from './steps/step_install_esql_views';
+import { stepInstallWorkflows } from './steps/step_install_workflows';
 import { stepResolveDependencies } from './steps/step_resolve_dependencies';
 
 export interface InstallContext extends StateContext<StateNames> {
@@ -178,6 +179,11 @@ export const regularStatesDefinition: StateMachineStates<StateNames> = {
   },
   resolve_kibana_promise: {
     onTransition: stepResolveKibanaPromise,
+    nextState: INSTALL_STATES.INSTALL_WORKFLOWS,
+    onPostTransition: updateLatestExecutedState,
+  },
+  install_workflows: {
+    onTransition: stepInstallWorkflows,
     nextState: INSTALL_STATES.CREATE_ALERTING_ASSETS,
     onPostTransition: updateLatestExecutedState,
   },
@@ -206,6 +212,11 @@ export const streamingStatesDefinition: StateMachineStates<string> = {
   },
   install_kibana_assets: {
     onTransition: stepInstallKibanaAssetsWithStreaming,
+    nextState: INSTALL_STATES.INSTALL_WORKFLOWS,
+    onPostTransition: updateLatestExecutedState,
+  },
+  install_workflows: {
+    onTransition: stepInstallWorkflows,
     nextState: INSTALL_STATES.SAVE_ARCHIVE_ENTRIES,
     onPostTransition: updateLatestExecutedState,
   },

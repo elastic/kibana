@@ -159,6 +159,13 @@ export const epmRouteService = {
     ); // trim trailing slash
   },
 
+  getInstallWorkflowAssetsPath: (pkgName: string, pkgVersion: string) => {
+    return buildPath(EPM_API_ROUTES.INSTALL_WORKFLOW_ASSETS_PATTERN, {
+      pkgName,
+      pkgVersion,
+    }).replace(/\/$/, ''); // trim trailing slash
+  },
+
   getUpdatePath: (pkgName: string, pkgVersion: string) => {
     return buildPath(EPM_API_ROUTES.INFO_PATTERN, { pkgName, pkgVersion });
   },

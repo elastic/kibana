@@ -1278,6 +1278,21 @@ export const InstallRuleAssetsRequestSchema = {
   ),
 };
 
+export const InstallWorkflowAssetsRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string({ maxLength: 255, meta: { description: 'Package name' } }),
+    pkgVersion: schema.string({ maxLength: 255, meta: { description: 'Package version' } }),
+  }),
+  body: schema.nullable(
+    schema.object(
+      {
+        force: schema.maybe(schema.boolean()),
+      },
+      { meta: { id: 'install_workflow_assets_request' } }
+    )
+  ),
+};
+
 export const DeleteKibanaAssetsRequestSchema = {
   params: schema.object({
     pkgName: schema.string({ meta: { description: 'Package name' } }),

@@ -155,7 +155,15 @@ export interface RegisteredManagedWorkflowsLifecycleApi {
 
 export interface ManagedWorkflowsSystemApi
   extends RegisteredManagedWorkflowsLifecycleApi,
-    ManagedWorkflowStateApi {}
+    ManagedWorkflowStateApi {
+  /**
+   * Whether Workflows is currently available (license and `workflowsManagement.available`).
+   * It is live and follows license changes, so check it on each use rather than caching it.
+   * When `false`, `install`, `uninstall` and `ready` silently no-op and the status and state
+   * reads throw.
+   */
+  isWorkflowsAvailable: boolean;
+}
 
 /**
  * Plugin-bound API for managed workflow operations that do not require a Kibana request.
@@ -202,6 +210,8 @@ export interface ManagedWorkflowsApi {
 export interface PluginScopedManagedWorkflowsApi
   extends RegisteredManagedWorkflowsLifecycleApi,
     ManagedWorkflowStateApi {
+  /** See {@link ManagedWorkflowsSystemApi.isWorkflowsAvailable}. */
+  isWorkflowsAvailable: boolean;
   execute: (
     request: KibanaRequest,
     id: ManagedWorkflowId,
