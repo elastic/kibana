@@ -279,7 +279,9 @@ export const ProfileDetailsPage = () => {
     },
     {
       field: 'size_in_bytes',
-      name: i18n.translate('xpack.boost.profileDetails.sizeColumn', { defaultMessage: 'Size' }),
+      name: i18n.translate('xpack.boost.profileDetails.storageSizeColumn', {
+        defaultMessage: 'Storage size',
+      }),
       width: '9em',
       sortable: true,
       dataType: 'number',
@@ -312,7 +314,8 @@ export const ProfileDetailsPage = () => {
                 testId: 'boostProfileDetailsEdit',
               },
               items: [
-                duplicateItem,
+                // Copying a profile is occasional, so it waits in the menu with Delete.
+                { ...duplicateItem, overflow: true },
                 {
                   id: 'delete',
                   label: i18n.translate('xpack.boost.profileDetails.deleteAction', {
@@ -376,8 +379,8 @@ export const ProfileDetailsPage = () => {
                   description: formatDataSourceCount(profile.type, usedBy.length),
                 },
                 {
-                  title: i18n.translate('xpack.boost.profileDetails.data', {
-                    defaultMessage: 'Data',
+                  title: i18n.translate('xpack.boost.profileDetails.storageSize', {
+                    defaultMessage: 'Storage size',
                   }),
                   description: formatSize(sizeInBytes),
                 },

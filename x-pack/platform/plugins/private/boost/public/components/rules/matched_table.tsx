@@ -265,7 +265,9 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
       : []),
     {
       field: 'size_in_bytes',
-      name: i18n.translate('xpack.boost.matchedTable.sizeColumn', { defaultMessage: 'Size' }),
+      name: i18n.translate('xpack.boost.matchedTable.storageSizeColumn', {
+        defaultMessage: 'Storage size',
+      }),
       width: '9em',
       sortable: true,
       dataType: 'number',

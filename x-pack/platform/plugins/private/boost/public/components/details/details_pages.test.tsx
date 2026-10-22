@@ -39,7 +39,7 @@ jest.mock('@kbn/app-header', () => {
       badges?: Array<{ label: string; color?: string }>;
       menu?: {
         primaryActionItem?: { label: string };
-        items?: Array<{ id: string; label: string; disableButton?: boolean }>;
+        items?: Array<{ id: string; label: string; disableButton?: boolean; overflow?: boolean }>;
       };
     }) =>
       createElement(
@@ -51,8 +51,13 @@ jest.mock('@kbn/app-header', () => {
         ),
         menu?.primaryActionItem &&
           createElement('button', { key: 'primary' }, menu.primaryActionItem.label),
-        ...(menu?.items ?? []).map(({ id, label, disableButton }) =>
-          createElement('button', { key: id, disabled: disableButton === true }, label)
+        // Items in the overflow menu are marked, as they're out of view until it opens.
+        ...(menu?.items ?? []).map(({ id, label, disableButton, overflow }) =>
+          createElement(
+            'button',
+            { key: id, disabled: disableButton === true, 'data-overflow': overflow === true },
+            label
+          )
         )
       ),
     AppHeaderLoading: () => null,
@@ -186,6 +191,10 @@ describe('ProfileDetailsPage', () => {
     expect(getHeader().getByText('Indices')).toBeInTheDocument();
     expect(getHeader().queryByText('Managed')).not.toBeInTheDocument();
     expect(getHeader().getByRole('button', { name: 'Edit profile' })).toBeInTheDocument();
+    expect(getHeader().getByRole('button', { name: 'Duplicate' })).toHaveAttribute(
+      'data-overflow',
+      'true'
+    );
     expect(getHeader().getByRole('button', { name: 'Delete' })).toBeEnabled();
 
     const settings = screen.getByTestId('boostProfileSettings');
@@ -250,7 +259,15 @@ describe('RuleDetailsPage', () => {
 
     expect(getHeader().getByRole('heading', { name: 'catalogs' })).toBeInTheDocument();
     expect(getHeader().getByRole('button', { name: 'Edit rule' })).toBeInTheDocument();
-    expect(getHeader().getByRole('button', { name: 'Delete' })).toBeInTheDocument();
+    // Duplicate and Delete wait in the overflow menu.
+    expect(getHeader().getByRole('button', { name: 'Duplicate' })).toHaveAttribute(
+      'data-overflow',
+      'true'
+    );
+    expect(getHeader().getByRole('button', { name: 'Delete' })).toHaveAttribute(
+      'data-overflow',
+      'true'
+    );
 
     const settings = screen.getByTestId('boostRuleSettings');
     expect(within(settings).getByRole('link', { name: 'catalog-search' })).toBeInTheDocument();
@@ -260,6 +277,7 @@ describe('RuleDetailsPage', () => {
     const usage = screen.getByTestId('boostRuleUsage');
     expect(usage).toHaveTextContent('Matches2 indices');
     expect(usage).toHaveTextContent('Applies to1 index');
+    expect(usage).toHaveTextContent(/Storage size\d/);
 
     const matched = screen.getByTestId('boostRuleMatched');
     expect(within(matched).getByRole('heading', { name: 'Matching indices' })).toBeInTheDocument();

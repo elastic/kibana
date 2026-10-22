@@ -128,6 +128,8 @@ export const RuleDetailsPage = () => {
                         defaultMessage: 'Duplicate',
                       }),
                       iconType: 'copy',
+                      // Copying a rule is occasional, so it waits in the menu with Delete.
+                      overflow: true,
                       run: () => setFlyout('duplicate'),
                       testId: 'boostRuleDetailsDuplicate',
                     },
@@ -219,8 +221,8 @@ export const RuleDetailsPage = () => {
                   description: formatDataSourceCount(type, applied.length),
                 },
                 {
-                  title: i18n.translate('xpack.boost.ruleDetails.data', {
-                    defaultMessage: 'Data',
+                  title: i18n.translate('xpack.boost.ruleDetails.storageSize', {
+                    defaultMessage: 'Storage size',
                   }),
                   description: formatSize(sizeInBytes),
                 },
