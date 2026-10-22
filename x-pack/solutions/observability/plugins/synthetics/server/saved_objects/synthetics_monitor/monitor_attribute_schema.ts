@@ -20,19 +20,22 @@ import {
   TLSVersion,
   VerificationMode,
 } from '../../../common/runtime_types/monitor_management/monitor_configs';
+import {
+  AUTH_INLINE_CONF_MAX,
+  AUTH_STRING_MAX,
+} from '../../../common/runtime_types/schemas/monitor_configs';
+import {
+  MAX_MONITOR_FANOUT_SIZE,
+  MAX_PARAM_VALUE_LENGTH,
+  MAX_ROUTE_STRING_LENGTH,
+} from '../../../routes/zod_query';
 
-// Same caps as the monitor route schemas. Bounds stop an unbounded attribute
-// from being stored; they are not a tighter product limit.
-const SHORT_STRING = 4096;
-const LONG_STRING = 1_000_000;
-const AUTH_INLINE = 131_072;
-const MAX_ITEMS = 1000;
 // `secrets` is the JSON of every secret field, so it has to hold more than one script.
-const SECRETS_STRING = 8_000_000;
+const SECRETS_STRING = MAX_PARAM_VALUE_LENGTH * 8;
 
-const shortString = () => schema.string({ maxLength: SHORT_STRING });
-const longString = () => schema.string({ maxLength: LONG_STRING });
-const stringArray = () => schema.arrayOf(shortString(), { maxSize: MAX_ITEMS });
+const shortString = () => schema.string({ maxLength: MAX_ROUTE_STRING_LENGTH });
+const longString = () => schema.string({ maxLength: MAX_PARAM_VALUE_LENGTH });
+const stringArray = () => schema.arrayOf(shortString(), { maxSize: MAX_MONITOR_FANOUT_SIZE });
 
 const literals = (values: readonly string[]) =>
   schema.oneOf(values.map((value) => schema.literal(value)) as [Type<string>, ...Type<string>[]]);
@@ -72,12 +75,12 @@ const alertStatusSchema = loose({
 
 const stringRecord = () =>
   schema.recordOf(
-    schema.string({ maxLength: SHORT_STRING }),
-    schema.string({ maxLength: LONG_STRING })
+    schema.string({ maxLength: MAX_ROUTE_STRING_LENGTH }),
+    schema.string({ maxLength: MAX_PARAM_VALUE_LENGTH })
   );
 
-const authString = () => schema.string({ maxLength: SHORT_STRING });
-const authInline = () => schema.string({ maxLength: AUTH_INLINE });
+const authString = () => schema.string({ maxLength: AUTH_STRING_MAX });
+const authInline = () => schema.string({ maxLength: AUTH_INLINE_CONF_MAX });
 
 const kerberosSchema = schema.object({
   enabled: schema.boolean(),
@@ -140,7 +143,9 @@ export const monitorCreateSchema = schema.object({
   [ConfigKey.TAGS]: stringArray(),
   // A location is a service or private location object. Tests also store a location id string.
   [ConfigKey.LOCATIONS]: schema.maybe(
-    schema.arrayOf(schema.oneOf([shortString(), locationSchema]), { maxSize: MAX_ITEMS })
+    schema.arrayOf(schema.oneOf([shortString(), locationSchema]), {
+      maxSize: MAX_MONITOR_FANOUT_SIZE,
+    })
   ),
   [ConfigKey.APM_SERVICE_NAME]: schema.maybe(shortString()),
   [ConfigKey.MONITOR_QUERY_ID]: schema.maybe(shortString()),
@@ -194,7 +199,7 @@ export const monitorCreateSchema = schema.object({
   [ConfigKey.USERNAME]: schema.maybe(longString()),
   [ConfigKey.PROXY_HEADERS]: schema.maybe(stringRecord()),
   [ConfigKey.RESPONSE_JSON_CHECK]: schema.maybe(
-    schema.arrayOf(responseJsonCheckSchema, { maxSize: MAX_ITEMS })
+    schema.arrayOf(responseJsonCheckSchema, { maxSize: MAX_MONITOR_FANOUT_SIZE })
   ),
   [ConfigKey.KERBEROS]: schema.maybe(kerberosSchema),
   [ConfigKey.NTLM]: schema.maybe(ntlmSchema),
@@ -208,7 +213,7 @@ export const monitorCreateSchema = schema.object({
   [ConfigKey.JOURNEY_FILTERS_TAGS]: schema.maybe(stringArray()),
   [ConfigKey.IGNORE_HTTPS_ERRORS]: schema.maybe(schema.boolean()),
   [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: schema.maybe(
-    schema.oneOf([longString(), schema.arrayOf(longString(), { maxSize: MAX_ITEMS })])
+    schema.oneOf([longString(), schema.arrayOf(longString(), { maxSize: MAX_MONITOR_FANOUT_SIZE })])
   ),
   [ConfigKey.THROTTLING_CONFIG]: schema.maybe(
     loose({
@@ -219,7 +224,7 @@ export const monitorCreateSchema = schema.object({
   ),
   [ConfigKey.SYNTHETICS_ARGS]: schema.maybe(stringArray()),
   [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: schema.maybe(
-    schema.oneOf([longString(), schema.arrayOf(longString(), { maxSize: MAX_ITEMS })])
+    schema.oneOf([longString(), schema.arrayOf(longString(), { maxSize: MAX_MONITOR_FANOUT_SIZE })])
   ),
   [ConfigKey.TLS_CERTIFICATE]: schema.maybe(longString()),
   [ConfigKey.TLS_VERIFICATION_MODE]: schema.maybe(literals(Object.values(VerificationMode))),
