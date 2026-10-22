@@ -51,7 +51,7 @@ export function SharedSettingsSection({
       <EuiTitle size="xs">
         <h3>
           {i18n.translate('xpack.ingestHub.sharedSettings.title', {
-            defaultMessage: 'Shared settings',
+            defaultMessage: 'Integration settings',
           })}{' '}
           <EuiIconTip
             type="info"
