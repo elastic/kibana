@@ -270,8 +270,9 @@ export class StreamsApp {
     return this.page.locator(`.react-flow__node[aria-label="${ariaLabel}"]`);
   }
 
+  /** Edge ids contain `->`, which `testSubj` selectors would read as a child combinator. */
   getCanvasEdge(edgeId: string) {
-    return this.page.testSubj.locator(`streamsCanvasEdge-${edgeId}`);
+    return this.page.locator(`[data-test-subj="streamsCanvasEdge-${edgeId}"]`);
   }
 
   /**
