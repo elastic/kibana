@@ -161,7 +161,7 @@ steps:
 
   # ---------------------------------------------------------------------------
   # 2. Open an Investigation conversation seeded from the `investigation`
-  #    template. Seeds status, severity, and the workflow_execution_ids that link
+  #    template. Seeds status and the workflow_execution_ids that link
   #    the Investigation to this run.
   # ---------------------------------------------------------------------------
   - name: create_investigation
@@ -173,9 +173,6 @@ steps:
         access_mode: public
       metadata:
         status: open
-        # The rule input carries no severity, so it is read off the first alert. A rule's alerts share one severity unless the rule
-        # maps it per alert. Both alert document shapes are read: dotted keys and nested objects.
-        severity: "{{ steps.load_alerts.output.alerts[0]['kibana.alert.severity'] | default: steps.load_alerts.output.alerts[0].kibana.alert.severity | default: 'medium' }}"
         description: >-
           Automated triage of {{ steps.load_alerts.output.alerts.size }} alert{% if steps.load_alerts.output.alerts.size != 1 %}s{% endif %} from rule
           "{{ inputs.rule_name }}" ({{ inputs.rule_id }}).

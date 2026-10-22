@@ -313,7 +313,7 @@ describe('Alert Triage managed versions', () => {
     [
       ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW.id,
       ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW.version,
-      6,
+      7,
     ],
     [
       ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW.id,
