@@ -6,6 +6,11 @@
  */
 
 import { schema, type Type } from '@kbn/config-schema';
+import {
+  MAX_MONITOR_FANOUT_SIZE,
+  MAX_PARAM_VALUE_LENGTH,
+  MAX_ROUTE_STRING_LENGTH,
+} from '../../../common/constants/monitor_attribute_limits';
 import { ConfigKey } from '../../../common/constants/monitor_management';
 import {
   CodeEditorMode,
@@ -24,11 +29,6 @@ import {
   AUTH_INLINE_CONF_MAX,
   AUTH_STRING_MAX,
 } from '../../../common/runtime_types/schemas/monitor_configs';
-import {
-  MAX_MONITOR_FANOUT_SIZE,
-  MAX_PARAM_VALUE_LENGTH,
-  MAX_ROUTE_STRING_LENGTH,
-} from '../../../routes/zod_query';
 
 // `secrets` is the JSON of every secret field, so it has to hold more than one script.
 const SECRETS_STRING = MAX_PARAM_VALUE_LENGTH * 8;
