@@ -17,3 +17,14 @@ export interface ImpactPill {
    */
   name?: string;
 }
+
+/** The pills loaded so far, and how many remain. */
+export interface PagedImpactPills {
+  pills: readonly ImpactPill[];
+  total: number;
+  remaining: number;
+  isLoadingMore: boolean;
+  showMore: () => void;
+  /** Present once more than the first page has loaded. */
+  showFewer?: () => void;
+}

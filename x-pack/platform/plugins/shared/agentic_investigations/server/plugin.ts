@@ -301,7 +301,10 @@ export class AgenticInvestigationsPlugin
     }
 
     this.impactPillsService = new ImpactPillsService({
-      getImpactClient,
+      esClient,
+      logger: this.logger,
+      getImpactService: () => this.requireImpactService(),
+      privileges: startPrivileges,
       getSpaceId: (request) => this.getSpaceId(request),
       getProposals: () => plugins.proposals,
       getEscalationsService: () => this.escalationsService,
