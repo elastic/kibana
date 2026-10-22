@@ -64,14 +64,17 @@ export const getConnectorEventTriggerDefinitions = ({
   }
 
   return specs.filter(isConnectorSpecWithEvents).flatMap((spec) =>
-    Object.values(spec.events.definitions).map((eventDefinition) => ({
-      id: eventDefinition.eventId,
-      title: eventDefinition.title,
-      description: eventDefinition.description,
-      eventSchema: toConnectorEventTriggerSchema(eventDefinition.eventSchema),
-      stability: 'tech_preview' as const,
-      requiresConnectorId: true,
-    }))
+    Object.values(spec.events.definitions)
+      // HITL interactivity resumes a paused step; it must not start workflows.
+      .filter((eventDefinition) => eventDefinition.eventId !== 'slack2.hitl_action')
+      .map((eventDefinition) => ({
+        id: eventDefinition.eventId,
+        title: eventDefinition.title,
+        description: eventDefinition.description,
+        eventSchema: toConnectorEventTriggerSchema(eventDefinition.eventSchema),
+        stability: 'tech_preview' as const,
+        requiresConnectorId: true,
+      }))
   );
 };
 

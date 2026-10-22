@@ -32,9 +32,15 @@ const createEmitParams = (
 });
 
 describe('registerWorkflowsConnectorEventEmitter', () => {
+  const originalFetch = globalThis.fetch;
+
   beforeEach(() => {
     jest.clearAllMocks();
     resetConnectorEventEmitFailureCountForTests();
+  });
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
   });
 
   const registerAndGetEmitter = ({
@@ -46,12 +52,15 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
   } = {}): {
     emitter: ConnectorEventEmitter;
     emitEvent: jest.Mock;
+    resumeExternalHitl: jest.Mock;
     getClient: jest.Mock;
     actions: ReturnType<typeof actionsMock.createSetup>;
   } => {
     const actions = actionsMock.createSetup();
     const emitEvent = jest.fn().mockResolvedValue(undefined);
-    const resolvedGetClient = getClient ?? jest.fn().mockResolvedValue({ emitEvent });
+    const resumeExternalHitl = jest.fn().mockResolvedValue(undefined);
+    const resolvedGetClient =
+      getClient ?? jest.fn().mockResolvedValue({ emitEvent, resumeExternalHitl });
 
     registerWorkflowsConnectorEventEmitter({
       actions,
@@ -63,7 +72,7 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
 
     expect(actions.registerConnectorEventEmitter).toHaveBeenCalledTimes(1);
     const emitter = actions.registerConnectorEventEmitter.mock.calls[0][0] as ConnectorEventEmitter;
-    return { emitter, emitEvent, getClient: resolvedGetClient, actions };
+    return { emitter, emitEvent, resumeExternalHitl, getClient: resolvedGetClient, actions };
   };
 
   it('registers an emitter that forwards to workflows emitEvent with enriched payload', async () => {
@@ -167,5 +176,112 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
     expect(getClient).not.toHaveBeenCalled();
     expect(emitEvent).not.toHaveBeenCalled();
     expect(getConnectorEventEmitFailureCount()).toBe(1);
+  });
+
+  it('resumes HITL instead of starting a workflow for slack2.hitl_action', async () => {
+    const { emitter, emitEvent, resumeExternalHitl } = registerAndGetEmitter();
+
+    await emitter.emit(
+      createEmitParams({
+        eventId: 'slack2.hitl_action',
+        connectorTypeId: '.slack2',
+        payload: {
+          executionId: 'exec-1',
+          stepId: 'step-1',
+          token: 'token-1',
+          spaceId: 'default',
+          kind: 'approval',
+          approved: true,
+        },
+      })
+    );
+
+    expect(emitEvent).not.toHaveBeenCalled();
+    expect(resumeExternalHitl).toHaveBeenCalledWith({
+      token: 'token-1',
+      executionId: 'exec-1',
+      stepId: 'step-1',
+      spaceId: 'default',
+      input: { approved: true },
+    });
+  });
+
+  it('replaces the Slack message after a successful HITL resume', async () => {
+    const fetchMock = jest.fn().mockResolvedValue({ ok: true });
+    globalThis.fetch = fetchMock as typeof fetch;
+    const { emitter, resumeExternalHitl } = registerAndGetEmitter();
+
+    await emitter.emit(
+      createEmitParams({
+        eventId: 'slack2.hitl_action',
+        connectorTypeId: '.slack2',
+        payload: {
+          executionId: 'exec-1',
+          stepId: 'step-1',
+          token: 'token-1',
+          spaceId: 'default',
+          kind: 'approval',
+          approved: true,
+          responseUrl: 'https://hooks.slack.com/actions/T/B/xxx',
+          slackUserId: 'U123',
+        },
+      })
+    );
+
+    expect(resumeExternalHitl).toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://hooks.slack.com/actions/T/B/xxx',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({
+          replace_original: true,
+          text: 'Approved by <@U123>.',
+        }),
+      })
+    );
+  });
+
+  it('replaces the Slack message and swallows already-claimed HITL resumes', async () => {
+    const fetchMock = jest.fn().mockResolvedValue({ ok: true });
+    globalThis.fetch = fetchMock as typeof fetch;
+    const alreadyClaimed = Object.assign(
+      new Error('This workflow response link is no longer valid'),
+      {
+        name: 'ExternalResumeError',
+        statusCode: 409,
+      }
+    );
+    const resumeExternalHitl = jest.fn().mockRejectedValue(alreadyClaimed);
+    const getClient = jest.fn().mockResolvedValue({ emitEvent: jest.fn(), resumeExternalHitl });
+    const { emitter } = registerAndGetEmitter({ getClient });
+
+    await expect(
+      emitter.emit(
+        createEmitParams({
+          eventId: 'slack2.hitl_action',
+          connectorTypeId: '.slack2',
+          payload: {
+            executionId: 'exec-1',
+            stepId: 'step-1',
+            token: 'token-1',
+            spaceId: 'default',
+            kind: 'approval',
+            approved: false,
+            responseUrl: 'https://hooks.slack.com/actions/T/B/xxx',
+          },
+        })
+      )
+    ).resolves.toBeUndefined();
+
+    expect(getConnectorEventEmitFailureCount()).toBe(0);
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://hooks.slack.com/actions/T/B/xxx',
+      expect.objectContaining({
+        body: JSON.stringify({
+          replace_original: true,
+          text: 'This request was already responded to.',
+        }),
+      })
+    );
   });
 });
