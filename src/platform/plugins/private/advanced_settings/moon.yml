@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/spaces-plugin'
   - '@kbn/scout'
+  - '@kbn/serverless-common-settings'
 tags:
   - plugin
   - prod
