@@ -54,6 +54,7 @@ const LinkedProjectSchema = z.object({
  * - `serverless: false` (stateful) forbids `projectType`, `productTier`,
  *   `organizationId`, `linkedProject`, and `uiam: true` (UIAM is serverless-
  *   only).
+ * - `customSamlProviderName` is only allowed on ECH (`isCloud: true`, `serverless: false`).
  * - `isCloud: true` requires `cloudHostName` (used by SAML against Elastic
  *   Cloud), forbids `http2: true`, and forbids any `uiam` value that does not
  *   match `serverless` (UIAM behavior on cloud is fixed). Local runs may set
@@ -73,6 +74,8 @@ export const ScoutTestConfigSchema = z
     uiam: z.boolean({ error: 'must be a boolean' }).optional(),
     isCloud: z.boolean({ error: 'is required and must be a boolean' }),
     cloudHostName: z.string().min(1).optional(),
+    // Kibana SAML provider whose realm trusts the mock IdP, e.g. `qaf` on QAF ECH deployments
+    customSamlProviderName: z.string().min(1, { error: 'must be a non-empty string' }).optional(),
     cloudUsersFilePath: z
       .string({ error: 'is required' })
       .min(1, { error: 'must be a non-empty file path' }),
@@ -128,6 +131,22 @@ export const ScoutTestConfigSchema = z
         path: ['cloudHostName'],
         message: `is required when 'isCloud' is true (used by SAML against Elastic Cloud)`,
       });
+    }
+
+    if (cfg.customSamlProviderName !== undefined) {
+      if (!cfg.isCloud) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['customSamlProviderName'],
+          message: `must not be set when 'isCloud' is false; local runs already authenticate with the mock IdP`,
+        });
+      } else if (cfg.serverless) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['customSamlProviderName'],
+          message: `must not be set when 'serverless' is true; custom SAML realms are only supported on ECH deployments`,
+        });
+      }
     }
 
     if (cfg.isCloud && cfg.http2 === true) {

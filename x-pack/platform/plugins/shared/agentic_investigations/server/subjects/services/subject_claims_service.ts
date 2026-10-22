@@ -128,6 +128,12 @@ export class SubjectClaimsService {
     return { claimed: true };
   }
 
+  /** The investigation (conversation id) holding the subject's claim in the space, open or closed. */
+  async findHolder(spaceId: string, subject: InvestigationSubjectKey): Promise<string | undefined> {
+    const existing = await this.findVersioned(subjectClaimId(spaceId, subject));
+    return existing?.claim.conversationId;
+  }
+
   /** Maintenance: removes every claim in the space. */
   async deleteAllInSpace(spaceId: string): Promise<number> {
     return this.deleteMatching([{ term: { spaceId } }]);
