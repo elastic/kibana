@@ -225,6 +225,67 @@ describe('buildCandidateQuery', () => {
     expect(JSON.stringify(searchBodyOf(esClient).query)).not.toContain('last_hunted_at');
   });
 
+  describe('the publish-date lookback', () => {
+    const lookbackFilter = (range: string) => ({
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          { range: { 'content.published_at': { gte: range } } },
+          {
+            bool: {
+              filter: [{ range: { '@timestamp': { gte: range } } }],
+              must_not: [{ exists: { field: 'content.published_at' } }],
+            },
+          },
+        ],
+      },
+    });
+
+    const filtersFor = async (params: Partial<Parameters<typeof buildCandidateQuery>[2]>) => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf([]));
+      await buildCandidateQuery(esClient, logger, {
+        trigger: 'scheduled',
+        spaceId: 'default',
+        ...params,
+      });
+      return JSON.stringify(searchBodyOf(esClient).query.bool.filter);
+    };
+
+    it('defaults a scheduled sweep to 30 days', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf([]));
+      await buildCandidateQuery(esClient, logger, { trigger: 'scheduled', spaceId: 'default' });
+      expect(searchBodyOf(esClient).query.bool.filter).toContainEqual(lookbackFilter('now-30d'));
+    });
+
+    it('uses the requested lookbackDays', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf([]));
+      await buildCandidateQuery(esClient, logger, {
+        trigger: 'scheduled',
+        spaceId: 'default',
+        lookbackDays: 14,
+      });
+      expect(searchBodyOf(esClient).query.bool.filter).toContainEqual(lookbackFilter('now-14d'));
+    });
+
+    it('does not age-gate a request that names report ids', async () => {
+      const filters = await filtersFor({
+        trigger: 'manual',
+        report_ids: ['rpt-old'],
+        lookbackDays: 14,
+      });
+      expect(filters).not.toContain('content.published_at');
+      expect(filters).not.toContain('@timestamp');
+    });
+
+    it('treats a manual trigger with empty report_ids as a sweep', async () => {
+      const filters = await filtersFor({ trigger: 'manual', report_ids: [] });
+      expect(filters).toContain('now-30d');
+    });
+  });
+
   describe('the hunt-once gate', () => {
     // The report mapping is `dynamic: strict` and has no top-level `feedback`
     // field: hunt outcomes live in the per-space nested `evidence[]` array. A flat
