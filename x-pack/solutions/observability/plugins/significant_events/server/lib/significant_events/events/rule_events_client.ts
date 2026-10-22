@@ -22,6 +22,7 @@ import {
   type SignificantEvent,
   type SignificantEventResponse,
   type Severity,
+  type SignalVerdict,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
@@ -327,6 +328,25 @@ export type UpdateEventStatusResult =
       reason: LifecycleSkipReason | 'not_found' | 'superseded';
     };
 
+/** A rule's membership in one live series, with that member's latest stored signal. */
+export interface LiveRuleMembership {
+  eventId: string | undefined;
+  status: SignificantEventStatus;
+  verdict: SignalVerdict;
+  /** The stored verification query, absent when the signal ran no query. */
+  esqlQuery: string | undefined;
+  /** Whether the stored query found rows when the verdict was made. */
+  evidenceFound: boolean;
+  /** When this member's signal was last verified: the agent's last verdict for the rule. */
+  verifiedAt: string | undefined;
+  /** When the series was opened: its earliest version. */
+  createdAt: string | undefined;
+  /** The sources the series covers. */
+  sourceIds: string[];
+  /** The series' title, for saying which event a decision rests on. */
+  eventTitle: string | undefined;
+}
+
 /**
  * `.rule-events` client used by agent-side call sites (`event_search`, `event_write`'s dedup scan,
  * `attach_investigation`, SML): reads, plus `createEvent` / `updateEvent` / `updateEventStatus` to
@@ -559,6 +579,69 @@ export class RuleEventsClient {
       fields: ['data_json'],
     });
     return { hits: hits.map(decodeSignificantEvent) };
+  }
+
+  /**
+   * Reads, in one query, the live series (`active` or `recovering`) the requested rules are members
+   * of, with each member's latest stored signal. A rule in none is absent from the map.
+   *
+   * `from` bounds the read on a series' latest version, applied after `created_at` is computed over
+   * the whole lineage: bounding earlier would clip `created_at` and make an old series look young.
+   * A live series with no write since `from` is read as "not a live member", which sends its
+   * detections to the agent. Capped at MAX_DEDUP_SCAN_LIMIT series, newest first; a space with more
+   * can omit older ones, which callers must read the same way.
+   */
+  async findLiveMemberships({
+    ruleUuids,
+    from,
+  }: {
+    ruleUuids: string[];
+    from: string;
+  }): Promise<Map<string, LiveRuleMembership[]>> {
+    const live = new Map<string, LiveRuleMembership[]>();
+    if (ruleUuids.length === 0) return live;
+
+    const requested = new Set(ruleUuids);
+    const lineage = buildBaseQuery(this.clients.space)
+      .pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(GROUP_HASH_FIELD)}`;
+    const query = applyTimeRange({
+      query: pickLatestPerGroup(lineage, GROUP_HASH_FIELD),
+      from,
+    }).where`${ruleUuidsIntersects(ruleUuids)}`;
+    const rows = await executeEsqlQuery<RuleEventSourceRowWithCreatedAt>({
+      esClient: this.clients.esClient,
+      query: withDataJsonProjection(query)
+        .sort(['@timestamp', 'DESC'], ['_id', 'ASC'])
+        .keep('_source', 'data_json', 'created_at')
+        .limit(MAX_DEDUP_SCAN_LIMIT),
+      fields: ['data_json', 'created_at'],
+    });
+
+    for (const row of rows) {
+      const event = decodeSignificantEvent(row);
+      if (!(SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS as readonly string[]).includes(event.status)) {
+        continue;
+      }
+      for (const signal of event.signals ?? []) {
+        const ruleUuid = signal.metadata.rule_uuid;
+        if (!ruleUuid || !requested.has(ruleUuid)) continue;
+        live.set(ruleUuid, [
+          ...(live.get(ruleUuid) ?? []),
+          {
+            eventId: event.event_id,
+            status: event.status,
+            verdict: signal.verdict,
+            esqlQuery: signal.evidence?.esql_query,
+            evidenceFound: signal.evidence?.result === 'found',
+            verifiedAt: signal.collected_at,
+            createdAt: row.created_at,
+            sourceIds: event.source_ids,
+            eventTitle: event.title,
+          },
+        ]);
+      }
+    }
+    return live;
   }
 
   async findByEventId(eventId: string): Promise<{ hits: SignificantEventResponse[] }> {
