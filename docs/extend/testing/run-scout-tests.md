@@ -42,7 +42,7 @@ node scripts/playwright test --config <plugin-path>/test/scout/ui/playwright.con
 
 - Use `--project local` to target your locally running Kibana/Elasticsearch processes.
 - Use `--grep` to filter by tag (for example `@local-stateful-classic`). If you omit `--grep`, Playwright will run all suites in the config, including ones that may not be compatible with your target.
-- [Limit tags](./deployment-tags.md#scout-deployment-tags-limit) are not applied when calling Playwright directly. Add `--grep-invert @limit/only-fips` to skip FIPS-only suites when your Kibana doesn't run in FIPS mode.
+- [Limit tags](./deployment-tags.md#scout-deployment-tags-limit) are not applied when calling Playwright directly. Use `--grep-invert` to skip the suites whose limit tags don't match your environment, for example `--grep-invert @limit/only-<attribute>` for an attribute your environment doesn't have.
 
 We recommend checking out Playwright's [**UI mode**](./debugging.md#playwright-ui-mode) (use `--ui`).
 
@@ -86,21 +86,23 @@ All `--testFiles` paths must fall under the same Scout root (for example, `scout
 
 ### Declare target attributes with `--targetAttribute` [scout-run-tests-target-attributes]
 
-[Limit tags](./deployment-tags.md#scout-deployment-tags-limit) are only honored when the run declares the matching **target attribute**. If the Kibana you test against runs in FIPS mode, declare it so that `tags.limit.only.fips` suites run and `tags.limit.except.fips` suites are skipped:
+[Limit tags](./deployment-tags.md#scout-deployment-tags-limit) are only honored when the run declares the **target attributes** of the environment it runs against. Declare them so that `limit.only` suites for those attributes run and `limit.except` suites are skipped:
 
 ```bash
 node scripts/scout run-tests \
   --arch <stateful|serverless> \
   --domain <domain> \
-  --targetAttribute fips \
+  --targetAttribute <attribute> \
   --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
-`--targetAttribute` is repeatable and accepts comma-separated values. When omitted, Scout reads the `SCOUT_TARGET_ATTRIBUTES` environment variable instead. Without either, Scout assumes Kibana is **not** in FIPS mode.
+`--targetAttribute` is repeatable and accepts comma-separated values. When omitted, Scout reads the `SCOUT_TARGET_ATTRIBUTES` environment variable instead. Without either, Scout assumes the environment has no attributes and skips every `limit.only` suite.
 
 ::::::{note}
-Declaring an attribute doesn't change how Scout starts the servers: `--targetAttribute fips` tells Scout that Kibana runs in FIPS mode but doesn't enable it.
+Declaring an attribute doesn't change how Scout starts the servers: it tells Scout what the environment is but doesn't make it so.
 ::::::
+
+Available attributes: `fips` (Kibana runs in FIPS mode).
 
 ### Custom server configuration [scout-run-tests-server-config-set]
 
