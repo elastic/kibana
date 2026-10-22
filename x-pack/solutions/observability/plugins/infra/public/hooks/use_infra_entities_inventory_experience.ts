@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { INFRA_ENTITIES_INVENTORY_EXPERIENCE_KEY } from '../../common/ui_settings_keys';
+import { INFRA_ENTITIES_INVENTORY_EXPERIENCE_KEY } from '@kbn/entity-inventory-app-plugin/public';
 import { useKibanaContextForPlugin } from './use_kibana';
 
 export function useInfraEntitiesInventoryExperience() {

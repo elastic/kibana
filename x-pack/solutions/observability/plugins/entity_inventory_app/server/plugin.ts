@@ -8,9 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-
-// Key also referenced in x-pack/solutions/observability/plugins/infra/common/ui_settings_keys.ts
-const INFRA_ENTITIES_INVENTORY_EXPERIENCE_KEY = 'observability:infraEntitiesInventoryExperience';
+import { INFRA_ENTITIES_INVENTORY_EXPERIENCE_KEY } from '../common/ui_settings_keys';
 
 export type EntityInventoryAppServerSetup = Record<string, never>;
 
