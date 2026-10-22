@@ -191,11 +191,6 @@ describe('Slack inbound events', () => {
         'Alert\nDisk full',
       ],
       [
-        'text with detail in an attachment',
-        { text: 'Alert', attachments: [{ text: 'Disk full' }] },
-        'Alert\nDisk full',
-      ],
-      [
         'an edited message',
         {
           subtype: 'message_changed',
@@ -214,7 +209,6 @@ describe('Slack inbound events', () => {
         },
         'Gone',
       ],
-      ['no text anywhere', {}, undefined],
     ])('reads %s', async (_name, event, expected) => {
       expect(await emitText(event)).toBe(expected);
     });

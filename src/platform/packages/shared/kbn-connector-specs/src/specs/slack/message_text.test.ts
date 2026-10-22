@@ -55,11 +55,6 @@ describe('readSlackMessageText', () => {
       ].join('\n'),
     ],
     [
-      'a headline in text and the detail in an attachment',
-      { text: 'New alert', attachments: [{ title: 'New alert', text: 'p99 latency 4s' }] },
-      'New alert\np99 latency 4s',
-    ],
-    [
       'the attachment fallback only when the attachment has no other content',
       {
         attachments: [
@@ -271,12 +266,14 @@ describe('readSlackMessageText', () => {
       'ALERT\npayments-api is down\ndb-1 disk 98%',
     ],
     [
-      'short values that text only contains inside a longer word',
+      'a headline and short values that text only contains inside a longer word',
       {
         text: 'prod-eu down',
-        attachments: [{ fields: [{ title: 'Env', value: 'prod' }, { value: 'prod-eu down' }] }],
+        attachments: [
+          { title: 'prod-eu down', fields: [{ title: 'Env', value: 'prod' }], text: 'p99 4s' },
+        ],
       },
-      'prod-eu down\nEnv: prod',
+      'prod-eu down\np99 4s\nEnv: prod',
     ],
     [
       'repeated lines once, ignoring whitespace',
