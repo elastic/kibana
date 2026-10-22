@@ -160,8 +160,16 @@ const mockEpisode = {
   last_timestamp: '2026-05-08T08:05:00.000Z',
   triggered_at: '2026-05-08T08:00:00.000Z',
   duration: 300000,
-  last_tags: ['tag-a'],
+};
+
+// The page adds the episode and series action state to the rule events row.
+const mockEpisodeWithActions = {
+  ...mockEpisode,
+  last_ack_action: 'ack',
   last_assignee_uid: 'u-1',
+  last_tags: ['tag-a'],
+  last_snooze_action: null,
+  snoozed_until: null,
 };
 
 const episodeQuery = {
@@ -228,9 +236,12 @@ beforeEach(() => {
           lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
           lastAssigneeUid: 'u-1',
           lastAckActor: null,
+          tags: ['tag-a'],
         },
       ],
     ]),
+    isSuccess: true,
+    isPreviousData: false,
   } as ReturnType<typeof useFetchEpisodeActions>);
   mockUseFetchGroupActions.mockReturnValue({
     data: new Map([
@@ -248,6 +259,8 @@ beforeEach(() => {
         },
       ],
     ]),
+    isSuccess: true,
+    isPreviousData: false,
   } as unknown as ReturnType<typeof useFetchGroupActions>);
   mockCreateEpisodeActions.mockReturnValue([
     {
@@ -364,6 +377,8 @@ describe('EpisodeDetailsPage', () => {
           },
         ],
       ]),
+      isSuccess: true,
+      isPreviousData: false,
     } as unknown as ReturnType<typeof useFetchGroupActions>);
 
     renderPage();
@@ -390,6 +405,8 @@ describe('EpisodeDetailsPage', () => {
           },
         ],
       ]),
+      isSuccess: true,
+      isPreviousData: false,
     } as unknown as ReturnType<typeof useFetchGroupActions>);
 
     renderPage();
@@ -475,6 +492,36 @@ describe('EpisodeDetailsPage', () => {
     ).toBeInTheDocument();
   });
 
+  it('holds back the app header menu actions until the action state loads', async () => {
+    mockUseFetchEpisodeActions.mockReturnValue({
+      data: undefined,
+      isSuccess: false,
+      isPreviousData: false,
+    } as unknown as ReturnType<typeof useFetchEpisodeActions>);
+
+    renderPage();
+    await openAppMenuOverflow();
+
+    expect(
+      screen.queryByTestId('episodeActionsBar-primary-ALERTING_V2_ACK_EPISODE')
+    ).not.toBeInTheDocument();
+  });
+
+  it("doesn't read the actions of the previous alert as the current ones", async () => {
+    mockUseFetchGroupActions.mockReturnValue({
+      data: new Map(),
+      isSuccess: true,
+      isPreviousData: true,
+    } as unknown as ReturnType<typeof useFetchGroupActions>);
+
+    renderPage();
+    await openAppMenuOverflow();
+
+    expect(
+      screen.queryByTestId('episodeActionsBar-primary-ALERTING_V2_ACK_EPISODE')
+    ).not.toBeInTheDocument();
+  });
+
   it('runs an app header menu action when clicked', async () => {
     const execute = jest.fn(async () => {});
     mockCreateEpisodeActions.mockReturnValue([
@@ -497,7 +544,7 @@ describe('EpisodeDetailsPage', () => {
 
     expect(execute).toHaveBeenCalledWith(
       expect.objectContaining({
-        episodes: [mockEpisode],
+        episodes: [mockEpisodeWithActions],
       })
     );
   });
@@ -617,12 +664,45 @@ describe('EpisodeDetailsPage', () => {
       renderPage();
 
       expect(mockUseAlertAutoAttach).toHaveBeenCalledWith(
-        mockEpisode,
+        mockEpisodeWithActions,
         {
           ruleName: 'Rule A',
           groupingFields: ['host.name'],
         },
         expect.any(Object)
+      );
+    });
+
+    it('waits for the alert data before attaching the episode', () => {
+      mockUseFetchEpisodeQuery.mockReturnValue({
+        ...episodeQuery,
+        isDataLoading: true,
+      } as unknown as EpisodeQueryResult);
+
+      renderPage();
+
+      expect(mockUseAlertAutoAttach).toHaveBeenCalled();
+      expect(mockUseAlertAutoAttach).not.toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('waits for the action state before attaching the episode', () => {
+      mockUseFetchEpisodeActions.mockReturnValue({
+        data: undefined,
+        isSuccess: false,
+        isPreviousData: false,
+      } as unknown as ReturnType<typeof useFetchEpisodeActions>);
+
+      renderPage();
+
+      expect(mockUseAlertAutoAttach).toHaveBeenCalled();
+      expect(mockUseAlertAutoAttach).not.toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything()
       );
     });
 
@@ -639,7 +719,7 @@ describe('EpisodeDetailsPage', () => {
       renderPage();
 
       expect(mockUseAlertAutoAttach).toHaveBeenCalledWith(
-        mockEpisode,
+        mockEpisodeWithActions,
         {
           ruleName: undefined,
           groupingFields: undefined,
@@ -677,7 +757,7 @@ describe('EpisodeDetailsPage', () => {
       );
 
       expect(mockUseAlertAutoAttach).toHaveBeenLastCalledWith(
-        nextEpisode,
+        expect.objectContaining(nextEpisode),
         {
           ruleName: 'Rule A',
           groupingFields: ['host.name'],

@@ -15,7 +15,7 @@ describe('buildEpisodeActionsQuery', () => {
     expect(queryString).toContain('"ep-a"');
     expect(queryString).toContain('"ep-b"');
     expect(queryString).toContain(
-      'action_type IN ("ack", "unack", "assign", "deactivate", "activate")'
+      'action_type IN ("ack", "unack", "assign", "deactivate", "activate", "tag")'
     );
     expect(queryString).toContain('BY alert_id, rule_id, group_hash');
   });
@@ -38,5 +38,7 @@ describe('buildEpisodeActionsQuery', () => {
     expect(queryString).toContain(
       'last_deactivate_actor = LAST(actor.profile_uid, @timestamp) WHERE action_type == "deactivate"'
     );
+    expect(queryString).toContain('last_tags = LAST(tags, @timestamp) WHERE action_type == "tag"');
+    expect(queryString).toMatch(/KEEP [^|]*\blast_tags\b/);
   });
 });
