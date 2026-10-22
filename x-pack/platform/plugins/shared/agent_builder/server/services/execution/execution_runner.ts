@@ -187,6 +187,7 @@ const handleConversationExecution = async ({
     accessControl,
     readOnly,
     origin,
+    author: requestAuthor,
     nextInput,
     browserApiTools,
     configurationOverrides,
@@ -216,7 +217,7 @@ const handleConversationExecution = async ({
     user: { ...owner, isAdmin: false },
   });
 
-  const author = conversationClient.getAuthor(origin?.author);
+  const author = conversationClient.getAuthor(origin?.author, requestAuthor);
 
   // The execution service resolved the conversation, created it when it was new and wrote the
   // opening user message before this run was dispatched: the run reads the stored document and is
