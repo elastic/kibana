@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Evaluator, EvaluationResult } from '../../types';
+import { createHash } from 'node:crypto';
+import type { Evaluator, EvaluatorParams, EvaluationResult } from '../../types';
 
 type AggregationStrategy = 'mean' | 'median' | 'majority';
 
@@ -23,6 +24,28 @@ function computeMajority(scores: number[]): number {
   const rounded = scores.map((s) => (s >= 0.5 ? 1 : 0));
   const ones = rounded.filter((s) => s === 1).length;
   return ones > rounded.length / 2 ? 1 : 0;
+}
+
+/**
+ * Deterministically reorders judges per example: the same example always gets the
+ * same order (stable across repetitions and re-runs), while different examples get
+ * different orders. This prevents a fixed position bias — the first judge always
+ * anchoring subsequent judges when conversations are shared — without giving up
+ * reproducibility for debugging and score comparison. Judges execute concurrently,
+ * so this only affects construction order of any shared conversation context.
+ */
+function shuffleJudgesForParams<TJudge>(
+  judges: TJudge[],
+  params: EvaluatorParams<any, any>
+): TJudge[] {
+  const seed = createHash('sha256')
+    .update(JSON.stringify({ input: params.input, expected: params.expected }))
+    .digest();
+
+  return judges
+    .map((judge, index) => ({ judge, index, key: seed.readUInt32BE((index % 8) * 4) }))
+    .sort((a, b) => a.key - b.key || a.index - b.index)
+    .map(({ judge }) => judge);
 }
 
 /**
@@ -51,7 +74,14 @@ export function createMultiJudgeEvaluator(config: {
     kind: hasLlmJudge ? 'LLM' : 'CODE',
     direction: 'maximize',
     evaluate: async (params) => {
-      const results = await Promise.allSettled(judges.map((judge) => judge.evaluate(params)));
+      // Deterministic per-example order: see shuffleJudgesForParams. Order does not
+      // affect the aggregation itself (all strategies are commutative), but it does
+      // affect any judge that observes shared, order-sensitive context such as a
+      // conversation seeded by earlier judges.
+      const orderedJudges = shuffleJudgesForParams(judges, params);
+      const results = await Promise.allSettled(
+        orderedJudges.map((judge) => judge.evaluate(params))
+      );
 
       const judgeResults: Array<{ name: string; result: EvaluationResult }> = [];
       const scores: number[] = [];
@@ -60,14 +90,14 @@ export function createMultiJudgeEvaluator(config: {
 
       results.forEach((result, i) => {
         if (result.status === 'fulfilled') {
-          judgeResults.push({ name: judges[i].name, result: result.value });
+          judgeResults.push({ name: orderedJudges[i].name, result: result.value });
           if (result.value.score != null && Number.isFinite(result.value.score)) {
             scores.push(result.value.score);
           }
         } else {
           const errorMessage =
             result.reason instanceof Error ? result.reason.message : String(result.reason);
-          failedJudges.push({ name: judges[i].name, error: errorMessage });
+          failedJudges.push({ name: orderedJudges[i].name, error: errorMessage });
           logger?.warn(`Judge "${judges[i].name}" failed: ${errorMessage}`);
         }
       });
