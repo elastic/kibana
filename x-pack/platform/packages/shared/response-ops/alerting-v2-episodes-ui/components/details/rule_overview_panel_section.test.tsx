@@ -21,12 +21,12 @@ import { AlertEpisodeRuleOverviewPanelSection } from './rule_overview_panel_sect
 
 jest.mock('../../utils/run_esql_async_search');
 // The first ES|QL build in a module registry costs ~1.4s locally, which this test would await.
-jest.mock('../../queries/episode_query', () => ({
-  buildEpisodeGroupHashQuery: jest.fn(() => ({
-    print: () => 'FROM .alerts | KEEP group_hash',
-  })),
-  buildEpisodeQuery: jest.fn(() => ({
-    print: () => 'FROM .alerts | STATS BY group_hash',
+jest.mock('@kbn/alerting-v2-common-queries', () => ({
+  ...jest.requireActual('@kbn/alerting-v2-common-queries'),
+  buildEpisodeQuery: jest.fn(() => ({ print: () => 'FROM .rule-events | STATS BY episode.id' })),
+  buildEpisodeDataRequest: jest.fn(() => ({
+    query: { print: () => 'FROM .rule-events | KEEP episode_data' },
+    filter: {},
   })),
 }));
 
