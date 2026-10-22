@@ -6,6 +6,19 @@
     "patterns": [
       "api/note"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-PersistNoteRoute"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-PersistNoteRoute",
+    "data_autocomplete_rules": {
+      "note": {
+        "eventId": "",
+        "note": "",
+        "timelineId": "",
+        "created": "",
+        "createdBy": "",
+        "updated": "",
+        "updatedBy": ""
+      },
+      "noteId": "",
+      "version": ""
+    }
   }
 }

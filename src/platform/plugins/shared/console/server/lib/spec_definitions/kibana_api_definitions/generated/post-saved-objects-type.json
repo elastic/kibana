@@ -6,6 +6,23 @@
     "patterns": [
       "api/saved_objects/{type}"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-saved-objects-type"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-saved-objects-type",
+    "url_params": {
+      "overwrite": "__flag__"
+    },
+    "data_autocomplete_rules": {
+      "attributes": {},
+      "coreMigrationVersion": "",
+      "initialNamespaces": [],
+      "migrationVersion": {},
+      "references": [
+        {
+          "id": "",
+          "name": "",
+          "type": ""
+        }
+      ],
+      "typeMigrationVersion": ""
+    }
   }
 }

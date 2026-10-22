@@ -6,6 +6,11 @@
     "patterns": [
       "api/fleet/enrollment_api_keys"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-enrollment-api-keys"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-enrollment-api-keys",
+    "url_params": {
+      "page": [],
+      "perPage": [],
+      "kuery": []
+    }
   }
 }

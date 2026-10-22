@@ -6,6 +6,10 @@
     "patterns": [
       "api/agent_builder/plugins/install"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-agent-builder-plugins-install"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-agent-builder-plugins-install",
+    "data_autocomplete_rules": {
+      "plugin_name": "",
+      "url": ""
+    }
   }
 }

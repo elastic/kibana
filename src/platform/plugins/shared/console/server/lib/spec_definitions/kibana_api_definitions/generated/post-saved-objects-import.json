@@ -6,6 +6,11 @@
     "patterns": [
       "api/saved_objects/_import"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-saved-objects-import"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-saved-objects-import",
+    "url_params": {
+      "overwrite": "__flag__",
+      "createNewCopies": "__flag__",
+      "compatibilityMode": "__flag__"
+    }
   }
 }

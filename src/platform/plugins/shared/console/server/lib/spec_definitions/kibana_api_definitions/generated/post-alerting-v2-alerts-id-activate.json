@@ -6,6 +6,9 @@
     "patterns": [
       "api/alerting/v2/alerts/{id}/_activate"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-v2-alerts-id-activate"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-v2-alerts-id-activate",
+    "data_autocomplete_rules": {
+      "reason": ""
+    }
   }
 }

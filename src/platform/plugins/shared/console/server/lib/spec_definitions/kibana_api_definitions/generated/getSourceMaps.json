@@ -6,6 +6,10 @@
     "patterns": [
       "api/apm/sourcemaps"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getSourceMaps"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getSourceMaps",
+    "url_params": {
+      "page": [],
+      "perPage": []
+    }
   }
 }

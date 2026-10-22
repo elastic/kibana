@@ -6,6 +6,29 @@
     "patterns": [
       "api/agent_builder/conversations/{conversation_id}/access_control"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-agent-builder-conversations-conversation-id-access-control"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-agent-builder-conversations-conversation-id-access-control",
+    "data_autocomplete_rules": {
+      "access_mode": {
+        "__one_of": [
+          "private",
+          "public"
+        ]
+      },
+      "entries": [
+        {
+          "id": "",
+          "role": {
+            "__one_of": [
+              "member"
+            ]
+          },
+          "type": {
+            "__one_of": [
+              "user"
+            ]
+          }
+        }
+      ]
+    }
   }
 }

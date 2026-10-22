@@ -6,6 +6,9 @@
     "patterns": [
       "api/lists/items/_export"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ExportListItems"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ExportListItems",
+    "url_params": {
+      "list_id": []
+    }
   }
 }

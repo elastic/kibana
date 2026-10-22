@@ -6,6 +6,12 @@
     "patterns": [
       "api/fleet/agent_status/data"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-agent-status-data"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-agent-status-data",
+    "url_params": {
+      "agentsIds": [],
+      "pkgName": [],
+      "pkgVersion": [],
+      "previewData": "__flag__"
+    }
   }
 }

@@ -6,6 +6,9 @@
     "patterns": [
       "api/attack_discovery/schedules/_bulk_disable"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-BulkDisableAttackDiscoverySchedules"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-BulkDisableAttackDiscoverySchedules",
+    "data_autocomplete_rules": {
+      "ids": []
+    }
   }
 }

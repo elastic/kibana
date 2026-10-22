@@ -6,6 +6,9 @@
     "patterns": [
       "api/saved_objects/_bulk_create"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-saved-objects-bulk-create"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-saved-objects-bulk-create",
+    "url_params": {
+      "overwrite": "__flag__"
+    }
   }
 }

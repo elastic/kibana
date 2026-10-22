@@ -6,6 +6,9 @@
     "patterns": [
       "api/agent_builder/plugins/{pluginId}"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-agent-builder-plugins-pluginid"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-agent-builder-plugins-pluginid",
+    "url_params": {
+      "force": "__flag__"
+    }
   }
 }

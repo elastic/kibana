@@ -6,6 +6,9 @@
     "patterns": [
       "api/alerting/v2/rules/_bulk_get"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-v2-rules-bulk-get"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-v2-rules-bulk-get",
+    "data_autocomplete_rules": {
+      "ids": []
+    }
   }
 }

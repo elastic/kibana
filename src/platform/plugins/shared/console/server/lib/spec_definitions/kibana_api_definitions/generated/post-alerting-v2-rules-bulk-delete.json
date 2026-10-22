@@ -6,6 +6,9 @@
     "patterns": [
       "api/alerting/v2/rules/_bulk_delete"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-v2-rules-bulk-delete"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-v2-rules-bulk-delete",
+    "data_autocomplete_rules": {
+      "ids": []
+    }
   }
 }

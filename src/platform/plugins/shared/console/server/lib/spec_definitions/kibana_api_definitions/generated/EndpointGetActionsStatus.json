@@ -6,6 +6,9 @@
     "patterns": [
       "api/endpoint/action_status"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-EndpointGetActionsStatus"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-EndpointGetActionsStatus",
+    "url_params": {
+      "agent_ids": []
+    }
   }
 }

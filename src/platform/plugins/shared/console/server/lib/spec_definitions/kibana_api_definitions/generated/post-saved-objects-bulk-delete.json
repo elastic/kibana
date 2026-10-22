@@ -6,6 +6,9 @@
     "patterns": [
       "api/saved_objects/_bulk_delete"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-saved-objects-bulk-delete"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-saved-objects-bulk-delete",
+    "url_params": {
+      "force": "__flag__"
+    }
   }
 }

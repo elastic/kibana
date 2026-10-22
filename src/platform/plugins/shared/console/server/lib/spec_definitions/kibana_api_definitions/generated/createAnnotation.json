@@ -6,6 +6,15 @@
     "patterns": [
       "api/apm/services/{serviceName}/annotation"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-createAnnotation"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-createAnnotation",
+    "data_autocomplete_rules": {
+      "@timestamp": "",
+      "message": "",
+      "service": {
+        "environment": "",
+        "version": ""
+      },
+      "tags": []
+    }
   }
 }

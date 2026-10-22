@@ -6,6 +6,11 @@
     "patterns": [
       "api/workflows/executions/{executionId}"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-workflows-executions-executionid"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-workflows-executions-executionid",
+    "url_params": {
+      "includeInput": "__flag__",
+      "includeOutput": "__flag__",
+      "omitStepExecutions": "__flag__"
+    }
   }
 }

@@ -6,6 +6,15 @@
     "patterns": [
       "api/osquery/packs"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-OsqueryFindPacks"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-OsqueryFindPacks",
+    "url_params": {
+      "page": [],
+      "pageSize": [],
+      "sort": [],
+      "sortOrder": [
+        "asc",
+        "desc"
+      ]
+    }
   }
 }

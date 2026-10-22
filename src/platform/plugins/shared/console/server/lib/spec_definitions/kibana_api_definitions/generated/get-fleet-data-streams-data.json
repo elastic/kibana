@@ -6,6 +6,10 @@
     "patterns": [
       "api/fleet/data_streams/data"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-data-streams-data"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-data-streams-data",
+    "url_params": {
+      "dataStreams": [],
+      "start": []
+    }
   }
 }

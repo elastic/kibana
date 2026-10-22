@@ -6,6 +6,15 @@
     "patterns": [
       "api/osquery/saved_queries"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-OsqueryFindSavedQueries"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-OsqueryFindSavedQueries",
+    "url_params": {
+      "page": [],
+      "pageSize": [],
+      "sort": [],
+      "sortOrder": [
+        "asc",
+        "desc"
+      ]
+    }
   }
 }

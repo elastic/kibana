@@ -6,6 +6,9 @@
     "patterns": [
       "api/data_views/data_view/{viewId}"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-deleteDataViewDefault"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-deleteDataViewDefault",
+    "url_components": {
+      "viewId": "__kibana_data_view"
+    }
   }
 }

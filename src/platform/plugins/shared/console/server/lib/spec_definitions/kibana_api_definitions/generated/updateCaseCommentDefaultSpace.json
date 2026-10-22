@@ -6,6 +6,29 @@
     "patterns": [
       "api/cases/{caseId}/comments"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-updateCaseCommentDefaultSpace"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-updateCaseCommentDefaultSpace",
+    "data_autocomplete_rules": {
+      "comment": "",
+      "id": "",
+      "owner": {
+        "__one_of": [
+          "cases",
+          "observability",
+          "securitySolution"
+        ]
+      },
+      "type": {
+        "__one_of": [
+          "alert"
+        ]
+      },
+      "version": "",
+      "alertId": "",
+      "index": "",
+      "rule": {
+        "id": "",
+        "name": ""
+      }
+    }
   }
 }

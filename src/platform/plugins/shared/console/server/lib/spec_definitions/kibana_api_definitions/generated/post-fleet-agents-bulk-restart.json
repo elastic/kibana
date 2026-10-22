@@ -6,6 +6,16 @@
     "patterns": [
       "api/fleet/agents/bulk_restart"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agents-bulk-restart"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agents-bulk-restart",
+    "data_autocomplete_rules": {
+      "agents": "",
+      "batchSize": "",
+      "includeInactive": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    }
   }
 }

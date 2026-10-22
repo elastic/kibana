@@ -6,6 +6,19 @@
     "patterns": [
       "api/fleet/agents/{agentId}/actions"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agents-agentid-actions"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agents-agentid-actions",
+    "data_autocomplete_rules": {
+      "action": {
+        "data": "",
+        "type": {
+          "__one_of": [
+            "UNENROLL",
+            "UPGRADE",
+            "POLICY_REASSIGN"
+          ]
+        },
+        "ack_data": ""
+      }
+    }
   }
 }

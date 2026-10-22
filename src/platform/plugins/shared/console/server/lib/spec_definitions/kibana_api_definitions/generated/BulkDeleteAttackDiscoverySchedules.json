@@ -6,6 +6,9 @@
     "patterns": [
       "api/attack_discovery/schedules/_bulk_delete"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-BulkDeleteAttackDiscoverySchedules"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-BulkDeleteAttackDiscoverySchedules",
+    "data_autocomplete_rules": {
+      "ids": []
+    }
   }
 }

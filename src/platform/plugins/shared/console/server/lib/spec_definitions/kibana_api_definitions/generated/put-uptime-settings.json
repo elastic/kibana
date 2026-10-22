@@ -6,6 +6,17 @@
     "patterns": [
       "api/uptime/settings"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-uptime-settings"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-uptime-settings",
+    "data_autocomplete_rules": {
+      "certAgeThreshold": "",
+      "certExpirationThreshold": "",
+      "defaultConnectors": [],
+      "defaultEmail": {
+        "bcc": [],
+        "cc": [],
+        "to": []
+      },
+      "heartbeatIndices": ""
+    }
   }
 }

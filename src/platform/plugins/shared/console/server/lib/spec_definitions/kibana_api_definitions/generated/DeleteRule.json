@@ -6,6 +6,10 @@
     "patterns": [
       "api/detection_engine/rules"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-DeleteRule"
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-DeleteRule",
+    "url_params": {
+      "id": [],
+      "rule_id": []
+    }
   }
 }
