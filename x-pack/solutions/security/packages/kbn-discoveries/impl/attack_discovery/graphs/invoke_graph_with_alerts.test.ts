@@ -8,6 +8,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { InferenceClient } from '@kbn/inference-common';
 import { invokeAttackDiscoveryGraphWithAlerts } from './invoke_graph_with_alerts';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
@@ -254,6 +255,44 @@ describe('invokeAttackDiscoveryGraphWithAlerts', () => {
       discoveries: mockDiscoveries,
       replacements: mockReplacements,
     });
+  });
+
+  it('caps a template connector at 100 alerts and logs the omitted count', async () => {
+    const alerts = Array.from({ length: 120 }, (_, index) => ({
+      metadata: {},
+      pageContent: `alert ${index}`,
+    }));
+    mockGraphInvoke.mockResolvedValue({
+      anonymizedDocuments: alerts.slice(0, 100),
+      insights: [],
+      replacements: {},
+    });
+
+    await invokeAttackDiscoveryGraphWithAlerts({
+      actionsClient: mockActionsClient,
+      alerts,
+      apiConfig: {
+        action_type_id: '.inference',
+        connector_id: 'daybreak',
+      },
+      connectorTimeout: 60000,
+      esClient: mockEsClient,
+      inferenceClient: {
+        chatComplete: jest.fn(),
+        getConnectorById: jest.fn().mockResolvedValue({
+          metadata: { capabilities: { templates: { policy: 'required' } } },
+        }),
+      } as unknown as InferenceClient,
+      logger: mockLogger,
+      prompts: mockPrompts,
+      size: 500,
+    });
+
+    expect(getDefaultAttackDiscoveryGraph).toHaveBeenCalledWith(
+      expect.objectContaining({ size: 100 })
+    );
+    expect(mockGraphInvoke.mock.calls[0][0].anonymizedDocuments).toHaveLength(100);
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('omitting 20 of 120'));
   });
 
   it('uses default size of 10 when not provided', async () => {
