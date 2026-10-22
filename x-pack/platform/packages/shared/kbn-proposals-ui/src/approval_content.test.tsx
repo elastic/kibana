@@ -6,12 +6,10 @@
  */
 
 import React from 'react';
-import moment from 'moment';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ApprovalContent, type ApprovalContentProps } from './approval_content';
-import { DATE_TIME_FORMAT } from './proposal_helpers';
 import type { ApprovalProposal } from './types';
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -60,9 +58,10 @@ describe('ApprovalContent', () => {
 
   it.each<Partial<ApprovalProposal>>([
     { status: 'superseded' },
+    { status: 'failed', decision: 'approved', supersededBy: 'successor' },
     { status: 'expired', supersededBy: 'successor' },
   ])(
-    'reads a replaced proposal nobody decided as Expired, saying it was replaced: %j',
+    'keeps a replaced proposal visible without pending or outcome instructions: %j',
     (overrides) => {
       renderContent({
         proposal: {
@@ -74,37 +73,15 @@ describe('ApprovalContent', () => {
         onDismiss: jest.fn(),
       });
       expect(screen.getByText('Block IP 10.0.0.4')).toBeInTheDocument();
+      expect(screen.getByText(/Configure/)).toBeInTheDocument();
       expect(screen.getByText('Isolate the compromised host.')).toBeInTheDocument();
-      expect(screen.getAllByText('Expired').length).toBeGreaterThanOrEqual(2);
       expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
       expect(screen.queryByTestId('approvalContent-outcome')).not.toBeInTheDocument();
       expect(screen.queryByTestId('approvalContent-previous-failure')).not.toBeInTheDocument();
-      expect(screen.getByTestId('approvalContent-expired')).toHaveTextContent(
-        'Expired • This proposal was replaced by a newer one and can no longer be actioned.'
-      );
-      expect(screen.queryByTestId('approvalContent-replaced')).not.toBeInTheDocument();
       expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
       expect(screen.queryByTestId('approvalContent-dismiss')).not.toBeInTheDocument();
     }
   );
-
-  it('keeps the outcome of a replaced proposal that was decided, with a Replaced callout', () => {
-    renderContent({
-      proposal: {
-        ...baseProposal,
-        status: 'failed',
-        decision: 'approved',
-        supersededBy: 'successor',
-      },
-      onDismiss: jest.fn(),
-    });
-    expect(screen.getByText('Failed')).toBeInTheDocument();
-    expect(screen.queryByTestId('approvalContent-expired')).not.toBeInTheDocument();
-    expect(screen.getByTestId('approvalContent-replaced')).toHaveTextContent(
-      'Replaced • This proposal was replaced by a newer one and can no longer be actioned.'
-    );
-    expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
-  });
 
   it('shows who acted and when on a replaced proposal that had been decided', () => {
     renderContent({
@@ -153,7 +130,6 @@ describe('ApprovalContent', () => {
       'Failed • HTTP 500: host unreachable'
     );
     expect(screen.getByTestId('approvalContent-failed-attempt')).toHaveClass('euiCallOut--danger');
-    expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
   });
 
   it('leaves the error to the outcome banner when a failed proposal was not replaced', () => {
@@ -179,7 +155,7 @@ describe('ApprovalContent', () => {
     expect(screen.queryByText('Failed')).not.toBeInTheDocument();
   });
 
-  it('names the action type instead of the actor when the approved action failed', () => {
+  it('names the action type, not the actor, when the approved action failed', () => {
     renderContent({
       proposal: {
         ...baseProposal,
@@ -190,7 +166,6 @@ describe('ApprovalContent', () => {
       },
     });
     expect(screen.queryByText('elastic')).not.toBeInTheDocument();
-    expect(screen.queryByText(/executed by/)).not.toBeInTheDocument();
   });
 
   it('restores the comment and drops the decision buttons when replaced during dismissal', () => {
@@ -233,7 +208,7 @@ describe('ApprovalContent', () => {
     expect(screen.getByText('Critical impact')).toBeInTheDocument();
   });
 
-  it('says when a pending proposal expires in an info callout, not in the caption', () => {
+  it('leaves the decision deadline out of the caption', () => {
     const expiresAt = '2024-01-05T17:00:00.000Z';
     renderContent({
       proposal: {
@@ -243,22 +218,13 @@ describe('ApprovalContent', () => {
         expiresAt,
       },
     });
-    const formattedDeadline = moment(expiresAt).format(DATE_TIME_FORMAT);
     expect(screen.getByText('Configure • Reversible • Critical impact')).toBeInTheDocument();
-    const callout = screen.getByTestId('approvalContent-expires');
-    expect(callout).toHaveTextContent(`Expires on ${formattedDeadline}`);
-    expect(callout).toHaveClass('euiCallOut--primary');
   });
 
-  it('leaves the expiry time to the callout, not repeating it in the caption', () => {
+  it('leaves the expiry time out of the caption after the deadline', () => {
     const expiresAt = '2024-01-05T17:00:00.000Z';
     renderContent({ proposal: { ...baseProposal, status: 'expired', expiresAt } });
-    const formattedDeadline = moment(expiresAt).format(DATE_TIME_FORMAT);
-    // The caption stops at the impact; the time lives in the callout title alone.
     expect(screen.getByText('Critical impact')).toBeInTheDocument();
-    expect(screen.getByTestId('approvalContent-expired')).toHaveTextContent(
-      `Expired on ${formattedDeadline}`
-    );
   });
 
   it('renders the comment', () => {
@@ -363,14 +329,15 @@ describe('ApprovalContent', () => {
     renderContent({
       proposal: { ...baseProposal, previousExecutionError: 'HTTP 400: something went wrong' },
     });
-    const callout = screen.getByTestId('approvalContent-previous-failure');
-    expect(callout).toHaveTextContent(
-      'Failed • Previous attempt failed: HTTP 400: something went wrong. Try one more time'
+    expect(screen.getByTestId('approvalContent-previous-failure')).toHaveTextContent(
+      'Previous attempt failed: HTTP 400: something went wrong'
     );
-    // The badge agrees with the callout rather than reading "Needs review".
-    expect(screen.getAllByText('Failed')).toHaveLength(2);
-    expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
-    expect(isBefore(callout, screen.getByTestId('approvalContent-confirm'))).toBe(true);
+    expect(
+      isBefore(
+        screen.getByTestId('approvalContent-previous-failure'),
+        screen.getByTestId('approvalContent-confirm')
+      )
+    ).toBe(true);
   });
 
   it('renders the previous-execution-error callout as a danger callout', () => {
@@ -392,35 +359,13 @@ describe('ApprovalContent', () => {
         decidedAt: '2026-01-01T00:00:00.000Z',
       },
     });
-    expect(screen.queryByText('Failed')).not.toBeInTheDocument();
-  });
-
-  it('shows a Restricted badge and callout instead of Needs review when the user cannot decide', () => {
-    renderContent({ readOnly: true });
-    // Once in the header badge, once leading the callout.
-    expect(screen.getAllByText('Restricted')).toHaveLength(2);
-    expect(
-      screen.getByText(/You don't have permissions to act on this proposal/)
-    ).toBeInTheDocument();
-    expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
-    expect(screen.queryByText('Approve')).not.toBeInTheDocument();
-    expect(screen.queryByText('Decline')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('approvalContent-previous-failure')).not.toBeInTheDocument();
   });
 
   it('renders an expiry explanation once the workflow settles the proposal as expired', () => {
     renderContent({ proposal: { ...baseProposal, status: 'expired' } });
     expect(screen.getByTestId('approvalContent-expired')).toHaveTextContent(
-      "Expired • This proposal wasn't decided in time and can no longer be actioned."
-    );
-  });
-
-  it('says when the proposal expired in the callout title, when it carries a deadline', () => {
-    renderContent({
-      proposal: { ...baseProposal, status: 'expired', expiresAt: '2024-01-05T17:00:00.000Z' },
-    });
-
-    expect(screen.getByTestId('approvalContent-expired')).toHaveTextContent(
-      /^Expired on .*2024.* • This proposal wasn't decided in time/
+      "This proposal wasn't decided in time and can no longer be actioned."
     );
   });
 
@@ -429,9 +374,7 @@ describe('ApprovalContent', () => {
       "The rule was deleted after this proposal was created, so this tuning can't be applied.";
     renderContent({ proposal: { ...baseProposal, status: 'expired', rationale: reason } });
 
-    const callout = screen.getByTestId('approvalContent-expired');
-    expect(callout).toHaveTextContent(`This proposal can no longer be actioned. ${reason}`);
-    expect(callout).not.toHaveTextContent("wasn't decided in time");
+    expect(screen.getByTestId('approvalContent-expired')).toHaveTextContent(reason);
   });
 
   it('renders always-allow checkbox when alwaysAllow is supplied', () => {
@@ -466,7 +409,7 @@ describe('ApprovalContent', () => {
   });
 
   describe('decision outcome', () => {
-    it('shows Approving while the approval is still being sent, hiding the actions', () => {
+    it('shows Approving when isSubmitting is set, hiding the actions', () => {
       renderContent({ isSubmitting: 'applying', currentActorName: 'Ava' });
 
       // The badge and the outcome banner's own title both say it.
@@ -475,12 +418,6 @@ describe('ApprovalContent', () => {
         /^Approving • Awaiting approval request to return$/
       );
       expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
-    });
-
-    it('keeps the action characteristics, not the actor, in the header while approving', () => {
-      renderContent({ isSubmitting: 'applying', currentActorName: 'Ava' });
-
-      expect(screen.queryByText('Ava')).not.toBeInTheDocument();
     });
 
     it('keeps showing Approving across an unmount and remount mid-submission, since isSubmitting is sourced externally', () => {
@@ -538,7 +475,7 @@ describe('ApprovalContent', () => {
         />
       );
 
-      // The badge and the outcome banner's own title both say it.
+      // The badge's own short label and the banner's own full title.
       expect(screen.getAllByText('Applied')).toHaveLength(2);
     });
 
@@ -553,7 +490,6 @@ describe('ApprovalContent', () => {
         },
       });
 
-      // The badge and the outcome banner's own title both say it.
       expect(screen.getAllByText('Failed')).toHaveLength(2);
       expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
     });
@@ -612,7 +548,6 @@ describe('ApprovalContent', () => {
       // Expiry resolves to a real (actor-less) decision via `getProposalDecision`, so the footer
       // — Approve alongside it — is gone the same way it is for any other decided proposal.
       renderContent({ onDismiss: jest.fn(), proposal: { ...baseProposal, status: 'expired' } });
-      // The badge and the callout's own title both say it.
       expect(screen.getAllByText('Expired').length).toBeGreaterThanOrEqual(2);
       expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
       expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();

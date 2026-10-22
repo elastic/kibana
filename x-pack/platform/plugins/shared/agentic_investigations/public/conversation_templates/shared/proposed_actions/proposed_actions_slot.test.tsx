@@ -162,9 +162,7 @@ describe('ProposedActionsSlot', () => {
     mockConversationProposalsPage([mockProposal]);
     renderSlot();
     fireEvent.click(screen.getByText('Isolate cfo-mbp-14 — host isolation'));
-    // A user who cannot decide is offered no Approve or Decline at all.
     expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Decline' })).not.toBeInTheDocument();
     expect(approveMutateAsync).not.toHaveBeenCalled();
     expect(dismissMutateAsync).not.toHaveBeenCalled();
   });

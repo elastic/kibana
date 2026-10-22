@@ -92,7 +92,7 @@ describe('ProposalDecision', () => {
     expect(screen.getByTestId('investigationHypothesisTreeProposal-p-1-dismiss')).toBeEnabled();
   });
 
-  it('offers no decision without the decide capability', () => {
+  it('disables the decision without the decide capability', () => {
     setup({ canDecide: false });
 
     expect(

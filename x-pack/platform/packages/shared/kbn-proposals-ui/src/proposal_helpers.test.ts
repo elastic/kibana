@@ -119,12 +119,22 @@ describe('getProposalCaption', () => {
     ).toBe('Configure • High impact');
   });
 
-  it('leaves the deadline out, since the modal says it in an info callout', () => {
+  it('leaves the decision deadline out, since the modal says it in a callout', () => {
     const expiresAt = '2999-01-05T17:00:00.000Z';
     expect(
       getProposalCaption(proposal({ category: 'configure', impact: 'high', expiresAt }), {
         includeRiskDetails: true,
       })
+    ).toBe('Configure • High impact');
+  });
+
+  it('leaves the expiry time out once the decision window has passed', () => {
+    const expiresAt = '2024-01-05T17:00:00.000Z';
+    expect(
+      getProposalCaption(
+        proposal({ category: 'configure', impact: 'high', status: 'expired', expiresAt }),
+        { includeRiskDetails: true }
+      )
     ).toBe('Configure • High impact');
   });
 

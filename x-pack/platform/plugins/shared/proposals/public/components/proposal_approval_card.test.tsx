@@ -31,6 +31,21 @@ jest.mock('@elastic/eui', () => ({
   EuiSpacer: () => <div />,
 }));
 
+jest.mock('@kbn/ui-callout', () => ({
+  KbnInfoCallout: ({ title }: { title: string }) => (
+    <div data-test-subj="info-callout">{title}</div>
+  ),
+  KbnDangerCallout: ({ title }: { title: string }) => (
+    <div data-test-subj="danger-callout">{title}</div>
+  ),
+  KbnWarningCallout: ({ title, children }: { title: string; children?: React.ReactNode }) => (
+    <div data-test-subj="warning-callout">
+      {title}
+      {children}
+    </div>
+  ),
+}));
+
 /** Set by the `ApprovalContent` mock on every render, so a test can invoke an action directly
  *  (e.g. to assert what its promise rejects with) without going through a simulated click. */
 let latestOnApprove: (() => void | Promise<void>) | undefined;
