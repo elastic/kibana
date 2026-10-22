@@ -69,6 +69,9 @@ const SlackMessageEventSchema = lazySchema(() =>
       .describe(
         'Display name of the bot or app that sent the message, when Slack includes it. The sender can set it, so use appId to identify the app.'
       ),
+    externalConversationId: optionalSlackId(
+      "The Relay's opaque key for the message's thread, when the Relay forwarded the event. A mention of the app in that thread carries the same key."
+    ),
   })
 );
 
@@ -217,9 +220,19 @@ const readAppId = (source: Record<string, unknown>): string | undefined =>
 const readBotName = (source: Record<string, unknown>): string | undefined =>
   readName(nestedRecord(source, 'bot_profile')?.name) ?? readName(source.username);
 
+const relayConversationKey = (envelope: Record<string, unknown>): string | undefined => {
+  const relay = nestedRecord(envelope, 'relay');
+  const origin = relay ? nestedRecord(relay, 'origin') : undefined;
+  if (origin?.type !== 'slack') {
+    return undefined;
+  }
+  return readId(origin.external_conversation_id);
+};
+
 const parseMessage = (
   event: Record<string, unknown>,
-  workspace: string | undefined
+  workspace: string | undefined,
+  externalConversationId: string | undefined
 ): ParsedSlackEvent | undefined => {
   const nested = nestedRecord(event, 'message');
   const previous = nestedRecord(event, 'previous_message');
@@ -260,6 +273,7 @@ const parseMessage = (
       botId: fromSources((source) => readId(source.bot_id)),
       appId: fromSources(readAppId),
       botName: fromSources(readBotName),
+      externalConversationId,
     }),
   };
 };
@@ -424,7 +438,7 @@ const parseSlackCallback = (
   const workspace = workspaceId(envelope, event);
   const parsed = (() => {
     if (event.type === 'message') {
-      return parseMessage(event, workspace);
+      return parseMessage(event, workspace, relayConversationKey(envelope));
     }
     if (event.type === 'app_mention') {
       return parseAppMention(event, workspace);

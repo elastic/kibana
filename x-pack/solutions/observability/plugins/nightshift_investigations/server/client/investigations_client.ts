@@ -558,15 +558,13 @@ export class NightshiftInvestigationsClient {
     executionId: string;
   }): Promise<void> {
     try {
-      const { workflowExecutionIds } = await getOrCreateInvestigationConversation({
+      // Records the run in the creating write. If the run's `_ensure` step created the
+      // conversation first, it already recorded itself, so there is nothing to add.
+      await getOrCreateInvestigationConversation({
         conversations,
         id: investigationId,
+        workflowExecutionId: executionId,
       });
-      if (!workflowExecutionIds.includes(executionId)) {
-        await conversations.patchMetadata(investigationId, {
-          workflow_execution_ids: [...workflowExecutionIds, executionId],
-        });
-      }
     } catch (error) {
       this.logger.warn(
         `Could not create the conversation of investigation "${investigationId}" on start; its run creates it: ${
@@ -743,6 +741,7 @@ export class NightshiftInvestigationsClient {
     const conversation = await getOrCreateInvestigationConversation({
       conversations,
       id: investigationId,
+      workflowExecutionId: executionId,
       // A raw workflow can fail before ensuring its agent, which conversation creation requires.
       ...(!reopen
         ? {
@@ -1063,8 +1062,8 @@ export class NightshiftInvestigationsClient {
 
   /**
    * What lifecycle events attribute the investigation to: its first recorded subject, preferring
-   * the subject types lifecycle triggers carry. A Slack thread is reported as a manual subject,
-   * since that is what it is to the trigger's consumers. Undefined when it has no subject.
+   * any other subject to a Slack thread the investigation also reports in. Undefined when it has
+   * no subject.
    */
   async getLifecycleSubject(investigationId: string): Promise<LifecycleSubject | undefined> {
     const { agenticInvestigations } = this.requireWriteDeps();
@@ -1081,10 +1080,7 @@ export class NightshiftInvestigationsClient {
       return undefined;
     }
     return {
-      subject: {
-        type: first.subjectType === 'slack_thread' ? 'manual' : first.subjectType,
-        id: first.subjectId,
-      },
+      subject: { type: first.subjectType, id: first.subjectId },
       triggerType: first.triggerType ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
       startedAt: first.createdAt,
     };
