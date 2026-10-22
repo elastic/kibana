@@ -10,6 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createStreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { createActor, waitFor } from 'xstate';
+import { disconnectFromDestination } from '../../../../../services/unit_connections';
 import type { ProcessingNodeRef } from '../../../../../services/unit_graph';
 import type { Unit } from '../../../../../services/unit_repository';
 import { canvasStateMachine, createCanvasMachineImplementations } from './canvas_state_machine';
@@ -234,5 +235,38 @@ describe('canvas processing flyout', () => {
 
     expect(canvas.getSnapshot().context.processingFlyout).toBeUndefined();
     expect(canvas.getSnapshot().context.nextUnit).toBe(staged);
+  });
+});
+
+describe('canvas save', () => {
+  it('keeps an unhooked processing node staged but refuses to save it', async () => {
+    const processed = loadedUnit();
+    processed.unit.processors = [{ id: 'tag', type: 'add_fields', supported_telemetry: ['logs'] }];
+    processed.unit.pipelines[0].config = [
+      { name: 'sources', value: ['src'] },
+      { name: 'processors', value: ['tag'] },
+      { name: 'destinations', value: ['es'] },
+    ];
+    const persisted: Unit[] = [];
+    const { canvas } = startCanvas(async (unit) => {
+      persisted.push(unit);
+      return unit;
+    }, processed);
+    await waitForUnitReady(canvas);
+
+    const unhooked = disconnectFromDestination(
+      processed,
+      { kind: 'processing', ref: sourceSlot },
+      'es'
+    );
+    canvas.send({ type: 'unit.stage', unitDefinition: unhooked });
+    canvas.send({ type: 'unit.save' });
+    await waitFor(canvas, (snapshot) => snapshot.matches({ ready: { unit: 'saveFailed' } }));
+
+    expect(persisted).toEqual([]);
+    expect(canvas.getSnapshot().context.nextUnit).toBe(unhooked);
+    expect(canvas.getSnapshot().context.error?.message).toBe(
+      'Connect each processing node to a destination before saving. To remove a processing node, delete all of its processors.'
+    );
   });
 });

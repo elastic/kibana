@@ -215,6 +215,26 @@ describe('applyProcessingDraft', () => {
     ]);
   });
 
+  it('removes an unconnected processing node once its last processor is deleted', () => {
+    const unit = baseUnit(
+      [
+        ...directUnit().unit.pipelines,
+        {
+          id: 'unhooked',
+          supported_telemetry: ['logs'],
+          config: [
+            { name: 'sources', value: ['src'] },
+            { name: 'processors', value: ['tag'] },
+          ],
+        },
+      ],
+      [{ id: 'tag', type: 'add_fields', supported_telemetry: ['logs'] }]
+    );
+    const next = savedUnit(applyProcessingDraft(unit, pipelineSlot('unhooked'), []));
+    expect(next.unit.pipelines.map(({ id }) => id)).toEqual(['p-src']);
+    expect(next.unit.processors).toEqual([]);
+  });
+
   it('keeps a processor another slot still references', () => {
     const unit = baseUnit(
       [

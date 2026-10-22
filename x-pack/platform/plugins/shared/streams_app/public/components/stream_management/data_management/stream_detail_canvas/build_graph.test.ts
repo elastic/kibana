@@ -42,6 +42,8 @@ describe('buildClassicStreamsGraph', () => {
       source: 'source-logs-nginx-default',
       target: 'destination-logs-nginx-default',
     });
+    // Unit line data is what offers "Add processing" on the edge menu.
+    expect(edges[0].data).toBeUndefined();
 
     // The auto-layout always places the source to the left of its destination.
     expect(source.position.x).toBeLessThan(destination.position.x);

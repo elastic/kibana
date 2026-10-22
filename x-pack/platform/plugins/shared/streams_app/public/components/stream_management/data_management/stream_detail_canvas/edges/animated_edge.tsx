@@ -75,6 +75,7 @@ export function AnimatedEdge({
   const { euiTheme } = useEuiTheme();
   const [isHovered, hover] = useBoolean();
   const [showMenu, menu] = useBoolean();
+  const isUnitLine = data !== undefined;
   const canUnhook = Boolean(data?.unitConnection);
   const processingTarget = data?.processingTarget;
 
@@ -266,16 +267,21 @@ export function AnimatedEdge({
               onKeyDown={closeOnEscape}
             >
               <EuiContextMenuPanel onClose={menu.off}>
-                <EuiContextMenuItem
-                  data-test-subj="streamsCanvasEdgeMenu-addProcessing"
-                  disabled={!processingTarget}
-                  toolTipContent={processingTarget ? undefined : addProcessingUnavailableLabel}
-                  onClick={openEdgeProcessingFlyout}
-                >
-                  {i18n.translate('xpack.streams.animatedEdge.addProcessingContextMenuItemLabel', {
-                    defaultMessage: 'Add processing',
-                  })}
-                </EuiContextMenuItem>
+                {isUnitLine ? (
+                  <EuiContextMenuItem
+                    data-test-subj="streamsCanvasEdgeMenu-addProcessing"
+                    disabled={!processingTarget}
+                    toolTipContent={processingTarget ? undefined : addProcessingUnavailableLabel}
+                    onClick={openEdgeProcessingFlyout}
+                  >
+                    {i18n.translate(
+                      'xpack.streams.animatedEdge.addProcessingContextMenuItemLabel',
+                      {
+                        defaultMessage: 'Add processing',
+                      }
+                    )}
+                  </EuiContextMenuItem>
+                ) : null}
                 <EuiContextMenuItem
                   data-test-subj="streamsCanvasEdgeMenu-addRouting"
                   onClick={openEdgeRoutingFlyout}

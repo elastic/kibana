@@ -104,6 +104,29 @@ describe('processingFlyoutMachine', () => {
     expect(flyout.getSnapshot().context.steps.map(({ key }) => key)).toEqual(['step-0']);
   });
 
+  it('deletes every step at once and saves an empty list', () => {
+    const { flyout, requests } = startFlyout();
+    flyout.send({ type: 'step.duplicate', key: 'step-0' });
+    flyout.send({ type: 'step.edit', key: 'step-1' });
+
+    flyout.send({ type: 'step.deleteAll' });
+    const { context, value } = flyout.getSnapshot();
+    expect(value).toBe('idle');
+    expect(context.steps).toEqual([]);
+    expect(context.editingKey).toBeUndefined();
+    expect(context.hasChanges).toBe(true);
+    expect(requests).toEqual([]);
+
+    flyout.send({ type: 'flyout.save' });
+    expect(requests).toEqual([
+      {
+        type: 'processing.save',
+        slot: { kind: 'pipeline', pipelineId: 'processing-1' },
+        processors: [],
+      },
+    ]);
+  });
+
   it('duplicates a step right after the original as a new processor', () => {
     const { flyout } = startFlyout();
     flyout.send({ type: 'step.duplicate', key: 'step-0' });
@@ -171,5 +194,9 @@ describe('processingFlyoutMachine', () => {
     const { flyout } = startFlyout({ editable: false });
     flyout.send({ type: 'step.create' });
     expect(flyout.getSnapshot().value).toBe('idle');
+
+    flyout.send({ type: 'step.deleteAll' });
+    expect(flyout.getSnapshot().context.steps).toHaveLength(1);
+    expect(flyout.getSnapshot().context.hasChanges).toBe(false);
   });
 });

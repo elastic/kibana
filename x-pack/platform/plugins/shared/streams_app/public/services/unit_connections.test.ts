@@ -13,6 +13,7 @@ import {
   connectToDestination,
   disconnectFromDestination,
   disconnectSourceFromDestination,
+  getPipelinesWithoutDestinations,
   getUnitConnections,
   isolateSourceLine,
   moveUnitConnection,
@@ -438,11 +439,27 @@ describe('unit connections', () => {
       expect(next).toEqual(processedUnit());
     });
 
-    it('drops the processing pipeline and its processors with its last line', () => {
+    it('keeps the processing node and its processors when its last line is unhooked', () => {
       const next = disconnectFromDestination(processedUnit(), processing('main'), 'es-logs');
 
-      expect(next.unit.pipelines.map(({ id }) => id)).toEqual(['nop']);
-      expect(next.unit.processors).toEqual([]);
+      expect(pipelineConfig(next, 'main')).toEqual([
+        { name: 'sources', value: ['otlp-input'] },
+        { name: 'processors', value: ['tag'] },
+      ]);
+      expect(next.unit.processors?.map(({ id }) => id)).toEqual(['tag']);
+      expect(getPipelinesWithoutDestinations(next).map(({ id }) => id)).toEqual(['main']);
+    });
+
+    it('reconnects an unhooked processing node to another destination', () => {
+      const unhooked = disconnectFromDestination(processedUnit(), processing('main'), 'es-logs');
+      const next = connectToDestination(unhooked, processing('main'), 'es-metrics');
+
+      expect(pipelineConfig(next, 'main')).toEqual([
+        { name: 'sources', value: ['otlp-input'] },
+        { name: 'processors', value: ['tag'] },
+        { name: 'destinations', value: ['es-metrics'] },
+      ]);
+      expect(getPipelinesWithoutDestinations(next)).toEqual([]);
     });
 
     it('moves the last processed line onto another destination', () => {

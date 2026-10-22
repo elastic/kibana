@@ -60,6 +60,11 @@ const findPipeline = (unit: Unit, pipelineId: string): UnitPipeline | undefined 
 const hasSources = (pipeline: UnitPipeline): boolean =>
   pipeline.config.some((entry) => entry.name === PIPELINE_ENTRY.sources);
 
+const pipelineForwards = (pipeline: UnitPipeline): boolean =>
+  pipeline.config.some(
+    ({ name }) => name === PIPELINE_ENTRY.destinations || name === PIPELINE_ENTRY.routes
+  );
+
 const readRoutes = (config: PipelineConfig): RouteRule[] =>
   config.flatMap((entry) => (entry.name === PIPELINE_ENTRY.routes ? entry.value : []));
 
@@ -260,6 +265,17 @@ const withRouteProcessors = (route: RouteRule, ids: readonly string[]): RouteRul
   return next;
 };
 
+/** Emptying an unconnected processing node removes it: a pipeline with nothing to run or forward is invalid. */
+const dropIdlePipeline = (unit: Unit, pipelineId: string): Unit => {
+  const pipeline = findPipeline(unit, pipelineId);
+  if (!pipeline || readProcessorIds(pipeline.config).length > 0 || pipelineForwards(pipeline)) {
+    return unit;
+  }
+  return replaceUnit(unit, {
+    pipelines: unit.unit.pipelines.filter(({ id }) => id !== pipelineId),
+  });
+};
+
 /**
  * Writes the flyout's processors to one slot. Fails when the slot is gone or
  * cannot be edited, so the caller does not persist a save that changed nothing.
@@ -280,13 +296,10 @@ export const applyProcessingDraft = (
       ? setPipelineProcessors(current, ids)
       : mapRouteAt(current, ref.routeIndex, (route) => withRouteProcessors(route, ids))
   );
-  return { ok: true, unit: removeOrphanedProcessors(next, previousIds), processorIds: ids };
+  const kept =
+    ref.kind === PROCESSING_SLOT_KIND.pipeline ? dropIdlePipeline(next, ref.pipelineId) : next;
+  return { ok: true, unit: removeOrphanedProcessors(kept, previousIds), processorIds: ids };
 };
-
-const pipelineForwards = (pipeline: UnitPipeline): boolean =>
-  pipeline.config.some(
-    ({ name }) => name === PIPELINE_ENTRY.destinations || name === PIPELINE_ENTRY.routes
-  );
 
 const reachablePipelineIds = (pipelines: readonly UnitPipeline[]): Set<string> => {
   const byId = new Map(pipelines.map((pipeline) => [pipeline.id, pipeline]));

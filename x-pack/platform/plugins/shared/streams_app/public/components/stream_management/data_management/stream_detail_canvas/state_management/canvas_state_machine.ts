@@ -38,6 +38,7 @@ import {
   type Unit,
   type UnitRepository,
 } from '../../../../../services/unit_repository';
+import { getPipelinesWithoutDestinations } from '../../../../../services/unit_connections';
 import { getFormattedError } from '../../../../../util/errors';
 import {
   CANVAS_URL_STATE_KEY,
@@ -806,6 +807,14 @@ async function validateCanvasUnitDefinition(unitDefinition: Unit): Promise<void>
     throw new Error(
       i18n.translate('xpack.streams.streamDetailCanvas.duplicateDestinationIdsErrorMessage', {
         defaultMessage: 'Destination IDs must be unique.',
+      })
+    );
+  }
+  if (getPipelinesWithoutDestinations(unitDefinition).length > 0) {
+    throw new Error(
+      i18n.translate('xpack.streams.streamDetailCanvas.unconnectedProcessingErrorMessage', {
+        defaultMessage:
+          'Connect each processing node to a destination before saving. To remove a processing node, delete all of its processors.',
       })
     );
   }

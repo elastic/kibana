@@ -70,6 +70,7 @@ export type ProcessingFlyoutEvent =
   | { type: 'step.cancel' }
   | { type: 'step.commit'; processor: DraftProcessor }
   | { type: 'step.delete'; key: string }
+  | { type: 'step.deleteAll' }
   | { type: 'step.duplicate'; key: string }
   | { type: 'step.changeDescription'; key: string; description: string }
   | { type: 'step.reorder'; from: number; to: number }
@@ -159,6 +160,7 @@ export const processingFlyoutMachine = setup({
           }
         : {}
     ),
+    deleteAllSteps: assign({ steps: [], editingKey: undefined, hasChanges: true }),
     duplicateStep: assign(({ context, event }) => {
       if (event.type !== 'step.duplicate') {
         return {};
@@ -226,6 +228,7 @@ export const processingFlyoutMachine = setup({
   },
   guards: {
     canSave: ({ context }) => context.editable && context.hasChanges,
+    canDeleteAll: ({ context }) => context.editable && context.steps.length > 0,
     shouldStartCreating: ({ context }) => context.editable && context.initialCreate !== undefined,
     isEditingDeletedStep: ({ context, event }) =>
       event.type === 'step.delete' && event.key === context.editingKey,
@@ -281,6 +284,7 @@ export const processingFlyoutMachine = setup({
           actions: { type: 'openEditor', params: ({ event }) => ({ key: event.key }) },
         },
         'step.delete': { actions: 'deleteStep' },
+        'step.deleteAll': { guard: 'canDeleteAll', actions: 'deleteAllSteps' },
         'step.duplicate': {
           guard: ({ context }) => context.editable,
           actions: 'duplicateStep',
@@ -304,6 +308,7 @@ export const processingFlyoutMachine = setup({
           { guard: 'isEditingDeletedStep', target: 'idle', actions: 'deleteStep' },
           { actions: 'deleteStep' },
         ],
+        'step.deleteAll': { guard: 'canDeleteAll', target: 'idle', actions: 'deleteAllSteps' },
         'step.reorder': { actions: 'reorderStep' },
         'step.edit': {
           actions: { type: 'openEditor', params: ({ event }) => ({ key: event.key }) },

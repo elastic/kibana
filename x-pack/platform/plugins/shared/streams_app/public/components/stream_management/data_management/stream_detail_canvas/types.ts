@@ -46,7 +46,7 @@ export interface ProcessingNodeData extends Record<string, unknown> {
   unconfiguredNodeId?: never;
 }
 
-/** Edge data for lines derived from the unit's pipelines. */
+/** Edge data for lines derived from the unit's pipelines. Classic-stream lines carry none. */
 export interface UnitEdgeData extends Record<string, unknown> {
   /** Lines into a destination from a source or pipeline processing can be reconnected or unhooked. */
   unitConnection?: boolean;

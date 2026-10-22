@@ -10,6 +10,7 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -19,6 +20,7 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -37,7 +39,18 @@ import {
 } from '../stream_management/data_management/stream_detail_canvas/state_management';
 import { NoProcessorsPrompt } from './empty_states';
 import { ProcessorList } from './processor_list';
-import { discardProcessingChangesPromptOptions } from './prompt_options';
+import {
+  deleteAllProcessorsPromptOptions,
+  discardProcessingChangesPromptOptions,
+} from './prompt_options';
+
+const deleteAllLabel = i18n.translate('xpack.streams.processingFlyout.deleteAll', {
+  defaultMessage: 'Delete all processors',
+});
+
+const closeLabel = i18n.translate('xpack.streams.processingFlyout.close', {
+  defaultMessage: 'Close',
+});
 
 export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout }) {
   const { euiTheme } = useEuiTheme();
@@ -92,6 +105,10 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
     enabled: hasChanges || isEditing,
     ...discardProcessingChangesPromptOptions,
   });
+  const requestDeleteAll = useDiscardConfirm(
+    () => ref.send({ type: 'step.deleteAll' }),
+    deleteAllProcessorsPromptOptions
+  );
 
   const unmatchedDiagnostics = diagnostics.filter(({ stepIndex }) => stepIndex === undefined);
 
@@ -151,6 +168,7 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
       onClose={requestClose}
       data-test-subj="streamsProcessingFlyout"
       paddingSize="none"
+      hideCloseButton
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup
@@ -179,6 +197,32 @@ export function ProcessingFlyout({ flyout }: { flyout: CanvasProcessingFlyout })
               </EuiBadge>
             </EuiFlexItem>
           ) : null}
+          <EuiFlexItem />
+          {editable && steps.length > 0 ? (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={deleteAllLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="trash"
+                  color="danger"
+                  aria-label={deleteAllLabel}
+                  isDisabled={isSaving}
+                  onClick={requestDeleteAll}
+                  data-test-subj="streamsProcessingFlyoutDeleteAll"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={closeLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="cross"
+                color="text"
+                aria-label={closeLabel}
+                onClick={requestClose}
+                data-test-subj="streamsProcessingFlyoutClose"
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

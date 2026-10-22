@@ -192,6 +192,14 @@ const findUnprocessedSourcePipelineIndex = (
 const findPipelineIndex = (unit: Unit, pipelineId: string): number =>
   unit.unit.pipelines.findIndex(({ id }) => id === pipelineId);
 
+const replacePipelineConfig = (unit: Unit, pipelineIndex: number, config: PipelineConfig): Unit =>
+  replacePipelines(
+    unit,
+    unit.unit.pipelines.map((pipeline, index) =>
+      index === pipelineIndex ? { ...pipeline, config } : pipeline
+    )
+  );
+
 const writePipeline = (unit: Unit, pipelineIndex: number, config: PipelineConfig): Unit => {
   const pipelines = unit.unit.pipelines.flatMap((pipeline, index) => {
     if (index !== pipelineIndex) {
@@ -618,7 +626,7 @@ const disconnectProcessingFromDestination = (
     return unit;
   }
   const { config } = pipeline;
-  return writePipeline(
+  return replacePipelineConfig(
     unit,
     pipelineIndex,
     pipelineUsesRoutes(pipeline)
@@ -651,20 +659,21 @@ export const connectToDestination = (
     : connectProcessingToDestination(unit, origin.ref, destinationId);
 
 /**
- * Removes one drawn line. A pipeline left forwarding nowhere is dropped with
- * the processors only it used.
+ * Removes one drawn line. A source pipeline left forwarding nowhere is dropped;
+ * a processing node stays, unconnected, until it is reconnected or emptied.
  */
 export const disconnectFromDestination = (
   unit: Unit,
   origin: UnitConnectionOrigin,
   destinationId: string
 ): Unit =>
-  pruneUnit(
-    unit,
-    origin.kind === GRAPH_ENDPOINT_KIND.source
-      ? disconnectSourceFromDestination(unit, origin.id, destinationId)
-      : disconnectProcessingFromDestination(unit, origin.ref, destinationId)
-  );
+  origin.kind === GRAPH_ENDPOINT_KIND.source
+    ? pruneUnit(unit, disconnectSourceFromDestination(unit, origin.id, destinationId))
+    : disconnectProcessingFromDestination(unit, origin.ref, destinationId);
+
+/** Pipelines that send records nowhere. The distributor rejects a unit that has any. */
+export const getPipelinesWithoutDestinations = (unit: Unit): UnitPipeline[] =>
+  unit.unit.pipelines.filter(({ config }) => !pipelineForwards(config));
 
 /** Moves a line onto a new start or destination handle. */
 export const moveUnitConnection = (
@@ -685,14 +694,9 @@ export const moveUnitConnection = (
     return unit;
   }
   const released = disconnectFromDestination(unit, previousOrigin, previousDestinationId);
-  if (canConnectToDestination(released, origin, destinationId)) {
-    return connectToDestination(released, origin, destinationId);
-  }
-  // Releasing a processing node's last line drops its pipeline, so add the new line first.
-  const connected = connectToDestination(unit, origin, destinationId);
-  return connected === unit
-    ? unit
-    : disconnectFromDestination(connected, previousOrigin, previousDestinationId);
+  return canConnectToDestination(released, origin, destinationId)
+    ? connectToDestination(released, origin, destinationId)
+    : unit;
 };
 
 const removeComponentReferences = (unit: Unit, componentId: string): Unit =>
