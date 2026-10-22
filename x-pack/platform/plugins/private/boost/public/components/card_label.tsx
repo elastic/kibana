@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 
 interface CardLabelProps {
   title: string;
-  description: string;
+  description: ReactNode;
   badge?: ReactNode;
 }
 

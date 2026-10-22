@@ -154,8 +154,8 @@ describe('Project defaults', () => {
 
     const flyout = screen.getByTestId('boostProjectDefaultFlyout');
     expect(getChoice('boostProjectDefaultPreset-elastic-performant')).toBeChecked();
-    // Nothing to save until the choice changes.
-    expect(within(flyout).getByTestId('boostProjectDefaultSave')).toBeDisabled();
+    // Saving is always available, even before the choice changes.
+    expect(within(flyout).getByTestId('boostProjectDefaultSave')).toBeEnabled();
 
     await userEvent.click(
       within(flyout).getByTestId('boostProjectDefaultPreset-elastic-on-demand')
@@ -172,7 +172,13 @@ describe('Project defaults', () => {
     renderPage();
     await userEvent.click(screen.getByTestId('boostEditProjectDefault-indices'));
 
-    expect(getChoice('boostProjectDefaultCustom')).toBeDisabled();
+    const custom = getChoice('boostProjectDefaultCustom');
+    expect(custom).toBeDisabled();
+    // Its description stays the same; screen readers also hear why it's disabled, which a tooltip
+    // shows on hover.
+    expect(custom).toHaveAccessibleName(
+      'Custom boost profile Use one of your own boost profiles. Create an indices boost profile to use one here.'
+    );
   });
 
   it('saves a custom profile chosen in the flyout', async () => {
@@ -210,6 +216,7 @@ describe('Project defaults', () => {
     renderPage();
     await userEvent.click(screen.getByTestId('boostEditProjectDefault-data_streams'));
 
-    expect(screen.getByTestId('boostCostEstimate')).toHaveTextContent('1 data stream · 3 GB');
+    expect(screen.getByTestId('boostCostEstimateCount')).toHaveTextContent('1 data stream');
+    expect(screen.getByTestId('boostCostEstimateSize')).toHaveTextContent('3 GB');
   });
 });

@@ -17,15 +17,16 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiToolTip,
+  EuiScreenReaderOnly,
+  EuiLink,
   EuiFormRow,
   EuiSelect,
-  EuiSpacer,
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_PROFILE_KEYS, DEFAULT_RULE_NAMES } from '../../../common/presets';
 import type { BoostProfileInput, BoostProfileType, BoostRule } from '../../../common/types';
 import { estimateRuleCost } from '../../../common/vcu_estimate';
@@ -47,15 +48,6 @@ const TITLES: Readonly<Record<BoostProfileType, string>> = {
   }),
   data_streams: i18n.translate('xpack.boost.projectDefaultForm.dataStreamsTitle', {
     defaultMessage: 'Edit project default for data streams',
-  }),
-};
-
-const LEGENDS: Readonly<Record<BoostProfileType, string>> = {
-  indices: i18n.translate('xpack.boost.projectDefaultForm.indicesLegend', {
-    defaultMessage: 'Default boost for indices',
-  }),
-  data_streams: i18n.translate('xpack.boost.projectDefaultForm.dataStreamsLegend', {
-    defaultMessage: 'Default boost for data streams',
   }),
 };
 
@@ -100,6 +92,16 @@ export const ProjectDefaultFlyout = ({ type, onClose }: ProjectDefaultFlyoutProp
     .sort((a, b) => a.name.localeCompare(b.name));
   const isCustom = !presets.some((preset) => preset.profileName === profileName);
   const firstCustomProfile = customProfileName || (customProfiles[0]?.name ?? '');
+  const noCustomProfilesReason =
+    customProfiles.length > 0
+      ? undefined
+      : type === 'indices'
+      ? i18n.translate('xpack.boost.projectDefaultForm.noIndicesProfiles', {
+          defaultMessage: 'Create an indices boost profile to use one here.',
+        })
+      : i18n.translate('xpack.boost.projectDefaultForm.noDataStreamsProfiles', {
+          defaultMessage: 'Create a data streams boost profile to use one here.',
+        });
 
   const chooseCustom = (name: string) => {
     setCustomProfileName(name);
@@ -190,20 +192,31 @@ export const ProjectDefaultFlyout = ({ type, onClose }: ProjectDefaultFlyoutProp
         <EuiTitle size="s">
           <h2 id={titleId}>{TITLES[type]}</h2>
         </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
-          <p>
-            <FormattedMessage
-              id="xpack.boost.projectDefaultForm.description"
-              defaultMessage="Boost for any {type, select, indices {index} other {data stream}} that no boost rule matches, which the default rule {rule} uses."
-              values={{ type, rule: <strong>{ruleName}</strong> }}
-            />
-          </p>
-        </EuiText>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <fieldset aria-label={LEGENDS[type]}>
+        <EuiFormRow
+          labelType="legend"
+          label={i18n.translate('xpack.boost.projectDefaultForm.profileLabel', {
+            defaultMessage: 'Boost profile',
+          })}
+          // Here rather than in the custom card, whose title is its radio's label, which can't hold
+          // a button, and which is disabled until there's a custom profile to choose.
+          labelAppend={
+            <EuiText size="xs">
+              <EuiLink
+                onClick={() => setIsCreatingProfile(true)}
+                disabled={isSaving}
+                data-test-subj="boostProjectDefaultCreateProfile"
+              >
+                {i18n.translate('xpack.boost.projectDefaultForm.createProfile', {
+                  defaultMessage: 'Create profile',
+                })}
+              </EuiLink>
+            </EuiText>
+          }
+          fullWidth
+        >
           <EuiFlexGroup direction="column" gutterSize="s">
             {presets.map(({ profileName: presetProfileName, label, description, isDefault }) => (
               <EuiFlexItem key={presetProfileName}>
@@ -225,73 +238,58 @@ export const ProjectDefaultFlyout = ({ type, onClose }: ProjectDefaultFlyoutProp
               </EuiFlexItem>
             ))}
             <EuiFlexItem>
-              <EuiCheckableCard
-                id={`${groupName}-custom`}
-                name={groupName}
-                label={
-                  <CardLabel
-                    title={i18n.translate('xpack.boost.projectDefaultForm.customLabel', {
-                      defaultMessage: 'Custom boost profile',
-                    })}
-                    description={
-                      customProfiles.length > 0
-                        ? i18n.translate('xpack.boost.projectDefaultForm.customDescription', {
+              {/* Until there's a custom profile of this type, the card is disabled, and a tooltip
+                  says why. Screen readers read the reason with the description, since a disabled
+                  card can't take the focus that shows the tooltip. */}
+              <EuiToolTip content={noCustomProfilesReason} display="block">
+                <EuiCheckableCard
+                  id={`${groupName}-custom`}
+                  name={groupName}
+                  label={
+                    <CardLabel
+                      title={i18n.translate('xpack.boost.projectDefaultForm.customLabel', {
+                        defaultMessage: 'Custom boost profile',
+                      })}
+                      description={
+                        <>
+                          {i18n.translate('xpack.boost.projectDefaultForm.customDescription', {
                             defaultMessage: 'Use one of your own boost profiles.',
-                          })
-                        : type === 'indices'
-                        ? i18n.translate('xpack.boost.projectDefaultForm.noIndicesProfiles', {
-                            defaultMessage:
-                              'Create an indices boost profile to use your own boost values.',
-                          })
-                        : i18n.translate('xpack.boost.projectDefaultForm.noDataStreamsProfiles', {
-                            defaultMessage:
-                              'Create a data streams boost profile to use your own phases.',
-                          })
-                    }
-                  />
-                }
-                checked={isCustom}
-                onChange={() => chooseCustom(firstCustomProfile)}
-                // Nothing to choose until there's a custom profile of this type.
-                disabled={isSaving || customProfiles.length === 0}
-                data-test-subj="boostProjectDefaultCustom"
-              >
-                {isCustom && (
-                  <EuiFormRow
-                    display="rowCompressed"
-                    label={i18n.translate('xpack.boost.projectDefaultForm.customProfileLabel', {
-                      defaultMessage: 'Boost profile',
-                    })}
-                    fullWidth
-                  >
+                          })}
+                          {noCustomProfilesReason && (
+                            <EuiScreenReaderOnly>
+                              <span> {noCustomProfilesReason}</span>
+                            </EuiScreenReaderOnly>
+                          )}
+                        </>
+                      }
+                    />
+                  }
+                  checked={isCustom}
+                  onChange={() => chooseCustom(firstCustomProfile)}
+                  // Nothing to choose until there's a custom profile of this type.
+                  disabled={isSaving || customProfiles.length === 0}
+                  data-test-subj="boostProjectDefaultCustom"
+                >
+                  {isCustom && (
                     <EuiSelect
                       compressed
                       fullWidth
+                      aria-label={i18n.translate(
+                        'xpack.boost.projectDefaultForm.customProfileLabel',
+                        { defaultMessage: 'Custom boost profile' }
+                      )}
                       options={customProfiles.map(({ name }) => ({ value: name, text: name }))}
                       value={profileName}
                       onChange={({ target: { value } }) => chooseCustom(value)}
                       disabled={isSaving}
                       data-test-subj="boostProjectDefaultCustomProfile"
                     />
-                  </EuiFormRow>
-                )}
-              </EuiCheckableCard>
+                  )}
+                </EuiCheckableCard>
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </fieldset>
-        <EuiSpacer size="s" />
-        <EuiButtonEmpty
-          size="s"
-          iconType="plusCircle"
-          flush="left"
-          onClick={() => setIsCreatingProfile(true)}
-          disabled={isSaving}
-          data-test-subj="boostProjectDefaultCreateProfile"
-        >
-          {i18n.translate('xpack.boost.projectDefaultForm.createProfile', {
-            defaultMessage: 'Create boost profile',
-          })}
-        </EuiButtonEmpty>
+        </EuiFormRow>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
@@ -315,7 +313,6 @@ export const ProjectDefaultFlyout = ({ type, onClose }: ProjectDefaultFlyoutProp
               fill
               onClick={onSave}
               isLoading={isSaving}
-              isDisabled={profileName === savedProfileName}
               data-test-subj="boostProjectDefaultSave"
             >
               {i18n.translate('xpack.boost.projectDefaultForm.saveButton', {

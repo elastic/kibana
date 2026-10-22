@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiNotificationBadge,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
@@ -236,15 +237,15 @@ const EstimateContent = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued" aria-live="polite">
-            {i18n.translate('xpack.boost.costEstimate.subtitle', {
-              defaultMessage: '{targets} · {size}',
-              values: {
-                targets: formatDataSourceCount(type, dataSourceCount),
-                size: formatSize(sizeInBytes),
-              },
-            })}
-          </EuiText>
+          {/* How many it covers, and how much data, as on the project default panels. */}
+          <EuiFlexGroup gutterSize="s" responsive={false} aria-live="polite">
+            <EuiNotificationBadge color="subdued" size="s" data-test-subj="boostCostEstimateCount">
+              {formatDataSourceCount(type, dataSourceCount)}
+            </EuiNotificationBadge>
+            <EuiNotificationBadge color="subdued" size="s" data-test-subj="boostCostEstimateSize">
+              {formatSize(sizeInBytes)}
+            </EuiNotificationBadge>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />

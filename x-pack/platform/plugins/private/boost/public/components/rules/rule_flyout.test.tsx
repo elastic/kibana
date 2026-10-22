@@ -233,7 +233,7 @@ describe('RuleFlyout estimate', () => {
   it("estimates the rule's targets", () => {
     renderFlyout();
 
-    expect(getEstimate()).toHaveTextContent('1 index · 4 GB');
+    expect(getEstimate()).toHaveTextContent('1 index4 GB');
     expect(getEstimate()).toHaveAttribute('data-shown', 'true');
     expect(getEstimate()).toHaveAttribute('data-stale', 'false');
     expect(screen.getByTestId('boostCostEstimate-atRest')).toBeInTheDocument();
@@ -259,7 +259,7 @@ describe('RuleFlyout estimate', () => {
     it("splits a data streams rule's estimate between its profile's periods", () => {
       renderFlyout(logsRule);
 
-      expect(getEstimate()).toHaveTextContent('1 data stream · 3 GB');
+      expect(getEstimate()).toHaveTextContent('1 data stream3 GB');
       expect(screen.getByTestId('boostCostEstimate-atRest')).toBeInTheDocument();
       expect(screen.getByTestId('boostCostEstimateTimeline-recent')).toHaveTextContent(
         'Recent1 GB'
@@ -354,7 +354,7 @@ describe('RuleFlyout estimate', () => {
     await blur();
 
     expect(getEstimate()).toHaveAttribute('data-shown', 'true');
-    expect(getEstimate()).toHaveTextContent('0 indices · 0 GB');
+    expect(getEstimate()).toHaveTextContent('0 indices0 GB');
     expect(getEstimate()).toHaveTextContent('$0.00 at rest');
     // Each end has its own indicator. EUI's test build renders an icon's label as its text.
     expect(screen.getByText(/^At rest, down from/)).toBeInTheDocument();
@@ -397,7 +397,7 @@ describe('RuleFlyout estimate', () => {
 
     await userEvent.click(screen.getByTestId('boostRuleCreateProfile'));
 
-    expect(getEstimate()).toHaveTextContent('1 index · 4 GB');
+    expect(getEstimate()).toHaveTextContent('1 index4 GB');
   });
 });
 
