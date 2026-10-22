@@ -39,7 +39,10 @@ const caseConfiguration: GetObservabilityAlertsTableProp<'casesConfiguration'> =
   owner: [observabilityFeatureId],
 };
 
-export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
+export function ObservabilityAlertsTable({
+  onRemoveFromCase,
+  ...props
+}: ObservabilityAlertsTableProps) {
   const { observability } = useKibana<{ observability?: ObservabilityPublicStart }>().services;
   const { observabilityRuleTypeRegistry, config } = usePluginContext();
 
@@ -58,6 +61,7 @@ export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
         observabilityRuleTypeRegistry:
           observabilityRuleTypeRegistry ?? observability?.observabilityRuleTypeRegistry,
         config,
+        onRemoveFromCase,
       }}
       renderCellValue={AlertsTableCellValue}
       renderActionsCell={AlertActions}

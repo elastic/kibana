@@ -11,7 +11,7 @@ import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
 import type { DeleteAllArgs, DeleteArgs } from './types';
-import { deleteCaseAttachments } from './delete_utils';
+import { deleteCaseAttachments, deleteRelatedAttachments } from './delete_utils';
 
 /**
  * Delete all comments for a case.
@@ -77,6 +77,8 @@ export async function deleteComment(
         attachments,
         operation: Operations.deleteComment,
         notInCaseMessage: () => `This comment ${savedObjectId} does not exist in ${caseID}.`,
+        beforeDelete: (decoded) =>
+          deleteRelatedAttachments({ caseId: caseID, attachments: decoded }, clientArgs),
       },
       clientArgs
     );

@@ -229,6 +229,13 @@ export const fetchComputedColumnSortPage = (
     : fetchPageEmptyLast(column, args, ctx);
 };
 
+/** A column without data anywhere: every entity in view is empty, so they come by id. */
+export const fetchEmptyColumnSortPage = (
+  column: ComputedColumn,
+  args: QueryArgs,
+  ctx: SortPageContext
+): Promise<Row[]> => ctx.runQuery(buildEmptyRowsQuery(column, args, [], args.pageSize + 1));
+
 export const buildSortWithValueSteps = (
   args: QueryArgs,
   field: string,

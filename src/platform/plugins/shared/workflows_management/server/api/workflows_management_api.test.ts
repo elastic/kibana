@@ -214,7 +214,7 @@ describe('WorkflowsManagementApi', () => {
             'default'
           );
         } else {
-          await expect(steps).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+          await expect(steps).rejects.toBeInstanceOf(WorkflowNotFoundError);
           expect(mockWorkflowsService.getExecutionStepExecutions).not.toHaveBeenCalled();
         }
 
@@ -227,7 +227,7 @@ describe('WorkflowsManagementApi', () => {
             'default'
           );
         } else {
-          await expect(history).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+          await expect(history).rejects.toBeInstanceOf(WorkflowNotFoundError);
           expect(mockWorkflowsService.searchStepExecutions).not.toHaveBeenCalled();
         }
 
@@ -243,7 +243,7 @@ describe('WorkflowsManagementApi', () => {
             historyOptions
           );
         } else {
-          await expect(changes).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+          await expect(changes).rejects.toBeInstanceOf(WorkflowNotFoundError);
           expect(mockWorkflowsService.getHistoryForWorkflow).not.toHaveBeenCalled();
         }
       }
@@ -927,7 +927,7 @@ steps:
           mockWorkflowYaml,
           spaceId,
           mockRequest,
-          { includeVariableRules: false }
+          { includeVariableRules: false, includeEsqlRules: false }
         );
         const engine = await mockWorkflowsService.getWorkflowsExecutionEngine();
         expect(engine.executeWorkflow).toHaveBeenCalledWith(
@@ -1253,7 +1253,7 @@ steps:
           mockWorkflowYaml,
           spaceId,
           mockRequest,
-          { includeVariableRules: false }
+          { includeVariableRules: false, includeEsqlRules: false }
         );
       });
     });
@@ -1522,7 +1522,7 @@ steps:
         'name: Test Workflow',
         'default',
         mockRequest,
-        { includeVariableRules: false }
+        { includeVariableRules: false, includeEsqlRules: false }
       );
       expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1633,7 +1633,7 @@ steps:
         'name: Test',
         'default',
         mockRequest,
-        { includeVariableRules: true }
+        { includeVariableRules: true, includeEsqlRules: true }
       );
       expect(result).toBe(expectedResult);
     });
@@ -1659,7 +1659,7 @@ steps:
         'invalid: yaml',
         'my-space',
         mockRequest,
-        { includeVariableRules: true }
+        { includeVariableRules: true, includeEsqlRules: true }
       );
       expect(result).toEqual(expectedResult);
     });
@@ -1896,6 +1896,91 @@ steps:
         undefined,
         mockRequest
       );
+    });
+
+    describe('with a hidden workflow', () => {
+      const privateAccess: NonNullable<WorkflowDetailDto['access_control']> = {
+        access_mode: 'private',
+        entries: [],
+      };
+
+      beforeEach(async () => {
+        mockWorkflowsService.getWorkflow.mockImplementation(async (id) =>
+          createWorkflowDto({ id, access_control: privateAccess })
+        );
+        mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([]);
+        mockWorkflowsService.deleteWorkflows.mockResolvedValue({
+          total: 2,
+          deleted: 1,
+          successfulIds: ['visible'],
+          failures: [],
+        });
+      });
+
+      it('leaves it to the service to skip it like an unknown id', async () => {
+        const access = await mockWorkflowsService.getAccessControl();
+        jest.mocked(access.assertAccess).mockImplementation(async ({ id }) => {
+          if (id === 'hidden') throw new WorkflowNotFoundError(id);
+        });
+
+        await api.deleteWorkflows(['hidden', 'visible'], 'default', mockRequest);
+
+        expect(mockWorkflowsService.deleteWorkflows).toHaveBeenCalledWith(
+          ['hidden', 'visible'],
+          'default',
+          undefined,
+          mockRequest
+        );
+      });
+
+      it('still rejects a workflow the caller can read but not delete', async () => {
+        const access = await mockWorkflowsService.getAccessControl();
+        jest.mocked(access.assertAccess).mockRejectedValue(new WorkflowAccessDeniedError());
+
+        await expect(
+          api.deleteWorkflows(['visible'], 'default', mockRequest)
+        ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+        expect(mockWorkflowsService.deleteWorkflows).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('bulkCreateWorkflows overwrite with a hidden workflow', () => {
+    const yaml = 'name: Test Workflow';
+
+    beforeEach(() => {
+      mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
+        { id: 'hidden' } as WorkflowDetailDto,
+      ]);
+      mockWorkflowsService.bulkCreateWorkflows.mockResolvedValue({ created: [], failed: [] });
+    });
+
+    it('leaves it to the service to report it as already existing', async () => {
+      const access = await mockWorkflowsService.getAccessControl();
+      jest.mocked(access.assertAccess).mockRejectedValue(new WorkflowNotFoundError('hidden'));
+
+      await api.bulkCreateWorkflows([{ id: 'hidden', yaml }], 'default', mockRequest, {
+        overwrite: true,
+      });
+
+      expect(mockWorkflowsService.bulkCreateWorkflows).toHaveBeenCalledWith(
+        [{ id: 'hidden', yaml }],
+        'default',
+        mockRequest,
+        { overwrite: true }
+      );
+    });
+
+    it('still rejects the request when the caller can read but not edit', async () => {
+      const access = await mockWorkflowsService.getAccessControl();
+      jest.mocked(access.assertAccess).mockRejectedValue(new WorkflowAccessDeniedError());
+
+      await expect(
+        api.bulkCreateWorkflows([{ id: 'hidden', yaml }], 'default', mockRequest, {
+          overwrite: true,
+        })
+      ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+      expect(mockWorkflowsService.bulkCreateWorkflows).not.toHaveBeenCalled();
     });
   });
 
