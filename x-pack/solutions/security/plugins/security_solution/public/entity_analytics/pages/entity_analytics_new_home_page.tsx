@@ -80,7 +80,7 @@ import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import type { EntityViewMode } from '../../../common/entity_analytics/entity_store/resolution_group';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
-import { useGenerateAiBriefAction } from '../components/home/ai_brief/use_generate_ai_brief_action';
+import { GenerateAiBriefButton } from '../components/home/ai_brief/generate_ai_brief_button';
 import { useKibana } from '../../common/lib/kibana';
 import { APP_ID, SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { ENTITY_PROMPT } from '../../agent_builder/components/prompts';
@@ -1179,13 +1179,6 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     ]
   );
 
-  const generateAiBriefAction = useGenerateAiBriefAction({
-    cards: signalCards,
-    timeRange,
-    entityFilters,
-    focusTileId: activeTile ?? undefined,
-  });
-
   const onGroupChange = useCallback((key: string) => {
     setGroupsSelected((prev) => {
       if (key === 'none') return ['none'];
@@ -1268,10 +1261,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   return (
     <>
       <div className="entityAnalyticsPageHeader" css={isGridFullScreen ? hiddenCss : undefined}>
-        <EntityAnalyticsHomeHeader
-          onStartTour={productTour.startTour}
-          primaryActionItem={generateAiBriefAction}
-        />
+        <EntityAnalyticsHomeHeader onStartTour={productTour.startTour} />
       </div>
       <SecuritySolutionPageWrapper noPadding data-test-subj="entityAnalyticsNewHomePage">
         <div
@@ -1327,6 +1317,14 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
             `}
           >
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <GenerateAiBriefButton
+                  cards={signalCards}
+                  timeRange={timeRange}
+                  entityFilters={entityFilters}
+                  focusTileId={activeTile ?? undefined}
+                />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <HuntWithAiButton />
               </EuiFlexItem>

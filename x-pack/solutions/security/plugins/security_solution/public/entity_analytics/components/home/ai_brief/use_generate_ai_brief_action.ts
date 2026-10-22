@@ -7,7 +7,6 @@
 
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { AppHeaderMenu } from '@kbn/app-header';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 import type { TimeRange } from '../../../../../common/entity_analytics/home/constants';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
@@ -17,13 +16,9 @@ import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use
 import type { SignalCardData, SignalCardId } from '../needs_attention_tiles/data';
 import type { EntityFilters } from '../entities_grid/common';
 
-const BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.home.aiBrief.buttonLabel',
-  { defaultMessage: 'Generate AI brief' }
-);
 /**
- * The page header's "Generate AI brief" button: captures the page's view and opens Agent Builder on it.
- * Absent when the user can't use Agent Builder.
+ * What the "Generate AI brief" button needs: whether the user can use Agent Builder, whether the page's
+ * counts are still loading, and the action that captures the view and opens Agent Builder on it.
  */
 export const useGenerateAiBriefAction = ({
   cards,
@@ -35,7 +30,7 @@ export const useGenerateAiBriefAction = ({
   timeRange: TimeRange;
   entityFilters: EntityFilters;
   focusTileId?: SignalCardId;
-}): AppHeaderMenu['primaryActionItem'] => {
+}): { isAvailable: boolean; isLoading: boolean; open: () => void } => {
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
 
   const scope = useMemo(
@@ -55,17 +50,7 @@ export const useGenerateAiBriefAction = ({
 
   const isLoading = isWaitingForCounts(cards);
   return useMemo(
-    () =>
-      isAgentBuilderEnabled
-        ? {
-            id: 'generateAiBrief',
-            label: BUTTON_LABEL,
-            iconType: 'sparkles',
-            run: openAgentBuilderFlyout,
-            disableButton: isLoading,
-            testId: 'generateAiBriefButton',
-          }
-        : undefined,
+    () => ({ isAvailable: isAgentBuilderEnabled, isLoading, open: openAgentBuilderFlyout }),
     [isAgentBuilderEnabled, isLoading, openAgentBuilderFlyout]
   );
 };
