@@ -52,6 +52,7 @@ describe('getLensConfigLabel', () => {
       { type: 'pie', metrics: [{ column: 'Bytes' }], group_by: [{ column: 'host' }] },
       'Bytes',
     ],
+    ['mosaic: single metric', { type: 'mosaic', metric: { column: 'Bytes' } }, 'Bytes'],
     ['gauge: single metric', { type: 'gauge', metric: { column: 'CPU %' } }, 'CPU %'],
     ['tag_cloud: single metric', { type: 'tag_cloud', metric: { column: 'Count' } }, 'Count'],
     [

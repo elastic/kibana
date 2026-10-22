@@ -57,10 +57,10 @@ export const getLensConfigLabel = (config: UnknownRecord): string | undefined =>
     }
     case 'pie':
     case 'treemap':
-    case 'mosaic':
     case 'waffle':
       return firstColumnLabel(config.metrics);
     case 'gauge':
+    case 'mosaic':
     case 'tag_cloud':
     case 'heatmap':
     case 'region_map':
