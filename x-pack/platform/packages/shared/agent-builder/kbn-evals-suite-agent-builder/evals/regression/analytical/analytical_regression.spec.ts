@@ -10,11 +10,11 @@ import {
   createQuantitativeCorrectnessEvaluators,
   createQuantitativeGroundednessEvaluator,
   createSpanLatencyEvaluator,
-  withEvaluatorSpan,
 } from '@kbn/evals';
 import type { ExperimentTask, TaskOutput } from '@kbn/evals';
 import { createGcsRepository, restoreSnapshot } from '@kbn/es-snapshot-loader';
-import { evaluate } from '../../src/evaluate';
+import { evaluate } from '../../../src/evaluate';
+import { runJudgeAnalyses } from '../../../src/regression_analyses';
 import type { AnalyticalRegressionExample } from './analytical_regression_dataset';
 import { ANALYTICAL_REGRESSION_DATASET } from './analytical_regression_dataset';
 
@@ -141,35 +141,23 @@ evaluate.describe(
             messages: [{ message: input.question }],
           });
 
-          // The quantitative Factuality/Relevance/Procedural Fidelity/Groundedness evaluators
-          // read these analyses from the task output. Run them inside evaluator spans with
-          // root context so the judge calls don't inflate the task's own trace metrics.
-          const [correctnessResult, groundednessResult] = await Promise.all([
-            withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
-              evaluators.correctnessAnalysis().evaluate({
-                input,
-                expected: output,
-                output: response,
-                metadata,
-              })
-            ),
-            withEvaluatorSpan('GroundednessAnalysis', {}, () =>
-              evaluators.groundednessAnalysis().evaluate({
-                input,
-                expected: output,
-                output: response,
-                metadata,
-              })
-            ),
-          ]);
+          const { correctnessAnalysis, groundednessAnalysis, analysisErrors } =
+            await runJudgeAnalyses({
+              evaluators,
+              input,
+              expected: output,
+              response,
+              metadata,
+              log,
+            });
 
           return {
-            errors: response.errors,
+            errors: [...response.errors, ...analysisErrors],
             messages: response.messages,
             steps: response.steps,
             traceId: response.traceId,
-            correctnessAnalysis: correctnessResult?.metadata,
-            groundednessAnalysis: groundednessResult?.metadata,
+            correctnessAnalysis,
+            groundednessAnalysis,
           };
         };
 

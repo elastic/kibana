@@ -16,7 +16,7 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
  * evaluator name across runs). Use EVAL_REPETITIONS for higher-confidence runs.
  */
 export default createPlaywrightEvalsConfig({
-  testDir: Path.resolve(__dirname, './evals/analytical'),
+  testDir: Path.resolve(__dirname, './evals/regression'),
   repetitions: 1,
   timeout: 60 * 60_000, // 1 hour — the suite must stay small enough to run per-PR
   workers: 2,
