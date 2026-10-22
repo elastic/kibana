@@ -34,6 +34,7 @@ import {
   setAlertingV2NavSettings,
   unsetAlertingV2EnabledSetting,
 } from '../fixtures/alerting_v2_setting';
+import { ALERTS_TABLE_TEST_SUBJECTS } from '../fixtures/constants';
 import { observabilityAlertingNavRole } from '../fixtures/roles';
 
 const ALERTS_PANEL_ID = 'alerting';
@@ -379,6 +380,7 @@ test.describe(
 
     test('clicking Alerts V1 loads the classic alerts page when the V1 alerts table setting is on', async ({
       browserAuth,
+      page,
       pageObjects,
       kbnClient,
       scoutSpace,
@@ -409,6 +411,7 @@ test.describe(
 
       await nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK).click();
       await expectPageTitle(pageObjects.chrome.pageTitle, CLASSIC_ALERTS_TITLE);
+      await expect(page.testSubj.locator(ALERTS_TABLE_TEST_SUBJECTS.PAGE_WITH_DATA)).toBeVisible();
     });
 
     test('reverts to a plain Alerts link that loads the classic alerts page after disabling v2', async ({
