@@ -10,9 +10,12 @@ import { AIMessage, type UsageMetadata } from '@langchain/core/messages';
 
 export const tokenCountToUsageMetadata = (tokens: ChatCompletionTokenCount): UsageMetadata => ({
   input_tokens: tokens.prompt,
-  output_tokens: tokens.completion,
+  output_tokens: tokens.completion + (tokens.thinking ?? 0),
   total_tokens: tokens.total,
   ...(tokens.cached !== undefined ? { input_token_details: { cache_read: tokens.cached } } : {}),
+  ...(tokens.thinking !== undefined
+    ? { output_token_details: { reasoning: tokens.thinking } }
+    : {}),
 });
 
 export const responseToLangchainMessage = (response: ChatCompleteResponse): AIMessage => {
