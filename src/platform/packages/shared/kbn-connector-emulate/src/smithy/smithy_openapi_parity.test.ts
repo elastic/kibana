@@ -36,6 +36,9 @@ const KNOWN_DIFFERENCES = {
   // Senders may leave out members with a `@default`, which receivers fill in; AWS's protocol
   // tests require servers to accept requests without them.
   requiredWithDefault: '`@required` members with a `@default` are optional',
+  // An `@httpResponseCode` member lets the operation answer with another status, such as
+  // Lambda's Invoke with 202 for asynchronous invocations.
+  responseCode: 'operations with an `@httpResponseCode` member also declare `2XX`',
 } as const;
 
 type Paths = Record<string, Record<string, Record<string, unknown>>>;
@@ -164,8 +167,10 @@ const describeOperations = (document: OpenApiDocument, errorsAsLastVariant: bool
             content: contentOf(document, operation.requestBody),
           },
           responses: Object.fromEntries(
-            Object.entries(isRecord(operation.responses) ? operation.responses : {}).map(
-              ([status, response]) => [
+            Object.entries(isRecord(operation.responses) ? operation.responses : {})
+              // KNOWN_DIFFERENCES.responseCode
+              .filter(([status]) => status !== '2XX')
+              .map(([status, response]) => [
                 status,
                 {
                   headers: Object.keys(
@@ -173,8 +178,7 @@ const describeOperations = (document: OpenApiDocument, errorsAsLastVariant: bool
                   ).sort(),
                   content: contentOf(document, response, errorsAsLastVariant && status !== '200'),
                 },
-              ]
-            )
+              ])
           ),
         },
       ])
@@ -189,6 +193,7 @@ describe('convertSmithy compared with smithy-openapi', () => {
       'blobPayload',
       'sensitive',
       'requiredWithDefault',
+      'responseCode',
     ]);
   });
 

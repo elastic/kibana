@@ -10,6 +10,7 @@
 import type { ParameterInput } from './read_parameters';
 import { readParameters } from './read_parameters';
 import { validateValue } from './schema_violations';
+import { isRecord } from './schema_walk';
 import type { ContractOperation, Violation } from './types';
 import { validateContent } from './validate_content';
 
@@ -53,7 +54,17 @@ const checkQueryEncoding = (
       .flatMap(({ credential }) => (credential?.in === 'query' ? [credential.name] : [])),
     ...fixedQuery.map(({ name }) => name),
   ]);
-  const undeclared = Object.keys(query)
+  // A map of all query parameters (`style: form`, `explode: true`, an object), such as Smithy's
+  // `@httpQueryParams`, takes every parameter.
+  const takesAll = declared.some(
+    ({ style, explode, schema }) =>
+      style === 'form' &&
+      explode &&
+      isRecord(schema?.schema) &&
+      schema?.schema.type === 'object' &&
+      schema.schema.additionalProperties !== undefined
+  );
+  const undeclared = (takesAll ? [] : Object.keys(query))
     .filter(
       (key) =>
         key !== MOCK_PAGE_PARAM &&

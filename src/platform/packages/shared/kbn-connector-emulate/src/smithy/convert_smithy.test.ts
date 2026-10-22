@@ -338,13 +338,16 @@ describe('convertSmithy', () => {
       },
       responses: { '201': { description: 'PutObject 201 response' } },
     });
-    expect(paths['/buckets/{name}/objects/{key}'].get.responses).toEqual({
-      '200': {
-        description: 'GetObject 200 response',
-        content: {
-          'application/json': { schema: { $ref: '#/components/schemas/ObjectMetadata' } },
-        },
+    const getObject = {
+      description: 'GetObject 200 response',
+      content: {
+        'application/json': { schema: { $ref: '#/components/schemas/ObjectMetadata' } },
       },
+    };
+    // The `@httpResponseCode` member lets GetObject answer with another 2xx status.
+    expect(paths['/buckets/{name}/objects/{key}'].get.responses).toEqual({
+      '200': getObject,
+      '2XX': getObject,
       '400': expect.anything(),
     });
     expect(paths['/buckets/{name}/events'].get.responses).toMatchObject({

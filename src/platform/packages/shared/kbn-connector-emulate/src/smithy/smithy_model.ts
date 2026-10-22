@@ -46,6 +46,8 @@ export interface Shape {
   readonly update?: ShapeRef;
   readonly delete?: ShapeRef;
   readonly list?: ShapeRef;
+  /** Shapes whose members and traits the shape includes. */
+  readonly mixins?: readonly ShapeRef[];
 }
 
 export interface SmithyModel {
@@ -88,11 +90,35 @@ const PRELUDE_TYPES: Readonly<Record<string, string>> = {
 /** Looks up a shape, including prelude shapes such as `smithy.api#String`. */
 export const getShape = (model: SmithyModel, id: string): Shape | undefined => {
   const shape = model.shapes[id];
-  if (shape || !id.startsWith(PRELUDE)) {
-    return shape;
+  if (shape) {
+    return shape.mixins?.length ? withMixins(model, shape) : shape;
+  }
+  if (!id.startsWith(PRELUDE)) {
+    return undefined;
   }
   const type = PRELUDE_TYPES[shapeName(id).replace(/^Primitive/, '')];
   return type ? { type, ...(type === 'structure' ? { members: {} } : {}) } : undefined;
+};
+
+// A shape with the members and traits of its mixins, which the JSON AST lists only on the
+// mixins (https://smithy.io/2.0/spec/mixins.html); the shape's own come last and win.
+const withMixins = (model: SmithyModel, shape: Shape): Shape => {
+  const mixins = (shape.mixins ?? []).flatMap(({ target }) => getShape(model, target) ?? []);
+  const traits = Object.assign(
+    {},
+    ...mixins.map(({ traits: mixinTraits = {} }) => {
+      const { 'smithy.api#mixin': _, ...rest } = mixinTraits;
+      return rest;
+    }),
+    shape.traits
+  );
+  return {
+    ...shape,
+    traits,
+    ...(shape.members || mixins.some(({ members }) => members)
+      ? { members: Object.assign({}, ...mixins.map(({ members }) => members), shape.members) }
+      : {}),
+  };
 };
 
 export const UNIT = `${PRELUDE}Unit`;
