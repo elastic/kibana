@@ -119,9 +119,9 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // Switching the method resets the agent policy name and options (see setDeploymentMethod), so
   // when the user has entered some, the card asks before switching.
   const switchResetsSettings =
-    !!authenticateAndDeployStep?.agentPolicyId ||
-    !!authenticateAndDeployStep?.agentPolicyName ||
-    authenticateAndDeployStep?.withSysMonitoring !== undefined;
+    !!agentBasedDeploymentFromFlow?.agentPolicyId ||
+    !!agentBasedDeploymentFromFlow?.agentPolicyName ||
+    agentBasedDeploymentFromFlow?.withSysMonitoring !== undefined;
 
   const handleDeploymentMethodChange = useCallback(
     (method: DeploymentMethod) => {
