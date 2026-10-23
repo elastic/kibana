@@ -107,6 +107,48 @@ describe('AlertZero action workflows', () => {
     }
   );
 
+  describe('create rule', () => {
+    const yaml = parsed(ALERTZERO_ACTION_CREATE_RULE_WORKFLOW.yaml);
+
+    // `security.createRule` always creates the rule disabled, and an approved
+    // proposal is meant to close the coverage gap, so the action has to turn the
+    // new rule on itself.
+    it('enables the rule it created, by the returned saved-object id', () => {
+      const create = stepByName(yaml, 'create_rule');
+      const enable = stepByName(yaml, 'enable_rule');
+      expect(create?.type).toBe('security.createRule');
+      expect(enable?.type).toBe('security.enableRule');
+      expect(enable?.with?.ids).toEqual(['{{ steps.create_rule.output.id }}']);
+      expect(enable?.with).not.toHaveProperty('query');
+      // An unconditional step: a created rule that stays disabled is not a success.
+      expect(enable?.if).toBeUndefined();
+
+      const names = yaml.steps.map(({ name }) => name);
+      expect(names.indexOf('create_rule')).toBeLessThan(names.indexOf('enable_rule'));
+      expect(names.indexOf('enable_rule')).toBeLessThan(names.indexOf('emit_result'));
+    });
+
+    it('reports the created rule as enabled, including when it was already on', () => {
+      const emit = stepByName(yaml, 'emit_result')?.with as Record<string, string>;
+      expect(emit.ruleId).toBe('{{ steps.create_rule.output.id }}');
+      expect(
+        evaluateExpression(emit.enabled, {
+          steps: { enable_rule: { output: { succeeded: 1, skipped: 0 } } },
+        })
+      ).toBe(true);
+      expect(
+        evaluateExpression(emit.enabled, {
+          steps: { enable_rule: { output: { succeeded: 0, skipped: 1 } } },
+        })
+      ).toBe(true);
+      expect(
+        evaluateExpression(emit.enabled, {
+          steps: { enable_rule: { output: { succeeded: 0, skipped: 0 } } },
+        })
+      ).toBe(false);
+    });
+  });
+
   describe('enable rule', () => {
     const yaml = parsed(ALERTZERO_ACTION_ENABLE_RULE_WORKFLOW.yaml);
 

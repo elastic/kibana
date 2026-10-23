@@ -2,8 +2,8 @@ version: "1"
 name: Detection Rule Creation Worker
 description: >
   Drafts an ES|QL detection rule for a reported gap, previews it, and records the
-  draft as a proposal on the caller's investigation. The rule is created disabled only
-  once an analyst approves, under the approver's identity.
+  draft as a proposal on the caller's investigation. The rule is created and enabled
+  only once an analyst approves, under the approver's identity.
 enabled: true
 tags:
   - security
@@ -290,7 +290,7 @@ steps:
           **Draft:** [agent conversation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.draft_creation.output.conversation_id }})
 
           **On approval**
-          If you approve, the agent creates the rule in the disabled state under your identity. Review the rule and enable it on the rules page. If you dismiss, the agent discards the draft.
+          If you approve, the agent creates and enables the rule under your identity, so it starts running on its next scheduled interval. If you dismiss, the agent discards the draft.
         actionWorkflowId: system-alertzero-action-create-rule
         actionInput: "${{ steps.draft_creation.output.structured_output.rule }}"
         impact: low
