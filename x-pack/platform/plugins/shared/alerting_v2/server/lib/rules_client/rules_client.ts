@@ -937,9 +937,7 @@ export class RulesClient {
       );
     }
 
-    const items = ids
-      .map((id) => rulesById.get(id))
-      .filter((rule): rule is RuleResponse => rule !== undefined);
+    const items = ids.map((id) => rulesById.get(id)).filter((rule) => rule !== undefined);
 
     return { items, errors };
   }

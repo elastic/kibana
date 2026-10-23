@@ -20,7 +20,7 @@ import {
 const TEMPLATE_ID = 'template-1';
 const TEMPLATE = { id: TEMPLATE_ID };
 
-apiTest.describe('Rule metadata.template', { tag: testData.API_ENGINE_TAG }, () => {
+apiTest.describe('Rule metadata.template', { tag: testData.API_ENGINE_NON_MKI_TAG }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
 
