@@ -14,6 +14,8 @@ import { Router } from '@kbn/shared-ux-router';
 import { useDetectionOverview } from '../../data/detection_overview/use_detection_overview';
 import { useDetectionEntities } from '../../data/detection_entities/use_detection_entities';
 import { useMaintenanceStatus } from '../../data/maintenance/use_significant_events_maintenance';
+import { useDeveloperMode } from '../../hooks/use_developer_mode';
+import type { DetectionTabId } from './detection_tabs';
 import { DetectionPage } from './page';
 
 jest.mock('../../app/app_header', () => ({
@@ -22,11 +24,15 @@ jest.mock('../../app/app_header', () => ({
 jest.mock('../../data/detection_overview/use_detection_overview');
 jest.mock('../../data/detection_entities/use_detection_entities');
 jest.mock('../../data/maintenance/use_significant_events_maintenance');
+jest.mock('../../hooks/use_developer_mode');
 jest.mock('./events/events_tab', () => ({
   EventsTab: () => <div data-test-subj="eventsTabStub" />,
 }));
 jest.mock('./rules/rules_tab', () => ({
   RulesTab: () => <div data-test-subj="rulesTabStub" />,
+}));
+jest.mock('./signals/signals_tab', () => ({
+  SignalsTab: () => <div data-test-subj="signalsTabStub" />,
 }));
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
@@ -41,9 +47,10 @@ jest.mock('../../hooks/use_kibana', () => ({
 const mockUseDetectionOverview = useDetectionOverview as jest.Mock;
 const mockUseDetectionEntities = useDetectionEntities as jest.Mock;
 const mockUseMaintenanceStatus = useMaintenanceStatus as jest.Mock;
+const mockUseDeveloperMode = useDeveloperMode as jest.Mock;
 const refetch = jest.fn();
 
-const renderPage = (initialPath = '/detections/events', tab: 'events' | 'rules' = 'events') => {
+const renderPage = (initialPath = '/detections/events', tab: DetectionTabId = 'events') => {
   const history = createMemoryHistory({ initialEntries: [initialPath] });
   render(
     <I18nProvider>
@@ -60,6 +67,7 @@ const renderPage = (initialPath = '/detections/events', tab: 'events' | 'rules' 
 describe('DetectionPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseDeveloperMode.mockReturnValue({ isDeveloperMode: false });
     mockUseDetectionEntities.mockReturnValue({
       data: { entities: [], unassigned: { rules: 0, active_events: 0 }, truncated: false },
       isLoading: false,
@@ -89,6 +97,19 @@ describe('DetectionPage', () => {
     renderPage('/detections/rules', 'rules');
     expect(await screen.findByTestId('rulesTabStub')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftDetectionTab-rules')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+    expect(screen.queryByTestId('nightshiftDetectionTab-signals')).not.toBeInTheDocument();
+  });
+
+  it('shows the Signals tab in developer mode', async () => {
+    mockUseDeveloperMode.mockReturnValue({ isDeveloperMode: true });
+
+    renderPage('/detections/signals', 'signals');
+
+    expect(await screen.findByTestId('signalsTabStub')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftDetectionTab-signals')).toHaveAttribute(
       'aria-selected',
       'true'
     );
