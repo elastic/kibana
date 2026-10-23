@@ -193,8 +193,12 @@ steps:
   # Cross-run matches read unexpired fingerprints by host, user, and alert id.
   # A match is attached instead of reviewed; a new canonical attack is written from
   # inside the step (`op_type: create`) so a parallel run cannot save a second copy.
+  # An unexpected failure returns every attack as a review. `continue` covers a
+  # failure that still comes back as an error, and the fallback below dispatches those.
   - name: match_fingerprints
     type: security.matchAttackFingerprints
+    on-failure:
+      continue: true
     with:
       attacks: "${{ steps.resolve_fanout.output.attacks }}"
       parent_run_id: "{{ execution.id }}"
@@ -285,6 +289,41 @@ steps:
                 sibling_alert_ids: "${{ foreach.item.sibling_alert_ids }}"
                 # `${{ }}` so the editor does not type-check the template source
                 # against the child's enum.
+                autonomy: "${{ inputs.autonomy }}"
+                parent_run_id: "{{ execution.id }}"
+
+  # Matching failed closed. Review every generated attack, which is what this run
+  # did before fingerprints existed. The persisted documents still use dotted keys;
+  # the matcher is what normally flattens them.
+  - name: run_unmatched_reviews
+    type: foreach
+    if: "${{ steps.match_fingerprints.error != blank }}"
+    foreach: "${{ steps.resolve_fanout.output.batches }}"
+    steps:
+      - name: unmatched_batch
+        type: data.set
+        with:
+          attacks: "${{ foreach.item }}"
+
+      - name: run_unmatched
+        type: parallel
+        foreach: "${{ steps.unmatched_batch.output.attacks }}"
+        mode: settled
+        concurrency:
+          max: 2
+        steps:
+          - name: run_unmatched_review
+            type: workflow.executeAsync
+            with:
+              workflow-id: system-security-attack-discovery-review
+              run-as-mode: inherit
+              inputs:
+                attack_discovery_id: "{{ foreach.item['kibana.alert.uuid'] }}"
+                title: "{{ foreach.item['kibana.alert.attack_discovery.title'] }}"
+                alert_ids: "${{ foreach.item['kibana.alert.attack_discovery.alert_ids'] | default: consts.no_discoveries }}"
+                summary_markdown: "{{ foreach.item['kibana.alert.attack_discovery.summary_markdown'] }}"
+                related_investigation_id: ""
+                sibling_alert_ids: "${{ consts.no_discoveries }}"
                 autonomy: "${{ inputs.autonomy }}"
                 parent_run_id: "{{ execution.id }}"
 

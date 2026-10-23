@@ -39,15 +39,18 @@ export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID =
  * to the Investigation that already describes it.
  *
  * Version 7 passes the detection alert ids of those same-run attacks to the
- * review, which tags them with its own when the verdict escalates. The YAML
- * change rolls out through `definitionHash`; the bump is the deliberate signal.
+ * review, which tags them with its own when the verdict escalates.
+ *
+ * Version 8 reviews every generated attack when fingerprint matching fails, so
+ * one matcher error does not drop the run. The YAML change rolls out through
+ * `definitionHash`; the bump is the deliberate signal.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 7,
+  version: 8,
   yaml: ATTACK_DISCOVERY_RUNNER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

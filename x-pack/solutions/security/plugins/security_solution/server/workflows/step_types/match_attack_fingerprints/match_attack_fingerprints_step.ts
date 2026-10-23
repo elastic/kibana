@@ -10,7 +10,7 @@ import {
   matchAttackFingerprintsInputSchema,
   matchAttackFingerprintsStepCommonDefinition,
 } from '../../../../common/workflows/step_types/match_attack_fingerprints/match_attack_fingerprints_step_common';
-import { matchAttackFingerprints } from './match_attack_fingerprints';
+import { matchAttackFingerprints, reviewsWhenMatchFails } from './match_attack_fingerprints';
 import { resolveSpaceId } from '../get_alert_entities_step/resolve_space_id';
 
 export const matchAttackFingerprintsStepDefinition = createServerStepDefinition({
@@ -33,12 +33,13 @@ export const matchAttackFingerprintsStepDefinition = createServerStepDefinition(
       });
       return { output };
     } catch (error) {
-      if (!context.abortSignal?.aborted) {
-        context.logger.error('Failed to match attack fingerprints', error);
+      if (context.abortSignal?.aborted) {
+        return {
+          error: error instanceof Error ? error : new Error('Failed to match attack fingerprints'),
+        };
       }
-      return {
-        error: error instanceof Error ? error : new Error('Failed to match attack fingerprints'),
-      };
+      context.logger.error('Failed to match attack fingerprints', error);
+      return { output: reviewsWhenMatchFails(parsed.data.attacks) };
     }
   },
 });

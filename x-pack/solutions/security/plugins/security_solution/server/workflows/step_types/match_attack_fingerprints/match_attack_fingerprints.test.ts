@@ -9,7 +9,12 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { getAlertEntities } from '../get_alert_entities_step/get_alert_entities';
-import { ATTACK_FINGERPRINT_INDEX, matchAttackFingerprints } from './match_attack_fingerprints';
+import {
+  ATTACK_FINGERPRINT_INDEX,
+  matchAttackFingerprints,
+  reviewsWhenMatchFails,
+} from './match_attack_fingerprints';
+import { matchAttackFingerprintsStepDefinition } from './match_attack_fingerprints_step';
 
 jest.mock('../get_alert_entities_step/get_alert_entities', () => ({
   getAlertEntities: jest.fn(),
@@ -59,14 +64,18 @@ const logger = {
 
 const createHarness = ({
   hits = [] as unknown[],
+  alertHits = [] as unknown[],
   index = jest.fn().mockResolvedValue({ result: 'created' }),
   get = jest.fn(),
   update = jest.fn().mockResolvedValue({ result: 'updated' }),
   conversation = { metadata: { status: 'open', close_reason: '', verdict: '' } },
 } = {}) => {
-  const search = jest.fn(async (params: { index?: string }) => {
+  const search = jest.fn(async (params: { index?: string; size?: number }) => {
     if (params.index === ATTACK_FINGERPRINT_INDEX) {
       return { hits: { hits } };
+    }
+    if ((params.size ?? 0) > 0) {
+      return { hits: { hits: alertHits } };
     }
     return {
       aggregations: {
@@ -662,5 +671,79 @@ describe('matchAttackFingerprints', () => {
       }),
       expect.anything()
     );
+  });
+
+  it('does not attach a service account that was never seen on that host', async () => {
+    getAlertEntitiesMock.mockResolvedValue({
+      entities: [
+        { id: 'repro-host-8b', name: 'repro-host-8b', type: 'host' },
+        { id: 'root', name: 'root', type: 'user' },
+      ],
+      total: 2,
+      truncated: false,
+    });
+    const { esClient, contextManager } = createHarness({
+      hits: [
+        fingerprintHit({
+          alert_ids: ['repro-8-1', 'repro-8-2'],
+          host_entity_ids: ['repro-host-8a', 'repro-host-8b'],
+          user_entity_ids: ['deploy', 'root'],
+          entity_pairs: ['root@repro-host-8a', 'deploy@repro-host-8b'],
+        }),
+      ],
+      alertHits: [{ fields: { 'host.name': ['repro-host-8b'], 'user.name': ['root'] } }],
+    });
+
+    const output = await matchAttackFingerprints({
+      attacks: [
+        {
+          ...attackDocument(ATTACK_ID, ['repro-8-3']),
+          'kibana.alert.attack_discovery.mitre_attack_tactics': ['TA0003'],
+        },
+      ],
+      contextManager,
+      esClient,
+      logger,
+      now: new Date('2026-10-21T12:00:00.000Z'),
+      spaceId: 'default',
+    });
+
+    expect(output.attachments).toEqual([]);
+    expect(output.reviews).toHaveLength(1);
+  });
+
+  it('reviews every attack when matching throws', async () => {
+    const result = await matchAttackFingerprintsStepDefinition.handler({
+      abortSignal: new AbortController().signal,
+      input: { attacks: [attackDocument(ATTACK_ID, ['a1', 'a2'])] },
+      logger,
+      contextManager: {
+        getScopedEsClient: () => {
+          throw new Error('elasticsearch unavailable');
+        },
+      },
+    } as never);
+
+    expect(reviewsWhenMatchFails([attackDocument(ATTACK_ID, ['a1'])])).toEqual({
+      reviews: [
+        expect.objectContaining({
+          attack_discovery_id: ATTACK_ID,
+          related_investigation_id: '',
+          sibling_alert_ids: [],
+        }),
+      ],
+      attachments: [],
+    });
+    expect(result).toEqual({
+      output: {
+        reviews: [
+          expect.objectContaining({
+            attack_discovery_id: ATTACK_ID,
+            related_investigation_id: '',
+          }),
+        ],
+        attachments: [],
+      },
+    });
   });
 });

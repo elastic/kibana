@@ -2932,6 +2932,7 @@ describe('Attack Discovery worker chain', () => {
           'match_fingerprints',
           'resolve_dispatch',
           'run_review_batches',
+          'run_unmatched_reviews',
           'run_attach_batches',
           'emit_result',
         ]);
@@ -3515,8 +3516,22 @@ describe('Attack Discovery worker chain', () => {
 
     describe('managed versions', () => {
       // Fixed `yaml` definitions roll out through the hash; the bump is the signal.
-      it('bumps the runner to version 7 so the review receives sibling alert ids', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(7);
+      it('bumps the runner to version 8 so a matcher failure still reviews every attack', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(8);
+      });
+
+      it('continues when fingerprint matching fails', () => {
+        expect(stepIn(workerSteps, 'match_fingerprints')?.['on-failure']?.continue).toBe(true);
+      });
+
+      it('reviews the generated attacks when fingerprint matching fails', () => {
+        const fallback = stepIn(workerSteps, 'run_unmatched_reviews');
+
+        expect(fallback?.if).toBe('${{ steps.match_fingerprints.error != blank }}');
+        expect(fallback?.foreach).toBe('${{ steps.resolve_fanout.output.batches }}');
+        expect(stepIn(workerSteps, 'run_unmatched_review')?.with?.['workflow-id']).toBe(
+          ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID
+        );
       });
 
       it('bumps the review to version 12 so it tags the sibling alerts', () => {

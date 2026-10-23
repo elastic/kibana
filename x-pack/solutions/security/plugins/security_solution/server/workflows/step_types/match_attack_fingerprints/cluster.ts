@@ -27,6 +27,11 @@ export interface AttackMatchFields {
   alertIds: readonly string[];
   hostEntityIds: readonly string[];
   userEntityIds: readonly string[];
+  /**
+   * `user@host` for a host and user seen on the same alert. Absent on a fingerprint
+   * written before pairs were stored.
+   */
+  entityPairs?: readonly string[];
   tactics: readonly string[];
   firstAlertAt?: string;
   lastAlertAt?: string;
@@ -127,16 +132,25 @@ export const timeClose = (left: AttackMatchFields, right: AttackMatchFields): bo
   return gap <= ENTITY_GAP_MS;
 };
 
+/** The user as seen on that host. Service accounts stay qualified, so `root` on two hosts is not one user. */
+export const hostUserPair = (host: string, user: string): string => `${user}@${host}`;
+
 /**
- * Host and user must both be shared, and the alerts must be within the chain window.
+ * A shared host and the user seen on that host, within the chain window.
  * Tactics are allowed to differ: a later phase is a continuation, not a new attack.
- * A host with no user matches only inside the same worker run.
+ * A host with no user matches only inside the same worker run. A fingerprint that
+ * has no pairs yet still matches on a shared host and a shared user.
  */
 export const entityMatch = (
   left: AttackMatchFields,
   right: AttackMatchFields,
   sameRun: boolean
 ): boolean => {
+  const leftPairs = left.entityPairs ?? [];
+  const rightPairs = right.entityPairs ?? [];
+  if (leftPairs.length > 0 && rightPairs.length > 0) {
+    return timeClose(left, right) && intersectionSize(leftPairs, rightPairs) >= 1;
+  }
   const shareHost = intersectionSize(left.hostEntityIds, right.hostEntityIds) >= 1;
   const shareUser = intersectionSize(left.userEntityIds, right.userEntityIds) >= 1;
   if (!shareHost || !timeClose(left, right)) {
@@ -236,6 +250,7 @@ export const chainSpan = (group: readonly AttackSignals[]): AttackSignals => {
     alertIds: uniqueSorted(group.flatMap((attack) => attack.alertIds)),
     hostEntityIds: uniqueSorted(group.flatMap((attack) => attack.hostEntityIds)),
     userEntityIds: uniqueSorted(group.flatMap((attack) => attack.userEntityIds)),
+    entityPairs: uniqueSorted(group.flatMap((attack) => attack.entityPairs ?? [])),
     tactics: uniqueSorted(group.flatMap((attack) => attack.tactics)),
     firstAlertAt: group.reduce<string | undefined>(
       (earliest, attack) => earlierIso(earliest, attack.firstAlertAt ?? attack.lastAlertAt),

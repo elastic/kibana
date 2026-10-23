@@ -25,6 +25,7 @@ import {
   clusterNewAttacks,
   disposition,
   fingerprintId,
+  hostUserPair,
   journalAlertsRetired,
   sameAttack,
   tagCorrelatedAlerts,
@@ -204,7 +205,7 @@ const enrichAttack = async (
   if (alertIds.length === 0) {
     return attack;
   }
-  const [entities, span] = await Promise.all([
+  const [entities, span, entityPairs] = await Promise.all([
     getAlertEntities({
       abortSignal,
       alertIds,
@@ -230,15 +231,63 @@ const enrichAttack = async (
       }
       return { first: undefined, last: undefined };
     }),
+    readEntityPairs(esClient, spaceId, alertIds, abortSignal).catch((error: unknown) => {
+      logger.warn(
+        `Attack fingerprint host and user pairs failed for ${attack.attackId}: ${errorText(error)}`
+      );
+      return [] as string[];
+    }),
   ]);
 
   return {
     ...attack,
     hostEntityIds: entities.entities.filter((entity) => entity.type === 'host').map(entityKey),
     userEntityIds: entities.entities.filter((entity) => entity.type === 'user').map(entityKey),
+    entityPairs,
     firstAlertAt: span.first,
     lastAlertAt: span.last,
   };
+};
+
+const fieldStrings = (fields: Record<string, unknown>, key: string): string[] => {
+  const value = fields[key];
+  const list = Array.isArray(value) ? value : [];
+  return list.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
+};
+
+/** Host and user names from each alert, paired only within that alert. */
+const readEntityPairs = async (
+  esClient: ElasticsearchClient,
+  spaceId: string,
+  alertIds: readonly string[],
+  abortSignal: AbortSignal | undefined
+): Promise<string[]> => {
+  if (alertIds.length === 0) {
+    return [];
+  }
+  const response = await esClient.search(
+    {
+      index: `${DEFAULT_ALERTS_INDEX}-${asSpaceId(spaceId)}`,
+      size: alertIds.length,
+      expand_wildcards: ['open', 'hidden'],
+      _source: false,
+      fields: ['host.name', 'user.name'],
+      query: { ids: { values: [...alertIds] } },
+    },
+    { signal: abortSignal }
+  );
+  const pairs: string[] = [];
+  for (const hit of response.hits?.hits ?? []) {
+    const fields = (hit.fields ?? {}) as Record<string, unknown>;
+    const hosts = fieldStrings(fields, 'host.name');
+    const users = fieldStrings(fields, 'user.name');
+    for (const host of hosts) {
+      for (const user of users) {
+        pairs.push(hostUserPair(host.trim(), user.trim()));
+      }
+    }
+  }
+  return uniqueSorted(pairs).slice(0, STORED_ALERT_ID_CAP);
 };
 
 const toStored = (hit: {
@@ -260,6 +309,7 @@ const toStored = (hit: {
     alertIds: asStringList(attributes.alert_ids),
     hostEntityIds: asStringList(attributes.host_entity_ids),
     userEntityIds: asStringList(attributes.user_entity_ids),
+    entityPairs: asStringList(attributes.entity_pairs),
     tactics: asStringList(attributes.mitre_attack_tactics),
     firstAlertAt:
       typeof attributes.first_alert_at === 'string' ? attributes.first_alert_at : undefined,
@@ -288,6 +338,7 @@ const attributeQueries = (
   const fields = [
     ['attributes.host_entity_ids', uniqueSorted(attacks.flatMap((item) => item.hostEntityIds))],
     ['attributes.user_entity_ids', uniqueSorted(attacks.flatMap((item) => item.userEntityIds))],
+    ['attributes.entity_pairs', uniqueSorted(attacks.flatMap((item) => item.entityPairs ?? []))],
     ['attributes.alert_ids', uniqueSorted(attacks.flatMap((item) => item.alertIds))],
   ] as const;
   return fields.flatMap(([field, values]) =>
@@ -391,6 +442,7 @@ const fingerprintDocument = (
       alert_count: attack.alertIds.length,
       host_entity_ids: uniqueSorted(attack.hostEntityIds).slice(0, STORED_ALERT_ID_CAP),
       user_entity_ids: uniqueSorted(attack.userEntityIds).slice(0, STORED_ALERT_ID_CAP),
+      entity_pairs: uniqueSorted(attack.entityPairs ?? []).slice(0, STORED_ALERT_ID_CAP),
       mitre_attack_tactics: uniqueSorted(attack.tactics).slice(0, STORED_ALERT_ID_CAP),
       first_alert_at: attack.firstAlertAt ?? '',
       last_alert_at: attack.lastAlertAt ?? '',
@@ -497,6 +549,10 @@ const extensionDoc = (current: StoredFingerprint, span: AttackSignals, now: Date
         0,
         STORED_ALERT_ID_CAP
       ),
+      entity_pairs: uniqueSorted([
+        ...(current.entityPairs ?? []),
+        ...(span.entityPairs ?? []),
+      ]).slice(0, STORED_ALERT_ID_CAP),
       mitre_attack_tactics: uniqueSorted([...current.tactics, ...span.tactics]).slice(
         0,
         STORED_ALERT_ID_CAP
@@ -615,6 +671,17 @@ const reviewOf = (
   summary_markdown: attack.summaryMarkdown.slice(0, 8000),
   related_investigation_id: relatedInvestigationId.slice(0, 256),
   sibling_alert_ids: siblingIds.slice(0, MAX_ALERT_IDS),
+});
+
+/** Every parsed attack as its own review. Used when matching itself fails. */
+export const reviewsWhenMatchFails = (
+  attacks: readonly Record<string, unknown>[]
+): MatchAttackFingerprintsOutput => ({
+  reviews: attacks
+    .map((raw) => parseAttack(raw))
+    .filter((item): item is AttackSignals => item !== undefined)
+    .map((attack) => reviewOf(attack, '', [])),
+  attachments: [],
 });
 
 // Alert ids the later attacks add. The review tags these with its own when the

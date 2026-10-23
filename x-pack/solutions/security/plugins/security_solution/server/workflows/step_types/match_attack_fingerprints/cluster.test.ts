@@ -164,6 +164,37 @@ describe('entityMatch', () => {
   it('returns true when one attack has no tactics', () => {
     expect(entityMatch(attack({ tactics: [] }), attack({ tactics: ['TA0008'] }), false)).toBe(true);
   });
+
+  it('returns true when the same host and user were seen together', () => {
+    expect(
+      entityMatch(
+        attack({ entityPairs: ['user-1@host-1'] }),
+        attack({ entityPairs: ['user-1@host-1'], alertIds: ['c1', 'c2'] }),
+        false
+      )
+    ).toBe(true);
+  });
+
+  it('returns false when the shared host and user were not seen together', () => {
+    expect(
+      entityMatch(
+        attack({
+          hostEntityIds: ['repro-host-8a', 'repro-host-8b'],
+          userEntityIds: ['deploy', 'root'],
+          entityPairs: ['root@repro-host-8a', 'deploy@repro-host-8b'],
+          alertIds: ['x1', 'x2'],
+        }),
+        attack({
+          hostEntityIds: ['repro-host-8b'],
+          userEntityIds: ['root'],
+          entityPairs: ['root@repro-host-8b'],
+          alertIds: ['y1'],
+          tactics: ['TA0003'],
+        }),
+        false
+      )
+    ).toBe(false);
+  });
 });
 
 describe('sameAttack', () => {
