@@ -233,8 +233,7 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product",
-        "@timestamp"
+        "observer.product"
       ]
     },
     {
@@ -283,8 +282,7 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product",
-        "@timestamp"
+        "observer.product"
       ]
     },
     {
@@ -912,8 +910,7 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product",
-        "@timestamp"
+        "observer.product"
       ]
     },
     {
@@ -997,8 +994,7 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product",
-        "@timestamp"
+        "observer.product"
       ]
     },
     {
@@ -2631,8 +2627,7 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product",
-        "@timestamp"
+        "observer.product"
       ]
     },
     {
@@ -2671,8 +2666,7 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product",
-        "@timestamp"
+        "observer.product"
       ]
     },
     {
@@ -2712,8 +2706,7 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product",
-        "@timestamp"
+        "observer.product"
       ]
     },
     {
@@ -3725,10 +3718,7 @@
       },
       "unscoredFields": [
         "observer.vendor",
-        "observer.product",
-        "@timestamp",
-        "event.start",
-        "event.end"
+        "observer.product"
       ]
     },
     {
