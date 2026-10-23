@@ -18,9 +18,7 @@ import { apiTest, generatePodsData, generateSemconvPodsData, testData } from '..
 
 const POD_WITH_LIMITS = testData.SEMCONV_PODS[0];
 const POD_WITHOUT_LIMITS = testData.SEMCONV_PODS[1];
-const POD_MULTI_INTERFACE = testData.SEMCONV_PODS.find(
-  (pod) => (pod.interfaces?.length ?? 0) > 1
-);
+const POD_MULTI_INTERFACE = testData.SEMCONV_PODS.find((pod) => (pod.interfaces?.length ?? 0) > 1);
 const SEMCONV_CPU_WITH_LIMIT = 0.46;
 const SEMCONV_CPU_WITHOUT_LIMIT = 0.32;
 const SEMCONV_MEMORY_WITH_LIMIT = 0.55;
