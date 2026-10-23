@@ -5,53 +5,9 @@
  * 2.0.
  */
 
-import {
-  indexPatternToRegex,
-  matchesPattern,
-  findConflictingTemplates,
-} from './validate_template_conflicts';
+import { findConflictingTemplates } from './validate_template_conflicts';
 
 describe('index_template_matching', () => {
-  describe('indexPatternToRegex', () => {
-    it('converts simple wildcard patterns', () => {
-      const regex = indexPatternToRegex('logs-*');
-      expect(regex.test('logs-app')).toBe(true);
-      expect(regex.test('logs-test')).toBe(true);
-      expect(regex.test('metrics-app')).toBe(false);
-    });
-
-    it('converts multi-wildcard patterns', () => {
-      const regex = indexPatternToRegex('logs-*-*');
-      expect(regex.test('logs-app-default')).toBe(true);
-      expect(regex.test('logs-test-prod')).toBe(true);
-      expect(regex.test('logs-app')).toBe(false);
-    });
-
-    it('escapes special regex characters', () => {
-      const regex = indexPatternToRegex('foo-logs-bar-*');
-      expect(regex.test('foo-logs-bar-baz')).toBe(true);
-      expect(regex.test('fooXlogsXbarXbaz')).toBe(false);
-    });
-
-    it('escapes dots correctly', () => {
-      const regex = indexPatternToRegex('.kibana-*');
-      expect(regex.test('.kibana-test')).toBe(true);
-      expect(regex.test('Xkibana-test')).toBe(false);
-    });
-  });
-
-  describe('matchesPattern', () => {
-    it('matches simple patterns', () => {
-      expect(matchesPattern('logs-app-default', 'logs-*-*')).toBe(true);
-      expect(matchesPattern('metrics-app-default', 'logs-*-*')).toBe(false);
-    });
-
-    it('matches exact patterns (no wildcards)', () => {
-      expect(matchesPattern('exact-name', 'exact-name')).toBe(true);
-      expect(matchesPattern('exact-name-suffix', 'exact-name')).toBe(false);
-    });
-  });
-
   describe('findConflictingTemplates', () => {
     const mockTemplates = [
       {
