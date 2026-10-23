@@ -20,7 +20,7 @@ import type { AlertContextMeta } from './expression';
 import { defaultExpression, ExpressionRow, Expressions, type ExpressionsProps } from './expression';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { ResolvedDataView } from '../../../utils/data_view';
-import { DEFAULT_SCHEMA, TIMESTAMP_FIELD } from '../../../../common/constants';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
 
 const mockDataView = {
@@ -266,7 +266,7 @@ describe('Expression', () => {
     });
 
     it('treats a pod rule without a stored schema like a host rule without one', () => {
-      expect(selectedSchema({ nodeType: 'pod' })).toBe(DEFAULT_SCHEMA);
+      expect(selectedSchema({ nodeType: 'pod' })).toBeUndefined();
       expect(previewSchema({ nodeType: 'pod' }).schema).toBeUndefined();
     });
 
@@ -275,8 +275,8 @@ describe('Expression', () => {
       expect(selectedSchema({ nodeType: 'pod', schema: 'ecs' })).toBe('ecs');
     });
 
-    it('falls back to the default schema for a host rule that has none', () => {
-      expect(selectedSchema({ nodeType: 'host' })).toBe(DEFAULT_SCHEMA);
+    it('shows the schema as unset for a host rule that has none', () => {
+      expect(selectedSchema({ nodeType: 'host' })).toBeUndefined();
       expect(selectedSchema({ nodeType: 'host', schema: 'ecs' })).toBe('ecs');
     });
 
@@ -297,6 +297,14 @@ describe('Expression', () => {
       expect(params.schema).toBe('semconv');
     });
 
+    it('clears a stored schema back to omitted when the unset option is selected', () => {
+      const { wrapper, params } = renderShallow({ nodeType: 'host', schema: 'semconv' });
+
+      wrapper.find('[data-test-subj="schemaExpressionSelect"]').prop('onChange')!(undefined);
+
+      expect(params.schema).toBeUndefined();
+    });
+
     it('prefills a pod schema from the waffle', async () => {
       const { ruleParams } = await setup({
         nodeType: 'pod',
@@ -306,25 +314,25 @@ describe('Expression', () => {
       expect(ruleParams.schema).toBe('semconv');
     });
 
-    it('persists the default schema when creating a new host rule without touching the selector', async () => {
+    it('leaves the schema omitted when creating a new host rule without touching the selector', async () => {
       const { ruleParams } = await setup({ nodeType: 'host' } as AlertContextMeta);
 
-      expect(ruleParams.schema).toBe(DEFAULT_SCHEMA);
+      expect(ruleParams.schema).toBeUndefined();
     });
 
-    it('persists the default schema when creating a new pod rule without touching the selector', async () => {
+    it('leaves the schema omitted when creating a new pod rule without touching the selector', async () => {
       const { ruleParams } = await setup({ nodeType: 'pod' } as AlertContextMeta);
 
-      expect(ruleParams.schema).toBe(DEFAULT_SCHEMA);
+      expect(ruleParams.schema).toBeUndefined();
     });
 
-    it('defaults the schema when opening an existing rule that has none', async () => {
+    it('leaves the schema omitted when opening an existing rule that has none', async () => {
       const { ruleParams } = await setup({} as AlertContextMeta, {
         id: 'existing-rule-id',
         initialRuleParams: { nodeType: 'host', schema: undefined },
       });
 
-      expect(ruleParams.schema).toBe(DEFAULT_SCHEMA);
+      expect(ruleParams.schema).toBeUndefined();
     });
 
     it('keeps the stored schema when opening an existing rule', async () => {

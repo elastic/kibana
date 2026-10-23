@@ -47,7 +47,6 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 import type { Query } from '@kbn/es-query';
-import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import { getInventoryRuleSchema } from '../../../../common/inventory/get_inventory_rule_schema';
 import { isSchemaSelectableForInventoryRule } from '../is_schema_selectable_for_inventory_rule';
 import { schemaTranslationMap } from '../../../components/schema_selector';
@@ -205,7 +204,11 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
   );
 
   const updateNodeType = useCallback(
-    (nt: InventoryItemType) => {
+    (nt: InventoryItemType | undefined) => {
+      if (!nt) {
+        return;
+      }
+
       setRuleParams('nodeType', nt);
 
       if (!isSchemaSelectableForInventoryRule(nt)) {
@@ -224,7 +227,7 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
   );
 
   const updateSchema = useCallback(
-    (nt: DataSchemaFormat) => {
+    (nt: DataSchemaFormat | undefined) => {
       setRuleParams('schema', nt);
     },
     [setRuleParams]
@@ -276,8 +279,11 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
       }
     }
 
-    if (!ruleParams.schema && canSelectSchema) {
-      setRuleParams('schema', md?.schema ?? DEFAULT_SCHEMA);
+    // Prefill the schema only when create-from-Inventory metadata provides one.
+    // An omitted schema stays omitted (Hosts legacy open path); do not coerce it
+    // to DEFAULT_SCHEMA, which would silently switch evaluation to the SemConv path.
+    if (!ruleParams.schema && canSelectSchema && md?.schema) {
+      setRuleParams('schema', md.schema);
     }
 
     if (ruleParams.criteria && ruleParams.criteria.length) {
@@ -350,8 +356,17 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
             <div css={NonCollapsibleExpressionCss}>
               <ExpressionDropDown
                 options={schemaOptions}
-                value={ruleParams.schema ?? DEFAULT_SCHEMA}
+                value={ruleParams.schema ?? undefined}
                 onChange={updateSchema}
+                unsetOption={{
+                  value: SCHEMA_UNSET_VALUE,
+                  text: i18n.translate(
+                    'xpack.infra.metrics.alertFlyout.expression.schema.unsetLabel',
+                    {
+                      defaultMessage: 'Not specified',
+                    }
+                  ),
+                }}
                 description={i18n.translate(
                   'xpack.infra.metrics.alertFlyout.expression.schema.descriptionLabel',
                   {
@@ -871,6 +886,11 @@ const nodeTypeOptions: Record<InventoryItemType, EuiSelectOption> = {
     value: 'awsSQS',
   },
 };
+
+// Sentinel for the "Not specified" option in the Schema dropdown. It is a
+// UI-only value: an omitted schema is stored as `undefined`, never as this
+// string, so stored rule params stay `ecs | semconv | omitted`.
+const SCHEMA_UNSET_VALUE = '__unset__';
 
 const schemaOptions: Record<DataSchemaFormat, EuiSelectOption> = {
   ecs: {

@@ -19,10 +19,23 @@ import {
 import { EuiPopoverTitle, EuiButtonIcon, useGeneratedHtmlId } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 
+interface UnsetOption {
+  /** Value rendered for the "not specified" option in the select. */
+  value: string;
+  /** Label shown both in the expression button and as the select option. */
+  text: string;
+}
+
 interface WhenExpressionProps<TDropDownType extends string> {
-  value: TDropDownType;
+  value: TDropDownType | undefined;
   options: Record<TDropDownType, EuiSelectOption>;
-  onChange: (value: TDropDownType) => void;
+  onChange: (value: TDropDownType | undefined) => void;
+  /**
+   * When provided, the dropdown can represent an unset state: an omitted
+   * `value` renders this option's text instead of coercing to a concrete
+   * option, and selecting it reports `undefined` back to `onChange`.
+   */
+  unsetOption?: UnsetOption;
   popupPosition?:
     | 'upCenter'
     | 'upLeft'
@@ -48,6 +61,7 @@ export const ExpressionDropDown = <TDropDownType extends string>({
   value,
   options,
   onChange,
+  unsetOption,
   popupPosition,
   description,
   popoverTitle,
@@ -56,6 +70,13 @@ export const ExpressionDropDown = <TDropDownType extends string>({
   const [popoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
   const popoverTitleId = useGeneratedHtmlId();
 
+  const displayValue = value === undefined ? unsetOption?.text ?? '' : options[value].text;
+  const selectValue = value === undefined ? unsetOption?.value ?? '' : value;
+  const selectOptions = [
+    ...(unsetOption ? [{ value: unsetOption.value, text: unsetOption.text }] : []),
+    ...(Object.values(options) as EuiSelectOption[]),
+  ];
+
   return (
     <EuiPopover
       aria-labelledby={popoverTitleId}
@@ -63,7 +84,7 @@ export const ExpressionDropDown = <TDropDownType extends string>({
         <EuiExpression
           data-test-subj="nodeTypeExpression"
           description={description}
-          value={options[value].text}
+          value={displayValue}
           isActive={popoverOpen}
           onClick={togglePopover}
         />
@@ -80,13 +101,18 @@ export const ExpressionDropDown = <TDropDownType extends string>({
         <EuiSelect
           aria-label={props['aria-label']}
           data-test-subj={props['data-test-subj']}
-          value={value}
+          value={selectValue}
           fullWidth
           onChange={(e) => {
-            onChange(e.target.value as TDropDownType);
+            const nextValue = e.target.value;
+            onChange(
+              unsetOption && nextValue === unsetOption.value
+                ? undefined
+                : (nextValue as TDropDownType)
+            );
             closePopover();
           }}
-          options={Object.values(options).map((o) => o) as EuiSelectOption[]}
+          options={selectOptions}
         />
       </div>
     </EuiPopover>
