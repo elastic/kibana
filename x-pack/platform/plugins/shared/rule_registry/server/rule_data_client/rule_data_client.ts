@@ -39,6 +39,28 @@ export interface RuleDataClientConstructorOptions {
 
 export type WaitResult = Either<Error, ElasticsearchClient>;
 
+/**
+ * Returns true when the bulk response failed and every failed item was rejected
+ * because the target index / write alias does not exist. This distinguishes a
+ * missing write target (which can be resolved by installing resources) from
+ * per-document failures such as version conflicts or mapping errors.
+ */
+const isIndexNotFoundBulkResponse = (body: estypes.BulkResponse): boolean => {
+  if (!body.errors) {
+    return false;
+  }
+
+  const failedItems = body.items.filter((item) => Object.values(item).some((op) => op?.error));
+
+  if (failedItems.length === 0) {
+    return false;
+  }
+
+  return failedItems.every((item) =>
+    Object.values(item).every((op) => !op?.error || op.error.type === 'index_not_found_exception')
+  );
+};
+
 export class RuleDataClient implements IRuleDataClient {
   private _isWriteEnabled: boolean = false;
   private _isWriterCacheEnabled: boolean = true;
@@ -219,22 +241,60 @@ export class RuleDataClient implements IRuleDataClient {
       throw error;
     }
 
+    const executeBulk = async (request: estypes.BulkRequest) => {
+      return this.clusterClient!.bulk(
+        {
+          ...request,
+          require_alias: !this._isUsingDataStreams,
+          index: alias,
+        },
+        { meta: true }
+      );
+    };
+
     return {
       bulk: async (request: estypes.BulkRequest) => {
         try {
           if (this.clusterClient) {
-            const requestWithDefaultParameters = {
-              ...request,
-              require_alias: !this._isUsingDataStreams,
-              index: alias,
-            };
-
-            const response = await this.clusterClient.bulk(requestWithDefaultParameters, {
-              meta: true,
-            });
+            let response = await executeBulk(request);
 
             if (!response.body.errors) {
               return response;
+            }
+
+            // If every item failed because the write alias / concrete index does not exist,
+            // the resources were never installed (or were removed). Rather than logging the
+            // full 404 bulk body on every rule execution forever, attempt to (re)install the
+            // namespace-level resources once and retry the write.
+            if (isIndexNotFoundBulkResponse(response.body)) {
+              this.options.logger.warn(
+                `The write target "${alias}" does not exist for the ${indexInfo.indexOptions.registrationContext} registration context. Attempting to (re)install namespace-level resources and retry.`
+              );
+
+              try {
+                await resourceInstaller.installAndUpdateNamespaceLevelResources(
+                  indexInfo,
+                  namespace
+                );
+                response = await executeBulk(request);
+
+                if (!response.body.errors) {
+                  return response;
+                }
+              } catch (installError) {
+                this.options.logger.error(
+                  `Failed to (re)install namespace-level resources for "${alias}" (${indexInfo.indexOptions.registrationContext}): ${installError.message}`
+                );
+              }
+
+              // If the write target is still missing after attempting installation, log a
+              // single concise, actionable error instead of the entire bulk response body.
+              if (isIndexNotFoundBulkResponse(response.body)) {
+                this.options.logger.error(
+                  `Could not write alerts for the ${indexInfo.indexOptions.registrationContext} registration context because the write target "${alias}" does not exist and could not be created.`
+                );
+                return response;
+              }
             }
 
             // TODO: #160572 - add support for version conflict errors, in case alert was updated
