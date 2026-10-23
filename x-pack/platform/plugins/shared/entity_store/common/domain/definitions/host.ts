@@ -14,6 +14,7 @@ import {
   getEntityFieldsDescriptions,
   isNotEmptyCondition,
 } from './common_fields';
+import { hostDynamicBlock } from './dynamic/host_dynamic';
 
 // Mostly copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/host.ts
 
@@ -22,7 +23,9 @@ export const hostEntityDefinition: ManagedEntityDefinitionWithoutId & {
 } = {
   type: 'host',
   managedBy: { kind: 'plugin', id: PLUGIN_ID },
-  name: `Security 'host' Entity Store Definition`,
+  name: 'Host',
+  description:
+    'A physical or virtual machine that runs workloads. Identified by host.id, falling back to host.name, then host.hostname.',
   identityField: {
     euidRanking: {
       branches: [
@@ -39,6 +42,7 @@ export const hostEntityDefinition: ManagedEntityDefinitionWithoutId & {
       ],
     },
   },
+  dynamic: hostDynamicBlock,
   extraction: {
     entityTypeFallback: 'Host',
     /** Requires `host.id`; name-only documents remain lookup-only to avoid duplicate entities. */

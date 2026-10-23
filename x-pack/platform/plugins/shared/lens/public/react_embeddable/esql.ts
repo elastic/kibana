@@ -9,6 +9,7 @@ import { getIndexForESQLQuery, getInitialESQLQuery, getESQLQueryColumns } from '
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import type { LensSerializedState } from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { withTimeout } from '@kbn/std';
 import { createEsqlAdHocDataView } from '../data_views_service/create_esql_ad_hoc_data_view';
 import { isESQLModeEnabled } from './initializers/utils';
 import type { LensEmbeddableStartServices } from './types';
@@ -34,21 +35,22 @@ export async function loadESQLAttributes(
     return;
   }
 
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-  const timeoutFallback = new Promise<LensSerializedState['attributes'] | undefined>((resolve) => {
-    timeoutId = setTimeout(
-      () =>
-        buildESQLAttributes(FALLBACK_ESQL_QUERY, services).then(resolve, () => resolve(undefined)),
-      LOAD_ESQL_ATTRIBUTES_TIMEOUT_MS
-    );
+  const main = buildMainESQLAttributes(services);
+  const outcome = await withTimeout({
+    promise: main,
+    timeoutMs: LOAD_ESQL_ATTRIBUTES_TIMEOUT_MS,
   });
-
-  try {
-    return await Promise.race([buildMainESQLAttributes(services), timeoutFallback]);
-  } finally {
-    clearTimeout(timeoutId);
+  if (!outcome.timedout) {
+    return outcome.value;
   }
+
+  // The deadline only starts the fallback. Main stays in the race, so a result that
+  // lands while the fallback is still building still wins.
+  const fallback = buildESQLAttributes(FALLBACK_ESQL_QUERY, services).then(
+    (attributes) => attributes,
+    () => undefined
+  );
+  return Promise.race([main, fallback]);
 }
 
 async function buildMainESQLAttributes({

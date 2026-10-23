@@ -155,7 +155,7 @@ describe('addComment', () => {
       clientArgs.request,
       expect.objectContaining({
         caseId,
-        attachmentIds: expect.any(Array),
+        ids: expect.any(Array),
         attachmentType: 'comment',
         owner: SECURITY_SOLUTION_OWNER,
       })

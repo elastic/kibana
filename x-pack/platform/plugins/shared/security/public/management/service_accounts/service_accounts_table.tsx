@@ -16,6 +16,7 @@ import {
   EuiBadge,
   EuiBadgeGroup,
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
@@ -32,10 +33,7 @@ import type {
   ServiceAccountDirectoryEntry,
 } from '../../service_accounts';
 
-export interface ServiceAccountTableItem extends ServiceAccountDirectoryEntry {
-  description?: string;
-  workloadCount?: number;
-}
+export type ServiceAccountTableItem = ServiceAccountDirectoryEntry;
 
 export interface ServiceAccountsTableProps {
   serviceAccounts: ServiceAccountTableItem[];
@@ -45,6 +43,8 @@ export interface ServiceAccountsTableProps {
   onLoadMore: () => void;
   /** Shows a delete action on each row when set. */
   onDeleteAccount?: (serviceAccount: ServiceAccountTableItem) => void;
+  /** Shows a View link next to the workload count of each bound account when set. */
+  onViewWorkloads?: (serviceAccount: ServiceAccountTableItem) => void;
 }
 
 const unavailableValue = (tabIndex?: number) => (
@@ -84,6 +84,7 @@ export const ServiceAccountsTable = ({
   hasLoadMoreError,
   onLoadMore,
   onDeleteAccount,
+  onViewWorkloads,
 }: ServiceAccountsTableProps) => {
   const [pageIndex, setPageIndex] = useState(0);
   const roleOptions = useMemo(
@@ -212,22 +213,59 @@ export const ServiceAccountsTable = ({
         name: i18n.translate('xpack.security.management.serviceAccounts.table.workloadsColumn', {
           defaultMessage: 'Workloads',
         }),
-        render: (workloadCount: number | undefined) =>
-          workloadCount === undefined ? (
-            <EuiToolTip
-              content={i18n.translate(
-                'xpack.security.management.serviceAccounts.table.workloadsUnavailable',
-                { defaultMessage: 'Workload associations are not available yet.' }
+        render: (workloadCount: number | undefined, serviceAccount: ServiceAccountTableItem) => {
+          if (workloadCount === undefined) {
+            return (
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.security.management.serviceAccounts.table.workloadsCountFailed',
+                  { defaultMessage: 'Unable to count the workloads bound to this account.' }
+                )}
+              >
+                {unavailableValue(0)}
+              </EuiToolTip>
+            );
+          }
+
+          if (workloadCount === 0) {
+            return <span data-test-subj="serviceAccountWorkloadCount">{workloadCount}</span>;
+          }
+
+          return (
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="primary" data-test-subj="serviceAccountWorkloadCount">
+                  {workloadCount}
+                </EuiBadge>
+              </EuiFlexItem>
+              {onViewWorkloads && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="xs"
+                    flush="both"
+                    onClick={() => onViewWorkloads(serviceAccount)}
+                    aria-label={i18n.translate(
+                      'xpack.security.management.serviceAccounts.table.viewWorkloadsAriaLabel',
+                      {
+                        defaultMessage: 'View the workloads bound to {name}',
+                        values: { name: serviceAccount.name },
+                      }
+                    )}
+                    data-test-subj="serviceAccountViewWorkloads"
+                  >
+                    {i18n.translate(
+                      'xpack.security.management.serviceAccounts.table.viewWorkloadsButton',
+                      { defaultMessage: 'View' }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
               )}
-            >
-              {unavailableValue(0)}
-            </EuiToolTip>
-          ) : (
-            <EuiBadge color="primary">{workloadCount}</EuiBadge>
-          ),
+            </EuiFlexGroup>
+          );
+        },
       },
     ],
-    []
+    [onViewWorkloads]
   );
 
   const columnsWithActions = useMemo(() => {

@@ -16,11 +16,7 @@ import {
   assertAgentBuilderSidebarIsOpen,
   assertAgentBuilderConversationInputEditorContains,
 } from '../../../../tasks/agent_builder';
-import {
-  CREATE_RULE_BUTTON,
-  AI_RULE_CREATION_MENU_ITEM,
-  MANUAL_RULE_CREATION_MENU_ITEM,
-} from '../../../../screens/agent_builder';
+import { CREATE_RULE_BUTTON, AI_RULE_CREATION_MENU_ITEM } from '../../../../screens/agent_builder';
 
 describe(
   'AI Rule Creation via Agent Builder',
@@ -45,11 +41,10 @@ describe(
       visitRulesManagementTable();
     });
 
-    it('should display the "Create rule" dropdown with AI and Manual options', () => {
+    it('should display the "Create rule" split button with the AI option', () => {
       cy.get(CREATE_RULE_BUTTON).should('be.visible');
       openCreateRuleMenu();
       cy.get(AI_RULE_CREATION_MENU_ITEM).should('be.visible');
-      cy.get(MANUAL_RULE_CREATION_MENU_ITEM).should('be.visible');
     });
 
     it('should open Agent Builder sidebar with pre-populated prompt when clicking "AI rule creation"', () => {

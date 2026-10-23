@@ -49,6 +49,10 @@ export const PackFieldWrapper = ({
   const actionId = useMemo(() => liveQueryDetails?.action_id, [liveQueryDetails?.action_id]);
   const agentIds = useMemo(() => liveQueryDetails?.agents, [liveQueryDetails?.agents]);
 
+  // Supplied details win: the response action form passes the form value that gets
+  // persisted, so a pack list fallback would advertise queries the rule won't save.
+  const packQueries = liveQueryDetails ? liveQueryDetails.queries : selectedPackData?.queries;
+
   return (
     <>
       <EuiFlexItem>
@@ -61,7 +65,7 @@ export const PackFieldWrapper = ({
       {submitButtonContent}
       <EuiSpacer />
 
-      {(actionId && liveQueryDetails?.queries?.length) || selectedPackData?.queries?.length ? (
+      {packQueries?.length ? (
         <EuiFlexItem>
           <PackQueriesStatusTable
             actionId={actionId}
@@ -69,7 +73,7 @@ export const PackFieldWrapper = ({
             startDate={liveQueryDetails?.['@timestamp']}
             expirationDate={liveQueryDetails?.expiration}
             // @ts-expect-error update types
-            data={liveQueryDetails?.queries ?? selectedPackData?.queries}
+            data={packQueries}
             showResultsHeader={showResultsHeader}
             addToTimeline={addToTimeline}
           />

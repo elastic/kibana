@@ -168,6 +168,8 @@ export interface IAdditionalFields {
   fromEnrich: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
   fromFrom: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
   fromPromql?: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
+  /** True when the pipeline source command is TS, so STATS output typing can apply implicit aggregates. */
+  isTimeseriesSource?: boolean;
 }
 
 /**

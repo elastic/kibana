@@ -14,8 +14,8 @@ import {
   applyLiquidMask,
   classifyLiquidPosition,
   findMaskedRangeAtOffset,
-} from '../../../esql_validation/classify_liquid_position';
-import type { EsqlStepRegion } from '../../../esql_validation/extract_esql_region';
+} from '../../../../../../../common/lib/esql_validation/classify_liquid_position';
+import type { EsqlStepRegion } from '../../../../../../../common/lib/esql_validation/extract_esql_region';
 import type { ExtendedAutocompleteContext } from '../../context/autocomplete.types';
 import type { WorkflowEsqlCompletionServices } from '../workflow_esql_completion_services';
 

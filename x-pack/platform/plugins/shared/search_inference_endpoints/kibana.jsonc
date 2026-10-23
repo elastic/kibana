@@ -13,7 +13,6 @@
       "searchInferenceEndpoints"
     ],
     "requiredPlugins": [
-      "actions",
       "features",
       "inference",
       "licensing",

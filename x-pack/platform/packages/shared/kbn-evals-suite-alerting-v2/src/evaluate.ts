@@ -8,6 +8,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { evaluate as evalsBase } from '@kbn/evals';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import {
+  installHostMetricsDataStream,
+  removeHostMetricsDataStream,
+  type HostMetricsDataStream,
+} from './data_stream_data';
 import { createEvaluateDataset } from './evaluate_dataset';
 import type { EvaluateDataset } from './types';
 import {
@@ -35,6 +40,11 @@ export const evaluate = evalsBase.extend<{
    * Resolves to the seeded admin-console index pattern
    */
   adminConsoleIndex: string;
+  /**
+   * Seeds a real host-metrics data stream and resolves its name and current
+   * backing index. Opt-in: only the concrete-index evals pay for it.
+   */
+  hostMetricsDataStream: HostMetricsDataStream;
   /** Creates a test `.email` connector */
   emailConnectorId: string;
 }>({
@@ -73,6 +83,16 @@ export const evaluate = evalsBase.extend<{
   adminConsoleIndex: [
     async ({ fullStackData }, use) => {
       await use(ADMIN_CONSOLE_INDEX);
+    },
+    { scope: 'test' },
+  ],
+  hostMetricsDataStream: [
+    async ({ esClient, log }, use) => {
+      try {
+        await use(await installHostMetricsDataStream(esClient, log));
+      } finally {
+        await removeHostMetricsDataStream(esClient, log);
+      }
     },
     { scope: 'test' },
   ],

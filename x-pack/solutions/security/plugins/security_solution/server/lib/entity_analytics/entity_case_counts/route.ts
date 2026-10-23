@@ -18,6 +18,7 @@ import {
   canReadSecurityCases,
   fetchEntityCaseCounts,
 } from './fetch_entity_case_counts';
+import { fetchGroupMemberIds } from './fetch_group_member_ids';
 
 export const registerEntityCaseCountsRoute = ({
   router,
@@ -39,8 +40,12 @@ export const registerEntityCaseCountsRoute = ({
         validate: {
           request: {
             body: buildRouteValidationWithZod(
-              // An id is at most as long as an entity attachment's `attachmentId`.
-              z.object({ entity_ids: z.array(z.string().max(1000)).max(100) })
+              z.object({
+                // An id is at most as long as an entity attachment's `attachmentId`.
+                entity_ids: z.array(z.string().max(1000)).max(100),
+                // Counts the cases of the entities resolved to each entity with its own.
+                include_members: z.boolean().optional(),
+              })
             ),
           },
         },
@@ -60,11 +65,22 @@ export const registerEntityCaseCountsRoute = ({
           const repository = coreStart.savedObjects.createInternalRepository([
             CASE_ATTACHMENT_TYPE,
           ]);
+          const { entity_ids: entityIds, include_members: includeMembers } = request.body;
+          const memberIds = includeMembers
+            ? await fetchGroupMemberIds(
+                (
+                  await context.core
+                ).elasticsearch.client.asCurrentUser,
+                spaceId,
+                entityIds
+              )
+            : {};
           const counts = await fetchEntityCaseCounts(
             repository,
             await cases.getCasesClientWithRequest(request),
             spaceId,
-            request.body.entity_ids
+            entityIds,
+            memberIds
           );
           return response.ok({ body: Object.fromEntries(counts) });
         } catch (err) {

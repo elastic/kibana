@@ -56,8 +56,9 @@ for the user to confirm.
 2. **Draft** a short bulleted preview before any write: name, description, tags, maturity,
    example count, and the first few examples. For an upsert, say which examples will be
    added and which existing ones will be removed.
-3. **Write**. Each of these asks the user to confirm before it runs:
-   - \`${evalsDatasetTools.createDataset}\` - create a dataset. Fails if the name already exists in this space.
+3. **Write**. \`${evalsDatasetTools.createDataset}\` creates a dataset without an additional
+   confirmation step and fails if the name already exists in this space. The remaining write
+   tools ask the user to confirm before they run:
    - \`${evalsDatasetTools.editExamples}\` - add examples and/or remove specific examples by id, keeping every other example.
    - \`${evalsDatasetTools.upsertDataset}\` - create or replace by **name**. Replaces the whole example set: any existing example missing from the payload is removed.
    - \`${evalsDatasetTools.copyDataset}\` - copy a dataset under a new name.

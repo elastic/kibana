@@ -100,14 +100,14 @@ export const useInvestigationSections = ({
   const low = useFetchInvestigations({ ...tierSection('low'), query });
   const notRated = useFetchInvestigations({ inProgress: false, severities: ['none'], query });
 
-  // The tiles count the same investigations as the severity sections.
+  // The shared counts cannot leave out running investigations, so the tiles include them.
   const severityCountsQuery = useQuery({
     queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'severityCounts', query],
     enabled: agenticInvestigations != null,
     queryFn: ({ signal }) =>
       http.get<InvestigationSeverityCounts>(SHARED_INVESTIGATIONS_SEVERITY_COUNTS_URL, {
         version: SHARED_INVESTIGATIONS_API_VERSION,
-        query: { in_progress: false, ...(query ? { query } : {}) },
+        query: query ? { query } : {},
         signal,
       }),
     keepPreviousData: true,

@@ -67,7 +67,10 @@ export const planBatches = ({
       continue;
     }
     reclaimAlertIds.push(alert.id);
-    if (alert.timestamp >= lookbackCutoff) reclaimedInWindow.push(alert);
+    // An alert the settings now exclude is released like any stale claim, but not planned again.
+    if (alert.timestamp >= lookbackCutoff && !alert.excludedBySettings) {
+      reclaimedInWindow.push(alert);
+    }
   }
 
   const base = {

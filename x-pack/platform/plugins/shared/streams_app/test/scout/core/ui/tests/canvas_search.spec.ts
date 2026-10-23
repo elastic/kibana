@@ -25,10 +25,9 @@ const SUPPORTED_TELEMETRY = ['logs', 'metrics', 'traces'];
 const MOCK_UNIT = {
   unit: {
     sources: [
-      { id: 'nop-input', name: 'Nop', type: 'nop', supported_telemetry: SUPPORTED_TELEMETRY },
+      { id: 'otlp-input', name: 'OTLP', type: 'otlp', supported_telemetry: SUPPORTED_TELEMETRY },
     ],
     destinations: [
-      { id: 'debug-out', name: 'Debug', type: 'debug', supported_telemetry: SUPPORTED_TELEMETRY },
       {
         id: DESTINATION_ID,
         name: DESTINATION_NAME,
@@ -42,8 +41,8 @@ const MOCK_UNIT = {
         id: 'main',
         supported_telemetry: SUPPORTED_TELEMETRY,
         config: [
-          { name: 'sources', value: ['nop-input'] },
-          { name: 'destinations', value: ['debug-out'] },
+          { name: 'sources', value: ['otlp-input'] },
+          { name: 'destinations', value: [DESTINATION_ID] },
         ],
       },
     ],
@@ -63,10 +62,17 @@ const mockUnitDefinition = async (page: ScoutPage) => {
       body: JSON.stringify(MOCK_UNIT),
     });
   });
+  await page.route('**/internal/streams/unit/*/_resolve_indices', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ destinations: {} }),
+    });
+  });
 };
 
 test.describe(
-  'Stream canvas - search',
+  'Stream map - search',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ kbnClient, logsSynthtraceEsClient }) => {
@@ -100,7 +106,7 @@ test.describe(
       });
     });
 
-    test('pivots from a destination row into a pre-filled canvas search', async ({
+    test('pivots from a destination row into a pre-filled map search', async ({
       page,
       pageObjects: { streams },
     }) => {
@@ -109,11 +115,10 @@ test.describe(
 
       await streams.getDestinationShowOnCanvasButton(DESTINATION_NAME).click();
 
-      await expect(streams.getStreamsLayoutTab('canvas')).toHaveAttribute('aria-selected', 'true');
+      await expect(streams.getStreamsLayoutTab('map')).toHaveAttribute('aria-selected', 'true');
       await expect(streams.canvasSearch).toHaveValue(DESTINATION_NAME);
       await expect(page).toHaveURL(
-        (url) =>
-          url.searchParams.get('canvasState')?.includes(`query:'${DESTINATION_NAME}'`) ?? false
+        (url) => url.searchParams.get('mapState')?.includes(`query:'${DESTINATION_NAME}'`) ?? false
       );
 
       // Only the matching flow is rendered; the unrelated classic stream is hidden.
@@ -124,19 +129,23 @@ test.describe(
       await streams.canvasSearch.fill('');
 
       await expect(page).toHaveURL(/query:!n/);
-      await expect(streams.getCanvasDestinationNode(CLASSIC_STREAM)).toBeVisible();
-      await expect(streams.getCanvasSourceNode(CLASSIC_STREAM)).toBeVisible();
+      await expect(streams.canvasDataStreamsNode).toHaveCount(0);
+      await expect(streams.getCanvasDestinationNode(DESTINATION_NAME)).toBeVisible();
+      await expect(streams.getCanvasDestinationNode(CLASSIC_STREAM)).toHaveCount(0);
+      await expect(streams.getCanvasSourceNode(CLASSIC_STREAM)).toHaveCount(0);
     });
 
-    test('filters the canvas while typing', async ({ page, pageObjects: { streams } }) => {
-      await streams.gotoStreamsLayoutTab('canvas');
+    test('filters the map while typing', async ({ page, pageObjects: { streams } }) => {
+      await streams.gotoStreamsLayoutTab('map');
       await expect(streams.getCanvasDestinationNode(DESTINATION_NAME)).toBeVisible();
 
       await streams.canvasSearch.fill(CLASSIC_STREAM);
 
       await expect(page).toHaveURL(new RegExp(`query:'?${CLASSIC_STREAM}`));
-      await expect(streams.getCanvasSourceNode(CLASSIC_STREAM)).toBeVisible();
-      await expect(streams.getCanvasDestinationNode(CLASSIC_STREAM)).toBeVisible();
+      await expect(streams.canvasSearchNoMatches).toBeVisible();
+      await expect(streams.canvasDataStreamsNode).toHaveCount(0);
+      await expect(streams.getCanvasSourceNode(CLASSIC_STREAM)).toHaveCount(0);
+      await expect(streams.getCanvasDestinationNode(CLASSIC_STREAM)).toHaveCount(0);
       await expect(streams.getCanvasDestinationNode(DESTINATION_NAME)).toHaveCount(0);
     });
 

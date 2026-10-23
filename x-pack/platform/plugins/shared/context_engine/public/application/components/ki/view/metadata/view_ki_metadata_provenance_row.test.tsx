@@ -34,7 +34,7 @@ const renderProvenanceRow = (props: React.ComponentProps<typeof KiMetadataProven
 describe('KiMetadataProvenanceRow', () => {
   it('renders timestamp only', () => {
     const { container } = renderProvenanceRow({ at: '2026-01-15T12:00:00.000Z' });
-    expect(container.querySelector('span[tabindex="0"]')).toBeInTheDocument();
+    expect(container.querySelector('span[tabindex="-1"]')).toBeInTheDocument();
     expect(screen.queryByText(/by/)).not.toBeInTheDocument();
   });
 
@@ -59,7 +59,7 @@ describe('KiMetadataProvenanceRow', () => {
 
   it('renders updated-style timestamp without writer', () => {
     const { container } = renderProvenanceRow({ at: '2026-02-01T08:30:00.000Z' });
-    expect(container.querySelector('span[tabindex="0"]')).toBeInTheDocument();
+    expect(container.querySelector('span[tabindex="-1"]')).toBeInTheDocument();
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 

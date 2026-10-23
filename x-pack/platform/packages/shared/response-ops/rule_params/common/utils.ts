@@ -29,9 +29,12 @@ export const jobsSelectionSchema = schema.object(
   {
     validate: (v) => {
       if (!v.jobIds?.length && !v.groupIds?.length) {
-        return i18n.translate('xpack.ml.alertTypes.anomalyDetection.jobSelection.errorMessage', {
-          defaultMessage: 'Job selection is required',
-        });
+        return i18n.translate(
+          'xpack.responseOps.alertTypes.anomalyDetection.jobSelection.errorMessage',
+          {
+            defaultMessage: 'Job selection is required',
+          }
+        );
       }
     },
   }

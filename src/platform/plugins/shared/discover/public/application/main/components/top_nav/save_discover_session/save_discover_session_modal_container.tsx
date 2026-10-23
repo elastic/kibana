@@ -39,6 +39,7 @@ import {
 
 export interface DiscoverSessionSaveModalContainerProps {
   initialCopyOnSave?: boolean;
+  initialTitle?: string;
   onClose: () => void;
   onSaveCb?: () => void;
   services: DiscoverServices;
@@ -46,6 +47,7 @@ export interface DiscoverSessionSaveModalContainerProps {
 
 export const DiscoverSessionSaveModalContainer = ({
   initialCopyOnSave,
+  initialTitle,
   onClose,
   onSaveCb,
   services,
@@ -56,7 +58,6 @@ export const DiscoverSessionSaveModalContainer = ({
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
   const allTabs = useInternalStateSelector(selectAllTabs);
   const persistedDiscoverSession = useInternalStateSelector(selectPersistedDiscoverSession);
-  const draftSessionTitle = useInternalStateSelector((state) => state.draftSessionTitle);
   const savedDataViews = useInternalStateSelector(selectSavedDataViews);
 
   const isEmbeddedEditor = services.embeddableEditor.isEmbeddedEditor();
@@ -209,7 +210,7 @@ export const DiscoverSessionSaveModalContainer = ({
       onSave={onSave}
       savedObjectsTagging={services.savedObjectsTagging}
       sessionId={initialCopyOnSave ? undefined : persistedDiscoverSession?.id}
-      title={persistedDiscoverSession?.title ?? draftSessionTitle ?? ''}
+      title={persistedDiscoverSession?.title ?? initialTitle ?? ''}
     />
   );
 };

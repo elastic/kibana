@@ -2,7 +2,7 @@
 
 This folder defines the managed Elasticsearch resources for alerting v2:
 
-- data streams with explicit mappings and ILM policies
+- data streams with explicit mappings and data stream lifecycle
 - ES|QL views layered over those streams
 - the startup registration path that initializes them at plugin start
 
@@ -198,14 +198,35 @@ If you add a new optional field to `.rule-events`, the minimum change set is usu
 
 That keeps stored schema, runtime validation, and application code aligned.
 
-## ILM and retention
+## Lifecycle and retention
 
-Current ILM policies keep both streams in the hot phase with rollover on:
+Both streams use data stream lifecycle (DSL), not ILM. Rollover follows the Elasticsearch DSL defaults. `.alert-actions` has no DSL retention; a cleanup task deletes its dispatcher docs instead (see below).
 
-- `30d` max age
-- `50gb` primary shard size
+`.rule-events` retention is set in `kibana.yml`:
 
-See the `*_ILM_POLICY` definitions in the datastream files if you need to change retention behavior.
+| Setting | Default | Notes |
+| --- | --- | --- |
+| `xpack.alerting_v2.retention.ruleEvents.enabled` | `false` | `config/serverless.oblt.yml` turns it on for Observability Serverless. |
+| `xpack.alerting_v2.retention.ruleEvents.dataRetention` | `90d` | Units `d`, `h`, `m`, `s` or `ms` (no `w`). Minimum `30d`. |
+
+`DatastreamInitializer` applies the `.rule-events` lifecycle with `PUT _data_stream/.rule-events/_lifecycle` on every startup (`manageLifecycle: true`), because `@kbn/data-streams` only updates it on a template version bump. Changes take effect on restart, disabling retention removes `data_retention`, and any retention set by hand on `.rule-events` is overwritten. `.alert-actions` is left untouched. A failed update fails the stream's initialization, so a previous, retention is never silently kept.
+
+Caveats:
+
+- An active episode that stops getting new events expires once its last event is older than the window, with no recovery event or notification. This happens for rules using `no_data: ignore` with manual, condition or query recovery, and for rules that are disabled or keep failing.
+- Retention applies to the whole stream, not per rule, source or space. Significant Events shares this stream.
+- DSL deletes whole backing indices measured from rollover, so documents can live a little longer than the window.
+
+### `.alert-actions` cleanup
+
+The `alerting_v2:alert_actions_cleanup` task runs daily and deletes the dispatcher's bookkeeping docs (`action_type` of `fire`, `suppress` or `unmatched`) older than the retention. All other action types, including user actions and `notified`, are kept.
+
+| Setting | Default | Notes |
+| --- | --- | --- |
+| `xpack.alerting_v2.retention.alertActions.dispatcher.enabled` | `false` | When `false`, the task is removed at startup. |
+| `xpack.alerting_v2.retention.alertActions.dispatcher.dataRetention` | `90d` | Minimum `1d`. |
+
+Deleted docs only free disk space once their segments merge.
 
 ## Related server code
 

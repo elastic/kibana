@@ -25,6 +25,7 @@ import type {
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
+import { findParamVaultReferenceError } from '../secret_connection/connection_utils';
 
 export const ParamsObjectSchema = z
   .strictObject({
@@ -45,7 +46,7 @@ export const ParamsObjectSchema = z
       .optional()
       .describe('Specify whether the parameter should be shared across spaces.'),
   })
-  .meta({ id: 'parameterRequest' });
+  .meta({ id: 'parameterRequest', title: 'Single parameter' });
 
 export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   SyntheticsParams | SyntheticsParams[]
@@ -63,7 +64,13 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   validation: {
     request: {
       body: z
-        .union([ParamsObjectSchema, z.array(ParamsObjectSchema).max(MAX_PARAM_BULK_SIZE)])
+        .union([
+          ParamsObjectSchema,
+          z
+            .array(ParamsObjectSchema)
+            .max(MAX_PARAM_BULK_SIZE)
+            .meta({ title: 'Multiple parameters' }),
+        ])
         .describe(
           'The request body can contain either a single parameter object or an array of parameter objects.'
         ),
@@ -74,6 +81,15 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
         id: DEFAULT_SPACE_ID,
       };
+
+      const params = [request.body].flat() as SyntheticsParamRequest[];
+      const vaultReferenceError = await findParamVaultReferenceError(
+        { savedObjectsClient, server },
+        params.map(({ value }) => value)
+      );
+      if (vaultReferenceError) {
+        return response.badRequest({ body: { message: vaultReferenceError } });
+      }
 
       const savedObjectsData = parseParamBody(
         spaceId,

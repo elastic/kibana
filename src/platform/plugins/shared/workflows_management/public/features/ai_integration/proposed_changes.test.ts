@@ -310,6 +310,37 @@ describe('ProposalManager', () => {
     addDocSpy.mockRestore();
   });
 
+  it('hotkeys run after a mouse move over the editor without a mouseenter', () => {
+    const addDocSpy = jest.spyOn(document, 'addEventListener');
+    const original = 'line1\nline2\nline3\n';
+    const editor = createRealisticMockEditor(original);
+    manager.initialize(editor);
+
+    manager.applyAfterYaml('line1\nchanged\nline3\n');
+    const keyHandler = addDocSpy.mock.calls.find(
+      (c: unknown[]) => c[0] === 'keydown' && c[2] === true
+    )![1] as (e: KeyboardEvent) => void;
+    const mouseMoveHandler = (editor.onMouseMove as jest.Mock).mock.calls[0][0] as (
+      e: unknown
+    ) => void;
+
+    mouseMoveHandler({ target: { position: null } });
+    keyHandler({
+      key: 'Backspace',
+      ctrlKey: true,
+      shiftKey: false,
+      metaKey: true,
+      altKey: false,
+      preventDefault: jest.fn(),
+      stopPropagation: jest.fn(),
+    } as unknown as KeyboardEvent);
+
+    expect(editor.getModel().getValue()).toBe(original);
+    expect(manager.hasPendingProposals()).toBe(false);
+
+    addDocSpy.mockRestore();
+  });
+
   it('decline-all hotkey runs only while pointer is over editor surface', () => {
     const addDocSpy = jest.spyOn(document, 'addEventListener');
     const onReject = jest.fn();

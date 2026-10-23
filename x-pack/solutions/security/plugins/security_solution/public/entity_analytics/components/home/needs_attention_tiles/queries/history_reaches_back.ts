@@ -7,7 +7,6 @@
 
 import type { TimeRange } from '../../entities_grid/common';
 import {
-  ANOMALY_RECORD_FILTER,
   ML_ANOMALY_INDICES,
   buildAnomalyJobFilter,
   getAlertsIndex,
@@ -20,6 +19,10 @@ import { buildPreviousPeriodStart } from './tile_period';
  * history, and the delta a false rise. Each source gets one cheap query that returns a single boolean
  * column, `reaches_back`: is its oldest doc older than the start of the previous period. The risk
  * tiles have their own check, in `risk_previous_period.ts`.
+ *
+ * A check asks whether the source reaches back, not whether its old docs would have counted for the
+ * tile: no severity, score or other predicate of the tile is applied. A previous period full of docs
+ * that do not qualify is a count of 0, which is a valid comparison.
  */
 
 /** The column every history check returns. */
@@ -37,14 +40,17 @@ const reachesBack = (oldest: string, timeRange: TimeRange): string[] => [
 export const buildAlertsHistoryReachesBackQuery = (spaceId: string, timeRange: TimeRange): string =>
   [`FROM ${getAlertsIndex(spaceId)}`, ...reachesBack('@timestamp', timeRange)].join('\n');
 
-/** Builds the history check of the Entities with anomalies tile: the oldest record of the installed jobs. */
+/**
+ * Builds the history check of the Entities with anomalies tile: the oldest final record of the
+ * installed jobs, whatever its score (the tile's score threshold is left out on purpose).
+ */
 export const buildAnomaliesHistoryReachesBackQuery = (
   timeRange: TimeRange,
   jobIds: string[]
 ): string =>
   [
     `FROM ${ML_ANOMALY_INDICES}`,
-    `| WHERE ${ANOMALY_RECORD_FILTER} AND ${buildAnomalyJobFilter(jobIds)}`,
+    `| WHERE result_type == "record" AND is_interim == false AND ${buildAnomalyJobFilter(jobIds)}`,
     ...reachesBack('@timestamp', timeRange),
   ].join('\n');
 
