@@ -9,8 +9,11 @@ set +e
 node scripts/check_pkg_json_semver_ranges
 check_exit_code=$?
 
-pnpm kbn bootstrap --force-install
-bootstrap_exit_code=$?
+bootstrap_exit_code=0
+if [[ "${check_exit_code}" == "0" && -n "$(git status --porcelain -- package.json)" ]]; then
+  pnpm kbn bootstrap --force-install
+  bootstrap_exit_code=$?
+fi
 set -e
 
 if [[ "${check_exit_code}" != "0" || "${bootstrap_exit_code}" != "0" ]]; then

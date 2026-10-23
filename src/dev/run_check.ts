@@ -242,12 +242,40 @@ const runJestTestsDirectly = async (
   };
 };
 
+const VALIDATION_STEPS = ['tsproj', 'moon', 'oxlint', 'lint', 'jest', 'tsc'] as const;
+type ValidationStep = (typeof VALIDATION_STEPS)[number];
+
 // ── Main ────────────────────────────────────────────────────────────────────
 
 run(
   async ({ flagsReader }) => {
     const verbose = flagsReader.boolean('verbose');
     const fix = flagsReader.boolean('fix');
+    const onlyFlag = flagsReader.string('only');
+    const skipFlag = flagsReader.string('skip');
+    const parseSteps = (raw: string | undefined, flagName: string): Set<ValidationStep> => {
+      if (!raw) return new Set();
+      const items = raw
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const invalid = items.filter(
+        (s): s is string => !VALIDATION_STEPS.includes(s as ValidationStep)
+      );
+      if (invalid.length > 0) {
+        throw new Error(
+          `Invalid ${flagName} step(s): ${invalid.join(', ')}. Valid steps: ${VALIDATION_STEPS.join(
+            ', '
+          )}`
+        );
+      }
+      return new Set(items as ValidationStep[]);
+    };
+    const onlySteps = parseSteps(onlyFlag, '--only');
+    const skipSteps = parseSteps(skipFlag, '--skip');
+    const shouldRunStep = (step: ValidationStep): boolean =>
+      (onlySteps.size === 0 || onlySteps.has(step)) && !skipSteps.has(step);
+
     const parsedValidationFlags = readValidationRunFlags(flagsReader);
     const hasValidationFlags = Object.values(parsedValidationFlags).some(
       (value) => value !== undefined
@@ -296,7 +324,7 @@ run(
 
     // ── ts projects ────────────────────────────────────────────────────
 
-    {
+    if (shouldRunStep('tsproj')) {
       const tsProjectsProgress = startProgress('tsproj');
 
       if (isSkipOrFull) {
@@ -358,7 +386,7 @@ run(
 
     // ── moon ───────────────────────────────────────────────────────────
 
-    {
+    if (shouldRunStep('moon')) {
       const moonProgress = startProgress('moon');
       try {
         const result = await runMoonRegeneration(fix);
@@ -383,7 +411,7 @@ run(
 
     // ── oxlint ─────────────────────────────────────────────────────────
 
-    {
+    if (shouldRunStep('oxlint')) {
       const { log, captured } = createSilentLog();
       const progress = startProgress('oxlint');
       try {
@@ -423,7 +451,7 @@ run(
 
     // ── lint ───────────────────────────────────────────────────────────
 
-    {
+    if (shouldRunStep('lint')) {
       const { log, captured } = createSilentLog();
       const progress = startProgress('lint');
       try {
@@ -470,7 +498,7 @@ run(
 
     // ── jest ───────────────────────────────────────────────────────────
 
-    {
+    if (shouldRunStep('jest')) {
       const jestProgress = startProgress('jest');
 
       if (isSkipOrFull) {
@@ -647,7 +675,7 @@ run(
 
     // ── tsc ────────────────────────────────────────────────────────────
 
-    {
+    if (shouldRunStep('tsc')) {
       const { log, captured } = createSilentLog();
       const procRunner = new ProcRunner(log);
       const tscProgress = startProgress('tsc');
@@ -742,12 +770,25 @@ run(
         node scripts/check --scope branch --base-ref origin/main
     `,
     flags: {
-      string: [...VALIDATION_RUN_STRING_FLAGS],
+      string: [...VALIDATION_RUN_STRING_FLAGS, 'only', 'skip'],
       boolean: ['fix'],
       default: {
         fix: true,
       },
-      help: [...VALIDATION_RUN_HELP, { flag: '--no-fix', description: 'Disable lint auto-fix' }],
+      help: [
+        ...VALIDATION_RUN_HELP,
+        { flag: '--no-fix', description: 'Disable lint auto-fix' },
+        {
+          flag: '--only <steps>',
+          description: `Run only the specified comma-separated steps (${VALIDATION_STEPS.join(
+            ', '
+          )})`,
+        },
+        {
+          flag: '--skip <steps>',
+          description: `Skip the specified comma-separated steps (${VALIDATION_STEPS.join(', ')})`,
+        },
+      ],
     },
   }
 );

@@ -75,46 +75,53 @@ void run(async ({ log, flagsReader }) => {
     checks: flagsReader.string('checks'),
   });
 
-  const workspaceExclusiveChecks = checksToRun
-    .filter((check) => check.mayChangeFiles || check.requiresStableWorkspace)
-    .map((check) => (isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script)));
+  const toScriptPaths = (checks: QuickCheck[]) =>
+    checks.map((check) =>
+      isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script)
+    );
 
-  const regularChecks = checksToRun
-    .filter((check) => !check.mayChangeFiles && !check.requiresStableWorkspace)
-    .map((check) => (isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script)));
+  const fileChangingChecks = toScriptPaths(checksToRun.filter((check) => check.mayChangeFiles));
+  const stableWorkspaceChecks = toScriptPaths(
+    checksToRun.filter((check) => !check.mayChangeFiles && check.requiresStableWorkspace)
+  );
+  const regularChecks = toScriptPaths(
+    checksToRun.filter((check) => !check.mayChangeFiles && !check.requiresStableWorkspace)
+  );
 
   logger.write(
-    `--- Running ${checksToRun.length} checks (${workspaceExclusiveChecks.length} workspace-exclusive with parallelism=1, ${regularChecks.length} regular with parallelism=${MAX_PARALLELISM})...`
+    `--- Running ${checksToRun.length} checks (${fileChangingChecks.length} file-changing + ${stableWorkspaceChecks.length} stable-workspace with parallelism=1, ${regularChecks.length} regular with parallelism=${MAX_PARALLELISM})...`
   );
   const startTime = Date.now();
-  const results = await runPartitionedChecks(workspaceExclusiveChecks, regularChecks);
+  const regularPromise = runAllChecks(regularChecks, MAX_PARALLELISM);
+  const fileChangingResults = await runAllChecks(fileChangingChecks, 1);
 
-  logger.write('--- All checks finished.');
-  printResults(startTime, results);
-
-  // Check if any commits were made and push them in a single batch
-  // This allows multiple quick-check fixes to be committed and pushed together,
-  // avoiding multiple CI restarts when a PR has multiple offenses.
-  // File-changing checks run with parallelism=1 (sequentially), so commits happen
-  // one at a time without conflicts.
+  // Check if any commits were made and push them in a single batch immediately,
+  // before running slow stable-workspace checks (e.g. unused_deps) or waiting on regularChecks.
   const commitsWereMade = existsSync(COLLECT_COMMITS_MARKER_FILE);
   if (commitsWereMade) {
+    printResults(startTime, fileChangingResults);
     logger.write('--- Commits were made during checks. Pushing all changes now...');
     try {
       await pushCommits();
       logger.write('--- Successfully pushed all commits.');
-      // Clean up marker file
       if (existsSync(COLLECT_COMMITS_MARKER_FILE)) {
         unlinkSync(COLLECT_COMMITS_MARKER_FILE);
       }
-      // Still exit with error to fail the current build, a new build should be started after the push
       logger.write('--- Build will fail to trigger a new build with the fixes.');
-      process.exitCode = 1;
     } catch (error) {
       logger.error(`--- Failed to push commits: ${error}`);
-      process.exitCode = 1;
     }
+    process.exit(1);
   }
+
+  const [stableWorkspaceResults, regularResults] = await Promise.all([
+    runAllChecks(stableWorkspaceChecks, 1),
+    regularPromise,
+  ]);
+  const results = [...fileChangingResults, ...stableWorkspaceResults, ...regularResults];
+
+  logger.write('--- All checks finished.');
+  printResults(startTime, results);
 
   const failedChecks = results.filter((check) => !check.success);
   if (failedChecks.length > 0) {
@@ -122,7 +129,7 @@ void run(async ({ log, flagsReader }) => {
     logger.write(`See the script(s) marked with ❌ above for details.`);
     annotateFailures(failedChecks);
     process.exitCode = 1;
-  } else if (!commitsWereMade) {
+  } else {
     logger.write('--- All checks passed. ✅');
     return results;
   }
@@ -165,19 +172,6 @@ function collectScriptsToRun(inputOptions: {
         .map((line) => ({ script: line.trim() }));
     }
   }
-}
-
-async function runPartitionedChecks(
-  fileChangingChecks: string[],
-  regularChecks: string[]
-): Promise<CheckResult[]> {
-  // Run both partitions concurrently, but with different parallelism
-  const [fileChangingResults, regularResults] = await Promise.all([
-    runAllChecks(fileChangingChecks, 1), // File-changing checks run one at a time
-    runAllChecks(regularChecks, MAX_PARALLELISM), // Regular checks run with full parallelism
-  ]);
-
-  return [...fileChangingResults, ...regularResults];
 }
 
 async function runAllChecks(
@@ -382,6 +376,13 @@ async function pushCommits(): Promise<void> {
 
     pushProcess.on('exit', (code) => {
       if (code === 0) {
+        if (process.env.CI === 'true') {
+          try {
+            execFileSync('buildkite-agent', ['meta-data', 'set', 'auto_commit_pushed', 'true']);
+          } catch (error) {
+            logger.warning(`Failed to set auto_commit_pushed metadata: ${error}`);
+          }
+        }
         resolve();
       } else {
         reject(new Error(`git push failed with code ${code}: ${output}`));

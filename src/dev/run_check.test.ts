@@ -100,10 +100,13 @@ let handler: (args: {
   };
   flagsReader: {
     boolean: (name: string) => boolean;
+    string: (name: string) => string | undefined;
   };
 }) => Promise<void>;
 
-const createArgs = (overrides: { fix?: boolean; verbose?: boolean } = {}) => ({
+const createArgs = (
+  overrides: { fix?: boolean; verbose?: boolean; only?: string; skip?: string } = {}
+) => ({
   flags: {
     fix: overrides.fix ?? true,
   },
@@ -114,6 +117,11 @@ const createArgs = (overrides: { fix?: boolean; verbose?: boolean } = {}) => ({
       }
 
       return name === 'verbose' ? overrides.verbose ?? false : false;
+    },
+    string: (name: string) => {
+      if (name === 'only') return overrides.only;
+      if (name === 'skip') return overrides.skip;
+      return undefined;
     },
   },
 });
@@ -773,6 +781,44 @@ describe('run_check', () => {
       const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
       expect(output).toContain('moon  ✗ failed');
       expect(output).toContain('node scripts/regenerate_moon_projects.js --update');
+    });
+  });
+
+  describe('--only and --skip flags', () => {
+    it('runs only the specified steps when --only is provided', async () => {
+      await handler(createArgs({ only: 'tsproj,moon,oxlint,lint' }));
+
+      const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+      expect(output).toContain('tsproj');
+      expect(output).toContain('moon');
+      expect(output).toContain('oxlint');
+      expect(output).toContain('lint');
+      expect(output).not.toContain('jest');
+      expect(output).not.toContain('tsc');
+      expect(mockRunJestViaMoon).not.toHaveBeenCalled();
+      expect(mockExecuteTypeCheckValidation).not.toHaveBeenCalled();
+    });
+
+    it('skips the specified steps when --skip is provided', async () => {
+      await handler(createArgs({ skip: 'tsproj,moon,oxlint,lint' }));
+
+      const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+      expect(output).not.toContain('tsproj');
+      expect(output).not.toContain('moon');
+      expect(output).not.toContain('oxlint');
+      expect(output).not.toContain('lint');
+      expect(output).toContain('jest');
+      expect(output).toContain('tsc');
+      expect(mockExecuteOxlintValidation).not.toHaveBeenCalled();
+      expect(mockExecuteEslintValidation).not.toHaveBeenCalled();
+      expect(mockRunJestViaMoon).toHaveBeenCalled();
+      expect(mockExecuteTypeCheckValidation).toHaveBeenCalled();
+    });
+
+    it('throws on unknown step names', async () => {
+      await expect(handler(createArgs({ only: 'moon,bogus' }))).rejects.toThrow(
+        'Invalid --only step(s): bogus'
+      );
     });
   });
 });

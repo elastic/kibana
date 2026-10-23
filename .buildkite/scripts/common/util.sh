@@ -98,6 +98,9 @@ check_for_changed_files() {
         else
           git push
         fi
+        if command -v buildkite-agent >/dev/null 2>&1; then
+          buildkite-agent meta-data set "auto_commit_pushed" "true" || true
+        fi
       fi
       exit 1
     else
