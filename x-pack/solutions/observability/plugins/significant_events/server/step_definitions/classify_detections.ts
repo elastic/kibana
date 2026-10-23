@@ -189,11 +189,14 @@ const isWithinReviewWindow = ({
  * (the latest included) shifting up from the count at the review. A rule with an unjudged member has
  * no verdict to compare the probe to, so the probe must also agree with the matches at the review:
  * the series ends before the current bucket and cannot show a rule that only just started matching.
- * Any doubt (no series, an untrusted verdict time, a review the series cannot show) means no fresh
- * review.
+ * The review is recorded when the run ends, so a detection at or before that time may have arrived
+ * mid-run and never been in the agent's batch: it is never covered. Any doubt (no series, an
+ * untrusted verdict time, an unknown detection time, a review the series cannot show) means no
+ * fresh review.
  */
 const freshReviewTime = ({
   reviewedAt,
+  detectedAt,
   memberships,
   observed,
   probed,
@@ -202,6 +205,8 @@ const freshReviewTime = ({
   probeSpanBuckets,
 }: {
   reviewedAt: number | undefined;
+  /** When the detection being classified fired. */
+  detectedAt: number | undefined;
   memberships: readonly LiveRuleMembership[];
   observed: ObservedSeries | undefined;
   probed: ProbeResult | undefined;
@@ -210,6 +215,9 @@ const freshReviewTime = ({
   probeSpanBuckets: number;
 }): number | undefined => {
   if (reviewedAt === undefined || observed === undefined) {
+    return undefined;
+  }
+  if (detectedAt === undefined || detectedAt <= reviewedAt) {
     return undefined;
   }
   const verdictTime = newestVerdictTime(memberships, now);
@@ -305,17 +313,35 @@ const findJoinedSeries = ({
   return joined;
 };
 
-/** The reason a count changed against the level a verdict or review saw, if it did. */
+/**
+ * The levels a verdict or review could have judged at: the last complete bucket before its own
+ * (`seen`), and its own bucket (`own`), which can include matches that came after it. They differ
+ * when a spike began inside that bucket, and which one it judged is unknown.
+ */
+interface JudgedLevels {
+  seen: BaselineObservation | undefined;
+  own: BaselineObservation | undefined;
+}
+
+/**
+ * The reason a count changed against the level a verdict or review saw, if it did. Where the level
+ * is ambiguous the agent gets the change: a rise is read against the lower level, a recovery
+ * against the higher one.
+ */
 const changeReason = ({
   observed,
   judged,
 }: {
   observed: BaselineObservation | undefined;
-  judged: BaselineObservation | undefined;
+  judged: JudgedLevels;
 }): NeedsAgentReason | undefined => {
-  const change = observed && changeSinceJudged({ observed, judged });
-  if (change === 'rose') return 'above_normal';
-  return change === 'recovered' ? 'below_judged' : undefined;
+  if (!observed) return undefined;
+  if (changeSinceJudged({ observed, judged: judged.seen ?? judged.own }) === 'rose') {
+    return 'above_normal';
+  }
+  return changeSinceJudged({ observed, judged: judged.own ?? judged.seen }) === 'recovered'
+    ? 'below_judged'
+    : undefined;
 };
 
 /** Whether a verdict is older than the limit; an untrusted verdict time falls back to the series' age. */
@@ -357,8 +383,8 @@ const reconcileSkip = ({
   joiningEventIds: ReadonlySet<string>;
   baseline: BaselineObservation | undefined;
   /** The level the verdict was made at, and the level of the fresh review, read from the series. */
-  judgedAtVerdict: BaselineObservation | undefined;
-  judgedAtReview: BaselineObservation | undefined;
+  judgedAtVerdict: JudgedLevels;
+  judgedAtReview: JudgedLevels;
   freshReviewAt: number | undefined;
 }): RowDecision => {
   const isUnjudged =
@@ -525,8 +551,10 @@ const decideRow = ({
   if (entry.flaky_probe === true) return { decision: 'needs_agent', reason: 'flaky_probe' };
   if (index >= MAX_CLASSIFIED_ROWS) return { decision: 'needs_agent', reason: 'over_cap' };
   const { now, maxSkipAgeMs, reviewFreshMs, probeSpanBuckets, joiningEventIds } = context;
+  const detectedAt = Date.parse(entry['@timestamp'] ?? '');
   const freshReviewAt = freshReviewTime({
     reviewedAt,
+    detectedAt: Number.isNaN(detectedAt) ? undefined : detectedAt,
     memberships,
     observed,
     probed,
@@ -534,10 +562,13 @@ const decideRow = ({
     reviewFreshMs,
     probeSpanBuckets,
   });
-  const levelAt = (time: number | undefined) =>
+  const levelsAt = (time: number | undefined): JudgedLevels =>
     observed && time !== undefined
-      ? observationAt(observed.series, seenAt(observed.series, time))
-      : undefined;
+      ? {
+          seen: observationAt(observed.series, seenAt(observed.series, time)),
+          own: observationAt(observed.series, time),
+        }
+      : { seen: undefined, own: undefined };
   return reconcileSkip({
     classification: classifyDetection({ memberships, probe: probed ?? NOT_PROBED }),
     memberships,
@@ -545,8 +576,8 @@ const decideRow = ({
     now,
     joiningEventIds,
     baseline: observed?.observation,
-    judgedAtVerdict: levelAt(newestVerdictTime(memberships, now)),
-    judgedAtReview: levelAt(freshReviewAt),
+    judgedAtVerdict: levelsAt(newestVerdictTime(memberships, now)),
+    judgedAtReview: levelsAt(freshReviewAt),
     freshReviewAt,
   });
 };

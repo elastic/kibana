@@ -167,7 +167,8 @@ steps:
   # unprocessed detection per rule (_id tie-break). `last_reviewed_at` is when the agent last processed
   # a detection of the rule it was given: the newest processed marker (a marker without `skip`;
   # every skip marker carries `skip.event_id`), not the detection's own time, since the agent reads
-  # the data when it reviews. Score by severity + age. The flaky-rule gate
+  # the data when it reviews. The marker is written when the run ends, so the classifier never lets
+  # a review cover a detection that fired before it. Score by severity + age. The flaky-rule gate
   # flags a rule `held_back` instead of dropping it, and held rows sort last, so noisy rules never
   # take batch slots from quiet ones. The classifier reads the flag by name: it may skip a held row
   # and never hands it to the agent.

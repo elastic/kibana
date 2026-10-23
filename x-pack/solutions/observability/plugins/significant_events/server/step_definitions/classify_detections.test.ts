@@ -47,10 +47,18 @@ const detectionRow = (
     sourceId,
     heldBack = false,
     reviewedAt = null,
-  }: { sourceId?: string; heldBack?: boolean; reviewedAt?: string | null } = {}
+    detectedAt = new Date(NOW - 10_000).toISOString(),
+  }: {
+    sourceId?: string;
+    heldBack?: boolean;
+    reviewedAt?: string | null;
+    /** When the detection fired: a moment ago, after any review. */
+    detectedAt?: string;
+  } = {}
 ) => [
   ruleUuid,
   {
+    '@timestamp': detectedAt,
     detection_id: `${ruleUuid}-detection`,
     rule_uuid: ruleUuid,
     ...(sourceId ? { source_id: sourceId } : {}),
@@ -160,17 +168,19 @@ const classifyRule = async ({
   memberships = [membership('confirms')],
   counts,
   reviewedAt,
+  detectedAt,
   heldBack = false,
   ...overrides
 }: Omit<BatchOverrides, 'findLiveMembers' | 'rows'> & {
   memberships?: LiveRuleMembership[];
   counts?: number[];
   reviewedAt?: string;
+  detectedAt?: string;
   heldBack?: boolean;
 } = {}) => {
   const output = await classifyBatch(
     batchParams({
-      rows: [detectionRow('rule-A', { reviewedAt, heldBack })],
+      rows: [detectionRow('rule-A', { reviewedAt, heldBack, detectedAt })],
       findLiveMembers: async () => membersOf({ 'rule-A': memberships }),
       observe: jest.fn(async () => (counts ? observedSeries(counts) : undefined)),
       ...overrides,
@@ -342,6 +352,13 @@ describe('classifyBatch', () => {
         { decision: 'needs_agent', reason: 'above_normal' },
       ],
       [
+        // The verdict may have been made in the spike or before it: either way the recovery goes on.
+        "a recovery after a spike that began inside the verdict's own bucket",
+        [...repeat(55, 5), ...repeat(5, 200), 5],
+        isoOfBucket(61, 55),
+        { decision: 'needs_agent', reason: 'below_judged' },
+      ],
+      [
         'a verdict older than the series, so any rise above normal escalates',
         plateau(210),
         hoursAgo(6),
@@ -475,6 +492,13 @@ describe('classifyBatch', () => {
       });
 
       expect(decision).toMatchObject({ decision: 'needs_agent', reason: 'unjudged_member' });
+    });
+
+    it('does not stand in for a detection that was already in the index when the review was recorded', async () => {
+      // The agent's run could have started before it fired: it was never in its batch.
+      const { decision } = await review({ detectedAt: hoursAgo(2) });
+
+      expect(decision).toMatchObject({ decision: 'needs_agent', reason: 'series_too_old' });
     });
 
     it('lasts as long as the review window says', async () => {
