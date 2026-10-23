@@ -12,7 +12,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -106,15 +106,15 @@ type StickyHeaderExtensionPoint = Parameters<
   DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']
 >[0]['stickyHeaderExtensionPoint'];
 
-const createInactiveStickyHeaderExtensionPoint = (): StickyHeaderExtensionPoint => ({
-  isDisplayed: false,
+const createStickyHeaderExtensionPoint = (): StickyHeaderExtensionPoint => ({
+  stickyEnabled: true,
   extensionPointElement: document.createElement('div'),
 });
 
 const renderLeafCellWithContext = ({
   contextValue,
   services,
-  stickyHeaderExtensionPoint = createInactiveStickyHeaderExtensionPoint(),
+  stickyHeaderExtensionPoint = createStickyHeaderExtensionPoint(),
   virtualizerController = createVirtualizerController(),
 }: {
   contextValue: CascadedDocumentsContext;
@@ -341,81 +341,63 @@ describe('ESQLDataCascadeLeafCell', () => {
       };
     };
 
-    it('renders the toolbar and header row in place when the row is not the active sticky row', () => {
-      renderLeafAndGridParts(createInactiveStickyHeaderExtensionPoint());
-
-      const gridRoot = screen.getByTestId('gridRoot');
-      const gridBody = screen.getByTestId('gridBody');
-      const toolbar = screen.getByTestId('unifiedDataTableToolbar');
-      const headerRow = screen.getByTestId('gridHeaderRow');
-
-      expect(gridRoot).toContainElement(toolbar);
-      expect(gridBody).not.toContainElement(toolbar);
-      expect(gridBody).toContainElement(headerRow);
-    });
-
-    it('relocates the toolbar ahead of the header row into the sticky header extension point', () => {
+    it('renders the toolbar and column headers in the persistent inline host', () => {
       const extensionPointElement = document.createElement('div');
       document.body.appendChild(extensionPointElement);
-
       try {
-        renderLeafAndGridParts({ isDisplayed: true, extensionPointElement });
-
-        const gridRoot = screen.getByTestId('gridRoot');
-        const toolbar = screen.getByTestId('unifiedDataTableToolbar');
-        const headerRow = screen.getByTestId('gridHeaderRow');
-
-        expect(extensionPointElement).toContainElement(toolbar);
-        expect(extensionPointElement).toContainElement(headerRow);
-        // the body flags that it is reserving the relocated content's space
-        expect(screen.getByTestId('discoverCascadeCustomDataGridBody')).toHaveAttribute(
-          'data-sticky-header-active',
-          'true'
+        renderLeafAndGridParts({ stickyEnabled: true, extensionPointElement });
+        expect(extensionPointElement).toContainElement(
+          screen.getByTestId('unifiedDataTableToolbar')
         );
-        expect(gridRoot).not.toContainElement(toolbar);
-        expect(gridRoot).not.toContainElement(headerRow);
-        expect(
-          // eslint-disable-next-line no-bitwise
-          toolbar.compareDocumentPosition(headerRow) & Node.DOCUMENT_POSITION_FOLLOWING
-        ).toBeTruthy();
+        expect(extensionPointElement).toContainElement(screen.getByTestId('gridHeaderRow'));
+        const body = screen.getByTestId('discoverCascadeCustomDataGridBody');
+        expect(body).not.toHaveAttribute('data-sticky-header-active');
+        expect(body.style.getPropertyValue('--discoverCascadeStickyHeaderSpacer')).toBe('');
       } finally {
         extensionPointElement.remove();
       }
     });
 
-    it('preserves the grid body and its measured spacer through sticky header transitions', () => {
+    it('preserves the body, toolbar, and headers through fullscreen round trips', () => {
       const extensionPointElement = document.createElement('div');
       document.body.appendChild(extensionPointElement);
-
       try {
-        const view = renderLeafAndGridParts({ isDisplayed: false, extensionPointElement });
+        renderLeafAndGridParts({ stickyEnabled: true, extensionPointElement });
         const body = screen.getByTestId('discoverCascadeCustomDataGridBody');
         const toolbar = screen.getByTestId('unifiedDataTableToolbar');
         const headerRow = screen.getByTestId('gridHeaderRow');
-        body.style.setProperty('--discoverCascadeStickyHeaderSpacer', '70px');
-
-        view.rerender({ isDisplayed: true, extensionPointElement });
-
+        act(() => unifiedDataTableMock.mock.lastCall?.[0].onFullScreenChange?.(true));
         expect(screen.getByTestId('discoverCascadeCustomDataGridBody')).toBe(body);
-        expect(body).toHaveAttribute('data-sticky-header-active', 'true');
-        expect(body.style.getPropertyValue('--discoverCascadeStickyHeaderSpacer')).toBe('70px');
-        expect(extensionPointElement).toContainElement(toolbar);
-        expect(extensionPointElement).toContainElement(headerRow);
-
-        view.rerender({ isDisplayed: false, extensionPointElement });
-
-        expect(screen.getByTestId('discoverCascadeCustomDataGridBody')).toBe(body);
-        expect(body).toHaveAttribute('data-sticky-header-active', 'false');
-        expect(body.style.getPropertyValue('--discoverCascadeStickyHeaderSpacer')).toBe('70px');
         expect(screen.getByTestId('gridRoot')).toContainElement(toolbar);
         expect(body).toContainElement(headerRow);
+        expect(extensionPointElement).not.toContainElement(toolbar);
+        act(() => unifiedDataTableMock.mock.lastCall?.[0].onFullScreenChange?.(false));
+        expect(screen.getByTestId('discoverCascadeCustomDataGridBody')).toBe(body);
+        expect(extensionPointElement).toContainElement(toolbar);
+        expect(extensionPointElement).toContainElement(headerRow);
+      } finally {
+        extensionPointElement.remove();
+      }
+    });
+
+    it('keeps the same header host when sticky positioning is disabled', () => {
+      const extensionPointElement = document.createElement('div');
+      document.body.appendChild(extensionPointElement);
+      try {
+        const view = renderLeafAndGridParts({ stickyEnabled: true, extensionPointElement });
+        const body = screen.getByTestId('discoverCascadeCustomDataGridBody');
+        const toolbar = screen.getByTestId('unifiedDataTableToolbar');
+        view.rerender({ stickyEnabled: false, extensionPointElement });
+        expect(screen.getByTestId('discoverCascadeCustomDataGridBody')).toBe(body);
+        expect(extensionPointElement).toContainElement(toolbar);
+        expect(extensionPointElement).toContainElement(screen.getByTestId('gridHeaderRow'));
       } finally {
         extensionPointElement.remove();
       }
     });
 
     it('scrolls the custom virtualized body to the active in-table search match', () => {
-      renderLeafAndGridParts(createInactiveStickyHeaderExtensionPoint());
+      renderLeafAndGridParts(createStickyHeaderExtensionPoint());
 
       const unifiedDataTableProps = unifiedDataTableMock.mock.lastCall?.[0]!;
       expect(unifiedDataTableProps.enableInTableSearch).toBe(true);
@@ -423,23 +405,6 @@ describe('ESQLDataCascadeLeafCell', () => {
       unifiedDataTableProps.scrollToCell!({ rowIndex: 7, columnIndex: 1, align: 'center' });
 
       expect(mockScrollToIndex).toHaveBeenCalledWith(7, { align: 'auto', behavior: 'auto' });
-    });
-
-    it('keeps the toolbar and header row in place while the sticky header is not displayed for the row', () => {
-      renderLeafAndGridParts({
-        isDisplayed: false,
-        extensionPointElement: document.createElement('div'),
-      });
-
-      const gridRoot = screen.getByTestId('gridRoot');
-      const gridBody = screen.getByTestId('gridBody');
-
-      expect(gridRoot).toContainElement(screen.getByTestId('unifiedDataTableToolbar'));
-      expect(gridBody).toContainElement(screen.getByTestId('gridHeaderRow'));
-      expect(screen.getByTestId('discoverCascadeCustomDataGridBody')).toHaveAttribute(
-        'data-sticky-header-active',
-        'false'
-      );
     });
   });
 });
