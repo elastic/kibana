@@ -282,6 +282,8 @@ export default function ({ getService }: FtrProviderContext) {
         'task_manager:invalidate_api_keys',
         'task_manager:mark_removed_tasks_as_unrecognized',
         'task_manager:snapshot_telemetry',
+        'threat_intel:promote_threat_indicators',
+        'threat_intel:scrub_report_content',
         'unusedUrlsCleanupTask',
         'workflow:resume',
         'workflow:run',

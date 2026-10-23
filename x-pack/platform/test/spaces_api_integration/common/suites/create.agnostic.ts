@@ -100,6 +100,7 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
       color: '#5c5959',
       disabledFeatures: [
         // Disabled features are automatically added to the space when a solution is set
+        'alertzero',
         'apm',
         'infrastructure',
         'logs',

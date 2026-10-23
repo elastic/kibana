@@ -4,13 +4,15 @@ Security Watch investigation queue and catalog behind the `securitySolution:enab
 
 ## Enablement
 
+### Deployment defaults
+
+In stateful deployments (including ECH) AlertZero and its runtime dependencies are **on by default**, so no `kibana.yml` changes are needed. Users turn AlertZero on per space with `securitySolution:enableAlertZero` (below) and then go through onboarding.
+
+In serverless, `xpack.alertzero.enabled`, `xpack.proposals.enabled` and `xpack.agenticInvestigations.enabled` still default to `false`.
+
 ### Runtime dependencies
 
-AlertZero's upgrade and access-denied screens can load when Agent Builder, Proposals, or Agentic Investigations is disabled. These plugins are optional dependencies of the shell, but all three are required to run the feature. For example, enable Agentic Investigations with:
-
-```yaml
-xpack.agenticInvestigations.enabled: true
-```
+AlertZero's upgrade and access-denied screens can load when Agent Builder, Proposals, or Agentic Investigations is disabled. These plugins are optional dependencies of the shell, but all three are required to run the feature. Their enablement flags are `xpack.agentBuilder.enabled`, `xpack.proposals.enabled` and `xpack.agenticInvestigations.enabled`.
 
 When a runtime dependency is absent, AlertZero does not register its managed-workflow owner or start feature services. Eligible users see an unavailable screen and the APIs return 503. An insufficient subscription still shows the appropriate upgrade gate first.
 
@@ -37,13 +39,13 @@ The Agent Builder conversation template UI for investigations and escalations (t
 
 ### `xpack.alertzero.enabled` — the deployment kill switch
 
-A plugin config flag, defaulting to `false`. It is *not* the user-facing toggle; it is a deployment-level gate that must be on for AlertZero to register anything. Turning it on or off requires a restart:
+A plugin config flag, defaulting to `true` in stateful deployments and `false` in serverless. It is *not* the user-facing toggle; it is a deployment-level gate that must be on for AlertZero to register anything. Turning it on or off requires a restart. To turn AlertZero off for a whole deployment:
 
 ```yaml
-xpack.alertzero.enabled: true
+xpack.alertzero.enabled: false
 ```
 
-- **`xpack.alertzero.enabled`** — deployment-level plugin gate (default `false`). When false, the plugin registers no app, routes, or features; Security nav nodes for AlertZero are omitted automatically.
+- **`xpack.alertzero.enabled`** — deployment-level plugin gate (default `true` in stateful, `false` in serverless). When false, the plugin registers no app, routes, or features; Security nav nodes for AlertZero are omitted automatically.
 
 AlertZero reads live data only. To work on the UI without waiting for Workers to produce proposals, seed the queue with `scripts/seed_proposal_attachments.sh`, which writes real proposal documents and Agent Builder conversations into your local stack.
 
