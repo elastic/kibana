@@ -59,6 +59,7 @@ export type {
   ResponseFixture,
   StoredResponse,
 } from './src/engine/response_engine';
+export type { RequestMatcher } from './src/engine/request_match';
 export type {
   ContractAdapter,
   ContractProtocol,
