@@ -256,6 +256,20 @@ export function NightshiftPage(): React.ReactElement | null {
       restrictWidth={false}
       pageSectionProps={{
         paddingSize: 'none',
+        ...(isDetectionPage
+          ? {
+              contentProps: {
+                css: css`
+                  display: flex;
+                  flex: 1 1 auto;
+                  flex-direction: column;
+                  min-height: 0;
+                  height: 100%;
+                  width: 100%;
+                `,
+              },
+            }
+          : {}),
         ...(isHomePage
           ? {
               css: css`
