@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import React from 'react';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -21,6 +21,9 @@ jest.mock('../../../hooks/use_kibana');
 jest.mock('../../../hooks/use_fetch_slo_details');
 jest.mock('../../../hooks/use_fetch_slo_list');
 jest.mock('../../../hooks/use_fetch_historical_summary');
+jest.mock('../../../pages/slo_details/components/error_budget_chart', () => ({
+  ErrorBudgetChart: () => <div data-test-subj="error-budget-chart">ErrorBudgetChart</div>,
+}));
 
 const useKibanaMock = useKibana as jest.Mock;
 const useFetchSloDetailsMock = useFetchSloDetails as jest.Mock;
@@ -54,7 +57,7 @@ describe('SloErrorBudget', () => {
     useFetchHistoricalSummaryMock.mockReturnValue({ isLoading: false, data: [] });
   });
 
-  it('renders the SLO name when data is loaded', async () => {
+  it('renders the SLO name when data is loaded', () => {
     const slo = buildSlo({ id: 'test-slo-id', name: 'My Test SLO' });
     useFetchSloDetailsMock.mockReturnValue({
       isLoading: false,
@@ -65,12 +68,10 @@ describe('SloErrorBudget', () => {
 
     render(<SloErrorBudget sloId="test-slo-id" sloInstanceId={ALL_VALUE} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('My Test SLO')).toBeTruthy();
-    });
+    expect(screen.getByText('My Test SLO')).toBeTruthy();
   });
 
-  it('renders not found message when SLO does not exist', async () => {
+  it('renders not found message when SLO does not exist', () => {
     useFetchSloDetailsMock.mockReturnValue({
       isLoading: false,
       isRefetching: false,
@@ -80,12 +81,10 @@ describe('SloErrorBudget', () => {
 
     render(<SloErrorBudget sloId="non-existent-id" sloInstanceId={ALL_VALUE} />);
 
-    await waitFor(() => {
-      expect(screen.getByText(/Unable to find SLO/)).toBeTruthy();
-    });
+    expect(screen.getByText(/Unable to find SLO/)).toBeTruthy();
   });
 
-  it('renders correctly when sloInstanceId defaults to ALL_VALUE', async () => {
+  it('renders correctly when sloInstanceId defaults to ALL_VALUE', () => {
     const slo = buildSlo({ id: 'default-instance-slo', name: 'Default Instance SLO' });
     useFetchSloDetailsMock.mockReturnValue({
       isLoading: false,
@@ -96,10 +95,7 @@ describe('SloErrorBudget', () => {
 
     render(<SloErrorBudget sloId="default-instance-slo" sloInstanceId={ALL_VALUE} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('Default Instance SLO')).toBeTruthy();
-    });
-
+    expect(screen.getByText('Default Instance SLO')).toBeTruthy();
     expect(useFetchSloListMock).toHaveBeenCalledWith(
       expect.objectContaining({
         kqlQuery: `slo.id:"default-instance-slo" and slo.instanceId:"${ALL_VALUE}"`,
@@ -107,7 +103,7 @@ describe('SloErrorBudget', () => {
     );
   });
 
-  it('passes the correct kqlQuery with a specific sloInstanceId', async () => {
+  it('passes the correct kqlQuery with a specific sloInstanceId', () => {
     const slo = buildSlo({
       id: 'grouped-slo',
       name: 'Grouped SLO',
@@ -122,10 +118,7 @@ describe('SloErrorBudget', () => {
 
     render(<SloErrorBudget sloId="grouped-slo" sloInstanceId="instance-abc" />);
 
-    await waitFor(() => {
-      expect(screen.getByText('Grouped SLO')).toBeTruthy();
-    });
-
+    expect(screen.getByText('Grouped SLO')).toBeTruthy();
     expect(useFetchSloListMock).toHaveBeenCalledWith(
       expect.objectContaining({
         kqlQuery: 'slo.id:"grouped-slo" and slo.instanceId:"instance-abc"',
