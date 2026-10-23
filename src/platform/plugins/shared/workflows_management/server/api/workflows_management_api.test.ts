@@ -1515,7 +1515,7 @@ steps:
         },
         yaml: 'name: Delegating',
       } as WorkflowExecutionEngineModel;
-      mockPreprocessAlertInputs.mockResolvedValue({});
+      mockPreprocessTriggerInputs.mockResolvedValue({});
 
       await api.runWorkflowWithAlertPreprocessing({
         workflow,
