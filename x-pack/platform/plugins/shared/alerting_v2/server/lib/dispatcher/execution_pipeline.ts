@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { injectable, multiInject } from 'inversify';
+import { inject, injectable, multiInject } from 'inversify';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import { type LoggerServiceContract } from '../services/logger_service/logger_service';
+import {
+  DispatcherEventPublisher,
+  type DispatcherEventPublisherContract,
+} from '../events/dispatcher_event_publisher/dispatcher_event_publisher';
+import { buildDispatchedWorkflows } from './build_dispatched_workflows';
 import { DispatcherExecutionStepsToken } from './steps/tokens';
 import type {
   DispatcherPipelineInput,
@@ -29,7 +34,9 @@ export interface DispatcherPipelineContract {
 @injectable()
 export class DispatcherPipeline implements DispatcherPipelineContract {
   constructor(
-    @multiInject(DispatcherExecutionStepsToken) private readonly steps: DispatcherStep[]
+    @multiInject(DispatcherExecutionStepsToken) private readonly steps: DispatcherStep[],
+    @inject(DispatcherEventPublisher)
+    private readonly eventPublisher: DispatcherEventPublisherContract
   ) {}
 
   public async execute(
@@ -85,9 +92,31 @@ export class DispatcherPipeline implements DispatcherPipelineContract {
       }
     }
 
+    this.publishExecutionCompleted(pipelineState, parentLogger);
+
     return {
       completed: true,
       finalState: pipelineState,
     };
+  }
+
+  private publishExecutionCompleted(
+    state: DispatcherPipelineState,
+    logger: LoggerServiceContract
+  ): void {
+    try {
+      const deliveries = buildDispatchedWorkflows(state);
+      if (deliveries.length === 0) {
+        return;
+      }
+
+      this.eventPublisher.publishExecutionCompleted({ deliveries });
+    } catch (error) {
+      logger.warn({
+        message: 'Failed to publish dispatcher execution completed event',
+        error,
+        code: ALERTING_LOG_CODES.DISPATCHER_EXECUTION_EVENT_PUBLISH_FAILED,
+      });
+    }
   }
 }

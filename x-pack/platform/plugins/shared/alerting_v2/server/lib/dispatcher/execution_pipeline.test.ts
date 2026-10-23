@@ -6,9 +6,14 @@
  */
 
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
+import { createMockDispatcherEventPublisher } from '../events/dispatcher_event_publisher/dispatcher_event_publisher.mock';
 import { DispatcherPipeline } from './execution_pipeline';
-import { createDispatcherPipelineInput, createMockDispatcherStep } from './fixtures/test_utils';
-import { AlertScan, AlertTriage } from './state';
+import {
+  createActionGroup,
+  createDispatcherPipelineInput,
+  createMockDispatcherStep,
+} from './fixtures/test_utils';
+import { AlertScan, AlertTriage, DispatchOutcome, DispatchPlan } from './state';
 import type { DispatcherPipelineState } from './types';
 
 jest.mock('./with_dispatcher_span', () => ({
@@ -35,7 +40,7 @@ describe('DispatcherPipeline', () => {
         return { type: 'continue' };
       });
 
-      const pipeline = new DispatcherPipeline([step1, step2, step3]);
+      const pipeline = new DispatcherPipeline([step1, step2, step3], createMockDispatcherEventPublisher());
       const input = createDispatcherPipelineInput();
 
       const result = await pipeline.execute(input, createLoggerService().loggerService);
@@ -63,7 +68,7 @@ describe('DispatcherPipeline', () => {
         return { type: 'continue' };
       });
 
-      const pipeline = new DispatcherPipeline([step1, step2, step3]);
+      const pipeline = new DispatcherPipeline([step1, step2, step3], createMockDispatcherEventPublisher());
       const input = createDispatcherPipelineInput();
 
       const result = await pipeline.execute(input, createLoggerService().loggerService);
@@ -92,7 +97,7 @@ describe('DispatcherPipeline', () => {
         return { type: 'continue' };
       });
 
-      const pipeline = new DispatcherPipeline([step1, step2, step3]);
+      const pipeline = new DispatcherPipeline([step1, step2, step3], createMockDispatcherEventPublisher());
       const input = createDispatcherPipelineInput();
 
       const result = await pipeline.execute(input, createLoggerService().loggerService);
@@ -121,7 +126,7 @@ describe('DispatcherPipeline', () => {
         return { type: 'continue' };
       });
 
-      const pipeline = new DispatcherPipeline([step1, step2]);
+      const pipeline = new DispatcherPipeline([step1, step2], createMockDispatcherEventPublisher());
       const input = createDispatcherPipelineInput();
 
       await expect(pipeline.execute(input, createLoggerService().loggerService)).rejects.toThrow(
@@ -131,7 +136,7 @@ describe('DispatcherPipeline', () => {
     });
 
     it('returns completed result when no steps', async () => {
-      const pipeline = new DispatcherPipeline([]);
+      const pipeline = new DispatcherPipeline([], createMockDispatcherEventPublisher());
       const input = createDispatcherPipelineInput();
 
       const result = await pipeline.execute(input, createLoggerService().loggerService);
@@ -146,7 +151,7 @@ describe('DispatcherPipeline', () => {
 
       const step1 = createMockDispatcherStep('step1', async () => ({ type: 'continue' }));
 
-      const pipeline = new DispatcherPipeline([step1]);
+      const pipeline = new DispatcherPipeline([step1], createMockDispatcherEventPublisher());
       const input = createDispatcherPipelineInput({ signal: controller.signal });
 
       const result = await pipeline.execute(input, createLoggerService().loggerService);
@@ -166,7 +171,7 @@ describe('DispatcherPipeline', () => {
 
       const step2 = createMockDispatcherStep('step2', async () => ({ type: 'continue' }));
 
-      const pipeline = new DispatcherPipeline([step1, step2]);
+      const pipeline = new DispatcherPipeline([step1, step2], createMockDispatcherEventPublisher());
       const input = createDispatcherPipelineInput({ signal: controller.signal });
 
       const result = await pipeline.execute(input, createLoggerService().loggerService);
@@ -175,6 +180,80 @@ describe('DispatcherPipeline', () => {
       expect(result.haltReason).toBe('aborted');
       expect(step1.execute).toHaveBeenCalledTimes(1);
       expect(step2.execute).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('publishing the execution completed event', () => {
+    const deliveryStep = createMockDispatcherStep('deliver', async () => ({
+      type: 'continue',
+      data: {
+        plan: DispatchPlan.of({
+          toDispatch: [createActionGroup({ id: 'g1', policyId: 'p1' })],
+          throttled: [],
+          dispatchable: [],
+        }),
+        outcome: DispatchOutcome.of({
+          executionsByGroup: new Map(),
+          failures: [],
+          deliveries: [{ actionGroupId: 'g1', workflowId: 'wf-1', workflowExecutionId: 'exec-1' }],
+        }),
+      },
+    }));
+
+    it('publishes the resolved deliveries once the pipeline completes', async () => {
+      const publisher = createMockDispatcherEventPublisher();
+      const pipeline = new DispatcherPipeline([deliveryStep], publisher);
+
+      await pipeline.execute(createDispatcherPipelineInput(), createLoggerService().loggerService);
+
+      expect(publisher.publishExecutionCompleted).toHaveBeenCalledTimes(1);
+      expect(publisher.publishExecutionCompleted).toHaveBeenCalledWith({
+        deliveries: [
+          expect.objectContaining({
+            workflowId: 'wf-1',
+            workflowExecutionId: 'exec-1',
+            actionPolicyId: 'p1',
+          }),
+        ],
+      });
+    });
+
+    it('does not publish when the tick delivered nothing', async () => {
+      const publisher = createMockDispatcherEventPublisher();
+      const noopStep = createMockDispatcherStep('noop', async () => ({ type: 'continue' }));
+      const pipeline = new DispatcherPipeline([noopStep], publisher);
+
+      await pipeline.execute(createDispatcherPipelineInput(), createLoggerService().loggerService);
+
+      expect(publisher.publishExecutionCompleted).not.toHaveBeenCalled();
+    });
+
+    it('does not publish when a step halts the pipeline', async () => {
+      const publisher = createMockDispatcherEventPublisher();
+      const haltStep = createMockDispatcherStep('halt', async () => ({
+        type: 'halt',
+        reason: 'no_alerts',
+      }));
+      const pipeline = new DispatcherPipeline([deliveryStep, haltStep], publisher);
+
+      await pipeline.execute(createDispatcherPipelineInput(), createLoggerService().loggerService);
+
+      expect(publisher.publishExecutionCompleted).not.toHaveBeenCalled();
+    });
+
+    it('does not fail the tick when publishing throws', async () => {
+      const publisher = createMockDispatcherEventPublisher();
+      publisher.publishExecutionCompleted.mockImplementation(() => {
+        throw new Error('bus down');
+      });
+      const pipeline = new DispatcherPipeline([deliveryStep], publisher);
+
+      const result = await pipeline.execute(
+        createDispatcherPipelineInput(),
+        createLoggerService().loggerService
+      );
+
+      expect(result.completed).toBe(true);
     });
   });
 });

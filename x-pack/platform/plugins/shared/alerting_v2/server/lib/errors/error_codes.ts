@@ -511,6 +511,11 @@ export const ALERTING_LOG_CODES = {
    * failed. The rule run itself already completed.
    */
   RULE_EXECUTION_EVENT_PUBLISH_FAILED: 'RULE_EXECUTION_EVENT_PUBLISH_FAILED',
+  /**
+   * Publishing the dispatcher execution completed event to the bus threw. The
+   * dispatcher tick itself already completed.
+   */
+  DISPATCHER_EXECUTION_EVENT_PUBLISH_FAILED: 'DISPATCHER_EXECUTION_EVENT_PUBLISH_FAILED',
   /** A run hit `maxGroupsPerExecution`; groups past the cap were dropped. */
   RULE_EXECUTION_MAX_GROUPS_EXCEEDED: 'RULE_EXECUTION_MAX_GROUPS_EXCEEDED',
   /**

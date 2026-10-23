@@ -40,6 +40,7 @@ import {
   TICK_DEADLINE_MS,
 } from './constants';
 import { DispatcherService } from './dispatcher';
+import { createMockDispatcherEventPublisher } from '../events/dispatcher_event_publisher/dispatcher_event_publisher.mock';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
 import {
   createDispatchableAlertEventsResponse,
@@ -155,7 +156,7 @@ function buildDispatcherService(deps: {
     new DispatchStep(deps.workflowsManagement, deps.licenseService ?? createMockLicenseService()),
     new StoreActionsStep(deps.storageService),
     new StoreExecutionHistoryStep(deps.eventLogService),
-  ]);
+  ], createMockDispatcherEventPublisher());
   return new DispatcherService(pipeline, deps.storageService, createLoggerService().loggerService);
 }
 

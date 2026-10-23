@@ -19,4 +19,3 @@ export { ApplyThrottlingStep } from './apply_throttling_step';
 export { DispatchStep } from './dispatch_step';
 export { StoreActionsStep } from './store_actions_step';
 export { StoreExecutionHistoryStep } from './store_execution_history_step';
-export { ReportTelemetryStep } from './report_telemetry_step';

@@ -28,6 +28,7 @@ import type { EventBus } from '../event_bus';
 import type { AlertActionEvent } from '../alert_action_event_publisher/events';
 import type { RuleEvent } from '../rule_event_publisher/events';
 import type { RuleExecutorEvent } from '../rule_executor_event_publisher/events';
+import type { DispatcherEvent } from '../dispatcher_event_publisher/events';
 
 export type {
   AlertActionEvent,
@@ -89,6 +90,14 @@ export {
   RULE_EXECUTION_FAILED_EVENT_TYPE,
 } from '../rule_executor_event_publisher/events';
 
+export type {
+  DispatcherEvent,
+  DispatcherExecutionCompletedEvent,
+  DispatcherExecutionCompletedPayload,
+  DispatchedWorkflow,
+} from '../dispatcher_event_publisher/events';
+export { DISPATCHER_EXECUTION_COMPLETED_EVENT_TYPE } from '../dispatcher_event_publisher/events';
+
 /**
  * Discriminated union of every domain event the alerting framework publishes
  * on its event bus.
@@ -97,7 +106,11 @@ export {
  * (and its own envelope shape if it diverges). Extend this union by adding
  * each subdomain's sub-union here.
  */
-export type AlertingDomainEvent = AlertActionEvent | RuleEvent | RuleExecutorEvent;
+export type AlertingDomainEvent =
+  | AlertActionEvent
+  | RuleEvent
+  | RuleExecutorEvent
+  | DispatcherEvent;
 
 /**
  * Publisher-side context threaded through every alerting bus publish call.
