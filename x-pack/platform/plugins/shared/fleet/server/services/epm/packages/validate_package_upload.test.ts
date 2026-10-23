@@ -135,6 +135,25 @@ describe('validatePackageUpload', () => {
       );
     });
 
+    // `untarBuffer` and `unzipBuffer` swallow errors thrown by the entry callback on 8.19.
+    it('rejects a restricted index when the archive iterator swallows callback errors', async () => {
+      const assets = {
+        [transformPath]: 'source:\n  index: [".fleet-policies"]\ndest:\n  index: "my_index"\n',
+      };
+      const swallowingIterator: ArchiveIterator = {
+        getPaths: async () => Object.keys(assets),
+        traverseEntries: async (onEntry) => {
+          for (const [path, content] of Object.entries(assets)) {
+            await onEntry({ path, buffer: Buffer.from(content) }).catch(() => {});
+          }
+        },
+      };
+      await expectUploadRejected({
+        ...transformUpload(assets[transformPath]),
+        archiveIterator: swallowingIterator,
+      });
+    });
+
     it('rejects a transform whose destination writes a restricted index', async () => {
       await expectUploadRejected(
         transformUpload('source:\n  index: ["my_index"]\ndest:\n  index: ".fleet-policies"\n')

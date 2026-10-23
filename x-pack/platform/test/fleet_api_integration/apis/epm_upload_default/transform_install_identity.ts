@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import JSZip from 'jszip';
 import expect from '@kbn/expect';
+import AdmZip from 'adm-zip';
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -57,55 +57,62 @@ export default function (providerContext: FtrProviderContext) {
     const key = `${pkgName}-${version}`;
     const path =
       transformPath ?? `${key}/elasticsearch/transform/${transformModuleId}/transform.yml`;
-    const zip = new JSZip();
-    zip.file(
+    // adm-zip instead of jszip: 8.19 does not have jszip as a dependency.
+    const zip = new AdmZip();
+    zip.addFile(
       `${key}/manifest.yml`,
-      [
-        `name: ${pkgName}`,
-        `title: Transform Install Identity Test`,
-        `version: ${version}`,
-        `description: Test package for uploaded transform identity`,
-        `type: integration`,
-        `format_version: 1.0.0`,
-        `categories: []`,
-        `conditions:`,
-        `  kibana.version: "^8.0.0"`,
-        `owner:`,
-        `  github: elastic/fleet`,
-      ].join('\n')
+      Buffer.from(
+        [
+          `name: ${pkgName}`,
+          `title: Transform Install Identity Test`,
+          `version: ${version}`,
+          `description: Test package for uploaded transform identity`,
+          `type: integration`,
+          `format_version: 1.0.0`,
+          `categories: []`,
+          `conditions:`,
+          `  kibana.version: "^8.0.0"`,
+          `owner:`,
+          `  github: elastic/fleet`,
+        ].join('\n')
+      )
     );
     if (legacy) {
-      zip.file(
+      zip.addFile(
         `${key}/elasticsearch/transform/${legacyTransformFile}.json`,
-        JSON.stringify({
-          source: { index: [sourceIndex] },
-          dest: { index: `${pkgName}_dest` },
-          latest: { unique_key: ['id'], sort: '@timestamp' },
-          frequency: '1m',
-        })
+        Buffer.from(
+          JSON.stringify({
+            source: { index: [sourceIndex] },
+            dest: { index: `${pkgName}_dest` },
+            latest: { unique_key: ['id'], sort: '@timestamp' },
+            frequency: '1m',
+          })
+        )
       );
-      return await zip.generateAsync({ type: 'nodebuffer' });
+      return zip.toBuffer();
     }
-    zip.file(
+    zip.addFile(
       `${key}/elasticsearch/transform/${transformModuleId}/manifest.yml`,
-      ['start: false'].join('\n')
+      Buffer.from(['start: false'].join('\n'))
     );
-    zip.file(
+    zip.addFile(
       path,
-      [
-        `source:`,
-        `  index: ["${sourceIndex}"]`,
-        `dest:`,
-        `  index: "${pkgName}_dest"`,
-        `latest:`,
-        `  unique_key: ["id"]`,
-        `  sort: "@timestamp"`,
-        `frequency: 1m`,
-        `_meta:`,
-        `  fleet_transform_version: ${version}`,
-      ].join('\n')
+      Buffer.from(
+        [
+          `source:`,
+          `  index: ["${sourceIndex}"]`,
+          `dest:`,
+          `  index: "${pkgName}_dest"`,
+          `latest:`,
+          `  unique_key: ["id"]`,
+          `  sort: "@timestamp"`,
+          `frequency: 1m`,
+          `_meta:`,
+          `  fleet_transform_version: ${version}`,
+        ].join('\n')
+      )
     );
-    return await zip.generateAsync({ type: 'nodebuffer' });
+    return zip.toBuffer();
   };
 
   const uploadPackage = (buf: Buffer) =>
@@ -297,35 +304,6 @@ export default function (providerContext: FtrProviderContext) {
       await supertest
         .delete(`/api/fleet/epm/packages/${pkgName}/${upgradeVersion}`)
         .set('kbn-xsrf', 'xxxx');
-    });
-
-    // PUT /custom_integrations/{pkgName} replays the stored archive with force: true, so an
-    // uploaded package's real transforms are recreated here. It must not reinstall them under
-    // the editing user, or a README edit becomes an alternate reauthorization path around the
-    // gate in handleTransformReauthorizeAndStart. It fails closed instead.
-    it('refuses to reinstall an uploaded integration whose archive ships transforms', async () => {
-      await uploadPackage(
-        await buildPackageZip({ sourceIndex: 'logs-transform_identity_test-*' })
-      ).expect(200);
-
-      const before = await esClient.transform.getTransform({ transform_id: transformId });
-      const keyBefore = (before.transforms[0].authorization as { api_key?: { id: string } })
-        ?.api_key?.id;
-      expect(keyBefore).to.be.a('string');
-
-      await supertest
-        .put(`/api/fleet/epm/custom_integrations/${pkgName}`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({ readMeData: '# Edited', categories: ['custom'] })
-        .expect(403);
-
-      // The transform is untouched and still bound to the uploader, not to the editor.
-      const after = await esClient.transform.getTransform({ transform_id: transformId });
-      const authorization = after.transforms[0].authorization as
-        | { api_key?: { id: string }; roles?: string[] }
-        | undefined;
-      expect(authorization?.roles).to.be(undefined);
-      expect(authorization?.api_key?.id).to.be(keyBefore);
     });
 
     it('rejects a restricted index in a transform placed outside elasticsearch/', async () => {

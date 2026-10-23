@@ -324,39 +324,54 @@ async function assertNoRestrictedTransformIndices(
   }
 
   const transformSpecPathSet = new Set(transformSpecPaths);
+  // On 8.19, `untarBuffer` and `unzipBuffer` do not propagate errors thrown by the entry
+  // callback, so the first validation failure is recorded and thrown after traversal.
+  let validationError: unknown;
   await archiveIterator.traverseEntries(
     async ({ path, buffer }) => {
-      if (!buffer) {
+      if (!buffer || validationError) {
         return;
       }
 
-      const contents = parseTransformSpecs(buffer);
-      if (contents.length === 0) {
-        throw new PackageInvalidArchiveError(
-          i18n.translate('xpack.fleet.packageUpload.unparsableTransformSpec', {
-            defaultMessage:
-              'Uploaded package contains a transform asset in "{path}" that could not be parsed as YAML or JSON.',
-            values: { path },
-          })
-        );
-      }
-
-      for (const content of contents) {
-        for (const expression of collectTransformIndexExpressions(content)) {
-          if (normalizeIndexExpressions(expression).some((pattern) => pattern.startsWith('.'))) {
-            throw new PackageInvalidArchiveError(
-              i18n.translate('xpack.fleet.packageUpload.restrictedTransformIndex', {
-                defaultMessage:
-                  'Uploaded package contains a transform in "{path}" that targets the restricted index "{index}". Transforms in uploaded packages cannot read from or write to system indices.',
-                values: { path, index: expression },
-              })
-            );
-          }
-        }
+      try {
+        assertTransformSpecHasNoRestrictedIndices(path, buffer);
+      } catch (error) {
+        validationError = error;
       }
     },
     (path) => transformSpecPathSet.has(path)
   );
+
+  if (validationError) {
+    throw validationError;
+  }
+}
+
+function assertTransformSpecHasNoRestrictedIndices(path: string, buffer: Buffer): void {
+  const contents = parseTransformSpecs(buffer);
+  if (contents.length === 0) {
+    throw new PackageInvalidArchiveError(
+      i18n.translate('xpack.fleet.packageUpload.unparsableTransformSpec', {
+        defaultMessage:
+          'Uploaded package contains a transform asset in "{path}" that could not be parsed as YAML or JSON.',
+        values: { path },
+      })
+    );
+  }
+
+  for (const content of contents) {
+    for (const expression of collectTransformIndexExpressions(content)) {
+      if (normalizeIndexExpressions(expression).some((pattern) => pattern.startsWith('.'))) {
+        throw new PackageInvalidArchiveError(
+          i18n.translate('xpack.fleet.packageUpload.restrictedTransformIndex', {
+            defaultMessage:
+              'Uploaded package contains a transform in "{path}" that targets the restricted index "{index}". Transforms in uploaded packages cannot read from or write to system indices.',
+            values: { path, index: expression },
+          })
+        );
+      }
+    }
+  }
 }
 
 function assertValidUploadDataStreams(dataStreams: UploadDataStream[]): void {
