@@ -7,7 +7,7 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { mockAwsPackage, navigateToOnboardingStep } from './onboarding';
+import { mockAwsPackage, navigateToOnboardingStep, selectStaticKeysAuth } from './onboarding';
 import { ACCESS_KEY_REF, SECRET_KEY_REF, fulfillJson } from './stored_secrets';
 
 // Two services of the `aws` package: adding the second one to a deployed first one must update the
@@ -150,7 +150,7 @@ export async function deployElbWithTypedKeys(
     selectedServiceIds: ['elb'],
     globalRegion: 'us-east-1',
   });
-  await page.getByRole('radio', { name: /access keys/i }).click({ force: true });
+  await selectStaticKeysAuth(page);
   await page.testSubj.locator('awsStaticKeysForm-accessKeyId').fill('mi1');
   await page.testSubj.locator('awsStaticKeysForm-secretAccessKey').fill('mis1');
   const deployButton = page.testSubj.locator('managedIntegrationsSection-deployButton');

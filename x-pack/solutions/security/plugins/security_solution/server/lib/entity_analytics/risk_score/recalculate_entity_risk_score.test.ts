@@ -76,10 +76,13 @@ const storeEntity = (scoreNorm?: number) => ({
 describe('recalculateEntityRiskScore', () => {
   let crudClient: EntityStoreCRUDClient;
   let writer: RiskEngineDataWriter;
+  let esClient: ReturnType<
+    typeof elasticsearchServiceMock.createScopedClusterClient
+  >['asCurrentUser'];
 
   const run = () =>
     recalculateEntityRiskScore({
-      esClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
+      esClient,
       soClient: savedObjectsClientMock.create(),
       crudClient,
       namespace: 'default',
@@ -92,6 +95,8 @@ describe('recalculateEntityRiskScore', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    esClient.indices.exists.mockResolvedValue(true);
     crudClient = { listEntities: jest.fn() } as unknown as EntityStoreCRUDClient;
     writer = {} as RiskEngineDataWriter;
     mockGetConfiguration.mockResolvedValue({ dataViewId: 'security-dv', pageSize: 100 });
@@ -164,6 +169,26 @@ describe('recalculateEntityRiskScore', () => {
     await run();
 
     expect(mockPersistZeroBaseScore).not.toHaveBeenCalled();
+  });
+
+  describe('when the alerts index does not exist', () => {
+    beforeEach(() => {
+      esClient.indices.exists.mockResolvedValue(false);
+    });
+
+    it('skips the recalculation and returns no scores', async () => {
+      (crudClient.listEntities as jest.Mock).mockResolvedValue({ entities: [storeEntity(70)] });
+
+      const result = await run();
+
+      expect(esClient.indices.exists).toHaveBeenCalledWith({
+        index: '.alerts-security.alerts-default',
+      });
+      expect(mockScoreBaseEntities).not.toHaveBeenCalled();
+      expect(mockPersistZeroBaseScore).not.toHaveBeenCalled();
+      expect(mockRunResolutionScoringStep).not.toHaveBeenCalled();
+      expect(result).toEqual({ baseScore: undefined, resolutionScore: undefined });
+    });
   });
 
   it('throws when the entity is not in the store', async () => {

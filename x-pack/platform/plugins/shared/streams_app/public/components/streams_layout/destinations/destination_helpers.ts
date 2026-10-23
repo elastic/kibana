@@ -6,7 +6,8 @@
  */
 
 import type { Unit } from '../../../services/unit_repository';
-import { getUnitDestinations } from './destination_models';
+import { DESTINATION_SIGNALS, getUnitDestinations } from './destination_models';
+import type { DestinationSignal } from './types';
 
 const MAX_DESTINATION_ID_LENGTH = 256;
 
@@ -56,18 +57,30 @@ const normalizeDestinationName = (destinationName: string): string =>
 export const getDestinationNameValidationError = ({
   destinationName,
   unitDefinition,
+  signals,
 }: {
   destinationName: string;
   unitDefinition: Unit;
+  signals: readonly DestinationSignal[];
 }): DestinationNameValidationError | undefined => {
   const normalizedDestinationName = normalizeDestinationName(destinationName);
   if (!normalizedDestinationName) {
     return 'required';
   }
 
-  return getUnitDestinations(unitDefinition).some(
-    ({ name, id }) => normalizeDestinationName(name ?? id) === normalizedDestinationName
-  )
+  const signalsToCreate = new Set(signals);
+  return getUnitDestinations(unitDefinition).some((destination) => {
+    if (
+      normalizeDestinationName(destination.name ?? destination.id) !== normalizedDestinationName
+    ) {
+      return false;
+    }
+    const destinationSignals = (destination.supported_telemetry ?? []).filter(
+      (candidate): candidate is DestinationSignal =>
+        DESTINATION_SIGNALS.includes(candidate as DestinationSignal)
+    );
+    return destinationSignals.some((signal) => signalsToCreate.has(signal));
+  })
     ? 'duplicate'
     : undefined;
 };

@@ -33,7 +33,7 @@ export const ProposalDecision = ({
 }: ProposalDecisionProps): React.ReactElement => {
   const queryClient = useQueryClient();
   const { data: proposal, isLoading } = useProposal(proposalId);
-  const { readOnly, isSubmitting, currentActorName, approve, dismiss } =
+  const { readOnly, isSubmitting, currentActorName, approve, dismiss, reopen, isReopening } =
     useProposalDecision(proposalId);
 
   const refreshInvestigation = useCallback(
@@ -64,6 +64,15 @@ export const ProposalDecision = ({
     [dismiss, refreshInvestigation]
   );
 
+  const handleReopen = useCallback(async () => {
+    try {
+      await reopen();
+    } catch (err) {
+      throw new Error(decisionErrorMessage(err));
+    }
+    await refreshInvestigation();
+  }, [reopen, refreshInvestigation]);
+
   if (isLoading) {
     return <EuiLoadingSpinner size="m" />;
   }
@@ -79,6 +88,8 @@ export const ProposalDecision = ({
       currentActorName={currentActorName}
       onApprove={handleApprove}
       onDismiss={handleDismiss}
+      onReopen={handleReopen}
+      isReopening={isReopening}
       data-test-subj={`investigationHypothesisTreeProposal-${proposalId}`}
     />
   );

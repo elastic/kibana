@@ -16,6 +16,7 @@ import {
 } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { ALL_PROJECT_ROUTING, LOCAL_PROJECT_ROUTING } from '../../common/project_routings';
+import type { SLODefinition } from '../domain/models';
 import { CreateSLO } from './create_slo';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import { createAPMTransactionErrorRateIndicator, createSLOParams } from './fixtures/slo';
@@ -273,6 +274,51 @@ describe('CreateSLO', () => {
         mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
       ).toHaveBeenCalledTimes(2);
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
+    });
+
+    it('waits for in-flight install operations to settle before rolling back', async () => {
+      const pendingCreate = Promise.withResolvers<SLODefinition>();
+      mockRepository.create.mockReturnValueOnce(pendingCreate.promise);
+      mockTransformManager.install.mockRejectedValueOnce(
+        new Error('Rollup transform install error')
+      );
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      const assertion = expect(createSLO.execute(sloParams)).rejects.toThrow(
+        'Rollup transform install error'
+      );
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(mockScopedClusterClient.asCurrentUser.delete).not.toHaveBeenCalled();
+      expect(mockRepository.deleteById).not.toHaveBeenCalled();
+
+      pendingCreate.resolve(mockRepository.create.mock.calls[0][0]);
+      await assertion;
+
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
+      expect(mockRepository.deleteById).toHaveBeenCalled();
+    });
+
+    it('waits for in-flight start operations to settle before rolling back', async () => {
+      const pendingSummaryStart = Promise.withResolvers<void>();
+      mockTransformManager.start.mockRejectedValueOnce(new Error('Rollup transform start error'));
+      mockSummaryTransformManager.start.mockReturnValueOnce(pendingSummaryStart.promise);
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      const assertion = expect(createSLO.execute(sloParams)).rejects.toThrow(
+        'Rollup transform start error'
+      );
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(mockSummaryTransformManager.start).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.asCurrentUser.delete).not.toHaveBeenCalled();
+      expect(mockRepository.deleteById).not.toHaveBeenCalled();
+
+      pendingSummaryStart.resolve();
+      await assertion;
+
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
+      expect(mockRepository.deleteById).toHaveBeenCalled();
     });
   });
 });

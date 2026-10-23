@@ -6,132 +6,185 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { EscalationsService } from '../../escalations/services/escalations_service';
 import { ImpactPillsService } from './impact_pills_service';
+import { queryProposalPills } from './proposal_pills_query';
+
+jest.mock('./proposal_pills_query');
+const queryProposalPillsMock = jest.mocked(queryProposalPills);
 
 const request = httpServerMock.createKibanaRequest();
 const query = {
   origin: 'alertzero' as const,
   categories: ['respond', 'investigate'],
   decidedWithinHours: 72,
+  from: 0,
+  size: 10,
 };
 
 const makeService = ({
-  open = new Map<string, number>(),
-  closed = new Map<string, number>(),
-  entityIds = new Map<string, Array<{ id: string; type?: string; name?: string }>>(),
   assertCanRead = jest.fn().mockResolvedValue(undefined),
+  assertCanReadInvestigations = jest.fn().mockResolvedValue(undefined),
   proposalsAvailable = true,
+  labels = new Map<string, { type?: string; name?: string }>(),
   getEntityStoreNames,
 }: {
-  open?: Map<string, number>;
-  closed?: Map<string, number>;
-  entityIds?: Map<string, Array<{ id: string; type?: string; name?: string }>>;
   assertCanRead?: jest.Mock;
+  assertCanReadInvestigations?: jest.Mock;
   proposalsAvailable?: boolean;
+  labels?: Map<string, { type?: string; name?: string }>;
   getEntityStoreNames?: jest.Mock;
 } = {}) => {
-  const countByConversation = jest.fn().mockResolvedValueOnce(open).mockResolvedValueOnce(closed);
-  const getEntitiesByConversationId = jest.fn().mockResolvedValue(entityIds);
+  const reconcileMappings = jest.fn().mockResolvedValue(undefined);
+  const getEntityLabels = jest.fn().mockResolvedValue(labels);
   const scanWithEntityIds = jest.fn();
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const service = new ImpactPillsService({
-    getImpactClient: () => ({ getEntitiesByConversationId } as never),
+    esClient,
+    logger: loggingSystemMock.createLogger(),
+    getImpactService: () => ({ reconcileMappings, getEntityLabels } as never),
+    privileges: { assertCanRead: assertCanReadInvestigations, assertCanManage: jest.fn() },
     getSpaceId: () => 'space-1',
     getProposals: () =>
       proposalsAvailable
         ? ({
             getProposalPrivileges: () => ({ assertCanRead }),
-            getProposalsService: () => ({ countByConversation }),
           } as unknown as ProposalsPluginStart)
         : undefined,
     getEscalationsService: () => ({ scanWithEntityIds } as unknown as EscalationsService),
     ...(getEntityStoreNames ? { getEntityStoreNames } : {}),
   });
-  return { service, countByConversation, getEntitiesByConversationId, scanWithEntityIds };
+  return { service, esClient, reconcileMappings, getEntityLabels, scanWithEntityIds };
 };
 
 describe('ImpactPillsService', () => {
+  beforeEach(() => {
+    queryProposalPillsMock.mockReset().mockResolvedValue({ rows: [], total: 0 });
+  });
+
   describe('forProposals', () => {
-    it('counts the proposals of the open queue and the closed window per entity', async () => {
-      const { service, countByConversation, getEntitiesByConversationId } = makeService({
-        open: new Map([
-          ['c1', 2],
-          ['c2', 1],
-        ]),
-        closed: new Map([['c1', 1]]),
-        entityIds: new Map([
-          ['c1', [{ id: 'host-1', type: 'host', name: 'web-01' }]],
-          ['c2', [{ id: 'host-1' }, { id: 'user-1' }]],
-        ]),
+    it('reads the requested page and reports how many pills remain', async () => {
+      queryProposalPillsMock.mockResolvedValue({
+        rows: [
+          { entityId: 'host-1', count: 4 },
+          { entityId: 'user-1', count: 1 },
+        ],
+        total: 25,
+      });
+      const { service, esClient, reconcileMappings } = makeService({
+        labels: new Map([['host-1', { type: 'host', name: 'web-01' }]]),
       });
 
-      const pills = await service.forProposals(request, query);
+      const response = await service.forProposals(request, { ...query, from: 10, size: 2 });
 
-      expect(pills).toEqual([
-        { entityId: 'host-1', count: 4, entityType: 'host', name: 'web-01' },
-        { entityId: 'user-1', count: 1 },
-      ]);
-      expect(countByConversation).toHaveBeenNthCalledWith(
-        1,
+      expect(response).toEqual({
+        pills: [
+          { entityId: 'host-1', count: 4, entityType: 'host', name: 'web-01' },
+          { entityId: 'user-1', count: 1 },
+        ],
+        total: 25,
+        remaining: 13,
+      });
+      expect(reconcileMappings).toHaveBeenCalled();
+      expect(queryProposalPillsMock).toHaveBeenCalledWith(
         expect.objectContaining({
+          esClient,
+          spaceId: 'space-1',
           origin: 'alertzero',
           categories: ['respond', 'investigate'],
-          status: 'pending',
-          excludeSuperseded: true,
-        }),
-        'space-1',
-        expect.any(Number)
+          decidedWithinHours: 72,
+          from: 10,
+          size: 2,
+        })
       );
-      expect(countByConversation).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({ origin: 'alertzero', decidedWithinHours: 72 }),
-        'space-1',
-        expect.any(Number)
-      );
-      expect(getEntitiesByConversationId).toHaveBeenCalledWith(['c1', 'c2']);
     });
 
-    it('leaves the closed window out when none is asked for', async () => {
-      const { service, countByConversation } = makeService();
+    it('labels only the ids of the page', async () => {
+      queryProposalPillsMock.mockResolvedValue({
+        rows: [{ entityId: 'host-1', count: 1 }],
+        total: 1,
+      });
+      const { service, getEntityLabels } = makeService();
 
-      await service.forProposals(request, { ...query, decidedWithinHours: undefined });
+      await service.forProposals(request, query);
 
-      expect(countByConversation).toHaveBeenCalledTimes(1);
+      expect(getEntityLabels).toHaveBeenCalledWith(['host-1'], 'space-1');
+    });
+
+    it('falls back to the Entity Store id prefix for the type of an unlabeled entity', async () => {
+      queryProposalPillsMock.mockResolvedValue({
+        rows: [{ entityId: 'user:root', count: 3 }],
+        total: 1,
+      });
+      const { service } = makeService();
+
+      expect((await service.forProposals(request, query)).pills).toEqual([
+        { entityId: 'user:root', count: 3, entityType: 'user' },
+      ]);
+    });
+
+    it('reports nothing remaining on the last page', async () => {
+      queryProposalPillsMock.mockResolvedValue({
+        rows: [{ entityId: 'host-1', count: 1 }],
+        total: 11,
+      });
+      const { service } = makeService();
+
+      expect(await service.forProposals(request, { ...query, from: 10 })).toMatchObject({
+        total: 11,
+        remaining: 0,
+      });
     });
 
     it('returns no pills when the proposals plugin is unavailable', async () => {
       const { service } = makeService({ proposalsAvailable: false });
 
-      expect(await service.forProposals(request, query)).toEqual([]);
+      expect(await service.forProposals(request, query)).toEqual({
+        pills: [],
+        total: 0,
+        remaining: 0,
+      });
+      expect(queryProposalPillsMock).not.toHaveBeenCalled();
     });
 
     it('refuses, rather than answering with no pills, when the caller cannot read proposals', async () => {
-      const { service, countByConversation } = makeService({
+      const { service } = makeService({
         assertCanRead: jest.fn().mockRejectedValue(new Error('forbidden')),
       });
 
       await expect(service.forProposals(request, query)).rejects.toThrow('forbidden');
-      expect(countByConversation).not.toHaveBeenCalled();
+      expect(queryProposalPillsMock).not.toHaveBeenCalled();
+    });
+
+    it('refuses when the caller cannot read investigations, even if they can read proposals', async () => {
+      const { service } = makeService({
+        assertCanReadInvestigations: jest.fn().mockRejectedValue(new Error('no investigations')),
+      });
+
+      await expect(service.forProposals(request, query)).rejects.toThrow('no investigations');
+      expect(queryProposalPillsMock).not.toHaveBeenCalled();
     });
 
     it('prefers the Entity Store name and does not look up ids that are not in the store', async () => {
+      queryProposalPillsMock.mockResolvedValue({
+        rows: [
+          { entityId: 'checkout', count: 1 },
+          { entityId: 'host:abc', count: 1 },
+        ],
+        total: 2,
+      });
       const getEntityStoreNames = jest.fn().mockResolvedValue(new Map([['host:abc', 'web-01']]));
       const { service } = makeService({
-        open: new Map([['c1', 1]]),
-        entityIds: new Map([
-          [
-            'c1',
-            [
-              { id: 'host:abc', type: 'host', name: 'snapshot' },
-              { id: 'checkout', name: 'Checkout' },
-            ],
-          ],
+        labels: new Map([
+          ['host:abc', { type: 'host', name: 'snapshot' }],
+          ['checkout', { name: 'Checkout' }],
         ]),
         getEntityStoreNames,
       });
 
-      expect(await service.forProposals(request, query)).toEqual([
+      expect((await service.forProposals(request, query)).pills).toEqual([
         { entityId: 'checkout', count: 1, name: 'Checkout' },
         { entityId: 'host:abc', count: 1, entityType: 'host', name: 'web-01' },
       ]);
@@ -139,14 +192,16 @@ describe('ImpactPillsService', () => {
     });
 
     it('lets a failed read surface, so the client keeps the pills it has', async () => {
-      const { service, countByConversation } = makeService();
-      countByConversation.mockReset().mockRejectedValue(new Error('es down'));
+      queryProposalPillsMock.mockRejectedValue(new Error('es down'));
+      const { service } = makeService();
 
       await expect(service.forProposals(request, query)).rejects.toThrow('es down');
     });
   });
 
   describe('forEscalations', () => {
+    const page = { from: 0, size: 10 };
+
     it('counts each escalation once per entity across open and closed', async () => {
       const { service, scanWithEntityIds } = makeService();
       scanWithEntityIds
@@ -156,12 +211,32 @@ describe('ImpactPillsService', () => {
         ])
         .mockResolvedValueOnce([{ id: 'e3' }, { id: 'e4', entity_ids: ['host-1'] }]);
 
-      expect(await service.forEscalations(request)).toEqual([
-        { entityId: 'host-1', count: 3 },
-        { entityId: 'user-1', count: 1 },
-      ]);
+      expect(await service.forEscalations(request, page)).toEqual({
+        pills: [
+          { entityId: 'host-1', count: 3 },
+          { entityId: 'user-1', count: 1 },
+        ],
+        total: 2,
+        remaining: 0,
+      });
       expect(scanWithEntityIds).toHaveBeenCalledWith(request, { status: 'open' });
       expect(scanWithEntityIds).toHaveBeenCalledWith(request, { status: 'closed' });
+    });
+
+    it('slices the requested page and reports how many pills remain', async () => {
+      const { service, scanWithEntityIds } = makeService();
+      scanWithEntityIds.mockResolvedValueOnce([
+        { id: 'e1', entity_ids: ['host-1', 'user-1', 'user-2'] },
+        { id: 'e2', entity_ids: ['host-1', 'user-1'] },
+        { id: 'e3', entity_ids: ['host-1'] },
+      ]);
+      scanWithEntityIds.mockResolvedValueOnce([]);
+
+      expect(await service.forEscalations(request, { from: 1, size: 1 })).toEqual({
+        pills: [{ entityId: 'user-1', count: 2 }],
+        total: 3,
+        remaining: 1,
+      });
     });
 
     it('labels a pill with the entity name carried on the escalation', async () => {
@@ -176,7 +251,7 @@ describe('ImpactPillsService', () => {
       ]);
       scanWithEntityIds.mockResolvedValueOnce([]);
 
-      expect(await service.forEscalations(request)).toEqual([
+      expect((await service.forEscalations(request, page)).pills).toEqual([
         { entityId: 'host:abc', count: 1, entityType: 'host', name: 'web-01' },
       ]);
     });
@@ -185,7 +260,7 @@ describe('ImpactPillsService', () => {
       const { service, scanWithEntityIds } = makeService();
       scanWithEntityIds.mockRejectedValue(new Error('impact read failed'));
 
-      await expect(service.forEscalations(request)).rejects.toThrow('impact read failed');
+      await expect(service.forEscalations(request, page)).rejects.toThrow('impact read failed');
     });
   });
 });
