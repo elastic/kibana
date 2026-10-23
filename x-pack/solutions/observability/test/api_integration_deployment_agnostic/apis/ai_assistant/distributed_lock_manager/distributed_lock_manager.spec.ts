@@ -31,6 +31,11 @@ import { getLoggerMock } from '../utils/kibana_mocks';
 import { dateAsTimestamp, durationAsMs, sleep } from '../utils/time';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  // Install HTTP interception during test discovery, before FTR creates the ES client.
+  if (!nock.isActive()) {
+    nock.activate();
+  }
+
   const es = getService('es');
   const log = getService('log');
   const logger = getLoggerMock(log);
