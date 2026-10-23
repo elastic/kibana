@@ -193,17 +193,23 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   // the stack reported and the identity already exists.
   const isManualEntryLocked = isWaiting || callbackStatus === 'received';
 
+  // The initial tab is decided once, from the list as first loaded. Deciding again whenever the
+  // list turns non-empty would move the user to Existing Identity the moment the stack creates
+  // the first identity of a project, away from the stages still being shown.
   const hasSetInitialTab = useRef(false);
   useEffect(() => {
     if (hasSetInitialTab.current) return;
     if (isEditPage) {
       setSelectedTabId(TABS.EXISTING_CONNECTION);
       hasSetInitialTab.current = true;
-    } else if (cloudConnectors.length > 0) {
-      setSelectedTabId(TABS.EXISTING_CONNECTION);
-      hasSetInitialTab.current = true;
+      return;
     }
-  }, [cloudConnectors.length, isEditPage]);
+    if (isLoadingConnectors) return;
+    hasSetInitialTab.current = true;
+    if (cloudConnectors.length > 0) {
+      setSelectedTabId(TABS.EXISTING_CONNECTION);
+    }
+  }, [cloudConnectors.length, isEditPage, isLoadingConnectors]);
 
   useEffect(() => {
     onNewIdentityTabChange?.(selectedTabId === TABS.NEW_CONNECTION);

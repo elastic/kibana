@@ -853,6 +853,28 @@ describe('AwsIdentityFederationSetup', () => {
       expect(clearIacConfirm).toHaveBeenCalledTimes(1);
     });
 
+    it('stays on the New Identity tab when the identity the stack created is the first one', () => {
+      // A project with no identities yet: the initial tab was decided on an empty list.
+      mockGetConnectors({ data: [] });
+      mockUseProvisioningCallback.mockReturnValue(
+        callbackState({ status: 'deploying', created: { id: 'cc-1', name: 'my-identity' } })
+      );
+      const { rerender } = renderSetup({ cloud, integrations });
+      expect(screen.getByRole('tab', { name: 'New Identity' })).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+
+      // The list refetched after the creation now has one entry: no reason to move the user.
+      mockGetConnectors();
+      rerender(setupElement({ cloud, integrations }));
+
+      expect(screen.getByRole('tab', { name: 'New Identity' })).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+    });
+
     it('keeps the name of the identity the stack created on screen', async () => {
       const user = userEvent.setup();
       const { rerender } = renderSetup({ cloud, integrations });
