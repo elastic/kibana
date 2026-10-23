@@ -42,12 +42,12 @@ const formatPointer = async (data: DashboardPanelAttachmentData): Promise<string
 };
 
 describe('createDashboardPanelAttachmentType', () => {
-  it('is a read-only type with no tools', () => {
+  it('is a read-only type exposing the pointed panel tool', () => {
     const definition = createDashboardPanelAttachmentType();
 
     expect(definition.id).toBe(DASHBOARD_PANEL_ATTACHMENT_TYPE);
     expect(definition.isReadonly).toBe(true);
-    expect(definition.getTools?.()).toEqual([dashboardTools.panelToVisualization]);
+    expect(definition.getTools?.()).toEqual([dashboardTools.pointedPanel]);
   });
 
   it('validates pointer data against the schema', async () => {
@@ -63,9 +63,16 @@ describe('createDashboardPanelAttachmentType', () => {
     expect(text).toContain('panel "CPU usage" (panelId: "panel-1", type: lens)');
     expect(text).toContain('dashboard attachment "dashboard-attachment-1"');
     expect(text).toContain(dashboardTools.generateDashboard);
-    expect(text).toContain('`panels: [{ id: "panel-1", content: <new content> }]`');
-    expect(text).toContain('source: "attachment", attachment_id: "platform.dashboard.panel-panel-1"');
-    expect(text).toContain(dashboardTools.panelToVisualization);
+    expect(text).toContain(
+      '`panels: [{ id: "panel-1", content: { source: "request", query: <the change> } }]`'
+    );
+    expect(text).toContain('do not read the dashboard attachment first');
+    expect(text).toContain(dashboardTools.pointedPanel);
+    expect(text).toContain('action: "read"');
+    expect(text).toContain(
+      'source: "attachment", attachment_id: "platform.dashboard.panel-panel-1"'
+    );
+    expect(text).toContain('action: "show"');
     expect(text).toContain('platform.dashboard.panel-panel-1');
   });
 

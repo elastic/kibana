@@ -18,7 +18,7 @@ import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { dashboardTools } from '../../../common';
-import { createPanelToVisualizationTool } from './panel_to_visualization_tool';
+import { createPointedPanelTool } from './pointed_panel_tool';
 
 const POINTER_ID = getDashboardPanelAttachmentId('panel-1');
 const grid = { x: 0, y: 0, w: 24, h: 15 };
@@ -84,21 +84,66 @@ const firstResult = (returned: Awaited<ReturnType<BuiltinToolDefinition['handler
   return returned.results[0];
 };
 
-const run = async (records: Record<string, unknown>, panelAttachmentId = POINTER_ID) => {
+const run = async (records: Record<string, unknown>, action: 'read' | 'show' = 'show') => {
   const { attachments, add } = createAttachments(records);
-  const tool = createPanelToVisualizationTool() as BuiltinToolDefinition;
-  const result = await tool.handler({ panel_attachment_id: panelAttachmentId }, {
+  const tool = createPointedPanelTool() as BuiltinToolDefinition;
+  const result = await tool.handler({ panel_attachment_id: POINTER_ID, action }, {
     attachments,
     logger,
   } as unknown as Parameters<BuiltinToolDefinition['handler']>[1]);
   return { result: firstResult(result), add };
 };
 
-describe('createPanelToVisualizationTool', () => {
+describe('createPointedPanelTool', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('registers under the dashboard tool id', () => {
-    expect(createPanelToVisualizationTool().id).toBe(dashboardTools.panelToVisualization);
+    expect(createPointedPanelTool().id).toBe(dashboardTools.pointedPanel);
+  });
+
+  it('reads only the pointed panel with its ES|QL query', async () => {
+    const config = {
+      type: 'metric',
+      title: 'Requests',
+      data_source: { type: 'esql', query: 'FROM logs | STATS c = COUNT(*)' },
+    };
+    const { result, add } = await run(
+      {
+        [POINTER_ID]: pointer(),
+        'dashboard-1': dashboard([
+          lensPanel(config),
+          { ...customPanel({ template: '<p/>' }), id: 'panel-2' },
+        ]),
+      },
+      'read'
+    );
+
+    expect(result).toEqual({
+      tool_result_id: expect.any(String),
+      type: ToolResultType.other,
+      data: {
+        panel_attachment_id: POINTER_ID,
+        dashboard_attachment_id: 'dashboard-1',
+        panel: { id: 'panel-1', type: LENS_EMBEDDABLE_TYPE, title: 'Requests', config },
+        esql: 'FROM logs | STATS c = COUNT(*)',
+      },
+    });
+    expect(add).not.toHaveBeenCalled();
+  });
+
+  it('reads panels that cannot be shown', async () => {
+    const { result } = await run(
+      {
+        [POINTER_ID]: pointer(),
+        'dashboard-1': dashboard([{ type: 'markdown', id: 'panel-1', grid, config: {} }]),
+      },
+      'read'
+    );
+
+    expect(result).toMatchObject({
+      type: ToolResultType.other,
+      data: { panel: { id: 'panel-1', type: 'markdown', config: {} } },
+    });
   });
 
   it('copies a custom panel into a custom content visualization attachment', async () => {
@@ -242,9 +287,9 @@ describe('createPanelToVisualizationTool', () => {
       'dashboard-1': dashboard([customPanel({ template: '<p>hi</p>' })]),
     });
     (attachments.add as jest.Mock).mockRejectedValue(new Error('boom'));
-    const tool = createPanelToVisualizationTool() as BuiltinToolDefinition;
+    const tool = createPointedPanelTool() as BuiltinToolDefinition;
 
-    const result = await tool.handler({ panel_attachment_id: POINTER_ID }, {
+    const result = await tool.handler({ panel_attachment_id: POINTER_ID, action: 'show' }, {
       attachments,
       logger,
     } as unknown as Parameters<BuiltinToolDefinition['handler']>[1]);

@@ -14,15 +14,11 @@ import {
   type CustomContentVisualizationResultData,
   type VisualizationResultData,
 } from '@kbn/agent-builder-common/tools/tool_result';
-import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools/builtin';
 import {
   DASHBOARD_PANEL_ATTACHMENT_TYPE,
-  findPanelById,
   getPanelLabel,
-  isDashboardAttachment,
-  isDashboardPanelAttachment,
   type AttachmentPanel,
 } from '@kbn/agent-builder-dashboards-common';
 import {
@@ -37,6 +33,7 @@ import {
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { dashboardTools } from '../../../common';
 import { extractEsqlQueries } from '../generate/time_range/extract_esql_queries';
+import { resolvePointedPanel } from '../resolve_pointed_panel';
 
 const MAX_QUERY_LENGTH = 2048;
 
@@ -47,12 +44,17 @@ type UnpersistedVisualizationResultData =
   | Omit<ChartVisualizationResultData, PersistedFields>
   | Omit<CustomContentVisualizationResultData, PersistedFields>;
 
-const panelToVisualizationSchema = z.object({
+const pointedPanelSchema = z.object({
   panel_attachment_id: z
     .string()
     .max(256)
     .describe(
-      `Id of the ${DASHBOARD_PANEL_ATTACHMENT_TYPE} pointer attachment naming the panel to show, e.g. "${DASHBOARD_PANEL_ATTACHMENT_TYPE}-<panelId>".`
+      `Id of the ${DASHBOARD_PANEL_ATTACHMENT_TYPE} pointer attachment naming the panel, e.g. "${DASHBOARD_PANEL_ATTACHMENT_TYPE}-<panelId>".`
+    ),
+  action: z
+    .enum(['read', 'show'])
+    .describe(
+      '"read" returns the panel\'s current config; "show" copies the panel into a visualization attachment to render inline in the chat.'
     ),
 });
 
@@ -118,6 +120,17 @@ const panelToVisualization = (
   );
 };
 
+const getPanelEsql = (panel: AttachmentPanel): string | undefined => {
+  if (panel.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE) {
+    return readEsqlQuery(panel.config as Partial<CustomContentState>);
+  }
+  if (panel.type === LENS_EMBEDDABLE_TYPE) {
+    const [esql] = extractEsqlQueries([panel]);
+    return esql;
+  }
+  return undefined;
+};
+
 const errorResult = (message: string, panelAttachmentId: string) => ({
   results: [
     {
@@ -129,16 +142,14 @@ const errorResult = (message: string, panelAttachmentId: string) => ({
 });
 
 /**
- * Copies the panel a pointer names into a standalone visualization attachment, so the agent can
- * show a dashboard panel inline in the chat without regenerating it.
+ * Works on the one dashboard panel a pointer names: reads its config, or copies it into a
+ * standalone visualization attachment so the agent can show it inline without regenerating it.
  */
-export const createPanelToVisualizationTool = (): BuiltinToolDefinition<
-  typeof panelToVisualizationSchema
-> => ({
-  id: dashboardTools.panelToVisualization,
+export const createPointedPanelTool = (): BuiltinToolDefinition<typeof pointedPanelSchema> => ({
+  id: dashboardTools.pointedPanel,
   type: ToolType.builtin,
   annotations: {
-    title: 'Show Dashboard Panel As Visualization',
+    title: 'Dashboard Panel',
     readOnlyHint: false,
     destructiveHint: false,
     idempotentHint: false,
@@ -146,51 +157,46 @@ export const createPanelToVisualizationTool = (): BuiltinToolDefinition<
   },
   tags: ['dashboard'],
   excludeFromMcp: true,
-  description: `Show a dashboard panel inline in the chat as a standalone visualization.
+  description: `Read or show the dashboard panel a ${DASHBOARD_PANEL_ATTACHMENT_TYPE} pointer attachment names, without reading the whole dashboard attachment.
 
-Pass the id of a ${DASHBOARD_PANEL_ATTACHMENT_TYPE} pointer attachment. The tool copies that panel (its current config from the dashboard attachment) into a new visualization attachment and returns \`attachment_id\` and \`version\`. Render it as the last part of your response with \`<render_attachment id="{attachment_id}" version="{version}" />\`.
+Actions:
+- \`read\`: returns the panel's id, type, title, current config and ES|QL query when it has one. Use it to answer a question about the panel or describe what it shows. Editing does not need it: \`${dashboardTools.generateDashboard}\` loads the panel's current config itself.
+- \`show\`: copies the panel into a new visualization attachment and returns \`attachment_id\` and \`version\`. Render it as the last part of your response with \`<render_attachment id="{attachment_id}" version="{version}" />\`. Use it when the user asks to see, show, paint or preview the panel here in the chat, or asks for it as a visualization. Never regenerate the panel with the visualization creation tool for that: it would author a different chart. The copy is independent of the dashboard: later panel edits do not update it. Supports ES|QL Lens panels and custom panels.
 
-Use it when the user asks to see, show, paint or preview the panel here in the chat, or asks for it as a visualization. Never regenerate the panel with the visualization creation tool for that: it would author a different chart. Do not use this tool to change the panel; edits go through \`${dashboardTools.generateDashboard}\` by panel id. The copy is independent of the dashboard: later panel edits do not update it.
-
-Supports ES|QL Lens panels and custom panels.`,
-  schema: panelToVisualizationSchema,
-  handler: async ({ panel_attachment_id: panelAttachmentId }, { attachments, logger }) => {
-    const pointer = attachments.getAttachmentRecord(panelAttachmentId);
-    if (!pointer || !isDashboardPanelAttachment(pointer)) {
-      return errorResult(
-        `"${panelAttachmentId}" is not a ${DASHBOARD_PANEL_ATTACHMENT_TYPE} attachment in this conversation.`,
-        panelAttachmentId
-      );
+This tool never changes the panel; edits go through \`${dashboardTools.generateDashboard}\` by panel id.`,
+  schema: pointedPanelSchema,
+  handler: async ({ panel_attachment_id: panelAttachmentId, action }, { attachments, logger }) => {
+    const resolution = resolvePointedPanel(attachments, panelAttachmentId);
+    if ('error' in resolution) {
+      return errorResult(resolution.error, panelAttachmentId);
     }
-
-    const pointerData = getLatestVersion(pointer)?.data;
-    if (!pointerData) {
-      return errorResult(
-        `Panel pointer "${panelAttachmentId}" has no readable data.`,
-        panelAttachmentId
-      );
-    }
-
-    const { dashboard_attachment_id: dashboardAttachmentId, panel_id: panelId } = pointerData;
-    const dashboard = attachments.getAttachmentRecord(dashboardAttachmentId);
-    const dashboardData =
-      dashboard && isDashboardAttachment(dashboard) ? getLatestVersion(dashboard)?.data : undefined;
-    if (!dashboardData) {
-      return errorResult(
-        `Dashboard attachment "${dashboardAttachmentId}" named by the pointer is not in this conversation.`,
-        panelAttachmentId
-      );
-    }
-
-    const panel = findPanelById(dashboardData.panels, panelId);
-    if (!panel) {
-      return errorResult(
-        `Panel "${panelId}" no longer exists on dashboard attachment "${dashboardAttachmentId}". Tell the user instead of recreating it.`,
-        panelAttachmentId
-      );
-    }
-
+    const { pointerData, dashboardData, panel } = resolution;
+    const { panel_id: panelId } = pointerData;
     const title = getPanelLabel(panel) ?? pointerData.label;
+
+    if (action === 'read') {
+      const esql = getPanelEsql(panel);
+      return {
+        results: [
+          {
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.other,
+            data: {
+              panel_attachment_id: panelAttachmentId,
+              dashboard_attachment_id: pointerData.dashboard_attachment_id,
+              panel: {
+                id: panel.id,
+                type: panel.type,
+                ...(title ? { title } : {}),
+                config: panel.config,
+              },
+              ...(esql ? { esql } : {}),
+            },
+          },
+        ],
+      };
+    }
+
     const dashboardName = dashboardData.title
       ? `dashboard "${dashboardData.title}"`
       : 'a dashboard';

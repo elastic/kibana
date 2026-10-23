@@ -126,7 +126,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.streams}.delete_stream`,
 
   // Platform – Dashboards
-  'platform.dashboard.panel_to_visualization',
+  'platform.dashboard.pointed_panel',
 
   // Custom content panels
   'custom_content_update_panel',

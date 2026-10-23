@@ -39,7 +39,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
       expect.objectContaining({ id: 'platform.dashboard.panel', isReadonly: true })
     );
     expect(registerTool).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'platform.dashboard.panel_to_visualization' })
+      expect.objectContaining({ id: 'platform.dashboard.pointed_panel' })
     );
     expect(registerSkill).toHaveBeenCalledTimes(1);
     expect(registerSkill).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboards' }));

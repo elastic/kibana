@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createPanelToVisualizationTool } from './panel_to_visualization_tool';
+export { createPointedPanelTool } from './pointed_panel_tool';

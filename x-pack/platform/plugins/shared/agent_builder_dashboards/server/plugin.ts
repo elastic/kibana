@@ -25,7 +25,7 @@ import {
 } from './attachment_types';
 import { createDashboardSmlType } from './sml_types';
 import { createDashboardAppStateValidator } from './tools/generate/validate_dashboard_app_state';
-import { createPanelToVisualizationTool } from './tools/panel_to_visualization';
+import { createPointedPanelTool } from './tools/pointed_panel';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -70,9 +70,7 @@ export class AgentBuilderDashboardsPlugin
       >[0]
     );
     setupDeps.agentBuilder.tools.register(
-      createPanelToVisualizationTool() as Parameters<
-        typeof setupDeps.agentBuilder.tools.register
-      >[0]
+      createPointedPanelTool() as Parameters<typeof setupDeps.agentBuilder.tools.register>[0]
     );
     setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));
 
