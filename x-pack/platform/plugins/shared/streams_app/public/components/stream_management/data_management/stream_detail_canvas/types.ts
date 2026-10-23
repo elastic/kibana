@@ -10,10 +10,13 @@ import type { Edge, Node } from '@xyflow/react';
 
 export const SOURCE_NODE_TYPE = 'source';
 export const DESTINATION_NODE_TYPE = 'destination';
+export const ROUTING_NODE_TYPE = 'routing';
 export const ANIMATED_EDGE_TYPE = 'animated';
 
 export interface SourceNodeData extends Record<string, unknown> {
   sourceId?: string;
+  /** A source has one outgoing connection, so a connected source cannot start another. */
+  hasConnection?: boolean;
   unconfiguredNodeId?: string;
   configurationLabel?: string;
   title: string;
@@ -32,9 +35,23 @@ export interface DestinationNodeData extends Record<string, unknown> {
   configurationLabel?: string;
 }
 
+export interface RoutingNodeRule {
+  /** React Flow source handle id the rule's edges leave from. */
+  handleId: string;
+  label: string;
+  isCatchAll: boolean;
+  action?: 'copy' | 'move';
+}
+
+export interface RoutingNodeData extends Record<string, unknown> {
+  pipelineId: string;
+  rules: RoutingNodeRule[];
+}
+
 export type SourceNode = Node<SourceNodeData, typeof SOURCE_NODE_TYPE>;
 export type DestinationNode = Node<DestinationNodeData, typeof DESTINATION_NODE_TYPE>;
-export type ClassicCanvasNode = SourceNode | DestinationNode;
+export type RoutingNode = Node<RoutingNodeData, typeof ROUTING_NODE_TYPE>;
+export type ClassicCanvasNode = SourceNode | DestinationNode | RoutingNode;
 export type ClassicCanvasEdge = Edge;
 
 export interface ClassicCanvasGraph {

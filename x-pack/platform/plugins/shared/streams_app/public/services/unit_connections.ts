@@ -10,11 +10,11 @@ import type { Unit } from './unit_repository';
 /**
  * Wires sources to destinations.
  *
- * Each source has its own pipeline. Unconditional wires are that pipeline's
- * `destinations` list, which can name several destinations. Conditional wires
- * are `routes` rules, which cannot share a pipeline with `destinations`. A new
- * wire on a pipeline that already uses routes is stored as a catch-all rule so
- * a later condition can be set on it without changing the connection model.
+ * A source has a single outgoing connection: either its own direct pipeline
+ * to one destination, or a routing pipeline whose `routes` rules fan out.
+ * Several sources can share a destination. Wires drawn from a routing rule are
+ * added to that rule. Existing pipelines with several destinations still render
+ * and can be unhooked line by line.
  */
 
 type UnitPipeline = Unit['unit']['pipelines'][number];
@@ -89,37 +89,6 @@ const withRoutes = (config: PipelineConfig, routes: readonly RouteRule[]): Pipel
 const routeDestinationIds = (route: RouteRule): readonly string[] =>
   'destinations' in route ? route.destinations : [];
 
-const isCatchAllDestinationRoute = (route: RouteRule): boolean =>
-  route.when === undefined && 'destinations' in route;
-
-/** A catch-all that delegates to child pipelines already consumes every record. */
-const catchAllBlocksDestination = (routes: readonly RouteRule[]): boolean => {
-  const catchAll = routes.find((route) => route.when === undefined);
-  return catchAll !== undefined && !('destinations' in catchAll);
-};
-
-const routesIncludeDestination = (routes: readonly RouteRule[], destinationId: string): boolean =>
-  routes.some((route) => routeDestinationIds(route).includes(destinationId));
-
-const addDestinationToRoutes = (
-  routes: readonly RouteRule[],
-  destinationId: string
-): RouteRule[] => {
-  const catchAllIndex = routes.findIndex(isCatchAllDestinationRoute);
-  if (catchAllIndex === -1) {
-    return [...routes, { destinations: [destinationId] }];
-  }
-  return routes.map((route, index) => {
-    if (index !== catchAllIndex || !('destinations' in route)) {
-      return route;
-    }
-    if (route.destinations.includes(destinationId)) {
-      return route;
-    }
-    return { ...route, destinations: [...route.destinations, destinationId] };
-  });
-};
-
 const removeDestinationFromRoutes = (
   routes: readonly RouteRule[],
   destinationId: string
@@ -144,8 +113,13 @@ const replacePipelines = (unit: Unit, pipelines: Unit['unit']['pipelines']): Uni
   },
 });
 
+/** The pipeline holding a source's unconditional wires. Routing pipelines are left alone. */
 const findSourcePipelineIndex = (pipelines: Unit['unit']['pipelines'], sourceId: string): number =>
-  pipelines.findIndex((pipeline) => readIdentifiers(pipeline.config, 'sources').includes(sourceId));
+  pipelines.findIndex(
+    (pipeline) =>
+      !pipelineUsesRoutes(pipeline) &&
+      readIdentifiers(pipeline.config, 'sources').includes(sourceId)
+  );
 
 const writePipeline = (unit: Unit, pipelineIndex: number, config: PipelineConfig): Unit => {
   const pipelines = unit.unit.pipelines.flatMap((pipeline, index) => {
@@ -234,7 +208,7 @@ const pushConnection = (
   seen: Set<string>,
   connection: UnitConnection
 ): void => {
-  const key = `${connection.sourceId}\0${connection.destinationId}`;
+  const key = `${connection.sourceId}\0${connection.destinationId}\0${connection.forwarding}`;
   if (seen.has(key)) {
     return;
   }
@@ -312,34 +286,26 @@ const pipelineTelemetry = (
   return fit === 'unknown' || fit === 'incompatible' ? [...DEFAULT_SUPPORTED_TELEMETRY] : fit;
 };
 
+/**
+ * Whether the source already forwards somewhere, through a direct pipeline or a
+ * routing pipeline. A source has at most one outgoing connection.
+ */
+export const hasSourceConnection = (unit: Unit, sourceId: string): boolean =>
+  unit.unit.pipelines.some(
+    (pipeline) =>
+      readIdentifiers(pipeline.config, 'sources').includes(sourceId) &&
+      pipelineForwards(pipeline.config)
+  );
+
 export const canConnectSourceToDestination = (
   unit: Unit,
   sourceId: string,
   destinationId: string
-): boolean => {
-  const fit = telemetryFit(unit, sourceId, destinationId);
-  if (fit === 'incompatible') {
-    return false;
-  }
-  const pipelineIndex = findSourcePipelineIndex(unit.unit.pipelines, sourceId);
-  if (pipelineIndex === -1) {
-    return true;
-  }
-  const pipeline = unit.unit.pipelines[pipelineIndex];
-  if (fit !== 'unknown') {
-    const pipelineSignals = new Set(pipeline.supported_telemetry);
-    if (!fit.some((signal) => pipelineSignals.has(signal))) {
-      return false;
-    }
-  }
-  if (pipelineUsesRoutes(pipeline)) {
-    const routes = readRoutes(pipeline.config);
-    return !routesIncludeDestination(routes, destinationId) && !catchAllBlocksDestination(routes);
-  }
-  return !readIdentifiers(pipeline.config, 'destinations').includes(destinationId);
-};
+): boolean =>
+  telemetryFit(unit, sourceId, destinationId) !== 'incompatible' &&
+  !hasSourceConnection(unit, sourceId);
 
-/** Adds a destination to the source's own pipeline, creating that pipeline when needed. */
+/** Gives an unconnected source its own direct pipeline to one destination. */
 export const connectSourceToDestination = (
   unit: Unit,
   sourceId: string,
@@ -348,46 +314,12 @@ export const connectSourceToDestination = (
   if (!canConnectSourceToDestination(unit, sourceId, destinationId)) {
     return unit;
   }
-  const pipelineIndex = findSourcePipelineIndex(unit.unit.pipelines, sourceId);
-  if (pipelineIndex === -1) {
-    return appendSourcePipeline(unit, sourceId, pipelineTelemetry(unit, sourceId, destinationId), [
-      { name: 'destinations', value: [destinationId] },
-    ]);
-  }
-  const pipeline = unit.unit.pipelines[pipelineIndex];
-  const sources = readIdentifiers(pipeline.config, 'sources');
-  if (pipelineUsesRoutes(pipeline)) {
-    const routes = addDestinationToRoutes(readRoutes(pipeline.config), destinationId);
-    if (sources.length === 1) {
-      return writePipeline(unit, pipelineIndex, withRoutes(pipeline.config, routes));
-    }
-    return appendSourcePipeline(
-      detachSource(unit, pipelineIndex, sourceId),
-      sourceId,
-      pipeline.supported_telemetry,
-      [...processorEntries(pipeline.config), { name: 'routes', value: routes }]
-    );
-  }
-  const destinations = readIdentifiers(pipeline.config, 'destinations');
-  if (sources.length === 1) {
-    return writePipeline(
-      unit,
-      pipelineIndex,
-      withIdentifiers(pipeline.config, 'destinations', [...destinations, destinationId])
-    );
-  }
-  return appendSourcePipeline(
-    detachSource(unit, pipelineIndex, sourceId),
-    sourceId,
-    pipeline.supported_telemetry,
-    [
-      ...processorEntries(pipeline.config),
-      { name: 'destinations', value: [...destinations, destinationId] },
-    ]
-  );
+  return appendSourcePipeline(unit, sourceId, pipelineTelemetry(unit, sourceId, destinationId), [
+    { name: 'destinations', value: [destinationId] },
+  ]);
 };
 
-/** Drops one drawn line from the source pipeline that owns it. */
+/** Drops one drawn line from the source's direct pipeline. */
 export const disconnectSourceFromDestination = (
   unit: Unit,
   sourceId: string,
@@ -399,23 +331,6 @@ export const disconnectSourceFromDestination = (
   }
   const pipeline = unit.unit.pipelines[pipelineIndex];
   const sources = readIdentifiers(pipeline.config, 'sources');
-  if (pipelineUsesRoutes(pipeline)) {
-    if (!routesIncludeDestination(readRoutes(pipeline.config), destinationId)) {
-      return unit;
-    }
-    const routes = removeDestinationFromRoutes(readRoutes(pipeline.config), destinationId);
-    if (sources.length === 1) {
-      return writePipeline(unit, pipelineIndex, withRoutes(pipeline.config, routes));
-    }
-    const detached = detachSource(unit, pipelineIndex, sourceId);
-    if (routes.length === 0) {
-      return detached;
-    }
-    return appendSourcePipeline(detached, sourceId, pipeline.supported_telemetry, [
-      ...processorEntries(pipeline.config),
-      { name: 'routes', value: routes },
-    ]);
-  }
   const destinations = readIdentifiers(pipeline.config, 'destinations');
   if (!destinations.includes(destinationId)) {
     return unit;
@@ -465,6 +380,237 @@ export const moveUnitConnection = (
     return unit;
   }
   return connectSourceToDestination(released, sourceId, destinationId);
+};
+
+/**
+ * One output of a routing node: a rule in a pipeline's `routes` list, or rule 0
+ * of a routed child pipeline that uses a plain `destinations` list.
+ */
+export interface RouteRuleRef {
+  pipelineId: string;
+  ruleIndex: number;
+}
+
+const findPipelineIndex = (unit: Unit, pipelineId: string): number =>
+  unit.unit.pipelines.findIndex((pipeline) => pipeline.id === pipelineId);
+
+/** Where a routing rule forwards records: a destination, or a child pipeline. */
+export interface RouteTarget {
+  kind: 'destination' | 'pipeline';
+  id: string;
+}
+
+const isSameTarget = (left: RouteTarget, right: RouteTarget): boolean =>
+  left.kind === right.kind && left.id === right.id;
+
+const isRoutedPipeline = (unit: Unit, pipelineId: string): boolean =>
+  unit.unit.pipelines.some((pipeline) =>
+    readRoutes(pipeline.config).some(
+      (route) => 'pipelines' in route && route.pipelines.includes(pipelineId)
+    )
+  );
+
+/** Whether records leaving `fromPipelineId` can reach `toPipelineId` through routes. */
+const pipelineReaches = (unit: Unit, fromPipelineId: string, toPipelineId: string): boolean => {
+  const visited = new Set<string>();
+  const pending = [fromPipelineId];
+  while (pending.length > 0) {
+    const pipelineId = pending.pop();
+    if (pipelineId === undefined || visited.has(pipelineId)) {
+      continue;
+    }
+    if (pipelineId === toPipelineId) {
+      return true;
+    }
+    visited.add(pipelineId);
+    const pipeline = unit.unit.pipelines.find(({ id }) => id === pipelineId);
+    for (const route of pipeline ? readRoutes(pipeline.config) : []) {
+      if ('pipelines' in route) {
+        pending.push(...route.pipelines);
+      }
+    }
+  }
+  return false;
+};
+
+/** Targets a rule forwards to, or undefined when the rule does not exist. */
+const readRuleTargets = (pipeline: UnitPipeline, ruleIndex: number): RouteTarget[] | undefined => {
+  if (!pipelineUsesRoutes(pipeline)) {
+    return ruleIndex === 0
+      ? readIdentifiers(pipeline.config, 'destinations').map((id) => ({ kind: 'destination', id }))
+      : undefined;
+  }
+  const route = readRoutes(pipeline.config)[ruleIndex];
+  if (!route) {
+    return undefined;
+  }
+  return 'destinations' in route
+    ? route.destinations.map((id) => ({ kind: 'destination', id }))
+    : route.pipelines.map((id) => ({ kind: 'pipeline', id }));
+};
+
+const routeWithTargets = (rule: RouteRule, kind: RouteTarget['kind'], ids: string[]): RouteRule => {
+  // We omit existing destinations/pipelines from the original rule, so we can recreate
+  // it with the updated target ids.
+  // oxlint-disable-next-line no-unused-vars
+  const { pipelines, destinations, ...rest } = rule as Record<string, unknown>;
+
+  return kind === 'destination' ? { ...rest, destinations: ids } : { ...rest, pipelines: ids };
+};
+
+/**
+ * Pipeline config with one rule's targets replaced. A rule left with no targets
+ * is removed. Undefined when the targets cannot be stored: a rule lists either
+ * destinations or pipelines, and a plain `destinations` list only holds
+ * destinations.
+ */
+const withRuleTargets = (
+  pipeline: UnitPipeline,
+  ruleIndex: number,
+  targets: readonly RouteTarget[]
+): PipelineConfig | undefined => {
+  const kinds = new Set(targets.map(({ kind }) => kind));
+  if (kinds.size > 1) {
+    return undefined;
+  }
+  const kind = targets[0]?.kind ?? 'destination';
+  const ids = targets.map(({ id }) => id);
+  if (!pipelineUsesRoutes(pipeline)) {
+    return kind === 'destination'
+      ? withIdentifiers(pipeline.config, 'destinations', ids)
+      : undefined;
+  }
+  return withRoutes(
+    pipeline.config,
+    readRoutes(pipeline.config).flatMap((route, index) => {
+      if (index !== ruleIndex) {
+        return [route];
+      }
+      return ids.length > 0 ? [routeWithTargets(route, kind, ids)] : [];
+    })
+  );
+};
+
+const routeFitsTarget = (
+  unit: Unit,
+  pipeline: UnitPipeline,
+  { kind, id }: RouteTarget
+): boolean => {
+  if (kind === 'pipeline') {
+    const target = unit.unit.pipelines.find((item) => item.id === id);
+    if (!target || pipelineReaches(unit, id, pipeline.id)) {
+      return false;
+    }
+    const targetSignals = new Set(target.supported_telemetry);
+    return pipeline.supported_telemetry.some((signal) => targetSignals.has(signal));
+  }
+  const destination = unit.unit.destinations?.find((item) => item.id === id);
+  if (!destination) {
+    return true;
+  }
+  const destinationSignals = new Set(destination.supported_telemetry);
+  return pipeline.supported_telemetry.some((signal) => destinationSignals.has(signal));
+};
+
+/**
+ * Writes new targets for one rule, or returns `unit` unchanged when they do not
+ * fit. A routed child pipeline keeps its last destination, since dropping the
+ * pipeline would leave its parent route pointing nowhere.
+ */
+const writeRuleTargets = (
+  unit: Unit,
+  { pipelineId, ruleIndex }: RouteRuleRef,
+  targets: readonly RouteTarget[]
+): Unit => {
+  const pipelineIndex = findPipelineIndex(unit, pipelineId);
+  const pipeline = unit.unit.pipelines[pipelineIndex];
+  const config = pipeline ? withRuleTargets(pipeline, ruleIndex, targets) : undefined;
+  if (!config || (!pipelineForwards(config) && isRoutedPipeline(unit, pipelineId))) {
+    return unit;
+  }
+  return writePipeline(unit, pipelineIndex, config);
+};
+
+export const canConnectRouteToTarget = (
+  unit: Unit,
+  rule: RouteRuleRef,
+  target: RouteTarget
+): boolean => connectRouteToTarget(unit, rule, target) !== unit;
+
+/** Adds a target to one routing rule. */
+export const connectRouteToTarget = (unit: Unit, rule: RouteRuleRef, target: RouteTarget): Unit => {
+  const pipeline = unit.unit.pipelines[findPipelineIndex(unit, rule.pipelineId)];
+  const targets = pipeline ? readRuleTargets(pipeline, rule.ruleIndex) : undefined;
+  if (
+    !pipeline ||
+    !targets ||
+    targets.some((item) => isSameTarget(item, target)) ||
+    !routeFitsTarget(unit, pipeline, target)
+  ) {
+    return unit;
+  }
+  return writeRuleTargets(unit, rule, [...targets, target]);
+};
+
+/** Drops one target from a routing rule. A rule left with no targets is removed. */
+export const disconnectRouteFromTarget = (
+  unit: Unit,
+  rule: RouteRuleRef,
+  target: RouteTarget
+): Unit => {
+  const pipeline = unit.unit.pipelines[findPipelineIndex(unit, rule.pipelineId)];
+  const targets = pipeline ? readRuleTargets(pipeline, rule.ruleIndex) : undefined;
+  if (!targets?.some((item) => isSameTarget(item, target))) {
+    return unit;
+  }
+  return writeRuleTargets(
+    unit,
+    rule,
+    targets.filter((item) => !isSameTarget(item, target))
+  );
+};
+
+/**
+ * Moves a routing rule's line onto another target. Within one rule the target
+ * is swapped in place, so a single-target rule can switch between a
+ * destination and a child pipeline.
+ */
+export const moveRouteConnection = (
+  unit: Unit,
+  {
+    previousRule,
+    previousTarget,
+    rule,
+    target,
+  }: {
+    previousRule: RouteRuleRef;
+    previousTarget: RouteTarget;
+    rule: RouteRuleRef;
+    target: RouteTarget;
+  }
+): Unit => {
+  if (previousRule.pipelineId !== rule.pipelineId || previousRule.ruleIndex !== rule.ruleIndex) {
+    const connected = connectRouteToTarget(unit, rule, target);
+    // Connect first: adding never removes a rule, so both rule indexes stay valid.
+    return connected === unit
+      ? unit
+      : disconnectRouteFromTarget(connected, previousRule, previousTarget);
+  }
+  const pipeline = unit.unit.pipelines[findPipelineIndex(unit, rule.pipelineId)];
+  const targets = pipeline ? readRuleTargets(pipeline, rule.ruleIndex) : undefined;
+  if (
+    !pipeline ||
+    !targets?.some((item) => isSameTarget(item, previousTarget)) ||
+    targets.some((item) => isSameTarget(item, target)) ||
+    !routeFitsTarget(unit, pipeline, target)
+  ) {
+    return unit;
+  }
+  return writeRuleTargets(
+    unit,
+    rule,
+    targets.map((item) => (isSameTarget(item, previousTarget) ? target : item))
+  );
 };
 
 /** Drops a deleted component id from pipeline source and destination lists. */

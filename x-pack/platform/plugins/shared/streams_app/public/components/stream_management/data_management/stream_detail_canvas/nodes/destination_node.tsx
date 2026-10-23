@@ -30,7 +30,6 @@ export function DestinationNode({ data, selected, dragging }: NodeProps<Destinat
         type="target"
         position={Position.Left}
         isConnectable={Boolean(data.destinationId)}
-        destinationId={data.destinationId}
       />
       <EuiPanel
         // `nokey` stops React Flow from arming a marquee when a Shift+drag starts
