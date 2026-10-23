@@ -20,12 +20,14 @@ export interface DetectionStatusBadgeProps {
   status: SignificantEventsMaintenanceStatus | undefined;
   isLoading: boolean;
   isError: boolean;
+  testSubject?: string;
 }
 
 export const DetectionStatusBadge = ({
   status,
   isLoading,
   isError,
+  testSubject = 'nightshiftDetectionStatus',
 }: DetectionStatusBadgeProps): React.ReactElement => {
   if (isLoading) {
     return (
@@ -41,7 +43,7 @@ export const DetectionStatusBadge = ({
   if (isError || !status) {
     return (
       <EuiToolTip content={STATUS_ERROR_TOOLTIP}>
-        <EuiHealth color="subdued" data-test-subj="nightshiftDetectionStatusUnknown">
+        <EuiHealth color="subdued" data-test-subj={`${testSubject}Unknown`}>
           {UNKNOWN_STATUS_LABEL}
         </EuiHealth>
       </EuiToolTip>
@@ -50,7 +52,7 @@ export const DetectionStatusBadge = ({
 
   const isPaused = status.state === 'paused';
   return (
-    <EuiBadge color="hollow" data-test-subj="nightshiftDetectionStatus">
+    <EuiBadge color="hollow" data-test-subj={testSubject}>
       <EuiIcon type="dot" color={isPaused ? 'warning' : 'primary'} aria-hidden={true} />{' '}
       {isPaused ? PAUSED_STATUS_LABEL : MONITORING_STATUS_LABEL}
     </EuiBadge>
