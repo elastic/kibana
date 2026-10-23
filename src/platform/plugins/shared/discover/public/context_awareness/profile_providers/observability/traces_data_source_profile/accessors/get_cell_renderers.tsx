@@ -10,12 +10,12 @@ import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 import { SERVICE_NAME_FIELD } from '../../../../../../common/data_types/logs/constants';
 import { getTracesSummaryColumn } from '../../../../../components/data_types/traces/summary_column';
 import type { DataSourceProfileProvider } from '../../../../profiles';
-import { getServiceNameCell } from '../../../../../components/data_types/logs/service_name_cell';
+import { getServiceSummaryCell } from './service_summary_cell';
 
 export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRenderers'] =
   (prev, { toolkit }) =>
   (params) => ({
     ...prev(params),
     [SOURCE_COLUMN]: getTracesSummaryColumn(params, toolkit),
-    [SERVICE_NAME_FIELD]: getServiceNameCell(SERVICE_NAME_FIELD, toolkit),
+    [SERVICE_NAME_FIELD]: getServiceSummaryCell(SERVICE_NAME_FIELD, toolkit),
   });

@@ -31,6 +31,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { sloListLocatorID, type SloListLocatorParams } from '@kbn/deeplinks-observability';
 import type { MetricsDataPluginStart } from '@kbn/metrics-data-access-plugin/public';
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -431,6 +432,28 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           './services/rest/fetch_latency_overall_transaction_distribution'
         );
         return fetchLatencyOverallTransactionDistribution(params, signal);
+      },
+    });
+
+    plugins.discoverShared.features.registry.register({
+      id: 'observability-traces-fetch-service-summary',
+      fetchServiceSummary: async (params, signal) => {
+        const [{ fetchServiceSummary }, { getServiceSummaryLinks }, [coreStart]] =
+          await Promise.all([
+            import('./services/rest/fetch_service_summary'),
+            import('./services/rest/get_service_summary_links'),
+            core.getStartServices(),
+          ]);
+        const sloListLocator =
+          plugins.share.url.locators.get<SloListLocatorParams>(sloListLocatorID);
+        const summary = await fetchServiceSummary(params, signal);
+        return {
+          ...summary,
+          links: getServiceSummaryLinks(params, {
+            application: coreStart.application,
+            sloListLocator,
+          }),
+        };
       },
     });
 

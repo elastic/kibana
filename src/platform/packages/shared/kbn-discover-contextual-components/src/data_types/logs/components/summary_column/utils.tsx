@@ -95,6 +95,15 @@ export interface ResourceFieldDescriptor {
   rawValue: unknown;
 }
 
+/**
+ * Lets a caller replace the default badge for a specific resource field (matched by `field.name`).
+ * Returning a nullish value falls back to the default badge.
+ */
+export type RenderResourceBadge = (ctx: {
+  field: ResourceFieldDescriptor;
+  row: DataTableRecord;
+}) => ReactNode;
+
 const getResourceBadgeComponent = (
   name: FieldKey,
   core: CoreStart,
