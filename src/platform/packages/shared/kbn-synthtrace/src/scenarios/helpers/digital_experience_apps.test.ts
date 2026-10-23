@@ -7,11 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { timerange, type EdotBrowserDocument, type OtelLogDocument } from '@kbn/synthtrace-client';
+import {
+  timerange,
+  type EdotBrowserDocument,
+  type OtelLogDocument,
+  type Timerange,
+} from '@kbn/synthtrace-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   DIGITAL_EXPERIENCE_APPS,
   generateEdotBrowserSessions,
+  generatePerMinute,
   parseDigitalExperienceScenarioOpts,
 } from './digital_experience_apps';
 
@@ -21,13 +27,19 @@ const range = timerange(
   {} as ToolingLog
 );
 
-const collect = (withSessionId: boolean, includeRawAttribution: boolean = false) =>
-  generateEdotBrowserSessions(range, {
+const at = (offsetSeconds: number) => new Date(range.from.getTime() + offsetSeconds * 1000);
+
+const collect = (
+  withSessionId: boolean,
+  includeRawAttribution: boolean = false,
+  { scale = 1, timeRange = range }: { scale?: number; timeRange?: Timerange } = {}
+) =>
+  generateEdotBrowserSessions(timeRange, {
     environment: 'test',
-    from: range.from.getTime(),
+    from: timeRange.from.getTime(),
     withSessionId,
     includeRawAttribution,
-    scale: 1,
+    scale,
   }).flatMap((generator) =>
     Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
   );
@@ -120,11 +132,24 @@ describe('digital experience apps', () => {
     });
 
     it('keeps sessions between the start of the run and the last generated timestamp', () => {
-      const lastTimestamp = range.to.getTime() - 60_000;
+      const lastTimestamp = range.to.getTime() - 1;
       const timestamps = collect(false).map((doc) => Number(doc['@timestamp']));
 
       expect(Math.min(...timestamps)).toBeGreaterThanOrEqual(range.from.getTime());
       expect(Math.max(...timestamps)).toBeLessThanOrEqual(lastTimestamp);
+    });
+
+    it('generates data for runs of one minute or less', () => {
+      [60, 30].forEach((seconds) => {
+        const shortRange = timerange(range.from, at(seconds), {} as ToolingLog);
+        const docs = collect(false, false, { timeRange: shortRange });
+
+        expect(docs.length).toBeGreaterThan(0);
+        docs.forEach((doc) => {
+          expect(Number(doc['@timestamp'])).toBeGreaterThanOrEqual(shortRange.from.getTime());
+          expect(Number(doc['@timestamp'])).toBeLessThan(shortRange.to.getTime());
+        });
+      });
     });
 
     it('sets the deployment environment', () => {
@@ -143,6 +168,52 @@ describe('digital experience apps', () => {
 
       expect(sessionIds.has(undefined)).toBe(false);
       expect(sessionIds.size).toBeGreaterThan(DIGITAL_EXPERIENCE_APPS.length);
+    });
+  });
+
+  describe('generatePerMinute', () => {
+    const indices = (timeRange: Timerange, perMinute: number) => {
+      const created: number[] = [];
+      Array.from(
+        generatePerMinute<EdotBrowserDocument>(timeRange, perMinute, ({ index }) => {
+          created.push(index);
+          return [];
+        })
+      );
+      return created;
+    };
+
+    it('creates as many events as the rate says over a run', () => {
+      expect(indices(range, 6)).toHaveLength(12);
+      expect(indices(range, 0.5)).toHaveLength(1);
+    });
+
+    it('creates the same events whatever the batch size', () => {
+      // Live mode uploads batches of one second, each generated on its own
+      const liveBatches = Array.from({ length: 120 }, (_, second) =>
+        indices(timerange(at(second), at(second + 1), {} as ToolingLog), 7.5)
+      ).flat();
+
+      expect(liveBatches).toEqual(indices(range, 7.5));
+      expect(liveBatches).toHaveLength(15);
+    });
+
+    it('creates events in runs of less than a minute', () => {
+      expect(indices(timerange(at(0), at(30), {} as ToolingLog), 6).length).toBeGreaterThan(0);
+      expect(indices(timerange(at(0), at(0.5), {} as ToolingLog), 600).length).toBeGreaterThan(0);
+    });
+
+    it('keeps fractional rates, so apps stay apart at a low scale', () => {
+      const fiveMinutes = timerange(at(0), at(300), {} as ToolingLog);
+
+      expect(indices(fiveMinutes, 6 * 0.2)).toHaveLength(6);
+      expect(indices(fiveMinutes, 1 * 0.2)).toHaveLength(1);
+    });
+
+    it('numbers events by absolute time', () => {
+      expect(indices(timerange(at(0), at(60), {} as ToolingLog), 3)).toEqual(
+        indices(range, 3).slice(0, 3)
+      );
     });
   });
 });

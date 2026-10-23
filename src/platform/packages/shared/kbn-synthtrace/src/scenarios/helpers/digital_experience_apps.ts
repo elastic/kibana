@@ -14,7 +14,9 @@ import {
   type EdotBrowserDocument,
   type EdotBrowserEvent,
   type EdotBrowserSite,
+  type Fields,
   type HealthProfileName,
+  type Serializable,
   type SynthtraceGenerator,
   type Timerange,
 } from '@kbn/synthtrace-client';
@@ -33,7 +35,10 @@ export interface DigitalExperienceScenarioOpts {
   withSessionId: boolean;
   /** Write the web vital attribution as a JSON body, which EDOT Browser only does when opted in. */
   includeRawAttribution: boolean;
-  /** Multiplies the number of sessions per minute of every app. */
+  /**
+   * Multiplies the number of sessions per minute of every app. Fractions of a session add up over
+   * time, so a scale below 1 thins out every app in proportion.
+   */
   scale: number;
 }
 
@@ -405,12 +410,50 @@ export const parseDigitalExperienceScenarioOpts = (
 const MIN_PAGE_VIEWS = 1;
 const MAX_PAGE_VIEWS = 5;
 
+const MS_PER_MINUTE = 60_000;
+
+/** The number of events of a per-minute rate that start in `[from, to)`, counted from the epoch. */
+const countInWindow = (perMinute: number, from: number, to: number): number =>
+  Math.floor((perMinute * to) / MS_PER_MINUTE) - Math.floor((perMinute * from) / MS_PER_MINUTE);
+
+/**
+ * Generates `perMinute` events a minute over `range`, calling `create` for each of them with the
+ * one-second window it falls in and its index, counted from the epoch. Events are placed by their
+ * absolute time, so the rate holds for any batch size, from the one-second batches of live mode to
+ * runs of less than a minute.
+ */
+export const generatePerMinute = <TFields extends Fields>(
+  range: Timerange,
+  perMinute: number,
+  create: (event: {
+    windowStart: number;
+    windowEnd: number;
+    index: number;
+  }) => Serializable<TFields> | Array<Serializable<TFields>>
+): SynthtraceGenerator<TFields> => {
+  const to = range.to.getTime();
+
+  return range.interval('1s').generator<TFields>((windowStart, _index, { stepMilliseconds }) => {
+    const windowEnd = Math.min(windowStart + stepMilliseconds, to);
+    const eventCount = countInWindow(perMinute, windowStart, windowEnd);
+    if (eventCount === 0) {
+      return [];
+    }
+    const firstIndex = Math.floor((perMinute * windowStart) / MS_PER_MINUTE);
+
+    return Array.from({ length: eventCount }, (_, offset) =>
+      create({ windowStart, windowEnd, index: firstIndex + offset })
+    ).flat();
+  });
+};
+
 const getTimestamp = (event: EdotBrowserEvent) => Number(event.serialize()[0]['@timestamp']);
 
 /**
  * One generator per app in the catalogue, each producing EDOT Browser sessions over `range`.
- * Sessions end by their interval timestamp, so live mode never writes into the future. Sessions
- * that started before the run's `from` are cut off there, like traffic at the edge of any window.
+ * Sessions end inside the window of their rate tick, so live mode never writes into the future.
+ * Sessions that started before the run's `from` are cut off there, like traffic at the edge of any
+ * window.
  */
 export const generateEdotBrowserSessions = (
   range: Timerange,
@@ -426,10 +469,10 @@ export const generateEdotBrowserSessions = (
     ({ serviceName, serviceVersion, health, sessionsPerMinute, site, browserWeights }) => {
       const app = edotBrowser.app({ serviceName, serviceVersion, environment });
 
-      return range
-        .interval('1m')
-        .rate(Math.max(1, Math.round(sessionsPerMinute * scale)))
-        .generator((timestamp, _index, { stepMilliseconds }) => {
+      return generatePerMinute<EdotBrowserDocument>(
+        range,
+        sessionsPerMinute * scale,
+        ({ windowStart, windowEnd }) => {
           const pageViews =
             MIN_PAGE_VIEWS + Math.floor(Math.random() * (MAX_PAGE_VIEWS - MIN_PAGE_VIEWS + 1));
 
@@ -441,11 +484,11 @@ export const generateEdotBrowserSessions = (
               }),
               site,
               health: edotBrowser.healthProfiles[health],
-              // Sessions end by `timestamp`, which live mode keeps at or before now
-              end: timestamp - Math.floor(Math.random() * stepMilliseconds),
+              end: windowStart + Math.floor(Math.random() * (windowEnd - windowStart)),
               pageViews,
             })
             .filter((event) => getTimestamp(event) >= from);
-        });
+        }
+      );
     }
   );

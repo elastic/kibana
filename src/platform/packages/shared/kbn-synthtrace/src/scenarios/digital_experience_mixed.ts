@@ -34,6 +34,7 @@ import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environmen
 import { withClient } from '../lib/utils/with_client';
 import {
   generateEdotBrowserSessions,
+  generatePerMinute,
   parseDigitalExperienceScenarioOpts,
 } from './helpers/digital_experience_apps';
 
@@ -55,26 +56,27 @@ const scenario: Scenario<OtelDocument | ApmFields> = async ({ scenarioOpts, logg
         userAgent: apm.getChromeUserAgentDefaults(),
       });
 
-      const classicPageLoads = range
-        .interval('1m')
-        .rate(Math.max(1, Math.round(CLASSIC_RUM_PAGE_LOADS_PER_MINUTE * opts.scale)))
-        .generator((timestamp, index) => {
+      const classicPageLoads = generatePerMinute<ApmFields>(
+        range,
+        CLASSIC_RUM_PAGE_LOADS_PER_MINUTE * opts.scale,
+        ({ windowStart, index }) => {
           const pageLoadDuration = 800 + Math.round(Math.random() * 2400);
           const requestName = CLASSIC_RUM_REQUESTS[index % CLASSIC_RUM_REQUESTS.length];
 
           return classicRum
             .transaction({ transactionName: CLASSIC_RUM_PAGES[index % CLASSIC_RUM_PAGES.length] })
-            .timestamp(timestamp)
+            .timestamp(windowStart)
             .duration(pageLoadDuration)
             .success()
             .children(
               classicRum
                 .span({ spanName: requestName, spanType: 'external', spanSubtype: 'http' })
-                .timestamp(timestamp + Math.round(pageLoadDuration * 0.6))
+                .timestamp(windowStart + Math.round(pageLoadDuration * 0.6))
                 .duration(50 + Math.round(Math.random() * 250))
                 .success()
             );
-        });
+        }
+      );
 
       return [
         withClient(
