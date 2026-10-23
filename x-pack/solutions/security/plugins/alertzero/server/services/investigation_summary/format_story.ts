@@ -6,7 +6,7 @@
  */
 
 import { TimelineEventType } from '@kbn/agent-builder-common';
-import { PROPOSAL_ATTACHMENT_TYPE } from '@kbn/proposals-common';
+import { PROPOSAL_ATTACHMENT_TYPE, isTerminal, proposalStatusSchema } from '@kbn/proposals-common';
 
 const TEXT_NOTE = 'text_note';
 const STORY_MAX_CHARS = 16_000;
@@ -98,10 +98,20 @@ export const collectStoryProposalIds = ({
 const isSuperseded = (proposal: StoryProposal): boolean =>
   proposal.supersededBy !== undefined || proposal.status === 'superseded';
 
+const isTerminalStatus = (status: string): boolean => {
+  const parsed = proposalStatusSchema.safeParse(status);
+  return parsed.success && isTerminal(parsed.data);
+};
+
 const formatProposal = (proposal: StoryProposal): string => {
-  const header = proposal.decision
-    ? `Proposal: ${proposal.title} (status: ${proposal.status}, decision: ${proposal.decision})`
-    : `Proposal: ${proposal.title}`;
+  const details = [
+    proposal.decision || isTerminalStatus(proposal.status) ? `status: ${proposal.status}` : '',
+    proposal.decision ? `decision: ${proposal.decision}` : '',
+  ].filter(Boolean);
+  const header =
+    details.length > 0
+      ? `Proposal: ${proposal.title} (${details.join(', ')})`
+      : `Proposal: ${proposal.title}`;
   const comment = proposal.comment?.trim().slice(0, PROPOSAL_COMMENT_MAX_CHARS);
   return comment ? `${header}\n${comment}` : header;
 };

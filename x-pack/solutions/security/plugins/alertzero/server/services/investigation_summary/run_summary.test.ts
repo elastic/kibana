@@ -430,7 +430,7 @@ describe('runInvestigationSummary', () => {
       expect(getProposals).not.toHaveBeenCalled();
     });
 
-    it('caps how many proposals it reads', async () => {
+    it('caps how many proposals it reads, keeping the newest', async () => {
       const ids = Array.from({ length: 25 }, (_, index) => index);
       const { client, resolveChatModel } = setup({
         conversationOverride: {
@@ -456,7 +456,7 @@ describe('runInvestigationSummary', () => {
       });
 
       expect(getProposals).toHaveBeenCalledWith(
-        ids.slice(0, 20).map((index) => `prop-${index}`),
+        ids.slice(-20).map((index) => `prop-${index}`),
         'default',
         request
       );

@@ -163,7 +163,7 @@ export const runInvestigationSummary = async ({
   const proposalIds = collectStoryProposalIds({
     events: conversation.events ?? [],
     attachments: conversation.attachments,
-  }).slice(0, MAX_PROPOSALS_READ);
+  }).slice(-MAX_PROPOSALS_READ);
   const proposals =
     deps.getProposals && proposalIds.length > 0
       ? await deps.getProposals(proposalIds, spaceId, request)

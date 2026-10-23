@@ -126,6 +126,28 @@ describe('formatInvestigationStory', () => {
       expect(story).toBe('Proposal: Review detection gap\nWhy.');
     });
 
+    it('tells an expired proposal by its status even though it has no decision', () => {
+      const story = formatInvestigationStory({
+        events,
+        attachments,
+        proposals: {
+          'prop-1': { title: 'Review detection gap', status: 'expired', comment: 'Why.' },
+        },
+      });
+
+      expect(story).toBe('Proposal: Review detection gap (status: expired)\nWhy.');
+    });
+
+    it('does not tell the status of a proposal that can still change', () => {
+      const story = formatInvestigationStory({
+        events,
+        attachments,
+        proposals: { 'prop-1': { title: 'Review detection gap', status: 'executing' } },
+      });
+
+      expect(story).toBe('Proposal: Review detection gap');
+    });
+
     it('clips a long proposal comment', () => {
       const story = formatInvestigationStory({
         events,
