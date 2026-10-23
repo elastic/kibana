@@ -56,10 +56,10 @@ describe('Case View Page files tab', () => {
     expect((await screen.findAllByTestId('cases-files-add')).length).toBe(2);
   });
 
-  it('should render the files table', async () => {
+  it('should render the files table', () => {
     renderWithTestingProviders(<CaseViewFiles caseData={caseData} />);
 
-    expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-files-table')).toBeInTheDocument();
   });
 
   it('clicking table pagination triggers calls to useGetCaseFiles', async () => {
