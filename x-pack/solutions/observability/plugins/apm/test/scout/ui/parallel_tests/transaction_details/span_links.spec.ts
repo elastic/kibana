@@ -92,6 +92,7 @@ test.describe(
         await page
           .getByTestId('waterfall')
           .getByLabel('View details for Span B', { exact: true })
+          .getByTestId('apmBarDetailsName')
           .click();
         await transactionDetailsPage.getSpanLinksTab().click();
 
@@ -123,7 +124,10 @@ test.describe(
           end: timeRange.rangeTo,
         });
 
-        await page.getByRole('button', { name: /View details for Transaction C/ }).click();
+        await page
+          .getByRole('button', { name: /View details for Transaction C/ })
+          .getByTestId('apmBarDetailsName')
+          .click();
         await transactionDetailsPage.getSpanLinksTab().click();
 
         const consumerMultipleLink = page.getByRole('link', {
@@ -160,7 +164,10 @@ test.describe(
           end: timeRange.rangeTo,
         });
 
-        await page.getByRole('button', { name: /View details for Transaction D/ }).click();
+        await page
+          .getByRole('button', { name: /View details for Transaction D/ })
+          .getByTestId('apmBarDetailsName')
+          .click();
         await transactionDetailsPage.getSpanLinksTab().click();
 
         const producerConsumerLink = page.getByRole('link', { name: 'zzz-producer-consumer' });
