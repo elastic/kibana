@@ -33,9 +33,13 @@ const DEFAULT_PAGE_SIZE = 25;
 export const EventsTab = ({
   timeRange,
   onTimeRangeChange,
+  entities,
+  unassigned,
 }: {
   timeRange: DetectionTimeRange;
   onTimeRangeChange: (timeRange: DetectionTimeRange) => void;
+  entities: string[];
+  unassigned: boolean;
 }): React.ReactElement => {
   const { notifications } = useKibana().services;
   const [perPage, setPerPage] = useState(DEFAULT_PAGE_SIZE);
@@ -62,6 +66,8 @@ export const EventsTab = ({
   } = useEventsUrlState();
   const filters = {
     ...timeRange,
+    entities,
+    unassigned,
     search: searchQuery,
     status,
     severity,
