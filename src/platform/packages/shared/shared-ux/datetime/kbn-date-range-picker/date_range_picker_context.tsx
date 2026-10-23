@@ -233,10 +233,14 @@ export function DateRangePickerProvider({
     () => timeRangeToDisplayText(timeRange, transformOptions),
     [timeRange, transformOptions]
   );
-  const displayFullFormattedText = useMemo(
-    () => timeRangeToFullFormattedText(timeRange, { ...transformOptions, timePrecision: 'ms' }),
-    [timeRange, transformOptions]
-  );
+  const displayFullFormattedText = useMemo(() => {
+    const { startDate, endDate } = timeRange;
+    const hasSubSecondBound = [startDate, endDate].some((date) => date?.getMilliseconds());
+    return timeRangeToFullFormattedText(timeRange, {
+      ...transformOptions,
+      timePrecision: hasSubSecondBound ? 'ms' : 's',
+    });
+  }, [timeRange, transformOptions]);
   const isRounded = hasRoundedOffset(timeRange);
   const duration =
     timeRange.startDate && timeRange.endDate

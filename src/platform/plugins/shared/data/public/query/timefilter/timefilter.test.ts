@@ -442,6 +442,35 @@ describe('calculateBounds', () => {
     stubNowTime('not_a_parsable_date');
     expect(() => timefilter.calculateBounds(timeRange)).toThrow();
   });
+
+  test('resolves relative bounds on whole seconds', () => {
+    stubNowTime('2026-10-22T12:34:56.789Z');
+    const result = timefilter.calculateBounds({ from: 'now-15m', to: 'now+1d/d' });
+    expect(result.min?.toISOString()).toBe('2026-10-22T12:19:56.000Z');
+    expect(result.max?.milliseconds()).toBe(0);
+  });
+
+  test('keeps milliseconds when a bound uses the ms unit', () => {
+    stubNowTime('2026-10-22T12:34:56.789Z');
+    const result = timefilter.calculateBounds({ from: 'now-500ms', to: 'now' });
+    expect(result.min?.toISOString()).toBe('2026-10-22T12:34:56.289Z');
+    expect(result.max?.toISOString()).toBe('2026-10-22T12:34:56.789Z');
+  });
+});
+
+describe('getAbsoluteTime', () => {
+  afterEach(() => {
+    clearNowTimeStub();
+  });
+
+  test('resolves relative bounds on whole seconds', () => {
+    stubNowTime('2026-10-22T12:34:56.789Z');
+    timefilter.setTime({ from: 'now-15m', to: 'now' });
+    expect(timefilter.getAbsoluteTime()).toEqual({
+      from: '2026-10-22T12:19:56.000Z',
+      to: '2026-10-22T12:34:56.000Z',
+    });
+  });
 });
 
 describe('getAutoRefreshFetch$', () => {

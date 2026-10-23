@@ -167,6 +167,35 @@ function parseDateMath(mathString: string, time: moment.Moment, roundUp: boolean
   return dateTime;
 }
 
+/** Unit that resolved relative time ranges are rounded down to. */
+export const TIME_RANGE_RESOLUTION: Unit = 's';
+
+const isUnit = (token: string): token is Unit => Object.hasOwn(unitsMap, token);
+
+const getRelativeUnits = (value: string): Unit[] => {
+  if (typeof value !== 'string' || !value.startsWith('now')) return [];
+  const tokens: string[] = value.slice(3).match(/ms|[a-zA-Z]/g) ?? [];
+  return tokens.filter(isUnit);
+};
+
+/**
+ * Returns the unit a time range should be rounded to: `now` is truncated to it and
+ * rounded-up relative ends (e.g. `now/d`) end on the last whole unit. Returns `null`
+ * when a relative bound uses a finer unit (e.g. `now-500ms` at second resolution),
+ * so the range keeps full precision.
+ */
+export function getTimeRangeResolution(
+  from: string,
+  to: string,
+  resolution: Unit = TIME_RANGE_RESOLUTION
+): Unit | null {
+  const { weight } = unitsMap[resolution];
+  const usesFinerUnit = [...getRelativeUnits(from), ...getRelativeUnits(to)].some(
+    (unit) => unitsMap[unit].weight < weight
+  );
+  return usesFinerUnit ? null : resolution;
+}
+
 // eslint-disable-next-line import/no-default-export
 export default {
   parse,

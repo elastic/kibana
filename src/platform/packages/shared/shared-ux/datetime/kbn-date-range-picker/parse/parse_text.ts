@@ -8,6 +8,7 @@
  */
 
 import dateMath from '@elastic/datemath';
+import { getTimeRangeResolution } from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
@@ -437,14 +438,22 @@ function buildRange(
 ): TimeRange {
   const startType = dateStringToType(start);
   const endType = dateStringToType(end);
-  // Anchor both bounds to the same instant
-  const forceNow = new Date();
+  // Anchor both bounds to the same instant, rounded down to the time range resolution
+  // unless a bound uses a finer unit, where the extra precision is meaningful.
+  const resolution = getTimeRangeResolution(start, end);
+  const now = moment();
+  const forceNow = (resolution ? now.startOf(resolution) : now).toDate();
+  const endDate = dateStringToDate(end, formats, { roundUp: true, forceNow });
   const range: TimeRange = {
     value: text,
     start,
     end,
     startDate: dateStringToDate(start, formats, { forceNow }),
-    endDate: dateStringToDate(end, formats, { roundUp: true, forceNow }),
+    // Rounding up (`/d`, `/h`, ...) lands on `.999`; end on the last whole unit instead.
+    endDate:
+      endDate && endType !== DATE_TYPE_ABSOLUTE && resolution
+        ? moment(endDate).startOf(resolution).toDate()
+        : endDate,
     type: [startType, endType],
     isNaturalLanguage,
     startOffset: startType === DATE_TYPE_RELATIVE ? dateStringToOffset(start) : null,

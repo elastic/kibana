@@ -749,6 +749,67 @@ describe('"now" anchoring', () => {
 
     expect(range.endDate!.getTime() - range.startDate!.getTime()).toBe(15 * 60 * 1000);
   });
+
+  it('truncates "now" to the last whole second', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-07-15T12:00:00.750Z'));
+
+    const range = textToTimeRange('-15m to now', { roundRelativeTime: false });
+
+    expect(range.startDate?.toISOString()).toBe('2025-07-15T11:45:00.000Z');
+    expect(range.endDate?.toISOString()).toBe('2025-07-15T12:00:00.000Z');
+  });
+
+  it('does not truncate absolute bounds', () => {
+    const range = textToTimeRange('2025-07-15T11:00:00.123Z to 2025-07-15T11:30:00.456Z');
+
+    expect(range.startDate?.toISOString()).toBe('2025-07-15T11:00:00.123Z');
+    expect(range.endDate?.toISOString()).toBe('2025-07-15T11:30:00.456Z');
+  });
+
+  it('ends rounded-up relative bounds on the last whole second', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-07-15T12:00:00.750Z'));
+
+    const range = textToTimeRange('yesterday');
+
+    expect(range.endDate?.getMilliseconds()).toBe(0);
+    expect(range.endDate?.getHours()).toBe(23);
+    expect(range.endDate?.getMinutes()).toBe(59);
+    expect(range.endDate?.getSeconds()).toBe(59);
+  });
+
+  it('keeps milliseconds in "now" when a bound uses the ms unit', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-07-15T12:00:00.750Z'));
+
+    const range = textToTimeRange('-500ms', { roundRelativeTime: false });
+
+    expect(range.startDate?.toISOString()).toBe('2025-07-15T12:00:00.250Z');
+    expect(range.endDate?.toISOString()).toBe('2025-07-15T12:00:00.750Z');
+  });
+
+  it('shares the un-truncated anchor with the other bound when one bound uses ms', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-07-15T12:00:00.750Z'));
+
+    const range = textToTimeRange('now-1h to now-200ms', { roundRelativeTime: false });
+
+    expect(range.startDate?.toISOString()).toBe('2025-07-15T11:00:00.750Z');
+    expect(range.endDate?.toISOString()).toBe('2025-07-15T12:00:00.550Z');
+  });
+
+  it('rounds the ms bound to the second when roundRelativeTime is on, leaving "now" un-truncated', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-07-15T12:00:00.750Z'));
+
+    const range = textToTimeRange('-500ms', { roundRelativeTime: true });
+
+    expect(range.start).toBe('now-500ms/s');
+    expect(range.end).toBe('now');
+    expect(range.startDate?.toISOString()).toBe('2025-07-15T12:00:00.000Z');
+    expect(range.endDate?.toISOString()).toBe('2025-07-15T12:00:00.750Z');
+  });
 });
 
 describe('matchPreset', () => {

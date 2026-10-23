@@ -46,7 +46,7 @@ export interface TimeWindowButtonsConfig {
 export const DEFAULT_ZOOM_FACTOR = 0.5;
 
 /** Minimum zoom delta (ms) used when the window is zero-width. */
-export const ZOOM_DELTA_FALLBACK_MS = 500;
+export const ZOOM_DELTA_FALLBACK_MS = 1000;
 
 const BUTTON_ID_PREVIOUS = 'previous';
 const BUTTON_ID_ZOOM_OUT = 'zoomOut';
@@ -248,9 +248,14 @@ function useTimeWindow(
   const isInvalid = !min || !min.isValid() || !max || !max.isValid();
   const windowDuration = isInvalid ? -1 : max.diff(min);
   const isWindowDurationZero = windowDuration === 0;
+  // Whole-second windows move in whole seconds: ranges are inclusive at second
+  // resolution, so the adjacent window starts one second after the current end.
+  const isWholeSecondWindow = !isInvalid && min.milliseconds() === 0 && max.milliseconds() === 0;
+  const adjacentStepMs = isWholeSecondWindow ? 1000 : 1;
   const durationText = isInvalid ? '' : durationToDisplayFullText(min.toDate(), max.toDate());
   const zoomMultiplier = parseZoomFactor(options.zoomFactor);
-  const zoomDelta = windowDuration * (zoomMultiplier / 2);
+  const rawZoomDelta = windowDuration * (zoomMultiplier / 2);
+  const zoomDelta = isWholeSecondWindow ? Math.round(rawZoomDelta / 1000) * 1000 : rawZoomDelta;
 
   const applyDates = useCallback(
     (s: moment.Moment, e: moment.Moment) => {
@@ -270,15 +275,15 @@ function useTimeWindow(
   // DST transition.
   const stepForward = useCallback(() => {
     if (isInvalid || isWindowDurationZero) return;
-    const nextStart = moment(max).add(1, 'ms');
+    const nextStart = moment(max).add(adjacentStepMs, 'ms');
     applyDates(nextStart, moment(nextStart).add(windowDuration, 'ms'));
-  }, [isInvalid, isWindowDurationZero, max, windowDuration, applyDates]);
+  }, [isInvalid, isWindowDurationZero, max, windowDuration, adjacentStepMs, applyDates]);
 
   const stepBackward = useCallback(() => {
     if (isInvalid || isWindowDurationZero) return;
-    const previousEnd = moment(min).subtract(1, 'ms');
+    const previousEnd = moment(min).subtract(adjacentStepMs, 'ms');
     applyDates(moment(previousEnd).subtract(windowDuration, 'ms'), previousEnd);
-  }, [isInvalid, isWindowDurationZero, min, windowDuration, applyDates]);
+  }, [isInvalid, isWindowDurationZero, min, windowDuration, adjacentStepMs, applyDates]);
 
   const expandWindow = useCallback(() => {
     if (isInvalid) return;
