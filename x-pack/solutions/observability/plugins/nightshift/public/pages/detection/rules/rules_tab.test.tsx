@@ -84,13 +84,18 @@ const rules = [
   { query: { id: 'q2', title: 'Latency', description: 'Slow responses' }, matches: 2 },
 ] as DetectionRule[];
 
-const renderTab = (path = '/detections/rules') => {
+const renderTab = (path = '/detections/rules', entities: string[] = []) => {
   const history = createMemoryHistory({ initialEntries: [path] });
   render(
     <I18nProvider>
       <EuiProvider>
         <Router history={history}>
-          <RulesTab timeRange={{ from: 'now-24h', to: 'now' }} onTimeRangeChange={jest.fn()} />
+          <RulesTab
+            timeRange={{ from: 'now-24h', to: 'now' }}
+            onTimeRangeChange={jest.fn()}
+            entities={entities}
+            unassigned={false}
+          />
         </Router>
       </EuiProvider>
     </I18nProvider>
@@ -132,6 +137,30 @@ describe('RulesTab', () => {
     expect(screen.queryByRole('button', { name: 'Error rate' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Latency' })).toBeInTheDocument();
     expect(screen.getByTestId('chartTotal')).toHaveTextContent('7');
+  });
+
+  it('restores the search from the URL on Back after typing a newer one', async () => {
+    const history = renderTab('/detections/rules?rulesSearch=slow');
+    history.push('/detections/rules?rulesSearch=slow&entity=checkout');
+    fireEvent.change(screen.getByTestId('nightshiftDetectionRulesSearch'), {
+      target: { value: 'error' },
+    });
+    history.goBack();
+    await waitFor(() =>
+      expect(screen.getByTestId('nightshiftDetectionRulesSearch')).toHaveValue('slow')
+    );
+    expect(screen.getByRole('button', { name: 'Latency' })).toBeInTheDocument();
+  });
+
+  it('explains an empty entity selection instead of showing the empty engine state', () => {
+    mockUseDetectionRules.mockReturnValue({
+      ...mockUseDetectionRules(),
+      rules: [],
+      total: 0,
+    });
+    renderTab('/detections/rules', ['checkout']);
+    expect(screen.queryByTestId('nightshiftDetectionRulesEmpty')).not.toBeInTheDocument();
+    expect(screen.getByText('No rules for the selected entities')).toBeInTheDocument();
   });
 
   it('opens a rule via its id in the URL', () => {
