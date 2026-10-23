@@ -40,6 +40,8 @@ const collect = (
     withSessionId,
     includeRawAttribution,
     scale,
+    // Unseeded runs are random, which could make the minimums the tests rely on flaky
+    seed: 'collect',
   }).flatMap((generator) =>
     Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
   );

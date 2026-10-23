@@ -83,14 +83,8 @@ const SITE: EdotBrowserSite = {
   ],
 };
 
-// Deterministic Park-Miller PRNG so session tests are reproducible
-const seededRandom = (seed: number) => {
-  let state = (seed % 2147483646) + 1;
-  return () => {
-    state = (state * 16807) % 2147483647;
-    return (state - 1) / 2147483646;
-  };
-};
+// Deterministic, so session tests are reproducible
+const seededRandom = (seed: number) => createSeededRandom(`edot-browser-test:${seed}`);
 
 const isSpan = (doc: EdotBrowserDocument): doc is EdotBrowserSpanDocument =>
   'span_id' in doc && 'kind' in doc;
@@ -902,7 +896,14 @@ describe('edotBrowser', () => {
 
     it('timestamps web vitals like the instrumentation', () => {
       for (let seed = 1; seed <= 30; seed++) {
-        const docs = createSession({ seed, pageViews: 1, health: HEALTH_PROFILES.critical });
+        // A long dwell, as timestamps are capped to the end of the page view, which a slow LCP
+        // would otherwise run past
+        const docs = createSession({
+          seed,
+          pageViews: 1,
+          health: HEALTH_PROFILES.critical,
+          dwell: { median: 120_000, sigma: 0.1 },
+        });
         const vital = (name: string) =>
           docs.find(
             (doc) =>

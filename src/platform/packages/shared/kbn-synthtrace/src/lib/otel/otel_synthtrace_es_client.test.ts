@@ -8,7 +8,12 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { edotBrowser, timerange, type EdotBrowserDocument } from '@kbn/synthtrace-client';
+import {
+  createSeededRandom,
+  edotBrowser,
+  timerange,
+  type EdotBrowserDocument,
+} from '@kbn/synthtrace-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Readable } from 'stream';
 import type { Logger } from '../utils/create_logger';
@@ -76,6 +81,7 @@ describe('OtelSynthtraceEsClient', () => {
           health: edotBrowser.healthProfiles.healthy,
           start: timestamp,
           pageViews: 1,
+          random: createSeededRandom(`es-client:${timestamp}`),
         })
       );
 
