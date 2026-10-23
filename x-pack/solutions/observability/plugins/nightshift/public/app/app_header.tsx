@@ -33,8 +33,8 @@ export const SOURCES_PAGE_TITLE = i18n.translate('xpack.nightshift.sourcesPage.t
   defaultMessage: 'Sources',
 });
 
-export const SIGNALS_PAGE_TITLE = i18n.translate('xpack.nightshift.signalsPage.title', {
-  defaultMessage: 'Signals',
+export const DETECTION_PAGE_TITLE = i18n.translate('xpack.nightshift.detectionPage.title', {
+  defaultMessage: 'Detections',
 });
 
 const sourcesLabel = i18n.translate('xpack.nightshift.sourcesLinkLabel', {
@@ -167,7 +167,7 @@ export function NightshiftAppHeader({
                 href: automationsHref,
                 run: () => void onAutomationsClick(),
                 testId: 'nightshiftAutomationsPrimaryAction',
-                // The menu shows two buttons; Signals keeps them for Sources and Settings.
+                // The menu shows two buttons; Detections keeps them for Sources and Settings.
                 overflow: isDetectionPage,
               },
             ]
@@ -277,7 +277,7 @@ export function NightshiftAppHeader({
         isAutomationsPage
           ? automationsLabel
           : isDetectionPage
-          ? SIGNALS_PAGE_TITLE
+          ? DETECTION_PAGE_TITLE
           : isKnowledgePage
           ? KNOWLEDGE_PAGE_TITLE
           : isSettingsPage

@@ -21,9 +21,9 @@ import { DetectionStatusBadge } from './detection_status_badge';
 import { MetricCell, type MetricCellProps } from './metric_cell';
 import {
   DETECTION_ENGINE_LABEL,
-  getDetectionsLabel,
   getKnowledgeIndicatorsLabel,
   getRulesLabel,
+  getSignalsLabel,
   getSignificantEventsLabel,
   getEntitiesLabel,
   OVERVIEW_ERROR_MESSAGE,
@@ -87,8 +87,8 @@ export const DetectionOverview = ({
       icon: 'moon',
       tone: 'warning',
       value: counts?.detections,
-      getLabel: getDetectionsLabel,
-      testSubject: 'nightshiftDetectionOverviewDetections',
+      getLabel: getSignalsLabel,
+      testSubject: 'nightshiftDetectionOverviewSignals',
     },
     {
       icon: 'warning',

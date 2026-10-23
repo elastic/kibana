@@ -121,7 +121,7 @@ describe('DetectionPage', () => {
     expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftDetectionStatus')).toHaveTextContent('Paused');
     expect(screen.getByText('knowledge indicators')).toBeInTheDocument();
-    expect(screen.getByText('detections')).toBeInTheDocument();
+    expect(screen.getByText('signals')).toBeInTheDocument();
   });
 
   it('moves the detection status above the entities rail while the tab body scrolls', async () => {
