@@ -7,6 +7,7 @@
 
 import { act } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
+import { of } from 'rxjs';
 
 // Real session storage and real `useSessionStorage` on purpose: these tests are about what the
 // mounted persistence hooks do to storage while the app is torn down.
@@ -56,7 +57,7 @@ function setup(initialEntry: Array<string | { pathname: string; hash: string; st
   const history = createMemoryHistory({ initialEntries: initialEntry });
   const coreStart = {
     rendering: { addContext: (node: React.ReactNode) => node },
-    theme: { getTheme: () => ({ darkMode: false }) },
+    theme: { theme$: of({ darkMode: false }), getTheme: () => ({ darkMode: false }) },
   };
   const deps = { fleet: { authz: {} }, cloud: undefined, spaces: undefined };
 
