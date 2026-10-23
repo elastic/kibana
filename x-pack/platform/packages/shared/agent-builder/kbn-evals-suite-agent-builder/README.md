@@ -1,154 +1,53 @@
 # @kbn/evals-suite-agent-builder
 
-Evaluation test suites for AgentBuilder API, built on top of [`@kbn/evals`](../kbn-evals/README.md).
+Agent Builder evaluations are run and experimented with using [Orca](https://github.com/elastic/orca) (Offline Reliability Check for Agents). See the Orca repository for setup and usage instructions.
 
-## Overview
+## Running suites with `@kbn/evals`
 
-This package contains evaluation tests specifically for AgentBuilder API and its default agent.
-
-For general information about writing evaluation tests, configuration, and usage, see the main [`@kbn/evals` documentation](../kbn-evals/README.md).
-
-## Prerequisites
-
-### Configure Tracing and Phoenix Exporter
-
-Configure tracing and Phoenix exporter in `kibana.dev.yml`. To enable trace-based metrics (token usage, latency, tool calls), add both Phoenix and HTTP exporters:
-
-```yaml
-telemetry.tracing.exporters:
-  - phoenix:
-      base_url: 'https://<my-phoenix-host>'
-      public_url: 'https://<my-phoenix-host>'
-      project_name: '<my-name>'
-      api_key: '<my-api-key>'
-  - http:
-      url: 'http://localhost:4318/v1/traces'
-```
-
-### Configure AI Connectors
-
-Define the models to evaluate as inference endpoint definitions in the `KIBANA_TESTING_INFERENCE_ENDPOINTS` environment variable (raw or base64-encoded JSON; `node scripts/evals init` can generate it for EIS and OpenRouter):
-
-Alternatively, declare a preconfigured `.inference` connector in `kibana.dev.yml`.
-
-See [Connector definitions and inference endpoints](../../kbn-evals/README.md#connector-definitions-and-inference-endpoints) for the full shape.
-
-## Running AgentBuilder Evaluations
-
-### Start Scout Server
-
-Start Scout server:
+This package contains the specs for several `@kbn/evals` suites. Run them with the evals CLI:
 
 ```bash
-node scripts/scout.js start-server --arch stateful --domain classic
+node scripts/evals list                                  # list all registered suites
+node scripts/evals start --suite agent-builder           # start the eval stack (EDOT, Scout) and run a suite
+node scripts/evals start --suite agent-builder --model <connector-id> --grep "product documentation"
+node scripts/evals stop                                  # stop the background services
 ```
 
-### Start EDOT Collector
+Run `node scripts/evals start --help` for all flags. Suites are registered in `.buildkite/pipelines/evals/evals.suites.json`.
 
-To collect trace-based metrics, start the EDOT (Elastic Distribution of OpenTelemetry) Gateway Collector. Ensure Docker is running, then execute:
+## Suites in this package
 
-```bash
-# Optionally use non-default ports using --http-port <http-port> or --grpc-port <grpc-port>. You must update the tracing exporters with the right port in `kibana.dev.yml`
-ELASTICSEARCH_HOST=http://localhost:9220 node scripts/edot_collector.js
-```
+| Suite ID                    | Config                                 | Samples | Covers                                                                                       |
+| --------------------------- | -------------------------------------- | ------- | -------------------------------------------------------------------------------------------- |
+| `agent-builder`             | `playwright.config.ts`                 | 52      | Default agent knowledge base retrieval and the product documentation tool                    |
+| `skill-selection-benchmark` | `skill_selection.playwright.config.ts` | ~169    | Whether the agent picks the right skill (Platform, Streams, Security, Observability, Search) |
+| `esql-generation`           | `esql.playwright.config.ts`            | 3       | ES\|QL generation. Early stage, very few samples                                             |
 
-The EDOT Collector receives traces from Kibana via the HTTP exporter configured above and stores them in your local Elasticsearch cluster, where they can be queried to extract non-functional metrics.
+### `agent-builder`
 
-**Note:** If your EDOT Collector stores traces in a different Elasticsearch cluster than your test environment (i.e common cluster for the team), specify the trace cluster URL when running evaluations using `TRACING_ES_URL=https://<username>:<password>@<url>`. Dedicated ES client will be instantiated to query traces from the specified cluster.
+- **Knowledge base retrieval** (`evals/kb`, 50 samples): text retrieval (9), analytical (15), hybrid (9), unanswerable (13) and ambiguous (4) queries.
+- **Product documentation tool** (`evals/product_documentation`, 2 samples).
 
-### Load AgentBuilder Datasets
+#### Data
 
-The following options are available to load Knowledge bases:
+The knowledge base samples depend on data that must already exist in the cluster under test:
 
-A. Restore the [snapshot](https://www.elastic.co/docs/deploy-manage/tools/snapshot-and-restore/ec-gcs-snapshotting) from gcs-bucket, credentials are stored in secret's vault. **Fastest, recommended when restoring snapshot is available, e.g. ECH**
+- Text retrieval samples have ground truth pointing at documents in the `wix_knowledge_base` index.
+- Analytical samples contain ES|QL that queries the `support_ticket`, `users`, `projects`, `invoice`, `invoice_item`, `error_rate_daily` and `requests_daily_count` indices.
 
-B. Use the ETL pipeline from the workchat-solution-ds-experiments (internal) repo. **Recommended when restoring snapshot is not an option, e.g. serverless**. Estimated time: ~30 minutes (Serverless Cloud) or ~1 hour (local).
+Restoring snapshots or indexing corpora is covered in [Orca](https://github.com/elastic/orca) (see its "Restore or index the corpus" step and "Datasets & Snapshots" section). Orca lists the Wix corpus as cleaned files to index rather than a snapshot, and its snapshot configs don't include the analytical indices above.
 
-### Run Evaluations
+> **TODO:** This suite does not load any snapshot or index data itself, so running it against a fresh cluster fails the knowledge base samples. The data needed for each dataset still has to be identified, and loading (for example with `@kbn/es-snapshot-loader`) added to the suite. This will be done in a separate PR.
 
-Then run the evaluations:
+### `skill-selection-benchmark`
 
-```bash
-# Run all AgentBuilder evaluations
-node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+Samples live in `evals/skill_selection/benchmark_dataset.csv`: ~169 queries across `platform` (37), `security` (51), `search` (35), `observability` (27) and `streams` (19). Each query is tagged `direct`, `indirect` or `distractor`, with the expected skill. It uses code-based evaluators only (no LLM judge) and needs no external data.
 
-# Run specific test file
-node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts evals/kb/kb.spec.ts
+## Other Agent Builder suites
 
-# Run with specific connector
-node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts --project="my-connector"
+These live in their own packages:
 
-# Run with LLM-as-a-judge for consistent evaluation results
-EVAL_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
-
-# Run only selected evaluators
-SELECTED_EVALUATORS="Factuality,Relevance,Groundedness" node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
-
-# Override IR evaluator K value (takes priority over config)
-IR_EVAL_K=5 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
-
-# Run IR evaluators with multiple K values using patterns (Precision@K matches Precision@5, Precision@10, etc.)
-# This suite registers Precision, Recall, F1 and HitRate only. MRR, NDCG and MAP are omitted because
-# multi-hop search concatenates results from several tool calls in call order, not by relevance rank.
-SELECTED_EVALUATORS="Precision@K,Recall@K,F1@K,HitRate@K,Factuality" IR_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
-
-# Override IR evaluator K value (supports comma-separated values for multi-K evaluation)
-IR_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
-
-# Retrieve traces from another (monitoring) cluster
-TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVAL_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
-
-```
-
-> **Tip:** When using preconfigured connectors, set `KBN_EVALS_SKIP_CONNECTOR_SETUP=true` to skip automatic connector setup/teardown, causing instability running evaluations.
-
-### External dataset evaluations
-
-If you want to run evaluations against a dataset that already exists in Elasticsearch (for ad-hoc testing), set `DATASET_NAME` to match the name of the stored dataset and run:
-
-```bash
-DATASET_NAME="my-dataset" \
-node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts evals/external/external_dataset.spec.ts
-```
-
-Notes:
-
-- The dataset **must already exist in Elasticsearch**. If it doesn't, the run will fail with a clear error.
-- In this mode, the suite **does not** create or upsert datasets/examples — the stored dataset is the source of truth.
-- Dataset examples must match the example schema used in the eval suite (at minimum `input.question`, plus any `output.expected` / `output.groundTruth` needed by evaluators).
-
-### Evaluation comparisons
-
-Use the evals CLI to compare two evaluation runs (persisted to the `.evaluation-scores` data stream) using paired t-tests.
-
-Run the suite twice and capture the two execution IDs (via `TEST_RUN_ID`). Scout will generate a `TEST_RUN_ID` automatically, but it's easiest to set it explicitly. Each model gets its own execution ID (`TEST_RUN_ID::model-id`), so multiple models can run in the same suite invocation without collisions.
-
-```bash
-# This must point at the Kibana instance where eval scores are ingested/read.
-export EVAL_KBN_URL=http://elastic:changeme@localhost:5601/dev
-
-# LLM-as-a-judge connector (required by @kbn/evals)
-export EVAL_CONNECTOR_ID=<llm-judge-connector-id>
-
-# Run A
-TEST_RUN_ID=agent-builder-baseline \
-  node scripts/evals run --suite agent-builder --project <task-connector-id>
-
-# Run B
-TEST_RUN_ID=agent-builder-change \
-  node scripts/evals run --suite agent-builder --project <task-connector-id>
-```
-
-Tip: the execution id is also printed at the end of the run in the export message containing `metadata.execution_id:"..."`.
-
-Then compare:
-
-```bash
-export EVAL_KBN_URL=http://elastic:changeme@localhost:5601/dev
-node scripts/evals compare agent-builder-baseline agent-builder-change
-```
-
-Notes:
-
-- The two runs must use the same connector and configuration.
-- `compare` reads through `EVAL_KBN_URL` (defaults to `http://elastic:changeme@localhost:5601/dev`).
+- `agent-builder-dashboards`
+- `agent-builder-visualizations`
+- `ml` (ML Agent Builder skills)
+- `attack-discovery-agent-builder`
