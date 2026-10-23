@@ -103,7 +103,6 @@ export const PrototypeMenu = ({ http, notifications, onRestored }: PrototypeMenu
           items={[
             <EuiContextMenuItem
               key="restoreDefaults"
-              icon="refresh"
               onClick={() => {
                 setIsPopoverOpen(false);
                 setIsModalVisible(true);
