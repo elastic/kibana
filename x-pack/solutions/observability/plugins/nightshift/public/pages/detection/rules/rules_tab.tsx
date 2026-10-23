@@ -84,12 +84,22 @@ export const RulesTab = ({
   const [search, setSearch] = useState(
     () => new URLSearchParams(location.search).get(RULES_SEARCH_QUERY_PARAM) ?? ''
   );
-  const { run: writeSearch } = useDebounceFn((value: string) => {
+  const { run: writeSearch, cancel: cancelSearchWrite } = useDebounceFn((value: string) => {
     const params = new URLSearchParams(history.location.search);
     if (value.trim()) params.set(RULES_SEARCH_QUERY_PARAM, value);
     else params.delete(RULES_SEARCH_QUERY_PARAM);
     history.replace({ ...history.location, search: `?${params.toString()}` });
   }, SEARCH_DEBOUNCE_OPTIONS);
+  // Back/Forward restores that entry's search and drops a pending write for the old one.
+  useEffect(
+    () =>
+      history.listen((nextLocation, action) => {
+        if (action !== 'POP') return;
+        cancelSearchWrite();
+        setSearch(new URLSearchParams(nextLocation.search).get(RULES_SEARCH_QUERY_PARAM) ?? '');
+      }),
+    [cancelSearchWrite, history]
+  );
   const updateSearch = (value: string) => {
     setSearch(value);
     writeSearch(value);

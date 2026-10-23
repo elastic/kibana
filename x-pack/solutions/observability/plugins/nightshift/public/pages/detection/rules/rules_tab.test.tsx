@@ -27,7 +27,11 @@ let mockBlocksActivity = false;
 jest.mock('../../../data/rules/use_detection_rules');
 jest.mock('../../../data/rules/use_rules_demote');
 jest.mock('../../../data/detection_entities/use_detection_entities', () => ({
-  useDetectionEntities: () => ({ data: { entities: [] }, isLoading: false, isError: false }),
+  useDetectionEntities: () => ({
+    data: { entities: [{ id: 'checkout' }] },
+    isLoading: false,
+    isError: false,
+  }),
 }));
 jest.mock('../../../data/maintenance/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({ blocksActivity: mockBlocksActivity }),
@@ -83,11 +87,30 @@ jest.mock('./rules_table', () => ({
 }));
 
 const rules = [
-  { query: { id: 'q1', title: 'Error rate', description: 'Failures' }, matches: 5 },
-  { query: { id: 'q2', title: 'Latency', description: 'Slow responses' }, matches: 2 },
+  {
+    query: {
+      id: 'q1',
+      title: 'Error rate',
+      description: 'Failures',
+      features: [{ id: 'checkout' }],
+    },
+    matches: 5,
+  },
+  {
+    query: {
+      id: 'q2',
+      title: 'Latency',
+      description: 'Slow responses',
+      features: [{ id: 'gone' }],
+    },
+    matches: 2,
+  },
 ] as DetectionRule[];
 
-const renderTab = (path = '/detections/rules') => {
+const renderTab = (
+  path = '/detections/rules',
+  { entities = [], unassigned = false }: { entities?: string[]; unassigned?: boolean } = {}
+) => {
   const history = createMemoryHistory({ initialEntries: [path] });
   render(
     <I18nProvider>
@@ -96,8 +119,8 @@ const renderTab = (path = '/detections/rules') => {
           <RulesTab
             timeRange={{ from: 'now-24h', to: 'now' }}
             onTimeRangeChange={jest.fn()}
-            entities={[]}
-            unassigned={false}
+            entities={entities}
+            unassigned={unassigned}
           />
         </Router>
       </EuiProvider>
@@ -140,6 +163,29 @@ describe('RulesTab', () => {
     expect(screen.queryByRole('button', { name: 'Error rate' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Latency' })).toBeInTheDocument();
     expect(screen.getByTestId('chartTotal')).toHaveTextContent('7');
+  });
+
+  it.each([
+    ['a selected entity', { entities: ['checkout'] }, 'Error rate', 'Latency', '5'],
+    ['Unassigned', { unassigned: true }, 'Latency', 'Error rate', '2'],
+  ])('narrows the chart and table to %s', (_, selection, shown, hidden, chartTotal) => {
+    renderTab('/detections/rules', selection);
+    expect(screen.getByRole('button', { name: shown })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: hidden })).not.toBeInTheDocument();
+    expect(screen.getByTestId('chartTotal')).toHaveTextContent(chartTotal);
+  });
+
+  it('restores the search from the URL on Back after typing a newer one', async () => {
+    const history = renderTab('/detections/rules?rulesSearch=slow');
+    history.push('/detections/rules?rulesSearch=slow&entity=checkout');
+    fireEvent.change(screen.getByTestId('nightshiftDetectionRulesSearch'), {
+      target: { value: 'error' },
+    });
+    history.goBack();
+    await waitFor(() =>
+      expect(screen.getByTestId('nightshiftDetectionRulesSearch')).toHaveValue('slow')
+    );
+    expect(screen.getByRole('button', { name: 'Latency' })).toBeInTheDocument();
   });
 
   it('opens a rule via its id in the URL', () => {
