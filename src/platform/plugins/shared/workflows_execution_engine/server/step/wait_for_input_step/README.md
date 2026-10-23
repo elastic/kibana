@@ -36,6 +36,11 @@ steps:
 5. The submitted `input` is read from `context.resumeInput`, passed as step output, then cleared
 6. Execution continues to the next step
 
+If the resume cannot be handed to Task Manager, the request retries the handoff a few times. When
+it still fails and no resume is already under way, the response is removed from
+`context.resumeInput` again and the request fails with `WorkflowResumeNotAppliedError`. The
+resume API then releases its claim on the step, so the step can be answered again.
+
 ## Statuses
 
 | Status | Description |

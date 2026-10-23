@@ -16,6 +16,11 @@ import {
 } from '@kbn/workflows';
 import type { WorkflowExecutionsDataClient } from './data_access_layer';
 import { getBulkUpdaterWriteResult } from './data_access_layer/lib/bulk/bulk_updater_write_result';
+import {
+  getResumeContextRevert,
+  type RevertResumeContextParams,
+  type RevertResumeContextResult,
+} from './resume_context_revert';
 
 /**
  * An execution document is written by several independent writers while the run is in flight:
@@ -612,6 +617,43 @@ export class WorkflowExecutionRepository {
       );
     }
     return writeResult === 'updated';
+  }
+
+  /**
+   * CAS: takes back the resume response a request wrote into the context, restoring the values it
+   * replaced, but only while the response is still there and no runner has picked it up.
+   */
+  public async tryRevertResumeContext(
+    params: RevertResumeContextParams
+  ): Promise<RevertResumeContextResult> {
+    // Set by the updater, which re-runs after a version conflict; the last run decides. An object,
+    // because TypeScript would narrow a `let` assigned in a callback to its initial value.
+    const outcome: { skip?: RevertResumeContextResult } = {};
+    const { items } = await this.workflowExecutionsDataClient.bulk({
+      refresh: false,
+      items: [
+        {
+          operation: 'update',
+          documentId: params.workflowExecutionId,
+          sourceFields: ['spaceId', 'status', 'context'] as const,
+          retryOnConflict: UPDATE_RETRY_ON_CONFLICT,
+          updater: (current) => {
+            const revert = getResumeContextRevert(current, params);
+            if ('skip' in revert) {
+              outcome.skip = revert.skip;
+              return 'noop';
+            }
+            outcome.skip = undefined;
+            return { context: revert.context };
+          },
+        },
+      ],
+    });
+
+    const writeResult = getBulkUpdaterWriteResult(items[0]);
+    if (writeResult === 'updated') return 'reverted';
+    if (writeResult === 'noop') return outcome.skip ?? 'not_pending';
+    return writeResult;
   }
 
   /**
