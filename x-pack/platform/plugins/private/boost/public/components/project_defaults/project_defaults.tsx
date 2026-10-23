@@ -215,7 +215,7 @@ const ProjectDefaultPanel = ({
               <p>{preset ? preset.description : CUSTOM_PROFILE_DESCRIPTION}</p>
             </EuiText>
             {/* What the default applies to: how many, and how much data. */}
-            <EuiSpacer size="xs" />
+            <EuiSpacer size="s" />
             <span css={inlineCss}>
               <EuiNotificationBadge
                 color="subdued"
