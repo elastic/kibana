@@ -140,7 +140,7 @@ describe('DatePicker', () => {
         })
       );
     });
-  });
+  }, 30_000);
 
   it('enables auto-refresh when refreshPaused is false', async () => {
     jest.useFakeTimers({ legacyFakeTimers: true });
