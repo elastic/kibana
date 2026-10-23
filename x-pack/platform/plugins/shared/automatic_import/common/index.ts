@@ -42,8 +42,42 @@ export {
   DeleteDataStreamRequestParams,
   ReanalyzeDataStreamRequestParams,
   ReanalyzeDataStreamRequestBody,
-  UpdateDataStreamPipelineRequestBody,
+  ApplyDataStreamEditsRequestBody,
+  ApplyDataStreamEditsRequestParams,
 } from './model/api/data_streams/data_stream.gen';
+
+export type {
+  ApplyDataStreamEditsResponse,
+  ApprovedFieldType,
+  DataStreamEditsFailure,
+  DataStreamEditsResult,
+  DataStreamResults,
+  FieldMapping,
+  FieldTypeChange,
+  FieldTypeError,
+  FieldTypeOverride,
+  PipelineErrors,
+} from './model/api/data_streams/data_stream.gen';
+
+export {
+  getConvertType,
+  getFieldTypeProcessorTag,
+  readBackFieldTypeProcessors,
+  stripFieldTypeProcessors,
+  syncFieldTypeProcessors,
+} from './field_type_processors';
+export type { FieldTypeEdit, PipelineDefinition } from './field_type_processors';
+
+export {
+  SUPPORTED_FIELD_TYPES,
+  MAX_FIELD_TYPE_OVERRIDES,
+  isSupportedFieldType,
+  getFieldTypeCompatibility,
+  getFieldValue,
+} from './field_type_compatibility';
+export type { FieldTypeCompatibility, FieldTypeIssue } from './field_type_compatibility';
+
+export { isUnsafeProperty, mergeObjectElements, mergeSamples } from './merge_samples';
 
 export type {
   Integration,
@@ -86,6 +120,9 @@ export {
 } from './telemetry/types';
 
 export { MAX_STRING_LENGTH } from './constants';
+
+export { getDataStreamEditState } from './data_stream_edit_state';
+export type { DataStreamEditState } from './data_stream_edit_state';
 
 export {
   DATA_STREAM_PHASES,

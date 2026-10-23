@@ -67,6 +67,28 @@ export const changelogEntrySchema = schema.object({
   ),
 });
 
+const integrationMetadataSchemaV2 = schema.object(
+  {
+    title: schema.string(),
+    version: schema.maybe(
+      schema.string({
+        minLength: MIN_VERSION_LENGTH,
+        maxLength: MAX_VERSION_LENGTH,
+        validate(value) {
+          if (!/^\d+\.\d+\.\d+$/.test(value)) {
+            return 'version must be in semantic versioning format (x.y.z)';
+          }
+        },
+      })
+    ),
+    logo: schema.maybe(schema.string()),
+    description: schema.string(),
+    created_at: schema.maybe(schema.string()),
+    categories: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
+  },
+  { unknowns: 'allow' }
+);
+
 export const integrationSchemaV2 = schema.object({
   integration_id: schema.string({ maxLength: MAX_ID_LENGTH, minLength: 1 }),
   created_by: schema.string({ minLength: 1 }),
@@ -78,30 +100,23 @@ export const integrationSchemaV2 = schema.object({
       Object.values(TASK_STATUSES).map((status) => schema.literal(status)) as [Type<string>]
     )
   ),
-  metadata: schema.object(
-    {
-      title: schema.string(),
-      version: schema.maybe(
-        schema.string({
-          minLength: MIN_VERSION_LENGTH,
-          maxLength: MAX_VERSION_LENGTH,
-          validate(value) {
-            if (!/^\d+\.\d+\.\d+$/.test(value)) {
-              return 'version must be in semantic versioning format (x.y.z)';
-            }
-          },
-        })
-      ),
-      logo: schema.maybe(schema.string()),
-      description: schema.string(),
-      created_at: schema.maybe(schema.string()),
-      categories: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
-    },
-    { unknowns: 'allow' }
-  ),
+  metadata: integrationMetadataSchemaV2,
   changelog: schema.maybe(schema.arrayOf(changelogEntrySchema, { maxSize: 1000 })),
 });
 
 export const integrationSchemaV3 = integrationSchemaV2.extends({
   connector_id: schema.maybe(schema.string()),
+});
+
+export const integrationSchemaV4 = integrationSchemaV3.extends({
+  metadata: integrationMetadataSchemaV2.extends(
+    {
+      last_approved_data_stream_ids: schema.maybe(
+        schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_ID_LENGTH }), {
+          maxSize: 100,
+        })
+      ),
+    },
+    { unknowns: 'allow' }
+  ),
 });

@@ -27,15 +27,31 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
-import type { IntegrationResponse, DataStreamResponse, TaskStatus, InputType } from '../../common';
+import { isEqual } from 'lodash';
+import type {
+  ApplyDataStreamEditsResponse,
+  IntegrationResponse,
+  DataStreamResponse,
+  TaskStatus,
+  InputType,
+  DataStreamResults,
+  FieldTypeChange,
+  PipelineErrors,
+} from '../../common';
+import {
+  readBackFieldTypeProcessors,
+  stripFieldTypeProcessors,
+  syncFieldTypeProcessors,
+} from '../../common';
 import type {
   IntegrationAttributes,
   DataStreamAttributes,
   ChangelogEntry,
+  ApprovedFieldType,
 } from './saved_objects/schemas/types';
 import type { AddSamplesToDataStreamParams as SamplesToDataStreamParams } from './samples_index/index_service';
 import { AutomaticImportSamplesIndexService } from './samples_index/index_service';
-import type { IntegrationName } from './saved_objects/saved_objects_service';
+import type { FieldMappingEntry, IntegrationName } from './saved_objects/saved_objects_service';
 import { AutomaticImportSavedObjectService } from './saved_objects/saved_objects_service';
 import { integrationSavedObjectType } from './saved_objects/integration';
 import { dataStreamSavedObjectType } from './saved_objects/data_stream';
@@ -51,6 +67,28 @@ import type { BuildIntegrationPackageResult } from './build_integration/build_in
 import { buildIntegrationPackage } from './build_integration/build_integration_service';
 import { generateFieldMappings } from './build_integration/fields';
 import { validateFieldMappings } from './build_integration/validate_fields';
+import {
+  applyFieldTypeOverrides,
+  collectRuleErrors,
+  mergeFieldTypeChanges,
+  refreshFieldTypeOverrides,
+} from './field_types/field_type_overrides';
+import { collectConversionErrors } from './field_types/field_type_conversion_checks';
+import {
+  collectApprovedChangeErrors,
+  findRemovedApprovedFields,
+  mergeApprovedFieldTypes,
+  pinApprovedFieldTypes,
+  toApprovedFieldTypes,
+} from './field_types/approved_field_types';
+import { groupErrors, processSimulationResults } from '../agents/tools/pipeline_utils';
+
+const MAX_PERSISTED_PREVIEW_DOCUMENTS = 100;
+const MAX_INGEST_PIPELINE_PROCESSORS = 10_000;
+const MAX_PIPELINE_ERROR_GROUPS = 10;
+// A verbose simulate returns a copy of the document after every processor, so its size grows with
+// the processor count.
+const MAX_PROCESSORS_FOR_FAILING_TAGS = 500;
 
 /**
  * Derives the integration status from its data streams.
@@ -85,6 +123,79 @@ function deriveIntegrationStatus(
   }
   return 'pending' as TaskStatus;
 }
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
+
+const unwrapPipelineDoc = (doc: unknown): Record<string, unknown> | undefined => {
+  if (!isPlainObject(doc)) {
+    return undefined;
+  }
+  if (isPlainObject(doc._source)) {
+    return doc._source;
+  }
+  if (isPlainObject(doc.doc) && isPlainObject(doc.doc._source)) {
+    return doc.doc._source;
+  }
+  return doc;
+};
+
+const parseIngestPipeline = (ingestPipeline: string | Record<string, unknown>): Pipeline => {
+  let pipelineObject: unknown;
+  try {
+    pipelineObject =
+      typeof ingestPipeline === 'string' ? (JSON.parse(ingestPipeline) as unknown) : ingestPipeline;
+  } catch (e) {
+    throw new Error(`Invalid ingest pipeline JSON: ${(e as Error).message}`);
+  }
+
+  if (!isPlainObject(pipelineObject)) {
+    throw new Error('Invalid ingest pipeline: expected a JSON object');
+  }
+  const { processors } = pipelineObject;
+  if (!Array.isArray(processors)) {
+    throw new Error('Invalid ingest pipeline: "processors" must be an array');
+  }
+  if (processors.length > MAX_INGEST_PIPELINE_PROCESSORS) {
+    throw new Error(
+      `Invalid ingest pipeline: "processors" must contain at most ${MAX_INGEST_PIPELINE_PROCESSORS} entries`
+    );
+  }
+  if (!processors.every(isPlainObject)) {
+    throw new Error('Invalid ingest pipeline: every processor must be an object');
+  }
+  return pipelineObject as unknown as Pipeline;
+};
+
+/** One entry per sample, in order, with `undefined` for samples the pipeline failed on outright. */
+const getSimulatedDocuments = (
+  response: estypes.IngestSimulateResponse
+): Array<Record<string, unknown> | undefined> =>
+  (response.docs ?? []).map((doc) => doc?.doc?._source as Record<string, unknown> | undefined);
+
+const compactDocuments = (
+  documents: Array<Record<string, unknown> | undefined>
+): Array<Record<string, unknown>> =>
+  documents.filter((document): document is Record<string, unknown> => document !== undefined);
+
+const getLastApprovedDataStreamIdsFromMetadata = (
+  integration: IntegrationAttributes,
+  dataStreams: DataStreamAttributes[]
+): string[] | undefined => {
+  const stamped = integration.metadata.last_approved_data_stream_ids;
+  if (Array.isArray(stamped)) {
+    return stamped.filter((id): id is string => typeof id === 'string' && id.length > 0);
+  }
+
+  const wasApproved =
+    integration.status === TASK_STATUSES.approved || (integration.changelog?.length ?? 0) > 0;
+  if (!wasApproved) {
+    return undefined;
+  }
+
+  // Integrations approved before these ids were stored treat every data stream as approved.
+  return dataStreams.map((dataStream) => dataStream.data_stream_id);
+};
 
 /**
  * The job phase is only meaningful while a data stream is still being generated. For terminal
@@ -126,6 +237,7 @@ function getElasticsearchErrorReason(error: Error | ElasticsearchErrorLike): str
 }
 import { DATA_STREAM_CREATION_TASK_TYPE } from './task_manager';
 import { ErrorUtils } from '../errors/util';
+import { InvalidFieldTypeChangeError } from '../errors';
 import type { AutomaticImportPluginStartDependencies } from '../types';
 
 function bumpMinorVersion(version: string): string {
@@ -367,6 +479,9 @@ export class AutomaticImportService {
 
     const title = existing.metadata?.title ?? integrationId;
     const changelogEntry = this.createChangelogEntry(version, title, existing.changelog);
+    const lastApprovedDataStreamIds = dataStreams
+      .map((dataStream) => dataStream.data_stream_id)
+      .filter((id): id is string => typeof id === 'string' && id.length > 0);
 
     const updateData: IntegrationAttributes = {
       ...existing,
@@ -376,11 +491,22 @@ export class AutomaticImportService {
       metadata: {
         ...existing.metadata,
         categories,
+        last_approved_data_stream_ids: lastApprovedDataStreamIds,
       },
       changelog: [changelogEntry, ...(existing.changelog ?? [])],
     };
 
     await this.savedObjectService.updateIntegration(updateData, version);
+    for (const dataStream of dataStreams) {
+      await this.savedObjectService.updateDataStreamApprovedFieldTypes(
+        dataStream.data_stream_id,
+        integrationId,
+        mergeApprovedFieldTypes(
+          dataStream.approved_field_types ?? [],
+          dataStream.result?.field_mapping ?? []
+        )
+      );
+    }
   }
 
   public async buildIntegrationPackage(
@@ -496,6 +622,21 @@ export class AutomaticImportService {
 
     await this.savedObjectService.deleteDataStream(dataStreamId, integrationId, options);
 
+    const integration = await this.savedObjectService.getIntegration(integrationId);
+    const approvedIds = integration.metadata?.last_approved_data_stream_ids;
+    if (approvedIds?.includes(dataStreamId)) {
+      await this.savedObjectService.updateIntegration(
+        {
+          ...integration,
+          metadata: {
+            ...integration.metadata,
+            last_approved_data_stream_ids: approvedIds.filter((id) => id !== dataStreamId),
+          },
+        },
+        integration.metadata?.version ?? '0.1.0'
+      );
+    }
+
     await this.resetApprovedStatus(integrationId);
   }
 
@@ -542,22 +683,38 @@ export class AutomaticImportService {
       jobType: DATA_STREAM_CREATION_TASK_TYPE,
     });
 
-    if (integration.status === TASK_STATUSES.approved) {
+    // Reanalysis starts the data stream over, so it leaves the last approved version.
+    const dataStreams = await this.savedObjectService.getAllDataStreams(integrationId);
+    const lastApprovedDataStreamIds = getLastApprovedDataStreamIdsFromMetadata(
+      integration,
+      dataStreams
+    );
+    const leavesApprovedVersion = lastApprovedDataStreamIds?.includes(dataStreamId) ?? false;
+    const isApproved = integration.status === TASK_STATUSES.approved;
+
+    if (isApproved || leavesApprovedVersion) {
       const currentVersion = integration.metadata?.version || '0.1.0';
-      const newVersion = bumpMinorVersion(currentVersion);
+      const newVersion = isApproved ? bumpMinorVersion(currentVersion) : currentVersion;
 
       const updateData: IntegrationAttributes = {
         ...integration,
-        status: TASK_STATUSES.completed,
+        status: isApproved ? TASK_STATUSES.completed : integration.status,
         metadata: {
           ...integration.metadata,
           version: newVersion,
+          ...(leavesApprovedVersion && lastApprovedDataStreamIds
+            ? {
+                last_approved_data_stream_ids: lastApprovedDataStreamIds.filter(
+                  (id) => id !== dataStreamId
+                ),
+              }
+            : {}),
         },
       };
 
       await this.savedObjectService.updateIntegration(updateData, newVersion);
       this.logger.debug(
-        `Integration ${integrationId} status reset from approved to completed, version bumped to ${newVersion}`
+        `Integration ${integrationId} updated for reanalysis of ${dataStreamId} (version ${newVersion})`
       );
     }
 
@@ -573,13 +730,13 @@ export class AutomaticImportService {
   public async getDataStreamResults(
     integrationId: string,
     dataStreamId: string
-  ): Promise<{
-    ingest_pipeline: Record<string, unknown>;
-    results: Array<Record<string, unknown>>;
-    field_mapping: Array<Record<string, unknown>>;
-  }> {
+  ): Promise<DataStreamResults> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
     const dataStreamSO = await this.savedObjectService.getDataStream(dataStreamId, integrationId);
+    assert(
+      dataStreamSO.version,
+      `Data stream ${dataStreamId} is missing its saved object version.`
+    );
     const status = dataStreamSO.attributes.job_info?.status;
 
     if (status === TASK_STATUSES.failed) {
@@ -594,48 +751,328 @@ export class AutomaticImportService {
     );
 
     const ingestPipelineObj = dataStreamSO.attributes.result?.ingest_pipeline ?? {};
-    const results = dataStreamSO.attributes.result?.pipeline_docs ?? [];
+    const results = (dataStreamSO.attributes.result?.pipeline_docs ?? [])
+      .map((doc) => unwrapPipelineDoc(doc))
+      .filter((doc): doc is Record<string, unknown> => doc !== undefined);
     const fieldMapping = dataStreamSO.attributes.result?.field_mapping ?? [];
 
     if (!ingestPipelineObj) {
       throw new Error(`Data stream ${dataStreamId} has no ingest pipeline results`);
     }
 
+    const { isApproved, approvedFieldTypes } = await this.getApproval(
+      integrationId,
+      dataStreamSO.attributes
+    );
     return {
       ingest_pipeline: ingestPipelineObj,
       results,
       field_mapping: fieldMapping,
+      field_type_overrides: dataStreamSO.attributes.field_type_overrides ?? [],
+      approved_field_types: approvedFieldTypes,
+      data_stream_approved: isApproved,
+      version: dataStreamSO.version,
     };
   }
 
-  public async updateDataStreamPipeline(params: {
+  /**
+   * Applies pipeline and field type edits together. Generated convert processors are rebuilt from
+   * the field types, and the edits are saved only when every edited field converts and indexes
+   * cleanly and no more samples fail than with the saved pipeline. After approval, field types
+   * can't be edited, fields from the approved version keep their type, and a save that stops
+   * producing any of them needs `acknowledgeBreakingChanges`.
+   */
+  public async applyDataStreamEdits(params: {
     integrationId: string;
     dataStreamId: string;
     ingestPipeline: string | Record<string, unknown>;
+    changes: FieldTypeChange[];
+    version: string;
+    dryRun: boolean;
+    acknowledgeBreakingChanges?: boolean;
     esClient: ElasticsearchClient;
     fieldsMetadataClient: IFieldsMetadataClient;
-  }): Promise<{
-    ingest_pipeline: Record<string, unknown>;
-    results: Array<Record<string, unknown>>;
-  }> {
+  }): Promise<ApplyDataStreamEditsResponse> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    const { integrationId, dataStreamId, ingestPipeline, esClient, fieldsMetadataClient } = params;
+    const {
+      integrationId,
+      dataStreamId,
+      ingestPipeline,
+      changes,
+      version,
+      dryRun,
+      acknowledgeBreakingChanges = false,
+      esClient,
+      fieldsMetadataClient,
+    } = params;
+    const pipeline = parseIngestPipeline(ingestPipeline);
 
-    let parsedPipeline: Pipeline;
+    const dataStreamSO = await this.savedObjectService.getDataStream(dataStreamId, integrationId);
+    const { job_info: jobInfo, result } = dataStreamSO.attributes;
+    if (jobInfo?.status !== TASK_STATUSES.completed || !result?.ingest_pipeline) {
+      throw new Error(`Data stream ${dataStreamId} has not completed yet`);
+    }
+    assert(
+      dataStreamSO.version,
+      `Data stream ${dataStreamId} is missing its saved object version.`
+    );
+    const { isApproved, approvedFieldTypes } = await this.getApproval(
+      integrationId,
+      dataStreamSO.attributes
+    );
+    if (isApproved && changes.length > 0) {
+      throw new InvalidFieldTypeChangeError(
+        `Field types of data stream ${dataStreamId} can't be edited after it is approved`
+      );
+    }
+
+    const samples = await this.getSamplesOrThrow(integrationId, dataStreamId);
+
+    const basePipeline = stripFieldTypeProcessors(pipeline);
+    const baseResponse = await this.simulatePipeline(esClient, basePipeline, samples);
+    const pipelineErrors = await this.getPipelineRegressions({
+      esClient,
+      samples,
+      basePipeline,
+      baseResponse,
+      savedPipeline: result.ingest_pipeline as Pipeline,
+    });
+    if (pipelineErrors) {
+      return { status: 'failure', field_errors: [], pipeline_errors: pipelineErrors };
+    }
+
+    const baseDocuments = getSimulatedDocuments(baseResponse);
+    const basePipelineDocs = compactDocuments(baseDocuments);
+    const baseFieldMapping = await generateFieldMappings(basePipelineDocs, fieldsMetadataClient);
+
+    const { overrides: storedOverrides, dropped } = refreshFieldTypeOverrides(
+      baseFieldMapping,
+      dataStreamSO.attributes.field_type_overrides ?? []
+    );
+    // Explicit changes win. Generated processors are read back for fields not in `changes`, so a
+    // deleted, retyped, or hand-added processor updates the field type.
+    const changedFields = new Set(changes.map(({ name }) => name));
+    const readBack = readBackFieldTypeProcessors(
+      pipeline,
+      storedOverrides.filter(({ name }) => !changedFields.has(name)),
+      { fieldMapping: baseFieldMapping, skipFields: new Set([...changedFields, ...dropped]) }
+    );
+    const approvedTypes = new Map(approvedFieldTypes.map(({ name, type }) => [name, type]));
+    // After approval, a hand-added processor can't give a field added since then a new type.
+    const lockedReadBackErrors = isApproved
+      ? readBack.changes
+          .filter(({ name }) => !approvedTypes.has(name))
+          .map(({ name }) => ({ name, issue: 'unsupported_generated_processor' }))
+      : [];
+    const readBackErrors = [...readBack.errors, ...lockedReadBackErrors];
+    if (readBackErrors.length > 0) {
+      return { status: 'failure', field_errors: readBackErrors };
+    }
+    const knownFields = new Set(baseFieldMapping.map(({ name }) => name));
+    const knownChanges = changes.filter(({ name }) => knownFields.has(name));
+    const approvedChangeErrors = collectApprovedChangeErrors(
+      [...readBack.changes, ...knownChanges],
+      approvedTypes
+    );
+    if (approvedChangeErrors.length > 0) {
+      return { status: 'failure', field_errors: approvedChangeErrors };
+    }
+
+    const draft = mergeFieldTypeChanges(baseFieldMapping, storedOverrides, readBack.changes);
+    const edited = mergeFieldTypeChanges(baseFieldMapping, draft.overrides, knownChanges);
+
+    const { fieldMapping: overriddenMapping, overrides } = applyFieldTypeOverrides(
+      baseFieldMapping,
+      edited.overrides,
+      [...draft.reverted, ...edited.reverted]
+    );
+    const pinned = pinApprovedFieldTypes(overriddenMapping, approvedTypes, baseDocuments);
+    const ruleErrors = [...collectRuleErrors(edited.overrides, baseDocuments), ...pinned.errors];
+    if (ruleErrors.length > 0) {
+      return { status: 'failure', field_errors: ruleErrors };
+    }
+    const { fieldMapping } = pinned;
+    const finalPipeline = syncFieldTypeProcessors(pipeline, overrides, basePipelineDocs);
+    const finalResponse = isEqual(finalPipeline, basePipeline)
+      ? baseResponse
+      : await this.simulatePipeline(esClient, finalPipeline, samples);
+    const conversionErrors = collectConversionErrors({ overrides, baseDocuments, finalResponse });
+    if (conversionErrors.length > 0) {
+      return { status: 'failure', field_errors: conversionErrors };
+    }
+
+    await this.assertValidFieldMappings(esClient, fieldMapping, dataStreamId);
+
+    const pipelineDocs = compactDocuments(getSimulatedDocuments(finalResponse)).slice(
+      0,
+      MAX_PERSISTED_PREVIEW_DOCUMENTS
+    );
+    const droppedFieldTypes = [
+      ...new Set([
+        ...dropped,
+        ...changes.filter(({ name }) => !knownFields.has(name)).map(({ name }) => name),
+      ]),
+    ];
+    const removedApprovedFields = findRemovedApprovedFields(
+      result.field_mapping ?? [],
+      fieldMapping,
+      approvedTypes
+    );
+
+    if (dryRun) {
+      return {
+        status: 'preview',
+        ingest_pipeline: finalPipeline as unknown as Record<string, unknown>,
+        results: pipelineDocs,
+        field_mapping: fieldMapping,
+        field_type_overrides: overrides,
+        approved_field_types: approvedFieldTypes,
+        data_stream_approved: isApproved,
+        dropped_field_types: droppedFieldTypes,
+        removed_approved_fields: removedApprovedFields,
+        version: dataStreamSO.version,
+      };
+    }
+    if (removedApprovedFields.length > 0 && !acknowledgeBreakingChanges) {
+      return {
+        status: 'failure',
+        field_errors: [],
+        removed_approved_fields: removedApprovedFields,
+      };
+    }
+
+    await this.savedObjectService.updateDataStreamSavedObjectAttributes({
+      integrationId,
+      dataStreamId,
+      expectedVersion: version,
+      ingestPipeline: finalPipeline,
+      pipelineDocs,
+      fieldMapping,
+      fieldTypeOverrides: overrides,
+      approvedFieldTypes,
+      status: TASK_STATUSES.completed,
+    });
+
+    await this.resetApprovedStatus(integrationId);
+
+    return {
+      status: 'saved',
+      ...(await this.getDataStreamResults(integrationId, dataStreamId)),
+      dropped_field_types: droppedFieldTypes,
+      removed_approved_fields: removedApprovedFields,
+    };
+  }
+
+  /**
+   * Returns the failing sample groups when the edited pipeline (without generated processors) fails
+   * on more samples than the saved one.
+   */
+  private async getPipelineRegressions({
+    esClient,
+    samples,
+    basePipeline,
+    baseResponse,
+    savedPipeline,
+  }: {
+    esClient: ElasticsearchClient;
+    samples: string[];
+    basePipeline: Pipeline;
+    baseResponse: estypes.IngestSimulateResponse;
+    savedPipeline: Pipeline;
+  }): Promise<PipelineErrors | undefined> {
+    const { failedSamples } = processSimulationResults(baseResponse, samples);
+    if (failedSamples.length === 0) return undefined;
+
+    const savedBasePipeline = stripFieldTypeProcessors(savedPipeline);
+    let baselineFailedSamples = failedSamples.length;
+    if (!isEqual(savedBasePipeline, basePipeline)) {
+      try {
+        const savedResponse = await this.simulatePipeline(esClient, savedBasePipeline, samples);
+        baselineFailedSamples = processSimulationResults(savedResponse, samples).failedSamples
+          .length;
+      } catch (error) {
+        this.logger.debug(`Saved ingest pipeline could not be simulated: ${error}`);
+        baselineFailedSamples = samples.length;
+      }
+    }
+    if (failedSamples.length <= baselineFailedSamples) return undefined;
+
+    const groups = groupErrors(failedSamples, MAX_PIPELINE_ERROR_GROUPS);
+    const processorTags = await this.getFailingProcessorTags(
+      esClient,
+      basePipeline,
+      groups.map(
+        ({ error }) => failedSamples.find((failed) => failed.error === error)?.sample ?? ''
+      )
+    );
+    return {
+      failed_samples: failedSamples.length,
+      baseline_failed_samples: baselineFailedSamples,
+      error_groups: groups.map(({ error, count, exampleSample }, index) => {
+        const processorTag = processorTags[index];
+        return {
+          error,
+          count,
+          example_sample: exampleSample,
+          ...(processorTag ? { processor_tag: processorTag } : {}),
+        };
+      }),
+    };
+  }
+
+  /**
+   * Returns the tag of the first processor that fails on each sample, when it has one. Large
+   * pipelines are skipped and return no tags.
+   */
+  private async getFailingProcessorTags(
+    esClient: ElasticsearchClient,
+    pipeline: Pipeline,
+    samples: string[]
+  ): Promise<Array<string | undefined>> {
+    if (pipeline.processors.length > MAX_PROCESSORS_FOR_FAILING_TAGS) {
+      return samples.map(() => undefined);
+    }
     try {
-      const pipelineObject =
-        typeof ingestPipeline === 'string'
-          ? (JSON.parse(ingestPipeline) as Record<string, unknown>)
-          : ingestPipeline;
-      parsedPipeline = pipelineObject as unknown as Pipeline;
-    } catch (e) {
-      throw new Error(`Invalid ingest pipeline JSON: ${(e as Error).message}`);
+      const response = await esClient.ingest.simulate({
+        pipeline: pipeline as unknown as estypes.IngestPipeline,
+        docs: samples.map((sample) => ({ _source: { message: sample } })),
+        verbose: true,
+      });
+      return response.docs.map(
+        (doc) => doc.processor_results?.find(({ status }) => status === 'error')?.tag
+      );
+    } catch (error) {
+      this.logger.debug(`Failing processors could not be found: ${error}`);
+      return samples.map(() => undefined);
     }
+  }
 
-    if (!Array.isArray(parsedPipeline.processors)) {
-      throw new Error('Invalid ingest pipeline: "processors" must be an array');
-    }
+  /**
+   * Returns whether the data stream is in the last approved version, and the field types its
+   * approved versions shipped. Data streams approved before these were stored fall back to their
+   * current field types.
+   */
+  private async getApproval(
+    integrationId: string,
+    dataStream: DataStreamAttributes
+  ): Promise<{ isApproved: boolean; approvedFieldTypes: ApprovedFieldType[] }> {
+    assert(this.savedObjectService, 'Saved Objects service not initialized.');
+    const integration = await this.savedObjectService.getIntegration(integrationId);
+    const dataStreams = await this.savedObjectService.getAllDataStreams(integrationId);
+    const isApproved =
+      getLastApprovedDataStreamIdsFromMetadata(integration, dataStreams)?.includes(
+        dataStream.data_stream_id
+      ) ?? false;
+    if (!isApproved) return { isApproved, approvedFieldTypes: [] };
+    return {
+      isApproved,
+      approvedFieldTypes:
+        dataStream.approved_field_types ??
+        toApprovedFieldTypes(dataStream.result?.field_mapping ?? []),
+    };
+  }
 
+  private async getSamplesOrThrow(integrationId: string, dataStreamId: string): Promise<string[]> {
     const samples = await this.samplesIndexService.getSamplesForDataStream(
       integrationId,
       dataStreamId
@@ -643,11 +1080,18 @@ export class AutomaticImportService {
     if (samples.length === 0) {
       throw new Error(`No samples found for data stream ${dataStreamId}`);
     }
+    return samples;
+  }
 
-    let simulateResponse: estypes.IngestSimulateResponse;
+  /** Runs the pipeline over the samples as the current user. */
+  private async simulatePipeline(
+    esClient: ElasticsearchClient,
+    pipeline: Pipeline,
+    samples: string[]
+  ): Promise<estypes.IngestSimulateResponse> {
     try {
-      simulateResponse = await esClient.ingest.simulate({
-        pipeline: parsedPipeline as unknown as estypes.IngestPipeline,
+      return await esClient.ingest.simulate({
+        pipeline: pipeline as unknown as estypes.IngestPipeline,
         docs: samples.map((sample) => ({
           _source: { message: sample },
         })),
@@ -659,40 +1103,19 @@ export class AutomaticImportService {
         )}`
       );
     }
+  }
 
-    const pipelineDocs = (simulateResponse.docs ?? [])
-      .map((doc) => doc?.doc?._source)
-      .filter(
-        (source): source is NonNullable<estypes.IngestSimulateDocumentResult['doc']>['_source'] =>
-          source !== undefined
-      );
-
-    const fieldMapping = await generateFieldMappings(
-      pipelineDocs as Array<Record<string, unknown>>,
-      fieldsMetadataClient
-    );
-
+  private async assertValidFieldMappings(
+    esClient: ElasticsearchClient,
+    fieldMapping: FieldMappingEntry[],
+    dataStreamId: string
+  ): Promise<void> {
     const validationResult = await validateFieldMappings(esClient, fieldMapping, this.logger);
     if (!validationResult.valid) {
-      this.logger.warn(
-        `Field mapping validation warnings for ${dataStreamId}: ${validationResult.errors.join(
-          ', '
-        )}`
+      throw new InvalidFieldTypeChangeError(
+        `Invalid field mappings for ${dataStreamId}: ${validationResult.errors.join(', ')}`
       );
     }
-
-    await this.savedObjectService.updateDataStreamSavedObjectAttributes({
-      integrationId,
-      dataStreamId,
-      ingestPipeline: parsedPipeline,
-      pipelineDocs,
-      fieldMapping,
-      status: TASK_STATUSES.completed,
-    });
-
-    await this.resetApprovedStatus(integrationId);
-
-    return this.getDataStreamResults(integrationId, dataStreamId);
   }
 
   private async resetApprovedStatus(integrationId: string): Promise<void> {
@@ -700,9 +1123,7 @@ export class AutomaticImportService {
     const integration = await this.savedObjectService.getIntegration(integrationId);
     if (integration.status === TASK_STATUSES.approved) {
       const currentVersion = integration.metadata?.version || '0.1.0';
-      const parts = currentVersion.split('.');
-      const newVersion =
-        parts.length === 3 ? `${parts[0]}.${parseInt(parts[1], 10) + 1}.0` : currentVersion;
+      const newVersion = bumpMinorVersion(currentVersion);
       const title = integration.metadata?.title ?? integrationId;
       const changelogEntry = this.createChangelogEntry(newVersion, title, integration.changelog);
       const updateData: IntegrationAttributes = {

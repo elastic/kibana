@@ -5,214 +5,144 @@
  * 2.0.
  */
 
-import type { EuiSearchBarProps } from '@elastic/eui';
-import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiText,
-  EuiTitle,
-  EuiFlexItem,
-  EuiPagination,
-  EuiSpacer,
-  EuiTabs,
-  EuiTab,
-  EuiInMemoryTable,
-  EuiFlexGroup,
-  EuiToken,
-  EuiToolTip,
-  EuiLoadingSpinner,
-  EuiCallOut,
-  EuiButtonEmpty,
-  EuiConfirmModal,
-} from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { CodeEditor } from '@kbn/code-editor';
-import { XJsonLang } from '@kbn/monaco';
-import type { DataStreamResponse } from '../../../../../common';
-import { useGetDataStreamResults, useUpdateDataStreamPipeline } from '../../../../common';
+import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { DataStreamResponse, DataStreamEditState } from '../../../../../common';
+import { useGetDataStreamResults } from '../../../../common';
 import { useUIState } from '../../contexts';
-import { useTelemetry } from '../../../telemetry_context';
+import { formatServerError, useMappingEditor } from './mapping_editor';
+import {
+  BreakingChangesConfirmModal,
+  CloseConfirmModal,
+  EditPipelineFlyoutFooter,
+  FlyoutStatusCallouts,
+  FlyoutTabs,
+  PipelineEditorPanel,
+  TablePanel,
+} from './edit_pipeline_flyout_parts';
 import * as i18n from './translations';
-import { getIconFromType, flattenPipelineObject, diffPipelineLines } from './utils';
+import { useDataStreamDraft } from './use_data_stream_draft';
+import { getFlyoutFooterState } from './utils';
 
 interface EditPipelineFlyoutProps {
   integrationId: string;
   dataStream: DataStreamResponse;
   onClose: () => void;
+  editState: DataStreamEditState;
 }
 
-interface TableRow {
-  field: string;
-  value: string;
-  type: string;
-}
+const usePagedDocuments = (resultCount: number | undefined) => {
+  const [activeDocument, setActiveDocument] = useState(0);
+  const pageCount = resultCount ?? 0;
+
+  useEffect(() => {
+    if (activeDocument >= pageCount && pageCount > 0) {
+      setActiveDocument(pageCount - 1);
+    }
+  }, [activeDocument, pageCount]);
+
+  return { activeDocument, setActiveDocument, pageCount };
+};
 
 export const EditPipelineFlyout = ({
   integrationId,
   dataStream,
   onClose,
+  editState,
 }: EditPipelineFlyoutProps) => {
-  const [activeDocument, setActiveDocument] = useState(0);
-  const [pipelineText, setPipelineText] = useState('');
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const isEditable = editState === 'editable';
   const [isCloseConfirmVisible, setIsCloseConfirmVisible] = useState(false);
   const { selectedPipelineTab, selectPipelineTab } = useUIState();
-  const { reportCodeEditorCopyClicked, reportEditPipelineTabOpened, reportPipelineEdited } =
-    useTelemetry();
-  const editorContainerRef = useRef<HTMLDivElement>(null);
-
   const { data, isLoading, isError, error } = useGetDataStreamResults(
     integrationId,
     dataStream.dataStreamId
   );
-  const { updateDataStreamPipelineMutation } = useUpdateDataStreamPipeline();
-
-  const tableData = useMemo<TableRow[]>(() => {
-    if (!data?.results || data.results.length === 0) return [];
-    const currentDoc = data.results[activeDocument];
-    if (!currentDoc) return [];
-    return flattenPipelineObject(currentDoc as Record<string, unknown>);
-  }, [data?.results, activeDocument]);
-
-  const handlePageClick = (doc: number) => {
-    setActiveDocument(doc);
-  };
-
-  const stringifiedPipeline = useMemo(() => {
-    if (!data?.ingest_pipeline) return '';
-    try {
-      return JSON.stringify(data.ingest_pipeline, null, 2);
-    } catch (_error) {
-      return '';
-    }
-  }, [data?.ingest_pipeline]);
-
-  useEffect(() => {
-    setPipelineText(stringifiedPipeline);
-  }, [stringifiedPipeline]);
-
-  useEffect(() => {
-    const docsLength = data?.results?.length ?? 0;
-    if (activeDocument >= docsLength && docsLength > 0) {
-      setActiveDocument(docsLength - 1);
-    }
-  }, [activeDocument, data?.results?.length]);
-
-  const handleSave = useCallback(async () => {
-    setSaveError(null);
-    try {
-      JSON.parse(pipelineText);
-    } catch (e) {
-      setSaveError(i18n.EDIT_PIPELINE_FLYOUT.invalidJsonError((e as Error).message));
-      return;
-    }
-    try {
-      await updateDataStreamPipelineMutation.mutateAsync({
-        integrationId,
-        dataStreamId: dataStream.dataStreamId,
-        ingestPipeline: pipelineText,
-      });
-
-      const { linesAdded, linesRemoved, netLineChange } = diffPipelineLines(
-        stringifiedPipeline,
-        pipelineText
-      );
-
-      reportPipelineEdited({
-        integrationId,
-        dataStreamId: dataStream.dataStreamId,
-        linesAdded,
-        linesRemoved,
-        netLineChange,
-      });
-    } catch (e) {
-      setSaveError(e instanceof Error ? e.message : i18n.EDIT_PIPELINE_FLYOUT.saveErrorMessage);
-    }
-  }, [
-    updateDataStreamPipelineMutation,
+  const draft = useDataStreamDraft({
     integrationId,
-    dataStream.dataStreamId,
-    pipelineText,
-    stringifiedPipeline,
-    reportPipelineEdited,
-  ]);
+    dataStreamId: dataStream.dataStreamId,
+    data,
+    isEditable,
+  });
+  const { activeDocument, setActiveDocument, pageCount } = usePagedDocuments(
+    draft.documents.length
+  );
+  const mappingEditor = useMappingEditor({
+    dataStreamId: dataStream.dataStreamId,
+    fieldMappings: draft.fieldMappings,
+    savedFieldMappings: draft.savedFieldMappings,
+    fieldTypeOverrides: draft.fieldTypeOverrides,
+    approvedFieldTypes: draft.approvedFieldTypes,
+    isDataStreamApproved: draft.isDataStreamApproved,
+    documents: draft.documents,
+    activeDocument,
+    pendingTypes: draft.pendingTypes,
+    serverErrors: draft.fieldErrors,
+    stageType: draft.stageType,
+  });
 
-  const columns = [
-    {
-      field: 'field',
-      name: i18n.TABLE_COLUMN_HEADERS.field,
-      sortable: true,
-      searchable: true,
-      render: (fieldName: string, item: TableRow) => {
-        return (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={item.type} anchorProps={{ css: { display: 'flex' } }}>
-                <EuiToken iconType={getIconFromType(item.type)} />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{fieldName}</EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      },
-    },
-    {
-      field: 'value',
-      name: i18n.TABLE_COLUMN_HEADERS.value,
-      sortable: true,
-      searchable: true,
-      truncateText: true,
-      render: (value: string) => {
-        return (
-          <EuiToolTip content={value} anchorProps={{ css: { display: 'flex' } }}>
-            <EuiText size="s" tabIndex={0}>
-              {value}
-            </EuiText>
-          </EuiToolTip>
-        );
-      },
-    },
-  ];
+  const isBusy = draft.isSaving || draft.isSyncing;
+  const isTableTab = selectedPipelineTab === 'table';
+  const isTableVisible = !isLoading && !isError && isTableTab;
+  const isEditorVisible = !isLoading && !isError && !isTableTab && Boolean(data?.ingest_pipeline);
+  const footerState = getFlyoutFooterState({
+    isTableTab,
+    isDirty: draft.isDirty,
+    isBusy,
+    pipelineText: draft.pipelineText,
+  });
 
-  const search: EuiSearchBarProps = {
-    box: {
-      incremental: true,
-      placeholder: i18n.EDIT_PIPELINE_FLYOUT.filterPlaceholder,
-    },
-  };
-
-  const pageCount = data?.results?.length ?? 0;
-  const hasUnsavedChanges = pipelineText !== stringifiedPipeline;
-
-  const isTableVisible = !isLoading && !isError && selectedPipelineTab === 'table';
-  const isEditorVisible =
-    !isLoading && !isError && selectedPipelineTab === 'pipeline' && pageCount > 0;
+  const pipelineFieldErrors = useMemo(
+    () =>
+      Object.values(draft.fieldErrors).map((fieldError) => {
+        const type =
+          draft.pendingTypes[fieldError.name] ??
+          draft.fieldMappings?.find(({ name }) => name === fieldError.name)?.type ??
+          '';
+        return { name: fieldError.name, message: formatServerError(type, fieldError) };
+      }),
+    [draft.fieldErrors, draft.fieldMappings, draft.pendingTypes]
+  );
 
   const handleFlyoutClose = useCallback(() => {
-    if (hasUnsavedChanges) {
+    if (isBusy) return;
+    if (draft.isDirty) {
       setIsCloseConfirmVisible(true);
       return;
     }
     onClose();
-  }, [hasUnsavedChanges, onClose]);
+  }, [draft.isDirty, isBusy, onClose]);
+
+  const handleSelectTable = useCallback(async () => {
+    if (await draft.syncToTable()) selectPipelineTab('table');
+  }, [draft, selectPipelineTab]);
+
+  const handleSelectPipeline = useCallback(() => {
+    draft.syncToPipeline();
+    selectPipelineTab('pipeline');
+  }, [draft, selectPipelineTab]);
+
+  const handleFooterSave = useCallback(async () => {
+    if (await draft.save(!isTableTab)) onClose();
+  }, [draft, isTableTab, onClose]);
+
+  const handleConfirmBreakingChanges = useCallback(async () => {
+    if (await draft.save(!isTableTab, true)) onClose();
+  }, [draft, isTableTab, onClose]);
 
   const handleDiscardAndClose = useCallback(() => {
+    if (isBusy) return;
     setIsCloseConfirmVisible(false);
     onClose();
-  }, [onClose]);
+  }, [isBusy, onClose]);
 
-  const handleEditorContainerClick = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
-      const target = event.target as HTMLElement;
-      if (
-        target.closest('.euiCodeBlock__copyButton') ||
-        target.getAttribute('aria-label')?.toLowerCase().includes('copy')
-      ) {
-        reportCodeEditorCopyClicked({ integrationId, dataStreamId: dataStream.dataStreamId });
-      }
-    },
-    [integrationId, dataStream.dataStreamId, reportCodeEditorCopyClicked]
+  const showFooter = isEditable && (isTableVisible || isEditorVisible);
+  const pipelineNotice = isEditable ? undefined : (
+    <KbnInfoCallout
+      size="s"
+      title={i18n.EDIT_PIPELINE_FLYOUT.notEditableNotice}
+      data-test-subj="editPipelineFlyoutReadOnlyNotice"
+    />
   );
 
   return (
@@ -228,150 +158,77 @@ export const EditPipelineFlyout = ({
 
         <EuiSpacer size="s" />
 
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText>{i18n.EDIT_PIPELINE_FLYOUT.documents}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {pageCount > 0 && (
-                  <EuiPagination
-                    aria-label={i18n.EDIT_PIPELINE_FLYOUT.paginationAriaLabel}
-                    onPageClick={handlePageClick}
-                    activePage={activeDocument}
-                    pageCount={pageCount}
-                    compressed
-                  />
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="save"
-              onClick={handleSave}
-              isLoading={updateDataStreamPipelineMutation.isLoading}
-              isDisabled={
-                selectedPipelineTab !== 'pipeline' || !pipelineText.trim() || !hasUnsavedChanges
-              }
-              data-test-subj="editPipelineFlyoutSaveButton"
-            >
-              {i18n.EDIT_PIPELINE_FLYOUT.saveButton}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiTabs>
-          <EuiTab
-            isSelected={selectedPipelineTab === 'table'}
-            onClick={() => selectPipelineTab('table')}
-          >
-            {i18n.EDIT_PIPELINE_FLYOUT.tableTab}
-          </EuiTab>
-          <EuiTab
-            isSelected={selectedPipelineTab === 'pipeline'}
-            onClick={() => {
-              reportEditPipelineTabOpened({
-                integrationId,
-                dataStreamId: dataStream.dataStreamId,
-              });
-              selectPipelineTab('pipeline');
-            }}
-          >
-            {i18n.EDIT_PIPELINE_FLYOUT.pipelineTab}
-          </EuiTab>
-        </EuiTabs>
+        <FlyoutTabs
+          isTableTab={isTableTab}
+          isBusy={isBusy}
+          integrationId={integrationId}
+          dataStreamId={dataStream.dataStreamId}
+          onSelectTable={handleSelectTable}
+          onSelectPipeline={handleSelectPipeline}
+        />
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
         {isCloseConfirmVisible && (
-          <EuiConfirmModal
-            title={i18n.EDIT_PIPELINE_FLYOUT.closeConfirmTitle}
-            aria-label={i18n.EDIT_PIPELINE_FLYOUT.closeConfirmTitle}
+          <CloseConfirmModal
+            isSaving={isBusy}
             onCancel={() => setIsCloseConfirmVisible(false)}
             onConfirm={handleDiscardAndClose}
-            cancelButtonText={i18n.EDIT_PIPELINE_FLYOUT.closeConfirmCancel}
-            confirmButtonText={i18n.EDIT_PIPELINE_FLYOUT.closeConfirmDiscard}
-            defaultFocusedButton="confirm"
-            buttonColor="danger"
-          >
-            <p>{i18n.EDIT_PIPELINE_FLYOUT.closeConfirmBody}</p>
-          </EuiConfirmModal>
+          />
         )}
 
-        {isLoading && (
-          <EuiFlexGroup justifyContent="center" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="xl" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        {draft.pendingBreakingChanges.length > 0 && (
+          <BreakingChangesConfirmModal
+            fieldNames={draft.pendingBreakingChanges}
+            isSaving={draft.isSaving}
+            onCancel={draft.cancelBreakingChanges}
+            onConfirm={handleConfirmBreakingChanges}
+          />
         )}
 
-        {isError && (
-          <EuiCallOut
-            announceOnMount
-            title={i18n.EDIT_PIPELINE_FLYOUT.errorTitle}
-            color="danger"
-            iconType="error"
-          >
-            <p>{error?.message ?? i18n.EDIT_PIPELINE_FLYOUT.errorMessage}</p>
-          </EuiCallOut>
-        )}
-
-        {saveError && (
-          <EuiCallOut
-            announceOnMount
-            title={i18n.EDIT_PIPELINE_FLYOUT.saveErrorTitle}
-            color="danger"
-            iconType="error"
-          >
-            <p>{saveError}</p>
-          </EuiCallOut>
-        )}
+        <FlyoutStatusCallouts
+          isLoading={isLoading}
+          isError={isError}
+          errorMessage={error?.message}
+          pipelineErrors={isTableTab ? draft.pipelineErrors : undefined}
+        />
 
         {isTableVisible && (
-          <EuiInMemoryTable
-            items={tableData}
-            columns={columns}
-            searchFormat="text"
-            search={search}
-            tableCaption={i18n.EDIT_PIPELINE_FLYOUT.tableCaption}
-            pagination
-            sorting
+          <TablePanel
+            pageCount={pageCount}
+            activeDocument={activeDocument}
+            onPageClick={setActiveDocument}
+            mappingEditor={mappingEditor}
+            editState={editState}
+            droppedFieldTypes={draft.droppedFieldTypes}
           />
         )}
 
         {isEditorVisible && (
-          <div
-            role="presentation"
-            ref={editorContainerRef}
-            onClick={handleEditorContainerClick}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                // Prevent parent form handlers from intercepting Enter while editing JSON.
-                event.stopPropagation();
-              }
-            }}
-          >
-            <CodeEditor
-              isCopyable
-              enableFindAction
-              languageId={XJsonLang.ID}
-              height="calc(100vh - 280px)"
-              width="100%"
-              options={{
-                readOnly: false,
-                automaticLayout: true,
-                tabSize: 2,
-                wordWrap: 'on',
-              }}
-              value={pipelineText}
-              onChange={setPipelineText}
-            />
-          </div>
+          <PipelineEditorPanel
+            integrationId={integrationId}
+            dataStreamId={dataStream.dataStreamId}
+            value={draft.pipelineText}
+            onChange={draft.setPipelineText}
+            readOnly={!isEditable}
+            isBusy={isBusy}
+            notice={pipelineNotice}
+            pipelineError={draft.pipelineError}
+            pipelineErrors={draft.pipelineErrors}
+            fieldErrors={pipelineFieldErrors}
+            removedApprovedFields={draft.removedApprovedFields}
+            isChecking={draft.isChecking}
+          />
         )}
       </EuiFlyoutBody>
+      {showFooter && (
+        <EditPipelineFlyoutFooter
+          {...footerState}
+          isSaving={draft.isSaving}
+          onReset={draft.reset}
+          onSave={handleFooterSave}
+        />
+      )}
     </EuiFlyout>
   );
 };

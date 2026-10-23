@@ -12,7 +12,12 @@ import type {
   GetAllAutoImportIntegrationsResponse,
 } from '../../../common/model/api/integrations/integration.gen';
 
-import type { UploadSamplesToDataStreamResponse } from '../../../common/model/api/data_streams/data_stream.gen';
+import type {
+  DataStreamResults,
+  FieldTypeChange,
+  UploadSamplesToDataStreamResponse,
+  ApplyDataStreamEditsResponse,
+} from '../../../common/model/api/data_streams/data_stream.gen';
 import type { DataStream, OriginalSource } from '../../../common/model/common_attributes.gen';
 import { getLangSmithOptions } from './lang_smith';
 import type { LangSmithOptions } from './lang_smith';
@@ -230,10 +235,7 @@ export interface GetDataStreamResultsRequest {
   dataStreamId: string;
 }
 
-export interface GetDataStreamResultsResponse {
-  ingest_pipeline: Record<string, unknown>;
-  results: Array<Record<string, unknown>>;
-}
+export type GetDataStreamResultsResponse = DataStreamResults;
 
 export const getDataStreamResults = async ({
   http,
@@ -251,26 +253,40 @@ export const getDataStreamResults = async ({
     }
   );
 
-export interface UpdateDataStreamPipelineRequest {
+export interface ApplyDataStreamEditsRequest {
   integrationId: string;
   dataStreamId: string;
   ingestPipeline: string;
+  changes: FieldTypeChange[];
+  version: string;
+  dryRun: boolean;
+  acknowledgeBreakingChanges?: boolean;
 }
 
-export const updateDataStreamPipeline = async ({
+export const applyDataStreamEdits = async ({
   http,
   abortSignal,
   integrationId,
   dataStreamId,
   ingestPipeline,
-}: RequestDeps & UpdateDataStreamPipelineRequest): Promise<GetDataStreamResultsResponse> =>
-  http.patch<GetDataStreamResultsResponse>(
+  changes,
+  version,
+  dryRun,
+  acknowledgeBreakingChanges = false,
+}: RequestDeps & ApplyDataStreamEditsRequest): Promise<ApplyDataStreamEditsResponse> =>
+  http.put<ApplyDataStreamEditsResponse>(
     `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
       integrationId
-    )}/data_streams/${encodeURIComponent(dataStreamId)}`,
+    )}/data_streams/${encodeURIComponent(dataStreamId)}/edits`,
     {
       version: '1',
-      body: JSON.stringify({ ingest_pipeline: ingestPipeline }),
+      body: JSON.stringify({
+        ingest_pipeline: ingestPipeline,
+        changes,
+        version,
+        dry_run: dryRun,
+        acknowledge_breaking_changes: acknowledgeBreakingChanges,
+      }),
       signal: abortSignal,
     }
   );

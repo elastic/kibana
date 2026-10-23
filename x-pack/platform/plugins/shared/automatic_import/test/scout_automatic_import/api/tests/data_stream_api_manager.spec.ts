@@ -12,6 +12,7 @@ import {
   MANAGER_DS_FLOW_DATA_STREAM_ID,
   MANAGER_DS_FLOW_INTEGRATION_ID,
   dataStreamsApiBasePath,
+  scoutApiErrorText,
 } from '../fixtures/api_test_constants';
 
 // Failing: See https://github.com/elastic/kibana/issues/259261
@@ -37,7 +38,7 @@ apiTest.describe.skip(
     });
 
     apiTest(
-      'manager flow: upload samples, patch pipeline, read results, delete data stream',
+      'manager flow: upload samples, reject edits before analysis completes, delete data stream',
       async ({ apiClient }) => {
         const uploadResponse = await apiClient.post(
           `${dsBasePath}/${MANAGER_DS_FLOW_DATA_STREAM_ID}/upload`,
@@ -52,40 +53,22 @@ apiTest.describe.skip(
         );
         expect(uploadResponse).toHaveStatusCode(200);
 
-        const patchResponse = await apiClient.patch(
-          `${dsBasePath}/${MANAGER_DS_FLOW_DATA_STREAM_ID}`,
+        const editsResponse = await apiClient.put(
+          `${dsBasePath}/${MANAGER_DS_FLOW_DATA_STREAM_ID}/edits`,
           {
             headers: { ...COMMON_API_HEADERS, ...cookieHeader },
             body: {
               ingest_pipeline: {
                 processors: [{ set: { field: 'scout_api_test_marker', value: true } }],
               },
+              changes: [],
+              version: 'WzEsMV0=',
             },
             responseType: 'json',
           }
         );
-        expect(patchResponse).toHaveStatusCode(200);
-        const patchBody = patchResponse.body as { ingest_pipeline?: unknown };
-        expect(
-          typeof patchBody.ingest_pipeline === 'object' && patchBody.ingest_pipeline !== null
-        ).toBe(true);
-
-        const resultsResponse = await apiClient.get(
-          `${dsBasePath}/${MANAGER_DS_FLOW_DATA_STREAM_ID}/results`,
-          {
-            headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-            responseType: 'json',
-          }
-        );
-        expect(resultsResponse).toHaveStatusCode(200);
-        const resultsBody = resultsResponse.body as {
-          ingest_pipeline?: unknown;
-          results?: unknown;
-        };
-        expect(
-          typeof resultsBody.ingest_pipeline === 'object' && resultsBody.ingest_pipeline !== null
-        ).toBe(true);
-        expect(Array.isArray(resultsBody.results)).toBe(true);
+        expect(editsResponse).toHaveStatusCode(400);
+        expect(scoutApiErrorText(editsResponse.body)).toContain('has not completed yet');
 
         const deleteResponse = await apiClient.delete(
           `${dsBasePath}/${MANAGER_DS_FLOW_DATA_STREAM_ID}`,

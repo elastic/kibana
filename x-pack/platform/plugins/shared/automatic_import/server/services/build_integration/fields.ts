@@ -6,72 +6,15 @@
  */
 
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
+import { isUnsafeProperty, mergeObjectElements, mergeSamples } from '../../../common';
 import type { FieldMapping } from '../../agents/state';
 import type { FieldMappingEntry } from '../saved_objects/saved_objects_service';
-
-interface SampleObj {
-  [key: string]: unknown;
-}
-
-const isObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
-const isEmptyValue = (value: unknown): boolean => {
-  if (value == null) return true;
-  if (Array.isArray(value)) return value.length === 0;
-  if (isObject(value)) return Object.keys(value).length === 0;
-  return false;
-};
-
-const isUnsafeProperty = (key: string): boolean =>
-  key === '__proto__' || key === 'constructor' || key === 'prototype';
-
-const merge = (
-  target: Record<string, unknown>,
-  source: Record<string, unknown>
-): Record<string, unknown> => {
-  const result = Object.create(null) as Record<string, unknown>;
-
-  for (const [key, value] of Object.entries(target)) {
-    if (!isUnsafeProperty(key)) {
-      result[key] = value;
-    }
-  }
-
-  for (const [key, sourceValue] of Object.entries(source)) {
-    if (!isUnsafeProperty(key)) {
-      const targetValue = result[key];
-
-      if (Array.isArray(sourceValue)) {
-        result[key] = [...sourceValue];
-      } else if (isObject(sourceValue)) {
-        if (!isObject(targetValue) || isEmptyValue(targetValue)) {
-          result[key] = merge(Object.create(null), sourceValue);
-        } else {
-          result[key] = merge(targetValue, sourceValue);
-        }
-      } else if (!(key in result) || (isEmptyValue(targetValue) && !isEmptyValue(sourceValue))) {
-        result[key] = sourceValue;
-      }
-    }
-  }
-
-  return result;
-};
-
-export const mergeSamples = (docs: Array<Record<string, unknown>>): SampleObj => {
-  let result: Record<string, unknown> = {};
-  for (const doc of docs) {
-    result = merge(result, doc);
-  }
-  return result;
-};
 
 const determineType = (value: unknown): string => {
   if (typeof value === 'object' && value !== null) return 'group';
   if (typeof value === 'string') return 'keyword';
   if (typeof value === 'boolean') return 'boolean';
-  if (typeof value === 'number') return 'long';
+  if (typeof value === 'number') return Number.isInteger(value) ? 'long' : 'double';
   return 'keyword';
 };
 
@@ -86,10 +29,11 @@ const collectFields = (obj: unknown, parentPath: string): RawField[] => {
   }
 
   if (Array.isArray(obj)) {
-    if (obj.length > 0 && isObject(obj[0])) {
-      return collectFields(obj[0], parentPath);
+    const mergedElements = mergeObjectElements(obj);
+    if (mergedElements) {
+      return collectFields(mergedElements, parentPath);
     }
-    return [{ name: parentPath, type: determineType(obj[0]) }];
+    return [{ name: parentPath, type: determineType(obj.find((element) => element != null)) }];
   }
 
   const fields: RawField[] = [];
