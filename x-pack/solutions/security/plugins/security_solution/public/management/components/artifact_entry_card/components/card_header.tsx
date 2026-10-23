@@ -15,7 +15,7 @@ import type { CardActionsFlexItemProps } from './card_actions_flex_item';
 import { CardActionsFlexItem } from './card_actions_flex_item';
 
 export interface CardHeaderProps
-  extends CardActionsFlexItemProps,
+  extends Pick<CardActionsFlexItemProps, 'actions'>,
     Pick<CommonProps, 'data-test-subj'> {
   name: string;
   createdDate: string;
@@ -59,7 +59,11 @@ export const CardHeader = memo<CardHeaderProps>(
             </EuiFlexItem>
           </EuiFlexGroup>
         </StyledEuiFlexItemSmallBottomMargin>
-        <CardActionsFlexItem actions={actions} data-test-subj={getTestId('actions')} />
+        <CardActionsFlexItem
+          actions={actions}
+          itemName={name}
+          data-test-subj={getTestId('actions')}
+        />
       </EuiFlexGroup>
     );
   }

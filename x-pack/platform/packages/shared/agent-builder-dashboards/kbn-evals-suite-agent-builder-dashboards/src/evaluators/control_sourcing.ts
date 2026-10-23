@@ -14,17 +14,17 @@ import {
 import type { ControlsGold, DashboardAgentEvaluator } from '../types';
 import { noDashboardResult, scoreChecks, skippedResult, type Check } from '../evaluator_utils';
 import {
-  getAddControlsFailures,
+  getControlFailures,
   getAttemptedControls,
   type AttemptedControl,
-  type DashboardFailure,
+  type ControlFailure,
 } from '../extract_dashboard';
 
 export const DASHBOARD_CONTROL_SOURCING_EVALUATOR_NAME = 'Dashboard Control Sourcing';
 
-/** Fragments of the server's `add_controls` failure messages the reply must not repeat. */
+/** Fragments of the server's control failure messages the reply must not repeat. */
 const RAW_FAILURE_TEXT =
-  /not mapped on index|unknown column|conflicting mappings|not aggregatable|needs a (keyword|numeric)/i;
+  /on index "|unknown column|conflicting mappings|not aggregatable|_control needs/i;
 /**
  * A sentence that names a filter missing from the dashboard and talks about
  * controls accounts for it: the stored controls already show it was not added.
@@ -45,26 +45,19 @@ const isDataControl = (control: AttemptedControl): control is DataControl =>
 
 const unique = (values: string[]): string[] => [...new Set(values)];
 
-/**
- * Controls the failures cover: the server groups same-message failures as
- * "a, b, c", and a field retried and rejected again is still one failed control.
- */
-const getFailedFields = (failures: DashboardFailure[]): string[] =>
-  unique(
-    failures.flatMap(({ identifier }) =>
-      identifier.split(',').map((field) => withoutKeyword(field.trim()))
-    )
-  );
+/** Fields of the failed controls; a field retried and rejected again is still one failed control. */
+const getFailedFields = (failures: ControlFailure[]): string[] =>
+  unique(failures.flatMap(({ field }) => (field === undefined ? [] : [withoutKeyword(field)])));
 
 /**
  * Stored requested controls on fields first asked for in a later
- * `generate_dashboard` call than the first `add_controls` failure: retries
+ * `generate_dashboard` call than the first control failure: retries
  * that stand in for a control the server could not add. Requested controls
  * that succeeded alongside the failure fill other requests, so they do not count.
  */
 const countReplacements = (
   attemptedData: DataControl[],
-  failures: DashboardFailure[],
+  failures: ControlFailure[],
   storedFields: string[]
 ): number => {
   if (failures.length === 0) {
@@ -114,7 +107,7 @@ const checkSourcing = (
   }: {
     storedFields: string[];
     attempted: AttemptedControl[];
-    failures: DashboardFailure[];
+    failures: ControlFailure[];
     message: string;
   }
 ): Check[] => {
@@ -195,8 +188,8 @@ const checkSourcing = (
     assertion: 'replyWithoutRawErrors',
     passed: !RAW_FAILURE_TEXT.test(message),
     detail: RAW_FAILURE_TEXT.test(message)
-      ? `the reply repeats a raw add_controls error: "${RAW_FAILURE_TEXT.exec(message)?.[0]}"`
-      : 'the reply repeats no raw add_controls error',
+      ? `the reply repeats a raw control error: "${RAW_FAILURE_TEXT.exec(message)?.[0]}"`
+      : 'the reply repeats no raw control error',
   });
 
   // A failed requested control the agent replaced with a stored mapped one
@@ -247,7 +240,7 @@ export const dashboardControlSourcingEvaluator: DashboardAgentEvaluator = {
 
     const steps = output.steps ?? [];
     const attempted = getAttemptedControls(steps);
-    const failures = getAddControlsFailures(steps);
+    const failures = getControlFailures(steps);
     const storedFields = getControls(dashboard).flatMap(getControlFields);
     const checks = checkSourcing(gold, {
       storedFields,

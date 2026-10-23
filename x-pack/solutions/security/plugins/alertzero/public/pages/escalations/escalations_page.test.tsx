@@ -89,6 +89,18 @@ jest.mock('../../hooks/use_alertzero_doc_title', () => ({
 const mockUseAssignEscalation = useAssignEscalation as jest.Mock;
 const mockUseListEscalations = useListEscalations as jest.Mock;
 const mockUseEscalationImpactPills = useEscalationImpactPills as jest.Mock;
+
+/** What the pills hook returns once the server has sent every pill. */
+const pagedPills = (pills: Array<{ entityId: string; count: number }>) => ({
+  pills,
+  total: pills.length,
+  remaining: 0,
+  canShowMore: true,
+  reachLimit: 10_000,
+  loadFailed: false,
+  isLoadingMore: false,
+  showMore: jest.fn(),
+});
 const mockUseUserProfiles = useUserProfiles as jest.Mock;
 const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
 const mockUseOpenInChat = useOpenInChat as jest.Mock;
@@ -177,7 +189,7 @@ beforeEach(() => {
   });
   mockUseInvestigationDetails.mockImplementation(() => undefined);
   mockUseAssignEscalation.mockReturnValue({ mutateAsync: assignMutate });
-  mockUseEscalationImpactPills.mockReturnValue({ data: [] });
+  mockUseEscalationImpactPills.mockReturnValue(pagedPills([]));
   mockUseUserProfiles.mockReturnValue({ data: [], isLoading: false });
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
 });
@@ -537,7 +549,7 @@ describe('EscalationsPage', () => {
     };
 
     beforeEach(() => {
-      mockUseEscalationImpactPills.mockReturnValue({ data: pills });
+      mockUseEscalationImpactPills.mockReturnValue(pagedPills(pills));
     });
 
     it('renders one pill per entity the pills query returns', () => {
@@ -549,7 +561,7 @@ describe('EscalationsPage', () => {
     });
 
     it('renders no pills when no escalation has an impact', () => {
-      mockUseEscalationImpactPills.mockReturnValue({ data: [] });
+      mockUseEscalationImpactPills.mockReturnValue(pagedPills([]));
       mockBothQueues([openEscalation], [closedEscalation]);
       renderPage();
 
@@ -585,6 +597,21 @@ describe('EscalationsPage', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Sales-NAS' }));
 
       expect(screen.getByText(/7 open escalations/)).toBeInTheDocument();
+    });
+
+    it('loads the next page of pills from the +n pill', () => {
+      const showMore = jest.fn();
+      mockUseEscalationImpactPills.mockReturnValue({
+        ...pagedPills(pills),
+        remaining: 40,
+        showMore,
+      });
+      mockBothQueues([impactOpen], [impactClosed]);
+      renderPage();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Show 40 more' }));
+
+      expect(showMore).toHaveBeenCalledTimes(1);
     });
 
     it('starts both queues over at page 1 when the filter changes', () => {

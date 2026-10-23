@@ -1340,6 +1340,11 @@ _alertzero_threat_hunt:
       privileges:
         - "read"
       allow_restricted_indices: false
+    - names:
+        - "metrics-endpoint.metadata_current_*"
+      privileges:
+        - "read"
+      allow_restricted_indices: false
   applications:
     - application: "kibana-.kibana"
       privileges:
