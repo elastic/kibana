@@ -179,7 +179,7 @@ export const hasDeadlinePassed = (proposal: Pick<ApprovalProposal, 'expiresAt'>)
   proposal.expiresAt !== undefined && new Date(proposal.expiresAt).getTime() <= Date.now();
 
 /** How close a deadline has to be for the modal to warn about it. */
-const EXPIRES_SOON_WINDOW_MS = 24 * 60 * 60 * 1000;
+export const EXPIRES_SOON_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 /** Whether a deadline is still ahead but no more than a day away. */
 export const isExpiringSoon = (proposal: Pick<ApprovalProposal, 'expiresAt'>): boolean => {

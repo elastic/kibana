@@ -7,7 +7,7 @@
 
 import React from 'react';
 import moment from 'moment';
-import { cleanup, render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act, cleanup, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ApprovalContent, type ApprovalContentProps } from './approval_content';
@@ -518,6 +518,23 @@ describe('ApprovalContent', () => {
 
       renderContent({
         proposal: { ...baseProposal, status: 'pending', expiresAt: '2026-10-25T12:00:00.000Z' },
+      });
+      expect(screen.queryByTestId('approvalContent-expires')).not.toBeInTheDocument();
+    });
+
+    it('starts warning when the deadline comes within a day, and stops once it has passed', () => {
+      renderContent({
+        proposal: { ...baseProposal, status: 'pending', expiresAt: '2026-10-23T12:01:00.000Z' },
+      });
+      expect(screen.queryByTestId('approvalContent-expires')).not.toBeInTheDocument();
+
+      act(() => {
+        jest.advanceTimersByTime(2 * 60 * 1000);
+      });
+      expect(screen.getByTestId('approvalContent-expires')).toBeInTheDocument();
+
+      act(() => {
+        jest.advanceTimersByTime(24 * 60 * 60 * 1000);
       });
       expect(screen.queryByTestId('approvalContent-expires')).not.toBeInTheDocument();
     });

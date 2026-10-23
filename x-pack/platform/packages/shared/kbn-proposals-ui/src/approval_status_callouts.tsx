@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiCallOut, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import { InlineCalloutTitle } from './inline_callout_title';
-import { formatDateTime, hasDeadlinePassed, isExpiringSoon } from './proposal_helpers';
+import {
+  EXPIRES_SOON_WINDOW_MS,
+  formatDateTime,
+  hasDeadlinePassed,
+  isExpiringSoon,
+} from './proposal_helpers';
 
 interface ApprovalStatusCalloutsProps {
   /** Only shown while still pending — a decided proposal's outcome banner already covers it. */
@@ -82,6 +87,30 @@ const StatusCallout = ({
   );
 };
 
+/** The longest delay `setTimeout` accepts. */
+const MAX_TIMEOUT_MS = 2 ** 31 - 1;
+
+/**
+ * Renders again when a deadline enters its warning window, and again when it passes, so a
+ * callout left open does not keep showing what was true when it opened.
+ */
+const useRerenderAtExpiryBoundaries = (expiresAt: string | undefined) => {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (expiresAt === undefined) {
+      return;
+    }
+    const deadline = new Date(expiresAt).getTime();
+    const now = Date.now();
+    const next = [deadline - EXPIRES_SOON_WINDOW_MS, deadline].find((at) => at > now);
+    if (next === undefined) {
+      return;
+    }
+    const id = setTimeout(() => setTick((tick) => tick + 1), Math.min(next - now, MAX_TIMEOUT_MS));
+    return () => clearTimeout(id);
+  });
+};
+
 /**
  * The callouts `ApprovalContent` shows between the body and the footer: why a proposal is offered
  * again after a failed attempt, when it expires, why the user cannot decide it, why a replaced
@@ -102,6 +131,7 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
     isReplaced = false,
     'data-test-subj': dataTestSubj,
   }) => {
+    useRerenderAtExpiryBoundaries(upcomingExpiry ?? expiresAt);
     const deadlinePassed = hasDeadlinePassed({ expiresAt });
     const testSubj = (suffix: string) => (dataTestSubj ? `${dataTestSubj}-${suffix}` : undefined);
 
