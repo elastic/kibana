@@ -22,6 +22,9 @@ export {
   cleanSavedObjectIndices,
   createDefaultSpace,
   isSavedObjectIndex,
+  deleteIndex,
+  deleteDataStream,
+  type CreatedTarget,
 } from './indices';
 
 export { createFilterRecordsStream } from './records';

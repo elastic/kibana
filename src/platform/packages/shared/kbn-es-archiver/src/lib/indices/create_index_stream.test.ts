@@ -17,7 +17,7 @@ import sinon from 'sinon';
 import Chance from 'chance';
 import { createPromiseFromStreams, createConcatStream, createListStream } from '@kbn/utils';
 
-import { createCreateIndexStream } from './create_index_stream';
+import { createCreateIndexStream, type CreatedTarget } from './create_index_stream';
 
 import {
   createStubStats,
@@ -306,6 +306,32 @@ describe('esArchiver: createCreateIndexStream()', () => {
       sinon.assert.notCalled(client.indices.create as sinon.SinonSpy);
       sinon.assert.notCalled(client.indices.updateAliases as sinon.SinonSpy);
       expect(output).toEqual([createStubDocRecord('index', 1)]);
+    });
+  });
+
+  describe('createdTargets', () => {
+    it('records every index and data stream it created, and nothing it skipped', async () => {
+      const client = createStubClient(['existing-index']);
+      const stats = createStubStats();
+      const createdTargets: CreatedTarget[] = [];
+
+      await createPromiseFromStreams([
+        createListStream([
+          createStubIndexRecord('new-index'),
+          createStubIndexRecord('existing-index'),
+          createStubDataStreamRecord('new-data-stream', 'new-data-stream-template'),
+        ]),
+        createCreateIndexStream({ client, stats, log, skipExisting: true, createdTargets }),
+      ]);
+
+      expect(createdTargets).toEqual([
+        { type: 'index', name: 'new-index' },
+        {
+          type: 'data_stream',
+          name: 'new-data-stream',
+          template: 'new-data-stream-template',
+        },
+      ]);
     });
   });
 
