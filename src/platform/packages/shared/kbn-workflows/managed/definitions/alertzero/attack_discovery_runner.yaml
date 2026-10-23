@@ -193,8 +193,10 @@ steps:
   # Cross-run matches read unexpired fingerprints by host, user, and alert id.
   # A match is attached instead of reviewed; a new canonical attack is written from
   # inside the step (`op_type: create`) so a parallel run cannot save a second copy.
-  # An unexpected failure returns every attack as a review. `continue` covers a
-  # failure that still comes back as an error, and the fallback below dispatches those.
+  # An unexpected failure returns every attack as a review. A fingerprint index
+  # that was not read returns no reviews and writes nothing, so this run does not
+  # open Investigations the next run cannot match. `continue` covers a failure
+  # that still comes back as an error, and the fallback below dispatches those.
   - name: match_fingerprints
     type: security.matchAttackFingerprints
     on-failure:
@@ -328,9 +330,8 @@ steps:
                 parent_run_id: "{{ execution.id }}"
 
   # Attacks that match a fingerprint, or a sibling in this run, skip FP/TP. The
-  # attach workflow creates the Investigation id when the canonical review has not
-  # yet, and a 409 there is the expected race. Same chunking and dispatch bound as
-  # the reviews above.
+  # attach workflow waits for the review to create the Investigation and does not
+  # create it. Same chunking and dispatch bound as the reviews above.
   - name: run_attach_batches
     type: foreach
     foreach: "${{ steps.resolve_dispatch.output.attach_batches }}"

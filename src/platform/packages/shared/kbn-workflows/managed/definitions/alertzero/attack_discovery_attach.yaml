@@ -2,9 +2,9 @@ version: "1"
 name: Attack Discovery attach
 description: >
   Attaches one Attack Discovery to an Investigation that already describes the
-  same attack. Opens that Investigation when the canonical review has not yet,
-  journals the match, the attachments, and any alert tagging, and does not run
-  FP/TP analysis or the forensics gate.
+  same attack. Waits for the review to create that Investigation, then journals
+  the match, the attachments, and any alert tagging. Does not create the
+  Investigation, and does not run FP/TP analysis or the forensics gate.
 enabled: true
 tags:
   - security
@@ -28,7 +28,7 @@ triggers:
         title:
           type: string
           maxLength: 1024
-          description: Persisted, anonymized title. Used only if this run creates the Investigation.
+          description: Persisted, anonymized title. Quoted in the match journal. The review writes the Investigation title.
         alert_ids:
           type: array
           maxItems: 1000
@@ -39,13 +39,13 @@ triggers:
         summary_markdown:
           type: string
           maxLength: 8000
-          description: Persisted, anonymized summary. Used only if this run creates the Investigation.
+          description: Persisted, anonymized summary. The review writes the Investigation summary.
         investigation_id:
           type: string
           maxLength: 256
           description: >
-            Investigation to attach to. For a same-run sibling this is the id the
-            canonical review derives, so whichever create lands first wins.
+            Investigation to attach to. This run waits for the review to create it
+            and does not create it itself.
         tag_correlated_alerts:
           type: boolean
           description: >
@@ -73,26 +73,21 @@ consts:
   ad_correlated_tag: az:ad_correlated
   impact_entity_cap: 50
 steps:
-  # Create-or-409. A same-run sibling can arrive before the canonical review; the
-  # review's own create then 409s onto this conversation. A 409 here is that race
-  # the other way around.
-  - name: open_investigation
-    type: ai.conversation.create
+  # The review creates the Investigation, after it has read the de-anonymized
+  # title. That read can take about a minute. Creating here would win that race
+  # and leave the anonymized title in place, and a create against an Investigation
+  # that already exists is logged as an error. Wait instead. A cross-run attach
+  # finds the Investigation on the first read. A same-run attach retries until the
+  # review has created it, for about two minutes. Still missing after that, this
+  # run stops. The next run attaches once the Investigation exists.
+  - name: wait_for_investigation
+    type: ai.conversation.metadata.read
     with:
       conversation_id: "{{ inputs.investigation_id }}"
-      title: "{{ inputs.title }}"
-      template_id: investigation
-      access_control:
-        access_mode: public
-      metadata:
-        status: open
-        summary: "{{ inputs.summary_markdown | truncate: 8000 }}"
-        description: >-
-          Attack Discovery attached to an existing investigation.
-          {{ inputs.alert_ids | default: consts.no_alert_ids | size }} detection alert(s).
-        workflow_execution_ids: ["{{ inputs.parent_run_id }}"]
     on-failure:
-      continue: true
+      retry:
+        max-attempts: 12
+        delay: 10s
 
   # The decision, before any attachment write. Says why this attack did not open
   # its own Investigation. It does not claim the attachments landed: those writes
@@ -211,6 +206,30 @@ steps:
     on-failure:
       continue: true
 
+  # Same alerts the tag step just marked, and only the ones still open. A by-id
+  # status write has no status condition, so an alert closed while this ran would
+  # be reopened. The query skips those. Same gate as the tag: a closed false
+  # positive does not reach here.
+  - name: acknowledge_correlated_alerts
+    type: kibana.SetAlertsStatus
+    if: "${{ inputs.tag_correlated_alerts == true and inputs.alert_ids != blank }}"
+    timeout: "60s"
+    with:
+      status: acknowledged
+      conflicts: proceed
+      query:
+        bool:
+          filter:
+            - ids:
+                values: "${{ inputs.alert_ids }}"
+            - term:
+                kibana.alert.workflow_status: open
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      continue: true
+
   # Same gate as the review's `journal_alerts_retired`: a true-positive or
   # inconclusive verdict. The worker sets the input only when the Investigation
   # verdict records that handoff. A declined or other close still tags above and
@@ -226,7 +245,9 @@ steps:
         message: >-
           {% if steps.tag_correlated_alerts.error == blank %}Tagged
           {{ inputs.alert_ids | size }} correlated detection alert(s)
-          {{ consts.ad_correlated_tag }}, so later Worker runs skip them.{% else %}Could not tag the
+          {{ consts.ad_correlated_tag }}, so later Worker runs skip them.
+          {% if steps.acknowledge_correlated_alerts.error == blank %}Acknowledged the ones that were still open.{% else %}Could not acknowledge the ones that were still open. See attach execution {{ execution.id }}.{% endif %}
+          {% else %}Could not tag the
           {{ inputs.alert_ids | size }} correlated detection alert(s)
           {{ consts.ad_correlated_tag }}. Later Worker runs may correlate them again.
           See attach execution {{ execution.id }}.{% endif %}

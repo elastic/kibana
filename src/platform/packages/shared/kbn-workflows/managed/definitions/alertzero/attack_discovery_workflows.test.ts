@@ -3567,14 +3567,23 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
-      it('opens the matched investigation id rather than deriving a new one', () => {
-        expect(stepIn(attachSteps, 'open_investigation')?.with?.conversation_id).toBe(
+      it('waits for the review to create the investigation', () => {
+        expect(stepIn(attachSteps, 'wait_for_investigation')?.type).toBe(
+          'ai.conversation.metadata.read'
+        );
+        expect(stepIn(attachSteps, 'wait_for_investigation')?.with?.conversation_id).toBe(
           '{{ inputs.investigation_id }}'
         );
       });
 
-      it('treats an existing investigation as success, so the create does not fail the attach', () => {
-        expect(stepIn(attachSteps, 'open_investigation')?.['on-failure']?.continue).toBe(true);
+      it('retries that read for about two minutes and stops if the investigation is still missing', () => {
+        expect(stepIn(attachSteps, 'wait_for_investigation')?.['on-failure']).toEqual({
+          retry: { 'max-attempts': 12, delay: '10s' },
+        });
+      });
+
+      it('does not create the investigation', () => {
+        expect(attachSteps.some((step) => step.type === 'ai.conversation.create')).toBe(false);
       });
 
       it('attaches the attack discovery to the matched investigation', () => {
@@ -3605,7 +3614,7 @@ describe('Attack Discovery worker chain', () => {
 
       it('journals the match, then the attachment attempt, then alert tagging', () => {
         expect(attach.steps?.map((step) => step.name)).toEqual([
-          'open_investigation',
+          'wait_for_investigation',
           'journal_attach_started',
           'attach_discovery',
           'attach_alerts',
@@ -3614,6 +3623,7 @@ describe('Attack Discovery worker chain', () => {
           'attach_impact',
           'journal_impact_recorded',
           'tag_correlated_alerts',
+          'acknowledge_correlated_alerts',
           'journal_alerts_retired',
         ]);
       });
@@ -3668,8 +3678,26 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
-      it('bumps the attach workflow to version 3 so a continuation records impact', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(3);
+      it('bumps the attach workflow to version 4 so it waits for the investigation and acknowledges open alerts', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(4);
+      });
+
+      it('acknowledges the open alerts it tags', () => {
+        const acknowledge = stepIn(attachSteps, 'acknowledge_correlated_alerts');
+
+        expect(acknowledge?.type).toBe('kibana.SetAlertsStatus');
+        expect(acknowledge?.with?.status).toBe('acknowledged');
+        expect(acknowledge?.if).toBe(
+          '${{ inputs.tag_correlated_alerts == true and inputs.alert_ids != blank }}'
+        );
+        expect(acknowledge?.with?.query).toEqual({
+          bool: {
+            filter: [
+              { ids: { values: '${{ inputs.alert_ids }}' } },
+              { term: { 'kibana.alert.workflow_status': 'open' } },
+            ],
+          },
+        });
       });
 
       it('records the continuation hosts and users on the matched investigation', () => {

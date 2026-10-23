@@ -10,7 +10,11 @@ import {
   matchAttackFingerprintsInputSchema,
   matchAttackFingerprintsStepCommonDefinition,
 } from '../../../../common/workflows/step_types/match_attack_fingerprints/match_attack_fingerprints_step_common';
-import { matchAttackFingerprints, reviewsWhenMatchFails } from './match_attack_fingerprints';
+import {
+  FingerprintIndexUnreadError,
+  matchAttackFingerprints,
+  reviewsWhenMatchFails,
+} from './match_attack_fingerprints';
 import { resolveSpaceId } from '../get_alert_entities_step/resolve_space_id';
 
 export const matchAttackFingerprintsStepDefinition = createServerStepDefinition({
@@ -37,6 +41,16 @@ export const matchAttackFingerprintsStepDefinition = createServerStepDefinition(
         return {
           error: error instanceof Error ? error : new Error('Failed to match attack fingerprints'),
         };
+      }
+      // A read that never happened must not open Investigations. The next run
+      // matches them once the index can be read. Any other failure still reviews
+      // every attack, which is what this run did before fingerprints existed.
+      if (error instanceof FingerprintIndexUnreadError) {
+        context.logger.error(
+          'Attack fingerprint index was not read; this run will not open investigations for it',
+          error
+        );
+        return { output: { reviews: [], attachments: [] } };
       }
       context.logger.error('Failed to match attack fingerprints', error);
       return { output: reviewsWhenMatchFails(parsed.data.attacks) };

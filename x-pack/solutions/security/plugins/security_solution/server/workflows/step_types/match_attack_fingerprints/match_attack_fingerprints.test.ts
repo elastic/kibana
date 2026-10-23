@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { getAlertEntities } from '../get_alert_entities_step/get_alert_entities';
 import {
   ATTACK_FINGERPRINT_INDEX,
+  FingerprintIndexUnreadError,
   matchAttackFingerprints,
   reviewsWhenMatchFails,
 } from './match_attack_fingerprints';
@@ -844,5 +846,105 @@ describe('matchAttackFingerprints', () => {
         attachments: [],
       },
     });
+  });
+
+  it('reviews nothing and writes nothing when the fingerprint index was not read', async () => {
+    const index = jest.fn();
+    const search = jest.fn(async (params: { index?: string; size?: number }) => {
+      if (params.index === ATTACK_FINGERPRINT_INDEX) {
+        return { _shards: { total: 0 }, hits: { hits: [] } };
+      }
+      if ((params.size ?? 0) > 0) {
+        return { hits: { hits: [] } };
+      }
+      return {
+        aggregations: {
+          first: { value_as_string: '2026-10-21T10:00:00.000Z' },
+          last: { value_as_string: '2026-10-21T10:30:00.000Z' },
+        },
+      };
+    });
+
+    const result = await matchAttackFingerprintsStepDefinition.handler({
+      abortSignal: new AbortController().signal,
+      input: { attacks: [attackDocument(ATTACK_ID, ['a1', 'a2'])] },
+      logger,
+      contextManager: {
+        getScopedEsClient: () => ({ search, index, get: jest.fn(), update: jest.fn() }),
+        callKibanaApi: async () => ({ body: { id: 'default' } }),
+        getContext: () => ({ workflow: { spaceId: 'default' } }),
+      },
+    } as never);
+
+    expect(index).not.toHaveBeenCalled();
+    expect(result).toEqual({ output: { reviews: [], attachments: [] } });
+  });
+
+  it('reviews nothing when the fingerprint search fails', async () => {
+    const { esClient, contextManager, index } = createHarness();
+    const search = (esClient as unknown as { search: jest.Mock }).search;
+    search.mockImplementation(async (params: { index?: string; size?: number }) => {
+      if (params.index === ATTACK_FINGERPRINT_INDEX) {
+        throw new Error('security_exception');
+      }
+      if ((params.size ?? 0) > 0) {
+        return { hits: { hits: [] } };
+      }
+      return {
+        aggregations: {
+          first: { value_as_string: '2026-10-21T10:00:00.000Z' },
+          last: { value_as_string: '2026-10-21T10:30:00.000Z' },
+        },
+      };
+    });
+
+    await expect(
+      matchAttackFingerprints({
+        attacks: [attackDocument(ATTACK_ID, ['a1', 'a2'])],
+        contextManager,
+        esClient,
+        logger,
+        now: new Date('2026-10-21T12:00:00.000Z'),
+        spaceId: 'default',
+      })
+    ).rejects.toBeInstanceOf(FingerprintIndexUnreadError);
+    expect(index).not.toHaveBeenCalled();
+  });
+
+  it('writes a fingerprint when the index does not exist yet', async () => {
+    const { esClient, contextManager, index } = createHarness();
+    const search = (esClient as unknown as { search: jest.Mock }).search;
+    search.mockImplementation(async (params: { index?: string; size?: number }) => {
+      if (params.index === ATTACK_FINGERPRINT_INDEX) {
+        throw new errors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'index_not_found_exception' } },
+          headers: {},
+          warnings: [],
+          meta: {} as never,
+        });
+      }
+      if ((params.size ?? 0) > 0) {
+        return { hits: { hits: [] } };
+      }
+      return {
+        aggregations: {
+          first: { value_as_string: '2026-10-21T10:00:00.000Z' },
+          last: { value_as_string: '2026-10-21T10:30:00.000Z' },
+        },
+      };
+    });
+
+    const output = await matchAttackFingerprints({
+      attacks: [attackDocument(ATTACK_ID, ['a1', 'a2'])],
+      contextManager,
+      esClient,
+      logger,
+      now: new Date('2026-10-21T12:00:00.000Z'),
+      spaceId: 'default',
+    });
+
+    expect(output.reviews).toHaveLength(1);
+    expect(index).toHaveBeenCalled();
   });
 });

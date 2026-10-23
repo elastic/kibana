@@ -38,6 +38,19 @@ export const ATTACK_FINGERPRINT_INDEX = `ai-index-idx-${ATTACK_FINGERPRINT_AI_IN
 export const ATTACK_FINGERPRINT_TYPE = 'security.attack_fingerprint';
 export const ATTACK_FINGERPRINT_TAG = 'consumer:attack-discovery';
 
+/**
+ * The fingerprint index was not searched. A missing privilege with
+ * `ignore_unavailable` returns an empty success, and any other read failure used
+ * to look the same as no stored fingerprints. Either one must not write a new
+ * fingerprint or open an Investigation the next run cannot match.
+ */
+export class FingerprintIndexUnreadError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'FingerprintIndexUnreadError';
+  }
+}
+
 const SEARCH_SIZE = 100;
 const SEARCH_PAGE_CAP = 20;
 const ENRICH_CONCURRENCY = 4;
@@ -372,15 +385,15 @@ const searchFingerprints = async (
     return [];
   }
 
-  try {
-    const byId = new Map<string, StoredFingerprint>();
-    for (const query of attributeQueries(spaceId, attacks, now)) {
-      let searchAfter: SortResults | undefined;
-      for (let page = 0; page < SEARCH_PAGE_CAP; page++) {
-        const response = await esClient.search(
+  const byId = new Map<string, StoredFingerprint>();
+  for (const query of attributeQueries(spaceId, attacks, now)) {
+    let searchAfter: SortResults | undefined;
+    for (let page = 0; page < SEARCH_PAGE_CAP; page++) {
+      let response: Awaited<ReturnType<ElasticsearchClient['search']>>;
+      try {
+        response = await esClient.search(
           {
             index: ATTACK_FINGERPRINT_INDEX,
-            ignore_unavailable: true,
             seq_no_primary_term: true,
             size: SEARCH_SIZE,
             sort: [{ expires_at: { order: 'desc' } }, { id: { order: 'asc' } }],
@@ -389,30 +402,39 @@ const searchFingerprints = async (
           },
           { signal: abortSignal }
         );
-        const hits = response.hits?.hits ?? [];
-        for (const hit of hits) {
-          const stored = toStored(hit as { _id?: string; _source?: Record<string, unknown> });
-          if (stored !== undefined) {
-            byId.set(stored.id, stored);
-          }
+      } catch (error) {
+        // A missing index is a first run: there are no fingerprints to match.
+        // Any other failure, including a missing privilege, was not a search.
+        if (isNotFoundError(error)) {
+          return [];
         }
-        if (hits.length < SEARCH_SIZE) {
-          break;
-        }
-        const sort = hits[hits.length - 1]?.sort;
-        if (sort === undefined) {
-          break;
-        }
-        searchAfter = sort;
+        logger.warn(`Attack fingerprint search failed: ${errorText(error)}`);
+        throw new FingerprintIndexUnreadError(errorText(error));
       }
+      // No shards means the index was skipped rather than searched. That is how a
+      // missing privilege used to come back as an empty, successful response.
+      if (response._shards?.total === 0) {
+        logger.warn('Attack fingerprint search read no shards');
+        throw new FingerprintIndexUnreadError('Attack fingerprint index was not read');
+      }
+      const hits = response.hits?.hits ?? [];
+      for (const hit of hits) {
+        const stored = toStored(hit as { _id?: string; _source?: Record<string, unknown> });
+        if (stored !== undefined) {
+          byId.set(stored.id, stored);
+        }
+      }
+      if (hits.length < SEARCH_SIZE) {
+        break;
+      }
+      const sort = hits[hits.length - 1]?.sort;
+      if (sort === undefined) {
+        break;
+      }
+      searchAfter = sort;
     }
-    return [...byId.values()];
-  } catch (error) {
-    if (!isNotFoundError(error)) {
-      logger.warn(`Attack fingerprint search failed: ${errorText(error)}`);
-    }
-    return [];
   }
+  return [...byId.values()];
 };
 
 const fingerprintDocument = (
