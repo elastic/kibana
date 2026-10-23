@@ -101,7 +101,6 @@ function getLastMiSectionProps(): { showIdentityFederation: boolean } {
 const miService: AwsServiceMatrixEntry = {
   id: 'guardduty',
   name: 'AWS GuardDuty',
-  category: 'security_identity_compliance',
   signalTypes: ['logs'],
   dataStreams: [],
   packageName: 'aws',
@@ -118,7 +117,6 @@ const miService: AwsServiceMatrixEntry = {
 const ecfService: AwsServiceMatrixEntry = {
   id: 'cloudtrail',
   name: 'AWS CloudTrail',
-  category: 'management_governance',
   signalTypes: ['logs'],
   dataStreams: [],
   packageName: 'aws',
@@ -822,7 +820,6 @@ describe('AuthenticateAndDeployStep', () => {
     const agentService: AwsServiceMatrixEntry = {
       id: 'awsfargate',
       name: 'AWS Fargate',
-      category: 'compute',
       signalTypes: ['logs'],
       dataStreams: [],
       packageName: 'awsfargate',
@@ -912,7 +909,6 @@ describe('AuthenticateAndDeployStep', () => {
     const agentService: AwsServiceMatrixEntry = {
       id: 'awsfargate',
       name: 'AWS Fargate',
-      category: 'compute',
       signalTypes: ['logs'],
       dataStreams: [],
       packageName: 'awsfargate',

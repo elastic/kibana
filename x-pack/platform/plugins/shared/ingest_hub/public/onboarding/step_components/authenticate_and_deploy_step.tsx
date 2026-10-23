@@ -6,14 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
@@ -46,6 +39,7 @@ import {
   SERVICE_SETTINGS_SESSION_KEY,
   type ServiceSettingsPersistedState,
 } from './service_settings_step/use_service_settings';
+import { StepFooter } from './step_footer';
 
 const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
   globalRegion: '',
@@ -121,6 +115,13 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     }),
     [ecfOnlyServices]
   );
+
+  // Switching the method resets the agent policy name and options (see setDeploymentMethod), so
+  // when the user has entered some, the card asks before switching.
+  const switchResetsSettings =
+    !!agentBasedDeploymentFromFlow?.agentPolicyId ||
+    !!agentBasedDeploymentFromFlow?.agentPolicyName ||
+    agentBasedDeploymentFromFlow?.withSysMonitoring !== undefined;
 
   const handleDeploymentMethodChange = useCallback(
     (method: DeploymentMethod) => {
@@ -683,6 +684,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         onChange={handleDeploymentMethodChange}
         availableMethods={isSelfManaged ? SELF_MANAGED_DEPLOYMENT_METHODS : undefined}
         unsupportedServices={unsupportedServices}
+        switchResetsSettings={switchResetsSettings}
         locked={isSelfManaged || ((allAgentBasedOnly || allEcfOnly) && !isMethodLocked)}
         disabled={isMethodLocked}
       />
@@ -918,34 +920,20 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         <EcfDeploymentSection {...ecfSectionProps} />
       )}
 
-      <EuiSpacer size="l" />
-
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          {onBack && (
-            <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.backButton"
-                defaultMessage="Back"
-              />
-            </EuiButtonEmpty>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            onClick={handleNext}
-            isDisabled={isNextDisabled}
-            isLoading={hasUnloadedSelectedManifests || isSavingSO || isAgentDeploying}
-            data-test-subj="authenticateAndDeployStep-nextButton"
-          >
-            <FormattedMessage
-              id="xpack.ingestHub.authenticateAndDeployStep.nextButton"
-              defaultMessage="Next"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <StepFooter onBack={onBack}>
+        <EuiButton
+          fill
+          onClick={handleNext}
+          isDisabled={isNextDisabled}
+          isLoading={hasUnloadedSelectedManifests || isSavingSO || isAgentDeploying}
+          data-test-subj="authenticateAndDeployStep-nextButton"
+        >
+          <FormattedMessage
+            id="xpack.ingestHub.authenticateAndDeployStep.nextButton"
+            defaultMessage="Next"
+          />
+        </EuiButton>
+      </StepFooter>
     </div>
   );
 }

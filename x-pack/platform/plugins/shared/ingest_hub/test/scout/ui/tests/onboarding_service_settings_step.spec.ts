@@ -188,7 +188,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await mockAwsPackage(page, MOCK_AWS_PACKAGE_RESPONSE);
   });
 
-  test('renders table with Service Name, Collects, Category, Region columns', async ({
+  test('renders table with Service Name, Collects, Region columns', async ({
     browserAuth,
     page,
   }) => {
@@ -200,7 +200,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     // Column headers
     await expect(page.getByRole('columnheader', { name: 'Service Name' })).toBeVisible();
     await expect(page.getByRole('columnheader', { name: 'Collects' })).toBeVisible();
-    await expect(page.getByRole('columnheader', { name: 'Category' })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'Category' })).toBeHidden();
     await expect(page.getByRole('columnheader', { name: 'Region' })).toBeVisible();
 
     // Both services appear as rows

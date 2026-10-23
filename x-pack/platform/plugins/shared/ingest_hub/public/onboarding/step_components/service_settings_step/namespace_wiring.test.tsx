@@ -40,7 +40,6 @@ function makeService(deploymentMethods: AwsServiceMatrixEntry['deploymentMethods
   return {
     id: 'svc',
     name: 'Service',
-    category: 'compute',
     signalTypes: ['logs'],
     dataStreams: ['svc'],
     packageName: 'aws',
