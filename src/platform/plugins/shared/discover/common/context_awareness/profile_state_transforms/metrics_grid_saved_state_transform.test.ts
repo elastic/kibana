@@ -39,6 +39,7 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
       counterAggregation: 'max',
       gaugeAggregation: 'min',
       histogramPercentile: 'p50',
+      histogramVisualization: 'lnsXY',
       dimensions: ['host.name'],
       searchTerm: 'bytes',
       gridSortField: 'recency',
@@ -49,6 +50,7 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
         counterAggregation: 'max',
         gaugeAggregation: 'min',
         histogramPercentile: 'p50',
+        histogramVisualization: 'lnsXY',
         dimensions: ['host.name'],
         searchTerm: 'bytes',
         sortField: 'recency',
@@ -100,12 +102,40 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
     });
   });
 
+  it('saves and restores histogram distribution', () => {
+    const registry = createRegistry();
+    const savedState = registry.toSavedState(DiscoverTabType.Metrics, {
+      metricsState: {
+        histogramVisualization: 'lnsHeatmap',
+      },
+    });
+
+    expect(savedState).toMatchObject({ histogramVisualization: 'lnsHeatmap' });
+    expect(registry.fromSavedState(savedState).metricsState).toMatchObject({
+      histogramVisualization: 'lnsHeatmap',
+    });
+  });
+
+  it('leaves histogram visualization unset when a saved session predates it', () => {
+    expect(
+      createRegistry().fromSavedState({
+        type: DiscoverTabType.Metrics,
+        counterAggregation: 'sum',
+        gaugeAggregation: 'avg',
+        histogramPercentile: 'p95',
+        dimensions: [],
+        searchTerm: '',
+      }).metricsState
+    ).not.toHaveProperty('histogramVisualization');
+  });
+
   it('expands grid setting defaults when saving', () => {
     expect(createRegistry().toSavedState(DiscoverTabType.Metrics, {})).toEqual({
       type: DiscoverTabType.Metrics,
       counterAggregation: 'sum',
       gaugeAggregation: 'avg',
       histogramPercentile: 'p95',
+      histogramVisualization: 'lnsXY',
       dimensions: [],
       searchTerm: '',
       gridSortField: 'alphabetically',

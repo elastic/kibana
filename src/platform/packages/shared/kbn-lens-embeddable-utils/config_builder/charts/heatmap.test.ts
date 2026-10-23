@@ -139,6 +139,55 @@ test('hides the legend when configured', async () => {
   );
 });
 
+test('writes a custom percent palette when cell colors are provided', async () => {
+  const colors = ['#d6e8f5', '#8ec4ea', '#1ba9f5'];
+  const { state } = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'test',
+      dataset: {
+        esql: 'from test | count=count() by @timestamp, category',
+      },
+      breakdown: 'category',
+      xAxis: '@timestamp',
+      value: 'count',
+      palette: { colors },
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  expect(state.visualization).toEqual(
+    expect.objectContaining({
+      palette: {
+        type: 'palette',
+        name: 'custom',
+        accessor: 'metric_formula_accessor',
+        params: {
+          name: 'custom',
+          reverse: false,
+          rangeType: 'percent',
+          rangeMin: 0,
+          rangeMax: 100,
+          continuity: 'all',
+          steps: colors.length,
+          stops: [
+            { color: '#d6e8f5', stop: 100 / 3 },
+            { color: '#8ec4ea', stop: 200 / 3 },
+            { color: '#1ba9f5', stop: 100 },
+          ],
+          colorStops: [
+            { color: '#d6e8f5', stop: 0 },
+            { color: '#8ec4ea', stop: 100 / 3 },
+            { color: '#1ba9f5', stop: 200 / 3 },
+          ],
+        },
+      },
+    })
+  );
+});
+
 test('shows axis labels when configured', async () => {
   const { state } = await buildHeatmap(
     {

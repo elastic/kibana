@@ -24,6 +24,7 @@ import { stableStringify } from '@kbn/std';
 import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
 import type { ChartSize } from '../../chart';
 import { Chart } from '../../chart';
+import { buildXySeriesConfig } from '../../chart/build_xy_series_config';
 import { MetricInsightsFlyout } from '../../flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
@@ -35,6 +36,7 @@ import {
   getMetricUniqueKey,
 } from '../../../common/utils';
 import type { HistogramBoundsByMetricKey } from './hooks/use_fetch_histogram_bounds';
+import { useHistogramHeatmap } from './hooks/use_histogram_heatmap';
 import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -44,41 +46,6 @@ import {
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { useFetchExemplars } from './hooks/use_fetch_exemplars';
-import { useHistogramHeatmap } from './hooks/use_histogram_heatmap';
-
-const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
-
-const useStableApplicableDimensions = (
-  dimensions: Dimension[],
-  dimensionFields: readonly Dimension[]
-): Dimension[] => {
-  const stabilizedRef = useRef<{ key: string | null; value: Dimension[] }>({
-    key: null,
-    value: EMPTY_APPLICABLE_DIMENSIONS,
-  });
-
-  return useMemo(() => {
-    const applicable = dimensions.filter((dimension) =>
-      dimensionFields.some((field) => field.name === dimension.name)
-    );
-    const key = applicable.length === 0 ? null : stableStringify(applicable);
-
-    if (stabilizedRef.current.key === key) {
-      return stabilizedRef.current.value;
-    }
-
-    const value = applicable.length === 0 ? EMPTY_APPLICABLE_DIMENSIONS : applicable;
-    stabilizedRef.current = { key, value };
-    return value;
-  }, [dimensions, dimensionFields]);
-};
-
-const METRICS_QUICK_ACTION_IDS: QuickActionIds = [
-  ACTION_EXPLORE_IN_DISCOVER_TAB,
-  ACTION_INSPECT_PANEL,
-  ACTION_VIEW_DETAILS,
-  ACTION_COPY_TO_DASHBOARD,
-];
 
 export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
@@ -120,6 +87,34 @@ const EMPTY_HISTOGRAM_BOUNDS: HistogramBoundsByMetricKey = new Map();
 const getItemKey = (metricItem: ParsedMetricItem, index: number) => {
   return `${metricItem.metricName}-${index}`;
 };
+
+const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
+
+const useStableApplicableDimensions = (
+  dimensions: Dimension[],
+  dimensionFields: readonly Dimension[]
+): Dimension[] => {
+  const stabilizedRef = useRef<{ key: string | null; value: Dimension[] }>({
+    key: null,
+    value: EMPTY_APPLICABLE_DIMENSIONS,
+  });
+
+  return useMemo(() => {
+    const applicable = dimensions.filter((dimension) =>
+      dimensionFields.some((field) => field.name === dimension.name)
+    );
+    const key = applicable.length === 0 ? null : stableStringify(applicable);
+
+    if (stabilizedRef.current.key === key) {
+      return stabilizedRef.current.value;
+    }
+
+    const value = applicable.length === 0 ? EMPTY_APPLICABLE_DIMENSIONS : applicable;
+    stabilizedRef.current = { key, value };
+    return value;
+  }, [dimensions, dimensionFields]);
+};
+
 export const MetricsGrid = ({
   metricItems,
   onBrushEnd,
@@ -307,6 +302,13 @@ export const MetricsGrid = ({
   );
 };
 
+const METRICS_QUICK_ACTION_IDS: QuickActionIds = [
+  ACTION_EXPLORE_IN_DISCOVER_TAB,
+  ACTION_INSPECT_PANEL,
+  ACTION_VIEW_DETAILS,
+  ACTION_COPY_TO_DASHBOARD,
+];
+
 interface ChartItemProps
   extends Pick<
     UnifiedMetricsGridProps,
@@ -373,6 +375,7 @@ const ChartItem = React.memo(
       () => Object.values(euiTheme.colors.vis).slice(0, 10),
       [euiTheme.colors.vis]
     );
+    const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
 
     const recordExploredMetric = useCallback<React.MouseEventHandler<HTMLDivElement>>(
       (event) => {
@@ -414,6 +417,10 @@ const ChartItem = React.memo(
         histogramBoundsLoading,
         whereStatements,
         originalSource: userSource,
+        histogramVisualization: gridSettings.histogramVisualization,
+        description,
+        seriesColor: color,
+        backgroundColor: euiTheme.colors.backgroundBasePlain,
       });
 
     const esqlQuery = useMemo(() => {
@@ -446,13 +453,46 @@ const ChartItem = React.memo(
       return instrument ? getAggregationLabel({ instrument, gridSettings }) : undefined;
     }, [metricItem.metricTypes, gridSettings]);
 
-    const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
     const chartLayers = useChartLayers({
       dimensions: applicableDimensions,
       metricItem,
       color,
       gridSettings,
     });
+
+    const lensConfig = useMemo(() => {
+      if (heatmapConfig) {
+        return heatmapConfig;
+      }
+
+      // Bounds are loading or failed. No series yet; the empty XY config keeps the
+      // loader or the bounds error.
+      if (shouldRenderHistogram) {
+        return buildXySeriesConfig({
+          query: '',
+          title: metricItem.metricName,
+          description,
+          chartLayers: [],
+        });
+      }
+
+      return buildXySeriesConfig({
+        query: esqlQuery,
+        title: metricItem.metricName,
+        description,
+        chartLayers,
+        yAxisTitle,
+      });
+    }, [
+      heatmapConfig,
+      shouldRenderHistogram,
+      metricItem.metricName,
+      description,
+      esqlQuery,
+      chartLayers,
+      yAxisTitle,
+    ]);
+
     const handleViewDetailsCallback = useCallback(
       () => onViewDetails(index, esqlQuery, metricItem),
       [index, esqlQuery, metricItem, onViewDetails]
@@ -479,7 +519,10 @@ const ChartItem = React.memo(
         <Chart
           id={metricItem.metricName}
           isSelected={isSelected}
-          esqlQuery={esqlQuery}
+          lensConfig={lensConfig}
+          // Chart does not know which configs are heatmaps. Click-to-filter is
+          // disabled here because ES|QL cannot compare a histogram value to a number.
+          disableClickFilter={lensConfig.chartType === 'heatmap'}
           size={size}
           discoverFetch$={discoverFetch$}
           fetchParams={fetchParams}
@@ -488,11 +531,6 @@ const ChartItem = React.memo(
           onFilter={onFilter}
           onExploreInDiscoverTab={actions.openInNewTab}
           onViewDetails={handleViewDetailsCallback}
-          title={metricItem.metricName}
-          description={description}
-          chartLayers={shouldRenderHistogram ? [] : chartLayers}
-          yAxisTitle={shouldRenderHistogram ? undefined : yAxisTitle}
-          heatmapConfig={heatmapConfig}
           isLoading={shouldRenderHistogram && histogramBoundsLoading}
           error={shouldRenderHistogram ? boundsError : undefined}
           syncCursor

@@ -1235,6 +1235,7 @@ describe('discover session API transforms', () => {
       const [, esqlTab] = discoverSessionAttributes.tabs;
       // Required keeps this test up to date when we add new saved fields, even optional ones.
       // Give them real values so we catch any fields we forget to map in the transforms.
+      // histogramVisualization is stored for the Discover UI and is omitted from the public API.
       const savedTabTypeState: Required<DiscoverSessionTabTypeState> = {
         type: DiscoverTabType.Metrics,
         dimensions: ['host.name', 'service.name'],
@@ -1244,6 +1245,7 @@ describe('discover session API transforms', () => {
         histogramPercentile: 'p99',
         gridSortField: 'recency',
         gridSortDirection: 'desc',
+        histogramVisualization: 'lnsHeatmap',
       };
       const savedMetricsSession = {
         ...discoverSessionAttributes,
@@ -1272,12 +1274,15 @@ describe('discover session API transforms', () => {
       });
 
       expect(sessionState.tabs[0]).not.toHaveProperty('tabTypeState');
+      expect(sessionState.tabs[0]).not.toHaveProperty('histogram_visualization');
 
       const { attributes: writtenBack } = transformDiscoverSessionIn(
         discoverSessionApiDataSchema.parse(sessionState)
       );
+      const { histogramVisualization: _histogramVisualization, ...publicTabTypeState } =
+        savedTabTypeState;
 
-      expect(writtenBack.tabs[0].attributes.tabTypeState).toEqual(savedTabTypeState);
+      expect(writtenBack.tabs[0].attributes.tabTypeState).toEqual(publicTabTypeState);
     });
 
     it('ignores saved metrics state on a classic tab while preserving its classic settings', () => {

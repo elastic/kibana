@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FormBasedPersistedState, HeatmapVisualizationState } from '@kbn/lens-common';
+import { CUSTOM_PALETTE, shiftPalette } from '@kbn/coloring';
+import type {
+  FormBasedPersistedState,
+  HeatmapPalette,
+  HeatmapVisualizationState,
+} from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { BuildDependencies, LensAttributes, LensHeatmapConfig } from '../types';
 import { DEFAULT_LAYER_ID } from '../constants';
@@ -20,8 +25,40 @@ function getAccessorName(type: 'x' | 'y') {
   return `${type}_${ACCESSOR}`;
 }
 
+/** Maps low-to-high colors onto a percent scale Lens can remap to the data domain. */
+function buildCellPalette(colors: readonly string[]): HeatmapPalette | undefined {
+  if (colors.length === 0) {
+    return undefined;
+  }
+
+  const step = 100 / colors.length;
+  const colorStops = colors.map((color, index) => ({
+    color,
+    stop: index * step,
+  }));
+  const stops = shiftPalette(colorStops, 100);
+
+  return {
+    type: 'palette',
+    name: CUSTOM_PALETTE,
+    accessor: ACCESSOR,
+    params: {
+      name: CUSTOM_PALETTE,
+      reverse: false,
+      rangeType: 'percent',
+      rangeMin: 0,
+      rangeMax: 100,
+      continuity: 'all',
+      steps: colors.length,
+      stops,
+      colorStops,
+    },
+  };
+}
+
 function buildVisualizationState(config: LensHeatmapConfig): HeatmapVisualizationState {
   const layer = config;
+  const palette = layer.palette ? buildCellPalette(layer.palette.colors) : undefined;
 
   return {
     layerId: DEFAULT_LAYER_ID,
@@ -52,6 +89,7 @@ function buildVisualizationState(config: LensHeatmapConfig): HeatmapVisualizatio
       position: config.legend?.position || 'left',
       type: 'heatmap_legend',
     },
+    ...(palette ? { palette } : {}),
   };
 }
 
