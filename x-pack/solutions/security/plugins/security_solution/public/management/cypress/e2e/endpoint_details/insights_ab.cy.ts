@@ -110,12 +110,14 @@ describe(
 
     it('should display results after a completed scan', () => {
       stubWorkflowInsightsPendingApiResponse([]);
-      stubWorkflowInsightsApiResponse(endpointId, 1);
+      stubWorkflowInsightsApiResponse(endpointId, 0);
 
       loadEndpointDetailsFlyout(endpointId);
+      expectWorkflowInsightsApiToBeCalled();
 
       // scan completes (pending returns empty), results fetched
       triggerRunningWorkflowInsights();
+      stubWorkflowInsightsApiResponse(endpointId, 1);
       clickScanButton();
       stubWorkflowInsightsPendingApiResponse([]);
 
