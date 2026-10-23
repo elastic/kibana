@@ -701,17 +701,88 @@ describe('AwsIdentityFederationSetup', () => {
       renderSetup({ cloud, integrations });
 
       expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toHaveTextContent(
-        'Creating the CloudFormation stack'
+        'Creating stack'
       );
       expect(screen.getByTestId('awsIdentityFederationSetup-callbackSpinner')).toBeInTheDocument();
+      // Nothing but the stage: no hint text and no way to take over by hand.
+      expect(
+        screen.queryByTestId('awsIdentityFederationSetup-enterManually')
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toHaveTextContent(
+        /^Creating stack$/
+      );
     });
 
-    it('says it is creating the identity, without the manual link, once the report is being applied', () => {
+    it('keeps the ARN fields and Create inside a collapsed "Create stack manually" section', () => {
+      renderSetup({ cloud, integrations });
+
+      const toggle = screen.getByTestId('awsIdentityFederationSetup-manualEntryToggle');
+      expect(toggle).toHaveTextContent('Create stack manually');
+      expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      const section = screen.getByTestId('awsIdentityFederationSetup-manualEntry');
+      expect(section).toContainElement(screen.getByTestId('awsIdentityFederationSetup-stackArn'));
+      expect(section).toContainElement(screen.getByTestId('awsIdentityFederationSetup-roleArn'));
+      expect(section).toContainElement(
+        screen.getByTestId('awsIdentityFederationSetup-createButton')
+      );
+      expect(screen.queryByText('Steps to assume role')).not.toBeInTheDocument();
+    });
+
+    it('renders the host actions next to Create inside the manual section', () => {
+      renderSetup({
+        cloud,
+        integrations,
+        manualEntryActions: <button data-test-subj="host-deploy">Deploy integrations</button>,
+      });
+
+      expect(screen.getByTestId('awsIdentityFederationSetup-manualEntry')).toContainElement(
+        screen.getByTestId('host-deploy')
+      );
+    });
+
+    it('opens the manual section when CloudFormation cannot report back', () => {
+      mockUseProvisioningCallback.mockReturnValue(
+        callbackState({ available: false, isChecking: false })
+      );
+      renderSetup({ cloud, integrations });
+
+      expect(screen.getByTestId('awsIdentityFederationSetup-manualEntryToggle')).toHaveAttribute(
+        'aria-expanded',
+        'true'
+      );
+    });
+
+    it.each(['expired', 'error'] as const)(
+      'opens the manual section once the callback is %s',
+      (status) => {
+        mockUseProvisioningCallback.mockReturnValue(callbackState({ status }));
+        renderSetup({ cloud, integrations });
+
+        expect(screen.getByTestId('awsIdentityFederationSetup-manualEntryToggle')).toHaveAttribute(
+          'aria-expanded',
+          'true'
+        );
+      }
+    );
+
+    it('tells the host whether the New Identity tab is shown', async () => {
+      // With identities to choose from the form opens on the Existing tab.
+      mockGetConnectors();
+      const onNewIdentityTabChange = jest.fn();
+      const user = userEvent.setup();
+      renderSetup({ cloud, integrations, onNewIdentityTabChange });
+
+      expect(onNewIdentityTabChange).toHaveBeenLastCalledWith(false);
+      await user.click(screen.getByRole('tab', { name: 'New Identity' }));
+      expect(onNewIdentityTabChange).toHaveBeenLastCalledWith(true);
+    });
+
+    it('says it is creating the identity once the report is being applied', () => {
       mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'receiving' }));
       renderSetup({ cloud, integrations });
 
       expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toHaveTextContent(
-        'Creating the federated identity'
+        /^Creating identity$/
       );
       expect(screen.getByTestId('awsIdentityFederationSetup-callbackSpinner')).toBeInTheDocument();
       // Too late to take over by hand: the identity is already being made.
@@ -733,30 +804,6 @@ describe('AwsIdentityFederationSetup', () => {
         ).not.toBeInTheDocument();
       }
     );
-
-    it('names the identity the stack will create in the waiting hint', async () => {
-      const user = userEvent.setup();
-      const { rerender } = renderSetup({ cloud, integrations });
-      await user.type(
-        screen.getByTestId('awsIdentityFederationSetup-connectorName'),
-        'my-identity'
-      );
-      const { getLaunchStackParams } = mockUseCloudConnectorTemplate.mock.lastCall![0];
-      await act(async () => {
-        await getLaunchStackParams?.(RENDERED_IAC_CONFIRM);
-      });
-      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
-      rerender(setupElement({ cloud, integrations }));
-
-      expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toHaveTextContent(
-        'federated identity my-identity is created'
-      );
-      // Renaming afterwards does not change what the stack reports.
-      await user.type(screen.getByTestId('awsIdentityFederationSetup-connectorName'), '-2');
-      expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toHaveTextContent(
-        'federated identity my-identity is created'
-      );
-    });
 
     it('needs a name before Launch when the stack can report back', async () => {
       const user = userEvent.setup();
@@ -1037,31 +1084,6 @@ describe('AwsIdentityFederationSetup', () => {
         mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'received' }));
         rerender(setupElement({ cloud, integrations, onWaitingChange }));
         expect(onWaitingChange).toHaveBeenLastCalledWith(false);
-      });
-    });
-
-    it('offers to enter the ARNs by hand while waiting, which retires the record', async () => {
-      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
-      const user = userEvent.setup();
-      renderSetup({ cloud, integrations });
-
-      await user.click(screen.getByTestId('awsIdentityFederationSetup-enterManually'));
-
-      expect(mockCallbackCancel).toHaveBeenCalledTimes(1);
-      expect(mockAddDanger).not.toHaveBeenCalled();
-    });
-
-    it('explains when the record could not be retired from the manual-entry link', async () => {
-      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
-      mockCallbackCancel.mockResolvedValue('failed');
-      const user = userEvent.setup();
-      renderSetup({ cloud, integrations });
-
-      await user.click(screen.getByTestId('awsIdentityFederationSetup-enterManually'));
-
-      expect(mockAddDanger).toHaveBeenCalledWith({
-        title:
-          'Could not stop waiting for CloudFormation. Try again, or wait for the stack to report back.',
       });
     });
 

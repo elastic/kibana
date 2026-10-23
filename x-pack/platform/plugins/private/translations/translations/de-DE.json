@@ -21659,7 +21659,6 @@
     "xpack.fleet.awsIdentityFederationSetup.existingIdentityTab": "Bestehende Identität",
     "xpack.fleet.awsIdentityFederationSetup.launchCloudFormation": "CloudFormation starten",
     "xpack.fleet.awsIdentityFederationSetup.newIdentityTab": "Neue Identität",
-    "xpack.fleet.awsIdentityFederationSetup.stepsToAssumeRole": "Schritte zur Übernahme der Rolle",
     "xpack.fleet.awsStaticKeysForm.accessKeyIdLabel": "Zugriffsschlüssel-ID",
     "xpack.fleet.awsStaticKeysForm.accessKeyIdRequired": "Eine Zugriffsschlüssel-ID ist erforderlich",
     "xpack.fleet.awsStaticKeysForm.secretAccessKeyLabel": "Geheimer Zugriffsschlüssel",

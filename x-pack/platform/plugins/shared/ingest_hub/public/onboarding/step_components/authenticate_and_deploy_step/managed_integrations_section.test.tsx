@@ -120,7 +120,11 @@ function setupMocks({
       onConnectorIdChange,
       onIacTemplateRecorded,
       initialConnectorId: initId,
+      manualEntryActions,
+      onNewIdentityTabChange,
     }: {
+      manualEntryActions?: React.ReactNode;
+      onNewIdentityTabChange?: (isNewIdentityTab: boolean) => void;
       onReadyChange?: (v: boolean) => void;
       onConnectorIdChange?: (id: string | undefined, name?: string) => void;
       onIacTemplateRecorded?: (
@@ -138,6 +142,9 @@ function setupMocks({
         <button onClick={() => onReadyChange?.(true)}>mark-ready</button>
         <button onClick={() => onReadyChange?.(false)}>mark-not-ready</button>
         <button onClick={() => onConnectorIdChange?.('id-1', 'my-connector')}>mark-named</button>
+        <button onClick={() => onNewIdentityTabChange?.(true)}>tab-new</button>
+        <button onClick={() => onNewIdentityTabChange?.(false)}>tab-existing</button>
+        <div data-test-subj="manual-entry-actions">{manualEntryActions}</div>
         <button
           onClick={() =>
             onIacTemplateRecorded?.(
@@ -244,6 +251,20 @@ describe('ManagedIntegrationsSection', () => {
         .querySelectorAll('input[type="radio"]');
       expect(radios.length).toBeGreaterThan(0);
       radios.forEach((radio) => expect(radio).toBeDisabled());
+    });
+
+    it('shows Deploy inside the manual section of the identity form on the New Identity tab, below it otherwise', () => {
+      setupMocks();
+      renderSection({ showIdentityFederation: true });
+
+      fireEvent.click(screen.getByText('tab-new'));
+      expect(screen.getByTestId('manual-entry-actions')).toContainElement(
+        screen.getByTestId('managedIntegrationsSection-deployButton')
+      );
+
+      fireEvent.click(screen.getByText('tab-existing'));
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeInTheDocument();
+      expect(screen.getByTestId('manual-entry-actions')).toBeEmptyDOMElement();
     });
 
     it('passes the launch preparation, outcome and waiting callbacks to the identity form', () => {
