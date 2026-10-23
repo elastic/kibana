@@ -193,7 +193,8 @@ export const createResponseEngine = (
     .forEach((exchange) => add('recording', exchange));
 
   return {
-    respond: (operation, request) => served.get(operation) ?? fallback(operation, request),
+    respond: (operation, request, context) =>
+      served.get(operation) ?? fallback(operation, request, context),
     servedFrom: (operation) => servedFrom.get(operation),
     rejected,
     recordedExchanges: (operation) => recorded.get(operation) ?? [],
