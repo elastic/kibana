@@ -102,7 +102,7 @@ export const GridSettingsFlyout = ({
         defaultMessage: 'Percentile',
       })
     : i18n.translate('metricsExperience.gridSettingsFlyout.histogramLabel', {
-        defaultMessage: 'Histogram percentile',
+        defaultMessage: 'Histogram',
       });
   const histogramDisplayLabel = i18n.translate(
     'metricsExperience.gridSettingsFlyout.histogramDisplayLabel',

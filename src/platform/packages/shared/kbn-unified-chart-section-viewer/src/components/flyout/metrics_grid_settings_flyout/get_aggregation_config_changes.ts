@@ -28,35 +28,31 @@ const SETTINGS_BY_METRIC_TYPE: Record<
 export const getAggregationConfigChanges = (
   gridSettings: MetricsGridSettings,
   update: Partial<MetricsGridSettings>
-): MetricAggregationConfigChangedEvent[] => {
-  return (Object.keys(SETTINGS_BY_METRIC_TYPE) as MetricAggregationConfigMetricType[]).flatMap(
-    (metricType) => {
-      const { aggregation, visualization } = SETTINGS_BY_METRIC_TYPE[metricType];
-      const previousAggregation = gridSettings[aggregation];
-      const newAggregation = update[aggregation] ?? previousAggregation;
-      const previousVisualization = visualization ? gridSettings[visualization] : undefined;
-      const newVisualization = visualization
-        ? update[visualization] ?? previousVisualization
-        : undefined;
-      const changed =
-        newAggregation !== previousAggregation ||
-        (visualization !== undefined && newVisualization !== previousVisualization);
-
-      if (!changed) {
-        return [];
-      }
-
-      return [
-        {
-          metric_type: metricType,
-          previous_aggregation: previousAggregation,
-          new_aggregation: newAggregation,
-          ...(visualization !== undefined && {
-            previous_visualization: previousVisualization,
-            new_visualization: newVisualization,
-          }),
-        },
-      ];
+): MetricAggregationConfigChangedEvent[] =>
+  (
+    Object.entries(SETTINGS_BY_METRIC_TYPE) as Array<
+      [
+        MetricAggregationConfigMetricType,
+        (typeof SETTINGS_BY_METRIC_TYPE)[MetricAggregationConfigMetricType]
+      ]
+    >
+  ).flatMap(([metricType, { aggregation, visualization }]) => {
+    if (
+      update[aggregation] === undefined &&
+      (!visualization || update[visualization] === undefined)
+    ) {
+      return [];
     }
-  );
-};
+
+    return [
+      {
+        metric_type: metricType,
+        previous_aggregation: gridSettings[aggregation],
+        new_aggregation: update[aggregation] ?? gridSettings[aggregation],
+        ...(visualization && {
+          previous_visualization: gridSettings[visualization],
+          new_visualization: update[visualization] ?? gridSettings[visualization],
+        }),
+      },
+    ];
+  });

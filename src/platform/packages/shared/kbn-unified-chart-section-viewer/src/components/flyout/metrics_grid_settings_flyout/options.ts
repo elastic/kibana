@@ -38,22 +38,22 @@ export const SIMPLE_AGGREGATION_LABELS: Record<SimpleAggregation, string> = {
   }),
 };
 
-/** Display labels for `HistogramPercentile` values, e.g. "p50". */
+/** Display labels for `HistogramPercentile` values, e.g. "50th percentile". */
 export const HISTOGRAM_PERCENTILE_LABELS: Record<HistogramPercentile, string> = {
   p50: i18n.translate('metricsExperience.gridSettingsFlyout.p50OptionLabel', {
-    defaultMessage: 'p50',
+    defaultMessage: '50th percentile',
   }),
   p75: i18n.translate('metricsExperience.gridSettingsFlyout.p75OptionLabel', {
-    defaultMessage: 'p75',
+    defaultMessage: '75th percentile',
   }),
   p90: i18n.translate('metricsExperience.gridSettingsFlyout.p90OptionLabel', {
-    defaultMessage: 'p90',
+    defaultMessage: '90th percentile',
   }),
   p95: i18n.translate('metricsExperience.gridSettingsFlyout.p95OptionLabel', {
-    defaultMessage: 'p95',
+    defaultMessage: '95th percentile',
   }),
   p99: i18n.translate('metricsExperience.gridSettingsFlyout.p99OptionLabel', {
-    defaultMessage: 'p99',
+    defaultMessage: '99th percentile',
   }),
 };
 
