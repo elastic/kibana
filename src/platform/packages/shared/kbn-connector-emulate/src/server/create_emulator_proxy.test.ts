@@ -14,6 +14,9 @@ import { request as httpsRequest } from 'https';
 import type { CustomHostSettings } from '@kbn/actions-utils';
 import { getCustomAgents } from '@kbn/actions-utils';
 import { loggerMock } from '@kbn/logging-mocks';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { CfWorkerJsonSchemaValidator } from '@modelcontextprotocol/sdk/validation/cfworker-provider.js';
 import type { OpenApiDocument } from '../openapi';
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
 import { createCertificateAuthority } from './certificate_authority';
@@ -290,6 +293,37 @@ describe('createEmulatorProxy', () => {
 
       await control.reset();
       expect(await control.calls()).toEqual({ calls: [], total: 0 });
+    });
+
+    it('serves an MCP server at /_mock/mcp that an MCP client can steer the emulator with', async () => {
+      const client = new Client(
+        { name: 'test', version: '1.0.0' },
+        { jsonSchemaValidator: new CfWorkerJsonSchemaValidator() }
+      );
+      await client.connect(new StreamableHTTPClientTransport(new URL('/_mock/mcp', proxyUrl)));
+      try {
+        const { tools } = await client.listTools();
+        expect(tools.map(({ name }) => name)).toContain('set_fixtures');
+
+        const set = await client.callTool({
+          name: 'set_fixtures',
+          arguments: {
+            fixtures: [
+              {
+                operation: { method: 'GET', path: '/items/{id}' },
+                response: { status: 200, body: { id: 99 } },
+              },
+            ],
+          },
+        });
+        expect(set.isError).toBeFalsy();
+
+        const url = 'https://api.vendor.example/v1/items/42';
+        const response = await send(url, { agent: trustingCa(url).httpsAgent });
+        expect(JSON.parse(response.body)).toEqual({ id: 99 });
+      } finally {
+        await client.close();
+      }
     });
 
     it('sets, lists and clears runtime fixtures, and describes operations, for a client', async () => {

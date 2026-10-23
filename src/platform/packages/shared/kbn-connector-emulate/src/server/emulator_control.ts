@@ -11,14 +11,15 @@ import type { RejectedResponse, ResponseFixture } from '../engine/response_engin
 import type { ContractCall, Emulator } from '../fetch/create_emulator_fetch';
 import type { OperationDescription } from '../fetch/describe_operation';
 import type { EmulatorOperation } from '../fetch/list_operations';
-import { isRecord } from '../openapi/schema_walk';
+import { checkFixtures } from './check_fixtures';
+import type { EmulatorMcpOptions } from './emulator_mcp';
+import { createEmulatorMcpHandler } from './emulator_mcp';
 
 /** The path the control endpoints are served under, on the proxy's own origin. */
 export const CONTROL_PATH = '/_mock';
 
-// Bounds on what `PUT /_mock/fixtures` accepts.
+// The most `PUT /_mock/fixtures` reads.
 const MAX_FIXTURES_BODY = 10 * 1024 * 1024;
-const MAX_FIXTURES = 1000;
 
 export interface EmulatorCalls {
   /** The calls from index `since` on, in the order they arrived. */
@@ -67,35 +68,6 @@ const problem = (status: number, title: string, detail: string, headers?: Header
 export const isControlPath = (path: string): boolean =>
   path === CONTROL_PATH || /^\/_mock[/?]/.test(path);
 
-const isStringRecord = (value: unknown): boolean =>
-  isRecord(value) && Object.values(value).every((entry) => typeof entry === 'string');
-
-// The shape of a fixture; whether the spec allows its response is checked when it is set.
-const fixtureShapeError = (fixture: unknown, index: number): string | undefined => {
-  const at = `fixtures[${index}]`;
-  if (!isRecord(fixture)) {
-    return `${at} must be an object`;
-  }
-  const { operation, when, response } = fixture;
-  const namesOperation =
-    isRecord(operation) &&
-    (typeof operation.name === 'string' ||
-      (typeof operation.method === 'string' && typeof operation.path === 'string'));
-  if (!namesOperation) {
-    return `${at}.operation must be { method, path, source? } or { name, source? }`;
-  }
-  if (when !== undefined && !isRecord(when)) {
-    return `${at}.when must be an object`;
-  }
-  if (!isRecord(response) || !Number.isInteger(response.status)) {
-    return `${at}.response must be { status, headers?, body? }`;
-  }
-  if (response.headers !== undefined && !isStringRecord(response.headers)) {
-    return `${at}.response.headers must map names to strings`;
-  }
-  return undefined;
-};
-
 const readFixtures = async (
   request: Request
 ): Promise<{ fixtures: ResponseFixture[] } | { error: string }> => {
@@ -103,23 +75,11 @@ const readFixtures = async (
   if (text.length > MAX_FIXTURES_BODY) {
     return { error: `The body is over ${MAX_FIXTURES_BODY} characters` };
   }
-  let parsed: unknown;
   try {
-    parsed = JSON.parse(text);
+    return checkFixtures(JSON.parse(text));
   } catch {
     return { error: 'The body is not JSON' };
   }
-  const fixtures = isRecord(parsed) ? parsed.fixtures : undefined;
-  if (!Array.isArray(fixtures)) {
-    return { error: 'The body must be { "fixtures": [...] }' };
-  }
-  if (fixtures.length > MAX_FIXTURES) {
-    return { error: `At most ${MAX_FIXTURES} fixtures can be set at once` };
-  }
-  const shapeError = fixtures
-    .map((fixture, index) => fixtureShapeError(fixture, index))
-    .find((error) => error !== undefined);
-  return shapeError ? { error: shapeError } : { fixtures: fixtures as ResponseFixture[] };
 };
 
 const optional = (url: URL, name: string): string | undefined =>
@@ -128,17 +88,17 @@ const optional = (url: URL, name: string): string | undefined =>
 /**
  * Serves an emulator's control endpoints, all as JSON: `GET /_mock/calls?since=<n>`,
  * `POST /_mock/reset`, `GET /_mock/operations`, `GET /_mock/operations/<id>`, and
- * `GET`, `PUT` and `DELETE /_mock/fixtures` for runtime fixtures. They are for local test runs
- * and take no credentials.
+ * `GET`, `PUT` and `DELETE /_mock/fixtures` for runtime fixtures; and an MCP server with tools
+ * for the same at `/_mock/mcp`. They are for local test runs and take no credentials.
  */
-export const createEmulatorControlHandler = ({
-  calls,
-  operations,
-  reset,
-  runtimeFixtures,
-  describeOperation,
-}: ControlEmulator): EmulatorControlHandler => {
+export const createEmulatorControlHandler = (
+  emulator: ControlEmulator,
+  mcpOptions: EmulatorMcpOptions = {}
+): EmulatorControlHandler => {
+  const { calls, operations, reset, runtimeFixtures, describeOperation } = emulator;
+  const mcp = createEmulatorMcpHandler(emulator, mcpOptions);
   const routes: Record<string, Record<string, Answer>> = {
+    [`${CONTROL_PATH}/mcp`]: { POST: mcp, GET: mcp, DELETE: mcp },
     [`${CONTROL_PATH}/calls`]: {
       GET: (_request, { searchParams }) => {
         const since = Number(searchParams.get('since') ?? 0);
