@@ -307,9 +307,11 @@ const sendRequest = (
   ctx: SessionContext,
   { timeOrigin }: DocumentState,
   request: EdotBrowserRequest,
-  time: number,
+  requestedTime: number,
   latestEnd: number
 ): EdotBrowserEvent[] => {
+  // The request, and with it its 1ms minimum duration, must end within the page view
+  const time = Math.min(requestedTime, latestEnd - 1);
   const { client, site, health, random, slowdown } = ctx;
   const {
     method,
@@ -321,7 +323,7 @@ const sendRequest = (
   const url = toUrl(site, request.url);
   const duration = Math.min(
     sample(health.httpLatency, random) * latencyFactor * slowdown,
-    Math.max(latestEnd - time, 1)
+    latestEnd - time
   );
   const isNetworkError = random() < health.networkErrorRate;
   const statusCode = isNetworkError

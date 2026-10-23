@@ -626,6 +626,23 @@ describe('edotBrowser', () => {
       }
     });
 
+    it('ends requests within the session even when they start at the end of a page view', () => {
+      for (let seed = 1; seed <= 200; seed++) {
+        const docs = createSession({
+          seed,
+          end: TIMESTAMP,
+          pageViews: 3,
+          dwell: { median: 500, sigma: 0 },
+          health: HEALTH_PROFILES.critical,
+        });
+
+        docs.forEach((doc) => {
+          const durationMs = isSpan(doc) ? Number(doc.duration) / 1_000_000 : 0;
+          expect(Number(doc['@timestamp']) + durationMs).toBeLessThanOrEqual(TIMESTAMP);
+        });
+      }
+    });
+
     it('emits soft navigations without navigation timing', () => {
       const docs = Array.from({ length: 20 }, (_, seed) =>
         createSession({ seed, pageViews: 5 })
