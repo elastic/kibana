@@ -15,6 +15,7 @@ import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { VEGA_API_PATH, commonRouteConfig, PUBLIC_API_VERSION } from '../constants';
+import { isVegaApiEnabled } from '../is_vega_api_enabled';
 import { searchResponseBodySchema } from './schemas';
 import { search } from './search';
 
@@ -50,11 +51,18 @@ export const registerSearchRoute = (
           403: {
             description: 'forbidden',
           },
+          404: {
+            description: 'not found',
+          },
         },
       },
     },
     async (ctx, req, res) =>
       telemetryHandler(req, { usageCounter }, async () => {
+        const { core } = await ctx.resolve(['core']);
+        if (!(await isVegaApiEnabled(core.featureFlags))) {
+          return res.notFound();
+        }
         let result;
         try {
           result = await search(ctx, req.query);

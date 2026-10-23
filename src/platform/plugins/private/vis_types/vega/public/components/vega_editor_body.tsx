@@ -10,13 +10,13 @@
 import React, { Suspense, lazy, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSkeletonText,
   euiFullHeight,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isCombinedFilter, isOfQueryType, type Filter, type Query } from '@kbn/es-query';
 import { omit } from 'lodash';
@@ -151,8 +151,10 @@ export const VegaEditorBody = ({
       </EuiFlexItem>
       {hasTooManyFilters(filters) ? (
         <EuiFlexItem grow={false}>
-          <KbnDangerCallout
+          <EuiCallOut
             announceOnMount
+            color="danger"
+            iconType="error"
             size="s"
             title={tooManyFiltersMessage}
             data-test-subj="vegaEditorTooManyFiltersCallout"

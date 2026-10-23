@@ -50,13 +50,29 @@ const getVegaByReferenceEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSc
     .strip()
     .meta(BY_REF_SCHEMA_META);
 
-export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
-  z
+/**
+ * Returns the by-value schema, or the union of the by-value and by-reference schemas when Vega
+ * library items can be used on dashboards.
+ */
+export const getVegaEmbeddableSchema = (
+  getDrilldownsSchema: GetDrilldownsSchemaFnType,
+  byReferenceEnabled = false
+) => {
+  const byValueSchema = getVegaByValueEmbeddableSchema(getDrilldownsSchema);
+  if (!byReferenceEnabled) {
+    return byValueSchema.meta({
+      id: 'kbn-vega-embeddable',
+      title: 'Vega',
+      description: 'Vega by-value embeddable state schema.',
+    });
+  }
+  return z
     .union([
-      getVegaByValueEmbeddableSchema(getDrilldownsSchema).meta(BY_VALUE_SCHEMA_META),
+      byValueSchema.meta(BY_VALUE_SCHEMA_META),
       getVegaByReferenceEmbeddableSchema(getDrilldownsSchema),
     ])
     .meta({ id: 'kbn-vega-embeddable', title: 'Vega', description: 'Vega panel config.' });
+};
 
 /**
  * NOTE: `vis_types/vega` compiles with `strictNullChecks: false`, which can make the Zod-inferred

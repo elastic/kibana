@@ -71,8 +71,8 @@ dependsOn:
   - '@kbn/as-code-utils'
   - '@kbn/as-code-filters-constants'
   - '@kbn/core-saved-objects-server'
+  - '@kbn/core-feature-flags-server'
   - '@kbn/core-http-server'
-  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

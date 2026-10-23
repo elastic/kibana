@@ -11,6 +11,15 @@ import { globalSetupHook } from '@kbn/scout';
 
 export const VEGA_TEST_INDEX = 'vega-test-index';
 
+globalSetupHook('Enable the Vega feature flags', async ({ apiServices }) => {
+  await apiServices.core.settings({
+    'feature_flags.overrides': {
+      'vega.apiEnabled': true,
+      'vega.standaloneEmbeddable': true,
+    },
+  });
+});
+
 globalSetupHook('Setup Vega tests data', async ({ esClient }) => {
   const exists = await esClient.indices.exists({ index: VEGA_TEST_INDEX });
   if (!exists) {
