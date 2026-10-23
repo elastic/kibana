@@ -10,6 +10,7 @@ import type { AssignmentsService } from '../assignments/assignments_service';
 import type { InvestigationStatusService } from './services/investigation_status_service';
 import type { InvestigationsQueryService } from './services/investigations_query_service';
 import type { InvestigationsPrivilegesReader } from './services/check_investigations_privileges';
+import type { InvestigationSectionCountsService } from './services/section_counts_service';
 
 export interface InvestigationRouteDependencies {
   router: IRouter;
@@ -17,5 +18,6 @@ export interface InvestigationRouteDependencies {
   getAssignmentsService: () => AssignmentsService;
   getInvestigationStatusService?: () => InvestigationStatusService;
   getInvestigationsQueryService: () => InvestigationsQueryService;
+  getSectionCountsService: () => InvestigationSectionCountsService;
   privileges: InvestigationsPrivilegesReader;
 }

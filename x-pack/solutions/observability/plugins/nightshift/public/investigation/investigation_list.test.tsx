@@ -54,6 +54,7 @@ const makeSection = (
   isFetching: false,
   isPreviousData: false,
   error: null,
+  isFilteredOut: false,
   fetchNextPage: jest.fn(),
   refetch: jest.fn(),
   ...overrides,
@@ -225,6 +226,58 @@ describe('InvestigationList', () => {
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
     expect(getToggleControl('high')).toHaveAttribute('aria-expanded', 'true');
     expect(ref.current?.scrollToSeverity('critical')).toBe(false);
+  });
+
+  it('shows a section a search emptied as collapsed with a message', () => {
+    renderSections([
+      makeSection('critical', { investigations: [investigation], total: 1 }),
+      makeSection('high', { isFilteredOut: true }),
+    ]);
+
+    expect(getToggleControl('high')).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByTestId('nightshiftInvestigationSectionFilteredOut-high')).toHaveTextContent(
+      'No investigations in this group match your search.'
+    );
+    expect(screen.queryByTestId('nightshiftInvestigationsEmpty')).not.toBeInTheDocument();
+  });
+
+  it('opens a filtered-out section without saving it, and restores the saved state after the search', () => {
+    window.localStorage.setItem(SECTION_EXPANSION_STORAGE_KEY, JSON.stringify({ high: false }));
+    const { rerender } = renderSections([makeSection('high', { isFilteredOut: true })]);
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionToggle-high'));
+
+    expect(getToggleControl('high')).toHaveAttribute('aria-expanded', 'true');
+    expect(JSON.parse(window.localStorage.getItem(SECTION_EXPANSION_STORAGE_KEY) ?? '{}')).toEqual({
+      high: false,
+    });
+
+    rerender(
+      <I18nProvider>
+        <InvestigationList
+          sections={[makeSection('high', { investigations: [investigation], total: 1 })]}
+        />
+      </I18nProvider>
+    );
+
+    expect(getToggleControl('high')).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('scrolls to a filtered-out section without opening it', () => {
+    const ref = React.createRef<InvestigationListHandle>();
+    renderSections([makeSection('high', { isFilteredOut: true })], ref);
+
+    let scrolled: boolean | undefined;
+    act(() => {
+      scrolled = ref.current?.scrollToSeverity('high');
+    });
+
+    expect(scrolled).toBe(true);
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(getToggleControl('high')).toHaveAttribute('aria-expanded', 'false');
+    expect(JSON.parse(window.localStorage.getItem(SECTION_EXPANSION_STORAGE_KEY) ?? '{}')).toEqual(
+      {}
+    );
   });
 
   it('renders each investigation as the shared investigation card', () => {

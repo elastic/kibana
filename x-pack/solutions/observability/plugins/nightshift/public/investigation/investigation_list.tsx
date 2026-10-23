@@ -6,12 +6,15 @@
  */
 
 import { css } from '@emotion/react';
-import React, { forwardRef, useImperativeHandle } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import type { Severity } from '@kbn/nightshift-investigations-plugin/common';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { NO_INVESTIGATIONS_FOUND_MESSAGE } from '../common/messages';
-import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
+import type {
+  InvestigationSectionId,
+  InvestigationSectionState,
+} from '../hooks/use_investigation_sections';
 import {
   getInvestigationSectionAnchorId,
   InvestigationSection,
@@ -39,6 +42,36 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
     const visibleSections = sections.filter(isInvestigationSectionVisible);
     const expansion = useInvestigationSectionExpansion();
 
+    // A section the search emptied starts collapsed whatever the user chose for it, and opening it
+    // is not remembered: clearing the search brings back the user's own choice.
+    const filteredOutIds = sections
+      .filter(({ isFilteredOut }) => isFilteredOut)
+      .map(({ id }) => id)
+      .join();
+    const [openFilteredOutIds, setOpenFilteredOutIds] = useState<
+      ReadonlySet<InvestigationSectionId>
+    >(new Set());
+    useEffect(() => {
+      setOpenFilteredOutIds(new Set());
+    }, [filteredOutIds]);
+
+    const isSectionExpanded = (section: InvestigationSectionState): boolean =>
+      section.isFilteredOut ? openFilteredOutIds.has(section.id) : expansion.isExpanded(section.id);
+
+    const toggleSection = (section: InvestigationSectionState): void => {
+      if (!section.isFilteredOut) {
+        expansion.toggle(section.id);
+        return;
+      }
+      setOpenFilteredOutIds((open) => {
+        const next = new Set(open);
+        if (!next.delete(section.id)) {
+          next.add(section.id);
+        }
+        return next;
+      });
+    };
+
     useImperativeHandle(
       ref,
       () => ({
@@ -47,8 +80,11 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
           if (section == null) {
             return false;
           }
-          // A jump to a collapsed section would land on a lone heading, so open it first.
-          expansion.expand(severity);
+          // A jump to a collapsed section would land on a lone heading, so open it first. One the
+          // search emptied stays closed: it has no rows to show.
+          if (!sections.some(({ id, isFilteredOut }) => id === severity && isFilteredOut)) {
+            expansion.expand(severity);
+          }
           section.scrollIntoView({ behavior: 'smooth', block: 'start' });
           // Scrolling alone leaves keyboard and screen reader users where they were, so move focus
           // to the section too. `preventScroll` keeps the smooth scroll above from being cut short.
@@ -56,7 +92,7 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
           return true;
         },
       }),
-      [expansion]
+      [expansion, sections]
     );
 
     if (visibleSections.length === 0) {
@@ -92,10 +128,11 @@ export const InvestigationList = forwardRef<InvestigationListHandle, Investigati
               isInitialLoading={section.isInitialLoading}
               isLoadingMore={section.isFetchingNextPage}
               error={section.error}
+              isFilteredOut={section.isFilteredOut}
               onShowMore={section.fetchNextPage}
               onRetry={section.refetch}
-              isExpanded={expansion.isExpanded(section.id)}
-              onToggle={() => expansion.toggle(section.id)}
+              isExpanded={isSectionExpanded(section)}
+              onToggle={() => toggleSection(section)}
               selectedInvestigationId={selectedInvestigationId}
               onInvestigationClick={onInvestigationClick}
             />

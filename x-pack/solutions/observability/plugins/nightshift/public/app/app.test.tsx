@@ -96,6 +96,7 @@ function makeSection(
     isFetching: false,
     isPreviousData: false,
     error: null,
+    isFilteredOut: false,
     fetchNextPage: jest.fn(),
     refetch: jest.fn(),
     ...overrides,
@@ -358,6 +359,18 @@ describe('NightshiftApp', () => {
     fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('locationProbe')).toHaveTextContent('?severity=critical');
+  });
+
+  it('keeps a severity tile actionable when a search emptied its section', () => {
+    setSections({
+      sections: defaultSections({ critical: { isFilteredOut: true } }),
+    });
+
+    renderApp();
+
+    expect(screen.getByTestId('nightshiftInvestigationSection-critical')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
   });
 
   it('keeps a severity tile actionable when its section failed to load, since it still renders', () => {

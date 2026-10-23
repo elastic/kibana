@@ -10,8 +10,8 @@
  * so this plugin does not load the agentic investigations bundle on every page; a test pins them.
  */
 export const SHARED_INVESTIGATIONS_URL = '/internal/investigations/investigations';
-export const SHARED_INVESTIGATIONS_SEVERITY_COUNTS_URL =
-  '/internal/investigations/investigations/_severity_counts';
+export const SHARED_INVESTIGATIONS_SECTION_COUNTS_URL =
+  '/internal/investigations/investigations/_section_counts';
 export const SHARED_INVESTIGATIONS_API_VERSION = '1';
 
 /** The list API reaches at most this many investigations per filter. */

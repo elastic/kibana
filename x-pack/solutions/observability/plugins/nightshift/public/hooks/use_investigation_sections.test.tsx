@@ -96,10 +96,23 @@ const renderSections = (query?: string) =>
     wrapper: createWrapper(),
   });
 
+const count = (total: number, matching = total) => ({ total, matching });
+
+const SECTION_COUNTS = {
+  open: {
+    critical: count(3),
+    high: count(4, 1),
+    medium: count(0),
+    low: count(2),
+    none: count(1, 0),
+  },
+  closed: count(5, 0),
+};
+
 describe('useInvestigationSections', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    httpGet.mockResolvedValue({ critical: 3, high: 1, medium: 0, low: 2 });
+    httpGet.mockResolvedValue(SECTION_COUNTS);
     mockUseKibana.mockReturnValue({
       services: { http: { get: httpGet }, agenticInvestigations: {} },
     });
@@ -140,7 +153,7 @@ describe('useInvestigationSections', () => {
     ]);
   });
 
-  it('maps the shared severity counts onto the tiers for the tiles', async () => {
+  it('maps the matching open counts onto the tiers for the tiles', async () => {
     const { result } = renderSections('checkout');
 
     await waitFor(() =>
@@ -152,9 +165,60 @@ describe('useInvestigationSections', () => {
       })
     );
     expect(httpGet).toHaveBeenCalledWith(
-      '/internal/investigations/investigations/_severity_counts',
-      expect.objectContaining({ query: { status: 'open', query: 'checkout' }, version: '1' })
+      '/internal/investigations/investigations/_section_counts',
+      expect.objectContaining({ query: { query: 'checkout' }, version: '1' })
     );
+  });
+
+  it('marks the sections a search emptied that hold investigations without it', async () => {
+    const { result } = renderSections('checkout');
+
+    await waitFor(() =>
+      expect(
+        result.current.sections.filter(({ isFilteredOut }) => isFilteredOut).map(({ id }) => id)
+      ).toEqual(['critical', 'high', 'low', 'not-rated', 'closed'])
+    );
+  });
+
+  it('marks the in-progress section a search emptied from its list without the search', async () => {
+    mockUseFetchInvestigations.mockImplementation((params) =>
+      params.inProgress && params.query == null
+        ? sectionResult({ ids: ['running-a'] })
+        : sectionResult()
+    );
+    const { result } = renderSections('checkout');
+
+    await waitFor(() => expect(httpGet).toHaveBeenCalled());
+    expect(result.current.sections.find(({ id }) => id === 'in-progress')?.isFilteredOut).toBe(
+      true
+    );
+    expect(mockUseFetchInvestigations).toHaveBeenCalledWith({
+      inProgress: true,
+      refetchInterval: 5_000,
+    });
+  });
+
+  it('marks no section without a search', async () => {
+    const { result } = renderSections();
+
+    await waitFor(() => expect(httpGet).toHaveBeenCalled());
+    expect(httpGet).toHaveBeenCalledWith(
+      '/internal/investigations/investigations/_section_counts',
+      expect.objectContaining({ query: {} })
+    );
+    expect(result.current.sections.some(({ isFilteredOut }) => isFilteredOut)).toBe(false);
+  });
+
+  it('does not mark a section the search leaves rows in', async () => {
+    mockUseFetchInvestigations.mockImplementation((params) =>
+      isCritical(params) ? sectionResult({ ids: ['critical-a'] }) : sectionResult()
+    );
+    const { result } = renderSections('checkout');
+
+    await waitFor(() =>
+      expect(result.current.sections.find(({ id }) => id === 'high')?.isFilteredOut).toBe(true)
+    );
+    expect(result.current.sections.find(({ id }) => id === 'critical')?.isFilteredOut).toBe(false);
   });
 
   it('treats a non-empty in-progress section as active and polls only that section', () => {

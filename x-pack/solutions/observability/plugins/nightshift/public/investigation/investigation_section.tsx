@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSkeletonText,
+  EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -43,6 +44,8 @@ export interface InvestigationSectionProps {
   isInitialLoading?: boolean;
   isLoadingMore?: boolean;
   error?: Error | null;
+  /** The search matches none of the section's investigations; see `InvestigationSectionState`. */
+  isFilteredOut?: boolean;
   onShowMore: () => void;
   onRetry: () => void;
   /** Collapsed sections keep their heading and count; the rows are hidden. */
@@ -106,9 +109,10 @@ const getSectionPresentation = (id: InvestigationSectionId): SectionPresentation
 /**
  * What a section is showing. `hidden` covers the section having nothing to say at all — the list
  * skips it rather than rendering a heading over a "none found" panel, so emptiness is decided
- * here and nowhere else.
+ * here and nowhere else. `filtered-out` is a section the search emptied: it stays, with a zero
+ * count, so it does not read as having no investigations at all.
  */
-type SectionView = 'loading' | 'rows' | 'unloadable' | 'hidden';
+type SectionView = 'loading' | 'rows' | 'unloadable' | 'filtered-out' | 'hidden';
 
 type VisibleSectionView = Exclude<SectionView, 'hidden'>;
 
@@ -116,10 +120,12 @@ const getSectionView = ({
   isInitialLoading,
   hasInvestigations,
   hasError,
+  isFilteredOut,
 }: {
   isInitialLoading: boolean;
   hasInvestigations: boolean;
   hasError: boolean;
+  isFilteredOut: boolean;
 }): SectionView => {
   if (isInitialLoading) {
     return 'loading';
@@ -127,7 +133,10 @@ const getSectionView = ({
   if (hasInvestigations) {
     return 'rows';
   }
-  return hasError ? 'unloadable' : 'hidden';
+  if (hasError) {
+    return 'unloadable';
+  }
+  return isFilteredOut ? 'filtered-out' : 'hidden';
 };
 
 /** Whether the list should render this section at all. */
@@ -136,6 +145,7 @@ export const isInvestigationSectionVisible = (section: InvestigationSectionState
     isInitialLoading: section.isInitialLoading,
     hasInvestigations: section.investigations.length > 0,
     hasError: section.error != null,
+    isFilteredOut: section.isFilteredOut,
   }) !== 'hidden';
 
 /** The bordered card around a section; the accordion header and rows sit inside it. */
@@ -372,6 +382,7 @@ export const InvestigationSection = ({
   isInitialLoading = false,
   isLoadingMore = false,
   error = null,
+  isFilteredOut = false,
   onShowMore,
   onRetry,
   isExpanded,
@@ -384,6 +395,7 @@ export const InvestigationSection = ({
     isInitialLoading,
     hasInvestigations: investigations.length > 0,
     hasError: error != null,
+    isFilteredOut,
   });
 
   const renderBody = (visibleView: VisibleSectionView): React.ReactNode => {
@@ -398,6 +410,16 @@ export const InvestigationSection = ({
         return (
           <SectionBodyInset>
             <RetryCallout presentation={presentation} isUnloadable onRetry={onRetry} />
+          </SectionBodyInset>
+        );
+      case 'filtered-out':
+        return (
+          <SectionBodyInset data-test-subj={`nightshiftInvestigationSectionFilteredOut-${id}`}>
+            <EuiText size="s" color="subdued">
+              {i18n.translate('xpack.nightshift.investigations.sectionFilteredOutMessage', {
+                defaultMessage: 'No investigations in this group match your search.',
+              })}
+            </EuiText>
           </SectionBodyInset>
         );
       case 'rows':

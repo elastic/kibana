@@ -11,6 +11,7 @@ import { registerSetInvestigationStatusRoute } from './set_investigation_status'
 import { registerSetInvestigationSeverityRoute } from './set_investigation_severity';
 import { registerGetInvestigationClosePreviewRoute } from './get_investigation_close_preview';
 import { registerGetSeverityCountsRoute } from './get_severity_counts';
+import { registerGetSectionCountsRoute } from './get_section_counts';
 import { registerGetInvestigationRoute } from './get_investigation';
 import { registerListInvestigationsRoute } from './list_investigations';
 import { registerGetInvestigationsPrivilegesRoute } from './get_investigations_privileges';
@@ -20,8 +21,9 @@ export const registerInvestigationRoutes = (deps: InvestigationRouteDependencies
   registerSetInvestigationStatusRoute(deps);
   registerSetInvestigationSeverityRoute(deps);
   registerGetInvestigationClosePreviewRoute(deps);
-  // Before `{id}`, so `_severity_counts` is never read as an investigation id.
+  // Before `{id}`, so `_severity_counts` and `_section_counts` are never read as investigation ids.
   registerGetSeverityCountsRoute(deps);
+  registerGetSectionCountsRoute(deps);
   registerListInvestigationsRoute(deps);
   registerGetInvestigationRoute(deps);
   registerGetInvestigationsPrivilegesRoute(deps);

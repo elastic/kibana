@@ -33,6 +33,10 @@ export const INVESTIGATION_BY_ID_URL = `${INVESTIGATIONS_INTERNAL_URL}/{id}` as 
 export const INVESTIGATIONS_SEVERITY_COUNTS_URL =
   `${INVESTIGATIONS_INTERNAL_URL}/_severity_counts` as const;
 
+/** Counts per status and severity, with and without a text query. Registered before `{id}`. */
+export const INVESTIGATIONS_SECTION_COUNTS_URL =
+  `${INVESTIGATIONS_INTERNAL_URL}/_section_counts` as const;
+
 export const INVESTIGATION_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
 
 /** Severity filter value for investigations whose severity has not been set. */

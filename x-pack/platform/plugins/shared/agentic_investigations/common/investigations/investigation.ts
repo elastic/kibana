@@ -79,6 +79,13 @@ export const investigationFiltersSchema = z.object({
   created_after: isoDateTime({ offset: true }).optional(),
   created_before: isoDateTime({ offset: true }).optional(),
 });
+export const investigationSectionCountsQuerySchema = z.object({
+  query: investigationFiltersSchema.shape.query,
+});
+export type InvestigationSectionCountsQuery = z.output<
+  typeof investigationSectionCountsQuerySchema
+>;
+
 export type InvestigationFiltersInput = z.input<typeof investigationFiltersSchema>;
 export type InvestigationFilters = z.output<typeof investigationFiltersSchema>;
 
@@ -201,3 +208,18 @@ export interface ListInvestigationsResponse {
 
 /** Filtered investigations per severity. Investigations without a severity are not counted. */
 export type InvestigationSeverityCounts = Record<InvestigationSeverity, number>;
+
+/** Investigations in a group: all of them, and the ones the text query matches. */
+export interface InvestigationSectionCount {
+  total: number;
+  matching: number;
+}
+
+/**
+ * Open investigations per severity (`none`: without one) and closed ones, without a cap. An
+ * investigation in progress counts under its status and severity like any other.
+ */
+export interface InvestigationSectionCounts {
+  open: Record<InvestigationSeverityFilterValue, InvestigationSectionCount>;
+  closed: InvestigationSectionCount;
+}
