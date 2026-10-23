@@ -1242,7 +1242,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
             case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body.error).to.eql('Forbidden');
-              expect(response.body.message).to.eql('Unauthorized to get actions');
+              expect(response.body.message).to.eql('Unauthorized to execute actions');
               break;
             // Superuser has access to everything
             case 'superuser at space1':
@@ -1392,6 +1392,131 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
                 adHocRunParamsId: result[1].id,
                 spaceId: space.id,
               });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should schedule backfill without connector execute privilege when rule only has actions unsupported by backfill', async () => {
+          // create a connector
+          const cresponse = await supertest
+            .post(`${getUrlPrefix(apiOptions.spaceId)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'An index connector',
+              connector_type_id: '.index',
+              config: {
+                index: TEST_ACTIONS_INDEX,
+                refresh: true,
+              },
+              secrets: {},
+            })
+            .expect(200);
+          const connectorId = cresponse.body.id;
+          objectRemover.add(apiOptions.spaceId, connectorId, 'connector', 'actions');
+
+          const createRuleWithUnsupportedAction = async () => {
+            const rresponse = await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
+              .set('kbn-xsrf', 'foo')
+              .send(
+                getRule({
+                  actions: [
+                    {
+                      group: 'default',
+                      id: connectorId,
+                      uuid: '111-111',
+                      params: { documents: [{ alertUuid: '{{alert.uuid}}' }] },
+                      frequency: {
+                        notify_when: 'onActionGroupChange',
+                        throttle: null,
+                        summary: true,
+                      },
+                    },
+                  ],
+                })
+              )
+              .expect(200);
+            objectRemover.add(apiOptions.spaceId, rresponse.body.id, 'rule', 'alerting');
+            return rresponse.body.id;
+          };
+
+          const start = moment().utc().startOf('day').subtract(14, 'days').toISOString();
+          const end = moment().utc().startOf('day').subtract(5, 'days').toISOString();
+          const ruleId1 = await createRuleWithUnsupportedAction();
+          const ruleId2 = await createRuleWithUnsupportedAction();
+
+          // schedule backfill as current user, with run_actions explicitly true and omitted
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
+            .set('kbn-xsrf', 'foo')
+            .set('x-elastic-internal-origin', 'xxx')
+            .auth(apiOptions.username, apiOptions.password)
+            .send([
+              { rule_id: ruleId1, ranges: [{ start, end }], run_actions: true },
+              { rule_id: ruleId2, ranges: [{ start, end }] },
+            ]);
+
+          switch (scenario.id) {
+            // User can't do anything in this space
+            case 'no_kibana_privileges at space1':
+            // User has no privileges in this space
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to find rules for any rule types.`,
+                statusCode: 403,
+              });
+              break;
+            // User has read privileges in this space
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body.error).to.eql('Forbidden');
+              expect(response.body.message).to.match(
+                /Unauthorized by "alertsFixture" to scheduleBackfill "[^"]+" rule/
+              );
+              break;
+            // User doesn't have access to actions, but the backfill won't run any connectors
+            case 'space_1_all_alerts_none_actions at space1':
+            // Superuser has access to everything
+            case 'superuser at space1':
+            // User has read privileges and manual run subfeature privilege
+            case 'manual_run_only at space1':
+            // User has all privileges in this space
+            case 'space_1_all at space1':
+            // User has all privileges in this space
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              const result: Array<{
+                id: string;
+                status: string;
+                rule: { actions: object[] };
+                warnings?: string[];
+              }> = response.body;
+
+              expect(result.length).to.eql(2);
+              result.forEach((backfill) => {
+                expect(typeof backfill.id).to.be('string');
+                backfillIds.push({ id: backfill.id, spaceId: apiOptions.spaceId });
+                expect(backfill.status).to.eql('pending');
+                expect(backfill.rule.actions).to.eql([]);
+                expect(backfill.warnings).to.eql([
+                  `Rule has actions that are not supported for backfill. Those actions will be skipped.`,
+                ]);
+              });
+
+              // check that no connector references were stored
+              const adHocRunSOs = (await Promise.all(
+                result.map((backfill) => getAdHocRunSO(backfill.id))
+              )) as Array<SavedObject<AdHocRunSO>>;
+              expect(adHocRunSOs[0].references).to.eql([
+                { id: ruleId1, name: 'rule', type: 'alert' },
+              ]);
+              expect(adHocRunSOs[1].references).to.eql([
+                { id: ruleId2, name: 'rule', type: 'alert' },
+              ]);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
