@@ -34,7 +34,8 @@ import type {
 } from '../../../common/types';
 import { PROFILE_TYPE_LABELS, formatBoost } from '../format';
 import { DeleteProfileModal } from './delete_profile_modal';
-import { TypeFilter, matchesTypeFilter } from '../type_filter';
+import { TypeFilter, countByType, matchesTypeFilter } from '../type_filter';
+import { TableCount } from '../details/table_count';
 import { RuleFlyout } from '../rules/rule_flyout';
 import { getProfileRulesLocation } from '../rules/rules_tab';
 import { DetailsLink } from '../details_link';
@@ -235,10 +236,12 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
     ...(canEdit ? [actionsColumn] : []),
   ];
 
-  const typedRows = rows.filter(({ type }) => matchesTypeFilter(typeFilter, type));
-  const filteredRows = searchQuery ? Query.execute(searchQuery, typedRows) : typedRows;
+  const searchedRows = searchQuery ? Query.execute(searchQuery, rows) : rows;
+  // Each type counts what it would show with the search.
+  const typeCounts = countByType(searchedRows, ({ type }) => type);
+  const filteredRows = searchedRows.filter(({ type }) => matchesTypeFilter(typeFilter, type));
   // A new search or filter starts again at the first page.
-  const { pagination, onTableChange } = useTablePage<ProfileRow>(
+  const { pageIndex, pageSize, pagination, onTableChange } = useTablePage<ProfileRow>(
     `${searchQuery?.text ?? ''}|${typeFilter ?? ''}`,
     filteredRows.length
   );
@@ -262,7 +265,7 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
     },
     toolsRight: [
       <EuiFilterGroup key="filters" compressed>
-        <TypeFilter value={typeFilter} onChange={setTypeFilter} />
+        <TypeFilter value={typeFilter} onChange={setTypeFilter} counts={typeCounts} />
       </EuiFilterGroup>,
       ...(canEdit
         ? [
@@ -285,7 +288,19 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
   return (
     <>
       <EuiSearchBar {...search} />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
+      <TableCount
+        pageIndex={pageIndex}
+        pageSize={pageSize}
+        total={filteredRows.length}
+        formatTotal={(count) =>
+          i18n.translate('xpack.boost.profilesTab.profileCount', {
+            defaultMessage: '{count, plural, one {# boost profile} other {# boost profiles}}',
+            values: { count },
+          })
+        }
+        data-test-subj="boostProfilesCount"
+      />
       <EuiInMemoryTable
         tableCaption={i18n.translate('xpack.boost.profilesTab.caption', {
           defaultMessage: 'Boost profiles',

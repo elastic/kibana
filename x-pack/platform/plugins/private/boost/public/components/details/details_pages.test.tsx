@@ -277,7 +277,8 @@ describe('ProfileDetailsPage', () => {
     expect(screen.getByTestId('boostProfilePhase-recent')).toHaveTextContent(
       'Data up to 7 days old'
     );
-    expect(screen.getByTestId('boostProfilePhase-standard')).toHaveTextContent('Skipped');
+    // Like the others, it shows its boost, with what data it holds, which is none.
+    expect(screen.getByTestId('boostProfilePhase-standard')).toHaveTextContent('boostSkipped');
     // Background data starts where recent data ends.
     expect(screen.getByTestId('boostProfilePhase-background')).toHaveTextContent(
       'Data older than 7 days'

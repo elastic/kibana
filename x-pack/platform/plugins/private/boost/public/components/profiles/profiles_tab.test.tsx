@@ -61,5 +61,12 @@ describe('ProfilesTab', () => {
     expect(
       screen.queryByRole('link', { name: /using boost profile "elastic-on-demand"/ })
     ).not.toBeInTheDocument();
+    // The count and the type filters say what's there: three built-in profiles of each type, and
+    // the custom indices one.
+    expect(screen.getByTestId('boostProfilesCount')).toHaveTextContent(
+      'Showing 1–7 of 7 boost profiles'
+    );
+    expect(screen.getByTestId('boostTypeFilter-indices')).toHaveTextContent('4');
+    expect(screen.getByTestId('boostTypeFilter-data_streams')).toHaveTextContent('3');
   });
 });

@@ -31,7 +31,7 @@ export const TableCount = ({
   const last = Math.min((pageIndex + 1) * pageSize, total);
   return (
     <>
-      <EuiText size="s" color="subdued" aria-live="polite" data-test-subj={dataTestSubj}>
+      <EuiText size="xs" color="subdued" aria-live="polite" data-test-subj={dataTestSubj}>
         {i18n.translate('xpack.boost.tableCount.showing', {
           defaultMessage: 'Showing {range} of {total}',
           values: {

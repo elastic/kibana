@@ -7,8 +7,8 @@
 
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import type { EuiSearchBarProps, Query } from '@elastic/eui';
-import { EuiButton, EuiFilterGroup, EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import type { EuiSearchBarProps } from '@elastic/eui';
+import { EuiButton, EuiFilterGroup, EuiSearchBar, EuiSpacer, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   BoostDataSource,
@@ -16,7 +16,7 @@ import type {
   BoostProfileType,
   BoostRule,
 } from '../../../common/types';
-import { TypeFilter, matchesTypeFilter } from '../type_filter';
+import { TypeFilter, countByType, matchesTypeFilter } from '../type_filter';
 import type { ProfileSelections } from './profile_filter';
 import { ProfileFilter, matchesProfileFilter } from './profile_filter';
 import { RuleFlyout } from './rule_flyout';
@@ -58,6 +58,18 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
     matchesProfileFilter(profileSelections, profileName) &&
     matchesTypeFilter(typeFilter, profileType);
 
+  // Each type counts what it would show with the search and the profile filter.
+  const profileTypes = new Map(profiles.map(({ name, type }) => [name, type]));
+  const searchedRules = searchQuery
+    ? Query.execute(searchQuery, rules, { defaultFields: ['name', 'boost_profile'] })
+    : rules;
+  const typeCounts = countByType(
+    searchedRules.filter(({ boost_profile: profileName }) =>
+      matchesProfileFilter(profileSelections, profileName)
+    ),
+    ({ boost_profile: profileName }) => profileTypes.get(profileName)
+  );
+
   // The search box only searches text. The filters sit beside it and filter the rows themselves,
   // so they don't write query syntax into the box. It's above the table rather than the table's own,
   // which would set it further from the table than the details pages' searches.
@@ -82,7 +94,7 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
           onChange={setProfileSelections}
           profileNames={usedProfileNames}
         />
-        <TypeFilter value={typeFilter} onChange={setTypeFilter} />
+        <TypeFilter value={typeFilter} onChange={setTypeFilter} counts={typeCounts} />
       </EuiFilterGroup>,
       ...(canEdit
         ? [
@@ -105,7 +117,7 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
   return (
     <>
       <EuiSearchBar {...search} />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
       <RulesTable
         rules={rules}
         profiles={profiles}
@@ -113,6 +125,7 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
         canEdit={canEdit}
         filter={filter}
         searchQuery={searchQuery}
+        showsCount
         resetKey={`${[...profileSelections].join()}|${typeFilter ?? ''}`}
         tableCaption={i18n.translate('xpack.boost.rulesTab.caption', {
           defaultMessage: 'Boost rules',

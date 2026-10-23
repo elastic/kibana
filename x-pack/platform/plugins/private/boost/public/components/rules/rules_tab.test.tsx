@@ -279,6 +279,20 @@ describe('RulesTab search', () => {
 
     expect(screen.queryByText('picked')).not.toBeInTheDocument();
   });
+
+  it('counts the rules, and what each type filter would show, with the search', async () => {
+    renderTab('/rules');
+
+    expect(screen.getByTestId('boostRulesCount')).toHaveTextContent('Showing 1–6 of 6 boost rules');
+    expect(screen.getByTestId('boostTypeFilter-indices')).toHaveTextContent('5');
+    expect(screen.getByTestId('boostTypeFilter-data_streams')).toHaveTextContent('1');
+
+    // Two rules use the catalog-search profile; neither is for data streams.
+    await userEvent.type(screen.getByRole('searchbox'), 'catalog');
+    expect(screen.getByTestId('boostRulesCount')).toHaveTextContent('Showing 1–2 of 2 boost rules');
+    expect(screen.getByTestId('boostTypeFilter-indices')).toHaveTextContent('2');
+    expect(screen.getByTestId('boostTypeFilter-data_streams')).toBeDisabled();
+  });
 });
 
 describe('RulesTab editing', () => {

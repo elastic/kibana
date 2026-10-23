@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiText, EuiTextColor, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataStreamsBoostProfile } from '../../../common/types';
 import { parseMaxAge, toMaxAgeHours } from '../../../common/validation';
@@ -59,8 +59,8 @@ const getAgeTexts = (
  * A data streams profile's phases, newest data first like the timeline, in the same list as the
  * page's other settings and usage: each with the swatch of its timeline color, its boost, and the
  * ages of its data below, as a usage value has its share below. A standard phase that ends where
- * the recent one does never holds data, so it's disabled, saying only that it's skipped, and why in
- * its tooltip.
+ * the recent one does never holds data, so it's disabled, saying it's skipped in place of its ages,
+ * and why in its tooltip.
  */
 export const PhaseList = ({ profile }: { profile: DataStreamsBoostProfile }) => {
   const { euiTheme } = useEuiTheme();
@@ -82,37 +82,28 @@ export const PhaseList = ({ profile }: { profile: DataStreamsBoostProfile }) => 
               : PERIOD_LABELS[period].description,
             isDisabled: isSkipped,
             // The phase's color in the timeline, which leaves it out when skipped.
+            // A dot in the phase's timeline color, which the timeline leaves out when skipped.
             titlePrepend: (
-              <span
+              <EuiIcon
+                type="dot"
+                color={isSkipped ? euiTheme.colors.textDisabled : colors[period].background}
+                // The dot is centered in its box, with a quarter of the box beside it, so this
+                // makes 8px between the dot and the title.
+                css={{ marginInlineEnd: euiTheme.size.xs }}
                 aria-hidden={true}
-                css={{
-                  display: 'inline-block',
-                  inlineSize: euiTheme.size.m,
-                  blockSize: euiTheme.size.m,
-                  marginInlineEnd: euiTheme.size.s,
-                  verticalAlign: 'middle',
-                  borderRadius: euiTheme.border.radius.small,
-                  backgroundColor: isSkipped
-                    ? euiTheme.colors.borderBasePlain
-                    : colors[period].background,
-                }}
               />
             ),
-            // A skipped phase has no data to boost, so it only says it's skipped.
-            description: isSkipped ? (
+            // Like the others, its boost, then what data it holds, which for a skipped phase is none.
+            description: (
               <EuiTextColor
-                color={euiTheme.colors.textDisabled}
+                color={isSkipped ? euiTheme.colors.textDisabled : 'inherit'}
                 data-test-subj={`boostProfilePhase-${period}`}
               >
-                {SKIPPED_LABEL}
-              </EuiTextColor>
-            ) : (
-              <div data-test-subj={`boostProfilePhase-${period}`}>
                 <div>{formatPhaseBoost(minBoost, maxBoost)}</div>
-                <EuiText size="xs" color="subdued">
-                  {ageTexts[period]}
+                <EuiText size="xs" color={isSkipped ? 'inherit' : 'subdued'}>
+                  {isSkipped ? SKIPPED_LABEL : ageTexts[period]}
                 </EuiText>
-              </div>
+              </EuiTextColor>
             ),
           };
         })}

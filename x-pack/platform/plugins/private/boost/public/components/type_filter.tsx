@@ -16,13 +16,16 @@ interface TypeFilterProps {
   /** The type shown, or undefined for both. */
   value?: BoostProfileType;
   onChange: (value?: BoostProfileType) => void;
+  /** How many rows each type would show, with the search and any other filters. */
+  counts: Readonly<Record<BoostProfileType, number>>;
 }
 
 /**
  * Indices and Data streams toggles for a filter group, set up like EUI's toggle group filter, but
- * kept out of the search box so its text stays the user's.
+ * kept out of the search box so its text stays the user's. Each counts what it would show, like the
+ * rule details page's filters.
  */
-export const TypeFilter = ({ value, onChange }: TypeFilterProps) => (
+export const TypeFilter = ({ value, onChange, counts }: TypeFilterProps) => (
   <>
     {PROFILE_TYPES.map((type, index) => {
       const isActive = value === type;
@@ -32,6 +35,9 @@ export const TypeFilter = ({ value, onChange }: TypeFilterProps) => (
           isToggle
           isSelected={isActive}
           hasActiveFilters={isActive}
+          numFilters={counts[type]}
+          // A filter with nothing to show is off, unless it's on already.
+          isDisabled={counts[type] === 0 && !isActive}
           aria-pressed={isActive}
           withNext={index < PROFILE_TYPES.length - 1}
           onClick={() => onChange(isActive ? undefined : type)}
@@ -49,3 +55,16 @@ export const matchesTypeFilter = (
   value: BoostProfileType | undefined,
   type: BoostProfileType | undefined
 ): boolean => value === undefined || value === type;
+
+/** How many rows of each type there are, for the filter's counts. */
+export const countByType = <T,>(
+  rows: readonly T[],
+  getType: (row: T) => BoostProfileType | undefined
+): Record<BoostProfileType, number> =>
+  rows.reduce<Record<BoostProfileType, number>>(
+    (counts, row) => {
+      const type = getType(row);
+      return type ? { ...counts, [type]: counts[type] + 1 } : counts;
+    },
+    { indices: 0, data_streams: 0 }
+  );
