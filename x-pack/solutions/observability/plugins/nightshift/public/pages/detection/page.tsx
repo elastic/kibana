@@ -111,7 +111,20 @@ export const DetectionPage = ({
           }),
         }}
       />
-      <EuiPageTemplate.Section component="div" restrictWidth={false}>
+      <EuiPageTemplate.Section
+        component="div"
+        restrictWidth={false}
+        grow
+        contentProps={{
+          css: css`
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: column;
+            min-height: 0;
+            width: 100%;
+          `,
+        }}
+      >
         <DetectionOverview
           status={maintenanceStatus.data}
           isStatusLoading={maintenanceStatus.isLoading}
@@ -122,11 +135,19 @@ export const DetectionPage = ({
           onRetry={() => void overview.refetch()}
         />
         <EuiSpacer size="m" />
-        <EuiFlexGroup gutterSize="l" alignItems="flexStart">
+        <EuiFlexGroup
+          gutterSize="l"
+          alignItems="stretch"
+          css={css`
+            flex: 1 1 auto;
+            min-height: 0;
+          `}
+        >
           <EuiFlexItem
             grow={false}
             css={css`
               width: ${euiTheme.base * 16}px;
+              min-height: 0;
             `}
           >
             <EntitiesPanel
@@ -136,7 +157,14 @@ export const DetectionPage = ({
               onKnowledgeClick={headerProps.onKnowledgeClick}
             />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem
+            css={css`
+              display: flex;
+              flex-direction: column;
+              min-width: 0;
+              min-height: 0;
+            `}
+          >
             <EuiTabs size="s">
               {getVisibleDetectionTabs(isDeveloperMode).map((id) => (
                 <EuiTab
@@ -155,36 +183,44 @@ export const DetectionPage = ({
               ))}
             </EuiTabs>
             <EuiSpacer size="m" />
-            <React.Suspense
-              fallback={
-                <EuiLoadingSpinner size="xl" data-test-subj="nightshiftDetectionTabLoading" />
-              }
+            <div
+              css={css`
+                flex: 1 1 auto;
+                min-height: 0;
+                overflow: auto;
+              `}
             >
-              {tab === 'events' && (
-                <EventsTab
-                  timeRange={timeRange}
-                  onTimeRangeChange={setTimeRange}
-                  entities={selection.entities}
-                  unassigned={selection.unassigned}
-                />
-              )}
-              {tab === 'rules' && (
-                <RulesTab
-                  timeRange={timeRange}
-                  onTimeRangeChange={setTimeRange}
-                  entities={selection.entities}
-                  unassigned={selection.unassigned}
-                />
-              )}
-              {tab === 'signals' && isDeveloperMode && (
-                <SignalsTab
-                  timeRange={timeRange}
-                  onTimeRangeChange={setTimeRange}
-                  entities={selection.entities}
-                  unassigned={selection.unassigned}
-                />
-              )}
-            </React.Suspense>
+              <React.Suspense
+                fallback={
+                  <EuiLoadingSpinner size="xl" data-test-subj="nightshiftDetectionTabLoading" />
+                }
+              >
+                {tab === 'events' && (
+                  <EventsTab
+                    timeRange={timeRange}
+                    onTimeRangeChange={setTimeRange}
+                    entities={selection.entities}
+                    unassigned={selection.unassigned}
+                  />
+                )}
+                {tab === 'rules' && (
+                  <RulesTab
+                    timeRange={timeRange}
+                    onTimeRangeChange={setTimeRange}
+                    entities={selection.entities}
+                    unassigned={selection.unassigned}
+                  />
+                )}
+                {tab === 'signals' && isDeveloperMode && (
+                  <SignalsTab
+                    timeRange={timeRange}
+                    onTimeRangeChange={setTimeRange}
+                    entities={selection.entities}
+                    unassigned={selection.unassigned}
+                  />
+                )}
+              </React.Suspense>
+            </div>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageTemplate.Section>

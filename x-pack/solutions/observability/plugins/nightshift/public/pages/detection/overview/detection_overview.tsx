@@ -101,6 +101,7 @@ export const DetectionOverview = ({
     <EuiPanel
       hasBorder
       hasShadow={false}
+      grow={false}
       paddingSize="m"
       data-test-subj="nightshiftDetectionOverview"
     >
