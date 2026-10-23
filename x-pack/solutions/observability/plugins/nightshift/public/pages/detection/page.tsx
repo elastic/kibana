@@ -28,12 +28,14 @@ import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/eb
 import {
   NIGHTSHIFT_EVENT_ID_QUERY_PARAM,
   NIGHTSHIFT_RULE_ID_QUERY_PARAM,
+  NIGHTSHIFT_SIGNAL_ID_QUERY_PARAM,
 } from '../../common/url_params';
 import { useDetectionOverview } from '../../data/detection_overview/use_detection_overview';
 import { useMaintenanceStatus } from '../../data/maintenance/use_significant_events_maintenance';
 import { useKibana } from '../../hooks/use_kibana';
+import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import type { DetectionTabId } from './detection_tabs';
-import { DETECTION_TAB_IDS, DETECTION_TAB_LABELS } from './detection_tabs';
+import { DETECTION_TAB_LABELS, getVisibleDetectionTabs } from './detection_tabs';
 import { DetectionOverview } from './overview/detection_overview';
 import { EntitiesPanel } from './entities/entities_panel';
 import { PAGE_QUERY_PARAM } from './constants';
@@ -50,6 +52,10 @@ const EventsTab = React.lazy(() =>
 
 const RulesTab = React.lazy(() =>
   import('./rules/rules_tab').then(({ RulesTab: Tab }) => ({ default: Tab }))
+);
+
+const SignalsTab = React.lazy(() =>
+  import('./signals/signals_tab').then(({ SignalsTab: Tab }) => ({ default: Tab }))
 );
 
 export type DetectionPageHeaderProps = Pick<
@@ -77,14 +83,18 @@ export const DetectionPage = ({
   const location = useLocation();
   const { euiTheme } = useEuiTheme();
   const maintenanceStatus = useMaintenanceStatus();
+  const { isDeveloperMode } = useDeveloperMode();
   const { timeRange, setTimeRange } = useDetectionTimeRange();
   const overview = useDetectionOverview(timeRange);
   const selection = useEntitySelection();
   // Tab switches keep every filter, so returning to a tab restores it; only pages and flyouts reset.
   const tabParams = new URLSearchParams(location.search);
-  [PAGE_QUERY_PARAM, NIGHTSHIFT_EVENT_ID_QUERY_PARAM, NIGHTSHIFT_RULE_ID_QUERY_PARAM].forEach(
-    (param) => tabParams.delete(param)
-  );
+  [
+    PAGE_QUERY_PARAM,
+    NIGHTSHIFT_EVENT_ID_QUERY_PARAM,
+    NIGHTSHIFT_RULE_ID_QUERY_PARAM,
+    NIGHTSHIFT_SIGNAL_ID_QUERY_PARAM,
+  ].forEach((param) => tabParams.delete(param));
   tabParams.set(RANGE_FROM_QUERY_PARAM, timeRange.from);
   tabParams.set(RANGE_TO_QUERY_PARAM, timeRange.to);
   const tabSearch = `?${tabParams.toString()}`;
@@ -128,7 +138,7 @@ export const DetectionPage = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTabs size="s">
-              {DETECTION_TAB_IDS.map((id) => (
+              {getVisibleDetectionTabs(isDeveloperMode).map((id) => (
                 <EuiTab
                   key={id}
                   isSelected={tab === id}
@@ -160,6 +170,14 @@ export const DetectionPage = ({
               )}
               {tab === 'rules' && (
                 <RulesTab
+                  timeRange={timeRange}
+                  onTimeRangeChange={setTimeRange}
+                  entities={selection.entities}
+                  unassigned={selection.unassigned}
+                />
+              )}
+              {tab === 'signals' && isDeveloperMode && (
+                <SignalsTab
                   timeRange={timeRange}
                   onTimeRangeChange={setTimeRange}
                   entities={selection.entities}
