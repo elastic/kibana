@@ -24,6 +24,7 @@ import { createFailError } from '@kbn/dev-cli-errors';
 
 import { KIBANA_JSONC_FILENAME, MOON_CONFIG_KEY_ORDER, MOON_CONST } from '../const';
 import type { MoonProjectConfig } from './moon_project_type';
+import { findNestedProjects } from './nested_projects';
 import {
   compactFilePathsToGlobs,
   filterPackages,
@@ -82,10 +83,18 @@ export function regenerateMoonProjects() {
       skip: [],
     };
 
-    const packages: Package[] = filter?.length
-      ? filterPackages(getPackages(REPO_ROOT), filter)
-      : getPackages(REPO_ROOT);
+    const allPackages = getPackages(REPO_ROOT);
+    const packages: Package[] = filter?.length ? filterPackages(allPackages, filter) : allPackages;
     const packageIds = packages.map((pkg) => pkg.name);
+
+    const nestedProjects = findNestedProjects(
+      allPackages.map((pkg) => pkg.normalizedRepoRelativeDir)
+    );
+    if (nestedProjects.length > 0) {
+      throw createFailError(
+        `Moon projects must not be nested inside other projects:\n  ${nestedProjects.join('\n  ')}`
+      );
+    }
 
     for (const pkg of packages) {
       log.verbose(`Generating project configuration for ${pkg.name}`);
