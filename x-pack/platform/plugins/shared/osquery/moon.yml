@@ -115,6 +115,4 @@ fileGroups:
     - test/scout_osquery_workflows/**/*
     - common/schemas/*/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}
