@@ -9,6 +9,7 @@
 
 export type { GetConfigFn } from './src/types';
 export { UI_SETTINGS, DEFAULT_HISTOGRAM_BAR_TARGET } from './src/constants';
+export { getAutoDateBucketTarget } from './src/get_auto_date_bucket_target';
 export { getEsQueryConfig } from './src/es_query';
 export {
   tabifyDocs,

@@ -64,6 +64,8 @@ export interface EsqlConversionCase {
   readonly columnRoles?: Readonly<Record<string, string>>;
   /** Models a detached time picker; auto date histograms fall back to 1h. */
   readonly omitDateRange?: true;
+  /** Override `histogram:barTarget` (fixture default 100). */
+  readonly histogramBarTarget?: number;
   /** Synthetic unit-only case that cannot run against the pinned sample datasets. */
   readonly skipApiExecution?: true;
   readonly expected: EsqlConversionSuccess | EsqlConversionFailure;

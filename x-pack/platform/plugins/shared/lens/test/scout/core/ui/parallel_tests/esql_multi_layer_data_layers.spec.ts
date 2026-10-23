@@ -22,7 +22,7 @@ import {
 const COUNT_QUERY =
   'FROM logstash-* | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS COUNT(*) BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend)';
 const MAX_QUERY =
-  'FROM logstash-* | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS MAX(bytes) BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend) | LIMIT 100';
+  'FROM logstash-* | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS MAX(bytes) BY @timestamp = BUCKET(@timestamp, 100, ?_tstart, ?_tend) | LIMIT 100';
 const X_DIMENSION = 'lnsXY_xDimensionPanel';
 const Y_DIMENSION = 'lnsXY_yDimensionPanel';
 
@@ -138,7 +138,7 @@ spaceTest.describe('Lens ES|QL data-layer lifecycle', { tag: '@local-stateful-cl
       const newSourceQuery =
         `FROM ${indexName} ` +
         '| WHERE utc_time >= ?_tstart AND utc_time <= ?_tend ' +
-        '| STATS COUNT(*) BY utc_time = BUCKET(utc_time, 75, ?_tstart, ?_tend)';
+        '| STATS COUNT(*) BY utc_time = BUCKET(utc_time, 100, ?_tstart, ?_tend)';
       await lens.workspace.submitEsqlQuery(newSourceQuery);
       await lens.dimensions.setTextBasedDimensionField(X_DIMENSION, 'utc_time', 1);
       await lens.dimensions.setTextBasedDimensionField(Y_DIMENSION, 'COUNT(*)', 1);

@@ -718,6 +718,7 @@
     "@kbn/entity-inventory-plugin": "workspace:*",
     "@kbn/entity-store": "workspace:*",
     "@kbn/error-boundary-example-plugin": "workspace:*",
+    "@kbn/es-date-rounding": "workspace:*",
     "@kbn/es-errors": "workspace:*",
     "@kbn/es-mappings": "workspace:*",
     "@kbn/es-query": "workspace:*",

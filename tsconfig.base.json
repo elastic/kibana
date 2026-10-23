@@ -1279,6 +1279,8 @@
       "@kbn/es/*": ["./src/platform/packages/shared/kbn-es/*"],
       "@kbn/es-archiver": ["./src/platform/packages/shared/kbn-es-archiver"],
       "@kbn/es-archiver/*": ["./src/platform/packages/shared/kbn-es-archiver/*"],
+      "@kbn/es-date-rounding": ["./src/platform/packages/shared/kbn-es-date-rounding"],
+      "@kbn/es-date-rounding/*": ["./src/platform/packages/shared/kbn-es-date-rounding/*"],
       "@kbn/es-errors": ["./src/platform/packages/shared/kbn-es-errors"],
       "@kbn/es-errors/*": ["./src/platform/packages/shared/kbn-es-errors/*"],
       "@kbn/es-mappings": ["./src/platform/packages/shared/kbn-es-mappings"],

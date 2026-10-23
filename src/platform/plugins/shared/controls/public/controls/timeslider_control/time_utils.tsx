@@ -10,7 +10,7 @@
 import React from 'react';
 import moment from 'moment-timezone';
 import type { EuiRangeTick } from '@elastic/eui';
-import { calcAutoIntervalNear } from '@kbn/data-plugin/common';
+import { ianaTimeZoneOrUtc, pickDateRounding } from '@kbn/es-date-rounding';
 
 const MAX_TICKS = 20; // eui range has hard limit of 20 ticks and throws when exceeded
 
@@ -54,25 +54,22 @@ function getScaledDateFormat(interval: number): string {
   return 'ss.SSS';
 }
 
-export function getInterval(min: number, max: number, steps = MAX_TICKS): number {
-  const duration = max - min;
-  let interval = calcAutoIntervalNear(MAX_TICKS, duration).asMilliseconds();
-  // Sometimes auto interval is not quite right and returns 2X, 3X, 1/2X, or 1/3X  requested ticks
-  const actualSteps = duration / interval;
+export function getInterval(min: number, max: number, timezone: string, steps = MAX_TICKS): number {
+  const { nominalMs } = pickDateRounding(steps, {
+    from: min,
+    to: max,
+    timeZone: ianaTimeZoneOrUtc(getMomentTimezone(timezone)),
+  });
+  const actualSteps = (max - min) / nominalMs;
+  // 1y is the coarsest pick. A range longer than 20 years still overflows EuiRange.
   if (actualSteps > MAX_TICKS) {
-    // EuiRange throws if ticks exceeds MAX_TICKS
-    // Adjust the interval to ensure MAX_TICKS is never exceeded
-    const factor = Math.ceil(actualSteps / MAX_TICKS);
-    interval = interval * factor;
-  } else if (actualSteps < MAX_TICKS / 2) {
-    // Increase number of ticks when ticks is less then half MAX_TICKS
-    interval = interval / 2;
+    return nominalMs * Math.ceil(actualSteps / MAX_TICKS);
   }
-  return interval;
+  return nominalMs;
 }
 
 export function getTicks(min: number, max: number, timezone: string): EuiRangeTick[] {
-  const interval = getInterval(min, max);
+  const interval = getInterval(min, max, timezone);
   const format = getScaledDateFormat(interval);
 
   let tickValue = Math.ceil(min / interval) * interval;

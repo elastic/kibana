@@ -9,10 +9,11 @@
 
 import { esql } from '@elastic/esql';
 import { UI_SETTINGS, convertIntervalToEsInterval } from '@kbn/data-plugin/common';
+import { getAutoDateBucketTarget } from '@kbn/data-service';
+import { ianaTimeZoneOrUtc, pickDateRounding } from '@kbn/es-date-rounding';
 import { TIME_SYSTEM_PARAMS, escapeEsqlColumnName } from '@kbn/esql-language';
 import moment from 'moment';
 import { partition } from 'lodash';
-import { calculateAuto } from '@kbn/calculate-auto';
 import type { DateRange, IndexPattern, OriginalColumn } from '../types';
 import type {
   DateHistogramIndexPatternColumn,
@@ -21,7 +22,7 @@ import type {
 } from '../datasources/operations';
 import type { FormBasedLayer, GenericIndexPatternColumn } from '../datasources/types';
 import { isColumnFormatted, isColumnOfType } from '../datasources/form_based/helpers';
-import { AUTO_TARGET_NUMBER_OF_BUCKETS, DEFAULT_STATIC_VALUE } from './constants';
+import { DEFAULT_STATIC_VALUE } from './constants';
 import { convertToAbsoluteDateRange } from './date_range';
 import { resolveTimeShift } from './time_shift';
 import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
@@ -223,7 +224,7 @@ export function generateEsqlQuery(
     queryParts.push(timeFilter);
   }
 
-  const histogramBarsTarget = uiSettings.get<number>(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
+  const histogramBarsTarget = getAutoDateBucketTarget((key) => uiSettings.get(key));
   const absDateRange = convertToAbsoluteDateRange(dateRange, nowInstant);
 
   const hasDateHistogram = esAggEntries.some(([, col]) => col.operationType === 'date_histogram');
@@ -469,10 +470,16 @@ export function generateEsqlQuery(
       if (interval === AUTO_INTERVAL) {
         if (hasDateRange(dateRange)) {
           const { toDate, fromDate } = absDateRange;
-          const absDate = new Date(toDate).getTime() - new Date(fromDate).getTime();
-          const rangeDuration = moment.duration(absDate, 'ms');
-          const intervalDuration = calculateAuto.near(AUTO_TARGET_NUMBER_OF_BUCKETS, rangeDuration);
-          intervalInMs = intervalDuration?.as('ms') ?? DEFAULT_DATE_HISTOGRAM_INTERVAL_MS;
+          const from = new Date(fromDate).getTime();
+          const to = new Date(toDate).getTime();
+          intervalInMs =
+            Number.isFinite(from) && Number.isFinite(to) && from < to
+              ? pickDateRounding(histogramBarsTarget, {
+                  from,
+                  to,
+                  timeZone: ianaTimeZoneOrUtc(uiSettings.get<string>(UI_SETTINGS.DATEFORMAT_TZ)),
+                }).nominalMs
+              : DEFAULT_DATE_HISTOGRAM_INTERVAL_MS;
         } else {
           // Fall back to default 1h when date range is missing
           intervalInMs = DEFAULT_DATE_HISTOGRAM_INTERVAL_MS;

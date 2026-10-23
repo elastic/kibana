@@ -105,7 +105,7 @@ describe('query', () => {
                 "fooField": Object {
                   "format": "strict_date_optional_time",
                   "gte": "2022-01-29T22:03:02.317Z",
-                  "lte": "2022-02-07T08:00:00.000Z",
+                  "lte": "2022-02-07T06:00:00.000Z",
                 },
               },
             },
@@ -161,7 +161,7 @@ describe('query', () => {
                 "fooField": Object {
                   "format": "strict_date_optional_time",
                   "gte": "2022-01-29T22:03:02.317Z",
-                  "lte": "2022-02-07T08:00:00.000Z",
+                  "lte": "2022-02-07T06:00:00.000Z",
                 },
               },
             },
@@ -222,7 +222,7 @@ describe('query', () => {
                 "fooField": Object {
                   "format": "strict_date_optional_time",
                   "gte": "2022-01-29T22:03:02.317Z",
-                  "lte": "2022-02-07T08:00:00.000Z",
+                  "lte": "2022-02-07T06:00:00.000Z",
                 },
               },
             },
@@ -284,7 +284,7 @@ describe('query', () => {
                 "fooField": Object {
                   "format": "strict_date_optional_time",
                   "gte": "2022-01-29T22:03:02.317Z",
-                  "lte": "2022-02-07T08:00:00.000Z",
+                  "lte": "2022-02-07T06:00:00.000Z",
                 },
               },
             },
@@ -373,7 +373,7 @@ describe('query', () => {
                 "fooField": Object {
                   "format": "strict_date_optional_time",
                   "gte": "2022-01-29T22:03:02.317Z",
-                  "lte": "2022-02-07T08:00:00.000Z",
+                  "lte": "2022-02-07T06:00:00.000Z",
                 },
               },
             },
@@ -412,7 +412,7 @@ describe('query', () => {
                 "fooField": Object {
                   "format": "strict_date_optional_time",
                   "gte": "2022-01-29T22:03:02.317Z",
-                  "lte": "2022-02-07T08:00:00.000Z",
+                  "lte": "2022-02-07T06:00:00.000Z",
                 },
               },
             },

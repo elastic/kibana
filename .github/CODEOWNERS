@@ -608,6 +608,7 @@ src/platform/packages/shared/kbn-entity-access-control @elastic/workflows-eng
 src/platform/packages/shared/kbn-entity-access-control-ui @elastic/workflows-eng
 src/platform/packages/shared/kbn-es @elastic/kibana-operations
 src/platform/packages/shared/kbn-es-archiver @elastic/appex-qa
+src/platform/packages/shared/kbn-es-date-rounding @elastic/kibana-discover @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-es-errors @elastic/kibana-core
 src/platform/packages/shared/kbn-es-mappings @elastic/kibana-core
 src/platform/packages/shared/kbn-es-query @elastic/kibana-discover
