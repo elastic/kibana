@@ -14,7 +14,6 @@ export const RateLimitCallout = ({ count, onShow }: { count: number; onShow?: ()
     announceOnMount
     size="s"
     color="warning"
-    iconType="hourglass"
     title={getRateLimitTitle(count)}
     text={listLabels.rateLimitBody}
     actionProps={
