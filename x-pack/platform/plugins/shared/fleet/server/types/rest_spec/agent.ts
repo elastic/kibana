@@ -26,8 +26,9 @@ const validateAgentsKueryField = (value: string) => {
 };
 
 export const AGENT_ID_MAX_LENGTH = 512;
-// Matches the FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH constant that will be introduced by elastic/kibana#288283.
-export const AGENTS_KUERY_MAX_LENGTH = 10_000;
+// The Fleet UI "select all" bulk selection excludes every managed and agentless agent by ID
+// (up to SO_SEARCH_LIMIT IDs, ~420k characters), so the limit must fit that generated query.
+export const AGENTS_KUERY_MAX_LENGTH = 500_000;
 
 const bulkAgentsSchema = ({
   idsDescription,
