@@ -848,7 +848,7 @@ describe('matchAttackFingerprints', () => {
     });
   });
 
-  it('reviews nothing and writes nothing when the fingerprint index was not read', async () => {
+  it('reviews every attack and writes nothing when the fingerprint index was not read', async () => {
     const index = jest.fn();
     const search = jest.fn(async (params: { index?: string; size?: number }) => {
       if (params.index === ATTACK_FINGERPRINT_INDEX) {
@@ -877,10 +877,21 @@ describe('matchAttackFingerprints', () => {
     } as never);
 
     expect(index).not.toHaveBeenCalled();
-    expect(result).toEqual({ output: { reviews: [], attachments: [] } });
+    expect(result).toEqual({
+      output: {
+        reviews: [
+          expect.objectContaining({
+            attack_discovery_id: ATTACK_ID,
+            related_investigation_id: '',
+            sibling_alert_ids: [],
+          }),
+        ],
+        attachments: [],
+      },
+    });
   });
 
-  it('reviews nothing when the fingerprint search fails', async () => {
+  it('does not write a fingerprint when the fingerprint search fails', async () => {
     const { esClient, contextManager, index } = createHarness();
     const search = (esClient as unknown as { search: jest.Mock }).search;
     search.mockImplementation(async (params: { index?: string; size?: number }) => {

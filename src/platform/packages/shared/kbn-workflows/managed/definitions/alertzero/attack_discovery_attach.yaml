@@ -74,20 +74,22 @@ consts:
   impact_entity_cap: 50
 steps:
   # The review creates the Investigation, after it has read the de-anonymized
-  # title. That read can take about a minute. Creating here would win that race
-  # and leave the anonymized title in place, and a create against an Investigation
-  # that already exists is logged as an error. Wait instead. A cross-run attach
-  # finds the Investigation on the first read. A same-run attach retries until the
-  # review has created it, for about two minutes. Still missing after that, this
-  # run stops. The next run attaches once the Investigation exists.
+  # title. Creating here would win that race and leave the anonymized title in
+  # place, and a create against an Investigation that already exists is logged
+  # as an error. Wait instead. A cross-run attach finds the Investigation on
+  # the first read. A same-run attach, or one whose review has not created the
+  # conversation yet, retries for 15 minutes. That is the same window the
+  # matcher treats the fingerprint as in flight. Generation will not hand this
+  # discovery to a later run, so the wait has to cover that window. Still
+  # missing after that, this run stops.
   - name: wait_for_investigation
     type: ai.conversation.metadata.read
     with:
       conversation_id: "{{ inputs.investigation_id }}"
     on-failure:
       retry:
-        max-attempts: 12
-        delay: 10s
+        max-attempts: 30
+        delay: 30s
 
   # The decision, before any attachment write. Says why this attack did not open
   # its own Investigation. It does not claim the attachments landed: those writes

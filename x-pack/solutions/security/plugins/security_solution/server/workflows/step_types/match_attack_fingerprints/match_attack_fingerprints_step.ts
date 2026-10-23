@@ -42,15 +42,14 @@ export const matchAttackFingerprintsStepDefinition = createServerStepDefinition(
           error: error instanceof Error ? error : new Error('Failed to match attack fingerprints'),
         };
       }
-      // A read that never happened must not open Investigations. The next run
-      // matches them once the index can be read. Any other failure still reviews
-      // every attack, which is what this run did before fingerprints existed.
+      // A read that never happened must not write a fingerprint. Generation will
+      // not hand these discoveries to a later run, so this run still reviews them.
       if (error instanceof FingerprintIndexUnreadError) {
         context.logger.error(
-          'Attack fingerprint index was not read; this run will not open investigations for it',
+          'Attack fingerprint index was not read; reviewing every attack and writing no fingerprint',
           error
         );
-        return { output: { reviews: [], attachments: [] } };
+        return { output: reviewsWhenMatchFails(parsed.data.attacks) };
       }
       context.logger.error('Failed to match attack fingerprints', error);
       return { output: reviewsWhenMatchFails(parsed.data.attacks) };

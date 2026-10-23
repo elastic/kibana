@@ -194,9 +194,9 @@ steps:
   # A match is attached instead of reviewed; a new canonical attack is written from
   # inside the step (`op_type: create`) so a parallel run cannot save a second copy.
   # An unexpected failure returns every attack as a review. A fingerprint index
-  # that was not read returns no reviews and writes nothing, so this run does not
-  # open Investigations the next run cannot match. `continue` covers a failure
-  # that still comes back as an error, and the fallback below dispatches those.
+  # that was not read does the same and writes nothing: generation will not hand
+  # those discoveries to a later run. `continue` covers a failure that still
+  # comes back as an error, and the fallback below dispatches those.
   - name: match_fingerprints
     type: security.matchAttackFingerprints
     on-failure:

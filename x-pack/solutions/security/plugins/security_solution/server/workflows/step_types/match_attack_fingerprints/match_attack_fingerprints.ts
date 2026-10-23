@@ -39,10 +39,9 @@ export const ATTACK_FINGERPRINT_TYPE = 'security.attack_fingerprint';
 export const ATTACK_FINGERPRINT_TAG = 'consumer:attack-discovery';
 
 /**
- * The fingerprint index was not searched. A missing privilege with
- * `ignore_unavailable` returns an empty success, and any other read failure used
- * to look the same as no stored fingerprints. Either one must not write a new
- * fingerprint or open an Investigation the next run cannot match.
+ * The fingerprint index was not searched. A missing privilege used to look the
+ * same as no stored fingerprints. The handler still reviews every attack. It
+ * does not write a fingerprint for a read that never happened.
  */
 export class FingerprintIndexUnreadError extends Error {
   constructor(message: string) {

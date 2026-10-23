@@ -3576,9 +3576,9 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
-      it('retries that read for about two minutes and stops if the investigation is still missing', () => {
+      it('retries that read for the 15 minutes a missing investigation stays in flight', () => {
         expect(stepIn(attachSteps, 'wait_for_investigation')?.['on-failure']).toEqual({
-          retry: { 'max-attempts': 12, delay: '10s' },
+          retry: { 'max-attempts': 30, delay: '30s' },
         });
       });
 
@@ -3678,8 +3678,8 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
-      it('bumps the attach workflow to version 4 so it waits for the investigation and acknowledges open alerts', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(4);
+      it('bumps the attach workflow to version 5 so the wait covers the in-flight window', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(5);
       });
 
       it('acknowledges the open alerts it tags', () => {

@@ -96,7 +96,10 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
  * because an attached attack no longer gets its own review.
  *
  * Version 4 waits for the review to create the Investigation instead of creating
- * it here, and acknowledges the open alerts it tags. The YAML change rolls out
+ * it here, and acknowledges the open alerts it tags.
+ *
+ * Version 5 keeps that wait open for 15 minutes, the same window the matcher
+ * treats a missing Investigation as in flight. The YAML change rolls out
  * through `definitionHash`; the bump is the deliberate signal.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW = {
@@ -104,7 +107,7 @@ export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW = {
   id: ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 4,
+  version: 5,
   yaml: ATTACK_DISCOVERY_ATTACH_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
