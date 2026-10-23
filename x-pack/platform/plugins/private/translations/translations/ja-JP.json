@@ -18327,7 +18327,6 @@
     "xpack.csp.rules.rulesTable.optionEnable": "有効にする",
     "xpack.csp.rules.rulesTable.ruleNumberColumnLabel": "ルール番号",
     "xpack.csp.rules.rulesTable.searchPlaceholder": "ルール名で検索",
-    "xpack.csp.rules.rulesTable.selectAllRulesAriaLabel": "現在のページのすべてのルールを選択",
     "xpack.csp.rules.rulesTable.selectAllRulesOption": "{total, plural, one {# rule} other {# 個のルール}}をすべて選択",
     "xpack.csp.rules.rulesTable.selectRuleAriaLabel": "ルールを選択：{ruleName}",
     "xpack.csp.rules.rulesTable.showingPageOfTotalLabel": "{pageSize}/{total, plural, one {# rule} other {# 個のルール}}を表示しています{pipe} {selectedRulesAmount, plural, one {# rule} other {# 個のルール}}が選択されています",

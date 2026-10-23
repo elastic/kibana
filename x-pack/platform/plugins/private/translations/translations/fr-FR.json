@@ -18240,7 +18240,6 @@
     "xpack.csp.rules.rulesTable.optionEnable": "Activer",
     "xpack.csp.rules.rulesTable.ruleNumberColumnLabel": "Numéro de règle",
     "xpack.csp.rules.rulesTable.searchPlaceholder": "Rechercher par nom de règle",
-    "xpack.csp.rules.rulesTable.selectAllRulesAriaLabel": "Sélectionnez toutes les règles sur la page actuelle",
     "xpack.csp.rules.rulesTable.selectAllRulesOption": "Tout sélectionner {total, plural, one {# rule} other {# règles}}",
     "xpack.csp.rules.rulesTable.selectRuleAriaLabel": "Règle de sélection : {ruleName}",
     "xpack.csp.rules.rulesTable.tableCaption": "Liste des règles de benchmark CSP",
