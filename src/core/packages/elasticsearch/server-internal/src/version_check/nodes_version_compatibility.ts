@@ -64,27 +64,29 @@ function getHumanizedNodeName(node: NodeInfo) {
   return 'v' + node.version + ' @ ' + publishAddress + '(' + node.ip + ')';
 }
 
+/** The outcome of a nodes info request: the nodes it returned, or the error it failed with. */
+export type NodesInfoResult = { ok: true; value: NodesInfo } | { ok: false; error: Error };
+
 const UNABLE_TO_RETRIEVE = 'Unable to retrieve version information from Elasticsearch nodes.';
 
-/** The compatibility of a nodes info request that failed; the message ends with the error's. */
-export const compatibilityFromRequestError = (
-  nodesInfoRequestError: Error,
-  kibanaVersion: string
-): NodesVersionCompatibility => ({
-  isCompatible: false,
-  message: `${UNABLE_TO_RETRIEVE} ${nodesInfoRequestError.message}`,
-  incompatibleNodes: [],
-  warningNodes: [],
-  kibanaVersion,
-  nodesInfoRequestError,
-});
-
-/** The compatibility of the nodes a nodes info request returned. */
+/** The compatibility of the cluster a nodes info request reported on; a failed request is incompatible. */
 export function compatibilityFromNodesInfo(
-  nodesInfo: NodesInfo,
+  result: NodesInfoResult,
   kibanaVersion: string,
   ignoreVersionMismatch: boolean
 ): NodesVersionCompatibility {
+  if (!result.ok) {
+    return {
+      isCompatible: false,
+      message: `${UNABLE_TO_RETRIEVE} ${result.error.message}`,
+      incompatibleNodes: [],
+      warningNodes: [],
+      kibanaVersion,
+      nodesInfoRequestError: result.error,
+    };
+  }
+
+  const nodesInfo = result.value;
   if (Object.keys(nodesInfo.nodes ?? {}).length === 0) {
     return {
       isCompatible: false,

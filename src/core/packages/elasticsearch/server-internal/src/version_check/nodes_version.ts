@@ -18,12 +18,12 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { HEALTH_CHECK_REQUEST_TIMEOUT } from './constants';
 import {
   compatibilityFromNodesInfo,
-  compatibilityFromRequestError,
   sameCompatibility,
   type NodesInfo,
   type NodesVersionCompatibility,
 } from './nodes_version_compatibility';
 import {
+  attempt,
   realClock,
   run,
   type Action,
@@ -119,9 +119,11 @@ const model = (
     };
   }
 
-  const compatibility = result.ok
-    ? compatibilityFromNodesInfo(result.value, config.kibanaVersion, config.ignoreVersionMismatch)
-    : compatibilityFromRequestError(result.error, config.kibanaVersion);
+  const compatibility = compatibilityFromNodesInfo(
+    result,
+    config.kibanaVersion,
+    config.ignoreVersionMismatch
+  );
   const controlState = nextControlState(state, result, compatibility);
   const changed =
     state.compatibility === undefined || !sameCompatibility(state.compatibility, compatibility);
@@ -162,14 +164,11 @@ export const checkEsNodesVersion = async ({
   ignoreVersionMismatch,
 }: CheckEsNodesVersionOptions): Promise<NodesVersionCompatibility> => {
   const fetch = fetchNodesInfo(internalClient);
-  const check = () =>
-    fetch().then(
-      (nodes) => compatibilityFromNodesInfo(nodes, kibanaVersion, ignoreVersionMismatch),
-      (error) =>
-        compatibilityFromRequestError(
-          error instanceof Error ? error : new Error(String(error)),
-          kibanaVersion
-        )
+  const check = async () =>
+    compatibilityFromNodesInfo(
+      await attempt(fetch, realClock.now),
+      kibanaVersion,
+      ignoreVersionMismatch
     );
   const first = await check();
   return first.nodesInfoRequestError ? check() : first;
