@@ -387,6 +387,112 @@ describe('score_resolution_entities', () => {
     });
   });
 
+  describe('membership from the entity store', () => {
+    const STORE_INDEX = '.entities.v2.latest.default-00001';
+    const RESOLVED_TO = 'entity.relationships.resolution.resolved_to';
+
+    const run = (pageSize = 10_000) =>
+      collectPages(
+        calculateResolutionEntityScores({
+          esClient,
+          crudClient,
+          logger,
+          entityType: EntityType.user,
+          alertsIndex: '.alerts-security.alerts-default',
+          lookupIndex: '.entity_analytics.risk_score.lookup-default',
+          pageSize,
+          sampleSize: 1000,
+          now: '2026-01-01T00:00:00.000Z',
+          calculationRunId: 'run-1',
+          watchlistConfigs: new Map(),
+          alertFilters: [],
+          membershipFromStore: true,
+        })
+      );
+
+    beforeEach(() => {
+      crudClient.latestIndexName = jest.fn<Promise<string>, []>().mockResolvedValue(STORE_INDEX);
+    });
+
+    it('scores store pages with the store joined, filtered to the members, with modifiers from both reads', async () => {
+      jest
+        .mocked(crudClient.listEntities)
+        .mockResolvedValueOnce({
+          entities: [],
+          took: 3,
+          fields: [
+            {
+              'entity.id': ['user:alias-a1'],
+              [RESOLVED_TO]: ['user:target-a'],
+              'asset.criticality': ['high_impact'],
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          entities: [],
+          took: 2,
+          fields: [{ 'entity.id': ['user:target-a'] }],
+        });
+      jest.mocked(esClient.esql.query).mockResolvedValue({
+        columns: [],
+        values: [
+          [
+            1,
+            20,
+            JSON.stringify({ risk_score: '50', id: 'alert-1', index: 'alerts', time: 'now' }),
+            'user:target-a|self',
+            'user:target-a',
+          ],
+        ],
+      });
+
+      const pages = await run();
+
+      expect(esClient.search).not.toHaveBeenCalled();
+      const [[request]] = jest.mocked(esClient.esql.query).mock.calls;
+      expect(request.query).toContain(`LOOKUP JOIN ${STORE_INDEX} ON entity_id == entity.id`);
+      expect(request.query).toContain('resolution_target_id <= "user:target-a"');
+      expect(request.filter).toEqual({
+        bool: {
+          filter: [
+            getResolutionPageMemberFilter(EntityType.user, ['user:target-a', 'user:alias-a1']),
+          ],
+        },
+      });
+      expect(pages).toEqual([
+        [
+          expect.objectContaining({
+            id_value: 'user:target-a',
+            modifiers: [
+              expect.objectContaining({
+                type: 'asset_criticality',
+                metadata: { criticality_level: 'high_impact', contributor_euid: 'user:alias-a1' },
+              }),
+            ],
+          }),
+        ],
+      ]);
+    });
+
+    it('skips a page with more members than a terms query accepts', async () => {
+      const aliases = Array.from({ length: MAX_RESOLUTION_PAGE_MEMBERS }, (_, i) => ({
+        'entity.id': [`user:alias-${i}`],
+        [RESOLVED_TO]: ['user:target-a'],
+      }));
+      jest
+        .mocked(crudClient.listEntities)
+        .mockResolvedValueOnce({ entities: [], took: 1, fields: aliases.slice(0, 2) })
+        .mockResolvedValueOnce({ entities: [], took: 1, fields: aliases })
+        .mockResolvedValue({ entities: [], took: 1, fields: [] });
+
+      const pages = await run(2);
+
+      expect(pages).toEqual([[]]);
+      expect(esClient.esql.query).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('skipped'));
+    });
+  });
+
   it('throws when member fetch receives more than the capped ids', async () => {
     await expect(
       fetchResolutionGroupMemberIds({

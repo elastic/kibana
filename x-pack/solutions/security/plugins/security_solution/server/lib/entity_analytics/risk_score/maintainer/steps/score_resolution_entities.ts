@@ -26,6 +26,11 @@ import type { PageStepRecorder, PageStepTimings, PageTimer } from '../utils/page
 import { createPageStepTimings } from '../utils/page_step_timings';
 import { buildResolutionModifierEntity } from './resolution_modifiers';
 import { getResolutionPageMemberFilter } from './resolution_member_filter';
+import {
+  byEntityId,
+  discoverResolutionPagesFromStore,
+  readResolutionTargets,
+} from './resolution_store_pages';
 import { parseEsqlResolutionScoreRow } from './parse_esql_row';
 import type { ParsedResolutionScore } from './parse_esql_row';
 import type { ScopedLogger } from '../utils/with_log_context';
@@ -56,6 +61,12 @@ interface ScoreResolutionEntitiesParams {
   joinEntityStore?: boolean;
   /** Reduce alerts to one row per entity before joining them to their resolution targets. */
   preAggregateByEntity?: boolean;
+  /**
+   * Full runs only: read each page's groups and their modifiers from the entity store, and join
+   * the store in the scoring query, instead of using the Phase 0 lookup index. Assumes every alert
+   * carries its stamped entity ID, which keeps the member filter exact.
+   */
+  membershipFromStore?: boolean;
 }
 
 interface ResolutionPageResult {
@@ -71,13 +82,25 @@ export interface ResolutionPageTask {
   resolutionTargetIds: string[];
   bounds: { lower?: string; upper: string } | undefined;
   timer: PageTimer;
+  /** Pages found in the entity store: the page's aliases, with their modifiers. */
+  aliasEntities?: Map<string, RiskScoreModifierEntity>;
 }
 
-/**
- * Finds the resolution pages, one after another: each composite aggregation over the lookup index
- * needs the previous one's `after_key`.
- */
-export const discoverResolutionPages = async function* ({
+const readsMembershipFromStore = ({
+  membershipFromStore,
+  targetEntityIds,
+}: ScoreResolutionEntitiesParams): boolean => membershipFromStore === true && !targetEntityIds;
+
+/** Finds the resolution pages, one after another, each starting where the previous one ended. */
+export const discoverResolutionPages = (
+  params: ScoreResolutionEntitiesParams
+): AsyncGenerator<ResolutionPageTask> =>
+  readsMembershipFromStore(params)
+    ? discoverResolutionPagesFromStore(params)
+    : discoverResolutionPagesFromLookup(params);
+
+/** Each composite aggregation over the lookup index needs the previous one's `after_key`. */
+const discoverResolutionPagesFromLookup = async function* ({
   esClient,
   logger,
   entityType,
@@ -133,7 +156,102 @@ export const discoverResolutionPages = async function* ({
 };
 
 /** Scores one resolution page: fetches its groups, scores them, then applies merged group modifiers. */
-export const scoreResolutionPage = async (
+export const scoreResolutionPage = (
+  params: ScoreResolutionEntitiesParams,
+  task: ResolutionPageTask
+): Promise<EntityRiskScoreRecord[]> =>
+  readsMembershipFromStore(params)
+    ? scoreResolutionPageFromStore(params, task)
+    : scoreResolutionPageFromLookup(params, task);
+
+/**
+ * The page's aliases already came with discovery. Reads the targets' own modifiers, scores the
+ * page's range with the store joined, and merges each group's modifiers from both reads.
+ */
+const scoreResolutionPageFromStore = async (
+  {
+    esClient,
+    crudClient,
+    logger,
+    entityType,
+    alertsIndex,
+    lookupIndex,
+    pageSize,
+    sampleSize,
+    now,
+    calculationRunId,
+    watchlistConfigs,
+    alertFilters,
+    preAggregateByEntity = false,
+  }: ScoreResolutionEntitiesParams,
+  { pageNumber, resolutionTargetIds, bounds, timer, aliasEntities = new Map() }: ResolutionPageTask
+): Promise<EntityRiskScoreRecord[]> => {
+  const targets = await timer.time(
+    'memberFetch',
+    () => readResolutionTargets({ crudClient, targetIds: resolutionTargetIds }),
+    (result) => result.tookMs
+  );
+  const memberEntities = new Map([...aliasEntities, ...byEntityId(targets.entities)]);
+  logger.debug(
+    `[resolution][page:${pageNumber}] store targets_requested=${resolutionTargetIds.length}, fetched=${targets.entities.length}, took=${targets.tookMs}ms`
+  );
+
+  const pageMemberIds = [...new Set([...resolutionTargetIds, ...aliasEntities.keys()])];
+  // The store join can't tell a target from an entity in no group, so only the member filter keeps
+  // the latter's alerts out. Without one, the page would score entities that aren't targets.
+  const memberFilter = getResolutionPageMemberFilter(entityType, pageMemberIds);
+  if (!memberFilter) {
+    logger.warn(
+      `[resolution][page:${pageNumber}] skipped: members=${pageMemberIds.length} exceed a terms query`
+    );
+    return [];
+  }
+
+  const { parsedScores, esqlRows, profileSummary } = await runResolutionScoringQuery({
+    esClient,
+    entityType,
+    resolutionTargetIds,
+    bounds,
+    entityStoreIndex: await crudClient.latestIndexName(),
+    preAggregate: preAggregateByEntity,
+    calculationRunId,
+    sampleSize,
+    pageSize,
+    alertsIndex,
+    lookupIndex,
+    alertFilters: [...alertFilters, memberFilter],
+    profile: shouldProfilePage(pageNumber),
+    timer,
+  });
+  if (profileSummary) {
+    logger.info(
+      `[resolution][page:${pageNumber}] esql profile ${JSON.stringify({
+        ...profileSummary,
+        members: pageMemberIds.length,
+        memberFilter: true,
+      })}`
+    );
+  }
+  logger.debug(
+    `[resolution][page:${pageNumber}] parsed_scores=${parsedScores.length}, esql_rows=${esqlRows}`
+  );
+  if (parsedScores.length === 0) {
+    return [];
+  }
+
+  return timer.timeSync('modifiers', () =>
+    applyResolutionModifiers({
+      parsedScores,
+      memberEntities,
+      now,
+      entityType,
+      calculationRunId,
+      watchlistConfigs,
+    })
+  );
+};
+
+const scoreResolutionPageFromLookup = async (
   {
     esClient,
     crudClient,

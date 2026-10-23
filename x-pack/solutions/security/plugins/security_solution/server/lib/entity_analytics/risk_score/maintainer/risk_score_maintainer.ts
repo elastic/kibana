@@ -82,6 +82,12 @@ type RunMetricsTracker = ReturnType<typeof createRunMetricsTracker>;
 type TelemetryReporter = ReturnType<typeof createRiskScoreMaintainerTelemetryReporter>;
 const toRunTag = (calculationRunId: string) => calculationRunId.slice(0, 8);
 
+/**
+ * Test setting: resolution reads its groups from the entity store, so the run skips Phase 0 and
+ * the lookup prune. Assumes every alert carries its stamped entity ID.
+ */
+const RESOLVE_FROM_ENTITY_STORE = true;
+
 type LookupIndexReadinessStatus = 'ready' | 'mapping_upgrade_failed';
 
 interface LookupIndexReadiness {
@@ -205,54 +211,58 @@ export const createRiskScoreMaintainer = ({
             logger.info(`maintainer health ${JSON.stringify(runHealth.stop())}`);
           let stage0Ms: number | undefined;
           telemetryReporter.clearGlobalSkipReason();
-          const phase0LookupStage = telemetryReporter.startPhase0LookupBuildStage({
-            namespace: runContext.namespace,
-            idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
-          });
-          const phase0StartedAtMs = Date.now();
-          try {
-            const phase0Summary = await runWithSpan({
-              name: ENTITY_ANALYTICS_SPAN_NAMES.phase0LookupBuild,
+          if (RESOLVE_FROM_ENTITY_STORE) {
+            logger.info('Phase 0 skipped: resolution reads its groups from the entity store');
+          } else {
+            const phase0LookupStage = telemetryReporter.startPhase0LookupBuildStage({
               namespace: runContext.namespace,
-              cb: () =>
-                buildLookupIndex({
-                  esClient: runContext.esClient,
-                  crudClient,
-                  logger,
-                  lookupIndex: runContext.lookupIndex,
-                  entityTypes: runConfig.entityTypes,
-                  calculationRunId,
-                  now: runNow,
-                  abortSignal: signal,
-                }),
+              idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
             });
-            stage0Ms = Date.now() - phase0StartedAtMs;
-            runHealth.mark('stage0');
-            phase0LookupStage.success({
-              lookupRowsWritten: phase0Summary.lookupRowsWritten,
-              entitiesIterated: phase0Summary.entitiesIterated,
-              pagesProcessed: phase0Summary.pagesProcessed,
-              bulkBatches: phase0Summary.bulkBatches,
-              lookupRowsFailed: phase0Summary.lookupRowsFailed,
-            });
-            frameworkTelemetry.report(
-              buildRiskScorePhase0EntityMaintainerRunSummary({
-                status: 'success',
-                durationMs: stage0Ms,
-                summary: phase0Summary,
-              })
-            );
-          } catch (error) {
-            phase0LookupStage.error({ errorKind: 'unexpected' });
-            frameworkTelemetry.report(
-              buildRiskScorePhase0EntityMaintainerRunSummary({
-                status: 'error',
-                durationMs: Date.now() - phase0StartedAtMs,
-                errorKind: 'unexpected',
-              })
-            );
-            logRunHealth();
-            throw error;
+            const phase0StartedAtMs = Date.now();
+            try {
+              const phase0Summary = await runWithSpan({
+                name: ENTITY_ANALYTICS_SPAN_NAMES.phase0LookupBuild,
+                namespace: runContext.namespace,
+                cb: () =>
+                  buildLookupIndex({
+                    esClient: runContext.esClient,
+                    crudClient,
+                    logger,
+                    lookupIndex: runContext.lookupIndex,
+                    entityTypes: runConfig.entityTypes,
+                    calculationRunId,
+                    now: runNow,
+                    abortSignal: signal,
+                  }),
+              });
+              stage0Ms = Date.now() - phase0StartedAtMs;
+              runHealth.mark('stage0');
+              phase0LookupStage.success({
+                lookupRowsWritten: phase0Summary.lookupRowsWritten,
+                entitiesIterated: phase0Summary.entitiesIterated,
+                pagesProcessed: phase0Summary.pagesProcessed,
+                bulkBatches: phase0Summary.bulkBatches,
+                lookupRowsFailed: phase0Summary.lookupRowsFailed,
+              });
+              frameworkTelemetry.report(
+                buildRiskScorePhase0EntityMaintainerRunSummary({
+                  status: 'success',
+                  durationMs: stage0Ms,
+                  summary: phase0Summary,
+                })
+              );
+            } catch (error) {
+              phase0LookupStage.error({ errorKind: 'unexpected' });
+              frameworkTelemetry.report(
+                buildRiskScorePhase0EntityMaintainerRunSummary({
+                  status: 'error',
+                  durationMs: Date.now() - phase0StartedAtMs,
+                  errorKind: 'unexpected',
+                })
+              );
+              logRunHealth();
+              throw error;
+            }
           }
           // Entity types are scored in parallel: each run reads alerts independently
           // and writes to the same risk-score data stream and entity store, with no
@@ -664,6 +674,7 @@ const executeEntityTypeRun = async ({
             pagesInFlight: 2,
             joinEntityStore: true,
             preAggregateByEntity: true,
+            membershipFromStore: RESOLVE_FROM_ENTITY_STORE,
             pageTimings: resolutionPageTimings,
           }),
       });
@@ -837,7 +848,8 @@ const executeEntityTypeRun = async ({
 
   checkAbortBetweenStages();
 
-  if (!skipRemainingStages) {
+  // Without Phase 0 nothing writes lookup docs, so there is nothing to prune.
+  if (!skipRemainingStages && !RESOLVE_FROM_ENTITY_STORE) {
     // Final cleanup: remove old lookup docs outside the current risk window.
     const riskWindowStart = runConfig.configuration.range?.start ?? 'now-30d';
     const pruneStartedAtMs = Date.now();
