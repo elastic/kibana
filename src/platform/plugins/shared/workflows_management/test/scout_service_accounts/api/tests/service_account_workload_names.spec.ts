@@ -29,8 +29,8 @@ apiTest.describe(
       workflowName: `Bound workload ${randomUUID()}`,
     };
 
-    apiTest.beforeAll(async ({ apiClient, samlAuth, config, esClient }) => {
-      await setup({ apiClient, samlAuth, config, esClient });
+    apiTest.beforeAll(async ({ apiClient, samlAuth, requestAuth, config, esClient }) => {
+      await setup({ apiClient, samlAuth, requestAuth, config, esClient });
       const { headers, accountId } = getContext();
       await createBoundWorkflow(apiClient, headers, { ...workflow, accountId });
     });

@@ -16,11 +16,24 @@ import {
   MOCK_IDP_UIAM_COSMOS_DB_URL,
   MOCK_IDP_UIAM_ORG_ADMIN_API_KEY,
 } from '@kbn/mock-idp-utils';
-import type { ApiClientFixture, EsClient, SamlAuth, ScoutTestConfig } from '@kbn/scout';
+import type {
+  ApiClientFixture,
+  EsClient,
+  RequestAuthFixture,
+  SamlAuth,
+  ScoutTestConfig,
+} from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { cleanupEsServiceAccounts } from './cleanup_es_service_accounts';
+
+/** Headers every suite request needs, to add to a caller's credentials. */
+export const commonHeaders = {
+  'kbn-xsrf': 'true',
+  'x-elastic-internal-origin': 'kibana',
+  'elastic-api-version': '2023-10-31',
+};
 
 export const authenticationStep = `  - name: authenticate
     type: elasticsearch.request
@@ -168,22 +181,26 @@ export const createServiceAccountSuite = (options: { testWritePermissions?: bool
   const setup = async ({
     apiClient,
     samlAuth,
+    requestAuth,
     config,
     esClient,
   }: {
     apiClient: ApiClientFixture;
     samlAuth: SamlAuth;
+    requestAuth: RequestAuthFixture;
     config: ScoutTestConfig;
     esClient: EsClient;
   }): Promise<void> => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-    headers = {
-      ...cookieHeader,
-      'kbn-xsrf': 'true',
-      'x-elastic-internal-origin': 'kibana',
-      'elastic-api-version': '2023-10-31',
-    };
-    const user = await apiClient.get('internal/security/me', { headers, responseType: 'json' });
+    const interactiveHeaders = { ...commonHeaders, ...cookieHeader };
+    // The same admin owns both credentials; only the API key survives scheduling a workflow task,
+    // which hands the caller's credential to Elasticsearch after the session token may have expired.
+    const { apiKeyHeader } = await requestAuth.getApiKey('admin');
+    headers = { ...commonHeaders, ...apiKeyHeader };
+    const user = await apiClient.get('internal/security/me', {
+      headers: interactiveHeaders,
+      responseType: 'json',
+    });
     expect(user).toHaveStatusCode(200);
     initiatingUser = user.body;
     expect(typeof initiatingUser.username).toBe('string');
@@ -204,7 +221,7 @@ export const createServiceAccountSuite = (options: { testWritePermissions?: bool
               'x-elastic-internal-origin': 'kibana',
               Authorization: `ApiKey ${MOCK_IDP_UIAM_ORG_ADMIN_API_KEY}`,
             }
-          : headers,
+          : interactiveHeaders,
         body: {
           name: `cp2-${name}-${Date.now()}`,
           roles:
