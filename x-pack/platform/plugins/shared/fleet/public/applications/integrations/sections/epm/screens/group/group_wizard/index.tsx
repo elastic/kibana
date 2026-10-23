@@ -89,6 +89,7 @@ import {
   getEnabledSignals,
   getEnabledStreams,
   getInstallSummary,
+  getEnabledPushSources,
   getGroupSteps,
   getSignalInfo,
   getTargetDataset,
@@ -102,6 +103,7 @@ import {
   HowStep,
   IntegrationSettingsSection,
   ReviewStep,
+  PushSourceStep,
   SignalStep,
   StepRecap,
   getStepVars,
@@ -415,6 +417,9 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({
       onStreamsChange={(packageName, enabled) =>
         updateState(packageName, (s) => ({ ...s, enabled: { ...s.enabled, ...enabled } }))
       }
+      onPushChange={(packageName, id, enabled) =>
+        updateState(packageName, (s) => ({ ...s, push: { ...s.push, [id]: enabled } }))
+      }
       onValueChange={(packageName, path, value) =>
         updateState(packageName, (s) => ({ ...s, values: { ...s.values, [path]: value } }))
       }
@@ -485,6 +490,7 @@ interface BodyProps {
   model?: SchemaModel;
   state: SchemaState;
   onStreamsChange: (packageName: string, enabled: Record<string, boolean>) => void;
+  onPushChange: (packageName: string, id: string, enabled: boolean) => void;
   onValueChange: (packageName: string, path: string, value: unknown) => void;
   onVarGroupChange: (
     packageName: string,
@@ -757,7 +763,12 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
       schemaLabels={group.schema_labels}
       detail={
         model
-          ? getEnabledSignals(model, state)
+          ? [
+              ...new Set([
+                ...getEnabledPushSources(model, state).map((p) => p.signal),
+                ...getEnabledSignals(model, state),
+              ]),
+            ]
               .map((s) => getSignalInfo(s).title)
               .join(', ')
           : undefined
@@ -790,6 +801,7 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
           packages={props.collectPackages}
           onPackageToggle={props.onPackageToggle}
           onStreamsChange={props.onStreamsChange}
+          onPushChange={props.onPushChange}
         />
       );
     }
@@ -873,6 +885,11 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
           method={props.method}
           showMethod={props.showHow}
           agentPolicySection={!props.showHow ? agentPolicySection : undefined}
+          showManagedUnavailable={
+            !props.showHow &&
+            !!model.supportsAgentless &&
+            !props.methods.includes(SetupTechnology.AGENTLESS)
+          }
           agentPolicyLabel={
             props.showHow && !isAgentless
               ? props.policyMode === 'new'
@@ -910,8 +927,12 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
         packageName: string;
       } => !!sec.model && !!sec.ctx && getEnabledSignals(sec.model, sec.state).includes(step)
     );
+    const pushSources = getEnabledPushSources(model, state).filter((p) => p.signal === step);
     return (
       <div css={css({ display: 'flex', flexDirection: 'column', gap: euiTheme.size.xl })}>
+        {pushSources.map((source) => (
+          <PushSourceStep key={source.id} source={source} recap={recap} />
+        ))}
         {sections.map((sec) => (
           <SignalStep
             key={sec.packageName}

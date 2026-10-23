@@ -39,14 +39,19 @@ import { getSchemaLabel } from '../../../../../../../../common/services';
 import type {
   CarryOverReport,
   InstallSummary,
+  PushSource,
   SchemaModel,
   SchemaState,
   WizardInput,
   WizardStream,
 } from './model';
 import {
+  MANAGED_INPUTS_BASE_URL,
   getContentInstallText,
   getDataStreamChoices,
+  getEnabledPushSources,
+  getPushSources,
+  isPushSourceEnabled,
   getEnabledSignals,
   isDataStreamChoiceEnabled,
   toggleDataStreamChoice,
@@ -105,6 +110,7 @@ export const CollectStep: React.FC<{
   packages: CollectPackage[];
   onPackageToggle: (packageName: string, selected: boolean) => void;
   onStreamsChange: (packageName: string, enabled: Record<string, boolean>) => void;
+  onPushChange: (packageName: string, id: string, enabled: boolean) => void;
 }> = (props) => {
   const { title, schemaLabels } = props;
   // Default (recommended) schema first, planned (not available yet) last
@@ -118,7 +124,12 @@ export const CollectStep: React.FC<{
   const selectedPackages = props.packages.filter((p) => p.selected);
   const noSignals =
     selectedPackages.length > 0 &&
-    selectedPackages.every((p) => !!p.model && getEnabledStreams(p.model, p.state).length === 0);
+    selectedPackages.every(
+      (p) =>
+        !!p.model &&
+        getEnabledStreams(p.model, p.state).length === 0 &&
+        getEnabledPushSources(p.model, p.state).length === 0
+    );
   const single = props.packages.length === 1 ? props.packages[0] : undefined;
 
   return (
@@ -224,6 +235,7 @@ export const CollectStep: React.FC<{
               state={single.state}
               title={title}
               onStreamsChange={(enabled) => props.onStreamsChange(single.packageName, enabled)}
+              onPushChange={(id, enabled) => props.onPushChange(single.packageName, id, enabled)}
             />
           )}
         </div>
@@ -280,10 +292,30 @@ const SignalPicker: React.FC<{
   state: SchemaState;
   title: string;
   onStreamsChange: (enabled: Record<string, boolean>) => void;
-}> = ({ model, state, title, onStreamsChange }) => {
+  onPushChange?: (id: string, enabled: boolean) => void;
+}> = ({ model, state, title, onStreamsChange, onPushChange }) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup gutterSize="s" responsive={false}>
+      {/* PROTOTYPE: signals pushed by the technology (Supabase Log Drain), see PUSH_SOURCES */}
+      {getPushSources(model).map((source) => (
+        <EuiFlexItem key={source.id}>
+          <ChoiceCard
+            control="checkbox"
+            title={getSignalInfo(source.signal).title}
+            description={
+              <>
+                {getSignalInfo(source.signal).description}
+                <br />
+                <strong>{source.title}</strong>: {source.description}
+              </>
+            }
+            checked={isPushSourceEnabled(source, state)}
+            onChange={() => onPushChange?.(source.id, !isPushSourceEnabled(source, state))}
+            data-test-subj={`groupWizardPush-${source.id}`}
+          />
+        </EuiFlexItem>
+      ))}
       {model.signals.map((signal) => {
         const info = getSignalInfo(signal);
         const streams = model.streams.filter((s) => s.signal === signal);
@@ -381,10 +413,53 @@ const METHOD_INFO: Record<SetupTechnology, { title: string; description: string 
     description: 'Install Elastic Agent on your hosts. Agent policies manage what it collects.',
   },
   [SetupTechnology.AGENTLESS]: {
-    title: 'Agentless',
+    title: 'Managed by Elastic',
     description: 'Elastic collects the data for you. Nothing to install.',
   },
 };
+
+/**
+ * PROTOTYPE: "Where to run" on review when the package supports agentless but this deployment
+ * doesn't (local stack, self-managed): the managed option shows, disabled, so the choice is
+ * visible. With both available, the "how" step handles it.
+ */
+export const WhereToRunSection: React.FC<{ title: string }> = ({ title }) => (
+  <div data-test-subj="groupWizardWhereToRun">
+    <SectionHeading title="Where to run" description={`How ${title} data gets collected.`} />
+    <EuiSpacer size="s" />
+    <EuiFlexGroup gutterSize="s" responsive={false}>
+      <EuiFlexItem>
+        <ChoiceCard
+          control="radio"
+          name="groupWizardWhereToRun"
+          title={METHOD_INFO[SetupTechnology.AGENT_BASED].title}
+          description={METHOD_INFO[SetupTechnology.AGENT_BASED].description}
+          checked
+          onChange={() => {}}
+          data-test-subj="groupWizardWhereToRun-agent"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <ChoiceCard
+          control="radio"
+          name="groupWizardWhereToRun"
+          title={METHOD_INFO[SetupTechnology.AGENTLESS].title}
+          description={
+            <>
+              {METHOD_INFO[SetupTechnology.AGENTLESS].description}
+              <br />
+              Available on Elastic Cloud and Serverless
+            </>
+          }
+          checked={false}
+          disabled
+          onChange={() => {}}
+          data-test-subj="groupWizardWhereToRun-agentless"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
+);
 
 export const HowStep: React.FC<{
   methods: SetupTechnology[];
@@ -573,6 +648,8 @@ export const ReviewStep: React.FC<{
   showMethod: boolean;
   /** Agent policy choice, when the "how" step is hidden. */
   agentPolicySection?: React.ReactNode;
+  /** PROTOTYPE: package supports agentless, this deployment doesn't - show it disabled. */
+  showManagedUnavailable?: boolean;
   agentPolicyLabel?: string;
   integrationSettings: React.ReactNode;
   onEdit: (step: string) => void;
@@ -584,6 +661,7 @@ export const ReviewStep: React.FC<{
   /** PROTOTYPE: pick-any schemas - the other selected packages. */
   extraPackages?: ReviewExtraPackage[];
 }> = (props) => {
+  const pushSources = getEnabledPushSources(props.model, props.state);
   const { euiTheme } = useEuiTheme();
   const { model, state, title } = props;
   const streams = getEnabledStreams(model, state);
@@ -593,7 +671,9 @@ export const ReviewStep: React.FC<{
   const extras = props.extraPackages ?? [];
   const isMulti = extras.length > 0;
   const allStreamCount =
-    streams.length + extras.reduce((n, e) => n + getEnabledStreams(e.model, e.state).length, 0);
+    streams.length +
+    pushSources.length +
+    extras.reduce((n, e) => n + getEnabledStreams(e.model, e.state).length, 0);
   const hasAnyContent =
     !!contentText?.hasContent ||
     extras.some(
@@ -684,6 +764,13 @@ export const ReviewStep: React.FC<{
               )
               .join(', ')
           )}
+        {pushSources.map((source) =>
+          row(
+            `${getSignalInfo(source.signal).title} (pushed)`,
+            `${source.title}: set up in ${title}, sends to ${MANAGED_INPUTS_BASE_URL}${source.endpointPath}`,
+            source.signal
+          )
+        )}
         {props.showMethod &&
           row(
             'Deployment',
@@ -774,8 +861,48 @@ export const ReviewStep: React.FC<{
         </EuiFormRow>
       )}
 
+      {props.showManagedUnavailable && <WhereToRunSection title={title} />}
       {props.agentPolicySection}
       {props.integrationSettings}
+    </div>
+  );
+};
+
+/* ---------- Push source step (prototype special case) ---------- */
+
+export const PushSourceStep: React.FC<{
+  source: PushSource;
+  recap: React.ReactNode;
+}> = ({ source, recap }) => {
+  const endpoint = `${MANAGED_INPUTS_BASE_URL}${source.endpointPath}`;
+  return (
+    <div css={sectionGap} data-test-subj={`groupWizardPushStep-${source.id}`}>
+      <StepIntro
+        title={`${getSignalInfo(source.signal).title}: ${source.title}`}
+        description={source.description}
+        recap={recap}
+      />
+      <EuiPanel hasBorder paddingSize="m">
+        <EuiText size="s">
+          <ol>
+            {source.setupSteps.map((text) => (
+              <li key={text}>{text}</li>
+            ))}
+          </ol>
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiFormRow label="Endpoint" fullWidth>
+          <EuiCode transparentBackground={false}>{endpoint}</EuiCode>
+        </EuiFormRow>
+        <EuiFormRow label="Header" fullWidth>
+          <EuiCode transparentBackground={false}>
+            {'Authorization: ApiKey <your Elastic API key>'}
+          </EuiCode>
+        </EuiFormRow>
+      </EuiPanel>
+      <EuiText size="xs" color="subdued">
+        Nothing is installed for this signal. Logs land in Elasticsearch as OpenTelemetry data.
+      </EuiText>
     </div>
   );
 };

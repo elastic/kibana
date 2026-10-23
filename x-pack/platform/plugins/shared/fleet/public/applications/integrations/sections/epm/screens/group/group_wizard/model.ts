@@ -244,6 +244,8 @@ export interface SchemaState {
   values: Record<string, unknown>;
   /** `package` or a stream id -> var group name -> selected option. Missing = first option. */
   varGroupSelections: Record<string, Record<string, string>>;
+  /** PROTOTYPE: push source id -> enabled. Missing = enabled. */
+  push?: Record<string, boolean>;
 }
 
 export const emptySchemaState = (): SchemaState => ({
@@ -337,11 +339,66 @@ export const getGroupSteps = (
   COLLECT_STEP,
   ...(showHow ? [HOW_STEP] : []),
   ...sortSignals(
-    units.flatMap(({ model, state }) => (model ? getEnabledSignals(model, state) : []))
+    units.flatMap(({ model, state }) =>
+      model
+        ? [
+            ...getEnabledSignals(model, state),
+            ...getEnabledPushSources(model, state).map((p) => p.signal),
+          ]
+        : []
+    )
   ),
   REVIEW_STEP,
   DETECT_STEP,
 ];
+
+/* ---------- Push sources (prototype special case) ---------- */
+
+/**
+ * PROTOTYPE: a signal the technology pushes to an Elastic managed endpoint, set up on the
+ * technology's side (no package policy, nothing to install). Hardcoded until packages can declare
+ * it. Supabase: logs come from a Supabase Log Drain into Managed Inputs, metrics from the
+ * `supabase` package (scrape).
+ */
+export interface PushSource {
+  id: string;
+  packageName: string;
+  signal: string;
+  title: string;
+  description: string;
+  /** Managed Inputs path the source sends to. */
+  endpointPath: string;
+  setupSteps: string[];
+}
+
+export const PUSH_SOURCES: PushSource[] = [
+  {
+    id: 'supabase-log-drain',
+    packageName: 'supabase',
+    signal: 'logs',
+    title: 'Supabase Log Drain',
+    description:
+      'Supabase pushes project logs to an Elastic managed endpoint. Set up in Supabase, nothing to install.',
+    endpointPath: '/inputs/supabase/_default_/v1/logs',
+    setupSteps: [
+      'In the Supabase dashboard, open Project Settings > Log Drains and add a destination.',
+      'Use the endpoint below and add the Authorization header with an Elastic API key.',
+      'Save. Logs from Postgres, Auth, Storage, Realtime, Edge Functions and the API gateway start flowing within a minute.',
+    ],
+  },
+];
+
+/** Placeholder until the deployment's Managed Inputs URL is known to Kibana. */
+export const MANAGED_INPUTS_BASE_URL = 'https://<deployment>.ingest.<region>.elastic.cloud';
+
+export const getPushSources = (model?: SchemaModel): PushSource[] =>
+  model ? PUSH_SOURCES.filter((p) => p.packageName === model.packageName) : [];
+
+export const isPushSourceEnabled = (source: PushSource, state: SchemaState) =>
+  state.push?.[source.id] ?? true;
+
+export const getEnabledPushSources = (model: SchemaModel | undefined, state: SchemaState) =>
+  getPushSources(model).filter((p) => isPushSourceEnabled(p, state));
 
 /* ---------- Review: what gets installed ---------- */
 

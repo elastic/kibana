@@ -287,6 +287,24 @@ describe('group wizard model', () => {
       expect(Object.values(toggleDataStreamChoice(choices[0], false))).toEqual([false, false]);
     });
 
+    it('push sources (Supabase Log Drain) add their signal step until turned off', () => {
+      const supabase = { ...buildSchemaModel(apacheInputOtelPackageInfo), packageName: 'supabase' };
+      expect(getGroupSteps([{ model: supabase, state: emptySchemaState() }])).toEqual([
+        'collect',
+        'logs',
+        'metrics',
+        'review',
+        'detect',
+      ]);
+      const off = { ...emptySchemaState(), push: { 'supabase-log-drain': false } };
+      expect(getGroupSteps([{ model: supabase, state: off }])).toEqual([
+        'collect',
+        'metrics',
+        'review',
+        'detect',
+      ]);
+    });
+
     it('pick-any: one settings step per signal across selected packages', () => {
       const nginx = buildSchemaModel(nginxPackageInfo);
       const apache = buildSchemaModel(apacheInputOtelPackageInfo);
