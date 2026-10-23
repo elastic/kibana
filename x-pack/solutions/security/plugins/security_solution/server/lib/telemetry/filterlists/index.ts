@@ -72,11 +72,11 @@ export class FilterList {
     this._prebuiltRulesAlerts = list;
   }
 
-  public get detectionAlertsInfluencerAllowlist(): string[] {
+  public get detectionAlertsInfluencerAllowlist(): AllowlistFields {
     return this._detectionAlertsInfluencerAllowlist;
   }
 
-  public set detectionAlertsInfluencerAllowlist(list: string[]) {
+  public set detectionAlertsInfluencerAllowlist(list: AllowlistFields) {
     this._detectionAlertsInfluencerAllowlist = list;
   }
 

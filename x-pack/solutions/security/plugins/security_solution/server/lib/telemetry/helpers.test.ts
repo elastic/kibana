@@ -1221,7 +1221,7 @@ describe('processDetectionRuleCustomizations', () => {
 });
 
 describe('buildSanitizedInfluencers', () => {
-  const allowlist = ['process.name', 'event.module'];
+  const allowlist = { 'process.name': true, 'event.module': true };
 
   it('returns undefined when influencers is missing', () => {
     expect(buildSanitizedInfluencers(undefined, allowlist)).toBeUndefined();

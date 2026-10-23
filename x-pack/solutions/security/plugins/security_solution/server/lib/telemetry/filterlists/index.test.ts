@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { copyAllowlistedFields, filterList as filterListSingleton } from '.';
+import { copyAllowlistedFields } from '.';
 import { prebuiltRuleAllowlistFields } from './prebuilt_rules_alerts';
-import { detectionAlertsInfluencerAllowlist } from './detection_alerts_influencer_allowlist';
 import type { AllowlistFields } from './types';
 import { unflatten } from '../helpers';
 import { createDefaultExternalRuleSource } from '../../detection_engine/rule_management/logic/detection_rules_client/mergers/rule_source/create_default_external_rule_source';
@@ -634,26 +633,6 @@ describe('Security Telemetry filters', () => {
         },
       };
       expect(filteredEvent).toStrictEqual(expectedEvent);
-    });
-  });
-
-  describe('detectionAlertsInfluencerAllowlist', () => {
-    afterEach(() => {
-      filterListSingleton.resetAllToDefault();
-    });
-
-    it('defaults to the bundled allowlist', () => {
-      expect(filterListSingleton.detectionAlertsInfluencerAllowlist).toEqual(
-        detectionAlertsInfluencerAllowlist
-      );
-    });
-
-    it('is restored to the default by resetAllToDefault', () => {
-      filterListSingleton.detectionAlertsInfluencerAllowlist = ['process.name'];
-      filterListSingleton.resetAllToDefault();
-      expect(filterListSingleton.detectionAlertsInfluencerAllowlist).toEqual(
-        detectionAlertsInfluencerAllowlist
-      );
     });
   });
 });

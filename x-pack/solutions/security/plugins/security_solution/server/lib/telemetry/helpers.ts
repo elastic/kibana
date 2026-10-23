@@ -14,6 +14,7 @@ import { set } from '@kbn/safer-lodash-set';
 import type { Logger, LogMeta } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { copyAllowlistedFields, filterList } from './filterlists';
+import type { AllowlistFields } from './filterlists/types';
 import type { PolicyConfig, PolicyData, SafeEndpointEvent } from '../../../common/endpoint/types';
 import type { ITelemetryReceiver } from './receiver';
 import type {
@@ -408,17 +409,15 @@ const isInfluencerEntry = (value: unknown): value is InfluencerEntry =>
  */
 export const buildSanitizedInfluencers = (
   influencers: SearchTypes,
-  allowlist: string[]
+  allowlist: AllowlistFields
 ): InfluencerEntry[] | undefined => {
   if (!Array.isArray(influencers) || influencers.length === 0) {
     return undefined;
   }
 
-  const allowed = new Set(allowlist);
-
   return influencers
     .filter(isInfluencerEntry)
-    .filter((entry) => allowed.has(entry.influencer_field_name))
+    .filter((entry) => allowlist[entry.influencer_field_name] === true)
     .map((entry) => ({
       influencer_field_name: entry.influencer_field_name,
       influencer_field_values: entry.influencer_field_values,
