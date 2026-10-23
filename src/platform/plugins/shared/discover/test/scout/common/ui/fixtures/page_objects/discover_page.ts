@@ -482,8 +482,7 @@ export class DiscoverPage extends DiscoverApp {
             // the cells add for copying.
             cell.querySelector<HTMLElement>(
               '.euiDataGridRowCell__content, .kbnDataGrid__cellContent'
-            ) ??
-            (cell as HTMLElement);
+            ) ?? (cell as HTMLElement);
           rows[rowIdx].push(content.innerText.trim());
         }
       });
