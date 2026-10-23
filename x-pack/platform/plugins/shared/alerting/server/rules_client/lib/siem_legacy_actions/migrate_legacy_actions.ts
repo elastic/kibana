@@ -15,7 +15,7 @@ import {
   deleteMigratedSidecars,
   deleteNotificationRulesOfRules,
   findAndTransformLegacyActions,
-} from './find_and_transform_legacy_actions';
+} from './transform_and_delete_legacy_actions';
 
 interface BulkMigrateLegacyActionsParams {
   context: RulesClientContext;

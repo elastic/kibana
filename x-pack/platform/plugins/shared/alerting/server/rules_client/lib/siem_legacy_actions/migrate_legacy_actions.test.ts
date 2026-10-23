@@ -13,7 +13,7 @@ import type { RawRule, RawRuleAction } from '../../../types';
 import { findRules } from '../../../application/rule/methods/find/find_rules';
 import { bulkDeleteRules } from '../../../application/rule/methods/bulk_delete';
 import { bulkMigrateLegacyActions } from './migrate_legacy_actions';
-import { deleteLegacyActionsForRules } from './find_and_transform_legacy_actions';
+import { deleteLegacyActionsForRules } from './transform_and_delete_legacy_actions';
 import type { LegacyIRuleActionsAttributes } from './types';
 import { legacyRuleActionsSavedObjectType } from './types';
 

@@ -23,7 +23,7 @@ jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invali
 jest.mock('../../../../lib/rule_gaps/soft_delete/soft_delete_gaps');
 
 jest.mock(
-  '../../../../rules_client/lib/siem_legacy_actions/find_and_transform_legacy_actions',
+  '../../../../rules_client/lib/siem_legacy_actions/transform_and_delete_legacy_actions',
   () => ({
     deleteLegacyActionsForRules: jest.fn(),
   })

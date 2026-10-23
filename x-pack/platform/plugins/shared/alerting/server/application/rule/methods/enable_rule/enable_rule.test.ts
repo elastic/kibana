@@ -29,7 +29,7 @@ jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actio
 });
 
 jest.mock(
-  '../../../../rules_client/lib/siem_legacy_actions/find_and_transform_legacy_actions',
+  '../../../../rules_client/lib/siem_legacy_actions/transform_and_delete_legacy_actions',
   () => ({
     deleteLegacyActionsForRules: jest.fn(),
   })
