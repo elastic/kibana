@@ -81,6 +81,29 @@ describe('AlertEpisodeStatusBadges', () => {
     expect(await screen.findByRole('tooltip')).toHaveTextContent(/snoozed/i);
   });
 
+  it('summarizes the snooze conditions in the tooltip when the snooze has any', async () => {
+    const user = userEvent.setup();
+    renderWithI18n(
+      <AlertEpisodeStatusBadges
+        status={ALERT_EPISODE_STATUS.ACTIVE}
+        groupAction={{
+          lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+          snoozedUntil: null,
+          snoozeConditions: [
+            { type: 'severity_change' },
+            { type: 'field_change', field: 'host.name' },
+          ],
+          snoozeConditionOperator: 'all',
+        }}
+      />
+    );
+    await user.hover(screen.getByTestId('alertEpisodeStatusCellSnoozeIndicator'));
+    const tooltip = await screen.findByRole('tooltip');
+    expect(tooltip).toHaveTextContent('severity is changed');
+    expect(tooltip).toHaveTextContent('and');
+    expect(tooltip).toHaveTextContent('field "host.name" is changed');
+  });
+
   it('renders checkCircle badge when acknowledged via episodeAction', () => {
     renderWithI18n(
       <AlertEpisodeStatusBadges

@@ -129,6 +129,8 @@ export const createClassicEpisodeSource = ({
 
   useWriteAccess: useClassicWriteAccess,
 
+  supportsConditionalSnooze: true,
+
   getRuleDetailsHref: (ruleId) =>
     `${host.appBasePath ?? `/app/${host.app}`}${host.pathPrefix}${getRuleDetailsRoute(ruleId)}`,
 });

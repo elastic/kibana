@@ -19,6 +19,7 @@ import type { EpisodeActionExtension, EpisodeDataSource } from '../types/episode
 import type { AlertEpisode } from '../queries/episodes_query';
 import { isSourceEpisode } from '../queries/episodes_query';
 import { withEpisodeWritePrivilege, type CanWriteEpisode } from '../utils/episode_write_privilege';
+import type { EpisodeSnoozePayload } from '../components/snooze_modal';
 import type { EpisodeAction } from './types';
 import { createAckAction } from './ack';
 import { createUnackAction } from './unack';
@@ -82,9 +83,7 @@ export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] 
     createUnackAction(actionDeps, ext('ALERTING_V2_UNACK_EPISODE')),
     createSnoozeAction(
       deps,
-      ext('ALERTING_V2_SNOOZE_EPISODE') as
-        | EpisodeActionExtension<{ snoozedUntil: string | null }>
-        | undefined
+      ext('ALERTING_V2_SNOOZE_EPISODE') as EpisodeActionExtension<EpisodeSnoozePayload> | undefined
     ),
     createUnsnoozeAction(actionDeps, ext('ALERTING_V2_UNSNOOZE_EPISODE')),
     createResolveAction(actionDeps, ext('ALERTING_V2_RESOLVE_EPISODE')),

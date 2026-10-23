@@ -135,6 +135,11 @@ export interface EpisodeDataSource {
   resolveRules?: (params: ResolveSourceRulesParams) => Promise<RuleResponse[]>;
   fetchSearchFields?: (params: EpisodeDataSourceBaseParams) => Promise<EpisodeSearchField[]>;
   actionExtensions?: Array<EpisodeActionExtension<any>>;
+  /**
+   * Whether the source's backend can evaluate snooze conditions, which gates the
+   * condition based tab of the snooze modal. Defaults to `false` when omitted.
+   */
+  supportsConditionalSnooze?: boolean;
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
   /**
    * Resolves which of this source's alerts the user may modify. Called as a React hook, so it can
