@@ -224,6 +224,8 @@ const useInstalledContent = (pkgName: string) => {
 export const DetectStep: React.FC<{
   title: string;
   schema: string;
+  /** PROTOTYPE: group `schema_labels`. */
+  schemaLabels?: Record<string, string>;
   pkgName: string;
   rows: DetectRow[];
   /** Saved package policy (agent-based), for agent input health. */
@@ -236,6 +238,7 @@ export const DetectStep: React.FC<{
 }> = ({
   title,
   schema,
+  schemaLabels,
   pkgName,
   rows,
   packagePolicy,
@@ -302,7 +305,7 @@ export const DetectStep: React.FC<{
                 <EuiBadge color="hollow">{isAgentless ? 'Agentless' : 'Elastic Agent'}</EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{getSchemaInfo(schema).title}</EuiBadge>
+                <EuiBadge color="hollow">{getSchemaInfo(schema, schemaLabels).title}</EuiBadge>
               </EuiFlexItem>
               {!isAgentless && agents?.total === 0 && rows.length > 0 && (
                 <EuiFlexItem grow={false}>

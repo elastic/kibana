@@ -21,7 +21,6 @@ import {
   fetchInfo,
   getLicensePath,
   fetchCategories,
-  fetchGroups,
   fetchList,
   getPackage,
 } from '.';
@@ -334,32 +333,6 @@ describe('fetchCategories', () => {
     expect(mockFetchUrl).toHaveBeenCalledTimes(1);
     const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
     expect(callUrl.searchParams.get('capabilities')).toBeNull();
-  });
-});
-
-// PROTOTYPE: integration groups
-describe('fetchGroups', () => {
-  beforeEach(() => {
-    mockFetchUrl.mockReset();
-    mockGetConfig.mockReset();
-    mockGetConfig.mockReturnValue({});
-  });
-
-  it('returns the registry groups', async () => {
-    const groups = [{ name: 'nginx', title: 'Nginx', schemas: { ecs: { package: 'nginx' } } }];
-    mockFetchUrl.mockResolvedValue(JSON.stringify(groups));
-    expect(await fetchGroups()).toEqual(groups);
-    expect(new URL(mockFetchUrl.mock.calls[0][0]).pathname).toBe('/groups');
-  });
-
-  it('returns no groups when the registry has no /groups endpoint', async () => {
-    mockFetchUrl.mockRejectedValue(new RegistryResponseError('Not found', 404));
-    expect(await fetchGroups()).toEqual([]);
-  });
-
-  it('rethrows other registry errors', async () => {
-    mockFetchUrl.mockRejectedValue(new RegistryResponseError('Bad gateway', 502));
-    await expect(fetchGroups()).rejects.toThrow('Bad gateway');
   });
 });
 

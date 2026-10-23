@@ -13,7 +13,6 @@ import {
   getInstalledGroupSchemas,
   getGroupInstalledLabel,
 } from './apply_group_packages';
-import { applyGrouping } from './apply_grouping';
 
 jest.mock('../card_utils', () => ({
   mapToCard: ({ item }: { item: PackageListItem }) => ({
@@ -23,7 +22,9 @@ jest.mock('../card_utils', () => ({
     description: item.description || '',
     url: `/detail/${item.id}`,
     categories: [],
-    icons: [],
+    icons: item.icons ?? [],
+    version: item.version,
+    release: 'beta',
   }),
 }));
 
@@ -39,15 +40,20 @@ const pkg = (name: string, extra: Record<string, unknown> = {}) =>
 
 const installed = { installationInfo: { install_status: installationStatuses.Installed } };
 
+const member = (pkgName: string, schema: string) => ({
+  package: pkgName,
+  version: '1.0.0',
+  title: pkgName,
+  schema,
+});
+
 const group: IntegrationGroup = {
   name: 'nginx',
   title: 'Nginx',
   description: 'Collect logs and metrics from Nginx web servers.',
-  icon: 'nginx_otel',
-  schemas: {
-    otel: { package: 'nginx_otel', default: true },
-    ecs: { package: 'nginx' },
-  },
+  icon: { package: 'nginx_otel', version: '1.0.0', path: 'img/nginx-group.svg' },
+  default: 'nginx_otel',
+  members: [member('nginx_otel', 'otel'), member('nginx', 'ecs')],
 };
 
 const params = {
@@ -61,20 +67,19 @@ const params = {
 const names = (items: Array<PackageListItem | unknown>) =>
   items.map((i) => (i as PackageListItem).name);
 
+const oneTemplate = { policy_templates: [{ name: 'default', title: 'Default' }] };
+
 describe('applyGroupPackages', () => {
-  it('no groups: passes items through', () => {
+  it('no groups and no groups of one: passes items through', () => {
     const items = [pkg('nginx'), pkg('redis')];
     const res = applyGroupPackages({ items, groups: [], ...params });
     expect(res.groupCards).toHaveLength(0);
     expect(res.remainingItems).toBe(items);
   });
 
-  it('one tile per group from the API, member packages hidden', () => {
-    const otel = pkg('nginx_otel', {
-      icons: [{ src: '/img/logo.svg', type: 'image/svg+xml' }],
-    });
+  it('one tile per group, member packages hidden', () => {
     const res = applyGroupPackages({
-      items: [pkg('nginx'), otel, pkg('redis')],
+      items: [pkg('nginx'), pkg('nginx_otel'), pkg('redis')],
       groups: [group],
       ...params,
     });
@@ -89,15 +94,39 @@ describe('applyGroupPackages', () => {
       url: '/integration_group/nginx',
       isIntegrationGroupCard: true,
       installStatus: undefined,
+      release: undefined,
     });
-    // Icon of the `icon` member, by absolute path
-    expect(card.icons).toEqual([
-      { src: '', path: '/package/nginx_otel/1.0.0/img/logo.svg', type: 'image/svg+xml' },
-    ]);
     expect(card.searchableContent).toContain('nginx_otel');
   });
 
-  it('skips schemas whose package is not listed, and groups with none listed', () => {
+  it('group icon from group.yml, by absolute path in the default member', () => {
+    const [card] = applyGroupPackages({
+      items: [pkg('nginx'), pkg('nginx_otel')],
+      groups: [group],
+      ...params,
+    }).groupCards;
+    expect(card.icons).toEqual([
+      {
+        src: '',
+        path: '/package/nginx_otel/1.0.0/img/nginx-group.svg',
+        type: 'image/svg+xml',
+      },
+    ]);
+  });
+
+  it('no group icon: icons of the default member, by absolute path', () => {
+    const otel = pkg('nginx_otel', { icons: [{ src: '/img/logo.svg', type: 'image/svg+xml' }] });
+    const [card] = applyGroupPackages({
+      items: [pkg('nginx'), otel],
+      groups: [{ ...group, icon: undefined }],
+      ...params,
+    }).groupCards;
+    expect(card.icons).toEqual([
+      { src: '', path: '/package/nginx_otel/1.0.0/img/logo.svg', type: 'image/svg+xml' },
+    ]);
+  });
+
+  it('skips members that are not listed, and groups with none listed', () => {
     const ecsOnly = applyGroupPackages({ items: [pkg('nginx')], groups: [group], ...params });
     expect(ecsOnly.groupCards.map((c) => c.title)).toEqual(['Nginx']);
     expect(ecsOnly.remainingItems).toEqual([]);
@@ -113,44 +142,81 @@ describe('applyGroupPackages', () => {
     expect(res.groupCards[0].installStatus).toBe(installationStatuses.Installed);
   });
 
-  it('labels', () => {
+  it('labels, renamed by the group schema_labels', () => {
     expect(getGroupInstalledLabel([])).toBeUndefined();
     expect(getGroupInstalledLabel(['ecs'])).toBe('Installed, ECS');
     expect(getGroupInstalledLabel(['otel'])).toBe('Installed, OTel');
     expect(getGroupInstalledLabel(['ecs', 'otel'])).toBe('Installed, ECS + OTel');
+    expect(getGroupInstalledLabel(['ecs', 'otel'], { schema_labels: { ecs: 'Legacy' } })).toBe(
+      'Installed, Legacy + OTel'
+    );
   });
 
-  // PROTOTYPE: second group with no Kibana changes. Spark/Tomcat still carry the static
-  // `group: apache` upstream, so the static Apache collection stays next to the group tile.
-  it('Apache: group tile and the static Apache collection', () => {
-    const apacheGroup: IntegrationGroup = {
-      name: 'apache',
-      title: 'Apache HTTP Server',
-      icon: 'apache',
-      schemas: { otel: { package: 'apache_otel', default: true }, ecs: { package: 'apache' } },
-    };
+  it('bare `group` strings without a group are separate tiles', () => {
     const items = [
-      pkg('apache', { title: 'Apache HTTP Server' }),
-      pkg('apache_otel', { title: 'Apache HTTP Server OpenTelemetry' }),
-      pkg('apache_spark', { group: 'apache', title: 'Apache Spark' }),
-      pkg('apache_tomcat', { group: 'apache', title: 'Apache Tomcat' }),
-      pkg('apache_tomcat_otel', {
-        type: 'content',
-        group: 'apache',
-        title: 'Apache Tomcat OpenTelemetry Assets',
-      }),
+      pkg('redis', { group: 'redis', ...oneTemplate }),
+      pkg('redis_otel', { group: 'redis', ...oneTemplate }),
     ];
-    const { groupCards, remainingItems } = applyGroupPackages({
-      items,
-      groups: [apacheGroup],
-      ...params,
+    const res = applyGroupPackages({ items, groups: [group], ...params });
+    expect(res.groupCards).toHaveLength(0);
+    expect(names(res.remainingItems)).toEqual(['redis', 'redis_otel']);
+  });
+
+  describe('groups of one', () => {
+    const packages = [
+      pkg('supabase', oneTemplate),
+      pkg('aws', {
+        policy_templates: [
+          { name: 'cloudtrail', title: 'CloudTrail' },
+          { name: 's3', title: 'S3' },
+        ],
+      }),
+      pkg('prometheus_input', { type: 'input', ...oneTemplate }),
+      pkg('old', { deprecated: { description: 'Deprecated' }, ...oneTemplate }),
+      pkg('nginx', oneTemplate),
+      pkg('nginx_otel', oneTemplate),
+    ];
+    // Catalog tiles: `policy_templates` stripped, multi-template packages flattened
+    const items = [
+      pkg('supabase'),
+      pkg('aws'),
+      pkg('aws', { id: 'aws-cloudtrail', integration: 'cloudtrail' }),
+      pkg('aws', { id: 'aws-s3', integration: 's3' }),
+      pkg('prometheus_input', { type: 'input' }),
+      pkg('old'),
+      pkg('nginx'),
+      pkg('nginx_otel'),
+    ];
+
+    it('single-template integration packages open the wizard, the rest stay stock', () => {
+      const res = applyGroupPackages({ items, groups: [group], packages, ...params });
+      expect(res.groupCards.map((c) => c.id)).toEqual(['group:nginx', 'epr:supabase']);
+      expect(res.remainingItems.map((i) => (i as PackageListItem).id)).toEqual([
+        'aws',
+        'aws-cloudtrail',
+        'aws-s3',
+        'prometheus_input',
+        'old',
+      ]);
     });
-    const { collectionCards, ungroupedItems } = applyGrouping({ items: remainingItems, ...params });
-    expect(groupCards.map((c) => c.title)).toEqual(['Apache HTTP Server']);
-    expect(ungroupedItems).toEqual([]);
-    // INTEGRATION_GROUPS.apache ("Apache technologies") still collects the upstream packages.
-    expect(collectionCards.map((c) => [c.title, c.groupMembers?.map((m) => m.name)])).toEqual([
-      ['Apache', ['apache_spark', 'apache_tomcat', 'apache_tomcat_otel']],
-    ]);
+
+    it('keeps the stock card, pointed at the wizard', () => {
+      const res = applyGroupPackages({ items, groups: [], packages, ...params });
+      const supabase = res.groupCards.find((c) => c.name === 'supabase');
+      expect(supabase).toEqual({
+        id: 'epr:supabase',
+        name: 'supabase',
+        title: 'supabase',
+        description: '',
+        url: '/integration_group/supabase',
+        categories: [],
+        icons: [],
+        version: '1.0.0',
+        release: 'beta',
+        isIntegrationGroupCard: true,
+      });
+      // Without groups, nginx members are groups of one too
+      expect(res.groupCards.map((c) => c.name)).toEqual(['supabase', 'nginx', 'nginx_otel']);
+    });
   });
 });

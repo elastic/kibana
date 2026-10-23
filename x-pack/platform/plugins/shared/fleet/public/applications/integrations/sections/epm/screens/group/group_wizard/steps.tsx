@@ -34,6 +34,7 @@ import {
 import type { AgentPolicy, NewPackagePolicy } from '../../../../../../../types';
 import type { PackagePolicyValidationResults } from '../../../../../../../../common/services';
 import { SetupTechnology } from '../../../../../../../../common/types';
+import { getSchemaLabel } from '../../../../../../../../common/services';
 
 import type {
   CarryOverReport,
@@ -45,7 +46,10 @@ import type {
 } from './model';
 import {
   getContentInstallText,
+  getDataStreamChoices,
   getEnabledSignals,
+  isDataStreamChoiceEnabled,
+  toggleDataStreamChoice,
   getEnabledStreams,
   getSchemaInfo,
   getSignalInfo,
@@ -74,6 +78,19 @@ export interface SchemaChoice {
   isReady: boolean;
   /** Signals the schema's child collects, once loaded. */
   signals?: string[];
+  /** PROTOTYPE: group `planned_schemas` - no package yet, shown disabled. */
+  isPlanned?: boolean;
+}
+
+/** A member package of the selected schema. */
+export interface CollectPackage {
+  packageName: string;
+  title: string;
+  description?: string;
+  model?: SchemaModel;
+  state: SchemaState;
+  selected: boolean;
+  isDefault: boolean;
 }
 
 export const CollectStep: React.FC<{
@@ -81,26 +98,32 @@ export const CollectStep: React.FC<{
   schemas: SchemaChoice[];
   schema: string;
   defaultSchema?: string;
+  schemaLabels?: Record<string, string>;
   onSchemaChange: (schema: string) => void;
   lastSwitch?: { from: string; to: string; report: CarryOverReport };
-  model?: SchemaModel;
-  state: SchemaState;
-  onStreamsChange: (enabled: Record<string, boolean>) => void;
+  /** Member packages of the selected schema. 2+ -> pick-any package cards. */
+  packages: CollectPackage[];
+  onPackageToggle: (packageName: string, selected: boolean) => void;
+  onStreamsChange: (packageName: string, enabled: Record<string, boolean>) => void;
 }> = (props) => {
-  const { euiTheme } = useEuiTheme();
-  const { model, state, onStreamsChange, title } = props;
-  // Default (recommended) schema first
+  const { title, schemaLabels } = props;
+  // Default (recommended) schema first, planned (not available yet) last
   const schemas = [...props.schemas].sort(
-    (a, b) => Number(b.schema === props.defaultSchema) - Number(a.schema === props.defaultSchema)
+    (a, b) =>
+      Number(!!a.isPlanned) - Number(!!b.isPlanned) ||
+      Number(b.schema === props.defaultSchema) - Number(a.schema === props.defaultSchema)
   );
   const switchNote =
     props.lastSwitch && props.lastSwitch.to === props.schema ? props.lastSwitch : undefined;
-  const noSignals = !!model && getEnabledStreams(model, state).length === 0;
+  const selectedPackages = props.packages.filter((p) => p.selected);
+  const noSignals =
+    selectedPackages.length > 0 &&
+    selectedPackages.every((p) => !!p.model && getEnabledStreams(p.model, p.state).length === 0);
+  const single = props.packages.length === 1 ? props.packages[0] : undefined;
 
   return (
     <div css={sectionGap}>
-      {/* Single-schema integrations skip the choice entirely (design I1). */}
-      {schemas.length > 1 && (
+      {schemas.length > 1 ? (
         <div data-test-subj="groupWizardSchemaChoice">
           <SectionHeading
             title="Data schema"
@@ -109,7 +132,7 @@ export const CollectStep: React.FC<{
           <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="s" responsive={false}>
             {schemas.map((s) => {
-              const info = getSchemaInfo(s.schema);
+              const info = getSchemaInfo(s.schema, schemaLabels);
               return (
                 <EuiFlexItem key={s.schema}>
                   <ChoiceCard
@@ -117,20 +140,29 @@ export const CollectStep: React.FC<{
                     name="groupWizardSchema"
                     title={info.title}
                     description={
-                      <>
-                        {info.description}
-                        {s.signals && (
-                          <>
-                            <br />
-                            {/* PROTOTYPE: makes per-schema coverage gaps visible (Apache OTel has no logs) */}
-                            Collects: {s.signals.map((sig) => getSignalInfo(sig).title).join(', ')}
-                          </>
-                        )}
-                      </>
+                      s.isPlanned ? (
+                        <>
+                          {info.description}
+                          <br />
+                          Not available yet
+                        </>
+                      ) : (
+                        <>
+                          {info.description}
+                          {s.signals && (
+                            <>
+                              <br />
+                              {/* PROTOTYPE: makes per-schema coverage gaps visible (Apache OTel has no logs) */}
+                              Collects:{' '}
+                              {s.signals.map((sig) => getSignalInfo(sig).title).join(', ')}
+                            </>
+                          )}
+                        </>
+                      )
                     }
                     badge={s.schema === props.defaultSchema ? 'Recommended' : undefined}
                     checked={props.schema === s.schema}
-                    disabled={!s.isReady}
+                    disabled={s.isPlanned || !s.isReady}
                     onChange={() => props.onSchemaChange(s.schema)}
                     data-test-subj={`groupWizardSchema-${s.schema}`}
                   />
@@ -148,11 +180,11 @@ export const CollectStep: React.FC<{
                   color="warning"
                   iconType="info"
                   data-test-subj="groupWizardCarryOver"
-                  title={`Switched to ${getSchemaInfo(switchNote.to).title}`}
+                  title={`Switched to ${getSchemaInfo(switchNote.to, schemaLabels).title}`}
                 >
                   {switchNote.report.lostSignals.length > 0 && (
                     <p>
-                      {getSchemaInfo(switchNote.to).title} doesn&apos;t collect{' '}
+                      {getSchemaInfo(switchNote.to, schemaLabels).title} doesn&apos;t collect{' '}
                       {switchNote.report.lostSignals
                         .map((sig) => getSignalInfo(sig).title.toLowerCase())
                         .join(' or ')}{' '}
@@ -169,70 +201,174 @@ export const CollectStep: React.FC<{
               </>
             )}
         </div>
+      ) : (
+        // One schema: read-only label, no disabled options (design: avoids a disabled OCSF on
+        // every tile).
+        <EuiText size="s" data-test-subj="groupWizardSchemaLabel">
+          <strong>Schema:</strong> {getSchemaLabel(props.schema, { schema_labels: schemaLabels })}
+        </EuiText>
       )}
 
-      <div>
-        <SectionHeading
-          title="Signals"
-          description="Pick what to collect. You can also skip collection and only install the assets."
-        />
-        <EuiSpacer size="s" />
-        {!model ? (
-          <EuiLoadingSpinner />
-        ) : (
-          <EuiFlexGroup gutterSize="s" responsive={false}>
-            {model.signals.map((signal) => {
-              const info = getSignalInfo(signal);
-              const streams = model.streams.filter((s) => s.signal === signal);
-              const checked = streams.some((s) => isStreamEnabled(s, state));
-              return (
-                <EuiFlexItem key={signal}>
-                  <ChoiceCard
-                    control="checkbox"
-                    title={info.title}
-                    description={info.description}
-                    checked={checked}
-                    onChange={() =>
-                      onStreamsChange(Object.fromEntries(streams.map((s) => [s.id, !checked])))
-                    }
-                    data-test-subj={`groupWizardSignal-${signal}`}
-                  >
-                    {streams.length > 1 && (
-                      <div
-                        css={css({
-                          display: 'flex',
-                          flexWrap: 'wrap',
-                          gap: `${euiTheme.size.xs} ${euiTheme.size.l}`,
-                          marginTop: euiTheme.size.s,
-                        })}
-                      >
-                        {streams.map((s) => (
-                          <EuiCheckbox
-                            key={s.id}
-                            id={`groupWizardStream-${s.id}`}
-                            label={<EuiText size="xs">{getStreamShortTitle(s, title)}</EuiText>}
-                            checked={isStreamEnabled(s, state)}
-                            onChange={(e) => onStreamsChange({ [s.id]: e.target.checked })}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </ChoiceCard>
-                </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGroup>
-        )}
-        {noSignals && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiText size="xs" color="subdued" data-test-subj="groupWizardNoSignalsHint">
-              Nothing selected: {title} will be added without collecting data, and only its assets
-              (dashboards and other saved objects) are installed.
+      {single ? (
+        <div>
+          <SectionHeading
+            title="Signals"
+            description="Pick what to collect. You can also skip collection and only install the assets."
+          />
+          <EuiSpacer size="s" />
+          {!single.model ? (
+            <EuiLoadingSpinner />
+          ) : (
+            <SignalPicker
+              model={single.model}
+              state={single.state}
+              title={title}
+              onStreamsChange={(enabled) => props.onStreamsChange(single.packageName, enabled)}
+            />
+          )}
+        </div>
+      ) : (
+        <div data-test-subj="groupWizardPackages">
+          <SectionHeading
+            title="Integrations"
+            description={`Pick one or more. Each one is added as its own integration on the same agent policy.`}
+          />
+          <EuiSpacer size="s" />
+          <div css={css({ display: 'flex', flexDirection: 'column', gap: 8 })}>
+            {props.packages.map((pkg) => (
+              <ChoiceCard
+                key={pkg.packageName}
+                control="checkbox"
+                title={pkg.title}
+                description={pkg.description ?? ''}
+                badge={pkg.isDefault ? 'Recommended' : undefined}
+                checked={pkg.selected}
+                // At least one package stays selected.
+                disabled={pkg.selected && selectedPackages.length === 1}
+                onChange={() => props.onPackageToggle(pkg.packageName, !pkg.selected)}
+                data-test-subj={`groupWizardPackage-${pkg.packageName}`}
+              >
+                {pkg.selected &&
+                  (pkg.model ? (
+                    <PackageStreamsPicker
+                      model={pkg.model}
+                      state={pkg.state}
+                      title={title}
+                      onStreamsChange={(enabled) => props.onStreamsChange(pkg.packageName, enabled)}
+                    />
+                  ) : (
+                    <EuiLoadingSpinner />
+                  ))}
+              </ChoiceCard>
+            ))}
+          </div>
+        </div>
+      )}
+      {noSignals && (
+        <EuiText size="xs" color="subdued" data-test-subj="groupWizardNoSignalsHint">
+          Nothing selected: {title} will be added without collecting data, and only its assets
+          (dashboards and other saved objects) are installed.
+        </EuiText>
+      )}
+    </div>
+  );
+};
+
+/** Signal cards (one per data stream type) with a checkbox per data stream. */
+const SignalPicker: React.FC<{
+  model: SchemaModel;
+  state: SchemaState;
+  title: string;
+  onStreamsChange: (enabled: Record<string, boolean>) => void;
+}> = ({ model, state, title, onStreamsChange }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiFlexGroup gutterSize="s" responsive={false}>
+      {model.signals.map((signal) => {
+        const info = getSignalInfo(signal);
+        const streams = model.streams.filter((s) => s.signal === signal);
+        const choices = getDataStreamChoices(model, signal);
+        const checked = streams.some((s) => isStreamEnabled(s, state));
+        return (
+          <EuiFlexItem key={signal}>
+            <ChoiceCard
+              control="checkbox"
+              title={info.title}
+              description={info.description}
+              checked={checked}
+              onChange={() =>
+                onStreamsChange(Object.fromEntries(streams.map((s) => [s.id, !checked])))
+              }
+              data-test-subj={`groupWizardSignal-${signal}`}
+            >
+              {choices.length > 1 && (
+                <div
+                  css={css({
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: `${euiTheme.size.xs} ${euiTheme.size.l}`,
+                    marginTop: euiTheme.size.s,
+                  })}
+                >
+                  {choices.map((c) => (
+                    <EuiCheckbox
+                      key={c.key}
+                      id={`groupWizardStream-${c.key}`}
+                      label={
+                        <EuiText size="xs">{getStreamShortTitle(c.streams[0], title)}</EuiText>
+                      }
+                      checked={isDataStreamChoiceEnabled(c, state)}
+                      onChange={(e) => onStreamsChange(toggleDataStreamChoice(c, e.target.checked))}
+                    />
+                  ))}
+                </div>
+              )}
+            </ChoiceCard>
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
+  );
+};
+
+/** Inside a package card: per signal, a checkbox per data stream. */
+const PackageStreamsPicker: React.FC<{
+  model: SchemaModel;
+  state: SchemaState;
+  title: string;
+  onStreamsChange: (enabled: Record<string, boolean>) => void;
+}> = ({ model, state, title, onStreamsChange }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div css={css({ marginTop: euiTheme.size.s })}>
+      {model.signals.map((signal) => {
+        const choices = getDataStreamChoices(model, signal);
+        return (
+          <div key={signal} css={css({ marginTop: euiTheme.size.xs })}>
+            <EuiText size="xs">
+              <strong>{getSignalInfo(signal).title}</strong>
             </EuiText>
-          </>
-        )}
-      </div>
+            <div
+              css={css({
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: `${euiTheme.size.xs} ${euiTheme.size.l}`,
+                marginTop: euiTheme.size.xs,
+              })}
+            >
+              {choices.map((c) => (
+                <EuiCheckbox
+                  key={c.key}
+                  id={`groupWizardStream-${model.packageName}-${c.key}`}
+                  label={<EuiText size="xs">{getStreamShortTitle(c.streams[0], title)}</EuiText>}
+                  checked={isDataStreamChoiceEnabled(c, state)}
+                  onChange={(e) => onStreamsChange(toggleDataStreamChoice(c, e.target.checked))}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };
@@ -416,9 +552,19 @@ export const IntegrationSettingsSection: React.FC<{
 
 /* ---------- Review ---------- */
 
+/** PROTOTYPE: another selected package of a pick-any schema, saved as its own package policy. */
+export interface ReviewExtraPackage {
+  packageName: string;
+  model: SchemaModel;
+  state: SchemaState;
+  packagePolicy?: NewPackagePolicy;
+  installSummary?: InstallSummary;
+}
+
 export const ReviewStep: React.FC<{
   title: string;
   schema: string;
+  schemaLabels?: Record<string, string>;
   model: SchemaModel;
   state: SchemaState;
   packagePolicy: NewPackagePolicy;
@@ -435,6 +581,8 @@ export const ReviewStep: React.FC<{
   onInstallContentChange: (installContent: boolean) => void;
   /** Set when the package is already installed: the choice was made then, shown read-only. */
   installContentLockedReason?: string;
+  /** PROTOTYPE: pick-any schemas - the other selected packages. */
+  extraPackages?: ReviewExtraPackage[];
 }> = (props) => {
   const { euiTheme } = useEuiTheme();
   const { model, state, title } = props;
@@ -442,6 +590,16 @@ export const ReviewStep: React.FC<{
   const signals = getEnabledSignals(model, state);
   const summary = props.installSummary;
   const contentText = summary && getContentInstallText(summary, props.installContent);
+  const extras = props.extraPackages ?? [];
+  const isMulti = extras.length > 0;
+  const allStreamCount =
+    streams.length + extras.reduce((n, e) => n + getEnabledStreams(e.model, e.state).length, 0);
+  const hasAnyContent =
+    !!contentText?.hasContent ||
+    extras.some(
+      (e) =>
+        e.installSummary && getContentInstallText(e.installSummary, props.installContent).hasContent
+    );
 
   const row = (label: string, value: React.ReactNode, editStep?: string) => (
     <div
@@ -480,7 +638,7 @@ export const ReviewStep: React.FC<{
         </EuiText>
       </div>
 
-      {streams.length === 0 && (
+      {allStreamCount === 0 && (
         <EuiCallOut
           announceOnMount
           iconType="info"
@@ -496,7 +654,8 @@ export const ReviewStep: React.FC<{
       )}
 
       <EuiPanel hasBorder paddingSize="m">
-        {row('Data schema', getSchemaInfo(props.schema).title, 'collect')}
+        {row('Data schema', getSchemaInfo(props.schema, props.schemaLabels).title, 'collect')}
+        {isMulti && row('Integration', `${model.packageTitle} (${props.packagePolicy.name})`)}
         {row(
           'Collect',
           streams.length
@@ -546,7 +705,58 @@ export const ReviewStep: React.FC<{
           )}
       </EuiPanel>
 
-      {contentText?.hasContent && (
+      {extras.map((extra) => {
+        const extraStreams = getEnabledStreams(extra.model, extra.state);
+        const extraContent =
+          extra.installSummary && getContentInstallText(extra.installSummary, props.installContent);
+        return (
+          <EuiPanel
+            key={extra.packageName}
+            hasBorder
+            paddingSize="m"
+            data-test-subj={`groupWizardReviewExtra-${extra.packageName}`}
+          >
+            {row(
+              'Integration',
+              `${extra.model.packageTitle}${
+                extra.packagePolicy ? ` (${extra.packagePolicy.name})` : ''
+              }`
+            )}
+            {row(
+              'Collect',
+              extraStreams.length
+                ? getEnabledSignals(extra.model, extra.state)
+                    .map(
+                      (sig) =>
+                        `${getSignalInfo(sig).title}: ${extraStreams
+                          .filter((s) => s.signal === sig)
+                          .map((s) => getStreamShortTitle(s, title))
+                          .join(', ')}`
+                    )
+                    .join(' · ')
+                : 'Nothing (assets only)',
+              'collect'
+            )}
+            {extraStreams.length > 0 &&
+              extra.packagePolicy &&
+              row(
+                'Data streams',
+                extraStreams
+                  .map(
+                    (s) =>
+                      `${s.signal}-${getTargetDataset(
+                        s,
+                        getDatasetVarValue(extra.packagePolicy!, extra.model, s)
+                      )}-*`
+                  )
+                  .join(', ')
+              )}
+            {extraContent && row('Installs', extraContent.installed)}
+          </EuiPanel>
+        );
+      })}
+
+      {hasAnyContent && (
         <EuiFormRow
           helpText={
             props.installContentLockedReason ??
@@ -575,11 +785,12 @@ export const ReviewStep: React.FC<{
 /** One-line reminder of the "what to collect" choices, with a link back to change them. */
 export const StepRecap: React.FC<{
   schema: string;
+  schemaLabels?: Record<string, string>;
   detail?: string;
   onEdit: () => void;
-}> = ({ schema, detail, onEdit }) => (
+}> = ({ schema, schemaLabels, detail, onEdit }) => (
   <EuiText size="xs" color="subdued" data-test-subj="groupWizardRecap">
-    {getSchemaInfo(schema).title} {detail ? `· ${detail} ` : ''}·{' '}
+    {getSchemaInfo(schema, schemaLabels).title} {detail ? `· ${detail} ` : ''}·{' '}
     <EuiLink onClick={onEdit} data-test-subj="groupWizardRecapEdit">
       Change
     </EuiLink>
@@ -644,7 +855,9 @@ export const SignalStep: React.FC<{
   ctx: VarFieldContext;
   icon: React.ReactNode;
   recap: React.ReactNode;
-}> = ({ signal, groupTitle, model, state, ctx, icon, recap }) => {
+  /** PROTOTYPE: pick-any schemas render one section per selected package. */
+  packageTitle?: string;
+}> = ({ signal, groupTitle, model, state, ctx, icon, recap, packageTitle }) => {
   const info = getSignalInfo(signal);
   const { packageVars, streams } = getStepVars(model, state, signal);
   const stepInputs = getStepInputs(model, state, signal);
@@ -663,7 +876,7 @@ export const SignalStep: React.FC<{
   return (
     <div css={sectionGap}>
       <StepIntro
-        title={info.title}
+        title={packageTitle ? `${packageTitle}: ${info.title}` : info.title}
         description={`Collect ${streams
           .map((s) => getStreamShortTitle(s, groupTitle).toLowerCase())
           .join(', ')} from ${groupTitle}.`}

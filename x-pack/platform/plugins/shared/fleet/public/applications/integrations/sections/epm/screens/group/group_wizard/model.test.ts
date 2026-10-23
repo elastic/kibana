@@ -27,11 +27,13 @@ import {
 } from './__fixtures__/otel_integrations';
 import {
   getGroupDefaultSchema,
-  getGroupSchemaChildren,
+  getGroupSchemas,
+  getPackageSchema,
+  getSchemaLabel,
 } from '../../../../../../../../common/services';
 import { SetupTechnology } from '../../../../../../../../common/types';
 
-import { nginxGroup, singleSchemaGroup } from './__fixtures__/groups';
+import { nginxGroup, pickAnyGroup, singleSchemaGroup } from './__fixtures__/groups';
 import type { SchemaModel, SchemaState, WizardStream } from './model';
 import {
   getAgentInputErrors,
@@ -39,7 +41,10 @@ import {
   getDeploymentMethods,
   getDetectStatus,
   getInstallSummary,
-  resolveDefaultSchema,
+  getGroupSteps,
+  getSchemaInfo,
+  getDataStreamChoices,
+  toggleDataStreamChoice,
   applySchemaState,
   buildSchemaModel,
   carryOverSchemaState,
@@ -237,25 +242,60 @@ describe('group wizard model', () => {
     });
   });
 
-  describe('default schema', () => {
-    const { schemas } = nginxGroup;
-    it('by solution when the group has that schema, else manifest default', () => {
-      expect(resolveDefaultSchema(schemas, 'oblt')).toBe('otel');
-      expect(resolveDefaultSchema(schemas, 'observability')).toBe('otel');
-      expect(resolveDefaultSchema(schemas, 'security')).toBe('ecs');
-      expect(resolveDefaultSchema(schemas, 'es')).toBe('otel');
-      expect(resolveDefaultSchema(schemas, 'classic')).toBe('otel');
-      expect(resolveDefaultSchema(schemas, undefined)).toBe('otel');
+  describe('schema', () => {
+    it('explicit manifest schema, else otelcol inputs -> otel, else ecs', () => {
+      expect(getPackageSchema(nginxPackageInfo)).toBe('ecs');
+      expect(getPackageSchema(nginxOtelIntegrationPackageInfo)).toBe('otel');
+      // Input package: the template's `input`
+      expect(getPackageSchema(apacheInputOtelPackageInfo)).toBe('otel');
+      expect(getPackageSchema({ ...nginxPackageInfo, schema: 'ocsf' })).toBe('ocsf');
     });
 
-    it('single-schema group without `default`', () => {
-      expect(getGroupSchemaChildren(singleSchemaGroup)).toEqual([
-        { schema: 'otel', package: 'nginx_otel' },
-      ]);
-      expect(getGroupDefaultSchema(singleSchemaGroup)).toBe('otel');
-      // Security prefers ECS, but this group has no ECS schema.
-      expect(resolveDefaultSchema({ otel: {} }, 'security')).toBe('otel');
-      expect(resolveDefaultSchema({ ecs: {}, otel: {} }, undefined)).toBe('ecs');
+    it('group schemas: default member first, distinct, planned left out', () => {
+      expect(getGroupSchemas(nginxGroup)).toEqual(['otel', 'ecs']);
+      expect(getGroupDefaultSchema({ ...nginxGroup, default: 'nginx' })).toBe('ecs');
+      expect(getGroupSchemas({ ...nginxGroup, default: 'nginx' })).toEqual(['ecs', 'otel']);
+      expect(getGroupSchemas(singleSchemaGroup)).toEqual(['otel']);
+      expect(getGroupSchemas(pickAnyGroup)).toEqual(['ecs']);
+    });
+
+    it('group schema_labels rename a schema', () => {
+      expect(getSchemaLabel('ecs', pickAnyGroup)).toBe('Legacy');
+      expect(getSchemaLabel('otel', pickAnyGroup)).toBe('OTel');
+      expect(getSchemaInfo('ecs', pickAnyGroup.schema_labels).title).toBe('Legacy');
+      expect(getSchemaInfo('prometheus').title).toBe('Prometheus');
+    });
+
+    it('one checkbox per data stream, even when several inputs collect it', () => {
+      const model = buildSchemaModel(nginxPackageInfo);
+      const access = model.streams.find((st) => st.dataset === 'nginx.access')!;
+      const twoInputs = {
+        ...model,
+        streams: [
+          ...model.streams,
+          { ...access, id: `other/${access.id}`, inputKey: 'other', enabledByDefault: false },
+        ],
+      };
+      const choices = getDataStreamChoices(twoInputs, 'logs');
+      expect(choices.map((c) => c.key)).toEqual(['logs-nginx.access', 'logs-nginx.error']);
+      expect(choices[0].streams).toHaveLength(2);
+      // On: default-enabled streams only. Off: all.
+      expect(toggleDataStreamChoice(choices[0], true)).toEqual({
+        [access.id]: true,
+        [`other/${access.id}`]: false,
+      });
+      expect(Object.values(toggleDataStreamChoice(choices[0], false))).toEqual([false, false]);
+    });
+
+    it('pick-any: one settings step per signal across selected packages', () => {
+      const nginx = buildSchemaModel(nginxPackageInfo);
+      const apache = buildSchemaModel(apacheInputOtelPackageInfo);
+      expect(
+        getGroupSteps([
+          { model: apache, state: emptySchemaState() },
+          { model: nginx, state: emptySchemaState() },
+        ])
+      ).toEqual(['collect', 'logs', 'metrics', 'review', 'detect']);
     });
   });
 

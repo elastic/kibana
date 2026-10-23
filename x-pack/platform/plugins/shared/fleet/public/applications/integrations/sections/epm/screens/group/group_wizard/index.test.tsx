@@ -13,7 +13,7 @@ import { act, fireEvent, waitFor, within } from '@testing-library/react';
 
 import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
 import type { IntegrationGroup, PackageInfo, PackageListItem } from '../../../../../../../types';
-import type { GroupSchemaOption } from '../../../../../../../hooks/use_group_package';
+import type { GroupMemberOption } from '../../../../../../../hooks/use_group_package';
 import { of } from 'rxjs';
 
 import {
@@ -26,7 +26,7 @@ import {
 
 import { nginxOtelPackageInfo, nginxPackageInfo } from './__fixtures__/nginx';
 import { apacheInputOtelPackageInfo, apachePackageInfo } from './__fixtures__/apache';
-import { apacheGroup, nginxGroup, singleSchemaGroup } from './__fixtures__/groups';
+import { apacheGroup, nginxGroup, pickAnyGroup, singleSchemaGroup } from './__fixtures__/groups';
 import { nginxOtelIntegrationPackageInfo } from './__fixtures__/otel_integrations';
 
 import { buildSchemaModel, getTargetDataset } from './model';
@@ -80,7 +80,7 @@ const listItem = (info: PackageInfo) =>
     type: info.type,
   } as unknown as PackageListItem);
 
-const option = (schema: string, info: PackageInfo): GroupSchemaOption => ({
+const option = (schema: string, info: PackageInfo): GroupMemberOption => ({
   schema,
   packageName: info.name,
   child: listItem(info),
@@ -105,7 +105,7 @@ describe('GroupOnboardingWizard', () => {
   let renderer: ReturnType<typeof createIntegrationsTestRendererMock>;
   const renderWizard = (
     group: IntegrationGroup,
-    options: GroupSchemaOption[],
+    options: GroupMemberOption[],
     projectType?: string,
     host: Partial<React.ComponentProps<typeof GroupOnboardingWizard>> = {}
   ) => {
@@ -224,11 +224,11 @@ describe('GroupOnboardingWizard', () => {
     expect(result.getByTestId('groupWizardSave')).toHaveTextContent('Install assets only');
   });
 
-  it('default schema follows the solution: Security -> ECS', async () => {
+  it('default schema: the default member schema (group.yml default), not the solution', async () => {
     const result = renderWizard(
-      nginxGroup,
+      { ...nginxGroup, default: 'nginx' },
       [option('otel', nginxOtelPackageInfo), option('ecs', nginxPackageInfo)],
-      'security'
+      'observability'
     );
     await waitFor(() =>
       expect(within(result.getByTestId('groupWizardSchema-ecs')).getByRole('radio')).toBeChecked()
@@ -241,6 +241,69 @@ describe('GroupOnboardingWizard', () => {
     const result = renderWizard(singleSchemaGroup, [option('otel', nginxOtelPackageInfo)]);
     await waitFor(() => expect(result.getByTestId('groupWizardSignal-logs')).toBeInTheDocument());
     expect(result.queryByTestId('groupWizardSchemaChoice')).not.toBeInTheDocument();
+    expect(result.getByTestId('groupWizardSchemaLabel')).toHaveTextContent('Schema: OTel');
+  });
+
+  it('pick-any: same-schema members as package cards, one package policy each', async () => {
+    (sendCreatePackagePolicyForRq as jest.Mock).mockClear();
+    (sendInstallPackage as jest.Mock).mockClear();
+    const result = renderWizard(pickAnyGroup, [
+      option('ecs', nginxPackageInfo),
+      option('ecs', apachePackageInfo),
+    ]);
+    // Renamed schema + planned schema shown disabled
+    await waitFor(() =>
+      expect(result.getByTestId('groupWizardSchema-ecs')).toHaveTextContent('Legacy')
+    );
+    expect(result.getByTestId('groupWizardSchema-prometheus')).toHaveTextContent(
+      'Not available yet'
+    );
+    expect(
+      within(result.getByTestId('groupWizardSchema-prometheus')).getByRole('radio')
+    ).toBeDisabled();
+    // Default member checked (and can't be the last one unchecked), the other opt-in
+    await waitFor(() =>
+      expect(
+        within(result.getByTestId('groupWizardPackage-nginx')).getAllByRole('checkbox').length
+      ).toBeGreaterThan(1)
+    );
+    const nginxCard = result.getByTestId('groupWizardPackage-nginx');
+    const apacheCard = result.getByTestId('groupWizardPackage-apache');
+    expect(within(nginxCard).getAllByRole('checkbox')[0]).toBeChecked();
+    expect(within(nginxCard).getAllByRole('checkbox')[0]).toBeDisabled();
+    expect(within(apacheCard).getAllByRole('checkbox')).toHaveLength(1);
+    click(within(apacheCard).getAllByRole('checkbox')[0]);
+    await waitFor(() =>
+      expect(
+        within(result.getByTestId('groupWizardPackage-apache')).getAllByRole('checkbox').length
+      ).toBeGreaterThan(1)
+    );
+
+    // Settings steps: one section per package
+    click(result.getByTestId('groupWizardNext'));
+    await waitFor(() => expect(result.getByText('Nginx: Logs')).toBeInTheDocument());
+    expect(result.getByText('Apache HTTP Server: Logs')).toBeInTheDocument();
+    click(result.getByTestId('groupWizardNext'));
+    await waitFor(() => expect(result.getByText('Nginx: Metrics')).toBeInTheDocument());
+    click(result.getByTestId('groupWizardNext'));
+    await waitFor(() => expect(result.getByTestId('groupWizardReview')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(result.getByTestId('groupWizardReviewExtra-apache')).toHaveTextContent('apache-1')
+    );
+
+    await waitFor(() => expect(result.getByTestId('groupWizardSave')).not.toBeDisabled());
+    click(result.getByTestId('groupWizardSave'));
+    await waitFor(() => expect(sendCreatePackagePolicyForRq).toHaveBeenCalledTimes(2));
+    const [first, second] = (sendCreatePackagePolicyForRq as jest.Mock).mock.calls.map((c) => c[0]);
+    expect(first.package.name).toBe('nginx');
+    expect(second.package.name).toBe('apache');
+    expect(second.policy_ids).toEqual(first.policy_ids);
+    expect(second.policy_ids.length).toBe(1);
+    expect(sendInstallPackage).toHaveBeenCalledWith('apache', '3.0.2', false, {
+      skipKibanaAssets: false,
+    });
+    (sendCreatePackagePolicyForRq as jest.Mock).mockClear();
+    (sendInstallPackage as jest.Mock).mockClear();
   });
 
   it('Apache: same code, OTel input package child with metrics only', async () => {

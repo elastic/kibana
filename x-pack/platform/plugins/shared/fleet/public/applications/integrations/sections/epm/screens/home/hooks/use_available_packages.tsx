@@ -248,18 +248,25 @@ export const useAvailablePackages = ({
   // Used by useBrowseIntegrationHook which applies both filters from the live URL.
   const allCards: IntegrationCardItem[] = useMemo(() => {
     // PROTOTYPE: integration groups get one tile each; their member packages are hidden.
+    // Single-template integration packages become wizard tiles too (groups of one).
     const { groupCards, remainingItems: eprAndCustomPackages } = applyGroupPackages({
       items: [...mergedEprPackages, ...(appendCustomIntegrations || [])],
       groups: integrationGroups?.items ?? [],
+      packages: eprPackages?.items,
       getHref,
       getAbsolutePath,
       addBasePath,
+      packageVerificationKeyId,
+      canAddIntegration,
     });
 
     let itemsToMap: Array<PackageListItem | CustomIntegration>;
     let extraCards: IntegrationCardItem[] = [...groupCards];
 
-    if (enableIntegrationCollectionTiles && enableCollectionGrouping) {
+    // PROTOTYPE: bare `group` strings (static INTEGRATION_GROUPS) no longer collapse packages
+    // into collection tiles; only integration groups (group.yml) do. Code kept for the real thing.
+    const collapseStaticGroups = false;
+    if (collapseStaticGroups && enableIntegrationCollectionTiles && enableCollectionGrouping) {
       const { collectionCards, ungroupedItems } = applyGrouping({
         items: eprAndCustomPackages,
         getHref,
@@ -295,6 +302,7 @@ export const useAvailablePackages = ({
     canAddIntegration,
     applyOnboardingOverride,
     enableCollectionGrouping,
+    eprPackages?.items,
     enableIntegrationCollectionTiles,
     getAbsolutePath,
     getHref,

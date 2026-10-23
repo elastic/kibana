@@ -159,7 +159,7 @@ export const getCategoriesHandler: FleetRequestHandler<
   return response.ok({ body, headers: { ...CACHE_CONTROL_10_MINUTES_HEADER } });
 };
 
-// PROTOTYPE: integration groups from the package registry
+// PROTOTYPE: integration groups, built from member packages that bundle a group.yml
 export const getIntegrationGroupsHandler: FleetRequestHandler = async (
   context,
   request,

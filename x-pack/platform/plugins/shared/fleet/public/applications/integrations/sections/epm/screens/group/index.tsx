@@ -19,7 +19,7 @@ import { EuiCallOut, EuiSkeletonText } from '@elastic/eui';
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../constants';
 import { useBreadcrumbs, useLink, useStartServices } from '../../../../hooks';
 import { useGroupPackage } from '../../../../../../hooks/use_group_package';
-import type { GroupSchemaOption } from '../../../../../../hooks/use_group_package';
+import type { GroupMemberOption } from '../../../../../../hooks/use_group_package';
 import type { IntegrationGroup } from '../../../../../../types';
 
 import type { GroupWizardExitResult } from './group_wizard';
@@ -28,7 +28,7 @@ import { GroupOnboardingWizard } from './group_wizard';
 export { GroupSchemaToggle } from './schema_toggle';
 export { GroupWizardModal, useGroupWizardModal } from './group_wizard_modal';
 
-const GroupWizardRoute: React.FC<{ group: IntegrationGroup; options: GroupSchemaOption[] }> = ({
+const GroupWizardRoute: React.FC<{ group: IntegrationGroup; options: GroupMemberOption[] }> = ({
   group,
   options,
 }) => {

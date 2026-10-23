@@ -263,6 +263,45 @@ export const getEnabledStreams = (model: SchemaModel, state: SchemaState) => {
   );
 };
 
+/**
+ * PROTOTYPE: one choice per data stream (signal + dataset). A data stream several inputs can
+ * collect (CrowdStrike FDR: aws-s3 or logfile) is one checkbox; turning it on enables its
+ * default-enabled streams (else the first), turning it off disables them all.
+ */
+export interface DataStreamChoice {
+  key: string;
+  title: string;
+  streams: WizardStream[];
+}
+
+export const getDataStreamChoices = (model: SchemaModel, signal: string): DataStreamChoice[] => {
+  const choices: DataStreamChoice[] = [];
+  model.streams
+    .filter((s) => s.signal === signal)
+    .forEach((stream) => {
+      const key = `${stream.signal}-${stream.dataset}`;
+      const existing = choices.find((c) => c.key === key);
+      if (existing) existing.streams.push(stream);
+      else choices.push({ key, title: stream.title, streams: [stream] });
+    });
+  return choices;
+};
+
+export const isDataStreamChoiceEnabled = (choice: DataStreamChoice, state: SchemaState) =>
+  choice.streams.some((s) => isStreamEnabled(s, state));
+
+export const toggleDataStreamChoice = (
+  choice: DataStreamChoice,
+  on: boolean
+): Record<string, boolean> => {
+  if (!on) return Object.fromEntries(choice.streams.map((s) => [s.id, false]));
+  const defaults = choice.streams.filter((s) => s.enabledByDefault);
+  const enable = new Set(
+    (defaults.length ? defaults : choice.streams.slice(0, 1)).map((s) => s.id)
+  );
+  return Object.fromEntries(choice.streams.map((s) => [s.id, enable.has(s.id)]));
+};
+
 export const getEnabledSignals = (model: SchemaModel, state: SchemaState) =>
   sortSignals(getEnabledStreams(model, state).map((s) => s.signal));
 
@@ -285,36 +324,24 @@ export const getSteps = (
   model: SchemaModel | undefined,
   state: SchemaState,
   { showHow = false }: { showHow?: boolean } = {}
+): WizardStep[] => getGroupSteps([{ model, state }], { showHow });
+
+/**
+ * PROTOTYPE: steps for one or more selected packages of a schema (pick-any members, e.g.
+ * crowdstrike + ti_crowdstrike): one settings step per signal any of them collects.
+ */
+export const getGroupSteps = (
+  units: Array<{ model?: SchemaModel; state: SchemaState }>,
+  { showHow = false }: { showHow?: boolean } = {}
 ): WizardStep[] => [
   COLLECT_STEP,
   ...(showHow ? [HOW_STEP] : []),
-  ...(model ? getEnabledSignals(model, state) : []),
+  ...sortSignals(
+    units.flatMap(({ model, state }) => (model ? getEnabledSignals(model, state) : []))
+  ),
   REVIEW_STEP,
   DETECT_STEP,
 ];
-
-/* ---------- Default schema ---------- */
-
-// Nima's install flow spec: Observability defaults to OTel, Security to ECS.
-const SOLUTION_SCHEMA: Record<string, string> = {
-  observability: 'otel',
-  oblt: 'otel',
-  security: 'ecs',
-};
-
-/**
- * Default schema: by solution (serverless project type or the space's solution view) when the
- * group has that schema, else the manifest's `default: true`, else the first schema.
- */
-export const resolveDefaultSchema = (
-  schemas: Record<string, { default?: boolean } | undefined>,
-  solution?: string
-): string | undefined => {
-  const names = Object.keys(schemas);
-  const preferred = solution ? SOLUTION_SCHEMA[solution] : undefined;
-  if (preferred && names.includes(preferred)) return preferred;
-  return names.find((name) => schemas[name]?.default) ?? names[0];
-};
 
 /* ---------- Review: what gets installed ---------- */
 
@@ -758,10 +785,19 @@ export const getSignalInfo = (signal: string) =>
 export const SCHEMA_INFO: Record<string, { title: string; description: string }> = {
   otel: { title: 'OpenTelemetry', description: 'OpenTelemetry semantic conventions.' },
   ecs: { title: 'ECS', description: 'Elastic Common Schema - best for compatibility.' },
+  prometheus: {
+    title: 'Prometheus',
+    description: 'Native Prometheus metric names and labels, stored as scraped.',
+  },
+  ocsf: { title: 'OCSF', description: 'Open Cybersecurity Schema Framework.' },
 };
 
-export const getSchemaInfo = (schema: string) =>
-  SCHEMA_INFO[schema] ?? { title: schema.toUpperCase(), description: '' };
+/** Schema copy. A group's `schema_labels` rename the title (Prometheus: ecs -> "Legacy"). */
+export const getSchemaInfo = (schema: string, schemaLabels?: Record<string, string>) => {
+  const info = SCHEMA_INFO[schema] ?? { title: schema.toUpperCase(), description: '' };
+  const label = schemaLabels?.[schema];
+  return label ? { ...info, title: label } : info;
+};
 
 const STEP_LABELS: Record<string, string> = {
   [COLLECT_STEP]: 'What to collect',

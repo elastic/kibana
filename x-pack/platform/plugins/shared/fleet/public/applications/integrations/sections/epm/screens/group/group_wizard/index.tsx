@@ -51,10 +51,15 @@ import {
 } from '../../../../../../../hooks';
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
 import { incrementPolicyName } from '../../../../../../../services';
-import type { GroupSchemaOption } from '../../../../../../../hooks/use_group_package';
+import type { GroupMemberOption } from '../../../../../../../hooks/use_group_package';
+import {
+  getDefaultMemberOption,
+  getGroupChildVersion,
+  getMemberInfoQueryOptions,
+} from '../../../../../../../hooks/use_group_package';
 import { GroupIcon } from '../group_icon';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
-import { validationHasErrors } from '../../../../../../../../common/services';
+import { getGroupSchemas, validationHasErrors } from '../../../../../../../../common/services';
 import { SetupTechnology } from '../../../../../../../../common/types';
 import { useOnSubmit } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks';
 import { useAgentless } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
@@ -62,7 +67,6 @@ import { PackageDocumentationModal } from '../../../../../../fleet/sections/agen
 import { SelectedPolicyTab } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/components';
 import { useAllNonManagedAgentPolicies } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/components/steps/components/use_policies';
 import type { SavedPolicyResult } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/types';
-import { getGroupChildVersion } from '../schema_toggle';
 
 import type {
   CarryOverReport,
@@ -85,14 +89,13 @@ import {
   getEnabledSignals,
   getEnabledStreams,
   getInstallSummary,
+  getGroupSteps,
   getSignalInfo,
-  getSteps,
   getTargetDataset,
   isSignalStep,
-  resolveDefaultSchema,
 } from './model';
 import { StepRail } from './primitives';
-import type { AgentPolicyMode, SchemaChoice } from './steps';
+import type { AgentPolicyMode, CollectPackage, SchemaChoice } from './steps';
 import {
   AgentPolicySection,
   CollectStep,
@@ -106,6 +109,8 @@ import {
 import { DetectStep } from './detect_step';
 import type { VarFieldContext } from './var_fields';
 import { countVarErrors } from './var_fields';
+import type { ExtraPackageInput } from './extra_packages';
+import { saveExtraPackagePolicies, useExtraPackagePolicies } from './extra_packages';
 
 /** What the wizard hands back to its host when the user leaves. */
 export interface GroupWizardExitResult {
@@ -138,7 +143,7 @@ export interface GroupWizardHostProps {
 
 interface WizardProps extends GroupWizardHostProps {
   group: IntegrationGroup;
-  options: GroupSchemaOption[];
+  options: GroupMemberOption[];
 }
 
 /** Current step + navigation, either in the URL (`?step=`) or in local state. */
@@ -167,19 +172,27 @@ const useStepState = (mode: 'url' | 'local') => {
 
 const EMPTY_STATE = emptySchemaState();
 
-interface SchemaPackage {
+interface MemberPackage {
   packageInfo?: PackageInfo;
   model?: SchemaModel;
   isLoading: boolean;
   error: unknown;
 }
 
-/** Full package info (archive-backed, like the stock create page) for every schema's child. */
-const useSchemaPackages = (options: GroupSchemaOption[]): Record<string, SchemaPackage> => {
+/** A selected member package with its loaded info and wizard state. */
+export interface WizardUnit {
+  packageName: string;
+  packageInfo?: PackageInfo;
+  model?: SchemaModel;
+  state: SchemaState;
+}
+
+/** Full package info (archive-backed, like the stock create page) for every member package. */
+const useMemberPackages = (options: GroupMemberOption[]): Record<string, MemberPackage> => {
   const results = useQueries({
     queries: options.map((option) => {
       const version = getGroupChildVersion(option);
-      const queryOptions = { full: true, prerelease: option.child?.release !== 'ga' };
+      const queryOptions = getMemberInfoQueryOptions(option.child);
       return {
         // Same key as useGetPackageInfoByKeyQuery, so the cache is shared with the stock pages.
         queryKey: [option.packageName, version, queryOptions],
@@ -200,34 +213,11 @@ const useSchemaPackages = (options: GroupSchemaOption[]): Record<string, SchemaP
         cache.current.set(packageInfo, model);
       }
       return [
-        option.schema,
+        option.packageName,
         { packageInfo, model, isLoading: !!results[i]?.isLoading, error: results[i]?.error },
       ];
     })
   );
-};
-
-/**
- * Solution the user is in: serverless project type, else the active space's solution view
- * (`oblt`, `security`, `es`, `classic`). `isResolved` turns true once the space has loaded.
- */
-export const useActiveSolution = () => {
-  const { cloud, spaces } = useStartServices();
-  const projectType = cloud?.serverless?.projectType;
-  const [space, setSpace] = useState<{ solution?: string; resolved: boolean }>({
-    resolved: !!projectType || !spaces,
-  });
-  useEffect(() => {
-    if (projectType || !spaces) return;
-    let cancelled = false;
-    Promise.resolve(spaces.getActiveSpace())
-      .then((s) => !cancelled && setSpace({ solution: s?.solution, resolved: true }))
-      .catch(() => !cancelled && setSpace({ resolved: true }));
-    return () => {
-      cancelled = true;
-    };
-  }, [projectType, spaces]);
-  return { solution: projectType ?? space.solution, isResolved: space.resolved };
 };
 
 export const GroupOnboardingWizard: React.FC<WizardProps> = ({
@@ -242,26 +232,42 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({
   const spaceSettings = useSpaceSettingsContext();
   const existingPolicies = useAllNonManagedAgentPolicies();
   const { isAgentlessEnabled } = useAgentless();
-  const packages = useSchemaPackages(options);
+  const packages = useMemberPackages(options);
 
-  // Default schema by solution (Nima): Observability -> otel, Security -> ecs, when the group has
-  // it; else the manifest's `default: true`; else the first schema.
-  const { solution, isResolved: isSolutionResolved } = useActiveSolution();
-  const defaultSchema = useMemo(
+  // Schemas come from the listed members' `schema`; the default is the default member's schema
+  // (group.yml `default`). Planned schemas (group.yml placeholder) show disabled.
+  const schemas = useMemo(
     () =>
-      resolveDefaultSchema(
-        Object.fromEntries(options.map((o) => [o.schema, group.schemas?.[o.schema]])),
-        solution
-      ),
-    [group.schemas, options, solution]
+      getGroupSchemas({
+        members: options.map((o) => ({
+          package: o.packageName,
+          version: o.child.version,
+          title: o.child.title,
+          schema: o.schema,
+        })),
+        default: group.default,
+      }),
+    [group.default, options]
   );
-  const [schema, setSchema] = useState<string>(defaultSchema ?? options[0].schema);
-  const userPickedSchema = useRef(false);
-  useEffect(() => {
-    if (isSolutionResolved && !userPickedSchema.current && defaultSchema) setSchema(defaultSchema);
-  }, [defaultSchema, isSolutionResolved]);
+  const defaultSchema = getDefaultMemberOption(group, options)?.schema ?? schemas[0];
+  const [schema, setSchema] = useState<string>(defaultSchema);
 
-  const [schemaStates, setSchemaStates] = useState<Record<string, SchemaState>>({});
+  // Pick-any: selected member packages per schema. Default: the default member if it has that
+  // schema, else the schema's first member.
+  const [selectedBySchema, setSelectedBySchema] = useState<Record<string, string[]>>({});
+  const membersOf = useCallback((s: string) => options.filter((o) => o.schema === s), [options]);
+  const selectedNamesOf = useCallback(
+    (s: string) => {
+      const members = membersOf(s);
+      const picked = selectedBySchema[s] ?? [
+        (members.find((o) => o.packageName === group.default) ?? members[0])?.packageName,
+      ];
+      return members.map((o) => o.packageName).filter((name) => picked.includes(name));
+    },
+    [membersOf, selectedBySchema, group.default]
+  );
+
+  const [packageStates, setPackageStates] = useState<Record<string, SchemaState>>({});
   const [policyOverrides, setPolicyOverrides] = useState<PolicyOverrides>({});
   const [lastSwitch, setLastSwitch] = useState<{
     from: string;
@@ -289,8 +295,17 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({
     }
   }, [existingPolicies.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const model = packages[schema]?.model;
-  const state = schemaStates[schema] ?? EMPTY_STATE;
+  const selectedNames = selectedNamesOf(schema);
+  const units: WizardUnit[] = selectedNames.map((name) => ({
+    packageName: name,
+    packageInfo: packages[name]?.packageInfo,
+    model: packages[name]?.model,
+    state: packageStates[name] ?? EMPTY_STATE,
+  }));
+  // The first selected package runs the stock create flow; the others are saved alongside it.
+  const primary = units[0];
+  const model = primary?.model;
+  const state = primary?.state ?? EMPTY_STATE;
 
   // "How" only shows when the child offers more than one deployment method.
   const methods = getDeploymentMethods(model, isAgentlessEnabled);
@@ -298,29 +313,46 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({
   const [pickedMethod, setPickedMethod] = useState<SetupTechnology>();
   const method = pickedMethod && methods.includes(pickedMethod) ? pickedMethod : methods[0];
 
-  const steps = useMemo(() => getSteps(model, state, { showHow }), [model, state, showHow]);
+  const unitsKey = units.map((u) => `${u.packageName}:${!!u.model}`).join(',');
+  const steps = useMemo(
+    () => getGroupSteps(units, { showHow }),
+    [unitsKey, packageStates, showHow] // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   const updateState = useCallback(
-    (fn: (s: SchemaState) => SchemaState) =>
-      setSchemaStates((prev) => ({ ...prev, [schema]: fn(prev[schema] ?? emptySchemaState()) })),
-    [schema]
+    (packageName: string, fn: (s: SchemaState) => SchemaState) =>
+      setPackageStates((prev) => ({
+        ...prev,
+        [packageName]: fn(prev[packageName] ?? emptySchemaState()),
+      })),
+    []
   );
 
   const onSchemaChange = (next: string) => {
     if (next === schema) return;
-    userPickedSchema.current = true;
-    const fromModel = packages[schema]?.model;
-    const toModel = packages[next]?.model;
+    const fromName = selectedNames[0];
+    const toName = selectedNamesOf(next)[0];
+    const fromModel = fromName ? packages[fromName]?.model : undefined;
+    const toModel = toName ? packages[toName]?.model : undefined;
     if (fromModel && toModel) {
       const result = carryOverSchemaState(
         { model: fromModel, state },
-        { model: toModel, state: schemaStates[next] }
+        { model: toModel, state: packageStates[toName] }
       );
-      setSchemaStates((prev) => ({ ...prev, [next]: result.state }));
+      setPackageStates((prev) => ({ ...prev, [toName]: result.state }));
       setLastSwitch({ from: schema, to: next, report: result.report });
     }
     setSchema(next);
   };
+
+  const onPackageToggle = (packageName: string, isSelected: boolean) =>
+    setSelectedBySchema((prev) => {
+      const current = selectedNamesOf(schema);
+      const next = isSelected
+        ? [...current, packageName]
+        : current.filter((name) => name !== packageName);
+      return next.length ? { ...prev, [schema]: next } : prev;
+    });
 
   // Page: the current step lives in `?step=` so browser back/forward moves between steps.
   // Embedded: local state, the host's URL is left alone.
@@ -343,16 +375,28 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({
     [navigate]
   );
 
-  const option = options.find((o) => o.schema === schema);
-  const schemaChoices: SchemaChoice[] = options.map((o) => ({
-    schema: o.schema,
-    isReady: !!packages[o.schema]?.model,
-    signals: packages[o.schema]?.model?.signals,
+  const schemaChoices: SchemaChoice[] = [
+    ...schemas.map((s) => {
+      const first = packages[selectedNamesOf(s)[0] ?? membersOf(s)[0]?.packageName];
+      return { schema: s, isReady: !!first?.model, signals: first?.model?.signals };
+    }),
+    ...(group.planned_schemas ?? [])
+      .filter((s) => !schemas.includes(s))
+      .map((s) => ({ schema: s, isReady: false, isPlanned: true })),
+  ];
+  const collectPackages: CollectPackage[] = membersOf(schema).map((o) => ({
+    packageName: o.packageName,
+    title: packages[o.packageName]?.packageInfo?.title ?? o.child.title,
+    description: packages[o.packageName]?.packageInfo?.description ?? o.child.description,
+    model: packages[o.packageName]?.model,
+    state: packageStates[o.packageName] ?? EMPTY_STATE,
+    selected: selectedNames.includes(o.packageName),
+    isDefault: o.packageName === group.default,
   }));
 
   return (
     <GroupWizardBody
-      key={schema}
+      key={`${schema}:${primary?.packageName}`}
       group={group}
       options={options}
       schema={schema}
@@ -360,19 +404,22 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({
       schemaChoices={schemaChoices}
       onSchemaChange={onSchemaChange}
       lastSwitch={lastSwitch}
-      pkgName={option?.packageName}
-      packageInfo={packages[schema]?.packageInfo}
-      packageInfoError={packages[schema]?.error}
+      collectPackages={collectPackages}
+      onPackageToggle={onPackageToggle}
+      units={units}
+      pkgName={primary?.packageName}
+      packageInfo={primary?.packageInfo}
+      packageInfoError={primary ? packages[primary.packageName]?.error : undefined}
       model={model}
       state={state}
-      onStreamsChange={(enabled) =>
-        updateState((s) => ({ ...s, enabled: { ...s.enabled, ...enabled } }))
+      onStreamsChange={(packageName, enabled) =>
+        updateState(packageName, (s) => ({ ...s, enabled: { ...s.enabled, ...enabled } }))
       }
-      onValueChange={(path, value) =>
-        updateState((s) => ({ ...s, values: { ...s.values, [path]: value } }))
+      onValueChange={(packageName, path, value) =>
+        updateState(packageName, (s) => ({ ...s, values: { ...s.values, [path]: value } }))
       }
-      onVarGroupChange={(scopeKey, groupName, optionName) =>
-        updateState((s) => ({
+      onVarGroupChange={(packageName, scopeKey, groupName, optionName) =>
+        updateState(packageName, (s) => ({
           ...s,
           varGroupSelections: {
             ...s.varGroupSelections,
@@ -405,8 +452,8 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({
           reason,
           saved,
           schema,
-          packageName: packages[schema]?.packageInfo?.name,
-          packageVersion: packages[schema]?.packageInfo?.version,
+          packageName: primary?.packageInfo?.name,
+          packageVersion: primary?.packageInfo?.version,
         })
       }
       policyMode={policyMode}
@@ -422,20 +469,29 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({
 
 interface BodyProps {
   group: IntegrationGroup;
-  options: GroupSchemaOption[];
+  options: GroupMemberOption[];
   schema: string;
   defaultSchema?: string;
   schemaChoices: SchemaChoice[];
   onSchemaChange: (schema: string) => void;
   lastSwitch?: { from: string; to: string; report: CarryOverReport };
+  collectPackages: CollectPackage[];
+  onPackageToggle: (packageName: string, selected: boolean) => void;
+  /** Selected packages of the schema; the first is `pkgName` / `packageInfo` / `model`. */
+  units: WizardUnit[];
   pkgName?: string;
   packageInfo?: PackageInfo;
   packageInfoError?: unknown;
   model?: SchemaModel;
   state: SchemaState;
-  onStreamsChange: (enabled: Record<string, boolean>) => void;
-  onValueChange: (path: string, value: unknown) => void;
-  onVarGroupChange: (scopeKey: string, groupName: string, optionName: string) => void;
+  onStreamsChange: (packageName: string, enabled: Record<string, boolean>) => void;
+  onValueChange: (packageName: string, path: string, value: unknown) => void;
+  onVarGroupChange: (
+    packageName: string,
+    scopeKey: string,
+    groupName: string,
+    optionName: string
+  ) => void;
   policyOverrides: PolicyOverrides;
   onPolicyFieldChange: (field: 'name' | 'namespace', value: string) => void;
   installContent: boolean;
@@ -530,8 +586,34 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
     if (update) updatePackagePolicy(update);
   }, [isInitialized, model, packagePolicy, state, props.policyOverrides, updatePackagePolicy]);
 
+  // PROTOTYPE: pick-any schemas. The other selected packages get their own package policy, saved
+  // after the first one on the same agent policy.
+  const extraInputs: ExtraPackageInput[] = props.units.slice(1);
+  const extras = useExtraPackagePolicies(extraInputs, packagePolicy.namespace);
+  const [isSavingExtras, setIsSavingExtras] = useState(false);
+  const savingExtras = useRef(false);
+
   useEffect(() => {
-    if (savedPackagePolicy && !saved) props.onSaved(savedPackagePolicy);
+    if (!savedPackagePolicy || saved || savingExtras.current) return;
+    if (!extras.length || savedPackagePolicy.type !== 'packagePolicy') {
+      props.onSaved(savedPackagePolicy);
+      return;
+    }
+    savingExtras.current = true;
+    setIsSavingExtras(true);
+    saveExtraPackagePolicies(
+      extras,
+      savedPackagePolicy.policy.policy_ids ?? [],
+      installContent
+    ).then(({ errors }) => {
+      setIsSavingExtras(false);
+      errors.forEach((e) =>
+        notifications.toasts.addError(new Error(e.message), {
+          title: `Couldn't add ${e.packageName}`,
+        })
+      );
+      props.onSaved(savedPackagePolicy);
+    });
   }, [savedPackagePolicy, saved]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const ctx: VarFieldContext | undefined = model && {
@@ -539,9 +621,23 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
     packagePolicy,
     validationResults,
     showErrors,
-    onChange: props.onValueChange,
-    onVarGroupChange: props.onVarGroupChange,
+    onChange: (path, value) => props.onValueChange(props.pkgName!, path, value),
+    onVarGroupChange: (scopeKey, groupName, optionName) =>
+      props.onVarGroupChange(props.pkgName!, scopeKey, groupName, optionName),
   };
+  const extraCtxs = extras.map((extra): VarFieldContext | undefined =>
+    extra.model && extra.packagePolicy
+      ? {
+          model: extra.model,
+          packagePolicy: extra.packagePolicy,
+          validationResults: extra.validationResults,
+          showErrors,
+          onChange: (path, value) => props.onValueChange(extra.packageName, path, value),
+          onVarGroupChange: (scopeKey, groupName, optionName) =>
+            props.onVarGroupChange(extra.packageName, scopeKey, groupName, optionName),
+        }
+      : undefined
+  );
 
   // PROTOTYPE: "Install content". An installed package keeps the choice it was installed with
   // (shown read-only). Otherwise, with content off, install the package without Kibana assets
@@ -561,14 +657,20 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
   const nextStep = steps[index + 1];
   const prevStep = steps[index - 1];
   const enabledStreams = model ? getEnabledStreams(model, state) : [];
-  const assetsOnly = !!model && enabledStreams.length === 0;
+  const extraEnabledStreams = extras.flatMap((e) =>
+    e.model ? getEnabledStreams(e.model, e.state) : []
+  );
+  const assetsOnly = !!model && enabledStreams.length + extraEnabledStreams.length === 0;
   const isAgentless = props.method === SetupTechnology.AGENTLESS;
   const policyValid =
     isAgentless ||
     (props.policyMode === 'new' ? !!props.newAgentPolicy.name.trim() : !!props.existingPolicyId);
-  const isSaving = (formState === 'LOADING' || isInstallingPackage) && !saved;
-  const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
-  const canSave = !!packageInfo && isInitialized && !isSaving;
+  const isSaving = (formState === 'LOADING' || isInstallingPackage || isSavingExtras) && !saved;
+  const hasErrors =
+    (validationResults ? validationHasErrors(validationResults) : false) ||
+    extras.some((e) => e.validationResults && validationHasErrors(e.validationResults));
+  const canSave =
+    !!packageInfo && isInitialized && !isSaving && extras.every((e) => !!e.packagePolicy);
   // Agent policy goes on "how" when that step shows, else on review.
   const agentPolicyStep = props.showHow ? HOW_STEP : REVIEW_STEP;
 
@@ -579,7 +681,17 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
       return !!validationResults?.name?.length || !!validationResults?.namespace?.length;
     }
     if (!isSignalStep(s)) return false;
-    return countVarErrors(getStepVars(model, state, s).all, ctx) > 0;
+    return (
+      countVarErrors(getStepVars(model, state, s).all, ctx) > 0 ||
+      extras.some((extra, i) => {
+        const extraCtx = extraCtxs[i];
+        return (
+          !!extra.model &&
+          !!extraCtx &&
+          countVarErrors(getStepVars(extra.model, extra.state, s).all, extraCtx) > 0
+        );
+      })
+    );
   };
   const onNext = () => {
     if (stepHasErrors(step)) {
@@ -642,6 +754,7 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
   const recap = (
     <StepRecap
       schema={schema}
+      schemaLabels={group.schema_labels}
       detail={
         model
           ? getEnabledSignals(model, state)
@@ -671,10 +784,11 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
           schemas={props.schemaChoices}
           schema={schema}
           defaultSchema={props.defaultSchema}
+          schemaLabels={group.schema_labels}
           onSchemaChange={props.onSchemaChange}
           lastSwitch={props.lastSwitch}
-          model={model}
-          state={state}
+          packages={props.collectPackages}
+          onPackageToggle={props.onPackageToggle}
           onStreamsChange={props.onStreamsChange}
         />
       );
@@ -694,9 +808,10 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
         <DetectStep
           title={group.title}
           schema={schema}
+          schemaLabels={group.schema_labels}
           pkgName={props.pkgName ?? ''}
-          rows={
-            model
+          rows={[
+            ...(model
               ? enabledStreams.map((stream) => ({
                   stream,
                   dataset: getTargetDataset(
@@ -704,8 +819,19 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
                     getDatasetVarValue(packagePolicy, model, stream)
                   ),
                 }))
-              : []
-          }
+              : []),
+            ...extras.flatMap((extra) =>
+              extra.model && extra.packagePolicy
+                ? getEnabledStreams(extra.model, extra.state).map((stream) => ({
+                    stream,
+                    dataset: getTargetDataset(
+                      stream,
+                      getDatasetVarValue(extra.packagePolicy!, extra.model!, stream)
+                    ),
+                  }))
+                : []
+            ),
+          ]}
           packagePolicy={saved?.type === 'packagePolicy' ? saved.policy : undefined}
           isAgentless={saved?.type === 'agentless'}
           agentPolicyId={savedAgentPolicyId}
@@ -721,6 +847,22 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
         <ReviewStep
           title={group.title}
           schema={schema}
+          schemaLabels={group.schema_labels}
+          extraPackages={extras.flatMap((extra) =>
+            extra.model
+              ? [
+                  {
+                    packageName: extra.packageName,
+                    model: extra.model,
+                    state: extra.state,
+                    packagePolicy: extra.packagePolicy,
+                    installSummary: extra.packageInfo
+                      ? getInstallSummary(extra.packageInfo)
+                      : undefined,
+                  },
+                ]
+              : []
+          )}
           model={model}
           state={state}
           packagePolicy={packagePolicy}
@@ -749,16 +891,41 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
         />
       );
     }
+    const isMulti = extras.length > 0;
+    const sections = [
+      { model, state, ctx, packageName: props.pkgName },
+      ...extras.map((extra, i) => ({
+        model: extra.model,
+        state: extra.state,
+        ctx: extraCtxs[i],
+        packageName: extra.packageName,
+      })),
+    ].filter(
+      (
+        sec
+      ): sec is {
+        model: SchemaModel;
+        state: SchemaState;
+        ctx: VarFieldContext;
+        packageName: string;
+      } => !!sec.model && !!sec.ctx && getEnabledSignals(sec.model, sec.state).includes(step)
+    );
     return (
-      <SignalStep
-        signal={step}
-        groupTitle={group.title}
-        model={model}
-        state={state}
-        ctx={ctx}
-        icon={groupIcon}
-        recap={recap}
-      />
+      <div css={css({ display: 'flex', flexDirection: 'column', gap: euiTheme.size.xl })}>
+        {sections.map((sec) => (
+          <SignalStep
+            key={sec.packageName}
+            signal={step}
+            groupTitle={group.title}
+            model={sec.model}
+            state={sec.state}
+            ctx={sec.ctx}
+            icon={groupIcon}
+            recap={recap}
+            packageTitle={isMulti ? sec.model.packageTitle : undefined}
+          />
+        ))}
+      </div>
     );
   })();
 

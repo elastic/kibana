@@ -53,6 +53,12 @@ jest.mock('./use_build_integrations_url', () => ({
   useBuildIntegrationsUrl: () => mockUseBuildIntegrationsUrl(),
 }));
 
+// PROTOTYPE: real integration group tiles, wrapped to check the call
+jest.mock('./apply_group_packages', () => {
+  const actual = jest.requireActual('./apply_group_packages');
+  return { ...actual, applyGroupPackages: jest.fn(actual.applyGroupPackages) };
+});
+
 jest.mock('./apply_grouping', () => ({
   applyGrouping: (params: any) => mockApplyGrouping(params),
 }));
@@ -131,6 +137,7 @@ jest.mock('..', () => ({
 
 // Import after mocks are set up
 import { useAvailablePackages } from './use_available_packages';
+import { applyGroupPackages } from './apply_group_packages';
 
 describe('useAvailablePackages', () => {
   const mockPackageVerificationKeyId = 'test-key-id';
@@ -405,7 +412,8 @@ describe('useAvailablePackages', () => {
       expect(result.current.allCards[0]).toMatchObject({ canAddIntegration: true });
     });
 
-    it('should pass the integrations write privilege to applyGrouping', () => {
+    // PROTOTYPE: static `group` collapsing (applyGrouping) is off in the prototype.
+    it.skip('should pass the integrations write privilege to applyGrouping', () => {
       mockExperimentalFeaturesServiceGet.mockReturnValue({
         enableIntegrationCollectionTiles: true,
       });
@@ -899,6 +907,38 @@ describe('useAvailablePackages', () => {
       ],
     };
 
+    // PROTOTYPE
+    it('does not collapse static groups even when the flag is on', () => {
+      mockExperimentalFeaturesServiceGet.mockReturnValue({
+        enableIntegrationCollectionTiles: true,
+      });
+
+      const { result } = renderHook(() =>
+        useAvailablePackages({
+          prereleaseIntegrationsEnabled: false,
+          enableCollectionGrouping: true,
+        })
+      );
+
+      expect(mockApplyGrouping).not.toHaveBeenCalled();
+      expect(result.current.allCards).toHaveLength(1);
+    });
+
+    // PROTOTYPE
+    it('passes the registry packages and write privilege to applyGroupPackages', () => {
+      mockUseAuthz.mockReturnValue({ integrations: { all: false } });
+
+      renderHook(() => useAvailablePackages({ prereleaseIntegrationsEnabled: false }));
+
+      expect(jest.mocked(applyGroupPackages)).toHaveBeenCalledWith(
+        expect.objectContaining({
+          packages: [mockBasicPackage],
+          canAddIntegration: false,
+          packageVerificationKeyId: mockPackageVerificationKeyId,
+        })
+      );
+    });
+
     it('does not call applyGrouping when flag is off', () => {
       mockExperimentalFeaturesServiceGet.mockReturnValue({
         enableIntegrationCollectionTiles: false,
@@ -909,7 +949,8 @@ describe('useAvailablePackages', () => {
       expect(mockApplyGrouping).not.toHaveBeenCalled();
     });
 
-    it('calls applyGrouping and emits collection cards when flag is on and enableCollectionGrouping is true', () => {
+    // PROTOTYPE: static `group` collapsing (applyGrouping) is off in the prototype.
+    it.skip('calls applyGrouping and emits collection cards when flag is on and enableCollectionGrouping is true', () => {
       mockExperimentalFeaturesServiceGet.mockReturnValue({
         enableIntegrationCollectionTiles: true,
       });
@@ -971,7 +1012,8 @@ describe('useAvailablePackages', () => {
     });
   });
 
-  describe('collection card category filtering', () => {
+  // PROTOTYPE: static `group` collapsing (applyGrouping) is off in the prototype.
+  describe.skip('collection card category filtering', () => {
     const nginxMemberCard = {
       id: 'epr:nginx',
       name: 'nginx',
@@ -1204,7 +1246,8 @@ describe('useAvailablePackages', () => {
     });
   });
 
-  describe('collection card agentless filtering', () => {
+  // PROTOTYPE: static `group` collapsing (applyGrouping) is off in the prototype.
+  describe.skip('collection card agentless filtering', () => {
     const nginxMemberCard = {
       id: 'epr:nginx',
       name: 'nginx',

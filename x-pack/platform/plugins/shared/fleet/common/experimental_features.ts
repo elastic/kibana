@@ -36,7 +36,6 @@ const _allowedExperimentalValues = {
   enableOtelUI: true, // When enabled, OTel-specific UI elements (e.g. Collector Config tab) will be shown.
   enableIncludeTagsInEvents: false, // When enabled, the include_tags_in_events agent policy advanced setting is available in the UI.
   enableIntegrationCollectionTiles: true, // When enabled, packages sharing a `group` id are collapsed into a single collection tile in the integrations marketplace.
-  integrationGroupsFixture: false, // PROTOTYPE: serve a fixture Nginx integration group when the registry has no `GET /groups`.
   enableIntegrationTileClickToAdd: true, // When enabled, clicking an integration tile navigates directly to the add-integration page instead of the overview page.
   // NOTE: Prefer Kibana feature flags over adding new entries here. See x-pack/platform/plugins/shared/fleet/common/constants/feature_flags.ts
 };

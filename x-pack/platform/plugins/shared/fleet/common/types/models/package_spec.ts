@@ -86,7 +86,15 @@ export interface PackageSpecManifest {
   provider_permissions?: RegistryProviderPermissions[];
   /** Groups related packages (e.g. nginx, nginx_otel) under a shared technology tile. */
   group?: string;
+  /**
+   * PROTOTYPE: data schema the package produces. Optional; when missing, `otelcol` inputs mean
+   * `otel`, anything else `ecs` (see getPackageSchema).
+   */
+  schema?: PackageSchema;
 }
+
+/** PROTOTYPE: package-spec `schema` enum. */
+export type PackageSchema = 'ecs' | 'otel' | 'prometheus' | 'ocsf';
 export interface DiscoveryDataset {
   name: string;
 }

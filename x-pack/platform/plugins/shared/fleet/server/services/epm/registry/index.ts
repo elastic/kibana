@@ -56,7 +56,7 @@ import { resolveDataStreamFields, resolveDataStreamsMap, withPackageSpan } from 
 
 import { verifyPackageArchiveSignature } from '../packages/package_verification';
 
-import type { ArchiveIterator, IntegrationGroup } from '../../../../common/types';
+import type { ArchiveIterator } from '../../../../common/types';
 
 import { airGappedUtils } from '../airgapped';
 
@@ -360,25 +360,6 @@ export async function fetchCategories(
   setConstraints(url);
 
   return fetchUrl(url.toString()).then(JSON.parse);
-}
-
-/**
- * PROTOTYPE: integration groups (`GET /groups`). Registries without the endpoint (404) and
- * air-gapped setups have no groups, so every package keeps its own tile.
- */
-export async function fetchGroups(): Promise<IntegrationGroup[]> {
-  if (airGappedUtils().shouldSkipRegistryRequests) {
-    return [];
-  }
-  try {
-    const groups = await fetchUrl(`${getRegistryUrl()}/groups`).then(JSON.parse);
-    return Array.isArray(groups) ? groups : [];
-  } catch (err) {
-    if (err instanceof RegistryResponseError && err.status === 404) {
-      return [];
-    }
-    throw err;
-  }
 }
 
 export async function getInfo(name: string, version: string) {

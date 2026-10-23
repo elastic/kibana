@@ -11,19 +11,20 @@
 import React from 'react';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
-import { getSchemaLabel } from '../../../../../../../common/services';
-import { useGroupPackage } from '../../../../../../hooks/use_group_package';
-import type { GroupSchemaOption } from '../../../../../../hooks/use_group_package';
+import { getGroupSchemas, getSchemaLabel } from '../../../../../../../common/services';
+import {
+  getDefaultMemberOption,
+  getGroupChildVersion,
+  useGroupPackage,
+} from '../../../../../../hooks/use_group_package';
+import type { GroupMemberOption } from '../../../../../../hooks/use_group_package';
 import { useLink, useStartServices } from '../../../../../../hooks';
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../constants';
-
-export const getGroupChildVersion = (option: GroupSchemaOption) =>
-  option.child?.installationInfo?.version ?? option.child?.version;
 
 /** Builds the integrations-app path to the create page for a schema's child integration. */
 export const useGroupSchemaPath = () => {
   const { getPath } = useLink();
-  return (groupName: string, option: GroupSchemaOption, agentPolicyId?: string) => {
+  return (groupName: string, option: GroupMemberOption, agentPolicyId?: string) => {
     const version = getGroupChildVersion(option);
     if (!version) return undefined;
     return getPath('add_integration_to_policy', {
@@ -40,15 +41,25 @@ export const GroupSchemaToggle: React.FC<{ groupName: string; currentPackageName
   currentPackageName,
 }) => {
   const { application } = useStartServices();
-  const { options, defaultSchema } = useGroupPackage(groupName);
+  const { group, options, defaultSchema } = useGroupPackage(groupName);
   const getSchemaPath = useGroupSchemaPath();
 
-  if (options.length < 2) return null;
+  // One entry per schema: the default member when it has that schema, else the first member.
+  const schemaOptions = group
+    ? getGroupSchemas(group).flatMap((schema) => {
+        const members = options.filter((o) => o.schema === schema);
+        const option = members.includes(getDefaultMemberOption(group, options))
+          ? getDefaultMemberOption(group, options)
+          : members[0];
+        return option ? [option] : [];
+      })
+    : [];
+  if (schemaOptions.length < 2) return null;
 
   const selected = options.find((o) => o.packageName === currentPackageName)?.schema;
 
   const onChange = (schema: string) => {
-    const option = options.find((o) => o.schema === schema);
+    const option = schemaOptions.find((o) => o.schema === schema);
     if (!option || schema === selected) return;
     const agentPolicyId = new URLSearchParams(window.location.search).get('policyId') ?? undefined;
     const path = getSchemaPath(groupName, option, agentPolicyId);
@@ -70,11 +81,11 @@ export const GroupSchemaToggle: React.FC<{ groupName: string; currentPackageName
           onChange={onChange}
           buttonSize="compressed"
           // Default (recommended) schema first
-          options={[...options]
+          options={[...schemaOptions]
             .sort((a, b) => Number(b.schema === defaultSchema) - Number(a.schema === defaultSchema))
             .map((o) => ({
               id: o.schema,
-              label: `${getSchemaLabel(o.schema)}${
+              label: `${getSchemaLabel(o.schema, group)}${
                 o.schema === defaultSchema ? ' (recommended)' : ''
               }`,
               isDisabled: !o.child,

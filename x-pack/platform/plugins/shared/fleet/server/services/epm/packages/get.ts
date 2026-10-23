@@ -33,6 +33,8 @@ import {
   SO_SEARCH_LIMIT,
 } from '../../../../common/constants';
 import { isPackageLimited } from '../../../../common/services';
+import type { GroupConfigFile } from '../../../../common/services/integration_groups';
+import { getPackageSchema } from '../../../../common/services/integration_groups';
 import type {
   PackageUsageStats,
   Installable,
@@ -71,7 +73,6 @@ import {
 import { appContextService } from '../..';
 import { dataStreamService } from '../../data_streams';
 import * as Registry from '../registry';
-import { INTEGRATION_GROUPS_FIXTURE } from '../registry/integration_groups_fixture';
 import type { PackageAsset } from '../archive/storage';
 import { getEsPackage, packageAssetToArchiveEntry } from '../archive/storage';
 import { normalizeKuery } from '../../saved_object';
@@ -114,12 +115,144 @@ export async function getCategories(options: GetCategoriesRequest['query']) {
   return Registry.fetchCategories(options);
 }
 
-/** PROTOTYPE: integration groups from the registry, or the fixture behind a flag when it has none. */
+// PROTOTYPE: registry files are immutable per name@version, so keep them in memory. Value is the
+// file content, or undefined when the package doesn't have it (404). Other errors aren't cached.
+const registryFileCache = new Map<string, Promise<string | undefined>>();
+
+async function getCachedRegistryFile(
+  name: string,
+  version: string,
+  relPath: string
+): Promise<string | undefined> {
+  const key = `${name}@${version}/${relPath}`;
+  const cached = registryFileCache.get(key);
+  if (cached) return cached;
+  const promise = Registry.getFile(name, version, relPath).then(
+    async (res) => (res ? await res.text() : undefined),
+    (err) => {
+      if (!(err instanceof RegistryResponseError && err.status === 404)) {
+        registryFileCache.delete(key);
+        appContextService
+          .getLogger()
+          .debug(`getIntegrationGroups: failed to fetch ${key}: ${err.message}`);
+      }
+      return undefined;
+    }
+  );
+  registryFileCache.set(key, promise);
+  return promise;
+}
+
+/** PROTOTYPE: exported for tests only. */
+export function _clearIntegrationGroupsCache() {
+  registryFileCache.clear();
+}
+
+async function getCachedRegistryYaml<T>(
+  name: string,
+  version: string,
+  relPath: string
+): Promise<T | undefined> {
+  const content = await getCachedRegistryFile(name, version, relPath);
+  if (content === undefined) return undefined;
+  try {
+    return (parse(content) ?? undefined) as T | undefined;
+  } catch (err) {
+    appContextService
+      .getLogger()
+      .debug(`getIntegrationGroups: invalid yaml in ${name}@${version}/${relPath}`);
+    return undefined;
+  }
+}
+
+/**
+ * PROTOTYPE: integration groups, built from member packages. A member is a listed package with a
+ * `group` string whose archive has a `group.yml` (bare `group` strings, e.g. 9.6 brand families,
+ * aren't groups). Group config comes from the default member's `group.yml`, else any member's.
+ * Schema per member from its manifest (`schema`, else inferred).
+ */
 export async function getIntegrationGroups(): Promise<IntegrationGroup[]> {
-  const groups = await Registry.fetchGroups();
-  return appContextService.getExperimentalFeatures().integrationGroupsFixture && !groups.length
-    ? INTEGRATION_GROUPS_FIXTURE
-    : groups;
+  if (airGappedUtils().shouldSkipRegistryRequests) return [];
+
+  const items = await Registry.fetchList({ prerelease: true });
+  const candidates = items.filter(
+    (item): item is typeof item & { group: string } =>
+      typeof item.group === 'string' && !!item.group
+  );
+
+  const members = (
+    await pMap(
+      candidates,
+      async (item) => {
+        const groupConfig = await getCachedRegistryYaml<GroupConfigFile>(
+          item.name,
+          item.version,
+          'group.yml'
+        );
+        if (!groupConfig || typeof groupConfig !== 'object') return undefined;
+        const manifest = await getCachedRegistryYaml<PackageSpecManifest>(
+          item.name,
+          item.version,
+          'manifest.yml'
+        );
+        return {
+          groupName: item.group,
+          groupConfig,
+          member: {
+            package: item.name,
+            version: item.version,
+            title: item.title || nameAsTitle(item.name),
+            schema: getPackageSchema(manifest ?? item),
+          },
+        };
+      },
+      { concurrency: 10 }
+    )
+  ).filter((m): m is NonNullable<typeof m> => !!m);
+
+  const byGroup = new Map<string, typeof members>();
+  for (const m of members) {
+    byGroup.set(m.groupName, [...(byGroup.get(m.groupName) ?? []), m]);
+  }
+
+  return [...byGroup.entries()]
+    .map(([name, groupMembers]): IntegrationGroup => {
+      const declaredDefault = groupMembers
+        .map((m) => m.groupConfig.default)
+        .find((d) => d && groupMembers.some((m) => m.member.package === d));
+      const defaultMember =
+        groupMembers.find((m) => m.member.package === declaredDefault) ??
+        [...groupMembers].sort((a, b) => a.member.package.localeCompare(b.member.package))[0];
+      // The default member's group.yml wins when members were built from different versions.
+      const config = defaultMember.groupConfig;
+      const iconPath = config.icon?.replace(/^\.?\//, '');
+      return {
+        name,
+        title: config.title ?? nameAsTitle(name),
+        ...(config.description ? { description: config.description } : {}),
+        ...(iconPath
+          ? {
+              icon: {
+                package: defaultMember.member.package,
+                version: defaultMember.member.version,
+                path: iconPath,
+              },
+            }
+          : {}),
+        default: defaultMember.member.package,
+        members: groupMembers
+          .map((m) => m.member)
+          .sort((a, b) => {
+            const isDefault = (pkg: string) => (pkg === defaultMember.member.package ? 0 : 1);
+            return (
+              isDefault(a.package) - isDefault(b.package) || a.package.localeCompare(b.package)
+            );
+          }),
+        ...(config.schema_labels ? { schema_labels: config.schema_labels } : {}),
+        ...(config.planned_schemas ? { planned_schemas: config.planned_schemas } : {}),
+      };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function getPackages(

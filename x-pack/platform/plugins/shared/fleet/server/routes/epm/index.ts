@@ -228,7 +228,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       moveToReplacementHandler
     );
 
-  // PROTOTYPE: integration groups (package registry `GET /groups`)
+  // PROTOTYPE: integration groups, built from member packages that bundle a group.yml
   router.versioned
     .get({
       path: EPM_API_ROUTES.GROUPS_PATTERN,

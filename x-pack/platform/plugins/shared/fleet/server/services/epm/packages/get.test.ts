@@ -24,7 +24,7 @@ import type { PackagePolicySOAttributes } from '../../../types';
 import { dataStreamService } from '../../data_streams';
 import { createAppContextStartContractMock } from '../../../mocks';
 import { appContextService } from '../../app_context';
-import { PackageNotFoundError } from '../../../errors';
+import { PackageNotFoundError, RegistryResponseError } from '../../../errors';
 
 import { getSettings } from '../../settings';
 import { auditLoggingService } from '../../audit_logging';
@@ -45,6 +45,8 @@ import {
   getPackageUsageStats,
   getPackageKnowledgeBase,
   getInstallationObject,
+  getIntegrationGroups,
+  _clearIntegrationGroupsCache,
 } from './get';
 
 const mockPackagePolicySavedObjectType = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
@@ -2055,7 +2057,6 @@ owner: elastic`,
     });
 
     it('falls back to bundled archive when EPR returns 404 for a package not in the registry', async () => {
-      const { RegistryResponseError } = jest.requireActual('../../../errors');
       MockRegistry.getPackage.mockRejectedValue(new RegistryResponseError('not found', 404));
       MockRegistry.getBundledArchive.mockResolvedValue(bundledResult);
 
@@ -2114,6 +2115,131 @@ owner: elastic`,
           failOnUnexpectedError: true,
         })
       ).resolves.toBeUndefined();
+    });
+  });
+
+  // PROTOTYPE: integration groups built from member packages
+  describe('getIntegrationGroups', () => {
+    const files: Record<string, string> = {
+      'nginx@1.0.0/group.yml': [
+        'title: Nginx',
+        'description: Collect logs and metrics from Nginx.',
+        'icon: ./img/nginx-group.svg',
+        'default: nginx_otel',
+      ].join('\n'),
+      'nginx@1.0.0/manifest.yml':
+        'name: nginx\npolicy_templates:\n  - name: nginx\n    inputs:\n      - type: logfile\n',
+      'nginx_otel@1.1.0/group.yml': [
+        'title: Nginx',
+        'icon: img/nginx-group.svg',
+        'default: nginx_otel',
+        'schema_labels:',
+        '  ecs: Legacy',
+        'planned_schemas:',
+        '  - prometheus',
+      ].join('\n'),
+      'nginx_otel@1.1.0/manifest.yml':
+        'name: nginx_otel\npolicy_templates:\n  - name: nginx\n    inputs:\n      - type: otelcol\n',
+      'prom@1.0.0/group.yml': 'title: Prometheus\ndefault: prom_otel\n',
+      'prom@1.0.0/manifest.yml':
+        'name: prom\nschema: prometheus\npolicy_templates:\n  - name: prom\n    inputs:\n      - type: otelcol\n',
+      'prom_otel@1.0.0/group.yml': 'title: Prometheus\ndefault: prom_otel\n',
+      'prom_otel@1.0.0/manifest.yml':
+        'name: prom_otel\npolicy_templates:\n  - name: prom\n    inputs:\n      - type: otelcol\n',
+    };
+
+    beforeEach(() => {
+      _clearIntegrationGroupsCache();
+      MockRegistry.getFile.mockImplementation(async (name, version, relPath) => {
+        const content = files[`${name}@${version}/${relPath}`];
+        if (content === undefined) throw new RegistryResponseError('Not found', 404);
+        return { text: async () => content } as any;
+      });
+    });
+
+    const listPackages = (pkgs: Array<{ name: string; version: string; group?: string }>) =>
+      MockRegistry.fetchList.mockResolvedValue(
+        pkgs.map((p) => ({ ...p, title: p.name, type: 'integration' })) as any
+      );
+
+    it('builds a group from members with a group.yml, default member first', async () => {
+      listPackages([
+        { name: 'nginx', version: '1.0.0', group: 'nginx' },
+        { name: 'nginx_otel', version: '1.1.0', group: 'nginx' },
+        { name: 'supabase', version: '1.0.0' },
+      ]);
+
+      expect(await getIntegrationGroups()).toEqual([
+        {
+          name: 'nginx',
+          title: 'Nginx',
+          // default member's group.yml wins: no description there
+          icon: { package: 'nginx_otel', version: '1.1.0', path: 'img/nginx-group.svg' },
+          default: 'nginx_otel',
+          members: [
+            { package: 'nginx_otel', version: '1.1.0', title: 'nginx_otel', schema: 'otel' },
+            { package: 'nginx', version: '1.0.0', title: 'nginx', schema: 'ecs' },
+          ],
+          schema_labels: { ecs: 'Legacy' },
+          planned_schemas: ['prometheus'],
+        },
+      ]);
+      expect(MockRegistry.fetchList).toHaveBeenCalledWith({ prerelease: true });
+      expect(MockRegistry.getFile).not.toHaveBeenCalledWith('supabase', '1.0.0', 'group.yml');
+    });
+
+    it('falls back to any member group.yml when the default member is not listed', async () => {
+      listPackages([{ name: 'nginx', version: '1.0.0', group: 'nginx' }]);
+
+      const [group] = await getIntegrationGroups();
+      expect(group).toMatchObject({
+        name: 'nginx',
+        description: 'Collect logs and metrics from Nginx.',
+        default: 'nginx',
+        icon: { package: 'nginx', version: '1.0.0', path: 'img/nginx-group.svg' },
+        members: [{ package: 'nginx', schema: 'ecs' }],
+      });
+    });
+
+    it('ignores bare group strings without a group.yml', async () => {
+      listPackages([
+        { name: 'redis', version: '1.0.0', group: 'redis' },
+        { name: 'redis_otel', version: '1.0.0', group: 'redis' },
+      ]);
+
+      expect(await getIntegrationGroups()).toEqual([]);
+    });
+
+    it('uses an explicit manifest schema over the inferred one', async () => {
+      listPackages([
+        { name: 'prom', version: '1.0.0', group: 'prometheus' },
+        { name: 'prom_otel', version: '1.0.0', group: 'prometheus' },
+      ]);
+
+      const [group] = await getIntegrationGroups();
+      expect(group.members).toEqual([
+        { package: 'prom_otel', version: '1.0.0', title: 'prom_otel', schema: 'otel' },
+        { package: 'prom', version: '1.0.0', title: 'prom', schema: 'prometheus' },
+      ]);
+    });
+
+    it('caches registry files per name@version', async () => {
+      listPackages([{ name: 'nginx', version: '1.0.0', group: 'nginx' }]);
+
+      await getIntegrationGroups();
+      await getIntegrationGroups();
+      expect(MockRegistry.getFile).toHaveBeenCalledTimes(2); // group.yml + manifest.yml once
+    });
+
+    it('returns no groups when air-gapped without a registry', async () => {
+      const spy = jest
+        .spyOn(appContextService, 'getConfig')
+        .mockReturnValue({ isAirGapped: true } as any);
+      listPackages([{ name: 'nginx', version: '1.0.0', group: 'nginx' }]);
+
+      expect(await getIntegrationGroups()).toEqual([]);
+      expect(MockRegistry.fetchList).not.toHaveBeenCalled();
+      spy.mockRestore();
     });
   });
 });

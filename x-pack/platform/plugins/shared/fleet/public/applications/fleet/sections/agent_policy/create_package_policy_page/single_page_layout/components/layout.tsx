@@ -32,6 +32,7 @@ import { PackageIcon } from '../../../../../components';
 import { useGroupPackage } from '../../../../../../../hooks/use_group_package';
 import { GROUP_QUERYPARAM } from '../../../../../../../../common/services';
 import { GroupSchemaToggle } from '../../../../../../integrations/sections/epm/screens/group/schema_toggle';
+import { getGroupIconProps } from '../../../../../../integrations/sections/epm/screens/group/group_icon';
 import type { EditPackagePolicyFrom } from '../../types';
 
 const AgentPolicyName = styled(EuiDescriptionListDescription)`
@@ -98,7 +99,8 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
     // Read window.location directly: this layout is also rendered outside a router.
     const groupName =
       new URLSearchParams(window.location.search).get(GROUP_QUERYPARAM) ?? undefined;
-    const { group, iconPackage: groupIconPackage } = useGroupPackage(isAdd ? groupName : undefined);
+    const { group, options: groupOptions } = useGroupPackage(isAdd ? groupName : undefined);
+    const groupIconProps = group ? getGroupIconProps(group, groupOptions) : undefined;
 
     const pageTitle = useMemo(() => {
       if ((isAdd || isEdit || isUpgrade) && packageInfo) {
@@ -137,13 +139,8 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
         return (
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
-              {groupIconPackage ? (
-                <PackageIcon
-                  packageName={groupIconPackage.name}
-                  version={groupIconPackage.version}
-                  icons={groupIconPackage.icons}
-                  size="xl"
-                />
+              {groupIconProps ? (
+                <PackageIcon {...groupIconProps} size="xl" />
               ) : (
                 <PackageIcon
                   packageName={packageInfo?.name || ''}
@@ -222,7 +219,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
       integrationInfo?.title,
       packageInfo,
       group,
-      groupIconPackage,
+      groupIconProps,
       defaultPolicyData?.name,
       isAdd,
       isEdit,

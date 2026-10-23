@@ -441,24 +441,36 @@ export type RegistrySearchResult = Pick<
 >;
 
 /**
- * PROTOTYPE: integration group from the package registry `GET /groups` (fed by a taxonomy file in
- * the integrations repo). One tile per technology; each schema names the package that implements
- * it, with no version (the latest compatible version is used). Groups aren't packages.
+ * PROTOTYPE: integration group. A group is a directory in the integrations repo
+ * (`packages/<group>/`) with a `group.yml` next to its member packages. elastic-package bundles
+ * `group.yml` (+ its icon) into each member and sets `group: <dir>` on the built manifest. Fleet
+ * builds groups from the package list: packages sharing a `group` string whose archive carries a
+ * `group.yml`. Bare `group` strings without one (9.6 brand families) aren't groups here.
+ * The default member's `group.yml` wins when members disagree.
  */
-export interface IntegrationGroupSchema {
+export interface IntegrationGroupMember {
   package: string;
-  /** Exactly one schema per group should set this. */
-  default?: boolean;
+  /** Latest registry version compatible with this stack. */
+  version: string;
+  title: string;
+  /** Manifest `schema`, else inferred (otelcol inputs -> otel, else ecs). */
+  schema: string;
 }
 
 export interface IntegrationGroup {
+  /** Group directory name = the members' `group` string. */
   name: string;
   title: string;
   description?: string;
-  /** Member package whose first icon the tile uses. */
-  icon?: string;
-  /** e.g. { otel: { package: 'nginx_otel', default: true }, ecs: { package: 'nginx' } } */
-  schemas: Record<string, IntegrationGroupSchema>;
+  /** Group icon bundled in the default member's archive, e.g. img/nginx-group.svg. */
+  icon?: { package: string; version: string; path: string };
+  /** Default member package (group.yml `default`). */
+  default?: string;
+  members: IntegrationGroupMember[];
+  /** PROTOTYPE placeholder: rename a schema in the wizard, e.g. { ecs: 'Legacy' }. */
+  schema_labels?: Record<string, string>;
+  /** PROTOTYPE placeholder: schemas shown disabled as "Not available yet". */
+  planned_schemas?: string[];
 }
 
 // from /categories

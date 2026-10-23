@@ -5,27 +5,42 @@
  * 2.0.
  */
 
-// PROTOTYPE: an integration group has no icon of its own; it uses its `icon` member package's.
+// PROTOTYPE: group icon from `group.yml` (`icon`), bundled in the default member's archive. Falls
+// back to the default member's own icons (groups of one: the package's icons).
 
 import React from 'react';
 
 import { PackageIcon } from '../../../../../../components';
 import type { IntegrationGroup } from '../../../../../../types';
-import type { GroupSchemaOption } from '../../../../../../hooks/use_group_package';
-import { getGroupIconPackage } from '../../../../../../hooks/use_group_package';
+import type { GroupMemberOption } from '../../../../../../hooks/use_group_package';
+import { getDefaultMemberOption } from '../../../../../../hooks/use_group_package';
+
+/** PackageIcon props for a group. `integrationName` keeps the icon cache apart from the member's. */
+export const getGroupIconProps = (group: IntegrationGroup, options: GroupMemberOption[]) => {
+  if (group.icon) {
+    const { package: packageName, version, path } = group.icon;
+    return {
+      packageName,
+      version,
+      integrationName: 'group',
+      icons: [
+        {
+          src: `/${path.replace(/^\.?\//, '')}`,
+          type: path.endsWith('.svg') ? 'image/svg+xml' : 'image/png',
+        },
+      ],
+    };
+  }
+  const pkg = getDefaultMemberOption(group, options)?.child;
+  return pkg
+    ? { packageName: pkg.name, version: pkg.version, icons: pkg.icons }
+    : { packageName: group.name, version: '' };
+};
 
 export const GroupIcon: React.FC<{
   group: IntegrationGroup;
-  options: GroupSchemaOption[];
+  options: GroupMemberOption[];
   size: 'm' | 'l' | 'xl';
-}> = ({ group, options, size }) => {
-  const pkg = getGroupIconPackage(
-    group,
-    options.map((o) => o.child)
-  );
-  return pkg ? (
-    <PackageIcon packageName={pkg.name} version={pkg.version} icons={pkg.icons} size={size} />
-  ) : (
-    <PackageIcon packageName={group.name} version="" size={size} />
-  );
-};
+}> = ({ group, options, size }) => (
+  <PackageIcon {...getGroupIconProps(group, options)} size={size} />
+);
