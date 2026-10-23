@@ -114,8 +114,7 @@ steps:
     on-failure:
       continue: true
 
-  # Only a disabled rule is compared: enabling bumps the revision, so an
-  # already-enabled rule always differs and is handled above.
+  # A rule enabled by hand takes the note above even if it was also edited.
   - name: fail_rule_changed
     type: workflow.fail
     if: >-
