@@ -42,7 +42,14 @@ describe('resolveTrackedColumn', () => {
     expect(resolveTrackedColumn(commandsAfterStats, 'b').name).not.toBe('b');
   });
 
-  it.each([
+  it.each<
+    [
+      description: string,
+      pipeline: string,
+      resolvedName: string | undefined,
+      resolvedAliases: string[]
+    ]
+  >([
     ['prefers a direct EVAL alias', 'EVAL time = bucket', 'time', ['bucket', 'time']],
     [
       'tracks chained aliases',
@@ -130,10 +137,13 @@ describe('resolveTrackedColumn', () => {
       ['latest'],
     ],
     ['invalidates identity across ungrouped STATS', 'STATS total = COUNT(*)', undefined, []],
-  ])('%s', (_description, pipeline, name, aliases) => {
+  ])('%s', (_description, pipeline, resolvedName, resolvedAliases) => {
     const root = parse(`FROM index | ${pipeline}`);
 
-    expect(resolveTrackedColumn(root.commands, 'bucket')).toEqual({ name, aliases });
+    expect(resolveTrackedColumn(root.commands, 'bucket')).toEqual({
+      name: resolvedName,
+      aliases: resolvedAliases,
+    });
   });
 
   it('does not mutate KEEP commands', () => {
