@@ -908,6 +908,8 @@ Non-zero timings and web vital values always have a fractional part, so dynamic 
 
 The data is written through the `otelEsClient`, which indexes documents as-is. In code and Scout tests, use the `edotBrowser` DSL from `@kbn/synthtrace-client` (`edotBrowser.app()`, `edotBrowser.session()`) with the `otelSynthtraceEsClient` fixture from `@kbn/scout-synthtrace`.
 
+> **Warning:** `--clean` (and `otelEsClient.clean()` in code and Scout tests) deletes every `logs-*.otel-*` and `traces-*.otel-*` data stream, not only the EDOT Browser data. On a shared cluster, that also removes other OTel data.
+
 **Options (both scenarios):**
 
 - `withSessionId` (boolean, default `true`): writes `attributes.session.id`, with the tab ID and `session.start` that come with sessions. Set it to `false` to match EDOT Browser 0.3.0 and earlier, which don't emit them.
