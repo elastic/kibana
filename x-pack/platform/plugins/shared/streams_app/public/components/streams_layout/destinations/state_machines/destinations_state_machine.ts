@@ -78,7 +78,6 @@ export interface DestinationCreationContext {
   formErrors: DestinationCreationFormErrors;
   pendingDestinations?: PendingDestination[];
   createdDestinations?: DestinationViewModel[];
-  pendingSecrets?: StreamsUnit.Secrets;
 }
 
 export type ResolvedIndicesStatus = 'loading' | 'ready' | 'unavailable';
@@ -402,7 +401,6 @@ export const destinationsStateMachine = setup({
         bucket: s3.bucket.trim(),
         prefix: s3.prefix.trim(),
       });
-      const names = s3CredentialNames(id);
       return {
         creationContext: {
           ...context.creationContext,
@@ -410,10 +408,6 @@ export const destinationsStateMachine = setup({
           // A failed Elasticsearch key mint leaves its pending ids behind, and a later
           // S3 persist failure would otherwise revoke them.
           pendingDestinations: undefined,
-          pendingSecrets: {
-            [names.accessKeyId]: s3.accessKeyId.trim(),
-            [names.secretAccessKey]: s3.secretAccessKey.trim(),
-          },
         },
         unitDefinition: withUnitDestinations(context.unitDefinition, [
           ...getUnitDestinations(context.unitDefinition),
@@ -510,15 +504,23 @@ export const destinationsStateMachine = setup({
       ({ context }) => context.parentRef,
       ({ context }): DestinationsParentEvent => {
         const destinationIds = context.creationContext?.createdDestinations?.map(({ id }) => id);
-        if (!destinationIds?.length) {
+        if (!context.creationContext || !destinationIds?.length) {
           throw new Error('Expected created destinations');
         }
+        const { storageKind, s3 } = context.creationContext.formData;
+        const names = s3CredentialNames(destinationIds[0]);
         return {
           type: 'unit.changed',
           unitDefinition: context.unitDefinition,
           destinationIds,
           intent: 'create',
-          secrets: context.creationContext?.pendingSecrets,
+          secrets:
+            storageKind === 'external_storage'
+              ? {
+                  [names.accessKeyId]: s3.accessKeyId.trim(),
+                  [names.secretAccessKey]: s3.secretAccessKey.trim(),
+                }
+              : undefined,
         };
       }
     ),
@@ -587,7 +589,6 @@ export const destinationsStateMachine = setup({
                       secretAccessKey: '',
                     },
                   },
-                  pendingSecrets: undefined,
                 }
               : undefined,
           }

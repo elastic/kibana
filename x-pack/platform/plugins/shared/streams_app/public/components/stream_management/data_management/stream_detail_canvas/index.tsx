@@ -863,9 +863,6 @@ export const buildConfiguredDestinationNode = (
       data: {
         destinationId: destination.id,
         signals: destination.signals,
-        streamName: undefined,
-        indexCount: 0,
-        targetedIndexNames: [],
         title: destination.name,
         subtitle: !hasConnectedSource ? noSourceLabel : destination.bucket,
       },

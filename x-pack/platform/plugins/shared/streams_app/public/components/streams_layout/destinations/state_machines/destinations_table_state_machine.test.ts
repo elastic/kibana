@@ -58,7 +58,7 @@ describe('destinationsTableStateMachine', () => {
     expect(actor.getSnapshot().context.pendingSecrets).toBeUndefined();
   });
 
-  it('clears pending secrets when persist fails and records the failed intent', async () => {
+  it('clears pending secrets when persist fails without storing an error for a failed create', async () => {
     persist.mockRejectedValueOnce(new Error('boom'));
     actor.send({
       type: 'unit.changed',
@@ -69,10 +69,10 @@ describe('destinationsTableStateMachine', () => {
     });
     await waitFor(actor, (snapshot) => snapshot.matches('failed'));
     expect(actor.getSnapshot().context.pendingSecrets).toBeUndefined();
-    expect(actor.getSnapshot().context.failedIntent).toBe('create');
+    expect(actor.getSnapshot().context.error).toBeUndefined();
   });
 
-  it('drops the failed create intent when a later reload fails', async () => {
+  it('stores the error when a reload after a failed create fails', async () => {
     persist.mockRejectedValueOnce(new Error('boom'));
     actor.send({
       type: 'unit.changed',
@@ -87,6 +87,5 @@ describe('destinationsTableStateMachine', () => {
       actor,
       (snapshot) => snapshot.matches('failed') && snapshot.context.error?.message === 'offline'
     );
-    expect(actor.getSnapshot().context.failedIntent).toBeUndefined();
   });
 });

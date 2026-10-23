@@ -142,20 +142,18 @@ export const useDestinationsTable = (): DestinationsTableController => {
   const pagination = useSelector(tableActorRef, (state) => state.context.pagination);
   const visibleColumnIds = useSelector(tableActorRef, (state) => state.context.visibleColumnIds);
   const error = useSelector(tableActorRef, (state) => state.context.error);
-  const failedIntent = useSelector(tableActorRef, (state) => state.context.failedIntent);
   const isLoadingUnit = useSelector(tableActorRef, (state) => state.matches('loading'));
   const isUnitUnavailable = useSelector(tableActorRef, (state) => state.matches('loadFailed'));
 
   useEffect(() => {
-    // A failed create shows its error in the create modal instead.
-    if (error && failedIntent !== 'create') {
+    if (error) {
       toasts.addError(error, {
         title: i18n.translate('xpack.streams.destinations.unitRequestFailedTitle', {
           defaultMessage: 'Could not update destinations',
         }),
       });
     }
-  }, [error, failedIntent, toasts]);
+  }, [error, toasts]);
 
   const destinationsController = useDestinations({
     destinationsActorRef,

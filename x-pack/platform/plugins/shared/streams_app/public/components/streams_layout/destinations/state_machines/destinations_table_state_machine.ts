@@ -46,7 +46,6 @@ export interface DestinationsTableStateContext {
   pendingDestinationIds?: string[];
   pendingIntent?: 'create' | 'delete';
   pendingSecrets?: StreamsUnit.Secrets;
-  failedIntent?: 'create' | 'delete';
   destinationsRef: DestinationsActorRef;
   query: string;
   selectedTypes: DestinationType[];
@@ -112,7 +111,6 @@ export const destinationsTableStateMachine = setup({
         event.type === 'unit.changed' ? event.destinationIds : undefined,
       pendingIntent: ({ event }) => (event.type === 'unit.changed' ? event.intent : undefined),
       pendingSecrets: ({ event }) => (event.type === 'unit.changed' ? event.secrets : undefined),
-      failedIntent: undefined,
       error: undefined,
     }),
     storeLoadedUnitDefinition: assign({
@@ -124,7 +122,6 @@ export const destinationsTableStateMachine = setup({
       pendingDestinationIds: undefined,
       pendingIntent: undefined,
       pendingSecrets: undefined,
-      failedIntent: undefined,
       error: undefined,
     }),
     storePersistedUnitDefinition: assign({
@@ -136,20 +133,17 @@ export const destinationsTableStateMachine = setup({
       pendingDestinationIds: undefined,
       pendingIntent: undefined,
       pendingSecrets: undefined,
-      failedIntent: undefined,
       error: undefined,
     }),
     storeFailure: assign({
-      error: ({ event }) =>
+      // A failed create shows its error in the create modal instead of a toast.
+      error: ({ context, event }) =>
         event.type === 'xstate.error.actor.loadUnitDefinition' ||
-        event.type === 'xstate.error.actor.persistUnitDefinition'
+        (event.type === 'xstate.error.actor.persistUnitDefinition' &&
+          context.pendingIntent !== 'create')
           ? getFormattedError(event.error)
           : undefined,
       pendingSecrets: undefined,
-      failedIntent: ({ context, event }) =>
-        event.type === 'xstate.error.actor.persistUnitDefinition'
-          ? context.pendingIntent
-          : undefined,
     }),
     syncLoadedUnitDefinition: sendTo(
       ({ context }) => context.destinationsRef,
