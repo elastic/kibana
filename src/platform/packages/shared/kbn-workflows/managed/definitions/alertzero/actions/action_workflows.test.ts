@@ -173,6 +173,30 @@ describe('AlertZero action workflows', () => {
       expect(traceSteps(yaml, context)).toEqual(steps);
     });
 
+    // The coverage check matched the rule as proposed, so an edit is worth flagging.
+    it.each([
+      [
+        'a rule only enabled by hand',
+        3,
+        'Rule "R" was already enabled when this proposal was approved. No change was made.',
+      ],
+      [
+        'a rule enabled and edited by hand',
+        5,
+        'Rule "R" was already enabled when this proposal was approved. No change was made. ' +
+          'It was also changed by "elastic" after this proposal was created, so check that it ' +
+          'still covers this gap.',
+      ],
+    ])('posts the chat note for %s', (_scenario, revision, note) => {
+      const step = stepByName(yaml, 'note_already_enabled');
+      const { message } = (step?.with?.inputs ?? {}) as { message: string };
+      const context = {
+        steps: { fetch_rule: { output: { ...enabled, revision } } },
+        inputs: { actionInput: { id: 'x', expected_revision: 3, investigation_id: 'c' } },
+      };
+      expect(createWorkflowLiquidEngine().parseAndRenderSync(message, context)).toBe(note);
+    });
+
     it.each([
       ['a rule it enabled', disabled, { succeeded: 1, skipped: 0, failed: 0 }, true, false, 1],
       ['a rule enabled by hand', enabled, undefined, true, true, 0],

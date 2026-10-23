@@ -100,7 +100,8 @@ steps:
     with:
       message: "{{ steps.fetch_rule.error.message }}"
 
-  # Enabled by hand since the proposal: nothing to do, so say so in the chat.
+  # Enabled by hand since the proposal: nothing to do, so say so in the chat. An edit
+  # means the running rule is not the one the coverage check matched.
   - name: note_already_enabled
     type: workflow.execute
     if: "${{ steps.fetch_rule.output.enabled == true }}"
@@ -110,7 +111,9 @@ steps:
         conversation_id: "{{ inputs.actionInput.investigation_id }}"
         message: >-
           Rule "{{ steps.fetch_rule.output.name }}" was already enabled when this
-          proposal was approved. No change was made.
+          proposal was approved. No change was made.{% if steps.fetch_rule.output.revision != inputs.actionInput.expected_revision %}
+          It was also changed by "{{ steps.fetch_rule.output.updated_by }}" after this
+          proposal was created, so check that it still covers this gap.{% endif %}
     on-failure:
       continue: true
 
