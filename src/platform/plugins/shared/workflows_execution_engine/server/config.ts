@@ -28,6 +28,17 @@ const EventTriggersConfigSchema = schema.object({
    * Scheduling is skipped when depth exceeds this value.
    */
   maxChainDepth: schema.number({ defaultValue: 10, min: 1 }),
+  /**
+   * When false, every event runs a fresh subscriber search. Useful for A/B
+   * benchmarks and incident kill of the process-local subscription cache.
+   */
+  subscriptionCacheEnabled: schema.boolean({ defaultValue: true }),
+  /**
+   * How long this node keeps a cached subscriber set for one space and trigger.
+   * A hit does not extend it. Other nodes keep the previous set until their own TTL.
+   * Ignored when `subscriptionCacheEnabled` is false.
+   */
+  subscriptionCacheTtl: schema.duration({ defaultValue: '60s', min: '1s' }),
 });
 
 const configSchema = schema.object({
