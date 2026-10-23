@@ -128,7 +128,7 @@ pageLoadAssetSize:
   logsShared: 2042
   logstash: 11772
   maintenanceWindows: 4338
-  management: 10296
+  management: 11778
   maps: 1201
   mapsEms: 3256
   metricsDataAccess: 2418
@@ -147,7 +147,7 @@ pageLoadAssetSize:
   observabilityAIAssistant: 2236
   observabilityAIAssistantApp: 5918
   observabilityAiAssistantManagement: 2280
-  observabilityAlerting: 3883
+  observabilityAlerting: 4632
   observabilityLogsExplorer: 1351
   observabilityOnboarding: 8873
   observabilityShared: 8355

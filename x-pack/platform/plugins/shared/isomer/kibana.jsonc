@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/isomer-plugin",
+  "owner": ["@elastic/appex-sharedux"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Hosts an Isomer runtime with Kibana's primitive packs, for features and tools built on Isomer.",
+  "plugin": {
+    "id": "isomer",
+    "browser": false,
+    "server": true
+  }
+}

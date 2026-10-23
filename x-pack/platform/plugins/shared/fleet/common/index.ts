@@ -125,6 +125,8 @@ export {
   buildPolicyIdsOrVariantsKuery,
   buildPolicyBaseIdWithFallbackKuery,
   buildPolicyBaseIdsWithFallbackKuery,
+  extractAgentIdsWithData,
+  getIncompatibleIntegrations,
 } from './services';
 
 export type {

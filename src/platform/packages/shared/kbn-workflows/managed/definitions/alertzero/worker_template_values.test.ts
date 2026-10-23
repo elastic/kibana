@@ -13,11 +13,9 @@ import DETECTION_RULE_TUNING_YAML from './detection_rule_tuning.yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './floor_alert_triage.yaml';
 import FLOOR_ATTACK_DISCOVERY_YAML from './floor_attack_discovery.yaml';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './forensics_endpoint_analysis.yaml';
-import HUNT_CONTINUOUS_THREAT_HUNT_YAML from './hunt_continuous_threat_hunt.yaml';
 import {
   renderAlertTriageWorkerYaml,
   renderCommonWorkerYaml,
-  renderHuntWorkerYaml,
   renderRuleCoverageWorkerYaml,
   renderRuleTuningWorkerYaml,
   renderScheduledWorkerYaml,
@@ -58,15 +56,6 @@ const workers: Array<[string, (serviceAccountId?: string) => string]> = [
     'Endpoint analysis',
     (serviceAccountId) =>
       renderCommonWorkerYaml(FORENSICS_ENDPOINT_ANALYSIS_YAML, { ...shared, serviceAccountId }),
-  ],
-  [
-    'Continuous Threat Hunt',
-    (serviceAccountId) =>
-      renderHuntWorkerYaml(HUNT_CONTINUOUS_THREAT_HUNT_YAML, {
-        ...shared,
-        scheduleInterval: '4h',
-        serviceAccountId,
-      }),
   ],
   [
     'Rule Tuning',

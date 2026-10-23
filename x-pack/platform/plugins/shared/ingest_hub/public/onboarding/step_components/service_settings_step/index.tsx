@@ -32,7 +32,6 @@ import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { DEFAULT_NAMESPACE } from '../authenticate_and_deploy_step/deploy_group_helpers';
-import { getCategoryTitle } from '../../service_categories';
 import {
   AWS_REGION_OPTIONS,
   getRegionFieldName,
@@ -46,6 +45,7 @@ import { SignalTypeBadge } from '../services_step/signal_type_badge';
 import { ServiceSearchFilter } from '../service_search_filter';
 import { buildDuplicateName } from './duplicate_name';
 import type { SignalFilter } from '../services_step/use_services_step';
+import { StepFooter } from '../step_footer';
 
 interface ServiceSettingsStepProps {
   onContinue: () => void;
@@ -271,19 +271,6 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         },
         sortable: (inst: ServiceInstance) =>
           awsServicesMap?.get(inst.serviceId)?.signalTypes.join(',') ?? '',
-      },
-      {
-        name: i18n.translate('xpack.ingestHub.serviceSettingsStep.table.col.category', {
-          defaultMessage: 'Category',
-        }),
-        render: (inst: ServiceInstance) => {
-          const cat = awsServicesMap?.get(inst.serviceId)?.category;
-          return cat ? getCategoryTitle(cat) : '';
-        },
-        sortable: (inst: ServiceInstance) => {
-          const cat = awsServicesMap?.get(inst.serviceId)?.category;
-          return cat ? getCategoryTitle(cat) : '';
-        },
       },
       {
         name: i18n.translate('xpack.ingestHub.serviceSettingsStep.table.col.region', {
@@ -577,7 +564,6 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       <EuiInMemoryTable
         items={filteredInstances}
         columns={columns}
-        pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
         sorting={true}
         tableLayout="auto"
         tableCaption={i18n.translate('xpack.ingestHub.serviceSettingsStep.table.caption', {
@@ -586,39 +572,25 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         data-test-subj="serviceSettingsStep-table"
       />
 
-      <EuiSpacer size="m" />
-
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          {onBack && (
-            <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
+      <StepFooter onBack={onBack}>
+        <EuiToolTip content={continueTooltipContent}>
+          {/* span needed: disabled <button> swallows pointer events, span intercepts them for the tooltip */}
+          <span tabIndex={0} style={{ display: 'inline-block' }}>
+            <EuiButton
+              fill
+              onClick={handleNext}
+              disabled={!isReady || hasUnloadedSelectedManifests || hasErroredSelectedManifests}
+              isLoading={hasUnloadedSelectedManifests}
+              data-test-subj="serviceSettingsStep-continueButton"
+            >
               <FormattedMessage
-                id="xpack.ingestHub.serviceSettingsStep.backButton"
-                defaultMessage="Back"
+                id="xpack.ingestHub.serviceSettingsStep.nextButton"
+                defaultMessage="Next"
               />
-            </EuiButtonEmpty>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={continueTooltipContent}>
-            {/* span needed: disabled <button> swallows pointer events, span intercepts them for the tooltip */}
-            <span tabIndex={0} style={{ display: 'inline-block' }}>
-              <EuiButton
-                fill
-                onClick={handleNext}
-                disabled={!isReady || hasUnloadedSelectedManifests || hasErroredSelectedManifests}
-                isLoading={hasUnloadedSelectedManifests}
-                data-test-subj="serviceSettingsStep-continueButton"
-              >
-                <FormattedMessage
-                  id="xpack.ingestHub.serviceSettingsStep.nextButton"
-                  defaultMessage="Next"
-                />
-              </EuiButton>
-            </span>
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            </EuiButton>
+          </span>
+        </EuiToolTip>
+      </StepFooter>
 
       {activeFlyoutService && activeFlyoutInstance && (
         <ServiceSettingsFlyout
