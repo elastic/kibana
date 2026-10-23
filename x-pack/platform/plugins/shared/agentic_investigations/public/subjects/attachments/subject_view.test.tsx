@@ -7,11 +7,13 @@
 
 import React from 'react';
 import moment from 'moment';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSubject } from '../../../common/subjects/subject';
-import { subjectAttachmentRenderer } from './subject_attachment_definition';
+import { createSubjectAttachmentRenderer } from './subject_attachment_definition';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { SubjectLinkServices } from './subject_link';
 import type { SubjectRowData } from './subject_title';
 import { SubjectList, SubjectView } from './subject_view';
 
@@ -22,14 +24,34 @@ const base = {
   createdAt: '2026-07-28T14:00:00.000Z',
 };
 
-const renderView = (subject: InvestigationSubject) =>
+const renderView = (subject: InvestigationSubject, services: SubjectLinkServices = {}) =>
   render(
     <EuiProvider>
       <I18nProvider>
-        <SubjectView document={subject} variant="details" />
+        <KibanaContextProvider services={services}>
+          <SubjectView document={subject} variant="details" />
+        </KibanaContextProvider>
       </I18nProvider>
     </EuiProvider>
   );
+
+/** A `share` whose locators resolve to `/located/<id>?<params>`. */
+const createShare = () => {
+  const navigate = jest.fn().mockResolvedValue(undefined);
+  const services = {
+    share: {
+      url: {
+        locators: {
+          get: (locatorId: string) => ({
+            getUrl: async (params: object) => `/located/${locatorId}?${JSON.stringify(params)}`,
+            navigate,
+          }),
+        },
+      },
+    },
+  } as unknown as SubjectLinkServices;
+  return { services, navigate };
+};
 
 describe('SubjectView', () => {
   it('renders an alert as one compact row that links to the alert URL', () => {
@@ -77,6 +99,49 @@ describe('SubjectView', () => {
     renderView({ ...base, subjectType: 'alert', subjectId: 'alert-1' });
 
     expect(screen.getByTestId('investigationSubjectTitle')).toHaveTextContent('alert-1');
+  });
+
+  it("links an alert to its details page through the alerts locator, over the alert's own URL", async () => {
+    const { services } = createShare();
+    renderView(
+      {
+        ...base,
+        subjectType: 'alert',
+        subjectId: 'alert-1',
+        snapshot: { rule_name: 'Latency', url: '/app/discover#/view/1' },
+      },
+      services
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute(
+        'href',
+        '/located/ALERTS_LOCATOR?{"alertId":"alert-1"}'
+      )
+    );
+    const row = screen.getByTestId('investigationSubject-alert');
+    expect(row).not.toHaveAttribute('target');
+  });
+
+  it('links an alerting v2 alert to its episode details page, by rule name', async () => {
+    const { services } = createShare();
+    renderView(
+      {
+        ...base,
+        subjectType: 'alert',
+        subjectId: 'episode-1',
+        snapshot: { alert_version: 'v2', rule_name: 'CPU high', rule_id: 'rule-1' },
+      },
+      services
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute(
+        'href',
+        '/located/ALERTING_V2_EPISODES_LOCATOR?{"episodeId":"episode-1","host":{"app":"observabilityAlerting","pathPrefix":"/alerts"}}'
+      )
+    );
+    expect(screen.getByTestId('investigationSubjectTitle')).toHaveTextContent('CPU high');
   });
 
   it('renders a significant event and a question by their summary, without a link', () => {
@@ -233,9 +298,9 @@ describe('SubjectList', () => {
   });
 });
 
-describe('subjectAttachmentRenderer', () => {
+describe('createSubjectAttachmentRenderer', () => {
   it('labels subjects by type', () => {
-    const { getLabel } = subjectAttachmentRenderer;
+    const { getLabel } = createSubjectAttachmentRenderer({});
 
     expect(
       getLabel({
@@ -254,5 +319,29 @@ describe('subjectAttachmentRenderer', () => {
       })
     ).toBe('Slack: #oncall');
     expect(getLabel({ ...base, subjectType: 'manual', subjectId: 'q' })).toBe('Question');
+  });
+
+  it("links the loaded content through the plugin's locators", async () => {
+    const SubjectContent = await createSubjectAttachmentRenderer(
+      createShare().services
+    ).loadContent();
+
+    render(
+      <EuiProvider>
+        <I18nProvider>
+          <SubjectContent
+            document={{ ...base, subjectType: 'alert', subjectId: 'alert-1' }}
+            variant="inline"
+          />
+        </I18nProvider>
+      </EuiProvider>
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute(
+        'href',
+        '/located/ALERTS_LOCATOR?{"alertId":"alert-1"}'
+      )
+    );
   });
 });

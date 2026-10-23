@@ -13,6 +13,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { ComponentType } from 'react';
 import type { ProposalsPublicPluginStart } from '@kbn/proposals-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { InvestigationCardProps } from './conversation_templates/templates/investigation/card';
 
 export interface AgenticInvestigationsPublicSetupDependencies {
@@ -22,6 +23,8 @@ export interface AgenticInvestigationsPublicSetupDependencies {
 export interface AgenticInvestigationsPublicStartDependencies {
   agentBuilder?: AgentBuilderPluginStart;
   proposals?: ProposalsPublicPluginStart;
+  /** Locators that link alert subjects to their details pages. */
+  share?: SharePluginStart;
 }
 
 /** The part of `xpack.agenticInvestigations` exposed to the browser. */

@@ -170,6 +170,34 @@ export const alertSnapshotSchema = z.object({
 });
 
 /**
+ * A point-in-time copy of an alerting v2 episode, resolved server-side from its id. Unlike a
+ * classic alert it has no rule type, category or reason, and the alert's own fields live in
+ * `data`.
+ */
+export const v2AlertSnapshotSchema = z.object({
+  alert_version: z.literal('v2'),
+  /** `episode.id` */
+  id: z.string().min(1).max(500),
+  rule_id: z.string().min(1).max(500),
+  rule_name: z.string().min(1).max(500).optional(),
+  group_hash: z.string().min(1).max(500),
+  /** `episode.status` */
+  status: z.string().min(1).max(100),
+  /** Timestamp of the episode's first event. */
+  start: isoDateTime({ offset: true }).max(100),
+  last_event_timestamp: isoDateTime({ offset: true }).max(100).optional(),
+  severity: z.string().min(1).max(100).optional(),
+  source: z.string().min(1).max(500).optional(),
+  /** The `data` of the latest event that carried any. */
+  data: z.record(z.string().max(128), z.unknown()).optional(),
+});
+
+export const investigationAlertSnapshotSchema = z.discriminatedUnion('alert_version', [
+  alertSnapshotSchema.extend({ alert_version: z.literal('v1').optional() }),
+  v2AlertSnapshotSchema,
+]);
+
+/**
  * Strict, so that an alert investigation carries alert data and nothing else. In particular a
  * caller cannot pass the `event_uuid` the workflow's attach steps read and have the results land
  * on a significant event: one investigation has one trigger today, and an alert is not a
@@ -179,7 +207,7 @@ export const alertSnapshotSchema = z.object({
  */
 export const alertInvestigationContextSchema = z
   .object({
-    alerts: z.array(alertSnapshotSchema).min(1).max(MAX_ALERTS_PER_INVESTIGATION),
+    alerts: z.array(investigationAlertSnapshotSchema).min(1).max(MAX_ALERTS_PER_INVESTIGATION),
   })
   .strict();
 
@@ -215,5 +243,7 @@ export type InvestigationNotificationDestination = z.infer<
 export type AlertSnapshotGroup = z.infer<typeof alertSnapshotGroupSchema>;
 export type AlertSnapshotEvaluation = z.infer<typeof alertSnapshotEvaluationSchema>;
 export type AlertSnapshot = z.infer<typeof alertSnapshotSchema>;
+export type V2AlertSnapshot = z.infer<typeof v2AlertSnapshotSchema>;
+export type InvestigationAlertSnapshot = z.infer<typeof investigationAlertSnapshotSchema>;
 export type AlertInvestigationContext = z.infer<typeof alertInvestigationContextSchema>;
 export type InvestigationContext = z.infer<typeof freeFormContextSchema>;

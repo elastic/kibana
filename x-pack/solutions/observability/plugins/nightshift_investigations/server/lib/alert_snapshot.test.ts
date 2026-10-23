@@ -6,7 +6,9 @@
  */
 
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
-import { fetchAlertSnapshot, parseAlertSnapshot } from './alert_snapshot';
+import { errors } from '@elastic/elasticsearch';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { fetchInvestigationAlertSnapshots, parseAlertSnapshot } from './alert_snapshot';
 
 const alert = {
   'kibana.alert.uuid': 'alert-1',
@@ -62,41 +64,161 @@ describe('parseAlertSnapshot', () => {
   });
 });
 
-describe('fetchAlertSnapshot', () => {
-  const makeAlertsClient = (overrides: Partial<Record<string, jest.Mock>> = {}) =>
-    ({
-      getAuthorizedAlertsIndices: jest.fn().mockResolvedValue(['.alerts-observability.test']),
-      get: jest.fn().mockResolvedValue(alert),
-      ...overrides,
-    } as unknown as AlertsClient);
-
-  it('loads the alert and returns its snapshot', async () => {
-    await expect(fetchAlertSnapshot(makeAlertsClient(), 'alert-1')).resolves.toEqual(
-      expect.objectContaining({ id: 'alert-1', rule_id: 'rule-1' })
-    );
+describe('fetchInvestigationAlertSnapshots', () => {
+  const makeAlertsClient = ({
+    indices = ['.alerts-observability.test'],
+    alerts = [alert],
+  }: { indices?: string[]; alerts?: Array<Record<string, unknown>> } = {}) => ({
+    getAuthorizedAlertsIndices: jest.fn().mockResolvedValue(indices),
+    find: jest.fn().mockResolvedValue({ hits: { hits: alerts.map((_source) => ({ _source })) } }),
   });
 
-  it('returns not found when the user has no authorized alert indices', async () => {
-    const alertsClient = makeAlertsClient({
-      getAuthorizedAlertsIndices: jest.fn().mockResolvedValue([]),
+  const makeLookup = ({
+    bulkGet = jest.fn().mockResolvedValue({
+      saved_objects: [{ id: 'v2-rule', attributes: { metadata: { name: 'V2 rule' } } }],
+    }),
+    queryError,
+    columns = [] as string[],
+    rows = [] as unknown[][],
+  }: { bulkGet?: jest.Mock; queryError?: Error; columns?: string[]; rows?: unknown[][] } = {}) => ({
+    esClient: {
+      esql: {
+        query: queryError
+          ? jest.fn().mockRejectedValue(queryError)
+          : jest.fn().mockResolvedValue({
+              columns: columns.map((name) => ({ name })),
+              values: rows,
+            }),
+      },
+    },
+    bulkGet,
+    getSoClient: jest.fn().mockReturnValue({ bulkGet }),
+    spaceId: 'default',
+  });
+
+  const run = (
+    alertsClient: ReturnType<typeof makeAlertsClient>,
+    lookup: ReturnType<typeof makeLookup>,
+    alertIds: string[]
+  ) =>
+    fetchInvestigationAlertSnapshots({
+      alertsClient: alertsClient as unknown as AlertsClient,
+      alertIds,
+      ...lookup,
+    } as never);
+
+  it('loads classic alerts in one query', async () => {
+    const alertsClient = makeAlertsClient();
+    const lookup = makeLookup();
+
+    await expect(run(alertsClient, lookup, ['alert-1', 'alert-1'])).resolves.toEqual([
+      expect.objectContaining({ id: 'alert-1' }),
+    ]);
+    expect(alertsClient.find).toHaveBeenCalledTimes(1);
+    expect(lookup.esClient.esql.query).not.toHaveBeenCalled();
+    expect(lookup.getSoClient).not.toHaveBeenCalled();
+  });
+
+  it('resolves ids the alerts index misses as v2 episodes, keeping the requested order', async () => {
+    const alertsClient = makeAlertsClient();
+    const lookup = makeLookup({
+      columns: ['episode_id', 'start', 'status', 'rule_id', 'group_hash', 'data_json'],
+      rows: [
+        [
+          'episode-1',
+          '2026-09-02T10:00:00.000Z',
+          'active',
+          'v2-rule',
+          'hash',
+          '{"host.name":"h1"}',
+        ],
+      ],
     });
-    await expect(fetchAlertSnapshot(alertsClient, 'alert-1')).rejects.toMatchObject({
+
+    const snapshots = await run(alertsClient, lookup, ['episode-1', 'alert-1']);
+
+    expect(snapshots).toEqual([
+      expect.objectContaining({
+        alert_version: 'v2',
+        id: 'episode-1',
+        rule_name: 'V2 rule',
+        data: { 'host.name': 'h1' },
+      }),
+      expect.objectContaining({ id: 'alert-1' }),
+    ]);
+    expect(lookup.esClient.esql.query).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves the rule name unset when the user cannot read the rule', async () => {
+    const bulkGet = jest
+      .fn()
+      .mockRejectedValue(SavedObjectsErrorHelpers.decorateForbiddenError(new Error('forbidden')));
+    const lookup = makeLookup({
+      bulkGet,
+      columns: ['episode_id', 'start', 'status', 'rule_id', 'group_hash'],
+      rows: [['episode-1', '2026-09-02T10:00:00.000Z', 'active', 'v2-rule', 'hash']],
+    });
+
+    const [snapshot] = await run(makeAlertsClient({ alerts: [] }), lookup, ['episode-1']);
+
+    expect(snapshot).toEqual(expect.objectContaining({ id: 'episode-1' }));
+    expect(snapshot).not.toHaveProperty('rule_name', expect.any(String));
+  });
+
+  it('lists every id it cannot find in one not found error', async () => {
+    const alertsClient = makeAlertsClient({ indices: [] });
+    const lookup = makeLookup();
+
+    await expect(run(alertsClient, lookup, ['a', 'b'])).rejects.toMatchObject({
+      message: 'Alert with id a, b not found',
       output: { statusCode: 404 },
     });
   });
 
-  it('returns bad request when the alert lacks required fields', async () => {
+  it.each([
+    ['the user cannot read the events', 403, 'security_exception'],
+    [
+      'the events index does not exist',
+      400,
+      'verification_exception: Unknown index [.rule-events]',
+    ],
+  ])('treats an id as not found when %s', async (_, statusCode, reason) => {
+    const queryError = new errors.ResponseError({
+      statusCode,
+      body: { error: { reason } },
+      headers: {},
+      meta: {} as never,
+      warnings: [],
+    });
+
+    await expect(
+      run(makeAlertsClient({ alerts: [] }), makeLookup({ queryError }), ['a'])
+    ).rejects.toMatchObject({ output: { statusCode: 404 } });
+  });
+
+  it('keeps unexpected events lookup failures as errors', async () => {
+    const queryError = new Error('Elasticsearch unavailable');
+
+    await expect(
+      run(makeAlertsClient({ alerts: [] }), makeLookup({ queryError }), ['a'])
+    ).rejects.toBe(queryError);
+  });
+
+  it('keeps an alert that lacks required fields, with placeholders', async () => {
     const alertsClient = makeAlertsClient({
-      get: jest.fn().mockResolvedValue({ ...alert, 'kibana.alert.uuid': undefined }),
+      alerts: [{ ...alert, 'kibana.alert.rule.name': undefined }],
     });
-    await expect(fetchAlertSnapshot(alertsClient, 'alert-1')).rejects.toMatchObject({
-      output: { statusCode: 400 },
-    });
+
+    await expect(run(alertsClient, makeLookup(), ['alert-1'])).resolves.toEqual([
+      expect.objectContaining({ id: 'alert-1', rule_name: 'unknown' }),
+    ]);
   });
 
   it('preserves alert lookup failures', async () => {
     const lookupError = new Error('Elasticsearch unavailable');
-    const alertsClient = makeAlertsClient({ get: jest.fn().mockRejectedValue(lookupError) });
-    await expect(fetchAlertSnapshot(alertsClient, 'alert-1')).rejects.toBe(lookupError);
+    const alertsClient = makeAlertsClient();
+    alertsClient.find.mockRejectedValue(lookupError);
+
+    await expect(run(alertsClient, makeLookup(), ['alert-1'])).rejects.toBe(lookupError);
   });
 });

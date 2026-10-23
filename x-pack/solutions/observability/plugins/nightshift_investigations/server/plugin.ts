@@ -25,6 +25,7 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
+import { ALERTING_V2_RULE_SO_TYPE } from './lib/alert_snapshot';
 import type { NightshiftInvestigationsConfig } from './config';
 import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
@@ -38,6 +39,7 @@ import { installInvestigationAgent } from './lib/install_investigation_agent';
 import { installAssistantAgent } from './lib/install_assistant_agent';
 import { createInvestigationAvailability } from './create_investigation_availability';
 import { nightshiftInvestigationsRouteRepository } from './routes';
+import type { GetEpisodeLookup } from './routes/types';
 import {
   isInvestigationInfrastructureAvailable,
   isInvestigationRunAvailable,
@@ -351,7 +353,9 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           triggerInvestigationStepDefinition(
             this.getInvestigationsClient,
-            this.getAutomationsSoClient
+            this.getAutomationsSoClient,
+            this.getAlertsClient,
+            this.getEpisodeLookup
           )
         );
         // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
@@ -474,8 +478,8 @@ export class NightshiftInvestigationsPlugin
         dependencies: {
           getInvestigationsClient: this.getInvestigationsClient,
           getTriggerEmitter,
-          getAlertsClient: (request: KibanaRequest) =>
-            this.ruleRegistry?.getRacClientWithRequest(request),
+          getAlertsClient: this.getAlertsClient,
+          getEpisodeLookup: this.getEpisodeLookup,
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
           isCortexEnabled: () => this.cortexEnabled,
@@ -721,6 +725,26 @@ export class NightshiftInvestigationsPlugin
       conversationId,
       investigationId,
     });
+  };
+
+  private getAlertsClient = (request: KibanaRequest) =>
+    this.ruleRegistry?.getRacClientWithRequest(request);
+
+  private getEpisodeLookup: GetEpisodeLookup = (request, spaceId) => {
+    const { elasticsearch, savedObjects } = this;
+    if (!elasticsearch || !savedObjects) {
+      throw new Error('core services are not available — plugin start() has not been called');
+    }
+    const resolvedSpaceId =
+      spaceId ?? this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    return {
+      esClient: elasticsearch.client.asScoped(request).asCurrentUser,
+      getSoClient: () =>
+        savedObjects
+          .getScopedClient(request, { includedHiddenTypes: [ALERTING_V2_RULE_SO_TYPE] })
+          .asScopedToNamespace(resolvedSpaceId),
+      spaceId: resolvedSpaceId,
+    };
   };
 
   private getAutomationsSoClient = (request: KibanaRequest, spaceId: string) => {

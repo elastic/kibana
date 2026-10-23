@@ -6,6 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
+import { esql } from '@elastic/esql';
+import { isResponseError } from '@kbn/es-errors';
+import {
+  SavedObjectsErrorHelpers,
+  type ElasticsearchClient,
+  type SavedObjectsClientContract,
+} from '@kbn/core/server';
+import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -30,7 +38,15 @@ import {
   STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { alertSnapshotSchema, type AlertSnapshot } from '../../common';
+import {
+  alertSnapshotSchema,
+  v2AlertSnapshotSchema,
+  type InvestigationAlertSnapshot,
+  type AlertSnapshot,
+  type V2AlertSnapshot,
+} from '../../common';
+
+export const ALERTING_V2_RULE_SO_TYPE = 'alerting_rule';
 
 const INVESTIGABLE_RULE_TYPE_IDS = [
   ...OBSERVABILITY_RULE_TYPE_IDS,
@@ -69,25 +85,156 @@ export const parseAlertSnapshot = (alert: Record<string, unknown>): AlertSnapsho
   return result.success ? result.data : undefined;
 };
 
-export const fetchAlertSnapshot = async (
-  alertsClient: AlertsClient,
-  alertId: string
-): Promise<AlertSnapshot> => {
-  const indices = (await alertsClient.getAuthorizedAlertsIndices(INVESTIGABLE_RULE_TYPE_IDS)) ?? [];
-  if (!indices.length) {
-    throw Boom.notFound(`Alert with id ${alertId} not found`);
-  }
+export interface EpisodeLookup {
+  esClient: ElasticsearchClient;
+  getSoClient: () => SavedObjectsClientContract;
+  spaceId: string;
+}
 
-  const alert = await alertsClient.get({ id: alertId, index: indices.join(',') }).catch((error) => {
-    if (Boom.isBoom(error) && error.output.statusCode === 404) {
-      throw Boom.notFound(`Alert with id ${alertId} not found`);
-    }
-    throw error;
+const UNKNOWN = 'unknown';
+
+const buildClassicSnapshot = (alert: Record<string, unknown>): AlertSnapshot =>
+  parseAlertSnapshot(alert) ??
+  alertSnapshotSchema.parse({
+    id: alert[ALERT_UUID],
+    rule_id: alert[ALERT_RULE_UUID] ?? UNKNOWN,
+    rule_name: alert[ALERT_RULE_NAME] ?? UNKNOWN,
+    rule_type_id: alert[ALERT_RULE_TYPE_ID] ?? UNKNOWN,
+    rule_category: alert[ALERT_RULE_CATEGORY] ?? UNKNOWN,
+    status: alert[ALERT_STATUS] ?? UNKNOWN,
+    start: alert[ALERT_START] ?? alert[TIMESTAMP],
   });
 
-  const snapshot = parseAlertSnapshot(alert);
-  if (!snapshot) {
-    throw Boom.badRequest('Alert does not contain the fields required for an investigation');
+const fetchClassicSnapshots = async (
+  alertsClient: AlertsClient,
+  alertIds: string[]
+): Promise<Map<string, AlertSnapshot>> => {
+  const indices = (await alertsClient.getAuthorizedAlertsIndices(INVESTIGABLE_RULE_TYPE_IDS)) ?? [];
+  if (!indices.length) {
+    return new Map();
   }
-  return snapshot;
+
+  const {
+    hits: { hits },
+  } = await alertsClient.find({
+    index: indices.join(','),
+    query: { terms: { [ALERT_UUID]: alertIds } },
+    size: alertIds.length,
+  });
+  return new Map(
+    hits.flatMap(({ _source: alert }) =>
+      alert ? [[String(alert[ALERT_UUID]), buildClassicSnapshot({ ...alert })]] : []
+    )
+  );
+};
+
+const fetchRuleNames = async (
+  getSoClient: () => SavedObjectsClientContract,
+  ruleIds: string[]
+): Promise<Map<string, string>> => {
+  if (!ruleIds.length) {
+    return new Map();
+  }
+  const { saved_objects: rules } = await getSoClient()
+    .bulkGet<{ metadata?: { name?: string } }>(
+      ruleIds.map((id) => ({ type: ALERTING_V2_RULE_SO_TYPE, id }))
+    )
+    .catch((error) => {
+      if (SavedObjectsErrorHelpers.isForbiddenError(error)) return { saved_objects: [] };
+      throw error;
+    });
+  return new Map(
+    rules.flatMap((rule) =>
+      'attributes' in rule && rule.attributes.metadata?.name
+        ? [[rule.id, rule.attributes.metadata.name]]
+        : []
+    )
+  );
+};
+
+const isEventsUnavailable = (error: unknown): boolean =>
+  isResponseError(error) &&
+  (error.statusCode === 403 ||
+    error.statusCode === 404 ||
+    (error.statusCode === 400 && /unknown index/i.test(error.message)));
+
+const fetchV2Snapshots = async (
+  { esClient, getSoClient, spaceId }: EpisodeLookup,
+  episodeIds: string[]
+): Promise<Map<string, V2AlertSnapshot>> => {
+  const episodeIdValues = episodeIds.map((episodeId) => esql.str(episodeId));
+  const { query } = esql`
+    FROM ${ALERT_EVENTS_DATA_STREAM} METADATA _source
+    | WHERE type == "alert" AND space_id == ${spaceId} AND episode.id IN (${episodeIdValues})
+    | EVAL data_json = JSON_EXTRACT(_source, "$.data"), episode_id = episode.id
+    | DROP _source
+    | STATS
+        start = MIN(@timestamp),
+        last_event_timestamp = MAX(@timestamp),
+        data_json = LAST(data_json, @timestamp) WHERE data_json != "{}",
+        status = LAST(episode.status, @timestamp),
+        severity = LAST(severity, @timestamp),
+        source = LAST(source, @timestamp),
+        rule_id = LAST(rule.id, @timestamp),
+        group_hash = LAST(group_hash, @timestamp)
+      BY episode_id`.toRequest();
+
+  const response = await esClient.esql.query({ query, drop_null_columns: true }).catch((error) => {
+    if (isEventsUnavailable(error)) return undefined;
+    throw error;
+  });
+  if (!response) {
+    return new Map();
+  }
+
+  const { columns, values } = response;
+  const rows = values.map((row) =>
+    Object.fromEntries(
+      columns.flatMap(({ name }, index) => (row[index] === null ? [] : [[name, row[index]]]))
+    )
+  );
+  const ruleNames = await fetchRuleNames(getSoClient, [
+    ...new Set(rows.flatMap(({ rule_id: ruleId }) => (typeof ruleId === 'string' ? [ruleId] : []))),
+  ]);
+
+  return new Map(
+    rows.map(({ data_json: dataJson, episode_id: id, ...fields }) => {
+      const snapshot = v2AlertSnapshotSchema.parse({
+        alert_version: 'v2',
+        id,
+        ...fields,
+        rule_id: fields.rule_id ?? UNKNOWN,
+        group_hash: fields.group_hash ?? UNKNOWN,
+        status: fields.status ?? UNKNOWN,
+        rule_name: ruleNames.get(String(fields.rule_id)),
+        data: v2AlertSnapshotSchema.shape.data
+          .catch(undefined)
+          .parse(typeof dataJson === 'string' ? JSON.parse(dataJson) : undefined),
+      });
+      return [snapshot.id, snapshot];
+    })
+  );
+};
+
+export const fetchInvestigationAlertSnapshots = async ({
+  alertsClient,
+  alertIds,
+  ...lookup
+}: EpisodeLookup & {
+  alertsClient: AlertsClient;
+  alertIds: string[];
+}): Promise<InvestigationAlertSnapshot[]> => {
+  const ids = [...new Set(alertIds)];
+  const classic = await fetchClassicSnapshots(alertsClient, ids);
+  const unresolved = ids.filter((id) => !classic.has(id));
+  const universal = unresolved.length
+    ? await fetchV2Snapshots(lookup, unresolved)
+    : new Map<string, V2AlertSnapshot>();
+
+  const missing = unresolved.filter((id) => !universal.has(id));
+  if (missing.length) {
+    throw Boom.notFound(`Alert with id ${missing.join(', ')} not found`);
+  }
+  const resolved = new Map<string, InvestigationAlertSnapshot>([...classic, ...universal]);
+  return ids.flatMap((id) => resolved.get(id) ?? []);
 };

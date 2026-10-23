@@ -16,6 +16,7 @@ import type {
 } from '../../../common/subjects/subject';
 import type { InvestigationAttachmentContentProps } from '../../investigation_attachments';
 import { getSubjectTitle, type SubjectRowData } from './subject_title';
+import { useSubjectLink } from './subject_link';
 import {
   OPENS_IN_NEW_TAB,
   TRIGGER_LABEL,
@@ -37,30 +38,6 @@ const SUBJECT_ICON_TONES: Record<InvestigationSubjectType, SubjectIconTone> = {
   significant_event: 'danger',
   manual: 'neutral',
   slack_thread: 'logo',
-};
-
-/**
- * Alert URLs come from the rule type: a Kibana path or an absolute URL. Anything else (for
- * example a `javascript:` URL) is not rendered as a link.
- */
-const isSafeHref = (url: string): boolean =>
-  (url.startsWith('/') && !url.startsWith('//')) || /^https?:\/\//i.test(url);
-
-/** Slack permalinks are validated as HTTPS on write; checked again because the row is a raw link. */
-const isSafeSlackHref = (url: string): boolean => /^https:\/\//i.test(url);
-
-/**
- * Where a click on the row goes: the alert's `kibana.alert.url` (whatever the rule type writes
- * there, for example a Discover link) or the Slack thread.
- */
-export const getSubjectHref = ({ type, snapshot, slack }: SubjectRowData): string | undefined => {
-  if (type === 'alert') {
-    return snapshot?.url && isSafeHref(snapshot.url) ? snapshot.url : undefined;
-  }
-  if (type === 'slack_thread') {
-    return slack?.permalink && isSafeSlackHref(slack.permalink) ? slack.permalink : undefined;
-  }
-  return undefined;
 };
 
 const SubjectIcon = ({ iconType, tone }: { iconType: IconType; tone: SubjectIconTone }) => {
@@ -109,6 +86,8 @@ interface CompactRowProps {
   /** Makes the row a link; Slack threads open in a new tab. */
   href?: string;
   isExternal?: boolean;
+  /** Opens `href` inside Kibana instead of loading the page again. */
+  onLinkClick?: (event: React.MouseEvent) => void;
   /** Makes the row a button that shows or hides more rows. */
   onToggle?: () => void;
   isExpanded?: boolean;
@@ -128,6 +107,7 @@ const CompactRow = ({
   description,
   href,
   isExternal = false,
+  onLinkClick,
   onToggle,
   isExpanded,
   isNested = false,
@@ -218,6 +198,7 @@ const CompactRow = ({
     return (
       <a
         href={href}
+        onClick={onLinkClick}
         css={rowStyles}
         data-test-subj={dataTestSubj}
         {...(isExternal && { target: '_blank', rel: 'noopener noreferrer' })}
@@ -282,13 +263,14 @@ const getSubjectDescription = (
 
 /**
  * One compact row per subject: an icon for its type, what it is called, and "Trigger · <type>".
- * Alerts link to their `kibana.alert.url` and Slack threads to the thread; other subjects do not link.
+ * The row links where `useSubjectLink` says (the subject's page, else its own link); without a
+ * link it is plain text.
  */
 export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean }> = ({
   subject,
   isNested = false,
 }) => {
-  const href = getSubjectHref(subject);
+  const { href, onClick: onLinkClick, isExternal } = useSubjectLink(subject);
   return (
     <CompactRow
       iconType={SUBJECT_ICONS[subject.type]}
@@ -296,7 +278,8 @@ export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean 
       title={getSubjectTitle(subject)}
       description={getSubjectDescription(subject, isNested)}
       href={href}
-      isExternal={href !== undefined && subject.type === 'slack_thread'}
+      isExternal={isExternal}
+      onLinkClick={onLinkClick}
       isNested={isNested}
       data-test-subj={`investigationSubject-${subject.type}`}
     />

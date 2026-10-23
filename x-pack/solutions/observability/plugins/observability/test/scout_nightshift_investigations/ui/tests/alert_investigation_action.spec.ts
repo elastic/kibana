@@ -87,7 +87,7 @@ test.describe(
       await pageObjects.alertsTablePage.clickInvestigate();
 
       expect((await requestPromise).postDataJSON()).toMatchObject({
-        subject: { type: 'alert', id: alertId },
+        subject: { type: 'alert', ids: [alertId] },
       });
     });
 
@@ -106,7 +106,7 @@ test.describe(
       await pageObjects.alertPage.clickInvestigate();
 
       expect((await requestPromise).postDataJSON()).toMatchObject({
-        subject: { type: 'alert', id: alertId },
+        subject: { type: 'alert', ids: [alertId] },
       });
     });
 

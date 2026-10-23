@@ -91,7 +91,7 @@ export class AgenticInvestigationsPublicPlugin
           application: core.application,
         });
       }
-      registerSubjectAttachmentTypes(agentBuilder);
+      registerSubjectAttachmentTypes(agentBuilder, { share: startDeps.share });
       registerHypothesesAttachmentTypes(agentBuilder);
       registerTemplate({
         core,

@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -25,6 +25,15 @@ export type GetInvestigationsClient = (
 ) => NightshiftInvestigationsClient;
 
 export type GetAlertsClient = (request: KibanaRequest) => Promise<AlertsClient> | undefined;
+
+export type GetEpisodeLookup = (
+  request: KibanaRequest,
+  spaceId?: string
+) => {
+  esClient: ElasticsearchClient;
+  getSoClient: () => SavedObjectsClientContract;
+  spaceId: string;
+};
 
 export type GetAutomationsSoClient = (
   request: KibanaRequest,
@@ -45,6 +54,7 @@ export interface NightshiftInvestigationsRouteHandlerResources
   getInvestigationsClient: GetInvestigationsClient;
   getTriggerEmitter: GetTriggerEmitter;
   getAlertsClient: GetAlertsClient;
+  getEpisodeLookup: GetEpisodeLookup;
   getAutomationsSoClient: GetAutomationsSoClient;
   getWorkflowsManagement: GetWorkflowsManagement;
   getCortexPageStore: GetCortexPageStore;

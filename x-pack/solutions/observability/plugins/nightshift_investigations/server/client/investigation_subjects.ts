@@ -18,14 +18,14 @@ import type {
   InvestigationSubjectKey,
 } from '@kbn/agentic-investigations-plugin/common';
 import type {
-  AlertSnapshot,
+  InvestigationAlertSnapshot,
   InvestigationSubject,
   InvestigationTriggerType,
   SlackThreadReference,
 } from '../../common';
 import {
   alertInvestigationContextSchema,
-  alertSnapshotSchema,
+  investigationAlertSnapshotSchema,
   DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
   INVESTIGATION_TRIGGER_TYPES,
   toSlackThreadKey,
@@ -49,7 +49,7 @@ export const workflowSubjectInputSchema = z.object({
   id: z.string().min(1).max(MAX_SUBJECT_ID_LENGTH),
   summary: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
   triggerType: z.enum(INVESTIGATION_SUBJECT_TRIGGER_TYPES).optional(),
-  snapshot: alertSnapshotSchema.optional(),
+  snapshot: investigationAlertSnapshotSchema.optional(),
   slack: z
     .object({
       channel: z.string().min(1).max(MAX_SLACK_FIELD_LENGTH),
@@ -108,7 +108,7 @@ export const toStartSubjects = ({
   slackThread,
 }: {
   subject: InvestigationSubject;
-  alerts?: AlertSnapshot[];
+  alerts?: InvestigationAlertSnapshot[];
   triggerType: InvestigationTriggerType;
   investigationId: string;
   slackThread?: SlackThreadReference;
@@ -234,8 +234,8 @@ export const buildFollowUpMessage = ({
 }: {
   subject: InvestigationSubject;
   message: string;
-  alerts: AlertSnapshot[];
-  newAlerts: AlertSnapshot[];
+  alerts: InvestigationAlertSnapshot[];
+  newAlerts: InvestigationAlertSnapshot[];
 }): string => {
   if (subject.type !== 'alert' || alerts.length === 0) {
     return `${FOLLOW_UP_PREAMBLE}\n\n${message}`;

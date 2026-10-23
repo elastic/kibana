@@ -22,6 +22,8 @@ import {
   HypothesisTreeNode,
   type HypothesisTreeFlowNode,
 } from './hypothesis_tree_nodes';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { SubjectLinkServices } from '../../subjects/attachments/subject_link';
 
 jest.mock('@kbn/proposals-plugin/public');
 
@@ -29,15 +31,20 @@ const flags = { isSelected: false, isDimmed: false, selectedActionIndex: null };
 
 const renderNode = (
   data: HypothesisTreeFlowNode['data'],
-  actions = { onSelectAction: jest.fn(), onSelectNode: jest.fn() }
+  actions = { onSelectAction: jest.fn(), onSelectNode: jest.fn() },
+  services: SubjectLinkServices = {}
 ) => {
   render(
     <EuiProvider>
       <I18nProvider>
         <ReactFlowProvider>
-          <HypothesisTreeActionsContext.Provider value={actions}>
-            <HypothesisTreeNode {...({ id: 'node', data } as NodeProps<HypothesisTreeFlowNode>)} />
-          </HypothesisTreeActionsContext.Provider>
+          <KibanaContextProvider services={services}>
+            <HypothesisTreeActionsContext.Provider value={actions}>
+              <HypothesisTreeNode
+                {...({ id: 'node', data } as NodeProps<HypothesisTreeFlowNode>)}
+              />
+            </HypothesisTreeActionsContext.Provider>
+          </KibanaContextProvider>
         </ReactFlowProvider>
       </I18nProvider>
     </EuiProvider>

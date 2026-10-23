@@ -25,7 +25,7 @@ import type { HypothesisStatus } from '../../../common/hypotheses/hypotheses';
 import type { InvestigationProposalSummary } from '../../../common/investigations/investigation';
 import type { InvestigationSubjectType } from '../../../common/subjects/subject';
 import { getSubjectTitle } from '../../subjects/attachments/subject_title';
-import { getSubjectHref } from '../../subjects/attachments/subject_view';
+import { useSubjectLink } from '../../subjects/attachments/subject_link';
 import { SUBJECT_TYPE_LABELS } from '../../subjects/attachments/translations';
 import { HYPOTHESIS_STATUS_LABELS, confidenceLabel } from '../attachments/translations';
 import type { HypothesisTreeNodeData, HypothesisTreeNodeKind } from './build_hypothesis_graph';
@@ -470,6 +470,8 @@ const HypothesisTreeNodeComponent = ({
 }: NodeProps<HypothesisTreeFlowNode>): React.ReactElement => {
   const { isSelected, isDimmed } = data;
   const { onSelectNode } = useContext(HypothesisTreeActionsContext);
+  const triggerSubject = data.kind === 'trigger' ? data.subjects[0] : undefined;
+  const triggerLink = useSubjectLink(triggerSubject);
   const shellProps = { isSelected, isDimmed };
   // The chip only summarizes the row below it, and the actions node's cards are buttons themselves.
   const selectableProps = { ...shellProps, onActivate: () => onSelectNode(id) };
@@ -477,8 +479,7 @@ const HypothesisTreeNodeComponent = ({
   switch (data.kind) {
     case 'trigger': {
       const [first, ...rest] = data.subjects;
-      const href = first ? getSubjectHref(first) : undefined;
-      const isSlack = first?.type === 'slack_thread';
+      const { href, onClick: onTriggerLinkClick, isExternal: isSlack } = triggerLink;
       return (
         <NodeShell kind="trigger" label={NODE_LABELS.trigger} {...selectableProps}>
           <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false}>
@@ -507,7 +508,10 @@ const HypothesisTreeNodeComponent = ({
                     target={isSlack ? '_blank' : undefined}
                     data-test-subj="investigationHypothesisTreeTriggerLink"
                     // Following the link should not also select the node.
-                    onClick={(event: React.MouseEvent) => event.stopPropagation()}
+                    onClick={(event: React.MouseEvent) => {
+                      event.stopPropagation();
+                      onTriggerLinkClick?.(event);
+                    }}
                   >
                     {isSlack ? OPEN_SLACK_THREAD_LABEL : VIEW_ALERT_LABEL}
                   </EuiLink>
