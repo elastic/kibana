@@ -1756,6 +1756,7 @@ describe('Editor actions provider', () => {
 
   describe('provideCompletionItems', () => {
     const mockModel = {
+      getVersionId: () => 1,
       getWordAtPosition: () => {
         return {
           word: 'GET',
@@ -2638,6 +2639,26 @@ describe('Editor actions provider', () => {
 
         expect(suggestions).toHaveLength(1);
         expect(suggestions[0].label).toBe('false');
+      });
+
+      it('returns an incomplete empty list when the model changes while body suggestions are computed', async () => {
+        let resolveParsedRequests: (requests: typeof unterminatedRequest) => void = () => {};
+        mockGetParsedRequests.mockReturnValue(
+          new Promise<typeof unterminatedRequest>((resolve) => {
+            resolveParsedRequests = resolve;
+          })
+        );
+        mockPopulateContext.mockImplementation((...args) => {
+          const context = args[0][1];
+          context.autoCompleteSet = [{ name: 'aggs' }];
+        });
+        const model = setup(['GET _search', '{', '  "ag'], 3, 7);
+
+        const pending = provideCompletionItems(model, { lineNumber: 3, column: 7 });
+        model.getVersionId.mockReturnValue(2);
+        resolveParsedRequests(unterminatedRequest);
+
+        expect(await pending).toEqual({ suggestions: [], incomplete: true });
       });
 
       it('still returns method completion items on an empty line outside triple quotes', async () => {
