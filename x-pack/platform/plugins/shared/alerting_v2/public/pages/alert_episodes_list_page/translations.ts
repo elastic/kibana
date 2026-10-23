@@ -276,6 +276,13 @@ export const CLASSIC_ALERT_DETAILS_TITLE = i18n.translate(
   }
 );
 
+export const CLASSIC_ALERT_DETAILS_CLOSE = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.closeButton',
+  {
+    defaultMessage: 'Close',
+  }
+);
+
 export const CLASSIC_ALERT_DETAILS_OVERVIEW_TAB = i18n.translate(
   'xpack.alertingV2.episodes.classicAlertDetails.overviewTab',
   {

@@ -165,6 +165,31 @@ describe('ClassicAlertDetailsFlyout', () => {
     });
   });
 
+  it('closes from the footer Close button in the loading, error and loaded states', async () => {
+    const onClose = jest.fn();
+    mockFetchClassicAlertById.mockReturnValue(new Promise(() => {}));
+    const loading = renderFlyout({ onClose });
+
+    fireEvent.click(screen.getByTestId('classicAlertEpisodeDetailsCloseButton'));
+    expect(onClose).toHaveBeenCalledTimes(1);
+    loading.unmount();
+
+    mockFetchClassicAlertById.mockRejectedValue(new Error('not found'));
+    const failed = renderFlyout({ onClose });
+    await screen.findByTestId('classicAlertEpisodeDetailsError');
+
+    fireEvent.click(screen.getByTestId('classicAlertEpisodeDetailsCloseButton'));
+    expect(onClose).toHaveBeenCalledTimes(2);
+    failed.unmount();
+
+    mockFetchClassicAlertById.mockResolvedValue(activeClassicAlert);
+    renderFlyout({ onClose });
+    await screen.findByTestId('classicAlertEpisodeDetailsTabs');
+
+    fireEvent.click(screen.getByTestId('classicAlertEpisodeDetailsCloseButton'));
+    expect(onClose).toHaveBeenCalledTimes(3);
+  });
+
   it('shows a loading spinner while the classic alert is being fetched', () => {
     mockFetchClassicAlertById.mockReturnValue(new Promise(() => {}));
 

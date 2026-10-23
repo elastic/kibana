@@ -325,6 +325,11 @@ export const ClassicAlertDetailsFlyout = ({
       </FlyoutTemplate.Body>
 
       <FlyoutTemplate.Footer>
+        <FlyoutTemplate.Footer.SecondaryAction
+          label={i18n.CLASSIC_ALERT_DETAILS_CLOSE}
+          onClick={onClose}
+          data-test-subj="classicAlertEpisodeDetailsCloseButton"
+        />
         <FlyoutTemplate.Footer.PrimaryActionMenu
           label={FLYOUT_TAKE_ACTION}
           aria-label={FLYOUT_TAKE_ACTION}
