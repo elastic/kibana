@@ -634,7 +634,9 @@ The Nightshift Vault config must hold a `nightshiftOrcaEs` block (see
 [`vault/config.example.json`](vault/config.example.json)) whose key can only `read` and
 `view_index_metadata` on `logs-orcabench.otel-*`, `traces-orcabench.otel-*` and
 `metrics-orcabench.otel-*`. An optional `readableIndices` in that block replaces the index hint
-the agent's manifest gets.
+the agent's manifest gets. The ORCA shard ignores `nightshift.defaultTelemetryTarget` and binds
+its legacy telemetry connector to this block, so a profile's `c0` or `none` default cannot
+redirect the benchmark. Configured named targets remain available for explicit selection.
 
 - The dataset's ID, case count and content digest are pinned in
   [`orca_dataset.ts`](evals/investigation/orca_dataset.ts). A changed release fails before any

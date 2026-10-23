@@ -449,6 +449,40 @@ describe('ORCA CI shard', () => {
     );
     expect(fallback.output.env.NIGHTSHIFT_SANDBOX_READABLE_INDICES).not.toMatch(/2026|April/);
   });
+  it.each(['c0', 'none'])(
+    'uses ORCA telemetry despite a profile default of %s',
+    (defaultTarget) => {
+      const { output, status } = runHook(
+        {
+          ...existing,
+          nightshiftOrcaEs: orca,
+          nightshift: {
+            ...existing.nightshift,
+            defaultTelemetryTarget: defaultTarget,
+            telemetryTargets: { c0: existing.nightshift.telemetry },
+          },
+        },
+        { EVAL_SHARD_ID: 'orcabench' }
+      );
+      expect(status).toBe(0);
+      const originalEnv = process.env;
+      process.env = { ...originalEnv, ...output.env };
+      try {
+        const { xpack } = getConfigFromFiles([output.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG]);
+        expect(xpack.nightshift_investigations.sandbox.default_telemetry_target).toBeUndefined();
+        expect(xpack.nightshift_investigations.sandbox.telemetry_connector_id).toBe(
+          'nightshift-evals-telemetry'
+        );
+        expect(xpack.actions.preconfigured['nightshift-evals-telemetry']).toMatchObject({
+          actionTypeId: '.http',
+          config: { url: orca.url },
+          secrets: { secretHeaders: { Authorization: `ApiKey ${orca.apiKey}` } },
+        });
+      } finally {
+        process.env = originalEnv;
+      }
+    }
+  );
   it('ignores a shared evals config, so the suite secret is the only source of the ORCA key', () => {
     const { status, stderr } = runHook(existing, {
       EVAL_SHARD_ID: 'orcabench',
@@ -532,10 +566,12 @@ describe('named telemetry targets', () => {
       expect(xpack.actions.preconfigured).toMatchObject({
         existing: { name: 'Existing' },
         'nightshift-evals-telemetry-c0': {
+          actionTypeId: '.http',
           config: { url: telemetryTargets.c0.url },
           secrets: { secretHeaders: { Authorization: 'ApiKey c0-key' } },
         },
         'nightshift-evals-telemetry-orca': {
+          actionTypeId: '.http',
           config: { url: telemetryTargets.orca.url },
           secrets: { secretHeaders: { Authorization: 'ApiKey orca-key' } },
         },
