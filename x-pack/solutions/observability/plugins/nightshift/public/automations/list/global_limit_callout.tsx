@@ -7,15 +7,32 @@
 
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import { globalLimitLabels } from './translations';
 
-export const GlobalLimitCallout = () => (
+export const GlobalLimitCallout = ({ settingsHref }: { settingsHref?: string }) => (
   <EuiCallOut
     announceOnMount
     size="s"
     color="warning"
     iconType="hourglass"
     title={globalLimitLabels.title}
+    actionProps={
+      settingsHref
+        ? {
+            primary: {
+              children: globalLimitLabels.goToSettings,
+              href: settingsHref,
+              'data-test-subj': 'automationsGlobalLimitSettingsLink',
+              ...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SETTINGS,
+                element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_LIST,
+              }),
+            },
+          }
+        : undefined
+    }
     data-test-subj="automationsGlobalLimitBanner"
   >
     {globalLimitLabels.body}

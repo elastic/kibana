@@ -73,7 +73,11 @@ describe('AutomationsPage', () => {
   beforeEach(() => {
     mockUseKibana.mockReturnValue({
       services: {
-        application: { capabilities: { nightshift: { manage: true } }, navigateToUrl: jest.fn() },
+        application: {
+          capabilities: { nightshift: { manage: true } },
+          navigateToUrl: jest.fn(),
+          getUrlForApp: (app: string, { path }: { path: string }) => `/app/${app}${path}`,
+        },
         http: { basePath: { prepend: (path: string) => path } },
         charts: { theme: { useChartsBaseTheme: () => ({}), useSparklineOverrides: () => ({}) } },
       },
@@ -414,6 +418,16 @@ describe('AutomationsPage', () => {
       expect(screen.getByText('Triage incoming alerts')).toBeInTheDocument();
     });
 
+    it('shows only the global callout when automations are also rate limited', () => {
+      mockUseRunQuotas.mockReturnValue({
+        data: { enabled: true, limits: { investigation: 3 }, counts: { investigation: 3 } },
+      });
+      renderPage();
+
+      expect(screen.getByTestId('automationsGlobalLimitBanner')).toBeInTheDocument();
+      expect(screen.queryByTestId('automationsRateLimitBanner')).not.toBeInTheDocument();
+    });
+
     it('shows the paused callout only when the global investigation limit is reached', () => {
       const quotas = (used: number) => ({
         data: { enabled: true, limits: { investigation: 3 }, counts: { investigation: used } },
@@ -426,6 +440,28 @@ describe('AutomationsPage', () => {
       mockUseRunQuotas.mockReturnValue(quotas(3));
       renderPage();
       expect(screen.getByTestId('automationsGlobalLimitBanner')).toBeInTheDocument();
+    });
+
+    it('links the paused callout to the investigation settings only when the user can manage limits', () => {
+      const quotas = (canManage: boolean) => ({
+        data: {
+          enabled: true,
+          limits: { investigation: 3 },
+          counts: { investigation: 3 },
+          canManage,
+        },
+      });
+      mockUseRunQuotas.mockReturnValue(quotas(false));
+      const { unmount } = renderPage();
+      expect(screen.queryByTestId('automationsGlobalLimitSettingsLink')).not.toBeInTheDocument();
+      unmount();
+
+      mockUseRunQuotas.mockReturnValue(quotas(true));
+      renderPage();
+      expect(screen.getByTestId('automationsGlobalLimitSettingsLink')).toHaveAttribute(
+        'href',
+        '/app/nightshift/settings/investigations'
+      );
     });
 
     it('filters by the configured triggers', async () => {

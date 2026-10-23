@@ -125,6 +125,9 @@ export const globalLimitLabels = {
     defaultMessage:
       'Automatic investigations resume at 00:00 UTC. Alerts that continue an open investigation and manual investigations are not blocked.',
   }),
+  goToSettings: i18n.translate('xpack.nightshift.automations.globalLimitBannerGoToSettings', {
+    defaultMessage: 'Go to settings',
+  }),
 };
 
 export const runCountColumns = [

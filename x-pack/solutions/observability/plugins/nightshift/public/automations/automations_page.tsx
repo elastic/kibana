@@ -8,6 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { EuiConfirmModal, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useHistory, useParams } from 'react-router-dom';
 import { RETRY_BUTTON_LABEL } from '../common/messages';
@@ -85,6 +86,9 @@ export const AutomationsPage = (): React.ReactElement => {
   } = useAutomationFilters(automations, getFacets);
   const { data: quotas } = useRunQuotas();
   const isGlobalLimitReached = isGlobalInvestigationLimitReached(quotas);
+  const globalLimitSettingsHref = quotas?.canManage
+    ? services.application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/settings/investigations' })
+    : undefined;
   const rateLimitedCount = automations.filter(isRateLimited).length;
   const openCreateFlyout = canManage ? () => navigate('/automations/new') : undefined;
   const isEmpty = !isInitialLoading && !error && automations.length === 0;
@@ -157,11 +161,11 @@ export const AutomationsPage = (): React.ReactElement => {
         <>
           {isGlobalLimitReached && (
             <>
-              <GlobalLimitCallout />
+              <GlobalLimitCallout settingsHref={globalLimitSettingsHref} />
               <EuiSpacer size="m" />
             </>
           )}
-          {rateLimitedCount > 0 && (
+          {!isGlobalLimitReached && rateLimitedCount > 0 && (
             <>
               <RateLimitCallout
                 count={rateLimitedCount}
