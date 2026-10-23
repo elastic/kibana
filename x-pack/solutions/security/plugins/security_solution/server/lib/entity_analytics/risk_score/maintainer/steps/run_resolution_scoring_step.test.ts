@@ -15,27 +15,32 @@ import { riskScoreServiceMock } from '../../risk_score_service.mock';
 import { runResolutionScoringStep } from './run_resolution_scoring_step';
 import {
   buildZeroResolutionScores,
-  calculateResolutionEntityScores,
+  discoverResolutionPages,
+  scoreResolutionPage,
 } from './score_resolution_entities';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
+import { createPageStepTimings } from '../utils/page_step_timings';
 
 jest.mock('./score_resolution_entities');
 jest.mock('./persist_scores');
 
-async function* toAsyncGenerator<T>(pages: T[]) {
-  for (const page of pages) {
-    yield page;
-  }
-}
-
-async function* scorePages(
-  pages: EntityRiskScoreRecord[][]
-): AsyncGenerator<EntityRiskScoreRecord[], number> {
-  for (const page of pages) {
-    yield page;
-  }
-  return pages.length;
-}
+// Each inner array is the scores one page of resolution targets produces.
+const mockPages = (pages: EntityRiskScoreRecord[][]) => {
+  const timings = createPageStepTimings();
+  jest.mocked(discoverResolutionPages).mockImplementation(async function* () {
+    for (let index = 0; index < pages.length; index++) {
+      yield {
+        pageNumber: index + 1,
+        resolutionTargetIds: [],
+        bounds: undefined,
+        timer: timings.startPage(),
+      };
+    }
+  });
+  jest
+    .mocked(scoreResolutionPage)
+    .mockImplementation(async (_params, { pageNumber }) => pages[pageNumber - 1]);
+};
 
 describe('runResolutionScoringStep', () => {
   let esClient: ElasticsearchClient;
@@ -59,7 +64,7 @@ describe('runResolutionScoringStep', () => {
   it('does not report lookup_empty when aborted before first page is processed', async () => {
     const abortController = new AbortController();
     abortController.abort();
-    (calculateResolutionEntityScores as jest.Mock).mockReturnValue(toAsyncGenerator([[]]));
+    mockPages([[]]);
 
     const result = await runResolutionScoringStep({
       esClient,
@@ -79,7 +84,7 @@ describe('runResolutionScoringStep', () => {
       alertFilters: [],
     });
 
-    expect(calculateResolutionEntityScores).toHaveBeenCalledWith(
+    expect(discoverResolutionPages).toHaveBeenCalledWith(
       expect.objectContaining({
         abortSignal: abortController.signal,
         alertFilters: [],
@@ -96,7 +101,7 @@ describe('runResolutionScoringStep', () => {
   });
 
   it('reports lookup_empty when no lookup pages are returned', async () => {
-    (calculateResolutionEntityScores as jest.Mock).mockReturnValue(toAsyncGenerator([]));
+    mockPages([]);
 
     const result = await runResolutionScoringStep({
       esClient,
@@ -166,7 +171,7 @@ describe('runResolutionScoringStep', () => {
     });
 
     it('writes a zero for a target whose group had nothing to score', async () => {
-      jest.mocked(calculateResolutionEntityScores).mockReturnValue(scorePages([[]]));
+      mockPages([[]]);
       jest.mocked(persistScoresToRiskIndex).mockResolvedValue(1);
 
       const result = await run();
@@ -188,11 +193,7 @@ describe('runResolutionScoringStep', () => {
     });
 
     it('asks for zeros only for the targets that got no score', async () => {
-      jest
-        .mocked(calculateResolutionEntityScores)
-        .mockReturnValue(
-          scorePages([[riskScoreServiceMock.createRiskScore({ id_value: TARGET_ID })]])
-        );
+      mockPages([[riskScoreServiceMock.createRiskScore({ id_value: TARGET_ID })]]);
 
       await run({ targetEntityIds: [TARGET_ID, OTHER_TARGET_ID] });
 
@@ -203,11 +204,7 @@ describe('runResolutionScoringStep', () => {
 
     it('writes no zero when the target scored but the write failed', async () => {
       // Zeroing here would drop the score of a group that does have alerts.
-      jest
-        .mocked(calculateResolutionEntityScores)
-        .mockReturnValue(
-          scorePages([[riskScoreServiceMock.createRiskScore({ id_value: TARGET_ID })]])
-        );
+      mockPages([[riskScoreServiceMock.createRiskScore({ id_value: TARGET_ID })]]);
       jest.mocked(persistScoresToRiskIndex).mockResolvedValue(0);
 
       await run();
@@ -216,7 +213,7 @@ describe('runResolutionScoringStep', () => {
     });
 
     it('writes no zero in a full run, which leaves stale scores to resetToZero', async () => {
-      jest.mocked(calculateResolutionEntityScores).mockReturnValue(scorePages([[]]));
+      mockPages([[]]);
 
       await run({ targetEntityIds: undefined });
 
@@ -224,7 +221,7 @@ describe('runResolutionScoringStep', () => {
     });
 
     it('writes no zero when the lookup holds no group for the target', async () => {
-      jest.mocked(calculateResolutionEntityScores).mockReturnValue(scorePages([]));
+      mockPages([]);
 
       await run();
 
@@ -234,7 +231,7 @@ describe('runResolutionScoringStep', () => {
     it('writes no zero when the run is aborted', async () => {
       const abortController = new AbortController();
       abortController.abort();
-      jest.mocked(calculateResolutionEntityScores).mockReturnValue(scorePages([[]]));
+      mockPages([[]]);
 
       await run({ abortSignal: abortController.signal });
 
@@ -242,7 +239,7 @@ describe('runResolutionScoringStep', () => {
     });
 
     it('keeps the previous score when building the zero fails', async () => {
-      jest.mocked(calculateResolutionEntityScores).mockReturnValue(scorePages([[]]));
+      mockPages([[]]);
       jest.mocked(buildZeroResolutionScores).mockRejectedValue(new Error('lookup unavailable'));
 
       const result = await run();

@@ -10,7 +10,7 @@ import type { EntityType } from '../../../../../../common/entity_analytics/types
 import type { EntityRiskScoreRecord } from '../../../../../../common/api/entity_analytics/common';
 import type { RiskEngineDataWriter } from '../../risk_engine_data_writer';
 import { persistRiskScoresToEntityStore } from '../../persist_risk_scores_to_entity_store';
-import type { PageStepTimings } from '../utils/page_step_timings';
+import type { PageStepRecorder } from '../utils/page_step_timings';
 import type { ScopedLogger } from '../utils/with_log_context';
 
 export const persistScoresToRiskIndex = async ({
@@ -19,7 +19,7 @@ export const persistScoresToRiskIndex = async ({
   scores,
   logger,
   refresh,
-  pageTimings,
+  timer,
 }: {
   writer: RiskEngineDataWriter;
   entityType: EntityType;
@@ -27,11 +27,11 @@ export const persistScoresToRiskIndex = async ({
   logger: ScopedLogger;
   refresh?: Parameters<RiskEngineDataWriter['bulk']>[0]['refresh'];
   /** Records the write as the page's `riskWrite` step, with the bulk response's `took`. */
-  pageTimings?: PageStepTimings;
+  timer?: PageStepRecorder;
 }): Promise<number> => {
   const write = () => writer.bulk({ [entityType]: scores, refresh });
-  const bulkResponse = pageTimings
-    ? await pageTimings.time('riskWrite', write, (response) => response.took)
+  const bulkResponse = timer
+    ? await timer.time('riskWrite', write, (response) => response.took)
     : await write();
   if (bulkResponse.errors.length > 0) {
     logger.warn(

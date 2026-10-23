@@ -22,7 +22,7 @@ import { applyScoreModifiersFromEntities } from '../../modifiers/apply_modifiers
 import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
 import type { EsqlPageProfileSummary } from '../utils/esql_page_profile';
 import { shouldProfilePage, summarizeEsqlPage } from '../utils/esql_page_profile';
-import type { PageStepTimings } from '../utils/page_step_timings';
+import type { PageStepRecorder, PageStepTimings, PageTimer } from '../utils/page_step_timings';
 import { createPageStepTimings } from '../utils/page_step_timings';
 import { buildResolutionModifierEntity } from './resolution_modifiers';
 import { getResolutionPageMemberFilter } from './resolution_member_filter';
@@ -59,36 +59,39 @@ interface ResolutionPageResult {
 
 const RESOLUTION_GROUP_MEMBER_FETCH_PAGE_SIZE = 1000;
 
-export const calculateResolutionEntityScores = async function* ({
+export interface ResolutionPageTask {
+  pageNumber: number;
+  resolutionTargetIds: string[];
+  bounds: { lower?: string; upper: string } | undefined;
+  timer: PageTimer;
+}
+
+/**
+ * Finds the resolution pages, one after another: each composite aggregation over the lookup index
+ * needs the previous one's `after_key`.
+ */
+export const discoverResolutionPages = async function* ({
   esClient,
-  crudClient,
   logger,
   entityType,
-  alertsIndex,
   lookupIndex,
   pageSize,
-  sampleSize,
-  now,
-  calculationRunId,
-  watchlistConfigs,
   abortSignal,
   targetEntityIds,
-  alertFilters,
   pageTimings = createPageStepTimings(),
-}: ScoreResolutionEntitiesParams): AsyncGenerator<EntityRiskScoreRecord[], number> {
+}: ScoreResolutionEntitiesParams): AsyncGenerator<ResolutionPageTask> {
   let afterKey: Record<string, string> | undefined;
   let previousPageUpperBound: string | undefined;
-  let pagesProcessed = 0;
+  let pageNumber = 0;
 
   do {
     if (abortSignal?.aborted) {
       logger.info('Resolution scoring aborted between pages');
-      return pagesProcessed;
+      return;
     }
 
-    // Per page: fetch groups, score them, then apply merged group modifiers.
-    pageTimings.startPage();
-    const pageResult = await pageTimings.time('discovery', () =>
+    const timer = pageTimings.startPage();
+    const pageResult = await timer.time('discovery', () =>
       fetchNextResolutionPage({
         esClient,
         entityType,
@@ -99,105 +102,139 @@ export const calculateResolutionEntityScores = async function* ({
       })
     );
     if (!pageResult) {
-      pageTimings.dropPage();
-      break;
+      timer.drop();
+      return;
     }
 
-    pagesProcessed += 1;
+    pageNumber += 1;
     afterKey = pageResult.afterKey;
     logger.debug(
-      `[resolution][page:${pagesProcessed}] lookup buckets=${pageResult.bucketCount}, targets=${pageResult.resolutionTargetIds.length}`
+      `[resolution][page:${pageNumber}] lookup buckets=${pageResult.bucketCount}, targets=${pageResult.resolutionTargetIds.length}`
     );
-
-    // Fetched before scoring so the query can skip alerts outside the page's groups, and reused
-    // for the group modifiers below.
-    const lookupMemberIds = await pageTimings.time('memberFetch', () =>
-      fetchResolutionGroupMemberIds({
-        esClient,
-        logger,
-        lookupIndex,
-        resolutionTargetIds: pageResult.resolutionTargetIds,
-      })
-    );
-    const pageMemberIds = [...new Set([...pageResult.resolutionTargetIds, ...lookupMemberIds])];
-    const memberFilter = getResolutionPageMemberFilter(entityType, pageMemberIds);
-    if (!memberFilter) {
-      logger.debug(
-        `[resolution][page:${pagesProcessed}] members=${pageMemberIds.length} exceed a terms query, reading every alert`
-      );
-    }
 
     const pageUpperBound =
       pageResult.resolutionTargetIds[pageResult.resolutionTargetIds.length - 1];
-    const { parsedScores, esqlRows, profileSummary } = await scoreResolutionPage({
-      esClient,
-      entityType,
-      resolutionTargetIds: pageResult.resolutionTargetIds,
-      // Full runs page through every target in sort order, so each page is exactly the
-      // targets in (previous upper bound, this upper bound]. Explicit target lists from
-      // single-entity recalculation can be sparse and keep the ID list.
-      bounds: targetEntityIds
-        ? undefined
-        : { lower: previousPageUpperBound, upper: pageUpperBound },
-      // A full run shares its ID with the lookup rows Phase 0 wrote for it.
-      calculationRunId,
-      sampleSize,
-      pageSize,
-      alertsIndex,
-      lookupIndex,
-      alertFilters: memberFilter ? [...alertFilters, memberFilter] : alertFilters,
-      profile: shouldProfilePage(pagesProcessed),
-      pageTimings,
-    });
+    // Full runs page through every target in sort order, so each page is exactly the targets in
+    // (previous upper bound, this upper bound]. Explicit target lists from single-entity
+    // recalculation can be sparse and keep the ID list.
+    const bounds = targetEntityIds
+      ? undefined
+      : { lower: previousPageUpperBound, upper: pageUpperBound };
     previousPageUpperBound = pageUpperBound;
-    if (profileSummary) {
-      logger.info(
-        `[resolution][page:${pagesProcessed}] esql profile ${JSON.stringify({
-          ...profileSummary,
-          members: pageMemberIds.length,
-          memberFilter: memberFilter !== undefined,
-        })}`
-      );
-    }
-    logger.debug(
-      `[resolution][page:${pagesProcessed}] parsed_scores=${parsedScores.length}, esql_rows=${esqlRows}`
-    );
-
-    let modifiedScores: EntityRiskScoreRecord[] = [];
-    if (parsedScores.length > 0) {
-      const allMemberIds = collectMemberEntityIds(parsedScores);
-      for (const memberId of lookupMemberIds) {
-        allMemberIds.add(memberId);
-      }
-
-      const memberEntities = await pageTimings.time('entityFetch', () =>
-        fetchEntitiesByIds({
-          crudClient,
-          entityIds: [...allMemberIds],
-          logger,
-          errorContext:
-            'Error fetching entities for resolution modifier application. Resolution scoring will proceed without modifiers',
-        })
-      );
-      logger.debug(
-        `[resolution][page:${pagesProcessed}] member_entities_requested=${allMemberIds.size}, fetched=${memberEntities.size}`
-      );
-
-      modifiedScores = pageTimings.timeSync('modifiers', () =>
-        applyResolutionModifiers({
-          parsedScores,
-          memberEntities,
-          now,
-          entityType,
-          calculationRunId,
-          watchlistConfigs,
-        })
-      );
-    }
-    yield modifiedScores;
-    logger.debug(`[resolution][page:${pagesProcessed}] modified_scores=${modifiedScores.length}`);
+    yield { pageNumber, resolutionTargetIds: pageResult.resolutionTargetIds, bounds, timer };
   } while (afterKey !== undefined);
+};
 
+/** Scores one resolution page: fetches its groups, scores them, then applies merged group modifiers. */
+export const scoreResolutionPage = async (
+  {
+    esClient,
+    crudClient,
+    logger,
+    entityType,
+    alertsIndex,
+    lookupIndex,
+    pageSize,
+    sampleSize,
+    now,
+    calculationRunId,
+    watchlistConfigs,
+    alertFilters,
+  }: ScoreResolutionEntitiesParams,
+  { pageNumber, resolutionTargetIds, bounds, timer }: ResolutionPageTask
+): Promise<EntityRiskScoreRecord[]> => {
+  // Fetched before scoring so the query can skip alerts outside the page's groups, and reused
+  // for the group modifiers below.
+  const lookupMemberIds = await timer.time('memberFetch', () =>
+    fetchResolutionGroupMemberIds({
+      esClient,
+      logger,
+      lookupIndex,
+      resolutionTargetIds,
+    })
+  );
+  const pageMemberIds = [...new Set([...resolutionTargetIds, ...lookupMemberIds])];
+  const memberFilter = getResolutionPageMemberFilter(entityType, pageMemberIds);
+  if (!memberFilter) {
+    logger.debug(
+      `[resolution][page:${pageNumber}] members=${pageMemberIds.length} exceed a terms query, reading every alert`
+    );
+  }
+
+  const { parsedScores, esqlRows, profileSummary } = await runResolutionScoringQuery({
+    esClient,
+    entityType,
+    resolutionTargetIds,
+    bounds,
+    // A full run shares its ID with the lookup rows Phase 0 wrote for it.
+    calculationRunId,
+    sampleSize,
+    pageSize,
+    alertsIndex,
+    lookupIndex,
+    alertFilters: memberFilter ? [...alertFilters, memberFilter] : alertFilters,
+    profile: shouldProfilePage(pageNumber),
+    timer,
+  });
+  if (profileSummary) {
+    logger.info(
+      `[resolution][page:${pageNumber}] esql profile ${JSON.stringify({
+        ...profileSummary,
+        members: pageMemberIds.length,
+        memberFilter: memberFilter !== undefined,
+      })}`
+    );
+  }
+  logger.debug(
+    `[resolution][page:${pageNumber}] parsed_scores=${parsedScores.length}, esql_rows=${esqlRows}`
+  );
+
+  if (parsedScores.length === 0) {
+    return [];
+  }
+
+  const allMemberIds = collectMemberEntityIds(parsedScores);
+  for (const memberId of lookupMemberIds) {
+    allMemberIds.add(memberId);
+  }
+
+  const memberEntities = await timer.time('entityFetch', () =>
+    fetchEntitiesByIds({
+      crudClient,
+      entityIds: [...allMemberIds],
+      logger,
+      errorContext:
+        'Error fetching entities for resolution modifier application. Resolution scoring will proceed without modifiers',
+    })
+  );
+  logger.debug(
+    `[resolution][page:${pageNumber}] member_entities_requested=${allMemberIds.size}, fetched=${memberEntities.size}`
+  );
+
+  const modifiedScores = timer.timeSync('modifiers', () =>
+    applyResolutionModifiers({
+      parsedScores,
+      memberEntities,
+      now,
+      entityType,
+      calculationRunId,
+      watchlistConfigs,
+    })
+  );
+  logger.debug(`[resolution][page:${pageNumber}] modified_scores=${modifiedScores.length}`);
+  return modifiedScores;
+};
+
+/** Streams resolution scores for one entity type, one page per yield. */
+export const calculateResolutionEntityScores = async function* (
+  params: ScoreResolutionEntitiesParams
+): AsyncGenerator<EntityRiskScoreRecord[], number> {
+  let pagesProcessed = 0;
+  for await (const task of discoverResolutionPages(params)) {
+    pagesProcessed += 1;
+    yield await scoreResolutionPage(params, task);
+    task.timer.end();
+  }
   return pagesProcessed;
 };
 
@@ -405,7 +442,7 @@ export const fetchResolutionGroupMemberIds = async ({
   return memberIds;
 };
 
-const scoreResolutionPage = async ({
+const runResolutionScoringQuery = async ({
   esClient,
   entityType,
   resolutionTargetIds,
@@ -417,7 +454,7 @@ const scoreResolutionPage = async ({
   lookupIndex,
   alertFilters,
   profile,
-  pageTimings,
+  timer,
 }: {
   esClient: ElasticsearchClient;
   entityType: EntityType;
@@ -430,7 +467,7 @@ const scoreResolutionPage = async ({
   lookupIndex: string;
   alertFilters: QueryDslQueryContainer[];
   profile: boolean;
-  pageTimings: PageStepTimings;
+  timer: PageStepRecorder;
 }): Promise<{
   parsedScores: ParsedResolutionScore[];
   esqlRows: number;
@@ -455,7 +492,7 @@ const scoreResolutionPage = async ({
         lookupIndex
       );
   const startedAt = Date.now();
-  const esqlResponse = await pageTimings.time(
+  const esqlResponse = await timer.time(
     'esql',
     () =>
       esClient.esql.query(
@@ -470,7 +507,7 @@ const scoreResolutionPage = async ({
   );
   const wallMs = Date.now() - startedAt;
   return {
-    parsedScores: pageTimings.timeSync('parse', () =>
+    parsedScores: timer.timeSync('parse', () =>
       (esqlResponse.values ?? []).map(parseEsqlResolutionScoreRow(alertsIndex, sampleSize))
     ),
     esqlRows: esqlResponse.values?.length ?? 0,

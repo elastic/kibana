@@ -14,12 +14,14 @@ import type { EntityRiskScoreRecord } from '../../../../../../common/api/entity_
 import type { RiskScoreDataClient } from '../../risk_score_data_client';
 import {
   buildZeroResolutionScores,
-  calculateResolutionEntityScores,
+  discoverResolutionPages,
+  scoreResolutionPage,
 } from './score_resolution_entities';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
 import type { ResolutionStepResult } from './pipeline_types';
-import type { PageStepTimings } from '../utils/page_step_timings';
+import type { PageStepRecorder, PageStepTimings } from '../utils/page_step_timings';
 import { createPageStepTimings } from '../utils/page_step_timings';
+import { forEachConcurrently } from '../utils/for_each_concurrently';
 import type { ScopedLogger } from '../utils/with_log_context';
 
 interface RunResolutionScoringParams {
@@ -44,6 +46,8 @@ interface RunResolutionScoringParams {
   entityStoreRefresh?: Parameters<typeof persistScoresToEntityStore>[0]['refresh'];
   /** Splits each page's entity store write into this many bulk requests, sent at the same time. */
   entityStoreWriteChunks?: number;
+  /** How many pages are scored and written at the same time. */
+  pagesInFlight?: number;
   /** When true, populate `scores` in the result. Omit for full-population runs. */
   collectScores?: boolean;
   /** Collects each page's step times; pass one in to read them after the stage. */
@@ -70,6 +74,7 @@ export const runResolutionScoringStep = async ({
   refresh,
   entityStoreRefresh,
   entityStoreWriteChunks,
+  pagesInFlight = 1,
   collectScores,
   pageTimings = createPageStepTimings(),
 }: RunResolutionScoringParams): Promise<ResolutionStepResult> => {
@@ -84,29 +89,29 @@ export const runResolutionScoringStep = async ({
   const newScores: Record<string, number> = {};
   const scoredTargetIds = new Set<string>();
 
-  const writeScores = async (scores: EntityRiskScoreRecord[]) => {
+  // Pages run concurrently, so every counter is updated after its page's awaits, never across one.
+  const writeScores = async (scores: EntityRiskScoreRecord[], timer?: PageStepRecorder) => {
     const docsWrittenRiskIndex = await persistScoresToRiskIndex({
       writer,
       entityType,
       scores,
       logger: runLogger,
       refresh,
-      pageTimings,
+      timer,
     });
-    const { docsWritten, errorsCount } = await pageTimings.time(
-      'storeWrite',
-      () =>
-        persistScoresToEntityStore({
-          crudClient,
-          logger: runLogger,
-          entityType,
-          scores,
-          enabled: idBasedRiskScoringEnabled,
-          refresh: entityStoreRefresh,
-          parallelChunks: entityStoreWriteChunks,
-        }),
-      (result) => result.tookMs
-    );
+    const writeToStore = () =>
+      persistScoresToEntityStore({
+        crudClient,
+        logger: runLogger,
+        entityType,
+        scores,
+        enabled: idBasedRiskScoringEnabled,
+        refresh: entityStoreRefresh,
+        parallelChunks: entityStoreWriteChunks,
+      });
+    const { docsWritten, errorsCount } = timer
+      ? await timer.time('storeWrite', writeToStore, (result) => result.tookMs)
+      : await writeToStore();
     scoresWrittenRiskIndex += docsWrittenRiskIndex;
     scoresWrittenEntityStore += docsWritten;
     scoresFailed += errorsCount;
@@ -120,7 +125,7 @@ export const runResolutionScoringStep = async ({
     }
   };
 
-  for await (const pageScores of calculateResolutionEntityScores({
+  const scoringParams = {
     esClient,
     crudClient,
     logger: runLogger,
@@ -136,22 +141,27 @@ export const runResolutionScoringStep = async ({
     targetEntityIds,
     alertFilters,
     pageTimings,
-  })) {
+  };
+
+  await forEachConcurrently(discoverResolutionPages(scoringParams), pagesInFlight, async (task) => {
+    const pageScores = await scoreResolutionPage(scoringParams, task);
     if (abortSignal?.aborted) {
       runLogger.info('Resolution scoring aborted between pages');
       abortedBetweenPages = true;
-      break;
+      task.timer.end();
+      return;
     }
     pagesProcessed += 1;
     if (pageScores.length > 0) {
-      // Tracked before the write, so a failed write doesn't look like a group with nothing to score
-      // and get its score zeroed below.
+      // Tracked before the write, so a failed write doesn't look like a group with nothing to
+      // score and get its score zeroed below.
       for (const score of pageScores) {
         scoredTargetIds.add(score.id_value);
       }
-      await writeScores(pageScores);
+      await writeScores(pageScores, task.timer);
     }
-  }
+    task.timer.end();
+  });
 
   // A targeted run clears the stale score of a target whose group has no alert left, instead of
   // leaving it on screen until the next full run's `resetToZero`. A processed page means the lookup
