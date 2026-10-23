@@ -262,6 +262,7 @@ export class ContextEnginePlugin
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.spaces;
       },
+      analyticsService,
     });
 
     const isContextEngineEnabled = async (spaceId: string) => {
