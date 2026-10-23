@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { CandidateStage, StrategyCandidate } from '../../../common';
+import type {
+  CandidateReplay,
+  CandidateStage,
+  CandidateTrial,
+  StrategyCandidate,
+} from '../../../common';
 import { CANDIDATE_RUNNING_STAGES } from '../../../common';
 import type { IStateStore } from '../storage/state_store';
 import type { RunningDetector } from '../strategies/types';
@@ -31,8 +36,40 @@ export function advance(
   };
 }
 
+/** Replay and trial counts as stored before opens outside incidents were called unlabelled. */
+interface ILegacyOpenCounts {
+  false_opens?: number;
+  false_opens_per_day?: number;
+}
+
+/**
+ * Candidates stored before 2026-10-23 called every open outside a real incident false. Those
+ * counts were the unlabelled and the dismissed opens together, so they map onto the new fields
+ * without losing what the replay or trial measured.
+ */
+function withCurrentOpenCounts(candidate: StrategyCandidate): StrategyCandidate {
+  const replay = candidate.replay as (CandidateReplay & ILegacyOpenCounts) | undefined;
+  const trial = candidate.trial as (CandidateTrial & ILegacyOpenCounts) | undefined;
+  return {
+    ...candidate,
+    ...(replay && replay.unlabelled_opens === undefined
+      ? {
+          replay: {
+            ...replay,
+            unlabelled_opens: Math.max(0, (replay.false_opens ?? 0) - replay.dismissed_opens),
+            outside_opens_per_day: replay.false_opens_per_day ?? 0,
+          },
+        }
+      : {}),
+    ...(trial && trial.unlabelled_opens === undefined
+      ? { trial: { ...trial, unlabelled_opens: trial.false_opens ?? 0, dismissed_opens: 0 } }
+      : {}),
+  };
+}
+
 export async function listCandidates(state: IStateStore): Promise<StrategyCandidate[]> {
-  return state.list('candidate');
+  const candidates = await state.list('candidate');
+  return candidates.map(withCurrentOpenCounts);
 }
 
 export async function saveCandidate(

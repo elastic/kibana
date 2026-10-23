@@ -330,6 +330,23 @@ async function learn({
   }
 }
 
+/**
+ * Whether a candidate caught an incident it was not mined from, on replay or in its trial. A
+ * detector mined from a missed incident catches that incident by construction; only another
+ * one shows it generalises. Candidates with nothing they were mined from pass.
+ */
+function hasIndependentEvidence(candidate: StrategyCandidate): boolean {
+  const trainedOn = new Set(candidate.acceptance.trained_on ?? []);
+  if (trainedOn.size === 0) {
+    return true;
+  }
+  const caught = [
+    ...(candidate.replay?.caught.map((item) => item.incident_id) ?? []),
+    ...(candidate.trial?.caught ?? []),
+  ];
+  return caught.some((incidentId) => !trainedOn.has(incidentId));
+}
+
 /** One step of one candidate along the evolution path, or the candidate unchanged. */
 async function step({
   scope,
@@ -396,8 +413,15 @@ async function step({
       const result = `Trial of ${Math.round((now - startedAt) / MINUTE_MS)} min passed: ${
         trial.would_open
       } would-be event(s), ${trial.caught.length} on labelled incidents, ${
-        trial.false_opens
-      } false.`;
+        trial.unlabelled_opens
+      } unlabelled, ${trial.dismissed_opens} on dismissed incidents.`;
+      if (!hasIndependentEvidence(judged)) {
+        return advance(
+          judged,
+          'review',
+          `${result} It has only caught the incident it was mined from, which proves nothing about the next one, so a person approves it whatever the autonomy.`
+        );
+      }
       return autonomy === 'act'
         ? goLive(judged, `${result} Autonomy is "act", so it goes live with its daily cap.`)
         : advance(judged, 'review', `${result} Waiting for a person to approve it.`);
@@ -461,8 +485,10 @@ function startOrWait(
   const result = `${why}: ${replay.would_open} would-be event(s) over ${Math.round(
     (Date.parse(replay.to) - Date.parse(replay.from)) / HOUR_MS
   )} h, ${replay.caught.length} kept incident(s) caught, ${
-    replay.false_opens_per_day
-  } false per day.`;
+    replay.outside_opens_per_day
+  } opens per day outside real incidents (${replay.unlabelled_opens} unlabelled, ${
+    replay.dismissed_opens
+  } on dismissed incidents).`;
   if (candidate.kind === 'detector') {
     return {
       ...advance(
@@ -475,7 +501,8 @@ function startOrWait(
         would_raise: 0,
         would_open: 0,
         caught: [],
-        false_opens: 0,
+        unlabelled_opens: 0,
+        dismissed_opens: 0,
         reasons: [],
       },
     };

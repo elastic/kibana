@@ -55,6 +55,11 @@ const MAX_FOUND_SIGNALS = 5_000;
 export interface HistorySample {
   bucket_start: string;
   value: number;
+  /**
+   * Whether the strategy's own trigger fired in this bucket, when the reader asked for it. A
+   * reference that is meant to describe normal leaves these buckets out.
+   */
+  looks_off?: boolean;
 }
 
 /** One stored evaluation, with whether the strategy's own trigger fired. */
@@ -243,7 +248,7 @@ export function createRecordsStore({
               top_hits: {
                 size: Math.min(limit, MAX_SAMPLES_PER_SERIES),
                 sort: [{ bucket_start: { order: 'desc' } }],
-                _source: ['bucket_start', 'value'],
+                _source: ['bucket_start', 'value', 'looks_off'],
               },
             },
           },

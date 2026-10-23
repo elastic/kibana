@@ -15,6 +15,12 @@ import { esqlString, field, listColumns, queryRows, timeRangeWhere, toNumber } f
 import type { ConfirmedPath } from './tree_paths';
 
 const MAX_PATTERNS = 40;
+/**
+ * Rows of the query that categorizes both windows at once: one per pattern and window. Fifty
+ * times the patterns kept, so a kept pattern's reference row is cut only when one service logs
+ * thousands of templates in three hours.
+ */
+const MAX_WINDOWED_ROWS = 2_000;
 /** A pattern needs this many lines in the incident before it can explain it. */
 const MIN_INCIDENT_LINES = 5;
 /** How much more often a pattern must appear during the incident than before it. */
@@ -124,29 +130,36 @@ export async function minePatterns({
     return { messageField, patterns: [] };
   }
   const message = field(messageField);
-  const statsIn = async (windowFrom: number, windowTo: number) => {
-    const { rows } = await queryRows({
-      esClient,
-      query: `FROM ${source.view_name}
-| WHERE ${timeRangeWhere(windowFrom, windowTo)} AND ${field('service.name')} == ${esqlString(
-        service
-      )}
+  const serviceWhere = `${field('service.name')} == ${esqlString(service)}`;
+  const inWindow = timeRangeWhere(from, to);
+  // One CATEGORIZE over both windows, so a line gets the same pattern on both sides. Two
+  // separate runs can split one template differently, and a top-N reference list reads every
+  // template outside its top N as "absent before".
+  const { rows } = await queryRows({
+    esClient,
+    query: reference
+      ? `FROM ${source.view_name}
+| WHERE (${inWindow} OR ${timeRangeWhere(reference.from, reference.to)}) AND ${serviceWhere}
+| EVAL window = CASE(${inWindow}, "current", "reference")
+| STATS count = COUNT(*), sample = MAX(${message}) BY pattern = CATEGORIZE(${message}), window
+| SORT count DESC
+| LIMIT ${MAX_WINDOWED_ROWS}`
+      : `FROM ${source.view_name}
+| WHERE ${inWindow} AND ${serviceWhere}
 | STATS count = COUNT(*), sample = MAX(${message}) BY pattern = CATEGORIZE(${message})
 | SORT count DESC
 | LIMIT ${MAX_PATTERNS}`,
-      signal,
-      timeoutMs: 120_000,
-    });
-    return rows.map((row) => ({
-      pattern: String(row.pattern ?? ''),
-      sample: String(row.sample ?? ''),
-      count: toNumber(row.count),
-    }));
-  };
-  const [current, before] = await Promise.all([
-    statsIn(from, to),
-    reference ? statsIn(reference.from, reference.to) : Promise.resolve([]),
-  ]);
+    signal,
+    timeoutMs: 120_000,
+  });
+  const counted = rows.map((row) => ({
+    pattern: String(row.pattern ?? ''),
+    sample: String(row.sample ?? ''),
+    count: toNumber(row.count),
+    inReference: row.window === 'reference',
+  }));
+  const current = counted.filter((item) => !item.inReference).slice(0, MAX_PATTERNS);
+  const before = counted.filter((item) => item.inReference);
   const referenceCounts = new Map(before.map((item) => [item.pattern, item.count]));
   const referenceWords = new Set(
     before.flatMap((item) =>

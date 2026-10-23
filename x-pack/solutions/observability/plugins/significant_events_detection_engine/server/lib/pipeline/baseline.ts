@@ -108,6 +108,17 @@ export function checkBaseline({
   if (policy === 'skip' || policy === 'firing_frequency') {
     return { decision: 'skipped', samples: 0, excludedSamples: 0 };
   }
+  // A drop is capped at 1, while median + k x MAD of a bursty service's drops is often above
+  // it, so this check would block a total outage. The strategy already tested the drop against
+  // its expected traffic with a Poisson tail, which is the test counts need.
+  if (unit === 'drop') {
+    return {
+      decision: 'skipped',
+      samples: 0,
+      excludedSamples: 0,
+      reason: 'a drop is judged by the Poisson test on its counts, in the health check',
+    };
+  }
 
   const minDelta = MIN_DELTA_BY_UNIT[unit] ?? DEFAULT_MIN_DELTA;
 

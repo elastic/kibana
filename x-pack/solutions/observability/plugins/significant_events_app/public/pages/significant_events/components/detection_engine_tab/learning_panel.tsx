@@ -94,22 +94,25 @@ function evidenceOf(candidate: StrategyCandidate): string {
     candidate.replay
       ? i18n.translate('xpack.significantEventsApp.detectionEngine.learning.replayLine', {
           defaultMessage:
-            'Replay: {opens} would-be events, {caught} kept incidents caught, {falsePerDay} false per day',
+            'Replay: {opens} would-be events, {caught} kept incidents caught, {outsidePerDay} per day outside real incidents ({unlabelled} unlabelled, {dismissed} dismissed)',
           values: {
             opens: candidate.replay.would_open,
             caught: candidate.replay.caught.length,
-            falsePerDay: candidate.replay.false_opens_per_day,
+            outsidePerDay: candidate.replay.outside_opens_per_day,
+            unlabelled: candidate.replay.unlabelled_opens,
+            dismissed: candidate.replay.dismissed_opens,
           },
         })
       : undefined,
     candidate.trial?.judged_at
       ? i18n.translate('xpack.significantEventsApp.detectionEngine.learning.trialLine', {
           defaultMessage:
-            'Trial: {raise} would-raise minutes, {opens} would-be events, {false} false',
+            'Trial: {raise} would-raise minutes, {opens} would-be events, {unlabelled} unlabelled, {dismissed} dismissed',
           values: {
             raise: candidate.trial.would_raise,
             opens: candidate.trial.would_open,
-            false: candidate.trial.false_opens,
+            unlabelled: candidate.trial.unlabelled_opens,
+            dismissed: candidate.trial.dismissed_opens,
           },
         })
       : undefined,

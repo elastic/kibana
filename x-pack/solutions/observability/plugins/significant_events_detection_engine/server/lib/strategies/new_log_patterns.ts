@@ -63,10 +63,14 @@ async function hasMessage(
   return { message: columns.includes('message'), service: columns.includes('service.name') };
 }
 
+/**
+ * Groups by pattern and service: a pattern is new for the service that starts logging it, even
+ * when another service in the source has logged it all along.
+ */
 function statsPipeline(withService: boolean): string {
-  return `| STATS count = COUNT(*), first_seen = MIN(@timestamp)${
-    withService ? `, services = VALUES(${field('service.name')})` : ''
-  } BY pattern = CATEGORIZE(message)`;
+  return `| STATS count = COUNT(*), first_seen = MIN(@timestamp) BY pattern = CATEGORIZE(message)${
+    withService ? `, service = ${field('service.name')}` : ''
+  }`;
 }
 
 function toObservation(source: NightshiftSource, row: PatternRow): StrategyObservation {
@@ -76,17 +80,21 @@ function toObservation(source: NightshiftSource, row: PatternRow): StrategyObser
       ? `${row.pattern.slice(0, PATTERN_TITLE_LENGTH)}...`
       : row.pattern;
   return {
-    fingerprint: `pattern:${source.id}:${shortHash(row.pattern)}`,
+    fingerprint: `pattern:${source.id}:${row.service ?? ''}:${shortHash(row.pattern)}`,
     service: row.service ?? source.title,
     bucket_start: bucketStart,
     value: row.count,
     unit: 'count',
     looks_off: true,
     title: `New log pattern: ${shortPattern}`,
-    description: `A log pattern not seen in the previous two hours appeared ${row.count} times.`,
+    description: `A log pattern not seen in the previous two hours${
+      row.service ? ` on ${row.service}` : ''
+    } appeared ${row.count} times.`,
     importance: 45,
     evidence_esql: `FROM ${source.view_name}
-| WHERE ${timeRangeWhere(bucketStart - 15 * MINUTE_MS, bucketStart + BUCKET_MS)}
+| WHERE ${timeRangeWhere(bucketStart - 15 * MINUTE_MS, bucketStart + BUCKET_MS)}${
+      row.service ? ` AND ${field('service.name')} == ${esqlString(row.service)}` : ''
+    }
 ${statsPipeline(false)}
 | WHERE pattern == ${esqlString(row.pattern)}`,
     source_id: source.id,
@@ -110,9 +118,12 @@ async function evaluateLive(context: StrategyContext): Promise<StrategyEvaluatio
     signal: context.signal,
   });
   const sourceOfRule = new Map(rules.map((rule) => [rule.rule_id, rule.source_id]));
-  // Overlapping runs report the same new pattern twice; one observation per pattern is enough.
+  // Overlapping runs report the same new pattern twice; one observation per pattern and service
+  // is enough.
   const latest = latestRowPerKey(rows, (row) =>
-    row.data.pattern === undefined ? undefined : `${row.rule_id}|${String(row.data.pattern)}`
+    row.data.pattern === undefined
+      ? undefined
+      : `${row.rule_id}|${firstValue(row.data.service) ?? ''}|${String(row.data.pattern)}`
   );
   const observations = [...latest.values()].flatMap((row) => {
     const source = sourcesById.get(sourceOfRule.get(row.rule_id) ?? '');
@@ -163,7 +174,7 @@ ${statsPipeline(shape.service)}
                     pattern: String(row.pattern),
                     count: toNumber(row.count),
                     firstSeen,
-                    service: firstValue(row.services),
+                    service: firstValue(row.service),
                   }),
                 ]
               : [];
@@ -192,7 +203,7 @@ export const newLogPatternsStrategy: ISignalStrategy = {
     id: 'new_log_patterns',
     name: STRATEGY_NAME,
     watches: 'Log message patterns in each logs source, grouped with CATEGORIZE',
-    reportsWhen: 'A pattern appears that was absent for the previous two hours',
+    reportsWhen: 'A service logs a pattern it had not logged in the previous two hours',
     baselinePolicy: 'implicit_zero',
     runner: 'alerting_v2_rule',
     reportsOnlyFiring: true,
@@ -223,14 +234,12 @@ export const newLogPatternsStrategy: ISignalStrategy = {
 | WHERE message IS NOT NULL
 ${statsPipeline(shape.service)}
 | WHERE first_seen >= DATE_TRUNC(1 minute, NOW()) - ${RULE_NEW_WITHIN_MINUTES} minutes AND first_seen < DATE_TRUNC(1 minute, NOW())
-| EVAL bucket = DATE_TRUNC(1 minute, first_seen)${
-                shape.service ? ', service = MV_FIRST(services)' : ''
-              }
+| EVAL bucket = DATE_TRUNC(1 minute, first_seen)
 | KEEP bucket, first_seen, pattern, count${shape.service ? ', service' : ''}
 | LIMIT ${MAX_PATTERNS}`,
               every: RULE_EVERY,
               lookback: RULE_LOOKBACK,
-              groupBy: ['pattern'],
+              groupBy: shape.service ? ['pattern', 'service'] : ['pattern'],
               cpsEnabled: context.cpsEnabled,
             }),
           };

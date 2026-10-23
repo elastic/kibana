@@ -134,9 +134,17 @@ export type CandidateOrigin =
 export interface AcceptanceCriteria {
   /** Kept incidents the change must catch on replay. */
   must_catch: string[];
+  /**
+   * Incidents the change was mined from. Catching them again proves nothing, so they stay a
+   * regression check in `must_catch` and never count as evidence that the change helps.
+   */
+  trained_on?: string[];
   /** A caught incident must be raised within this many minutes of its start. */
   max_warning_minutes: number;
-  /** Events the change would open outside every labelled incident, per day. */
+  /**
+   * Events the change may open outside every real incident, per day. Unlabelled opens count:
+   * nobody confirmed them, and each one still reaches a person.
+   */
   max_false_opens_per_day: number;
   /** How long the trial runs on live data before it is judged. */
   min_trial_minutes: number;
@@ -177,10 +185,11 @@ export interface CandidateReplay {
   would_open: number;
   caught: Array<{ incident_id: string; warning_minutes: number }>;
   missed: string[];
-  /** Opens outside every labelled incident window. */
-  false_opens: number;
-  false_opens_per_day: number;
-  /** Opens that overlapped an incident a person had dismissed. */
+  /** Opens outside every labelled incident window: nobody confirmed or dismissed them. */
+  unlabelled_opens: number;
+  /** Unlabelled and dismissed opens per day, the rate `max_false_opens_per_day` bounds. */
+  outside_opens_per_day: number;
+  /** Opens on an incident a person dismissed: the only opens known to be false. */
   dismissed_opens: number;
   passed: boolean;
   reasons: string[];
@@ -195,7 +204,10 @@ export interface CandidateTrial {
   /** Distinct runs of would-raise minutes. */
   would_open: number;
   caught: string[];
-  false_opens: number;
+  /** Opens outside every labelled incident window. */
+  unlabelled_opens: number;
+  /** Opens on an incident a person dismissed. */
+  dismissed_opens: number;
   passed?: boolean;
   reasons: string[];
 }
@@ -276,7 +288,7 @@ export interface LearningConfig {
   /** Minutes between learning passes; the schedule runs it after a detection run. */
   interval_minutes: number;
   /** Defaults for the bar of new candidates. */
-  acceptance: Omit<AcceptanceCriteria, 'must_catch'>;
+  acceptance: Omit<AcceptanceCriteria, 'must_catch' | 'trained_on'>;
   /** How far back a candidate is replayed. */
   replay_hours: number;
   /** Most model calls per learning pass to write detector conditions. */

@@ -17,6 +17,7 @@ import { BUCKET_MS, DAY_MS, HOUR_MS, MINUTE_MS } from '../../../common';
 import type { IEngineScope } from '../engine/engine_scope';
 import { getErrorMessage } from '../errors';
 import { checkBaseline, fillSparseHistory } from '../pipeline/baseline';
+import { poissonRateLowerBound } from '../pipeline/poisson';
 import type { StoredSample } from '../storage/records_store';
 import { countDetectorsDirectly, learnedFingerprint } from '../strategies/learned_detectors';
 import { incidentWindow } from './incidents';
@@ -29,6 +30,8 @@ const REPLAY_LEAD_MS = HOUR_MS;
 const REPLAY_SLICE_MS = 6 * HOUR_MS;
 /** Observations are kept three days, which bounds a threshold replay. */
 const THRESHOLD_REPLAY_MS = 3 * DAY_MS;
+/** The shortest span a daily rate is estimated over; a replay spans a day or more. */
+const MIN_ESTIMATE_DAYS = 1 / 24;
 
 /** One run of above-normal minutes: roughly one event the change would open. */
 export interface SimulatedOpen {
@@ -106,8 +109,10 @@ export function incidentsOn(incidents: LabelledIncident[], service: string): Lab
 
 /**
  * Scores what a change would have opened against the labelled incidents of its scope. An open
- * catches an incident when it starts inside the incident's window; an open outside every real
- * incident is false, and one on a dismissed incident counts as both false and dismissed.
+ * catches an incident when it starts inside the incident's window. An open on a dismissed
+ * incident is false; one outside every labelled incident is unlabelled, because nobody looked
+ * at it, and it may be an incident nobody reported. Both count against the bar on opens outside
+ * real incidents, since both reach a person.
  */
 export function scoreOpens({
   opens,
@@ -115,7 +120,7 @@ export function scoreOpens({
   from,
   to,
   acceptance,
-  minDays = 1 / 24,
+  rate = 'estimate',
 }: {
   opens: SimulatedOpen[];
   incidents: LabelledIncident[];
@@ -123,10 +128,12 @@ export function scoreOpens({
   to: number;
   acceptance: AcceptanceCriteria;
   /**
-   * The shortest span the false-open rate is computed over. A short trial would turn one
-   * unlabelled open into dozens per day; the replay already measured the rate over a day.
+   * How the bar on opens per day is applied. `estimate` divides by the span, at least an hour.
+   * `lower_bound` is for spans too short to estimate a daily rate, such as a trial: it fails
+   * only when even the 95% lower bound of the rate is above the bar, because one open in 30
+   * minutes is not yet evidence of 48 a day, and no open in 30 minutes is no evidence of quiet.
    */
-  minDays?: number;
+  rate?: 'estimate' | 'lower_bound';
 }): Omit<CandidateReplay, 'at'> {
   const real = incidents.filter((incident) => incident.label !== 'false_positive');
   const dismissed = incidents.filter((incident) => incident.label === 'false_positive');
@@ -150,8 +157,14 @@ export function scoreOpens({
   const dismissedOpens = outsideReal.filter((open) =>
     dismissed.some((incident) => overlaps(open, incidentWindow(incident)))
   ).length;
-  const days = Math.max((to - from) / DAY_MS, minDays);
-  const falseOpensPerDay = outsideReal.length / days;
+  const spanDays = (to - from) / DAY_MS;
+  const outsideOpensPerDay = outsideReal.length / Math.max(spanDays, MIN_ESTIMATE_DAYS);
+  const judgedRate =
+    rate === 'lower_bound'
+      ? poissonRateLowerBound({ count: outsideReal.length, exposure: spanDays })
+      : outsideOpensPerDay;
+  const unlabelledOpens = outsideReal.length - dismissedOpens;
+  const outsideBreakdown = `${unlabelledOpens} unlabelled, ${dismissedOpens} on dismissed incidents`;
 
   const caughtIds = new Map(caught.map((item) => [item.incident_id, item.warning_minutes]));
   const missed = acceptance.must_catch.filter((id) => !caughtIds.has(id));
@@ -166,11 +179,19 @@ export function scoreOpens({
           acceptance.max_warning_minutes
         } min bar`
     ),
-    ...(falseOpensPerDay > acceptance.max_false_opens_per_day
+    ...(judgedRate > acceptance.max_false_opens_per_day
       ? [
-          `${falseOpensPerDay.toFixed(1)} false opens per day, above the bar of ${
-            acceptance.max_false_opens_per_day
-          }`,
+          rate === 'lower_bound'
+            ? `${outsideReal.length} open(s) outside real incidents in ${Math.round(
+                spanDays * 24 * 60
+              )} min (${outsideBreakdown}): even the 95% lower bound, ${judgedRate.toFixed(
+                1
+              )} per day, is above the bar of ${acceptance.max_false_opens_per_day}`
+            : `${outsideOpensPerDay.toFixed(
+                1
+              )} opens per day outside real incidents (${outsideBreakdown}), above the bar of ${
+                acceptance.max_false_opens_per_day
+              }`,
         ]
       : []),
     ...(opens.length === 0 ? ['would not have opened anything; nothing shows it helps'] : []),
@@ -181,8 +202,8 @@ export function scoreOpens({
     would_open: opens.length,
     caught,
     missed,
-    false_opens: outsideReal.length,
-    false_opens_per_day: Math.round(falseOpensPerDay * 100) / 100,
+    unlabelled_opens: unlabelledOpens,
+    outside_opens_per_day: Math.round(outsideOpensPerDay * 100) / 100,
     dismissed_opens: dismissedOpens,
     passed: reasons.length === 0,
     reasons,
@@ -277,8 +298,8 @@ export async function replayDetector({
       would_open: 0,
       caught: [],
       missed: candidate.acceptance.must_catch,
-      false_opens: 0,
-      false_opens_per_day: 0,
+      unlabelled_opens: 0,
+      outside_opens_per_day: 0,
       dismissed_opens: 0,
       passed: false,
       reasons: ['the replay failed'],
@@ -422,7 +443,9 @@ export async function judgeTrial({
     from: Date.parse(trial.started_at),
     to: now,
     acceptance: { ...candidate.acceptance, must_catch: [] },
-    minDays: 1,
+    // The trial is a canary: the rule runs and is not plainly noisy. How noisy it is over a
+    // day comes from the replay.
+    rate: 'lower_bound',
   });
   const reasons = score.reasons.filter((reason) => !reason.startsWith('would not have opened'));
   return {
@@ -431,7 +454,8 @@ export async function judgeTrial({
     would_raise: signals.length,
     would_open: opens.length,
     caught: score.caught.map((item) => item.incident_id),
-    false_opens: score.false_opens,
+    unlabelled_opens: score.unlabelled_opens,
+    dismissed_opens: score.dismissed_opens,
     passed: reasons.length === 0,
     reasons,
   };

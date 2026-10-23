@@ -357,7 +357,11 @@ export async function proposeFromMissedIncidents(
               incident_id: incident.incident_id,
               pattern: pattern.pattern,
             },
-            acceptance: acceptanceOf(context.config, [incident.incident_id]),
+            // The incident it was mined from stays a regression check, never its evidence.
+            acceptance: {
+              ...acceptanceOf(context.config, [incident.incident_id]),
+              trained_on: [incident.incident_id],
+            },
             detector: built as LearnedDetector,
           })
         );
