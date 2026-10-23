@@ -8,7 +8,9 @@
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import expect from 'expect';
 import { Readable } from 'node:stream';
-import { apm, serviceMap, timerange } from '@kbn/synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
+import { expectToReject } from '../../../../apm_api_integration/common/utils/expect_to_reject';
+import type { ApmApiError } from '../../../services/apm_api';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -56,13 +58,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('rejects failed calls without dependencies', async () => {
-        const response = await apmApiClient.readUser({
-          endpoint: 'GET /internal/apm/service-map/connection/failed_calls',
-          // @ts-expect-error dependencies is required
-          params: { query: { ...range, sourceServiceName: 'frontend-node' } },
-        });
+        const error = await expectToReject<ApmApiError>(() =>
+          apmApiClient.readUser({
+            endpoint: 'GET /internal/apm/service-map/connection/failed_calls',
+            // @ts-expect-error dependencies is required
+            params: { query: { ...range, sourceServiceName: 'frontend-node' } },
+          })
+        );
 
-        expect(response.status).toBe(400);
+        expect(error.res.status).toBe(400);
       });
     });
 
@@ -72,27 +76,78 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       before(async () => {
         synthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
+        // Built by hand instead of the `serviceMap()` generator: the generator parents every
+        // span of the trace to the root transaction, while real APM agents set `transaction.id`
+        // to the local transaction of each service — which the transactions join relies on.
+        const rum = apm
+          .service({ name: 'frontend-rum', environment: 'production', agentName: 'rum-js' })
+          .instance('rum-1');
+        const node = apm
+          .service({ name: 'frontend-node', environment: 'production', agentName: 'nodejs' })
+          .instance('node-1');
+        const advert = apm
+          .service({ name: 'advertService', environment: 'production', agentName: 'java' })
+          .instance('advert-1');
+
         const events = timerange(start, end)
           .interval('10s')
           .rate(3)
-          .generator(
-            serviceMap({
-              services: [
-                { 'frontend-rum': 'rum-js' },
-                { 'frontend-node': 'nodejs' },
-                { advertService: 'java' },
-              ],
-              definePaths([rum, node, adv]) {
-                return [
-                  [
-                    [rum, 'fetchAd'],
-                    [node, 'GET /nodejs/adTag'],
-                    [adv, 'APIRestController#getAd'],
-                    ['elasticsearch', 'GET ad-*/_search'],
-                  ],
-                ];
-              },
-            })
+          .generator((timestamp) =>
+            rum
+              .transaction({ transactionName: 'fetchAd' })
+              .timestamp(timestamp)
+              .duration(400)
+              .success()
+              .children(
+                rum
+                  .span({
+                    spanName: 'GET /nodejs/adTag',
+                    spanType: 'external',
+                    spanSubtype: 'http',
+                  })
+                  .destination('frontend-node')
+                  .timestamp(timestamp + 10)
+                  .duration(300)
+                  .success()
+                  .children(
+                    node
+                      .transaction({ transactionName: 'GET /nodejs/adTag' })
+                      .timestamp(timestamp + 20)
+                      .duration(250)
+                      .success()
+                      .children(
+                        node
+                          .span({
+                            spanName: 'POST /advert/ad',
+                            spanType: 'external',
+                            spanSubtype: 'http',
+                          })
+                          .destination('advertService')
+                          .timestamp(timestamp + 30)
+                          .duration(150)
+                          .success()
+                          .children(
+                            advert
+                              .transaction({ transactionName: 'APIRestController#getAd' })
+                              .timestamp(timestamp + 40)
+                              .duration(100)
+                              .success()
+                              .children(
+                                advert
+                                  .span({
+                                    spanName: 'GET ad-*/_search',
+                                    spanType: 'db',
+                                    spanSubtype: 'elasticsearch',
+                                  })
+                                  .destination('elasticsearch')
+                                  .timestamp(timestamp + 50)
+                                  .duration(50)
+                                  .success()
+                              )
+                          )
+                      )
+                  )
+              )
           );
 
         await synthtraceEsClient.index(Readable.from(Array.from(events)));
