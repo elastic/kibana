@@ -7,6 +7,7 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 
+import { fromExpression } from '@kbn/interpreter';
 import { encode } from '../../common/lib/embeddable_dataurl';
 import { DEFAULT_TIME_RANGE } from '../../common/lib';
 import { embeddableService, logger } from '../kibana_services';
@@ -35,6 +36,7 @@ const mockMapTransforms = {
 
 jest.mock('../kibana_services', () => ({
   embeddableService: {
+    getPanelTypeMigration: jest.fn(),
     getTransforms: jest.fn((type: string) => {
       switch (type) {
         case 'lens-dashboard-app':
@@ -518,6 +520,60 @@ describe('legacy expressions', () => {
     });
     expect(logger.warn).toHaveBeenCalledWith(
       'Error transforming element [element-id] out: Transform failed'
+    );
+  });
+});
+
+describe('transformWorkpadOut panel type migrations', () => {
+  const workpad = makeWorkpad(
+    `embeddable type="visualization" config="${encode({ title: 'Legacy vis' })}" | render`
+  );
+  const references = [
+    { id: 'vis-id', name: 'element-id:savedObjectRef', type: 'visualization' },
+  ] as SavedObjectReference[];
+  const getEmbeddableType = (transformedWorkpad: typeof workpad) =>
+    fromExpression(transformedWorkpad.pages[0].elements[0].expression).chain[0].arguments.type[0];
+  const migrateOut = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(embeddableService.getPanelTypeMigration).mockReturnValue({
+      from: VISUALIZE_EMBEDDABLE_TYPE,
+      migrateOut,
+    });
+    migrateOut.mockReturnValue({ type: 'vega', config: { title: 'Migrated' } });
+  });
+
+  it('replaces the embeddable type and config when migratePanelTypes is true', () => {
+    const transformedWorkpad = transformWorkpadOut(workpad, references, true);
+
+    expect(getEmbeddableType(transformedWorkpad)).toBe('vega');
+    expect(getDecodedConfig(transformedWorkpad)).toEqual({ title: 'Migrated', type: 'vega' });
+    expect(embeddableService.getPanelTypeMigration).toHaveBeenCalledWith(VISUALIZE_EMBEDDABLE_TYPE);
+    expect(migrateOut).toHaveBeenCalledWith({ title: 'Legacy vis', savedObjectId: 'vis-id' });
+  });
+
+  it('does not migrate when migratePanelTypes is false', () => {
+    const transformedWorkpad = transformWorkpadOut(workpad, references);
+
+    expect(getEmbeddableType(transformedWorkpad)).toBe(VISUALIZE_EMBEDDABLE_TYPE);
+    expect(embeddableService.getPanelTypeMigration).not.toHaveBeenCalled();
+  });
+
+  it('keeps the transformed element and logs a warning when the migration throws', () => {
+    migrateOut.mockImplementation(() => {
+      throw new Error('Migration failed');
+    });
+
+    const transformedWorkpad = transformWorkpadOut(workpad, references, true);
+
+    expect(getEmbeddableType(transformedWorkpad)).toBe(VISUALIZE_EMBEDDABLE_TYPE);
+    expect(getDecodedConfig(transformedWorkpad)).toEqual({
+      title: 'Legacy vis',
+      savedObjectId: 'vis-id',
+    });
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Error transforming element [element-id] out: Migration failed'
     );
   });
 });

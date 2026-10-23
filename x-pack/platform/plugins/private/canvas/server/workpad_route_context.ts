@@ -99,7 +99,7 @@ export const createWorkpadRouteContext: () => IContextProvider<
           const workpad = await soClient.get<WorkpadAttributes>(CANVAS_TYPE, id);
 
           // embeddables transform out
-          workpad.attributes = transformWorkpadOut(workpad.attributes, workpad.references);
+          workpad.attributes = transformWorkpadOut(workpad.attributes, workpad.references, true);
 
           return workpad;
         },
@@ -113,7 +113,8 @@ export const createWorkpadRouteContext: () => IContextProvider<
           // embeddables transform out
           resolved.saved_object.attributes = transformWorkpadOut(
             resolved.saved_object.attributes,
-            resolved.saved_object.references
+            resolved.saved_object.references,
+            true
           );
 
           return resolved;

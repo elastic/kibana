@@ -349,3 +349,24 @@ embeddableServerSetup.registerEmbeddableServerDefinition(
   }
 });
 ```
+
+### Panel type migrations (server)
+
+Dashboard and Canvas migrate stored panels from one embeddable type to other types **when they are
+read**. The stored saved object is not changed until it is saved with the migrated panel.
+
+- **Registration**: call `embeddableServerSetup.registerPanelTypeMigration({ from, migrateOut })`
+  during server plugin `setup`. Only one migration may be registered per `from` type; registering a
+  second one throws. The owner of the `from` type dispatches to other target types itself.
+- **Migration**: `migrateOut(config)` is synchronous and receives one panel's config. Return
+  `{ type, config }` to replace the panel with the given target `type`, or `undefined` to leave it
+  unchanged. If `migrateOut` throws, Dashboard drops the panel with a warning, and Canvas logs a
+  warning and keeps the element as its stored type.
+- **Validation**: Dashboard validates a migrated panel against its target type's schema, if it has
+  one. A migrated panel whose target type has no schema is kept without validation, the same as any
+  other panel without a schema: Dashboard REST endpoints drop it, but the Dashboard app keeps it.
+  Canvas does not validate panel configs.
+- **One step per read**: only the migration for the panel's stored type runs. If the target type also
+  has a migration, it does not run until the dashboard is saved with the migrated panel and read
+  again. Migrate directly to the final type instead of registering a chain (`A → B` and `B → C`).
+- **Lookup**: containers retrieve a migration with `embeddableStart.getPanelTypeMigration(from)`.

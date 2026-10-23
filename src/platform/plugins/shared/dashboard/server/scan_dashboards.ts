@@ -54,7 +54,8 @@ export async function scanDashboards(
         so.attributes,
         so.references,
         true, // temporary fix to return old Lens SO panel format,
-        strictValidationSchema
+        strictValidationSchema,
+        true
       );
 
       return {

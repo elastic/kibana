@@ -13,6 +13,7 @@ import { apiHasAppContext } from '@kbn/presentation-publishing';
 
 import type { VegaPluginStartDependencies } from './plugin';
 import { VegaPanelIcon } from './vega_icon';
+import { VEGA_VIS_NAME } from '../common/constants';
 import { vegaVisType } from './vega_type';
 
 export function getAddVegaPanelAction(deps: VegaPluginStartDependencies) {
@@ -24,7 +25,7 @@ export function getAddVegaPanelAction(deps: VegaPluginStartDependencies) {
     execute: async ({ embeddable }: EmbeddableApiContext) => {
       const stateTransferService = deps.embeddable.getStateTransfer();
       stateTransferService.navigateToEditor('visualize', {
-        path: '#/create?type=vega',
+        path: `#/create?type=${VEGA_VIS_NAME}`,
         state: {
           originatingApp: apiHasAppContext(embeddable)
             ? embeddable.getAppContext().currentAppId
