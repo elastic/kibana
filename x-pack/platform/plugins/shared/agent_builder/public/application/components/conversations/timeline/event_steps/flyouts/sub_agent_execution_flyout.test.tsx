@@ -177,4 +177,43 @@ describe('SubAgentExecutionFlyout', () => {
       expect(onClose).not.toHaveBeenCalled();
     });
   });
+
+  describe('stopped state', () => {
+    beforeEach(() => {
+      mockIsEmbeddedContext = true;
+    });
+
+    it('shows an incomplete Execution step instead of a loading one', () => {
+      renderWithProviders(
+        <SubAgentExecutionFlyout executionId="exec-1" isStopped onClose={jest.fn()} />
+      );
+      expect(screen.getByText('Step 1 is incomplete')).toBeInTheDocument();
+      expect(screen.queryByText('Step 1 is loading')).not.toBeInTheDocument();
+    });
+
+    it('shows a loading Execution step when not stopped', () => {
+      renderWithProviders(<SubAgentExecutionFlyout executionId="exec-1" onClose={jest.fn()} />);
+      expect(screen.getByText('Step 1 is loading')).toBeInTheDocument();
+    });
+
+    it('shows nested tool calls without results as stopped', () => {
+      useFollowExecution.mockReturnValue({
+        steps: [
+          createToolCallStep({
+            tool_call_id: 'c2',
+            tool_id: 'inner_tool',
+            params: {},
+            results: [],
+          }),
+        ],
+        response: null,
+        streamingMessage: null,
+        error: null,
+      });
+      renderWithProviders(
+        <SubAgentExecutionFlyout executionId="exec-1" isStopped onClose={jest.fn()} />
+      );
+      expect(screen.getByRole('status')).toHaveTextContent('stopped');
+    });
+  });
 });

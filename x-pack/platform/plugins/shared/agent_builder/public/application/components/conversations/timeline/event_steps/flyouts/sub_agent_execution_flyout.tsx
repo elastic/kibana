@@ -52,6 +52,7 @@ interface SubAgentExecutionFlyoutProps {
   executionId: string;
   params?: Record<string, unknown>;
   isCompleted?: boolean;
+  isStopped?: boolean;
   onBack?: () => void;
   onClose: () => void;
 }
@@ -60,6 +61,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
   executionId,
   params,
   isCompleted = false,
+  isStopped = false,
   onBack,
   onClose,
 }) => {
@@ -86,6 +88,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
   const displayMessage = response?.message ?? streamingMessage;
   const isRunning = !response && !error;
   const hasError = Boolean(error);
+  const isRunStopped = isStopped && isRunning;
 
   const euiSteps = [
     ...(params
@@ -99,20 +102,26 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
       : []),
     {
       title: executionLabel,
-      status: (hasError ? 'danger' : isRunning && !isCompleted ? 'loading' : 'complete') as
-        | 'danger'
-        | 'loading'
-        | 'complete',
-      children: <EventSteps steps={executionSteps} />,
+      status: (hasError
+        ? 'danger'
+        : isRunStopped
+        ? 'incomplete'
+        : isRunning && !isCompleted
+        ? 'loading'
+        : 'complete') as 'danger' | 'incomplete' | 'loading' | 'complete',
+      children: <EventSteps steps={executionSteps} isAborted={isStopped} />,
     },
     ...(!isRunning || displayMessage
       ? [
           {
             title: resultLabel,
-            status: (hasError ? 'danger' : isRunning ? 'loading' : 'complete') as
-              | 'danger'
-              | 'loading'
-              | 'complete',
+            status: (hasError
+              ? 'danger'
+              : isRunStopped
+              ? 'incomplete'
+              : isRunning
+              ? 'loading'
+              : 'complete') as 'danger' | 'incomplete' | 'loading' | 'complete',
             children: (
               <>
                 {hasError ? (
@@ -178,6 +187,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
       {liveNestedStep && (
         <ToolResponseFlyout
           step={liveNestedStep}
+          isAborted={isStopped}
           onClose={isEmbeddedContext ? onClose : closeNestedStep}
           onBack={isEmbeddedContext ? closeNestedStep : undefined}
         />
