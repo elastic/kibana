@@ -1,0 +1,55 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  MAX_HYPOTHESES,
+  MAX_IMPACT_TOOL_ENTITIES,
+} from '@kbn/agentic-investigations-plugin/common';
+import { FINDINGS_JSON_SCHEMA, findingsOutputSchema, limitFindings } from './output_schema';
+
+describe('findings output', () => {
+  it('sets no hard size limits in the schema the model is held to', () => {
+    expect(JSON.stringify(FINDINGS_JSON_SCHEMA)).not.toMatch(/maxLength|maxItems/);
+  });
+
+  it('accepts long text and trims it to the store limits', () => {
+    const long = 'x'.repeat(20_000);
+    const parsed = findingsOutputSchema.safeParse({
+      summary: long,
+      verdict: long,
+      impact_summary: long,
+      impact_entities: Array.from({ length: 20 }, (_, i) => ({ name: `svc-${i}` })),
+      hypotheses: Array.from({ length: MAX_HYPOTHESES + 10 }, () => ({
+        candidate: long,
+        confidence: 1.4,
+        status: 'investigating' as const,
+        reason: long,
+      })),
+    });
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+
+    const limited = limitFindings(parsed.data);
+    expect(limited.summary.length).toBeLessThan(long.length);
+    expect(limited.verdict?.length).toBeLessThan(long.length);
+    expect(limited.impact_summary?.length).toBeLessThan(long.length);
+    expect(limited.impact_entities).toHaveLength(MAX_IMPACT_TOOL_ENTITIES);
+    expect(limited.hypotheses).toHaveLength(MAX_HYPOTHESES);
+    expect(limited.hypotheses[0].confidence).toBe(1);
+    expect(limited.hypotheses[0].candidate.length).toBeLessThan(long.length);
+  });
+
+  it('still rejects a record without a summary or with an unknown status', () => {
+    expect(findingsOutputSchema.safeParse({ hypotheses: [] }).success).toBe(false);
+    expect(
+      findingsOutputSchema.safeParse({
+        summary: 's',
+        hypotheses: [{ candidate: 'c', confidence: 0.5, status: 'maybe' }],
+      }).success
+    ).toBe(false);
+  });
+});

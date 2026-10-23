@@ -20,7 +20,12 @@ import {
   toolNamesToDefine,
   STRUCTURED_OUTPUT_TOOL,
 } from './messages';
-import { FINDINGS_JSON_SCHEMA, findingsOutputSchema, type FindingsOutput } from './output_schema';
+import {
+  FINDINGS_JSON_SCHEMA,
+  findingsOutputSchema,
+  limitFindings,
+  type FindingsOutput,
+} from './output_schema';
 import { FINDINGS_RECORDER_SYSTEM_PROMPT } from './prompt';
 
 export interface FindingsPassDeps {
@@ -132,7 +137,7 @@ export const runFindingsPass = async (
         const call = response.toolCalls?.find((c) => c.function.name === STRUCTURED_OUTPUT_TOOL);
         const parsed = findingsOutputSchema.safeParse(call?.function.arguments);
         if (parsed.success) {
-          output = parsed.data;
+          output = limitFindings(parsed.data);
         } else {
           logger.warn(
             `Findings recorder returned an invalid record (attempt ${attempt}): ${parsed.error.message}`
@@ -140,10 +145,12 @@ export const runFindingsPass = async (
         }
       } catch (error) {
         if (!guard.signal.aborted) {
+          // A tool validation error says which fields failed only in its metadata.
+          const reason = (error as { meta?: { errorsText?: string } }).meta?.errorsText;
           logger.warn(
             `Findings recorder pass failed for ${conversationId} (attempt ${attempt}): ${
               error instanceof Error ? error.message : String(error)
-            }`
+            }${reason ? ` (${reason})` : ''}`
           );
         }
       }
