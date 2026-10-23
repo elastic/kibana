@@ -21,12 +21,12 @@ import type { Step } from '../types.ts';
 
 const minimalImage = 'family/kibana-minimal-ubuntu-2604';
 
-export const baseEnv = { KBN_ES_SNAPSHOT_USE_CACHED: 'true' } as const;
+export const prBaseEnv = { KBN_ES_SNAPSHOT_USE_CACHED: 'true' } as const;
 
 // The Kibana build and the gate steps. A failing gate step cancels the steps
 // registered for cancel-on-gate, so these are not themselves rendered with
 // `cancelOnGateFailure`.
-export const baseSteps = (): readonly Step[] => [
+export const prBaseSteps = (): readonly Step[] => [
   commandStep({
     command: '.buildkite/scripts/steps/build_kibana.sh',
     label: 'Build Kibana Distribution',

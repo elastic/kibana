@@ -10,6 +10,6 @@
 export * from './helpers.ts';
 export * from './presets.ts';
 export * from './render.ts';
-export { baseEnv, baseSteps } from './steps/base.ts';
+export { prBaseEnv, prBaseSteps } from './steps/pull_request_base.ts';
 export { cpsTests } from './steps/cps_testing.ts';
 export type * from './types.ts';

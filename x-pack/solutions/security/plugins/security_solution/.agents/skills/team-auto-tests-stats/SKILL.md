@@ -182,7 +182,7 @@ The deliverable **Tests** table **always lists FTR**. If legacy suites remain on
 
 | Phase | Source hints |
 |-------|---------------|
-| PR CI | [.buildkite/pipeline-utils/step-library/steps/base.ts](../../../../../../../../.buildkite/pipeline-utils/step-library/steps/base.ts) (`build_scout_tests`), [.buildkite/scripts/pipelines/pull_request/pipeline.ts](../../../../../../../../.buildkite/scripts/pipelines/pull_request/pipeline.ts), [.buildkite/scout_ci_config.yml](../../../../../../../../.buildkite/scout_ci_config.yml) |
+| PR CI | [.buildkite/pipeline-utils/step-library/steps/pull_request_base.ts](../../../../../../../../.buildkite/pipeline-utils/step-library/steps/pull_request_base.ts) (`build_scout_tests`), [.buildkite/scripts/pipelines/pull_request/pipeline.ts](../../../../../../../../.buildkite/scripts/pipelines/pull_request/pipeline.ts), [.buildkite/scout_ci_config.yml](../../../../../../../../.buildkite/scout_ci_config.yml) |
 | Post-merge | [.buildkite/pipelines/on_merge.yml](../../../../../../../../.buildkite/pipelines/on_merge.yml) (`build_scout_tests`) |
 | Quality gates | `.buildkite/pipelines/quality-gates/`, `.buildkite/pipelines/security_solution_quality_gate/` |
 | Periodic | MKI periodic groups under `.buildkite/pipelines/security_solution_quality_gate/` |

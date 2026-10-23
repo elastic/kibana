@@ -35,7 +35,7 @@ import {
   doAllChangesMatch,
   isAutomatedVersionBumpPR,
 } from '#pipeline-utils';
-import { baseEnv, baseSteps, cpsTests, renderSteps } from '#pipeline-utils/step-library';
+import { prBaseEnv, prBaseSteps, cpsTests, renderSteps } from '#pipeline-utils/step-library';
 
 const prConfigs =
   loadBuildkiteJson<typeof import('../../../pull_requests.json')>('pull_requests.json');
@@ -147,7 +147,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     await runPreBuild();
-    pipeline.push(renderSteps(baseSteps(), { header: true, env: baseEnv }));
+    pipeline.push(renderSteps(prBaseSteps(), { header: true, env: prBaseEnv }));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/local_check.yml', {}));
 
     // Gated together: check_api_contracts depends_on check_oas_snapshot.

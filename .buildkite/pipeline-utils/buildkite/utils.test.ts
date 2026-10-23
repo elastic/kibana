@@ -18,7 +18,7 @@ jest.mock('child_process', () => ({
 }));
 
 import { getPipeline, flushCancelOnGateFailureMetadata, _resetPendingCancelKeys } from './utils.ts';
-import { baseSteps } from '../step-library/steps/base.ts';
+import { prBaseSteps } from '../step-library/steps/pull_request_base.ts';
 import { getStepKeys } from '../step-library/render.ts';
 
 const execFileSyncMock = execFileSync as jest.MockedFunction<typeof execFileSync>;
@@ -130,7 +130,7 @@ describe('getPipeline', () => {
     const manualKeys = [...manualKeysMatch![1].matchAll(/'([^']+)'/g)].map(([, key]) => key);
     expect(manualKeys.length).toBeGreaterThan(0);
 
-    const baseKeys = new Set(getStepKeys(baseSteps()));
+    const baseKeys = new Set(getStepKeys(prBaseSteps()));
 
     for (const key of manualKeys) {
       expect(baseKeys).toContain(key);
@@ -193,7 +193,10 @@ describe('getPipeline', () => {
         rel: path.relative(repoRoot, filename),
         steps: loadYaml(fs.readFileSync(filename, 'utf8'))?.steps,
       })),
-      { rel: '.buildkite/pipeline-utils/step-library/steps/base.ts', steps: baseSteps() },
+      {
+        rel: '.buildkite/pipeline-utils/step-library/steps/pull_request_base.ts',
+        steps: prBaseSteps(),
+      },
     ];
 
     for (const { rel, steps: sourceSteps } of sources) {
