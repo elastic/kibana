@@ -131,11 +131,14 @@ export const buildRecorderMessages = ({
   steps,
   turns: earlier,
   final,
+  notices = [],
 }: {
   question?: string;
   steps: readonly ConversationRoundStep[];
   turns: readonly RecorderTurn[];
   final: boolean;
+  /** What people did to the investigation outside the agent's steps, such as changing its severity. */
+  notices?: readonly string[];
 }): Message[] => {
   const agentTurns = groupTurns(steps);
   const messages: Message[] = [
@@ -173,6 +176,8 @@ export const buildRecorderMessages = ({
     );
   });
   for (; cursor < agentTurns.length; cursor++) messages.push(...turnMessages(agentTurns[cursor]));
+  // Placed after the part of the conversation that is kept between passes, so they never move it.
+  notices.forEach((notice) => messages.push({ role: MessageRole.User, content: notice }));
   messages.push({ role: MessageRole.User, content: final ? FINAL_INSTRUCTION : LIVE_INSTRUCTION });
   return messages;
 };

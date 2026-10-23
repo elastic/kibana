@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
-import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import { getEventActorDisplayName, type ConversationRoundStep } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE } from '@kbn/agentic-investigations-plugin/common';
@@ -75,21 +75,34 @@ export const limitToOneConfirmed = (hypotheses: FindingsOutput['hypotheses']): H
  * throws for a model or write failure; it logs and returns false, because the investigation must
  * not depend on it.
  */
-const hasUserChosenSeverity = async (
-  conversations: {
-    get?: (conversationId: string) => Promise<{ events?: Array<{ type: string }> }>;
-  },
+interface ConversationEventLike {
+  type: string;
+  data?: { severity?: string; previous_severity?: string };
+  actor?: Parameters<typeof getEventActorDisplayName>[0];
+}
+
+/** What a person changing the severity looks like to the recorder, one notice per change. */
+const readSeverityChanges = async (
+  agentBuilder: AgentBuilderPluginStart,
+  request: KibanaRequest,
   conversationId: string
-): Promise<boolean> => {
+): Promise<string[]> => {
   try {
-    const conversation = await conversations.get?.(conversationId);
-    return (
-      conversation?.events?.some(
-        ({ type }) => type === INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE
-      ) ?? false
-    );
+    const conversations = await agentBuilder.conversations.getScopedClient({ request });
+    const conversation = (await conversations.get(conversationId)) as {
+      events?: ConversationEventLike[];
+    };
+    return (conversation.events ?? [])
+      .filter(({ type }) => type === INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE)
+      .map(
+        ({ data, actor }) =>
+          `${getEventActorDisplayName(actor) ?? 'A user'} (a human) changed the investigation ` +
+          `severity ${data?.previous_severity ? `from "${data.previous_severity}" ` : ''}to "${
+            data?.severity
+          }". Do not set the severity.`
+      );
   } catch {
-    return false;
+    return [];
   }
 };
 
@@ -104,6 +117,7 @@ export const runFindingsPass = async (
   if (!agentBuilder || !agenticInvestigations) return false;
 
   let output: FindingsOutput | undefined;
+  let severityChosenByUser = false;
   try {
     const model = await createOptimizeModel({
       request,
@@ -116,7 +130,15 @@ export const runFindingsPass = async (
     });
     if (!model) return false;
 
-    const messages = buildRecorderMessages({ question, steps, turns: memory.turns(), final });
+    const notices = await readSeverityChanges(agentBuilder, request, conversationId);
+    severityChosenByUser = notices.length > 0;
+    const messages = buildRecorderMessages({
+      question,
+      steps,
+      turns: memory.turns(),
+      final,
+      notices,
+    });
     // The agent's tool calls are replayed as they happened, so each tool needs a definition for
     // the provider to accept them. The list is fixed so the cached prefix survives from one pass
     // to the next. The recorder never calls them: only the answer tool is forced.
@@ -190,8 +212,7 @@ export const runFindingsPass = async (
 
   const writer = agenticInvestigations.getFindingsWriter(request);
   const conversations = await agentBuilder.conversations.getScopedClient({ request });
-  // A severity a user chose is theirs: the recorder's own rating never replaces it.
-  const severityChosenByUser = await hasUserChosenSeverity(conversations, conversationId);
+  // A severity a user chose is theirs: the recorder is told so, and never replaces it either way.
   const verdict = final ? output?.verdict ?? answer?.slice(0, MAX_METADATA_TEXT_LENGTH) : undefined;
 
   const writes: Array<[string, () => Promise<unknown>]> = [

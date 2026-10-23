@@ -57,7 +57,7 @@ describe('runFindingsPass', () => {
   const setup = ({
     answers = [answerWith(output)] as unknown[],
     earlier = [] as never[],
-    events = [] as Array<{ type: string }>,
+    events = [] as Array<Record<string, unknown>>,
   } = {}) => {
     const writer = {
       setHypotheses: jest.fn().mockResolvedValue(undefined),
@@ -121,13 +121,25 @@ describe('runFindingsPass', () => {
     expect(Object.keys(call.tools)).toContain('structuredOutput');
   });
 
-  it('leaves the severity alone when a user changed it', async () => {
-    const { deps, patchMetadata, memory } = setup({
-      events: [{ type: 'investigation_severity_changed' }],
+  it('tells the recorder a user changed the severity, and does not write one', async () => {
+    const { deps, patchMetadata, chatComplete, memory } = setup({
+      events: [
+        {
+          type: 'investigation_severity_changed',
+          data: { severity: 'low', previous_severity: 'high' },
+          actor: { type: 'user', username: 'jane' },
+        },
+      ],
     });
 
     await expect(run(deps, memory)).resolves.toBe(true);
 
+    const sent = chatComplete.mock.calls[0][0].messages as Array<{ content: unknown }>;
+    const notice = sent.find(
+      ({ content }) => typeof content === 'string' && content.includes('(a human) changed')
+    );
+    expect(notice?.content).toContain('from "high" to "low"');
+    expect(notice?.content).toContain('Do not set the severity');
     expect(patchMetadata).toHaveBeenCalledWith('c1', { summary: output.summary });
   });
 

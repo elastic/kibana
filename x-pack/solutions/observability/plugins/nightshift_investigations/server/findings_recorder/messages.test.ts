@@ -115,6 +115,18 @@ describe('buildRecorderMessages', () => {
     expect(messages.at(-1)).toMatchObject({ content: FINAL_INSTRUCTION });
   });
 
+  it('puts notices about what people did just before the instruction', () => {
+    const messages = buildRecorderMessages({
+      steps,
+      turns: [],
+      final: false,
+      notices: ['Jane (a human) changed the investigation severity to "low".'],
+    });
+
+    expect(messages.at(-2)).toMatchObject({ content: expect.stringContaining('Jane (a human)') });
+    expect(messages.at(-1)).toMatchObject({ content: LIVE_INSTRUCTION });
+  });
+
   it('slots an earlier recorder answer in after the agent turns that preceded it', () => {
     const earlier: RecorderTurn = {
       atGroups: 1,

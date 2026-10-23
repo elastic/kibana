@@ -28,6 +28,7 @@ The record is shown to people on the investigation overview, on its card, and in
   - high: the affected operation fails or is blocked on the verified path, or is broadly degraded or intermittently failing for a significant subset.
   - medium: minor confirmed degradation with limited reach, or the evidence never settled whether the operation fails or only slows.
   - low: confirmed recovery, or confirmed absence of impact. Say which in the verdict.
+  - If the conversation says a person changed the severity, it is theirs: leave severity out of your answer, whatever the evidence shows.
 - impact: the business consequence in one or two plain sentences: who or what was affected, how badly, for how long and how broadly, using the numbers the agent measured. Add entities only when two or more services or components were affected in different ways, grouped at service level; never list a single entity.
 - hypotheses: every candidate cause the agent considered, as a snapshot that replaces the stored list.
   - status is investigating while open, dismissed once ruled out, confirmed for the root cause.
@@ -45,4 +46,4 @@ export const LIVE_INSTRUCTION =
 
 /** Asked once the agent has given its final answer. */
 export const FINAL_INSTRUCTION =
-  'The agent has finished. Make the record final: set the verdict from its answer, settle every hypothesis (none left investigating unless the telemetry needed to check it was unavailable), and set severity and impact.';
+  'The agent has finished. Make the record final: set the verdict from its answer, settle every hypothesis (none left investigating unless the telemetry needed to check it was unavailable), and set severity (unless a person changed it) and impact.';
