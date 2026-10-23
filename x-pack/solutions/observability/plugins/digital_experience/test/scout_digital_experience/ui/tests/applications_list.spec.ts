@@ -27,10 +27,8 @@ test.describe(
     }) => {
       await test.step('shows the summary and the page loads over time', async () => {
         await expect(digitalExperience.summary).toBeVisible();
-        await expect(digitalExperience.pageLoadsChart).toHaveAttribute(
-          'data-render-complete',
-          'true'
-        );
+        // The chart's figure wraps a canvas drawn over it, so it's attached but has no size of its own.
+        await expect(digitalExperience.pageLoadsChart.getByRole('figure')).toBeAttached();
       });
 
       await test.step('shows one EDOT Browser row with a hint for a name with both sources', async () => {

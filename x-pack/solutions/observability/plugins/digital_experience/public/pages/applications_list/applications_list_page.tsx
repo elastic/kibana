@@ -428,7 +428,7 @@ type OptionalColumnId =
   | 'lastSeen';
 
 /**
- * The columns the user can hide, in display order. The application and its page loads, which the
+ * The columns the user can hide, in display order; the application and its page loads, which the
  * table is sorted by, are always shown.
  */
 const OPTIONAL_COLUMNS: Array<{ id: OptionalColumnId; label: string }> = [

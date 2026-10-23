@@ -13,8 +13,8 @@ import {
 import { termQuery } from '@kbn/es-query';
 
 /**
- * Documents without an environment: the "Not defined" sentinel APM writes, or none of `fields` set.
- * Same semantics as APM's `environmentQuery`, which lives in the APM plugin.
+ * Documents without an environment, as APM's `environmentQuery` defines them: the "Not defined"
+ * sentinel APM writes, or none of `fields` set.
  */
 export const environmentNotDefinedFilter = (fields: string[]) => ({
   bool: {

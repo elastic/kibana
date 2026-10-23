@@ -73,8 +73,8 @@ const environmentTerms = (size: number) => ({
   environmentNames: { terms: { field: RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME, size } },
 });
 
-// The filter's doc count is the number of samples. Semconv writes names in lower case (`cls`) and
-// the web-vitals library in upper case (`CLS`), so both match.
+// The filter's doc count is the number of samples, and names match in any case, as semconv writes
+// `cls` and the web-vitals library `CLS`.
 const webVital = (vital: CoreWebVital) => ({
   filter: {
     bool: {

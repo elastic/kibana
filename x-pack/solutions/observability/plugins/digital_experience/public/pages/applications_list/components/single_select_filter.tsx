@@ -24,8 +24,8 @@ const listCss = css({ inlineSize: 280 });
 const buttonCss = css({ maxInlineSize: '22em' });
 
 /**
- * A filter button of an `EuiFilterGroup` that opens a list to pick one option. While the selection
- * narrows the list, the button shows it, e.g. "Source: Classic RUM".
+ * A filter button of an `EuiFilterGroup` that opens a list to pick one option, and shows the
+ * selection while it narrows the list, e.g. "Source: Classic RUM".
  */
 export function SingleSelectFilter({
   label,

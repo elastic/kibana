@@ -68,7 +68,10 @@ const sortEnvironments = (environments: Set<string>): string[] => {
     : names;
 };
 
-/** Merges the applications of each source, leaving out a source that fails unless all of them do. */
+/**
+ * Merges the applications of each source; a source that fails is left out and listed in
+ * `unavailableSources`, unless every source fails.
+ */
 export const getApplications = async ({
   getOtelApplications,
   getClassicApplications,

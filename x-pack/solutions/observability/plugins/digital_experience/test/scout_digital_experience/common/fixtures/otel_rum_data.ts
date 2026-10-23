@@ -9,20 +9,20 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import type { EsClient } from '@kbn/scout-oblt';
 
-// Mock EDOT Browser data, also loadable with curl for manual testing:
-// `curl -XPOST -H 'Content-Type: application/x-ndjson' <es>/_bulk --data-binary @otel_rum_data.ndjson`
-// Each document is preceded by its `create` action.
+/** A line of the bulk file: a document's `create` action, or the document after it. */
 interface BulkLine {
   create?: { _index: string; _id: string };
 }
 
+// Mock EDOT Browser data, also loadable with curl for manual testing:
+// `curl -XPOST -H 'Content-Type: application/x-ndjson' <es>/_bulk --data-binary @otel_rum_data.ndjson`
 const readBulkLines = (): BulkLine[] =>
   readFileSync(resolve(__dirname, 'otel_rum_data.ndjson'), 'utf8')
     .split('\n')
     .filter((line) => line.trim() !== '')
     .map((line) => JSON.parse(line));
 
-/** Indexes the mock EDOT Browser data. Documents that already exist are left as they are. */
+/** Indexes the mock EDOT Browser data, leaving the documents that already exist as they are. */
 export const ingestOtelRumData = async (esClient: EsClient): Promise<void> => {
   const { errors, items } = await esClient.bulk({
     operations: readBulkLines(),

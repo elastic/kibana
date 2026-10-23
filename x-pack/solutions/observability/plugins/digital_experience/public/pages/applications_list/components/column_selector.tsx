@@ -28,7 +28,7 @@ const COLUMNS_LABEL = i18n.translate('xpack.digitalExperience.columnSelector.lab
 
 const listCss = css({ inlineSize: 240 });
 
-/** "Columns 8/11": a button that opens a list to show or hide the table's optional columns. */
+/** A "Columns 6/9" button that opens a list to show or hide the table's optional columns. */
 export function ColumnSelector<TColumnId extends string>({
   columns,
   visibleColumns,

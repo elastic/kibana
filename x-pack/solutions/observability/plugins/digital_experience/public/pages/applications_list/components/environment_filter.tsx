@@ -16,8 +16,8 @@ const ENVIRONMENT_LABEL = i18n.translate('xpack.digitalExperience.environmentFil
 });
 
 /**
- * Environment filter with APM's "All" and "Not defined" entries; `undefined` is all. The selected
- * environment stays listed even when the time range has no data for it.
+ * Environment filter with APM's "All" and "Not defined" entries (`undefined` is all), which keeps
+ * the selected environment listed even when the time range has no data for it.
  */
 export function EnvironmentFilter({
   environments,

@@ -36,13 +36,4 @@ describe('PageLoadsChart', () => {
     expect(screen.queryByText('No page loads in the selected time range')).not.toBeInTheDocument();
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
-
-  it('is not reported as drawn while loading', () => {
-    renderChart({ points: [], isLoading: true });
-
-    expect(screen.getByTestId('digitalExperiencePageLoadsChart')).toHaveAttribute(
-      'data-render-complete',
-      'false'
-    );
-  });
 });

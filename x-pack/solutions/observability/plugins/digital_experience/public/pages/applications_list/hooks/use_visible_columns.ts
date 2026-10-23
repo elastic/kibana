@@ -9,8 +9,8 @@ import { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 /**
- * The columns the user chose to show, kept in local storage under `storageKey`. Until they choose,
- * every column but `hiddenByDefault`; ids saved for columns that no longer exist are ignored.
+ * The columns the user chose to show, kept in local storage under `storageKey`: every column but
+ * `hiddenByDefault` until they choose, ignoring saved ids of columns that no longer exist.
  */
 export const useVisibleColumns = <TColumnId extends string>({
   storageKey,

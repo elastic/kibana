@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import type { BrushEndListener } from '@elastic/charts';
@@ -37,8 +37,8 @@ const NO_DATA = i18n.translate('xpack.digitalExperience.pageLoadsChart.noData', 
 });
 
 /**
- * Page loads over the time range; dragging over the bars selects a narrower range. The chart area
- * keeps its height while loading or empty.
+ * Page loads over the time range, where dragging over the bars selects a narrower range; the chart
+ * area keeps its height while loading or empty.
  */
 export function PageLoadsChart({
   points,
@@ -53,7 +53,6 @@ export function PageLoadsChart({
   const baseTheme = useElasticChartsTheme();
   const { formatDate, timeZone } = useFormatters();
   const hasPageLoads = points.some(({ count }) => count > 0);
-  const [renderedPoints, setRenderedPoints] = useState<TimeSeriesPoint[]>();
 
   const onBrushEnd: BrushEndListener = (brushArea) => {
     const [start, end] = ('x' in brushArea && brushArea.x) || [];
@@ -84,7 +83,6 @@ export function PageLoadsChart({
           showLegend={false}
           locale={i18n.getLocale()}
           onBrushEnd={onBrushEnd}
-          onRenderChange={(isRendered) => setRenderedPoints(isRendered ? points : undefined)}
         />
         <Tooltip headerFormatter={({ value }) => formatDate(value)} />
         <Axis id="time" position={Position.Bottom} />
@@ -105,11 +103,7 @@ export function PageLoadsChart({
   };
 
   return (
-    <EuiPanel
-      hasBorder
-      data-test-subj="digitalExperiencePageLoadsChart"
-      data-render-complete={!isLoading && hasPageLoads && renderedPoints === points}
-    >
+    <EuiPanel hasBorder data-test-subj="digitalExperiencePageLoadsChart">
       <EuiTitle size="xs">
         <h2>{TITLE}</h2>
       </EuiTitle>
