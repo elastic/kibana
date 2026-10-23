@@ -10,7 +10,7 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import { UI_SETTINGS } from '@kbn/data-service';
 import type { EntityInventoryEntityType } from '../../types';
-import { DEFAULT_TIME_RANGE, ENTITY_INVENTORY_MAX_TIME_RANGE_MS } from '../constants';
+import { DEFAULT_TIME_RANGE, ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../constants';
 import { useEntityInventoryKibana } from '../hooks/use_kibana';
 import { INVALID_QUERY_TOAST_TITLE, TIME_RANGE_CLAMPED_TOAST_TITLE } from '../translations';
 import { clampTimeRange } from '../utils/clamp_time_range';
@@ -26,8 +26,8 @@ export interface EntityInventorySearchContextValue {
   filters: Filter[];
   dateRange: TimeRange;
   setFilters: (filters: Filter[]) => void;
-  /** Commits a search and returns the effective date range, or undefined if it was rejected. */
-  submit: (payload: EntityInventorySearchSubmitPayload) => TimeRange | undefined;
+  /** Commits a search and returns the effective date range. An invalid query is not committed. */
+  submit: (payload: EntityInventorySearchSubmitPayload) => TimeRange;
 }
 
 const DEFAULT_QUERY: Query = { language: 'kuery', query: '' };
@@ -51,6 +51,7 @@ export const EntityInventorySearchProvider = ({
 
   const submit = useCallback(
     ({ dateRange: submittedRange, query: submittedQuery }: EntityInventorySearchSubmitPayload) => {
+      let queryToCommit = submittedQuery;
       if (submittedQuery?.language === 'kuery') {
         try {
           fromKueryExpression(submittedQuery.query, {
@@ -58,21 +59,21 @@ export const EntityInventorySearchProvider = ({
           });
         } catch (error) {
           notifications.toasts.addError(error, { title: INVALID_QUERY_TOAST_TITLE });
-          return undefined;
+          queryToCommit = undefined;
         }
       }
 
       const { range, wasClamped, isValid } = clampTimeRange(
         submittedRange,
-        ENTITY_INVENTORY_MAX_TIME_RANGE_MS
+        ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS
       );
       const effectiveRange = isValid ? range : dateRange;
 
       if (wasClamped) {
         notifications.toasts.addWarning({ title: TIME_RANGE_CLAMPED_TOAST_TITLE });
       }
-      if (submittedQuery) {
-        setQuery(submittedQuery);
+      if (queryToCommit) {
+        setQuery(queryToCommit);
       }
       setDateRange(effectiveRange);
 

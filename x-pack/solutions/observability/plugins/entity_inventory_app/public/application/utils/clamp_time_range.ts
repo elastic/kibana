@@ -14,27 +14,15 @@ export interface ClampTimeRangeResult {
   isValid: boolean;
 }
 
-const DATEMATH_UNITS_MS: ReadonlyArray<readonly [string, number]> = [
-  ['d', 24 * 60 * 60 * 1000],
-  ['h', 60 * 60 * 1000],
-  ['m', 60 * 1000],
-  ['s', 1000],
-];
-
-// Expresses a duration with the largest datemath unit that divides it exactly, e.g. 3d.
-const toDatemathDuration = (durationMs: number): string => {
-  const match = DATEMATH_UNITS_MS.find(([, unitMs]) => durationMs % unitMs === 0);
-  return match ? `${durationMs / match[1]}${match[0]}` : `${durationMs}ms`;
-};
-
 const isRelative = (value: string): boolean => value.startsWith('now');
 
 /**
- * Limits a time range to `maxMs`, keeping the end of the range and moving the start forward.
+ * Limits a time range to `maxDays`, keeping the end of the range and moving the start forward.
+ * An end in the future (e.g. "This week") is capped at now so the clamped range is never empty.
  */
 export const clampTimeRange = (
   range: TimeRange,
-  maxMs: number,
+  maxDays: number,
   now: Date = new Date()
 ): ClampTimeRangeResult => {
   const from = dateMath.parse(range.from, { forceNow: now });
@@ -44,13 +32,13 @@ export const clampTimeRange = (
     return { range, wasClamped: false, isValid: false };
   }
 
-  if (to.diff(from) <= maxMs) {
+  if (to.diff(from, 'days', true) <= maxDays) {
     return { range, wasClamped: false, isValid: true };
   }
 
-  if (range.to === 'now') {
+  if (range.to === 'now' || to.isAfter(now)) {
     return {
-      range: { from: `now-${toDatemathDuration(maxMs)}`, to: 'now' },
+      range: { from: `now-${maxDays}d`, to: 'now' },
       wasClamped: true,
       isValid: true,
     };
@@ -59,7 +47,7 @@ export const clampTimeRange = (
   const clampedTo = isRelative(range.to) ? to.toISOString() : range.to;
 
   return {
-    range: { from: to.clone().subtract(maxMs, 'ms').toISOString(), to: clampedTo },
+    range: { from: to.clone().subtract(maxDays, 'days').toISOString(), to: clampedTo },
     wasClamped: true,
     isValid: true,
   };

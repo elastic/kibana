@@ -7,10 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EntityInventoryEntityType } from '../types';
+import { ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from './constants';
 
 export const TIME_RANGE_CLAMPED_TOAST_TITLE = i18n.translate(
   'xpack.entityInventoryApp.searchBar.timeRangeClampedToast',
-  { defaultMessage: 'Time range limited to the last 3 days of the selected range' }
+  {
+    defaultMessage: 'Time range limited to the last {maxDays} days of the selected range',
+    values: { maxDays: ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS },
+  }
 );
 
 export const INVALID_QUERY_TOAST_TITLE = i18n.translate(
@@ -20,7 +24,10 @@ export const INVALID_QUERY_TOAST_TITLE = i18n.translate(
 
 export const MAX_TIME_RANGE_HINT = i18n.translate(
   'xpack.entityInventoryApp.searchBar.maxTimeRangeHint',
-  { defaultMessage: 'Max 3 days' }
+  {
+    defaultMessage: 'Max {maxDays} days',
+    values: { maxDays: ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS },
+  }
 );
 
 export const SEARCH_BAR_PLACEHOLDERS: Readonly<Record<EntityInventoryEntityType, string>> = {

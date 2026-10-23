@@ -10,7 +10,7 @@ import type { EntityInventoryEntityType } from '../types';
 
 export const ENTITY_INVENTORY_APP_NAME = 'entityInventoryApp';
 
-export const ENTITY_INVENTORY_MAX_TIME_RANGE_MS = 3 * 24 * 60 * 60 * 1000;
+export const ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS = 3;
 
 export const DEFAULT_TIME_RANGE: TimeRange = { from: 'now-15m', to: 'now' };
 

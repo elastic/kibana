@@ -71,7 +71,7 @@ describe('EntityInventorySearchProvider', () => {
     });
   });
 
-  it('rejects invalid KQL without committing and surfaces an error', () => {
+  it('does not commit invalid KQL, surfaces an error and still commits the time range', () => {
     const { result, core } = renderSearchHook();
     let committed;
 
@@ -82,9 +82,9 @@ describe('EntityInventorySearchProvider', () => {
       });
     });
 
-    expect(committed).toBeUndefined();
+    expect(committed).toEqual({ from: 'now-1h', to: 'now' });
     expect(result.current.query).toEqual(kuery(''));
-    expect(result.current.dateRange).toEqual(DEFAULT_TIME_RANGE);
+    expect(result.current.dateRange).toEqual({ from: 'now-1h', to: 'now' });
     expect(core.notifications.toasts.addError).toHaveBeenCalledWith(expect.any(Error), {
       title: INVALID_QUERY_TOAST_TITLE,
     });

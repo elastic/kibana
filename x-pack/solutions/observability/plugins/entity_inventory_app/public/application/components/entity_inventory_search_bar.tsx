@@ -29,10 +29,7 @@ export const EntityInventorySearchBar = () => {
   const onQuerySubmit = useCallback(
     ({ dateRange: submittedRange, query: submittedQuery }: EntityInventorySearchSubmitPayload) => {
       const committedRange = submit({ dateRange: submittedRange, query: submittedQuery });
-      if (
-        committedRange &&
-        (committedRange.from !== submittedRange.from || committedRange.to !== submittedRange.to)
-      ) {
+      if (committedRange.from !== submittedRange.from || committedRange.to !== submittedRange.to) {
         setSearchBarKey((key) => key + 1);
       }
     },

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ENTITY_INVENTORY_MAX_TIME_RANGE_MS } from '../constants';
+import { ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../constants';
 import { clampTimeRange } from './clamp_time_range';
 
 const NOW = new Date('2026-10-21T12:00:00.000Z');
 
 const clamp = (from: string, to: string) =>
-  clampTimeRange({ from, to }, ENTITY_INVENTORY_MAX_TIME_RANGE_MS, NOW);
+  clampTimeRange({ from, to }, ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS, NOW);
 
 describe('clampTimeRange', () => {
   it('leaves a range shorter than the maximum unchanged', () => {
@@ -54,14 +54,24 @@ describe('clampTimeRange', () => {
     });
   });
 
-  it('clamps rounded ranges such as "This week"', () => {
-    const result = clamp('now/w', 'now/w');
+  it.each([
+    ['This week', 'now/w'],
+    ['This month', 'now/M'],
+    ['This year', 'now/y'],
+  ])('clamps "%s" to the last maximum range instead of a window in the future', (_, unit) => {
+    expect(clamp(unit, unit)).toEqual({
+      range: { from: 'now-3d', to: 'now' },
+      wasClamped: true,
+      isValid: true,
+    });
+  });
 
-    expect(result.wasClamped).toBe(true);
-    expect(result.isValid).toBe(true);
-    expect(Date.parse(result.range.to) - Date.parse(result.range.from)).toBe(
-      ENTITY_INVENTORY_MAX_TIME_RANGE_MS
-    );
+  it('never ends the clamped range after now', () => {
+    expect(clamp('now-1d', 'now+5d')).toEqual({
+      range: { from: 'now-3d', to: 'now' },
+      wasClamped: true,
+      isValid: true,
+    });
   });
 
   it('marks invalid datemath as invalid and returns the range untouched', () => {
