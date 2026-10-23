@@ -929,6 +929,7 @@ steps:
               workflow-id: system-alertzero-journal-note
               run-as-mode: inherit
               inputs:
+                author_name: "{{ consts.author_name }}"
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
                 message: >-
                   Extracted IoCs during forensic analysis of `{{ steps.resolve_host.output.host_name }}`.
@@ -947,6 +948,7 @@ steps:
               workflow-id: system-alertzero-journal-note
               run-as-mode: inherit
               inputs:
+                author_name: "{{ consts.author_name }}"
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
                 message: >-
                   {%- if steps.attach_timeline.error != null and steps.attach_iocs.error != null -%}
