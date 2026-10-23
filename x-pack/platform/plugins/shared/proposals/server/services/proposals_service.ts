@@ -22,8 +22,10 @@ import {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ActionMetadata, WorkflowExecutionDto } from '@kbn/workflows';
 import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
+import { CREATE_PROPOSAL_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {
   DEFAULT_PROPOSAL_TITLE,
+  isTodoProposal,
   isTerminal,
   PROPOSAL_CATEGORY_TODO,
   PROPOSAL_ATTACHMENT_TYPE,
@@ -102,6 +104,9 @@ export interface ProposalsServiceDeps {
   getWorkflowsApi: () => WorkflowsManagementApi;
   getAttachmentsClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
 }
+
+/** How long `reopen` waits for the gate workflow to create the successor. */
+const REOPEN_WAIT = { timeoutMs: 15_000, intervalMs: 250 };
 
 const gateEndedError = (status: ExecutionStatus): string =>
   `The gate execution ended as ${status} before it settled the proposal.`;
@@ -708,6 +713,119 @@ export class ProposalsService {
     await this.attachToConversation(cloneId, document.conversationId, document.title, request);
 
     return cloneId;
+  }
+
+  /**
+   * Re-offers a to-do proposal that was marked as applied, for the analyst who marked it by
+   * mistake: a successor carrying the same content is created pending, behind a gate of its own,
+   * and the original is pointed at it.
+   *
+   * The original keeps its decision. A decision is immutable and reaches the record only through
+   * the gate, and the original's gate has ended, so it cannot be undone in place. Superseding it
+   * instead leaves the chain saying what happened — applied, then re-opened — and the successor
+   * goes through the same gate as any proposal, so "I've applied" works on it again.
+   *
+   * Only for a to-do proposal: an action that ran cannot be un-run by relabelling it.
+   */
+  async reopen(
+    id: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<{ proposalId: string }> {
+    const { proposal } = await this.load(id, spaceId);
+
+    if (!isTodoProposal(proposal)) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] is not a to-do, and only a to-do proposal can be marked as not applied`
+      );
+    }
+    if (proposal.decision !== 'approved' || proposal.status !== 'no_action') {
+      throw new ProposalConflictError(
+        `Proposal [${id}] was not marked as applied: it is ${proposal.decision ?? 'undecided'}/${
+          proposal.status
+        }`
+      );
+    }
+    if (proposal.supersededBy !== undefined) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] was already superseded by ${proposal.supersededBy}`
+      );
+    }
+
+    // Through the gate workflow rather than written here, so the successor is gated, deadlined
+    // and attached to the conversation exactly like a proposal the agent created.
+    const successorId = uuidv4();
+    await this.deps.getWorkflowsApi().executeWorkflow({
+      workflowId: CREATE_PROPOSAL_WORKFLOW_ID,
+      spaceId,
+      request,
+      inputs: {
+        conversationId: proposal.conversationId,
+        title: proposal.title,
+        comment: proposal.comment,
+        origin: proposal.origin,
+        impact: proposal.impact,
+        confidence: proposal.confidence,
+        ...(proposal.category !== undefined && { category: proposal.category }),
+        proposalId: successorId,
+      },
+      // The gate parks on the analyst's decision; only its start is awaited.
+      waitForCompletion: false,
+    });
+
+    const successor = await this.waitForCreated(successorId, spaceId);
+    if (!successor) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] could not be re-offered: its successor [${successorId}] was not created in time`
+      );
+    }
+
+    // The original is marked before the successor joins its chain. If the successor were linked
+    // first and this write then lost, the chain would have two live heads for the gate's
+    // `getLatestRevision` to choose between; this way a failure leaves the successor as a
+    // chain of its own, still decidable.
+    const current = await this.load(id, spaceId);
+    if (current.proposal.supersededBy !== undefined) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] was already superseded by ${current.proposal.supersededBy}`
+      );
+    }
+    const { id: _originalId, ...original } = current.proposal;
+    await this.writeDocument(id, { ...original, supersededBy: successorId }, current);
+
+    const { id: _successorId, ...successorDocument } = successor.proposal;
+    await this.writeDocument(
+      successorId,
+      {
+        ...successorDocument,
+        rootProposalId: original.rootProposalId,
+        supersedes: id,
+        revision: original.revision + 1,
+      },
+      successor
+    );
+
+    return { proposalId: successorId };
+  }
+
+  /** Waits for a proposal a gate workflow is creating, or `undefined` once the wait runs out. */
+  private async waitForCreated(
+    id: string,
+    spaceId: string,
+    { timeoutMs, intervalMs } = REOPEN_WAIT
+  ): Promise<StoredProposal | undefined> {
+    const deadline = Date.now() + timeoutMs;
+    do {
+      try {
+        return await this.load(id, spaceId);
+      } catch (error) {
+        if (!(error instanceof ProposalNotFoundError)) {
+          throw error;
+        }
+      }
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    } while (Date.now() < deadline);
+    return undefined;
   }
 
   /**

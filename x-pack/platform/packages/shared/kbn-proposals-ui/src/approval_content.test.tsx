@@ -311,6 +311,52 @@ describe('ApprovalContent', () => {
       expect(screen.queryByTestId('approvalContent-dismiss')).not.toBeInTheDocument();
     });
 
+    const appliedTodo: ApprovalProposal = {
+      ...todoProposal,
+      decision: 'approved',
+      decidedBy: { fullName: 'Ava', username: 'ava', email: null },
+      decidedAt: '2024-01-01T17:20:00.000Z',
+      status: 'no_action',
+    };
+
+    it('offers Mark as not applied once marked as applied, and calls onReopen', async () => {
+      const onReopen = jest.fn().mockResolvedValue(undefined);
+      renderContent({ proposal: appliedTodo, onReopen });
+
+      fireEvent.click(screen.getByTestId('approvalContent-reopen'));
+
+      expect(screen.getByTestId('approvalContent-reopen')).toHaveTextContent('Mark as not applied');
+      await waitFor(() => expect(onReopen).toHaveBeenCalledTimes(1));
+    });
+
+    it('shows why marking as not applied failed', async () => {
+      const onReopen = jest.fn().mockRejectedValue(new Error('Already re-offered.'));
+      renderContent({ proposal: appliedTodo, onReopen });
+
+      fireEvent.click(screen.getByTestId('approvalContent-reopen'));
+
+      await waitFor(() => expect(screen.getByText('Already re-offered.')).toBeInTheDocument());
+    });
+
+    it.each<[string, Partial<ApprovalContentProps>]>([
+      ['a pending to-do proposal', { proposal: todoProposal }],
+      [
+        'an action proposal that ran',
+        { proposal: { ...baseProposal, decision: 'approved', status: 'succeeded' } },
+      ],
+      ['a replaced one', { proposal: { ...appliedTodo, supersededBy: 'successor' } }],
+    ])('does not offer Mark as not applied for %s', (_, props) => {
+      renderContent({ ...props, onReopen: jest.fn() });
+
+      expect(screen.queryByTestId('approvalContent-reopen')).not.toBeInTheDocument();
+    });
+
+    it('disables Mark as not applied when read-only', () => {
+      renderContent({ proposal: appliedTodo, onReopen: jest.fn(), readOnly: true });
+
+      expect(screen.getByTestId('approvalContent-reopen')).toBeDisabled();
+    });
+
     it("records the application through onApprove when I've applied is clicked", async () => {
       const onApprove = jest.fn();
       renderContent({ proposal: todoProposal, onApprove });
