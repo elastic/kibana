@@ -308,6 +308,17 @@ const shimmerSwitchLabel = i18n.translate(
   }
 );
 
+const dotsTitle = i18n.translate('core.ui.chrome.headerGlobalNav.motionRefreshDotsTitle', {
+  defaultMessage: 'Dot Loader',
+});
+
+const dotsSwitchLabel = i18n.translate(
+  'core.ui.chrome.headerGlobalNav.motionRefreshDotsToggleSwitch',
+  {
+    defaultMessage: 'Enable dot loader',
+  }
+);
+
 const loginTitle = i18n.translate('core.ui.chrome.headerGlobalNav.motionRefreshLoginTitle', {
   defaultMessage: 'Log in screen',
 });
@@ -440,6 +451,7 @@ export const MotionRefreshSidebar = ({ onClose }: MotionRefreshSidebarProps) => 
     settings.page &&
     settings.spinner &&
     settings.shimmer &&
+    settings.dots &&
     settings.login;
 
   const tooltipRows: TokenRow[] = [
@@ -615,6 +627,15 @@ export const MotionRefreshSidebar = ({ onClose }: MotionRefreshSidebarProps) => 
             checked={settings.shimmer}
             rows={[]}
             caption={shimmerTitle}
+          />
+          <MotionSection
+            id="dots"
+            title={dotsTitle}
+            description=""
+            switchLabel={dotsSwitchLabel}
+            checked={settings.dots}
+            rows={[]}
+            caption={dotsTitle}
           />
           <MotionSection
             id="login"
