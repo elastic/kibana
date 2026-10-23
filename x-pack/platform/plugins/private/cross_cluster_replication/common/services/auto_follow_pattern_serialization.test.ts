@@ -21,6 +21,7 @@ describe('[CCR] auto-follow_serialization', () => {
         active: true,
         remoteCluster: 'foo',
         leaderIndexPatterns: ['foo-*'],
+        leaderIndexExclusionPatterns: ['foo-private-*'],
         followIndexPattern: 'bar',
       };
 
@@ -30,6 +31,7 @@ describe('[CCR] auto-follow_serialization', () => {
           active: true,
           remote_cluster: expected.remoteCluster,
           leader_index_patterns: expected.leaderIndexPatterns,
+          leader_index_exclusion_patterns: expected.leaderIndexExclusionPatterns,
           follow_index_pattern: expected.followIndexPattern,
         },
       };
@@ -48,12 +50,14 @@ describe('[CCR] auto-follow_serialization', () => {
           name: name1,
           remoteCluster: 'foo1',
           leaderIndexPatterns: ['foo1-*'],
+          leaderIndexExclusionPatterns: ['foo1-private-*'],
           followIndexPattern: 'bar2',
         },
         {
           name: name2,
           remoteCluster: 'foo2',
           leaderIndexPatterns: ['foo2-*'],
+          leaderIndexExclusionPatterns: ['foo2-private-*'],
           followIndexPattern: 'bar2',
         },
       ];
@@ -65,6 +69,7 @@ describe('[CCR] auto-follow_serialization', () => {
             pattern: {
               remote_cluster: expected[0].remoteCluster,
               leader_index_patterns: expected[0].leaderIndexPatterns,
+              leader_index_exclusion_patterns: expected[0].leaderIndexExclusionPatterns,
               follow_index_pattern: expected[0].followIndexPattern,
             },
           },
@@ -73,6 +78,7 @@ describe('[CCR] auto-follow_serialization', () => {
             pattern: {
               remote_cluster: expected[1].remoteCluster,
               leader_index_patterns: expected[1].leaderIndexPatterns,
+              leader_index_exclusion_patterns: expected[1].leaderIndexExclusionPatterns,
               follow_index_pattern: expected[1].followIndexPattern,
             },
           },
@@ -90,12 +96,14 @@ describe('[CCR] auto-follow_serialization', () => {
       const expected = {
         remote_cluster: 'foo',
         leader_index_patterns: ['bar-*'],
+        leader_index_exclusion_patterns: ['bar-private-*'],
         follow_index_pattern: 'faz',
       };
 
       const object = {
         remoteCluster: expected.remote_cluster,
         leaderIndexPatterns: expected.leader_index_patterns,
+        leaderIndexExclusionPatterns: expected.leader_index_exclusion_patterns,
         followIndexPattern: expected.follow_index_pattern,
       };
 

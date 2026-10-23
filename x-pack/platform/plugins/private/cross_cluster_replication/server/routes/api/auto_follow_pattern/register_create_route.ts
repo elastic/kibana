@@ -23,6 +23,9 @@ export const registerCreateRoute = ({
     id: schema.string({ maxLength: 1000 }),
     remoteCluster: schema.string({ maxLength: 1000 }),
     leaderIndexPatterns: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
+    leaderIndexExclusionPatterns: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 })
+    ),
     followIndexPattern: schema.string({ maxLength: 1000 }),
   });
 

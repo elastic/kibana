@@ -202,6 +202,7 @@ export const validateSuffix = (suffix: string): ReactElement | null => {
 export interface AutoFollowPatternValidationFields {
   name?: string;
   leaderIndexPatterns?: string[];
+  leaderIndexExclusionPatterns?: string[];
   followIndexPatternPrefix?: string;
   followIndexPatternSuffix?: string;
   remoteCluster?: string;
@@ -215,6 +216,7 @@ export interface MessageError {
 export interface AutoFollowPatternValidationErrors {
   name?: string | null;
   leaderIndexPatterns?: MessageError | null;
+  leaderIndexExclusionPatterns?: MessageError | null;
   followIndexPatternPrefix?: ReactElement | null;
   followIndexPatternSuffix?: ReactElement | null;
   remoteCluster?: MessageError | null;
