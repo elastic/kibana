@@ -178,6 +178,13 @@ export const hasDeadlinePassed = (proposal: Pick<ApprovalProposal, 'expiresAt'>)
 export const isProposalReplaced = (proposal: ApprovalProposal): boolean =>
   proposal.supersededBy !== undefined || proposal.status === 'superseded';
 
+/** A to-do marked as applied, then as not applied: a successor is offered and this one is void. */
+const isUnappliedTodo = (proposal: ApprovalProposal): boolean =>
+  isProposalReplaced(proposal) &&
+  isTodoProposal(proposal) &&
+  proposal.decision === 'approved' &&
+  proposal.status === 'no_action';
+
 /**
  * `status: 'expired'` is the workflow's reliable settlement for an unanswered proposal (on
  * attempt exhaustion, or a failure) before the deadline itself passes. A deadline that has passed
@@ -185,10 +192,12 @@ export const isProposalReplaced = (proposal: ApprovalProposal): boolean =>
  * than compared against `expiresAt` directly.
  *
  * A replaced proposal nobody ever decided reads as expired too: it can no longer be actioned, and
- * "expired" is how the UI already says that. One that was decided keeps its own outcome.
+ * "expired" is how the UI already says that. One that was decided keeps its own outcome, except
+ * a to-do that was marked as applied and then not applied.
  */
 export const isProposalExpired = (proposal: ApprovalProposal): boolean =>
-  proposal.status === 'expired' || (isProposalReplaced(proposal) && !proposal.decision);
+  proposal.status === 'expired' ||
+  (isProposalReplaced(proposal) && (!proposal.decision || isUnappliedTodo(proposal)));
 
 /**
  * Why a proposal that can no longer be decided is in that state, as the flyout row captions it and

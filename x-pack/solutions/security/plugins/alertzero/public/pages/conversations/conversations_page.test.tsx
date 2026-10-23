@@ -155,6 +155,21 @@ const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
 const mockUseSetInvestigationStatus = useSetInvestigationStatus as jest.Mock;
 const mockUseInvestigationClosePreview = useInvestigationClosePreview as jest.Mock;
 
+/** Entities a proposal's conversation impacts, by proposal id: what the server filters rows by. */
+const impactOf: Record<string, string[]> = {};
+
+/** What the pills hook returns once the server has sent every pill. */
+const pagedPills = (pills: Array<{ entityId: string; count: number }>) => ({
+  pills,
+  total: pills.length,
+  remaining: 0,
+  canShowMore: true,
+  reachLimit: 10_000,
+  loadFailed: false,
+  isLoadingMore: false,
+  showMore: jest.fn(),
+});
+
 /** Records the fetchNextPage of each bucket, so a Show more click can be asserted. */
 const fetchNextPage: Record<string, jest.Mock> = {};
 
@@ -167,7 +182,7 @@ const fetchNextPage: Record<string, jest.Mock> = {};
 const mockProposals = (groups: Record<string, ProposalItem[]>) => {
   // The server applies the entity filter, so the fake narrows the rows the same way.
   const narrowed = (rows: ProposalItem[], entity?: string | null) =>
-    entity ? rows.filter(({ entityIds }) => entityIds?.includes(entity)) : rows;
+    entity ? rows.filter(({ id }) => impactOf[id]?.includes(entity)) : rows;
 
   const count = (rows: ProposalItem[], enabled: boolean, entity?: string | null) => ({
     data: enabled ? { proposals: [], total: narrowed(rows, entity).length } : undefined,
@@ -345,7 +360,7 @@ beforeEach(() => {
     isFetching: false,
     refetch: jest.fn(),
   });
-  mockUseProposalImpactPills.mockReturnValue({ data: [] });
+  mockUseProposalImpactPills.mockReturnValue(pagedPills([]));
   mockOpenCount(0);
   mockUseRunningSummary.mockReturnValue({ watchCount: 4, enabledWorkerCount: 6, workerCount: 6 });
 });
@@ -1068,13 +1083,11 @@ describe('ConversationsPage impact pills', () => {
     ...proposal,
     id: 'prop-host',
     conversationTitle: 'Host investigation',
-    entityIds: ['host-1'],
   };
   const userProposal: ProposalItem = {
     ...proposal,
     id: 'prop-user',
     conversationTitle: 'User investigation',
-    entityIds: ['user-1'],
   };
   const pills = [
     { entityId: 'host-1', count: 1 },
@@ -1082,8 +1095,14 @@ describe('ConversationsPage impact pills', () => {
   ];
 
   beforeEach(() => {
+    impactOf['prop-host'] = ['host-1'];
+    impactOf['prop-user'] = ['user-1'];
     mockProposals({ investigate: [hostProposal, userProposal] });
-    mockUseProposalImpactPills.mockReturnValue({ data: pills });
+    mockUseProposalImpactPills.mockReturnValue(pagedPills(pills));
+  });
+
+  afterEach(() => {
+    Object.keys(impactOf).forEach((id) => delete impactOf[id]);
   });
 
   // Toggling a pill changes the section badges' text; awaiting flushes the resulting
@@ -1106,16 +1125,17 @@ describe('ConversationsPage impact pills', () => {
   });
 
   it('keeps the pills when a section holding their entities is collapsed', async () => {
+    impactOf['prop-respond'] = ['host-9'];
     mockProposals({
-      respond: [{ ...proposal, id: 'prop-respond', category: 'respond', entityIds: ['host-9'] }],
+      respond: [{ ...proposal, id: 'prop-respond', category: 'respond' }],
       investigate: [hostProposal],
     });
-    mockUseProposalImpactPills.mockReturnValue({
-      data: [
+    mockUseProposalImpactPills.mockReturnValue(
+      pagedPills([
         { entityId: 'host-1', count: 1 },
         { entityId: 'host-9', count: 1 },
-      ],
-    });
+      ])
+    );
     mockOpenCount(2);
     renderPage('/');
 
@@ -1161,7 +1181,7 @@ describe('ConversationsPage impact pills', () => {
   });
 
   it('hides the pill row when the queue has no entities and leaves it unfiltered', () => {
-    mockUseProposalImpactPills.mockReturnValue({ data: [] });
+    mockUseProposalImpactPills.mockReturnValue(pagedPills([]));
     mockProposals({ investigate: [{ ...proposal, conversationTitle: 'No impact' }] });
     renderPage('/');
 
@@ -1169,21 +1189,48 @@ describe('ConversationsPage impact pills', () => {
     expect(screen.getByText('No impact')).toBeInTheDocument();
   });
 
-  it('clears the filter when the selected entity disappears from the pills', async () => {
+  it('keeps the filter, pinning its pill, when the selected entity is past the loaded pills', async () => {
     const { rerender } = renderPage('/');
 
     await togglePill('host-1');
     expect(screen.queryByText('User investigation')).not.toBeInTheDocument();
 
-    mockUseProposalImpactPills.mockReturnValue({ data: [{ entityId: 'user-1', count: 1 }] });
+    mockUseProposalImpactPills.mockReturnValue({
+      ...pagedPills([{ entityId: 'user-1', count: 1 }]),
+      total: 25,
+      remaining: 24,
+    });
     rerender();
 
-    expect(screen.queryByRole('button', { name: 'host-1' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'host-1' })).toBeInTheDocument();
+    expect(screen.queryByText('User investigation')).not.toBeInTheDocument();
+  });
+
+  it('clears the filter when the queue no longer has any pills', async () => {
+    const { rerender } = renderPage('/');
+
+    await togglePill('host-1');
+    expect(screen.queryByText('User investigation')).not.toBeInTheDocument();
+
+    mockUseProposalImpactPills.mockReturnValue(pagedPills([]));
+    rerender();
+
     expect(screen.getByText('User investigation')).toBeInTheDocument();
     expect(screen.queryByText('No events match the current filter.')).not.toBeInTheDocument();
   });
 
+  it('loads the next page of pills from the +n pill', async () => {
+    const showMore = jest.fn();
+    mockUseProposalImpactPills.mockReturnValue({ ...pagedPills(pills), remaining: 8482, showMore });
+    renderPage('/');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show 8482 more' }));
+
+    expect(showMore).toHaveBeenCalledTimes(1);
+  });
+
   it('shows the filtered empty state in a section the selected entity does not reach', async () => {
+    impactOf['prop-respond'] = ['user-9'];
     mockProposals({
       investigate: [hostProposal],
       respond: [
@@ -1192,7 +1239,6 @@ describe('ConversationsPage impact pills', () => {
           id: 'prop-respond',
           category: 'respond',
           conversationTitle: 'Respond investigation',
-          entityIds: ['user-9'],
         },
       ],
     });
@@ -1256,21 +1302,25 @@ describe('ConversationsPage telemetry', () => {
     conversationTitle: 'Second investigation',
     title: 'Second action',
     status: 'executing',
-    entityIds: ['host-1'],
   };
 
   beforeEach(() => {
-    mockProposals({ investigate: [{ ...proposal, entityIds: ['user-1'] }, secondProposal] });
+    impactOf[proposal.id] = ['user-1'];
+    impactOf['prop-2'] = ['host-1'];
+    mockProposals({ investigate: [proposal, secondProposal] });
     // The server builds the Impact pills for the whole queue.
-    mockUseProposalImpactPills.mockReturnValue({
-      data: [
+    mockUseProposalImpactPills.mockReturnValue(
+      pagedPills([
         { entityId: 'host-1', count: 1 },
         { entityId: 'user-1', count: 1 },
-      ],
-    });
+      ])
+    );
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => {
+    jest.clearAllMocks();
+    Object.keys(impactOf).forEach((id) => delete impactOf[id]);
+  });
 
   const reportedEvents = (core: ReturnType<typeof renderPage>['core'], eventType: string) =>
     (core.analytics.reportEvent as jest.Mock).mock.calls.filter(([type]) => type === eventType);

@@ -19,7 +19,9 @@ import {
   useDismissProposal,
   useIsApprovingProposal,
   useIsDecliningProposal,
+  useIsReopeningProposal,
   useProposal,
+  useReopenProposal,
 } from '../hooks/use_proposals_api';
 import { useCurrentUserProfile } from '../hooks/use_current_user_profile';
 
@@ -75,6 +77,8 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
   const proposalQuery = useProposal(proposalId);
   const approveMutation = useApproveProposal();
   const dismissMutation = useDismissProposal();
+  const reopenMutation = useReopenProposal();
+  const isReopening = useIsReopeningProposal(proposalId);
   const isApproving = useIsApprovingProposal(proposalId);
   const isDeclining = useIsDecliningProposal(proposalId);
   const isSubmitting = isApproving ? 'applying' : isDeclining ? 'declining' : undefined;
@@ -108,6 +112,14 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
     },
     [dismissMutation, proposalId]
   );
+
+  const handleReopen = useCallback(async () => {
+    try {
+      await reopenMutation.mutateAsync({ id: proposalId });
+    } catch (err) {
+      throw toFriendlyError(err);
+    }
+  }, [reopenMutation, proposalId]);
 
   const liveProposal = proposalQuery.data;
 
@@ -146,6 +158,8 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
         currentActorName={currentActorName}
         onApprove={isPending || isReplaced ? handleApprove : undefined}
         onDismiss={isPending && !isReplaced ? handleDismiss : undefined}
+        onReopen={handleReopen}
+        isReopening={isReopening}
         data-test-subj={`proposalCard-${proposalId}`}
       />
     </div>

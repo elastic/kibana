@@ -37,6 +37,9 @@ export interface ApprovalModalProps {
   submittedAt?: string;
   /** Who's approving, for the "Applying"/"Declining" caption before the server confirms a decider. */
   currentActorName?: string;
+  /** See `ApprovalContentProps.onReopen`. */
+  onReopen?: () => Promise<void>;
+  isReopening?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -64,6 +67,8 @@ export const ApprovalModal = memo<ApprovalModalProps>(
     isSubmitting,
     submittedAt,
     currentActorName,
+    onReopen,
+    isReopening,
     'data-test-subj': dataTestSubj,
   }) => {
     const titleId = useGeneratedHtmlId({ prefix: 'ApprovalModal' });
@@ -88,6 +93,8 @@ export const ApprovalModal = memo<ApprovalModalProps>(
           data-test-subj={dataTestSubj}
           onApprove={onConfirm}
           onDismiss={onDismiss}
+          onReopen={onReopen}
+          isReopening={isReopening}
         />
       </EuiModal>
     );

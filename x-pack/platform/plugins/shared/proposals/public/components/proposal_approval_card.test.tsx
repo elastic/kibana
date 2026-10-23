@@ -154,6 +154,8 @@ jest.mock('../hooks/use_proposals_api', () => ({
   useDismissProposal: jest.fn(),
   useIsApprovingProposal: jest.fn(),
   useIsDecliningProposal: jest.fn(),
+  useReopenProposal: jest.fn(() => ({ mutateAsync: jest.fn() })),
+  useIsReopeningProposal: jest.fn(() => false),
 }));
 
 jest.mock('../hooks/use_current_user_profile', () => ({
