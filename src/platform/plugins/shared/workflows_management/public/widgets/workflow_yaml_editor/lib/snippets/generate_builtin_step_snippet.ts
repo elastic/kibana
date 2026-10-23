@@ -30,6 +30,7 @@ interface GenerateBuiltInStepSnippetOptions {
  * @returns The formatted YAML step snippet with appropriate parameters and structure
  */
 // Switch is good readable
+// eslint-disable-next-line complexity
 export function generateBuiltInStepSnippet(
   stepType: BuiltInStepType,
   { full, withStepsSection }: GenerateBuiltInStepSnippetOptions = {},

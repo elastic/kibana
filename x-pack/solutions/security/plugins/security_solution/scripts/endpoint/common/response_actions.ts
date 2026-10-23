@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable complexity,@typescript-eslint/no-non-null-assertion */
 
 import type { Client } from '@elastic/elasticsearch';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';

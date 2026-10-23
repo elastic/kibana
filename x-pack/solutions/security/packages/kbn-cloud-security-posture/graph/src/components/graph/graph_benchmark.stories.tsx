@@ -76,6 +76,7 @@ const useExpandButtonPopover = () => {
     closePopover();
   }, [closePopover]);
 
+  // eslint-disable-next-line react/display-name
   const PopoverComponent = memo(() => (
     <GraphPopover
       panelPaddingSize="s"
@@ -125,6 +126,7 @@ const useExpandButtonPopover = () => {
 const useNodePopover = () => {
   const { id, state, actions } = useGraphPopoverState('node-popover');
 
+  // eslint-disable-next-line react/display-name
   const PopoverComponent = memo(() => (
     <GraphPopover
       panelPaddingSize="s"

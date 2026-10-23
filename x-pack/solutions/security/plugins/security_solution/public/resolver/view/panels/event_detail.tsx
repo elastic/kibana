@@ -94,6 +94,7 @@ export const EventDetail = memo(function EventDetail({
  * This view presents a detailed view of all the available data for a related event, split and titled by the "section"
  * it appears in the underlying ResolverEvent
  */
+// eslint-disable-next-line react/display-name
 const EventDetailContents = memo(function ({
   id,
   nodeID,

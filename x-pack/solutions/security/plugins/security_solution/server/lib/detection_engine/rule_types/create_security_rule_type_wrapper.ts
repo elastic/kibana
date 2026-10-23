@@ -90,6 +90,7 @@ export const securityRuleTypeFieldMap = {
   ...aliasesFieldMap,
 };
 
+/* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
   ({
     lists,

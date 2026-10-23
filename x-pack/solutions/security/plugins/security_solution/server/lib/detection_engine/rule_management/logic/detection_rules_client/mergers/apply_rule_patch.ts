@@ -55,6 +55,7 @@ interface ApplyRulePatchProps {
   rulePatch: UnresolvedRulePatchProps;
 }
 
+// eslint-disable-next-line complexity
 export const applyRulePatch = async ({
   rulePatch,
   existingRule,

@@ -32,6 +32,7 @@ export const canUseCases =
     owners: CasesOwners[] = [OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER, GENERAL_CASES_OWNER]
   ): CasesPermissions => {
     const aggregatedPermissions = owners.reduce<CasesPermissions>(
+      // eslint-disable-next-line complexity
       (acc, owner) => {
         const userCapabilitiesForOwner = getUICapabilities(capabilities[getFeatureID(owner)]);
         acc.create = acc.create || userCapabilitiesForOwner.create;

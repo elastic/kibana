@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any, complexity */
 
 import { Frequency } from '@kbn/rrule';
 import { parseIntervalString, type WorkflowTrigger } from '../../common/lib/trigger_types';

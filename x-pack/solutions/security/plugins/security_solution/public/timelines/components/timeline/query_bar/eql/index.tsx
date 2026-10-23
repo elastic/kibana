@@ -53,6 +53,7 @@ const hiddenUseFieldClassName = css`
   display: none;
 `;
 
+// eslint-disable-next-line react/display-name
 export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string }) => {
   const dispatch = useDispatch();
   const getOptionsSelected = useMemo(() => getEqlOptions(), []);

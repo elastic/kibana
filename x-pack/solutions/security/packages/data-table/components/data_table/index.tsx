@@ -135,6 +135,7 @@ const memoizedGetColumnHeaders: (
   browserFields: BrowserFields
 ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
+// eslint-disable-next-line react/display-name
 export const DataTableComponent = React.memo<DataTableProps>(
   ({
     additionalControls,

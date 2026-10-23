@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any, complexity */
 
 import { Frequency, RRule, Weekday } from '@kbn/rrule';
 import type { WorkflowExecutionHistoryModel } from '@kbn/workflows';

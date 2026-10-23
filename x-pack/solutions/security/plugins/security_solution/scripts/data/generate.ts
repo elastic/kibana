@@ -874,6 +874,7 @@ export const cli = () => {
   };
 
   run(
+    // eslint-disable-next-line complexity
     async (cliContext) => {
       const log = cliContext.log;
 

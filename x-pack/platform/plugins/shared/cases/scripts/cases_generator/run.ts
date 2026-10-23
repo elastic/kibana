@@ -133,6 +133,7 @@ function logFinalSummary(config: GeneratorConfig) {
 // then dispatches to the right path: dry-run preview, cleanup, or a real
 // generation run (spaces → templates → analytics → alerts/events → cases).
 // Called from cases_generator.ts (the bin entry).
+// eslint-disable-next-line complexity -- top-level orchestrator branches on many config flags by design
 export async function runGenerator(): Promise<void> {
   const config = await loadConfig();
   const restoreRandom = config.seed ? installSeededRandom(config.seed) : null;

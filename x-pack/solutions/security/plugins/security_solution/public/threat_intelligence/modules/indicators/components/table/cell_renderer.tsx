@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable react/display-name */
+
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { useStyles } from './styles';

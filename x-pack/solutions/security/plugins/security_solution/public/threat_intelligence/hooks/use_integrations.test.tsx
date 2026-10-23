@@ -29,6 +29,7 @@ const httpGet = jest.fn();
 
 const createWrapper = (): FC<PropsWithChildren<{}>> => {
   const queryClient = new QueryClient();
+  // eslint-disable-next-line react/display-name
   return ({ children }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );

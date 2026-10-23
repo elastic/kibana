@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 

@@ -23,6 +23,7 @@ jest.mock('../../../assistant_context');
 
 const createWrapper = () => {
   const queryClient = new QueryClient();
+  // eslint-disable-next-line react/display-name
   return ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );

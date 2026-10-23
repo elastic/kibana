@@ -491,6 +491,7 @@ function injectSuggestTechPreviewBadges(
   appendStyleToEditorScope(style, styleId, editorContainer, targetDoc);
 }
 
+/* eslint-disable-next-line complexity */
 async function injectDynamicShadowIcons(
   connectorTypes: ConnectorTypeInfoMinimal[],
   editorContainer: HTMLElement | undefined,

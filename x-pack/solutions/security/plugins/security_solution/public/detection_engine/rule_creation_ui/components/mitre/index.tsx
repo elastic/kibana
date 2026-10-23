@@ -42,6 +42,7 @@ interface AddItemProps {
   isDisabled: boolean;
 }
 
+// eslint-disable-next-line react/display-name
 export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItemProps) => {
   const [isAddFrameworkOpen, setIsAddFrameworkOpen] = useState(false);
   const availableFrameworks = useAvailableMitreFrameworks();

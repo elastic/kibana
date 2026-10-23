@@ -98,6 +98,7 @@ export interface ActionsProps extends CommonProps {
   searchWarningMessage?: { title: string; content: string };
 }
 
+// eslint-disable-next-line complexity
 export const Actions = ({
   showToggleSearch = true,
   showInvestigateInTimeline = true,

@@ -47,6 +47,7 @@ export type NodeEventOnClick = ({
 /**
  * Render a list of events that are related to `nodeID` and that have a category of `eventType`.
  */
+// eslint-disable-next-line react/display-name
 export const NodeEventsInCategory = memo(function ({
   id,
   nodeID,
@@ -114,6 +115,7 @@ export const NodeEventsInCategory = memo(function ({
 /**
  * Rendered for each event in the list.
  */
+// eslint-disable-next-line react/display-name
 export const NodeEventsListItem = memo(function ({
   id,
   event,
@@ -254,6 +256,7 @@ const NodeEventList = memo(function NodeEventList({
 /**
  * Renders `Breadcrumbs`.
  */
+// eslint-disable-next-line react/display-name
 const NodeEventsInCategoryBreadcrumbs = memo(function ({
   id,
   nodeName,

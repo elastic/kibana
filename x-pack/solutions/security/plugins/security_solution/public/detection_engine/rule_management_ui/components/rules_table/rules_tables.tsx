@@ -69,6 +69,7 @@ const NO_ITEMS_MESSAGE = (
  *   * Delete
  *   * Import/Export
  */
+// eslint-disable-next-line complexity
 export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const modalTitleId = useGeneratedHtmlId();
 

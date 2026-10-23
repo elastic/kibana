@@ -51,6 +51,7 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
           },
         },
       },
+      // eslint-disable-next-line complexity
       async (context, request, response): Promise<IKibanaResponse<SearchRulesResponse>> => {
         const siemResponse = buildSiemResponse(response);
 

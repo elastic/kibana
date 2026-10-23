@@ -23,6 +23,7 @@ const getLazyComponent = () =>
   React.lazy(() => {
     return Promise.resolve().then(() => {
       return {
+        // eslint-disable-next-line react/display-name
         default: React.memo(() => {
           return <>{'My component'}</>;
         }),

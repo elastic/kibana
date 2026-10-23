@@ -74,6 +74,7 @@ jest.mock('@kbn/agentic-investigations-plugin/public', () => {
     // Stub the lazy close-investigation modal so lazy-loading and provider complexity don't
     // affect unit tests. The stub renders a minimal dialog and calls the mocked status hook
     // so the mutation assertions still hold.
+    // eslint-disable-next-line react/display-name
     LazyConnectedCloseInvestigationModal: ({
       investigation,
       onClose,
@@ -106,6 +107,7 @@ jest.mock('@kbn/agentic-investigations-common', () => {
     ...actual,
     // Replace AssignToUsers with a minimal stub so the queue renders without needing
     // a full EUI/user-profile environment.
+    // eslint-disable-next-line react/display-name
     AssignToUsers: ({
       conversationId,
       onChange,

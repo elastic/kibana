@@ -121,6 +121,7 @@ export const useNodeDetailsPopover = ({
     [items, contentTestSubj, itemTestSubj]
   );
 
+  // eslint-disable-next-line react/display-name
   const PopoverComponent = memo(() => (
     <GraphPopover
       panelPaddingSize="m"

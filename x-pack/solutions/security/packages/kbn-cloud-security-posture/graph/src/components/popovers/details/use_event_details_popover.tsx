@@ -46,6 +46,7 @@ export const useEventDetailsPopover = (
 ): UseEventDetailsPopoverReturn => {
   const { id, state, actions } = useGraphPopoverState('events-popover');
 
+  // eslint-disable-next-line react/display-name
   const PopoverComponent = memo(() => (
     <GraphPopover
       anchorPosition="upCenter"

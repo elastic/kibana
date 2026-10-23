@@ -119,6 +119,7 @@ export const getRequestIds = (
 };
 
 /** Manages the state (e.g table selection) of the (pure) `OpenTimeline` component */
+// eslint-disable-next-line react/display-name
 export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
   ({
     closeModalTimeline,

@@ -104,6 +104,7 @@ export const getMachineLearningJobId = (rule: RuleResponse): string[] | undefine
   return undefined;
 };
 
+/* eslint-disable complexity */
 export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
   ruleType: rule.type,
   anomalyThreshold: 'anomaly_threshold' in rule ? rule.anomaly_threshold : 50,

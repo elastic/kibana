@@ -26,6 +26,7 @@ interface Props {
 
 const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks, textSize = 'm' }) => {
   const MarkdownLinkProcessingComponent: React.FC<EuiLinkAnchorProps> = useMemo(
+    // eslint-disable-next-line react/display-name
     () => (props) => <MarkdownLink {...props} disableLinks={disableLinks} />,
     [disableLinks]
   );

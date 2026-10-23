@@ -44,6 +44,7 @@ import { useImportExceptionList } from '../../hooks/use_import_exception_list';
 
 import * as i18n from '../../translations';
 
+// eslint-disable-next-line react/display-name
 export const ImportExceptionListFlyout = React.memo(
   ({
     handleRefresh,

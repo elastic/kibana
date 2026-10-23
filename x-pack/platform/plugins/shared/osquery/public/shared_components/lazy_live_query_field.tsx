@@ -20,6 +20,7 @@ interface LazyLiveQueryFieldServices {
 
 export const getLazyLiveQueryField =
   ({ services }: LazyLiveQueryFieldServices) =>
+  // eslint-disable-next-line react/display-name
   ({
     formMethods,
     ...props

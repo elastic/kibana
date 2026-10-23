@@ -31,6 +31,7 @@ import '@xyflow/react/dist/style.css';
 import { HandleStyleOverride } from '../node/styles';
 
 const nodeTypes = {
+  // eslint-disable-next-line react/display-name
   default: memo<NodeProps<BuiltInNode>>((props: NodeProps<BuiltInNode>) => {
     return (
       <div>

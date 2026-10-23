@@ -62,6 +62,7 @@ export function NodeEvents({ id, nodeID }: { id: string; nodeID: string }) {
  * | 2                      | Network                    |
  *
  */
+// eslint-disable-next-line react/display-name
 const EventCategoryLinks = memo(function ({
   id,
   nodeID,
@@ -138,6 +139,7 @@ const EventCategoryLinks = memo(function ({
   );
 });
 
+// eslint-disable-next-line react/display-name
 const NodeEventsBreadcrumbs = memo(function ({
   id,
   nodeID,
@@ -188,6 +190,7 @@ const NodeEventsBreadcrumbs = memo(function ({
   );
 });
 
+// eslint-disable-next-line react/display-name
 const NodeEventsLink = memo(
   ({
     id,

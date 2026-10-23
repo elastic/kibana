@@ -18,6 +18,7 @@ export function createReactQueryWrapper(): React.FC<React.PropsWithChildren<{}>>
     },
   });
 
+  // eslint-disable-next-line react/display-name
   return ({ children }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );

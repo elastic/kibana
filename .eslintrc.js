@@ -701,10 +701,13 @@ module.exports = {
         jest: true,
       },
       rules: {
+        complexity: 'warn',
+
         'no-duplicate-imports': 'off',
         // rely on typescript
         'no-undef': 'off',
         'react/boolean-prop-naming': 'error',
+        'react/display-name': 'error',
         'react/no-deprecated': 'error',
         'react/no-typos': 'error',
         'react/no-unused-prop-types': 'error',
@@ -727,6 +730,13 @@ module.exports = {
           ],
         },
       ],
+    },
+    {
+      files: ['x-pack/platform/plugins/shared/cases/public/**/*.{js,mjs,ts,tsx}'],
+      excludedFiles: ['x-pack/platform/plugins/shared/cases/**/*.{test,mock,test_helper}.{ts,tsx}'],
+      rules: {
+        'react/display-name': ['error', { ignoreTranspilerName: true }],
+      },
     },
     {
       files: ['x-pack/platform/plugins/shared/cases/**/*.{test,mock,test_helper}.tsx'],
@@ -771,6 +781,7 @@ module.exports = {
       },
       rules: {
         'react/boolean-prop-naming': 'error',
+        'react/display-name': 'error',
         'react/no-deprecated': 'error',
         'react/no-typos': 'error',
         'react/no-unused-prop-types': 'error',
@@ -1058,6 +1069,7 @@ module.exports = {
           },
         ],
         // Rules from `eslint:recommended` and `plugin:react/recommended` that don't run in oxlint.
+        'react/display-name': 'error',
         'react/no-deprecated': 'error',
       },
     },
@@ -1169,10 +1181,13 @@ module.exports = {
         jest: true,
       },
       rules: {
+        complexity: 'warn',
+
         'no-duplicate-imports': 'off',
         // rely on typescript
         'no-undef': 'off',
         'react/boolean-prop-naming': 'error',
+        'react/display-name': 'error',
         'react/no-deprecated': 'error',
         'react/no-typos': 'error',
         'react/no-unused-prop-types': 'error',
