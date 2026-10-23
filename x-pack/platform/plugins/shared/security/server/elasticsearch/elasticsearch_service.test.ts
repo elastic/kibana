@@ -134,7 +134,7 @@ describe('ElasticsearchService', () => {
       expect(mockHandler).toHaveBeenCalledTimes(7);
 
       // New changes still trigger handler once again and reset retry timer.
-      mockLicenseSubject.next({} as unknown as SecurityLicenseFeatures);
+      mockLicenseSubject.next({ allowRbac: true } as unknown as SecurityLicenseFeatures);
       expect(mockHandler).toHaveBeenCalledTimes(8);
 
       // Retry timer is reset.
@@ -208,12 +208,64 @@ describe('ElasticsearchService', () => {
       expect(mockHandler).toHaveBeenCalledTimes(1);
 
       // New changes should immediately call handler.
-      mockLicenseSubject.next({} as unknown as SecurityLicenseFeatures);
+      mockLicenseSubject.next({ allowRbac: true } as unknown as SecurityLicenseFeatures);
       expect(mockHandler).toHaveBeenCalledTimes(2);
 
       // Retry timeout should have been cancelled.
       await nextTick();
       jest.runAllTimers();
+      expect(mockHandler).toHaveBeenCalledTimes(2);
+    });
+
+    it('`watchOnlineStatus$` ignores core status changes that tasks do not depend on', async () => {
+      jest.useFakeTimers({ legacyFakeTimers: true });
+      jest.spyOn(Math, 'random').mockReturnValue(0);
+
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockStatusSubject.next({
+        elasticsearch: { level: ServiceStatusLevels.available, summary: 'Service is working' },
+        savedObjects: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
+      });
+
+      const mockHandler = jest.fn();
+      service.start().watchOnlineStatus$().subscribe(mockHandler);
+      expect(mockHandler).toHaveBeenCalledTimes(1);
+
+      const [[{ scheduleRetry }]] = mockHandler.mock.calls;
+      scheduleRetry();
+      await nextTick();
+
+      // Only the saved objects status changes, so nothing is emitted.
+      mockStatusSubject.next({
+        elasticsearch: { level: ServiceStatusLevels.available, summary: 'Service is working' },
+        savedObjects: { level: ServiceStatusLevels.available, summary: 'Service is working' },
+      });
+      expect(mockHandler).toHaveBeenCalledTimes(1);
+
+      // The pending retry wasn't cancelled.
+      jest.advanceTimersByTime(500);
+      expect(mockHandler).toHaveBeenCalledTimes(2);
+    });
+
+    it('`watchOnlineStatus$` emits when the license type changes even if features do not', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockLicense.getLicenseType.mockReturnValue('platinum');
+      mockStatusSubject.next({
+        elasticsearch: { level: ServiceStatusLevels.available, summary: 'Service is working' },
+        savedObjects: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
+      });
+
+      const mockHandler = jest.fn();
+      service.start().watchOnlineStatus$().subscribe(mockHandler);
+      expect(mockHandler).toHaveBeenCalledTimes(1);
+
+      // The same features again, with the same license type.
+      mockLicenseSubject.next({} as unknown as SecurityLicenseFeatures);
+      expect(mockHandler).toHaveBeenCalledTimes(1);
+
+      // Platinum and enterprise have the same features, but privileges can differ between them.
+      mockLicense.getLicenseType.mockReturnValue('enterprise');
+      mockLicenseSubject.next({} as unknown as SecurityLicenseFeatures);
       expect(mockHandler).toHaveBeenCalledTimes(2);
     });
   });

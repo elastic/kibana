@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
 import {
   BehaviorSubject,
@@ -19,7 +20,7 @@ import {
 import type { Logger, StatusServiceSetup } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 
-import type { SecurityLicense } from '../../common';
+import type { SecurityLicense, SecurityLicenseFeatures } from '../../common';
 
 export interface ElasticsearchServiceSetupParams {
   readonly status: StatusServiceSetup;
@@ -34,12 +35,18 @@ export interface OnlineStatusRetryScheduler {
   scheduleRetry: () => void;
 }
 
+interface OnlineStatus {
+  isAvailable: boolean;
+  licenseType: ReturnType<SecurityLicense['getLicenseType']>;
+  features: SecurityLicenseFeatures;
+}
+
 /**
  * Service responsible for interactions with the Elasticsearch.
  */
 export class ElasticsearchService {
   readonly #logger: Logger;
-  #coreStatus$!: Observable<boolean>;
+  #coreStatus$!: Observable<OnlineStatus>;
 
   constructor(logger: Logger) {
     this.#logger = logger;
@@ -47,10 +54,18 @@ export class ElasticsearchService {
 
   setup({ status, license }: ElasticsearchServiceSetupParams) {
     this.#coreStatus$ = combineLatest([status.core$, license.features$]).pipe(
-      map(
-        ([coreStatus]) =>
-          license.isEnabled() && coreStatus.elasticsearch.level === ServiceStatusLevels.available
-      ),
+      map(([coreStatus, features]) => ({
+        isAvailable:
+          license.isEnabled() && coreStatus.elasticsearch.level === ServiceStatusLevels.available,
+        // Privilege registration also depends on the license type (`hasAtLeast`), and the features
+        // can't tell platinum from enterprise.
+        licenseType: license.getLicenseType(),
+        features,
+      })),
+      // `core$` also emits when the `http` or `savedObjects` status changes. Each emission resets
+      // the retry backoff and starts a new run, so we only emit when something the tasks depend
+      // on changes.
+      distinctUntilChanged(isEqual),
       shareReplay(1)
     );
   }
@@ -108,7 +123,7 @@ export class ElasticsearchService {
             distinctUntilChanged((prev, curr) => prev === curr || curr === 0)
           ),
         ]).pipe(
-          filter(([isAvailable]) => isAvailable),
+          filter(([{ isAvailable }]) => isAvailable),
           map(() => retryScheduler)
         );
       },
