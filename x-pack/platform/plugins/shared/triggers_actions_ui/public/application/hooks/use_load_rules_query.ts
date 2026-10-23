@@ -106,6 +106,7 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
       data: rulesResponse?.data ?? [],
       totalItemCount: rulesResponse?.total ?? 0,
       initialLoad: isLoading || isInitialLoading,
+      errors: rulesResponse?.errors ?? [],
     },
     lastUpdate: moment(dataUpdatedAt).format(),
     hasData,
