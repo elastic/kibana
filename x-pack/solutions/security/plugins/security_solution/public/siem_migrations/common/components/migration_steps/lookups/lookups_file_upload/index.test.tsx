@@ -87,4 +87,28 @@ describe('LookupsFileUpload', () => {
       { type: 'lookup', name: 'threat_intel_ip', content },
     ]);
   });
+
+  it('enables upload for a matching file and shows an error for the file that does not match', async () => {
+    const matchingContent = 'ip\n1.1.1.1\n';
+    const matchingFile = new File([matchingContent], 'threat_intel_ip.csv', { type: 'text/csv' });
+    const otherFile = new File(['ip\n2.2.2.2\n'], 'other_lookup.csv', { type: 'text/csv' });
+    const { getByTestId, getByText } = render(<LookupsFileUpload {...props} />);
+
+    await selectFiles(getByTestId('lookupsFilePicker'), [matchingFile, otherFile]);
+
+    await waitFor(() => {
+      expect(
+        getByText(
+          'other_lookup: The file name must match one of the lookup names in the list above.'
+        )
+      ).toBeVisible();
+    });
+    expect(getByTestId('uploadFileButton')).not.toBeDisabled();
+
+    fireEvent.click(getByTestId('uploadFileButton'));
+
+    expect(props.createResources).toHaveBeenCalledWith([
+      { type: 'lookup', name: 'threat_intel_ip', content: matchingContent },
+    ]);
+  });
 });
