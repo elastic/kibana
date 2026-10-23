@@ -131,7 +131,7 @@ it belongs to the cumulative strategy that reads before it merges — it is not 
 On an index `deleteKi` removes the document; on a data stream it appends a revision with
 `governance.lifecycle.status: deleted`, so the earlier revisions stay in the backing store and
 `platform.context_engine.query_ai_indices` hides the indicator. It fails when the indicator does
-not exist. This is what pilot cleanup runs.
+not exist.
 
 **Verification rides on `createKi`.** Its `verifiers` list is non-empty and duplicate-free, and the
 step runs each entry in order before it writes. The two built-in verifier ids are

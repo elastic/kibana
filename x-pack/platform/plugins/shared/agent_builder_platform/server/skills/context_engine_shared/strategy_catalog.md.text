@@ -43,7 +43,7 @@ Choose from the shape of the data, read off the row sample, the row count and th
 - **Long text bodies in a bounded corpus** — articles, incident reports, product docs → Bottom-Up.
 - **A keyword key with many rows per value in one index** — customers, products, hosts →
   Cumulative, through the `unit_profile` template. When the unit needs a second index, it needs a
-  workflow built in the Workflow editor.
+  workflow.
 - **Several sources the agent must route between or join** → Index/Table Metadata over all of
   them, in one install; then one deeper strategy for the source that matters most.
 - **A noisy event stream** where most records are routine → Selective / Outlier, with Detection /

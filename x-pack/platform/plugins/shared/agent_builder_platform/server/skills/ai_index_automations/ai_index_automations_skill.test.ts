@@ -574,9 +574,7 @@ describe('aiIndexAutomationsSkill', () => {
       expect(prose).toMatch(
         /The template reads one index\. A unit that needs data from a second index .* needs a workflow built outside this conversation, in the Workflow editor/
       );
-      expect(catalog).toMatch(
-        /When the unit needs a second index, it needs a\s+workflow built in the Workflow editor/
-      );
+      expect(catalog).toMatch(/When the unit needs a second index, it needs a\s+workflow/);
       expect(catalog).not.toMatch(/from one or several indices/);
     });
 
