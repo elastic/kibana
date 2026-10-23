@@ -251,11 +251,14 @@ export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS: Readonly<
     'sentinel_one.agent.agent.id',
   ],
   crowdstrike: ['device.id'],
+  // The `mde_device_id` fields hold the MDE machine id and must come before `cloud.instance.id`,
+  // which on m365_defender alert/incident docs is an array of evidence instance ids (not the MDE id)
   microsoft_defender_endpoint: [
+    'm365_defender.alert.evidence.mde_device_id',
+    'm365_defender.incident.alert.evidence.mde_device_id',
     'cloud.instance.id',
     'm365_defender.alerts.entities.deviceId',
     'm365_defender.alerts.devices.mdatpDeviceId',
-    'm365_defender.incident.alert.evidence.mde_device_id',
   ],
 });
 

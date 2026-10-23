@@ -34,6 +34,52 @@ export interface MicrosoftDefenderActionsClientOptionsMock
   connectorActions: NormalizedExternalConnectorClient;
 }
 
+/**
+ * Builds the response for the ES search the client uses to resolve MDE agent ids to Elastic agent ids
+ * (`filters` aggregation keyed by the requested MDE id). Pass `null` as the elastic agent id (or
+ * `undefined` for the whole entry) to simulate an id that has no matching document.
+ */
+const createMsDefenderAgentLookupEsResponse = (
+  elasticAgentIdByMsAgentId: Record<string, string | null | undefined>,
+  /** Extra `_source` fields for a hit, keyed by the requested MDE id. */
+  sourceOverridesByMsAgentId: Record<string, object> = {}
+) => {
+  const response = new MicrosoftDefenderDataGenerator('seed').toEsSearchResponse([]);
+
+  response.aggregations = {
+    agents: {
+      buckets: Object.fromEntries(
+        Object.entries(elasticAgentIdByMsAgentId).map(([msAgentId, elasticAgentId]) => [
+          msAgentId,
+          {
+            doc_count: elasticAgentId === undefined ? 0 : 1,
+            most_recent: {
+              hits: {
+                hits:
+                  elasticAgentId === undefined
+                    ? []
+                    : [
+                        {
+                          _index: '',
+                          _source: elasticAgentId
+                            ? {
+                                agent: { id: elasticAgentId },
+                                ...sourceOverridesByMsAgentId[msAgentId],
+                              }
+                            : {},
+                        },
+                      ],
+              },
+            },
+          },
+        ])
+      ),
+    },
+  };
+
+  return response;
+};
+
 const createMsDefenderClientConstructorOptionsMock = () => {
   const options = {
     ...responseActionsClientMock.createConstructorOptions(),
@@ -41,36 +87,12 @@ const createMsDefenderClientConstructorOptionsMock = () => {
       createMsConnectorActionsClientMock()
     ),
   };
-  const generator = new MicrosoftDefenderDataGenerator('seed');
-  const msLogIndexEsHit = generator.generateEndpointLogEsHit({
-    cloud: { instance: { id: '1-2-3' } },
-  });
-
-  msLogIndexEsHit.inner_hits = {
-    most_recent: {
-      hits: {
-        hits: [
-          {
-            _index: '',
-            _source: {
-              agent: {
-                id: '1-2-3',
-              },
-              cloud: {
-                instance: { id: '1-2-3' },
-              },
-            },
-          },
-        ],
-      },
-    },
-  };
 
   // Mocks for MS data indexes
   applyEsClientSearchMock({
     esClientMock: options.esClient,
     index: MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN,
-    response: generator.generateEndpointLogEsSearchResponse([msLogIndexEsHit]),
+    response: createMsDefenderAgentLookupEsResponse({ '1-2-3': '1-2-3' }),
   });
 
   return options;
@@ -353,6 +375,7 @@ const createMicrosoftRunScriptOptionsMock = (
 
 export const microsoftDefenderMock = {
   createConstructorOptions: createMsDefenderClientConstructorOptionsMock,
+  createAgentLookupEsResponse: createMsDefenderAgentLookupEsResponse,
   createMsConnectorActionsClient: createMsConnectorActionsClientMock,
   createMachineAction: createMicrosoftMachineActionMock,
   createMachine: createMicrosoftMachineMock,
