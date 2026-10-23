@@ -6,11 +6,13 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ActionPolicyDestination } from '@kbn/alerting-v2-schemas';
 import type { ValidateWorkflowResponseDto } from '@kbn/workflows';
-import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
+import type {
+  TypedAttachmentClient,
+  WorkflowYamlAttachmentData,
+} from '../../../lib/services/attachments_service';
 import {
   DestinationValidator,
   type PersistedWorkflowLookup,
@@ -25,7 +27,7 @@ export type {
 } from './destination_diagnostics';
 
 export interface ValidateDestinationsDeps {
-  attachments: AttachmentStateManager;
+  workflowAttachments: TypedAttachmentClient<WorkflowYamlAttachmentData>;
   persistedWorkflowLookup: PersistedWorkflowLookup;
   connectorLookup: ConnectorLookup;
   spaceId: string;
@@ -60,7 +62,7 @@ export async function validateDestinations(
   deps: ValidateDestinationsDeps
 ) {
   const {
-    attachments,
+    workflowAttachments,
     persistedWorkflowLookup,
     connectorLookup,
     spaceId,
@@ -75,7 +77,7 @@ export async function validateDestinations(
     spaceId,
     persistedWorkflowLookup,
     connectorLookup,
-    attachmentIndex: buildAttachmentIndex(attachments),
+    attachmentIndex: buildAttachmentIndex(workflowAttachments),
     validateWorkflow,
     request,
     logger,
@@ -89,22 +91,21 @@ export async function validateDestinations(
 }
 
 /** Indexes workflow attachments by workflowId and attachment ID for fast lookup. */
-function buildAttachmentIndex(attachments: AttachmentStateManager) {
+function buildAttachmentIndex(
+  workflowAttachments: TypedAttachmentClient<WorkflowYamlAttachmentData>
+) {
   const inMemoryWorkflowIds = new Set<string>();
   const attachmentToWorkflowId = new Map<string, string | undefined>();
   const inMemoryWorkflowIdToYaml = new Map<string, string>();
 
-  for (const att of attachments.getActive()) {
-    if (att.type !== WORKFLOW_YAML_ATTACHMENT_TYPE) continue;
-    const latestVersion = att.versions.at(-1);
-    const data = latestVersion?.data as { workflowId?: string; yaml?: string } | undefined;
+  for (const { id, data } of workflowAttachments.list()) {
     if (data?.workflowId) {
       inMemoryWorkflowIds.add(data.workflowId);
       if (data.yaml) {
         inMemoryWorkflowIdToYaml.set(data.workflowId, data.yaml);
       }
     }
-    attachmentToWorkflowId.set(att.id, data?.workflowId);
+    attachmentToWorkflowId.set(id, data?.workflowId);
   }
 
   return { inMemoryWorkflowIds, attachmentToWorkflowId, inMemoryWorkflowIdToYaml };

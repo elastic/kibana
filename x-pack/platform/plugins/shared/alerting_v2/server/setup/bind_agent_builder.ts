@@ -21,6 +21,7 @@ import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
 import { AttachmentTypeToken } from '../agent_builder/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_step_tokens';
+import { AttachmentsServiceToken } from '../lib/services/attachments_service';
 import { EpisodesClient } from '../lib/episodes_client';
 import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
 import { RulesClient } from '../lib/rules_client';
@@ -145,6 +146,7 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
       : undefined;
     registerSkills(agentBuilder, {
       logger: agentBuilderLogger,
+      attachmentsService: container.get(AttachmentsServiceToken),
       getWorkflowClient: (request) => workflowsManagementApi.getClient(request),
       getAvailableConnectors: (sid, req) => workflowsManagementApi.getAvailableConnectors(sid, req),
       availability: createAlertingV2Availability({
