@@ -119,14 +119,14 @@ export const getRateLimitTitle = (count: number) =>
 
 export const globalLimitLabels = {
   title: i18n.translate('xpack.nightshift.automations.globalLimitBannerTitle', {
-    defaultMessage: 'Automations are paused: the deployment-wide investigation limit was reached',
+    defaultMessage: 'You reached automations daily limit for this deployment',
   }),
   body: i18n.translate('xpack.nightshift.automations.globalLimitBannerBody', {
     defaultMessage:
-      'Automatic investigations resume at 00:00 UTC. Alerts that continue an open investigation and manual investigations are not blocked.',
+      'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue. You can still trigger investigations manually.',
   }),
   goToSettings: i18n.translate('xpack.nightshift.automations.globalLimitBannerGoToSettings', {
-    defaultMessage: 'Go to settings',
+    defaultMessage: 'Open settings',
   }),
 };
 

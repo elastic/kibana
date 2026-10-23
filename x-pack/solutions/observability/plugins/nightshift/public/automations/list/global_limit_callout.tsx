@@ -16,8 +16,8 @@ export const GlobalLimitCallout = ({ settingsHref }: { settingsHref?: string }) 
     announceOnMount
     size="s"
     color="warning"
-    iconType="hourglass"
     title={globalLimitLabels.title}
+    text={globalLimitLabels.body}
     actionProps={
       settingsHref
         ? {
@@ -34,7 +34,5 @@ export const GlobalLimitCallout = ({ settingsHref }: { settingsHref?: string }) 
         : undefined
     }
     data-test-subj="automationsGlobalLimitBanner"
-  >
-    {globalLimitLabels.body}
-  </EuiCallOut>
+  />
 );
