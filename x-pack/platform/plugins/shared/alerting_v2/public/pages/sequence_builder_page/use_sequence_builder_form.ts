@@ -185,8 +185,6 @@ export const useSequenceBuilderForm = (
     isLoading: (Boolean(ruleId) && isLoading) || isRuleFetchPending,
     loadError,
     parsedSeqValues,
-    savedRecoveryStepIndices: rawParsedSeqValues?.recoveryStepIndices,
-    savedStepsCount: rawParsedSeqValues?.steps.length,
   };
 };
 

@@ -37,12 +37,7 @@ import { useSequenceBuilderForm, useSequenceBuilderState } from './use_sequence_
 import type { SequenceBuilderLoadError } from './use_sequence_builder_form';
 import { SequenceBuilderHeader } from './sequence_builder_header';
 import { AlertConditionCanvas } from './alert_condition_canvas';
-import {
-  RecoveryConditionCanvas,
-  DEFAULT_RECOVERY_CONFIG,
-  resolveRecoveryIndices,
-} from './recovery_condition_canvas';
-import type { RecoveryConfig } from './recovery_condition_canvas';
+import { RecoveryConditionCanvas } from './recovery_condition_canvas';
 import { SequenceBuilderDetailsSidebar } from './sequence_builder_details_sidebar';
 
 const useRuleFormServicesBag = (): RuleFormServices => {
@@ -103,25 +98,11 @@ const useRuleFormServicesBag = (): RuleFormServices => {
   );
 };
 
-const resolveSavedRecoveryConfig = (
-  savedRecoveryStepIndices: number[] | undefined,
-  savedStepsCount: number | undefined
-): RecoveryConfig => {
-  if (!savedRecoveryStepIndices?.length || savedStepsCount === undefined) {
-    return DEFAULT_RECOVERY_CONFIG;
-  }
-  if (savedRecoveryStepIndices.length === savedStepsCount) return { mode: 'all' };
-  const isLast =
-    savedRecoveryStepIndices.length === 1 && savedRecoveryStepIndices[0] === savedStepsCount - 1;
-  return isLast ? DEFAULT_RECOVERY_CONFIG : { mode: 'custom' };
-};
-
 interface SequenceBuilderProps {
   ruleId: string | undefined;
   sourceRuleId: string | undefined;
   methods: UseFormReturn<FormValues>;
   initialSeqValues: SequenceFormValues | undefined;
-  initialRecoveryConfig: RecoveryConfig;
 }
 
 const SequenceBuilder: React.FC<SequenceBuilderProps> = ({
@@ -129,7 +110,6 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({
   sourceRuleId,
   methods,
   initialSeqValues,
-  initialRecoveryConfig,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { rulesLocators } = useAlertingLocators();
@@ -140,27 +120,15 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({
     [uiState.seqValues.steps]
   );
 
-  const [recoveryConfig, setRecoveryConfig] = useState<RecoveryConfig>(initialRecoveryConfig);
-
   const [isRuleListOpen, setIsRuleListOpen] = useState(true);
   const handleToggleRuleList = useCallback(() => setIsRuleListOpen((v) => !v), []);
 
   const handleStepChange = useCallback(
     (nextStep: 'alert' | 'recovery') => {
-      if (nextStep === 'recovery') {
-        uiState.setSeqValues((prev) => ({
-          ...prev,
-          ...resolveRecoveryIndices(
-            recoveryConfig.mode,
-            prev.steps.length,
-            prev.recoveryStepIndices
-          ),
-        }));
-      }
       uiState.setStep(nextStep);
       uiState.setSidebarOpen(false);
     },
-    [uiState, recoveryConfig.mode]
+    [uiState]
   );
 
   const handleCancel = useCallback(() => {
@@ -184,8 +152,6 @@ const SequenceBuilder: React.FC<SequenceBuilderProps> = ({
       <RecoveryConditionCanvas
         seqValues={uiState.seqValues}
         setSeqValues={uiState.setSeqValues}
-        recoveryConfig={recoveryConfig}
-        setRecoveryConfig={setRecoveryConfig}
         isRuleListOpen={isRuleListOpen}
         onToggleRuleList={handleToggleRuleList}
       />
@@ -297,14 +263,9 @@ export const SequenceBuilderPage: React.FC = () => {
   const { rulesLocators } = useAlertingLocators();
   const rulesListHref = rulesLocators.useUrl({});
 
-  const {
-    methods,
-    isLoading,
-    loadError,
-    parsedSeqValues,
-    savedRecoveryStepIndices,
-    savedStepsCount,
-  } = useSequenceBuilderForm(sourceRuleId, { isClone: Boolean(cloneFromId) });
+  const { methods, isLoading, loadError, parsedSeqValues } = useSequenceBuilderForm(sourceRuleId, {
+    isClone: Boolean(cloneFromId),
+  });
 
   if (isLoading) {
     return (
@@ -326,10 +287,6 @@ export const SequenceBuilderPage: React.FC = () => {
           sourceRuleId={sourceRuleId}
           methods={methods}
           initialSeqValues={parsedSeqValues}
-          initialRecoveryConfig={resolveSavedRecoveryConfig(
-            savedRecoveryStepIndices,
-            savedStepsCount
-          )}
         />
       </FormProvider>
     </RuleFormProvider>

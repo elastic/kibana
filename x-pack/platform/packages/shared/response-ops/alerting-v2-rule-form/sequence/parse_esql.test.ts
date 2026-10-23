@@ -39,7 +39,7 @@ describe('parseSequenceEsql', () => {
         { id: generateStepId(), rules: [makeRule('rule-b')], operator: 'or' },
       ],
       hopWindows: [{ value: 5, unit: 'm' }],
-      recoveryStepIndices: [1],
+      recoveryMode: 'last',
     };
 
     it('reconstructs the step count', () => {
@@ -58,13 +58,68 @@ describe('parseSequenceEsql', () => {
       expect(parsed.hopWindows[0].unit).toBe('m');
     });
 
-    it('reconstructs recoveryStepIndices for last step', () => {
-      expect(roundTrip(original)?.recoveryStepIndices).toEqual([1]);
+    it('reconstructs the last-step recovery mode', () => {
+      const parsed = roundTrip(original)!;
+      expect(parsed.recoveryMode).toBe('last');
+      expect(parsed.recoveryStepIndices).toBeUndefined();
     });
   });
 
-  describe('round-trip — single-step recovery preserves recoveryStepIndices', () => {
-    it('preserves recoveryStepIndices for a non-last step', () => {
+  describe('round-trip — recovery mode', () => {
+    const threeSteps = (
+      recovery: Pick<SequenceFormValues, 'recoveryMode' | 'recoveryStepIndices'>
+    ): SequenceFormValues => ({
+      steps: [
+        { id: generateStepId(), rules: [makeRule('rule-a')], operator: 'or' },
+        { id: generateStepId(), rules: [makeRule('rule-b')], operator: 'or' },
+        { id: generateStepId(), rules: [makeRule('rule-c')], operator: 'or' },
+      ],
+      hopWindows: [
+        { value: 5, unit: 'm' },
+        { value: 10, unit: 'm' },
+      ],
+      ...recovery,
+    });
+
+    it('reads last-step mode back as last', () => {
+      const parsed = roundTrip(threeSteps({ recoveryMode: 'last' }))!;
+      expect(parsed.recoveryMode).toBe('last');
+      expect(parsed.recoveryStepIndices).toBeUndefined();
+    });
+
+    it('reads a custom selection of the last step back as custom', () => {
+      const parsed = roundTrip(threeSteps({ recoveryMode: 'custom', recoveryStepIndices: [2] }))!;
+      expect(parsed.recoveryMode).toBe('custom');
+      expect(parsed.recoveryStepIndices).toEqual([2]);
+    });
+
+    it('reads all-steps mode back as all', () => {
+      const parsed = roundTrip(threeSteps({ recoveryMode: 'all' }))!;
+      expect(parsed.recoveryMode).toBe('all');
+      expect(parsed.recoveryStepIndices).toBeUndefined();
+    });
+
+    it('reads last-step mode back as last when the last step is an AND step', () => {
+      const parsed = roundTrip({
+        steps: [
+          { id: generateStepId(), rules: [makeRule('rule-a')], operator: 'or' },
+          {
+            id: generateStepId(),
+            rules: [makeRule('rule-b'), makeRule('rule-c')],
+            operator: 'and',
+          },
+        ],
+        hopWindows: [{ value: 5, unit: 'm' }],
+        recoveryMode: 'last',
+      })!;
+
+      expect(parsed.recoveryMode).toBe('last');
+      expect(parsed.recoveryStepIndices).toBeUndefined();
+    });
+  });
+
+  describe('round-trip — a custom selection preserves the picked steps', () => {
+    it('preserves a pick of a non-last step', () => {
       const original: SequenceFormValues = {
         steps: [
           { id: generateStepId(), rules: [makeRule('rule-a')], operator: 'or' },
@@ -75,19 +130,21 @@ describe('parseSequenceEsql', () => {
           { value: 5, unit: 'm' },
           { value: 10, unit: 'm' },
         ],
+        recoveryMode: 'custom',
         recoveryStepIndices: [1],
       };
       const parsed = roundTrip(original)!;
       expect(parsed.recoveryStepIndices).toEqual([1]);
     });
 
-    it('preserves recoveryStepIndices for the last step', () => {
+    it('preserves a pick of the last step', () => {
       const original: SequenceFormValues = {
         steps: [
           { id: generateStepId(), rules: [makeRule('rule-a')], operator: 'or' },
           { id: generateStepId(), rules: [makeRule('rule-b')], operator: 'or' },
         ],
         hopWindows: [{ value: 5, unit: 'm' }],
+        recoveryMode: 'custom',
         recoveryStepIndices: [1],
       };
       const parsed = roundTrip(original)!;
@@ -106,6 +163,7 @@ describe('parseSequenceEsql', () => {
         { value: 5, unit: 'm' },
         { value: 10, unit: 'm' },
       ],
+      recoveryMode: 'custom',
       recoveryStepIndices: [0],
     };
 
@@ -121,7 +179,7 @@ describe('parseSequenceEsql', () => {
       expect(parsed.hopWindows[1].unit).toBe('m');
     });
 
-    it('reconstructs recoveryStepIndices=[0]', () => {
+    it('reconstructs the selection of step 0', () => {
       expect(roundTrip(original)?.recoveryStepIndices).toEqual([0]);
     });
   });
@@ -137,7 +195,7 @@ describe('parseSequenceEsql', () => {
         },
       ],
       hopWindows: [{ value: 15, unit: 'm' }],
-      recoveryStepIndices: [1],
+      recoveryMode: 'last',
     };
 
     it('reconstructs 2 rules in step 1', () => {
@@ -162,7 +220,7 @@ describe('parseSequenceEsql', () => {
         },
       ],
       hopWindows: [{ value: 5, unit: 'm' }],
-      recoveryStepIndices: [1],
+      recoveryMode: 'last',
     };
 
     it('reconstructs operator=and for step 1', () => {
@@ -187,7 +245,7 @@ describe('parseSequenceEsql', () => {
         },
       ],
       hopWindows: [{ value: 10, unit: 'm' }],
-      recoveryStepIndices: [1],
+      recoveryMode: 'last',
     };
 
     it('reconstructs all 3 rules in step 1', () => {
@@ -208,6 +266,7 @@ describe('parseSequenceEsql', () => {
         { id: generateStepId(), rules: [makeRule('rule-c')], operator: 'or' },
       ],
       hopWindows: [{ value: 5, unit: 'm' }],
+      recoveryMode: 'custom',
       recoveryStepIndices: [0],
     };
 
@@ -224,7 +283,7 @@ describe('parseSequenceEsql', () => {
         { id: generateStepId(), rules: [makeRule('rule-b')], operator: 'or' },
       ],
       hopWindows: [{ value: 2, unit: 'h' }],
-      recoveryStepIndices: [1],
+      recoveryMode: 'last',
     };
     const parsed = roundTrip(original)!;
     expect(parsed.hopWindows[0].value).toBe(2);
@@ -252,7 +311,7 @@ describe('parseSequenceEsql', () => {
           { id: generateStepId(), rules: [makeRule('rule-b')], operator: 'and' },
         ],
         hopWindows: [{ value: 5, unit: 'm' }],
-        recoveryStepIndices: [0, 1],
+        recoveryMode: 'all',
       };
       const breach = buildSequenceEsql(state);
       const recovery = buildSequenceRecoveryEsql(state).replace(/a_1\b/g, 'a_5');
@@ -281,7 +340,7 @@ describe('parseSequenceEsql', () => {
           { id: generateStepId(), rules: [makeRule('rule-b')], operator: 'or' },
         ],
         hopWindows: [{ value: 5, unit: 'm' }],
-        recoveryStepIndices: [1],
+        recoveryMode: 'last',
       };
       const parsed = roundTrip(original)!;
       expect(parsed.steps[0].rules[0].ruleId).toBe('rule-with-"quotes"');
@@ -303,7 +362,7 @@ describe('parseSequenceEsql', () => {
           { id: generateStepId(), rules: [makeSignalRule('signal-b')], operator: 'or' },
         ],
         hopWindows: [{ value: 5, unit: 'm' }],
-        recoveryStepIndices: [1],
+        recoveryMode: 'last',
       };
       const parsed = roundTrip(original)!;
       expect(parsed.steps[1].rules[0].kind).toBe('signal');
@@ -316,7 +375,7 @@ describe('parseSequenceEsql', () => {
           { id: generateStepId(), rules: [makeSignalRule('signal-b')], operator: 'or' },
         ],
         hopWindows: [{ value: 5, unit: 'm' }],
-        recoveryStepIndices: [0, 1],
+        recoveryMode: 'all',
       };
       const parsed = roundTrip(original)!;
       expect(parsed.steps[0].rules[0].kind).toBe('alert');
@@ -330,7 +389,7 @@ describe('parseSequenceEsql', () => {
           { id: generateStepId(), rules: [makeRule('rule-b')], operator: 'or' },
         ],
         hopWindows: [{ value: 5, unit: 'm' }],
-        recoveryStepIndices: [1],
+        recoveryMode: 'last',
       };
       const parsed = roundTrip(original)!;
       expect(parsed.steps[0].rules[0].kind).toBe('alert');

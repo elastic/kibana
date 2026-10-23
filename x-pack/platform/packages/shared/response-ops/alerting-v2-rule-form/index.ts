@@ -127,12 +127,18 @@ export {
 } from './flyout/compose_discover/compose_mappers';
 
 // Sequence builder
-export type { SequenceFormValues, SequenceSubRule, HopWindow } from './sequence/form_types';
+export type {
+  SequenceFormValues,
+  SequenceRecoveryMode,
+  SequenceSubRule,
+  HopWindow,
+} from './sequence/form_types';
 export {
   RULE_DRAG_MIME_TYPE,
   generateStepId,
   DEFAULT_SEQUENCE_FORM_VALUES,
   isSequenceValid,
+  recoveryTrackedStepIndices,
   totalLookbackSeconds,
   getCommonGroupingFields,
   formatLookbackString,

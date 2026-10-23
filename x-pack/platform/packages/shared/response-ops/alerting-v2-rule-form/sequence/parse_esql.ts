@@ -22,7 +22,7 @@ import type {
 } from '@elastic/esql/types';
 import type { SequenceFormValues, SequenceStep, HopWindow, RuleKindPair } from './form_types';
 import { generateStepId, isSequenceValid, secondsToHopWindow } from './form_types';
-import { RULE_EVENTS_INDEX } from './build_esql';
+import { LAST_STEP_COL_LABEL, RULE_EVENTS_INDEX } from './build_esql';
 
 const getColName = (node: ESQLAstItem): string | null => {
   const item = node as ESQLSingleAstItem;
@@ -177,13 +177,14 @@ const extractHopMap = (cmd: ESQLCommand): Map<number, number> => {
   return hopMap;
 };
 
-const detectMultiRecoveryIndices = (recoveryQuery: string): number[] => {
+const detectRecoveryTracking = (
+  recoveryQuery: string
+): { tracksLastStep: boolean; trackedStepIndices: number[] } => {
   const { root, errors } = Parser.parse(recoveryQuery);
-  if (errors.length > 0) return [];
+  const statsCmd = errors.length > 0 ? undefined : root.commands.find((c) => c.name === 'stats');
+  if (!statsCmd) return { tracksLastStep: false, trackedStepIndices: [] };
 
-  const statsCmd = root.commands.find((c) => c.name === 'stats');
-  if (!statsCmd) return [];
-
+  let tracksLastStep = false;
   const indices = new Set<number>();
   for (const arg of statsCmd.args) {
     const item = arg as ESQLSingleAstItem;
@@ -192,51 +193,16 @@ const detectMultiRecoveryIndices = (recoveryQuery: string): number[] => {
     if (!fn || fn.name !== '=' || fn.args.length !== 2) continue;
     const colName = getColName(fn.args[0]);
     if (!colName) continue;
-    const m = /^a_(\d+)/.exec(colName);
-    if (m) indices.add(parseInt(m[1], 10));
-  }
-
-  return [...indices].sort((a, b) => a - b);
-};
-
-const detectSingleRecoveryIdx = (recoveryQuery: string, steps: SequenceStep[]): number => {
-  const { root, errors } = Parser.parse(recoveryQuery);
-  if (errors.length > 0) return steps.length - 1;
-
-  const whereCmd = root.commands.find((c) => c.name === 'where');
-  if (!whereCmd || whereCmd.args.length === 0) return steps.length - 1;
-
-  const leaves = flattenBool(whereCmd.args[0] as ESQLSingleAstItem, 'and');
-  for (const leaf of leaves) {
-    const fn = asFn(leaf);
-    if (!fn) continue;
-    const col = getColName(fn.args[0]);
-    if (col !== 'rule.id') continue;
-
-    if (fn.name === '==' && fn.args.length === 2) {
-      const val = getStringVal(fn.args[1]);
-      if (val !== null) {
-        const found = steps.findIndex((s) => s.rules.some((r) => r.ruleId === val));
-        if (found !== -1) return found;
-      }
-    } else if (fn.name === 'in') {
-      const listNode = fn.args[1] as any;
-      const listValues: ESQLAstItem[] = Array.isArray(listNode?.values)
-        ? listNode.values
-        : Array.isArray(listNode)
-        ? listNode
-        : [];
-      const inValues = listValues.map((a) => getStringVal(a)).filter(Boolean) as string[];
-      if (inValues.length > 0) {
-        const found = steps.findIndex((s) =>
-          inValues.every((v) => s.rules.some((r) => r.ruleId === v))
-        );
-        if (found !== -1) return found;
-      }
+    const m = /^a_(last|\d+)/.exec(colName);
+    if (!m) continue;
+    if (m[1] === LAST_STEP_COL_LABEL) {
+      tracksLastStep = true;
+    } else {
+      indices.add(parseInt(m[1], 10));
     }
   }
 
-  return steps.length - 1;
+  return { tracksLastStep, trackedStepIndices: [...indices].sort((a, b) => a - b) };
 };
 
 export const parseSequenceEsql = (
@@ -306,22 +272,17 @@ export const parseSequenceEsql = (
     hopWindows.push(secondsToHopWindow(secs));
   }
 
-  let recoveryStepIndices: number[] = [steps.length - 1];
+  const { tracksLastStep, trackedStepIndices } = recoveryQuery?.trim()
+    ? detectRecoveryTracking(recoveryQuery)
+    : { tracksLastStep: false, trackedStepIndices: [] };
+  if (trackedStepIndices.some((i) => i >= steps.length)) return null;
 
-  if (recoveryQuery?.trim()) {
-    const multiIndices = detectMultiRecoveryIndices(recoveryQuery);
-    if (multiIndices.length >= 1) {
-      recoveryStepIndices = multiIndices;
-    } else {
-      recoveryStepIndices = [detectSingleRecoveryIdx(recoveryQuery, steps)];
-    }
-  }
-
-  const parsed: SequenceFormValues = {
-    steps,
-    hopWindows,
-    recoveryStepIndices,
-  };
+  const parsed: SequenceFormValues =
+    tracksLastStep || trackedStepIndices.length === 0
+      ? { steps, hopWindows, recoveryMode: 'last' }
+      : trackedStepIndices.length === steps.length
+      ? { steps, hopWindows, recoveryMode: 'all' }
+      : { steps, hopWindows, recoveryMode: 'custom', recoveryStepIndices: trackedStepIndices };
 
   return isSequenceValid(parsed) ? parsed : null;
 };
