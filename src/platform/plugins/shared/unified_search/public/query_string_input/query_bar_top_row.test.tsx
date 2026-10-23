@@ -24,7 +24,8 @@ jest.mock('@kbn/date-range-picker-presets', () => ({
 
 import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { render, screen, waitFor, within, act } from '@testing-library/react';
+import moment from 'moment-timezone';
+import { render, screen, waitFor, within, act, fireEvent } from '@testing-library/react';
 import { EMPTY, of } from 'rxjs';
 
 import { QueryBarTopRow, SharingMetaFields } from './query_bar_top_row';
@@ -1319,6 +1320,55 @@ describe('QueryBarTopRowTopRow', () => {
       await userEvent.click(screen.getByTestId('dateRangePickerAutoRefreshButton'));
 
       expect(onRefreshChange).toHaveBeenCalledWith({ isPaused: false, refreshInterval: 5000 });
+    });
+  });
+
+  describe('manual refresh with a relative date range (new picker)', () => {
+    const initialNow = new Date('2026-06-04T12:00:00.000Z');
+
+    beforeEach(() => {
+      useNewDateRangePickerFlag = true;
+      // Pin to UTC so the asserted times are deterministic across machines.
+      moment.tz.setDefault('UTC');
+      jest.useFakeTimers().setSystemTime(initialNow);
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+      moment.tz.setDefault('Browser');
+    });
+
+    const hoverPickerTooltipText = () => {
+      fireEvent.mouseOver(screen.getByTestId('dateRangePickerControlButton'));
+      return screen.getByRole('tooltip').textContent;
+    };
+
+    it('re-resolves the displayed bounds on Refresh while keeping the relative range', async () => {
+      const onSubmit = jest.fn();
+      render(
+        wrapQueryBarTopRowInContext({
+          isDirty: false,
+          timeHistory: mockTimeHistory,
+          showDatePicker: true,
+          dateRangeFrom: 'now-15m',
+          dateRangeTo: 'now',
+          onSubmit,
+        })
+      );
+      await waitFor(() => {
+        expect(screen.getByTestId('dateRangePickerControlButton')).toBeEnabled();
+      });
+
+      expect(hoverPickerTooltipText()).toContain('12:00:00.000');
+
+      jest.setSystemTime(new Date(initialNow.getTime() + 5 * 60_000));
+      fireEvent.click(screen.getByTestId('querySubmitButton'));
+
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ dateRange: { from: 'now-15m', to: 'now' } }),
+        expect.anything()
+      );
+      expect(hoverPickerTooltipText()).toContain('12:05:00.000');
     });
   });
 });

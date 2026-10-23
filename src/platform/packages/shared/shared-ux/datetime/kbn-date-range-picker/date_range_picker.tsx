@@ -177,10 +177,18 @@ export interface DateRangePickerProps {
   onRefresh?: () => void;
   /**
    * Increment this value whenever an external timer (e.g. the Kibana timefilter) triggers a
-   * refresh, so the visual countdown resets to stay in sync with actual query cadence.
+   * refresh, so the visual countdown resets to stay in sync with actual query cadence and
+   * relative bounds (e.g. `now-15m`) are re-resolved against the current time.
    * `undefined` on first render is ignored.
    */
   refreshEpoch?: number;
+  /**
+   * Increment this value whenever the host refreshed its data without changing `value`
+   * (e.g. a manual "Refresh"), so relative bounds (e.g. `now-15m`) are re-resolved against the
+   * current time and the displayed absolute dates advance with the data. Unlike `refreshEpoch`,
+   * this does not reset the auto-refresh countdown.
+   */
+  resolveEpoch?: number;
   /**
    * Prepends the Kibana server `basePath` to an internal URL path.
    * Typically provided as `core.http.basePath.prepend`.
