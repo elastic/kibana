@@ -15,6 +15,8 @@ export const ANIMATED_EDGE_TYPE = 'animated';
 
 export interface SourceNodeData extends Record<string, unknown> {
   sourceId?: string;
+  /** A source has one outgoing connection, so a connected source cannot start another. */
+  hasConnection?: boolean;
   unconfiguredNodeId?: string;
   configurationLabel?: string;
   title: string;

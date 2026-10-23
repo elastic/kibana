@@ -79,7 +79,9 @@ function RoutingRuleRow({ rule }: { rule: RoutingNodeRule }) {
         id={rule.handleId}
         type="source"
         position={Position.Right}
-        isConnectable={false}
+        isConnectable
+        // Each rule keeps one outgoing line. It can be moved, but not added to.
+        isConnectableStart={false}
       />
     </div>
   );

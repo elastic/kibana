@@ -79,8 +79,8 @@ export const buildUnitConnectionEdges = (
     }));
 
 /**
- * Only rule -> destination lines can be moved or unhooked. Lines into a routing
- * node, and rule -> child pipeline lines, are fixed until routes can be edited.
+ * Lines out of a rule can be moved to another destination or child routing
+ * node. Lines from a source into a routing node are fixed.
  */
 const routingEdge = (
   edge: Pick<ClassicCanvasEdge, 'id' | 'source' | 'target' | 'sourceHandle'>,
@@ -138,7 +138,7 @@ export const buildRoutingEdges = (
                     ? configuredDestinationNodeId(id)
                     : configuredRoutingNodeId(id),
               },
-              kind === 'destination'
+              true
             )
           );
         }

@@ -6,22 +6,25 @@
  */
 
 import {
-  canConnectRouteToDestination,
   canConnectSourceToDestination,
-  connectRouteToDestination,
+  connectRouteToTarget,
   connectSourceToDestination,
-  disconnectRouteFromDestination,
+  disconnectRouteFromTarget,
   disconnectSourceFromDestination,
   moveRouteConnection,
   moveUnitConnection,
   type RouteRuleRef,
+  type RouteTarget,
 } from '../../../../services/unit_connections';
 import type { Unit } from '../../../../services/unit_repository';
 import {
+  readConfiguredDestinationId,
   readConfiguredRoutingId,
   readConfiguredSourceId,
   readRoutingRuleIndex,
 } from './build_unit_connection_edges';
+
+export type { RouteTarget };
 
 /**
  * Where a drawn line starts: a source node, which wires its direct pipeline, or
@@ -47,65 +50,81 @@ export const readConnectionOrigin = (
   return undefined;
 };
 
+/** Where a drawn line ends: a configured destination, or a routing node's pipeline. */
+export const readConnectionTarget = (
+  nodeId: string | null | undefined
+): RouteTarget | undefined => {
+  const destinationId = readConfiguredDestinationId(nodeId);
+  if (destinationId) {
+    return { kind: 'destination', id: destinationId };
+  }
+  const pipelineId = readConfiguredRoutingId(nodeId);
+  return pipelineId ? { kind: 'pipeline', id: pipelineId } : undefined;
+};
+
 export const canConnectOrigin = (
   unit: Unit,
   origin: ConnectionOrigin,
-  destinationId: string
-): boolean =>
-  origin.kind === 'source'
-    ? canConnectSourceToDestination(unit, origin.sourceId, destinationId)
-    : canConnectRouteToDestination(unit, origin.rule, destinationId);
+  target: RouteTarget
+): boolean => connectOrigin(unit, origin, target) !== unit;
 
-export const connectOrigin = (unit: Unit, origin: ConnectionOrigin, destinationId: string): Unit =>
-  origin.kind === 'source'
-    ? connectSourceToDestination(unit, origin.sourceId, destinationId)
-    : connectRouteToDestination(unit, origin.rule, destinationId);
+/** Sources only wire straight to destinations. Rules take destinations or pipelines. */
+export const connectOrigin = (unit: Unit, origin: ConnectionOrigin, target: RouteTarget): Unit => {
+  if (origin.kind === 'route') {
+    return connectRouteToTarget(unit, origin.rule, target);
+  }
+  return target.kind === 'destination' &&
+    canConnectSourceToDestination(unit, origin.sourceId, target.id)
+    ? connectSourceToDestination(unit, origin.sourceId, target.id)
+    : unit;
+};
 
 export const disconnectOrigin = (
   unit: Unit,
   origin: ConnectionOrigin,
-  destinationId: string
-): Unit =>
-  origin.kind === 'source'
-    ? disconnectSourceFromDestination(unit, origin.sourceId, destinationId)
-    : disconnectRouteFromDestination(unit, origin.rule, destinationId);
+  target: RouteTarget
+): Unit => {
+  if (origin.kind === 'route') {
+    return disconnectRouteFromTarget(unit, origin.rule, target);
+  }
+  return target.kind === 'destination'
+    ? disconnectSourceFromDestination(unit, origin.sourceId, target.id)
+    : unit;
+};
 
+export interface OriginConnectionMove {
+  previousOrigin: ConnectionOrigin;
+  previousTarget: RouteTarget;
+  origin: ConnectionOrigin;
+  target: RouteTarget;
+}
+
+/** Moves an existing line. Returns `unit` unchanged when the move is not allowed. */
 export const moveOriginConnection = (
   unit: Unit,
-  {
-    previousOrigin,
-    previousDestinationId,
-    origin,
-    destinationId,
-  }: {
-    previousOrigin: ConnectionOrigin;
-    previousDestinationId: string;
-    origin: ConnectionOrigin;
-    destinationId: string;
-  }
+  { previousOrigin, previousTarget, origin, target }: OriginConnectionMove
 ): Unit => {
   if (previousOrigin.kind === 'source' && origin.kind === 'source') {
-    return moveUnitConnection(unit, {
-      previousSourceId: previousOrigin.sourceId,
-      previousDestinationId,
-      sourceId: origin.sourceId,
-      destinationId,
-    });
+    return previousTarget.kind === 'destination' && target.kind === 'destination'
+      ? moveUnitConnection(unit, {
+          previousSourceId: previousOrigin.sourceId,
+          previousDestinationId: previousTarget.id,
+          sourceId: origin.sourceId,
+          destinationId: target.id,
+        })
+      : unit;
   }
   if (previousOrigin.kind === 'route' && origin.kind === 'route') {
     return moveRouteConnection(unit, {
       previousRule: previousOrigin.rule,
-      previousDestinationId,
+      previousTarget,
       rule: origin.rule,
-      destinationId,
+      target,
     });
   }
-  if (!canConnectOrigin(unit, origin, destinationId)) {
-    return unit;
-  }
-  return disconnectOrigin(
-    connectOrigin(unit, origin, destinationId),
-    previousOrigin,
-    previousDestinationId
-  );
+  const connected = connectOrigin(unit, origin, target);
+  return connected === unit ? unit : disconnectOrigin(connected, previousOrigin, previousTarget);
 };
+
+export const canMoveOriginConnection = (unit: Unit, move: OriginConnectionMove): boolean =>
+  moveOriginConnection(unit, move) !== unit;

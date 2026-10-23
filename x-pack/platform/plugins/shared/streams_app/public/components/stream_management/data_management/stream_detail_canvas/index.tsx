@@ -103,13 +103,21 @@ import {
   getUnitDestinations,
   withUnitDestinations,
 } from '../../../streams_layout/destinations/destination_models';
-import { removeComponentFromPipelines } from '../../../../services/unit_connections';
+import {
+  hasSourceConnection,
+  removeComponentFromPipelines,
+} from '../../../../services/unit_connections';
 import {
   canConnectOrigin,
+  canMoveOriginConnection,
   connectOrigin,
   disconnectOrigin,
   moveOriginConnection,
   readConnectionOrigin,
+  readConnectionTarget,
+  type ConnectionOrigin,
+  type OriginConnectionMove,
+  type RouteTarget,
 } from './connection_origin';
 import { getUnitRoutings } from '../../../streams_layout/routing/routing_models';
 import type { RoutingViewModel } from '../../../streams_layout/routing/types';
@@ -258,7 +266,9 @@ function StreamsCanvasInner() {
         return destinationId ? [destinationId] : [];
       })
     );
-    const configuredSourceNodes = sources.map(buildConfiguredSourceNode);
+    const configuredSourceNodes = sources.map((source) =>
+      buildConfiguredSourceNode(source, hasSourceConnection(unitDefinition, source.id))
+    );
     const unconfiguredSourceNodes = unconfiguredNodeIds.map(buildUnconfiguredSourceNode);
     const configuredDestinationNodes = destinations.map((destination) =>
       buildConfiguredDestinationNode(destination, connectedDestinationIds.has(destination.id))
@@ -475,15 +485,41 @@ function StreamsCanvasInner() {
 
   const [connectionTargetIds, setConnectionTargetIds] = useState<ReadonlySet<string> | null>(null);
 
+  // The line being moved, if any. Drops are then checked as a move of that line,
+  // so a source or rule can swap its one connection for another target.
+  const reconnectingRef = useRef<Pick<
+    OriginConnectionMove,
+    'previousOrigin' | 'previousTarget'
+  > | null>(null);
+
+  const canDropConnection = useCallback(
+    (origin: ConnectionOrigin, target: RouteTarget): boolean => {
+      const reconnecting = reconnectingRef.current;
+      return reconnecting
+        ? canMoveOriginConnection(unitDefinition, { ...reconnecting, origin, target })
+        : canConnectOrigin(unitDefinition, origin, target);
+    },
+    [unitDefinition]
+  );
+
+  const onReconnectStart = useCallback<
+    NonNullable<React.ComponentProps<typeof CanvasShell>['onReconnectStart']>
+  >((_event, edge) => {
+    const previousOrigin = readConnectionOrigin(edge.source, edge.sourceHandle);
+    const previousTarget = readConnectionTarget(edge.target);
+    reconnectingRef.current =
+      previousOrigin && previousTarget ? { previousOrigin, previousTarget } : null;
+  }, []);
+
   const onConnect = useCallback<OnConnect>(
     (connection) => {
       const origin = readConnectionOrigin(connection.source, connection.sourceHandle);
-      const destinationId = readConfiguredDestinationId(connection.target);
-      if (!origin || !destinationId) {
+      const target = readConnectionTarget(connection.target);
+      if (!origin || !target) {
         return;
       }
       record();
-      changeUnitConnection(connectOrigin(unitDefinition, origin, destinationId));
+      changeUnitConnection(connectOrigin(unitDefinition, origin, target));
     },
     [changeUnitConnection, record, unitDefinition]
   );
@@ -500,13 +536,16 @@ function StreamsCanvasInner() {
       }
       setConnectionTargetIds(
         new Set(
-          destinations
-            .map((destination) => destination.id)
-            .filter((destinationId) => canConnectOrigin(unitDefinition, origin, destinationId))
+          graph.nodes
+            .map(({ id }) => id)
+            .filter((id) => {
+              const target = readConnectionTarget(id);
+              return target && canDropConnection(origin, target);
+            })
         )
       );
     },
-    [destinations, unitDefinition]
+    [canDropConnection, graph.nodes]
   );
 
   const clearConnectionTargets = useCallback(() => {
@@ -516,32 +555,24 @@ function StreamsCanvasInner() {
   const isValidConnection = useCallback<IsValidConnection>(
     (connection) => {
       const origin = readConnectionOrigin(connection.source, connection.sourceHandle);
-      const destinationId = readConfiguredDestinationId(connection.target);
-      if (!origin || !destinationId) {
-        return false;
-      }
-      return canConnectOrigin(unitDefinition, origin, destinationId);
+      const target = readConnectionTarget(connection.target);
+      return origin !== undefined && target !== undefined && canDropConnection(origin, target);
     },
-    [unitDefinition]
+    [canDropConnection]
   );
 
   const onReconnect = useCallback<OnReconnect>(
     (oldEdge, connection) => {
       const previousOrigin = readConnectionOrigin(oldEdge.source, oldEdge.sourceHandle);
-      const previousDestinationId = readConfiguredDestinationId(oldEdge.target);
+      const previousTarget = readConnectionTarget(oldEdge.target);
       const origin = readConnectionOrigin(connection.source, connection.sourceHandle);
-      const destinationId = readConfiguredDestinationId(connection.target);
-      if (!previousOrigin || !previousDestinationId || !origin || !destinationId) {
+      const target = readConnectionTarget(connection.target);
+      if (!previousOrigin || !previousTarget || !origin || !target) {
         return;
       }
       record();
       changeUnitConnection(
-        moveOriginConnection(unitDefinition, {
-          previousOrigin,
-          previousDestinationId,
-          origin,
-          destinationId,
-        })
+        moveOriginConnection(unitDefinition, { previousOrigin, previousTarget, origin, target })
       );
     },
     [changeUnitConnection, record, unitDefinition]
@@ -551,17 +582,18 @@ function StreamsCanvasInner() {
     NonNullable<React.ComponentProps<typeof CanvasShell>['onReconnectEnd']>
   >(
     (_event, edge, _handleType, connectionState) => {
+      reconnectingRef.current = null;
       // Dropping on a handle keeps or moves the line. Releasing on the canvas unhooks it.
       if (connectionState.toHandle) {
         return;
       }
       const origin = readConnectionOrigin(edge.source, edge.sourceHandle);
-      const destinationId = readConfiguredDestinationId(edge.target);
-      if (!origin || !destinationId) {
+      const target = readConnectionTarget(edge.target);
+      if (!origin || !target) {
         return;
       }
       record();
-      changeUnitConnection(disconnectOrigin(unitDefinition, origin, destinationId));
+      changeUnitConnection(disconnectOrigin(unitDefinition, origin, target));
     },
     [changeUnitConnection, record, unitDefinition]
   );
@@ -826,6 +858,7 @@ function StreamsCanvasInner() {
           onConnectStart={onConnectStart}
           onConnectEnd={clearConnectionTargets}
           onReconnect={onReconnect}
+          onReconnectStart={onReconnectStart}
           onReconnectEnd={onReconnectEnd}
           isValidConnection={isValidConnection}
           nodesConnectable={!isSaving}
@@ -925,7 +958,10 @@ function StreamsCanvasInner() {
   );
 }
 
-const buildConfiguredSourceNode = (source: SourceViewModel): SourceNode => ({
+const buildConfiguredSourceNode = (
+  source: SourceViewModel,
+  hasConnection: boolean
+): SourceNode => ({
   id: configuredSourceNodeId(source.id),
   type: SOURCE_NODE_TYPE,
   position: { x: 0, y: 0 },
@@ -936,6 +972,7 @@ const buildConfiguredSourceNode = (source: SourceViewModel): SourceNode => ({
   }),
   data: {
     sourceId: source.id,
+    hasConnection,
     title: source.name ?? source.id,
     subtitle: SOURCE_TYPE_CONFIG_BY_TYPE[source.type].shortLabel,
     iconType: SOURCE_TYPE_ICONS[source.type],

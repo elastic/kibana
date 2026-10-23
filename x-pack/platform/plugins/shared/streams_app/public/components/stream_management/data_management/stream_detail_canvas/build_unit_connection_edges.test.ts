@@ -76,7 +76,7 @@ describe('buildRoutingEdges', () => {
     );
   });
 
-  it('only lets rule -> destination lines be moved or unhooked', () => {
+  it('lets every rule line be moved, but not lines into a routing node', () => {
     const edges = buildRoutingEdges(getUnitRoutings(unit), sourceIds, destinationIds);
 
     expect(new Set(edges.map(({ id }) => id)).size).toBe(edges.length);
@@ -85,7 +85,7 @@ describe('buildRoutingEdges', () => {
     ).toEqual([
       ['configured-routing-p-routed', false, false],
       ['configured-destination-es-a', 'target', true],
-      ['configured-routing-child', false, false],
+      ['configured-routing-child', 'target', true],
       ['configured-destination-es-b', 'target', true],
       ['configured-destination-es-c', 'target', true],
     ]);

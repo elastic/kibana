@@ -7,17 +7,22 @@
 
 import { createDefaultUnit, type Unit } from './unit_repository';
 import {
-  canConnectRouteToDestination,
+  canConnectRouteToTarget,
   canConnectSourceToDestination,
-  connectRouteToDestination,
+  connectRouteToTarget,
   connectSourceToDestination,
-  disconnectRouteFromDestination,
+  disconnectRouteFromTarget,
   disconnectSourceFromDestination,
   getUnitConnections,
+  hasSourceConnection,
   moveRouteConnection,
   moveUnitConnection,
   removeComponentFromPipelines,
+  type RouteTarget,
 } from './unit_connections';
+
+const destination = (id: string): RouteTarget => ({ kind: 'destination', id });
+const pipelineTarget = (id: string): RouteTarget => ({ kind: 'pipeline', id });
 
 const configuredSources = new Set(['nop-input', 'otlp-input', 'bulk-input']);
 const configuredDestinations = new Set(['debug-out', 'es-logs', 'es-metrics']);
@@ -74,20 +79,12 @@ describe('unit connections', () => {
     ]);
   });
 
-  it('keeps a second destination on the same source pipeline', () => {
+  it('refuses a second line from a source that is already connected', () => {
     const connected = connectSourceToDestination(unitWith([]), 'otlp-input', 'es-logs');
-    const next = connectSourceToDestination(connected, 'otlp-input', 'es-metrics');
 
-    expect(next.unit.pipelines[0]?.config).toEqual([
-      { name: 'sources', value: ['otlp-input'] },
-      { name: 'destinations', value: ['es-logs', 'es-metrics'] },
-    ]);
-    expect(getUnitConnections(next, configuredSources, configuredDestinations)).toEqual([
-      { sourceId: 'otlp-input', destinationId: 'es-logs', forwarding: 'direct' },
-      { sourceId: 'otlp-input', destinationId: 'es-metrics', forwarding: 'direct' },
-    ]);
+    expect(canConnectSourceToDestination(connected, 'otlp-input', 'es-metrics')).toBe(false);
+    expect(connectSourceToDestination(connected, 'otlp-input', 'es-metrics')).toBe(connected);
   });
-
   it('lets several sources share one destination', () => {
     const connected = connectSourceToDestination(unitWith([]), 'otlp-input', 'es-logs');
     const next = connectSourceToDestination(connected, 'bulk-input', 'es-logs');
@@ -108,7 +105,7 @@ describe('unit connections', () => {
     ]);
   });
 
-  it('gives a source that feeds a routing pipeline a separate direct pipeline', () => {
+  it('refuses a direct line from a source that feeds a routing pipeline', () => {
     const routed = unitWith([
       {
         id: 'main',
@@ -123,23 +120,13 @@ describe('unit connections', () => {
       },
     ]);
 
-    expect(canConnectSourceToDestination(routed, 'otlp-input', 'es-metrics')).toBe(true);
-
-    const next = connectSourceToDestination(routed, 'otlp-input', 'es-metrics');
-
-    expect(next.unit.pipelines[0]).toEqual(routed.unit.pipelines[0]);
-    expect(next.unit.pipelines[1]?.config).toEqual([
-      { name: 'sources', value: ['otlp-input'] },
-      { name: 'destinations', value: ['es-metrics'] },
-    ]);
-    expect(getUnitConnections(next, configuredSources, configuredDestinations)).toEqual([
-      { sourceId: 'otlp-input', destinationId: 'es-logs', forwarding: 'route' },
-      { sourceId: 'otlp-input', destinationId: 'es-metrics', forwarding: 'direct' },
-    ]);
+    expect(hasSourceConnection(routed, 'otlp-input')).toBe(true);
+    expect(canConnectSourceToDestination(routed, 'otlp-input', 'es-metrics')).toBe(false);
+    expect(connectSourceToDestination(routed, 'otlp-input', 'es-metrics')).toBe(routed);
+    expect(canConnectSourceToDestination(routed, 'bulk-input', 'es-logs')).toBe(true);
   });
-
   it('keeps a routed destination and a direct wire to the same destination apart', () => {
-    const routed = unitWith([
+    const unit = unitWith([
       {
         id: 'main',
         supported_telemetry: ['logs'],
@@ -148,15 +135,21 @@ describe('unit connections', () => {
           { name: 'routes', value: [{ when: 'true', destinations: ['es-logs'] }] },
         ],
       },
+      {
+        id: 'p-otlp-input',
+        supported_telemetry: ['logs'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          { name: 'destinations', value: ['es-logs'] },
+        ],
+      },
     ]);
-    const next = connectSourceToDestination(routed, 'otlp-input', 'es-logs');
 
-    expect(getUnitConnections(next, configuredSources, configuredDestinations)).toEqual([
+    expect(getUnitConnections(unit, configuredSources, configuredDestinations)).toEqual([
       { sourceId: 'otlp-input', destinationId: 'es-logs', forwarding: 'route' },
       { sourceId: 'otlp-input', destinationId: 'es-logs', forwarding: 'direct' },
     ]);
   });
-
   it('adds a destination to the routing rule it was drawn from', () => {
     const routed = unitWith([
       {
@@ -176,10 +169,10 @@ describe('unit connections', () => {
     ]);
     const rule = { pipelineId: 'main', ruleIndex: 0 };
 
-    expect(canConnectRouteToDestination(routed, rule, 'es-logs')).toBe(false);
-    expect(canConnectRouteToDestination(routed, rule, 'es-metrics')).toBe(true);
+    expect(canConnectRouteToTarget(routed, rule, destination('es-logs'))).toBe(false);
+    expect(canConnectRouteToTarget(routed, rule, destination('es-metrics'))).toBe(true);
 
-    const next = connectRouteToDestination(routed, rule, 'es-metrics');
+    const next = connectRouteToTarget(routed, rule, destination('es-metrics'));
     const routes = next.unit.pipelines[0]?.config.find((entry) => entry.name === 'routes');
 
     expect(next.unit.pipelines).toHaveLength(1);
@@ -207,16 +200,24 @@ describe('unit connections', () => {
     ]);
 
     expect(
-      canConnectRouteToDestination(routed, { pipelineId: 'main', ruleIndex: 0 }, 'es-metrics')
+      canConnectRouteToTarget(
+        routed,
+        { pipelineId: 'main', ruleIndex: 0 },
+        destination('es-metrics')
+      )
     ).toBe(false);
     expect(
-      canConnectRouteToDestination(routed, { pipelineId: 'main', ruleIndex: 1 }, 'es-metrics')
+      canConnectRouteToTarget(
+        routed,
+        { pipelineId: 'main', ruleIndex: 1 },
+        destination('es-metrics')
+      )
     ).toBe(false);
 
-    const next = connectRouteToDestination(
+    const next = connectRouteToTarget(
       routed,
       { pipelineId: 'child', ruleIndex: 0 },
-      'es-metrics'
+      destination('es-metrics')
     );
 
     expect(next.unit.pipelines[1]?.config).toEqual([
@@ -242,7 +243,11 @@ describe('unit connections', () => {
     ]);
 
     expect(
-      disconnectRouteFromDestination(routed, { pipelineId: 'child', ruleIndex: 0 }, 'es-logs')
+      disconnectRouteFromTarget(
+        routed,
+        { pipelineId: 'child', ruleIndex: 0 },
+        destination('es-logs')
+      )
     ).toBe(routed);
   });
 
@@ -263,10 +268,10 @@ describe('unit connections', () => {
         ],
       },
     ]);
-    const next = disconnectRouteFromDestination(
+    const next = disconnectRouteFromTarget(
       routed,
       { pipelineId: 'main', ruleIndex: 0 },
-      'es-logs'
+      destination('es-logs')
     );
     const routes = next.unit.pipelines[0]?.config.find((entry) => entry.name === 'routes');
 
@@ -290,13 +295,102 @@ describe('unit connections', () => {
     ]);
     const next = moveRouteConnection(routed, {
       previousRule: { pipelineId: 'main', ruleIndex: 0 },
-      previousDestinationId: 'es-logs',
+      previousTarget: destination('es-logs'),
       rule: { pipelineId: 'main', ruleIndex: 1 },
-      destinationId: 'es-logs',
+      target: destination('es-logs'),
     });
     const routes = next.unit.pipelines[0]?.config.find((entry) => entry.name === 'routes');
 
     expect(routes?.value).toEqual([{ destinations: ['es-metrics', 'es-logs'] }]);
+  });
+
+  it('switches a single-target rule between a destination and a child pipeline', () => {
+    const routed = unitWith([
+      {
+        id: 'main',
+        supported_telemetry: ['logs'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          {
+            name: 'routes',
+            value: [{ when: 'true', action: 'copy', destinations: ['es-logs'] }],
+          },
+        ],
+      },
+      {
+        id: 'child',
+        supported_telemetry: ['logs'],
+        config: [{ name: 'destinations', value: ['es-metrics'] }],
+      },
+    ]);
+    const rule = { pipelineId: 'main', ruleIndex: 0 };
+    const toChild = moveRouteConnection(routed, {
+      previousRule: rule,
+      previousTarget: destination('es-logs'),
+      rule,
+      target: pipelineTarget('child'),
+    });
+
+    expect(toChild.unit.pipelines[0]?.config[1]).toEqual({
+      name: 'routes',
+      value: [{ when: 'true', action: 'copy', pipelines: ['child'] }],
+    });
+
+    const back = moveRouteConnection(toChild, {
+      previousRule: rule,
+      previousTarget: pipelineTarget('child'),
+      rule,
+      target: destination('debug-out'),
+    });
+
+    expect(back.unit.pipelines[0]?.config[1]).toEqual({
+      name: 'routes',
+      value: [{ when: 'true', action: 'copy', destinations: ['debug-out'] }],
+    });
+    expect(back.unit.pipelines.map(({ id }) => id)).toEqual(['main', 'child']);
+  });
+
+  it('refuses routes that would loop back or mix destinations and pipelines', () => {
+    const routed = unitWith([
+      {
+        id: 'main',
+        supported_telemetry: ['logs'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          { name: 'routes', value: [{ destinations: ['es-logs', 'es-metrics'] }] },
+        ],
+      },
+      {
+        id: 'child',
+        supported_telemetry: ['logs'],
+        config: [{ name: 'routes', value: [{ pipelines: ['grandchild'] }] }],
+      },
+      {
+        id: 'grandchild',
+        supported_telemetry: ['logs'],
+        config: [{ name: 'routes', value: [{ destinations: ['es-logs'] }] }],
+      },
+    ]);
+    const mainRule = { pipelineId: 'main', ruleIndex: 0 };
+    const grandchildRule = { pipelineId: 'grandchild', ruleIndex: 0 };
+
+    expect(
+      moveRouteConnection(routed, {
+        previousRule: mainRule,
+        previousTarget: destination('es-logs'),
+        rule: mainRule,
+        target: pipelineTarget('child'),
+      })
+    ).toBe(routed);
+    expect(
+      moveRouteConnection(routed, {
+        previousRule: grandchildRule,
+        previousTarget: destination('es-logs'),
+        rule: grandchildRule,
+        target: pipelineTarget('child'),
+      })
+    ).toBe(routed);
+    expect(canConnectRouteToTarget(routed, mainRule, pipelineTarget('main'))).toBe(false);
   });
 
   it('removes a deleted destination from route rules', () => {
@@ -324,11 +418,16 @@ describe('unit connections', () => {
   });
 
   it('unhooks one line and leaves the source pipeline when another destination remains', () => {
-    const connected = connectSourceToDestination(
-      connectSourceToDestination(unitWith([]), 'otlp-input', 'es-logs'),
-      'otlp-input',
-      'es-metrics'
-    );
+    const connected = unitWith([
+      {
+        id: 'p-otlp-input',
+        supported_telemetry: ['logs'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          { name: 'destinations', value: ['es-logs', 'es-metrics'] },
+        ],
+      },
+    ]);
     const next = disconnectSourceFromDestination(connected, 'otlp-input', 'es-logs');
 
     expect(next.unit.pipelines[0]?.config).toEqual([
@@ -336,7 +435,6 @@ describe('unit connections', () => {
       { name: 'destinations', value: ['es-metrics'] },
     ]);
   });
-
   it('drops the source pipeline when its last line is unhooked', () => {
     const connected = connectSourceToDestination(createDefaultUnit(), 'otlp-input', 'es-logs');
     const next = disconnectSourceFromDestination(connected, 'otlp-input', 'es-logs');
@@ -368,7 +466,7 @@ describe('unit connections', () => {
     ]);
   });
 
-  it('moves one line without wiring the previous source to the new destination', () => {
+  it('refuses to move a line onto a source that is already connected', () => {
     const connected = connectSourceToDestination(
       connectSourceToDestination(unitWith([]), 'otlp-input', 'es-logs'),
       'bulk-input',
@@ -381,12 +479,8 @@ describe('unit connections', () => {
       destinationId: 'es-logs',
     });
 
-    expect(getUnitConnections(next, configuredSources, configuredDestinations)).toEqual([
-      { sourceId: 'bulk-input', destinationId: 'es-metrics', forwarding: 'direct' },
-      { sourceId: 'bulk-input', destinationId: 'es-logs', forwarding: 'direct' },
-    ]);
+    expect(next).toBe(connected);
   });
-
   it('moves a line onto a free destination', () => {
     const connected = connectSourceToDestination(unitWith([]), 'otlp-input', 'es-logs');
     const next = moveUnitConnection(connected, {
