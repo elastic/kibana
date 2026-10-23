@@ -120,10 +120,80 @@ describe('AlertZero action workflows', () => {
       expect(enable?.with).not.toHaveProperty('query');
     });
 
-    it('reports enabled for a rule that was already on', () => {
+    it('reads the rule by its URL-encoded saved-object id before enabling it', () => {
+      const fetch = stepByName(yaml, 'fetch_rule');
+      expect(fetch?.type).toBe('kibana.request');
+      expect(fetch?.with?.method).toBe('GET');
+
+      const path = createWorkflowLiquidEngine().parseAndRenderSync(String(fetch?.with?.path), {
+        workflow: { spaceId: 'default' },
+        inputs: { actionInput: { id: 'a&b' } },
+      });
+      expect(path).toBe('/s/default/api/detection_engine/rules?id=a%26b');
+
+      const names = yaml.steps.map(({ name }) => name);
+      expect(names.indexOf('fetch_rule')).toBeLessThan(names.indexOf('enable_rule'));
+      expect(names.indexOf('fail_rule_changed')).toBeLessThan(names.indexOf('enable_rule'));
+    });
+
+    const runs = (name: string, context: Record<string, unknown>) =>
+      evaluateExpression(String(stepByName(yaml, name)?.if), context) === true;
+
+    // Gated steps that run, in order, stopping at the first workflow.fail that fires.
+    const trace = (context: Record<string, unknown>) => {
+      const ran = yaml.steps.filter((step) => step.if && runs(step.name, context));
+      const fail = ran.findIndex(({ type }) => type === 'workflow.fail');
+      return (fail === -1 ? ran : ran.slice(0, fail + 1)).map(({ name }) => name);
+    };
+
+    const disabled = { enabled: false, revision: 3, name: 'R', updated_by: 'elastic' };
+    const enabled = { ...disabled, enabled: true, revision: 4 };
+    const deleted = { error: { message: 'HTTP 404: Not Found' } };
+
+    // Steps that run, in order, for each rule state found at approval time.
+    it.each([
+      ['an unchanged disabled rule', { output: disabled }, 3, ['enable_rule']],
+      [
+        'a disabled rule edited since',
+        { output: { ...disabled, revision: 5 } },
+        3,
+        ['fail_rule_changed'],
+      ],
+      ['a rule enabled by hand', { output: enabled }, 3, ['note_already_enabled']],
+      ['a deleted rule', deleted, 3, ['fail_rule_deleted']],
+      [
+        'a proposal made before revisions were recorded',
+        { output: disabled },
+        undefined,
+        ['enable_rule'],
+      ],
+    ])('handles %s', (_scenario, fetch, expected, steps) => {
+      const context = {
+        steps: { fetch_rule: fetch },
+        inputs: { actionInput: { id: 'x', expected_revision: expected, investigation_id: 'c' } },
+      };
+      expect(trace(context)).toEqual(steps);
+    });
+
+    it('skips the chat note when the proposal carries no investigation', () => {
+      const context = {
+        steps: { fetch_rule: { output: enabled } },
+        inputs: { actionInput: { id: 'x' } },
+      };
+      expect(runs('note_already_enabled', context)).toBe(false);
+    });
+
+    it.each([
+      ['a rule it enabled', disabled, { succeeded: 1, skipped: 0, failed: 0 }, true, false, 1],
+      ['a rule enabled by hand', enabled, undefined, true, true, 0],
+    ])('reports %s', (_scenario, rule, enable, isEnabled, alreadyEnabled, succeeded) => {
       const emit = stepByName(yaml, 'emit_result')?.with as Record<string, string>;
-      expect(emit.enabled).toContain('steps.enable_rule.output.succeeded > 0');
-      expect(emit.enabled).toContain('steps.enable_rule.output.skipped > 0');
+      const context = {
+        steps: { fetch_rule: { output: rule }, enable_rule: enable && { output: enable } },
+      };
+      expect(evaluateExpression(emit.enabled, context)).toBe(isEnabled);
+      expect(evaluateExpression(emit.already_enabled, context)).toBe(alreadyEnabled);
+      expect(evaluateExpression(emit.succeeded, context)).toBe(succeeded);
     });
   });
 
