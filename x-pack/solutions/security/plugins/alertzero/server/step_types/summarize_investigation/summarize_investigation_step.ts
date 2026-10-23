@@ -42,6 +42,7 @@ export const getSummarizeInvestigationStepDefinition = (
           request,
           spaceId,
           conversationId: input.conversation_id,
+          abortSignal: context.abortSignal,
           deps,
         });
         return { output };

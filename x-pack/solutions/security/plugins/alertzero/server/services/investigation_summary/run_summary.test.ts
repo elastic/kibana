@@ -55,10 +55,13 @@ describe('runInvestigationSummary', () => {
     });
     expect(withStructuredOutput).toHaveBeenCalledTimes(1);
     expect(invoke).toHaveBeenCalledTimes(1);
-    expect(invoke).toHaveBeenCalledWith([
-      ['system', expect.stringContaining('ASD-STE100')],
-      ['human', 'User: Okta rule fired for the admin.'],
-    ]);
+    expect(invoke).toHaveBeenCalledWith(
+      [
+        ['system', expect.stringContaining('ASD-STE100')],
+        ['human', 'User: Okta rule fired for the admin.'],
+      ],
+      expect.anything()
+    );
     expect(client.patchMetadata).toHaveBeenCalledWith(
       'conv-1',
       { summary: 'The Okta admin rule fired and was noted.' },
@@ -169,6 +172,80 @@ describe('runInvestigationSummary', () => {
     expect(client.patchMetadata).not.toHaveBeenCalled();
   });
 
+  it('passes the cancellation signal to the model call', async () => {
+    const { client, invoke, resolveChatModel } = setup();
+    const { signal } = new AbortController();
+
+    await runInvestigationSummary({
+      request,
+      spaceId: 'default',
+      conversationId: 'conv-1',
+      abortSignal: signal,
+      deps: { getConversationClient: async () => client, resolveChatModel },
+    });
+
+    expect(invoke).toHaveBeenCalledWith(expect.anything(), { signal });
+  });
+
+  it('does not call the model for a run that was already cancelled', async () => {
+    const { client, invoke, resolveChatModel } = setup();
+    const controller = new AbortController();
+    controller.abort();
+
+    const result = await runInvestigationSummary({
+      request,
+      spaceId: 'default',
+      conversationId: 'conv-1',
+      abortSignal: controller.signal,
+      deps: { getConversationClient: async () => client, resolveChatModel },
+    });
+
+    expect(result).toEqual({ skipped: true, reason: 'cancelled' });
+    expect(invoke).not.toHaveBeenCalled();
+    expect(client.patchMetadata).not.toHaveBeenCalled();
+  });
+
+  it('does not write the summary of a run that was cancelled during the model call', async () => {
+    const { client, invoke, resolveChatModel } = setup();
+    const controller = new AbortController();
+    invoke.mockImplementationOnce(async () => {
+      controller.abort();
+      return { summary: 'A summary of the older timeline.' };
+    });
+
+    const result = await runInvestigationSummary({
+      request,
+      spaceId: 'default',
+      conversationId: 'conv-1',
+      abortSignal: controller.signal,
+      deps: { getConversationClient: async () => client, resolveChatModel },
+    });
+
+    expect(result).toEqual({ skipped: true, reason: 'cancelled' });
+    expect(client.patchMetadata).not.toHaveBeenCalled();
+  });
+
+  it('does not log a failure when the model call rejects because the run was cancelled', async () => {
+    const { client, invoke, resolveChatModel } = setup();
+    const controller = new AbortController();
+    const logger = { warn: jest.fn() } as unknown as Logger;
+    invoke.mockImplementationOnce(async () => {
+      controller.abort();
+      throw new Error('Aborted');
+    });
+
+    const result = await runInvestigationSummary({
+      request,
+      spaceId: 'default',
+      conversationId: 'conv-1',
+      abortSignal: controller.signal,
+      deps: { getConversationClient: async () => client, resolveChatModel, logger },
+    });
+
+    expect(result).toEqual({ skipped: true, reason: 'cancelled' });
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
   it('writes nothing when the model returns no summary', async () => {
     const { client, resolveChatModel } = setup({ output: { summary: '   ' } });
 
@@ -210,10 +287,10 @@ describe('runInvestigationSummary', () => {
       deps: { getConversationClient: async () => client, resolveChatModel },
     });
 
-    expect(invoke).toHaveBeenCalledWith([
-      ['system', expect.stringContaining('in single backticks')],
-      expect.anything(),
-    ]);
+    expect(invoke).toHaveBeenCalledWith(
+      [['system', expect.stringContaining('in single backticks')], expect.anything()],
+      expect.anything()
+    );
   });
 
   it('tells the model not to call a proposal pending', async () => {
@@ -226,13 +303,18 @@ describe('runInvestigationSummary', () => {
       deps: { getConversationClient: async () => client, resolveChatModel },
     });
 
-    expect(invoke).toHaveBeenCalledWith([
+    expect(invoke).toHaveBeenCalledWith(
       [
-        'system',
-        expect.stringMatching(/Never say that a proposal is pending[\s\S]*stay true whichever way/),
+        [
+          'system',
+          expect.stringMatching(
+            /Never say that a proposal is pending[\s\S]*stay true whichever way/
+          ),
+        ],
+        expect.anything(),
       ],
-      expect.anything(),
-    ]);
+      expect.anything()
+    );
   });
 
   describe('proposal attachments', () => {
@@ -275,10 +357,13 @@ describe('runInvestigationSummary', () => {
       });
 
       expect(getProposals).toHaveBeenCalledWith(['prop-1'], 'space-a', request);
-      expect(invoke).toHaveBeenCalledWith([
-        expect.anything(),
-        ['human', 'Proposal: Review detection gap\nNo rule covers payroll account changes.'],
-      ]);
+      expect(invoke).toHaveBeenCalledWith(
+        [
+          expect.anything(),
+          ['human', 'Proposal: Review detection gap\nNo rule covers payroll account changes.'],
+        ],
+        expect.anything()
+      );
     });
 
     it('falls back to the attachment label when the proposal cannot be read', async () => {
@@ -295,10 +380,13 @@ describe('runInvestigationSummary', () => {
       });
 
       expect(result.skipped).toBe(false);
-      expect(invoke).toHaveBeenCalledWith([
-        expect.anything(),
-        ['human', 'Attachment added (platform.proposal): Review detection gap'],
-      ]);
+      expect(invoke).toHaveBeenCalledWith(
+        [
+          expect.anything(),
+          ['human', 'Attachment added (platform.proposal): Review detection gap'],
+        ],
+        expect.anything()
+      );
     });
     it('reads only the proposals an attachment event added', async () => {
       const { client, resolveChatModel } = setup({

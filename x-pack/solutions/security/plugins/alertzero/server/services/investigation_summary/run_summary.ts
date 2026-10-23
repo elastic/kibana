@@ -59,7 +59,7 @@ export interface RunInvestigationSummaryDeps {
 
 export interface InvestigationSummaryResult {
   skipped: boolean;
-  reason?: 'template' | 'no_proposal' | 'empty' | 'no_connector' | 'incomplete';
+  reason?: 'template' | 'no_proposal' | 'empty' | 'no_connector' | 'incomplete' | 'cancelled';
   summary?: string;
 }
 
@@ -98,20 +98,28 @@ const SYSTEM_PROMPT = [
 const summarize = async ({
   chatModel,
   story,
+  abortSignal,
   logger,
 }: {
   chatModel: ScopedModel['chatModel'];
   story: string;
+  abortSignal?: AbortSignal;
   logger?: Logger;
 }): Promise<unknown> => {
   try {
     return await chatModel
       .withStructuredOutput(OUTPUT_SCHEMA, { name: 'investigation_summary' })
-      .invoke([
-        ['system', SYSTEM_PROMPT],
-        ['human', story],
-      ]);
+      .invoke(
+        [
+          ['system', SYSTEM_PROMPT],
+          ['human', story],
+        ],
+        { signal: abortSignal }
+      );
   } catch (error) {
+    if (abortSignal?.aborted) {
+      return undefined;
+    }
     logger?.warn(
       `AlertZero investigation summary model call failed. ${
         error instanceof Error ? error.message : String(error)
@@ -129,11 +137,14 @@ export const runInvestigationSummary = async ({
   request,
   spaceId,
   conversationId,
+  abortSignal,
   deps,
 }: {
   request: KibanaRequest;
   spaceId: string;
   conversationId: string;
+  /** Aborted when a newer run replaces this one, so the older timeline must not be written. */
+  abortSignal?: AbortSignal;
   deps: RunInvestigationSummaryDeps;
 }): Promise<InvestigationSummaryResult> => {
   const client = await deps.getConversationClient(request);
@@ -170,7 +181,15 @@ export const runInvestigationSummary = async ({
   if (!chatModel) {
     return { skipped: true, reason: 'no_connector' };
   }
-  const output = readOutput(await summarize({ chatModel, story, logger: deps.logger }));
+  if (abortSignal?.aborted) {
+    return { skipped: true, reason: 'cancelled' };
+  }
+  const output = readOutput(
+    await summarize({ chatModel, story, abortSignal, logger: deps.logger })
+  );
+  if (abortSignal?.aborted) {
+    return { skipped: true, reason: 'cancelled' };
+  }
   if (!output) {
     return { skipped: true, reason: 'incomplete' };
   }

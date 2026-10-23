@@ -24,7 +24,7 @@ const inputSchema = z.object({
 const outputSchema = z.object({
   skipped: z.boolean().describe('True when no summary was written.'),
   reason: z
-    .enum(['template', 'no_proposal', 'empty', 'no_connector', 'incomplete'])
+    .enum(['template', 'no_proposal', 'empty', 'no_connector', 'incomplete', 'cancelled'])
     .optional()
     .describe('Why the step wrote nothing.'),
   summary: z.string().optional().describe('Reading written to metadata.summary.'),
