@@ -35,6 +35,19 @@ describe('Agent Builder audit event builders', () => {
       });
     });
 
+    it('names the bound service account when the write carried one', () => {
+      const event = agentAuditEvent({
+        action: AgentBuilderAuditAction.AGENT_UPDATE,
+        agentId: 'my.awesome.agent',
+        agentName: 'Threat Hunting Agent',
+        serviceAccountId: 'kibana/sa-1',
+      });
+
+      expect(event.message).toBe(
+        'User has updated agent [id=my.awesome.agent, name="Threat Hunting Agent", service_account=kibana/sa-1]'
+      );
+    });
+
     it('returns a deletion audit event for agent delete with only the id', () => {
       const event = agentAuditEvent({
         action: AgentBuilderAuditAction.AGENT_DELETE,

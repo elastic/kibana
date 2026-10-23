@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UserIdAndName } from '@kbn/agent-builder-common';
 import { Observable, shareReplay } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
@@ -35,6 +36,7 @@ export const executeAgent$ = ({
   nextInput,
   origin,
   author,
+  owner,
   abortSignal,
   defaultConnectorId,
   telemetryMetadata,
@@ -60,6 +62,8 @@ export const executeAgent$ = ({
   nextInput: ConverseInput;
   origin?: ExecutionConversationOrigin;
   author?: ConversationRoundAuthor;
+  /** Identity conversation writes are attributed to; see {@link RunAgentParams.owner}. */
+  owner?: UserIdAndName;
   abortSignal?: AbortSignal;
   defaultConnectorId?: string;
   telemetryMetadata?: ConnectorTelemetryMetadata;
@@ -80,6 +84,7 @@ export const executeAgent$ = ({
       request,
       agentId,
       executionId,
+      owner,
       abortSignal,
       defaultConnectorId,
       telemetryMetadata,

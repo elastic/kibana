@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { AgentAccessControlMode, type CurrentUser } from '@kbn/agent-builder-common';
+import {
+  AgentAccessControlMode,
+  serviceAccountIdFromUserId,
+  type CurrentUser,
+} from '@kbn/agent-builder-common';
 
 /**
  * Builds an Elasticsearch DSL filter that limits the visible agents for a non-admin user
@@ -44,6 +48,13 @@ export const buildReadAccessFilter = ({ user }: { user: CurrentUser }) => {
 
   if (user.id !== undefined) {
     shouldClauses.push({ term: { created_by_id: user.id } });
+  }
+
+  // A bound service account may list the agent it runs, matching `getEffectiveAgentRole`.
+  const boundServiceAccountId =
+    user.type === 'service_account' ? serviceAccountIdFromUserId(user.id) : undefined;
+  if (boundServiceAccountId !== undefined) {
+    shouldClauses.push({ term: { service_account_id: boundServiceAccountId } });
   }
 
   // Legacy ownership: username match only when created_by_id was never stored, so owners of those

@@ -11,6 +11,7 @@ import type { AgentRef } from '../../../../common/http_api/tools';
 import type { AgentsUsingToolsResult } from './types';
 import { updateRequestToEs } from './client/converters';
 import { createSpaceDslFilter } from '../../../utils/spaces';
+import { assertCanEditBoundAgentsInBulk } from '../service_account_binding';
 
 const SEARCH_SIZE = 1000;
 
@@ -20,6 +21,8 @@ export interface PluginRefCleanupParams {
   pluginIds: string[];
   logger?: Logger;
   checkOnly?: boolean;
+  /** Bound agents are read-only without manage_security; the cleanup is refused unless set. */
+  canEditBoundAgents?: boolean;
 }
 
 function getPluginIdsFromSource(source: AgentProperties): string[] {
@@ -50,6 +53,7 @@ export async function runPluginRefCleanup({
   pluginIds,
   logger,
   checkOnly = false,
+  canEditBoundAgents = false,
 }: PluginRefCleanupParams): Promise<AgentsUsingToolsResult> {
   const pluginIdSet = new Set(pluginIds);
   const response = await storage.getClient().search({
@@ -69,6 +73,7 @@ export async function runPluginRefCleanup({
   }
 
   const agents: AgentRef[] = [];
+  const matchedSources: AgentProperties[] = [];
   const bulkOperations: Array<{ index: { _id: string; document: AgentProperties } }> = [];
   const now = new Date();
 
@@ -80,6 +85,7 @@ export async function runPluginRefCleanup({
     if (!referencesPluginIds(currentPluginIds, pluginIdSet)) continue;
 
     agents.push(toAgentRef(source, String(hit._id)));
+    matchedSources.push(source);
 
     if (!checkOnly) {
       const newPluginIds = removePluginIdsFromAgent(currentPluginIds, pluginIds);
@@ -98,6 +104,12 @@ export async function runPluginRefCleanup({
   if (checkOnly) {
     return { agents };
   }
+
+  assertCanEditBoundAgentsInBulk({
+    sources: matchedSources,
+    canEditBoundAgents,
+    action: 'Removing plugin references',
+  });
 
   if (bulkOperations.length > 0) {
     try {

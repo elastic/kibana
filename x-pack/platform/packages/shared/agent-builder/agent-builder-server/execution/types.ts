@@ -169,6 +169,11 @@ export type AgentExecutionParams = StoredConversationExecutionParams | Standalon
 /**
  * Common fields shared by all agent execution documents.
  */
+export interface ExecutionRunAs {
+  type: 'service_account';
+  serviceAccountId: string;
+}
+
 interface BaseAgentExecution {
   /** Unique id of the execution. */
   executionId: string;
@@ -184,6 +189,11 @@ interface BaseAgentExecution {
   spaceId: string;
   /** The user the request that created this execution authenticated as. */
   owner?: UserIdAndName;
+  /**
+   * The service account the execution runs as, captured from the agent's binding at dispatch.
+   * Absent when the execution runs with the caller's own credentials.
+   */
+  runAs?: ExecutionRunAs;
   /** Error details, present when status is 'failed'. */
   error?: SerializedExecutionError;
   /** Why the execution was aborted, present when status is 'aborted' and the origin recorded it. */
