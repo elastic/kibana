@@ -773,6 +773,52 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
         })
       ).toEqual({ total: { value: 2 }, hits: [] });
     });
+
+    // `events_failed` reads the two searches directly, not the combined
+    // `load_events` hit set: the search that ran decides, so a skipped search's
+    // absent `error` cannot masquerade as a failure (or hide one).
+    describe('the event-search failure flag', () => {
+      const expression = String(stepIn('source_status')?.with?.events_failed)
+        .replace(/^\$\{\{/, '')
+        .replace(/\}\}$/, '')
+        .trim();
+
+      const evaluate = (steps: Record<string, unknown>): unknown =>
+        createWorkflowLiquidEngine().evalValueSync(expression, { steps });
+
+      it('reports the failure when the host.id search failed', () => {
+        expect(
+          evaluate({
+            load_events_by_host_id: { error: { message: 'failed' } },
+          })
+        ).toBe(true);
+      });
+
+      it('reports the failure when the host.name search failed', () => {
+        expect(
+          evaluate({
+            load_events_by_host_name: { error: { message: 'failed' } },
+          })
+        ).toBe(true);
+      });
+
+      it('reports no failure when both searches are clean', () => {
+        expect(
+          evaluate({
+            load_events_by_host_id: { output: { hits: { total: { value: 0 }, hits: [] } } },
+            load_events_by_host_name: { output: { hits: { total: { value: 0 }, hits: [] } } },
+          })
+        ).toBe(false);
+      });
+
+      it('reports no failure when the host.id search is clean and the host.name search was skipped', () => {
+        expect(evaluate({ load_events_by_host_id: { output: {} } })).toBe(false);
+      });
+
+      it('reports no failure when the host.name search is clean and the host.id search was skipped', () => {
+        expect(evaluate({ load_events_by_host_name: { output: {} } })).toBe(false);
+      });
+    });
   });
 
   describe('the truncation clear', () => {
@@ -982,12 +1028,12 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       },
     });
 
-    const downgraded = (context: Record<string, unknown>): string =>
-      engine.parseAndRenderSync(String(stepIn('check_claim_grounding')?.with?.downgraded), context);
+    const ungrounded = (context: Record<string, unknown>): string =>
+      engine.parseAndRenderSync(String(stepIn('check_claim_grounding')?.with?.ungrounded), context);
 
     it('returns false when the cited raw-event id is in the hits', () => {
       expect(
-        downgraded(
+        ungrounded(
           groundingContext({
             world: [{ source: 'raw_event', id: 'event-1' }],
             eventIds: ['event-1'],
@@ -1000,7 +1046,7 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
 
     it('returns true when a true positive cites a raw-event id that was not returned', () => {
       expect(
-        downgraded(
+        ungrounded(
           groundingContext({
             world: [{ source: 'raw_event', id: 'copied-from-the-alert' }],
             eventIds: [],
@@ -1013,7 +1059,7 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
 
     it('returns true when a false positive cites an entity id that was not returned', () => {
       expect(
-        downgraded(
+        ungrounded(
           groundingContext({
             world: [{ source: 'entity_store', id: 'missing-entity' }],
             eventIds: ['event-1'],
@@ -1026,7 +1072,7 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
 
     it('returns false when the model cited no world claims', () => {
       expect(
-        downgraded(
+        ungrounded(
           groundingContext({
             eventIds: [],
             entityIds: [],
@@ -1038,7 +1084,7 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
 
     it('returns false when the verdict is already inconclusive', () => {
       expect(
-        downgraded(
+        ungrounded(
           groundingContext({
             world: [{ source: 'raw_event', id: 'copied-from-the-alert' }],
             eventIds: [],
@@ -1053,7 +1099,7 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(
         engine.parseAndRenderSync(String(stepIn('block_ungrounded_claims')?.with?.verdict), {
           steps: {
-            check_claim_grounding: { output: { downgraded: 'true' } },
+            check_claim_grounding: { output: { ungrounded: 'true' } },
             block_truncated_clear: { output: { verdict: 'true_positive' } },
           },
         })
@@ -1066,7 +1112,7 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
           String(stepIn('block_ungrounded_claims')?.with?.summary_markdown),
           {
             steps: {
-              check_claim_grounding: { output: { downgraded: 'true' } },
+              check_claim_grounding: { output: { ungrounded: 'true' } },
               block_truncated_clear: { output: { summary_markdown: 'Model summary.' } },
             },
           }
@@ -1080,7 +1126,7 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
           String(stepIn('block_ungrounded_claims')?.with?.summary_markdown),
           {
             steps: {
-              check_claim_grounding: { output: { downgraded: 'false' } },
+              check_claim_grounding: { output: { ungrounded: 'false' } },
               block_truncated_clear: { output: { summary_markdown: 'Model summary.' } },
             },
           }

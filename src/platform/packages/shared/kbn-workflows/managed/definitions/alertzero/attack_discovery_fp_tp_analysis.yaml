@@ -659,12 +659,14 @@ steps:
   # A world claim may only cite an id from the hits. `capture` records a miss
   # without depending on `assign` inside `for`. No claims is not a miss: claims
   # are optional. An already inconclusive verdict is left as the model wrote it.
-  # `downgraded` is the string "true" or "false" because the loop cannot live in
-  # a typed `${{ }}` expression.
+  # The flag is `ungrounded`, not `downgraded`: it is the string "true" or
+  # "false" because the loop cannot live in a typed `${{ }}` expression, while
+  # `block_truncated_clear.downgraded` is a real boolean — a shared name would
+  # let a copy-paste silently compare one against the other's type.
   - name: check_claim_grounding
     type: data.set
     with:
-      downgraded: |
+      ungrounded: |
         {%- assign world = steps.analyze.output.structured_output.claims.world -%}
         {%- assign event_ids = steps.load_events.output.hits.hits | default: consts.no_rows | map: '_id' -%}
         {%- assign entity_ids = steps.load_entities.output.hits.hits | default: consts.no_rows | map: '_source.entity.id' -%}
@@ -676,8 +678,8 @@ steps:
   - name: block_ungrounded_claims
     type: data.set
     with:
-      verdict: "{% if steps.check_claim_grounding.output.downgraded == 'true' %}inconclusive{% else %}{{ steps.block_truncated_clear.output.verdict }}{% endif %}"
-      summary_markdown: "{% if steps.check_claim_grounding.output.downgraded == 'true' %}A cited world-check id is not in the evidence, so this cannot be classified.{% else %}{{ steps.block_truncated_clear.output.summary_markdown }}{% endif %}"
+      verdict: "{% if steps.check_claim_grounding.output.ungrounded == 'true' %}inconclusive{% else %}{{ steps.block_truncated_clear.output.verdict }}{% endif %}"
+      summary_markdown: "{% if steps.check_claim_grounding.output.ungrounded == 'true' %}A cited world-check id is not in the evidence, so this cannot be classified.{% else %}{{ steps.block_truncated_clear.output.summary_markdown }}{% endif %}"
 
   # The model's rationale, checks, and claims still argue the old verdict after it
   # is rewritten. The review attaches the rationale, so a downgrade omits them.
@@ -687,7 +689,7 @@ steps:
     type: data.set
     with:
       rows:
-        - keep: "${{ steps.block_truncated_clear.output.downgraded == false and steps.check_claim_grounding.output.downgraded != 'true' }}"
+        - keep: "${{ steps.block_truncated_clear.output.downgraded == false and steps.check_claim_grounding.output.ungrounded != 'true' }}"
           rationale_markdown: "${{ steps.analyze.output.structured_output.rationale_markdown }}"
           checks: "${{ steps.analyze.output.structured_output.checks }}"
           claims: "${{ steps.analyze.output.structured_output.claims }}"
