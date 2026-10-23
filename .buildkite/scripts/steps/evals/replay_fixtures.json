@@ -1,0 +1,254 @@
+[
+  {
+    "pr": 275505,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "acceptance"
+  },
+  {
+    "pr": 276089,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "tuning"
+  },
+  {
+    "pr": 277050,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "acceptance"
+  },
+  {
+    "pr": 278345,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "tuning"
+  },
+  {
+    "pr": 281920,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "tuning"
+  },
+  {
+    "pr": 282229,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "tuning"
+  },
+  {
+    "pr": 283207,
+    "kind": "eval-worthy",
+    "expectedSuiteIds": ["alerting-v2"],
+    "split": "tuning"
+  },
+  {
+    "pr": 284413,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "tuning"
+  },
+  {
+    "pr": 285055,
+    "kind": "eval-worthy",
+    "expectedSuiteIds": ["alerting-v2"],
+    "split": "tuning"
+  },
+  {
+    "pr": 285443,
+    "kind": "eval-worthy",
+    "expectedSuiteIds": ["agent-builder"],
+    "split": "tuning"
+  },
+  {
+    "pr": 285489,
+    "kind": "eval-worthy",
+    "expectedSuiteIds": ["alerting-v2"],
+    "split": "acceptance"
+  },
+  {
+    "pr": 285741,
+    "kind": "eval-worthy",
+    "expectedSuiteIds": ["alerting-v2"],
+    "split": "acceptance"
+  },
+  {
+    "pr": 286346,
+    "kind": "eval-worthy",
+    "expectedSuiteIds": ["esql-generation"],
+    "split": "tuning"
+  },
+  {
+    "pr": 286656,
+    "kind": "eval-worthy",
+    "expectedSuiteIds": ["ml"],
+    "split": "acceptance"
+  },
+  {
+    "pr": 287087,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "tuning"
+  },
+  {
+    "pr": 288921,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "acceptance"
+  },
+  {
+    "pr": 289148,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "tuning"
+  },
+  {
+    "pr": 289199,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "tuning"
+  },
+  {
+    "pr": 289524,
+    "kind": "eval-worthy",
+    "expectedSuiteIds": ["esql-generation"],
+    "split": "acceptance"
+  },
+  {
+    "pr": 291163,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "tuning"
+  },
+  {
+    "pr": 292266,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "acceptance"
+  },
+  {
+    "pr": 292649,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "tuning"
+  },
+  {
+    "pr": 292927,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "tuning"
+  },
+  {
+    "pr": 293349,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "acceptance"
+  },
+  {
+    "pr": 293700,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "acceptance"
+  },
+  {
+    "pr": 295366,
+    "kind": "eval-worthy",
+    "expectedSuiteIds": ["esql-generation"],
+    "split": "tuning"
+  },
+  {
+    "pr": 295367,
+    "kind": "eval-worthy",
+    "expectedSuiteIds": ["esql-generation"],
+    "split": "tuning"
+  },
+  {
+    "pr": 295788,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "acceptance"
+  },
+  {
+    "pr": 295834,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "tuning"
+  },
+  {
+    "pr": 295962,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "acceptance"
+  },
+  {
+    "pr": 296078,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "tuning"
+  },
+  {
+    "pr": 296470,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "tuning"
+  },
+  {
+    "pr": 296501,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "tuning"
+  },
+  {
+    "pr": 296812,
+    "kind": "eval-worthy",
+    "expectedSuiteIds": ["esql-generation"],
+    "split": "tuning"
+  },
+  {
+    "pr": 297776,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "tuning"
+  },
+  {
+    "pr": 297822,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "acceptance"
+  },
+  {
+    "pr": 298067,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "tuning"
+  },
+  {
+    "pr": 298081,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "tuning"
+  },
+  {
+    "pr": 298230,
+    "kind": "eval-worthy",
+    "expectedSuiteIds": ["alerting-v2"],
+    "split": "acceptance"
+  },
+  {
+    "pr": 298824,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "acceptance"
+  },
+  {
+    "pr": 299133,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "acceptance"
+  },
+  {
+    "pr": 299443,
+    "kind": "ordinary",
+    "expectedSuiteIds": [],
+    "split": "tuning"
+  }
+]

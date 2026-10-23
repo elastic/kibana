@@ -11,4 +11,5 @@ export * from './helpers.ts';
 export * from './presets.ts';
 export * from './render.ts';
 export { cpsTests } from './steps/cps_testing.ts';
+export { EVALS_SUGGESTIONS_LABEL, evalsSuggestions } from './steps/evals_suggestions.ts';
 export type * from './types.ts';

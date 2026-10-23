@@ -28,7 +28,24 @@
       ],
       "ciLabels": [
         "evals:agent-builder"
-      ]
+      ],
+      "coverage": {
+        "include": [
+          "x-pack/platform/plugins/shared/agent_builder/server/services/agents/**",
+          "x-pack/platform/plugins/shared/agent_builder/server/services/execution/run_agent/prompts/**",
+          "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/**",
+          "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/evals/**",
+          "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts",
+          "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/src/chat_client.ts",
+          "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/src/evaluate.ts",
+          "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/src/evaluate_dataset.ts",
+          "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/src/ir_extractor.ts"
+        ],
+        "exclude": [
+          "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/evals/esql/**",
+          "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/evals/skill_selection/**"
+        ]
+      }
     },
     {
       "id": "ml",
@@ -43,7 +60,12 @@
       ],
       "ciLabels": [
         "evals:ml"
-      ]
+      ],
+      "coverage": {
+        "include": [
+          "x-pack/platform/plugins/shared/ml/server/agent_builder/**"
+        ]
+      }
     },
     {
       "id": "alerting-v2",
@@ -57,7 +79,12 @@
       ],
       "ciLabels": [
         "evals:alerting-v2"
-      ]
+      ],
+      "coverage": {
+        "include": [
+          "x-pack/platform/plugins/shared/alerting_v2/server/agent_builder/**"
+        ]
+      }
     },
     {
       "id": "esql-generation",
@@ -70,7 +97,18 @@
       ],
       "ciLabels": [
         "evals:esql-generation"
-      ]
+      ],
+      "coverage": {
+        "include": [
+          "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/generate_esql/**",
+          "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/generate_esql/documentation/*.md",
+          "x-pack/platform/plugins/shared/agent_builder_platform/server/tools/generate_esql.ts",
+          "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/evals/esql/**",
+          "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/esql.playwright.config.ts",
+          "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/src/chat_client.ts",
+          "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/src/evaluate.ts"
+        ]
+      }
     },
     {
       "id": "streams",

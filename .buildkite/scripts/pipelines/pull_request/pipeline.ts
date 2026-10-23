@@ -35,7 +35,12 @@ import {
   doAllChangesMatch,
   isAutomatedVersionBumpPR,
 } from '#pipeline-utils';
-import { cpsTests, renderSteps } from '#pipeline-utils/step-library';
+import {
+  cpsTests,
+  EVALS_SUGGESTIONS_LABEL,
+  evalsSuggestions,
+  renderSteps,
+} from '#pipeline-utils/step-library';
 
 const prConfigs =
   loadBuildkiteJson<typeof import('../../../pull_requests.json')>('pull_requests.json');
@@ -51,6 +56,10 @@ if (!prConfig) {
 }
 
 const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
+// Exact match: `includes` on the raw string would also match similarly named labels.
+const EVALS_SUGGESTIONS_OPTED_IN = GITHUB_PR_LABELS.split(/[\n,]+/)
+  .map((label) => label.trim())
+  .includes(EVALS_SUGGESTIONS_LABEL);
 const ALL_UI_TEST_SUITES = GITHUB_PR_LABELS.includes('ci:all-ui-test-suites');
 const REQUIRED_PATHS = prConfig.always_require_ci_on_changed!.map((r) => new RegExp(r, 'i'));
 const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new RegExp(r, 'i'));
@@ -109,7 +118,15 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
 
     if (skippable) {
-      emitPipeline([emptyStep]);
+      // An opted-in PR that stops matching any suite must still clear the comment an earlier push left.
+      emitPipeline(
+        EVALS_SUGGESTIONS_OPTED_IN
+          ? [
+              getAgentImageConfig({ returnYaml: true }),
+              renderSteps(evalsSuggestions(), { header: true }),
+            ]
+          : [emptyStep]
+      );
       return;
     }
 
@@ -731,6 +748,11 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     const evalsTrigger = getEvalTriggerStep(GITHUB_PR_LABELS);
     if (evalsTrigger) {
       pipeline.push(evalsTrigger);
+    }
+
+    // Advisory, and only for PRs that opted in with the label.
+    if (EVALS_SUGGESTIONS_OPTED_IN) {
+      pipeline.push(renderSteps(evalsSuggestions(), cancelOnGate));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:sync-model-labels')) {

@@ -12,7 +12,7 @@ import type { AgentConfig, Retry } from './types.ts';
 export type SpotZone = 'us-central1-a' | 'us-central1-c' | 'us-central1-f';
 
 // Add a machine type here when a ported step first uses it.
-export type MachineType = 'n2-standard-8';
+export type MachineType = 'n2-standard-2' | 'n2-standard-8';
 
 export const spotZones = {
   centralFCA: ['us-central1-f', 'us-central1-c', 'us-central1-a'],

@@ -211,6 +211,7 @@ const SCENARIOS: Scenario[] = [
   { name: 'scout cspm label', labels: ['ci:cloud-security-posture-scout'] },
   { name: 'scout edr label', labels: ['ci:scout-edr-real-fleet'] },
   { name: 'sync model labels', labels: ['ci:sync-model-labels'] },
+  { name: 'evals suggestions opted in', labels: ['ci:evals-suggestions'] },
   { name: 'workflow oom label', labels: ['ci:workflow-oom-test'] },
   { name: 'cps test', labels: ['ci:cps-test'] },
   { name: 'benchmarks', labels: ['ci:bench-jest', 'ci:bench-ftr', 'ci:bench-page-load'] },
@@ -281,6 +282,30 @@ describe('pull_request pipeline scenarios', () => {
       expect(await emittedIds()).toMatchSnapshot();
     }
   );
+
+  it('adds the evals suggestions step only to PRs that opted in with the label', async () => {
+    process.env.GITHUB_PR_LABELS = '';
+    expect(await emittedIds()).not.toContain('evals-suggestions');
+
+    jest.resetModules();
+    process.env.GITHUB_PR_LABELS = 'ci:evals-suggestions';
+    expect(await emittedIds()).toContain('evals-suggestions');
+  });
+
+  it('matches the opt-in label exactly, not as a substring', async () => {
+    process.env.GITHUB_PR_LABELS = 'ci:evals-suggestions-later,not-ci:evals-suggestions';
+    expect(await emittedIds()).not.toContain('evals-suggestions');
+  });
+
+  it('still runs the step on skippable changes for an opted-in PR, to clear a stale comment', async () => {
+    mockAreChangesSkippable.mockResolvedValue(true);
+    process.env.GITHUB_PR_LABELS = 'ci:evals-suggestions';
+    expect(await emittedIds()).toEqual(['evals-suggestions']);
+
+    jest.resetModules();
+    process.env.GITHUB_PR_LABELS = '';
+    expect(await emittedIds()).toEqual([]);
+  });
 
   // These return before pre-build runs, so the table above cannot express them.
   it('skippable changes', async () => {

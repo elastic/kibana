@@ -100,7 +100,7 @@ describe('pull_request pipeline generation', () => {
     process.env = ORIGINAL_ENV;
   });
 
-  it('emits valid empty pipeline when changes are skippable', async () => {
+  it('emits a valid empty pipeline when changes are skippable and the PR has not opted in', async () => {
     mockAreChangesSkippable.mockResolvedValueOnce(true);
     const emitted = waitForEmission();
 
@@ -109,6 +109,20 @@ describe('pull_request pipeline generation', () => {
 
     const parsed = yamlLoad(output) as Record<string, unknown>;
     expect(parsed).toEqual({ steps: [] });
+    expect(mockRunPreBuild).not.toHaveBeenCalled();
+  });
+
+  it('emits only the evals suggestions step when changes are skippable and the PR opted in', async () => {
+    // Kept so an opted-in PR that stops matching any suite still clears its earlier comment.
+    process.env.GITHUB_PR_LABELS = 'ci:evals-suggestions';
+    mockAreChangesSkippable.mockResolvedValueOnce(true);
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    const parsed = yamlLoad(output) as { steps: Array<{ key?: string }> };
+    expect(parsed.steps.map(({ key }) => key)).toEqual(['evals-suggestions']);
     expect(mockRunPreBuild).not.toHaveBeenCalled();
   });
 

@@ -162,11 +162,24 @@ Add an entry to `.buildkite/pipelines/evals/evals.suites.json`:
   "name": "<Human Readable Name>",
   "configPath": "<repo-relative path to playwright.config.ts>",
   "tags": ["<group>", "<name>"],
-  "ciLabels": ["evals:<name>"]
+  "ciLabels": ["evals:<name>"],
+  "coverage": {
+    "include": ["<repo-relative glob of the prompts, skills and tools this suite evaluates>"],
+    "exclude": ["<optional glob to leave out>"]
+  }
 }
 ```
 
 Registration is optional for local dev (suites are auto-discovered from `createPlaywrightEvalsConfig` imports), but required for CI labeling and `node scripts/evals list`.
+
+### `coverage` (optional, recommended)
+
+`coverage` tells the PR suggester which production files this suite evaluates, so a PR that changes them is told to run the suite (and which `evals:*` and `models:*` labels to add). Without it, changes to the code your suite evaluates are reported as having "no matching suite mapping".
+
+- List the files the model sees or follows: prompts, skills, agent instructions, tool definitions. Prefer narrow globs; plumbing around them (routes, storage, UI) should not match.
+- The suite's own package is matched automatically, except when several suites share one config directory. In that case each suite must list its own spec and dataset files in `include`.
+- Markdown counts as documentation and is ignored, unless an `include` glob itself ends in `.md` (for example prompt documents the model reads). Skill markdown under a `server/skills` directory is recognised automatically.
+- A suite with `coverage` must also have at least one `ciLabels` entry, and every `include` glob must match a tracked file; both are checked by `.buildkite/pipelines/evals/evals_suites_config.test.ts`.
 
 ## Post-Scaffold Steps
 
