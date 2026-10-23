@@ -65,7 +65,7 @@ test.describe(
       });
     });
 
-    test('sends an investigation request from an alert row action', async ({
+    test('starts and views an investigation from an alert row action', async ({
       page,
       pageObjects,
     }) => {
@@ -89,9 +89,14 @@ test.describe(
       expect((await requestPromise).postDataJSON()).toMatchObject({
         subject: { type: 'alert', id: alertId },
       });
+
+      await pageObjects.toasts.waitForToastWithText('Investigation started');
+      expect(await pageObjects.toasts.getMessageText()).toContain('You will find it in Nightshift');
+      await pageObjects.alertPage.viewStartedInvestigation();
+      await expect(page).toHaveURL(/\/app\/nightshift\?investigationId=investigation-1$/);
     });
 
-    test('sends an investigation request from the alert detail action menu', async ({
+    test('starts and views an investigation from the alert detail action menu', async ({
       page,
       pageObjects,
     }) => {
@@ -108,6 +113,11 @@ test.describe(
       expect((await requestPromise).postDataJSON()).toMatchObject({
         subject: { type: 'alert', id: alertId },
       });
+
+      await pageObjects.toasts.waitForToastWithText('Investigation started');
+      expect(await pageObjects.toasts.getMessageText()).toContain('You will find it in Nightshift');
+      await pageObjects.alertPage.viewStartedInvestigation();
+      await expect(page).toHaveURL(/\/app\/nightshift\?investigationId=investigation-1$/);
     });
 
     test('views a completed investigation from an alert row action', async ({

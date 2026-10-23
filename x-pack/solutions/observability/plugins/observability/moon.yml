@@ -50,6 +50,7 @@ dependsOn:
   - '@kbn/core-ui-settings-browser-mocks'
   - '@kbn/alerts-ui-shared'
   - '@kbn/core-notifications-browser'
+  - '@kbn/core-rendering-browser-mocks'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/rule-registry-plugin'
   - '@kbn/alerts-grouping'
