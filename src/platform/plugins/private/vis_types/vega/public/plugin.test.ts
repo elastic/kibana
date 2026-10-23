@@ -170,6 +170,8 @@ describe('VegaPlugin', () => {
         type: VEGA_SAVED_OBJECT_TYPE,
         attributes: { title: 'My chart', description: 'A chart' },
         references: [],
+        updatedAt: '2026-10-23T19:44:56.091Z',
+        managed: true,
       } as unknown as Parameters<typeof extension.toListItem>[0]);
 
       expect(listItem).toEqual(
@@ -177,6 +179,8 @@ describe('VegaPlugin', () => {
           id: 'item-1',
           title: 'My chart',
           description: 'A chart',
+          updatedAt: '2026-10-23T19:44:56.091Z',
+          managed: true,
           savedObjectType: VEGA_SAVED_OBJECT_TYPE,
         })
       );

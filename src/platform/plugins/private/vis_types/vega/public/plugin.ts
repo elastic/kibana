@@ -176,10 +176,12 @@ export class VegaPlugin implements Plugin<void, void> {
           searchFields: ['title^3', 'description'],
           client: (_contentManagement, http) =>
             getVegaVisualizationClient(http) as BasicVisualizationClient,
-          toListItem: ({ id, type, attributes }) => ({
+          toListItem: ({ id, type, attributes, updatedAt, managed }) => ({
             id,
             title: attributes.title,
             description: attributes.description,
+            updatedAt,
+            managed,
             icon: 'visualizeApp',
             typeTitle: vegaTitleInWizard,
             stage: 'production',
