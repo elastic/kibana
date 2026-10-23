@@ -21,7 +21,7 @@ import {
   type Severity,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
@@ -103,16 +103,45 @@ export const useEventsUrlState = () => {
   );
 
   // Only typing writes the search to the URL, so Back/Forward can't be overwritten by a stale value.
-  const { run: writeSearch, cancel: cancelSearchWrite } = useDebounceFn((value: string) => {
-    updateParams((nextParams) => {
-      if (value.trim()) {
-        nextParams.set(SEARCH_QUERY_PARAM, value);
-      } else {
-        nextParams.delete(SEARCH_QUERY_PARAM);
-      }
-      nextParams.delete(PAGE_QUERY_PARAM);
-    }, true);
-  }, SEARCH_DEBOUNCE_OPTIONS);
+  const pendingSearch = useRef<string>();
+  const { run: debouncedWriteSearch, cancel: cancelDebouncedWrite } = useDebounceFn(
+    (value: string) => {
+      pendingSearch.current = undefined;
+      updateParams((nextParams) => {
+        if (value.trim()) {
+          nextParams.set(SEARCH_QUERY_PARAM, value);
+        } else {
+          nextParams.delete(SEARCH_QUERY_PARAM);
+        }
+        nextParams.delete(PAGE_QUERY_PARAM);
+      }, true);
+    },
+    SEARCH_DEBOUNCE_OPTIONS
+  );
+  const writeSearch = useCallback(
+    (value: string) => {
+      pendingSearch.current = value;
+      debouncedWriteSearch(value);
+    },
+    [debouncedWriteSearch]
+  );
+  const cancelSearchWrite = useCallback(() => {
+    pendingSearch.current = undefined;
+    cancelDebouncedWrite();
+  }, [cancelDebouncedWrite]);
+
+  // A tab switch inside the debounce unmounts this hook; keep the typed search on the new URL.
+  useEffect(
+    () => () => {
+      const value = pendingSearch.current;
+      if (value === undefined || !history.location.pathname.startsWith('/detections/')) return;
+      const nextParams = new URLSearchParams(history.location.search);
+      if (value.trim()) nextParams.set(SEARCH_QUERY_PARAM, value);
+      else nextParams.delete(SEARCH_QUERY_PARAM);
+      history.replace({ ...history.location, search: nextParams.toString() });
+    },
+    [history]
+  );
 
   useEffect(() => {
     cancelSearchWrite();

@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { sloIdSchema } from '../../schema/slo';
+import { z } from '@kbn/zod';
 
-const repairParamsSchema = t.type({
-  body: t.type({
-    list: t.array(sloIdSchema),
+import { sloIdSchema } from '../../schema/zod/slo';
+
+const repairParamsSchema = z.object({
+  body: z.object({
+    list: z.array(sloIdSchema),
   }),
 });
 
-type RepairParams = t.TypeOf<typeof repairParamsSchema.props.body>;
+type RepairParams = z.output<typeof repairParamsSchema.shape.body>;
 
 interface RepairAction {
   type: 'recreate-transform' | 'start-transform' | 'stop-transform' | 'noop';

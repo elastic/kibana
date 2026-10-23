@@ -16,25 +16,27 @@ import {
   type SourceNode,
 } from './types';
 
-const sourceNode = (sourceId: string, title: string, subtitle = 'Bulk'): SourceNode => ({
+const sourceNode = (
+  sourceId: string,
+  title: string,
+  subtitle = 'Bulk',
+  signals?: SourceNode['data']['signals']
+): SourceNode => ({
   id: configuredSourceNodeId(sourceId),
   type: SOURCE_NODE_TYPE,
   position: { x: 0, y: 0 },
-  data: { sourceId, title, subtitle },
+  data: { sourceId, title, subtitle, signals },
 });
 
-const destinationNode = (destinationId: string, title: string): DestinationNode => ({
+const destinationNode = (
+  destinationId: string,
+  title: string,
+  signals?: DestinationNode['data']['signals']
+): DestinationNode => ({
   id: configuredDestinationNodeId(destinationId),
   type: DESTINATION_NODE_TYPE,
   position: { x: 0, y: 0 },
-  data: { destinationId, title },
-});
-
-const placeholderNode = (nodeId: string): DestinationNode => ({
-  id: nodeId,
-  type: DESTINATION_NODE_TYPE,
-  position: { x: 0, y: 0 },
-  data: { unconfiguredNodeId: nodeId, title: 'New destination' },
+  data: { destinationId, title, signals },
 });
 
 const edge = (sourceId: string, destinationId: string): ClassicCanvasEdge => ({
@@ -43,14 +45,13 @@ const edge = (sourceId: string, destinationId: string): ClassicCanvasEdge => ({
   target: configuredDestinationNodeId(destinationId),
 });
 
-// nginx -> archive, nginx -> logs-nginx, otlp -> logs-nginx, plus an unconnected placeholder.
+// nginx -> archive, nginx -> logs-nginx, otlp -> logs-nginx.
 const graph: ClassicCanvasGraph = {
   nodes: [
     sourceNode('s1', 'Nginx', 'Logs'),
     sourceNode('s2', 'MOTLP endpoint', 'Managed input'),
-    destinationNode('d1', 'archive'),
-    destinationNode('d2', 'logs-nginx-default'),
-    placeholderNode('new-1'),
+    destinationNode('d1', 'archive', ['logs']),
+    destinationNode('d2', 'logs-nginx-default', ['logs']),
   ],
   edges: [edge('s1', 'd1'), edge('s1', 'd2'), edge('s2', 'd2')],
 };
@@ -101,6 +102,42 @@ describe('resolveCanvasSearch', () => {
       [configuredSourceNodeId('s2'), configuredDestinationNodeId('d2')].sort()
     );
   });
+
+  it('matches source signal badges', () => {
+    const tracesGraph: ClassicCanvasGraph = {
+      nodes: [sourceNode('s-traces', 'OTLP', 'Managed input', ['traces'])],
+      edges: [],
+    };
+    expect(nodeIdsOf(resolveCanvasSearch(tracesGraph, 'traces'))).toEqual([
+      configuredSourceNodeId('s-traces'),
+    ]);
+  });
+
+  it('matches destination signal badges', () => {
+    const metricsGraph: ClassicCanvasGraph = {
+      nodes: [destinationNode('d-metrics', 'prod', ['metrics'])],
+      edges: [],
+    };
+    expect(nodeIdsOf(resolveCanvasSearch(metricsGraph, 'metrics'))).toEqual([
+      configuredDestinationNodeId('d-metrics'),
+    ]);
+  });
+
+  it('matches targeted index names on a destination node', () => {
+    const destination: DestinationNode = {
+      id: configuredDestinationNodeId('d-logs'),
+      type: DESTINATION_NODE_TYPE,
+      position: { x: 0, y: 0 },
+      data: {
+        destinationId: 'd-logs',
+        title: 'prod logs',
+        targetedIndexNames: ['logs-nginx-default'],
+      },
+    };
+    expect(nodeIdsOf(resolveCanvasSearch({ nodes: [destination], edges: [] }, 'nginx'))).toEqual([
+      configuredDestinationNodeId('d-logs'),
+    ]);
+  });
 });
 
 describe('applyCanvasSearch', () => {
@@ -110,7 +147,7 @@ describe('applyCanvasSearch', () => {
     expect(result.edges).toBe(graph.edges);
   });
 
-  it('hides nodes and edges outside the flow but keeps placeholders visible', () => {
+  it('hides nodes and edges outside the flow', () => {
     const flow = resolveCanvasSearch(graph, 'archive');
     const { nodes, edges } = applyCanvasSearch(graph.nodes, graph.edges, flow);
 
@@ -119,7 +156,6 @@ describe('applyCanvasSearch', () => {
       [configuredSourceNodeId('s2')]: true,
       [configuredDestinationNodeId('d1')]: false,
       [configuredDestinationNodeId('d2')]: true,
-      'new-1': false,
     });
     expect(Object.fromEntries(edges.map((item) => [item.id, item.hidden]))).toEqual({
       's1->d1': false,

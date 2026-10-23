@@ -7,6 +7,7 @@
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { monitorCreateSchema, monitorForwardCompatibilitySchema } from './monitor_attribute_schema';
 import { attributesToIncludeInAAD } from './synthetics_monitor_config';
 import { monitorConfigMappings } from './monitor_mappings';
 import { legacySyntheticsMonitorTypeSingle } from '../../../common/types/saved_objects';
@@ -71,6 +72,15 @@ export const getLegacySyntheticsMonitorSavedObjectType = (
             },
           },
         ],
+      },
+      // Versions 1 and 2 shipped with mappings only, so a rollback to version 2
+      // cannot strip attributes added by a newer Kibana.
+      '3': {
+        changes: [],
+        schemas: {
+          create: monitorCreateSchema,
+          forwardCompatibility: monitorForwardCompatibilitySchema,
+        },
       },
     },
   };

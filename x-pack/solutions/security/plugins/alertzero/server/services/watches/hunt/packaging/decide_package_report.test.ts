@@ -12,9 +12,9 @@ import {
   ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
+import { buildProposalSubjectKey } from '../../../proposals/dedup';
 import {
   buildActionInput,
-  buildProposalSubjectKey,
   buildProposalSummaryBullets,
   canFillRespondAction,
   collectSubjects,
@@ -183,8 +183,9 @@ const forensicsHandoff: ActionCatalogEntry = {
 const enrolledHost = (
   name: string,
   agentId: string,
-  capabilities: string[] = ['isolation']
-): CurrentRunHost => ({ name, enrolled: true, agentId, capabilities });
+  capabilities: string[] = ['isolation'],
+  capabilitiesSource: CurrentRunHost['capabilitiesSource'] = 'reported'
+): CurrentRunHost => ({ name, enrolled: true, agentId, capabilities, capabilitiesSource });
 
 const selector = (
   overrides: Partial<ProcessSelector> & Pick<ProcessSelector, 'processKey' | 'processName'>
@@ -360,7 +361,13 @@ describe('decidePackageReport', () => {
           kind: 'host',
           value: 'host-a',
           reachable: true,
-          host: { name: 'host-a', enrolled: true, agentId: 'agent-a', capabilities: [] },
+          host: {
+            name: 'host-a',
+            enrolled: true,
+            agentId: 'agent-a',
+            capabilities: [],
+            capabilitiesSource: 'reported',
+          },
         },
       })
     ).toBe(false);
@@ -513,7 +520,13 @@ describe('decidePackageReport', () => {
     kind: 'process',
     value: processSelector.processName,
     reachable: true,
-    host: { name: 'host-a', enrolled: true, agentId: 'agent-a', capabilities: [] },
+    host: {
+      name: 'host-a',
+      enrolled: true,
+      agentId: 'agent-a',
+      capabilities: [],
+      capabilitiesSource: 'reported',
+    },
     processSelector,
   });
 
@@ -636,29 +649,6 @@ describe('decidePackageReport', () => {
     expect(byWorkflow.get(isolateHost.workflowId)).toBe('6f30494e-d19c-51d9-94b3-da6a6e4a17fd');
     // uuidv5(`agent-a|system-security-action-kill-process|entity:ent-4242`).
     expect(byWorkflow.get(killProcess.workflowId)).toBe('e7f4d23d-c0a4-57a8-804e-a1cbca13bc1c');
-  });
-
-  it('builds stable subject keys for the same host × action × process', () => {
-    const key = {
-      subjectId: 'e',
-      actionWorkflowId: 'a',
-      processKey: 'p',
-    };
-
-    expect(buildProposalSubjectKey(key)).toBe(buildProposalSubjectKey({ ...key }));
-  });
-
-  it('builds different subject keys for a different host, action or process', () => {
-    const key = { subjectId: 'e', actionWorkflowId: 'a', processKey: 'p' };
-    const keys = [
-      buildProposalSubjectKey(key),
-      buildProposalSubjectKey({ ...key, subjectId: 'e2' }),
-      buildProposalSubjectKey({ ...key, actionWorkflowId: 'a2' }),
-      buildProposalSubjectKey({ ...key, processKey: 'p2' }),
-      buildProposalSubjectKey({ subjectId: 'e', actionWorkflowId: 'a' }),
-    ];
-
-    expect(new Set(keys).size).toBe(keys.length);
   });
 
   describe('which Investigation raised a proposal', () => {
@@ -799,7 +789,13 @@ describe('decidePackageReport', () => {
       const subjects = collectSubjects(
         baseHitState({
           hosts: [
-            { name: 'host-a', enrolled: true, agentId: 'agent-a', capabilities: [] },
+            {
+              name: 'host-a',
+              enrolled: true,
+              agentId: 'agent-a',
+              capabilities: [],
+              capabilitiesSource: 'reported',
+            },
             { name: 'ghost', enrolled: false, capabilities: [] },
           ],
           processSelectors: [
@@ -896,6 +892,34 @@ describe('decidePackageReport', () => {
       );
       expect(result.proposals.find((p) => !p.actionWorkflowId)?.comment).toContain(
         'does not report isolation'
+      );
+    });
+
+    it('says the capabilities could not be read, not that the endpoint lacks them, when the metadata was unavailable', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          hosts: [enrolledHost('host-a', 'agent-a', [], 'unavailable')],
+          processSelectors: [ps1, rundll],
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      const executable = result.proposals.filter((p) => p.actionWorkflowId);
+      expect(kinds(executable)).toEqual([
+        ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+        ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+      ]);
+      expect(
+        executable.every((p) =>
+          p.comment.includes(
+            "the endpoint's capabilities could not be read (memdump_process is not assumed)"
+          )
+        )
+      ).toBe(true);
+      const recommendation = result.proposals.find((p) => !p.actionWorkflowId);
+      expect(recommendation?.comment).toContain('**Held back**');
+      expect(recommendation?.comment).toContain(
+        "the endpoint's capabilities could not be read (isolation is not assumed)"
       );
     });
 

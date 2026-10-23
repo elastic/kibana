@@ -235,6 +235,7 @@ const SuggestionPreview = ({
             margin-left: ${euiTheme.size.xxs};
             margin-bottom: ${euiTheme.size.xxs};
             padding: 0 ${euiTheme.size.s};
+            padding-bottom: ${euiTheme.size.s};
             box-shadow: none !important; // sass-lint:disable-line no-important
 
             &:focus {
@@ -678,13 +679,18 @@ export function SuggestionPanel({
           overflow-y: hidden;
           display: flex;
           padding-top: ${euiTheme.size.xs};
-          mask-image: linear-gradient(
-            to right,
-            ${dangerAlpha10} 0%,
-            ${euiTheme.colors.danger} 5px,
-            ${euiTheme.colors.danger} calc(100% - 5px),
-            ${dangerAlpha10} 100%
-          );
+          padding-bottom: ${wrapSuggestions ? euiTheme.size.base : 0};
+          ${!wrapSuggestions
+            ? `
+                mask-image: linear-gradient(
+                  to right,
+                  ${dangerAlpha10} 0%,
+                  ${euiTheme.colors.danger} 5px,
+                  ${euiTheme.colors.danger} calc(100% - 5px),
+                  ${dangerAlpha10} 100%
+                );
+              `
+            : ''}
         `}
       >
         {changesApplied ? renderSuggestionsUI() : renderApplyChangesPrompt()}

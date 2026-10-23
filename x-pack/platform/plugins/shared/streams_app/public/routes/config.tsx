@@ -18,6 +18,8 @@ import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
 import { StreamsLayout } from '../components/streams_layout';
 import { DEFAULT_STREAMS_LAYOUT_TAB } from '../components/streams_layout/tabs';
+import { IndexInspectPage } from '../components/index_inspect/index_inspect_page';
+import { DEFAULT_INDEX_INSPECT_TAB } from '../components/index_inspect/types';
 
 /**
  * Optional time range query params.
@@ -85,6 +87,41 @@ const streamsAppRoutes = {
                 params={{ path: { tab: DEFAULT_STREAMS_LAYOUT_TAB } }}
               />
             ),
+          },
+          /**
+           * Declared before `/{tab}` so `indices` is not treated as a layout tab.
+           */
+          '/new-experience/indices/{indexName}': {
+            element: (
+              <RedirectTo
+                path="/new-experience/indices/{indexName}/{tab}"
+                params={{ path: { tab: DEFAULT_INDEX_INSPECT_TAB } }}
+              />
+            ),
+            params: t.intersection([
+              t.type({
+                path: t.type({
+                  indexName: t.string,
+                }),
+              }),
+              t.partial({
+                query: timeRangeQueryParams,
+              }),
+            ]),
+          },
+          '/new-experience/indices/{indexName}/{tab}': {
+            element: <IndexInspectPage />,
+            params: t.intersection([
+              t.type({
+                path: t.type({
+                  indexName: t.string,
+                  tab: t.string,
+                }),
+              }),
+              t.partial({
+                query: managementQueryParams,
+              }),
+            ]),
           },
           '/new-experience/{tab}': {
             element: <StreamsLayout />,
