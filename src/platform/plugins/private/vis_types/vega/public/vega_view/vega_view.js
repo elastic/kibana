@@ -15,16 +15,19 @@ export class VegaView extends VegaBaseView {
     // In some cases, Vega may be initialized twice... TBD
     if (!this._container) return;
 
-    const view = new View(parse(this._parser.spec, undefined, { ast: true }), this._vegaViewConfig);
+    const view = new View(
+      parse(this._descriptor.spec, undefined, { ast: true }),
+      this._vegaViewConfig
+    );
 
-    if (this._parser.useResize) this.updateVegaSize(view);
+    if (this._descriptor.useResize) this.updateVegaSize(view);
     view.initialize(this._container, this._controls);
     // resize again to take controls into account
-    if (this._parser.useResize) this.updateVegaSize(view);
+    if (this._descriptor.useResize) this.updateVegaSize(view);
 
-    if (this._parser.useHover) view.hover();
+    if (this._descriptor.useHover) view.hover();
 
     await this.setView(view);
-    this.setDebugValues(view, this._parser.spec, this._parser.vlspec);
+    this._onViewCreated(view);
   }
 }

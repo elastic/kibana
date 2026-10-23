@@ -395,6 +395,37 @@ describe('deployNewAgentPolicy', () => {
     expect(result.packagePolicyIdsByInstance.s3).toBeDefined();
   });
 
+  it('names the package policy after the integration name and sets the description', async () => {
+    const svc = makeSimpleService();
+    const groups = buildAgentBasedTargets([], ['vpcflow'], new Map([['vpcflow', svc]]));
+
+    await deployNewAgentPolicy(groups, {
+      ...BASE_OPTS,
+      integrationName: ' my-aws ',
+      description: ' Production AWS ',
+      agentPolicyName: 'AWS Agent Policy 1',
+    });
+
+    const [packagePolicy] = mockSendCreateAgentPolicy.mock.calls[0][0].package_policies;
+    expect(packagePolicy.name).toBe('my-aws');
+    expect(packagePolicy.description).toBe('Production AWS');
+  });
+
+  it('omits the description when it is blank', async () => {
+    const svc = makeSimpleService();
+    const groups = buildAgentBasedTargets([], ['vpcflow'], new Map([['vpcflow', svc]]));
+
+    await deployNewAgentPolicy(groups, {
+      ...BASE_OPTS,
+      integrationName: 'my-aws',
+      description: '   ',
+      agentPolicyName: 'AWS Agent Policy 1',
+    });
+
+    const [packagePolicy] = mockSendCreateAgentPolicy.mock.calls[0][0].package_policies;
+    expect(packagePolicy).not.toHaveProperty('description');
+  });
+
   it('puts namespace on the agent policy and omits it per package policy', async () => {
     const svc = makeSimpleService();
     const groups = buildAgentBasedTargets([], ['vpcflow'], new Map([['vpcflow', svc]]));
