@@ -54,12 +54,8 @@ async function checkConsistentFailures({
   repo: string;
   dryRun: boolean;
 }) {
-  const {
-    BUILDKITE_PIPELINE_SLUG: pipeline,
-    BUILDKITE_BRANCH: branch,
-    BUILDKITE_BUILD_NUMBER: buildNumber,
-  } = process.env;
-  if (!pipeline || !branch || !buildNumber) {
+  const { BUILDKITE_PIPELINE_SLUG: pipeline, BUILDKITE_BRANCH: branch } = process.env;
+  if (!pipeline || !branch) {
     log.warning('Not in a Buildkite job, skipping the consistent failure check');
     return;
   }
@@ -82,7 +78,7 @@ async function checkConsistentFailures({
       es,
       github: new GithubApi({ log, token: process.env.GITHUB_TOKEN, dryRun, repo }),
       repo,
-      build: { pipeline, branch, number: Number(buildNumber) },
+      build: { pipeline, branch },
       dryRun,
     });
   } finally {

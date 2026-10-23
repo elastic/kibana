@@ -20,7 +20,7 @@ import type { ScoutTestFailureExtended } from './get_scout_failures';
 import type { GithubApi, GithubIssue } from './github_api';
 
 const log = new ToolingLog();
-const build = { pipeline: 'kibana-on-merge', branch: 'main', number: 102 };
+const build = { pipeline: 'kibana-on-merge', branch: 'main' };
 
 const SPEC = 'x-pack/platform/plugins/shared/discover/test/scout/ui/tests/esql.spec.ts';
 const FTR_FILE = 'x-pack/platform/test/functional/apps/discover/group1/_discover.ts';
@@ -140,7 +140,6 @@ const report = (
     repo: 'elastic/appex-qa-ai',
     build,
     dryRun: false,
-    finishedBuilds: async () => new Set(),
     ...overrides,
   });
 
@@ -237,43 +236,28 @@ describe('reportConsistentFailureIssues', () => {
     expect(summary).toEqual({ created: [], tracked: [], skipped: [] });
   });
 
-  it('settles a build whose retry did not report once Buildkite says it finished', async () => {
-    const rows = brokenSince('test-1', 101, 102).map((record) =>
-      record.build === 101 ? { ...record, failed: 1, attempts: 1 } : record
-    );
-    const finishedBuilds = jest.fn().mockResolvedValue(new Set([101]));
-
-    const settled = await report({
-      es: mockEs(rows).es,
-      failures: [scoutFailure('test-1', 'x')],
-      finishedBuilds,
-    });
-    expect(finishedBuilds).toHaveBeenCalledWith([101]);
-    expect(settled.created).toHaveLength(1);
-
-    const stillRunning = await report({
-      es: mockEs(rows).es,
-      failures: [scoutFailure('test-1', 'x')],
-      finishedBuilds: async () => new Set(),
-    });
-    expect(stillRunning.created).toHaveLength(0);
-  });
-
-  it('does not ask Buildkite about the current build, which settles through its retry alone', async () => {
-    const rows = brokenSince('test-1', 101, 102).map((record) =>
+  it('leaves a build whose retry has not reported the test out of the count', async () => {
+    // the current build's job failed once, its retry has not run: #101 alone is one build short
+    const current = brokenSince('test-1', 101, 102).map((record) =>
       record.build === 102 ? { ...record, failed: 1, attempts: 1 } : record
     );
-    const finishedBuilds = jest.fn().mockResolvedValue(new Set());
+    const short = await report({ es: mockEs(current).es, failures: [scoutFailure('test-1', 'x')] });
+    expect(short.created).toHaveLength(0);
 
-    const summary = await report({
-      es: mockEs(rows).es,
+    // an earlier build with a single failing report neither counts nor breaks the streak
+    const earlier = brokenSince('test-1', 100, 102).map((record) =>
+      record.build === 101 ? { ...record, failed: 1, attempts: 1 } : record
+    );
+    const { github, createIssue } = mockGithub();
+    const found = await report({
+      es: mockEs(earlier).es,
+      github,
       failures: [scoutFailure('test-1', 'x')],
-      finishedBuilds,
     });
-
-    expect(finishedBuilds).not.toHaveBeenCalled();
-    // #101 alone is one failing build short
-    expect(summary.created).toHaveLength(0);
+    expect(found.created).toHaveLength(1);
+    expect(createIssue.mock.calls[0][1]).toContain(
+      'builds [#100](https://buildkite.com/elastic/kibana-on-merge/builds/100) and [#102]'
+    );
   });
 
   it('skips a suite an open issue is already about, and names it', async () => {

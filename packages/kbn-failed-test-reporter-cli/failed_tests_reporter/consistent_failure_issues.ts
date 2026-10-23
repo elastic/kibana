@@ -15,7 +15,6 @@ import {
   type ConsistentFailure,
   type TestFramework,
   type TestSetup,
-  type TestSetupRuns,
 } from '@kbn/scout-reporting';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { plural } from '../flaky_test_issues/markdown';
@@ -28,7 +27,6 @@ import {
   type MatchedIssue,
 } from '../flaky_test_issues/match_issues';
 import { FAILED_TEST_LABEL, issueLabels } from '../flaky_test_issues/reporter';
-import { fetchFinishedBuilds } from './buildkite_builds';
 import { getScoutTestId, getTestFilePath, isScoutFailure } from './failure_identity';
 import {
   failingSuiteIssueTitle,
@@ -58,7 +56,6 @@ const UNKNOWN_TARGET_MODE = 'unknown';
 export interface CurrentBuild {
   pipeline: string;
   branch: string;
-  number: number;
 }
 
 export interface ConsistentFailureIssuesOptions {
@@ -72,8 +69,6 @@ export interface ConsistentFailureIssuesOptions {
   repo: string;
   build: CurrentBuild;
   dryRun: boolean;
-  /** Which of the given builds of the pipeline have finished; Buildkite is asked by default. */
-  finishedBuilds?: (builds: number[]) => Promise<Set<number>>;
   now?: Date;
 }
 
@@ -124,36 +119,6 @@ const candidatesOf = (failures: readonly TestFailure[]): Candidate[] => {
     }
   }
   return [...byId.values()];
-};
-
-/**
- * Settles the pending runs of finished builds. The current build is still running, so its runs
- * only settle through the events, once a second job attempt reported them.
- */
-const settleFinishedBuilds = async (
-  runs: readonly TestSetupRuns[],
-  current: CurrentBuild,
-  finishedBuilds: (builds: number[]) => Promise<Set<number>>
-): Promise<void> => {
-  const pending = new Set<number>();
-  for (const { runs: builds } of runs) {
-    for (const run of builds) {
-      if (run.build !== current.number && verdictOf(run) === 'pending') {
-        pending.add(run.build);
-      }
-    }
-  }
-  if (pending.size === 0) {
-    return;
-  }
-  const finished = await finishedBuilds([...pending].sort((a, b) => a - b));
-  for (const { runs: builds } of runs) {
-    for (const run of builds) {
-      if (finished.has(run.build)) {
-        run.settled = true;
-      }
-    }
-  }
 };
 
 const setupLabel = ({ configPath, targetMode }: TestSetup): string =>
@@ -246,8 +211,7 @@ const describeSuite = ({ filePath, framework }: FailingSuite): string =>
 /**
  * Files a `failed-test` issue for every test file of the job whose tests failed every attempt of
  * the latest builds of the pipeline and branch after passing before, by the test events of those
- * builds. Builds whose retry has not reported yet are asked about from Buildkite and settle once
- * finished. A file an open issue is already about gets none, nor do files beyond
+ * builds. A file an open issue is already about gets none, nor do files beyond
  * `MAX_NEW_ISSUES_PER_JOB`, so a job that breaks everything files a few issues, not dozens. The
  * same break is found again by the next builds while it lasts, so a check that could not run
  * does not lose it; the issue it filed then keeps it from being filed twice.
@@ -256,9 +220,6 @@ export const reportConsistentFailureIssues = async (
   options: ConsistentFailureIssuesOptions
 ): Promise<ConsistentFailureIssuesSummary> => {
   const { log, failures, es, github, repo, build, dryRun, now = new Date() } = options;
-  const finishedBuilds =
-    options.finishedBuilds ??
-    ((builds: number[]) => fetchFinishedBuilds(build.pipeline, builds, log));
   const summary: ConsistentFailureIssuesSummary = { created: [], tracked: [], skipped: [] };
 
   const candidates = candidatesOf(failures);
@@ -276,7 +237,6 @@ export const reportConsistentFailureIssues = async (
     { pipeline: build.pipeline, branch: build.branch, since },
     candidates
   );
-  await settleFinishedBuilds(runs, build, finishedBuilds);
 
   const byId = new Map(candidates.map((candidate) => [candidate.testId, candidate]));
   const breaks: Break[] = [];

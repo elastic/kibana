@@ -34,11 +34,11 @@ so for now these issues go to the sandbox while the per-test issues keep being f
 without failing the job's reporting.
 
 A test fails consistently when its latest builds, at least two, all failed on every attempt and
-the 20 settled builds before all passed; a new test with no history before counts too. A build
-is settled once a second attempt of the job reported the test or, when none has, once Buildkite
-says the build finished. The current build is never asked about, so a job that does not retry contributes to the
-check of the next build. The check runs on every failing attempt and finds a break again on every
-build while it lasts; the issue filed the first time keeps it from filing another.
+the 20 builds before all passed; a new test with no history before counts too. A build counts
+only once a second attempt of the job reported the test; a build with a single failing report,
+the current one included until its retry runs, is left out. The check runs on every failing
+attempt and finds a break again on every build while it lasts; the issue filed the first time
+keeps it from filing another.
 
 The issue is titled `Failing <Framework> [UI|API] suite: <title>`, with the `describe` block the
 breaking tests share or the file name, and labelled like a flaky suite issue (`failed-test` plus
