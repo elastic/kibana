@@ -168,7 +168,7 @@ const prepareLegacyVisualization = async ({
   await expect
     .poll(() => discover.getHistogramLegendLabels())
     .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
-  await expect.poll(() => discover.getVisualizationTitle()).toBe('Line');
+  await expect(discover.getHistogramChart()).toHaveAttribute('data-series-type', 'line');
   await discover.saveSearch(sessionName);
 
   const { saved_objects: sessions } = await kbnClient.savedObjects.find<DiscoverSessionAttributes>({
@@ -232,10 +232,8 @@ spaceTest.describe(
         await spaceTest.step('save a customized chart and verify a normal reload', async () => {
           await discover.writeAndSubmitEsqlQuery(ESQL_QUERY);
           await discover.changeVisualizationShape('Line');
-          // Applying the flyout doesn't switch the chart right away: it stays a Bar until the chart
-          // finishes loading the query we just submitted. On a slow machine that takes a bit,
-          // so a single read can still see "Bar". Keep checking until it says "Line".
-          await expect.poll(() => discover.getVisualizationTitle()).toBe('Line');
+          // The chart may still be loading here; wait on it without reopening the flyout.
+          await expect(discover.getHistogramChart()).toHaveAttribute('data-series-type', 'line');
 
           await discover.saveSearch(sessionName);
           await page.reload();
@@ -292,7 +290,7 @@ spaceTest.describe(
           await expect
             .poll(() => discover.getHistogramLegendLabels())
             .toStrictEqual(BREAKDOWN_LEGEND_LABELS);
-          await expect.poll(() => discover.getVisualizationTitle()).toBe('Line');
+          await expect(discover.getHistogramChart()).toHaveAttribute('data-series-type', 'line');
           await discover.saveSearch(sessionName);
         });
 
