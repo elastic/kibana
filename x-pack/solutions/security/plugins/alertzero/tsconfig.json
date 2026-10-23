@@ -66,6 +66,7 @@
     "@kbn/security-mitre-attack-common",
     "@kbn/security-mitre-attack-mocks",
     "@kbn/inference-plugin",
+    "@kbn/inference-common",
     "@kbn/fleet-plugin",
     "@kbn/mitre-attack-plugin",
     "@kbn/management-settings-ids",

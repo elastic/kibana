@@ -6,6 +6,7 @@
  */
 
 import type { IUiSettingsClient, KibanaRequest, Logger } from '@kbn/core/server';
+import { ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { HuntModels, HuntModelTier } from '../../../services/watches/hunt/types';
@@ -13,7 +14,7 @@ import {
   HUNT_MODEL_TIERS,
   HUNT_MODEL_TIER_FEATURE_IDS,
 } from '../../../services/watches/hunt/common/hunt_model_tiers';
-import { resolveScopedModel } from './scoped_model';
+import { resolveConfiguredScopedModel, resolveScopedModel } from './scoped_model';
 
 export interface HuntModelFailure {
   tier: HuntModelTier;
@@ -114,5 +115,16 @@ export const resolveHuntModels = async ({
     if (model) models[tier] = model;
     if (failure) failures.push(failure);
   }
+
+  // Empty when the row has no saved model. Callers then stay on the tier they asked for.
+  const cyber = await resolveConfiguredScopedModel({
+    inference,
+    searchInferenceEndpoints,
+    featureId: ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
+    request,
+    logger,
+  });
+  if (cyber) models.cyber = cyber;
+
   return { models, failures };
 };

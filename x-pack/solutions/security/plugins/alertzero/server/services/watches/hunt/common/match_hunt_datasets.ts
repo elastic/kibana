@@ -10,6 +10,11 @@ import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntIoc } from '@kbn/alertzero-common';
 import type { DiscoveredDataset } from './discover_hunt_datasets';
+import { invokeHuntStructured } from './invoke_hunt_structured';
+import {
+  HUNT_DATASET_MATCH_TEMPLATE_ID,
+  HUNT_PROMPT_TEMPLATE_VERSION,
+} from './hunt_prompt_templates';
 
 /** What a report contributes to scope matching. All optional. */
 export interface HuntScopeReportContext {
@@ -259,8 +264,28 @@ export const matchDatasetsWithModel = async ({
 
   let output: DatasetMatchOutput;
   try {
-    const structured = model.chatModel.withStructuredOutput(datasetMatchSchema);
-    output = await structured.invoke(buildPrompt(options, report));
+    output = await invokeHuntStructured({
+      model,
+      schema: datasetMatchSchema,
+      prompt: buildPrompt(options, report),
+      template: {
+        id: HUNT_DATASET_MATCH_TEMPLATE_ID,
+        version: HUNT_PROMPT_TEMPLATE_VERSION,
+        variables: {
+          vendor: report.vendor ?? '',
+          product: report.product ?? '',
+          datasets: options
+            .map((dataset) => `${dataset.dataset} | ${dataset.index_pattern}`)
+            .join('\n'),
+          techniques: (report.techniques ?? []).join(', '),
+          iocs: (report.iocs ?? [])
+            .slice(0, MAX_PROMPT_IOCS)
+            .map((ioc) => ioc.value)
+            .join(', '),
+          report_text: report.text?.slice(0, MAX_PROMPT_TEXT_CHARS) ?? '',
+        },
+      },
+    });
   } catch (err) {
     logger?.warn(
       `Hunt dataset model matching failed: ${err instanceof Error ? err.message : String(err)}`

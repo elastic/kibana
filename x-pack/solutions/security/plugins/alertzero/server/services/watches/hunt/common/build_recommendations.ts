@@ -9,6 +9,11 @@ import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { z } from '@kbn/zod/v4';
 import type { HuntCoordinatorCoreResult } from '../hunt_coordinator';
+import { invokeHuntStructured } from './invoke_hunt_structured';
+import {
+  HUNT_PROMPT_TEMPLATE_VERSION,
+  HUNT_RECOMMENDATIONS_TEMPLATE_ID,
+} from './hunt_prompt_templates';
 
 /** Schema cap: `manual_remediation` on the SSE accepts up to 50, but a hunt should stay short. */
 export const MAX_RECOMMENDATIONS = 8;
@@ -169,10 +174,16 @@ export const generateRecommendations = async ({
     return templateRecommendations(result);
   }
   try {
-    const structured = model.chatModel.withStructuredOutput(recommendationsExtractionSchema);
-    const parsed = (await structured.invoke(
-      `${RECOMMENDATIONS_PROMPT}\n\n--- CONTEXT ---\n${context}`
-    )) as z.infer<typeof recommendationsExtractionSchema>;
+    const parsed = await invokeHuntStructured({
+      model,
+      schema: recommendationsExtractionSchema,
+      prompt: `${RECOMMENDATIONS_PROMPT}\n\n--- CONTEXT ---\n${context}`,
+      template: {
+        id: HUNT_RECOMMENDATIONS_TEMPLATE_ID,
+        version: HUNT_PROMPT_TEMPLATE_VERSION,
+        variables: { context },
+      },
+    });
     const allowed = buildAllowedEntitySet(result);
     const grounded = parsed.recommendations
       .filter((line) => isLineGrounded(line, allowed))
