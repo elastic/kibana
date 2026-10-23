@@ -9,12 +9,13 @@ import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { OutputErrorCode } from '../../../common/workflows/contract/error_codes';
 import type { OutputErrorCodeValue } from '../../../common/workflows/contract/error_codes';
 import type { StepStatus, TargetInput } from '../../../common/workflows/contract/schemas';
-import { PUBLIC_API_HEADERS } from './api_headers';
-import { collectResults } from './collect_results';
+import { DISPATCH_API_HEADERS, PUBLIC_API_HEADERS } from './api_headers';
+import { collectResults, countIndexedResults } from './collect_results';
 import type { OutputBudget } from './collect_results';
 import type { ResultRow } from './build_rows';
 import { toDispatchRejection } from './errors';
 import { deriveStepStatus } from './poll_contract';
+import type { QueryCounters } from './poll_contract';
 import type { KibanaApiCaller, StepLogger } from './types';
 
 export interface PollQuerySpec {
@@ -51,7 +52,11 @@ interface DispatchResponse {
   data: {
     action_id: string;
     agents?: string[];
-    queries?: Array<{ action_id: string; id?: string }>;
+    queries?: Array<{
+      action_id: string;
+      id?: string;
+      ecs_mapping?: Record<string, unknown> | Array<{ key?: string }>;
+    }>;
   };
 }
 
@@ -73,7 +78,11 @@ export type DispatchOutcome =
       type: 'dispatched';
       actionId: string;
       agentsTotal: number;
-      queries: Array<{ action_id: string; id?: string }>;
+      queries: Array<{
+        action_id: string;
+        id?: string;
+        ecs_mapping?: Record<string, unknown> | Array<{ key?: string }>;
+      }>;
     }
   | { type: 'unconfirmed' };
 
@@ -104,7 +113,7 @@ export const dispatchLiveQuery = async ({
       method: 'POST',
       path: '/api/osquery/live_queries',
       body: { ...fields, ...targetFields(target) },
-      headers: PUBLIC_API_HEADERS,
+      headers: DISPATCH_API_HEADERS,
     }));
   } catch (error) {
     const rejection = toDispatchRejection(error);
@@ -172,9 +181,12 @@ export const readLiveQuery = async ({
     logger.warn(`Live query ${state.action_id} poll failed: ${(error as Error).message}`);
   }
 
-  const results: QueryResult[] = [];
-  let rowsStillIndexing = false;
-
+  const finished: Array<{
+    spec: PollQuerySpec;
+    status: StepStatus;
+    counters: QueryCounters;
+    rowCount: number;
+  }> = [];
   for (const spec of state.queries) {
     const detail = details.find((query) => query.action_id === spec.action_id);
     const counters = {
@@ -186,7 +198,39 @@ export const readLiveQuery = async ({
     const status = deriveStepStatus(counters, deadlinePassed);
     if (status === undefined) return { type: 'pending' };
 
-    const rowCount = detail?.docs ?? 0;
+    finished.push({ spec, status, counters, rowCount: detail?.docs ?? 0 });
+  }
+
+  // The response counters are written before the result documents become searchable. Until the
+  // deadline, a poll only counts them; the rows are read once, when all of them can be.
+  if (!deadlinePassed) {
+    for (const { spec, rowCount } of finished) {
+      const wanted = Math.min(rowCount, state.max_rows);
+      if (wanted === 0) continue;
+
+      try {
+        const indexed = await countIndexedResults({
+          contextManager,
+          actionId: state.action_id,
+          queryActionId: spec.action_id,
+        });
+        if (indexed < wanted) return { type: 'pending' };
+      } catch (error) {
+        if (isForbidden(error)) {
+          return { type: 'failed', errorCode: OutputErrorCode.STATUS_UNREADABLE_FORBIDDEN };
+        }
+
+        logger.warn(
+          `Live query ${state.action_id} results count failed: ${(error as Error).message}`
+        );
+
+        return { type: 'pending' };
+      }
+    }
+  }
+
+  const results: QueryResult[] = [];
+  for (const { spec, status, counters, rowCount } of finished) {
     let rows: ResultRow[] = [];
     if (rowCount > 0) {
       try {
@@ -207,12 +251,9 @@ export const readLiveQuery = async ({
         logger.warn(
           `Live query ${state.action_id} results read failed: ${(error as Error).message}`
         );
+        // The rows were countable a moment ago: read them again on the next poll.
+        if (!deadlinePassed) return { type: 'pending' };
       }
-    }
-
-    // The response counters are written before the result documents become searchable.
-    if (rows.length < Math.min(rowCount, state.max_rows) && !budget.exhausted) {
-      rowsStillIndexing = true;
     }
 
     results.push({
@@ -230,8 +271,6 @@ export const readLiveQuery = async ({
       truncated: rows.length < rowCount,
     });
   }
-
-  if (rowsStillIndexing && !deadlinePassed) return { type: 'pending' };
 
   return { type: 'done', results };
 };

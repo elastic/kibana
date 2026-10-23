@@ -92,15 +92,23 @@ describe('osquery workflow step pickers', () => {
       expect(await selection.resolve('procs_linux', context('saved_query'))).toBeNull();
     });
 
-    it('does not call the API for an empty value, and swallows request errors', async () => {
+    it('does not call the API for an empty value', async () => {
       const selection = createSavedQuerySelection(http);
 
       expect(await selection.resolve('  ', context('saved_query'))).toBeNull();
       expect(http.get).not.toHaveBeenCalled();
+    });
 
-      http.get.mockRejectedValue(new Error('403'));
+    it('reports a failed lookup instead of a missing saved query', async () => {
+      const selection = createSavedQuerySelection(http);
+      http.get.mockRejectedValue({ message: 'Forbidden', body: { message: 'Forbidden' } });
+
       expect(await selection.search('x', context('saved_query'))).toEqual([]);
       expect(await selection.resolve('x', context('saved_query'))).toBeNull();
+
+      const details = await selection.getDetails('x', context('saved_query'), null);
+      expect(details.message).toMatch(/Forbidden/);
+      expect(details.message).not.toMatch(/install/i);
     });
 
     it('explains how to fix a missing saved query', async () => {

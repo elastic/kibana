@@ -11,6 +11,10 @@ import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { PreDispatchErrorCode } from '../../../common/workflows/contract/error_codes';
 import type { PreDispatchErrorCodeValue } from '../../../common/workflows/contract/error_codes';
 
+/** True when a pre-dispatch read was rejected for authz (401/403). */
+export const isMissingPrivilege = (error: unknown): boolean =>
+  error instanceof ExecutionError && error.details?.code === PreDispatchErrorCode.MISSING_PRIVILEGE;
+
 /** Raised before dispatch: `details.code` is the contract's error code. */
 export const stepError = (
   code: PreDispatchErrorCodeValue,
@@ -63,6 +67,10 @@ export const toDispatchRejection = (error: unknown): ExecutionError | undefined 
       `Live query rejected (HTTP ${error.status}): ${message}`,
       'PermissionError'
     );
+  }
+
+  if (error.status === 400 && /above the limit of \d+/i.test(message)) {
+    return stepError(PreDispatchErrorCode.TARGET_LIMIT_EXCEEDED, message);
   }
 
   if (error.status === 400 && /No agents found for selection/i.test(message)) {

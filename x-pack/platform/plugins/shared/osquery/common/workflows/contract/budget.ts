@@ -8,6 +8,18 @@
 export const DEFAULT_WAIT_MS = 5 * 60 * 1000;
 export const MAX_WAIT_MS = 30 * 60 * 1000;
 
+const WAIT_UNIT_MS = { s: 1000, m: 60 * 1000, h: 60 * 60 * 1000 } as const;
+
+/** False for a duration above {@link MAX_WAIT_MS}. Invalid strings are rejected by the schema regex. */
+export const isWithinMaxWait = (value: string): boolean => {
+  const match = value.match(/^([1-9][0-9]*)(s|m|h)$/);
+  if (!match) return false;
+
+  const unit = match[2] as keyof typeof WAIT_UNIT_MS;
+
+  return Number(match[1]) * WAIT_UNIT_MS[unit] <= MAX_WAIT_MS;
+};
+
 export const DEFAULT_MAX_ROWS = 1000;
 export const MAX_ROWS = 10000;
 

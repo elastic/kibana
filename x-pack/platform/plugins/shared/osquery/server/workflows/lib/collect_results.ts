@@ -19,8 +19,38 @@ export interface OutputBudget {
 }
 
 interface ResultsResponse {
-  data?: { edges?: Array<{ _source?: Record<string, unknown> }> };
+  data?: { edges?: Array<{ _source?: Record<string, unknown> }>; total?: number };
 }
+
+const rowBytes = (row: ResultRow): number => Buffer.byteLength(JSON.stringify(row), 'utf8');
+
+const resultsPath = (actionId: string, queryActionId: string) =>
+  `/api/osquery/live_queries/${encodeURIComponent(actionId)}/results/${encodeURIComponent(
+    queryActionId
+  )}`;
+
+/**
+ * How many result documents are searchable now, from a one-row read. Polls call this until it
+ * reaches the response counters, so the rows themselves are read once, after indexing caught up.
+ */
+export const countIndexedResults = async ({
+  contextManager,
+  actionId,
+  queryActionId,
+}: {
+  contextManager: KibanaApiCaller;
+  actionId: string;
+  queryActionId: string;
+}): Promise<number> => {
+  const { body } = await contextManager.callKibanaApi<ResultsResponse>({
+    method: 'GET',
+    path: resultsPath(actionId, queryActionId),
+    query: { page: 0, pageSize: 1 },
+    headers: PUBLIC_API_HEADERS,
+  });
+
+  return body.data?.total ?? 0;
+};
 
 /**
  * Reads up to `maxRows` rows page by page. Stops at `rowCount`, at the route's 10k window and
@@ -47,9 +77,7 @@ export const collectResults = async ({
   const rows: ResultRow[] = [];
   if (budget.exhausted) return rows;
 
-  const path = `/api/osquery/live_queries/${encodeURIComponent(
-    actionId
-  )}/results/${encodeURIComponent(queryActionId)}`;
+  const path = resultsPath(actionId, queryActionId);
 
   for (
     let page = 0;
@@ -61,7 +89,14 @@ export const collectResults = async ({
     const { body } = await contextManager.callKibanaApi<ResultsResponse>({
       method: 'GET',
       path,
-      query: { page, pageSize: RESULTS_PAGE_SIZE },
+      query: {
+        page,
+        pageSize: RESULTS_PAGE_SIZE,
+        // A document still arriving during the read (after the deadline) sorts after the pages
+        // already read, instead of shifting them.
+        sort: 'event.ingested',
+        sortOrder: 'asc',
+      },
       headers: PUBLIC_API_HEADERS,
     });
     const edges = body.data?.edges ?? [];
@@ -70,7 +105,7 @@ export const collectResults = async ({
     for (const edge of edges) {
       if (!edge._source || rows.length >= maxRows) continue;
       const row = buildRow(edge._source, ecsKeys);
-      const size = JSON.stringify(row).length;
+      const size = rowBytes(row);
       if (size > budget.remainingBytes) {
         budget.exhausted = true;
 
@@ -80,6 +115,8 @@ export const collectResults = async ({
       budget.remainingBytes -= size;
       rows.push(row);
     }
+
+    if (edges.length < RESULTS_PAGE_SIZE) break;
   }
 
   return rows;

@@ -31,6 +31,24 @@ describe('buildRow', () => {
     });
   });
 
+  it('reads a multi-field mapping key from its parent field', () => {
+    const row = buildRow(
+      { agent: { id: 'a1' }, host: { os: { name: 'Ubuntu', platform: 'ubuntu' } } },
+      ['host.os.name.text', 'host.os.platform']
+    );
+
+    expect(row.ecs).toEqual({ 'host.os.name.text': 'Ubuntu', 'host.os.platform': 'ubuntu' });
+  });
+
+  it('does not fall back to a parent object or a missing parent', () => {
+    const row = buildRow({ agent: { id: 'a1' }, host: { os: { name: 'Ubuntu' } } }, [
+      'host.os.missing',
+      'nope.text',
+    ]);
+
+    expect(row.ecs).toEqual({});
+  });
+
   it('has an empty ecs object without a mapping', () => {
     expect(buildRow(source, []).ecs).toEqual({});
   });

@@ -23,6 +23,11 @@ const ONLINE_KUERY = '(status:online OR status:degraded)';
  */
 const SAFE_FLEET_PLATFORM = /^[a-z0-9][a-z0-9._-]{0,63}$/;
 
+export interface ResolvedTarget {
+  target: TargetInput;
+  agentCount: number;
+}
+
 interface AgentsResponse {
   total?: number;
   groups?: { platforms?: Array<{ id: string; size: number }> };
@@ -66,16 +71,20 @@ const readAgents = async (
  * Turns the step's targeting input into what the live-query route takes, before anything is
  * dispatched:
  * - `agent_ids` is bounded by the schema and passed through.
- * - `agent_policy_ids` is counted against the ceiling, because the route has no bound.
+ * - `agent_policy_ids` is counted against the ceiling. The dispatch POST repeats the check
+ *   on the agents the route actually selects, so a short count here cannot fan out past it.
  * - `agent_platforms` (osquery ids) is expanded to the Fleet platform values of the online,
  *   osquery-enabled agents in this space, and counted from the same response.
+ *
+ * `agentCount` is that count (online agents only), for outputs written when the dispatch
+ * response never arrives.
  */
 export const resolveTarget = async (
   contextManager: KibanaApiCaller,
   input: TargetInput
-): Promise<TargetInput> => {
+): Promise<ResolvedTarget> => {
   if (input.agent_ids) {
-    return { agent_ids: input.agent_ids };
+    return { target: { agent_ids: input.agent_ids }, agentCount: input.agent_ids.length };
   }
 
   if (input.agent_policy_ids) {
@@ -85,7 +94,7 @@ export const resolveTarget = async (
     );
     if (total > TARGET_AGENT_LIMIT) throw tooMany(total);
 
-    return { agent_policy_ids: input.agent_policy_ids };
+    return { target: { agent_policy_ids: input.agent_policy_ids }, agentCount: total };
   }
 
   const platformIds = (input.agent_platforms ?? []) as PlatformId[];
@@ -106,5 +115,5 @@ export const resolveTarget = async (
   const total = buckets.reduce((sum, bucket) => sum + bucket.size, 0);
   if (total > TARGET_AGENT_LIMIT) throw tooMany(total);
 
-  return { agent_platforms: buckets.map((bucket) => bucket.id) };
+  return { target: { agent_platforms: buckets.map((bucket) => bucket.id) }, agentCount: total };
 };

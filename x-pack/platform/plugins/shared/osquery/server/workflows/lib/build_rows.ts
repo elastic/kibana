@@ -13,6 +13,24 @@ export type ResultRow = RunQueryOutput['rows'][number];
 const readPath = (source: Record<string, unknown>, path: string): unknown =>
   path in source ? source[path] : get(source, path);
 
+const isLeafValue = (value: unknown): boolean =>
+  value !== null && value !== undefined && (typeof value !== 'object' || Array.isArray(value));
+
+/**
+ * Reads an `ecs_mapping` key. A key naming a multi-field (`host.os.name.text`, used by prebuilt
+ * saved queries) is never in `_source`: its value is the parent field's.
+ */
+const readEcsValue = (source: Record<string, unknown>, key: string): unknown => {
+  const value = readPath(source, key);
+  if (value !== undefined) return value;
+
+  const lastDot = key.lastIndexOf('.');
+  if (lastDot <= 0) return undefined;
+  const parent = readPath(source, key.slice(0, lastDot));
+
+  return isLeafValue(parent) ? parent : undefined;
+};
+
 const toColumns = (source: Record<string, unknown>): Record<string, string> => {
   const columns: Record<string, string> = {};
   const nested = source.osquery;
@@ -40,7 +58,7 @@ export const buildRow = (source: Record<string, unknown>, ecsKeys: string[]): Re
 
   const ecs: Record<string, unknown> = {};
   ecsKeys.forEach((key) => {
-    const value = readPath(source, key);
+    const value = readEcsValue(source, key);
     if (value !== undefined) {
       ecs[key] = value;
     }

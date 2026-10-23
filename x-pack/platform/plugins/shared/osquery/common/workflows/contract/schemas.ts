@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { PLATFORM_IDS } from '../../constants';
-import { MAX_AGENT_IDS, MAX_AGENT_POLICY_IDS, MAX_ROWS } from './budget';
+import { isWithinMaxWait, MAX_AGENT_IDS, MAX_AGENT_POLICY_IDS, MAX_ROWS } from './budget';
 
 export const STEP_STATUSES = ['success', 'partial', 'failed', 'timed_out'] as const;
 export type StepStatus = (typeof STEP_STATUSES)[number];
@@ -21,7 +21,8 @@ export const commonInputShape = () => ({
   agent_platforms: z.array(z.enum(PLATFORM_IDS)).min(1).max(PLATFORM_IDS.length).optional(),
   wait_timeout: z
     .string()
-    .regex(/^[1-9][0-9]*(s|m|h)$/, 'Use a duration such as 30s, 5m or 1h')
+    .regex(/^[1-9][0-9]*(s|m|h)$/, 'Use a duration such as 30s, 5m or 30m')
+    .refine(isWithinMaxWait, 'wait_timeout cannot exceed 30m')
     .optional(),
   max_rows: z.number().int().min(1).max(MAX_ROWS).optional(),
 });

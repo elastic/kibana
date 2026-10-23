@@ -46,7 +46,8 @@ describe('preflight', () => {
       const contextManager = createContextManager({});
 
       expect(await resolveTarget(contextManager, { agent_ids: ['a'] })).toEqual({
-        agent_ids: ['a'],
+        target: { agent_ids: ['a'] },
+        agentCount: 1,
       });
       expect(contextManager.callKibanaApi).not.toHaveBeenCalled();
     });
@@ -56,7 +57,7 @@ describe('preflight', () => {
 
       expect(
         await resolveTarget(contextManager, { agent_policy_ids: ['pol" or true or "'] })
-      ).toEqual({ agent_policy_ids: ['pol" or true or "'] });
+      ).toEqual({ target: { agent_policy_ids: ['pol" or true or "'] }, agentCount: 1000 });
 
       const { kuery } = contextManager.callKibanaApi.mock.calls[0][0].query as { kuery: string };
       expect(kuery).toContain('(status:online OR status:degraded)');
@@ -83,7 +84,8 @@ describe('preflight', () => {
       });
 
       expect(await resolveTarget(contextManager, { agent_platforms: ['linux'] })).toEqual({
-        agent_platforms: ['ubuntu', 'centos'],
+        target: { agent_platforms: ['ubuntu', 'centos'] },
+        agentCount: 5,
       });
     });
 
@@ -99,7 +101,7 @@ describe('preflight', () => {
 
       expect(
         await resolveTarget(contextManager, { agent_platforms: ['darwin', 'windows'] })
-      ).toEqual({ agent_platforms: ['darwin', 'windows'] });
+      ).toEqual({ target: { agent_platforms: ['darwin', 'windows'] }, agentCount: 9 });
     });
 
     it('never forwards a Fleet platform value with query characters', async () => {
@@ -112,7 +114,8 @@ describe('preflight', () => {
       });
 
       expect(await resolveTarget(contextManager, { agent_platforms: ['linux'] })).toEqual({
-        agent_platforms: ['ubuntu'],
+        target: { agent_platforms: ['ubuntu'] },
+        agentCount: 1,
       });
     });
 

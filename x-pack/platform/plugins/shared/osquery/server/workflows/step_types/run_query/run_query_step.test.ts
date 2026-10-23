@@ -6,6 +6,8 @@
  */
 
 import type { ExecutionError } from '@kbn/workflows/server';
+import { OSQUERY_MAX_AGENTS_HEADER } from '../../../../common/constants';
+import { TARGET_AGENT_LIMIT } from '../../../../common/workflows/contract/budget';
 import { runQueryStepDefinition } from './run_query_step';
 import { apiError, createContextManager, createLogger, resultEdges } from '../../test_helpers';
 
@@ -59,6 +61,20 @@ const baseState = {
   queries: [{ query_id: 'procs', action_id: 'query-action-1', ecs_keys: ['process.name'] }],
 };
 
+/** The results route over `indexed` searchable documents: the requested page and the `total`. */
+const resultsRoute = (indexed: number) =>
+  jest.fn(({ query }: { query?: Record<string, unknown> }) => {
+    const pageSize = Number(query?.pageSize ?? 200);
+    const from = Number(query?.page ?? 0) * pageSize;
+
+    return {
+      data: { edges: resultEdges(Math.max(0, Math.min(pageSize, indexed - from))), total: indexed },
+    };
+  });
+
+const pageSizes = (results: ReturnType<typeof resultsRoute>) =>
+  results.mock.calls.map(([call]) => call.query?.pageSize);
+
 const poll = (routes: Routes, state: Record<string, unknown> = {}) => {
   const contextManager = createContextManager(routes);
 
@@ -88,6 +104,7 @@ describe('osquery.runQuery step', () => {
       expect(posts).toHaveLength(1);
       expect(posts[0][0]).toMatchObject({
         path: '/api/osquery/live_queries',
+        headers: { [OSQUERY_MAX_AGENTS_HEADER]: String(TARGET_AGENT_LIMIT) },
         body: {
           query: SAVED_QUERY.query,
           ecs_mapping: SAVED_QUERY.ecs_mapping,
@@ -106,16 +123,52 @@ describe('osquery.runQuery step', () => {
       });
     });
 
-    it('sets the deadline from wait_timeout, capped at 30m', async () => {
+    it('sets the deadline from wait_timeout', async () => {
       const before = Date.now();
-      const { result } = start({}, { wait_timeout: '10h' });
+      const { result } = start({}, { wait_timeout: '10m' });
 
       const { state } = (await result) as { state: { deadline: string } };
+      const waited = new Date(state.deadline).getTime() - before;
 
-      expect(new Date(state.deadline).getTime() - before).toBeLessThanOrEqual(
-        30 * 60 * 1000 + 1000
-      );
-      expect(new Date(state.deadline).getTime() - before).toBeGreaterThan(29 * 60 * 1000);
+      expect(waited).toBeGreaterThan(9 * 60 * 1000);
+      expect(waited).toBeLessThanOrEqual(10 * 60 * 1000 + 1000);
+    });
+
+    it('rejects a wait_timeout above 30m before any call', async () => {
+      const { contextManager, result } = start({}, { wait_timeout: '10h' });
+
+      await expect(result).rejects.toMatchObject({ details: { code: 'INVALID_INPUT' } });
+      expect(contextManager.callKibanaApi).not.toHaveBeenCalled();
+    });
+
+    it('dispatches the saved query id alone when the caller cannot read saved queries', async () => {
+      const { contextManager, result } = start({
+        [FIND]: () => apiError(403, 'Forbidden'),
+        [POST]: () => ({
+          data: {
+            action_id: 'action-1',
+            agents: ['agent-1'],
+            queries: [
+              {
+                action_id: 'query-action-1',
+                ecs_mapping: { 'process.name': { field: 'name' } },
+              },
+            ],
+          },
+        }),
+      });
+
+      const { state } = (await result) as {
+        state: { queries: Array<{ ecs_keys: string[] }> };
+      };
+      const post = contextManager.callKibanaApi.mock.calls.find(
+        ([call]) => call.method === 'POST'
+      )![0] as {
+        body: Record<string, unknown>;
+      };
+
+      expect(post.body).toEqual({ saved_query_id: 'procs', agent_ids: ['agent-1'] });
+      expect(state.queries[0].ecs_keys).toEqual(['process.name']);
     });
 
     it('sends policy targeting as agent_policy_ids and counts the agents first', async () => {
@@ -181,6 +234,18 @@ describe('osquery.runQuery step', () => {
       );
     });
 
+    it('maps the route agent ceiling to TARGET_LIMIT_EXCEEDED', async () => {
+      const { result } = start({
+        [POST]: () =>
+          apiError(
+            400,
+            'The selection matches 1001 agents, above the limit of 1000. Narrow it down.'
+          ),
+      });
+
+      await expect(result).rejects.toMatchObject({ details: { code: 'TARGET_LIMIT_EXCEEDED' } });
+    });
+
     it('maps the route 400 "No agents found" to AGENTS_NOT_IN_SPACE naming both causes', async () => {
       const { result } = start({ [POST]: () => apiError(400, 'No agents found for selection') });
 
@@ -210,6 +275,23 @@ describe('osquery.runQuery step', () => {
         contextManager.callKibanaApi.mock.calls.filter(([c]) => c.method === 'POST')
       ).toHaveLength(1);
     });
+
+    it('reports the preflight agent count with DISPATCH_UNCONFIRMED for policy targets', async () => {
+      const { result } = start(
+        {
+          'GET /internal/osquery/fleet_wrapper/agents': () => ({ total: 3 }),
+          [POST]: () => apiError(503),
+        },
+        { agent_ids: undefined, agent_policy_ids: ['pol-1'] }
+      );
+
+      const output = (await result) as { output: Record<string, unknown> };
+
+      expect(output.output).toMatchObject({
+        error_code: 'DISPATCH_UNCONFIRMED',
+        agents: { total: 3, responded: 0, pending: 3, failed: 0 },
+      });
+    });
   });
 
   describe('poll', () => {
@@ -226,7 +308,7 @@ describe('osquery.runQuery step', () => {
     it('returns success with rows tagged by agent and only the ecs_mapping keys', async () => {
       const { result } = poll({
         [DETAILS]: () => ({ data: { queries: [counters({ docs: 2 })] } }),
-        [RESULTS]: () => ({ data: { edges: resultEdges(2) } }),
+        [RESULTS]: resultsRoute(2),
       });
 
       const { output } = (await result) as { output: Record<string, any> };
@@ -247,13 +329,68 @@ describe('osquery.runQuery step', () => {
       });
     });
 
+    it('only counts rows while some are not searchable, and keeps no rows in state', async () => {
+      const results = resultsRoute(200);
+      const { result } = poll({
+        [DETAILS]: () => ({ data: { queries: [counters({ docs: 400 })] } }),
+        [RESULTS]: results,
+      });
+
+      expect(await result).toEqual({ state: { ...baseState, deadline: expect.any(String) } });
+      expect(pageSizes(results)).toEqual([1]);
+    });
+
+    it('reads every row once in ingest order when all of them are searchable', async () => {
+      const results = resultsRoute(400);
+      const { result } = poll({
+        [DETAILS]: () => ({ data: { queries: [counters({ docs: 400 })] } }),
+        [RESULTS]: results,
+      });
+
+      const { output } = (await result) as { output: { rows: unknown[]; truncated: boolean } };
+
+      expect(output.rows).toHaveLength(400);
+      expect(output.truncated).toBe(false);
+      expect(pageSizes(results)).toEqual([1, 200, 200]);
+      expect(results.mock.calls[1][0].query).toMatchObject({
+        sort: 'event.ingested',
+        sortOrder: 'asc',
+      });
+    });
+
     it('waits for rows that are not searchable yet while counters say done', async () => {
       const { result } = poll({
         [DETAILS]: () => ({ data: { queries: [counters({ docs: 20 })] } }),
-        [RESULTS]: () => ({ data: { edges: [] } }),
+        [RESULTS]: resultsRoute(0),
       });
 
       expect(await result).toEqual({ state: expect.any(Object) });
+    });
+
+    it('keeps polling when the count read fails', async () => {
+      const { result } = poll({
+        [DETAILS]: () => ({ data: { queries: [counters({ docs: 20 })] } }),
+        [RESULTS]: () => apiError(502),
+      });
+
+      expect(await result).toEqual({ state: expect.any(Object) });
+    });
+
+    it('skips the count once the deadline passed and returns the rows that exist', async () => {
+      const results = resultsRoute(5);
+      const { result } = poll(
+        {
+          [DETAILS]: () => ({ data: { queries: [counters({ docs: 20 })] } }),
+          [RESULTS]: results,
+        },
+        { deadline: new Date(Date.now() - 1000).toISOString() }
+      );
+
+      const { output } = (await result) as { output: { rows: unknown[]; truncated: boolean } };
+
+      expect(output.rows).toHaveLength(5);
+      expect(output.truncated).toBe(true);
+      expect(pageSizes(results)).toEqual([200]);
     });
 
     it('finishes without rows once the deadline passed, with truncated true', async () => {
@@ -276,7 +413,7 @@ describe('osquery.runQuery step', () => {
       const { result } = poll(
         {
           [DETAILS]: () => ({ data: { queries: [counters({ docs: 25000 })] } }),
-          [RESULTS]: () => ({ data: { edges: resultEdges(200) } }),
+          [RESULTS]: resultsRoute(25000),
         },
         { max_rows: 300 }
       );
@@ -291,7 +428,7 @@ describe('osquery.runQuery step', () => {
     });
 
     it('never asks for rows beyond the 10k window', async () => {
-      const results = jest.fn(() => ({ data: { edges: resultEdges(200) } }));
+      const results = resultsRoute(50000);
       const { result } = poll(
         {
           [DETAILS]: () => ({ data: { queries: [counters({ docs: 50000 })] } }),
@@ -302,7 +439,7 @@ describe('osquery.runQuery step', () => {
 
       await result;
 
-      expect(results).toHaveBeenCalledTimes(50);
+      expect(pageSizes(results).filter((size) => size === 200)).toHaveLength(50);
     });
 
     it('returns timed_out when nobody answered by the deadline', async () => {
@@ -414,6 +551,15 @@ describe('osquery.runQuery step', () => {
       const resolved = typeof schema === 'function' ? schema() : schema;
 
       expect(resolved.safeParse({ saved_query: 'a', agent_ids: ['x'] }).success).toBe(true);
+      expect(
+        resolved.safeParse({ saved_query: 'a', agent_ids: ['x'], wait_timeout: '30m' }).success
+      ).toBe(true);
+      expect(
+        resolved.safeParse({ saved_query: 'a', agent_ids: ['x'], wait_timeout: '31m' }).success
+      ).toBe(false);
+      expect(
+        resolved.safeParse({ saved_query: 'a', agent_ids: ['x'], wait_timeout: '1h' }).success
+      ).toBe(false);
       expect(resolved.safeParse({ saved_query: 'a' }).success).toBe(false);
       expect(
         resolved.safeParse({ saved_query: 'a', agent_ids: ['x'], agent_platforms: ['linux'] })

@@ -14,7 +14,7 @@ import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { createLiveQueryRequestBodySchema } from '../../../common/api';
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS, OSQUERY_MAX_AGENTS_HEADER } from '../../../common/constants';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -224,6 +224,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
               alertData,
               space,
               dispatch: { entryPoint: 'live_query', source: liveDispatchSource },
+              maxAgents: maxAgentsFromHeader(request.headers[OSQUERY_MAX_AGENTS_HEADER]),
             }
           );
 
@@ -251,4 +252,14 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         }
       }
     );
+};
+
+/** A positive integer from the workflow step. Anything else means the caller did not opt in. */
+const maxAgentsFromHeader = (header: string | string[] | undefined): number | undefined => {
+  const raw = Array.isArray(header) ? header[0] : header;
+  if (!raw || !/^[1-9][0-9]{0,6}$/.test(raw)) {
+    return undefined;
+  }
+
+  return Number(raw);
 };

@@ -19,11 +19,11 @@ import { OutputErrorCode } from '../../../../common/workflows/contract/error_cod
 import { runQueryStepCommonDefinition } from '../../../../common/workflows/step_types/run_query/run_query_common';
 import type { RunQueryOutput } from '../../../../common/workflows/step_types/run_query/run_query_common';
 import { runQueryInputSchema } from '../../../../common/workflows/step_types/run_query/run_query_common';
-import { parseStepInput } from '../../lib/errors';
+import { isMissingPrivilege, parseStepInput } from '../../lib/errors';
 import { dispatchLiveQuery, readLiveQuery } from '../../lib/live_query';
 import { parseWaitTimeoutMs } from '../../lib/poll_contract';
 import { resolveTarget } from '../../lib/preflight';
-import { resolveSavedQuery } from '../../lib/resolve_saved_query';
+import { resolveSavedQuery, type ResolvedSavedQuery } from '../../lib/resolve_saved_query';
 
 const stateSchema = lazySchema(() =>
   z.object({
@@ -40,6 +40,34 @@ const stateSchema = lazySchema(() =>
     ),
   })
 );
+
+/** ECS field names from a saved-query mapping, whether the API returned a record or `{ key }` rows. */
+const ecsKeysFromMapping = (mapping: unknown): string[] => {
+  if (!mapping) return [];
+  if (Array.isArray(mapping)) {
+    return mapping.flatMap((entry) =>
+      entry && typeof entry === 'object' && 'key' in entry && typeof entry.key === 'string'
+        ? [entry.key]
+        : []
+    );
+  }
+
+  if (typeof mapping === 'object') {
+    return Object.keys(mapping as Record<string, unknown>);
+  }
+
+  return [];
+};
+
+const dispatchFields = (savedQuery: ResolvedSavedQuery | undefined, savedQueryId: string) =>
+  savedQuery
+    ? {
+        query: savedQuery.query,
+        ecs_mapping: savedQuery.ecs_mapping,
+        saved_query_id: savedQueryId,
+        ...(savedQuery.timeout ? { timeout: savedQuery.timeout } : {}),
+      }
+    : { saved_query_id: savedQueryId };
 
 const failedOutput = (
   errorCode: RunQueryOutput['error_code'],
@@ -62,24 +90,27 @@ export const runQueryStepDefinition = createPollServerStepDefinition({
     const { contextManager, logger } = context;
     const input = parseStepInput(runQueryInputSchema, context.input);
 
-    const target = await resolveTarget(contextManager, input);
-    const savedQuery = await resolveSavedQuery(contextManager, input.saved_query);
+    const { target, agentCount } = await resolveTarget(contextManager, input);
+    // `run_saved_queries` can dispatch a saved query but cannot read the saved-query API.
+    // The live-query route loads the stored SQL for that privilege, so a 403 here is not fatal:
+    // send the id alone. Callers who can read the query still send its SQL, which is what
+    // `writeLiveQueries` actually runs.
+    let savedQuery: ResolvedSavedQuery | undefined;
+    try {
+      savedQuery = await resolveSavedQuery(contextManager, input.saved_query);
+    } catch (error) {
+      if (!isMissingPrivilege(error)) throw error;
+    }
 
     const dispatched = await dispatchLiveQuery({
       contextManager,
       logger,
-      // The route never resolves a saved query's SQL itself: send the saved query's own.
-      fields: {
-        query: savedQuery.query,
-        ecs_mapping: savedQuery.ecs_mapping,
-        saved_query_id: input.saved_query,
-        ...(savedQuery.timeout ? { timeout: savedQuery.timeout } : {}),
-      },
+      fields: dispatchFields(savedQuery, input.saved_query),
       target,
     });
     if (dispatched.type === 'unconfirmed') {
       return {
-        output: failedOutput(OutputErrorCode.DISPATCH_UNCONFIRMED, input.agent_ids?.length ?? 0),
+        output: failedOutput(OutputErrorCode.DISPATCH_UNCONFIRMED, agentCount),
       };
     }
 
@@ -99,7 +130,9 @@ export const runQueryStepDefinition = createPollServerStepDefinition({
           {
             query_id: input.saved_query,
             action_id: dispatched.queries[0].action_id,
-            ecs_keys: Object.keys(savedQuery.ecs_mapping ?? {}),
+            ecs_keys: savedQuery
+              ? Object.keys(savedQuery.ecs_mapping ?? {})
+              : ecsKeysFromMapping(dispatched.queries[0].ecs_mapping),
           },
         ],
       },

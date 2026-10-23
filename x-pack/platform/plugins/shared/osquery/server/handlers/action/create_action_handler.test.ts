@@ -78,6 +78,24 @@ describe('createActionHandler', () => {
     ]);
   });
 
+  it('rejects a live query whose selected agents exceed maxAgents before writing actions', async () => {
+    const { context, bulkCreate } = buildOsqueryContext();
+    mockedParseAgentSelection.mockResolvedValue(['a1', 'a2']);
+
+    await expect(
+      createActionHandler(
+        context,
+        { query: 'SELECT 1;', agent_policy_ids: ['policy-1'] },
+        {
+          dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
+          maxAgents: 1,
+        }
+      )
+    ).rejects.toThrow(/above the limit of 1/);
+
+    expect(bulkCreate).not.toHaveBeenCalled();
+  });
+
   it('writes the originating space_id on each Fleet action document', async () => {
     const { context, bulkCreate } = buildOsqueryContext();
 
