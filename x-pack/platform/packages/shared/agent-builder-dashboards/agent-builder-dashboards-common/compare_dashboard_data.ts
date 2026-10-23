@@ -61,6 +61,7 @@ const toComparableDashboardData = (data: DashboardAttachmentData): unknown => {
   const {
     esql_approximation = false,
     time_range,
+    refresh_interval,
     ...rest
   } = omit(
     dashboardStateToAttachmentData(
@@ -74,7 +75,19 @@ const toComparableDashboardData = (data: DashboardAttachmentData): unknown => {
     pinned_panels: sortPanelsById(rest.pinned_panels),
     esql_approximation,
     ...(time_range && { time_range: omit(time_range, 'mode') }),
+    // a paused refresh interval does nothing, whatever its value
+    ...(refresh_interval && !refresh_interval.pause && { refresh_interval }),
   });
+};
+
+// attachment version data is immutable, so its comparable form only needs to be computed once
+const comparableDataCache = new WeakMap<DashboardAttachmentData, unknown>();
+
+const getComparableDashboardData = (data: DashboardAttachmentData): unknown => {
+  if (!comparableDataCache.has(data)) {
+    comparableDataCache.set(data, toComparableDashboardData(data));
+  }
+  return comparableDataCache.get(data);
 };
 
 /**
@@ -84,4 +97,4 @@ const toComparableDashboardData = (data: DashboardAttachmentData): unknown => {
 export const isSameDashboardContent = (
   left: DashboardAttachmentData,
   right: DashboardAttachmentData
-): boolean => isEqual(toComparableDashboardData(left), toComparableDashboardData(right));
+): boolean => isEqual(getComparableDashboardData(left), getComparableDashboardData(right));

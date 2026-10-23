@@ -14,10 +14,8 @@ import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import type { DashboardApi, DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
-import {
-  MANUAL_CHANGES_DEBOUNCE_MS,
-  registerDashboardAppIntegration,
-} from './dashboard_app_integration';
+import { registerDashboardAppIntegration } from './dashboard_app_integration';
+import { MANUAL_CHANGES_DEBOUNCE_MS } from './apply_attachment';
 import { createAppliedAttachmentsStore } from './applied_attachments_store';
 import type { IdGenerator } from '..';
 

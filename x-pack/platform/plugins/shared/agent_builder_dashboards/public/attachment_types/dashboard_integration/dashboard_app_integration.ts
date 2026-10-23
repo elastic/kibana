@@ -9,7 +9,7 @@ import { debounceTime, merge, Observable } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
-import type { AttachmentVersion } from '@kbn/agent-builder-common/attachments';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type {
   DashboardAttachment,
@@ -31,8 +31,6 @@ import { createNewAttachmentIdRegenerationSubscription } from './new_attachment_
 import { createOriginSyncSubscription } from './origin_sync_subscription';
 import type { IdGenerator } from '..';
 
-export { MANUAL_CHANGES_DEBOUNCE_MS };
-
 export interface DashboardAppIntegrationParams {
   agentBuilder: AgentBuilderPluginStart;
   api: DashboardApi;
@@ -51,14 +49,11 @@ export interface DashboardAppIntegrationParams {
   ) => ((origin: string) => Promise<UpdateOriginResponse | undefined>) | undefined;
 }
 
-interface DashboardAttachmentVersions {
-  id: string;
-  versions: Array<AttachmentVersion<DashboardAttachmentData>>;
-}
-
 interface State {
   attachments: DashboardAttachment[] | undefined;
-  attachmentVersions: DashboardAttachmentVersions[];
+  versionedAttachments: Array<
+    VersionedAttachment<typeof DASHBOARD_ATTACHMENT_TYPE, DashboardAttachmentData>
+  >;
   conversationId: string | undefined;
 }
 
@@ -72,33 +67,33 @@ export const registerDashboardAppIntegration = ({
 }: DashboardAppIntegrationParams): (() => void) => {
   const state: State = {
     attachments: undefined,
-    attachmentVersions: [],
+    versionedAttachments: [],
     conversationId: undefined,
   };
 
   // dashboard data last staged in the chat input, per attachment id
   const stagedAttachmentData = new Map<string, DashboardAttachmentData>();
+  // linked attachments the dashboard showed at the last check, so their staged edits are only
+  // dropped when the dashboard comes back to them
+  const appliedAttachmentIds = new Set<string>();
   let pendingAddAttachmentTimeout: ReturnType<typeof setTimeout> | undefined;
 
   // marks every attachment version in the conversation whose content the dashboard shows
   const updateShownVersions = () => {
-    if (appliedAttachments.pendingApplies.size > 0) {
+    if (appliedAttachments.isApplying()) {
       return;
     }
-    const isShownByContentHash = new Map<string, boolean>();
+    const dashboardData = getDashboardAttachmentData(api);
     const shownVersions = new Set<string>();
-    for (const { id, versions } of state.attachmentVersions) {
-      for (const { version, data, content_hash: contentHash } of versions) {
-        const cacheKey = `${id}:${contentHash}`;
-        const isShown =
-          isShownByContentHash.get(cacheKey) ??
+    for (const { id, versions } of state.versionedAttachments) {
+      for (const { version, data } of versions) {
+        if (
           isAttachmentAppliedToDashboard({
             store: appliedAttachments,
-            api,
-            attachment: { id, type: DASHBOARD_ATTACHMENT_TYPE, data },
-          });
-        isShownByContentHash.set(cacheKey, isShown);
-        if (isShown) {
+            dashboardData,
+            attachment: { id, data },
+          })
+        ) {
           shownVersions.add(toShownVersionKey(id, version));
         }
       }
@@ -110,7 +105,7 @@ export const registerDashboardAppIntegration = ({
 
   const addAttachmentFromDashboard = () => {
     // the dashboard is still settling after applying an attachment, so its state is not a manual change
-    if (appliedAttachments.pendingApplies.size > 0) {
+    if (appliedAttachments.isApplying()) {
       return;
     }
 
@@ -123,19 +118,27 @@ export const registerDashboardAppIntegration = ({
     }
 
     const attachmentId = syncAttachment?.id ?? draftAttachmentId.current;
+    const dashboardData = getDashboardAttachmentData(api);
 
     if (
       syncAttachment &&
-      isAttachmentAppliedToDashboard({ store: appliedAttachments, api, attachment: syncAttachment })
+      isAttachmentAppliedToDashboard({
+        store: appliedAttachments,
+        dashboardData,
+        attachment: syncAttachment,
+      })
     ) {
       // the chat already has this state, so drop an edit staged before it was reverted, even one
       // staged before the integration re-registered
-      stagedAttachmentData.delete(attachmentId);
-      agentBuilder.removeAttachment(attachmentId);
+      if (!appliedAttachmentIds.has(attachmentId)) {
+        appliedAttachmentIds.add(attachmentId);
+        stagedAttachmentData.delete(attachmentId);
+        agentBuilder.removeAttachment(attachmentId);
+      }
       return;
     }
 
-    const dashboardData = getDashboardAttachmentData(api);
+    appliedAttachmentIds.delete(attachmentId);
     if (isEqual(stagedAttachmentData.get(attachmentId), dashboardData)) {
       return;
     }
@@ -153,7 +156,7 @@ export const registerDashboardAppIntegration = ({
     (change) => {
       if (!change) {
         state.attachments = undefined;
-        state.attachmentVersions = [];
+        state.versionedAttachments = [];
         state.conversationId = undefined;
         updateShownVersions();
         return;
@@ -180,10 +183,7 @@ export const registerDashboardAppIntegration = ({
       );
 
       state.attachments = dashboardAttachments;
-      state.attachmentVersions = (versionedDashboardAttachments ?? []).map(({ id, versions }) => ({
-        id,
-        versions,
-      }));
+      state.versionedAttachments = versionedDashboardAttachments ?? [];
       state.conversationId = conversationId;
       updateShownVersions();
       // we have to defer adding the attachment from the dashboard until after the active conversation change has fully propagated, otherwise sidebarCallbacks from agent builder are null
@@ -241,9 +241,10 @@ export const registerDashboardAppIntegration = ({
       pendingAddAttachmentTimeout = undefined;
     }
     state.attachments = undefined;
-    state.attachmentVersions = [];
+    state.versionedAttachments = [];
     state.conversationId = undefined;
     stagedAttachmentData.clear();
+    appliedAttachmentIds.clear();
   };
 };
 

@@ -7,6 +7,7 @@
 
 import { isEqual } from 'lodash';
 import { firstValueFrom, from, race, timer } from 'rxjs';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type {
   DashboardAttachment,
@@ -46,18 +47,17 @@ const waitForPanelsToLoad = async (api: DashboardApi): Promise<void> => {
 };
 
 /**
- * Whether the dashboard still shows exactly what applying the attachment produced.
+ * Whether the dashboard data still shows exactly what applying the attachment produced.
  */
 export const isAttachmentAppliedToDashboard = ({
   store,
-  api,
+  dashboardData,
   attachment,
 }: {
   store: AppliedAttachmentsStore;
-  api: DashboardApi;
-  attachment: DashboardAttachment;
+  dashboardData: DashboardAttachmentData;
+  attachment: Pick<DashboardAttachment, 'id' | 'data'>;
 }): boolean => {
-  const dashboardData = getDashboardAttachmentData(api);
   if (isSameDashboardContent(attachment.data, dashboardData)) {
     return true;
   }
@@ -70,10 +70,27 @@ export const isAttachmentAppliedToDashboard = ({
 };
 
 /**
+ * An attachment without a refresh interval pauses the dashboard's own one. Keeping its value,
+ * which the timefilter already accepted, avoids a default below the minimum refresh interval
+ * that the timefilter would clamp and report as an unsaved change.
+ */
+const toAppliedDashboardState = (
+  api: DashboardApi,
+  data: DashboardAttachmentData
+): DashboardState => {
+  const dashboardState = attachmentDataToDashboardState(data);
+  const { refresh_interval: currentRefreshInterval } = api.getSerializedState().attributes;
+  if (dashboardState.refresh_interval || !currentRefreshInterval) {
+    return dashboardState;
+  }
+  return { ...dashboardState, refresh_interval: { ...currentRefreshInterval, pause: true } };
+};
+
+/**
  * Applies the attachment to the dashboard and records how the dashboard represents it
  * once its panels settled. Skips applying when the dashboard already shows it.
  */
-export const applyAttachmentToDashboard = async ({
+export const applyAttachmentToDashboard = ({
   store,
   api,
   attachment,
@@ -81,22 +98,23 @@ export const applyAttachmentToDashboard = async ({
   store: AppliedAttachmentsStore;
   api: DashboardApi;
   attachment: DashboardAttachment;
-}): Promise<void> => {
-  if (isAttachmentAppliedToDashboard({ store, api, attachment })) {
-    return;
-  }
+}): Promise<void> =>
+  store.queueApply(async () => {
+    if (
+      isAttachmentAppliedToDashboard({
+        store,
+        dashboardData: getDashboardAttachmentData(api),
+        attachment,
+      })
+    ) {
+      return;
+    }
 
-  store.pendingApplies.add(attachment.id);
-  try {
-    await api.setState(attachmentDataToDashboardState(attachment.data), { changedBy: ['agent'] });
+    await api.setState(toAppliedDashboardState(api, attachment.data), { changedBy: ['agent'] });
     await waitForPanelsToLoad(api);
     await firstValueFrom(timer(MANUAL_CHANGES_DEBOUNCE_MS));
     store.baselines.set(attachment.id, {
       attachmentData: attachment.data,
       dashboardData: getDashboardAttachmentData(api),
     });
-  } finally {
-    store.pendingApplies.delete(attachment.id);
-    store.applyFinished$.next();
-  }
-};
+  });

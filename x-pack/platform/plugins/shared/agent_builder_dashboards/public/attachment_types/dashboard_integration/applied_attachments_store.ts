@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, type Observable } from 'rxjs';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common/types';
 
 export interface AppliedAttachmentBaseline {
@@ -22,9 +22,15 @@ export interface AppliedAttachmentBaseline {
  */
 export interface AppliedAttachmentsStore {
   baselines: Map<string, AppliedAttachmentBaseline>;
-  pendingApplies: Set<string>;
+  /**
+   * Runs the apply once the previous ones settled, so a baseline is never read from a
+   * dashboard that is still applying another attachment.
+   */
+  queueApply: (apply: () => Promise<void>) => Promise<void>;
+  /** Whether an apply is queued or the dashboard is still settling after one. */
+  isApplying: () => boolean;
   /** Emits when an apply finished, so the dashboard can be compared with the conversation again. */
-  applyFinished$: Subject<void>;
+  applyFinished$: Observable<void>;
   /** Conversation attachment versions the dashboard shows, as keys from `toShownVersionKey`. */
   shownVersions$: BehaviorSubject<ReadonlySet<string>>;
 }
@@ -32,9 +38,25 @@ export interface AppliedAttachmentsStore {
 export const toShownVersionKey = (attachmentId: string, version: number): string =>
   `${attachmentId}:${version}`;
 
-export const createAppliedAttachmentsStore = (): AppliedAttachmentsStore => ({
-  baselines: new Map(),
-  pendingApplies: new Set(),
-  applyFinished$: new Subject(),
-  shownVersions$: new BehaviorSubject<ReadonlySet<string>>(new Set()),
-});
+export const createAppliedAttachmentsStore = (): AppliedAttachmentsStore => {
+  const applyFinished$ = new Subject<void>();
+  let pendingApplies = 0;
+  let lastApply: Promise<void> = Promise.resolve();
+
+  return {
+    baselines: new Map(),
+    queueApply: (apply) => {
+      // an idle queue starts the apply right away, so the dashboard updates in the same tick
+      const isIdle = pendingApplies++ === 0;
+      const queuedApply = (isIdle ? apply() : lastApply.then(apply)).finally(() => {
+        pendingApplies--;
+        applyFinished$.next();
+      });
+      lastApply = queuedApply.catch(() => undefined);
+      return queuedApply;
+    },
+    isApplying: () => pendingApplies > 0,
+    applyFinished$: applyFinished$.asObservable(),
+    shownVersions$: new BehaviorSubject<ReadonlySet<string>>(new Set()),
+  };
+};
