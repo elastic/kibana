@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import semver from 'semver';
 import type { KbnClient, ScoutLogger, ScoutTestConfig } from '@kbn/scout-oblt';
 import { tryForTime } from '../../../scout/common/fixtures/retry';
+import {
+  ELASTIC_AGENT_COMPLETE_IMAGE,
+  ELASTIC_AGENT_IMAGE,
+  resolveAgentSnapshotTag,
+  type AgentImageKind,
+} from '../../../agent_image/resolve_agent_snapshot_tag';
 import type { ScoutPrivateLocation } from '../../../scout/common/services/synthetics_private_location_api_service';
 import type { SyntheticsApiServicesFixture } from '../../../scout/common/fixtures';
 import {
@@ -26,9 +31,6 @@ import { startTargetServer, stopTargetServer, type TargetServer } from './target
 
 const FLEET_SERVER_CONTAINER_PORT = 8220;
 const DOCKER_HOST_GATEWAY = ['--add-host', 'host.docker.internal:host-gateway'];
-const ARTIFACTS_VERSIONS_URL = 'https://artifacts-api.elastic.co/v1/versions';
-const ELASTIC_AGENT_IMAGE = 'docker.elastic.co/elastic-agent/elastic-agent';
-const ELASTIC_AGENT_COMPLETE_IMAGE = 'docker.elastic.co/elastic-agent/elastic-agent-complete';
 
 export interface EnrolledAgent {
   id: string;
@@ -53,7 +55,7 @@ export interface StartAgentStackOptions {
    * `complete` includes Chromium (browser journeys). `agent` is the lightweight
    * image and is enough for HTTP/TCP/ICMP.
    */
-  agentImage?: 'complete' | 'agent';
+  agentImage?: AgentImageKind;
 }
 
 interface EnrollmentApiKeyItem {
@@ -71,86 +73,6 @@ const esPortFromUrl = (elasticsearchUrl: string): string => {
   const parsed = new URL(elasticsearchUrl);
   return parsed.port || (parsed.protocol === 'https:' ? '443' : '80');
 };
-
-const toSnapshotTag = (version: string): string =>
-  version.includes('-SNAPSHOT') ? version : `${version}-SNAPSHOT`;
-
-const toReleaseVersion = (version: string): string => version.replace(/-SNAPSHOT$/, '');
-
-/**
- * Resolves the Elastic Agent snapshot tag for the Kibana under test. When
- * Kibana bumps to a new minor before `elastic-agent:<version>-SNAPSHOT` is
- * published, falls back to the latest published snapshot `<=` Kibana's version.
- */
-export async function resolveAgentSnapshotTag(
-  kibanaVersion: string,
-  log: ScoutLogger,
-  agentImage: 'complete' | 'agent' = 'complete',
-  deps: {
-    hasManifest?: (image: string) => boolean;
-    fetchSnapshotVersions?: () => Promise<string[]>;
-  } = {}
-): Promise<string> {
-  const hasManifest = deps.hasManifest ?? isImageAvailableInRegistry;
-  const fetchSnapshotVersions =
-    deps.fetchSnapshotVersions ??
-    (async () => {
-      const response = await fetch(ARTIFACTS_VERSIONS_URL);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status} ${response.statusText}`);
-      }
-      const { versions } = (await response.json()) as { versions: string[] };
-      return versions.filter((v) => v.endsWith('-SNAPSHOT'));
-    });
-
-  const hasRequiredImages = (tag: string): boolean =>
-    hasManifest(`${ELASTIC_AGENT_IMAGE}:${tag}`) &&
-    (agentImage !== 'complete' || hasManifest(`${ELASTIC_AGENT_COMPLETE_IMAGE}:${tag}`));
-
-  const preferredTag = toSnapshotTag(kibanaVersion);
-  if (hasRequiredImages(preferredTag)) {
-    return preferredTag;
-  }
-
-  const targetRelease = toReleaseVersion(kibanaVersion);
-
-  try {
-    const snapshots = await fetchSnapshotVersions();
-    const candidates = snapshots
-      .map(toReleaseVersion)
-      .filter((v) => semver.valid(v) !== null && semver.lte(v, targetRelease))
-      .sort(semver.rcompare);
-
-    for (const candidate of candidates) {
-      const candidateTag = `${candidate}-SNAPSHOT`;
-      if (candidateTag !== preferredTag && hasRequiredImages(candidateTag)) {
-        log.warning(
-          `${ELASTIC_AGENT_IMAGE}:${preferredTag} not published yet; falling back to ${candidateTag}`
-        );
-        return candidateTag;
-      }
-    }
-  } catch (error) {
-    log.warning(
-      `Failed to resolve fallback snapshot from ${ARTIFACTS_VERSIONS_URL}: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-  }
-
-  const parsed = semver.parse(targetRelease);
-  if (parsed && parsed.minor > 0 && parsed.patch === 0) {
-    const prevMinorTag = `${parsed.major}.${parsed.minor - 1}.0-SNAPSHOT`;
-    if (hasRequiredImages(prevMinorTag)) {
-      log.warning(
-        `${ELASTIC_AGENT_IMAGE}:${preferredTag} not published yet; falling back to ${prevMinorTag}`
-      );
-      return prevMinorTag;
-    }
-  }
-
-  return preferredTag;
-}
 
 async function waitForFleetServer(url: string, log: ScoutLogger): Promise<void> {
   await tryForTime(
@@ -237,7 +159,9 @@ export async function startAgentStack({
   const version = await kbnClient.version.get();
   // Image tag follows the Kibana under test (8.19.x on an 8.19 backport, 9.7.0
   // on main), falling back to the latest published snapshot during version bumps.
-  const imageTag = await resolveAgentSnapshotTag(version, log, agentImage);
+  const imageTag = await resolveAgentSnapshotTag(version, log, agentImage, {
+    hasManifest: isImageAvailableInRegistry,
+  });
   const fleetServerImage = `${ELASTIC_AGENT_IMAGE}:${imageTag}`;
   const agentImageName =
     agentImage === 'complete' ? `${ELASTIC_AGENT_COMPLETE_IMAGE}:${imageTag}` : fleetServerImage;
