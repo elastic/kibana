@@ -14,6 +14,7 @@ import { EXECUTION_IO_FALLBACK_INDEXES, WORKFLOWS_EXECUTIONS_IO_DATA_STREAM } fr
 import { executionIoId, parseExecutionIoId } from './execution_io_id';
 import type { ExecutionIoType } from './execution_io_id';
 import type { EsExecutionIo } from './types';
+import { WORKFLOWS_EXECUTIONS_INDEX } from '../../constants/execution_indexes';
 import type {
   BulkItemResponse,
   BulkItemResult,
@@ -45,6 +46,10 @@ export interface ExecutionsIoClient {
 interface LegacyExecutionIoSource {
   input?: EsExecutionIo['value'];
   output?: EsExecutionIo['value'];
+  context?: {
+    inputs?: EsExecutionIo['value'];
+    output?: EsExecutionIo['value'];
+  };
 }
 
 type IoHit = GetExecutionsByIdsResponse<EsExecutionIo>['items'][number];
@@ -253,7 +258,7 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
       EXECUTION_IO_FALLBACK_INDEXES.map((index) => ({
         executionId,
         index,
-        sourceIncludes: sourceIncludesFor(types),
+        sourceIncludes: sourceIncludesFor(index, types),
       }))
     );
 
@@ -288,7 +293,7 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
 
     for (const entry of parsed) {
       const hit = (hitsByExecutionId.get(entry.executionId) ?? []).find(
-        (doc) => entry.type in doc._source
+        (doc) => readLegacyIo(doc._index, doc._source, entry.type) !== undefined
       );
       if (hit) {
         byId.set(entry.id, {
@@ -296,7 +301,7 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
             id: entry.id,
             executionId: entry.executionId,
             type: entry.type,
-            value: hit._source[entry.type],
+            value: readLegacyIo(hit._index, hit._source, entry.type),
             size: 0,
             '@timestamp': '',
           },
@@ -311,15 +316,30 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
   }
 }
 
-function sourceIncludesFor(types: Set<ExecutionIoType>): ExecutionIoType[] {
-  const includes: ExecutionIoType[] = [];
+const isWorkflowIndex = (index: string): boolean => index.includes(WORKFLOWS_EXECUTIONS_INDEX);
+
+// Step docs keep IO at the top level; workflow docs keep it under `context` (`inputs` is plural).
+function sourceIncludesFor(index: string, types: Set<ExecutionIoType>): string[] {
+  const workflow = isWorkflowIndex(index);
+  const includes: string[] = [];
   if (types.has('input')) {
-    includes.push('input');
+    includes.push(workflow ? 'context.inputs' : 'input');
   }
   if (types.has('output')) {
-    includes.push('output');
+    includes.push(workflow ? 'context.output' : 'output');
   }
   return includes;
+}
+
+function readLegacyIo(
+  index: string,
+  source: LegacyExecutionIoSource,
+  type: ExecutionIoType
+): EsExecutionIo['value'] | undefined {
+  if (isWorkflowIndex(index)) {
+    return type === 'input' ? source.context?.inputs : source.context?.output;
+  }
+  return source[type];
 }
 
 type FoundMgetDoc<TSource> = estypes.GetGetResult<TSource> & {

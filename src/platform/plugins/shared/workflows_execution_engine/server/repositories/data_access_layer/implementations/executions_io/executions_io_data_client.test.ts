@@ -181,7 +181,7 @@ describe('ExecutionsIoDataClient', () => {
             _index: workflowIndex,
             _id: 'run-1',
             found: true,
-            _source: { input: { workflow: true } },
+            _source: { context: { inputs: { workflow: true } } },
           },
           { _index: stepIndex, _id: 'run-1', found: false },
         ],
@@ -191,9 +191,9 @@ describe('ExecutionsIoDataClient', () => {
 
     expect(esClient.mget).toHaveBeenNthCalledWith(2, {
       docs: [
-        { _index: workflowIndex, _id: 'step-1', _source: { includes: ['output'] } },
+        { _index: workflowIndex, _id: 'step-1', _source: { includes: ['context.output'] } },
         { _index: stepIndex, _id: 'step-1', _source: { includes: ['output'] } },
-        { _index: workflowIndex, _id: 'run-1', _source: { includes: ['input'] } },
+        { _index: workflowIndex, _id: 'run-1', _source: { includes: ['context.inputs'] } },
         { _index: stepIndex, _id: 'run-1', _source: { includes: ['input'] } },
       ],
     });
@@ -254,7 +254,7 @@ describe('ExecutionsIoDataClient', () => {
             _index: workflowIndex,
             _id: 'run-1',
             found: true,
-            _source: { output: { done: true } },
+            _source: { context: { output: { done: true } } },
           },
           { _index: stepIndex, _id: 'run-1', found: false },
         ],
@@ -267,10 +267,10 @@ describe('ExecutionsIoDataClient', () => {
         {
           _index: workflowIndex,
           _id: 'step-1',
-          _source: { includes: ['input', 'output'] },
+          _source: { includes: ['context.inputs', 'context.output'] },
         },
         { _index: stepIndex, _id: 'step-1', _source: { includes: ['input', 'output'] } },
-        { _index: workflowIndex, _id: 'run-1', _source: { includes: ['output'] } },
+        { _index: workflowIndex, _id: 'run-1', _source: { includes: ['context.output'] } },
         { _index: stepIndex, _id: 'run-1', _source: { includes: ['output'] } },
       ],
     });
