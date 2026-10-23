@@ -19,6 +19,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useConversationActions } from './use_conversation_actions';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 import { removeAttachmentFromList } from './remove_attachment_from_list';
+import { removeAttachmentById } from './remove_attachment_by_id';
 import { ConversationChangeNotifier } from './conversation_change_notifier';
 
 interface RoutedConversationsProviderProps {
@@ -29,7 +30,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
   children,
 }) => {
   const queryClient = useQueryClient();
-  const { conversationsService } = useAgentBuilderServices();
+  const { conversationsService, registerFullPageAttachmentCallbacks } = useAgentBuilderServices();
   const {
     services: { analytics },
   } = useKibana();
@@ -105,6 +106,18 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     }
     setAttachments((prev) => upsertAttachmentsIntoList(prev, nextAttachments));
   }, []);
+
+  useEffect(
+    function receiveAttachmentsFromOtherApps() {
+      return registerFullPageAttachmentCallbacks({
+        addAttachment: (attachment) =>
+          setAttachments((prev) => upsertAttachmentsIntoList(prev, [attachment])),
+        removeAttachmentById: (attachmentId) =>
+          setAttachments((prev) => (prev ? removeAttachmentById(prev, attachmentId) : prev)),
+      });
+    },
+    [registerFullPageAttachmentCallbacks]
+  );
 
   const resetAttachments = useCallback(() => {
     setAttachments(undefined);

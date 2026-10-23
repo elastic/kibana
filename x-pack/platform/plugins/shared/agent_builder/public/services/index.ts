@@ -22,4 +22,4 @@ export { PluginsService } from './plugins/plugins_service';
 export { OAuthClientsService } from './oauth_clients';
 export { EventsService } from './events';
 export { SpaceSettingsService } from './space_settings';
-export type { AgentBuilderInternalService } from './types';
+export type { AgentBuilderInternalService, ChatAttachmentCallbacks } from './types';

@@ -6,6 +6,7 @@
  */
 
 import { debounceTime, Observable } from 'rxjs';
+import { isEqual } from 'lodash';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
@@ -13,6 +14,7 @@ import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import {
   isDashboardAttachment,
+  isDashboardPanelAttachment,
   dashboardStateToAttachmentData,
   DASHBOARD_ATTACHMENT_TYPE,
 } from '@kbn/agent-builder-dashboards-common';
@@ -23,6 +25,7 @@ import {
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
 import { createNewAttachmentIdRegenerationSubscription } from './new_attachment_id_regeneration_subscription';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
+import { syncPanelPointerLabels, type DashboardPanelPointer } from './panel_pointer_labels';
 import type { IdGenerator } from '..';
 
 /**
@@ -52,6 +55,7 @@ export interface DashboardAppIntegrationParams {
 
 interface State {
   attachments: DashboardAttachment[] | undefined;
+  panelPointers: DashboardPanelPointer[] | undefined;
   conversationId: string | undefined;
 }
 
@@ -64,6 +68,7 @@ export const registerDashboardAppIntegration = ({
 }: DashboardAppIntegrationParams): (() => void) => {
   const state: State = {
     attachments: undefined,
+    panelPointers: undefined,
     conversationId: undefined,
   };
 
@@ -73,6 +78,12 @@ export const registerDashboardAppIntegration = ({
     const dashboardId = api.savedObjectId$.getValue();
     const syncAttachment = state.attachments?.find(({ origin }) => origin === dashboardId);
     const dashboardData = dashboardStateToAttachmentData(api.getSerializedState().attributes);
+
+    // The latest version already matches the dashboard: drop any staged copy instead of re-attaching it.
+    if (syncAttachment && isEqual(syncAttachment.data, dashboardData)) {
+      agentBuilder.removeAttachment(syncAttachment.id);
+      return;
+    }
 
     // update an existing linked attachment, or add a draft attachment only when the conversation is new
     if (syncAttachment || !state.conversationId) {
@@ -89,6 +100,7 @@ export const registerDashboardAppIntegration = ({
     (change) => {
       if (!change) {
         state.attachments = undefined;
+        state.panelPointers = undefined;
         state.conversationId = undefined;
         return;
       }
@@ -112,6 +124,7 @@ export const registerDashboardAppIntegration = ({
         });
 
       state.attachments = dashboardAttachments;
+      state.panelPointers = conversation?.attachments?.filter(isDashboardPanelAttachment);
       state.conversationId = conversationId;
       // we have to defer adding the attachment from the dashboard until after the active conversation change has fully propagated, otherwise sidebarCallbacks from agent builder are null
       if (pendingAddAttachmentTimeout !== undefined) {
@@ -147,7 +160,17 @@ export const registerDashboardAppIntegration = ({
 
   const manualChangesSubscription = api.anyStateChange$
     .pipe(debounceTime(MANUAL_CHANGES_DEBOUNCE_MS))
-    .subscribe(addAttachmentFromDashboard);
+    .subscribe(() => {
+      addAttachmentFromDashboard();
+      syncPanelPointerLabels({
+        agentBuilder,
+        api,
+        dashboardAttachmentId: state.attachments?.find(
+          ({ origin }) => origin === api.savedObjectId$.getValue()
+        )?.id,
+        pointers: state.panelPointers,
+      });
+    });
 
   return () => {
     agentLiveUpdatesSubscription.unsubscribe();
@@ -160,6 +183,7 @@ export const registerDashboardAppIntegration = ({
       pendingAddAttachmentTimeout = undefined;
     }
     state.attachments = undefined;
+    state.panelPointers = undefined;
     state.conversationId = undefined;
   };
 };
