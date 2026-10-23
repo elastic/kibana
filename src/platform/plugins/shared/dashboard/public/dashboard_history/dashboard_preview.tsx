@@ -60,7 +60,7 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
 
   const applyQueue = useRef<Promise<void>>(Promise.resolve());
   /** the selection whose snapshot could not be applied; the preview would not match this version */
-  const [failedChange, setFailedChange] 02= useState<typeof change | undefined>();
+  const [failedChange, setFailedChange] = useState<typeof change | undefined>();
 
   useEffect(() => {
     if (!dashboardApi) return;
