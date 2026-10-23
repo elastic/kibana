@@ -31,7 +31,7 @@ export interface UnitRepublisher {
 const isOperatorError = (error: unknown): boolean =>
   (error instanceof StatusError && error.statusCode === 503) || error instanceof EncryptionError;
 
-/** Republishes every stored unit once. A failing unit is logged and the next run retries it. */
+/** Republishes every stored unit once. Throws after the loop if any unit failed, so Task Manager records a failed run. */
 export const runRepublishUnits = async ({
   republisher,
   logger,
@@ -42,6 +42,7 @@ export const runRepublishUnits = async ({
   signal: AbortSignal;
 }): Promise<void> => {
   const unitIds = await republisher.listUnitIds();
+  let failedCount = 0;
 
   for (const unitId of unitIds) {
     if (signal.aborted) {
@@ -68,7 +69,12 @@ export const runRepublishUnits = async ({
       } else {
         logger.warn(message);
       }
+      failedCount++;
     }
+  }
+
+  if (failedCount > 0) {
+    throw new Error(`Failed to republish ${failedCount} of ${unitIds.length} Streams units`);
   }
 };
 
@@ -109,7 +115,12 @@ export const registerRepublishUnitsTask = ({
               signal: runSignal.signal,
             });
           } catch (error) {
-            logger.warn(`Streams unit republish run failed, the next run retries: ${error}`);
+            if (runSignal.signal.aborted) {
+              logger.debug(`Streams unit republish run aborted: ${error}`);
+              return { state: {} };
+            }
+            // A plain error keeps the recurring schedule. throwUnrecoverableError would stop the task.
+            throw error;
           } finally {
             // The stop signal lives as long as the plugin, so a run must not leave a listener on it.
             runSignal.dispose();

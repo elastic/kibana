@@ -52,7 +52,9 @@ describe('runRepublishUnits', () => {
     );
     const logger = loggerMock.create();
 
-    await runRepublishUnits({ republisher, logger, signal: new AbortController().signal });
+    await expect(
+      runRepublishUnits({ republisher, logger, signal: new AbortController().signal })
+    ).rejects.toThrow('Failed to republish 1 of 2 Streams units');
 
     expect(republisher.republishUnit).toHaveBeenCalledTimes(2);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('[default]'));
@@ -67,7 +69,9 @@ describe('runRepublishUnits', () => {
     );
     const logger = loggerMock.create();
 
-    await runRepublishUnits({ republisher, logger, signal: new AbortController().signal });
+    await expect(
+      runRepublishUnits({ republisher, logger, signal: new AbortController().signal })
+    ).rejects.toThrow('Failed to republish 1 of 1 Streams units');
 
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('cannot read current-kid'));
     expect(logger.warn).not.toHaveBeenCalled();
@@ -84,7 +88,9 @@ describe('runRepublishUnits', () => {
     );
     const logger = loggerMock.create();
 
-    await runRepublishUnits({ republisher, logger, signal: new AbortController().signal });
+    await expect(
+      runRepublishUnits({ republisher, logger, signal: new AbortController().signal })
+    ).rejects.toThrow('Failed to republish 1 of 1 Streams units');
 
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Unable to decrypt'));
     expect(logger.warn).not.toHaveBeenCalled();
@@ -218,13 +224,31 @@ describe('registerRepublishUnitsTask', () => {
     expect(removeEventListener).toHaveBeenCalledWith('abort', expect.any(Function));
   });
 
-  it('logs and returns empty state instead of throwing when listing fails', async () => {
+  it('rejects when listing fails, so Task Manager records a failed run', async () => {
     const republisher = createRepublisher();
     republisher.listUnitIds.mockRejectedValue(new Error('es down'));
-    const { logger, runTask } = register(republisher);
+    const { runTask } = register(republisher);
+
+    await expect(runTask()).rejects.toThrow('es down');
+  });
+
+  it('rejects when a unit fails', async () => {
+    const republisher = createRepublisher();
+    republisher.republishUnit.mockRejectedValue(new StatusError('distributor down', 502));
+    const { runTask } = register(republisher);
+
+    await expect(runTask()).rejects.toThrow('Failed to republish 1 of 1 Streams units');
+  });
+
+  it('returns empty state instead of throwing when the run is aborted', async () => {
+    const republisher = createRepublisher();
+    const { runTask, stopController } = register(republisher);
+    republisher.listUnitIds.mockImplementationOnce(async () => {
+      stopController.abort();
+      throw new Error('request aborted');
+    });
 
     await expect(runTask()).resolves.toEqual({ state: {} });
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('es down'));
   });
 });
 
