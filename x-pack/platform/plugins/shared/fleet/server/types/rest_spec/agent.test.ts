@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../constants';
+
 import {
   AGENT_ID_MAX_LENGTH,
   AGENTS_KUERY_MAX_LENGTH,
@@ -20,7 +22,6 @@ import {
   PostBulkRequestDiagnosticsActionRequestSchema,
   PostBulkUpdateAgentTagsRequestSchema,
 } from './agent';
-import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../constants';
 
 describe('GetAgentsRequestSchema', () => {
   it('should allow pagination with less than 10000 agents', () => {
