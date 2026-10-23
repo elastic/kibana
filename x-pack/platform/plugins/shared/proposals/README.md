@@ -515,7 +515,7 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 
 **Prerequisites** — all four are load-bearing, and the identity behaviour degrades silently without them:
 
-- **This plugin enabled** (`xpack.proposals.enabled: true`). It is **off by default**, so without this the routes 404 and AlertZero's proposals panel renders its load error rather than a queue.
+- **This plugin enabled** (`xpack.proposals.enabled`). It is on by default in stateful deployments but **off by default in serverless**; when it is off the routes 404 and AlertZero's proposals panel renders its load error rather than a queue.
 - **Security enabled.** With security off no API key is stored, the resume task gets no fake request, and the resume fails outright.
 - **Encrypted Saved Objects configured** (`xpack.encryptedSavedObjects.encryptionKey`). Scheduling a task with an API key throws without it.
 - **API keys enabled** in Elasticsearch.

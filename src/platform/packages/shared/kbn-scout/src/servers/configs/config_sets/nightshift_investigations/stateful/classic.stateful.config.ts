@@ -13,8 +13,8 @@ import { defaultConfig } from '../../default/stateful/base.config';
 // The plugin is disabled by default (xpack.nightshift_investigations.enabled),
 // so its tests run against a config set that turns it on. The workflows_extensions trigger
 // approval test runs on it too, it needs the plugin on so its triggers are in the catalog.
-// Investigations are stored as agentic investigations and propose actions through proposals, both
-// disabled by default too, and they are only available behind the nightshift.enabled feature flag.
+// Investigations are stored as agentic investigations and propose actions through proposals (both
+// on by default in stateful), and they are only available behind the nightshift.enabled feature flag.
 // Semantic Memory is a separate flag that also defaults to false, and the Memory browsing
 // page is silently absent without it, so it is turned on here rather than in each suite.
 
@@ -35,8 +35,6 @@ export const servers: ScoutServerConfig = {
       ...defaultConfig.kbnTestServer.serverArgs,
       '--xpack.nightshift_investigations.enabled=true',
       '--xpack.nightshift_investigations.memory.enabled=true',
-      '--xpack.agenticInvestigations.enabled=true',
-      '--xpack.proposals.enabled=true',
       '--feature_flags.overrides.nightshift.enabled=true',
       `--xpack.actions.preconfigured=${JSON.stringify({
         [NIGHTSHIFT_INVESTIGATION_DEFAULT_MODEL_ID]: {
