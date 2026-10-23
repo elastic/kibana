@@ -15,6 +15,7 @@ import { RuleWorkflowSubscriber } from '../lib/events/rule_workflow_subscriber/r
 import { RuleChangesHistorySubscriber } from '../lib/events/rule_changes_history_subscriber/rule_changes_history_subscriber';
 import { RuleTelemetrySubscriber } from '../lib/events/rule_telemetry_subscriber/rule_telemetry_subscriber';
 import { RuleExecutorEventPublisher } from '../lib/events/rule_executor_event_publisher/rule_executor_event_publisher';
+import { DispatcherTelemetrySubscriber } from '../lib/events/dispatcher_telemetry_subscriber/dispatcher_telemetry_subscriber';
 import { DispatcherEventPublisher } from '../lib/events/dispatcher_event_publisher/dispatcher_event_publisher';
 import { RuleExecutorWorkflowSubscriber } from '../lib/events/rule_executor_workflow_subscriber/rule_executor_workflow_subscriber';
 
@@ -52,7 +53,8 @@ export const bindEvents = ({ bind }: ContainerModuleLoadOptions) => {
   bind(RuleExecutorWorkflowSubscriber).toSelf().inSingletonScope();
 
   /**
-   * Dispatcher event publisher. Singleton: the dispatcher runs without a request.
+   * Dispatcher event publisher (singleton: the dispatcher runs without a request) and subscribers.
    */
   bind(DispatcherEventPublisher).toSelf().inSingletonScope();
+  bind(DispatcherTelemetrySubscriber).toSelf().inSingletonScope();
 };
