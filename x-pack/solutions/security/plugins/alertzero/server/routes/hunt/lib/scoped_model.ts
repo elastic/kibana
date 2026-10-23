@@ -1,8 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Use of this source code is governed
- * by the Elastic License 2.0; the Elastic License 2.0 or a higher edition must
- * be purchased for use in production. All rights reserved.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { IUiSettingsClient, KibanaRequest, Logger } from '@kbn/core/server';
