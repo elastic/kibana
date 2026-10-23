@@ -183,16 +183,16 @@ describe('InlineWorkflowEditor', () => {
       renderStatefulEditor(draft());
 
       expect(screen.queryByText('Select a connector.')).not.toBeInTheDocument();
-      expect(screen.queryByText('subject is required.')).not.toBeInTheDocument();
+      expect(screen.queryByText("'subject' is required.")).not.toBeInTheDocument();
     });
 
     it('shows every error when forced', () => {
       renderStatefulEditor(draft(), { forceShowErrors: true });
 
       expect(screen.getByText('Select a connector.')).toBeInTheDocument();
-      expect(screen.getByText('to is required.')).toBeInTheDocument();
-      expect(screen.getByText('subject is required.')).toBeInTheDocument();
-      expect(screen.getByText('message is required.')).toBeInTheDocument();
+      expect(screen.getByText("'to' is required.")).toBeInTheDocument();
+      expect(screen.getByText("'subject' is required.")).toBeInTheDocument();
+      expect(screen.getByText("'message' is required.")).toBeInTheDocument();
     });
 
     it('shows params errors once the params are edited, without the connector error', () => {
@@ -200,8 +200,8 @@ describe('InlineWorkflowEditor', () => {
 
       typeParams('to:\n  - user@example.com\nsubject: Hi\nmessage: ""\n');
 
-      expect(screen.getByText('message is required.')).toBeInTheDocument();
-      expect(screen.queryByText('subject is required.')).not.toBeInTheDocument();
+      expect(screen.getByText("'message' is required.")).toBeInTheDocument();
+      expect(screen.queryByText("'subject' is required.")).not.toBeInTheDocument();
       expect(screen.queryByText('Select a connector.')).not.toBeInTheDocument();
     });
 
@@ -215,13 +215,29 @@ describe('InlineWorkflowEditor', () => {
       ).toBeInTheDocument();
     });
 
+    it('reports unknown fields', () => {
+      renderStatefulEditor(draft());
+
+      typeParams('to:\n  - user@example.com\nsubject: Hi\nmessage: Body\nfoo: bar\n');
+
+      expect(screen.getByText("Unknown field: 'foo'.")).toBeInTheDocument();
+    });
+
+    it('reports a list field given a string', () => {
+      renderStatefulEditor(draft());
+
+      typeParams('to: user@example.com\nsubject: Hi\nmessage: Body\n');
+
+      expect(screen.getByText("'to' must be a list of strings.")).toBeInTheDocument();
+    });
+
     it('keeps showing params errors after reverting to the template', () => {
       renderStatefulEditor(draft());
 
       typeParams('subject: Hi\n');
       typeParams(EMAIL_TEMPLATE);
 
-      expect(screen.getByText('subject is required.')).toBeInTheDocument();
+      expect(screen.getByText("'subject' is required.")).toBeInTheDocument();
     });
 
     it('shows the connector error once the connector selector is blurred', () => {
@@ -230,7 +246,7 @@ describe('InlineWorkflowEditor', () => {
       fireEvent.blur(screen.getByTestId('connectorSelectorInput'));
 
       expect(screen.getByText('Select a connector.')).toBeInTheDocument();
-      expect(screen.queryByText('subject is required.')).not.toBeInTheDocument();
+      expect(screen.queryByText("'subject' is required.")).not.toBeInTheDocument();
     });
   });
 });
