@@ -9,8 +9,7 @@ import { badRequest, serverUnavailable } from '@hapi/boom';
 import type { SlackChannelEligibilityCallback } from '../../types';
 import type { NightshiftAutomationAttributes } from './types';
 
-/** Channel ids an automation reads from (Slack triggers) or posts to (channel completions). */
-export const collectAutomationSlackChannels = ({
+const collectAutomationSlackChannels = ({
   trigger,
   completions,
 }: Pick<NightshiftAutomationAttributes, 'trigger' | 'completions'>): string[] => {

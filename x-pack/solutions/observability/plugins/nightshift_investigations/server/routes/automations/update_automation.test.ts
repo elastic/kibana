@@ -342,12 +342,16 @@ it.each([{ name: 'Changed' }, { isEnabled: false }])(
 describe('private Slack channels', () => {
   const slackRow = { kind: 'slack', event: 'message', channels: ['G0123456789'] };
 
-  it('rejects a trigger that selects a private channel', async () => {
+  it.each([
+    ['selecting one in the trigger', { trigger: { rows: [slackRow] } }],
+    ['enabling an automation that holds one', { isEnabled: true }],
+  ])('rejects %s', async (_, body) => {
+    soClient.get.mockResolvedValue({
+      attributes: { ...existing, isEnabled: false, trigger: { rows: [slackRow] } },
+    });
     checkEligibility.mockResolvedValue(['G0123456789']);
 
-    await expect(call({ trigger: { rows: [slackRow] } })).rejects.toMatchObject({
-      output: { statusCode: 400 },
-    });
+    await expect(call(body)).rejects.toMatchObject({ output: { statusCode: 400 } });
     expect(soClient.update).not.toHaveBeenCalled();
   });
 
@@ -362,16 +366,5 @@ describe('private Slack channels', () => {
 
     expect(checkEligibility).not.toHaveBeenCalled();
     expect(soClient.update).toHaveBeenCalledTimes(2);
-  });
-
-  it('checks again when the automation is enabled', async () => {
-    soClient.get.mockResolvedValue({
-      attributes: { ...existing, isEnabled: false, trigger: { rows: [slackRow] } },
-    });
-    checkEligibility.mockResolvedValue(['G0123456789']);
-
-    await expect(call({ isEnabled: true })).rejects.toMatchObject({
-      output: { statusCode: 400 },
-    });
   });
 });

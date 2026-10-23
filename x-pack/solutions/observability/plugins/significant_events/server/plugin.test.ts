@@ -10,6 +10,8 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { consumeRunQuota, createRunQuotaInternalRepository } from './lib/run_quotas';
 import { knowledgeIndicatorsDataStream } from './lib/knowledge_indicators';
 import { detectionsDataStream } from './lib/significant_events/detections';
+import { RELAY_APP_CONNECTION_SO_TYPE } from './lib/slack_app/saved_object';
+import { SlackAppService } from './lib/slack_app/service';
 import type { SignificantEventsPluginSetupDependencies } from './types';
 import { SignificantEventsPlugin } from './plugin';
 
@@ -33,10 +35,12 @@ const createCoreSetup = () => {
 
 const createSetupDeps = ({
   registerInvestigationQuota,
+  registerSlackChannelEligibility = jest.fn(),
   onSourceChange = jest.fn(),
   workflowsExtensions,
 }: {
   registerInvestigationQuota?: jest.Mock;
+  registerSlackChannelEligibility?: jest.Mock;
   onSourceChange?: jest.Mock;
   workflowsExtensions?: {
     registerStepDefinition: jest.Mock;
@@ -50,7 +54,7 @@ const createSetupDeps = ({
       ? {
           nightshiftInvestigations: {
             registerInvestigationQuota,
-            registerSlackChannelEligibility: jest.fn(),
+            registerSlackChannelEligibility,
           },
         }
       : {}),
@@ -141,6 +145,33 @@ describe('SignificantEventsPlugin setup', () => {
       internalRepository,
       group: 'investigation',
     });
+  });
+
+  it('checks Slack channel eligibility through an internal client, not the user request', async () => {
+    const registerSlackChannelEligibility = jest.fn();
+    const findPrivateChannels = jest
+      .spyOn(SlackAppService.prototype, 'findPrivateChannels')
+      .mockResolvedValue(['G1']);
+    const plugin = createPlugin();
+    plugin.setup(
+      createCoreSetup(),
+      createSetupDeps({ registerInvestigationQuota: jest.fn(), registerSlackChannelEligibility })
+    );
+    const server = plugin.server;
+    if (!server) {
+      throw new Error('Expected Significant Events server');
+    }
+    const coreStart = coreMock.createStart();
+    server.core = coreStart;
+    const [callback] = registerSlackChannelEligibility.mock.calls[0];
+
+    await expect(callback(['G1', 'C1'])).resolves.toEqual(['G1']);
+
+    expect(coreStart.savedObjects.createInternalRepository).toHaveBeenCalledWith([
+      RELAY_APP_CONNECTION_SO_TYPE,
+    ]);
+    expect(coreStart.savedObjects.getScopedClient).not.toHaveBeenCalled();
+    expect(findPrivateChannels).toHaveBeenCalledWith(expect.anything(), ['G1', 'C1']);
   });
 });
 

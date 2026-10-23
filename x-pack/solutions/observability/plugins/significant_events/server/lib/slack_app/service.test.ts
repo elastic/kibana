@@ -1433,15 +1433,6 @@ describe('SlackAppService', () => {
         ).resolves.toEqual([]);
         expect(listBindings).not.toHaveBeenCalled();
       });
-
-      it('propagates Relay failures so callers fail closed', async () => {
-        const { server, soClient } = createHarnessWithListBindings();
-        soClient.get.mockResolvedValue(connected);
-        listBindings.mockRejectedValue(new Error('boom'));
-        await expect(
-          new SlackAppService(server).findPrivateChannels(soClient as never, ['C1'])
-        ).rejects.toThrow('boom');
-      });
     });
 
     it('rethrows and logs a warning when the bindings API call fails', async () => {

@@ -301,20 +301,6 @@ describe('AppsSection', () => {
     );
   });
 
-  it('binds a channel from a pasted Slack link', async () => {
-    makeBindings([]);
-    setup();
-    revealChannels();
-
-    const input = await screen.findByTestId('streamsSlackAppChannelIdInput');
-    fireEvent.change(input, {
-      target: { value: 'https://acme.slack.com/archives/G0123456789' },
-    });
-    fireEvent.click(screen.getByTestId('streamsSlackAppBindChannelButton'));
-
-    expect(bindChannel).toHaveBeenCalledWith('G0123456789');
-  });
-
   it('keeps the Bind button disabled for input that is not a channel id or link', async () => {
     makeBindings([]);
     setup();

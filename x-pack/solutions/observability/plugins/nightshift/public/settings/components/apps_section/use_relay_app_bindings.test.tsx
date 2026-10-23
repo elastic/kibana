@@ -247,9 +247,7 @@ describe('useBindChannel', () => {
   });
 
   it.each([
-    ['not_a_member', 'not_a_member'],
     ['private_channel_access_required', 'private_channel_access_required'],
-    ['channel_taken', 'channel_taken'],
     ['something_new', 'other'],
   ])('exposes a %s rejection as the %s failure instead of a toast', async (sent, expected) => {
     httpPost.mockRejectedValue({

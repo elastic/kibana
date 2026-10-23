@@ -13,7 +13,6 @@ import {
 import {
   canSaveAutomation,
   getSaveBlocker,
-  getSelectedChannels,
   isTriggerValid,
   isValidDailyLimit,
   validationLabels,
@@ -122,33 +121,15 @@ describe('private channel validation', () => {
       channels,
     },
   });
-  const privateChannels = new Set(['G1']);
-
-  it('collects trigger channels and channel destinations', () => {
-    expect(
-      getSelectedChannels({
-        ...slackValues(['C1']),
-        slackAction: { target: 'channel', destination: 'C2' },
-      })
-    ).toEqual(['C1', 'C2']);
-  });
-
-  it('blocks saving a private trigger channel', () => {
-    expect(getSaveBlocker(slackValues(['C1', 'G1']), privateChannels)).toBe(
-      validationLabels.privateChannels
-    );
-    expect(canSaveAutomation(slackValues(['G1']), privateChannels)).toBe(false);
-  });
-
-  it('blocks saving a private channel destination', () => {
+  it.each([
+    ['a private trigger channel', ['C1', 'G1'], 'C2', validationLabels.privateChannels],
+    ['a private channel destination', ['C1'], 'G1', validationLabels.privateChannels],
+    ['only other channels', ['C1'], 'C2', undefined],
+  ])('save blocker for %s', (_, channels, destination, expected) => {
     const values = {
-      ...slackValues(['C1']),
-      slackAction: { target: 'channel' as const, destination: 'G1' },
+      ...slackValues(channels),
+      slackAction: { target: 'channel' as const, destination },
     };
-    expect(getSaveBlocker(values, privateChannels)).toBe(validationLabels.privateChannels);
-  });
-
-  it('allows other channels', () => {
-    expect(getSaveBlocker(slackValues(['C1']), privateChannels)).toBeUndefined();
+    expect(getSaveBlocker(values, new Set(['G1']))).toBe(expected);
   });
 });

@@ -65,8 +65,7 @@ export const isTriggerValid = (trigger?: TriggerFormValues): trigger is TriggerF
   return true;
 };
 
-/** Channel ids the form selects, as a Slack trigger channel or a channel destination. */
-export const getSelectedChannels = ({ trigger, slackAction }: AutomationFormValues): string[] => [
+const getSelectedChannels = ({ trigger, slackAction }: AutomationFormValues): string[] => [
   ...(trigger && isSlackTrigger(trigger) ? trigger.channels : []),
   ...(slackAction?.target === 'channel' && slackAction.destination
     ? [slackAction.destination]

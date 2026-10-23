@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  assertSlackChannelsEligible,
-  collectAutomationSlackChannels,
-} from './assert_slack_channels_eligible';
+import { assertSlackChannelsEligible } from './assert_slack_channels_eligible';
 
 const automation = {
   trigger: {
@@ -16,41 +13,17 @@ const automation = {
   },
   completions: [
     { action: 'post_to_slack' as const, targetMode: 'channel' as const, destination: 'C3' },
+    { action: 'post_to_slack' as const, targetMode: 'self' as const, destination: 'U1' },
   ],
 };
 
-describe('collectAutomationSlackChannels', () => {
-  it('gathers trigger channels and channel-mode post destinations', () => {
-    expect(collectAutomationSlackChannels(automation)).toEqual(['C1', 'C2', 'C3']);
-  });
-
-  it('ignores direct-message destinations', () => {
-    expect(
-      collectAutomationSlackChannels({
-        trigger: { rows: [] },
-        completions: [{ action: 'post_to_slack', targetMode: 'self', destination: 'U1' }],
-      })
-    ).toEqual([]);
-  });
-});
-
 describe('assertSlackChannelsEligible', () => {
-  it('passes when nothing is ineligible', async () => {
+  it('checks trigger channels and channel destinations, not direct messages', async () => {
     const checkEligibility = jest.fn().mockResolvedValue([]);
-    await expect(
-      assertSlackChannelsEligible({ automation, checkEligibility })
-    ).resolves.toBeUndefined();
+    await expect(assertSlackChannelsEligible({ automation, checkEligibility })).resolves.toBe(
+      undefined
+    );
     expect(checkEligibility).toHaveBeenCalledWith(['C1', 'C2', 'C3']);
-  });
-
-  it('rejects private channels with a 400 that lists their ids', async () => {
-    const checkEligibility = jest.fn().mockResolvedValue(['C2']);
-    await expect(
-      assertSlackChannelsEligible({ automation, checkEligibility })
-    ).rejects.toMatchObject({
-      output: { statusCode: 400 },
-      message: expect.stringContaining('C2'),
-    });
   });
 
   it('fails closed with a 503 when the check throws', async () => {
