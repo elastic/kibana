@@ -130,6 +130,10 @@ const AgentTurnComponent: React.FC<AgentTurnProps> = ({
     min-inline-size: ${euiTheme.size.l};
   `;
 
+  const contentColumnStyles = css`
+    min-inline-size: 0;
+  `;
+
   const content = renderContent(item, conversationId, conversationAttachments);
 
   return (
@@ -146,7 +150,7 @@ const AgentTurnComponent: React.FC<AgentTurnProps> = ({
           agent && <AgentAvatar agent={agent} size="s" iconSize="l" />
         )}
       </EuiFlexItem>
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem grow={true} css={contentColumnStyles}>
         <EuiFlexGroup direction="column" gutterSize="s">
           {agent && (
             <EuiFlexItem grow={false}>
