@@ -1,5 +1,5 @@
 {
-  "sha1": "2d009255fd94da8f30ac358295f7f9fa98f49fac",
+  "sha1": "41012a9c231e5c37bfdbb881856b279fc2635433",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -15,6 +15,46 @@
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/add_layer_panel.spec.ts",
         "line": 23,
         "column": 23
+      }
+    },
+    {
+      "id": "854a799e84b9bab-6e296e5ed32d09f",
+      "title": "Maps - add to dashboard save flow new map saved by value to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/add_to_dashboard.spec.ts",
+        "line": 15,
+        "column": 11
+      }
+    },
+    {
+      "id": "854a799e84b9bab-13e26d488a5ab05",
+      "title": "Maps - add to dashboard save flow new map saved by reference to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/add_to_dashboard.spec.ts",
+        "line": 24,
+        "column": 17
       }
     },
     {
@@ -91,8 +131,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/discover.spec.ts",
-        "line": 32,
-        "column": 43
+        "line": 33,
+        "column": 13
       }
     },
     {
@@ -106,6 +146,58 @@
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/discover.spec.ts",
         "line": 42,
         "column": 95
+      }
+    },
+    {
+      "id": "7bb1c014d258d13-a4b331b9efb2c28",
+      "title": "Maps - embed in dashboard should render map embeddables",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/embed_in_dashboard.spec.ts",
+        "line": 71,
+        "column": 16
+      }
+    },
+    {
+      "id": "7bb1c014d258d13-f54d53db8e21b46",
+      "title": "Maps - embed in dashboard should apply filters added to the dashboard filter bar to map panels",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/embed_in_dashboard.spec.ts",
+        "line": 99,
+        "column": 56
+      }
+    },
+    {
+      "id": "7bb1c014d258d13-473b4873570e817",
+      "title": "Maps - embed in dashboard should apply filters saved in the map panel itself",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/embed_in_dashboard.spec.ts",
+        "line": 140,
+        "column": 9
+      }
+    },
+    {
+      "id": "7bb1c014d258d13-3bb6b011c0c8ba6",
+      "title": "Maps - embed in dashboard should re-fetch documents on refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/embed_in_dashboard.spec.ts",
+        "line": 157,
+        "column": 14
       }
     },
     {
@@ -384,8 +476,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mvt_scaling.spec.ts",
-        "line": 232,
-        "column": 13
+        "line": 231,
+        "column": 15
       }
     },
     {
@@ -397,8 +489,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mvt_scaling.spec.ts",
-        "line": 232,
-        "column": 13
+        "line": 231,
+        "column": 15
       }
     },
     {
@@ -410,8 +502,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mvt_scaling.spec.ts",
-        "line": 232,
-        "column": 13
+        "line": 231,
+        "column": 15
       }
     },
     {
@@ -423,7 +515,85 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mvt_scaling.spec.ts",
-        "line": 232,
+        "line": 231,
+        "column": 15
+      }
+    },
+    {
+      "id": "618b9f5d0692d9f-f898ff7f9df730f",
+      "title": "Maps - save and return work flow new map: save should return to dashboard and add new map panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/save_and_return.spec.ts",
+        "line": 39,
+        "column": 5
+      }
+    },
+    {
+      "id": "618b9f5d0692d9f-c93b52bdfd85b5c",
+      "title": "Maps - save and return work flow new map: save and uncheck return to origin switch should cut the originator and stay in maps application",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/save_and_return.spec.ts",
+        "line": 51,
+        "column": 11
+      }
+    },
+    {
+      "id": "618b9f5d0692d9f-7b5209c860fd1b0",
+      "title": "Maps - save and return work flow edit existing map: save and return should return to dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/save_and_return.spec.ts",
+        "line": 61,
+        "column": 16
+      }
+    },
+    {
+      "id": "618b9f5d0692d9f-5019cf352d6fcf6",
+      "title": "Maps - save and return work flow edit existing map: save and return should lose its connection to the dashboard when creating new map",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/save_and_return.spec.ts",
+        "line": 78,
+        "column": 7
+      }
+    },
+    {
+      "id": "618b9f5d0692d9f-e8dba5f9301ee02",
+      "title": "Maps - save and return work flow edit existing map: save as should return to dashboard and add new panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/save_and_return.spec.ts",
+        "line": 86,
+        "column": 19
+      }
+    },
+    {
+      "id": "618b9f5d0692d9f-a412f6fc65adba5",
+      "title": "Maps - save and return work flow edit existing map: save as and uncheck return to origin switch should cut the originator and stay in maps application",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/save_and_return.spec.ts",
+        "line": 99,
         "column": 13
       }
     },
