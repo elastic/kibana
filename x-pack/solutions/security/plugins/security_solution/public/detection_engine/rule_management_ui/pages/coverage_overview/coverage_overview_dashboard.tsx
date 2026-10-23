@@ -66,6 +66,7 @@ const CoverageOverviewDashboardComponent = () => {
           </EuiTabs>
         </div>
       )}
+
       <EuiSpacer size="m" />
       {isMitreAttackUpdatesUIEnabled && <CoverageOverviewInvalidMitreRulesCallout />}
       <CoverageOverviewFiltersPanel />
