@@ -179,8 +179,10 @@ describe('ConnectedConnectors', () => {
 
       expect(await screen.findByTestId('addConnectorFlyoutStub')).toBeInTheDocument();
       const props = (getAddConnectorFlyout.mock.calls as unknown as Array<[unknown]>)[0][0] as {
+        featureId?: string;
         onConnectorCreated: (connector: { id: string; name: string }) => void;
       };
+      expect(props.featureId).toBe('agentBuilder');
       props.onConnectorCreated({ id: 'new', name: 'New' });
       await expectAdded(agents, 'new');
     });

@@ -6,7 +6,6 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import { createListSandboxConnectors } from './list_sandbox_connectors';
 
 const connector = (
@@ -26,15 +25,13 @@ const setup = ({
   connectors?: ReturnType<typeof connector>[];
   getAll?: jest.Mock;
 } = {}) => {
-  const logger = loggerMock.create();
   const actions = {
     getActionsClientWithRequest: jest.fn().mockResolvedValue({ getAll }),
   };
   const listSandboxConnectors = createListSandboxConnectors({
     getActions: () => actions as never,
-    logger,
   });
-  return { listSandboxConnectors, getAll, logger, request: httpServerMock.createKibanaRequest() };
+  return { listSandboxConnectors, getAll, request: httpServerMock.createKibanaRequest() };
 };
 
 describe('createListSandboxConnectors', () => {
@@ -73,22 +70,16 @@ describe('createListSandboxConnectors', () => {
   });
 
   it('returns no connectors when the actions plugin is not available', async () => {
-    const logger = loggerMock.create();
-    const listSandboxConnectors = createListSandboxConnectors({
-      getActions: () => undefined,
-      logger,
-    });
+    const listSandboxConnectors = createListSandboxConnectors({ getActions: () => undefined });
 
     await expect(listSandboxConnectors(httpServerMock.createKibanaRequest())).resolves.toEqual([]);
-    expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('returns no connectors and warns when listing fails', async () => {
-    const { listSandboxConnectors, logger, request } = setup({
+  it('fails when listing fails, rather than reporting an empty space', async () => {
+    const { listSandboxConnectors, request } = setup({
       getAll: jest.fn().mockRejectedValue(new Error('boom')),
     });
 
-    await expect(listSandboxConnectors(request)).resolves.toEqual([]);
-    expect(logger.warn).toHaveBeenCalledWith('Failed to list sandbox connectors: boom');
+    await expect(listSandboxConnectors(request)).rejects.toThrow('boom');
   });
 });

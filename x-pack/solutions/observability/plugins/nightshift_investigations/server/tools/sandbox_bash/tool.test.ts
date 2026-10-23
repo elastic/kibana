@@ -86,6 +86,121 @@ describe('sandbox bash tool', () => {
   });
 });
 
+describe('sandbox bash tool — connector credentials', () => {
+  const resolved = (): ResolveConnectorCredentials =>
+    jest.fn().mockResolvedValue({
+      env: { CONNECTOR_HEADER_AUTHORIZATION: GITHUB_TOKEN, CONNECTOR_CONFIG_URL: 'https://gh' },
+      secretValues: [GITHUB_TOKEN],
+    });
+
+  it('resolves the connector for the calling user and passes its credentials to the command', async () => {
+    const resolveConnectorCredentials = resolved();
+    const { run, runCommand, request } = setup({ resolveConnectorCredentials });
+
+    await run({ connector_id: 'connector-1' });
+
+    expect(resolveConnectorCredentials).toHaveBeenCalledWith(
+      'connector-1',
+      expect.objectContaining({ request, allowedConnectorIds: ['connector-1'] })
+    );
+    expect(runCommand.mock.calls[0][0].env).toEqual(
+      expect.objectContaining({
+        CONNECTOR_HEADER_AUTHORIZATION: GITHUB_TOKEN,
+        CONNECTOR_CONFIG_URL: 'https://gh',
+      })
+    );
+  });
+
+  it('does not let agent-supplied env shadow the credentials', async () => {
+    const { run, runCommand } = setup({ resolveConnectorCredentials: resolved() });
+
+    await run({
+      connector_id: 'connector-1',
+      env: { CONNECTOR_HEADER_AUTHORIZATION: 'agent-value', FOO: 'bar' },
+    });
+
+    const { env } = runCommand.mock.calls[0][0];
+    expect(env.CONNECTOR_HEADER_AUTHORIZATION).toBe(GITHUB_TOKEN);
+    expect(env.FOO).toBe('bar');
+  });
+
+  it('passes no credentials without a connector_id', async () => {
+    const resolveConnectorCredentials = resolved();
+    const { run, runCommand } = setup({ resolveConnectorCredentials });
+
+    await run({});
+
+    expect(resolveConnectorCredentials).not.toHaveBeenCalled();
+    expect(runCommand.mock.calls[0][0].env).not.toHaveProperty('CONNECTOR_HEADER_AUTHORIZATION');
+  });
+
+  it('redacts the secret from stdout and stderr of a successful command', async () => {
+    const { run, runCommand } = setup({ resolveConnectorCredentials: resolved() });
+    runCommand.mockResolvedValue({
+      exit_code: 0,
+      timed_out: false,
+      stdout: `token=${GITHUB_TOKEN}`,
+      stderr: `warn ${GITHUB_TOKEN}`,
+    });
+
+    const { results } = await run({ connector_id: 'connector-1' });
+
+    expect(results).toEqual([
+      {
+        type: ToolResultType.other,
+        data: { stdout: 'token=[REDACTED]', stderr: 'warn [REDACTED]', exit_code: 0 },
+      },
+    ]);
+  });
+
+  it('redacts the secret from the error message of a failed command', async () => {
+    const { run, runCommand } = setup({ resolveConnectorCredentials: resolved() });
+    runCommand.mockResolvedValue({
+      exit_code: 1,
+      timed_out: false,
+      stdout: '',
+      stderr: `401 for ${GITHUB_TOKEN}`,
+    });
+
+    const { results } = await run({ connector_id: 'connector-1' });
+
+    const { message } = (results[0] as { data: { message: string } }).data;
+    expect(message).not.toContain(GITHUB_TOKEN);
+    expect(message).toContain('401 for [REDACTED]');
+  });
+
+  it('returns the resolver error and runs nothing when the connector cannot be used', async () => {
+    const resolveConnectorCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
+      errorMessage: 'Connector "connector-2" is not assigned to this agent.',
+    });
+    const { run, runCommand } = setup({ resolveConnectorCredentials });
+
+    const { results } = await run({ connector_id: 'connector-2' });
+
+    expect(results).toEqual([
+      {
+        type: ToolResultType.error,
+        data: { message: 'Connector "connector-2" is not assigned to this agent.' },
+      },
+    ]);
+    expect(runCommand).not.toHaveBeenCalled();
+  });
+
+  it('returns an error when connector credentials are not available in the deployment', async () => {
+    const { run, runCommand } = setup();
+
+    const { results } = await run({ connector_id: 'connector-1' });
+
+    expect(results).toEqual([
+      {
+        type: ToolResultType.error,
+        data: { message: 'Connector credentials are not available in this deployment.' },
+      },
+    ]);
+    expect(runCommand).not.toHaveBeenCalled();
+  });
+});
+
 describe('sandbox bash tool — command timeout', () => {
   it.each([
     ['omitted', undefined, MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS],

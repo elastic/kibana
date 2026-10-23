@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { AgentWithPermissions } from '@kbn/agent-builder-browser';
+import { AgentBuilderConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '@kbn/nightshift-investigations-plugin/common';
 import { isHttpClientError } from '../common/http_error';
 import { useKibana } from '../hooks/use_kibana';
@@ -122,6 +123,7 @@ export function useAgentConnectors(): {
               refresh();
             },
             onConnectorCreated: assign,
+            featureId: AgentBuilderConnectorFeatureId,
           })
         : null,
     [assign, isCreating, refresh, triggersActionsUi]

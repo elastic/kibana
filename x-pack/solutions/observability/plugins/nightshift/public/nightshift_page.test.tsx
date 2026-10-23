@@ -41,7 +41,6 @@ jest.mock('./investigation/start_investigation_panel', () => ({
     </div>
   ),
 }));
-}));
 jest.mock('./automations/automations_page', () => ({
   AutomationsPage: () => <div data-test-subj="automationsPageStub" />,
 }));

@@ -201,7 +201,6 @@ export class NightshiftInvestigationsPlugin
 
     const listSandboxConnectors = createListSandboxConnectors({
       getActions: () => this.actionsStart,
-      logger: this.logger.get('sandbox_connectors'),
     });
 
     const getTriggerEmitter = (request: KibanaRequest): TriggerEmitter | undefined =>

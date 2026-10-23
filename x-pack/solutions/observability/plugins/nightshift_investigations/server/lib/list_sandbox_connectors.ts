@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { SandboxConnector } from '../../common/sandbox_connectors';
 
@@ -17,30 +17,19 @@ import type { SandboxConnector } from '../../common/sandbox_connectors';
 export type ListSandboxConnectors = (request: KibanaRequest) => Promise<SandboxConnector[]>;
 
 export const createListSandboxConnectors =
-  ({
-    getActions,
-    logger,
-  }: {
-    getActions: () => ActionsPluginStart | undefined;
-    logger: Logger;
-  }): ListSandboxConnectors =>
+  ({ getActions }: { getActions: () => ActionsPluginStart | undefined }): ListSandboxConnectors =>
   async (request) => {
     const actions = getActions();
     if (!actions) return [];
-    try {
-      const actionsClient = await actions.getActionsClientWithRequest(request);
-      const all = await actionsClient.getAll({
-        includeSystemActions: false,
-        sandboxCapableOnly: true,
-      });
-      return all.map((connector) => ({
-        id: connector.id,
-        name: connector.name,
-        connector_type_id: connector.actionTypeId,
-        is_preconfigured: connector.isPreconfigured,
-      }));
-    } catch (error) {
-      logger.warn(`Failed to list sandbox connectors: ${(error as Error).message}`);
-      return [];
-    }
+    const actionsClient = await actions.getActionsClientWithRequest(request);
+    const all = await actionsClient.getAll({
+      includeSystemActions: false,
+      sandboxCapableOnly: true,
+    });
+    return all.map((connector) => ({
+      id: connector.id,
+      name: connector.name,
+      connector_type_id: connector.actionTypeId,
+      is_preconfigured: connector.isPreconfigured,
+    }));
   };
