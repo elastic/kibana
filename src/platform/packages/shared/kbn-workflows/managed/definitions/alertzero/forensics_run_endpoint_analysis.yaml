@@ -613,7 +613,8 @@ steps:
                     maxLength: 7900
                     description: >
                       Assessment only, as markdown in ASD-STE100 Simplified Technical English: an opening
-                      paragraph, then `## Affected hosts` and `## Data gaps` bullets (omit an empty heading).
+                      paragraph, then `## Affected hosts`, `## Earlier activity` and `## Data gaps` bullets
+                      (omit an empty heading).
                       Do not list the actions, the timeline, or the IoCs.
                   # `timeline` and `iocs` mirror the `security.investigation.timeline` and
                   # `security.investigation.iocs` attachment payloads exactly, so the attach steps
