@@ -20,6 +20,8 @@ import type { Locator, ScoutPage } from '@kbn/scout';
  */
 export class WorkflowExecutionPage {
   public executionPanel: Locator;
+  /** Step detail overlay, or the legacy inline panel when the executions view is off. */
+  public readonly stepDetail: Locator;
   public readonly serviceAccountIdentity: Locator;
   public readonly serviceAccountBadges: Locator;
   public readonly copyServiceAccountId: Locator;
@@ -27,6 +29,9 @@ export class WorkflowExecutionPage {
   constructor(private readonly page: ScoutPage) {
     this.executionPanel = this.page.testSubj
       .locator('workflowExecutionFlyout')
+      .or(this.page.testSubj.locator('workflowExecutionPanel'));
+    this.stepDetail = this.page.testSubj
+      .locator('workflowExecutionStepFlyout')
       .or(this.page.testSubj.locator('workflowExecutionPanel'));
     this.serviceAccountIdentity = this.page.testSubj.locator('workflowServiceAccountName');
     this.serviceAccountBadges = this.page.testSubj
@@ -192,7 +197,7 @@ export class WorkflowExecutionPage {
    * Input, output, or error section in the open step detail.
    */
   getStepResultSection(type: 'input' | 'output' | 'error'): Locator {
-    return this.executionPanel.locator(`[data-test-subj="workflowStepDataSection_${type}"]`);
+    return this.stepDetail.locator(`[data-test-subj="workflowStepDataSection_${type}"]`);
   }
 
   /**
