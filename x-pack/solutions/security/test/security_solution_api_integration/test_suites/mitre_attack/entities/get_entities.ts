@@ -146,16 +146,17 @@ export default ({ getService }: FtrProviderContext) => {
         }
       });
 
-      it('returns 200 with empty buckets for framework=atlas when only enterprise entities exist', async () => {
+      it('returns 503 for framework=atlas when only enterprise entities exist', async () => {
         await seedMitreEntities(es, [createMitreTactic()]);
 
-        const { body, status } = await mitreAttackApi.getEntities({ framework: 'atlas' });
+        const { status } = await mitreAttackApi.getEntities({ framework: 'atlas' });
 
-        expect(status).to.eql(200);
-        expect(body.framework).to.eql('atlas');
-        expect(body.tactics).to.eql([]);
-        expect(body.techniques).to.eql([]);
-        expect(body.subtechniques).to.eql([]);
+        // Every bundled framework ships entities, so an empty unpinned result means data is missing.
+        expect(status).to.eql(503);
+
+        // The 503 triggers a background repopulation; wait for it (artifact + the seeded tactic)
+        // so it does not race the next test's beforeEach delete.
+        await waitForMitrePopulation(es, log, loadMitreArtifact().length + 1);
       });
     });
 
