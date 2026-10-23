@@ -333,7 +333,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.pluginContext.env.packageInfo.version,
       plugins.encryptedSavedObjects?.canEncrypt === true
     );
-    registerAttachments(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
+    registerAttachments(
+      agentBuilder,
+      core,
+      logger,
+      experimentalFeatures,
+      this.pluginContext.env.packageInfo.version,
+      plugins.ml
+    ).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });
 

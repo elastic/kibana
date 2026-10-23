@@ -41,6 +41,12 @@ export const queryKeys = {
   episodeAll: () => [...queryKeys.all, 'episode'] as const,
   episode: (spaceId: string, episodeId: string) =>
     [...queryKeys.episodeAll(), spaceId, episodeId] as const,
+  episodeDataAll: () => [...queryKeys.all, 'episode-data'] as const,
+  episodeData: (spaceId: string, episodeId: string) =>
+    [...queryKeys.episodeDataAll(), spaceId, episodeId] as const,
+  // `batch` keeps a single id list apart from `episodeData`, which caches another shape.
+  episodesData: (spaceId: string, episodeIds: string[]) =>
+    [...queryKeys.episodeDataAll(), spaceId, 'batch', ...episodeIds] as const,
   episodeEventsAll: () => [...queryKeys.all, 'episode-events'] as const,
   episodeEvents: (spaceId: string, episodeId: string) =>
     [...queryKeys.episodeEventsAll(), spaceId, episodeId] as const,
@@ -80,9 +86,6 @@ export const queryKeys = {
       currentGroupKey,
       excludeEpisodeId,
     ] as const,
-  episodeEventDataAll: () => [...queryKeys.all, 'episode-event-data'] as const,
-  episodeEventData: (spaceId: string, episodeId: string) =>
-    [...queryKeys.episodeEventDataAll(), spaceId, episodeId] as const,
   tagOptionsAll: () => [...queryKeys.all, 'tag-options'] as const,
   tagOptions: (
     spaceId: string,
