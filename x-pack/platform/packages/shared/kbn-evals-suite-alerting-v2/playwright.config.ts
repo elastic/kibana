@@ -14,6 +14,7 @@ const baseConfig = createPlaywrightEvalsConfig({
   // combinations driving multi-step skill conversations. Keep this high enough to
   // avoid spurious timeouts, and use CI step timeouts to bound runtime.
   timeout: 30 * 60_000, // 30 minutes
+  repetitions: 3,
 });
 
 export default defineConfig({
