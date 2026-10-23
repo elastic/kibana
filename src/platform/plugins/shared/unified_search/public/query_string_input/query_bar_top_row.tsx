@@ -374,11 +374,6 @@ type GenericQueryBarTopRow = <QT extends AggregateQuery | Query = Query>(
   props: QueryBarTopRowProps<QT>
 ) => React.ReactElement;
 
-const WEEKDAY_INDICES: readonly FirstDayOfWeek[] = [0, 1, 2, 3, 4, 5, 6];
-
-export const getFirstDayOfWeek = (weekday: string): FirstDayOfWeek | undefined =>
-  WEEKDAY_INDICES.find((index) => moment.weekdays(index) === weekday);
-
 export const QueryBarTopRow = React.memo(
   function QueryBarTopRow<QT extends Query | AggregateQuery = Query>(
     props: QueryBarTopRowProps<QT>
@@ -765,10 +760,12 @@ export const QueryBarTopRow = React.memo(
 
     const dayOfWeekSetting: string = uiSettings.get('dateFormat:dow');
 
-    const calendarOptions = useMemo(() => {
-      const firstDayOfWeek = getFirstDayOfWeek(dayOfWeekSetting);
-      return firstDayOfWeek === undefined ? undefined : { firstDayOfWeek };
-    }, [dayOfWeekSetting]);
+    const calendarOptions = useMemo(
+      () => ({
+        firstDayOfWeek: moment.weekdays().indexOf(dayOfWeekSetting) as FirstDayOfWeek,
+      }),
+      [dayOfWeekSetting]
+    );
 
     // Visualize-style consumers request auto-refresh-only mode via
     // `showAutoRefreshOnly` + `!showDatePicker`: the picker renders readOnly with

@@ -27,7 +27,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { render, screen, waitFor, within, act, fireEvent } from '@testing-library/react';
 import { EMPTY, of } from 'rxjs';
 
-import { getFirstDayOfWeek, QueryBarTopRow, SharingMetaFields } from './query_bar_top_row';
+import { QueryBarTopRow, SharingMetaFields } from './query_bar_top_row';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -1347,18 +1347,6 @@ describe('QueryBarTopRowTopRow', () => {
     const [firstWeekdayHeader] = within(calendar).getAllByRole('columnheader', { hidden: true });
 
     expect(firstWeekdayHeader).toHaveTextContent('We');
-  });
-});
-
-describe('getFirstDayOfWeek', () => {
-  it('maps weekday names to zero-based indices', () => {
-    expect(getFirstDayOfWeek('Sunday')).toBe(0);
-    expect(getFirstDayOfWeek('Wednesday')).toBe(3);
-    expect(getFirstDayOfWeek('Saturday')).toBe(6);
-  });
-
-  it('returns undefined for an unknown weekday', () => {
-    expect(getFirstDayOfWeek('Something')).toBeUndefined();
   });
 });
 
