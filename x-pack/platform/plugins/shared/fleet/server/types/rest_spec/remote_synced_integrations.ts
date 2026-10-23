@@ -8,6 +8,9 @@ import { schema } from '@kbn/config-schema';
 
 export const GetRemoteSyncedIntegrationsInfoRequestSchema = {
   params: schema.object({
-    outputId: schema.string({ meta: { description: 'The ID of the output' } }),
+    outputId: schema.savedObjectId({
+      minLength: 0,
+      meta: { description: 'The ID of the output' },
+    }),
   }),
 };

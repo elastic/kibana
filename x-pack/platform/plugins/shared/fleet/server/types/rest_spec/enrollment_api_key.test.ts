@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { PostEnrollmentAPIKeyRequestSchema } from './enrollment_api_key';
+import {
+  PostEnrollmentAPIKeyRequestSchema,
+  GetEnrollmentAPIKeysRequestSchema,
+} from './enrollment_api_key';
 
 describe('PostEnrollmentAPIKeyRequestSchema', () => {
   const validate = (expiration: unknown) =>
@@ -68,5 +71,20 @@ describe('PostEnrollmentAPIKeyRequestSchema', () => {
     it('rejects values exceeding maxLength of 20 characters', () => {
       expect(() => validate('1'.repeat(20) + 'd')).toThrow();
     });
+  });
+});
+
+describe('schema field length limits', () => {
+  // kuery uses searchFilter.warn(): overlong input is reported, not rejected.
+  it.each([10_000, 10_001, 50_000])('accepts a kuery of %i characters', (length) => {
+    expect(() =>
+      GetEnrollmentAPIKeysRequestSchema.query.validate({ kuery: 'a'.repeat(length) })
+    ).not.toThrow();
+  });
+
+  it('rejects a policy_id over 512 characters in PostEnrollmentAPIKeyRequestSchema', () => {
+    expect(() =>
+      PostEnrollmentAPIKeyRequestSchema.body.validate({ policy_id: 'a'.repeat(513) })
+    ).toThrow();
   });
 });

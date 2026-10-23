@@ -7,8 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { FLEET_SCHEMA_NAME_MAX_LENGTH } from '../../constants';
+
 export const PostStandaloneAgentAPIKeyRequestSchema = {
   body: schema.object({
-    name: schema.string(),
+    name: schema.string({ maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH }),
   }),
 };
