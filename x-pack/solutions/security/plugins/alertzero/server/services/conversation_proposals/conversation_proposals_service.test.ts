@@ -82,18 +82,13 @@ const makeAgentBuilder = (
   } as unknown as AgentBuilderPluginStart);
 
 const makeImpactClient = (
-  entityIdsByConversationId: Record<string, string[]> = {}
+  conversationIdsByEntity: Record<string, string[]> = {}
 ): AgenticInvestigationsPluginStart['getImpactClient'] =>
   jest.fn().mockReturnValue({
-    getEntityIdsByConversationId: jest.fn().mockImplementation(
-      async (ids: string[]) =>
-        new Map(
-          [...new Set(ids)].flatMap((conversationId) => {
-            const entityIds = entityIdsByConversationId[conversationId];
-            return entityIds ? [[conversationId, entityIds] as [string, string[]]] : [];
-          })
-        )
-    ),
+    searchConversationIdsByEntityId: jest
+      .fn()
+      .mockImplementation(async (entityId: string) => conversationIdsByEntity[entityId] ?? []),
+    getEntitiesByConversationId: jest.fn(),
   });
 
 describe('ConversationProposalsService', () => {
@@ -153,7 +148,7 @@ describe('ConversationProposalsService', () => {
       expect(proposalsService.list).toHaveBeenCalledWith(
         expect.objectContaining({
           category: 'respond',
-          status: 'pending',
+          statuses: ['pending', 'executing'],
           excludeSuperseded: true,
           size: 10,
           from: 0,
@@ -369,68 +364,69 @@ describe('ConversationProposalsService', () => {
       expect(result.total).toBe(42);
     });
 
-    it('attaches hydrated entity ids to each proposal for the same conversation', async () => {
-      const proposals = [
-        makeProposal({ id: 'p1', conversationId: 'shared' }),
-        makeProposal({ id: 'p2', conversationId: 'shared' }),
-        makeProposal({ id: 'p3', conversationId: 'other' }),
-      ];
-      const getEntityIdsByConversationId = jest
-        .fn()
-        .mockResolvedValue(new Map([['shared', ['user-1', 'host-1']]]));
-      const getImpactClient = jest.fn().mockReturnValue({ getEntityIdsByConversationId });
-
+    it('does not read the impact of the rows it lists', async () => {
+      const getEntitiesByConversationId = jest.fn();
+      const getImpactClient = jest.fn().mockReturnValue({ getEntitiesByConversationId });
       const service = new ConversationProposalsService(
-        makeProposalsService(proposals),
+        makeProposalsService([makeProposal()]),
         makeAgentBuilder(),
         logger,
         getImpactClient
       );
+
       const result = await service.listByCategory('investigate', request, spaceId, {
         size: 10,
         from: 0,
       });
 
-      expect(getImpactClient).toHaveBeenCalledWith(request);
-      expect(getEntityIdsByConversationId).toHaveBeenCalledWith(['shared', 'shared', 'other']);
-      expect(result.proposals[0].entityIds).toEqual(['user-1', 'host-1']);
-      expect(result.proposals[1].entityIds).toEqual(['user-1', 'host-1']);
-      expect(result.proposals[2]).not.toHaveProperty('entityIds');
-    });
-
-    it('omits entity ids for an impact recorded without entities', async () => {
-      const getEntityIdsByConversationId = jest.fn().mockResolvedValue(new Map([['conv-1', []]]));
-      const service = new ConversationProposalsService(
-        makeProposalsService([makeProposal()]),
-        makeAgentBuilder(),
-        logger,
-        jest.fn().mockReturnValue({ getEntityIdsByConversationId })
-      );
-      const result = await service.listByCategory('investigate', request, spaceId, {
-        size: 10,
-        from: 0,
-      });
-
+      expect(getEntitiesByConversationId).not.toHaveBeenCalled();
       expect(result.proposals[0]).not.toHaveProperty('entityIds');
-    });
-
-    it('still resolves when the impact fetch fails', async () => {
-      const service = new ConversationProposalsService(
-        makeProposalsService([makeProposal()]),
-        makeAgentBuilder(),
-        logger,
-        jest.fn().mockReturnValue({
-          getEntityIdsByConversationId: jest.fn().mockRejectedValue(new Error('index missing')),
-        })
-      );
-      const result = await service.listByCategory('investigate', request, spaceId, {
-        size: 10,
-        from: 0,
-      });
-
-      expect(result.proposals).toHaveLength(1);
       expect(result.proposals[0].conversationTitle).toBe('Title for conv-1');
-      expect(result.proposals[0]).not.toHaveProperty('entityIds');
+    });
+  });
+
+  describe.each([
+    [
+      'listByCategory',
+      (service: ConversationProposalsService, entity: string) =>
+        service.listByCategory('respond', request, spaceId, { size: 10, from: 0, entity }),
+    ],
+    [
+      'listClosed',
+      (service: ConversationProposalsService, entity: string) =>
+        service.listClosed(request, spaceId, { size: 10, from: 0, entity }),
+    ],
+  ])('%s with an entity filter', (_name, run) => {
+    it('restricts the proposals to the conversations impacting the entity', async () => {
+      const proposalsService = makeProposalsService();
+      const service = new ConversationProposalsService(
+        proposalsService,
+        makeAgentBuilder(),
+        logger,
+        makeImpactClient({ 'host-1': ['conv-1', 'conv-2'] })
+      );
+
+      await run(service, 'host-1');
+
+      expect(proposalsService.list).toHaveBeenCalledWith(
+        expect.objectContaining({ conversationIds: ['conv-1', 'conv-2'] }),
+        spaceId,
+        request,
+        expect.anything()
+      );
+    });
+
+    it('returns an empty page without querying proposals when no conversation has the entity', async () => {
+      const proposalsService = makeProposalsService();
+      const service = new ConversationProposalsService(
+        proposalsService,
+        makeAgentBuilder(),
+        logger,
+        makeImpactClient()
+      );
+
+      expect(await run(service, 'unknown')).toEqual({ proposals: [], total: 0 });
+      expect(proposalsService.list).not.toHaveBeenCalled();
     });
   });
 
@@ -449,6 +445,7 @@ describe('ConversationProposalsService', () => {
       expect(proposalsService.list).toHaveBeenCalledWith(
         expect.objectContaining({
           decidedWithinHours: 72,
+          statuses: ['succeeded', 'failed', 'expired', 'no_action'],
           excludeSuperseded: true,
           size: 25,
           from: 0,

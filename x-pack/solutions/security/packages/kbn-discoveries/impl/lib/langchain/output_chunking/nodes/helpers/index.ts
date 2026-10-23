@@ -8,6 +8,10 @@
 export { addTrailingBackticksIfNecessary } from './add_trailing_backticks_if_necessary';
 export { extractJson } from './extract_json';
 export { generationsAreRepeating } from './generations_are_repeating';
-export { getChainWithFormatInstructions } from './get_chain_with_format_instructions';
+export {
+  getChainWithFormatInstructions,
+  getFormatInstructionsFromZodV4Schema,
+  getStructuredGenerationPrompt,
+} from './get_chain_with_format_instructions';
 export { getCombined } from './get_combined';
 export { parseCombinedOrThrow } from './parse_combined_or_throw';

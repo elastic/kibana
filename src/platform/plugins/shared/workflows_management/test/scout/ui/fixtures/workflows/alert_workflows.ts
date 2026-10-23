@@ -221,7 +221,9 @@ steps:
  * documents into the index the alert rule monitors.
  *
  * Indexes with `refresh=wait_for` so the documents are searchable by the time
- * the test forces the rule to run.
+ * the test forces the rule to run. All documents go in one `_bulk` request so
+ * they become searchable together; otherwise a rule run can match only the first
+ * one and the summary workflow fires twice.
  */
 export const getTriggerAlertWorkflowYaml = (name: string, alertsIndex: string) => `
 name: ${name}
@@ -258,9 +260,13 @@ steps:
               value: "{% raw %}{{_ingest.timestamp}}{% endraw %}"
   - name: index
     type: elasticsearch.request
-    foreach: "{{inputs.alerts}}"
     with:
       method: POST
-      path: /{{consts.alerts_index_name}}/_doc?pipeline={{consts.pipeline_name}}&refresh=wait_for
-      body: \${{foreach.item}}
+      path: /{{consts.alerts_index_name}}/_bulk?pipeline={{consts.pipeline_name}}&refresh=wait_for
+      headers:
+        Content-Type: application/x-ndjson
+      body: |-
+        {% for alert in inputs.alerts %}{"index":{}}
+        {{ alert | json }}
+        {% endfor %}
 `;

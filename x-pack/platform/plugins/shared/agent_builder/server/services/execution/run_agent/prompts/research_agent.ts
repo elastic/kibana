@@ -14,6 +14,7 @@ import { renderVisibleContext } from '../utils/visible_context';
 import { attachmentToolsInstructions, renderAttachmentPrompt } from './utils/attachments';
 import { structuredOutputDescription } from './utils/custom_instructions';
 import { getFileSystemInstructions } from './utils/filestore';
+import { getDynamicToolsInstructions } from './utils/dynamic_tools';
 import { getAiIndicesInstructions } from './utils/ai_indices';
 import { getDeploymentInstructions } from './utils/deployment';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
@@ -177,6 +178,8 @@ Assume users can't see most tool calls or thinking - only your text output.
 
 ${getFileSystemInstructions({ bashEnabled: experimentalFeatures.bash })}
 
+${experimentalFeatures.dynamicTools ? getDynamicToolsInstructions() : ''}
+
 ${
   experimentalFeatures.skills
     ? relevantSkillsEnabled
@@ -201,8 +204,8 @@ ${structuredOutputDescription(outputSchema)}
 
 ${attachmentToolsInstructions()}
 
-## SML @ REFERENCES
-When the user picks from the @ menu, the message includes markdown links: \`[@label](sml://ENTRY_ID)\`. The substring after \`sml://\` is the entry id (same as \`entry_id\` from \`sml_search\` and accepted by \`sml_attach\`).
+## SML '#' REFERENCES
+When the user picks from the # menu, the message includes markdown links: \`[#label](sml://ENTRY_ID)\`. The substring after \`sml://\` is the entry id (same as \`entry_id\` from \`sml_search\` and accepted by \`sml_attach\`).
 - For each distinct entry id in \`sml://\` links in the **current** user message, call \`sml_attach\` with those ids **before** other tools that need that asset's content. When this applies, it overrides generic tool-order rules for tools that depend on those assets.
 - Skip \`sml_attach\` for an entry id only if a **previous** turn already ran \`sml_attach\` successfully for that entry id (see prior tool output text such as \`created from SML item '...'\`). Do **not** infer skip from conversation attachment XML: attachment \`id\` attributes are conversation attachment ids, not SML entry ids.
 - You may pass multiple entry ids in one \`sml_attach\` call when the user referenced several assets.

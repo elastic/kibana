@@ -13,7 +13,7 @@ import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/significant-event
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useKibana } from '../hooks/use_kibana';
 import { DetectionsSettingsTab } from './detections_settings_tab';
-import { useDeveloperMode } from './hooks/use_developer_mode';
+import { useDeveloperMode } from '../hooks/use_developer_mode';
 
 const mockContinuousSave = jest.fn();
 const mockRunLimitsRequestSave = jest.fn();
@@ -32,8 +32,8 @@ jest.mock('@kbn/unsaved-changes-prompt', () => ({
   useUnsavedChangesPrompt: jest.fn(),
 }));
 jest.mock('../hooks/use_kibana');
-jest.mock('./hooks/use_developer_mode');
-jest.mock('./hooks/use_significant_events_maintenance', () => ({
+jest.mock('../hooks/use_developer_mode');
+jest.mock('../data/maintenance/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({
     blocksActivity: mockBlocksActivity,
     isBlocked: mockBlocksActivity,
@@ -43,6 +43,11 @@ jest.mock('./hooks/use_significant_events_maintenance', () => ({
       : undefined,
   }),
   useMaintenanceStatus: () => ({ data: undefined }),
+  useSignificantEventsMaintenanceActions: () => ({
+    reset: jest.fn(),
+    isResetting: false,
+    isMutating: false,
+  }),
 }));
 jest.mock('./components/use_continuous_extraction_settings', () => ({
   useContinuousExtractionSettings: () => ({
@@ -146,11 +151,15 @@ const setup = ({
   isDeveloperMode = false,
   isSaving = false,
   canSaveAdvancedSettings = true,
+  canManage = true,
+  canConfigure = true,
   tuningConfig = {},
 }: {
   isDeveloperMode?: boolean;
   isSaving?: boolean;
   canSaveAdvancedSettings?: boolean;
+  canManage?: boolean;
+  canConfigure?: boolean;
   tuningConfig?: unknown;
 } = {}) => {
   mockUseDeveloperMode.mockReturnValue({
@@ -165,8 +174,8 @@ const setup = ({
         capabilities: {
           nightshift: {
             show: true,
-            manage: true,
-            configure: true,
+            manage: canManage,
+            configure: canConfigure,
           },
           advancedSettings: {
             save: canSaveAdvancedSettings,
@@ -339,6 +348,30 @@ describe('DetectionsSettingsTab', () => {
 
     expect(screen.getByTestId('stale-event-cleanup-section')).toBeInTheDocument();
     expect(screen.getByTestId('cost-estimate')).toBeInTheDocument();
+  });
+
+  it('hides reset outside developer mode', () => {
+    setup({ isDeveloperMode: false });
+
+    expect(screen.queryByTestId('significantEventsResetSection')).not.toBeInTheDocument();
+  });
+
+  it('shows reset inside advanced developer settings without needing maintenance status', () => {
+    setup({ isDeveloperMode: true });
+
+    expect(screen.getByTestId('nightshiftAdvancedDeveloperSettingsSection')).toContainElement(
+      screen.getByTestId('significantEventsResetSection')
+    );
+    expect(screen.getByTestId('significantEventsResetButton')).toBeEnabled();
+  });
+
+  it.each([
+    { canManage: false, canConfigure: true },
+    { canManage: true, canConfigure: false },
+  ])('requires both Nightshift engine capabilities: %o', (capabilities) => {
+    setup({ isDeveloperMode: true, ...capabilities });
+
+    expect(screen.getByTestId('significantEventsResetButton')).toBeDisabled();
   });
 
   it('opens the tuning flyout and shows the Dev badge when developer mode is on', () => {
