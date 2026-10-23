@@ -189,9 +189,27 @@ describe('buildAutomationSuggestionContext', () => {
   it('summarizes signals by tag', async () => {
     selectSignalsMock.mockResolvedValue({
       patterns: [
-        { tag: 'coverage_gap', target_index: 'tickets', tool: 'execute_esql', count: 2, signal_ids: ['a'] },
-        { tag: 'coverage_gap', target_index: 'tickets', tool: 'execute_esql', count: 1, signal_ids: ['b'] },
-        { tag: 'empty_retrieval', target_index: 'tickets', tool: 'execute_esql', count: 3, signal_ids: ['c'] },
+        {
+          tag: 'coverage_gap',
+          target_index: 'tickets',
+          tool: 'execute_esql',
+          count: 2,
+          signal_ids: ['a'],
+        },
+        {
+          tag: 'coverage_gap',
+          target_index: 'tickets',
+          tool: 'execute_esql',
+          count: 1,
+          signal_ids: ['b'],
+        },
+        {
+          tag: 'empty_retrieval',
+          target_index: 'tickets',
+          tool: 'execute_esql',
+          count: 3,
+          signal_ids: ['c'],
+        },
       ],
       spaces: ['default'],
       signalCount: 6,
