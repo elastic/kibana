@@ -441,13 +441,14 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('Sorting', () => {
-      it('should fetch rules sorted by `title`', async () => {
+      it('should fetch rules sorted case-insensitively by the displayed `title`', async () => {
         const migrationId = uuidv4();
-        const titles = ['Elastic 1', 'Windows', 'Linux', 'Elastic 2'];
+        const titles = ['elastic 1', 'Windows', 'linux', 'Elastic 2'];
+        const ascendingTitles = ['elastic 1', 'Elastic 2', 'linux', 'Windows'];
 
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
           const title = titles[index];
-          const originalRule = { ...defaultOriginalRule, title };
+          const originalRule = { ...defaultOriginalRule, title: `Original ${index}` };
           const elasticRule = { ...defaultElasticRule, title };
           return {
             migration_id: migrationId,
@@ -463,7 +464,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationId,
           queryParams: { sort_field: 'elastic_rule.title', sort_direction: 'asc' },
         });
-        expect(response.body.data.map((rule) => rule.elastic_rule?.title)).toEqual(titles.sort());
+        expect(response.body.data.map((rule) => rule.elastic_rule?.title)).toEqual(ascendingTitles);
 
         // fetch migration rules
         response = await migrationRulesRoutes.getRules({
@@ -471,7 +472,42 @@ export default ({ getService }: FtrProviderContext) => {
           queryParams: { sort_field: 'elastic_rule.title', sort_direction: 'desc' },
         });
         expect(response.body.data.map((rule) => rule.elastic_rule?.title)).toEqual(
-          titles.sort().reverse()
+          [...ascendingTitles].reverse()
+        );
+      });
+
+      it('should fetch failed rules sorted by their original `title`', async () => {
+        const migrationId = uuidv4();
+        const titles = ['Zulu rule', 'alpha rule', 'Delta rule'];
+        const ascendingTitles = ['alpha rule', 'Delta rule', 'Zulu rule'];
+
+        const migrationRuleDocuments = getMigrationRuleDocuments(titles.length, (index) => ({
+          migration_id: migrationId,
+          original_rule: { ...defaultOriginalRule, title: titles[index] },
+          status: SiemMigrationStatus.FAILED,
+        })).map(({ elastic_rule: _, ...document }) => document);
+        await createMigrationRules(es, migrationRuleDocuments);
+
+        let response = await migrationRulesRoutes.getRules({
+          migrationId,
+          queryParams: {
+            is_failed: true,
+            sort_field: 'elastic_rule.title',
+            sort_direction: 'asc',
+          },
+        });
+        expect(response.body.data.map((rule) => rule.original_rule.title)).toEqual(ascendingTitles);
+
+        response = await migrationRulesRoutes.getRules({
+          migrationId,
+          queryParams: {
+            is_failed: true,
+            sort_field: 'elastic_rule.title',
+            sort_direction: 'desc',
+          },
+        });
+        expect(response.body.data.map((rule) => rule.original_rule.title)).toEqual(
+          [...ascendingTitles].reverse()
         );
       });
 

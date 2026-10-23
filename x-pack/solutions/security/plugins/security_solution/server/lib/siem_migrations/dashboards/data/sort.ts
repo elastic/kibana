@@ -8,13 +8,15 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { SiemMigrationSort } from '../../common/data/types';
 import type { SiemMigrationSortHandler } from '../../common/data/sort';
-import { commonSortingOptions, getFieldExistenceSort } from '../../common/data/sort';
+import {
+  commonSortingOptions,
+  getCaseInsensitiveStringSort,
+  getFieldExistenceSort,
+} from '../../common/data/sort';
 
 const sortOptions = {
   ...commonSortingOptions,
-  name(direction: estypes.SortOrder = 'asc'): estypes.SortCombinations[] {
-    return [{ 'original_dashboard.title.keyword': direction }];
-  },
+  name: getCaseInsensitiveStringSort(['original_dashboard.title.keyword']),
   installedDashboardId(direction: estypes.SortOrder = 'asc'): estypes.SortCombinations[] {
     const field = 'elastic_dashboard.id';
     return getFieldExistenceSort(field)(direction);
