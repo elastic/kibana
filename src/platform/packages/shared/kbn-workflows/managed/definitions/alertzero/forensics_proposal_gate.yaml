@@ -122,6 +122,11 @@ outputs:
     type: string
   - name: expired
     type: boolean
+consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Endpoint Analysis worker"
+
 steps:
   # The gate child adds no second gate: this is a single sync wrap of
   # system-create-alertzero-proposal's own waitForApproval.
@@ -207,6 +212,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ inputs.investigationConversationId }}"
         message: "{{ variables.lost_race_note }}"
     on-failure:
@@ -226,6 +232,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ inputs.investigationConversationId }}"
         message: >-
           The containment proposal{% if inputs.title != blank %} "{{ inputs.title }}"{% endif %}

@@ -444,12 +444,12 @@ describe('Endpoint Analysis managed versions', () => {
     [
       ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.id,
       ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.version,
-      13,
+      15,
     ],
     [
       ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW.id,
       ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW.version,
-      4,
+      5,
     ],
   ])('bumps %s to the version that carries its reports', (_id, version, expected) => {
     expect(version).toBe(expected);
