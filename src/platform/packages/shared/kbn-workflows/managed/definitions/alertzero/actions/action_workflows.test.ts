@@ -241,6 +241,38 @@ describe('AlertZero action workflows', () => {
       }
     });
 
+    it('fails with the stale message when the rule is installed during the approval', () => {
+      const context = {
+        steps: {
+          review_rule: { output: { rules: [{ rule_id: 'r', version: 10, name: 'R' }] } },
+          install_rule: { output: { summary: { skipped: 1 } } },
+        },
+        inputs: { actionInput: { rule_id: 'r', version: 10 } },
+      };
+      const fail = stepByName(yaml, 'fail_install_skipped');
+      expect(runsStep(yaml, 'fail_install_skipped', context)).toBe(true);
+      expect(
+        createWorkflowLiquidEngine().parseAndRenderSync(String(fail?.with?.message), context)
+      ).toBe(
+        'The rule "R" was installed after this proposal was created. Approving again won\'t work, so decline it.'
+      );
+
+      const names = yaml.steps.map(({ name }) => name);
+      expect(names.indexOf('fail_install_skipped')).toBeLessThan(
+        names.indexOf('enable_installed_rule')
+      );
+    });
+
+    it('filters the installation review by the exact signature id', () => {
+      const review = stepByName(yaml, 'review_rule');
+      const body = review?.with?.body as { filter: { term: string } };
+      expect(
+        createWorkflowLiquidEngine().parseAndRenderSync(body.filter.term, {
+          inputs: { actionInput: { rule_id: 'r-1' } },
+        })
+      ).toBe('security-rule.rule_id: "r-1"');
+    });
+
     const notInstalled = { error: { message: 'HTTP 404: Not Found' } };
     const latest = (version: number, ruleId = 'r') => ({
       output: { rules: [{ rule_id: ruleId, version, name: 'R' }] },

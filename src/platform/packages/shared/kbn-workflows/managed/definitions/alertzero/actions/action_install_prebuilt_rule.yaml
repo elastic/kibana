@@ -145,6 +145,16 @@ steps:
           - rule_id: "{{ inputs.actionInput.rule_id }}"
             version: "${{ inputs.actionInput.version }}"
 
+  # Installed by someone else between the check above and this install.
+  - name: fail_install_skipped
+    type: workflow.fail
+    if: "${{ steps.install_rule.output.summary.skipped > 0 }}"
+    with:
+      message: >-
+        The rule "{{ steps.review_rule.output.rules[0].name | default: inputs.actionInput.rule_id }}"
+        was installed after this proposal was created. Approving again won't work, so
+        decline it.
+
   # A fresh install answers with the new saved object, so enable it by uuid.
   - name: enable_installed_rule
     type: security.enableRule
@@ -153,9 +163,8 @@ steps:
       ids:
         - "{{ steps.install_rule.output.results.created[0].id }}"
 
-  # The install API answers 200 even when it installed nothing (`summary.failed`,
-  # or `skipped` for a rule installed since the check above), and the proposal
-  # gate counts any error-free run as success. Step `if` cannot group with
+  # The install API answers 200 even when it installed nothing (`summary.failed`),
+  # and the proposal gate counts any error-free run as success. Step `if` cannot group with
   # parentheses, so what landed is computed here and read below as flags.
   - name: outcome
     type: data.set
