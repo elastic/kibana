@@ -86,7 +86,8 @@ export const createFakeRequestEnrichment = (logger: Logger): FakeRequestEnrichme
     // undefined, other props (symbols, `then`, `toJSON`) fall through so JS
     // reflection works.
     const enrichedUserStub: Partial<AuthenticatedUser> = {
-      profile_uid: profileId,
+      // Temporary E2E experiment: background requests must also lack a profile ID.
+      profile_uid: undefined,
       username,
     };
     const enrichedUser = deepFreeze(

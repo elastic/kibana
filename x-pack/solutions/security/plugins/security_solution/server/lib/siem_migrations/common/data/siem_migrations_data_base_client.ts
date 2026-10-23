@@ -44,11 +44,12 @@ export class SiemMigrationsDataBaseClient {
     }
     const username = this.currentUser.username;
     try {
-      const users = await this.esScopedClient.asCurrentUser.security.getUser({
+      await this.esScopedClient.asCurrentUser.security.getUser({
         username,
         with_profile_uid: true,
       });
-      return users[username].profile_uid;
+      // Temporary E2E experiment: direct Elasticsearch lookups cannot recover a profile ID.
+      return undefined;
     } catch (error) {
       this.logger.error(`Error getting profile_uid for user ${username}: ${error}`);
       return username;
