@@ -57,7 +57,6 @@ const timeRangeSchema = lazySchema(() =>
 const changePointGridStaticContextSchema = lazySchema(() =>
   z
     .object({
-      time_range: timeRangeSchema,
       filters: z.array(asCodeFilterSchema).max(MAX_FILTERS).optional(),
       query: asCodeQuerySchema.optional(),
       esql_variables: z.array(esqlVariableSchema).max(MAX_VARIABLES).optional(),
@@ -69,20 +68,12 @@ export const changePointGridEmbeddableSchema = lazySchema(() =>
   z
     .object({
       ...serializedTitlesSchema.shape,
+      time_range: timeRangeSchema.optional(),
       esql: z.string().max(MAX_ESQL_LENGTH),
       apply_dashboard_context: z.boolean().default(true),
       static_context: changePointGridStaticContextSchema.optional(),
     })
     .strict()
-    .superRefine((state, context) => {
-      if (state.apply_dashboard_context === false && !state.static_context) {
-        context.addIssue({
-          code: 'custom',
-          path: ['static_context'],
-          message: 'static_context is required when apply_dashboard_context is false',
-        });
-      }
-    })
     .meta(BY_VALUE_SCHEMA_META)
 );
 

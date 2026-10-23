@@ -14,6 +14,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { fetchEsql } from '../../application/main/data_fetching/fetch_esql';
 import { resolveEsqlSource } from '../../application/main/data_fetching/resolve_esql_source';
 import type { DiscoverServices } from '../../build_services';
+import type { ChangePointGridEmbeddableState } from '../../../server/embeddable/change_point_grid_schema';
 import type { ChangePointCardModel } from '@kbn/change-point-chart-viewer';
 import { initializeChangePointGridFetch } from './initialize_change_point_grid_fetch';
 import type { ChangePointGridSearchRequest } from './resolve_change_point_grid_search_request';
@@ -73,7 +74,7 @@ describe('initializeChangePointGridFetch', () => {
     );
   });
 
-  const start = () => {
+  const start = (panelState: ChangePointGridEmbeddableState = state) => {
     const setDataLoading = jest.fn();
     const setSearchError = jest.fn();
     const setApproximationApplied = jest.fn();
@@ -90,7 +91,7 @@ describe('initializeChangePointGridFetch', () => {
 
     const { cleanup } = initializeChangePointGridFetch({
       api: {},
-      state: state as never,
+      state: panelState as never,
       discoverServices,
       cards$,
       searchContext$,
@@ -249,5 +250,32 @@ describe('initializeChangePointGridFetch', () => {
     expect(discoverServices.dataSourceService.unregisterEsqlSource).toHaveBeenCalledWith(
       'source-new'
     );
+  });
+
+  it('does not search a static panel again until its time range changes', async () => {
+    jest.mocked(fetchEsql).mockClear();
+    const { setDataLoading } = start({
+      ...state,
+      apply_dashboard_context: false,
+      static_context: {
+        query: { expression: 'status:active', language: 'kql' },
+      },
+    });
+    fetchContext$.next(dashboardContext);
+    await Promise.resolve();
+    expect(jest.mocked(fetchEsql)).toHaveBeenCalledTimes(1);
+
+    fetchContext$.next({ ...dashboardContext, filters: [], searchSessionId: 'session-2' });
+    await Promise.resolve();
+    expect(jest.mocked(fetchEsql)).toHaveBeenCalledTimes(1);
+    expect(setDataLoading).toHaveBeenCalledTimes(1);
+
+    fetchContext$.next({ ...dashboardContext, timeRange: { from: 'now-1h', to: 'now' } });
+    await Promise.resolve();
+    expect(jest.mocked(fetchEsql)).toHaveBeenCalledTimes(2);
+    expect(jest.mocked(fetchEsql).mock.calls[1][0].timeRange).toEqual({
+      from: 'now-1h',
+      to: 'now',
+    });
   });
 });

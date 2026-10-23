@@ -58,6 +58,7 @@ describe('getChangePointGridEmbeddableFactory', () => {
     expect(api.serializeState()).toEqual({
       esql: 'FROM logs-* | CHANGE_POINT count ON @timestamp',
       apply_dashboard_context: true,
+      time_range: undefined,
     });
 
     render(<Component />);
@@ -81,5 +82,42 @@ describe('getChangePointGridEmbeddableFactory', () => {
       from: expect.stringMatching(/Z$/),
       to: expect.stringMatching(/Z$/),
     });
+  });
+
+  it('publishes a custom time range and serializes changes from panel settings', async () => {
+    const parentApi = {} as PresentationContainer;
+    const uuid = 'change-point-grid';
+    const factory = getChangePointGridEmbeddableFactory({
+      discoverServices: discoverServiceMock,
+    });
+    const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: mockInitializeDrilldownsManager,
+      uuid,
+      parentApi,
+      initialState: {
+        esql: 'FROM logs-* | CHANGE_POINT count ON @timestamp',
+        apply_dashboard_context: false,
+        time_range: { from: '2020-01-01T00:00:00.000Z', to: '2020-01-02T00:00:00.000Z' },
+      },
+      finalizeApi: (apiRegistration) => ({
+        ...apiRegistration,
+        uuid,
+        type: factory.type,
+        parentApi,
+        phase$: new BehaviorSubject<PhaseEvent | undefined>(undefined),
+      }),
+    });
+
+    expect(api.timeRange$?.getValue()).toEqual({
+      from: '2020-01-01T00:00:00.000Z',
+      to: '2020-01-02T00:00:00.000Z',
+    });
+
+    const nextRange = { from: 'now-1h', to: 'now' };
+    api.setTimeRange(nextRange);
+    expect(api.serializeState().time_range).toEqual(nextRange);
+
+    api.setTimeRange(undefined);
+    expect(api.serializeState().time_range).toBeUndefined();
   });
 });

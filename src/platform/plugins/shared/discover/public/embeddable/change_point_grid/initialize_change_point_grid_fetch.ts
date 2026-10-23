@@ -8,6 +8,7 @@
  */
 
 import { buildChangePointCards, type ChangePointCardModel } from '@kbn/change-point-chart-viewer';
+import type { TimeRange } from '@kbn/es-query';
 import { unregisterFromDataViewsCache } from '@kbn/data-source';
 import { fetch$ } from '@kbn/presentation-publishing';
 import type { BehaviorSubject } from 'rxjs';
@@ -49,19 +50,19 @@ export const initializeChangePointGridFetch = ({
   });
   let abortController: AbortController | undefined;
   let esqlSourceId: string | undefined;
-  let hasSearched = false;
+  let previousTimeRange: TimeRange | undefined;
   let requestId = 0;
 
   const subscription = fetch$(api).subscribe((fetchContext) => {
     const searchRequest = resolveChangePointGridSearchRequest({
       state,
       fetchContext,
-      hasSearched,
+      previousTimeRange,
     });
     if (!searchRequest) {
       return;
     }
-    hasSearched = true;
+    previousTimeRange = searchRequest.timeRange;
     searchContext$.next(searchRequest);
 
     abortController?.abort();

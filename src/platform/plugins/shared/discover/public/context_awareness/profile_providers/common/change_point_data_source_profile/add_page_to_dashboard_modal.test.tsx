@@ -111,9 +111,12 @@ describe('AddPageToDashboardModal', () => {
     const packages = navigateToWithEmbeddablePackages.mock.calls[0][1].state;
     expect(packages).toHaveLength(1);
     expect(packages[0].serializedState.apply_dashboard_context).toBe(false);
+    expect(packages[0].serializedState.time_range).toEqual({
+      from: '2020-01-01T00:00:00.000Z',
+      to: '2020-01-02T00:00:00.000Z',
+    });
     expect(packages[0].serializedState.static_context).toEqual(
       expect.objectContaining({
-        time_range: { from: '2020-01-01T00:00:00.000Z', to: '2020-01-02T00:00:00.000Z' },
         query: { expression: 'status:active', language: 'kql' },
       })
     );

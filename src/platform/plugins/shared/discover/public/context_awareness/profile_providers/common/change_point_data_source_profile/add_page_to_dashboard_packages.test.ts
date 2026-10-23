@@ -98,10 +98,10 @@ describe('toChangePointDashboardPackages', () => {
       expect.objectContaining({
         apply_dashboard_context: false,
         static_context: expect.objectContaining({
-          time_range: context.timeRange,
           query: { expression: 'status:active', language: 'kql' },
           esql_variables: [{ key: 'service', value: 'orders', type: ESQLVariableType.VALUES }],
         }),
+        time_range: context.timeRange,
       })
     );
     expect(

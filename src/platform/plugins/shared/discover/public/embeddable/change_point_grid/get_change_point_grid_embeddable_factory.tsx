@@ -15,13 +15,16 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import {
   initializeStateApi,
+  initializeTimeRangeManager,
   initializeTitleManager,
+  timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
   type HasTypeDisplayName,
   type PublishesBlockingError,
   type PublishesDataLoading,
   type PublishesEsql,
+  type PublishesWritableTimeRange,
   type PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type {
@@ -30,7 +33,7 @@ import type {
 } from '@kbn/embeddable-plugin/public';
 import type { UnifiedHistogramFetch$Arguments } from '@kbn/unified-histogram/types';
 import React, { useEffect, useMemo } from 'react';
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, merge, ReplaySubject } from 'rxjs';
 import { CHANGE_POINT_GRID_EMBEDDABLE_TYPE } from '../../../common';
 import type { DiscoverServices } from '../../build_services';
 import type { ChangePointGridEmbeddableState } from '../../../server/embeddable/change_point_grid_schema';
@@ -59,7 +62,8 @@ type ChangePointGridApi = DefaultEmbeddableApi<ChangePointGridEmbeddableState> &
   HasTypeDisplayName &
   PublishesDataLoading &
   PublishesBlockingError &
-  PublishesEsql & {
+  PublishesEsql &
+  PublishesWritableTimeRange & {
     searchContext$: PublishingSubject<ChangePointGridSearchRequest | undefined>;
     applyDashboardContext: boolean;
   };
@@ -72,6 +76,7 @@ export const getChangePointGridEmbeddableFactory = ({
   type: CHANGE_POINT_GRID_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const titleManager = initializeTitleManager(initialState);
+    const timeRangeManager = initializeTimeRangeManager(initialState);
     const defaultTitle$ = new BehaviorSubject<string | undefined>(
       getDefaultPanelTitle(initialState.esql)
     );
@@ -89,23 +94,29 @@ export const getChangePointGridEmbeddableFactory = ({
       parentApi,
       serializeState: () => ({
         ...titleManager.getLatestState(),
+        ...timeRangeManager.getLatestState(),
         esql: initialState.esql,
         apply_dashboard_context: applyDashboardContext,
         ...(applyDashboardContext ? {} : { static_context: initialState.static_context }),
       }),
-      anyStateChange$: titleManager.anyStateChange$,
+      anyStateChange$: merge(titleManager.anyStateChange$, timeRangeManager.anyStateChange$),
       getComparators: () => ({
         ...titleComparators,
+        ...timeRangeComparators,
         esql: 'skip',
         apply_dashboard_context: 'skip',
         static_context: 'skip',
       }),
-      applySerializedState: (state) => titleManager.reinitializeState(state),
+      applySerializedState: (state) => {
+        titleManager.reinitializeState(state);
+        timeRangeManager.reinitializeState(state);
+      },
     });
 
     const api = finalizeApi({
       ...stateApi,
       ...titleManager.api,
+      ...timeRangeManager.api,
       defaultTitle$,
       dataLoading$,
       blockingError$,
@@ -162,18 +173,7 @@ export const getChangePointGridEmbeddableFactory = ({
           <ChangePointGridRenderer
             esql={initialState.esql}
             cards={cards}
-            services={{
-              data: discoverServices.data,
-              uiActions: discoverServices.uiActions,
-              uiSettings: discoverServices.uiSettings,
-              fieldFormats: discoverServices.fieldFormats,
-              lens: discoverServices.lens,
-              storage: discoverServices.storage,
-              expressions: discoverServices.expressions,
-              capabilities: discoverServices.capabilities,
-              dataViews: discoverServices.dataViews,
-              fieldsMetadata: discoverServices.fieldsMetadata,
-            }}
+            services={discoverServices}
             fetchParams={fetchParams}
             fetch$={refresh$}
             searchContext={{

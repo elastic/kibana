@@ -25,42 +25,49 @@ export interface ChangePointGridSearchRequest {
   searchSessionId?: string;
 }
 
+const isSameTimeRange = (left?: TimeRange, right?: TimeRange): boolean =>
+  left?.from === right?.from && left?.to === right?.to;
+
 /**
- * A following panel uses the dashboard context. A static panel uses the context captured in
- * Discover, except on the first search and on an explicit dashboard refresh.
+ * A following panel uses the dashboard context. A static panel keeps the filters, query, and
+ * variables captured in Discover, and searches again only when its effective time range changes
+ * or the dashboard refreshes. `fetch$` has already chosen the panel time range over the dashboard
+ * time range.
  */
 export const resolveChangePointGridSearchRequest = ({
   state,
   fetchContext,
-  hasSearched,
+  previousTimeRange,
 }: {
   state: ChangePointGridEmbeddableState;
   fetchContext: FetchContext;
-  hasSearched: boolean;
+  previousTimeRange?: TimeRange;
 }): ChangePointGridSearchRequest | undefined => {
+  if (!fetchContext.timeRange) {
+    return undefined;
+  }
+
   const isStatic = state.apply_dashboard_context === false;
-  if (isStatic && hasSearched && !fetchContext.isReload) {
+  if (
+    isStatic &&
+    previousTimeRange &&
+    isSameTimeRange(previousTimeRange, fetchContext.timeRange) &&
+    !fetchContext.isReload
+  ) {
     return undefined;
   }
 
   if (isStatic) {
     const staticContext = state.static_context;
-    if (!staticContext?.time_range) {
-      return undefined;
-    }
     return {
-      timeRange: staticContext.time_range,
-      filters: (toStoredFilters(staticContext.filters) ?? []) as Filter[],
-      inputQuery: toStoredQuery(staticContext.query),
-      esqlVariables: staticContext.esql_variables ?? [],
+      timeRange: fetchContext.timeRange,
+      filters: (toStoredFilters(staticContext?.filters) ?? []) as Filter[],
+      inputQuery: toStoredQuery(staticContext?.query),
+      esqlVariables: staticContext?.esql_variables ?? [],
       isApproximate: false,
       projectRouting: fetchContext.projectRouting,
       searchSessionId: fetchContext.searchSessionId,
     };
-  }
-
-  if (!fetchContext.timeRange) {
-    return undefined;
   }
 
   return {

@@ -59,8 +59,8 @@ export const toChangePointDashboardPackages = ({
       ...(applyDashboardContext
         ? {}
         : {
+            time_range: { from: timeRange.from, to: timeRange.to },
             static_context: {
-              time_range: { from: timeRange.from, to: timeRange.to },
               filters: fromStoredFilters(filters),
               query: toAsCodeQuery(inputQuery),
               esql_variables: esqlVariables?.map(({ key, value, type }) => ({ key, value, type })),

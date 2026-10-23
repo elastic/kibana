@@ -22,8 +22,8 @@ describe('changePointGridEmbeddableSchema', () => {
       changePointGridEmbeddableSchema.safeParse({
         ...validState,
         apply_dashboard_context: false,
+        time_range: { from: '2020-01-01T00:00:00.000Z', to: '2020-01-02T00:00:00.000Z' },
         static_context: {
-          time_range: { from: '2020-01-01T00:00:00.000Z', to: '2020-01-02T00:00:00.000Z' },
           query: { expression: 'status:active', language: 'kql' },
           esql_variables: [{ key: 'service', value: 'orders', type: ESQLVariableType.VALUES }],
         },
@@ -46,20 +46,17 @@ describe('changePointGridEmbeddableSchema', () => {
     ).toBe(false);
   });
 
-  it('rejects a static panel without context and an oversized static context', () => {
+  it('accepts a static panel with no captured context and rejects an oversized time range', () => {
     expect(
       changePointGridEmbeddableSchema.safeParse({
         ...validState,
         apply_dashboard_context: false,
       }).success
-    ).toBe(false);
+    ).toBe(true);
     expect(
       changePointGridEmbeddableSchema.safeParse({
         ...validState,
-        apply_dashboard_context: false,
-        static_context: {
-          time_range: { from: 'x'.repeat(129), to: 'now' },
-        },
+        time_range: { from: 'x'.repeat(129), to: 'now' },
       }).success
     ).toBe(false);
   });
