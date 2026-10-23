@@ -482,6 +482,29 @@ describe('AgentExecutionService', () => {
         ]);
       });
 
+      it('reads escaped labels after many brackets without slowing down', async () => {
+        await execute(
+          `${'['.repeat(200_000)} [#dashboard/\\[Elastic\\] Rules](sml://dashboard:dash-2)`
+        );
+
+        expect(validated()).toEqual([
+          {
+            type: 'dashboard-attachment',
+            origin: 'dash-2',
+            description: 'dashboard/[Elastic] Rules',
+          },
+        ]);
+      });
+
+      it('does not slow down on text with many brackets and no links', async () => {
+        const start = Date.now();
+
+        await execute('['.repeat(200_000));
+
+        expect(validated()).toBeUndefined();
+        expect(Date.now() - start).toBeLessThan(2000);
+      });
+
       it('skips types that cannot be attached and ids that are not entry ids', async () => {
         await execute('[a](sml://visualization:vis-1) [b](sml://dashboard) [c](sml://dashboard%)');
 

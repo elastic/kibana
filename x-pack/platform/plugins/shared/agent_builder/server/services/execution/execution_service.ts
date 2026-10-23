@@ -97,7 +97,22 @@ export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
 }
 
 // Links to the items picked from the chat input's menu: `[label](sml://<url-encoded entry id>)`.
-const SML_LINK_PATTERN = /\[((?:\\.|[^\]\\])+)\]\(sml:\/\/([^)?\s]+)/g;
+const SML_LINK_PATTERN = /\]\(sml:\/\/([^)?\s]+)/g;
+const MAX_LINK_LABEL_LENGTH = 300;
+
+// The label of the link whose text ends at `closeIndex`, read back to its unescaped `[`. Reading
+// back, and for a bounded length, keeps this linear on text with many brackets.
+const getLinkLabel = (message: string, closeIndex: number): string => {
+  const earliest = Math.max(0, closeIndex - MAX_LINK_LABEL_LENGTH);
+  for (let index = closeIndex - 1; index >= earliest; index--) {
+    if (message[index] === '[') {
+      let backslashes = 0;
+      while (message[index - 1 - backslashes] === '\\') backslashes++;
+      if (backslashes % 2 === 0) return message.slice(index + 1, closeIndex);
+    }
+  }
+  return '';
+};
 
 export const createAgentExecutionService = (
   deps: AgentExecutionServiceDeps
@@ -975,14 +990,20 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   /** The items linked in the message that can be attached, as by-reference attachment inputs. */
   private getReferencedAttachments(message: string | undefined): AttachmentInput[] {
     const inputs = new Map<string, AttachmentInput>();
-    for (const [, label, encodedId] of (message ?? '').matchAll(SML_LINK_PATTERN)) {
+    for (const match of (message ?? '').matchAll(SML_LINK_PATTERN)) {
+      const [, encodedId] = match;
       const entry = parseSmlEntryId(decodeSmlLinkId(encodedId));
       const type = entry && this.deps.getSmlTypeDefinition(entry.type)?.attachmentType;
       const key = entry && `${type}:${entry.originId}`;
       if (entry && type && key && !inputs.has(key)) {
         // The label, without its trigger, tells the agent which attachment a link in the message is.
+        const label = getLinkLabel(message ?? '', match.index ?? 0);
         const description = label.replace(/\\([\\[\]])/g, '$1').replace(/^[#@]/, '');
-        inputs.set(key, { type, origin: entry.originId, description });
+        inputs.set(key, {
+          type,
+          origin: entry.originId,
+          ...(description ? { description } : {}),
+        });
       }
     }
     return Array.from(inputs.values());

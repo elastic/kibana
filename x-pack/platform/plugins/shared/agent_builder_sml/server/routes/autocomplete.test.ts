@@ -74,6 +74,51 @@ describe('registerAutocompleteRoute', () => {
     return response;
   };
 
+  describe('authorization', () => {
+    const withoutSmlPrivilege = () => {
+      startDeps.security = {
+        authz: {
+          actions: { api: { get: (action: string) => `api:${action}` } },
+          checkPrivilegesWithRequest: jest.fn().mockReturnValue({
+            atSpace: jest.fn().mockResolvedValue({ hasAllRequested: false }),
+          }),
+        },
+      };
+    };
+
+    it('accepts the SML privilege or the Agent Builder privilege', () => {
+      expect(router.post.mock.calls[0][0].security).toEqual({
+        authz: {
+          requiredPrivileges: [{ anyRequired: ['agentBuilderSml:read', 'agentBuilder:read'] }],
+        },
+      });
+    });
+
+    it('refuses the SML index to a user without the SML privilege', async () => {
+      withoutSmlPrivilege();
+
+      const response = await callHandler({ query: '*' });
+
+      expect(response.forbidden).toHaveBeenCalled();
+      expect(mockSmlService.autocomplete).not.toHaveBeenCalled();
+    });
+
+    it('serves the lookup through the types to a user without the SML privilege', async () => {
+      withoutSmlPrivilege();
+      mockSmlService.listTypeDefinitions.mockReturnValue([
+        {
+          id: 'dashboard',
+          searchByTitle: jest.fn().mockResolvedValue([{ originId: 'd', title: 'D' }]),
+        },
+      ]);
+
+      const response = await callHandler({ query: '*' }, false);
+
+      expect(response.forbidden).not.toHaveBeenCalled();
+      expect(response.ok).toHaveBeenCalled();
+    });
+  });
+
   describe('when the SML index is not enabled', () => {
     const createType = (id: string, items: Array<{ originId: string; title: string }> = []) => ({
       id,

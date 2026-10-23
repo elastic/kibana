@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
+import type { RouteSecurity } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type {
@@ -18,12 +19,20 @@ import {
   SmlSearchFilterType,
 } from '../../common/http_api/sml';
 import { smlAutocompletePath } from '../../common/constants';
+import { apiPrivileges } from '../../common/features';
 import type { SmlAutocompleteResult, SmlService } from '../services/sml/types';
 import { smlEntryId, smlOriginUri } from '../services/sml/sml_origin';
 import type { AgentBuilderSmlStartDependencies, AgentBuilderSmlPluginStart } from '../types';
-import { READ_SECURITY } from './common';
 
 const SML_AUTOCOMPLETE_SIZE_MAX = 50;
+
+// Agent Builder users can look items up through the APIs of the types, which check access
+// themselves. The SML index needs the SML privilege, which the handler checks on that path.
+const AUTOCOMPLETE_SECURITY: RouteSecurity = {
+  authz: {
+    requiredPrivileges: [{ anyRequired: [apiPrivileges.readAgentBuilderSml, 'agentBuilder:read'] }],
+  },
+};
 
 type AutocompleteParams = Parameters<SmlService['autocomplete']>[0];
 
@@ -139,7 +148,7 @@ export const registerAutocompleteRoute = ({
         }),
       },
       options: { access: 'internal' },
-      security: READ_SECURITY,
+      security: AUTOCOMPLETE_SECURITY,
     },
     async (ctx, request, response) => {
       try {
@@ -155,6 +164,19 @@ export const registerAutocompleteRoute = ({
         const isIndexEnabled = await coreContext.uiSettings.client.get<boolean>(
           AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
         );
+        const hasApiPrivileges = async (actions: readonly string[]) => {
+          const { security } = startDeps;
+          if (!security) return true;
+          const { hasAllRequested } = await security.authz
+            .checkPrivilegesWithRequest(request)
+            .atSpace(spaceId, {
+              kibana: actions.map((action) => security.authz.actions.api.get(action)),
+            });
+          return hasAllRequested;
+        };
+        if (isIndexEnabled && !(await hasApiPrivileges([apiPrivileges.readAgentBuilderSml]))) {
+          return response.forbidden();
+        }
         const params = { query, size, spaceId, request, constraints, filters };
         const results = isIndexEnabled
           ? (await sml.autocomplete({ ...params, esClient })).results
@@ -162,16 +184,7 @@ export const registerAutocompleteRoute = ({
               {
                 ...params,
                 savedObjectsClient: coreContext.savedObjects.client,
-                hasApiPrivileges: async (actions) => {
-                  const { security } = startDeps;
-                  if (!security) return true;
-                  const { hasAllRequested } = await security.authz
-                    .checkPrivilegesWithRequest(request)
-                    .atSpace(spaceId, {
-                      kibana: actions.map((action) => security.authz.actions.api.get(action)),
-                    });
-                  return hasAllRequested;
-                },
+                hasApiPrivileges,
               },
               sml,
               logger
