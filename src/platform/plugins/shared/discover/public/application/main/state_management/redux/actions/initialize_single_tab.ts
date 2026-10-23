@@ -24,7 +24,6 @@ import {
 import { TabInitializationStatus, type DiscoverAppState } from '..';
 import type { DiscoverDataStateContainer } from '../../discover_data_state_container';
 import { appendAdHocDataViews, loadDataViewListOnce } from './data_views';
-import { loadDataAvailabilityOnce } from './data_availability';
 import { setDataSource, setDataView } from './tab_state_data_view';
 import { type AppStateUrl, cleanupUrlState } from '../../utils/cleanup_url_state';
 import { loadAndResolveDataView } from '../../utils/resolve_data_view';
@@ -169,13 +168,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     const needsDataView = !isNonEmptyEsqlQuery(initialQuery);
 
     if (needsDataView) {
-      await Promise.all([dispatch(loadDataAvailabilityOnce()), dispatch(loadDataViewListOnce())]);
-
-      const { hasESData, hasDataView } = getState().initializationState;
-      // Apply the same welcome-page condition as the route after availability is known.
-      if (!hasESData && !hasDataView) {
-        return { showNoDataPage: true };
-      }
+      await dispatch(loadDataViewListOnce());
     }
 
     const initialDataViewIdOrSpec = tabInitialInternalState?.serializedSearchSource?.index;
