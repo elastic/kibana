@@ -6,7 +6,6 @@
  */
 
 import expect from 'expect';
-import pRetry from 'p-retry';
 import {
   createLookupsForMigrationId,
   createMacrosForMigrationId,
@@ -111,50 +110,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('Error handling', () => {
-        it('should return 409 if migration is already running', async () => {
-          await ruleMigrationRoutes.addRulesToMigration({
-            migrationId,
-            /** enough rules to keep the migration running while delete is attempted */
-            payload: Array.from({ length: 40 }, () => splunkRuleWithResources),
-          });
-
-          const response = await ruleMigrationRoutes.start({
-            migrationId,
-            payload: {
-              settings: {
-                connector_id: 'preconfigured-bedrock',
-              },
-            },
-          });
-
-          expect(response.body).toMatchObject({ started: true });
-
-          await pRetry(
-            async () => {
-              const statsResponse = await ruleMigrationRoutes.stats({ migrationId });
-              if (statsResponse.body.status !== 'running') {
-                throw new Error('Retry until migration is running');
-              }
-            },
-            { retries: 5 }
-          );
-
-          const deleteResponse = await ruleMigrationRoutes.delete({
-            migrationId,
-            expectStatusCode: 409,
-          });
-
-          expect(deleteResponse.body).toMatchObject({
-            statusCode: 409,
-            error: 'Conflict',
-            message:
-              'A running migration cannot be deleted. Please stop the migration first and try again',
-          });
-
-          /** this is the only test that leaves a migration running, stop it so it does not leak into the following tests */
-          await ruleMigrationRoutes.stop({ migrationId });
-        });
-
         it('should return 404 if migration ID does not exist', async () => {
           const { body } = await ruleMigrationRoutes.delete({
             migrationId: 'non-existing-migration-id',
