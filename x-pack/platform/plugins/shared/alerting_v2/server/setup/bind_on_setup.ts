@@ -31,7 +31,6 @@ import {
 } from '../lib/dispatcher/steps/constants';
 import { registerAlertingAdvancedSettings } from '../settings/advanced_settings';
 import { registerTelemetryEvents } from '../lib/telemetry/register_rule_ebt_events';
-import { AlertingV2EpisodesLocatorDefinition } from '../../common/locators';
 
 /**
  * Core platform setup-phase registrations (feature privileges, saved objects,
@@ -78,10 +77,6 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
     const workflowsExtensionsSetup = container.get(
       PluginSetup<AlertingServerSetupDependencies['workflowsExtensions']>('workflowsExtensions')
     );
-    container
-      .get(PluginSetup<AlertingServerSetupDependencies['share']>('share'))
-      .url.locators.create(AlertingV2EpisodesLocatorDefinition);
-
     registerAlertingV2ManagedWorkflowOwner(workflowsExtensionsSetup);
     registerTriggerDefinitions(workflowsExtensionsSetup);
 
