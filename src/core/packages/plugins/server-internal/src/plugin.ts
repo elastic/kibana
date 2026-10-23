@@ -243,6 +243,13 @@ export class PluginWrapper<
       throw new Error(`Instance of plugin "${this.name}" does not define "setup" function.`);
     }
 
+    // `initialize` is reserved for an upcoming core lifecycle hook.
+    if ('initialize' in instance && typeof instance.initialize === 'function') {
+      throw new Error(
+        `Instance of plugin "${this.name}" defines an "initialize" function. "initialize" is reserved by core for plugin lifecycle hooks, rename the method.`
+      );
+    }
+
     return instance;
   }
 

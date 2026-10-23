@@ -282,6 +282,30 @@ test('`init` fails if object returned from initializer does not define `setup` f
   );
 });
 
+test('`init` fails if object returned from initializer defines an `initialize` function', async () => {
+  const manifest = createPluginManifest();
+  const opaqueId = Symbol();
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
+    manifest,
+    opaqueId,
+    initializerContext: createPluginInitializerContext({
+      coreContext,
+      opaqueId,
+      manifest,
+      instanceInfo,
+      nodeInfo,
+    }),
+  });
+
+  const mockPluginInstance = { setup: jest.fn(), initialize: jest.fn() };
+  mockPluginInitializer.mockResolvedValue(mockPluginInstance);
+
+  await expect(() => plugin.init()).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Instance of plugin \\"some-plugin-id\\" defines an \\"initialize\\" function. \\"initialize\\" is reserved by core for plugin lifecycle hooks, rename the method."`
+  );
+});
+
 test('`setup` initializes plugin and calls appropriate lifecycle hook', async () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
