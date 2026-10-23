@@ -631,6 +631,54 @@
       "approvedBy": "@elastic/security-defend-workflows",
       "oasdiffId": "request-property-max-length-set",
       "prUrl": "https://github.com/elastic/kibana/pull/295450"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_migrate",
+      "method": "post",
+      "reason": "False positive from oasdiff subschema matching: both agents oneOf branches (agent ID array and KQL string) are unchanged in shape; adding maxLength (512 per agent ID, 10000 for the KQL string) makes oasdiff report them as removed. Agent IDs are UUIDs and the Fleet UI sends the same KQL it uses for the agent list, so no working value is affected.",
+      "approvedBy": "@elastic/streams-ui",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/299837"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_reassign",
+      "method": "post",
+      "reason": "False positive from oasdiff subschema matching: both agents oneOf branches (agent ID array and KQL string) are unchanged in shape; adding maxLength (512 per agent ID, 10000 for the KQL string) makes oasdiff report them as removed. Agent IDs are UUIDs and the Fleet UI sends the same KQL it uses for the agent list, so no working value is affected.",
+      "approvedBy": "@elastic/streams-ui",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/299837"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_request_diagnostics",
+      "method": "post",
+      "reason": "False positive from oasdiff subschema matching: both agents oneOf branches (agent ID array and KQL string) are unchanged in shape; adding maxLength (512 per agent ID, 10000 for the KQL string) makes oasdiff report them as removed. Agent IDs are UUIDs and the Fleet UI sends the same KQL it uses for the agent list, so no working value is affected.",
+      "approvedBy": "@elastic/streams-ui",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/299837"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_unenroll",
+      "method": "post",
+      "reason": "False positive from oasdiff subschema matching: both agents oneOf branches (agent ID array and KQL string) are unchanged in shape; adding maxLength (512 per agent ID, 10000 for the KQL string) makes oasdiff report them as removed. Agent IDs are UUIDs and the Fleet UI sends the same KQL it uses for the agent list, so no working value is affected.",
+      "approvedBy": "@elastic/streams-ui",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/299837"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_update_agent_tags",
+      "method": "post",
+      "reason": "False positive from oasdiff subschema matching: both agents oneOf branches (agent ID array and KQL string) are unchanged in shape; adding maxLength (512 per agent ID, 10000 for the KQL string) makes oasdiff report them as removed. Agent IDs are UUIDs and the Fleet UI sends the same KQL it uses for the agent list, so no working value is affected.",
+      "approvedBy": "@elastic/streams-ui",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/299837"
+    },
+    {
+      "path": "/api/fleet/agents/bulk_upgrade",
+      "method": "post",
+      "reason": "False positive from oasdiff subschema matching: both agents oneOf branches (agent ID array and KQL string) are unchanged in shape; adding maxLength (512 per agent ID, 10000 for the KQL string) makes oasdiff report them as removed. Agent IDs are UUIDs and the Fleet UI sends the same KQL it uses for the agent list, so no working value is affected.",
+      "approvedBy": "@elastic/streams-ui",
+      "oasdiffId": "request-property-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/299837"
     }
   ]
 }
