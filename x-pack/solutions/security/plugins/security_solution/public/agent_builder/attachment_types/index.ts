@@ -150,6 +150,23 @@ export const registerInvestigationIocsAttachment = ({
  * `security.search_entities`), which are gated on `entityAnalyticsEntityStoreV2`, so non-V2
  * environments never exercise this renderer even though it's registered unconditionally.
  */
+/**
+ * The impact entity opener links into Security entity flyouts, so it only makes sense in spaces
+ * where the Security solution is visible: classic spaces (solution unset or `classic`) and
+ * Security solution spaces. If the active space can't be resolved, fall back to registering.
+ */
+const isSecurityRelevantSpace = async (spaces?: SpacesPluginStart): Promise<boolean> => {
+  if (!spaces) {
+    return true;
+  }
+  try {
+    const { solution } = await spaces.getActiveSpace();
+    return !solution || solution === 'classic' || solution === 'security';
+  } catch {
+    return true;
+  }
+};
+
 export const registerEntityAttachment = ({
   attachments,
   application,
@@ -160,6 +177,7 @@ export const registerEntityAttachment = ({
   searchSession,
   uiSettings,
   rendering,
+  spaces,
   registerImpactEntityOpener,
 }: {
   attachments: AttachmentServiceStartContract;
@@ -171,16 +189,24 @@ export const registerEntityAttachment = ({
   searchSession?: ISessionService;
   uiSettings: IUiSettingsClient;
   rendering: CoreStart['rendering'];
+  spaces?: SpacesPluginStart;
   registerImpactEntityOpener?: AgenticInvestigationsPublicPluginStart['registerImpactEntityOpener'];
 }): void => {
-  registerImpactEntityOpener?.((entity) => {
-    void import(
-      /* webpackChunkName: "security_impact_entity_flyout" */
-      './open_impact_entity_flyout'
-    ).then(({ openImpactEntityFlyout }) =>
-      openImpactEntityFlyout({ entity, rendering, resolveSecurityCanvasContext })
-    );
-  });
+  if (registerImpactEntityOpener) {
+    void isSecurityRelevantSpace(spaces).then((isRelevant) => {
+      if (!isRelevant) {
+        return;
+      }
+      registerImpactEntityOpener((entity) => {
+        void import(
+          /* webpackChunkName: "security_impact_entity_flyout" */
+          './open_impact_entity_flyout'
+        ).then(({ openImpactEntityFlyout }) =>
+          openImpactEntityFlyout({ entity, rendering, resolveSecurityCanvasContext })
+        );
+      });
+    });
+  }
 
   void import(
     /* webpackChunkName: "security_entity_attachment_rich" */
