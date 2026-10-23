@@ -783,8 +783,8 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
         .replace(/\}\}$/, '')
         .trim();
 
-      const evaluate = (steps: Record<string, unknown>): unknown =>
-        createWorkflowLiquidEngine().evalValueSync(expression, { steps });
+      const evaluate = (stepsContext: Record<string, unknown>): unknown =>
+        createWorkflowLiquidEngine().evalValueSync(expression, { steps: stepsContext });
 
       it('reports the failure when the host.id search failed', () => {
         expect(
