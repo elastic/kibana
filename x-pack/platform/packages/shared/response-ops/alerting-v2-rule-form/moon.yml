@@ -33,7 +33,6 @@ dependsOn:
   - '@kbn/alerting-v2-schemas'
   - '@kbn/alerting-v2-constants'
   - '@kbn/alerting-v2-utils'
-  - '@kbn/std'
   - '@kbn/yaml-rule-editor'
   - '@kbn/core-application-browser-mocks'
   - '@kbn/react-hooks'
@@ -71,6 +70,4 @@ fileGroups:
     - .storybook/**/*.ts
     - .storybook/**/*.tsx
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

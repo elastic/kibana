@@ -34,10 +34,10 @@ import {
   useProjectPicker,
   useUserMenu,
 } from '../shared/chrome_hooks';
-import { SearchButton } from '../chrome_next/global_header/search_button';
-import { AiButtonSlot } from '../chrome_next/global_header/ai_button_slot';
-import { HelpButton } from '../chrome_next/global_header/help_button';
-import { GlobalHeaderRightGroup } from '../chrome_next/global_header/global_header_shell';
+import { SearchButton } from '../shared/search_button';
+import { AiButtonSlot } from '../shared/ai_button_slot';
+import { HelpButton } from '../shared/help_button';
+import { HeaderRightGroup } from '../shared/header_right_group';
 import { ClassicHeaderDarkColorMode } from '../shared/header_color_mode';
 
 const dark = (node: ReactNode) =>
@@ -55,7 +55,7 @@ export const ClassicHeader = React.memo(() => {
   const isSmall = useIsWithinMaxBreakpoint('s');
   const search = dark(<SearchButton layout={isSmall ? 'compact' : 'expanded'} />);
   const rightGroup = (
-    <GlobalHeaderRightGroup
+    <HeaderRightGroup
       search={isSmall ? search : undefined}
       help={dark(<HelpButton />)}
       actions={<AiButtonSlot />}

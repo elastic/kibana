@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { ListType } from '@kbn/securitysolution-lists-common/api';
 import { ExceptionListItem, ExceptionListItemOsTypeArray } from '../api';
@@ -15,18 +15,20 @@ import { ExceptionListItem, ExceptionListItemOsTypeArray } from '../api';
  * verb maps onto an API entry `type` + `operator` (included/excluded) pair;
  * see `toApiEntries` in the server workflows utils.
  */
-export const exceptionEntryOperatorSchema = z.enum([
-  'is',
-  'is_not',
-  'is_one_of',
-  'is_not_one_of',
-  'matches',
-  'does_not_match',
-  'exists',
-  'does_not_exist',
-  'is_in_list',
-  'is_not_in_list',
-]);
+export const exceptionEntryOperatorSchema = lazySchema(() =>
+  z.enum([
+    'is',
+    'is_not',
+    'is_one_of',
+    'is_not_one_of',
+    'matches',
+    'does_not_match',
+    'exists',
+    'does_not_exist',
+    'is_in_list',
+    'is_not_in_list',
+  ])
+);
 
 /**
  * The key each operator takes its operand from. `exists` / `does_not_exist`
@@ -71,51 +73,53 @@ const OPERAND_KEY_BY_OPERATOR: Record<
  * executions (the built `nested` query sets no `ignore_unmapped`). Endpoint
  * exceptions that need nested conditions can be managed via the UI or API.
  */
-export const exceptionEntrySchema = z
-  .object({
-    field: z.string().min(1).max(1024),
-    operator: exceptionEntryOperatorSchema,
-    value: z.string().min(1).max(1024).optional(),
-    values: z.array(z.string().min(1).max(1024)).min(1).max(1000).optional(),
-    list: z
-      .object({
-        id: z.string().min(1),
-        type: ListType,
-      })
-      .optional(),
-  })
-  .superRefine((entry, ctx) => {
-    const operandKey = OPERAND_KEY_BY_OPERATOR[entry.operator];
+export const exceptionEntrySchema = lazySchema(() =>
+  z
+    .object({
+      field: z.string().min(1).max(1024),
+      operator: exceptionEntryOperatorSchema,
+      value: z.string().min(1).max(1024).optional(),
+      values: z.array(z.string().min(1).max(1024)).min(1).max(1000).optional(),
+      list: z
+        .object({
+          id: z.string().min(1),
+          type: ListType,
+        })
+        .optional(),
+    })
+    .superRefine((entry, ctx) => {
+      const operandKey = OPERAND_KEY_BY_OPERATOR[entry.operator];
 
-    for (const key of ['value', 'values', 'list'] as const) {
-      if (key === operandKey && entry[key] === undefined) {
-        ctx.addIssue({
-          code: 'custom',
-          path: [key],
-          message: i18n.translate(
-            'xpack.securitySolution.workflows.steps.exceptionItem.entryOperandRequired',
-            {
-              defaultMessage: '`{operandKey}` is required for `{operator}` entries',
-              values: { operandKey: key, operator: entry.operator },
-            }
-          ),
-        });
+      for (const key of ['value', 'values', 'list'] as const) {
+        if (key === operandKey && entry[key] === undefined) {
+          ctx.addIssue({
+            code: 'custom',
+            path: [key],
+            message: i18n.translate(
+              'xpack.securitySolution.workflows.steps.exceptionItem.entryOperandRequired',
+              {
+                defaultMessage: '`{operandKey}` is required for `{operator}` entries',
+                values: { operandKey: key, operator: entry.operator },
+              }
+            ),
+          });
+        }
+        if (key !== operandKey && entry[key] !== undefined) {
+          ctx.addIssue({
+            code: 'custom',
+            path: [key],
+            message: i18n.translate(
+              'xpack.securitySolution.workflows.steps.exceptionItem.entryOperandNotAllowed',
+              {
+                defaultMessage: '`{operandKey}` is not allowed for `{operator}` entries',
+                values: { operandKey: key, operator: entry.operator },
+              }
+            ),
+          });
+        }
       }
-      if (key !== operandKey && entry[key] !== undefined) {
-        ctx.addIssue({
-          code: 'custom',
-          path: [key],
-          message: i18n.translate(
-            'xpack.securitySolution.workflows.steps.exceptionItem.entryOperandNotAllowed',
-            {
-              defaultMessage: '`{operandKey}` is not allowed for `{operator}` entries',
-              values: { operandKey: key, operator: entry.operator },
-            }
-          ),
-        });
-      }
-    }
-  });
+    })
+);
 
 /**
  * Fields shared by both exception-creation steps: everything describing the
@@ -138,26 +142,28 @@ const LIST_OPERATORS: ReadonlyArray<z.infer<typeof exceptionEntryOperatorSchema>
  * giving workflow authors the error at validation time instead of a runtime
  * 400.
  */
-const entriesArraySchema = z
-  .array(exceptionEntrySchema)
-  .min(1)
-  .max(100)
-  .superRefine((entries, ctx) => {
-    const hasListEntry = entries.some((entry) => LIST_OPERATORS.includes(entry.operator));
-    const hasNonListEntry = entries.some((entry) => !LIST_OPERATORS.includes(entry.operator));
-    if (hasListEntry && hasNonListEntry) {
-      ctx.addIssue({
-        code: 'custom',
-        message: i18n.translate(
-          'xpack.securitySolution.workflows.steps.exceptionItem.valueListEntryMixed',
-          {
-            defaultMessage:
-              'Value-list conditions (`is_in_list` / `is_not_in_list`) cannot be combined with other conditions in the same exception item',
-          }
-        ),
-      });
-    }
-  });
+const entriesArraySchema = lazySchema(() =>
+  z
+    .array(exceptionEntrySchema)
+    .min(1)
+    .max(100)
+    .superRefine((entries, ctx) => {
+      const hasListEntry = entries.some((entry) => LIST_OPERATORS.includes(entry.operator));
+      const hasNonListEntry = entries.some((entry) => !LIST_OPERATORS.includes(entry.operator));
+      if (hasListEntry && hasNonListEntry) {
+        ctx.addIssue({
+          code: 'custom',
+          message: i18n.translate(
+            'xpack.securitySolution.workflows.steps.exceptionItem.valueListEntryMixed',
+            {
+              defaultMessage:
+                'Value-list conditions (`is_in_list` / `is_not_in_list`) cannot be combined with other conditions in the same exception item',
+            }
+          ),
+        });
+      }
+    })
+);
 
 /**
  * Shared refine message for the `overwrite` inputs of both exception steps.
@@ -167,18 +173,20 @@ export const OVERWRITE_REQUIRES_ITEM_ID_MESSAGE = i18n.translate(
   { defaultMessage: '`overwrite` requires `item_id`' }
 );
 
-export const exceptionItemBaseSchema = z.object({
-  name: z.string().min(1).max(256),
-  description: z.string().max(2048),
-  entries: entriesArraySchema,
-  os_types: ExceptionListItemOsTypeArray.optional(),
-  tags: z.array(z.string().min(1).max(256)).max(50).optional(),
-  // ISO 8601 datetime after which the exception no longer applies. Kept a
-  // plain string so template expressions pass workflow validation; the
-  // exceptions API enforces the format.
-  expire_time: z.string().min(1).max(256).optional(),
-  comments: z.array(z.string().min(1).max(1024)).max(50).optional(),
-});
+export const exceptionItemBaseSchema = lazySchema(() =>
+  z.object({
+    name: z.string().min(1).max(256),
+    description: z.string().max(2048),
+    entries: entriesArraySchema,
+    os_types: ExceptionListItemOsTypeArray.optional(),
+    tags: z.array(z.string().min(1).max(256)).max(50).optional(),
+    // ISO 8601 datetime after which the exception no longer applies. Kept a
+    // plain string so template expressions pass workflow validation; the
+    // exceptions API enforces the format.
+    expire_time: z.string().min(1).max(256).optional(),
+    comments: z.array(z.string().min(1).max(1024)).max(50).optional(),
+  })
+);
 
 /**
  * Summary of an exception item as returned by the exceptions APIs: the
@@ -186,27 +194,33 @@ export const exceptionItemBaseSchema = z.object({
  * schemas, this can use the generated schemas verbatim (datetime formats
  * included) since outputs never contain template expressions.
  */
-export const exceptionItemSummarySchema = ExceptionListItem.pick({
-  id: true,
-  item_id: true,
-  list_id: true,
-  namespace_type: true,
-  name: true,
-  created_at: true,
-  created_by: true,
-  expire_time: true,
-});
+export const exceptionItemSummarySchema = lazySchema(() =>
+  ExceptionListItem.pick({
+    id: true,
+    item_id: true,
+    list_id: true,
+    namespace_type: true,
+    name: true,
+    created_at: true,
+    created_by: true,
+    expire_time: true,
+  })
+);
 
 /**
  * What the step did: created a new item, skipped because an item with the
  * given `item_id` already exists, or overwrote that existing item
  * (`overwrite: true`).
  */
-export const exceptionItemOutcomeSchema = z.enum(['created', 'skipped', 'overwritten']);
+export const exceptionItemOutcomeSchema = lazySchema(() =>
+  z.enum(['created', 'skipped', 'overwritten'])
+);
 
-export const exceptionItemOutputSchema = exceptionItemSummarySchema.extend({
-  outcome: exceptionItemOutcomeSchema,
-});
+export const exceptionItemOutputSchema = lazySchema(() =>
+  exceptionItemSummarySchema.extend({
+    outcome: exceptionItemOutcomeSchema,
+  })
+);
 
 export type ExceptionEntryOperator = z.infer<typeof exceptionEntryOperatorSchema>;
 export type ExceptionItemSummary = z.infer<typeof exceptionItemSummarySchema>;

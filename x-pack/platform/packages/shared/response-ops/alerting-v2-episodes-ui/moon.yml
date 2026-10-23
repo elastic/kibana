@@ -66,11 +66,15 @@ dependsOn:
   - '@kbn/core-ui-settings-browser'
   - '@kbn/unified-doc-viewer-plugin'
   - '@kbn/rule-data-utils'
+  - '@kbn/object-utils'
   - '@kbn/rule-registry-plugin'
   - '@kbn/tooling-log'
   - '@kbn/test'
   - '@kbn/ui-callout'
+  - '@kbn/flyout-template'
+  - '@kbn/flyout-sections'
   - '@kbn/response-ops-alerts-apis'
+  - '@kbn/connector-specs'
 tags:
   - shared-browser
   - package
@@ -83,6 +87,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

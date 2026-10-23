@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import {
+  EuiBadge,
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,7 +25,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CreateOptionItem } from '../create_options';
 import { CreateOptionsPanel } from '../create_options';
-import type { AgentBuilderSkillsRequirements } from '../../hooks/use_are_agent_builder_skills_available';
+import {
+  type AgentBuilderSkillsRequirements,
+  useAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements,
+} from '../../hooks/use_are_agent_builder_skills_available';
+import { experimentalBadgeLabel } from '../experimental_badge';
 import rulesListEmptyIllustration from '../../assets/illustration-results-128.svg';
 
 export interface LegacyRuleTypeItem {
@@ -38,18 +44,8 @@ interface RuleCreateOptionsPanelProps {
   onCreateEsqlRule: () => void;
   layout?: 'vertical' | 'horizontal';
   onCreateWithAgent: () => void;
-  /**
-   * When `true`, the "With AI Agent" option is rendered disabled (click is a no-op). Independent
-   * of `createWithAgentTooltipText` — a disabled option need not have a tooltip, and a tooltip can be
-   * shown without disabling.
-   */
-  createWithAgentDisabled?: boolean;
-  /**
-   * Optional tooltip text for the "With AI Agent" option (e.g. explaining a missing
-   * prerequisite). Shown on hover/focus regardless of whether the option is disabled.
-   */
-  createWithAgentTooltipText?: string;
   onCreateThresholdRule?: () => void;
+  onBuildSequence?: () => void;
   legacyRuleTypes?: LegacyRuleTypeItem[];
 }
 
@@ -59,7 +55,7 @@ const ESQL_RULE_TITLE = i18n.translate(
 );
 const ESQL_RULE_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.createWithEsqlDescription',
-  { defaultMessage: 'Create as an ES|QL query with live preview. YAML editor available.' }
+  { defaultMessage: 'Write your own ES|QL query and preview the results live.' }
 );
 const AI_AGENT_TITLE = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentTitle',
@@ -76,41 +72,16 @@ const CREATE_WITH_AGENT_MISSING_PRIVILEGE_TOOLTIP = i18n.translate(
       'To create rules with the AI Agent, you need the "Agent Builder: Read" privilege.',
   }
 );
-const CREATE_WITH_AGENT_MISSING_SETTING_TOOLTIP = i18n.translate(
-  'xpack.alertingV2.ruleCreateOptions.createWithAgentMissingSettingTooltip',
-  {
-    defaultMessage:
-      'To create rules with the AI Agent, enable the "Elastic Agent Builder: Experimental Features" advanced setting.',
-  }
-);
-const CREATE_WITH_AGENT_MISSING_ALL_TOOLTIP = i18n.translate(
-  'xpack.alertingV2.ruleCreateOptions.createWithAgentMissingAllTooltip',
-  {
-    defaultMessage:
-      'To create rules with the AI Agent, you need the "Agent Builder: Read" privilege and the "Elastic Agent Builder: Experimental Features" advanced setting enabled.',
-  }
-);
 
 /**
- * Builds the tooltip shown on the disabled "Create with agent" entry points, naming the specific
- * prerequisite(s) the user is missing. Returns `undefined` when the skill is fully available (the
- * option should then be enabled). Shared so all entry points produce the same message.
+ * Builds the tooltip shown on the disabled "Create with agent" entry points. Returns `undefined`
+ * when the skill is available (the option should then be enabled). Shared so all entry points
+ * produce the same message.
  */
 export const getCreateWithAgentTooltipText = ({
   hasAgentBuilderCapability,
-  isExperimentalFeaturesEnabled,
-}: AgentBuilderSkillsRequirements): string | undefined => {
-  if (hasAgentBuilderCapability && isExperimentalFeaturesEnabled) {
-    return undefined;
-  }
-  if (!hasAgentBuilderCapability && !isExperimentalFeaturesEnabled) {
-    return CREATE_WITH_AGENT_MISSING_ALL_TOOLTIP;
-  }
-  if (!hasAgentBuilderCapability) {
-    return CREATE_WITH_AGENT_MISSING_PRIVILEGE_TOOLTIP;
-  }
-  return CREATE_WITH_AGENT_MISSING_SETTING_TOOLTIP;
-};
+}: AgentBuilderSkillsRequirements): string | undefined =>
+  hasAgentBuilderCapability ? undefined : CREATE_WITH_AGENT_MISSING_PRIVILEGE_TOOLTIP;
 
 const THRESHOLD_RULE_TITLE = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleTitle',
@@ -119,11 +90,30 @@ const THRESHOLD_RULE_TITLE = i18n.translate(
 const THRESHOLD_RULE_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleDescription',
   {
-    defaultMessage: 'Monitor metrics against one or more threshold conditions.',
+    defaultMessage: 'Use the query builder to monitor metrics against threshold conditions.',
   }
 );
 
+const SEQUENCE_TITLE = i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.sequenceTitle', {
+  defaultMessage: 'Build a sequence',
+});
+const SEQUENCE_DESCRIPTION = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.sequenceDescription',
+  { defaultMessage: 'Chain rules to detect multi-step alert patterns.' }
+);
+
 const noop = () => undefined;
+
+const SequenceTitleWithBadge = () => (
+  <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+    <EuiFlexItem grow={false}>{SEQUENCE_TITLE}</EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiBadge color="hollow" data-test-subj="createSequenceRuleExperimentalBadge">
+        {experimentalBadgeLabel}
+      </EuiBadge>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 /** Applied to the EuiCard in the flyout layout when the option is disabled. */
 const flyoutCardDisabledStyle = css({
@@ -135,10 +125,12 @@ const flyoutCardDisabledStyle = css({
 const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
   onCreateWithAgent,
-  createWithAgentDisabled,
-  createWithAgentTooltipText,
   onCreateThresholdRule,
 }) => {
+  const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
+  const createWithAgentTooltipText = getCreateWithAgentTooltipText(
+    useAgentBuilderSkillsRequirements()
+  );
   const primaryItems = useMemo<CreateOptionItem[]>(
     () => [
       {
@@ -155,12 +147,17 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
         title: AI_AGENT_TITLE,
         description: AI_AGENT_DESCRIPTION,
         onClick: onCreateWithAgent,
-        disabled: createWithAgentDisabled,
+        disabled: !areAgentBuilderSkillsAvailable,
         tooltipText: createWithAgentTooltipText,
         'data-test-subj': 'createWithAgentCard',
       },
     ],
-    [onCreateEsqlRule, onCreateWithAgent, createWithAgentDisabled, createWithAgentTooltipText]
+    [
+      onCreateEsqlRule,
+      onCreateWithAgent,
+      areAgentBuilderSkillsAvailable,
+      createWithAgentTooltipText,
+    ]
   );
 
   const secondaryItems = useMemo<CreateOptionItem[]>(
@@ -180,10 +177,10 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
   return (
     <CreateOptionsPanel
       title={
-        <h2>
+        <h2 data-test-subj="ruleCreateOptionsEmptyStateTitle">
           <FormattedMessage
             id="xpack.alertingV2.ruleCreateOptionsPanel.emptyStateTitle"
-            defaultMessage="No rules yet. Let's get started!"
+            defaultMessage="No Universal rules yet. Let's get started!"
           />
         </h2>
       }
@@ -210,7 +207,7 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
 
 const RuleBuilderSectionDivider: React.FC = () => (
   <>
-    <EuiSpacer size="s" />
+    <EuiSpacer size="l" />
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
       <EuiFlexItem>
         <EuiHorizontalRule margin="none" />
@@ -278,12 +275,15 @@ const LegacyRuleTypesSection: React.FC<{ items: LegacyRuleTypeItem[] }> = ({ ite
 const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
   onCreateWithAgent,
-  createWithAgentDisabled,
-  createWithAgentTooltipText,
   onCreateThresholdRule,
+  onBuildSequence,
   legacyRuleTypes,
 }) => {
-  const isAgentDisabled = createWithAgentDisabled === true;
+  const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
+  const createWithAgentTooltipText = getCreateWithAgentTooltipText(
+    useAgentBuilderSkillsRequirements()
+  );
+  const isAgentDisabled = !areAgentBuilderSkillsAvailable;
   const hasAgentTooltip = createWithAgentTooltipText !== undefined;
   const agentCard = (
     <EuiCard
@@ -328,6 +328,22 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
             agentCard
           )}
         </EuiFlexItem>
+        {onBuildSequence && (
+          <EuiFlexItem>
+            <EuiCard
+              layout="horizontal"
+              display="plain"
+              titleElement="h3"
+              titleSize="xs"
+              hasBorder={true}
+              title={<SequenceTitleWithBadge />}
+              description={SEQUENCE_DESCRIPTION}
+              onClick={onBuildSequence}
+              icon={<EuiIcon type="branch" color="text" size="l" aria-hidden={true} />}
+              data-test-subj="createSequenceRuleCard"
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <RuleBuilderSectionDivider />
       <EuiCard

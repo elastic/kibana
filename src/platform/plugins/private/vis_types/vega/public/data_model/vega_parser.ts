@@ -41,6 +41,8 @@ import type {
   ControlsLocation,
   ControlsDirection,
   KibanaConfig,
+  VegaRenderDescriptor,
+  Renderer,
 } from './types';
 
 const locToDirMap: Record<string, ControlsLocation> = {
@@ -65,9 +67,10 @@ export class VegaParser {
   useHover?: boolean;
   _config?: VegaConfig;
   useMap?: boolean;
-  renderer?: string;
+  renderer?: Renderer;
   tooltips?: boolean | TooltipConfig;
-  mapConfig?: object;
+  mapConfig?: VegaConfig;
+  colorSchemes?: Record<string, string[]>;
   vlspec?: VegaSpec;
   useResize?: boolean;
   containerDir?: ControlsLocation | ControlsDirection;
@@ -109,6 +112,30 @@ export class VegaParser {
       this.error = Utils.formatErrorToStr(err);
     }
     return this;
+  }
+
+  /** Returns the structured-cloneable render state of a parsed spec, without parser internals. */
+  toRenderDescriptor(): VegaRenderDescriptor {
+    return {
+      spec: this.spec,
+      vlspec: this.vlspec,
+      isVegaLite: this.isVegaLite,
+      useMap: this.useMap,
+      useResize: this.useResize,
+      useHover: this.useHover,
+      renderer: this.renderer,
+      tooltips: this.tooltips,
+      mapConfig: this.mapConfig,
+      colorSchemes: this.colorSchemes,
+      containerDir: this.containerDir,
+      controlsDir: this.controlsDir,
+      hideWarnings: this.hideWarnings,
+      restoreSignalValuesOnRefresh: this.restoreSignalValuesOnRefresh,
+      warnings: this.warnings,
+      error: this.error,
+      approximationApplied: this.approximationApplied,
+      trustedDataUrls: this._urlParsers?.emsfile.trustedUrls ?? [],
+    };
   }
 
   async _parseAsync() {
@@ -720,6 +747,8 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     // Add the default palette
     const paletteColors = getVegaThemeColors(this.theme, 'visColors');
     scheme('elastic', paletteColors);
+    // Vega registers schemes per realm, so a view in another frame must register them itself.
+    this.colorSchemes = { elastic: paletteColors };
 
     // Default category coloring to the Elastic color scheme
     this._setDefaultValue({ scheme: 'elastic' }, 'config', 'range', 'category');
@@ -750,13 +779,15 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       // https://github.com/vega/vega/issues/1083
       const markDefaults = [
         ['arc', 'fill', defaultColor],
-        ['area', 'fill', defaultAreaFill],
+        // we don't apply the gradient in plain Vega, because we can't add the line on top using configuration
+        ['area', 'fill', defaultColor],
         ['line', 'stroke', defaultColor],
         ['path', 'stroke', defaultColor],
         ['rect', 'fill', defaultColor],
         ['rule', 'stroke', defaultColor],
         ['shape', 'stroke', defaultColor],
         ['symbol', 'fill', defaultColor],
+        ['text', 'fill', getVegaThemeColors(this.theme, 'text')],
         ['trail', 'fill', defaultColor],
       ] as const;
 
@@ -778,9 +809,17 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     this._setDefaultValue(axisColor, 'config', 'axis', 'gridColor');
     this._setDefaultValue(500, 'config', 'axis', 'titleFontWeight');
 
-    this._setDefaultValue(0.3, 'config', 'area', 'fillOpacity');
-    this._setDefaultValue(null, 'config', 'view', 'stroke');
+    // this only applies to Vega-Lite, in plain Vega, the line on top needs to be added as an extra mark.
     this._setDefaultValue(true, 'config', 'area', 'line');
+
+    if (this.isVegaLite) {
+      this._setDefaultValue(0.3, 'config', 'area', 'fillOpacity');
+    } else {
+      // because we can't add the line on top using configuration in plain Vega, we up the fill opacity to 0.5
+      this._setDefaultValue(0.5, 'config', 'area', 'fillOpacity');
+    }
+
+    this._setDefaultValue(null, 'config', 'view', 'stroke');
     this._setDefaultValue(1.5, 'config', 'area', 'line', 'strokeWidth');
     this._setDefaultValue('transparent', 'config', 'background');
   }

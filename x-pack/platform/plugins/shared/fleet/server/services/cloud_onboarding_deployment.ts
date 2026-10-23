@@ -91,10 +91,26 @@ class CloudOnboardingDeploymentService {
     id: string,
     update: UpdateCloudOnboardingDeploymentInput
   ): Promise<CloudOnboardingDeployment> {
-    await soClient.update<CloudOnboardingDeploymentSOAttributes>(
+    // soClient.update sends a partial ES doc update. ES deep-merges nested objects, so keys
+    // removed from record fields like policyIdsByInstance or serviceVars would persist in the
+    // stored document. Use get + create(overwrite) for a full-replace write instead.
+    const existing = await soClient.get<CloudOnboardingDeploymentSOAttributes>(
       CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-      id,
-      { ...update }
+      id
+    );
+    // A null description clears it. The saved object schema has no null for it, so the key is
+    // removed rather than stored.
+    const { description, ...rest } = update;
+    const attributes: CloudOnboardingDeploymentSOAttributes = {
+      ...existing.attributes,
+      ...rest,
+      ...(description ? { description } : {}),
+    };
+    if (description === null || description === '') delete attributes.description;
+    await soClient.create<CloudOnboardingDeploymentSOAttributes>(
+      CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+      attributes,
+      { id, overwrite: true, references: existing.references }
     );
 
     return this.getById(soClient, id);

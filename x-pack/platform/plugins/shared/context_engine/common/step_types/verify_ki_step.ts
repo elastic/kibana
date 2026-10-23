@@ -76,6 +76,17 @@ export type KiVerifierEntry = z.infer<typeof kiVerifierEntrySchema>;
 export const getKiVerifierEntryKey = (entry: KiVerifierEntry): string =>
   typeof entry === 'string' ? entry : `${WORKFLOW_VERIFIER_ID_PREFIX}${entry.workflow_id}`;
 
+export const kiVerifiersSchema = z
+  .array(kiVerifierEntrySchema)
+  .min(1)
+  .max(MAX_KI_VERIFIERS)
+  .refine((entries) => new Set(entries.map(getKiVerifierEntryKey)).size === entries.length, {
+    message: 'Verifier ids must be unique.',
+  })
+  .describe(
+    'The verifiers to run, in order: built-in verifier ids and custom verifier workflows (`workflow_id`). At least one unique entry is required.'
+  );
+
 export const VerifyKiInputSchema = z.object({
   ki: kiPartialFieldsSchema,
   ai_index_id: aiIndexIdSchema.optional().describe('AI index the KI belongs to'),
@@ -88,16 +99,7 @@ export const VerifyKiInputSchema = z.object({
     .describe(
       `Total seconds to wait for all verifiers before aborting the step (default ${DEFAULT_KI_VERIFIER_STEP_TIMEOUT_SEC})`
     ),
-  verifiers: z
-    .array(kiVerifierEntrySchema)
-    .min(1)
-    .max(MAX_KI_VERIFIERS)
-    .refine((entries) => new Set(entries.map(getKiVerifierEntryKey)).size === entries.length, {
-      message: 'Verifier ids must be unique.',
-    })
-    .describe(
-      'The verifiers to run, in order: built-in verifier ids and custom verifier workflows (`workflow_id`). At least one unique entry is required.'
-    ),
+  verifiers: kiVerifiersSchema,
 });
 
 export const VerifyKiOutputSchema = z.object({

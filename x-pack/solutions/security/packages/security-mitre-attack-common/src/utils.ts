@@ -7,6 +7,10 @@
 
 import type { MitreFramework } from './schema';
 
+/** Returns the standard display label for a MITRE entity: "Name (ID)". */
+export const getMitreEntityDisplayName = ({ name, id }: { name: string; id: string }): string =>
+  `${name} (${id})`;
+
 /** Builds the deterministic saved-object ID for a MITRE entity. */
 export const buildSoId = ({
   framework,

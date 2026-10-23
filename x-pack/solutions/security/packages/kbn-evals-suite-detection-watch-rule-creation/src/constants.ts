@@ -27,6 +27,9 @@ export const WORKFLOWS_API_VERSION = '2023-10-31';
 /** Step ids from the managed workflow yaml (@kbn/workflows managed/definitions/alertzero/rule_creation.yaml). */
 export const DRAFT_STEP_ID = 'draft_creation';
 export const REVIEW_STEP_ID = 'review_creation';
+export const PROPOSE_STEP_ID = 'propose_creation';
+
+export const SCORING_INVESTIGATION_ID = '00000000-0000-4000-8000-000000000000';
 
 /**
  * Agent Builder tool the workflow's `ai.agent` step is instructed to call. Consumed by the
@@ -35,8 +38,8 @@ export const REVIEW_STEP_ID = 'review_creation';
  */
 export const RULE_CREATION_TOOL_ID = 'security.create_detection_rule';
 
-/**
- * Skill the workflow's `ai.agent` step is instructed to route through. Consumed by the
- * Tool Routing evaluator (src/evaluators/tool_routing.ts).
- */
+/** Agent Builder tool the detection-rule-edit skill directs the agent to call after drafting. */
+export const RULE_PREVIEW_TOOL_ID = 'security.run_rule_preview';
+
+/** Skill the workflow's `ai.agent` step is instructed to route through. */
 export const RULE_CREATION_SKILL_ID = 'detection-rule-edit';

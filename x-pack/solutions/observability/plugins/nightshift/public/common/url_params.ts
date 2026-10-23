@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-/** Query param for the investigations search box — shareable, restored on load. */
-export const NIGHTSHIFT_SEARCH_QUERY_PARAM = 'q';
+import {
+  NIGHTSHIFT_SEARCH_QUERY_PARAM,
+  NIGHTSHIFT_SEVERITY_QUERY_PARAM,
+  NIGHTSHIFT_INVESTIGATION_ID_QUERY_PARAM,
+} from '@kbn/nightshift-investigations-plugin/common';
 
-/** Query param that scrolls to a severity section on load or from a shared link. */
-export const NIGHTSHIFT_SEVERITY_QUERY_PARAM = 'severity';
+export {
+  NIGHTSHIFT_SEARCH_QUERY_PARAM,
+  NIGHTSHIFT_SEVERITY_QUERY_PARAM,
+  NIGHTSHIFT_INVESTIGATION_ID_QUERY_PARAM,
+};
 
 /** Query param that restores the open event flyout on load or from a shared link. */
 export const NIGHTSHIFT_EVENT_ID_QUERY_PARAM = 'eventId';
-
-/** Query param that restores the open investigation detail flyout on load or from a shared link. */
-export const NIGHTSHIFT_INVESTIGATION_ID_QUERY_PARAM = 'investigationId';
 
 export const getNightshiftEventIdFromSearch = (search: string): string | undefined =>
   new URLSearchParams(search).get(NIGHTSHIFT_EVENT_ID_QUERY_PARAM) ?? undefined;
@@ -32,6 +35,31 @@ export const buildNightshiftEventFlyoutShareUrl = (eventId: string): string => {
   const url = new URL(window.location.href);
   url.searchParams.set(NIGHTSHIFT_EVENT_ID_QUERY_PARAM, eventId);
   return url.toString();
+};
+
+export const NIGHTSHIFT_RULE_ID_QUERY_PARAM = 'ruleId';
+
+export const getNightshiftRuleIdFromSearch = (search: string): string | undefined =>
+  new URLSearchParams(search).get(NIGHTSHIFT_RULE_ID_QUERY_PARAM) ?? undefined;
+
+export const setNightshiftRuleIdParam = (params: URLSearchParams, ruleId: string): void => {
+  params.set(NIGHTSHIFT_RULE_ID_QUERY_PARAM, ruleId);
+};
+
+export const clearNightshiftRuleIdParam = (params: URLSearchParams): void => {
+  params.delete(NIGHTSHIFT_RULE_ID_QUERY_PARAM);
+};
+
+export const buildNightshiftRuleFlyoutShareUrl = (ruleId: string): string => {
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.set(NIGHTSHIFT_RULE_ID_QUERY_PARAM, ruleId);
+    return url.toString();
+  } catch {
+    const params = new URLSearchParams(window.location.search);
+    params.set(NIGHTSHIFT_RULE_ID_QUERY_PARAM, ruleId);
+    return `${window.location.pathname}?${params}`;
+  }
 };
 
 export const getNightshiftSearchQueryFromSearch = (search: string): string | undefined =>
@@ -64,6 +92,9 @@ export const setNightshiftInvestigationIdParam = (
 export const clearNightshiftInvestigationIdParam = (params: URLSearchParams): void => {
   params.delete(NIGHTSHIFT_INVESTIGATION_ID_QUERY_PARAM);
 };
+
+export const getNightshiftInvestigationPath = (investigationId: string): string =>
+  `/?${NIGHTSHIFT_INVESTIGATION_ID_QUERY_PARAM}=${encodeURIComponent(investigationId)}`;
 
 export const buildNightshiftInvestigationFlyoutShareUrl = (investigationId: string): string => {
   const url = new URL(window.location.href);

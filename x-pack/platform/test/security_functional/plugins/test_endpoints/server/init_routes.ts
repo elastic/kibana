@@ -17,6 +17,11 @@ import type {
 } from '@kbn/core/server';
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import {
+  ES_CLIENT_AUTHENTICATION_HEADER,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+  type UiamAPIKeysType,
+} from '@kbn/core-security-server';
 import { ROUTE_TAG_AUTH_FLOW } from '@kbn/security-plugin/server';
 import { restApiKeySchema } from '@kbn/security-plugin-types-server';
 import {
@@ -29,6 +34,24 @@ import {
 import type { PluginStartDependencies } from '.';
 
 export const SESSION_INDEX_CLEANUP_TASK_NAME = 'session_cleanup';
+
+const SELF_CLIENT_ES_TARGET = '/internal/test_endpoints/self_client/fake_request';
+const SELF_CLIENT_OAUTH_TARGET = '/internal/test_endpoints/self_client/oauth_me';
+const SELF_CLIENT_TARGET_PATH = schema.maybe(
+  schema.oneOf([schema.literal(SELF_CLIENT_ES_TARGET), schema.literal(SELF_CLIENT_OAUTH_TARGET)])
+);
+
+const getReceivedSelfCallHeaders = (headers: Headers, uiam: UiamAPIKeysType | null) => {
+  const clientAuthentication = headers[ES_CLIENT_AUTHENTICATION_HEADER];
+  const isOwn = [clientAuthentication ?? []]
+    .flat()
+    .some((value) => uiam?.isOwnClientAuthentication(value));
+
+  return {
+    clientAuthentication: clientAuthentication === undefined ? 'absent' : isOwn ? 'own' : 'other',
+    attestation: headers[UIAM_INTERNAL_CALLER_ATTESTATION_HEADER] !== undefined,
+  };
+};
 
 export function initRoutes(
   initializerContext: PluginInitializerContext,
@@ -759,7 +782,7 @@ export function initRoutes(
 
   router.get(
     {
-      path: '/internal/test_endpoints/self_client/fake_request',
+      path: SELF_CLIENT_ES_TARGET,
       security: {
         authz: {
           enabled: false,
@@ -769,8 +792,9 @@ export function initRoutes(
       validate: false,
       options: { access: 'internal' },
     },
-    async (context, _request, response) => {
+    async (context, request, response) => {
       const { elasticsearch, security } = await context.core;
+      const [{ security: securityStart }] = await core.getStartServices();
       const { has_all_requested: hasManage } =
         await elasticsearch.client.asCurrentUser.security.hasPrivileges({ cluster: ['manage'] });
 
@@ -778,6 +802,10 @@ export function initRoutes(
         body: {
           username: security.authc.getCurrentUser()?.username,
           hasManage,
+          receivedHeaders: getReceivedSelfCallHeaders(
+            request.headers,
+            securityStart.authc.apiKeys.uiam
+          ),
         },
       });
     }
@@ -804,10 +832,9 @@ export function initRoutes(
       try {
         const body = await coreStart.http.selfClient
           .asScoped(fakeRequest)
-          .fetch<{ username?: string; hasManage: boolean }>(
-            '/internal/test_endpoints/self_client/fake_request',
-            { access: 'internal' }
-          );
+          .fetch<{ username?: string; hasManage: boolean }>(SELF_CLIENT_ES_TARGET, {
+            access: 'internal',
+          });
         return response.ok({ body });
       } catch (error) {
         if (error instanceof Error && 'response' in error) {
@@ -823,6 +850,83 @@ export function initRoutes(
       }
     }
   );
+
+  router.get(
+    {
+      path: SELF_CLIENT_OAUTH_TARGET,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Security test endpoint verifies UIAM self-call authentication.',
+        },
+      },
+      validate: false,
+      options: { access: 'internal', tags: ['security:acceptUiamOAuth'] },
+    },
+    async (context, request, response) => {
+      const { elasticsearch, security } = await context.core;
+      const [{ security: securityStart }] = await core.getStartServices();
+      const { has_all_requested: hasManage } =
+        await elasticsearch.client.asCurrentUser.security.hasPrivileges({ cluster: ['manage'] });
+
+      return response.ok({
+        body: {
+          username: security.authc.getCurrentUser()?.username,
+          hasManage,
+          receivedHeaders: getReceivedSelfCallHeaders(
+            request.headers,
+            securityStart.authc.apiKeys.uiam
+          ),
+        },
+      });
+    }
+  );
+
+  const asScopedSelfCallRoutes: Array<{ path: string; tags?: string[] }> = [
+    { path: '/test_endpoints/self_client/as_scoped' },
+    {
+      path: '/test_endpoints/self_client/as_scoped_oauth',
+      tags: ['security:acceptUiamOAuth'],
+    },
+  ];
+
+  for (const { path: routePath, tags } of asScopedSelfCallRoutes) {
+    router.post(
+      {
+        path: routePath,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'Security test endpoint verifies self-call attestation on the inbound request.',
+          },
+        },
+        validate: { body: schema.object({ path: SELF_CLIENT_TARGET_PATH }) },
+        ...(tags ? { options: { tags } } : {}),
+      },
+      async (_context, request, response) => {
+        const [coreStart] = await core.getStartServices();
+        const path = request.body.path ?? SELF_CLIENT_ES_TARGET;
+
+        try {
+          const body = await coreStart.http.selfClient
+            .asScoped(request)
+            .fetch<{ username?: string; hasManage: boolean }>(path, { access: 'internal' });
+          return response.ok({ body });
+        } catch (error) {
+          if (error instanceof Error && 'response' in error) {
+            const { response: targetResponse } = error as Error & { response?: Response };
+            if (targetResponse) {
+              return response.custom({
+                statusCode: targetResponse.status,
+                body: targetResponse.statusText,
+              });
+            }
+          }
+          throw error;
+        }
+      }
+    );
+  }
 
   router.post(
     {
@@ -965,6 +1069,23 @@ export function initRoutes(
           body: { message: err.message },
         });
       }
+    }
+  );
+
+  // Reports how Core classified the request's principal. Authorization is intentionally off:
+  // the point is to observe classification for every credential kind, including ones without
+  // Kibana privileges.
+  router.get(
+    {
+      path: '/test_endpoints/principal',
+      validate: false,
+      security: {
+        authz: { enabled: false, reason: 'Test endpoint reporting the authenticated principal' },
+      },
+    },
+    async (context, request, response) => {
+      const { security: coreSecurity } = await context.core;
+      return response.ok({ body: { principal: coreSecurity.authc.getPrincipal() } });
     }
   );
 

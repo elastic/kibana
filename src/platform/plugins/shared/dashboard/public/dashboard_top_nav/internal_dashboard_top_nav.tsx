@@ -39,8 +39,7 @@ import type {
   AppHeaderShareAction,
 } from '@kbn/app-header';
 import { useFavorite } from '@kbn/content-management-favorites-public';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
+import { AppMenuComponent, type AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
@@ -67,8 +66,9 @@ import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoritesProvider } from './dashboard_favorite_button';
 import { LegacyDashboardHeader } from './legacy_dashboard_header';
+import { useHeaderMode } from './use_header_mode';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
-import { usePrettifyDashboardAction } from '../dashboard_app/prettify/use_prettify_dashboard_action';
+import { useEnhanceDashboardAction } from '../dashboard_app/enhance/use_enhance_dashboard_action';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -80,7 +80,7 @@ export interface InternalDashboardTopNavProps {
   showResetChange?: boolean;
 }
 
-interface DashboardChromeNextHeaderProps {
+interface DashboardAppHeaderProps {
   headerMode: 'inline' | 'registered';
   title: string;
   back: AppHeaderBack;
@@ -93,9 +93,9 @@ interface DashboardChromeNextHeaderProps {
 }
 
 /**
- * Chrome Next header path. Must render inside `DashboardFavoritesProvider`.
+ * App header path. Must render inside `DashboardFavoritesProvider`.
  */
-const DashboardChromeNextHeader = ({
+const DashboardAppHeader = ({
   headerMode,
   title,
   back,
@@ -105,7 +105,7 @@ const DashboardChromeNextHeader = ({
   viewMode,
   share,
   experimentalDashboardAiAction,
-}: DashboardChromeNextHeaderProps) => {
+}: DashboardAppHeaderProps) => {
   const favorite = useFavorite({ id: dashboardId });
 
   if (headerMode === 'inline') {
@@ -152,15 +152,10 @@ export function InternalDashboardTopNav({
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
-  const chromeStyle = useChromeStyle();
-  // Header rendering mode:
-  //  - `inline`: next chrome, standalone -> we render `AppHeader`.
-  //  - `registered`: next chrome, embedded in a host that owns the layout (e.g. Security) -> register
-  //    the content so chrome renders it in the app-header slot.
-  //  - `legacy`: classic chrome -> push through the imperative chrome APIs.
-  const isEmbedded = Boolean(embedSettings || setCustomHeaderActionMenu);
-  const isAppHeaderActive = chromeStyle === 'project';
-  const headerMode = !isAppHeaderActive ? 'legacy' : isEmbedded ? 'registered' : 'inline';
+  const headerMode = useHeaderMode({
+    isEmbeddedViaUrl: Boolean(embedSettings?.isEmbeddedViaUrl),
+    isHostedByApp: Boolean(setCustomHeaderActionMenu),
+  });
 
   const { onAppLeave } = useDashboardMountContext();
 
@@ -376,22 +371,27 @@ export function InternalDashboardTopNav({
       return false;
     }
     const disabled =
-      (allDataViews?.length ?? 0) > 0 && !allDataViews?.some((dv) => dv.isTimeBased());
+      (allDataViews?.length ?? 0) > 0 &&
+      !allDataViews?.some(
+        (dv) => (dv.type !== 'esql' && dv.isTimeBased()) || (dv.type === 'esql' && dv.timeFieldName)
+      );
     return { disabled };
   }, [visibilityProps.showDatePicker, allDataViews]);
 
   const shareAction = useDashboardShareAction({ redirectTo });
-  const prettifyAction = usePrettifyDashboardAction(dashboardApi);
+  const enhanceAction = useEnhanceDashboardAction(dashboardApi);
   const experimentalDashboardAiAction = useMemo(
     () =>
-      viewMode === 'edit' && prettifyAction
+      viewMode === 'edit' && enhanceAction
         ? {
             onClick: () => {
-              void prettifyAction.execute();
+              void enhanceAction.execute();
             },
+            isDisabled: enhanceAction.isDisabled,
+            tooltip: enhanceAction.tooltip,
           }
         : undefined,
-    [viewMode, prettifyAction]
+    [viewMode, enhanceAction]
   );
 
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
@@ -471,7 +471,7 @@ export function InternalDashboardTopNav({
     return viewMode === 'edit' ? editModeTopNavConfig : viewModeTopNavConfig;
   }, [visibilityProps.showTopNavMenu, viewMode, editModeTopNavConfig, viewModeTopNavConfig]);
 
-  // Chrome Next hides the classic breadcrumbs, so the header carries its own back button that leads to the dashboard listing page.
+  // Project chrome hides the classic breadcrumbs, so the header carries its own back button that leads to the dashboard listing page.
   const backToListing = useMemo<AppHeaderBack>(
     () => ({
       href: coreServices.application.getUrlForApp(DASHBOARD_APP_ID, {
@@ -492,7 +492,7 @@ export function InternalDashboardTopNav({
       </EuiScreenReaderOnly>
       {(headerMode === 'inline' || headerMode === 'registered') && (
         <DashboardFavoritesProvider>
-          <DashboardChromeNextHeader
+          <DashboardAppHeader
             headerMode={headerMode}
             title={dashboardTitle}
             back={backToListing}
@@ -505,6 +505,9 @@ export function InternalDashboardTopNav({
           />
         </DashboardFavoritesProvider>
       )}
+      {headerMode === 'embedded' && visibilityProps.showTopNavMenu && (
+        <AppMenuComponent config={appMenuConfig} />
+      )}
       {headerMode === 'legacy' && (
         <LegacyDashboardHeader
           badges={badges}
@@ -516,6 +519,7 @@ export function InternalDashboardTopNav({
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
         <unifiedSearchService.ui.SearchBar
           {...visibilityProps}
+          isDisabled={viewMode === 'non-interactive'}
           showDatePicker={showDatePicker}
           query={query as Query | undefined}
           screenTitle={title}
@@ -546,7 +550,7 @@ export function InternalDashboardTopNav({
           esqlApproximation={{
             isApproximate: esqlApproximation ?? false,
             onChange: dashboardApi.setEsqlApproximation,
-            disabled: !hasEsqlPanel,
+            disabled: viewMode === 'non-interactive' || !hasEsqlPanel,
             additionalText: i18n.translate('dashboard.esqlApproximationToggle.additionalText', {
               defaultMessage:
                 'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',

@@ -30,6 +30,12 @@ import type { ServiceVars, ServiceDataStreamVars } from './use_service_settings'
 import { getRequiredTextFields, resolveFieldMeta, toTyped } from './field_config';
 import { ServiceFieldsForm } from './service_fields_form';
 import { isDuplicateNameTaken } from './duplicate_name';
+import { MAX_POLICY_NAME_LENGTH } from './integration_settings';
+import {
+  InstanceNamespaceField,
+  getNamespaceError,
+  supportsNamespace,
+} from './instance_namespace_field';
 
 interface DuplicateServiceModalProps {
   service: AwsServiceMatrixEntry;
@@ -42,7 +48,8 @@ interface DuplicateServiceModalProps {
   onAdd: (
     name: string,
     varsByDataStream: Record<string, ServiceDataStreamVars>,
-    enabledDataStreams: string[]
+    enabledDataStreams: string[],
+    namespace: string
   ) => void;
   onCancel: () => void;
 }
@@ -62,11 +69,16 @@ export function DuplicateServiceModal({
   const [draftByDs, setDraftByDs] = useState<Record<string, ServiceDataStreamVars>>(() => ({
     ...sourceConfig.varsByDataStream,
   }));
+  const [namespace, setNamespace] = useState(sourceConfig.namespace ?? '');
+  const showNamespace = supportsNamespace(service);
+  const isNamespaceInvalid = showNamespace && !!getNamespaceError(namespace);
 
   const trimmedName = name.trim();
   const nameEmpty = trimmedName === '';
   const nameTaken = !nameEmpty && isDuplicateNameTaken(trimmedName, existingNames);
-  const nameInvalid = nameEmpty || nameTaken;
+  // The service name is the duplicate's policy name, which Fleet limits.
+  const nameTooLong = trimmedName.length > MAX_POLICY_NAME_LENGTH;
+  const nameInvalid = nameEmpty || nameTaken || nameTooLong;
 
   const singleDs = service.dataStreams.length === 1;
   const enabledDsFromInputs = service.dataStreams.filter((dsId) => {
@@ -100,7 +112,7 @@ export function DuplicateServiceModal({
     );
   });
 
-  const canAdd = !nameInvalid && !anyRequiredEmpty;
+  const canAdd = !nameInvalid && !anyRequiredEmpty && !isNamespaceInvalid;
 
   const nameError = nameEmpty
     ? i18n.translate('xpack.ingestHub.serviceSettingsStep.duplicateModal.name.errorEmpty', {
@@ -109,6 +121,11 @@ export function DuplicateServiceModal({
     : nameTaken
     ? i18n.translate('xpack.ingestHub.serviceSettingsStep.duplicateModal.name.errorTaken', {
         defaultMessage: 'This name is already in use. Choose a different name.',
+      })
+    : nameTooLong
+    ? i18n.translate('xpack.ingestHub.serviceSettingsStep.duplicateModal.name.errorTooLong', {
+        defaultMessage: 'The name must be {max} characters or less.',
+        values: { max: MAX_POLICY_NAME_LENGTH },
       })
     : undefined;
 
@@ -123,7 +140,7 @@ export function DuplicateServiceModal({
       if (singleDs) return true;
       return (service.varDefsByDataStream?.[dsId]?.defaultEnabledInputs?.length ?? 0) > 0;
     });
-    onAdd(trimmedName, draftByDs, enabledDataStreams);
+    onAdd(trimmedName, draftByDs, enabledDataStreams, namespace);
   };
 
   return (
@@ -175,6 +192,13 @@ export function DuplicateServiceModal({
         </EuiFormRow>
 
         <EuiSpacer size="m" />
+
+        {showNamespace && (
+          <>
+            <InstanceNamespaceField namespace={namespace} onChange={setNamespace} />
+            <EuiSpacer size="m" />
+          </>
+        )}
 
         <ServiceFieldsForm
           service={service}

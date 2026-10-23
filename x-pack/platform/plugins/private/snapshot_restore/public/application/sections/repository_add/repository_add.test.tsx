@@ -13,6 +13,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 
 import { textService } from '../../services/text';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
@@ -143,18 +145,22 @@ describe('<RepositoryAdd />', () => {
     const history = createMemoryHistory({ initialEntries: ['/add_repository'] });
 
     render(
-      <I18nProvider>
-        <Router history={history}>
-          <RepositoryAdd
-            history={history}
-            location={history.location}
-            match={{ params: {}, isExact: true, path: '', url: '' }}
-          />
-        </Router>
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <Router history={history}>
+            <RepositoryAdd
+              history={history}
+              location={history.location}
+              match={{ params: {}, isExact: true, path: '', url: '' }}
+            />
+          </Router>
+        </I18nProvider>
+      </MockAppHeaderProvider>
     );
 
-    expect(screen.getByTestId('pageTitle')).toHaveTextContent('Register repository');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      'Register repository'
+    );
     expect(screen.queryByText('Default repository could not be loaded')).not.toBeInTheDocument();
   });
 
@@ -172,15 +178,17 @@ describe('<RepositoryAdd />', () => {
     const history = createMemoryHistory({ initialEntries: ['/add_repository'] });
 
     render(
-      <I18nProvider>
-        <Router history={history}>
-          <RepositoryAdd
-            history={history}
-            location={history.location}
-            match={{ params: {}, isExact: true, path: '', url: '' }}
-          />
-        </Router>
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <Router history={history}>
+            <RepositoryAdd
+              history={history}
+              location={history.location}
+              match={{ params: {}, isExact: true, path: '', url: '' }}
+            />
+          </Router>
+        </I18nProvider>
+      </MockAppHeaderProvider>
     );
 
     fireEvent.click(screen.getByTestId('repositoryFormSave'));
@@ -197,15 +205,17 @@ describe('<RepositoryAdd />', () => {
     const history = createMemoryHistory({ initialEntries: ['/add_repository'] });
 
     render(
-      <I18nProvider>
-        <Router history={history}>
-          <RepositoryAdd
-            history={history}
-            location={history.location}
-            match={{ params: {}, isExact: true, path: '', url: '' }}
-          />
-        </Router>
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <Router history={history}>
+            <RepositoryAdd
+              history={history}
+              location={history.location}
+              match={{ params: {}, isExact: true, path: '', url: '' }}
+            />
+          </Router>
+        </I18nProvider>
+      </MockAppHeaderProvider>
     );
 
     fireEvent.click(screen.getByTestId('repositoryFormSave'));
@@ -224,15 +234,17 @@ describe('<RepositoryAdd />', () => {
     });
 
     render(
-      <I18nProvider>
-        <Router history={history}>
-          <RepositoryAdd
-            history={history}
-            location={history.location}
-            match={{ params: {}, isExact: true, path: '', url: '' }}
-          />
-        </Router>
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <Router history={history}>
+            <RepositoryAdd
+              history={history}
+              location={history.location}
+              match={{ params: {}, isExact: true, path: '', url: '' }}
+            />
+          </Router>
+        </I18nProvider>
+      </MockAppHeaderProvider>
     );
 
     fireEvent.click(screen.getByTestId('repositoryFormSave'));
@@ -262,15 +274,17 @@ describe('<RepositoryAdd />', () => {
 
     const history = createMemoryHistory({ initialEntries: ['/add_repository'] });
     render(
-      <I18nProvider>
-        <Router history={history}>
-          <RepositoryAdd
-            history={history}
-            location={history.location}
-            match={{ params: {}, isExact: true, path: '', url: '' }}
-          />
-        </Router>
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <Router history={history}>
+            <RepositoryAdd
+              history={history}
+              location={history.location}
+              match={{ params: {}, isExact: true, path: '', url: '' }}
+            />
+          </Router>
+        </I18nProvider>
+      </MockAppHeaderProvider>
     );
 
     expect(screen.getByTestId('repositoryFormIsDefault')).toHaveTextContent('true');
@@ -308,15 +322,17 @@ describe('<RepositoryAdd />', () => {
 
     const history = createMemoryHistory({ initialEntries: ['/add_repository'] });
     render(
-      <I18nProvider>
-        <Router history={history}>
-          <RepositoryAdd
-            history={history}
-            location={history.location}
-            match={{ params: {}, isExact: true, path: '', url: '' }}
-          />
-        </Router>
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <Router history={history}>
+            <RepositoryAdd
+              history={history}
+              location={history.location}
+              match={{ params: {}, isExact: true, path: '', url: '' }}
+            />
+          </Router>
+        </I18nProvider>
+      </MockAppHeaderProvider>
     );
 
     await waitFor(() => {
@@ -352,15 +368,17 @@ describe('<RepositoryAdd />', () => {
 
     const history = createMemoryHistory({ initialEntries: ['/add_repository'] });
     render(
-      <I18nProvider>
-        <Router history={history}>
-          <RepositoryAdd
-            history={history}
-            location={history.location}
-            match={{ params: {}, isExact: true, path: '', url: '' }}
-          />
-        </Router>
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <Router history={history}>
+            <RepositoryAdd
+              history={history}
+              location={history.location}
+              match={{ params: {}, isExact: true, path: '', url: '' }}
+            />
+          </Router>
+        </I18nProvider>
+      </MockAppHeaderProvider>
     );
 
     expect(screen.queryByTestId('repositoryFormToggleDefault')).not.toBeInTheDocument();
@@ -393,15 +411,17 @@ describe('<RepositoryAdd />', () => {
 
     const history = createMemoryHistory({ initialEntries: ['/add_repository'] });
     render(
-      <I18nProvider>
-        <Router history={history}>
-          <RepositoryAdd
-            history={history}
-            location={history.location}
-            match={{ params: {}, isExact: true, path: '', url: '' }}
-          />
-        </Router>
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <Router history={history}>
+            <RepositoryAdd
+              history={history}
+              location={history.location}
+              match={{ params: {}, isExact: true, path: '', url: '' }}
+            />
+          </Router>
+        </I18nProvider>
+      </MockAppHeaderProvider>
     );
 
     expect(screen.getByTestId('repositoryFormToggleDefault')).toBeDisabled();
@@ -434,15 +454,17 @@ describe('<RepositoryAdd />', () => {
 
     const history = createMemoryHistory({ initialEntries: ['/add_repository'] });
     render(
-      <I18nProvider>
-        <Router history={history}>
-          <RepositoryAdd
-            history={history}
-            location={history.location}
-            match={{ params: {}, isExact: true, path: '', url: '' }}
-          />
-        </Router>
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <Router history={history}>
+            <RepositoryAdd
+              history={history}
+              location={history.location}
+              match={{ params: {}, isExact: true, path: '', url: '' }}
+            />
+          </Router>
+        </I18nProvider>
+      </MockAppHeaderProvider>
     );
 
     fireEvent.click(screen.getByTestId('repositoryFormToggleDefault'));
@@ -477,15 +499,17 @@ describe('<RepositoryAdd />', () => {
 
     const history = createMemoryHistory({ initialEntries: ['/add_repository'] });
     render(
-      <I18nProvider>
-        <Router history={history}>
-          <RepositoryAdd
-            history={history}
-            location={history.location}
-            match={{ params: {}, isExact: true, path: '', url: '' }}
-          />
-        </Router>
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <Router history={history}>
+            <RepositoryAdd
+              history={history}
+              location={history.location}
+              match={{ params: {}, isExact: true, path: '', url: '' }}
+            />
+          </Router>
+        </I18nProvider>
+      </MockAppHeaderProvider>
     );
 
     expect(screen.getByTestId('repositoryFormIsDefault')).toHaveTextContent('false');
@@ -511,15 +535,17 @@ describe('<RepositoryAdd />', () => {
 
     const history = createMemoryHistory({ initialEntries: ['/add_repository'] });
     render(
-      <I18nProvider>
-        <Router history={history}>
-          <RepositoryAdd
-            history={history}
-            location={history.location}
-            match={{ params: {}, isExact: true, path: '', url: '' }}
-          />
-        </Router>
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <Router history={history}>
+            <RepositoryAdd
+              history={history}
+              location={history.location}
+              match={{ params: {}, isExact: true, path: '', url: '' }}
+            />
+          </Router>
+        </I18nProvider>
+      </MockAppHeaderProvider>
     );
 
     fireEvent.click(screen.getByTestId('repositoryFormToggleDefault'));
@@ -553,15 +579,17 @@ describe('<RepositoryAdd />', () => {
 
     const history = createMemoryHistory({ initialEntries: ['/add_repository'] });
     render(
-      <I18nProvider>
-        <Router history={history}>
-          <RepositoryAdd
-            history={history}
-            location={history.location}
-            match={{ params: {}, isExact: true, path: '', url: '' }}
-          />
-        </Router>
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <Router history={history}>
+            <RepositoryAdd
+              history={history}
+              location={history.location}
+              match={{ params: {}, isExact: true, path: '', url: '' }}
+            />
+          </Router>
+        </I18nProvider>
+      </MockAppHeaderProvider>
     );
 
     fireEvent.click(screen.getByTestId('repositoryFormToggleDefault'));
@@ -600,15 +628,17 @@ describe('<RepositoryAdd />', () => {
 
     const history = createMemoryHistory({ initialEntries: ['/add_repository'] });
     render(
-      <I18nProvider>
-        <Router history={history}>
-          <RepositoryAdd
-            history={history}
-            location={history.location}
-            match={{ params: {}, isExact: true, path: '', url: '' }}
-          />
-        </Router>
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <Router history={history}>
+            <RepositoryAdd
+              history={history}
+              location={history.location}
+              match={{ params: {}, isExact: true, path: '', url: '' }}
+            />
+          </Router>
+        </I18nProvider>
+      </MockAppHeaderProvider>
     );
 
     fireEvent.click(screen.getByTestId('repositoryFormSave'));

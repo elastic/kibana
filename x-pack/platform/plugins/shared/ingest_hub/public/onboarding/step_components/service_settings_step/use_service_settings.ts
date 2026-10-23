@@ -5,15 +5,40 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
+import {
+  getMaxPackageName,
+  isValidNamespace,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '@kbn/fleet-plugin/common';
+import { sendGetPackagePolicies } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
-import { getOnboardingSessionKey } from '../../onboarding_session_storage';
+import { getOnboardingSessionKey } from '../../core/onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { getRequiredTextFields, resolveFieldMeta, toTyped } from './field_config';
+import { useOnboardingSO } from '../authenticate_and_deploy_step/use_onboarding_so';
+import { toSOSettingsUpdate } from '../authenticate_and_deploy_step/so_settings';
+import {
+  getMissingSourceGroup,
+  getRequiredTextFields,
+  resolveFieldMeta,
+  toTyped,
+} from './field_config';
 import type { SignalFilter } from '../services_step/use_services_step';
+import {
+  AWS_MAIN_PACKAGE_NAME,
+  AWS_OTEL_PACKAGE_NAME,
+  getBareNamePackage,
+  isMainPackageName,
+} from '../authenticate_and_deploy_step/deploy_group_helpers';
+import {
+  getDescriptionError,
+  getIntegrationNameError,
+  supportsIntegrationSettings,
+} from './integration_settings';
 
 export interface ServiceDataStreamVars {
   /** Input types enabled for this data stream. */
@@ -32,6 +57,8 @@ export interface ServiceVars {
    * Per-data-stream var values. Keys are data stream ids (e.g. 'vpcflow', 'ec2_logs').
    */
   varsByDataStream: Record<string, ServiceDataStreamVars>;
+  /** Data stream namespace for this instance's policy. Empty or absent inherits the agent policy's. */
+  namespace?: string;
 }
 
 /**
@@ -50,6 +77,16 @@ export interface ServiceInstance {
 
 export interface ServiceSettingsPersistedState {
   globalRegion: string;
+  /**
+   * Integration name as entered. Policy names are derived from it at deploy time. Absent until
+   * the default is prefilled or the user types one.
+   */
+  integrationName?: string;
+  /** The Fleet-style default (`aws-<n>`) the name was prefilled from. Absent once the name came from a saved onboarding. */
+  defaultNameBase?: string;
+  /** The last name the prefill generated. While the name still equals it, it follows the selection. */
+  autoName?: string;
+  description?: string;
   /** Keyed by instanceId. */
   serviceVars: Record<string, ServiceVars>;
   /** Absent in old sessions — reconciled on read from selectedServiceIds. */
@@ -57,6 +94,14 @@ export interface ServiceSettingsPersistedState {
 }
 
 export const SERVICE_SETTINGS_SESSION_KEY = getOnboardingSessionKey('aws', 'serviceSettingsStep');
+
+/** Duplicate instance ids are `<serviceId>__dup-<n>`. */
+export const getDuplicateInstanceIdPrefix = (serviceId: string): string => `${serviceId}__dup-`;
+
+export const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
+  globalRegion: '',
+  serviceVars: {},
+};
 
 /** Derive the canonical base instances (one per serviceId) from the selected ids list. */
 function baseInstances(
@@ -123,16 +168,83 @@ function mergeVarsByDataStream(
   return result;
 }
 
+/**
+ * Instances missing a required text field for any active input. `awsServicesMap` should already
+ * reflect the selected deployment method (see the flow context), so the required set is
+ * ARN-only under ECF and the full manifest set under agent-based.
+ */
+export function isServiceConfigIncomplete(
+  service: AwsServiceMatrixEntry,
+  config: ServiceVars
+): boolean {
+  if (!isValidNamespace(config.namespace ?? '', true).valid) return true;
+  return config.enabledDataStreams.some((dsId) => {
+    const dsInfo = service.varDefsByDataStream?.[dsId];
+    const dsVars = config.varsByDataStream[dsId] ?? { enabledInputs: [], varsByInput: {} };
+    const isSingleDs = service.dataStreams.length === 1;
+    let activeInputs = dsVars.enabledInputs.length
+      ? dsVars.enabledInputs
+      : isSingleDs
+      ? service.inputs ?? dsInfo?.inputs ?? []
+      : dsInfo?.defaultEnabledInputs?.length
+      ? dsInfo.defaultEnabledInputs
+      : dsInfo?.inputs?.slice(0, 1) ?? [];
+    const dsView = makeDsView(service, dsId);
+    // Stored input selections outlive a method switch. Under ECF only the inputs ECF can route
+    // count (WAF: S3 only); a selection left over from agent-based (e.g. CloudWatch only) would
+    // otherwise pass with no supported source, and the ECF launch would carry none for the service.
+    if (service.settingsScope === 'ecf' && dsVars.enabledInputs.length > 0) {
+      const supportedInputs = dsView.inputs ?? [];
+      activeInputs = activeInputs.filter((input) => supportedInputs.includes(input));
+      if (activeInputs.length === 0) return true;
+    }
+    return activeInputs.some(
+      (inp) =>
+        getMissingSourceGroup(dsView, inp, dsVars.varsByInput?.[inp]) !== undefined ||
+        getRequiredTextFields(dsView, inp).some((f) => {
+          const meta = resolveFieldMeta(dsView, inp, f);
+          const raw = dsVars.varsByInput?.[inp]?.[f];
+          const effective = meta ? toTyped(raw, meta) : raw ?? '';
+          if (Array.isArray(effective)) return effective.length === 0;
+          return typeof effective === 'string' && effective.trim() === '';
+        })
+    );
+  });
+}
+
+export function getIncompleteInstances(
+  instances: ServiceInstance[],
+  serviceVars: Record<string, ServiceVars>,
+  awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined
+): ServiceInstance[] {
+  return instances.filter((inst) => {
+    const service = awsServicesMap?.get(inst.serviceId);
+    if (!service) return false;
+    // An absent key means never configured: default to every data stream. An explicitly stored
+    // empty array means the user disabled all inputs — respect it.
+    const config: ServiceVars = serviceVars[inst.instanceId] ?? {
+      enabledDataStreams: service.dataStreams,
+      varsByDataStream: {},
+    };
+    return isServiceConfigIncomplete(service, config);
+  });
+}
+
 export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
-  const { servicesStep, removeDeployInstance, awsServicesMap } = useOnboardingFlow();
+  const {
+    servicesStep,
+    removeDeployInstance,
+    awsServicesMap,
+    deploymentMethod,
+    setServiceSettingsMethod,
+    detectAndReviewStep,
+  } = useOnboardingFlow();
+  const { updateDeployment } = useOnboardingSO();
   const { selectedServiceIds } = servicesStep;
 
   const [persisted, setPersisted] = useSessionStorage<ServiceSettingsPersistedState>(
     SERVICE_SETTINGS_SESSION_KEY,
-    {
-      globalRegion: '',
-      serviceVars: {},
-    }
+    DEFAULT_SERVICE_SETTINGS
   );
 
   const globalRegion = persisted?.globalRegion ?? '';
@@ -147,11 +259,144 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     [persisted, setPersisted]
   );
 
+  const integrationName = persisted?.integrationName ?? '';
+  const description = persisted?.description ?? '';
+
+  const setIntegrationName = useCallback(
+    (name: string) => {
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        integrationName: name,
+      });
+    },
+    [persisted, setPersisted]
+  );
+
+  const setDescription = useCallback(
+    (value: string) => {
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        description: value,
+      });
+    },
+    [persisted, setPersisted]
+  );
+
   // Reconcile instances each render — cheap since selectedServiceIds rarely changes.
   const instances: ServiceInstance[] = useMemo(
     () => reconcileInstances(selectedServiceIds, persisted?.instances, awsServicesMap),
     [selectedServiceIds, persisted?.instances, awsServicesMap]
   );
+
+  // Packages of the services that deploy as a package policy. ECF-only services create none under
+  // managed integration; the name and description still apply to them (they describe the
+  // onboarding instance) but they do not take part in naming policies.
+  const policyPackages = useMemo(
+    () =>
+      instances.flatMap((inst) => {
+        const service = awsServicesMap?.get(inst.serviceId);
+        return service && supportsIntegrationSettings(service, deploymentMethod)
+          ? [service.packageName]
+          : [];
+      }),
+    [instances, awsServicesMap, deploymentMethod]
+  );
+
+  // The package whose policy keeps the integration name as entered (the only package selected, or
+  // the main one), so the default name already carries the package when that is not `aws`.
+  const bareNamePackage = useMemo(() => getBareNamePackage(policyPackages), [policyPackages]);
+  // Policies of the selected packages count too: a Bedrock-only deploy creates `aws-1-aws_bedrock`
+  // under `aws_bedrock`, which an `aws`-only query never sees. Both main packages always count,
+  // because ECS and OTel onboardings share the plain `aws-<n>` names.
+  const defaultNamePackages = useMemo(
+    () => [...new Set([AWS_MAIN_PACKAGE_NAME, AWS_OTEL_PACKAGE_NAME, ...policyPackages])].sort(),
+    [policyPackages]
+  );
+  const defaultNamePackagesRef = useRef(defaultNamePackages);
+  defaultNamePackagesRef.current = defaultNamePackages;
+  const toAutoName = useCallback(
+    (base: string) => (isMainPackageName(bareNamePackage) ? base : `${base}-${bareNamePackage}`),
+    [bareNamePackage]
+  );
+
+  // Prefill the Fleet-style default (`aws-<n>`) once, when no name exists yet. The fetch can
+  // outlive other edits, so the write is based on the latest persisted state.
+  const persistedRef = useRef(persisted);
+  persistedRef.current = persisted;
+  const toAutoNameRef = useRef(toAutoName);
+  toAutoNameRef.current = toAutoName;
+  const isPrefilling = useRef(false);
+  useEffect(() => {
+    if (persisted?.integrationName !== undefined || isPrefilling.current) {
+      return;
+    }
+    isPrefilling.current = true;
+    let cancelled = false;
+    (async () => {
+      let base = `${AWS_MAIN_PACKAGE_NAME}-1`;
+      try {
+        const { data } = await sendGetPackagePolicies({
+          perPage: SO_SEARCH_LIMIT,
+          page: 1,
+          kuery: defaultNamePackagesRef.current
+            .map((pkg) => `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkg}`)
+            .join(' or '),
+        });
+        base = getMaxPackageName(AWS_MAIN_PACKAGE_NAME, data?.items);
+      } catch {
+        // Best-effort: fall back to the first number, the user can still edit the name.
+      }
+      const latest = persistedRef.current;
+      if (cancelled || latest?.integrationName !== undefined) {
+        isPrefilling.current = false;
+        return;
+      }
+      const name = toAutoNameRef.current(base);
+      setPersisted({
+        ...(latest ?? { globalRegion: '', serviceVars: {} }),
+        integrationName: name,
+        defaultNameBase: base,
+        autoName: name,
+      });
+      isPrefilling.current = false;
+    })();
+    return () => {
+      cancelled = true;
+      isPrefilling.current = false;
+    };
+  }, [persisted?.integrationName, setPersisted]);
+
+  // A name nobody edited follows the selection: Bedrock alone gives `aws-1-aws_bedrock`, adding an
+  // `aws` service back gives `aws-1`.
+  useEffect(() => {
+    const { defaultNameBase, autoName } = persisted ?? {};
+    if (!defaultNameBase || !autoName || persisted?.integrationName !== autoName) return;
+    const next = toAutoName(defaultNameBase);
+    if (next === autoName) return;
+    setPersisted({
+      ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+      integrationName: next,
+      autoName: next,
+    });
+  }, [persisted, toAutoName, setPersisted]);
+
+  // Lazy prune: drop serviceVars entries for instances no longer present (deselected in Step 1).
+  // Runs on mount and whenever the instance list changes. Writing only when stale keys exist
+  // breaks the update→re-run loop after one iteration (next run finds zero stale keys).
+  // Guard: skip while awsServicesMap is still loading — instances would be empty, making every
+  // stored key look stale and erasing valid configuration before the matrix can reconstruct them.
+  useEffect(() => {
+    if (!awsServicesMap) return;
+    const validIds = new Set(instances.map((i) => i.instanceId));
+    const storedVars = persisted?.serviceVars ?? {};
+    const staleKeys = Object.keys(storedVars).filter((k) => !validIds.has(k));
+    if (staleKeys.length === 0) return;
+    const pruned: Record<string, ServiceVars> = {};
+    for (const [k, v] of Object.entries(storedVars)) {
+      if (validIds.has(k)) pruned[k] = v as ServiceVars;
+    }
+    setPersisted({ ...(persisted ?? { globalRegion: '', serviceVars: {} }), serviceVars: pruned });
+  }, [instances, persisted, setPersisted, awsServicesMap]);
 
   const getServiceVars = useCallback(
     (instanceId: string): ServiceVars => {
@@ -175,7 +420,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     (
       instanceId: string,
       newVarsByDataStream: Record<string, ServiceDataStreamVars>,
-      enabledDataStreams: string[]
+      enabledDataStreams: string[],
+      namespace?: string
     ) => {
       const current = getServiceVars(instanceId);
       const merged = mergeVarsByDataStream(current.varsByDataStream, newVarsByDataStream);
@@ -184,7 +430,11 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
         instances,
         serviceVars: {
           ...(persisted?.serviceVars ?? {}),
-          [instanceId]: { enabledDataStreams, varsByDataStream: merged },
+          [instanceId]: {
+            enabledDataStreams,
+            varsByDataStream: merged,
+            namespace: namespace ?? current.namespace,
+          },
         },
       });
     },
@@ -196,16 +446,17 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       sourceInstanceId: string,
       newName: string,
       newVarsByDataStream: Record<string, ServiceDataStreamVars>,
-      enabledDataStreams: string[]
+      enabledDataStreams: string[],
+      namespace?: string
     ) => {
       const source = instances.find((i) => i.instanceId === sourceInstanceId);
       if (!source) return;
 
       const existingIds = new Set(instances.map((i) => i.instanceId));
       let n = instances.filter((i) => i.serviceId === source.serviceId && i.isDuplicate).length + 1;
-      let newInstanceId = `${source.serviceId}__dup-${n}`;
+      let newInstanceId = `${getDuplicateInstanceIdPrefix(source.serviceId)}${n}`;
       while (existingIds.has(newInstanceId)) {
-        newInstanceId = `${source.serviceId}__dup-${++n}`;
+        newInstanceId = `${getDuplicateInstanceIdPrefix(source.serviceId)}${++n}`;
       }
 
       const sourceVars = getServiceVars(sourceInstanceId);
@@ -228,6 +479,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
               ? enabledDataStreams
               : sourceVars.enabledDataStreams,
             varsByDataStream: mergedByDs,
+            namespace: namespace ?? sourceVars.namespace,
           },
         },
       });
@@ -267,38 +519,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   }, [instances, searchQuery, signalFilter, awsServicesMap]);
 
   const incompleteInstances = useMemo(
-    () =>
-      instances.filter((inst) => {
-        const service = awsServicesMap?.get(inst.serviceId);
-        if (!service) return false;
-        const config = getServiceVars(inst.instanceId);
-        // getServiceVars returns service.dataStreams when the key is absent (never configured).
-        // An explicitly stored empty array means the user disabled all inputs — respect it.
-        const activeDataStreams = config.enabledDataStreams;
-        return activeDataStreams.some((dsId) => {
-          const dsInfo = service.varDefsByDataStream?.[dsId];
-          const dsVars = config.varsByDataStream[dsId] ?? { enabledInputs: [], varsByInput: {} };
-          const isSingleDs = service.dataStreams.length === 1;
-          const activeInputs = dsVars.enabledInputs.length
-            ? dsVars.enabledInputs
-            : isSingleDs
-            ? dsInfo?.inputs ?? []
-            : dsInfo?.defaultEnabledInputs?.length
-            ? dsInfo.defaultEnabledInputs
-            : dsInfo?.inputs?.slice(0, 1) ?? [];
-          const dsView = makeDsView(service, dsId);
-          return activeInputs.some((inp) =>
-            getRequiredTextFields(dsView, inp).some((f) => {
-              const meta = resolveFieldMeta(dsView, inp, f);
-              const raw = dsVars.varsByInput?.[inp]?.[f];
-              const effective = meta ? toTyped(raw, meta) : raw ?? '';
-              if (Array.isArray(effective)) return effective.length === 0;
-              return typeof effective === 'string' && effective.trim() === '';
-            })
-          );
-        });
-      }),
-    [instances, getServiceVars, awsServicesMap]
+    () => getIncompleteInstances(instances, persisted?.serviceVars ?? {}, awsServicesMap),
+    [instances, persisted?.serviceVars, awsServicesMap]
   );
 
   const incompleteInstanceIds = useMemo(
@@ -306,9 +528,16 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     [incompleteInstances]
   );
 
+  const integrationNameError = getIntegrationNameError(integrationName);
+  const descriptionError = getDescriptionError(description);
+
   const isReady = useMemo(
-    () => !!globalRegion.trim() && incompleteInstances.length === 0,
-    [globalRegion, incompleteInstances]
+    () =>
+      !!globalRegion.trim() &&
+      incompleteInstances.length === 0 &&
+      !integrationNameError &&
+      !descriptionError,
+    [globalRegion, incompleteInstances, integrationNameError, descriptionError]
   );
 
   const [globalRegionTouched, setGlobalRegionTouched] = useState(false);
@@ -319,8 +548,25 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       ...(persisted ?? { globalRegion: '', serviceVars: {} }),
       instances,
     });
+    setServiceSettingsMethod(deploymentMethod);
+    // The name and description stay editable after a deploy, and a later deploy may find nothing
+    // to do, so save them to the onboarding record here. Best-effort: the next deploy writes them
+    // again.
+    const deploymentId = detectAndReviewStep?.onboardingDeploymentId;
+    if (deploymentId) {
+      updateDeployment(deploymentId, toSOSettingsUpdate(persisted));
+    }
     onContinue();
-  }, [onContinue, persisted, setPersisted, instances]);
+  }, [
+    onContinue,
+    persisted,
+    setPersisted,
+    instances,
+    deploymentMethod,
+    setServiceSettingsMethod,
+    detectAndReviewStep?.onboardingDeploymentId,
+    updateDeployment,
+  ]);
 
   // All instance display names — used by the duplicate modal for collision detection.
   const allInstanceNames = useMemo(() => instances.map((i) => i.name), [instances]);
@@ -328,6 +574,13 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   return {
     globalRegion,
     setGlobalRegion,
+    integrationName,
+    setIntegrationName,
+    integrationNameError,
+    description,
+    setDescription,
+    descriptionError,
+    bareNamePackage,
     instances,
     filteredInstances,
     incompleteInstances,

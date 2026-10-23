@@ -324,6 +324,27 @@ describe('FlyoutTemplate body accordions', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Extra action' }));
     expect(onClick).toHaveBeenCalled();
   });
+
+  it('replaces the accordion action and content with a loading state', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.Accordion
+            title="Errors"
+            action={{ label: 'Extra action', onClick: noop }}
+            isLoading
+            isLoadingMessage="Loading errors"
+          >
+            error list
+          </FlyoutTemplate.Body.Accordion>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.queryByRole('button', { name: 'Extra action' })).not.toBeInTheDocument();
+    expect(screen.getByText('Loading errors')).toBeInTheDocument();
+    expect(screen.queryByText('error list')).not.toBeInTheDocument();
+  });
 });
 
 describe('FlyoutTemplate body subsections', () => {
@@ -513,5 +534,149 @@ describe('FlyoutTemplate body subsections', () => {
     expect(bodyChildParses).toHaveLength(1);
 
     parseChildren.mockRestore();
+  });
+});
+
+describe('FlyoutTemplate body data attributes', () => {
+  it('forwards data attributes from sections, accordions, and subsections', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.Section title="Overview" data-test-subj="section" data-kind="a">
+            <FlyoutTemplate.Body.Section.Subsection
+              title="Host"
+              data-test-subj="subsection"
+              data-kind="b"
+            >
+              host content
+            </FlyoutTemplate.Body.Section.Subsection>
+          </FlyoutTemplate.Body.Section>
+          <FlyoutTemplate.Body.Accordion title="Errors" data-test-subj="accordion" data-kind="c">
+            error list
+          </FlyoutTemplate.Body.Accordion>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByTestId('section')).toHaveAttribute('data-kind', 'a');
+    expect(screen.getByTestId('subsection')).toHaveAttribute('data-kind', 'b');
+    expect(screen.getByTestId('accordion')).toHaveAttribute('data-kind', 'c');
+  });
+
+  it('keeps the attributes the section styles depend on', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.Section
+            title="Overview"
+            data-test-subj="section"
+            data-flyout-section="other"
+            data-open="true"
+          >
+            <FlyoutTemplate.Body.Section.Subsection
+              title="Host"
+              data-test-subj="subsection"
+              data-bordered="true"
+            >
+              host content
+            </FlyoutTemplate.Body.Section.Subsection>
+          </FlyoutTemplate.Body.Section>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    const section = screen.getByTestId('section');
+    expect(section).toHaveAttribute('data-flyout-section', 'section');
+    expect(section).not.toHaveAttribute('data-open');
+    expect(screen.getByTestId('subsection')).not.toHaveAttribute('data-bordered');
+  });
+});
+
+describe('FlyoutTemplate body sections in tabbed mode', () => {
+  const TABS = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'metadata', label: 'Metadata' },
+  ];
+
+  const renderCount = jest.fn();
+  const CountRenders = () => {
+    renderCount();
+    return <span>shared content</span>;
+  };
+
+  const TabbedFlyout = () => (
+    <FlyoutTemplate onClose={noop} session="never" tabs={TABS}>
+      <FlyoutTemplate.Header title="Span" />
+      <FlyoutTemplate.Body>
+        <FlyoutTemplate.Body.Callout level="warning" title="Flyout-wide callout" />
+        <FlyoutTemplate.Body.Section title="Shared section" data-test-subj="sharedSection">
+          <CountRenders />
+        </FlyoutTemplate.Body.Section>
+        <FlyoutTemplate.Body.TabPanel tabId="overview" data-test-subj="overviewPanel">
+          overview content
+        </FlyoutTemplate.Body.TabPanel>
+        <FlyoutTemplate.Body.TabPanel tabId="metadata" data-test-subj="metadataPanel">
+          metadata content
+        </FlyoutTemplate.Body.TabPanel>
+      </FlyoutTemplate.Body>
+    </FlyoutTemplate>
+  );
+
+  beforeEach(() => renderCount.mockClear());
+
+  it('renders a section under Body above the active tab panel, after the callouts', () => {
+    renderTemplate(<TabbedFlyout />);
+
+    const section = screen.getByRole('region', { name: 'Shared section' });
+    expect(section).toHaveTextContent('shared content');
+    expect(screen.getByTestId('overviewPanel')).not.toContainElement(section);
+    expect(screen.getByText('Flyout-wide callout').compareDocumentPosition(section)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(section.compareDocumentPosition(screen.getByTestId('overviewPanel'))).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+  });
+
+  it('does not remount or re-render a section under Body on tab switch', async () => {
+    const user = userEvent.setup();
+    renderTemplate(<TabbedFlyout />);
+
+    const section = screen.getByTestId('sharedSection');
+    const rendersBeforeSwitch = renderCount.mock.calls.length;
+    await user.click(screen.getByRole('tab', { name: 'Metadata' }));
+
+    expect(screen.getByText('metadata content')).toBeInTheDocument();
+    expect(screen.getByTestId('sharedSection')).toBe(section);
+    expect(renderCount).toHaveBeenCalledTimes(rendersBeforeSwitch);
+  });
+
+  it('renders an accordion under Body above the active tab panel, in source order with sections', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never" tabs={TABS}>
+        <FlyoutTemplate.Header title="Span" />
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.Accordion title="Shared accordion" initialIsOpen>
+            accordion content
+          </FlyoutTemplate.Body.Accordion>
+          <FlyoutTemplate.Body.Section title="Shared section">
+            section content
+          </FlyoutTemplate.Body.Section>
+          <FlyoutTemplate.Body.TabPanel tabId="overview" data-test-subj="overviewPanel">
+            overview content
+          </FlyoutTemplate.Body.TabPanel>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    const accordionContent = screen.getByText('accordion content');
+    const sectionContent = screen.getByText('section content');
+    expect(screen.getByTestId('overviewPanel')).not.toContainElement(accordionContent);
+    expect(accordionContent.compareDocumentPosition(sectionContent)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(sectionContent.compareDocumentPosition(screen.getByTestId('overviewPanel'))).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
   });
 });

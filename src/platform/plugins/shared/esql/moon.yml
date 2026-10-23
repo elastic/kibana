@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/config-schema'
   - '@kbn/esql-utils'
+  - '@kbn/esql-controls-utils'
   - '@kbn/esql-browser'
   - '@kbn/ui-actions-plugin'
   - '@kbn/data-plugin'
@@ -61,8 +62,6 @@ dependsOn:
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-common'
   - '@kbn/code-editor'
-  - '@kbn/management-settings-ids'
-  - '@kbn/core-ui-settings-server'
   - '@kbn/es-errors'
   - '@kbn/es-types'
 tags:
@@ -76,6 +75,4 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

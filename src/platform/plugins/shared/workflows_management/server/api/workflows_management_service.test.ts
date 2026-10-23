@@ -24,7 +24,7 @@
  */
 
 import type { CoreSetup, CoreStart, ElasticsearchClient } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 
@@ -179,7 +179,6 @@ describe('WorkflowsService (facade)', () => {
       'getChildWorkflowExecutions',
       'getExecutionStepExecutions',
       'getWorkflowExecutions',
-      'getWorkflowExecutionHistory',
       'getStepExecutions',
       'searchStepExecutions',
       'getExecutionLogs',
@@ -233,6 +232,7 @@ describe('WorkflowsService (facade)', () => {
       expect(changeHistoryInstance.initialize).toHaveBeenCalledWith({
         elasticsearchClient: esClient,
         authService: coreStart.security!.authc,
+        userProfileService: coreStart.userProfile,
       });
     });
 
@@ -307,7 +307,7 @@ describe('WorkflowsService (facade)', () => {
         overwrite: true,
       });
       await service.updateWorkflow('wf-1', { name: 'new' } as any, 'default', request);
-      await service.deleteWorkflows(['wf-1'], 'default', { force: true });
+      await service.deleteWorkflows(['wf-1'], 'default', { force: true }, request);
       await service.disableAllWorkflows('my-space', request);
 
       expect(crudSpies.getWorkflow).toHaveBeenCalledWith('wf-1', 'default', {
@@ -334,7 +334,12 @@ describe('WorkflowsService (facade)', () => {
         'default',
         request
       );
-      expect(crudSpies.deleteWorkflows).toHaveBeenCalledWith(['wf-1'], 'default', { force: true });
+      expect(crudSpies.deleteWorkflows).toHaveBeenCalledWith(
+        ['wf-1'],
+        'default',
+        { force: true },
+        request
+      );
       expect(crudSpies.disableAllWorkflows).toHaveBeenCalledWith('my-space', request);
     });
 
@@ -398,7 +403,6 @@ describe('WorkflowsService (facade)', () => {
         'default'
       );
       await service.getWorkflowExecutions({ workflowId: 'wf-1' } as any, 'default');
-      await service.getWorkflowExecutionHistory('exec-1', 'default');
       await service.getStepExecutions({ executionId: 'exec-1' } as any, 'default');
       await service.searchStepExecutions({ executionId: 'exec-1' } as any, 'default');
       await service.getExecutionLogs({ executionId: 'exec-1' } as any);
@@ -417,7 +421,6 @@ describe('WorkflowsService (facade)', () => {
         'default'
       );
       expect(executionQuerySpies.getWorkflowExecutions).toHaveBeenCalled();
-      expect(executionQuerySpies.getWorkflowExecutionHistory).toHaveBeenCalled();
       expect(executionQuerySpies.getStepExecutions).toHaveBeenCalled();
       expect(executionQuerySpies.searchStepExecutions).toHaveBeenCalled();
       expect(executionQuerySpies.getExecutionLogs).toHaveBeenCalled();
@@ -430,11 +433,19 @@ describe('WorkflowsService (facade)', () => {
       const request = {} as any;
 
       await service.getAvailableConnectors('default', request);
-      await service.validateWorkflow('name: wf', 'default', request);
+      await service.validateWorkflow('name: wf', 'default', request, {
+        includeVariableRules: false,
+        includeEsqlRules: false,
+      });
       await service.getWorkflowZodSchema({ loose: false }, 'default', request);
 
       expect(validationSpies.getAvailableConnectors).toHaveBeenCalledWith('default', request);
-      expect(validationSpies.validateWorkflow).toHaveBeenCalledWith('name: wf', 'default', request);
+      expect(validationSpies.validateWorkflow).toHaveBeenCalledWith(
+        'name: wf',
+        'default',
+        request,
+        { includeVariableRules: false, includeEsqlRules: false }
+      );
       expect(validationSpies.getWorkflowZodSchema).toHaveBeenCalledWith(
         { loose: false },
         'default',
@@ -497,11 +508,33 @@ describe('WorkflowsService (facade)', () => {
       expect(managedSpies.installManagedWorkflow).toHaveBeenCalledWith(
         'wf.managed',
         { spaceId: 'default' },
-        'owner'
+        'owner',
+        undefined
       );
       expect(managedSpies.markInstallIncomplete).not.toHaveBeenCalled();
       expect(managedSpies.pluginReady).toHaveBeenCalledWith('owner');
       expect(managedSpies.cleanupUnregisteredOrphans).toHaveBeenCalledWith(['owner']);
+    });
+  });
+
+  describe('managed install request forwarding', () => {
+    it('forwards the caller request to the managed workflow service', async () => {
+      const service = await buildService();
+      const request = httpServerMock.createKibanaRequest();
+
+      await service.installManagedWorkflow(
+        'system-example-greeting',
+        { spaceId: 'default' },
+        'owner',
+        request
+      );
+
+      expect(managedSpies.installManagedWorkflow).toHaveBeenCalledWith(
+        'system-example-greeting',
+        { spaceId: 'default' },
+        'owner',
+        request
+      );
     });
   });
 

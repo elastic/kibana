@@ -6,8 +6,9 @@
  */
 
 import type { EuiFlyoutProps } from '@elastic/eui';
-import { EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
+import { EuiHealth, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { RuleExecutionOutcome } from '@kbn/alerting-v2-schemas';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { RULE_KIND_ICONS, RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { PluginStart } from '@kbn/core-di';
@@ -17,11 +18,22 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useAlertingLocators } from '../../../../application/locator_context';
 import { useRuleAuditMetadata } from '../../../../hooks/use_rule_audit_metadata';
+import { useRuleLastExecution } from '../../../../hooks/use_rule_last_execution';
 import { RuleActionsMenu } from '../../../../pages/rules_list_page/rule_actions_menu';
 import type { RuleApiResponse } from '../../../../services/rules_api';
-import { RuleSummaryBody } from '../../rule_summary';
+import {
+  RuleSummaryAboutSection,
+  RuleSummaryArtifactsSection,
+  RuleSummaryBody,
+  RuleSummaryInvestigationSection,
+} from '../../rule_summary';
 
 const TAKE_ACTION_BUTTON_ID = 'ruleSummaryFlyoutTakeAction';
+
+const LAST_EXECUTION_HEALTH_COLOR: Record<RuleExecutionOutcome, 'success' | 'danger'> = {
+  success: 'success',
+  failure: 'danger',
+};
 
 export interface RuleSummaryFlyoutProps {
   rule: RuleApiResponse;
@@ -36,7 +48,6 @@ export interface RuleSummaryFlyoutProps {
   canWrite?: boolean;
   isToggleLoading?: boolean;
   session?: EuiFlyoutProps['session'];
-  ownFocus?: EuiFlyoutProps['ownFocus'];
 }
 
 export const RuleSummaryFlyout = ({
@@ -52,7 +63,6 @@ export const RuleSummaryFlyout = ({
   canWrite = true,
   isToggleLoading = false,
   session,
-  ownFocus = true,
 }: RuleSummaryFlyoutProps) => {
   const chrome = useService(CoreStart('chrome'));
   const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
@@ -61,6 +71,7 @@ export const RuleSummaryFlyout = ({
   const { rulesLocators } = useAlertingLocators();
   useRuleAutoAttach(rule, { chrome, agentBuilder });
   const { createdByDisplay, updatedByDisplay, updatedAtFormatted } = useRuleAuditMetadata(rule);
+  const lastExecution = useRuleLastExecution(rule.id);
   const [isTakeActionOpen, setIsTakeActionOpen] = useState(false);
   const detailsHref = rulesLocators.useUrl({ ruleId: rule.id }, undefined, [rule.id]);
 
@@ -76,18 +87,47 @@ export const RuleSummaryFlyout = ({
   const { Header, Body, Footer } = FlyoutTemplate;
   const { Badge, InfoBlock } = Header;
 
+  const renderLastExecutionValue = (): React.ReactNode => {
+    if (lastExecution.isLoading) {
+      return <EuiLoadingSpinner data-test-subj="ruleSummaryFlyoutLastExecutionSpinner" size="m" />;
+    }
+    if (lastExecution.isError) {
+      return (
+        <EuiHealth color="subdued" data-test-subj="ruleSummaryFlyoutLastExecutionError">
+          {lastExecution.value}
+        </EuiHealth>
+      );
+    }
+    if (lastExecution.outcome) {
+      return (
+        <EuiHealth
+          color={LAST_EXECUTION_HEALTH_COLOR[lastExecution.outcome]}
+          data-test-subj="ruleSummaryFlyoutLastExecutionStatus"
+        >
+          {lastExecution.value}
+        </EuiHealth>
+      );
+    }
+    return lastExecution.value;
+  };
+
   return (
     <>
       <FlyoutTemplate
         type="overlay"
         size="m"
         resizable
-        ownFocus={ownFocus}
+        ownFocus={false}
         session={session}
         onClose={onClose}
         data-test-subj="ruleSummaryFlyout"
       >
         <Header title={rule.metadata.name} description={updatedAtFormatted}>
+          <Badge color="hollow" data-test-subj="universalRulesBadge">
+            {i18n.translate('xpack.alertingV2.ruleSummaryFlyout.universalRulesBadge', {
+              defaultMessage: 'Universal',
+            })}
+          </Badge>
           <Badge
             color="hollow"
             iconType={RULE_KIND_ICONS[rule.kind] ?? 'dot'}
@@ -121,6 +161,16 @@ export const RuleSummaryFlyout = ({
               />
             )}
           </InfoBlock>
+          {lastExecution.visible && (
+            <InfoBlock
+              title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.lastExecution', {
+                defaultMessage: 'Last execution',
+              })}
+              data-test-subj="ruleSummaryFlyoutLastExecutionBlock"
+            >
+              {renderLastExecutionValue()}
+            </InfoBlock>
+          )}
           <InfoBlock
             title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.createdBy', {
               defaultMessage: 'Created by',
@@ -140,7 +190,11 @@ export const RuleSummaryFlyout = ({
         </Header>
 
         <Body>
-          <RuleSummaryBody rule={rule} />
+          <RuleSummaryBody rule={rule}>
+            <RuleSummaryAboutSection />
+            <RuleSummaryInvestigationSection />
+            <RuleSummaryArtifactsSection />
+          </RuleSummaryBody>
         </Body>
 
         <Footer>
@@ -150,6 +204,7 @@ export const RuleSummaryFlyout = ({
               defaultMessage: 'Take action',
             })}
             iconType={isTakeActionOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
+            iconSide="right"
             onClick={() => setIsTakeActionOpen((open) => !open)}
             data-test-subj="ruleSummaryFlyoutTakeActionButton"
           />
