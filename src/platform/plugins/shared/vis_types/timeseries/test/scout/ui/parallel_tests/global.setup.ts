@@ -14,5 +14,6 @@ globalSetupHook('Setup environment for TSVB tests', async ({ esArchiver }) => {
   await Promise.all([
     esArchiver.loadIfNeeded(testData.ES_ARCHIVE_PATHS.LOGSTASH),
     esArchiver.loadIfNeeded(testData.ES_ARCHIVE_PATHS.LONG_WINDOW_LOGSTASH),
+    esArchiver.loadIfNeeded(testData.ES_ARCHIVE_PATHS.DASHBOARD_DATA),
   ]);
 });

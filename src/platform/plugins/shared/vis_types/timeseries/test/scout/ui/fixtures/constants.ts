@@ -13,6 +13,7 @@ const PLATFORM_KBN_ARCHIVER_DIR = 'src/platform/test/functional/fixtures/kbn_arc
 export const ES_ARCHIVE_PATHS = {
   LOGSTASH: `${PLATFORM_ES_ARCHIVER_DIR}/logstash_functional`,
   LONG_WINDOW_LOGSTASH: `${PLATFORM_ES_ARCHIVER_DIR}/long_window_logstash`,
+  DASHBOARD_DATA: `${PLATFORM_ES_ARCHIVER_DIR}/dashboard/current/data`,
 } as const;
 
 /**

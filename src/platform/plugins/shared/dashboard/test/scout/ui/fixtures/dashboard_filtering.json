@@ -405,94 +405,6 @@
   "attributes": {
     "description": "",
     "kibanaSavedObjectMeta": {
-      "searchSourceJSON": "{}"
-    },
-    "title": "Filter Bytes Test: tsvb markdown",
-    "uiStateJSON": "{}",
-    "version": 1,
-    "visState": "{\"title\":\"Filter Bytes Test: tsvb markdown\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"time_range_mode\":\"last_value\",\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"markdown\",\"series\":[{\"time_range_mode\":\"last_value\",\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"#68BC00\",\"split_mode\":\"filters\",\"metrics\":[{\"id\":\"482d6560-4194-11e8-a461-7d278185cba4\",\"type\":\"avg\",\"field\":\"bytes\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"terms_field\":\"clientip\",\"filter\":{\"query\":\"Filter Bytes Test:>1000\",\"language\":\"lucene\"},\"override_index_pattern\":0,\"series_index_pattern\":\"logstash-*\",\"series_time_field\":\"utc_time\",\"series_interval\":\"1m\",\"value_template\":\"\",\"split_filters\":[{\"filter\":{\"query\":\"bytes:>1000\",\"language\":\"lucene\"},\"label\":\"\",\"color\":\"#68BC00\",\"id\":\"39a107e0-4194-11e8-a461-7d278185cba4\"}],\"label\":\"\",\"var_name\":\"\",\"split_color_mode\":\"gradient\",\"series_drop_last_bucket\":1}],\"time_field\":\"@timestamp\",\"index_pattern\":\"logstash-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"show_grid\":1,\"background_color_rules\":[{\"id\":\"06893260-4194-11e8-a461-7d278185cba4\"}],\"bar_color_rules\":[{\"id\":\"36a0e740-4194-11e8-a461-7d278185cba4\"}],\"markdown\":\"{{bytes_1000.last.formatted}}\",\"use_kibana_indexes\":false,\"hide_last_value_indicator\":true,\"axis_scale\":\"normal\",\"truncate_legend\":1,\"max_lines_legend\":1,\"tooltip_mode\":\"show_all\",\"drop_last_bucket\":1,\"isModelInvalid\":false}}"
-  },
-  "coreMigrationVersion": "8.0.1",
-  "id": "9fb4c670-4194-11e8-bb13-d53698fb349a",
-  "migrationVersion": {
-    "visualization": "8.0.0"
-  },
-  "references": [],
-  "type": "visualization",
-  "updated_at": "2018-04-17T16:32:59.086Z",
-  "version": "WzI1NywxXQ=="
-}
-
-{
-  "attributes": {
-    "description": "",
-    "kibanaSavedObjectMeta": {
-      "searchSourceJSON": "{}"
-    },
-    "title": "Filter Bytes Test: tsvb metric with custom interval and bytes filter",
-    "uiStateJSON": "{}",
-    "version": 1,
-    "visState": "{\"title\":\"Filter Bytes Test: tsvb metric with custom interval and bytes filter\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"time_range_mode\":\"last_value\",\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"metric\",\"series\":[{\"time_range_mode\":\"last_value\",\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"metrics\":[{\"value\":\"\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"sum\",\"field\":\"bytes\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"terms_field\":\"clientip\",\"filter\":{\"query\":\"Filter Bytes Test:>1000\",\"language\":\"lucene\"},\"override_index_pattern\":1,\"series_index_pattern\":\"logstash-*\",\"series_time_field\":\"utc_time\",\"series_interval\":\"1d\",\"value_template\":\"{{value}} custom template\",\"split_color_mode\":\"gradient\",\"series_drop_last_bucket\":1}],\"time_field\":\"@timestamp\",\"index_pattern\":\"logstash-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"show_grid\":1,\"background_color_rules\":[{\"id\":\"06893260-4194-11e8-a461-7d278185cba4\"}],\"use_kibana_indexes\":false,\"hide_last_value_indicator\":true,\"axis_scale\":\"normal\",\"truncate_legend\":1,\"max_lines_legend\":1,\"tooltip_mode\":\"show_all\",\"drop_last_bucket\":0,\"isModelInvalid\":false,\"bar_color_rules\":[{\"id\":\"71f4e260-4186-11ec-8262-619fbabeae59\"}]}}"
-  },
-  "coreMigrationVersion": "8.0.1",
-  "id": "35417e50-4194-11e8-bb13-d53698fb349a",
-  "migrationVersion": {
-    "visualization": "8.0.0"
-  },
-  "references": [],
-  "type": "visualization",
-  "updated_at": "2018-04-17T16:06:03.785Z",
-  "version": "WzI1NiwxXQ=="
-}
-
-{
-  "attributes": {
-    "description": "",
-    "kibanaSavedObjectMeta": {
-      "searchSourceJSON": "{}"
-    },
-    "title": "Filter Bytes Test: tsvb time series with bytes filter split by clientip",
-    "uiStateJSON": "{}",
-    "version": 1,
-    "visState": "{\"title\":\"Filter Bytes Test: tsvb time series with bytes filter split by clientip\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"time_range_mode\":\"entire_time_range\",\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"time_range_mode\":\"entire_time_range\",\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"#68BC00\",\"split_mode\":\"terms\",\"metrics\":[{\"value\":\"\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"sum\",\"field\":\"bytes\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"terms_field\":\"clientip\",\"filter\":{\"query\":\"Filter Bytes Test:>1000\",\"language\":\"lucene\"},\"split_color_mode\":\"gradient\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"logstash-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"show_grid\":1,\"use_kibana_indexes\":false,\"axis_scale\":\"normal\",\"truncate_legend\":1,\"max_lines_legend\":1,\"tooltip_mode\":\"show_all\",\"drop_last_bucket\":1,\"isModelInvalid\":false}}"
-  },
-  "coreMigrationVersion": "8.0.1",
-  "id": "039e4770-4194-11e8-bb13-d53698fb349a",
-  "migrationVersion": {
-    "visualization": "8.0.0"
-  },
-  "references": [],
-  "type": "visualization",
-  "updated_at": "2018-04-17T15:06:35.220Z",
-  "version": "WzI0NSwxXQ=="
-}
-
-{
-  "attributes": {
-    "description": "",
-    "kibanaSavedObjectMeta": {
-      "searchSourceJSON": "{}"
-    },
-    "title": "Filter Bytes Test: tsvb top n with bytes filter",
-    "uiStateJSON": "{}",
-    "version": 1,
-    "visState": "{\"title\":\"Filter Bytes Test: tsvb top n with bytes filter\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"time_range_mode\":\"last_value\",\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"top_n\",\"series\":[{\"time_range_mode\":\"entire_time_range\",\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"#68BC00\",\"split_mode\":\"filters\",\"metrics\":[{\"id\":\"482d6560-4194-11e8-a461-7d278185cba4\",\"type\":\"avg\",\"field\":\"bytes\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"terms_field\":\"clientip\",\"filter\":{\"query\":\"Filter Bytes Test:>1000\",\"language\":\"lucene\"},\"override_index_pattern\":0,\"series_index_pattern\":\"logstash-*\",\"series_time_field\":\"utc_time\",\"series_interval\":\"1m\",\"value_template\":\"\",\"split_filters\":[{\"filter\":{\"query\":\"Filter Bytes Test:>100\",\"language\":\"lucene\"},\"label\":\"\",\"color\":\"#68BC00\",\"id\":\"39a107e0-4194-11e8-a461-7d278185cba4\"}],\"split_color_mode\":\"gradient\"},{\"time_range_mode\":\"entire_time_range\",\"id\":\"4fd5b150-4194-11e8-a461-7d278185cba4\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"4fd5b151-4194-11e8-a461-7d278185cba4\",\"type\":\"avg\",\"field\":\"bytes\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"filter\":{\"query\":\"Filter Bytes Test:>3000\",\"language\":\"lucene\"},\"split_color_mode\":\"gradient\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"logstash-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"show_grid\":1,\"background_color_rules\":[{\"id\":\"06893260-4194-11e8-a461-7d278185cba4\"}],\"bar_color_rules\":[{\"id\":\"36a0e740-4194-11e8-a461-7d278185cba4\"}],\"use_kibana_indexes\":false,\"hide_last_value_indicator\":true,\"axis_scale\":\"normal\",\"truncate_legend\":1,\"max_lines_legend\":1,\"tooltip_mode\":\"show_all\",\"drop_last_bucket\":1,\"isModelInvalid\":false}}"
-  },
-  "coreMigrationVersion": "8.0.1",
-  "id": "76c7f020-4194-11e8-bb13-d53698fb349a",
-  "migrationVersion": {
-    "visualization": "8.0.0"
-  },
-  "references": [],
-  "type": "visualization",
-  "updated_at": "2018-04-17T15:06:34.583Z",
-  "version": "WzI0MywxXQ=="
-}
-
-{
-  "attributes": {
-    "description": "",
-    "kibanaSavedObjectMeta": {
       "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
     },
     "title": "Rendering Test: animal sounds pie",
@@ -562,7 +474,7 @@
       "searchSourceJSON": "{\"query\": {\"language\": \"kuery\", \"query\": \"\"}, \"filter\": []}"
     },
     "optionsJSON": "{\"useMargins\": true, \"hidePanelTitles\": false}",
-    "panelsJSON": "[{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":15,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_1\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":15,\"w\":24,\"h\":15,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_2\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":15,\"w\":24,\"h\":15,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_3\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":30,\"w\":24,\"h\":15,\"i\":\"4\"},\"panelIndex\":\"4\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_4\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":30,\"w\":24,\"h\":15,\"i\":\"5\"},\"panelIndex\":\"5\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_5\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":45,\"w\":24,\"h\":15,\"i\":\"6\"},\"panelIndex\":\"6\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_6\"},{\"version\":\"7.3.0\",\"type\":\"search\",\"gridData\":{\"x\":24,\"y\":45,\"w\":24,\"h\":15,\"i\":\"7\"},\"panelIndex\":\"7\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_7\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":60,\"w\":24,\"h\":15,\"i\":\"8\"},\"panelIndex\":\"8\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_8\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":60,\"w\":24,\"h\":15,\"i\":\"9\"},\"panelIndex\":\"9\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_9\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":75,\"w\":24,\"h\":15,\"i\":\"10\"},\"panelIndex\":\"10\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_10\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":75,\"w\":24,\"h\":15,\"i\":\"11\"},\"panelIndex\":\"11\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_11\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":90,\"w\":24,\"h\":15,\"i\":\"12\"},\"panelIndex\":\"12\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_12\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":90,\"w\":24,\"h\":15,\"i\":\"13\"},\"panelIndex\":\"13\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_13\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":105,\"w\":24,\"h\":15,\"i\":\"14\"},\"panelIndex\":\"14\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_14\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":105,\"w\":24,\"h\":15,\"i\":\"15\"},\"panelIndex\":\"15\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_15\"}]",
+    "panelsJSON": "[{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":15,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_1\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":15,\"w\":24,\"h\":15,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_2\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":15,\"w\":24,\"h\":15,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_3\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":30,\"w\":24,\"h\":15,\"i\":\"4\"},\"panelIndex\":\"4\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_4\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":30,\"w\":24,\"h\":15,\"i\":\"5\"},\"panelIndex\":\"5\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_5\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":45,\"w\":24,\"h\":15,\"i\":\"6\"},\"panelIndex\":\"6\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_6\"},{\"version\":\"7.3.0\",\"type\":\"search\",\"gridData\":{\"x\":24,\"y\":45,\"w\":24,\"h\":15,\"i\":\"7\"},\"panelIndex\":\"7\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_7\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":60,\"w\":24,\"h\":15,\"i\":\"8\"},\"panelIndex\":\"8\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_8\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":60,\"w\":24,\"h\":15,\"i\":\"9\"},\"panelIndex\":\"9\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_9\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":75,\"w\":24,\"h\":15,\"i\":\"10\"},\"panelIndex\":\"10\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_10\"},{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":75,\"w\":24,\"h\":15,\"i\":\"11\"},\"panelIndex\":\"11\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_11\"}]",
     "refreshInterval": {
       "pause": true,
       "value": 0
@@ -627,26 +539,6 @@
       "name": "panel_11",
       "type": "visualization",
       "id": "9bebe980-4192-11e8-bb13-d53698fb349a"
-    },
-    {
-      "name": "panel_12",
-      "type": "visualization",
-      "id": "9fb4c670-4194-11e8-bb13-d53698fb349a"
-    },
-    {
-      "name": "panel_13",
-      "type": "visualization",
-      "id": "35417e50-4194-11e8-bb13-d53698fb349a"
-    },
-    {
-      "name": "panel_14",
-      "type": "visualization",
-      "id": "039e4770-4194-11e8-bb13-d53698fb349a"
-    },
-    {
-      "name": "panel_15",
-      "type": "visualization",
-      "id": "76c7f020-4194-11e8-bb13-d53698fb349a"
     }
   ],
   "coreMigrationVersion": "8.8.0",

@@ -60,9 +60,6 @@ const getChartSnapshot = async (page: ScoutPage) => ({
   goalAndGauge: await getTexts(page.locator('.chart-label')),
   metric: await getTexts(page.locator('.legacyMtrVis__value')),
   tagCloud: await getTagCloudTexts(page),
-  tsvbMetric: await getTexts(page.testSubj.locator('tsvbMetricValue')),
-  tsvbTopN: await getTexts(page.testSubj.locator('tsvbTopNValue')),
-  tsvbMarkdown: await getTexts(page.testSubj.locator('tsvbMarkdown')),
   timelion: await page.testSubj.locator('flotLegendLabel').count(),
 });
 
@@ -157,13 +154,8 @@ spaceTest.describe('Dashboard filtering', { tag: tags.deploymentAgnostic }, () =
         page.locator('[data-test-subj="tbvChartContainer"] [data-test-subj="visNoResult"]')
       ).toBeVisible();
       await expectTextsToExist(page.locator('.chart-label'), ['0', '0%']);
-      await expect(
-        page.locator('[data-test-subj="timeseriesVis"] [data-test-subj="visNoResult"]')
-      ).toBeVisible();
       await expectTextsToExist(page.locator('.legacyMtrVis__value'), [NULL_PLACEHOLDER]);
       await expect.poll(async () => (await getTagCloudTexts(page)).length).toBe(0);
-      await expectTextsToExist(page.testSubj.locator('tsvbMetricValue'), ['0 custom template']);
-      await expectTextsToExist(page.testSubj.locator('tsvbTopNValue'), ['-', '-']);
       await expect(page.testSubj.locator('flotLegendLabel')).toHaveCount(0);
 
       const filtered = await getStableSnapshot(page);
