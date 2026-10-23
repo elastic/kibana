@@ -171,6 +171,9 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
                 platforms: {
                   terms: {
                     field: 'local_metadata.os.platform',
+                    // Linux agents report their distribution, so a fleet easily has more than
+                    // the default 10 values; `agent_platforms` targeting needs every one of them.
+                    size: 500,
                   },
                 },
                 policies: {

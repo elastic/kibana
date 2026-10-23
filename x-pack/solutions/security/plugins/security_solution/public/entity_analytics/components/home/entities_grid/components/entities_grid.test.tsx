@@ -14,6 +14,7 @@ import { useEntityGridData } from '../hooks/use_entity_grid_data';
 import { useEntityAnalyticsUrlState } from '../hooks/use_entity_analytics_url_state';
 import { EntitiesGrid } from './entities_grid';
 import type { EntitiesGridProps } from './entities_grid';
+import type { ReadAccess } from '../grid_columns';
 
 jest.mock('../hooks/use_entity_grid_data', () => ({
   ...jest.requireActual('../hooks/use_entity_grid_data'),
@@ -42,6 +43,8 @@ const mockGridData = (data: Partial<ReturnType<typeof useEntityGridData>> = {}) 
     ...data,
   } as ReturnType<typeof useEntityGridData>);
 
+const FULL_ACCESS: ReadAccess = { alerts: true, risk: true, anomalies: true, cases: true };
+
 const renderGrid = (props: Partial<EntitiesGridProps> = {}) =>
   render(
     <TestProviders>
@@ -53,6 +56,7 @@ const renderGrid = (props: Partial<EntitiesGridProps> = {}) =>
         sortField="entity.name"
         sortDirection="asc"
         onSortChange={jest.fn()}
+        readAccess={FULL_ACCESS}
         {...props}
       />
     </TestProviders>
@@ -116,16 +120,78 @@ describe('EntitiesGrid', () => {
     );
   });
 
+  it('lists a large group by risk score, with its main entity marked even when its score is lower', () => {
+    const MAIN_ENTITY: Row = {
+      'entity.id': 'host:a',
+      'entity.name': 'alpha',
+      'entity.risk.calculated_score_norm': 20,
+    };
+    const ALIAS: Row = {
+      'entity.id': 'host:a-okta',
+      'entity.name': 'alpha-okta',
+      'entity.risk.calculated_score_norm': 80,
+    };
+    jest.mocked(useEntityGridData).mockImplementation((options) => {
+      const data = {
+        isEnriching: false,
+        updatedAt: null,
+        isFetching: false,
+        isAtLoadLimit: false,
+        prefetch: jest.fn(),
+        onRowsInViewChange: jest.fn(),
+      };
+      if (options.keyScope !== 'children') return { ...data, rows: [GROUP], total: 1 };
+      return options.entityExpression?.startsWith('entity.id')
+        ? { ...data, rows: [MAIN_ENTITY], total: 1 }
+        : { ...data, rows: [ALIAS], total: 150 };
+    });
+    jest.mocked(useEntityAnalyticsUrlState).mockReturnValue({
+      expandedIds: ['host:a'],
+      toggleExpandedId,
+    } as unknown as ReturnType<typeof useEntityAnalyticsUrlState>);
+
+    renderGrid();
+
+    const recordNames = screen.getAllByText(/^alpha/).slice(1);
+    expect(recordNames.map((name) => name.textContent)).toEqual(['alpha-okta', 'alpha']);
+    expect(screen.getAllByTestId('entityGridMainEntityIcon')).toHaveLength(1);
+    expect(screen.getByText('Showing 2 of 151 records')).toBeInTheDocument();
+  });
+
   it('has no expander when the rows are individual records', () => {
     renderGrid({ rowsMode: 'individual', columns: INDIVIDUAL_ROWS_COLUMNS });
 
     expect(screen.queryByRole('button', { name: 'Expand group' })).not.toBeInTheDocument();
   });
 
-  it('has no Cases column for users who cannot read cases', () => {
-    renderGrid();
+  it.each([
+    ['alerts', ['Alerts', 'Last alert'], ['alert_count', 'last_seen_alert']],
+    ['risk', ['Risk score change'], ['risk_score_change']],
+    ['anomalies', ['Anomalies'], ['anomaly_count']],
+    ['cases', ['Cases'], ['case_count']],
+  ] as const)(
+    'leaves out the %s columns, and their queries, for users who cannot read them',
+    (source, headers, columnIds) => {
+      renderGrid({ readAccess: { ...FULL_ACCESS, [source]: false } });
 
-    expect(screen.queryByText('Cases')).not.toBeInTheDocument();
+      headers.forEach((header) => expect(screen.queryByText(header)).not.toBeInTheDocument());
+      const [options] = jest.mocked(useEntityGridData).mock.calls.at(-1) ?? [];
+      columnIds.forEach((id) => expect(options?.columnIds).not.toContain(id));
+    }
+  );
+
+  it('sorts by risk score when the sort column is one the user cannot read', () => {
+    renderGrid({
+      sortField: 'anomaly_count',
+      sortDirection: 'asc',
+      readAccess: { ...FULL_ACCESS, anomalies: false },
+    });
+
+    const [options] = jest.mocked(useEntityGridData).mock.calls.at(-1) ?? [];
+    expect(options).toMatchObject({
+      sortField: 'entity.risk.calculated_score_norm',
+      sortDirection: 'desc',
+    });
   });
 
   it('offers to reset the filters when no entity matches', () => {

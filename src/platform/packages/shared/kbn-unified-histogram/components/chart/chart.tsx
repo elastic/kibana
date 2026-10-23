@@ -36,6 +36,7 @@ import type {
   UnifiedHistogramFetch$,
   UnifiedHistogramFetchParams,
   UnifiedHistogramHitsContext,
+  UnifiedHistogramLensActionsOptions,
   UnifiedHistogramServices,
   UnifiedHistogramSuggestionContext,
   LensVisServiceState,
@@ -87,6 +88,7 @@ export interface UnifiedHistogramChartProps {
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
   withLensActions?: boolean;
+  lensActionsOptions?: UnifiedHistogramLensActionsOptions;
   onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
   /**
    * Selected subset counted on the histogram's own buckets and drawn as a stacked bar.
@@ -144,6 +146,7 @@ export function UnifiedHistogramChart({
   onApiAvailable: consumerOnApiAvailable,
   comparison,
   withLensActions = true,
+  lensActionsOptions,
   ...histogramProps
 }: UnifiedHistogramChartProps) {
   const { euiTheme } = useEuiTheme();
@@ -399,6 +402,7 @@ export function UnifiedHistogramChart({
     dataSource,
     relativeTimeRange,
     lensAttributes: visContext?.attributes,
+    lensEditorOptions: lensActionsOptions?.navigation,
   });
 
   const toolbarToggleActions = useMemo(() => renderToggleActions(), [renderToggleActions]);
@@ -559,6 +563,7 @@ export function UnifiedHistogramChart({
           onClose={() => setIsSaveModalVisible(false)}
           isSaveable={false}
           controlsState={controlsState}
+          telemetrySource={lensActionsOptions?.telemetrySource}
         />
       )}
       {isFlyoutVisible && !!visContext && !!lensVisServiceCurrentSuggestionContext && (

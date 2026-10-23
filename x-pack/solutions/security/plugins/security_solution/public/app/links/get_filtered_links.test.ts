@@ -73,7 +73,7 @@ describe('getFilteredLinks', () => {
     // Check specific links that we know should be present based on the actual output
     const resultIds = result.map((link) => link.id);
     expect(resultIds).toContain('dashboards');
-    expect(resultIds).toContain('alerts');
+    expect(resultIds).toContain('alert_detections');
     expect(resultIds).toContain('cases');
     expect(resultIds).toContain('configurations');
     expect(resultIds).toContain('launchpad');
@@ -100,12 +100,14 @@ describe('getFilteredLinks', () => {
     );
   });
 
-  describe('`securitySolution:enableAlertsAndAttacksAlignment` setting', () => {
-    it('includes correct base links in the result when setting is disabled', async () => {
-      mockCore.uiSettings.get.mockReturnValue(false);
+  describe('`enableAlertsAndAttacksAlignment` experimental feature', () => {
+    it('includes correct base links in the result when the feature is disabled', async () => {
       mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
 
-      const result = await getFilteredLinks(mockCore, mockPlugins, mockExperimentalFeatures);
+      const result = await getFilteredLinks(mockCore, mockPlugins, {
+        ...mockExperimentalFeatures,
+        enableAlertsAndAttacksAlignment: false,
+      });
 
       // Check that base links are included by checking the result has expected length
       expect(result.length).toBeGreaterThan(10);
@@ -124,11 +126,13 @@ describe('getFilteredLinks', () => {
       expect(resultIds).toContain('launchpad');
     });
 
-    it('includes all base links in the result when setting is enabled', async () => {
-      mockCore.uiSettings.get.mockReturnValue(true);
+    it('includes all base links in the result when the feature is enabled', async () => {
       mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
 
-      const result = await getFilteredLinks(mockCore, mockPlugins, mockExperimentalFeatures);
+      const result = await getFilteredLinks(mockCore, mockPlugins, {
+        ...mockExperimentalFeatures,
+        enableAlertsAndAttacksAlignment: true,
+      });
 
       // Check that base links are included by checking the result has expected length
       expect(result.length).toBeGreaterThan(10);

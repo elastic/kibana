@@ -1,5 +1,5 @@
 {
-  "sha1": "c957999dc5eabd5279409078bdf5662132ddabe5",
+  "sha1": "8550672434e233246b38018574d66b9dda482b50",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -829,6 +829,54 @@
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
         "line": 701,
         "column": 10
+      }
+    },
+    {
+      "id": "ddd5b28c53d0781-79f59ef964bafc1",
+      "title": "Custom resolution rules Security all can manage rules, and enabling one needs write on the entity index; Security read can list them but not write",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/custom_resolution_rules.spec.ts",
+        "line": 110,
+        "column": 5
+      }
+    },
+    {
+      "id": "ddd5b28c53d0781-6aca8d0c60f925e",
+      "title": "Custom resolution rules rejects invalid rules with a clear error and saves nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/custom_resolution_rules.spec.ts",
+        "line": 214,
+        "column": 98
+      }
+    },
+    {
+      "id": "ddd5b28c53d0781-c77d58aee342dfb",
+      "title": "Custom resolution rules previews, links local users to AD, stops on disable, resumes on enable, and cleans up on delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/custom_resolution_rules.spec.ts",
+        "line": 282,
+        "column": 16
       }
     },
     {

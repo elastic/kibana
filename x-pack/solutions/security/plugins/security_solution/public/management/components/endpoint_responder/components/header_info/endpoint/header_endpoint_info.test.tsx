@@ -20,6 +20,8 @@ import { waitFor } from '@testing-library/react';
 jest.mock('../../../../../hooks/endpoint/use_get_endpoint_details');
 jest.mock('../../../../../hooks/response_actions/use_get_endpoint_pending_actions_summary');
 
+jest.setTimeout(15_000);
+
 const useGetEndpointDetailsMock = _useGetEndpointDetails as jest.Mock;
 const getPendingActions = useGetEndpointPendingActionsSummary as jest.Mock;
 

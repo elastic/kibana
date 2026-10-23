@@ -22,8 +22,10 @@ import {
   createOptimizeModel,
 } from '../lib/create_optimize_model';
 import { CORTEX_AI_INDEX_DEST, CORTEX_AI_INDEX_ID } from '../../common/cortex';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID, SANDBOX_TOOL_IDS } from '../agents/investigation';
+import { SANDBOX_TOOL_IDS } from '../agents/investigation';
+import { usesKnowledge } from '../agents/agent_policy';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
+import { loadInvestigationRound } from '../investigation_round';
 import { createCortexTelemetry } from '../telemetry';
 import { materializeCortex } from './materialize';
 import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
@@ -124,6 +126,7 @@ export const runCortexOptimize = async ({
   analytics,
   conversationId,
   roundId,
+  roundIndex,
   requestedConnectorId,
   roundConnectorId,
   getInference,
@@ -144,6 +147,7 @@ export const runCortexOptimize = async ({
   analytics: AnalyticsServiceSetup;
   conversationId?: string;
   roundId?: string;
+  roundIndex?: number;
   requestedConnectorId?: string;
   roundConnectorId?: string;
   getInference: () => InferenceServerStart | undefined;
@@ -151,16 +155,29 @@ export const runCortexOptimize = async ({
   getUiSettings: () => CoreStart['uiSettings'] | undefined;
   logger: Logger;
 }): Promise<void> => {
-  // Only the Nightshift investigator writes to Cortex: it is the one agent whose post-execution
-  // hook runs this workflow, and other agents' rounds must not edit the wiki. An unidentified
-  // caller is refused rather than trusted — the optimize workflow has a manual trigger, so it can
-  // be run without an agent id.
-  if (agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
-    logger.info('Cortex optimizer skipped — round was not produced by the Nightshift investigator');
+  // Only the Nightshift knowledge agents write to Cortex: their post-execution hook runs this
+  // workflow, and other agents' rounds must not edit the wiki. An unidentified caller is refused
+  // rather than trusted — the optimize workflow has a manual trigger, so it can be run without an
+  // agent id.
+  if (!usesKnowledge(agentId)) {
+    logger.info(
+      'Cortex optimizer skipped — round was not produced by a Nightshift knowledge agent'
+    );
     return;
   }
 
-  const sandboxToolCalls = toolCalls.filter(
+  const loadedRound = await loadInvestigationRound({
+    agentBuilder: getAgentBuilder(),
+    request,
+    conversationId,
+    roundId,
+    roundIndex,
+    fallbackToolCalls: toolCalls,
+    logger,
+    signal,
+  });
+
+  const sandboxToolCalls = loadedRound.toolCalls.filter(
     ({ tool_id: toolId }) => toolId !== undefined && OPTIMIZER_TOOL_IDS.has(toolId)
   );
   if (sandboxToolCalls.length < MIN_OPTIMIZE_TOOL_CALLS) {

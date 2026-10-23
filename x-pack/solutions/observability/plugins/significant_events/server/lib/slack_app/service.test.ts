@@ -185,8 +185,6 @@ describe('SlackAppService', () => {
         })
       );
 
-      // Read-only, least-privilege: direct ES read on observability signals only (queried as
-      // this key), everything else (Streams, Significant Events, connectors) via Kibana features.
       const { kibana_role_descriptors: descriptors } = grantAsInternalUser.mock.calls[0][1];
       expect(descriptors.nightshift_relay_agent_builder).toEqual({
         elasticsearch: {
@@ -196,6 +194,14 @@ describe('SlackAppService', () => {
               names: ['traces-*', 'logs-*', 'metrics-*', 'apm-*'],
               privileges: ['read', 'view_index_metadata'],
             },
+            {
+              names: [
+                'ai-index-idx-nightshift-cortex',
+                'ai-index-idx-nightshift-semantic-memory',
+                'ai-index-idx-nightshift-decision-trees',
+              ],
+              privileges: ['read', 'view_index_metadata', 'write', 'auto_configure'],
+            },
           ],
           run_as: [],
         },
@@ -204,8 +210,7 @@ describe('SlackAppService', () => {
             spaces: ['*'],
             feature: {
               nightshift: ['minimal_all'],
-              streams: ['read'],
-              agentBuilder: ['read'],
+              agentBuilder: ['minimal_all'],
               actions: ['read'],
               workflowsManagement: ['read'],
             },
@@ -672,6 +677,27 @@ describe('SlackAppService', () => {
       });
     });
 
+    it('returns who connected the workspace and when', async () => {
+      const { server, soClient } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          tenantKey: 'tenant-A',
+          apiKeyId: 'key-1',
+          createdBy: 'alice',
+          createdAt: '2026-10-19T12:00:00.000Z',
+        },
+      });
+
+      await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
+        available: true,
+        status: RELAY_APP_CONNECTION_STATUS.connected,
+        workspace: { tenantKey: 'tenant-A' },
+        createdBy: 'alice',
+        createdAt: '2026-10-19T12:00:00.000Z',
+      });
+    });
+
     it('reports an in-progress install that has a tenant key as awaiting confirmation, without polling the Relay', async () => {
       const { server, soClient } = createHarness();
       soClient.get.mockResolvedValue({
@@ -857,6 +883,8 @@ describe('SlackAppService', () => {
           status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
           apiKeyId: 'key-1',
           claimId: 'claim-1',
+          createdBy: 'alice',
+          createdAt: '2026-10-19T12:00:00.000Z',
         },
       });
       fetchClaim.mockResolvedValue({
@@ -884,6 +912,8 @@ describe('SlackAppService', () => {
         available: true,
         status: RELAY_APP_CONNECTION_STATUS.pendingConfirmation,
         workspace: { tenantKey: 'T0123ABC', name: 'Acme', url: 'https://acme.slack.com/' },
+        createdBy: 'alice',
+        createdAt: '2026-10-19T12:00:00.000Z',
       });
     });
 

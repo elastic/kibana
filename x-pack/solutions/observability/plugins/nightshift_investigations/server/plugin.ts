@@ -28,12 +28,14 @@ import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigati
 import type { NightshiftInvestigationsConfig } from './config';
 import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
+import { createIsNightshiftEnabled } from './is_nightshift_enabled';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
 import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
 import { installSandboxMaterializeWorkspaceWorkflow } from './lib/managed_workflows/install_sandbox_materialize_workspace';
 import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/install_agent_optimizations';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
+import { installAssistantAgent } from './lib/install_assistant_agent';
 import { createInvestigationAvailability } from './create_investigation_availability';
 import { nightshiftInvestigationsRouteRepository } from './routes';
 import {
@@ -67,8 +69,10 @@ import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_
 import { setupNightshiftTelemetry } from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
+import type { NightshiftAgentTypeOptions } from './agents/investigation';
 import { registerInvestigationAgentType } from './agents/investigation';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
+import { registerAssistantAgentType } from './agents/assistant';
 import { createDecisionTreeTools } from './tools/decision_tree';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
@@ -134,6 +138,7 @@ export class NightshiftInvestigationsPlugin
   private memoryEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
   private decisionTreesEnabled = false;
+  private assistantEnabled = false;
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
@@ -148,6 +153,8 @@ export class NightshiftInvestigationsPlugin
       new InvestigationLocatorDefinition()
     );
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
+    const isNightshiftEnabled = createIsNightshiftEnabled(core.getStartServices);
+    plugins.alerting?.enableAlertStatusChanged({ isEnabled: isNightshiftEnabled });
     const telemetry = setupNightshiftTelemetry({
       analytics: core.analytics,
       logger: this.logger.get('telemetry'),
@@ -234,20 +241,27 @@ export class NightshiftInvestigationsPlugin
       });
       const config = this.ctx.config.get();
       const telemetryConnectorId = config.sandbox?.telemetry_connector_id;
-      registerInvestigationAgentType(plugins.agentBuilder, {
+      const nightshiftAgentOptions: NightshiftAgentTypeOptions = {
         sandboxEnabled: plugins.sandbox?.isAvailable ?? false,
         cortexEnabled: this.cortexEnabled,
         memoryEnabled: this.memoryEnabled,
-        decisionTreesEnabled: this.decisionTreesEnabled,
         investigationToolsEnabled: Boolean(plugins.agenticInvestigations),
         proposalsEnabled: Boolean(plugins.proposals),
         telemetryConnectorId,
         getCustomContextInstructions: ({ request, spaceId }) =>
           customContextClient.getInstructions(request, spaceId),
         logger: this.logger.get('custom_context'),
+      };
+      registerInvestigationAgentType(plugins.agentBuilder, {
+        ...nightshiftAgentOptions,
+        decisionTreesEnabled: this.decisionTreesEnabled,
       });
       if (this.decisionTreesEnabled) {
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
+      }
+      if (plugins.sandbox?.isAvailable) {
+        registerAssistantAgentType(plugins.agentBuilder, nightshiftAgentOptions);
+        this.assistantEnabled = true;
       }
 
       if (plugins.sandbox?.isAvailable) {
@@ -265,11 +279,12 @@ export class NightshiftInvestigationsPlugin
           getDeps: () => ({ actions: this.actionsStart }),
           logger: sandboxLogger.get('connector_credentials'),
         });
+        const outputRedactionLogger = sandboxLogger.get('output_redaction');
         const redaction = {
           getOutputRedactor: createSandboxOutputRedactorProvider({
             getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
           }),
-          logger: sandboxLogger.get('output_redaction'),
+          logger: outputRedactionLogger,
         };
         const availability = createSandboxToolAvailability({
           getDeps: () => ({ featureFlags: this.featureFlags, security: this.securityStart }),
@@ -561,6 +576,15 @@ export class NightshiftInvestigationsPlugin
       }).catch((err) => {
         this.logger.error(`Failed to install investigation agent in default space: ${err.message}`);
       });
+      if (this.assistantEnabled) {
+        void installAssistantAgent({
+          agentBuilder,
+          spaceId: DEFAULT_SPACE_ID,
+          availability: this.getInvestigationAvailability(),
+        }).catch((err) => {
+          this.logger.error(`Failed to install assistant agent in default space: ${err.message}`);
+        });
+      }
     }
 
     if (plugins.workflowsExtensions) {
@@ -628,6 +652,7 @@ export class NightshiftInvestigationsPlugin
       agentBuilder: this.agentBuilder,
       agenticInvestigations: this.agenticInvestigations,
       agentAvailability: this.getInvestigationAvailability(),
+      assistantEnabled: this.assistantEnabled,
       investigationQuotaCallback: this.investigationQuotaCallback,
       inference: this.inference,
       savedObjects: this.savedObjects,

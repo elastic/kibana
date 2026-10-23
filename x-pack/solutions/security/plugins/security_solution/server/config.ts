@@ -193,6 +193,13 @@ export const configSchema = schema.object({
         maxBulkRequestBodySizeBytes: schema.number({ defaultValue: 100_000 }), // 100KB
       }),
     }),
+    alertEntityIdBackfill: schema.object({
+      /**
+       * Kill switch for the one-off task that stamps `kibana.alert.entity.id` onto alerts written
+       * before the field existed.
+       */
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
     entityStore: schema.object({
       syncDelay: schema.duration({ defaultValue: '60s' }),
       frequency: schema.duration({ defaultValue: '60s' }),

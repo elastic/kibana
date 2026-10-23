@@ -36,6 +36,7 @@ import { Duration, DurationUnit } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { SLOIdConflict, SecurityException } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
+import { allSettledOrThrow } from '../utils/all_settled_or_throw';
 import { retryTransientEsErrors } from '../utils/retry';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
@@ -93,7 +94,7 @@ export class CreateSLO {
       const tempDocPromise = this.createTempSummaryDocument(slo);
       rollbackOperations.push(() => this.deleteTempSummaryDocument(slo));
 
-      await Promise.all([
+      await allSettledOrThrow([
         createPromise,
         sloPipelinePromise,
         rollupTransformPromise,
@@ -103,7 +104,7 @@ export class CreateSLO {
       ]);
 
       // transforms can only be started after the related pipelines are created
-      await Promise.all([
+      await allSettledOrThrow([
         this.transformManager.start(rollupTransformId),
         this.summaryTransformManager.start(summaryTransformId),
       ]);
@@ -175,11 +176,14 @@ export class CreateSLO {
   private async deleteTempSummaryDocument(slo: SLODefinition) {
     return retryTransientEsErrors(
       () =>
-        this.scopedClusterClient.asCurrentUser.delete({
-          index: SUMMARY_TEMP_INDEX_NAME,
-          id: `slo-${slo.id}`,
-          refresh: true,
-        }),
+        this.scopedClusterClient.asCurrentUser.delete(
+          {
+            index: SUMMARY_TEMP_INDEX_NAME,
+            id: `slo-${slo.id}`,
+            refresh: true,
+          },
+          { ignore: [404] }
+        ),
       { logger: this.logger }
     );
   }

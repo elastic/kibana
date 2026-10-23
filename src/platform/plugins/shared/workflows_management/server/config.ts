@@ -65,7 +65,7 @@ const configSchema = schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
   /**
-   * Workflow Template Library — fetches the curated catalog and exposes it at
+   * Workflow Template library — fetches the curated catalog and exposes it at
    * `/internal/workflows/library/*`. Server-only infrastructure settings; the
    * tech-preview enable/disable toggle is the `workflowsManagement:library:enabled`
    * global uiSetting (so browser components can read it without depending on

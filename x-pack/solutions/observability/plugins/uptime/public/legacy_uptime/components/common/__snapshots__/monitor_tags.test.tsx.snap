@@ -14,7 +14,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
       class="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        class="euiBadge__text emotion-euiBadge__text-clickable"
+        class="euiBadge__text emotion-euiBadge__text"
       >
         red
       </span>
@@ -30,7 +30,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
       class="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        class="euiBadge__text emotion-euiBadge__text-clickable"
+        class="euiBadge__text emotion-euiBadge__text"
       >
         green
       </span>
@@ -46,7 +46,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
       class="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        class="euiBadge__text emotion-euiBadge__text-clickable"
+        class="euiBadge__text emotion-euiBadge__text"
       >
         blue
       </span>
@@ -62,7 +62,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
       class="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        class="euiBadge__text emotion-euiBadge__text-clickable"
+        class="euiBadge__text emotion-euiBadge__text"
       >
         black
       </span>
@@ -78,7 +78,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
       class="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        class="euiBadge__text emotion-euiBadge__text-clickable"
+        class="euiBadge__text emotion-euiBadge__text"
       >
         purple
       </span>
@@ -92,7 +92,7 @@ exports[`MonitorTags component it shows expand tag on too many tags 1`] = `
       class="euiBadge__content emotion-euiBadge__content"
     >
       <span
-        class="euiBadge__text emotion-euiBadge__text-clickable"
+        class="euiBadge__text emotion-euiBadge__text"
       >
         +1
       </span>

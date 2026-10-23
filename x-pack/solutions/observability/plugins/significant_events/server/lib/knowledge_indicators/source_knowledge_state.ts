@@ -65,6 +65,13 @@ export interface SourceKnowledgeStateClient {
       checkpoint: (state: Partial<SourceKnowledgeState>) => Promise<void>
     ) => Promise<T>;
   }): Promise<T>;
+  /**
+   * Runs the cleanup of a deleted source, then deletes its state object, which a failed cleanup
+   * keeps for the retry.
+   */
+  retire(args: { sourceId: string; run: () => Promise<void> }): Promise<void>;
+  /** Lists the ids of the sources that have a state object, so ones left by a deleted source can be retired. */
+  listSourceIds(): Promise<string[]>;
   /** Rejects results of an obsolete query, disabled source, or unfinished invalidation. */
   write<T>(args: {
     sourceId: string;
@@ -89,7 +96,18 @@ export const createSourceKnowledgeStateClient = ({
   space: string;
   sourcesClient: SourcesClient;
 }): SourceKnowledgeStateClient => {
-  const runExclusive: SourceKnowledgeStateClient['runExclusive'] = async ({ sourceId, run }) => {
+  const runExclusive = async <T>({
+    sourceId,
+    run,
+    deleteWhenDone = false,
+  }: {
+    sourceId: string;
+    run: (
+      state: SourceKnowledgeState,
+      checkpoint: (state: Partial<SourceKnowledgeState>) => Promise<void>
+    ) => Promise<T>;
+    deleteWhenDone?: boolean;
+  }): Promise<T> => {
     let stored;
     try {
       stored = await repository.get<SourceKnowledgeState>(SOURCE_KNOWLEDGE_STATE_TYPE, sourceId, {
@@ -142,20 +160,51 @@ export const createSourceKnowledgeStateClient = ({
       );
     }, WRITE_LEASE_MS / 3);
     renewal.unref();
+    let succeeded = false;
     try {
       const result = await run(state, checkpoint);
       if (renewalError !== undefined) {
         throw renewalError;
       }
+      succeeded = true;
       return result;
     } finally {
       clearInterval(renewal);
-      await checkpoint({ lease: null });
+      if (succeeded && deleteWhenDone) {
+        // Deleted while the lease is still held, so no other write can own the object by then.
+        await serializeCheckpoint(() =>
+          repository.delete(SOURCE_KNOWLEDGE_STATE_TYPE, sourceId, { namespace: space })
+        ).catch(async (error) => {
+          // A lease left behind would turn every retry into a 409 until it expires. If releasing
+          // it fails too, the delete error is the one worth reporting.
+          await checkpoint({ lease: null }).catch(() => {});
+          throw error;
+        });
+      } else {
+        await checkpoint({ lease: null });
+      }
     }
   };
 
   return {
     runExclusive,
+    retire: ({ sourceId, run }) => runExclusive({ sourceId, run, deleteWhenDone: true }),
+    listSourceIds: async () => {
+      const finder = repository.createPointInTimeFinder({
+        type: SOURCE_KNOWLEDGE_STATE_TYPE,
+        namespaces: [space],
+        fields: [],
+      });
+      const sourceIds: string[] = [];
+      try {
+        for await (const { saved_objects: objects } of finder.find()) {
+          sourceIds.push(...objects.map(({ id }) => id));
+        }
+      } finally {
+        await finder.close();
+      }
+      return sourceIds;
+    },
     write: ({ sourceId, expectedRevision, allowDisabled = false, run }) =>
       runExclusive({
         sourceId,
