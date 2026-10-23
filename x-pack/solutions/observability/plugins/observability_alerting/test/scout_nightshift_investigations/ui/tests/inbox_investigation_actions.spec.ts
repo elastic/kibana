@@ -13,6 +13,7 @@ import {
   setAlertingV2EnabledSetting,
   unsetAlertingV2EnabledSetting,
 } from '../../../scout/ui/fixtures/alerting_v2_setting';
+import { deleteInboxEpisode, seedInboxEpisode } from '../../../scout/ui/fixtures/inbox_episode';
 
 const suffix = randomUUID();
 const alertId = `nightshift-v2-alert-${suffix}`;
@@ -67,8 +68,15 @@ test.describe(
   'Observability Alerting v2 Inbox investigation actions',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    let nativeRuleId: string;
+    let nativeEpisodeId: string;
+
     test.beforeAll(async ({ esClient, kbnClient }) => {
       await setAlertingV2EnabledSetting(kbnClient, true);
+      ({ ruleId: nativeRuleId, episodeId: nativeEpisodeId } = await seedInboxEpisode(
+        esClient,
+        kbnClient
+      ));
       const timestamp = new Date().toISOString();
       await esClient.create({
         index: alertIndex,
@@ -103,6 +111,7 @@ test.describe(
     });
 
     test.afterAll(async ({ esClient, kbnClient }) => {
+      await deleteInboxEpisode(esClient, kbnClient, { ruleId: nativeRuleId });
       await esClient.deleteByQuery({
         index: alertIndex,
         query: { ids: { values: [alertId] } },
@@ -159,11 +168,35 @@ test.describe(
       await investigateItem.click();
 
       expect((await requestPromise).postDataJSON()).toMatchObject({
-        subject: { type: 'alert', id: alertId },
+        subject: { type: 'alert', ids: [alertId] },
       });
       await expect(investigateItem).toHaveText('Investigating…');
       await expect(investigateItem).toHaveAttribute('aria-disabled', 'true');
       releaseStart();
+    });
+
+    test('triggers investigation for a native v2 episode using its episode id', async ({
+      page,
+      pageObjects,
+    }) => {
+      const alerting = pageObjects.observabilityAlerting;
+      await alerting.gotoInboxFilteredByRule(nativeRuleId);
+      await expect(alerting.pageTitle).toHaveText('Alerts', { timeout: 30_000 });
+
+      const menuButton = page.getByRole('button', { name: 'Additional actions' });
+      await expect(menuButton).toBeVisible({ timeout: 30_000 });
+      await menuButton.click();
+
+      const requestPromise = page.waitForRequest(
+        (request) =>
+          request.method() === 'POST' &&
+          request.url().endsWith('/internal/nightshift/investigations')
+      );
+      await page.testSubj.locator('investigateAlert').click();
+
+      expect((await requestPromise).postDataJSON()).toMatchObject({
+        subject: { type: 'alert', ids: [nativeEpisodeId] },
+      });
     });
 
     test('triggers investigation from classic alert details flyout take action menu', async ({
@@ -192,7 +225,7 @@ test.describe(
       await investigateItem.click();
 
       expect((await requestPromise).postDataJSON()).toMatchObject({
-        subject: { type: 'alert', id: alertId },
+        subject: { type: 'alert', ids: [alertId] },
       });
     });
 

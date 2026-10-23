@@ -11,7 +11,10 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { MAX_ARRAY_LENGTH, MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { InvestigationQuotaDeniedError } from '../client/errors';
 import type { GetInvestigationsClient } from '../routes/types';
+import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
 import { triggerInvestigationStepDefinition } from './trigger_investigation';
+
+jest.mock('../lib/alert_snapshot', () => ({ fetchInvestigationAlertSnapshots: jest.fn() }));
 
 jest.mock('@kbn/workflows-extensions/server', () => ({
   createServerStepDefinition: jest.fn((definition) => definition),
@@ -32,14 +35,57 @@ const createDefinition = (start: jest.Mock, soClient = savedObjectsClientMock.cr
     .fn()
     .mockReturnValue({ start }) as unknown as GetInvestigationsClient;
   const getAutomationsSoClient = jest.fn().mockReturnValue(soClient);
+  const getAlertsClient = jest.fn().mockResolvedValue({});
+  const getEpisodeLookup = jest.fn().mockReturnValue({ spaceId: 'test-space' });
   return {
     getAutomationsSoClient,
-    definition: triggerInvestigationStepDefinition(getInvestigationsClient, getAutomationsSoClient),
+    getAlertsClient,
+    getEpisodeLookup,
+    definition: triggerInvestigationStepDefinition(
+      getInvestigationsClient,
+      getAutomationsSoClient,
+      getAlertsClient,
+      getEpisodeLookup
+    ),
     getInvestigationsClient,
   };
 };
 
 describe('triggerInvestigationStepDefinition', () => {
+  describe('alert subjects', () => {
+    const snapshots = [{ alert_version: 'v2', id: 'episode-1' }];
+
+    it('resolves the alert by id when the step carries no alerts, in the workflow space', async () => {
+      (fetchInvestigationAlertSnapshots as jest.Mock).mockResolvedValue(snapshots);
+      const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+      const { definition, getEpisodeLookup } = createDefinition(start);
+
+      await definition.handler(createContext({ subject_type: 'alert', subject_id: 'episode-1' }));
+
+      expect(getEpisodeLookup).toHaveBeenCalledWith(request, 'test-space');
+      expect(fetchInvestigationAlertSnapshots).toHaveBeenCalledWith(
+        expect.objectContaining({ alertIds: ['episode-1'] })
+      );
+      expect(start).toHaveBeenCalledWith(
+        expect.objectContaining({ context: { alerts: snapshots } })
+      );
+    });
+
+    it('keeps the caller-provided alerts without looking anything up', async () => {
+      (fetchInvestigationAlertSnapshots as jest.Mock).mockClear();
+      const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+      const { definition } = createDefinition(start);
+      const context = { alerts: [{ id: 'alert-1' }] };
+
+      await definition.handler(
+        createContext({ subject_type: 'alert', subject_id: 'alert-1', context })
+      );
+
+      expect(fetchInvestigationAlertSnapshots).not.toHaveBeenCalled();
+      expect(start).toHaveBeenCalledWith(expect.objectContaining({ context }));
+    });
+  });
+
   it('defaults an omitted trigger type to automatic', async () => {
     const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
     const { definition } = createDefinition(start);
