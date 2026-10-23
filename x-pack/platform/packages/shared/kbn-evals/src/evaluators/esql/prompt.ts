@@ -16,6 +16,7 @@ export const EsqlEquivalencePrompt = createPrompt({
   input: z.object({
     ground_truth: z.string(),
     prediction: z.string(),
+    instructions: z.string().optional(),
   }),
 })
   .version({

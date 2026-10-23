@@ -9,4 +9,8 @@ Candidate ES|QL query:
 ```esql
 {{{prediction}}}
 ```
+{{#instructions}}
 
+Additional instructions for judging equivalence:
+{{{instructions}}}
+{{/instructions}}
