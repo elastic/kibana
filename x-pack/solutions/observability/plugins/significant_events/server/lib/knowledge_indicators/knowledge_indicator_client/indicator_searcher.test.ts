@@ -41,13 +41,13 @@ const storedFeature = {
 };
 
 describe('IndicatorSearcher ranking function per embedding model', () => {
-  const fetchLatestRevisions = jest.fn();
+  const fetchLatestRevisionEntries = jest.fn();
   const resolveEmbeddingModel = jest.fn<Promise<SearchEmbeddingModel>, []>();
   const searcher = new IndicatorSearcher(
     elasticsearchServiceMock.createElasticsearchClient(),
     loggingSystemMock.createLogger(),
     { semantic_min_score: 0, rrf_rank_constant: 60 },
-    { fetchLatestRevisions } as unknown as RevisionReader,
+    { fetchLatestRevisionEntries } as unknown as RevisionReader,
     SPACE,
     resolveEmbeddingModel
   );
@@ -57,7 +57,7 @@ describe('IndicatorSearcher ranking function per embedding model', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     resolveEmbeddingModel.mockResolvedValue({ kind: 'sparse' });
-    fetchLatestRevisions.mockResolvedValue([storedFeature]);
+    fetchLatestRevisionEntries.mockResolvedValue([{ esId: 'es-u1', doc: storedFeature }]);
     (queryEsql as jest.Mock).mockResolvedValue(emptyRankResponse);
   });
 

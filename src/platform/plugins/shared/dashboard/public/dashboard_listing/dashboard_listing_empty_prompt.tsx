@@ -13,8 +13,11 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIllustration,
   EuiLink,
+  useEuiTheme,
 } from '@elastic/eui';
+import { dashboard as dashboardIllustration } from '@elastic/eui-illustrations';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup_service';
@@ -46,6 +49,12 @@ export const DashboardListingEmptyPrompt = ({
   createItem,
   disableCreateDashboardButton,
 }: DashboardListingEmptyPromptProps) => {
+  const { euiTheme } = useEuiTheme();
+  // Same size as the visualization and annotation tab illustrations
+  const listingIllustrationSize = euiTheme.base * 8;
+  // This artwork is wide and short, so it's drawn 1.2x larger to look the same size as the others.
+  // The negative block margins trim its extra empty space so the heading stays aligned across tabs.
+  const illustrationSize = listingIllustrationSize * 1.2;
   const isEditingFirstDashboard = useMemo(
     () => useSessionStorageIntegration && unsavedDashboardIds.length === 1,
     [unsavedDashboardIds.length, useSessionStorageIntegration]
@@ -56,7 +65,7 @@ export const DashboardListingEmptyPrompt = ({
       return (
         <EuiButton
           onClick={createItem}
-          fill
+          color="text"
           iconType="plusCircle"
           data-test-subj="newItemButton"
           disabled={disableCreateDashboardButton}
@@ -122,7 +131,17 @@ export const DashboardListingEmptyPrompt = ({
 
   return (
     <EuiEmptyPrompt
-      iconType="dashboardApp"
+      icon={
+        <EuiIllustration
+          type={dashboardIllustration}
+          alt=""
+          fullWidth={false}
+          css={{
+            inlineSize: illustrationSize,
+            marginBlock: (listingIllustrationSize - illustrationSize) / 2,
+          }}
+        />
+      }
       title={
         <h1 id="dashboardListingHeading" data-test-subj="emptyListPrompt">
           {isEditingFirstDashboard

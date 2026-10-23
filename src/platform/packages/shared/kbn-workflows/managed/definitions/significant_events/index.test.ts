@@ -84,7 +84,7 @@ const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(24);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(26);
     expect(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.version).toBe(4);
   });
 
@@ -158,6 +158,8 @@ describe('significant events persistence workflow contracts', () => {
     });
     expect(triggerStep.with?.message).toContain('Probable cause:');
     expect(triggerStep.with?.source_ids).toContain('source_ids');
+    // Open investigations are matched by subject; the start step takes no concurrency key.
+    expect(triggerStep.with).not.toHaveProperty('concurrency_key');
   });
 
   it('bounds the discovery investigation message below the trigger input limit', () => {
@@ -240,10 +242,14 @@ describe('significant events persistence workflow contracts', () => {
     expect(engine.parseAndRenderSync(template, makeContext([{ id: 'inv-1' }]))).toBe('false');
   });
 
-  it('attaches completed investigations only to Significant Events', () => {
+  it('attaches completed or failed investigations only to Significant Events', () => {
     expect(investigationCompleted.triggers).toEqual([
       {
         type: 'nightshift-investigations.completed',
+        on: { condition: 'event.subject.type: "significant_event"' },
+      },
+      {
+        type: 'nightshift-investigations.failed',
         on: { condition: 'event.subject.type: "significant_event"' },
       },
     ]);
@@ -253,6 +259,7 @@ describe('significant events persistence workflow contracts', () => {
       workflow_execution_id: '{{ event.investigation_id }}',
       started_at: '{{ event.started_at }}',
       completed_at: '{{ event.completed_at }}',
+      outcome: '{{ event.status }}',
     });
   });
 });

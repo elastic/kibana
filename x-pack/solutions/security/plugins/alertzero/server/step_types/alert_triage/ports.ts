@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { set } from '@kbn/safer-lodash-set';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   ALERT_FETCH_LIMIT,
+  ALERT_SEVERITIES,
+  BATCH_ALERT_CAP,
   OPEN_ALERT_STATUSES,
+  RULE_FETCH_LIMIT,
   TRIAGE_FAILED_TAG,
   TRIAGE_PENDING_TAG,
   VERDICT_TAGS,
+  type AlertSeverity,
 } from '../../alert_triage/constants';
 import type { SweepPorts } from '../../alert_triage/plan_sweep';
 import type { TriageAlert } from '../../alert_triage/types';
@@ -123,6 +128,9 @@ export const readWorkflowRunLagMs = async (
   return typeof oldest === 'number' ? Math.max(0, now - oldest) : 0;
 };
 
+/** Most urgent first: highest risk, then oldest. */
+const URGENCY_SORT = [{ [ALERT_FIELDS.riskScore]: 'desc' }, { [ALERT_FIELDS.timestamp]: 'asc' }];
+
 const searchAlerts = async (
   { callKibanaApi }: KibanaApi,
   query: Record<string, unknown>
@@ -133,11 +141,56 @@ const searchAlerts = async (
     body: {
       size: ALERT_FETCH_LIMIT,
       _source: Object.values(ALERT_FIELDS),
-      sort: [{ [ALERT_FIELDS.riskScore]: 'desc' }, { [ALERT_FIELDS.timestamp]: 'asc' }],
+      sort: URGENCY_SORT,
       query,
     },
   });
   return (body.hits?.hits ?? []).map(toTriageAlert);
+};
+
+/**
+ * The most urgent alerts of each rule, rules ordered by their most urgent alert. A batch holds at
+ * most `BATCH_ALERT_CAP` alerts, so a rule with a large backlog contributes one batch's worth and
+ * cannot fill the result and crowd quieter rules out of the plan.
+ */
+const searchAlertsPerRule = async (
+  { callKibanaApi }: KibanaApi,
+  query: Record<string, unknown>
+): Promise<TriageAlert[]> => {
+  const { body } = await callKibanaApi<{
+    aggregations?: { rules?: { buckets?: Array<{ top?: { hits?: { hits?: AlertHit[] } } }> } };
+  }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: 0,
+      query,
+      aggs: {
+        rules: {
+          terms: {
+            field: ALERT_FIELDS.ruleId,
+            size: RULE_FETCH_LIMIT,
+            order: [{ most_urgent_risk: 'desc' }, { oldest: 'asc' }],
+          },
+          aggs: {
+            most_urgent_risk: { max: { field: ALERT_FIELDS.riskScore } },
+            oldest: { min: { field: ALERT_FIELDS.timestamp } },
+            top: {
+              top_hits: {
+                size: BATCH_ALERT_CAP,
+                _source: Object.values(ALERT_FIELDS),
+                sort: URGENCY_SORT,
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+  const buckets = body.aggregations?.rules?.buckets;
+  // An empty result would read as an idle queue, so a response without the aggregation fails.
+  if (buckets === undefined) throw new Error('Per-rule alerts missing from the search response');
+  return buckets.flatMap(({ top }) => (top?.hits?.hits ?? []).map(toTriageAlert));
 };
 
 /** Alerts no triage or analysis has touched: no verdict, failure, claim or analysis tag. */
@@ -146,32 +199,92 @@ const UNTRIAGED_MUST_NOT = (analysisTagPrefix: string) => [
   { prefix: { [ALERT_FIELDS.tags]: analysisTagPrefix } },
 ];
 
+export interface TriageFilters {
+  minSeverity: AlertSeverity;
+  excludeBuildingBlocks: boolean;
+  excludedRuleTags: readonly string[];
+}
+
+// Filter-only fields: kept out of `ALERT_FIELDS`, which also decides which fields are fetched.
+const SEVERITY_FIELD = 'kibana.alert.severity';
+const BUILDING_BLOCK_TYPE_FIELD = 'kibana.alert.building_block_type';
+const RULE_TAGS_FIELD = 'kibana.alert.rule.tags';
+
+/** Alerts the settings keep from ever reaching a Worker, beyond the untriaged check. */
+const excludedByFilters = ({ excludeBuildingBlocks, excludedRuleTags }: TriageFilters) => [
+  ...(excludeBuildingBlocks ? [{ exists: { field: BUILDING_BLOCK_TYPE_FIELD } }] : []),
+  ...(excludedRuleTags.length > 0 ? [{ terms: { [RULE_TAGS_FIELD]: [...excludedRuleTags] } }] : []),
+];
+
+/** No clause for `low`: the lowest severity admits every alert, including ones with no severity. */
+const severityFilter = (minSeverity: AlertSeverity) =>
+  minSeverity === ALERT_SEVERITIES[0]
+    ? []
+    : [
+        {
+          terms: {
+            [SEVERITY_FIELD]: ALERT_SEVERITIES.slice(ALERT_SEVERITIES.indexOf(minSeverity)),
+          },
+        },
+      ];
+
+/** Claimed alerts the settings now exclude, so a stale claim is released but not planned again. */
+const searchExcludedClaims = async (
+  api: KibanaApi,
+  filters: TriageFilters
+): Promise<Set<string>> => {
+  const severity = severityFilter(filters.minSeverity);
+  const excluded = excludedByFilters(filters);
+  if (severity.length === 0 && excluded.length === 0) return new Set();
+  const alerts = await searchAlerts(api, {
+    bool: {
+      filter: [
+        { terms: { [ALERT_FIELDS.status]: [...OPEN_ALERT_STATUSES] } },
+        { term: { [ALERT_FIELDS.tags]: TRIAGE_PENDING_TAG } },
+      ],
+      // The negation of the unclaimed search's own conditions, so both read the settings the same way.
+      must_not: [{ bool: { filter: severity, must_not: excluded } }],
+    },
+  });
+  return new Set(alerts.map(({ id }) => id));
+};
+
 /**
  * Open alerts created since `windowStart` that still need triage, so the look-back is the search
- * window and older alerts are never read or tagged. Claimed alerts come from a separate query with
- * no time bound, so a claim on a low-risk or aged-out alert is still seen and can be reclaimed.
+ * window and older alerts are never read or tagged. They are read per rule, the most urgent
+ * `BATCH_ALERT_CAP` of each, so one rule's backlog cannot hide the others. Claimed alerts come from
+ * a separate query with no time bound, so a claim on a low-risk or aged-out alert is still seen and
+ * can be reclaimed. Claims the settings now exclude are flagged so they are released, not re-planned.
  */
 export const fetchTriageAlerts = async (
   api: KibanaApi,
   analysisTagPrefix: string,
-  windowStart: number
+  windowStart: number,
+  filters: TriageFilters
 ): Promise<TriageAlert[]> => {
   const openStatus = { terms: { [ALERT_FIELDS.status]: [...OPEN_ALERT_STATUSES] } };
-  const [unclaimed, claimed] = await Promise.all([
-    searchAlerts(api, {
+  const [unclaimed, claimed, excludedClaimIds] = await Promise.all([
+    searchAlertsPerRule(api, {
       bool: {
         filter: [
           openStatus,
           { range: { [ALERT_FIELDS.timestamp]: { gte: new Date(windowStart).toISOString() } } },
+          ...severityFilter(filters.minSeverity),
         ],
-        must_not: UNTRIAGED_MUST_NOT(analysisTagPrefix),
+        must_not: [...UNTRIAGED_MUST_NOT(analysisTagPrefix), ...excludedByFilters(filters)],
       },
     }),
     searchAlerts(api, {
       bool: { filter: [openStatus, { term: { [ALERT_FIELDS.tags]: TRIAGE_PENDING_TAG } }] },
     }),
+    searchExcludedClaims(api, filters),
   ]);
-  return [...unclaimed, ...claimed];
+  return [
+    ...unclaimed,
+    ...claimed.map((alert) =>
+      excludedClaimIds.has(alert.id) ? { ...alert, excludedBySettings: true } : alert
+    ),
+  ];
 };
 
 /** The tags route returns Elasticsearch's update-by-query response, which can be a 200 with gaps. */
@@ -206,7 +319,8 @@ export const tagAlerts =
 export const countAgedOutAlerts = async (
   { callKibanaApi }: KibanaApi,
   analysisTagPrefix: string,
-  windowStart: number
+  windowStart: number,
+  filters: TriageFilters
 ): Promise<number> => {
   const { body } = await callKibanaApi<{ hits?: { total?: { value?: number } | number } }>({
     method: 'POST',
@@ -219,8 +333,9 @@ export const countAgedOutAlerts = async (
           filter: [
             { terms: { [ALERT_FIELDS.status]: [...OPEN_ALERT_STATUSES] } },
             { range: { [ALERT_FIELDS.timestamp]: { lt: new Date(windowStart).toISOString() } } },
+            ...severityFilter(filters.minSeverity),
           ],
-          must_not: UNTRIAGED_MUST_NOT(analysisTagPrefix),
+          must_not: [...UNTRIAGED_MUST_NOT(analysisTagPrefix), ...excludedByFilters(filters)],
         },
       },
     },
@@ -229,4 +344,47 @@ export const countAgedOutAlerts = async (
   if (typeof total === 'number') return total;
   if (typeof total?.value === 'number') return total.value;
   throw new Error('Aged-out alert count missing from the search response');
+};
+
+export interface LoadedAlerts {
+  alerts: Array<Record<string, unknown>>;
+  missingAlertIds: string[];
+}
+
+/**
+ * The alerts index stores `kibana.*` as flat dotted keys next to nested ECS objects. Alert
+ * Analysis requires the nested `kibana.alert.rule.uuid` shape, so dotted keys are expanded.
+ */
+const expandDottedKeys = (source: Record<string, unknown>): Record<string, unknown> =>
+  Object.entries(source).reduce<Record<string, unknown>>((expanded, [key, value]) => {
+    if (key.includes('.')) {
+      set(expanded, key, value);
+    } else {
+      expanded[key] = value;
+    }
+    return expanded;
+  }, {});
+
+/** Loads a batch's alert documents by id, as `{ _id, _index, ...source }` for Alert Analysis. */
+export const loadAlertsByIds = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[]
+): Promise<LoadedAlerts> => {
+  const { body } = await callKibanaApi<{
+    hits?: { hits?: Array<AlertHit & { _index?: string }> };
+  }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: { size: alertIds.length, query: { ids: { values: alertIds } } },
+  });
+  const hits = body.hits?.hits ?? [];
+  const found = new Set(hits.map(({ _id }) => _id));
+  return {
+    alerts: hits.map(({ _id, _index, _source = {} }) => ({
+      ...expandDottedKeys(_source),
+      _id,
+      _index,
+    })),
+    missingAlertIds: alertIds.filter((id) => !found.has(id)),
+  };
 };

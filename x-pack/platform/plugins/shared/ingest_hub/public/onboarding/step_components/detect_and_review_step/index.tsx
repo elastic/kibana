@@ -34,6 +34,7 @@ import { DeploymentSummary } from './deployment_summary';
 import { AgentSetupCallout } from './agent_setup_callout';
 import { InstalledContent } from './installed_content';
 import { useAwsOverviewDashboardUrl } from './use_aws_overview_dashboard_url';
+import { StepFooter } from '../step_footer';
 
 const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
   globalRegion: '',
@@ -70,7 +71,8 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
     return names;
   }, [selectedServiceIds, awsServicesMap, serviceSettings]);
 
-  const { statusByInstanceId, receivingCount, totalCount } = useServiceDataDetection();
+  const { statusByInstanceId, agentInfoByServiceId, receivingCount, totalCount } =
+    useServiceDataDetection();
 
   // Installed content — read from AWS package installation.
   const { data: awsPackageData } = useGetPackageInfoByKeyQuery('aws', undefined, { full: true });
@@ -127,6 +129,7 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
             awsServicesMap={awsServicesMap}
             serviceNames={serviceNames}
             statusByInstanceId={statusByInstanceId}
+            agentInfoByServiceId={agentInfoByServiceId}
             deploymentMethod={deploymentMethod}
             receivingCount={receivingCount}
             totalCount={totalCount}
@@ -143,50 +146,37 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
         </>
       )}
 
-      {/* ── Footer ──────────────────────────────────────────────────────── */}
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          {onBack && (
-            <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
+      <StepFooter onBack={onBack}>
+        <EuiFlexGroup gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              href={policiesHref}
+              onClick={onContinue}
+              data-test-subj="detectAndReviewStep-finishButton"
+            >
               <FormattedMessage
-                id="xpack.ingestHub.detectAndReviewStep.backButton"
-                defaultMessage="Back"
+                id="xpack.ingestHub.detectAndReviewStep.finishButton"
+                defaultMessage="Finish"
               />
             </EuiButtonEmpty>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href={policiesHref}
-                onClick={onContinue}
-                data-test-subj="detectAndReviewStep-finishButton"
-              >
-                <FormattedMessage
-                  id="xpack.ingestHub.detectAndReviewStep.finishButton"
-                  defaultMessage="Finish"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                iconType="sortRight"
-                iconSide="right"
-                href={overviewHref}
-                onClick={onContinue}
-                data-test-subj="detectAndReviewStep-continueButton"
-              >
-                <FormattedMessage
-                  id="xpack.ingestHub.detectAndReviewStep.continueButton"
-                  defaultMessage="Take me to my data"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              iconType="sortRight"
+              iconSide="right"
+              href={overviewHref}
+              onClick={onContinue}
+              data-test-subj="detectAndReviewStep-continueButton"
+            >
+              <FormattedMessage
+                id="xpack.ingestHub.detectAndReviewStep.continueButton"
+                defaultMessage="Take me to my data"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </StepFooter>
     </div>
   );
 }

@@ -546,6 +546,8 @@ export type RenderContext<AC extends AdditionalContext> = {
   showAlertStatusWithFlapping?: boolean;
 
   bulkActionsStore: [BulkActionsState, Dispatch<BulkActionsReducerAction>];
+
+  allowLinks?: boolean;
 } & SetRequired<
   Pick<
     AlertsTableProps<AC>,
@@ -644,6 +646,10 @@ export interface PublicAlertsDataGridProps
    * Options to customize the actions menu for each cell
    */
   cellActionsOptions?: CellActionsOptions;
+  /**
+   * When `false`, the page size selector is hidden. Defaults to `true`.
+   */
+  isInteractive?: boolean;
 }
 
 export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalContext>
@@ -720,6 +726,7 @@ export type BulkActionGroupId =
   | 'status'
   | 'assignees'
   | 'cases'
+  | 'caseRemoval'
   | 'tags'
   | 'timeline'
   | 'custom'
@@ -734,6 +741,11 @@ export interface BulkActionsConfig {
   'data-test-subj'?: string;
   disableOnQuery: boolean;
   disabledLabel?: string;
+  /**
+   * Caps how many alerts the action accepts. When more are selected, counting every matching
+   * alert under a "select all", the item is disabled and `reason` is shown as its tooltip.
+   */
+  selectionLimit?: { max: number; reason: string };
   onClick?: (
     selectedIds: TimelineItem[],
     isAllSelected: boolean,

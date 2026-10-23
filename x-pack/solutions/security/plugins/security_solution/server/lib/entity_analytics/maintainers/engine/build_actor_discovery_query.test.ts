@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 
 import {
   buildActorDiscoveryQuery,
@@ -17,8 +17,12 @@ import { COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS } from '../communica
 import { ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS } from '../accesses/configs';
 import type { RelationshipIntegrationConfig, CompositeBucket } from './types';
 
-const HOST_EUID_FILTER = euid.dsl.getEuidDocumentsContainsIdFilter('host');
-const USER_EUID_FILTER = euid.dsl.getEuidDocumentsContainsIdFilter('user');
+const HOST_EUID_FILTER = euid.dsl.getEuidDocumentsContainsIdFilter(
+  getBuiltInEntityDefinition('host')
+);
+const USER_EUID_FILTER = euid.dsl.getEuidDocumentsContainsIdFilter(
+  getBuiltInEntityDefinition('user')
+);
 
 const accessesConfig: RelationshipIntegrationConfig = {
   kind: 'bucketed',

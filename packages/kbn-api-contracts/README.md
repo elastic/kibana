@@ -31,7 +31,7 @@ By default the check is a soft gate: a BC detected in stable/tech_preview fails 
 3. **`src/report/`** - Error formatting and user guidance
 
    - `format_failure.ts` - Generates the tier-grouped CI-log summary (gating tiers first, then an informational experimental section)
-   - `release_note.json` - Release note wording shared by the CI log and the PR comment
+   - `release_note.json` - Release note, `## Impact` and `## Action` wording shared by the CI log and the PR comment
    - `write_impact_report.ts` - Writes the JSON impact report consumed by the PR notifier
    - `links.ts` - Documentation links
 
@@ -164,7 +164,7 @@ When the change list would make the comment too long for GitHub, the comment sti
 
 ### Release note suggestions
 
-Gating changes (stable and Technical Preview) get release note guidance in the PR comment and the CI log. The "If intentional" step of "What to do" asks the author to add an allowlist entry, the `release_note:breaking` label (in place of any other `release_note:*` label), and release note text in the PR description. The "Release note" section after it asks for a `## Release note` section in the PR description. Per the [release notes guidelines](https://www.elastic.co/docs/extend/kibana/contributing/workflow/how-we-use-github#release-notes), the release notes script publishes that text as the change's entry in the Breaking changes section, so it should tell API users what changed, how it affects them, and what they need to do. This check doesn't write release notes itself.
+Gating changes (stable and Technical Preview) get release note guidance in the PR comment and the CI log. The "If intentional" step of "What to do" asks the author to add an allowlist entry, the `release_note:breaking` label (in place of any other `release_note:*` label), and release note text in the PR description. The "Release note" section after it asks for a `## Release note` section in the PR description, plus `## Impact` and `## Action` sections for a breaking change: who and what the change affects, and the steps or workarounds API users need to adapt. Per the [release notes guidelines](https://www.elastic.co/docs/extend/kibana/contributing/workflow/how-we-use-github#release-notes), the release notes script publishes that text as the change's entry in the Breaking changes section, so it should tell API users what changed, how it affects them, and what they need to do. This check doesn't write release notes itself.
 
 Allowlisting a stable or Technical Preview change stops it from failing the check, but it still ships as a breaking change. So once its allowlist entry is added, the change moves to an "Approved" section and the label and release note guidance stay, even when nothing else gates.
 
@@ -218,7 +218,7 @@ When the check detects changes, CI posts a PR comment listing the affected endpo
 3. **If intentional:**
    - add an allowlist entry with team approval (see [Allowlist](#allowlist)), coordinating with the owning team.
    - add the `release_note:breaking` label to the PR (replacing any other `release_note:*` label).
-   - add a `## Release note` section to the PR description. See [Release note suggestions](#release-note-suggestions).
+   - add a `## Release note` section to the PR description, plus `## Impact` and `## Action` sections for a breaking change. See [Release note suggestions](#release-note-suggestions).
 
 Once the allowlist entry is added, the check passes, but the comment stays. It lists the change as approved and keeps the label and release note steps.
 

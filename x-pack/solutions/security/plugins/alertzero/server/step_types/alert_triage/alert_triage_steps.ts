@@ -10,6 +10,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import {
   triageHeadroomStepCommonDefinition,
+  triageLoadAlertsStepCommonDefinition,
   triagePlanSweepStepCommonDefinition,
 } from '../../../common/step_types/alert_triage';
 import { readHeadroom } from '../../alert_triage/headroom';
@@ -19,6 +20,7 @@ import {
   countAgedOutAlerts,
   fetchTriageAlerts,
   listLiveExecutionIds,
+  loadAlertsByIds,
   readWorkflowRunLagMs,
   tagAlerts,
 } from './ports';
@@ -81,6 +83,11 @@ export const getTriagePlanSweepStepDefinition = () =>
             : { status: 'unknown' };
 
         const now = Date.now();
+        const filters = {
+          minSeverity: input.min_severity,
+          excludeBuildingBlocks: input.exclude_building_blocks,
+          excludedRuleTags: input.excluded_rule_tags,
+        };
         const plan = await planSweep(
           {
             readHeadroom: async () => headroom,
@@ -88,13 +95,15 @@ export const getTriagePlanSweepStepDefinition = () =>
               countAgedOutAlerts(
                 contextManager,
                 input.analysis_tag_prefix,
-                now - input.lookback_hours * 60 * 60 * 1000
+                now - input.lookback_hours * 60 * 60 * 1000,
+                filters
               ),
             fetchAlerts: () =>
               fetchTriageAlerts(
                 contextManager,
                 input.analysis_tag_prefix,
-                now - input.lookback_hours * 60 * 60 * 1000
+                now - input.lookback_hours * 60 * 60 * 1000,
+                filters
               ),
             listLiveExecutionIds: () =>
               listLiveExecutionIds(contextManager, input.batch_workflow_id, logger),
@@ -132,6 +141,19 @@ export const getTriagePlanSweepStepDefinition = () =>
         };
       } catch (error) {
         throw toApiError(error, 'plan triage sweep');
+      }
+    },
+  });
+
+export const getTriageLoadAlertsStepDefinition = () =>
+  createServerStepDefinition({
+    ...triageLoadAlertsStepCommonDefinition,
+    handler: async ({ input, contextManager }) => {
+      try {
+        const { alerts, missingAlertIds } = await loadAlertsByIds(contextManager, input.alert_ids);
+        return { output: { alerts, missing_alert_ids: missingAlertIds } };
+      } catch (error) {
+        throw toApiError(error, 'load triage batch alerts');
       }
     },
   });

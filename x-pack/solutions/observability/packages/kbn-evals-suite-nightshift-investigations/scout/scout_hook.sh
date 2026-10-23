@@ -2,7 +2,9 @@
 
 # Scout hook for the nightshift-investigations eval suite (`scoutHook` in evals.suites.json).
 #
-# Reads the evals config JSON on stdin and prints `{"env": {...}}`. The sandbox API key, `url` and
+# Reads this suite's config JSON on stdin and prints `{"env": {...}}`. In CI and with the dev-vault
+# profile that is the suite's own `nightshift` Vault secret (`vaultSecret`), not the general evals
+# config; a file profile passes its config.<profile>.json. The sandbox API key, `url` and
 # optional mTLS file paths (`ssl`) come from the config's `sandbox` block, falling back to SANDBOX_*
 # already exported in the shell (e.g. a self-hosted sandbox). The shared sandbox needs only `apiKey`
 # and `url`: it authenticates by API key over plain TLS.
@@ -84,6 +86,29 @@ certificate="$(pem_path SANDBOX_CLIENT_CERT_PATH '.sandbox.ssl.certificate')"
 key="$(pem_path SANDBOX_CLIENT_KEY_PATH '.sandbox.ssl.key')"
 ca="$(pem_path SANDBOX_CA_CERT_PATH '.sandbox.ssl.certificateAuthorities')"
 
+orca=false
+if [[ "${EVAL_SHARD_ID:-}" == orcabench || "${NIGHTSHIFT_DATASETS:-}" == orcabench ]]; then
+  orca=true
+  # Only the suite's own config holds the ORCA key. CI forwards this same input when the native
+  # CLI invokes the hook again.
+  orca_config="$(printf '%s' "$config" | jq -c '.nightshiftOrcaEs // null')"
+  if ! printf '%s' "$orca_config" | jq -e '
+    type == "object" and (.url | type == "string" and startswith("https://") and (contains("@") | not))
+    and (.apiKey | type == "string" and length > 0 and (contains("REPLACE_ME") | not))
+    and (.readableIndices == null or (.readableIndices | type == "string" and length > 0))
+  ' >/dev/null 2>&1; then
+    echo "nightshift-investigations scout hook: ORCA requires nightshiftOrcaEs.url and apiKey (and a nonempty readableIndices, if set) in the Nightshift evals config" >&2
+    exit 1
+  fi
+  # Replace only this process's target; the existing Nightshift secret is never modified. The
+  # hint lands in the agent's manifest, so it comes from config (where a change shows up as a
+  # benchmark change) and the fallback names the indices without hinting at an incident window.
+  config="$(printf '%s' "$config" | HOOK_ORCA_CONFIG="$orca_config" jq '
+    .nightshift.telemetry = ({
+      readableIndices: "Read logs-orcabench.otel-*, traces-orcabench.otel-* and metrics-orcabench.otel-*."
+    } + ($ENV.HOOK_ORCA_CONFIG | fromjson | with_entries(select(.value != null))))')"
+fi
+
 telemetry_url="$(resolve NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL '.nightshift.telemetry.url')"
 telemetry_key="$(resolve NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY '.nightshift.telemetry.apiKey')"
 readable_indices="$(resolve NIGHTSHIFT_SANDBOX_READABLE_INDICES '.nightshift.telemetry.readableIndices')"
@@ -131,6 +156,7 @@ done
 
 # Values reach jq through its environment, not `--arg`: argv is visible to any process listing,
 # while a process's environment is readable only by its owner.
+HOOK_ORCA="$orca" \
 HOOK_HOST="$host" \
   HOOK_PORT="$port" \
   HOOK_API_KEY="$api_key" \
@@ -143,7 +169,9 @@ HOOK_HOST="$host" \
   HOOK_TELEMETRY_CONFIG="$telemetry_config" \
   HOOK_KIBANA_CONFIG="$script_dir/kibana.sandbox.yml" \
   jq -n '{
-    env: (({
+    env: ((if $ENV.HOOK_ORCA == "true" then {
+      NIGHTSHIFT_DATASETS: "orcabench", NIGHTSHIFT_ORCA_TELEMETRY: "1"
+    } else {} end) + ({
       SANDBOX_API_HOST: $ENV.HOOK_HOST,
       SANDBOX_API_PORT: $ENV.HOOK_PORT,
       SANDBOX_API_KEY: $ENV.HOOK_API_KEY

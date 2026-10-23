@@ -17,7 +17,7 @@ import type { AwsServiceMatrixEntry, DataFormat, DeploymentMethod } from './aws_
 import { applyDeploymentMethodView } from './aws_service_matrix';
 import { useAwsServiceMatrix } from './use_aws_service_matrix';
 import { useDefaultDataFormat } from './use_default_data_format';
-import { getOnboardingSessionKey } from './onboarding_session_storage';
+import { getOnboardingSessionKey } from './core/onboarding_session_storage';
 import type { ExistingSecretRefs } from './step_components/authenticate_and_deploy_step/secret_refs';
 import { useIsSelfManaged } from './use_is_self_managed';
 
@@ -68,7 +68,12 @@ export interface DetectAndReviewStepState {
   /** SO id of the cloud-onboarding-deployment record created at Deploy time. Used to update the record after allSettled and on retry. */
   onboardingDeploymentId?: string;
   /** ECF stacks last written to the SO. Used to skip redundant PUT calls on Back→Next. */
-  ecfStacks?: Array<{ family: string; stackName: string; templateVersion: string }>;
+  ecfStacks?: Array<{
+    family: string;
+    stackName: string;
+    templateVersion: string;
+    stackArn?: string;
+  }>;
   /**
    * instanceId → policyId for instances removed from Step 1 whose deployed policy has not yet
    * been cleaned up. Populated by removeDeployInstance; consumed and cleared by handleDeploy.
@@ -141,7 +146,12 @@ interface PersistedDetectAndReviewStep {
   failedInstances: string[];
   deployErrors: Record<string, string>;
   onboardingDeploymentId?: string;
-  ecfStacks?: Array<{ family: string; stackName: string; templateVersion: string }>;
+  ecfStacks?: Array<{
+    family: string;
+    stackName: string;
+    templateVersion: string;
+    stackArn?: string;
+  }>;
   pendingCleanupPolicyIds?: Record<string, string>;
   isDirty?: boolean;
   isAuthDirty?: boolean;
@@ -192,6 +202,8 @@ interface OnboardingFlowState {
   refetchAwsServiceMatrix: () => void;
   /** False while the default data format is being resolved (async spaces lookup). */
   isDataFormatResolved: boolean;
+  /** The data format derived from the solution (OTel for Observability, ECS otherwise), the recommended one. */
+  defaultDataFormat: DataFormat;
 }
 
 const OnboardingFlowContext = createContext<OnboardingFlowState | undefined>(undefined);
@@ -651,6 +663,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         awsServiceMatrixError,
         refetchAwsServiceMatrix,
         isDataFormatResolved,
+        defaultDataFormat: defaultFormat,
       }}
     >
       {children}

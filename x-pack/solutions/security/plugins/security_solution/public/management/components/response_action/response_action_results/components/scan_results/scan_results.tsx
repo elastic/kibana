@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { ActionDetails, MaybeImmutable } from '../../../../../../../common/endpoint/types';
-import { EndpointActionFailureMessage } from '../action_failure_message';
+import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
 import { getAgentActionState } from '../../utils';
 
 export interface ScanResultsProps {
