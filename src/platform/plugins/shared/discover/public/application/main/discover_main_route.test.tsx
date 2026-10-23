@@ -14,7 +14,7 @@ import {
   createKbnUrlStateStorage,
   type IKbnUrlStateStorage,
 } from '@kbn/kibana-utils-plugin/public';
-import { act, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { discoverServiceMock } from '../../__mocks__/services';
 import type { MainRouteProps } from './discover_main_route';
 import { DiscoverMainRoute } from './discover_main_route';
@@ -35,6 +35,14 @@ import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { DEFAULT_ESQL_QUERY_SETTING } from '@kbn/discover-utils';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
+import { DiscoverMainApp } from './components/single_tab_view/main_app';
+import {
+  internalStateActions,
+  useCurrentDataView,
+  useCurrentTabAction,
+  useCurrentTabSelector,
+  useInternalStateDispatch,
+} from './state_management/redux';
 
 let mockCustomizationService: Promise<DiscoverCustomizationService> | undefined;
 
@@ -71,9 +79,9 @@ jest.mock('../../context_awareness/hooks/use_root_profile', () => ({
 
 function getServicesMock(
   hasESData: boolean | Promise<boolean> = true,
-  hasDataView = true,
+  hasDataView: boolean | Promise<boolean> = true,
   locationState?: MainHistoryLocationState,
-  hasESQLDatasets = false
+  hasESQLDatasets: boolean | Promise<boolean> = false
 ) {
   const dataViewsMock = discoverServiceMock.data.dataViews;
   dataViewsMock.hasData = {
@@ -81,16 +89,20 @@ function getServicesMock(
     hasUserDataView: jest.fn(),
     hasDataView: jest.fn(() => Promise.resolve(hasDataView)),
   };
-  dataViewsMock.getDefaultDataView = jest.fn(async () => (hasDataView ? dataViewMock : null));
-  dataViewsMock.getIdsWithTitle = jest.fn(async () => (hasDataView ? [dataViewListItem] : []));
+  dataViewsMock.getDefaultDataView = jest.fn(async () =>
+    (await hasDataView) ? dataViewMock : null
+  );
+  dataViewsMock.getIdsWithTitle = jest.fn(async () =>
+    (await hasDataView) ? [dataViewListItem] : []
+  );
   dataViewsMock.create = jest.fn().mockResolvedValue(dataViewMock);
   discoverServiceMock.core.http.get = jest.fn().mockImplementation((path: string) => {
     if (path === DATASETS_ROUTE) {
-      return Promise.resolve({
-        datasets: hasESQLDatasets
+      return Promise.resolve(hasESQLDatasets).then((hasDatasets) => ({
+        datasets: hasDatasets
           ? [{ name: 'fds_dataset', data_source: 's3', resource: 'bucket' }]
           : [],
-      });
+      }));
     }
     return Promise.resolve({});
   });
@@ -113,10 +125,10 @@ const setupComponent = ({
   dataViewList,
 }: {
   hasESData?: boolean | Promise<boolean>;
-  hasDataView?: boolean;
+  hasDataView?: boolean | Promise<boolean>;
   locationState?: MainHistoryLocationState;
   onAppLeave?: AppMountParameters['onAppLeave'];
-  hasESQLDatasets?: boolean;
+  hasESQLDatasets?: boolean | Promise<boolean>;
   stateStorageContainer?: IKbnUrlStateStorage;
   dataViewList?: Promise<DataViewListItem[]>;
 } = {}) => {
@@ -161,6 +173,9 @@ describe('DiscoverMainRoute', () => {
   beforeEach(() => {
     mockCustomizationService = Promise.resolve(createCustomizationService());
     mockRootProfileState = defaultRootProfileState;
+    jest
+      .mocked(DiscoverMainApp)
+      .mockImplementation(() => <div data-test-subj="discover-main-app" />);
   });
 
   test('renders the main app when hasESData=true & hasDataView=true ', async () => {
@@ -401,6 +416,91 @@ describe('DiscoverMainRoute', () => {
     await waitForLoad();
 
     expect(screen.getByTestId('discover-main-app')).toBeVisible();
+  });
+
+  test('keeps the app mounted when switching to Classic before the catalog loads', async () => {
+    const stateStorageContainer = await createUrlStateWithQuery({ esql: 'ROW value = 1' });
+    const catalog = Promise.withResolvers<DataViewListItem[]>();
+    jest.mocked(DiscoverMainApp).mockImplementation(function StatefulApp() {
+      const dispatch = useInternalStateDispatch();
+      const transition = useCurrentTabAction(internalStateActions.transitionFromESQLToDataView);
+      const dataView = useCurrentDataView();
+      const isLoading = useCurrentTabSelector((tab) => tab.isDataViewLoading);
+
+      return (
+        <div data-test-subj="discover-main-app">
+          <input aria-label="Draft query" defaultValue="keep this draft" />
+          <button onClick={() => dispatch(transition({ dataView }))}>Switch to Classic</button>
+          <output>{isLoading ? 'Switching' : 'Ready'}</output>
+        </div>
+      );
+    });
+
+    setupComponent({ stateStorageContainer, dataViewList: catalog.promise });
+    await screen.findByTestId('discover-main-app');
+    const draft = screen.getByRole('textbox', { name: 'Draft query' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to Classic' }));
+
+    expect(await screen.findByText('Switching')).toBeVisible();
+    expect(screen.getByRole('textbox', { name: 'Draft query' })).toBe(draft);
+
+    await act(async () => {
+      catalog.resolve([dataViewListItem]);
+    });
+
+    expect(await screen.findByText('Ready')).toBeVisible();
+    expect(screen.getByRole('textbox', { name: 'Draft query' })).toBe(draft);
+    expect(draft).toHaveValue('keep this draft');
+  });
+
+  test('opens ES|QL before availability checks finish and shows the no-data page if they find nothing', async () => {
+    const stateStorageContainer = await createUrlStateWithQuery({ esql: 'ROW value = 1' });
+    const esData = Promise.withResolvers<boolean>();
+    const dataViews = Promise.withResolvers<boolean>();
+    const datasets = Promise.withResolvers<boolean>();
+
+    setupComponent({
+      stateStorageContainer,
+      hasESData: esData.promise,
+      hasDataView: dataViews.promise,
+      hasESQLDatasets: datasets.promise,
+    });
+
+    expect(await screen.findByTestId('discover-main-app')).toBeVisible();
+    expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
+
+    await act(async () => {
+      esData.resolve(false);
+      dataViews.resolve(false);
+      datasets.resolve(false);
+    });
+
+    expect(await screen.findByTestId('kbnNoDataPage')).toBeVisible();
+    expect(screen.queryByTestId('discover-main-app')).not.toBeInTheDocument();
+  });
+
+  test('keeps a classic tab loading until availability is known even if its catalog is ready', async () => {
+    const stateStorageContainer = await createUrlStateWithQuery({ language: 'kuery', query: '' });
+    const dataViews = Promise.withResolvers<boolean>();
+
+    setupComponent({
+      stateStorageContainer,
+      hasDataView: dataViews.promise,
+      dataViewList: Promise.resolve([dataViewListItem]),
+    });
+
+    await screen.findByRole('tab', { name: 'Untitled', exact: true });
+    expect(screen.getByLabelText('Loading')).toBeVisible();
+    expect(screen.queryByTestId('noDataViewsPrompt')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('discover-main-app')).not.toBeInTheDocument();
+
+    await act(async () => {
+      dataViews.resolve(true);
+    });
+
+    expect(await screen.findByTestId('discover-main-app')).toBeVisible();
+    expect(discoverServiceMock.dataViews.hasData.hasDataView).toHaveBeenCalledTimes(1);
   });
 
   test('waits for the data view list before opening a classic tab', async () => {
