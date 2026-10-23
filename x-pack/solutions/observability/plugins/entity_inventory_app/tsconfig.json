@@ -12,7 +12,6 @@
     "@kbn/i18n",
     "@kbn/observability-shared-plugin",
     "@kbn/app-header",
-    "@kbn/react-kibana-context-render",
     "@kbn/shared-ux-router"
   ]
 }
