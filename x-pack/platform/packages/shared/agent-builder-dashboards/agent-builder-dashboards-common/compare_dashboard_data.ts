@@ -6,21 +6,24 @@
  */
 
 import { isEqual, isPlainObject, omit, sortBy } from 'lodash';
+import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { attachmentDataToDashboardState, dashboardStateToAttachmentData } from './converters';
-import type { DashboardAttachmentData } from './types';
+import type { AttachmentPanel, DashboardAttachmentData, DashboardSection } from './types';
 
-// an empty array means the same as a missing key, and the dashboard omits or adds them freely
-const omitEmptyArrays = (value: unknown): unknown => {
+// an undefined value or an empty array means the same as a missing key, and the dashboard omits or
+// adds them freely
+const omitEmptyValues = (value: unknown): unknown => {
   if (Array.isArray(value)) {
-    return value.map(omitEmptyArrays);
+    return value.map(omitEmptyValues);
   }
   if (!isPlainObject(value)) {
     return value;
   }
   return Object.fromEntries(
     Object.entries(value as Record<string, unknown>)
-      .filter(([, entry]) => !(Array.isArray(entry) && entry.length === 0))
-      .map(([key, entry]) => [key, omitEmptyArrays(entry)])
+      .filter(([, entry]) => entry !== undefined && !(Array.isArray(entry) && entry.length === 0))
+      .map(([key, entry]) => [key, omitEmptyValues(entry)])
   );
 };
 
@@ -34,9 +37,24 @@ const sortPanelsById = <Panel extends { id?: string; panels?: unknown[] }>(
       : panel
   );
 
+// the dashboard read API validates Lens panels with the Lens API schema, which fills in defaults
+// (legend truncation, percent decimals, …) that the agent never writes
+const withLensApiDefaults = <Widget extends AttachmentPanel | DashboardSection>(
+  widget: Widget
+): Widget => {
+  if ('panels' in widget) {
+    return { ...widget, panels: widget.panels.map(withLensApiDefaults) };
+  }
+  if (widget.type !== LENS_EMBEDDABLE_TYPE) {
+    return widget;
+  }
+  const parsed = lensApiConfigSchema.safeParse(widget.config);
+  return parsed.success ? { ...widget, config: { ...widget.config, ...parsed.data } } : widget;
+};
+
 /**
- * Brings attachment data to the form the dashboard serializes it in: the converter round trip
- * fills in the Lens API defaults, and the dashboard drops the time range mode, defaults
+ * Brings attachment data to the form the dashboard serializes it in: the Lens API schema and the
+ * converter round trip fill in the Lens defaults, and the dashboard drops the time range mode, defaults
  * ES|QL approximation and fills in the access control on save, which the agent never edits.
  */
 const toComparableDashboardData = (data: DashboardAttachmentData): unknown => {
@@ -44,8 +62,13 @@ const toComparableDashboardData = (data: DashboardAttachmentData): unknown => {
     esql_approximation = false,
     time_range,
     ...rest
-  } = omit(dashboardStateToAttachmentData(attachmentDataToDashboardState(data)), 'access_control');
-  return omitEmptyArrays({
+  } = omit(
+    dashboardStateToAttachmentData(
+      attachmentDataToDashboardState({ ...data, panels: data.panels.map(withLensApiDefaults) })
+    ),
+    'access_control'
+  );
+  return omitEmptyValues({
     ...rest,
     panels: sortPanelsById(rest.panels),
     pinned_panels: sortPanelsById(rest.pinned_panels),
