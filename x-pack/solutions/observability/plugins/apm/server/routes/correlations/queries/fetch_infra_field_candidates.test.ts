@@ -11,10 +11,10 @@ import {
   CONTAINER_ID,
   KUBERNETES_POD_NAME,
   CLOUD_REGION,
-  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '@kbn/apm-types';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { fetchInfraFieldCandidates } from './fetch_infra_field_candidates';
 
 const makeFieldEntry = () => ({
@@ -105,7 +105,7 @@ describe('fetchInfraFieldCandidates', () => {
     expect(filter).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ range: expect.anything() }),
-        expect.objectContaining({ term: { [SERVICE_ENVIRONMENT]: 'production' } }),
+        ...environmentQuery('production'),
       ])
     );
     // kuery clause expands filter beyond query + range + environment (≥ 4 clauses)

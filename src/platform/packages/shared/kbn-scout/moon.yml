@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/test-subj-selector'
   - '@kbn/scout-info'
   - '@kbn/scout-reporting'
+  - '@kbn/std'
   - '@kbn/zod'
   - '@kbn/core-http-common'
   - '@kbn/axe-config'
@@ -57,6 +58,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

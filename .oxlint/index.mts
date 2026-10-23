@@ -11,33 +11,67 @@
 // `@kbn/eslint-config` so each rule runs in exactly one linter. When enabling a rule here,
 // delete it from packages/kbn-eslint-config/*.js; when removing one, add it back there.
 // A rule whose ESLint options are stricter than oxlint's implementation must stay in ESLint.
+// Exception: the generated `test-api-clients` bundles keep `@kbn/imports/no_unused_imports` and
+// `import/no-duplicates` in ESLint, because the OpenAPI generator relies on both fixing its output in one pass.
 //
 // oxlint loads this through the repo-root `oxlint.config.mjs` and resolves `files`,
 // `ignorePatterns`, and `jsPlugins` paths relative to that root entry. Rule sets are spread
 // rather than passed through `extends`, which drops rule options in oxlint
 // (https://github.com/oxc-project/oxc/issues/22230).
+//
+// ESLint plugins run here through `jsPlugins` stay registered (with no rules) in the ESLint
+// config, because ESLint rejects `eslint-disable` directives that name rules it does not know.
 
-import { defineConfig, type OxlintConfig } from 'oxlint';
+import { defineConfig, type OxlintConfig, type OxlintOverride } from 'oxlint';
 
-import { javascriptRules } from './javascript.mts';
-import { typescriptRules } from './typescript.mts';
-import { jestRules } from './jest.mts';
-import { reactRules } from './react.mts';
+import { javascriptOverrides, javascriptRules, kbnConfigRules } from './javascript.mts';
+import { typescriptOverrides, typescriptRules } from './typescript.mts';
+import { jestOverrides, jestRules } from './jest.mts';
+import { reactOverrides, reactRules } from './react.mts';
 import { kibanaOverrides, kibanaRules } from './kibana.mts';
 import { licenseHeaderOverrides } from './license_headers.mts';
 import { scoutOverrides } from './scout.mts';
+import { importsOverrides } from './imports.mts';
 import { i18nOverrides } from './i18n.mts';
 import { telemetryOverrides } from './telemetry.mts';
 import { kbnUiOverrides, kbnUiRules } from './kbn_ui.mts';
 import { alertingV2Overrides } from './alerting_v2.mts';
 import { securityImportsOverrides } from './security_imports.mts';
+import { banOverrides } from './ban.mts';
+import { cypressOverrides } from './cypress.mts';
+import { dependRules } from './depend.mts';
+import { eslintCommentsOverrides } from './eslint_comments.mts';
+import { euiRules } from './eui.mts';
+import { nOverrides } from './n.mts';
+import { playwrightOverrides, playwrightSettings } from './playwright.mts';
+import { testingLibraryOverrides } from './testing_library.mts';
+import { unusedVarsOverrides } from './unused_vars.mts';
+import { importPluginOverrides } from './import_plugin.mts';
+import { nestedConfigOverrides, teamOverrides } from './team_overrides.mts';
+
+const movedFromEslintOverrides: OxlintOverride[] = [
+  ...javascriptOverrides,
+  ...typescriptOverrides,
+  ...jestOverrides,
+  ...teamOverrides,
+  ...nestedConfigOverrides,
+];
+
+const movedFromEslintRuleNames = new Set([
+  ...Object.keys(kbnConfigRules),
+  ...movedFromEslintOverrides.flatMap(({ rules }) => Object.keys(rules ?? {})),
+]);
 
 export default defineConfig<OxlintConfig>({
-  plugins: ['react', 'typescript', 'import', 'jsx-a11y', 'react-perf', 'node', 'jest'],
+  plugins: ['react', 'typescript', 'import', 'jsx-a11y', 'react-perf', 'node', 'jest', 'unicorn'],
   jsPlugins: [
     {
       name: '@kbn/eslint',
       specifier: './packages/kbn-eslint-plugin-eslint/oxlint_plugin.js',
+    },
+    {
+      name: '@kbn/imports',
+      specifier: './packages/kbn-eslint-plugin-imports/oxlint_plugin.js',
     },
     {
       name: '@kbn/i18n',
@@ -59,27 +93,57 @@ export default defineConfig<OxlintConfig>({
       name: '@kbn/alerting-v2',
       specifier: './packages/kbn-eslint-plugin-alerting-v2/oxlint_plugin.js',
     },
+    'eslint-plugin-ban',
+    'eslint-plugin-cypress',
+    'eslint-plugin-depend',
+    '@eslint-community/eslint-plugin-eslint-comments',
+    '@elastic/eslint-plugin-eui',
+    'eslint-plugin-n',
+    'eslint-plugin-playwright',
+    'eslint-plugin-testing-library',
   ],
   categories: {
     correctness: 'off',
   },
+  settings: playwrightSettings,
   rules: {
     ...javascriptRules,
+    ...kbnConfigRules,
     ...typescriptRules,
     ...jestRules,
     ...reactRules,
     ...kibanaRules,
     ...kbnUiRules,
+    ...dependRules,
+    ...euiRules,
   },
   overrides: [
+    ...importPluginOverrides,
     ...licenseHeaderOverrides,
     ...kibanaOverrides,
+    ...reactOverrides,
     ...scoutOverrides,
+    ...importsOverrides,
     ...i18nOverrides,
     ...telemetryOverrides,
     ...securityImportsOverrides,
     ...kbnUiOverrides,
     ...alertingV2Overrides,
+    ...banOverrides,
+    ...cypressOverrides,
+    ...eslintCommentsOverrides,
+    ...nOverrides,
+    ...playwrightOverrides,
+    ...testingLibraryOverrides,
+    ...unusedVarsOverrides,
+    ...movedFromEslintOverrides,
+    {
+      // ESLint skips hidden files and directories, except nested `.eslintrc.js` files and the
+      // directories `.eslintignore` re-includes. Rules moved from ESLint stay off there.
+      files: ['**/.*/**', '**/.*'],
+      excludeFiles: ['**/.buildkite/**', '**/.github/**', '**/.storybook/**', '**/.eslintrc.js'],
+      rules: Object.fromEntries([...movedFromEslintRuleNames].map((name) => [name, 'off'])),
+    },
   ],
   // oxlint's parser rejects TypeScript grammar errors (TS1016: required parameter after an
   // optional one) that ESLint's parser and tsc's `skipLibCheck` let through in this declaration.

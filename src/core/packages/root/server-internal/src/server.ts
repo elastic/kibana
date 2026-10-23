@@ -61,10 +61,8 @@ import { PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
 import {
-  ES_CLIENT_AUTHENTICATION_HEADER,
   HTTPAuthorizationHeader,
   isUiamCredential,
-  isExternalUiamCredential,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
@@ -625,21 +623,7 @@ export class Server {
         if (!credential || !isUiamCredential(credential)) {
           return undefined;
         }
-        if (isExternalUiamCredential(request) || uiam.isExternalApiKey(request)) {
-          return undefined;
-        }
-
-        const inboundClientSecret = request.headers[ES_CLIENT_AUTHENTICATION_HEADER];
-        let inboundSecrets: string[] = [];
-        if (typeof inboundClientSecret === 'string') {
-          inboundSecrets = [inboundClientSecret];
-        } else if (Array.isArray(inboundClientSecret)) {
-          inboundSecrets = inboundClientSecret;
-        }
-        const hasUpstreamSecret = inboundSecrets.some(
-          (entry) => entry.length > 0 && !uiam.isOwnClientAuthentication(entry)
-        );
-        if (hasUpstreamSecret) {
+        if (uiam.isExternalApiKey(request)) {
           return undefined;
         }
 
@@ -647,6 +631,9 @@ export class Server {
           UIAM_INTERNAL_CALLER_ATTESTATION_HEADER
         ];
       });
+      httpStart.setSelfClientOwnClientAuthenticationCheck((value) =>
+        uiam.isOwnClientAuthentication(value)
+      );
     }
     const coreUsageDataStart = this.coreUsageData.start({
       elasticsearch: elasticsearchStart,

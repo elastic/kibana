@@ -92,7 +92,7 @@ export const observablesTool = (
       const result = await runStep();
       // delete returns { case_id, observable_id } — no full case to emit.
       if (mode !== 'delete') {
-        const attachmentIds = await emitFromStepResult(toolContext.attachments, result);
+        const attachmentIds = await emitFromStepResult(toolContext, result);
         return injectAttachmentIds(result, attachmentIds);
       }
       return result;

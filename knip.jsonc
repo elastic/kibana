@@ -123,12 +123,11 @@
       "entry": ["set.js", "setWith.js", "fp/*.js"]
     },
     "src/platform/packages/private/kbn-esql-scripts": {
-      // These are standalone CLI scripts invoked via ts-node from the package's shell scripts
-      // (definitions/make_defs.sh, documentation/make_docs.sh), not from an index/main entry.
-      // Declaring them as entries lets knip follow their imports.
-      "entry": ["definitions/generate_*.ts", "documentation/generate_*.ts"]
+      // generate.ts is a standalone CLI invoked via swc-register from the package's generate.sh,
+      // not from an index/main entry. Declaring it as an entry lets knip follow its imports.
+      "entry": ["generate.ts"]
     },
-    "src/platform/packages/shared/kbn-test": {
+    "src/platform/packages/shared/kbn-jest": {
       // Jest setup/polyfill/serializer files referenced from jest-preset.js via `<rootDir>/...`.
       // knip can't resolve `<rootDir>` inside a shared preset.
       "entry": ["**/*.{js,ts}"]
