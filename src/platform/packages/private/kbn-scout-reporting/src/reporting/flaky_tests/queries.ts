@@ -60,7 +60,7 @@ export interface TestMetadataRow {
 }
 
 /** What the Jest reporter writes as the suite title of a test outside any describe block. */
-const UNKNOWN_SUITE_TITLE = 'unknown';
+export const UNKNOWN_SUITE_TITLE = 'unknown';
 
 const asArray = (value: string | string[] | null | undefined): string[] => {
   if (value === null || value === undefined) return [];
@@ -68,7 +68,7 @@ const asArray = (value: string | string[] | null | undefined): string[] => {
 };
 
 /** Tests split by execution model, so each group can be queried the way its framework requires. */
-const groupByExecutionModel = (
+export const groupByExecutionModel = (
   tests: ReadonlyArray<{ testId: string; framework: TestFramework }>
 ): Array<{ frameworks: readonly TestFramework[]; testIds: string[] }> =>
   buildExecutionModels([...new Set(tests.map((test) => test.framework))]).map((model) => ({
@@ -282,7 +282,7 @@ export const buildTestMetadataQuery = (
     `LIMIT ${ESQL_ROW_LIMIT}`,
   ].join(' | ');
 
-const runEsql = async <T extends Record<string, unknown>>(
+export const runEsql = async <T extends Record<string, unknown>>(
   es: ESClient,
   query: string
 ): Promise<T[]> => {
