@@ -12,12 +12,16 @@ import {
   AUTHENTICATIONS_TABLE,
 } from '../../../screens/users/user_authentications';
 import { EVENTS_TAB, EVENTS_TAB_CONTENT } from '../../../screens/users/user_events';
+import { RISK_SCORE_TAB } from '../../../screens/users/user_risk_score';
 
 import { login } from '../../../tasks/login';
 import { visitUserDetailsPage, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { usersUrl } from '../../../urls/navigation';
 import { waitForTabToBeLoaded } from '../../../tasks/common';
+import { ENABLE_RISK_SCORE_BUTTON } from '../../../screens/entity_analytics';
+
+const RISK_SCORE_MAINTAINER_STATUS_URL = '/internal/security/entity_store/entity_maintainers*';
 
 describe(
   'Users stats and tables',
@@ -40,6 +44,10 @@ describe(
     });
 
     beforeEach(() => {
+      cy.intercept('GET', RISK_SCORE_MAINTAINER_STATUS_URL, {
+        statusCode: 200,
+        body: { maintainers: [] },
+      }).as('riskScoreMaintainerStatus');
       login();
       visitWithTimeRange(usersUrl('allUsers'));
     });
@@ -77,6 +85,13 @@ describe(
         waitForTabToBeLoaded(EVENTS_TAB);
 
         cy.get(EVENTS_TAB_CONTENT).should('exist');
+      });
+
+      // https://github.com/elastic/kibana/issues/184201
+      it(`renders users risk tab`, { tags: ['@skipInServerless'] }, () => {
+        waitForTabToBeLoaded(RISK_SCORE_TAB);
+
+        cy.get(ENABLE_RISK_SCORE_BUTTON).should('exist');
       });
     });
 
