@@ -8,13 +8,11 @@
  */
 
 import { css } from '@emotion/react';
-import { type UseEuiTheme } from '@elastic/eui';
+import { type UseEuiTheme, euiCanAnimate } from '@elastic/eui';
 
 export const overflowYAuto = css({ overflowY: 'auto' });
 
-/**
- * Data attribute set on the sticky header render slot that reflects whether the sticky header is displayed.
- */
+// Data attribute set on the sticky header render slot that reflects whether the sticky header is displayed.
 export const stickyHeaderVisibleAttribute = 'data-sticky-header-visible';
 
 export const relativePosition = css({ position: 'relative' });
@@ -62,6 +60,10 @@ export const dataCascadeImplStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
     zIndex: euiTheme.levels.header,
     transform: 'translateY(0)',
     visibility: 'visible',
+
+    [euiCanAnimate]: {
+      transition: `visibility ${euiTheme.animation.normal} ${euiTheme.animation.resistance}, transform ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
+    },
 
     [`&[${stickyHeaderVisibleAttribute}="false"]`]: {
       pointerEvents: 'none',
