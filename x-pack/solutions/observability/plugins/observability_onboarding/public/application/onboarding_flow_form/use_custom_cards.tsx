@@ -35,7 +35,7 @@ export function useCustomCards(
       application,
       http,
       featureFlags,
-      context: { isServerless, isCloud, isDev },
+      context: { isServerless, isDev },
       share,
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
@@ -57,7 +57,6 @@ export function useCustomCards(
     history,
     buildKubernetesRoutePath(location.search)
   );
-  const { href: firehoseUrl } = reactRouterNavigate(history, `/firehose/${location.search}`);
   const { href: otelApmQuickstartUrl } = reactRouterNavigate(
     history,
     `/otel-apm/${location.search}`
@@ -71,36 +70,6 @@ export function useCustomCards(
   const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
   const otelApmUrl = isManagedOtlpServiceAvailable ? otelApmQuickstartUrl : apmUrl;
   const syntheticsLocator = share?.url.locators.get(syntheticsAddMonitorLocatorID);
-
-  const firehoseQuickstartCard: IntegrationCardItem = {
-    id: 'firehose-quick-start',
-    name: 'firehose-quick-start',
-    type: 'virtual',
-    title: i18n.translate('xpack.observability_onboarding.packageList.uploadFileTitle', {
-      defaultMessage: 'AWS Firehose',
-    }),
-    description: metricsOnboardingEnabled
-      ? i18n.translate('xpack.observability_onboarding.packageList.uploadFileDescription', {
-          defaultMessage: 'Collect logs and metrics from Amazon Web Services (AWS).',
-        })
-      : i18n.translate(
-          'xpack.observability_onboarding.logsEssential.packageList.uploadFileDescription',
-          {
-            defaultMessage: 'Collect logs from Amazon Web Services (AWS).',
-          }
-        ),
-    categories: ['observability'],
-    icons: [
-      {
-        type: 'svg',
-        src: 'https://epr.elastic.co/package/awsfirehose/1.1.0/img/logo_firehose.svg',
-      },
-    ],
-    url: firehoseUrl,
-    version: '',
-    integration: '',
-    isQuickstart: true,
-  };
 
   const cloudforwarderQuickstartCard: IntegrationCardItem = {
     id: 'cloudforwarder-quick-start',
@@ -500,14 +469,6 @@ export function useCustomCards(
       integration: '',
       isCollectionCard: false,
     },
-    /**
-     * The new Firehose card should only be visible on Cloud
-     * as Firehose integration requires additional proxy,
-     * which is not available for on-prem customers.
-     * Also visible in dev mode for local development.
-     * Hidden when the new AWS onboarding flow is enabled.
-     */
-    ...((isCloud || isDev) && !isIngestHubOnboardingEnabled ? [firehoseQuickstartCard] : []),
     /**
      * The EDOT Cloud Forwarder card should only be visible on Serverless
      * as it requires Elastic Cloud infrastructure.

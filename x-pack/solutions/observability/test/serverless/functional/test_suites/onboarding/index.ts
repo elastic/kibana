@@ -10,6 +10,5 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Onboarding', function () {
     loadTestFile(require.resolve('./auto_detect'));
-    loadTestFile(require.resolve('./firehose'));
   });
 }

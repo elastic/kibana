@@ -27,7 +27,6 @@ import { css } from '@emotion/react';
 
 import { useSearchParams } from '@kbn/shared-ux-router';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { LazyPackageCard } from '@kbn/fleet-plugin/public';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
@@ -38,7 +37,6 @@ import { useCustomCards, AWS_CLOUDWATCH_OTEL_CARD_ID } from './use_custom_cards'
 import { buildKubernetesRoutePath } from '../shared/build_kubernetes_route';
 import type { SupportedLogo } from '../shared/logo_icon';
 import { LogoIcon } from '../shared/logo_icon';
-import type { ObservabilityOnboardingAppServices } from '../..';
 import { PackageList } from '../package_list/package_list';
 import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
 import { ApiEndpoints } from '../api_endpoints/api_endpoints';
@@ -54,12 +52,6 @@ interface UseCaseOption {
 }
 
 export const OnboardingFlowForm: FunctionComponent = () => {
-  const {
-    services: {
-      context: { isCloud },
-    },
-  } = useKibana<ObservabilityOnboardingAppServices>();
-
   const metricsOnboardingEnabled = usePricingFeature(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
   );
@@ -211,13 +203,6 @@ export const OnboardingFlowForm: FunctionComponent = () => {
 
     return cardList.includes(card.id);
   });
-
-  /**
-   * Cloud deployments have the new Firehose quick start
-   * flow enabled, so the ond card 'epr:awsfirehose' should
-   * not show up in the search results.
-   */
-  const searchExcludePackageIdList = isCloud ? ['epr:awsfirehose'] : [];
 
   // True while a radio is being selected via keyboard, used to tell keyboard
   // selection apart from a pointer click. A ref so it survives re-renders.
@@ -441,7 +426,6 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           customCards={customCards.filter(
             (card) => !card.isCollectionCard && card.id !== AWS_CLOUDWATCH_OTEL_CARD_ID
           )}
-          excludePackageIdList={searchExcludePackageIdList}
         />
       </div>
       <ApiEndpoints />
