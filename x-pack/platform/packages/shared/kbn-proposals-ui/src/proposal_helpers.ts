@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { isTodoProposal, PROPOSAL_CATEGORY_TODO } from '@kbn/proposals-common';
 import type { ApprovalProposal, ApprovalDecision } from './types';
@@ -14,6 +15,9 @@ import { formatDismissReason } from './dismiss_reason';
 
 /** The format of each full date and time in the proposal UI. The time uses 24 hours: "20 Oct 2026, 14:36". */
 export const DATE_TIME_FORMAT = 'D MMM YYYY, HH:mm';
+
+/** Every full date and time in the proposal UI, from an ISO 8601 timestamp: "20 Oct 2026, 14:36". */
+export const formatDateTime = (iso: string): string => moment(iso).format(DATE_TIME_FORMAT);
 
 /** Stored lowercase (`configure`, `respond`, ...); the caption reads it in sentence case. */
 const toSentenceCase = (value: string): string =>
@@ -173,6 +177,18 @@ export const getProposalTone = (proposal: ApprovalProposal): 'primary' | 'danger
  */
 export const hasDeadlinePassed = (proposal: Pick<ApprovalProposal, 'expiresAt'>): boolean =>
   proposal.expiresAt !== undefined && new Date(proposal.expiresAt).getTime() <= Date.now();
+
+/** How close a deadline has to be for the modal to warn about it. */
+const EXPIRES_SOON_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+/** Whether a deadline is still ahead but no more than a day away. */
+export const isExpiringSoon = (proposal: Pick<ApprovalProposal, 'expiresAt'>): boolean => {
+  if (proposal.expiresAt === undefined) {
+    return false;
+  }
+  const remaining = new Date(proposal.expiresAt).getTime() - Date.now();
+  return remaining > 0 && remaining <= EXPIRES_SOON_WINDOW_MS;
+};
 
 /** Replaced by a newer proposal, by a retry or a revision. */
 export const isProposalReplaced = (proposal: ApprovalProposal): boolean =>

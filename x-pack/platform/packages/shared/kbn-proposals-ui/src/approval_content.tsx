@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import moment from 'moment';
 import { type EuiButtonColor, useGeneratedHtmlId } from '@elastic/eui';
 import { isTodoProposal, type DismissReason } from '@kbn/proposals-common';
 import { ApprovalContentHeader } from './approval_content_header';
@@ -19,7 +18,7 @@ import { getApprovalOutcomeBanner } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import { getProposalBadge } from './proposal_badge';
 import {
-  DATE_TIME_FORMAT,
+  formatDateTime,
   getProposalCaption,
   getProposalDecision,
   getProposalTone,
@@ -251,9 +250,8 @@ export const ApprovalContent = memo<ApprovalContentProps>(
 
     const approvalPhase = getProposalPhase(proposal, isSubmitting);
 
-    // A replaced card stays 'pending' for the footer and banner (see `approvalPhase`), but a failed
-    // attempt still has to say how it ended; replaced revisions keep no badge, since their
-    // successor carries the live state.
+    // A replaced proposal shows no outcome banner and no footer, since its successor carries the
+    // live state, but a failed attempt still has to say how it ended.
     const isReplacedFailure = isReplaced && decision?.status === 'failed';
     // An undecided proposal this user has no permission to decide: the same restricted state the
     // flyout row shows, so the row and its modal agree.
@@ -263,9 +261,10 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const banner = isReplaced ? undefined : getApprovalOutcomeBanner(approvalPhase);
     // A decision in flight has no reason to give yet, only what it is waiting on.
     const startedBy = currentActorName ?? APPROVAL_MODAL_TRANSLATIONS.currentActorFallback;
-    const startedAt = since ? moment(since).format(DATE_TIME_FORMAT) : undefined;
+    const startedAt = since ? formatDateTime(since) : undefined;
     // A decision still in flight keeps the state's own title (Applying, Declining), then
     // who asked and when as the description.
+    const applyingSince = decision?.decidedAt ?? since;
     const inFlightDescription =
       approvalPhase === 'declining'
         ? APPROVAL_MODAL_TRANSLATIONS.whoAndWhenBannerDescription(startedBy, startedAt)
@@ -274,9 +273,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           // decision's).
           APPROVAL_MODAL_TRANSLATIONS.whoAndWhenBannerDescription(
             decision?.actorName ?? startedBy,
-            decision?.decidedAt ?? since
-              ? moment(decision?.decidedAt ?? since).format(DATE_TIME_FORMAT)
-              : undefined
+            applyingSince ? formatDateTime(applyingSince) : undefined
           )
         : undefined;
     // A settled decision: who decided it and when, then the reason if there is one.
@@ -284,11 +281,12 @@ export const ApprovalContent = memo<ApprovalContentProps>(
       approvalPhase === 'applied' ||
       approvalPhase === 'marked_applied' ||
       approvalPhase === 'no_action' ||
-      approvalPhase === 'declined'
+      approvalPhase === 'declined' ||
+      approvalPhase === 'failed'
         ? [
             APPROVAL_MODAL_TRANSLATIONS.whoAndWhenBannerDescription(
               decision?.actorName ?? APPROVAL_MODAL_TRANSLATIONS.unknownActorFallback,
-              decision?.decidedAt ? moment(decision.decidedAt).format(DATE_TIME_FORMAT) : undefined
+              decision?.decidedAt ? formatDateTime(decision.decidedAt) : undefined
             ),
             typeof decision?.reason === 'string' ? decision.reason : undefined,
           ]
@@ -379,7 +377,9 @@ export const ApprovalContent = memo<ApprovalContentProps>(
         <ApprovalStatusCallouts
           isPending={!isReplaced && !isRestricted && approvalPhase === 'pending'}
           previousExecutionError={proposal.previousExecutionError}
-          failedAttemptError={isReplacedFailure ? proposal.executionError : undefined}
+          failedAttemptError={
+            isReplacedFailure ? settledDescription ?? proposal.executionError : undefined
+          }
           isExpired={isExpired}
           expiredCaption={isExpired ? getExpiredCaption(proposal) : undefined}
           expiresAt={proposal.expiresAt}

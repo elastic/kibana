@@ -245,48 +245,16 @@ describe('ProposedActionButton', () => {
       jest.useRealTimers();
     });
 
-    it('says Expires soon on the row and in the modal header', () => {
+    it('keeps Needs review on the row and warns about the deadline in the modal', () => {
       renderButton({ proposal: { ...mockProposal, expiresAt: '2026-10-23T12:00:00.000Z' } });
 
-      expect(within(screen.getByTestId('proposedAction')).getByText('Expires soon')).toBeVisible();
+      expect(within(screen.getByTestId('proposedAction')).getByText('Needs review')).toBeVisible();
 
       fireEvent.click(screen.getByTestId('proposedAction'));
 
-      expect(
-        within(screen.getByRole('dialog')).getAllByText('Expires soon').length
-      ).toBeGreaterThan(0);
-    });
-  });
-
-  describe('a proposal offered again after a failed attempt', () => {
-    const retried = { ...mockProposal, previousExecutionError: 'Timed out waiting for workflow' };
-
-    it('retries by approving, without opening the modal', () => {
-      const onConfirm = jest.fn().mockResolvedValue(undefined);
-      renderButton({ proposal: retried, onConfirm });
-
-      fireEvent.click(screen.getByTestId('proposedAction-retry'));
-
-      expect(onConfirm).toHaveBeenCalledTimes(1);
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    });
-
-    it('offers no retry to a user who cannot decide', () => {
-      renderButton({ proposal: retried, readOnly: true });
-
-      expect(screen.queryByTestId('proposedAction-retry')).not.toBeInTheDocument();
-    });
-
-    it('offers no retry while an approval is being sent', () => {
-      renderButton({ proposal: retried, isSubmitting: 'applying' });
-
-      expect(screen.queryByTestId('proposedAction-retry')).not.toBeInTheDocument();
-    });
-
-    it('offers no retry once the proposal has been replaced', () => {
-      renderButton({ proposal: { ...retried, status: 'superseded', supersededBy: 'next' } });
-
-      expect(screen.queryByTestId('proposedAction-retry')).not.toBeInTheDocument();
+      const dialog = within(screen.getByRole('dialog'));
+      expect(dialog.getByText('Needs review')).toBeVisible();
+      expect(dialog.getAllByText(/Expires soon/).length).toBeGreaterThan(0);
     });
   });
 
@@ -308,12 +276,11 @@ describe('ProposedActionButton', () => {
       expect(screen.queryByText('Irreversible')).not.toBeInTheDocument();
     });
 
-    it('shows the full date and time in a tooltip on the time of the decision', async () => {
+    it('shows the full date and time of the decision, not how long ago it was', () => {
       renderButton({ proposal: decidedProposal });
 
-      fireEvent.mouseOver(screen.getByText(/ago$/));
-
-      expect(await screen.findByRole('tooltip')).toHaveTextContent(/^1 Jan 2024, \d{2}:\d{2}$/);
+      expect(screen.getByText(/1 Jan 2024, \d{2}:\d{2}/)).toBeInTheDocument();
+      expect(screen.queryByText(/ago$/)).not.toBeInTheDocument();
     });
 
     it('shows a Declined badge for a dismissed proposal', () => {
@@ -323,8 +290,8 @@ describe('ProposedActionButton', () => {
     });
 
     it.each<[string, Partial<ApprovalProposal>, RegExp]>([
-      ['approved', {}, /ago$/],
-      ['to-do, marked as applied,', { category: 'todo', status: 'no_action' }, /ago$/],
+      ['approved', {}, /1 Jan 2024/],
+      ['to-do, marked as applied,', { category: 'todo', status: 'no_action' }, /1 Jan 2024/],
     ])('captions a %s proposal with who acted and when', (_, overrides, caption) => {
       renderButton({ proposal: { ...decidedProposal, ...overrides } });
 

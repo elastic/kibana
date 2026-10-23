@@ -94,16 +94,6 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     noTypeCaption: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.noType', {
       defaultMessage: 'No action type',
     }),
-    retryCaption: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.retryCaption', {
-      defaultMessage: 'Try one more time',
-    }),
-    noFailureReasonCaption: i18n.translate(
-      'xpack.alertzero.detailsFlyout.proposedAction.noFailureReason',
-      { defaultMessage: 'No reason found' }
-    ),
-    retryTooltip: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.retryTooltip', {
-      defaultMessage: 'Retry applying',
-    }),
     reversible: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.reversible', {
       defaultMessage: 'Reversible',
     }),

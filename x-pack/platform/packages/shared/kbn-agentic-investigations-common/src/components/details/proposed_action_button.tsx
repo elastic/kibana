@@ -8,7 +8,6 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiButtonIcon,
   EuiText,
   EuiToolTip,
   euiTextTruncate,
@@ -64,12 +63,7 @@ export interface ProposedActionButtonProps {
  * surrounding `ProposedActionsList`.
  */
 const rowStyles = ({ euiTheme }: UseEuiTheme) => ({
-  // The row's button and, for a retry, the icon beside it: the list item carries the hover tint so
-  // both sit on it, and each keeps the base padding on its own sides.
   item: css`
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
     transition: background ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
 
     &:hover,
@@ -108,13 +102,6 @@ const rowStyles = ({ euiTheme }: UseEuiTheme) => ({
     ${euiTextTruncate()}
   `,
   // The tooltip anchor must stretch like the button it wraps, or the grid collapses to content.
-  // 8px between the badge and the retry icon beside it.
-  rowWithRetry: css`
-    padding-inline-end: ${euiTheme.size.s};
-  `,
-  retry: css`
-    margin-inline-end: ${euiTheme.size.base};
-  `,
   noType: css`
     color: ${euiTheme.colors.textDisabled};
   `,
@@ -160,10 +147,6 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
 
     // Only an undecided proposal is restricted: a decided one reports its outcome to everyone.
     const isRestricted = readOnly && approvalPhase === 'pending';
-    // Still undecided, but offered again after a run of its action failed: the row says so and
-    // offers the retry, which is the same approval the modal's Approve button submits.
-    const isRetry =
-      !readOnly && approvalPhase === 'pending' && Boolean(proposal.previousExecutionError);
 
     // The same badge the modal shows in its header.
     const badge = getProposalBadge(proposal, { readOnly, isSubmitting });
@@ -191,32 +174,25 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
         : decision?.actorName ?? (isSubmitting ? currentActorName : undefined);
     const actedAt = decision?.decidedAt ?? submittedAt;
 
-    // A failed record says why it failed, in red, rather than who acted: the badge already says "Failed".
-    const failureReason = decision?.status === 'failed' ? decision.reason : undefined;
-    const isFailure = isRetry || decision?.status === 'failed';
     const isExpired = decision?.status === 'expired';
     // Why it can no longer be decided: the same text the modal's callout repeats.
     const expiredReason = isExpired ? getExpiredCaption(proposal) : undefined;
 
     // Nothing to say about the action itself: the caption says so, in a disabled colour, rather
     // than leaving a bare dash.
-    const hasNoType =
-      !failureReason && !pendingCaption && !isFailure && !(actorName || isRestricted || decision);
+    const hasNoType = !pendingCaption && !(actorName || isRestricted || decision);
 
-    const caption = isRetry ? (
-      // Offered again after a failed attempt: the row invites another go, and the modal says why.
-      DETAILS_FLYOUT_LABELS.proposedAction.retryCaption
-    ) : expiredReason ? (
+    const caption = expiredReason ? (
       expiredReason
-    ) : failureReason ? (
-      failureReason
     ) : hasNoType ? (
       DETAILS_FLYOUT_LABELS.proposedAction.noTypeCaption
-    ) : isFailure ? (
-      // No reason on record: the caption says so, in the failure colour.
-      DETAILS_FLYOUT_LABELS.proposedAction.noFailureReasonCaption
     ) : actorName ? (
-      <ApprovalActorTime actorName={actorName} at={actedAt} isUnknown={decision?.isActorUnknown} />
+      <ApprovalActorTime
+        actorName={actorName}
+        at={actedAt}
+        isUnknown={decision?.isActorUnknown}
+        live={approvalPhase === 'applying' || approvalPhase === 'declining'}
+      />
     ) : isRestricted ? (
       DETAILS_FLYOUT_LABELS.proposedAction.restrictedCaption
     ) : decision ? (
@@ -226,10 +202,15 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     );
 
     // Captions that only say something is missing read in the disabled text colour.
-    const isMuted = hasNoType || (!isRetry && decision?.status === 'failed' && !failureReason);
+    const isMuted = hasNoType;
 
     const [titleElement, setTitleElement] = useState<HTMLSpanElement | null>(null);
     const isTitleTruncated = useIsTextTruncated(titleElement, proposal.title);
+    // A reason (an error, a decline, why it expired) can be as long as whoever wrote it, so it is
+    // cut to one line too. Only plain-text captions are measured; the rest are short components.
+    const captionText = typeof caption === 'string' ? caption : undefined;
+    const [captionElement, setCaptionElement] = useState<HTMLSpanElement | null>(null);
+    const isCaptionTruncated = useIsTextTruncated(captionElement, captionText ?? '');
     const styles = useEuiMemoizedStyles(rowStyles);
 
     const button = (
@@ -240,7 +221,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
           status: badge.label,
         })}
         data-test-subj={dataTestSubj}
-        css={[styles.row, isRetry && styles.rowWithRetry]}
+        css={styles.row}
         onClick={openModal}
       >
         <span css={styles.text}>
@@ -250,22 +231,16 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
             </EuiText>
           </span>
           {caption && (
-            <EuiText
-              size="xs"
-              color={
-                isMuted
-                  ? 'subdued'
-                  : isRestricted || isExpired
-                  ? 'warning'
-                  : isFailure
-                  ? 'danger'
-                  : 'subdued'
-              }
-              component="span"
-              css={[(isFailure || expiredReason) && styles.title, isMuted && styles.noType]}
-            >
-              {caption}
-            </EuiText>
+            <span ref={setCaptionElement} css={captionText !== undefined && styles.title}>
+              <EuiText
+                size="xs"
+                color={isMuted ? 'subdued' : isRestricted || isExpired ? 'warning' : 'subdued'}
+                component="span"
+                css={isMuted && styles.noType}
+              >
+                {caption}
+              </EuiText>
+            </span>
           )}
         </span>
         <ProposedActionStatusBadge
@@ -278,34 +253,23 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
       </button>
     );
 
-    const retryButton = isRetry && (
-      // Positioned on the tooltip's own anchor: left in flow, it adds a line below the row.
-      <EuiToolTip
-        content={DETAILS_FLYOUT_LABELS.proposedAction.retryTooltip}
-        // The button's own aria-label says the same, so the tooltip is not read out twice.
-        disableScreenReaderOutput
-        position="top"
-        anchorProps={{ css: styles.retry }}
-      >
-        <EuiButtonIcon
-          iconType="refresh"
-          color="primary"
-          size="xs"
-          iconSize="m"
-          aria-label={DETAILS_FLYOUT_LABELS.proposedAction.retryTooltip}
-          // The host surfaces a rejection itself (a toast), so it is not repeated here.
-          onClick={() => onConfirm().catch(() => {})}
-          data-test-subj={dataTestSubj ? `${dataTestSubj}-retry` : undefined}
-        />
-      </EuiToolTip>
-    );
-
     return (
       <li css={styles.item}>
-        {/* Anchored on the button itself, so keyboard focus reveals the full title too. */}
-        {isTitleTruncated ? (
+        {/* Anchored on the button itself, so keyboard focus reveals the full text too. One tooltip
+            for the pair: the title, and under it the reason when that is cut off as well. */}
+        {isTitleTruncated || isCaptionTruncated ? (
           <EuiToolTip
-            content={proposal.title}
+            content={
+              isCaptionTruncated ? (
+                <>
+                  <strong>{proposal.title}</strong>
+                  <br />
+                  {captionText}
+                </>
+              ) : (
+                proposal.title
+              )
+            }
             position="top"
             anchorProps={{ css: styles.tooltipAnchor }}
           >
@@ -314,8 +278,6 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
         ) : (
           button
         )}
-
-        {retryButton}
 
         {isModalOpen && (
           <ApprovalModal

@@ -12,7 +12,7 @@ import { ApprovalContent } from './approval_content';
 import type { DeclineParams, AlwaysAllowOption, ApprovalProposal } from './types';
 
 export interface ApprovalModalProps {
-  /** Disables the Approve/Decline actions without hiding them, so a reopened decided-or-expired-looking proposal still reads the same. */
+  /** The user cannot decide: an undecided proposal shows a restricted notice in place of Approve/Decline. */
   readOnly?: boolean;
   alwaysAllow?: AlwaysAllowOption;
   proposal: ApprovalProposal;

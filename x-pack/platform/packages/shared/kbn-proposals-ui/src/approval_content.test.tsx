@@ -7,7 +7,7 @@
 
 import React from 'react';
 import moment from 'moment';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ApprovalContent, type ApprovalContentProps } from './approval_content';
@@ -120,7 +120,7 @@ describe('ApprovalContent', () => {
         supersededBy: 'successor',
       },
     });
-    expect(screen.getByText('Failed')).toBeInTheDocument();
+    expect(screen.getAllByText('Failed').length).toBeGreaterThan(0);
     expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
     expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
   });
@@ -138,7 +138,7 @@ describe('ApprovalContent', () => {
       },
     });
     expect(screen.getByTestId('approvalContent-failed-attempt')).toHaveTextContent(
-      'Failed • HTTP 500: host unreachable'
+      /^Failed • elastic on .+\. HTTP 500: host unreachable$/
     );
     expect(screen.getByTestId('approvalContent-failed-attempt')).toHaveClass('euiCallOut--danger');
   });
@@ -358,10 +358,10 @@ describe('ApprovalContent', () => {
       await waitFor(() => expect(onApprove).toHaveBeenCalledTimes(1));
     });
 
-    it('reads its category as "Manual action" in the caption', () => {
+    it('reads its category as "Apply manually" in the caption', () => {
       renderContent({ proposal: todoProposal });
 
-      expect(screen.getByText(/^Manual action/)).toBeInTheDocument();
+      expect(screen.getByText(/^Apply manually/)).toBeInTheDocument();
     });
 
     it('keeps Approve and Decline for a proposal without an action in another category', () => {
@@ -440,7 +440,7 @@ describe('ApprovalContent', () => {
       proposal: { ...baseProposal, previousExecutionError: 'HTTP 400: something went wrong' },
     });
     expect(screen.getByTestId('approvalContent-previous-failure')).toHaveTextContent(
-      'Attempt failed, try one more time • HTTP 400: something went wrong'
+      'Previous attempt to apply this proposal failed • HTTP 400: something went wrong'
     );
     expect(
       isBefore(
@@ -507,6 +507,19 @@ describe('ApprovalContent', () => {
 
     afterEach(() => {
       jest.useRealTimers();
+    });
+
+    it('warns that a deadline within a day is close, and stays quiet about one further away', () => {
+      renderContent({
+        proposal: { ...baseProposal, status: 'pending', expiresAt: '2026-10-22T18:00:00.000Z' },
+      });
+      expect(screen.getByTestId('approvalContent-expires')).toHaveTextContent('Expires soon');
+      cleanup();
+
+      renderContent({
+        proposal: { ...baseProposal, status: 'pending', expiresAt: '2026-10-25T12:00:00.000Z' },
+      });
+      expect(screen.queryByTestId('approvalContent-expires')).not.toBeInTheDocument();
     });
 
     it('does not say Expires soon once the deadline has passed but the gate has not settled', () => {

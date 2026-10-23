@@ -6,7 +6,7 @@
  */
 
 import { getApprovalOutcomeBadge, type ApprovalOutcomeBadge } from './approval_outcome';
-import { getProposalPhase, hasDeadlinePassed, isProposalReplaced } from './proposal_helpers';
+import { getProposalPhase } from './proposal_helpers';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import type { ApprovalProposal } from './types';
 
@@ -14,13 +14,6 @@ const NEEDS_REVIEW_BADGE: ApprovalOutcomeBadge = {
   color: 'primary',
   iconType: 'eye',
   label: APPROVAL_MODAL_TRANSLATIONS.needsReviewBadge,
-  isLoading: false,
-};
-
-const EXPIRES_SOON_BADGE: ApprovalOutcomeBadge = {
-  color: 'warning',
-  iconType: 'clock',
-  label: APPROVAL_MODAL_TRANSLATIONS.expiresSoonCalloutTitle,
   isLoading: false,
 };
 
@@ -53,17 +46,6 @@ export const getProposalBadge = (
   }
   if (readOnly) {
     return RESTRICTED_BADGE;
-  }
-  // Undecided, but offered again after a run of its action failed.
-  if (proposal.previousExecutionError) {
-    return getApprovalOutcomeBadge('failed') ?? NEEDS_REVIEW_BADGE;
-  }
-  if (
-    proposal.expiresAt !== undefined &&
-    !hasDeadlinePassed(proposal) &&
-    !isProposalReplaced(proposal)
-  ) {
-    return EXPIRES_SOON_BADGE;
   }
   return NEEDS_REVIEW_BADGE;
 };

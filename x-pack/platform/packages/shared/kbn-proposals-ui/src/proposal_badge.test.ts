@@ -31,14 +31,8 @@ describe('getProposalBadge', () => {
     expect(getProposalBadge(pending).label).toBe('Needs review');
   });
 
-  it('says Expires soon, as a warning, while the deadline is still ahead', () => {
-    expect(getProposalBadge({ ...pending, expiresAt: FUTURE })).toMatchObject({
-      label: 'Expires soon',
-      color: 'warning',
-    });
-  });
-
-  it('goes back to Needs review once the deadline has passed but nothing has settled it yet', () => {
+  it('says Needs review whatever the deadline, ahead or passed', () => {
+    expect(getProposalBadge({ ...pending, expiresAt: FUTURE }).label).toBe('Needs review');
     expect(getProposalBadge({ ...pending, expiresAt: PAST }).label).toBe('Needs review');
   });
 
@@ -46,12 +40,6 @@ describe('getProposalBadge', () => {
     expect(getProposalBadge({ ...pending, expiresAt: FUTURE }, { readOnly: true }).label).toBe(
       'Restricted'
     );
-  });
-
-  it('puts a retry after a failed attempt before the deadline', () => {
-    expect(
-      getProposalBadge({ ...pending, expiresAt: FUTURE, previousExecutionError: 'boom' }).label
-    ).toBe('Failed');
   });
 
   it('puts a recorded outcome before the deadline', () => {

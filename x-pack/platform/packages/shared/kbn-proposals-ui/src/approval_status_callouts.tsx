@@ -8,10 +8,9 @@
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiCallOut, EuiSpacer, useEuiTheme } from '@elastic/eui';
-import moment from 'moment';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import { InlineCalloutTitle } from './inline_callout_title';
-import { DATE_TIME_FORMAT, hasDeadlinePassed } from './proposal_helpers';
+import { formatDateTime, hasDeadlinePassed, isExpiringSoon } from './proposal_helpers';
 
 interface ApprovalStatusCalloutsProps {
   /** Only shown while still pending — a decided proposal's outcome banner already covers it. */
@@ -36,20 +35,12 @@ interface ApprovalStatusCalloutsProps {
   isReplaced?: boolean;
   /** ISO 8601 deadline, when the proposal carries one: the callout says when it expired. */
   expiresAt?: string;
-  /** ISO 8601 deadline of a proposal still awaiting a decision: an info callout says when. */
+  /** ISO 8601 deadline of a proposal still awaiting a decision: a warning says when, if it is within a day. */
   upcomingExpiry?: string;
   /** The user cannot decide: an undecided proposal they have no permission to approve. */
   isRestricted?: boolean;
   'data-test-subj'?: string;
 }
-
-/**
- * The callouts `ApprovalContent` shows between the body and the footer: why a proposal is
- * being offered again after a failed attempt, why a replaced attempt failed, and why an expired
- * one can no longer be actioned. Split out from `ApprovalContent` itself only because every
- * condition renders the same spacer-callout-spacer shape, not because they share any state.
- */
-const formatDeadline = (iso: string): string => moment(iso).format(DATE_TIME_FORMAT);
 
 interface StatusCalloutProps {
   color: 'danger' | 'warning' | 'primary';
@@ -91,6 +82,13 @@ const StatusCallout = ({
   );
 };
 
+/**
+ * The callouts `ApprovalContent` shows between the body and the footer: why a proposal is offered
+ * again after a failed attempt, when it expires, why the user cannot decide it, why a replaced
+ * attempt failed, and why an expired one can no longer be applied. Split out from
+ * `ApprovalContent` itself only because every condition renders the same spacer-callout-spacer
+ * shape, not because they share any state.
+ */
 export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
   ({
     isPending,
@@ -109,7 +107,7 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
 
     return (
       <>
-        {/* Why this proposal is being offered again, when it is a retry. */}
+        {/* Why this proposal is being offered again, when a revision follows a failed attempt. */}
         {isPending && previousExecutionError && (
           <StatusCallout
             color="danger"
@@ -119,11 +117,11 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
           />
         )}
 
-        {upcomingExpiry && !hasDeadlinePassed({ expiresAt: upcomingExpiry }) && (
+        {upcomingExpiry && isExpiringSoon({ expiresAt: upcomingExpiry }) && (
           <StatusCallout
             color="warning"
             title={APPROVAL_MODAL_TRANSLATIONS.expiresSoonCalloutTitle}
-            description={formatDeadline(upcomingExpiry)}
+            description={formatDateTime(upcomingExpiry)}
             data-test-subj={testSubj('expires')}
           />
         )}
@@ -171,7 +169,7 @@ export const ApprovalStatusCallouts = memo<ApprovalStatusCalloutsProps>(
                     expiredCaption !== APPROVAL_MODAL_TRANSLATIONS.expiredGenericCaption
                       ? expiredCaption
                       : undefined,
-                    expiresAt && deadlinePassed ? formatDeadline(expiresAt) : undefined,
+                    expiresAt && deadlinePassed ? formatDateTime(expiresAt) : undefined,
                   ]
                     .filter(Boolean)
                     .join('. ') || undefined

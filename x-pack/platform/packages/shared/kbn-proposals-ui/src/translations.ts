@@ -100,9 +100,9 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
     'xpack.proposals.approvalModal.outcome.markedAppliedTitle',
     { defaultMessage: 'Marked as applied' }
   ),
-  /** The caption's name for the to-do category: a manual action, which would read oddly as "Todo". */
+  /** The caption's name for the to-do category: applied by hand, which would read oddly as "Todo". */
   todoCategory: i18n.translate('xpack.proposals.approvalModal.caption.todoCategory', {
-    defaultMessage: 'Manual action',
+    defaultMessage: 'Apply manually',
   }),
   actionErrorTitle: i18n.translate('xpack.proposals.approvalModal.outcome.actionError', {
     defaultMessage: 'Could not record the decision. Try again.',
@@ -119,7 +119,7 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   previousFailureCalloutTitle: i18n.translate(
     'xpack.proposals.approvalModal.previousFailureCallout',
     {
-      defaultMessage: 'Attempt failed, try one more time',
+      defaultMessage: 'Previous attempt to apply this proposal failed',
     }
   ),
   // Deliberately silent on *why* it expired: `isProposalExpired` is true both once the deadline

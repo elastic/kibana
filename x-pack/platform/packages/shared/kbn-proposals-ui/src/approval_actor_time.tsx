@@ -6,11 +6,10 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import moment from 'moment';
 import { css } from '@emotion/react';
 import { EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DATE_TIME_FORMAT } from './proposal_helpers';
+import { formatDateTime } from './proposal_helpers';
 
 export interface ApprovalActorTimeProps {
   actorName: string;
@@ -22,6 +21,11 @@ export interface ApprovalActorTimeProps {
   at?: string;
   /** The name is a fallback for an unknown decider, shown in the disabled text colour. */
   isUnknown?: boolean;
+  /**
+   * A decision still in flight: the time ages as it goes ("3 sec ago"). A settled one shows its
+   * full date and time instead, so the record reads the same whenever it is opened.
+   */
+  live?: boolean;
 }
 
 /** Abbreviated on purpose ("3 sec ago"), which react-intl's relative-time formatter cannot do. */
@@ -71,12 +75,17 @@ const useNow = (at: string | undefined): number => {
 };
 
 /**
- * "Kate Sosedova • 3 sec ago" — the one who/when line every state of a proposal shows, in the
- * flyout row and the modal header alike, so the two never word the same fact differently. The
- * outcome itself (applied, declined, failed…) is the badge's to say. A tooltip on the time shows
+ * "Kate Sosedova • 21 Oct 2026, 14:36" — the one who/when line every settled state of a proposal
+ * shows, or "Kate Sosedova • 3 sec ago" while a decision is still in flight (`live`). The outcome
+ * itself (applied, declined, failed…) is the badge's to say. A tooltip on the relative time shows
  * the full date and time.
  */
-export const ApprovalActorTime = ({ actorName, at, isUnknown = false }: ApprovalActorTimeProps) => {
+export const ApprovalActorTime = ({
+  actorName,
+  at,
+  isUnknown = false,
+  live = false,
+}: ApprovalActorTimeProps) => {
   const { euiTheme } = useEuiTheme();
   const now = useNow(at);
   const name = (
@@ -89,11 +98,21 @@ export const ApprovalActorTime = ({ actorName, at, isUnknown = false }: Approval
     return name;
   }
 
+  if (!live) {
+    return (
+      <>
+        {name}
+        {' • '}
+        {formatDateTime(at)}
+      </>
+    );
+  }
+
   return (
     <>
       {name}
       {' • '}
-      <EuiToolTip content={moment(at).format(DATE_TIME_FORMAT)}>
+      <EuiToolTip content={formatDateTime(at)}>
         <span tabIndex={0}>{formatAgo(at, now)}</span>
       </EuiToolTip>
     </>
