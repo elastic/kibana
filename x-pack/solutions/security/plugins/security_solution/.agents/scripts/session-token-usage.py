@@ -100,7 +100,10 @@ def resolve_price_catalog() -> PriceCatalog:
     try:
         return fetch_price_catalog(url, date.today().isoformat())
     except ValueError as exc:
-        catalog = load_price_catalog()
+        try:
+            catalog = load_price_catalog()
+        except ValueError as copy_exc:
+            raise ValueError(f"{exc}; {copy_exc}") from copy_exc
         print(f"{exc}; using the local copy.", file=sys.stderr)
         return catalog
 

@@ -747,6 +747,8 @@ class SessionMetricsParserTests(unittest.TestCase):
 
             self.assertEqual(result.returncode, 2)
             self.assertTrue(result.stdout.startswith("input=2 "), result.stdout)
+            self.assertIn("Unable to fetch price catalog", result.stderr)
+            self.assertIn("Unable to read price catalog", result.stderr)
             self.assertNotIn("using the local copy", result.stderr)
 
     def test_with_cost_prints_tokens_and_cost_from_one_read(self):
