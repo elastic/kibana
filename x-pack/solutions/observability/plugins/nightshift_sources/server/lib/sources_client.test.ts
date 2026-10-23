@@ -968,7 +968,7 @@ describe('SourcesClient', () => {
       expect(soClient.find).toHaveBeenCalledWith(expect.objectContaining({ filter: undefined }));
     });
 
-    it('looks ids up directly, drops missing sources, and then applies search and paging', async () => {
+    it('looks ids up directly, drops missing sources, and then applies the multi-word search and paging', async () => {
       const { client, soClient } = setup();
       soClient.bulkGet.mockResolvedValue({
         saved_objects: [
@@ -979,11 +979,15 @@ describe('SourcesClient', () => {
             error: { statusCode: 404, error: 'Not Found', message: 'missing' },
           },
           makeSavedObject(
-            makeAttributes({ title: 'alpha', slug: 'alpha', view_name: NGINX_VIEW_NAME_2 }),
+            makeAttributes({ title: 'alpha lake', slug: 'alpha', view_name: NGINX_VIEW_NAME_2 }),
             'alpha'
           ),
           makeSavedObject(
-            makeAttributes({ title: 'alpine', slug: 'alpine', view_name: TITLE_T_VIEW_NAME }),
+            makeAttributes({
+              title: 'alpine big lake',
+              slug: 'alpine',
+              view_name: TITLE_T_VIEW_NAME,
+            }),
             'alpine'
           ),
         ],
@@ -992,7 +996,7 @@ describe('SourcesClient', () => {
       const response = await client.list({
         page: 2,
         perPage: 1,
-        search: 'alp',
+        search: ' alp  lake ',
         ids: ['zeta', 'missing', 'alpha', 'alpine', 'zeta'],
       });
 

@@ -41,7 +41,9 @@ const sourceUpdateSchema = lazySchema(() => {
     enabled: z
       .boolean()
       .optional()
-      .describe('`false` disables the source, `true` enables it. Omit to leave it as it is.'),
+      .describe(
+        '`false` disables the source: its onboarding is cancelled and its rules are turned off, but its Knowledge Indicators and rules are kept. `true` enables it again and turns its rules back on. Omit to leave it as it is.'
+      ),
   });
 });
 
