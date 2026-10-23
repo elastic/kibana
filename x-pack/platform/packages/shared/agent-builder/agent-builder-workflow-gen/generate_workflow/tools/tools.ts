@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { parse as parseYaml } from 'yaml';
 import { tool } from '@langchain/core/tools';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import type { ToolCall } from '@kbn/agent-builder-genai-utils/langchain';
@@ -153,12 +152,21 @@ const modifyWorkflowPropertyTool = defineTool({
     'Replace the value of a top-level workflow property (e.g. "triggers", "name", "description", "consts", "settings"). Not for "steps".',
   schema: z.object({
     property: z.string().describe('Top-level property key'),
+    // A typed union: with `z.unknown()` the JSON schema has no type, and models send arrays as strings.
     value: z
-      .string()
-      .describe('New value for the whole property, as YAML text (e.g. a YAML list for "triggers")'),
+      .union([
+        z.array(z.unknown()),
+        z.record(z.string(), z.unknown()),
+        z.string(),
+        z.number(),
+        z.boolean(),
+      ])
+      .describe(
+        'New value for the whole property (e.g. an array of trigger objects for "triggers")'
+      ),
   }),
   mutatesYaml: true,
-  execute: async ({ property, value: valueYaml }, { state }) => {
+  execute: async ({ property, value }, { state }) => {
     if (property === 'steps') {
       return {
         message: {
@@ -167,13 +175,6 @@ const modifyWorkflowPropertyTool = defineTool({
             'Use insert_step / modify_step / modify_step_property / delete_step to change steps',
         },
       };
-    }
-    // The value is YAML text: with an untyped value, models send arrays and objects as strings.
-    let value: unknown;
-    try {
-      value = parseYaml(valueYaml);
-    } catch (e) {
-      return { message: { success: false, error: `value is not valid YAML: ${e.message}` } };
     }
     const result = modifyWorkflowProperty(state.yaml, property, value);
     return result.success

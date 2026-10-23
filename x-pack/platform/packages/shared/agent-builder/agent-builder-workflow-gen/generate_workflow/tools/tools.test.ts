@@ -145,15 +145,12 @@ describe('dispatchToolCall', () => {
         args: {
           property: 'triggers',
           value: [
-            '- type: scheduled',
-            '  with:',
-            '    every: 1h',
-            '- type: manual',
-            '  inputs:',
-            '    properties:',
-            '      host:',
-            '        type: string',
-          ].join('\n'),
+            { type: 'scheduled', with: { every: '1h' } },
+            {
+              type: 'manual',
+              inputs: { properties: { host: { type: 'string' } }, required: ['host'] },
+            },
+          ],
         },
       },
       baseDeps
@@ -168,28 +165,13 @@ describe('dispatchToolCall', () => {
     expect(result.yaml).toContain('message: hi');
   });
 
-  it('returns an error from modify_workflow_property when the value is not valid YAML', async () => {
-    const result = await dispatchToolCall(
-      { yaml: twoStepYaml },
-      {
-        toolCallId: 't1',
-        toolName: 'modify_workflow_property',
-        args: { property: 'triggers', value: '- type: manual\n  inputs: [' },
-      },
-      baseDeps
-    );
-
-    expect(result.message.success).toBe(false);
-    expect(result.yaml).toBeUndefined();
-  });
-
   it('rejects modify_workflow_property on steps', async () => {
     const result = await dispatchToolCall(
       { yaml: twoStepYaml },
       {
         toolCallId: 't1',
         toolName: 'modify_workflow_property',
-        args: { property: 'steps', value: '[]' },
+        args: { property: 'steps', value: [] },
       },
       baseDeps
     );
