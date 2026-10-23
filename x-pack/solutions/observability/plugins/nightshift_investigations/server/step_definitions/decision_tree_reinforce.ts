@@ -9,6 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { isToolCallStep } from '@kbn/agent-builder-common';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import type { CoreStart } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { MAX_KEYWORD_LENGTH } from '../../common';
@@ -25,12 +27,28 @@ import {
 } from '../investigation_round';
 import {
   DECISION_TREE_LEARNING_TOOL_IDS,
+  DECISION_TREE_SUBMIT_TOOL_ID,
   reinforcementSessionRegistry,
 } from '../tools/decision_tree';
 import { scopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withNightshiftBackgroundSpan } from '../tracing';
 
 const MAX_INPUT_CHARS = 100_000;
+const SUBMIT_ARGUMENTS_JSON_LIMIT = 100_000;
+
+/** Arguments of each submit call, so a micro-eval can grade them without a persisted conversation. */
+export const submitArgumentsJson = (
+  steps: readonly ConversationRoundStep[] | undefined
+): string => {
+  const submissions = (steps ?? [])
+    .filter(isToolCallStep)
+    .filter((step) => step.tool_id === DECISION_TREE_SUBMIT_TOOL_ID)
+    .map((step) => step.params);
+  const json = JSON.stringify(submissions);
+  if (json.length <= SUBMIT_ARGUMENTS_JSON_LIMIT) return json;
+  const last = JSON.stringify(submissions.slice(-1));
+  return last.length <= SUBMIT_ARGUMENTS_JSON_LIMIT ? last : '[]';
+};
 
 export const decisionTreeReinforceStepDefinition = ({
   getAgentBuilder,
@@ -52,11 +70,6 @@ export const decisionTreeReinforceStepDefinition = ({
       'tool calls and their results as real tool messages), followed by the prepared turn message.',
     inputSchema: z.object({
       ...investigationRoundInputsSchema,
-      prompt: z.string().max(MAX_INPUT_CHARS).describe('The user message that started the round.'),
-      response: z
-        .string()
-        .max(MAX_INPUT_CHARS)
-        .describe("The investigator's final response for the round."),
       message: z
         .string()
         .max(MAX_INPUT_CHARS)
@@ -82,13 +95,18 @@ export const decisionTreeReinforceStepDefinition = ({
         .array(appliedWriteSchema)
         .optional()
         .describe('Decision tree and learning writes applied during this reinforcement turn.'),
+      submissions_json: z
+        .string()
+        .describe(
+          'JSON array of nightshift_submit_optimizer_result arguments, in call order. Empty when the agent did not submit.'
+        ),
     }),
     handler: async (context) => {
       // The combined optimize workflow installs with Cortex or Memory, so this step is registered
       // even when the tree feature is off.
       if (isEnabled && !isEnabled()) {
         context.logger.info('Skipped decision tree reinforcement (flag off)');
-        return { output: { message: '', skipped: true } };
+        return { output: { message: '', skipped: true, submissions_json: '[]' } };
       }
 
       const agentBuilder = getAgentBuilder();
@@ -126,7 +144,7 @@ export const decisionTreeReinforceStepDefinition = ({
         context.logger.info(
           `Skipped decision tree reinforcement — conversation ${conversationId} is not readable by this caller`
         );
-        return { output: { message: '', skipped: true } };
+        return { output: { message: '', skipped: true, submissions_json: '[]' } };
       }
       const resolvedRoundId = loadedRound.roundId || roundId || undefined;
       const now = new Date().toISOString();
@@ -230,6 +248,7 @@ export const decisionTreeReinforceStepDefinition = ({
         return {
           output: {
             message: result.round.response.message,
+            submissions_json: submitArgumentsJson(result.round.steps),
             ...(sessionState.appliedWrites.length > 0
               ? { applied_writes: sessionState.appliedWrites }
               : {}),
