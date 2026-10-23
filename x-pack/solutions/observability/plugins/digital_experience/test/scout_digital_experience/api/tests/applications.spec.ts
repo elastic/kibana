@@ -152,12 +152,27 @@ apiTest.describe('Digital Experience applications API', { tag: DIGITAL_EXPERIENC
       expect(response).toHaveStatusCode(400);
     });
 
-    await apiTest.step('rejects an environment over 200 characters', async () => {
+    await apiTest.step('rejects an environment over 1024 characters', async () => {
       const response = await apiClient.get(
-        `${APPLICATIONS_IN_TIME_RANGE_PATH}&environment=${'x'.repeat(201)}`,
+        `${APPLICATIONS_IN_TIME_RANGE_PATH}&environment=${'x'.repeat(1025)}`,
         { headers }
       );
       expect(response).toHaveStatusCode(400);
     });
+  });
+
+  apiTest('accepts environments up to 1024 characters', async ({ apiClient, samlAuth }) => {
+    const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+    const headers = { ...COMMON_HEADERS, ...cookieHeader };
+
+    for (const length of [201, 1024]) {
+      await apiTest.step(`accepts an environment of ${length} characters`, async () => {
+        const response = await apiClient.get(
+          `${APPLICATIONS_IN_TIME_RANGE_PATH}&environment=${'x'.repeat(length)}`,
+          { headers }
+        );
+        expect(response).toHaveStatusCode(200);
+      });
+    }
   });
 });
