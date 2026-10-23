@@ -176,10 +176,12 @@ export const ClassicAlertDetailsFlyout = ({
   });
 
   const alert = data?.alert;
-  const episode = data?.episode;
-  // A failed refetch keeps the previous data, so `alert` alone does not mean it loaded.
-  const loadedAlert = !isLoading && !isError ? alert : undefined;
-  const episodes = useMemo(() => (episode ? [episode] : []), [episode]);
+  // A failed refetch keeps the previous data, so `alert` alone does not mean it loaded. Only
+  // loaded data feeds the tabs and the actions; the title may keep the last known rule name.
+  const isLoaded = !isLoading && !isError;
+  const loadedAlert = isLoaded ? alert : undefined;
+  const loadedEpisode = isLoaded ? data?.episode : undefined;
+  const episodes = useMemo(() => (loadedEpisode ? [loadedEpisode] : []), [loadedEpisode]);
   // Keep actions the table shows while disabled, such as Unresolve on a resolved classic alert.
   const menuActions = useMemo(
     () =>
@@ -240,8 +242,8 @@ export const ClassicAlertDetailsFlyout = ({
   }, [alert]);
 
   const alertDetailsHref = useMemo(
-    () => (alert ? resolveAlertDetailsHref(alertId, alert, services.http) : null),
-    [alert, alertId, services.http]
+    () => (loadedAlert ? resolveAlertDetailsHref(alertId, loadedAlert, services.http) : null),
+    [loadedAlert, alertId, services.http]
   );
 
   const takeActionPanels = useMemo(
@@ -283,10 +285,14 @@ export const ClassicAlertDetailsFlyout = ({
 
       <FlyoutTemplate.Body>
         {isLoading ? (
-          <AlertEpisodeDescriptionListSkeleton
-            rows={OVERVIEW_ROW_COUNT}
+          // The skeleton has no accessible name of its own, so the wrapper announces what loads.
+          <div
+            role="progressbar"
+            aria-label={i18n.CLASSIC_ALERT_DETAILS_LOADING}
             data-test-subj="classicAlertEpisodeDetailsLoading"
-          />
+          >
+            <AlertEpisodeDescriptionListSkeleton rows={OVERVIEW_ROW_COUNT} />
+          </div>
         ) : !loadedAlert ? (
           <EuiEmptyPrompt
             iconType="alert"

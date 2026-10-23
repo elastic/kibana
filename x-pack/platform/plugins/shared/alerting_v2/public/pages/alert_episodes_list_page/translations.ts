@@ -290,6 +290,13 @@ export const CLASSIC_ALERT_DETAILS_FIELDS_TAB = i18n.translate(
   }
 );
 
+export const CLASSIC_ALERT_DETAILS_LOADING = i18n.translate(
+  'xpack.alertingV2.episodes.classicAlertDetails.loading',
+  {
+    defaultMessage: 'Loading classic alert',
+  }
+);
+
 export const CLASSIC_ALERT_DETAILS_ERROR_TITLE = i18n.translate(
   'xpack.alertingV2.episodes.classicAlertDetails.errorTitle',
   {

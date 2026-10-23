@@ -171,6 +171,7 @@ describe('ClassicAlertDetailsFlyout', () => {
     renderFlyout();
 
     expect(screen.getByTestId('classicAlertEpisodeDetailsLoading')).toBeInTheDocument();
+    expect(screen.getByRole('progressbar', { name: 'Loading classic alert' })).toBeInTheDocument();
   });
 
   it('renders the overview and fields tabs when the alert loads', async () => {
@@ -248,6 +249,28 @@ describe('ClassicAlertDetailsFlyout', () => {
     await waitFor(() => {
       expect(screen.getByTestId('classicAlertEpisodeDetailsError')).toBeInTheDocument();
     });
+  });
+
+  it('drops the take action menu and tabs when a refetch fails after a successful load', async () => {
+    mockFetchClassicAlertById.mockResolvedValue({
+      ...activeClassicAlert,
+      _index: '.internal.alerts-observability.apm.alerts-default-000001',
+      'kibana.alert.rule.rule_type_id': 'apm.error_rate',
+    });
+
+    renderFlyout({ actions: classicWorkflowActions() });
+    expect(
+      await screen.findByTestId('alertingV2EpisodeFlyoutTakeActionButton')
+    ).toBeInTheDocument();
+
+    mockFetchClassicAlertById.mockRejectedValue(new Error('not found'));
+    await queryClient.refetchQueries({ queryKey: classicAlertQueryKeys.alert('alert-1') });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('classicAlertEpisodeDetailsError')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('alertingV2EpisodeFlyoutTakeActionButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('classicAlertEpisodeDetailsTabs')).not.toBeInTheDocument();
   });
 
   it('renders EpisodeFooterActionMenu when actions are provided', async () => {
