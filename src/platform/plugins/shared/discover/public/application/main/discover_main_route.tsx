@@ -10,7 +10,6 @@
 import { useHistory, useParams } from 'react-router-dom';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { DATASETS_ROUTE, type EsqlDatasetsResult } from '@kbn/esql-types';
 import React, { useEffect, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMountParameters } from '@kbn/core/public';
@@ -21,7 +20,6 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import { DiscoverCustomizationContextProvider } from '../../customizations';
 import {
-  type DiscoverInternalState,
   internalStateActions,
   InternalStateProvider,
   RuntimeStateManagerProvider,
@@ -47,7 +45,6 @@ import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { useUnsavedChanges } from './state_management/hooks/use_unsaved_changes';
 import { DiscoverTopNavMenuProvider } from './components/top_nav/discover_topnav_menu';
-import type { DiscoverServices } from '../../build_services';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -57,7 +54,6 @@ export interface MainRouteProps {
 }
 
 type LoadedRootProfileState = Extract<RootProfileState, { rootProfileLoading: false }>;
-type DataAvailability = DiscoverInternalState['initializationState'];
 
 const defaultCustomizationCallbacks: CustomizationCallback[] = [];
 
@@ -130,13 +126,9 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     }
   );
 
-  const [dataAvailabilityState, loadDataAvailability] = useAsyncFunction(async () => {
-    const dataAvailability = await fetchDataAvailability(services);
-
-    dispatch(internalStateActions.setInitializationState(dataAvailability));
-
-    return dataAvailability;
-  });
+  const [dataAvailabilityState, loadDataAvailability] = useAsyncFunction(() =>
+    dispatch(internalStateActions.loadDataAvailabilityOnce())
+  );
 
   const [tabsInitializationState, initializeTabs] = useAsyncFunction(
     async ({
@@ -241,7 +233,6 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const isLoading =
     rootProfileState.rootProfileLoading ||
     profileInitializationState.loading ||
-    dataAvailabilityState.loading ||
     tabsInitializationState.loading ||
     areTabsInitializing;
 
@@ -258,9 +249,11 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     return <InitializationError error={error} />;
   }
 
-  const { hasESData, hasDataView } = dataAvailabilityState.value;
-
-  if (!hasESData && !hasDataView) {
+  if (
+    !dataAvailabilityState.loading &&
+    !dataAvailabilityState.value.hasESData &&
+    !dataAvailabilityState.value.hasDataView
+  ) {
     return (
       <NoDataPage
         {...dataAvailabilityState.value}
@@ -306,28 +299,4 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
       </DiscoverTopNavMenuProvider>
     </ChartPortalsRenderer>
   );
-};
-
-const fetchDataAvailability = async ({
-  core,
-  dataViews,
-}: DiscoverServices): Promise<DataAvailability> => {
-  const esDataRequest = dataViews.hasData.hasESData().catch(() => false);
-  const esqlDatasetsRequest = core.http
-    .get<EsqlDatasetsResult>(DATASETS_ROUTE)
-    .then(({ datasets }) => datasets.length > 0)
-    .catch(() => false);
-  const hasDataView = await dataViews.hasData.hasDataView().catch(() => false);
-
-  if (hasDataView) {
-    // With a data view, the welcome page and the tab's data view prompt don't read hasESData.
-    return { hasESData: true, hasDataView };
-  }
-
-  const [hasESData, hasESQLDatasets] = await Promise.all([esDataRequest, esqlDatasetsRequest]);
-
-  return {
-    hasESData: hasESData || hasESQLDatasets,
-    hasDataView,
-  };
 };

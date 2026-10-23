@@ -922,6 +922,40 @@ describe('tab_state actions', () => {
   });
 
   describe('transitionFromESQLToDataView', () => {
+    it('waits for the catalog without waiting for the pending data availability check', async () => {
+      const { internalState, tabId, services, getCurrentTab } = await setup();
+      const availability = Promise.withResolvers<boolean>();
+      const catalog =
+        Promise.withResolvers<Awaited<ReturnType<typeof services.dataViews.getIdsWithTitle>>>();
+      jest.mocked(services.dataViews.hasData.hasDataView).mockReturnValueOnce(availability.promise);
+      jest.mocked(services.dataViews.getIdsWithTitle).mockReturnValueOnce(catalog.promise);
+      const availabilityRequest = internalState.dispatch(
+        internalStateActions.loadDataAvailabilityOnce()
+      );
+
+      const transition = internalState.dispatch(
+        internalStateActions.transitionFromESQLToDataView({
+          tabId,
+          dataView: dataViewMockWithTimeField,
+        })
+      );
+
+      expect(getCurrentTab().isDataViewLoading).toBe(true);
+      expect(getCurrentTab().appState.query).toEqual({ esql: 'FROM test-index' });
+
+      catalog.resolve([{ id: 'the-data-view-id', title: 'test-index' }]);
+      expect(getCurrentTab().isDataViewLoading).toBe(true);
+
+      await transition;
+
+      expect(getCurrentTab().isDataViewLoading).toBe(false);
+      expect(getCurrentTab().appState.query).toEqual({ language: 'kuery', query: '' });
+      expect(services.dataViews.hasData.hasDataView).toHaveBeenCalledTimes(1);
+
+      availability.resolve(true);
+      await availabilityRequest;
+    });
+
     it('should transition from ES|QL mode to Data View mode', async () => {
       const { internalState, runtimeStateManager, tabId, services, getCurrentTab } = await setup();
       const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
