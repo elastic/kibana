@@ -76,7 +76,11 @@ import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
-import { preprocessAlertInputs } from './routes/executions/utils/preprocess_alert_inputs';
+import {
+  ALL_TRIGGER_SELECTION_KINDS,
+  preprocessTriggerInputs,
+} from './routes/executions/utils/preprocess_trigger_inputs';
+import type { TriggerSelectionKind } from './routes/executions/utils/preprocess_trigger_inputs';
 import type { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_logging';
 import type { WorkflowsManagementClient } from './workflows_management_client';
 import { createWorkflowsManagementClient } from './workflows_management_client';
@@ -247,12 +251,17 @@ export interface RunWorkflowWithAlertPreprocessingParams {
   preprocessingContext: AlertPreprocessingContext;
   metadata?: Record<string, unknown>;
   /**
-   * Fields to merge into `event` *after* alert preprocessing. Use this to inject
-   * server-owned values (e.g. `caseIds`) that alert preprocessing would otherwise
-   * overwrite, because `preprocessAlertInputs` replaces the whole `event` object with
-   * the expanded alert-event shape.
+   * Fields to merge into `event` *after* trigger preprocessing. Use this to inject
+   * server-owned values (e.g. `caseIds`) that preprocessing would otherwise
+   * overwrite, because `preprocessTriggerInputs` rewrites the `event` object into
+   * its expanded shape.
    */
   eventOverrides?: Record<string, unknown>;
+  /**
+   * Which compact selections in `event` the server may expand. Defaults to every kind it
+   * supports; a caller that validates selections itself should list only the kinds it checked.
+   */
+  expandSelections?: readonly TriggerSelectionKind[];
 }
 
 export interface RunWorkflowWithAlertPreprocessingResult {
@@ -553,7 +562,12 @@ export class WorkflowsManagementApi {
         spaceId
       );
       for (const { id } of existing) {
-        await this.assertWorkflowAccess(id, spaceId, 'edit', request);
+        try {
+          await this.assertWorkflowAccess(id, spaceId, 'edit', request);
+        } catch (error) {
+          // A hidden workflow is reported per item by the service, like an id taken by anyone else.
+          if (!(error instanceof WorkflowNotFoundError)) throw error;
+        }
       }
     }
     const result = await this.workflowsService.bulkCreateWorkflows(
@@ -581,7 +595,7 @@ export class WorkflowsManagementApi {
     // Rewrite only the `name` field directly in the YAML text so that cloning
     // works even when the source workflow's YAML is schema-invalid. Strictly
     // parsing/validating here would reject invalid-but-editable workflows.
-    const cloneName = `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
+    const cloneName = `${workflow.name} ${i18n.translate('workflows.cloneSuffix', {
       defaultMessage: 'Copy',
     })}`;
     const clonedYaml = updateWorkflowYamlFields(workflow.yaml, { name: cloneName });
@@ -663,12 +677,17 @@ export class WorkflowsManagementApi {
       });
       if (workflow?.access_control) {
         const access = await this.workflowsService.getAccessControl();
-        await access.assertAccess(
-          workflow,
-          getWorkflowDeleteOperation(workflow, options?.force),
-          request,
-          { allowAdminOverride: options?.force === true }
-        );
+        try {
+          await access.assertAccess(
+            workflow,
+            getWorkflowDeleteOperation(workflow, options?.force),
+            request,
+            { allowAdminOverride: options?.force === true }
+          );
+        } catch (error) {
+          // The service skips a hidden workflow like an unknown one.
+          if (!(error instanceof WorkflowNotFoundError)) throw error;
+        }
       }
     }
     const workflows = await this.workflowsService.getWorkflowsByIds(workflowIds, spaceId);
@@ -736,11 +755,12 @@ export class WorkflowsManagementApi {
   }
 
   /**
-   * Preprocesses alert inputs and starts a workflow without waiting for its execution document.
+   * Expands any compact trigger selection in `inputs` and starts a workflow without waiting for
+   * its execution document.
    *
    * When `eventOverrides` is supplied, its keys are merged into `event` *after* preprocessing.
-   * This is needed because `preprocessAlertInputs` replaces the whole `event` object with the
-   * expanded alert-event shape, so any caller-owned event fields must be re-applied afterwards.
+   * This is needed because preprocessing rewrites the `event` object into its expanded shape, so
+   * any caller-owned event fields must be re-applied afterwards.
    */
   public async runWorkflowWithAlertPreprocessing({
     workflow,
@@ -750,12 +770,14 @@ export class WorkflowsManagementApi {
     preprocessingContext,
     metadata,
     eventOverrides,
+    expandSelections = ALL_TRIGGER_SELECTION_KINDS,
   }: RunWorkflowWithAlertPreprocessingParams): Promise<RunWorkflowWithAlertPreprocessingResult> {
-    const processedInputs = await preprocessAlertInputs(
+    const processedInputs = await preprocessTriggerInputs(
       inputs,
       preprocessingContext,
       spaceId,
-      this.logger
+      this.logger,
+      expandSelections
     );
 
     const finalInputs =
@@ -832,7 +854,7 @@ export class WorkflowsManagementApi {
       params.spaceId,
       params.request,
       // This throws on an invalid result, so it must not apply the variable rules.
-      { includeVariableRules: false }
+      { includeVariableRules: false, includeEsqlRules: false }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
       throw buildWorkflowValidationError(validation, params.yaml);
@@ -1009,6 +1031,7 @@ export class WorkflowsManagementApi {
       request,
       {
         includeVariableRules: false,
+        includeEsqlRules: false,
       }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
@@ -1066,6 +1089,7 @@ export class WorkflowsManagementApi {
       request,
       {
         includeVariableRules: false,
+        includeEsqlRules: false,
       }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
@@ -1586,6 +1610,7 @@ export class WorkflowsManagementApi {
   ): Promise<ValidateWorkflowResponseDto> {
     return this.workflowsService.validateWorkflow(yaml, spaceId, request, {
       includeVariableRules: true,
+      includeEsqlRules: true,
     });
   }
 

@@ -6,7 +6,7 @@ Consumed by AlertZero (Security) and intended for Nightshift (Observability). No
 
 ## What belongs here, and what does not
 
-This plugin owns the record, the decision, and the guarantee that an approved action runs **as the approver**. It does not decide what to propose, when to propose it, or whether autonomy allows skipping the human gate — a Worker does all three.
+This plugin owns the record, the decision, and the guarantee that an approved action runs under the right identity: **as the approver** when a human approved it, and **as the caller's service account** when it was auto-approved. It does not decide what to propose, when to propose it, or whether autonomy allows skipping the human gate — a Worker does all three.
 
 ## Layout
 
@@ -122,6 +122,12 @@ The only valid combinations, enforced by `ProposalsService.update`:
 | `approved` | `no_action` | Accepted, but there is nothing to run |
 | `approved` | `executing` | The action is running |
 | `approved` | `succeeded` / `failed` | The action's outcome |
+
+### To-do proposals
+
+A proposal in the `todo` category (`PROPOSAL_CATEGORY_TODO`, `isTodoProposal` in `@kbn/proposals-common`) is one the analyst carries out themselves, so there is nothing to approve or decline. `ApprovalContent` offers it a single **I've applied** button instead of Approve/Decline, which approves it through the gate as usual, and shows it as **Applied** / **Marked as applied** once approved. The producer sets the category explicitly: a proposal without an action is not necessarily a to-do — it may still ask for permission, for example to run an analysis — so it keeps Approve/Decline unless it is categorised `todo`. A `todo` proposal cannot carry an `actionWorkflowId`: `create()` refuses the combination, since "I've applied" would otherwise run the action.
+
+An analyst who marked one by mistake can take it back with **Mark as not applied** (`POST /internal/proposals/{id}/reopen`, `ProposalsService.reopen`). The decision stays immutable: the original keeps `approved` + `no_action`, a successor with the same content is created pending through a gate of its own (the `system-create-proposal` workflow, as `proposals.create` does), and the two are linked as a revision chain (`supersededBy` on the original; `supersedes`, `rootProposalId` and `revision` on the successor). Lists that pass `excludeSuperseded` show only the successor, and "I've applied" works on it again.
 
 Note the consequence for an undecided proposal: `expired` is its *only* terminal status, since every execution state requires an approval. A malfunction before anyone decided therefore settles as "no decision was reached" rather than as a failure.
 
@@ -362,9 +368,11 @@ The flag is a request, not a guarantee. The gate skips the human decision only w
 
 1. `autoApprove` is `true`;
 2. `actionWorkflowId` is set — autonomy governs whether an *action* may run unattended, and a proposal with no action has none to govern, so it is always gated regardless of the flag;
-3. the action does not declare `approvalPolicy: always-gate`.
+3. the action declares `approvalPolicy: autonomy-dependent`.
 
 An action declaring `always-gate` therefore overrides any autonomy the caller resolved: a Worker cannot auto-approve it by mistake, and the action's own declaration is what enforces that rather than the caller's good behaviour. When the gate is skipped the proposal is still recorded, and the action still runs.
+
+**An auto-approved action runs as the caller's service account.** With no approver to run as, `execute_as_worker` inherits the calling execution's identity (`run-as-mode: inherit`, restricted to workflows tagged `action`). `autoApprove: true` therefore needs a caller that is itself running as a service account: otherwise `execute_as_worker` fails, the failure is recorded, and the clone parks for a human like any other failed action.
 
 **The calling workflow must itself be managed.** An unmanaged parent can neither execute a managed child nor see globally-installed definitions, so a Worker registered outside `@kbn/workflows/managed` cannot reach the gate.
 
@@ -372,7 +380,7 @@ Omitting an optional input is safe. A Liquid template for an absent input still 
 
 ### How an agent creates a proposal
 
-The builtin Agent Builder tool `proposals.create` (`server/tools/create_proposal_tool.ts`, allow-listed in `@kbn/agent-builder-server`; the `proposals` tool namespace is reserved for built-in tools in `@kbn/agent-builder-common`) lets an agent propose an action in the conversation it runs in. It takes `title`, `comment` (Markdown), `origin` (the closed enum above; the agent's instructions name it), and optionally `impact`, `confidence`, and `category`. It takes no `actionWorkflowId`: the analyst carries the action out and approves or dismisses it.
+The builtin Agent Builder tool `proposals.create` (`server/tools/create_proposal_tool.ts`, allow-listed in `@kbn/agent-builder-server`; the `proposals` tool namespace is reserved for built-in tools in `@kbn/agent-builder-common`) lets an agent propose an action in the conversation it runs in. It takes `title`, `comment` (Markdown), `origin` (the closed enum above; the agent's instructions name it), and optionally `impact`, `confidence`, and `category`. It takes no `actionWorkflowId`: the analyst carries the action out and approves or dismisses it — or, for a `todo` proposal, marks it as applied (see [To-do proposals](#to-do-proposals)).
 
 - **It goes through the gate like any Worker.** The tool starts `system-create-proposal` with `workflowsManagement.management.executeWorkflow`, as the caller's request, with the conversation id of the innermost agent on the run stack. It does not call `ProposalsService.create`, because a proposal's decision is only ever recorded behind its gate (`resumeGate` refuses a proposal with no gate execution).
 - **The card is attached by the gate's create step**, through the public attachment client (`render_inline: true`), not through the run's attachment state. That write needs the caller to own the conversation, which holds for an investigation run started by its owner; otherwise the proposal is still created and only the card is missing, as for any Worker. Because the attachment is written out of band, the agent does not see its id in the same turn; the card is shown to the analyst all the same.

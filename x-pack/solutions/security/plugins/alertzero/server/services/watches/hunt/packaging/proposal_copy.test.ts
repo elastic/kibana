@@ -18,6 +18,7 @@ const host: CurrentRunHost = {
   enrolled: true,
   agentId: 'agent-1',
   capabilities: [],
+  capabilitiesSource: 'reported',
 };
 const hostSubject: Subject = { kind: 'host', value: host.name, reachable: true, host };
 const processSubject = (processSelector: ProcessSelector): Subject => ({
@@ -29,30 +30,35 @@ const processSubject = (processSelector: ProcessSelector): Subject => ({
 });
 const killProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-kill-process',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Kill process',
   category: 'respond',
 };
 
 const suspendProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-suspend-process',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Suspend process',
   category: 'respond',
 };
 
 const isolateHost: ActionCatalogEntry = {
   workflowId: 'system-security-action-isolate-host',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Isolate host',
   category: 'respond',
 };
 
 const memoryDump: ActionCatalogEntry = {
   workflowId: 'system-alertzero-action-memory-dump',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Dump memory of process',
   category: 'investigate',
 };
 
 const configureSomething: ActionCatalogEntry = {
   workflowId: 'system-security-action-configure-something',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Configure something',
   category: 'configure',
 };

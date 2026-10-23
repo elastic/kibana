@@ -27,6 +27,8 @@ jest.mock('@kbn/proposals-plugin/public', () => ({
   useDismissProposal: jest.fn(),
   useIsApprovingProposal: jest.fn(),
   useIsDecliningProposal: jest.fn(),
+  useReopenProposal: jest.fn(() => ({ mutateAsync: jest.fn() })),
+  useIsReopeningProposal: jest.fn(() => false),
 }));
 
 jest.mock('../../../user_profiles', () => ({
@@ -68,7 +70,11 @@ const mockProposal: ProposalWithMetadata = {
   confidence: 'high',
   origin: 'alertzero',
   createdAt: '2024-01-01T00:00:00Z',
-  action: { name: 'Isolate cfo-mbp-14 — host isolation', category: 'Response action' },
+  action: {
+    name: 'Isolate cfo-mbp-14 — host isolation',
+    category: 'Response action',
+    approvalPolicy: 'always-gate',
+  },
 };
 
 const decidedProposal: ProposalWithMetadata = {
@@ -79,7 +85,11 @@ const decidedProposal: ProposalWithMetadata = {
   decidedBy: { fullName: 'Bonnie Fishel', username: 'bfishel', email: null },
   decidedAt: '2024-01-01T17:20:00.000Z',
   title: 'After-hours domain admin logins — fin-dc-01',
-  action: { name: 'After-hours domain admin logins — fin-dc-01', category: 'Response action' },
+  action: {
+    name: 'After-hours domain admin logins — fin-dc-01',
+    category: 'Response action',
+    approvalPolicy: 'always-gate',
+  },
 };
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (

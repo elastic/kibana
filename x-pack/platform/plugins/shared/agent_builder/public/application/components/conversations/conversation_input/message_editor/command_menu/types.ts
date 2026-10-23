@@ -49,6 +49,8 @@ export interface CommandDefinition {
   readonly scheme: string;
   /** The character sequence that activates the command (e.g. '@', '/') */
   readonly sequence: string;
+  /** Sequences that activated the command before `sequence`, still found in labels of badges serialized then */
+  readonly legacySequences?: readonly string[];
   /** Human readable name to be used for a11y */
   readonly name: string;
   /** Component that will render the menu for this command */
