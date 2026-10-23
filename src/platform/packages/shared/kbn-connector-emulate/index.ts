@@ -35,6 +35,7 @@ export type {
   EmulatorNamedOperation,
   EmulatorOperation,
 } from './src/fetch/list_operations';
+export type { DescribedContent, OperationDescription } from './src/fetch/describe_operation';
 export { isGraphQLSpec } from './src/graphql/graphql_protocol';
 export type { GraphQLSpec } from './src/graphql/graphql_protocol';
 export { isMcpSpec } from './src/mcp/mcp_protocol';
@@ -56,6 +57,7 @@ export type {
   Recording,
   RejectedResponse,
   ResponseFixture,
+  ResponseOrigin,
   StoredResponse,
 } from './src/engine/response_engine';
 export type { RequestMatcher } from './src/engine/request_match';

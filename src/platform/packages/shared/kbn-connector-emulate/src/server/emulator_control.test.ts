@@ -28,6 +28,13 @@ const spec: OpenApiDocument = {
 const control = (path: string, method = 'GET') =>
   new Request(new URL(path, 'http://emulator.invalid'), { method });
 
+const putJson = (path: string, body: unknown) =>
+  new Request(new URL(path, 'http://emulator.invalid'), {
+    method: 'PUT',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
 describe('createEmulatorControlHandler', () => {
   let emulator: ReturnType<typeof createEmulatorFetch>;
   let handle: ReturnType<typeof createEmulatorControlHandler>;
@@ -93,6 +100,69 @@ describe('createEmulatorControlHandler', () => {
     expect(response.status).toBe(405);
     expect(response.headers.get('allow')).toBe('POST');
     expect(emulator.calls).toHaveLength(2);
+  });
+
+  it('sets, lists and drops runtime fixtures on PUT, GET and DELETE /_mock/fixtures', async () => {
+    const fixture = {
+      operation: { method: 'GET', path: '/items' },
+      response: { status: 429, headers: { 'retry-after': '1' } },
+    };
+
+    const put = await handle(putJson('/_mock/fixtures', { fixtures: [fixture] }));
+    expect(put.status).toBe(200);
+    expect(await put.json()).toEqual({ fixtures: [fixture] });
+    expect((await emulator.fetch('https://api.vendor.example/v1/items')).status).toBe(429);
+    expect(await (await handle(control('/_mock/fixtures'))).json()).toEqual({
+      fixtures: [fixture],
+    });
+
+    expect((await handle(control('/_mock/fixtures?operation=listItems', 'DELETE'))).status).toBe(
+      204
+    );
+    expect(emulator.runtimeFixtures.list()).toEqual([]);
+  });
+
+  it('answers 400 with the rejected fixtures, and sets none, when the spec rejects one', async () => {
+    const response = await handle(
+      putJson('/_mock/fixtures', {
+        fixtures: [{ operation: { method: 'GET', path: '/teams' }, response: { status: 200 } }],
+      })
+    );
+
+    expect(response.status).toBe(400);
+    expect((await response.json()).rejected).toEqual([
+      expect.objectContaining({ operation: 'GET /teams' }),
+    ]);
+    expect(emulator.runtimeFixtures.list()).toEqual([]);
+  });
+
+  it.each([
+    ['not JSON', 'nope', 'not JSON'],
+    ['no fixtures list', { fixture: {} }, '"fixtures"'],
+    ['a fixture without an operation', { fixtures: [{ response: { status: 200 } }] }, 'operation'],
+    [
+      'a fixture without a status',
+      { fixtures: [{ operation: { name: 'query boards' }, response: {} }] },
+      'response',
+    ],
+  ])('answers 400 to a body with %s', async (_case, body, detail) => {
+    const response = await handle(
+      new Request(new URL('/_mock/fixtures', 'http://emulator.invalid'), {
+        method: 'PUT',
+        body: typeof body === 'string' ? body : JSON.stringify(body),
+      })
+    );
+
+    expect(response.status).toBe(400);
+    expect((await response.json()).detail).toContain(detail);
+  });
+
+  it('describes an operation on GET /_mock/operations/<id>', async () => {
+    const response = await handle(control('/_mock/operations/listItems'));
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ id: 'listItems', method: 'GET', path: '/items' });
+    expect((await handle(control('/_mock/operations/deleteItem'))).status).toBe(404);
   });
 
   it('answers 404 naming the endpoints to unknown paths', async () => {
