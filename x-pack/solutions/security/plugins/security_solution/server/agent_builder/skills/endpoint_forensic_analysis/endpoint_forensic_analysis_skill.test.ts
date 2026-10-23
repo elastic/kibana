@@ -52,6 +52,19 @@ describe('endpointForensicAnalysisSkill', () => {
     expect(endpointForensicAnalysisSkill.content).toContain('Do not also render the indicators');
   });
 
+  it('keeps the skeleton opt-in rules generic and unambiguous', () => {
+    const content = endpointForensicAnalysisSkill.content.replace(/\s+/g, ' ');
+    expect(content).toContain('flag the ambiguity, and do not add a skeleton');
+    expect(content).not.toContain('flag the ambiguity, and stop');
+    // Examples name classes of benign activity, not a specific fixture's events.
+    expect(content).toContain('admin tooling, scheduled maintenance, routine share access');
+    expect(content).not.toContain('vssadmin');
+    expect(content).toContain(
+      'In structured-output mode, omit the skeleton unless the schema has a dedicated non-timeline field for it'
+    );
+    expect(content).toContain('events: []');
+  });
+
   it('routes conflicting antivirus / configuration issues to elastic-defend-configuration-troubleshooting', () => {
     expect(endpointForensicAnalysisSkill.description).toContain('antivirus');
     expect(endpointForensicAnalysisSkill.description).toContain(
