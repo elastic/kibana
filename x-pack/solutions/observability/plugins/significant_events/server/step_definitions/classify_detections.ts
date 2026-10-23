@@ -185,13 +185,17 @@ const isWithinReviewWindow = ({
  * The time of the agent's last review of a rule, when it can stand in for the verdict: inside the
  * review window, after every verdict of the rule's live series, before the latest bucket, and with
  * the rule's own series unchanged since — the same matches over the probe span, and no bucket since
- * (the latest included) shifting up from the count at the review. Any doubt (no series, an
- * untrusted verdict time, a review the series cannot show) means no fresh review.
+ * (the latest included) shifting up from the count at the review. A rule with an unjudged member has
+ * no verdict to compare the probe to, so the probe must also agree with the matches at the review:
+ * the series ends before the current bucket and cannot show a rule that only just started matching.
+ * Any doubt (no series, an untrusted verdict time, a review the series cannot show) means no fresh
+ * review.
  */
 const freshReviewTime = ({
   reviewedAt,
   memberships,
   observed,
+  probed,
   now,
   reviewFreshMs,
   probeSpanBuckets,
@@ -199,6 +203,7 @@ const freshReviewTime = ({
   reviewedAt: number | undefined;
   memberships: readonly LiveRuleMembership[];
   observed: ObservedSeries | undefined;
+  probed: ProbeResult | undefined;
   now: number;
   reviewFreshMs: number;
   probeSpanBuckets: number;
@@ -216,6 +221,8 @@ const freshReviewTime = ({
   const rowsNow = hasRowsAt({ series, time: latestStart, spanBuckets: probeSpanBuckets });
   const countThen = countAt(series, reviewedAt);
   if (rowsThen === undefined || countThen === undefined || rowsThen !== rowsNow) return undefined;
+  const isProbeAgreeing = probed?.status === 'ok' && probed.hasRows === rowsThen;
+  if (!needsProbe(memberships) && !isProbeAgreeing) return undefined;
   const hasShiftedUp = countsAfter(series, reviewedAt).some(
     (count) => shiftFrom({ value: count, from: countThen }) === 'up'
   );
@@ -396,7 +403,8 @@ const needsProbe = (series: readonly LiveRuleMembership[]): boolean =>
 
 /**
  * Probes and observes the rules that need it, at most `probeConcurrency` at once. A judged rule is
- * probed; one with an agent review is observed even when unjudged, since the review needs its series.
+ * probed; one with an agent review is observed and probed even when unjudged, since the review needs
+ * its series and the probe's proof that nothing started since.
  * Rules the agent may read go first, so a spent budget never costs them their read.
  */
 const readSeries = async ({
@@ -437,7 +445,7 @@ const readSeries = async ({
           }
           const storedQuery = series.find(({ esqlQuery }) => esqlQuery !== undefined)?.esqlQuery;
           const [probed, observed] = await Promise.all([
-            isJudged ? probe(storedQuery) : undefined,
+            isJudged || reviewedRuleUuids.has(ruleUuid) ? probe(storedQuery) : undefined,
             observe(storedQuery),
           ]);
           if (probed) probes.set(ruleUuid, probed);
@@ -503,6 +511,7 @@ const decideRow = ({
     reviewedAt,
     memberships,
     observed,
+    probed,
     now,
     reviewFreshMs,
     probeSpanBuckets,

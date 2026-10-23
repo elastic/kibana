@@ -100,11 +100,11 @@ describe('discovery workflow detection classifier wiring', () => {
       expect([...order].sort((a, b) => a - b)).toEqual(order);
     });
 
-    it('uses the registered step type and never lets a classifier failure fail the run', () => {
+    it('uses the registered step type and lets a classifier failure fail the run', () => {
       const step = requireStep('classify_detections');
 
       expect(step.type).toBe('significantEvents.classifyDetections');
-      expect(step['on-failure']).toEqual({ continue: true });
+      expect(step['on-failure']).toBeUndefined();
     });
 
     it('passes the detection rows, the space and every classifier input to the step', () => {

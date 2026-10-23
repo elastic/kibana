@@ -227,9 +227,12 @@ export const describeSkip = (
   skip: DetectionSkip,
   formatTime: (isoTime: string) => string
 ): string[] => {
+  const reasonState = REASON_STATES[skip.reason];
+  // The stored verdict only refines a reason this knows; an unknown reason is shown as stored.
   const state =
-    (skip.stored_verdict ? VERDICT_STATES[skip.stored_verdict] : undefined) ??
-    REASON_STATES[skip.reason];
+    reasonState === undefined
+      ? undefined
+      : (skip.stored_verdict ? VERDICT_STATES[skip.stored_verdict] : undefined) ?? reasonState;
   const lines: string[] = [];
   if (skip.reason === 'already_reviewed') {
     lines.push(

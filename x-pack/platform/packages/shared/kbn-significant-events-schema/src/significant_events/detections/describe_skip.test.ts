@@ -35,6 +35,12 @@ describe('describeSkip', () => {
     ]);
   });
 
+  it('shows an unknown reason as stored, whatever verdict the marker carries', () => {
+    expect(
+      describeSkip({ reason: 'a_newer_reason' as never, stored_verdict: 'confirms' }, formatTime)
+    ).toEqual(['a_newer_reason']);
+  });
+
   it('says what the query returned and what the event already records', () => {
     expect(
       describeSkip(

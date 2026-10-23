@@ -447,6 +447,19 @@ describe('classifyBatch', () => {
       }
     );
 
+    it.each([
+      [
+        'matches the series cannot see yet: the probe finds rows where the review saw none',
+        jest.fn(async () => probeResult('ok', true)),
+        repeat(61, 0),
+      ],
+      ['a probe that failed', jest.fn(async () => probeResult('timeout', false)), FLAT],
+    ])('does not stand in for an unjudged verdict with %s', async (_name, probe, counts) => {
+      const { decision } = await review({ memberships: unjudged(hoursAgo(2)), probe, counts });
+
+      expect(decision).toMatchObject({ decision: 'needs_agent', reason: 'unjudged_member' });
+    });
+
     it('lasts as long as the review window says', async () => {
       const at3h = { reviewedAt: hoursAgo(3) };
 
