@@ -14,9 +14,14 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { usesKnowledge } from '../agents/agent_policy';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
-import { investigationRoundInputsSchema, withToolResults } from '../investigation_round';
+import {
+  appliedWriteSchema,
+  investigationRoundInputsSchema,
+  withToolResults,
+} from '../investigation_round';
 import { runMemoryOptimize } from '../memory/register_memory';
 import type { NightshiftTelemetryClient } from '../telemetry';
+import { withNightshiftBackgroundSpan } from '../tracing';
 import { withTimeout } from './with_timeout';
 
 /** Bounds the non-blocking post-round optimizer so a stuck inference call cannot hang a task. */
@@ -76,10 +81,23 @@ export const memoryOptimizeStepDefinition = ({
         .max(MAX_KEYWORD_LENGTH)
         .optional()
         .describe('Inference connector the triggering agent used for this round.'),
+      background_trace_id: z
+        .string()
+        .max(128)
+        .optional()
+        .describe('Deterministic T_background trace id from materialize.'),
     }),
     outputSchema: z.object({
       status: z.literal('ok').describe('The memory optimizer finished without throwing.'),
       skipped: z.boolean().optional(),
+      opened_ids: z
+        .array(z.string())
+        .optional()
+        .describe('Canonical Semantic Memory ids opened by the investigator this round.'),
+      applied_writes: z
+        .array(appliedWriteSchema)
+        .optional()
+        .describe('Semantic Memory writes applied during this round.'),
     }),
     handler: async (context) => {
       if (isEnabled && !isEnabled()) {
@@ -109,37 +127,64 @@ export const memoryOptimizeStepDefinition = ({
       );
 
       let summary: Awaited<ReturnType<typeof runMemoryOptimize>>;
+      const request = context.contextManager.getFakeRequest();
       try {
-        summary = await withTimeout(
-          async (signal) =>
-            runMemoryOptimize({
-              request: context.contextManager.getFakeRequest(),
-              agentId: context.input.agent_id,
-              userMessage: context.input.prompt,
-              assistantMessage: context.input.response,
-              toolCalls: withToolResults(
-                (context.input.tool_calls ?? []) as InvestigationToolCall[],
-                context.input.tool_results ?? []
-              ),
-              conversationId: context.input.conversation_id,
-              roundId: context.input.round_id,
-              roundIndex: context.input.round_index,
-              recalledIds: context.input.recalled_ids ?? [],
-              esClient: context.contextManager.getScopedEsClient(),
-              spaceId,
-              signal,
-              logger,
-              getAgentBuilder,
-              getInference,
-              getSavedObjects,
-              getUiSettings,
-              requestedConnectorId: context.input.connector_id,
-              roundConnectorId: context.input.round_connector_id,
-              interactionId: workflowExecutionId,
-            }),
-          OPTIMIZE_TIMEOUT_MS,
-          `Memory optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`,
-          context.abortSignal
+        summary = await withNightshiftBackgroundSpan(
+          {
+            name: 'nightshift.memoryOptimize',
+            traceId: context.input.background_trace_id || workflowExecutionId,
+            roundId: context.input.round_id,
+            conversationId: context.input.conversation_id,
+            spaceId,
+            workflowExecutionId,
+            request,
+            getSavedObjects,
+            getUiSettings,
+            logger,
+            attributes: {
+              'nightshift.recalled_ids': JSON.stringify(context.input.recalled_ids ?? []),
+            },
+          },
+          async (span) => {
+            const res = await withTimeout(
+              async (signal) =>
+                runMemoryOptimize({
+                  request,
+                  agentId: context.input.agent_id,
+                  userMessage: context.input.prompt,
+                  assistantMessage: context.input.response,
+                  toolCalls: withToolResults(
+                    (context.input.tool_calls ?? []) as InvestigationToolCall[],
+                    context.input.tool_results ?? []
+                  ),
+                  conversationId: context.input.conversation_id,
+                  roundId: context.input.round_id,
+                  roundIndex: context.input.round_index,
+                  recalledIds: context.input.recalled_ids ?? [],
+                  esClient: context.contextManager.getScopedEsClient(),
+                  spaceId,
+                  signal,
+                  logger,
+                  getAgentBuilder,
+                  getInference,
+                  getSavedObjects,
+                  getUiSettings,
+                  requestedConnectorId: context.input.connector_id,
+                  roundConnectorId: context.input.round_connector_id,
+                  interactionId: workflowExecutionId,
+                }),
+              OPTIMIZE_TIMEOUT_MS,
+              `Memory optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`,
+              context.abortSignal
+            );
+            if (res?.openedIds) {
+              span?.setAttribute('nightshift.opened_ids', JSON.stringify(res.openedIds));
+            }
+            if (res?.appliedWrites) {
+              span?.setAttribute('nightshift.applied_writes', JSON.stringify(res.appliedWrites));
+            }
+            return res;
+          }
         );
       } catch (error) {
         telemetry.reportSemanticMemoryOptimized({
@@ -204,6 +249,16 @@ export const memoryOptimizeStepDefinition = ({
         });
       }
 
-      return { output: { status: 'ok' as const } };
+      return {
+        output: {
+          status: 'ok' as const,
+          ...(summary?.openedIds && summary.openedIds.length > 0
+            ? { opened_ids: summary.openedIds }
+            : {}),
+          ...(summary?.appliedWrites && summary.appliedWrites.length > 0
+            ? { applied_writes: summary.appliedWrites }
+            : {}),
+        },
+      };
     },
   });

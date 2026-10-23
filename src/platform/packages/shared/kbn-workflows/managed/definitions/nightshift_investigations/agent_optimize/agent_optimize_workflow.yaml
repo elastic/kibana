@@ -59,6 +59,10 @@ triggers:
                       type: array
                       items:
                         type: string
+                    materialize_execution_id:
+                      type: string
+                    background_trace_id:
+                      type: string
         tool_calls:
           type: array
           description: >
@@ -111,6 +115,7 @@ steps:
               conversation_id: '{{ inputs.conversation_id }}'
               round_id: '{{ inputs.round_id }}'
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
+              background_trace_id: '{{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.background_trace_id }}'
               # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…".
               tool_calls: '${{ inputs.tool_calls }}'
               tool_results: '${{ inputs.tool_results }}'
@@ -127,6 +132,7 @@ steps:
               conversation_id: '{{ inputs.conversation_id }}'
               round_id: '{{ inputs.round_id }}'
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
+              background_trace_id: '{{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.background_trace_id }}'
               # Preserve the array for the step's bounded Zod schema.
               recalled_ids: '${{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.recalled_ids }}'
               # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…".
@@ -148,6 +154,7 @@ steps:
     with:
       response: '{{ inputs.response }}'
       agent_id: '{{ inputs.agent_id }}'
+      background_trace_id: '{{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.background_trace_id }}'
       # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…"
       # and JSON.parse in preprocess falls back to [], so every round distills from scratch.
       tool_calls: '${{ inputs.tool_calls }}'
@@ -185,6 +192,7 @@ steps:
       response: '{{ inputs.response }}'
       conversation_id: '{{ inputs.conversation_id }}'
       round_id: '{{ inputs.round_id }}'
+      background_trace_id: '{{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.background_trace_id }}'
       message: '{{ steps.prepare_turn.output.message }}'
       turn_kind: '{{ steps.prepare_turn.output.turn_kind }}'
       connector_id: '{{ steps.resolve_model.output.connector_id }}'

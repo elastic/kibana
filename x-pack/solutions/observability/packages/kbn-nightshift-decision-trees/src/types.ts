@@ -78,6 +78,9 @@ export interface LearningRecord {
   /** Connector the learning applies to. Tool learnings only. */
   connector_name?: string;
   keywords: string[];
+  conversation_id?: string;
+  round_id?: string;
+  workflow_execution_id?: string;
 }
 
 /** One decision-tree file the agent edited and is asking to have persisted. */
