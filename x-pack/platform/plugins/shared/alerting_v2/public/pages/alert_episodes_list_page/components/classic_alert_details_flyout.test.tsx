@@ -224,9 +224,7 @@ describe('ClassicAlertDetailsFlyout', () => {
       expect(screen.getByTestId('classicAlertEpisodeDetailsTabs')).toBeInTheDocument();
     });
 
-    expect(
-      screen.queryByTestId('alertingV2EpisodeFlyoutTakeActionButton')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertingV2EpisodeFlyoutTakeActionButton')).not.toBeInTheDocument();
   });
 
   it('leaves View details out of the take action menu for rule types without an observability details page', async () => {
