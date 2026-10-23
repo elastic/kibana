@@ -180,7 +180,9 @@ spaceTest.describe(
         await metricsExperience.gridSettings.open();
         await expect(metricsExperience.gridSettings.counterSelect).toContainText('Maximum');
         await expect(metricsExperience.gridSettings.gaugeSelect).toContainText('Minimum');
-        await expect(metricsExperience.gridSettings.histogramSelect).toContainText('p50');
+        await expect(metricsExperience.gridSettings.histogramSelect).toContainText(
+          '50th percentile'
+        );
         await metricsExperience.gridSettings.cancel();
       });
 

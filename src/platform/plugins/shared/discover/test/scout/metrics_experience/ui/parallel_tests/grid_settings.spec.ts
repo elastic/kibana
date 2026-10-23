@@ -98,7 +98,7 @@ spaceTest.describe(
 
         await spaceTest.step('stage and apply a histogram percentile selection', async () => {
           await gridSettings.selectHistogramPercentile('p50');
-          await expect(gridSettings.histogramSelect).toContainText('p50');
+          await expect(gridSettings.histogramSelect).toContainText('50th percentile');
           await gridSettings.apply();
           await expect(gridSettings.flyout).toBeHidden();
         });
@@ -122,7 +122,7 @@ spaceTest.describe(
 
         await spaceTest.step('reopen and verify the selection persisted', async () => {
           await gridSettings.open();
-          await expect(gridSettings.histogramSelect).toContainText('p50');
+          await expect(gridSettings.histogramSelect).toContainText('50th percentile');
         });
       }
     );
@@ -190,7 +190,7 @@ spaceTest.describe(
           await gridSettings.open();
           await expect(gridSettings.counterSelect).toContainText('Maximum');
           await expect(gridSettings.gaugeSelect).toContainText('Minimum');
-          await expect(gridSettings.histogramSelect).toContainText('p50');
+          await expect(gridSettings.histogramSelect).toContainText('50th percentile');
           await gridSettings.cancel();
         });
       }
