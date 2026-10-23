@@ -21,6 +21,7 @@ import {
 import { environmentQuery } from '../../../common/utils/environment_query';
 import type { Environment } from '../../../common/environment_rt';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { CONNECTION_JOIN_TIME_BUFFER_MS } from './connection_constants';
 
 /**
  * Names of the gRPC status codes shown in "Top error" labels.
@@ -174,7 +175,7 @@ export function getTopErrorOfSpans({
           minimum_should_match: 1,
         },
       },
-      ...rangeQuery(start, end),
+      ...rangeQuery(start, end + CONNECTION_JOIN_TIME_BUFFER_MS),
       ...environmentQuery(environment),
     ],
   });
@@ -200,7 +201,7 @@ export function getTopErrorOfTransactions({
     filter: [
       { term: { [SERVICE_NAME]: serviceName } },
       { terms: { [TRANSACTION_ID]: transactionIds } },
-      ...rangeQuery(start, end),
+      ...rangeQuery(start, end + CONNECTION_JOIN_TIME_BUFFER_MS),
     ],
   });
 }

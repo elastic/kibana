@@ -11,3 +11,10 @@
  * are used and the response is flagged as sampled.
  */
 export const MAX_CONNECTION_IDS = 1000;
+
+/**
+ * Widens the time range of a join query so documents linked to an in-range document are found
+ * even when their own timestamp falls just outside the window: a transaction starts before its
+ * exit spans, and a target entry transaction starts after the exit span that called it.
+ */
+export const CONNECTION_JOIN_TIME_BUFFER_MS = 5 * 60 * 1000;

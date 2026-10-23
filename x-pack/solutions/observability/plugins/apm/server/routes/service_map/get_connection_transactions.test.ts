@@ -6,7 +6,7 @@
  */
 
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { MAX_CONNECTION_IDS } from './connection_constants';
+import { CONNECTION_JOIN_TIME_BUFFER_MS, MAX_CONNECTION_IDS } from './connection_constants';
 import { getConnectionTransactions } from './get_connection_transactions';
 
 // withApmSpan is just a tracing wrapper: invoke the callback directly in tests.
@@ -213,7 +213,26 @@ describe('getConnectionTransactions', () => {
   });
 
   describe('service → service', () => {
-    it('joins the exit spans of the source to the entry transactions of the target', async () => {
+    it('scopes the exit spans by the resources of the edge when it has them', async () => {
+      const { search, options } = setup();
+      search.mockResolvedValueOnce(exitSpansResponse([]));
+
+      await getConnectionTransactions(
+        options({ targetServiceName: 'serviceB', dependencies: ['opbeans-b:3000'] })
+      );
+
+      expect(search.mock.calls.map(([name]) => name)).toEqual([
+        'get_connection_transactions_exit_spans',
+      ]);
+      expect(search.mock.calls[0][1].query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { term: { 'service.name': 'serviceA' } },
+          { terms: { 'span.destination.service.resource': ['opbeans-b:3000'] } },
+        ])
+      );
+    });
+
+    it('falls back to the entry transactions of the target when the edge has no resources', async () => {
       const { search, options } = setup();
       search
         .mockResolvedValueOnce(entryTransactionsResponse(['span-1', 'span-2']))
@@ -244,42 +263,30 @@ describe('getConnectionTransactions', () => {
       expect(result.transactionGroups).toHaveLength(1);
     });
 
-    it('reads the newest entry transactions of the target', async () => {
+    it('does not filter the environment of the target: the parent id is specific to the call', async () => {
       const { search, options } = setup();
       search.mockResolvedValueOnce(entryTransactionsResponse([]));
 
-      await getConnectionTransactions(options({ targetServiceName: 'serviceB' }));
+      await getConnectionTransactions(options({ targetServiceName: 'serviceB', dependencies: [] }));
 
       expect(search.mock.calls[0][1]).toMatchObject({
         size: MAX_CONNECTION_IDS,
         sort: [{ '@timestamp': 'desc' }],
         fields: ['parent.id'],
       });
+      expect(JSON.stringify(search.mock.calls[0][1].query)).not.toContain('service.environment');
     });
 
     it('stops after the first query when the target has no entry transaction', async () => {
       const { search, options } = setup();
       search.mockResolvedValueOnce(entryTransactionsResponse([]));
 
-      const result = await getConnectionTransactions(options({ targetServiceName: 'serviceB' }));
+      const result = await getConnectionTransactions(
+        options({ targetServiceName: 'serviceB', dependencies: [] })
+      );
 
       expect(search).toHaveBeenCalledTimes(1);
       expect(result).toEqual({ transactionGroups: [], isSampled: false });
-    });
-
-    it('ignores the resources: the parent span decides which calls reach the target', async () => {
-      const { search, options } = setup();
-      search
-        .mockResolvedValueOnce(entryTransactionsResponse(['span-1']))
-        .mockResolvedValueOnce(exitSpansResponse([]));
-
-      await getConnectionTransactions(
-        options({ targetServiceName: 'serviceB', dependencies: ['some-resource'] })
-      );
-
-      expect(JSON.stringify(search.mock.calls[1][1].query)).not.toContain(
-        'span.destination.service.resource'
-      );
     });
   });
 
@@ -293,9 +300,26 @@ describe('getConnectionTransactions', () => {
         .mockResolvedValueOnce(exitSpansResponse([{ transactionId: 'tx-1' }]))
         .mockResolvedValueOnce(transactionNamesResponse([{ id: 'tx-1', name: 'GET /a' }]));
 
-      const result = await getConnectionTransactions(options({ targetServiceName: 'serviceB' }));
+      const result = await getConnectionTransactions(
+        options({ targetServiceName: 'serviceB', dependencies: [] })
+      );
 
       expect(result.isSampled).toBe(true);
+    });
+
+    it('stays true when the sampled parent ids match no exit span of the source', async () => {
+      const { search, options } = setup();
+      search
+        .mockResolvedValueOnce(
+          entryTransactionsResponse(['span-of-another-caller'], MAX_CONNECTION_IDS + 1)
+        )
+        .mockResolvedValueOnce(exitSpansResponse([]));
+
+      const result = await getConnectionTransactions(
+        options({ targetServiceName: 'serviceB', dependencies: [] })
+      );
+
+      expect(result).toEqual({ transactionGroups: [], isSampled: true });
     });
 
     it('is true when the connection has more exit spans than the cap', async () => {
@@ -311,6 +335,17 @@ describe('getConnectionTransactions', () => {
       expect(result.isSampled).toBe(true);
     });
 
+    it('is false when exit spans only lack a transaction id (nothing was capped)', async () => {
+      const { search, options } = setup();
+      search
+        .mockResolvedValueOnce(exitSpansResponse([{ transactionId: 'tx-1' }, {}], /* total */ 2))
+        .mockResolvedValueOnce(transactionNamesResponse([{ id: 'tx-1', name: 'GET /a' }]));
+
+      const result = await getConnectionTransactions(options());
+
+      expect(result.isSampled).toBe(false);
+    });
+
     it('is false when every call of the connection fits in the cap', async () => {
       const { search, options } = setup();
       search
@@ -318,9 +353,28 @@ describe('getConnectionTransactions', () => {
         .mockResolvedValueOnce(exitSpansResponse([{ transactionId: 'tx-1' }]))
         .mockResolvedValueOnce(transactionNamesResponse([{ id: 'tx-1', name: 'GET /a' }]));
 
-      const result = await getConnectionTransactions(options({ targetServiceName: 'serviceB' }));
+      const result = await getConnectionTransactions(
+        options({ targetServiceName: 'serviceB', dependencies: [] })
+      );
 
       expect(result.isSampled).toBe(false);
+    });
+  });
+
+  describe('join time buffer', () => {
+    it('widens the start of the name lookup so calls of long transactions resolve', async () => {
+      const { search, options } = setup();
+      search
+        .mockResolvedValueOnce(exitSpansResponse([{ transactionId: 'tx-1' }]))
+        .mockResolvedValueOnce(transactionNamesResponse([{ id: 'tx-1', name: 'GET /a' }]));
+
+      await getConnectionTransactions(options());
+
+      const namesRange = search.mock.calls[1][1].query.bool.filter.find(
+        (f: Record<string, unknown>) => 'range' in f
+      );
+      expect(namesRange.range['@timestamp'].gte).toBe(START - CONNECTION_JOIN_TIME_BUFFER_MS);
+      expect(namesRange.range['@timestamp'].lte).toBe(END);
     });
   });
 });

@@ -135,7 +135,7 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
     return getServiceMapDependencyNodeInfo({
       apmEventClient,
       sourceServiceName,
-      dependencies: Array.isArray(dependencies) ? dependencies : [dependencies],
+      dependencies,
       start,
       end,
       environment,

@@ -14,6 +14,7 @@ import {
 } from '../../app/service_map/popover/edge_payload_metrics';
 import { getEnvironmentLabel } from '../../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { RequestFlyoutFailedCalls } from './failed_calls';
 import { RequestFlyoutLatencyDistribution } from './latency_distribution';
 import { RequestFlyoutOperations } from './operations';
@@ -29,7 +30,7 @@ import { RequestFlyoutTransactions } from './transactions';
  */
 export function RequestFlyoutBody() {
   const { connection, filters } = useRequestFlyoutContext();
-  const { environment, rangeFrom, rangeTo } = filters;
+  const { environment, start, end } = filters;
 
   const [latencyAggregationType, setLatencyAggregationType] = useState(LatencyAggregationType.avg);
 
@@ -43,7 +44,11 @@ export function RequestFlyoutBody() {
         {i18n.translate('xpack.apm.requestFlyout.inheritedFilters', {
           defaultMessage:
             '{rangeFrom} – {rangeTo} · Environment: {environment} · inherited from the map',
-          values: { rangeFrom, rangeTo, environment: getEnvironmentLabel(environment) },
+          values: {
+            rangeFrom: asAbsoluteDateTime(new Date(start).getTime()),
+            rangeTo: asAbsoluteDateTime(new Date(end).getTime()),
+            environment: getEnvironmentLabel(environment),
+          },
         })}
       </EuiText>
 

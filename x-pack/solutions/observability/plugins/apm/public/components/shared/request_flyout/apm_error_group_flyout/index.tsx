@@ -97,7 +97,8 @@ export function RequestFlyoutApmErrorGroupFlyout({
     [serviceName, groupId, errorId, environment, start, end]
   );
 
-  const isLoading = isPending(samplesStatus) || isPending(errorStatus);
+  // Without a sample id the error fetch never starts and its status stays pending forever.
+  const isLoading = isPending(samplesStatus) || (errorId != null && isPending(errorStatus));
   const hasError = samplesStatus === FETCH_STATUS.FAILURE || errorStatus === FETCH_STATUS.FAILURE;
   const error = errorData?.error;
   const transaction = errorData?.transaction;

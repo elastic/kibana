@@ -27,8 +27,10 @@ import { useLogsIndexPattern } from '../../../../hooks/use_logs_index_pattern';
 import { useServiceErrorsFromLogs } from '../../../app/error_group_overview/errors_from_logs/use_service_errors_from_logs';
 import { RequestFlyoutApmErrorGroupFlyout } from '../apm_error_group_flyout';
 import { REQUEST_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
+import { usePopoverFetchOptions } from '../../../app/service_map/popover/popover_fetch_options_context';
 import { ExpandableNameCell } from '../expandable_name_cell';
 import { useRequestFlyoutContext } from '../request_flyout_context';
+import { useTablePagination } from '../use_table_pagination';
 import { groupLogErrors, type LogErrorGroup } from './group_log_errors';
 
 interface Props {
@@ -96,12 +98,23 @@ export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props
     );
   }, [apmData, bucket.topErrorGroupId]);
 
+  const { showToastOnError } = usePopoverFetchOptions();
   const {
     rows: logRows,
     status: logsStatus,
     isLoading: logsLoading,
-  } = useServiceErrorsFromLogs({ serviceName, environment, kuery: '', rangeFrom, rangeTo });
+  } = useServiceErrorsFromLogs({
+    serviceName,
+    environment,
+    kuery: '',
+    rangeFrom,
+    rangeTo,
+    showToastOnError,
+  });
   const logGroups = useMemo(() => groupLogErrors(logRows), [logRows]);
+
+  const apmGroupsTable = useTablePagination(apmGroups);
+  const logGroupsTable = useTablePagination(logGroups);
 
   const apmColumns: Array<EuiBasicTableColumn<ApmErrorGroupRow>> = [
     {
@@ -162,7 +175,8 @@ export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props
             ebtElement={REQUEST_FLYOUT_EBT_ELEMENTS.LOG_ERROR_NAME}
             name={message || group.type}
             isExpanded={selected?.key === child.key}
-            onToggle={() => toggle(child)}
+            // The document flyout needs the data view: ignore clicks until it is ready.
+            onToggle={() => dataView && toggle(child)}
           />
         );
       },
@@ -227,7 +241,9 @@ export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props
           <EuiSpacer size="s" />
           <EuiBasicTable
             columns={apmColumns}
-            items={apmGroups}
+            items={apmGroupsTable.pageItems}
+            pagination={apmGroupsTable.pagination}
+            onChange={apmGroupsTable.onTableChange}
             loading={isPending(apmStatus)}
             error={
               apmStatus === FETCH_STATUS.FAILURE
@@ -269,7 +285,9 @@ export function RequestFlyoutErrorsFlyout({ bucket, historyKey, onClose }: Props
           <EuiSpacer size="s" />
           <EuiBasicTable
             columns={logColumns}
-            items={logGroups}
+            items={logGroupsTable.pageItems}
+            pagination={logGroupsTable.pagination}
+            onChange={logGroupsTable.onTableChange}
             loading={logsLoading}
             error={
               logsStatus === FETCH_STATUS.FAILURE

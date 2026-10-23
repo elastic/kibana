@@ -18,8 +18,6 @@ import { ExternalsListContents } from './externals_list_contents';
 import { ResourceContents } from './resource_contents';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
-export type { ServiceMapSelection } from './utils';
-
 /**
  * Props for the popover content subcomponents (service, dependency, resource, etc.)
  * They receive the raw React Flow node.

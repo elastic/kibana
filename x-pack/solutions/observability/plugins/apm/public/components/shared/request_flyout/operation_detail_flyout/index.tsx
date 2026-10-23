@@ -258,7 +258,10 @@ export function RequestFlyoutOperationDetailFlyout({
       </FlyoutTemplate>
 
       {selectedTraceId && (
+        // Keyed by trace: the samples table stays clickable behind the non-modal waterfall, and
+        // switching samples must drop the waterfall's own doc-flyout state.
         <TraceWaterfallFlyout
+          key={selectedTraceId}
           traceId={selectedTraceId}
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}

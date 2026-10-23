@@ -26,7 +26,7 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import type { Environment } from '../../../common/environment_rt';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { MAX_CONNECTION_IDS } from './connection_constants';
+import { CONNECTION_JOIN_TIME_BUFFER_MS, MAX_CONNECTION_IDS } from './connection_constants';
 import {
   fieldsOf,
   getTopErrorOfSpans,
@@ -168,7 +168,8 @@ export function getConnectionFailedCalls({
 
     // Service → service: the target's entry transactions whose parent is one of the failed exit
     // spans tell whether (and how) the request arrived. The parent id is specific to the call,
-    // so the environment of the target is not filtered.
+    // so the environment of the target is not filtered; the range reaches past the window's end
+    // because the entry transaction starts after the exit span that called it.
     const failedSpanIds = failedSpans.map(({ spanId }) => spanId);
     const entryTransactionsResponse = await apmEventClient.search(
       'get_connection_failed_calls_target_transactions',
@@ -183,7 +184,7 @@ export function getConnectionFailedCalls({
             filter: [
               { term: { [SERVICE_NAME]: targetServiceName } },
               { terms: { [PARENT_ID]: failedSpanIds } },
-              ...rangeQuery(start, end),
+              ...rangeQuery(start, end + CONNECTION_JOIN_TIME_BUFFER_MS),
             ],
           },
         },

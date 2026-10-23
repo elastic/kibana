@@ -26,7 +26,7 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import type { Environment } from '../../../common/environment_rt';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { MAX_CONNECTION_IDS } from './connection_constants';
+import { CONNECTION_JOIN_TIME_BUFFER_MS, MAX_CONNECTION_IDS } from './connection_constants';
 import { fieldsOf } from './get_connection_top_error';
 
 /** Maximum number of transaction groups (distinct transaction names) returned. */
@@ -41,11 +41,11 @@ interface ExitSpanCall {
 /**
  * Transactions of the source service that call a connection, with the metrics of those calls.
  *
- * The calls are the exit spans of the source service that belong to the connection:
- * - service → dependency: the exit spans to the connection's resources (`dependencies`);
- * - service → service (`targetServiceName`): the exit spans that are the parent of an entry
- *   transaction of the target. Matching on the parent id (not on the resource, nor on the trace)
- *   keeps calls to the target through another service out of the result.
+ * The calls are the exit spans of the source service that belong to the connection, matched on
+ * the connection's resources (`dependencies`) like the failed calls are. Edges without resources
+ * (service → service edges of the AI Agent map) fall back to the exit spans that are the parent
+ * of an entry transaction of the target; that path spends the id budget on the target's whole
+ * inbound traffic, so a busy target can leave this edge undersampled.
  *
  * A span document does not carry the name of its transaction, so the names are resolved through
  * the transaction documents of the source (`transaction.id`). Latency and failure rate are the
@@ -73,9 +73,15 @@ export function getConnectionTransactions({
     let scopeFilter: QueryDslQueryContainer[];
     let isSampled = false;
 
-    if (targetServiceName) {
+    if (dependencies.length > 0) {
+      scopeFilter = [
+        { term: { [SERVICE_NAME]: sourceServiceName } },
+        { terms: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencies } },
+      ];
+    } else if (targetServiceName) {
       // The parent ids of the newest entry transactions of the target: the span ids of the exit
-      // spans that called it.
+      // spans that called it. The parent id is specific to the call, so the environment of the
+      // target is not filtered (the exit span query filters the source's environment).
       const entryTransactionsResponse = await apmEventClient.search(
         'get_connection_transactions_target_parent_ids',
         {
@@ -91,7 +97,6 @@ export function getConnectionTransactions({
                 { term: { [SERVICE_NAME]: targetServiceName } },
                 { exists: { field: PARENT_ID } },
                 ...rangeQuery(start, end),
-                ...environmentQuery(environment),
               ],
             },
           },
@@ -112,10 +117,8 @@ export function getConnectionTransactions({
         { terms: { [SPAN_ID]: parentIds } },
       ];
     } else {
-      scopeFilter = [
-        { term: { [SERVICE_NAME]: sourceServiceName } },
-        { terms: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencies } },
-      ];
+      // Unreachable: the route schema requires dependencies or targetServiceName.
+      return { transactionGroups: [], isSampled: false };
     }
 
     const exitSpansResponse = await apmEventClient.search(
@@ -149,12 +152,14 @@ export function getConnectionTransactions({
     });
 
     if (calls.length === 0) {
-      return { transactionGroups: [], isSampled: false };
+      return { transactionGroups: [], isSampled };
     }
 
-    isSampled = isSampled || exitSpansResponse.hits.total.value > calls.length;
+    isSampled =
+      isSampled || exitSpansResponse.hits.total.value > exitSpansResponse.hits.hits.length;
 
-    // The name and type of the transaction of each call.
+    // The name and type of the transaction of each call. A transaction starts before its exit
+    // spans, so the range reaches back beyond the window to still resolve calls near its start.
     const transactionsResponse = await apmEventClient.search('get_connection_transactions_names', {
       apm: { events: [ProcessorEvent.transaction] },
       track_total_hits: false,
@@ -166,7 +171,7 @@ export function getConnectionTransactions({
           filter: [
             { term: { [SERVICE_NAME]: sourceServiceName } },
             { terms: { [TRANSACTION_ID]: [...new Set(calls.map((c) => c.transactionId))] } },
-            ...rangeQuery(start, end),
+            ...rangeQuery(start - CONNECTION_JOIN_TIME_BUFFER_MS, end),
           ],
         },
       },
