@@ -42,6 +42,7 @@ export const AgeTimeline = ({ profile, dataStreams, appliesThrough }: AgeTimelin
     <div data-test-subj="boostAgeTimeline">
       <DataStreamTimeline
         maxAges={{ recent: profile.recent.max_age, standard: profile.standard.max_age }}
+        boosts={profile}
         estimates={estimates}
         showsCost
         background="plain"

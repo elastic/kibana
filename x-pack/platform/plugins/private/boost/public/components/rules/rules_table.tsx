@@ -6,12 +6,8 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import type {
-  EuiBasicTableColumn,
-  EuiSearchBarProps,
-  EuiTableActionsColumnType,
-} from '@elastic/eui';
-import { EuiBadge, EuiInMemoryTable, EuiScreenReaderOnly } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
+import { EuiBadge, EuiInMemoryTable, EuiScreenReaderOnly, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleCoverage } from '../../../common/resolution';
 import { getRuleCoverage } from '../../../common/resolution';
@@ -23,6 +19,8 @@ import type {
   BoostRule,
 } from '../../../common/types';
 import { DetailsLink } from '../details_link';
+import { TableCount } from '../details/table_count';
+import { useTablePage } from '../use_table_page';
 import { ProjectDefaultFlyout } from '../project_defaults/project_default_flyout';
 import { DeleteRuleModal } from './delete_rule_modal';
 import { RuleFlyout } from './rule_flyout';
@@ -30,13 +28,17 @@ import { RuleMatches } from './rule_matches';
 
 export type RuleRow = BoostRule & RuleCoverage & { profileType?: BoostProfileType };
 
-const PAGE_SIZE = 10;
-
 export const DEFAULT_BADGE_LABEL = i18n.translate('xpack.boost.rulesTab.defaultBadge', {
   defaultMessage: 'Default',
 });
 
 const isCustomRule = ({ is_builtin: isBuiltin }: BoostRule) => !isBuiltin;
+
+const formatRuleCount = (count: number): string =>
+  i18n.translate('xpack.boost.rulesTable.ruleCount', {
+    defaultMessage: '{count, plural, one {# boost rule} other {# boost rules}}',
+    values: { count },
+  });
 
 interface RulesTableProps {
   /** Every rule, which together decide what each one applies to. */
@@ -48,7 +50,14 @@ interface RulesTableProps {
   filter?: (row: RuleRow) => boolean;
   /** Whether to show each rule's profile, which a profile's own page leaves out. */
   showsProfile?: boolean;
-  search?: EuiSearchBarProps;
+  /** A search bar's query, run on rule names, and profiles when the table shows them. */
+  searchQuery?: Query;
+  /** Text from a search field that rule names must contain. */
+  query?: string;
+  /** Changes when filters outside the table change, which starts it again at the first page. */
+  resetKey?: string;
+  /** Whether to say above the table which of the rules the search leaves its page shows. */
+  showsCount?: boolean;
   tableCaption: string;
   'data-test-subj'?: string;
 }
@@ -65,7 +74,10 @@ export const RulesTable = ({
   canEdit,
   filter,
   showsProfile = true,
-  search,
+  searchQuery,
+  query = '',
+  resetKey = '',
+  showsCount = false,
   tableCaption,
   'data-test-subj': dataTestSubj,
 }: RulesTableProps) => {
@@ -229,21 +241,41 @@ export const RulesTable = ({
     ...(canEdit ? [actionsColumn] : []),
   ];
 
+  const searchedText = query.trim().toLowerCase();
+  const listed = rows.filter(
+    (row) => (!filter || filter(row)) && row.name.toLowerCase().includes(searchedText)
+  );
+  // Patterns aren't shown in the table, so a search doesn't look in them either.
+  const items = searchQuery
+    ? Query.execute(searchQuery, listed, {
+        defaultFields: showsProfile ? ['name', 'boost_profile'] : ['name'],
+      })
+    : listed;
+  // A new search or filter starts again at the first page.
+  const { pageIndex, pageSize, pagination, onTableChange } = useTablePage<RuleRow>(
+    `${resetKey}|${query}|${searchQuery?.text ?? ''}`,
+    items.length
+  );
+
   return (
     <>
+      {showsCount && (
+        <TableCount
+          pageIndex={pageIndex}
+          pageSize={pageSize}
+          total={items.length}
+          formatTotal={formatRuleCount}
+          data-test-subj="boostRulesCount"
+        />
+      )}
       <EuiInMemoryTable
         tableCaption={tableCaption}
-        items={filter ? rows.filter(filter) : rows}
-        // Text searches names and profiles; patterns aren't shown in the table, so they aren't
-        // searched either.
-        executeQueryOptions={{
-          defaultFields: showsProfile ? ['name', 'boost_profile'] : ['name'],
-        }}
+        items={items}
         itemId="name"
         columns={columns}
-        search={search}
         sorting={{ sort: { field: 'name', direction: 'asc' } }}
-        pagination={{ pageSize: PAGE_SIZE, pageSizeOptions: [PAGE_SIZE, 25, 50] }}
+        pagination={pagination}
+        onTableChange={onTableChange}
         data-test-subj={dataTestSubj}
       />
 

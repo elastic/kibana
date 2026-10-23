@@ -7,8 +7,8 @@
 
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import type { EuiSearchBarProps } from '@elastic/eui';
-import { EuiButton, EuiFilterGroup } from '@elastic/eui';
+import type { EuiSearchBarProps, Query } from '@elastic/eui';
+import { EuiButton, EuiFilterGroup, EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   BoostDataSource,
@@ -48,6 +48,7 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
     return new Map(profileName ? [[profileName, 'on']] : []);
   });
   const [typeFilter, setTypeFilter] = useState<BoostProfileType>();
+  const [searchQuery, setSearchQuery] = useState<Query>();
 
   // Only profiles that rules use, since the others would filter to an empty table.
   const usedProfileNames = [...new Set(rules.map(({ boost_profile: name }) => name))].sort((a, b) =>
@@ -58,9 +59,16 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
     matchesTypeFilter(typeFilter, profileType);
 
   // The search box only searches text. The filters sit beside it and filter the rows themselves,
-  // so they don't write query syntax into the box.
+  // so they don't write query syntax into the box. It's above the table rather than the table's own,
+  // which would set it further from the table than the details pages' searches.
   const search: EuiSearchBarProps = {
     compressed: true,
+    // Until the text can be read as a query, the last one that could stays.
+    onChange: ({ query }) => {
+      if (query) {
+        setSearchQuery(query);
+      }
+    },
     box: {
       incremental: true,
       placeholder: i18n.translate('xpack.boost.rulesTab.searchPlaceholder', {
@@ -96,13 +104,16 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
 
   return (
     <>
+      <EuiSearchBar {...search} />
+      <EuiSpacer size="m" />
       <RulesTable
         rules={rules}
         profiles={profiles}
         dataSources={dataSources}
         canEdit={canEdit}
         filter={filter}
-        search={search}
+        searchQuery={searchQuery}
+        resetKey={`${[...profileSelections].join()}|${typeFilter ?? ''}`}
         tableCaption={i18n.translate('xpack.boost.rulesTab.caption', {
           defaultMessage: 'Boost rules',
         })}

@@ -10,16 +10,20 @@ import {
   EuiConfirmModal,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
+  EuiSwitch,
   EuiToolTip,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { HeaderActionButton } from '@kbn/core-chrome-browser-components';
 import { i18n } from '@kbn/i18n';
 import { BOOST_RESTORE_API_PATH } from '../../common/constants';
+import { setShowsEstimates, useShowsEstimates } from './estimates_setting';
 
 interface PrototypeMenuProps {
   http: HttpStart;
@@ -38,6 +42,8 @@ export const PrototypeMenu = ({ http, notifications, onRestored }: PrototypeMenu
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
+  const showsEstimates = useShowsEstimates();
+  const { euiTheme } = useEuiTheme();
 
   const onConfirmRestore = async () => {
     setIsRestoring(true);
@@ -80,6 +86,19 @@ export const PrototypeMenu = ({ http, notifications, onRestored }: PrototypeMenu
         }
       >
         <EuiPopoverTitle paddingSize="s">{PROTOTYPE_MENU_LABEL}</EuiPopoverTitle>
+        {/* Each tester's own view, kept in their browser, unlike the shared prototype data. */}
+        <div css={{ padding: euiTheme.size.s }}>
+          <EuiSwitch
+            compressed
+            label={i18n.translate('xpack.boost.prototype.showEstimates', {
+              defaultMessage: 'Show cost and VCU estimates',
+            })}
+            checked={showsEstimates}
+            onChange={({ target: { checked } }) => setShowsEstimates(checked)}
+            data-test-subj="boostShowEstimatesSwitch"
+          />
+        </div>
+        <EuiHorizontalRule margin="none" />
         <EuiContextMenuPanel
           items={[
             <EuiContextMenuItem

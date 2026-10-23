@@ -19,6 +19,9 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiScreenReaderOnly,
+  EuiSearchBar,
+  EuiSpacer,
+  Query,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -36,6 +39,7 @@ import { RuleFlyout } from '../rules/rule_flyout';
 import { getProfileRulesLocation } from '../rules/rules_tab';
 import { DetailsLink } from '../details_link';
 import { ProfileFlyout } from './profile_flyout';
+import { useTablePage } from '../use_table_page';
 
 interface ProfilesTabProps {
   profiles: BoostProfile[];
@@ -53,8 +57,6 @@ type ProfileRow = BoostProfile & {
 };
 
 type FlyoutState = { profile?: BoostProfile; duplicateOf?: BoostProfile } | undefined;
-
-const PAGE_SIZE = 10;
 
 export const MANAGED_BADGE_LABEL = i18n.translate('xpack.boost.profilesTab.managedBadge', {
   defaultMessage: 'Managed',
@@ -79,6 +81,7 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
   const history = useHistory();
   const [flyout, setFlyout] = useState<FlyoutState>();
   const [typeFilter, setTypeFilter] = useState<BoostProfileType>();
+  const [searchQuery, setSearchQuery] = useState<Query>();
   const [profileToDelete, setProfileToDelete] = useState<BoostProfile>();
   // A profile just created with "Save and create rule", which the rule flyout starts with.
   const [ruleProfileName, setRuleProfileName] = useState<string>();
@@ -232,12 +235,25 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
     ...(canEdit ? [actionsColumn] : []),
   ];
 
-  const filteredRows = rows.filter(({ type }) => matchesTypeFilter(typeFilter, type));
+  const typedRows = rows.filter(({ type }) => matchesTypeFilter(typeFilter, type));
+  const filteredRows = searchQuery ? Query.execute(searchQuery, typedRows) : typedRows;
+  // A new search or filter starts again at the first page.
+  const { pagination, onTableChange } = useTablePage<ProfileRow>(
+    `${searchQuery?.text ?? ''}|${typeFilter ?? ''}`,
+    filteredRows.length
+  );
 
   // The search box only searches text. The filter sits beside it and filters the rows itself, so it
-  // doesn't write query syntax into the box.
+  // doesn't write query syntax into the box. It's above the table rather than the table's own,
+  // which would set it further from the table than the details pages' searches.
   const search: EuiSearchBarProps = {
     compressed: true,
+    // Until the text can be read as a query, the last one that could stays.
+    onChange: ({ query }) => {
+      if (query) {
+        setSearchQuery(query);
+      }
+    },
     box: {
       incremental: true,
       placeholder: i18n.translate('xpack.boost.profilesTab.searchPlaceholder', {
@@ -268,6 +284,8 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
 
   return (
     <>
+      <EuiSearchBar {...search} />
+      <EuiSpacer size="m" />
       <EuiInMemoryTable
         tableCaption={i18n.translate('xpack.boost.profilesTab.caption', {
           defaultMessage: 'Boost profiles',
@@ -275,9 +293,9 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
         items={filteredRows}
         itemId="name"
         columns={columns}
-        search={search}
         sorting={{ sort: { field: 'name', direction: 'asc' } }}
-        pagination={{ pageSize: PAGE_SIZE, pageSizeOptions: [PAGE_SIZE, 25, 50] }}
+        pagination={pagination}
+        onTableChange={onTableChange}
         data-test-subj="boostProfilesTable"
       />
 

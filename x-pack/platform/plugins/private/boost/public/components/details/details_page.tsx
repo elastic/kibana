@@ -190,17 +190,29 @@ interface DetailsSectionProps {
 const DetailsTitle = ({
   title,
   titleAppend,
-}: Pick<DetailsSectionProps, 'title' | 'titleAppend'>) => (
-  <>
-    <div css={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      <EuiTitle size="xs">
-        <h2>{title}</h2>
-      </EuiTitle>
-      {titleAppend}
-    </div>
-    <EuiSpacer size="m" />
-  </>
-);
+}: Pick<DetailsSectionProps, 'title' | 'titleAppend'>) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <>
+      {/* Controls beside the title wrap below it when they don't fit. */}
+      <div
+        css={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: euiTheme.size.m,
+        }}
+      >
+        <EuiTitle size="xs">
+          <h2>{title}</h2>
+        </EuiTitle>
+        {titleAppend}
+      </div>
+      <EuiSpacer size="m" />
+    </>
+  );
+};
 
 /** A titled section of a details page, such as in a band. */
 export const DetailsSection = ({

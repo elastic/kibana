@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { BoostProfileType } from '../../common/types';
 import type { CostImpact, VcuRange } from '../../common/vcu_estimate';
 import { COST_DISCLAIMER, formatCost, formatSize, getVcusText, roundVcus } from './cost_format';
+import { useShowsEstimates } from '../prototype/estimates_setting';
 import { DataStreamTimeline } from './data_stream_timeline';
 import { formatDataSourceCount } from './format';
 
@@ -177,16 +178,20 @@ interface EstimateContentProps {
   estimate: ShownEstimate;
   isStale: boolean;
   showChange: boolean;
+  /** Whether to show the search cost and VCUs, which the prototype's testers can turn off. */
+  showsCost: boolean;
 }
 
 /**
  * The estimate as a stat: its title, with what it covers on the right, then its cost range and VCUs
- * below it. For data streams, a timeline below splits it between the profile's periods.
+ * below it. For data streams, a timeline below splits it between the profile's periods. Without
+ * the cost, what it covers and the timeline remain, under a title that says so.
  */
 const EstimateContent = ({
   estimate: { impact, type },
   isStale,
   showChange,
+  showsCost,
 }: EstimateContentProps) => {
   const { euiTheme } = useEuiTheme();
   const { next: estimate, dataSourceCount, sizeInBytes } = impact;
@@ -209,32 +214,42 @@ const EstimateContent = ({
         wrap
       >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                <strong>
-                  {i18n.translate('xpack.boost.costEstimate.title', {
-                    defaultMessage: 'Search cost per hour',
+          {showsCost ? (
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs">
+                  <strong>
+                    {i18n.translate('xpack.boost.costEstimate.title', {
+                      defaultMessage: 'Search cost per hour',
+                    })}
+                  </strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  type="info"
+                  color="subdued"
+                  size="s"
+                  // A flex anchor sizes to the icon, so the row's flex alignment centers it. The
+                  // default inline-block anchor gets a line box from the inherited font, which
+                  // offsets the icon.
+                  display="flex"
+                  content={COST_DISCLAIMER}
+                  aria-label={i18n.translate('xpack.boost.costEstimate.disclaimerLabel', {
+                    defaultMessage: 'About this estimate',
                   })}
-                </strong>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                type="info"
-                color="subdued"
-                size="s"
-                // A flex anchor sizes to the icon, so the row's flex alignment centers it. The
-                // default inline-block anchor gets a line box from the inherited font, which
-                // offsets the icon.
-                display="flex"
-                content={COST_DISCLAIMER}
-                aria-label={i18n.translate('xpack.boost.costEstimate.disclaimerLabel', {
-                  defaultMessage: 'About this estimate',
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : (
+            <EuiText size="xs">
+              <strong>
+                {i18n.translate('xpack.boost.costEstimate.appliesToTitle', {
+                  defaultMessage: 'Applies to',
                 })}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              </strong>
+            </EuiText>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {/* How many it covers, and how much data, as on the project default panels. */}
@@ -248,24 +263,29 @@ const EstimateContent = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <div aria-live="polite">
-        {isStale && (
-          <EuiScreenReaderOnly>
-            <span>
-              {i18n.translate('xpack.boost.costEstimate.staleLabel', {
-                defaultMessage: 'Last available estimate:',
-              })}
-            </span>
-          </EuiScreenReaderOnly>
-        )}
-        <EstimateValues estimate={estimate} comparison={comparison} />
-      </div>
+      {showsCost && (
+        <>
+          <EuiSpacer size="s" />
+          <div aria-live="polite">
+            {isStale && (
+              <EuiScreenReaderOnly>
+                <span>
+                  {i18n.translate('xpack.boost.costEstimate.staleLabel', {
+                    defaultMessage: 'Last available estimate:',
+                  })}
+                </span>
+              </EuiScreenReaderOnly>
+            )}
+            <EstimateValues estimate={estimate} comparison={comparison} />
+          </div>
+        </>
+      )}
       {periods && (
         <>
           <EuiSpacer size="s" />
           <DataStreamTimeline
             maxAges={periods.maxAges}
+            boosts={periods.boosts}
             estimates={periods.estimates}
             showsCost
             testSubj="boostCostEstimateTimeline"
@@ -276,11 +296,13 @@ const EstimateContent = ({
   );
 };
 
-/**
- * The illustrative hourly search cost of what a rule or profile applies to, compared with today, above
- * a footer's buttons. It's only shown for real data, so it's hidden until there's some to estimate.
- */
-export const CostEstimate = ({ impact, type, isEditing, showChange }: CostEstimateProps) => {
+const CostEstimateContent = ({
+  impact,
+  type,
+  isEditing,
+  showChange,
+  showsCost,
+}: CostEstimateProps & { showsCost: boolean }) => {
   const { euiTheme } = useEuiTheme();
   const lastShownRef = useRef<ShownEstimate>();
   // The last estimate rendered, which stays while it animates out.
@@ -358,7 +380,12 @@ export const CostEstimate = ({ impact, type, isEditing, showChange }: CostEstima
           `}
         >
           {rendered && (
-            <EstimateContent estimate={rendered} isStale={isStale} showChange={showChange} />
+            <EstimateContent
+              estimate={rendered}
+              isStale={isStale}
+              showChange={showChange}
+              showsCost={showsCost}
+            />
           )}
         </div>
       </div>
@@ -379,3 +406,12 @@ export const CostEstimate = ({ impact, type, isEditing, showChange }: CostEstima
     </div>
   );
 };
+
+/**
+ * The illustrative hourly search cost of what a rule or profile applies to, compared with today, above
+ * a footer's buttons. It's only shown for real data, so it's hidden until there's some to estimate.
+ */
+export const CostEstimate = (props: CostEstimateProps) => (
+  // The cost only while the prototype shows estimates, which testers can turn off.
+  <CostEstimateContent {...props} showsCost={useShowsEstimates()} />
+);

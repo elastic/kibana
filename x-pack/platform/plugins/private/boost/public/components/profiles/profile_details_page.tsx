@@ -7,7 +7,15 @@
 
 import React, { useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { EuiButton, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSpacer,
+} from '@elastic/eui';
 import { AppHeaderLoading } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -17,6 +25,7 @@ import type { BoostProfile, IndicesBoostProfile } from '../../../common/types';
 import { estimateDataSourcesVcuRange, estimateProjectVcuRange } from '../../../common/vcu_estimate';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useBoostState } from '../../hooks/use_boost_state';
+import { useShowsEstimates } from '../../prototype/estimates_setting';
 import { AgeTimeline } from '../age_timeline';
 import { COST_DISCLAIMER, formatSize, getCostText } from '../cost_format';
 import {
@@ -27,24 +36,25 @@ import {
 } from '../details/details_page';
 import { DetailsList } from '../details/details_list';
 import { ShareMeter, ShareMeterGroup } from '../details/share_meter';
-import { PROFILE_TYPE_LABELS, formatBoost, formatDataSourceCount } from '../format';
+import { PROFILE_TYPE_LABELS, formatBoostRange, formatDataSourceCount } from '../format';
 import { LoadError } from '../load_error';
 import { RuleFlyout } from '../rules/rule_flyout';
 import { getProfileRulesLocation } from '../rules/rules_tab';
 import { RulesTable } from '../rules/rules_table';
 import { DeleteProfileModal } from './delete_profile_modal';
-import { PhaseCards } from './phase_cards';
+import { PhaseList } from './phase_list';
 import { INDEX_OPTIONS, ProfileFlyout } from './profile_flyout';
 import { MANAGED_BADGE_LABEL, USED_BY_DEFAULT_RULE_DESCRIPTIONS } from './profiles_tab';
 
 const ON_LABEL = i18n.translate('xpack.boost.profileDetails.on', { defaultMessage: 'On' });
 const OFF_LABEL = i18n.translate('xpack.boost.profileDetails.off', { defaultMessage: 'Off' });
 
-const MIN_BOOST_LABEL = i18n.translate('xpack.boost.profileDetails.minBoost', {
-  defaultMessage: 'Min boost',
+const BOOST_LABEL = i18n.translate('xpack.boost.profileDetails.boost', {
+  defaultMessage: 'Boost',
 });
-const MAX_BOOST_LABEL = i18n.translate('xpack.boost.profileDetails.maxBoost', {
-  defaultMessage: 'Max boost',
+
+const RULES_SEARCH_LABEL = i18n.translate('xpack.boost.profileDetails.searchRules', {
+  defaultMessage: 'Search boost rules',
 });
 
 type FlyoutState = 'edit' | 'duplicate' | 'createRule' | undefined;
@@ -58,8 +68,11 @@ const IndicesSettings = ({ profile }: { profile: IndicesBoostProfile }) => {
   return (
     <DetailsList
       items={[
-        { title: MIN_BOOST_LABEL, description: formatBoost(profile.min_boost) },
-        { title: MAX_BOOST_LABEL, description: formatBoost(profile.max_boost) },
+        // One range, as a data streams profile's phases show theirs.
+        {
+          title: BOOST_LABEL,
+          description: formatBoostRange(profile.min_boost, profile.max_boost),
+        },
         ...INDEX_OPTIONS.map(({ key, title, description }) => ({
           title,
           tip: description,
@@ -73,12 +86,14 @@ const IndicesSettings = ({ profile }: { profile: IndicesBoostProfile }) => {
 /** A boost profile's settings, the rules that use it, and what it applies to. */
 export const ProfileDetailsPage = () => {
   const { application } = useBoostServices();
+  const showsEstimates = useShowsEstimates();
   const canEdit = application.capabilities[PLUGIN_ID]?.save === true;
   const history = useHistory();
   const { profileName: name } = useParams<{ profileName: string }>();
   const { data: state, error, refetch } = useBoostState();
   const [flyout, setFlyout] = useState<FlyoutState>();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [ruleQuery, setRuleQuery] = useState('');
 
   if (error) {
     return <LoadError error={error} onRetry={() => refetch()} />;
@@ -176,7 +191,7 @@ export const ProfileDetailsPage = () => {
             {profile.type === 'indices' ? (
               <IndicesSettings profile={profile} />
             ) : (
-              <PhaseCards profile={profile} />
+              <PhaseList profile={profile} />
             )}
           </DetailsSection>
         }
@@ -189,9 +204,11 @@ export const ProfileDetailsPage = () => {
           >
             <DetailsList
               items={[
+                // Repeats the rules table's count, as the rule page's usage starts with what it
+                // matches, which keeps this from being sparse without the estimates.
                 {
                   title: i18n.translate('xpack.boost.profileDetails.rulesUsing', {
-                    defaultMessage: 'Boost rules',
+                    defaultMessage: 'Rules using',
                   }),
                   description:
                     profileRules.length > 0 ? (
@@ -226,30 +243,35 @@ export const ProfileDetailsPage = () => {
                     </ShareMeter>
                   ),
                 },
-                {
-                  title: i18n.translate('xpack.boost.profileDetails.cost', {
-                    defaultMessage: 'Search cost per hour',
-                  }),
-                  tip: COST_DISCLAIMER,
-                  description: (
-                    <ShareMeterGroup>
-                      <ShareMeter
-                        value={vcus.atRest}
-                        total={projectVcus.atRest}
-                        data-test-subj="boostProfileRestCostShare"
-                      >
-                        {getCostText('atRest', vcus.atRest)}
-                      </ShareMeter>
-                      <ShareMeter
-                        value={vcus.atPeak}
-                        total={projectVcus.atPeak}
-                        data-test-subj="boostProfilePeakCostShare"
-                      >
-                        {getCostText('atPeak', vcus.atPeak)}
-                      </ShareMeter>
-                    </ShareMeterGroup>
-                  ),
-                },
+                // Only while the prototype shows estimates, which testers can turn off.
+                ...(showsEstimates
+                  ? [
+                      {
+                        title: i18n.translate('xpack.boost.profileDetails.cost', {
+                          defaultMessage: 'Search cost per hour',
+                        }),
+                        tip: COST_DISCLAIMER,
+                        description: (
+                          <ShareMeterGroup>
+                            <ShareMeter
+                              value={vcus.atRest}
+                              total={projectVcus.atRest}
+                              data-test-subj="boostProfileRestCostShare"
+                            >
+                              {getCostText('atRest', vcus.atRest)}
+                            </ShareMeter>
+                            <ShareMeter
+                              value={vcus.atPeak}
+                              total={projectVcus.atPeak}
+                              data-test-subj="boostProfilePeakCostShare"
+                            >
+                              {getCostText('atPeak', vcus.atPeak)}
+                            </ShareMeter>
+                          </ShareMeterGroup>
+                        ),
+                      },
+                    ]
+                  : []),
               ]}
             />
           </DetailsSection>
@@ -317,9 +339,39 @@ export const ProfileDetailsPage = () => {
             })}
             data-test-subj="boostProfileRules"
           >
-            {/* The same table as the rules tab, without the profile, which is this page's. Its
-                rules all share the profile's type, so only the search remains of the tab's
-                filters, beside the same button to create a rule, with this profile chosen. */}
+            {/* Above the table: the search, and the same button as the rules tab to create a rule,
+                with this profile chosen. The rules all share the profile's type, so the tab's other
+                filters have nothing to filter. */}
+            <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+              <EuiFlexItem css={{ minInlineSize: '12em' }}>
+                <EuiFieldSearch
+                  compressed
+                  fullWidth
+                  isClearable
+                  value={ruleQuery}
+                  onChange={(event) => setRuleQuery(event.target.value)}
+                  placeholder={RULES_SEARCH_LABEL}
+                  aria-label={RULES_SEARCH_LABEL}
+                  data-test-subj="boostProfileRulesSearch"
+                />
+              </EuiFlexItem>
+              {canEdit && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    size="s"
+                    onClick={() => setFlyout('createRule')}
+                    data-test-subj="boostProfileDetailsCreateRule"
+                  >
+                    {i18n.translate('xpack.boost.profileDetails.createRule', {
+                      defaultMessage: 'Create boost rule',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            {/* The same table as the rules tab, without the profile, which is this page's. */}
             <RulesTable
               rules={rules}
               profiles={profiles}
@@ -327,30 +379,8 @@ export const ProfileDetailsPage = () => {
               canEdit={canEdit}
               filter={({ boost_profile: profileName }) => profileName === name}
               showsProfile={false}
-              search={{
-                compressed: true,
-                box: {
-                  incremental: true,
-                  placeholder: i18n.translate('xpack.boost.profileDetails.searchRules', {
-                    defaultMessage: 'Search boost rules',
-                  }),
-                },
-                toolsRight: canEdit
-                  ? [
-                      <EuiButton
-                        key="create"
-                        fill
-                        size="s"
-                        onClick={() => setFlyout('createRule')}
-                        data-test-subj="boostProfileDetailsCreateRule"
-                      >
-                        {i18n.translate('xpack.boost.profileDetails.createRule', {
-                          defaultMessage: 'Create boost rule',
-                        })}
-                      </EuiButton>,
-                    ]
-                  : undefined,
-              }}
+              query={ruleQuery}
+              showsCount
               tableCaption={i18n.translate('xpack.boost.profileDetails.rulesCaption', {
                 defaultMessage: 'Boost rules using this profile',
               })}

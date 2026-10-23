@@ -198,8 +198,7 @@ describe('ProfileDetailsPage', () => {
     expect(getHeader().getByRole('button', { name: 'Delete' })).toBeEnabled();
 
     const settings = screen.getByTestId('boostProfileSettings');
-    expect(settings).toHaveTextContent('Min boost2');
-    expect(settings).toHaveTextContent('Max boost50');
+    expect(settings).toHaveTextContent('Boost2–50');
     expect(settings).toHaveTextContent('One extra copyOn');
     expect(settings).toHaveTextContent('PrewarmOn');
     expect(settings).toHaveTextContent('PinOff');
@@ -223,8 +222,27 @@ describe('ProfileDetailsPage', () => {
       'Create boost rule'
     );
     expect(screen.queryByTestId('boostProfileUsedBy')).not.toBeInTheDocument();
+    expect(screen.getByTestId('boostProfileUsage')).toHaveTextContent('Rules using1');
     expect(screen.getByTestId('boostProfileUsage')).toHaveTextContent('Applies to1 index');
     expect(screen.getByTestId('boostProfileStorageShare')).toHaveTextContent(/GB\d+% of project/);
+  });
+
+  it('searches the rules using a profile by name', async () => {
+    renderAt('/profiles/catalog-search');
+    const profileRules = within(screen.getByTestId('boostProfileRules'));
+
+    expect(profileRules.getByTestId('boostRulesCount')).toHaveTextContent(
+      'Showing 1 of 1 boost rule'
+    );
+    await userEvent.type(profileRules.getByTestId('boostProfileRulesSearch'), 'nothing');
+    expect(profileRules.queryByText('catalogs')).not.toBeInTheDocument();
+    expect(profileRules.getByTestId('boostRulesCount')).toHaveTextContent(
+      'Showing 0 of 0 boost rules'
+    );
+
+    await userEvent.clear(profileRules.getByTestId('boostProfileRulesSearch'));
+    await userEvent.type(profileRules.getByTestId('boostProfileRulesSearch'), 'CATA');
+    expect(profileRules.getByText('catalogs')).toBeInTheDocument();
   });
 
   it('only offers to duplicate an Elastic-managed profile', () => {
@@ -256,11 +274,13 @@ describe('ProfileDetailsPage', () => {
   it('marks a standard phase that ends where the recent one does as skipped', () => {
     renderAt(`/profiles/${BUILTIN_DATA_STREAMS_PROFILE_NAMES.last_7_days}`);
 
-    expect(screen.getByTestId('boostProfilePhase-recent')).toHaveTextContent('Up to 7 days');
+    expect(screen.getByTestId('boostProfilePhase-recent')).toHaveTextContent(
+      'Data up to 7 days old'
+    );
     expect(screen.getByTestId('boostProfilePhase-standard')).toHaveTextContent('Skipped');
     // Background data starts where recent data ends.
     expect(screen.getByTestId('boostProfilePhase-background')).toHaveTextContent(
-      'Older than 7 days'
+      'Data older than 7 days'
     );
   });
 
@@ -271,7 +291,7 @@ describe('ProfileDetailsPage', () => {
     expect(screen.getByTestId('boostProfilePhase-standard')).toHaveTextContent('1 day–7 days');
     expect(screen.getByTestId('boostProfilePhase-standard')).not.toHaveTextContent('Skipped');
     expect(screen.getByTestId('boostProfilePhase-background')).toHaveTextContent(
-      'Older than 7 days'
+      'Data older than 7 days'
     );
     // Its only rule matches nothing, so it applies the profile nowhere.
     expect(screen.getByTestId('boostProfileRules')).toHaveTextContent('0 data streams');
@@ -413,8 +433,11 @@ describe('RuleDetailsPage', () => {
           (row) => row.querySelector('[data-test-subj="boostIndexManagementLink"]')?.textContent
         );
 
+    expect(matched.getByTestId('boostMatchedCount')).toHaveTextContent('Showing 1–2 of 2 indices');
     await userEvent.type(matched.getByRole('searchbox', { name: 'Search indices' }), 'spring');
     expect(getNames()).toEqual(['catalog-spring']);
+    // The count says which of the matches the search leaves the page shows.
+    expect(matched.getByTestId('boostMatchedCount')).toHaveTextContent('Showing 1 of 1 index');
     // The filters count what they'd show with the search.
     expect(matched.getByTestId('boostMatchedFilter-applied')).toHaveTextContent('1');
     expect(matched.getByTestId('boostMatchedFilter-outranked')).toHaveTextContent('0');

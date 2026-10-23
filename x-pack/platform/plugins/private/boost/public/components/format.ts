@@ -13,6 +13,20 @@ const numberFormat = new Intl.NumberFormat(i18n.getLocale(), { maximumFractionDi
 
 export const formatBoost = (boost: number): string => numberFormat.format(boost);
 
+/** A min–max boost, such as "2–5,000". */
+export const formatBoostRange = (minBoost: number, maxBoost: number): string =>
+  i18n.translate('xpack.boost.format.boostRange', {
+    defaultMessage: '{min}–{max}',
+    values: { min: formatBoost(minBoost), max: formatBoost(maxBoost) },
+  });
+
+/** A phase's min–max boost, such as "2–5,000 boost". */
+export const formatPhaseBoost = (minBoost: number, maxBoost: number): string =>
+  i18n.translate('xpack.boost.format.phaseBoost', {
+    defaultMessage: '{range} boost',
+    values: { range: formatBoostRange(minBoost, maxBoost) },
+  });
+
 export const PROFILE_TYPE_LABELS: Readonly<Record<BoostProfileType, string>> = {
   indices: i18n.translate('xpack.boost.format.indicesType', { defaultMessage: 'Indices' }),
   data_streams: i18n.translate('xpack.boost.format.dataStreamsType', {

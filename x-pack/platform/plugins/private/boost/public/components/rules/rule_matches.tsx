@@ -121,22 +121,25 @@ const MatchesPopover = ({ patterns, type, coverage }: MatchesPopoverProps) => {
         ) : (
           title
         )}
-        {/* How the matches add up to the count, when higher-ranked rules take some of them. It's
-            set in the regular weight, since it's in the title. */}
-        {outranked > 0 && (
-          <EuiText
-            size="xs"
-            color="subdued"
-            css={{ fontWeight: euiTheme.font.weight.regular }}
-            data-test-subj="boostRuleOutranked"
-          >
-            {i18n.translate('xpack.boost.ruleMatches.outranked', {
-              defaultMessage:
-                '{matches, plural, one {# match} other {# matches}}, {outranked} outranked',
-              values: { matches, outranked },
-            })}
-          </EuiText>
-        )}
+        {/* How many the rule matches, and how many of those higher-ranked rules take. It's set in
+            the regular weight, since it's in the title. */}
+        <EuiText
+          size="xs"
+          color="subdued"
+          css={{ fontWeight: euiTheme.font.weight.regular }}
+          data-test-subj="boostRuleMatchCount"
+        >
+          {outranked > 0
+            ? i18n.translate('xpack.boost.ruleMatches.outranked', {
+                defaultMessage:
+                  '{matches, plural, one {# match} other {# matches}}, {outranked} outranked',
+                values: { matches, outranked },
+              })
+            : i18n.translate('xpack.boost.ruleMatches.matchCount', {
+                defaultMessage: '{matches, plural, one {# match} other {# matches}}',
+                values: { matches },
+              })}
+        </EuiText>
       </EuiPopoverTitle>
       <div
         tabIndex={0}

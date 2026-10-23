@@ -33,8 +33,11 @@ import { estimateDataSourceVcuRange } from '../../../common/vcu_estimate';
 import { formatCost, formatSize, roundVcus } from '../cost_format';
 import { DetailsLink } from '../details_link';
 import { DetailsSection } from '../details/details_page';
+import { TableCount } from '../details/table_count';
+import { useTablePage } from '../use_table_page';
+import { useShowsEstimates } from '../../prototype/estimates_setting';
 import { EmptyCell } from '../empty_cell';
-import { formatMaxAge } from '../format';
+import { formatDataSourceCount, formatMaxAge } from '../format';
 import { TargetName } from './target_name';
 
 /** Whether the rule applies to a match, or a higher-ranked rule outranks it. */
@@ -196,7 +199,7 @@ const SizeBar = ({ bytes, maxBytes, isOutranked }: SizeBarProps) => {
       value={bytes}
       max={maxBytes > 0 ? maxBytes : 1}
       size="s"
-      color={isOutranked ? euiTheme.colors.textDisabled : 'accentSecondary'}
+      color={isOutranked ? euiTheme.colors.textDisabled : 'primary'}
       css={{ inlineSize: SIZE_BAR_WIDTH }}
     />
   );
@@ -225,6 +228,7 @@ interface MatchedTableProps {
  */
 export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTableProps) => {
   const { euiTheme } = useEuiTheme();
+  const showsEstimates = useShowsEstimates();
   // The size bars only add a glance at the sizes beside them, so a narrower table gives their space
   // to the other columns. The table's width decides, rather than the screen's, since Kibana's
   // navigation takes more or less of the screen.
@@ -268,6 +272,12 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
     status === undefined
       ? searched
       : searched.filter((dataSource) => getStatus(dataSource) === status);
+
+  // A new search or filter starts again at the first page.
+  const { pageIndex, pageSize, pagination, onTableChange } = useTablePage<MatchedRow>(
+    `${query}|${status}`,
+    items.length
+  );
 
   const searchLabel = isDataStreams
     ? i18n.translate('xpack.boost.matchedTable.searchDataStreams', {
@@ -345,7 +355,8 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
           },
         ]
       : []),
-    ...(profile
+    // Only while the prototype shows estimates, which testers can turn off.
+    ...(profile && showsEstimates
       ? [
           {
             field: 'restVcus',
@@ -367,6 +378,44 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
       : []),
   ];
 
+  // Above the table: the search, and the filters whose counts follow it.
+  const toolbar = (
+    <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+      <EuiFlexItem css={{ minInlineSize: '12em' }}>
+        <EuiFieldSearch
+          compressed
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder={searchLabel}
+          aria-label={searchLabel}
+          isClearable
+          fullWidth
+          data-test-subj="boostMatchedSearch"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup compressed>
+          {STATUSES.map((item, index) => (
+            <EuiFilterButton
+              key={item}
+              isToggle
+              isSelected={status === item}
+              hasActiveFilters={status === item}
+              numFilters={counts[item]}
+              // A filter with nothing to show is off, unless it's on already.
+              isDisabled={counts[item] === 0 && status !== item}
+              withNext={index < STATUSES.length - 1}
+              onClick={() => setStatus(status === item ? undefined : item)}
+              data-test-subj={`boostMatchedFilter-${item}`}
+            >
+              {STATUS_LABELS[item]}
+            </EuiFilterButton>
+          ))}
+        </EuiFilterGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   return (
     <DetailsSection
       title={
@@ -382,41 +431,15 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
     >
       {matched.length > 0 && (
         <>
-          <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-            <EuiFlexItem css={{ minInlineSize: '12em' }}>
-              <EuiFieldSearch
-                compressed
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder={searchLabel}
-                aria-label={searchLabel}
-                isClearable
-                fullWidth
-                data-test-subj="boostMatchedSearch"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFilterGroup compressed>
-                {STATUSES.map((item, index) => (
-                  <EuiFilterButton
-                    key={item}
-                    isToggle
-                    isSelected={status === item}
-                    hasActiveFilters={status === item}
-                    numFilters={counts[item]}
-                    // A filter with nothing to show is off, unless it's on already.
-                    isDisabled={counts[item] === 0 && status !== item}
-                    withNext={index < STATUSES.length - 1}
-                    onClick={() => setStatus(status === item ? undefined : item)}
-                    data-test-subj={`boostMatchedFilter-${item}`}
-                  >
-                    {STATUS_LABELS[item]}
-                  </EuiFilterButton>
-                ))}
-              </EuiFilterGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {toolbar}
           <EuiSpacer size="s" />
+          <TableCount
+            pageIndex={pageIndex}
+            pageSize={pageSize}
+            total={items.length}
+            formatTotal={(count) => formatDataSourceCount(type, count)}
+            data-test-subj="boostMatchedCount"
+          />
         </>
       )}
       <div ref={setTableWrapper}>
@@ -427,7 +450,9 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
           items={items}
           columns={columns}
           sorting={{ sort: { field: 'name', direction: 'asc' } }}
-          pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
+          // The page is tracked here, for the count above the table.
+          pagination={pagination}
+          onTableChange={onTableChange}
           noItemsMessage={
             matched.length === 0
               ? i18n.translate('xpack.boost.matchedTable.noMatches', {

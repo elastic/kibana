@@ -15,6 +15,7 @@ import { getAppliedRules, getRuleCoverage } from '../../../common/resolution';
 import { estimateDataSourcesVcuRange, estimateProjectVcuRange } from '../../../common/vcu_estimate';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useBoostState } from '../../hooks/use_boost_state';
+import { useShowsEstimates } from '../../prototype/estimates_setting';
 import { AgeTimeline } from '../age_timeline';
 import { COST_DISCLAIMER, formatSize, getCostText } from '../cost_format';
 import {
@@ -42,6 +43,7 @@ type FlyoutState = 'edit' | 'duplicate' | undefined;
 /** A boost rule's targets, profile, and priority, and what it applies to. */
 export const RuleDetailsPage = () => {
   const { application } = useBoostServices();
+  const showsEstimates = useShowsEstimates();
   const canEdit = application.capabilities[PLUGIN_ID]?.save === true;
   const history = useHistory();
   const { ruleName: name } = useParams<{ ruleName: string }>();
@@ -238,30 +240,35 @@ export const RuleDetailsPage = () => {
                     </ShareMeter>
                   ),
                 },
-                {
-                  title: i18n.translate('xpack.boost.ruleDetails.cost', {
-                    defaultMessage: 'Search cost per hour',
-                  }),
-                  tip: COST_DISCLAIMER,
-                  description: (
-                    <ShareMeterGroup>
-                      <ShareMeter
-                        value={vcus.atRest}
-                        total={projectVcus.atRest}
-                        data-test-subj="boostRuleRestCostShare"
-                      >
-                        {getCostText('atRest', vcus.atRest)}
-                      </ShareMeter>
-                      <ShareMeter
-                        value={vcus.atPeak}
-                        total={projectVcus.atPeak}
-                        data-test-subj="boostRulePeakCostShare"
-                      >
-                        {getCostText('atPeak', vcus.atPeak)}
-                      </ShareMeter>
-                    </ShareMeterGroup>
-                  ),
-                },
+                // Only while the prototype shows estimates, which testers can turn off.
+                ...(showsEstimates
+                  ? [
+                      {
+                        title: i18n.translate('xpack.boost.ruleDetails.cost', {
+                          defaultMessage: 'Search cost per hour',
+                        }),
+                        tip: COST_DISCLAIMER,
+                        description: (
+                          <ShareMeterGroup>
+                            <ShareMeter
+                              value={vcus.atRest}
+                              total={projectVcus.atRest}
+                              data-test-subj="boostRuleRestCostShare"
+                            >
+                              {getCostText('atRest', vcus.atRest)}
+                            </ShareMeter>
+                            <ShareMeter
+                              value={vcus.atPeak}
+                              total={projectVcus.atPeak}
+                              data-test-subj="boostRulePeakCostShare"
+                            >
+                              {getCostText('atPeak', vcus.atPeak)}
+                            </ShareMeter>
+                          </ShareMeterGroup>
+                        ),
+                      },
+                    ]
+                  : []),
               ]}
             />
           </DetailsSection>

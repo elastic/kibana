@@ -18,6 +18,7 @@ import {
 } from '../../../common/presets';
 import type { BoostDataSource, BoostProfile, BoostRule, BoostState } from '../../../common/types';
 import { RuleFlyout } from './rule_flyout';
+import { setShowsEstimates } from '../../prototype/estimates_setting';
 
 const customProfile = (name: string): BoostProfile => ({
   name,
@@ -271,7 +272,7 @@ describe('RuleFlyout estimate', () => {
       expect(screen.queryByTestId('boostCostEstimateTimeline-standard')).not.toBeInTheDocument();
     });
 
-    it("shows a period's cost in a tooltip", async () => {
+    it("shows a period's boost and cost in a tooltip", async () => {
       renderFlyout(logsRule);
 
       expect(screen.getByTestId('boostCostEstimateTimeline-recent')).not.toHaveTextContent('$');
@@ -280,8 +281,27 @@ describe('RuleFlyout estimate', () => {
       );
 
       const tooltip = await screen.findByRole('tooltip');
-      expect(tooltip).toHaveTextContent(/^Recent\$/);
+      expect(tooltip).toHaveTextContent(/^Recent\d[\d,.]*–[\d,.]+ boost\$/);
       expect(tooltip).toHaveTextContent(/VCUs$/);
+    });
+
+    // Each tester's setting stays in their browser, so it's turned back on after each test.
+    afterEach(() => setShowsEstimates(true));
+
+    it("shows a period's boost without its cost while estimates are off", async () => {
+      setShowsEstimates(false);
+      renderFlyout(logsRule);
+
+      // What the rule applies to stays, without its cost.
+      expect(screen.getByTestId('boostCostEstimate')).toHaveTextContent('Applies to');
+      expect(screen.getByTestId('boostCostEstimate')).not.toHaveTextContent('Search cost per hour');
+      await userEvent.hover(
+        within(screen.getByTestId('boostCostEstimateTimeline-recent')).getByText('Recent')
+      );
+
+      const tooltip = await screen.findByRole('tooltip');
+      expect(tooltip).toHaveTextContent(/boost$/);
+      expect(tooltip).not.toHaveTextContent('$');
     });
 
     it('hides a data streams estimate once the rule switches to an indices profile', async () => {

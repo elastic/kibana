@@ -13,6 +13,8 @@ whatever no other rule matches: an Elastic-managed preset, or a custom profile.
   Kibana. "Restore prototype defaults" (the flask menu in the global header) resets the boost
   configuration and re-creates any missing sample data. Sample data is created with the signed-in
   user's privileges, since Kibana's service account cannot create user indices.
+- The same menu's "Show cost and VCU estimates" switch hides every search cost and VCU estimate.
+  It's each tester's own setting, kept in their browser's local storage, and on by default.
 - The saved object type is registered as a work-in-progress type (see
   `src/core/packages/saved-objects/server-internal/wip_types.json`).
 

@@ -18,11 +18,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import type {
   DataStreamPeriod,
+  DataStreamPeriodBoosts,
   DataStreamPeriodEstimates,
   VcuRange,
 } from '../../common/vcu_estimate';
 import { parseMaxAge, toMaxAgeHours } from '../../common/validation';
 import { formatCostRange, formatSize, getVcuRangeText } from './cost_format';
+import { formatPhaseBoost } from './format';
+import { useShowsEstimates } from '../prototype/estimates_setting';
 import { PERIOD_LABELS } from './profiles/period_labels';
 
 interface DataStreamTimelineProps {
@@ -30,7 +33,9 @@ interface DataStreamTimelineProps {
   maxAges: { recent?: string; standard?: string };
   /** Each period's data and search VCUs; omitted while no data streams use the periods. */
   estimates?: DataStreamPeriodEstimates;
-  /** Whether hovering or focusing a period shows its search cost per hour and VCUs. */
+  /** Each period's boost, which hovering or focusing it shows. */
+  boosts?: DataStreamPeriodBoosts;
+  /** Whether hovering or focusing a period also shows its search cost per hour and VCUs. */
   showsCost?: boolean;
   /**
    * The background the timeline sits on, which its track is two shades darker than: a plain one,
@@ -43,11 +48,21 @@ interface DataStreamTimelineProps {
 
 const PERIODS: readonly DataStreamPeriod[] = ['recent', 'standard', 'background'];
 
-/** A period's search cost per hour and VCUs, for its tooltip. */
-const PeriodCost = ({ vcus }: { vcus: VcuRange }) => (
+interface PeriodDetailsProps {
+  boost?: { min_boost: number; max_boost: number };
+  vcus?: VcuRange;
+}
+
+/** A period's boost, and its search cost per hour and VCUs, for its tooltip. */
+const PeriodDetails = ({ boost, vcus }: PeriodDetailsProps) => (
   <>
-    <div>{formatCostRange(vcus)}</div>
-    <div>{getVcuRangeText(vcus)}</div>
+    {boost && <div>{formatPhaseBoost(boost.min_boost, boost.max_boost)}</div>}
+    {vcus && (
+      <>
+        <div>{formatCostRange(vcus)}</div>
+        <div>{getVcuRangeText(vcus)}</div>
+      </>
+    )}
   </>
 );
 
@@ -97,12 +112,14 @@ export const usePeriodColors = (): Record<
 export const DataStreamTimeline = ({
   maxAges,
   estimates,
+  boosts,
   showsCost = false,
   background = 'subdued',
   testSubj,
 }: DataStreamTimelineProps) => {
   const { euiTheme } = useEuiTheme();
   const colors = usePeriodColors();
+  const showsEstimates = useShowsEstimates();
   const recentHours = toHours(maxAges.recent);
   const standardHours = Math.max(toHours(maxAges.standard) - recentHours, 0);
   const weights: Record<DataStreamPeriod, number> = {
@@ -172,11 +189,13 @@ export const DataStreamTimeline = ({
           {periods.map((period) => {
             const estimate = estimates?.[period];
             const size = estimate ? formatSize(estimate.sizeInBytes) : '—';
-            const cost = showsCost ? estimate?.vcus : undefined;
+            const cost = showsCost && showsEstimates ? estimate?.vcus : undefined;
+            const boost = boosts?.[period];
+            const hasDetails = boost !== undefined || cost !== undefined;
             const bar = (
               <div
-                // Focusable when it has a tooltip, so keyboard users can reach its cost too.
-                tabIndex={cost ? 0 : undefined}
+                // Focusable when it has a tooltip, so keyboard users can reach its details too.
+                tabIndex={hasDetails ? 0 : undefined}
                 css={{
                   padding: `${euiTheme.size.s} var(--boostPeriodPadding)`,
                   borderRadius: euiTheme.border.radius.control,
@@ -204,10 +223,10 @@ export const DataStreamTimeline = ({
                 css={{ paddingInline: euiTheme.size.xxs, minInlineSize: 0 }}
                 data-test-subj={`${testSubj}-${period}`}
               >
-                {cost ? (
+                {hasDetails ? (
                   <EuiToolTip
                     title={PERIOD_LABELS[period].title}
-                    content={<PeriodCost vcus={cost} />}
+                    content={<PeriodDetails boost={boost} vcus={cost} />}
                     display="block"
                   >
                     {bar}

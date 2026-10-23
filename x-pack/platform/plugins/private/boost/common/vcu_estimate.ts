@@ -181,7 +181,7 @@ export const estimateDataSourceVcuRange = (
 /** Search VCUs a profile uses today for these indices or data streams together. */
 export const estimateDataSourcesVcuRange = (
   dataSources: readonly BoostDataSource[],
-  profile: BoostProfile
+  profile: BoostProfile | BoostProfileInput
 ): VcuRange =>
   dataSources.reduce<VcuRange>(
     (total, dataSource) => addRanges(total, estimateDataSourceVcuRange(dataSource, profile)),
@@ -223,8 +223,16 @@ export interface CostImpact {
 export interface DataStreamPeriodsImpact {
   /** The max ages that end the recent and standard periods. */
   maxAges: { recent?: string; standard?: string };
+  /** Each period's min and max boost. */
+  boosts: DataStreamPeriodBoosts;
   estimates: DataStreamPeriodEstimates;
 }
+
+/** Each data stream period's min and max boost. */
+export type DataStreamPeriodBoosts = Record<
+  DataStreamPeriod,
+  { min_boost: number; max_boost: number }
+>;
 
 interface RuleCostInput {
   dataSources: readonly BoostDataSource[];
@@ -280,7 +288,54 @@ export const estimateRuleCost = ({
               recent: nextProfile.recent.max_age,
               standard: nextProfile.standard.max_age,
             },
+            boosts: nextProfile,
             estimates: estimateDataStreamPeriods(nextProfile, appliesNext),
+          }
+        : undefined,
+  };
+};
+
+interface ProfileCostInput {
+  dataSources: readonly BoostDataSource[];
+  rules: readonly BoostRule[];
+  profiles: readonly BoostProfile[];
+  /** The saved profile being edited. */
+  savedProfile: BoostProfile;
+  /** The profile as it would be saved. */
+  nextProfile: BoostProfileInput;
+}
+
+/**
+ * Estimates an edit to a profile: the search cost of what rules apply it to, with the edit, compared
+ * with today. An edit changes how the profile boosts, not what the rules apply it to.
+ */
+export const estimateProfileCost = ({
+  dataSources,
+  rules,
+  profiles,
+  savedProfile,
+  nextProfile,
+}: ProfileCostInput): CostImpact => {
+  const profilesByName = new Map(profiles.map((profile) => [profile.name, profile]));
+  const applies = dataSources.filter(
+    (dataSource) =>
+      resolveRule(dataSource, rules, profilesByName)?.boost_profile === savedProfile.name
+  );
+  return {
+    dataSourceCount: applies.length,
+    sizeInBytes: applies.reduce((total, { size_in_bytes: bytes }) => total + bytes, 0),
+    next: estimateDataSourcesVcuRange(applies, nextProfile),
+    current: estimateDataSourcesVcuRange(applies, savedProfile),
+    hasCurrentData: applies.length > 0,
+    periods:
+      nextProfile.type === 'data_streams'
+        ? {
+            maxAges: {
+              recent: nextProfile.recent.max_age,
+              standard: nextProfile.standard.max_age,
+            },
+            boosts: nextProfile,
+            estimates: estimateDataStreamPeriods(nextProfile, applies),
           }
         : undefined,
   };
