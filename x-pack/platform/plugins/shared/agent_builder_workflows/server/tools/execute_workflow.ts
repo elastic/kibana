@@ -18,6 +18,7 @@ import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import {
   executeWorkflow,
   hasWorkflowExecutePrivilege,
+  hasWorkflowReadPrivilege,
 } from '@kbn/agent-builder-tools-base/workflows';
 import { confirmToolCall } from './utils/confirm_tool_call';
 import { findUnsafeSteps, getWorkflowSteps, type UnsafeStep } from './utils/step_risk';
@@ -65,12 +66,14 @@ const executeWorkflowSchema = z.object({
 const confirmRun = ({
   toolContext,
   workflowApi,
+  getSecurity,
   yaml,
   workflowId,
   name,
 }: {
   toolContext: ToolHandlerContext;
   workflowApi: WorkflowsServerPluginSetup['management'];
+  getSecurity: () => SecurityPluginStart | undefined;
   yaml?: string;
   workflowId?: string;
   name?: string;
@@ -95,7 +98,11 @@ const confirmRun = ({
         return undefined;
       }
 
-      const workflowName = name ?? persisted?.name ?? workflowId;
+      // Execute and read are separate privileges, so an execute-only caller sees no step details.
+      const canReadDefinition =
+        persisted === undefined ||
+        (await hasWorkflowReadPrivilege({ security: getSecurity(), request, spaceId }));
+      const workflowName = name ?? (canReadDefinition ? persisted?.name : undefined) ?? workflowId;
       return {
         title: workflowName
           ? i18n.translate('workflows.agentBuilder.executeWorkflow.confirmation.title', {
@@ -105,7 +112,15 @@ const confirmRun = ({
           : i18n.translate('workflows.agentBuilder.executeWorkflow.confirmation.titleInline', {
               defaultMessage: 'Run inline workflow?',
             }),
-        message: buildConfirmationMessage(unsafeSteps),
+        message: canReadDefinition
+          ? buildConfirmationMessage(unsafeSteps)
+          : i18n.translate(
+              'workflows.agentBuilder.executeWorkflow.confirmation.messageWithoutSteps',
+              {
+                defaultMessage:
+                  'This workflow has steps that can change data or call external services.',
+              }
+            ),
         confirm_text: i18n.translate(
           'workflows.agentBuilder.executeWorkflow.confirmation.confirmText',
           { defaultMessage: 'Run workflow' }
@@ -239,6 +254,7 @@ If set to false, or if the workflow does not complete within the timeout, the to
       const confirmation = await confirmRun({
         toolContext,
         workflowApi,
+        getSecurity,
         yaml: resolvedYaml,
         workflowId: resolvedWorkflowId,
         name: resolvedName,

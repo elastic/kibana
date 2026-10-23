@@ -340,6 +340,34 @@ steps:
       expect(result.prompt.title).toContain('Notify');
     });
 
+    it('hides step details from a caller without the workflow read privilege', async () => {
+      const getWorkflow = jest.fn().mockResolvedValue({ name: 'Notify', yaml: UNSAFE_YAML });
+      const atSpace = jest
+        .fn()
+        .mockImplementation(async (_space: string, { kibana }: { kibana: string[] }) => ({
+          hasAllRequested: kibana.includes('api:workflowsManagement:execute'),
+        }));
+      const executeOnlySecurity = () =>
+        ({
+          authz: {
+            actions: { api: { get: (a: string) => `api:${a}` } },
+            checkPrivilegesWithRequest: () => ({ atSpace }),
+          },
+        } as any);
+      const tool = executeWorkflowTool({
+        workflowsManagement: { management: { getWorkflow } } as any,
+        getSecurity: executeOnlySecurity,
+      });
+      const context = buildContext({ interactive: true });
+
+      const result = (await tool.handler({ workflowId: 'wf-1' } as never, context)) as any;
+
+      expect(executeWorkflowMock).not.toHaveBeenCalled();
+      expect(result.prompt.title).toContain('wf-1');
+      expect(result.prompt.title).not.toContain('Notify');
+      expect(result.prompt.message).not.toContain('drop');
+    });
+
     it('runs after the user accepts', async () => {
       executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });
       const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
