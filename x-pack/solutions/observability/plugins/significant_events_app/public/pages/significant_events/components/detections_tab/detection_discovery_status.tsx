@@ -48,13 +48,13 @@ export const DetectionDiscoveryStatus = ({
 
   return processed ? (
     <EuiBadge color="success">
-      {i18n.translate('xpack.significantEventsApp.detectionStatus.processed', {
+      {i18n.translate('xpack.significantEventsApp.detectionFlyout.status.processed', {
         defaultMessage: 'Processed',
       })}
     </EuiBadge>
   ) : (
     <EuiBadge color="hollow">
-      {i18n.translate('xpack.significantEventsApp.detectionStatus.pending', {
+      {i18n.translate('xpack.significantEventsApp.detectionFlyout.status.pending', {
         defaultMessage: 'Pending',
       })}
     </EuiBadge>
