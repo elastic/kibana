@@ -55758,7 +55758,6 @@
     "xpack.synthetics.monitorEditPage.error.label": "Não é possível carregar a configuração de monitoramento",
     "xpack.synthetics.monitorErrors.title": "Alertas do monitor do Synthetics | {baseTitle}",
     "xpack.synthetics.monitorErrorsTab.title": "Erros",
-    "xpack.synthetics.monitorFilters.frequencyLabel": "A cada {count} minutos",
     "xpack.synthetics.monitorHealth.status.missingAgentPolicy": "A política de agente referenciada por este local privado não existe mais.",
     "xpack.synthetics.monitorHealth.status.missingAgents": "Nenhum agente do Fleet está inscrito na política de agente para este local privado. Inscreva um agente no Fleet para resolver isso.",
     "xpack.synthetics.monitorHealth.status.missingLocation": "O monitor faz referência a um local privado que não existe mais.",

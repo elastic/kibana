@@ -55902,7 +55902,6 @@
     "xpack.synthetics.monitorEditPage.error.label": "モニター構成を読み込めません",
     "xpack.synthetics.monitorErrors.title": "Syntheticsモニターアラート | {baseTitle}",
     "xpack.synthetics.monitorErrorsTab.title": "エラー",
-    "xpack.synthetics.monitorFilters.frequencyLabel": "{count}分間隔",
     "xpack.synthetics.monitorHealth.status.missingAgentPolicy": "このプライベートロケーションで参照されているエージェントポリシーはもはや存在しません。",
     "xpack.synthetics.monitorHealth.status.missingAgents": "このプライベートロケーションに対するエージェントポリシーには、Fleetエージェントが登録されていません。この問題を解決するには、Fleetにエージェントを登録してください。",
     "xpack.synthetics.monitorHealth.status.missingLocation": "モニターはもはや存在しないプライベートロケーションを参照しています。",

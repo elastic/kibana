@@ -17,7 +17,10 @@ import type {
   SyntheticsMonitorFilterChangeHandler,
   LabelWithCountValue,
 } from '../../../../utils/filters/filter_fields';
-import { getSyntheticsFilterDisplayValues } from '../../../../utils/filters/filter_fields';
+import {
+  getSyntheticsFilterDisplayValues,
+  sortScheduleFilterValues,
+} from '../../../../utils/filters/filter_fields';
 import { useFilters } from './use_filters';
 import { FilterButton } from './filter_button';
 import { getRemoteOriginFieldLabel } from '../../../../utils/remote/remote_origin_copy';
@@ -137,7 +140,7 @@ export const FilterGroup = ({
       label: SCHEDULE_LABEL,
       field: 'schedules',
       values: getSyntheticsFilterDisplayValues(
-        mixUrlValues(data?.schedules, urlParams.schedules),
+        sortScheduleFilterValues(mixUrlValues(data?.schedules, urlParams.schedules)),
         'schedules',
         locations
       ),

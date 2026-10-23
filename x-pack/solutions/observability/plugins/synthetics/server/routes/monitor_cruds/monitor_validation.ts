@@ -33,6 +33,7 @@ import {
   DEFAULT_FIELDS,
   HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS,
 } from '../../../common/constants/monitor_defaults';
+import { SCHEDULE_INTERVAL_FIELD } from '../../../common/lib/schedule_to_time';
 import {
   hasPublicServiceLocation,
   monitorTypeRequiresPrivateLocations,
@@ -446,6 +447,10 @@ export const normalizeAPIConfig = (
   }
   // needed for SO AAD
   supportedKeys.push(ConfigKey.PROJECT_ID, ConfigKey.ORIGINAL_SPACE);
+
+  // Saved on the monitor for Frequency sort, then round-tripped by edit. It is
+  // recomputed from `schedule` on write, so a client value is not a monitor field.
+  delete rawConfig[SCHEDULE_INTERVAL_FIELD];
 
   let unsupportedKeys = Object.keys(rawConfig).filter((key) => !supportedKeys.includes(key));
 

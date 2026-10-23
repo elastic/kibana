@@ -55488,7 +55488,6 @@
     "xpack.synthetics.monitorEditPage.error.label": "Impossible de charger la configuration du moniteur",
     "xpack.synthetics.monitorErrors.title": "Alertes du moniteur Synthetics | {baseTitle}",
     "xpack.synthetics.monitorErrorsTab.title": "Erreurs",
-    "xpack.synthetics.monitorFilters.frequencyLabel": "Toutes les {count} minutes",
     "xpack.synthetics.monitorHealth.status.missingAgentPolicy": "La politique d'agent référencée par cet emplacement privé n’existe plus.",
     "xpack.synthetics.monitorHealth.status.missingAgents": "Aucun agent Fleet n'est inscrit dans la politique d'agent pour cet emplacement privé. Inscrivez un agent dans Fleet pour résoudre ce problème.",
     "xpack.synthetics.monitorHealth.status.missingLocation": "Le moniteur fait référence à un emplacement privé qui n’existe plus.",
