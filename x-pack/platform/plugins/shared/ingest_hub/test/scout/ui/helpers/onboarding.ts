@@ -230,6 +230,18 @@ export async function navigateToOnboardingStep(
   await expectOnboardingStepVisible(page, step);
 }
 
+/**
+ * Picks the "Access keys" credential method. The radio input is visually hidden, so the click is
+ * forced, which clicks at the element's coordinates whatever is on top. Scroll it to the middle of
+ * the viewport first: at the bottom edge the sticky step footer covers it and the click would land
+ * on the footer's Back button.
+ */
+export async function selectStaticKeysAuth(page: ScoutPage): Promise<void> {
+  const accessKeysRadio = page.getByRole('radio', { name: /access keys/i });
+  await accessKeysRadio.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+  await accessKeysRadio.click({ force: true });
+}
+
 /** Enables the onboarding flag plus any extra overrides for the describe block; afterAll removes them (null deletes an override). */
 export function useOnboardingFeatureFlag(extraOverrides: Record<string, boolean> = {}): void {
   // eslint-disable-next-line playwright/require-top-level-describe
