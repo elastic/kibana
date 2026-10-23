@@ -56,7 +56,7 @@ describe('Nightshift assistant agent type', () => {
     );
   });
 
-  it('shares the investigator configuration except for its instructions', () => {
+  it('shares the investigator hooks and connectors, but keeps Agent Builder tools and prompt', () => {
     const { instructions, ...assistant } = staticConfiguration(getAssistantAgentType(options));
     const { instructions: investigatorInstructions, ...investigator } = staticConfiguration(
       getInvestigationAgentType({ ...options, decisionTreesEnabled: true })
@@ -64,12 +64,20 @@ describe('Nightshift assistant agent type', () => {
 
     expect(instructions).toBe(ASSISTANT_INSTRUCTIONS);
     expect(instructions).not.toBe(investigatorInstructions);
-    expect(assistant).toEqual(investigator);
     expect(assistant).toMatchObject({
       connector_ids: ['telemetry'],
       workflow_ids: [NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID],
       post_execution_workflow_ids: [NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID],
     });
+    expect(assistant.connector_ids).toEqual(investigator.connector_ids);
+    expect(assistant.workflow_ids).toEqual(investigator.workflow_ids);
+    expect(assistant.post_execution_workflow_ids).toEqual(investigator.post_execution_workflow_ids);
+    // Only the investigator is stripped down to its own tools and prompt.
+    expect(investigator).toMatchObject({ disable_internal_tools: true, raw_system_prompt: true });
+    expect(assistant).not.toHaveProperty('disable_internal_tools');
+    expect(assistant).not.toHaveProperty('raw_system_prompt');
+    expect(assistant.tools?.[0]?.tool_ids).toContain('proposals.create');
+    expect(investigator.tools?.[0]?.tool_ids).not.toContain('proposals.create');
   });
 
   it('points to the workspace files instead of embedding their guidance', () => {

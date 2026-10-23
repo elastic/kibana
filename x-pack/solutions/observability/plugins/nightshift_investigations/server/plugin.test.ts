@@ -22,6 +22,7 @@ const createPlugin = (memoryEnabled = false) =>
       cortex: { enabled: false },
       decision_trees: { enabled: true },
       memory: { enabled: memoryEnabled },
+      findings_recorder: { enabled: true },
     })
   );
 

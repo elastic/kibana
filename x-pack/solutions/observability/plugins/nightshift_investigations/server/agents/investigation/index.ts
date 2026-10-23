@@ -16,14 +16,16 @@ import {
   SET_HYPOTHESES_TOOL_ID,
   SET_IMPACT_TOOL_ID,
 } from '@kbn/agentic-investigations-plugin/common';
-import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
 import {
   NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
+import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
 import instructions from './instructions/investigator.md.text';
 import decisionTreesSection from './instructions/decision_trees.text';
+import { REPLY_USER_TOOL_ID } from '../../tools/reply_user/tool';
+import { TIME_CONVERTER_TOOL_ID } from '../../tools/time_converter/tool';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
@@ -39,11 +41,7 @@ export const SANDBOX_TOOL_IDS = [
   SANDBOX_WRITE_FILE_TOOL_ID,
 ] as const;
 
-/**
- * The agentic investigations tools the agent records its findings with.
- * `set_conversation_metadata` (summary, verdict, severity) is not listed: Agent Builder adds it to
- * every run on a template conversation, which every investigation is.
- */
+/** The agentic investigations tools earlier versions of the agent recorded findings with. */
 export const INVESTIGATION_TOOL_IDS = [SET_IMPACT_TOOL_ID, SET_HYPOTHESES_TOOL_ID] as const;
 
 export const INVESTIGATION_AGENT_NAME = 'Nightshift Investigator';
@@ -51,13 +49,15 @@ export const INVESTIGATION_AGENT_DESCRIPTION =
   'Answers an arbitrary investigation question by reasoning from cluster telemetry it queries ' +
   'inside a sandbox and, when Cortex is enabled, records what it learns in the Nightshift Cortex wiki.';
 
-/** Interpolated only when hydrate will actually write `/workspace/decision-trees/`. */
-const DECISION_TREES_LOAD_STEP =
-  ' Also check `/workspace/decision-trees/monitors.md` for a prior decision tree matching this symptom — see <decision_trees>.';
-
-const SEMANTIC_MEMORY_LOAD_STEP = ` Also inspect this turn's Semantic Memory paths from
-<system_update>, or /workspace/memories/.index.json when present. Treat memories as historical
-observations and verify them against current telemetry before relying on them.`;
+const SEMANTIC_MEMORY_SECTION = `
+**USING MEMORIES**
+Memories are observations from past tasks — they help steer your investigation but reflect a point in time and may no longer be current.
+- Inspect this turn's Semantic Memory paths from <system_update>, or \`/workspace/memories/.index.json\` when present.
+- Independently verify memory claims against live connector APIs before including them in your reply.
+- Use them to guide where you look, but confirm the details are still accurate.
+- When you cannot confirm a memory claim, note it as a past observation (e.g. 'previously observed that…') so the user knows it needs confirmation.
+- Pay attention to memory age — old memories are more likely to be stale.
+`;
 
 const fillContextInstructions = ({
   includeDecisionTrees,
@@ -67,11 +67,10 @@ const fillContextInstructions = ({
   includeMemory: boolean;
 }): string =>
   instructions
-    .replace('{{decision_trees_load_step}}', includeDecisionTrees ? DECISION_TREES_LOAD_STEP : '')
-    .replace('{{semantic_memory_load_step}}', includeMemory ? SEMANTIC_MEMORY_LOAD_STEP : '')
+    .replace('{{semantic_memory_section}}', includeMemory ? SEMANTIC_MEMORY_SECTION : '')
     .replace(
       '{{decision_trees_section}}',
-      includeDecisionTrees ? `\n${decisionTreesSection.trimEnd()}\n` : ''
+      includeDecisionTrees ? `${decisionTreesSection.trimEnd()}\n` : ''
     );
 
 export interface InvestigationAgentTypeOptions {
@@ -119,6 +118,8 @@ export type NightshiftAgentTypeOptions = Omit<
 /**
  * Builds the configuration every Nightshift agent type shares: tools, connectors, the Cortex and
  * Memory hooks and the space's custom context. Only the instructions differ between types.
+ * With `standalone`, the agent gets only the tools it lists and the instructions as its whole system
+ * prompt: no Agent Builder internal tools, attachment tools or generic prompt.
  */
 export const buildNightshiftAgentConfiguration = ({
   instructions: agentInstructions,
@@ -127,25 +128,41 @@ export const buildNightshiftAgentConfiguration = ({
   memoryEnabled = false,
   investigationToolsEnabled,
   proposalsEnabled,
+  standalone = false,
   telemetryConnectorId,
   getCustomContextInstructions,
   logger,
 }: NightshiftAgentTypeOptions & {
   instructions: string;
+  standalone?: boolean;
 }): AgentTypeDefinition['baseConfiguration'] => {
   const baseConfiguration = {
     instructions: agentInstructions,
     skill_ids: [],
     tools: [
       {
-        tool_ids: [
-          ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
-          ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),
-          ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
-        ],
+        tool_ids: standalone
+          ? [
+              ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
+              TIME_CONVERTER_TOOL_ID,
+              REPLY_USER_TOOL_ID,
+            ]
+          : [
+              ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
+              ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),
+              ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
+            ],
       },
     ],
     enable_elastic_capabilities: false,
+    ...(standalone
+      ? {
+          // Only the tools listed above: none of Agent Builder's internal file, API, todo,
+          // attachment or metadata tools, and the agent's own prompt without Agent Builder's.
+          disable_internal_tools: true,
+          raw_system_prompt: true,
+        }
+      : {}),
     connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
     ...(() => {
       // Decision trees are no longer a separate before-agent hook: they hydrate as a third
@@ -195,6 +212,7 @@ export const getInvestigationAgentType = ({
   avatar_icon: 'logoElastic',
   baseConfiguration: buildNightshiftAgentConfiguration({
     ...options,
+    standalone: true,
     instructions: fillContextInstructions({
       includeDecisionTrees: options.sandboxEnabled && decisionTreesEnabled,
       includeMemory: options.sandboxEnabled && (options.memoryEnabled ?? false),

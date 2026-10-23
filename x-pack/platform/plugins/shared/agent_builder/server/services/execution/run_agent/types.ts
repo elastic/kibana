@@ -23,6 +23,8 @@ export interface AiIndexCatalogEntry {
 
 export interface ResolvedConfiguration {
   instructions: string;
+  /** The system prompt is exactly `instructions`, without Agent Builder's own sections. */
+  rawSystemPrompt: boolean;
   /** Context Engine ids (not Elasticsearch index names) of the AI indices this agent may use. */
   aiIndices: string[];
   /** Rendered AI index catalog, in config order. Absent when the AI indices feature is off. */

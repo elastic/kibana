@@ -118,6 +118,11 @@ export const registerInternalTools = async ({
   const canSpawnSubagents = executionMode !== AgentExecutionMode.standalone && !parentExecutionId;
   const interactive = interactivity.enabled;
 
+  // Agents that opt out get only the tools they select explicitly.
+  if (agentConfiguration.disable_internal_tools) {
+    return;
+  }
+
   const tools: Array<InternalBuiltinToolDefinition<any>> = [];
 
   // Filesystem — read_file and list_files are always on; bash is FF-gated.

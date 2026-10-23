@@ -141,6 +141,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'nightshift_sandbox_str_replace',
   'nightshift_sandbox_write_file',
 
+  // Nightshift – Investigation
+  'reply_user',
+  'time_converter_tool',
+
   // Nightshift – Decision trees
   'nightshift_submit_optimizer_result',
   'nightshift_record_system_learning',
@@ -469,7 +473,7 @@ export const isAllowedBuiltinAttachment = (
  * This is a manually maintained list of all cycle hooks registered in Agent Builder.
  * The intention is to force a code review from the Agent Builder team when any team adds a new cycle hook.
  */
-export const AGENT_BUILDER_CYCLE_HOOKS = [] as const;
+export const AGENT_BUILDER_CYCLE_HOOKS = ['nightshift.findings_recorder'] as const;
 
 export type AgentBuilderCycleHook = (typeof AGENT_BUILDER_CYCLE_HOOKS)[number];
 

@@ -119,8 +119,6 @@ describe('agent hooks around the combined workflows', () => {
       cortexEnabled: true,
       memoryEnabled: true,
       decisionTreesEnabled: true,
-      investigationToolsEnabled: true,
-      proposalsEnabled: true,
     }).baseConfiguration;
 
     expect(typeof base === 'function' ? [] : base.workflow_ids).toEqual([

@@ -71,9 +71,12 @@ import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import type { NightshiftAgentTypeOptions } from './agents/investigation';
 import { registerInvestigationAgentType } from './agents/investigation';
+import { registerFindingsRecorder } from './findings_recorder';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
 import { registerAssistantAgentType } from './agents/assistant';
 import { createDecisionTreeTools } from './tools/decision_tree';
+import { createReplyUserTool } from './tools/reply_user/tool';
+import { createTimeConverterTool } from './tools/time_converter/tool';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
 import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_tool';
@@ -256,6 +259,25 @@ export class NightshiftInvestigationsPlugin
         ...nightshiftAgentOptions,
         decisionTreesEnabled: this.decisionTreesEnabled,
       });
+      if (plugins.agenticInvestigations && config.findings_recorder.enabled) {
+        // Records summary, severity, hypotheses and impact from outside the agent, so the
+        // investigator needs no recording tools. Every dependency is read lazily: hooks are
+        // registered in setup() but only run once the plugin has started.
+        registerFindingsRecorder({
+          agentBuilder: plugins.agentBuilder,
+          deps: {
+            getAgentBuilder: () => this.agentBuilder,
+            getInference: () => this.inference,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
+            getAgenticInvestigations: () => this.agenticInvestigations,
+            logger: this.logger.get('findings_recorder'),
+          },
+          logger: this.logger.get('findings_recorder'),
+        });
+      }
+      plugins.agentBuilder.tools.register(createReplyUserTool());
+      plugins.agentBuilder.tools.register(createTimeConverterTool());
       if (this.decisionTreesEnabled) {
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
       }
@@ -457,6 +479,10 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreePrepareStepDefinition({
             getTelemetryConnectorId: () => this.ctx.config.get().sandbox?.telemetry_connector_id,
+            getAgentBuilder: () => this.agentBuilder,
+            getInference: () => this.inference,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
           })

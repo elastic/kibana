@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ToolHandlerContext } from '@kbn/agent-builder-server';
+import type {
+  AttachmentPublicClient,
+  ConversationPublicClient,
+  ToolHandlerContext,
+} from '@kbn/agent-builder-server';
 import type { User } from '../../../common/user';
 import type { Hypothesis, InvestigationHypotheses } from '../../../common/hypotheses/hypotheses';
 import {
@@ -19,6 +23,31 @@ import type { HypothesesDocument } from '../storage/hypotheses_storage';
 export const hypothesesDocumentId = (spaceId: string, conversationId: string): string =>
   hypothesesAttachment.documentId(spaceId, conversationId);
 
+const buildHypothesesDocument = ({
+  existing,
+  spaceId,
+  conversationId,
+  hypotheses,
+  user,
+}: {
+  existing: HypothesesDocument | undefined;
+  spaceId: string;
+  conversationId: string;
+  hypotheses: Hypothesis[];
+  user?: User;
+}): HypothesesDocument => {
+  const now = new Date().toISOString();
+  const createdBy = existing ? existing.createdBy : user;
+  return {
+    spaceId,
+    conversationId,
+    hypotheses,
+    createdAt: existing?.createdAt ?? now,
+    ...(createdBy && { createdBy }),
+    updatedAt: now,
+  };
+};
+
 /**
  * Owns the hypotheses index. Each write is a full snapshot: the list the agent sends replaces
  * the stored one, so a hypothesis it leaves out is gone.
@@ -31,6 +60,37 @@ export class HypothesesService {
   /** The generic store, for the Agent Builder attachment type's resolve and staleness checks. */
   getDocumentService(): InvestigationAttachmentDocService<HypothesesDocument> {
     return this.deps.documents;
+  }
+
+  /**
+   * Out-of-run path (a hook or a workflow, with no tool context): replaces the hypotheses, then
+   * adds or updates the conversation attachment through the public Agent Builder clients.
+   */
+  async setWithPublicClient({
+    conversationId,
+    hypotheses,
+    spaceId,
+    user,
+    conversations,
+    attachments,
+  }: {
+    conversationId: string;
+    hypotheses: Hypothesis[];
+    spaceId: string;
+    user?: User;
+    conversations: ConversationPublicClient;
+    attachments: AttachmentPublicClient;
+  }): Promise<void> {
+    await hypothesesAttachment.writeAndAttach({
+      service: this.deps.documents,
+      id: hypothesesDocumentId(spaceId, conversationId),
+      spaceId,
+      conversationId,
+      conversations,
+      attachments,
+      mutate: (existing) =>
+        buildHypothesesDocument({ existing, spaceId, conversationId, hypotheses, user }),
+    });
   }
 
   /** Agent tool path: replaces the hypotheses, then adds or updates the attachment in the run. */
@@ -51,18 +111,8 @@ export class HypothesesService {
       id: hypothesesDocumentId(spaceId, conversationId),
       spaceId,
       context,
-      mutate: (existing) => {
-        const now = new Date().toISOString();
-        const createdBy = existing ? existing.createdBy : user;
-        return {
-          spaceId,
-          conversationId,
-          hypotheses,
-          createdAt: existing?.createdAt ?? now,
-          ...(createdBy && { createdBy }),
-          updatedAt: now,
-        };
-      },
+      mutate: (existing) =>
+        buildHypothesesDocument({ existing, spaceId, conversationId, hypotheses, user }),
     });
   }
 

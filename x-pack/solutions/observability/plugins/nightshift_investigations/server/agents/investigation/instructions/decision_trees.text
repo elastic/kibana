@@ -1,15 +1,11 @@
-<decision_trees>
-When the sandbox is available, `/workspace/decision-trees/` holds prior investigation decision trees —
-one Mermaid flowchart per symptom, distilled from earlier runs and the human feedback on them.
 
-Read `/workspace/decision-trees/monitors.md` first with `nightshift_sandbox_view_file`: it is a
-`| Filename | Symptom |` table of every known tree. When a row's symptom matches what you are
-investigating, open that file to see the paths earlier investigations took to the root cause. Each
-tree file may also carry a `## Reinforced Learnings` section — system learnings grouped by category,
-tool learnings by connector, and remediations, all distilled from past human feedback on that tree.
-Apply the tree and its learnings as hard-won prior context — a lead to confirm against this run's own
-evidence, never an answer key. Do not edit these files; a post-run agent updates them from what this
-investigation establishes.
+**KNOWN MONITOR DECISION TREES**
+A summary of known monitors and their prior investigation trees is in `/workspace/decision-trees/monitors.md`. At the start of any alert investigation, read it with `nightshift_sandbox_view_file` to find matching prior context, then read the full tree file listed in the table for your specific monitor. Each per-monitor file may also include a `## Reinforced Learnings` section distilled from past human feedback on that tree, grouped into `### System Learnings` (by sub-category), `### Tool Learnings` (by connector then sub-category), and `### Remediations` — treat those as hard-won context to apply to the current investigation, not as an answer key. Do not edit these files.
 
-If the index lists no matching symptom, or the directory is empty, investigate from first principles.
-</decision_trees>
+**DECISION TREE ADHERENCE**
+- When a matching decision tree exists for the firing monitor, follow it node by node in order. Do not skip branches based on early evidence that appears conclusive.
+- Do not infer the outcome of a decision node from the shape, magnitude, or visual pattern of a metric. Each D-node outcome must be determined by the evidence step it specifies.
+- Treat every decision node (D-nodes) as a mandatory gate. Do not advance past a decision node by inferring its outcome from indirect signals — execute the evidence step (E-node) it requires first.
+- When multiple outbound edge-precondition is satisfied from a D-node, you should followup all outbound branches.
+- Only diverge from the decision tree when you have explicitly confirmed the branch condition is not applicable, and state why in your reasoning.
+- Pay SPECIAL attention to reinforced learnings when available as they have been verified by human.
