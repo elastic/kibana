@@ -83,7 +83,14 @@ export const createDashboardAttachmentType = ({
       attachment: VersionedAttachment<typeof DASHBOARD_ATTACHMENT_TYPE, DashboardAttachmentData>,
       context: AttachmentResolveContext
     ): Promise<boolean> => {
-      if (!attachment.origin || !attachment.origin_snapshot_at) {
+      if (!attachment.origin) {
+        return false;
+      }
+      const latestVersion = getLatestVersion(attachment);
+      if (!latestVersion) {
+        logger.warn(
+          `Attachment "${attachment.id}" has no version matching current_version ${attachment.current_version}`
+        );
         return false;
       }
       try {
@@ -93,24 +100,19 @@ export const createDashboardAttachmentType = ({
           return false;
         }
 
-        if (Date.parse(dashboardUpdatedAt) > Date.parse(attachment.origin_snapshot_at)) {
-          const latestVersion = getLatestVersion(attachment);
-          if (!latestVersion) {
-            logger.warn(
-              `Attachment "${attachment.id}" has no version matching current_version ${attachment.current_version}`
-            );
-            return false;
-          }
-          const resolvedDashboardData = normalizeDashboardAttachmentData(
-            dashboardStateToAttachmentData(dashboard.data)
-          );
-          // Compare canonicalized attachment data so Lens panel shape differences do not cause false staleness.
-          return !deepEqual(
-            resolvedDashboardData,
-            normalizeDashboardAttachmentData(latestVersion.data)
-          );
+        // Compare against the latest version rather than origin_snapshot_at: saving a dashboard
+        // re-links the attachment origin, which resets the snapshot time after the save.
+        if (Date.parse(dashboardUpdatedAt) <= Date.parse(latestVersion.created_at)) {
+          return false;
         }
-        return false;
+        const resolvedDashboardData = normalizeDashboardAttachmentData(
+          dashboardStateToAttachmentData(dashboard.data)
+        );
+        // Compare canonicalized attachment data so Lens panel shape differences do not cause false staleness.
+        return !deepEqual(
+          resolvedDashboardData,
+          normalizeDashboardAttachmentData(latestVersion.data)
+        );
       } catch (error) {
         logger.warn(
           `Failed to check staleness for dashboard attachment "${attachment.origin}": ${error}`
