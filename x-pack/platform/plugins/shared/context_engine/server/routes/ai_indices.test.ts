@@ -1494,7 +1494,7 @@ describe('ai indices routes', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'ai_index_ki_update',
+            action: 'ki_update',
             outcome: 'success',
           }),
           kibana: { saved_object: { type: 'ki', id: 'ki-1' } },
@@ -1606,7 +1606,7 @@ describe('ai indices routes', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'ai_index_ki_delete',
+            action: 'ki_delete',
             outcome: 'success',
           }),
           kibana: { saved_object: { type: 'ki', id: 'ki-1' } },
@@ -1669,7 +1669,7 @@ describe('ai indices routes', () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
       jest.mocked(restoreKi).mockResolvedValue({ id: 'ki-1' });
       jest.mocked(buildKiApiWriter).mockReturnValue({
-        uri: 'api://context_engine.ki.update',
+        uri: 'api://context_engine.ki.restore',
         metadata: { space_id: defaultSpaceId },
       });
 
@@ -1678,7 +1678,7 @@ describe('ai indices routes', () => {
       });
 
       expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', defaultSpaceId);
-      expect(buildKiApiWriter).toHaveBeenCalledWith('update', defaultSpaceId);
+      expect(buildKiApiWriter).toHaveBeenCalledWith('restore', defaultSpaceId);
       expect(restoreKi).toHaveBeenCalledWith(
         expect.objectContaining({ search: esSearch }),
         expect.objectContaining({
@@ -1697,7 +1697,7 @@ describe('ai indices routes', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'ai_index_ki_restore',
+            action: 'ki_restore',
             outcome: 'success',
           }),
           kibana: { saved_object: { type: 'ki', id: 'ki-1' } },

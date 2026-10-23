@@ -7,13 +7,7 @@
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { deleteKiStepCommonDefinition } from '../../common/step_types/delete_ki';
-import { KiNotFoundError } from '../ai_indices/errors';
-import {
-  findKiRevision,
-  hardDeleteKiRevision,
-  isKiDeleted,
-  writeKiRevision,
-} from '../ai_indices/ki_revision';
+import { softDeleteKi } from '../ai_indices/ki_write';
 import type { KiStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
@@ -51,54 +45,18 @@ export const getDeleteKiStepDefinition = ({
             const { dest, managed } = await resolveAiIndex(getAiIndexService, aiIndexId, spaceId);
             setManaged(managed);
             const esClient = context.contextManager.getScopedEsClient();
+            const writer = kiWriterFromContext(context.contextManager.getContext());
 
-            const revision = await findKiRevision({
-              esClient,
+            const result = await softDeleteKi(esClient, {
               aiIndexId,
               dest,
               kiId,
-              abortSignal: context.abortSignal,
-            });
-            if (!revision) {
-              throw new KiNotFoundError(aiIndexId, kiId);
-            }
-
-            if (dest.type === 'data_stream') {
-              if (isKiDeleted(revision.source)) {
-                throw new KiNotFoundError(aiIndexId, kiId);
-              }
-              const now = new Date().toISOString();
-              await writeKiRevision({
-                esClient,
-                aiIndexId,
-                dest,
-                kiId,
-                revision,
-                changes: {
-                  updated_at: now,
-                  governance: {
-                    provenance: {
-                      updated_by: kiWriterFromContext(context.contextManager.getContext()),
-                    },
-                    lifecycle: { status: 'deleted' },
-                  },
-                },
-                refresh,
-                abortSignal: context.abortSignal,
-              });
-              return { output: { id: kiId } };
-            }
-
-            await hardDeleteKiRevision({
-              esClient,
-              aiIndexId,
-              kiId,
-              revision,
+              writer,
               refresh,
               abortSignal: context.abortSignal,
             });
 
-            return { output: { id: kiId } };
+            return { output: result };
           },
         });
       } catch (error) {

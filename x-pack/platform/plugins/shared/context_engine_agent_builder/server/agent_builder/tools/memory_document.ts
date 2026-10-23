@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StoredKi } from '@kbn/context-engine-plugin/server/step_types/helpers';
+import type { StoredKi } from '@kbn/context-engine-plugin/server/ai_indices/ki_revision';
 
 interface MemoryReference {
   uri: string;

@@ -18,7 +18,7 @@ import {
   writeKiRevision,
   isKiDeleted,
   type KiWriter,
-} from '@kbn/context-engine-plugin/server/step_types/helpers';
+} from '@kbn/context-engine-plugin/server/ai_indices/ki_revision';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { z } from '@kbn/zod/v4';

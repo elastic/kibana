@@ -217,6 +217,75 @@ export const writeKiRevision = async ({
   return { result: response.result === 'noop' ? 'noop' : 'updated' };
 };
 
+type PutKiIndexWriteOptions = Pick<
+  Parameters<ElasticsearchClient['index']>[0],
+  'op_type' | 'if_seq_no' | 'if_primary_term'
+>;
+
+const resolvePutKiWriteOptions = (
+  dest: AiIndexDest,
+  existing: Pick<KiRevision, 'seqNo' | 'primaryTerm'> | undefined,
+  failIfExists: boolean
+): PutKiIndexWriteOptions => {
+  if (dest.type === 'data_stream') {
+    return { op_type: 'create' };
+  }
+  if (existing) {
+    return { if_seq_no: existing.seqNo, if_primary_term: existing.primaryTerm };
+  }
+  if (failIfExists) {
+    return { op_type: 'create' };
+  }
+  return {};
+};
+
+export const putKiRevision = async ({
+  esClient,
+  aiIndexId,
+  dest,
+  kiId,
+  document,
+  existing,
+  failIfExists = false,
+  refresh = false,
+  abortSignal,
+}: {
+  esClient: ElasticsearchClient;
+  aiIndexId: string;
+  dest: AiIndexDest;
+  kiId: string;
+  document: StoredKi;
+  /** An already-resolved revision to overwrite with optimistic concurrency (index dest only). Omit to create a new document. */
+  existing?: Pick<KiRevision, 'index' | 'documentId' | 'seqNo' | 'primaryTerm'>;
+  /** Fails instead of silently overwriting if a document with this id already exists. Ignored (always true) for data-stream dests, which only accept `create`. */
+  failIfExists?: boolean;
+  refresh?: boolean;
+  abortSignal?: AbortSignal;
+}): Promise<void> => {
+  const writeOptions = resolvePutKiWriteOptions(dest, existing, failIfExists);
+
+  await esClient
+    .index(
+      {
+        index: existing?.index ?? dest.value,
+        ...(dest.type !== 'data_stream' && { id: existing?.documentId ?? kiId }),
+        document,
+        ...writeOptions,
+        ...(refresh && { refresh: 'wait_for' as const }),
+      },
+      { signal: abortSignal }
+    )
+    .catch((error) => {
+      if (isResponseError(error) && error.statusCode === 404) {
+        throw new KiNotFoundError(aiIndexId, kiId);
+      }
+      if (isResponseError(error) && error.statusCode === 409) {
+        throw new KiConflictError(aiIndexId, kiId);
+      }
+      throw error;
+    });
+};
+
 /** Hard-deletes an index-backed KI document. Data-stream KIs use lifecycle tombstones instead. */
 export const hardDeleteKiRevision = async ({
   esClient,

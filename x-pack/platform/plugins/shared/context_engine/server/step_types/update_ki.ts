@@ -8,8 +8,7 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { updateKiStepCommonDefinition } from '../../common/step_types/update_ki';
 import { omitNullKiAttributes } from '../../common/step_types/ki';
-import { KiDeletedError, KiNotFoundError } from '../ai_indices/errors';
-import { findKiRevision, isKiDeleted, writeKiRevision } from '../ai_indices/ki_revision';
+import { updateKi } from '../ai_indices/ki_write';
 import type { KiStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
@@ -54,44 +53,21 @@ export const getUpdateKiStepDefinition = ({
             const { dest, managed } = await resolveAiIndex(getAiIndexService, aiIndexId, spaceId);
             setManaged(managed);
             const esClient = context.contextManager.getScopedEsClient();
-
-            const revision = await findKiRevision({
-              esClient,
-              aiIndexId,
-              dest,
-              kiId,
-              abortSignal: context.abortSignal,
-            });
-            if (!revision) {
-              throw new KiNotFoundError(aiIndexId, kiId);
-            }
-            if (isKiDeleted(revision.source) && !force) {
-              throw new KiDeletedError(aiIndexId, kiId);
-            }
-            if (Object.keys(ki).length === 0 && lifecycle === undefined) {
-              return { output: { id: kiId, result: 'noop' as const } };
-            }
-
-            const now = new Date().toISOString();
             const writer = kiWriterFromContext(context.contextManager.getContext());
-            const changes = {
-              ...ki,
-              updated_at: now,
-              governance: { provenance: { updated_by: writer }, ...(lifecycle && { lifecycle }) },
-            };
 
-            const { result } = await writeKiRevision({
-              esClient,
+            const result = await updateKi(esClient, {
               aiIndexId,
               dest,
               kiId,
-              revision,
-              changes,
+              ki,
+              writer,
+              force,
+              lifecycle,
               refresh,
               abortSignal: context.abortSignal,
             });
 
-            return { output: { id: kiId, result } };
+            return { output: result };
           },
         });
       } catch (error) {

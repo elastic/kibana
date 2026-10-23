@@ -25,8 +25,11 @@ import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indice
 import {
   getKiRevision,
   isKiDeleted,
+  putKiRevision,
+  type KiRevision,
   type KiWriter,
-} from '@kbn/context-engine-plugin/server/step_types/helpers';
+  type StoredKi,
+} from '@kbn/context-engine-plugin/server/ai_indices/ki_revision';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { isoDateTime, z } from '@kbn/zod/v4';
@@ -179,11 +182,10 @@ export const createRememberTool = ({
         runId: runContext.runId,
         agentId: agent?.agentId,
       });
-      let existingBackingIndex: string | undefined;
-      let existingDocumentId: string | undefined;
-      let existingSeqNo: number | undefined;
-      let existingPrimaryTerm: number | undefined;
       let existingDocument: StoredMemoryDocument | undefined;
+      let existingRevision:
+        | Pick<KiRevision, 'index' | 'documentId' | 'seqNo' | 'primaryTerm'>
+        | undefined;
 
       if (params.id) {
         const abortSignal = new AbortController().signal;
@@ -210,11 +212,13 @@ export const createRememberTool = ({
           throw new Error(`Memory '${params.id}' was deleted and cannot be revised.`);
         }
 
-        existingBackingIndex = revision.index;
-        existingDocumentId = revision.documentId;
-        existingSeqNo = revision.seqNo;
-        existingPrimaryTerm = revision.primaryTerm;
         existingDocument = revision.source;
+        existingRevision = {
+          index: revision.index,
+          documentId: revision.documentId,
+          seqNo: revision.seqNo,
+          primaryTerm: revision.primaryTerm,
+        };
       }
 
       let tags: string[] | undefined;
@@ -224,7 +228,7 @@ export const createRememberTool = ({
         tags = existingDocument.tags;
       }
 
-      const document: StoredMemoryDocument = {
+      const document: StoredKi = {
         '@timestamp':
           aiIndex.dest.type === 'data_stream' ? now : existingDocument?.['@timestamp'] ?? now,
         id: logicalId,
@@ -257,27 +261,20 @@ export const createRememberTool = ({
       if (
         aiIndex.dest.type === 'index' &&
         existingDocument &&
-        (existingSeqNo === undefined || existingPrimaryTerm === undefined)
+        (existingRevision?.seqNo === undefined || existingRevision?.primaryTerm === undefined)
       ) {
         throw new Error(`Memory '${logicalId}' is missing concurrency metadata.`);
       }
 
-      await currentUserClient.index({
-        index:
-          aiIndex.dest.type === 'index' && existingBackingIndex
-            ? existingBackingIndex
-            : aiIndex.dest.value,
-        ...(aiIndex.dest.type === 'index' && {
-          id: existingBackingIndex && existingDocumentId ? existingDocumentId : logicalId,
-        }),
+      await putKiRevision({
+        esClient: currentUserClient,
+        aiIndexId: params.aiIndexId,
+        dest: aiIndex.dest,
+        kiId: logicalId,
         document,
-        ...(aiIndex.dest.type === 'data_stream' || !existingDocument
-          ? { op_type: 'create' as const }
-          : {
-              if_seq_no: existingSeqNo,
-              if_primary_term: existingPrimaryTerm,
-            }),
-        refresh: 'wait_for',
+        existing: aiIndex.dest.type === 'index' ? existingRevision : undefined,
+        failIfExists: !existingDocument,
+        refresh: true,
       });
 
       return {

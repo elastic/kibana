@@ -15,9 +15,9 @@ export enum AiIndexAuditAction {
   GET = 'ai_index_get',
   LIST = 'ai_index_list',
   DELETE = 'ai_index_delete',
-  RESTORE = 'ai_index_ki_restore',
-  KI_UPDATE = 'ai_index_ki_update',
-  KI_DELETE = 'ai_index_ki_delete',
+  KI_RESTORE = 'ki_restore',
+  KI_UPDATE = 'ki_update',
+  KI_DELETE = 'ki_delete',
   DELETE_RESOURCES = 'ai_index_delete_resources',
   QUERY = 'ai_index_query',
   DESCRIBE = 'ai_index_describe',
@@ -32,9 +32,9 @@ const eventVerbs: Record<AiIndexAuditAction, VerbsTuple> = {
   ai_index_get: ['access', 'accessing', 'accessed'],
   ai_index_list: ['access', 'accessing', 'accessed'],
   ai_index_delete: ['delete', 'deleting', 'deleted'],
-  ai_index_ki_restore: ['restore', 'restoring', 'restored'],
-  ai_index_ki_update: ['update', 'updating', 'updated'],
-  ai_index_ki_delete: ['delete', 'deleting', 'deleted'],
+  ki_restore: ['restore', 'restoring', 'restored'],
+  ki_update: ['update', 'updating', 'updated'],
+  ki_delete: ['delete', 'deleting', 'deleted'],
   ai_index_delete_resources: [
     'delete related resources of',
     'deleting related resources of',
@@ -51,9 +51,9 @@ const eventTypes: Record<AiIndexAuditAction, string> = {
   ai_index_get: 'access',
   ai_index_list: 'access',
   ai_index_delete: 'deletion',
-  ai_index_ki_restore: 'change',
-  ai_index_ki_update: 'change',
-  ai_index_ki_delete: 'deletion',
+  ki_restore: 'change',
+  ki_update: 'change',
+  ki_delete: 'deletion',
   ai_index_delete_resources: 'deletion',
   ai_index_query: 'access',
   ai_index_describe: 'access',
@@ -61,13 +61,13 @@ const eventTypes: Record<AiIndexAuditAction, string> = {
 
 type AiIndexOnlyAuditAction = Exclude<
   AiIndexAuditAction,
-  AiIndexAuditAction.KI_UPDATE | AiIndexAuditAction.KI_DELETE | AiIndexAuditAction.RESTORE
+  AiIndexAuditAction.KI_UPDATE | AiIndexAuditAction.KI_DELETE | AiIndexAuditAction.KI_RESTORE
 >;
 
 export type KiAuditAction =
   | AiIndexAuditAction.KI_UPDATE
   | AiIndexAuditAction.KI_DELETE
-  | AiIndexAuditAction.RESTORE;
+  | AiIndexAuditAction.KI_RESTORE;
 
 export interface AiIndexAuditEventParams {
   action: AiIndexOnlyAuditAction;

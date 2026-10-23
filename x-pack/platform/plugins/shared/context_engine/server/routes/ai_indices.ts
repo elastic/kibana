@@ -976,7 +976,7 @@ export const registerAiIndexRoutes = ({
               const { dest, managed } = await getAiIndexService().get(aiIndexId, spaceId);
               setManaged(managed);
               const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
-              const writer = buildKiApiWriter('update', spaceId);
+              const writer = buildKiApiWriter('restore', spaceId);
               const result = await restoreKi(esClient, {
                 aiIndexId,
                 dest,
@@ -987,13 +987,13 @@ export const registerAiIndexRoutes = ({
               return { output: result };
             },
           });
-          auditLogger.log(kiAuditEvent({ action: AiIndexAuditAction.RESTORE, aiIndexId, kiId }));
+          auditLogger.log(kiAuditEvent({ action: AiIndexAuditAction.KI_RESTORE, aiIndexId, kiId }));
           const body: RestoreKiResponse = output;
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(
             kiAuditEvent({
-              action: AiIndexAuditAction.RESTORE,
+              action: AiIndexAuditAction.KI_RESTORE,
               aiIndexId,
               kiId,
               error,

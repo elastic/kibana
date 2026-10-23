@@ -60,6 +60,13 @@ describe('buildKiApiWriter', () => {
       metadata: { space_id: 'marketing' },
     });
   });
+
+  it('builds a writer for restore with the space id', () => {
+    expect(buildKiApiWriter('restore', 'default')).toEqual({
+      uri: 'api://context_engine.ki.restore',
+      metadata: { space_id: 'default' },
+    });
+  });
 });
 
 describe('updateKi', () => {
@@ -85,7 +92,7 @@ describe('updateKi', () => {
       query: kiIdQuery('ki-1'),
       size: 2,
       seq_no_primary_term: true,
-      _source: ['id', 'governance'],
+      _source: true,
     });
     expectEsRequest(esClient.update as jest.Mock, {
       index: 'ai-index-idx-my-ai-index',
@@ -128,7 +135,7 @@ describe('updateKi', () => {
       sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
       size: REVISION_TIE_WINDOW,
       seq_no_primary_term: true,
-      _source: ['id', 'governance'],
+      _source: true,
     });
   });
 
@@ -195,6 +202,46 @@ describe('updateKi', () => {
 
     expect(thrown).toBeInstanceOf(KiNotFoundError);
     expect(esClient.update).not.toHaveBeenCalled();
+  });
+
+  it('returns noop when submitted content already matches the stored KI', async () => {
+    const storedWithContent = { ...storedKi, content: 'Same content' };
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index', storedWithContent)),
+      update: jest.fn(),
+      index: jest.fn(),
+    } as unknown as ElasticsearchClient;
+
+    const result = await updateKi(esClient, {
+      aiIndexId: 'my-ai-index',
+      dest: indexDest,
+      kiId: 'ki-1',
+      ki: { content: 'Same content' },
+      writer: apiWriter,
+    });
+
+    expect(result).toEqual({ id: 'ki-1', result: 'noop' });
+    expect(esClient.update).not.toHaveBeenCalled();
+    expect(esClient.index).not.toHaveBeenCalled();
+  });
+
+  it('writes when an array field is narrowed, not treating it as a noop', async () => {
+    const storedWithTags = { ...storedKi, tags: ['keep', 'remove'] };
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index', storedWithTags)),
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    } as unknown as ElasticsearchClient;
+
+    const result = await updateKi(esClient, {
+      aiIndexId: 'my-ai-index',
+      dest: indexDest,
+      kiId: 'ki-1',
+      ki: { tags: ['keep'] },
+      writer: apiWriter,
+    });
+
+    expect(result).toEqual({ id: 'ki-1', result: 'updated' });
+    expect(esClient.update).toHaveBeenCalled();
   });
 
   it('throws ConflictError when the update loses the revision check', async () => {
