@@ -53,6 +53,7 @@ export const VegaThemeColors = {
       grid: borealisDark.euiColorBorderBaseSubdued,
       title: borealisDark.euiColorTextSubdued,
       label: borealisDark.euiColorTextSubdued,
+      text: borealisDark.euiColorTextParagraph,
       default: borealisDark.euiColorVis0,
       visColors: [
         borealisDark.euiColorVis0,
@@ -71,6 +72,7 @@ export const VegaThemeColors = {
       grid: borealisLight.euiColorBorderBaseSubdued,
       title: borealisLight.euiColorTextSubdued,
       label: borealisLight.euiColorTextSubdued,
+      text: borealisLight.euiColorTextParagraph,
       default: borealisLight.euiColorVis0,
       visColors: [
         borealisLight.euiColorVis0,
@@ -88,10 +90,9 @@ export const VegaThemeColors = {
   },
 };
 
-export function getVegaThemeColors<T extends 'grid' | 'title' | 'label' | 'default' | 'visColors'>(
-  theme: CoreTheme,
-  colorToken: T
-) {
+export function getVegaThemeColors<
+  T extends 'grid' | 'title' | 'label' | 'text' | 'default' | 'visColors'
+>(theme: CoreTheme, colorToken: T) {
   const colorMode = theme.darkMode ? 'dark' : 'light';
   return VegaThemeColors[theme.name as keyof typeof VegaThemeColors]?.[colorMode][colorToken] as
     | (T extends 'visColors' ? Color[] : Color)
