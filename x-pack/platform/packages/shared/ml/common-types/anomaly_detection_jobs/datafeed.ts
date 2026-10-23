@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { JobId } from './job';
 
 export type DatafeedId = string;
 
@@ -14,6 +15,15 @@ export type Datafeed = estypes.MlDatafeed & {
   project_routing?: string;
   authorization?: Authorization;
 };
+
+export interface EsqlDatafeedConfig {
+  datafeed_id: DatafeedId;
+  job_id: JobId;
+  esql_query: string;
+  source_time_field: string;
+  grouping_interval: string;
+  delayed_data_check_config?: estypes.MlDelayedDataCheckConfig;
+}
 
 export type ChunkingConfig = estypes.MlChunkingConfig;
 

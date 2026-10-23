@@ -33,6 +33,14 @@ describe('ML management internal locator', () => {
   );
 
   describe('Job Management Page', () => {
+    it('should generate a valid URL for the ES|QL anomaly detection job page', async () => {
+      const { url } = await mlManagementLocatorInternal.getUrl({
+        page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ESQL,
+      });
+
+      expect(url).toEqual('/app/management/ml/anomaly_detection/jobs/new_job/esql');
+    });
+
     it('should generate valid URL for the Anomaly Detection job management page', async () => {
       const { url } = await mlManagementLocatorInternal.getUrl(
         {

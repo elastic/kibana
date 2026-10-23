@@ -682,7 +682,12 @@ export function getMlClient(
     },
     async previewDatafeed(...p: Parameters<MlClient['previewDatafeed']>) {
       await datafeedIdsCheck(p);
-      return mlClientWithSecondaryAuth().previewDatafeed(...p);
+      const [payload, options] = p;
+      // Pass the payload through as a plain object. The @elastic/elasticsearch
+      // transport only skips JSON serialization (and the JSON content-type)
+      // when body is a string, which Elasticsearch's _preview endpoint
+      // rejects with a 406. Do not JSON.stringify here.
+      return mlClientWithSecondaryAuth().previewDatafeed(payload, options);
     },
     async putCalendar(...p: Parameters<MlClient['putCalendar']>) {
       return auditLogger.wrapTask(() => mlClient.putCalendar(...p), 'ml_put_calendar', p);

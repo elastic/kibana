@@ -14,12 +14,12 @@ import {
   getNewJobDefaults,
   getNewJobLimits,
   extractDeploymentId,
+  getIsMlEsqlDatafeedEnabled,
 } from './ml_server_info';
 import mockMlInfoResponse from './__mocks__/ml_info_response.json';
 
-const mlApiServicesMock = {
-  mlInfo: jest.fn(() => Promise.resolve(mockMlInfoResponse)),
-} as unknown as MlApi;
+const mlInfo = jest.fn(() => Promise.resolve(mockMlInfoResponse));
+const mlApiServicesMock = { mlInfo } as unknown as MlApi;
 
 describe('ml_server_info initial state', () => {
   it('should fail to get server info ', () => {
@@ -39,6 +39,12 @@ describe('ml_server_info', () => {
       expect(isCloudTrial()).toBe(true);
       expect(getCloudDeploymentId()).toBe('85d666f3350c469e8c3242d76a7f459c');
     });
+  });
+
+  it('gets the ES|QL datafeed capability', async () => {
+    mlInfo.mockResolvedValueOnce({ ...mockMlInfoResponse, isMlEsqlDatafeedEnabled: true });
+    await loadMlServerInfo(mlApiServicesMock);
+    expect(getIsMlEsqlDatafeedEnabled()).toBe(true);
   });
 
   describe('defaults', () => {
