@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiComboBox, EuiFormRow, EuiIconTip, EuiToolTip } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { AWS_REGION_OPTIONS } from './field_config';
@@ -59,20 +59,9 @@ export function GlobalRegionField({
   return (
     <EuiFormRow
       fullWidth
-      label={
-        <>
-          {i18n.translate('xpack.ingestHub.serviceSettingsStep.globalRegion.label', {
-            defaultMessage: 'Global AWS region',
-          })}{' '}
-          <EuiIconTip
-            type="info"
-            color="subdued"
-            content={i18n.translate('xpack.ingestHub.serviceSettingsStep.globalRegion.note', {
-              defaultMessage: 'Applies to all services',
-            })}
-          />
-        </>
-      }
+      label={i18n.translate('xpack.ingestHub.serviceSettingsStep.globalRegion.label', {
+        defaultMessage: 'Global AWS region',
+      })}
       isInvalid={isInvalid}
       error={
         isInvalid ? (
