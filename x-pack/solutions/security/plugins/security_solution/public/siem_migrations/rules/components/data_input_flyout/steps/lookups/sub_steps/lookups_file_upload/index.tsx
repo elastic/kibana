@@ -24,6 +24,7 @@ export interface RulesFileUploadStepProps {
 export const useLookupsFileUploadStep = ({
   status,
   migrationStats,
+  missingLookups,
   addUploadedLookups,
 }: RulesFileUploadStepProps): EuiStepProps => {
   const { upsertResources, isLoading, error } = useUpsertResources(addUploadedLookups);
@@ -64,6 +65,7 @@ export const useLookupsFileUploadStep = ({
         isLoading={isLoading}
         apiError={error?.message}
         migrationSource={migrationStats.vendor as MigrationSource}
+        missingLookups={missingLookups}
       />
     ),
   };

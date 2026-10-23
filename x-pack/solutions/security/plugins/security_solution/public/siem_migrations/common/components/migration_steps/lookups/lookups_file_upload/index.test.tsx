@@ -6,12 +6,27 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { LookupsFileUpload } from '.';
 import { MigrationSource } from '../../../../types';
 
+const selectFiles = async (filePicker: HTMLElement, files: File[]) => {
+  await act(async () => {
+    fireEvent.change(filePicker, { target: { files } });
+  });
+};
+
 describe('LookupsFileUpload', () => {
-  const props = { createResources: jest.fn(), migrationSource: MigrationSource.SPLUNK };
+  const missingLookups = ['threat_intel_ip'];
+  const props = {
+    createResources: jest.fn(),
+    migrationSource: MigrationSource.SPLUNK,
+    missingLookups,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('renders the file picker', () => {
     const { getByTestId } = render(<LookupsFileUpload {...props} />);
@@ -39,5 +54,37 @@ describe('LookupsFileUpload', () => {
     const { getByTestId } = render(<LookupsFileUpload {...props} onSkip={onSkip} />);
     fireEvent.click(getByTestId('lookupsUploadSkipButton'));
     expect(onSkip).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a name error when the selected file is not in the lookup list and keeps upload disabled', async () => {
+    const file = new File(['ip\n1.1.1.1\n'], 'other_lookup.csv', { type: 'text/csv' });
+    const { getByTestId, getByText } = render(<LookupsFileUpload {...props} />);
+
+    await selectFiles(getByTestId('lookupsFilePicker'), [file]);
+
+    await waitFor(() => {
+      expect(
+        getByText('The file name must match one of the lookup names in the list above.')
+      ).toBeVisible();
+    });
+    expect(getByTestId('uploadFileButton')).toBeDisabled();
+    expect(props.createResources).not.toHaveBeenCalled();
+  });
+
+  it('uploads a matching lookup using the name from the list', async () => {
+    const content = 'ip\n1.1.1.1\n';
+    const file = new File([content], 'Threat_Intel_IP.csv', { type: 'text/csv' });
+    const { getByTestId } = render(<LookupsFileUpload {...props} />);
+
+    await selectFiles(getByTestId('lookupsFilePicker'), [file]);
+    await waitFor(() => {
+      expect(getByTestId('uploadFileButton')).not.toBeDisabled();
+    });
+
+    fireEvent.click(getByTestId('uploadFileButton'));
+
+    expect(props.createResources).toHaveBeenCalledWith([
+      { type: 'lookup', name: 'threat_intel_ip', content },
+    ]);
   });
 });

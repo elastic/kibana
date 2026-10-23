@@ -24,6 +24,7 @@ export interface DashboardsFileUploadStepProps {
 export const useLookupsFileUploadStep = ({
   status,
   migrationStats,
+  missingLookups,
   addUploadedLookups,
 }: DashboardsFileUploadStepProps): EuiStepProps => {
   const { upsertResources, isLoading, error } = useUpsertResources(addUploadedLookups);
@@ -61,6 +62,7 @@ export const useLookupsFileUploadStep = ({
         isLoading={isLoading}
         apiError={error?.message}
         migrationSource={MigrationSource.SPLUNK}
+        missingLookups={missingLookups}
       />
     ),
   };
