@@ -454,8 +454,8 @@ describe('DiscoverMainRoute', () => {
     expect(draft).toHaveValue('keep this draft');
   });
 
-  test('opens ES|QL before availability checks finish and shows the no-data page if they find nothing', async () => {
-    const stateStorageContainer = await createUrlStateWithQuery({ esql: 'ROW value = 1' });
+  test('shows the no-data page without mounting the editor when delayed checks find nothing', async () => {
+    const stateStorageContainer = await createUrlStateWithQuery({ esql: 'FROM logs-*' });
     const esData = Promise.withResolvers<boolean>();
     const dataViews = Promise.withResolvers<boolean>();
     const datasets = Promise.withResolvers<boolean>();
@@ -467,7 +467,10 @@ describe('DiscoverMainRoute', () => {
       hasESQLDatasets: datasets.promise,
     });
 
-    expect(await screen.findByTestId('discover-main-app')).toBeVisible();
+    await act(async () => {});
+
+    expect(screen.getByLabelText('Loading')).toBeVisible();
+    expect(DiscoverMainApp).not.toHaveBeenCalled();
     expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
 
     await act(async () => {
@@ -477,31 +480,36 @@ describe('DiscoverMainRoute', () => {
     });
 
     expect(await screen.findByTestId('kbnNoDataPage')).toBeVisible();
-    expect(screen.queryByTestId('discover-main-app')).not.toBeInTheDocument();
+    expect(DiscoverMainApp).not.toHaveBeenCalled();
   });
 
-  test('keeps a classic tab loading until availability is known even if its catalog is ready', async () => {
-    const stateStorageContainer = await createUrlStateWithQuery({ language: 'kuery', query: '' });
-    const dataViews = Promise.withResolvers<boolean>();
+  test.each<Query | AggregateQuery>([{ language: 'kuery', query: '' }, { esql: 'ROW value = 1' }])(
+    'waits for data view availability before mounting tabs with query %j even if the catalog is ready',
+    async (query) => {
+      const stateStorageContainer = await createUrlStateWithQuery(query);
+      const dataViews = Promise.withResolvers<boolean>();
 
-    setupComponent({
-      stateStorageContainer,
-      hasDataView: dataViews.promise,
-      dataViewList: Promise.resolve([dataViewListItem]),
-    });
+      setupComponent({
+        stateStorageContainer,
+        hasDataView: dataViews.promise,
+        dataViewList: Promise.resolve([dataViewListItem]),
+      });
 
-    await screen.findByRole('tab', { name: 'Untitled', exact: true });
-    expect(screen.getByLabelText('Loading')).toBeVisible();
-    expect(screen.queryByTestId('noDataViewsPrompt')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('discover-main-app')).not.toBeInTheDocument();
+      await act(async () => {});
 
-    await act(async () => {
-      dataViews.resolve(true);
-    });
+      expect(screen.getByLabelText('Loading')).toBeVisible();
+      expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('noDataViewsPrompt')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('discover-main-app')).not.toBeInTheDocument();
 
-    expect(await screen.findByTestId('discover-main-app')).toBeVisible();
-    expect(discoverServiceMock.dataViews.hasData.hasDataView).toHaveBeenCalledTimes(1);
-  });
+      await act(async () => {
+        dataViews.resolve(true);
+      });
+
+      expect(await screen.findByTestId('discover-main-app')).toBeVisible();
+      expect(discoverServiceMock.dataViews.hasData.hasDataView).toHaveBeenCalledTimes(1);
+    }
+  );
 
   test('waits for the data view list before opening a classic tab', async () => {
     const stateStorageContainer = await createUrlStateWithQuery({

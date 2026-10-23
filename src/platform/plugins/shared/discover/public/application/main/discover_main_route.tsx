@@ -233,6 +233,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const isLoading =
     rootProfileState.rootProfileLoading ||
     profileInitializationState.loading ||
+    dataAvailabilityState.loading ||
     tabsInitializationState.loading ||
     areTabsInitializing;
 
@@ -249,11 +250,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     return <InitializationError error={error} />;
   }
 
-  if (
-    !dataAvailabilityState.loading &&
-    !dataAvailabilityState.value.hasESData &&
-    !dataAvailabilityState.value.hasDataView
-  ) {
+  if (!dataAvailabilityState.value.hasESData && !dataAvailabilityState.value.hasDataView) {
     return (
       <NoDataPage
         {...dataAvailabilityState.value}
