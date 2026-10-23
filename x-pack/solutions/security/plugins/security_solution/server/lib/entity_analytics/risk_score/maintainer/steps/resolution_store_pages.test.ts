@@ -27,7 +27,13 @@ const storeReturning = (...reads: Array<Array<Record<string, unknown[]>>>) => {
   const remaining = [...reads];
   const listEntities = jest.fn<ReturnType<ListEntities>, Parameters<ListEntities>>(async () => {
     const fields = remaining.shift() ?? [];
-    return { entities: [], fields, took: 5, nextSearchAfter: fields.length ? ['next'] : undefined };
+    const lastId = fields[fields.length - 1]?.['entity.id']?.[0];
+    return {
+      entities: [],
+      fields,
+      took: 5,
+      nextSearchAfter: typeof lastId === 'string' ? [lastId] : undefined,
+    };
   });
   return { listEntities };
 };
@@ -102,10 +108,10 @@ describe('discoverResolutionPagesFromStore', () => {
     expect(crudClient.listEntities).toHaveBeenCalledTimes(1);
   });
 
-  it('leaves the last group of a full read to the next page, which starts after the previous one', async () => {
+  it('carries the last group of a full read into the next page and reads on after the last hit', async () => {
     const crudClient = storeReturning(
       [alias('user:a1', 'user:t1'), alias('user:a2', 'user:t2'), alias('user:a3', 'user:t2')],
-      [alias('user:a2', 'user:t2'), alias('user:a3', 'user:t2')]
+      [alias('user:a4', 'user:t2')]
     );
 
     const pages = await discover(crudClient, 3);
@@ -125,34 +131,43 @@ describe('discoverResolutionPagesFromStore', () => {
       {
         resolutionTargetIds: ['user:t2'],
         bounds: { lower: 'user:t1', upper: 'user:t2' },
-        aliases: ['user:a2', 'user:a3'],
+        aliases: ['user:a2', 'user:a3', 'user:a4'],
       },
     ]);
-    expect(crudClient.listEntities.mock.calls[1][0]?.filter).toEqual([
-      { term: { 'entity.EngineMetadata.Type': 'user' } },
-      { range: { [RESOLVED_TO]: { gt: 'user:t1' } } },
-    ]);
+    expect(crudClient.listEntities).toHaveBeenCalledTimes(2);
+    expect(crudClient.listEntities.mock.calls[1][0]).toEqual(
+      expect.objectContaining({
+        filter: [
+          { term: { 'entity.EngineMetadata.Type': 'user' } },
+          { exists: { field: RESOLVED_TO } },
+        ],
+        searchAfter: ['user:a3'],
+      })
+    );
   });
 
-  it('reads a group larger than one read to its end and makes it a page of its own', async () => {
+  it('reads on through a group larger than one read until the next group starts', async () => {
     const crudClient = storeReturning(
       [alias('user:a1', 'user:t1'), alias('user:a2', 'user:t1')],
-      [alias('user:a1', 'user:t1'), alias('user:a2', 'user:t1')],
-      [alias('user:a3', 'user:t1')],
+      [alias('user:a3', 'user:t1'), alias('user:a4', 'user:t2')],
       []
     );
 
     const pages = await discover(crudClient, 2);
 
-    expect(pages).toHaveLength(1);
-    expect(pages[0].resolutionTargetIds).toEqual(['user:t1']);
-    expect([...(pages[0].aliasEntities?.keys() ?? [])]).toEqual(['user:a1', 'user:a2', 'user:a3']);
-    expect(crudClient.listEntities.mock.calls[1][0]?.filter).toEqual([
-      { term: { [RESOLVED_TO]: 'user:t1' } },
+    expect(
+      pages.map(({ resolutionTargetIds, aliasEntities }) => ({
+        resolutionTargetIds,
+        aliases: [...(aliasEntities?.keys() ?? [])],
+      }))
+    ).toEqual([
+      { resolutionTargetIds: ['user:t1'], aliases: ['user:a1', 'user:a2', 'user:a3'] },
+      { resolutionTargetIds: ['user:t2'], aliases: ['user:a4'] },
     ]);
-    expect(crudClient.listEntities.mock.calls[3][0]?.filter).toEqual([
-      { term: { 'entity.EngineMetadata.Type': 'user' } },
-      { range: { [RESOLVED_TO]: { gt: 'user:t1' } } },
+    expect(crudClient.listEntities.mock.calls.map(([params]) => params?.searchAfter)).toEqual([
+      undefined,
+      ['user:a2'],
+      ['user:a4'],
     ]);
   });
 

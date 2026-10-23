@@ -143,87 +143,107 @@ const readAll = async (
   return { entities, tookMs };
 };
 
+/**
+ * Measurement toggle: also sort aliases by `entity.id`, which makes the read's order unique and
+ * stable across merges. Without it, an alias whose document is rewritten mid-stage, right at a
+ * read's boundary, can be read twice or skipped for that run.
+ */
+const SORT_ALIASES_BY_ENTITY_ID = false;
+
+const ALIAS_SORT: SortCombinations[] = [
+  { [RESOLVED_TO]: 'asc' },
+  ...(SORT_ALIASES_BY_ENTITY_ID ? [{ 'entity.id': 'asc' as const }] : []),
+];
+
+/** Where the next alias read starts, and the aliases already read for the group it starts in. */
+interface AliasCursor {
+  searchAfter?: Array<string | number>;
+  carried: RiskScoreModifierEntity[];
+  exhausted: boolean;
+}
+
 interface AliasPage {
   aliases: RiskScoreModifierEntity[];
   targetIds: string[];
   /** The page's last target, and the lower bound (exclusive) of the next page. */
   upper: string;
-  last: boolean;
   tookMs: number;
 }
 
+const targetsInOrder = (aliases: RiskScoreModifierEntity[]): string[] => [
+  ...new Set(aliases.flatMap((alias) => resolvedTo(alias) ?? [])),
+];
+
 /**
- * Reads the next aliases in `resolved_to` order and cuts them into a page of whole groups. A full
- * read can end partway through its last target's aliases, so that target is left for the next
- * page. A read holding a single target is a group larger than the read, which is read to its end.
+ * Reads the next aliases in `resolved_to` order with `search_after` and cuts them into a page of
+ * whole groups. The filters stay the same on every read, so Elasticsearch caches them; a moving
+ * range on `resolved_to` would have it walk every value after the bound on every page. A full
+ * read can end partway through its last target's aliases: that group is carried into the next
+ * page rather than read again. A group larger than one read is read on until another starts.
  */
 const readAliasPage = async ({
   crudClient,
   entityType,
-  lowerBound,
+  cursor,
   size,
 }: {
   crudClient: StoreReader;
   entityType: EntityType;
-  lowerBound: string | undefined;
+  cursor: AliasCursor;
   size: number;
-}): Promise<AliasPage | undefined> => {
-  const read = await readOnePage(crudClient, {
-    filter: [
-      { term: { 'entity.EngineMetadata.Type': entityType } },
-      lowerBound === undefined
-        ? { exists: { field: RESOLVED_TO } }
-        : { range: { [RESOLVED_TO]: { gt: lowerBound } } },
-    ],
-    sort: [{ [RESOLVED_TO]: 'asc' }],
-    size,
-  });
+}): Promise<{ page: AliasPage | undefined; cursor: AliasCursor }> => {
+  let aliases = cursor.carried;
+  let { searchAfter, exhausted } = cursor;
+  let tookMs = 0;
+  while (!exhausted && targetsInOrder(aliases).length < 2) {
+    const read = await readOnePage(crudClient, {
+      filter: [
+        { term: { 'entity.EngineMetadata.Type': entityType } },
+        { exists: { field: RESOLVED_TO } },
+      ],
+      sort: ALIAS_SORT,
+      size,
+      searchAfter,
+    });
+    aliases = aliases.concat(read.entities);
+    tookMs += read.tookMs;
+    searchAfter = read.nextSearchAfter;
+    exhausted = read.hits < size;
+  }
 
-  const targetIds = [...new Set(read.entities.flatMap((alias) => resolvedTo(alias) ?? []))];
+  const targetIds = targetsInOrder(aliases);
   if (targetIds.length === 0) {
-    return undefined;
+    return { page: undefined, cursor: { searchAfter, carried: [], exhausted: true } };
   }
-
-  const last = read.hits < size;
-  if (last) {
+  if (exhausted) {
     return {
-      aliases: read.entities,
-      targetIds,
-      upper: targetIds[targetIds.length - 1],
-      last,
-      tookMs: read.tookMs,
+      page: { aliases, targetIds, upper: targetIds[targetIds.length - 1], tookMs },
+      cursor: { searchAfter, carried: [], exhausted },
     };
   }
-  if (targetIds.length > 1) {
-    const unfinished = targetIds.pop();
-    return {
-      aliases: read.entities.filter((alias) => resolvedTo(alias) !== unfinished),
-      targetIds,
-      upper: targetIds[targetIds.length - 1],
-      last,
-      tookMs: read.tookMs,
-    };
-  }
-  const [target] = targetIds;
-  const group = await readAll(crudClient, {
-    filter: [{ term: { [RESOLVED_TO]: target } }],
-    sort: [{ 'entity.id': 'asc' }],
-    size,
-  });
+  // More aliases follow, so the last target's group may not be complete yet.
+  const complete = targetIds.slice(0, -1);
+  const unfinished = targetIds[targetIds.length - 1];
   return {
-    aliases: group.entities,
-    targetIds,
-    upper: target,
-    last,
-    tookMs: read.tookMs + group.tookMs,
+    page: {
+      aliases: aliases.filter((alias) => resolvedTo(alias) !== unfinished),
+      targetIds: complete,
+      upper: complete[complete.length - 1],
+      tookMs,
+    },
+    cursor: {
+      searchAfter,
+      carried: aliases.filter((alias) => resolvedTo(alias) === unfinished),
+      exhausted,
+    },
   };
 };
 
 /**
  * Finds resolution pages in the entity store, without the Phase 0 lookup index. Each page reads the
- * next aliases in `resolved_to` order after the previous page's last target, from doc values, so
- * every group lands whole on one page and its aliases arrive with their modifiers. The page's range
- * `(lower, upper]` covers exactly its targets.
+ * next aliases in `resolved_to` order from doc values, so every group lands whole on one page and
+ * its aliases arrive with their modifiers. The page's range `(lower, upper]` covers exactly its
+ * targets.
  */
 export const discoverResolutionPagesFromStore = async function* ({
   crudClient,
@@ -241,22 +261,24 @@ export const discoverResolutionPagesFromStore = async function* ({
   pageTimings?: PageStepTimings;
 }): AsyncGenerator<ResolutionPageTask> {
   const size = Math.min(pageSize, MAX_RESOLUTION_TARGETS_PER_PAGE);
+  let cursor: AliasCursor = { carried: [], exhausted: false };
   let lowerBound: string | undefined;
   let pageNumber = 0;
-  let last = false;
 
-  while (!last) {
+  while (!cursor.exhausted || cursor.carried.length > 0) {
     if (abortSignal?.aborted) {
       logger.info('Resolution scoring aborted between pages');
       return;
     }
 
     const timer = pageTimings.startPage();
-    const page = await timer.time(
+    const from = cursor;
+    const { page, cursor: next } = await timer.time(
       'discovery',
-      () => readAliasPage({ crudClient, entityType, lowerBound, size }),
-      (result) => result?.tookMs
+      () => readAliasPage({ crudClient, entityType, cursor: from, size }),
+      (result) => result.page?.tookMs
     );
+    cursor = next;
     if (!page) {
       timer.drop();
       return;
@@ -268,7 +290,6 @@ export const discoverResolutionPagesFromStore = async function* ({
     );
     const bounds = { lower: lowerBound, upper: page.upper };
     lowerBound = page.upper;
-    last = page.last;
     yield {
       pageNumber,
       resolutionTargetIds: page.targetIds,
