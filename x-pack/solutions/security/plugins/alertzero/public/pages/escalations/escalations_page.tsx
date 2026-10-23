@@ -8,6 +8,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -36,6 +37,7 @@ import { useQueuePolling } from '../../hooks/use_queue_polling';
 import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
 import { escalationToQueueItem } from './escalation_to_queue_item';
 import { ESCALATIONS_PAGE_INFO } from './translations';
+import { AGENT_BUILDER_PRIVILEGE_REQUIRED } from '../conversations/translations';
 import { EscalationsOpenNote } from './escalations_open_note';
 import { EscalationsEmptyBanner } from './escalations_empty_banner';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
@@ -49,7 +51,8 @@ export const EscalationsPage: React.FC = () => {
   useQueuePolling(POLLED_QUERY_KEYS, POLLED_ALL_PAGES_QUERY_KEYS);
 
   // Capability check: only render the assignee picker when the user can manage escalations.
-  const { manageEscalations: canManage } = useAlertZeroInvestigationsCapabilities();
+  const { manageEscalations: canManage, canAccessAgentBuilder } =
+    useAlertZeroInvestigationsCapabilities();
 
   // Clicking a row navigates to Agent Builder with the conversation details flyout open.
   // getChatHref is also forwarded so cards render as real links (Cmd-click, URL on hover).
@@ -210,6 +213,20 @@ export const EscalationsPage: React.FC = () => {
           />
         </EuiFlexItem>
 
+        {!canAccessAgentBuilder && (
+          <EuiFlexItem grow={false}>
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="warning"
+              iconType="lock"
+              data-test-subj="alertZeroAgentBuilderPrivilegeCallout"
+            >
+              {AGENT_BUILDER_PRIVILEGE_REQUIRED.callout}
+            </EuiCallOut>
+          </EuiFlexItem>
+        )}
+
         {isLoading ? (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="center" style={{ minHeight: 200 }}>
@@ -248,6 +265,7 @@ export const EscalationsPage: React.FC = () => {
                 renderAssignees={renderAssignees}
                 onClickCard={(item) => openChat(item.id, item.agentId)}
                 getHref={(item) => getChatHref(item.id, item.agentId)}
+                canOpenInvestigationDetails={canAccessAgentBuilder}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -263,6 +281,7 @@ export const EscalationsPage: React.FC = () => {
                 renderAssignees={renderAssignees}
                 onClickCard={(item) => openChat(item.id, item.agentId)}
                 getHref={(item) => getChatHref(item.id, item.agentId)}
+                canOpenInvestigationDetails={canAccessAgentBuilder}
               />
             </EuiFlexItem>
           </>
