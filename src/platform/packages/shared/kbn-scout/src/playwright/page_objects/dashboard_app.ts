@@ -1186,6 +1186,10 @@ export class DashboardApp {
   // Fullscreen
   // ============================================================
 
+  async hasFullscreenMenuItem(): Promise<boolean> {
+    return this.appMenu.hasItem('dashboardFullScreenMode');
+  }
+
   async enterFullscreen() {
     await this.appMenu.clickItem('dashboardFullScreenMode');
     await expect(this.page.testSubj.locator('exitFullScreenModeButton')).toBeVisible();
