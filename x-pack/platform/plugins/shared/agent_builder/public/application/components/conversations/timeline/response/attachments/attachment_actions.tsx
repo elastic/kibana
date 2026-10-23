@@ -65,14 +65,6 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
     onClick: button.handler,
   });
 
-  const getTextButtonProps = (button: ActionButton) => ({
-    color: button.color ?? 'text',
-    size: 's' as const,
-    iconType: button.icon,
-    isDisabled: button.disabled,
-    ...getNavProps(button),
-  });
-
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd" responsive={false}>
       {secondaryButtons.map((button) => (
@@ -82,8 +74,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
               <span tabIndex={button.disabled ? 0 : undefined}>
                 <EuiButtonIcon
                   aria-label={button.label}
-                  color={button.color ?? 'text'}
-                  display={button.highlighted ? 'base' : 'empty'}
+                  color="text"
                   size="s"
                   iconType={button.icon ?? ''}
                   isDisabled={button.disabled}
@@ -94,11 +85,15 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
           ) : (
             maybeWrapWithTooltip(
               button,
-              button.highlighted ? (
-                <EuiButton {...getTextButtonProps(button)}>{button.label}</EuiButton>
-              ) : (
-                <EuiButtonEmpty {...getTextButtonProps(button)}>{button.label}</EuiButtonEmpty>
-              )
+              <EuiButtonEmpty
+                color={button.color ?? 'text'}
+                size="s"
+                iconType={button.icon}
+                isDisabled={button.disabled}
+                {...getNavProps(button)}
+              >
+                {button.label}
+              </EuiButtonEmpty>
             )
           )}
         </EuiFlexItem>
@@ -110,8 +105,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
               <span tabIndex={button.disabled ? 0 : undefined}>
                 <EuiButtonIcon
                   aria-label={button.label}
-                  color={button.color ?? 'text'}
-                  display={button.highlighted ? 'base' : 'empty'}
+                  color="text"
                   size="s"
                   iconType={button.icon ?? ''}
                   isDisabled={button.disabled}
@@ -122,7 +116,13 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
           ) : (
             maybeWrapWithTooltip(
               button,
-              <EuiButton fill={button.highlighted} {...getTextButtonProps(button)}>
+              <EuiButton
+                color={button.color ?? 'text'}
+                size="s"
+                iconType={button.icon}
+                isDisabled={button.disabled}
+                {...getNavProps(button)}
+              >
                 {button.label}
               </EuiButton>
             )

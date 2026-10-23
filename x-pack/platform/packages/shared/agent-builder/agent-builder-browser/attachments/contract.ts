@@ -22,7 +22,15 @@ export enum ActionButtonType {
   OVERFLOW = 'overflow',
 }
 
-export type AttachmentPreviewState = 'none' | 'preview_available' | 'previewing';
+/**
+ * Preview state of an attachment card.
+ * - none: regular action buttons
+ * - preview_available: "Read-only preview" badge
+ * - previewing: shown in canvas, with a "Close preview" button instead of the action buttons
+ * - shown_in_app: the app the user is on shows the attachment, with a "You're previewing this"
+ *   badge instead of the action buttons
+ */
+export type AttachmentPreviewState = 'none' | 'preview_available' | 'previewing' | 'shown_in_app';
 /**
  * Props passed to custom attachment content renderers.
  */
@@ -73,14 +81,9 @@ export interface InlineRenderCallbacks {
 /**
  * Parameters passed when requesting action buttons for an inline-rendered attachment.
  */
-export interface GetActionButtonsParams<
-  TAttachment extends UnknownAttachment = UnknownAttachment,
-  TActionButtonsState = unknown
-> {
+export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = UnknownAttachment> {
   /** The attachment for which to provide action buttons */
   attachment: TAttachment;
-  /** Latest value of the definition's `actionButtonsState$` (inline attachments only) */
-  actionButtonsState?: TActionButtonsState;
   /** Whether the attachment is being rendered in a sidebar context */
   isSidebar: boolean;
   /** Whether the attachment is being rendered in canvas mode (expanded flyout view) */
@@ -114,8 +117,6 @@ export interface ActionButton {
   type: ActionButtonType;
   /** Optional EUI button color override (defaults to 'text') */
   color?: EuiButtonColor;
-  /** Whether the button gets a tinted background, e.g. to mark an action as currently active */
-  highlighted?: boolean;
   /** Whether the action is currently unavailable */
   disabled?: boolean;
   /** Optional explanation shown when a disabled action remains visible */
@@ -185,10 +186,7 @@ export interface HeaderBadge {
 /**
  * UI definition for rendering attachments of a specific type.
  */
-export interface AttachmentUIDefinition<
-  TAttachment extends UnknownAttachment = UnknownAttachment,
-  TActionButtonsState = unknown
-> {
+export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = UnknownAttachment> {
   /**
    * Returns a human-readable label for the attachment.
    */
@@ -259,14 +257,13 @@ export interface AttachmentUIDefinition<
    * Optional function to provide action buttons for inline-rendered attachments.
    * Buttons will appear alongside or below the rendered content.
    */
-  getActionButtons?: (
-    params: GetActionButtonsParams<TAttachment, TActionButtonsState>
-  ) => ActionButton[];
+  getActionButtons?: (params: GetActionButtonsParams<TAttachment>) => ActionButton[];
   /**
-   * Optional state outside the attachment that the buttons depend on (e.g. the app it is
-   * applied to). Each new value is passed to `getActionButtons` as `actionButtonsState`.
+   * Optional preview state of an inline-rendered attachment that depends on state outside the
+   * conversation, e.g. `shown_in_app` while the current app shows the attachment. Applies
+   * while the attachment is not previewed in canvas.
    */
-  actionButtonsState$?: Observable<TActionButtonsState>;
+  getPreviewState$?: (attachment: TAttachment) => Observable<AttachmentPreviewState>;
   /**
    * Optional max-width (in px) for the inline attachment panel.
    * When provided, the outer panel will not exceed this width.
@@ -352,12 +349,9 @@ export interface AttachmentServiceStartContract {
    * @param attachmentType - The unique identifier for the attachment type
    * @param definition - The UI definition for rendering this attachment type
    */
-  addAttachmentType: <
-    TAttachment extends UnknownAttachment = UnknownAttachment,
-    TActionButtonsState = unknown
-  >(
+  addAttachmentType: <TAttachment extends UnknownAttachment = UnknownAttachment>(
     attachmentType: string,
-    definition: AttachmentUIDefinition<TAttachment, TActionButtonsState>
+    definition: AttachmentUIDefinition<TAttachment>
   ) => void;
 
   /**

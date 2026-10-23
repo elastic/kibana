@@ -95,7 +95,11 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
     attachment.id,
     attachment.versionData?.version
   );
-  const actionButtonsState = useObservable(uiDefinition?.actionButtonsState$ ?? EMPTY);
+  const appPreviewState$ = useMemo(
+    () => uiDefinition?.getPreviewState$?.(attachment) ?? EMPTY,
+    [uiDefinition, attachment]
+  );
+  const appPreviewState = useObservable(appPreviewState$, 'none');
   const [dynamicButtonsState, setDynamicButtonsState] = useState<{
     key: string;
     buttons: ActionButton[];
@@ -112,7 +116,6 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
     () =>
       uiDefinition?.getActionButtons?.({
         attachment,
-        actionButtonsState,
         isSidebar,
         agentId,
         updateOrigin,
@@ -135,7 +138,6 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
       setPreviewedAttachmentKey,
       attachmentPreviewKey,
       openSidebarConversation,
-      actionButtonsState,
     ]
   );
 
@@ -150,7 +152,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
   const isPreviewingAttachment = previewedAttachmentKey === attachmentPreviewKey;
 
   const resolvedPreviewBadgeState: AttachmentPreviewState =
-    previewBadgeState ?? (isPreviewingAttachment ? 'previewing' : 'none');
+    previewBadgeState ?? (isPreviewingAttachment ? 'previewing' : appPreviewState);
 
   if (!uiDefinition) {
     return null;
