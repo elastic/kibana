@@ -933,7 +933,8 @@ export default function (providerContext: FtrProviderContext) {
           const updateRes = await supertest
             .put(`/api/fleet/outputs/${outputId}`)
             .set('kbn-xsrf', 'xxxx')
-            .send({ auth_type: 'none' })
+            // the Kafka update payload requires a name
+            .send({ name: `Kafka Output renamed ${uuidV4()}`, auth_type: 'none' })
             .expect(200);
 
           expect(updateRes.body.item.secrets?.password).to.equal(undefined);
