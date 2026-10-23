@@ -12,7 +12,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/public';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import type { ApmRuleType } from '@kbn/rule-data-utils';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-constants';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import type { ApmIndicatorType } from '../../../../../common/slo_indicator_types';
