@@ -90,6 +90,7 @@ dependsOn:
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/unified-search-plugin'
   - '@kbn/unsaved-changes-prompt'
+  - '@kbn/actions-plugin'
 tags:
   - plugin
   - prod
