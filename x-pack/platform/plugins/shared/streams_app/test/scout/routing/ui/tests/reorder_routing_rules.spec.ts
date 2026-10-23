@@ -32,7 +32,9 @@ test.describe(
         });
       }
 
-      await pageObjects.streams.gotoPartitioningTab('logs.otel');
+      await pageObjects.streams.gotoPartitioningTab('logs.otel', {
+        waitUntil: 'domcontentloaded',
+      });
       // A cold Cloud bootstrap can outlast the first drag's 10s action timeout.
       await expect(page.getByTestId('routingRuleDragHandle-logs.otel.first')).toBeVisible({
         timeout: 30_000,
