@@ -188,6 +188,7 @@ describe('registerDashboardAppIntegration', () => {
       api: mockApi as unknown as DashboardApi,
       draftAttachmentId,
       checkSavedDashboardExist,
+      staleUpdateStaged$: new Subject<DashboardAttachment>(),
     });
   };
 
