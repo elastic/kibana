@@ -30,7 +30,6 @@ import type {
 } from '../../services/license_service/license_service';
 import { LicenseServiceToken } from '../../services/license_service/tokens';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
-import { KibanaBaseUrlToken } from '../../locators/tokens';
 import { buildAlertDetailsUrl } from '../alert_details_url';
 import { DISPATCH_CHUNK_SIZE } from '../constants';
 import type {
@@ -45,7 +44,7 @@ import type {
 } from '../types';
 import { DispatchOutcome, DispatchPlan, PolicyCatalog } from '../state';
 import { DISPATCH_FAILURE_REASONS, type DispatchFailureReason } from './constants';
-import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
+import { KibanaBaseUrlToken, WorkflowsManagementApiToken } from './dispatch_step_tokens';
 
 const ACTION_POLICY_TRIGGER = 'action_policy';
 

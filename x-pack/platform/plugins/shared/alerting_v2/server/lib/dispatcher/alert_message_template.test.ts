@@ -6,8 +6,8 @@
  */
 
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
-import { MOCK_KIBANA_BASE_URL } from '../locators/tokens.mock';
 import { buildAlertDetailsUrl } from './alert_details_url';
+import { MOCK_KIBANA_BASE_URL } from './fixtures/test_utils';
 
 const template = `{% for alert in inputs.payload.alerts %}
 - {{ inputs.payload.rules[alert.rule_id].name | default: "Alert" }} ({{ alert.alert_status }}): {{ alert.alert_url }}

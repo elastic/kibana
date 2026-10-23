@@ -24,8 +24,7 @@ import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strate
 import { CountTimeframeStrategy } from '../lib/director/strategies/count_timeframe_strategy';
 import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
 import { TransitionStrategyToken } from '../lib/director/strategies/types';
-import { getKibanaBaseUrl } from '../lib/locators/kibana_base_url';
-import { KibanaBaseUrlToken } from '../lib/locators/tokens';
+import { getKibanaBaseUrl } from '../lib/dispatcher/kibana_base_url';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
 import { DispatcherServiceInternalToken } from '../lib/dispatcher/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
@@ -120,6 +119,7 @@ import {
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../common/saved_object_types';
 import {
   EncryptedSavedObjectsClientToken,
+  KibanaBaseUrlToken,
   WorkflowsManagementApiToken,
 } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';

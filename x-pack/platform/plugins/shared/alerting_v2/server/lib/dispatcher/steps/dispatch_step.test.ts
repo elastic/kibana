@@ -11,7 +11,6 @@ import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { ActionPoliciesLicenseState } from '../../services/license_service/license_service';
 import { createMockLicenseService } from '../../services/license_service/license_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { MOCK_KIBANA_BASE_URL } from '../../locators/tokens.mock';
 import { buildAlertDetailsUrl } from '../alert_details_url';
 import { DISPATCH_CHUNK_SIZE } from '../constants';
 import {
@@ -20,6 +19,7 @@ import {
   createAlert,
   createDispatcherPipelineInput,
   createDispatcherPipelineState,
+  MOCK_KIBANA_BASE_URL,
   type DispatcherPipelineStateOverrides,
 } from '../fixtures/test_utils';
 import type { DispatchFailure } from '../types';

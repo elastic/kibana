@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MOCK_KIBANA_BASE_URL } from '../locators/tokens.mock';
 import { buildAlertDetailsUrl } from './alert_details_url';
+import { MOCK_KIBANA_BASE_URL } from './fixtures/test_utils';
 
 describe('buildAlertDetailsUrl', () => {
   const build = (spaceId: string, baseUrl: string = MOCK_KIBANA_BASE_URL, alertId = 'ep-1') =>

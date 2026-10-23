@@ -32,7 +32,6 @@ import { createRulesSavedObjectService } from '../services/rules_saved_object_se
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
 import { createRuleSoAttributes } from '../test_utils';
-import { MOCK_KIBANA_BASE_URL } from '../locators/tokens.mock';
 import {
   MAX_WINDOW_MINUTES,
   OVERLAP_WINDOW_MINUTES,
@@ -49,7 +48,11 @@ import {
   createLastNotifiedTimestampsResponse,
   createSeriesSuppressionsResponse,
 } from './fixtures/dispatcher';
-import { createAlert, createAlertSuppressionRow } from './fixtures/test_utils';
+import {
+  createAlert,
+  createAlertSuppressionRow,
+  MOCK_KIBANA_BASE_URL,
+} from './fixtures/test_utils';
 import { AlertScan } from './state';
 import { getDispatchableAlertEventsQuery } from './queries';
 import {

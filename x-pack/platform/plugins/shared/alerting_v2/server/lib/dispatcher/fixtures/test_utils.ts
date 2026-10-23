@@ -38,6 +38,8 @@ import type {
   SeriesSuppressionRow,
 } from '../types';
 
+export const MOCK_KIBANA_BASE_URL = 'https://kibana.example.com';
+
 export function createStepLogger(): LoggerServiceContract {
   return createLoggerService().loggerService;
 }
