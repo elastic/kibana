@@ -79,6 +79,14 @@ export interface ApprovalContentProps {
    * for a to-do proposal (`isTodoProposal`), whose only decision is "I've applied".
    */
   onDismiss?: (params: DeclineParams) => Promise<void>;
+  /**
+   * Marks a to-do proposal that was marked as applied as not applied again. When set, such a
+   * proposal shows a "Mark as not applied" action in place of the footer it no longer has.
+   * Disabled with `readOnly`; a rejection is shown in the card like a failed decision.
+   */
+  onReopen?: () => Promise<void>;
+  /** Whether this proposal's `onReopen` is in flight, from the host's mutation cache. */
+  isReopening?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -115,6 +123,8 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     onApprove,
     secondaryActions,
     onDismiss,
+    onReopen,
+    isReopening = false,
     'data-test-subj': dataTestSubj,
   }) => {
     const generatedTitleId = useGeneratedHtmlId({ prefix: 'ApprovalContent' });
@@ -246,6 +256,31 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const bannerSuffix = decision?.reason;
     const isSettledOrTransient = approvalPhase !== 'pending';
 
+    // Only a human's own "I've applied" can be taken back: nothing ran, so nothing is undone.
+    const canReopen =
+      Boolean(onReopen) && isTodo && !isReplaced && approvalPhase === 'marked_applied';
+    const reopenAction: ApprovalAction | undefined =
+      canReopen && onReopen
+        ? {
+            label: APPROVAL_MODAL_TRANSLATIONS.markNotApplied,
+            color: 'text',
+            iconType: 'undo',
+            isDisabled: readOnly,
+            isLoading: isReopening,
+            onClick: async () => {
+              setActionError(undefined);
+              try {
+                await onReopen();
+              } catch (err) {
+                setActionError(
+                  err instanceof Error ? err.message : APPROVAL_MODAL_TRANSLATIONS.actionErrorTitle
+                );
+              }
+            },
+            'data-test-subj': dataTestSubj ? `${dataTestSubj}-reopen` : undefined,
+          }
+        : undefined;
+
     const hasReplacedCaption = isReplaced && getProposalCaption(proposal) !== undefined;
     const headerCaption = decision?.actorName ? (
       <>
@@ -333,6 +368,14 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           <ApprovalContentFooter
             secondaryActions={resolvedSecondaryActions}
             primaryAction={resolvedPrimaryAction}
+            defaultButtonColor={defaultButtonColor}
+            onPrimaryClick={handlePrimaryClick}
+          />
+        )}
+
+        {reopenAction && (
+          <ApprovalContentFooter
+            secondaryActions={[reopenAction]}
             defaultButtonColor={defaultButtonColor}
             onPrimaryClick={handlePrimaryClick}
           />

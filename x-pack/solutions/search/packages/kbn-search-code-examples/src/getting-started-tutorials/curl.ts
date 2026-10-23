@@ -12,7 +12,7 @@ import type { CodeLanguage, GettingStartedCodeDefinition } from './types';
 
 export const CURL_INFO: CodeLanguage = {
   id: 'curl',
-  title: i18n.translate('xpack.searchGettingStarted.codingLanguages.curl', {
+  title: i18n.translate('xpack.searchCodeExamples.codingLanguages.curl', {
     defaultMessage: 'cURL',
   }),
   icon: 'curl.svg',

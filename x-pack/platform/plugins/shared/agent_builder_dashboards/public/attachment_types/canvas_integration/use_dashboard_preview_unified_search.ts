@@ -194,7 +194,7 @@ export const useDashboardPreviewUnifiedSearch = ({
           dashboardApi?.setEsqlApproximation(nextIsApproximate),
         disabled: !hasEsqlPanel,
         additionalText: i18n.translate(
-          'agentBuilderDashboards.esqlApproximationToggle.additionalText',
+          'xpack.agentBuilderDashboards.esqlApproximationToggle.additionalText',
           {
             defaultMessage:
               'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',

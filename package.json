@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "9.6.0",
+  "version": "9.7.0",
   "branch": "main",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -1430,7 +1430,7 @@
     "@mapbox/mapbox-gl-supported": "2.0.1",
     "@mapbox/vector-tile": "1.3.1",
     "@modelcontextprotocol/sdk": "1.32.1",
-    "@moonrepo/cli": "2.4.6",
+    "@moonrepo/cli": "2.6.2",
     "@openfeature/core": "1.12.0",
     "@openfeature/launchdarkly-client-provider": "0.4.0",
     "@openfeature/server-sdk": "1.23.0",
