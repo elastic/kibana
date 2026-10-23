@@ -82,4 +82,32 @@ steps:
       }),
     ]);
   });
+
+  it('resolves child steps shared through a YAML alias', () => {
+    const yaml = `name: alias
+consts:
+  children: &children
+    - name: drop
+      type: elasticsearch.indices.delete
+      with:
+        index: test-x
+triggers:
+  - type: manual
+steps:
+  - name: loop
+    type: foreach
+    foreach: '[1]'
+    steps: *children
+`;
+    expect(getWorkflowSteps(yaml).map(({ stepId, stepType }) => [stepId, stepType])).toEqual([
+      ['drop', 'elasticsearch.indices.delete'],
+      ['loop', 'foreach'],
+    ]);
+  });
+
+  it('throws on a recursive alias', () => {
+    expect(() => getWorkflowSteps('name: &a\n  b: *a\n')).toThrow(
+      'Workflow YAML has a recursive alias.'
+    );
+  });
 });

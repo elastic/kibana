@@ -158,7 +158,18 @@ export const resolveYamlAliases = (yaml: string): string => {
       return visit.BREAK;
     },
   });
-  return hasAlias && doc.errors.length === 0 ? stringify(doc.toJS({ maxAliasCount: 100 })) : yaml;
+  if (!hasAlias || doc.errors.length > 0) {
+    return yaml;
+  }
+  try {
+    // By default `stringify` writes shared objects back as aliases; write each copy in full.
+    return stringify(doc.toJS({ maxAliasCount: 100 }), { aliasDuplicateObjects: false });
+  } catch (error) {
+    if (error instanceof RangeError) {
+      throw new Error('Workflow YAML has a recursive alias.');
+    }
+    throw error;
+  }
 };
 
 /** Parses workflow YAML into its steps; returns an empty list when the YAML does not parse. */

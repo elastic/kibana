@@ -646,6 +646,33 @@ steps:
       expect(mockApi.testStep).not.toHaveBeenCalled();
     });
 
+    it('blocks a step whose unsafe children are a YAML alias', async () => {
+      mockApi.validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
+
+      const yaml = `name: alias
+consts:
+  children: &children
+    - name: drop
+      type: elasticsearch.indices.delete
+      with:
+        index: test-x
+triggers:
+  - type: manual
+steps:
+  - name: loop
+    type: foreach
+    foreach: '[1]'
+    steps: *children
+`;
+      const context = createMockContext(yaml);
+      const result = await invokeHandler(registeredTool, { stepName: 'loop' }, context);
+      const data = result.results[0].data as Record<string, unknown>;
+
+      expect(data.blocked).toBe(true);
+      expect(data.unsafeStepType).toBe('elasticsearch.indices.delete');
+      expect(mockApi.testStep).not.toHaveBeenCalled();
+    });
+
     it('blocks a nested unsafe step referenced directly', async () => {
       mockApi.validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
 
