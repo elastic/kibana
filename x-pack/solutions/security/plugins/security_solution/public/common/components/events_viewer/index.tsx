@@ -448,6 +448,28 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     itemsPerPage,
   ]);
 
+  const runWorkflowSelectionScope = useMemo(
+    () => ({
+      dataViewId: selectedDataViewId ?? '',
+      indexNames: indexNames ?? selectedPatterns,
+      filterQuery,
+      from: start,
+      to: end,
+      runtimeMappings,
+      queryId: `${tableId}-run-workflow-selection`,
+    }),
+    [
+      selectedDataViewId,
+      indexNames,
+      selectedPatterns,
+      filterQuery,
+      start,
+      end,
+      runtimeMappings,
+      tableId,
+    ]
+  );
+
   const alertBulkActions = useAlertBulkActions({
     tableId,
     data: nonDeletedEvents,
@@ -458,6 +480,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     filterQuery,
     bulkActions,
     selectedCount,
+    selectionScope: runWorkflowSelectionScope,
   });
 
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created

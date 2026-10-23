@@ -45,6 +45,7 @@ export interface BulkActionGroups {
   customItems: BulkActionMenuItem[];
   workflowItems: BulkActionMenuItem[];
 }
+import type { RunWorkflowSelectionScope } from '../../../../detections/components/alerts_table/timeline_actions/use_run_workflow_selection';
 
 export interface BulkActionsProps {
   eventIds: string[];
@@ -59,6 +60,15 @@ export interface BulkActionsProps {
   data?: TimelineItem[];
   closePopover?: () => void;
   showRunWorkflowActions?: boolean;
+  /** True when the user chose "select all N", so the selection exceeds the loaded rows. */
+  isAllSelected?: boolean;
+  /**
+   * Query context used to resolve a select-all beyond the loaded rows for the run-workflow
+   * action. Omit it and a run stays scoped to the loaded rows, as it always has.
+   */
+  selectionScope?: RunWorkflowSelectionScope;
+  /** Number of items a select-all covers, so the run-workflow action can refuse too many. */
+  totalItems?: number;
 }
 
 type CustomActionGroups = Pick<BulkActionGroups, 'casesItems' | 'timelineItems' | 'customItems'>;
@@ -120,6 +130,9 @@ export const useBulkActionItems = ({
   data,
   closePopover,
   showRunWorkflowActions = true,
+  isAllSelected,
+  selectionScope,
+  totalItems,
 }: BulkActionsProps) => {
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
@@ -250,6 +263,9 @@ export const useBulkActionItems = ({
     documentIds: workflowDocumentIds,
     closePopover: closePopover ?? noop,
     isBulk: true,
+    isAllSelected,
+    selectionScope,
+    totalItems,
   });
 
   const statusItems = useMemo<BulkActionMenuItem[]>(() => {
