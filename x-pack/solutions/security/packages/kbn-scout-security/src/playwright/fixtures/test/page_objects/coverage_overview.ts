@@ -67,6 +67,36 @@ export class CoverageOverviewPage {
     return this.page.testSubj.locator(`coverageOverviewTacticGroup-${tacticId}`);
   }
 
+  /** Returns the framework tab (`enterprise` is MITRE ATT&CK, `atlas` is MITRE ATLAS). */
+  frameworkTab(framework: 'enterprise' | 'atlas'): Locator {
+    return this.page.testSubj.locator(`coverageOverviewFrameworkTab-${framework}`);
+  }
+
+  /**
+   * Switches the matrix to the given framework. Tab switches reuse the fetched
+   * rules, so this waits on the matrix rather than a network response.
+   */
+  async selectFramework(framework: 'enterprise' | 'atlas'): Promise<void> {
+    const tab = this.frameworkTab(framework);
+    await tab.click();
+    await tab.and(this.page.locator('[aria-selected="true"]')).waitFor({ state: 'visible' });
+    await this.waitForMatrixLoaded();
+  }
+
+  /** Returns the title element of the technique cell identified by `techniqueId`. */
+  techniqueTitle(techniqueId: string): Locator {
+    return this.page.testSubj.locator(`coverageOverviewTechniqueTitle-${techniqueId}`);
+  }
+
+  /** Clicks the technique cell containing `techniqueId` and waits for its popover. */
+  async openTechniquePopover(techniqueId: string): Promise<void> {
+    await this.page.testSubj
+      .locator('coverageOverviewTechniquePanel')
+      .filter({ has: this.techniqueTitle(techniqueId) })
+      .click();
+    await this.page.testSubj.locator('coverageOverviewPopover').waitFor({ state: 'visible' });
+  }
+
   /**
    * Opens the rule activity filter popover, clicks the option whose rendered
    * label contains `optionLabel` (e.g. `'Disabled rules'`), then closes the

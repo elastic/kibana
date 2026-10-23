@@ -39,9 +39,12 @@ describe('AnsibleControllerConnector', () => {
       expect(AnsibleControllerConnector.metadata.displayName).toBe('Ansible Control Server');
     });
 
-    it('is technical preview for agentBuilder', () => {
+    it('is technical preview for agentBuilder and workflows', () => {
       expect(AnsibleControllerConnector.metadata.isTechnicalPreview).toBe(true);
-      expect(AnsibleControllerConnector.metadata.supportedFeatureIds).toEqual(['agentBuilder']);
+      expect(AnsibleControllerConnector.metadata.supportedFeatureIds).toEqual([
+        'agentBuilder',
+        'workflows',
+      ]);
     });
   });
 

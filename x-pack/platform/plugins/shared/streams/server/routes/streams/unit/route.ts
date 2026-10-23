@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { notFound } from '@hapi/boom';
-import { OBSERVABILITY_STREAMS_ENABLE_CANVAS } from '@kbn/management-settings-ids';
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { streamsUnitIdentifierSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { StreamsUnitService } from '../../../lib/saved_objects/streams_unit_service';
-import { validateUnitForWrite } from '../../../lib/unit_config/validate_unit';
 import { createServerRoute } from '../../create_server_route';
+import { assertStreamsCanvasEnabled } from './assert_streams_canvas_enabled';
 import { assertUnitPutEnvelope, parseUnitPutBody } from './parse_unit_put_body';
+import { unitStatsRoutes } from './stats_route';
 
 const UNIT_PUT_MAX_BYTES = 1_048_576;
 
@@ -23,16 +22,6 @@ const unitPathSchema = z.object({
     id: streamsUnitIdentifierSchema.describe('The unit id.'),
   }),
 });
-
-const assertStreamsCanvasEnabled = async (uiSettingsClient: {
-  get: (key: string) => Promise<unknown>;
-}) => {
-  const canvasEnabled = await uiSettingsClient.get(OBSERVABILITY_STREAMS_ENABLE_CANVAS);
-
-  if (!canvasEnabled) {
-    throw notFound('Streams unit API is not enabled.');
-  }
-};
 
 export const getStreamsUnitRoute = createServerRoute({
   endpoint: 'GET /internal/streams/unit/{id}',
@@ -116,22 +105,19 @@ export const putStreamsUnitRoute = createServerRoute({
       contentType: request.headers['content-type'],
     });
 
-    const { compiled_config: compiledConfig } = await validateUnitForWrite(
-      parsed.unit,
-      unitConfigHooks
-    );
-
     const { ui_metadata: uiMetadata, secrets } = assertUnitPutEnvelope(parsed);
 
     const streamsUnitService = new StreamsUnitService({
       soClient,
       logger,
+      validateUnit: unitConfigHooks.validate,
       publishUnit: unitConfigHooks.publish,
+      prepareCredentials: unitConfigHooks.prepareCredentials,
       encryptedSavedObjectsClient,
       canEncrypt,
     });
 
-    await streamsUnitService.upsertUnit({
+    const { compiled_config: compiledConfig } = await streamsUnitService.upsertUnit({
       unitId: params.path.id,
       unit: parsed.unit,
       ui_metadata: uiMetadata,
@@ -184,4 +170,5 @@ export const unitRoutes = {
   ...getStreamsUnitRoute,
   ...putStreamsUnitRoute,
   ...resetStreamsUnitRoute,
+  ...unitStatsRoutes,
 };

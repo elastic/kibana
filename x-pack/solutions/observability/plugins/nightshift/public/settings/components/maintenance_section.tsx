@@ -28,7 +28,7 @@ import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/eb
 import {
   useMaintenanceStatus,
   useSignificantEventsMaintenanceActions,
-} from '../hooks/use_significant_events_maintenance';
+} from '../../data/maintenance/use_significant_events_maintenance';
 import { DetectionPausedCallout } from './detection_paused_callout';
 import { SettingsSectionRow } from './settings_section';
 
@@ -95,14 +95,13 @@ const ActivityCounts = ({
 
 export function MaintenanceSection({ canManage }: { canManage: boolean }) {
   const { data: status, isLoading, isError, refetch } = useMaintenanceStatus();
-  const { pause, resume, isPausing, isResuming } = useSignificantEventsMaintenanceActions();
+  const { pause, resume, isPausing, isMutating } = useSignificantEventsMaintenanceActions();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const modalTitleId = useGeneratedHtmlId({
     prefix: 'nightshiftDetectionEngineConfirmationTitle',
   });
 
   const paused = status?.state === 'paused';
-  const isMutating = isPausing || isResuming;
   const statusReady = !isLoading && !isError && status !== undefined;
   const activityCounts = {
     automationsDisabled: status?.lastSummary?.workflowsDisabled ?? 0,
@@ -280,6 +279,7 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
               color={paused ? 'primary' : 'warning'}
               iconType={paused ? 'play' : 'pause'}
               data-test-subj="streams-settings-maintenance-confirm-button"
+              isDisabled={isMutating}
               onClick={onConfirm}
               {...getEbtProps({
                 action: paused
