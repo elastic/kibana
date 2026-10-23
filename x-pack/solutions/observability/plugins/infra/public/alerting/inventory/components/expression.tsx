@@ -355,7 +355,9 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
                 options={schemaOptions}
                 // A saved rule without a schema evaluates on ECS fields and aggregations,
                 // so show ECS without writing it to the rule params.
-                value={ruleParams.schema ?? (isExistingRule ? 'ecs' : DEFAULT_SCHEMA)}
+                value={
+                  ruleParams.schema ?? (isExistingRule ? DataSchemaFormatEnum.ECS : DEFAULT_SCHEMA)
+                }
                 onChange={updateSchema}
                 description={i18n.translate(
                   'xpack.infra.metrics.alertFlyout.expression.schema.descriptionLabel',
