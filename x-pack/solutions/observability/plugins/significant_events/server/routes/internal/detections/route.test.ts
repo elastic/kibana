@@ -18,6 +18,8 @@ jest.mock('../../../lib/significant_events/entities/get_live_entities', () => ({
 }));
 
 const searchRoute = internalDetectionsRoutes['GET /internal/significant_events/detections'];
+const detectionByIdRoute =
+  internalDetectionsRoutes['GET /internal/significant_events/detections/{id}'];
 const createRoute = internalDetectionsRoutes['POST /internal/significant_events/detections'];
 const markProcessedRoute =
   internalDetectionsRoutes['POST /internal/significant_events/detections/_mark_processed'];
@@ -63,6 +65,19 @@ const createSearchResources = (links: ReturnType<typeof queryLink>[]) => {
     }),
   };
   return { resources, findLatestPaginated };
+};
+
+const createDetectionByIdResources = (hits: Array<typeof detection>) => {
+  const findById = jest.fn().mockResolvedValue({ hits });
+  const resources = {
+    request: {},
+    server: {},
+    getScopedClients: jest.fn().mockResolvedValue({
+      licensing: {},
+      getDetectionClient: jest.fn().mockResolvedValue({ findById }),
+    }),
+  };
+  return { resources, findById };
 };
 
 describe('GET /internal/significant_events/detections', () => {
@@ -122,6 +137,36 @@ describe('GET /internal/significant_events/detections', () => {
 
     expect(findLatestPaginated).toHaveBeenCalledWith({
       rule_uuid: ['rule-1', 'rule-2'],
+    });
+  });
+});
+
+describe('GET /internal/significant_events/detections/{id}', () => {
+  it('returns the newest matching detection', async () => {
+    const olderDetection = { ...detection, '@timestamp': '2026-10-22T10:00:00.000Z' };
+    const newestDetection = { ...detection, '@timestamp': '2026-10-22T11:00:00.000Z' };
+    const { resources, findById } = createDetectionByIdResources([olderDetection, newestDetection]);
+
+    await expect(
+      detectionByIdRoute.handler({
+        ...resources,
+        params: { path: { id: detection.detection_id } },
+      } as unknown as Parameters<typeof detectionByIdRoute.handler>[0])
+    ).resolves.toBe(newestDetection);
+    expect(findById).toHaveBeenCalledWith(detection.detection_id);
+  });
+
+  it('returns 404 when the detection does not exist', async () => {
+    const { resources } = createDetectionByIdResources([]);
+
+    await expect(
+      detectionByIdRoute.handler({
+        ...resources,
+        params: { path: { id: 'missing-detection' } },
+      } as unknown as Parameters<typeof detectionByIdRoute.handler>[0])
+    ).rejects.toMatchObject({
+      message: 'Detection "missing-detection" not found.',
+      output: { statusCode: 404 },
     });
   });
 });

@@ -40,6 +40,8 @@ import {
   LIST_ERROR_TITLE,
   RETRY_LABEL,
   SEARCH_PLACEHOLDER,
+  SIGNAL_ERROR_MESSAGE,
+  SIGNAL_ERROR_TITLE,
   SIGNAL_NOT_FOUND_TOAST_TITLE,
 } from './translations';
 import { useSignalsUrlState } from './use_signals_url_state';
@@ -182,6 +184,26 @@ export const SignalsTab = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
+      {signalByIdQuery.isError ? (
+        <>
+          <KbnDangerCallout
+            announceOnMount
+            title={SIGNAL_ERROR_TITLE}
+            text={SIGNAL_ERROR_MESSAGE}
+            size="s"
+            data-test-subj="nightshiftDetectionSignalError"
+            actionProps={{
+              primary: {
+                children: RETRY_LABEL,
+                iconType: 'refresh',
+                onClick: () => void signalByIdQuery.refetch(),
+                'data-test-subj': 'nightshiftDetectionSignalRetryButton',
+              },
+            }}
+          />
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
       {signalsQuery.isError && !signalsQuery.data ? (
         <KbnDangerCallout
           announceOnMount
