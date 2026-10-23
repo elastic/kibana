@@ -1622,9 +1622,9 @@ describe('Endpoint analysis run', () => {
         names.indexOf('resolve_attack_alerts')
       );
 
-      expect(evaluate(resolve.attack_status, when({ status: 'open', currentStatus: 'closed' }))).toBe(
-        'closed'
-      );
+      expect(
+        evaluate(resolve.attack_status, when({ status: 'open', currentStatus: 'closed' }))
+      ).toBe('closed');
       expect(evaluate(resolve.attack_status, when({ status: 'open' }))).toBe('open');
     });
 
