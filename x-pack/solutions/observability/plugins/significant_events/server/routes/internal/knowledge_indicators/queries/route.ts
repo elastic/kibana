@@ -494,9 +494,10 @@ const getDiscoveryQueriesRoute = createServerRoute({
         .union([
           z
             .string()
+            .min(1)
             .max(MAX_ID_LENGTH)
             .transform((id) => [id]),
-          z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_DISCOVERY_QUERY_IDS),
+          z.array(z.string().min(1).max(MAX_ID_LENGTH)).max(MAX_DISCOVERY_QUERY_IDS),
         ])
         .optional()
         .describe('Only return queries linked to these entity slugs'),
