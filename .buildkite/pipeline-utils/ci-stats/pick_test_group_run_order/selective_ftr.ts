@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { allChangedFilesInScope, touchedCriticalFiles } from '../../affected-packages/index.ts';
+import {
+  allChangedFilesInScope,
+  getAffectedPackages,
+  touchedCriticalFiles,
+} from '../../affected-packages/index.ts';
 
 /**
  * Modules that cannot affect FTR. When a PR only touches these (and no critical
@@ -138,4 +142,22 @@ export function shouldSkipFtrTests(
   }
 
   return false;
+}
+
+/** Directly affected modules when the diff cannot affect FTR; null when FTR must run. */
+export async function getFtrSkipModules(changedFiles: string[]): Promise<string[] | null> {
+  const directlyAffected = await getAffectedPackages(undefined, {
+    changedFiles,
+    strategy: 'git',
+    includeDownstream: false,
+    ignoreUncategorizedChanges: true,
+  }).catch((error) => {
+    console.error('Error getting affected packages for FTR skip check', error);
+    return null;
+  });
+
+  if (directlyAffected === null || !shouldSkipFtrTests(directlyAffected, changedFiles)) {
+    return null;
+  }
+  return [...directlyAffected];
 }

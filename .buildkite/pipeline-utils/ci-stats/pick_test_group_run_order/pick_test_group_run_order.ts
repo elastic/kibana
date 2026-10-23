@@ -10,7 +10,6 @@
 import * as Fs from 'fs';
 
 import { minimatch } from 'minimatch';
-import { getAffectedPackages } from '../../affected-packages/index.ts';
 import type { BuildkiteStep } from '../../buildkite/index.ts';
 import { BuildkiteClient } from '../../buildkite/index.ts';
 import { getTrackedBranch } from '../../utils.ts';
@@ -21,8 +20,9 @@ import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const.ts';
 import { loadRunOrderConfig } from './env_config.ts';
 import { ftrManifest } from './ftr_manifests.ts';
 import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs.ts';
+import { recordOnMergeShadow } from './on_merge_shadow.ts';
 import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups.ts';
-import { shouldSkipFtrTests } from './selective_ftr.ts';
+import { getFtrSkipModules } from './selective_ftr.ts';
 import { isScoutPathOnlyDiff } from './selective_scout.ts';
 import { resolveSelectiveTestingChanges } from './selective_changes.ts';
 import {
@@ -47,7 +47,10 @@ export async function pickTestGroupRunOrder() {
   const config = loadRunOrderConfig();
 
   const selectiveChangedFiles = config.useSelectiveTesting
-    ? resolveSelectiveTestingChanges(config.selectionBase, config.isMergeQueue)
+    ? resolveSelectiveTestingChanges(
+        config.selectionBase,
+        config.isMergeQueue ? 'merge-queue' : 'pr'
+      )
     : null;
 
   // A diff containing only Scout test files cannot affect any Jest unit/integration
@@ -90,21 +93,23 @@ export async function pickTestGroupRunOrder() {
 
   if (!ftrConfigsIncluded) ftrManifestEntriesByQueue.clear();
 
-  if (selectiveChangedFiles !== null) {
-    const directlyAffected = await getAffectedPackages(undefined, {
-      changedFiles: selectiveChangedFiles,
-      strategy: 'git',
-      includeDownstream: false,
-      ignoreUncategorizedChanges: true,
-    }).catch((error) => {
-      console.error('Error getting affected packages for FTR skip check', error);
-      return null;
+  if (config.isOnMerge && config.onMergeSelectiveMode === 'shadow') {
+    await recordOnMergeShadow(bk, {
+      jestUnitConfigs,
+      jestIntegrationConfigs,
+      ftrConfigCount: [...ftrManifestEntriesByQueue.values()].reduce(
+        (count, entries) => count + entries.length,
+        0
+      ),
     });
+  }
 
-    if (directlyAffected !== null && shouldSkipFtrTests(directlyAffected, selectiveChangedFiles)) {
+  if (selectiveChangedFiles !== null) {
+    const ftrSkipModules = await getFtrSkipModules(selectiveChangedFiles);
+    if (ftrSkipModules !== null) {
       console.log(
         `Skipping FTR configs — diff cannot affect FTR: ${
-          directlyAffected.size ? [...directlyAffected].join(', ') : '(irrelevant paths only)'
+          ftrSkipModules.length ? ftrSkipModules.join(', ') : '(irrelevant paths only)'
         }`
       );
       bk.setAnnotation(
