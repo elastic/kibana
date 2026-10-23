@@ -55,6 +55,7 @@ export const createRuleMigrationsTaskClientMock = () => ({
     },
   }),
   getAllStats: jest.fn().mockResolvedValue([]),
+  isMigrationRunning: jest.fn().mockReturnValue(false),
 });
 
 export const MockRuleMigrationsTaskClient = jest
