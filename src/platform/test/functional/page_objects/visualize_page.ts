@@ -224,6 +224,20 @@ export class VisualizePageObject extends FtrService {
   }
 
   /**
+   * The listing renders `newItemButton` both while its initial fetch is in flight and in the
+   * empty prompt that then replaces the table, so a click placed in between is dropped.
+   */
+  public async waitForListingToSettle() {
+    const settledState = await this.testSubjects.waitForFirst(
+      ['listingTable-isLoaded', 'emptyListPrompt'],
+      { timeout: this.testSubjects.TRY_TIME }
+    );
+    if (!settledState) {
+      throw new Error('The Visualize listing did not finish its initial fetch');
+    }
+  }
+
+  /**
    * Navigation now happens without URL refresh by default
    * so a new "forceRefresh" option has been passed in order to
    * address those scenarios where a full refresh is required (i.e. changing default settings)
@@ -233,6 +247,7 @@ export class VisualizePageObject extends FtrService {
   ) {
     await this.gotoVisualizationLandingPage(options);
     await this.header.waitUntilLoadingHasFinished();
+    await this.waitForListingToSettle();
     await this.clickNewVisualization();
     await this.waitForGroupsSelectPage();
   }
@@ -240,6 +255,7 @@ export class VisualizePageObject extends FtrService {
   public async navigateToNewAggBasedVisualization() {
     await this.gotoVisualizationLandingPage();
     await this.header.waitUntilLoadingHasFinished();
+    await this.waitForListingToSettle();
     await this.clickNewVisualization();
     await this.clickAggBasedVisualizations();
     await this.waitForVisualizationSelectPage();
