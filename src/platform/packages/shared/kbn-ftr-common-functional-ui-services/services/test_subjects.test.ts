@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { RetryService } from '@kbn/ftr-common-functional-services';
 import type { FtrProviderContext } from './ftr_provider_context';
 import { TestSubjects } from './test_subjects';
 
@@ -138,5 +139,76 @@ describe('TestSubjects existence checks', () => {
       ['[data-test-subj="legacy"]', '[data-test-subj="next"]'],
       50
     );
+  });
+});
+
+describe('TestSubjects.waitForEnabled', () => {
+  const byCssSelector = jest.fn();
+  const isDisplayed = jest.fn();
+  const isEnabled = jest.fn();
+
+  // Uses the real RetryService so the test exercises the production poll/timeout semantics
+  // (retryForTruthy: a falsy result is retried, only the deadline throws).
+  const getTestSubjects = () => {
+    const config = { get: jest.fn(() => 120000) };
+    const log = { debug: jest.fn() };
+    const retry = new RetryService({
+      getService: (name: string) => (name === 'log' ? log : config),
+    } as unknown as ConstructorParameters<typeof RetryService>[0]);
+    const services = { config, find: { byCssSelector }, log, retry };
+    const ctx = {
+      getService: (name: keyof typeof services) => services[name],
+    } as unknown as FtrProviderContext;
+
+    return new TestSubjects(ctx);
+  };
+
+  beforeEach(() => {
+    byCssSelector.mockReset().mockResolvedValue({ isDisplayed, isEnabled });
+    isDisplayed.mockReset().mockResolvedValue(true);
+    isEnabled.mockReset();
+  });
+
+  it('keeps polling while the element is disabled and resolves only once it is enabled', async () => {
+    let settled = false;
+    const settledWhenProbed: boolean[] = [];
+    isEnabled.mockImplementation(async () => {
+      settledWhenProbed.push(settled);
+      return settledWhenProbed.length >= 3;
+    });
+    const testSubjects = getTestSubjects();
+
+    await testSubjects.waitForEnabled('selector', 5000).then(() => {
+      settled = true;
+    });
+
+    // two disabled probes were seen before the enabled one, and none of them resolved the call
+    expect(settledWhenProbed).toEqual([false, false, false]);
+    expect(isEnabled).toHaveBeenCalledTimes(3);
+    // the element is re-queried on every probe rather than reused from the first lookup
+    expect(byCssSelector).toHaveBeenCalledTimes(3);
+    expect(byCssSelector).toHaveBeenCalledWith('[data-test-subj="selector"]', 120000);
+  });
+
+  it('keeps polling while the element is not displayed', async () => {
+    isDisplayed.mockResolvedValueOnce(false).mockResolvedValue(true);
+    isEnabled.mockResolvedValue(true);
+    const testSubjects = getTestSubjects();
+
+    await expect(testSubjects.waitForEnabled('selector', 5000)).resolves.toBeUndefined();
+
+    expect(isDisplayed).toHaveBeenCalledTimes(2);
+  });
+
+  it('throws a timeout error when the element stays disabled', async () => {
+    isEnabled.mockResolvedValue(false);
+    const testSubjects = getTestSubjects();
+
+    await expect(testSubjects.waitForEnabled('selector', 150)).rejects.toThrow(
+      'timed out waiting for testSubject(selector) to be displayed and enabled'
+    );
+
+    // the deadline, not the first disabled probe, ended the wait
+    expect(isEnabled.mock.calls.length).toBeGreaterThan(1);
   });
 });
