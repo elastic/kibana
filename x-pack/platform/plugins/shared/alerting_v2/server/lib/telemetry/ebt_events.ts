@@ -5,14 +5,18 @@
  * 2.0.
  */
 
+import type { AlertActionAppliedEbtData, AlertActionEbtEventType } from './alert_action_ebt_schema';
 import type { RuleChangedEbtData, RuleEbtEventType } from './rule_ebt_schema';
 
 /**
  * Maps every EBT event type the plugin registers to the data it is reported with.
- * Rule-lifecycle events share {@link RuleChangedEbtData}.
+ * Rule-lifecycle events share {@link RuleChangedEbtData}. Alert-action events share
+ * {@link AlertActionAppliedEbtData}.
  */
 export type AlertingEbtEventMap = {
   [TEventType in RuleEbtEventType]: RuleChangedEbtData;
+} & {
+  [TEventType in AlertActionEbtEventType]: AlertActionAppliedEbtData;
 };
 
 export type AlertingEbtEventType = keyof AlertingEbtEventMap;
