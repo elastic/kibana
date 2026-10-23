@@ -11,7 +11,7 @@ import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { ActionPoliciesLicenseState } from '../../services/license_service/license_service';
 import { createMockLicenseService } from '../../services/license_service/license_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { createAlertingV2LocatorsMock, MOCK_KIBANA_BASE_URL } from '../../locators/tokens.mock';
+import { MOCK_KIBANA_BASE_URL } from '../../locators/tokens.mock';
 import { buildAlertDetailsUrl } from '../alert_details_url';
 import { DISPATCH_CHUNK_SIZE } from '../constants';
 import {
@@ -28,15 +28,8 @@ import { DispatchStep } from './dispatch_step';
 
 const API_KEY = 'dGVzdC1pZDp0ZXN0LWtleQ==';
 
-const locators = createAlertingV2LocatorsMock();
-
 const getExpectedAlertUrl = (spaceId: string, alertId: string): string =>
-  buildAlertDetailsUrl({
-    episodesLocator: locators.episodesLocators,
-    baseUrl: MOCK_KIBANA_BASE_URL,
-    spaceId,
-    alertId,
-  });
+  buildAlertDetailsUrl({ baseUrl: MOCK_KIBANA_BASE_URL, spaceId, alertId });
 
 const getFailures = (result: Awaited<ReturnType<DispatchStep['execute']>>): DispatchFailure[] =>
   result.type === 'continue' ? [...(result.data?.outcome?.failures ?? [])] : [];
@@ -105,7 +98,7 @@ describe('DispatchStep', () => {
   afterEach(() => jest.clearAllMocks());
 
   it('dispatches each group to its workflow destinations', async () => {
-    const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+    const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
 
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
       { status: 'fulfilled', value: [createWorkflowDetailDto()] },
@@ -169,7 +162,7 @@ describe('DispatchStep', () => {
   });
 
   it('authenticates with the raw secret when the policy API key is a stored UIAM key', async () => {
-    const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+    const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
     const uiamSecret = 'essu_uiam-secret';
     const storedUiamApiKey = Buffer.from(`uiam-key-id:${uiamSecret}`).toString('base64');
 
@@ -202,7 +195,7 @@ describe('DispatchStep', () => {
   });
 
   it('passes an Elasticsearch policy API key through unchanged', async () => {
-    const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+    const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
     const esApiKey = Buffer.from('es-key-id:es-key-secret').toString('base64');
 
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
@@ -234,7 +227,7 @@ describe('DispatchStep', () => {
   });
 
   it('dispatches to multiple workflow destinations', async () => {
-    const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+    const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
 
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
       {
@@ -278,7 +271,7 @@ describe('DispatchStep', () => {
   });
 
   it('continues dispatching remaining groups when one group fails', async () => {
-    const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+    const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
 
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
       { status: 'fulfilled', value: [createWorkflowDetailDto()] },
@@ -320,7 +313,7 @@ describe('DispatchStep', () => {
   });
 
   it('includes rule metadata in the workflow payload', async () => {
-    const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+    const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
 
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
       { status: 'fulfilled', value: [createWorkflowDetailDto()] },
@@ -359,7 +352,7 @@ describe('DispatchStep', () => {
   });
 
   it('maps group alerts to payload alerts with alert_id and alert_status', async () => {
-    const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+    const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
 
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
       { status: 'fulfilled', value: [createWorkflowDetailDto()] },
@@ -415,7 +408,7 @@ describe('DispatchStep', () => {
   });
 
   it("builds alert_url from each alert's space and id", async () => {
-    const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+    const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
 
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
       { status: 'fulfilled', value: [createWorkflowDetailDto()] },
@@ -457,7 +450,7 @@ describe('DispatchStep', () => {
   });
 
   it('records a missing_api_key failure per destination when the policy has no API key', async () => {
-    const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+    const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
 
     const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
     const group = createActionGroup({
@@ -514,7 +507,7 @@ describe('DispatchStep', () => {
   });
 
   it('records a workflow_not_found failure when the destination workflow is missing', async () => {
-    const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+    const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
 
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([{ status: 'fulfilled', value: [] }]);
 
@@ -549,7 +542,7 @@ describe('DispatchStep', () => {
   });
 
   it('records a workflow_disabled failure when the destination workflow is disabled', async () => {
-    const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+    const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
 
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
       { status: 'fulfilled', value: [createWorkflowDetailDto({ enabled: false })] },
@@ -578,7 +571,7 @@ describe('DispatchStep', () => {
   });
 
   it('records a schedule_error failure and logs the error when scheduling throws', async () => {
-    const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+    const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
 
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
       { status: 'fulfilled', value: [createWorkflowDetailDto()] },
@@ -619,7 +612,7 @@ describe('DispatchStep', () => {
   });
 
   it('records only the failed destination when a group partially succeeds', async () => {
-    const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+    const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
 
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
       {
@@ -664,7 +657,7 @@ describe('DispatchStep', () => {
   });
 
   it('skips all groups when signal is already aborted, records no executions and no failures', async () => {
-    const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+    const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
     const controller = new AbortController();
     controller.abort();
 
@@ -693,7 +686,7 @@ describe('DispatchStep', () => {
   });
 
   it('prefetches workflows for all spaces in one call', async () => {
-    const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+    const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
 
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
       { status: 'fulfilled', value: [createWorkflowDetailDto()] },
@@ -733,7 +726,7 @@ describe('DispatchStep', () => {
   });
 
   it('issues one bulkScheduleWorkflow call per API key and never mixes keys', async () => {
-    const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+    const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
 
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
       { status: 'fulfilled', value: [createWorkflowDetailDto()] },
@@ -777,7 +770,7 @@ describe('DispatchStep', () => {
   });
 
   it('records schedule_error for every destination in a space when prefetch throws', async () => {
-    const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+    const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
 
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
       { status: 'rejected', reason: new Error('es down') },
@@ -837,7 +830,7 @@ describe('DispatchStep', () => {
   });
 
   it('records schedule_error when scheduling returns no execution id', async () => {
-    const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+    const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
 
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
       { status: 'fulfilled', value: [createWorkflowDetailDto()] },
@@ -866,7 +859,7 @@ describe('DispatchStep', () => {
   });
 
   it('does not start a second chunk once the signal is aborted', async () => {
-    const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+    const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
     const controller = new AbortController();
 
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
@@ -904,7 +897,7 @@ describe('DispatchStep', () => {
   });
 
   it('continues other API keys when one chunk throws', async () => {
-    const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+    const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
 
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
       { status: 'fulfilled', value: [createWorkflowDetailDto()] },
@@ -960,7 +953,7 @@ describe('DispatchStep', () => {
       ['empty', { dispatch: [] }],
       ['undefined', {}],
     ])('does not check the license when the dispatch plan is %s', async (_label, overrides) => {
-      const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+      const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
 
       const result = await step.execute(createDispatcherPipelineState(overrides), loggerService);
 
@@ -972,7 +965,7 @@ describe('DispatchStep', () => {
     });
 
     it('records a license failure per workflow destination and skips workflows when the license is invalid', async () => {
-      const step = new DispatchStep(mockWfm, mockLicenseService, locators, MOCK_KIBANA_BASE_URL);
+      const step = new DispatchStep(mockWfm, mockLicenseService, MOCK_KIBANA_BASE_URL);
       mockLicenseService.getActionPoliciesLicenseState.mockResolvedValue(invalidLicense);
 
       const result = await step.execute(

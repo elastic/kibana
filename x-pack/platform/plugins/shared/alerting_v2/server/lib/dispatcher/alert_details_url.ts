@@ -5,30 +5,28 @@
  * 2.0.
  */
 
-import type { LocatorPublic } from '@kbn/share-plugin/common';
-import {
-  OBSERVABILITY_ALERTING_HOST,
-  type AlertingV2EpisodesLocatorParams,
-} from '../../../common/locators';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
+import { OBSERVABILITY_ALERTING_BASE_PATH } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
+import { getEpisodesLocation } from '../../../common/locators/locator_get_location';
 
-/** Builds an absolute, space-aware episodes-locator redirect link to an alert details page. */
+/** Builds an absolute, space-aware direct link to an alert details page. */
 export const buildAlertDetailsUrl = ({
-  episodesLocator,
   baseUrl,
   spaceId,
   alertId,
 }: {
-  episodesLocator: Pick<LocatorPublic<AlertingV2EpisodesLocatorParams>, 'getRedirectUrl'>;
   baseUrl: string;
   spaceId: string;
   alertId: string;
-}): string =>
-  // Without `publicBaseUrl` the share service returns a relative link, so resolve it
-  // against the Kibana base URL to keep notification links absolute.
-  new URL(
-    episodesLocator.getRedirectUrl(
-      { episodeId: alertId, host: OBSERVABILITY_ALERTING_HOST.alerts },
-      { spaceId }
-    ),
-    baseUrl
-  ).toString();
+}): string => {
+  const { path } = getEpisodesLocation({
+    episodeId: alertId,
+    host: OBSERVABILITY_ALERTING_HOST.alerts,
+  });
+  /* The server has no application registry to resolve the app id to its route, so the
+   * base path must stay in sync with the app of `OBSERVABILITY_ALERTING_HOST`.
+   * In the future we should probably hop to a generic page and redirect based on the space
+   * or serverless project context */
+  return addSpaceIdToPath(baseUrl, spaceId, `${OBSERVABILITY_ALERTING_BASE_PATH}${path}`);
+};
