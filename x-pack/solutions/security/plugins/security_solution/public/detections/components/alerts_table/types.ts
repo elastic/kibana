@@ -14,6 +14,7 @@ import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import type { GroupingBucket } from '@kbn/grouping/src';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { PageScope } from '../../../data_view_manager/constants';
+import type { TimeFieldSpec } from '../../../data_view_manager/redux/actions';
 import type { AlertsUserProfilesData } from '../../configurations/security_solution_detections/fetch_page_context';
 import type { Status } from '../../../../common/api/detection_engine';
 import type { Note } from '../../../../common/api/timeline';
@@ -56,6 +57,10 @@ export interface CreateTimelineProps {
   notes: Note[] | null;
   ruleNote?: string;
   ruleAuthor?: string | string[];
+  /**
+   * Time field for the ad-hoc data view created from `timeline.indexNames`
+   */
+  timeFieldSpec?: TimeFieldSpec;
 }
 
 export type CreateTimeline = ({ from, timeline, to }: CreateTimelineProps) => Promise<void>;

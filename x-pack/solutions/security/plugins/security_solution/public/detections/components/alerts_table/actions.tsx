@@ -87,6 +87,7 @@ import {
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
 import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
+import { getTimelineTimeFieldSpec } from './get_timeline_time_field_spec';
 
 export const updateAlertStatusAction = async ({
   query,
@@ -515,6 +516,7 @@ const createThresholdTimeline = async (
       to: thresholdTo,
       ruleNote: noteContent,
       ruleAuthor,
+      timeFieldSpec: getTimelineTimeFieldSpec(alertDoc),
     });
   } catch (error) {
     const { toasts } = KibanaServices.get().notifications;
@@ -670,6 +672,7 @@ const createNewTermsTimeline = async (
       },
       to,
       ruleNote: noteContent,
+      timeFieldSpec: getTimelineTimeFieldSpec(alertDoc),
     });
   } catch (error) {
     const { toasts } = KibanaServices.get().notifications;
@@ -841,6 +844,7 @@ const createSuppressedTimeline = async (
       },
       to,
       ruleNote: noteContent,
+      timeFieldSpec: getTimelineTimeFieldSpec(alertDoc),
     });
   } catch (error) {
     const { toasts } = KibanaServices.get().notifications;
