@@ -172,3 +172,12 @@ export const parseMaxAge = (maxAge: string | undefined): MaxAge | undefined => {
 };
 
 export const formatMaxAge = ({ value, unit }: MaxAge): string => `${value}${unit}`;
+
+/** Whether an indices profile pins its cached data without prewarming it, which isn't allowed. */
+export const isPinnedWithoutPrewarm = ({
+  prewarm,
+  pinned,
+}: {
+  prewarm: boolean;
+  pinned: boolean;
+}): boolean => pinned && !prewarm;

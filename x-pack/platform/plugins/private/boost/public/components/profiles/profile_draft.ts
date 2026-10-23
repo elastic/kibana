@@ -106,7 +106,8 @@ export const draftFromProfile = (profile: BoostProfile): ProfileDraft => {
         ...rangeDraft(profile),
         extraCopy: profile.high_availability === 'one_extra_copy',
         prewarm: profile.prewarm,
-        pinned: profile.pinned,
+        // Only prewarmed data can be pinned.
+        pinned: profile.pinned && profile.prewarm,
       },
     };
   }

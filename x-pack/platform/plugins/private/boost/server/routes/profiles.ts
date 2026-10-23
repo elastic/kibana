@@ -15,12 +15,13 @@ import {
 } from '../../common/constants';
 import type { BoostRangeError, MaxAgeError, ProfileNameError } from '../../common/validation';
 import {
-  MAX_AGE_MAX_DAYS,
-  PROFILE_NAME_MAX_LENGTH,
   getBoostRangeError,
   getMaxAgeError,
   getProfileNameError,
+  isPinnedWithoutPrewarm,
+  MAX_AGE_MAX_DAYS,
   parseMaxAge,
+  PROFILE_NAME_MAX_LENGTH,
 } from '../../common/validation';
 import { createProfile, deleteProfile, getState, updateProfile } from '../lib/boost_store';
 import { toErrorResponse } from '../lib/errors';
@@ -92,7 +93,11 @@ const indicesProfileSchema = schema.object(
     prewarm: schema.boolean(),
     pinned: schema.boolean(),
   },
-  { validate: boostRangeValidator }
+  {
+    validate: (profile) =>
+      boostRangeValidator(profile) ??
+      (isPinnedWithoutPrewarm(profile) ? 'pinned requires prewarm' : undefined),
+  }
 );
 
 const dataStreamsProfileSchema = schema.object(

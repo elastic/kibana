@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   BUILTIN_PROFILES,
@@ -89,5 +90,41 @@ describe('ProfileFlyout estimate', () => {
     mockState = createState(['nothing-*']);
     renderFlyout(savedProfile);
     expect(screen.queryByTestId('boostCostEstimateCount')).not.toBeInTheDocument();
+  });
+});
+
+describe('ProfileFlyout options', () => {
+  // A checkbox card's test subject is on its checkbox.
+  const getOption = (key: string) => screen.getByTestId(`boostProfileOption-${key}`);
+
+  it('only lets prewarmed data be pinned, and turns pin off with prewarm', async () => {
+    renderFlyout();
+
+    // A new profile doesn't prewarm, so it can't pin either, and says why.
+    expect(getOption('pinned')).toBeDisabled();
+    expect(getOption('pinned')).toHaveAccessibleName(
+      "Pin Don't evict cached data. Turn on prewarm to pin cached data."
+    );
+
+    await userEvent.click(getOption('prewarm'));
+    expect(getOption('pinned')).toBeEnabled();
+    await userEvent.click(getOption('pinned'));
+    expect(getOption('pinned')).toBeChecked();
+
+    await userEvent.click(getOption('prewarm'));
+    expect(getOption('pinned')).not.toBeChecked();
+    expect(getOption('pinned')).toBeDisabled();
+
+    // Turning prewarm back on leaves pin for the user to turn on again.
+    await userEvent.click(getOption('prewarm'));
+    expect(getOption('pinned')).toBeEnabled();
+    expect(getOption('pinned')).not.toBeChecked();
+  });
+
+  it('opens a saved profile that pins without prewarm with pin off', () => {
+    renderFlyout({ ...savedProfile, prewarm: false, pinned: true });
+
+    expect(getOption('pinned')).not.toBeChecked();
+    expect(getOption('pinned')).toBeDisabled();
   });
 });

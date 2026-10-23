@@ -14,6 +14,7 @@ import {
   getProfileNameError,
   getRulePriorityError,
   parseMaxAge,
+  isPinnedWithoutPrewarm,
 } from './validation';
 
 describe('getProfileNameError', () => {
@@ -129,5 +130,13 @@ describe('getRulePriorityError', () => {
     expect(getRulePriorityError(undefined)).toBe('required');
     expect(getRulePriorityError(-1)).toBe('out_of_range');
     expect(getRulePriorityError(1.5)).toBe('out_of_range');
+  });
+});
+
+describe('isPinnedWithoutPrewarm', () => {
+  it('only allows pinning prewarmed data', () => {
+    expect(isPinnedWithoutPrewarm({ prewarm: false, pinned: true })).toBe(true);
+    expect(isPinnedWithoutPrewarm({ prewarm: true, pinned: true })).toBe(false);
+    expect(isPinnedWithoutPrewarm({ prewarm: false, pinned: false })).toBe(false);
   });
 });
