@@ -19,6 +19,7 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
 import { getOnboardingSessionKey } from '../../core/onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { reconcileInstances } from './instances';
 import { useOnboardingSO } from '../authenticate_and_deploy_step/use_onboarding_so';
 import { toSOSettingsUpdate } from '../authenticate_and_deploy_step/so_settings';
 import {
@@ -102,53 +103,6 @@ export const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
   globalRegion: '',
   serviceVars: {},
 };
-
-/** Derive the canonical base instances (one per serviceId) from the selected ids list. */
-function baseInstances(
-  selectedServiceIds: string[],
-  awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined
-): ServiceInstance[] {
-  return selectedServiceIds
-    .map((id) => {
-      const service = awsServicesMap?.get(id);
-      if (!service || !service.showInUI) return null;
-      return { instanceId: id, serviceId: id, name: service.name, isDuplicate: false };
-    })
-    .filter((i): i is ServiceInstance => i !== null);
-}
-
-/**
- * Reconcile persisted instances against the current selectedServiceIds.
- * - Keep instances whose serviceId is still selected.
- * - Add a base instance for any newly-selected service with no existing instance.
- * - Drop instances for deselected services.
- */
-function reconcileInstances(
-  selectedServiceIds: string[],
-  persisted: ServiceInstance[] | undefined,
-  awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined
-): ServiceInstance[] {
-  const selectedSet = new Set(selectedServiceIds);
-
-  if (!persisted || persisted.length === 0) {
-    return baseInstances(selectedServiceIds, awsServicesMap);
-  }
-
-  const kept = persisted.filter((inst) => selectedSet.has(inst.serviceId));
-  const coveredServiceIds = new Set(kept.map((i) => i.serviceId));
-
-  const added: ServiceInstance[] = [];
-  for (const id of selectedServiceIds) {
-    if (!coveredServiceIds.has(id)) {
-      const service = awsServicesMap?.get(id);
-      if (service?.showInUI) {
-        added.push({ instanceId: id, serviceId: id, name: service.name, isDuplicate: false });
-      }
-    }
-  }
-
-  return [...kept, ...added];
-}
 
 function mergeVarsByDataStream(
   base: Record<string, ServiceDataStreamVars>,
@@ -284,7 +238,12 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
 
   // Reconcile instances each render — cheap since selectedServiceIds rarely changes.
   const instances: ServiceInstance[] = useMemo(
-    () => reconcileInstances(selectedServiceIds, persisted?.instances, awsServicesMap),
+    () =>
+      reconcileInstances(
+        persisted?.instances ?? [],
+        selectedServiceIds,
+        awsServicesMap ?? new Map()
+      ),
     [selectedServiceIds, persisted?.instances, awsServicesMap]
   );
 
