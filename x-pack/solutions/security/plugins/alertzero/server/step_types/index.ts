@@ -30,8 +30,8 @@ export const registerStepDefinitions = ({
   workflowsExtensions,
   getActionsService,
   getConversations,
-  getExecution,
-  resolveConnectorId,
+  resolveChatModel,
+  getProposals,
   getHuntServices,
   getResolveHostEnrollment,
   isContextEngineEnabled,
@@ -42,8 +42,8 @@ export const registerStepDefinitions = ({
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   getActionsService: () => ActionsService;
   getConversations: () => AgentBuilderPluginStart['conversations'];
-  getExecution: SummarizeInvestigationStepDependencies['executeAgent'];
-  resolveConnectorId?: SummarizeInvestigationStepDependencies['resolveConnectorId'];
+  resolveChatModel: SummarizeInvestigationStepDependencies['resolveChatModel'];
+  getProposals?: SummarizeInvestigationStepDependencies['getProposals'];
   getHuntServices: () => HuntServices;
   getResolveHostEnrollment?: PackageReportStepDependencies['getResolveHostEnrollment'];
   isContextEngineEnabled: PackageReportStepDependencies['isContextEngineEnabled'];
@@ -73,8 +73,9 @@ export const registerStepDefinitions = ({
   workflowsExtensions.registerStepDefinition(
     getSummarizeInvestigationStepDefinition({
       getConversationClient: (request) => getConversations().getScopedClient({ request }),
-      executeAgent: (params) => getExecution(params),
-      resolveConnectorId,
+      resolveChatModel,
+      getProposals,
+      logger,
     })
   );
   workflowsExtensions.registerStepDefinition(getTriageHeadroomStepDefinition({ getTaskManager }));
