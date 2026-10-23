@@ -3936,6 +3936,10 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.buildkite/pipelines/evals/ @elastic/nightshift-context-and-research-team @elastic/security-generative-ai
 /.buildkite/scripts/steps/evals/ @elastic/nightshift-context-and-research-team @elastic/security-generative-ai
 
+# Agent Builder prompt-injection regressions and their dedicated suite config
+/x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/evals/security/prompt_injection/ @elastic/workchat-eng @elastic/kibana-security
+/x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/security.playwright.config.ts @elastic/workchat-eng @elastic/kibana-security
+
 # Inbox FTR test directory (no kibana.jsonc — manual entry)
 /x-pack/platform/test/inbox_api_integration/ @elastic/security-generative-ai
 
