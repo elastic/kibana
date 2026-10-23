@@ -51,10 +51,13 @@ export interface SequenceStep {
   operator: 'and' | 'or';
 }
 
+export type SequenceRecoveryMode = 'last' | 'all' | 'custom';
+
 export interface SequenceFormValues {
   steps: SequenceStep[];
   hopWindows: HopWindow[];
-  recoveryStepIndices: number[];
+  recoveryMode: SequenceRecoveryMode;
+  recoveryStepIndices?: number[];
 }
 
 export const RULE_DRAG_MIME_TYPE = 'application/x-alerting-v2-rule-id';
@@ -65,7 +68,23 @@ export const generateStepId = (): string => `step_${Date.now()}_${++idCounter}`;
 export const DEFAULT_SEQUENCE_FORM_VALUES: SequenceFormValues = {
   steps: [],
   hopWindows: [],
-  recoveryStepIndices: [],
+  recoveryMode: 'last',
+};
+
+export const recoveryTrackedStepIndices = (state: SequenceFormValues): number[] => {
+  const { steps, recoveryMode, recoveryStepIndices } = state;
+  if (steps.length === 0) return [];
+
+  if (recoveryMode === 'all') return steps.map((_, i) => i);
+
+  if (recoveryMode === 'custom') {
+    const picked = [...new Set(recoveryStepIndices ?? [])]
+      .filter((i) => Number.isInteger(i) && i >= 0 && i < steps.length)
+      .sort((a, b) => a - b);
+    if (picked.length > 0) return picked;
+  }
+
+  return [steps.length - 1];
 };
 
 export const isSequenceValid = (state: SequenceFormValues): boolean => {
@@ -73,12 +92,10 @@ export const isSequenceValid = (state: SequenceFormValues): boolean => {
   if (state.hopWindows.length !== state.steps.length - 1) return false;
   if (state.steps.some((s) => s.rules.length === 0)) return false;
   if (state.hopWindows.some((w) => w.value <= 0)) return false;
-  if (
-    state.recoveryStepIndices.some((i) => !Number.isInteger(i) || i < 0 || i >= state.steps.length)
-  ) {
-    return false;
-  }
-  if (new Set(state.recoveryStepIndices).size !== state.recoveryStepIndices.length) return false;
+
+  const picked = state.recoveryStepIndices ?? [];
+  if (picked.some((i) => !Number.isInteger(i) || i < 0 || i >= state.steps.length)) return false;
+  if (new Set(picked).size !== picked.length) return false;
   return true;
 };
 

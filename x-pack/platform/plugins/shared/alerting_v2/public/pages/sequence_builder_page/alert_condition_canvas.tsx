@@ -224,16 +224,24 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
           .filter((s) => s.rules.length > 0);
 
         const hopWindows = [...prev.hopWindows];
-        if (removedIdx !== -1 && nextSteps.length < prev.steps.length) {
+        const stepWasRemoved = removedIdx !== -1 && nextSteps.length < prev.steps.length;
+        if (stepWasRemoved) {
           const hopToRemove = removedIdx > 0 ? removedIdx - 1 : 0;
           hopWindows.splice(hopToRemove, 1);
         }
+
+        const recoveryStepIndices =
+          stepWasRemoved && prev.recoveryStepIndices
+            ? prev.recoveryStepIndices
+                .filter((i) => i !== removedIdx)
+                .map((i) => (i > removedIdx ? i - 1 : i))
+            : prev.recoveryStepIndices;
 
         return {
           ...prev,
           steps: nextSteps,
           hopWindows: hopWindows.slice(0, Math.max(0, nextSteps.length - 1)),
-          recoveryStepIndices: [Math.max(0, nextSteps.length - 1)],
+          recoveryStepIndices,
         };
       });
     },
@@ -320,7 +328,6 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
               0,
               nextSteps.length - 1
             ),
-            recoveryStepIndices: [nextSteps.length - 1],
           };
         });
       } catch {
