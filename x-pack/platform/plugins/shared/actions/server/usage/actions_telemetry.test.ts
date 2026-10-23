@@ -11,6 +11,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { errors } from '@elastic/elasticsearch';
 import {
+  getAuthTypeCounts,
   getCounts,
   getExecutionsPerDayCount,
   getInUseTotalCount,
@@ -121,12 +122,14 @@ describe('actions telemetry', () => {
 
     expect(telemetry).toMatchInlineSnapshot(`
       Object {
+        "countByAuthType": Object {},
         "countByType": Object {
           "__index": 1,
           "__server-log": 1,
           "another.type__": 1,
           "some.type": 1,
         },
+        "countByTypeAndAuthType": Object {},
         "countGenAiProviderTypes": Object {},
         "countTotal": 4,
         "hasErrors": false,
@@ -154,7 +157,9 @@ describe('actions telemetry', () => {
 
     expect(telemetry).toMatchInlineSnapshot(`
       Object {
+        "countByAuthType": Object {},
         "countByType": Object {},
+        "countByTypeAndAuthType": Object {},
         "countGenAiProviderTypes": Object {},
         "countTotal": 0,
         "errorMessage": "oh no",
@@ -208,7 +213,9 @@ describe('actions telemetry', () => {
 
     expect(telemetry).toMatchInlineSnapshot(`
       Object {
+        "countByAuthType": Object {},
         "countByType": Object {},
+        "countByTypeAndAuthType": Object {},
         "countGenAiProviderTypes": Object {},
         "countTotal": 0,
         "errorMessage": "no_shard_available_action_exception",
@@ -591,6 +598,7 @@ describe('actions telemetry', () => {
 
     expect(telemetry).toMatchInlineSnapshot(`
       Object {
+        "countByAuthType": Object {},
         "countByType": Object {
           "__index": 1,
           "__server-log": 2,
@@ -598,6 +606,7 @@ describe('actions telemetry', () => {
           "another.type__": 1,
           "some.type": 1,
         },
+        "countByTypeAndAuthType": Object {},
         "countGenAiProviderTypes": Object {},
         "countTotal": 6,
         "hasErrors": false,
@@ -633,9 +642,11 @@ describe('actions telemetry', () => {
 
     expect(telemetry).toMatchInlineSnapshot(`
       Object {
+        "countByAuthType": Object {},
         "countByType": Object {
           "test.system-action": 1,
         },
+        "countByTypeAndAuthType": Object {},
         "countGenAiProviderTypes": Object {},
         "countTotal": 1,
         "hasErrors": false,
@@ -1224,6 +1235,94 @@ describe('actions telemetry', () => {
         "hasErrors": true,
       }
     `);
+  });
+
+  test('getTotalCount counts auth types from saved objects and in-memory connectors', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockResponse(
+      // @ts-expect-error not full search response
+      {
+        aggregations: {
+          byActionTypeId: {
+            buckets: [
+              { key: '.http', doc_count: 2 },
+              { key: '.slack', doc_count: 1 },
+            ],
+          },
+          byTypeAndAuthType: {
+            buckets: [
+              { key: '.http||oauth_authorization_code', doc_count: 1 },
+              { key: '.http||bearer', doc_count: 1 },
+            ],
+          },
+        },
+      }
+    );
+
+    const telemetry = await getTotalCount(mockEsClient, 'test', logger, [
+      createMockInMemoryConnector({
+        id: 'preconfigured-http',
+        actionTypeId: '.http',
+        name: 'preconfigured http',
+        isPreconfigured: true,
+        config: { authType: 'basic' },
+      }),
+      createMockInMemoryConnector({
+        id: 'system-connector-.workflows',
+        actionTypeId: '.workflows',
+        name: 'Workflows',
+        isSystemAction: true,
+        config: {},
+      }),
+    ]);
+
+    expect(telemetry).toEqual({
+      hasErrors: false,
+      countTotal: 5,
+      countByType: {
+        __http: 3,
+        __slack: 1,
+        __workflows: 1,
+      },
+      countGenAiProviderTypes: {},
+      countByAuthType: {
+        oauth_authorization_code: 1,
+        bearer: 1,
+        basic: 1,
+      },
+      countByTypeAndAuthType: {
+        __http: {
+          oauth_authorization_code: 1,
+          bearer: 1,
+          basic: 1,
+        },
+      },
+    });
+  });
+
+  it('getAuthTypeCounts', () => {
+    const { countByAuthType, countByTypeAndAuthType } = getAuthTypeCounts({
+      '.http||oauth_authorization_code': 2,
+      '.http||bearer': 1,
+      '.slack||ears': 3,
+      '.server-log': 4,
+      '.http||': 1,
+    });
+
+    expect(countByAuthType).toEqual({
+      oauth_authorization_code: 2,
+      bearer: 1,
+      ears: 3,
+    });
+    expect(countByTypeAndAuthType).toEqual({
+      __http: {
+        oauth_authorization_code: 2,
+        bearer: 1,
+      },
+      __slack: {
+        ears: 3,
+      },
+    });
   });
 
   it('getCounts', () => {
