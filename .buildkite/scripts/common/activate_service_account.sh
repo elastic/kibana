@@ -3,12 +3,11 @@
 set -euo pipefail
 
 GCLOUD_EMAIL_POSTFIX="elastic-kibana-ci.iam.gserviceaccount.com"
-GCLOUD_SA_PROXY_EMAIL="kibana-ci-sa-proxy@$GCLOUD_EMAIL_POSTFIX"
 GCLOUD_WIF_AUDIENCE="//iam.googleapis.com/projects/1003139005402/locations/global/workloadIdentityPools/buildkite/providers/buildkite"
 GCP_OIDC_TOKEN_SCRIPT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/gcp_oidc_token.sh"
 
 KIBANA_WIF_CREDENTIALS_DIR="${KIBANA_WIF_CREDENTIALS_DIR:-${TMPDIR:-/tmp}/kibana-wif-${BUILDKITE_JOB_ID:-local}}"
-WIF_CREDENTIALS_FILE="$KIBANA_WIF_CREDENTIALS_DIR/credentials.json"
+LOGGED_IN_ACCOUNTS_FILE="$KIBANA_WIF_CREDENTIALS_DIR/logged-in-accounts"
 
 # access tokens live 60 minutes and can't be refreshed in place, so re-minting after 30 leaves every
 # command at least 30 minutes. Single commands running longer than that need --auto-refresh.
@@ -16,9 +15,9 @@ ACCESS_TOKEN_MAX_AGE_MINUTES=30
 TOKEN_EXCHANGE_ATTEMPTS=5
 
 USAGE="Usage:
-  $0 <bucket|gs://bucket|email>                  Share one access token per service account for the rest of the job
-  $0 --auto-refresh <bucket|gs://bucket|email>   Let gcloud refresh credentials itself (one token exchange per gcloud process)
-  $0 --unset-impersonation                       Drop the active service account from the gcloud config
+  $0 <bucket|gs://bucket>                  Share one access token per service account for the rest of the job
+  $0 --auto-refresh <bucket|gs://bucket>   Let gcloud refresh credentials itself
+  $0 --unset-impersonation                 Drop the active service account from the gcloud config
   $0 --logout-gcloud                             Also remove this job's credentials"
 
 main() {
@@ -65,22 +64,27 @@ activate_with_shared_token() {
 
 activate_with_auto_refresh() {
   local email="$1"
+  local credentials_file
+  credentials_file="$(credentials_file_for "$email")"
 
   require_tools
-  write_wif_credentials_file
-  if ! gcloud auth login --cred-file="$WIF_CREDENTIALS_FILE" --quiet --no-user-output-enabled; then
-    fail "Failed to activate service account $GCLOUD_SA_PROXY_EMAIL."
+  write_wif_credentials_file "$email"
+  if ! gcloud auth login --cred-file="$credentials_file" --quiet --no-user-output-enabled; then
+    fail "Failed to activate service account $email."
   fi
+  echo "$email" >> "$LOGGED_IN_ACCOUNTS_FILE"
 
   clear_gcloud_auth_config
-  gcloud config set auth/impersonate_service_account "$email"
   echo "Activated service account $email (auto-refresh)"
 }
 
 logout_gcloud() {
+  local email
   clear_gcloud_auth_config
-  if [[ -x "$(command -v gcloud)" ]] && gcloud auth list 2>/dev/null | grep -q "$GCLOUD_SA_PROXY_EMAIL"; then
-    gcloud auth revoke "$GCLOUD_SA_PROXY_EMAIL" --no-user-output-enabled
+  if [[ -x "$(command -v gcloud)" && -s "$LOGGED_IN_ACCOUNTS_FILE" ]]; then
+    while read -r email; do
+      gcloud auth revoke "$email" --no-user-output-enabled
+    done < <(sort -u "$LOGGED_IN_ACCOUNTS_FILE")
   fi
   rm -rf "$KIBANA_WIF_CREDENTIALS_DIR"
 }
@@ -97,9 +101,9 @@ mint_access_token() {
   local email="$1" token_file="$2"
   local partial_file="$token_file.partial" attempt error delay
 
-  write_wif_credentials_file
+  write_wif_credentials_file "$email"
   for ((attempt = 1; attempt <= TOKEN_EXCHANGE_ATTEMPTS; attempt++)); do
-    if error="$(print_impersonated_access_token "$email" 2>&1 > "$partial_file")" && [[ -s "$partial_file" ]]; then
+    if error="$(print_access_token "$email" 2>&1 > "$partial_file")" && [[ -s "$partial_file" ]]; then
       mv "$partial_file" "$token_file"
       echo "Minted access token for $email"
       return 0
@@ -119,35 +123,38 @@ mint_access_token() {
 }
 
 # Empty CLOUDSDK_* values override the gcloud config, so a token file left by an earlier activation isn't used here.
-print_impersonated_access_token() {
+print_access_token() {
+  local email="$1"
   CLOUDSDK_AUTH_ACCESS_TOKEN_FILE="" \
-    CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE="$WIF_CREDENTIALS_FILE" \
-    CLOUDSDK_AUTH_IMPERSONATE_SERVICE_ACCOUNT="$1" \
+    CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE="$(credentials_file_for "$email")" \
+    CLOUDSDK_AUTH_IMPERSONATE_SERVICE_ACCOUNT="" \
     gcloud auth print-access-token --verbosity=error
 }
 
 # gcloud runs the executable to request a fresh Buildkite OIDC token whenever it needs one.
 write_wif_credentials_file() {
-  if [[ -s "$WIF_CREDENTIALS_FILE" ]]; then
+  local email="$1"
+  local credentials_file
+  credentials_file="$(credentials_file_for "$email")"
+  if [[ -s "$credentials_file" ]]; then
     return 0
   fi
 
   mkdir -p -m 700 "$KIBANA_WIF_CREDENTIALS_DIR"
   gcloud iam workload-identity-pools create-cred-config \
     "${GCLOUD_WIF_AUDIENCE#//iam.googleapis.com/}" \
-    --service-account="$GCLOUD_SA_PROXY_EMAIL" \
+    --service-account="$email" \
     --executable-command="\"$GCP_OIDC_TOKEN_SCRIPT\"" \
-    --output-file="$WIF_CREDENTIALS_FILE"
+    --output-file="$credentials_file"
+}
+
+credentials_file_for() {
+  echo "$KIBANA_WIF_CREDENTIALS_DIR/$1.credentials.json"
 }
 
 resolve_service_account() {
   local argument="$1"
   local bucket="${argument#gs://}"
-
-  if [[ "$argument" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
-    echo "$argument"
-    return 0
-  fi
 
   case "$bucket" in
     "kibana-ci-es-snapshots-daily")
@@ -162,11 +169,25 @@ resolve_service_account() {
     "kibana-performance")
       echo "kibana-ci-access-perf-stats@$GCLOUD_EMAIL_POSTFIX"
       ;;
-    "ci-artifacts.kibana.dev" | "kibana-ci-artifacts-"*)
+    "ci-artifacts.kibana.dev")
+      case "${BUILDKITE_PIPELINE_SLUG:-}" in
+        "kibana-pull-request" | "kibana-storybooks-from-pr")
+          echo "kibana-ci-access-published-pr@$GCLOUD_EMAIL_POSTFIX"
+          ;;
+        *)
+          echo "kibana-ci-access-published@$GCLOUD_EMAIL_POSTFIX"
+          ;;
+      esac
+      ;;
+    "kibana-ci-artifacts-"*)
       echo "kibana-ci-access-artifacts@$GCLOUD_EMAIL_POSTFIX"
       ;;
     "ci-typescript-archives")
-      echo "kibana-ci-access-ts-archives@$GCLOUD_EMAIL_POSTFIX"
+      if [[ "${BUILDKITE_PIPELINE_SLUG:-}" == "kibana-pull-request" ]]; then
+        echo "kibana-ci-ts-archives-pr@$GCLOUD_EMAIL_POSTFIX"
+      else
+        echo "kibana-ci-access-ts-archives@$GCLOUD_EMAIL_POSTFIX"
+      fi
       ;;
     "kibana-ai-assistant-kb-artifacts-dev" | "kibana-ai-assistant-kb-artifacts")
       echo "kibana-ci-access-ai-buckets@$GCLOUD_EMAIL_POSTFIX"
