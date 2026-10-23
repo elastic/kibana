@@ -8,6 +8,7 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import { buildPath } from '@kbn/core-http-browser';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { toAsCodeTags, toStoredTags } from '@kbn/as-code-shared-transforms';
 import type { BasicVisualizationClient } from '@kbn/visualizations-plugin/public';
@@ -25,7 +26,7 @@ import type {
 /** The details and spec of a library item as the API returns them, minus the tags. */
 type VegaLibraryAttributes = Omit<VegaReadResponseBody['data'], 'tags'>;
 
-const getItemPath = (id: string) => `${VEGA_API_PATH}/${encodeURIComponent(id)}`;
+const getItemPath = (id: string) => buildPath(`${VEGA_API_PATH}/{id}`, { id });
 
 export const createVegaLibraryClient = (http: HttpStart) => ({
   create: (item: VegaCreateRequestBody) =>

@@ -17,6 +17,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-http-browser",
     "@kbn/vega-sandbox",
     "@kbn/as-code-filters-schema",
     "@kbn/as-code-filters-transforms",
