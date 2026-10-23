@@ -188,6 +188,37 @@ export class IndicatorReader {
     return { hits };
   }
 
+  async getFeatureSourcesBySlug(
+    sourceIds: string[],
+    featureType: string,
+    slugs: string[]
+  ): Promise<Map<string, string[]>> {
+    const bySlug = new Map<string, string[]>();
+    if (sourceIds.length === 0 || slugs.length === 0) {
+      return bySlug;
+    }
+    // Tombstones carry no `feature.*` fields: filtering on them before the latest-per-group pick
+    // would resurface deleted features through their previous revision.
+    const docs = await this.revisionReader.fetchLatestRevisions(
+      combineWhere(inPredicate(SOURCE_ID, sourceIds), inPredicate(TYPE, [KI_TYPE_FEATURE])),
+      combineWhere(
+        IS_NOT_DELETED,
+        IS_NOT_EXCLUDED,
+        IS_NOT_EXPIRED,
+        inPredicate(FEATURE_TYPE, [featureType]),
+        inPredicate(FEATURE_SLUG, slugs)
+      )
+    );
+    for (const doc of docs) {
+      if (!isStoredFeatureKnowledgeIndicator(doc)) continue;
+      const slug = doc.feature.slug;
+      const sources = bySlug.get(slug) ?? [];
+      if (!sources.includes(doc['source.id'])) sources.push(doc['source.id']);
+      bySlug.set(slug, sources);
+    }
+    return bySlug;
+  }
+
   async getFeature(sourceId: string, id: string): Promise<Feature> {
     const { hits } = await this.getFeatures(sourceId, { id: [id] });
     if (hits.length === 0) {
