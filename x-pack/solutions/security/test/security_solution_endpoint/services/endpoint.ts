@@ -314,6 +314,34 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
     }
 
     /**
+     * Re-establishes the metadata transforms and waits until united metadata is available for every
+     * agent in the data sets provided.
+     *
+     * Each `loadEndpointData()` call reinstalls the Endpoint Fleet package, which recreates the
+     * transforms that every space's metadata is derived from. A suite that loads data more than once
+     * must therefore re-establish them after the last load, since the readiness gate of an earlier
+     * load no longer holds.
+     *
+     * @param dataSets the responses of every `loadEndpointData()` call made by the suite
+     * @param [spaceId] space used to look up the installed Endpoint package version
+     */
+    async ensureUnitedMetadata(
+      dataSets: IndexedHostsAndAlertsResponse[],
+      spaceId: string = DEFAULT_SPACE_ID
+    ): Promise<void> {
+      const agentIds = Array.from(
+        new Set(
+          dataSets
+            .flatMap(({ agents }) => agents.map((agent) => agent.agent?.id))
+            .filter((id): id is string => Boolean(id))
+        )
+      );
+      const endpointPackage = await getEndpointPackageInfo(this.getScopedKbnClient(spaceId));
+
+      await startMetadataTransforms(this.esClient, agentIds, endpointPackage.version);
+    }
+
+    /**
      * installs (or upgrades) the Endpoint Fleet package
      * (NOTE: ensure that fleet is setup first before calling this function)
      */
