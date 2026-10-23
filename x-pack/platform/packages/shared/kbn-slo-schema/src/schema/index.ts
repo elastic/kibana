@@ -5,20 +5,15 @@
  * 2.0.
  */
 
-export * from './common';
-export * from './duration';
-export * from './indicators';
-export * from './time_window';
-export * from './slo';
 export * from './composite_slo';
 export * from './composite_slo_summary_index';
-export * from './settings';
-export * from './health';
-export * from './slo_template';
 
-// Zod twins of the io-ts schemas above, exported with a temporary `…Zod`
-// suffix while both codec libraries coexist. The suffix is dropped once the
-// io-ts schemas are deleted at the end of the zod migration.
+export { ALL_VALUE, SLO_GROUPINGS_PREFIX, SLO_STATUS } from '../constants';
+export type { SLOStatus, TransformHealthResponse } from './zod';
+export { timesliceMetricComparatorMapping } from './zod';
+
+// Zod schemas, exported with a temporary `…Zod` suffix that is dropped in a
+// follow-up commit of the zod migration.
 export {
   // common
   allOrAnyString as allOrAnyStringZod,
@@ -96,5 +91,5 @@ export {
   storedSloTemplateSchema as storedSloTemplateSchemaZod,
 } from './zod';
 
-// Unsuffixed: a helper, not an io-ts twin.
+// Unsuffixed: a helper.
 export { is } from './zod';

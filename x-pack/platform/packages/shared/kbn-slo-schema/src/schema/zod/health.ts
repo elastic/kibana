@@ -37,3 +37,5 @@ const sloHealthSchema = z.object({
 });
 
 export { sloHealthSchema, transformHealthSchema };
+
+export type TransformHealthResponse = z.input<typeof transformHealthSchema>;

@@ -6,17 +6,17 @@
  */
 
 import type {
-  calendarAlignedTimeWindowSchema,
-  rollingTimeWindowSchema,
-  timeWindowSchema,
+  calendarAlignedTimeWindowSchemaZod,
+  rollingTimeWindowSchemaZod,
+  timeWindowSchemaZod,
 } from '@kbn/slo-schema';
 import type moment from 'moment';
-import type * as t from 'io-ts';
+import type { z } from '@kbn/zod';
 import { Duration, toDurationUnit } from '@kbn/slo-schema';
 
-type TimeWindow = t.TypeOf<typeof timeWindowSchema>;
-type RollingTimeWindow = t.TypeOf<typeof rollingTimeWindowSchema>;
-type CalendarAlignedTimeWindow = t.TypeOf<typeof calendarAlignedTimeWindowSchema>;
+type TimeWindow = z.output<typeof timeWindowSchemaZod>;
+type RollingTimeWindow = z.output<typeof rollingTimeWindowSchemaZod>;
+type CalendarAlignedTimeWindow = z.output<typeof calendarAlignedTimeWindowSchemaZod>;
 
 export type { RollingTimeWindow, TimeWindow, CalendarAlignedTimeWindow };
 

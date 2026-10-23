@@ -126,6 +126,13 @@ const timesliceMetricComparator = z
   .enum(['GT', 'GTE', 'LT', 'LTE'])
   .describe('The comparator to use to compare the equation to the threshold.');
 
+const timesliceMetricComparatorMapping = {
+  GT: '>',
+  GTE: '>=',
+  LT: '<',
+  LTE: '<=',
+} as const satisfies Record<z.output<typeof timesliceMetricComparator>, string>;
+
 const metricNameSchema = z.string().describe('The name of the metric. Only valid options are A-Z');
 
 const metricFilterSchema = querySchema.describe('The filter to apply to the metric.');
@@ -402,6 +409,7 @@ export {
   timesliceMetricIndicatorTypeSchema,
   timesliceMetricMetricDef,
   timesliceMetricBasicMetricWithField,
+  timesliceMetricComparatorMapping,
   timesliceMetricDocCountMetric,
   timesliceMetricPercentileMetric,
   histogramIndicatorTypeSchema,

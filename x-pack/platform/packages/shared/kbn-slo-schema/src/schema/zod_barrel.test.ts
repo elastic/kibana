@@ -8,8 +8,9 @@
 import * as schemaBarrel from '.';
 import * as zodSchemas from './zod';
 
-// Helpers, not io-ts twins: exported under their final name without the suffix.
-const UNSUFFIXED_EXPORTS = new Set(['is']);
+// Exported under their final name without the suffix: a helper, and a mapping
+// that never had a suffixed twin.
+const UNSUFFIXED_EXPORTS = new Set(['is', 'timesliceMetricComparatorMapping']);
 
 describe('zod schema barrel', () => {
   it('re-exports every zod twin with the temporary Zod suffix', () => {

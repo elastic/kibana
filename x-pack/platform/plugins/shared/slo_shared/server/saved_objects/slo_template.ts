@@ -9,13 +9,13 @@ import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { SavedObject } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { storedSloTemplateSchema } from '@kbn/slo-schema';
-import type * as t from 'io-ts';
+import type { storedSloTemplateSchemaZod } from '@kbn/slo-schema';
+import type { z } from '@kbn/zod';
 import { pick } from 'lodash';
 import { SO_SLO_TEMPLATE_TYPE } from '../../common';
 import { paths } from '../../common/locators/paths';
 
-type StoredSLOTemplate = t.TypeOf<typeof storedSloTemplateSchema>;
+type StoredSLOTemplate = z.output<typeof storedSloTemplateSchemaZod>;
 
 /**
  * We will use the savedObject.id as the template identifier when
