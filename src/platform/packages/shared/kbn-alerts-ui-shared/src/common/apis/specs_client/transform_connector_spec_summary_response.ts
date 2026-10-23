@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorSpecSummary, GetConnectorSpecResponse } from '@kbn/actions-plugin/common';
+import type { ConnectorSpecSummary } from '@kbn/actions-plugin/common';
 import { resolveActionScope } from '@kbn/connector-specs';
+
+interface ConnectorSpecAvailabilityWire {
+  enabled?: boolean;
+  enabled_in_config?: boolean;
+  enabled_in_license?: boolean;
+  is_deprecated?: boolean;
+}
 
 interface ConnectorSpecSummaryWire {
   id: string;
@@ -19,7 +26,7 @@ interface ConnectorSpecSummaryWire {
   minimum_license: string;
   is_technical_preview?: boolean;
   supported_feature_ids: string[];
-  availability?: GetConnectorSpecResponse['availability'];
+  availability?: ConnectorSpecAvailabilityWire;
   auth_type_ids?: string[];
   is_testable?: boolean;
   has_inbound_events?: boolean;

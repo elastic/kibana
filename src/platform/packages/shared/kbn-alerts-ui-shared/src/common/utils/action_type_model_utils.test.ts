@@ -52,12 +52,6 @@ describe('action_type_model_utils', () => {
       schema: { type: 'object', properties: {} },
       is_testable: true,
       auth_type_ids: ['basic'],
-      availability: {
-        enabled: true,
-        enabled_in_config: true,
-        enabled_in_license: true,
-        is_deprecated: false,
-      },
       has_inbound_events: false,
       is_inbound_only: false,
       is_ears_experimental: false,
@@ -108,6 +102,8 @@ describe('action_type_model_utils', () => {
         '/internal/actions/connector_types/test-connector/spec'
       );
       expect(result).toEqual(expectedClientSpec());
+      expect(result).not.toHaveProperty('availability');
+      expect(result).not.toHaveProperty('skill');
       expect(result.actions?.[0]).not.toHaveProperty('inputSchema');
     });
   });

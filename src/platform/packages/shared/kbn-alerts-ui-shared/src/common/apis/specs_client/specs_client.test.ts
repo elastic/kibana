@@ -28,12 +28,6 @@ const fullWire: GetConnectorSpecResponse = {
   schema: formSchema,
   is_testable: true,
   auth_type_ids: ['basic', 'api_key_header'],
-  availability: {
-    enabled: true,
-    enabled_in_config: true,
-    enabled_in_license: false,
-    is_deprecated: false,
-  },
   has_inbound_events: true,
   is_inbound_only: false,
   is_ears_experimental: false,
@@ -67,12 +61,8 @@ describe('createSpecsClient', () => {
       `);
       expect(result.formSchema).toBe(formSchema);
       expect(result.authTypeIds).toEqual(['basic', 'api_key_header']);
-      expect(result.availability).toEqual({
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: false,
-        isDeprecated: false,
-      });
+      expect(result).not.toHaveProperty('availability');
+      expect(result).not.toHaveProperty('skill');
       expect(result.actions[0].inputSchema).toBe(inputSchema);
       expect(result.icon).toBe('testIcon');
       expect(result.docsUrl).toBe('https://example.com/docs');

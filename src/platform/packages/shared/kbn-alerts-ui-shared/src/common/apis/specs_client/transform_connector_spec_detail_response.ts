@@ -8,35 +8,32 @@
  */
 
 import type { ConnectorSpecDetail, GetConnectorSpecResponse } from '@kbn/actions-plugin/common';
-import { transformConnectorSpecSummaryResponse } from './transform_connector_spec_summary_response';
+import { resolveActionScope } from '@kbn/connector-specs';
 
 export const transformConnectorSpecDetailResponse = (
   wire: GetConnectorSpecResponse
-): ConnectorSpecDetail => {
-  const summary = transformConnectorSpecSummaryResponse({
-    id: wire.metadata.id,
-    display_name: wire.metadata.display_name,
-    description: wire.metadata.description,
-    icon: wire.metadata.icon,
-    docs_url: wire.metadata.docs_url,
-    minimum_license: wire.metadata.minimum_license,
-    is_technical_preview: wire.metadata.is_technical_preview,
-    supported_feature_ids: wire.metadata.supported_feature_ids,
-    availability: wire.availability,
-    auth_type_ids: wire.auth_type_ids,
-    is_testable: wire.is_testable,
-    has_inbound_events: wire.has_inbound_events,
-    is_inbound_only: wire.is_inbound_only,
-    is_ears_experimental: wire.is_ears_experimental,
-    actions: (wire.actions ?? []).map(({ input_schema: _inputSchema, ...action }) => action),
-  });
-
-  return {
-    ...summary,
-    formSchema: wire.schema,
-    actions: summary.actions.map((action, index) => ({
-      ...action,
-      inputSchema: wire.actions?.[index]?.input_schema ?? {},
-    })),
-  };
-};
+): ConnectorSpecDetail => ({
+  id: wire.metadata.id,
+  displayName: wire.metadata.display_name,
+  description: wire.metadata.description,
+  ...(wire.metadata.icon !== undefined ? { icon: wire.metadata.icon } : {}),
+  ...(wire.metadata.docs_url !== undefined ? { docsUrl: wire.metadata.docs_url } : {}),
+  minimumLicense: wire.metadata.minimum_license as ConnectorSpecDetail['minimumLicense'],
+  isTechnicalPreview: wire.metadata.is_technical_preview ?? false,
+  supportedFeatureIds: wire.metadata.supported_feature_ids,
+  authTypeIds: wire.auth_type_ids ?? [],
+  isTestable: wire.is_testable ?? false,
+  hasInboundEvents: wire.has_inbound_events ?? false,
+  isInboundOnly: wire.is_inbound_only ?? false,
+  isEarsExperimental: wire.is_ears_experimental ?? false,
+  formSchema: wire.schema,
+  actions: (wire.actions ?? []).map(
+    ({ input_schema: inputSchema, name, description, is_tool: isTool, scope }) => ({
+      name,
+      ...(description !== undefined ? { description } : {}),
+      isTool,
+      scope: resolveActionScope({ scope, isTool }),
+      inputSchema: inputSchema ?? {},
+    })
+  ),
+});
