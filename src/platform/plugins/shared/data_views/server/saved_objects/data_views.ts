@@ -20,7 +20,7 @@ export const dataViewSavedObjectType: SavedObjectsType = {
   convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
     displayName: 'data view',
-    icon: 'indexPatternApp',
+    icon: 'table',
     defaultSearchField: 'name',
     importableAndExportable: true,
     getTitle(obj) {

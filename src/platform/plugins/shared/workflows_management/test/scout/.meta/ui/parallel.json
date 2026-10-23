@@ -1,5 +1,5 @@
 {
-  "sha1": "981c4266c35f1c2f568d2776fa8f94c77849cf4f",
+  "sha1": "139aa341edc0a9de97a2d184566ccb4299de3059",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -382,48 +382,6 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
         "line": 253,
         "column": 73
-      }
-    },
-    {
-      "id": "35e1b13303eb455-503470e3a1c5be6",
-      "title": "Service account UI with the feature flag disabled omits run_as from settings autocomplete and inserted snippets",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/service_accounts_disabled.spec.ts",
-        "line": 69,
-        "column": 7
-      }
-    },
-    {
-      "id": "35e1b13303eb455-6d3fd990e830902",
-      "title": "Service account UI with the feature flag disabled keeps a typed run_as ID without resolving names or showing account suggestions",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/service_accounts_disabled.spec.ts",
-        "line": 82,
-        "column": 20
-      }
-    },
-    {
-      "id": "35e1b13303eb455-12e39ee89151417",
-      "title": "Service account UI with the feature flag disabled shows historical raw identity without name badges or directory calls",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/service_accounts_disabled.spec.ts",
-        "line": 109,
-        "column": 20
       }
     },
     {
