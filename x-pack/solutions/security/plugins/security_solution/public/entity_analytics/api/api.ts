@@ -12,7 +12,6 @@ import {
   API_VERSIONS as ENTITY_STORE_API_VERSIONS,
   type EntityMaintainerResponseItem,
   ENTITY_STORE_ROUTES,
-  FF_ENABLE_ENTITY_STORE_V2,
   type GetEntityMaintainersResponse,
   type SaveEntityAiSummaryParams,
   type GetPersistedAiSummaryResponse,
@@ -149,12 +148,10 @@ const getMaintainerRouteWithId = (route: string, id: string): string =>
   route.replace('{id}', encodeURIComponent(id));
 
 export const useEntityAnalyticsRoutes = () => {
-  const { http, uiSettings } = useKibana().services;
+  const { http } = useKibana().services;
   const isEntityAnalyticsEntityStoreV2Enabled = useIsExperimentalFeatureEnabled(
     'entityAnalyticsEntityStoreV2'
   );
-  // Maintainer routes 403 when this opt-in is off. Status has to stay readable as NOT_INSTALLED.
-  const isEntityStoreV2OptedIn = uiSettings.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, true);
 
   return useMemo(() => {
     const fetchEntityMaintainers = (ids?: string[], context?: KibanaExecutionContext) =>
@@ -284,10 +281,6 @@ export const useEntityAnalyticsRoutes = () => {
       signal?: AbortSignal;
       context?: KibanaExecutionContext;
     }) => {
-      if (!isEntityStoreV2OptedIn) {
-        return { risk_engine_status: 'NOT_INSTALLED' } as RiskEngineStatusResponse;
-      }
-
       const riskScoreMaintainer = await fetchRiskScoreMaintainer(context);
       const riskEngineStatus = !riskScoreMaintainer
         ? 'NOT_INSTALLED'
@@ -1145,7 +1138,7 @@ export const useEntityAnalyticsRoutes = () => {
       fetchAnomalyOverview,
       fetchAnomalySummary,
     };
-  }, [http, isEntityAnalyticsEntityStoreV2Enabled, isEntityStoreV2OptedIn]);
+  }, [http, isEntityAnalyticsEntityStoreV2Enabled]);
 };
 
 export type AssetCriticality = SnakeToCamelCase<AssetCriticalityRecord>;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RISK_ENGINE_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { HEADER_SUBTITLE, ALL_USERS_TABLE } from '../../../screens/users/all_users';
 import { ANOMALIES_TAB, ANOMALIES_TAB_CONTENT } from '../../../screens/users/user_anomalies';
 import {
@@ -13,14 +12,12 @@ import {
   AUTHENTICATIONS_TABLE,
 } from '../../../screens/users/user_authentications';
 import { EVENTS_TAB, EVENTS_TAB_CONTENT } from '../../../screens/users/user_events';
-import { RISK_SCORE_TAB } from '../../../screens/users/user_risk_score';
 
 import { login } from '../../../tasks/login';
 import { visitUserDetailsPage, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { usersUrl } from '../../../urls/navigation';
 import { waitForTabToBeLoaded } from '../../../tasks/common';
-import { ENABLE_RISK_SCORE_BUTTON } from '../../../screens/entity_analytics';
 
 describe(
   'Users stats and tables',
@@ -43,10 +40,6 @@ describe(
     });
 
     beforeEach(() => {
-      cy.intercept('GET', `${RISK_ENGINE_STATUS_URL}*`, {
-        statusCode: 200,
-        body: { risk_engine_status: 'NOT_INSTALLED' },
-      }).as('riskEngineStatus');
       login();
       visitWithTimeRange(usersUrl('allUsers'));
     });
@@ -84,13 +77,6 @@ describe(
         waitForTabToBeLoaded(EVENTS_TAB);
 
         cy.get(EVENTS_TAB_CONTENT).should('exist');
-      });
-
-      // https://github.com/elastic/kibana/issues/184201
-      it(`renders users risk tab`, { tags: ['@skipInServerless'] }, () => {
-        waitForTabToBeLoaded(RISK_SCORE_TAB);
-
-        cy.get(ENABLE_RISK_SCORE_BUTTON).should('exist');
       });
     });
 

@@ -23,18 +23,10 @@ const mockFetch = jest.fn();
 const useKibanaMock = useKibana as jest.Mock;
 const useExperimentalMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
-const mockUiSettings = (entityStoreV2OptedIn: boolean) => ({
-  get: jest.fn((key: string, defaultValue?: boolean) =>
-    key === 'securitySolution:entityStoreEnableV2' ? entityStoreV2OptedIn : defaultValue
-  ),
-});
-
 describe('useEntityAnalyticsRoutes — executionContext propagation on v2 branch', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useKibanaMock.mockReturnValue({
-      services: { http: { fetch: mockFetch }, uiSettings: mockUiSettings(true) },
-    });
+    useKibanaMock.mockReturnValue({ services: { http: { fetch: mockFetch } } });
   });
 
   it('threads context into the maintainers request when fetchRiskEngineStatus is called on the v2 path', async () => {
@@ -70,19 +62,6 @@ describe('useEntityAnalyticsRoutes — executionContext propagation on v2 branch
       expect.objectContaining({ context })
     );
   });
-
-  it('returns NOT_INSTALLED without calling maintainers when entity store v2 is opted out', async () => {
-    useKibanaMock.mockReturnValue({
-      services: { http: { fetch: mockFetch }, uiSettings: mockUiSettings(false) },
-    });
-    useExperimentalMock.mockReturnValue(true);
-
-    const { result } = renderHook(() => useEntityAnalyticsRoutes());
-    const status = await result.current.fetchRiskEngineStatus({});
-
-    expect(status).toEqual({ risk_engine_status: 'NOT_INSTALLED' });
-    expect(mockFetch).not.toHaveBeenCalled();
-  });
 });
 
 describe('useEntityAnalyticsRoutes — executionContext propagation on entity details flyout endpoints', () => {
@@ -96,9 +75,7 @@ describe('useEntityAnalyticsRoutes — executionContext propagation on entity de
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useKibanaMock.mockReturnValue({
-      services: { http: { fetch: mockFetch }, uiSettings: mockUiSettings(true) },
-    });
+    useKibanaMock.mockReturnValue({ services: { http: { fetch: mockFetch } } });
     mockFetch.mockResolvedValue({});
   });
 
