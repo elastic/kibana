@@ -20,6 +20,8 @@ import {
 import { createAssetManagerClient } from './factories';
 import {
   ENTITY_STORE_METADATA_USAGE_EVENT,
+  ENTITY_STORE_ENTITY_METADATA_EVENT,
+  ENTITY_STORE_SOURCE_STATE_EVENT,
   ENTITY_STORE_RESOLUTION_RULES_STATE_EVENT,
   ENTITY_STORE_RESOLUTION_STATE_EVENT,
   ENTITY_STORE_USAGE_EVENT,
@@ -60,14 +62,16 @@ const EMAIL_RULE_DISABLED_OVERRIDE = {
   },
 };
 
+// Rows are [groups, size]: how many resolution groups have this size (target + aliases).
 const makeEsqlResponse = (values: Array<Array<number | null>>) => ({
   columns: [
-    { name: 'resolvedEntities', type: 'long' },
-    { name: 'resolutionGroups', type: 'long' },
-    { name: 'maxGroupAliases', type: 'long' },
+    { name: 'groups', type: 'long' },
+    { name: 'size', type: 'long' },
   ],
   values,
 });
+
+const isResolutionStateQuery = ({ query }: { query: string }) => query.includes('aliasCount');
 
 describe('getEntityRiskScoreDistribution', () => {
   let logger: MockedLogger;
@@ -529,7 +533,13 @@ describe('getEntitySourceDistribution', () => {
 describe('getResolutionState', () => {
   it('returns correct values for a populated resolution state', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue(makeEsqlResponse([[4, 2, 3]]));
+    // Two groups: a target with 3 aliases (size 4) and a target with 1 alias (size 2)
+    esClient.esql.query.mockResolvedValue(
+      makeEsqlResponse([
+        [1, 4],
+        [1, 2],
+      ])
+    );
 
     const result = await getResolutionState(
       esClient,
@@ -543,12 +553,16 @@ describe('getResolutionState', () => {
       targetEntities: 2,
       maxGroupSize: 4,
       avgGroupSize: 3,
+      groupSizes: [
+        { size: 2, groups: 1 },
+        { size: 4, groups: 1 },
+      ],
     });
   });
 
-  it('returns all zeros when the ESQL summary row has null counts', async () => {
+  it('returns all zeros when the ESQL rows have null counts', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue(makeEsqlResponse([[null, 0, null]]));
+    esClient.esql.query.mockResolvedValue(makeEsqlResponse([[null, null]]));
 
     const result = await getResolutionState(
       esClient,
@@ -562,6 +576,7 @@ describe('getResolutionState', () => {
       targetEntities: 0,
       maxGroupSize: 0,
       avgGroupSize: 0,
+      groupSizes: [],
     });
   });
 
@@ -581,6 +596,7 @@ describe('getResolutionState', () => {
       targetEntities: 0,
       maxGroupSize: 0,
       avgGroupSize: 0,
+      groupSizes: [],
     });
   });
 
@@ -588,11 +604,13 @@ describe('getResolutionState', () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.esql.query.mockResolvedValue({
       columns: [
-        { name: 'maxGroupAliases', type: 'long' },
-        { name: 'resolvedEntities', type: 'long' },
-        { name: 'resolutionGroups', type: 'long' },
+        { name: 'size', type: 'long' },
+        { name: 'groups', type: 'long' },
       ],
-      values: [[3, 4, 2]],
+      values: [
+        [4, 1],
+        [2, 1],
+      ],
     });
 
     const result = await getResolutionState(
@@ -607,12 +625,16 @@ describe('getResolutionState', () => {
       targetEntities: 2,
       maxGroupSize: 4,
       avgGroupSize: 3,
+      groupSizes: [
+        { size: 2, groups: 1 },
+        { size: 4, groups: 1 },
+      ],
     });
   });
 
   it('passes the abort controller signal to the ESQL query call', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue(makeEsqlResponse([[0, 0, 0]]));
+    esClient.esql.query.mockResolvedValue(makeEsqlResponse([]));
     const { signal } = new AbortController();
 
     await getResolutionState(esClient, 'my-index', 'generic', signal);
@@ -624,7 +646,7 @@ describe('getResolutionState', () => {
 
   it('queries the given index and scopes to the entity type in the ESQL pipeline', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue(makeEsqlResponse([[0, 0, 0]]));
+    esClient.esql.query.mockResolvedValue(makeEsqlResponse([]));
 
     await getResolutionState(esClient, 'my-index', 'host', new AbortController().signal);
 
@@ -632,9 +654,7 @@ describe('getResolutionState', () => {
     expect(queryParams.query).toContain('FROM my-index');
     expect(queryParams.query).toContain('entity.EngineMetadata.Type == "host"');
     expect(queryParams.query).toContain('entity.relationships.resolution.resolved_to IS NOT NULL');
-    expect(queryParams.query).toContain(
-      'STATS resolvedEntities = SUM(aliasCount), resolutionGroups = COUNT(*), maxGroupAliases = MAX(aliasCount)'
-    );
+    expect(queryParams.query).toContain('STATS groups = COUNT(*) BY size = aliasCount + 1');
   });
 });
 
@@ -647,6 +667,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let withContextSpy: jest.Mock;
   let soFind: jest.Mock;
+  let getIndexTemplate: jest.Mock;
 
   // Drives the task the way task-manager does: register, grab the definition,
   // build the runner and run it once.
@@ -659,6 +680,9 @@ describe('status report task — usage, resolution state & metadata telemetry', 
       getStartServices: jest.fn().mockResolvedValue([
         {
           executionContext: { withContext: withContextSpy },
+          elasticsearch: {
+            client: { asInternalUser: { indices: { getIndexTemplate } } },
+          },
           savedObjects: {
             createInternalRepository: jest.fn().mockReturnValue({
               find: jest.fn().mockResolvedValue({ saved_objects: [{ id: 'engine' }], total: 1 }),
@@ -688,13 +712,14 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     reportEvent = jest.fn();
     withContextSpy = jest.fn(<T>(_ctx: unknown, fn: () => T) => fn());
     soFind = jest.fn().mockResolvedValue({ saved_objects: [] });
+    getIndexTemplate = jest.fn().mockResolvedValue({ index_templates: [] });
     getStatus = jest.fn().mockResolvedValue({ status: ENTITY_STORE_STATUS.NOT_INSTALLED });
     // Store-usage counts carry a `query`; the metadata-datastream count does not.
     count = jest.fn(async (params: { query?: unknown }) =>
       params.query ? { count: 5 } : { count: 42 }
     );
-    // Default resolution state: 3 resolved entities in 1 group, max bucket = 2 aliases
-    esqlQuery = jest.fn().mockResolvedValue(makeEsqlResponse([[3, 1, 2]]));
+    // Default resolution state: one group of 3 (a target and 2 aliases)
+    esqlQuery = jest.fn().mockResolvedValue(makeEsqlResponse([[1, 3]]));
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.count.mockImplementation(count);
     esClient.esql.query.mockImplementation(esqlQuery);
@@ -748,7 +773,12 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     count.mockImplementation(async (params: { query?: unknown }) =>
       params.query ? { count: 7 } : { count: 42 }
     );
-    esqlQuery.mockResolvedValue(makeEsqlResponse([[4, 2, 3]]));
+    esqlQuery.mockResolvedValue(
+      makeEsqlResponse([
+        [1, 4],
+        [1, 2],
+      ])
+    );
 
     await runStatusReportTask();
 
@@ -778,7 +808,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
 
   it('reports zeros for the no-resolution case and treats all entities as standalone', async () => {
     // storeSize = 5, no resolution groups → standaloneEntities = totalEntities, avgGroupSize = 0
-    esqlQuery.mockResolvedValue(makeEsqlResponse([[null, 0, null]]));
+    esqlQuery.mockResolvedValue(makeEsqlResponse([]));
 
     await runStatusReportTask();
 
@@ -798,8 +828,13 @@ describe('status report task — usage, resolution state & metadata telemetry', 
   });
 
   it('reports a fractional avgGroupSize when the average is non-integer', async () => {
-    // resolvedEntities=5 across resolutionGroups=2 → avgGroupSize = 5/2 + 1 = 3.5 (float field)
-    esqlQuery.mockResolvedValue(makeEsqlResponse([[5, 2, 3]]));
+    // resolvedEntities=5 across 2 groups (sizes 4 and 3) → avgGroupSize = 5/2 + 1 = 3.5 (float field)
+    esqlQuery.mockResolvedValue(
+      makeEsqlResponse([
+        [1, 4],
+        [1, 3],
+      ])
+    );
 
     await runStatusReportTask();
 
@@ -826,7 +861,13 @@ describe('status report task — usage, resolution state & metadata telemetry', 
 
   it('clamps standaloneEntities to 0 when arithmetic would go negative', async () => {
     // storeSize = 5, resolvedEntities=4, targetEntities=3 → 5 - 4 - 3 = -2 → clamped to 0
-    esqlQuery.mockResolvedValue(makeEsqlResponse([[4, 3, 1]]));
+    // Three groups (sizes 3, 2, 2): resolvedEntities = 4, targetEntities = 3
+    esqlQuery.mockResolvedValue(
+      makeEsqlResponse([
+        [1, 3],
+        [2, 2],
+      ])
+    );
 
     await runStatusReportTask();
 
@@ -846,7 +887,10 @@ describe('status report task — usage, resolution state & metadata telemetry', 
       expect(params.index).toBe(LATEST_INDEX);
     });
 
-    expect(esqlQuery).toHaveBeenCalledTimes(ALL_ENTITY_TYPES.length);
+    const resolutionStateCalls = esqlQuery.mock.calls.filter(([params]) =>
+      isResolutionStateQuery(params)
+    );
+    expect(resolutionStateCalls).toHaveLength(ALL_ENTITY_TYPES.length);
     esqlQuery.mock.calls.forEach(([params]) => {
       expect(params.query).toContain(`FROM ${LATEST_INDEX}`);
     });
@@ -879,8 +923,10 @@ describe('status report task — usage, resolution state & metadata telemetry', 
   it('isolates failures per entity type — a failure for one type still reports the others', async () => {
     const [failingType] = ALL_ENTITY_TYPES;
     esqlQuery.mockImplementation(async ({ query }: { query: string }) => {
-      if (query.includes(`"${failingType}"`)) throw new Error('boom');
-      return makeEsqlResponse([[3, 1, 2]]);
+      if (isResolutionStateQuery({ query }) && query.includes(`"${failingType}"`)) {
+        throw new Error('boom');
+      }
+      return makeEsqlResponse([[1, 3]]);
     });
 
     await expect(runStatusReportTask()).rejects.toThrow('boom');
@@ -936,7 +982,190 @@ describe('status report task — usage, resolution state & metadata telemetry', 
         sources: { elastic_defend: 3, other: 1 },
       });
     });
-    expect(esClient.search).toHaveBeenCalledTimes(ALL_ENTITY_TYPES.length * 3);
+    // Three usage searches per type. The metadata searches are counted in their own tests.
+    const usageSearches = esClient.search.mock.calls.filter(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ([params]: any) => !params?.aggs?.withoutSource && !params?.runtime_mappings
+    );
+    expect(usageSearches).toHaveLength(ALL_ENTITY_TYPES.length * 3);
+  });
+
+  describe('entity metadata', () => {
+    const metadataAggregations = {
+      sources: {
+        buckets: [
+          {
+            key: 'okta',
+            doc_count: 6,
+            resolved: { doc_count: 2 },
+            withRiskScore: { doc_count: 3 },
+            watchlistManaged: { doc_count: 1 },
+            watchlistCustom: { doc_count: 4 },
+          },
+          { key: 'my_app', doc_count: 2 },
+        ],
+      },
+      withoutSource: { doc_count: 1 },
+      withMultipleSources: { doc_count: 2 },
+      byCreator: {
+        buckets: [
+          { key: 'logs_extraction', doc_count: 7 },
+          { key: 'risk_score_maintainer', doc_count: 1 },
+        ],
+      },
+      byIdentityProvider: { buckets: [{ key: 'okta', doc_count: 6 }] },
+      activity: {
+        buckets: {
+          seenLast24h: { doc_count: 3 },
+          seenLast7d: { doc_count: 5 },
+          seenLast30d: { doc_count: 7 },
+          notSeenIn30d: { doc_count: 1 },
+        },
+      },
+      criticality: { buckets: [{ key: 'high_impact', doc_count: 2 }] },
+      onAnyWatchlist: { doc_count: 5 },
+      relationships: { buckets: { owns: { doc_count: 2 } } },
+      attr_asset: {
+        buckets: [
+          { key: 1, key_as_string: 'true', doc_count: 4 },
+          { key: 0, key_as_string: 'false', doc_count: 1 },
+        ],
+      },
+    };
+
+    const reportedMetadata = () =>
+      reportEvent.mock.calls
+        .filter(([eventType]) => eventType === ENTITY_STORE_ENTITY_METADATA_EVENT.eventType)
+        .map(([, payload]) => payload);
+
+    beforeEach(() => {
+      esClient.search.mockImplementation(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (async (params: any) =>
+          params?.aggs?.withoutSource
+            ? { aggregations: metadataAggregations }
+            : { aggregations: {} }) as never
+      );
+      getIndexTemplate.mockResolvedValue({
+        index_templates: [
+          { index_template: { _meta: { managed_by: 'fleet', package: { name: 'okta' } } } },
+          { index_template: { _meta: { managed_by: 'custom', package: { name: 'my_app' } } } },
+        ],
+      });
+    });
+
+    it('reports one metadata event per entity type with the resolution group sizes', async () => {
+      esqlQuery.mockImplementation(async (params: { query: string }) =>
+        isResolutionStateQuery(params)
+          ? makeEsqlResponse([
+              [1, 4],
+              [1, 2],
+            ])
+          : makeEsqlResponse([])
+      );
+
+      await runStatusReportTask();
+
+      const events = reportedMetadata();
+      expect(events.map((event) => event.entityType).sort()).toEqual([...ALL_ENTITY_TYPES].sort());
+      events.forEach((event) => {
+        expect(event).toMatchObject({
+          namespace: NAMESPACE,
+          totalEntities: 5,
+          resolution: {
+            groupSizes: [
+              { size: 2, groups: 1 },
+              { size: 4, groups: 1 },
+            ],
+          },
+          origin: { withMultipleSources: 2, withoutSource: 1 },
+          activity: { seenLast24h: 3, seenLast7d: 5, seenLast30d: 7, notSeenIn30d: 1 },
+          securityContext: { onAnyWatchlist: 5, criticality: { highImpact: 2, lowImpact: 0 } },
+        });
+        expect(event.enrichment.attributes).toContainEqual({
+          attribute: 'asset',
+          setTrue: 4,
+          setFalse: 1,
+        });
+        expect(event.enrichment.relationships).toContainEqual({ type: 'owns', entities: 2 });
+      });
+    });
+
+    it('only reports type-specific fields for the types they apply to', async () => {
+      await runStatusReportTask();
+
+      const byType = Object.fromEntries(
+        reportedMetadata().map((event) => [event.entityType, event])
+      );
+      expect(byType.user.origin.byIdentityProvider).toEqual([{ provider: 'okta', entities: 6 }]);
+      expect(byType.host.origin.byIdentityProvider).toBeUndefined();
+      expect(byType.service.origin.byIdentityProvider).toBeUndefined();
+      expect(byType.generic.origin.byIdentityProvider).toBeUndefined();
+      expect(byType.generic.unlinkedDuplicates).toEqual({});
+      expect(byType.generic.identifiers).toBeUndefined();
+    });
+
+    it('reports a missing creator as logs_extraction and tags the source kind', async () => {
+      await runStatusReportTask();
+
+      const sourceStates = reportEvent.mock.calls
+        .filter(([eventType]) => eventType === ENTITY_STORE_SOURCE_STATE_EVENT.eventType)
+        .map(([, payload]) => payload)
+        .filter((payload) => payload.entityType === 'user');
+      expect(sourceStates).toHaveLength(2);
+      expect(sourceStates.find((payload) => payload.source === 'okta')).toMatchObject({
+        sourceKind: 'integration',
+        entities: 6,
+        resolved: 2,
+        withRiskScore: 3,
+        onWatchlist: { managed: 1, custom: 4 },
+      });
+      expect(sourceStates.find((payload) => payload.source === 'my_app')).toMatchObject({
+        sourceKind: 'custom',
+        entities: 2,
+      });
+      expect(reportedMetadata()[0].origin.byCreator).toContainEqual({
+        creator: 'logs_extraction',
+        entities: 7,
+      });
+    });
+
+    it('still reports the event when an expensive part fails, and says which one', async () => {
+      esqlQuery.mockImplementation(async (params: { query: string }) => {
+        if (isResolutionStateQuery(params)) return makeEsqlResponse([[1, 3]]);
+        throw new Error('esql_boom');
+      });
+
+      await expect(runStatusReportTask()).resolves.toEqual({ state: { namespace: NAMESPACE } });
+
+      const user = reportedMetadata().find((event) => event.entityType === 'user');
+      expect(user).toBeDefined();
+      expect(user.unlinkedDuplicates).toEqual({});
+      expect(user.collection).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ part: 'sameIdDifferentCase', outcome: 'failed' }),
+          expect.objectContaining({ part: 'sameValueAcrossSources.user.email', outcome: 'failed' }),
+          expect.objectContaining({ part: 'sourceResolution', outcome: 'failed' }),
+        ])
+      );
+    });
+
+    it('does not report metadata when the cheap pass search fails', async () => {
+      esClient.search.mockImplementation(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (async (params: any) => {
+          if (params?.aggs?.withoutSource) throw new Error('search_boom');
+          return { aggregations: {} };
+        }) as never
+      );
+
+      await expect(runStatusReportTask()).resolves.toEqual({ state: { namespace: NAMESPACE } });
+
+      expect(reportedMetadata()).toHaveLength(0);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to report entity metadata for')
+      );
+    });
   });
 
   it('adds base and resolution risk score distributions to the usage event', async () => {
