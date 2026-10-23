@@ -20,6 +20,7 @@ describe('resolveEvalSelection', () => {
         runOrca: false,
         runSmoke: true,
         runInvestigations: true,
+        runConnectorProbes: false,
         smokeDatasetsRequest: undefined,
         fellBackToSmoke: false,
       });
@@ -30,6 +31,7 @@ describe('resolveEvalSelection', () => {
         runOrca: false,
         runSmoke: true,
         runInvestigations: false,
+        runConnectorProbes: false,
         smokeDatasetsRequest: undefined,
         fellBackToSmoke: true,
       });
@@ -52,6 +54,7 @@ describe('resolveEvalSelection', () => {
       runOrca: false,
       runSmoke: false,
       runInvestigations: true,
+      runConnectorProbes: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: false,
     });
@@ -62,6 +65,7 @@ describe('resolveEvalSelection', () => {
       runOrca: false,
       runSmoke: true,
       runInvestigations: false,
+      runConnectorProbes: false,
       smokeDatasetsRequest: 'synthetic-smoke',
       fellBackToSmoke: false,
     });
@@ -74,9 +78,35 @@ describe('resolveEvalSelection', () => {
       runOrca: false,
       runSmoke: true,
       runInvestigations: true,
+      runConnectorProbes: false,
       smokeDatasetsRequest: 'synthetic-smoke',
       fellBackToSmoke: false,
     });
+  });
+
+  it('runs only the connector probes for connector-probe', () => {
+    expect(
+      resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'connector-probe' })
+    ).toEqual({
+      runOrca: false,
+      runSmoke: false,
+      runInvestigations: false,
+      runConnectorProbes: true,
+      smokeDatasetsRequest: undefined,
+      fellBackToSmoke: false,
+    });
+  });
+
+  it('never selects the connector probes for all', () => {
+    expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'all' })).toMatchObject({
+      runConnectorProbes: false,
+    });
+  });
+
+  it('rejects connector-probe without credentials', () => {
+    expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASETS: 'connector-probe' })).toThrow(
+      'NIGHTSHIFT_DATASETS=connector-probe selects connector-probe'
+    );
   });
 
   it.each(['trace-only', 'synthetic-smoke,trace-only'])(
@@ -128,6 +158,7 @@ describe('ORCA selection', () => {
         runOrca: true,
         runSmoke: false,
         runInvestigations: false,
+        runConnectorProbes: false,
       });
     }
   );
