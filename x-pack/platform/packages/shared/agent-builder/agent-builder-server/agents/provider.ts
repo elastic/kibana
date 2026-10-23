@@ -177,6 +177,11 @@ export interface ExperimentalFeatures {
   bash: boolean;
   /** Whether the `discover_apis` tool is enabled. */
   apiDiscovery: boolean;
+  /**
+   * Whether dynamically loaded tools (skill and attachment-bound tools) are exposed through the
+   * `execute_dynamic_tool` meta-tool instead of being added to the native tool list.
+   */
+  dynamicTools: boolean;
 }
 
 /**

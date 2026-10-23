@@ -117,6 +117,19 @@ describe('getScoutFailures', () => {
     });
   });
 
+  it('attributes Cloud failures where Kibana never bootstrapped to the CDN', async () => {
+    const [failure] = await getScoutFailures(
+      writeReport([
+        createEntry({
+          consoleErrors:
+            '[2026-10-18T21:27:45.611Z] Kibana bootstrap failed: could not load https://kibana.estccdn.com/4135878c7aa5/bundles/kibana.bundle.js',
+        }),
+      ])
+    );
+    expect(failure.likelyIrrelevant).toBe(true);
+    expect(failure.infraReason?.category).toBe('cdn');
+  });
+
   it('keeps local failures with connection-level browser console errors relevant', async () => {
     const [failure] = await getScoutFailures(
       writeReport([

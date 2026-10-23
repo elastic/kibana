@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { notFound } from '@hapi/boom';
-import { OBSERVABILITY_STREAMS_ENABLE_CANVAS } from '@kbn/management-settings-ids';
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { streamsUnitIdentifierSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
@@ -14,9 +12,11 @@ import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { StreamsUnitService } from '../../../lib/saved_objects/streams_unit_service';
 import { revokeRemovedComponentApiKeys } from '../../../lib/unit_config/revoke_removed_component_api_keys';
 import { createServerRoute } from '../../create_server_route';
+import { assertStreamsCanvasEnabled } from './assert_streams_canvas_enabled';
 import { indexMetadataRoute } from './index_metadata';
 import { assertUnitPutEnvelope, parseUnitPutBody } from './parse_unit_put_body';
 import { resolveUnitIndicesRoute } from './resolve_indices';
+import { unitStatsRoutes } from './stats_route';
 
 const UNIT_PUT_MAX_BYTES = 1_048_576;
 
@@ -25,16 +25,6 @@ const unitPathSchema = z.object({
     id: streamsUnitIdentifierSchema.describe('The unit id.'),
   }),
 });
-
-const assertStreamsCanvasEnabled = async (uiSettingsClient: {
-  get: (key: string) => Promise<unknown>;
-}) => {
-  const canvasEnabled = await uiSettingsClient.get(OBSERVABILITY_STREAMS_ENABLE_CANVAS);
-
-  if (!canvasEnabled) {
-    throw notFound('Streams unit API is not enabled.');
-  }
-};
 
 export const getStreamsUnitRoute = createServerRoute({
   endpoint: 'GET /internal/streams/unit/{id}',
@@ -224,4 +214,5 @@ export const unitRoutes = {
   ...resetStreamsUnitRoute,
   ...resolveUnitIndicesRoute,
   ...indexMetadataRoute,
+  ...unitStatsRoutes,
 };

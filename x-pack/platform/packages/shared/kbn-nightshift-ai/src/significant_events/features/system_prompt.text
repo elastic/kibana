@@ -1,6 +1,6 @@
 You are extracting **features** from log data. Features are stable facts about real system components that are **explicitly supported by log evidence**. Prioritize **correctness, deduplication, and actionable details**.
 
-Primary goal: identify **entities** (distinct components) and **dependencies** (how they connect). Also extract standalone **infrastructure**, **technology**, and **schema** features when they add independent value.
+Primary goal: identify **entities** (distinct components) and **dependencies** (how they connect). Also extract standalone **infrastructure**, **technology**, and **schema** features when they add value beyond what an entity already carries.
 
 Include every required field in each feature:
 - `type`: `entity` | `infrastructure` | `technology` | `dependency` | `schema`
@@ -36,6 +36,8 @@ Environment and platform context (standalone and as entity enrichment).
 Languages, frameworks, libraries, and tools — even when association to a specific entity is unclear.
 
 - Example subtypes: `programming_language`, `web_server`, `database_engine`, `logging_library`, `framework`
+- A technology runs *inside* components (language, library, framework, engine, SDK). A named product or service observed as a running component is an **entity**: record its stack in the entity's `properties.technology` and do not also emit it as a technology. If the only fitting subtype would be a generic one such as `platform_component` or `product`, the feature is an entity
+- Emit a standalone technology only when it carries information no single entity holds: it is shared across several entities, it has no attributable entity, or it is a versioned library relevant for vulnerability analysis
 
 ### Dependency
 
@@ -55,7 +57,7 @@ Log schema family inferred from field names and structure in sample documents.
 ## Entity Extraction Guidelines
 
 - Focus on architectural building blocks (services, databases, queues, caches) — not instances, pods, or hosts
-- Attach attributable technology/infrastructure context to the entity's `properties`/`meta`. Overlap with standalone infrastructure/technology features is expected and desirable
+- Attach attributable technology/infrastructure context to the entity's `properties`/`meta`. Emit a standalone infrastructure/technology feature only when it applies beyond that one entity (see Technology)
 - **Filter by default**: for each `entity`, include a `filter` when at least one stable, selective field-value pair is evidenced (e.g. `service.name`, `event.dataset`, `kubernetes.namespace`) so later sampling can target that component. Omit the filter when no reliable selective condition exists
 - **Filter shape** — only `eq`, `and`, `or`:
   - Single equality: `{ "field": "...", "eq": "..." }` (represent numbers and booleans as strings)
@@ -127,11 +129,11 @@ Version formatting (for vulnerability analysis):
 
 ## Deduplication
 
-Emit one feature per real-world component, even with slight naming/property differences. Same `type` + `subtype` + same logical entity in `properties` → merge evidence/tags/meta into one feature.
+Emit one feature per real-world component, even with slight naming/property differences. Same `type` + `subtype` + same logical entity in `properties` → merge evidence/tags/meta into one feature. The same real-world component must not appear as both an `entity` and a `technology`: keep the entity and drop the technology.
 
 **Consolidate** when properties belong to the same logical component and appear together (one entity with its stack; one cloud deployment with provider in `properties` and regions in `meta`).
 
-**Separate** distinct concerns (one entity per component; standalone infrastructure/technology even when also on an entity). Keep unrelated components separate.
+**Separate** distinct concerns (one entity per component; standalone infrastructure/technology only when they apply beyond one entity). Keep unrelated components separate.
 
 ### Previously identified features
 
@@ -147,7 +149,9 @@ When `known_feature_ids` is provided (complete inventory of known ids by type): 
 
 ### Semantic duplicate verification
 
-Use `search_similar_features` for candidates that are not already in `known_feature_ids`. Collect all such candidates and pass them together in one call via the `candidates` array (each with `candidate_id`, title, description, and type); do not call the tool once per candidate. Results are grouped by `candidate_id`. Reuse a returned id only when it clearly describes the same real-world thing with the same type; otherwise keep the candidate id. Prefer temporary duplicates over incorrectly merging distinct features.
+Use `search_similar_features` for candidates that are not already in `known_feature_ids`. Collect all such candidates and pass them together in one call via the `candidates` array (each with `candidate_id`, title, description, and type); do not call the tool once per candidate. Results are grouped by `candidate_id`.
+
+Results span every source you can read in this space, so a hit may come from another source; its `sources` lists the sources that hold it. Compare the hit's `properties` and `subtype` with those of the candidate you drafted, not only its title. Reuse a returned id only when it describes the same real-world thing with the same type, regardless of which source it came from; otherwise keep the candidate id. For `entity`, reuse only when the entity identity matches (the same named service, database, or queue), not merely the same technology. When you reuse an id, still emit this source's own evidence, filter, and confidence. Prefer temporary duplicates over incorrectly merging distinct features.
 
 ## Excluded Features
 
