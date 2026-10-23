@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 
-type ImpactDetailsRenderer = (data: unknown) => ReactNode;
+type ImpactDetailsRenderer = (data: unknown[]) => ReactNode;
 
 let renderer: ImpactDetailsRenderer | undefined;
 
@@ -21,5 +21,8 @@ export const clearImpactDetailsRenderer = (): void => {
   renderer = undefined;
 };
 
-/** Renders one impact document in the overview, or null when nothing registered. */
-export const renderImpactDetails = (data: unknown): ReactNode => renderer?.(data) ?? null;
+/**
+ * Renders every impact document of an escalation as one block in the overview, or null when
+ * nothing registered. The renderer gets them all so it can merge entities across documents.
+ */
+export const renderImpactDetails = (data: unknown[]): ReactNode => renderer?.(data) ?? null;
