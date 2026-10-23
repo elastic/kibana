@@ -298,7 +298,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const bannerReason = inFlightDescription ?? settledDescription;
     const isSettledOrTransient = approvalPhase !== 'pending';
 
-    // Only a human's own "I've applied" can be taken back: nothing ran, so nothing is undone.
+    // Only a human's own "Mark as applied" can be taken back: nothing ran, so nothing is undone.
     const canReopen =
       Boolean(onReopen) && isTodo && !isReplaced && approvalPhase === 'marked_applied';
     const reopenAction: ApprovalAction | undefined =

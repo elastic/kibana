@@ -186,8 +186,8 @@ export class ProposalsService {
     // caller always "wins" with an empty string, the action's own metadata is
     // never consulted, and the queue silently drops a proposal it cannot group.
     const category = blankToUndefined(params.category) ?? metadata?.category;
-    // A to-do is offered as "I applied" alone, so approving one must not run anything: the
-    // click records work the analyst already did, and there is no Decline beside it.
+    // A to-do is offered as "Mark as applied" in place of Approve, so approving one must not run
+    // anything: the click records work the analyst already did.
     if (actionWorkflowId !== undefined && category === PROPOSAL_CATEGORY_TODO) {
       throw new ProposalInvalidActionInputError(
         `A "${PROPOSAL_CATEGORY_TODO}" proposal is carried out by the analyst, so it cannot ` +
@@ -723,7 +723,7 @@ export class ProposalsService {
    * The original keeps its decision. A decision is immutable and reaches the record only through
    * the gate, and the original's gate has ended, so it cannot be undone in place. Superseding it
    * instead leaves the chain saying what happened — applied, then re-opened — and the successor
-   * goes through the same gate as any proposal, so "I've applied" works on it again.
+   * goes through the same gate as any proposal, so "Mark as applied" works on it again.
    *
    * Only for a to-do proposal: an action that ran cannot be un-run by relabelling it.
    */
