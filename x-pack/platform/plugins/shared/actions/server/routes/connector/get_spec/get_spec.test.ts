@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import type { ConnectorSpecDetail } from '../../../../common/connector_spec';
+import type { GetConnectorSpecResult } from '../../../application/connector/methods/get_connector_spec/types';
 import { getConnectorSpecResponseBodySchemaV1 } from '../../../../common/routes/connector/response';
 import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../_mock_handler_arguments';
@@ -36,25 +36,21 @@ const formSchema = {
 
 const inputSchema = { type: 'object', properties: {} };
 
-const detail: ConnectorSpecDetail = {
-  id: 'test-connector',
-  displayName: 'Test Connector',
-  description: 'A test connector',
-  minimumLicense: 'basic',
-  isTechnicalPreview: true,
-  supportedFeatureIds: ['alerting'],
-  availability: {
-    enabled: true,
-    enabledInConfig: true,
-    enabledInLicense: true,
-    isDeprecated: false,
+const serverResult: GetConnectorSpecResult = {
+  metadata: {
+    id: 'test-connector',
+    displayName: 'Test Connector',
+    description: 'A test connector',
+    minimumLicense: 'basic',
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['alerting'],
   },
-  authTypeIds: ['basic'],
+  schema: formSchema,
   isTestable: true,
+  authTypeIds: ['basic'],
   hasInboundEvents: false,
   isInboundOnly: false,
   isEarsExperimental: false,
-  formSchema,
   actions: [
     {
       name: 'listIncidents',
@@ -66,27 +62,9 @@ const detail: ConnectorSpecDetail = {
   ],
 };
 
-const getConnectorSpecResult = (overrides: Partial<ConnectorSpecDetail> = {}) => {
-  const merged: ConnectorSpecDetail = { ...detail, ...overrides };
-  return {
-    metadata: {
-      id: merged.id,
-      displayName: merged.displayName,
-      description: merged.description,
-      minimumLicense: merged.minimumLicense,
-      supportedFeatureIds: ['alerting' as const],
-    },
-    schema: merged.formSchema,
-    isTestable: merged.isTestable,
-    actions: merged.actions.map(({ name, isTool, description, scope }) => ({
-      name,
-      isTool,
-      description,
-      scope,
-    })),
-    detail: merged,
-  };
-};
+const getConnectorSpecResult = (
+  overrides: Partial<GetConnectorSpecResult> = {}
+): GetConnectorSpecResult => ({ ...serverResult, ...overrides });
 
 const configurationUtilities = actionsConfigMock.create();
 
@@ -102,12 +80,6 @@ const responseBody = {
   schema: formSchema,
   is_testable: true,
   auth_type_ids: ['basic'],
-  availability: {
-    enabled: true,
-    enabled_in_config: true,
-    enabled_in_license: true,
-    is_deprecated: false,
-  },
   has_inbound_events: false,
   is_inbound_only: false,
   is_ears_experimental: false,

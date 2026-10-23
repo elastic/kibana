@@ -49,7 +49,10 @@ export interface ConnectorSpecSummary {
 }
 
 /** Full spec-backed connector type including form schema and action input schemas. */
-export interface ConnectorSpecDetail extends Omit<ConnectorSpecSummary, 'actions'> {
+export interface ConnectorSpecDetail
+  extends Omit<ConnectorSpecSummary, 'actions' | 'availability'> {
   formSchema: Record<string, unknown>;
   actions: ConnectorSpecActionDetail[];
+  /** Bundled agent skill text. Server only, never sent over HTTP. */
+  skill?: string;
 }

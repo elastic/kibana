@@ -5,45 +5,33 @@
  * 2.0.
  */
 
-import type { ConnectorSpecDetail } from '../../../../../../common/connector_spec';
+import type { GetConnectorSpecResult } from '../../../../../application/connector/methods/get_connector_spec/types';
 import type { GetConnectorSpecResponseV1 } from '../../../../../../common/routes/connector/response';
-import {
-  transformConnectorSpecActionSummaryResponse,
-  transformConnectorSpecSummaryResponse,
-} from '../../../transforms';
+import { transformConnectorSpecActionSummaryResponse } from '../../../transforms';
 
 export const transformGetConnectorSpecResponse = (
-  detail: ConnectorSpecDetail
-): GetConnectorSpecResponseV1 => {
-  const {
-    id,
-    display_name,
-    description,
-    icon,
-    docs_url,
-    minimum_license,
-    is_technical_preview,
-    supported_feature_ids,
-    actions: _summaryActions,
-    ...topLevel
-  } = transformConnectorSpecSummaryResponse(detail);
-
-  return {
-    metadata: {
-      id,
-      display_name,
-      description,
-      minimum_license,
-      supported_feature_ids,
-      ...(icon !== undefined ? { icon } : {}),
-      ...(docs_url !== undefined ? { docs_url } : {}),
-      is_technical_preview,
-    },
-    schema: detail.formSchema,
-    ...topLevel,
-    actions: detail.actions.map((action) => ({
-      ...transformConnectorSpecActionSummaryResponse(action),
-      input_schema: action.inputSchema,
-    })),
-  };
-};
+  spec: GetConnectorSpecResult
+): GetConnectorSpecResponseV1 => ({
+  metadata: {
+    id: spec.metadata.id,
+    display_name: spec.metadata.displayName,
+    description: spec.metadata.description,
+    minimum_license: spec.metadata.minimumLicense as string,
+    supported_feature_ids: spec.metadata.supportedFeatureIds,
+    ...(spec.metadata.icon !== undefined ? { icon: spec.metadata.icon } : {}),
+    ...(spec.metadata.docsUrl !== undefined ? { docs_url: spec.metadata.docsUrl } : {}),
+    ...(spec.metadata.isTechnicalPreview !== undefined
+      ? { is_technical_preview: spec.metadata.isTechnicalPreview }
+      : {}),
+  },
+  schema: spec.schema,
+  is_testable: spec.isTestable,
+  auth_type_ids: spec.authTypeIds,
+  has_inbound_events: spec.hasInboundEvents,
+  is_inbound_only: spec.isInboundOnly,
+  is_ears_experimental: spec.isEarsExperimental,
+  actions: spec.actions.map((action) => ({
+    ...transformConnectorSpecActionSummaryResponse(action),
+    input_schema: action.inputSchema,
+  })),
+});

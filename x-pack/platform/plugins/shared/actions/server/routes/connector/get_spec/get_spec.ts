@@ -72,9 +72,8 @@ export const getConnectorSpecRoute = (
           id,
           configurationUtilities: actionsConfigUtils,
         });
-        const responseBody: GetConnectorSpecResponseV1 = transformGetConnectorSpecResponseV1(
-          specResult.detail
-        );
+        const responseBody: GetConnectorSpecResponseV1 =
+          transformGetConnectorSpecResponseV1(specResult);
         return res.ok({ body: responseBody });
       })
     )

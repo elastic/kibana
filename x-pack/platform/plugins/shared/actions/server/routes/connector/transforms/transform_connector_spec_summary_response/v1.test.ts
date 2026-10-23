@@ -101,7 +101,6 @@ describe('transformConnectorSpecSummaryResponse', () => {
       schema: {},
       is_testable: wire.is_testable,
       auth_type_ids: wire.auth_type_ids,
-      availability: wire.availability,
       has_inbound_events: wire.has_inbound_events,
       is_inbound_only: wire.is_inbound_only,
       is_ears_experimental: wire.is_ears_experimental,

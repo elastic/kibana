@@ -12,12 +12,10 @@ import type { ActionsConfigurationUtilities } from '../../actions_config';
 import type { RegisteredSpec } from './get_registered_spec';
 import { serializeSpecActionSummary, serializeSpecSummary } from './serialize_spec_summary';
 
-export type ServerConnectorSpecDetail = ConnectorSpecDetail & { skill?: string };
-
 export const serializeSpecDetail = (
   registered: RegisteredSpec,
   configurationUtilities: ActionsConfigurationUtilities
-): ServerConnectorSpecDetail => {
+): ConnectorSpecDetail => {
   try {
     const { spec } = registered;
     const webhookSettings = configurationUtilities.getWebhookSettings();
@@ -26,7 +24,7 @@ export const serializeSpecDetail = (
       isEarsEnabled: configurationUtilities.isEarsEnabled(),
       isEarsExperimentalEnabled: configurationUtilities.isEarsExperimentalEnabled(),
     });
-    const summary = serializeSpecSummary(registered);
+    const { availability: _availability, ...summary } = serializeSpecSummary(registered);
 
     return {
       ...summary,

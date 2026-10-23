@@ -45,7 +45,7 @@ export default function getConnectorSpecTests({ getService }: FtrProviderContext
         expect(secretsAuthTypes[0].properties).to.have.property('X-OTX-API-KEY');
 
         expect(response.body.auth_type_ids).to.contain('api_key_header');
-        expect(typeof response.body.availability.enabled_in_license).to.eql('boolean');
+        expect(response.body).to.not.have.property('availability');
         expect(response.body.actions[0].input_schema).to.be.an('object');
         expect(response.body.actions[0].input_schema).to.have.property('type');
         expect(response.body.is_inbound_only).to.eql(false);

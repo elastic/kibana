@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ServerConnectorSpecDetail } from '../../../../../specs_client/lib/serialize_spec_detail';
+import type { GetConnectorSpecResult } from '../../../../../application/connector/methods/get_connector_spec/types';
 import { getConnectorSpecResponseBodySchemaV1 } from '../../../../../../common/routes/connector/response';
 import { transformGetConnectorSpecResponse } from './v1';
 
@@ -19,28 +19,23 @@ const formSchema = {
 
 const inputSchema = { type: 'object', properties: { id: { type: 'string' } } };
 
-const detail: ServerConnectorSpecDetail = {
-  id: 'test-connector',
-  displayName: 'Test Connector',
-  description: 'A test connector',
-  icon: 'testIcon',
-  docsUrl: 'https://example.com/docs',
-  minimumLicense: 'gold',
-  isTechnicalPreview: true,
-  supportedFeatureIds: ['alerting'],
-  availability: {
-    enabled: true,
-    enabledInConfig: true,
-    enabledInLicense: true,
-    isDeprecated: false,
+const result: GetConnectorSpecResult = {
+  metadata: {
+    id: 'test-connector',
+    displayName: 'Test Connector',
+    description: 'A test connector',
+    icon: 'testIcon',
+    docsUrl: 'https://example.com/docs',
+    minimumLicense: 'gold',
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['alerting'],
   },
-  authTypeIds: ['basic'],
+  schema: formSchema,
   isTestable: true,
+  authTypeIds: ['basic'],
   hasInboundEvents: false,
   isInboundOnly: false,
   isEarsExperimental: false,
-  formSchema,
-  skill: 'test-skill',
   actions: [
     {
       name: 'listIncidents',
@@ -53,8 +48,8 @@ const detail: ServerConnectorSpecDetail = {
 };
 
 describe('transformGetConnectorSpecResponse', () => {
-  it('keeps legacy keys and adds new detail fields', () => {
-    const body = transformGetConnectorSpecResponse(detail);
+  it('maps metadata and detail fields to the wire shape', () => {
+    const body = transformGetConnectorSpecResponse(result);
 
     expect(body.metadata).toEqual({
       id: 'test-connector',
@@ -69,16 +64,10 @@ describe('transformGetConnectorSpecResponse', () => {
     expect(body.schema).toBe(formSchema);
     expect(body.is_testable).toBe(true);
     expect(body.auth_type_ids).toEqual(['basic']);
-    expect(body.availability).toEqual({
-      enabled: true,
-      enabled_in_config: true,
-      enabled_in_license: true,
-      is_deprecated: false,
-    });
     expect(body.has_inbound_events).toBe(false);
     expect(body.is_inbound_only).toBe(false);
     expect(body.is_ears_experimental).toBe(false);
-    expect(body).not.toHaveProperty('skill');
+    expect(body).not.toHaveProperty('availability');
     expect(body.actions).toEqual([
       {
         name: 'listIncidents',
@@ -90,36 +79,39 @@ describe('transformGetConnectorSpecResponse', () => {
     ]);
   });
 
-  it('omits icon and docs_url when undefined', () => {
-    const { icon, docsUrl, ...rest } = detail;
-    const body = transformGetConnectorSpecResponse(rest);
+  it('omits optional metadata keys when they are undefined', () => {
+    const { icon, docsUrl, isTechnicalPreview, ...metadata } = result.metadata;
+    const body = transformGetConnectorSpecResponse({ ...result, metadata });
 
     expect(body.metadata).not.toHaveProperty('icon');
     expect(body.metadata).not.toHaveProperty('docs_url');
-    expect(body.metadata.is_technical_preview).toBe(true);
+    expect(body.metadata).not.toHaveProperty('is_technical_preview');
   });
 
   it('keeps long bundled skill text off the wire and still validates', () => {
     const longSkill = 'Use listIncidents to search incident records. '.repeat(40);
     expect(longSkill.length).toBeGreaterThan(1024);
 
-    const serverDetail: ServerConnectorSpecDetail = { ...detail, skill: longSkill };
-    const body = transformGetConnectorSpecResponse(serverDetail);
+    const resultWithSkill: GetConnectorSpecResult = { ...result, skill: longSkill };
+    const body = transformGetConnectorSpecResponse(resultWithSkill);
 
-    expect(serverDetail.skill).toBe(longSkill);
-    expect(body).not.toHaveProperty('skill');
+    expect(resultWithSkill.skill).toBe(longSkill);
     expect(JSON.stringify(body)).not.toContain(longSkill);
+    expect(body).not.toHaveProperty('skill');
     expect(() => getConnectorSpecResponseBodySchemaV1.validate(body)).not.toThrow();
+    expect(() =>
+      getConnectorSpecResponseBodySchemaV1.validate({ ...body, skill: longSkill })
+    ).toThrow();
   });
 
   it('passes input_schema through unchanged', () => {
-    const body = transformGetConnectorSpecResponse(detail);
+    const body = transformGetConnectorSpecResponse(result);
     expect(body.actions[0].input_schema).toBe(inputSchema);
   });
 
   it('validates against getConnectorSpecResponseBodySchemaV1', () => {
     expect(() =>
-      getConnectorSpecResponseBodySchemaV1.validate(transformGetConnectorSpecResponse(detail))
+      getConnectorSpecResponseBodySchemaV1.validate(transformGetConnectorSpecResponse(result))
     ).not.toThrow();
   });
 });

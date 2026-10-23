@@ -285,26 +285,6 @@ export const connectorAuthStatusResponseSchema = schema.recordOf(
   }
 );
 
-export const connectorSpecAvailabilityResponseSchema = schema.object(
-  {
-    enabled: schema.boolean({
-      meta: { description: 'Whether this connector type is enabled for use.' },
-    }),
-    enabled_in_config: schema.boolean({
-      meta: { description: 'Whether this connector type is enabled in Kibana configuration.' },
-    }),
-    enabled_in_license: schema.boolean({
-      meta: { description: 'Whether the current license allows this connector type.' },
-    }),
-    is_deprecated: schema.boolean({
-      meta: { description: 'Whether this connector type is deprecated.' },
-    }),
-  },
-  {
-    meta: { description: 'Availability flags for a spec-backed connector type.' },
-  }
-);
-
 export const connectorSpecActionSummaryResponseSchema = schema.object(
   {
     name: schema.string({
@@ -409,7 +389,6 @@ export const getConnectorSpecResponseBodySchema = schema.object({
     maxSize: 100,
     meta: { description: 'Authentication type identifiers this connector type supports.' },
   }),
-  availability: connectorSpecAvailabilityResponseSchema,
   has_inbound_events: schema.boolean({
     meta: { description: 'Whether this connector type can receive inbound events.' },
   }),
