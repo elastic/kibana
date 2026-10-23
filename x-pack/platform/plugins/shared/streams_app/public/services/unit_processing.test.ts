@@ -235,6 +235,31 @@ describe('applyProcessingDraft', () => {
     expect(next.unit.processors).toEqual([]);
   });
 
+  it('drops the delegation to an emptied child node and a parent left without outputs', () => {
+    const unit = baseUnit(
+      [
+        ...directUnit().unit.pipelines,
+        {
+          id: 'parent',
+          supported_telemetry: ['logs'],
+          config: [
+            { name: 'sources', value: ['src'] },
+            { name: 'routes', value: [{ pipelines: ['child'] }] },
+          ],
+        },
+        {
+          id: 'child',
+          supported_telemetry: ['logs'],
+          config: [{ name: 'processors', value: ['tag'] }],
+        },
+      ],
+      [{ id: 'tag', type: 'add_fields', supported_telemetry: ['logs'] }]
+    );
+    const next = savedUnit(applyProcessingDraft(unit, pipelineSlot('child'), []));
+    expect(next.unit.pipelines.map(({ id }) => id)).toEqual(['p-src']);
+    expect(next.unit.processors).toEqual([]);
+  });
+
   it('keeps a processor another slot still references', () => {
     const unit = baseUnit(
       [

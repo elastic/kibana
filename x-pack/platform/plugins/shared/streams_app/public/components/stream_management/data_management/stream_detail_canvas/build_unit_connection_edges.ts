@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { canDisconnectFromDestination } from '../../../../services/unit_connections';
 import {
   GRAPH_ENDPOINT_KIND,
-  PROCESSING_SLOT_KIND,
   buildUnitGraph,
   processingNodeId,
   type UnitGraphEndpoint,
@@ -92,10 +92,9 @@ export const buildUnitCanvasGraph = (
         source.kind === GRAPH_ENDPOINT_KIND.source &&
         target.kind === GRAPH_ENDPOINT_KIND.destination;
       const isMovable =
-        isDirect ||
-        (source.kind === GRAPH_ENDPOINT_KIND.processing &&
-          source.ref.kind === PROCESSING_SLOT_KIND.pipeline &&
-          target.kind === GRAPH_ENDPOINT_KIND.destination);
+        source.kind !== GRAPH_ENDPOINT_KIND.destination &&
+        target.kind === GRAPH_ENDPOINT_KIND.destination &&
+        canDisconnectFromDestination(unit, source, target.id);
       return {
         id: isDirect
           ? `unit-connection-${source.id}->${target.id}`

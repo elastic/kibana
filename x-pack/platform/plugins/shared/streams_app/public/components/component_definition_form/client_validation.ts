@@ -199,8 +199,21 @@ export const validateObject = (
   return errors;
 };
 
+/**
+ * Validates the form's values. Fields named in `suppliedElsewhere` (e.g. by
+ * telemetry-scoped config entries the form keeps as-is) are only checked when
+ * the form sets them.
+ */
 export const validateValues = (
   fields: readonly CatalogueNamedFieldDefinition[],
   values: ObjectValue,
-  context: FormContextValues
-): FieldErrors => validateObject(fields, undefined, values, '', context);
+  context: FormContextValues,
+  suppliedElsewhere: ReadonlySet<string> = new Set()
+): FieldErrors =>
+  validateObject(
+    fields.filter(({ name }) => !(suppliedElsewhere.has(name) && isEmptyValue(values[name]))),
+    undefined,
+    values,
+    '',
+    context
+  );

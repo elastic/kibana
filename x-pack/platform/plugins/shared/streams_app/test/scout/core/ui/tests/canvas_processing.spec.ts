@@ -90,7 +90,7 @@ test.describe(
     test.beforeEach(async ({ browserAuth, page, pageObjects: { streams } }) => {
       await browserAuth.loginAsAdmin();
       await mockUnit(page);
-      await streams.gotoStreamsLayoutTab('canvas');
+      await streams.gotoStreamsLayoutTab('map');
     });
 
     test.afterAll(async ({ kbnClient }) => {

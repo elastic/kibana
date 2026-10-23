@@ -317,13 +317,40 @@ export const getUnitConnections = (
   );
 };
 
+/** Sources whose records reach the endpoint, including through route delegation. */
+const upstreamSourceIds = (graph: UnitGraph, endpoint: UnitGraphEndpoint): string[] => {
+  const incoming = new Map<string, UnitGraphEdge[]>();
+  for (const edge of graph.edges) {
+    const key = endpointKey(edge.target);
+    incoming.set(key, [...(incoming.get(key) ?? []), edge]);
+  }
+  const sourceIds = new Set<string>();
+  const visited = new Set<string>();
+  const visit = (current: UnitGraphEndpoint) => {
+    const key = endpointKey(current);
+    if (visited.has(key)) {
+      return;
+    }
+    visited.add(key);
+    for (const { source } of incoming.get(key) ?? []) {
+      if (source.kind === GRAPH_ENDPOINT_KIND.source) {
+        sourceIds.add(source.id);
+      } else {
+        visit(source);
+      }
+    }
+  };
+  visit(endpoint);
+  return [...sourceIds];
+};
+
 /** Whether records from any of the origins already reach the destination, processed or not. */
 const reaches = (
-  unit: Unit,
+  graph: UnitGraph,
   origins: readonly UnitConnectionOrigin[],
   destinationId: string
 ): boolean => {
-  const reachedFrom = reachabilityOf(buildUnitGraph(unit));
+  const reachedFrom = reachabilityOf(graph);
   return origins.some((origin) =>
     reachedFrom(origin).some((reached) => reached.destinationId === destinationId)
   );
@@ -380,7 +407,7 @@ export const canConnectSourceToDestination = (
   const fit = telemetryFit(unit, sourceId, destinationId);
   if (
     fit === TELEMETRY_FIT.incompatible ||
-    reaches(unit, [sourceOrigin(sourceId)], destinationId)
+    reaches(buildUnitGraph(unit), [sourceOrigin(sourceId)], destinationId)
   ) {
     return false;
   }
@@ -544,16 +571,10 @@ const canConnectProcessingToDestination = (
   if (destination && !sharesSignal(destination.supported_telemetry, pipeline.supported_telemetry)) {
     return false;
   }
-  if (
-    reaches(
-      unit,
-      [
-        { kind: GRAPH_ENDPOINT_KIND.processing, ref },
-        ...readEntryIds(pipeline.config, PIPELINE_ENTRY.sources).map(sourceOrigin),
-      ],
-      destinationId
-    )
-  ) {
+  const graph = buildUnitGraph(unit);
+  const processing: UnitConnectionOrigin = { kind: GRAPH_ENDPOINT_KIND.processing, ref };
+  const origins = [processing, ...upstreamSourceIds(graph, processing).map(sourceOrigin)];
+  if (reaches(graph, origins, destinationId)) {
     return false;
   }
   return !pipelineUsesRoutes(pipeline) || !catchAllBlocksDestination(readRoutes(pipeline.config));
@@ -643,24 +664,55 @@ export const disconnectFromDestination = (
 export const getPipelinesWithoutDestinations = (unit: Unit): UnitPipeline[] =>
   unit.unit.pipelines.filter(({ config }) => !pipelineForwards(config));
 
-/** Moves a line onto a new start or destination handle. */
-export const moveUnitConnection = (
+/**
+ * Whether the drawn line is stored where this module can remove it. Lines the
+ * graph collapses through delegated pipelines without processors are not.
+ */
+export const canDisconnectFromDestination = (
   unit: Unit,
-  {
-    previousOrigin,
-    previousDestinationId,
-    origin,
-    destinationId,
-  }: {
-    previousOrigin: UnitConnectionOrigin;
-    previousDestinationId: string;
-    origin: UnitConnectionOrigin;
-    destinationId: string;
+  origin: UnitConnectionOrigin,
+  destinationId: string
+): boolean => {
+  if (origin.kind === GRAPH_ENDPOINT_KIND.source) {
+    return findUnprocessedSourcePipelineIndex(unit.unit.pipelines, origin.id, destinationId) !== -1;
   }
-): Unit => {
-  if (isEqual(previousOrigin, origin) && previousDestinationId === destinationId) {
+  const pipeline =
+    origin.ref.kind === PROCESSING_SLOT_KIND.pipeline
+      ? unit.unit.pipelines[findPipelineIndex(unit, origin.ref.pipelineId)]
+      : undefined;
+  return pipeline !== undefined && forwardsDirectlyTo(pipeline, destinationId);
+};
+
+export interface UnitConnectionMove {
+  previousOrigin: UnitConnectionOrigin;
+  previousDestinationId: string;
+  origin: UnitConnectionOrigin;
+  destinationId: string;
+}
+
+const isSameLine = ({
+  previousOrigin,
+  previousDestinationId,
+  origin,
+  destinationId,
+}: UnitConnectionMove) =>
+  isEqual(previousOrigin, origin) && previousDestinationId === destinationId;
+
+/** Whether a line can be dropped on the new handle, judged with the line itself released. */
+export const canMoveUnitConnection = (unit: Unit, move: UnitConnectionMove): boolean =>
+  isSameLine(move) ||
+  canConnectToDestination(
+    disconnectFromDestination(unit, move.previousOrigin, move.previousDestinationId),
+    move.origin,
+    move.destinationId
+  );
+
+/** Moves a line onto a new start or destination handle. */
+export const moveUnitConnection = (unit: Unit, move: UnitConnectionMove): Unit => {
+  if (isSameLine(move)) {
     return unit;
   }
+  const { previousOrigin, previousDestinationId, origin, destinationId } = move;
   const released = disconnectFromDestination(unit, previousOrigin, previousDestinationId);
   return canConnectToDestination(released, origin, destinationId)
     ? connectToDestination(released, origin, destinationId)

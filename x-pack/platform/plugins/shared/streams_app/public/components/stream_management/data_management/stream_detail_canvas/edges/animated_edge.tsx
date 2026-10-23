@@ -25,7 +25,7 @@ const addProcessingUnavailableLabel = i18n.translate(
   'xpack.streams.animatedEdge.addProcessingUnavailableTooltip',
   {
     defaultMessage:
-      'This processing uses telemetry-specific processor lists, which cannot be edited on the canvas yet.',
+      'This processing uses telemetry-specific processor lists, which cannot be edited on the map yet.',
   }
 );
 
@@ -75,7 +75,6 @@ export function AnimatedEdge({
   const { euiTheme } = useEuiTheme();
   const [isHovered, hover] = useBoolean();
   const [showMenu, menu] = useBoolean();
-  const isUnitLine = data !== undefined;
   const canUnhook = Boolean(data?.unitConnection);
   const processingTarget = data?.processingTarget;
 
@@ -252,7 +251,7 @@ export function AnimatedEdge({
           style={PATH_OPACITY}
         />
       ) : null}
-      {canUnhook && isActive ? (
+      {isActive ? (
         <EdgeLabelRenderer>
           <div className="nopan nodrag" style={labelPositionStyle}>
             <EuiPopover
@@ -267,21 +266,16 @@ export function AnimatedEdge({
               onKeyDown={closeOnEscape}
             >
               <EuiContextMenuPanel onClose={menu.off}>
-                {isUnitLine ? (
-                  <EuiContextMenuItem
-                    data-test-subj="streamsCanvasEdgeMenu-addProcessing"
-                    disabled={!processingTarget}
-                    toolTipContent={processingTarget ? undefined : addProcessingUnavailableLabel}
-                    onClick={openEdgeProcessingFlyout}
-                  >
-                    {i18n.translate(
-                      'xpack.streams.animatedEdge.addProcessingContextMenuItemLabel',
-                      {
-                        defaultMessage: 'Add processing',
-                      }
-                    )}
-                  </EuiContextMenuItem>
-                ) : null}
+                <EuiContextMenuItem
+                  data-test-subj="streamsCanvasEdgeMenu-addProcessing"
+                  disabled={!processingTarget}
+                  toolTipContent={processingTarget ? undefined : addProcessingUnavailableLabel}
+                  onClick={openEdgeProcessingFlyout}
+                >
+                  {i18n.translate('xpack.streams.animatedEdge.addProcessingContextMenuItemLabel', {
+                    defaultMessage: 'Add processing',
+                  })}
+                </EuiContextMenuItem>
                 <EuiContextMenuItem
                   data-test-subj="streamsCanvasEdgeMenu-addRouting"
                   onClick={openEdgeRoutingFlyout}

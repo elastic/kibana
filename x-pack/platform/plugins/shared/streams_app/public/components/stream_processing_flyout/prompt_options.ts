@@ -56,7 +56,7 @@ export const deleteProcessorPromptOptions: DiscardPromptOptions = {
 export const deleteAllProcessorsPromptOptions: DiscardPromptOptions = {
   message: i18n.translate('xpack.streams.processingFlyout.deleteAllProcessors.message', {
     defaultMessage:
-      'All processors are removed from this processing when you save and apply, and the processing node is removed from the canvas.',
+      'All processors are removed from this processing when you save and apply, and the processing node is removed from the map.',
   }),
   title: i18n.translate('xpack.streams.processingFlyout.deleteAllProcessors.title', {
     defaultMessage: 'Are you sure you want to delete all processors?',

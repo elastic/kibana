@@ -111,6 +111,7 @@ export function ProcessorEditor({
   );
 
   const initial = useMemo(() => fromConfigEntries(step?.processor.config), [step]);
+  const scopedNames = useMemo(() => new Set(initial.scoped.map(({ name }) => name)), [initial]);
   const [values, setValues] = useState<ObjectValue>(() =>
     step || !definition
       ? initial.values
@@ -119,6 +120,7 @@ export function ProcessorEditor({
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitted, setSubmitted] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
+  const [hasUnparsedInput, setHasUnparsedInput] = useState(false);
 
   const handleCancel = useDiscardConfirm(onCancel, {
     enabled: isDirty,
@@ -151,15 +153,15 @@ export function ProcessorEditor({
     setValues(next);
     setIsDirty(true);
     if (submitted && definition) {
-      setErrors(validateValues(definition.fields, next, context));
+      setErrors(validateValues(definition.fields, next, context, scopedNames));
     }
   };
 
   const submit = () => {
-    if (!definition || !type) {
+    if (!definition || !type || hasUnparsedInput) {
       return;
     }
-    const nextErrors = validateValues(definition.fields, values, context);
+    const nextErrors = validateValues(definition.fields, values, context, scopedNames);
     setSubmitted(true);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
@@ -246,6 +248,7 @@ export function ProcessorEditor({
                 errors={errors}
                 componentRefs={componentRefs}
                 onChange={onValuesChange}
+                onUnparsedInputChange={setHasUnparsedInput}
               />
             ) : null}
           </EuiForm>
@@ -282,7 +285,7 @@ export function ProcessorEditor({
                   <EuiButton
                     size="s"
                     fill
-                    isDisabled={!definition || signals.length === 0}
+                    isDisabled={!definition || signals.length === 0 || hasUnparsedInput}
                     onClick={submit}
                     data-test-subj="streamsProcessingFlyoutEditorSubmit"
                   >

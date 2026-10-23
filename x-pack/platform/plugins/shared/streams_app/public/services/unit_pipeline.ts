@@ -123,7 +123,7 @@ const referencedProcessorIds = (unit: Unit): Set<string> =>
   );
 
 /** Drops processor components among `candidates` that nothing references any more. */
-export const removeOrphanedProcessors = (unit: Unit, candidates: Iterable<string>): Unit => {
+const removeOrphanedProcessors = (unit: Unit, candidates: Iterable<string>): Unit => {
   const referenced = referencedProcessorIds(unit);
   const orphaned = new Set([...candidates].filter((id) => !referenced.has(id)));
   if (orphaned.size === 0 || !unit.unit.processors) {

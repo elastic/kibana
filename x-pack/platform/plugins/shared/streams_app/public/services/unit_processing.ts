@@ -18,7 +18,7 @@ import {
   pipelineForwards,
   readEntryIds,
   readRoutes,
-  removeOrphanedProcessors,
+  pruneUnit,
   replaceUnit,
   usedComponentIds,
   type PipelineConfigEntry,
@@ -227,7 +227,6 @@ export const applyProcessingDraft = (
   if (!pipeline || !isProcessingSlotEditable(unit, ref)) {
     return { ok: false, reason: PROCESSING_DRAFT_FAILURE.missingSlot };
   }
-  const previousIds = slotProcessorIds(pipeline, ref);
   const { unit: withProcessors, ids } = upsertProcessors(unit, processors);
   const next = updatePipeline(withProcessors, ref.pipelineId, (current) =>
     ref.kind === PROCESSING_SLOT_KIND.pipeline
@@ -236,5 +235,6 @@ export const applyProcessingDraft = (
   );
   const kept =
     ref.kind === PROCESSING_SLOT_KIND.pipeline ? dropIdlePipeline(next, ref.pipelineId) : next;
-  return { ok: true, unit: removeOrphanedProcessors(kept, previousIds), processorIds: ids };
+  // Also drops route delegations to a removed pipeline and parents left forwarding nowhere.
+  return { ok: true, unit: pruneUnit(unit, kept), processorIds: ids };
 };

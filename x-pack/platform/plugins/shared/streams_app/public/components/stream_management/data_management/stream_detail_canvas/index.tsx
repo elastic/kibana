@@ -60,6 +60,7 @@ import {
   PROCESSING_NODE_TYPE,
   SOURCE_NODE_TYPE,
   type ClassicCanvasGraph,
+  type ClassicCanvasEdge,
   type ClassicCanvasNode,
   type DestinationNode,
   type SourceNode,
@@ -107,6 +108,7 @@ import {
 } from '../../../streams_layout/destinations/destination_models';
 import {
   canConnectToDestination,
+  canMoveUnitConnection,
   connectToDestination,
   disconnectFromDestination,
   moveUnitConnection,
@@ -475,6 +477,12 @@ function StreamsCanvasInner() {
     setConnectionTargetIds(null);
   }, []);
 
+  // A dragged line is still in the unit, so its drop targets are checked with it released.
+  const reconnectingEdgeRef = useRef<ClassicCanvasEdge | null>(null);
+  const onReconnectStart = useCallback((_event: React.MouseEvent, edge: ClassicCanvasEdge) => {
+    reconnectingEdgeRef.current = edge;
+  }, []);
+
   const isValidConnection = useCallback<IsValidConnection>(
     (connection) => {
       const origin = readConnectionOrigin(connection.source);
@@ -482,7 +490,17 @@ function StreamsCanvasInner() {
       if (!origin || !destinationId) {
         return false;
       }
-      return canConnectToDestination(unitDefinition, origin, destinationId);
+      const reconnecting = reconnectingEdgeRef.current;
+      const previousOrigin = reconnecting ? readConnectionOrigin(reconnecting.source) : undefined;
+      const previousDestinationId = readConfiguredDestinationId(reconnecting?.target);
+      return previousOrigin && previousDestinationId
+        ? canMoveUnitConnection(unitDefinition, {
+            previousOrigin,
+            previousDestinationId,
+            origin,
+            destinationId,
+          })
+        : canConnectToDestination(unitDefinition, origin, destinationId);
     },
     [readConnectionOrigin, unitDefinition]
   );
@@ -513,6 +531,7 @@ function StreamsCanvasInner() {
     NonNullable<React.ComponentProps<typeof CanvasShell>['onReconnectEnd']>
   >(
     (_event, edge, _handleType, connectionState) => {
+      reconnectingEdgeRef.current = null;
       // Dropping on a handle keeps or moves the line. Releasing on the canvas unhooks it.
       if (connectionState.toHandle) {
         return;
@@ -734,6 +753,7 @@ function StreamsCanvasInner() {
           onConnectStart={onConnectStart}
           onConnectEnd={clearConnectionTargets}
           onReconnect={onReconnect}
+          onReconnectStart={onReconnectStart}
           onReconnectEnd={onReconnectEnd}
           isValidConnection={isValidConnection}
           nodesConnectable={!isSaving}

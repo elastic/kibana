@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
+import type { CatalogueNamedFieldDefinition } from '@kbn/streams-schema';
 import { ComponentDefinitionForm } from './component_definition_form';
 import { createInitialObject } from './serialize';
 import { addFieldsDefinition, testCatalogue } from './test_helpers';
@@ -50,6 +51,34 @@ function Harness({
 const lastCall = (mock: jest.Mock): ObjectValue => mock.mock.calls[mock.mock.calls.length - 1][0];
 
 describe('ComponentDefinitionForm', () => {
+  it('reports JSON it cannot parse so its owner can hold the last parsed value back', () => {
+    const payload: CatalogueNamedFieldDefinition = {
+      name: 'payload',
+      type: 'literal',
+      literal_kinds: ['object'],
+    };
+    const onUnparsedInputChange = jest.fn();
+    render(
+      <EuiProvider>
+        <ComponentDefinitionForm
+          definition={{ ...addFieldsDefinition(), fields: [payload] }}
+          metadata={testCatalogue.metadata}
+          telemetry={telemetry}
+          values={{}}
+          onChange={jest.fn()}
+          onUnparsedInputChange={onUnparsedInputChange}
+        />
+      </EuiProvider>
+    );
+    const input = screen.getByTestId('componentDefinitionFormLiteral-payload');
+
+    fireEvent.change(input, { target: { value: '{"team":' } });
+    expect(onUnparsedInputChange).toHaveBeenLastCalledWith(true);
+
+    fireEvent.change(input, { target: { value: '{"team":"core"}' } });
+    expect(onUnparsedInputChange).toHaveBeenLastCalledWith(false);
+  });
+
   it('renders one add_fields row with the choice groups and preselected values', () => {
     render(<Harness onValues={jest.fn()} />);
     const items = screen.getAllByTestId('componentDefinitionFormArrayItem');

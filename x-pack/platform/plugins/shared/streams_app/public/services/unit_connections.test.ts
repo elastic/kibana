@@ -9,6 +9,8 @@ import { createDefaultUnit, type Unit } from './unit_repository';
 import {
   canConnectSourceToDestination,
   canConnectToDestination,
+  canDisconnectFromDestination,
+  canMoveUnitConnection,
   connectSourceToDestination,
   connectToDestination,
   disconnectFromDestination,
@@ -517,6 +519,81 @@ describe('unit connections', () => {
         { name: 'sources', value: ['otlp-input'] },
         { name: 'destinations', value: ['es-metrics'] },
       ]);
+    });
+
+    it('judges a move with the dragged line released', () => {
+      const move = {
+        previousOrigin: processing('main'),
+        previousDestinationId: 'es-logs',
+        origin: source('otlp-input'),
+        destinationId: 'es-logs',
+      };
+
+      expect(canConnectToDestination(processedUnit(), source('otlp-input'), 'es-logs')).toBe(false);
+      expect(canMoveUnitConnection(processedUnit(), move)).toBe(true);
+    });
+
+    it('does not widen a processing pipeline for a destination it cannot carry', () => {
+      const unit = processedUnit();
+      unit.unit.destinations = [
+        ...unit.unit.destinations,
+        { id: 'es-metrics', type: 'elasticsearch', supported_telemetry: ['metrics'] },
+      ];
+
+      expect(canConnectToDestination(unit, processing('main'), 'es-metrics')).toBe(false);
+    });
+
+    it('only offers to detach lines stored on the origin pipeline', () => {
+      expect(canDisconnectFromDestination(processedUnit(), processing('main'), 'es-logs')).toBe(
+        true
+      );
+      expect(canDisconnectFromDestination(processedUnit(), source('nop-input'), 'debug-out')).toBe(
+        true
+      );
+      expect(canDisconnectFromDestination(processedUnit(), source('otlp-input'), 'es-logs')).toBe(
+        false
+      );
+    });
+  });
+
+  describe('with route delegation', () => {
+    const delegated = (child: Unit['unit']['pipelines'][number]['config']): Unit => {
+      const unit = unitWith([
+        {
+          id: 'parent',
+          supported_telemetry: ['logs'],
+          config: [
+            { name: 'sources', value: ['otlp-input'] },
+            {
+              name: 'routes',
+              value: [
+                { when: 'true', action: 'copy', pipelines: ['child'] },
+                { destinations: ['es-logs'] },
+              ],
+            },
+          ],
+        },
+        { id: 'child', supported_telemetry: ['logs'], config: child },
+      ]);
+      unit.unit.processors = [{ id: 'tag', type: 'add_fields', supported_telemetry: ['logs'] }];
+      return unit;
+    };
+
+    it('refuses a child processing line to a destination its upstream source already reaches', () => {
+      const unit = delegated([
+        { name: 'processors', value: ['tag'] },
+        { name: 'destinations', value: ['es-metrics'] },
+      ]);
+
+      expect(canConnectToDestination(unit, processing('child'), 'es-logs')).toBe(false);
+      expect(canConnectToDestination(unit, processing('child'), 'debug-out')).toBe(true);
+    });
+
+    it('does not offer to detach a line drawn through a delegated pipeline', () => {
+      const unit = delegated([{ name: 'destinations', value: ['es-metrics'] }]);
+
+      expect(canDisconnectFromDestination(unit, source('otlp-input'), 'es-metrics')).toBe(false);
+      expect(canDisconnectFromDestination(unit, source('otlp-input'), 'es-logs')).toBe(true);
     });
   });
 

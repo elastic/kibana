@@ -185,6 +185,7 @@ interface CanvasShellProps<NodeType extends Node, EdgeType extends Edge> {
   onConnectStart?: OnConnectStart;
   onConnectEnd?: OnConnectEnd;
   onReconnect?: OnReconnect<EdgeType>;
+  onReconnectStart?: (event: React.MouseEvent, edge: EdgeType, handleType: HandleType) => void;
   onReconnectEnd?: (
     event: MouseEvent | TouchEvent,
     edge: EdgeType,
@@ -242,6 +243,7 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
   onConnectStart,
   onConnectEnd,
   onReconnect,
+  onReconnectStart,
   onReconnectEnd,
   isValidConnection,
   connectionLineType = ConnectionLineType.SmoothStep,
@@ -325,6 +327,7 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
           onConnectStart={onConnectStart}
           onConnectEnd={onConnectEnd}
           onReconnect={onReconnect}
+          onReconnectStart={onReconnectStart}
           onReconnectEnd={onReconnectEnd}
           isValidConnection={isValidConnection}
           connectionLineType={connectionLineType}

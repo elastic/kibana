@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { EuiAccordion, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
@@ -35,6 +35,11 @@ export interface ComponentDefinitionFormProps {
   telemetry: readonly CatalogueSignal[];
   errors?: FieldErrors;
   componentRefs?: readonly ComponentReferenceOption[];
+  /**
+   * Called when the form starts or stops holding input it could not parse. The
+   * values then still carry the last parsed input, so it must not be committed.
+   */
+  onUnparsedInputChange?: (hasUnparsedInput: boolean) => void;
 }
 
 /** Renders a configuration form from a catalogue component definition. */
@@ -46,12 +51,29 @@ export function ComponentDefinitionForm({
   telemetry,
   errors = NO_ERRORS,
   componentRefs = NO_REFS,
+  onUnparsedInputChange,
 }: ComponentDefinitionFormProps) {
   const { euiTheme } = useEuiTheme();
   const idPrefix = useGeneratedHtmlId({ prefix: `componentDefinitionForm-${definition.type}` });
+  const unparsedControlIds = useRef(new Set<string>());
+  const reportUnparsedInput = useCallback(
+    (controlId: string, isUnparsed: boolean) => {
+      const ids = unparsedControlIds.current;
+      const hadUnparsed = ids.size > 0;
+      if (isUnparsed) {
+        ids.add(controlId);
+      } else {
+        ids.delete(controlId);
+      }
+      if (hadUnparsed !== ids.size > 0) {
+        onUnparsedInputChange?.(ids.size > 0);
+      }
+    },
+    [onUnparsedInputChange]
+  );
   const context = useMemo<DefinitionFormContextValue>(
-    () => ({ metadata, telemetry, errors, componentRefs, idPrefix }),
-    [componentRefs, errors, idPrefix, metadata, telemetry]
+    () => ({ metadata, telemetry, errors, componentRefs, idPrefix, reportUnparsedInput }),
+    [componentRefs, errors, idPrefix, metadata, reportUnparsedInput, telemetry]
   );
   const sections = useMemo(
     () => layoutSections(definition.fields, definition.groups),

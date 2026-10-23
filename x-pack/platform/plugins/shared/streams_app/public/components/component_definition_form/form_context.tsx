@@ -24,6 +24,8 @@ export interface DefinitionFormContextValue {
   errors: FieldErrors;
   componentRefs: readonly ComponentReferenceOption[];
   idPrefix: string;
+  /** Controls that hold text they cannot turn into a value (e.g. invalid JSON) report it here. */
+  reportUnparsedInput: (controlId: string, isUnparsed: boolean) => void;
 }
 
 export const DefinitionFormContext = createContext<DefinitionFormContextValue | undefined>(

@@ -8,6 +8,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { EuiTextArea, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useDefinitionFormContext } from '../form_context';
 import { toFormValue, type FormValue } from '../values';
 
 const stringify = (value: FormValue | undefined): string =>
@@ -35,9 +36,15 @@ export function JsonValueControl({
   const monospace = css`
     font-family: ${euiTheme.font.familyCode};
   `;
+  const { reportUnparsedInput } = useDefinitionFormContext();
   const [text, setText] = useState(() => stringify(value));
   const [parseError, setParseError] = useState(false);
   const lastEmitted = useRef(value);
+
+  useEffect(() => {
+    reportUnparsedInput(controlId, parseError);
+  }, [controlId, parseError, reportUnparsedInput]);
+  useEffect(() => () => reportUnparsedInput(controlId, false), [controlId, reportUnparsedInput]);
 
   useEffect(() => {
     if (value !== lastEmitted.current) {

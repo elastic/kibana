@@ -31,6 +31,13 @@ describe('validateValues', () => {
     });
   });
 
+  it('does not require a field that config outside the form supplies', () => {
+    expect(validateValues(fields, {}, context, new Set(['fields']))).toEqual({});
+    expect(
+      validateValues(fields, { fields: [{ action: 'upsert' }] }, context, new Set(['fields']))
+    ).not.toEqual({});
+  });
+
   it('points at missing required fields inside items, including the chosen value source', () => {
     expect(
       validateValues(
