@@ -14,7 +14,7 @@ import DETECTION_RULE_TUNING_YAML from './detection_rule_tuning.yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './floor_alert_triage.yaml';
 import FLOOR_ATTACK_DISCOVERY_YAML from './floor_attack_discovery.yaml';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './forensics_endpoint_analysis.yaml';
-import HUNT_CONTINUOUS_THREAT_HUNT_YAML from './hunt_continuous_threat_hunt.yaml';
+import HUNT_CONTINUOUS_THREAT_HUNT_YAML from './hunt/hunt_continuous_threat_hunt.yaml';
 import {
   ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS,
   upgradeStoredWorkerSettings,
