@@ -188,7 +188,6 @@ describe('VegaEditorFlyout', () => {
     );
   });
 
-  // Unlinking from the library can leave a panel with more filters than it can store.
   it('cannot be saved with more than 100 filters', async () => {
     renderFlyout({
       initialFilters: Array.from({ length: 101 }, () => ({

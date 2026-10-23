@@ -76,7 +76,6 @@ import type { VegaRenderDescriptor } from '../data_model/types';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { toPanelFilters } from '../lib/library_draft';
 import { mergeQueries } from '../lib/merge_queries';
-import { hasTooManyFilters, tooManyFiltersMessage } from '../components/vega_editor_body';
 import {
   createVegaLibraryClient,
   hasVegaLibraryItemWithTitle,
@@ -327,11 +326,6 @@ export const vegaEmbeddableFactory = (
       hasLibraryItemWithTitle: (title) => hasVegaLibraryItemWithTitle(libraryClient, title),
       saveToLibrary: async (title) => {
         const { query, filters } = serializePanelSearch();
-        if (hasTooManyFilters(filters)) {
-          // The dashboard only reports that saving failed, so explain why.
-          core.notifications.toasts.addDanger(tooManyFiltersMessage);
-          throw new Error(tooManyFiltersMessage);
-        }
         const { id } = await libraryClient.create({
           title,
           description: titleManager.getLatestState().description,

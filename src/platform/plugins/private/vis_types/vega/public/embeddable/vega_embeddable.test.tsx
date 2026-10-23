@@ -830,17 +830,6 @@ describe('vegaEmbeddableFactory', () => {
       expect(byReferenceState).not.toHaveProperty('filters');
     });
 
-    it('does not save more than 100 filters to the library', async () => {
-      const { api } = await buildEmbeddable({
-        isLibraryEnabled: true,
-        filters: Array.from({ length: 101 }, () => panelFilter),
-      });
-
-      await expect(api.saveToLibrary?.('New item')).rejects.toThrow();
-      expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalled();
-      expect(coreStart.http.post).not.toHaveBeenCalled();
-    });
-
     it('merges the library item and panel query and filters when unlinked', async () => {
       const { api } = await buildByReference({
         title: 'Panel',
