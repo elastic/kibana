@@ -92,11 +92,11 @@ export class RuleTelemetrySubscriber {
       return;
     }
 
-    const { ruleId, rule, origin } = payload;
+    const { ruleId, rule, origin, templateId } = payload;
 
     this.ebtService.reportEvent(
       eventType,
-      buildRuleChangedEventData(rule, { ...origin, actor }, ruleId)
+      buildRuleChangedEventData(rule, { ...origin, actor }, ruleId, templateId)
     );
   }
 }

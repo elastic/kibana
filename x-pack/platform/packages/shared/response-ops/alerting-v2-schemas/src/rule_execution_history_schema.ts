@@ -65,7 +65,11 @@ export const listRuleExecutionsRequestSchema = lazySchema(() =>
           'Free-text search. Matches rule name, description or rule ID (case-insensitive). Combined with rule_ids using AND.'
         ),
       outcomes: outcomeArraySchema.optional().describe('Outcome filter. '),
-      from: isoDateTime().optional().describe('Inclusive ISO datetime lower bound on event.start.'),
+      from: isoDateTime()
+        .optional()
+        .describe(
+          'Inclusive ISO datetime lower bound on event.start. Defaults to 24 hours before `to`, or before the request when `to` is omitted. Set it to see older executions.'
+        ),
       to: isoDateTime().optional().describe('Inclusive ISO datetime upper bound on event.start.'),
       sort_field: z
         .enum(['started_at', 'duration_ms'])
@@ -104,7 +108,6 @@ export const ruleExecutionViewSchema = lazySchema(() =>
             'The rule version this run executed. Omitted until the rule executor emits its own event; the `task-run` event does not carry one.'
           ),
       }),
-      space_id: z.string(),
       started_at: isoDateTime(),
       ended_at: isoDateTime(),
       timings: z.object({
@@ -135,14 +138,18 @@ export const ruleExecutionViewSchema = lazySchema(() =>
           'Failure details. Omitted on a successful run, or when the failure was unclassified.'
         ),
     })
-    .meta({ id: 'alerting_rule_execution' })
+    .meta({ id: 'alerting_rule_execution_history_item' })
 );
 
 export type RuleExecutionView = z.infer<typeof ruleExecutionViewSchema>;
 
 export const ruleSearchMatchCountsSchema = lazySchema(() =>
   z.object({
-    rules: z.number().describe(`Rules matching the search. ${ESTIMATED_COUNT_NOTE}`),
+    rule_count: z
+      .number()
+      .int()
+      .nonnegative()
+      .describe(`The number of rules matching the search. ${ESTIMATED_COUNT_NOTE}`),
     is_truncated: z
       .boolean()
       .describe(
@@ -167,7 +174,7 @@ export const listRuleExecutionsResponseSchema = lazySchema(() =>
         .optional()
         .describe('Match counts for the active search. Omitted when no search was provided.'),
     })
-    .meta({ id: 'alerting_rule_executions_response' })
+    .meta({ id: 'alerting_rule_execution_history_response' })
 );
 
 export type ListRuleExecutionsResponse = z.infer<typeof listRuleExecutionsResponseSchema>;
