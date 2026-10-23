@@ -14,11 +14,11 @@ import {
   SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID,
   SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID,
-  SIGNIFICANT_EVENTS_SOURCE_LIST_TOOL_ID,
-  SIGNIFICANT_EVENTS_SOURCE_GET_TOOL_ID,
-  SIGNIFICANT_EVENTS_SOURCE_CREATE_TOOL_ID,
-  SIGNIFICANT_EVENTS_SOURCE_UPDATE_TOOL_ID,
-  SIGNIFICANT_EVENTS_SOURCE_DELETE_TOOL_ID,
+  NIGHTSHIFT_SOURCE_LIST_TOOL_ID,
+  NIGHTSHIFT_SOURCE_GET_TOOL_ID,
+  NIGHTSHIFT_SOURCE_CREATE_TOOL_ID,
+  NIGHTSHIFT_SOURCE_UPDATE_TOOL_ID,
+  NIGHTSHIFT_SOURCE_DELETE_TOOL_ID,
 } from './register_tools';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { NightshiftFeaturePrivilege } from '../utils/test_helpers';
@@ -72,11 +72,11 @@ describe('registerAgentBuilderTools', () => {
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID);
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID);
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID);
-    expect(registeredIds).toContain(SIGNIFICANT_EVENTS_SOURCE_LIST_TOOL_ID);
-    expect(registeredIds).toContain(SIGNIFICANT_EVENTS_SOURCE_GET_TOOL_ID);
-    expect(registeredIds).toContain(SIGNIFICANT_EVENTS_SOURCE_CREATE_TOOL_ID);
-    expect(registeredIds).toContain(SIGNIFICANT_EVENTS_SOURCE_UPDATE_TOOL_ID);
-    expect(registeredIds).toContain(SIGNIFICANT_EVENTS_SOURCE_DELETE_TOOL_ID);
+    expect(registeredIds).toContain(NIGHTSHIFT_SOURCE_LIST_TOOL_ID);
+    expect(registeredIds).toContain(NIGHTSHIFT_SOURCE_GET_TOOL_ID);
+    expect(registeredIds).toContain(NIGHTSHIFT_SOURCE_CREATE_TOOL_ID);
+    expect(registeredIds).toContain(NIGHTSHIFT_SOURCE_UPDATE_TOOL_ID);
+    expect(registeredIds).toContain(NIGHTSHIFT_SOURCE_DELETE_TOOL_ID);
   });
 
   it('registers tools with non-empty descriptions and schemas', () => {
@@ -153,11 +153,11 @@ describe('registerAgentBuilderTools', () => {
       spaceId: 'default',
     };
     const expectedStatusById: Record<string, string> = {
-      [SIGNIFICANT_EVENTS_SOURCE_LIST_TOOL_ID]: 'available',
-      [SIGNIFICANT_EVENTS_SOURCE_GET_TOOL_ID]: 'available',
-      [SIGNIFICANT_EVENTS_SOURCE_CREATE_TOOL_ID]: 'unavailable',
-      [SIGNIFICANT_EVENTS_SOURCE_UPDATE_TOOL_ID]: 'unavailable',
-      [SIGNIFICANT_EVENTS_SOURCE_DELETE_TOOL_ID]: 'unavailable',
+      [NIGHTSHIFT_SOURCE_LIST_TOOL_ID]: 'available',
+      [NIGHTSHIFT_SOURCE_GET_TOOL_ID]: 'available',
+      [NIGHTSHIFT_SOURCE_CREATE_TOOL_ID]: 'unavailable',
+      [NIGHTSHIFT_SOURCE_UPDATE_TOOL_ID]: 'unavailable',
+      [NIGHTSHIFT_SOURCE_DELETE_TOOL_ID]: 'unavailable',
     };
     const statusById = Object.fromEntries(
       await Promise.all(

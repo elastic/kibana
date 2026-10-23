@@ -14,7 +14,7 @@ import { createSignificantEventsAvailability } from '../significant_events_avail
 import { runSourceTool } from '../sources/run_source_tool';
 import type { SourceToolDeps } from '../sources/source_tool_deps';
 import { toSourceSummary } from '../sources/source_summary';
-import { SIGNIFICANT_EVENTS_SOURCE_LIST_TOOL_ID } from '../tool_ids';
+import { NIGHTSHIFT_SOURCE_LIST_TOOL_ID } from '../tool_ids';
 
 const DEFAULT_SOURCES_PER_PAGE = 25;
 
@@ -50,7 +50,7 @@ export const createSourceListTool = ({
   server,
   logger,
 }: SourceToolDeps): BuiltinToolDefinition<typeof sourceListSchema> => ({
-  id: SIGNIFICANT_EVENTS_SOURCE_LIST_TOOL_ID,
+  id: NIGHTSHIFT_SOURCE_LIST_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
     List the Nightshift sources defined in the current space. This is the full source catalog:

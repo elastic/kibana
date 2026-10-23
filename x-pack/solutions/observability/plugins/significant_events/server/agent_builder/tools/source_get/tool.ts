@@ -15,7 +15,7 @@ import { createSignificantEventsAvailability } from '../significant_events_avail
 import { runSourceTool } from '../sources/run_source_tool';
 import type { SourceToolDeps } from '../sources/source_tool_deps';
 import { toSourceSummary } from '../sources/source_summary';
-import { SIGNIFICANT_EVENTS_SOURCE_GET_TOOL_ID } from '../tool_ids';
+import { NIGHTSHIFT_SOURCE_GET_TOOL_ID } from '../tool_ids';
 
 const sourceGetSchema = lazySchema(() =>
   z.object({
@@ -28,7 +28,7 @@ export const createSourceGetTool = ({
   server,
   logger,
 }: SourceToolDeps): BuiltinToolDefinition<typeof sourceGetSchema> => ({
-  id: SIGNIFICANT_EVENTS_SOURCE_GET_TOOL_ID,
+  id: NIGHTSHIFT_SOURCE_GET_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
     Get one Nightshift source of the current space, with the health of its ES|QL view. Disabled

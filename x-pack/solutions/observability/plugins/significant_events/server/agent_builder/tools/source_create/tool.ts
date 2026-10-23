@@ -21,7 +21,7 @@ import { runSourceTool } from '../sources/run_source_tool';
 import { SOURCE_ESQL_RULES } from '../sources/source_esql_rules';
 import type { MaintenanceStateReader, SourceToolDeps } from '../sources/source_tool_deps';
 import { toSourceSummary } from '../sources/source_summary';
-import { SIGNIFICANT_EVENTS_SOURCE_CREATE_TOOL_ID } from '../tool_ids';
+import { NIGHTSHIFT_SOURCE_CREATE_TOOL_ID } from '../tool_ids';
 
 const sourceCreateSchema = lazySchema(() => {
   const { shape } = createSourceRequestSchema;
@@ -43,7 +43,7 @@ export const createSourceCreateTool = ({
 }: SourceToolDeps & {
   maintenanceService: MaintenanceStateReader;
 }): BuiltinToolDefinition<typeof sourceCreateSchema> => ({
-  id: SIGNIFICANT_EVENTS_SOURCE_CREATE_TOOL_ID,
+  id: NIGHTSHIFT_SOURCE_CREATE_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
     Create a Nightshift source in the current space. The query is validated and run as the current

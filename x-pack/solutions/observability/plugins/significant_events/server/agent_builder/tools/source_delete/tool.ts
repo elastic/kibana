@@ -15,7 +15,7 @@ import { resolveSource } from '../../utils/resolve_source_slugs';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { runSourceTool } from '../sources/run_source_tool';
 import type { SourceToolDeps } from '../sources/source_tool_deps';
-import { SIGNIFICANT_EVENTS_SOURCE_DELETE_TOOL_ID } from '../tool_ids';
+import { NIGHTSHIFT_SOURCE_DELETE_TOOL_ID } from '../tool_ids';
 
 const sourceDeleteSchema = lazySchema(() =>
   z.object({
@@ -28,7 +28,7 @@ export const createSourceDeleteTool = ({
   server,
   logger,
 }: SourceToolDeps): BuiltinToolDefinition<typeof sourceDeleteSchema> => ({
-  id: SIGNIFICANT_EVENTS_SOURCE_DELETE_TOOL_ID,
+  id: NIGHTSHIFT_SOURCE_DELETE_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
     Delete a Nightshift source of the current space. This cannot be undone. It deletes the source's

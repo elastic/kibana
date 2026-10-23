@@ -24,7 +24,7 @@ import { SOURCE_ESQL_RULES } from '../sources/source_esql_rules';
 import type { MaintenanceStateReader, SourceToolDeps } from '../sources/source_tool_deps';
 import { toSourceSummary } from '../sources/source_summary';
 import { formatSourceToolError } from '../sources/source_tool_error';
-import { SIGNIFICANT_EVENTS_SOURCE_UPDATE_TOOL_ID } from '../tool_ids';
+import { NIGHTSHIFT_SOURCE_UPDATE_TOOL_ID } from '../tool_ids';
 
 const sourceUpdateSchema = lazySchema(() => {
   const { shape } = updateSourceRequestSchema;
@@ -62,7 +62,7 @@ export const createSourceUpdateTool = ({
 }: SourceToolDeps & {
   maintenanceService: MaintenanceStateReader;
 }): BuiltinToolDefinition<typeof sourceUpdateSchema> => ({
-  id: SIGNIFICANT_EVENTS_SOURCE_UPDATE_TOOL_ID,
+  id: NIGHTSHIFT_SOURCE_UPDATE_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
     Change a Nightshift source of the current space. Pass only the fields to change: omitted fields
