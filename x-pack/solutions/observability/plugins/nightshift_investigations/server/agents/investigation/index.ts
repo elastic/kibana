@@ -79,9 +79,9 @@ export interface InvestigationAgentTypeOptions {
   memoryEnabled?: boolean;
   decisionTreesEnabled?: boolean;
   /** The agentic investigations plugin is enabled, so its tools are registered. */
-  investigationToolsEnabled: boolean;
+  investigationToolsEnabled?: boolean;
   /** The proposals plugin is enabled, so `proposals.create` is registered. */
-  proposalsEnabled: boolean;
+  proposalsEnabled?: boolean;
   telemetryConnectorId?: string;
   /** Resolves the space's custom context block, appended to the instructions on every run. */
   getCustomContextInstructions?: (ctx: AgentConfigContext) => Promise<string>;
