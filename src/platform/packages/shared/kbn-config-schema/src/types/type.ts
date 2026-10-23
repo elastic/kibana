@@ -135,7 +135,6 @@ export const setLazyConfigSchemaDisabled = (value: boolean): void => {
   lazyDisabled = value;
 };
 
-const internalSchemaCache = new WeakMap<Type<any>, WeakRef<Schema>>();
 const strongSchemaCache = new WeakMap<Type<any>, Schema>();
 
 export abstract class Type<V> {
@@ -163,7 +162,7 @@ export abstract class Type<V> {
   }
 
   protected get internalSchema(): Schema {
-    const cached = strongSchemaCache.get(this) ?? internalSchemaCache.get(this)?.deref();
+    const cached = strongSchemaCache.get(this);
     if (cached) {
       return cached;
     }
@@ -215,11 +214,7 @@ export abstract class Type<V> {
       schema = schema.error(([error]) => this.onError(error));
     }
 
-    if (lazyDisabled) {
-      strongSchemaCache.set(this, schema);
-    } else {
-      internalSchemaCache.set(this, new WeakRef(schema));
-    }
+    strongSchemaCache.set(this, schema);
     return schema;
   }
 
