@@ -31,13 +31,14 @@ const SOURCE = 'logs-app';
 
 function makeReader(): {
   reader: IndicatorReader;
+  revisionReader: RevisionReader;
   runEsql: jest.Mock;
 } {
   const runEsql = executeAndDecodeSource as jest.Mock;
   const logger = loggerMock.create();
   const revisionReader = new RevisionReader({} as ElasticsearchClient, logger, SPACE);
   const reader = new IndicatorReader(revisionReader);
-  return { reader, runEsql };
+  return { reader, revisionReader, runEsql };
 }
 
 function createQueryDoc(
@@ -151,6 +152,17 @@ describe('IndicatorReader overview counts', () => {
 });
 
 describe('IndicatorReader space scoping', () => {
+  it('retains the Elasticsearch IDs of the selected latest revisions', async () => {
+    const { revisionReader, runEsql } = makeReader();
+    const doc = createQueryDoc();
+    runEsql.mockResolvedValueOnce({ hits: [doc], esIds: ['latest-es-id'] });
+
+    await expect(revisionReader.fetchLatestRevisionEntries()).resolves.toEqual([
+      { esId: 'latest-es-id', doc },
+    ]);
+    expect(capturedQueryString(runEsql)).toContain('KEEP _id, _source');
+  });
+
   it('filters every read by the client space with no IS NULL fallback', async () => {
     const { reader, runEsql } = makeReader();
     runEsql.mockResolvedValueOnce({ hits: [] });
@@ -267,6 +279,52 @@ describe('IndicatorReader.getFeatures', () => {
     expect(query).toContain('"payment"');
     expect(query).toContain('feature.type');
     expect(query).toContain('"entity"');
+  });
+});
+
+describe('IndicatorReader.getFeatureSourcesBySlug', () => {
+  const featureDoc = (sourceId: string, slug: string) => ({
+    '@timestamp': '2026-01-01T00:00:00.000Z',
+    id: `${sourceId}-${slug}`,
+    type: KI_TYPE_FEATURE,
+    'source.id': sourceId,
+    title: slug,
+    description: slug,
+    feature: { slug, type: 'technology', subtype: 'cache', properties: {}, confidence: 90 },
+  });
+
+  it('groups active latest holders by slug', async () => {
+    const { reader, runEsql } = makeReader();
+    runEsql.mockResolvedValueOnce({
+      hits: [
+        featureDoc('src-a', 'redis'),
+        featureDoc('src-b', 'redis'),
+        featureDoc('src-b', 'redis'),
+        featureDoc('src-c', 'kafka'),
+      ],
+    });
+
+    const holders = await reader.getFeatureSourcesBySlug(
+      ['src-a', 'src-b', 'src-c'],
+      'technology',
+      ['redis', 'kafka']
+    );
+
+    expect(holders).toEqual(
+      new Map([
+        ['redis', ['src-a', 'src-b']],
+        ['kafka', ['src-c']],
+      ])
+    );
+    const query = capturedQueryString(runEsql);
+    expect(query).toContain('`source.id` IN ("src-a", "src-b", "src-c")');
+    expect(query).toContain('(excluded IS NULL OR excluded == FALSE)');
+    expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);
+    const grouping = query.indexOf('INLINE STATS');
+    expect(query.indexOf('`source.id` IN ("src-a", "src-b", "src-c")')).toBeLessThan(grouping);
+    expect(query.indexOf('`feature.slug` IN ("redis", "kafka")')).toBeGreaterThan(grouping);
+    expect(query.indexOf('`feature.type` IN ("technology")')).toBeGreaterThan(grouping);
+    expect(query.indexOf('deleted IS NULL')).toBeGreaterThan(grouping);
   });
 });
 
