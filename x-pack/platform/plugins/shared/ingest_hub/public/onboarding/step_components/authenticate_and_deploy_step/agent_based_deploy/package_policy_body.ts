@@ -13,7 +13,7 @@ import type { PackageInputEntry, AgentCredentialVars } from '../package_inputs';
 import { REGION_FIELD_NAMES } from '../../service_settings_step/field_config';
 import type { DeployGroup } from '../deploy_groups';
 import type { SecretRefValue } from '../secret_refs';
-import { buildGroupPolicyNameStem } from '../deploy_group_helpers';
+import { buildGroupPolicyNameStem, deriveGroupPolicyName } from '../deploy_group_helpers';
 
 export interface BuildPackagePolicyOpts {
   namespace: string;
@@ -22,6 +22,9 @@ export interface BuildPackagePolicyOpts {
   authenticateAndDeployStep: AuthenticateAndDeployStepState;
   pkgVersion: string;
   agentCredentials?: AgentCredentialVars;
+  /** Integration name as entered in step 2; the policy name is derived from it. */
+  integrationName?: string;
+  description?: string;
 }
 
 export interface PkgInfo {
@@ -40,8 +43,14 @@ export interface PkgInfo {
  * - Bundled originals (isDuplicateGroup: false): named after the package (e.g. "aws-logs").
  *   Date.now() suffix prevents cross-session name collisions (Fleet enforces unique names).
  * - Duplicates (isDuplicateGroup: true): named after the instance name the user typed.
+ *
+ * With an integration name, `deriveGroupPolicyName` decides instead and the Date.now() suffix is
+ * dropped.
  */
-export function buildPackagePolicyName(group: DeployGroup): string {
+export function buildPackagePolicyName(group: DeployGroup, integrationName?: string): string {
+  const derived = deriveGroupPolicyName(group, integrationName);
+  if (derived) return derived;
+  // Without an integration name (sessions that predate the field), keep the generated name.
   if (group.isDuplicateGroup) {
     const { instance } = group.members[0];
     const safe = instance.name.slice(0, 60).replace(/[^a-zA-Z0-9_\-. ]/g, '_');
@@ -186,6 +195,7 @@ export async function buildGroupPackagePolicy(
   opts: BuildPackagePolicyOpts
 ): Promise<{
   name: string;
+  description?: string;
   package: { name: string; version: string };
   namespace?: string;
   vars?: Record<string, string | SecretRefValue>;
@@ -199,7 +209,10 @@ export async function buildGroupPackagePolicy(
     authenticateAndDeployStep,
     pkgVersion,
     agentCredentials,
+    integrationName,
+    description,
   } = opts;
+  const descriptionField = description?.trim() ? { description: description.trim() } : {};
 
   // Build serviceVarsMap for all members. Key by service.id for buildPackageInputs.
   // Look up vars by instanceId first; fall back to serviceId for sessions predating instance keying.
@@ -276,7 +289,8 @@ export async function buildGroupPackagePolicy(
       const servicePts = members.map(({ service }) => service.policyTemplate ?? service.id);
       const disabledOtherInputs = buildDisabledInputsForOtherTemplates(pkgInfo, servicePts);
       return {
-        name: buildPackagePolicyName(group),
+        name: buildPackagePolicyName(group, integrationName),
+        ...descriptionField,
         package: { name: firstService.packageName, version: pkgVersion },
         ...(group.namespace ? { namespace: group.namespace } : {}),
         ...(vars ? { vars } : {}),
@@ -300,7 +314,8 @@ export async function buildGroupPackagePolicy(
   const disabledOtherInputs = buildDisabledInputsForOtherTemplates(pkgInfo, servicePts);
 
   return {
-    name: buildPackagePolicyName(group),
+    name: buildPackagePolicyName(group, integrationName),
+    ...descriptionField,
     package: { name: firstService.packageName, version: pkgVersion },
     ...(group.namespace ? { namespace: group.namespace } : {}),
     ...(vars ? { vars } : {}),
