@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 
-import { ConnectorStatus, CRAWLER_SERVICE_TYPE, SyncStatus } from '@kbn/search-connectors';
+import { ConnectorStatus, CRAWLER_SERVICE_TYPE, SyncStatus } from '@kbn/search-connectors/server';
 
 export const getOrphanedJobsCountQuery = (ids: string[], isCrawler?: boolean) => {
   if (isCrawler === undefined) {

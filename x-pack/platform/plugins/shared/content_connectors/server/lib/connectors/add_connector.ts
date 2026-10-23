@@ -7,14 +7,14 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-import type { Connector } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors/server';
 import {
   createConnector,
   ConnectorStatus,
   deleteConnectorById,
   fetchConnectorByIndexName,
   NATIVE_CONNECTOR_DEFINITIONS,
-} from '@kbn/search-connectors';
+} from '@kbn/search-connectors/server';
 
 import {
   DEFAULT_PIPELINE_VALUES,

@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IngestPipelineParams } from '@kbn/search-connectors';
+import type { IngestPipelineParams } from '@kbn/search-connectors/server';
 import {
   createConnector,
   deleteConnectorById,
@@ -20,7 +20,7 @@ import {
   updateConnectorNameAndDescription,
   updateConnectorScheduling,
   updateConnectorServiceType,
-} from '@kbn/search-connectors';
+} from '@kbn/search-connectors/server';
 import { DEFAULT_INGESTION_PIPELINE } from '../../common';
 import type { RouteDependencies } from '../plugin';
 import { errorHandler } from '../utils/error_handler';

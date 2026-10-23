@@ -14,17 +14,17 @@ import { schema } from '@kbn/config-schema';
 
 import { i18n } from '@kbn/i18n';
 
-import type { Connector } from '@kbn/search-connectors';
+import {
+  fetchConnectorByIndexName,
+  fetchConnectors,
+} from '@kbn/search-connectors/lib/fetch_connectors';
+import type { Connector } from '@kbn/search-connectors/server';
 import {
   CRAWLER_SERVICE_TYPE,
   deleteConnectorSecret,
   deleteConnectorById,
   updateConnectorIndexName,
-} from '@kbn/search-connectors';
-import {
-  fetchConnectorByIndexName,
-  fetchConnectors,
-} from '@kbn/search-connectors/lib/fetch_connectors';
+} from '@kbn/search-connectors/server';
 
 import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';

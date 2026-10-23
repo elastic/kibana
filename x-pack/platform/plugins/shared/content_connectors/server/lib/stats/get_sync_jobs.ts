@@ -7,7 +7,7 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX } from '@kbn/search-connectors';
+import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX } from '@kbn/search-connectors/server';
 
 import type { SyncJobsStats } from '../../../common/stats';
 

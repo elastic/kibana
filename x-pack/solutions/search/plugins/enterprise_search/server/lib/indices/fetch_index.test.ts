@@ -8,11 +8,11 @@
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 
-import { fetchConnectorByIndexName } from '@kbn/search-connectors';
+import { fetchConnectorByIndexName } from '@kbn/search-connectors/server';
 
 import { fetchIndex } from './fetch_index';
 
-jest.mock('@kbn/search-connectors', () => ({
+jest.mock('@kbn/search-connectors/server', () => ({
   SyncStatus: {
     CANCELED: 'canceled',
     CANCELING: 'canceling',
