@@ -158,6 +158,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickNewVisualization() {
+    await this.waitForListingToSettle();
     await this.appMenu.clickMenuItem('newItemButton');
     await this.waitForGroupsSelectPage();
   }
@@ -247,7 +248,6 @@ export class VisualizePageObject extends FtrService {
   ) {
     await this.gotoVisualizationLandingPage(options);
     await this.header.waitUntilLoadingHasFinished();
-    await this.waitForListingToSettle();
     await this.clickNewVisualization();
     await this.waitForGroupsSelectPage();
   }
@@ -255,7 +255,6 @@ export class VisualizePageObject extends FtrService {
   public async navigateToNewAggBasedVisualization() {
     await this.gotoVisualizationLandingPage();
     await this.header.waitUntilLoadingHasFinished();
-    await this.waitForListingToSettle();
     await this.clickNewVisualization();
     await this.clickAggBasedVisualizations();
     await this.waitForVisualizationSelectPage();
