@@ -85,8 +85,32 @@ describe('VegaPlugin', () => {
     return { core, embeddable, expressions, plugin, startCore, startDeps, visualizations };
   };
 
+  const startSetUpPlugin = (
+    setupResult: ReturnType<typeof setup>,
+    isLibraryApiEnabled: boolean
+  ) => {
+    setupResult.startCore.featureFlags.getBooleanValue$ = jest
+      .fn()
+      .mockImplementation(
+        (flag: string) => new BehaviorSubject(isLibraryApiEnabled && flag === VEGA_API_ENABLED_FLAG)
+      );
+    setupResult.plugin.start(setupResult.startCore, {
+      data: dataPluginMock.createStartContract(),
+      dataViews: dataViewPluginMocks.createStartContract(),
+      embeddable: embeddablePluginMock.createStartContract(),
+      expressions: expressionsPluginMock.createStartContract(),
+      inspector: inspectorPluginMock.createStartContract(),
+      uiActions: uiActionsPluginMock.createStartContract(),
+      unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+      mapsEms: {} as MapsEmsPluginPublicStart,
+      usageCollection: {} as UsageCollectionStart,
+    });
+  };
+
   it('registers the Vega embeddable definition', async () => {
-    const { embeddable } = setup();
+    const setupResult = setup();
+    const { embeddable } = setupResult;
+    startSetUpPlugin(setupResult, false);
     const embeddableLoader = jest.mocked(embeddable.registerEmbeddablePublicDefinition).mock
       .calls[0][1];
 
@@ -111,23 +135,7 @@ describe('VegaPlugin', () => {
   describe('Vega library', () => {
     const startPluginWithLibraryApi = async (isLibraryApiEnabled: boolean) => {
       const setupResult = setup();
-      setupResult.startCore.featureFlags.getBooleanValue$ = jest
-        .fn()
-        .mockImplementation(
-          (flag: string) =>
-            new BehaviorSubject(isLibraryApiEnabled && flag === VEGA_API_ENABLED_FLAG)
-        );
-      setupResult.plugin.start(setupResult.startCore, {
-        data: dataPluginMock.createStartContract(),
-        dataViews: dataViewPluginMocks.createStartContract(),
-        embeddable: embeddablePluginMock.createStartContract(),
-        expressions: expressionsPluginMock.createStartContract(),
-        inspector: inspectorPluginMock.createStartContract(),
-        uiActions: uiActionsPluginMock.createStartContract(),
-        unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-        mapsEms: {} as MapsEmsPluginPublicStart,
-        usageCollection: {} as UsageCollectionStart,
-      });
+      startSetUpPlugin(setupResult, isLibraryApiEnabled);
       // The alias waits for the feature flag.
       await Promise.resolve();
       return setupResult;

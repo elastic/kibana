@@ -7,7 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { distinctUntilChanged, firstValueFrom, type Subscription } from 'rxjs';
+import {
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  firstValueFrom,
+  map,
+  ReplaySubject,
+  take,
+  type Subscription,
+} from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
@@ -62,18 +71,6 @@ import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './const
 import { getVegaVisualizationClient } from './library/vega_library_client';
 import { VegaIcon, vegaTitleInWizard } from './vega_icon';
 
-/**
- * Whether dashboard panels can use Vega library items: both the standalone embeddable and the
- * library API must be enabled. Read once, so the panel library actions match the server schema.
- */
-const isLibraryEnabled = async ({ featureFlags }: Pick<CoreStart, 'featureFlags'>) => {
-  const [standaloneEmbeddableEnabled, apiEnabled] = await Promise.all([
-    firstValueFrom(featureFlags.getBooleanValue$(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)),
-    firstValueFrom(featureFlags.getBooleanValue$(VEGA_API_ENABLED_FLAG, false)),
-  ]);
-  return standaloneEmbeddableEnabled && apiEnabled;
-};
-
 /** @internal */
 export interface VegaVisualizationDependencies {
   core: CoreSetup;
@@ -110,6 +107,14 @@ export interface VegaPluginStartDependencies {
 export class VegaPlugin implements Plugin<void, void> {
   initializerContext: PluginInitializerContext<ConfigSchema>;
   private standaloneEmbeddableFlagSubscription?: Subscription;
+  private libraryFlagsSubscription?: Subscription;
+  private libraryAliasSubscription?: Subscription;
+  private addFromLibrarySubscription?: Subscription;
+  /**
+   * Whether dashboard panels can use Vega library items: both the standalone embeddable and the
+   * library API must be enabled. Emits once `start` has read the flags.
+   */
+  private readonly isLibraryEnabled$ = new ReplaySubject<boolean>(1);
   private registerLibraryAlias?: () => void;
   private registerAddFromLibrary?: () => void;
 
@@ -198,7 +203,8 @@ export class VegaPlugin implements Plugin<void, void> {
         SearchBar: startDeps.unifiedSearch.ui.SearchBar,
         visualizationDependencies,
         libraryEditorDependencies: startDeps,
-        isLibraryEnabled: await isLibraryEnabled(startCore),
+        // Taken once per panel, so the panel library actions match the server schema.
+        isLibraryEnabled: await firstValueFrom(this.isLibraryEnabled$),
       });
     });
 
@@ -227,17 +233,29 @@ export class VegaPlugin implements Plugin<void, void> {
     setThemeService(core.theme);
     setUsageCollectionStart(deps.usageCollection);
 
+    const apiEnabled$ = core.featureFlags.getBooleanValue$(VEGA_API_ENABLED_FLAG, false);
+
+    this.libraryFlagsSubscription = combineLatest([
+      core.featureFlags.getBooleanValue$(VEGA_STANDALONE_EMBEDDABLE_FLAG, false),
+      apiEnabled$,
+    ])
+      .pipe(
+        map(
+          ([standaloneEmbeddableEnabled, apiEnabled]) => standaloneEmbeddableEnabled && apiEnabled
+        ),
+        distinctUntilChanged()
+      )
+      .subscribe(this.isLibraryEnabled$);
+
     // Without the flag, the Visualize listing shouldn't query the library API.
-    firstValueFrom(core.featureFlags.getBooleanValue$(VEGA_API_ENABLED_FLAG, false)).then(
-      (isLibraryApiEnabled) => {
-        if (isLibraryApiEnabled) this.registerLibraryAlias?.();
-      }
-    );
+    this.libraryAliasSubscription = apiEnabled$
+      .pipe(filter(Boolean), take(1))
+      .subscribe(() => this.registerLibraryAlias?.());
 
     // Library items can only be added as panels once the standalone embeddable is enabled too.
-    isLibraryEnabled(core).then((enabled) => {
-      if (enabled) this.registerAddFromLibrary?.();
-    });
+    this.addFromLibrarySubscription = this.isLibraryEnabled$
+      .pipe(filter(Boolean), take(1))
+      .subscribe(() => this.registerAddFromLibrary?.());
 
     deps.uiActions.registerActionAsync(ADD_VEGA_PANEL_ACTION_ID, async () => {
       const { getAddVegaPanelAction } = await import('./add_vega_panel_action');
@@ -272,5 +290,8 @@ export class VegaPlugin implements Plugin<void, void> {
 
   public stop() {
     this.standaloneEmbeddableFlagSubscription?.unsubscribe();
+    this.libraryFlagsSubscription?.unsubscribe();
+    this.libraryAliasSubscription?.unsubscribe();
+    this.addFromLibrarySubscription?.unsubscribe();
   }
 }
