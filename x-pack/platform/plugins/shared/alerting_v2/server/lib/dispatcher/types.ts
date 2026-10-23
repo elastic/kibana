@@ -39,6 +39,7 @@ export interface Alert {
   alert_status: AlertEpisodeStatus;
   severity?: AlertEventSeverity;
   data?: AlertData;
+  alert_url: string;
 }
 
 /** Suppression fact read from `.alert-actions`; a null `alert_id` means series-scoped. */
@@ -146,10 +147,7 @@ export interface ActionGroup {
 
 export type ActionPolicyWorkflowPayloadRule = Pick<Rule, 'name'>;
 
-export type ActionPolicyWorkflowPayloadAlert = Alert & {
-  /** Absolute, space-aware URL of the alert details page. */
-  alert_url: string;
-};
+export type ActionPolicyWorkflowPayloadAlert = Alert;
 
 export interface ActionPolicyWorkflowPayload {
   id: ActionGroupId;

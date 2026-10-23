@@ -30,7 +30,6 @@ import type {
 } from '../../services/license_service/license_service';
 import { LicenseServiceToken } from '../../services/license_service/tokens';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
-import { buildAlertDetailsUrl } from '../alert_details_url';
 import { DISPATCH_CHUNK_SIZE } from '../constants';
 import type {
   ActionGroup,
@@ -44,7 +43,7 @@ import type {
 } from '../types';
 import { DispatchOutcome, DispatchPlan, PolicyCatalog } from '../state';
 import { DISPATCH_FAILURE_REASONS, type DispatchFailureReason } from './constants';
-import { KibanaBaseUrlToken, WorkflowsManagementApiToken } from './dispatch_step_tokens';
+import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
 
 const ACTION_POLICY_TRIGGER = 'action_policy';
 
@@ -91,8 +90,7 @@ export class DispatchStep implements DispatcherStep {
   constructor(
     @inject(WorkflowsManagementApiToken)
     private readonly workflowsManagement: WorkflowsServerPluginSetup['management'],
-    @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract,
-    @inject(KibanaBaseUrlToken) private readonly kibanaBaseUrl: string
+    @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract
   ) {}
 
   public async execute(
@@ -354,14 +352,7 @@ export class DispatchStep implements DispatcherStep {
       id: group.id,
       policyId: group.policyId,
       groupKey: group.groupKey,
-      alerts: group.alerts.map((alert) => ({
-        ...alert,
-        alert_url: buildAlertDetailsUrl({
-          baseUrl: this.kibanaBaseUrl,
-          spaceId: alert.space_id,
-          alertId: alert.alert_id,
-        }),
-      })),
+      alerts: group.alerts,
       rules: group.rules,
     };
     const inputs: Record<string, unknown> = { payload };

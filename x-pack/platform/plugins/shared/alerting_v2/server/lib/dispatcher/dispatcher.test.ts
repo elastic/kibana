@@ -47,6 +47,7 @@ import {
   createAlertSuppressionsResponse,
   createLastNotifiedTimestampsResponse,
   createSeriesSuppressionsResponse,
+  type DispatchableAlertEventRow,
 } from './fixtures/dispatcher';
 import {
   createAlert,
@@ -146,7 +147,7 @@ function buildDispatcherService(deps: {
   licenseService?: LicenseServiceContract;
 }): DispatcherService {
   const pipeline = new DispatcherPipeline([
-    new FetchAlertsStep(deps.queryService),
+    new FetchAlertsStep(deps.queryService, MOCK_KIBANA_BASE_URL),
     new FetchSuppressionsStep(deps.queryService),
     new ApplySuppressionStep(),
     new HydrateAlertDataStep(deps.queryService),
@@ -156,11 +157,7 @@ function buildDispatcherService(deps: {
     new EvaluateMatchersStep(),
     new BuildGroupsStep(),
     new ApplyThrottlingStep(deps.queryService),
-    new DispatchStep(
-      deps.workflowsManagement,
-      deps.licenseService ?? createMockLicenseService(),
-      MOCK_KIBANA_BASE_URL
-    ),
+    new DispatchStep(deps.workflowsManagement, deps.licenseService ?? createMockLicenseService()),
     new StoreActionsStep(deps.storageService),
     new StoreExecutionHistoryStep(deps.eventLogService),
   ]);
@@ -219,7 +216,7 @@ describe('DispatcherService', () => {
 
   describe('run', () => {
     it('indexes fire actions for dispatchable alerts when no suppressions exist', async () => {
-      const alerts: Alert[] = [
+      const alerts: DispatchableAlertEventRow[] = [
         {
           last_event_timestamp: '2026-01-22T07:10:00.000Z',
           rule_id: 'rule-1',
@@ -465,7 +462,7 @@ describe('DispatcherService', () => {
       // rule-003: two series (series-1 active, series-2 recovered + new alert) → all fire (no actions)
       // rule-004: two series, both snoozed (null alert_id) → both suppress
       // rule-005: two series, series-1 deactivated → suppress; series-2 no actions → fire
-      const alerts: Alert[] = [
+      const alerts: DispatchableAlertEventRow[] = [
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
           rule_id: 'rule-001',
@@ -750,7 +747,7 @@ describe('DispatcherService', () => {
     it('keeps external alerts isolated per space when a vendor group_hash collides', async () => {
       // The same PagerDuty incident is ingested into two spaces: identical source,
       // group_hash and alert_id. Only space-a has acked it.
-      const externalAlert = (spaceId: string): Alert => ({
+      const externalAlert = (spaceId: string): DispatchableAlertEventRow => ({
         last_event_timestamp: '2026-01-22T07:10:00.000Z',
         rule_id: null,
         source: 'pagerduty',
@@ -826,7 +823,7 @@ describe('DispatcherService', () => {
         matcher: { expression: 'data.severity: "critical"' },
       });
 
-      const alerts: Alert[] = [
+      const alerts: DispatchableAlertEventRow[] = [
         {
           last_event_timestamp: '2026-01-22T07:10:00.000Z',
           rule_id: 'rule-1',

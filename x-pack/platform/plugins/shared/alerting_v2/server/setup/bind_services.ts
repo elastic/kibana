@@ -26,7 +26,7 @@ import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_r
 import { TransitionStrategyToken } from '../lib/director/strategies/types';
 import { getKibanaBaseUrl } from '../lib/dispatcher/kibana_base_url';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
-import { DispatcherServiceInternalToken } from '../lib/dispatcher/tokens';
+import { DispatcherServiceInternalToken, KibanaBaseUrlToken } from '../lib/dispatcher/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
 import { ActionPolicyExecutionHistoryClient } from '../lib/action_policy_execution_history_client';
@@ -119,7 +119,6 @@ import {
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../common/saved_object_types';
 import {
   EncryptedSavedObjectsClientToken,
-  KibanaBaseUrlToken,
   WorkflowsManagementApiToken,
 } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';

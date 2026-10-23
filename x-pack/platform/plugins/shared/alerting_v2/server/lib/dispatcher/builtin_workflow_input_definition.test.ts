@@ -44,8 +44,7 @@ const exampleAlert: Required<ActionPolicyWorkflowPayloadAlert> = {
   space_id: 'default',
   group_hash: 'hash-1',
   alert_id: 'alert-1',
-  alert_url:
-    'https://kibana.example.com/app/r?l=ALERTING_V2_EPISODES_LOCATOR&v=9.3.0&lz=<compressed-params>',
+  alert_url: 'https://kibana.example.com/app/observability/alerting/alerts/alert-1',
   alert_status: 'active',
   severity: 'critical',
   data: {},

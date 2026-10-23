@@ -16,6 +16,3 @@ export const EncryptedSavedObjectsClientToken = createToken<EncryptedSavedObject
 export const WorkflowsManagementApiToken = createToken<WorkflowsServerPluginSetup['management']>(
   'alerting_v2.WorkflowsManagementApi'
 );
-
-/** Absolute Kibana URL used to make alert links absolute. */
-export const KibanaBaseUrlToken = createToken<string>('alerting_v2.KibanaBaseUrl');

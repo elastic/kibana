@@ -7,6 +7,7 @@
 
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { buildAlertDetailsUrl } from '../alert_details_url';
 import { DEFAULT_GROUPING } from '../constants';
 import {
   DispatchOutcome,
@@ -136,14 +137,16 @@ export function createDispatcherPipelineState(
 }
 
 export function createAlert(overrides: Partial<Alert> = {}): Alert {
+  const { space_id: spaceId = 'default', alert_id: alertId = 'alert-1' } = overrides;
   return {
     last_event_timestamp: '2026-01-22T07:10:00.000Z',
     rule_id: 'rule-1',
     source: 'internal',
-    space_id: 'default',
+    space_id: spaceId,
     group_hash: 'hash-1',
-    alert_id: 'alert-1',
+    alert_id: alertId,
     alert_status: 'active',
+    alert_url: buildAlertDetailsUrl({ baseUrl: MOCK_KIBANA_BASE_URL, spaceId, alertId }),
     ...overrides,
   };
 }
