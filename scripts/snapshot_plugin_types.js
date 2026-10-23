@@ -7,17 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env/setup_env');
-
-require('@kbn/swc-register').install({ ignore: [/\.(?:js|ts|tsx)$/] });
-require('@babel/register')({
-  extensions: ['.js', '.ts', '.tsx'],
-  presets: [require.resolve('@kbn/babel-preset/node_preset')],
-  babelrc: false,
-  sourceMaps: 'both',
-});
-
-require('@kbn/security-hardening');
+require('@kbn/setup-node-env');
 
 var command = process.argv[2];
 
