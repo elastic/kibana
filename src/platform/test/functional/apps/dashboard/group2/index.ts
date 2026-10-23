@@ -27,6 +27,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     before(loadCurrentData);
 
     loadTestFile(require.resolve('./dashboard_filter_bar'));
-    loadTestFile(require.resolve('./dashboard_filtering'));
   });
 }
