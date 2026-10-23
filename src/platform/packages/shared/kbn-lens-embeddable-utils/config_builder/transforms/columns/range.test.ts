@@ -19,6 +19,9 @@ import {
   LENS_RANGE_DEFAULT_INTERVAL,
 } from '../../schema/constants';
 
+type LensRange = RangeIndexPatternColumn['params']['ranges'][number];
+type ApiRange = LensApiRangeOperation['ranges'][number];
+
 describe('Range Transforms', () => {
   describe('fromRangeOrHistogramLensApiToLensState', () => {
     it('should transform range operation configuration', () => {
@@ -93,6 +96,31 @@ describe('Range Transforms', () => {
       const result = fromRangeOrHistogramLensApiToLensState(input);
       expect(result.params.maxBars).toBe(LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE);
       expect(result.params.includeEmptyRows).toBe(LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT);
+    });
+
+    describe('unbounded ranges', () => {
+      const getStateRanges = (ranges: ApiRange[]) =>
+        fromRangeOrHistogramLensApiToLensState({ operation: 'range', field: 'price', ranges })
+          .params.ranges;
+
+      it.each<[string, ApiRange, LensRange]>([
+        ['no bounds', {}, { from: null, to: null, label: '' }],
+        ['no bounds with a label', { label: 'All' }, { from: null, to: null, label: 'All' }],
+        ['no upper bound', { gt: 1000 }, { from: 1000, to: null, label: '' }],
+        ['no lower bound', { lte: 0 }, { from: null, to: 0, label: '' }],
+        ['a 0 lower bound and no upper bound', { gt: 0 }, { from: 0, to: null, label: '' }],
+        ['0 on both sides', { gt: 0, lte: 0 }, { from: 0, to: 0, label: '' }],
+      ])('should store a range with %s', (_, range, expected) => {
+        expect(getStateRanges([range])).toEqual([expected]);
+      });
+
+      it('should keep an unbounded range at its position in the list', () => {
+        expect(getStateRanges([{ gt: 0, lte: 1000 }, { label: 'All' }, { gt: 1000 }])).toEqual([
+          { from: 0, to: 1000, label: '' },
+          { from: null, to: null, label: 'All' },
+          { from: 1000, to: null, label: '' },
+        ]);
+      });
     });
   });
 
@@ -254,8 +282,6 @@ describe('Range Transforms', () => {
     });
 
     describe('unbounded ranges', () => {
-      type LensRange = RangeIndexPatternColumn['params']['ranges'][number];
-
       const getRangeColumn = (ranges: LensRange[]): RangeIndexPatternColumn => ({
         operationType: 'range',
         dataType: 'string',
@@ -271,7 +297,7 @@ describe('Range Transforms', () => {
         return result.operation === 'range' ? result.ranges : undefined;
       };
 
-      it.each<[string, LensRange, LensApiRangeOperation['ranges'][number]]>([
+      it.each<[string, LensRange, ApiRange]>([
         ['null on both sides', { from: null, to: null, label: '' }, { label: '' }],
         [
           'null on both sides with a label',
@@ -300,22 +326,54 @@ describe('Range Transforms', () => {
           ])
         ).toEqual([{ gt: 0, lte: 1000, label: '' }, { label: 'All' }, { gt: 1000, label: '' }]);
       });
+    });
+  });
 
-      it('should read an empty API range back as unbounded on both sides', () => {
-        const state = fromRangeOrHistogramLensApiToLensState({
-          operation: 'range',
-          field: 'price',
-          ranges: [{}, { label: 'All' }],
-        });
+  describe('round-trip', () => {
+    const getRangeStateColumn = (ranges: LensRange[]): RangeIndexPatternColumn => ({
+      operationType: 'range',
+      dataType: 'string',
+      sourceField: 'price',
+      customLabel: false,
+      label: '',
+      isBucketed: true,
+      params: {
+        type: 'range',
+        maxBars: 'auto',
+        ranges,
+        format: undefined,
+        parentFormat: { id: 'range', params: { template: 'arrow_right', replaceInfinity: true } },
+      },
+    });
 
-        expect(state.params.ranges).toEqual([
-          { from: null, to: null, label: '' },
+    it('should convert unbounded ranges from lens state to API and back', () => {
+      const original = getRangeStateColumn([
+        { from: 0, to: 1000, label: '' },
+        { from: 1000, to: null, label: '' },
+        { from: null, to: 0, label: '' },
+        { from: null, to: null, label: '' },
+        { from: null, to: null, label: 'All' },
+      ]);
+
+      const api = fromRangeOrHistogramLensStateToAPI(original);
+      expect(fromRangeOrHistogramLensApiToLensState(api)).toEqual(original);
+    });
+
+    it('should store infinite editor bounds as null after converting to API and back', () => {
+      const original = getRangeStateColumn([
+        { from: 1000, to: Infinity, label: '' },
+        { from: -Infinity, to: 0, label: '' },
+        { from: -Infinity, to: Infinity, label: 'All' },
+      ]);
+
+      const api = fromRangeOrHistogramLensStateToAPI(original);
+      expect(fromRangeOrHistogramLensApiToLensState(api)).toEqual(
+        getRangeStateColumn([
+          { from: 1000, to: null, label: '' },
+          { from: null, to: 0, label: '' },
           { from: null, to: null, label: 'All' },
-        ]);
-        expect(fromRangeOrHistogramLensStateToAPI(state)).toMatchObject({
-          ranges: [{ label: '' }, { label: 'All' }],
-        });
-      });
+        ])
+      );
     });
   });
 });
