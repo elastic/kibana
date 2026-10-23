@@ -10,7 +10,14 @@ import {
   createTriggerFormValues,
   type TriggerFormValues,
 } from './automation_form_values';
-import { canSaveAutomation, getSaveBlocker, isTriggerValid, isValidDailyLimit } from './validation';
+import {
+  canSaveAutomation,
+  getSaveBlocker,
+  getSelectedChannels,
+  isTriggerValid,
+  isValidDailyLimit,
+  validationLabels,
+} from './validation';
 
 const everyTrigger = (overrides: Partial<Extract<TriggerFormValues, { kind: 'every' }>> = {}) => ({
   ...(createTriggerFormValues('every') as Extract<TriggerFormValues, { kind: 'every' }>),
@@ -101,5 +108,47 @@ describe('automation validation', () => {
         })
       ).toBe(false);
     });
+  });
+});
+
+describe('private channel validation', () => {
+  const slackValues = (channels: string[]) => ({
+    ...createAutomationFormValues(),
+    trigger: {
+      ...(createTriggerFormValues('slack_message') as Extract<
+        TriggerFormValues,
+        { kind: 'slack_message' }
+      >),
+      channels,
+    },
+  });
+  const privateChannels = new Set(['G1']);
+
+  it('collects trigger channels and channel destinations', () => {
+    expect(
+      getSelectedChannels({
+        ...slackValues(['C1']),
+        slackAction: { target: 'channel', destination: 'C2' },
+      })
+    ).toEqual(['C1', 'C2']);
+  });
+
+  it('blocks saving a private trigger channel', () => {
+    expect(getSaveBlocker(slackValues(['C1', 'G1']), privateChannels)).toBe(
+      validationLabels.privateChannels
+    );
+    expect(canSaveAutomation(slackValues(['G1']), privateChannels)).toBe(false);
+  });
+
+  it('blocks saving a private channel destination', () => {
+    const values = {
+      ...slackValues(['C1']),
+      slackAction: { target: 'channel' as const, destination: 'G1' },
+    };
+    expect(getSaveBlocker(values, privateChannels)).toBe(validationLabels.privateChannels);
+  });
+
+  it('allows other channels', () => {
+    expect(getSaveBlocker(slackValues(['C1']), privateChannels)).toBeUndefined();
   });
 });

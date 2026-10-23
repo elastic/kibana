@@ -1341,14 +1341,21 @@ describe('SlackAppService', () => {
         bindings: [
           { scope_type: 'SUB', scope_id: 'C123', display_name: 'general', visibility: 'public' },
           { scope_type: 'SUB', scope_id: 'C456' }, // no persisted display snapshot
+          { scope_type: 'SUB', scope_id: 'G789', visibility: 'private' },
         ],
         nextCursor: 'cursor-2',
       });
 
       await expect(new SlackAppService(server).listBindings(request)).resolves.toEqual({
         bindings: [
-          { channel: 'C123', displayName: 'general', status: 'bound_to_self' },
+          {
+            channel: 'C123',
+            displayName: 'general',
+            visibility: 'public',
+            status: 'bound_to_self',
+          },
           { channel: 'C456', status: 'bound_to_self' },
+          { channel: 'G789', visibility: 'private', status: 'bound_to_self' },
         ],
         nextCursor: 'cursor-2',
       });
@@ -1388,6 +1395,52 @@ describe('SlackAppService', () => {
       await expect(new SlackAppService(server).listBindings(request)).resolves.toEqual({
         bindings: [{ channel: 'C123', displayName: 'general', status: 'bound_to_self' }],
         nextCursor: undefined,
+      });
+    });
+
+    describe('findPrivateChannels', () => {
+      const connected = {
+        attributes: { status: RELAY_APP_CONNECTION_STATUS.connected, tenantKey: 'tenant-A' },
+      };
+
+      it('returns the requested channels bound as private, across pages', async () => {
+        const { server, soClient } = createHarnessWithListBindings();
+        soClient.get.mockResolvedValue(connected);
+        listBindings
+          .mockResolvedValueOnce({
+            bindings: [
+              { scope_type: 'SUB', scope_id: 'C1', visibility: 'public', display_name: 'a' },
+            ],
+            nextCursor: 'next',
+          })
+          .mockResolvedValueOnce({
+            bindings: [
+              { scope_type: 'SUB', scope_id: 'C2', visibility: 'private' },
+              { scope_type: 'SUB', scope_id: 'C3', visibility: 'private' },
+            ],
+            nextCursor: undefined,
+          });
+
+        await expect(
+          new SlackAppService(server).findPrivateChannels(request, ['C1', 'C2', 'C9'])
+        ).resolves.toEqual(['C2']);
+      });
+
+      it('skips the Relay when no channels are given', async () => {
+        const { server } = createHarnessWithListBindings();
+        await expect(new SlackAppService(server).findPrivateChannels(request, [])).resolves.toEqual(
+          []
+        );
+        expect(listBindings).not.toHaveBeenCalled();
+      });
+
+      it('propagates Relay failures so callers fail closed', async () => {
+        const { server, soClient } = createHarnessWithListBindings();
+        soClient.get.mockResolvedValue(connected);
+        listBindings.mockRejectedValue(new Error('boom'));
+        await expect(
+          new SlackAppService(server).findPrivateChannels(request, ['C1'])
+        ).rejects.toThrow('boom');
       });
     });
 

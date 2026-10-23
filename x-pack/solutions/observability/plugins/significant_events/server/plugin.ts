@@ -193,6 +193,15 @@ export class SignificantEventsPlugin
       });
     });
 
+    plugins.nightshiftInvestigations?.registerSlackChannelEligibility(
+      async (request, channelIds) => {
+        if (!this.server) {
+          throw new Error('Significant Events services are unavailable');
+        }
+        return new SlackAppService(this.server).findPrivateChannels(request, channelIds);
+      }
+    );
+
     core.dataStreams.registerDataStream(detectionsDataStream);
     core.dataStreams.registerDataStream(knowledgeIndicatorsDataStream);
 

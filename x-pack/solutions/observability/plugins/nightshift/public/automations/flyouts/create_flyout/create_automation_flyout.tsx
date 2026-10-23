@@ -25,6 +25,7 @@ import { AutomationFormBody } from '../form/automation_form_body';
 import { AutomationFlyoutFooter } from './automation_flyout_footer';
 import { toAutomationRequestBody } from '../form/to_automation_request';
 import { canSaveAutomation, getSaveBlocker, isTriggerValid } from '../form/validation';
+import { usePrivateChannelIds } from '../form/use_private_channel_ids';
 
 const labels = {
   untitled: i18n.translate('xpack.nightshift.automations.flyout.untitled', {
@@ -84,8 +85,9 @@ export const CreateAutomationFlyout = ({
   const update = (changes: Partial<AutomationFormValues>) =>
     setValues((current) => ({ ...current, ...changes }));
   const isDirty = JSON.stringify(values) !== JSON.stringify(initialValues);
-  const saveBlocker = getSaveBlocker(values);
-  const canSave = isDirty && canSaveAutomation(values);
+  const privateChannelIds = usePrivateChannelIds();
+  const saveBlocker = getSaveBlocker(values, privateChannelIds);
+  const canSave = isDirty && canSaveAutomation(values, privateChannelIds);
 
   const requestClose = () => (isDirty ? setIsDiscardOpen(true) : onClose());
 

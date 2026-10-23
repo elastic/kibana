@@ -12,6 +12,7 @@ import { createNightshiftInvestigationsServerRoute } from '../create_server_rout
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import { automationCompletionSchema, promptTemplateSchema } from '../../lib/automations/schemas';
 import { generateWorkflowYaml } from '../../lib/automations/generate_workflow_yaml';
+import { assertSlackChannelsEligible } from '../../lib/automations/assert_slack_channels_eligible';
 import { validateScheduledAutomation } from '../../lib/automations/validate_scheduled_automation';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 import { triggerRowSchema } from './trigger_row_schema';
@@ -64,7 +65,14 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
         .optional(),
     }),
   }),
-  handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
+  handler: async ({
+    request,
+    params,
+    getAutomationsSoClient,
+    getWorkflowsManagement,
+    getSlackChannelEligibility,
+    context,
+  }) => {
     const workflowsManagement = getWorkflowsManagement();
     if (!workflowsManagement) {
       throw serverUnavailable('Workflows management is not available');
@@ -98,6 +106,14 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     merged.completions = completions.data;
 
     validateScheduledAutomation(merged);
+    // Disabling or renaming must stay possible for an automation that already holds a private channel.
+    if (body.trigger || body.completions || body.isEnabled === true) {
+      await assertSlackChannelsEligible({
+        request,
+        automation: merged,
+        checkEligibility: getSlackChannelEligibility?.(),
+      });
+    }
 
     // Update the workflow first — if it fails, the SO is left unchanged so reads stay consistent.
     if (existing.attributes.workflowId) {

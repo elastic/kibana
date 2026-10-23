@@ -202,11 +202,13 @@ describe('formatChannelValue', () => {
   const bindings = [
     { channel: 'C1', displayName: 'alerts', status: 'bound_to_self' as const },
     { channel: 'C9', status: 'bound_to_self' as const },
+    { channel: 'G7', visibility: 'private' as const, status: 'bound_to_self' as const },
   ];
 
   it.each([
     ['C1', '#alerts'],
     ['C9', 'C9'],
+    ['G7', 'Private · G7'],
     ['#legacy', '#legacy'],
   ])('labels %s as %s', (value, label) => {
     expect(formatChannelValue(value, bindings)).toBe(label);
@@ -244,8 +246,15 @@ describe('useBindChannel', () => {
     );
   });
 
-  it('shows an error toast when bind fails', async () => {
-    httpPost.mockRejectedValue(new Error('conflict'));
+  it.each([
+    ['not_a_member', 'not_a_member'],
+    ['private_channel_access_required', 'private_channel_access_required'],
+    ['channel_taken', 'channel_taken'],
+    ['something_new', 'other'],
+  ])('exposes a %s rejection as the %s failure instead of a toast', async (sent, expected) => {
+    httpPost.mockRejectedValue({
+      body: { message: 'Elastic is not in this channel.', attributes: { data: { reason: sent } } },
+    });
     const { wrapper } = createSetup();
     const { result } = renderHook(() => useBindChannel(), { wrapper });
 
@@ -253,27 +262,16 @@ describe('useBindChannel', () => {
       await result.current.bind('C123').catch(() => {});
     });
 
-    expect(addError).toHaveBeenCalledWith(
-      expect.any(Error),
-      expect.objectContaining({ title: expect.stringContaining('bind') })
-    );
-  });
-
-  it('surfaces the relay reason from the response body as the toast message', async () => {
-    httpPost.mockRejectedValue(
-      Object.assign(new Error('Conflict'), { body: { message: 'channel already claimed' } })
-    );
-    const { wrapper } = createSetup();
-    const { result } = renderHook(() => useBindChannel(), { wrapper });
-
-    await act(async () => {
-      await result.current.bind('C123').catch(() => {});
+    await flush();
+    expect(result.current.failure).toEqual({
+      reason: expected,
+      message: 'Elastic is not in this channel.',
     });
+    expect(addError).not.toHaveBeenCalled();
 
-    expect(addError).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'channel already claimed' }),
-      expect.any(Object)
-    );
+    act(() => result.current.clearFailure());
+    await flush();
+    expect(result.current.failure).toBeUndefined();
   });
 });
 

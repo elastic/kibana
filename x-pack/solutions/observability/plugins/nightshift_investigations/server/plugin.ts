@@ -99,6 +99,7 @@ import { createSandboxSecretsClient } from './sandbox_secrets';
 import { createCustomContextClient } from './custom_context';
 import type {
   InvestigationQuotaCallback,
+  SlackChannelEligibilityCallback,
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
   NightshiftInvestigationsSetupDeps,
@@ -137,6 +138,7 @@ export class NightshiftInvestigationsPlugin
   private cortexEnabled = false;
   private memoryEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
+  private slackChannelEligibilityCallback?: SlackChannelEligibilityCallback;
   private decisionTreesEnabled = false;
   private assistantEnabled = false;
 
@@ -478,6 +480,7 @@ export class NightshiftInvestigationsPlugin
             this.ruleRegistry?.getRacClientWithRequest(request),
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
+          getSlackChannelEligibility: () => this.slackChannelEligibilityCallback,
           isCortexEnabled: () => this.cortexEnabled,
           sandboxSecretsClient,
           customContextClient,
@@ -537,6 +540,12 @@ export class NightshiftInvestigationsPlugin
           throw new Error('Investigation quota callback is already registered');
         }
         this.investigationQuotaCallback = callback;
+      },
+      registerSlackChannelEligibility: (callback) => {
+        if (this.slackChannelEligibilityCallback) {
+          throw new Error('Slack channel eligibility callback is already registered');
+        }
+        this.slackChannelEligibilityCallback = callback;
       },
     };
   }

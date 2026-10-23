@@ -12,6 +12,8 @@ import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { SlackChannelBinding } from '@kbn/significant-events-plugin/common';
+import { PrivateChannelIcon } from '../../../settings/components/apps_section/channel_label';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
@@ -30,7 +32,25 @@ export const findUnconnectedChannels = (
     ? []
     : values.filter((value) => !bindings.some(({ channel }) => channel === value));
 
+/** Automations can't use private channels yet, so only other channels are offered. */
+export const isAutomationEligibleChannel = ({ visibility }: SlackChannelBinding): boolean =>
+  visibility !== 'private';
+
+export const findPrivateChannels = (
+  values: string[],
+  { bindings }: Pick<UseAllRelayAppBindings, 'bindings'>
+): string[] =>
+  values.filter((value) =>
+    bindings.some(({ channel, visibility }) => channel === value && visibility === 'private')
+  );
+
 const labels = {
+  privateChannels: (channels: string) =>
+    i18n.translate('xpack.nightshift.automations.flyout.slackChannelsPrivate', {
+      defaultMessage:
+        'Private channels aren’t available for automations yet: {channels}. Remove them to save. They still work for @Elastic questions.',
+      values: { channels },
+    }),
   loadError: i18n.translate('xpack.nightshift.automations.flyout.slackChannelsLoadError', {
     defaultMessage: 'Unable to load connected Slack channels.',
   }),
@@ -92,15 +112,21 @@ export const SlackChannelComboBox = ({
   const connected = useAllRelayAppBindings();
   const { bindings, isLoading, isError, isComplete } = connected;
 
-  const options: Array<EuiComboBoxOptionOption<string>> = bindings.map((binding) => ({
-    label: formatChannelLabel(binding),
-    value: binding.channel,
-  }));
-  const selectedOptions = values.map((value) => ({
-    label: formatChannelValue(value, bindings),
-    value,
-  }));
-  const isEmpty = !isLoading && !isError && bindings.length === 0;
+  const options: Array<EuiComboBoxOptionOption<string>> = bindings
+    .filter(isAutomationEligibleChannel)
+    .map((binding) => ({
+      label: formatChannelLabel(binding),
+      value: binding.channel,
+    }));
+  const privateSelected = findPrivateChannels(values, connected);
+  const privateIds = new Set(privateSelected);
+  const selectedOptions: Array<EuiComboBoxOptionOption<string>> = values.map((value) =>
+    privateIds.has(value)
+      ? { label: value, value, prepend: <PrivateChannelIcon /> }
+      : { label: formatChannelValue(value, bindings), value }
+  );
+  const isEmpty =
+    !isLoading && !isError && bindings.filter(isAutomationEligibleChannel).length === 0;
   const unconnected = warnUnconnected ? findUnconnectedChannels(values, connected) : [];
   const isTruncated = !isLoading && !isError && !isComplete;
 
@@ -113,19 +139,23 @@ export const SlackChannelComboBox = ({
         aria-label={ariaLabel}
         placeholder={placeholder}
         isLoading={isLoading}
-        isInvalid={unconnected.length > 0}
+        isInvalid={unconnected.length > 0 || privateSelected.length > 0}
         options={options}
         selectedOptions={selectedOptions}
         singleSelection={singleSelection ? { asPlainText: true } : false}
         onChange={(selected) => onChange(selected.map(({ label, value }) => value ?? label))}
         data-test-subj={testSubject}
       />
-      {(isError || isEmpty || isTruncated || unconnected.length > 0) && (
+      {(isError ||
+        isEmpty ||
+        isTruncated ||
+        unconnected.length > 0 ||
+        privateSelected.length > 0) && (
         <>
           <EuiSpacer size="xs" />
           <EuiText
             size="xs"
-            color={unconnected.length > 0 ? 'danger' : 'subdued'}
+            color={unconnected.length > 0 || privateSelected.length > 0 ? 'danger' : 'subdued'}
             data-test-subj={`${testSubject}Help`}
           >
             {isError && labels.loadError}
@@ -137,6 +167,10 @@ export const SlackChannelComboBox = ({
                 values={{ connectLink: <ConnectChannelsLink testSubject={testSubject} /> }}
               />
             )}
+            {privateSelected.length > 0 &&
+              labels.privateChannels(
+                privateSelected.map((value) => formatChannelValue(value, bindings)).join(', ')
+              )}
             {unconnected.length > 0 &&
               labels.notConnected(
                 unconnected.map((value) => formatChannelValue(value, bindings)).join(', ')

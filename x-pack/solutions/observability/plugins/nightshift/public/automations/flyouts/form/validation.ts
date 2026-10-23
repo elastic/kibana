@@ -43,6 +43,10 @@ export const validationLabels = {
   channelRequired: i18n.translate('xpack.nightshift.automations.flyout.channelRequired', {
     defaultMessage: 'Choose a Slack channel to post to before saving',
   }),
+  privateChannels: i18n.translate('xpack.nightshift.automations.flyout.privateChannelsBlocker', {
+    defaultMessage:
+      'Private channels aren’t available for automations yet. Remove them from the trigger or action to save.',
+  }),
   personRequired: i18n.translate('xpack.nightshift.automations.flyout.personRequired', {
     defaultMessage: 'Choose who to message in Slack before saving',
   }),
@@ -61,7 +65,21 @@ export const isTriggerValid = (trigger?: TriggerFormValues): trigger is TriggerF
   return true;
 };
 
-export const getSaveBlocker = (values: AutomationFormValues): string | undefined => {
+/** Channel ids the form selects, as a Slack trigger channel or a channel destination. */
+export const getSelectedChannels = ({ trigger, slackAction }: AutomationFormValues): string[] => [
+  ...(trigger && isSlackTrigger(trigger) ? trigger.channels : []),
+  ...(slackAction?.target === 'channel' && slackAction.destination
+    ? [slackAction.destination]
+    : []),
+];
+
+export const getSaveBlocker = (
+  values: AutomationFormValues,
+  privateChannels: ReadonlySet<string> = new Set()
+): string | undefined => {
+  if (getSelectedChannels(values).some((channel) => privateChannels.has(channel))) {
+    return validationLabels.privateChannels;
+  }
   if (!values.trigger) return validationLabels.triggerRequired;
   if (values.trigger.kind === 'every') {
     if (!values.instructions.trim()) return validationLabels.instructionsRequired;
@@ -84,7 +102,10 @@ export const getSaveBlocker = (values: AutomationFormValues): string | undefined
   return undefined;
 };
 
-export const canSaveAutomation = (values: AutomationFormValues): boolean =>
+export const canSaveAutomation = (
+  values: AutomationFormValues,
+  privateChannels?: ReadonlySet<string>
+): boolean =>
   isTriggerValid(values.trigger) &&
   isValidDailyLimit(values.dailyDispatchLimit) &&
-  !getSaveBlocker(values);
+  !getSaveBlocker(values, privateChannels);
