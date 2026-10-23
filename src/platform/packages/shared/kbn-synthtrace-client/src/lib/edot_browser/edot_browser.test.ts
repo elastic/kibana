@@ -559,6 +559,12 @@ describe('edotBrowser', () => {
     const eventNames = (docs: ReturnType<typeof createSession>) =>
       docs.map((doc) => ('event_name' in doc ? doc.event_name : undefined));
 
+    it('rejects a site without pages with a descriptive error', () => {
+      expect(() => createSession({ site: { ...SITE, pages: [] } })).toThrow(
+        'Site https://shop.example.com must have at least one page to simulate a session'
+      );
+    });
+
     it('starts with a full page load', () => {
       const docs = createSession({ pageViews: 1 });
       const names = eventNames(docs);

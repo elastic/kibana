@@ -727,6 +727,9 @@ export const session = (options: EdotBrowserSessionOptions): EdotBrowserEvent[] 
     hardNavigationRate = 0.2,
     random = Math.random,
   } = options;
+  if (site.pages.length === 0) {
+    throw new Error(`Site ${site.origin} must have at least one page to simulate a session`);
+  }
   const ctx: SessionContext = {
     client,
     site,
