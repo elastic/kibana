@@ -41,15 +41,24 @@ const esqlVariableSchema = lazySchema(() =>
         ESQLVariableType.FUNCTIONS,
       ]),
     })
-    .strict()
+    .strip()
 );
 
 const timeRangeSchema = lazySchema(() =>
   z
     .object({
-      from: z.string().max(128),
-      to: z.string().max(128),
-      mode: z.enum(['absolute', 'relative']).optional(),
+      from: z.string().max(128).meta({
+        description:
+          'The start of the time range. Accepts date math (for example, now-7d) or an ISO 8601 timestamp.',
+      }),
+      to: z.string().max(128).meta({
+        description:
+          'The end of the time range. Accepts date math (for example, now) or an ISO 8601 timestamp.',
+      }),
+      mode: z.enum(['absolute', 'relative']).optional().meta({
+        description:
+          'Use absolute for fixed timestamps, or relative for date math that is re-evaluated at query time.',
+      }),
     })
     .strict()
 );
@@ -57,23 +66,39 @@ const timeRangeSchema = lazySchema(() =>
 const changePointGridStaticContextSchema = lazySchema(() =>
   z
     .object({
-      filters: z.array(asCodeFilterSchema).max(MAX_FILTERS).optional(),
-      query: asCodeQuerySchema.optional(),
-      esql_variables: z.array(esqlVariableSchema).max(MAX_VARIABLES).optional(),
+      filters: z.array(asCodeFilterSchema).max(MAX_FILTERS).optional().meta({
+        description: 'Filters captured from Discover.',
+      }),
+      query: asCodeQuerySchema.optional().meta({
+        description: 'KQL or Lucene query captured from Discover.',
+      }),
+      esql_variables: z.array(esqlVariableSchema).max(MAX_VARIABLES).optional().meta({
+        description: 'ES|QL variable values captured from Discover.',
+      }),
     })
-    .strict()
+    .strip()
 );
 
 export const changePointGridEmbeddableSchema = lazySchema(() =>
   z
     .object({
       ...serializedTitlesSchema.shape,
-      time_range: timeRangeSchema.optional(),
-      esql: z.string().max(MAX_ESQL_LENGTH),
-      apply_dashboard_context: z.boolean().default(true),
-      static_context: changePointGridStaticContextSchema.optional(),
+      time_range: timeRangeSchema.optional().meta({
+        description: 'Panel time range. When set, it overrides the dashboard time range.',
+      }),
+      esql: z.string().max(MAX_ESQL_LENGTH).meta({
+        description: 'The ES|QL query that detects the change points.',
+      }),
+      apply_dashboard_context: z.boolean().default(true).meta({
+        description:
+          'When true, the panel uses the dashboard filters, query, and ES|QL variables. When false, it uses static_context.',
+      }),
+      static_context: changePointGridStaticContextSchema.optional().meta({
+        description:
+          'Filters, query, and ES|QL variables captured from Discover. Used only when apply_dashboard_context is false.',
+      }),
     })
-    .strict()
+    .strip()
     .meta(BY_VALUE_SCHEMA_META)
 );
 

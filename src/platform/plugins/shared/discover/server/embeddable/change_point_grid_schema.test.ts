@@ -31,7 +31,16 @@ describe('changePointGridEmbeddableSchema', () => {
     ).toBe(true);
   });
 
-  it('rejects an oversized query and unknown fields', () => {
+  it('accepts a static panel with no captured context', () => {
+    expect(
+      changePointGridEmbeddableSchema.safeParse({
+        ...validState,
+        apply_dashboard_context: false,
+      }).success
+    ).toBe(true);
+  });
+
+  it('rejects an oversized query and time range', () => {
     expect(
       changePointGridEmbeddableSchema.safeParse({
         ...validState,
@@ -41,23 +50,32 @@ describe('changePointGridEmbeddableSchema', () => {
     expect(
       changePointGridEmbeddableSchema.safeParse({
         ...validState,
-        series: [],
+        time_range: { from: 'x'.repeat(129), to: 'now' },
       }).success
     ).toBe(false);
   });
 
-  it('accepts a static panel with no captured context and rejects an oversized time range', () => {
-    expect(
-      changePointGridEmbeddableSchema.safeParse({
-        ...validState,
-        apply_dashboard_context: false,
-      }).success
-    ).toBe(true);
-    expect(
-      changePointGridEmbeddableSchema.safeParse({
-        ...validState,
-        time_range: { from: 'x'.repeat(129), to: 'now' },
-      }).success
-    ).toBe(false);
+  it('drops unknown fields added by a later version', () => {
+    const parsed = changePointGridEmbeddableSchema.safeParse({
+      ...validState,
+      series: [],
+      static_context: {
+        extra: true,
+        esql_variables: [
+          { key: 'service', value: 'orders', type: ESQLVariableType.VALUES, extra: true },
+        ],
+      },
+    });
+
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) {
+      return;
+    }
+    expect(parsed.data).toEqual({
+      ...validState,
+      static_context: {
+        esql_variables: [{ key: 'service', value: 'orders', type: ESQLVariableType.VALUES }],
+      },
+    });
   });
 });
