@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, type ReactNode } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { EuiBadge, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -24,6 +24,15 @@ import { ensureLayoutDemoMounted, useLayoutDemoDirection } from './entity_summar
 const badgeStyle = css`
   max-width: 100%;
 `;
+
+const triggerWrapperStyle = css`
+  display: inline-flex;
+  max-width: 100%;
+`;
+
+// Grace period so the pointer can cross the gap between the badge and the popover panel without the
+// popover snapping shut; entering the badge or the panel cancels the pending close.
+const HOVER_CLOSE_DELAY_MS = 150;
 
 export interface EntitySummaryBadgeProps<RawData = unknown> {
   row: DataTableRecord;
@@ -52,7 +61,28 @@ export const EntitySummaryBadge = <RawData,>({
   'data-test-subj': dataTestSubj = 'entitySummaryBadge',
 }: EntitySummaryBadgeProps<RawData>) => {
   const services = useDiscoverServices();
-  const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
+  const [isPopoverOpen, { on: showPopover, off: closePopover }] = useBoolean(false);
+
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelScheduledClose = useCallback(() => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+  }, []);
+
+  const openOnHover = useCallback(() => {
+    cancelScheduledClose();
+    showPopover();
+  }, [cancelScheduledClose, showPopover]);
+
+  const closeOnHoverOut = useCallback(() => {
+    cancelScheduledClose();
+    closeTimeoutRef.current = setTimeout(closePopover, HOVER_CLOSE_DELAY_MS);
+  }, [cancelScheduledClose, closePopover]);
+
+  useEffect(() => cancelScheduledClose, [cancelScheduledClose]);
 
   // TEMPORARY DEMO ONLY — mounts the floating layout toggle and reads its current selection.
   useEffect(() => {
@@ -114,27 +144,29 @@ export const EntitySummaryBadge = <RawData,>({
   };
 
   const trigger = (
-    <EuiBadge
-      color="hollow"
-      css={badgeStyle}
-      onClick={togglePopover}
-      onClickAriaLabel={i18n.translate('discover.entitySummaryBadge.openAriaLabel', {
-        defaultMessage: 'Open summary for {entity}',
-        values: { entity: label },
-      })}
-      data-test-subj={`${dataTestSubj}-badge`}
-    >
-      {triggerIcon ? (
-        iconTooltip ? (
-          <EuiToolTip position="left" content={iconTooltip} repositionOnScroll>
-            {triggerIcon}
-          </EuiToolTip>
-        ) : (
-          triggerIcon
-        )
-      ) : null}{' '}
-      {formattedLabel ?? label}
-    </EuiBadge>
+    <span css={triggerWrapperStyle} onMouseEnter={openOnHover} onMouseLeave={closeOnHoverOut}>
+      <EuiBadge
+        color="hollow"
+        css={badgeStyle}
+        onClick={showPopover}
+        onClickAriaLabel={i18n.translate('discover.entitySummaryBadge.openAriaLabel', {
+          defaultMessage: 'Open summary for {entity}',
+          values: { entity: label },
+        })}
+        data-test-subj={`${dataTestSubj}-badge`}
+      >
+        {triggerIcon ? (
+          iconTooltip ? (
+            <EuiToolTip position="left" content={iconTooltip} repositionOnScroll>
+              {triggerIcon}
+            </EuiToolTip>
+          ) : (
+            triggerIcon
+          )
+        ) : null}{' '}
+        {formattedLabel ?? label}
+      </EuiBadge>
+    </span>
   );
 
   return (
@@ -144,6 +176,7 @@ export const EntitySummaryBadge = <RawData,>({
       closePopover={closePopover}
       anchorPosition="downLeft"
       panelPaddingSize="none"
+      panelProps={{ onMouseEnter: openOnHover, onMouseLeave: closeOnHoverOut }}
       aria-label={i18n.translate('discover.entitySummaryBadge.popoverAriaLabel', {
         defaultMessage: 'Summary for {entity}',
         values: { entity: label },
