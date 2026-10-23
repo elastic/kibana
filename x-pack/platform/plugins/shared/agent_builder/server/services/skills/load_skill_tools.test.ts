@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import { ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { InternalSkillDefinition, SkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -47,7 +48,7 @@ describe('loadSkillTools', () => {
     ctx.skills.convertSkillTool.mockReturnValue(convertedInline);
     ctx.toolProvider.list.mockResolvedValue([registryTool]);
 
-    const ids = await loadSkillTools({
+    const result = await loadSkillTools({
       skill,
       skillsService: ctx.skills,
       toolProvider: ctx.toolProvider,
@@ -57,7 +58,8 @@ describe('loadSkillTools', () => {
       runContext: ctx.runContext,
     });
 
-    expect(ids).toEqual(['inline-1', 'registry-1']);
+    expect(result).toEqual({ loadedToolIds: ['inline-1', 'registry-1'], dynamicTools: [] });
+    expect(ctx.toolManager.addTools).toHaveBeenCalledTimes(1);
     expect(ctx.toolManager.addTools).toHaveBeenCalledWith(
       {
         type: ToolManagerToolType.executable,
@@ -97,7 +99,7 @@ describe('loadSkillTools', () => {
       getRegistryTools: jest.fn().mockReturnValue([]),
     });
 
-    const ids = await loadSkillTools({
+    const result = await loadSkillTools({
       skill,
       skillsService: ctx.skills,
       toolProvider: ctx.toolProvider,
@@ -107,9 +109,105 @@ describe('loadSkillTools', () => {
       runContext: ctx.runContext,
     });
 
-    expect(ids).toEqual([]);
+    expect(result).toEqual({ loadedToolIds: [], dynamicTools: [] });
     expect(ctx.toolManager.addTools).toHaveBeenCalledWith(expect.objectContaining({ tools: [] }), {
       dynamic: true,
+    });
+  });
+
+  describe('with dynamic tools enabled', () => {
+    const inlineSchema = z.object({ query: z.string().describe('What to search for') });
+    const registrySchema = z.object({ id: z.number() });
+
+    const inlineTool = { id: 'inline-1', type: ToolType.builtin } as SkillBoundedTool;
+    const convertedInline = {
+      id: 'inline-1',
+      description: 'Inline tool',
+      getSchema: () => inlineSchema,
+    } as any;
+    const registryTool = {
+      id: 'registry-1',
+      description: 'Registry tool',
+      getSchema: () => registrySchema,
+    } as any;
+
+    let skill: InternalSkillDefinition;
+
+    const dynamicToolsInput = {
+      type: ToolManagerToolType.dynamic,
+      tools: [
+        { ...convertedInline, origin: ToolOrigin.inline },
+        { ...registryTool, origin: ToolOrigin.registry },
+      ],
+    };
+
+    beforeEach(() => {
+      skill = createMockSkill({
+        getInlineTools: jest.fn().mockReturnValue([inlineTool]),
+        getRegistryTools: jest.fn().mockReturnValue(['registry-1']),
+      });
+      ctx.skills.convertSkillTool.mockReturnValue(convertedInline);
+      ctx.toolProvider.list.mockResolvedValue([registryTool]);
+    });
+
+    const load = () =>
+      loadSkillTools({
+        skill,
+        skillsService: ctx.skills,
+        toolProvider: ctx.toolProvider,
+        request: ctx.request,
+        toolManager: ctx.toolManager,
+        logger: ctx.logger,
+        runContext: ctx.runContext,
+        dynamicToolsEnabled: true,
+      });
+
+    it('registers the tools as dynamic tools instead of binding them', async () => {
+      const result = await load();
+
+      expect(ctx.toolManager.addTools).toHaveBeenCalledTimes(1);
+      expect(ctx.toolManager.addTools).toHaveBeenCalledWith(dynamicToolsInput);
+      expect(result.loadedToolIds).toEqual(['inline-1', 'registry-1']);
+      expect(result.dynamicTools).toEqual([
+        {
+          tool_id: 'inline-1',
+          description: 'Inline tool',
+          parameters: expect.objectContaining({
+            type: 'object',
+            properties: {
+              query: expect.objectContaining({ type: 'string', description: 'What to search for' }),
+            },
+            required: ['query'],
+          }),
+        },
+        {
+          tool_id: 'registry-1',
+          description: 'Registry tool',
+          parameters: expect.objectContaining({
+            properties: { id: expect.objectContaining({ type: 'number' }) },
+          }),
+        },
+      ]);
+    });
+
+    it('still reports the full tool count to telemetry', async () => {
+      const analyticsService = { reportSkillInvoked: jest.fn() } as any;
+
+      await loadSkillTools({
+        skill,
+        skillsService: ctx.skills,
+        toolProvider: ctx.toolProvider,
+        request: ctx.request,
+        toolManager: ctx.toolManager,
+        logger: ctx.logger,
+        runContext: ctx.runContext,
+        dynamicToolsEnabled: true,
+        analyticsService,
+      });
+
+      expect(analyticsService.reportSkillInvoked).toHaveBeenCalledWith(
+        expect.objectContaining({ skillId: 'test-skill', toolCount: 2 })
+      );
     });
   });
 });
