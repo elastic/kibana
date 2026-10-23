@@ -143,7 +143,7 @@ Good descriptions make typed actions discoverable and usable by LLMs. Apply desc
    },
    ```
 
-2. **Param-level `.describe()`**: Add `.describe()` to every Zod field in the input schema. This tells the LLM what each parameter means and what values are valid.
+2. **Param-level `.describe()`**: Add `.describe()` to every Zod field in the input schema. This tells the LLM what each parameter means and what values are valid. Take each field's `.max()`/`.min()` from the tool's `inputSchema` returned by `listTools` (`maxLength`, `maxItems`, `minimum`, `maximum`) and from the vendor's API docs, as described in [Take every bound from the vendor](connector-patterns.md#take-every-bound-from-the-vendor).
    ```typescript
    const SearchInputSchema = lazySchema(() =>
      z.object({

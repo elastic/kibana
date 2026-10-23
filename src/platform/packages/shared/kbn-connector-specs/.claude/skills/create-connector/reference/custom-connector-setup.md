@@ -116,6 +116,15 @@ action you plan to implement, find the vendor's official API reference and confi
   zonal) and note which fields are absent or which operations are rejected for each. The AKS connector
   allowed scaling any pool to 0, which AKS rejects for System pools. Check variant-specific constraints
   in the handler before sending the request, and add a test fixture per variant.
+- **Input limits, per field**: for every input field, write down the vendor's documented limit:
+  string length, item count, numeric range, file or payload size (and whether it is stated in bytes or
+  characters), and any limit shared by several fields or by the whole request (e.g. GitHub's 100
+  requested reviewers across users and teams). Look in the endpoint's parameter table, the OpenAPI
+  `maxLength`/`maxItems`/`minimum`/`maximum`, and the vendor's limits or quotas page, and note the URL.
+  Also note the fields for which the vendor documents no limit. These become the `.max()`/`.min()` in
+  the schema, each with its source in a comment; see "Take every bound from the vendor" in
+  [connector-patterns.md](connector-patterns.md#take-every-bound-from-the-vendor). A guessed bound
+  either rejects valid input or lets through input the vendor rejects.
 - **Compound-document / sideloading conventions**: if the vendor's response envelope follows JSON:API
   (`data`/`attributes`/`relationships`/`included`) or a similar sparse-fieldset pattern, check whether
   related objects are populated by default or require an explicit param (e.g. `?include=services,groups`,
