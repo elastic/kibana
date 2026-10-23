@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getNormalizedDataStreams } from '../../../../../../common/services';
+import {
+  dataStreamUsesOtelInput,
+  getNormalizedDataStreams,
+} from '../../../../../../common/services';
+import { OTEL_TEMPLATE_SUFFIX } from '../../../../../../common/constants';
 
 import { installIndexTemplatesAndPipelines } from '../../install_index_template_pipeline';
 import { optimisticallyAddEsAssetReferences } from '../../es_assets_reference';
@@ -76,7 +80,19 @@ export async function stepInstallIndexTemplatePipelines(context: InstallContext)
         const i = ref.id.indexOf('-');
         const dataStreamType = i >= 0 ? ref.id.slice(0, i) : undefined;
         const dataset = i >= 0 ? ref.id.slice(i + 1) : ref.id;
-        return getNormalizedDataStreams(packageInfo, dataset, dataStreamType);
+        // PROTOTYPE: OTel input packages name templates `{type}-{dataset}.otel`. Without stripping
+        // the suffix, an upgrade installs `metrics-nginxreceiver.otel.otel` next to the real one
+        // (found moving nginx_otel_input 0.3.0 -> 0.4.0 on the stack).
+        const otelSuffix = `.${OTEL_TEMPLATE_SUFFIX}`;
+        return getNormalizedDataStreams(packageInfo, dataset, dataStreamType).flatMap((ds) =>
+          dataset.endsWith(otelSuffix) && dataStreamUsesOtelInput(packageInfo, ds)
+            ? getNormalizedDataStreams(
+                packageInfo,
+                dataset.slice(0, -otelSuffix.length),
+                dataStreamType
+              )
+            : [ds]
+        );
       })
       .filter((ds): ds is RegistryDataStream => !!ds.type);
 

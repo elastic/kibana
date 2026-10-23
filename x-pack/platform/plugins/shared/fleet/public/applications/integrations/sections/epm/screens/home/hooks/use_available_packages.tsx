@@ -14,6 +14,7 @@ import type { IntegrationPreferenceType } from '../../../components/integration_
 import { useAgentless } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import {
   useAuthz,
+  useGetIntegrationGroupsQuery,
   useGetPackagesQuery,
   useGetCategoriesQuery,
   useGetAppendCustomIntegrationsQuery,
@@ -31,6 +32,7 @@ import {
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
   filterPolicyTemplatesTiles,
+  getReplacementPackageName,
   shouldAddIntegrationFromCatalog,
 } from '../../../../../../../../common/services';
 
@@ -52,6 +54,7 @@ import { mergeCategoriesAndCount } from '../util';
 import { useBuildIntegrationsUrl } from './use_build_integrations_url';
 import { useOnboardingOverride } from './use_onboarding_override';
 import { applyGrouping } from './apply_grouping';
+import { applyGroupPackages } from './apply_group_packages';
 
 export interface IntegrationsURLParameters {
   searchString?: string;
@@ -198,6 +201,8 @@ export const useAvailablePackages = ({
     isLoading: isLoadingAllPackages,
     error: eprPackageLoadingError,
   } = useGetPackagesQuery({ prerelease: prereleaseIntegrationsEnabled });
+  // PROTOTYPE: integration groups from the registry. A failed request means no groups.
+  const { data: integrationGroups } = useGetIntegrationGroupsQuery();
 
   // Remove Kubernetes package granularity
   if (eprPackages?.items) {
@@ -209,8 +214,13 @@ export const useAvailablePackages = ({
   }
 
   const eprIntegrationList = useMemo(() => {
+    // PROTOTYPE: packages replaced by another (`deprecated.replaced_by.package`) aren't offered;
+    // Fleet moves existing installs to the replacement.
+    const offeredPackages = (eprPackages?.items || []).filter(
+      (item) => !getReplacementPackageName(item)
+    );
     const filteredPackageList =
-      filterPackageListDeploymentModes(eprPackages?.items || [], isAgentlessEnabled) || [];
+      filterPackageListDeploymentModes(offeredPackages, isAgentlessEnabled) || [];
     const integrations = packageListToIntegrationsList(filteredPackageList);
     return integrations;
   }, [eprPackages?.items, isAgentlessEnabled]);
@@ -237,10 +247,17 @@ export const useAvailablePackages = ({
   // All cards before any filter (no agentless filter, no category filter).
   // Used by useBrowseIntegrationHook which applies both filters from the live URL.
   const allCards: IntegrationCardItem[] = useMemo(() => {
-    const eprAndCustomPackages = [...mergedEprPackages, ...(appendCustomIntegrations || [])];
+    // PROTOTYPE: integration groups get one tile each; their member packages are hidden.
+    const { groupCards, remainingItems: eprAndCustomPackages } = applyGroupPackages({
+      items: [...mergedEprPackages, ...(appendCustomIntegrations || [])],
+      groups: integrationGroups?.items ?? [],
+      getHref,
+      getAbsolutePath,
+      addBasePath,
+    });
 
     let itemsToMap: Array<PackageListItem | CustomIntegration>;
-    let extraCards: IntegrationCardItem[] = [];
+    let extraCards: IntegrationCardItem[] = [...groupCards];
 
     if (enableIntegrationCollectionTiles && enableCollectionGrouping) {
       const { collectionCards, ungroupedItems } = applyGrouping({
@@ -252,7 +269,7 @@ export const useAvailablePackages = ({
         canAddIntegration,
       });
       itemsToMap = ungroupedItems;
-      extraCards = collectionCards;
+      extraCards = [...extraCards, ...collectionCards];
     } else {
       itemsToMap = eprAndCustomPackages;
     }
@@ -281,6 +298,7 @@ export const useAvailablePackages = ({
     enableIntegrationCollectionTiles,
     getAbsolutePath,
     getHref,
+    integrationGroups?.items,
     mergedEprPackages,
     packageVerificationKeyId,
   ]);

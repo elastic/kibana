@@ -58,7 +58,7 @@ describe('BackLink', () => {
 
   it('renders back to collection link when the return path names a known collection', () => {
     const appId = 'observabilityOnboarding';
-    const path = '?search=nginx&collection=nginx';
+    const path = '?search=nginx&collection=redis';
     const queryParams = new URLSearchParams();
     queryParams.set('returnAppId', appId);
     queryParams.set('returnPath', path);
@@ -66,8 +66,8 @@ describe('BackLink', () => {
     const { getByText } = renderBackLink(
       <BackLink queryParams={queryParams} integrationsPath="/browse" />
     );
-    expect(getByText('Back to Nginx collection')).toBeInTheDocument();
-    fireEvent.click(getByText('Back to Nginx collection'));
+    expect(getByText('Back to Redis collection')).toBeInTheDocument();
+    fireEvent.click(getByText('Back to Redis collection'));
     expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(appId, {
       path,
     });
@@ -75,7 +75,7 @@ describe('BackLink', () => {
 
   it('renders back to collection when returnPath is a full path containing a known collection', () => {
     const appId = 'integrations';
-    const path = '/browse?collection=nginx';
+    const path = '/browse?collection=redis';
     const queryParams = new URLSearchParams();
     queryParams.set('returnAppId', appId);
     queryParams.set('returnPath', path);
@@ -83,8 +83,8 @@ describe('BackLink', () => {
     const { getByText } = renderBackLink(
       <BackLink queryParams={queryParams} integrationsPath="/browse" />
     );
-    expect(getByText('Back to Nginx collection')).toBeInTheDocument();
-    fireEvent.click(getByText('Back to Nginx collection'));
+    expect(getByText('Back to Redis collection')).toBeInTheDocument();
+    fireEvent.click(getByText('Back to Redis collection'));
     expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(appId, {
       path,
     });

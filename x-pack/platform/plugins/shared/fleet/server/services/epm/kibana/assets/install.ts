@@ -246,6 +246,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
   installedPkg,
   spaceId,
   assetTags,
+  skipKibanaAssets,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
@@ -255,6 +256,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
   installedPkg?: SavedObject<Installation>;
   spaceId: string;
   assetTags?: PackageSpecTags[];
+  skipKibanaAssets?: boolean;
 }) {
   // Derive whether this is an additional-space install from the package's sticky primary space.
   // Any request from a space other than installed_kibana_space_id is an additional-space install.
@@ -274,6 +276,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
       spaceId,
       assetTags,
       installAsAdditionalSpace,
+      skipKibanaAssets,
     });
 
     const primarySpaceId = installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
@@ -290,6 +293,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
         spaceId: additionnalSpaceId,
         assetTags,
         installAsAdditionalSpace: true,
+        skipKibanaAssets,
       });
     }
     return refs;
@@ -305,6 +309,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
     spaceId,
     assetTags,
     installAsAdditionalSpace,
+    skipKibanaAssets,
   });
 }
 
@@ -438,6 +443,7 @@ export async function installKibanaAssetsAndReferences({
   spaceId,
   assetTags,
   installAsAdditionalSpace,
+  skipKibanaAssets,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
@@ -448,6 +454,8 @@ export async function installKibanaAssetsAndReferences({
   spaceId: string;
   assetTags?: PackageSpecTags[];
   installAsAdditionalSpace?: boolean;
+  /** PROTOTYPE: "Install content" off. Removes previously installed assets, installs none. */
+  skipKibanaAssets?: boolean;
 }) {
   const { savedObjectsImporter, savedObjectTagAssignmentService, savedObjectTagClient } =
     getSpaceAwareSaveobjectsClients(spaceId);
@@ -456,6 +464,15 @@ export async function installKibanaAssetsAndReferences({
 
   if (installedPkg) {
     await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg, spaceId });
+  }
+  const saveAsAdditionalSpace =
+    installedPkg && installedPkg.attributes.installed_kibana_space_id === spaceId
+      ? false
+      : installAsAdditionalSpace;
+
+  // PROTOTYPE: "Install content" off. Previous assets are gone (above), none are imported.
+  if (skipKibanaAssets) {
+    return saveKibanaAssetsRefs(savedObjectsClient, pkgName, [], spaceId, saveAsAdditionalSpace);
   }
   await deleteOrphanedMultipleIsolatedAssets({
     kibanaAssetsArchiveIterator,
@@ -495,9 +512,7 @@ export async function installKibanaAssetsAndReferences({
     pkgName,
     assets,
     spaceId,
-    installedPkg && installedPkg.attributes.installed_kibana_space_id === spaceId
-      ? false
-      : installAsAdditionalSpace
+    saveAsAdditionalSpace
   );
 
   await withPackageSpan('Create and assign package tags', () =>

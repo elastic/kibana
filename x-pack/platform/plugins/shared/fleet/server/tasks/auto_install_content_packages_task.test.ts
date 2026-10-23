@@ -129,22 +129,27 @@ describe('AutoInstallContentPackagesTask', () => {
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableAutoInstallContentPackages: true } as any);
-      MockRegistry.fetchList.mockResolvedValue([
-        {
-          name: 'kubernetes_otel',
-          version: '1.1.0',
-          discovery: {
-            datasets: [{ name: 'system.cpu' }, { name: 'system.memory' }],
-          },
-        } as any,
-        {
-          name: 'test_package',
-          version: '1.1.0',
-          discovery: {
-            datasets: [{ name: 'system.test' }],
-          },
-        } as any,
-      ]);
+      // PROTOTYPE: the task lists content and integration packages; no integration has discovery here
+      MockRegistry.fetchList.mockImplementation(async (params) =>
+        params?.type === 'content'
+          ? [
+              {
+                name: 'kubernetes_otel',
+                version: '1.1.0',
+                discovery: {
+                  datasets: [{ name: 'system.cpu' }, { name: 'system.memory' }],
+                },
+              } as any,
+              {
+                name: 'test_package',
+                version: '1.1.0',
+                discovery: {
+                  datasets: [{ name: 'system.test' }],
+                },
+              } as any,
+            ]
+          : []
+      );
     });
 
     afterEach(() => {
@@ -200,7 +205,42 @@ describe('AutoInstallContentPackagesTask', () => {
       await runTask();
       await runTask();
 
-      expect(MockRegistry.fetchList).toHaveBeenCalledTimes(1);
+      // One list per package type (content, integration)
+      expect(MockRegistry.fetchList).toHaveBeenCalledTimes(2);
+    });
+
+    // PROTOTYPE: package structure design - integration packages with `discovery`
+    it('should install integration packages with discovery content-only (no streaming)', async () => {
+      (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+        'logs-nginx.access.otel-default',
+      ]);
+      MockRegistry.fetchList.mockImplementation(async (params) =>
+        params?.type === 'integration'
+          ? [
+              {
+                name: 'nginx_otel',
+                version: '1.0.0',
+                type: 'integration',
+                discovery: { datasets: [{ name: 'nginx.access.otel' }] },
+              } as any,
+              { name: 'nginx', version: '3.2.2', type: 'integration' } as any,
+            ]
+          : []
+      );
+
+      await runTask();
+
+      expect(MockRegistry.fetchList).toHaveBeenCalledWith({
+        prerelease: false,
+        type: 'integration',
+      });
+      expect(packageClientMock.installPackage).toHaveBeenCalledTimes(1);
+      expect(packageClientMock.installPackage).toHaveBeenCalledWith({
+        pkgName: 'nginx_otel',
+        pkgVersion: '1.0.0',
+        useStreaming: false,
+        automaticInstall: true,
+      });
     });
 
     it('should install package if old version is installed', async () => {

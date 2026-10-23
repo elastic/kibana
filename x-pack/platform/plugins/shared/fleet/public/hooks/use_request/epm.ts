@@ -13,6 +13,7 @@ import { epmRouteService, isVerificationError } from '../../services';
 import type {
   GetCategoriesRequest,
   GetCategoriesResponse,
+  GetIntegrationGroupsResponse,
   GetPackagesRequest,
   GetPackagesResponse,
   GetLimitedPackagesResponse,
@@ -84,6 +85,20 @@ export function useGetCategoriesQuery(query: GetCategoriesRequest['query'] = {})
       retry: (_, error) => !isUserError(error) && !isRegistryConnectionError(error),
       refetchOnWindowFocus: false,
     }
+  );
+}
+
+/** PROTOTYPE: integration groups from the package registry. Errors -> no groups (stock tiles). */
+export function useGetIntegrationGroupsQuery(options?: { enabled?: boolean }) {
+  return useQuery<GetIntegrationGroupsResponse, RequestError>(
+    ['integration_groups'],
+    () =>
+      sendRequestForRq<GetIntegrationGroupsResponse>({
+        path: epmRouteService.getGroupsPath(),
+        method: 'get',
+        version: API_VERSIONS.internal.v1,
+      }),
+    { enabled: options?.enabled ?? true, retry: false, refetchOnWindowFocus: false }
   );
 }
 
@@ -346,8 +361,22 @@ export const sendGetFileByPath = (filePath: string) => {
   });
 };
 
-export const sendInstallPackage = (pkgName: string, pkgVersion: string, force: boolean = false) => {
-  const body = force ? { force } : undefined;
+export const sendInstallPackage = (
+  pkgName: string,
+  pkgVersion: string,
+  force: boolean = false,
+  // PROTOTYPE: "Install content" checkbox. Omitted keeps the installation's saved choice.
+  options: { skipKibanaAssets?: boolean } = {}
+) => {
+  const body =
+    force || options.skipKibanaAssets !== undefined
+      ? {
+          ...(force ? { force } : {}),
+          ...(options.skipKibanaAssets !== undefined
+            ? { skip_kibana_assets: options.skipKibanaAssets }
+            : {}),
+        }
+      : undefined;
   return sendRequest<InstallPackageResponse, FleetErrorResponse>({
     path: epmRouteService.getInstallPath(pkgName, pkgVersion),
     method: 'post',

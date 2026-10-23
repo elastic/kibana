@@ -58,6 +58,7 @@ import type {
   EpmPackageAdditions,
   GetCategoriesRequest,
   GetPackagesRequest,
+  IntegrationGroup,
 } from '../../../../common/types';
 import type { Installation, PackageInfo, PackagePolicySOAttributes } from '../../../types';
 import {
@@ -70,6 +71,7 @@ import {
 import { appContextService } from '../..';
 import { dataStreamService } from '../../data_streams';
 import * as Registry from '../registry';
+import { INTEGRATION_GROUPS_FIXTURE } from '../registry/integration_groups_fixture';
 import type { PackageAsset } from '../archive/storage';
 import { getEsPackage, packageAssetToArchiveEntry } from '../archive/storage';
 import { normalizeKuery } from '../../saved_object';
@@ -110,6 +112,14 @@ function nameAsTitle(name: string) {
 
 export async function getCategories(options: GetCategoriesRequest['query']) {
   return Registry.fetchCategories(options);
+}
+
+/** PROTOTYPE: integration groups from the registry, or the fixture behind a flag when it has none. */
+export async function getIntegrationGroups(): Promise<IntegrationGroup[]> {
+  const groups = await Registry.fetchGroups();
+  return appContextService.getExperimentalFeatures().integrationGroupsFixture && !groups.length
+    ? INTEGRATION_GROUPS_FIXTURE
+    : groups;
 }
 
 export async function getPackages(

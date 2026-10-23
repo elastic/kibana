@@ -29,6 +29,7 @@ import type { CollectionVariant } from './card_utils';
 import { COLLECTION_QUERYPARAM } from './card_utils';
 
 import { CollectionFlyout } from './components/collection_flyout';
+import { useGroupWizardModal } from '../group/group_wizard_modal';
 
 export const AvailablePackages: React.FC<{ prereleaseIntegrationsEnabled: boolean }> = ({
   prereleaseIntegrationsEnabled,
@@ -119,13 +120,17 @@ export const AvailablePackages: React.FC<{ prereleaseIntegrationsEnabled: boolea
 
   // Override onCardClick for collection tiles so they open the flyout via URL param
   // instead of navigating to the collection detail page.
+  // PROTOTYPE: integration group tiles open the onboarding wizard in a modal.
+  const { withGroupWizard, groupWizardModal } = useGroupWizardModal();
   const cardsWithCollectionHandlers = useMemo(
     () =>
-      filteredCards.map((card) => {
-        if (!card.isCollectionCard) return card;
-        return { ...card, onCardClick: () => openCollection(card.name) };
-      }),
-    [filteredCards, openCollection]
+      withGroupWizard(
+        filteredCards.map((card) => {
+          if (!card.isCollectionCard) return card;
+          return { ...card, onCardClick: () => openCollection(card.name) };
+        })
+      ),
+    [filteredCards, openCollection, withGroupWizard]
   );
 
   // Resolve the open collection card from filteredCards so the flyout variants
@@ -262,6 +267,7 @@ export const AvailablePackages: React.FC<{ prereleaseIntegrationsEnabled: boolea
           onClose={closeCollection}
         />
       )}
+      {groupWizardModal}
     </>
   );
 };

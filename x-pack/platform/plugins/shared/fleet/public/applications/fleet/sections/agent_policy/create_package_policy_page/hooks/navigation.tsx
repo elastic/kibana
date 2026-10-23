@@ -9,7 +9,7 @@ import { useCallback, useMemo, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 
-import { splitPkgKey } from '../../../../../../../common/services';
+import { GROUP_QUERYPARAM, splitPkgKey } from '../../../../../../../common/services';
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID } from '../../../../constants';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import { useStartServices, useLink, useIntraAppState } from '../../../../hooks';
@@ -57,6 +57,10 @@ export const useCancelAddPackagePolicy = (params: UseCancelParams) => {
     // External apps (Integrations catalog, Security, Observability Onboarding) append
     // returnPath/returnAppId as query params so Cancel returns to the originating page.
     const searchParams = new URLSearchParams(search);
+    // PROTOTYPE: coming from an integration group, return to browse (the group page just redirects here).
+    if (searchParams.get(GROUP_QUERYPARAM)) {
+      return getHref('integrations_all');
+    }
     const returnPath = searchParams.get('returnPath');
     const returnAppId = searchParams.get('returnAppId');
     if (returnPath && returnAppId && ALLOWED_RETURN_APP_IDS.has(returnAppId)) {

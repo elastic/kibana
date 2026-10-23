@@ -15,6 +15,7 @@ import type { AssetType, Installable, Installation } from '../../../types';
 export { bulkInstallPackages, isBulkInstallError } from './bulk_install_packages';
 export {
   getCategories,
+  getIntegrationGroups,
   getFile,
   getInstallationObject,
   getInstallation,

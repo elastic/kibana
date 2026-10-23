@@ -440,6 +440,27 @@ export type RegistrySearchResult = Pick<
   | 'group'
 >;
 
+/**
+ * PROTOTYPE: integration group from the package registry `GET /groups` (fed by a taxonomy file in
+ * the integrations repo). One tile per technology; each schema names the package that implements
+ * it, with no version (the latest compatible version is used). Groups aren't packages.
+ */
+export interface IntegrationGroupSchema {
+  package: string;
+  /** Exactly one schema per group should set this. */
+  default?: boolean;
+}
+
+export interface IntegrationGroup {
+  name: string;
+  title: string;
+  description?: string;
+  /** Member package whose first icon the tile uses. */
+  icon?: string;
+  /** e.g. { otel: { package: 'nginx_otel', default: true }, ecs: { package: 'nginx' } } */
+  schemas: Record<string, IntegrationGroupSchema>;
+}
+
 // from /categories
 // https://github.com/elastic/package-registry/blob/master/docs/api/categories.json
 export type CategorySummaryList = CategorySummaryItem[];
@@ -874,6 +895,40 @@ export interface Installation {
   namespace_customization_settings?: { [namespace: string]: { ilm_policy?: string } };
   /** Snapshot of dependency version changes made when this (composable) package was last installed/upgraded; used for rollback */
   previous_dependency_versions?: Array<{ name: string; previous_version: string | null }> | null;
+  /**
+   * PROTOTYPE: "Install content" off. Kibana assets (everything under `kibana/`: dashboards, ML
+   * jobs, alert and SLO templates, saved searches) are not installed. Elasticsearch assets always
+   * are. Kept across upgrades and reinstalls until an install request sets it again.
+   */
+  skip_kibana_assets?: boolean;
+  /**
+   * PROTOTYPE: packages that were replaced by this one (`deprecated.replaced_by.package`) and whose
+   * integration policies Fleet moved here. Shown on this package's page and the installed list.
+   */
+  moved_from?: ReplacedPackageMove[];
+  /** PROTOTYPE: set on a replaced package once its integration policies were moved. */
+  moved_to?: { package: string; version: string; moved_at: string };
+}
+
+/** PROTOTYPE: one move of a replaced package's integration policies to its replacement. */
+export interface ReplacedPackageMove {
+  /** The replaced package, e.g. nginx_otel_input */
+  package: string;
+  title: string;
+  /** Version of the replaced package that declared `replaced_by` */
+  version: string;
+  moved_at: string;
+  /** Integration policies recreated on the replacement, then deleted from the replaced package. */
+  package_policies: Array<{
+    name: string;
+    from_id: string;
+    to_id: string;
+    policy_ids: string[];
+    /** Settings that have no same-name setting in the replacement, as `<dataset or scope>: <var>`. */
+    unmapped_vars: string[];
+  }>;
+  /** Integration policies left on the replaced package, with why. */
+  not_moved: Array<{ name: string; id: string; reason: string }>;
 }
 
 export interface PackageUsageStats {

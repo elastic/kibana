@@ -80,6 +80,8 @@ export interface IntegrationCardItem {
   installStatus?: EpmPackageInstallStatus;
   integration: string;
   isCollectionCard?: boolean;
+  /** PROTOTYPE: tile of an integration group (package registry `GET /groups`). */
+  isIntegrationGroupCard?: boolean;
   groupMembers?: IntegrationCardItem[];
   searchableContent?: string;
   // Services bundled behind a single tile (e.g. AWS onboarding). Used to tell the user which

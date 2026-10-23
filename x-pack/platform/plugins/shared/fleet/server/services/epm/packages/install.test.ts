@@ -49,6 +49,7 @@ import { getBundledPackageByName, getBundledPackageByPkgKey } from './bundled_pa
 import { getInstallationObject, getPackageSavedObjects } from './get';
 import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
 import { setLastUploadInstallCache } from './utils';
+import { moveReplacedPackagePolicies } from './move_replaced_package';
 
 jest.mock('../../data_streams');
 jest.mock('./get');
@@ -136,6 +137,7 @@ jest.mock('./upload_preflight_authz', () => ({
   checkUploadPackageAssetPrivileges: jest.fn(),
 }));
 jest.mock('../../audit_logging');
+jest.mock('./move_replaced_package', () => ({ moveReplacedPackagePolicies: jest.fn() }));
 
 jest.mock('../../utils/agentless', () => {
   return {
@@ -241,6 +243,28 @@ describe('createInstallation', () => {
         savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
       });
     });
+  });
+
+  // PROTOTYPE: "Install content"
+  it('saves skip_kibana_assets only when content is skipped', async () => {
+    soClient.create.mockClear();
+    await createInstallation({
+      savedObjectsClient: soClient,
+      packageInfo,
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+      skipKibanaAssets: true,
+    });
+    expect(soClient.create.mock.calls[0][1]).toMatchObject({ skip_kibana_assets: true });
+
+    soClient.create.mockClear();
+    await createInstallation({
+      savedObjectsClient: soClient,
+      packageInfo,
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+    });
+    expect(soClient.create.mock.calls[0][1]).not.toHaveProperty('skip_kibana_assets');
   });
 
   describe('installSource: upload', () => {
@@ -491,6 +515,88 @@ describe('install', () => {
         packageName: 'apache',
         status: 'success',
         automaticInstall: false,
+      });
+    });
+
+    // PROTOTYPE: moving replaced packages
+    describe('replaced package', () => {
+      const install = async (installedVersion?: string) => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        jest.mocked(Registry.getPackage).mockResolvedValueOnce({
+          packageInfo: {
+            name: 'nginx_otel_input',
+            version: '1.3.0',
+            license: 'basic',
+            deprecated: { description: 'Moved', replaced_by: { package: 'nginx_otel' } },
+          },
+          paths: [],
+        } as any);
+        if (installedVersion) {
+          jest.mocked(getInstallationObject).mockResolvedValueOnce({
+            attributes: { version: installedVersion, installed_kibana: [] },
+          } as any);
+        }
+        jest.mocked(moveReplacedPackagePolicies).mockClear();
+        return installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'nginx_otel_input-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+      };
+
+      it('moves its policies after an upgrade', async () => {
+        await install('1.2.0');
+        expect(moveReplacedPackagePolicies).toHaveBeenCalledWith(
+          expect.objectContaining({ pkgName: 'nginx_otel_input' })
+        );
+      });
+
+      it('does nothing on a fresh install', async () => {
+        await install();
+        expect(moveReplacedPackagePolicies).not.toHaveBeenCalled();
+      });
+
+      it('a failed move does not fail the upgrade', async () => {
+        jest.mocked(moveReplacedPackagePolicies).mockRejectedValueOnce(new Error('boom'));
+        const result = await install('1.2.0');
+        expect(result.error).toBeUndefined();
+        expect(result.status).toBe('installed');
+      });
+    });
+
+    // PROTOTYPE: "Install content" - explicit choice wins, else the saved one (upgrade, reinstall)
+    describe('skipKibanaAssets', () => {
+      const installWith = async (
+        saved: boolean | undefined,
+        requested: boolean | undefined
+      ): Promise<boolean | undefined> => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        jest.mocked(installStateMachine._stateMachineInstallPackage).mockClear();
+        jest.mocked(getInstallationObject).mockResolvedValueOnce({
+          attributes: { version: '1.2.0', installed_kibana: [], skip_kibana_assets: saved },
+        } as any);
+        await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+          skipKibanaAssets: requested,
+        });
+        return jest.mocked(installStateMachine._stateMachineInstallPackage).mock.calls[0][0]
+          .skipKibanaAssets;
+      };
+
+      it('keeps the saved choice on upgrade when none is requested', async () => {
+        expect(await installWith(true, undefined)).toBe(true);
+        expect(await installWith(undefined, undefined)).toBe(false);
+      });
+
+      it('uses the requested choice over the saved one', async () => {
+        expect(await installWith(true, false)).toBe(false);
+        expect(await installWith(false, true)).toBe(true);
       });
     });
 

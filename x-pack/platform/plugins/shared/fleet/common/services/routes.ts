@@ -52,6 +52,10 @@ export const epmRouteService = {
     return EPM_API_ROUTES.CATEGORIES_PATTERN;
   },
 
+  getGroupsPath: () => {
+    return EPM_API_ROUTES.GROUPS_PATTERN;
+  },
+
   getListPath: () => {
     return EPM_API_ROUTES.LIST_PATTERN;
   },

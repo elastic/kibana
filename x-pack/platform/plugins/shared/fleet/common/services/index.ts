@@ -194,3 +194,5 @@ export {
   buildPolicyBaseIdWithFallbackKuery,
   buildPolicyBaseIdsWithFallbackKuery,
 } from './version_specific_policies_utils';
+export * from './integration_groups';
+export * from './replaced_packages';

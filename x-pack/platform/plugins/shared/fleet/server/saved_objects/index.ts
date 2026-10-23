@@ -49,6 +49,8 @@ import {
   EpmPackagesSchemaV10,
   EpmPackagesSchemaV11,
   EpmPackagesSchemaV12,
+  EpmPackagesSchemaV13,
+  EpmPackagesSchemaV14,
   SettingsSchemaV5,
   SettingsSchemaV6,
   SettingsSchemaV7,
@@ -1636,6 +1638,9 @@ export const getSavedObjectTypes = (
             properties: {},
           },
           installed_kibana_version: { type: 'keyword', ignore_above: 1024 },
+          skip_kibana_assets: { type: 'boolean' },
+          moved_from: { type: 'object', enabled: false },
+          moved_to: { type: 'object', enabled: false },
         },
       },
       modelVersions: {
@@ -1795,6 +1800,37 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: EpmPackagesSchemaV12.extends({}, { unknowns: 'ignore' }),
             create: EpmPackagesSchemaV12,
+          },
+        },
+        // PROTOTYPE: "Install content" choice
+        '13': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                skip_kibana_assets: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV13.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV13,
+          },
+        },
+        // PROTOTYPE: moving replaced packages
+        '14': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                moved_from: { type: 'object', enabled: false },
+                moved_to: { type: 'object', enabled: false },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV14.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV14,
           },
         },
       },

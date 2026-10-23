@@ -20,6 +20,10 @@ import type { InstalledPackageUIPackageListItem } from './types';
 import { useInstalledIntegrationsActions } from './hooks/use_installed_integrations_actions';
 import { BulkActionContextProvider } from './hooks/use_bulk_actions_context';
 import { PackagePoliciesPanel } from './components/package_policies_panel';
+import {
+  MovedPackagesCallout,
+  getMovedPackageNotices,
+} from '../../components/moved_packages_callout';
 
 const InstalledIntegrationsPageContent: React.FunctionComponent<{
   prereleaseIntegrationsEnabled: boolean;
@@ -75,6 +79,8 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
           selectedItems={selectedItems}
         />
         <EuiSpacer size="l" />
+        {/* PROTOTYPE: integration policies Fleet moved from replaced packages */}
+        <MovedPackagesCallout notices={getMovedPackageNotices(installedPackages)} />
         <InstalledIntegrationsTable
           total={total}
           pagination={pagination}

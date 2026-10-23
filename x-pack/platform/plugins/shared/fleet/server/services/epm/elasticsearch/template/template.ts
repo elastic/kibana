@@ -181,8 +181,12 @@ export function generateMappings(
 /**
  * Generates the template name out of the given information
  */
-export function generateTemplateName(dataStream: RegistryDataStream): string {
-  return getRegistryDataStreamAssetBaseName(dataStream);
+export function generateTemplateName(
+  dataStream: RegistryDataStream,
+  isOtelInputType?: boolean
+): string {
+  // PROTOTYPE: suffix OTel template names so they don't overwrite the ECS template for the same dataset
+  return getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType);
 }
 
 /**

@@ -53,6 +53,10 @@ export const EPM_API_ROUTES = {
   FILEPATH_PATTERN: `${EPM_PACKAGES_ONE}/{filePath*}`,
   KNOWLEDGE_BASE_PATTERN: `${INTERNAL_ROOT}/epm/packages/{pkgName}/knowledge_base`,
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
+  // PROTOTYPE: integration groups from the package registry
+  GROUPS_PATTERN: `${INTERNAL_ROOT}/epm/groups`,
+  // PROTOTYPE: move a replaced package's integration policies to its replacement
+  MOVE_TO_REPLACEMENT_PATTERN: `${INTERNAL_ROOT}/epm/packages/{pkgName}/_move_to_replacement`,
   VERIFICATION_KEY_ID: `${EPM_API_ROOT}/verification_key_id`,
   STATS_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/stats`,
   DEPENDENCIES_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/{pkgVersion}/dependencies`,

@@ -182,6 +182,9 @@ export const InstallationInfoSchema = schema.object(
     previous_version: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
     rolled_back: schema.maybe(schema.boolean()),
     is_rollback_ttl_expired: schema.maybe(schema.boolean()),
+    skip_kibana_assets: schema.maybe(schema.boolean()),
+    moved_from: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 100 })),
+    moved_to: schema.maybe(schema.any()),
   },
   { meta: { id: 'installation_info' } }
 );
@@ -1057,10 +1060,24 @@ export const InstallPackageFromRegistryRequestSchema = {
               'When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.',
           },
         }),
+        // PROTOTYPE: "Install content" checkbox
+        skip_kibana_assets: schema.maybe(
+          schema.boolean({
+            meta: {
+              description:
+                'When true, install without Kibana assets (dashboards, ML jobs, alert and SLO templates, saved searches); Elasticsearch assets are always installed. Saved on the installation and kept on upgrade and reinstall. When omitted, the saved choice is kept (default false).',
+            },
+          })
+        ),
       },
       { meta: { id: 'install_package_from_registry_request' } }
     )
   ),
+};
+
+// PROTOTYPE: move a replaced package's integration policies to its replacement
+export const MoveToReplacementRequestSchema = {
+  params: schema.object({ pkgName: schema.string() }),
 };
 
 export const InstallPackageFromRegistryWithoutVersionRequestSchema = {
