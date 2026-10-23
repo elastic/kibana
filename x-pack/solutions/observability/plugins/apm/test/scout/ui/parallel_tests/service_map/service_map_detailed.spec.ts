@@ -126,9 +126,10 @@ test.describe(
         { timeout: EXTENDED_TIMEOUT }
       );
 
-      // The first Escape closes the operation child, the second the request flyout itself.
+      // The first Escape closes the operation child only, the second the request flyout itself.
       await page.keyboard.press('Escape');
       await expect(page.testSubj.locator('requestFlyoutOperationDetailHeader')).toBeHidden();
+      await expect(serviceMapPage.requestFlyout).toBeVisible();
       await page.keyboard.press('Escape');
       await expect(serviceMapPage.requestFlyout).toBeHidden();
     });
