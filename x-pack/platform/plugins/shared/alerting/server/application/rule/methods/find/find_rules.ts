@@ -39,12 +39,21 @@ import { findRulesParamsSchema } from './schemas';
 import type { Rule, RuleParams } from '../../types';
 import { findRulesSo } from '../../../../data/rule';
 
+export interface FindRuleError {
+  message: string;
+  rule: {
+    id: string;
+    name?: string;
+  };
+}
+
 export interface FindResult<Params extends RuleParams> {
   page: number;
   perPage: number;
   total: number;
   searchAfter?: SortResults;
   data: Array<SanitizedRule<Params>>;
+  errors?: FindRuleError[];
   aggregations?: Record<string, unknown>;
 }
 
@@ -137,8 +146,9 @@ export async function findRules<Params extends RuleParams = never>(
   const searchAfter = data.length > 0 ? data[data.length - 1]?.sort : undefined;
 
   const siemRules: Rule[] = [];
+  const errors: FindRuleError[] = [];
 
-  const authorizedData = data.map(({ id, attributes, references }) => {
+  const authorizedData = data.flatMap(({ id, attributes, references }) => {
     try {
       ensureRuleTypeIsAuthorized(
         attributes.alertTypeId,
@@ -156,22 +166,39 @@ export async function findRules<Params extends RuleParams = never>(
       throw error;
     }
 
-    const rule = getAlertFromRaw<Params>({
-      id,
-      isSystemAction: context.isSystemAction,
-      logger: context.logger,
-      rawRule: (fields ? pick(attributes, fields) : attributes) as RawRule,
-      references,
-      ruleTypeId: attributes.alertTypeId,
-      ruleTypeRegistry: context.ruleTypeRegistry,
-    });
+    const reportError = (error: Error) => {
+      errors.push({
+        message: error.message,
+        rule: { id, ...(attributes.name && { name: attributes.name }) },
+      });
+    };
+
+    let rule;
+    try {
+      rule = getAlertFromRaw<Params>({
+        id,
+        isSystemAction: context.isSystemAction,
+        logger: context.logger,
+        rawRule: (fields ? pick(attributes, fields) : attributes) as RawRule,
+        references,
+        ruleTypeId: attributes.alertTypeId,
+        ruleTypeRegistry: context.ruleTypeRegistry,
+      });
+    } catch (error) {
+      // A rule that cannot be transformed at all is omitted rather than failing the whole find
+      context.logger.warn(
+        `Error transforming rule with id ${id}, the rule will be omitted from the results: ${error.message}`
+      );
+      reportError(error);
+      return [];
+    }
 
     // collect SIEM rule for further formatting legacy actions
     if (attributes.consumer === AlertConsumers.SIEM) {
       siemRules.push(rule as Rule);
     }
 
-    return rule;
+    return [rule];
   });
 
   authorizedData.forEach(({ id, name }) =>
@@ -201,6 +228,7 @@ export async function findRules<Params extends RuleParams = never>(
       total,
       ...(searchAfter !== undefined ? { searchAfter } : {}),
       ...(aggregations !== undefined ? { aggregations } : {}),
+      ...(errors.length > 0 ? { errors } : {}),
       // replace siem formatted rules
       data: authorizedData.map((rule) => formattedRulesMap[rule.id] ?? rule),
     };
@@ -212,6 +240,7 @@ export async function findRules<Params extends RuleParams = never>(
     total,
     ...(searchAfter !== undefined ? { searchAfter } : {}),
     ...(aggregations !== undefined ? { aggregations } : {}),
+    ...(errors.length > 0 ? { errors } : {}),
     data: authorizedData as Array<SanitizedRule<Params>>,
   };
 }

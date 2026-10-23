@@ -111,6 +111,60 @@ describe('findInternalRulesRoute', () => {
     });
   });
 
+  it('includes errors in the response when the rules client returns them', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    findInternalRulesRoute(router, licenseState);
+
+    const [, handler] = router.post.mock.calls[0];
+
+    const findResult = {
+      page: 1,
+      perPage: 1,
+      total: 2,
+      data: [],
+      errors: [
+        {
+          message:
+            'Error injecting reference into rule params for rule id 2 - something went wrong',
+          rule: { id: '2', name: 'broken rule' },
+        },
+      ],
+    };
+    rulesClient.find.mockResolvedValueOnce(findResult);
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        body: {
+          per_page: 1,
+          page: 1,
+          default_search_operator: 'OR',
+        },
+      },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: {
+        page: 1,
+        per_page: 1,
+        total: 2,
+        data: [],
+        errors: [
+          {
+            message:
+              'Error injecting reference into rule params for rule id 2 - something went wrong',
+            rule: { id: '2', name: 'broken rule' },
+          },
+        ],
+      },
+    });
+  });
+
   it('finds rules with search_fields string parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
