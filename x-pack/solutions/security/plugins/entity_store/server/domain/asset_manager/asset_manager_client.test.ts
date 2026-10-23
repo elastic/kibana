@@ -10,6 +10,7 @@ import type {
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -655,5 +656,121 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
     });
     expect(mockInstallSharedElasticsearchAssets).not.toHaveBeenCalled();
     expect(mockLogger.warn).not.toHaveBeenCalled();
+  });
+});
+
+describe('AssetManagerClient.getStatus privilege-independent probes', () => {
+  const namespace = 'default';
+
+  const notFound = () => Object.assign(new Error('not found'), { statusCode: 404 });
+  const forbidden = () => Object.assign(new Error('security_exception'), { statusCode: 403 });
+
+  const buildEsClient = ({
+    templatesExist,
+    error,
+  }: {
+    templatesExist: boolean;
+    error?: Error | { statusCode: number };
+  }) => {
+    const probe = jest.fn().mockImplementation(async () => {
+      if (error) throw error;
+      if (!templatesExist) throw notFound();
+      return {};
+    });
+    return {
+      indices: {
+        exists: jest.fn().mockImplementation(async () => {
+          if (error) throw error;
+          return templatesExist;
+        }),
+        getIndexTemplate: probe,
+        getDataStream: probe,
+      },
+      cluster: { getComponentTemplate: probe },
+    } as unknown as jest.Mocked<ElasticsearchClient>;
+  };
+
+  const buildClient = ({
+    userEsClient,
+    internalEsClient,
+  }: {
+    userEsClient: ElasticsearchClient;
+    internalEsClient: ElasticsearchClient;
+  }) =>
+    new AssetManagerClient({
+      logger: loggerMock.create(),
+      esClient: userEsClient,
+      internalEsClient,
+      taskManager: {
+        get: jest
+          .fn()
+          .mockRejectedValue(
+            SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'entity_store')
+          ),
+      } as unknown as jest.Mocked<TaskManagerStartContract>,
+      engineDescriptorClient: {
+        getAll: jest.fn().mockResolvedValue([{ type: 'user', status: 'started' }]),
+      } as unknown as import('../saved_objects').EngineDescriptorClient,
+      globalStateClient: {
+        findOrThrow: jest.fn().mockResolvedValue({ historySnapshot: {}, logsExtraction: {} }),
+      } as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
+      remoteLogExtractionStateClient:
+        {} as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
+      namespace,
+      isServerless: true,
+      logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
+      security: {} as SecurityPluginStart,
+      analytics: {
+        reportEvent: jest.fn(),
+      } as unknown as import('../../telemetry/events').TelemetryReporter,
+      savedObjectsClient: {} as SavedObjectsClientContract,
+    });
+
+  const getComponentsByResource = async (client: AssetManagerClient, resource: string) => {
+    const { engines } = await client.getStatus(true);
+    const components =
+      (engines[0] as { components?: Array<{ resource: string; id: string; installed: boolean }> })
+        .components ?? [];
+    return components.filter((c) => c.resource === resource);
+  };
+
+  it('reports resources as installed even when the requesting user is forbidden from reading them', async () => {
+    const client = buildClient({
+      userEsClient: buildEsClient({ templatesExist: true, error: forbidden() }),
+      internalEsClient: buildEsClient({ templatesExist: true }),
+    });
+
+    const templates = await getComponentsByResource(client, 'index_template');
+    const componentTemplates = await getComponentsByResource(client, 'component_template');
+    const indices = await getComponentsByResource(client, 'index');
+
+    expect(templates.length).toBeGreaterThan(0);
+    expect(templates.every((t) => t.installed)).toBe(true);
+    expect(componentTemplates.length).toBeGreaterThan(0);
+    expect(componentTemplates.every((t) => t.installed)).toBe(true);
+    expect(indices.length).toBeGreaterThan(0);
+    expect(indices.every((t) => t.installed)).toBe(true);
+  });
+
+  it('reports resources as not installed when the probes return 404', async () => {
+    const client = buildClient({
+      userEsClient: buildEsClient({ templatesExist: true }),
+      internalEsClient: buildEsClient({ templatesExist: false }),
+    });
+
+    const templates = await getComponentsByResource(client, 'index_template');
+    const componentTemplates = await getComponentsByResource(client, 'component_template');
+
+    expect(templates.every((t) => !t.installed)).toBe(true);
+    expect(componentTemplates.every((t) => !t.installed)).toBe(true);
+  });
+
+  it('propagates non-404 probe errors instead of reporting the component as missing', async () => {
+    const client = buildClient({
+      userEsClient: buildEsClient({ templatesExist: true }),
+      internalEsClient: buildEsClient({ templatesExist: true, error: { statusCode: 503 } }),
+    });
+
+    await expect(client.getStatus(true)).rejects.toMatchObject({ statusCode: 503 });
   });
 });
