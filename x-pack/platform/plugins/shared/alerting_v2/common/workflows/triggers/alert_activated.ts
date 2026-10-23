@@ -19,7 +19,7 @@ export const alertActivatedPayloadSchema = lazySchema(() =>
       .min(1)
       .max(1024)
       .describe(
-        i18n.translate('xpack.alertingVTwo.triggers.alertActivated.schema.reason', {
+        i18n.translate('xpack.alertingV2.triggers.alertActivated.schema.reason', {
           defaultMessage: 'Reason the alert was activated.',
         })
       ),
@@ -34,15 +34,15 @@ export const alertActivatedTriggerCommonDefinition: CommonTriggerDefinition<
   id: ALERT_ACTIVATED_TRIGGER_ID,
   stability: 'tech_preview',
   eventSchema: alertActivatedPayloadSchema,
-  title: i18n.translate('xpack.alertingVTwo.workflowTriggers.alertActivated.title', {
+  title: i18n.translate('xpack.alertingV2.workflowTriggers.alertActivated.title', {
     defaultMessage: 'Alerting - Alert activated',
   }),
-  description: i18n.translate('xpack.alertingVTwo.workflowTriggers.alertActivated.description', {
+  description: i18n.translate('xpack.alertingV2.workflowTriggers.alertActivated.description', {
     defaultMessage: 'Emitted when an alert is activated.',
   }),
   documentation: {
     details: i18n.translate(
-      'xpack.alertingVTwo.workflowTriggers.alertActivated.documentation.details',
+      'xpack.alertingV2.workflowTriggers.alertActivated.documentation.details',
       {
         defaultMessage:
           'Emitted after an alert activate action is persisted. The payload includes event.reason alongside event.alertId, event.ruleId, and event.spaceId for trigger conditions.',

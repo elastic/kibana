@@ -45,9 +45,10 @@ import {
 } from '../../../../services';
 
 import type { PackageListItem } from '../../../../types';
+import { COLLECTION_QUERYPARAM } from '../../../../../../services/collections';
 
 /** URL query-param key that holds the currently-open collection group id. */
-export const COLLECTION_QUERYPARAM = 'collection';
+export { COLLECTION_QUERYPARAM };
 
 export interface CollectionStateRef {
   groupId: string;
@@ -79,6 +80,8 @@ export interface IntegrationCardItem {
   installStatus?: EpmPackageInstallStatus;
   integration: string;
   isCollectionCard?: boolean;
+  // Number of services a collection tile bundles behind it (e.g. AWS onboarding), shown as a badge.
+  collectionSize?: number;
   groupMembers?: IntegrationCardItem[];
   searchableContent?: string;
   // Services bundled behind a single tile (e.g. AWS onboarding). Used to tell the user which

@@ -31,6 +31,4 @@ fileGroups:
     - '!target/**/*'
     - '!packaging/target/**/*'
     - '!packaging/example/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

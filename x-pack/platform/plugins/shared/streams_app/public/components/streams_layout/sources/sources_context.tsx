@@ -8,11 +8,13 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useActorRef, useSelector } from '@xstate/react';
 import { i18n } from '@kbn/i18n';
+import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { SourceApiKeyGenerationDeps } from './source_api_keys';
 import { createSourceEnvironmentLoader, type SourceEnvironmentLoader } from './source_environment';
 import type { SourceApiKeyPrivileges } from './source_api_keys';
-import type { RevealedApiKey, SourceStatus, SourceType, SourceViewModel } from './types';
+import type { SourceSignal } from './source_models';
+import type { RevealedApiKey, SourceType, SourceViewModel } from './types';
 import {
   getSourceViewModels,
   type SourceNameValidationError,
@@ -36,14 +38,16 @@ export interface SourcesController {
   availableSourceTypes: SourceType[];
   sourceName: string;
   sourceNameError?: SourceNameValidationError;
+  sourceSignals: SourceSignal[];
+  sourceSignalsError?: 'required';
   canCreateSource: boolean;
   isUnitSaving: boolean;
   createdSource?: SourceViewModel;
-  unconfiguredNodeIds: string[];
   refreshUnit: () => void;
   createSource: () => void;
   setCreateSourceType: (sourceType: SourceType) => void;
   setCreateSourceName: (sourceName: string) => void;
+  setCreateSourceSignals: (signals: SourceSignal[]) => void;
   validateCreateSourceName: () => void;
   deleteSource: (sourceId: string) => void;
   deleteSources: (sourceIds: string[]) => void;
@@ -59,7 +63,7 @@ export interface SourcesController {
   deleteApiKey: (sourceId: string, apiKeyId: string) => void;
   setQuery: (query: string) => void;
   setSelectedSources: (sources: SourceViewModel[]) => void;
-  openCreateModal: (associatedUnconfiguredNodeId?: string) => void;
+  openCreateModal: () => void;
   closeCreateModal: () => void;
   openSourceFlyout: (sourceId: string) => void;
   closeSourceFlyout: () => void;
@@ -67,18 +71,18 @@ export interface SourcesController {
 
 export interface SourcesTableController extends SourcesController {
   selectedTypes: SourceType[];
-  selectedStatuses: SourceStatus[];
   sortingColumns: SourcesTableSortingColumn[];
   pagination: SourcesTablePagination;
   visibleColumnIds: string[];
   isLoadingUnit: boolean;
   isUnitUnavailable: boolean;
   setSelectedTypes: (types: SourceType[]) => void;
-  setSelectedStatuses: (statuses: SourceStatus[]) => void;
   setSortingColumns: (columns: SourcesTableSortingColumn[]) => void;
   setPagination: (pagination: SourcesTablePagination) => void;
   setVisibleColumnIds: (columnIds: string[]) => void;
 }
+
+const EMPTY_SOURCE_SIGNALS: SourceSignal[] = [];
 
 const IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED = 'observability.managedOtlpPrwEndpointEnabled';
 
@@ -106,8 +110,9 @@ export const useSourcesTable = (): SourcesTableController => {
     () =>
       createUnitRepository({
         streamsRepositoryClient: streams.streamsRepositoryClient,
+        toasts,
       }),
-    [streams.streamsRepositoryClient]
+    [streams.streamsRepositoryClient, toasts]
   );
   const tableActorRef = useActorRef(sourcesTableStateMachine, {
     input: {
@@ -123,7 +128,6 @@ export const useSourcesTable = (): SourcesTableController => {
   const selectedSourceIds = useSelector(tableActorRef, (state) => state.context.selectedSourceIds);
   const isRefreshingUnit = useSelector(tableActorRef, (state) => state.matches('reloading'));
   const selectedTypes = useSelector(tableActorRef, (state) => state.context.selectedTypes);
-  const selectedStatuses = useSelector(tableActorRef, (state) => state.context.selectedStatuses);
   const sortingColumns = useSelector(tableActorRef, (state) => state.context.sortingColumns);
   const pagination = useSelector(tableActorRef, (state) => state.context.pagination);
   const visibleColumnIds = useSelector(tableActorRef, (state) => state.context.visibleColumnIds);
@@ -158,7 +162,6 @@ export const useSourcesTable = (): SourcesTableController => {
     () => ({
       ...sourcesController,
       selectedTypes,
-      selectedStatuses,
       sortingColumns,
       pagination,
       visibleColumnIds,
@@ -166,8 +169,6 @@ export const useSourcesTable = (): SourcesTableController => {
       isUnitUnavailable,
       setSelectedTypes: (sourceTypes: SourceType[]) =>
         tableActorRef.send({ type: 'filters.types.change', sourceTypes }),
-      setSelectedStatuses: (statuses: SourceStatus[]) =>
-        tableActorRef.send({ type: 'filters.statuses.change', statuses }),
       setSortingColumns: (columns: SourcesTableSortingColumn[]) =>
         tableActorRef.send({ type: 'sorting.change', columns }),
       setPagination: (nextPagination: SourcesTablePagination) =>
@@ -179,7 +180,6 @@ export const useSourcesTable = (): SourcesTableController => {
       isLoadingUnit,
       isUnitUnavailable,
       pagination,
-      selectedStatuses,
       selectedTypes,
       sortingColumns,
       sourcesController,
@@ -199,6 +199,7 @@ export const useSourceApiKeyGenerationDeps = (): SourceApiKeyGenerationDeps => {
   return useMemo(
     () => ({
       streamsRepositoryClient: streams.streamsRepositoryClient,
+      unitId: STREAMS_DEFAULT_UNIT_ID,
     }),
     [streams.streamsRepositoryClient]
   );
@@ -240,13 +241,11 @@ export const useSources = ({
   const apiKeyPrivileges = useSelector(sourcesActorRef, (state) => state.context.apiKeyPrivileges);
   const apiKeyError = useSelector(sourcesActorRef, (state) => state.context.apiKeyError?.message);
   const creationContext = useSelector(sourcesActorRef, (state) => state.context.creationContext);
-  const unconfiguredNodeIds = useSelector(
-    sourcesActorRef,
-    (state) => state.context.unconfiguredNodeIds
-  );
   const sourceType = creationContext?.formData.sourceType ?? 'async_bulk';
   const sourceName = creationContext?.formData.sourceName ?? '';
   const sourceNameError = creationContext?.formErrors.sourceName;
+  const sourceSignals = creationContext?.formData.signals ?? EMPTY_SOURCE_SIGNALS;
+  const sourceSignalsError = creationContext?.formErrors.signals;
   const createdSource = creationContext?.createdSource;
   const availableSourceTypes = useSelector(
     sourcesActorRef,
@@ -282,6 +281,7 @@ export const useSources = ({
     return Boolean(
       creation?.formData.sourceName.trim() &&
         !creation.formErrors.sourceName &&
+        !creation.formErrors.signals &&
         state.context.availableSourceTypes.includes(creation.formData.sourceType)
     );
   });
@@ -319,9 +319,13 @@ export const useSources = ({
     [sourcesActorRef]
   );
 
+  const setCreateSourceSignals = useCallback(
+    (signals: SourceSignal[]) => sourcesActorRef.send({ type: 'signals.change', signals }),
+    [sourcesActorRef]
+  );
+
   const openCreateModal = useCallback(
-    (associatedUnconfiguredNodeId?: string) =>
-      sourcesActorRef.send({ type: 'modal.openCreate', associatedUnconfiguredNodeId }),
+    () => sourcesActorRef.send({ type: 'modal.openCreate' }),
     [sourcesActorRef]
   );
 
@@ -362,16 +366,18 @@ export const useSources = ({
       availableSourceTypes,
       sourceName,
       sourceNameError,
+      sourceSignals,
+      sourceSignalsError,
       canCreateSource: canCreateSource && !isUnitSaving,
       isUnitSaving,
       createdSource,
-      unconfiguredNodeIds,
       refreshUnit: () => {
         tableState?.refreshUnit();
       },
       createSource,
       setCreateSourceType,
       setCreateSourceName,
+      setCreateSourceSignals,
       validateCreateSourceName,
       deleteSource,
       deleteSources,
@@ -423,14 +429,16 @@ export const useSources = ({
       selectedSourceId,
       selectedSourceIds,
       setCreateSourceName,
+      setCreateSourceSignals,
       setCreateSourceType,
       sourceName,
       sourceNameError,
+      sourceSignals,
+      sourceSignalsError,
       sourceType,
       sourceViews,
       sourcesActorRef,
       tableState,
-      unconfiguredNodeIds,
       validateCreateSourceName,
     ]
   );

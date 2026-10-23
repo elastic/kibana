@@ -1,5 +1,5 @@
 {
-  "sha1": "c68caf8f2ea3b8539746788eabc7496c25cade5c",
+  "sha1": "689feb591563fe2ed65ec5fcdbd302fe46d9e62c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -58,6 +58,20 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/form_rbac.spec.ts",
         "line": 64,
         "column": 11
+      }
+    },
+    {
+      "id": "09a79759062225a-c198245c2494f63",
+      "title": "Response console get-file from the endpoint list retrieves a file and shows the download link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/get_file_from_console.spec.ts",
+        "line": 45,
+        "column": 25
       }
     },
     {
