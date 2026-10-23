@@ -80,7 +80,7 @@ export const NodesOverview = ({
   const { onPageReady } = usePerformanceContext();
   const { jumpToTime } = useWaffleTimeContext();
   const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
-  const { preferredSchema } = useWaffleOptionsContext();
+  const { preferredSchema, changePreferredSchema } = useWaffleOptionsContext();
   const schemas: DataSchemaFormat[] = useMemo(
     () => timeRangeMetadata?.schemas || [],
     [timeRangeMetadata?.schemas]
@@ -112,6 +112,7 @@ export const NodesOverview = ({
 
   const hasDataOnAnotherSchema =
     schemas.length === 1 && preferredSchema !== schemas[0] && isSchemaAwareNodeType(nodeType);
+
   const refetchProps = hasDataOnAnotherSchema
     ? {}
     : {
@@ -146,6 +147,8 @@ export const NodesOverview = ({
             <SwitchSchemaMessage
               dataTestSubj="infraInventoryViewNoDataInSelectedSchema"
               nodeType={nodeType}
+              targetSchema={schemas[0]}
+              onSwitchSchema={changePreferredSchema}
             />
           ) : (
             <FormattedMessage
