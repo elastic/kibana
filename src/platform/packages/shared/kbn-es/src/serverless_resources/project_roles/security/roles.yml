@@ -991,6 +991,7 @@ soc_manager:
         - feature_workflowsManagement.all
         - feature_alertzero.all
         - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
         - feature_proposals.all
         - feature_workflowsManagement.workflow_update_managed
       resources: '*'
@@ -1517,6 +1518,8 @@ _alertzero_alert_triage:
     - application: 'kibana-.kibana'
       privileges:
         - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
         - feature_agentBuilder.read
         - feature_contextEngine.all
         - feature_proposals.all
@@ -1613,6 +1616,8 @@ _alertzero_attack_discovery:
     - application: 'kibana-.kibana'
       privileges:
         - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
         - feature_agentBuilder.read
         - feature_contextEngine.all
         - feature_proposals.all
@@ -1673,6 +1678,8 @@ _alertzero_endpoint_analysis:
     - application: 'kibana-.kibana'
       privileges:
         - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
         - feature_agentBuilder.read
         - feature_contextEngine.all
         - feature_proposals.all
@@ -1726,6 +1733,8 @@ _alertzero_threat_hunt:
     - application: 'kibana-.kibana'
       privileges:
         - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
         - feature_agentBuilder.read
         - feature_contextEngine.all
         - feature_proposals.all
@@ -1795,6 +1804,8 @@ _alertzero_rule_tuning:
     - application: 'kibana-.kibana'
       privileges:
         - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
         - feature_agentBuilder.read
         - feature_contextEngine.all
         - feature_proposals.all
@@ -1849,6 +1860,8 @@ _alertzero_rule_coverage:
     - application: 'kibana-.kibana'
       privileges:
         - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
         - feature_agentBuilder.read
         - feature_contextEngine.all
         - feature_proposals.all

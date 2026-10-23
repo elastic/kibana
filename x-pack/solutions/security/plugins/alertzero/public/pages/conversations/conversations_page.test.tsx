@@ -304,7 +304,10 @@ const renderPage = (
   core.application.getUrlForApp.mockImplementation(
     (appId, options) => `/app/${appId}${options?.path ?? ''}`
   );
-  (core.application.capabilities as Record<string, unknown>).agenticInvestigations = capabilities;
+  (core.application.capabilities as Record<string, unknown>).agenticInvestigations = {
+    readInvestigations: true,
+    ...capabilities,
+  };
   // The real hooks behind the details flyout and the assignee picker read these services, and
   // react-query rejects a query function that resolves to undefined.
   core.http.get.mockResolvedValue(proposal);
@@ -1105,6 +1108,28 @@ describe('ConversationsPage impact pills', () => {
     Object.keys(impactOf).forEach((id) => delete impactOf[id]);
   });
 
+  it('skips the impact request and names the missing privilege without investigations read', () => {
+    renderPage('/', { capabilities: { readInvestigations: false } });
+
+    expect(screen.getByTestId('alertzeroInvestigationsReadGate')).toHaveTextContent(
+      'Agentic Investigations Read'
+    );
+    expect(mockUseProposalImpactPills).toHaveBeenCalledWith(
+      expect.objectContaining({ enabled: false })
+    );
+    expect(screen.queryByRole('button', { name: /host-1/ })).not.toBeInTheDocument();
+    expect(screen.getByText('Host investigation')).toBeInTheDocument();
+  });
+
+  it('does not show the missing privilege callout with investigations read', () => {
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertzeroInvestigationsReadGate')).not.toBeInTheDocument();
+    expect(mockUseProposalImpactPills).toHaveBeenCalledWith(
+      expect.objectContaining({ enabled: true })
+    );
+  });
+
   // Toggling a pill changes the section badges' text; awaiting flushes the resulting
   // MutationObserver update, which would otherwise land outside `act`.
   const togglePill = async (name: string) => {
@@ -1121,6 +1146,7 @@ describe('ConversationsPage impact pills', () => {
       origin: 'alertzero',
       categories: ['respond', 'investigate', 'configure'],
       decidedWithinHours: 72,
+      enabled: true,
     });
   });
 

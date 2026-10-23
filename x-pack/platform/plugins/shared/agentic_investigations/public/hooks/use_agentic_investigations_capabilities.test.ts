@@ -12,6 +12,7 @@ const caps = (
   overrides: {
     showEscalations?: unknown;
     manageEscalations?: unknown;
+    readInvestigations?: unknown;
     manageInvestigations?: unknown;
   } = {}
 ): Capabilities =>
@@ -20,6 +21,10 @@ const caps = (
     management: {},
     catalogue: {},
     agenticInvestigations: {
+      readInvestigations: false,
+      ...('readInvestigations' in overrides
+        ? { readInvestigations: overrides.readInvestigations }
+        : {}),
       manageInvestigations: false,
       ...('manageInvestigations' in overrides
         ? { manageInvestigations: overrides.manageInvestigations }
@@ -38,6 +43,7 @@ describe('getAgenticInvestigationsCapabilities', () => {
     expect(getAgenticInvestigationsCapabilities({} as Capabilities)).toEqual({
       showEscalations: false,
       manageEscalations: false,
+      readInvestigations: false,
       manageInvestigations: false,
     });
   });
@@ -51,6 +57,12 @@ describe('getAgenticInvestigationsCapabilities', () => {
   it('maps manageEscalations correctly', () => {
     expect(getAgenticInvestigationsCapabilities(caps({ manageEscalations: true }))).toMatchObject({
       manageEscalations: true,
+    });
+  });
+
+  it('maps readInvestigations correctly', () => {
+    expect(getAgenticInvestigationsCapabilities(caps({ readInvestigations: true }))).toMatchObject({
+      readInvestigations: true,
     });
   });
 
@@ -72,11 +84,17 @@ describe('getAgenticInvestigationsCapabilities', () => {
   it('returns all flags for a fully granted capabilities object', () => {
     expect(
       getAgenticInvestigationsCapabilities(
-        caps({ showEscalations: true, manageEscalations: true, manageInvestigations: true })
+        caps({
+          showEscalations: true,
+          manageEscalations: true,
+          readInvestigations: true,
+          manageInvestigations: true,
+        })
       )
     ).toEqual({
       showEscalations: true,
       manageEscalations: true,
+      readInvestigations: true,
       manageInvestigations: true,
     });
   });
