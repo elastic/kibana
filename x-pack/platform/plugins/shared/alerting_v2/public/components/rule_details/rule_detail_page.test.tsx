@@ -388,6 +388,12 @@ describe('RuleDetailPage', () => {
     expect(mockOpenEditFlyout).toHaveBeenCalledWith(baseRule);
   });
 
+  it('does not include View details in the overflow menu', async () => {
+    renderPage(baseRule);
+    await openAppMenuOverflow();
+    expect(screen.queryByText('View details')).not.toBeInTheDocument();
+  });
+
   it('does not render enable/disable options in the overflow menu', async () => {
     renderPage(baseRule);
     await openAppMenuOverflow();
