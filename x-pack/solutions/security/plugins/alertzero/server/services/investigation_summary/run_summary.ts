@@ -9,7 +9,9 @@ import type { MetadataFieldValue } from '@kbn/agent-builder-common';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { z, lazySchema } from '@kbn/zod/v4';
+import { TEMPLATE_ID_INVESTIGATION } from '@kbn/alertzero-common';
 import {
+  collectProposalIds,
   collectStoryProposalIds,
   formatInvestigationStory,
   type StoryAttachment,
@@ -57,7 +59,7 @@ export interface RunInvestigationSummaryDeps {
 
 export interface InvestigationSummaryResult {
   skipped: boolean;
-  reason?: 'template' | 'empty' | 'no_connector' | 'incomplete';
+  reason?: 'template' | 'no_proposal' | 'empty' | 'no_connector' | 'incomplete';
   summary?: string;
 }
 
@@ -138,6 +140,12 @@ export const runInvestigationSummary = async ({
   const templateId = conversation.template_id;
   if (!templateId || !SUMMARY_TEMPLATES.has(templateId)) {
     return { skipped: true, reason: 'template' };
+  }
+  if (
+    templateId === TEMPLATE_ID_INVESTIGATION &&
+    collectProposalIds(conversation.attachments).length === 0
+  ) {
+    return { skipped: true, reason: 'no_proposal' };
   }
 
   const proposalIds = collectStoryProposalIds({

@@ -21,7 +21,7 @@ describe('runInvestigationSummary', () => {
         data: { message: 'Okta rule fired for the admin.' },
       },
     ],
-    attachments: [],
+    attachments: [{ id: 'att-proposal', type: 'platform.proposal', origin: 'prop-0' }],
   };
 
   const setup = ({
@@ -81,6 +81,62 @@ describe('runInvestigationSummary', () => {
     expect(result).toEqual({ skipped: true, reason: 'template' });
     expect(invoke).not.toHaveBeenCalled();
     expect(client.patchMetadata).not.toHaveBeenCalled();
+  });
+
+  it('does not summarize an investigation that has no proposal', async () => {
+    const { client, invoke, resolveChatModel } = setup({
+      conversationOverride: { attachments: [] },
+    });
+    const getProposals = jest.fn(async () => ({}));
+
+    const result = await runInvestigationSummary({
+      request,
+      spaceId: 'default',
+      conversationId: 'conv-1',
+      deps: { getConversationClient: async () => client, resolveChatModel, getProposals },
+    });
+
+    expect(result).toEqual({ skipped: true, reason: 'no_proposal' });
+    expect(resolveChatModel).not.toHaveBeenCalled();
+    expect(getProposals).not.toHaveBeenCalled();
+    expect(invoke).not.toHaveBeenCalled();
+    expect(client.patchMetadata).not.toHaveBeenCalled();
+  });
+
+  it('does not count a hidden proposal as a proposal', async () => {
+    const { client, invoke, resolveChatModel } = setup({
+      conversationOverride: {
+        attachments: [
+          { id: 'att-proposal', type: 'platform.proposal', origin: 'prop-0', hidden: true },
+        ] as never,
+      },
+    });
+
+    const result = await runInvestigationSummary({
+      request,
+      spaceId: 'default',
+      conversationId: 'conv-1',
+      deps: { getConversationClient: async () => client, resolveChatModel },
+    });
+
+    expect(result).toEqual({ skipped: true, reason: 'no_proposal' });
+    expect(invoke).not.toHaveBeenCalled();
+  });
+
+  it('always summarizes an escalation, with or without a proposal', async () => {
+    const { client, invoke, resolveChatModel } = setup({
+      conversationOverride: { template_id: 'escalation', attachments: [] },
+    });
+
+    const result = await runInvestigationSummary({
+      request,
+      spaceId: 'default',
+      conversationId: 'conv-1',
+      deps: { getConversationClient: async () => client, resolveChatModel },
+    });
+
+    expect(result.skipped).toBe(false);
+    expect(invoke).toHaveBeenCalledTimes(1);
   });
 
   it('does not call the model when the timeline has no story', async () => {
