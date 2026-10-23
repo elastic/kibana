@@ -250,7 +250,7 @@ export class NightshiftInvestigationsPlugin
           customContextClient.getInstructions(request, spaceId),
         logger: this.logger.get('custom_context'),
       });
-      if (plugins.agenticInvestigations) {
+      if (plugins.agenticInvestigations && config.findings_recorder.enabled) {
         // Records summary, severity, hypotheses and impact from outside the agent, so the
         // investigator needs no recording tools. Every dependency is read lazily: hooks are
         // registered in setup() but only run once the plugin has started.
