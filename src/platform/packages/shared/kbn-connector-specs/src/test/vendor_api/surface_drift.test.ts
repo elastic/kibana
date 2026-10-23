@@ -233,6 +233,7 @@ describe('renderDriftIssue', () => {
     expect(body).toContain('<details><summary>1 non-breaking change(s)</summary>');
     expect(body).toContain('- search: GET /items: limit must be <= 50');
     expect(body).toContain('node scripts/connector_vendor_api --drift --connector acme');
+    expect(body).toContain('`/update-connector acme <this issue>`');
     expect(body).not.toContain('cc ');
   });
 
