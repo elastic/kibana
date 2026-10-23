@@ -21,6 +21,7 @@ import { RESOLUTION_RELATIONSHIP_TYPE } from '../lookup/lookup_types';
 import { applyScoreModifiersFromEntities } from '../../modifiers/apply_modifiers_from_entities';
 import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
 import { buildResolutionModifierEntity } from './resolution_modifiers';
+import { getResolutionPageMemberFilter } from './resolution_member_filter';
 import { parseEsqlResolutionScoreRow } from './parse_esql_row';
 import type { ParsedResolutionScore } from './parse_esql_row';
 import type { ScopedLogger } from '../utils/with_log_context';
@@ -97,6 +98,22 @@ export const calculateResolutionEntityScores = async function* ({
       `[resolution][page:${pagesProcessed}] lookup buckets=${pageResult.bucketCount}, targets=${pageResult.resolutionTargetIds.length}`
     );
 
+    // Fetched before scoring so the query can skip alerts outside the page's groups, and reused
+    // for the group modifiers below.
+    const lookupMemberIds = await fetchResolutionGroupMemberIds({
+      esClient,
+      logger,
+      lookupIndex,
+      resolutionTargetIds: pageResult.resolutionTargetIds,
+    });
+    const pageMemberIds = [...new Set([...pageResult.resolutionTargetIds, ...lookupMemberIds])];
+    const memberFilter = getResolutionPageMemberFilter(entityType, pageMemberIds);
+    if (!memberFilter) {
+      logger.debug(
+        `[resolution][page:${pagesProcessed}] members=${pageMemberIds.length} exceed a terms query, reading every alert`
+      );
+    }
+
     const pageUpperBound =
       pageResult.resolutionTargetIds[pageResult.resolutionTargetIds.length - 1];
     const { parsedScores, esqlRows } = await scoreResolutionPage({
@@ -115,7 +132,7 @@ export const calculateResolutionEntityScores = async function* ({
       pageSize,
       alertsIndex,
       lookupIndex,
-      alertFilters,
+      alertFilters: memberFilter ? [...alertFilters, memberFilter] : alertFilters,
     });
     previousPageUpperBound = pageUpperBound;
     logger.debug(
@@ -125,12 +142,6 @@ export const calculateResolutionEntityScores = async function* ({
     let modifiedScores: EntityRiskScoreRecord[] = [];
     if (parsedScores.length > 0) {
       const allMemberIds = collectMemberEntityIds(parsedScores);
-      const lookupMemberIds = await fetchResolutionGroupMemberIds({
-        esClient,
-        logger,
-        lookupIndex,
-        resolutionTargetIds: pageResult.resolutionTargetIds,
-      });
       for (const memberId of lookupMemberIds) {
         allMemberIds.add(memberId);
       }
@@ -412,7 +423,9 @@ const scoreResolutionPage = async ({
     { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
   );
   return {
-    parsedScores: (esqlResponse.values ?? []).map(parseEsqlResolutionScoreRow(alertsIndex)),
+    parsedScores: (esqlResponse.values ?? []).map(
+      parseEsqlResolutionScoreRow(alertsIndex, sampleSize)
+    ),
     esqlRows: esqlResponse.values?.length ?? 0,
   };
 };

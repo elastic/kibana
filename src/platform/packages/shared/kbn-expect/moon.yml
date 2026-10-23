@@ -28,6 +28,4 @@ fileGroups:
     - expect.d.ts
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

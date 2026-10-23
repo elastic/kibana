@@ -21,7 +21,6 @@ import { applyPrivmonModifier } from './modifiers/privileged_users';
 
 import { allowedExperimentalValues } from '../../../../common';
 import type { Modifier } from './modifiers/types';
-import { RIEMANN_ZETA_VALUE } from './constants';
 
 jest.mock('./modifiers/asset_criticality', () => ({
   ...jest.requireActual('./modifiers/asset_criticality'),
@@ -539,8 +538,7 @@ describe('riskScoreDocFactory', () => {
           score: 70,
           normalized_score: 65,
           notes: ['Test note'],
-          // The highest possible raw score: every sampled alert scoring 100.
-          category_1_score: 100 * RIEMANN_ZETA_VALUE,
+          category_1_score: 70, // Raw value before normalization
           category_1_count: 2,
           risk_inputs: [
             {
@@ -557,12 +555,12 @@ describe('riskScoreDocFactory', () => {
     },
   };
 
-  it('should normalize category_1_score by RIEMANN_ZETA_VALUE', () => {
+  it('should use the normalized score as category_1_score', () => {
     const factory = riskScoreDocFactory({ now, identifierField, globalWeight: undefined });
 
     const result = factory(mockBucket, undefined, []);
 
-    expect(result.category_1_score).toBeCloseTo(100, 0);
+    expect(result.category_1_score).toBe(65);
   });
 
   describe('a saturated score', () => {

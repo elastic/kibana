@@ -45,9 +45,16 @@ export const getLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], logge
         try {
           const { getSpaceId } = await context.securitySolution;
           const spaceId = getSpaceId();
-          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const coreCtx = await context.core;
+          const esClient = coreCtx.elasticsearch.client.asCurrentUser;
+          const internalEsClient = coreCtx.elasticsearch.client.asInternalUser;
 
-          const leadDataClient = createLeadDataClient({ esClient, logger, spaceId });
+          const leadDataClient = createLeadDataClient({
+            esClient,
+            internalEsClient,
+            logger,
+            spaceId,
+          });
           const result = await leadDataClient.findLeads(request.query);
 
           return response.ok({ body: result });

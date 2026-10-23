@@ -1,5 +1,5 @@
 {
-  "sha1": "a33cf4ec5a9d0d514e1f0dce777978254b9f7697",
+  "sha1": "143456547c609561b8b4c42b96e71c401822d7af",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -400,6 +400,34 @@
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/sandbox_secrets.spec.ts",
         "line": 207,
         "column": 24
+      }
+    },
+    {
+      "id": "63a66063df79f9e-4086e916e3d62e9",
+      "title": "Scheduled Nightshift automations an edited schedule starts a scoped investigation and stops it at the configured timeout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/scheduled_automations.spec.ts",
+        "line": 70,
+        "column": 5
+      }
+    },
+    {
+      "id": "63a66063df79f9e-0bcda865dc9df24",
+      "title": "Scheduled Nightshift automations rejects unsupported schedules and missing instructions without creating an automation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/scheduled_automations.spec.ts",
+        "line": 211,
+        "column": 11
       }
     },
     {

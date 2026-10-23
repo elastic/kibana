@@ -69,8 +69,25 @@ describe('getAlertingClassicNavSection', () => {
 
     expect(getEntries(core)).toEqual([
       { label: 'Alerts', app: 'observabilityAlerting', path: '/alerts' },
+      { label: 'Rule Library', app: 'observabilityAlerting', path: '/rule-library' },
       { label: 'Action Policies', app: 'observabilityAlerting', path: '/action-policies' },
       { label: 'Execution History', app: 'observabilityAlerting', path: '/execution-history' },
+    ]);
+  });
+
+  it('lists Rule Library when the user has v2 rules read', () => {
+    setCapabilities(core, { alerting_v2_rules: { read: true } });
+
+    expect(getEntries(core)).toEqual([
+      { label: 'Rule Library', app: 'observabilityAlerting', path: '/rule-library' },
+    ]);
+  });
+
+  it('lists Rule Library when the user has v2 rules write', () => {
+    setCapabilities(core, { alerting_v2_rules: { all: true } });
+
+    expect(getEntries(core)).toEqual([
+      { label: 'Rule Library', app: 'observabilityAlerting', path: '/rule-library' },
     ]);
   });
 

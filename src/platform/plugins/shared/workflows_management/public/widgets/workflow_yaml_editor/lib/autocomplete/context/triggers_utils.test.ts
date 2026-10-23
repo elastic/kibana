@@ -56,6 +56,7 @@ function buildStepInfoFromYaml(yamlContent: string, stepId: string, stepType: st
     stepId,
     stepType,
     stepYamlNode: rootMap,
+    path: ['steps', 0],
     lineStart: 1,
     lineEnd: yamlContent.split('\n').length,
     propInfos,

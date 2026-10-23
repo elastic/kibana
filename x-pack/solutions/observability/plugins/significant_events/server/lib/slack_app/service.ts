@@ -111,6 +111,21 @@ const toWorkspace = (connection: RelayAppConnectionAttributes): SlackAppWorkspac
   };
 };
 
+const toWorkspaceDetails = (
+  connection: RelayAppConnectionAttributes
+): Pick<SlackAppStatusResponse, 'workspace' | 'createdBy' | 'createdAt'> => {
+  const workspace = toWorkspace(connection);
+  if (!workspace) {
+    return {};
+  }
+  const { createdBy, createdAt } = connection;
+  return {
+    workspace,
+    ...(createdBy ? { createdBy } : {}),
+    ...(createdAt ? { createdAt } : {}),
+  };
+};
+
 /** Pagination options for a single page of connected channels. */
 export interface ListBindingsOptions {
   /** Opaque cursor from a previous page's `nextCursor`; omit for the first page. */
@@ -289,7 +304,8 @@ export class SlackAppService {
   }
 
   private async mintApiKeyCredential(request: KibanaRequest): Promise<MintedRelayCredential> {
-    // Mint a managed, read-only, least-privilege ES API key for the agent. The key
+    // Mint a managed, least-privilege ES API key for the agent, matching the
+    // `_nightshift_agent` predefined role. The key
     // is granted on behalf of the connecting user but survives their deletion (ES keys
     // outlive their owner). Because the grant intersects with the owner's privileges, the
     // connecting user must themselves hold every privilege below or the key is silently
@@ -299,10 +315,11 @@ export class SlackAppService {
     //   (asCurrentUser). Broad conventional patterns cover APM/OTel logs, metrics and traces
     //   without regenerating the key when new data is onboarded.
     // - Nightshift gets `minimal_all`, not `read`, because the sandbox tools require
-    //   `manage_nightshift`. `configure_nightshift` stays out. Streams data goes through
-    //   `streams` (read), and connectors/LLM through `actions` (read). Those go via the
-    //   internal Kibana client, so no grants on system/dot indices (unsupported in serverless)
-    //   are needed.
+    //   `manage_nightshift`. `configure_nightshift` stays out. Connectors/LLM go through
+    //   `actions` (read) via the internal Kibana client, so no grants on system/dot indices
+    //   (unsupported in serverless) are needed.
+    // - The agent's before/after workflows read and write the Cortex, memory and
+    //   decision-tree AI indices as the caller.
     const apiKeyResult = await this.server.security.authc.apiKeys.grantAsInternalUser(request, {
       name: 'nightshift-relay-agent-builder',
       metadata: { managed: true, managed_by: 'nightshift-relay', type: 'agent_builder_converse' },
@@ -315,6 +332,14 @@ export class SlackAppService {
                 names: ['traces-*', 'logs-*', 'metrics-*', 'apm-*'],
                 privileges: ['read', 'view_index_metadata'],
               },
+              {
+                names: [
+                  'ai-index-idx-nightshift-cortex',
+                  'ai-index-idx-nightshift-semantic-memory',
+                  'ai-index-idx-nightshift-decision-trees',
+                ],
+                privileges: ['read', 'view_index_metadata', 'write', 'auto_configure'],
+              },
             ],
             run_as: [],
           },
@@ -323,8 +348,7 @@ export class SlackAppService {
               spaces: ['*'],
               feature: {
                 nightshift: ['minimal_all'],
-                streams: ['read'],
-                agentBuilder: ['read'],
+                agentBuilder: ['minimal_all'],
                 actions: ['read'],
                 workflowsManagement: ['read'],
               },
@@ -580,7 +604,7 @@ export class SlackAppService {
           return {
             available: true,
             status: RELAY_APP_CONNECTION_STATUS.pendingConfirmation,
-            workspace: toWorkspace(pending),
+            ...toWorkspaceDetails(pending),
           };
         }
       } catch (error) {
@@ -591,14 +615,13 @@ export class SlackAppService {
       }
     }
 
-    const workspace = toWorkspace(connection);
     return {
       available: true,
       status: isAwaitingConfirmation(connection)
         ? RELAY_APP_CONNECTION_STATUS.pendingConfirmation
         : connection.status,
       ...(connection.error ? { error: connection.error } : {}),
-      ...(workspace ? { workspace } : {}),
+      ...toWorkspaceDetails(connection),
     };
   }
 

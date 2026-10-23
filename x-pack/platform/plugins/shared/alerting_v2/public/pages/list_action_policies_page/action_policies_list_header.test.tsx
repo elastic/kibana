@@ -11,11 +11,9 @@ import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { ActionPoliciesListHeader } from './action_policies_list_header';
 
 let mockPhase: 'initialLoad' | 'empty' | 'populated' | 'filtering' | 'filtered' = 'populated';
-let mockExperimentalFeaturesEnabled = true;
 let mockAreAgentBuilderSkillsAvailable = true;
 let mockAgentBuilderSkillsRequirements = {
   hasAgentBuilderCapability: true,
-  isExperimentalFeaturesEnabled: true,
 };
 let mockIsLicenseValid = true;
 
@@ -26,10 +24,6 @@ jest.mock('@kbn/content-list-provider', () => {
     useContentListPhase: () => mockPhase,
   };
 });
-
-jest.mock('../../hooks/use_alerting_v2_experimental_features', () => ({
-  useAlertingV2ExperimentalFeatures: () => mockExperimentalFeaturesEnabled,
-}));
 
 jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
   useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
@@ -79,11 +73,9 @@ describe('ActionPoliciesListHeader', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockPhase = 'populated';
-    mockExperimentalFeaturesEnabled = true;
     mockAreAgentBuilderSkillsAvailable = true;
     mockAgentBuilderSkillsRequirements = {
       hasAgentBuilderCapability: true,
-      isExperimentalFeaturesEnabled: true,
     };
     mockIsLicenseValid = true;
   });
@@ -114,7 +106,7 @@ describe('ActionPoliciesListHeader', () => {
       expect(screen.getByTestId('createActionPolicyWithAgentButton')).toBeInTheDocument()
     );
     expect(screen.getByTestId('createActionPolicyWithAgentButton')).toHaveTextContent(
-      'Create with agent (Experimental)'
+      'Create with agent'
     );
     fireEvent.click(screen.getByTestId('createActionPolicyWithAgentButton'));
 
@@ -126,7 +118,6 @@ describe('ActionPoliciesListHeader', () => {
     mockAreAgentBuilderSkillsAvailable = false;
     mockAgentBuilderSkillsRequirements = {
       hasAgentBuilderCapability: false,
-      isExperimentalFeaturesEnabled: true,
     };
     renderHeader();
 
