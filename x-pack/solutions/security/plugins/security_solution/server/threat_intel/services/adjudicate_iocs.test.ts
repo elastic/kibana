@@ -73,15 +73,14 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(result.ioc_set_hash).toMatch(/^[a-f0-9]{64}$/);
   });
 
-  it('preserves deterministic non-URL indicators without semantic review', () => {
-    const hash = 'a'.repeat(64);
+  it('preserves deterministic non-candidate indicators without semantic review', () => {
     const prepared = prepareIocAdjudication({
       iocs: [
-        candidate(hash, {
-          type: 'hash',
+        candidate('203.0.113.5', {
+          type: 'ip',
           tier: 'discriminating',
           tier_heuristic: 'discriminating',
-          tier_basis: 'hash_high_entropy',
+          tier_basis: 'defanged_source',
           context: undefined,
         }),
       ],
@@ -91,6 +90,104 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(result.iocs[0].tier).toBe('discriminating');
     expect(result.promotable_count).toBe(1);
     expect(prepared.reviewable).toHaveLength(0);
+  });
+
+  it('includes a hash with non-empty context in reviewable candidates', () => {
+    const hash = 'a'.repeat(64);
+    const prepared = prepareIocAdjudication({
+      iocs: [
+        candidate(hash, {
+          type: 'hash',
+          tier: 'discriminating',
+          tier_heuristic: 'discriminating',
+          tier_basis: 'hash_high_entropy',
+          context: `Payload hash ${hash}.`,
+        }),
+      ],
+    });
+
+    expect(prepared.reviewable).toHaveLength(1);
+    expect(prepared.reviewable[0].ioc.type).toBe('hash');
+  });
+
+  it('downgrades an unapproved hash to reference and excludes it from anchors', () => {
+    const hash = 'a'.repeat(64);
+    const prepared = prepareIocAdjudication({
+      iocs: [
+        candidate(hash, {
+          type: 'hash',
+          tier: 'discriminating',
+          tier_heuristic: 'discriminating',
+          tier_basis: 'hash_high_entropy',
+          context: `Payload hash ${hash}.`,
+        }),
+      ],
+    });
+    const result = reconcileIocAdjudication(prepared, new Set());
+
+    expect(result.iocs[0].tier).toBe('reference');
+    expect(result.iocs[0].tier_basis).toBe('semantic_reference');
+    expect(result.anchor_iocs.some((ioc) => ioc.value === hash)).toBe(false);
+  });
+
+  it('keeps an approved hash discriminating and includes it in anchors', () => {
+    const hash = 'a'.repeat(64);
+    const prepared = prepareIocAdjudication({
+      iocs: [
+        candidate(hash, {
+          type: 'hash',
+          tier: 'discriminating',
+          tier_heuristic: 'discriminating',
+          tier_basis: 'hash_high_entropy',
+          context: `Payload hash ${hash}.`,
+        }),
+      ],
+    });
+    const result = reconcileIocAdjudication(prepared, new Set([0]));
+
+    expect(result.iocs[0].tier).toBe('discriminating');
+    expect(result.iocs[0].tier_basis).toBe('semantic_indicator:hash_high_entropy');
+    expect(result.anchor_iocs.some((ioc) => ioc.value === hash)).toBe(true);
+  });
+
+  it('defers a hash with empty context and excludes it from anchors', () => {
+    const hash = 'a'.repeat(64);
+    const prepared = prepareIocAdjudication({
+      iocs: [
+        candidate(hash, {
+          type: 'hash',
+          tier: 'discriminating',
+          tier_heuristic: 'discriminating',
+          tier_basis: 'hash_high_entropy',
+          context: '',
+        }),
+      ],
+    });
+    const result = reconcileIocAdjudication(prepared, new Set());
+
+    expect(prepared.reviewable).toHaveLength(0);
+    expect(result.iocs[0].deferred_unreviewed).toBe(true);
+    expect(result.anchor_iocs.some((ioc) => ioc.value === hash)).toBe(false);
+  });
+
+  it('downgrades an unapproved SHA-1 commit hash the same way as a SHA-256 sample', () => {
+    const hash = '31c0ea7d7ff1d1fccb6492e52dab544011628065';
+    const prepared = prepareIocAdjudication({
+      iocs: [
+        candidate(hash, {
+          type: 'hash',
+          tier: 'discriminating',
+          tier_heuristic: 'discriminating',
+          tier_basis: 'hash_high_entropy',
+          context: `The commit that patched the vulnerabilities is ${hash}.`,
+        }),
+      ],
+    });
+    const result = reconcileIocAdjudication(prepared, new Set());
+
+    expect(result.iocs[0].tier).toBe('reference');
+    expect(result.iocs[0].tier_basis).toBe('semantic_reference');
+    expect(result.anchor_iocs.some((ioc) => ioc.value === hash)).toBe(false);
   });
 
   it('defers a candidate with an empty context instead of sending it', () => {
@@ -367,19 +464,18 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
       tier: 'discriminating',
       tier_heuristic: 'discriminating',
       tier_basis: 'hash_high_entropy',
-      context: undefined,
+      context: `Payload hash ${'a'.repeat(64)}.`,
     });
-    const all = [...iocs, hash];
+    // Hash first so it sits inside capacity and is reviewed while 6 URLs overflow.
+    const all = [hash, ...iocs];
     const prepared = prepareIocAdjudication({ iocs: all });
     const approved = new Set(prepared.reviewable.map((entry) => entry.id));
     const result = reconcileIocAdjudication(prepared, approved);
 
-    expect(prepared.deferredUnreviewed).toBe(5);
-    expect(result.iocs[capacity].tier).toBe('discriminating');
-    expect(result.iocs[capacity].deferred_unreviewed).toBe(true);
-    expect(result.anchor_iocs.some((ioc) => ioc.value === iocs[capacity].value)).toBe(false);
+    expect(prepared.deferredUnreviewed).toBe(6);
+    expect(result.iocs[capacity + 1].deferred_unreviewed).toBe(true);
     expect(result.anchor_iocs.some((ioc) => ioc.type === 'hash')).toBe(true);
-    expect(result.promotable_count).toBe(capacity + 1);
+    expect(result.promotable_count).toBe(capacity);
   });
 
   it('keeps ioc_set_hash independent of deferred anchors', () => {
