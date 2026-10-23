@@ -1,8 +1,6 @@
 # DEDUP
 
-`DEDUP` removes duplicate rows from a result set, keeping only one row per unique combination of values across all columns. It compares all columns currently in scope and discards any row that is an exact duplicate of a previously seen row. Null values are treated as equal for deduplication.
-
-`DEDUP` is equivalent to `LIMIT 1 BY <all columns>`.
+The DEDUP command removes duplicate rows from a result set, keeping only one row per unique combination of values across all columns. Null values are treated as equal. DEDUP is equivalent to `LIMIT 1 BY <all columns>`.
 
 ## Syntax
 
@@ -10,11 +8,11 @@
 
 ### Parameters
 
-`DEDUP` takes no parameters.
+DEDUP takes no arguments.
 
 ## Examples
 
-Selects the gender values for a small set of employees, removes duplicate genders, and sorts the remaining values:
+Filters selected employees to their gender values, removes duplicate genders, and sorts the remaining values.
 
 ```esql
 FROM employees
@@ -24,7 +22,11 @@ FROM employees
 | SORT gender
 ```
 
-Selects gender and language values for a small set of employees, removes rows with duplicate combinations, and sorts the unique results:
+gender:keyword
+F
+M
+
+Filters selected employees to gender and language values, removes duplicate combinations, and sorts the results with null genders last.
 
 ```esql
 FROM employees
@@ -34,8 +36,46 @@ FROM employees
 | SORT gender NULLS LAST, languages
 ```
 
+gender:keyword | languages:integer
+F | 5
+M | 2
+null | 4
+null | 5
+
+Keeps up to two rows for each languages value from the selected employees and sorts the retained values.
+
+```esql
+FROM employees
+| WHERE emp_no IN (10001, 10003, 10007, 10008, 10010)
+| KEEP languages
+| LIMIT 2 BY languages
+| SORT languages
+```
+
+languages:integer
+2
+2
+4
+4
+
+Sorts selected employees by last name, keeps the first row for each gender, and returns the associated names and gender.
+
+```esql
+FROM employees
+| WHERE emp_no IN (10001, 10002, 10003, 10005, 10006)
+| SORT last_name
+| LIMIT 1 BY gender
+| KEEP first_name, last_name, gender
+```
+
+first_name:keyword | last_name:keyword | gender:keyword
+Parto | Bamford | M
+Anneke | Preusig | F
+
 ## Limitations
 
-`DEDUP` cannot be used when any column in scope has one of the following types: `aggregate_metric_double`, counter types (`counter_long`, `counter_integer`, `counter_double`), or `date_range`. Attempting to do so results in a validation error.
+DEDUP cannot be used when any column in scope has one of the following types: `aggregate_metric_double`, counter types (`counter_long`, `counter_integer`, `counter_double`), or `date_range`. Attempting to do so results in a validation error.
 
-Full-text search functions, such as `MATCH` or `KQL`, cannot appear after `DEDUP` in the same pipeline.
+Columns of an `unsupported` type are ignored when comparing rows, and DEDUP does not fail because of them. This includes fields mapped to incompatible types across the indices of a `FROM` command. Such fields are returned as `null` until converted, so they cannot tell rows apart. To deduplicate on the value of such a field, convert it first and then use DEDUP, for example: `EVAL e = emp_no::long | DROP emp_no | DEDUP`.
+
+Full-text search functions, such as `MATCH` or `KQL`, cannot appear after DEDUP in the same pipeline.

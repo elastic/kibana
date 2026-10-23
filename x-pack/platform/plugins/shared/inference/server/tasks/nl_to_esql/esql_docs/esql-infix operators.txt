@@ -1,65 +1,57 @@
 # INFIX OPERATORS
 
-Infix operators provide shorthand syntax for casting values, testing membership, matching wildcard or regular-expression patterns, and running full-text match queries.
+Infix operators provide expression syntax for casting values, testing membership, matching wildcard or regular-expression patterns, and performing full-text search.
 
 ## Syntax
 
-- Cast `::`
-- `IN`
-- `LIKE`
-- `RLIKE`
-- Match `:`
+- Cast: `expression::type`
+- `expression IN (value[, ...])`
+- `expression LIKE pattern`
+- `expression RLIKE pattern`
+- Match: `field:query`
 
 ### Parameters
 
-#### Cast (`::`)
+#### `::`
 
-The `::` operator provides a convenient alternative syntax to the `TO_<type>` conversion functions.
+The cast operator provides a convenient alternative syntax to the `TO_<type>` conversion functions.
 
-#### IN
+#### `IN`
 
-The `IN` operator allows testing whether a field or expression equals an element in a list of literals, fields, or expressions.
+The `IN` operator tests whether a field or expression equals an element in a list of literals, fields, or expressions. You can also use a subquery with `IN` or `NOT IN` to compare a field or a tuple of fields against the results of another query in `WHERE`, `EVAL`, and the per-aggregate `WHERE` of `STATS` and `INLINE STATS`.
 
-You can also use a subquery with `IN` or `NOT IN` to compare a field or a tuple of fields against the results of another query, in `WHERE`, `EVAL`, and the per-aggregate `WHERE` of `STATS` and `INLINE STATS`.
+#### `LIKE`
 
-#### LIKE
-
-Use `LIKE` to filter data based on string patterns using wildcards. `LIKE` usually acts on a field placed on the left-hand side of the operator, but it can also act on a constant expression. The right-hand side of the operator represents the pattern.
+The `LIKE` operator filters data based on string patterns using wildcards. `LIKE` usually acts on a field placed on the left-hand side of the operator, but it can also act on a constant expression. The right-hand side of the operator represents the pattern.
 
 The following wildcard characters are supported:
 
 - `*` matches zero or more characters.
 - `?` matches one character.
 
-Both a single pattern or a list of patterns are supported. If a list of patterns is provided, the expression returns true if any of the patterns match.
+Both a single pattern and a list of patterns are supported. If a list of patterns is provided, the expression returns true if any of the patterns match. Patterns may also be specified with REST query placeholders or constant expressions.
 
-Patterns may be specified with REST query placeholders. The pattern can also be any constant expression, such as a call to `CONCAT` or `TO_LOWER`.
+#### `RLIKE`
 
-#### RLIKE
+The `RLIKE` operator filters data based on string patterns using regular expressions. `RLIKE` usually acts on a field placed on the left-hand side of the operator, but it can also act on a constant expression. The right-hand side of the operator represents the pattern.
 
-Use `RLIKE` to filter data based on string patterns using regular expressions. `RLIKE` usually acts on a field placed on the left-hand side of the operator, but it can also act on a constant expression. The right-hand side of the operator represents the pattern.
+Both a single pattern and a list of patterns are supported. If a list of patterns is provided, the expression returns true if any of the patterns match. Patterns may also be specified with REST query placeholders or constant expressions.
 
-Both a single pattern or a list of patterns are supported. If a list of patterns is provided, the expression returns true if any of the patterns match.
+#### `:`
 
-Patterns may be specified with REST query placeholders. The pattern can also be any constant expression, such as a call to `CONCAT` or `TO_UPPER`.
-
-#### Match operator (`:`)
-
-Use the match operator (`:`) to perform full-text search and filter rows that match a given query string.
-
-The match operator performs a match query on the specified field or expression. It returns true if the provided query matches the row.
+The match operator performs full-text search and filters rows that match a given query string. It performs a match query on the specified field or expression and returns true if the provided query matches the row.
 
 The match operator can also search expressions that are not backed by an index, such as computed columns produced by `EVAL` or `STATS`.
 
 ## Examples
 
-Create a `version` value by casting numeric and string expressions.
+Cast integer and string values into a version value.
 
 ```esql
 ROW ver = CONCAT(("0"::INT + 1)::STRING, ".2.3")::VERSION
 ```
 
-Filter a row by testing an arithmetic expression against literals and expressions.
+Test whether an arithmetic expression matches one value in a mixed list.
 
 ```esql
 ROW a = 1, b = 4, c = 3
@@ -74,35 +66,35 @@ FROM employees
 | KEEP first_name, last_name
 ```
 
-Match a literal asterisk in a string with escaped wildcards.
+Match a literal `*` character with an escaped wildcard.
 
 ```esql
 ROW message = "foo * bar"
 | WHERE message LIKE "foo \\* bar"
 ```
 
-Match a literal asterisk with a triple-quoted string pattern.
+Match a literal `*` character using a triple-quoted string.
 
 ```esql
 ROW message = "foo * bar"
 | WHERE message LIKE """foo \* bar"""
 ```
 
-Match a Windows path prefix with triple-quoted strings.
+Match a Windows-style path with a triple-quoted string.
 
 ```esql
 ROW path = """C:\Windows\System32\foo.txt"""
 | WHERE path LIKE """C:\\Windows*"""
 ```
 
-Match a message against a list of wildcard patterns.
+Filter rows by matching any wildcard pattern in a pattern list.
 
 ```esql
 ROW message = "foobar"
 | WHERE message like ("foo*", "bar?")
 ```
 
-Filter employee names with a wildcard pattern supplied by a REST query placeholder.
+Filter employees with a wildcard pattern supplied through a REST query placeholder.
 
 ```esql
 FROM employees
@@ -110,7 +102,7 @@ FROM employees
 | KEEP first_name, last_name
 ```
 
-Build a wildcard pattern with `CONCAT` and filter employee names.
+Filter employees using a constant expression as the wildcard pattern.
 
 ```esql
 from employees | where first_name like concat("Eber", "*") | keep emp_no, first_name
@@ -124,28 +116,28 @@ FROM employees
 | KEEP first_name, last_name
 ```
 
-Match a literal opening parenthesis in a string with escaped regular-expression syntax.
+Match a literal `(` character with an escaped regular-expression character.
 
 ```esql
 ROW message = "foo ( bar"
 | WHERE message RLIKE "foo \\( bar"
 ```
 
-Match a literal opening parenthesis with a triple-quoted regular-expression pattern.
+Match a literal `(` character using a triple-quoted string.
 
 ```esql
 ROW message = "foo ( bar"
 | WHERE message RLIKE """foo \( bar"""
 ```
 
-Match a message against a list of regular-expression patterns.
+Filter rows by matching any regular expression in a pattern list.
 
 ```esql
 ROW message = "foobar"
 | WHERE message RLIKE ("foo.*", "bar.")
 ```
 
-Filter employee names with a regular-expression pattern supplied by a REST query placeholder.
+Filter employees with a regular-expression pattern supplied through a REST query placeholder.
 
 ```esql
 FROM employees
@@ -153,20 +145,20 @@ FROM employees
 | KEEP first_name, last_name
 ```
 
-Build a regular-expression pattern with `CONCAT` and filter employee names.
+Filter employees using a constant expression as the regular-expression pattern.
 
 ```esql
 from employees | where first_name rlike concat("Eber", ".*") | keep emp_no, first_name
 ```
 
-Perform full-text search on a `text` field.
+Search a text field for rows whose author matches `Faulkner`.
 
 ```esql
 FROM books
 | WHERE author:"Faulkner"
 ```
 
-Filter multi-valued `keyword` columns with the match operator.
+Filter multi-valued keyword columns for the `Internship` job position.
 
 ```esql
 FROM employees
@@ -187,6 +179,6 @@ FROM books METADATA _score
 
 When used on `text` fields, `LIKE` and `RLIKE` treat the field as a `keyword` and do not use the analyzer. Pattern matching is case-sensitive and must match the exact indexed string. To perform full-text search, use the `MATCH` or `QSTR` functions.
 
-Matching exact wildcard characters with `LIKE`, such as `*` and `?`, requires escaping. Matching special characters with `RLIKE`, such as `.`, `*`, or `(`, also requires escaping.
+Matching literal wildcard or regular-expression characters with `LIKE` and `RLIKE` requires escaping. Backslash is also special in string literals, so it may require additional escaping. Triple-quoted strings can reduce escaping overhead.
 
-When the match operator searches a target that is not an indexed field, the search evaluates by scanning values row by row, which may be slower on large datasets.
+When the match operator searches an expression that is not backed by an index, the search scans values row by row, which may be slower on large datasets.
