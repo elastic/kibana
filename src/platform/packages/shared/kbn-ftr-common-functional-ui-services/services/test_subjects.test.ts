@@ -147,8 +147,9 @@ describe('TestSubjects.waitForEnabled', () => {
   const isDisplayed = jest.fn();
   const isEnabled = jest.fn();
 
-  // Uses the real RetryService so the test exercises the production poll/timeout semantics
-  // (retryForTruthy: a falsy result is retried, only the deadline throws).
+  // Uses the real RetryService so the tests exercise the production poll/timeout semantics
+  // (retryForTruthy: a falsy result is retried every 100 ms, only the deadline throws). Timers
+  // are faked so probe counts and the deadline are deterministic rather than wall-clock based.
   const getTestSubjects = () => {
     const config = { get: jest.fn(() => 120000) };
     const log = { debug: jest.fn() };
@@ -164,26 +165,39 @@ describe('TestSubjects.waitForEnabled', () => {
   };
 
   beforeEach(() => {
+    jest.useFakeTimers();
     byCssSelector.mockReset().mockResolvedValue({ isDisplayed, isEnabled });
     isDisplayed.mockReset().mockResolvedValue(true);
     isEnabled.mockReset();
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('keeps polling while the element is disabled and resolves only once it is enabled', async () => {
-    let settled = false;
-    const settledWhenProbed: boolean[] = [];
-    isEnabled.mockImplementation(async () => {
-      settledWhenProbed.push(settled);
-      return settledWhenProbed.length >= 3;
-    });
+    isEnabled.mockResolvedValueOnce(false).mockResolvedValueOnce(false).mockResolvedValue(true);
     const testSubjects = getTestSubjects();
 
-    await testSubjects.waitForEnabled('selector', 5000).then(() => {
+    let settled = false;
+    const result = testSubjects.waitForEnabled('selector', 5000).then(() => {
       settled = true;
     });
 
-    // two disabled probes were seen before the enabled one, and none of them resolved the call
-    expect(settledWhenProbed).toEqual([false, false, false]);
+    // first probe: disabled, must not resolve the call
+    await jest.advanceTimersByTimeAsync(50);
+    expect(isEnabled).toHaveBeenCalledTimes(1);
+    expect(settled).toBe(false);
+
+    // second probe after the 100 ms retry delay: still disabled
+    await jest.advanceTimersByTimeAsync(50);
+    expect(isEnabled).toHaveBeenCalledTimes(2);
+    expect(settled).toBe(false);
+
+    // third probe: enabled
+    await jest.advanceTimersByTimeAsync(100);
+    await result;
+    expect(settled).toBe(true);
     expect(isEnabled).toHaveBeenCalledTimes(3);
     // the element is re-queried on every probe rather than reused from the first lookup
     expect(byCssSelector).toHaveBeenCalledTimes(3);
@@ -195,20 +209,26 @@ describe('TestSubjects.waitForEnabled', () => {
     isEnabled.mockResolvedValue(true);
     const testSubjects = getTestSubjects();
 
-    await expect(testSubjects.waitForEnabled('selector', 5000)).resolves.toBeUndefined();
+    const result = testSubjects.waitForEnabled('selector', 5000);
 
+    await jest.advanceTimersByTimeAsync(100);
+    await expect(result).resolves.toBeUndefined();
     expect(isDisplayed).toHaveBeenCalledTimes(2);
+    // a hidden element short-circuits the probe before the enabled check
+    expect(isEnabled).toHaveBeenCalledTimes(1);
   });
 
   it('throws a timeout error when the element stays disabled', async () => {
     isEnabled.mockResolvedValue(false);
     const testSubjects = getTestSubjects();
 
-    await expect(testSubjects.waitForEnabled('selector', 150)).rejects.toThrow(
+    const result = expect(testSubjects.waitForEnabled('selector', 250)).rejects.toThrow(
       'timed out waiting for testSubject(selector) to be displayed and enabled'
     );
 
-    // the deadline, not the first disabled probe, ended the wait
-    expect(isEnabled.mock.calls.length).toBeGreaterThan(1);
+    await jest.advanceTimersByTimeAsync(300);
+    await result;
+    // probes at 0, 100 and 200 ms; the 250 ms deadline, not the first disabled probe, ended the wait
+    expect(isEnabled).toHaveBeenCalledTimes(3);
   });
 });
