@@ -51,7 +51,7 @@ import { registerInferenceFeatures } from './inference_features';
 import { createConversationEventBus } from './workflows/triggers/conversation_event_bus';
 import { registerAttachmentWorkflowSteps, registerConversationWorkflowSteps } from './workflows';
 import { registerConversationWorkflowEventBridge } from './workflows/triggers/event_bridge';
-import { AGENTBUILDER_FEATURE_ID } from '../common/features';
+import { apiPrivileges } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
 import { RecommendedEndpointsPoller } from './recommended_endpoints_poller';
 import { registerDeductiveAgent } from './services/execution/run_agent/deductive/register_deductive_agent';
@@ -99,11 +99,8 @@ export class AgentBuilderPlugin
       allowedMimeTypes: [...SUPPORTED_IMAGE_MIME_TYPES],
       maxSizeBytes: MAX_IMAGE_BYTES,
       http: {
-        create: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-        download: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-        getById: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-        list: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-        delete: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        create: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+        download: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     });
 
@@ -327,6 +324,10 @@ export class AgentBuilderPlugin
           this.conversationUpdatedOptIns.push(optIn);
         },
       },
+      callbacks: {
+        registerConversationResolver: serviceSetups.callbacks.registerConversationResolver,
+        registerTransport: serviceSetups.callbacks.registerTransport,
+      },
       topSnippets: this.config.topSnippets,
     };
   }
@@ -347,6 +348,7 @@ export class AgentBuilderPlugin
       searchInferenceEndpoints,
       licensing,
       security: securityPlugin,
+      isomer,
     } = startDeps;
     const { elasticsearch, http, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
@@ -383,6 +385,7 @@ export class AgentBuilderPlugin
         airgapped: this.env.airgapped,
       }),
       deductiveRegister: this.config.deductive?.register ?? false,
+      isomer,
       conversationEventBus: this.conversationEventBus,
     });
 

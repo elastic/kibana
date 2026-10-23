@@ -54,6 +54,7 @@ export {
   type EscalationFlyoutHeaderProps,
 } from './src/components/details/escalation_flyout_header';
 export { StatusToggle, type StatusToggleProps } from './src/components/details/status_toggle';
+export { SeverityPicker, type SeverityPickerProps } from './src/components/details/severity_picker';
 export {
   SEVERITY_COLORS,
   SEVERITY_LABELS,
@@ -68,6 +69,8 @@ export {
   ProposedActionsList,
   type ProposedActionsListProps,
 } from './src/components/details/proposed_actions_list';
+
+export { ShowMoreFooter } from './src/components/show_more_footer';
 
 export {
   FlyoutGroupedAttachments,
@@ -98,6 +101,8 @@ export {
   type AssigneesSlotRenderProps,
   type RenderStatus,
   type StatusSlotRenderProps,
+  type RenderSeverity,
+  type SeveritySlotRenderProps,
   type RenderLinkedInvestigations,
   type RenderSyncIndicator,
   type SyncIndicatorSlotRenderProps,
@@ -138,12 +143,9 @@ export {
 } from './src/components/impact/open_impact_entity';
 export {
   Impact,
-  impactPills,
-  investigationEntityIds,
-  matchesEntityFilter,
   useEntityFilter,
-  type ImpactFilterable,
   type ImpactPill,
+  type PagedImpactPills,
 } from './src/components/filters/impact';
 
 export { BaseActionModal } from './src/components/modals/base_action_modal';
