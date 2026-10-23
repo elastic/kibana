@@ -393,9 +393,9 @@ export class PreviewController {
       this.debouncedLoadDocument.cancel();
       this.setFetchDocError(null);
       // The discarded lookup raised the preview-loading flag for a preview that will no longer
-      // run, so reset it — unless an in-flight _execute request still owns the flag, in which
-      // case its response will settle it.
-      if (wasFetchingDocument && this.inFlightPreviewId === null) {
+      // run, so reset it. An _execute request that is still in flight settles the flag itself
+      // when its response is applied.
+      if (wasFetchingDocument) {
         this.setIsLoadingPreview(false);
       }
     }
