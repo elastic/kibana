@@ -227,7 +227,10 @@ describe('runInvestigationSummary', () => {
     });
 
     expect(invoke).toHaveBeenCalledWith([
-      ['system', expect.stringContaining('Never say that a proposal is pending')],
+      [
+        'system',
+        expect.stringMatching(/Never say that a proposal is pending[\s\S]*stay true whichever way/),
+      ],
       expect.anything(),
     ]);
   });
