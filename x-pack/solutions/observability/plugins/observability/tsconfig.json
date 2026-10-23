@@ -171,7 +171,8 @@
     "@kbn/ui-callout",
     "@kbn/alerting-v2-utils",
     "@kbn/alerting-v2-constants",
-    "@kbn/agentic-investigations-plugin"
+    "@kbn/agentic-investigations-plugin",
+    "@kbn/slo-constants"
   ],
   "exclude": ["target/**/*"]
 }

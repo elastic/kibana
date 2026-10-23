@@ -143,6 +143,7 @@ dependsOn:
   - '@kbn/cps-server-utils'
   - '@kbn/app-header'
   - '@kbn/ui-callout'
+  - '@kbn/slo-constants'
 tags:
   - plugin
   - prod
