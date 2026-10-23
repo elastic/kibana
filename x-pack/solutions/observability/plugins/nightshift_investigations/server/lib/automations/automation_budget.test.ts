@@ -8,7 +8,11 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { NightshiftAutomationBudgetAttributes } from './types';
-import { consumeAutomationBudget, readAutomationUsage } from './automation_budget';
+import {
+  consumeAutomationBudget,
+  hasAutomationBudget,
+  readAutomationUsage,
+} from './automation_budget';
 
 const createRepository = () => {
   const documents = new Map<
@@ -54,6 +58,17 @@ const createRepository = () => {
 describe('automation daily dispatch budget', () => {
   beforeEach(() => jest.useFakeTimers().setSystemTime(new Date('2026-10-19T23:59:00.000Z')));
   afterEach(() => jest.useRealTimers());
+
+  it('reports whether budget is left without using any', async () => {
+    const repository = createRepository();
+
+    expect(await hasAutomationBudget(repository, 'a1', undefined)).toBe(true);
+    expect(await hasAutomationBudget(repository, 'a1', 1)).toBe(true);
+    await consumeAutomationBudget(repository, 'a1', 1);
+    expect(await hasAutomationBudget(repository, 'a1', 1)).toBe(false);
+    expect(await hasAutomationBudget(repository, 'a1', undefined)).toBe(true);
+    expect(await readAutomationUsage(repository, 'a1')).toBe(1);
+  });
 
   it('admits exactly the limit under concurrent first creates and updates', async () => {
     const repository = createRepository();

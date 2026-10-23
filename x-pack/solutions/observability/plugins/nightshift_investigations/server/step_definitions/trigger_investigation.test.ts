@@ -354,8 +354,9 @@ describe('automation budget enforcement before dispatch', () => {
     'skips %s dispatches when the limit is reached',
     async (subjectType) => {
       const { start, definition, soClient } = setup(2, 2);
-      start.mockImplementation(async (_request, { beforeOpeningNew }) => {
-        await beforeOpeningNew();
+      start.mockImplementation(async (_request, { automationBudget }) => {
+        await automationBudget.check();
+        await automationBudget.consume();
         return { investigation_id: 'inv-1' };
       });
       expect(
@@ -371,9 +372,10 @@ describe('automation budget enforcement before dispatch', () => {
 
   it('charges the budget only when the client opens a new investigation', async () => {
     const { start, definition, soClient } = setup(2, 1);
-    start.mockImplementation(async (_request, { beforeOpeningNew }) => {
+    start.mockImplementation(async (_request, { automationBudget }) => {
+      await automationBudget.check();
       expect(soClient.update).not.toHaveBeenCalled();
-      await beforeOpeningNew();
+      await automationBudget.consume();
       expect(soClient.update).toHaveBeenCalledWith(
         'nightshift-automation-budget',
         'a1',

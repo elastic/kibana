@@ -25,8 +25,9 @@ import {
 import type { GetAutomationsSoClient, GetInvestigationsClient } from '../routes/types';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../lib/automations/types';
-import { consumeAutomationBudget } from '../lib/automations/automation_budget';
+import { consumeAutomationBudget, hasAutomationBudget } from '../lib/automations/automation_budget';
 import { AutomationDailyLimitReachedError, InvestigationQuotaDeniedError } from '../client/errors';
+import type { AutomationBudget } from '../types';
 
 const inputSchema = lazySchema(() =>
   z.object({
@@ -181,7 +182,7 @@ export const triggerInvestigationStepDefinition = (
       const spaceId = workflow.spaceId;
       const input = inputSchema.parse(context.input);
       const subjectId = toSubjectId(input);
-      let beforeOpeningNew: (() => Promise<void>) | undefined;
+      let automationBudget: AutomationBudget | undefined;
       if (input.automation_id) {
         const soClient = getAutomationsSoClient(request, spaceId);
         const automationId = input.automation_id;
@@ -193,10 +194,17 @@ export const triggerInvestigationStepDefinition = (
           throw new Error('The automation does not belong to this workflow.');
         }
         const dailyLimit = automation.attributes.runtime.dailyDispatchLimit;
-        beforeOpeningNew = async () => {
-          if (!(await consumeAutomationBudget(soClient, automationId, dailyLimit))) {
-            throw new AutomationDailyLimitReachedError(dailyLimit);
-          }
+        automationBudget = {
+          check: async () => {
+            if (!(await hasAutomationBudget(soClient, automationId, dailyLimit))) {
+              throw new AutomationDailyLimitReachedError(dailyLimit);
+            }
+          },
+          consume: async () => {
+            if (!(await consumeAutomationBudget(soClient, automationId, dailyLimit))) {
+              throw new AutomationDailyLimitReachedError(dailyLimit);
+            }
+          },
         };
       }
       const client = getInvestigationsClient(request, spaceId);
@@ -220,7 +228,7 @@ export const triggerInvestigationStepDefinition = (
             notificationDestinations: input.notificationDestinations,
             slack_thread: input.slack_thread,
           },
-          { beforeOpeningNew }
+          { automationBudget }
         );
         return { output: result };
       } catch (error) {

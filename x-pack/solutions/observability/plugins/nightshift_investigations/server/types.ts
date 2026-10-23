@@ -37,7 +37,14 @@ export interface InvestigationQuotaResult {
   allowed: boolean;
 }
 
-export type InvestigationQuotaCallback = () => Promise<InvestigationQuotaResult>;
+export type InvestigationQuotaCallback = (options: {
+  consume: boolean;
+}) => Promise<InvestigationQuotaResult>;
+
+export interface AutomationBudget {
+  check: () => Promise<void>;
+  consume: () => Promise<void>;
+}
 
 export interface NightshiftInvestigationsServerSetup {
   registerInvestigationQuota: (callback: InvestigationQuotaCallback) => void;
