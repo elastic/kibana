@@ -46,6 +46,7 @@ import {
   EventsService,
   SpaceSettingsService,
   type AgentBuilderInternalService,
+  type ChatAttachmentCallbacks,
 } from './services';
 import { createPublicEmbeddableChatAccess } from './services/access';
 import { createPublicAttachmentContract } from './services/attachments';
@@ -123,12 +124,13 @@ export class AgentBuilderPlugin
     usageCollection?: UsageCollectionSetup;
   };
   private activeSidebarRef: ConversationSidebarRef | null = null;
-  private sidebarCallbacks: {
-    updateProps: (props: EmbeddableConversationProps) => void;
-    resetBrowserApiTools: () => void;
-    addAttachment: (attachment: AttachmentInput) => void;
-    removeAttachmentById: (attachmentId: string) => void;
-  } | null = null;
+  private sidebarCallbacks:
+    | (ChatAttachmentCallbacks & {
+        updateProps: (props: EmbeddableConversationProps) => void;
+        resetBrowserApiTools: () => void;
+      })
+    | null = null;
+  private fullPageAttachmentCallbacks: ChatAttachmentCallbacks | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private isEarsEnabled = true;
   private isEarsExperimentalEnabled = false;
@@ -313,6 +315,14 @@ export class AgentBuilderPlugin
       openSidebarConversation: (options?: OpenSidebarInternalOptions) => {
         return openSidebarInternal(options);
       },
+      registerFullPageAttachmentCallbacks: (callbacks) => {
+        this.fullPageAttachmentCallbacks = callbacks;
+        return () => {
+          if (this.fullPageAttachmentCallbacks === callbacks) {
+            this.fullPageAttachmentCallbacks = null;
+          }
+        };
+      },
     };
 
     this.internalServices = internalServices;
@@ -412,14 +422,12 @@ export class AgentBuilderPlugin
         application: core.application,
       }),
       addAttachment: (attachment: AttachmentInput) => {
-        if (this.sidebarCallbacks) {
-          this.sidebarCallbacks.addAttachment(attachment);
-        }
+        (this.sidebarCallbacks ?? this.fullPageAttachmentCallbacks)?.addAttachment(attachment);
       },
       removeAttachment: (attachmentId: string) => {
-        if (this.sidebarCallbacks) {
-          this.sidebarCallbacks.removeAttachmentById(attachmentId);
-        }
+        (this.sidebarCallbacks ?? this.fullPageAttachmentCallbacks)?.removeAttachmentById(
+          attachmentId
+        );
       },
       setChatConfig: (config: EmbeddableConversationProps) => {
         // Set config until sidebar is next opened

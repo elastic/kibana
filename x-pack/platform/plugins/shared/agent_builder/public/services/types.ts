@@ -6,6 +6,7 @@
  */
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import type { AgentBuilderAccessChecker } from './access/access';
 import type { AgentBuilderStartDependencies, OpenConversationSidebarReturn } from '../types';
@@ -26,6 +27,11 @@ import type { OAuthClientsService } from './oauth_clients';
 import type { NavigationService } from './navigation';
 import type { EventsService } from './events';
 import type { SpaceSettingsService } from './space_settings';
+
+export interface ChatAttachmentCallbacks {
+  addAttachment: (attachment: AttachmentInput) => void;
+  removeAttachmentById: (attachmentId: string) => void;
+}
 
 export interface AgentBuilderInternalService {
   filesClient: ScopedFilesClient;
@@ -51,4 +57,6 @@ export interface AgentBuilderInternalService {
   isEarsEnabled: boolean;
   isEarsExperimentalEnabled: boolean;
   openSidebarConversation: (options?: OpenSidebarInternalOptions) => OpenConversationSidebarReturn;
+  /** Lets the full-page chat receive attachments added through the public `addAttachment`. */
+  registerFullPageAttachmentCallbacks: (callbacks: ChatAttachmentCallbacks) => () => void;
 }

@@ -9,6 +9,7 @@ import React from 'react';
 import { act, render } from '@testing-library/react';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import { RoutedConversationsProvider } from './routed_conversations_provider';
+import type { ChatAttachmentCallbacks } from '../../../services';
 import { useConversationContext } from './conversation_context';
 
 const mockUseParams = jest.fn();
@@ -23,9 +24,14 @@ jest.mock('@kbn/react-query', () => ({
   useQueryClient: jest.fn(() => ({})),
 }));
 
+const mockRegisterFullPageAttachmentCallbacks = jest.fn((_callbacks: ChatAttachmentCallbacks) =>
+  jest.fn()
+);
+
 jest.mock('../../hooks/use_agent_builder_service', () => ({
   useAgentBuilderServices: jest.fn(() => ({
     conversationsService: {},
+    registerFullPageAttachmentCallbacks: mockRegisterFullPageAttachmentCallbacks,
   })),
 }));
 
@@ -92,6 +98,29 @@ describe('RoutedConversationsProvider — attachment lifecycle', () => {
     });
 
     expect(capture.attachments).toHaveLength(1);
+  });
+
+  it('receives attachments added and removed by other apps', async () => {
+    const capture: ContextCapture = { attachments: undefined, upsertAttachments: undefined };
+
+    render(
+      <RoutedConversationsProvider>
+        <ContextReader capture={capture} />
+      </RoutedConversationsProvider>
+    );
+
+    await act(async () => {});
+    const callbacks = mockRegisterFullPageAttachmentCallbacks.mock.calls.at(-1)?.[0];
+
+    act(() => {
+      callbacks?.addAttachment({ ...createMockAttachment(), id: 'from-other-app' });
+    });
+    expect(capture.attachments).toEqual([expect.objectContaining({ id: 'from-other-app' })]);
+
+    act(() => {
+      callbacks?.removeAttachmentById('from-other-app');
+    });
+    expect(capture.attachments).toEqual([]);
   });
 
   it('clears attachments when navigating to a different conversation', async () => {
