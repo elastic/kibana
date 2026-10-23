@@ -504,3 +504,27 @@ export function getInputScrollLeftToCenter(
 
   return clamp(midX - input.clientWidth / 2);
 }
+
+/**
+ * Returns the character offset in a single-line input closest to a horizontal client
+ * coordinate, accounting for padding, border and horizontal scroll.
+ * Uses canvas text measurement; returns undefined when 2d context is unavailable.
+ */
+export function getInputOffsetAtClientX(input: HTMLInputElement, clientX: number) {
+  const ctx = document.createElement('canvas').getContext('2d');
+  if (!ctx) return undefined;
+
+  const style = window.getComputedStyle(input);
+  ctx.font = style.font;
+  const leftInset = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.borderLeftWidth) || 0);
+  const x = clientX - input.getBoundingClientRect().left - leftInset + input.scrollLeft;
+
+  const { value } = input;
+  let previousWidth = 0;
+  for (let i = 1; i <= value.length; i++) {
+    const width = ctx.measureText(value.substring(0, i)).width;
+    if (x < (previousWidth + width) / 2) return i - 1;
+    previousWidth = width;
+  }
+  return value.length;
+}
