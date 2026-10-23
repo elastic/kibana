@@ -5831,8 +5831,8 @@ importers:
         specifier: 18.0.7
         version: 18.0.7
       '@types/react-virtualized':
-        specifier: 9.22.3
-        version: 9.22.3
+        specifier: 9.22.4
+        version: 9.22.4
       '@types/react-window':
         specifier: 1.8.8
         version: 1.8.8
@@ -14540,8 +14540,8 @@ packages:
     peerDependencies:
       '@types/react': 18.2.79
 
-  '@types/react-virtualized@9.22.3':
-    resolution: {integrity: sha512-UKRWeBIrECaKhE4O//TSFhlgwntMwyiEIOA7WZoVkr52Jahv0dH6YIOorqc358N2V3oKFclsq5XxPmx2PiYB5A==}
+  '@types/react-virtualized@9.22.4':
+    resolution: {integrity: sha512-7xBz1a/zXt4Qpogi9khBeaZhphcHPnEF3uchRXsqsKhpHwgxgrpo6OgghLqgc5NWQ6aj5/ws7HaNzIShKNCnXg==}
 
   '@types/react-window-infinite-loader@1.0.9':
     resolution: {integrity: sha512-gEInTjQwURCnDOFyIEK2+fWB5gTjqwx30O62QfxA9stE5aiB6EWkGj4UMhc0axq7/FV++Gs/TGW8FtgEx0S6Tw==}
@@ -32235,7 +32235,7 @@ snapshots:
     dependencies:
       '@types/react': 18.2.79
 
-  '@types/react-virtualized@9.22.3':
+  '@types/react-virtualized@9.22.4':
     dependencies:
       '@types/prop-types': 15.7.5
       '@types/react': 18.2.79
