@@ -109,7 +109,8 @@ export const createRunHealthTracker = () => {
     const gcByKind: Record<string, { count: number; pauseMs: number }> = {};
     const gcObserver = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
-        const kind = gcKindName(entry.detail);
+        // `detail` is declared on marks and measures only, though gc entries carry it too.
+        const kind = gcKindName('detail' in entry ? entry.detail : undefined);
         const current = gcByKind[kind] ?? { count: 0, pauseMs: 0 };
         gcByKind[kind] = { count: current.count + 1, pauseMs: current.pauseMs + entry.duration };
       }
