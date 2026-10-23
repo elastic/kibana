@@ -122,7 +122,6 @@ describe('registerDashboardAppIntegration', () => {
   let chatEventsByConversationId: Map<string, Subject<ChatEvent>>;
   let addAttachment: jest.Mock;
   let updateAttachmentOrigin: jest.Mock;
-  let getUpdateOrigin: jest.Mock;
   let checkSavedDashboardExist: jest.Mock;
   let draftAttachmentId: IdGenerator;
   let emitConversationChange: (change: {
@@ -142,10 +141,6 @@ describe('registerDashboardAppIntegration', () => {
     chatEventsByConversationId = new Map();
     addAttachment = jest.fn();
     updateAttachmentOrigin = jest.fn().mockResolvedValue(undefined);
-    getUpdateOrigin = jest.fn(
-      (attachmentId: string) => async (origin: string) =>
-        updateAttachmentOrigin('conversation-1', attachmentId, origin)
-    );
     checkSavedDashboardExist = jest.fn().mockResolvedValue(true);
     let currentDraftAttachmentId = 'draft-attachment-id-1';
     draftAttachmentId = {
@@ -193,7 +188,6 @@ describe('registerDashboardAppIntegration', () => {
       api: mockApi as unknown as DashboardApi,
       draftAttachmentId,
       checkSavedDashboardExist,
-      getUpdateOrigin,
     });
   };
 

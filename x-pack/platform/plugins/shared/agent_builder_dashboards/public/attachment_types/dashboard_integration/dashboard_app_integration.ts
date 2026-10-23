@@ -8,7 +8,6 @@
 import { debounceTime, Observable } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
-import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import {
@@ -38,16 +37,6 @@ export interface DashboardAppIntegrationParams {
   api: DashboardApi;
   draftAttachmentId: IdGenerator;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
-  /**
-   * Lookup for the framework-provided `updateOrigin` callback bound to a specific
-   * attachment id. Returns `undefined` when the attachment has not been rendered yet
-   * (and thus hasn't registered an updater). Using this callback instead of
-   * `agentBuilder.updateAttachmentOrigin` keeps the rendered conversation in sync
-   * because it invalidates the conversation query after persisting the new origin.
-   */
-  getUpdateOrigin: (
-    attachmentId: string
-  ) => ((origin: string) => Promise<UpdateOriginResponse | undefined>) | undefined;
 }
 
 interface State {
@@ -60,7 +49,6 @@ export const registerDashboardAppIntegration = ({
   api,
   draftAttachmentId,
   checkSavedDashboardExist,
-  getUpdateOrigin,
 }: DashboardAppIntegrationParams): (() => void) => {
   const state: State = {
     attachments: undefined,
@@ -142,7 +130,18 @@ export const registerDashboardAppIntegration = ({
     api,
     checkSavedDashboardExist,
     getAttachments: () => state.attachments,
-    updateOrigin: (id: string, origin: string) => getUpdateOrigin(id)?.(origin),
+    updateOrigin: async (attachmentId: string, origin: string) => {
+      const { conversationId } = state;
+      if (!conversationId) {
+        return;
+      }
+      await agentBuilder.updateAttachmentOrigin(conversationId, attachmentId, origin);
+      // The conversation is not refetched, so keep the local origin in sync for later
+      // manual changes to find the attachment by the new dashboard id.
+      state.attachments = state.attachments?.map((attachment) =>
+        attachment.id === attachmentId ? { ...attachment, origin } : attachment
+      );
+    },
   });
 
   const manualChangesSubscription = api.anyStateChange$
