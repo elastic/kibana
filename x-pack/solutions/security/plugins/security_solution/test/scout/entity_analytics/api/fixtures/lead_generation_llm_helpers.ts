@@ -13,21 +13,26 @@ import { LEAD_GENERATION_ROUTES } from './lead_generation_constants';
 export const createLeadGenerationConnector = async ({
   apiServices,
   log,
+  spaceId,
 }: {
   apiServices: ApiServicesFixture;
   log: ToolingLog;
+  spaceId?: string;
 }): Promise<{ connectorId: string; llmProxy: LlmProxy }> => {
   const llmProxy = await createLlmProxy(log);
-  const connector = await apiServices.alerting.connectors.create({
-    name: 'lead-generation-llm-proxy',
-    connectorTypeId: '.gen-ai',
-    config: {
-      apiProvider: 'OpenAI',
-      apiUrl: `http://localhost:${llmProxy.getPort()}`,
-      defaultModel: 'gpt-4',
+  const connector = await apiServices.alerting.connectors.create(
+    {
+      name: 'lead-generation-llm-proxy',
+      connectorTypeId: '.gen-ai',
+      config: {
+        apiProvider: 'OpenAI',
+        apiUrl: `http://localhost:${llmProxy.getPort()}`,
+        defaultModel: 'gpt-4',
+      },
+      secrets: { apiKey: 'test-api-key' },
     },
-    secrets: { apiKey: 'test-api-key' },
-  });
+    spaceId
+  );
   return { connectorId: connector.id, llmProxy };
 };
 
@@ -35,13 +40,15 @@ export const cleanupLeadGenerationConnector = async ({
   apiServices,
   connectorId,
   llmProxy,
+  spaceId,
 }: {
   apiServices: ApiServicesFixture;
   connectorId: string;
   llmProxy: LlmProxy;
+  spaceId?: string;
 }): Promise<void> => {
   llmProxy.close();
-  await apiServices.alerting.connectors.delete(connectorId);
+  await apiServices.alerting.connectors.delete(connectorId, spaceId);
 };
 
 interface LeadGenerationStatusBody {
