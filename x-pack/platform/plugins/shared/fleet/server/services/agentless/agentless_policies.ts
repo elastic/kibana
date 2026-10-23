@@ -118,7 +118,7 @@ export interface AgentlessPoliciesService {
   ) => Promise<AgentlessPolicyUpgradeDryRunResponse>;
 }
 
-const getAgentlessAgentPolicyConfig = (
+export const getAgentlessAgentPolicyConfig = (
   packageInfo?: PackageInfo
 ): AgentlessAgentPolicyConfig | undefined => {
   if (
