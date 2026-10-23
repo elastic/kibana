@@ -107,12 +107,12 @@ Vendor specs are sometimes wrong about authentication too. Trello's declares onl
 
 Responses come from, in order of preference:
 
-1. **Fixtures**: hand-written responses passed as `fixtures`, for operations where nothing else is good enough;
+1. **Fixtures**: hand-written responses passed as `fixtures`, for operations where nothing else is good enough. A fixture with `when` answers only the requests it matches (see below);
 2. **Recordings**: responses captured from the real vendor API, passed as `recordings`. A recording is served only while it conforms to the spec; one that doesn't, or that names an operation the spec lacks, is listed in `rejectedResponses` (with the `spec` it contradicts, for named specs), which signals drift on the vendor's side. Recorded error responses are not served by default;
 3. **Spec examples**: the response media type's `example` or `examples`, when they match the schema;
 4. **Samples** of the response schema.
 
-Fixtures and recordings name their operation by method and path template, not by URL, so they apply whatever the request's parameters are (GraphQL and MCP operations by name, see above):
+Fixtures and recordings name their operation by method and path template, not by URL, so without `when` they apply whatever the request's parameters are (GraphQL and MCP operations by name, see above):
 
 ```ts
 const { fetch, rejectedResponses } = createEmulatorFetch({
@@ -131,6 +131,28 @@ const { fetch, rejectedResponses } = createEmulatorFetch({
 });
 ```
 
+A fixture's `when` names the requests it answers: path parameters, query parameters and headers by value, and the fields of a body it lists, so `GET /users/1` and `GET /users/2` can get different users, and an unknown ID a `404`:
+
+```ts
+const { fetch } = createEmulatorFetch({
+  specs: [openApiDocument],
+  fixtures: [
+    {
+      operation: { method: 'GET', path: '/users/{id}' },
+      when: { path: { id: '1' } },
+      response: { status: 200, body: { id: 1, name: 'Ada' } },
+    },
+    {
+      operation: { method: 'GET', path: '/users/{id}' },
+      when: { path: { id: '404' } },
+      response: { status: 404, body: { message: 'Not found' } },
+    },
+  ],
+});
+```
+
+A request gets the fixture that checks the most values among those it matches, else the operation's fixture without `when`. A `when.path` naming a parameter the operation doesn't have is listed in `rejectedResponses`. Recordings match the request they recorded the same way, by its `pathParameters`, query and body (not its headers), and other requests get the operation's first recording. `when` applies to OpenAPI operations; GraphQL and MCP fixtures name their operation instead.
+
 Examples and samples use the lowest declared 2xx response (then `2XX`, then `default`; operations without one, such as downloads that redirect or endpoints the vendor removed, get their lowest declared 3xx, then their lowest declared status) and the content type that best matches the request's `Accept` header, preferring JSON; the mock answers **406** when no content type matches. Sampled values come from the schema's first `examples` entry, `example` or `default` that conforms to the schema, then its `const` or first `enum` value, and otherwise from a placeholder that stays within the schema's type, format and bounds (`minimum`/`maximum`, `multipleOf`, `minLength`/`maxLength`, `minItems`/`maxItems`, and `pattern`, sampled from the regex). Vendors' examples often contradict their own schemas (a date-time under `format: date`, a number for a string), so non-conforming ones are skipped; examples of schemas merged from `allOf` parts are used unchecked. For `oneOf`, the first variant whose sample matches exactly one variant is used. Below a fixed depth only required properties are generated, which keeps recursive schemas finite. Required properties the schema doesn't declare are filled from `additionalProperties`, or with `null`.
 
 `sampleJsonSchema(schema, { optional, boundary })` samples a standalone JSON Schema the same way, with refs resolving against the schema itself (`#/$defs/...`), for example to generate inputs from a zod schema converted with `z.toJSONSchema`. `optional: 'required'` leaves out optional properties at every depth, so object and array examples and defaults, which may include them, are skipped; `boundary: true` samples at the upper bounds, ignoring examples and defaults.
@@ -139,7 +161,7 @@ To test how a connector handles extreme responses, pass `sampling: 'boundary'`. 
 
 ### Responders
 
-Pass `respond` to answer OpenAPI operations in front of the default chain above, for example to keep state across requests (create something, then read it back), or to answer from another emulator. It gets the operation, the request and a context, and may return a promise:
+Pass `respond` to answer OpenAPI operations in front of the default chain above, for example to keep state across requests (create something, then read it back), or to answer from another emulator. It gets the operation, the request (with its decoded `pathParameters`) and a context, and may return a promise:
 
 ```ts
 const CREATED = Symbol('created items');

@@ -330,7 +330,12 @@ export const createEmulatorFetch = ({
       };
     }
 
-    const response = await contract.respond(operation, request, contextFor(operation, request));
+    const routedRequest = { ...request, pathParameters: routed.pathParameters };
+    const response = await contract.respond(
+      operation,
+      routedRequest,
+      contextFor(operation, routedRequest)
+    );
     const responseViolations = contract.validateResponse(operation, response);
     calls.push({
       request: description,

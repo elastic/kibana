@@ -21,6 +21,8 @@ export interface ContractRequest {
   readonly query: Readonly<Record<string, string | string[]>>;
   readonly headers: Readonly<Record<string, string>>;
   readonly body?: unknown;
+  /** Set once the request is routed to an OpenAPI operation, decoded. */
+  readonly pathParameters?: Readonly<Record<string, string>>;
 }
 
 export interface ContractResponse {
