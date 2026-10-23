@@ -8,38 +8,21 @@
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 
-import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelineData } from '../../../../../../common/mock';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 import { suricataRowRenderer } from './suricata_row_renderer';
-import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { TimelineId } from '../../../../../../../common/types/timeline';
 
 jest.mock('../../../../../../common/lib/kibana');
-
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-  return {
-    ...original,
-    EuiScreenReaderOnly: () => <></>,
-  };
-});
 
 jest.mock('../../../../../../common/components/link_to');
 
 describe('suricata_row_renderer', () => {
   let nonSuricata: Ecs;
   let suricata: Ecs;
-  const mount = useMountAppended();
-
-  const getWrapper = async (childrenComponent: JSX.Element) => {
-    const wrapper = mount(childrenComponent);
-    await waitFor(() => wrapper.find('[data-test-subj="suricataRefs"]').exists());
-    return wrapper;
-  };
 
   beforeEach(() => {
     nonSuricata = cloneDeep(mockTimelineData[0].ecs);
@@ -70,32 +53,45 @@ describe('suricata_row_renderer', () => {
       scopeId: TimelineId.test,
     });
 
-    const wrapper = await getWrapper(
-      <TestProviders>
-        <span>{children}</span>
-      </TestProviders>
-    );
+    // SuricataRefs resolves its links asynchronously, so let that state update settle within act
+    await act(async () => {
+      render(
+        <TestProviders>
+          <span>{children}</span>
+        </TestProviders>
+      );
+    });
 
-    const extractEuiIconText = removeExternalLinkText(wrapper.text()).replaceAll(
-      'External link',
-      ''
-    );
-    expect(extractEuiIconText).toContain(
-      '4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'
+    // signature id and the leading upper-case tokens of the signature are rendered as badges
+    expect(screen.getByText('4')).toBeInTheDocument();
+    expect(screen.getByText('ET')).toBeInTheDocument();
+    expect(screen.getByText('EXPLOIT')).toBeInTheDocument();
+    expect(screen.getByText('NETGEAR')).toBeInTheDocument();
+    // the rest of the signature is rendered as a link
+    expect(
+      screen.getByText('WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)')
+    ).toBeInTheDocument();
+    // netflow source and destination
+    expect(screen.getByTestId('source-ip-badge')).toHaveTextContent('Source192.168.0.3:53');
+    expect(screen.getByTestId('destination-ip-badge')).toHaveTextContent(
+      'Destination192.168.0.3:6343'
     );
   });
 
-  test('should render a suricata row even if it does not have a suricata signature', async () => {
+  test('should render a suricata row even if it does not have a suricata signature', () => {
     delete suricata?.suricata?.eve?.alert?.signature;
     const children = suricataRowRenderer.renderRow({
       data: suricata,
       scopeId: TimelineId.test,
     });
-    const wrapper = await getWrapper(
+
+    const { container } = render(
       <TestProviders>
         <span>{children}</span>
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('');
+
+    expect(screen.queryByTestId('suricataRefs')).not.toBeInTheDocument();
+    expect(container.textContent).toBe('');
   });
 });
