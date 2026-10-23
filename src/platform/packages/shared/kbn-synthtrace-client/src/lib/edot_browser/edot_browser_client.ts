@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { OtelScope } from '../otel_logs';
 import { generateLongId, generateShortId } from '../utils/generate_id';
 import { asFloat } from './as_float';
 import { EdotBrowserLog } from './edot_browser_log';
@@ -16,6 +17,7 @@ import { getWebVitalRating, type WebVitalName } from './health_profiles';
 const LOGS_INDEX = 'logs-generic.otel-default';
 const TRACES_INDEX = 'traces-generic.otel-default';
 const SCOPE_PREFIX = '@opentelemetry/browser-instrumentation';
+const DISTRO_SCOPE_NAME = '@elastic/opentelemetry-browser';
 // Version of the instrumentations, which EDOT Browser's `^0.8.0` range resolves to
 const SCOPE_VERSION = '0.8.2';
 
@@ -118,6 +120,10 @@ export class EdotBrowserClient {
     return 'browser.brands' in this.resourceAttributes;
   }
 
+  public get hasSession(): boolean {
+    return Boolean(this.options.sessionId);
+  }
+
   private get sessionAttributes(): Record<string, string> {
     const { sessionId, previousSessionId, tabId } = this.options;
     return {
@@ -127,18 +133,48 @@ export class EdotBrowserClient {
     };
   }
 
-  private log(
+  private logWithScope(
     eventName: string,
-    instrumentation: string,
+    scope: OtelScope,
     attributes: Record<string, unknown>,
     severityNumber: number = SEVERITY_INFO
   ): EdotBrowserLog {
     return new EdotBrowserLog({ _index: LOGS_INDEX })
       .eventName(eventName)
       .severity(severityNumber)
-      .scope({ name: `${SCOPE_PREFIX}/${instrumentation}`, version: SCOPE_VERSION })
+      .scope(scope)
       .addResourceAttributes({ ...this.resourceAttributes })
       .addAttributes({ ...attributes, ...this.sessionAttributes });
+  }
+
+  private log(
+    eventName: string,
+    instrumentation: string,
+    attributes: Record<string, unknown>,
+    severityNumber: number = SEVERITY_INFO
+  ): EdotBrowserLog {
+    return this.logWithScope(
+      eventName,
+      { name: `${SCOPE_PREFIX}/${instrumentation}`, version: SCOPE_VERSION },
+      attributes,
+      severityNumber
+    );
+  }
+
+  /**
+   * Emitted by the distro when a session starts, at page load. Its attributes are the session
+   * ones, so it needs a `sessionId`.
+   */
+  sessionStart() {
+    const distroVersion = this.resourceAttributes['telemetry.distro.version'];
+    return this.logWithScope(
+      'session.start',
+      {
+        name: DISTRO_SCOPE_NAME,
+        ...(typeof distroVersion === 'string' ? { version: distroVersion } : {}),
+      },
+      {}
+    );
   }
 
   navigation({

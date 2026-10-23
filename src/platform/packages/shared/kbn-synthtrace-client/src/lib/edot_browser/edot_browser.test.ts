@@ -479,6 +479,29 @@ describe('edotBrowser', () => {
       expect(span.attributes['session.id']).toBe('session-1');
     });
 
+    it('stamps session.start with the session, previous session and tab ids', () => {
+      const [start] = edotBrowser
+        .app({ serviceName: 'storefront-web', environment: 'production', distroVersion: '0.4.0' })
+        .client(BROWSER_PROFILES.chromeMacos, {
+          sessionId: 's-2',
+          previousSessionId: 's-1',
+          tabId: 'tab-1',
+        })
+        .sessionStart()
+        .timestamp(TIMESTAMP)
+        .serialize();
+
+      expect(start).toMatchObject({
+        event_name: 'session.start',
+        scope: { name: '@elastic/opentelemetry-browser', version: '0.4.0' },
+        attributes: {
+          'session.id': 's-2',
+          'session.previous_id': 's-1',
+          'browser.tab.id': 'tab-1',
+        },
+      });
+    });
+
     it('stamps the tab id and previous session id like EDOT Browser', () => {
       const app = edotBrowser.app({ serviceName: 'storefront-web', environment: 'production' });
       const stamp = (options: Parameters<typeof app.client>[1]) => {
@@ -991,6 +1014,26 @@ describe('edotBrowser', () => {
         Number(doc.attributes?.['browser.navigation_timing.load_event_end']),
         0
       );
+    });
+
+    it('starts a session with a session.start log at the start of the session', () => {
+      const docs = createSession({ sessionId: 'abc' });
+      const starts = docs.filter(
+        (doc) => 'event_name' in doc && doc.event_name === 'session.start'
+      );
+
+      expect(starts).toHaveLength(1);
+      expect(starts[0]).toMatchObject({
+        '@timestamp': TIMESTAMP,
+        scope: { name: '@elastic/opentelemetry-browser', version: '0.3.0' },
+        attributes: { 'session.id': 'abc' },
+      });
+      expect(docs[0]).toBe(starts[0]);
+      expect(Math.min(...timestamps(docs))).toBe(TIMESTAMP);
+    });
+
+    it('does not emit session.start without a session id', () => {
+      expect(eventNames(createSession())).not.toContain('session.start');
     });
 
     it('stamps the same session.id on all logs and spans of a session', () => {

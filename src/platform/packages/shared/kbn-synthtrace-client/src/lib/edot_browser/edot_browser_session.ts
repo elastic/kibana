@@ -751,7 +751,11 @@ export const session = (options: EdotBrowserSessionOptions): EdotBrowserEvent[] 
   const duration = documents.length ? documents[documents.length - 1].hiddenAt : 0;
   const start = options.start !== undefined ? options.start : options.end - duration;
 
-  return documents
-    .map((document) => shiftDocument(document, start))
-    .flatMap((document) => simulateDocument(ctx, document));
+  return [
+    // The distro announces a new session when the page loads
+    ...(client.hasSession && documents.length > 0 ? [client.sessionStart().timestamp(start)] : []),
+    ...documents
+      .map((document) => shiftDocument(document, start))
+      .flatMap((document) => simulateDocument(ctx, document)),
+  ];
 };
