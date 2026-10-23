@@ -230,7 +230,7 @@ export function AnimatedEdge({
           style={PATH_OPACITY}
         />
       ) : null}
-      {isActive ? (
+      {canUnhook && isActive ? (
         <EdgeLabelRenderer>
           <div className="nopan nodrag" style={labelPositionStyle}>
             <EuiPopover

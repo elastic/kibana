@@ -6,16 +6,33 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiIconTip, EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { formatBytes } from '../stream_management/data_management/stream_detail_lifecycle/helpers/format_bytes';
 
 interface StorageColumnProps {
   sizeBytes: number;
   isLoading: boolean;
+  hasError?: boolean;
 }
 
-export function StorageColumn({ sizeBytes, isLoading }: StorageColumnProps) {
+export function StorageColumn({ sizeBytes, isLoading, hasError }: StorageColumnProps) {
   if (isLoading) return <EuiLoadingSpinner size="s" />;
+
+  if (hasError) {
+    return (
+      <EuiIconTip
+        type="warning"
+        color="warning"
+        content={
+          <FormattedMessage
+            id="xpack.streams.storageColumn.errorTooltip"
+            defaultMessage="Unable to load the storage size"
+          />
+        }
+      />
+    );
+  }
 
   return <span>{formatBytes(sizeBytes)}</span>;
 }
