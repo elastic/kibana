@@ -11,7 +11,7 @@ import re
 import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 
 TOKEN_FIELDS = (
@@ -28,7 +28,7 @@ MODEL_PRICES_URL = (
 FETCH_TIMEOUT_SECONDS = 2
 MAX_REMOTE_CATALOG_BYTES = 1_000_000
 CACHE_WRITE_1H_INPUT_MULTIPLIER = 2
-MAX_MODEL_LESS_TOKEN_SHARE = 0.01
+MAX_MODEL_LESS_COST_SHARE = 0.01
 ALLOWED_SCOPES = frozenset(("orchestrator", "worker"))
 ALLOWED_ARTIFACT_KINDS = frozenset(
     (
@@ -122,6 +122,13 @@ class PriceCatalog:
     source: str
     checked: str
     models: Mapping[str, ModelPrice]
+
+
+@dataclass(frozen=True)
+class SessionCost:
+    usd: float | None
+    unavailable_reason: str | None = None
+    model_less_tokens_left_out: int = 0
 
 
 @dataclass(frozen=True)
@@ -391,19 +398,37 @@ def find_model_price(catalog: PriceCatalog, model: str) -> ModelPrice | None:
     return best
 
 
-def drop_small_model_less_usage(
+def estimate_session_cost(
     usage_by_model: Mapping[str | None, ModelUsage],
-) -> tuple[Mapping[str | None, ModelUsage], int]:
-    """Drop usage with no model id when it is at most 1% of the session tokens."""
+    catalog: PriceCatalog,
+) -> SessionCost:
+    """Return the session cost, leaving out usage with no model id when it is at most 1% of it."""
+    named = {model: usage for model, usage in usage_by_model.items() if model is not None}
+    cost = estimate_cost_usd(named, catalog)
+    if cost is None:
+        reason = "No price for every model in the session" if named else "No usage with a model id"
+        return SessionCost(usd=None, unavailable_reason=reason)
     model_less = usage_by_model.get(None)
     if model_less is None:
-        return usage_by_model, 0
-    session_tokens = sum(usage.totals.total for usage in usage_by_model.values())
-    dropped = model_less.totals.total
-    if dropped > session_tokens * MAX_MODEL_LESS_TOKEN_SHARE:
-        return usage_by_model, 0
-    kept = {model: usage for model, usage in usage_by_model.items() if model is not None}
-    return kept, dropped
+        return SessionCost(usd=cost)
+    # Priced at the session's highest prices, the left-out share is an upper bound.
+    named_prices = [find_model_price(catalog, model) for model in named]
+    highest = _highest_prices([price for price in named_prices if price is not None])
+    if _usage_cost(model_less, highest) > cost * MAX_MODEL_LESS_COST_SHARE:
+        return SessionCost(
+            usd=None,
+            unavailable_reason="Usage with no model id is over 1% of the session cost",
+        )
+    return SessionCost(usd=cost, model_less_tokens_left_out=model_less.totals.total)
+
+
+def _highest_prices(prices: Sequence[ModelPrice]) -> ModelPrice:
+    return ModelPrice(
+        input=max(price.input for price in prices),
+        output=max(price.output for price in prices),
+        cache_read=max(price.cache_read for price in prices),
+        cache_write=max(price.cache_write for price in prices),
+    )
 
 
 def estimate_cost_usd(
@@ -419,18 +444,20 @@ def estimate_cost_usd(
         price = find_model_price(catalog, model) if model else None
         if price is None:
             return None
-        totals = usage.totals
-        cache_write_5m = totals.cache_creation_input_tokens - usage.cache_write_1h_tokens
-        cost += (
-            totals.input_tokens * price.input
-            + totals.output_tokens * price.output
-            + totals.cache_read_input_tokens * price.cache_read
-            + cache_write_5m * price.cache_write
-            + usage.cache_write_1h_tokens
-            * price.input
-            * CACHE_WRITE_1H_INPUT_MULTIPLIER
-        )
+        cost += _usage_cost(usage, price)
     return cost
+
+
+def _usage_cost(usage: ModelUsage, price: ModelPrice) -> float:
+    totals = usage.totals
+    cache_write_5m = totals.cache_creation_input_tokens - usage.cache_write_1h_tokens
+    return (
+        totals.input_tokens * price.input
+        + totals.output_tokens * price.output
+        + totals.cache_read_input_tokens * price.cache_read
+        + cache_write_5m * price.cache_write
+        + usage.cache_write_1h_tokens * price.input * CACHE_WRITE_1H_INPUT_MULTIPLIER
+    )
 
 
 def format_cost(cost_usd: float, catalog: PriceCatalog) -> str | None:

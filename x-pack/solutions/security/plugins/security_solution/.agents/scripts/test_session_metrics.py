@@ -4,6 +4,7 @@ import http.client
 import json
 import math
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -25,8 +26,8 @@ from session_metrics import (  # noqa: E402
     PriceCatalog,
     TokenTotals,
     build_session_metrics,
-    drop_small_model_less_usage,
     estimate_cost_usd,
+    estimate_session_cost,
     fetch_price_catalog,
     find_model_price,
     format_cost,
@@ -566,22 +567,48 @@ class SessionMetricsParserTests(unittest.TestCase):
                 self.assertIsNone(estimate_cost_usd(usage_by_model, CATALOG))
             self.assertIsNone(estimate_cost_usd({}, CATALOG))
 
-    def test_small_model_less_usage_is_dropped_from_the_cost(self):
-        priced = ModelUsage(TokenTotals(cache_read_input_tokens=99_000))
-        small = {"claude-sonnet-5-5": priced, None: ModelUsage(TokenTotals(input_tokens=1_000))}
-        large = {"claude-sonnet-5-5": priced, None: ModelUsage(TokenTotals(input_tokens=1_001))}
+    def test_model_less_usage_is_left_out_only_below_one_percent_of_the_cost(self):
+        cache_reads = ModelUsage(TokenTotals(cache_read_input_tokens=990_000))
 
-        kept, dropped = drop_small_model_less_usage(small)
-        self.assertEqual(list(kept), ["claude-sonnet-5-5"])
-        self.assertEqual(dropped, 1_000)
-        self.assertAlmostEqual(estimate_cost_usd(kept, CATALOG) or 0, 99_000 * 1e-7)
+        small = estimate_session_cost(
+            {"claude-sonnet-5-5": cache_reads, None: ModelUsage(TokenTotals(output_tokens=90))},
+            CATALOG,
+        )
+        self.assertAlmostEqual(small.usd or 0, 990_000 * 1e-7)
+        self.assertEqual(small.model_less_tokens_left_out, 90)
 
-        kept, dropped = drop_small_model_less_usage(large)
-        self.assertEqual(dropped, 0)
-        self.assertIsNone(estimate_cost_usd(kept, CATALOG))
+        # 1% of the tokens, but about half of the dollars.
+        cheap_tokens_dominate = estimate_session_cost(
+            {"claude-sonnet-5-5": cache_reads, None: ModelUsage(TokenTotals(output_tokens=10_000))},
+            CATALOG,
+        )
+        self.assertIsNone(cheap_tokens_dominate.usd)
+        self.assertEqual(
+            cheap_tokens_dominate.unavailable_reason,
+            "Usage with no model id is over 1% of the session cost",
+        )
 
-        only_model_less = {None: ModelUsage(TokenTotals(input_tokens=5))}
-        self.assertEqual(drop_small_model_less_usage(only_model_less), (only_model_less, 0))
+        # Priced at claude-sonnet-5's cache read price, the highest in the session.
+        highest_price = estimate_session_cost(
+            {
+                "claude-sonnet-5-5": ModelUsage(TokenTotals(output_tokens=10_000)),
+                "claude-sonnet-5": ModelUsage(TokenTotals(input_tokens=1)),
+                None: ModelUsage(TokenTotals(cache_read_input_tokens=6_000)),
+            },
+            CATALOG,
+        )
+        self.assertIsNone(highest_price.usd)
+
+        unpriced = estimate_session_cost(
+            {"gemini-3-pro": cache_reads, None: ModelUsage(TokenTotals(output_tokens=1))},
+            CATALOG,
+        )
+        self.assertEqual(unpriced.unavailable_reason, "No price for every model in the session")
+
+        only_model_less = estimate_session_cost(
+            {None: ModelUsage(TokenTotals(input_tokens=5))}, CATALOG
+        )
+        self.assertEqual(only_model_less.unavailable_reason, "No usage with a model id")
 
     def test_price_catalog_in_the_repo_is_valid(self):
         catalog = load_price_catalog(MODEL_PRICES_PATH)
@@ -696,6 +723,32 @@ class SessionMetricsParserTests(unittest.TestCase):
             self.assertEqual(copy_only.stdout, fallback.stdout)
             self.assertEqual(copy_only.stderr, "")
 
+    def test_with_cost_does_not_promise_a_broken_local_copy(self):
+        with tempfile.TemporaryDirectory() as raw_dir:
+            script_dir = Path(raw_dir) / "scripts"
+            script_dir.mkdir()
+            for name in (SCRIPT.name, "session_metrics.py"):
+                shutil.copy(SCRIPT_DIR / name, script_dir / name)
+            (script_dir / "model_prices.json").write_text("{", encoding="utf-8")
+            transcript = Path(raw_dir) / "session.jsonl"
+            transcript.write_text(
+                usage_line("msg_1", "claude-sonnet-5-5", 10), encoding="utf-8"
+            )
+            environment = os.environ.copy()
+            environment["MODEL_PRICES_URL"] = (Path(raw_dir) / "missing.json").as_uri()
+
+            result = subprocess.run(
+                [sys.executable, str(script_dir / SCRIPT.name), "--with-cost", str(transcript)],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment,
+            )
+
+            self.assertEqual(result.returncode, 2)
+            self.assertTrue(result.stdout.startswith("input=2 "), result.stdout)
+            self.assertNotIn("using the local copy", result.stderr)
+
     def test_with_cost_prints_tokens_and_cost_from_one_read(self):
         with tempfile.TemporaryDirectory() as raw_dir:
             priced = Path(raw_dir) / "priced.jsonl"
@@ -722,21 +775,28 @@ class SessionMetricsParserTests(unittest.TestCase):
                 "input=2 output=10 cache_create=100 cache_read=1000 total=1112\n",
             )
 
-            with_model_less_line = Path(raw_dir) / "with_model_less_line.jsonl"
-            with_model_less_line.write_text(
-                usage_line("msg_1", "claude-sonnet-5-5", 10)
-                + json.dumps({"type": "assistant", "usage": {"input_tokens": 3}})
-                + "\n",
-                encoding="utf-8",
-            )
-            result = self.run_script("--with-cost", str(with_model_less_line))
-            self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertRegex(
-                result.stdout,
-                r"^input=5 output=10 cache_create=100 cache_read=1000 total=1115\n"
-                r"usd=\d+\.\d{4} pricing=\d{4}-\d{2}-\d{2}\n$",
-            )
-            self.assertIn("Left 3 tokens with no model id out of the cost.", result.stderr)
+            for model_less_input, expected_stderr in (
+                (1, "Left 1 tokens with no model id out of the cost."),
+                (3, "Usage with no model id is over 1% of the session cost; cost left out."),
+            ):
+                with_model_less_line = Path(raw_dir) / "with_model_less_line.jsonl"
+                with_model_less_line.write_text(
+                    usage_line("msg_1", "claude-sonnet-5-5", 10)
+                    + json.dumps(
+                        {"type": "assistant", "usage": {"input_tokens": model_less_input}}
+                    )
+                    + "\n",
+                    encoding="utf-8",
+                )
+                result = self.run_script("--with-cost", str(with_model_less_line))
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertTrue(
+                    result.stdout.startswith(f"input={2 + model_less_input} "), result.stdout
+                )
+                self.assertEqual(
+                    len(result.stdout.splitlines()), 2 if model_less_input == 1 else 1
+                )
+                self.assertIn(expected_stderr, result.stderr)
 
             cheap_models = Path(raw_dir) / "cheap_models.json"
             cheap_models.write_text(

@@ -11,8 +11,8 @@ from the same read of the transcript:
     usd=N.NNNN pricing=YYYY-MM-DD
 The second line is left out when any model in the session has no price, or
 when the cost rounds to 0.0000. Usage with no model id is left out of the cost
-(with a note on stderr) when it is at most 1% of the session tokens; above
-that, the cost is left out too.
+(with a note on stderr) when, priced at the highest prices of the session's
+models, it is at most 1% of the cost; above that, the cost is left out too.
 
 Each API response is counted once: Claude Code repeats a response's usage on
 every transcript line of that response, so lines sharing a message id are
@@ -70,8 +70,7 @@ from session_metrics import (
     MODEL_PRICES_URL,
     PriceCatalog,
     build_session_metrics,
-    drop_small_model_less_usage,
-    estimate_cost_usd,
+    estimate_session_cost,
     fetch_price_catalog,
     format_cost,
     format_legacy_usage,
@@ -96,12 +95,14 @@ def parse_args() -> argparse.Namespace:
 def resolve_price_catalog() -> PriceCatalog:
     """Return today's gh-aw prices, or the local copy when they cannot be read."""
     url = os.environ.get("MODEL_PRICES_URL", MODEL_PRICES_URL)
-    if url:
-        try:
-            return fetch_price_catalog(url, date.today().isoformat())
-        except ValueError as exc:
-            print(f"{exc}; using the local copy.", file=sys.stderr)
-    return load_price_catalog()
+    if not url:
+        return load_price_catalog()
+    try:
+        return fetch_price_catalog(url, date.today().isoformat())
+    except ValueError as exc:
+        catalog = load_price_catalog()
+        print(f"{exc}; using the local copy.", file=sys.stderr)
+        return catalog
 
 
 def main() -> int:
@@ -139,17 +140,16 @@ def main() -> int:
     except ValueError as exc:
         print(str(exc), file=sys.stderr)
         return 2
-    usage_by_model, dropped_tokens = drop_small_model_less_usage(result.usage_by_model)
-    cost = estimate_cost_usd(usage_by_model, catalog)
-    if cost is None:
-        print("No price for every model in the session; cost left out.", file=sys.stderr)
+    cost = estimate_session_cost(result.usage_by_model, catalog)
+    if cost.usd is None:
+        print(f"{cost.unavailable_reason}; cost left out.", file=sys.stderr)
         return 0
-    if dropped_tokens:
+    if cost.model_less_tokens_left_out:
         print(
-            f"Left {dropped_tokens} tokens with no model id out of the cost.",
+            f"Left {cost.model_less_tokens_left_out} tokens with no model id out of the cost.",
             file=sys.stderr,
         )
-    cost_line = format_cost(cost, catalog)
+    cost_line = format_cost(cost.usd, catalog)
     if cost_line is None:
         print("Cost rounds to zero; cost left out.", file=sys.stderr)
         return 0
