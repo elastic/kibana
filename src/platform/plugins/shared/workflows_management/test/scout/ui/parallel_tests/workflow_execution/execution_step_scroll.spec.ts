@@ -15,8 +15,17 @@ import { EXECUTION_TIMEOUT } from '../../fixtures/constants';
 import { getScrollTestWorkflowYaml } from '../../fixtures/workflows';
 
 test.describe('Workflow execution - Step scroll', { tag: [...tags.stateful.classic] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
+  test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsPrivilegedUser();
+
+    // No LLM connector keeps Agent Builder's sidebar closed, so the editor width stays deterministic.
+    await page.route('**/internal/inference/connectors', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ connectors: [] }),
+      })
+    );
   });
 
   test.afterAll(async ({ scoutSpace, apiServices }) => {
