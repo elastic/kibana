@@ -24,6 +24,7 @@ import {
   styles as cascadeRowStyles,
   rootRowAttribute,
   childRowAttribute,
+  stickyHeaderExtensionPointTestSubjAttribute,
 } from './cascade_row.styles';
 import { CascadeRowHeaderPrimitive } from './components/cascade_row_header';
 import { StickyHeaderExtensionPointProvider } from './components/cascade_row_header_extension_point';
@@ -38,7 +39,7 @@ function CascadeRowPrimitiveComponent<G extends GroupNode, L extends LeafNode>({
   isMobile,
   activeStickyRenderSlotRef,
   isActiveSticky,
-  isStickyHeaderVisible,
+  enableStickyGroupHeader = true,
   innerRef,
   onCascadeGroupNodeExpanded,
   onCascadeGroupNodeCollapsed,
@@ -64,12 +65,10 @@ function CascadeRowPrimitiveComponent<G extends GroupNode, L extends LeafNode>({
 
   const isGroupNode = isCascadeGroupRowNode(currentGroupByColumns, rowInstance);
 
-  // The extension point element is created once and re-attached to the sticky header whenever it is
-  // displayed. Keeping it stable lets descendant cells portal into it on the very render that the
-  // sticky header appears, instead of one commit later once a ref would have been populated.
+  // A stable host lets cells keep their toolbar and column headers mounted throughout scrolling.
   const [stickyHeaderExtensionElement] = useState(() => {
     const element = document.createElement('div');
-    element.setAttribute('data-test-subj', 'sticky-header-extension-point');
+    element.setAttribute('data-test-subj', stickyHeaderExtensionPointTestSubjAttribute);
     return element;
   });
 
@@ -103,6 +102,13 @@ function CascadeRowPrimitiveComponent<G extends GroupNode, L extends LeafNode>({
       size
     );
   }, [euiTheme, hasAllParentsExpanded, rowDepth, rowParentId, size]);
+
+  // Layout offsets let native sticky positioning account for a leaf's place in the virtual list.
+  const leafRowPositionStyle = useMemo(
+    () => ({ top: virtualRow.start, zIndex: rowDepth + 1 }),
+    [virtualRow.start, rowDepth]
+  );
+  const rowPositionStyle = isGroupNode ? virtualRowStyle : leafRowPositionStyle;
 
   const rowHeader = useMemo(() => {
     return (
@@ -140,44 +146,42 @@ function CascadeRowPrimitiveComponent<G extends GroupNode, L extends LeafNode>({
       data-index={virtualRow.index}
       data-row-type={rowDepth === 0 ? rootRowAttribute : childRowAttribute}
       ref={innerRef}
-      style={virtualRowStyle}
+      style={rowPositionStyle}
       {...(isActiveSticky ? { 'data-active-sticky': true } : {})}
       css={styles.rowWrapper}
     >
-      <EuiFlexGroup direction="column" gutterSize={size} css={styles.rowInner}>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize={!isGroupNode && rowIsExpanded ? 'none' : size}
+        css={styles.rowInner}
+      >
         <React.Fragment>
-          {/**
-           * `isActiveSticky` is true when the user's scroll position exceeds the row header's Y position, when this happens
-           * we portal the entire sticky header into a designated area within the grid container that stays sticky on scroll,
-           * given the actual rendered header might be so far way, keeping it sticky would require a transform to bring it into view,
-           * which would be visually jarring since we would have to adjust on every scroll event.
-           */}
-          {isActiveSticky && activeStickyRenderSlotRef.current
+          {enableStickyGroupHeader &&
+          isActiveSticky &&
+          isGroupNode &&
+          activeStickyRenderSlotRef.current
             ? createPortal(
-                <EuiFlexGroup
-                  css={styles.rowStickyHeaderInner}
-                  direction="column"
-                  gutterSize="none"
-                >
-                  <EuiFlexItem>{rowHeader}</EuiFlexItem>
-                  <EuiFlexItem
-                    ref={attachStickyHeaderExtensionElement}
-                    css={styles.rowStickyHeaderExtensionPointWrapper}
-                  />
-                </EuiFlexGroup>,
+                <div css={styles.rowStickyHeaderInner}>{rowHeader}</div>,
                 activeStickyRenderSlotRef.current,
                 `${rowId}-sticky-header`
               )
             : null}
         </React.Fragment>
-        <EuiFlexItem>{rowHeader}</EuiFlexItem>
-        {/**
-         * Descendants are only told the sticky header is active once the slot is actually displayed,
-         * so content they move into it never disappears into a hidden slot ahead of the reveal.
-         */}
+        <EuiFlexItem
+          css={[
+            !isGroupNode && styles.rowHeader,
+            enableStickyGroupHeader && !isGroupNode && rowIsExpanded && styles.inlineStickyHeader,
+          ]}
+          data-test-subj={!isGroupNode ? 'dataCascadeInlineStickyHeader' : undefined}
+        >
+          {rowHeader}
+          {!isGroupNode && (
+            <div ref={attachStickyHeaderExtensionElement} css={styles.rowInlineHeaderExtension} />
+          )}
+        </EuiFlexItem>
         <StickyHeaderExtensionPointProvider
           extensionPointElement={stickyHeaderExtensionElement}
-          isDisplayed={isActiveSticky && isStickyHeaderVisible}
+          stickyEnabled={enableStickyGroupHeader}
         >
           {!isGroupNode && rowIsExpanded && hasAllParentsExpanded && (
             <EuiFlexItem role="gridcell">

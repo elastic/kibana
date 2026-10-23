@@ -13,6 +13,7 @@ import type { CascadeSizing } from '../types';
 
 export const rootRowAttribute = 'root' as const;
 export const childRowAttribute = 'sub-group' as const;
+export const stickyHeaderExtensionPointTestSubjAttribute = 'sticky-header-extension-point' as const;
 
 export const styles = (
   euiTheme: UseEuiTheme['euiTheme'],
@@ -64,6 +65,7 @@ export const styles = (
 
     [`[data-row-type="${childRowAttribute}"][aria-level="3"] &`]: {
       gap: 0,
+      isolation: 'isolate',
     },
 
     [`[data-row-type="${childRowAttribute}"][aria-level="3"] & > *`]: {
@@ -86,9 +88,15 @@ export const styles = (
       width: `calc(100% - ${euiSizing[size]} * 2)`,
       height: '100%',
       pointerEvents: 'none',
+      zIndex: euiTheme.levels.header,
       borderTop: `${border.width.thin} solid ${border.color}`,
       borderLeft: `${border.width.thin} solid ${border.color}`,
       borderRight: `${border.width.thin} solid ${border.color}`,
+    },
+
+    // Keep the inset frame behind the widened active header.
+    [`[data-row-type="${childRowAttribute}"][aria-level="3"][data-active-sticky="true"] &:after`]: {
+      zIndex: 0,
     },
 
     [`[data-row-type="${childRowAttribute}"]:not([aria-level="3"]) + [data-row-type="${childRowAttribute}"][aria-level="3"]  &:after`]:
@@ -258,25 +266,35 @@ export const styles = (
       borderStyle: 'solid',
       borderColor: border.color,
     }),
-    rowStickyHeaderExtensionPointWrapper: css({
-      marginTop: euiSizing[size],
-      marginBottom: `-${euiSizing[size]}`,
-      marginRight: `-${border.width.thin}`,
+    rowHeader: css({
       position: 'relative',
+      zIndex: euiTheme.levels.header,
+      backgroundColor:
+        rowDepth % 2 === 1 ? colors.backgroundBaseSubdued : colors.backgroundBasePlain,
+      flexShrink: 0,
+      [`[data-active-sticky="true"] &`]: {
+        boxShadow: `0 ${border.width.thin} 0 ${border.color}`,
+      },
+    }),
+    inlineStickyHeader: css({
+      position: 'sticky',
+      top: 0,
+      padding: `${euiSizing[size]} 0`,
 
-      '&:after': {
-        content: '""',
-        display: 'block',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'none',
-        borderTop: `${border.width.thin} solid ${border.color}`,
-        borderLeft: `${border.width.thin} solid ${border.color}`,
-        borderRight: `${border.width.thin} solid ${border.color}`,
-        borderRadius: `${border.radius.inline} ${border.radius.inline} 0 0`,
+      [`[data-active-sticky="true"] &`]: {
+        marginInlineStart: `calc(${euiSizing[size]} * -${rowDepth})`,
+        marginInlineEnd: `calc(${euiSizing[size]} * -${rowDepth})`,
+      },
+    }),
+    rowInlineHeaderExtension: css({
+      marginTop: euiSizing[size],
+      borderRadius: `${border.radius.inline} ${border.radius.inline} 0 0`,
+      backgroundColor: colors.backgroundBaseSubdued,
+      [`&:has(> [data-test-subj="${stickyHeaderExtensionPointTestSubjAttribute}"]:empty)`]: {
+        display: 'none',
+      },
+      [`[data-active-sticky="true"] &`]: {
+        boxShadow: `inset 0 0 0 ${border.width.thin} ${border.color}`,
       },
     }),
   };

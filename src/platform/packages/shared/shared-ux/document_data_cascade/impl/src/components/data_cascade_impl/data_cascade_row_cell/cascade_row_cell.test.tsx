@@ -41,7 +41,7 @@ const renderComponent = ({
       initialGroupColumn={initialGroupColumn}
     >
       <StickyHeaderExtensionPointProvider
-        isDisplayed={false}
+        stickyEnabled={false}
         extensionPointElement={document.createElement('div')}
       >
         {/* @ts-expect-error -- we don't need to provide all the props */}
@@ -72,7 +72,6 @@ describe('CascadeRowCellPrimitive', () => {
         scrollOffset: 0,
         scrollElement: null,
         activeStickyIndex: null,
-        virtualizedRowComputedTranslateValue: new Map(),
         preventRowSizeChangePropagation: jest.fn(() => jest.fn()),
         childController: {
           subscribe: jest.fn(() => () => {}),
@@ -189,7 +188,7 @@ describe('CascadeRowCellPrimitive', () => {
             data: expect.anything(),
             rowIndex: expect.any(Number),
             stickyHeaderExtensionPoint: expect.objectContaining({
-              isDisplayed: false,
+              stickyEnabled: false,
               extensionPointElement: expect.any(HTMLDivElement),
             }),
           })
@@ -219,7 +218,6 @@ describe('CascadeRowCellPrimitive', () => {
             scrollOffset: 0,
             scrollElement: null,
             activeStickyIndex: null,
-            virtualizedRowComputedTranslateValue: new Map(),
             childController: mockChildController,
           } as unknown as CascadeRootVirtualizerReturnValue)
       );

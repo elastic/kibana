@@ -66,8 +66,7 @@ export interface CascadeRowCellRendererProps<G extends GroupNode, L extends Leaf
   virtualizerController: ChildVirtualizerController;
   rowIndex: number;
   /**
-   * Portal information for the sticky header. When `isActiveSticky` is true the sticky header is being
-   * displayed for the row and the child can use `createPortal` to render content into `extensionPointElement`.
+   * Stable inline header host for content rendered with `createPortal`, including before the header pins.
    * This allows the child to maintain its React tree relationship with the portaled content,
    * ensuring state updates trigger proper re-renders.
    */
@@ -178,7 +177,7 @@ export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends L
 export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNode>
   extends Omit<CascadeRowHeaderPrimitiveProps<G, L>, 'isGroupNode'> {
   /**
-   * Ref that provides a reference to the DOM element that will be used to portal the active sticky header.
+   * Ref that provides a reference to the DOM element that will be used to portal the active sticky group node header.
    */
   activeStickyRenderSlotRef: React.RefObject<HTMLDivElement | null>;
   /**
@@ -189,15 +188,12 @@ export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNod
    * Denotes if the row is the sticky candidate, i.e. the nearest expanded ancestor of the first visible row.
    */
   isActiveSticky: boolean;
-  /**
-   * Denotes if the sticky header slot is currently displayed. The slot only becomes visible once the
-   * sticky row's own header has scrolled out of view, which can be later than `isActiveSticky` turning true.
-   */
-  isStickyHeaderVisible: boolean;
+  /** Whether the inline header sticks while scrolling. */
+  enableStickyGroupHeader?: boolean;
   /**
    * Ref that provides a reference to the DOM element that renders the cascade row.
    */
-  innerRef: React.LegacyRef<HTMLDivElement>;
+  innerRef: React.Ref<HTMLDivElement>;
   /**
    * The virtual row for the cascade row.
    */
