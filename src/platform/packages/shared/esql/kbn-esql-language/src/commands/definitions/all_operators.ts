@@ -42,13 +42,13 @@ export const matchOperators: FunctionDefinition[] = operatorFunctionDefinitions.
 export const logicalOperators: FunctionDefinition[] = [
   {
     name: 'and',
-    description: i18n.translate('kbn-esql-language.esql.definition.andDoc', {
+    description: i18n.translate('esqlLanguage.esql.definition.andDoc', {
       defaultMessage: 'and',
     }),
   },
   {
     name: 'or',
-    description: i18n.translate('kbn-esql-language.esql.definition.orDoc', {
+    description: i18n.translate('esqlLanguage.esql.definition.orDoc', {
       defaultMessage: 'or',
     }),
   },
@@ -85,7 +85,7 @@ const otherDefinitions: FunctionDefinition[] = [
   {
     type: FunctionDefinitionTypes.OPERATOR,
     name: 'not',
-    description: i18n.translate('kbn-esql-language.esql.definition.notDoc', {
+    description: i18n.translate('esqlLanguage.esql.definition.notDoc', {
       defaultMessage: 'Not',
     }),
     locationsAvailable: [
@@ -111,7 +111,7 @@ const otherDefinitions: FunctionDefinition[] = [
   {
     type: FunctionDefinitionTypes.OPERATOR,
     name: '=',
-    description: i18n.translate('kbn-esql-language.esql.definition.assignDoc', {
+    description: i18n.translate('esqlLanguage.esql.definition.assignDoc', {
       defaultMessage: 'Assign (=)',
     }),
     locationsAvailable: [
@@ -147,7 +147,7 @@ const otherDefinitions: FunctionDefinition[] = [
   {
     type: FunctionDefinitionTypes.OPERATOR,
     name: 'as',
-    description: i18n.translate('kbn-esql-language.esql.definition.asDoc', {
+    description: i18n.translate('esqlLanguage.esql.definition.asDoc', {
       defaultMessage: 'Rename as (AS)',
     }),
     locationsAvailable: [Location.RENAME, Location.JOIN],
@@ -164,7 +164,7 @@ const otherDefinitions: FunctionDefinition[] = [
   {
     type: FunctionDefinitionTypes.OPERATOR,
     name: 'where',
-    description: i18n.translate('kbn-esql-language.esql.definition.whereDoc', {
+    description: i18n.translate('esqlLanguage.esql.definition.whereDoc', {
       defaultMessage: 'WHERE operator',
     }),
     locationsAvailable: [Location.STATS],
@@ -183,7 +183,7 @@ const otherDefinitions: FunctionDefinition[] = [
     // TODO — this shouldn't be a function or an operator...
     name: 'info',
     type: FunctionDefinitionTypes.OPERATOR,
-    description: i18n.translate('kbn-esql-language.esql.definition.infoDoc', {
+    description: i18n.translate('esqlLanguage.esql.definition.infoDoc', {
       defaultMessage: 'Show information about the current ES node',
     }),
     locationsAvailable: [Location.SHOW],

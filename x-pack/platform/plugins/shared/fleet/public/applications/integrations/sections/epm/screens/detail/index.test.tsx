@@ -629,7 +629,7 @@ describe('When on integration detail', () => {
 
         expect(testRenderer.startServices.application.navigateToApp).toHaveBeenCalledWith(
           'onboarding',
-          { path: '/aws', state: { newSession: true } }
+          { path: '/aws', state: { newSession: true, returnUrl: window.location.href } }
         );
       },
       TESTS_TIMEOUT

@@ -98,6 +98,7 @@ export const MonacoEditor = ({
   const actionsProvider = useRef<MonacoEditorActionsProvider | null>(null);
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
   const [selectedRequestsCount, setSelectedRequestsCount] = useState(0);
+  const [hasAutocompleteEntities, setHasAutocompleteEntities] = useState(false);
 
   const setInputEditor = useSetInputEditor();
   const styles = useStyles();
@@ -201,6 +202,16 @@ export const MonacoEditor = ({
 
   useSetupAutocompletePolling({ autocompleteInfo, settingsService });
 
+  // Cluster-derived suggestions (indices, aliases, templates) only exist once the first
+  // autocomplete_entities response has been merged, so surface that in the DOM.
+  useEffect(() => {
+    const subscription = autocompleteInfo.entitiesRefreshGeneration$.subscribe((generation) =>
+      setHasAutocompleteEntities(generation > 0)
+    );
+
+    return () => subscription.unsubscribe();
+  }, [autocompleteInfo]);
+
   useSetupAutosave({ value });
 
   // Restore the request from history if there is one
@@ -234,6 +245,7 @@ export const MonacoEditor = ({
       ref={divRef}
       data-test-subj="consoleMonacoEditorContainer"
       data-currently-selected-requests={selectedRequestsCount}
+      data-autocomplete-entities-loaded={hasAutocompleteEntities}
     >
       <EuiFlexGroup
         css={styles.editorActions}

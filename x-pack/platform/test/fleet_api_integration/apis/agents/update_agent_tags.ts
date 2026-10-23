@@ -206,9 +206,11 @@ export default function (providerContext: FtrProviderContext) {
         const { body } = await supertest
           .get(`/api/fleet/agents/action_status`)
           .set('kbn-xsrf', 'xxx');
+        // the hosted agent is reported as failed, the regular agent is updated
         const actionStatus = body.items[0];
-        expect(actionStatus.status).to.eql('COMPLETE');
+        expect(actionStatus.status).to.eql('FAILED');
         expect(actionStatus.nbAgentsAck).to.eql(1);
+        expect(actionStatus.nbAgentsFailed).to.eql(1);
       });
     });
   });
