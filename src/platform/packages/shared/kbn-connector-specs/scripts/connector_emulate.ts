@@ -10,7 +10,12 @@
 import { existsSync } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
-import type { ContractCall, Emulator, OpenApiDocument } from '@kbn/connector-emulate';
+import type {
+  ContractCall,
+  Emulator,
+  McpControlRequest,
+  OpenApiDocument,
+} from '@kbn/connector-emulate';
 import {
   combineEmulators,
   CONTROL_PATH,
@@ -98,6 +103,30 @@ const kibanaSettings = (proxyUrl: URL, certFile: string, origins: readonly strin
         ]),
   ].join('\n');
 
+const MAX_LOGGED_ARGUMENTS = 300;
+
+const logMcpRequest = (log: ToolingLog, request: McpControlRequest) => {
+  if (!('tool' in request)) {
+    log.info(
+      `[mcp] ${
+        request.method === 'initialize'
+          ? `${request.client ?? 'a client'} connected`
+          : request.method
+      }`
+    );
+    return;
+  }
+  const args = JSON.stringify(request.arguments);
+  const line = `[mcp] ${request.tool} ${
+    args.length > MAX_LOGGED_ARGUMENTS ? `${args.slice(0, MAX_LOGGED_ARGUMENTS)}…` : args
+  } → ${request.summary}`;
+  if (request.isError) {
+    log.warning(line);
+  } else {
+    log.info(line);
+  }
+};
+
 const logCall = (
   log: ToolingLog,
   {
@@ -110,7 +139,10 @@ const logCall = (
   }: ContractCall,
   prefix = ''
 ) => {
-  const served = responseSource === 'fixture' || responseSource === 'recording';
+  const served =
+    responseSource === 'fixture' ||
+    responseSource === 'recording' ||
+    responseSource === 'runtime-fixture';
   const line = `${prefix}${status} ${request}${operation ? ` (${operation})` : ''}${
     served ? ` [${responseSource}]` : ''
   }`;
@@ -266,7 +298,9 @@ run(
     const proxy = createEmulatorProxy({
       fetch: mock.fetch,
       certificateAuthority,
-      control: createEmulatorControlHandler(mock),
+      control: createEmulatorControlHandler(mock, {
+        onRequest: (request) => logMcpRequest(log, request),
+      }),
     });
     const proxyUrl = await proxy.listen(port, host);
     const controlUrl = (endpoint: string) => new URL(`${CONTROL_PATH}/${endpoint}`, proxyUrl).href;
@@ -286,6 +320,11 @@ run(
       `Control endpoints: GET ${controlUrl('calls')}, POST ${controlUrl('reset')}, GET ${controlUrl(
         'operations'
       )}${single ? '' : '; add ?connector=<id> to scope them to one connector'}`
+    );
+    log.info(
+      `MCP server for agents: ${controlUrl(
+        'mcp'
+      )} (claude mcp add --transport http emulator ${controlUrl('mcp')})`
     );
     log.info('Start Kibana with these settings in config/kibana.dev.yml:');
     const origins = [...new Set([...originsByConnector.values()].flat())].sort();
