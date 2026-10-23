@@ -79,7 +79,7 @@ function RoutingRuleRow({ rule }: { rule: RoutingNodeRule }) {
         id={rule.handleId}
         type="source"
         position={Position.Right}
-        isConnectable={rule.action === 'copy'}
+        isConnectable={false}
       />
     </div>
   );
