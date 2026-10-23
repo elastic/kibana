@@ -46,10 +46,12 @@ const setup = ({
   universalEnabled,
   alertingVTwoAvailable = true,
   hasAlertingRules = true,
+  showV1AlertsTable = false,
 }: {
   universalEnabled: boolean;
   alertingVTwoAvailable?: boolean;
   hasAlertingRules?: boolean;
+  showV1AlertsTable?: boolean;
 }) => {
   jest.spyOn(datePickerHook, 'useDatePickerContext').mockReturnValue({
     relativeStart: 'now-15m',
@@ -68,7 +70,7 @@ const setup = ({
           isDeclared: () => universalEnabled,
           get: () => universalEnabled,
         },
-        client: { get: () => false },
+        client: { get: () => showV1AlertsTable },
       },
       ...(alertingVTwoAvailable
         ? { alertingVTwo: { AlertsProvider: () => null, createAlertingV2HostApp: jest.fn() } }
@@ -138,5 +140,23 @@ describe('AlertsSection', () => {
     render(<AlertsSection bucketSize={bucketSize} />);
 
     expect(screen.getByTestSubject('classicAlertsSection')).toBeInTheDocument();
+  });
+
+  it('renders the classic section when the space opts into the classic alerts table', () => {
+    setup({ universalEnabled: true, showV1AlertsTable: true });
+    render(<AlertsSection bucketSize={bucketSize} />);
+
+    expect(screen.getByTestSubject('classicAlertsSection')).toBeInTheDocument();
+    expect(screen.queryByTestSubject('universalAlertsSection')).not.toBeInTheDocument();
+  });
+
+  it('links to the classic alerts page when the space opts into the classic alerts table', () => {
+    setup({ universalEnabled: true, showV1AlertsTable: true });
+    render(<AlertsSection bucketSize={bucketSize} />);
+
+    expect(screen.getByTestSubject('sectionAppLink')).toHaveAttribute(
+      'href',
+      '/app/observability/alerts'
+    );
   });
 });

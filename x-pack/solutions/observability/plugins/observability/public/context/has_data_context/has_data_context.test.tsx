@@ -630,6 +630,21 @@ describe('HasDataContextProvider', () => {
       );
     });
 
+    it('does not request universal rules when the space opts into the classic alerts table', async () => {
+      universalCore.settings.client.get.mockReturnValue(true);
+      universalCore.http.get.mockImplementation(async () => ({ data: [] }));
+
+      const { result } = renderHook(() => useHasData(), { wrapper: universalWrapper });
+
+      await waitFor(() =>
+        expect(result.current.hasDataMap.alert).toEqual({ hasData: false, status: 'success' })
+      );
+      expect(universalCore.http.get).not.toHaveBeenCalledWith(
+        ALERTING_V2_RULE_API_PATH,
+        expect.anything()
+      );
+    });
+
     it('does not request universal rules without the rules read capability', async () => {
       universalCore.application.capabilities = {
         ...universalCore.application.capabilities,
