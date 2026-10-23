@@ -11,7 +11,8 @@ import { resolveEvalSelection } from './src/datasets/eval_selection';
 
 // The suite's scout hook exports SANDBOX_API_KEY together with SANDBOX_KIBANA_CONFIG, which is what
 // makes the `evals_nightshift_investigations` config set start the investigation server.
-const { runSmoke, runInvestigations, fellBackToSmoke } = resolveEvalSelection();
+const { runSmoke, runInvestigations, runOrca, runConnectorProbes, fellBackToSmoke } =
+  resolveEvalSelection();
 // Workers re-evaluate this config; only the main process (no TEST_WORKER_INDEX) warns.
 if (fellBackToSmoke && process.env.TEST_WORKER_INDEX === undefined) {
   process.stderr.write(
@@ -26,6 +27,8 @@ export default createPlaywrightEvalsConfig({
   concurrency: 16,
   testIgnore: [
     ...(runSmoke ? [] : ['**/smoke/**']),
-    ...(runInvestigations ? [] : ['**/investigation/**']),
+    ...(runInvestigations ? [] : ['**/investigation/investigation.spec.ts']),
+    ...(runOrca ? [] : ['**/investigation/orcabench.spec.ts']),
+    ...(runConnectorProbes ? [] : ['**/connector_probe/**']),
   ],
 });

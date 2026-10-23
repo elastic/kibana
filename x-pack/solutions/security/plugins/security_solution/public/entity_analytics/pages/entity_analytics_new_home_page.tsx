@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { GroupSelector } from '@kbn/grouping/src/components/group_selector';
 import { css } from '@emotion/react';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { i18n } from '@kbn/i18n';
 import { isNoneGroup } from '@kbn/grouping';
 import { EntityType, useEntityStoreEuidApi } from '@kbn/entity-store/public';
@@ -80,6 +81,7 @@ import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import type { EntityViewMode } from '../../../common/entity_analytics/entity_store/resolution_group';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
+import { usePinnedBarsHeight } from '../components/home/use_pinned_bars_height';
 import { GenerateAiBriefButton } from '../components/home/ai_brief/generate_ai_brief_button';
 import { useKibana } from '../../common/lib/kibana';
 import { APP_ID, SecurityAgentBuilderAttachments } from '../../../common/constants';
@@ -359,6 +361,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   const scopeId = getEntityAnalyticsNewHomeScopeId(timeRange);
 
   const [isGridFullScreen, setIsGridFullScreen] = useState(false);
+  const [pinnedBarsHeight, gridAreaRef] = usePinnedBarsHeight(isGridFullScreen);
 
   const activeColumns = rowsMode === 'individual' ? INDIVIDUAL_ROWS_COLUMNS : RESOLVED_ROWS_COLUMNS;
 
@@ -1180,6 +1183,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   );
 
   const onGroupChange = useCallback((key: string) => {
+    // Grouping unmounts the grid, and EUI doesn't report leaving full screen when it unmounts.
+    if (key !== 'none') setIsGridFullScreen(false);
     setGroupsSelected((prev) => {
       if (key === 'none') return ['none'];
       const cleaned = prev.filter((g) => g !== 'none');
@@ -1260,15 +1265,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
 
   return (
     <>
-      <div className="entityAnalyticsPageHeader" css={isGridFullScreen ? hiddenCss : undefined}>
-        <EntityAnalyticsHomeHeader onStartTour={productTour.startTour} />
-      </div>
+      {/* Unwrapped: a wrapper would stop the header from sticking. */}
+      {!isGridFullScreen && <EntityAnalyticsHomeHeader onStartTour={productTour.startTour} />}
       <SecuritySolutionPageWrapper noPadding data-test-subj="entityAnalyticsNewHomePage">
         <div
           className="entityAnalyticsSearchSection"
           css={[
             css`
               padding-block-start: ${euiTheme.size.s};
+              padding-inline: ${euiTheme.size.base};
               display: flex;
               flex-direction: column;
               height: 100%;
@@ -1311,11 +1316,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
 
           <EuiSpacer size="m" />
 
-          <div
-            css={css`
-              padding-inline: ${euiTheme.size.base};
-            `}
-          >
+          <div>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <GenerateAiBriefButton
@@ -1341,10 +1342,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         <EuiSpacer size="m" />
 
         <div
-          css={css`
-            padding-inline: ${euiTheme.size.base};
-            padding-block-end: ${euiTheme.size.base};
-          `}
+          ref={gridAreaRef}
+          css={[
+            css`
+              padding-inline: ${euiTheme.size.base};
+            `,
+            // Scrolled to, the grid fills the view between the pinned bars; groups keep their
+            // natural height.
+            !isGroupSelected && kbnFullBodyHeightCss(`${pinnedBarsHeight}px`),
+          ]}
         >
           <DataViewContext.Provider value={dataViewContextValue}>
             {isGroupSelected ? (
@@ -1383,12 +1389,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
           </DataViewContext.Provider>
         </div>
       </SecuritySolutionPageWrapper>
-      <ProductTour
-        steps={productTour.steps}
-        currentStep={productTour.currentStep}
-        onNext={productTour.nextStep}
-        onEnd={productTour.endTour}
-      />
+      {/* Full screen hides the tour's anchors; the tour picks up at the same step on exit. */}
+      {!isGridFullScreen && (
+        <ProductTour
+          steps={productTour.steps}
+          currentStep={productTour.currentStep}
+          onNext={productTour.nextStep}
+          onEnd={productTour.endTour}
+        />
+      )}
       <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
     </>
   );

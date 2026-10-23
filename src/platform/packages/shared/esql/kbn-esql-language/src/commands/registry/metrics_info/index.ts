@@ -24,7 +24,7 @@ export const metricsInfoCommand: ICommand = {
   name: Commands.METRICS_INFO,
   methods: metricsInfoCommandMethods,
   metadata: {
-    description: i18n.translate('kbn-esql-language.esql.definitions.metricsInfoDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.metricsInfoDoc', {
       defaultMessage:
         'The METRICS_INFO command returns information about the metrics in the query. Only available on TS commands.',
     }),
