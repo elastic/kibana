@@ -1,5 +1,5 @@
 {
-  "sha1": "5051bf8c2c89bb422b9a204323d7fd4224cf718e",
+  "sha1": "60364872030c8b9e8250fdd5dc782683837a113d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -87,8 +87,21 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
-        "line": 35,
-        "column": 59
+        "line": 45,
+        "column": 40
+      }
+    },
+    {
+      "id": "7b072b0731322c3-ff733218948dadc",
+      "title": "Vega library editor saves a copy and leaves the original unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
+        "line": 67,
+        "column": 19
       }
     },
     {
@@ -100,8 +113,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
-        "line": 61,
-        "column": 19
+        "line": 78,
+        "column": 94
       }
     },
     {
@@ -113,8 +126,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
-        "line": 75,
-        "column": 21
+        "line": 103,
+        "column": 4
       }
     },
     {
