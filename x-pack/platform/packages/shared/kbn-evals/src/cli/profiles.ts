@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { timeoutSignal } from '@kbn/std';
 import Fs from 'fs';
 import Path from 'path';
 import type { FlagsReader } from '@kbn/dev-cli-runner';
@@ -35,8 +36,13 @@ export const stripTrailingSlash = (url: string): string => url.replace(/\/$/, ''
 
 export const probeHttp = async (url: string): Promise<boolean> => {
   try {
-    await fetch(url, { signal: AbortSignal.timeout(2000) });
-    return true;
+    const deadline = timeoutSignal(2000);
+    try {
+      await fetch(url, { signal: deadline });
+      return true;
+    } finally {
+      deadline.dispose();
+    }
   } catch {
     return false;
   }

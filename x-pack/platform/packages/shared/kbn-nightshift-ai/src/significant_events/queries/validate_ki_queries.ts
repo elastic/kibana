@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { timeoutSignal } from '@kbn/std';
 import { getMappingConflicts } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
@@ -158,31 +159,38 @@ export async function createQueryValidationContext({
   logger: Logger;
 }): Promise<QueryValidationContext> {
   const targetSources = sources;
-  const [validationLookback, mappingConflicts] = await Promise.all([
-    computeValidationLookback({ esClient, sources: targetSources, signal, logger }),
-    getMappingConflicts({
-      esClient,
-      index: targetSources,
-      signal: AbortSignal.any([signal, AbortSignal.timeout(15_000)]),
-    }).catch((error) => {
-      logger.debug(
-        () =>
-          `Failed to probe mapping conflicts for [${targetSources.join(', ')}]: ${getErrorMessage(
-            error
-          )}`
-      );
-      return [];
-    }),
-  ]);
+  const deadline = timeoutSignal(15_000);
+  try {
+    const [validationLookback, mappingConflicts] = await Promise.all([
+      computeValidationLookback({ esClient, sources: targetSources, signal, logger }),
+      getMappingConflicts({
+        esClient,
+        index: targetSources,
+        signal: AbortSignal.any([signal, deadline]),
+      }).catch((error) => {
+        logger.debug(
+          () =>
+            `Failed to probe mapping conflicts for [${targetSources.join(', ')}]: ${getErrorMessage(
+              error
+            )}`
+        );
+        return [];
+      }),
+    ]);
 
-  return {
-    targetSources,
-    validationLookback,
-    conflictingFields: new Set(mappingConflicts.map(({ field }) => field)),
-    normalizedStoredEsqls: new Set(
-      existingQueries.map(({ esql }) => normalizeEsqlSafe(replaceFromSources(esql, targetSources)))
-    ),
-  };
+    return {
+      targetSources,
+      validationLookback,
+      conflictingFields: new Set(mappingConflicts.map(({ field }) => field)),
+      normalizedStoredEsqls: new Set(
+        existingQueries.map(({ esql }) =>
+          normalizeEsqlSafe(replaceFromSources(esql, targetSources))
+        )
+      ),
+    };
+  } finally {
+    deadline.dispose();
+  }
 }
 
 export async function validateKIQueries({

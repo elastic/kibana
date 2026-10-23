@@ -48,7 +48,8 @@
     "@kbn/reindex-service-plugin",
     "@kbn/core-doc-links-browser-mocks",
     "@kbn/scout",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/std"
   ],
   "exclude": [
     "target/**/*",

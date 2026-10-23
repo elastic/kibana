@@ -82,6 +82,7 @@
     "@kbn/datemath",
     "@kbn/esql-utils",
     "@kbn/ebt-click",
+    "@kbn/std",
     "@kbn/usage-collection-plugin"
   ]
 }

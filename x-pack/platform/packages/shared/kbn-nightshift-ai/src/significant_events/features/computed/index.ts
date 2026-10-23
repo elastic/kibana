@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { timeoutSignal } from '@kbn/std';
 import type { BaseFeature } from '@kbn/significant-events-schema';
 import { codeAnalysisGenerator } from './code_analysis';
 import { datasetAnalysisGenerator } from './dataset_analysis';
@@ -109,37 +110,39 @@ export async function generateAllComputedFeatures({
   timeoutMs = DEFAULT_COMPUTED_FEATURES_TIMEOUT_MS,
   ...baseOptions
 }: GenerateAllComputedFeaturesOptions): Promise<ComputedFeatureGenerationResult> {
-  const signal = AbortSignal.any([
-    ...(requestSignal ? [requestSignal] : []),
-    AbortSignal.timeout(timeoutMs),
-  ]);
-  const options: ComputedFeatureGeneratorOptions = { ...baseOptions, signal };
+  const deadline = timeoutSignal(timeoutMs);
+  try {
+    const signal = AbortSignal.any([...(requestSignal ? [requestSignal] : []), deadline]);
+    const options: ComputedFeatureGeneratorOptions = { ...baseOptions, signal };
 
-  const allGenerators = registry.getAll();
-  const results = await Promise.allSettled(
-    allGenerators.map((generator) => generator.generate(options))
-  );
-
-  const errors: Array<{ feature: string; error: string }> = [];
-  const features: BaseFeature[] = [];
-
-  for (const [index, result] of results.entries()) {
-    const generator = allGenerators[index];
-    if (result.status === 'rejected') {
-      const message =
-        result.reason instanceof Error ? result.reason.message : String(result.reason);
-      options.logger.warn(`Computed feature generator "${generator.type}" failed: ${message}`);
-      errors.push({ feature: generator.type, error: message });
-    } else if (result.value !== undefined) {
-      features.push(toComputedFeature(generator, result.value));
-    }
-  }
-
-  if (features.length === 0 && errors.length > 0) {
-    throw new Error(
-      `All computed feature generators failed: ${errors.map((e) => e.error).join('; ')}`
+    const allGenerators = registry.getAll();
+    const results = await Promise.allSettled(
+      allGenerators.map((generator) => generator.generate(options))
     );
-  }
 
-  return { features, errors };
+    const errors: Array<{ feature: string; error: string }> = [];
+    const features: BaseFeature[] = [];
+
+    for (const [index, result] of results.entries()) {
+      const generator = allGenerators[index];
+      if (result.status === 'rejected') {
+        const message =
+          result.reason instanceof Error ? result.reason.message : String(result.reason);
+        options.logger.warn(`Computed feature generator "${generator.type}" failed: ${message}`);
+        errors.push({ feature: generator.type, error: message });
+      } else if (result.value !== undefined) {
+        features.push(toComputedFeature(generator, result.value));
+      }
+    }
+
+    if (features.length === 0 && errors.length > 0) {
+      throw new Error(
+        `All computed feature generators failed: ${errors.map((e) => e.error).join('; ')}`
+      );
+    }
+
+    return { features, errors };
+  } finally {
+    deadline.dispose();
+  }
 }
