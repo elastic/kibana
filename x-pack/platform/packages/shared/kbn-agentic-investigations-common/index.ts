@@ -24,6 +24,8 @@ export {
   type CardActionType,
 } from './src/components/actions/base_actions';
 
+export { toPlainSummary } from './src/utils/to_plain_summary';
+
 export { ConversationCard } from './src/components/conversation_card/conversation_card';
 export { ConversationCardCompact } from './src/components/conversation_card/conversation_card_compact';
 export { ConversationMetaInfo } from './src/components/conversation_card/conversation_meta_info';
