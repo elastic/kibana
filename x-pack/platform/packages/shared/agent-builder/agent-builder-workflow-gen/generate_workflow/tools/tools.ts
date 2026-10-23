@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { parse as parseYaml } from 'yaml';
 import { tool } from '@langchain/core/tools';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import type { ToolCall } from '@kbn/agent-builder-genai-utils/langchain';
@@ -13,6 +14,7 @@ import {
   insertStep,
   modifyStep,
   modifyStepProperty,
+  modifyWorkflowProperty,
   deleteStep,
   type StepDefinition,
 } from '@kbn/workflows-yaml';
@@ -145,6 +147,41 @@ const modifyStepPropertyTool = defineTool({
   },
 });
 
+const modifyWorkflowPropertyTool = defineTool({
+  name: 'modify_workflow_property',
+  description:
+    'Replace the value of a top-level workflow property (e.g. "triggers", "name", "description", "consts", "settings"). Not for "steps".',
+  schema: z.object({
+    property: z.string().describe('Top-level property key'),
+    value: z
+      .string()
+      .describe('New value for the whole property, as YAML text (e.g. a YAML list for "triggers")'),
+  }),
+  mutatesYaml: true,
+  execute: async ({ property, value: valueYaml }, { state }) => {
+    if (property === 'steps') {
+      return {
+        message: {
+          success: false,
+          error:
+            'Use insert_step / modify_step / modify_step_property / delete_step to change steps',
+        },
+      };
+    }
+    // The value is YAML text: with an untyped value, models send arrays and objects as strings.
+    let value: unknown;
+    try {
+      value = parseYaml(valueYaml);
+    } catch (e) {
+      return { message: { success: false, error: `value is not valid YAML: ${e.message}` } };
+    }
+    const result = modifyWorkflowProperty(state.yaml, property, value);
+    return result.success
+      ? { yaml: result.yaml, message: { success: true } }
+      : { message: { success: false, error: result.error } };
+  },
+});
+
 const deleteStepTool = defineTool({
   name: 'delete_step',
   description: 'Delete a step by name',
@@ -192,6 +229,7 @@ export const workflowGenTools: ReadonlyArray<WorkflowGenToolDefinition> = [
   insertStepTool,
   modifyStepTool,
   modifyStepPropertyTool,
+  modifyWorkflowPropertyTool,
   deleteStepTool,
   getStepDefinitionsTool,
   getTriggerDefinitionsTool,
