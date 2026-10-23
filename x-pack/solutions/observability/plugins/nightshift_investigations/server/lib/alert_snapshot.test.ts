@@ -197,6 +197,29 @@ describe('fetchInvestigationAlertSnapshots', () => {
     expect(snapshot).not.toHaveProperty('rule_name', expect.any(String));
   });
 
+  it('omits the data of a v2 episode that is too large to store in a subject snapshot', async () => {
+    const lookup = makeLookup({
+      columns: [
+        'episode.id',
+        'first_timestamp',
+        'last_timestamp',
+        'episode.status',
+        'rule.id',
+        'group_hash',
+      ],
+      rows: [
+        ['ep-1', '2026-09-02T10:00:00.000Z', '2026-09-02T10:05:00.000Z', 'active', 'v2-rule', 'h1'],
+      ],
+      episodeData: { 'ep-1': JSON.stringify({ message: 'x'.repeat(65_000) }) },
+    });
+
+    const [snapshot] = await run(makeAlertsClient({ alerts: [] }), lookup, ['ep-1']);
+
+    expect(snapshot).toEqual(
+      expect.objectContaining({ id: 'ep-1', rule_name: 'V2 rule', data: undefined })
+    );
+  });
+
   it('keeps the names of readable rules when another rule is inaccessible', async () => {
     const lookup = makeLookup({
       getRule: jest.fn(async ({ id }: { id: string }) => {

@@ -26,6 +26,7 @@ export const MAX_ALERTS_PER_INVESTIGATION = 20;
 // A rule type writes one evaluation entry per metric or criterion, so this bounds a hostile
 // array rather than a realistic rule.
 const MAX_EVALUATION_ENTRIES = 20;
+const MAX_V2_ALERT_DATA_LENGTH = 32_000;
 
 export const investigationSubjectTypeSchema = z.enum(INVESTIGATION_SUBJECT_TYPES);
 
@@ -189,7 +190,10 @@ export const v2AlertSnapshotSchema = z.object({
   severity: z.string().min(1).max(100).optional(),
   source: z.string().min(1).max(500).optional(),
   /** The `data` of the latest event that carried any. */
-  data: z.record(z.string().max(128), z.unknown()).optional(),
+  data: z
+    .record(z.string().max(128), z.unknown())
+    .refine((data) => JSON.stringify(data).length <= MAX_V2_ALERT_DATA_LENGTH)
+    .optional(),
 });
 
 export const investigationAlertSnapshotSchema = z.discriminatedUnion('alert_version', [
