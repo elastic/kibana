@@ -9,7 +9,6 @@
 
 import type { OtelLogDocument } from '../otel_logs';
 import type { Serializable } from '../serializable';
-import { generateLongId, generateShortId } from '../utils/generate_id';
 import type {
   EdotBrowserClient,
   HttpInstrumentation,
@@ -18,7 +17,7 @@ import type {
 } from './edot_browser_client';
 import type { EdotBrowserSpanDocument } from './edot_browser_span';
 import { sample, type Distribution, type HealthProfile } from './health_profiles';
-import { between, pick } from './random';
+import { between, pick, randomHex } from './random';
 import { resourceTimings } from './resource_timings';
 
 export interface EdotBrowserResource {
@@ -336,7 +335,7 @@ const sendRequest = (
     : method === 'POST'
     ? 201
     : 200;
-  const traceContext = { traceId: generateLongId(), spanId: generateShortId() };
+  const traceContext = { traceId: randomHex(random, 32), spanId: randomHex(random, 16) };
 
   const events: EdotBrowserEvent[] = [
     client

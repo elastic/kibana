@@ -912,7 +912,8 @@ The data is written through the `otelEsClient`, which indexes documents as-is. I
 
 - `withSessionId` (boolean, default `true`): writes `attributes.session.id`. Set it to `false` to match EDOT Browser, which does not emit it yet.
 - `includeRawAttribution` (boolean, default `false`): writes the web-vitals attribution as a JSON string body on `browser.web_vital` events, as the web-vitals instrumentation does when its experimental `includeRawAttribution` option is on.
-- `scale` (number, default `1`): multiplies the number of sessions per minute of every app
+- `scale` (number, default `1`): multiplies the number of sessions per minute of every app. Fractions of a session add up over time, so a scale below 1 thins out every app in proportion.
+- `seed` (string or number, default random): makes the data reproducible. Every session, with its session, trace and span IDs, browser, page views and events, derives from the seed, its app and its number since the epoch, so the same seed generates the same sessions at the same times, however the time range is split into batches. Sessions are spread evenly over time. The classic RUM page loads of `digital_experience_mixed` take their timings from the seed too, but not their document IDs.
 
 #### `digital_experience_browser`
 
@@ -932,6 +933,7 @@ Generates EDOT Browser data for five apps in different states of health:
 node scripts/synthtrace digital_experience_browser --from=now-30m --to=now
 node scripts/synthtrace digital_experience_browser --live --scenarioOpts withSessionId=false
 node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts scale=3
+node scripts/synthtrace digital_experience_browser --from=2026-10-16T12:00:00Z --to=2026-10-16T13:00:00Z --scenarioOpts seed=my-seed
 ```
 
 #### `digital_experience_mixed`

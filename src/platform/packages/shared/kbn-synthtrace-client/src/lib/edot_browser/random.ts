@@ -13,3 +13,7 @@ export const between = (random: () => number, min: number, max: number): number 
 
 export const pick = <T>(random: () => number, items: readonly T[]): T =>
   items[Math.floor(random() * items.length)];
+
+/** A lowercase hex string of the given length, like trace and span IDs. */
+export const randomHex = (random: () => number, length: number): string =>
+  Array.from({ length }, () => Math.floor(random() * 16).toString(16)).join('');

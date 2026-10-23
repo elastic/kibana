@@ -78,6 +78,17 @@ describe('digital experience apps', () => {
       });
     });
 
+    it('accepts a seed as a string or a number', () => {
+      expect(parseDigitalExperienceScenarioOpts({ seed: 'abc' }).seed).toBe('abc');
+      expect(parseDigitalExperienceScenarioOpts({ seed: 42 }).seed).toBe('42');
+      expect(parseDigitalExperienceScenarioOpts(undefined).seed).toBeUndefined();
+      ['', '  ', true, {}, NaN, Infinity].forEach((seed) => {
+        expect(() => parseDigitalExperienceScenarioOpts({ seed })).toThrow(
+          'seed must be a non-empty string or a finite number'
+        );
+      });
+    });
+
     it('rejects unknown and invalid options', () => {
       expect(() => parseDigitalExperienceScenarioOpts({ sessionId: true })).toThrow(
         'Unknown scenarioOpts: sessionId'
@@ -152,6 +163,114 @@ describe('digital experience apps', () => {
       });
     });
 
+    describe('seed', () => {
+      const generate = (
+        seed?: string,
+        {
+          timeRange = range,
+          from = timeRange.from.getTime(),
+          withSessionId = true,
+          scale = 1,
+        }: { timeRange?: Timerange; from?: number; withSessionId?: boolean; scale?: number } = {}
+      ) =>
+        generateEdotBrowserSessions(timeRange, {
+          environment: 'test',
+          from,
+          withSessionId,
+          includeRawAttribution: false,
+          scale,
+          seed,
+        }).flatMap((generator) =>
+          Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
+        );
+      // Key order isn't part of the data
+      const sorted = (docs: EdotBrowserDocument[]) =>
+        docs
+          .map((doc) =>
+            JSON.stringify(doc, (_key, value) =>
+              value && typeof value === 'object' && !Array.isArray(value)
+                ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)))
+                : value
+            )
+          )
+          .sort();
+
+      it('generates the same data for the same seed and different data otherwise', () => {
+        const docs = generate('seed-a');
+
+        expect(docs.length).toBeGreaterThan(0);
+        expect(generate('seed-a')).toEqual(docs);
+        expect(generate('seed-b')).not.toEqual(docs);
+        expect(generate(undefined)).not.toEqual(generate(undefined));
+      });
+
+      it('generates the same data when the run is split into batches', () => {
+        const from = range.from.getTime();
+        // Batches of live mode, and of workers, don't start on whole seconds
+        const batches = [0, 13.37, 61.5, 119.25, 120].map((seconds) => at(seconds));
+        const batched = batches
+          .slice(1)
+          .flatMap((end, i) =>
+            generate('seed-a', { timeRange: timerange(batches[i], end, {} as ToolingLog), from })
+          );
+
+        expect(sorted(batched)).toEqual(sorted(generate('seed-a')));
+      });
+
+      it('does not change the rest of the data without session IDs', () => {
+        const withoutSessionIds = generate('seed-a', { withSessionId: false });
+        // session.start only exists for sessions that have an ID
+        const withSessionIds = generate('seed-a')
+          .filter((doc) => !('event_name' in doc && doc.event_name === 'session.start'))
+          .map(({ attributes, ...doc }) => ({
+            ...doc,
+            attributes: Object.fromEntries(
+              Object.entries(attributes ?? {}).filter(([key]) => key !== 'session.id')
+            ),
+          }));
+
+        expect(withoutSessionIds.length).toBeGreaterThan(0);
+        expect(sorted(withoutSessionIds)).toEqual(sorted(withSessionIds));
+      });
+
+      it('does not repeat session, trace or span IDs', () => {
+        const hour = timerange(at(0), at(3600), {} as ToolingLog);
+        // From the epoch on, so that sessions that started before the run are kept whole
+        const docs = generate('seed-a', { timeRange: hour, from: 0, scale: 3 });
+        const sessionCount = docs.filter(
+          (doc) => 'event_name' in doc && doc.event_name === 'session.start'
+        ).length;
+        const sessionIds = new Set(docs.map((doc) => doc.attributes?.['session.id']));
+        // Resource timing logs of requests carry the IDs of their span, only count the spans
+        const spans = docs.flatMap((doc) => ('kind' in doc ? [doc] : []));
+
+        expect(sessionCount).toBeGreaterThan(500);
+        expect(sessionIds.size).toBe(sessionCount);
+        expect(new Set(spans.map(({ trace_id: id }) => id)).size).toBe(spans.length);
+        expect(new Set(spans.map(({ span_id: id }) => id)).size).toBe(spans.length);
+      });
+
+      it('derives UUID v4 session IDs and trace IDs from the seed', () => {
+        const docs = generate('seed-a');
+        const sessionIds = new Set(docs.map((doc) => String(doc.attributes?.['session.id'])));
+
+        expect(sessionIds.size).toBeGreaterThan(1);
+        sessionIds.forEach((id) =>
+          expect(id).toMatch(
+            /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+          )
+        );
+        docs
+          .filter((doc) => 'kind' in doc)
+          .forEach((doc) => {
+            expect(doc).toMatchObject({
+              trace_id: expect.stringMatching(/^[0-9a-f]{32}$/),
+              span_id: expect.stringMatching(/^[0-9a-f]{16}$/),
+            });
+          });
+      });
+    });
+
     it('sets the deployment environment', () => {
       collect(false).forEach((doc) => {
         expect(doc.resource?.attributes?.['deployment.environment.name']).toBe('test');
@@ -196,6 +315,28 @@ describe('digital experience apps', () => {
 
       expect(liveBatches).toEqual(indices(range, 7.5));
       expect(liveBatches).toHaveLength(15);
+    });
+
+    it('places events evenly, by absolute time and inside their batch', () => {
+      const times = (timeRange: Timerange) => {
+        const created: number[] = [];
+        Array.from(
+          generatePerMinute<EdotBrowserDocument>(timeRange, 6, ({ time }) => {
+            created.push(time);
+            return [];
+          })
+        );
+        return created;
+      };
+      const batches = [0, 7.3, 31, 60].map((seconds) => at(seconds));
+      const batchTimes = batches
+        .slice(1)
+        .flatMap((end, i) => times(timerange(batches[i], end, {} as ToolingLog)));
+
+      expect(batchTimes).toEqual(times(timerange(at(0), at(60), {} as ToolingLog)));
+      expect(times(timerange(at(0), at(60), {} as ToolingLog))).toEqual(
+        Array.from({ length: 6 }, (_, i) => range.from.getTime() + (i + 1) * 10_000 - 1)
+      );
     });
 
     it('creates events in runs of less than a minute', () => {

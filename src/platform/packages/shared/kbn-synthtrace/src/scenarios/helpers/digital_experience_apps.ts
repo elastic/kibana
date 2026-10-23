@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as generateUuid } from 'uuid';
 import {
   edotBrowser,
-  generateLongId,
   type BrowserProfileId,
   type EdotBrowserDocument,
   type EdotBrowserEvent,
@@ -20,6 +20,7 @@ import {
   type SynthtraceGenerator,
   type Timerange,
 } from '@kbn/synthtrace-client';
+import { createSeededRandom } from '../../lib/utils/seeded_random';
 
 export interface DigitalExperienceApp {
   serviceName: string;
@@ -40,12 +41,18 @@ export interface DigitalExperienceScenarioOpts {
    * time, so a scale below 1 thins out every app in proportion.
    */
   scale: number;
+  /**
+   * Makes the data reproducible: every session, with its IDs, browser, page views and events, is
+   * derived from the seed, its app and its number since the epoch. Random when unset.
+   */
+  seed?: string;
 }
 
 const DEFAULT_SCENARIO_OPTS: DigitalExperienceScenarioOpts = {
   withSessionId: true,
   includeRawAttribution: false,
   scale: 1,
+  seed: undefined,
 };
 
 const STOREFRONT_ORIGIN = 'https://www.example-store.com';
@@ -389,6 +396,16 @@ const parseScale = (value: unknown): number => {
   return scale;
 };
 
+const parseSeed = (value: unknown): string | undefined => {
+  if (value === undefined) {
+    return DEFAULT_SCENARIO_OPTS.seed;
+  }
+  if ((typeof value === 'string' && value.trim() !== '') || Number.isFinite(value)) {
+    return String(value);
+  }
+  throw new Error('seed must be a non-empty string or a finite number');
+};
+
 /** Parses `--scenarioOpts` for the digital experience scenarios, rejecting unknown keys and values. */
 export const parseDigitalExperienceScenarioOpts = (
   opts: Record<string, unknown> | undefined
@@ -404,6 +421,7 @@ export const parseDigitalExperienceScenarioOpts = (
     withSessionId: parseBooleanOpt(opts, 'withSessionId'),
     includeRawAttribution: parseBooleanOpt(opts, 'includeRawAttribution'),
     scale: parseScale(opts?.scale),
+    seed: parseSeed(opts?.seed),
   };
 };
 
@@ -417,17 +435,17 @@ const countInWindow = (perMinute: number, from: number, to: number): number =>
   Math.floor((perMinute * to) / MS_PER_MINUTE) - Math.floor((perMinute * from) / MS_PER_MINUTE);
 
 /**
- * Generates `perMinute` events a minute over `range`, calling `create` for each of them with the
- * one-second window it falls in and its index, counted from the epoch. Events are placed by their
- * absolute time, so the rate holds for any batch size, from the one-second batches of live mode to
- * runs of less than a minute.
+ * Generates `perMinute` events a minute over `range`, calling `create` for each of them with its
+ * time and its index, counted from the epoch. Events are placed by their absolute time, evenly
+ * apart, so the rate holds and the same event comes out at the same time for any batch size, from
+ * the one-second batches of live mode to runs of less than a minute. Times are never in the future
+ * of `range.to`.
  */
 export const generatePerMinute = <TFields extends Fields>(
   range: Timerange,
   perMinute: number,
   create: (event: {
-    windowStart: number;
-    windowEnd: number;
+    time: number;
     index: number;
   }) => Serializable<TFields> | Array<Serializable<TFields>>
 ): SynthtraceGenerator<TFields> => {
@@ -441,17 +459,24 @@ export const generatePerMinute = <TFields extends Fields>(
     }
     const firstIndex = Math.floor((perMinute * windowStart) / MS_PER_MINUTE);
 
-    return Array.from({ length: eventCount }, (_, offset) =>
-      create({ windowStart, windowEnd, index: firstIndex + offset })
-    ).flat();
+    return Array.from({ length: eventCount }, (_, offset) => {
+      const index = firstIndex + offset;
+      // The event happens when the rate reaches the next whole event, within the window
+      const time = Math.ceil(((index + 1) * MS_PER_MINUTE) / perMinute) - 1;
+      return create({ time: Math.min(Math.max(time, windowStart), windowEnd - 1), index });
+    }).flat();
   });
 };
+
+/** A random v4 UUID, like the `crypto.randomUUID()` EDOT Browser takes its IDs from. */
+const randomUuid = (random: () => number): string =>
+  generateUuid({ random: Uint8Array.from({ length: 16 }, () => Math.floor(random() * 256)) });
 
 const getTimestamp = (event: EdotBrowserEvent) => Number(event.serialize()[0]['@timestamp']);
 
 /**
  * One generator per app in the catalogue, each producing EDOT Browser sessions over `range`.
- * Sessions end inside the window of their rate tick, so live mode never writes into the future.
+ * Sessions end at the time of their rate tick, so live mode never writes into the future.
  * Sessions that started before the run's `from` are cut off there, like traffic at the edge of any
  * window.
  */
@@ -463,6 +488,7 @@ export const generateEdotBrowserSessions = (
     withSessionId,
     includeRawAttribution,
     scale,
+    seed = String(Math.random()),
   }: DigitalExperienceScenarioOpts & { environment: string; from: number }
 ): Array<SynthtraceGenerator<EdotBrowserDocument>> =>
   DIGITAL_EXPERIENCE_APPS.map(
@@ -472,20 +498,25 @@ export const generateEdotBrowserSessions = (
       return generatePerMinute<EdotBrowserDocument>(
         range,
         sessionsPerMinute * scale,
-        ({ windowStart, windowEnd }) => {
+        ({ time, index }) => {
+          const random = createSeededRandom(`${seed}:${serviceName}:${index}`);
           const pageViews =
-            MIN_PAGE_VIEWS + Math.floor(Math.random() * (MAX_PAGE_VIEWS - MIN_PAGE_VIEWS + 1));
+            MIN_PAGE_VIEWS + Math.floor(random() * (MAX_PAGE_VIEWS - MIN_PAGE_VIEWS + 1));
+          const profile = edotBrowser.pickBrowserProfile(random, browserWeights);
+          // Drawn even without session IDs, so that the option doesn't change the rest of the data
+          const sessionId = randomUuid(random);
 
           return edotBrowser
             .session({
-              client: app.client(edotBrowser.pickBrowserProfile(Math.random, browserWeights), {
-                sessionId: withSessionId ? generateLongId() : undefined,
+              client: app.client(profile, {
+                sessionId: withSessionId ? sessionId : undefined,
                 includeRawAttribution,
               }),
               site,
               health: edotBrowser.healthProfiles[health],
-              end: windowStart + Math.floor(Math.random() * (windowEnd - windowStart)),
+              end: time,
               pageViews,
+              random,
             })
             .filter((event) => getTimestamp(event) >= from);
         }
