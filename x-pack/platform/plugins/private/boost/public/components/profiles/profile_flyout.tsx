@@ -11,6 +11,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCheckableCard,
+  EuiCheckbox,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,8 +23,9 @@ import {
   EuiLink,
   EuiScreenReaderOnly,
   EuiSpacer,
+  EuiText,
   EuiTitle,
-  EuiToolTip,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -165,6 +167,9 @@ export const INDEX_OPTIONS: ReadonlyArray<{
   },
 ];
 
+// Pin, which the prewarm option holds, since it needs prewarm.
+const PIN_OPTION = INDEX_OPTIONS.find(({ key }) => key === 'pinned') ?? INDEX_OPTIONS[0];
+
 const PIN_NEEDS_PREWARM = i18n.translate('xpack.boost.profileForm.pinNeedsPrewarm', {
   defaultMessage: 'Turn on prewarm to pin cached data.',
 });
@@ -187,6 +192,7 @@ export const ProfileFlyoutContent = ({
     getInitialDraft(profile, duplicateOf, forRule, takenNames)
   );
   const [showErrors, setShowErrors] = useState(false);
+  const { euiTheme } = useEuiTheme();
   // While focus is in the boost values, an estimate they made unavailable stays, faded.
   const [isBoostFocused, setIsBoostFocused] = useState(false);
 
@@ -460,59 +466,68 @@ export const ProfileFlyoutContent = ({
             })}
           >
             <EuiFlexGroup direction="column" gutterSize="s">
-              {INDEX_OPTIONS.map(({ key, title, description }) => {
-                // Only prewarmed data can be pinned, so pin waits on prewarm, and turning prewarm
-                // off turns pin off too.
-                const needsPrewarm = key === 'pinned' && !indices.prewarm;
-                const isDisabled = isSaving || needsPrewarm;
-                const card = (
-                  <EuiCheckableCard
-                    id={`${optionsId}-${key}`}
-                    checkableType="checkbox"
-                    label={
-                      <CardLabel
-                        title={title}
-                        description={
-                          <>
-                            {description}
-                            {needsPrewarm && (
-                              <EuiScreenReaderOnly>
-                                <span> {PIN_NEEDS_PREWARM}</span>
-                              </EuiScreenReaderOnly>
-                            )}
-                          </>
-                        }
-                        isDisabled={isDisabled}
-                      />
-                    }
-                    checked={indices[key] && !needsPrewarm}
-                    onChange={() =>
-                      updateDraft({
-                        indices: {
-                          ...indices,
-                          [key]: !indices[key],
-                          ...(key === 'prewarm' && indices.prewarm ? { pinned: false } : {}),
-                        },
-                      })
-                    }
-                    disabled={isDisabled}
-                    data-test-subj={`boostProfileOption-${key}`}
-                  />
-                );
-                return (
+              {INDEX_OPTIONS.filter(({ key }) => key !== 'pinned').map(
+                ({ key, title, description }) => (
                   <EuiFlexItem key={key}>
-                    {/* A tooltip says why pin is disabled, on hover; screen readers hear it with
-                        the description. */}
-                    {needsPrewarm ? (
-                      <EuiToolTip content={PIN_NEEDS_PREWARM} display="block">
-                        {card}
-                      </EuiToolTip>
-                    ) : (
-                      card
-                    )}
+                    <EuiCheckableCard
+                      id={`${optionsId}-${key}`}
+                      checkableType="checkbox"
+                      label={
+                        <CardLabel title={title} description={description} isDisabled={isSaving} />
+                      }
+                      checked={indices[key]}
+                      onChange={() =>
+                        updateDraft({
+                          indices: {
+                            ...indices,
+                            [key]: !indices[key],
+                            // Only prewarmed data can be pinned, so turning prewarm off turns pin
+                            // off too.
+                            ...(key === 'prewarm' && indices.prewarm ? { pinned: false } : {}),
+                          },
+                        })
+                      }
+                      disabled={isSaving}
+                      data-test-subj={`boostProfileOption-${key}`}
+                    >
+                      {/* Pin is part of prewarm, in its card's body, usable once prewarm is on. */}
+                      {key === 'prewarm' && (
+                        <EuiCheckbox
+                          id={`${optionsId}-pinned`}
+                          // Its name in the regular weight, as a checkbox's label is, with what it does
+                          // right below.
+                          label={
+                            <>
+                              {PIN_OPTION.title}
+                              <EuiText
+                                size="xs"
+                                color={
+                                  isSaving || !indices.prewarm
+                                    ? euiTheme.colors.disabledText
+                                    : 'subdued'
+                                }
+                              >
+                                {PIN_OPTION.description}
+                                {!indices.prewarm && (
+                                  <EuiScreenReaderOnly>
+                                    <span> {PIN_NEEDS_PREWARM}</span>
+                                  </EuiScreenReaderOnly>
+                                )}
+                              </EuiText>
+                            </>
+                          }
+                          checked={indices.pinned && indices.prewarm}
+                          onChange={() =>
+                            updateDraft({ indices: { ...indices, pinned: !indices.pinned } })
+                          }
+                          disabled={isSaving || !indices.prewarm}
+                          data-test-subj="boostProfileOption-pinned"
+                        />
+                      )}
+                    </EuiCheckableCard>
                   </EuiFlexItem>
-                );
-              })}
+                )
+              )}
             </EuiFlexGroup>
           </FormSection>
         )}
