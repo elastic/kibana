@@ -101,16 +101,13 @@ describe('registerEntityAttachment impact entity opener', () => {
       getActiveSpace: jest.fn().mockResolvedValue({ id: 'default', name: 'Default', solution }),
     } as unknown as SpacesPluginStart);
 
-  it.each([undefined, 'classic', 'security'])(
-    'registers the opener in a %s space',
-    async (solution) => {
-      const registerImpactEntityOpener = setup(spacesWithSolution(solution));
-      await new Promise(process.nextTick);
-      expect(registerImpactEntityOpener).toHaveBeenCalledTimes(1);
-    }
-  );
+  it('registers the opener in a security space', async () => {
+    const registerImpactEntityOpener = setup(spacesWithSolution('security'));
+    await new Promise(process.nextTick);
+    expect(registerImpactEntityOpener).toHaveBeenCalledTimes(1);
+  });
 
-  it.each(['oblt', 'es', 'workplaceai'])(
+  it.each([undefined, 'classic', 'oblt', 'es', 'workplaceai'])(
     'does not register the opener in a %s space',
     async (solution) => {
       const registerImpactEntityOpener = setup(spacesWithSolution(solution));

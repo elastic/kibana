@@ -151,17 +151,16 @@ export const registerInvestigationIocsAttachment = ({
  * environments never exercise this renderer even though it's registered unconditionally.
  */
 /**
- * The impact entity opener links into Security entity flyouts, so it only makes sense in spaces
- * where the Security solution is visible: classic spaces (solution unset or `classic`) and
+ * The impact entity opener links into Security entity flyouts, so it is registered only in
  * Security solution spaces. If the active space can't be resolved, fall back to registering.
  */
-const isSecurityRelevantSpace = async (spaces?: SpacesPluginStart): Promise<boolean> => {
+const isSecuritySolutionSpace = async (spaces?: SpacesPluginStart): Promise<boolean> => {
   if (!spaces) {
     return true;
   }
   try {
     const { solution } = await spaces.getActiveSpace();
-    return !solution || solution === 'classic' || solution === 'security';
+    return solution === 'security';
   } catch {
     return true;
   }
@@ -193,8 +192,8 @@ export const registerEntityAttachment = ({
   registerImpactEntityOpener?: AgenticInvestigationsPublicPluginStart['registerImpactEntityOpener'];
 }): void => {
   if (registerImpactEntityOpener) {
-    void isSecurityRelevantSpace(spaces).then((isRelevant) => {
-      if (!isRelevant) {
+    void isSecuritySolutionSpace(spaces).then((isSecuritySpace) => {
+      if (!isSecuritySpace) {
         return;
       }
       registerImpactEntityOpener((entity) => {
