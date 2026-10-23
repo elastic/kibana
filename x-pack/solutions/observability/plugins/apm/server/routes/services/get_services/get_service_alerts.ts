@@ -15,7 +15,7 @@ import {
   ALERT_UUID,
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-constants';
 import type { ServiceAlertsResponse } from '@kbn/apm-api-shared';
 import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import type { ServiceGroup } from '../../../../common/service_groups';

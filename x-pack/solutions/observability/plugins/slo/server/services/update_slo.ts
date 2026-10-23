@@ -28,6 +28,7 @@ import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_p
 import type { SLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { SecurityException } from '../errors';
+import { allSettledOrThrow } from '../utils/all_settled_or_throw';
 import { retryTransientEsErrors } from '../utils/retry';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
@@ -157,7 +158,7 @@ export class UpdateSLO {
       const tempDocPromise = this.createTempSummaryDocument(updatedSlo);
       rollbackOperations.push(() => this.deleteTempSummaryDocument(updatedSlo));
 
-      await Promise.all([
+      await allSettledOrThrow([
         sloPipelinePromise,
         rollupTransformPromise,
         summaryPipelinePromise,
@@ -166,7 +167,7 @@ export class UpdateSLO {
       ]);
 
       // transforms can only be started after the pipelines are created
-      await Promise.all([
+      await allSettledOrThrow([
         this.transformManager.start(updatedRollupTransformId),
         this.summaryTransformManager.start(updatedSummaryTransformId),
       ]);
