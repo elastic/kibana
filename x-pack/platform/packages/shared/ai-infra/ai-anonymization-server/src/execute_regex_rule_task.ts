@@ -7,7 +7,7 @@
 
 import { RE2JS } from 're2js';
 import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
-import { shouldKeepBuiltInMatch } from '@kbn/ai-anonymization-common';
+import { refineBuiltInMatch } from '@kbn/ai-anonymization-common';
 import type { DetectedMatch } from './types';
 
 interface Span {
@@ -112,19 +112,24 @@ export const executeRegexRulesTask = ({
           return [];
         }
 
-        return findSpans(value)
-          .filter(
-            ({ start, end }) => !rule.builtIn || shouldKeepBuiltInMatch(rule.id, value, start, end)
-          )
-          .map(({ start, end }) => ({
-            ruleIndex,
-            recordIndex,
-            recordKey: key,
-            start,
-            end,
-            matchValue: value.slice(start, end),
-            class_name: rule.entityClass,
-          }));
+        return findSpans(value).flatMap((span) => {
+          const refined = rule.builtIn
+            ? refineBuiltInMatch(rule.id, value, span.start, span.end)
+            : span;
+          return refined
+            ? [
+                {
+                  ruleIndex,
+                  recordIndex,
+                  recordKey: key,
+                  start: refined.start,
+                  end: refined.end,
+                  matchValue: value.slice(refined.start, refined.end),
+                  class_name: rule.entityClass,
+                },
+              ]
+            : [];
+        });
       })
     );
   });

@@ -7,7 +7,7 @@
 
 import { RE2JS } from 're2js';
 import { DEFAULT_BUILTIN_REGEX_RULES } from './default_builtin_regex_rules';
-import { shouldKeepBuiltInMatch } from './builtin_match_filters';
+import { refineBuiltInMatch } from './builtin_match_filters';
 
 type Engine = 'native' | 're2';
 
@@ -58,9 +58,10 @@ describe.each(ENGINES)('built-in regex rules on %s', (engine) => {
             }
             return found;
           })()
-    )
-      .filter(([start, text]) => shouldKeepBuiltInMatch(id, input, start, start + text.length))
-      .map(([, text]) => text);
+    ).flatMap(([start, text]) => {
+      const refined = refineBuiltInMatch(id, input, start, start + text.length);
+      return refined ? [input.slice(refined.start, refined.end)] : [];
+    });
     expect(kept).toEqual(expected);
   };
 
@@ -357,18 +358,20 @@ describe.each(ENGINES)('built-in regex rules on %s', (engine) => {
     });
   });
 
-  describe('account rule path filter', () => {
-    const accountPatternMatches = (input: string): string[] =>
-      [...input.matchAll(new RegExp(patternFor('builtin-account-login'), 'g'))]
-        .filter(({ index, 0: text }) =>
-          shouldKeepBuiltInMatch(
+  describe('account rule match filter', () => {
+    // What the pipeline masks for the account rule: the pattern's matches after the filter.
+    const maskedByAccountRule = (input: string): string[] =>
+      [...input.matchAll(new RegExp(patternFor('builtin-account-login'), 'g'))].flatMap(
+        ({ index, 0: text }) => {
+          const refined = refineBuiltInMatch(
             'builtin-account-login',
             input,
             index ?? 0,
             (index ?? 0) + text.length
-          )
-        )
-        .map(([match]) => match);
+          );
+          return refined ? [input.slice(refined.start, refined.end)] : [];
+        }
+      );
 
     it.each([
       'C:\\WINDOWS\\System32',
@@ -376,19 +379,24 @@ describe.each(ENGINES)('built-in regex rules on %s', (engine) => {
       '\\Content.Outlook\\RANDOM\\attachment.hta',
       '/usr/SHARE\\x',
     ])('drops path segments in %s', (input) => {
-      expect(accountPatternMatches(input)).toEqual([]);
+      expect(maskedByAccountRule(input)).toEqual([]);
+    });
+
+    // The restored value is exact only if the masked text has no backslashes: a `DOMAIN\\name`
+    // masked whole came back from a migration with four times the backslashes.
+    it.each([1, 2, 4, 8, 16])('masks only the name behind %s backslashes', (count) => {
+      const input = `user: QACORP${'\\'.repeat(count)}jdoe.sentinel, ok`;
+
+      expect(maskedByAccountRule(input)).toEqual(['jdoe.sentinel']);
     });
 
     it('keeps an account that follows a space, quote or colon', () => {
-      expect(accountPatternMatches('user: CORP\\jdoe, "QACORP\\\\jdoe"')).toEqual([
-        'CORP\\jdoe',
-        'QACORP\\\\jdoe',
-      ]);
+      expect(maskedByAccountRule('user: CORP\\jdoe, "QACORP\\\\jdoe"')).toEqual(['jdoe', 'jdoe']);
     });
 
     it('never filters custom or unknown rules', () => {
-      expect(shouldKeepBuiltInMatch(undefined, 'C:\\A\\b', 3, 6)).toBe(true);
-      expect(shouldKeepBuiltInMatch('builtin-email', 'x', 0, 1)).toBe(true);
+      expect(refineBuiltInMatch(undefined, 'C:\\A\\b', 3, 6)).toEqual({ start: 3, end: 6 });
+      expect(refineBuiltInMatch('builtin-email', 'x', 0, 1)).toEqual({ start: 0, end: 1 });
     });
   });
 

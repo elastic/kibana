@@ -232,13 +232,13 @@ describe('executeRegexRulesTask', () => {
     const content =
       'user="QACORP\\\\jdoe" SORT count DESC\\n| LIMIT 20 in C:\\WINDOWS\\System32 as CORP\\a.mehta';
 
-    it('masks accounts only, not escape sequences or path segments', () => {
+    // Only the name is masked, never `DOMAIN\\` or the backslashes: the restored value must be exact
+    // in any escaping layer (structured model output, tool arguments, JSON in JSON).
+    it('masks the account name only, not the domain, escape sequences or path segments', () => {
       const matches = executeRegexRulesTask({ rules: [accountRule], records: [{ content }] });
 
-      expect(matches.map(({ matchValue }) => matchValue)).toEqual([
-        'QACORP\\\\jdoe',
-        'CORP\\a.mehta',
-      ]);
+      expect(matches.map(({ matchValue }) => matchValue)).toEqual(['jdoe', 'a.mehta']);
+      expect(matches.some(({ matchValue }) => matchValue.includes('\\'))).toBe(false);
     });
 
     it('does not filter a custom rule that reuses the same pattern', () => {

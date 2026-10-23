@@ -52,7 +52,7 @@ const IPV4_PATTERN = `\\b(?:${IPV4_OCTET}\\.){3}${IPV4_OCTET}(?:\\.[0-9]{1,3}){0
 // form. Every alternative needs either eight groups or a `::`, so clock times (`12:30:45`), MAC
 // addresses and `host:port` are not matched. Alternatives list the longest tail first because the
 // first one that matches wins. Words that merely end in hex digits before `::` (`std::`, `a::int`)
-// are rejected by `shouldKeepBuiltInMatch`.
+// are rejected by `refineBuiltInMatch`.
 const IPV6_GROUP = '[0-9A-Fa-f]{1,4}';
 const IPV6_PATTERN = [
   `::(?:[fF]{4}:)?(?:${IPV4_OCTET}\\.){3}${IPV4_OCTET}`,
@@ -187,7 +187,7 @@ const HOST_PATTERN =
 // nest several layers (an alert read by a tool arrives with eight). After the backslashes an
 // escape letter (`n r t b f u v 0`) only starts an account when a lower-case letter or digit
 // follows, so `DESC\n| LIMIT` and `DAYS\nFROM` (at any depth) are left alone while `CORP\nancy`
-// still matches. Path segments (`C:\WINDOWS\System32`) are rejected by `shouldKeepBuiltInMatch`,
+// still matches. Path segments (`C:\WINDOWS\System32`) are rejected by `refineBuiltInMatch`,
 // which needs the character before the match and so cannot be a lookbehind in a pattern that
 // must also run on RE2.
 const ACCOUNT_NAME = String.raw`[A-Za-z0-9._$-]`;
@@ -259,7 +259,7 @@ export const DEFAULT_BUILTIN_REGEX_RULES: RegexAnonymizationRule[] = [
     entityClass: 'USER_NAME',
     type: 'RegExp',
     // Windows `DOMAIN\account` form only. Off by default: an all-caps path segment followed by a
-    // backslash is only rejected for paths with a preceding separator (see `shouldKeepBuiltInMatch`).
+    // backslash is only rejected for paths with a preceding separator (see `refineBuiltInMatch`).
     pattern: ACCOUNT_LOGIN_PATTERN,
     enabled: false,
     builtIn: true,

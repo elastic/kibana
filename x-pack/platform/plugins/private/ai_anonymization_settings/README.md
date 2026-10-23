@@ -63,6 +63,11 @@ disables its controls for users who cannot save. The difference is intentional.
 - **Not covered by the built-ins:** email addresses in scripts other than Latin, Greek and Cyrillic
   (CJK, Arabic, Hebrew, ...) and bare single-label host names (`server01`, `nas.local`). Four-part version numbers (`3.11.4.2`) are indistinguishable from IPv4 addresses and
   are masked.
+- **The account rule masks only the account name.** For `DOMAIN\account` the mask covers `account`;
+  `DOMAIN\` and the backslashes stay visible. A masked value that contains backslashes does not
+  round-trip: the matched text carries the escaping of the layer it was found in, and restoring it
+  into a different layer (structured model output, tool arguments, JSON in JSON) changed the
+  number of backslashes. The rule is off by default.
 - **Well-known public sites are not masked as host names** (`github.com`, `mitre.org`, `nist.gov`,
   `cisa.gov`, `owasp.org`, `virustotal.com`, `microsoft.com`, `ss64.com`, ... and their
   subdomains). The list is `PUBLIC_DOMAINS` in `@kbn/ai-anonymization-common`
