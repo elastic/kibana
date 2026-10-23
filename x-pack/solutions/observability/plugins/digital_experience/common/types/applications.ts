@@ -67,7 +67,7 @@ export interface ApplicationsResponse {
   applications: ApplicationSummary[];
   /**
    * The environments in the time range, whatever the `environment` filter, for the picker; up to
-   * 100 per source, the most used first.
+   * 100 per source, the most used first. Names longer than the route accepts are left out.
    */
   environments: string[];
   /** Page loads over the time range in the selected environment, per source. */

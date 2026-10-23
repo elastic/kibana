@@ -8,7 +8,12 @@
 import type { ClassicBucket } from './search_responses';
 import { toApplication } from './to_application';
 
-const noVital = { doc_count: 0, p75: { values: [] }, ranks: { values: [] } };
+const noVital = {
+  doc_count: 0,
+  p75: { values: [] },
+  upToGood: { doc_count: 0 },
+  upToNeedsImprovement: { doc_count: 0 },
+};
 
 const bucket = (pageLoads: number, jsErrors: number): ClassicBucket => ({
   key: 'shop',

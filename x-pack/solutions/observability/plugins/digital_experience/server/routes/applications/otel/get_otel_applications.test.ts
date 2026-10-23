@@ -8,17 +8,12 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getOtelApplications } from './get_otel_applications';
 
-// `goodPercent` of the samples are good, the rest poor (the rank at both thresholds is the same).
-const vital = (value: number | null, samples: number, goodPercent = 100) => ({
+// `good` of the samples are good, the rest poor (as many up to both thresholds).
+const vital = (value: number | null, samples: number, good = samples) => ({
   doc_count: samples,
   p75: { values: value === null ? [] : [{ key: 75, value }] },
-  ranks: {
-    // Every vital's two thresholds; only the ones of the vital asked for are read.
-    values: [2500, 4000, 200, 500, 0.1, 0.25, 1800, 3000, 800, 1800].map((key) => ({
-      key,
-      value: samples === 0 ? null : goodPercent,
-    })),
-  },
+  upToGood: { doc_count: good },
+  upToNeedsImprovement: { doc_count: good },
 });
 
 const NO_VITAL = { p75Ms: null, sampleCount: 0, ratings: null };
@@ -85,7 +80,7 @@ describe('getOtelApplications', () => {
           inp: vital(180.25, 4),
           cls: vital(0.3, 9),
           fcp: vital(1500.5, 10),
-          ttfb: vital(950.75, 10, 40),
+          ttfb: vital(950.75, 10, 4),
           lastSeen: { value: Date.parse('2021-01-18T12:20:00.000Z') },
         },
         {

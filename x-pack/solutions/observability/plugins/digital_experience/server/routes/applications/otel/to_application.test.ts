@@ -10,7 +10,12 @@ import { environmentsOf, toApplication } from './to_application';
 
 const terms = (...keys: string[]) => ({ buckets: keys.map((key) => ({ key })) });
 
-const noVital = { doc_count: 0, p75: { values: [] }, ranks: { values: [] } };
+const noVital = {
+  doc_count: 0,
+  p75: { values: [] },
+  upToGood: { doc_count: 0 },
+  upToNeedsImprovement: { doc_count: 0 },
+};
 
 const logsBucket = (pageLoads: number, jsErrors: number): LogsBucket => ({
   key: 'shop',

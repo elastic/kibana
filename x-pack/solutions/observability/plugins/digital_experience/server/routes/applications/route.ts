@@ -14,9 +14,7 @@ import { createApmEventClient } from './classic/create_apm_event_client';
 import { getClassicApplications } from './classic/get_classic_applications';
 import { getOtelApplications } from './otel/get_otel_applications';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
-
-// Environment names are short; the bound keeps the query param small.
-const MAX_ENVIRONMENT_LENGTH = 200;
+import { MAX_ENVIRONMENT_LENGTH } from './constants';
 
 export const APPLICATIONS_ENDPOINT = 'GET /internal/digital_experience/applications';
 

@@ -8,13 +8,12 @@
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { getClassicApplications } from './get_classic_applications';
 
-// All samples rated good: the ranks at both thresholds are 100%.
-const vital = (value: number | null, samples: number, thresholds: [number, number]) => ({
+// All samples rated good: every sample is up to both thresholds.
+const vital = (value: number | null, samples: number) => ({
   doc_count: samples,
   p75: { values: value === null ? [] : [{ key: 75, value }] },
-  ranks: {
-    values: thresholds.map((key) => ({ key, value: samples === 0 ? null : 100 })),
-  },
+  upToGood: { doc_count: samples },
+  upToNeedsImprovement: { doc_count: samples },
 });
 
 const ALL_GOOD = { good: 1, needsImprovement: 0, poor: 0 };
@@ -39,11 +38,11 @@ const shopBucket = {
   jsErrors: { doc_count: 7 },
   httpSuccess: { doc_count: 90 },
   httpFailure: { doc_count: 10 },
-  lcp: vital(2412.5, 38, [2500, 4000]),
-  inp: vital(null, 0, [200, 500]),
-  cls: vital(0.05, 39, [0.1, 0.25]),
-  fcp: vital(1200.5, 36, [1800, 3000]),
-  ttfb: vital(300.25, 40, [800, 1800]),
+  lcp: vital(2412.5, 38),
+  inp: vital(null, 0),
+  cls: vital(0.05, 39),
+  fcp: vital(1200.5, 36),
+  ttfb: vital(300.25, 40),
   lastSeen: { value: Date.parse('2021-01-18T12:25:00.000Z') },
 };
 
@@ -164,12 +163,11 @@ describe('getClassicApplications', () => {
             keyed: false,
           },
         },
-        ranks: {
-          percentile_ranks: {
-            field: 'transaction.marks.agent.largestContentfulPaint',
-            values: [2500, 4000],
-            keyed: false,
-          },
+        upToGood: {
+          filter: { range: { 'transaction.marks.agent.largestContentfulPaint': { lte: 2500 } } },
+        },
+        upToNeedsImprovement: {
+          filter: { range: { 'transaction.marks.agent.largestContentfulPaint': { lte: 4000 } } },
         },
       },
     });

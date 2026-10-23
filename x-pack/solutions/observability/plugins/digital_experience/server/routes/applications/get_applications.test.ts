@@ -91,6 +91,16 @@ describe('getApplications', () => {
     expect(environments).toEqual(['ENVIRONMENT_NOT_DEFINED', 'Alpha', 'production']);
   });
 
+  it('leaves out the environments longer than the route accepts', async () => {
+    const longest = 'x'.repeat(1024);
+    const { environments } = await getApplications({
+      getOtelApplications: async () => result([], ['production', longest, 'y'.repeat(1025)]),
+      logger,
+    });
+
+    expect(environments).toEqual(['production', longest]);
+  });
+
   it('returns the page loads over time of each source', async () => {
     const otel = [{ timestamp: 0, count: 2 }];
     const classic = [{ timestamp: 0, count: 5 }];

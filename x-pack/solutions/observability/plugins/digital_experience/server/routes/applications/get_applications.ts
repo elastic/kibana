@@ -17,6 +17,7 @@ import type {
   ApplicationsResponse,
   PageLoadsOverTime,
 } from '../../../common/types/applications';
+import { MAX_ENVIRONMENT_LENGTH } from './constants';
 import type { SourceApplications } from './types';
 
 type ApplicationsFetcher = () => Promise<SourceApplications>;
@@ -60,9 +61,12 @@ const toClientError = (failures: SourceFailure[]) =>
 const byPageLoadsThenName = (a: ApplicationSummary, b: ApplicationSummary): number =>
   b.pageLoads.count - a.pageLoads.count || a.serviceName.localeCompare(b.serviceName);
 
-/** "Not defined" first, then the environment names alphabetically. */
+/** "Not defined" first, then the environment names the route accepts, alphabetically. */
 const sortEnvironments = (environments: Set<string>): string[] => {
-  const names = [...environments].filter((name) => name !== ENVIRONMENT_NOT_DEFINED_VALUE).sort();
+  const names = [...environments]
+    .filter((name) => name !== ENVIRONMENT_NOT_DEFINED_VALUE)
+    .filter((name) => name.length <= MAX_ENVIRONMENT_LENGTH)
+    .sort();
   return environments.has(ENVIRONMENT_NOT_DEFINED_VALUE)
     ? [ENVIRONMENT_NOT_DEFINED_VALUE, ...names]
     : names;

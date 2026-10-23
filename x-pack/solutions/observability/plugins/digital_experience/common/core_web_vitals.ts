@@ -36,10 +36,16 @@ export const CORE_WEB_VITAL_THRESHOLDS: Record<CoreWebVital, VitalThresholds> = 
   ttfb: { good: 800, needsImprovement: 1800 },
 };
 
+/**
+ * Compares with the thresholds as `float` fields store them: EDOT Browser's
+ * `browser.web_vital.value` is a float, so a CLS of 0.1 is read back as 0.10000000149011612 and must
+ * still be good. Integer thresholds are unchanged, and Classic RUM's scaled floats (steps of
+ * 0.000001) have no value between 0.1 and its float.
+ */
 export const getVitalRating = (vital: CoreWebVital, value: number): VitalRating => {
   const { good, needsImprovement } = CORE_WEB_VITAL_THRESHOLDS[vital];
-  if (value <= good) {
+  if (value <= Math.fround(good)) {
     return 'good';
   }
-  return value <= needsImprovement ? 'needsImprovement' : 'poor';
+  return value <= Math.fround(needsImprovement) ? 'needsImprovement' : 'poor';
 };

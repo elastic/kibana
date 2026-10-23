@@ -17,6 +17,9 @@ describe('getVitalRating', () => {
     ['inp', 500, 'needsImprovement'],
     ['inp', 501, 'poor'],
     ['cls', 0.1, 'good'],
+    // 0.1 read back from a float field
+    ['cls', 0.10000000149011612, 'good'],
+    ['cls', 0.1000001, 'needsImprovement'],
     ['cls', 0.25, 'needsImprovement'],
     ['cls', 0.26, 'poor'],
     ['fcp', 1800, 'good'],

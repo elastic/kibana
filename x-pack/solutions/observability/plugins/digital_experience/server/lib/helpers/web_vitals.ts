@@ -11,12 +11,18 @@ import type { DurationVital, ScoreVital, VitalRatings } from '../../../common/ty
 import type { PercentilesAggregation } from './aggregations';
 import { getP75, p75Of } from './aggregations';
 
-/** Sub-aggregations of one vital's documents: its p75 and the share up to each rating threshold. */
+// Elasticsearch parses the bound as the field's type, so a float 0.1 is still up to 0.1.
+const upTo = (field: string, threshold: number) => ({
+  filter: { range: { [field]: { lte: threshold } } },
+});
+
+/** Sub-aggregations of one vital's documents: its p75 and the samples up to each rating threshold. */
 export const vitalStatsAggs = (field: string, vital: CoreWebVital) => {
   const { good, needsImprovement } = CORE_WEB_VITAL_THRESHOLDS[vital];
   return {
     p75: p75Of(field),
-    ranks: { percentile_ranks: { field, values: [good, needsImprovement], keyed: false } },
+    upToGood: upTo(field, good),
+    upToNeedsImprovement: upTo(field, needsImprovement),
   };
 };
 
@@ -24,42 +30,35 @@ export const vitalStatsAggs = (field: string, vital: CoreWebVital) => {
 export interface VitalAggregation {
   doc_count: number;
   p75: PercentilesAggregation;
-  ranks: PercentilesAggregation;
+  upToGood: { doc_count: number };
+  upToNeedsImprovement: { doc_count: number };
 }
 
-// Percentile ranks are estimates, so a share is kept between 0 and 1.
-const toShare = (percent: number) => Math.min(Math.max(percent / 100, 0), 1);
-
-const toRatings = (
-  { doc_count: sampleCount, ranks }: VitalAggregation,
-  vital: CoreWebVital
-): VitalRatings | null => {
+const toRatings = ({
+  doc_count: sampleCount,
+  upToGood,
+  upToNeedsImprovement,
+}: VitalAggregation): VitalRatings | null => {
   if (sampleCount === 0) {
     return null;
   }
-  const { good, needsImprovement } = CORE_WEB_VITAL_THRESHOLDS[vital];
-  const rankAt = (threshold: number) =>
-    toShare(ranks.values.find(({ key }) => key === threshold)?.value ?? 0);
-  const goodShare = rankAt(good);
-  const upToNeedsImprovement = Math.max(rankAt(needsImprovement), goodShare);
+  const good = upToGood.doc_count / sampleCount;
+  const upToNeedsImprovementShare = upToNeedsImprovement.doc_count / sampleCount;
   return {
-    good: goodShare,
-    needsImprovement: upToNeedsImprovement - goodShare,
-    poor: 1 - upToNeedsImprovement,
+    good,
+    needsImprovement: upToNeedsImprovementShare - good,
+    poor: 1 - upToNeedsImprovementShare,
   };
 };
 
-export const toDurationVital = (
-  aggregation: VitalAggregation,
-  vital: CoreWebVital
-): DurationVital => ({
+export const toDurationVital = (aggregation: VitalAggregation): DurationVital => ({
   p75Ms: getP75(aggregation.p75),
   sampleCount: aggregation.doc_count,
-  ratings: toRatings(aggregation, vital),
+  ratings: toRatings(aggregation),
 });
 
-export const toScoreVital = (aggregation: VitalAggregation, vital: CoreWebVital): ScoreVital => ({
+export const toScoreVital = (aggregation: VitalAggregation): ScoreVital => ({
   p75: getP75(aggregation.p75),
   sampleCount: aggregation.doc_count,
-  ratings: toRatings(aggregation, vital),
+  ratings: toRatings(aggregation),
 });

@@ -149,4 +149,16 @@ describe('GET /internal/digital_experience/applications', () => {
     expect(schema.shape.query.safeParse({ start: END, end: END }).success).toBe(false);
     expect(schema.shape.query.safeParse({ start: END, end: START }).success).toBe(false);
   });
+
+  it('accepts every environment the picker lists, up to 1024 characters', () => {
+    const { params } = applicationsRouteRepository[APPLICATIONS_ENDPOINT];
+    const schema = params as unknown as {
+      shape: { query: { safeParse: (query: unknown) => { success: boolean } } };
+    };
+    const withEnvironment = (length: number) =>
+      schema.shape.query.safeParse({ start: START, end: END, environment: 'x'.repeat(length) });
+
+    expect(withEnvironment(1024).success).toBe(true);
+    expect(withEnvironment(1025).success).toBe(false);
+  });
 });

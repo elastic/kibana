@@ -6,7 +6,6 @@
  */
 
 import { APPLICATION_SOURCE } from '../../../../common/application_source';
-import { CORE_WEB_VITAL } from '../../../../common/core_web_vitals';
 import type { ApplicationSummary } from '../../../../common/types/applications';
 import { bucketKeys, ratio, toLastSeen } from '../../../lib/helpers/aggregations';
 import { toDurationVital, toScoreVital } from '../../../lib/helpers/web_vitals';
@@ -34,11 +33,11 @@ export const toApplication = (logs: LogsBucket, spans?: SpansBucket): Applicatio
     environments: environmentsOf(logs, spans),
     pageLoads: { count: logs.pageLoads.doc_count },
     webVitals: {
-      lcp: toDurationVital(logs.lcp, CORE_WEB_VITAL.lcp),
-      inp: toDurationVital(logs.inp, CORE_WEB_VITAL.inp),
-      cls: toScoreVital(logs.cls, CORE_WEB_VITAL.cls),
-      fcp: toDurationVital(logs.fcp, CORE_WEB_VITAL.fcp),
-      ttfb: toDurationVital(logs.ttfb, CORE_WEB_VITAL.ttfb),
+      lcp: toDurationVital(logs.lcp),
+      inp: toDurationVital(logs.inp),
+      cls: toScoreVital(logs.cls),
+      fcp: toDurationVital(logs.fcp),
+      ttfb: toDurationVital(logs.ttfb),
     },
     jsErrors: {
       count: logs.jsErrors.doc_count,

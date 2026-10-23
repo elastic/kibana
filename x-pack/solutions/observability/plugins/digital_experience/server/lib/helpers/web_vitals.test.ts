@@ -11,28 +11,38 @@ const percentiles = (entries: Array<[number, number | null]>) => ({
   values: entries.map(([key, value]) => ({ key, value })),
 });
 
+const vitalAggregation = (
+  samples: number,
+  p75: number | null,
+  upToGood: number,
+  upToNeedsImprovement: number
+) => ({
+  doc_count: samples,
+  p75: percentiles(p75 === null ? [] : [[75, p75]]),
+  upToGood: { doc_count: upToGood },
+  upToNeedsImprovement: { doc_count: upToNeedsImprovement },
+});
+
 describe('vitalStatsAggs', () => {
-  it("asks for the p75 and the percentile ranks at the vital's thresholds", () => {
+  it("asks for the p75 and the samples up to the vital's thresholds, inclusive", () => {
     expect(vitalStatsAggs('lcp.field', 'lcp')).toEqual({
       p75: { percentiles: { field: 'lcp.field', percents: [75], keyed: false } },
-      ranks: { percentile_ranks: { field: 'lcp.field', values: [2500, 4000], keyed: false } },
+      upToGood: { filter: { range: { 'lcp.field': { lte: 2500 } } } },
+      upToNeedsImprovement: { filter: { range: { 'lcp.field': { lte: 4000 } } } },
+    });
+  });
+
+  it('uses the unitless CLS thresholds', () => {
+    expect(vitalStatsAggs('cls.field', 'cls')).toMatchObject({
+      upToGood: { filter: { range: { 'cls.field': { lte: 0.1 } } } },
+      upToNeedsImprovement: { filter: { range: { 'cls.field': { lte: 0.25 } } } },
     });
   });
 });
 
 describe('toDurationVital', () => {
-  it('turns the percentile ranks into rating shares', () => {
-    const vital = toDurationVital(
-      {
-        doc_count: 10,
-        p75: percentiles([[75, 3100]]),
-        ranks: percentiles([
-          [2500, 60],
-          [4000, 90],
-        ]),
-      },
-      'lcp'
-    );
+  it('turns the sample counts into rating shares', () => {
+    const vital = toDurationVital(vitalAggregation(10, 3100, 6, 9));
 
     expect(vital.p75Ms).toBe(3100);
     expect(vital.sampleCount).toBe(10);
@@ -41,42 +51,18 @@ describe('toDurationVital', () => {
     expect(vital.ratings?.poor).toBeCloseTo(0.1);
   });
 
-  it('keeps the shares between 0 and 1 when the estimates overshoot', () => {
-    const { ratings } = toDurationVital(
-      {
-        doc_count: 1,
-        p75: percentiles([[75, 100]]),
-        ranks: percentiles([
-          [800, 100.4],
-          [1800, 100],
-        ]),
-      },
-      'ttfb'
-    );
-
-    expect(ratings).toEqual({ good: 1, needsImprovement: 0, poor: 0 });
-  });
-
   it('has no ratings without samples', () => {
-    expect(
-      toDurationVital({ doc_count: 0, p75: percentiles([]), ranks: percentiles([]) }, 'inp')
-    ).toEqual({ p75Ms: null, sampleCount: 0, ratings: null });
+    expect(toDurationVital(vitalAggregation(0, null, 0, 0))).toEqual({
+      p75Ms: null,
+      sampleCount: 0,
+      ratings: null,
+    });
   });
 });
 
 describe('toScoreVital', () => {
-  it('rates CLS against its unitless thresholds', () => {
-    const { p75, ratings } = toScoreVital(
-      {
-        doc_count: 4,
-        p75: percentiles([[75, 0.05]]),
-        ranks: percentiles([
-          [0.1, 100],
-          [0.25, 100],
-        ]),
-      },
-      'cls'
-    );
+  it('rates every sample up to the good threshold as good', () => {
+    const { p75, ratings } = toScoreVital(vitalAggregation(4, 0.05, 4, 4));
 
     expect(p75).toBe(0.05);
     expect(ratings).toEqual({ good: 1, needsImprovement: 0, poor: 0 });

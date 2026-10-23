@@ -106,6 +106,8 @@ export const classicSearch = ({
   apm: { events: [ProcessorEvent.transaction, ProcessorEvent.error, ProcessorEvent.span] },
   track_total_hits: false,
   size: 0,
+  // A shard that fails fails the search, so the source is reported as unavailable, not incomplete.
+  allow_partial_search_results: false,
   query: {
     bool: {
       filter: [

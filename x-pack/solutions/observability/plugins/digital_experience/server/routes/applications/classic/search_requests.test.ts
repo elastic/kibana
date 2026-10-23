@@ -15,6 +15,10 @@ const applicationAggsOf = (request: ReturnType<typeof classicSearch>) =>
   ).aggs.applications.aggs;
 
 describe('classicSearch', () => {
+  it('fails instead of returning partial results', () => {
+    expect(classicSearch({ start: 10, end: 20 }).allow_partial_search_results).toBe(false);
+  });
+
   it('counts page loads from the page-load transactions only', () => {
     expect(applicationAggsOf(classicSearch({ start: 10, end: 20 })).pageLoads).toEqual({
       filter: {

@@ -6,7 +6,6 @@
  */
 
 import { APPLICATION_SOURCE } from '../../../../common/application_source';
-import { CORE_WEB_VITAL } from '../../../../common/core_web_vitals';
 import type { ApplicationSummary } from '../../../../common/types/applications';
 import { bucketKeys, ratio, toLastSeen } from '../../../lib/helpers/aggregations';
 import { toDurationVital, toScoreVital } from '../../../lib/helpers/web_vitals';
@@ -22,11 +21,11 @@ export const toApplication = (bucket: ClassicBucket): ApplicationSummary => {
     environments: bucketKeys(bucket.environments),
     pageLoads: { count: bucket.pageLoads.doc_count },
     webVitals: {
-      lcp: toDurationVital(bucket.lcp, CORE_WEB_VITAL.lcp),
-      inp: toDurationVital(bucket.inp, CORE_WEB_VITAL.inp),
-      cls: toScoreVital(bucket.cls, CORE_WEB_VITAL.cls),
-      fcp: toDurationVital(bucket.fcp, CORE_WEB_VITAL.fcp),
-      ttfb: toDurationVital(bucket.ttfb, CORE_WEB_VITAL.ttfb),
+      lcp: toDurationVital(bucket.lcp),
+      inp: toDurationVital(bucket.inp),
+      cls: toScoreVital(bucket.cls),
+      fcp: toDurationVital(bucket.fcp),
+      ttfb: toDurationVital(bucket.ttfb),
     },
     jsErrors: {
       count: bucket.jsErrors.doc_count,
