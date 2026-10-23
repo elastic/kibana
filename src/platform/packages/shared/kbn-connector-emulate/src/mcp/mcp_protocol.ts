@@ -114,7 +114,7 @@ const notAllowed = (method: string): ProtocolExchange => ({
   requestViolations: [],
 });
 
-interface TransportError {
+export interface TransportError {
   readonly statusCode: number;
   /** The JSON-RPC error code. */
   readonly code: number;
@@ -128,17 +128,24 @@ const transportError = (
   message: string
 ): TransportError => ({ statusCode, code, violation: { path, code: 'transport', message } });
 
-const rejected = ({ statusCode, code, violation: { message } }: TransportError) => ({
+/** The JSON-RPC error response to a POST that `readMessages` turns down. */
+export const transportErrorResponse = ({
+  statusCode,
+  code,
+  violation: { message },
+}: TransportError): ContractResponse => ({
   statusCode,
   headers: JSON_HEADERS,
   body: { jsonrpc: '2.0', error: { code, message }, id: null },
 });
 
-// The checks a Streamable HTTP server makes before it reads a POST's JSON-RPC messages.
-const readMessages = ({
+/** The checks a Streamable HTTP server makes before it reads a POST's JSON-RPC messages. */
+export const readMessages = ({
   headers,
   body,
-}: ContractRequest): { messages: JSONRPCMessage[]; batch: boolean } | TransportError => {
+}: Pick<ContractRequest, 'headers' | 'body'>):
+  | { messages: JSONRPCMessage[]; batch: boolean }
+  | TransportError => {
   const accepted = headers.accept ?? '';
   if (!accepted.includes('application/json') || !accepted.includes('text/event-stream')) {
     const message = 'The Accept header must name both application/json and text/event-stream';
@@ -382,7 +389,11 @@ export const createMcpProtocol = (
       }
       const read = readMessages(request);
       if ('statusCode' in read) {
-        return { response: rejected(read), operations: [], requestViolations: [read.violation] };
+        return {
+          response: transportErrorResponse(read),
+          operations: [],
+          requestViolations: [read.violation],
+        };
       }
       const { messages, batch } = read;
       const violations = new Map<RequestId, Violation[]>();
