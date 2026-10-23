@@ -440,6 +440,16 @@ export const isProposalSettling = (proposal: Pick<Proposal, 'decision' | 'status
   proposal.decision === 'approved' &&
   (proposal.status === 'pending' || proposal.status === 'executing');
 
+/**
+ * The action failed and its retry does not exist yet. Poll until the original is superseded.
+ */
+export const isAwaitingRetry = (
+  proposal: Pick<Proposal, 'decision' | 'status' | 'supersededBy'>
+): boolean =>
+  proposal.decision === 'approved' &&
+  proposal.status === 'failed' &&
+  proposal.supersededBy === undefined;
+
 /** Settled by a deadline rather than a person.
  * `pending` reads as live even past `expiresAt` until the gate workflow sweeps it,
  * so this is not a substitute for comparing `expiresAt` to `now`. */

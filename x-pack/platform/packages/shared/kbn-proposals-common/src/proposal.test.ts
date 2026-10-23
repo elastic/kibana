@@ -8,6 +8,7 @@
 import { MAX_CHARTS_SUMMARY_BUCKETS } from './constants';
 import {
   isProposalSettling,
+  isAwaitingRetry,
   isTerminal,
   OPEN_PROPOSAL_STATUSES,
   proposalChartsSummaryQuerySchema,
@@ -53,6 +54,25 @@ describe('proposalChartsSummaryQuerySchema', () => {
     expect(proposalChartsSummaryQuerySchema.safeParse({ windowHours, bucketMinutes }).success).toBe(
       true
     );
+  });
+});
+
+describe('isAwaitingRetry', () => {
+  it('is true for an approved, failed proposal with no successor yet', () => {
+    expect(isAwaitingRetry({ decision: 'approved', status: 'failed' })).toBe(true);
+  });
+
+  it('is false once the retry has replaced it', () => {
+    expect(
+      isAwaitingRetry({ decision: 'approved', status: 'failed', supersededBy: 'retry-1' })
+    ).toBe(false);
+  });
+
+  it('is false for any other status or decision', () => {
+    expect(isAwaitingRetry({ decision: 'approved', status: 'executing' })).toBe(false);
+    expect(isAwaitingRetry({ decision: 'approved', status: 'succeeded' })).toBe(false);
+    expect(isAwaitingRetry({ decision: 'dismissed', status: 'failed' })).toBe(false);
+    expect(isAwaitingRetry({ decision: undefined, status: 'pending' })).toBe(false);
   });
 });
 
