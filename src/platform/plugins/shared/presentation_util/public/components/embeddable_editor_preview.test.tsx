@@ -80,10 +80,11 @@ describe('EmbeddableEditorPreview', () => {
     mockLayoutMode = 'side-by-side';
   });
 
-  it('renders the embeddable', async () => {
-    renderPreview();
+  it('renders the embeddable and the toolbar', async () => {
+    renderPreview({ toolbar: <div data-test-subj="previewToolbar" /> });
 
     expect(await screen.findByTestId('mockEmbeddable')).toBeInTheDocument();
+    expect(screen.getByTestId('previewToolbar')).toBeInTheDocument();
   });
 
   it('applies the latest serialized state when it changes', async () => {

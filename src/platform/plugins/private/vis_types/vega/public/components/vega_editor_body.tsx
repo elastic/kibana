@@ -12,15 +12,9 @@ import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, euiFullHeight } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  isCombinedFilter,
-  isOfQueryType,
-  type Filter,
-  type Query,
-  type TimeRange,
-} from '@kbn/es-query';
+import { isCombinedFilter, isOfQueryType, type Filter, type Query } from '@kbn/es-query';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import { isEqual, omit } from 'lodash';
+import { omit } from 'lodash';
 import { VEGA_MAX_FILTERS } from '../../common/constants';
 import type { VegaByValueState } from '../../server';
 import type { VegaPluginStartDependencies } from '../plugin';
@@ -85,9 +79,6 @@ interface VegaEditorBodyProps {
   initialFormat: VegaByValueState['spec']['format'];
   onSpecChange: (spec: string) => void;
   onFormatChange: (format: VegaByValueState['spec']['format']) => void;
-  /** Shows a date picker for editors that have no dashboard to take the time range from. */
-  timeRange?: TimeRange;
-  onTimeRangeChange?: (timeRange: TimeRange) => void;
 }
 
 /** The query bar and spec editor shared by the dashboard panel and library item editors. */
@@ -102,8 +93,6 @@ export const VegaEditorBody = ({
   initialFormat,
   onSpecChange,
   onFormatChange,
-  timeRange,
-  onTimeRangeChange,
 }: VegaEditorBodyProps) => {
   // Filters on the only ad-hoc data view are stored without its id, because the id isn't a
   // saved object and a reference to it fails import. The search bar gets the id back, because the
@@ -130,16 +119,13 @@ export const VegaEditorBody = ({
           showFilterBar
           // Pinned filters live in global state, which panel filters are not persisted to.
           hiddenFilterPanelOptions={['pinFilter']}
-          showDatePicker={timeRange !== undefined}
-          dateRangeFrom={timeRange?.from}
-          dateRangeTo={timeRange?.to}
+          showDatePicker={false}
           showSubmitButton
           showSavedQueryControls={false}
           isAutoRefreshDisabled
           useDefaultBehaviors={false}
           disableSubscribingToGlobalDataServices
-          onQuerySubmit={({ query: next, dateRange }) => {
-            if (onTimeRangeChange && !isEqual(dateRange, timeRange)) onTimeRangeChange(dateRange);
+          onQuerySubmit={({ query: next }) => {
             const submitted = next && isOfQueryType(next) ? next : undefined;
             if (
               !submitted ||

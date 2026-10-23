@@ -44,6 +44,7 @@ import { fromDraft, isSameDraft, toDraft } from '../lib/library_draft';
 import type { VegaDraft, VegaEditableState } from '../lib/library_draft';
 import type { VegaPluginStartDependencies } from '../plugin';
 import { getData } from '../services';
+import { PreviewTimePicker } from './preview_time_picker';
 import { saveVegaToLibrary } from './save_to_library';
 import type { VegaLibraryClient } from './vega_library_client';
 
@@ -66,7 +67,7 @@ const savedMessage = (title: string) =>
   });
 
 interface VegaLibraryEditorProps {
-  core: Pick<CoreStart, 'notifications'>;
+  core: Pick<CoreStart, 'application' | 'featureFlags' | 'http' | 'notifications' | 'uiSettings'>;
   client: VegaLibraryClient;
   SearchBar: VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
@@ -263,9 +264,6 @@ export const VegaLibraryEditor = ({
           initialFormat={initialDraft.format}
           onSpecChange={(spec) => setDraft((current) => ({ ...current, spec }))}
           onFormatChange={(format) => setDraft((current) => ({ ...current, format }))}
-          // A panel takes its time range from the dashboard.
-          timeRange={onPreview ? undefined : timeRange}
-          onTimeRangeChange={(next) => timefilter.setTime(next)}
         />
       </EuiFlyoutBody>
       <ManagedEditorFooter
@@ -311,6 +309,18 @@ export const VegaLibraryEditor = ({
           serializedState={previewState}
           getParentApi={getPreviewParentApi}
           onClose={() => setIsPreviewOpen(false)}
+          toolbar={
+            // Placed like the date picker in the unified search bar.
+            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <PreviewTimePicker
+                  core={core}
+                  timeRange={timeRange}
+                  onTimeRangeChange={(next) => timefilter.setTime(next)}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
         />
       ) : null}
       {isDiscardConfirmOpen ? (

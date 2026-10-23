@@ -42,11 +42,24 @@ jest.mock('../components/vega_vis_editor', () => ({
 const mockPreview = jest.fn();
 jest.mock('@kbn/presentation-util-plugin/public', () => ({
   ...jest.requireActual('@kbn/presentation-util-plugin/public'),
-  EmbeddableEditorPreview: (props: { serializedState: unknown; onClose?: () => void }) => {
+  EmbeddableEditorPreview: (props: {
+    serializedState: unknown;
+    toolbar?: React.ReactNode;
+    onClose?: () => void;
+  }) => {
     mockPreview(props);
-    return <div data-test-subj="mockPreview" />;
+    return <div data-test-subj="mockPreview">{props.toolbar}</div>;
   },
 }));
+
+const mockTimePicker = jest.fn();
+jest.mock('./preview_time_picker', () => ({
+  PreviewTimePicker: (props: unknown): null => {
+    mockTimePicker(props);
+    return null;
+  },
+}));
+const lastTimePickerProps = () => mockTimePicker.mock.lastCall?.[0];
 
 jest.mock('../default_spec', () => ({ getDefaultSpec: () => '{ mark: default }' }));
 jest.mock('./save_to_library', () => ({ saveVegaToLibrary: jest.fn() }));
@@ -303,17 +316,16 @@ describe('VegaLibraryEditor', () => {
       expect(screen.getByTestId('vegaLibraryEditorPreviewButton')).toBeEnabled();
     });
 
-    it('sets the global time range from the search bar date picker', async () => {
-      const { getSearchBarProps } = renderEditor();
+    it('sets the global time range from the preview time picker', async () => {
+      renderEditor();
       await screen.findByTestId('mockPreview');
-      expect(getSearchBarProps().showDatePicker).toBe(true);
 
       await act(async () => {
-        getSearchBarProps().onQuerySubmit?.({ dateRange: { from: 'now-7d', to: 'now' } });
+        lastTimePickerProps().onTimeRangeChange({ from: 'now-7d', to: 'now' });
       });
 
       expect(timefilter.setTime).toHaveBeenCalledWith({ from: 'now-7d', to: 'now' });
-      expect(getSearchBarProps().dateRangeFrom).toBe('now-7d');
+      expect(lastTimePickerProps().timeRange).toEqual({ from: 'now-7d', to: 'now' });
       expect(mockPreview.mock.lastCall?.[0].getParentApi().timeRange$.getValue()).toEqual({
         from: 'now-7d',
         to: 'now',
@@ -322,14 +334,14 @@ describe('VegaLibraryEditor', () => {
 
     // A spec's `kibanaSetTimeFilter`, such as a brush, sets the global time range.
     it('follows changes to the global time range', async () => {
-      const { getSearchBarProps } = renderEditor();
+      renderEditor();
       await screen.findByTestId('mockPreview');
 
       await act(async () => {
         timefilter.setTime({ from: 'now-1h', to: 'now' });
       });
 
-      expect(getSearchBarProps().dateRangeFrom).toBe('now-1h');
+      expect(lastTimePickerProps().timeRange).toEqual({ from: 'now-1h', to: 'now' });
       expect(mockPreview.mock.lastCall?.[0].getParentApi().timeRange$.getValue()).toEqual({
         from: 'now-1h',
         to: 'now',
@@ -373,13 +385,6 @@ describe('VegaLibraryEditor', () => {
         spec: { format: 'hjson', value: '{ mark: bar }' },
       });
       expect(screen.queryByTestId('mockPreview')).not.toBeInTheDocument();
-    });
-
-    it('takes its time range from the dashboard, not a date picker', async () => {
-      const { getSearchBarProps } = renderEditor({ onPreview: jest.fn() });
-      await screen.findByText('changeSpec');
-
-      expect(getSearchBarProps().showDatePicker).toBe(false);
     });
 
     it('follows query changes right away, keeping the previewed spec', async () => {

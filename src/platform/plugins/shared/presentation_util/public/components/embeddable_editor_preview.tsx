@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { css } from '@emotion/react';
 import {
@@ -38,6 +39,8 @@ interface EmbeddableEditorPreviewProps<
    * It is read once on mount, so the returned subjects must be stable.
    */
   getParentApi?: () => Partial<ParentApi>;
+  /** Rendered above the embeddable, e.g. a time range picker. */
+  toolbar?: ReactNode;
   /**
    * Called when the preview closes. The close button is only shown while EUI stacks the preview over
    * the editor flyout on narrow screens, where it is the only way back to the editor.
@@ -64,6 +67,7 @@ export const EmbeddableEditorPreview = <
   type,
   serializedState,
   getParentApi,
+  toolbar,
   onClose,
 }: EmbeddableEditorPreviewProps<SerializedState, Api, ParentApi>) => {
   const titleId = useGeneratedHtmlId({ prefix: 'embeddableEditorPreviewTitle' });
@@ -122,8 +126,9 @@ export const EmbeddableEditorPreview = <
           '.euiFlyoutBody__overflowContent': { blockSize: '100%' },
         })}
       >
-        {/* The embeddable takes the height left by the callout, so the body doesn't scroll. */}
+        {/* The embeddable takes the height left by the toolbar and callout, so the body doesn't scroll. */}
         <EuiFlexGroup direction="column" gutterSize="m" responsive={false} css={{ height: '100%' }}>
+          {toolbar ? <EuiFlexItem grow={false}>{toolbar}</EuiFlexItem> : null}
           {updateError ? (
             <EuiFlexItem grow={false}>
               <KbnDangerCallout

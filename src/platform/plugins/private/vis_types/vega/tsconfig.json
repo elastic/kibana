@@ -64,6 +64,8 @@
     "@kbn/presentation-util-plugin",
     "@kbn/saved-objects-plugin",
     "@kbn/saved-objects-tagging-oss-plugin",
+    "@kbn/date-range-picker",
+    "@kbn/date-range-picker-presets",
     "@kbn/zod",
     "@kbn/presentation-publishing-schemas",
     "@kbn/as-code-shared-telemetry",
