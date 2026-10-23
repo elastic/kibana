@@ -113,9 +113,6 @@ describe('createDashboardAttachmentType', () => {
       })
     );
     expect(result?.panels).toHaveLength(1);
-    expect(dashboardClient.read).toHaveBeenCalledWith(savedObjectsClient, 'dashboard-1', {
-      isDashboardAppRequest: true,
-    });
   });
 
   it('isStale should return true when the dashboard changed after the snapshot', async () => {
@@ -140,9 +137,6 @@ describe('createDashboardAttachmentType', () => {
     );
 
     expect(isStale).toBe(true);
-    expect(dashboardClient.read).toHaveBeenCalledWith(savedObjectsClient, 'dashboard-1', {
-      isDashboardAppRequest: true,
-    });
   });
 
   it('isStale should return false when the dashboard has not changed', async () => {

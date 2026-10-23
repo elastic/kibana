@@ -11,16 +11,6 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ScanDashboardsResult } from './scan_dashboards';
 import type { DashboardReadResponseBody } from './api';
 
-/** Options for {@link DashboardServerClient.read}. */
-export interface DashboardReadOptions {
-  /**
-   * Returns the dashboard the way the Dashboard app loads it: panels without an as-code API schema
-   * are kept, and by-value Lens panels keep their stored attributes while the Lens API format is
-   * disabled, instead of being dropped when they cannot be converted.
-   */
-  isDashboardAppRequest?: boolean;
-}
-
 /**
  * Client interface for dashboard CRUD operations
  */
@@ -28,7 +18,10 @@ export interface DashboardServerClient {
   read(
     savedObjectsClient: SavedObjectsClientContract,
     id: string,
-    options?: DashboardReadOptions
+    options?: {
+      /** Returns the dashboard the way the Dashboard app loads it, keeping panels that can't be converted to the as-code API format. */
+      isDashboardAppRequest?: boolean;
+    }
   ): Promise<DashboardReadResponseBody>;
 }
 

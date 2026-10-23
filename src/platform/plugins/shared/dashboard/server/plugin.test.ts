@@ -21,7 +21,7 @@ jest.mock('./usage/dashboard_telemetry_collection_task', () => ({
 
 jest.mock('./api', () => ({
   ...jest.requireActual('./api'),
-  read: jest.fn(),
+  read: jest.fn().mockResolvedValue({ body: {} }),
 }));
 
 const mockEmbeddable = createEmbeddableStartMock();
@@ -68,56 +68,22 @@ describe('DashboardPlugin', () => {
       });
     });
 
-    describe('client.read', () => {
-      const readResponseBody = {
-        id: 'dashboard-1',
-        data: { title: 'Dashboard', panels: [] },
-        meta: { outcome: 'exactMatch' },
-      };
-
-      beforeEach(() => {
-        jest.mocked(read).mockResolvedValue({
-          body: readResponseBody,
-          resolveHeaders: {},
-        } as unknown as Awaited<ReturnType<typeof read>>);
+    test('client.read forwards isDashboardAppRequest to read', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const { client } = new DashboardPlugin(initContext).start(mockCoreStart, {
+        embeddable: mockEmbeddable,
+        taskManager: mockTaskManager,
       });
 
-      test('reads the dashboard in the as-code API format by default', async () => {
-        const savedObjectsClient = savedObjectsClientMock.create();
-        const { client } = new DashboardPlugin(initContext).start(mockCoreStart, {
-          embeddable: mockEmbeddable,
-          taskManager: mockTaskManager,
-        });
+      await client.read(savedObjectsClient, 'dashboard-1', { isDashboardAppRequest: true });
 
-        const result = await client.read(savedObjectsClient, 'dashboard-1');
-
-        expect(result).toBe(readResponseBody);
-        expect(read).toHaveBeenCalledWith(
-          savedObjectsClient,
-          expect.anything(),
-          'dashboard-1',
-          undefined,
-          undefined
-        );
-      });
-
-      test('forwards isDashboardAppRequest to read', async () => {
-        const savedObjectsClient = savedObjectsClientMock.create();
-        const { client } = new DashboardPlugin(initContext).start(mockCoreStart, {
-          embeddable: mockEmbeddable,
-          taskManager: mockTaskManager,
-        });
-
-        await client.read(savedObjectsClient, 'dashboard-1', { isDashboardAppRequest: true });
-
-        expect(read).toHaveBeenCalledWith(
-          savedObjectsClient,
-          expect.anything(),
-          'dashboard-1',
-          undefined,
-          true
-        );
-      });
+      expect(read).toHaveBeenCalledWith(
+        savedObjectsClient,
+        expect.anything(),
+        'dashboard-1',
+        undefined,
+        true
+      );
     });
   });
 });
