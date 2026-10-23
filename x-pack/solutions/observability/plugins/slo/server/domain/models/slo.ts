@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import type { sloDefinitionSchema, sloIdSchema, storedSloDefinitionSchema } from '@kbn/slo-schema';
-import type * as t from 'io-ts';
+import type {
+  sloDefinitionSchemaZod,
+  sloIdSchemaZod,
+  storedSloDefinitionSchemaZod,
+} from '@kbn/slo-schema';
+import type { z } from '@kbn/zod';
 
-type SLODefinition = t.TypeOf<typeof sloDefinitionSchema>;
-type StoredSLODefinition = t.OutputOf<typeof storedSloDefinitionSchema>;
-type SLOId = t.TypeOf<typeof sloIdSchema>;
+type SLODefinition = z.output<typeof sloDefinitionSchemaZod>;
+type StoredSLODefinition = z.input<typeof storedSloDefinitionSchemaZod>;
+type SLOId = z.output<typeof sloIdSchemaZod>;
 
 export type { SLODefinition, StoredSLODefinition, SLOId };

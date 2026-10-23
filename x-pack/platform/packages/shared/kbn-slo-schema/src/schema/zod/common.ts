@@ -128,3 +128,5 @@ export {
   groupSummarySchema,
   remoteSchema,
 };
+
+export type SLOStatus = z.output<typeof statusSchema>;
