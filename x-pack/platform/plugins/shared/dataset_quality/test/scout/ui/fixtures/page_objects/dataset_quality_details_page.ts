@@ -197,8 +197,8 @@ export class DatasetQualityDetailsPage {
    * The failed-docs card remounts as its details/settings finish loading (the panel swaps
    * between card instances), so a single click fired mid-load can be dropped and leave the
    * chart on its previous selection. Retry the click until the card reports itself selected
-   * through `aria-pressed`, which is also the signal the URL state has flipped. A selected
-   * card is disabled, so the click is skipped once it is already pressed.
+   * through `aria-current`, which is also the signal the URL state has flipped. A selected
+   * card is disabled, so the click is skipped once it is already selected.
    */
   async selectQualityIssueChart(issue: 'degraded' | 'failed'): Promise<void> {
     const title = issue === 'degraded' ? 'Degraded documents' : 'Failed documents';
@@ -207,10 +207,10 @@ export class DatasetQualityDetailsPage {
     await expect
       .poll(
         async () => {
-          if ((await card.getAttribute('aria-pressed')) !== 'true') {
+          if ((await card.getAttribute('aria-current')) !== 'true') {
             await card.click();
           }
-          return card.getAttribute('aria-pressed');
+          return card.getAttribute('aria-current');
         },
         { timeout: 30_000 }
       )
