@@ -63,14 +63,7 @@ export const QueryResultsAppHeader: React.FC<QueryResultsAppHeaderProps> = ({
 
   return (
     <>
-      <AppHeader
-        title={title}
-        back={back}
-        metadata={metadata}
-        menu={menu}
-        docLink={docLink}
-        showAddIntegrations
-      />
+      <AppHeader title={title} back={back} metadata={metadata} menu={menu} docLink={docLink} />
       {modals}
     </>
   );

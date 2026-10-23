@@ -118,7 +118,10 @@ const setupKibana = ({
             writeSavedQueries: true,
           },
           discover_v2: { show: discoverShow },
+          navLinks: { integrations: true },
         },
+        getUrlForApp: (appId: string, { path }: { path?: string } = {}) =>
+          `/app/${appId}${path ?? ''}`,
       },
       cases: {
         helpers: { canUseCases: mockCanUseCases, getRuleIdFromEvent: jest.fn() },
@@ -248,7 +251,7 @@ describe('LiveQueryDetailsPage', () => {
       expect(metadata).not.toHaveTextContent('-');
     });
 
-    it('shows inline Export/Add tags, a primary Save query action, and an overflow with View in + Add to Case for a fully-permissioned run', async () => {
+    it('shows inline Export/Add tags, a primary Save query action, and an overflow with View in, Add to Case and Add integrations for a fully-permissioned run', async () => {
       renderPage();
       // The app menu is lazy-loaded (`React.lazy`/`Suspense`); waiting for its root settles that
       // before any item is queried, inline or in the overflow popover.
@@ -262,6 +265,10 @@ describe('LiveQueryDetailsPage', () => {
       expect(screen.getByTestId('query-details-view-in')).toBeInTheDocument();
       expect(screen.getByTestId('query-details-add-to-case')).toBeInTheDocument();
       expect(screen.getByTestId('query-details-add-to-case')).not.toBeDisabled();
+      expect(screen.getByTestId('osqueryAddIntegrationsMenuItem')).toHaveAttribute(
+        'href',
+        '/app/integrations/browse'
+      );
     });
 
     it('shows Export results once the experimental flag is enabled', async () => {
@@ -319,7 +326,21 @@ describe('LiveQueryDetailsPage', () => {
   });
 
   describe('pack path', () => {
-    it('keeps the static "Query results" title (not the query text) when pack_id is set', () => {
+    it('titles the header with the pack name and shows the "Run by" metadata', () => {
+      mockUseLiveQueryDetails.mockReturnValue({
+        data: { ...singleQueryData, pack_id: 'pack-1', pack_name: 'forensic-persistence' },
+        isLoading: false,
+      } as ReturnType<typeof useLiveQueryDetails>);
+
+      renderPage();
+
+      expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('forensic-persistence');
+      expect(screen.getByTestId('appHeaderMetadata')).toHaveTextContent('Elastic');
+      expect(screen.getByTestId('pack-queries-status-table')).toBeInTheDocument();
+      expect(screen.queryByTestId('result-tabs')).not.toBeInTheDocument();
+    });
+
+    it('falls back to the "Query results" title when the pack name is unknown', () => {
       mockUseLiveQueryDetails.mockReturnValue({
         data: { ...singleQueryData, pack_id: 'pack-1' },
         isLoading: false,
@@ -329,7 +350,6 @@ describe('LiveQueryDetailsPage', () => {
 
       expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('Query results');
       expect(screen.getByTestId('pack-queries-status-table')).toBeInTheDocument();
-      expect(screen.queryByTestId('result-tabs')).not.toBeInTheDocument();
     });
 
     it('keeps the "Query results" title when queries.length > 1', () => {

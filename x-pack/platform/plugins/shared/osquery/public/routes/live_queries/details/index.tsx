@@ -21,6 +21,7 @@ import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_
 import { SavedQueryFlyout } from '../../../saved_queries';
 import { useSaveQueryFromDetails } from './use_save_query_from_details';
 import { useRunByMetadata } from './use_run_by_metadata';
+import { useAddIntegrationsOnlyMenu } from '../../../common/hooks/use_add_integrations_menu_item';
 import { QueryResultsAppHeader } from './query_results_app_header';
 import { ResultTabs } from '../../saved_queries/edit/tabs';
 import { ExportFiltersProvider } from '../../../results/export_filters_context';
@@ -68,6 +69,8 @@ const LiveQueryDetailsPageComponent = () => {
     timestamp: data?.['@timestamp'],
   });
 
+  const packRunMenu = useAddIntegrationsOnlyMenu();
+
   const isInitialLoading = isLoading && !data;
 
   return (
@@ -114,14 +117,15 @@ const LiveQueryDetailsPageComponent = () => {
           </WithoutHeaderLayout>
         </ExportFiltersProvider>
       ) : (
-        // Pack runs (not redesigned): plain header; `PackQueriesStatusTable` keeps its own
-        // per-query actions.
+        // Pack runs: the pack name is the title (as in the History list); the pack-level and
+        // per-query actions stay in `PackQueriesStatusTable`.
         <>
           <AppHeader
-            title={PACK_RESULTS_TITLE}
+            title={data?.pack_name || PACK_RESULTS_TITLE}
             back={historyBack}
+            metadata={data ? runByMetadata : undefined}
+            menu={packRunMenu}
             docLink={docLinks.links.osquery.guide}
-            showAddIntegrations
           />
           <WithoutHeaderLayout restrictWidth={false}>
             <div css={resultsContentCss}>

@@ -24,6 +24,7 @@ import { useHasCasesPermissions } from '../../../cases/use_add_to_case_action';
 import { AddToCaseActionBridge } from '../../../cases/add_to_case_action_bridge';
 import { AddTagsFlyout } from '../../../actions/components/add_tags_flyout';
 import type { LiveQueryDetailsItem } from '../../../actions/use_live_query_details';
+import { useAddIntegrationsMenuItem } from '../../../common/hooks/use_add_integrations_menu_item';
 
 export interface UseQueryResultsMenuArgs {
   /** Live query action id, or the scheduleId on the scheduled execution details page (the id
@@ -163,6 +164,8 @@ export const useQueryResultsMenu = ({
   const [isAddToCaseReady, setIsAddToCaseReady] = useState(false);
   const openAddToCase = useCallback(() => openAddToCaseRef.current?.(), []);
 
+  const addIntegrationsMenuItem = useAddIntegrationsMenuItem();
+
   const [isTagsFlyoutOpen, setIsTagsFlyoutOpen] = useState(false);
   const openTagsFlyout = useCallback(() => setIsTagsFlyoutOpen(true), []);
   const closeTagsFlyout = useCallback(() => setIsTagsFlyoutOpen(false), []);
@@ -198,7 +201,7 @@ export const useQueryResultsMenu = ({
     }
 
     // The design drops "View in" on scheduled runs, but this page is the only place scheduled pack
-    // results can be opened in Discover/Lens, so it stays (deviation, pending design confirmation).
+    // results can be opened in Discover/Lens, so it stays (agreed with design).
     if (queryActionId && (canDiscover || canLens)) {
       const viewInItems: AppMenuPopoverItem[] = [];
 
@@ -228,7 +231,7 @@ export const useQueryResultsMenu = ({
       result.push({
         id: 'viewIn',
         label: VIEW_IN_LABEL,
-        iconType: 'popout',
+        iconType: 'eye',
         order: 2,
         overflow: true,
         items: viewInItems,
@@ -248,8 +251,13 @@ export const useQueryResultsMenu = ({
       run: openAddToCase,
     });
 
+    if (addIntegrationsMenuItem) {
+      result.push(addIntegrationsMenuItem);
+    }
+
     return result;
   }, [
+    addIntegrationsMenuItem,
     canDiscover,
     canEditTags,
     canLens,

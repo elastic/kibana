@@ -35,8 +35,10 @@ jest.mock('../common/lib/kibana', () => ({
       application: {
         capabilities: {
           osquery: mockOsqueryCapabilities,
+          navLinks: { integrations: true },
         },
-        getUrlForApp: () => '/app/integrations/osquery_manager/policies',
+        getUrlForApp: (appId: string, { path }: { path?: string } = {}) =>
+          `/app/${appId}${path ?? ''}`,
         navigateToApp: jest.fn(),
       },
       docLinks: {
@@ -90,11 +92,10 @@ const renderNavigation = (path: string, title?: string, chrome?: MockChromeStart
     </EuiProvider>
   );
 
-// Grants integrations access and a feedback handler so the built-in "Add integrations" /
-// "Feedback" static menu items render alongside our "Documentation" docLink item.
-const createChromeWithStaticItems = (): MockChromeStart => {
+// Registers a feedback handler so the built-in "Feedback" static menu item renders alongside our
+// "Documentation" docLink item.
+const createChromeWithFeedback = (): MockChromeStart => {
   const chrome = chromeServiceMock.createStartContract();
-  chrome.componentDeps.capabilities.navLinks = { integrations: true };
   (chrome.help.getFeedbackHandler$ as jest.Mock).mockReturnValue(new BehaviorSubject(() => {}));
 
   return chrome;
@@ -148,19 +149,33 @@ describe('MainNavigation', () => {
     expect(screen.getByTestId('osqueryRunQueryButton')).toHaveTextContent('Run query');
   });
 
-  it('should show Documentation, Add integrations and Feedback, but not Manage integration', async () => {
-    renderNavigation('/history', undefined, createChromeWithStaticItems());
+  it('should show Add integrations above the Feedback / Documentation divider, but not Manage integration', async () => {
+    renderNavigation('/history', undefined, createChromeWithFeedback());
 
     await openAppMenuOverflow();
-    expect(screen.getByTestId('appHeaderMenuDocumentation')).toHaveTextContent('Documentation');
+    const addIntegrations = screen.getByTestId('osqueryAddIntegrationsMenuItem');
+    expect(addIntegrations).toHaveTextContent('Add integrations');
+    expect(addIntegrations).toHaveAttribute('href', '/app/integrations/browse');
     expect(screen.getByTestId('appHeaderMenuDocumentation')).toHaveAttribute(
       'href',
       OSQUERY_DOC_LINK
     );
-    expect(screen.getByTestId('appHeaderMenuAddIntegrations')).toHaveTextContent(
-      'Add integrations'
-    );
     expect(screen.getByTestId('appHeaderMenuFeedback')).toHaveTextContent('Feedback');
+
+    // Page items come before the separator, the global Feedback / Documentation items after it.
+    const menuOrder = Array.from(
+      document.querySelectorAll(
+        '[data-test-subj="osqueryAddIntegrationsMenuItem"], [role="separator"], [data-test-subj="appHeaderMenuFeedback"], [data-test-subj="appHeaderMenuDocumentation"]'
+      )
+    ).map((element) => element.getAttribute('data-test-subj') ?? element.getAttribute('role'));
+    expect(menuOrder).toEqual([
+      'osqueryAddIntegrationsMenuItem',
+      'separator',
+      'appHeaderMenuFeedback',
+      'appHeaderMenuDocumentation',
+    ]);
+
+    expect(screen.queryByTestId('appHeaderMenuAddIntegrations')).not.toBeInTheDocument();
     expect(screen.queryByTestId('osqueryManageIntegrationButton')).not.toBeInTheDocument();
     expect(screen.queryByText('Manage integration')).not.toBeInTheDocument();
   });

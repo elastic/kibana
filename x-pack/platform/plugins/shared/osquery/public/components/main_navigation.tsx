@@ -18,6 +18,7 @@ import {
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 import { PAGE_ROUTING_PATHS } from '../common/page_paths';
 import { useOsqueryPageHeaderTitle } from './osquery_page_header_context';
+import { useAddIntegrationsMenuItem } from '../common/hooks/use_add_integrations_menu_item';
 import { getHistoryFilters } from '../actions/history_filter_storage';
 
 enum Section {
@@ -85,6 +86,8 @@ export const MainNavigation = () => {
     permissions.writeLiveQueries ||
     (permissions.runSavedQueries && (permissions.readSavedQueries || permissions.readPacks));
 
+  const addIntegrationsMenuItem = useAddIntegrationsMenuItem();
+
   const menu = useMemo<AppHeaderMenu | undefined>(
     () =>
       isListView
@@ -102,9 +105,10 @@ export const MainNavigation = () => {
                 history.push('/new');
               },
             },
+            items: addIntegrationsMenuItem ? [addIntegrationsMenuItem] : [],
           }
         : undefined,
-    [canRunQuery, history, isListView, newQueryNavProps.href]
+    [addIntegrationsMenuItem, canRunQuery, history, isListView, newQueryNavProps.href]
   );
   const loadingMenu = useMemo(() => ({ buttonCount: 1, hasPrimary: false }), []);
 
@@ -245,7 +249,6 @@ export const MainNavigation = () => {
       tabs={subpageHeader ? undefined : tabs}
       menu={menu}
       docLink={isListView ? docLinks.links.osquery.guide : undefined}
-      showAddIntegrations={isListView}
     />
   );
 };

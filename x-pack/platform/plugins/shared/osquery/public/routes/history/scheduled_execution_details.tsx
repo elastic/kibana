@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { AppHeader, AppHeaderLoading } from '@kbn/app-header';
 import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
 import { useHistoryBack } from '../../common/hooks/use_history_back';
+import { useAddIntegrationsOnlyMenu } from '../../common/hooks/use_add_integrations_menu_item';
 import { useRouterNavigate, useKibana } from '../../common/lib/kibana';
 import { pagePathGetters } from '../../common/page_paths';
 import { resultsContentCss, WithoutHeaderLayout } from '../../components/layouts';
@@ -50,6 +51,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
   const historyPath = pagePathGetters.history();
   const historyNavProps = useRouterNavigate(historyPath);
   const historyBack = useHistoryBack();
+  const fallbackMenu = useAddIntegrationsOnlyMenu();
 
   const { data, isLoading, isError } = useScheduledExecutionDetails({
     scheduleId,
@@ -169,8 +171,8 @@ const ScheduledExecutionDetailsPageComponent = () => {
         <AppHeader
           title={FALLBACK_TITLE}
           back={historyBack}
+          menu={fallbackMenu}
           docLink={docLinks.links.osquery.guide}
-          showAddIntegrations
         />
         <WithoutHeaderLayout restrictWidth={false}>
           <div css={resultsContentCss}>
@@ -188,8 +190,8 @@ const ScheduledExecutionDetailsPageComponent = () => {
         <AppHeader
           title={FALLBACK_TITLE}
           back={historyBack}
+          menu={fallbackMenu}
           docLink={docLinks.links.osquery.guide}
-          showAddIntegrations
         />
         <WithoutHeaderLayout restrictWidth={false}>
           <div css={resultsContentCss}>{emptyPrompt}</div>
