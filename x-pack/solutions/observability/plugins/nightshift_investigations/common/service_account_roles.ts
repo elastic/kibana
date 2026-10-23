@@ -59,7 +59,6 @@ export const NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES: Readonly<Record<string, 
       {
         application: 'kibana-.kibana',
         privileges: [
-          'feature_nightshift.read',
           'feature_agenticInvestigations.minimal_read',
           'feature_agenticInvestigations.investigations_all',
           'feature_agentBuilder.minimal_all',
