@@ -86,6 +86,7 @@ export function deanonymizeMessage(
           // concatenate `tool_calls` and `refusal` across chunks, so forwarding the model's raw
           // (masked) fragments would be appended to the complete, deanonymized values carried
           // by the catch-up chunk below. Drop them here and emit them once, deanonymized.
+          // `reasoning` is dropped entirely. If forwarded, it needs `replaceMasks` like `refusal`.
           return of({
             type: ChatCompletionEventType.ChatCompletionChunk,
             content: delta,

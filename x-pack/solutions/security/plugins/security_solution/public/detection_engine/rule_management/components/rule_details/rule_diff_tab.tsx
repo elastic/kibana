@@ -85,7 +85,7 @@ const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
   rule.note = rule.note ?? '';
 
   /*
-    Removes empty arrays (techniques, subtechniques) from the MITRE ATT&CK value.
+    Removes empty arrays (techniques, subtechniques) from the threat mappings value.
     The same processing is done in the rule editing UI before submitting the edits.
   */
   rule.threat = filterEmptyThreats(rule.threat);

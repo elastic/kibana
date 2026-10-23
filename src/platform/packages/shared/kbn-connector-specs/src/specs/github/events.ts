@@ -34,10 +34,10 @@ const DeliveryHeadersSchema = lazySchema(() =>
 const definitions = {
   issues: {
     eventId: buildEventId('.github', 'issues'),
-    title: i18n.translate('core.kibanaConnectorSpecs.github.events.issues.title', {
+    title: i18n.translate('connectorSpecs.github.events.issues.title', {
       defaultMessage: 'Issue',
     }),
-    description: i18n.translate('core.kibanaConnectorSpecs.github.events.issues.description', {
+    description: i18n.translate('connectorSpecs.github.events.issues.description', {
       defaultMessage:
         'An issue was opened, edited, reopened, closed, or otherwise changed. Filter with event.body.action.',
     }),
@@ -45,24 +45,21 @@ const definitions = {
   },
   issue_comment: {
     eventId: buildEventId('.github', 'issue_comment'),
-    title: i18n.translate('core.kibanaConnectorSpecs.github.events.issueComment.title', {
+    title: i18n.translate('connectorSpecs.github.events.issueComment.title', {
       defaultMessage: 'Issue comment',
     }),
-    description: i18n.translate(
-      'core.kibanaConnectorSpecs.github.events.issueComment.description',
-      {
-        defaultMessage:
-          'An issue or pull request comment was created, edited, or deleted. Filter with event.body.action.',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.github.events.issueComment.description', {
+      defaultMessage:
+        'An issue or pull request comment was created, edited, or deleted. Filter with event.body.action.',
+    }),
     eventSchema: GithubIssueCommentEventSchema,
   },
   pull_request: {
     eventId: buildEventId('.github', 'pull_request'),
-    title: i18n.translate('core.kibanaConnectorSpecs.github.events.pullRequest.title', {
+    title: i18n.translate('connectorSpecs.github.events.pullRequest.title', {
       defaultMessage: 'Pull request',
     }),
-    description: i18n.translate('core.kibanaConnectorSpecs.github.events.pullRequest.description', {
+    description: i18n.translate('connectorSpecs.github.events.pullRequest.description', {
       defaultMessage:
         'A pull request was opened, updated, reopened, or closed. Filter with event.body.action; updates use edited or synchronize. Check event.body.pull_request.merged to distinguish a merge from an unmerged close.',
     }),
@@ -70,24 +67,21 @@ const definitions = {
   },
   pull_request_review: {
     eventId: buildEventId('.github', 'pull_request_review'),
-    title: i18n.translate('core.kibanaConnectorSpecs.github.events.pullRequestReview.title', {
+    title: i18n.translate('connectorSpecs.github.events.pullRequestReview.title', {
       defaultMessage: 'Pull request review submitted',
     }),
-    description: i18n.translate(
-      'core.kibanaConnectorSpecs.github.events.pullRequestReview.description',
-      {
-        defaultMessage:
-          'A pull request review was submitted. The review state is available in event.body.review.state.',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.github.events.pullRequestReview.description', {
+      defaultMessage:
+        'A pull request review was submitted. The review state is available in event.body.review.state.',
+    }),
     eventSchema: GithubPullRequestReviewEventSchema,
   },
   push: {
     eventId: buildEventId('.github', 'push'),
-    title: i18n.translate('core.kibanaConnectorSpecs.github.events.push.title', {
+    title: i18n.translate('connectorSpecs.github.events.push.title', {
       defaultMessage: 'Push received',
     }),
-    description: i18n.translate('core.kibanaConnectorSpecs.github.events.push.description', {
+    description: i18n.translate('connectorSpecs.github.events.push.description', {
       defaultMessage:
         'Commits, a branch, or a tag were pushed. The ref and before and after commit IDs are available in the event body.',
     }),
@@ -95,10 +89,10 @@ const definitions = {
   },
   release: {
     eventId: buildEventId('.github', 'release'),
-    title: i18n.translate('core.kibanaConnectorSpecs.github.events.release.title', {
+    title: i18n.translate('connectorSpecs.github.events.release.title', {
       defaultMessage: 'Release published',
     }),
-    description: i18n.translate('core.kibanaConnectorSpecs.github.events.release.description', {
+    description: i18n.translate('connectorSpecs.github.events.release.description', {
       defaultMessage:
         'A release was published. The tag, release ID, and prerelease flag are available in event.body.release.',
     }),
@@ -106,24 +100,21 @@ const definitions = {
   },
   deployment_status: {
     eventId: buildEventId('.github', 'deployment_status'),
-    title: i18n.translate('core.kibanaConnectorSpecs.github.events.deploymentStatus.title', {
+    title: i18n.translate('connectorSpecs.github.events.deploymentStatus.title', {
       defaultMessage: 'Deployment status changed',
     }),
-    description: i18n.translate(
-      'core.kibanaConnectorSpecs.github.events.deploymentStatus.description',
-      {
-        defaultMessage:
-          'A deployment status changed. Filter with event.body.deployment_status.state to select an outcome.',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.github.events.deploymentStatus.description', {
+      defaultMessage:
+        'A deployment status changed. Filter with event.body.deployment_status.state to select an outcome.',
+    }),
     eventSchema: GithubDeploymentStatusEventSchema,
   },
   check_run: {
     eventId: buildEventId('.github', 'check_run'),
-    title: i18n.translate('core.kibanaConnectorSpecs.github.events.checkRun.title', {
+    title: i18n.translate('connectorSpecs.github.events.checkRun.title', {
       defaultMessage: 'Check run completed',
     }),
-    description: i18n.translate('core.kibanaConnectorSpecs.github.events.checkRun.description', {
+    description: i18n.translate('connectorSpecs.github.events.checkRun.description', {
       defaultMessage:
         'A check run completed. Filter with event.body.check_run.conclusion to select success, failure, or another outcome.',
     }),

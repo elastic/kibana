@@ -13,6 +13,7 @@ import type { HttpHandler } from '@kbn/core/public';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
+  OPEN_PROPOSAL_STATUSES,
   PROPOSALS_API_VERSION,
   PROPOSALS_INTERNAL_URL,
   PROPOSAL_DISMISS_URL,
@@ -104,8 +105,17 @@ export const settleHuntScope = async ({
 export const HUNT_INVESTIGATION_ID_NAMESPACE = 'hunt:report:';
 export const HUNT_INVESTIGATION_UUID_NAMESPACE = '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50';
 
-export const buildHuntInvestigationConversationId = (reportId: string): string =>
-  uuidv5(`${HUNT_INVESTIGATION_ID_NAMESPACE}${reportId}`, HUNT_INVESTIGATION_UUID_NAMESPACE);
+export const buildHuntInvestigationConversationId = ({
+  spaceId,
+  reportId,
+}: {
+  spaceId: string;
+  reportId: string;
+}): string =>
+  uuidv5(
+    `${HUNT_INVESTIGATION_ID_NAMESPACE}${spaceId}|${reportId}`,
+    HUNT_INVESTIGATION_UUID_NAMESPACE
+  );
 
 export interface GeneratorTarget {
   kibanaUrl: string;
@@ -136,6 +146,7 @@ export const buildCanaryReportDoc = (timestamp: string) => ({
       'Regular reviews, clear communication, and a culture of caution help teams respond well ' +
       'when something unusual happens. No specific activity is described in this note.',
     language: 'en',
+    published_at: timestamp,
   },
   severity: { level: 'low', score: 10 },
   extracted: {
@@ -185,6 +196,7 @@ export const buildIocDumpReportDoc = (timestamp: string) => ({
       'over the past week. Defenders should block or monitor traffic from the listed addresses. ' +
       'No specific intrusion activity, tooling, or affected organization is described.',
     language: 'en',
+    published_at: timestamp,
   },
   severity: { level: 'medium', score: 40 },
   extracted: {
@@ -223,7 +235,7 @@ export const applyHuntFault = async ({
   reportId: string;
   spaceId: string;
 }): Promise<void> => {
-  const conversationId = buildHuntInvestigationConversationId(reportId);
+  const conversationId = buildHuntInvestigationConversationId({ spaceId, reportId });
   // The evals fixture authenticates as the stack's superuser, who is not the Worker's service
   // account, so a private conversation it owns is one the Worker can neither read nor reopen.
   await fetch(spacePath(spaceId, '/api/agent_builder/conversations'), {
@@ -464,9 +476,6 @@ interface ProposalsListResponse {
   proposals: Array<{ id: string; status?: string }>;
 }
 
-/** Statuses the Worker's candidate query treats as an open Proposal (`OPEN_PROPOSAL_STATUSES`). */
-const OPEN_PROPOSAL_STATUSES = ['pending', 'executing'] as const;
-
 const listOpenProposals = async ({
   fetch,
   spaceId,
@@ -507,7 +516,7 @@ export const resetHuntReport = async ({
   reportId: string;
   spaceId: string;
 }) => {
-  const conversationId = buildHuntInvestigationConversationId(reportId);
+  const conversationId = buildHuntInvestigationConversationId({ spaceId, reportId });
 
   // An Investigation with no Proposals lists as empty, so a failure here is a real one. Swallowing
   // it would skip the dismiss, and the Worker would then skip the report as `open_proposal` with
