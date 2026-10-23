@@ -31,6 +31,10 @@ const EventsTab = React.lazy(() =>
   import('./events/events_tab').then(({ EventsTab: Tab }) => ({ default: Tab }))
 );
 
+const RulesTab = React.lazy(() =>
+  import('./rules/rules_tab').then(({ RulesTab: Tab }) => ({ default: Tab }))
+);
+
 export type DetectionPageHeaderProps = Pick<
   NightshiftAppHeaderProps,
   | 'onSourcesClick'
@@ -104,11 +108,10 @@ export const DetectionPage = ({
         </EuiTabs>
         <EuiSpacer size="m" />
         <React.Suspense
-          fallback={
-            <EuiLoadingSpinner size="xl" data-test-subj="nightshiftDetectionEventsTabLoading" />
-          }
+          fallback={<EuiLoadingSpinner size="xl" data-test-subj="nightshiftDetectionTabLoading" />}
         >
           {tab === 'events' && <EventsTab timeRange={timeRange} onTimeRangeChange={setTimeRange} />}
+          {tab === 'rules' && <RulesTab timeRange={timeRange} onTimeRangeChange={setTimeRange} />}
         </React.Suspense>
       </EuiPageTemplate.Section>
     </>

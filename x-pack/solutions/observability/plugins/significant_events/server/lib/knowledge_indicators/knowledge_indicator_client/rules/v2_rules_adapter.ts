@@ -154,6 +154,19 @@ export class RulesAdapterV2 implements IRulesManagementClient {
     }
   }
 
+  async findRuleEnabledStates(ids: string[]): Promise<Map<string, boolean>> {
+    const enabledById = new Map<string, boolean>();
+    for (let start = 0; start < ids.length; start += FIND_PAGE_SIZE) {
+      const chunk = ids.slice(start, start + FIND_PAGE_SIZE);
+      const { items } = await this.rulesClient.findRules({
+        filter: chunk.map((id) => `id: "${id}"`).join(' or '),
+        perPage: chunk.length,
+      });
+      items.forEach(({ id, enabled }) => enabledById.set(id, enabled));
+    }
+    return enabledById;
+  }
+
   async findExistingRuleIds(ids: string[]): Promise<string[]> {
     const limit = pLimit(RULE_EXISTS_CONCURRENCY);
     const results = await Promise.all(
