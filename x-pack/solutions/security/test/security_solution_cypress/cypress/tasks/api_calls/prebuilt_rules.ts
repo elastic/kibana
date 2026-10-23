@@ -220,9 +220,8 @@ export const installMockPrebuiltRulesPackage = (): Cypress.Chainable => {
   cy.log('Install mock prebuilt rules package');
 
   // On shared stacks a previous spec may have installed the real package from
-  // the registry (e.g. install_via_fleet.cy.ts). Fleet rejects uploads that
-  // would replace a registry-installed package, so remove any existing
-  // installation before uploading the mock.
+  // the registry. Fleet rejects uploads that would replace a registry-installed
+  // package, so remove any existing installation before uploading the mock.
   deletePrebuiltRulesFleetPackage();
 
   return installByUploadPrebuiltRulesPackage(
