@@ -16,7 +16,7 @@ const register = () => {
   const router = httpServiceMock.createRouter();
   const addVersion = jest.fn();
   let config:
-    | { path: string; security?: { authz?: { requiredPrivileges?: string[] } } }
+    | { path: string; security?: { authz?: { requiredPrivileges?: unknown[] } } }
     | undefined;
   (router.versioned.get as jest.Mock).mockImplementation((routeConfig) => {
     config = routeConfig;
@@ -39,11 +39,16 @@ const register = () => {
 };
 
 describe('registerGetProposalImpactPillsRoute', () => {
-  it('requires the proposals read privilege', () => {
+  it('requires proposals read and investigations read or manage', () => {
     const { config } = register();
 
     expect(config.path).toBe(IMPACT_PROPOSAL_SUMMARY_URL);
-    expect(config.security?.authz?.requiredPrivileges).toEqual([ApiPrivileges.read('proposals')]);
+    expect(config.security?.authz?.requiredPrivileges).toEqual([
+      ApiPrivileges.read('proposals'),
+      {
+        anyRequired: [ApiPrivileges.read('investigations'), ApiPrivileges.manage('investigations')],
+      },
+    ]);
   });
 
   it('reads a single category as a one-item list', () => {
