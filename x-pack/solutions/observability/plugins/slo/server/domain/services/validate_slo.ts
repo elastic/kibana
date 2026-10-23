@@ -6,11 +6,12 @@
  */
 
 import {
-  timeslicesBudgetingMethodSchema,
   Duration,
   DurationUnit,
-  rollingTimeWindowSchema,
-  calendarAlignedTimeWindowSchema,
+  is,
+  calendarAlignedTimeWindowSchemaZod,
+  rollingTimeWindowSchemaZod,
+  timeslicesBudgetingMethodSchemaZod,
 } from '@kbn/slo-schema';
 import { IllegalArgumentError } from '../../errors';
 import type { SLODefinition } from '../models';
@@ -32,20 +33,20 @@ export function validateSLO(slo: SLODefinition) {
   }
 
   if (
-    rollingTimeWindowSchema.is(slo.timeWindow) &&
+    is(rollingTimeWindowSchemaZod, slo.timeWindow) &&
     !isValidRollingTimeWindowDuration(slo.timeWindow.duration)
   ) {
     throw new IllegalArgumentError('Invalid time_window.duration');
   }
 
   if (
-    calendarAlignedTimeWindowSchema.is(slo.timeWindow) &&
+    is(calendarAlignedTimeWindowSchemaZod, slo.timeWindow) &&
     !isValidCalendarAlignedTimeWindowDuration(slo.timeWindow.duration)
   ) {
     throw new IllegalArgumentError('Invalid time_window.duration');
   }
 
-  if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
+  if (is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod)) {
     if (
       slo.objective.timesliceTarget === undefined ||
       !isValidTimesliceTarget(slo.objective.timesliceTarget)

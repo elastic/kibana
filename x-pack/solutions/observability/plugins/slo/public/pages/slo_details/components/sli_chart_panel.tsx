@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText, EuiTitle } from 
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
+import { is, rollingTimeWindowTypeSchemaZod } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
@@ -64,7 +64,7 @@ export function SliChartPanel({
             {!hideHeaderDurationLabel && (
               <EuiFlexItem>
                 <EuiText color="subdued" size="s">
-                  {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
+                  {is(rollingTimeWindowTypeSchemaZod, slo.timeWindow.type)
                     ? i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.duration', {
                         defaultMessage: 'Last {duration}',
                         values: { duration: toDurationLabel(slo.timeWindow.duration) },

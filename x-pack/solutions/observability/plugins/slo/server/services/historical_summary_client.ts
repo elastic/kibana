@@ -16,11 +16,12 @@ import type {
 } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
-  calendarAlignedTimeWindowSchema,
-  occurrencesBudgetingMethodSchema,
-  rollingTimeWindowSchema,
-  timeslicesBudgetingMethodSchema,
   toMomentUnitOfTime,
+  is,
+  calendarAlignedTimeWindowSchemaZod,
+  occurrencesBudgetingMethodSchemaZod,
+  rollingTimeWindowSchemaZod,
+  timeslicesBudgetingMethodSchemaZod,
 } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
@@ -97,8 +98,8 @@ export class HistoricalSummaryClient {
       // @ts-ignore typing msearch is hard, we cast the response to what it is supposed to be.
       const buckets = (result.responses[i].aggregations?.daily?.buckets as DailyAggBucket[]) || [];
 
-      if (rollingTimeWindowSchema.is(timeWindow)) {
-        if (timeslicesBudgetingMethodSchema.is(budgetingMethod)) {
+      if (is(rollingTimeWindowSchemaZod, timeWindow)) {
+        if (is(timeslicesBudgetingMethodSchemaZod, budgetingMethod)) {
           historicalSummary.push({
             sloId,
             instanceId,
@@ -113,7 +114,7 @@ export class HistoricalSummaryClient {
           continue;
         }
 
-        if (occurrencesBudgetingMethodSchema.is(budgetingMethod)) {
+        if (is(occurrencesBudgetingMethodSchemaZod, budgetingMethod)) {
           historicalSummary.push({
             sloId,
             instanceId,
@@ -125,8 +126,8 @@ export class HistoricalSummaryClient {
         assertNever(budgetingMethod);
       }
 
-      if (calendarAlignedTimeWindowSchema.is(timeWindow)) {
-        if (timeslicesBudgetingMethodSchema.is(budgetingMethod)) {
+      if (is(calendarAlignedTimeWindowSchemaZod, timeWindow)) {
+        if (is(timeslicesBudgetingMethodSchemaZod, budgetingMethod)) {
           const dateRange = dateRangeBySlo[sloId];
           historicalSummary.push({
             sloId,
@@ -137,7 +138,7 @@ export class HistoricalSummaryClient {
           continue;
         }
 
-        if (occurrencesBudgetingMethodSchema.is(budgetingMethod)) {
+        if (is(occurrencesBudgetingMethodSchemaZod, budgetingMethod)) {
           historicalSummary.push({
             sloId,
             instanceId,
@@ -331,7 +332,7 @@ function generateSearchQuery({
           },
         },
         aggs: {
-          ...(occurrencesBudgetingMethodSchema.is(budgetingMethod) && {
+          ...(is(occurrencesBudgetingMethodSchemaZod, budgetingMethod) && {
             good: {
               sum: {
                 field: 'slo.numerator',
@@ -343,7 +344,7 @@ function generateSearchQuery({
               },
             },
           }),
-          ...(timeslicesBudgetingMethodSchema.is(budgetingMethod) && {
+          ...(is(timeslicesBudgetingMethodSchemaZod, budgetingMethod) && {
             good: {
               sum: {
                 field: 'slo.isGoodSlice',
@@ -394,7 +395,7 @@ function getDateRange(
   timeWindow: TimeWindow,
   range?: DateRange
 ): { range: DateRange; queryRange: DateRange } {
-  if (rollingTimeWindowSchema.is(timeWindow)) {
+  if (is(rollingTimeWindowSchemaZod, timeWindow)) {
     const unit = toMomentUnitOfTime(timeWindow.duration.unit as DurationUnit);
 
     if (range) {
@@ -427,7 +428,7 @@ function getDateRange(
     };
   }
 
-  if (calendarAlignedTimeWindowSchema.is(timeWindow)) {
+  if (is(calendarAlignedTimeWindowSchemaZod, timeWindow)) {
     // If range is provided, we use the lower bound to calculate the calendar aligned range.
     const now = moment(range?.from ?? new Date());
     const unit = toCalendarAlignedTimeWindowMomentUnit(timeWindow);

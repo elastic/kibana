@@ -10,8 +10,9 @@ import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/ap
 import type { SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
-  syntheticsAvailabilityIndicatorSchema,
-  timeslicesBudgetingMethodSchema,
+  is,
+  syntheticsAvailabilityIndicatorSchemaZod,
+  timeslicesBudgetingMethodSchemaZod,
 } from '@kbn/slo-schema';
 import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
@@ -28,7 +29,7 @@ import { getFilterRange, getTimesliceTargetComparator } from './common';
 
 export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator {
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
-    if (!syntheticsAvailabilityIndicatorSchema.is(slo.indicator)) {
+    if (!is(syntheticsAvailabilityIndicatorSchemaZod, slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
@@ -178,7 +179,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
           },
         },
       },
-      ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+      ...(is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod) && {
         'slo.isGoodSlice': {
           bucket_script: {
             buckets_path: {

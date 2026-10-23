@@ -16,8 +16,9 @@ import type {
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   ALL_VALUE,
-  occurrencesBudgetingMethodSchema,
-  timeslicesBudgetingMethodSchema,
+  is,
+  occurrencesBudgetingMethodSchemaZod,
+  timeslicesBudgetingMethodSchemaZod,
 } from '@kbn/slo-schema';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import type { DateRange, Duration, SLODefinition } from '../domain/models';
@@ -96,7 +97,7 @@ export class DefaultBurnRatesClient implements BurnRatesClient {
     const result = await this.esClient.search<unknown, EsAggregations>({
       ...commonQuery(slo, instanceId, longestDateRange),
       index,
-      aggs: occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)
+      aggs: is(occurrencesBudgetingMethodSchemaZod, slo.budgetingMethod)
         ? toLookbackWindowsAggregationsQuery(
             longestDateRange.to,
             sortedLookbackWindows,
@@ -195,7 +196,7 @@ export class DefaultBurnRatesClient implements BurnRatesClient {
 
       memberAggs[`member_${i}`] = {
         filter: { bool: { filter: filterClauses } },
-        aggs: occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)
+        aggs: is(occurrencesBudgetingMethodSchemaZod, slo.budgetingMethod)
           ? toLookbackWindowsAggregationsQuery(
               longestDateRange.to,
               sortedLookbackWindows,
@@ -249,7 +250,7 @@ export class DefaultBurnRatesClient implements BurnRatesClient {
         { index },
         {
           ...commonQuery(slo, instanceId, longestDateRange),
-          aggs: occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)
+          aggs: is(occurrencesBudgetingMethodSchemaZod, slo.budgetingMethod)
             ? toLookbackWindowsAggregationsQuery(
                 longestDateRange.to,
                 sortedLookbackWindows,
@@ -411,7 +412,7 @@ function handleWindowedResult(
     }
 
     let sliValue;
-    if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
+    if (is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod)) {
       const dateRange = {
         from: new Date(bucket.from_as_string!),
         to: new Date(bucket.to_as_string!),

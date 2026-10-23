@@ -6,11 +6,10 @@
  */
 
 import type { SLODefinitionResponse } from '@kbn/slo-schema';
-import { timeslicesBudgetingMethodSchema, durationType } from '@kbn/slo-schema';
-import { isLeft } from 'fp-ts/Either';
+import { durationTypeZod, is, timeslicesBudgetingMethodSchemaZod } from '@kbn/slo-schema';
 
 export function getDelayInSecondsFromSLO(slo: SLODefinitionResponse) {
-  const fixedInterval = timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
+  const fixedInterval = is(timeslicesBudgetingMethodSchemaZod, slo.budgetingMethod)
     ? durationStringToSeconds(slo.objective.timesliceWindow)
     : 60;
   const syncDelay = durationStringToSeconds(slo.settings.syncDelay);
@@ -22,9 +21,9 @@ function durationStringToSeconds(duration: string | undefined) {
   if (!duration) {
     return 0;
   }
-  const result = durationType.decode(duration);
-  if (isLeft(result)) {
+  const result = durationTypeZod.safeParse(duration);
+  if (!result.success) {
     throw new Error(`Invalid duration string: ${duration}`);
   }
-  return result.right.asSeconds();
+  return result.data.asSeconds();
 }
