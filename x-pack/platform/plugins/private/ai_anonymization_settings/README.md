@@ -28,13 +28,16 @@ this page.
 
 ## Access
 
-- **Seeing the page** needs the Advanced Settings **Read** (or All) privilege, the Connectors
-  privilege (`show` and `execute`) and an Enterprise license. The Read privilege grants no
-  `advancedSettings.show` UI capability, so the page checks the management capability
-  `management.kibana.settings` instead.
-- **Changing anything** needs Advanced Settings **All** (`advancedSettings.save`). Without it the
-  page is read-only and says so, and the Pattern tester tab is hidden because its endpoint needs
-  `manage_advanced_settings`.
+The page is offered only to users who can change what it shows, so a user who cannot use it gets
+no Stack Management entry for it. That takes all of:
+
+- Advanced Settings **All** (`advancedSettings.save`; the pattern tester endpoint also needs
+  `manage_advanced_settings`),
+- the Connectors privilege (`actions.show` and `actions.execute`),
+- an Enterprise license.
+
+This is stricter than **GenAI Settings**, which is offered with the Connectors privilege alone and
+disables its controls for users who cannot save. The difference is intentional.
 
 ## Limitations
 

@@ -68,7 +68,7 @@ export class AiAnonymizationSettingsPlugin
       },
     });
 
-    // Stays disabled until start() confirms the user can view advanced settings and the license is
+    // Stays disabled until start() confirms the user can save advanced settings and the license is
     // Enterprise, so users who cannot use the page do not get a Stack Management entry for it.
     this.registeredApp.disable();
 
@@ -80,10 +80,7 @@ export class AiAnonymizationSettingsPlugin
     { licensing }: AiAnonymizationSettingsStartDeps
   ): AiAnonymizationSettingsPluginStart {
     const { capabilities } = coreStart.application;
-    // Read access is enough to see the page; editing stays gated on `save` inside it. The Advanced
-    // Settings "Read" privilege grants no `advancedSettings.show` UI capability, only access to the
-    // Advanced Settings management page, so that is what marks a user who may view settings.
-    const canViewAdvancedSettings = capabilities.management?.kibana?.settings === true;
+    const canSaveAdvancedSettings = capabilities.advancedSettings?.save === true;
     // The AI features this page configures run on connectors, which some serverless tiers (for example
     // observability essentials) do not offer. GenAI Settings is hidden there by the same check.
     const hasConnectorsAccess =
@@ -95,7 +92,7 @@ export class AiAnonymizationSettingsPlugin
     // The license can change while Kibana runs, so follow it instead of reading it once.
     this.licenseSubscription = licensing.license$.subscribe((license) => {
       if (
-        canViewAdvancedSettings &&
+        canSaveAdvancedSettings &&
         hasConnectorsAccess &&
         isSettingRegistered &&
         isValidLicense(license)

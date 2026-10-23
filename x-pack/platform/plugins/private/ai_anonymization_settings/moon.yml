@@ -34,7 +34,6 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/repo-info'
-  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

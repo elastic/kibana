@@ -109,18 +109,4 @@ export class AnonymizationSettingsPage {
   getOnFailureRadioGroup() {
     return this.page.testSubj.locator('aiAnonymizationSettingsOnFailureRadioGroup');
   }
-
-  /**
-   * Get the callout shown to users who can view but not change the settings
-   */
-  getReadOnlyCallout() {
-    return this.page.testSubj.locator('aiAnonymizationSettingsReadOnlyCallout');
-  }
-
-  /**
-   * Get the "Pattern tester" tab (absent when the tester is disabled or the user cannot save)
-   */
-  getTesterTab() {
-    return this.page.testSubj.locator('aiAnonymizationSettingsTab-tester');
-  }
 }
