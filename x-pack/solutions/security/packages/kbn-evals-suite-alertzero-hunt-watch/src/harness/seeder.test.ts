@@ -21,7 +21,7 @@ const samples = loadSamples();
 const NOW = Date.UTC(2026, 9, 9, 12, 0, 0);
 
 const twinSample = (): Record<string, CorpusSample> => ({
-  'aaaaaaaa-twin.json': {
+  'aaaaaaaa_twin.json': {
     chain: 'c',
     step: 's',
     positive: {
@@ -102,7 +102,7 @@ describe('buildPhasePlan', () => {
 
 describe('seeded index names honour HUNT_WATCH_SPACE_ID', () => {
   const scopedSample = (): Record<string, CorpusSample> => ({
-    'aaaaaaaa-twin.json': {
+    'aaaaaaaa_twin.json': {
       chain: 'c',
       step: 's',
       positive: { docs: [{ stream: 'logs-a', at: -60, doc: {} }] },
@@ -224,6 +224,6 @@ describe('PhaseSeeder', () => {
   });
 
   it('sample base is the first 8 chars of the file name', () => {
-    expect(sampleBase('00140285-abc.json')).toBe('00140285');
+    expect(sampleBase('00140285_abc.json')).toBe('00140285');
   });
 });

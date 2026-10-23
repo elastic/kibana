@@ -37,7 +37,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/00140285-lsass-comsvcs.json
+    sample: samples/00140285_lsass_comsvcs.json
     techniques:
     - T1003.001
     - T1003.003
@@ -51,7 +51,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/53a26770-pdf-child.json
+    sample: samples/53a26770_pdf_child.json
     techniques:
     - T1016.001
     - T1033
@@ -75,7 +75,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/9a1a2dae-defend-promotion.json
+    sample: samples/9a1a2dae_defend_promotion.json
     techniques: []
   - step: schtasks persistence
     rule_id: afcce5ad-65de-4ed2-8516-5e093d3ac99a
@@ -86,7 +86,7 @@ chains:
       positive: 3
       negative: 0
       pass: true
-    sample: samples/afcce5ad-schtasks.json
+    sample: samples/afcce5ad_schtasks.json
     techniques:
     - T1053.005
   - step: mshta HTTP
@@ -98,7 +98,7 @@ chains:
       positive: 3
       negative: 0
       pass: true
-    sample: samples/c2d90150-mshta-network.json
+    sample: samples/c2d90150_mshta_network.json
     techniques:
     - T1218.005
   - step: BITS job notify command line (T1197 persistence)
@@ -110,7 +110,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/c3b915e0-bits-notify-cmdline.json
+    sample: samples/c3b915e0_bits_notify_cmdline.json
     techniques:
     - T1197
   expected_attack:
@@ -160,7 +160,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/1c6a8c7a-entra-consent-grant.json
+    sample: samples/1c6a8c7a_entra_consent_grant.json
     techniques:
     - T1199
     - T1528
@@ -177,7 +177,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/2f0ee9fe-aws-s3-credential-file.json
+    sample: samples/2f0ee9fe_aws_s3_credential_file.json
     techniques:
     - T1530
     - T1552.001
@@ -190,7 +190,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/729aa18d-okta-mfa-reset.json
+    sample: samples/729aa18d_okta_mfa_reset.json
     techniques:
     - T1098
     - T1556.006
@@ -203,7 +203,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/8d696bd0-entra-ropc.json
+    sample: samples/8d696bd0_entra_ropc.json
     techniques:
     - T1078.004
   - step: alice.chen long-term access key used from new source IP
@@ -215,7 +215,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/9f8e3c5e-aws-key-new-ip.json
+    sample: samples/9f8e3c5e_aws_key_new_ip.json
     techniques:
     - T1078.004
     - T1552
@@ -228,7 +228,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/a8b3e2f0-aws-ssm-lolbin.json
+    sample: samples/a8b3e2f0_aws_ssm_lolbin.json
     techniques:
     - T1059.004
     - T1105
@@ -249,7 +249,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/c74fd275-okta-app-modify.json
+    sample: samples/c74fd275_okta_app_modify.json
     techniques: []
   - step: karen.d MFA disabled (post-compromise)
     rule_id: dafa3235-76dc-40e2-9f71-1773b96d24cf
@@ -260,7 +260,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/dafa3235-entra-mfa-disabled.json
+    sample: samples/dafa3235_entra_mfa_disabled.json
     techniques:
     - T1556.006
   - step: karen.d mailbox read through Graph by the newly consented app
@@ -272,7 +272,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/e882e934-graph-mail-access.json
+    sample: samples/e882e934_graph_mail_access.json
     techniques:
     - T1114.002
     - T1550.001
@@ -290,7 +290,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/f5778acd-aws-console-no-mfa.json
+    sample: samples/f5778acd_aws_console_no_mfa.json
     techniques:
     - T1078.004
   expected_attack:
@@ -334,7 +334,7 @@ chains:
       positive: 3
       negative: 0
       pass: true
-    sample: samples/3ebdc01e-curl-pipe-bash.json
+    sample: samples/3ebdc01e_curl_pipe_bash.json
     techniques:
     - T1059.004
     - T1071
@@ -347,7 +347,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/8a1b0278-suid-bit.json
+    sample: samples/8a1b0278_suid_bit.json
     techniques:
     - T1548.001
   - step: nginx -> curl fetching the dropper
@@ -359,7 +359,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/f16fca20-web-child.json
+    sample: samples/f16fca20_web_child.json
     techniques:
     - T1059
     - T1190
@@ -373,7 +373,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/ff10d4d8-cron-write.json
+    sample: samples/ff10d4d8_cron_write.json
     techniques:
     - T1053.003
   expected_attack:
@@ -409,7 +409,7 @@ chains:
       positive: 3
       negative: 0
       pass: true
-    sample: samples/58bc134c-lateral-tool-transfer-smb.json
+    sample: samples/58bc134c_lateral_tool_transfer_smb.json
     techniques:
     - T1021.002
     - T1570
@@ -422,7 +422,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/97fc44d3-run-key.json
+    sample: samples/97fc44d3_run_key.json
     techniques:
     - T1112
     - T1547.001
@@ -435,7 +435,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/a624863f-office-child.json
+    sample: samples/a624863f_office_child.json
     techniques:
     - T1016
     - T1033
@@ -464,7 +464,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/custom-ti-domain-match.json
+    sample: samples/custom_ti_domain_match.json
     techniques:
     - T1071.004
   - step: ADMIN$ copy to srv-files-02
@@ -476,7 +476,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/fa01341d-hidden-share-copy.json
+    sample: samples/fa01341d_hidden_share_copy.json
     techniques:
     - T1021.002
     - T1074.002
@@ -532,7 +532,7 @@ chains:
       positive: 3
       negative: 0
       pass: true
-    sample: samples/954ee7c8-remote-schtasks.json
+    sample: samples/954ee7c8_remote_schtasks.json
     techniques:
     - T1021
     - T1053.005
@@ -545,7 +545,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/9ccf3ce0-rundll32-shell.json
+    sample: samples/9ccf3ce0_rundll32_shell.json
     techniques:
     - T1059.001
     - T1059.003
@@ -560,7 +560,7 @@ chains:
       positive: 3
       negative: 0
       pass: true
-    sample: samples/c6b40f4c-kerberos-ticket.json
+    sample: samples/c6b40f4c_kerberos_ticket.json
     techniques:
     - T1550.003
     - T1558.003
@@ -574,7 +574,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/e72f87d0-wmi-subscription.json
+    sample: samples/e72f87d0_wmi_subscription.json
     techniques:
     - T1546.003
   - step: WMI incoming lateral movement on dc-fs-09 (target side)
@@ -586,7 +586,7 @@ chains:
       positive: 3
       negative: 0
       pass: true
-    sample: samples/f3475224-wmi-incoming.json
+    sample: samples/f3475224_wmi_incoming.json
     techniques:
     - T1021.003
     - T1047
@@ -599,7 +599,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/f59668de-wmic-remote.json
+    sample: samples/f59668de_wmic_remote.json
     techniques:
     - T1021.003
     - T1021.006
@@ -614,7 +614,7 @@ chains:
       positive: 1
       negative: 0
       pass: true
-    sample: samples/fd70c98a-certutil.json
+    sample: samples/fd70c98a_certutil.json
     techniques:
     - T1105
     - T1140

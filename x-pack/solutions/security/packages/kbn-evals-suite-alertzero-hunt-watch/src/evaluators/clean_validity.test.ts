@@ -632,7 +632,7 @@ describe('labels invariants over the vendored corpus', () => {
   });
 
   it('sampleBase takes the first 8 chars', () => {
-    expect(sampleBase('f3475224-wmi-incoming.json')).toBe('f3475224');
+    expect(sampleBase('f3475224_wmi_incoming.json')).toBe('f3475224');
   });
 });
 

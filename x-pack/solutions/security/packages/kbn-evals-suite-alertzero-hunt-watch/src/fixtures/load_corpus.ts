@@ -58,7 +58,7 @@ const FIXTURES_DIR = __dirname;
 const SAMPLES_DIR = join(FIXTURES_DIR, 'samples');
 
 export const loadManifest = (): Ad2Manifest =>
-  parse(readFileSync(join(FIXTURES_DIR, 'ad2-v1.yaml'), 'utf8')) as Ad2Manifest;
+  parse(readFileSync(join(FIXTURES_DIR, 'ad2_v1.yaml'), 'utf8')) as Ad2Manifest;
 
 export const loadSamples = (): Record<string, CorpusSample> => {
   const out: Record<string, CorpusSample> = {};
