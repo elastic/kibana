@@ -102,8 +102,11 @@ const app = ({
   lastSeen: '2021-01-18T12:25:00.000Z',
 });
 
-const respondWith = (applications: ApplicationSummary[], environments: string[] = []) =>
-  mockFetch.mockResolvedValue({ applications, environments });
+const respondWith = (
+  applications: ApplicationSummary[],
+  environments: string[] = [],
+  unavailableSources: Array<ApplicationSummary['source']> = []
+) => mockFetch.mockResolvedValue({ applications, environments, unavailableSources });
 
 // `isServerless` leaves out the ux plugin, as serverless does.
 const renderPage = ({ isServerless = false } = {}) => {
@@ -320,7 +323,60 @@ describe('ApplicationsListPage', () => {
     await screen.findByTestId('digitalExperienceApplicationLink');
 
     expect(screen.queryByTestId('digitalExperienceVital-fcp')).not.toBeInTheDocument();
-    expect(screen.getByTestId('digitalExperienceColumnSelector')).toHaveTextContent('7/10');
+    expect(screen.getByTestId('digitalExperienceColumnSelector')).toHaveTextContent('6/9');
+  });
+
+  it('always shows the page loads, which the table is sorted by', async () => {
+    window.localStorage.setItem(
+      'xpack.digitalExperience.applications.visibleColumns',
+      JSON.stringify([])
+    );
+    respondWith([app()]);
+    renderPage();
+    await screen.findByTestId('digitalExperienceApplicationLink');
+
+    expect(screen.getByRole('columnheader', { name: /Page loads/ })).toBeInTheDocument();
+  });
+
+  it('keeps the summary on every application while the search narrows the table', async () => {
+    respondWith([app({ serviceName: 'shop' }), app({ serviceName: 'docs', source: 'otel' })]);
+    renderPage();
+    await screen.findAllByTestId('digitalExperienceApplicationLink');
+
+    fireEvent.change(screen.getByTestId('digitalExperienceApplicationsSearch'), {
+      target: { value: 'sho' },
+    });
+
+    expect(screen.getAllByTestId('digitalExperienceApplicationLink')).toHaveLength(1);
+    expect(screen.getByTestId('digitalExperienceSummary-applications')).toHaveTextContent('2');
+  });
+
+  it('ignores a source in the URL where the source filter is not shown', async () => {
+    mockSourceFilter('classic');
+    respondWith([app({ serviceName: 'shop', source: 'otel' })]);
+    renderPage({ isServerless: true });
+
+    expect(await screen.findByTestId('digitalExperienceApplicationLink')).toHaveTextContent('shop');
+  });
+
+  it('offers to show all environments when the selected one has no applications', async () => {
+    mockEnvironment('staging');
+    respondWith([], ['production', 'staging']);
+    renderPage();
+
+    fireEvent.click(await screen.findByTestId('digitalExperienceShowAllEnvironments'));
+
+    expect(setEnvironment).toHaveBeenCalledWith(undefined);
+    expect(screen.queryByTestId('digitalExperienceApplicationsEmpty')).not.toBeInTheDocument();
+  });
+
+  it('warns when a source could not be loaded', async () => {
+    respondWith([app({ source: 'otel' })], [], ['classic']);
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceUnavailableSources')).toHaveTextContent(
+      'Classic RUM'
+    );
   });
 
   it('shows FCP, TTFB, the error rate and the last seen time', async () => {

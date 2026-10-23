@@ -10,6 +10,8 @@
  * name for; named after the user's intent, as that package asks.
  */
 export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
+  /** The user opens a filter's options. */
+  OPEN_FILTER: 'openFilter',
   /** The user narrows the list, e.g. to one environment or source. */
   SET_FILTER: 'setFilter',
   /** The user opens the list of columns to show or hide. */
@@ -26,4 +28,5 @@ export const APPLICATIONS_LIST_EBT_ELEMENTS = {
   SOURCE_FILTER: 'digitalExperienceSourceFilter',
   COLUMN_SELECTOR: 'digitalExperienceColumnSelector',
   RETRY: 'digitalExperienceApplicationsRetry',
+  SHOW_ALL_ENVIRONMENTS: 'digitalExperienceShowAllEnvironments',
 } as const;

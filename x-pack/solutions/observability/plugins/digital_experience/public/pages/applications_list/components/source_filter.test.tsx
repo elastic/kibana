@@ -54,12 +54,24 @@ describe('SourceFilter', () => {
 
     expect(onChange).toHaveBeenCalledWith(undefined);
   });
+
   it('shows the selection on the button', () => {
     renderFilter('classic');
 
     expect(screen.getByTestId('digitalExperienceSourceFilter')).toHaveTextContent(
       'Source: Classic RUM'
     );
+  });
+
+  it('reports opening the filter and picking an option as different clicks', () => {
+    renderFilter();
+
+    expect(screen.getByTestId('digitalExperienceSourceFilter')).toHaveAttribute(
+      'data-ebt-action',
+      'openFilter'
+    );
+    expect(option('classic')).toHaveAttribute('data-ebt-action', 'setFilter');
+    expect(option('classic')).toHaveAttribute('data-ebt-element', 'digitalExperienceSourceFilter');
   });
 
   it('shows only the label without a selection', () => {

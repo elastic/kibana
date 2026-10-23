@@ -70,6 +70,8 @@ export function SingleSelectFilter({
       label: optionLabel,
       checked: value === selected ? 'on' : undefined,
       'data-test-subj': `${dataTestSubj}Option-${value}`,
+      // Picking an option sets the filter; opening the list doesn't.
+      ...getEbtProps({ action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER, element: ebtElement }),
     })
   );
 
@@ -84,7 +86,7 @@ export function SingleSelectFilter({
         <EuiFilterButton
           data-test-subj={dataTestSubj}
           {...getEbtProps({
-            action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
+            action: DIGITAL_EXPERIENCE_EBT_ACTIONS.OPEN_FILTER,
             element: ebtElement,
           })}
           css={buttonCss}

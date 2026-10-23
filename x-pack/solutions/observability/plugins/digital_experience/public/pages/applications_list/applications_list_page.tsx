@@ -28,13 +28,18 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import type { DefaultClientOptions } from '@kbn/server-route-repository-client';
 import { getDateISORange } from '@kbn/timerange';
 import { APPLICATION_SOURCE } from '../../../common/application_source';
-import type { PageLoadsOverTime, VitalRatings } from '../../../common/types/applications';
+import type {
+  ApplicationSource,
+  PageLoadsOverTime,
+  VitalRatings,
+} from '../../../common/types/applications';
 import type { CoreWebVital, VitalRating } from '../../../common/core_web_vitals';
 import { CORE_WEB_VITAL, getVitalRating } from '../../../common/core_web_vitals';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../../common/feature';
@@ -327,6 +332,58 @@ const noApplicationsPrompt = (
   />
 );
 
+const NoApplicationsInEnvironmentPrompt = ({
+  onShowAllEnvironments,
+}: {
+  onShowAllEnvironments: () => void;
+}) => (
+  <EuiEmptyPrompt
+    data-test-subj="digitalExperienceApplicationsEmptyInEnvironment"
+    iconType="filter"
+    title={
+      <h2>
+        {i18n.translate('xpack.digitalExperience.applications.emptyInEnvironment.title', {
+          defaultMessage: 'No applications in this environment',
+        })}
+      </h2>
+    }
+    body={
+      <p>
+        {i18n.translate('xpack.digitalExperience.applications.emptyInEnvironment.body', {
+          defaultMessage:
+            'There are no monitored applications in the selected environment for this time range.',
+        })}
+      </p>
+    }
+    actions={
+      <EuiButton
+        data-test-subj="digitalExperienceShowAllEnvironments"
+        {...getEbtProps({
+          action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
+          element: APPLICATIONS_LIST_EBT_ELEMENTS.SHOW_ALL_ENVIRONMENTS,
+        })}
+        onClick={onShowAllEnvironments}
+      >
+        {i18n.translate('xpack.digitalExperience.applications.emptyInEnvironment.showAll', {
+          defaultMessage: 'Show all environments',
+        })}
+      </EuiButton>
+    }
+  />
+);
+
+const UnavailableSourcesCallOut = ({ sources }: { sources: ApplicationSource[] }) => (
+  <KbnWarningCallout
+    data-test-subj="digitalExperienceUnavailableSources"
+    size="s"
+    title={i18n.translate('xpack.digitalExperience.applications.unavailableSources', {
+      defaultMessage:
+        "Could not load the {sources} data, so it's missing from the applications, totals and chart.",
+      values: { sources: sources.map((source) => SOURCE_LABELS[source]).join(', ') },
+    })}
+  />
+);
+
 const LoadErrorPrompt = ({ error, onRetry }: { error: Error; onRetry: () => void }) => (
   <EuiEmptyPrompt
     data-test-subj="digitalExperienceApplicationsError"
@@ -360,7 +417,6 @@ const LoadErrorPrompt = ({ error, onRetry }: { error: Error; onRetry: () => void
 const SORT_BY_PAGE_LOADS = { sort: { field: 'pageLoads.count', direction: 'desc' } } as const;
 
 type OptionalColumnId =
-  | 'pageLoads'
   | 'errorRate'
   | 'lcp'
   | 'inp'
@@ -371,9 +427,11 @@ type OptionalColumnId =
   | 'failedHttp'
   | 'lastSeen';
 
-/** The columns the user can hide, in display order; the application is always shown. */
+/**
+ * The columns the user can hide, in display order. The application and its page loads, which the
+ * table is sorted by, are always shown.
+ */
 const OPTIONAL_COLUMNS: Array<{ id: OptionalColumnId; label: string }> = [
-  { id: 'pageLoads', label: PAGE_LOADS_COLUMN },
   { id: 'errorRate', label: ERROR_RATE_COLUMN },
   { id: 'lcp', label: LCP_COLUMN },
   { id: 'inp', label: INP_COLUMN },
@@ -436,35 +494,40 @@ export function ApplicationsListPage() {
   // Nothing has been fetched before the first request starts.
   const isLoading = loading || (!response && !error);
 
+  // Serverless has no ux plugin and no Classic RUM data; known on the first render, so the filter
+  // row doesn't change once the data loads.
+  const canFilterBySource = ux !== undefined;
+  // A source in the URL is ignored where the filter isn't shown, so it can't hide every row.
+  const selectedSource = canFilterBySource ? sourceFilter : undefined;
+
   const items = useMemo(
     () =>
       filterApplications({
         applications: response?.applications ?? [],
-        source: sourceFilter,
+        source: selectedSource,
         search,
       }),
-    [response, sourceFilter, search]
+    [response, selectedSource, search]
   );
-  // Serverless has no ux plugin and no Classic RUM data; known on the first render, so the filter
-  // row doesn't change once the data loads.
-  const canFilterBySource = ux !== undefined;
 
-  // Every source's rows, so the totals match the chart even where the list shows one row per name.
+  // The summary and the chart cover the same rows: every source's, without the search, which only
+  // narrows the table.
   const summary = useMemo(
     () =>
       summarizeApplications(
         applicationsMatching({
           applications: response?.applications ?? [],
-          source: sourceFilter,
-          search,
+          source: selectedSource,
+          search: '',
         })
       ),
-    [response, sourceFilter, search]
+    [response, selectedSource]
   );
   const pageLoadsOverTime = useMemo(
-    () => pageLoadsOfSources(response?.pageLoadsOverTime ?? NO_PAGE_LOADS, sourceFilter),
-    [response, sourceFilter]
+    () => pageLoadsOfSources(response?.pageLoadsOverTime ?? NO_PAGE_LOADS, selectedSource),
+    [response, selectedSource]
   );
+  const unavailableSources = response?.unavailableSources ?? [];
 
   const { visibleColumns, setVisibleColumns } = useVisibleColumns({
     storageKey: VISIBLE_COLUMNS_STORAGE_KEY,
@@ -481,6 +544,13 @@ export function ApplicationsListPage() {
     }
     if (response?.applications.length) {
       return NO_MATCHES_MESSAGE;
+    }
+    if (environment) {
+      return (
+        <NoApplicationsInEnvironmentPrompt
+          onShowAllEnvironments={() => setEnvironment(undefined)}
+        />
+      );
     }
     return noApplicationsPrompt;
   };
@@ -540,15 +610,16 @@ export function ApplicationsListPage() {
       ),
     };
 
+    const pageLoadsColumn: EuiBasicTableColumn<ApplicationRow> = {
+      field: 'pageLoads.count',
+      name: PAGE_LOADS_COLUMN,
+      dataType: 'number',
+      sortable: true,
+      ...metricColumnPreset<ApplicationRow>(),
+      render: renderCount(formatters),
+    };
+
     const optionalColumns: Record<OptionalColumnId, EuiBasicTableColumn<ApplicationRow>> = {
-      pageLoads: {
-        field: 'pageLoads.count',
-        name: PAGE_LOADS_COLUMN,
-        dataType: 'number',
-        sortable: true,
-        ...metricColumnPreset<ApplicationRow>(),
-        render: renderCount(formatters),
-      },
       errorRate: {
         field: 'jsErrors.perPageLoad',
         name: ERROR_RATE_COLUMN,
@@ -618,6 +689,7 @@ export function ApplicationsListPage() {
 
     return [
       applicationColumn,
+      pageLoadsColumn,
       ...OPTIONAL_COLUMN_IDS.filter((id) => visibleColumns.has(id)).map(
         (id) => optionalColumns[id]
       ),
@@ -632,6 +704,12 @@ export function ApplicationsListPage() {
         rightSideItems={[<TimeRangePicker key="timeRange" onRefresh={refresh} />]}
       />
       <EuiSpacer size="m" />
+      {unavailableSources.length > 0 && (
+        <>
+          <UnavailableSourcesCallOut sources={unavailableSources} />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <ApplicationsSummaryPanel summary={summary} isLoading={isLoading} />
       <EuiSpacer size="m" />
       <PageLoadsChart

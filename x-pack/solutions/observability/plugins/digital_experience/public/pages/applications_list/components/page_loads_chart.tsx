@@ -5,18 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
-import {
-  Axis,
-  BarSeries,
-  Chart,
-  niceTimeFormatter,
-  Position,
-  ScaleType,
-  Settings,
-  Tooltip,
-} from '@elastic/charts';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import type { BrushEndListener } from '@elastic/charts';
 import {
   EuiFlexGroup,
@@ -60,12 +51,8 @@ export function PageLoadsChart({
   onTimeRangeSelect: (range: { start: number; end: number }) => void;
 }) {
   const baseTheme = useElasticChartsTheme();
-  const { timeZone } = useFormatters();
+  const { formatDate, timeZone } = useFormatters();
   const hasPageLoads = points.some(({ count }) => count > 0);
-  const timeFormatter = useMemo(
-    () => niceTimeFormatter([points[0]?.timestamp ?? 0, points[points.length - 1]?.timestamp ?? 0]),
-    [points]
-  );
 
   const onBrushEnd: BrushEndListener = (brushArea) => {
     const [start, end] = ('x' in brushArea && brushArea.x) || [];
@@ -97,7 +84,7 @@ export function PageLoadsChart({
           locale={i18n.getLocale()}
           onBrushEnd={onBrushEnd}
         />
-        <Tooltip headerFormatter={({ value }) => timeFormatter(value)} />
+        <Tooltip headerFormatter={({ value }) => formatDate(value)} />
         <Axis id="time" position={Position.Bottom} />
         <Axis id="count" position={Position.Left} gridLine={{ visible: true }} ticks={4} />
         <BarSeries
