@@ -19,6 +19,7 @@ import type {
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { escapeQuotes } from '@kbn/es-query';
 import { coerce } from 'semver';
 import pMap from 'p-map';
@@ -44,7 +45,6 @@ import { AgentAlreadyAssignedError } from '../errors';
 import {
   splitVersionSuffixFromPolicyId,
   classifyPolicyId,
-  buildAgentVersionVariantsKueryFragment,
   getSentinelVersionPolicyId,
   hasSentinelVersionPolicy,
   hasSentinelVersionSuffix,
@@ -90,14 +90,12 @@ const STALE_VARIANT_GRACE_MS = 60 * 60 * 1000; // 1 hour
 // MAX_VERSION_SPECIFIC_POLICY_BUCKETS policy ids and the parent policies of the variants, so it does not run
 // on every run. It runs right away when the sentinel version is turned on or off, which changes what is orphaned.
 const ORPHAN_SWEEP_INTERVAL_MS = 10 * 60 * 1000;
-// Upper bound of the distinct `policy_id`s of agents that the candidate query reads: the agent policies of a page
-// with their `#sentinel` copies and variants, and the policies of agents without `policy_base_id`: none once the
-// startup backfill has run, only the agents of an older fleet-server in a mixed version rollout.
-const MAX_POLICY_IDS_OF_AGENTS = 5000;
+// Distinct `policy_id`s of agents read per request of the candidate query, which pages through all of them.
+const POLICY_IDS_PAGE_SIZE = 1000;
 // Upper bound of the distinct agent versions read per `policy_id`: the patch versions of one minor version and
 // of the few others that are mismatched. A variant with more is read with all its agents.
-// The two bounds keep the nested aggregation, `MAX_POLICY_IDS_OF_AGENTS * (1 + MAX_AGENT_VERSIONS_PER_POLICY_ID)`
-// buckets, below the default `search.max_buckets` of 65536, which would fail the search instead of truncating.
+// The two bounds keep a page of the aggregation, `POLICY_IDS_PAGE_SIZE * (1 + MAX_AGENT_VERSIONS_PER_POLICY_ID)`
+// buckets, below the default `search.max_buckets` of 65536, which would fail the search.
 const MAX_AGENT_VERSIONS_PER_POLICY_ID = 10;
 
 interface VersionSpecificPolicyAssignmentTaskState {
@@ -403,7 +401,8 @@ export class VersionSpecificPolicyAssignmentTask {
       // a count query for every policy of every run.
       const candidatesByPolicyId = await this.findPolicyIdsWithCandidateAgents(
         esClient,
-        agentPolicyPageResults.map((agentPolicy) => agentPolicy.id)
+        agentPolicyPageResults.map((agentPolicy) => agentPolicy.id),
+        signal
       );
       this.logger.debug(
         `[VersionSpecificPolicyAssignmentTask] ${candidatesByPolicyId.size} of ${agentPolicyPageResults.length} agent policies have agents to assign`
@@ -421,7 +420,7 @@ export class VersionSpecificPolicyAssignmentTask {
           signal,
           deployedThisRun,
           packageHasTemplateCondition,
-          candidatesByPolicyId.get(agentPolicy.id)
+          candidatesByPolicyId.get(agentPolicy.id)!
         );
       }
     }
@@ -595,7 +594,7 @@ export class VersionSpecificPolicyAssignmentTask {
     signal: AbortSignal,
     deployedThisRun: Set<string>,
     packageHasTemplateCondition: Map<string, boolean>,
-    mismatchedVariants?: MismatchedVariant[]
+    mismatchedVariants: MismatchedVariant[]
   ) {
     this.logger.debug(
       `[VersionSpecificPolicyAssignmentTask] Processing agent policy ${agentPolicy.id}`
@@ -639,103 +638,105 @@ export class VersionSpecificPolicyAssignmentTask {
    *
    * The result has the variants with such agents of every agent policy, to look only at those agents.
    * Agents without `policy_base_id` (enrolled by an older fleet-server) are found through their `policy_id`,
-   * so that a missing field never hides an agent. Those can be of any agent policy, so when there are more
-   * distinct `policy_id`s than the aggregation returns, every policy of the page is looked at, with all the
-   * agents of its variants (`undefined` variants), rather than skipping some that the truncated result did
-   * not show.
+   * so that a missing field never hides an agent. Those can be of any agent policy, so the `policy_id`s are
+   * paged through rather than truncated.
    */
   private async findPolicyIdsWithCandidateAgents(
     esClient: ElasticsearchClient,
-    agentPolicyIds: string[]
-  ): Promise<Map<string, MismatchedVariant[] | undefined>> {
+    agentPolicyIds: string[],
+    signal: AbortSignal
+  ): Promise<Map<string, MismatchedVariant[]>> {
+    // An agent policy has candidates when it has agents on the policy or `#sentinel`, or on a mismatched variant
+    const candidates = new Map<string, MismatchedVariant[]>();
     const policyIds = new Set(agentPolicyIds);
     if (policyIds.size === 0) {
-      return new Map();
+      return candidates;
     }
     const sentinelPolicyIds = agentPolicyIds.map(getSentinelVersionPolicyId);
     const parentPolicyIds = [...agentPolicyIds, ...sentinelPolicyIds];
-
-    const response = await esClient.search<
-      unknown,
-      {
-        policy_ids: {
-          buckets: Array<{
-            key: string;
-            agent_versions: { buckets: Array<{ key: string }>; sum_other_doc_count?: number };
-          }>;
-          sum_other_doc_count?: number;
-        };
-      }
-    >({
-      index: AGENTS_INDEX,
-      ignore_unavailable: true,
-      size: 0,
-      query: {
-        bool: {
-          filter: [{ term: { active: true } }],
-          must_not: NOT_OPAMP_COLLECTOR_ES_FILTER,
-          should: [
-            // on the policy or on its `#sentinel` copy
-            { terms: { policy_id: parentPolicyIds } },
-            // on a variant: matched by the base policy id, or for agents without it, by any `policy_id`
-            { terms: { policy_base_id: agentPolicyIds } },
-            { bool: { must_not: [{ exists: { field: 'policy_base_id' } }] } },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-      aggs: {
-        policy_ids: {
-          terms: { field: 'policy_id', size: MAX_POLICY_IDS_OF_AGENTS },
-          aggs: {
-            agent_versions: {
-              terms: { field: 'agent.version', size: MAX_AGENT_VERSIONS_PER_POLICY_ID },
-            },
-          },
-        },
-      },
-    });
-
-    if (response.aggregations?.policy_ids?.sum_other_doc_count) {
-      this.logger.debug(
-        `[VersionSpecificPolicyAssignmentTask] More than ${MAX_POLICY_IDS_OF_AGENTS} policy ids of agents: looking at all the agent policies of the page`
-      );
-      return new Map<string, MismatchedVariant[] | undefined>(
-        [...policyIds].map((policyId) => [policyId, undefined])
-      );
-    }
-
-    // An agent policy has candidates when it has agents on the policy or `#sentinel`, or on a mismatched variant
-    const candidates = new Map<string, MismatchedVariant[]>();
     const getVariants = (baseId: string) => {
       const variants = candidates.get(baseId) ?? [];
       candidates.set(baseId, variants);
       return variants;
     };
-    for (const bucket of response.aggregations?.policy_ids?.buckets ?? []) {
-      const { kind, baseId, version } = classifyPolicyId(bucket.key);
-      if (!policyIds.has(baseId)) {
-        continue;
+
+    let afterKey: Record<string, string> | undefined;
+    do {
+      throwIfAborted(signal);
+      const response: SearchResponse<
+        unknown,
+        {
+          policy_ids: {
+            buckets: Array<{
+              key: { policy_id: string };
+              agent_versions: { buckets: Array<{ key: string }>; sum_other_doc_count?: number };
+            }>;
+            after_key?: Record<string, string>;
+          };
+        }
+      > = await esClient.search({
+        index: AGENTS_INDEX,
+        ignore_unavailable: true,
+        size: 0,
+        query: {
+          bool: {
+            filter: [{ term: { active: true } }],
+            must_not: NOT_OPAMP_COLLECTOR_ES_FILTER,
+            should: [
+              // on the policy or on its `#sentinel` copy
+              { terms: { policy_id: parentPolicyIds } },
+              // on a variant: matched by the base policy id, or for agents without it, by any `policy_id`
+              { terms: { policy_base_id: agentPolicyIds } },
+              { bool: { must_not: [{ exists: { field: 'policy_base_id' } }] } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+        aggs: {
+          policy_ids: {
+            composite: {
+              size: POLICY_IDS_PAGE_SIZE,
+              sources: [{ policy_id: { terms: { field: 'policy_id' } } }],
+              ...(afterKey ? { after: afterKey } : {}),
+            },
+            aggs: {
+              agent_versions: {
+                terms: { field: 'agent.version', size: MAX_AGENT_VERSIONS_PER_POLICY_ID },
+              },
+            },
+          },
+        },
+      });
+
+      const agg = response.aggregations?.policy_ids;
+      for (const bucket of agg?.buckets ?? []) {
+        const policyId = bucket.key.policy_id;
+        const { kind, baseId, version } = classifyPolicyId(policyId);
+        if (!policyIds.has(baseId)) {
+          continue;
+        }
+        if (kind !== 'agentVersion') {
+          getVariants(baseId);
+          continue;
+        }
+        if (bucket.agent_versions.sum_other_doc_count) {
+          getVariants(baseId).push({ policyId });
+          continue;
+        }
+        // Unparsable versions are never moved, like in `findAgentsNeedingVersionSpecificPolicies`
+        const agentVersions = bucket.agent_versions.buckets
+          .map(({ key }) => key)
+          .filter((agentVersion) => {
+            const minorVersion = this.extractMinorVersion(agentVersion);
+            return minorVersion !== null && minorVersion !== version;
+          });
+        if (agentVersions.length > 0) {
+          getVariants(baseId).push({ policyId, agentVersions });
+        }
       }
-      if (kind !== 'agentVersion') {
-        getVariants(baseId);
-        continue;
-      }
-      if (bucket.agent_versions.sum_other_doc_count) {
-        getVariants(baseId).push({ policyId: bucket.key });
-        continue;
-      }
-      // Unparsable versions are never moved, like in `findAgentsNeedingVersionSpecificPolicies`
-      const agentVersions = bucket.agent_versions.buckets
-        .map(({ key }) => key)
-        .filter((agentVersion) => {
-          const minorVersion = this.extractMinorVersion(agentVersion);
-          return minorVersion !== null && minorVersion !== version;
-        });
-      if (agentVersions.length > 0) {
-        getVariants(baseId).push({ policyId: bucket.key, agentVersions });
-      }
-    }
+      afterKey = (agg?.buckets.length ?? 0) > 0 ? agg?.after_key : undefined;
+    } while (afterKey);
+
     return candidates;
   }
 
@@ -756,7 +757,7 @@ export class VersionSpecificPolicyAssignmentTask {
     soClient: SavedObjectsClientContract,
     agentPolicyId: string,
     signal: AbortSignal,
-    mismatchedVariants?: MismatchedVariant[]
+    mismatchedVariants: MismatchedVariant[]
   ): Promise<AgentVersionGroup[]> {
     const agentsByMinorVersion = new Map<string, string[]>();
 
@@ -772,20 +773,18 @@ export class VersionSpecificPolicyAssignmentTask {
     )}")`;
 
     // Query 2: Agents on a versioned policy derived from this parent that run another minor version than the
-    // one of the variant, they need to move to a different versioned policy. Without the mismatched variants
-    // all the agents of the variants are selected, and the check below tells which ones need to move.
+    // one of the variant, they need to move to a different versioned policy. On a variant with too many agent
+    // versions to tell them apart, all its agents are selected, and the check below tells which ones need to move.
     const versionedPolicyKuery = mismatchedVariants
-      ? mismatchedVariants
-          .map(({ policyId, agentVersions }) => {
-            const onVariant = `policy_id:"${escapeQuotes(policyId)}"`;
-            return agentVersions
-              ? `(${onVariant} and agent.version:(${agentVersions
-                  .map((agentVersion) => `"${escapeQuotes(agentVersion)}"`)
-                  .join(' or ')}))`
-              : onVariant;
-          })
-          .join(' or ')
-      : buildAgentVersionVariantsKueryFragment(agentPolicyId);
+      .map(({ policyId, agentVersions }) => {
+        const onVariant = `policy_id:"${escapeQuotes(policyId)}"`;
+        return agentVersions
+          ? `(${onVariant} and agent.version:(${agentVersions
+              .map((agentVersion) => `"${escapeQuotes(agentVersion)}"`)
+              .join(' or ')}))`
+          : onVariant;
+      })
+      .join(' or ');
 
     // Note: We intentionally do NOT query for agents with outdated policy revisions.
     // Agents already on the correct versioned policy will receive updated revisions

@@ -173,22 +173,23 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
   // The search of phase 1 that tells which agent policies have agents to look at (one per page of
   // agent policies). By default every agent policy of the page has agents on its plain policy id: pass
   // the ids to limit them. `agentVersionsByPolicyId` are other policy ids of agents, e.g. variants, with
-  // the versions of their agents.
+  // the versions of their agents. The policy ids are returned in pages of `pageSize`, the size of the
+  // request by default.
   const mockCandidateAgentPolicies = async ({
     policyIdsWithCandidates,
     agentVersionsByPolicyId = {},
-    otherPolicyIdsOfAgents = 0,
     otherAgentVersions = 0,
+    pageSize,
   }: {
     policyIdsWithCandidates?: string[];
     agentVersionsByPolicyId?: Record<string, string[]>;
-    otherPolicyIdsOfAgents?: number;
     otherAgentVersions?: number;
+    pageSize?: number;
   } = {}) => {
     const [coreStart] = await mockCore.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser as any;
-    const toBucket = (key: string, versions: string[]) => ({
-      key,
+    const toBucket = (policyId: string, versions: string[]) => ({
+      key: { policy_id: policyId },
       agent_versions: {
         buckets: versions.map((version) => ({ key: version })),
         sum_other_doc_count: otherAgentVersions,
@@ -199,18 +200,22 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         return {};
       }
       const requestedPolicyIds: string[] = request.query.bool.should[1].terms.policy_base_id;
+      const buckets = [
+        ...requestedPolicyIds
+          .filter((id) => !policyIdsWithCandidates || policyIdsWithCandidates.includes(id))
+          .map((id) => toBucket(id, ['8.18.0'])),
+        ...Object.entries(agentVersionsByPolicyId).map(([id, versions]) => toBucket(id, versions)),
+      ];
+      const { size, after } = request.aggs.policy_ids.composite;
+      const start = after
+        ? buckets.findIndex((bucket) => bucket.key.policy_id === after.policy_id) + 1
+        : 0;
+      const page = buckets.slice(start, start + (pageSize ?? size));
       return {
         aggregations: {
           policy_ids: {
-            buckets: [
-              ...requestedPolicyIds
-                .filter((id) => !policyIdsWithCandidates || policyIdsWithCandidates.includes(id))
-                .map((id) => toBucket(id, ['8.18.0'])),
-              ...Object.entries(agentVersionsByPolicyId).map(([id, versions]) =>
-                toBucket(id, versions)
-              ),
-            ],
-            sum_other_doc_count: otherPolicyIdsOfAgents,
+            buckets: page,
+            ...(page.length > 0 ? { after_key: page[page.length - 1].key } : {}),
           },
         },
       };
@@ -843,15 +848,18 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         const candidateSearches = esClient.search.mock.calls.filter(
           ([request]: any) => request.aggs?.policy_ids
         );
-        expect(candidateSearches).toHaveLength(1);
+        // a page with the policy ids, and a last empty one
+        expect(candidateSearches).toHaveLength(2);
         const [[request]] = candidateSearches;
         expect(request.index).toBe('.fleet-agents');
         expect(request.size).toBe(0);
         // the versions of the agents are read per policy id, not the agents
-        expect(request.aggs.policy_ids.terms.field).toBe('policy_id');
+        expect(request.aggs.policy_ids.composite.sources).toEqual([
+          { policy_id: { terms: { field: 'policy_id' } } },
+        ]);
         expect(request.aggs.policy_ids.aggs.agent_versions.terms.field).toBe('agent.version');
-        // the buckets stay below the default `search.max_buckets`, or the search fails instead of truncating
-        const { size: policyIdsSize } = request.aggs.policy_ids.terms;
+        // the buckets of a page stay below the default `search.max_buckets`, or the search fails
+        const { size: policyIdsSize } = request.aggs.policy_ids.composite;
         const { size: versionsSize } = request.aggs.policy_ids.aggs.agent_versions.terms;
         expect(policyIdsSize * (1 + versionsSize)).toBeLessThanOrEqual(65536);
         // agents that are inactive by timeout are active in the stored field, like in the agent queries
@@ -978,16 +986,31 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         expect(mockedGetAgentsByKuery).not.toHaveBeenCalled();
       });
 
-      it('looks at all the agents of the variants of all the agent policies of the page when the policy ids of the agents are truncated', async () => {
-        await mockCandidateAgentPolicies({
+      it('pages through the policy ids of the agents', async () => {
+        const esClient = await mockCandidateAgentPolicies({
           policyIdsWithCandidates: [],
-          otherPolicyIdsOfAgents: 5,
+          agentVersionsByPolicyId: {
+            'another-policy': ['8.18.0'],
+            'another-policy#9.4': ['9.5.0'],
+            'policy-2#9.4': ['9.5.0'],
+          },
+          pageSize: 2,
         });
 
         await runTask();
 
-        expect(policyIdsQueried().flat().sort()).toEqual(['policy-1', 'policy-2']);
-        expect(mockedGetAgentsByKuery.mock.calls[0][2].kuery).toContain('policy-1#*');
+        const candidateSearches = esClient.search.mock.calls.filter(
+          ([request]: any) => request.aggs?.policy_ids
+        );
+        // two pages with policy ids, and a last empty one
+        expect(candidateSearches).toHaveLength(3);
+        expect(candidateSearches[1][0].aggs.policy_ids.composite.after).toEqual({
+          policy_id: 'another-policy#9.4',
+        });
+        expect(policyIdsQueried().flat()).toEqual(['policy-2']);
+        expect(mockedGetAgentsByKuery.mock.calls[0][2].kuery).toContain(
+          '(policy_id:"policy-2#9.4" and agent.version:("9.5.0"))'
+        );
       });
     });
 
