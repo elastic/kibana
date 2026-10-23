@@ -114,18 +114,27 @@ export const getCaseConflictRebaseDecision = ({
 };
 
 /**
- * Executes a case mutation and transparently retries once if the server returns a
+ * How many times the request may be rebased after the initial attempt. The background task
+ * writes `incrementalId` to one case at a time and only ever selects cases that still lack
+ * the field, so re-reading and re-sending converges: a single retry is one round short
+ * whenever the task is still sweeping another case in the same request.
+ */
+const MAX_CONFLICT_REBASE_RETRIES = 3;
+
+/**
+ * Executes a case mutation and transparently retries it if the server returns a
  * 409 Conflict that was caused solely by a server-side system write (e.g. the
  * `incrementalId` background task bumping the ES document version).
  *
  * Flow:
  *  1. Attempt the mutation with the original request.
  *  2. On 409: fetch the latest version of every affected case.
- *  3. Compare stale vs. latest (ignoring system-managed fields).
+ *  3. Compare the pre-request state vs. latest (ignoring system-managed fields).
  *     - If only system fields changed → rebuild the request with fresh version
- *       tokens and retry. The user's intended change is preserved.
+ *       tokens and retry, up to `MAX_CONFLICT_REBASE_RETRIES` times. The user's
+ *       intended change is preserved.
  *     - If any user-owned field changed → a real concurrent edit occurred;
- *       re-throw the original error so the caller can inform the user.
+ *       re-throw the error so the caller can inform the user.
  *  4. Any non-409 error is re-thrown immediately without a retry attempt.
  */
 export const rebaseCaseMutationOnConflict = async <TRequest, TResponse>({
@@ -135,30 +144,36 @@ export const rebaseCaseMutationOnConflict = async <TRequest, TResponse>({
   fetchLatestCase,
   buildRetryRequest,
 }: RebaseCaseMutationOnConflictParams<TRequest, TResponse>): Promise<TResponse> => {
-  try {
-    return await executeRequest(request);
-  } catch (error) {
-    if (!isRetryableCaseConflictError(error) || preRequestServerState.length === 0) {
-      throw error;
-    }
+  let currentRequest = request;
 
-    const latestCases = await Promise.all(
-      preRequestServerState.map(({ id }) => fetchLatestCase(id))
-    );
-    const rebaseDecision = getCaseConflictRebaseDecision({
-      staleCases: preRequestServerState,
-      latestCases,
-    });
+  for (let retry = 0; ; retry++) {
+    try {
+      return await executeRequest(currentRequest);
+    } catch (error) {
+      if (
+        !isRetryableCaseConflictError(error) ||
+        preRequestServerState.length === 0 ||
+        retry === MAX_CONFLICT_REBASE_RETRIES
+      ) {
+        throw error;
+      }
 
-    if (rebaseDecision !== 'only_system_drift') {
-      throw error;
-    }
+      const latestCases = await Promise.all(
+        preRequestServerState.map(({ id }) => fetchLatestCase(id))
+      );
+      const rebaseDecision = getCaseConflictRebaseDecision({
+        staleCases: preRequestServerState,
+        latestCases,
+      });
 
-    return executeRequest(
-      buildRetryRequest({
-        request,
+      if (rebaseDecision !== 'only_system_drift') {
+        throw error;
+      }
+
+      currentRequest = buildRetryRequest({
+        request: currentRequest,
         latestCases: new Map(latestCases.map((theCase) => [theCase.id, theCase])),
-      })
-    );
+      });
+    }
   }
 };
