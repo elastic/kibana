@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ToastsStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
@@ -64,9 +66,11 @@ export const createDefaultUnit = (): Unit => ({
 export const createUnitRepository = ({
   streamsRepositoryClient,
   unitId = STREAMS_DEFAULT_UNIT_ID,
+  toasts,
 }: {
   streamsRepositoryClient: StreamsRepositoryClient;
   unitId?: string;
+  toasts?: ToastsStart;
 }): UnitRepository => ({
   load: async () => {
     try {
@@ -82,13 +86,37 @@ export const createUnitRepository = ({
     }
   },
   persist: async (unit) => {
-    await streamsRepositoryClient.fetch('PUT /internal/streams/unit/{id}', {
+    const response = await streamsRepositoryClient.fetch('PUT /internal/streams/unit/{id}', {
       params: {
         path: { id: unitId },
         body: unit,
       },
       signal: null,
     });
+
+    if (response.api_keys_may_remain) {
+      toasts?.addWarning({
+        title: i18n.translate('xpack.streams.unitRepository.apiKeysMayRemainTitle', {
+          defaultMessage: 'Some API keys may still be active',
+        }),
+        text: i18n.translate('xpack.streams.unitRepository.apiKeysMayRemainText', {
+          defaultMessage:
+            "Not all API keys for the removed sources or destinations could be revoked, for example keys created by other users. Revoke any that remain in Stack Management's API keys page.",
+        }),
+      });
+    }
+
+    if (response.ui_metadata_not_persisted) {
+      toasts?.addWarning({
+        title: i18n.translate('xpack.streams.unitRepository.uiMetadataNotPersistedTitle', {
+          defaultMessage: 'Map layout could not be saved',
+        }),
+        text: i18n.translate('xpack.streams.unitRepository.uiMetadataNotPersistedText', {
+          defaultMessage:
+            'The unit was published, but the canvas layout could not be stored. Node positions may reset the next time the map loads.',
+        }),
+      });
+    }
 
     return unit;
   },

@@ -17,7 +17,8 @@ import type { SourceEnvironmentLoader } from '../../../../streams_layout/sources
 /** Undo steps for a source or destination create, driven by the canvas save transitions. */
 export interface CanvasCreateHistoryHandlers {
   hold: () => void;
-  commit: () => void;
+  /** Clear the stack after a successful persist so undo cannot restore revoked keys. */
+  reset: () => void;
   discard: () => void;
 }
 
@@ -35,14 +36,18 @@ export interface CanvasStateServiceDeps {
   validateUnitDefinition?: (unit: Unit) => Promise<void>;
 }
 
+export type CanvasFlyoutKind = 'destination' | 'index';
+
 export interface CanvasUrlInput {
   flyoutName: string | null;
+  flyoutKind: CanvasFlyoutKind | null;
   flyoutTab: string | null;
   query: string | null;
 }
 
 export const defaultCanvasUrlState: CanvasUrlInput = {
   flyoutName: null,
+  flyoutKind: null,
   flyoutTab: null,
   query: null,
 };
@@ -98,7 +103,7 @@ export type CanvasUrlEvent =
       output: { unitDefinition: Unit };
     }
   | { type: 'xstate.error.actor.persistUnitDefinition'; error: unknown }
-  | { type: 'flyout.open'; flyoutName: string }
+  | { type: 'flyout.open'; flyoutName: string; flyoutKind?: CanvasFlyoutKind }
   | { type: 'flyout.tab'; flyoutTab: string }
   | { type: 'flyout.close' }
   | { type: 'search.change'; query: string }

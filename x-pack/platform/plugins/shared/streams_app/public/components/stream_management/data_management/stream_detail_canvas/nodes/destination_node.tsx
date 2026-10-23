@@ -7,22 +7,17 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiPanel, EuiSpacer, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiPanel, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Position, type NodeProps } from '@xyflow/react';
 import { ConnectionHandle } from './connection_handle';
 import type { DestinationNode as DestinationNodeType } from '../types';
 import { DESTINATION_NODE_WIDTH } from '../canvas_constants';
 import { getNodeCardStyles } from './node_card_styles';
-
-const processingLabel = i18n.translate('xpack.streams.canvas.destinationNode.processingLabel', {
-  defaultMessage: 'Processing',
-});
+import { DESTINATION_SIGNAL_LABELS } from '../../../../streams_layout/destinations/destination_type_config';
 
 export function DestinationNode({ data, selected, dragging }: NodeProps<DestinationNodeType>) {
   const { euiTheme } = useEuiTheme();
-  const isUnconfigured = Boolean(data.unconfiguredNodeId);
-  const streamName = data.streamName;
 
   return (
     <>
@@ -39,16 +34,11 @@ export function DestinationNode({ data, selected, dragging }: NodeProps<Destinat
         hasShadow={false}
         hasBorder
         paddingSize="m"
-        data-test-subj={
-          isUnconfigured
-            ? 'streamsCanvasUnconfiguredDestinationNode'
-            : 'streamsCanvasDestinationNode'
-        }
+        data-test-subj="streamsCanvasDestinationNode"
         css={getNodeCardStyles(euiTheme, {
-          width: isUnconfigured || data.destinationId ? 220 : DESTINATION_NODE_WIDTH,
+          width: DESTINATION_NODE_WIDTH,
           selected,
           dragging,
-          danger: isUnconfigured,
         })}
       >
         <div
@@ -65,39 +55,54 @@ export function DestinationNode({ data, selected, dragging }: NodeProps<Destinat
               overflow-wrap: anywhere;
             `}
           >
-            <EuiText size="m">
-              <strong>{data.title}</strong>
-            </EuiText>
+            <div
+              css={css`
+                display: flex;
+                align-items: center;
+                gap: ${euiTheme.size.xs};
+                flex-wrap: wrap;
+              `}
+            >
+              <EuiText size="m">
+                <strong>{data.title}</strong>
+              </EuiText>
+              {data.signals?.map((signal) => (
+                <EuiBadge
+                  key={signal}
+                  color="hollow"
+                  data-test-subj="streamsCanvasDestinationSignalBadge"
+                >
+                  {DESTINATION_SIGNAL_LABELS[signal]}
+                </EuiBadge>
+              ))}
+              {typeof data.indexCount === 'number' && data.indexCount > 0 && (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.streams.canvas.destinationNode.indexCountTooltip',
+                    {
+                      defaultMessage: '{indexCount, plural, one {# index} other {# indices}}',
+                      values: { indexCount: data.indexCount },
+                    }
+                  )}
+                  disableScreenReaderOutput
+                >
+                  <EuiBadge
+                    color="hollow"
+                    tabIndex={0}
+                    data-test-subj="streamsCanvasDestinationIndexCountBadge"
+                  >
+                    {data.indexCount}
+                  </EuiBadge>
+                </EuiToolTip>
+              )}
+            </div>
             {data.subtitle && (
               <EuiText size="s" color="subdued">
                 {data.subtitle}
               </EuiText>
             )}
           </div>
-          {data.hasProcessing && streamName && (
-            <EuiToolTip content={processingLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="processor"
-                size="xs"
-                color="text"
-                aria-label={processingLabel}
-                data-test-subj="streamsCanvasProcessingButton"
-                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                  event.stopPropagation();
-                  data.onProcessingClick?.(streamName);
-                }}
-              />
-            </EuiToolTip>
-          )}
         </div>
-        {isUnconfigured && data.configurationLabel && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiText size="s" color="danger">
-              {data.configurationLabel}
-            </EuiText>
-          </>
-        )}
       </EuiPanel>
     </>
   );

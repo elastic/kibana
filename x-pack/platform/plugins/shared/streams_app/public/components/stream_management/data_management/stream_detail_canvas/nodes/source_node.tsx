@@ -8,11 +8,11 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
-  EuiSpacer,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -21,27 +21,10 @@ import { ConnectionHandle } from './connection_handle';
 import type { SourceNode as SourceNodeType } from '../types';
 import { SOURCE_NODE_WIDTH } from '../canvas_constants';
 import { getNodeCardStyles } from './node_card_styles';
-
-// TODO: Replace with EuiIcon type="logIn" after Kibana picks up elastic/eui#9885.
-const UnconfiguredSourceIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 16 16"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="square"
-    strokeLinejoin="miter"
-    aria-hidden
-  >
-    <path d="M5 2v4M2 8h12m-4-4 4 4-4 4m-5-2v4" />
-  </svg>
-);
+import { DESTINATION_SIGNAL_LABELS } from '../../../../streams_layout/destinations/destination_type_config';
 
 export function SourceNode({ data, selected, dragging }: NodeProps<SourceNodeType>) {
   const { euiTheme } = useEuiTheme();
-  const isUnconfigured = Boolean(data.unconfiguredNodeId);
 
   return (
     <>
@@ -57,7 +40,6 @@ export function SourceNode({ data, selected, dragging }: NodeProps<SourceNodeTyp
           width: SOURCE_NODE_WIDTH,
           selected,
           dragging,
-          danger: isUnconfigured,
         })}
       >
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -71,14 +53,10 @@ export function SourceNode({ data, selected, dragging }: NodeProps<SourceNodeTyp
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                padding: ${isUnconfigured ? euiTheme.size.s : euiTheme.size.xxs};
+                padding: ${euiTheme.size.xxs};
               `}
             >
-              {isUnconfigured ? (
-                <UnconfiguredSourceIcon />
-              ) : data.iconType ? (
-                <EuiIcon type={data.iconType} size="s" aria-hidden={true} />
-              ) : null}
+              {data.iconType ? <EuiIcon type={data.iconType} size="s" aria-hidden={true} /> : null}
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem
@@ -87,22 +65,32 @@ export function SourceNode({ data, selected, dragging }: NodeProps<SourceNodeTyp
               overflow: hidden;
             `}
           >
-            <EuiText size="m">
-              <strong>{data.title}</strong>
-            </EuiText>
+            <div
+              css={css`
+                display: flex;
+                align-items: center;
+                gap: ${euiTheme.size.xs};
+                flex-wrap: wrap;
+              `}
+            >
+              <EuiText size="m">
+                <strong>{data.title}</strong>
+              </EuiText>
+              {data.signals?.map((signal) => (
+                <EuiBadge
+                  key={signal}
+                  color="hollow"
+                  data-test-subj="streamsCanvasSourceSignalBadge"
+                >
+                  {DESTINATION_SIGNAL_LABELS[signal]}
+                </EuiBadge>
+              ))}
+            </div>
             <EuiText size="s" color="subdued">
               {data.subtitle}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {isUnconfigured && data.configurationLabel && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiText size="s" color="danger">
-              {data.configurationLabel}
-            </EuiText>
-          </>
-        )}
       </EuiPanel>
       <ConnectionHandle
         type="source"

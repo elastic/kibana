@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: motel-index-collector
+---
+# CN must be motel-index-collector: the controller grants that principal
+# read ACLs on motel.events.metrics.{targetID}.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: motel-index-kafka-client
+  namespace: motel-index-collector
+spec:
+  secretName: motel-index-kafka-client
+  commonName: motel-index-collector
+  usages: [client auth]
+  issuerRef:
+    kind: ClusterIssuer
+    name: ecp-issuer
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: motel-index-collector
+  namespace: motel-index-collector
+data:
+  config.yaml: |
+    extensions:
+      compressedotlpencoding:
+        encoding_enabled: true
+        protocol: otlp_proto
+        compression: zstd
+    receivers:
+      kafka:
+        brokers: [warpstream.warpstream:9092]
+        group_id: motel-index-collector
+        initial_offset: earliest
+        session_timeout: 45s
+        heartbeat_interval: 5s
+        metrics:
+          topics:
+            - motel.events.metrics.__TARGET_ID__
+          encoding: compressedotlpencoding
+        tls:
+          ca_file: /secrets/kafka/ca.crt
+          cert_file: /secrets/kafka/tls.crt
+          key_file: /secrets/kafka/tls.key
+          server_name_override: warpstream.warpstream.svc.cluster.local
+    exporters:
+      elasticsearch:
+        endpoint: https://__TARGET_ID__.es.svc.cluster.local:9200
+        user: elastic_serverless
+        password: changeme
+        mapping:
+          mode: otel
+        tls:
+          insecure_skip_verify: true
+          server_name_override: host.docker.internal
+        sending_queue:
+          enabled: false
+    service:
+      extensions: [compressedotlpencoding]
+      pipelines:
+        metrics:
+          receivers: [kafka]
+          exporters: [elasticsearch]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: motel-index-collector
+  namespace: motel-index-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: motel-index-collector}
+  template:
+    metadata:
+      labels: {app: motel-index-collector}
+    spec:
+      imagePullSecrets:
+        - name: elastic-docker-registry
+      containers:
+        - name: collector
+          image: docker.elastic.co/observability-ci/hosted-otel-collector:__COLLECTOR_TAG__
+          args: [--config=/conf/config.yaml]
+          volumeMounts:
+            - {name: conf, mountPath: /conf}
+            - {name: kafka, mountPath: /secrets/kafka, readOnly: true}
+      volumes:
+        - name: conf
+          configMap: {name: motel-index-collector}
+        - name: kafka
+          secret: {secretName: motel-index-kafka-client}
