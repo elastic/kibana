@@ -457,7 +457,13 @@ export class SlackAppService {
     });
     try {
       const registry = await agentBuilder.agents.getRegistry({ request });
+      const isAssistantEnabled =
+        this.server.nightshiftInvestigations?.isAssistantEnabled() ?? false;
       for (const agentId of SLACK_AGENT_IDS) {
+        // A persisted assistant outlives its disabled type, and `get` accepts it without a gate.
+        if (agentId === NIGHTSHIFT_ASSISTANT_AGENT_ID && !isAssistantEnabled) {
+          continue;
+        }
         if (await this.isAgentAvailable(registry, agentId)) {
           return agentId;
         }

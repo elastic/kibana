@@ -246,8 +246,8 @@ describe('SlackAppService', () => {
     });
 
     describe('agent_id', () => {
-      const connectWithKey = async () => {
-        const harness = createHarness();
+      const connectWithKey = async ({ assistantEnabled = true } = {}) => {
+        const harness = createHarness({ assistantEnabled });
         harness.grantAsInternalUser.mockResolvedValue({
           id: 'key-1',
           name: 'k',
@@ -306,6 +306,18 @@ describe('SlackAppService', () => {
           expect(logger.warn).not.toHaveBeenCalled();
         }
       );
+
+      // A persisted assistant has no availability gate once the sandbox is disabled.
+      it('skips nightshift.assistant when it is disabled, even if a persisted copy exists', async () => {
+        getAgent.mockImplementation(async (agentId: string) => ({ id: agentId }));
+
+        await connectWithKey({ assistantEnabled: false });
+
+        expect(getAgent.mock.calls).toEqual([['nightshift.investigation']]);
+        expect(startInstall).toHaveBeenCalledWith(
+          expect.objectContaining({ agent_id: 'nightshift.investigation' })
+        );
+      });
 
       it('omits agent_id when no Nightshift agent is installed in the default space', async () => {
         const { logger } = await connectWithKey();
