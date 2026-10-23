@@ -13,7 +13,8 @@ import { EdotBrowserClient, type EdotBrowserClientOptions } from './edot_browser
 export interface EdotBrowserAppOptions {
   serviceName: string;
   serviceVersion?: string;
-  environment: string;
+  /** Omit it for an app that isn't deployed to a named environment. */
+  environment?: string;
   sdkVersion?: string;
   distroVersion?: string;
 }
@@ -32,7 +33,7 @@ export class EdotBrowserApp {
     this.resourceAttributes = {
       'service.name': serviceName,
       'service.version': serviceVersion,
-      'deployment.environment.name': environment,
+      ...(environment !== undefined ? { 'deployment.environment.name': environment } : {}),
       'telemetry.sdk.name': 'opentelemetry',
       'telemetry.sdk.language': 'webjs',
       'telemetry.sdk.version': sdkVersion,

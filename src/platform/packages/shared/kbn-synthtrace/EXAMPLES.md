@@ -925,7 +925,7 @@ Generates EDOT Browser data for five apps in different states of health:
 | `checkout-web`       | erroring | failing `POST /api/payment`, frequent JS errors     |
 | `media-portal-web`   | slow     | poor LCP from large images and render-blocking CSS  |
 | `support-center-web` | critical | poor INP/CLS, high error and request failure rate   |
-| `docs-web`           | healthy  | low traffic, mostly desktop browsers                |
+| `docs-web`           | healthy  | low traffic, mostly desktop, no environment         |
 
 With session IDs, most sessions are a single visit in a new tab. About 15% are a second visit to a session that is still running, in the same tab or in another one. Another 15% come back after the previous session expired: the tab kept sending background requests with `browser.tab.id` but no `session.id`, and the new session points to the expired one with `session.previous_id`. Each session has one `session.start` log. Earlier visits can be up to an hour and a half before the end of their session, so at the start of a run, where data before `--from` is cut off, some sessions have no `session.start` and some `session.previous_id` values point to nothing.
 
@@ -940,7 +940,7 @@ node scripts/synthtrace digital_experience_browser --from=2026-10-16T12:00:00Z -
 
 #### `digital_experience_mixed`
 
-Generates the `digital_experience_browser` apps plus a classic Elastic APM RUM (`rum-js`) app, `legacy-storefront-rum`, in `traces-apm.rum-default`. Use it to test lists that show both OTel and classic browser apps. The classic RUM data is minimal: page-load transactions with one XHR span each, and no marks or experience metrics.
+Generates the `digital_experience_browser` apps plus a classic Elastic APM RUM (`rum-js`) app in `traces-apm.rum-default`. The classic app is named `storefront-web` like one of the OTel apps, so the apps list shows its "+ Classic RUM" hint. Use it to test lists that show both OTel and classic browser apps. The classic RUM data is minimal: page-load transactions with one XHR span each, and no marks or experience metrics.
 
 **Usage:**
 

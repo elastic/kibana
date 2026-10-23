@@ -393,10 +393,25 @@ describe('digital experience apps', () => {
       });
     });
 
-    it('sets the deployment environment', () => {
-      collect(false).forEach((doc) => {
-        expect(doc.resource?.attributes?.['deployment.environment.name']).toBe('test');
+    it('sets the deployment environment, except for apps without one', () => {
+      const appsWithoutEnvironment = DIGITAL_EXPERIENCE_APPS.filter(
+        ({ withoutEnvironment }) => withoutEnvironment
+      ).map(({ serviceName }) => serviceName);
+      const docs = collect(false);
+
+      expect(appsWithoutEnvironment.length).toBeGreaterThan(0);
+      docs.forEach(({ resource }) => {
+        if (appsWithoutEnvironment.includes(String(resource?.attributes?.['service.name']))) {
+          expect(resource?.attributes).not.toHaveProperty(['deployment.environment.name']);
+        } else {
+          expect(resource?.attributes?.['deployment.environment.name']).toBe('test');
+        }
       });
+      expect(
+        docs.some(({ resource }) =>
+          appsWithoutEnvironment.includes(String(resource?.attributes?.['service.name']))
+        )
+      ).toBe(true);
     });
 
     it('only writes session.id when enabled', () => {

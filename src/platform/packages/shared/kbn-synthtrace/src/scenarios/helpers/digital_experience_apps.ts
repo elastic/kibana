@@ -28,6 +28,8 @@ export interface DigitalExperienceApp {
   serviceVersion: string;
   health: HealthProfileName;
   sessionsPerMinute: number;
+  /** Apps without a deployment environment show up as "Not defined" in the apps list. */
+  withoutEnvironment?: boolean;
   site: EdotBrowserSite;
   browserWeights?: Partial<Record<BrowserProfileId, number>>;
 }
@@ -335,6 +337,7 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
     serviceVersion: '1.0.0',
     health: 'healthy',
     sessionsPerMinute: 1,
+    withoutEnvironment: true,
     browserWeights: {
       chromeMacos: 45,
       edgeWindows: 25,
@@ -510,8 +513,20 @@ export const generateEdotBrowserSessions = (
   }: DigitalExperienceScenarioOpts & { environment: string; from: number }
 ): Array<SynthtraceGenerator<EdotBrowserDocument>> =>
   DIGITAL_EXPERIENCE_APPS.map(
-    ({ serviceName, serviceVersion, health, sessionsPerMinute, site, browserWeights }) => {
-      const app = edotBrowser.app({ serviceName, serviceVersion, environment });
+    ({
+      serviceName,
+      serviceVersion,
+      health,
+      sessionsPerMinute,
+      withoutEnvironment,
+      site,
+      browserWeights,
+    }) => {
+      const app = edotBrowser.app({
+        serviceName,
+        serviceVersion,
+        environment: withoutEnvironment ? undefined : environment,
+      });
       const healthProfile = edotBrowser.healthProfiles[health];
 
       return generatePerMinute<EdotBrowserDocument>(

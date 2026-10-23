@@ -15,13 +15,14 @@
  * Data shape:
  * - EDOT Browser: OTel-native logs and spans in `logs-generic.otel-default` and
  *   `traces-generic.otel-default`
- * - classic RUM (`legacy-storefront-rum`): page-load transactions with a few XHR spans in
+ * - classic RUM (`storefront-web`): page-load transactions with a few XHR spans in
  *   `traces-apm.rum-default`. Minimal on purpose: no marks or experience metrics.
  *
  * Scenario options:
  * - withSessionId (boolean, default: true): write `attributes.session.id` on EDOT Browser data
  * - includeRawAttribution (boolean, default: false): write web vital attribution JSON bodies
  * - scale (number, default: 1): multiplies the number of sessions/page loads per minute
+ * - seed (string or number, default: random): makes the data reproducible
  *
  * Run:
  *   node scripts/synthtrace digital_experience_mixed --from=now-30m --to=now
@@ -41,7 +42,8 @@ import {
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
-const CLASSIC_RUM_SERVICE_NAME = 'legacy-storefront-rum';
+// The storefront is instrumented with both agents, so the apps list shows the two together
+const CLASSIC_RUM_SERVICE_NAME = 'storefront-web';
 const CLASSIC_RUM_PAGE_LOADS_PER_MINUTE = 3;
 const CLASSIC_RUM_PAGES = ['/', '/products', '/products/:id', '/cart'] as const;
 const CLASSIC_RUM_REQUESTS = ['GET /api/products', 'GET /api/cart', 'GET /api/recommendations'];

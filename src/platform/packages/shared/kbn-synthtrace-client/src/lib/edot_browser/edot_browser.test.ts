@@ -430,6 +430,18 @@ describe('edotBrowser', () => {
       });
     });
 
+    it('omits the deployment environment of apps without one', () => {
+      const [doc] = edotBrowser
+        .app({ serviceName: 'docs-web' })
+        .client(BROWSER_PROFILES.chromeMacos)
+        .navigation({ url: 'https://docs.example.com/', sameDocument: false })
+        .timestamp(TIMESTAMP)
+        .serialize();
+
+      expect(doc.resource?.attributes).toMatchObject({ 'service.name': 'docs-web' });
+      expect(doc.resource?.attributes).not.toHaveProperty(['deployment.environment.name']);
+    });
+
     it('only writes the request body size when it is given', () => {
       const url = 'https://api.example.com/cart';
       const [withBody] = client
