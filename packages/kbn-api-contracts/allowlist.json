@@ -631,6 +631,126 @@
       "approvedBy": "@elastic/security-defend-workflows",
       "oasdiffId": "request-property-max-length-set",
       "prUrl": "https://github.com/elastic/kibana/pull/295450"
+    },
+    {
+      "path": "/api/dashboards",
+      "method": "post",
+      "reason": "False positive: the base bundle only had a redirect stub for this operation, so oasdiff sees the real operation as new. Kibana adds the `kbn-xsrf` header to every non-GET route that does not opt out, and this route does not. The header has been required since the route shipped in 9.4.0 (#242318 and #245297, 2025-11-11 to 2025-12-09), before the API became GA in 9.5.",
+      "approvedBy": "@elastic/kibana-dashboards",
+      "oasdiffId": "new-required-request-parameter",
+      "prUrl": "https://github.com/elastic/kibana/pull/298431"
+    },
+    {
+      "path": "/api/dashboards",
+      "method": "post",
+      "reason": "False positive: the base bundle only had a redirect stub for this operation, so oasdiff sees the real operation as new. The placeholder `200` was never returned. The create operation has returned `201` since #258346 (2026-03-19, 9.4.0), before the API became GA in 9.5.",
+      "approvedBy": "@elastic/kibana-dashboards",
+      "oasdiffId": "response-success-status-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/298431"
+    },
+    {
+      "path": "/api/dashboards/{id}",
+      "method": "delete",
+      "reason": "False positive: the base bundle only had a redirect stub for this operation, so oasdiff sees the real operation as new. The `id` path parameter has existed since `/api/dashboards/{id}` shipped in 9.4.0 (#245297, 2025-12-09), before the API became GA in 9.5.",
+      "approvedBy": "@elastic/kibana-dashboards",
+      "oasdiffId": "new-request-path-parameter",
+      "prUrl": "https://github.com/elastic/kibana/pull/298431"
+    },
+    {
+      "path": "/api/dashboards/{id}",
+      "method": "delete",
+      "reason": "False positive: the base bundle only had a redirect stub for this operation, so oasdiff sees the real operation as new. Kibana adds the `kbn-xsrf` header to every non-GET route that does not opt out, and this route does not. The header has been required since the route shipped in 9.4.0 (#242318 and #245297, 2025-11-11 to 2025-12-09), before the API became GA in 9.5.",
+      "approvedBy": "@elastic/kibana-dashboards",
+      "oasdiffId": "new-required-request-parameter",
+      "prUrl": "https://github.com/elastic/kibana/pull/298431"
+    },
+    {
+      "path": "/api/dashboards/{id}",
+      "method": "get",
+      "reason": "False positive: the base bundle only had a redirect stub for this operation, so oasdiff sees the real operation as new. The `id` path parameter has existed since `/api/dashboards/{id}` shipped in 9.4.0 (#245297, 2025-12-09), before the API became GA in 9.5.",
+      "approvedBy": "@elastic/kibana-dashboards",
+      "oasdiffId": "new-request-path-parameter",
+      "prUrl": "https://github.com/elastic/kibana/pull/298431"
+    },
+    {
+      "path": "/api/dashboards/{id}",
+      "method": "put",
+      "reason": "False positive: the base bundle only had a redirect stub for this operation, so oasdiff sees the real operation as new. The `id` path parameter has existed since `/api/dashboards/{id}` shipped in 9.4.0 (#245297, 2025-12-09), before the API became GA in 9.5.",
+      "approvedBy": "@elastic/kibana-dashboards",
+      "oasdiffId": "new-request-path-parameter",
+      "prUrl": "https://github.com/elastic/kibana/pull/298431"
+    },
+    {
+      "path": "/api/dashboards/{id}",
+      "method": "put",
+      "reason": "False positive: the base bundle only had a redirect stub for this operation, so oasdiff sees the real operation as new. Kibana adds the `kbn-xsrf` header to every non-GET route that does not opt out, and this route does not. The header has been required since the route shipped in 9.4.0 (#242318 and #245297, 2025-11-11 to 2025-12-09), before the API became GA in 9.5.",
+      "approvedBy": "@elastic/kibana-dashboards",
+      "oasdiffId": "new-required-request-parameter",
+      "prUrl": "https://github.com/elastic/kibana/pull/298431"
+    },
+    {
+      "path": "/api/visualizations",
+      "method": "post",
+      "reason": "False positive: the base bundle only had a redirect stub for this operation, so oasdiff sees the real operation as new. Kibana adds the `kbn-xsrf` header to every non-GET route that does not opt out, and this route does not. The header has been required since the route shipped at `/api/visualizations` in 9.4.0 (#252420, 2026-03-04), before the API became GA in 9.5.",
+      "approvedBy": "@elastic/kibana-dashboards",
+      "oasdiffId": "new-required-request-parameter",
+      "prUrl": "https://github.com/elastic/kibana/pull/298431"
+    },
+    {
+      "path": "/api/visualizations",
+      "method": "post",
+      "reason": "False positive: the base bundle only had a redirect stub for this operation, so oasdiff sees the real operation as new. The placeholder `200` was never returned. The create operation has returned `201` since it was added (#223296, 2025-06-25) and shipped at `/api/visualizations` in 9.4.0 (#252420, 2026-03-04), before the API became GA in 9.5.",
+      "approvedBy": "@elastic/kibana-dashboards",
+      "oasdiffId": "response-success-status-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/298431"
+    },
+    {
+      "path": "/api/visualizations/{id}",
+      "method": "delete",
+      "reason": "False positive: the base bundle only had a redirect stub for this operation, so oasdiff sees the real operation as new. The `id` path parameter has existed since `/api/visualizations/{id}` shipped in 9.4.0 (#252420, 2026-03-04), before the API became GA in 9.5.",
+      "approvedBy": "@elastic/kibana-dashboards",
+      "oasdiffId": "new-request-path-parameter",
+      "prUrl": "https://github.com/elastic/kibana/pull/298431"
+    },
+    {
+      "path": "/api/visualizations/{id}",
+      "method": "delete",
+      "reason": "False positive: the base bundle only had a redirect stub for this operation, so oasdiff sees the real operation as new. Kibana adds the `kbn-xsrf` header to every non-GET route that does not opt out, and this route does not. The header has been required since the route shipped at `/api/visualizations` in 9.4.0 (#252420, 2026-03-04), before the API became GA in 9.5.",
+      "approvedBy": "@elastic/kibana-dashboards",
+      "oasdiffId": "new-required-request-parameter",
+      "prUrl": "https://github.com/elastic/kibana/pull/298431"
+    },
+    {
+      "path": "/api/visualizations/{id}",
+      "method": "delete",
+      "reason": "False positive: the base bundle only had a redirect stub for this operation, so oasdiff sees the real operation as new. The placeholder `200` was never returned. The delete operation has returned `204` since it was added (#223296, 2025-06-25) and shipped at `/api/visualizations/{id}` in 9.4.0 (#252420, 2026-03-04), before the API became GA in 9.5.",
+      "approvedBy": "@elastic/kibana-dashboards",
+      "oasdiffId": "response-success-status-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/298431"
+    },
+    {
+      "path": "/api/visualizations/{id}",
+      "method": "get",
+      "reason": "False positive: the base bundle only had a redirect stub for this operation, so oasdiff sees the real operation as new. The `id` path parameter has existed since `/api/visualizations/{id}` shipped in 9.4.0 (#252420, 2026-03-04), before the API became GA in 9.5.",
+      "approvedBy": "@elastic/kibana-dashboards",
+      "oasdiffId": "new-request-path-parameter",
+      "prUrl": "https://github.com/elastic/kibana/pull/298431"
+    },
+    {
+      "path": "/api/visualizations/{id}",
+      "method": "put",
+      "reason": "False positive: the base bundle only had a redirect stub for this operation, so oasdiff sees the real operation as new. The `id` path parameter has existed since `/api/visualizations/{id}` shipped in 9.4.0 (#252420, 2026-03-04), before the API became GA in 9.5.",
+      "approvedBy": "@elastic/kibana-dashboards",
+      "oasdiffId": "new-request-path-parameter",
+      "prUrl": "https://github.com/elastic/kibana/pull/298431"
+    },
+    {
+      "path": "/api/visualizations/{id}",
+      "method": "put",
+      "reason": "False positive: the base bundle only had a redirect stub for this operation, so oasdiff sees the real operation as new. Kibana adds the `kbn-xsrf` header to every non-GET route that does not opt out, and this route does not. The header has been required since the route shipped at `/api/visualizations` in 9.4.0 (#252420, 2026-03-04), before the API became GA in 9.5.",
+      "approvedBy": "@elastic/kibana-dashboards",
+      "oasdiffId": "new-required-request-parameter",
+      "prUrl": "https://github.com/elastic/kibana/pull/298431"
     }
   ]
 }
