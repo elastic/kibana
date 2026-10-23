@@ -20,6 +20,7 @@ export const OVERSCAN = 5;
 export const DATA_GRID_REVEAL_ON_ROW_HOVER_CLASS = 'kbnDataGrid__revealOnRowHover';
 export const DATA_GRID_ROW_CLASS = 'kbnDataGrid__row';
 export const DATA_GRID_HEADER_ROW_CLASS = 'kbnDataGrid__headerRow';
+export const DATA_GRID_FOOTER_ROW_CLASS = 'kbnDataGrid__footerRow';
 export const DATA_GRID_CELL_CONTENT_CLASS = 'kbnDataGrid__cellContent';
 export const DEFAULT_DATA_GRID_STYLE = {
   cellPadding: 'l',
@@ -28,6 +29,7 @@ export const DEFAULT_DATA_GRID_STYLE = {
   stripes: true,
   rowHover: 'highlight',
   header: 'underline',
+  footer: 'overline',
 } as const;
 
 export const CELL_EXPAND_BUTTON_TEST_SUBJ = 'euiDataGridCellExpandButton';

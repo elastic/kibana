@@ -29,7 +29,7 @@ import type {
   EuiDataGridToolBarAdditionalControlsOptions,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, keys, mathWithUnits, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, keys, mathWithUnits, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { isEqual } from 'lodash';
 import { DataGrid } from '../components/data_grid';
@@ -39,6 +39,7 @@ import { DisplaySelector } from '../toolbar/display_selector';
 import { FullScreenSelector } from '../toolbar/full_screen_selector';
 import { KeyboardShortcuts } from '../toolbar/keyboard_shortcuts';
 import { SortSelector } from '../toolbar/sort_selector';
+import { popoverContentStyles } from '../styles';
 import { GRID_CELL_SELECTOR } from '../utils/grid_navigation';
 import type {
   DataGridCellPopoverProps,
@@ -77,6 +78,7 @@ type SupportedEuiDataGridProps = Pick<
   | 'gridStyle'
   | 'virtualizationOptions'
   | 'onFullScreenChange'
+  | 'renderFooterCellValue'
 >;
 
 export type EuiDataGridAdapterProps = SupportedEuiDataGridProps & {
@@ -87,6 +89,11 @@ export type EuiDataGridAdapterProps = SupportedEuiDataGridProps & {
   onColumnResize?: DataGridProps<number>['onColumnResize'];
   /** Number of columns, after the leading control columns, that stay in view while the rest scrolls. */
   stickyColumnCount?: number;
+  /**
+   * Called once the grid rendered its rows, and again when they change. `EuiDataGrid` has no such
+   * callback, consumers guess with a timeout instead.
+   */
+  onRenderComplete?: () => void;
 };
 
 /** Everything of the ref of `EuiDataGrid` but `scrollTo`. */
@@ -111,12 +118,28 @@ const getDensity = ({ fontSize, cellPadding }: EuiDataGridStyle): DataGridDensit
   return 'expanded';
 };
 
+// Like EuiDataGrid, rows show a single line of text unless told otherwise.
 const getRowHeight = (
   defaultHeight: NonNullable<EuiDataGridProps['rowHeightsOptions']>['defaultHeight']
-): DataGridRowHeight =>
-  typeof defaultHeight === 'object' && defaultHeight.lineCount !== undefined
+): DataGridRowHeight => {
+  if (defaultHeight === undefined) {
+    return { lineCount: 1 };
+  }
+  return typeof defaultHeight === 'object' && defaultHeight.lineCount !== undefined
     ? { lineCount: defaultHeight.lineCount }
     : 'auto';
+};
+
+// The defaults of EuiDataGrid's `gridStyle`.
+const EUI_DEFAULT_GRID_STYLE: Required<DataGridStyle> = {
+  cellPadding: 'm',
+  fontSize: 'm',
+  border: 'all',
+  stripes: false,
+  rowHover: 'highlight',
+  header: 'shade',
+  footer: 'overline',
+};
 
 // Below this width the toolbar only shows the controls on its right, like EuiDataGrid.
 const MIN_WIDTH_FOR_GRID_CONTROLS = 479;
@@ -124,8 +147,14 @@ const MIN_WIDTH_FOR_GRID_CONTROLS = 479;
 // few: consumers that want more, e.g. for cheap rows, ask for it.
 const EUI_DEFAULT_OVERSCAN = 2;
 
-/** A render function or a component of `EuiDataGrid`, which cells render as a component. */
-type CellValueComponent = ComponentType<EuiDataGridCellValueElementProps>;
+/**
+ * A render function or a component of `EuiDataGrid`, which cells render as a component. Like
+ * `EuiDataGrid`, it also gets `visibleRowIndex`, the index of the row in the page, which its types
+ * leave out.
+ */
+type CellValueComponent = ComponentType<
+  EuiDataGridCellValueElementProps & { visibleRowIndex: number }
+>;
 
 type CellRenderer = DataGridColumn<number>['renderCell'];
 
@@ -135,6 +164,16 @@ interface PopoverBridgeProps extends DataGridCellPopoverProps<number> {
   /** Index in all rows of the first row of the page. */
   pageStart: number;
 }
+
+/** Like the default popover of `EuiDataGrid`: the content and the actions it is given. */
+const DefaultCellPopover = ({ children, cellActions }: EuiDataGridCellPopoverElementProps) => (
+  <>
+    <EuiText size="s" css={popoverContentStyles}>
+      {children}
+    </EuiText>
+    {cellActions}
+  </>
+);
 
 /**
  * Gives the popover renderer of `EuiDataGrid` its props. `setCellPopoverProps` has to keep its identity:
@@ -151,7 +190,6 @@ const PopoverBridge = ({
   cellActions,
   cellContentElement,
   setPopoverProps,
-  DefaultPopoverContent,
 }: PopoverBridgeProps) => {
   const setCellPopoverProps = useCallback<
     EuiDataGridCellPopoverElementProps['setCellPopoverProps']
@@ -168,7 +206,7 @@ const PopoverBridge = ({
       schema={schema}
       cellContentsElement={cellContentElement as HTMLDivElement}
       cellActions={cellActions}
-      DefaultCellPopover={DefaultPopoverContent}
+      DefaultCellPopover={DefaultCellPopover}
       setCellPopoverProps={setCellPopoverProps}
     >
       {children}
@@ -177,6 +215,8 @@ const PopoverBridge = ({
 };
 
 /** `EuiDataGrid` tells the actions the index in all rows, the grid the one in the page. */
+const noop = () => {};
+
 const getCellActionForPage = (Action: EuiDataGridColumnCellAction, pageStart: number) => {
   const CellActionForPage: EuiDataGridColumnCellAction = (props) => (
     <Action {...props} rowIndex={pageStart + props.rowIndex} />
@@ -204,6 +244,8 @@ const toGridColumn = (
 ): DataGridColumn<number> => {
   const { id, display, displayAsText, schema, actions, cellActions, visibleCellActions } = column;
   const isActionShown = (action: boolean | object | undefined) => action !== false;
+  const getActionLabel = (action: boolean | { label?: ReactNode } | undefined) =>
+    typeof action === 'object' ? action.label : undefined;
 
   return {
     id,
@@ -222,6 +264,10 @@ const toGridColumn = (
         : {
             showSortAsc: isActionShown(actions?.showSortAsc),
             showSortDesc: isActionShown(actions?.showSortDesc),
+            sortLabels: {
+              asc: getActionLabel(actions?.showSortAsc),
+              desc: getActionLabel(actions?.showSortDesc),
+            },
             showMoveLeft: onMoveColumn && isActionShown(actions?.showMoveLeft),
             showMoveRight: onMoveColumn && isActionShown(actions?.showMoveRight),
             showHide: actions?.showHide
@@ -234,11 +280,15 @@ const toGridColumn = (
                 }
               : false,
             additional: (actions?.additional ?? []).map(
-              ({ label, iconType, onClick, ...rest }, index): DataGridHeaderActionItem => ({
+              (
+                { label, iconType, onClick, isDisabled, ...rest },
+                index
+              ): DataGridHeaderActionItem => ({
                 id: `${index}-${typeof label === 'string' ? label : 'action'}`,
                 label,
                 iconType: typeof iconType === 'string' ? iconType : undefined,
                 onClick: (event) => onClick?.(event),
+                isDisabled,
                 'data-test-subj': rest['data-test-subj'],
               })
             ),
@@ -248,7 +298,13 @@ const toGridColumn = (
 };
 
 const toControlColumn = (
-  { id, width, headerCellRender: HeaderCell, rowCellRender }: EuiDataGridControlColumn,
+  {
+    id,
+    width,
+    headerCellRender: HeaderCell,
+    headerCellProps,
+    rowCellRender,
+  }: EuiDataGridControlColumn,
   /** The padding of cells on each side: EuiDataGrid adds it to the width of a control column. */
   cellPaddingPx: number,
   getRenderControlCell: (
@@ -259,6 +315,7 @@ const toControlColumn = (
   id,
   width: width + cellPaddingPx * 2,
   header: <HeaderCell />,
+  headerAriaLabel: headerCellProps?.['aria-label'],
   renderCell: getRenderControlCell(id, rowCellRender as CellValueComponent),
 });
 
@@ -298,8 +355,9 @@ const gridAreaStyles = css({ flex: '1 1 0', minBlockSize: 0 });
  * Supports: columns (display, width, sorting, header actions, cell actions), leading and trailing
  * control columns, `renderCellValue` (and `cellContext`), `renderCellPopover`, sorting, pagination,
  * `gridStyle` (density), `rowHeightsOptions`, the toolbar (also a custom one), full screen, dragging
- * headers to reorder the columns (`columnVisibility.canDragAndDropColumns`), and the imperative
- * methods. Not supported: in-memory sorting and pagination, `renderCustomGridBody`, footers.
+ * headers to reorder the columns (`columnVisibility.canDragAndDropColumns`), the imperative methods,
+ * the footer row (`renderFooterCellValue`) and a render-complete callback (`onRenderComplete`).
+ * Not supported: in-memory sorting and pagination, `renderCustomGridBody`.
  */
 export const EuiDataGridAdapter = forwardRef(
   (
@@ -328,6 +386,8 @@ export const EuiDataGridAdapter = forwardRef(
       virtualizationOptions,
       onFullScreenChange,
       stickyColumnCount,
+      renderFooterCellValue,
+      onRenderComplete,
     }: EuiDataGridAdapterProps,
     ref: ForwardedRef<EuiDataGridAdapterRef>
   ) => {
@@ -469,8 +529,10 @@ export const EuiDataGridAdapter = forwardRef(
         if (cached && cached.CellValue === CellValue && cached.context === cellContext) {
           return cached.render;
         }
+        // Like EuiDataGrid, cells also get the index of their row in the page.
         const render: CellRenderer = ({
           row,
+          rowIndex,
           colIndex,
           setCellProps,
           isExpandable,
@@ -480,6 +542,7 @@ export const EuiDataGridAdapter = forwardRef(
           <CellValue
             {...cellContext}
             rowIndex={row}
+            visibleRowIndex={rowIndex}
             colIndex={colIndex}
             columnId={columnId}
             setCellProps={setCellProps}
@@ -558,12 +621,14 @@ export const EuiDataGridAdapter = forwardRef(
         }
         const render: DataGridControlColumn<number>['renderCell'] = ({
           row,
+          rowIndex,
           colIndex,
           setCellProps,
         }) => (
           <RowCell
             {...cellContext}
             rowIndex={row}
+            visibleRowIndex={rowIndex}
             colIndex={colIndex}
             columnId={columnId}
             setCellProps={setCellProps}
@@ -598,6 +663,46 @@ export const EuiDataGridAdapter = forwardRef(
           toControlColumn(column, cellPaddingPx, getRenderControlCell)
         ),
       [trailingControlColumns, cellPaddingPx, getRenderControlCell]
+    );
+
+    /**
+     * Footer: like EuiDataGrid, a row of `renderFooterCellValue`, with the `footerCellRender` of the
+     * control columns.
+     */
+    const FooterCellValue = renderFooterCellValue as CellValueComponent | undefined;
+    const controlFooters = useMemo(
+      () =>
+        new Map(
+          [...(leadingControlColumns ?? []), ...(trailingControlColumns ?? [])].map(
+            ({ id: columnId, footerCellRender }) => [
+              columnId,
+              footerCellRender as CellValueComponent | undefined,
+            ]
+          )
+        ),
+      [leadingControlColumns, trailingControlColumns]
+    );
+    const renderFooterCell = useMemo<DataGridProps<number>['renderFooterCell']>(
+      () =>
+        FooterCellValue
+          ? ({ columnId, colIndex, isControl }) => {
+              const FooterCell = isControl ? controlFooters.get(columnId) : FooterCellValue;
+              return FooterCell ? (
+                <FooterCell
+                  {...cellContext}
+                  rowIndex={rowCount}
+                  visibleRowIndex={rows.length}
+                  colIndex={colIndex}
+                  columnId={columnId}
+                  setCellProps={noop}
+                  isExpandable={false}
+                  isExpanded={false}
+                  isDetails={false}
+                />
+              ) : null;
+            }
+          : undefined,
+      [FooterCellValue, controlFooters, cellContext, rowCount, rows.length]
     );
 
     /**
@@ -652,12 +757,18 @@ export const EuiDataGridAdapter = forwardRef(
     /**
      * Style
      */
-    const dataGridStyle = useMemo<DataGridStyle | undefined>(() => {
-      if (!gridStyle) {
-        return undefined;
-      }
-      const { cellPadding, fontSize, border, stripes, rowHover, header } = gridStyle;
-      return { cellPadding, fontSize, border, stripes, rowHover, header };
+    // What gridStyle leaves out looks like in EuiDataGrid.
+    const dataGridStyle = useMemo<DataGridStyle>(() => {
+      const {
+        cellPadding = EUI_DEFAULT_GRID_STYLE.cellPadding,
+        fontSize = EUI_DEFAULT_GRID_STYLE.fontSize,
+        border = EUI_DEFAULT_GRID_STYLE.border,
+        stripes = EUI_DEFAULT_GRID_STYLE.stripes,
+        rowHover = EUI_DEFAULT_GRID_STYLE.rowHover,
+        header = EUI_DEFAULT_GRID_STYLE.header,
+        footer = EUI_DEFAULT_GRID_STYLE.footer,
+      } = gridStyle ?? {};
+      return { cellPadding, fontSize, border, stripes, rowHover, header, footer };
     }, [gridStyle]);
     const rowHeight = getRowHeight(rowHeightsOptions?.defaultHeight);
 
@@ -923,6 +1034,8 @@ export const EuiDataGridAdapter = forwardRef(
             overscan={virtualizationOptions?.overscanRowCount ?? EUI_DEFAULT_OVERSCAN}
             onScroll={onScroll}
             renderCellPopover={renderPopover}
+            renderFooterCell={renderFooterCell}
+            onRenderComplete={onRenderComplete}
             // Like in EuiDataGrid the cells close their popover, or Escape does.
             showCellPopoverCloseButton={false}
           />

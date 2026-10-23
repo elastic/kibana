@@ -103,6 +103,8 @@ export interface DataGridHeaderActionItem {
 export interface DataGridColumnActions {
   showSortAsc?: boolean;
   showSortDesc?: boolean;
+  /** Labels of the sort actions, instead of the ones worded by the `schema` of the column. */
+  sortLabels?: { asc?: ReactNode; desc?: ReactNode };
   showMoveLeft?: boolean;
   showMoveRight?: boolean;
   /** Offered only if the grid has `onHideColumn`. */
@@ -151,6 +153,8 @@ export interface DataGridColumn<TRow> {
 export interface DataGridControlColumn<TRow> {
   id: string;
   header: ReactNode;
+  /** Accessible name of the header, e.g. when it renders no text. */
+  headerAriaLabel?: string;
   width: number;
   renderCell: (
     props: Pick<
@@ -182,6 +186,7 @@ export interface DataGridRowItem<TRow> {
 /** The columns as the grid renders them, control columns included. */
 export interface DataGridInternalColumn<TRow> extends DataGridColumn<TRow> {
   isControl: boolean;
+  headerAriaLabel?: string;
 }
 
 export interface DataGridRef {
@@ -208,6 +213,15 @@ export interface DataGridScrollInfo {
   clientWidth: number;
 }
 
+/** Props of a cell of the footer row. */
+export interface DataGridFooterCellRenderProps {
+  columnId: string;
+  /** Position of the column among all the columns of the grid, starting at 0. */
+  colIndex: number;
+  /** Whether the column is a leading or trailing control column. */
+  isControl: boolean;
+}
+
 export type DataGridDensity = 'compact' | 'normal' | 'expanded';
 
 /** How the grid looks, the same options as `EuiDataGrid`'s `gridStyle`. */
@@ -218,6 +232,8 @@ export interface DataGridStyle {
   stripes?: boolean;
   rowHover?: 'highlight' | 'none';
   header?: 'shade' | 'underline';
+  /** Look of the footer row, see `renderFooterCell`. Defaults to `'overline'`. */
+  footer?: 'shade' | 'overline' | 'striped';
 }
 
 /** Rows grow to fit their content (`'auto'`), or show up to `lineCount` lines of text. */
@@ -300,5 +316,15 @@ export interface DataGridProps<TRow> {
   showCellPopoverCloseButton?: boolean;
   /** Customizes the popover of an expanded cell. */
   renderCellPopover?: (props: DataGridCellPopoverProps<TRow>) => ReactNode;
+  /**
+   * Renders a row below the data that stays in view, e.g. a summary of each column. Called for
+   * every column, control columns included. Without it there is no footer row.
+   */
+  renderFooterCell?: (props: DataGridFooterCellRenderProps) => ReactNode;
+  /**
+   * Called after the grid rendered its rows at their final width, and again whenever the rows or
+   * columns change, e.g. to tell a screenshot or a report that the content is ready.
+   */
+  onRenderComplete?: () => void;
   gridRef?: Ref<DataGridRef>;
 }

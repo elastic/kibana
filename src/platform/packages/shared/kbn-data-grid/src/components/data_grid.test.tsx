@@ -958,6 +958,25 @@ describe('DataGrid', () => {
       expect(onSort).toHaveBeenLastCalledWith([]);
     });
 
+    it('words the sort actions with the labels of the column', async () => {
+      render(
+        <DataGrid
+          {...defaultProps}
+          columns={[
+            {
+              ...sortableColumns[1],
+              actions: { sortLabels: { asc: 'Sort ascending', desc: 'Sort descending' } },
+            },
+          ]}
+          sorting={{ columns: [], onSort: jest.fn() }}
+        />
+      );
+      const menu = await openMenu('value');
+      expect(within(menu).getByText('Sort ascending')).toBeInTheDocument();
+      expect(within(menu).getByText('Sort descending')).toBeInTheDocument();
+      expect(within(menu).queryByText('Sort Low-High')).not.toBeInTheDocument();
+    });
+
     it('moves and hides columns from the menu', async () => {
       const onMoveColumn = jest.fn();
       const onHideColumn = jest.fn();
@@ -1316,6 +1335,104 @@ describe('DataGrid', () => {
       expect(popover).toHaveAttribute('aria-modal', 'true');
       // Anchored to the cell actions trigger (expand icon corner), not the full cell.
       expect(within(valueCell).getByTestId(CELL_ACTIONS_TRIGGER_TEST_SUBJ)).toBeInTheDocument();
+    });
+  });
+
+  describe('footer row', () => {
+    const renderFooterCell = ({ columnId, isControl }: { columnId: string; isControl: boolean }) =>
+      isControl ? null : `total of ${columnId}`;
+
+    it('renders a row after the data rows with a cell for every column', () => {
+      render(<DataGrid {...defaultProps} renderFooterCell={renderFooterCell} />);
+      const grid = screen.getByTestId('testGrid');
+      expect(grid).toHaveAttribute('aria-rowcount', '4');
+      expect(grid).toHaveAttribute('data-footer', 'overline');
+      const footerRow = screen.getByTestId('dataGridFooterCell-name').closest('[role="row"]');
+      expect(footerRow).toHaveAttribute('aria-rowindex', '4');
+      expect(
+        within(footerRow as HTMLElement)
+          .getAllByRole('gridcell')
+          .map((cell) => cell.textContent)
+      ).toEqual(['', 'total of name', 'total of value']);
+      expect(screen.getByTestId('dataGridFooterCell-control')).toHaveAttribute(
+        'aria-colindex',
+        '1'
+      );
+    });
+
+    it('does not render a footer row without renderFooterCell', () => {
+      render(<DataGrid {...defaultProps} />);
+      expect(screen.queryByTestId('dataGridFooterCell-name')).not.toBeInTheDocument();
+      expect(screen.getByTestId('testGrid')).toHaveAttribute('aria-rowcount', '3');
+    });
+
+    it('takes the look of the footer from gridStyle', () => {
+      render(
+        <DataGrid
+          {...defaultProps}
+          renderFooterCell={renderFooterCell}
+          gridStyle={{ footer: 'shade' }}
+        />
+      );
+      expect(screen.getByTestId('testGrid')).toHaveAttribute('data-footer', 'shade');
+    });
+
+    it('can be reached with the arrow keys', async () => {
+      render(<DataGrid {...defaultProps} renderFooterCell={renderFooterCell} />);
+      getCell('valueB').focus();
+      await userEvent.keyboard('{ArrowDown}');
+      expect(screen.getByTestId('dataGridFooterCell-value')).toHaveFocus();
+      expect(screen.getByTestId('dataGridFooterCell-value')).toHaveAttribute('tabindex', '0');
+      // It is the last row.
+      await userEvent.keyboard('{ArrowDown}');
+      expect(screen.getByTestId('dataGridFooterCell-value')).toHaveFocus();
+      await userEvent.keyboard('{ArrowUp}');
+      expect(getCell('valueB')).toHaveFocus();
+    });
+  });
+
+  describe('render complete', () => {
+    it('tells when the grid rendered its rows, and again when they change', async () => {
+      const onRenderComplete = jest.fn();
+      const { rerender } = render(
+        <DataGrid {...defaultProps} onRenderComplete={onRenderComplete} />
+      );
+      await waitFor(() => expect(onRenderComplete).toHaveBeenCalledTimes(1));
+      expect(screen.getByText('valueA')).toBeInTheDocument();
+
+      rerender(
+        <DataGrid
+          {...defaultProps}
+          rows={[buildRow('rowC', 'valueC')]}
+          onRenderComplete={onRenderComplete}
+        />
+      );
+      await waitFor(() => expect(onRenderComplete).toHaveBeenCalledTimes(2));
+    });
+
+    it('does not tell again when it renders the same rows and columns', async () => {
+      const onRenderComplete = jest.fn();
+      const { rerender } = render(
+        <DataGrid {...defaultProps} onRenderComplete={onRenderComplete} />
+      );
+      await waitFor(() => expect(onRenderComplete).toHaveBeenCalledTimes(1));
+      rerender(<DataGrid {...defaultProps} onRenderComplete={jest.fn()} />);
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      expect(onRenderComplete).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('control column headers', () => {
+    it('names a header that renders no text', () => {
+      render(
+        <DataGrid
+          {...defaultProps}
+          leadingControlColumns={[
+            { ...leadingControlColumns[0], header: null, headerAriaLabel: 'Row controls' },
+          ]}
+        />
+      );
+      expect(screen.getByRole('columnheader', { name: 'Row controls' })).toBeInTheDocument();
     });
   });
 });

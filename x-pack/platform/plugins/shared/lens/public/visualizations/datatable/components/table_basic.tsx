@@ -26,11 +26,13 @@ import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import type {
   EuiDataGridRefProps,
   EuiDataGridControlColumn,
+  EuiDataGridRowHeightsOptions,
   EuiDataGridColumn,
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
 import { EuiButtonIcon, EuiDataGrid, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiDataGridAdapter } from '@kbn/data-grid';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import type { ClickTriggerEvent } from '@kbn/charts-plugin/public';
@@ -57,6 +59,7 @@ import type {
   LensPagesizeAction,
 } from '@kbn/lens-common';
 import type { LensGridDirection } from '../../../../common/expressions';
+import { getLensFeatureFlags } from '../../../get_feature_flags';
 import { findMinMaxByColumnId, shouldColorByTerms } from '../../../shared_components';
 import type { DataContextType, DatatableRenderProps } from './types';
 import { createGridColumns } from './columns';
@@ -100,6 +103,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
   const isInteractive = props.interactive && props.viewMode !== 'non-interactive';
+  const isKbnDataGridEnabled = getLensFeatureFlags().enableTanstackDatatable;
   const isDarkMode = useKibanaIsDarkMode();
   const palettes = useKbnPalettes();
   const { euiTheme } = useEuiTheme();
@@ -116,12 +120,19 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     undefined
   );
 
+  const hasNoRows = firstLocalTable.rows.length === 0;
+
   useLayoutEffect(() => {
-    // Temporary solution: DataGrid should provide onRender callback
+    // `@kbn/data-grid` tells when it rendered its rows (`onRenderComplete`), unless there are none
+    // and the empty placeholder renders instead.
+    if (isKbnDataGridEnabled && !hasNoRows) {
+      return;
+    }
+    // Temporary solution: EuiDataGrid does not provide an onRender callback
     setTimeout(() => {
       props.renderComplete();
     }, 300);
-  }, [props]);
+  }, [props, isKbnDataGridEnabled, hasNoRows]);
 
   useEffect(() => {
     setPagination(
@@ -283,8 +294,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [firstTableRef, columnConfig, getType]
   );
 
-  const isEmpty = firstLocalTable.rows.length === 0;
-
   const visibleColumns = useMemo(
     () =>
       columnConfig.columns
@@ -388,6 +397,12 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     return [
       {
         headerCellRender: () => null,
+        // The header is empty, so it needs a name for assistive technology.
+        headerCellProps: {
+          'aria-label': i18n.translate('xpack.lens.table.rowActionsColumnLabel', {
+            defaultMessage: 'Row actions',
+          }),
+        },
         width: 40,
         id: 'trailingControlColumn',
         rowCellRender: function RowCellRender({ rowIndex }) {
@@ -605,6 +620,19 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [props.args.density]
   );
 
+  const rowHeightsOptions = useMemo<EuiDataGridRowHeightsOptions>(
+    () => ({
+      defaultHeight: props.args.fitRowToContent
+        ? RowHeightMode.auto
+        : props.args.rowHeightLines && props.args.rowHeightLines !== 1
+        ? {
+            lineCount: props.args.rowHeightLines,
+          }
+        : undefined,
+    }),
+    [props.args.fitRowToContent, props.args.rowHeightLines]
+  );
+
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     if (!props.args.showRowNumbers) {
       return [];
@@ -613,6 +641,12 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       {
         id: 'rowNumber',
         headerCellRender: () => null,
+        // The header is empty, so it needs a name for assistive technology.
+        headerCellProps: {
+          'aria-label': i18n.translate('xpack.lens.table.rowNumberColumnLabel', {
+            defaultMessage: 'Row number',
+          }),
+        },
         rowCellRender: function RowCellRender({ visibleRowIndex }) {
           return (
             <div
@@ -633,7 +667,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     ];
   }, [euiTheme.colors.backgroundFilledText, euiTheme.size.m, props.args.showRowNumbers]);
 
-  if (isEmpty) {
+  if (hasNoRows) {
     return (
       <div
         css={datatableContainerStyles}
@@ -651,6 +685,31 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       defaultMessage: 'Data table visualization',
     });
 
+  // What both grids render: the adapter of @kbn/data-grid takes the props of EuiDataGrid.
+  const sharedGridProps = {
+    'aria-label': dataGridAriaLabel,
+    'data-test-subj': 'lnsDataTable',
+    rowHeightsOptions,
+    columns,
+    columnVisibility,
+    leadingControlColumns,
+    trailingControlColumns,
+    rowCount: sortedTable.rows.length,
+    renderCellValue,
+    renderCellPopover,
+    gridStyle,
+    sorting: props.viewMode === 'non-interactive' ? undefined : sorting,
+    pagination: pagination && {
+      ...pagination,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
+      onChangeItemsPerPage,
+      onChangePage,
+    },
+    onColumnResize,
+    toolbarVisibility: false,
+    renderFooterCellValue: renderSummaryRow,
+  };
+
   return (
     <div
       css={datatableContainerStyles}
@@ -666,41 +725,17 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           handleFilterClick,
         }}
       >
-        <EuiDataGrid
-          aria-label={dataGridAriaLabel}
-          data-test-subj="lnsDataTable"
-          rowHeightsOptions={{
-            defaultHeight: props.args.fitRowToContent
-              ? RowHeightMode.auto
-              : props.args.rowHeightLines && props.args.rowHeightLines !== 1
-              ? {
-                  lineCount: props.args.rowHeightLines,
-                }
-              : undefined,
-          }}
-          columns={columns}
-          columnVisibility={columnVisibility}
-          leadingControlColumns={leadingControlColumns}
-          trailingControlColumns={trailingControlColumns}
-          rowCount={sortedTable.rows.length}
-          renderCellValue={renderCellValue}
-          renderCellPopover={renderCellPopover}
-          gridStyle={gridStyle}
-          schemaDetectors={schemaDetectors}
-          sorting={props.viewMode === 'non-interactive' ? undefined : sorting}
-          pagination={
-            pagination && {
-              ...pagination,
-              pageSizeOptions: PAGE_SIZE_OPTIONS,
-              onChangeItemsPerPage,
-              onChangePage,
-            }
-          }
-          onColumnResize={onColumnResize}
-          toolbarVisibility={false}
-          renderFooterCellValue={renderSummaryRow}
-          ref={dataGridRef}
-        />
+        {isKbnDataGridEnabled ? (
+          // Takes the props of EuiDataGrid, but sorts with the labels of the column actions instead
+          // of `schemaDetectors` and tells when it rendered its rows.
+          <EuiDataGridAdapter
+            {...sharedGridProps}
+            onRenderComplete={props.renderComplete}
+            ref={dataGridRef}
+          />
+        ) : (
+          <EuiDataGrid {...sharedGridProps} schemaDetectors={schemaDetectors} ref={dataGridRef} />
+        )}
       </DataContext.Provider>
     </div>
   );

@@ -38,6 +38,7 @@ import type {
   DataGridRef,
   DataGridRowItem,
 } from '../types';
+import { DataGridFooterRow } from './data_grid_footer_row';
 import { DataGridHeaderRow } from './data_grid_header_row';
 import type { DataGridColumnSlices } from './data_grid_row';
 import { DataGridRow } from './data_grid_row';
@@ -91,11 +92,13 @@ export const DataGrid = <TRow,>({
   overscan = OVERSCAN,
   renderCellPopover,
   showCellPopoverCloseButton = true,
+  renderFooterCell,
+  onRenderComplete,
   gridRef,
 }: DataGridProps<TRow>) => {
   const styles = useMemoCss(componentStyles);
   const themeContext = useEuiTheme();
-  const { cellPadding, fontSize, border, stripes, rowHover, header } = {
+  const { cellPadding, fontSize, border, stripes, rowHover, header, footer } = {
     ...DEFAULT_DATA_GRID_STYLE,
     ...gridStyle,
   };
@@ -175,6 +178,10 @@ export const DataGrid = <TRow,>({
   // Header and pinned rows share one sticky block, which the virtualized rows scroll below.
   const [stickyElement, setStickyElement] = useState<HTMLDivElement | null>(null);
   const { height: stickyHeight } = useResizeObserver(stickyElement, 'height');
+  // The footer row stays at the bottom: rows scrolled into view must not end up below it.
+  const [footerElement, setFooterElement] = useState<HTMLDivElement | null>(null);
+  const { height: footerHeight } = useResizeObserver(footerElement, 'height');
+  const hasFooter = Boolean(renderFooterCell);
 
   const { widths, resizingColumnId, startResize, resetColumnWidth } = useColumnSizing({
     columns,
@@ -218,6 +225,7 @@ export const DataGrid = <TRow,>({
     getItemKey,
     scrollMargin: stickyHeight,
     scrollPaddingStart: stickyHeight,
+    scrollPaddingEnd: footerHeight,
   });
   // The virtualizer keeps the sizes it estimated: a new estimate, e.g. for another line count, needs
   // a new measurement.
@@ -235,13 +243,14 @@ export const DataGrid = <TRow,>({
     [rowVirtualizer]
   );
 
-  const { ariaRowIndexOffset, getTabStopColIndex, onFocus, onKeyDown, focusCell } =
+  const { ariaRowIndexOffset, footerRow, getTabStopColIndex, onFocus, onKeyDown, focusCell } =
     useGridNavigation({
       scrollRef,
       showHeader,
       colCount: columns.length,
       firstDataColIndex: columnVirtualization.leadingControlCount + 1,
       rowCount: rows.length,
+      hasFooter,
       pinnedRowCount: pinnedRows.length,
       virtualItems,
       virtualizedRowCount: virtualizedRows.length,
@@ -423,6 +432,23 @@ export const DataGrid = <TRow,>({
     ]
   );
 
+  // Rows and columns are rendered once the grid knows its width: the first render has none yet,
+  // unless the grid really has no width (e.g. it is hidden), then there is nothing more to wait for.
+  const onRenderCompleteRef = useRef(onRenderComplete);
+  onRenderCompleteRef.current = onRenderComplete;
+  const hasRenderCompleteCallback = Boolean(onRenderComplete);
+  useEffect(() => {
+    if (!hasRenderCompleteCallback || !scrollElement) {
+      return;
+    }
+    if (gridWidth === 0 && scrollElement.clientWidth > 0) {
+      return;
+    }
+    // After the browser applied the measured row heights of this render.
+    const frame = requestAnimationFrame(() => onRenderCompleteRef.current?.());
+    return () => cancelAnimationFrame(frame);
+  }, [hasRenderCompleteCallback, scrollElement, gridWidth, rows, columns]);
+
   // What pinned and virtualized rows have in common.
   const sharedRowProps = {
     slices,
@@ -443,7 +469,7 @@ export const DataGrid = <TRow,>({
       onKeyDown={onKeyDown}
       tabIndex={-1}
       role="grid"
-      aria-rowcount={rows.length + (showHeader ? 1 : 0)}
+      aria-rowcount={rows.length + (showHeader ? 1 : 0) + (hasFooter ? 1 : 0)}
       aria-colcount={columns.length}
       id={gridId}
       className={className}
@@ -457,6 +483,7 @@ export const DataGrid = <TRow,>({
       data-stripes={stripes}
       data-row-hover={rowHover}
       data-header={header}
+      data-footer={footer}
       data-row-height={lineCount === undefined ? 'auto' : 'lines'}
       css={styles.scrollContainer}
       style={containerStyle}
@@ -536,6 +563,17 @@ export const DataGrid = <TRow,>({
           </OverrideCopiedTabularContent>
         </div>
       </div>
+      {renderFooterCell && footerRow !== undefined && (
+        <div ref={setFooterElement} css={styles.footerContainer} style={{ inlineSize: totalWidth }}>
+          <DataGridFooterRow
+            slices={slices}
+            styles={styles}
+            ariaRowIndex={footerRow}
+            renderFooterCell={renderFooterCell}
+            tabStopColIndex={getTabStopColIndex(footerRow)}
+          />
+        </div>
+      )}
     </div>
   );
 };

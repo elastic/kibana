@@ -14,6 +14,7 @@ import type { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { cellActionsHostStyles } from './components/cell_actions_bubble/cell_actions_bubble_styles';
 import {
   DATA_GRID_CELL_CONTENT_CLASS,
+  DATA_GRID_FOOTER_ROW_CLASS,
   DATA_GRID_HEADER_ROW_CLASS,
   DATA_GRID_REVEAL_ON_ROW_HOVER_CLASS,
   DATA_GRID_ROW_CLASS,
@@ -110,6 +111,19 @@ export const componentStyles = {
       [`&[data-header="shade"] .${DATA_GRID_HEADER_ROW_CLASS}`]: {
         backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       },
+      [`.${DATA_GRID_FOOTER_ROW_CLASS}`]: {
+        backgroundColor: euiTheme.components.dataGridRowBackground,
+        borderTop: euiTheme.border.thin,
+      },
+      [`&[data-footer="overline"] .${DATA_GRID_FOOTER_ROW_CLASS}`]: {
+        borderTop: euiTheme.border.thick,
+      },
+      [`&[data-footer="shade"] .${DATA_GRID_FOOTER_ROW_CLASS}`]: {
+        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      },
+      [`&[data-footer="striped"] .${DATA_GRID_FOOTER_ROW_CLASS}`]: {
+        backgroundColor: euiTheme.components.dataGridRowStripesBackgroundStriped,
+      },
 
       // Rows show a number of lines of text, or grow with their content.
       [`&[data-row-height="lines"] .${DATA_GRID_CELL_CONTENT_CLASS}`]: {
@@ -143,6 +157,15 @@ export const componentStyles = {
     minInlineSize: '100%',
   }),
   headerRow: css({ display: 'flex' }),
+  // Stays at the bottom while the rows scroll, or right below the last row when they do not fill the grid.
+  footerContainer: css({
+    position: 'sticky',
+    bottom: 0,
+    zIndex: 2,
+    minInlineSize: '100%',
+  }),
+  footerRow: ({ euiTheme }: UseEuiTheme) =>
+    css({ display: 'flex', fontWeight: euiTheme.font.weight.semiBold }),
   headerCell: ({ euiTheme }: UseEuiTheme) =>
     css({
       position: 'relative',

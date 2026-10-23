@@ -29,6 +29,8 @@ interface UseGridNavigationParams {
   /** Column index (1-based) of the first column that is not a control column. */
   firstDataColIndex: number;
   rowCount: number;
+  /** Whether there is a footer row after the data rows. */
+  hasFooter?: boolean;
   pinnedRowCount: number;
   virtualItems: VirtualItem[];
   /** Number of rows in the virtualized (not pinned) section. */
@@ -49,6 +51,7 @@ export const useGridNavigation = ({
   colCount,
   firstDataColIndex,
   rowCount,
+  hasFooter = false,
   pinnedRowCount,
   virtualItems,
   virtualizedRowCount,
@@ -58,7 +61,9 @@ export const useGridNavigation = ({
 }: UseGridNavigationParams) => {
   const ariaRowIndexOffset = showHeader ? 2 : 1;
   const firstRow = showHeader ? 1 : ariaRowIndexOffset;
-  const lastRow = Math.max(rowCount + ariaRowIndexOffset - 1, firstRow);
+  // aria-rowindex of the footer row, after the data rows. It is always rendered, like the header.
+  const footerRow = hasFooter ? rowCount + ariaRowIndexOffset : undefined;
+  const lastRow = Math.max(footerRow ?? rowCount + ariaRowIndexOffset - 1, firstRow);
   // aria-rowindex of the first virtualized row.
   const virtualizedStartRow = pinnedRowCount + ariaRowIndexOffset;
 
@@ -69,7 +74,7 @@ export const useGridNavigation = ({
   const effectiveTabStop = useMemo<GridPosition>(() => {
     let row = clamp(tabStop.row, firstRow, lastRow);
     // A virtualized row that is not rendered cannot be a tab stop, fall back to the first rendered one.
-    if (row >= virtualizedStartRow && virtualItems.length > 0) {
+    if (row >= virtualizedStartRow && row !== footerRow && virtualItems.length > 0) {
       const index = row - virtualizedStartRow;
       const firstIndex = virtualItems[0].index;
       const lastIndex = virtualItems[virtualItems.length - 1].index;
@@ -88,6 +93,7 @@ export const useGridNavigation = ({
     tabStop,
     firstRow,
     lastRow,
+    footerRow,
     virtualizedStartRow,
     virtualItems,
     colCount,
@@ -109,8 +115,8 @@ export const useGridNavigation = ({
       // The row or the column is virtualized out, scroll it into view and focus it once it is rendered.
       const index = position.row - virtualizedStartRow;
       const isVirtualizedRow = index >= 0 && index < virtualizedRowCount;
-      const isPinnedOrHeaderRow = position.row < virtualizedStartRow;
-      if (!isVirtualizedRow && !isPinnedOrHeaderRow) {
+      const isAlwaysRenderedRow = position.row < virtualizedStartRow || position.row === footerRow;
+      if (!isVirtualizedRow && !isAlwaysRenderedRow) {
         return;
       }
       if (isVirtualizedRow) {
@@ -128,7 +134,14 @@ export const useGridNavigation = ({
       };
       requestAnimationFrame(focusWhenRendered);
     },
-    [scrollRef, virtualizedStartRow, virtualizedRowCount, scrollToVirtualizedRow, scrollToColumn]
+    [
+      scrollRef,
+      virtualizedStartRow,
+      virtualizedRowCount,
+      footerRow,
+      scrollToVirtualizedRow,
+      scrollToColumn,
+    ]
   );
 
   const onFocus = useCallback((event: FocusEvent<HTMLElement>) => {
@@ -169,5 +182,5 @@ export const useGridNavigation = ({
     [effectiveTabStop]
   );
 
-  return { ariaRowIndexOffset, getTabStopColIndex, onFocus, onKeyDown, focusCell };
+  return { ariaRowIndexOffset, footerRow, getTabStopColIndex, onFocus, onKeyDown, focusCell };
 };

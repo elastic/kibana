@@ -104,7 +104,11 @@ const getHeaderMenuGroups = <TRow,>({
   const { id, schema, isSortable = false } = column;
   const actionOptions: DataGridColumnActions = column.actions || {};
   const sortColumn = sorting?.columns.find((sortedColumn) => sortedColumn.id === id);
-  const sortLabels = getSortLabels(schema);
+  const schemaSortLabels = getSortLabels(schema);
+  const sortLabels = {
+    asc: actionOptions.sortLabels?.asc ?? schemaSortLabels.asc,
+    desc: actionOptions.sortLabels?.desc ?? schemaSortLabels.desc,
+  };
   const groups: DataGridHeaderActionItem[][] = [];
   const pushGroup = (group: DataGridHeaderActionItem[]) => {
     if (group.length > 0) {
@@ -275,7 +279,7 @@ const DataGridHeaderCellComponent = <TRow,>({
   onStartDrag,
   dragState,
 }: DataGridHeaderCellProps<TRow>) => {
-  const { id, header, displayAsText, isResizable, isControl } = column;
+  const { id, header, headerAriaLabel, displayAsText, isResizable, isControl } = column;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const sortColumn = sorting?.columns.find((sortedColumn) => sortedColumn.id === id);
@@ -344,6 +348,7 @@ const DataGridHeaderCellComponent = <TRow,>({
     <div
       role="columnheader"
       aria-colindex={columnIndex + 1}
+      aria-label={headerAriaLabel}
       aria-sort={
         sortColumn ? (sortColumn.direction === 'asc' ? 'ascending' : 'descending') : undefined
       }

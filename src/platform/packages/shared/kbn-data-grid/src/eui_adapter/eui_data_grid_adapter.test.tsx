@@ -508,4 +508,183 @@ describe('EuiDataGridAdapter', () => {
     await userEvent.dblClick(resizeHandle);
     expect(onColumnResize).toHaveBeenLastCalledWith({ columnId: 'count', width: undefined });
   });
+
+  describe('like EuiDataGrid', () => {
+    const openMenu = async (columnId: string) => {
+      await userEvent.click(
+        await screen.findByTestId(`dataGridHeaderCellActionButton-${columnId}`)
+      );
+      const menu = await screen.findByTestId(`dataGridHeaderCellActionGroup-${columnId}`);
+      await waitFor(() => expect(getComputedStyle(menu).pointerEvents).not.toBe('none'));
+      return menu;
+    };
+
+    it('renders a footer row with renderFooterCellValue and the footers of control columns', () => {
+      const SelectFooter = () => <span>select footer</span>;
+      const FooterValue = ({ columnId }: EuiDataGridCellValueElementProps) => (
+        <span>{`sum of ${columnId}`}</span>
+      );
+      render(
+        <EuiDataGridAdapter
+          {...getProps({
+            leadingControlColumns: [
+              { ...leadingControlColumns[0], footerCellRender: SelectFooter },
+            ],
+            renderFooterCellValue: FooterValue,
+            gridStyle: { footer: 'shade' },
+          })}
+        />
+      );
+      expect(screen.getByTestId('dataGridFooterCell-select')).toHaveTextContent('select footer');
+      expect(screen.getByTestId('dataGridFooterCell-name')).toHaveTextContent('sum of name');
+      expect(screen.getByTestId('dataGridFooterCell-count')).toHaveTextContent('sum of count');
+      expect(screen.getByTestId('adapterGrid')).toHaveAttribute('data-footer', 'shade');
+    });
+
+    it('renders no footer row without renderFooterCellValue', () => {
+      render(<EuiDataGridAdapter {...getProps()} />);
+      expect(screen.queryByTestId('dataGridFooterCell-name')).not.toBeInTheDocument();
+    });
+
+    it('tells when it rendered its rows', async () => {
+      const onRenderComplete = jest.fn();
+      render(<EuiDataGridAdapter {...getProps({ onRenderComplete })} />);
+      await waitFor(() => expect(onRenderComplete).toHaveBeenCalled());
+    });
+
+    it('names control column headers with the aria-label of their header props', () => {
+      render(
+        <EuiDataGridAdapter
+          {...getProps({
+            leadingControlColumns: [
+              {
+                ...leadingControlColumns[0],
+                headerCellRender: () => null,
+                headerCellProps: { 'aria-label': 'Select rows' },
+              },
+            ],
+          })}
+        />
+      );
+      expect(screen.getByRole('columnheader', { name: 'Select rows' })).toBeInTheDocument();
+    });
+
+    it('gives cells the index of their row in the page as visibleRowIndex', () => {
+      // The types of EuiDataGrid leave `visibleRowIndex` out, but its cells get it.
+      const RowNumber = ({
+        visibleRowIndex,
+      }: EuiDataGridCellValueElementProps & { visibleRowIndex?: number }) => (
+        <span data-test-subj="rowNumber">{String(visibleRowIndex)}</span>
+      );
+      render(
+        <EuiDataGridAdapter
+          {...getProps({
+            leadingControlColumns: [{ ...leadingControlColumns[0], rowCellRender: RowNumber }],
+            pagination: {
+              pageIndex: 1,
+              pageSize: 2,
+              pageSizeOptions: [2],
+              onChangePage: jest.fn(),
+              onChangeItemsPerPage: jest.fn(),
+            },
+          })}
+        />
+      );
+      expect(screen.getByText('gamma')).toBeInTheDocument();
+      expect(screen.getAllByTestId('rowNumber').map(({ textContent }) => textContent)).toEqual([
+        '0',
+      ]);
+    });
+
+    it('words the sort actions with the labels of the column actions', async () => {
+      render(
+        <EuiDataGridAdapter
+          {...getProps({
+            columns: [
+              {
+                ...columns[1],
+                actions: {
+                  showSortAsc: { label: 'Sort ascending' },
+                  showSortDesc: { label: 'Sort descending' },
+                },
+              },
+            ],
+            columnVisibility: { visibleColumns: ['count'], setVisibleColumns: jest.fn() },
+            sorting: { columns: [], onSort: jest.fn() },
+          })}
+        />
+      );
+      const menu = await openMenu('count');
+      expect(within(menu).getByText('Sort ascending')).toBeInTheDocument();
+      expect(within(menu).getByText('Sort descending')).toBeInTheDocument();
+    });
+
+    it('disables the additional header actions that are disabled', async () => {
+      render(
+        <EuiDataGridAdapter
+          {...getProps({
+            columns: [
+              {
+                ...columns[0],
+                actions: {
+                  additional: [
+                    {
+                      label: 'Reset',
+                      onClick: jest.fn(),
+                      isDisabled: true,
+                      'data-test-subj': 'reset',
+                    },
+                  ],
+                },
+              },
+              columns[1],
+            ],
+          })}
+        />
+      );
+      const menu = await openMenu('name');
+      expect(within(menu).getByTestId('reset')).toBeDisabled();
+    });
+
+    it('shows a single line per row without a default row height', () => {
+      render(<EuiDataGridAdapter {...getProps()} />);
+      expect(screen.getByTestId('adapterGrid')).toHaveAttribute('data-row-height', 'lines');
+      expect(
+        screen.getByTestId('adapterGrid').style.getPropertyValue('--kbnDataGridRowLines')
+      ).toBe('1');
+    });
+
+    it('uses the defaults of EuiDataGrid for what gridStyle leaves out', () => {
+      render(<EuiDataGridAdapter {...getProps({ gridStyle: { cellPadding: 's' } })} />);
+      const grid = screen.getByTestId('adapterGrid');
+      expect(grid).toHaveAttribute('data-cell-padding', 's');
+      expect(grid).toHaveAttribute('data-font-size', 'm');
+      expect(grid).toHaveAttribute('data-border', 'all');
+      expect(grid).toHaveAttribute('data-stripes', 'false');
+      expect(grid).toHaveAttribute('data-row-hover', 'highlight');
+      expect(grid).toHaveAttribute('data-header', 'shade');
+      expect(grid).toHaveAttribute('data-footer', 'overline');
+    });
+
+    it('renders the content and actions given to the default popover', async () => {
+      const renderCellPopover = ({
+        DefaultCellPopover,
+        ...popoverProps
+      }: EuiDataGridCellPopoverElementProps) => (
+        <DefaultCellPopover
+          {...popoverProps}
+          DefaultCellPopover={DefaultCellPopover}
+          cellActions={<div data-test-subj="customActions">custom actions</div>}
+        />
+      );
+      render(<EuiDataGridAdapter {...getProps({ renderCellPopover })} />);
+
+      const cell = screen.getByText('beta').closest<HTMLElement>('[role="gridcell"]')!;
+      await userEvent.hover(cell);
+      await userEvent.click(await within(cell).findByTestId('kbnDataGridCellActionsButton'));
+      const popover = await screen.findByTestId(CELL_EXPANSION_POPOVER_TEST_SUBJ);
+      expect(within(popover).getByText('beta')).toBeInTheDocument();
+      expect(within(popover).getByTestId('customActions')).toBeInTheDocument();
+    });
+  });
 });

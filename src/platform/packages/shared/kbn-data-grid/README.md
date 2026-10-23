@@ -6,7 +6,9 @@ documents or data views: columns describe how to render a row, so any tabular UI
 It provides cells, cell actions, the cell expansion popover, keyboard navigation (single tab stop with
 arrow, Home and End keys), ARIA grid semantics, EUI theming, auto row heights and sticky pinned rows.
 
-Today it is used by the Doc Viewer fields table, behind the `discover.kbnDataGridEnabled` feature flag.
+Today it is used by the Doc Viewer fields table and `UnifiedDataTable`, behind the
+`discover.kbnDataGridEnabled` feature flag, and by the Lens Table visualization, behind the
+`lens.enableTanstackDatatable` feature flag.
 
 > **Experimental.** The API may still change until a second consumer (e.g. `@kbn/unified-data-table`)
 > uses it.
@@ -38,14 +40,16 @@ visible cells re-render when it changes.
 |---|---|
 | `rows`, `getRowId` | The data, and a stable string id per row. |
 | `columns` | `DataGridColumn[]`, see below. |
-| `leadingControlColumns`, `trailingControlColumns` | `DataGridControlColumn[]` before and after the data columns: `{ id, header, width, renderCell({ row, rowIndex, columnId, colIndex, setCellProps }), cellCss? }`. For columns with their own interactive content, e.g. a pin button or a checkbox. They are sticky, have no cell actions or popover, and keyboard focus skips them at first. |
+| `leadingControlColumns`, `trailingControlColumns` | `DataGridControlColumn[]` before and after the data columns: `{ id, header, headerAriaLabel?, width, renderCell({ row, rowIndex, columnId, colIndex, setCellProps }), cellCss? }`. `headerAriaLabel` names a header without text. For columns with their own interactive content, e.g. a pin button or a checkbox. They are sticky, have no cell actions or popover, and keyboard focus skips them at first. |
 | `ariaLabel`, `ariaLabelledBy`, `ariaDescribedBy`, `id`, `className`, `data-test-subj` | Accessible name and attributes of the grid. The pinned section uses `<subj>-pinnedRows`. |
 | `getCellProps({ row, rowIndex, columnId })`, `getRowProps({ row, rowIndex })` | Return `{ css?, className?, 'data-test-subj'? }` for a cell or a row, e.g. a background color. Keep them stable (`useCallback`). |
 | `sorting` | `{ columns: [{ id, direction }], onSort }`. Shows the sort indicator of the columns and the sort actions of the `isSortable` ones. |
 | `onMoveColumn`, `onHideColumn` | Enable the "Move left", "Move right" and "Hide column" actions of the column headers. |
 | `onReorderColumn({ columnId, toIndex })` | Enables reordering the data columns by dragging their headers (with a mouse or pen). `toIndex` is the column's position among the data columns after the move. The columns scroll while the pointer is near their edges, Escape cancels. Keyboard users move columns with the header actions. |
 | `showHeader`, `headerRowHeight` | Render the header row, and how many lines of text it shows (`'auto'` grows). |
-| `gridStyle` | `{ cellPadding, fontSize, border, stripes, rowHover, header }`, like `EuiDataGrid`. Defaults to compact text, horizontal borders, stripes and a hover highlight. |
+| `gridStyle` | `{ cellPadding, fontSize, border, stripes, rowHover, header, footer }`, like `EuiDataGrid`. Defaults to compact text, horizontal borders, stripes and a hover highlight. |
+| `renderFooterCell({ columnId, colIndex, isControl })` | Renders a footer row below the data, e.g. a summary of each column. It stays at the bottom while the rows scroll and can be reached with the arrow keys. Without it there is no footer. |
+| `onRenderComplete` | Called once the grid rendered its rows at their final width, and again when the rows or columns change, e.g. to tell a report or a screenshot that the content is ready. |
 | `rowHeight`, `lineHeight` | `'auto'`, or `{ lineCount }` lines of text per row, and the CSS line height of the text. |
 | `pinnedRowIds` | Rows kept in a sticky section below the header, in `rows` order. |
 | `estimatedRowHeight`, `overscan` | Sizing of the scrollbar before rows are measured, and rows rendered beyond the visible ones. |
@@ -67,7 +71,7 @@ are rendered, the control columns are always rendered and stay in view.
 | `initialWidth`, `minWidth`, `maxWidth` | `initialWidth` is a number of pixels, or a function of the grid width, used until the user resizes the column. |
 | `isResizable` | Allow resizing from the header edge. |
 | `isSortable`, `schema` | Whether the column can be sorted (needs `sorting`), and the kind of values (`'datetime'`, `'numeric'`, `'boolean'`) which words the sort actions. |
-| `actions` | The header menu: `{ showSortAsc, showSortDesc, showMoveLeft, showMoveRight, showHide, additional }`, or `false` for none. |
+| `actions` | The header menu: `{ showSortAsc, showSortDesc, sortLabels, showMoveLeft, showMoveRight, showHide, additional }`, or `false` for none. `sortLabels: { asc, desc }` replaces the wording based on `schema`. |
 | `cellActions`, `visibleCellActions` | `EuiDataGridColumnCellAction[]` shown in the hover/focus bubble (the first `visibleCellActions`) and in the popover footer (all of them). |
 | `isExpandable` | Whether cells can be expanded into a popover. Defaults to `true`. |
 | `renderCellExpansionFooter(row)` | Extra content at the bottom of the popover, e.g. a warning. |
@@ -82,9 +86,12 @@ The toolbar controls (column selector, sort selector, display options, keyboard 
 and the pagination are exported as building blocks. `EuiDataGridAdapter` puts the grid, the toolbar and
 the pagination together and takes the props of `EuiDataGrid`: columns, `columnVisibility`, control
 columns, `renderCellValue` and `cellContext`, `renderCellPopover`, `sorting`, `pagination`,
-`toolbarVisibility` and `renderCustomToolbar`, `gridStyle`, `rowHeightsOptions`, `onColumnResize`
-(also called with `width: undefined` when a column is reset), `virtualizationOptions` and the ref
-methods. A table that describes itself to `EuiDataGrid` can move to
+`toolbarVisibility` and `renderCustomToolbar`, `gridStyle` (with the defaults of `EuiDataGrid` for
+what it leaves out), `rowHeightsOptions` (a single line without `defaultHeight`), `onColumnResize`
+(also called with `width: undefined` when a column is reset), `renderFooterCellValue` and the
+`footerCellRender` of control columns, `virtualizationOptions` and the ref methods. It adds
+`onRenderComplete`, which `EuiDataGrid` lacks. Cells also get `visibleRowIndex`, the index of the row
+in the page, like in `EuiDataGrid`. A table that describes itself to `EuiDataGrid` can move to
 the new grid by swapping the component, the flag decides which one renders:
 
 ```tsx
@@ -98,9 +105,10 @@ and mark cells.
 
 ## Not supported yet
 
-Trailing control columns in pinned rows, a footer row, dragging headers on touch screens, a custom
-grid body (`renderCustomGridBody`), in-memory sorting and pagination, a non-interactive mode and a
-render-complete signal. The adapter also leaves out `schemaDetectors`.
+Trailing control columns in pinned rows, dragging headers on touch screens, a custom grid body
+(`renderCustomGridBody`), in-memory sorting and pagination and a non-interactive mode. The adapter
+also leaves out `schemaDetectors` (use the `label` of `showSortAsc` and `showSortDesc` to word the
+sort actions) and the `footerCellProps` of control columns.
 
 ## Using it in other components
 
