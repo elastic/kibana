@@ -176,6 +176,7 @@ export const fullBrowserMonitor = (): MonitorFixture => ({
   [ConfigKey.JOURNEY_FILTERS_TAGS]: ['smoke'],
   [ConfigKey.IGNORE_HTTPS_ERRORS]: false,
   [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: ['sha256/fixture-spki-hash'],
+  [ConfigKey.FILMSTRIPS]: false,
   [ConfigKey.THROTTLING_CONFIG]: {
     value: { download: '5', upload: '3', latency: '20' },
     label: 'Default',

@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux-v7';
+import { DisplayFilmstrips } from './display_filmstrips';
 import { ErrorCallOut } from './error_callout';
 import { useStepDetailsBreadcrumbs } from './hooks/use_step_details_breadcrumbs';
 import { WaterfallChartContainer } from './step_waterfall_chart/waterfall/waterfall_chart_container';
@@ -151,6 +152,8 @@ export const StepDetailPage = () => {
       </EuiFlexGroup>
 
       <EuiSpacer size="l" />
+
+      <DisplayFilmstrips checkGroup={checkGroupId} stepIndex={Number(stepIndex)} />
 
       {data && (
         <WaterfallChartContainer

@@ -157836,6 +157836,9 @@ components:
         enabled:
           description: Specify whether the monitor is enabled. Defaults to `true`.
           type: boolean
+        filmstrips:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
+          description: Capture filmstrip screenshots for each step of a browser monitor. Defaults to `false`.
         filter_journeys:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         filter_journeys.match:
@@ -161243,6 +161246,9 @@ components:
         enabled:
           description: Specify whether the monitor is enabled. Defaults to `true`.
           type: boolean
+        filmstrips:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
+          description: Capture filmstrip screenshots for each step of a browser monitor. Defaults to `false`.
         filter_journeys:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         filter_journeys.match:
