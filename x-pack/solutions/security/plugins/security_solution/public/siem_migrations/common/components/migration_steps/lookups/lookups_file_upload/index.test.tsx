@@ -111,4 +111,41 @@ describe('LookupsFileUpload', () => {
       { type: 'lookup', name: 'threat_intel_ip', content: matchingContent },
     ]);
   });
+
+  it('shows an empty-name error for a dotfile and keeps upload disabled', async () => {
+    const file = new File(['ip\n1.1.1.1\n'], '.DS_Store', { type: 'text/plain' });
+    const { getByTestId, getByText } = render(<LookupsFileUpload {...props} />);
+
+    await selectFiles(getByTestId('lookupsFilePicker'), [file]);
+
+    await waitFor(() => {
+      expect(
+        getByText('".DS_Store" cannot be uploaded because its lookup name is empty.')
+      ).toBeVisible();
+    });
+    expect(getByTestId('uploadFileButton')).toBeDisabled();
+    expect(props.createResources).not.toHaveBeenCalled();
+  });
+
+  it('uploads the matching file and skips a file with an empty lookup name', async () => {
+    const matchingContent = 'ip\n1.1.1.1\n';
+    const matchingFile = new File([matchingContent], 'threat_intel_ip.csv', { type: 'text/csv' });
+    const emptyNameFile = new File(['ignored'], '.DS_Store', { type: 'text/plain' });
+    const { getByTestId, getByText } = render(<LookupsFileUpload {...props} />);
+
+    await selectFiles(getByTestId('lookupsFilePicker'), [matchingFile, emptyNameFile]);
+
+    await waitFor(() => {
+      expect(
+        getByText('".DS_Store" cannot be uploaded because its lookup name is empty.')
+      ).toBeVisible();
+    });
+    expect(getByTestId('uploadFileButton')).not.toBeDisabled();
+
+    fireEvent.click(getByTestId('uploadFileButton'));
+
+    expect(props.createResources).toHaveBeenCalledWith([
+      { type: 'lookup', name: 'threat_intel_ip', content: matchingContent },
+    ]);
+  });
 });

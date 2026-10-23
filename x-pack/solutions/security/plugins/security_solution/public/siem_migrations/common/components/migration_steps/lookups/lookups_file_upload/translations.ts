@@ -17,6 +17,15 @@ export const SKIP_BUTTON_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Skip this step and continue without uploading all the items' }
 );
 
+export const emptyLookupNameError = (fileName: string): string =>
+  i18n.translate(
+    'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.emptyLookupNameErrorMessage',
+    {
+      defaultMessage: '"{fileName}" cannot be uploaded because its lookup name is empty.',
+      values: { fileName },
+    }
+  );
+
 export const lookupFileNameMismatchError = (fileName?: string): string => {
   if (fileName == null) {
     return i18n.translate(

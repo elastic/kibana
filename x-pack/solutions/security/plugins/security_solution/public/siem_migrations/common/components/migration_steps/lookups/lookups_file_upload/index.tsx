@@ -120,6 +120,12 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
                   return;
                 }
 
+                if (!name) {
+                  addError(i18n.emptyLookupNameError(file.name));
+                  resolve(undefined);
+                  return;
+                }
+
                 resolve({ type: 'lookup', name, content });
               };
 
