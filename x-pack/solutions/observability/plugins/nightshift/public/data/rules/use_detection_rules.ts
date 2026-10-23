@@ -36,16 +36,15 @@ export const toDetectionRule = (
   const status: RuleStatus | undefined =
     enabled === undefined
       ? undefined
+      : engineState === 'paused'
+      ? { state: 'inactive', reason: 'engine_paused' }
+      : sourceEnabled === false
+      ? { state: 'inactive', reason: 'source_disabled' }
       : enabled
       ? { state: 'active' }
       : {
           state: 'inactive',
-          reason:
-            engineState === 'paused'
-              ? 'engine_paused'
-              : sourceEnabled === false
-              ? 'source_disabled'
-              : 'rule_disabled',
+          reason: 'rule_disabled',
         };
   return { query, sourceId, occurrences, matches, lastActivity, status };
 };

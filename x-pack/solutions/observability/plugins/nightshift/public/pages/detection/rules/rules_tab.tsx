@@ -62,7 +62,6 @@ export const RulesTab = ({
   const history = useHistory();
   const location = useLocation();
   const { application, notifications } = useKibana().services;
-  const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const rulesQuery = useDetectionRules(timeRange);
   const { demoteRules, isPending } = useRulesDemote({});
@@ -124,6 +123,7 @@ export const RulesTab = ({
     setSelected([]);
   }, [search, timeRange.from, timeRange.to]);
 
+  const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
   const handleClose = () => {
     const link = ruleId ? openLinks.current.get(ruleId) : undefined;
     updateRuleId();

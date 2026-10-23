@@ -42,23 +42,25 @@ describe('toDetectionRule', () => {
     expect(convert({ ...makeRow(true), occurrences: [] }).lastActivity).toBeUndefined();
   });
 
-  it('uses the real rule state even if the engine or source disagrees', () => {
-    expect(convert(makeRow(true), 'paused', false).status).toEqual({ state: 'active' });
-  });
-
   it.each([
-    ['paused', false, 'engine_paused'],
-    ['enabled', false, 'source_disabled'],
-    ['enabled', true, 'rule_disabled'],
+    [true, 'paused', true, 'engine_paused'],
+    [true, 'enabled', false, 'source_disabled'],
+    [false, 'paused', false, 'engine_paused'],
+    [false, 'enabled', false, 'source_disabled'],
+    [false, 'enabled', true, 'rule_disabled'],
   ])(
-    'explains a disabled rule for engine %s and source %s',
-    (engineState, sourceEnabled, reason) => {
-      expect(convert(makeRow(false), engineState, sourceEnabled).status).toEqual({
+    'explains rule enabled %s for engine %s and source %s',
+    (enabled, engineState, sourceEnabled, reason) => {
+      expect(convert(makeRow(enabled), engineState, sourceEnabled).status).toEqual({
         state: 'inactive',
         reason,
       });
     }
   );
+
+  it('marks an enabled rule active when its engine and source are enabled', () => {
+    expect(convert(makeRow(true), 'enabled', true).status).toEqual({ state: 'active' });
+  });
 
   it('leaves status unknown when the server omits it', () => {
     expect(convert(makeRow(), 'paused', false).status).toBeUndefined();
