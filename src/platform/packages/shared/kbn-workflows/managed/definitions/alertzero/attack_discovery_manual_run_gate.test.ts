@@ -15,6 +15,7 @@ import FLOOR_ALERT_TRIAGE_YAML from './floor_alert_triage.yaml';
 import FLOOR_ATTACK_DISCOVERY_YAML from './floor_attack_discovery.yaml';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './forensics_endpoint_analysis.yaml';
 import HUNT_CONTINUOUS_THREAT_HUNT_YAML from './hunt/hunt_continuous_threat_hunt.yaml';
+import { renderHuntWorkerYaml } from './hunt/hunt_worker_template';
 import {
   ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS,
   upgradeStoredWorkerSettings,
@@ -22,7 +23,6 @@ import {
 import {
   renderAlertTriageWorkerYaml,
   renderCommonWorkerYaml,
-  renderHuntWorkerYaml,
   renderRuleCoverageWorkerYaml,
   renderRuleTuningWorkerYaml,
   renderScheduledWorkerYaml,
@@ -82,8 +82,16 @@ describe('Attack Discovery manual-run gate', () => {
         renderAlertTriageWorkerYaml(FLOOR_ALERT_TRIAGE_YAML, {
           settingsVersion: 1,
           autonomyLevel: 'manual',
+          scheduleInterval: '15m',
           serviceAccountId: 'space-service-account',
-          extras: { autoCloseConfidenceScoreMinThreshold: 80 },
+          extras: {
+            autoCloseConfidenceScoreMinThreshold: 80,
+            budgetPerHour: 10,
+            lookbackHours: 24,
+            minSeverity: 'medium',
+            excludeBuildingBlocks: false,
+            excludedRuleTags: [],
+          },
         }),
       ],
       [
