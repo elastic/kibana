@@ -12,6 +12,12 @@ jest.mock('../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
 }));
 
+const mockGetLiveEntities = jest.fn();
+jest.mock('../../../lib/significant_events/entities/get_live_entities', () => ({
+  getLiveEntities: (...args: unknown[]) => mockGetLiveEntities(...args),
+}));
+
+const searchRoute = internalDetectionsRoutes['GET /internal/significant_events/detections'];
 const createRoute = internalDetectionsRoutes['POST /internal/significant_events/detections'];
 const markProcessedRoute =
   internalDetectionsRoutes['POST /internal/significant_events/detections/_mark_processed'];
@@ -24,6 +30,101 @@ const detection = {
   change_point_type: 'spike',
   p_value: 0.01,
 };
+
+const queryLink = (ruleId: string, entityIds: string[]) => ({
+  rule_id: ruleId,
+  source_id: 'source-1',
+  query: {
+    id: `query-${ruleId}`,
+    features: entityIds.map((id) => ({ id })),
+  },
+});
+
+const createSearchResources = (links: ReturnType<typeof queryLink>[]) => {
+  const findLatestPaginated = jest.fn().mockResolvedValue({
+    hits: [],
+    page: 1,
+    perPage: 25,
+    total: 0,
+  });
+  const getQueryLinks = jest.fn().mockResolvedValue(links);
+  const sourcesClient = {
+    list: jest.fn().mockResolvedValue({ sources: [{ id: 'source-1' }], total: 1 }),
+    assertReadable: jest.fn().mockResolvedValue(undefined),
+  };
+  const resources = {
+    request: {},
+    server: {},
+    getScopedClients: jest.fn().mockResolvedValue({
+      licensing: {},
+      sourcesClient,
+      getDetectionClient: jest.fn().mockResolvedValue({ findLatestPaginated }),
+      getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getQueryLinks }),
+    }),
+  };
+  return { resources, findLatestPaginated };
+};
+
+describe('GET /internal/significant_events/detections', () => {
+  beforeEach(() => {
+    mockGetLiveEntities.mockReset();
+  });
+
+  it('passes the entity selection to the detection client as rule UUIDs', async () => {
+    const { resources, findLatestPaginated } = createSearchResources([
+      queryLink('rule-1', ['service-a']),
+      queryLink('rule-2', ['service-b']),
+    ]);
+
+    await searchRoute.handler({
+      ...resources,
+      params: {
+        query: { entityIds: ['service-a'], page: 2, perPage: 10 },
+      },
+    } as unknown as Parameters<typeof searchRoute.handler>[0]);
+
+    expect(findLatestPaginated).toHaveBeenCalledWith({
+      page: 2,
+      perPage: 10,
+      rule_uuid: ['rule-1'],
+    });
+  });
+
+  it('returns an empty page without searching detections when no rules match', async () => {
+    const { resources, findLatestPaginated } = createSearchResources([
+      queryLink('rule-1', ['service-b']),
+    ]);
+
+    await expect(
+      searchRoute.handler({
+        ...resources,
+        params: {
+          query: { entityIds: ['service-a'], page: 3, perPage: 10 },
+        },
+      } as unknown as Parameters<typeof searchRoute.handler>[0])
+    ).resolves.toEqual({ hits: [], page: 3, perPage: 10, total: 0 });
+    expect(findLatestPaginated).not.toHaveBeenCalled();
+  });
+
+  it('ignores Unassigned when the live entity set is truncated', async () => {
+    mockGetLiveEntities.mockResolvedValue({ entities: [{ id: 'service-a' }], truncated: true });
+    const { resources, findLatestPaginated } = createSearchResources([
+      queryLink('rule-1', ['service-a']),
+      queryLink('rule-2', []),
+    ]);
+
+    await searchRoute.handler({
+      ...resources,
+      params: {
+        query: { unassignedEntities: true },
+      },
+    } as unknown as Parameters<typeof searchRoute.handler>[0]);
+
+    expect(findLatestPaginated).toHaveBeenCalledWith({
+      rule_uuid: ['rule-1', 'rule-2'],
+    });
+  });
+});
 
 describe('detection write routes', () => {
   it('require the Nightshift manage privilege', () => {
