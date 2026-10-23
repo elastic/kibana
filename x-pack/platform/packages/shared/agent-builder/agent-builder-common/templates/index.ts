@@ -48,7 +48,7 @@ export interface ConversationTemplateFieldDefinition {
   default_value?: MetadataFieldValue;
   /** When true, the field must be non-empty on every metadata write. */
   required?: boolean;
-  /** Prevents adding, changing, or removing the value after the template is applied. */
+  /** Prevents changing the value through metadata patches; creation and template migrations may set it. */
   immutable?: boolean;
   /** SELECT only — the exhaustive set of accepted values. */
   options?: string[];

@@ -1528,7 +1528,8 @@ class ConversationClientImpl implements ConversationClient {
         }
 
         // validateMetadataUpdate throws with accumulated per-field errors if any key is invalid.
-        validateMetadataUpdate(template.id, template.fields, updates);
+        const storedMetadata = (current.metadata ?? {}) as Record<string, SerializedMetadataValue>;
+        validateMetadataUpdate(template.id, template.fields, updates, storedMetadata);
 
         const serialized = Object.fromEntries(
           Object.entries(updates).map(([k, v]) => {
@@ -1536,8 +1537,6 @@ class ConversationClientImpl implements ConversationClient {
             return [k, serializeMetadataValue(v as MetadataFieldValue, def.input_type)];
           })
         );
-
-        const storedMetadata = (current.metadata ?? {}) as Record<string, SerializedMetadataValue>;
 
         // Track which fields actually changed to suppress no-op trigger events.
         const metadata = { ...storedMetadata, ...serialized };
@@ -1760,36 +1759,9 @@ class ConversationClientImpl implements ConversationClient {
         id: conversationId,
         mutate: (current) => {
           before = current;
-          const update = fields(current);
-          // Enforce inside the OCC mutation for every metadata writer, including template migrations.
-          if (current.template_id && ('metadata' in update || 'template_id' in update)) {
-            const template = getTemplate(current.template_id);
-            const immutableFields = Object.entries(template?.fields ?? {})
-              .filter(([, definition]) => definition.immutable)
-              .map(([key]) => key);
-            if (
-              immutableFields.length > 0 &&
-              'template_id' in update &&
-              update.template_id !== current.template_id
-            ) {
-              throw createBadRequestError(
-                'Cannot change a template with immutable metadata fields'
-              );
-            }
-            const changedFields =
-              'metadata' in update
-                ? diffMetadata(current.metadata ?? {}, update.metadata ?? {})
-                : [];
-            const changedImmutableField = changedFields.find((key) =>
-              immutableFields.includes(key)
-            );
-            if (changedImmutableField) {
-              throw createBadRequestError(`Metadata field "${changedImmutableField}" is immutable`);
-            }
-          }
           return updateConversation({
             conversation: current,
-            update: { id: conversationId, ...update },
+            update: { id: conversationId, ...fields(current) },
             updateDate: new Date(),
             space: this.space,
           });
