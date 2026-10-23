@@ -124,11 +124,17 @@ export class ToastsService extends FtrService {
   }
 
   public async getTitleByIndex(index: number): Promise<string> {
-    const resultToast = await this.getElementByIndex(index);
-    const titleElement = await this.testSubjects.findDescendant(
-      'euiToastHeader__title',
-      resultToast
+    // Use a single XPath to locate the nth toast's title in one atomic query, avoiding stale
+    // element exceptions that arise when the DOM mutates between fetching the parent toast and
+    // then doing a second findDescendant call on it. The toast container is matched on the
+    // complete `euiToast` class token (same as the `.euiToast` CSS selector used elsewhere in
+    // this service) so that descendants like `euiToastHeader` do not shift the index. After
+    // locating the element, wait for it to become visible so we don't snapshot the title while
+    // it is still at opacity 0 during the toast fade-in animation.
+    const titleElement = await this.find.byXPath(
+      `(//*[@data-test-subj="globalToastList"]//*[contains(concat(" ", normalize-space(@class), " "), " euiToast ")])[${index}]//*[@data-test-subj="euiToastHeader__title"]`
     );
+    await this.find.waitForElementVisible(titleElement);
     const title: string = await titleElement.getVisibleText();
     return title;
   }
