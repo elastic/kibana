@@ -1013,7 +1013,20 @@ describe('ToolManager', () => {
       expect(toolManager.listDynamicTools()).toEqual([tool]);
       expect(toolManager.getDynamicTool('dynamic-1')).toBe(tool);
       expect(toolManager.list()).toEqual([]);
-      expect(toolManager.getDynamicToolIds()).toEqual([]);
+    });
+
+    it('persists registry ids after the LRU ids', async () => {
+      await toolManager.addTools(
+        {
+          type: ToolManagerToolType.executable,
+          tools: createMockExecutableTool('lru-1'),
+          logger: mockLogger,
+        },
+        { dynamic: true }
+      );
+      await addDynamic([createMockExecutableTool('dynamic-1')]);
+
+      expect(toolManager.getDynamicToolIds()).toEqual(['lru-1', 'dynamic-1']);
     });
 
     it('skips ids already bound natively', async () => {

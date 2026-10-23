@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import type { AfterToolCallHookContext } from '@kbn/agent-builder-server';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
@@ -558,6 +559,72 @@ describe('createLoadSkillToolsAfterRead', () => {
 
       expect(toolHandlerContext.skills.get).not.toHaveBeenCalled();
       expect(toolHandlerContext.toolManager.addTools).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('with dynamic tools enabled', () => {
+    const inlineTool = { id: 'inline-1', type: ToolType.builtin } as SkillBoundedTool;
+    const convertedInline = {
+      id: 'inline-1',
+      description: 'Inline tool',
+      getSchema: () => z.object({ query: z.string() }),
+    } as any;
+    const fileResult = { tool_result_id: 'r-1', type: 'other' as const, data: { body: 'skill' } };
+
+    beforeEach(() => {
+      toolHandlerContext.experimentalFeatures.dynamicTools = true;
+      toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
+      toolHandlerContext.skills.get.mockResolvedValue(
+        createMockSkill({ getInlineTools: jest.fn().mockReturnValue([inlineTool]) })
+      );
+      toolHandlerContext.skills.convertSkillTool.mockReturnValue(convertedInline);
+    });
+
+    it('registers the tools as dynamic tools and appends their definitions to the result', async () => {
+      const context = createHookContext({ toolHandlerContext });
+      context.toolReturn = { results: [fileResult] };
+
+      const hookResult = await loadSkillToolsAfterRead(context);
+
+      expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledTimes(1);
+      expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith({
+        type: ToolManagerToolType.dynamic,
+        tools: [{ ...convertedInline, origin: ToolOrigin.inline }],
+      });
+      expect(hookResult).toEqual({
+        toolReturn: {
+          results: [
+            fileResult,
+            expect.objectContaining({
+              type: 'other',
+              data: {
+                dynamic_tools: [
+                  {
+                    tool_id: 'inline-1',
+                    description: 'Inline tool',
+                    parameters: expect.objectContaining({ required: ['query'] }),
+                  },
+                ],
+              },
+            }),
+          ],
+        },
+      });
+    });
+
+    it('leaves the result alone when the skill has no tools', async () => {
+      toolHandlerContext.skills.get.mockResolvedValue(createMockSkill());
+      const context = createHookContext({ toolHandlerContext });
+      context.toolReturn = { results: [fileResult] };
+
+      await expect(loadSkillToolsAfterRead(context)).resolves.toBeUndefined();
+    });
+
+    it('leaves a prompt return alone', async () => {
+      const context = createHookContext({ toolHandlerContext });
+      context.toolReturn = { prompt: {} as any };
+
+      await expect(loadSkillToolsAfterRead(context)).resolves.toBeUndefined();
     });
   });
 });

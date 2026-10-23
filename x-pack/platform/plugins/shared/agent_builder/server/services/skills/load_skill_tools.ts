@@ -16,8 +16,13 @@ import type {
 } from '@kbn/agent-builder-server';
 import type { RunContext, SkillsService, ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
+import type {
+  DynamicToolDefinition,
+  ExecutableToolWithOrigin,
+} from '@kbn/agent-builder-server/runner/tool_manager';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { pickTools } from '../execution/run_agent/utils/select_tools';
+import { renderDynamicToolDefinition } from '../execution/runner/utils/dynamic_tool_registry';
 import { classifySkill } from '../../telemetry/utils';
 
 export const MAX_SKILL_REGISTRY_TOOLS = 25;
@@ -32,6 +37,12 @@ export interface LoadSkillToolsParams {
   runContext: RunContext;
   analyticsService?: AgentBuilderAnalytics;
   trackingService?: AgentBuilderTracking;
+  dynamicToolsEnabled?: boolean;
+}
+
+export interface LoadSkillToolsResult {
+  loadedToolIds: string[];
+  dynamicTools: DynamicToolDefinition[];
 }
 
 /**
@@ -39,8 +50,7 @@ export interface LoadSkillToolsParams {
  * emits SkillInvoked telemetry. Used by both the load_skill builtin tool and
  * the legacy load_skill_tools_after_read hook.
  *
- * Returns the ids of the tools that were registered (inline first, then
- * registry). Throws if the skill exceeds MAX_SKILL_REGISTRY_TOOLS registry tools.
+ * Throws if the skill exceeds MAX_SKILL_REGISTRY_TOOLS registry tools.
  */
 export const loadSkillTools = async ({
   skill,
@@ -52,7 +62,8 @@ export const loadSkillTools = async ({
   runContext,
   analyticsService,
   trackingService,
-}: LoadSkillToolsParams): Promise<string[]> => {
+  dynamicToolsEnabled = false,
+}: LoadSkillToolsParams): Promise<LoadSkillToolsResult> => {
   const inlineTools = (await skill.getInlineTools?.()) ?? [];
   const inlineExecutableTools = inlineTools.map((tool) => ({
     ...skillsService.convertSkillTool(tool),
@@ -76,14 +87,10 @@ export const loadSkillTools = async ({
         ).map((tool) => ({ ...tool, origin: ToolOrigin.registry }))
       : [];
 
-  await toolManager.addTools(
-    {
-      type: ToolManagerToolType.executable,
-      tools: [...inlineExecutableTools, ...registryExecutableTools],
-      logger,
-    },
-    { dynamic: true }
-  );
+  const tools = [...inlineExecutableTools, ...registryExecutableTools];
+  const result = dynamicToolsEnabled
+    ? await registerAsDynamicTools({ tools, toolManager })
+    : await bindToModel({ tools, toolManager, logger });
 
   try {
     const agentContext = getAgentFromRunContext(runContext);
@@ -103,5 +110,41 @@ export const loadSkillTools = async ({
     logger.warn(`Failed to report SkillInvoked telemetry: ${e}`);
   }
 
-  return [...inlineExecutableTools.map((t) => t.id), ...registryExecutableTools.map((t) => t.id)];
+  return result;
+};
+
+/** Legacy path: binds the tools to the model, subject to the tool manager's LRU eviction. */
+const bindToModel = async ({
+  tools,
+  toolManager,
+  logger,
+}: {
+  tools: ExecutableToolWithOrigin[];
+  toolManager: ToolManager;
+  logger: Logger;
+}): Promise<LoadSkillToolsResult> => {
+  await toolManager.addTools(
+    { type: ToolManagerToolType.executable, tools, logger },
+    { dynamic: true }
+  );
+  return { loadedToolIds: tools.map((tool) => tool.id), dynamicTools: [] };
+};
+
+/**
+ * Registers the tools as dynamic tools and renders a definition for each. A tool already bound
+ * natively is skipped by the tool manager but still gets a definition: `execute_dynamic_tool`
+ * falls back to the native tool, so the model can call it either way.
+ */
+const registerAsDynamicTools = async ({
+  tools,
+  toolManager,
+}: {
+  tools: ExecutableToolWithOrigin[];
+  toolManager: ToolManager;
+}): Promise<LoadSkillToolsResult> => {
+  await toolManager.addTools({ type: ToolManagerToolType.dynamic, tools });
+  return {
+    loadedToolIds: tools.map((tool) => tool.id),
+    dynamicTools: await Promise.all(tools.map(renderDynamicToolDefinition)),
+  };
 };
