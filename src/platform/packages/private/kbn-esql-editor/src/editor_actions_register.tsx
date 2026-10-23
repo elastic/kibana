@@ -39,9 +39,6 @@ export const EsqlEditorActionsRegister = (props: EsqlEditorActionsRegisterProps)
       get isHistoryOpen() {
         return propsRef.current.isHistoryOpen ?? false;
       },
-      get isVisorOpen() {
-        return propsRef.current.isVisorOpen ?? false;
-      },
       get isCurrentQueryStarred() {
         return propsRef.current.isCurrentQueryStarred ?? false;
       },

@@ -26,7 +26,6 @@ interface UseEsqlEditorActionsParams {
   setIsLanguageComponentOpen: (value: boolean) => void;
   setIsCurrentQueryStarred: (value: boolean) => void;
   trackQueryHistoryOpened: (isOpen: boolean) => void;
-  isVisorOpen: boolean;
   isVisorOpenRef: MutableRefObject<boolean>;
   setIsVisorOpen: (value: boolean) => void;
 }
@@ -44,7 +43,6 @@ export function useEsqlEditorActions({
   setIsLanguageComponentOpen,
   setIsCurrentQueryStarred,
   trackQueryHistoryOpened,
-  isVisorOpen,
   isVisorOpenRef,
   setIsVisorOpen,
 }: UseEsqlEditorActionsParams): {
@@ -105,7 +103,6 @@ export function useEsqlEditorActions({
       toggleLanguageComponent: onToggleLanguageComponent,
       submitEsqlQuery: onSubmitEsqlQuery,
       isHistoryOpen,
-      isVisorOpen,
       isCurrentQueryStarred,
       canToggleStarredQuery: Boolean(starredQueriesService && trimmedQuery),
       currentQuery: code,
@@ -116,7 +113,6 @@ export function useEsqlEditorActions({
       editorIsInline,
       isCurrentQueryStarred,
       isHistoryOpen,
-      isVisorOpen,
       onSubmitEsqlQuery,
       onToggleHistory,
       onToggleLanguageComponent,

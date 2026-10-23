@@ -15,7 +15,6 @@ export interface EsqlEditorActions {
   toggleLanguageComponent: () => void;
   submitEsqlQuery: (query: string) => void;
   isHistoryOpen: boolean;
-  isVisorOpen: boolean;
   isCurrentQueryStarred: boolean;
   canToggleStarredQuery: boolean;
   currentQuery: string;

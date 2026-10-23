@@ -12,9 +12,10 @@ import type { EuiFlyoutProps } from '@elastic/eui';
 import { StardustWrapper } from '@kbn/content-management-favorites-public';
 import { useEsqlEditorActions } from '../editor_actions_context';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
+import { searchPlaceholder } from '../editor_visor/visor_i18n';
 import { KeyboardShortcuts } from '../editor_footer/keyboard_shortcuts';
 import { QueryWrapComponent } from '../editor_footer/query_wrap_component';
-import { VisorToggleButton } from './visor_toggle_button';
+import { MagnifySparklesIcon } from './magnify_sparkles_icon';
 import { CreateViewModal, createViewLabel } from '../save_as_view/create_view_modal';
 import { ViewCreatedSource } from '../telemetry/telemetry_service';
 import { useApplySavedView } from '../save_as_view/use_apply_saved_view';
@@ -66,7 +67,6 @@ export function ESQLMenu({
   const visorTooltip = isNlToEsqlEnabled ? searchWithNlTooltipLabel : searchTooltipLabel;
   const isInline = editorActions?.editorIsInline;
   const onToggleVisor = editorActions?.toggleVisor;
-  const isVisorOpen = Boolean(editorActions?.isVisorOpen);
   const onToggleHistory = editorActions?.toggleHistory;
   const onToggleStarredQuery = editorActions?.toggleStarredQuery;
   const historyLabel = editorActions?.isHistoryOpen ? hideHistoryLabel : showHistoryLabel;
@@ -179,12 +179,17 @@ export function ESQLMenu({
       </EuiFlexItem>
       {isInline && !hideVisor && (
         <EuiFlexItem grow={false}>
-          <VisorToggleButton
-            isNlToEsqlEnabled={isNlToEsqlEnabled}
-            isVisorOpen={isVisorOpen}
-            tooltip={visorTooltip}
-            onToggle={onToggleVisor}
-          />
+          <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'search'}
+              size="xs"
+              aria-label={searchPlaceholder}
+              onClick={onToggleVisor}
+              isDisabled={!onToggleVisor}
+              data-test-subj="esql-menu-button"
+              color="text"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       )}
       {queryToSave !== undefined && (
