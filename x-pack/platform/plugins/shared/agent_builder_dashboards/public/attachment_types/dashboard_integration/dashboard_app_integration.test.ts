@@ -11,7 +11,10 @@ import type { ChatEvent, Conversation } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
-import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
+import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  dashboardStateToAttachmentData,
+} from '@kbn/agent-builder-dashboards-common';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import type { DashboardApi, DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
 import {
@@ -121,6 +124,7 @@ describe('registerDashboardAppIntegration', () => {
   let mockApi: MockDashboardApi;
   let chatEventsByConversationId: Map<string, Subject<ChatEvent>>;
   let addAttachment: jest.Mock;
+  let removeAttachment: jest.Mock;
   let updateAttachmentOrigin: jest.Mock;
   let getUpdateOrigin: jest.Mock;
   let checkSavedDashboardExist: jest.Mock;
@@ -141,6 +145,7 @@ describe('registerDashboardAppIntegration', () => {
     mockApi = createMockDashboardApi(mockAnyStateChange$.pipe(skip(1)));
     chatEventsByConversationId = new Map();
     addAttachment = jest.fn();
+    removeAttachment = jest.fn();
     updateAttachmentOrigin = jest.fn().mockResolvedValue(undefined);
     getUpdateOrigin = jest.fn(
       (attachmentId: string) => async (origin: string) =>
@@ -168,6 +173,7 @@ describe('registerDashboardAppIntegration', () => {
     const activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
     const agentBuilder = {
       addAttachment,
+      removeAttachment,
       updateAttachmentOrigin,
       events: {
         getChatEvents$: jest.fn((conversationId: string) => {
@@ -216,6 +222,25 @@ describe('registerDashboardAppIntegration', () => {
         origin: 'dashboard-1',
       })
     );
+  });
+
+  it('drops the staged copy instead of re-attaching a dashboard that matches its latest version', () => {
+    const attachment = createDashboardAttachment({
+      origin: 'dashboard-1',
+      data: dashboardStateToAttachmentData(mockApi.getSerializedState().attributes),
+    });
+    mockApi.savedObjectId$.next('dashboard-1');
+    register();
+    emitConversationChange({
+      id: 'conversation-1',
+      attachments: [createVersionedAttachment(attachment)],
+    });
+
+    simulateDashboardStateChange();
+    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+
+    expect(addAttachment).not.toHaveBeenCalled();
+    expect(removeAttachment).toHaveBeenCalledWith('dashboard-attachment-id');
   });
 
   it('selects the matching existing dashboard attachment for manual sync', () => {

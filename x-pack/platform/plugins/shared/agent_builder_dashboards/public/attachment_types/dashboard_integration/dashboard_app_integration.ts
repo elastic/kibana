@@ -6,6 +6,7 @@
  */
 
 import { debounceTime, Observable } from 'rxjs';
+import { isEqual } from 'lodash';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
@@ -77,6 +78,12 @@ export const registerDashboardAppIntegration = ({
     const dashboardId = api.savedObjectId$.getValue();
     const syncAttachment = state.attachments?.find(({ origin }) => origin === dashboardId);
     const dashboardData = dashboardStateToAttachmentData(api.getSerializedState().attributes);
+
+    // The latest version already matches the dashboard: drop any staged copy instead of re-attaching it.
+    if (syncAttachment && isEqual(syncAttachment.data, dashboardData)) {
+      agentBuilder.removeAttachment(syncAttachment.id);
+      return;
+    }
 
     // update an existing linked attachment, or add a draft attachment only when the conversation is new
     if (syncAttachment || !state.conversationId) {
