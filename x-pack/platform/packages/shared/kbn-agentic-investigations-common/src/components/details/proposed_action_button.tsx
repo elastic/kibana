@@ -57,6 +57,8 @@ export interface ProposedActionButtonProps {
 const ACTOR_OUTCOME_BY_STATUS: Partial<Record<ApprovalPhase, ApprovalActorTimeProps['outcome']>> = {
   applied: 'approved',
   applying: 'approved',
+  // A to-do proposal, marked as applied by the human who carried it out.
+  marked_applied: 'applied',
   declined: 'declined',
   failed: 'executed',
 };

@@ -1,5 +1,5 @@
 {
-  "sha1": "0132aff9757c72ab9e7fb226ec0fefd11f431669",
+  "sha1": "9a2b61851c701032c3db08aacf698a4229d20a71",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/api/tests/get_file_download.spec.ts",
-        "line": 98,
-        "column": 26
+        "line": 68,
+        "column": 41
       }
     },
     {
