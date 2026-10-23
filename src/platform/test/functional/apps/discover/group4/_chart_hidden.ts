@@ -38,6 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace(defaultSettings);
       await common.navigateToApp('discover');
       await timePicker.setDefaultAbsoluteRange();
+      await discover.waitUntilSearchingHasFinished();
     });
 
     after(async () => {
