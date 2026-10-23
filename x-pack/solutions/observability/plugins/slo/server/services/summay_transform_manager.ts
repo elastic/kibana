@@ -9,7 +9,7 @@ import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/ap
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { SLODefinition } from '../domain/models';
 import { SecurityException } from '../errors';
-import { retryTransientEsErrors } from '../utils/retry';
+import { ignoreAlreadyExistsAfterAmbiguousFailure, retryTransientEsErrors } from '../utils/retry';
 import type { SummaryTransformGenerator } from './summary_transform_generator/summary_transform_generator';
 import type { TransformManager } from './transform_manager';
 
@@ -27,10 +27,11 @@ export class DefaultSummaryTransformManager implements TransformManager {
     const transformParams = await this.generator.generate(slo);
     try {
       await retryTransientEsErrors(
-        () =>
+        ignoreAlreadyExistsAfterAmbiguousFailure(() =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.putTransform(transformParams, {
             signal: this.signal,
-          }),
+          })
+        ),
         {
           logger: this.logger,
         }

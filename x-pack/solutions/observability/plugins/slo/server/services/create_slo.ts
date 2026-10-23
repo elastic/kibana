@@ -176,11 +176,14 @@ export class CreateSLO {
   private async deleteTempSummaryDocument(slo: SLODefinition) {
     return retryTransientEsErrors(
       () =>
-        this.scopedClusterClient.asCurrentUser.delete({
-          index: SUMMARY_TEMP_INDEX_NAME,
-          id: `slo-${slo.id}`,
-          refresh: true,
-        }),
+        this.scopedClusterClient.asCurrentUser.delete(
+          {
+            index: SUMMARY_TEMP_INDEX_NAME,
+            id: `slo-${slo.id}`,
+            refresh: true,
+          },
+          { ignore: [404] }
+        ),
       { logger: this.logger }
     );
   }
