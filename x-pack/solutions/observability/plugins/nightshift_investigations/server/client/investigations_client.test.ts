@@ -427,11 +427,12 @@ describe('NightshiftInvestigationsClient.start()', () => {
   });
 
   it('installs the assistant in the investigation space when it is enabled', async () => {
+    // Investigations only start through the space's bound entry point.
     mockManagement.getWorkflow.mockResolvedValue({
-      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      id: BOUND_WORKFLOW_ID,
       enabled: true,
       valid: true,
-      definition: { steps: [] },
+      definition: BOUND_DEFINITION,
     });
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
@@ -450,11 +451,12 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
   it('starts the investigation when installing the assistant fails', async () => {
     installAssistantAgentMock.mockRejectedValueOnce(new Error('assistant install failed'));
+    // Investigations only start through the space's bound entry point.
     mockManagement.getWorkflow.mockResolvedValue({
-      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      id: BOUND_WORKFLOW_ID,
       enabled: true,
       valid: true,
-      definition: { steps: [] },
+      definition: BOUND_DEFINITION,
     });
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
