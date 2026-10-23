@@ -19,9 +19,8 @@ spec:
       description: Runs manually for pull requests
     spec:
       env:
-        ELASTIC_PR_COMMENTS_ENABLED: 'true'
-        PR_COMMENTS_SKIP_EARLY_SECONDARY_FAILURES: 'true'
-        ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
+        KIBANA_PR_COMMENTS_ENABLED: 'true'
+        KIBANA_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
         GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-ci
         SCOUT_REPORTER_ENABLED: 'true'
         SCOUT_TEST_RUN_SCOPE: 'pull-request'
