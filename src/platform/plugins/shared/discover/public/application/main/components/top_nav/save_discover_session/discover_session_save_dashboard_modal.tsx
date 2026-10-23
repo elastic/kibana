@@ -56,7 +56,7 @@ export const DiscoverSessionSaveDashboardModal: FC<DiscoverSessionSaveDashboardM
   title,
 }) => {
   const [selectedTags, setSelectedTags] = useState(initialTags);
-  const [timeRestore, setTimeRestore] = useState(Boolean(isTimeBased && initialTimeRestore));
+  const [timeRestore, setTimeRestore] = useState(Boolean(initialTimeRestore));
 
   const customModalTitle = (
     <>

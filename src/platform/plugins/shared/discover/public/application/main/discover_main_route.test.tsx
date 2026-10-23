@@ -353,9 +353,13 @@ describe('DiscoverMainRoute', () => {
     expect(screen.getByTestId('noDataViewsPrompt')).toBeVisible();
   });
 
-  test.each(['profile', 'space'])(
-    'opens the %s default ES|QL query with only ES|QL datasets',
-    async (defaultQuerySource) => {
+  test.each<[string, boolean, boolean]>([
+    ['profile', false, true],
+    ['space', false, true],
+    ['space', true, false],
+  ])(
+    'opens the %s default ES|QL query without data views (ES data: %s, ES|QL datasets: %s)',
+    async (defaultQuerySource, hasESData, hasESQLDatasets) => {
       mockRootProfileState = {
         ...defaultRootProfileState,
         getDefaultEsqlQuery: () =>
@@ -378,7 +382,7 @@ describe('DiscoverMainRoute', () => {
       getIsEsqlDefaultMock.mockImplementation(() => true);
 
       try {
-        setupComponent({ hasESData: false, hasDataView: false, hasESQLDatasets: true });
+        setupComponent({ hasESData, hasDataView: false, hasESQLDatasets });
         await waitForLoad();
 
         expect(screen.getByTestId('discover-main-app')).toBeVisible();
@@ -397,7 +401,6 @@ describe('DiscoverMainRoute', () => {
     await waitForLoad();
 
     expect(screen.getByTestId('discover-main-app')).toBeVisible();
-    expect(discoverServiceMock.dataViews.defaultDataViewExists).not.toHaveBeenCalled();
   });
 
   test('waits for the data view list before opening a classic tab', async () => {

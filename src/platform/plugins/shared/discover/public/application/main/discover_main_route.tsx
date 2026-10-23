@@ -178,6 +178,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
 
   useEffect(() => {
     loadDataAvailability();
+    // Start loading the list early so classic tabs can reuse the request when they initialize.
     dispatch(internalStateActions.loadDataViewListOnce());
   }, [dispatch, loadDataAvailability]);
 
@@ -319,7 +320,7 @@ const fetchDataAvailability = async ({
   const hasDataView = await dataViews.hasData.hasDataView().catch(() => false);
 
   if (hasDataView) {
-    // With a data view, neither onboarding check needs the ES data result.
+    // With a data view, the welcome page and the tab's data view prompt don't read hasESData.
     return { hasESData: true, hasDataView };
   }
 

@@ -153,6 +153,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       : undefined;
 
     const hasGlobalState = Object.keys(urlGlobalState || {}).length > 0;
+    const locationStateHasDataViewSpec = Boolean(dataViewSpec);
     const restoredQuery = urlAppState?.query ?? persistedTab?.serializedSearchSource.query;
     const configuredEsqlQuery = getConfiguredDefaultEsqlQuery({
       initialUrlState: urlAppState,
@@ -160,7 +161,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       persistedTab,
       services,
       defaultProfileEsqlQuery,
-      locationStateHasDataViewSpec: Boolean(dataViewSpec),
+      locationStateHasDataViewSpec,
     });
     const initialQuery = restoredQuery ?? configuredEsqlQuery;
     const isEsqlMode = isOfAggregateQueryType(initialQuery);
@@ -196,7 +197,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       .filter(({ id }) => id && defaultProfileAdHocDataViewIds.includes(id));
 
     const profileDataViewsExist = profileDataViews.length > 0;
-    const locationStateHasDataViewSpec = Boolean(dataViewSpec);
     const canAccessWithoutPersistedDataView =
       isEsqlMode ||
       tabHasInitialAdHocDataViewSpec ||
