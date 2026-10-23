@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 
 interface ActivityLogView {
   isOpen: boolean;
-  open: () => void;
+  open: (returnFocusTo?: HTMLElement | null) => void;
   close: () => void;
 }
 
@@ -19,13 +19,24 @@ const ActivityLogViewContext = createContext<ActivityLogView | undefined>(undefi
 export const ActivityLogViewProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const conversationId = useConversationId();
   const [isOpen, setIsOpen] = useState(false);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     setIsOpen(false);
   }, [conversationId]);
 
   const value = useMemo<ActivityLogView>(
-    () => ({ isOpen, open: () => setIsOpen(true), close: () => setIsOpen(false) }),
+    () => ({
+      isOpen,
+      open: (returnFocusTo) => {
+        returnFocusRef.current = returnFocusTo ?? null;
+        setIsOpen(true);
+      },
+      close: () => {
+        setIsOpen(false);
+        returnFocusRef.current?.focus();
+      },
+    }),
     [isOpen]
   );
 

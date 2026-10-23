@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useConversationFlyoutSessionProps } from '../../../hooks/use_conversation_flyout_session_props';
 import { ActivityLogContent, activityLogTitle } from './activity_log_content';
 
 const FLYOUT_WIDTH = 500;
@@ -21,28 +20,23 @@ interface ActivityLogFlyoutProps {
   onClose: () => void;
 }
 
-export const ActivityLogFlyout: React.FC<ActivityLogFlyoutProps> = ({ onClose }) => {
-  const flyoutSessionProps = useConversationFlyoutSessionProps(activityLogTitle);
-
-  return (
-    <EuiFlyout
-      type="push"
-      size={FLYOUT_WIDTH}
-      ownFocus={false}
-      onClose={onClose}
-      closeButtonProps={{ 'aria-label': closeAriaLabel }}
-      aria-labelledby="agentBuilderActivityLogTitle"
-      data-test-subj="agentBuilderActivityLogFlyout"
-      {...flyoutSessionProps}
-    >
-      <EuiFlyoutHeader>
-        <EuiTitle size="s">
-          <h2 id="agentBuilderActivityLogTitle">{activityLogTitle}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <ActivityLogContent />
-      </EuiFlyoutBody>
-    </EuiFlyout>
-  );
-};
+export const ActivityLogFlyout: React.FC<ActivityLogFlyoutProps> = ({ onClose }) => (
+  <EuiFlyout
+    type="push"
+    size={FLYOUT_WIDTH}
+    ownFocus={false}
+    onClose={onClose}
+    closeButtonProps={{ 'aria-label': closeAriaLabel }}
+    aria-labelledby="agentBuilderActivityLogTitle"
+    data-test-subj="agentBuilderActivityLogFlyout"
+  >
+    <EuiFlyoutHeader>
+      <EuiTitle size="s">
+        <h2 id="agentBuilderActivityLogTitle">{activityLogTitle}</h2>
+      </EuiTitle>
+    </EuiFlyoutHeader>
+    <EuiFlyoutBody>
+      <ActivityLogContent />
+    </EuiFlyoutBody>
+  </EuiFlyout>
+);

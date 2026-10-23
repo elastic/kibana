@@ -14,7 +14,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AGENT_BUILDER_UI_EBT, DEFAULT_CONVERSATION_TITLE } from '@kbn/agent-builder-common';
 import { downloadFileAs } from '@kbn/share-plugin/public';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -79,6 +79,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
   const embeddedActivityLog = useActivityLogView();
+  const moreActionsButtonRef = useRef<HTMLButtonElement>(null);
 
   const agentId = useAgentId();
   const { createAgentBuilderUrl, navigateToAgentBuilderUrl } = useNavigation();
@@ -141,7 +142,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   const handleOpenActivityLog = useCallback(() => {
     setIsPopoverOpen(false);
     if (embeddedActivityLog) {
-      embeddedActivityLog.open();
+      embeddedActivityLog.open(moreActionsButtonRef.current);
       return;
     }
     setIsActivityLogOpen(true);
@@ -281,6 +282,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
       ];
 
   const buttonProps = {
+    buttonRef: moreActionsButtonRef,
     iconType: 'boxesVertical' as const,
     color: 'text' as const,
     size: 's' as const,

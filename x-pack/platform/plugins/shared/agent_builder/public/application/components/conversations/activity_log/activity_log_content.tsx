@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiEmptyPrompt,
@@ -35,7 +35,12 @@ import { useUserProfiles } from '../../../hooks/use_user_profiles';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../hooks/use_kibana';
-import { findTriggeringUser, getTemplateDisplayName, toActivityItems } from './to_activity_items';
+import {
+  findTriggeringUser,
+  getTemplateDisplayName,
+  resolveTimeZone,
+  toActivityItems,
+} from './to_activity_items';
 
 const COLLAPSED_PARTICIPANTS = 5;
 
@@ -81,7 +86,7 @@ const participantsOf = (event: ActivityEvent): ConversationParticipant[] =>
     ? event.data.participants
     : [];
 
-const Strong = ({ children }: { children: React.ReactNode }) => (
+const Highlight = ({ children }: { children: React.ReactNode }) => (
   <EuiTextColor color="default">{children}</EuiTextColor>
 );
 
@@ -151,7 +156,7 @@ const EventSentence = ({
   actor: React.ReactNode;
   templateName?: string;
 }): React.ReactElement | null => {
-  const actorNode = <Strong>{actor}</Strong>;
+  const actorNode = <Highlight>{actor}</Highlight>;
 
   switch (event.type) {
     case ConversationActivityEventType.conversationCreated:
@@ -159,7 +164,7 @@ const EventSentence = ({
         <FormattedMessage
           id="xpack.agentBuilder.activityLog.conversationCreatedFromTemplate"
           defaultMessage="{actor} created this chat from {template}"
-          values={{ actor: actorNode, template: <Strong>{templateName}</Strong> }}
+          values={{ actor: actorNode, template: <Highlight>{templateName}</Highlight> }}
         />
       ) : (
         <FormattedMessage
@@ -173,7 +178,7 @@ const EventSentence = ({
         <FormattedMessage
           id="xpack.agentBuilder.activityLog.titleUpdated"
           defaultMessage="{actor} changed the title of the chat to {title}"
-          values={{ actor: actorNode, title: <Strong>{event.data.title}</Strong> }}
+          values={{ actor: actorNode, title: <Highlight>{event.data.title}</Highlight> }}
         />
       );
     case ConversationActivityEventType.participantsAdded:
@@ -199,8 +204,8 @@ const EventSentence = ({
           defaultMessage="{actor} changed visibility from {previous} to {current}"
           values={{
             actor: actorNode,
-            previous: <Strong>{visibilityLabels[event.data.previous_access_mode]}</Strong>,
-            current: <Strong>{visibilityLabels[event.data.access_mode]}</Strong>,
+            previous: <Highlight>{visibilityLabels[event.data.previous_access_mode]}</Highlight>,
+            current: <Highlight>{visibilityLabels[event.data.access_mode]}</Highlight>,
           }}
         />
       );
@@ -209,7 +214,10 @@ const EventSentence = ({
         <FormattedMessage
           id="xpack.agentBuilder.activityLog.attachmentAdded"
           defaultMessage="{actor} added attachment {attachment}"
-          values={{ actor: actorNode, attachment: <Strong>{event.data.attachment_type}</Strong> }}
+          values={{
+            actor: actorNode,
+            attachment: <Highlight>{event.data.attachment_type}</Highlight>,
+          }}
         />
       );
     case TimelineEventType.attachmentUpdated:
@@ -217,7 +225,10 @@ const EventSentence = ({
         <FormattedMessage
           id="xpack.agentBuilder.activityLog.attachmentUpdated"
           defaultMessage="{actor} updated attachment {attachment}"
-          values={{ actor: actorNode, attachment: <Strong>{event.data.attachment_type}</Strong> }}
+          values={{
+            actor: actorNode,
+            attachment: <Highlight>{event.data.attachment_type}</Highlight>,
+          }}
         />
       );
     default:
@@ -272,9 +283,7 @@ export const ActivityLogContent: React.FC = () => {
   );
   const { agents } = useAgentBuilderAgents({ includeHidden: true });
 
-  const configuredTimeZone = settings?.client.get<string>('dateFormat:tz');
-  const timeZone =
-    configuredTimeZone && configuredTimeZone !== 'Browser' ? configuredTimeZone : undefined;
+  const timeZone = resolveTimeZone(settings?.client.get<string>('dateFormat:tz'));
   const agentNames = useMemo(() => new Map(agents.map(({ id, name }) => [id, name])), [agents]);
 
   const uids = useMemo(
@@ -286,11 +295,13 @@ export const ActivityLogContent: React.FC = () => {
       ]),
     [rows]
   );
-  const { data: profileList = [], isInitialLoading: isLoadingProfiles } = useUserProfiles({ uids });
-  const profiles = useMemo(
-    () => new Map(profileList.map((profile) => [profile.uid, profile])),
-    [profileList]
-  );
+  const { data: profileList, isInitialLoading } = useUserProfiles({ uids });
+  const knownProfilesRef = useRef(new Map<string, UserProfileWithAvatar>());
+  const profiles = useMemo(() => {
+    profileList?.forEach((profile) => knownProfilesRef.current.set(profile.uid, profile));
+    return new Map(knownProfilesRef.current);
+  }, [profileList]);
+  const isLoadingProfiles = isInitialLoading && profiles.size === 0;
 
   const items = useMemo<EuiTimelineItemProps[]>(() => {
     const userName = ({ id, full_name: fullName, username }: EventActor): string => {
@@ -326,7 +337,6 @@ export const ActivityLogContent: React.FC = () => {
       return {
         key: event.id,
         icon: eventIcons[event.type] ?? 'dot',
-        iconAriaLabel: event.type,
         children: (
           <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={false}>

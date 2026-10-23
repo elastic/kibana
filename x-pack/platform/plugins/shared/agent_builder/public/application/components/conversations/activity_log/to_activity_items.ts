@@ -20,6 +20,18 @@ const HIDDEN_EVENT_TYPES: ReadonlySet<string> = new Set([
   TimelineEventType.attachmentDeleted,
 ]);
 
+export const resolveTimeZone = (configured?: string): string | undefined => {
+  if (!configured || configured === 'Browser') {
+    return undefined;
+  }
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: configured });
+    return configured;
+  } catch {
+    return undefined;
+  }
+};
+
 export const getTemplateDisplayName = (templateId: string, registeredName?: string): string => {
   if (registeredName) {
     return registeredName;

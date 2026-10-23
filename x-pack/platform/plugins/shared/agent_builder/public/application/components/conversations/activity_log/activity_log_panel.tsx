@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -21,6 +21,11 @@ interface ActivityLogPanelProps {
 
 export const ActivityLogPanel: React.FC<ActivityLogPanelProps> = ({ onClose }) => {
   const { euiTheme } = useEuiTheme();
+  const titleRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    titleRef.current?.focus();
+  }, []);
 
   return (
     <EuiFlexGroup
@@ -49,7 +54,9 @@ export const ActivityLogPanel: React.FC<ActivityLogPanelProps> = ({ onClose }) =
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiTitle size="s">
-          <h2>{activityLogTitle}</h2>
+          <h2 ref={titleRef} tabIndex={-1}>
+            {activityLogTitle}
+          </h2>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
