@@ -103,10 +103,12 @@ if [[ "${EVAL_SHARD_ID:-}" == orcabench || "${NIGHTSHIFT_DATASETS:-}" == orcaben
   # Replace only this process's target; the existing Nightshift secret is never modified. The
   # hint lands in the agent's manifest, so it comes from config (where a change shows up as a
   # benchmark change) and the fallback names the indices without hinting at an incident window.
+  # A profile's named default must not override the ORCA shard's telemetry connector.
   config="$(printf '%s' "$config" | HOOK_ORCA_CONFIG="$orca_config" jq '
     .nightshift.telemetry = ({
       readableIndices: "Read logs-orcabench.otel-*, traces-orcabench.otel-* and metrics-orcabench.otel-*."
-    } + ($ENV.HOOK_ORCA_CONFIG | fromjson | with_entries(select(.value != null))))')"
+    } + ($ENV.HOOK_ORCA_CONFIG | fromjson | with_entries(select(.value != null))))
+    | del(.nightshift.defaultTelemetryTarget)')"
 fi
 
 # The telemetry URL and key come from one source, so a partial profile block is never completed
@@ -180,14 +182,14 @@ if [[ "$named_targets" != '{}' || -n "$default_telemetry_target" && -n "$api_key
         "xpack.actions.preconfigured": (($targets | map({
           key: ("nightshift-evals-telemetry-" + .value),
           value: {
-            name: ("Elasticsearch telemetry: " + .value), actionTypeId: ".webhook",
-            config: {url: ("${NIGHTSHIFT_TELEMETRY_TARGET_" + (.key | tostring) + "_URL}"), method: "post", hasAuth: false, authType: null},
+            name: ("Elasticsearch telemetry: " + .value), actionTypeId: ".http",
+            config: {url: ("${NIGHTSHIFT_TELEMETRY_TARGET_" + (.key | tostring) + "_URL}"), hasAuth: false, authType: null},
             secrets: {secretHeaders: {Authorization: ("ApiKey ${NIGHTSHIFT_TELEMETRY_TARGET_" + (.key | tostring) + "_API_KEY}")}}
           }
         }) | from_entries) + (if $ENV.HOOK_HAS_LEGACY != "" then {
           "nightshift-evals-telemetry": {
-            name: "Remote Elasticsearch telemetry", actionTypeId: ".webhook",
-            config: {url: "${NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL}", method: "post", hasAuth: false, authType: null},
+            name: "Remote Elasticsearch telemetry", actionTypeId: ".http",
+            config: {url: "${NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL}", hasAuth: false, authType: null},
             secrets: {secretHeaders: {Authorization: "ApiKey ${NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY}"}}
           }
         } else {} end)),
