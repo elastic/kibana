@@ -25,6 +25,7 @@ import type {
 import type { UpdateESQLQueryFn } from '../../../../../context_awareness';
 import type { CascadedDocumentsFetcher } from '../../../data_fetching/cascaded_documents_fetcher';
 import type { RenderViewModeToggle } from '../../../../../components/view_mode_toggle';
+import type { FetchStatus } from '../../../../types';
 
 export type CascadedDocumentsDataGridUiStateMap = Record<
   string,
@@ -37,6 +38,8 @@ export interface CascadedDocumentsContext
   cascadedLeafDataSource: DataSource | undefined;
   esqlQuery: AggregateQuery;
   esqlVariables: ESQLControlVariable[] | undefined;
+  documentsFetchStatus: FetchStatus;
+  documentsQuery: string | undefined;
   timeRange: TimeRange | undefined;
   esqlApproximation: boolean;
   renderViewModeToggle: RenderViewModeToggle | undefined;

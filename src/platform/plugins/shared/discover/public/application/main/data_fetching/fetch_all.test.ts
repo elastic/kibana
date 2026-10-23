@@ -283,6 +283,10 @@ describe('test fetchAll', () => {
         result: documents,
         dataSource: expect.objectContaining({ id: 'mock-esql-source' }),
         query,
+        requestContext: {
+          timeRange: undefined,
+          esqlVariables: [],
+        },
       },
     ]);
   });

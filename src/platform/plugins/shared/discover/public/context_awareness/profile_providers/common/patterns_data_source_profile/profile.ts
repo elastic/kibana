@@ -20,6 +20,12 @@ import { createElement } from 'react';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
+import {
+  createPatternsHistogramComparison,
+  getComparableCategorizeColumn,
+  getPatternsRowAdditionalLeadingControls,
+  publishPatternsHistogramComparison,
+} from './histogram_comparison';
 import { getPatternCellRenderer } from './pattern_cell_renderer';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { SparklineCellRenderer } from '../sparkline_data_source_profile/sparkline_cell_renderer';
@@ -128,6 +134,24 @@ export const createPatternsDataSourceProfileProvider = (
             },
           },
         ];
+      },
+    getRowAdditionalLeadingControls: getPatternsRowAdditionalLeadingControls,
+    getHistogramComparison:
+      (prev, { toolkit }) =>
+      (params) => {
+        const esql = isOfAggregateQueryType(params.query) ? params.query.esql : undefined;
+        if (!getComparableCategorizeColumn(esql)) {
+          return prev(params);
+        }
+
+        return createPatternsHistogramComparison(toolkit, params);
+      },
+    publishHistogramComparison:
+      (prev, { toolkit }) =>
+      (params) => {
+        if (!publishPatternsHistogramComparison(toolkit, params)) {
+          prev(params);
+        }
       },
     getDefaultAppState: (prev) => (params) => {
       return {

@@ -43,6 +43,7 @@ import { useUnifiedHistogramRuntimeState } from './use_unified_histogram_runtime
 import { useUnifiedHistogramCommon } from './use_unified_histogram_common';
 import type { ChartSectionConfiguration } from '../../../../context_awareness/types';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { useHistogramComparison } from './use_histogram_comparison';
 
 export type ChartPortalNode = HtmlPortalNode;
 export type ChartPortalNodes = Record<string, ChartPortalNode>;
@@ -196,6 +197,12 @@ const UnifiedHistogramWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) =
     layoutProps: unifiedHistogram.layoutProps,
     panelsToggle,
   });
+  const chartProps = unifiedHistogram.isInitialized ? unifiedHistogram.chartProps : undefined;
+  const comparison = useHistogramComparison({
+    query: chartProps?.fetchParams.query,
+    esqlVariables: chartProps?.fetchParams.esqlVariables,
+    defaultHistogramAvailable: Boolean(chartProps?.isChartAvailable && !chartProps.chart?.hidden),
+  });
 
   if (!unifiedHistogram.isInitialized) {
     return null;
@@ -205,6 +212,7 @@ const UnifiedHistogramWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) =
     <UnifiedHistogramChart
       {...unifiedHistogram.chartProps}
       renderToggleActions={renderToggleActions}
+      comparison={comparison}
     />
   );
 };

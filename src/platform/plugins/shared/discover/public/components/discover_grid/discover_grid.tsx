@@ -15,6 +15,7 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
 import type { CascadedDocumentsContext } from '../../application/main/components/layout/cascaded_documents';
@@ -27,6 +28,8 @@ import {
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
   filters?: DiscoverAppState['filters'];
+  esqlVariables?: ESQLControlVariable[];
+  histogramComparisonEnabled?: boolean;
   cascadedDocumentsContext?: CascadedDocumentsContext;
 }
 
@@ -38,6 +41,8 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
   ({
     query,
     filters,
+    esqlVariables,
+    histogramComparisonEnabled,
     queryContext: providedQueryContext,
     cascadedDocumentsContext,
     dataSource,
@@ -63,11 +68,15 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       return getRowAdditionalLeadingControlsAccessor(() => customRowAdditionalLeadingControls)({
         dataView,
         query,
+        esqlVariables,
+        histogramComparisonEnabled,
       });
     }, [
       customRowAdditionalLeadingControls,
       dataView,
+      esqlVariables,
       getRowAdditionalLeadingControlsAccessor,
+      histogramComparisonEnabled,
       query,
     ]);
 
