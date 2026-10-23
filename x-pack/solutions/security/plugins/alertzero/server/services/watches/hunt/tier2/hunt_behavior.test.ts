@@ -1225,6 +1225,39 @@ describe('huntBehavior', () => {
       expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
     });
 
+    it('discards a second-wave query that filters on an excluded IOC', async () => {
+      // The survivor grounds on `AssumeRole`, so the sibling generates on its own in the second
+      // wave. Generation-time and publish-time grounding both read the denylist (the first drives
+      // the retry, the second discards), so the sibling keeps the placeholder and never executes.
+      const excluded = '169.254.169.254';
+      const EXCLUDED_ESQL = `FROM logs-aws.cloudtrail-*\n| WHERE source.ip == "${excluded}"\n| LIMIT 10`;
+      generateByTechnique({ 'T1078.004': GROUNDED_ESQL, T1566: EXCLUDED_ESQL });
+
+      const result = await huntBehavior(
+        buildMockModel(sharedCandidates),
+        logger,
+        {
+          ...executeParams,
+          text: `${COLLAPSE_TEXT} The metadata endpoint ${excluded} appeared in the article.`,
+          iocs: [sharedIoc],
+          excluded_iocs: [{ type: 'ip', value: excluded }],
+        },
+        esClient
+      );
+
+      const sibling = result.behaviors.find((b) => b.technique_id === 'T1566');
+      expect(sibling?.execution?.inconclusive_reason).toBe('query_ungrounded');
+      expect(sibling?.validated_esql).not.toContain(EXCLUDED_ESQL);
+      expect(result.incomplete).toContainEqual(
+        expect.objectContaining({
+          reason: 'query_ungrounded',
+          detail: expect.stringContaining('intel review rejected'),
+        })
+      );
+      // Only the survivor executed.
+      expect(executeEsqlMock).toHaveBeenCalledTimes(1);
+    });
+
     it('charges uncovered siblings to the generation budget when the first wave used it all', async () => {
       // 20 survivors fill the budget. Their queries ground on `AssumeRole`, so nothing searched
       // the two deferred siblings' artifacts, and no budget remains to generate them: they

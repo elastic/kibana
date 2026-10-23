@@ -2611,6 +2611,30 @@ describe('huntCoordinator', () => {
       expect(result.excluded_report_iocs).toEqual({ count: 2 });
     });
 
+    it('sets excluded_report_iocs on the degraded return when scope resolution throws', async () => {
+      const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+      const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
+      mockLoad.mockResolvedValueOnce({
+        iocs: [{ type: 'hash', value: 'a'.repeat(64) }],
+        techniques: [],
+        text: 'report body text',
+        extraction_pending: false,
+        excluded_iocs: excluded,
+      });
+      mockScope.mockRejectedValueOnce(new Error('resolve failed'));
+
+      const result = await huntCoordinator({ esClient, reportsEsClient: esClient }, {}, logger, {
+        report_id: 'rpt-excluded-scope',
+        spaceId: 'default',
+        indexPatterns: INDEX_PATTERNS,
+        trigger: 'scheduled',
+        run_id: 'run-excluded-scope',
+      });
+
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.excluded_report_iocs).toEqual({ count: 2 });
+    });
+
     it('does not pass exclusions when the caller supplies iocs', async () => {
       const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
       const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');

@@ -713,6 +713,7 @@ const huntCoordinatorCore = async (
       // come back. The report has to stay eligible.
       completeness: 'incomplete_retryable',
       completed_successfully: false,
+      ...(excludedIocs ? { excluded_report_iocs: { count: excludedIocs.count } } : {}),
     };
   }
 
