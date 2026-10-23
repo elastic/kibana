@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useLatest from 'react-use/lib/useLatest';
@@ -45,8 +45,8 @@ const IN_PROGRESS_REFETCH_INTERVAL_MS = 5_000;
 const PENDING_START_TIMEOUT_MS = 2 * 60_000;
 
 type AlertInvestigationStart =
-  | { status: 'starting' }
-  | { status: 'started'; id: string; at: number }
+  | { status: 'starting'; alertId: string }
+  | { status: 'started'; alertId: string; id: string; at: number }
   | null;
 
 const getAlertInvestigationsQuery = (alertId: string) => ({
@@ -102,16 +102,9 @@ export const useInvestigateAlert = ({
   const statusQueryKey = ['alertInvestigations', basePath, alertId] as const;
   const queryClient = useQueryClient();
   const { data: availability } = useInvestigationAvailability();
-  const startQueryKey = ['alertInvestigationStart', basePath, alertId] as const;
-  // The responsive page header remounts its actions at breakpoints. Keep starts in the cache
-  // until the shared list catches up so remounting cannot lose the link or allow another start.
-  const { data: start } = useQuery<AlertInvestigationStart>({
-    queryKey: startQueryKey,
-    initialData: null,
-    enabled: false,
-    cacheTime: PENDING_START_TIMEOUT_MS,
-  });
-  const pendingStart = start?.status === 'started' ? start : undefined;
+  const [start, setStart] = useState<AlertInvestigationStart>(null);
+  const pendingStart =
+    start?.alertId === alertId && start?.status === 'started' ? start : undefined;
   const canInvestigate = Boolean(enabled && alertId && investigationsClient && http);
   const isAwaitingStartIn = (data: ListInvestigationsResponse | undefined): boolean =>
     pendingStart !== undefined &&
@@ -138,7 +131,7 @@ export const useInvestigateAlert = ({
     []
   );
   const viewedInvestigationIdsRef = useLatest(viewedInvestigationIds);
-  const isStarting = start?.status === 'starting';
+  const isStarting = start?.alertId === alertId && start?.status === 'starting';
   const latestInvestigation = pickAlertInvestigation(investigations?.results);
   const isAwaitingStart = isAwaitingStartIn(investigations);
   const hasOngoingInvestigation = latestInvestigation?.in_progress === true || isAwaitingStart;
@@ -203,16 +196,11 @@ export const useInvestigateAlert = ({
   }
 
   const handleInvestigate = async () => {
-    if (
-      !alertId ||
-      !investigationsClient ||
-      isInvestigating ||
-      queryClient.getQueryData<AlertInvestigationStart>(startQueryKey)?.status === 'starting'
-    ) {
+    if (!alertId || !investigationsClient || isInvestigating) {
       return;
     }
 
-    queryClient.setQueryData<AlertInvestigationStart>(startQueryKey, { status: 'starting' });
+    setStart({ status: 'starting', alertId });
     try {
       // An open investigation that already holds the alert is continued, not duplicated.
       const { investigation_id: startedId } = await investigationsClient.fetch(
@@ -222,11 +210,11 @@ export const useInvestigateAlert = ({
           params: { body: { subject: { type: 'alert', id: alertId } } },
         }
       );
-      queryClient.setQueryData<AlertInvestigationStart>(startQueryKey, {
-        status: 'started',
-        id: startedId,
-        at: Date.now(),
-      });
+      setStart((current) =>
+        current?.alertId === alertId
+          ? { status: 'started', alertId, id: startedId, at: Date.now() }
+          : current
+      );
       const startedInvestigationUrl = investigationLocator?.getRedirectUrl({
         investigationId: startedId,
       });
@@ -265,7 +253,7 @@ export const useInvestigateAlert = ({
       await queryClient.invalidateQueries(statusQueryKey);
       onInvestigate?.();
     } catch (error) {
-      queryClient.setQueryData<AlertInvestigationStart>(startQueryKey, null);
+      setStart((current) => (current?.alertId === alertId ? null : current));
       services?.notifications?.toasts?.addDanger({
         title: i18n.translate('xpack.observability.alerts.investigationFailed', {
           defaultMessage: 'Failed to start investigation',

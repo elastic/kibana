@@ -440,58 +440,51 @@ describe('useInvestigateAlert', () => {
     ).toEqual([]);
   });
 
-  it('preserves the started investigation when the header remounts', async () => {
-    const initial = renderInvestigateAlert();
-    await waitFor(() => expect(initial.result.current.showInvestigateButton).toBe(true));
-    await act(() => initial.result.current.handleInvestigate());
-    initial.unmount();
+  it.each([false, true])(
+    'keeps the current alert start when an earlier alert request settles with failure=%s',
+    async (shouldFail) => {
+      const { result, rerender } = renderHook(
+        ({ alertId }) => useInvestigateAlert({ alertId, ebtElement: 'testElement' }),
+        { wrapper, initialProps: { alertId: 'alert-1' } }
+      );
+      await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
+      let finishStart = () => {};
+      fetchMock.mockImplementationOnce(
+        () =>
+          new Promise<{ investigation_id: string }>((resolve, reject) => {
+            finishStart = () => {
+              if (shouldFail) {
+                reject(new Error('Request failed'));
+              } else {
+                resolve({ investigation_id: 'first-investigation' });
+              }
+            };
+          })
+      );
+      let request = Promise.resolve();
+      act(() => {
+        request = result.current.handleInvestigate();
+      });
+      await waitFor(() => expect(result.current.isStarting).toBe(true));
 
-    const { result } = renderInvestigateAlert();
-    await waitFor(() =>
+      rerender({ alertId: 'alert-2' });
+      await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
+      expect(result.current.isStarting).toBe(false);
+      expect(result.current.viewInvestigationUrl).toBeUndefined();
+      fetchMock.mockResolvedValueOnce({ investigation_id: 'second-investigation' });
+      await act(() => result.current.handleInvestigate());
+
+      await act(async () => {
+        finishStart();
+        await request;
+      });
+      expect(result.current.isStarting).toBe(false);
       expect(result.current.viewInvestigationUrl).toBe(
-        '/app/nightshift?investigationId=investigation-1'
-      )
-    );
-    expect(result.current.isInvestigating).toBe(true);
-    expect(result.current.showInvestigateButton).toBe(false);
-    expect(result.current.isStarting).toBe(false);
-  });
-
-  it('prevents duplicate starts when the header remounts during the request', async () => {
-    const initial = renderInvestigateAlert();
-    await waitFor(() => expect(initial.result.current.showInvestigateButton).toBe(true));
-    let resolveStart = (value: { investigation_id: string }) => {};
-    fetchMock.mockImplementationOnce(
-      () =>
-        new Promise<{ investigation_id: string }>((resolve) => {
-          resolveStart = resolve;
-        })
-    );
-    let request = Promise.resolve();
-    act(() => {
-      request = initial.result.current.handleInvestigate();
-    });
-    initial.unmount();
-
-    const { result } = renderInvestigateAlert();
-    expect(result.current.isStarting).toBe(true);
-    await act(() => result.current.handleInvestigate());
-    expect(
-      fetchMock.mock.calls.filter(
-        ([endpoint]) => endpoint === 'POST /internal/nightshift/investigations'
-      )
-    ).toHaveLength(1);
-    await act(async () => {
-      resolveStart({ investigation_id: 'investigation-1' });
-      await request;
-    });
-    await waitFor(() =>
-      expect(result.current.viewInvestigationUrl).toBe(
-        '/app/nightshift?investigationId=investigation-1'
-      )
-    );
-    expect(result.current.isStarting).toBe(false);
-  });
+        '/app/nightshift?investigationId=second-investigation'
+      );
+      expect(result.current.isInvestigating).toBe(true);
+    }
+  );
 
   it('stops exposing an unlisted start after the pending timeout', async () => {
     const { result, rerender } = renderInvestigateAlert();

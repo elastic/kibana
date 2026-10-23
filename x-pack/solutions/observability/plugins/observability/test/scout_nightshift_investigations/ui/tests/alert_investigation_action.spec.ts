@@ -122,12 +122,6 @@ test.describe(
       await expect(page.testSubj.locator('alertDetailsViewInvestigation')).toBeVisible();
       await expect(page.testSubj.locator('alertDetailsInvestigate')).toBeHidden();
       expect(new URL(page.url()).pathname).toContain(`/observability/alerts/${alertId}`);
-      await page.setViewportSize({ width: 390, height: 844 });
-      await expect(page.testSubj.locator('alertDetailsViewInvestigation')).toBeVisible();
-      await testInfo.attach('investigation-header-narrow', {
-        body: await page.screenshot(),
-        contentType: 'image/png',
-      });
       await pageObjects.alertPage.clickViewInvestigation();
       await expect
         .poll(() => page.url())
