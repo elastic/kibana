@@ -16,12 +16,10 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { useFetchRuleExecutions } from '../../../../hooks/use_fetch_rule_executions';
 import { useRuleAuditMetadata } from '../../../../hooks/use_rule_audit_metadata';
+import { useRuleLastExecution } from '../../../../hooks/use_rule_last_execution';
 import { RuleActionsMenu } from '../../../../pages/rules_list_page/rule_actions_menu';
 import type { RuleApiResponse } from '../../../../services/rules_api';
-import { UserCapabilities } from '../../../../services/user_capabilities';
-import { EMPTY_VALUE } from '../../../../utils/rule_display';
 import {
   RuleSummaryAboutSection,
   RuleSummaryArtifactsSection,
@@ -31,13 +29,9 @@ import {
 
 const TAKE_ACTION_BUTTON_ID = 'ruleSummaryFlyoutTakeAction';
 
-const LAST_EXECUTION_OUTCOME_LABELS: Record<RuleExecutionOutcome, string> = {
-  success: i18n.translate('xpack.alertingV2.ruleSummaryFlyout.lastExecution.success', {
-    defaultMessage: 'Succeeded',
-  }),
-  failure: i18n.translate('xpack.alertingV2.ruleSummaryFlyout.lastExecution.failure', {
-    defaultMessage: 'Failed',
-  }),
+const LAST_EXECUTION_HEALTH_COLOR: Record<RuleExecutionOutcome, 'success' | 'danger'> = {
+  success: 'success',
+  failure: 'danger',
 };
 
 export interface RuleSummaryFlyoutProps {
@@ -75,19 +69,7 @@ export const RuleSummaryFlyout = ({
     | undefined;
   useRuleAutoAttach(rule, { chrome, agentBuilder });
   const { createdByDisplay, updatedByDisplay, updatedAtFormatted } = useRuleAuditMetadata(rule);
-  const canReadExecutionHistory = useService(UserCapabilities).canRead('executionHistory');
-  const {
-    data: executionsData,
-    isLoading: isLoadingLastExecution,
-    isError: isErrorLastExecution,
-  } = useFetchRuleExecutions({
-    ruleIds: [rule.id],
-    perPage: 1,
-    sortField: 'startedAt',
-    sortOrder: 'desc',
-    enabled: canReadExecutionHistory,
-  });
-  const lastExecution = executionsData?.items[0];
+  const lastExecution = useRuleLastExecution(rule.id);
   const [isTakeActionOpen, setIsTakeActionOpen] = useState(false);
 
   const kindLabel = RULE_KIND_LABELS[rule.kind] ?? rule.kind;
@@ -103,29 +85,27 @@ export const RuleSummaryFlyout = ({
   const { Badge, InfoBlock } = Header;
 
   const renderLastExecutionValue = (): React.ReactNode => {
-    if (isLoadingLastExecution) {
+    if (lastExecution.isLoading) {
       return <EuiLoadingSpinner data-test-subj="ruleSummaryFlyoutLastExecutionSpinner" size="m" />;
     }
-    if (isErrorLastExecution) {
+    if (lastExecution.isError) {
       return (
         <EuiHealth color="subdued" data-test-subj="ruleSummaryFlyoutLastExecutionError">
-          {i18n.translate('xpack.alertingV2.ruleSummaryFlyout.lastExecution.unavailable', {
-            defaultMessage: 'Unavailable',
-          })}
+          {lastExecution.value}
         </EuiHealth>
       );
     }
-    if (lastExecution) {
+    if (lastExecution.outcome) {
       return (
         <EuiHealth
-          color={lastExecution.outcome === 'success' ? 'success' : 'danger'}
+          color={LAST_EXECUTION_HEALTH_COLOR[lastExecution.outcome]}
           data-test-subj="ruleSummaryFlyoutLastExecutionStatus"
         >
-          {LAST_EXECUTION_OUTCOME_LABELS[lastExecution.outcome]}
+          {lastExecution.value}
         </EuiHealth>
       );
     }
-    return EMPTY_VALUE;
+    return lastExecution.value;
   };
 
   return (
@@ -178,7 +158,7 @@ export const RuleSummaryFlyout = ({
               />
             )}
           </InfoBlock>
-          {canReadExecutionHistory && (
+          {lastExecution.visible && (
             <InfoBlock
               title={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.lastExecution', {
                 defaultMessage: 'Last execution',

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -13,6 +14,10 @@ import type {
   EntityInventoryAppSetupDependencies,
   EntityInventoryAppStartDependencies,
 } from './types';
+
+const AppComponent = React.lazy(() =>
+  import('./application').then((m) => ({ default: m.EntityInventoryApp }))
+);
 
 export class EntityInventoryAppPlugin
   implements
@@ -46,6 +51,6 @@ export class EntityInventoryAppPlugin
     _core: CoreStart,
     _plugins: EntityInventoryAppStartDependencies
   ): EntityInventoryAppPublicStart {
-    return {};
+    return { getAppComponent: () => AppComponent };
   }
 }

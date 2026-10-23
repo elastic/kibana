@@ -1470,6 +1470,306 @@ describe('AttachmentService getter', () => {
     });
   });
 
+  describe('getCaseIdsByAttachmentIds', () => {
+    it('maps each attachment id to the cases that reference it, with their owners', async () => {
+      const caseBucket = (key: string, owner: string) => ({
+        key,
+        attachment: { owner: { buckets: [{ key: owner }] } },
+      });
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        ...createSOFindResponse([]),
+        aggregations: {
+          attachmentIds: {
+            buckets: [
+              {
+                key: 'host:a',
+                references: {
+                  cases: { caseIds: { buckets: [caseBucket('case-1', 'securitySolution')] } },
+                },
+              },
+              {
+                key: 'host:b',
+                references: {
+                  cases: {
+                    caseIds: {
+                      buckets: [
+                        caseBucket('case-1', 'securitySolution'),
+                        caseBucket('case-2', 'observability'),
+                      ],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      const res = await createAttachmentGetter().getCaseIdsByAttachmentIds({
+        type: 'security.entity',
+        attachmentIds: ['host:a', 'host:b', 'host:c'],
+      });
+
+      expect(res).toEqual([
+        { attachmentId: 'host:a', cases: [{ id: 'case-1', owner: 'securitySolution' }] },
+        {
+          attachmentId: 'host:b',
+          cases: [
+            { id: 'case-1', owner: 'securitySolution' },
+            { id: 'case-2', owner: 'observability' },
+          ],
+        },
+      ]);
+    });
+
+    it('reads unified attachments of the type and ids, aggregating the case references of the requested ids', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
+
+      await createAttachmentGetter().getCaseIdsByAttachmentIds({
+        type: 'security.entity',
+        attachmentIds: ['host:a', 'host:b'],
+      });
+
+      const [[findArgs]] = unsecuredSavedObjectsClient.find.mock.calls;
+      expect(findArgs).toMatchObject({
+        type: 'cases-attachments',
+        perPage: 0,
+        aggs: {
+          attachmentIds: {
+            terms: {
+              field: 'cases-attachments.attributes.attachmentId',
+              size: 2,
+              include: ['host:a', 'host:b'],
+            },
+            aggs: {
+              references: {
+                nested: { path: 'cases-attachments.references' },
+                aggregations: {
+                  cases: {
+                    filter: { term: { 'cases-attachments.references.type': 'cases' } },
+                    aggregations: {
+                      caseIds: {
+                        terms: { field: 'cases-attachments.references.id' },
+                        aggregations: {
+                          attachment: {
+                            reverse_nested: {},
+                            aggregations: {
+                              owner: {
+                                terms: { field: 'cases-attachments.attributes.owner', size: 1 },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      expect(JSON.stringify(findArgs.filter)).toContain('security.entity');
+      expect(JSON.stringify(findArgs.filter)).toContain('host:b');
+    });
+
+    it('throws when an attachment id is in more cases than one read returns', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        ...createSOFindResponse([]),
+        aggregations: {
+          attachmentIds: {
+            buckets: [
+              {
+                key: 'host:a',
+                references: { cases: { caseIds: { sum_other_doc_count: 1, buckets: [] } } },
+              },
+            ],
+          },
+        },
+      });
+
+      await expect(
+        createAttachmentGetter().getCaseIdsByAttachmentIds({
+          type: 'security.entity',
+          attachmentIds: ['host:a'],
+        })
+      ).rejects.toThrow('Attachment id host:a is in more than 10000 cases');
+    });
+
+    it('reads each requested id once', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
+
+      await createAttachmentGetter().getCaseIdsByAttachmentIds({
+        type: 'security.entity',
+        attachmentIds: ['host:a', 'host:a'],
+      });
+
+      const [[findArgs]] = unsecuredSavedObjectsClient.find.mock.calls;
+      expect(findArgs).toMatchObject({
+        aggs: { attachmentIds: { terms: { size: 1, include: ['host:a'] } } },
+      });
+    });
+
+    it('buckets only the requested ids of an attachment that holds several', async () => {
+      // An attachment holding ['host:a', 'host:b'] matches a request for 'host:b'; without
+      // `include`, its 'host:a' would take a bucket of the requested size.
+      unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
+
+      await createAttachmentGetter().getCaseIdsByAttachmentIds({
+        type: 'security.entity',
+        attachmentIds: ['host:b'],
+      });
+
+      const [[findArgs]] = unsecuredSavedObjectsClient.find.mock.calls;
+      expect(findArgs.aggs?.attachmentIds.terms).toEqual({
+        field: 'cases-attachments.attributes.attachmentId',
+        size: 1,
+        include: ['host:b'],
+      });
+    });
+
+    describe('legacy cases-comments rows', () => {
+      const findResponse = (attachmentId: string, caseIds: string[]) => ({
+        ...createSOFindResponse([]),
+        aggregations: {
+          attachmentIds: {
+            buckets: [
+              {
+                key: attachmentId,
+                references: {
+                  cases: {
+                    caseIds: {
+                      buckets: caseIds.map((key) => ({
+                        key,
+                        attachment: { owner: { buckets: [{ key: 'securitySolution' }] } },
+                      })),
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      it('reads only cases-attachments for a type with no legacy form', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
+
+        await createAttachmentGetter().getCaseIdsByAttachmentIds({
+          type: 'security.entity',
+          attachmentIds: ['host:a'],
+        });
+
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+      });
+
+      it('also reads the alert ids of legacy alert comments of the alert type owner, listing each case once', async () => {
+        unsecuredSavedObjectsClient.find
+          .mockResolvedValueOnce(findResponse('alert-1', ['case-1']))
+          .mockResolvedValueOnce(findResponse('alert-1', ['case-1', 'case-2']));
+
+        const res = await createAttachmentGetter().getCaseIdsByAttachmentIds({
+          type: 'security.alert',
+          attachmentIds: ['alert-1'],
+        });
+
+        const [, [legacyArgs]] = unsecuredSavedObjectsClient.find.mock.calls;
+        expect(legacyArgs).toMatchObject({
+          type: 'cases-comments',
+          aggs: {
+            attachmentIds: {
+              terms: { field: 'cases-comments.attributes.alertId', include: ['alert-1'] },
+            },
+          },
+        });
+        expect(JSON.stringify(legacyArgs.filter)).toContain('cases-comments.attributes.type');
+        expect(JSON.stringify(legacyArgs.filter)).toContain('securitySolution');
+        expect(res).toEqual([
+          {
+            attachmentId: 'alert-1',
+            cases: [
+              { id: 'case-1', owner: 'securitySolution' },
+              { id: 'case-2', owner: 'securitySolution' },
+            ],
+          },
+        ]);
+      });
+
+      it('reads the external reference id of legacy external reference comments', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
+
+        await createAttachmentGetter().getCaseIdsByAttachmentIds({
+          type: 'security.endpoint',
+          attachmentIds: ['endpoint-1'],
+        });
+
+        const [, [legacyArgs]] = unsecuredSavedObjectsClient.find.mock.calls;
+        expect(legacyArgs).toMatchObject({
+          aggs: {
+            attachmentIds: { terms: { field: 'cases-comments.attributes.externalReferenceId' } },
+          },
+        });
+        expect(JSON.stringify(legacyArgs.filter)).toContain('endpoint');
+      });
+
+      it('reads the references of legacy file comments, which keep the file id only there', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
+        mockFinder(
+          createSOFindResponse([
+            {
+              id: 'comment-1',
+              type: 'cases-comments',
+              score: 0,
+              attributes: { owner: 'securitySolution' },
+              references: [
+                { id: 'file-1', name: 'externalReferenceId', type: 'file' },
+                { id: 'case-1', name: 'associated-cases', type: 'cases' },
+              ],
+            },
+          ])
+        );
+
+        const res = await createAttachmentGetter().getCaseIdsByAttachmentIds({
+          type: 'file',
+          attachmentIds: ['file-1'],
+        });
+
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+        expect(unsecuredSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: 'cases-comments',
+            hasReference: [{ type: 'file', id: 'file-1' }],
+          })
+        );
+        expect(res).toEqual([
+          { attachmentId: 'file-1', cases: [{ id: 'case-1', owner: 'securitySolution' }] },
+        ]);
+      });
+
+      it('skips legacy forms that keep no id, such as comments', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
+
+        await createAttachmentGetter().getCaseIdsByAttachmentIds({
+          type: 'comment',
+          attachmentIds: ['x'],
+        });
+
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('returns no case ids when nothing matches', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
+
+      await expect(
+        createAttachmentGetter().getCaseIdsByAttachmentIds({
+          type: 'security.entity',
+          attachmentIds: ['x'],
+        })
+      ).resolves.toEqual([]);
+    });
+  });
+
   describe('getAttachmentIdsForCases', () => {
     it('always queries both legacy and unified SO types', async () => {
       mockFinder(createSOFindResponse([{ ...createUserAttachment(), score: 0 }]));

@@ -218,6 +218,7 @@ describe('RuleSummaryFlyout', () => {
         sortField: 'startedAt',
         sortOrder: 'desc',
         enabled: true,
+        keepPreviousData: false,
       });
     });
 

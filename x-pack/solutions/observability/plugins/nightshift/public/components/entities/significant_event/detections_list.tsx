@@ -46,8 +46,8 @@ const SPARKLINE_SKELETON_HEIGHT = 32;
 /** Placeholder rows on first load before any lifecycle data exists. */
 const INITIAL_DETECTION_SKELETON_COUNT = 2;
 const MAX_VISIBLE_ENTITY_PILLS = 2;
-/** Detection cards shown before the list collapses behind a `+{n} more` toggle. */
-export const MAX_VISIBLE_DETECTIONS = 3;
+/** Detection cards shown before the list collapses behind a show-more toggle. */
+export const MAX_VISIBLE_DETECTIONS = 5;
 
 export interface DetectionsListProps {
   event: SignificantEvent;
@@ -352,7 +352,7 @@ function DetectionsOverflowToggle({
             defaultMessage: 'Show less',
           })
         : i18n.translate('xpack.nightshift.flyout.detectionsShowMore', {
-            defaultMessage: '+{count} more',
+            defaultMessage: 'Show {count} more',
             values: { count: hiddenCount },
           })}
     </EuiButtonEmpty>
@@ -407,12 +407,11 @@ export function DetectionsList({
   const { data, isLoading, isError, refetch } = lifecycleQuery;
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Most recent detection first — it is the most actionable one during an incident.
   const detections = useMemo(
     () =>
       [...(data?.detections ?? [])].sort(
         (first, second) =>
-          parseTimestamp(second['@timestamp']) - parseTimestamp(first['@timestamp'])
+          parseTimestamp(first['@timestamp']) - parseTimestamp(second['@timestamp'])
       ),
     [data]
   );

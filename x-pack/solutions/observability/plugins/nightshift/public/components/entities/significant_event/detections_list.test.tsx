@@ -71,15 +71,15 @@ const mockDetection = (overrides: Partial<LifecycleDetection> = {}): LifecycleDe
   ...overrides,
 });
 
-const NEWEST_DETECTION_TIME_MS = Date.UTC(2026, 6, 10, 12);
+const FIRST_DETECTION_TIME_MS = Date.UTC(2026, 6, 10, 12);
 const ONE_HOUR_MS = 60 * 60 * 1000;
 
-const buildDetectionsNewestFirst = (count: number): LifecycleDetection[] =>
+const buildDetectionsEarliestFirst = (count: number): LifecycleDetection[] =>
   Array.from({ length: count }, (_, index) =>
     mockDetection({
       detection_id: `det-${index}`,
       rule_name: `detection-${index}`,
-      '@timestamp': new Date(NEWEST_DETECTION_TIME_MS - index * ONE_HOUR_MS).toISOString(),
+      '@timestamp': new Date(FIRST_DETECTION_TIME_MS + index * ONE_HOUR_MS).toISOString(),
     })
   );
 
@@ -238,7 +238,7 @@ describe('DetectionsList', () => {
     expect(screen.getByText('+1')).toBeInTheDocument();
   });
 
-  it('sorts detections with the most recent first', () => {
+  it('sorts detections with the earliest first', () => {
     setLifecycle({
       detections: [
         mockDetection({
@@ -256,8 +256,8 @@ describe('DetectionsList', () => {
     renderList();
 
     const cards = screen.getAllByTestId('nightshiftDetectionCard');
-    expect(cards[0]).toHaveTextContent('newer-detection');
-    expect(cards[1]).toHaveTextContent('older-detection');
+    expect(cards[0]).toHaveTextContent('older-detection');
+    expect(cards[1]).toHaveTextContent('newer-detection');
   });
 
   it('renders the whole detection card as a clickable element', () => {
@@ -343,7 +343,7 @@ describe('DetectionsList', () => {
 
   describe('detection overflow', () => {
     it('renders every detection without a toggle at the cap', () => {
-      setLifecycle({ detections: buildDetectionsNewestFirst(MAX_VISIBLE_DETECTIONS) });
+      setLifecycle({ detections: buildDetectionsEarliestFirst(MAX_VISIBLE_DETECTIONS) });
       renderList();
 
       expect(screen.getAllByTestId('nightshiftDetectionCard')).toHaveLength(MAX_VISIBLE_DETECTIONS);
@@ -351,17 +351,17 @@ describe('DetectionsList', () => {
     });
 
     it('caps the list and counts what it hides', () => {
-      setLifecycle({ detections: buildDetectionsNewestFirst(MAX_VISIBLE_DETECTIONS + 2) });
+      setLifecycle({ detections: buildDetectionsEarliestFirst(MAX_VISIBLE_DETECTIONS + 2) });
       renderList();
 
       expect(screen.getAllByTestId('nightshiftDetectionCard')).toHaveLength(MAX_VISIBLE_DETECTIONS);
-      expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('+2 more');
-      expect(screen.queryByText('detection-3')).not.toBeInTheDocument();
-      expect(screen.queryByText('detection-4')).not.toBeInTheDocument();
+      expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('Show 2 more');
+      expect(screen.queryByText(`detection-${MAX_VISIBLE_DETECTIONS}`)).not.toBeInTheDocument();
+      expect(screen.queryByText(`detection-${MAX_VISIBLE_DETECTIONS + 1}`)).not.toBeInTheDocument();
     });
 
     it('expands to the full list and collapses back', () => {
-      setLifecycle({ detections: buildDetectionsNewestFirst(MAX_VISIBLE_DETECTIONS + 2) });
+      setLifecycle({ detections: buildDetectionsEarliestFirst(MAX_VISIBLE_DETECTIONS + 2) });
       renderList();
 
       fireEvent.click(screen.getByTestId('nightshiftDetectionsShowMore'));
@@ -369,16 +369,16 @@ describe('DetectionsList', () => {
       expect(screen.getAllByTestId('nightshiftDetectionCard')).toHaveLength(
         MAX_VISIBLE_DETECTIONS + 2
       );
-      expect(screen.getByText('detection-4')).toBeInTheDocument();
+      expect(screen.getByText(`detection-${MAX_VISIBLE_DETECTIONS + 1}`)).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('nightshiftDetectionsShowLess'));
 
       expect(screen.getAllByTestId('nightshiftDetectionCard')).toHaveLength(MAX_VISIBLE_DETECTIONS);
-      expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('+2 more');
+      expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('Show 2 more');
     });
 
     it('reports expansion state through the toggle attributes', () => {
-      setLifecycle({ detections: buildDetectionsNewestFirst(MAX_VISIBLE_DETECTIONS + 2) });
+      setLifecycle({ detections: buildDetectionsEarliestFirst(MAX_VISIBLE_DETECTIONS + 2) });
       renderList();
 
       const showMore = screen.getByTestId('nightshiftDetectionsShowMore');
@@ -397,33 +397,43 @@ describe('DetectionsList', () => {
     });
 
     it('takes the last visible slot for a selected detection past the cap', () => {
-      setLifecycle({ detections: buildDetectionsNewestFirst(MAX_VISIBLE_DETECTIONS + 2) });
-      renderList({ selectedDetectionId: 'det-4', onDetectionClick: jest.fn() });
+      setLifecycle({ detections: buildDetectionsEarliestFirst(MAX_VISIBLE_DETECTIONS + 2) });
+      renderList({
+        selectedDetectionId: `det-${MAX_VISIBLE_DETECTIONS + 1}`,
+        onDetectionClick: jest.fn(),
+      });
 
       const cards = screen.getAllByTestId('nightshiftDetectionCard');
       expect(cards).toHaveLength(MAX_VISIBLE_DETECTIONS);
-      expect(cards[MAX_VISIBLE_DETECTIONS - 1]).toHaveTextContent('detection-4');
+      expect(cards[MAX_VISIBLE_DETECTIONS - 1]).toHaveTextContent(
+        `detection-${MAX_VISIBLE_DETECTIONS + 1}`
+      );
       expect(cards[MAX_VISIBLE_DETECTIONS - 1]).toHaveAttribute('aria-pressed', 'true');
-      expect(screen.queryByText('detection-2')).not.toBeInTheDocument();
-      expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('+2 more');
+      expect(screen.queryByText(`detection-${MAX_VISIBLE_DETECTIONS - 1}`)).not.toBeInTheDocument();
+      expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('Show 2 more');
     });
 
-    it('never offers a +0 more toggle when a single overflow detection is selected', () => {
-      setLifecycle({ detections: buildDetectionsNewestFirst(MAX_VISIBLE_DETECTIONS + 1) });
-      renderList({ selectedDetectionId: 'det-3', onDetectionClick: jest.fn() });
+    it('never offers a zero-more toggle when a single overflow detection is selected', () => {
+      setLifecycle({ detections: buildDetectionsEarliestFirst(MAX_VISIBLE_DETECTIONS + 1) });
+      renderList({
+        selectedDetectionId: `det-${MAX_VISIBLE_DETECTIONS}`,
+        onDetectionClick: jest.fn(),
+      });
 
       const cards = screen.getAllByTestId('nightshiftDetectionCard');
       expect(cards).toHaveLength(MAX_VISIBLE_DETECTIONS);
-      expect(cards[MAX_VISIBLE_DETECTIONS - 1]).toHaveTextContent('detection-3');
-      expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('+1 more');
+      expect(cards[MAX_VISIBLE_DETECTIONS - 1]).toHaveTextContent(
+        `detection-${MAX_VISIBLE_DETECTIONS}`
+      );
+      expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('Show 1 more');
     });
 
     it('ignores a selected detection that is no longer in the list', () => {
-      setLifecycle({ detections: buildDetectionsNewestFirst(MAX_VISIBLE_DETECTIONS + 2) });
+      setLifecycle({ detections: buildDetectionsEarliestFirst(MAX_VISIBLE_DETECTIONS + 2) });
       renderList({ selectedDetectionId: 'det-already-gone', onDetectionClick: jest.fn() });
 
       expect(screen.getAllByTestId('nightshiftDetectionCard')).toHaveLength(MAX_VISIBLE_DETECTIONS);
-      expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('+2 more');
+      expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('Show 2 more');
     });
   });
 });

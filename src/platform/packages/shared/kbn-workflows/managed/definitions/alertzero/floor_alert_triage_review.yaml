@@ -95,6 +95,11 @@ triggers:
 #   2. gate_fp_close        — post the proposal comment, raise the proposal, wait for the decision
 #   3. one branch per outcome — approved, dismissed, expired, unknown
 
+consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Alert Triage worker"
+
 steps:
   - name: count_fp_candidates
     type: data.set
@@ -121,6 +126,7 @@ steps:
     on-failure:
       continue: true
     with:
+      author_name: "{{ consts.author_name }}"
       conversation_id: "{{ inputs.conversation_id }}"
       message: >-
         Proposing closure of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} classified as false positive at or above the {{ inputs.confidence_floor }} confidence floor.
@@ -140,6 +146,7 @@ steps:
           on-failure:
             continue: true
           with:
+            author_name: "{{ consts.author_name }}"
             conversation_id: "{{ inputs.conversation_id }}"
             message: >-
               ⚠️ The closure proposal could not be completed: {{ error.message }}.
@@ -231,6 +238,7 @@ steps:
         on-failure:
           continue: true
         with:
+          author_name: "{{ consts.author_name }}"
           conversation_id: "{{ inputs.conversation_id }}"
           message: >-
             Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} closed as false positive.
@@ -340,6 +348,7 @@ steps:
             on-failure:
               continue: true
             with:
+              author_name: "{{ consts.author_name }}"
               conversation_id: "{{ inputs.conversation_id }}"
               message: >-
                 Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {% if variables.failed_retag_count > 0 %}{{ variables.fp_candidate_count | minus: variables.failed_retag_count }} of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}; {{ variables.failed_retag_count }} failed after retries and {% if variables.failed_retag_count == 1 %}needs{% else %}need{% endif %} manual re-tagging.{% else %}{{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}.{% endif %}{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}
@@ -349,6 +358,7 @@ steps:
             on-failure:
               continue: true
             with:
+              author_name: "{{ consts.author_name }}"
               conversation_id: "{{ inputs.conversation_id }}"
               message: >-
                 ⚠️ The proposal was dismissed, but its details could not be read after
@@ -397,6 +407,7 @@ steps:
         on-failure:
           continue: true
         with:
+          author_name: "{{ consts.author_name }}"
           conversation_id: "{{ inputs.conversation_id }}"
           message: >-
             The closure proposal expired before a closure was completed. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}is{% else %}are{% endif %} tagged az:false_positive. If a closure attempt partially succeeded before the proposal expired, some may already be closed, so check each alert's workflow_status rather than assuming {% if variables.fp_candidate_count == 1 %}it is{% else %}they are{% endif %} still open.
@@ -415,6 +426,7 @@ steps:
         on-failure:
           continue: true
         with:
+          author_name: "{{ consts.author_name }}"
           conversation_id: "{{ inputs.conversation_id }}"
           # Does not assert every candidate remains open: an earlier close attempt may have
           # partly succeeded (action_close_alerts_false_positive's fail_incomplete_close
