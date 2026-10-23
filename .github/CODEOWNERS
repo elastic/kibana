@@ -1136,6 +1136,7 @@ x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-ui @elastic/n
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-shared-components @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-significant-events-schema @elastic/nightshift
+x-pack/platform/packages/shared/kbn-slo-constants @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-streamlang @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-streamlang-tests @elastic/streams-ui
