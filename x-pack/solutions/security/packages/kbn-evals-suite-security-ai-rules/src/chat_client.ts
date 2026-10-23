@@ -6,10 +6,10 @@
  */
 
 import type { ReferenceRule } from '../datasets/sample_rules';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 
 // These string literals mirror the constants defined in security_solution/common/constants.
 // They are inlined here to avoid a package→plugin import boundary violation.
-const THREAT_HUNTING_AGENT_ID = 'security.agent';
 const SECURITY_RULE_ATTACHMENT_TYPE = 'security.rule';
 
 const AGENT_BUILDER_CONVERSE_API_PATH = '/api/agent_builder/converse';
@@ -48,10 +48,13 @@ export class SecurityRuleGenerationClient {
     error?: string;
   }> {
     const payload = {
-      agent_id: THREAT_HUNTING_AGENT_ID,
+      // 'security.agent' (the id this suite hardcoded at creation) is no longer registered
+      // in the product — sending it made every converse call fail with a misleading
+      // `Conversation <uuid> not found` (the access gate masks an unknown agent as 404).
+      // Pin the default agent explicitly, matching the alert-triage suite.
+      agent_id: agentBuilderDefaultAgentId,
       input: `Create a detection rule based on the following user_query using the dedicated detection rule creation tool. Do not perform any other actions after creating the rule. user_query: ${prompt}`,
       connector_id: this.connectorId,
-      capabilities: { visualizations: true },
       attachments: [
         {
           type: SECURITY_RULE_ATTACHMENT_TYPE,
@@ -62,6 +65,8 @@ export class SecurityRuleGenerationClient {
         },
       ],
       browser_api_tools: [],
+      // Run inline so the worker trace context propagates (matches kbn-evals agent_builder_client)
+      _execution_mode: 'local',
     };
 
     const syncResponse = (await this.fetch(AGENT_BUILDER_CONVERSE_API_PATH, {
