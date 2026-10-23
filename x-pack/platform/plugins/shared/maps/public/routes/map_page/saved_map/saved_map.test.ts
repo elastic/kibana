@@ -27,7 +27,11 @@ jest.mock('../../../licensed_features', () => ({
 }));
 
 import { SavedMap } from './saved_map';
-import { getMapCenter, getMapZoom } from '../../../selectors/map_selectors';
+import {
+  getWaitingForMapReadyLayerListRaw,
+  getMapCenter,
+  getMapZoom,
+} from '../../../selectors/map_selectors';
 import type { MapByValueState } from '../../../../common/embeddable/types';
 
 describe('SavedMap.whenReady adhoc data views', () => {
@@ -103,5 +107,28 @@ describe('SavedMap.initializeStore map center', () => {
     const state = savedMap.getStore().getState();
     expect(getMapCenter(state)).toEqual({ lat: 51, lon: -0.1 });
     expect(getMapZoom(state)).toBe(12);
+  });
+});
+
+describe('SavedMap.reset', () => {
+  const getLayerIds = (savedMap: SavedMap) =>
+    getWaitingForMapReadyLayerListRaw(savedMap.getStore().getState()).map((layer) => layer.id);
+
+  test('applies the layers of the new by-value attributes', async () => {
+    const baseLayer = { id: 'base', type: 'EMS_VECTOR_TILE' };
+    const extraLayer = { id: 'extra', type: 'EMS_VECTOR_TILE' };
+
+    const savedMap = new SavedMap({
+      mapEmbeddableState: {
+        attributes: { title: 'test map', layers: [baseLayer] },
+      } as MapByValueState,
+    });
+    await savedMap.whenReady();
+    expect(getLayerIds(savedMap)).toEqual(['base']);
+
+    savedMap.reset({
+      attributes: { title: 'test map', layers: [baseLayer, extraLayer] },
+    } as MapByValueState);
+    expect(getLayerIds(savedMap)).toEqual(['base', 'extra']);
   });
 });

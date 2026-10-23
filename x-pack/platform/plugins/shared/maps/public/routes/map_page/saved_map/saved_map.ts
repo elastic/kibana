@@ -145,6 +145,11 @@ export class SavedMap {
 
   public reset(mapEmbeddableState: MapEmbeddableState) {
     this._mapEmbeddableState = mapEmbeddableState;
+    // by-reference attributes are loaded from the library in `whenReady`; by-value attributes travel with the state
+    const byValueAttributes = (mapEmbeddableState as MapByValueState).attributes;
+    if (!(mapEmbeddableState as MapByReferenceState).savedObjectId && byValueAttributes) {
+      this._attributes = byValueAttributes;
+    }
     this.initializeStore();
   }
 
