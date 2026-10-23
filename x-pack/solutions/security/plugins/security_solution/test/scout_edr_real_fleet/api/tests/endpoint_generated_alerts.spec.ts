@@ -20,9 +20,9 @@ import {
 } from '../fixtures/endpoint_generated_alerts';
 import { apiTest } from '../fixtures';
 
-const MALICIOUS_COMMAND_TARGET = '/dev/tcp/foo';
-/** Matches an Elastic Defend malicious-behavior rule; the agent blocks it and raises an alert. */
-const MALICIOUS_COMMAND = `bash -c cat ${MALICIOUS_COMMAND_TARGET}`;
+const EICAR_URL = 'https://secure.eicar.org/eicar.com.txt';
+/** Writes the EICAR test file, which Elastic Defend malware protection detects and alerts on. */
+const MALICIOUS_COMMAND = `curl -sS -o /tmp/eicar.com.txt ${EICAR_URL}`;
 const ENDPOINT_ALERT_TIMEOUT_MS = 240_000;
 const DETECTION_ALERT_TIMEOUT_MS = 180_000;
 const POLL_INTERVAL_MS = 2_000;
@@ -42,7 +42,7 @@ apiTest.describe(
           const detectionState = await describeEndpointDetectionState(
             esClient,
             enrolledEndpoint.agentId,
-            MALICIOUS_COMMAND_TARGET
+            EICAR_URL
           );
           log.error(`[edr_real_fleet] Endpoint detection state: ${detectionState}`);
           await testInfo.attach('endpoint-detection-state', {
@@ -61,7 +61,7 @@ apiTest.describe(
         apiTest.setTimeout(TEST_TIMEOUT_MS);
         const { agentId, hostname } = enrolledEndpoint;
 
-        await apiTest.step('the Endpoint streams an alert for the malicious command', async () => {
+        await apiTest.step('the Endpoint streams an alert for the EICAR test file', async () => {
           const { exitCode, stderr } = await runCommandOnHost(hostname, MALICIOUS_COMMAND);
           const triggerResult = `exit code ${exitCode}, stderr: ${stderr || '<empty>'}`;
           log.info(`[edr_real_fleet] ran [${MALICIOUS_COMMAND}] on ${hostname}: ${triggerResult}`);
