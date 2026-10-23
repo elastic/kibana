@@ -739,7 +739,7 @@ export class WorkflowsManagementApi {
       throw new WorkflowRequiresDelegatedIdentityError(
         i18n.translate('workflows.api.workflowRequiresDelegatedIdentityErrorMessage', {
           defaultMessage:
-            "Workflow '{workflowId}' delegates its execution identity to a parent workflow and cannot be run standalone.",
+            "Workflow ''{workflowId}'' delegates its execution identity to a parent workflow and cannot be run standalone.",
           values: { workflowId: workflow.id },
         })
       );
