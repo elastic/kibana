@@ -22,6 +22,14 @@ const UBUNTU_ALERT = {
   host: { os: { name: 'Ubuntu' } },
 } as unknown as ParsedTechnicalFields & { _index: string };
 
+// The UI only offers saved query and pack runs to `runSavedQueries` users who can also read them.
+const RUN_SAVED_WITH_READS = {
+  writeLiveQueries: false,
+  runSavedQueries: true,
+  readPacks: true,
+  readSavedQueries: true,
+};
+
 const attributesIdFilter = (id: string) =>
   `${savedQuerySavedObjectType}.attributes.id: "${escapeQuotes(id)}"`;
 
@@ -142,15 +150,15 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
   });
 
-  describe('runSavedQueries only', () => {
+  describe('runSavedQueries with read access to saved queries and packs', () => {
     it('should reject when no reference is supplied', async () => {
-      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+      const coreStart = withSavedQuery(RUN_SAVED_WITH_READS);
 
       await expect(isOsqueryResponseActionAuthorized(coreStart, request, {})).resolves.toBe(false);
     });
 
     it('should authorize a resolvable saved_query_id with no caller-supplied query', async () => {
-      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+      const coreStart = withSavedQuery(RUN_SAVED_WITH_READS);
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, { saved_query_id: SAVED_QUERY_ID })
@@ -158,13 +166,10 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should reject when more than one saved query has the same attributes.id', async () => {
-      const coreStart = createMockCoreStart(
-        { writeLiveQueries: false, runSavedQueries: true },
-        {
-          'so-a': { id: SAVED_QUERY_ID, query: STORED_QUERY },
-          'so-b': { id: SAVED_QUERY_ID, query: STORED_QUERY },
-        }
-      );
+      const coreStart = createMockCoreStart(RUN_SAVED_WITH_READS, {
+        'so-a': { id: SAVED_QUERY_ID, query: STORED_QUERY },
+        'so-b': { id: SAVED_QUERY_ID, query: STORED_QUERY },
+      });
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, { saved_query_id: SAVED_QUERY_ID })
@@ -172,10 +177,9 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should authorize a saved_query_id that matches attributes.id rather than the SO id', async () => {
-      const coreStart = createMockCoreStart(
-        { writeLiveQueries: false, runSavedQueries: true },
-        { [SAVED_QUERY_SO_ID]: { id: SAVED_QUERY_ID, query: STORED_QUERY } }
-      );
+      const coreStart = createMockCoreStart(RUN_SAVED_WITH_READS, {
+        [SAVED_QUERY_SO_ID]: { id: SAVED_QUERY_ID, query: STORED_QUERY },
+      });
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, { saved_query_id: SAVED_QUERY_ID })
@@ -194,7 +198,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should authorize a resolvable pack_id', async () => {
-      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+      const coreStart = withSavedQuery(RUN_SAVED_WITH_READS);
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, { pack_id: PACK_ID })
@@ -202,10 +206,9 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should authorize a pack whose queries are stored as a record', async () => {
-      const coreStart = createMockCoreStart(
-        { writeLiveQueries: false, runSavedQueries: true },
-        { [PACK_ID]: { queries: { q1: { query: 'select 1;' } } } }
-      );
+      const coreStart = createMockCoreStart(RUN_SAVED_WITH_READS, {
+        [PACK_ID]: { queries: { q1: { query: 'select 1;' } } },
+      });
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, { pack_id: PACK_ID })
@@ -213,7 +216,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should reject a saved_query_id that does not resolve', async () => {
-      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+      const coreStart = withSavedQuery(RUN_SAVED_WITH_READS);
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
@@ -224,7 +227,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should reject a whitespace-only saved_query_id', async () => {
-      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+      const coreStart = withSavedQuery(RUN_SAVED_WITH_READS);
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
@@ -235,7 +238,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should reject a pack_id that does not resolve', async () => {
-      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+      const coreStart = withSavedQuery(RUN_SAVED_WITH_READS);
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, { pack_id: 'does-not-exist' })
@@ -243,7 +246,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should authorize a query matching the stored saved query', async () => {
-      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+      const coreStart = withSavedQuery(RUN_SAVED_WITH_READS);
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
@@ -254,7 +257,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should reject a query that does not match the stored saved query', async () => {
-      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+      const coreStart = withSavedQuery(RUN_SAVED_WITH_READS);
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
@@ -265,7 +268,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should reject a queries array with a resolvable saved_query_id', async () => {
-      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+      const coreStart = withSavedQuery(RUN_SAVED_WITH_READS);
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
@@ -276,7 +279,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should reject a queries array without a pack_id', async () => {
-      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+      const coreStart = withSavedQuery(RUN_SAVED_WITH_READS);
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
@@ -286,7 +289,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should authorize a resolvable pack_id even when queries[] is also supplied', async () => {
-      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+      const coreStart = withSavedQuery(RUN_SAVED_WITH_READS);
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
@@ -300,7 +303,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
       // Dispatch rebuilds the query set from the pack, so an unvouched-for copy cannot change
       // what SQL runs — but it is persisted on the rule and read to decide whether to dispatch
       // per alert with substitution. Requiring a match keeps that decision unsteerable.
-      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+      const coreStart = withSavedQuery(RUN_SAVED_WITH_READS);
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
@@ -311,15 +314,12 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should reject a mismatched ecs_mapping on a resolvable saved query', async () => {
-      const coreStart = createMockCoreStart(
-        { writeLiveQueries: false, runSavedQueries: true },
-        {
-          [SAVED_QUERY_ID]: {
-            query: STORED_QUERY,
-            ecs_mapping: [{ key: 'host.name', value: { field: 'name' } }],
-          },
-        }
-      );
+      const coreStart = createMockCoreStart(RUN_SAVED_WITH_READS, {
+        [SAVED_QUERY_ID]: {
+          query: STORED_QUERY,
+          ecs_mapping: [{ key: 'host.name', value: { field: 'name' } }],
+        },
+      });
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
@@ -330,15 +330,12 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should authorize an ecs_mapping that matches the stored saved query', async () => {
-      const coreStart = createMockCoreStart(
-        { writeLiveQueries: false, runSavedQueries: true },
-        {
-          [SAVED_QUERY_ID]: {
-            query: STORED_QUERY,
-            ecs_mapping: [{ key: 'host.name', value: { field: 'name' } }],
-          },
-        }
-      );
+      const coreStart = createMockCoreStart(RUN_SAVED_WITH_READS, {
+        [SAVED_QUERY_ID]: {
+          query: STORED_QUERY,
+          ecs_mapping: [{ key: 'host.name', value: { field: 'name' } }],
+        },
+      });
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
@@ -351,7 +348,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
     it('should authorize an empty ecs_mapping against a saved query that has none', async () => {
       // `toEcsMappingRecord` collapses `{}` to undefined on both sides, so an explicit empty
       // mapping is equivalent to omitting the field when the saved query has none either.
-      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+      const coreStart = withSavedQuery(RUN_SAVED_WITH_READS);
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
@@ -366,15 +363,12 @@ describe('isOsqueryResponseActionAuthorized', () => {
       // An absent or empty mapping asserts nothing, so it cannot deny. Sending `{}` is still not
       // a way to strip the stored mapping: dispatch derives it from the saved object whenever the
       // stored SQL is what runs (see `create_queries.test.ts`).
-      const coreStart = createMockCoreStart(
-        { writeLiveQueries: false, runSavedQueries: true },
-        {
-          [SAVED_QUERY_ID]: {
-            query: STORED_QUERY,
-            ecs_mapping: [{ key: 'host.name', value: { field: 'name' } }],
-          },
-        }
-      );
+      const coreStart = createMockCoreStart(RUN_SAVED_WITH_READS, {
+        [SAVED_QUERY_ID]: {
+          query: STORED_QUERY,
+          ecs_mapping: [{ key: 'host.name', value: { field: 'name' } }],
+        },
+      });
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
@@ -387,17 +381,14 @@ describe('isOsqueryResponseActionAuthorized', () => {
 
     it('should authorize an ecs_mapping that matches one of the pack queries', async () => {
       // Packs hold `ecs_mapping` per query, so a top-level mapping is matched against those.
-      const coreStart = createMockCoreStart(
-        { writeLiveQueries: false, runSavedQueries: true },
-        {
-          [PACK_ID]: {
-            queries: [
-              { query: 'select 1;' },
-              { query: STORED_PACK_QUERY, ecs_mapping: { 'host.name': { field: 'name' } } },
-            ],
-          },
-        }
-      );
+      const coreStart = createMockCoreStart(RUN_SAVED_WITH_READS, {
+        [PACK_ID]: {
+          queries: [
+            { query: 'select 1;' },
+            { query: STORED_PACK_QUERY, ecs_mapping: { 'host.name': { field: 'name' } } },
+          ],
+        },
+      });
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
@@ -409,16 +400,11 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should reject an ecs_mapping that matches no pack query', async () => {
-      const coreStart = createMockCoreStart(
-        { writeLiveQueries: false, runSavedQueries: true },
-        {
-          [PACK_ID]: {
-            queries: [
-              { query: STORED_PACK_QUERY, ecs_mapping: { 'host.name': { field: 'name' } } },
-            ],
-          },
-        }
-      );
+      const coreStart = createMockCoreStart(RUN_SAVED_WITH_READS, {
+        [PACK_ID]: {
+          queries: [{ query: STORED_PACK_QUERY, ecs_mapping: { 'host.name': { field: 'name' } } }],
+        },
+      });
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
@@ -430,7 +416,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should authorize an empty ecs_mapping against a pack whose queries have none', async () => {
-      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+      const coreStart = withSavedQuery(RUN_SAVED_WITH_READS);
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
@@ -445,16 +431,11 @@ describe('isOsqueryResponseActionAuthorized', () => {
       // As above: empty asserts nothing. Pack dispatch always rebuilds per-query mappings from
       // the pack saved object, so the caller's empty mapping never reaches the agent.
 
-      const coreStart = createMockCoreStart(
-        { writeLiveQueries: false, runSavedQueries: true },
-        {
-          [PACK_ID]: {
-            queries: [
-              { query: STORED_PACK_QUERY, ecs_mapping: { 'host.name': { field: 'name' } } },
-            ],
-          },
-        }
-      );
+      const coreStart = createMockCoreStart(RUN_SAVED_WITH_READS, {
+        [PACK_ID]: {
+          queries: [{ query: STORED_PACK_QUERY, ecs_mapping: { 'host.name': { field: 'name' } } }],
+        },
+      });
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
@@ -466,10 +447,9 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should authorize a client-substituted query when it matches server-side substitution', async () => {
-      const coreStart = createMockCoreStart(
-        { writeLiveQueries: false, runSavedQueries: true },
-        { [SAVED_QUERY_ID]: { query: "select * from os_version where name='{{host.os.name}}';" } }
-      );
+      const coreStart = createMockCoreStart(RUN_SAVED_WITH_READS, {
+        [SAVED_QUERY_ID]: { query: "select * from os_version where name='{{host.os.name}}';" },
+      });
 
       await expect(
         isOsqueryResponseActionAuthorized(
@@ -486,10 +466,9 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should reject a client-substituted query without alert context', async () => {
-      const coreStart = createMockCoreStart(
-        { writeLiveQueries: false, runSavedQueries: true },
-        { [SAVED_QUERY_ID]: { query: "select * from os_version where name='{{host.os.name}}';" } }
-      );
+      const coreStart = createMockCoreStart(RUN_SAVED_WITH_READS, {
+        [SAVED_QUERY_ID]: { query: "select * from os_version where name='{{host.os.name}}';" },
+      });
 
       await expect(
         isOsqueryResponseActionAuthorized(coreStart, request, {
@@ -500,10 +479,9 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should reject a parameter substitution that does not match server-side substitution', async () => {
-      const coreStart = createMockCoreStart(
-        { writeLiveQueries: false, runSavedQueries: true },
-        { [SAVED_QUERY_ID]: { query: "select * from os_version where name='{{host.os.name}}';" } }
-      );
+      const coreStart = createMockCoreStart(RUN_SAVED_WITH_READS, {
+        [SAVED_QUERY_ID]: { query: "select * from os_version where name='{{host.os.name}}';" },
+      });
 
       await expect(
         isOsqueryResponseActionAuthorized(
@@ -520,10 +498,9 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should reject SQL appended around a parameterised stored query', async () => {
-      const coreStart = createMockCoreStart(
-        { writeLiveQueries: false, runSavedQueries: true },
-        { [SAVED_QUERY_ID]: { query: "select * from os_version where name='{{host.os.name}}';" } }
-      );
+      const coreStart = createMockCoreStart(RUN_SAVED_WITH_READS, {
+        [SAVED_QUERY_ID]: { query: "select * from os_version where name='{{host.os.name}}';" },
+      });
 
       await expect(
         isOsqueryResponseActionAuthorized(
@@ -540,10 +517,9 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should reject a supplied query when the stored query is only a placeholder', async () => {
-      const coreStart = createMockCoreStart(
-        { writeLiveQueries: false, runSavedQueries: true },
-        { [SAVED_QUERY_ID]: { query: '{{host.os.name}}' } }
-      );
+      const coreStart = createMockCoreStart(RUN_SAVED_WITH_READS, {
+        [SAVED_QUERY_ID]: { query: '{{host.os.name}}' },
+      });
 
       await expect(
         isOsqueryResponseActionAuthorized(
@@ -557,6 +533,130 @@ describe('isOsqueryResponseActionAuthorized', () => {
           UBUNTU_ALERT
         )
       ).resolves.toBe(false);
+    });
+  });
+
+  describe('read access to the referenced object', () => {
+    const RUN_SAVED_NO_READS = {
+      writeLiveQueries: false,
+      runSavedQueries: true,
+      readPacks: false,
+      readSavedQueries: false,
+    };
+    const WRITE_LIVE_NO_READS = {
+      writeLiveQueries: true,
+      runSavedQueries: false,
+      readPacks: false,
+      readSavedQueries: false,
+    };
+
+    it.each([
+      {
+        scenario: 'runSavedQueries without readPacks runs a pack',
+        capabilities: RUN_SAVED_NO_READS,
+        params: { pack_id: PACK_ID },
+      },
+      {
+        scenario: 'runSavedQueries with only readSavedQueries runs a pack',
+        capabilities: { ...RUN_SAVED_NO_READS, readSavedQueries: true },
+        params: { pack_id: PACK_ID },
+      },
+      {
+        scenario: 'writeLiveQueries without readPacks runs a pack',
+        capabilities: WRITE_LIVE_NO_READS,
+        params: { pack_id: PACK_ID },
+      },
+      {
+        scenario: 'runSavedQueries without readPacks names a pack and a readable saved query',
+        capabilities: { ...RUN_SAVED_NO_READS, readSavedQueries: true },
+        params: { pack_id: PACK_ID, saved_query_id: SAVED_QUERY_ID },
+      },
+      {
+        scenario: 'runSavedQueries without readSavedQueries runs a saved query',
+        capabilities: RUN_SAVED_NO_READS,
+        params: { saved_query_id: SAVED_QUERY_ID, query: STORED_QUERY },
+      },
+      {
+        scenario: 'runSavedQueries with only readPacks runs a saved query',
+        capabilities: { ...RUN_SAVED_NO_READS, readPacks: true },
+        params: { saved_query_id: SAVED_QUERY_ID },
+      },
+    ])(
+      'should deny without reading saved objects when $scenario',
+      async ({ capabilities, params }) => {
+        const coreStart = withSavedQuery(capabilities);
+
+        await expect(isOsqueryResponseActionAuthorized(coreStart, request, params)).resolves.toBe(
+          false
+        );
+        expect(coreStart.savedObjects.getScopedClient).not.toHaveBeenCalled();
+      }
+    );
+
+    it.each([
+      {
+        scenario: 'writeLiveQueries with readPacks runs a pack',
+        capabilities: { ...WRITE_LIVE_NO_READS, readPacks: true },
+        params: { pack_id: PACK_ID },
+      },
+      {
+        scenario: 'runSavedQueries with only readPacks runs a pack',
+        capabilities: { ...RUN_SAVED_NO_READS, readPacks: true },
+        params: { pack_id: PACK_ID },
+      },
+      {
+        scenario: 'runSavedQueries with only readSavedQueries runs a saved query',
+        capabilities: { ...RUN_SAVED_NO_READS, readSavedQueries: true },
+        params: { saved_query_id: SAVED_QUERY_ID, query: STORED_QUERY },
+      },
+      {
+        scenario:
+          'writeLiveQueries without readSavedQueries sends a saved_query_id with its own SQL',
+        capabilities: WRITE_LIVE_NO_READS,
+        params: { saved_query_id: SAVED_QUERY_ID, query: 'select 6;' },
+      },
+      {
+        scenario: 'writeLiveQueries without readPacks sends a blank pack_id',
+        capabilities: WRITE_LIVE_NO_READS,
+        params: { pack_id: '   ', query: 'select 1;' },
+      },
+    ])('should authorize when $scenario', async ({ capabilities, params }) => {
+      const coreStart = withSavedQuery(capabilities);
+
+      await expect(isOsqueryResponseActionAuthorized(coreStart, request, params)).resolves.toBe(
+        true
+      );
+    });
+
+    it('should authorize a pack without reading the saved query when both ids are supplied', async () => {
+      const coreStart = withSavedQuery({ ...RUN_SAVED_NO_READS, readPacks: true });
+
+      await expect(
+        isOsqueryResponseActionAuthorized(coreStart, request, {
+          pack_id: PACK_ID,
+          saved_query_id: SAVED_QUERY_ID,
+        })
+      ).resolves.toBe(true);
+
+      // Pack resolution wins, as in `resolveQueryReference`. Loading the saved query here would
+      // return its SQL to a caller who does not have `readSavedQueries`.
+      const soClient = (coreStart.savedObjects.getScopedClient as jest.Mock).mock.results[0].value;
+      expect(soClient.get).toHaveBeenCalledTimes(1);
+      expect(soClient.get).toHaveBeenCalledWith(packSavedObjectType, PACK_ID);
+      expect(soClient.find).not.toHaveBeenCalled();
+      expect(soClient.resolve).not.toHaveBeenCalled();
+    });
+
+    it('should resolve capabilities once per request across pack and saved query checks', async () => {
+      const coreStart = withSavedQuery(RUN_SAVED_WITH_READS);
+
+      await expect(
+        isOsqueryResponseActionAuthorized(coreStart, request, { pack_id: PACK_ID })
+      ).resolves.toBe(true);
+      await expect(
+        isOsqueryResponseActionAuthorized(coreStart, request, { saved_query_id: SAVED_QUERY_ID })
+      ).resolves.toBe(true);
+      expect(coreStart.capabilities.resolveCapabilities).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -599,7 +699,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should look the reference up as the expected saved object type', async () => {
-      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+      const coreStart = withSavedQuery(RUN_SAVED_WITH_READS);
 
       await isOsqueryResponseActionAuthorized(coreStart, request, {
         saved_query_id: SAVED_QUERY_ID,
@@ -613,7 +713,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should look a pack reference up as the pack saved object type', async () => {
-      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+      const coreStart = withSavedQuery(RUN_SAVED_WITH_READS);
 
       await isOsqueryResponseActionAuthorized(coreStart, request, { pack_id: PACK_ID });
 
@@ -622,7 +722,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should resolve the same reference only once per request', async () => {
-      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+      const coreStart = withSavedQuery(RUN_SAVED_WITH_READS);
 
       await isOsqueryResponseActionAuthorized(coreStart, request, {
         saved_query_id: SAVED_QUERY_ID,
@@ -640,10 +740,9 @@ describe('isOsqueryResponseActionAuthorized', () => {
     // share one entry, so one would be authorized against the other's resolved object. Rule
     // import and bulk duplicate check many actions under a single request.
     it('should not share a cache entry between references that differ only by separator placement', async () => {
-      const coreStart = createMockCoreStart(
-        { writeLiveQueries: false, runSavedQueries: true },
-        { [PACK_ID]: { queries: [{ query: STORED_PACK_QUERY }] } }
-      );
+      const coreStart = createMockCoreStart(RUN_SAVED_WITH_READS, {
+        [PACK_ID]: { queries: [{ query: STORED_PACK_QUERY }] },
+      });
 
       // Resolves the pack `::${PACK_ID}`, which does not exist.
       await expect(
@@ -668,7 +767,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should share a cache entry between padded and trimmed saved query ids', async () => {
-      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+      const coreStart = withSavedQuery(RUN_SAVED_WITH_READS);
 
       await isOsqueryResponseActionAuthorized(coreStart, request, {
         saved_query_id: ` ${SAVED_QUERY_ID} `,
@@ -682,7 +781,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
     });
 
     it('should share a cache entry between padded and trimmed pack ids', async () => {
-      const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
+      const coreStart = withSavedQuery(RUN_SAVED_WITH_READS);
 
       await isOsqueryResponseActionAuthorized(coreStart, request, {
         pack_id: ` ${PACK_ID} `,
