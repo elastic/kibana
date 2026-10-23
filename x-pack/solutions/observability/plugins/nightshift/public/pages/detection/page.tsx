@@ -100,7 +100,18 @@ export const DetectionPage = ({
   const tabSearch = `?${tabParams.toString()}`;
 
   return (
-    <>
+    <div
+      css={css`
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        height: 100%;
+        min-height: 0;
+        overflow: hidden;
+        width: 100%;
+      `}
+      data-test-subj="nightshiftDetectionPage"
+    >
       <NightshiftAppHeader
         {...headerProps}
         page="detection"
@@ -115,12 +126,18 @@ export const DetectionPage = ({
         component="div"
         restrictWidth={false}
         grow
+        css={css`
+          flex: 1 1 auto;
+          min-height: 0;
+          overflow: hidden;
+        `}
         contentProps={{
           css: css`
             display: flex;
             flex: 1 1 auto;
             flex-direction: column;
             min-height: 0;
+            overflow: hidden;
             width: 100%;
           `,
         }}
@@ -224,6 +241,6 @@ export const DetectionPage = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageTemplate.Section>
-    </>
+    </div>
   );
 };

@@ -254,10 +254,24 @@ export function NightshiftPage(): React.ReactElement | null {
     <ObservabilityPageTemplate
       data-test-subj="nightshiftPage"
       restrictWidth={false}
+      css={
+        isDetectionPage
+          ? css`
+              height: 100%;
+              min-height: 0;
+              overflow: hidden;
+            `
+          : undefined
+      }
       pageSectionProps={{
         paddingSize: 'none',
         ...(isDetectionPage
           ? {
+              css: css`
+                flex: 1 1 auto;
+                min-height: 0;
+                overflow: hidden;
+              `,
               contentProps: {
                 css: css`
                   display: flex;
