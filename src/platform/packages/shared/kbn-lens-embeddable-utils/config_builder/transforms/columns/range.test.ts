@@ -11,7 +11,7 @@ import {
   fromRangeOrHistogramLensApiToLensState,
   fromRangeOrHistogramLensStateToAPI,
 } from './range';
-import type { RangeIndexPatternColumn } from '@kbn/lens-common';
+import type { RangeIndexPatternColumn, RangeTypeLens } from '@kbn/lens-common';
 import type { LensApiRangeOperation, LensApiHistogramOperation } from '../../schema/bucket_ops';
 import {
   LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
@@ -19,8 +19,17 @@ import {
   LENS_RANGE_DEFAULT_INTERVAL,
 } from '../../schema/constants';
 
-type LensRange = RangeIndexPatternColumn['params']['ranges'][number];
 type ApiRange = LensApiRangeOperation['ranges'][number];
+
+const getRangeStateColumn = (ranges: RangeTypeLens[]): RangeIndexPatternColumn => ({
+  operationType: 'range',
+  dataType: 'string',
+  sourceField: 'price',
+  customLabel: false,
+  label: 'price',
+  isBucketed: true,
+  params: { type: 'range', maxBars: 'auto', ranges },
+});
 
 describe('Range Transforms', () => {
   describe('fromRangeOrHistogramLensApiToLensState', () => {
@@ -103,7 +112,7 @@ describe('Range Transforms', () => {
         fromRangeOrHistogramLensApiToLensState({ operation: 'range', field: 'price', ranges })
           .params.ranges;
 
-      it.each<[string, ApiRange, LensRange]>([
+      it.each<[string, ApiRange, RangeTypeLens]>([
         ['no bounds', {}, { from: null, to: null, label: '' }],
         ['no bounds with a label', { label: 'All' }, { from: null, to: null, label: 'All' }],
         ['no upper bound', { gt: 1000 }, { from: 1000, to: null, label: '' }],
@@ -282,22 +291,12 @@ describe('Range Transforms', () => {
     });
 
     describe('unbounded ranges', () => {
-      const getRangeColumn = (ranges: LensRange[]): RangeIndexPatternColumn => ({
-        operationType: 'range',
-        dataType: 'string',
-        sourceField: 'price',
-        customLabel: false,
-        label: 'price',
-        isBucketed: true,
-        params: { type: 'range', maxBars: 'auto', ranges },
-      });
-
-      const getApiRanges = (ranges: LensRange[]) => {
-        const result = fromRangeOrHistogramLensStateToAPI(getRangeColumn(ranges));
+      const getApiRanges = (ranges: RangeTypeLens[]) => {
+        const result = fromRangeOrHistogramLensStateToAPI(getRangeStateColumn(ranges));
         return result.operation === 'range' ? result.ranges : undefined;
       };
 
-      it.each<[string, LensRange, ApiRange]>([
+      it.each<[string, RangeTypeLens, ApiRange]>([
         ['null on both sides', { from: null, to: null, label: '' }, { label: '' }],
         [
           'null on both sides with a label',
@@ -330,50 +329,35 @@ describe('Range Transforms', () => {
   });
 
   describe('round-trip', () => {
-    const getRangeStateColumn = (ranges: LensRange[]): RangeIndexPatternColumn => ({
-      operationType: 'range',
-      dataType: 'string',
-      sourceField: 'price',
-      customLabel: false,
-      label: '',
-      isBucketed: true,
-      params: {
-        type: 'range',
-        maxBars: 'auto',
-        ranges,
-        format: undefined,
-        parentFormat: { id: 'range', params: { template: 'arrow_right', replaceInfinity: true } },
-      },
-    });
+    const roundTripRanges = (ranges: RangeTypeLens[]) =>
+      fromRangeOrHistogramLensApiToLensState(
+        fromRangeOrHistogramLensStateToAPI(getRangeStateColumn(ranges))
+      ).params.ranges;
 
     it('should convert unbounded ranges from lens state to API and back', () => {
-      const original = getRangeStateColumn([
+      const ranges: RangeTypeLens[] = [
         { from: 0, to: 1000, label: '' },
         { from: 1000, to: null, label: '' },
         { from: null, to: 0, label: '' },
         { from: null, to: null, label: '' },
         { from: null, to: null, label: 'All' },
-      ]);
+      ];
 
-      const api = fromRangeOrHistogramLensStateToAPI(original);
-      expect(fromRangeOrHistogramLensApiToLensState(api)).toEqual(original);
+      expect(roundTripRanges(ranges)).toEqual(ranges);
     });
 
     it('should store infinite editor bounds as null after converting to API and back', () => {
-      const original = getRangeStateColumn([
-        { from: 1000, to: Infinity, label: '' },
-        { from: -Infinity, to: 0, label: '' },
-        { from: -Infinity, to: Infinity, label: 'All' },
-      ]);
-
-      const api = fromRangeOrHistogramLensStateToAPI(original);
-      expect(fromRangeOrHistogramLensApiToLensState(api)).toEqual(
-        getRangeStateColumn([
-          { from: 1000, to: null, label: '' },
-          { from: null, to: 0, label: '' },
-          { from: null, to: null, label: 'All' },
+      expect(
+        roundTripRanges([
+          { from: 1000, to: Infinity, label: '' },
+          { from: -Infinity, to: 0, label: '' },
+          { from: -Infinity, to: Infinity, label: 'All' },
         ])
-      );
+      ).toEqual([
+        { from: 1000, to: null, label: '' },
+        { from: null, to: 0, label: '' },
+        { from: null, to: null, label: 'All' },
+      ]);
     });
   });
 });
