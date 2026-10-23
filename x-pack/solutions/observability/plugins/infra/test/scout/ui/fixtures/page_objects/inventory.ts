@@ -396,6 +396,11 @@ export class InventoryPage {
     await this.waitForNodesToLoad();
   }
 
+  public async switchSchemaFromNoDataPrompt() {
+    await this.noDataSwitchSchemaLink.click();
+    await this.waitForNodesToLoad();
+  }
+
   public async openInventoryRuleFlyout() {
     await this.alertsHeaderButton.click();
     await this.inventoryAlertsMenuOption.click();

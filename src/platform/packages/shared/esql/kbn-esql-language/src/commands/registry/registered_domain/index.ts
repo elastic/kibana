@@ -26,7 +26,7 @@ export const registeredDomainCommand = {
   metadata: {
     docPreserving: true,
     preview: true,
-    description: i18n.translate('kbn-esql-language.esql.definitions.registeredDomainDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.registeredDomainDoc', {
       defaultMessage:
         'Parses an FQDN string and extracts domain parts into new columns using the public suffix list',
     }),

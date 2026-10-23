@@ -68,6 +68,15 @@ consts:
   max_recommended_actions: 8
   # Fallback when the KI carries no `attributes.autonomy`.
   default_autonomy: manual
+  # Hours added on each side of the incident window (earliest to latest cited
+  # alert) for the agent's searches. Kept narrow so older activity on the host
+  # does not read as this incident; the agent widens from inside the window by
+  # following a tie (process tree, file, hash, destination, account, initial access).
+  incident_margin_hours: 2
+  # How far before the incident the telemetry check looks. It asks whether the
+  # host ships Defend telemetry at all, not what happened in the incident, so it
+  # is much wider than the agent's margin and open-ended toward now.
+  telemetry_gate_lookback_hours: 72
 
 steps:
   # A read error fails the run, leaving the indicator pending for the next
@@ -116,6 +125,9 @@ steps:
       # Set by an earlier run of this workflow, before the agent. Blank means this
       # indicator has not been analyzed yet.
       forensic_attempted_at: "{{ steps.read_ki.output.hits.hits[0]._source.attributes.forensic_attempted_at | default: '' }}"
+      # The FP/TP verdict the handoff carried. Fallback when the verdict attachment
+      # cannot be read.
+      classification: "{{ steps.read_ki.output.hits.hits[0]._source.attributes.classification | default: '' }}"
       # Explicitly set whether we have the data we need to continue
       has_request: >-
         ${{ steps.read_ki.output.hits.hits[0]._source.attributes.attack_discovery_alert_id != blank
@@ -157,7 +169,7 @@ steps:
       # analysis but could not retire the indicator. Finding them lets this run
       # skip the agent and retry just the write. Fewer than both after an attempt
       # was already recorded skips the agent too: a later run does not start
-      # another 15m analysis. Another indicator's files do not count.
+      # another 30m analysis. Another indicator's files do not count.
       #
       # Listing rather than reading an attachment by id, because `ai.attachment.read`
       # reports "no such attachment" and "the attachment service is broken" the same
@@ -193,9 +205,15 @@ steps:
           index: ".alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}"
           ignore_unavailable: true
           size: 1
+          # The `_with_replacements` fields carry real host and user names, which is
+          # what the agent queries on. `@timestamp` is the window fallback.
           _source:
+            - "@timestamp"
             - host.name
             - kibana.alert.attack_discovery.alert_ids
+            - kibana.alert.attack_discovery.title_with_replacements
+            - kibana.alert.attack_discovery.summary_markdown_with_replacements
+            - kibana.alert.attack_discovery.details_markdown_with_replacements
           query:
             bool:
               should:
@@ -206,6 +224,8 @@ steps:
                     kibana.alert.uuid: "{{ steps.resolve_request.output.attack_discovery_alert_id }}"
               minimum_should_match: 1
 
+      # The host the cited alerts agree on, and the span of the incident: the
+      # earliest and latest `kibana.alert.original_time` across those alerts.
       - name: extract_host_from_ad_constituent_alerts
         type: elasticsearch.search
         if: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] != blank }}"
@@ -221,6 +241,12 @@ steps:
               terms:
                 field: host.name
                 size: 1
+            incident_start:
+              min:
+                field: kibana.alert.original_time
+            incident_end:
+              max:
+                field: kibana.alert.original_time
 
       # Only the not-found case reaches here now: a read error failed the run above. A
       # missing alert is permanent — the discovery this indicator names is gone — so it
@@ -246,6 +272,18 @@ steps:
         type: data.set
         with:
           host_name: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source.host.name | default: steps.extract_host_from_ad_constituent_alerts.output.aggregations.host_name.buckets[0].key | default: '' }}"
+
+      # The incident window the telemetry check and the agent anchor on. From the
+      # cited alerts when they carry `original_time`; otherwise the discovery's own
+      # `@timestamp`, so a window always exists once the alert was found. The
+      # margin is applied by the consumers, not here: Liquid has no date math.
+      - name: resolve_incident_window
+        type: data.set
+        with:
+          start: "{{ steps.extract_host_from_ad_constituent_alerts.output.aggregations.incident_start.value_as_string | default: steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['@timestamp'] | default: '' }}"
+          end: "{{ steps.extract_host_from_ad_constituent_alerts.output.aggregations.incident_end.value_as_string | default: steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['@timestamp'] | default: '' }}"
+          from_alerts: "${{ steps.extract_host_from_ad_constituent_alerts.output.aggregations.incident_start.value_as_string != blank }}"
+
       - name: when_host_known
         type: if
         condition: "${{ steps.resolve_host.output.host_name != blank }}"
@@ -254,8 +292,11 @@ steps:
           # worker makes the same check (`check_index_scope`) before it selects a
           # report. The forensic skill resolves `logs-endpoint.events.*` only once
           # the agent is running, so without this a host with no Elastic Defend
-          # telemetry spends the indicator's single attempt on a 15m run that can
+          # telemetry spends the indicator's single attempt on a 30m run that can
           # only report nothing.
+          #
+          # Telemetry existence check. Looks back over a longer time window
+          # because a miss here retires the indicator with no retry.
           #
           # Gated like the agent, so a retry of a finished analysis does not depend
           # on telemetry still being there. Fails the run on a read error, like the
@@ -276,7 +317,7 @@ steps:
                         host.name: "{{ steps.resolve_host.output.host_name }}"
                     - range:
                         "@timestamp":
-                          gte: "now-72h"
+                          gte: "{{ steps.resolve_incident_window.output.start }}||-{{ consts.telemetry_gate_lookback_hours }}h"
 
           # `checked` tells "no telemetry" apart from "did not look": a skipped step
           # has no output, and that must not read as an empty index.
@@ -300,7 +341,9 @@ steps:
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
                 message: >-
                   No Elastic Defend telemetry was found for `{{ steps.resolve_host.output.host_name }}`
-                  in `logs-endpoint.events.*`, so endpoint analysis was not run.
+                  in `logs-endpoint.events.*` from {{ consts.telemetry_gate_lookback_hours }}h before the
+                  incident window (`{{ steps.resolve_incident_window.output.start }}` to
+                  `{{ steps.resolve_incident_window.output.end }}`) until now, so endpoint analysis was not run.
 
           # Record the attempt before the agent. A later run reads it back from the
           # indicator and does not start another analysis. `attributes` merges, so
@@ -338,7 +381,38 @@ steps:
               inputs:
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
                 message: >-
-                  Starting endpoint analysis of `{{ steps.resolve_host.output.host_name }}`.
+                  Starting endpoint analysis of `{{ steps.resolve_host.output.host_name }}` for the
+                  incident window `{{ steps.resolve_incident_window.output.start }}` to
+                  `{{ steps.resolve_incident_window.output.end }}` (plus {{ consts.incident_margin_hours }}h on each side).
+
+          # The AD review's verdict, read from the fixed-id attachment it writes on the
+          # investigation. Context for the agent only: the KI's `classification` is the
+          # fallback, and nothing downstream decides on this read, so a failed read is
+          # not a reason to skip the analysis.
+          - name: read_ad_verdict
+            type: ai.attachment.read
+            if: >-
+              ${{ steps.resolve_prior_assessment.output.count != 2
+                and steps.resolve_request.output.forensic_attempted_at == blank
+                and steps.resolve_endpoint_telemetry.output.present == true }}
+            on-failure:
+              continue: true
+            with:
+              conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+              attachment_id: analysis-verdict
+
+          # Everything the agent is told about the incident, resolved once so the
+          # message below stays readable.
+          - name: resolve_incident_context
+            type: data.set
+            with:
+              title: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.title_with_replacements'] | default: '' }}"
+              summary: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.summary_markdown_with_replacements'] | default: '' }}"
+              details: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.details_markdown_with_replacements'] | default: '' }}"
+              verdict: "{{ steps.read_ad_verdict.output.data.verdict | default: steps.resolve_request.output.classification }}"
+              verdict_summary: "{{ steps.read_ad_verdict.output.data.summary_markdown | default: '' }}"
+              verdict_rationale: "{{ steps.read_ad_verdict.output.data.rationale_markdown | default: '' }}"
+
           - name: forensic_analysis
             type: ai.agent
             # Runs once per indicator: only when findings are still missing, no
@@ -351,11 +425,11 @@ steps:
                 and steps.resolve_endpoint_telemetry.output.present == true }}
             # Continues on failure so the run still reaches its terminal write.
             # If this step failed the run instead, the indicator would stay
-            # `pending`, and the sweep would re-run this 15m agent every minute
+            # `pending`, and the sweep would re-run this 30m agent every minute
             # for the rest of the lookback window. Continuing instead lets
             # `journal_analysis_problem` log what happened and `mark_failed`
             # retire the indicator, at the cost of one handoff instead of a
-            # 15m run every minute for the sweep lookback.
+            # 30m run every minute for the sweep lookback.
             on-failure:
               continue: true
             agent-id: alertzero-thin-agent
@@ -367,7 +441,7 @@ steps:
             # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
             plugin-id: alertzero_endpoint_analysis
             aggregate-by: alertzero_parent
-            timeout: "15m"
+            timeout: "30m"
             create-conversation: false
             with:
               configuration_overrides:
@@ -377,17 +451,66 @@ steps:
                   - tool_ids:
                       - security.alertzero.actions.list
               message: >
-                I have an alert on {{ steps.resolve_host.output.host_name }}.
-                Perform forensic analysis and extract all IoCs.
-                Write the reconstruction to `timeline.events` and the indicators to `iocs`,
-                matching this step's schema. Use `rationale` only for the assessment.
+                Perform forensic analysis of one incident on `{{ steps.resolve_host.output.host_name }}` and
+                extract all IoCs. Write the reconstruction to `timeline.events`, the range you searched to
+                `timeline.window`, and the indicators to `iocs`, matching this step's schema. Use `rationale`
+                only for the assessment.
+
+                ## The incident
+
+                Attack Discovery `{{ steps.resolve_request.output.attack_discovery_alert_id }}`:
+                {{ steps.resolve_incident_context.output.title }}
+
+                Summary: {{ steps.resolve_incident_context.output.summary }}
+
+                Details: {{ steps.resolve_incident_context.output.details }}
+
+                Attack Discovery verdict: {{ steps.resolve_incident_context.output.verdict }}.
+                {{ steps.resolve_incident_context.output.verdict_summary }}
+                {%- if steps.resolve_incident_context.output.verdict_rationale != blank %}
+
+                Verdict rationale:
+                {{ steps.resolve_incident_context.output.verdict_rationale }}
+                {%- endif %}
+
+                Incident window: `{{ steps.resolve_incident_window.output.start }}` to
+                `{{ steps.resolve_incident_window.output.end }}`
+                {%- if steps.resolve_incident_window.output.from_alerts == true -%}
+                , the earliest to the latest cited alert `kibana.alert.original_time`.
+                {%- else -%}
+                , the discovery's own time: its cited alerts carried no `kibana.alert.original_time`.
+                {%- endif %}
+                Margin: {{ consts.incident_margin_hours }} hours on each side.
+
+                ## Scope
+
+                - Call the skill's tools with `start`, `end`, and `margin_hours` set to the incident window and
+                  margin above. Do not use `time_window_hours`. Do not do date arithmetic yourself: the tools
+                  return the exact `searched_window`. Copy its `start` and `end` into `timeline.window`.
+                - Scope every ES|QL query to that `searched_window`. Widen a query only to follow a tie from
+                  inside the window: the same process tree, file, hash, destination, or account,
+                  or the initial access that led to it (how the earliest in-window process or file got onto
+                  the host). Say that you widened, and how far.
+                - Evidence inside the window is this incident.
+                  Evidence you reached by following such a tie is this incident too, even when it is earlier
+                  than the window: put it in `timeline.events` with its real timestamp, and name the tie in
+                  its `description`. Patient zero is often before the window.
+                - Evidence outside the window with no tie is history. Report it under `## Earlier activity` in
+                  `rationale`, with its dates, and say it is outside the window. Keep it out of `timeline.events`.
+                  History alone does not make this a real incident and does not justify containment.
+                - Containment based on history needs a concrete tie to this incident: the same process tree,
+                  file, hash, destination, or account seen inside the window. Name the tie in that action's
+                  `comment`. Without one, do not propose the action.
 
                 Write `rationale` as markdown, in ASD-STE100 Simplified Technical English.
                 Use short sentences. Put one idea in each sentence.
                 - One paragraph first. State whether this is a real incident and give the strongest reason.
-                  Say why the evidence supports containment, or why it does not.
+                  Say why the evidence supports containment, or why it does not. Name the window you searched.
                 - Then these headings, each with a bullet list. Omit a heading that has nothing to report:
                   - `## Affected hosts`. One bullet per host. Name the host and its role.
+                  - `## Earlier activity`. One bullet per finding outside the incident window that you could
+                    not tie to this incident. Give its date and what it was.
+                    Tied findings belong in `timeline.events`, not here.
                   - `## Data gaps`. One bullet per gap. Name the telemetry that is missing.
                 - Do not list the actions. `recommendedActions` carries each action, and each card's
                   `title` and `comment` name its target and the evidence.
@@ -457,12 +580,13 @@ steps:
                     maxLength: 7900
                     description: >
                       Assessment only, as markdown in ASD-STE100 Simplified Technical English.
-                      One opening paragraph, then the headings `## Affected hosts` and `## Data gaps`,
-                      each with one bullet per item. Omit a heading that has nothing to report.
-                      Say whether this is a real incident, which other hosts are affected, what the
-                      data gaps are, and why the evidence supports containment or does not. Do not
-                      list the actions; `recommendedActions` carries those. The reconstruction itself
-                      belongs in `timeline`, the indicators in `iocs`.
+                      One opening paragraph, then the headings `## Affected hosts`,
+                      `## Earlier activity` and `## Data gaps`, each with one bullet per item. Omit
+                      a heading that has nothing to report. Say whether this is a real incident,
+                      which window was searched, which other hosts are affected, what was found
+                      outside the window, what the data gaps are, and why the evidence supports
+                      containment or does not. Do not list the actions; `recommendedActions` carries
+                      those. The reconstruction itself belongs in `timeline`, the indicators in `iocs`.
                   # `timeline` and `iocs` mirror the `security.investigation.timeline` and
                   # `security.investigation.iocs` attachment payloads exactly, so the attach steps
                   # below can pass them through untouched. Changing a field name here without
@@ -474,11 +598,31 @@ steps:
                     type: object
                     required:
                       - events
+                      - window
                     description: >
-                      Chronological attack reconstruction. Same shape as the
-                      `security.investigation.timeline` attachment payload, so the attach
-                      step can pass it through untouched.
+                      Chronological attack reconstruction and the range it was searched over.
+                      Same shape as the `security.investigation.timeline` attachment payload,
+                      so the attach step can pass it through untouched.
                     properties:
+                      window:
+                        type: object
+                        required:
+                          - start
+                          - end
+                        description: >
+                          The `searched_window` the skill's tools returned: the exact range the
+                          telemetry was searched over, incident window plus margin.
+                        properties:
+                          start:
+                            type: string
+                            minLength: 1
+                            maxLength: 64
+                            description: ISO-8601 start of the searched range, copied verbatim.
+                          end:
+                            type: string
+                            minLength: 1
+                            maxLength: 64
+                            description: ISO-8601 end of the searched range, copied verbatim.
                       events:
                         type: array
                         maxItems: 50
@@ -730,7 +874,7 @@ steps:
               id: "{{ steps.finding_ids.output.timeline }}"
               render_inline: true
               type: security.investigation.timeline
-              description: "Attack timeline: {{ steps.resolve_host.output.host_name }}"
+              description: "Attack timeline: {{ steps.resolve_host.output.host_name }} ({{ steps.forensic_analysis.output.structured_output.timeline.window.start }} to {{ steps.forensic_analysis.output.structured_output.timeline.window.end }})"
               data: "${{ steps.forensic_analysis.output.structured_output.timeline }}"
 
           - name: journal_iocs
@@ -1253,7 +1397,7 @@ steps:
 
   # The investigation needs to hear how this analysis ended — every other
   # problem path already narrates itself, but this one didn't, even though
-  # it's the step that takes 15m and is most likely to fail. Without this,
+  # it's the step that takes 30m and is most likely to fail. Without this,
   # silence would read as "never analyzed" instead of "analyzed, found nothing."
   #
   # The note names which case it was and links the execution. It does not include
