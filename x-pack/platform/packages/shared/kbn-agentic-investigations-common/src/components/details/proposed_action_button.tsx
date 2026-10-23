@@ -63,14 +63,6 @@ export interface ProposedActionButtonProps {
  * surrounding `ProposedActionsList`.
  */
 const rowStyles = ({ euiTheme }: UseEuiTheme) => ({
-  item: css`
-    transition: background ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
-
-    &:hover,
-    &:focus-within {
-      background-color: ${euiTheme.colors.backgroundBaseSubdued};
-    }
-  `,
   row: css`
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -85,6 +77,12 @@ const rowStyles = ({ euiTheme }: UseEuiTheme) => ({
     font: inherit;
     text-align: start;
     cursor: pointer;
+    transition: background ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
+
+    &:hover,
+    &:focus-visible {
+      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+    }
 
     &:focus-visible {
       outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
@@ -201,9 +199,6 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
       pendingCaption
     );
 
-    // Captions that only say something is missing read in the disabled text colour.
-    const isMuted = hasNoType;
-
     const [titleElement, setTitleElement] = useState<HTMLSpanElement | null>(null);
     const isTitleTruncated = useIsTextTruncated(titleElement, proposal.title);
     // A reason (an error, a decline, why it expired) can be as long as whoever wrote it, so it is
@@ -234,9 +229,9 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
             <span ref={setCaptionElement} css={captionText !== undefined && styles.title}>
               <EuiText
                 size="xs"
-                color={isMuted ? 'subdued' : isRestricted || isExpired ? 'warning' : 'subdued'}
+                color={!hasNoType && (isRestricted || isExpired) ? 'warning' : 'subdued'}
                 component="span"
-                css={isMuted && styles.noType}
+                css={hasNoType && styles.noType}
               >
                 {caption}
               </EuiText>
@@ -254,7 +249,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     );
 
     return (
-      <li css={styles.item}>
+      <li>
         {/* Anchored on the button itself, so keyboard focus reveals the full text too. One tooltip
             for the pair: the title, and under it the reason when that is cut off as well. */}
         {isTitleTruncated || isCaptionTruncated ? (

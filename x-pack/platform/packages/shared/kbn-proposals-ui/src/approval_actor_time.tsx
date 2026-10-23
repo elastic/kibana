@@ -87,7 +87,7 @@ export const ApprovalActorTime = ({
   live = false,
 }: ApprovalActorTimeProps) => {
   const { euiTheme } = useEuiTheme();
-  const now = useNow(at);
+  const now = useNow(live ? at : undefined);
   const name = (
     <span css={isUnknown ? css({ color: euiTheme.colors.textDisabled }) : undefined}>
       {actorName}

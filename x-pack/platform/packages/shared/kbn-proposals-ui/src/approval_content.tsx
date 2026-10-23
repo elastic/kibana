@@ -294,10 +294,8 @@ export const ApprovalContent = memo<ApprovalContentProps>(
             // Two plain sentences: who and when, a full stop, then the reason.
             .join('. ')
         : undefined;
-    // Anything else keeps just its reason (a failure's, say); a decision in flight has none yet.
-    const isInFlight = approvalPhase === 'applying' || approvalPhase === 'declining';
-    const bannerReason =
-      inFlightDescription ?? settledDescription ?? (isInFlight ? undefined : decision?.reason);
+    // Every phase with a banner is one of the two above; the others have no banner to describe.
+    const bannerReason = inFlightDescription ?? settledDescription;
     const isSettledOrTransient = approvalPhase !== 'pending';
 
     // Only a human's own "I've applied" can be taken back: nothing ran, so nothing is undone.
