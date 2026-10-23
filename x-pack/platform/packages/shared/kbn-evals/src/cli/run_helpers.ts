@@ -34,6 +34,7 @@ import {
 import { runScoutHook } from './scout_hook';
 import { resolveScoutTarget, type ScoutTarget } from './scout_target';
 import { readCachedEisConnectors } from './eis_connectors_cache';
+import { validateSuiteVaultConfig } from '../../scripts/vault/manage_secrets';
 import { parseSpaceIds } from '../utils/space_ids';
 import { getConcurrencyFromEnv, parseConcurrency } from '../utils/concurrency';
 import {
@@ -240,13 +241,22 @@ export interface ResolveProfileEnvOverridesOptions {
  * The config a `scoutHook` reads: the datasets profile only. Suite secrets are credentials, like
  * `evaluationsKbn`, so an auto-selected export profile (e.g. `config.local.json`) must not replace them.
  * With `dev-vault`, a suite that declares a `vaultSecret` reads that secret instead of the general
- * config; file profiles keep passing the profile JSON, which holds any suite blocks itself.
+ * config; file profiles keep passing the profile JSON, which holds any suite blocks itself. In CI,
+ * `run_suite.sh` has already run the hook and forwards its input, so the CLI doesn't reread Vault.
  */
 export const loadScoutHookConfig = (
   repoRoot: string,
   datasetsProfile: string | undefined,
   suite: Pick<EvalSuiteDefinition, 'vaultSecret'> | undefined
 ): object => {
+  const ciHookConfig = process.env.KBN_EVALS_SCOUT_HOOK_CONFIG_B64;
+  if (!datasetsProfile && ciHookConfig) {
+    try {
+      return validateSuiteVaultConfig(JSON.parse(Buffer.from(ciHookConfig, 'base64').toString()));
+    } catch {
+      throw new Error('CI scout-hook config must encode a JSON object');
+    }
+  }
   if (suite?.vaultSecret && isDevVaultProfile(datasetsProfile)) {
     return readSuiteSecretFromDevVault(suite.vaultSecret) ?? {};
   }
