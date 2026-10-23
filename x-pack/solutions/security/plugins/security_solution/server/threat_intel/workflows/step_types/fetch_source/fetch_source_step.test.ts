@@ -19,8 +19,8 @@ jest.mock('../../../adapters', () => {
 const runAdapterMock = runAdapter as jest.Mock;
 
 const SOURCE: SourceHit = {
-  _id: 'rss:mandiant-research',
-  _source: { adapter_type: 'rss', name: 'Mandiant Research' },
+  _id: 'vendor_api:elastic-security-labs',
+  _source: { adapter_type: 'rss', name: 'Elastic Security Labs' },
 };
 
 const buildContext = (input: unknown): StepHandlerContext<unknown, unknown> =>
@@ -60,7 +60,7 @@ describe('buildFetchSourceStepDefinition handler', () => {
     expect(result.error).toBeUndefined();
     expect(result.output).toEqual({
       adapter_type: 'rss',
-      source_id: 'rss:mandiant-research',
+      source_id: 'vendor_api:elastic-security-labs',
       total_fetched: 1,
       reports,
     });
@@ -88,7 +88,7 @@ describe('buildFetchSourceStepDefinition handler', () => {
 
     expect(result.error).toBeInstanceOf(Error);
     expect(result.error?.message).toBe(
-      'Failed to fetch threat intelligence source rss:mandiant-research: HTTP 503'
+      'Failed to fetch threat intelligence source vendor_api:elastic-security-labs: HTTP 503'
     );
   });
 });

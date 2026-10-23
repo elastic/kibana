@@ -1,5 +1,5 @@
 {
-  "sha1": "8bb08a58a916dd1c6934db102c255eced4b24aa3",
+  "sha1": "8540ec245882d7fa82d84b2589bc0bbebf40994b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -332,8 +332,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 61,
-        "column": 15
+        "line": 62,
+        "column": 9
       }
     },
     {
@@ -348,8 +348,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 71,
-        "column": 10
+        "line": 72,
+        "column": 11
       }
     },
     {
