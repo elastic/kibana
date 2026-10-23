@@ -9,6 +9,11 @@
 
 import type { DateHistogramIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiDateHistogramOperation } from '../../schema/bucket_ops';
+import {
+  LENS_DATE_HISTOGRAM_DROP_PARTIALS_DEFAULT,
+  LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
+  LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
+} from '../../schema/constants';
 import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';
 
 export function fromDateHistogramLensApiToLensState(
@@ -30,7 +35,7 @@ export function fromDateHistogramLensApiToLensState(
     params: {
       interval: suggested_interval,
       includeEmptyRows: include_empty_rows,
-      dropPartials: Boolean(drop_partial_intervals),
+      dropPartials: drop_partial_intervals,
       ignoreTimeRange: use_original_time_range,
     },
   };
@@ -43,8 +48,8 @@ export function fromDateHistogramLensStateToAPI(
     operation: 'date_histogram',
     ...getLensAPIBucketSharedProps(column),
     suggested_interval: column.params.interval,
-    use_original_time_range: Boolean(column.params.ignoreTimeRange),
-    include_empty_rows: Boolean(column.params.includeEmptyRows),
-    drop_partial_intervals: Boolean(column.params.dropPartials),
+    use_original_time_range: column.params.ignoreTimeRange ?? LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
+    include_empty_rows: column.params.includeEmptyRows ?? LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
+    drop_partial_intervals: column.params.dropPartials ?? LENS_DATE_HISTOGRAM_DROP_PARTIALS_DEFAULT,
   };
 }

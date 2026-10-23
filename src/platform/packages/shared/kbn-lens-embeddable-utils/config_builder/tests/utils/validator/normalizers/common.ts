@@ -42,6 +42,9 @@ import {
   LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
   LENS_SAMPLING_DEFAULT_VALUE,
+  LENS_DATE_HISTOGRAM_DROP_PARTIALS_DEFAULT,
+  LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
+  LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
 } from '../../../../schema/constants';
 import type { LensAttributes } from '../../../../types';
 import { getValues, type NormalizerConfig } from './normalize';
@@ -603,15 +606,15 @@ const isDateHistogramColumn = (
 ): col is DateHistogramIndexPatternColumn => col.operationType === 'date_histogram';
 
 /**
- * Default missing `ignoreTimeRange`/`dropPartials`/`includeEmptyRows` to `false` on `date_histogram`
- * columns on the ORIGINAL side. The transform emits `Boolean(...)` in both directions
- * (`transforms/columns/date_histogram.ts`), so a missing flag round-trips as an explicit `false`.
+ * Apply runtime defaults for missing `ignoreTimeRange`/`dropPartials`/`includeEmptyRows` on
+ * `date_histogram` columns in the original SO. The transform uses the same constants when the
+ * SO omits a field, so both sides converge to the same value after round-trip.
  */
 const normalizeDateHistogramColumnParams = (col: DateHistogramIndexPatternColumn): void => {
   const { params } = col;
-  params.ignoreTimeRange = Boolean(params.ignoreTimeRange);
-  params.dropPartials = Boolean(params.dropPartials);
-  params.includeEmptyRows = Boolean(params.includeEmptyRows);
+  params.ignoreTimeRange = params.ignoreTimeRange ?? LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT;
+  params.dropPartials = params.dropPartials ?? LENS_DATE_HISTOGRAM_DROP_PARTIALS_DEFAULT;
+  params.includeEmptyRows = params.includeEmptyRows ?? LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT;
 };
 
 const isRangeColumn = (col: GenericIndexPatternColumn): col is RangeIndexPatternColumn =>
@@ -1569,7 +1572,7 @@ function clearUnusedNamedPaletteParams(palette: PaletteOutput<CustomPaletteParam
  * This need to address:
  * - named palettes: `palette id`, `continuity`, and `rangeType` are compared strictly (see
  *   `normalizeNamedPaletteParams`); the throwaway stops/colorStops/bounds are dropped, and
- *   `steps` is reconstructed from the chart's `defaultBandCount`.
+ *   a missing `steps` defaults to the chart's `defaultBandCount`.
  * - custom palettes: mirror the transform's continuity-driven open/closed encoding (open above
  *   nulls `rangeMax` and the last multi-stop; open below nulls `rangeMin`), set the last
  *   multi-stop to the effective `rangeMax` when closed, drop the unread `steps`, and
@@ -1620,13 +1623,9 @@ export function getPaletteNormalizer<T extends LensAttributes>(
           palette.name = canonicalName;
           palette.params.name = canonicalName;
           palette.params.rangeType = useNumericRange ? 'number' : 'percent';
-          // A named palette renders from its id and `steps` alone. Its stops are
-          // recomputed on every render. Users can't set `steps` directly: any edit to the color
-          // ranges (add, remove, recolor, move) turns the palette into `custom`. So a stored
-          // `steps` that differs from the chart default was inherited from an older default
-          // (e.g. gauges saved when it was 3). The API's `distributed_palette` has no band count,
-          // so API→SO writes the chart default and that difference is an accepted loss.
-          palette.params.steps = defaultBandCount;
+          // A named palette renders from its id and `steps` alone, and the API's
+          // `distributed_palette` carries `steps` when set. An omitted value takes the chart default.
+          palette.params.steps ??= defaultBandCount;
           clearUnusedNamedPaletteParams(palette);
           return;
         }

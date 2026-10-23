@@ -355,6 +355,7 @@ export {
   LENS_GAUGE_ID,
   LENS_GAUGE_DEFAULT_COLOR_STEPS,
   GAUGE_SHAPES,
+  LENS_GAUGE_DEFAULT_SHAPE,
   GAUGE_TICKS_POSITIONS,
   GAUGE_LABEL_MAJOR_MODES,
   GAUGE_CENTRAL_MAJOR_MODES,
@@ -414,6 +415,7 @@ export {
   YAxisModes,
   SeriesTypes,
   AvailableReferenceLineIcons,
+  LENS_XY_HIDE_ENDZONES_DEFAULT,
 } from './visualizations/xy/constants';
 export { LENS_SHARE_STATE_ACTION } from './locator_types';
 export { defaultSeriesType } from './visualizations/xy/types';

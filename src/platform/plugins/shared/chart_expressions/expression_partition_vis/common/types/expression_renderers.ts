@@ -19,6 +19,10 @@ import {
   type ExpressionValuePartitionLabels,
 } from './expression_functions';
 
+/**
+ * Only Waffle supports stats. We currently only support `value` in the UI, and showing more than one stat in a
+ * Waffle chart breaks the legend layout.
+ */
 export type PartitionLegendValue = Extract<LegendValue, 'value' | 'percent'>;
 
 export enum EmptySizeRatios {

@@ -13,6 +13,7 @@ import { validator } from '../utils/validator';
 import type { GaugeConfig } from '../../schema/charts/gauge';
 import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
+import type { LensAttributes } from '../../types';
 import {
   basicGaugeWithAdHocDataView,
   basicGaugeWithDataView,
@@ -75,6 +76,24 @@ describe('Gauge', () => {
 
     it('should convert a comprehensive ESQL-based gauge chart', () => {
       validator.gauge.fromApi(comprehensiveEsqlGauge);
+    });
+  });
+
+  describe('shape default application', () => {
+    it('should default a missing shape to a horizontal bullet', () => {
+      const { shape, ...visualizationWithoutShape } = gaugeAttributes.state.visualization as {
+        shape?: string;
+      };
+      const attributes = {
+        ...gaugeAttributes,
+        state: { ...gaugeAttributes.state, visualization: visualizationWithoutShape },
+      } as LensAttributes;
+
+      const builder = new LensConfigBuilder();
+      const apiOutput = builder.toAPIFormat(attributes) as GaugeConfig;
+
+      expect(shape).toBeDefined();
+      expect(apiOutput.styling?.shape).toEqual({ type: 'bullet', orientation: 'horizontal' });
     });
   });
 

@@ -234,7 +234,19 @@ describe('Color Schema', () => {
         }
       );
 
+      it('validates a distributed_palette with a band count', () => {
+        const input = { type: 'distributed_palette', palette: 'status', steps: 5 };
+
+        expect(allColoringTypeSchema.parse(input)).toEqual(input);
+      });
+
       describe('validation errors', () => {
+        it.each([0, -1, 2.5])('throws for an invalid band count (%s)', (steps) => {
+          const input = { type: 'distributed_palette', palette: 'status', steps };
+
+          expect(() => allColoringTypeSchema.parse(input)).toThrow();
+        });
+
         it('throws when the palette name is missing', () => {
           const input = {
             type: 'distributed_palette',

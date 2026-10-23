@@ -18,6 +18,7 @@ import type {
   VisualizationToolbarProps,
   XYVisualizationState,
 } from '@kbn/lens-common';
+import { LENS_XY_HIDE_ENDZONES_DEFAULT } from '@kbn/lens-common';
 import {
   hasNumericHistogramDimension,
   type AxesSettingsConfigKeys,
@@ -420,7 +421,7 @@ export const XyStyleSettings: React.FC<Props> = (props) => {
           orientation={labelsOrientation.x}
           setOrientation={onLabelsOrientationChange}
           isTitleVisible={axisTitlesVisibilitySettings.x}
-          endzonesVisible={!state?.hideEndzones}
+          endzonesVisible={!(state?.hideEndzones ?? LENS_XY_HIDE_ENDZONES_DEFAULT)}
           setEndzoneVisibility={onChangeEndzoneVisiblity}
           currentTimeMarkerVisible={state?.showCurrentTimeMarker}
           setCurrentTimeMarkerVisibility={onChangeCurrentTimeMarkerVisibility}

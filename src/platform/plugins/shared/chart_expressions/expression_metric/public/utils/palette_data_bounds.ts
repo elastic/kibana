@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SINGLE_VALUE_PALETTE_RANGE_FACTOR } from '@kbn/coloring';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
 export const getDataBoundsForPalette = (
@@ -26,7 +27,8 @@ export const getDataBoundsForPalette = (
   if (!accessors.max && !accessors.breakdownBy && (hasRowNumber || data.rows.length === 1)) {
     // dealing with a single metric and no max
     const metricValue = greatestMetric;
-    return metricValue < 0 ? { min: metricValue * 2, max: 0 } : { min: 0, max: metricValue * 2 };
+    const limit = metricValue * SINGLE_VALUE_PALETTE_RANGE_FACTOR;
+    return metricValue < 0 ? { min: limit, max: 0 } : { min: 0, max: limit };
   }
 
   const greatestMaximum = accessors.max

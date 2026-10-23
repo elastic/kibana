@@ -80,6 +80,7 @@ import {
   fromColorByValueLensStateToAPI,
   fromStaticColorAPIToLensState,
   fromStaticColorLensStateToAPI,
+  getSingleValuePercentColor,
   isColorByValueColor,
   isNoColor,
   NO_COLOR,
@@ -526,16 +527,22 @@ function enrichConfigurationWithVisualizationProperties(
     // The color/palette is derived from its own state presence, mirroring rendering: a color/palette
     // set without `apply_color_to` still paints the background.
     if (visualization.palette) {
-      const colorByValue = fromColorByValueLensStateToAPI(visualization.palette);
+      const colorByValue = fromColorByValueLensStateToAPI(
+        visualization.palette,
+        LENS_METRIC_DEFAULT_COLOR_STEPS
+      );
       // A percentage-ranged palette (custom or named) only makes sense when there is a data range
       // to color against: a breakdown or a max (bar background). On a single value with neither,
-      // only an absolute-ranged palette (`rangeType: 'number'`) is acceptable; otherwise the
-      // coloring is dropped entirely (the palette falls back to AUTO).
+      // only an absolute-ranged palette (`rangeType: 'number'`) is acceptable. If rangeType is `'percent'`,
+      // we attempt to resolve to the equivalent static color, else coloring is dropped entirely (i.e. AUTO_COLOR).
       const isPercentagePalette = visualization.palette.params?.rangeType === 'percent';
       const isSingleValue = !state.breakdown_by && !visualization.maxAccessor;
       const hasInvalidRangeType = isPercentagePalette && isSingleValue;
 
-      primaryMetric.color = colorByValue && !hasInvalidRangeType ? colorByValue : AUTO_COLOR;
+      primaryMetric.color = hasInvalidRangeType
+        ? fromStaticColorLensStateToAPI(getSingleValuePercentColor(visualization.palette)) ??
+          AUTO_COLOR
+        : colorByValue ?? AUTO_COLOR;
     } else if (visualization.color) {
       primaryMetric.color = fromStaticColorLensStateToAPI(visualization.color);
     } else {

@@ -40,6 +40,7 @@ import type {
   UserMessage,
   Visualization,
 } from '@kbn/lens-common';
+import { LENS_GAUGE_DEFAULT_SHAPE } from '@kbn/lens-common';
 import { getSuggestions } from './suggestions';
 import type { GaugeVisualizationState } from './constants';
 import { GROUP_ID, LENS_GAUGE_ID } from './constants';
@@ -161,7 +162,7 @@ const toExpression = (
     min: state.minAccessor,
     max: state.maxAccessor,
     goal: state.goalAccessor,
-    shape: state.shape ?? GaugeShapes.HORIZONTAL_BULLET,
+    shape: state.shape ?? LENS_GAUGE_DEFAULT_SHAPE,
     colorMode,
     palette: palette?.params
       ? paletteService
@@ -242,7 +243,7 @@ export const getGaugeVisualization = ({
       state || {
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
-        shape: GaugeShapes.HORIZONTAL_BULLET,
+        shape: LENS_GAUGE_DEFAULT_SHAPE,
         colorMode: 'palette',
         palette:
           mainPalette?.type === 'legacyPalette'

@@ -20,6 +20,7 @@ import {
 } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { TableSuggestion, Visualization, VisualizationSuggestion } from '@kbn/lens-common';
+import { LENS_GAUGE_DEFAULT_SHAPE } from '@kbn/lens-common';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { GaugeVisualizationState } from './constants';
 import { gaugeTitlesByType } from './constants';
@@ -67,7 +68,7 @@ export const getSuggestions = ({
   const baseSuggestion: VisualizationSuggestion<GaugeVisualizationState> = {
     state: {
       ...state,
-      shape: state?.shape ?? GaugeShapes.HORIZONTAL_BULLET,
+      shape: state?.shape ?? LENS_GAUGE_DEFAULT_SHAPE,
       layerId: table.layerId,
       layerType: LayerTypes.DATA,
       ticksPosition: GaugeTicksPositions.BANDS,

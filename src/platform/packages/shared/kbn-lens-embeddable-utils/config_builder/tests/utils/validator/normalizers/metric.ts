@@ -37,7 +37,7 @@ import {
 } from './common';
 import { getMetricAccessor } from '../../../../transforms/charts/utils';
 import { iconCompat } from '../../../../transforms/charts/metric';
-import { getRangeValue } from '../../../../transforms/coloring';
+import { getRangeValue, getSingleValuePercentColor } from '../../../../transforms/coloring';
 
 type MetricAttributes = Extract<LensAttributes, { visualizationType: 'lnsMetric' }>;
 
@@ -338,7 +338,10 @@ const alignMetricPaletteNormalizer: NormalizerConfig<MetricAttributes> = {
 
     const isAbsoluteRange = palette.params.rangeType === 'number';
     if (!viz.breakdownByAccessor && !viz.maxAccessor && !isAbsoluteRange) {
+      // The transform turns a percent palette on a single value into the static color of the band at 50%.
+      const staticColor = getSingleValuePercentColor(palette);
       delete viz.palette;
+      if (staticColor) viz.color = staticColor;
       return attributes;
     }
     // There are 4 metric tests that were failing because of this, since they had the same values stored in both `stops` and `colorStops`.

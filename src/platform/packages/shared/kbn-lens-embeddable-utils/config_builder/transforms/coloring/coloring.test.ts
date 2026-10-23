@@ -9,9 +9,11 @@
 
 import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { DEFAULT_COLOR_STEPS } from '@kbn/coloring';
+import { getPalettes } from '@kbn/palettes';
 import type { KbnPaletteId } from '@kbn/palettes';
 import type { ColorByValueType, ColorMappingType, StaticColorType } from '../../schema/color';
 import {
+  getSingleValuePercentColor,
   fromColorByValueAPIToLensState,
   fromColorByValueLensStateToAPI,
   fromStaticColorLensStateToAPI,
@@ -190,6 +192,18 @@ describe('Color util transforms', () => {
         const result = fromColorByValueAPIToLensState(colorByValue, 3);
 
         expect(result?.params?.steps).toBe(3);
+      });
+
+      it('should prefer the steps carried by the config over the chart default band count', () => {
+        const colorByValue: ColorByValueType = {
+          type: 'distributed_palette',
+          palette: 'status',
+          steps: 5,
+        };
+
+        const result = fromColorByValueAPIToLensState(colorByValue, 3);
+
+        expect(result?.params?.steps).toBe(5);
       });
 
       it('should use numeric range type when useNumericRange is true', () => {
@@ -599,6 +613,46 @@ describe('Color util transforms', () => {
         expect(result).toEqual({
           type: 'distributed_palette',
           palette: 'status',
+        } satisfies ColorByValueType);
+      });
+
+      it('should keep the band count when it differs from the chart default', () => {
+        const palette: PaletteOutput<CustomPaletteParams> = {
+          type: 'palette',
+          name: 'status',
+          params: { name: 'status', rangeType: 'percent', steps: 5 },
+        };
+
+        expect(fromColorByValueLensStateToAPI(palette, 3)).toEqual({
+          type: 'distributed_palette',
+          palette: 'status',
+          steps: 5,
+        } satisfies ColorByValueType);
+      });
+
+      it('should omit the band count when it equals the chart default', () => {
+        const palette: PaletteOutput<CustomPaletteParams> = {
+          type: 'palette',
+          name: 'status',
+          params: { name: 'status', rangeType: 'percent', steps: 3 },
+        };
+
+        expect(fromColorByValueLensStateToAPI(palette, 3)).toEqual({
+          type: 'distributed_palette',
+          palette: 'status',
+        } satisfies ColorByValueType);
+      });
+
+      it('should round-trip a non-default band count', () => {
+        const palette = fromColorByValueAPIToLensState(
+          { type: 'distributed_palette', palette: 'status', steps: 5 },
+          3
+        );
+
+        expect(fromColorByValueLensStateToAPI(palette, 3)).toEqual({
+          type: 'distributed_palette',
+          palette: 'status',
+          steps: 5,
         } satisfies ColorByValueType);
       });
 
@@ -1647,6 +1701,101 @@ describe('Color util transforms', () => {
       it('should be false for undefined', () => {
         expect(isColorByValueAbsolute(undefined)).toBe(false);
       });
+    });
+  });
+
+  describe('getSingleValuePercentColor', () => {
+    const customPalette = (
+      continuity: CustomPaletteParams['continuity'],
+      rangeMax: number | undefined = undefined
+    ): PaletteOutput<CustomPaletteParams> => ({
+      type: 'palette',
+      name: 'custom',
+      params: {
+        name: 'custom',
+        rangeType: 'percent',
+        rangeMin: 0,
+        rangeMax,
+        continuity,
+        stops: [
+          { color: 'red', stop: 30 },
+          { color: 'green', stop: 70 },
+          { color: 'blue', stop: 100 },
+        ],
+        colorStops: [
+          { color: 'red', stop: 0 },
+          { color: 'green', stop: 30 },
+          { color: 'blue', stop: 70 },
+        ],
+      },
+    });
+
+    it('returns the color of the band that contains 50%', () => {
+      expect(getSingleValuePercentColor(customPalette('above'))).toBe('green');
+    });
+
+    it('treats a band boundary at 50% as the start of the next band', () => {
+      const palette = customPalette('above');
+      palette.params!.stops = [
+        { color: 'red', stop: 50 },
+        { color: 'green', stop: 100 },
+      ];
+      palette.params!.colorStops = [
+        { color: 'red', stop: 0 },
+        { color: 'green', stop: 50 },
+      ];
+
+      expect(getSingleValuePercentColor(palette)).toBe('green');
+    });
+
+    it('returns the edge color when the band is open towards 50%', () => {
+      const palette = customPalette('all');
+      palette.params!.stops = [{ color: 'red', stop: 20 }];
+      palette.params!.colorStops = [{ color: 'red', stop: 0 }];
+
+      expect(getSingleValuePercentColor(palette)).toBe('red');
+    });
+
+    it('returns undefined when 50% falls outside every band', () => {
+      const palette = customPalette('none', 40);
+      palette.params!.stops = [{ color: 'red', stop: 40 }];
+      palette.params!.colorStops = [{ color: 'red', stop: 0 }];
+
+      expect(getSingleValuePercentColor(palette)).toBeUndefined();
+    });
+
+    describe('named palette', () => {
+      const namedPalette = (name: string, steps: number): PaletteOutput<CustomPaletteParams> => ({
+        type: 'palette',
+        name,
+        params: { name, rangeType: 'percent', steps },
+      });
+
+      it('returns the middle band color of three uniform bands', () => {
+        const colors = getPalettes(false).get('status').colors(3);
+
+        expect(getSingleValuePercentColor(namedPalette('status', 3))).toBe(colors[1]);
+      });
+
+      it('keeps a value on a band boundary in the lower band, like the runtime', () => {
+        const colors = getPalettes(false).get('temperature').colors(4);
+
+        expect(getSingleValuePercentColor(namedPalette('temperature', 4))).toBe(colors[1]);
+      });
+
+      it('uses the first band when two bands split the range at 50%', () => {
+        const colors = getPalettes(false).get('status').colors(2);
+
+        expect(getSingleValuePercentColor(namedPalette('status', 2))).toBe(colors[0]);
+      });
+
+      it('returns undefined for an unknown palette id', () => {
+        expect(getSingleValuePercentColor(namedPalette('not_a_palette', 3))).toBeUndefined();
+      });
+    });
+
+    it('returns undefined without a palette', () => {
+      expect(getSingleValuePercentColor(undefined)).toBeUndefined();
     });
   });
 });
