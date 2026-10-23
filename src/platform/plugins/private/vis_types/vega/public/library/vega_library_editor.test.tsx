@@ -11,7 +11,10 @@ import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import type { TimeRange } from '@kbn/es-query';
+import { Subject } from 'rxjs';
 import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import type { VegaReadResponseBody } from '../../server';
 import type { VegaEditableState } from '../lib/library_draft';
@@ -97,12 +100,24 @@ const renderEditor = ({
 };
 
 describe('VegaLibraryEditor', () => {
+  let timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
+
   beforeEach(() => {
     jest.clearAllMocks();
     const data = dataPluginMock.createStartContract();
     jest
       .mocked(data.query.queryString.getDefaultQuery)
       .mockReturnValue({ language: 'lucene', query: '' });
+    // Stands in for the global time range, which emits an update whenever it is set.
+    ({ timefilter } = data.query.timefilter);
+    let time: TimeRange = { from: 'now-15m', to: 'now' };
+    const timeUpdate$ = new Subject<void>();
+    jest.mocked(timefilter.getTime).mockImplementation(() => time);
+    jest.mocked(timefilter.getTimeUpdate$).mockReturnValue(timeUpdate$);
+    jest.mocked(timefilter.setTime).mockImplementation((next) => {
+      time = next as TimeRange;
+      timeUpdate$.next();
+    });
     setData(data);
   });
 
@@ -242,7 +257,7 @@ describe('VegaLibraryEditor', () => {
       expect(screen.getByTestId('vegaLibraryEditorPreviewButton')).toBeEnabled();
     });
 
-    it('takes its time range from the search bar date picker', async () => {
+    it('sets the global time range from the search bar date picker', async () => {
       const { getSearchBarProps } = renderEditor();
       await screen.findByTestId('mockPreview');
       expect(getSearchBarProps().showDatePicker).toBe(true);
@@ -251,9 +266,26 @@ describe('VegaLibraryEditor', () => {
         getSearchBarProps().onQuerySubmit?.({ dateRange: { from: 'now-7d', to: 'now' } });
       });
 
+      expect(timefilter.setTime).toHaveBeenCalledWith({ from: 'now-7d', to: 'now' });
       expect(getSearchBarProps().dateRangeFrom).toBe('now-7d');
       expect(mockPreview.mock.lastCall?.[0].getParentApi().timeRange$.getValue()).toEqual({
         from: 'now-7d',
+        to: 'now',
+      });
+    });
+
+    // A spec's `kibanaSetTimeFilter`, such as a brush, sets the global time range.
+    it('follows changes to the global time range', async () => {
+      const { getSearchBarProps } = renderEditor();
+      await screen.findByTestId('mockPreview');
+
+      await act(async () => {
+        timefilter.setTime({ from: 'now-1h', to: 'now' });
+      });
+
+      expect(getSearchBarProps().dateRangeFrom).toBe('now-1h');
+      expect(mockPreview.mock.lastCall?.[0].getParentApi().timeRange$.getValue()).toEqual({
+        from: 'now-1h',
         to: 'now',
       });
     });

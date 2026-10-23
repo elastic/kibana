@@ -121,12 +121,22 @@ export const VegaLibraryEditor = ({
     };
   }, [previewedSpec.spec]);
 
-  // The library has no dashboard to take a time range from, so the preview has its own.
+  // The library has no dashboard to take a time range from, so the preview follows the global
+  // time range, which the date picker and a spec's `kibanaSetTimeFilter` both set.
+  const { timefilter } = getData().query.timefilter;
   const timeRange$ = useMemo(
-    () => new BehaviorSubject<TimeRange>(getData().query.timefilter.timefilter.getTime()),
-    []
+    () => new BehaviorSubject<TimeRange>(timefilter.getTime()),
+    [timefilter]
   );
   const [timeRange, setTimeRange] = useState(timeRange$.getValue());
+  useEffect(() => {
+    const subscription = timefilter.getTimeUpdate$().subscribe(() => {
+      const next = timefilter.getTime();
+      setTimeRange(next);
+      timeRange$.next(next);
+    });
+    return () => subscription.unsubscribe();
+  }, [timefilter, timeRange$]);
   const getPreviewParentApi = useCallback(() => ({ timeRange$ }), [timeRange$]);
 
   const previewState = useMemo(
@@ -224,10 +234,7 @@ export const VegaLibraryEditor = ({
           onFormatChange={(format) => setDraft((current) => ({ ...current, format }))}
           // A panel takes its time range from the dashboard.
           timeRange={onPreview ? undefined : timeRange}
-          onTimeRangeChange={(next) => {
-            setTimeRange(next);
-            timeRange$.next(next);
-          }}
+          onTimeRangeChange={(next) => timefilter.setTime(next)}
         />
       </EuiFlyoutBody>
       <ManagedEditorFooter
