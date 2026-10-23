@@ -10,7 +10,7 @@ import { combineLatest, distinctUntilChanged, EMPTY, from, map, switchMap } from
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
-import type { ChromeStart } from '@kbn/core/public';
+import type { ChromeStart, CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
@@ -57,6 +57,7 @@ const LazyDashboardCanvasAttachment = React.lazy(async () => {
 export const registerDashboardAttachmentUiDefinition = ({
   agentBuilder,
   chrome,
+  toasts,
   dashboardLocator,
   unifiedSearch,
   data,
@@ -66,6 +67,7 @@ export const registerDashboardAttachmentUiDefinition = ({
 }: {
   agentBuilder: AgentBuilderPluginStart;
   chrome: ChromeStart;
+  toasts: CoreStart['notifications']['toasts'];
   dashboardLocator?: DashboardRendererProps['locator'];
   unifiedSearch: UnifiedSearchPublicPluginStart;
   data: DataPublicPluginStart;
@@ -105,15 +107,30 @@ export const registerDashboardAttachmentUiDefinition = ({
         const isAgentOpen = appId === 'agentBuilder';
         return api && isAgentOpen
           ? from(import('./async_services')).pipe(
-              switchMap(({ createDashboardAppIntegration$ }) =>
-                createDashboardAppIntegration$({
-                  agentBuilder,
-                  api,
-                  draftAttachmentId,
-                  appliedAttachments,
-                  checkSavedDashboardExist,
-                  getUpdateOrigin: (attachmentId) => updateOriginByAttachmentId.get(attachmentId),
-                })
+              switchMap(
+                ({
+                  createDashboardAppIntegration$,
+                  createOtherDashboardUpdateNotifier,
+                  previewAttachmentInDashboard,
+                }) =>
+                  createDashboardAppIntegration$({
+                    agentBuilder,
+                    api,
+                    draftAttachmentId,
+                    appliedAttachments,
+                    getUpdateOrigin: (attachmentId) => updateOriginByAttachmentId.get(attachmentId),
+                    notifyOtherDashboardUpdated: createOtherDashboardUpdateNotifier({
+                      toasts,
+                      openAttachment: (attachment) =>
+                        void previewAttachmentInDashboard({
+                          attachment,
+                          dashboardApi: api,
+                          appliedAttachments,
+                          dashboardLocator,
+                          checkSavedDashboardExist,
+                        }),
+                    }),
+                  })
               )
             )
           : EMPTY;

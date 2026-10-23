@@ -15,6 +15,7 @@ export {
   type DashboardCanvasAttachmentProps,
 } from './canvas_integration/dashboard_canvas_attachment';
 export { createDashboardAppIntegration$ } from './dashboard_integration/dashboard_app_integration';
+export { createOtherDashboardUpdateNotifier } from './dashboard_integration/other_dashboard_update_notifier';
 export { handlePreview } from './handle_preview';
 export { previewAttachmentInDashboard } from './dashboard_integration/preview_attachment';
 export { handleEditInDashboard } from './handle_edit_in_dashboard';

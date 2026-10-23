@@ -10,7 +10,7 @@ import type {
   DashboardAttachment,
   DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common/types';
-import { isAttachmentAppliedToDashboard } from './apply_attachment';
+import { getDashboardAttachmentData, isAttachmentAppliedToDashboard } from './apply_attachment';
 import type { AppliedAttachmentsStore } from './applied_attachments_store';
 
 /**
@@ -58,4 +58,28 @@ export const getLinkedAttachment = ({
   // an unsaved dashboard can only stand for an attachment without an origin, when there is one
   const unsavedAttachments = attachments.filter(({ origin }) => !origin);
   return unsavedAttachments.length === 1 ? unsavedAttachments[0] : undefined;
+};
+
+/**
+ * Whether the attachment belongs on the open dashboard: it is the attachment the dashboard is
+ * linked to, or the dashboard is a new, empty one with nothing to lose.
+ */
+export const canShowAttachmentInDashboard = ({
+  api,
+  store,
+  attachment,
+}: {
+  api: DashboardApi;
+  store: AppliedAttachmentsStore;
+  attachment: Pick<DashboardAttachment, 'id' | 'origin'>;
+}): boolean => {
+  if (store.linkedAttachmentIds.get(api) === attachment.id) {
+    return true;
+  }
+  const dashboardId = api.savedObjectId$.getValue();
+  if (dashboardId) {
+    return attachment.origin === dashboardId;
+  }
+  const { panels = [], pinned_panels: pinnedPanels = [] } = getDashboardAttachmentData(api);
+  return panels.length === 0 && pinnedPanels.length === 0;
 };

@@ -122,7 +122,6 @@ describe('registerDashboardAppIntegration', () => {
   let addAttachment: jest.Mock;
   let updateAttachmentOrigin: jest.Mock;
   let getUpdateOrigin: jest.Mock;
-  let checkSavedDashboardExist: jest.Mock;
   let draftAttachmentId: IdGenerator;
   let emitConversationChange: (change: {
     id?: string;
@@ -154,7 +153,6 @@ describe('registerDashboardAppIntegration', () => {
       (attachmentId: string) => async (origin: string) =>
         updateAttachmentOrigin('conversation-1', attachmentId, origin)
     );
-    checkSavedDashboardExist = jest.fn().mockResolvedValue(true);
     let currentDraftAttachmentId = 'draft-attachment-id-1';
     draftAttachmentId = {
       get current() {
@@ -202,8 +200,8 @@ describe('registerDashboardAppIntegration', () => {
       api: mockApi as unknown as DashboardApi,
       draftAttachmentId,
       appliedAttachments: createAppliedAttachmentsStore(),
-      checkSavedDashboardExist,
       getUpdateOrigin,
+      notifyOtherDashboardUpdated: jest.fn(),
     });
   };
 
@@ -282,10 +280,7 @@ describe('registerDashboardAppIntegration', () => {
     );
   });
 
-  it('updates the first attachment whose saved origin no longer exists on save', async () => {
-    checkSavedDashboardExist.mockImplementation(
-      async (dashboardId: string) => dashboardId === 'dashboard-1'
-    );
+  it('updates the linked attachment when an unsaved dashboard is saved', async () => {
     register();
     emitConversationChange({
       id: 'conversation-1',
@@ -299,14 +294,14 @@ describe('registerDashboardAppIntegration', () => {
         createVersionedAttachment(
           createDashboardAttachment({
             id: 'dashboard-attachment-2',
-            origin: 'dashboard-2',
           })
         ),
       ],
     });
+    jest.runOnlyPendingTimers();
 
     mockApi.onSave$.next({
-      previousDashboardId: 'dashboard-3',
+      previousDashboardId: undefined,
       dashboardId: 'dashboard-4',
       dashboardState: createDashboardSaveState(),
     });
@@ -318,6 +313,7 @@ describe('registerDashboardAppIntegration', () => {
       'dashboard-attachment-2',
       'dashboard-4'
     );
+    expect(updateAttachmentOrigin).toHaveBeenCalledTimes(1);
   });
 
   it('creates a new attachment from the current dashboard state when switching away from a conversation', () => {

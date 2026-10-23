@@ -10,6 +10,7 @@ import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-co
 import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import { applyAttachmentToDashboard } from './apply_attachment';
 import type { AppliedAttachmentsStore } from './applied_attachments_store';
+import { canShowAttachmentInDashboard } from './linked_attachment';
 
 interface PreviewAttachmentInDashboardParams {
   attachment: DashboardAttachment;
@@ -27,27 +28,18 @@ export const previewAttachmentInDashboard = async ({
   checkSavedDashboardExist,
 }: PreviewAttachmentInDashboardParams) => {
   const dashboardState = attachmentDataToDashboardState(attachment.data);
-  const currentSavedObjectId = dashboardApi.savedObjectId$.getValue();
-
-  // a) Viewing saved dashboard + attachment linked to same dashboard -> apply state
-  // Also handles both being undefined (unsaved dashboard, unlinked attachment)
-  if (attachment.origin === currentSavedObjectId) {
+  // the attachment belongs on the open dashboard, or the dashboard is new and empty -> apply state
+  if (canShowAttachmentInDashboard({ api: dashboardApi, store: appliedAttachments, attachment })) {
     await applyAttachmentToDashboard({ store: appliedAttachments, api: dashboardApi, attachment });
     return;
   }
 
-  // Check if the attachment's linked dashboard still exists
   const linkedDashboardExists = attachment.origin
     ? await checkSavedDashboardExist(attachment.origin)
     : false;
 
-  if (!currentSavedObjectId && !linkedDashboardExists) {
-    // b) Viewing unsaved dashboard + attachment linked to deleted dashboard
-    await applyAttachmentToDashboard({ store: appliedAttachments, api: dashboardApi, attachment });
-    return;
-  }
-
-  // c) Attachment linked to different existing dashboard -> navigate to linked dashboard or a new unsaved dashboard with the attachment's state
+  // otherwise navigate to the attachment's saved dashboard, or a new unsaved dashboard with its state,
+  // so the open dashboard is not overwritten
   // A host app's own `dashboardApi.locator` (e.g. Security's) may keep only `dashboardId` and drop
   // the attachment's panels, so navigate through the Dashboard app locator instead.
   await dashboardLocator?.navigate({

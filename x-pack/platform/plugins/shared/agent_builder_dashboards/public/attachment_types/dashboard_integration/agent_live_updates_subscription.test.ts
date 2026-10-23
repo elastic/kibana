@@ -40,6 +40,7 @@ const createHarness = (savedObjectId: string | undefined, isNewConversation = fa
   const getChatEvents$ = jest.fn().mockReturnValue(chatEvents$);
   const setState = jest.fn();
   const upsertAttachment = jest.fn();
+  const onOtherDashboardUpdated = jest.fn();
 
   const subscription = createAgentLiveUpdatesSubscription({
     agentBuilder: {
@@ -54,6 +55,7 @@ const createHarness = (savedObjectId: string | undefined, isNewConversation = fa
     } as unknown as DashboardApi,
     appliedAttachments: createAppliedAttachmentsStore(),
     upsertAttachment,
+    onOtherDashboardUpdated,
   });
 
   return {
@@ -62,6 +64,7 @@ const createHarness = (savedObjectId: string | undefined, isNewConversation = fa
     getChatEvents$,
     setState,
     upsertAttachment,
+    onOtherDashboardUpdated,
     subscription,
   };
 };
@@ -69,12 +72,12 @@ const createHarness = (savedObjectId: string | undefined, isNewConversation = fa
 describe('createAgentLiveUpdatesSubscription', () => {
   it.each([
     ['the linked saved dashboard', 'dashboard-1', 'dashboard-1', 1],
-    ['an unsaved dashboard', undefined, undefined, 1],
+    ['an empty unsaved dashboard', undefined, undefined, 1],
     ['a different saved dashboard', 'dashboard-1', 'other-dashboard', 0],
   ])(
     'upserts the attachment and applies the state only for its own dashboard: %s',
     (_, savedObjectId, origin, calls) => {
-      const { chatEvents$, setState, upsertAttachment, subscription } =
+      const { chatEvents$, setState, upsertAttachment, onOtherDashboardUpdated, subscription } =
         createHarness(savedObjectId);
       const attachment = buildAttachment(origin);
 
@@ -82,6 +85,7 @@ describe('createAgentLiveUpdatesSubscription', () => {
 
       expect(upsertAttachment).toHaveBeenCalledWith(attachment);
       expect(setState).toHaveBeenCalledTimes(calls);
+      expect(onOtherDashboardUpdated).toHaveBeenCalledTimes(1 - calls);
       subscription.unsubscribe();
     }
   );

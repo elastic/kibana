@@ -37,7 +37,6 @@ export interface DashboardAppIntegrationParams {
   api: DashboardApi;
   draftAttachmentId: IdGenerator;
   appliedAttachments: AppliedAttachmentsStore;
-  checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   /**
    * Lookup for the framework-provided `updateOrigin` callback bound to a specific
    * attachment id. Returns `undefined` when the attachment has not been rendered yet
@@ -48,6 +47,8 @@ export interface DashboardAppIntegrationParams {
   getUpdateOrigin: (
     attachmentId: string
   ) => ((origin: string) => Promise<UpdateOriginResponse | undefined>) | undefined;
+  /** Tells the user the agent changed a dashboard other than the open one. */
+  notifyOtherDashboardUpdated: (attachment: DashboardAttachment) => void;
 }
 
 interface State {
@@ -63,8 +64,8 @@ export const registerDashboardAppIntegration = ({
   api,
   draftAttachmentId,
   appliedAttachments,
-  checkSavedDashboardExist,
   getUpdateOrigin,
+  notifyOtherDashboardUpdated,
 }: DashboardAppIntegrationParams): (() => void) => {
   const state: State = {
     attachments: undefined,
@@ -117,6 +118,9 @@ export const registerDashboardAppIntegration = ({
       attachments: state.attachments,
       dashboardData,
     });
+    if (linkedAttachment) {
+      appliedAttachments.linkedAttachmentIds.set(api, linkedAttachment.id);
+    }
     // changes become versions of the linked attachment, otherwise the dashboard is staged as a draft
     const attachmentId = linkedAttachment?.id ?? draftAttachmentId.current;
 
@@ -206,6 +210,7 @@ export const registerDashboardAppIntegration = ({
       const otherAttachments = (state.attachments ?? []).filter(({ id }) => id !== attachment.id);
       state.attachments = [...otherAttachments, attachment];
     },
+    onOtherDashboardUpdated: notifyOtherDashboardUpdated,
   });
 
   const newAttachmentIdRegenerationSubscription = createNewAttachmentIdRegenerationSubscription({
@@ -215,7 +220,7 @@ export const registerDashboardAppIntegration = ({
 
   const originSyncSubscription = createOriginSyncSubscription({
     api,
-    checkSavedDashboardExist,
+    store: appliedAttachments,
     getAttachments: () => state.attachments,
     updateOrigin: (id: string, origin: string) => getUpdateOrigin(id)?.(origin),
   });
