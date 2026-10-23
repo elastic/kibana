@@ -23,6 +23,12 @@ export interface DashboardStructureGold {
   panelKinds?: Record<string, number>;
   sectionCount?: number;
   sections?: Array<{ titleIncludesAny: string[]; minPanels?: number }>;
+  /**
+   * Rows the prompt lays out, top to bottom: all panels of `kind` share one row
+   * (same top and height) directly below the previous one, spanning the 48
+   * columns when `fullWidth`.
+   */
+  rows?: Array<{ kind: string; fullWidth?: boolean }>;
 }
 
 export interface EnhanceGold {
@@ -31,6 +37,46 @@ export interface EnhanceGold {
   asksMode: boolean;
   /** Rules the seeded dashboard breaks that this mode is expected to fix. */
   defects: EnhanceDefectId[];
+}
+
+/** The top-level container in layout edit gold; sections are named by id. */
+export const TOP_LEVEL = 'top';
+
+/**
+ * A seed panel or section id, or the first panel of `kind` the edit added
+ * (`{ added: 'section' }` for the first added section).
+ */
+export type LayoutItem = string | { added: string };
+
+/**
+ * Where a prompt puts one panel or section; every listed field is checked.
+ * Panel ids in `beside`, `below`, `after` and `before` share the item's
+ * container. For a section, `after` and `before` follow the outer order.
+ */
+export interface LayoutPlacementGold {
+  item: LayoutItem;
+  /** `TOP_LEVEL` or a section id. */
+  in?: string;
+  /** First in its container's reading order. */
+  first?: boolean;
+  /** Same row and height as this panel. */
+  beside?: string;
+  /** Starts on the row where this panel ends. */
+  below?: string;
+  w?: number;
+  /** Later in reading order than this item. */
+  after?: string;
+  /** Earlier in reading order than this item. */
+  before?: string;
+}
+
+/** What a layout edit prompt may change, and where it puts things. */
+export interface LayoutEditGold {
+  /** Containers the edit may rearrange: `TOP_LEVEL` or section ids. The rest keep their grids. */
+  changes: readonly string[];
+  /** Seed panels and sections the prompt removes. */
+  removed?: readonly string[];
+  placements?: readonly LayoutPlacementGold[];
 }
 
 /** Where the dashboard's controls may draw their fields from, and what the prompt asked of them. */
@@ -74,6 +120,7 @@ export type DashboardDatasetExample = Example<
     structure?: DashboardStructureGold;
     enhance?: EnhanceGold;
     controls?: ControlsGold;
+    layoutEdit?: LayoutEditGold;
     goldenToolPath?: string[];
   },
   {

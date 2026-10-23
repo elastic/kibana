@@ -48,6 +48,12 @@ Chart presentation is checked on each panel's Lens Config API config, against th
   - Abstains when the agent never wrote the dashboard, since an unchanged seed keeps every invariant trivially.
 - **Enhance Defect Resolution** (`CODE`): the fraction of the seeded dashboard's declared defects the result no longer shows. Besides rule ids, a seed can declare seed defects that are judged against the seed itself, not by pattern-matching text. For example, `title_not_rewritten` holds when the title is unchanged from the seed, and `markdown_not_rewritten` holds when a seeded markdown panel still has its seeded text. A defect on a panel that was deleted without being allowed stays open, so deleting a broken chart does not count as fixing it; deleting a markdown panel is allowed in both modes, and appearance mode may delete nothing else. It abstains if the seeded dashboard does not actually show a declared defect, since that is a dataset bug.
 - **Enhance No Regression** (`CODE`): scored rules the seed already met still hold after enhance. This catches, for example, a metric that gains a title, or a new panel that runs the same ES|QL as another. The score is the fraction of panels with no newly introduced violation. Like Mode Compliance, it abstains when nothing was written.
+- **Dashboard Layout Edit** (`CODE`): a layout edit changes only what the prompt asked. It's gated on a gold `layoutEdit` block and compares the result with the seeded dashboard. Scored as the fraction of these checks that hold:
+  - every seed panel and section the prompt does not remove still exists, and the removed ones are gone;
+  - in every container (the top level or a section) the gold does not list under `changes`, the seed panels keep their grids. At the top level only `x`, `w` and `h` are compared, because adding or removing a section shifts the outer `y`;
+  - the top-level panels and sections that survive keep their relative order;
+  - collapsed sections stay collapsed;
+  - each gold placement holds: the container, first in it, beside a panel (same row and height), below one, a width, or after and before another item in reading order. A placement names a seed id, or the first added panel of a kind or the first added section.
 - **Trajectory**: `load_skill` → `generate_dashboard`. Content-mode enhance also expects `get_index_mapping` before the write, because it may change queries. Appearance mode changes no query, so reading the attachment is enough and the mapping call is not expected. Discover results examples read the attachment instead of the mapping, in every run on both models, so the mapping call is not expected there. Skipped on routing examples.
 - **Trace-based**: tokens, latency, and tool-call counts from OTel spans.
 
@@ -69,7 +75,7 @@ No LLM judge runs in this suite; every check is deterministic.
 
 ## Dataset
 
-Thirteen examples, because each dashboard example costs 150k–300k input tokens:
+Thirty examples, because each dashboard example costs 150k–300k input tokens:
 
 - **Creation** (`datasets/creation.ts`, 4): a rich logs dashboard, two requested sections, six compact KPIs, and four KPIs above a time series.
 - **Routing** (`datasets/routing.ts`, 3): a standalone chart, ES|QL help, and field discovery. Nothing is generated, so these are cheap.
@@ -82,7 +88,9 @@ Thirteen examples, because each dashboard example costs 150k–300k input tokens
   - The prompt from [#294133](https://github.com/elastic/kibana/issues/294133): the same dashboard plus controls for HTTP method, status code, path and HTTP version, which only exist as `DISSECT` output. The agent either substitutes mapped fields or says in plain words which filters it could not add.
   - Four KPIs and a status code breakdown plus a control on machine OS, a mapped field the results do not show, to prove requested controls still get added.
 
-Every example carries `metadata.behaviour` (`creation` | `routing` | `enhance` | `discover_results`) and `metadata.dataSource` (`logs`, or `logs_dissect` for the Discover results). Enhance examples also carry `metadata.enhanceMode`, so golden-cluster results can be sliced.
+Every example carries `metadata.behaviour` (`creation` | `routing` | `enhance` | `discover_results` | `layout_edit`) and `metadata.dataSource` (`logs`, or `logs_dissect` for the Discover results). Enhance examples also carry `metadata.enhanceMode`, so golden-cluster results can be sliced.
+
+- **Layout edit** (`datasets/layout_edit.ts`, 17), over the seeded sectioned dashboard: remove panels from one or two sections, remove a section, add a KPI, a chart in a section, or a section before or between others, move panels between sections and the top level, restyle or edit panels, set widths, add to a collapsed section, and empty a section.
 
 ### Seeded dashboard
 
@@ -107,6 +115,17 @@ Chart defects:
 Content defects, which only content mode should fix:
 - the same bar chart twice
 - no controls
+
+### Seeded sectioned dashboard
+
+`src/fixtures/sectioned_logs_dashboard.ts` is a clean dashboard over `kibana_sample_data_logs`, the seed of the layout edit examples:
+- at the top level, an intro markdown and four KPIs;
+- a Traffic section (six panels);
+- a note between Traffic and Errors;
+- an Errors section (five panels);
+- a Visitors section (three panels).
+
+It breaks no `must` rule, so any gap, overlap or styling miss in a result comes from the edit. Its ids are readable, so the gold can name what a prompt moves. A variant with Visitors collapsed covers edits of a collapsed section.
 
 ### Attached ES|QL results
 
@@ -175,6 +194,7 @@ Test titles, one per spec:
 - `keeps non-dashboard requests out of the dashboard skill` (`dashboard_routing.spec.ts`)
 - `enhances a seeded dashboard in the requested mode` (`dashboard_enhance.spec.ts`)
 - `builds dashboards from DISSECT results with controls on mapped fields only` (`dashboard_discover_results.spec.ts`)
+- `edits a sectioned dashboard and keeps the rest of the layout` (`dashboard_layout_edit.spec.ts`)
 
 After the eval stack is already running, use `run` for faster iteration:
 
