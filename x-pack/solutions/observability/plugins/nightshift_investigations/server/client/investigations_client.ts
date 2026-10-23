@@ -34,6 +34,7 @@ import {
 } from '@kbn/agentic-investigations-plugin/common';
 import { assertNever } from '@kbn/std';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
+import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import {
   validateNotificationDestination,
@@ -327,6 +328,8 @@ export interface NightshiftInvestigationsClientDeps {
   agenticInvestigations?: AgenticInvestigationsPluginStart;
   /** Passed through to `agents.ensure` so a pre-installed agent is hidden while unavailable. */
   agentAvailability: AgentAvailabilityConfig;
+  /** Installs the assistant agent wherever the investigation agent is installed. */
+  assistantEnabled?: boolean;
   investigationQuotaCallback?: InvestigationQuotaCallback;
   inference?: InferenceServerStart;
   savedObjects?: CoreStart['savedObjects'];
@@ -346,6 +349,7 @@ export class NightshiftInvestigationsClient {
   private readonly agentBuilder?: AgentBuilderPluginStart;
   private readonly agenticInvestigations?: AgenticInvestigationsPluginStart;
   private readonly agentAvailability: AgentAvailabilityConfig;
+  private readonly assistantEnabled: boolean;
   private readonly investigationQuotaCallback?: InvestigationQuotaCallback;
   private readonly inference?: InferenceServerStart;
   private readonly savedObjects?: CoreStart['savedObjects'];
@@ -363,6 +367,7 @@ export class NightshiftInvestigationsClient {
     this.agentBuilder = deps.agentBuilder;
     this.agenticInvestigations = deps.agenticInvestigations;
     this.agentAvailability = deps.agentAvailability;
+    this.assistantEnabled = deps.assistantEnabled ?? false;
     this.investigationQuotaCallback = deps.investigationQuotaCallback;
     this.inference = deps.inference;
     this.savedObjects = deps.savedObjects;
@@ -374,6 +379,23 @@ export class NightshiftInvestigationsClient {
 
   public isAvailable = (connectorId?: string): Promise<boolean> =>
     this.checkAvailability(connectorId);
+
+  /**
+   * Installs the investigation agent in a space. The assistant is ensured alongside it without
+   * being awaited, so it cannot fail or slow down the investigation.
+   */
+  private installAgents = async (
+    agentBuilder: AgentBuilderPluginStart,
+    spaceId: string
+  ): Promise<void> => {
+    const availability = this.agentAvailability;
+    if (this.assistantEnabled) {
+      installAssistantAgent({ agentBuilder, spaceId, availability }).catch((err) => {
+        this.logger.warn(`Failed to install assistant agent in space ${spaceId}: ${err.message}`);
+      });
+    }
+    await installInvestigationAgent({ agentBuilder, spaceId, availability });
+  };
 
   private getSpaceId(): string {
     return (
@@ -508,11 +530,7 @@ export class NightshiftInvestigationsClient {
     // below executes the *stored* workflow definition, which predates that step until the managed
     // install has upgraded it — and that install is fire-and-forget. Deliberately without the
     // step's visibility retry: the workflow owns that, and this request path should not pay for it.
-    await installInvestigationAgent({
-      agentBuilder,
-      spaceId,
-      availability: this.agentAvailability,
-    });
+    await this.installAgents(agentBuilder, spaceId);
 
     const newSubjects = withoutRecordedSubjects(subjects, recorded);
     const newAlertIds = new Set(newSubjects.map(({ id }) => id));
@@ -782,12 +800,7 @@ export class NightshiftInvestigationsClient {
       // A raw workflow can fail before ensuring its agent, which conversation creation requires.
       ...(!reopen
         ? {
-            beforeCreate: () =>
-              installInvestigationAgent({
-                agentBuilder,
-                spaceId: this.getSpaceId(),
-                availability: this.agentAvailability,
-              }),
+            beforeCreate: () => this.installAgents(agentBuilder, this.getSpaceId()),
           }
         : {}),
     });
@@ -1004,11 +1017,7 @@ export class NightshiftInvestigationsClient {
     }
 
     const spaceId = this.getSpaceId();
-    await installInvestigationAgent({
-      agentBuilder,
-      spaceId,
-      availability: this.agentAvailability,
-    });
+    await this.installAgents(agentBuilder, spaceId);
 
     // Of two concurrent creates for one thread, the second continues the first.
     const newInvestigationId = uuidv4();
