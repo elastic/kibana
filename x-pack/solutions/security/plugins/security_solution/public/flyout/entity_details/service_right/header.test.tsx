@@ -19,7 +19,16 @@ const mockProps = {
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
+const mockedUseNewEntityAnalyticsPage = jest.fn().mockReturnValue(false);
+jest.mock('../../../entity_analytics/hooks/use_new_entity_analytics_page', () => ({
+  useNewEntityAnalyticsPage: () => mockedUseNewEntityAnalyticsPage(),
+}));
+
 describe('ServicePanelHeader', () => {
+  beforeEach(() => {
+    mockedUseNewEntityAnalyticsPage.mockReturnValue(false);
+  });
+
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
@@ -69,6 +78,20 @@ describe('ServicePanelHeader', () => {
     );
 
     expect(getByTestId('service-panel-header-observed-badge')).toHaveTextContent('Entity Store');
+  });
+
+  it('renders the resolved-from badge when resolvedFromCount is provided on the new entity analytics page', () => {
+    mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <ServicePanelHeader {...mockProps} isEntityInStore resolvedFromCount={3} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('service-panel-header-observed-badge')).toHaveTextContent(
+      'Resolved from 3 records'
+    );
   });
 
   it('renders observed badge text when isEntityInStore is false', () => {

@@ -278,7 +278,7 @@ describe('selectedEvent deep link', () => {
   const defaultUrlState = {
     selectedEventId: event.event_id,
     openEventId: event.event_id,
-    statusFilter: ['active'],
+    statusFilter: ['active', 'recovering'],
     severityFilter: ['critical', 'high'],
     sourceFilter: [],
     serviceFilter: [],

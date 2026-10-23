@@ -336,6 +336,26 @@ agentBuilder.agents.register({
 
 `inference_feature_id` is only supported for built-in agents, and cannot be set by agent types.
 
+### Choosing the agent's reasoning level
+
+A built-in agent can declare the reasoning level its runs use by default:
+
+```ts
+agentBuilder.agents.register({
+  id: 'platform.my_solution.agent',
+  name: 'My solution agent',
+  description: 'Agent specialized in my solution',
+  configuration: {
+    instructions: 'You are a specialist [...]',
+    tools: [{ tool_ids: ['[...]'] }],
+    inference_feature_id: 'my_solution_agent',
+    reasoning_level: 'high',
+  },
+});
+```
+
+`reasoning_level` is only supported for built-in agents, and cannot be set by agent types.
+
 ## Registering attachment types
 
 Attachments are used to provide additional context when conversing with an agent.
@@ -444,7 +464,7 @@ GitHub-flavored markdown is converted per surface: tables become native Slack ta
 
 Agent Builder already ships a built-in `image` attachment type, so agents can see images pasted into the chat input. It's a real, file-backed attachment type and a good reference to copy from — the placeholder above just reuses the same `id` to illustrate `getAgentDescription`. See `x-pack/platform/plugins/shared/agent_builder_platform/server/attachment_types/image.ts`.
 
-It validates by looking up the file through a request-scoped Files client, so a user can never read another user's file. `format` downloads and base64-encodes the file lazily, only when the agent actually reads the attachment, so the bytes never end up in a tool result. The binary itself lives in the Files plugin under the `chat-attachment-images` file kind (registered in `agent_builder/server/plugin.ts`); the attachment only carries a `file_id` pointer. Limits — PNG/JPEG only, 3.5 MB max, 10 images per message — are defined in `agent-builder-common/attachments/attachment_types.ts`; the count limit is enforced client-side only.
+It validates by looking up the file through a request-scoped Files client, which checks that the file exists in the user's space, not who uploaded it. `format` downloads and base64-encodes the file lazily, only when the agent actually reads the attachment, so the bytes never end up in a tool result. The binary itself lives in the Files plugin under the `chat-attachment-images` file kind (registered in `agent_builder/server/plugin.ts` with only the `create`, which also registers upload, and `download` HTTP routes, both requiring `agentBuilder:read`); the attachment only carries a `file_id` pointer. Limits — PNG/JPEG only, 3.5 MB max, 10 images per message — are defined in `agent-builder-common/attachments/attachment_types.ts`; the count limit is enforced client-side only.
 
 ### Browser-side registration
 

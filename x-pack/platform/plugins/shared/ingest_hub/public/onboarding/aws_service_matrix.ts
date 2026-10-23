@@ -13,10 +13,6 @@ import type { PackageInfo, RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 import { DATA_STREAM_DATASET_VAR, DATA_STREAM_TYPE_VAR } from '@kbn/fleet-plugin/common';
 import type { DeploymentMethod } from '@kbn/fleet-plugin/public';
 
-import type { ServiceCategory } from './service_categories';
-
-export type { ServiceCategory };
-
 export type SignalType = 'logs' | 'metrics';
 
 export type { DeploymentMethod };
@@ -90,7 +86,6 @@ export interface AwsServiceMatrixEntry {
   /** Data stream ids included under this policy template (derived from the manifest). */
   dataStreams: string[];
   name: string;
-  category: ServiceCategory;
   /** Signal types produced by this policy template (may include both logs and metrics). */
   signalTypes: SignalType[];
   deploymentMethods: DeploymentMethodEntry[];
@@ -226,60 +221,50 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws package — Application Integration ──────────────────────────────
   {
     id: 'apigateway',
-    category: 'networking_content_delivery',
     packageName: 'aws',
   },
   {
     id: 'lambda',
-    category: 'compute',
     packageName: 'aws',
   },
 
   // ── aws package — Compute ───────────────────────────────────────────────
   {
     id: 'ec2',
-    category: 'compute',
     packageName: 'aws',
   },
   {
     id: 'ecs',
-    category: 'compute',
     packageName: 'aws',
   },
   {
     id: 'emr',
-    category: 'compute',
     packageName: 'aws',
   },
 
   // ── aws package — Management and Governance ──────────────────────────────
   {
     id: 'awshealth',
-    category: 'management_governance',
     packageName: 'aws',
   },
   {
     id: 'cloudwatch',
-    category: 'management_governance',
     packageName: 'aws',
   },
 
   // ── aws package — Cloud Financial Management ────────────────────────────
   {
     id: 'billing',
-    category: 'cloud_financial_management',
     packageName: 'aws',
   },
   {
     id: 'usage',
-    category: 'cloud_financial_management',
     packageName: 'aws',
   },
 
   // ── aws package — management_governance / security_identity_compliance ──
   {
     id: 'cloudtrail',
-    category: 'management_governance',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
     ecfLogType: 'cloudtrail',
@@ -287,7 +272,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   {
     id: 'cloudtrail_otel',
     name: 'AWS CloudTrail',
-    category: 'management_governance',
     dataFormat: 'otel',
     policyTemplate: 'cloudtrail',
     ecfDataStream: 'cloudtrail',
@@ -300,22 +284,18 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
   {
     id: 'config',
-    category: 'security_identity_compliance',
     packageName: 'aws',
   },
   {
     id: 'guardduty',
-    category: 'security_identity_compliance',
     packageName: 'aws',
   },
   {
     id: 'inspector',
-    category: 'security_identity_compliance',
     packageName: 'aws',
   },
   {
     id: 'firewall',
-    category: 'security_identity_compliance',
     packageName: 'aws',
     // firewall_metrics has no agentless support yet (tracked: elastic/integrations#19301).
     excludedDataStreams: ['firewall_metrics'],
@@ -323,7 +303,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   {
     id: 'firewall_otel',
     name: 'AWS Network Firewall',
-    category: 'security_identity_compliance',
     dataFormat: 'otel',
     policyTemplate: 'firewall',
     ecfDataStream: 'firewall_logs',
@@ -338,12 +317,10 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // aws_securityhub replaces securityhub policy template in aws (legacy)
   {
     id: 'aws_securityhub',
-    category: 'security_identity_compliance',
     packageName: 'aws_securityhub',
   },
   {
     id: 'waf',
-    category: 'security_identity_compliance',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
     ecfLogType: 'waf',
@@ -353,7 +330,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   {
     id: 'waf_otel',
     name: 'AWS WAF',
-    category: 'security_identity_compliance',
     dataFormat: 'otel',
     policyTemplate: 'waf',
     ecfDataStream: 'waf',
@@ -368,20 +344,17 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws package — Networking and Content Delivery ─────────────────────────
   {
     id: 'cloudfront',
-    category: 'networking_content_delivery',
     // ECF: CloudFront is in the edot-cloud-forwarder-aws#452 DoD but no released template yet
     // TODO enable ecf deployment method when supported
     packageName: 'aws',
   },
   {
     id: 'elb',
-    category: 'networking_content_delivery',
     packageName: 'aws',
   },
   {
     id: 'elb_otel',
     name: 'AWS ELB',
-    category: 'networking_content_delivery',
     dataFormat: 'otel',
     policyTemplate: 'elb',
     ecfDataStream: 'elb_logs',
@@ -395,22 +368,18 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
   {
     id: 'natgateway',
-    category: 'networking_content_delivery',
     packageName: 'aws',
   },
   {
     id: 'route53',
-    category: 'networking_content_delivery',
     packageName: 'aws',
   },
   {
     id: 'transitgateway',
-    category: 'networking_content_delivery',
     packageName: 'aws',
   },
   {
     id: 'vpcflow',
-    category: 'networking_content_delivery',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
     ecfLogType: 'vpcflow',
@@ -418,7 +387,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   {
     id: 'vpcflow_otel',
     name: 'AWS VPC Flow Logs',
-    category: 'networking_content_delivery',
     dataFormat: 'otel',
     policyTemplate: 'vpcflow',
     ecfDataStream: 'vpcflow',
@@ -431,25 +399,21 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
   {
     id: 'vpn',
-    category: 'networking_content_delivery',
     packageName: 'aws',
   },
 
   // ── aws package — Storage ───────────────────────────────────────────────
   {
     id: 'ebs',
-    category: 'storage',
     packageName: 'aws',
   },
   {
     id: 's3',
-    category: 'storage',
     packageName: 'aws',
   },
   {
     id: 's3access_otel',
     name: 'Amazon S3 Access Logs',
-    category: 'storage',
     dataFormat: 'otel',
     policyTemplate: 's3',
     ecfDataStream: 's3access',
@@ -463,79 +427,66 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
   {
     id: 's3_storage_lens',
-    category: 'storage',
     packageName: 'aws',
   },
 
   // ── aws package — Databases ──────────────────────────────────────────────
   {
     id: 'dynamodb',
-    category: 'databases',
     packageName: 'aws',
   },
   {
     id: 'rds',
-    category: 'databases',
     packageName: 'aws',
   },
   {
     id: 'redshift',
-    category: 'databases',
     packageName: 'aws',
   },
 
   // ── aws package — Messaging / Analytics ─────────────────────────────────
   {
     id: 'kafka',
-    category: 'management_governance',
     packageName: 'aws',
   },
   {
     id: 'kinesis',
-    category: 'management_governance',
     packageName: 'aws',
   },
   {
     id: 'sns',
-    category: 'management_governance',
     packageName: 'aws',
   },
   {
     id: 'sqs',
-    category: 'management_governance',
     packageName: 'aws',
   },
 
   // ── aws_bedrock package — Machine Learning ──────────────────────────────
   {
     id: 'aws_bedrock',
-    category: 'machine_learning',
     packageName: 'aws_bedrock',
   },
   {
     id: 'aws_bedrock_agentcore',
-    category: 'machine_learning',
     packageName: 'aws_bedrock_agentcore',
   },
 
   // ── awsfargate package — Containers ─────────────────────────────────────
   {
     id: 'awsfargate',
-    category: 'containers',
     packageName: 'awsfargate',
   },
 
   // ── aws_mq package — application_integration ────────────────────────────
   {
     id: 'amazon_mq',
-    category: 'application_integration',
     packageName: 'aws_mq',
   },
 
   // ── aws_logs package — Management and Governance ──────────────────────────
   {
     id: 'aws_logs',
-    category: 'management_governance',
     packageName: 'aws_logs',
   },
 
@@ -544,7 +495,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   {
     id: 'ec2_otel',
     name: 'Amazon EC2',
-    category: 'compute',
     dataFormat: 'otel',
     policyTemplate: 'aws.ec2',
     packageName: 'aws_cloudwatch_input_otel',
@@ -552,7 +502,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   {
     id: 'lambda_otel',
     name: 'AWS Lambda',
-    category: 'compute',
     dataFormat: 'otel',
     policyTemplate: 'aws.lambda',
     packageName: 'aws_cloudwatch_input_otel',
@@ -560,7 +509,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   {
     id: 'rds_otel',
     name: 'Amazon RDS',
-    category: 'databases',
     dataFormat: 'otel',
     policyTemplate: 'aws.rds',
     packageName: 'aws_cloudwatch_input_otel',
@@ -568,7 +516,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   {
     id: 'sqs_otel',
     name: 'Amazon SQS',
-    category: 'application_integration',
     dataFormat: 'otel',
     policyTemplate: 'aws.sqs',
     packageName: 'aws_cloudwatch_input_otel',
@@ -576,7 +523,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   {
     id: 'elb_alb_otel',
     name: 'Application Load Balancer',
-    category: 'networking_content_delivery',
     dataFormat: 'otel',
     policyTemplate: 'aws.elb',
     packageName: 'aws_cloudwatch_input_otel',
@@ -584,7 +530,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   {
     id: 'elb_clb_otel',
     name: 'Classic Load Balancer',
-    category: 'networking_content_delivery',
     dataFormat: 'otel',
     policyTemplate: 'aws.elb_classic',
     packageName: 'aws_cloudwatch_input_otel',
@@ -592,7 +537,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   {
     id: 'elb_nlb_otel',
     name: 'Network Load Balancer',
-    category: 'networking_content_delivery',
     dataFormat: 'otel',
     policyTemplate: 'aws.elb_network',
     packageName: 'aws_cloudwatch_input_otel',
@@ -600,7 +544,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   {
     id: 'elb_gwlb_otel',
     name: 'Gateway Load Balancer',
-    category: 'networking_content_delivery',
     dataFormat: 'otel',
     policyTemplate: 'aws.elb_gateway',
     packageName: 'aws_cloudwatch_input_otel',
@@ -608,7 +551,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   {
     id: 'ecs_otel',
     name: 'Amazon ECS',
-    category: 'containers',
     dataFormat: 'otel',
     policyTemplate: 'aws.ecs',
     packageName: 'aws_cloudwatch_input_otel',
@@ -618,7 +560,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   {
     id: 'aws_billing',
     name: 'AWS Cost and Usage Report (CUR 2.0)',
-    category: 'cloud_financial_management',
     packageName: 'aws_billing',
   },
 
@@ -626,7 +567,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   {
     id: 'amazon_security_lake',
     name: 'Amazon Security Lake',
-    category: 'security_identity_compliance',
     packageName: 'amazon_security_lake',
   },
 ];
@@ -1190,7 +1130,7 @@ export const isAgentBasedOnly = (service: AwsServiceMatrixEntry): boolean =>
 
 /**
  * Static metadata map for service lookups that do not require the manifest
- * (name, category, showInUI, etc.).
+ * (name, showInUI, etc.).
  * For manifest-enriched values (deploymentMethods, identityFederationSupported)
  * use useAwsServicesMap() in React components.
  * Note: signalTypes, dataStreams, and defaultEnabled are derived from the manifest at runtime;

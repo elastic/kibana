@@ -200,6 +200,7 @@ export const reportRoundTelemetry = ({
   trackingService,
   analyticsService,
   logger,
+  workflowExecutionId,
 }: {
   event: RoundCompleteEvent;
   conversation: Conversation;
@@ -211,6 +212,8 @@ export const reportRoundTelemetry = ({
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
   logger: Logger;
+  /** The workflow execution whose `ai.agent` step started the round; reported on the round event only. */
+  workflowExecutionId?: string;
 }): void => {
   try {
     const telemetry = buildExecutionTelemetry({ event, conversation, nextInput, logger });
@@ -268,6 +271,7 @@ export const reportRoundTelemetry = ({
         round: roundTotals,
         roundCount,
         conversationAttachments,
+        workflowExecutionId,
       });
     }
   } catch (error) {

@@ -198,9 +198,12 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
           uiPlugins,
         } = getDefaultEuiMarkdownPlugins({
           processingConfig: {
-            linkProps: {
-              target: settings?.open_links_in_new_tab ? '_blank' : '_self',
-            },
+            linkProps:
+              viewMode === 'non-interactive'
+                ? { href: undefined, disabled: true }
+                : {
+                    target: settings?.open_links_in_new_tab ? '_blank' : '_self',
+                  },
           },
         });
 
@@ -217,7 +220,7 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
         );
 
         const editorContent =
-          viewMode === 'view' || !isEditing ? (
+          viewMode !== 'edit' || !isEditing ? (
             <MarkdownRenderer
               parsingPluginList={parsingPluginList}
               processingPluginList={processingPluginList}

@@ -7,8 +7,13 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
+import {
+  ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+} from '@kbn/alertzero-common';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { RouteDependencies } from '../register_routes';
 import { registerHuntBehaviorRoute } from './hunt_behavior';
 import { resolveScopedModel } from './lib/scoped_model';
@@ -22,6 +27,7 @@ const resolveScopedModelMock = resolveScopedModel as jest.MockedFunction<typeof 
 const huntBehaviorMock = huntBehavior as jest.MockedFunction<typeof huntBehavior>;
 
 const model = { connector: { id: 'gpt' } } as unknown as ScopedModel;
+const mitreDataClient = { list: jest.fn() } as unknown as MitreAttackDataClient;
 const tier2Result: HuntBehaviorResult = {
   status: 'no_behaviors_found',
   has_hit: false,
@@ -43,6 +49,7 @@ const makeDeps = () => {
       ({
         getInference: () => inference,
         getSearchInferenceEndpoints: () => undefined,
+        mitreDataClient,
       } as unknown as ReturnType<RouteDependencies['getHuntServices']>),
   } as unknown as RouteDependencies);
 
@@ -92,13 +99,39 @@ describe('registerHuntBehaviorRoute', () => {
     expect(routeConfig.access).toBe('internal');
   });
 
-  it('resolves the frontier tier model rather than the deployment default', async () => {
+  it('resolves the frontier tier rather than the deployment default', async () => {
     const { handler, context } = makeDeps();
 
     await handler(context, requestFor(), httpServerMock.createResponseFactory());
 
-    expect(resolveScopedModelMock).toHaveBeenCalledWith(
-      expect.objectContaining({ featureId: ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID })
+    const featureIds = resolveScopedModelMock.mock.calls.map(([{ featureId }]) => featureId);
+    expect(featureIds).toEqual([ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID]);
+  });
+
+  it('hands both extraction and ES|QL generation the frontier model', async () => {
+    const frontier = { connector: { id: 'opus' } } as unknown as ScopedModel;
+    resolveScopedModelMock.mockImplementation(async ({ featureId }) =>
+      featureId === ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID
+        ? { ok: true, model: frontier }
+        : { ok: false, reason: 'no_connector', message: 'not a Tier 2 tier' }
+    );
+    const { handler, context } = makeDeps();
+
+    await handler(context, requestFor(), httpServerMock.createResponseFactory());
+
+    expect(huntBehaviorMock.mock.calls[0][0]).toEqual({ extraction: frontier, esql: frontier });
+  });
+
+  it('never resolves the efficient or balanced tiers, which Tier 2 has no consumer for', async () => {
+    const { handler, context } = makeDeps();
+
+    await handler(context, requestFor(), httpServerMock.createResponseFactory());
+
+    expect(resolveScopedModelMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ featureId: ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID })
+    );
+    expect(resolveScopedModelMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ featureId: ALERTZERO_BALANCED_INFERENCE_FEATURE_ID })
     );
   });
 
@@ -108,16 +141,18 @@ describe('registerHuntBehaviorRoute', () => {
     await handler(context, requestFor(), httpServerMock.createResponseFactory());
 
     expect(huntBehaviorMock).toHaveBeenCalledWith(
-      model,
+      { extraction: model, esql: model },
       expect.anything(),
       expect.anything(),
-      asCurrentUser
+      asCurrentUser,
+      mitreDataClient
     );
     expect(huntBehaviorMock).not.toHaveBeenCalledWith(
-      model,
+      { extraction: model, esql: model },
       expect.anything(),
       expect.anything(),
-      asInternalUser
+      asInternalUser,
+      mitreDataClient
     );
   });
 
@@ -137,7 +172,10 @@ describe('registerHuntBehaviorRoute', () => {
       statusCode: 503,
       body: {
         message: 'inference is not installed',
-        attributes: { tier2_skipped_reason: 'no_inference_plugin' },
+        attributes: {
+          tier2_skipped_reason: 'no_inference_plugin',
+          unavailable_model_tiers: ['frontier'],
+        },
       },
     });
   });
@@ -158,9 +196,75 @@ describe('registerHuntBehaviorRoute', () => {
       statusCode: 400,
       body: {
         message: 'no connector configured',
-        attributes: { tier2_skipped_reason: 'no_connector' },
+        attributes: {
+          tier2_skipped_reason: 'no_connector',
+          unavailable_model_tiers: ['frontier'],
+        },
       },
     });
+  });
+
+  it('fails with 500, not a missing-connector 400, when resolving a tier threw', async () => {
+    resolveScopedModelMock.mockRejectedValue(new Error('connector store unavailable'));
+    const { handler, context } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor(), response);
+
+    expect(huntBehaviorMock).not.toHaveBeenCalled();
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 500,
+      body: {
+        message: 'connector store unavailable',
+        attributes: {
+          tier2_skipped_reason: 'resolution_error',
+          unavailable_model_tiers: ['frontier'],
+        },
+      },
+    });
+  });
+
+  it('answers with the most severe failure across the tiers, so a thrown resolution is not hidden behind a missing connector', async () => {
+    resolveScopedModelMock.mockImplementation(async ({ featureId }) => {
+      if (featureId === ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID) {
+        throw new Error('connector store unavailable');
+      }
+      return { ok: false, reason: 'no_connector', message: 'no balanced connector' };
+    });
+    const { handler, context } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor(), response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 500,
+      body: {
+        message: 'connector store unavailable',
+        attributes: {
+          tier2_skipped_reason: 'resolution_error',
+          unavailable_model_tiers: ['frontier'],
+        },
+      },
+    });
+  });
+
+  it('answers 503 when the inference plugin is missing for any tier, whatever else failed', async () => {
+    resolveScopedModelMock.mockImplementation(async ({ featureId }) =>
+      featureId === ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID
+        ? { ok: false, reason: 'no_inference_plugin', message: 'inference is not installed' }
+        : { ok: false, reason: 'no_connector', message: 'no balanced connector' }
+    );
+    const { handler, context } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor(), response);
+
+    expect(response.customError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        statusCode: 503,
+        body: expect.objectContaining({ message: 'inference is not installed' }),
+      })
+    );
   });
 
   it('forwards the extraction threshold and report context to the service', async () => {
@@ -173,14 +277,15 @@ describe('registerHuntBehaviorRoute', () => {
     );
 
     expect(huntBehaviorMock).toHaveBeenCalledWith(
-      model,
+      { extraction: model, esql: model },
       expect.anything(),
       expect.objectContaining({
         report_id: 'report-1',
         llm_confidence_threshold: 0.8,
         iocs: [{ type: 'ip', value: '1.2.3.4' }],
       }),
-      expect.anything()
+      expect.anything(),
+      mitreDataClient
     );
   });
 

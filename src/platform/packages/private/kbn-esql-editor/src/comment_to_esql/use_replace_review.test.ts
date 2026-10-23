@@ -22,7 +22,7 @@ jest.mock('@kbn/code-editor', () => ({
       endColumn: ec,
     })),
     KeyMod: { CtrlCmd: 2048, Shift: 1024 },
-    KeyCode: { Backspace: 1, Enter: 3 },
+    KeyCode: { Backspace: 1 },
   },
 }));
 
@@ -81,8 +81,13 @@ const buildEditor = () => {
   };
 };
 
+const MODEL_VALUE = 'FROM logs | LIMIT 10';
+
 const buildModel = (lineMaxColumn = 10) =>
-  ({ getLineMaxColumn: jest.fn(() => lineMaxColumn) } as unknown as monaco.editor.ITextModel);
+  ({
+    getLineMaxColumn: jest.fn(() => lineMaxColumn),
+    getValue: jest.fn(() => MODEL_VALUE),
+  } as unknown as monaco.editor.ITextModel);
 
 const REVIEW_STATE = {
   firstChangedOriginalLine: 2,
@@ -103,7 +108,6 @@ describe('useReplaceReview', () => {
       editorModel,
       euiTheme,
       contextKeyId: 'testContextKey',
-      acceptAction: { id: 'test.accept', label: 'Accept' },
       rejectAction: { id: 'test.reject', label: 'Reject' },
       editSourceId: 'test-edit',
       onAfterAccept: jest.fn(),
@@ -194,7 +198,7 @@ describe('useReplaceReview', () => {
     expect(params.onAfterReject).toHaveBeenCalledWith(REVIEW_STATE);
   });
 
-  it('accept deletes the original lines and calls onAfterAccept', () => {
+  it('accept deletes the original lines and calls onAfterAccept with the accepted query', () => {
     const params = makeParams();
     const { editor, getAction, executeEdits } = buildEditor();
     params.editorRef.current = editor;
@@ -203,11 +207,13 @@ describe('useReplaceReview', () => {
     const { result } = renderHook(() => useReplaceReview(params));
 
     act(() => result.current.showReview(REVIEW_STATE));
+    act(() => {
+      result.current.accept();
+    });
 
-    const acceptRun = getAction('test.accept');
-    if (acceptRun === undefined) throw new Error('accept action not registered');
-    act(() => acceptRun());
-
+    // Accepting is the editor's run action, so no dedicated keybinding is registered.
+    expect(getAction('test.reject')).toBeDefined();
+    expect(editor.addAction).toHaveBeenCalledTimes(1);
     expect(executeEdits).toHaveBeenCalledWith('test-edit-accept', [
       expect.objectContaining({
         range: expect.objectContaining({
@@ -217,7 +223,36 @@ describe('useReplaceReview', () => {
         text: null,
       }),
     ]);
-    expect(params.onAfterAccept).toHaveBeenCalledWith(REVIEW_STATE);
+    expect(params.onAfterAccept).toHaveBeenCalledWith(REVIEW_STATE, MODEL_VALUE);
+  });
+
+  it('accept reports whether a review was pending', () => {
+    const params = makeParams();
+    const { editor, executeEdits } = buildEditor();
+    params.editorRef.current = editor;
+    params.editorModel.current = buildModel();
+
+    const { result } = renderHook(() => useReplaceReview(params));
+
+    let accepted: boolean | undefined;
+    act(() => {
+      accepted = result.current.accept();
+    });
+    expect(accepted).toBe(false);
+    expect(executeEdits).not.toHaveBeenCalled();
+
+    act(() => result.current.showReview(REVIEW_STATE));
+    act(() => {
+      accepted = result.current.accept();
+    });
+    expect(accepted).toBe(true);
+    expect(params.onAfterAccept).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      accepted = result.current.accept();
+    });
+    expect(accepted).toBe(false);
+    expect(params.onAfterAccept).toHaveBeenCalledTimes(1);
   });
 
   it('cleanup clears decorations and resets the context key', () => {

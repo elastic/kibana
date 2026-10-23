@@ -12,6 +12,7 @@ import type {
   AnalyticsServiceStart,
   CoreSetup,
   DocLinksServiceSetup,
+  FeatureFlagsStart,
   IClusterClient,
   KibanaRequest,
   Logger,
@@ -34,7 +35,7 @@ import { CsvSearchSourceExportType, CsvV2ExportType } from '@kbn/reporting-expor
 import { PdfExportType, PdfV1ExportType } from '@kbn/reporting-export-types-pdf';
 import { PngExportType } from '@kbn/reporting-export-types-png';
 import type { ReportingConfigType } from '@kbn/reporting-server';
-import type { ExportType } from '@kbn/reporting-server';
+import type { ExportType, ScheduleType } from '@kbn/reporting-server';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -53,6 +54,8 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { ReportingSetup } from '.';
 import { createConfig } from './config';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
+import { isScreenshotExportType } from './lib/screenshotting_availability';
+import { isServerlessExportEnabled } from './lib/serverless_export_gate';
 import type { IReport, ReportingStore } from './lib/store';
 import type { ReportTaskParams, ScheduledReportTaskParamsWithoutSpaceId } from './lib/tasks';
 import { RunSingleReportTask, RunScheduledReportTask } from './lib/tasks';
@@ -84,6 +87,7 @@ export interface ReportingInternalStart {
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
+  featureFlags: FeatureFlagsStart;
   data: DataPluginStart;
   discover: DiscoverServerPluginStart;
   fieldFormats: FieldFormatsStart;
@@ -156,6 +160,24 @@ export class ReportingCore {
 
   public getKibanaPackageInfo() {
     return this.packageInfo;
+  }
+
+  /**
+   * Whether reports of this export type can be created and run. PDF and PNG need a screenshotting
+   * implementation and, on serverless, an enabled feature flag.
+   */
+  public async isExportTypeEnabled(exportTypeId: string, scheduleType: ScheduleType) {
+    const { featureFlags, screenshotting } = await this.getPluginStartDeps();
+    if (!screenshotting && isScreenshotExportType(exportTypeId)) {
+      return false;
+    }
+
+    return isServerlessExportEnabled({
+      isServerless: this.packageInfo.buildFlavor === 'serverless',
+      featureFlags,
+      exportTypeId,
+      scheduleType,
+    });
   }
 
   /*
@@ -259,7 +281,10 @@ export class ReportingCore {
 
     if (pdf.enabled) {
       // NOTE: PdfV1ExportType is deprecated and tagged for removal: https://github.com/elastic/kibana/issues/154601
-      exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
+      // Serverless never registers it, so it does not become part of the serverless public API.
+      if (this.packageInfo.buildFlavor !== 'serverless') {
+        exportTypes.push(new PdfV1ExportType(this.core, this.config, this.logger, this.context));
+      }
       exportTypes.push(new PdfExportType(this.core, this.config, this.logger, this.context));
     }
 

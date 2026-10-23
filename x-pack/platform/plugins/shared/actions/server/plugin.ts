@@ -670,7 +670,7 @@ export class ActionsPlugin
     }: {
       request: KibanaRequest;
       unsecuredSavedObjectsClient: SavedObjectsClientContract;
-      spaceId?: string;
+      spaceId?: SpaceId;
     }) => {
       return new ActionsClient({
         publicBaseUrl: core.http.basePath.publicBaseUrl,

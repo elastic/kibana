@@ -128,11 +128,11 @@ export const TimeSeries = ({
       return;
     }
     const [min, max] = x;
-    onBrush(min, max, series);
+    onBrush?.(min, max, series);
   };
 
   const handleElementClick = (points) => {
-    onFilterClick(series, points);
+    onFilterClick?.(series, points);
   };
 
   const getSeriesColor = useCallback(

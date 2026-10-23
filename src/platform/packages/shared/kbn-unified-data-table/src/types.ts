@@ -67,6 +67,12 @@ export type CustomGridColumnsConfiguration = Record<
 
 export type DataGridPaginationMode = 'multiPage' | 'singlePage' | 'infinite';
 
+/**
+ * Render mode of the grid: 'interactive' (default) or 'print', which renders it without
+ * interactive controls (sorting, column actions/resizing, drag-and-drop, etc.)
+ */
+export type DataGridRenderMode = 'interactive' | 'print';
+
 export type DocumentsDisplayMode = 'table' | 'json';
 
 /**
@@ -88,6 +94,11 @@ export type CustomBulkActions = Array<
      * If omitted, the action is always shown.
      */
     isAvailable?: (payload: { selectedDocIds: string[] }) => boolean;
+    /**
+     * Optional reason the action cannot run on the current selection. Renders the action
+     * disabled, with the reason as its tooltip.
+     */
+    getDisabledReason?: (payload: { selectedDocIds: string[] }) => string | undefined;
     label: React.ReactElement | string;
     key: string;
   }

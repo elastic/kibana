@@ -150,6 +150,17 @@ describe('tokens_utils', () => {
       expect(urlPathTokens).toEqual([]);
       expect(urlParamsTokens).toEqual([]);
     });
+    it.each([
+      ['get', 'GET'],
+      ['Post ', 'POST'],
+      ['DeLeTe ', 'DELETE'],
+    ])('normalizes the method to upper case when the url is empty: "%s"', (line, expected) => {
+      const { method, url, urlPathTokens, urlParamsTokens } = parseLine(line);
+      expect(method).toBe(expected);
+      expect(url).toBe('');
+      expect(urlPathTokens).toEqual([]);
+      expect(urlParamsTokens).toEqual([]);
+    });
   });
 
   describe('parseBody', () => {

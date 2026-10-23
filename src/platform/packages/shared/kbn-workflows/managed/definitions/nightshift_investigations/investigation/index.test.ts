@@ -69,7 +69,7 @@ const workflow = parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml) as {
 describe('Nightshift investigation workflow', () => {
   it('records the investigation through the agent tools rather than persist steps', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.id).toBe('system-nightshift-investigation');
-    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(3);
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(4);
     expect(investigation.name).toBe('Nightshift Investigation');
     expect(investigation.steps.map((step) => step.name)).toEqual([
       'resolve_model',
@@ -81,10 +81,7 @@ describe('Nightshift investigation workflow', () => {
       'resolve_investigation_sources',
       'investigate',
       'emit_investigation_completed',
-      'emit_investigation_failed',
       'notify_completed',
-      'notify_failed',
-      'fail_investigation',
     ]);
     expect(requireStep('investigate').with?.message).toContain('{{ inputs.context | json }}');
   });
@@ -137,8 +134,8 @@ describe('Nightshift investigation workflow', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toContain('method: PATCH');
   });
 
-  it('keeps each notification failure nonfatal and selects the terminal phase from the agent result', () => {
-    for (const phase of ['started', 'completed', 'failed']) {
+  it('keeps delivery failures nonfatal and lets agent errors reach the workflow fallback', () => {
+    for (const phase of ['started', 'completed']) {
       const notify = requireStep(`notify_${phase}`);
       expect(notify.type).toBe('nightshift.sendNotifications');
       expect(notify.with).toMatchObject({
@@ -147,30 +144,42 @@ describe('Nightshift investigation workflow', () => {
       });
       expect(notify['on-failure']).toEqual({ continue: true });
     }
-    expect(requireStep('notify_started').if).toBeUndefined();
-    expect(requireStep('notify_completed').if).toBe('${{ steps.investigate.error == null }}');
-    expect(requireStep('notify_failed').if).toBe('${{ steps.investigate.error != null }}');
-    expect(requireStep('fail_investigation').if).toBe('${{ steps.investigate.error != null }}');
-    expect(investigation.steps.indexOf(requireStep('notify_started'))).toBeLessThan(
-      investigation.steps.indexOf(requireStep('investigate'))
-    );
-    expect(requireStep('investigate')).not.toHaveProperty('create-conversation');
+    expect(requireStep('investigate')['on-failure']).toBeUndefined();
+    expect(requireStep('notify_completed').if).toBeUndefined();
     expect(requireStep('investigate').with?.conversation_id).toBe(
       '${{ steps.persist_investigation_started.output.conversation_id }}'
     );
   });
 
-  it('bounds agent errors before passing them to the failed notification step', () => {
-    const template = requireStep('notify_failed').with?.reason;
-    if (typeof template !== 'string') {
-      throw new Error('Expected a failed notification reason template');
+  it('handles terminal errors globally and after persistence retries, preserving the original error', () => {
+    const definition = parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml);
+    const globalFailure = definition.settings['on-failure'];
+    const persistenceFailure = requireStep('persist_investigation_started')['on-failure'] as {
+      retry: { 'max-attempts': number };
+      fallback: WorkflowStep[];
+      continue?: boolean;
+    };
+    expect(globalFailure.continue).toBeUndefined();
+    expect(persistenceFailure.continue).toBeUndefined();
+    expect(persistenceFailure.retry['max-attempts']).toBe(3);
+    for (const fallback of [globalFailure.fallback, persistenceFailure.fallback]) {
+      expect(fallback).toHaveLength(1);
+      expect(fallback[0]).toMatchObject({
+        type: 'nightshift.handleInvestigationFailure',
+        with: { investigation_id: '{{ inputs.investigation_id | default: execution.id }}' },
+        'on-failure': { continue: true },
+      });
+      const engine = createWorkflowLiquidEngine({ outputDelimiterLeft: '${{' });
+      expect(
+        engine.parseAndRenderSync(fallback[0].with.reason, {
+          error: { message: 'Failure detail '.repeat(2000) },
+          steps: {
+            persist_investigation_started: { error: { message: 'Failure detail '.repeat(2000) } },
+          },
+        })
+      ).toHaveLength(10000);
+      expect(engine.parseAndRenderSync(fallback[0].with.reason, {})).toBe('Investigation failed');
     }
-    const engine = createWorkflowLiquidEngine({ outputDelimiterLeft: '${{' });
-    const reason = engine.parseAndRenderSync(template, {
-      steps: { investigate: { error: { message: 'Failure detail '.repeat(2000) } } },
-    });
-    expect(reason).toHaveLength(10000);
-    expect(reason).toMatch(/^Failure detail /);
   });
 
   it('attributes agent calls to Nightshift under the shared investigation id', () => {
@@ -289,17 +298,11 @@ describe('Nightshift investigation workflow', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toContain('inputs.conversation_id');
   });
 
-  it('keeps the lifecycle emits and fails a run whose agent step failed', () => {
-    expect(requireStep('emit_investigation_completed').if).toBe(
-      '${{ steps.investigate.error == null }}'
-    );
-    expect(requireStep('emit_investigation_failed').if).toBe(
-      '${{ steps.investigate.error != null }}'
-    );
-    expect(requireStep('fail_investigation')).toMatchObject({
-      type: 'workflow.fail',
-      if: '${{ steps.investigate.error != null }}',
-    });
+  it('emits completion only on the success path and delegates failures to the hook', () => {
+    expect(requireStep('emit_investigation_completed').with?.body).toEqual({ status: 'completed' });
+    expect(requireStep('emit_investigation_completed').if).toBeUndefined();
+    expect(requireStep('investigate')['on-failure']).toBeUndefined();
+    expect(investigation.steps.some(({ type }) => type === 'workflow.fail')).toBe(false);
   });
 
   it('knows nothing about Slack', () => {

@@ -90,7 +90,7 @@ describe('FetchRulesStep', () => {
     expect(mockFindByIds).not.toHaveBeenCalled();
   });
 
-  it('passes unique rule IDs to findAll', async () => {
+  it('passes unique rule IDs to findByIds', async () => {
     mockFindByIds.mockResolvedValue([
       {
         id: 'r1',

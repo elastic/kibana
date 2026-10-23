@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import {
   type SignificantEvent,
-  SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
 } from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import {
@@ -83,7 +83,6 @@ export const markDuplicateKeys = (
       results[candidate.index] = {
         index: candidate.index,
         event_id: candidate.eventId,
-        status: candidate.input.status,
         written: false,
         reason: 'duplicate_in_batch',
         error: {
@@ -167,7 +166,6 @@ export const resolveDedupSkips = (
   activeEvents: SignificantEvent[],
   results: BulkResults
 ): WriteCandidate[] => {
-  const activeStatuses = SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS as readonly string[];
   const sortedActiveEvents = activeEvents.toSorted((a, b) => {
     const timestampOrder = Date.parse(b['@timestamp']) - Date.parse(a['@timestamp']);
     return timestampOrder !== 0
@@ -179,7 +177,7 @@ export const resolveDedupSkips = (
   for (const candidate of validCandidates) {
     if (candidate.mode === 'dedup') {
       const duplicate = sortedActiveEvents.find((ev) =>
-        isCoveredByActiveEvent(candidate, ev, activeStatuses)
+        isCoveredByActiveEvent(candidate, ev, SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS)
       );
       if (duplicate) {
         const existingEventId = duplicate.event_id ?? candidate.eventId;

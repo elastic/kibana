@@ -34,6 +34,13 @@ describe('getEuidSourceFields', () => {
     );
     expect(result.requiresOneOf).toEqual(result.identitySourceFields);
   });
+
+  it('includes user.entity.id for user (ranked first for cloud.provider aws)', () => {
+    const result = getEuidSourceFields(getBuiltInEntityDefinition(EntityType.enum.user));
+
+    expect(result.identitySourceFields).toContain('user.entity.id');
+    expect(result.identitySourceFields).not.toContain('cloud.provider');
+  });
 });
 
 describe('getEuidNamespaceSourceFields', () => {

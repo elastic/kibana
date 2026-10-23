@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiForm, EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SettingsSection, SettingsSectionRow } from './settings_section';
-import type { UseDeveloperModeResult } from '../hooks/use_developer_mode';
+import type { UseDeveloperModeResult } from '../../hooks/use_developer_mode';
 
 export const DeveloperModeSection = ({
   isDeveloperMode,

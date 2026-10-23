@@ -25,7 +25,7 @@ inputs:
 waitForCompletion: true
 ```
 
-**Always set `waitForCompletion: true`.** The call waits synchronously for up to ~120s (a fixed wait window in the `execute_workflow` tool — not configurable from here) and then returns the execution. The investigation is recorded as its own conversation whose id is the returned `executionId`; its findings are in the investigation agent's final reply (see **Presenting results**). Since investigations may take a few minutes, longer runs return a still-running execution, so treat **Checking investigation status** as the expected next step rather than a rare fallback. Present the results in the same turn once they're available.
+**Always set `waitForCompletion: true`.** The call waits synchronously for up to ~120s (a fixed wait window in the `execute_workflow` tool — not configurable from here) and then returns the execution. The investigation is recorded as its own conversation whose id is the returned `executionId`; the investigation agent's final reply is a short wrap-up of its findings (see **Presenting results**). Since investigations may take a few minutes, longer runs return a still-running execution, so treat **Checking investigation status** as the expected next step rather than a rare fallback. Present the results in the same turn once they're available.
 
 - Before triggering, briefly tell the user you're starting the investigation and that it may take a few minutes — the agent gathers and correlates logs, traces, and metrics before reaching a conclusion.
 - Stay on the tool call until it returns; do not ask the user to come back later, and do not start polling in a loop — call `get_workflow_execution_status` once if needed.
@@ -147,4 +147,4 @@ Only call this tool when a Significant Event was the context for the investigati
 
 ### Presenting results
 
-When the investigation completes, the `investigate` step's output `message` is the investigation agent's final reply: the root cause and its mechanism, the confirmed and dismissed hypotheses, the impact, and any proposed actions. Present it in plain language. Highlight the conclusion and the confirmed hypothesis first, then the impact and the proposed actions, then surface the dismissed hypotheses (with their reasons) if they add useful context.
+When the investigation completes, the `investigate` step's output `message` is the investigation agent's final reply: a short wrap-up of the conclusion. The full findings (summary, verdict, severity, impact, hypotheses, and proposed actions) are recorded on the investigation itself, not in this reply. Present the wrap-up in plain language, then point the user to the investigation for the details: it opens in Nightshift at `/app/nightshift?investigationId=<executionId>`.

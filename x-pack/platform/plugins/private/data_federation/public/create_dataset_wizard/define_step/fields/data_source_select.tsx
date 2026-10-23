@@ -51,6 +51,8 @@ export function DataSourceSelect({
   onChange,
   onBlur,
   loadDataSources,
+  createdDataSourceNames,
+  onDataSourceCreated,
 }: {
   dataSources: DataSource[];
   value: string;
@@ -58,6 +60,8 @@ export function DataSourceSelect({
   onChange: (value: string) => void;
   onBlur: () => void;
   loadDataSources: () => Promise<void>;
+  createdDataSourceNames: readonly string[];
+  onDataSourceCreated: (name: string) => void;
 }) {
   const { euiTheme } = useEuiTheme();
   const {
@@ -128,6 +132,7 @@ export function DataSourceSelect({
       } catch (error) {
         return getFlyoutSaveErrorMessage(error);
       }
+      onDataSourceCreated(dataSource.name);
       reportUiCounter?.(getDatasourceCreateEvents(dataSource.type));
       try {
         await loadDataSources();
@@ -141,8 +146,10 @@ export function DataSourceSelect({
       setIsCreateDataSourceOpen(false);
       return null;
     },
-    [dataSourcesClient, loadDataSources, onChange, reportUiCounter]
+    [dataSourcesClient, loadDataSources, onChange, onDataSourceCreated, reportUiCounter]
   );
+
+  const showAuthenticationCallout = Boolean(value) && !createdDataSourceNames.includes(value);
 
   return (
     <>
@@ -158,7 +165,7 @@ export function DataSourceSelect({
         placeholder={createDatasetWizardStrings.dataSourcePlaceholder}
         isInvalid={isInvalid}
       />
-      {value ? (
+      {showAuthenticationCallout ? (
         <>
           <EuiSpacer size="s" />
           <EuiCallOut

@@ -90,6 +90,31 @@ describe('Color Format', () => {
       expect(colorer.convertToText(99)).toBe('99');
       expect(colorer.convertToReact(99)).toBe('99');
     });
+
+    test('should format the value with the numeral pattern and match ranges on the raw value', () => {
+      const colorer = new ColorFormat(
+        {
+          fieldType: 'number',
+          pattern: '0.00',
+          colors: [
+            {
+              range: '100:150',
+              text: 'blue',
+              background: 'yellow',
+            },
+          ],
+        },
+        jest.fn()
+      );
+
+      expect(colorer.convertToText(99.999)).toBe('100.00');
+      expect(colorer.convertToText(100)).toBe('100.00');
+
+      expect(colorer.convertToReact(99.999)).toBe('100.00');
+      expectColoredReactElement(colorer.convertToReact(100), '100.00', 'blue', 'yellow');
+
+      checkMissingValues(colorer);
+    });
   });
 
   describe('field is a boolean', () => {

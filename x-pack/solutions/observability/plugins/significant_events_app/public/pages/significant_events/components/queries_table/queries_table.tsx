@@ -30,6 +30,7 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useIsCpsMultiProject } from '@kbn/cps-utils';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import {
   DISCOVERY_QUERIES_QUERY_KEY,
@@ -101,6 +102,7 @@ export function QueriesTable() {
     },
     core: {
       application: {
+        getUrlForApp,
         capabilities: { nightshift },
       },
       notifications: { toasts },
@@ -400,9 +402,7 @@ export function QueriesTable() {
         actions={
           <EuiButtonEmpty
             data-test-subj="significantEventsAppQueriesTableGoToKnowledgeIndicatorsButton"
-            href={router.link('/{tab}', {
-              path: { tab: 'knowledge_indicators' },
-            })}
+            href={getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/knowledge/knowledge_indicators' })}
           >
             {i18n.translate(
               'xpack.significantEventsApp.queriesTable.emptyState.goToKnowledgeIndicatorsButton',

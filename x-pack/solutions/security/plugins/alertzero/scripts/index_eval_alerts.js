@@ -18,6 +18,7 @@
  *   --es      Elasticsearch base URL (default: http://localhost:9200)
  *   --kibana  Kibana base URL (default: http://localhost:5601)
  *   --space   Kibana space id (default: default)
+ *   --apiKey  Base64 API key; sent as `ApiKey` auth (default: $API_KEY, else basic auth via ES_USERNAME/ES_PASSWORD)
  *   --run     After indexing, trigger one Worker run per rule immediately (no curl needed)
  *   --clean   Delete all previously indexed eval alerts instead of creating new ones
  */
@@ -42,7 +43,17 @@ const RUN = args.includes('--run');
 const INDEX = `.alerts-security.alerts-${SPACE}`;
 const ES_USERNAME = process.env.ES_USERNAME ?? 'elastic';
 const ES_PASSWORD = process.env.ES_PASSWORD ?? 'changeme';
-const AUTH = `${ES_USERNAME}:${ES_PASSWORD}`;
+const API_KEY = flag('--apiKey', process.env.API_KEY);
+const AUTH_HEADER = API_KEY
+  ? `ApiKey ${API_KEY}`
+  : 'Basic ' + Buffer.from(`${ES_USERNAME}:${ES_PASSWORD}`).toString('base64');
+// Printed curl hints reference $API_KEY instead of the secret, so tell the user to export it first.
+const CURL_AUTH_NOTE = API_KEY
+  ? 'Before running the curl below: export API_KEY=<your API key> (--apiKey does not set it in your shell)'
+  : '';
+const CURL_AUTH = API_KEY
+  ? `-H "Authorization: ApiKey $API_KEY"`
+  : `-u '${`${ES_USERNAME}:${ES_PASSWORD}`.replace(/'/g, "'\\''")}'`; // single-quoted so $, ", ` survive pasting
 
 // Workers install lazily per space under `${workerId}-${spaceId}`, so the run route needs the
 // space-suffixed id. The bare registered id 404s even once the Worker is installed and enabled.
@@ -59,7 +70,7 @@ async function esRequest(method, path, body) {
     method,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: 'Basic ' + Buffer.from(AUTH).toString('base64'),
+      Authorization: AUTH_HEADER,
     },
     body: body ? JSON.stringify(body) : undefined,
   });
@@ -98,7 +109,8 @@ const noise = (id, timestamp) => ({
   'kibana.alert.original_time': timestamp,
   'kibana.alert.last_detected': timestamp,
   'kibana.alert.start': timestamp,
-  'kibana.alert.space_ids': [SPACE],
+  // RAC scopes alert queries by `kibana.space_ids`; without it the alerts table hides these docs.
+  'kibana.space_ids': [SPACE],
   'kibana.alert.workflow_assignee_ids': [],
   'kibana.alert.rule.author': [],
   'kibana.alert.rule.enabled': true,
@@ -489,7 +501,7 @@ async function indexAlerts() {
             'Content-Type': 'application/json',
             'kbn-xsrf': 'true',
             'elastic-api-version': '2023-10-31',
-            Authorization: 'Basic ' + Buffer.from(AUTH).toString('base64'),
+            Authorization: AUTH_HEADER,
           },
           body: JSON.stringify(body),
         }
@@ -500,8 +512,9 @@ async function indexAlerts() {
       console.log(`  ✓ ${label}: ${KB_URL}${SPACE_PATH_PREFIX}/app/workflows/executions/${execId}`);
     }
     console.log(`\n  Poll for result:`);
+    if (CURL_AUTH_NOTE) console.log(`  ${CURL_AUTH_NOTE}`);
     console.log(
-      `  curl -u elastic:changeme '${KB_URL}${SPACE_PATH_PREFIX}/api/workflows/executions/<executionId>' -H 'elastic-api-version: 2023-10-31'`
+      `  curl ${CURL_AUTH} '${KB_URL}${SPACE_PATH_PREFIX}/api/workflows/executions/<executionId>' -H 'elastic-api-version: 2023-10-31'`
     );
   } else {
     // Write payloads to temp files — avoids multiline -d quoting issues on paste.
@@ -518,7 +531,8 @@ async function indexAlerts() {
       console.log(`    API body:    ${payloadFile}`);
       console.log(`    UI Run body: ${uiPayloadFile}`);
     }
-    console.log(`\ncurl -u elastic:changeme -XPOST \\`);
+    if (CURL_AUTH_NOTE) console.log(`\n${CURL_AUTH_NOTE}`);
+    console.log(`\ncurl ${CURL_AUTH} -XPOST \\`);
     console.log(`  '${KB_URL}${SPACE_PATH_PREFIX}/api/workflows/workflow/${WORKER_ID}/run' \\`);
     console.log(`  -H 'kbn-xsrf: true' \\`);
     console.log(`  -H 'elastic-api-version: 2023-10-31' \\`);

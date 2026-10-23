@@ -59,10 +59,13 @@ spaceTest.describe(
     // re-searches Discover and re-renders the push flyout, which destabilises the cell-actions
     // popover. From a fresh flyout the grid is stable, so the toggle-column action is reliable.
     spaceTest(
-      'add as column cell action adds the field to the Discover table',
+      'toggle column cell action removes the field from the Discover table',
       async ({ pageObjects }) => {
         const { securityDiscoverFlyout, discover, docViewer } = pageObjects;
+        // `host.name` is one of the Security profile's default alert columns, so it starts in the
+        // grid and the highlighted-field toggle-column action removes it.
         const field = 'host.name';
+        expect(await discover.getDocHeader()).toContain(field);
 
         await securityDiscoverFlyout.hoverHighlightedFieldValue(field);
         // Wait for the popover button to settle (enabled) before clicking, so Playwright's
@@ -70,9 +73,9 @@ spaceTest.describe(
         await expect(securityDiscoverFlyout.cellActionToggleColumn).toBeEnabled();
         await securityDiscoverFlyout.cellActionToggleColumn.click();
 
-        // The column is added to the grid behind the flyout; close it and assert the header.
+        // The column is removed from the grid behind the flyout; close it and assert the header.
         await docViewer.close();
-        expect(await discover.getDocHeader()).toContain(field);
+        expect(await discover.getDocHeader()).not.toContain(field);
       }
     );
 

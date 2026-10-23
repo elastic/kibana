@@ -7,26 +7,15 @@
 
 import React from 'react';
 
-import {
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  type EuiButtonGroupOptionProps,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { ContentList, ContentListFooter, ContentListToolbar } from '@kbn/content-list';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { ContentList, ContentListFooter } from '@kbn/content-list';
+import type { EisViewMode } from '../../types';
 import type { EisDisplayOptions } from '../../utils/eis_utils';
-import { useDisplayOptionsTour } from '../../hooks/use_display_options_tour';
-import { DisplayOptions } from './display_options';
 import { EisCardGrid } from './eis_card_grid';
 import { EisNoModelsPrompt } from './eis_no_models_prompt';
-import { ModelTypeFilterPart, ModelFamilyFilterPart } from './eis_model_filters';
-import { RegionFilterPart } from './region_filter';
 import { EisTable } from './eis_table';
-
-export type EisViewMode = 'card' | 'table';
-
-type EisViewModeOption = Omit<EuiButtonGroupOptionProps, 'id'> & { id: EisViewMode };
+import { EisCardViewHeader } from './eis_card_view_header';
+import { EisModelsToolbar } from './eis_models_toolbar';
 
 interface EisModelsListingProps {
   onViewModelDetails: (modelId: string) => void;
@@ -35,29 +24,8 @@ interface EisModelsListingProps {
   hasBlockedModels: boolean;
   viewMode: EisViewMode;
   onViewModeChange: (viewMode: EisViewMode) => void;
+  catalogTotal: number;
 }
-
-const VIEW_MODE_OPTIONS: EisViewModeOption[] = [
-  {
-    id: 'card',
-    'data-test-subj': 'eisModelsViewModeSelector-card',
-    iconType: 'grid',
-    label: i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.cardView', {
-      defaultMessage: 'Card view',
-    }),
-  },
-  {
-    id: 'table',
-    'data-test-subj': 'eisModelsViewModeSelector-table',
-    iconType: 'list',
-    label: i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.tableView', {
-      defaultMessage: 'Table view',
-    }),
-  },
-];
-
-const isEisViewMode = (id: string): id is EisViewMode =>
-  VIEW_MODE_OPTIONS.some((option) => option.id === id);
 
 export const EisModelsListing = ({
   onViewModelDetails,
@@ -66,55 +34,36 @@ export const EisModelsListing = ({
   hasBlockedModels,
   viewMode,
   onViewModeChange,
-}: EisModelsListingProps) => {
-  const { isTourOpen, dismissTour, hideTour } = useDisplayOptionsTour(hasBlockedModels);
-
-  return (
-    <ContentList emptyState={<EisNoModelsPrompt />}>
-      <EuiFlexGroup alignItems="flexStart" gutterSize="s">
-        <EuiFlexItem>
-          <ContentListToolbar>
-            <ContentListToolbar.Filters>
-              <ModelTypeFilterPart />
-              <ModelFamilyFilterPart />
-              <RegionFilterPart />
-            </ContentListToolbar.Filters>
-          </ContentListToolbar>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            legend={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.viewMode', {
-              defaultMessage: 'View mode',
-            })}
-            options={VIEW_MODE_OPTIONS}
-            idSelected={viewMode}
-            onChange={(id) => {
-              if (isEisViewMode(id)) {
-                onViewModeChange(id);
-              }
-            }}
-            // `m` is form-control height, matching the toolbar's search box and filter buttons.
-            buttonSize="m"
-            isIconOnly
-            data-test-subj="eisModelsViewModeSelector"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <DisplayOptions
-            value={displayOptions}
-            onApply={onApplyDisplayOptions}
-            onOpen={hideTour}
-            isTourOpen={isTourOpen}
-            onDismissTour={dismissTour}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {viewMode === 'table' ? (
-        <EisTable {...{ onViewModelDetails }} />
+  catalogTotal,
+}: EisModelsListingProps) => (
+  <ContentList emptyState={<EisNoModelsPrompt />}>
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexItem grow={false}>
+        <EisModelsToolbar
+          {...{
+            displayOptions,
+            onApplyDisplayOptions,
+            hasBlockedModels,
+            viewMode,
+            onViewModeChange,
+          }}
+        />
+      </EuiFlexItem>
+      {viewMode === 'card' ? (
+        <>
+          <EuiFlexItem grow={false}>
+            <EisCardViewHeader catalogTotal={catalogTotal} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EisCardGrid {...{ onViewModelDetails }} />
+          </EuiFlexItem>
+        </>
       ) : (
-        <EisCardGrid {...{ onViewModelDetails }} />
+        <EuiFlexItem>
+          <EisTable {...{ onViewModelDetails }} />
+          <ContentListFooter />
+        </EuiFlexItem>
       )}
-      {viewMode === 'table' && <ContentListFooter />}
-    </ContentList>
-  );
-};
+    </EuiFlexGroup>
+  </ContentList>
+);

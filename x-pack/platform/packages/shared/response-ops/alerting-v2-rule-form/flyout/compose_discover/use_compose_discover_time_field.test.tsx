@@ -36,7 +36,11 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
 describe('useComposeDiscoverTimeField', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseResolveTimeField.mockReturnValue({ timeFieldOptions: [], isTimeFieldResolved: true });
+    mockUseResolveTimeField.mockReturnValue({
+      timeFieldOptions: [],
+      isTimeFieldResolved: true,
+      isResolvingTimeField: false,
+    });
   });
 
   it('resolves time fields with ES|QL introspection so federated datasets are supported', () => {

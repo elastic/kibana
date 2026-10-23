@@ -1343,6 +1343,18 @@ describe('HITL external channel schemas', () => {
       channels: ['C0123'],
       message: 'slack2 note',
     },
+    teams: {
+      'connector-id': 'teams-1',
+      'team-id': 'team-1',
+      'channel-id': 'channel-1',
+      message: 'teams note',
+    },
+    servicenow: {
+      'connector-id': 'snow-1',
+      table: 'incident',
+      'sys-id': 'abc123',
+      message: 'snow note',
+    },
     http: {
       url: 'https://hooks.example/hitl',
       body: '{{context.hitl.externalFormLink}}',
@@ -1377,6 +1389,8 @@ describe('HITL external channel schemas', () => {
       slack_api: ['connector-id', 'channels', 'message'],
       email: ['connector-id', 'to', 'cc', 'bcc', 'subject', 'message'],
       slack2: ['connector-id', 'channels', 'message'],
+      teams: ['connector-id', 'team-id', 'channel-id', 'message'],
+      servicenow: ['connector-id', 'table', 'sys-id', 'message'],
       http: ['connector-id', 'url', 'path', 'method', 'headers', 'body'],
     });
   });
@@ -1394,6 +1408,8 @@ describe('HITL external channel schemas', () => {
       slack_api: ['connector-id', 'channels'],
       email: ['connector-id', 'to', 'cc', 'bcc', 'subject'],
       slack2: ['connector-id', 'channels'],
+      teams: ['connector-id', 'team-id', 'channel-id'],
+      servicenow: ['connector-id', 'table', 'sys-id'],
       http: ['connector-id', 'url', 'path', 'method', 'headers', 'body'],
     });
   });
@@ -1607,5 +1623,39 @@ describe('dynamic timeout schema', () => {
     expect(encoded).toMatch(/"anyOf"|"oneOf"/);
     expect(encoded).toContain('\\d+w');
     expect(encoded).toContain('{{');
+  });
+});
+
+describe('workflow child identity allowlist', () => {
+  it.each([
+    [WorkflowExecuteStepSchema, 'allowed-workflow-ids'],
+    [WorkflowExecuteStepSchema, 'allowed-workflow-tags'],
+    [WorkflowExecuteAsyncStepSchema, 'allowed-workflow-ids'],
+    [WorkflowExecuteAsyncStepSchema, 'allowed-workflow-tags'],
+  ] as const)('requires bounded literal entries: %p %s', (schema, field) => {
+    const step = {
+      name: 'child',
+      type: schema.shape.type.value,
+      with: {
+        'workflow-id': '{{ variables.action_workflow_id }}',
+        'run-as-mode': 'inherit',
+        [field]: ['approved-child'],
+      },
+    };
+    expect(schema.safeParse(step).success).toBe(true);
+    for (const allowedIds of [
+      [],
+      [''],
+      ['a'.repeat(1025)],
+      Array.from({ length: 101 }, (_, index) => `child-${index}`),
+      ['{{ variables.child }}'],
+      ['${{ variables.child }}'],
+      ['{% if true %}child{% endif %}'],
+      ['child\n{{ variables.suffix }}'],
+    ]) {
+      expect(
+        schema.safeParse({ ...step, with: { ...step.with, [field]: allowedIds } }).success
+      ).toBe(false);
+    }
   });
 });

@@ -35,7 +35,7 @@ import { EsqlFunctionNames } from './function_names';
 const absentOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: EsqlFunctionNames.ABSENT_OVER_TIME,
-  description: i18n.translate('kbn-esql-language.esql.definitions.absent_over_time', {
+  description: i18n.translate('esqlLanguage.esql.definitions.absent_over_time', {
     defaultMessage: 'Calculates the absence of a field in the output result over time range.',
   }),
   preview: false,
@@ -426,7 +426,7 @@ const absentOverTimeDefinition: FunctionDefinition = {
 const avgOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: EsqlFunctionNames.AVG_OVER_TIME,
-  description: i18n.translate('kbn-esql-language.esql.definitions.avg_over_time', {
+  description: i18n.translate('esqlLanguage.esql.definitions.avg_over_time', {
     defaultMessage: 'Calculates the average over time of a numeric field.',
   }),
   preview: false,
@@ -545,7 +545,7 @@ const avgOverTimeDefinition: FunctionDefinition = {
 const countDistinctOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: EsqlFunctionNames.COUNT_DISTINCT_OVER_TIME,
-  description: i18n.translate('kbn-esql-language.esql.definitions.count_distinct_over_time', {
+  description: i18n.translate('esqlLanguage.esql.definitions.count_distinct_over_time', {
     defaultMessage: 'Calculates the count of distinct values over time for a field.',
   }),
   preview: false,
@@ -1598,7 +1598,7 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
 const countOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: EsqlFunctionNames.COUNT_OVER_TIME,
-  description: i18n.translate('kbn-esql-language.esql.definitions.count_over_time', {
+  description: i18n.translate('esqlLanguage.esql.definitions.count_over_time', {
     defaultMessage: 'Calculates the count over time value of a field.',
   }),
   preview: false,
@@ -1938,7 +1938,7 @@ const countOverTimeDefinition: FunctionDefinition = {
 const deltaDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: EsqlFunctionNames.DELTA,
-  description: i18n.translate('kbn-esql-language.esql.definitions.delta', {
+  description: i18n.translate('esqlLanguage.esql.definitions.delta', {
     defaultMessage: 'Calculates the absolute change of a gauge field in a time window.',
   }),
   preview: false,
@@ -2006,7 +2006,7 @@ const deltaDefinition: FunctionDefinition = {
 const derivDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: EsqlFunctionNames.DERIV,
-  description: i18n.translate('kbn-esql-language.esql.definitions.deriv', {
+  description: i18n.translate('esqlLanguage.esql.definitions.deriv', {
     defaultMessage:
       'Calculates the derivative over time of a numeric field using linear regression.',
   }),
@@ -2075,7 +2075,7 @@ const derivDefinition: FunctionDefinition = {
 const firstOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: EsqlFunctionNames.FIRST_OVER_TIME,
-  description: i18n.translate('kbn-esql-language.esql.definitions.first_over_time', {
+  description: i18n.translate('esqlLanguage.esql.definitions.first_over_time', {
     defaultMessage:
       'Calculates the earliest value of a field, where recency determined by the `@timestamp` field.',
   }),
@@ -2331,7 +2331,7 @@ const firstOverTimeDefinition: FunctionDefinition = {
 const ideltaDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: EsqlFunctionNames.IDELTA,
-  description: i18n.translate('kbn-esql-language.esql.definitions.idelta', {
+  description: i18n.translate('esqlLanguage.esql.definitions.idelta', {
     defaultMessage:
       'Calculates the idelta of a gauge. idelta is the absolute change between the last two data points (it ignores all but the last two data points in each time period). This function is very similar to delta, but is more responsive to recent changes.',
   }),
@@ -2400,7 +2400,7 @@ const ideltaDefinition: FunctionDefinition = {
 const increaseDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: EsqlFunctionNames.INCREASE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.increase', {
+  description: i18n.translate('esqlLanguage.esql.definitions.increase', {
     defaultMessage: 'Calculates the absolute increase of a counter field in a time window.',
   }),
   preview: false,
@@ -2468,7 +2468,7 @@ const increaseDefinition: FunctionDefinition = {
 const irateDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: EsqlFunctionNames.IRATE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.irate', {
+  description: i18n.translate('esqlLanguage.esql.definitions.irate', {
     defaultMessage:
       'Calculates the irate of a counter field. irate is the per-second rate of increase between the last two data points (it ignores all but the last two data points in each time period). This function is very similar to rate, but is more responsive to recent changes in the rate of increase.',
   }),
@@ -2537,7 +2537,7 @@ const irateDefinition: FunctionDefinition = {
 const lastOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: EsqlFunctionNames.LAST_OVER_TIME,
-  description: i18n.translate('kbn-esql-language.esql.definitions.last_over_time', {
+  description: i18n.translate('esqlLanguage.esql.definitions.last_over_time', {
     defaultMessage:
       'Calculates the latest value of a field, where recency determined by the `@timestamp` field.',
   }),
@@ -2793,7 +2793,7 @@ const lastOverTimeDefinition: FunctionDefinition = {
 const maxOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: EsqlFunctionNames.MAX_OVER_TIME,
-  description: i18n.translate('kbn-esql-language.esql.definitions.max_over_time', {
+  description: i18n.translate('esqlLanguage.esql.definitions.max_over_time', {
     defaultMessage: 'Calculates the maximum over time value of a field.',
   }),
   preview: false,
@@ -3048,7 +3048,7 @@ const maxOverTimeDefinition: FunctionDefinition = {
 const minOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: EsqlFunctionNames.MIN_OVER_TIME,
-  description: i18n.translate('kbn-esql-language.esql.definitions.min_over_time', {
+  description: i18n.translate('esqlLanguage.esql.definitions.min_over_time', {
     defaultMessage: 'Calculates the minimum over time value of a field.',
   }),
   preview: false,
@@ -3303,7 +3303,7 @@ const minOverTimeDefinition: FunctionDefinition = {
 const percentileOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: EsqlFunctionNames.PERCENTILE_OVER_TIME,
-  description: i18n.translate('kbn-esql-language.esql.definitions.percentile_over_time', {
+  description: i18n.translate('esqlLanguage.esql.definitions.percentile_over_time', {
     defaultMessage: 'Calculates the percentile over time of a field.',
   }),
   preview: false,
@@ -3620,7 +3620,7 @@ const percentileOverTimeDefinition: FunctionDefinition = {
 const presentOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: EsqlFunctionNames.PRESENT_OVER_TIME,
-  description: i18n.translate('kbn-esql-language.esql.definitions.present_over_time', {
+  description: i18n.translate('esqlLanguage.esql.definitions.present_over_time', {
     defaultMessage: 'Calculates the presence of a field in the output result over time range.',
   }),
   preview: false,
@@ -4011,7 +4011,7 @@ const presentOverTimeDefinition: FunctionDefinition = {
 const rateDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: EsqlFunctionNames.RATE,
-  description: i18n.translate('kbn-esql-language.esql.definitions.rate', {
+  description: i18n.translate('esqlLanguage.esql.definitions.rate', {
     defaultMessage:
       'Calculates the per-second average rate of increase of a counter. Rate calculations account for breaks in monotonicity, such as counter resets when a service restarts, and extrapolate values within each bucketed time interval. Rate is the most appropriate aggregate function for counters. It is only allowed in a STATS command under a `TS` source command, to be properly applied per time series.',
   }),
@@ -4080,7 +4080,7 @@ const rateDefinition: FunctionDefinition = {
 const stddevOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: EsqlFunctionNames.STDDEV_OVER_TIME,
-  description: i18n.translate('kbn-esql-language.esql.definitions.stddev_over_time', {
+  description: i18n.translate('esqlLanguage.esql.definitions.stddev_over_time', {
     defaultMessage: 'Calculates the population standard deviation over time of a numeric field.',
   }),
   preview: false,
@@ -4148,7 +4148,7 @@ const stddevOverTimeDefinition: FunctionDefinition = {
 const sumOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: EsqlFunctionNames.SUM_OVER_TIME,
-  description: i18n.translate('kbn-esql-language.esql.definitions.sum_over_time', {
+  description: i18n.translate('esqlLanguage.esql.definitions.sum_over_time', {
     defaultMessage: 'Calculates the sum over time value of a field.',
   }),
   preview: false,
@@ -4267,7 +4267,7 @@ const sumOverTimeDefinition: FunctionDefinition = {
 const varianceOverTimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.TIME_SERIES_AGG,
   name: EsqlFunctionNames.VARIANCE_OVER_TIME,
-  description: i18n.translate('kbn-esql-language.esql.definitions.variance_over_time', {
+  description: i18n.translate('esqlLanguage.esql.definitions.variance_over_time', {
     defaultMessage: 'Calculates the population variance over time of a numeric field.',
   }),
   preview: false,

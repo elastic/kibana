@@ -28,7 +28,7 @@ export const changePointCommand: ICommand = {
   metadata: {
     docPreserving: true,
     preview: true,
-    description: i18n.translate('kbn-esql-language.esql.definitions.changePointDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.changePointDoc', {
       defaultMessage: 'Detect change point in the query results',
     }),
     declaration: `CHANGE_POINT <value> ON <field_name> AS <type>, <pvalue> BY <grouping>`,

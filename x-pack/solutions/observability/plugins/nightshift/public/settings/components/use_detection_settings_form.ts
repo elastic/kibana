@@ -14,9 +14,9 @@ import {
   resolveSignificantEventsTuningConfig,
   type SignificantEventsTuningConfig,
 } from '@kbn/significant-events-schema';
-import { useDeveloperMode } from '../hooks/use_developer_mode';
+import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import { useKibana } from '../../hooks/use_kibana';
-import { useBlocksNewActivity } from '../hooks/use_significant_events_maintenance';
+import { useBlocksNewActivity } from '../../data/maintenance/use_significant_events_maintenance';
 import { getFormattedError } from '../../common/errors';
 import { configToAnnotatedYaml } from './significant_events_tuning_config_editor';
 import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';

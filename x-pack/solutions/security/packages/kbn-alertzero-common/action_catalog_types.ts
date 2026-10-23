@@ -28,7 +28,7 @@ export interface ActionCatalogEntry {
   description?: string;
   category?: ActionCategory;
   impact?: ActionImpact;
-  approvalPolicy?: ActionApprovalPolicy;
+  approvalPolicy: ActionApprovalPolicy;
   /**
    * Subject kinds the action acts on, normalized to a list from
    * `actionMetadata.subject`. Absent when the definition declares none; the

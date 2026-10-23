@@ -356,3 +356,49 @@ describe('billing unit', () => {
     expect(drive([{ own: usage(10_000), folded: usage(10_000), paused: true }])).toEqual([]);
   });
 });
+
+describe('round attribution', () => {
+  const report = (
+    attribution: { workflowExecutionId?: string },
+    roundParts: Partial<ConversationRound> = {}
+  ) => {
+    const analyticsService = {
+      reportExecutionComplete: jest.fn(),
+      reportRoundComplete: jest.fn(),
+    };
+    reportRoundTelemetry({
+      event: completeEvent({ round: round(roundParts) }),
+      conversation: conversation({ schema_version: CONVERSATION_SCHEMA_VERSION }),
+      agentId: 'agent-1',
+      executionId: 'execution-0',
+      ...attribution,
+      modelProvider: 'OpenAI' as never,
+      meteringService: { reportExecution: jest.fn().mockResolvedValue(undefined) } as never,
+      analyticsService: analyticsService as never,
+      logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as never,
+    });
+    return analyticsService;
+  };
+
+  it('passes the workflow execution id through to the round event', () => {
+    expect(
+      report({ workflowExecutionId: 'workflow-run-1' }).reportRoundComplete
+    ).toHaveBeenCalledWith(expect.objectContaining({ workflowExecutionId: 'workflow-run-1' }));
+  });
+
+  it('keeps the workflow execution id off the execution event', () => {
+    const [[call]] = report({ workflowExecutionId: 'workflow-run-1' }).reportExecutionComplete.mock
+      .calls;
+
+    expect(call).not.toHaveProperty('workflowExecutionId');
+  });
+
+  it('sends no round event, and so no id, for a paused round', () => {
+    const analyticsService = report(
+      { workflowExecutionId: 'workflow-run-1' },
+      { status: ConversationRoundStatus.awaitingPrompt, response: { message: '' } }
+    );
+
+    expect(analyticsService.reportRoundComplete).not.toHaveBeenCalled();
+  });
+});

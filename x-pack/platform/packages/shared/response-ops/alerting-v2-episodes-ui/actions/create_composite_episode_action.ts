@@ -12,7 +12,6 @@ import type { AlertEpisode } from '../queries/episodes_query';
 import type { EpisodeActionExtension } from '../types/episode_data_source';
 import type { EpisodeAction } from './types';
 import { executeCompositeAction } from './execute_composite_action';
-import * as i18n from './translations';
 
 export interface CompositeActionDef {
   id: string;
@@ -47,17 +46,14 @@ export const createCompositeEpisodeAction = (
       const eligible = episodes.filter(isEligible);
       if (!eligible.length) return;
 
-      try {
-        await executeCompositeAction({
-          episodes: eligible,
-          nativeExecute: def.execute,
-          extension,
-          deps,
-        });
-        onSuccess?.();
-      } catch {
-        deps.notifications.toasts.addDanger(i18n.BULK_ERROR_TOAST);
-      }
+      await executeCompositeAction({
+        episodes: eligible,
+        nativeExecute: def.execute,
+        extension,
+        actionName: def.displayName,
+        onSuccess,
+        deps,
+      });
     },
   };
 };

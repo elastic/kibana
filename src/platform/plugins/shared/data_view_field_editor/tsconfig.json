@@ -8,7 +8,8 @@
     "__jest__/**/*",
     "common/**/*",
     "public/**/*",
-    "server/**/*"
+    "server/**/*",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -31,6 +32,8 @@
     "@kbn/css-utils",
     "@kbn/field-formats-common",
     "@kbn/ui-callout",
+    "@kbn/scout",
+    "@kbn/core-http-common",
   ],
   "exclude": ["target/**/*"]
 }

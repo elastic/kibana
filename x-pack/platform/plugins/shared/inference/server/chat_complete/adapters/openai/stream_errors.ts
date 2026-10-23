@@ -35,12 +35,15 @@ export interface UnknownErrorLine {
 
 export type ErrorLine = OpenAIErrorLine | ElasticInferenceErrorLine | UnknownErrorLine;
 
-export const convertStreamError = ({ error }: ErrorLine) => {
+export const convertStreamError = (line: ErrorLine) => {
+  const { error } = line;
+  // keep the HTTP status when present so non-retryable failures are not retried
+  const statusCode = 'status' in line ? line.status : undefined;
   if ('message' in error) {
-    return convertUpstreamError(error.message);
+    return convertUpstreamError(error.message, { statusCode });
   } else if ('reason' in error) {
-    return convertUpstreamError(`${error.type} - ${error.reason}`);
+    return convertUpstreamError(`${error.type} - ${error.reason}`, { statusCode });
   } else {
-    return convertUpstreamError(JSON.stringify(error));
+    return convertUpstreamError(JSON.stringify(error), { statusCode });
   }
 };

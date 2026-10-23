@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import { useNodeExpandPopover } from './use_node_expand_popover';
 import type { NodeProps, NodeViewModel } from '../../types';
+import type { GraphTelemetryHandler } from '../../graph_telemetry';
 import { GRAPH_NODE_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
 import {
   getEntityExpandItems,
@@ -45,12 +46,14 @@ import {
  *                  identity fields. Supplied by the consumer (async-hydrated via
  *                  `useEntityStoreEuidApi()`); until it resolves, filters fall back to the
  *                  unnarrowed sourceFields.
+ * @param onTelemetryEvent - Optional callback invoked when the user triggers a popover action.
  * @returns The entity node expand popover.
  */
 export const useEntityNodeExpandPopover = (
   scopeId: string,
   onOpenEventPreview?: (node: NodeViewModel) => void,
-  euidApi?: EuidFilterApi
+  euidApi?: EuidFilterApi,
+  onTelemetryEvent?: GraphTelemetryHandler
 ) => {
   const itemsFn = useCallback(
     (node: NodeProps) => {
@@ -86,6 +89,12 @@ export const useEntityNodeExpandPopover = (
         toggleEntityFilter: (role, action) => {
           const spec = specByRole[role];
           if (!spec) return;
+          onTelemetryEvent?.({
+            type: 'node_action',
+            nodeType: 'entity',
+            action: role === 'actor' ? 'show_actions_by' : 'show_actions_on',
+            state: action,
+          });
           toggleEntityFilterSpec(scopeId, filterKey(role), spec, role, action);
 
           if (action === 'show') {
@@ -110,6 +119,12 @@ export const useEntityNodeExpandPopover = (
         toggleRelatedEvents: (action) => {
           const related = getRelatedEventsFilter(node.id, sourceFields, engineType);
           if (!related) return;
+          onTelemetryEvent?.({
+            type: 'node_action',
+            nodeType: 'entity',
+            action: 'show_related_events',
+            state: action,
+          });
           if (related.values.length === 1) {
             emitFilterToggle(scopeId, related.field, related.values[0], action);
           } else {
@@ -126,7 +141,20 @@ export const useEntityNodeExpandPopover = (
       return getEntityExpandItems({
         nodeId: node.id,
         entityFilterActions,
-        onShowEntityDetails: onOpenEventPreview ? () => onOpenEventPreview(node.data) : undefined,
+        onShowEntityDetails: onOpenEventPreview
+          ? () => {
+              onTelemetryEvent?.(
+                isGroupedEntities
+                  ? {
+                      type: 'node_action',
+                      nodeType: 'grouped_entity',
+                      action: 'show_grouped_entities',
+                    }
+                  : { type: 'node_action', nodeType: 'entity', action: 'show_details' }
+              );
+              onOpenEventPreview(node.data);
+            }
+          : undefined,
         shouldRender: {
           // Entity relationships only for single-entity mode when full feature set is active
           showEntityRelationships: isSingleEntity && onOpenEventPreview !== undefined,
@@ -142,6 +170,12 @@ export const useEntityNodeExpandPopover = (
         isEntityRelationshipsExpanded: isEntityRelationshipExpandedForScope(scopeId, node.id),
         isInitialEntity,
         toggleEntityRelationships: (action) => {
+          onTelemetryEvent?.({
+            type: 'node_action',
+            nodeType: 'entity',
+            action: 'show_entity_relationships',
+            state: action,
+          });
           emitEntityRelationshipToggle(scopeId, node.id, action);
           emitPinnedEuidToggle(scopeId, node.id, action);
         },
@@ -149,7 +183,7 @@ export const useEntityNodeExpandPopover = (
         showEntityDetailsDisabled: isSingleEntity && !isEnriched,
       });
     },
-    [scopeId, onOpenEventPreview, euidApi]
+    [scopeId, onOpenEventPreview, euidApi, onTelemetryEvent]
   );
 
   return useNodeExpandPopover({
