@@ -21,15 +21,18 @@
       "dataViews",
       "uiActions",
       "unifiedSearch",
+      "presentationUtil",
       "usageCollection"
     ],
     "optionalPlugins": [
-      "home"
+      "home",
+      "savedObjectsTaggingOss"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
-      "visDefaultEditor"
+      "visDefaultEditor",
+      "savedObjects"
     ],
     "extraPublicDirs": ["common"]
   }

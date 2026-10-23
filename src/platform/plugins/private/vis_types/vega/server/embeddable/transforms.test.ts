@@ -10,8 +10,8 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
-import type { VegaByValueState } from './schema';
-import { getTransforms, type StoredVegaState } from './transforms';
+import type { VegaByReferenceState, VegaByValueState } from './schema';
+import { getTransforms, type StoredVegaByValueState, type StoredVegaState } from './transforms';
 
 const drilldownReference: SavedObjectReference = {
   name: 'drilldown_0',
@@ -38,6 +38,13 @@ const panelFilter: NonNullable<VegaByValueState['filters']>[number] = {
 describe('Vega embeddable transforms', () => {
   const logger = loggingSystemMock.createLogger();
   const { transformIn, transformOut } = getTransforms(drilldownTransforms, logger);
+  // Only by-value panels have a query and filters.
+  const transformByValueIn = (state: VegaByValueState) => {
+    const { state: storedState, references } = transformIn(state);
+    return { state: storedState as StoredVegaByValueState, references };
+  };
+  const transformByValueOut = (...args: Parameters<typeof transformOut>) =>
+    transformOut(...args) as VegaByValueState;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -45,7 +52,7 @@ describe('Vega embeddable transforms', () => {
 
   it('moves panel filter data views into references and restores them on read', () => {
     const query: VegaByValueState['query'] = { language: 'kql', expression: 'bytes > 1000' };
-    const { state: storedState, references } = transformIn({
+    const { state: storedState, references } = transformByValueIn({
       spec,
       query,
       filters: [panelFilter],
@@ -69,14 +76,14 @@ describe('Vega embeddable transforms', () => {
       ...reference,
       id: 'imported-data-view',
     }));
-    const apiState = transformOut(storedState, renamedReferences);
+    const apiState = transformByValueOut(storedState, renamedReferences);
 
     expect(apiState.filters).toEqual([{ ...panelFilter, data_view_id: 'imported-data-view' }]);
     expect(apiState.query).toEqual(query);
   });
 
   it('keeps drilldown references alongside filter references', () => {
-    const { references } = transformIn({
+    const { references } = transformByValueIn({
       spec,
       filters: [panelFilter],
       drilldowns: [{ type: 'dashboard_drilldown' }],
@@ -89,21 +96,39 @@ describe('Vega embeddable transforms', () => {
   });
 
   it('passes panels without filters through unchanged', () => {
-    const { state: storedState, references } = transformIn({ spec } as VegaByValueState);
+    const { state: storedState, references } = transformByValueIn({ spec } as VegaByValueState);
 
     expect(references).toEqual([]);
     expect(storedState.filters).toBeUndefined();
-    expect(transformOut(storedState, references)).toEqual(expect.objectContaining({ spec }));
-    expect(transformOut(storedState, references).filters).toBeUndefined();
+    expect(transformByValueOut(storedState, references)).toEqual(expect.objectContaining({ spec }));
+    expect(transformByValueOut(storedState, references).filters).toBeUndefined();
+  });
+
+  it('moves the library item ID of a by-reference panel into a reference and restores it on read', () => {
+    const byReferenceState = {
+      ref_id: 'library-item',
+      title: 'Panel title',
+      time_range: { from: 'now-7d', to: 'now' },
+      drilldowns: [{ type: 'dashboard_drilldown' }],
+    } as unknown as VegaByReferenceState;
+
+    const { state: storedState, references } = transformIn(byReferenceState);
+
+    expect(storedState).not.toHaveProperty('ref_id');
+    expect(references).toEqual([
+      { name: 'savedObjectRef', type: 'vega', id: 'library-item' },
+      drilldownReference,
+    ]);
+    expect(transformOut(storedState, references)).toEqual(byReferenceState);
   });
 
   it('keeps filters and logs a warning when a filter reference is missing', () => {
-    const { state: storedState } = transformIn({
+    const { state: storedState } = transformByValueIn({
       spec,
       filters: [panelFilter],
     } as VegaByValueState);
 
-    const apiState = transformOut(storedState, []);
+    const apiState = transformByValueOut(storedState, []);
 
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Unable to transform filter and query state on read')

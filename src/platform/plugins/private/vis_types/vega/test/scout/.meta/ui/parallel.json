@@ -1,9 +1,20 @@
 {
-  "sha1": "2b8133c24019be81704bf97ed099b8f8d575391d",
+  "sha1": "9bb0232607f140d9f76917d84da9da7e343bbf71",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "fb6a28fdbf970dc-afb747e911dd160",
+      "title": "Enable the Vega feature flags",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 8,
+        "column": 1
+      }
+    },
     {
       "id": "fb6a28fdbf970dc-91c1b7602a9ab49",
       "title": "Setup Vega tests data",
@@ -11,8 +22,8 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 8,
-        "column": 1
+        "line": 17,
+        "column": 26
       }
     },
     {
@@ -39,6 +50,95 @@
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/embedded_vega_search_cancellation.spec.ts",
         "line": 46,
         "column": 9
+      }
+    },
+    {
+      "id": "bcc36143cd273ab-b6ada381ff7bd89",
+      "title": "Vega panels linked to the library adds a library item, unlinks it and saves it back to the library",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_dashboard_library.spec.ts",
+        "line": 55,
+        "column": 33
+      }
+    },
+    {
+      "id": "bcc36143cd273ab-e4d22952f8c7270",
+      "title": "Vega panels linked to the library edits the library item of a linked panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_dashboard_library.spec.ts",
+        "line": 63,
+        "column": 36
+      }
+    },
+    {
+      "id": "7b072b0731322c3-0fb51082617176b",
+      "title": "Vega library editor saves changes to an existing item in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
+        "line": 45,
+        "column": 40
+      }
+    },
+    {
+      "id": "7b072b0731322c3-ff733218948dadc",
+      "title": "Vega library editor saves a copy and leaves the original unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
+        "line": 86,
+        "column": 26
+      }
+    },
+    {
+      "id": "7b072b0731322c3-762274f3cb1fcb4",
+      "title": "Vega library editor asks before discarding changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
+        "line": 85,
+        "column": 5
+      }
+    },
+    {
+      "id": "7b072b0731322c3-658cbadaeb2b5e3",
+      "title": "Vega library editor opens a read only editor that cannot be saved",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
+        "line": 105,
+        "column": 14
+      }
+    },
+    {
+      "id": "824a1c0d9b29284-e20f893877d4a0a",
+      "title": "Reset the Vega feature flags",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]

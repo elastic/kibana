@@ -12,7 +12,11 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { mockGetDrilldownsSchema } from '@kbn/embeddable-plugin/server/mocks';
 import { VisTypeVegaPlugin } from './plugin';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
+import {
+  VEGA_API_ENABLED_FLAG,
+  VEGA_EMBEDDABLE_TYPE,
+  VEGA_STANDALONE_EMBEDDABLE_FLAG,
+} from '../common/constants';
 
 describe('VisTypeVegaPlugin (server)', () => {
   test('registers a server definition for vega', async () => {
@@ -79,5 +83,30 @@ describe('VisTypeVegaPlugin (server)', () => {
     expect(() => schema!.parse({ spec: '' })).toThrow();
     expect(() => schema!.parse({ spec: { format: 'hjson', value: '' } })).toThrow();
     expect(() => schema!.parse({ spec: { format: 'json', value: 'not-an-object' } })).toThrow();
+    expect(() => schema!.parse({ ref_id: 'library-item' })).toThrow();
+  });
+
+  test('accepts by-reference panels when vega.apiEnabled is also enabled', async () => {
+    const initializerContext = coreMock.createPluginInitializerContext();
+    const coreSetup = coreMock.createSetup();
+    const coreStart = coreMock.createStart();
+    coreStart.featureFlags.getBooleanValue$.mockImplementation((key, fallback) =>
+      of(key === VEGA_STANDALONE_EMBEDDABLE_FLAG || key === VEGA_API_ENABLED_FLAG ? true : fallback)
+    );
+    coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
+
+    const embeddable = createEmbeddableSetupMock();
+    const plugin = new VisTypeVegaPlugin(initializerContext);
+    plugin.setup(coreSetup, { embeddable });
+    await new Promise(process.nextTick);
+
+    const [, serverDefinition] = embeddable.registerEmbeddableServerDefinition.mock.calls[0];
+    const schema = serverDefinition.getSchema(mockGetDrilldownsSchema);
+    const query = { language: 'kql', expression: 'bytes > 1000' };
+
+    // The library item owns the query and filters.
+    expect(schema!.parse({ ref_id: 'library-item', query })).toEqual({ ref_id: 'library-item' });
+    expect(schema!.parse({ spec: { format: 'hjson', value: '{}' } })).toHaveProperty('spec');
+    expect(() => schema!.parse({})).toThrow();
   });
 });

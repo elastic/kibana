@@ -188,6 +188,20 @@ describe('VegaEditorFlyout', () => {
     );
   });
 
+  it('cannot be saved with more than 100 filters', async () => {
+    renderFlyout({
+      initialFilters: Array.from({ length: 101 }, () => ({
+        meta: {},
+        query: { match_all: {} },
+      })),
+    });
+
+    fireEvent.click(await screen.findByText('changeSpec'));
+
+    expect(screen.getByTestId('vegaEditorTooManyFiltersCallout')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Apply and close' })).toBeDisabled();
+  });
+
   it('does not enable saving when filters only differ in display metadata', async () => {
     const { api, getSearchBarProps } = renderFlyout({
       initialFilters: [

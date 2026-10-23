@@ -10,6 +10,7 @@
 import { z, displayName, description, searchFilter } from '@kbn/zod';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { asCodeQuerySchema, getAsCodeTagsSchema } from '@kbn/as-code-shared-schemas';
+import { VEGA_MAX_FILTERS } from '../../common/constants';
 
 export const vegaSpecSchema = z
   .discriminatedUnion('format', [
@@ -47,7 +48,7 @@ export const vegaQuerySchema = asCodeQuerySchema
   })
   .optional();
 
-export const vegaFiltersSchema = z.array(asCodeFilterSchema).max(100).optional();
+export const vegaFiltersSchema = z.array(asCodeFilterSchema).max(VEGA_MAX_FILTERS).optional();
 
 export const vegaLibraryItemSchema = z
   .object({
