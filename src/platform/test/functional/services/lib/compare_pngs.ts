@@ -108,7 +108,10 @@ export async function comparePngs(
     }
   );
 
-  const diffRatio = mismatchedPixels / (testWidth * testHeight);
+  // Pixels outside the compared region exist in only one of the images, so they count as mismatched.
+  const largestArea = Math.max(sessionWidth * sessionHeight, baselineWidth * baselineHeight);
+  const croppedPixels = largestArea - testWidth * testHeight;
+  const diffRatio = (mismatchedPixels + croppedPixels) / largestArea;
 
   log.debug(`percent different (ratio): ${diffRatio}`);
   if (diffRatio > 0) {
