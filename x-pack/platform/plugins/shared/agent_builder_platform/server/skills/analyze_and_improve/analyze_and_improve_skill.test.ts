@@ -211,7 +211,7 @@ describe('analyzeAndImproveSkill', () => {
       expect(catalog).toMatch(
         /\*\*A keyword key with many rows per value in one index\*\*[^*]*→ Cumulative/
       );
-      expect(catalog).toMatch(/a second index, it is a custom workflow built through a subagent/);
+      expect(catalog).toMatch(/a second index, it needs a workflow/);
       expect(catalog).toMatch(
         /\*\*Several sources the agent must route between or join\*\*[^*]*→ Index\/Table Metadata over all of them, in one install/
       );

@@ -38,7 +38,7 @@ describe('Context Engine agent instructions', () => {
 
     it('keeps tool names, parameters and mechanics out of what the user reads', () => {
       expect(instructions).toMatch(
-        /Never name tools, parameters, skills, subagents or attachments, and never quote the ids and flags a tool returns/
+        /Never name tools, parameters, skills or attachments, and never quote the ids and flags a tool returns/
       );
       expect(instructions).toMatch(/Do not narrate your reasoning or announce each step/);
     });
@@ -84,9 +84,6 @@ describe('Context Engine agent instructions', () => {
         /Without an attached AI index, do not attempt to persist changes/
       );
       expect(instructions).toMatch(
-        /when you are working from a brief handed to you as a subagent, the brief is your authority/
-      );
-      expect(instructions).toMatch(
         /Saving or running the automation itself stays with the conversation that has the attachment/
       );
     });
@@ -125,19 +122,21 @@ describe('Context Engine agent instructions', () => {
       expect(instructions).toMatch(
         /Index\/Table Metadata is not that default: it is the strategy for routing between or joining several sources/
       );
-      expect(instructions).toMatch(
-        /A strategy built through a subagent still stops at the checkpoint before a subagent/
-      );
     });
 
     it('asks for intent where it cannot be inferred', () => {
       expect(instructions).toMatch(/where the answer is new coverage, ask which strategy/);
       expect(instructions).toContain(`\`${internalTools.askUserQuestion}\``);
-      expect(instructions).toMatch(/name the unit and what one KI should carry/);
-      expect(instructions).toMatch(/not forced into the nearest one/);
       expect(instructions).toMatch(
         /may want new coverage, may want something that is not working fixed/
       );
+    });
+
+    it('offers only the four template strategies, with no custom-workflow option', () => {
+      expect(instructions).toMatch(
+        /Offer only the four strategies with a template as options — Index\/Table Metadata, Bottom-Up, Cumulative \/ Wiki-style and Targeted KI — and nothing else/
+      );
+      expect(instructions).not.toMatch(/something else/);
     });
 
     it('asks before the build and not before the save or the run', () => {
@@ -148,7 +147,7 @@ describe('Context Engine agent instructions', () => {
       expect(instructions).toMatch(/The question you owed was the one before the build/);
     });
 
-    it('installs template strategies directly, without a subagent or YAML', () => {
+    it('installs template strategies directly, without drafting YAML', () => {
       expect(instructions).toContain(`\`${CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID}\``);
       expect(instructions).toMatch(/do not pass an id, and do not draft YAML for them/);
       expect(instructions).toMatch(
@@ -160,22 +159,15 @@ describe('Context Engine agent instructions', () => {
       expect(instructions).not.toMatch(/rather than adding a second one/);
     });
 
-    it('gates every subagent handoff on a confirmed plan in the proposal shape, grounded in queries', () => {
-      expect(instructions).toMatch(/Always ask again before handing anything to a subagent/);
-      expect(instructions).toMatch(/naming the automation being replaced/);
+    it('sends anything the templates cannot build to the Workflow editor, not to this conversation', () => {
+      expect(instructions).toMatch(/Everything else is out of scope here/);
       expect(instructions).toMatch(
-        /with its Evidence and Cost sections filled from queries you ran/
+        /Do not draft workflow YAML yourself and do not try to author one through any other tool/
       );
-      expect(instructions).toMatch(/Propose values rather than asking for them/);
-      expect(instructions).toMatch(/Lay the plan out in chat before it/);
-      expect(instructions).toMatch(/rather than from the mapping/);
-    });
-
-    it('saves the piloted yaml rather than a regenerated definition', () => {
+      expect(instructions).toMatch(/tell them to build the workflow in the Workflow editor/);
       expect(instructions).toContain(
-        `\`${CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID}\` with the YAML the subagent returned as \`workflowYaml\``
+        `\`${CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID}\` with its \`workflowId\` to attach it to the AI index`
       );
-      expect(instructions).toMatch(/Never re-generate the definition the subagent returned/);
     });
 
     it('leaves saving and running to their own dialogs, one tool each', () => {
@@ -213,21 +205,20 @@ describe('Context Engine agent instructions', () => {
 
     it('loads the automations skill before installing, saving or running, since it carries the run tool', () => {
       expect(instructions).toMatch(
-        /load `ai-index-automations` before you install, draft, save or run an automation/
+        /load `ai-index-automations` before you install, save or run an automation/
       );
     });
 
-    it('lists Targeted KIs with the templates rather than the subagent path', () => {
+    it('lists Targeted KIs with the templates, the only automations built in this conversation', () => {
       expect(instructions).toMatch(
-        /Cumulative \/ Wiki-style and Targeted KI automations do not go through a subagent/
+        /Cumulative \/ Wiki-style and Targeted KI automations are the only automations built in this conversation/
       );
     });
 
-    it('never starts a full run without the run dialog, but still lets a draft be piloted', () => {
+    it('never starts a full run without the run dialog', () => {
       expect(instructions).toMatch(
         /Never start the full run of an attached automation with `platform\.core\.execute_workflow`/
       );
-      expect(instructions).toMatch(/Piloting an unsaved draft on a handful of documents/);
     });
 
     it('treats an error or a declined dialog as no run, without retrying', () => {

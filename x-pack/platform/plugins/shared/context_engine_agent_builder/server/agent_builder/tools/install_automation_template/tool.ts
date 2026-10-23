@@ -373,7 +373,7 @@ export const createInstallAutomationTemplateTool = ({
   },
   description: dedent`
     Install an automation template on the Context Engine AI index attached to this conversation.
-    Do not pass an AI index id; do not write the YAML yourself; do not start a subagent.
+    Do not pass an AI index id; do not write the YAML yourself.
 
     IMPORTANT: install templates one at a time — never call this tool in parallel for the same AI
     index. Concurrent calls cause a "modified concurrently" error; always wait for each call to
