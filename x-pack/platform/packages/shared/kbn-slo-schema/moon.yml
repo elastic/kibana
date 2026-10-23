@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/zod-helpers'
   - '@kbn/router-to-openapispec'
+  - '@kbn/slo-constants'
 tags:
   - shared-common
   - package
