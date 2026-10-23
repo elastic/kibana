@@ -160,10 +160,6 @@ describe('M1/M2 CODE evaluator wiring (spec-level mutation proof)', () => {
   });
 
   it('M1-T2: an infra skip before any behaviour executed is INVALID, not recall 0', async () => {
-    // Connector/inference plumbing died (or the report text was missing)
-    // before the model ever ran: recall is undefined, not zero. Every reason
-    // in the infra set must null the cell; only genuinely model-chargeable
-    // skips may keep scoring.
     for (const reason of [
       'no_report_text',
       'no_inference',

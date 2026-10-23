@@ -6,19 +6,31 @@
  */
 
 import { evaluate as base } from '@kbn/evals';
-import { ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
+import {
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+} from '@kbn/alertzero-common';
 import { HuntWatchClient } from './harness/hunt_client';
 import { ensureHuntWorkerEnabled } from './harness/worker_setup';
 import { huntWatchSpaceId } from './harness/space';
 
 // Paths are inlined like the template suite (threat-intel-enrichment): packages
 // expose a single public entry point, so subpath imports into the plugins would
-// break that boundary. The feature id comes from @kbn/alertzero-common, the same
-// constant the hunt coordinator and behavior routes resolve their model from.
+// break that boundary. The feature ids come from @kbn/alertzero-common, the same
+// constants the hunt resolves its models from (HUNT_MODEL_TIERS in hunt_model_tiers.ts).
 const INFERENCE_SETTINGS_URL = '/internal/search_inference_endpoints/settings';
 const INFERENCE_FEATURES_URL = '/internal/search_inference_endpoints/features';
-export const HUNT_TIER_FEATURE_ID = ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID;
-const TIER_FEATURE_IDS = new Set<string>([HUNT_TIER_FEATURE_ID]);
+
+/**
+ * Every tier a hunt runs on, all pinned to the model under test. Efficient picks the
+ * Tier 2 datasets, so leaving it on the stack default would put a second model inside
+ * every recall score.
+ */
+export const HUNT_TIER_FEATURE_IDS: readonly string[] = [
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+];
+const TIER_FEATURE_IDS = new Set<string>(HUNT_TIER_FEATURE_IDS);
 
 const INTERNAL_API_HEADERS = {
   'elastic-api-version': '1',
@@ -43,15 +55,17 @@ interface InferenceFeaturesResponse {
 /**
  * The settings route stores any feature id without checking it is registered, so
  * a tier rename turns the pin into a silent no-op and every score belongs to the
- * stack default model. Fail the run instead: the feature must be registered, and
- * the stored pick for it must be the model under test.
+ * stack default model. Fail the run instead: every hunt tier must be registered,
+ * and the stored pick for each must be the model under test.
  */
 export const assertTierRegistered = (registeredFeatureIds: string[]): void => {
-  if (!registeredFeatureIds.includes(HUNT_TIER_FEATURE_ID)) {
+  const missing = HUNT_TIER_FEATURE_IDS.filter((id) => !registeredFeatureIds.includes(id));
+  if (missing.length > 0) {
     throw new Error(
-      `[hunt-watch] inference feature "${HUNT_TIER_FEATURE_ID}" is not registered on this stack ` +
-        `(registered: ${registeredFeatureIds.join(', ') || 'none'}). Pinning it would be a no-op ` +
-        `and the hunt would run on the stack default model, not the model under test.`
+      `[hunt-watch] inference feature(s) ${missing.map((id) => `"${id}"`).join(', ')} not ` +
+        `registered on this stack (registered: ${registeredFeatureIds.join(', ') || 'none'}). ` +
+        `Pinning would be a no-op and the hunt would run on the stack default model, not the ` +
+        `model under test.`
     );
   }
 };
@@ -63,23 +77,25 @@ export const assertTierPinned = ({
   features: InferenceFeatureSetting[];
   expected: string;
 }): void => {
-  const actual = features.find((f) => f.feature_id === HUNT_TIER_FEATURE_ID)?.endpoints[0]?.id;
-  if (actual !== expected) {
-    throw new Error(
-      `[hunt-watch] ${HUNT_TIER_FEATURE_ID} resolves to endpoint "${actual ?? 'none'}", not the ` +
-        `model under test "${expected}". Scores would be attributed to the wrong model.`
-    );
+  for (const featureId of HUNT_TIER_FEATURE_IDS) {
+    const actual = features.find((f) => f.feature_id === featureId)?.endpoints[0]?.id;
+    if (actual !== expected) {
+      throw new Error(
+        `[hunt-watch] ${featureId} resolves to endpoint "${actual ?? 'none'}", not the ` +
+          `model under test "${expected}". Scores would be attributed to the wrong model.`
+      );
+    }
   }
 };
 
 /**
  * Extends the base `@kbn/evals` fixture with:
- * - `modelSettingsForHuntWatch` (auto, worker-scoped): pins the AlertZero
- *   Frontier-tier Model Setting to the model under test, fails the run if the
- *   tier is not registered or the stored pick is not the model under test. The
- *   hunt coordinator and behavior routes resolve their model from that tier
- *   first and only then fall back to the stack defaults, so without this the
- *   run measures whatever the stack default is.
+ * - `modelSettingsForHuntWatch` (auto, worker-scoped): pins every AlertZero tier
+ *   the hunt runs on (Efficient and Frontier) to the model under test, fails the
+ *   run if a tier is not registered or its stored pick is not the model under
+ *   test. The hunt resolves each tier's model from these settings first and only
+ *   then falls back to the stack defaults, so without this the run measures
+ *   whatever the stack default is.
  * - `huntWorker` (worker-scoped): installs and enables the hunt Worker with a
  *   service account, and asserts it is enabled before any phase runs.
  * - `huntWatchClient` (worker-scoped): drives the SUT over real HTTP — the
@@ -98,7 +114,9 @@ export const evaluate = base.extend<
 >({
   modelSettingsForHuntWatch: [
     async ({ kbnClient, connector, log }, use) => {
-      log.info(`[hunt-watch] Pinning Model Settings ${HUNT_TIER_FEATURE_ID}=${connector.id}`);
+      log.info(
+        `[hunt-watch] Pinning Model Settings ${HUNT_TIER_FEATURE_IDS.join(', ')}=${connector.id}`
+      );
 
       const registered = await kbnClient.request<InferenceFeaturesResponse>({
         path: INFERENCE_FEATURES_URL,
@@ -108,7 +126,7 @@ export const evaluate = base.extend<
       assertTierRegistered((registered.data.features ?? []).map((f) => f.featureId));
 
       // PUT replaces the whole saved object, so read first and merge: keep every
-      // other feature pick and only overwrite the tier this suite drives.
+      // other feature pick and only overwrite the tiers this suite drives.
       const existing = await kbnClient.request<InferenceSettingsResponse>({
         path: INFERENCE_SETTINGS_URL,
         method: 'GET',
@@ -127,7 +145,10 @@ export const evaluate = base.extend<
         body: {
           features: [
             ...otherFeatures,
-            { feature_id: HUNT_TIER_FEATURE_ID, endpoints: [{ id: connector.id }] },
+            ...HUNT_TIER_FEATURE_IDS.map((featureId) => ({
+              feature_id: featureId,
+              endpoints: [{ id: connector.id }],
+            })),
           ],
         },
         headers: INTERNAL_API_HEADERS,

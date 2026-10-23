@@ -113,11 +113,7 @@ export const createSeededHitRecallTier2Evaluator = (): Evaluator<HuntExample, Hu
         `report class ${output.reportClass} carries no behavioural text; tier 2 not applicable`
       );
     }
-    // An infra skip (connector/inference plumbing, no report text, scoped-out
-    // input) aborted the run before any behaviour executed: the model never
-    // got a chance to recall, so the cell is INVALID, not recall 0. Only
-    // applies when nothing executed — a partial run with executed behaviours
-    // scores on those behaviours whatever the skip flag says.
+    // A partial run with executed behaviours scores on them whatever the skip flag says.
     const t2Skip = output.run.tier2_skipped_reason;
     const t2Executed = (output.run.behaviours ?? []).some((b) => b.executed);
     if (t2Skip && INFRA_T2_SKIP.has(t2Skip) && !t2Executed) {

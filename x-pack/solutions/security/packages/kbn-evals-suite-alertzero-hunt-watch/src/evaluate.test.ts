@@ -9,8 +9,16 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
-import { HUNT_TIER_FEATURE_ID, assertTierPinned, assertTierRegistered, evaluate } from './evaluate';
+import {
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+} from '@kbn/alertzero-common';
+import {
+  HUNT_TIER_FEATURE_IDS,
+  assertTierPinned,
+  assertTierRegistered,
+  evaluate,
+} from './evaluate';
 
 const INFERENCE_SETTINGS_URL = '/internal/search_inference_endpoints/settings';
 const INFERENCE_FEATURES_URL = '/internal/search_inference_endpoints/features';
@@ -51,7 +59,7 @@ interface PutBody {
 /** Stateful stand-in for the settings saved object: PUT replaces it, GET reads it back. */
 const makeKbnClient = ({
   previousTierFeatures,
-  registeredFeatureIds = [HUNT_TIER_FEATURE_ID],
+  registeredFeatureIds = [...HUNT_TIER_FEATURE_IDS],
 }: {
   previousTierFeatures: Feature[];
   registeredFeatureIds?: string[];
@@ -82,13 +90,24 @@ const makeKbnClient = ({
   };
 };
 
-describe('hunt tier feature id', () => {
-  it('is the tier the hunt coordinator and behavior routes resolve their model from', () => {
-    expect(HUNT_TIER_FEATURE_ID).toBe(ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID);
-    expect(HUNT_TIER_FEATURE_ID).toBe('alertzero_frontier');
+const HUNT_MODEL_TIERS_SOURCE = join(
+  __dirname,
+  '../../../plugins/alertzero/server/services/watches/hunt/common/hunt_model_tiers.ts'
+);
+
+const pinnedTo = (id: string): Feature[] =>
+  HUNT_TIER_FEATURE_IDS.map((featureId) => ({ feature_id: featureId, endpoints: [{ id }] }));
+
+describe('hunt tier feature ids', () => {
+  it('are the Efficient and Frontier tiers, in that order', () => {
+    expect(HUNT_TIER_FEATURE_IDS).toEqual([
+      ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+      ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+    ]);
+    expect(HUNT_TIER_FEATURE_IDS).toEqual(['alertzero_efficient', 'alertzero_frontier']);
   });
 
-  it('is the feature hunt_models.ts resolves each hunt tier from', () => {
+  it('are the features hunt_models.ts resolves each hunt tier from', () => {
     const source = readFileSync(
       join(__dirname, '../../../plugins/alertzero/server/routes/hunt/lib/hunt_models.ts'),
       'utf8'
@@ -96,60 +115,78 @@ describe('hunt tier feature id', () => {
     expect(source).toContain('featureId: HUNT_MODEL_TIER_FEATURE_IDS[tier]');
   });
 
-  it('is the frontier entry HUNT_MODEL_TIER_FEATURE_IDS maps (hunt_model_tiers.ts)', () => {
-    const source = readFileSync(
-      join(
-        __dirname,
-        '../../../plugins/alertzero/server/services/watches/hunt/common/hunt_model_tiers.ts'
-      ),
-      'utf8'
+  it('cover every tier HUNT_MODEL_TIERS lists (hunt_model_tiers.ts)', () => {
+    const source = readFileSync(HUNT_MODEL_TIERS_SOURCE, 'utf8');
+    // A tier added to the hunt without a pin here would run on the stack default.
+    expect(source).toContain(
+      "HUNT_MODEL_TIERS: readonly HuntModelTier[] = ['efficient', 'frontier'];"
     );
+    expect(source).toContain('efficient: ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID');
     expect(source).toContain('frontier: ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID');
   });
 });
 
 describe('assertTierRegistered', () => {
-  it('passes when the tier is registered', () => {
-    expect(() => assertTierRegistered(['agent_builder', HUNT_TIER_FEATURE_ID])).not.toThrow();
+  it('passes when every hunt tier is registered', () => {
+    expect(() => assertTierRegistered(['agent_builder', ...HUNT_TIER_FEATURE_IDS])).not.toThrow();
   });
 
-  it('fails when the tier was renamed away, naming what is registered', () => {
+  it('fails when a tier was renamed away, naming what is registered', () => {
     expect(() => assertTierRegistered(['alertzero_efficient', 'alertzero_balanced'])).toThrow(
-      /"alertzero_frontier" is not registered.*alertzero_efficient, alertzero_balanced/
+      /"alertzero_frontier" not registered.*alertzero_efficient, alertzero_balanced/
+    );
+  });
+
+  it('fails when only Frontier is registered', () => {
+    expect(() => assertTierRegistered(['alertzero_frontier'])).toThrow(
+      /"alertzero_efficient" not registered/
     );
   });
 });
 
 describe('assertTierPinned', () => {
-  it('passes when the stored pick is the model under test', () => {
-    expect(() =>
-      assertTierPinned({
-        features: [{ feature_id: HUNT_TIER_FEATURE_ID, endpoints: [{ id: 'mut' }] }],
-        expected: 'mut',
-      })
-    ).not.toThrow();
+  it('passes when every tier stores the model under test', () => {
+    expect(() => assertTierPinned({ features: pinnedTo('mut'), expected: 'mut' })).not.toThrow();
   });
 
-  it('fails when the tier resolves to another endpoint or none', () => {
+  it('fails when a tier resolves to another endpoint or none', () => {
     expect(() =>
       assertTierPinned({
-        features: [{ feature_id: HUNT_TIER_FEATURE_ID, endpoints: [{ id: 'default' }] }],
+        features: [
+          { feature_id: 'alertzero_efficient', endpoints: [{ id: 'default' }] },
+          { feature_id: 'alertzero_frontier', endpoints: [{ id: 'mut' }] },
+        ],
         expected: 'mut',
       })
-    ).toThrow(/resolves to endpoint "default", not the model under test "mut"/);
+    ).toThrow(/alertzero_efficient resolves to endpoint "default", not the model under test "mut"/);
     expect(() => assertTierPinned({ features: [], expected: 'mut' })).toThrow(/endpoint "none"/);
+  });
+
+  it('fails when only Frontier is pinned', () => {
+    expect(() =>
+      assertTierPinned({
+        features: [{ feature_id: 'alertzero_frontier', endpoints: [{ id: 'mut' }] }],
+        expected: 'mut',
+      })
+    ).toThrow(/alertzero_efficient resolves to endpoint "none"/);
   });
 });
 
 describe('modelSettingsForHuntWatch', () => {
+  const previousTierFeatures: Feature[] = [
+    { feature_id: 'alertzero_efficient', endpoints: [{ id: 'old-efficient-endpoint' }] },
+    { feature_id: 'alertzero_frontier', endpoints: [{ id: 'old-frontier-endpoint' }] },
+  ];
+  const unrelated = {
+    feature_id: 'unrelated_feature',
+    endpoints: [{ id: 'pre-existing-endpoint' }],
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  test('pins the tier the product reads and restores the captured pick, keeping other picks', async () => {
-    const previousTierFeatures = [
-      { feature_id: HUNT_TIER_FEATURE_ID, endpoints: [{ id: 'old-frontier-endpoint' }] },
-    ];
+  test('pins every hunt tier and restores the captured picks, keeping other picks', async () => {
     const { kbnClient, puts } = makeKbnClient({ previousTierFeatures });
 
     await modelSettingsFixture()(
@@ -163,22 +200,17 @@ describe('modelSettingsForHuntWatch', () => {
     expect(putsBodies).toHaveLength(2); // pin + restore
 
     expect(putsBodies[0].body.features).toEqual([
-      { feature_id: 'unrelated_feature', endpoints: [{ id: 'pre-existing-endpoint' }] },
+      unrelated,
+      { feature_id: 'alertzero_efficient', endpoints: [{ id: 'model-under-test' }] },
       { feature_id: 'alertzero_frontier', endpoints: [{ id: 'model-under-test' }] },
     ]);
 
-    // Restore PUT writes back the captured previous pick (not defaults, not
+    // Restore PUT writes back the captured previous picks (not defaults, not
     // the pinned model) and keeps non-tier picks untouched.
-    expect(putsBodies[1].body.features).toEqual([
-      { feature_id: 'unrelated_feature', endpoints: [{ id: 'pre-existing-endpoint' }] },
-      { feature_id: 'alertzero_frontier', endpoints: [{ id: 'old-frontier-endpoint' }] },
-    ]);
+    expect(putsBodies[1].body.features).toEqual([unrelated, ...previousTierFeatures]);
   });
 
   test('restore still runs when the sweep body throws', async () => {
-    const previousTierFeatures = [
-      { feature_id: HUNT_TIER_FEATURE_ID, endpoints: [{ id: 'old-frontier-endpoint' }] },
-    ];
     const { kbnClient, puts } = makeKbnClient({ previousTierFeatures });
 
     await expect(
@@ -193,13 +225,21 @@ describe('modelSettingsForHuntWatch', () => {
     const putsBodies = puts();
     expect(putsBodies).toHaveLength(2);
     expect(putsBodies[1].method).toBe('PUT');
-    expect(putsBodies[1].body.features).toEqual([
-      { feature_id: 'unrelated_feature', endpoints: [{ id: 'pre-existing-endpoint' }] },
-      { feature_id: 'alertzero_frontier', endpoints: [{ id: 'old-frontier-endpoint' }] },
-    ]);
+    expect(putsBodies[1].body.features).toEqual([unrelated, ...previousTierFeatures]);
   });
 
-  test('fails before pinning, and never runs the sweep, when the tier is not registered', async () => {
+  test('restores to no pick when a tier had none before the suite', async () => {
+    const { kbnClient, puts } = makeKbnClient({ previousTierFeatures: [] });
+
+    await modelSettingsFixture()(
+      { kbnClient, connector: { id: 'model-under-test' }, log },
+      async () => {}
+    );
+
+    expect(puts()[1].body.features).toEqual([unrelated]);
+  });
+
+  test('fails before pinning, and never runs the sweep, when a tier is not registered', async () => {
     const { kbnClient, puts } = makeKbnClient({
       previousTierFeatures: [],
       registeredFeatureIds: ['alertzero_efficient', 'alertzero_balanced'],
