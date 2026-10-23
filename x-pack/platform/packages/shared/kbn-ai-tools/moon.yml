@@ -28,7 +28,6 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/traced-es-client'
   - '@kbn/zod'
-  - '@kbn/logging'
 tags:
   - shared-server
   - package
@@ -40,6 +39,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

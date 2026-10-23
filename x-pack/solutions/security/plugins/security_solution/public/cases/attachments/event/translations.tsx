@@ -29,16 +29,21 @@ export const NO_EVENTS_TITLE = i18n.translate('xpack.securitySolution.caseEvents
   defaultMessage: 'No Events Found',
 });
 
-export const ADD_TO_NEW_CASE = i18n.translate('xpack.securitySolution.caseEvents.addToNewCase', {
-  defaultMessage: 'Add to new case',
+export const SELECTED_EVENTS = (count: number) =>
+  i18n.translate('xpack.securitySolution.caseEvents.selectedEvents', {
+    defaultMessage: '{count} selected',
+    values: { count },
+  });
+
+export const REMOVE_EVENTS = i18n.translate('xpack.securitySolution.caseEvents.removeEvents', {
+  defaultMessage: 'Remove',
 });
 
-export const ADD_TO_EXISTING_CASE = i18n.translate(
-  'xpack.securitySolution.caseEvents.addToExistingCase',
-  {
-    defaultMessage: 'Add to existing case',
-  }
+export const SELECT_ALL_EVENTS = i18n.translate(
+  'xpack.securitySolution.caseEvents.selectAllEvents',
+  { defaultMessage: 'Select all events on this page' }
 );
+
 export const EVENT_COMMENT_LABEL_TITLE = i18n.translate(
   'xpack.securitySolution.cases.eventAttachment.eventCommentLabelTitle',
   {
@@ -72,7 +77,13 @@ export const REMOVED_EVENTS_LABEL_TITLE = (eventCount: number) =>
     values: { eventCount },
   });
 
-export const DELETE_EVENTS_SUCCESS_TITLE = (totalEvents: number) =>
+export const EVENTS_COUNT = (count: number) =>
+  i18n.translate('xpack.securitySolution.cases.eventAttachment.eventsCount', {
+    defaultMessage: '{count, plural, one {# event} other {# events}}',
+    values: { count },
+  });
+
+export const DELETE_EVENTS_SUCCESS_TOAST = (totalEvents: number) =>
   i18n.translate('xpack.securitySolution.cases.eventAttachment.deleteEventsSuccessTitle', {
     defaultMessage:
       'Deleted {totalEvents, plural, =1 {one} other {{totalEvents}}} {totalEvents, plural, =1 {event} other {events}}',

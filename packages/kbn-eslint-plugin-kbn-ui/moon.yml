@@ -16,7 +16,10 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   sourceRoot: packages/kbn-eslint-plugin-kbn-ui
-dependsOn: []
+dependsOn:
+  - '@kbn/repo-info'
+  - '@kbn/repo-packages'
+  - '@kbn/swc-register'
 tags:
   - shared-common
   - package
@@ -27,7 +30,7 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - oxlint_plugin.js
+    - rules/__fixtures__/*.mjs
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

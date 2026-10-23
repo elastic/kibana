@@ -16,9 +16,12 @@ env:
   LABEL_TO_OPTION: |
     {
       "kbn-evals": "6bf0df26",
-      "workstream:investigate-act": "45a6cbd6",
-      "Team:SigEvents": "a20a3c00",
-      "Feature:SigEvents": "a20a3c00"
+      "Feature: Nightshift Interfaces": "50665193",
+      "Feature: Nightshift UX": "6fffd57e",
+      "Feature: Nightshift Context Engine": "4f02c77b",
+      "Feature: Nightshift Investigation Engine": "45a6cbd6",
+      "Feature: Nightshift Remediation Engine": "9250ed50",
+      "Feature: Nightshift Detection Engine": "a20a3c00"
     }
 
 jobs:

@@ -374,6 +374,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.enableFooterInEmail=${enableFooterInEmail}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.alerting.invalidateApiKeysTask.removalDelay="1s"',
+          // Task Manager keeps the keys it granted queued for an hour by default, which is longer
+          // than any test can wait for a key to actually be revoked.
+          '--xpack.task_manager.invalidate_api_key_task.removalDelay="1s"',
           '--xpack.alerting.healthCheck.interval="1s"',
           '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
           `--xpack.alerting.rules.run.alerts.max=${maxAlerts}`,
@@ -393,7 +396,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...enabledRuleTypesSetting,
           ...emailMaximumBodyLengthSetting,
           ...ruleChangeTrackingSettings,
-          '--xpack.eventLog.logEntries=true',
+          '--xpack.eventLog.logEntries=false',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
             'actions:test.excluded',
           ])}`,
@@ -414,10 +417,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.task_manager.allow_reading_invalid_state=false',
           '--xpack.actions.queued.max=500',
           `--xpack.stack_connectors.enableExperimental=${JSON.stringify(experimentalFeatures)}`,
-          '--xpack.uptime.service.password=test',
-          '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
-          '--xpack.uptime.service.devUrl=mockDevUrl',
-          '--xpack.uptime.service.manifestUrl=mockDevUrl',
+          '--xpack.synthetics.service.password=test',
+          '--xpack.synthetics.service.username=localKibanaIntegrationTestsUser',
+          '--xpack.synthetics.service.devUrl=mockDevUrl',
+          '--xpack.synthetics.service.manifestUrl=mockDevUrl',
         ],
       },
       indexRefreshInterval,

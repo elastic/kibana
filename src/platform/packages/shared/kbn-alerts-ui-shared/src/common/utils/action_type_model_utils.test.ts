@@ -242,6 +242,43 @@ describe('action_type_model_utils', () => {
       expect(serializer?.(withoutAuthType)).toEqual(withoutAuthType);
     });
 
+    it('serializer strips selectedActions from config when null or undefined', () => {
+      const serializer = formModel().connectorForm?.serializer as
+        | LooseConnectorFormTransform
+        | undefined;
+
+      const withNull = {
+        name: 'My Connector',
+        config: { someField: 'value', selectedActions: null },
+        secrets: {},
+      };
+      const nullResult = serializer?.(withNull);
+      expect(nullResult?.config).toEqual({ someField: 'value' });
+      expect((nullResult?.config as Record<string, unknown>)?.selectedActions).toBeUndefined();
+
+      const withUndefined = {
+        name: 'My Connector',
+        config: { someField: 'value', selectedActions: undefined },
+        secrets: {},
+      };
+      const undefinedResult = serializer?.(withUndefined);
+      expect(undefinedResult?.config).toEqual({ someField: 'value' });
+      expect((undefinedResult?.config as Record<string, unknown>)?.selectedActions).toBeUndefined();
+    });
+
+    it('serializer preserves selectedActions in config when set to a non-empty array', () => {
+      const serializer = formModel().connectorForm?.serializer as
+        | LooseConnectorFormTransform
+        | undefined;
+
+      const withSelected = {
+        name: 'My Connector',
+        config: { someField: 'value', selectedActions: ['action1', 'action2'] },
+        secrets: {},
+      };
+      expect(serializer?.(withSelected)).toEqual(withSelected);
+    });
+
     it('deserializer merges config.authType into secrets when absent, preserves existing secrets.authType, or no-ops', () => {
       const deserializer = formModel().connectorForm?.deserializer as
         | LooseConnectorFormTransform
@@ -281,6 +318,33 @@ describe('action_type_model_utils', () => {
         secrets: { apiKey: 'secret' },
       };
       expect(deserializer?.(noAuthInConfig)).toEqual(noAuthInConfig);
+    });
+  });
+
+  describe('hideSettingsTitle', () => {
+    it('hides the generic settings heading for inbound-only connectors', () => {
+      const model = transformSpecToActionTypeModel(
+        {
+          metadata: {
+            id: '.inboundWebhook',
+            displayName: 'Inbound Webhook',
+            description: 'Test',
+            minimumLicense: 'gold',
+            supportedFeatureIds: ['workflows'],
+          },
+          schema: { type: 'object', properties: {} },
+          isTestable: false,
+        },
+        docLinks
+      );
+      expect(model.connectorForm?.hideSettingsTitle).toBe(true);
+    });
+
+    it('keeps the settings heading for outbound and dual spec connectors', () => {
+      expect(
+        transformSpecToActionTypeModel(minimalConnectorSpecForForm(), docLinks).connectorForm
+          ?.hideSettingsTitle
+      ).toBe(false);
     });
   });
 });

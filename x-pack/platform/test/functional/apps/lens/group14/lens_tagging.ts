@@ -58,6 +58,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await header.waitUntilLoadingHasFinished();
+      // From a dashboard, Save lives under the Save and return split button.
+      await lens.openSaveOptionsIfNeeded();
       await testSubjects.click('lnsApp_saveButton');
 
       await visualize.setSaveModalValues(lensTitle, {
@@ -67,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('savedObjectTagSelector');
       await testSubjects.click(`tagSelectorOption-action__create`);
 
-      expect(await tagManagement.tagModal.isOpened()).to.be(true);
+      await testSubjects.existOrFail('tagModalForm');
 
       await tagManagement.tagModal.fillForm(
         {
@@ -81,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
       );
 
-      expect(await tagManagement.tagModal.isOpened()).to.be(false);
+      await tagManagement.tagModal.waitUntilClosed();
       await testSubjects.click('confirmSaveSavedObjectButton');
       await common.waitForSaveModalToClose();
     });

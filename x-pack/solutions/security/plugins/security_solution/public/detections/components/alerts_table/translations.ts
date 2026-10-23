@@ -232,20 +232,6 @@ export const CLICK_TO_CHANGE_ALERT_STATUS = i18n.translate(
   }
 );
 
-export const ADD_TO_EXISTING_CASE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.addToCase',
-  {
-    defaultMessage: 'Add to existing case',
-  }
-);
-
-export const ADD_TO_NEW_CASE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.addToNewCase',
-  {
-    defaultMessage: 'Add to new case',
-  }
-);
-
 export const INVESTIGATE_BULK_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.addBulkToTimeline',
   {
@@ -367,36 +353,8 @@ export const REMOTE_DOCUMENT_ACTIONS_UNAVAILABLE = i18n.translate(
   }
 );
 
-export const WORKFLOW_START_SUCCESS_TOAST = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.workflow.start.success.toast',
-  {
-    defaultMessage: 'Workflow successfully started',
-  }
-);
-
-export const WORKFLOW_START_SUCCESS_BUTTON = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.workflow.start.success.button',
-  {
-    defaultMessage: 'View workflow execution',
-  }
-);
-
-export const WORKFLOW_START_FAILED_TOAST = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.workflow.start.failed.toast',
-  {
-    defaultMessage: 'Workflow failed to start',
-  }
-);
-
 export const CONTEXT_MENU_RUN_WORKFLOW = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.workflow.menu.run.workflow',
-  {
-    defaultMessage: 'Run workflow',
-  }
-);
-
-export const RUN_WORKFLOW_BUTTON = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.workflow.menu.run.workflow.button',
   {
     defaultMessage: 'Run workflow',
   }
@@ -406,5 +364,26 @@ export const SELECT_WORKFLOW_PANEL_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.workflow.select.title',
   {
     defaultMessage: 'Select workflow',
+  }
+);
+
+export const REMOVE_FROM_CASE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.removeFromCase',
+  {
+    defaultMessage: 'Remove from case',
+  }
+);
+
+export const RUN_WORKFLOW_SELECTION_TOO_LARGE = (maxItems: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.alerts.workflow.selectionTooLarge', {
+    values: { maxItems },
+    defaultMessage:
+      'A workflow can run on up to {maxItems} items at a time. Narrow your selection to run a workflow.',
+  });
+
+export const RUN_WORKFLOW_SELECTION_FAILED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.workflow.selectionFailed',
+  {
+    defaultMessage: 'Could not load the selected alerts. Try again.',
   }
 );

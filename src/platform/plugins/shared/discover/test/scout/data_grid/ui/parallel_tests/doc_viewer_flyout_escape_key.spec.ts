@@ -84,7 +84,7 @@ spaceTest.describe(
         await page.keyboard.press('Escape');
         await expect(docViewer.getFlyout()).toBeVisible();
 
-        await page.keyboard.press('Tab');
+        await page.keyboard.press('Shift+Tab');
         await page.keyboard.press('Escape');
         await expect(docViewer.getFlyout()).toBeHidden();
       }

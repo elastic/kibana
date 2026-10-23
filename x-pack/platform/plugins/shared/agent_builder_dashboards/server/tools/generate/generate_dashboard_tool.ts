@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -17,19 +18,38 @@ import {
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 
-import { dashboardTools } from '../../../common';
-import { retrieveLatestVersion } from './attachment_state';
 import {
-  createVisPanelResolver,
-  executeDashboardOperations,
+  arrangeDashboardLayout,
+  executeDashboardUpsert,
   getErrorMessage,
-  hasValidCreateMetadataOperations,
-  dashboardOperationSchema,
-} from './core';
+  hasValidNewDashboardMetadata,
+  upsertDashboardSchema,
+  type DashboardValidator,
+} from '@kbn/dashboard-agent-authoring';
+import {
+  dashboardTools,
+  DASHBOARD_UPDATED_UI_EVENT,
+  type DashboardUpdatedUiEventData,
+} from '../../../common';
+import { retrieveLatestVersion } from './attachment_state';
+import { createAttachmentPanelResolver } from './resolvers/attachment_panel_resolver';
+import { createControlFieldCapabilitiesResolver } from './resolvers/control_field_capabilities_resolver';
+import { createLayoutArranger } from './layout_arranger';
+import { createPanelResolver } from './resolvers/panel_resolver';
 import { applyDefaultDashboardTimeRange } from './time_range';
 
-const newDashboardMetadataErrorMessage =
-  'New dashboards require a set_metadata operation with a non-empty title.';
+const newDashboardMetadataErrorMessage = 'New dashboards require a non-empty `title`.';
+
+const noDashboardCreatedErrorMessage =
+  'No dashboard was created because none of the requested panels or controls could be added (see metadata.failures). Fix the failures and call again without dashboardAttachmentId.';
+
+const noControlsAddedErrorMessage =
+  'No dashboard was created because none of the requested controls could be added: controls you add on your own are left out when their field is missing or does not suit the control. Add panels, or controls on suitable fields, and call again without dashboardAttachmentId.';
+
+/** Whether the dashboard has no panels and no controls. Empty sections do not count. */
+const isEmptyDashboard = ({ panels, pinned_panels: pinnedPanels }: DashboardAttachmentData) =>
+  panels.every((widget) => isSection(widget) && widget.panels.length === 0) &&
+  (pinnedPanels ?? []).length === 0;
 
 const generateDashboardSchema = z.object({
   dashboardAttachmentId: z
@@ -39,15 +59,26 @@ const generateDashboardSchema = z.object({
     .describe(
       '(optional) The id of the dashboard attachment to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
     ),
-  operations: z.array(dashboardOperationSchema).min(1),
+  ...upsertDashboardSchema.shape,
+  layout: z
+    .string()
+    .min(1)
+    .max(1000)
+    .optional()
+    .describe(
+      'The user\'s own arrangement or size request, in plain words, e.g. "make the table full width". Omit it otherwise: new, moved, and removed panels and sections are placed and sized automatically, so do not describe where your changes go. It arranges panels only within their section or the top level: to move a panel into or out of a section, set its `section` in `panels`.'
+    ),
 });
+
+const asString = (value: unknown): string | undefined =>
+  typeof value === 'string' ? value : undefined;
 
 /**
  * Compact projection of a dashboard payload, returned in the tool result.
  *
  * The full dashboard payload lives in the dashboard attachment (referenced by
  * id); the LLM only ever sees this slim summary, so it never has to re-emit the
- * heavy payload into a follow-up tool call.
+ * heavy payload into a follow-up tool call. Grids let it report where the layout step put panels.
  *
  * `authoringNotesByPanelId` holds the one-sentence note describing every chart
  * authored in this run, keyed by panel id. Panels that were not authored now
@@ -64,8 +95,8 @@ const summarizeDashboard = (
       return {
         id: widget.id,
         title: widget.title,
-        collapsed: widget.collapsed,
-        grid: widget.grid,
+        y: widget.grid.y,
+        ...(widget.collapsed ? { collapsed: true } : {}),
         panels: widget.panels.map((panel) => ({
           type: panel.type,
           id: panel.id,
@@ -81,35 +112,24 @@ const summarizeDashboard = (
       authoring_note: authoringNotesByPanelId.get(widget.id),
     };
   }),
-  controls: (dashboardData.pinned_panels ?? []).map((control) => {
-    const c = control as { id?: string; type?: string; config?: { title?: string } };
-    return { id: c.id, type: c.type, title: c.config?.title };
-  }),
+  controls: (dashboardData.pinned_panels ?? []).map(({ id, type, config }) => ({
+    id: asString(id),
+    type: asString(type),
+    title:
+      typeof config === 'object' && config !== null && 'title' in config
+        ? asString(config.title)
+        : undefined,
+  })),
 });
 
-const CUSTOM_CONTENT_TOOL_GUIDANCE = `
-8. add / edit custom content panels (\`source: "config"\`, \`type: "custom_content"\`) for HTML-based layouts that Lens and Vega cannot express, such as KPI scorecards with colored status badges, health/status boards, or panels that mix narrative text with live data values.
-
-**Custom content panel type selection:**
-Use custom content only as a last resort:
-- Any standard time series, bar, pie, metric, or data table → use Lens.
-- Scatter plots, faceted charts, layered charts, combination charts → use Vega.
-- Plain explanatory text with no data → use markdown.
-- The content needs an HTML/CSS layout no single Lens chart type can express, or mixes narrative text with live data, or the user explicitly asks for a custom/HTML panel → use custom content.
-
-**Creating a custom content panel:**
-- Set \`config.prompt\` to a concise description of what to display. Do not supply \`template\` on create — the embeddable generates a visually consistent HTML template using EUI color tokens for the active theme.
-- Optionally set \`config.esqlQuery\` when the panel needs live data.
-
-**Editing a custom content panel:**
-- Use \`edit_panels\` (\`source: "config"\`, \`type: "custom_content"\`) and set \`panelId\` to the target panel.
-- Always carry over \`prompt\`, \`template\`, and \`esqlQuery\` from the existing panel config — only modify the fields the user is changing.
-- Modify \`template\` in place (targeted edits, not a full rewrite) so the changes are consistent with the existing EUI color scheme. Omit \`template\` only if the user wants a full regeneration from the updated prompt.`;
+export interface GenerateDashboardToolDeps {
+  getDashboardValidator: () => Promise<DashboardValidator>;
+}
 
 /**
  * Kibana dashboard generation tool.
  *
- * Wraps the environment-agnostic {@link executeDashboardOperations} core with
+ * Wraps the environment-agnostic {@link executeDashboardUpsert} core with
  * Kibana attachment persistence so the LLM works against a lightweight reference:
  * - the prior payload is read server-side from `dashboardAttachmentId`,
  * - the generated payload is persisted as a `dashboard` attachment,
@@ -119,72 +139,152 @@ Use custom content only as a last resort:
  * the attachment id to render it rather than copying it into the next tool call.
  */
 export const generateDashboardTool = ({
-  customContentEnabled = true,
-}: { customContentEnabled?: boolean } = {}): BuiltinSkillBoundedTool<
-  typeof generateDashboardSchema
-> => {
+  getDashboardValidator,
+}: GenerateDashboardToolDeps): BuiltinSkillBoundedTool<typeof generateDashboardSchema> => {
   return {
     id: dashboardTools.generateDashboard,
     type: ToolType.builtin,
-    description: `Generate or update a dashboard from ordered operations.
+    description: `Create or update a dashboard by describing the desired changes, keyed by id.
 
 Persists the resulting dashboard as an attachment and returns its id plus a compact summary (not the full payload). Reference the returned attachment id to render the dashboard; do not copy the payload into follow-up tool calls.
 
-Use operations[] to:
-1. set metadata
-2. add panels (resolved panel configs, or Lens/Vega visualizations from a natural-language query — pick the engine with the panel "renderer" field; defaults to Lens)
-3. edit existing Lens, Vega, or markdown panel content
-4. update panel layouts without changing content
-5. add / remove sections, including inline section panels during add_section
-6. remove panels
-7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)${
-      customContentEnabled ? CUSTOM_CONTENT_TOOL_GUIDANCE : ''
-    }`,
+- \`title\`, \`description\`, \`time_range\`: dashboard fields to set.
+- \`sections\`: sections to create or update.
+- \`panels\`: panels to create, edit, or move between sections, by id. To change a panel's kind, remove it and add a new panel with a new id. Panel content is generated from a natural-language query (\`source: "request"\`; pick the engine with "renderer": Lens (default), Vega, or custom content for HTML-based layouts that Lens and Vega cannot express), authored by value (\`source: "config"\`: markdown or ML anomaly panels), or taken from an existing visualization attachment (\`source: "attachment"\`).
+- \`controls\`: interactive filters pinned above the dashboard (dropdown, range slider, or time slider) to add, or to replace by id.
+- \`remove\`: ids of panels, sections, or controls to remove.
+- \`layout\`: the user's own arrangement or size request. Omit it otherwise.
+
+Panel positions and sizes are set automatically after the changes are applied, and the summary shows the resulting \`grid\` of every panel. The result lists the ids the call created, updated and removed, so a mistyped id that created a new panel instead of updating one is visible. A panel only moved or resized by the layout step is not listed as updated.`,
     schema: generateDashboardSchema,
     handler: async (
-      { dashboardAttachmentId: previousAttachmentId, operations },
+      { dashboardAttachmentId: previousAttachmentId, layout, ...upsert },
       { logger, attachments, events, esClient, modelProvider }
     ) => {
       try {
         const latestVersion = retrieveLatestVersion(attachments, previousAttachmentId);
         const isNewDashboard = !latestVersion;
 
-        if (isNewDashboard && !hasValidCreateMetadataOperations(operations)) {
+        if (isNewDashboard && !hasValidNewDashboardMetadata(upsert)) {
           logger.error(newDashboardMetadataErrorMessage);
           return missingNewDashboardMetadataErrorResult;
         }
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
-
-        const { dashboardData, failures, panelAuthoringNotes } = await executeDashboardOperations({
+        const {
+          dashboardData: validatedDashboardData,
+          created,
+          updated,
+          removed,
+          failures,
+          panelAuthoringNotes,
+        } = await executeDashboardUpsert({
           dashboardData: latestVersion?.data,
-          operations,
+          upsert,
           logger,
-          resolvePanelContent: createVisPanelResolver({
+          resolvePanelContent: createPanelResolver({
             logger,
             modelProvider,
             events,
             esClient,
           }),
+          resolveAttachmentPanel: createAttachmentPanelResolver({ attachments }),
+          resolveControlFieldCapabilities: createControlFieldCapabilitiesResolver({
+            esClient: esClient.asCurrentUser,
+          }),
+          validator: await getDashboardValidator(),
         });
 
+        // The arranger checks its own output and writes only grids, so the result is not validated again.
+        const { dashboardData: generatedDashboardData, failure: layoutFailure } =
+          await arrangeDashboardLayout({
+            originalPanels: latestVersion?.data.panels ?? [],
+            dashboardData: validatedDashboardData,
+            instructions: layout,
+            arrangeLayout: createLayoutArranger({ modelProvider }),
+            logger,
+          });
+        if (layoutFailure) {
+          failures.push(layoutFailure);
+        }
+
+        const toDashboardResult = (
+          dashboardData: DashboardAttachmentData,
+          attachmentId: string,
+          version: number
+        ) => ({
+          results: [
+            {
+              type: ToolResultType.dashboard,
+              tool_result_id: getToolResultId(),
+              data: {
+                attachment_id: attachmentId,
+                version,
+                dashboard: summarizeDashboard(
+                  dashboardData,
+                  new Map(
+                    panelAuthoringNotes.map(({ panelId, authoringNote }) => [
+                      panelId,
+                      authoringNote,
+                    ])
+                  )
+                ),
+                created,
+                updated,
+                removed,
+                failures: failures.length > 0 ? failures : undefined,
+              },
+            },
+          ],
+        });
+
+        // None of the requested panels and controls were added, so no attachment version is
+        // persisted; the failures reach the agent through the tool result. Controls the agent
+        // added on its own are left out without a failure, so the failures can be empty.
+        const requestedContent = (upsert.panels?.length ?? 0) + (upsert.controls?.length ?? 0) > 0;
+        if (isNewDashboard && requestedContent && isEmptyDashboard(generatedDashboardData)) {
+          logger.info('Dashboard was not created because none of the changes were applied');
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  message:
+                    failures.length > 0
+                      ? noDashboardCreatedErrorMessage
+                      : noControlsAddedErrorMessage,
+                  metadata: { failures },
+                },
+              },
+            ],
+          };
+        }
+        if (latestVersion && isEqual(generatedDashboardData, latestVersion.data)) {
+          logger.info('Dashboard was not updated because it did not change');
+          return toDashboardResult(
+            generatedDashboardData,
+            dashboardAttachmentId,
+            latestVersion.version
+          );
+        }
+
         // Data-aware default time range computation
-        const finalDashboardData = await applyDefaultDashboardTimeRange({
-          dashboardData,
+        const dashboardData = await applyDefaultDashboardTimeRange({
+          dashboardData: generatedDashboardData,
           esClient,
           logger,
         });
 
-        const description = `Dashboard: ${finalDashboardData.title}`;
+        const description = `Dashboard: ${dashboardData.title}`;
         const attachment = isNewDashboard
           ? await attachments.add({
               id: dashboardAttachmentId,
               type: DASHBOARD_ATTACHMENT_TYPE,
               description,
-              data: finalDashboardData,
+              data: dashboardData,
             })
           : await attachments.update(dashboardAttachmentId, {
-              data: finalDashboardData,
+              data: dashboardData,
               description,
             });
 
@@ -194,28 +294,19 @@ Use operations[] to:
 
         logger.info(`Dashboard payload ${isNewDashboard ? 'generated' : 'updated'}`);
 
-        return {
-          results: [
-            {
-              type: ToolResultType.dashboard,
-              tool_result_id: getToolResultId(),
-              data: {
-                attachment_id: attachment.id,
-                version: attachment.current_version ?? 1,
-                dashboard: summarizeDashboard(
-                  finalDashboardData,
-                  new Map(
-                    panelAuthoringNotes.map(({ panelId, authoringNote }) => [
-                      panelId,
-                      authoringNote,
-                    ])
-                  )
-                ),
-                failures: failures.length > 0 ? failures : undefined,
-              },
+        events.sendUiEvent<typeof DASHBOARD_UPDATED_UI_EVENT, DashboardUpdatedUiEventData>(
+          DASHBOARD_UPDATED_UI_EVENT,
+          {
+            attachment: {
+              id: attachment.id,
+              type: DASHBOARD_ATTACHMENT_TYPE,
+              data: dashboardData,
+              origin: attachment.origin,
             },
-          ],
-        };
+          }
+        );
+
+        return toDashboardResult(dashboardData, attachment.id, attachment.current_version ?? 1);
       } catch (error) {
         const errorMessage = getErrorMessage(error);
         logger.error(`Error in generate_dashboard tool: ${errorMessage}`);
@@ -225,7 +316,7 @@ Use operations[] to:
               type: ToolResultType.error,
               data: {
                 message: `Failed to generate dashboard: ${errorMessage}`,
-                metadata: { dashboardAttachmentId: previousAttachmentId, operations },
+                metadata: { dashboardAttachmentId: previousAttachmentId },
               },
             },
           ],

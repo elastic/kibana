@@ -93,4 +93,4 @@ Example with CLI:
 node scripts/sync_logs.js --source-host=https://source:9200 --source-api-key=... --index-pattern="logs*" --size=100 --interval=5
 ```
 
-Required: `SOURCE_ELASTICSEARCH_HOST` and `SOURCE_ELASTICSEARCH_API_KEY` (or `--source-host` and `--source-api-key`). Destination is read from Kibana config (default `config/kibana.dev.yml`) or env; defaults to `http://localhost:9200` with basic auth `elastic`/`changeme`. Use `node scripts/sync_logs.js --help` for all options.
+Required: `SOURCE_ELASTICSEARCH_HOST` and `SOURCE_ELASTICSEARCH_API_KEY` (or `--source-host` and `--source-api-key`). Destination is read from Kibana config (default `config/kibana.dev.yml`) or env. A localhost dest is detected the same way as `scripts/kibana_api_common.sh`: `http://localhost:9200` and `https://localhost:9200` with `elastic:changeme` and `elastic_serverless:changeme` (local HTTPS skips TLS verify). Use `node scripts/sync_logs.js --help` for all options.

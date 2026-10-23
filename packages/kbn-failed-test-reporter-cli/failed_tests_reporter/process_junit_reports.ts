@@ -10,7 +10,7 @@
 import { addMessagesToReport } from './add_messages_to_report';
 import { getFailures } from './get_failures';
 import type { ProcessReportsParams } from './process_reports_types';
-import { createFailureIssue, updateFailureIssue } from './report_failure';
+import { createFailureIssue, updateFailureIssue, updateSuiteIssue } from './report_failure';
 import { reportFailuresToEs } from './report_failures_to_es';
 import { reportFailuresToFile } from './report_failures_to_file';
 import { getReportMessageIter } from './report_metadata';
@@ -24,6 +24,10 @@ import { getRootMetadata, readTestReport } from './test_report';
 // regardless (cheap: just a counter bump and a build link, and they carry real signal). Duplicate
 // classname+name entries (e.g. retry artifacts) are deduplicated and do not consume the slot.
 // See https://github.com/elastic/kibana/issues/278308.
+//
+// Failures the FTR marked as cascading are excluded from all of this: they are the hooks that a
+// Mocha timeout forced to fail on its way out, so they all describe the same event. Only the
+// failure that caused the abort reaches GitHub, the rest are listed on its report.
 
 export async function processJUnitReports(
   reportPaths: string[],
@@ -57,6 +61,7 @@ export async function processJUnitReports(
     const seenNewIssueKeys = new Set<string>();
     let newIssueCreated = false;
     let skippedNewFailures = 0;
+    let cascadingFailures = 0;
 
     for (const failure of failures) {
       const pushMessage = (msg: string) => {
@@ -75,6 +80,16 @@ export async function processJUnitReports(
         continue;
       }
 
+      if (failure.cascading) {
+        cascadingFailures += 1;
+        pushMessage(
+          'Failure is a consequence of an earlier Mocha timeout that aborted the config run, so an ' +
+            'issue was not created or updated. See the failure that caused the abort.'
+        );
+        failure.failureCount = 0;
+        continue;
+      }
+
       // Deduplicate by classname+name: retry artifacts can emit the same test twice in one XML.
       const key = `${failure.classname}\n${failure.name}`;
       if (seenNewIssueKeys.has(key)) {
@@ -82,6 +97,35 @@ export async function processJUnitReports(
         continue;
       }
       seenNewIssueKeys.add(key);
+
+      // a test tracked by a flaky suite issue gets its failures recorded there, not on an issue of its own
+      const suiteIssue = existingIssues.getSuiteIssueForFailure(failure);
+      if (suiteIssue) {
+        const { newBody, newCount } = await updateSuiteIssue(
+          buildUrl,
+          suiteIssue,
+          githubApi,
+          branch,
+          pipeline,
+          failure
+        );
+        const url = suiteIssue.github.htmlUrl;
+        // in dry-run nothing was written, so the next failure of the suite counts from the same body
+        if (updateGithub) {
+          suiteIssue.github.body = newBody;
+        }
+        failure.githubIssue = url;
+        failure.failureCount = updateGithub ? newCount : newCount - 1;
+        pushMessage(
+          `Test is tracked by a flaky suite issue with ${
+            newCount - 1
+          } failures on tracked branches: ${url}`
+        );
+        if (updateGithub) {
+          pushMessage(`Updated flaky suite issue: ${url} (fail count: ${newCount})`);
+        }
+        continue;
+      }
 
       const existingIssue = existingIssues.getForFailure(failure);
       if (existingIssue) {
@@ -94,7 +138,9 @@ export async function processJUnitReports(
           failure
         );
         const url = existingIssue.github.htmlUrl;
-        existingIssue.github.body = newBody;
+        if (updateGithub) {
+          existingIssue.github.body = newBody;
+        }
         failure.githubIssue = url;
         failure.failureCount = updateGithub ? newCount : newCount - 1;
         pushMessage(`Test has failed ${newCount - 1} times on tracked branches: ${url}`);
@@ -130,6 +176,14 @@ export async function processJUnitReports(
         failure.githubIssue = newIssue.html_url;
       }
       failure.failureCount = updateGithub ? 1 : 0;
+    }
+
+    if (cascadingFailures > 0) {
+      log.info(
+        `Ignored ${cascadingFailures} failure(s) in ${reportPath} that cascaded from an earlier ` +
+          `Mocha timeout aborting the config run. They are listed on the report of the failure ` +
+          `that caused the abort.`
+      );
     }
 
     if (skippedNewFailures > 0) {

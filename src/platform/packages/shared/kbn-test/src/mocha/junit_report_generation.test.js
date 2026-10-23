@@ -14,6 +14,7 @@ import { promisify } from 'util';
 import { parseString } from 'xml2js';
 import del from 'del';
 import Mocha from 'mocha';
+import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { getUniqueJunitReportPath } from '../report_path';
 
 import { setupJUnitReportGeneration } from './junit_report_generation';
@@ -133,5 +134,57 @@ describe('dev/mocha/junit report generation', () => {
       'system-out': ['-- logs are only reported for failed tests --'],
       skipped: [''],
     });
+  });
+
+  it('marks failures trailing a mocha timeout as cascading', async () => {
+    const xmlPath = getUniqueJunitReportPath(PROJECT_DIR, 'timeout');
+    const mocha = new Mocha({
+      reporter: function Runner(runner) {
+        setupJUnitReportGeneration(runner, {
+          reportName: 'timeout',
+          rootDirectory: PROJECT_DIR,
+        });
+      },
+    });
+
+    mocha.addFile(resolve(PROJECT_DIR, 'timeout.js'));
+    await new Promise((resolve) => mocha.run(resolve));
+    const report = await parseStringAsync(await readFile(xmlPath));
+
+    const [rootCause, cascading] = report.testsuites.testsuite[0].testcase;
+
+    expect(rootCause.failure[0]).toMatch(/Timeout of 1ms exceeded/);
+    expect(rootCause.$.name).toBe('TIMEOUT_SUITE "before all" hook: root cause for "never runs"');
+    expect(rootCause.$['cascading-failure']).toBeUndefined();
+
+    expect(cascading.failure[0]).toMatch(/Timeout of 1ms exceeded/);
+    expect(cascading.$.name).toBe('TIMEOUT_SUITE "after all" hook: cascading for "never runs"');
+    expect(cascading.$['cascading-failure']).toBe('true');
+  });
+
+  it('logs report generation errors without blocking the mocha run callback', async () => {
+    const log = new ToolingLog();
+    const writer = new ToolingLogCollectingWriter();
+    log.setWriters([writer]);
+
+    const mocha = new Mocha({
+      reporter: function Runner(runner) {
+        setupJUnitReportGeneration(runner, {
+          reportName: 'report_error',
+          rootDirectory: PROJECT_DIR,
+          getTestMetadata: () => {
+            throw new Error('FORCE_REPORT_FAIL');
+          },
+          log,
+        });
+      },
+    });
+
+    mocha.addFile(resolve(PROJECT_DIR, 'report_error.js'));
+    const failures = await new Promise((resolve) => mocha.run(resolve));
+
+    expect(failures).toBe(1);
+    expect(writer.messages[0]).toContain('Failed to write JUnit report [report_error]');
+    expect(writer.messages[1]).toContain('Error: FORCE_REPORT_FAIL');
   });
 });

@@ -1,0 +1,366 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import {
+  GLOBAL_SPACE_ID,
+  THREAT_INTEL_SOURCES_INDEX,
+  APPROVED_SOURCE_IDS,
+  type APPROVED_CATALOG_SOURCE_IDS,
+  type FetchAdapterType,
+} from '../../../common/threat_intel';
+
+/**
+ * Approved sources seeded into `.kibana-threat-intel-sources` on first boot.
+ *
+ * Fetch URLs live in `common/threat_intel/catalog_source_urls.ts`, not in the
+ * sources index. This fixed catalog contains Elastic Security Labs reporting,
+ * CISA advisories, and publications from the UK NCSC, CERT-FR, and CERT-EU.
+ * Operators can only list and enable / disable entries. CISA KEV is left out for
+ * MVP (see `APPROVED_CATALOG_SOURCE_IDS`); a previously seeded KEV row is disabled
+ * by `disableLegacySources` on the next boot like any other retired source.
+ */
+interface DefaultSource {
+  /**
+   * Typed against the approved id list so a seeded row outside the catalog fails
+   * to compile instead of being disabled again by `disableLegacySources` on every boot.
+   */
+  id: (typeof APPROVED_CATALOG_SOURCE_IDS)[number];
+  adapter_type: FetchAdapterType;
+  name: string;
+  tags: string[];
+  /**
+   * Declared default state. Reconciliation preserves an operator's later choice
+   * across boots.
+   */
+  enabled: boolean;
+}
+
+export const DEFAULT_SOURCES: readonly DefaultSource[] = [
+  {
+    id: 'vendor_api:elastic-security-labs',
+    adapter_type: 'rss',
+    name: 'Elastic Security Labs',
+    tags: ['vendor', 'elastic', 'research', 'research-tools'],
+    enabled: true,
+  },
+  {
+    id: 'rss:cisa-alerts',
+    adapter_type: 'rss',
+    name: 'CISA Alerts and Advisories',
+    tags: ['government', 'advisories', 'vulnerability', 'government-policy'],
+    enabled: true,
+  },
+  {
+    id: 'rss:uk-ncsc',
+    adapter_type: 'rss',
+    name: 'UK National Cyber Security Centre',
+    tags: ['government', 'uk', 'advisories', 'news'],
+    enabled: true,
+  },
+  {
+    id: 'rss:cert-fr-alerts',
+    adapter_type: 'rss',
+    name: 'CERT-FR Security Alerts',
+    tags: ['government', 'france', 'advisories', 'vulnerability'],
+    enabled: true,
+  },
+  {
+    id: 'rss:cert-fr-threats',
+    adapter_type: 'rss',
+    name: 'CERT-FR Threats and Incidents',
+    tags: ['government', 'france', 'research', 'threat-report'],
+    enabled: true,
+  },
+  {
+    id: 'rss:cert-eu-advisories',
+    adapter_type: 'rss',
+    name: 'CERT-EU Security Advisories',
+    tags: ['government', 'eu', 'advisories', 'vulnerability'],
+    enabled: true,
+  },
+  {
+    id: 'rss:cert-eu-threat-intelligence',
+    adapter_type: 'rss',
+    name: 'CERT-EU Threat Intelligence',
+    tags: ['government', 'eu', 'research', 'threat-report'],
+    enabled: true,
+  },
+];
+
+export interface SeedDefaultSourcesResult {
+  total: number;
+  created: number;
+  updated: number;
+  skipped: number;
+  failed: number;
+}
+
+interface StoredSource {
+  adapter_type?: string;
+  name?: string;
+  enabled?: boolean;
+  config?: { url?: string };
+  tags?: string[];
+  space_id?: string;
+  created_at?: string;
+}
+
+interface CatalogAction {
+  id: string;
+  kind: 'create' | 'index';
+}
+
+const buildDefaultSourceDocument = (src: DefaultSource, now: string) => ({
+  adapter_type: src.adapter_type,
+  name: src.name,
+  enabled: src.enabled,
+  tags: src.tags,
+  space_id: GLOBAL_SPACE_ID,
+  created_at: now,
+  updated_at: now,
+});
+
+const arraysEqual = (left: readonly string[] | undefined, right: readonly string[]): boolean =>
+  left?.length === right.length && left.every((value, index) => value === right[index]);
+
+const isCatalogCurrent = (stored: StoredSource | undefined, source: DefaultSource): boolean =>
+  stored != null &&
+  !('config' in stored) &&
+  stored.adapter_type === source.adapter_type &&
+  stored.name === source.name &&
+  arraysEqual(stored.tags, source.tags) &&
+  stored.space_id === GLOBAL_SPACE_ID &&
+  typeof stored.enabled === 'boolean' &&
+  typeof stored.created_at === 'string';
+
+const buildReconciledSourceDocument = (
+  source: DefaultSource,
+  stored: StoredSource | undefined,
+  now: string
+) => ({
+  adapter_type: source.adapter_type,
+  name: source.name,
+  enabled: typeof stored?.enabled === 'boolean' ? stored.enabled : source.enabled,
+  tags: source.tags,
+  space_id: GLOBAL_SPACE_ID,
+  created_at: typeof stored?.created_at === 'string' ? stored.created_at : now,
+  updated_at: now,
+});
+
+const isCreateConflict = (error: { type?: string; status?: number } | undefined): boolean =>
+  error?.type === 'version_conflict_engine_exception' || error?.status === 409;
+
+/**
+ * Reconciles the fixed source catalog while preserving operator-owned enablement.
+ */
+export const seedDefaultSources = async ({
+  esClient,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}): Promise<SeedDefaultSourcesResult> => {
+  const log = logger.get('seed-default-sources');
+  const now = new Date().toISOString();
+
+  const result: SeedDefaultSourcesResult = {
+    total: DEFAULT_SOURCES.length,
+    created: 0,
+    updated: 0,
+    skipped: 0,
+    failed: 0,
+  };
+
+  // Debug, not info: this runs on every boot so a partial seed can finish, and on a
+  // healthy deployment every entry is already present. The caller logs the outcome at
+  // info when something actually changed.
+  log.debug(`Reconciling ${result.total} default threat-intel sources`);
+
+  const existing = await esClient.mget<StoredSource>({
+    index: THREAT_INTEL_SOURCES_INDEX,
+    ids: DEFAULT_SOURCES.map(({ id }) => id),
+  });
+  const existingById = new Map(existing.docs.map((document) => [document._id, document]));
+  const actions: CatalogAction[] = [];
+  const operations: Array<Record<string, unknown>> = [];
+
+  for (const source of DEFAULT_SOURCES) {
+    const existingDocument = existingById.get(source.id);
+    if (!existingDocument) {
+      throw new Error(`Catalog read did not return source ${source.id}`);
+    }
+    if ('error' in existingDocument) {
+      throw new Error(
+        `Catalog read failed for source ${source.id}: ${existingDocument.error.type ?? 'error'}`
+      );
+    }
+    if (!existingDocument.found) {
+      actions.push({ id: source.id, kind: 'create' });
+      operations.push(
+        { create: { _index: THREAT_INTEL_SOURCES_INDEX, _id: source.id } },
+        buildDefaultSourceDocument(source, now)
+      );
+    } else {
+      const stored = existingDocument._source;
+      if (!stored) {
+        throw new Error(`Catalog source ${source.id} was found without _source`);
+      }
+      if (isCatalogCurrent(stored, source)) {
+        result.skipped += 1;
+      } else {
+        if (
+          existingDocument._seq_no === undefined ||
+          existingDocument._primary_term === undefined
+        ) {
+          throw new Error(`Catalog source ${source.id} is missing concurrency metadata`);
+        }
+        actions.push({ id: source.id, kind: 'index' });
+        operations.push(
+          {
+            index: {
+              _index: THREAT_INTEL_SOURCES_INDEX,
+              _id: source.id,
+              if_seq_no: existingDocument._seq_no,
+              if_primary_term: existingDocument._primary_term,
+            },
+          },
+          buildReconciledSourceDocument(source, stored, now)
+        );
+      }
+    }
+  }
+
+  if (operations.length === 0) {
+    const legacy = await disableLegacySources({ esClient, logger, now });
+    result.updated += legacy.disabled;
+    result.failed += legacy.failed;
+    log.debug(
+      `Default source reconciliation finished: 0 created, ${result.updated} updated, ${result.skipped} unchanged, ${result.failed} failed`
+    );
+    return result;
+  }
+
+  try {
+    const bulkResponse = await esClient.bulk({ operations, refresh: false });
+    for (let index = 0; index < actions.length; index += 1) {
+      const action = actions[index];
+      const responseItem = bulkResponse.items[index];
+      const item = action.kind === 'create' ? responseItem?.create : responseItem?.index;
+      if (!item) {
+        result.failed += 1;
+      } else if (item.error) {
+        if (action.kind === 'create' && isCreateConflict(item.error)) {
+          result.skipped += 1;
+        } else {
+          result.failed += 1;
+          log.warn(
+            `Failed to reconcile default source ${action.id}: ${item.error.type ?? 'error'} ${
+              item.error.reason ?? ''
+            }`
+          );
+        }
+      } else if (action.kind === 'create' && item.result === 'created') {
+        result.created += 1;
+      } else if (action.kind === 'index' && item.result === 'updated') {
+        result.updated += 1;
+      } else {
+        result.failed += 1;
+      }
+    }
+  } catch (err) {
+    result.failed += actions.length;
+    log.warn(`Bulk source reconciliation failed: ${(err as Error).message}`);
+  }
+
+  if (result.created > 0 || result.updated > 0) {
+    await esClient.indices.refresh({ index: THREAT_INTEL_SOURCES_INDEX });
+  }
+
+  const legacy = await disableLegacySources({ esClient, logger, now });
+  result.updated += legacy.disabled;
+  result.failed += legacy.failed;
+
+  const summary = `Default source reconciliation finished: ${result.created} created, ${result.updated} updated, ${result.skipped} unchanged, ${result.failed} failed`;
+  if (result.created > 0 || result.updated > 0 || result.failed > 0) {
+    log.info(summary);
+  } else {
+    log.debug(summary);
+  }
+
+  return result;
+};
+
+const disableLegacySources = async ({
+  esClient,
+  logger,
+  now,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  now: string;
+}): Promise<{ disabled: number; failed: number }> => {
+  const log = logger.get('seed-default-sources');
+
+  try {
+    const response = await esClient.updateByQuery({
+      index: THREAT_INTEL_SOURCES_INDEX,
+      refresh: false,
+      conflicts: 'proceed',
+      wait_for_completion: true,
+      query: {
+        bool: {
+          filter: [{ term: { enabled: true } }],
+          must_not: [{ ids: { values: [...APPROVED_SOURCE_IDS] } }],
+        },
+      },
+      script: {
+        source: `
+          ctx._source.enabled = false;
+          ctx._source.updated_at = params.now;
+        `,
+        lang: 'painless',
+        params: { now },
+      },
+    });
+
+    const disabled = response.updated ?? 0;
+    // Only real per-document failures count as `failed`. The caller escalates a
+    // non-zero `failed` into a bootstrap retry and eventually a bootstrap
+    // rejection, which gates every route behind a 503 and leaves both tasks
+    // unscheduled, so it has to mean "something is actually wrong".
+    //
+    // `version_conflicts` is not that. Under `conflicts: 'proceed'` a conflict
+    // means an operator wrote to the source document between the scan and the
+    // update; the row is skipped, still matches the same query, and is picked up
+    // on the next boot. Reporting it as `failed` made a benign race able to fail
+    // bootstrap, while the failures that do mean something were dropped entirely.
+    const failures = response.failures ?? [];
+    const versionConflicts = response.version_conflicts ?? 0;
+
+    if (disabled > 0) {
+      log.info(`Disabled ${disabled} legacy source(s) outside the fixed catalog`);
+    }
+    if (failures.length > 0) {
+      log.warn(
+        `${failures.length} legacy source(s) outside the fixed catalog could not be disabled and ` +
+          `are still eligible for fetch (first failure: ${JSON.stringify(failures[0])})`
+      );
+    }
+    if (versionConflicts > 0) {
+      log.debug(
+        `${versionConflicts} legacy source(s) were skipped due to version conflicts; the next ` +
+          `boot's scan re-selects them.`
+      );
+    }
+
+    return { disabled, failed: failures.length };
+  } catch (err) {
+    log.warn(`Failed to disable legacy sources: ${(err as Error).message}`);
+    return { disabled: 0, failed: 1 };
+  }
+};

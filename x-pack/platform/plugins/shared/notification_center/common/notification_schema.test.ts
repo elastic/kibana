@@ -163,6 +163,49 @@ describe('notificationWriteSchema', () => {
       ).toThrow();
     });
   });
+
+  describe('targeting', () => {
+    it('omits profile_uid and space_ids when the notification is a broadcast', () => {
+      const parsed = notificationWriteSchema.parse(validInput);
+      expect(parsed).not.toHaveProperty('profile_uid');
+      expect(parsed).not.toHaveProperty('space_ids');
+    });
+
+    it('accepts a target user and spaces', () => {
+      const targeted = { ...validInput, profile_uid: 'u_abc123', space_ids: ['default', 'ops'] };
+      expect(notificationWriteSchema.parse(targeted)).toEqual(targeted);
+    });
+
+    it('rejects an empty profile_uid', () => {
+      expect(() => notificationWriteSchema.parse({ ...validInput, profile_uid: '' })).toThrow();
+    });
+
+    it('rejects a profile_uid longer than 256 characters', () => {
+      expect(() =>
+        notificationWriteSchema.parse({ ...validInput, profile_uid: 'x'.repeat(257) })
+      ).toThrow();
+    });
+
+    // An empty array would read as "targeted at no space", which no producer can mean.
+    it('rejects an empty space_ids array', () => {
+      expect(() => notificationWriteSchema.parse({ ...validInput, space_ids: [] })).toThrow();
+    });
+
+    it('rejects a space id longer than 1024 characters', () => {
+      expect(() =>
+        notificationWriteSchema.parse({ ...validInput, space_ids: ['x'.repeat(1025)] })
+      ).toThrow();
+    });
+
+    it('rejects more than 100 space ids', () => {
+      expect(() =>
+        notificationWriteSchema.parse({
+          ...validInput,
+          space_ids: Array.from({ length: 101 }, (_unused, i) => `space-${i}`),
+        })
+      ).toThrow();
+    });
+  });
 });
 
 describe('notificationReadSchema', () => {
@@ -224,24 +267,24 @@ describe('NotificationDocument typing', () => {
   });
 });
 
-describe('notificationQueryParamsSchema severity', () => {
-  it('normalizes a single value to an array', () => {
-    expect(notificationQueryParamsSchema.parse({ severity: 'critical' }).severity).toEqual([
-      'critical',
-    ]);
-  });
-
-  it('accepts an array of values', () => {
+describe('notificationQueryParamsSchema', () => {
+  it('accepts the document-level filters', () => {
     expect(
-      notificationQueryParamsSchema.parse({ severity: ['warning', 'error'] }).severity
-    ).toEqual(['warning', 'error']);
+      notificationQueryParamsSchema.parse({
+        namespace: 'inference',
+        type: 'modelStatus',
+        from: '2026-07-01T00:00:00.000Z',
+        to: '2026-07-20T00:00:00.000Z',
+      })
+    ).toEqual({
+      namespace: 'inference',
+      type: 'modelStatus',
+      from: '2026-07-01T00:00:00.000Z',
+      to: '2026-07-20T00:00:00.000Z',
+    });
   });
 
-  it('leaves severity undefined when omitted', () => {
-    expect(notificationQueryParamsSchema.parse({}).severity).toBeUndefined();
-  });
-
-  it('rejects an unknown severity tier', () => {
-    expect(() => notificationQueryParamsSchema.parse({ severity: 'nope' })).toThrow();
+  it('rejects unknown params (strict)', () => {
+    expect(() => notificationQueryParamsSchema.parse({ nope: 'value' })).toThrow();
   });
 });

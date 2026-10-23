@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { buildPolicyBaseIdWithFallbackKuery } from '@kbn/fleet-plugin/common';
 import React from 'react';
 import {
   EuiBadge,
@@ -57,7 +58,7 @@ export const AgentDetailsFlyout = ({
 }: {
   agent: AgentStat;
   agentPolicyId: string;
-  /** Monitors this agent runs (all of the location's monitors in the single-agent model). */
+  /** Monitors this agent runs (assigned count on a sharded location, else the location total). */
   monitorsRun: number;
   onClose: () => void;
 }) => {
@@ -67,7 +68,9 @@ export const AgentDetailsFlyout = ({
   // Prefer agent id for Fleet deep-links (exact match).
   const fleetAgentHref = agent.agentId
     ? `${basePath}/app/fleet/agents/${encodeURIComponent(agent.agentId)}`
-    : `${basePath}/app/fleet/agents?kuery=${encodeURIComponent(`policy_id:"${agentPolicyId}"`)}`;
+    : `${basePath}/app/fleet/agents?kuery=${encodeURIComponent(
+        buildPolicyBaseIdWithFallbackKuery(agentPolicyId)
+      )}`;
 
   const capacityItems: EuiDescriptionListProps['listItems'] = [
     {

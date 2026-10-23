@@ -15,9 +15,11 @@ import { generatePrebuiltRulesPackageBuffer } from '@kbn/security-solution-test-
 import expect from 'expect';
 import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import { refreshSavedObjectIndices } from '../../refresh_index';
+import { retryFleetRequest } from './retry_fleet_request';
 
-const MAX_RETRIES = 2;
-const TOTAL_TIMEOUT = 6 * 60000; // 6 mins, applies to all attempts (1 + MAX_RETRIES)
+const TOTAL_TIMEOUT = 6 * 60_000;
+// Fleet rate limits package uploads
+const FLEET_UPLOAD_RATE_LIMIT_DELAY = 10_000;
 
 interface InstallFleetPackageParams {
   getService: FtrProviderContext['getService'];
@@ -49,31 +51,25 @@ export const installFleetPackage = async ({
 
   log.debug(`Installing ${packageName} package`);
 
-  const fleetResponse = await retryService.tryWithRetries<InstallPackageResponse>(
-    installFleetPackage.name,
-    async () => {
-      const response = await supertest
+  const { body } = await retryFleetRequest(
+    retryService,
+    () =>
+      supertest
         .post(epmRouteService.getInstallPath(packageName, packageVersion))
         .set('kbn-xsrf', 'xxxx')
         .set('elastic-api-version', '2023-10-31')
         .type('application/json')
-        .send({ force })
-        .expect(200);
-
-      expect((response.body as InstallPackageResponse).items).toBeDefined();
-      expect((response.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
-
-      await refreshSavedObjectIndices(es);
-
-      log.success(`${packageName} has been installed`);
-
-      return response.body;
-    },
-    {
-      retryCount: MAX_RETRIES,
-      timeout: FLEET_RATE_LIMIT_TIMEOUT * 3,
-    }
+        .send({ force }),
+    { description: installFleetPackage.name, timeout: 30_000 }
   );
+  const fleetResponse = body as InstallPackageResponse;
+
+  expect(fleetResponse.items).toBeDefined();
+  expect(fleetResponse.items.length).toBeGreaterThan(0);
+
+  await refreshSavedObjectIndices(es);
+
+  log.success(`${packageName} has been installed`);
 
   return fleetResponse;
 };
@@ -97,32 +93,29 @@ export const installFleetPackageByUpload = async ({
 
   log.debug('Uploading a package to Fleet...');
 
-  const fleetResponse = await retryService.tryWithRetries<InstallPackageResponse>(
-    installFleetPackageByUpload.name,
-    async () => {
-      const response = await supertest
+  const { body } = await retryFleetRequest(
+    retryService,
+    () =>
+      supertest
         .post(EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN)
         .set('kbn-xsrf', 'xxxx')
         .set('elastic-api-version', '2023-10-31')
         .type('application/zip')
-        .send(packageBuffer)
-        .expect(200);
-
-      expect((response.body as InstallPackageResponse).items).toBeDefined();
-      expect((response.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
-
-      await refreshSavedObjectIndices(es);
-
-      log.success('Mock prebuilt rules package has been installed');
-
-      return response.body;
-    },
+        .send(packageBuffer),
     {
-      retryCount: MAX_RETRIES,
-      retryDelay: FLEET_RATE_LIMIT_TIMEOUT,
-      timeout: FLEET_RATE_LIMIT_TIMEOUT * 2,
+      description: installFleetPackageByUpload.name,
+      timeout: 20_000,
+      retryDelay: FLEET_UPLOAD_RATE_LIMIT_DELAY,
     }
   );
+  const fleetResponse = body as InstallPackageResponse;
+
+  expect(fleetResponse.items).toBeDefined();
+  expect(fleetResponse.items.length).toBeGreaterThan(0);
+
+  await refreshSavedObjectIndices(es);
+
+  log.success('Mock prebuilt rules package has been installed');
 
   return fleetResponse;
 };
@@ -134,11 +127,20 @@ interface InstallMockPrebuiltRulesPackageParams {
 /**
  * Installs a prepared mock prebuilt rules package `security_detection_engine`.
  * Installing it up front prevents installing the real package when making API requests.
+ *
+ * On TEST_CLOUD (MKI quality gate) Fleet rejects that upload because the name
+ * exists in the registry, and `kbnTestServerArgs` are not applied to the
+ * pre-deployed Kibana. Leave the environment package in place.
  */
 export const installMockPrebuiltRulesPackage = async ({
   getService,
-}: InstallMockPrebuiltRulesPackageParams): Promise<InstallPackageResponse> => {
+}: InstallMockPrebuiltRulesPackageParams): Promise<InstallPackageResponse | undefined> => {
   const log = getService('log');
+
+  if (process.env.TEST_CLOUD === '1') {
+    log.info('Skipping mock prebuilt rules package upload on TEST_CLOUD');
+    return undefined;
+  }
 
   log.info('Installing mock prebuilt rules package...');
 
@@ -170,26 +172,21 @@ export const installPrebuiltRulesPackageViaFleetAPI = async (
   supertest: SuperTest.Agent,
   retryService: RetryService
 ): Promise<InstallPackageResponse> => {
-  const fleetResponse = await retryService.tryWithRetries<InstallPackageResponse>(
-    installPrebuiltRulesPackageViaFleetAPI.name,
-    async () => {
-      const testResponse = await supertest
+  const { body } = await retryFleetRequest(
+    retryService,
+    () =>
+      supertest
         .post(`/api/fleet/epm/packages/security_detection_engine`)
         .set('kbn-xsrf', 'xxxx')
         .set('elastic-api-version', '2023-10-31')
         .type('application/json')
-        .send({ force: true })
-        .expect(200);
-      expect((testResponse.body as InstallPackageResponse).items).toBeDefined();
-      expect((testResponse.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
-
-      return testResponse.body;
-    },
-    {
-      retryCount: MAX_RETRIES,
-      timeout: TOTAL_TIMEOUT,
-    }
+        .send({ force: true }),
+    { description: installPrebuiltRulesPackageViaFleetAPI.name, timeout: TOTAL_TIMEOUT }
   );
+  const fleetResponse = body as InstallPackageResponse;
+
+  expect(fleetResponse.items).toBeDefined();
+  expect(fleetResponse.items.length).toBeGreaterThan(0);
 
   await refreshSavedObjectIndices(es);
 
@@ -212,30 +209,23 @@ export const installPrebuiltRulesPackageByVersion = async (
   version: string,
   retryService: RetryService
 ): Promise<InstallPackageResponse> => {
-  const fleetResponse = await retryService.tryWithRetries<InstallPackageResponse>(
-    installPrebuiltRulesPackageByVersion.name,
-    async () => {
-      const testResponse = await supertest
+  const { body } = await retryFleetRequest(
+    retryService,
+    () =>
+      supertest
         .post(epmRouteService.getInstallPath('security_detection_engine', version))
         .set('kbn-xsrf', 'xxxx')
         .set('elastic-api-version', '2023-10-31')
         .type('application/json')
-        .send({ force: true })
-        .expect(200);
-      expect((testResponse.body as InstallPackageResponse).items).toBeDefined();
-      expect((testResponse.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
-
-      return testResponse.body;
-    },
-    {
-      retryCount: MAX_RETRIES,
-      timeout: TOTAL_TIMEOUT,
-    }
+        .send({ force: true }),
+    { description: installPrebuiltRulesPackageByVersion.name, timeout: TOTAL_TIMEOUT }
   );
+  const fleetResponse = body as InstallPackageResponse;
+
+  expect(fleetResponse.items).toBeDefined();
+  expect(fleetResponse.items.length).toBeGreaterThan(0);
 
   await refreshSavedObjectIndices(es);
 
-  return fleetResponse as InstallPackageResponse;
+  return fleetResponse;
 };
-
-const FLEET_RATE_LIMIT_TIMEOUT = 10000; // 10 seconds

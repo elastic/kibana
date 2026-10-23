@@ -37,13 +37,12 @@ export const withCasesRedesign = ({
 };
 
 /**
- * Forces the cases list into the table view and reloads. The redesign defaults to a card list; its
- * table view reuses the legacy table selectors, so this keeps table-column assertions working when
- * the `casesRedesign.list` flag is on. Harmless in the legacy design (the key is ignored).
+ * Seeds the cases list view mode to `table` in localStorage so the list mounts in table view on
+ * first render. Pass as the initial visit's `onBeforeLoad` — seeding before the page loads avoids a
+ * mid-test reload (and its extra chunk fetch). The redesign defaults to a card list; its table view
+ * reuses the legacy table selectors, so this keeps table-column assertions working when the
+ * `casesRedesign.list` flag is on. Harmless in the legacy design (the key is ignored).
  */
-export const forceCasesTableView = () => {
-  cy.window().then((win) => {
-    win.localStorage.setItem(SECURITY_CASES_VIEW_MODE_LS_KEY, JSON.stringify('table'));
-  });
-  cy.reload();
+export const seedCasesTableView = (win: Window) => {
+  win.localStorage.setItem(SECURITY_CASES_VIEW_MODE_LS_KEY, JSON.stringify('table'));
 };

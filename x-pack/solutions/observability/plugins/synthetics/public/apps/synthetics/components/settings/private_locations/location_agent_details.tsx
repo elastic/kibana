@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { buildPolicyBaseIdWithFallbackKuery } from '@kbn/fleet-plugin/common';
 import React, { useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiCallOut,
   EuiHealth,
   EuiIcon,
   EuiIconTip,
@@ -25,6 +25,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import moment from 'moment';
 import { useHistory } from 'react-router-dom';
 import { useSyntheticsSettingsContext } from '../../../contexts';
@@ -41,6 +42,7 @@ export const LocationAgentDetails = ({
   agentPolicyId,
   locationLabel,
   locationMonitorCount,
+  missingCompleteAgent = false,
 }: {
   stats?: LocationAgentStats;
   loading: boolean;
@@ -48,6 +50,8 @@ export const LocationAgentDetails = ({
   locationLabel: string;
   /** Authoritative monitor count for the location (matches the table's "Monitors" column). */
   locationMonitorCount: number;
+  /** Browser monitors here cannot run: no enrolled agent is elastic-agent-complete. */
+  missingCompleteAgent?: boolean;
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
   const { canReadAgentPolicies, canReadAgents } = useFleetPermissions();
@@ -71,6 +75,7 @@ export const LocationAgentDetails = ({
   }
 
   const agents = stats?.agents ?? [];
+  const isShardingActive = stats?.isShardingActive === true;
   const healthyAgents = agents.filter((agent) => agent.healthy).length;
   const unhealthyAgents = agents.filter((agent) => !agent.healthy);
   const pressuredAgents = agents.filter(
@@ -83,13 +88,16 @@ export const LocationAgentDetails = ({
   const clusterUsedMib = agents.reduce((sum, a) => sum + (a.usedMemoryMib ?? 0), 0);
 
   const warnings: React.ReactNode[] = [];
+  if (missingCompleteAgent) {
+    warnings.push(BROWSER_NEEDS_COMPLETE_AGENT);
+  }
   if (unhealthyAgents.length > 0) {
     warnings.push(UNHEALTHY_AGENTS_WARNING(unhealthyAgents.length));
   }
   if (pressuredAgents.length > 0) {
     warnings.push(MEMORY_PRESSURE_WARNING(pressuredAgents.length));
   }
-  const calloutColor = unhealthyAgents.length > 0 ? 'danger' : 'warning';
+  const WarningsCallout = unhealthyAgents.length > 0 ? KbnDangerCallout : KbnWarningCallout;
 
   const columns: Array<EuiBasicTableColumn<AgentStat>> = [
     {
@@ -121,44 +129,47 @@ export const LocationAgentDetails = ({
       name: MONITORS_LABEL,
       width: '90px',
       align: 'right',
-      // Every enrolled agent runs all of the location's monitors today.
-      render: (agent: AgentStat) =>
-        locationMonitorCount > 0 ? (
+      render: (agent: AgentStat) => {
+        const monitorsRun = agent.monitorsAssigned ?? locationMonitorCount;
+        return monitorsRun > 0 ? (
           <EuiLink
             data-test-subj="syntheticsAgentMonitorsLink"
             href={locationMonitorsHref}
             title={VIEW_LOCATION_MONITORS}
             className="eui-textNoWrap"
           >
-            <strong>{locationMonitorCount}</strong>
+            <strong>{monitorsRun}</strong>
           </EuiLink>
         ) : (
           <EuiText size="s" color="subdued" className="eui-textNoWrap">
-            {locationMonitorCount}
+            {monitorsRun}
           </EuiText>
-        ),
+        );
+      },
     },
     {
       name: DISTRIBUTION_COLUMN,
       width: '200px',
-      // In the single-agent model each agent runs the full set (100%).
-      render: (agent: AgentStat) => (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem>
-            <EuiProgress
-              value={locationMonitorCount > 0 ? 1 : 0}
-              max={1}
-              size="s"
-              color={agent.healthy ? 'success' : 'danger'}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued" className="eui-textNoWrap">
-              {locationMonitorCount > 0 ? '100%' : '—'}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
+      render: (agent: AgentStat) => {
+        const share = agentShare(agent, locationMonitorCount, isShardingActive);
+        return (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem>
+              <EuiProgress
+                value={share ?? 0}
+                max={1}
+                size="s"
+                color={agent.healthy ? 'success' : 'danger'}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued" className="eui-textNoWrap">
+                {share == null ? '—' : `${Math.round(share * 100)}%`}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      },
     },
     {
       field: 'usedMemoryPct',
@@ -284,7 +295,7 @@ export const LocationAgentDetails = ({
             <EuiFlexItem grow={false}>
               <EuiLink
                 data-test-subj="syntheticsManageAgentsInFleetLink"
-                href={fleetAgentsHref(`policy_id:"${agentPolicyId}"`)}
+                href={fleetAgentsHref(buildPolicyBaseIdWithFallbackKuery(agentPolicyId))}
                 target="_blank"
                 external
               >
@@ -346,11 +357,9 @@ export const LocationAgentDetails = ({
         {warnings.length > 0 && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
+            <WarningsCallout
               announceOnMount
               size="s"
-              color={calloutColor}
-              iconType="warning"
               title={ATTENTION_TITLE}
               data-test-subj="locationAgentWarnings"
             >
@@ -359,7 +368,7 @@ export const LocationAgentDetails = ({
                   <li key={i}>{warning}</li>
                 ))}
               </ul>
-            </EuiCallOut>
+            </WarningsCallout>
           </>
         )}
 
@@ -368,7 +377,11 @@ export const LocationAgentDetails = ({
         <EuiTitle size="xxs">
           <h4>
             {DISTRIBUTION_TITLE}{' '}
-            <EuiIconTip content={DISTRIBUTION_HELP} position="right" type="question" />
+            <EuiIconTip
+              content={isShardingActive ? DISTRIBUTION_HELP_SHARDED : DISTRIBUTION_HELP}
+              position="right"
+              type="question"
+            />
           </h4>
         </EuiTitle>
         <EuiSpacer size="s" />
@@ -384,12 +397,26 @@ export const LocationAgentDetails = ({
         <AgentDetailsFlyout
           agent={flyoutAgent}
           agentPolicyId={agentPolicyId}
-          monitorsRun={locationMonitorCount}
+          monitorsRun={flyoutAgent.monitorsAssigned ?? locationMonitorCount}
           onClose={() => setFlyoutAgent(null)}
         />
       )}
     </>
   );
+};
+
+const agentShare = (
+  agent: AgentStat,
+  locationMonitorCount: number,
+  isShardingActive: boolean
+): number | null => {
+  if (locationMonitorCount <= 0) {
+    return null;
+  }
+  if (!isShardingActive || agent.monitorsAssigned == null) {
+    return 1;
+  }
+  return agent.monitorsAssigned / locationMonitorCount;
 };
 
 /**
@@ -593,9 +620,25 @@ const DISTRIBUTION_HELP = i18n.translate(
   }
 );
 
+const DISTRIBUTION_HELP_SHARDED = i18n.translate(
+  'xpack.synthetics.privateLocation.agentDetails.distributionShardedHelpDescription',
+  {
+    defaultMessage:
+      "Share of this location's monitors assigned to each agent via a per-monitor host condition.",
+  }
+);
+
 const NO_AGENTS_LABEL = i18n.translate('xpack.synthetics.privateLocation.agentDetails.noAgents', {
   defaultMessage: 'No agents enrolled for this location yet.',
 });
+
+const BROWSER_NEEDS_COMPLETE_AGENT = i18n.translate(
+  'xpack.synthetics.privateLocation.agentDetails.browserNeedsCompleteAgent',
+  {
+    defaultMessage:
+      'Browser monitors on this location are not running. They only run on the elastic-agent-complete image, and no enrolled agent is on that image.',
+  }
+);
 
 const AGENTS_TABLE_CAPTION = i18n.translate(
   'xpack.synthetics.privateLocation.agentDetails.tableCaption',

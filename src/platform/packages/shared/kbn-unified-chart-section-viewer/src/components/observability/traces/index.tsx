@@ -10,7 +10,7 @@ import { EuiFlexGrid, EuiFlexItem, EuiPanel, euiPaletteColorBlind } from '@elast
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram';
+import { UnifiedBreakdownFieldSelector, resolveBreakdownField } from '@kbn/unified-histogram';
 import { TraceMetricsProvider } from './context/trace_metrics_context';
 import { TRACES_BREAKDOWN_RECOMMENDED_FIELDS } from './constants';
 import { useEsqlQueryInfo } from '../../../hooks/use_esql_query_info';
@@ -37,7 +37,7 @@ function TraceMetricsGrid({
   breakdownField,
   onBreakdownFieldChange,
 }: UnifiedMetricsGridProps) {
-  const { query, dataView, columns, isESQLQuery } = fetchParams;
+  const { query, dataSource, columns } = fetchParams;
   const esqlQuery = useEsqlQueryInfo({
     query: query && 'esql' in query ? query.esql : '',
   });
@@ -61,8 +61,13 @@ function TraceMetricsGrid({
   }, [esqlQuery.metadataFields, filters]);
 
   const breakdownDataViewField = useMemo(
-    () => (breakdownField && dataView ? dataView.getFieldByName(breakdownField) : undefined),
-    [breakdownField, dataView]
+    () =>
+      resolveBreakdownField({
+        breakdownField,
+        dataSource,
+        columns,
+      }),
+    [breakdownField, dataSource, columns]
   );
 
   const handleBreakdownFieldChange = useCallback(
@@ -75,29 +80,27 @@ function TraceMetricsGrid({
   const toolbar = useMemo(
     () => ({
       toggleActions: renderToggleActions(),
-      leftSide: dataView ? (
+      leftSide: (
         <UnifiedBreakdownFieldSelector
-          dataView={dataView}
+          dataSource={dataSource}
           breakdown={{ field: breakdownDataViewField }}
           onBreakdownFieldChange={handleBreakdownFieldChange}
-          esqlColumns={isESQLQuery ? columns : undefined}
           recommendedFields={TRACES_BREAKDOWN_RECOMMENDED_FIELDS}
           fieldsMetadata={services.fieldsMetadata}
         />
-      ) : undefined,
+      ),
     }),
     [
       renderToggleActions,
-      dataView,
+      dataSource,
       breakdownDataViewField,
       handleBreakdownFieldChange,
-      columns,
-      isESQLQuery,
       services.fieldsMetadata,
     ]
   );
 
-  const indexPattern = dataView?.getIndexPattern();
+  // The source's index pattern, including remote cluster prefixes (`remote:traces-*`).
+  const indexPattern = dataSource.title || undefined;
 
   if (!indexPattern) {
     return undefined;

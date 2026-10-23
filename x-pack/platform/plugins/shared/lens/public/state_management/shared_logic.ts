@@ -12,6 +12,7 @@ import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import {
+  getChartScopedFilterQuery,
   type VisualizationState,
   type DatasourceStates,
   type DatasourceMap,
@@ -22,13 +23,14 @@ import {
 } from '@kbn/lens-common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import { INDEX_PATTERN_TYPE } from '../../common/constants';
+import { applyStateHydration } from '../state_hydration';
 
 // This piece of logic is shared between the main editor code base and the inline editor one within the embeddable
 export function mergeToNewDoc(
   persistedDoc: LensDocument | undefined,
   visualization: VisualizationState,
   datasourceStates: DatasourceStates,
-  query: AggregateQuery | Query,
+  query: AggregateQuery | Query | undefined,
   filters: Filter[],
   activeDatasourceId: string | null,
   adHocDataViews: Record<string, DataViewSpec>,
@@ -53,7 +55,19 @@ export function mergeToNewDoc(
     return;
   }
 
-  const activeDatasources: Record<string, Datasource> = Object.keys(datasourceStates).reduce(
+  const {
+    visualizationState: hydratedVisualizationState,
+    datasourceStates: hydratedDatasourceStates,
+  } = applyStateHydration({
+    visualizationId: visualization.activeId,
+    visualizationState: visualization.state,
+    datasourceStates,
+    context: 'editor',
+  });
+
+  const activeDatasources: Record<string, Datasource> = Object.keys(
+    hydratedDatasourceStates
+  ).reduce(
     (acc, datasourceId) => ({
       ...acc,
       [datasourceId]: datasourceMap[datasourceId],
@@ -66,7 +80,7 @@ export function mergeToNewDoc(
   const internalReferences: Reference[] = [];
   Object.entries(activeDatasources).forEach(([id, datasource]) => {
     const { state: persistableState, references: persistableReferences } =
-      datasource.getPersistableState(datasourceStates[id].state);
+      datasource.getPersistableState(hydratedDatasourceStates[id].state);
     persistibleDatasourceStates[id] = persistableState;
     persistableReferences.forEach((r) => {
       if (r.type === INDEX_PATTERN_TYPE && adHocDataViews[r.id]) {
@@ -77,13 +91,13 @@ export function mergeToNewDoc(
     });
   });
 
-  let persistibleVisualizationState = visualization.state;
+  let persistibleVisualizationState = hydratedVisualizationState;
   if (activeVisualization.getPersistableState) {
     const { state: persistableState, references: persistableReferences } =
       activeVisualization.getPersistableState(
-        visualization.state,
+        hydratedVisualizationState,
         activeDatasource,
-        datasourceStates[activeDatasource.id]
+        hydratedDatasourceStates[activeDatasource.id]
       );
     persistibleVisualizationState = persistableState;
     persistableReferences.forEach((r) => {
@@ -125,7 +139,10 @@ export function mergeToNewDoc(
     references,
     state: {
       visualization: persistibleVisualizationState,
-      query,
+      // Chart-scoped KQL/Lucene filter only. ES|QL queries live exclusively
+      // on the text-based datasource layers (`datasourceStates.textBased`);
+      // an aggregate editor query is never persisted into this slot.
+      query: getChartScopedFilterQuery(query),
       filters: [...persistableFilters, ...adHocFilters],
       datasourceStates: persistibleDatasourceStates,
       internalReferences,

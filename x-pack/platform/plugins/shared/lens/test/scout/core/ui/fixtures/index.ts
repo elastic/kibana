@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export * from './add_to_dashboard_save';
 export * from '../../../common/ui/fixtures';

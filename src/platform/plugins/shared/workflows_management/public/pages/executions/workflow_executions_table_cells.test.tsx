@@ -13,6 +13,7 @@ import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflo
 import {
   WorkflowExecutionDurationCell,
   WorkflowExecutionStartedAtCell,
+  WorkflowExecutionTagsCell,
   WorkflowExecutionWorkflowCell,
 } from './workflow_executions_table_cells';
 import { getTestProvider } from '../../shared/mocks/test_providers';
@@ -61,6 +62,7 @@ describe('WorkflowExecutionWorkflowCell', () => {
     expect(screen.getByTestId('workflowExecutionWorkflowLink')).toHaveTextContent(
       'OpenAI entity extraction'
     );
+    expect(screen.getByTestId('executionsTableWorkflowName')).toBeInTheDocument();
   });
 
   it('opens execution details when workflow link is clicked', () => {
@@ -173,5 +175,43 @@ describe('WorkflowExecutionDurationCell', () => {
     );
 
     expect(container).toBeEmptyDOMElement();
+  });
+});
+
+describe('WorkflowExecutionTagsCell', () => {
+  it('shows two badges and an overflow control for five tags', () => {
+    render(
+      <WorkflowExecutionTagsCell
+        execution={createExecution({
+          tags: ['alpha', 'bravo', 'charlie', 'delta', 'echo'],
+        })}
+      />,
+      { wrapper: getTestProvider({}) }
+    );
+
+    expect(screen.getByText('alpha')).toBeInTheDocument();
+    expect(screen.getByText('bravo')).toBeInTheDocument();
+    expect(screen.queryByText('charlie')).not.toBeInTheDocument();
+    expect(screen.getByTestId('executionsTableTagsOverflow')).toHaveTextContent('+3');
+  });
+
+  it('opens a popover with all tags when overflow is clicked', () => {
+    render(
+      <WorkflowExecutionTagsCell
+        execution={createExecution({
+          tags: ['alpha', 'bravo', 'charlie', 'delta', 'echo'],
+        })}
+      />,
+      { wrapper: getTestProvider({}) }
+    );
+
+    fireEvent.click(screen.getByTestId('executionsTableTagsOverflow'));
+
+    expect(screen.getByText('charlie')).toBeInTheDocument();
+    expect(screen.getByText('delta')).toBeInTheDocument();
+    expect(screen.getByText('echo')).toBeInTheDocument();
+    // Visible + popover copies: all five names appear at least once.
+    expect(screen.getAllByText('alpha').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('bravo').length).toBeGreaterThanOrEqual(1);
   });
 });

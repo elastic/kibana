@@ -8,12 +8,15 @@
  */
 
 import { readdirSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { basename, resolve } from 'node:path';
 import type { CodeOwnersEntry } from '@kbn/code-owners';
-import { getCodeOwnersEntries, getTeams } from '@kbn/code-owners';
+import { loadKibanaModule } from '../../../pipeline-utils/load_kibana_module.ts';
+
+const { getCodeOwnersEntries, getTeams } =
+  loadKibanaModule<typeof import('@kbn/code-owners')>('@kbn/code-owners');
 
 const CONNECTOR_SPECS_ROOT_PATTERN = 'src/platform/packages/shared/kbn-connector-specs/src/specs';
-const CONNECTOR_SPECS_ROOT = resolve(__dirname, '../../../..', CONNECTOR_SPECS_ROOT_PATTERN);
+const CONNECTOR_SPECS_ROOT = resolve(process.cwd(), CONNECTOR_SPECS_ROOT_PATTERN);
 
 export interface ConnectorSpecsRootEntry {
   name: string;
@@ -153,6 +156,6 @@ function main(): void {
   console.log('All CODEOWNERS teams are valid.');
 }
 
-if (require.main === module) {
+if (basename(process.argv[1] ?? '') === 'verify_codeowners_teams.ts') {
   main();
 }

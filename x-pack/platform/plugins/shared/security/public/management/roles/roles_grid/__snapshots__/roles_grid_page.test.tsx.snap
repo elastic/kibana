@@ -33,7 +33,7 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
             class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
           />
           <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
+            class="euiText emotion-euiText-s-euiTextColor-subdued"
           >
             <p
               data-test-subj="permissionDeniedMessage"

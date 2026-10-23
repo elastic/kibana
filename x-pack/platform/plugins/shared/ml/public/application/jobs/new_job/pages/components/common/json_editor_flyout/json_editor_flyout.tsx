@@ -25,6 +25,7 @@ import { KbnWarningCallout } from '@kbn/ui-callout';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import { getIsMlCpsEnabled } from '../../../../../../services/ml_server_info';
 import { useMlKibana } from '../../../../../../contexts/kibana';
 import { ML_EDITOR_MODE, MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { isValidJson } from '../../../../../../../../common/util/validation_utils';
@@ -63,6 +64,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
     services: { cps },
   } = useMlKibana();
   const cpsManager = cps?.cpsManager;
+  const isMlCpsEnabled = getIsMlCpsEnabled();
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const { displayErrorToast } = useToastNotificationService();
   const [showJsonFlyout, setShowJsonFlyout] = useState(false);
@@ -101,7 +103,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
       setAllowedProjects([]);
       setAllowedProjectsLoaded(!cpsManager);
 
-      if (cpsManager) {
+      if (isMlCpsEnabled && cpsManager) {
         let cancelled = false;
         cpsManager
           .fetchProjects()
@@ -187,7 +189,12 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
         originalIndices.every((value, index) => value === datafeed.indices[index]);
       setShowChangedIndicesWarning(valid === false);
 
-      if (cpsManager && allowedProjectsLoaded && datafeed.project_routing !== undefined) {
+      if (
+        isMlCpsEnabled &&
+        cpsManager &&
+        allowedProjectsLoaded &&
+        datafeed.project_routing !== undefined
+      ) {
         const invalidProjectRouting = hasInvalidProjectRouting(
           datafeed.project_routing,
           allowedProjects
@@ -216,7 +223,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
   // Re-validate project routing once allowed projects finish loading, so a
   // stale invalid warning (or blocked save) from the empty-list race is cleared.
   useEffect(() => {
-    if (!showJsonFlyout || !cpsManager || !allowedProjectsLoaded) {
+    if (!showJsonFlyout || !isMlCpsEnabled || !cpsManager || !allowedProjectsLoaded) {
       return;
     }
 

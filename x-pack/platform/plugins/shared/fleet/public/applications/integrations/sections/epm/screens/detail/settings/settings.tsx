@@ -18,8 +18,8 @@ import {
   EuiSpacer,
   EuiLink,
   EuiPortal,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 
@@ -605,10 +605,8 @@ export const SettingsPage: React.FC<Props> = memo(
                           </EuiFlexGroup>
                         </>
                       ) : (
-                        <EuiCallOut
+                        <KbnWarningCallout
                           announceOnMount
-                          color="warning"
-                          iconType="lock"
                           data-test-subj="installPermissionCallout"
                           title={
                             <FormattedMessage
@@ -616,12 +614,13 @@ export const SettingsPage: React.FC<Props> = memo(
                               defaultMessage="Permission required"
                             />
                           }
-                        >
-                          <FormattedMessage
-                            id="xpack.fleet.integrations.settings.installPermissionRequired"
-                            defaultMessage="You do not have permission to install this integration. Contact your administrator."
-                          />
-                        </EuiCallOut>
+                          text={
+                            <FormattedMessage
+                              id="xpack.fleet.integrations.settings.installPermissionRequired"
+                              defaultMessage="You do not have permission to install this integration. Contact your administrator."
+                            />
+                          }
+                        />
                       )}
                     </div>
                   ) : (

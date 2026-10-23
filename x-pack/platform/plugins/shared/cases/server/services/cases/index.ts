@@ -49,6 +49,7 @@ import type {
   SOWithErrors,
 } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
+import { STATUS_ESMODEL_TO_EXTERNAL } from '../../common/constants';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { buildFilter, combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
@@ -820,6 +821,29 @@ export class CasesService {
     }
   }
 
+  /**
+   * The status of each case found, reading only the status field; cases not found are left out.
+   */
+  public async getCaseStatuses({ caseIds }: GetCasesArgs): Promise<Map<string, CaseStatuses>> {
+    try {
+      this.log.debug(`Attempting to GET the status of cases ${caseIds.join(', ')}`);
+      const { saved_objects: cases } = await this.unsecuredSavedObjectsClient.bulkGet<
+        Pick<CasePersistedAttributes, 'status'>
+      >(caseIds.map((id) => ({ type: CASE_SAVED_OBJECT, id, fields: ['status'] })));
+
+      return new Map(
+        cases.flatMap((theCase): Array<[string, CaseStatuses]> => {
+          if (isSavedObjectErrorResult(theCase)) return [];
+          const status = STATUS_ESMODEL_TO_EXTERNAL[theCase.attributes.status];
+          return status ? [[theCase.id, status]] : [];
+        })
+      );
+    } catch (error) {
+      this.log.error(`Error on GET the status of cases ${caseIds.join(', ')}: ${error}`);
+      throw error;
+    }
+  }
+
   public async findCases(
     options?: SavedObjectFindOptionsKueryNode
   ): Promise<SavedObjectsFindResponse<CaseTransformedAttributes>> {
@@ -885,7 +909,6 @@ export class CasesService {
   private async getAllComments({
     id,
     options,
-    mode = 'legacy',
   }: FindCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       this.log.debug(`Attempting to GET all comments internal for id ${JSON.stringify(id)}`);
@@ -895,7 +918,6 @@ export class CasesService {
             sortField: defaultSortField,
             ...options,
           },
-          mode,
         });
       }
 
@@ -906,7 +928,6 @@ export class CasesService {
           sortField: defaultSortField,
           ...options,
         },
-        mode,
       });
     } catch (error) {
       this.log.error(`Error on GET all comments internal for ${JSON.stringify(id)}: ${error}`);
@@ -923,7 +944,6 @@ export class CasesService {
   public async getAllCaseComments({
     id,
     options,
-    mode = 'legacy',
   }: FindCaseCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       const refs = this.asArray(id).map((caseID) => ({ type: CASE_SAVED_OBJECT, id: caseID }));
@@ -945,7 +965,6 @@ export class CasesService {
           filter: options?.filter,
           ...options,
         },
-        mode,
       });
     } catch (error) {
       this.log.error(`Error on GET all comments for case ${JSON.stringify(id)}: ${error}`);

@@ -162,25 +162,4 @@ describe('When using the ContextMenuWithRouterSupport component', () => {
     expect(renderResult.getByTestId('testMenu-item-loading-1')).not.toBeNull();
     expect(renderResult.getByTestId('testMenu-item-loading-2')).not.toBeNull();
   });
-
-  it('should display view details button when prop', () => {
-    render({ hoverInfo: 'test' });
-    clickMenuTriggerButton();
-    expect(renderResult.getByTestId('testMenu-item-1').textContent).toEqual('click me 2test');
-  });
-
-  it("shouldn't display view details button when no prop", () => {
-    render();
-    clickMenuTriggerButton();
-    expect(renderResult.getByTestId('testMenu-item-1').textContent).toEqual('click me 2');
-  });
-
-  it('should display menu item `hoverInfo` when no `hoverInfo` is provided to menu component', () => {
-    items[1].hoverInfo = 'item hover info here';
-    render();
-    clickMenuTriggerButton();
-    expect(renderResult.getByTestId('testMenu-item-1').textContent).toEqual(
-      'click me 2item hover info here'
-    );
-  });
 });

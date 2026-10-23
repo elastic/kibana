@@ -11,6 +11,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCallOut,
   EuiComboBox,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -29,21 +30,27 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
-import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
+import { useOnboardingFlow } from '../../onboarding_flow_context';
+import {
+  DEFAULT_NAMESPACE,
+  getSourcePolicyName,
+} from '../authenticate_and_deploy_step/deploy_group_helpers';
+import { supportsIntegrationSettings } from './integration_settings';
 import {
   AWS_REGION_OPTIONS,
   getRegionFieldName,
   hasConfigurableFlyoutFields,
 } from './field_config';
-import type { TransportType } from './field_config';
 import type { ServiceInstance } from './use_service_settings';
 import { useServiceSettings } from './use_service_settings';
 import { ServiceSettingsFlyout } from './service_settings_flyout';
+import { SharedSettingsSection } from './shared_settings_section';
 import { DuplicateServiceModal } from './duplicate_service_modal';
 import { SignalTypeBadge } from '../services_step/signal_type_badge';
 import { ServiceSearchFilter } from '../service_search_filter';
 import { buildDuplicateName } from './duplicate_name';
 import type { SignalFilter } from '../services_step/use_services_step';
+import { StepFooter } from '../step_footer';
 
 interface ServiceSettingsStepProps {
   onContinue: () => void;
@@ -54,6 +61,13 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
   const {
     globalRegion,
     setGlobalRegion,
+    integrationName,
+    setIntegrationName,
+    integrationNameError,
+    description,
+    setDescription,
+    descriptionError,
+    bareNamePackage,
     instances,
     filteredInstances,
     incompleteInstances,
@@ -63,7 +77,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     signalFilter,
     setSignalFilter,
     getServiceVars,
-    setServiceFieldsAndTransport,
+    setServiceFieldsAndInputs,
     addDuplicate,
     removeInstance,
     allInstanceNames,
@@ -73,6 +87,33 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     handleNext,
   } = useServiceSettings({ onContinue });
 
+  const {
+    awsServicesMap,
+    detectAndReviewStep,
+    servicesStep,
+    refetchAwsServiceMatrix,
+    deploymentMethod,
+  } = useOnboardingFlow();
+  const { selectedServiceIds } = servicesStep;
+
+  // Gate Next on optional package manifests that are still in-flight or have errored.
+  // Errored manifests must also block here: an error leaves dataStreams/vars empty, so
+  // incompleteInstances would report nothing missing even though required fields aren't loaded.
+  const hasUnloadedSelectedManifests = selectedServiceIds.some((id) => {
+    const entry = awsServicesMap?.get(id);
+    return entry && !entry.isManifestLoaded && !entry.isManifestError;
+  });
+  const hasErroredSelectedManifests = selectedServiceIds.some((id) => {
+    const entry = awsServicesMap?.get(id);
+    return entry?.isManifestError === true;
+  });
+
+  const isRegionDisabled =
+    Object.keys(detectAndReviewStep.policyIdsByInstance).length > 0 ||
+    Object.values(detectAndReviewStep.serviceStatuses).some(
+      (s) => s !== 'error' && s !== 'timeout'
+    );
+
   const [activeFlyoutInstanceId, setActiveFlyoutInstanceId] = useState<string | null>(null);
   const [duplicateSourceInstanceId, setDuplicateSourceInstanceId] = useState<string | null>(null);
   const [openMenuInstanceId, setOpenMenuInstanceId] = useState<string | null>(null);
@@ -81,29 +122,35 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     ? instances.find((i) => i.instanceId === activeFlyoutInstanceId) ?? null
     : null;
   const activeFlyoutService = activeFlyoutInstance
-    ? AWS_SERVICES_MAP.get(activeFlyoutInstance.serviceId) ?? null
+    ? awsServicesMap?.get(activeFlyoutInstance.serviceId) ?? null
     : null;
 
   const duplicateSourceInstance = duplicateSourceInstanceId
     ? instances.find((i) => i.instanceId === duplicateSourceInstanceId) ?? null
     : null;
   const duplicateSourceService = duplicateSourceInstance
-    ? AWS_SERVICES_MAP.get(duplicateSourceInstance.serviceId) ?? null
+    ? awsServicesMap?.get(duplicateSourceInstance.serviceId) ?? null
     : null;
 
   const handleFlyoutApply =
-    (instanceId: string) => (fields: Record<string, string>, transport: TransportType | null) => {
-      setServiceFieldsAndTransport(instanceId, fields, transport);
+    (instanceId: string) =>
+    (
+      varsByDataStream: Record<string, import('./use_service_settings').ServiceDataStreamVars>,
+      enabledDataStreams: string[],
+      namespace: string
+    ) => {
+      setServiceFieldsAndInputs(instanceId, varsByDataStream, enabledDataStreams, namespace);
       setActiveFlyoutInstanceId(null);
     };
 
   const handleDuplicateAdd = (
     name: string,
-    fields: Record<string, string>,
-    transport: TransportType | null
+    varsByDataStream: Record<string, import('./use_service_settings').ServiceDataStreamVars>,
+    enabledDataStreams: string[],
+    namespace: string
   ) => {
     if (!duplicateSourceInstanceId) return;
-    addDuplicate(duplicateSourceInstanceId, name, fields, transport);
+    addDuplicate(duplicateSourceInstanceId, name, varsByDataStream, enabledDataStreams, namespace);
     setDuplicateSourceInstanceId(null);
   };
 
@@ -111,12 +158,32 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
   const selectedGlobalRegionOption = globalRegion ? [{ label: globalRegion }] : [];
 
   const continueTooltipContent = useMemo(() => {
-    if (isReady) return undefined;
+    if (isReady && !hasUnloadedSelectedManifests && !hasErroredSelectedManifests) return undefined;
     const reasons: string[] = [];
+    if (hasErroredSelectedManifests) {
+      reasons.push(
+        i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.erroredManifests', {
+          defaultMessage: 'Service details failed to load — retry to continue',
+        })
+      );
+    } else if (hasUnloadedSelectedManifests) {
+      reasons.push(
+        i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.loadingManifests', {
+          defaultMessage: 'Loading service details',
+        })
+      );
+    }
     if (!globalRegion.trim()) {
       reasons.push(
         i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.noRegion', {
           defaultMessage: 'Set a global region',
+        })
+      );
+    }
+    if (integrationNameError || descriptionError) {
+      reasons.push(
+        i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.integrationSettings', {
+          defaultMessage: 'Fix the integration settings',
         })
       );
     }
@@ -130,7 +197,15 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       );
     }
     return reasons.join(' · ');
-  }, [isReady, globalRegion, incompleteInstances]);
+  }, [
+    isReady,
+    hasUnloadedSelectedManifests,
+    hasErroredSelectedManifests,
+    globalRegion,
+    integrationNameError,
+    descriptionError,
+    incompleteInstances,
+  ]);
 
   const columns: Array<EuiBasicTableColumn<ServiceInstance>> = useMemo(
     () => [
@@ -156,7 +231,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           defaultMessage: 'Service Name',
         }),
         render: (inst: ServiceInstance) => {
-          const service = AWS_SERVICES_MAP.get(inst.serviceId);
+          const service = awsServicesMap?.get(inst.serviceId);
           const canConfigure = service ? hasConfigurableFlyoutFields(service) : false;
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -212,28 +287,32 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           defaultMessage: 'Collects',
         }),
         render: (inst: ServiceInstance) => {
-          const service = AWS_SERVICES_MAP.get(inst.serviceId);
-          return service ? <SignalTypeBadge signalType={service.signalType} /> : null;
+          const service = awsServicesMap?.get(inst.serviceId);
+          return service ? <SignalTypeBadge signalTypes={service.signalTypes} /> : null;
         },
-        sortable: (inst: ServiceInstance) => AWS_SERVICES_MAP.get(inst.serviceId)?.signalType ?? '',
-      },
-      {
-        name: i18n.translate('xpack.ingestHub.serviceSettingsStep.table.col.category', {
-          defaultMessage: 'Category',
-        }),
-        render: (inst: ServiceInstance) => AWS_SERVICES_MAP.get(inst.serviceId)?.category ?? '',
-        sortable: (inst: ServiceInstance) => AWS_SERVICES_MAP.get(inst.serviceId)?.category ?? '',
+        sortable: (inst: ServiceInstance) =>
+          awsServicesMap?.get(inst.serviceId)?.signalTypes.join(',') ?? '',
       },
       {
         name: i18n.translate('xpack.ingestHub.serviceSettingsStep.table.col.region', {
           defaultMessage: 'Region',
         }),
         render: (inst: ServiceInstance) => {
-          const service = AWS_SERVICES_MAP.get(inst.serviceId);
+          const service = awsServicesMap?.get(inst.serviceId);
           if (!service) return null;
           const config = getServiceVars(inst.instanceId);
-          const regionField = getRegionFieldName(service, config.trigger);
-          const override = config.vars[regionField]?.trim();
+          // Find the first enabled input across all data streams for region display.
+          let override: string | undefined;
+          for (const dsId of service.dataStreams) {
+            const dsVars = config.varsByDataStream[dsId];
+            const inp = dsVars?.enabledInputs?.[0];
+            if (inp) {
+              const regionField = getRegionFieldName(service, inp);
+              const rawRegion = dsVars.varsByInput?.[inp]?.[regionField];
+              override = (Array.isArray(rawRegion) ? rawRegion[0] : rawRegion)?.trim() || undefined;
+              break;
+            }
+          }
           if (override) return override;
           if (globalRegion) return globalRegion;
           return (
@@ -246,6 +325,9 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       {
         width: '40px',
         render: (inst: ServiceInstance) => {
+          const service = awsServicesMap?.get(inst.serviceId);
+          const isEcfOnly = service?.settingsScope === 'ecf';
+          if (isEcfOnly && !inst.isDuplicate) return null;
           const isOpen = openMenuInstanceId === inst.instanceId;
           const actionsLabel = i18n.translate(
             'xpack.ingestHub.serviceSettingsStep.table.actionsAriaLabel',
@@ -276,20 +358,24 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
             >
               <EuiContextMenuPanel
                 items={[
-                  <EuiContextMenuItem
-                    key="duplicate"
-                    icon="copy"
-                    onClick={() => {
-                      setOpenMenuInstanceId(null);
-                      setDuplicateSourceInstanceId(inst.instanceId);
-                    }}
-                    data-test-subj={`serviceSettingsStep-duplicateAction-${inst.instanceId}`}
-                  >
-                    <FormattedMessage
-                      id="xpack.ingestHub.serviceSettingsStep.table.action.duplicate"
-                      defaultMessage="Duplicate service"
-                    />
-                  </EuiContextMenuItem>,
+                  ...(!isEcfOnly
+                    ? [
+                        <EuiContextMenuItem
+                          key="duplicate"
+                          icon="copy"
+                          onClick={() => {
+                            setOpenMenuInstanceId(null);
+                            setDuplicateSourceInstanceId(inst.instanceId);
+                          }}
+                          data-test-subj={`serviceSettingsStep-duplicateAction-${inst.instanceId}`}
+                        >
+                          <FormattedMessage
+                            id="xpack.ingestHub.serviceSettingsStep.table.action.duplicate"
+                            defaultMessage="Duplicate service"
+                          />
+                        </EuiContextMenuItem>,
+                      ]
+                    : []),
                   ...(inst.isDuplicate
                     ? [
                         <EuiContextMenuItem
@@ -315,11 +401,18 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         },
       },
     ],
-    [getServiceVars, globalRegion, incompleteInstanceIds, openMenuInstanceId, removeInstance]
+    [
+      awsServicesMap,
+      getServiceVars,
+      globalRegion,
+      incompleteInstanceIds,
+      openMenuInstanceId,
+      removeInstance,
+    ]
   );
 
   return (
-    <div data-test-subj="onboardingStep-serviceSettings">
+    <div data-test-subj="onboardingStep-service-settings">
       <EuiFlexGroup alignItems="flexStart" gutterSize="l" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="m">
@@ -368,32 +461,101 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
               ) : undefined
             }
           >
-            <EuiComboBox
-              compressed
-              singleSelection={{ asPlainText: true }}
-              options={globalRegionOptions}
-              selectedOptions={selectedGlobalRegionOption}
-              onChange={(selected) => {
-                setGlobalRegionTouched(true);
-                setGlobalRegion(selected[0]?.label ?? '');
-              }}
-              onCreateOption={(searchValue) => {
-                setGlobalRegionTouched(true);
-                setGlobalRegion(searchValue);
-              }}
-              isInvalid={globalRegionTouched && !globalRegion.trim()}
-              customOptionText='Use "{searchValue}" as region'
-              placeholder={i18n.translate(
-                'xpack.ingestHub.serviceSettingsStep.globalRegion.placeholder',
-                { defaultMessage: 'Select or enter a region' }
-              )}
-              data-test-subj="serviceSettingsStep-globalRegion"
-            />
+            {(() => {
+              const comboBox = (
+                <EuiComboBox
+                  compressed
+                  singleSelection={{ asPlainText: true }}
+                  options={globalRegionOptions}
+                  selectedOptions={selectedGlobalRegionOption}
+                  onChange={(selected) => {
+                    setGlobalRegionTouched(true);
+                    setGlobalRegion(selected[0]?.label ?? '');
+                  }}
+                  onCreateOption={(searchValue) => {
+                    setGlobalRegionTouched(true);
+                    setGlobalRegion(searchValue);
+                  }}
+                  isInvalid={globalRegionTouched && !globalRegion.trim()}
+                  isDisabled={isRegionDisabled}
+                  customOptionText='Use "{searchValue}" as region'
+                  placeholder={i18n.translate(
+                    'xpack.ingestHub.serviceSettingsStep.globalRegion.placeholder',
+                    { defaultMessage: 'Select or enter a region' }
+                  )}
+                  data-test-subj="serviceSettingsStep-globalRegion"
+                />
+              );
+              if (!isRegionDisabled) return comboBox;
+              // span needed: disabled EuiComboBox has pointer-events:none; the span intercepts
+              // hover events so the tooltip fires even when the field is non-interactive.
+              return (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.ingestHub.serviceSettingsStep.globalRegion.disabledTooltip',
+                    {
+                      defaultMessage:
+                        'Region cannot be changed after services have been deployed. To use a different region, start a new session.',
+                    }
+                  )}
+                >
+                  <span tabIndex={0} style={{ display: 'block' }}>
+                    {comboBox}
+                  </span>
+                </EuiToolTip>
+              );
+            })()}
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
+
+      <SharedSettingsSection
+        integrationName={integrationName}
+        onIntegrationNameChange={setIntegrationName}
+        integrationNameError={integrationNameError}
+        description={description}
+        onDescriptionChange={setDescription}
+        descriptionError={descriptionError}
+      />
+      <EuiSpacer size="m" />
+
+      {hasErroredSelectedManifests && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.ingestHub.serviceSettingsStep.manifestErrorCallout.title"
+                defaultMessage="Could not load service details"
+              />
+            }
+            iconType="warning"
+            color="danger"
+            data-test-subj="serviceSettingsStep-manifestErrorCallout"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.ingestHub.serviceSettingsStep.manifestErrorCallout.body"
+                defaultMessage="One or more integration packages could not be loaded. Retry to continue."
+              />
+            </p>
+            <EuiButton
+              size="s"
+              color="danger"
+              onClick={refetchAwsServiceMatrix}
+              data-test-subj="serviceSettingsStep-manifestRetryButton"
+            >
+              <FormattedMessage
+                id="xpack.ingestHub.serviceSettingsStep.manifestErrorCallout.retryButton"
+                defaultMessage="Retry"
+              />
+            </EuiButton>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       {incompleteInstances.length > 0 && (
         <>
@@ -433,7 +595,6 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       <EuiInMemoryTable
         items={filteredInstances}
         columns={columns}
-        pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
         sorting={true}
         tableLayout="auto"
         tableCaption={i18n.translate('xpack.ingestHub.serviceSettingsStep.table.caption', {
@@ -442,43 +603,38 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         data-test-subj="serviceSettingsStep-table"
       />
 
-      <EuiSpacer size="m" />
-
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          {onBack && (
-            <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
+      <StepFooter onBack={onBack}>
+        <EuiToolTip content={continueTooltipContent}>
+          {/* span needed: disabled <button> swallows pointer events, span intercepts them for the tooltip */}
+          <span tabIndex={0} style={{ display: 'inline-block' }}>
+            <EuiButton
+              fill
+              onClick={handleNext}
+              disabled={!isReady || hasUnloadedSelectedManifests || hasErroredSelectedManifests}
+              isLoading={hasUnloadedSelectedManifests}
+              data-test-subj="serviceSettingsStep-continueButton"
+            >
               <FormattedMessage
-                id="xpack.ingestHub.serviceSettingsStep.backButton"
-                defaultMessage="Back"
+                id="xpack.ingestHub.serviceSettingsStep.nextButton"
+                defaultMessage="Next"
               />
-            </EuiButtonEmpty>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={continueTooltipContent}>
-            {/* span needed: disabled <button> swallows pointer events, span intercepts them for the tooltip */}
-            <span tabIndex={0} style={{ display: 'inline-block' }}>
-              <EuiButton
-                fill
-                onClick={handleNext}
-                disabled={!isReady}
-                data-test-subj="serviceSettingsStep-continueButton"
-              >
-                <FormattedMessage
-                  id="xpack.ingestHub.serviceSettingsStep.continueButton"
-                  defaultMessage="Continue"
-                />
-              </EuiButton>
-            </span>
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            </EuiButton>
+          </span>
+        </EuiToolTip>
+      </StepFooter>
 
       {activeFlyoutService && activeFlyoutInstance && (
         <ServiceSettingsFlyout
           service={activeFlyoutService}
           config={getServiceVars(activeFlyoutInstance.instanceId)}
+          globalRegion={globalRegion}
+          isNamespaceLocked={
+            !!detectAndReviewStep.policyIdsByInstance[activeFlyoutInstance.instanceId]
+          }
+          // Managed integrations put an empty namespace on `default`.
+          resolvedEmptyNamespace={
+            deploymentMethod === 'managed_integration' ? DEFAULT_NAMESPACE : undefined
+          }
           onApply={handleFlyoutApply(activeFlyoutInstance.instanceId)}
           onClose={() => setActiveFlyoutInstanceId(null)}
         />
@@ -488,8 +644,22 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         <DuplicateServiceModal
           service={duplicateSourceService}
           sourceConfig={getServiceVars(duplicateSourceInstance.instanceId)}
-          suggestedName={buildDuplicateName(duplicateSourceService.name, allInstanceNames)}
+          suggestedName={buildDuplicateName(
+            // The service name is the duplicate's policy name, so it starts from the name of the
+            // policy the service is deployed into.
+            integrationName.trim() &&
+              supportsIntegrationSettings(duplicateSourceService, deploymentMethod)
+              ? getSourcePolicyName(
+                  integrationName,
+                  duplicateSourceService.packageName,
+                  getServiceVars(duplicateSourceInstance.instanceId).namespace,
+                  bareNamePackage
+                )
+              : duplicateSourceService.name,
+            allInstanceNames
+          )}
           existingNames={allInstanceNames}
+          globalRegion={globalRegion}
           onAdd={handleDuplicateAdd}
           onCancel={() => setDuplicateSourceInstanceId(null)}
         />

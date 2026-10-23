@@ -18,6 +18,9 @@ export const buildkiteProperties: Record<PropertyName, MappingProperty> = {
   job_id: {
     type: 'wildcard',
   },
+  retry_count: {
+    type: 'integer',
+  },
   build: {
     type: 'object',
     properties: {
@@ -140,7 +143,13 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
       mode: {
         type: 'keyword',
       },
+      attributes: {
+        type: 'keyword',
+      },
     },
+  },
+  scope: {
+    type: 'keyword',
   },
   fully_parallel: {
     type: 'boolean',

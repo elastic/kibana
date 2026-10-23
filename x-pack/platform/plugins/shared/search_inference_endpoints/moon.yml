@@ -26,7 +26,6 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/core-http-server'
   - '@kbn/share-plugin'
-  - '@kbn/actions-plugin'
   - '@kbn/logging'
   - '@kbn/react-kibana-context-render'
   - '@kbn/doc-links'
@@ -45,13 +44,15 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/cloud-plugin'
   - '@kbn/core-http-router-server-mocks'
-  - '@kbn/logging-mocks'
   - '@kbn/cloud-connect-plugin'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-security-server'
   - '@kbn/inference-common'
   - '@kbn/inference-plugin'
   - '@kbn/management-settings-ids'
+  - '@kbn/content-list'
+  - '@kbn/content-list-provider'
+  - '@kbn/content-list-toolbar'
   - '@kbn/scout'
   - '@kbn/search-api-panels'
   - '@kbn/usage-collection-plugin'
@@ -61,6 +62,8 @@ dependsOn:
   - '@kbn/es-errors'
   - '@kbn/app-header'
   - '@kbn/core-chrome-browser-context-mocks'
+  - '@kbn/ui-callout'
+  - '@kbn/core-http-server-mocks'
 tags:
   - plugin
   - prod
@@ -75,6 +78,4 @@ fileGroups:
     - server/**/*
     - test/scout_inference_test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

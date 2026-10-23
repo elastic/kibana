@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/licensing-types'
   - '@kbn/scout'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
@@ -48,6 +49,4 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

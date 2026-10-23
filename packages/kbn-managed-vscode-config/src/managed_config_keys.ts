@@ -26,6 +26,7 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
       ['**/.chromium']: true,
       ['**/.es']: true,
       ['**/.eslintcache']: true,
+      ['**/.pnpm-store']: true,
       ['**/.yarn-local-mirror']: true,
       ['**/*.log']: true,
       ['**/api_docs']: true,
@@ -72,6 +73,21 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
         fileMatch: ['kibana.jsonc'],
         url: './.vscode/kibana-manifest-schema-v2.json',
       },
+    ],
+  },
+];
+
+/**
+ * Defines the keys which we overwrite in the user's `.vscode/extensions.json` for the workspace.
+ */
+export const MANAGED_EXTENSIONS_KEYS: ManagedConfigKey[] = [
+  {
+    key: 'recommendations',
+    value: [
+      'oxc.oxc-vscode',
+      'dbaeumer.vscode-eslint',
+      'stylelint.vscode-stylelint',
+      'orta.vscode-jest',
     ],
   },
 ];

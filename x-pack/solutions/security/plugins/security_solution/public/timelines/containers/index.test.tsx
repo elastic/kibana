@@ -161,6 +161,9 @@ describe('useTimelineEventsHandler', () => {
         refetch: expect.any(Function),
         totalCount: -1,
         refreshedAt: 0,
+        isPartial: false,
+        shardFailures: [],
+        timedOut: false,
       },
     ]);
   });
@@ -194,6 +197,9 @@ describe('useTimelineEventsHandler', () => {
           refetch: result.current[1].refetch,
           totalCount: 32,
           refreshedAt: result.current[1].refreshedAt,
+          isPartial: false,
+          shardFailures: [],
+          timedOut: false,
         },
       ]);
     });
@@ -239,6 +245,9 @@ describe('useTimelineEventsHandler', () => {
         refetch: result.current[1].refetch,
         totalCount: 32,
         refreshedAt: result.current[1].refreshedAt,
+        isPartial: false,
+        shardFailures: [],
+        timedOut: false,
       },
     ]);
   });
@@ -283,6 +292,266 @@ describe('useTimelineEventsHandler', () => {
       result.current[1].loadNextBatch();
     });
     await waitFor(() => expect(mockSearch).toHaveBeenCalledTimes(1));
+  });
+
+  describe('EQL isPartial', () => {
+    const eqlProps: UseTimelineEventsProps = {
+      ...props,
+      language: 'eql',
+      eqlOptions: {
+        eventCategoryField: 'category',
+        tiebreakerField: '',
+        timestampField: '@timestamp',
+        query: 'process where true',
+        size: 100,
+      },
+    };
+
+    it('returns isPartial false when the EQL strategy response is complete', async () => {
+      const { result } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
+        (args) => useTimelineEvents(args),
+        {
+          initialProps: eqlProps,
+        }
+      );
+
+      await waitFor(() => {
+        if (result.current[0] !== DataLoadingState.loaded) {
+          throw new Error('timeline still loading');
+        }
+      });
+
+      expect(result.current[1].isPartial).toEqual(false);
+    });
+
+    it('returns isPartial true when the EQL strategy response is partial', async () => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: { securitySolutionTimeline: { crud: true } },
+          },
+          data: {
+            search: {
+              search: () => ({
+                subscribe: jest.fn().mockImplementation(({ next }) => {
+                  const requestTimeout = setTimeout(() => {
+                    next({
+                      isRunning: false,
+                      isPartial: true,
+                      inspect: { dsl: [], response: [] },
+                      edges: [],
+                      pageInfo: { activePage: 0, querySize: 25 },
+                      rawResponse: {},
+                      totalCount: 1,
+                    });
+                  }, 50);
+                  return {
+                    unsubscribe: () => {
+                      clearTimeout(requestTimeout);
+                    },
+                  };
+                }),
+              }),
+              showError: jest.fn(),
+            },
+          },
+        },
+      });
+
+      const { result } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
+        (args) => useTimelineEvents(args),
+        {
+          initialProps: eqlProps,
+        }
+      );
+
+      await waitFor(() => {
+        if (result.current[0] !== DataLoadingState.loaded) {
+          throw new Error('timeline still loading');
+        }
+      });
+
+      expect(result.current[1].isPartial).toEqual(true);
+    });
+
+    it('returns isPartial true when the completed EQL response reports shard failures', async () => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: { securitySolutionTimeline: { crud: true } },
+          },
+          data: {
+            search: {
+              search: () => ({
+                subscribe: jest.fn().mockImplementation(({ next }) => {
+                  const requestTimeout = setTimeout(() => {
+                    next({
+                      isRunning: false,
+                      isPartial: false,
+                      inspect: { dsl: [], response: [] },
+                      edges: [],
+                      pageInfo: { activePage: 0, querySize: 25 },
+                      rawResponse: {
+                        is_partial: false,
+                        is_running: false,
+                        timed_out: false,
+                        shard_failures: [
+                          { shard: 0, index: 'logs-test', reason: { type: 'script_exception' } },
+                        ],
+                      },
+                      totalCount: 1,
+                    });
+                  }, 50);
+                  return {
+                    unsubscribe: () => {
+                      clearTimeout(requestTimeout);
+                    },
+                  };
+                }),
+              }),
+              showError: jest.fn(),
+            },
+          },
+        },
+      });
+
+      const { result } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
+        (args) => useTimelineEvents(args),
+        {
+          initialProps: eqlProps,
+        }
+      );
+
+      await waitFor(() => {
+        if (result.current[0] !== DataLoadingState.loaded) {
+          throw new Error('timeline still loading');
+        }
+      });
+
+      expect(result.current[1].isPartial).toEqual(true);
+    });
+
+    it('returns shardFailures from the completed EQL response', async () => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: { securitySolutionTimeline: { crud: true } },
+          },
+          data: {
+            search: {
+              search: () => ({
+                subscribe: jest.fn().mockImplementation(({ next }) => {
+                  const requestTimeout = setTimeout(() => {
+                    next({
+                      isRunning: false,
+                      isPartial: false,
+                      inspect: { dsl: [], response: [] },
+                      edges: [],
+                      pageInfo: { activePage: 0, querySize: 25 },
+                      rawResponse: {
+                        is_partial: false,
+                        is_running: false,
+                        timed_out: false,
+                        shard_failures: [
+                          {
+                            shard: 0,
+                            index: 'logs-test',
+                            reason: { type: 'script_exception', reason: 'boom' },
+                          },
+                        ],
+                      },
+                      totalCount: 1,
+                    });
+                  }, 50);
+                  return {
+                    unsubscribe: () => {
+                      clearTimeout(requestTimeout);
+                    },
+                  };
+                }),
+              }),
+              showError: jest.fn(),
+            },
+          },
+        },
+      });
+
+      const { result } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
+        (args) => useTimelineEvents(args),
+        {
+          initialProps: eqlProps,
+        }
+      );
+
+      await waitFor(() => {
+        if (result.current[0] !== DataLoadingState.loaded) {
+          throw new Error('timeline still loading');
+        }
+      });
+
+      expect(result.current[1].shardFailures).toEqual([
+        {
+          shard: 0,
+          index: 'logs-test',
+          reason: { type: 'script_exception', reason: 'boom' },
+        },
+      ]);
+    });
+
+    it('returns timedOut true when the completed EQL response timed out', async () => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: { securitySolutionTimeline: { crud: true } },
+          },
+          data: {
+            search: {
+              search: () => ({
+                subscribe: jest.fn().mockImplementation(({ next }) => {
+                  const requestTimeout = setTimeout(() => {
+                    next({
+                      isRunning: false,
+                      isPartial: false,
+                      inspect: { dsl: [], response: [] },
+                      edges: [],
+                      pageInfo: { activePage: 0, querySize: 25 },
+                      rawResponse: {
+                        is_partial: false,
+                        is_running: false,
+                        timed_out: true,
+                        shard_failures: [],
+                      },
+                      totalCount: 1,
+                    });
+                  }, 50);
+                  return {
+                    unsubscribe: () => {
+                      clearTimeout(requestTimeout);
+                    },
+                  };
+                }),
+              }),
+              showError: jest.fn(),
+            },
+          },
+        },
+      });
+
+      const { result } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
+        (args) => useTimelineEvents(args),
+        {
+          initialProps: eqlProps,
+        }
+      );
+
+      await waitFor(() => {
+        if (result.current[0] !== DataLoadingState.loaded) {
+          throw new Error('timeline still loading');
+        }
+      });
+
+      expect(result.current[1].timedOut).toEqual(true);
+    });
   });
 
   describe('error/invalid states', () => {
@@ -341,6 +610,46 @@ describe('useTimelineEventsHandler', () => {
         expect(mockSearch).not.toHaveBeenCalled();
         expect(result.current[0]).toBe(DataLoadingState.loaded);
       });
+    });
+
+    test('passes a failed search to the search handler error callback', async () => {
+      const { result } = renderHook(
+        (args) => useTimelineEventsModule.useTimelineEventsHandler(args),
+        { initialProps: { ...props, id: 'selection-query', timerangeKind: 'absolute' as const } }
+      );
+      const onResponse = jest.fn();
+      const onSearchError = jest.fn();
+
+      act(() => {
+        result.current[2](onResponse, onSearchError);
+      });
+
+      await waitFor(() => expect(onSearchError).toHaveBeenCalledWith(uniqueError));
+      expect(onResponse).not.toHaveBeenCalled();
+    });
+
+    test('reports a search that cannot start to the search handler error callback', async () => {
+      const { result } = renderHook(
+        (args) => useTimelineEventsModule.useTimelineEventsHandler(args),
+        {
+          initialProps: {
+            ...props,
+            id: 'selection-query',
+            indexNames: [],
+            timerangeKind: 'absolute' as const,
+          },
+        }
+      );
+      const onResponse = jest.fn();
+      const onSearchError = jest.fn();
+
+      act(() => {
+        result.current[2](onResponse, onSearchError);
+      });
+
+      await waitFor(() => expect(onSearchError).toHaveBeenCalledTimes(1));
+      expect(onResponse).not.toHaveBeenCalled();
+      expect(onError).not.toHaveBeenCalled();
     });
   });
 

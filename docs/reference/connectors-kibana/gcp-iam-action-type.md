@@ -11,6 +11,8 @@ applies_to:
 
 The Google Cloud IAM connector lets a workflow or agent respond to a cloud identity incident without an analyst opening the Google Cloud console. It disables and re-enables service accounts, lists and revokes service account keys, reads IAM allow policies, and grants or revokes individual role bindings on a project, folder, or organization.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Overview
 
 This connector calls the Google Cloud IAM API (`iam.googleapis.com`) and the Cloud Resource Manager API (`cloudresourcemanager.googleapis.com`). You upload a service account JSON key when creating the connector, and every action then runs as that service account, using a short-lived access token the connector mints for each request.

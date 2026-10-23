@@ -7,11 +7,11 @@
 
 import React from 'react';
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
 import { FilteringValidationState } from '@kbn/search-connectors';
+import { KbnDangerCallout, KbnSuccessCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 interface FilteringStatusCalloutsProps {
   applyDraft: () => void;
@@ -27,8 +27,7 @@ export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
   switch (state) {
     case FilteringValidationState.EDITED:
       return (
-        <EuiCallOut
-          color="warning"
+        <KbnWarningCallout
           title={
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
@@ -44,133 +43,90 @@ export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           }
-        >
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem>
-              {i18n.translate(
-                'xpack.enterpriseSearch.index.connector.syncRules.validatingDescription',
+          text={i18n.translate(
+            'xpack.enterpriseSearch.index.connector.syncRules.validatingDescription',
+            {
+              defaultMessage:
+                'Draft rules need to be validated before they can be activated. This may take a few minutes.',
+            }
+          )}
+          actionProps={{
+            primary: {
+              'data-telemetry-id':
+                'entSearchContent-connector-syncRules-validatingCallout-editRules',
+              onClick: editDraft,
+              children: i18n.translate(
+                'xpack.enterpriseSearch.index.connector.syncRules.validatingCallout.editDraftRulesTitle',
                 {
-                  defaultMessage:
-                    'Draft rules need to be validated before they can be activated. This may take a few minutes.',
+                  defaultMessage: 'Edit draft rules',
                 }
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <span>
-                <EuiButton
-                  data-telemetry-id="entSearchContent-connector-syncRules-validatingCallout-editRules"
-                  onClick={editDraft}
-                  color="warning"
-                  fill
-                >
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.index.connector.syncRules.validatingCallout.editDraftRulesTitle',
-                    {
-                      defaultMessage: 'Edit draft rules',
-                    }
-                  )}
-                </EuiButton>
-              </span>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiCallOut>
+              ),
+            },
+          }}
+        />
       );
     case FilteringValidationState.INVALID:
       return (
-        <EuiCallOut
-          color="danger"
-          iconType="cross"
+        <KbnDangerCallout
           title={i18n.translate('xpack.enterpriseSearch.index.connector.syncRules.invalidTitle', {
             defaultMessage: 'Draft sync rules are invalid',
           })}
-        >
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem>
-              {i18n.translate(
-                'xpack.enterpriseSearch.index.connector.syncRules.invalidDescription',
+          text={i18n.translate(
+            'xpack.enterpriseSearch.index.connector.syncRules.invalidDescription',
+            {
+              defaultMessage:
+                'Draft rules did not validate. Edit the draft rules before they can be activated.',
+            }
+          )}
+          actionProps={{
+            primary: {
+              'data-telemetry-id': 'entSearchContent-connector-syncRules-errorCallout-editRules',
+              onClick: editDraft,
+              children: i18n.translate(
+                'xpack.enterpriseSearch.index.connector.syncRules.errorCallout.editDraftRulesTitle',
                 {
-                  defaultMessage:
-                    'Draft rules did not validate. Edit the draft rules before they can be activated.',
+                  defaultMessage: 'Edit draft rules',
                 }
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <span>
-                <EuiButton
-                  data-telemetry-id="entSearchContent-connector-syncRules-errorCallout-editRules"
-                  onClick={editDraft}
-                  color="danger"
-                  fill
-                >
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.index.connector.syncRules.errorCallout.editDraftRulesTitle',
-                    {
-                      defaultMessage: 'Edit draft rules',
-                    }
-                  )}
-                </EuiButton>
-              </span>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiCallOut>
+              ),
+            },
+          }}
+        />
       );
     case FilteringValidationState.VALID:
       return (
-        <EuiCallOut
-          color="success"
-          iconType="check"
+        <KbnSuccessCallout
           title={i18n.translate('xpack.enterpriseSearch.index.connector.syncRules.validatedTitle', {
             defaultMessage: 'Draft sync rules validated',
           })}
-        >
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem>
-              {i18n.translate(
-                'xpack.enterpriseSearch.index.connector.syncRules.validatedDescription',
+          text={i18n.translate(
+            'xpack.enterpriseSearch.index.connector.syncRules.validatedDescription',
+            {
+              defaultMessage: 'Activate draft rules to take effect on the next sync.',
+            }
+          )}
+          actionProps={{
+            primary: {
+              'data-telemetry-id': 'entSearchContent-connector-syncRules-successCallout-applyRules',
+              onClick: applyDraft,
+              children: i18n.translate(
+                'xpack.enterpriseSearch.index.connector.syncRules.successCallout.applyDraftRulesTitle',
                 {
-                  defaultMessage: 'Activate draft rules to take effect on the next sync.',
+                  defaultMessage: 'Activate draft rules',
                 }
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup justifyContent="flexStart">
-                <EuiFlexItem grow={false}>
-                  <span>
-                    <EuiButton
-                      data-telemetry-id="entSearchContent-connector-syncRules-successCallout-applyRules"
-                      onClick={applyDraft}
-                      color="success"
-                      fill
-                    >
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.index.connector.syncRules.successCallout.applyDraftRulesTitle',
-                        {
-                          defaultMessage: 'Activate draft rules',
-                        }
-                      )}
-                    </EuiButton>
-                  </span>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <span>
-                    <EuiButton
-                      data-telemetry-id="entSearchContent-connector-syncRules-successCallout-editRules"
-                      onClick={editDraft}
-                      color="success"
-                    >
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.index.connector.syncRules.errorCallout.successEditDraftRulesTitle',
-                        {
-                          defaultMessage: 'Edit draft rules',
-                        }
-                      )}
-                    </EuiButton>
-                  </span>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiCallOut>
+              ),
+            },
+            secondary: {
+              'data-telemetry-id': 'entSearchContent-connector-syncRules-successCallout-editRules',
+              onClick: editDraft,
+              children: i18n.translate(
+                'xpack.enterpriseSearch.index.connector.syncRules.errorCallout.successEditDraftRulesTitle',
+                {
+                  defaultMessage: 'Edit draft rules',
+                }
+              ),
+            },
+          }}
+        />
       );
     default:
       return <></>;

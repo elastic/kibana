@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/ebt-click'
   - '@kbn/zod'
   - '@kbn/i18n'
+  - '@kbn/core-spaces-common'
 tags:
   - shared-common
   - package
@@ -33,6 +34,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

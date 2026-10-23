@@ -16,10 +16,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import type { PublishesUnifiedSearch, ViewMode } from '@kbn/presentation-publishing';
 import {
   apiHasExecutionContext,
   fetch$,
+  getViewModeSubject,
   initializeTimeRangeManager,
   initializeTitleManager,
   timeRangeComparators,
@@ -27,12 +28,11 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import { BehaviorSubject, distinctUntilChanged, map, merge, Subscription } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { initializeStateApi } from '@kbn/presentation-publishing';
-import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
 import { SWIM_LANE_SELECTION_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
 import type { AnomalySwimlaneEmbeddableServices } from '..';
@@ -109,6 +109,14 @@ export const getAnomalySwimLaneEmbeddableFactory = (
       const interval = new BehaviorSubject<number | undefined>(undefined);
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const rendered$ = new BehaviorSubject<boolean>(false);
+      subscriptions.add(
+        dataLoading$.subscribe((isLoading) => {
+          if (isLoading) {
+            rendered$.next(false);
+          }
+        })
+      );
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
       const query$ = ((parentApi as Partial<PublishesUnifiedSearch>)?.query$ ??
         new BehaviorSubject(undefined)) as PublishesUnifiedSearch['query$'];
@@ -195,6 +203,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           subscriptions
         ),
         dataLoading$,
+        rendered$,
       });
       const { swimLaneData$, onDestroy } = initializeSwimLaneDataFetcher(
         api,
@@ -218,6 +227,8 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             api.updatePagination({ fromPage: 1 });
           })
       );
+
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
 
       return {
         api,
@@ -244,41 +255,17 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             subscriptions.unsubscribe();
           });
 
-          const [fromPage, perPage, swimlaneType, swimlaneData, error, isLoading] =
+          const [fromPage, perPage, swimlaneType, swimlaneData, error, isLoading, viewMode] =
             useBatchedPublishingSubjects(
               api.fromPage,
               api.perPage,
               api.swimlaneType,
               swimLaneData$,
               blockingError$,
-              dataLoading$
+              dataLoading$,
+              viewMode$
             );
           const [selectedCells, setSelectedCells] = useState<AppStateSelectedCells | undefined>();
-
-          const [hasRendered, setHasRendered] = useState<boolean>(false);
-          const wrapperRef = useRef<HTMLDivElement>(null);
-          useEffect(() => {
-            if (isLoading) setHasRendered(false);
-          }, [isLoading]);
-
-          useEffect(
-            function dispatchRenderMessages() {
-              const el = wrapperRef.current;
-              if (!el) return;
-              if (error) {
-                dispatchRenderComplete(el);
-                return;
-              }
-              if (isLoading) {
-                dispatchRenderStart(el);
-                return;
-              }
-              if (hasRendered) {
-                dispatchRenderComplete(el);
-              }
-            },
-            [isLoading, hasRendered, error]
-          );
 
           const onCellsSelection = useCallback(
             (update?: AppStateSelectedCells) => {
@@ -305,9 +292,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                     padding: 8px;
                   `}
                   data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
-                  data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
-                  data-render-complete={error ? true : hasRendered}
-                  ref={wrapperRef}
                 >
                   {error ? (
                     <KbnDangerCallout
@@ -335,7 +319,9 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                       }
                       onResize={(size) => chartWidth$.next(size)}
                       selection={selectedCells}
-                      onCellsSelection={onCellsSelection}
+                      onCellsSelection={
+                        viewMode === 'non-interactive' ? undefined : onCellsSelection
+                      }
                       onPaginationChange={(update) => {
                         if (update.fromPage) {
                           api.updatePagination({ fromPage: update.fromPage });
@@ -363,9 +349,10 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                       chartsService={pluginsStartServices.charts}
                       onRenderComplete={() => {
                         if (!isLoading) {
-                          setHasRendered(true);
+                          rendered$.next(true);
                         }
                       }}
+                      isInteractive={viewMode !== 'non-interactive'}
                     />
                   )}
                 </div>

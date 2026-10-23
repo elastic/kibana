@@ -31,7 +31,7 @@ export async function getHelp(cmdName = undefined) {
     return [
       indent(
         depth,
-        `${title(`yarn kbn ${cmd.name}${cmd.usage ? ` ${cmd.usage}` : ''}`)}${
+        `${title(`pnpm kbn ${cmd.name}${cmd.usage ? ` ${cmd.usage}` : ''}`)}${
           intro ? ` ${intro}` : ''
         }`
       ),
@@ -47,7 +47,7 @@ export async function getHelp(cmdName = undefined) {
 
   return [
     'Usage:',
-    '  yarn kbn <command> [...flags]',
+    '  pnpm kbn <command> [...flags]',
     '',
     'Commands:',
     ...COMMANDS.flatMap((cmd) => (cmd.name.startsWith('_') ? [] : cmdLines(2, cmd))),

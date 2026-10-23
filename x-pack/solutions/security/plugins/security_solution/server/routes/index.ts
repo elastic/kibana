@@ -10,6 +10,7 @@ import type { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-
 
 import { registerTrialCompanionRoutes } from '../lib/trial_companion/register_routes';
 import type { EndpointAppContext } from '../endpoint/types';
+import type { SecuritySolutionEventBus } from '../events/event_bus';
 import type { SecuritySolutionPluginRouter } from '../types';
 
 import { registerFleetIntegrationsRoutes } from '../lib/detection_engine/fleet_integrations';
@@ -84,7 +85,9 @@ export const initRoutes = (
   docLinks: DocLinksServiceSetup,
   endpointContext: EndpointAppContext,
   trialCompanionDeps: TrialCompanionRoutesDeps,
-  enableDataGeneratorRoutes: boolean
+  enableDataGeneratorRoutes: boolean,
+  platformCpsEnabled: boolean,
+  eventBus?: SecuritySolutionEventBus
 ) => {
   registerFleetIntegrationsRoutes(router, logger);
   registerLegacyRuleActionsRoutes(router, logger);
@@ -105,16 +108,16 @@ export const initRoutes = (
     isServerless
   );
 
-  registerResolverRoutes(router, getStartServices);
+  registerResolverRoutes(router, getStartServices, platformCpsEnabled);
 
-  registerTimelineRoutes(router, config, getStartServices);
+  registerTimelineRoutes(router, config, getStartServices, logger, eventBus);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
-  setSignalsStatusRoute(router, logger, telemetrySender);
-  setAlertTagsRoute(router);
-  setAlertAssigneesRoute(router);
+  setSignalsStatusRoute(router, logger, telemetrySender, eventBus);
+  setAlertTagsRoute(router, eventBus);
+  setAlertAssigneesRoute(router, eventBus);
   querySignalsRoute(router, ruleDataClient);
   getSignalsMigrationStatusRoute(router, docLinks);
   createSignalsMigrationRoute(router, docLinks);
@@ -124,9 +127,9 @@ export const initRoutes = (
 
   // Detection Engine Extended Alerts routes that have the REST endpoints of /internal/detection_engine/unified_alerts
   searchUnifiedAlertsRoute(router, ruleDataClient);
-  setUnifiedAlertsWorkflowStatusRoute(router, ruleDataClient);
-  setUnifiedAlertsTagsRoute(router, ruleDataClient);
-  setUnifiedAlertsAssigneesRoute(router, ruleDataClient);
+  setUnifiedAlertsWorkflowStatusRoute(router, ruleDataClient, logger, eventBus);
+  setUnifiedAlertsTagsRoute(router, ruleDataClient, logger, eventBus);
+  setUnifiedAlertsAssigneesRoute(router, ruleDataClient, logger, eventBus);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
@@ -142,7 +145,7 @@ export const initRoutes = (
   registerDashboardsRoutes(router, logger);
   registerTagsRoutes(router, logger);
 
-  registerAttacksRoutes(router, ruleDataClient, telemetrySender);
+  registerAttacksRoutes(router, ruleDataClient, telemetrySender, eventBus, logger);
 
   const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
 

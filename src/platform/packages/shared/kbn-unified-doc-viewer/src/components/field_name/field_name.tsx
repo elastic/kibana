@@ -24,7 +24,7 @@ interface Props {
   fieldMapping?: DataViewField;
   fieldIconProps?: Omit<FieldIconProps, 'type'>;
   scripted?: boolean;
-  highlight?: string;
+  highlight?: string | string[];
   disableMultiFieldBadge?: boolean;
 }
 
@@ -71,7 +71,9 @@ export function FieldName({
             data-test-subj={`tableDocViewRow-${fieldName}-name`}
           >
             <EuiToolTip position="top" content={tooltip} anchorClassName="eui-textBreakAll">
-              <EuiHighlight search={highlight}>{fieldDisplayName}</EuiHighlight>
+              <EuiHighlight search={highlight} highlightAll>
+                {fieldDisplayName}
+              </EuiHighlight>
             </EuiToolTip>
           </EuiFlexItem>
 

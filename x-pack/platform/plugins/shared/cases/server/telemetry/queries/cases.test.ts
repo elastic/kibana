@@ -9,12 +9,7 @@ import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import type { SavedObjectsSearchResponse } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CasePersistedStatus } from '../../common/types/case';
-import type {
-  AttachmentAggregationResult,
-  AttachmentFrameworkAggsResult,
-  CaseAggregationResult,
-  FileAttachmentAggregationResults,
-} from '../types';
+import type { CaseAggregationResult, FileAttachmentAggregationResults } from '../types';
 import { getCasesTelemetryData } from './cases';
 import { getOnlyConnectorsFilter } from './utils';
 import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
@@ -198,66 +193,42 @@ describe('getCasesTelemetryData', () => {
         },
       };
 
-      const attachmentFramework: AttachmentFrameworkAggsResult = {
+      // Same shape reused for every owner so sec/obs/main are identical.
+      const legacyCommentsOwnerAgg = () => ({
+        doc_count: 12,
+        types: {
+          buckets: [{ key: 'user', doc_count: 3 }],
+        },
+        alert: { doc_count: 0, entityTotal: { value: 0 } },
+        event: { doc_count: 0, entityTotal: { value: 0 } },
         externalReferenceTypes: {
-          buckets: [
-            {
-              doc_count: 5,
-              key: '.osquery',
-              references: {
-                cases: {
-                  max: {
-                    value: 10,
-                  },
-                },
-              },
-            },
-            {
-              doc_count: 5,
-              key: '.files',
-              references: {
-                cases: {
-                  max: {
-                    value: 10,
-                  },
-                },
-              },
-            },
-          ],
+          buckets: [{ key: '.files', doc_count: 5 }],
         },
         persistableReferenceTypes: {
+          buckets: [{ key: '.lens', doc_count: 4 }],
+        },
+      });
+
+      const unifiedAttachmentsOwnerAgg = () => ({
+        doc_count: 5,
+        types: {
           buckets: [
-            {
-              doc_count: 5,
-              key: '.ml',
-              references: {
-                cases: {
-                  max: {
-                    value: 10,
-                  },
-                },
-              },
-            },
-            {
-              doc_count: 5,
-              key: '.files',
-              references: {
-                cases: {
-                  max: {
-                    value: 10,
-                  },
-                },
-              },
-            },
+            { key: 'comment', doc_count: 2, entityTotal: { value: 0 } },
+            { key: 'dashboard', doc_count: 3, entityTotal: { value: 0 } },
           ],
         },
+      });
+
+      const legacyCommentsAgg = {
+        securitySolution: legacyCommentsOwnerAgg(),
+        observability: legacyCommentsOwnerAgg(),
+        cases: legacyCommentsOwnerAgg(),
       };
 
-      const attachmentAggsResult: AttachmentAggregationResult = {
-        securitySolution: { ...attachmentFramework },
-        observability: { ...attachmentFramework },
-        cases: { ...attachmentFramework },
-        ...attachmentFramework,
+      const unifiedAttachmentsAgg = {
+        securitySolution: unifiedAttachmentsOwnerAgg(),
+        observability: unifiedAttachmentsOwnerAgg(),
+        cases: unifiedAttachmentsOwnerAgg(),
       };
 
       const filesRes: FileAttachmentAggregationResults = {
@@ -321,23 +292,24 @@ describe('getCasesTelemetryData', () => {
         },
       };
 
-      mockFind(caseAggsResult);
-      mockFind(attachmentAggsResult);
-      mockFind({ references: { referenceType: { referenceAgg: { value: 4 } } } });
+      mockFind(caseAggsResult); // find[0]
+      mockFind(legacyCommentsAgg); // find[1] getAttachmentsByTypeData -> legacy comments
+      mockFind(unifiedAttachmentsAgg); // find[2] getAttachmentsByTypeData -> unified attachments
+      mockFind({ references: { referenceType: { referenceAgg: { value: 4 } } } }); // find[3] connectors
 
       mockSavedObjectResponse({
         created_at: '2022-03-08T12:24:11.429Z',
-      });
+      }); // find[4]
       mockSavedObjectResponse({
         updated_at: '2022-03-08T12:24:11.429Z',
-      });
+      }); // find[5]
       mockSavedObjectResponse({
         closed_at: '2022-03-08T12:24:11.429Z',
-      });
-      mockFind(filesRes);
+      }); // find[6]
+      mockFind(filesRes); // find[7]
 
-      mockSearch(casesWithAlertsResult);
-      mockSearch({ participants: { value: 7 } });
+      mockSearch(casesWithAlertsResult); // search[0] cases with alerts
+      mockSearch({ participants: { value: 7 } }); // search[1] participants
     };
 
     beforeEach(() => {
@@ -347,71 +319,47 @@ describe('getCasesTelemetryData', () => {
     it('it returns the correct res', async () => {
       mockResponse();
 
-      const attachmentFramework = (total: number, average: number) => {
-        return {
-          attachmentFramework: {
-            externalAttachments: [
-              {
-                average,
-                maxOnACase: 10,
-                total,
-                type: '.osquery',
-              },
-              {
-                average,
-                maxOnACase: 10,
-                total,
-                type: '.files',
-              },
-            ],
-            persistableAttachments: [
-              {
-                average,
-                maxOnACase: 10,
-                total,
-                type: '.ml',
-              },
-              {
-                average,
-                maxOnACase: 10,
-                total,
-                type: '.files',
-              },
-            ],
-            files: {
-              averageSize: 500,
-              average,
-              maxOnACase: 10,
-              total,
-              topMimeTypes: [
-                {
-                  count: 5,
-                  name: 'image/png',
-                },
-                {
-                  count: 1,
-                  name: 'application/json',
-                },
-              ],
-            },
+      const filesStats = {
+        averageSize: 500,
+        topMimeTypes: [
+          { count: 5, name: 'image/png' },
+          { count: 1, name: 'application/json' },
+        ],
+      };
+
+      // sec/obs/main share the same owner data; each solution has SOLUTION_TOTAL
+      // (1) case, so average === total.
+      const solutionAttachmentFrameworkStats = {
+        attachmentFramework: {
+          attachmentsByType: {
+            comment: { total: 5, average: 5 },
+            file: { total: 5, average: 5 },
+            lens: { total: 4, average: 4 },
+            dashboard: { total: 3, average: 3 },
           },
-        };
+          bySavedObject: { legacy: { total: 12 }, unified: { total: 5 } },
+          files: filesStats,
+        },
+      };
+
+      // Merged across 3 owners; average uses MOCK_FIND_TOTAL (5) cases.
+      const allAttachmentFramework = {
+        attachmentFramework: {
+          attachmentsByType: {
+            comment: { total: 15, average: 3 },
+            file: { total: 15, average: 3 },
+            lens: { total: 12, average: 2 },
+            dashboard: { total: 9, average: 2 },
+          },
+          bySavedObject: { legacy: { total: 36 }, unified: { total: 15 } },
+          files: filesStats,
+        },
       };
 
       const res = await getCasesTelemetryData({
         savedObjectsClient: telemetrySavedObjectsClient,
         logger,
       });
-
-      const allAttachmentsTotal = 5;
-      const allAttachmentsAverage = allAttachmentsTotal / MOCK_FIND_TOTAL;
-
-      const solutionAttachmentsTotal = 5;
-      const solutionAttachmentsAverage = solutionAttachmentsTotal / SOLUTION_TOTAL;
-      const solutionAttachmentFrameworkStats = attachmentFramework(
-        solutionAttachmentsTotal,
-        solutionAttachmentsAverage
-      );
 
       expect(res).toEqual({
         all: {
@@ -449,7 +397,7 @@ describe('getCasesTelemetryData', () => {
             totalWithZero: 100,
             totalWithAtLeastOne: 0,
           },
-          ...attachmentFramework(allAttachmentsTotal, allAttachmentsAverage),
+          ...allAttachmentFramework,
         },
         main: {
           assignees: {
@@ -924,60 +872,29 @@ describe('getCasesTelemetryData', () => {
         }
       `);
 
-      const commentMaxBucketAgg = {
-        references: {
-          nested: { path: 'cases-comments.references' },
-          aggregations: {
-            cases: {
-              filter: { term: { 'cases-comments.references.type': 'cases' } },
-              aggregations: {
-                ids: { terms: { field: 'cases-comments.references.id' } },
-                max: { max_bucket: { buckets_path: 'ids._count' } },
-              },
-            },
-          },
-        },
-      };
-      const commentRegistries = {
-        externalReferenceTypes: {
-          terms: {
-            field: 'cases-comments.attributes.externalReferenceAttachmentTypeId',
-            size: 10,
-          },
-          aggs: commentMaxBucketAgg,
-        },
-        persistableReferenceTypes: {
-          terms: {
-            field: 'cases-comments.attributes.persistableStateAttachmentTypeId',
-            size: 10,
-          },
-          aggs: commentMaxBucketAgg,
-        },
-      };
+      // getAttachmentsByTypeData issues two queries: legacy comments then unified attachments.
+      const legacyCall = savedObjectsClient.find.mock.calls[1][0];
+      const legacyAggs = legacyCall.aggs as Record<string, { aggs: Record<string, unknown> }>;
+      expect(legacyCall.type).toBe('cases-comments');
+      expect(Object.keys(legacyAggs.securitySolution.aggs)).toEqual([
+        'types',
+        'alert',
+        'event',
+        'externalReferenceTypes',
+        'persistableReferenceTypes',
+      ]);
 
-      expect(savedObjectsClient.find.mock.calls[1][0]).toEqual({
-        aggs: {
-          securitySolution: {
-            filter: { term: { 'cases-comments.attributes.owner': 'securitySolution' } },
-            aggs: commentRegistries,
-          },
-          observability: {
-            filter: { term: { 'cases-comments.attributes.owner': 'observability' } },
-            aggs: commentRegistries,
-          },
-          cases: {
-            filter: { term: { 'cases-comments.attributes.owner': 'cases' } },
-            aggs: commentRegistries,
-          },
-          ...commentRegistries,
-        },
-        page: 0,
-        perPage: 0,
-        type: 'cases-comments',
-        namespaces: ['*'],
-      });
+      const unifiedCall = savedObjectsClient.find.mock.calls[2][0];
+      const unifiedAggs = unifiedCall.aggs as Record<
+        string,
+        { aggs: { types: { terms: { field: string } } } }
+      >;
+      expect(unifiedCall.type).toBe('cases-attachments');
+      expect(unifiedAggs.securitySolution.aggs.types.terms.field).toBe(
+        'cases-attachments.attributes.type'
+      );
 
-      expect(savedObjectsClient.find.mock.calls[2][0]).toEqual({
+      expect(savedObjectsClient.find.mock.calls[3][0]).toEqual({
         aggs: {
           references: {
             nested: { path: 'cases-user-actions.references' },
@@ -999,7 +916,7 @@ describe('getCasesTelemetryData', () => {
       });
 
       for (const [index, sortField] of ['created_at', 'updated_at', 'closed_at'].entries()) {
-        const callIndex = index + 3;
+        const callIndex = index + 4;
 
         expect(savedObjectsClient.find.mock.calls[callIndex][0]).toEqual({
           page: 1,
@@ -1011,7 +928,7 @@ describe('getCasesTelemetryData', () => {
         });
       }
 
-      expect(savedObjectsClient.find.mock.calls[6][0]).toMatchInlineSnapshot(`
+      expect(savedObjectsClient.find.mock.calls[7][0]).toMatchInlineSnapshot(`
         Object {
           "aggs": Object {
             "averageSize": Object {

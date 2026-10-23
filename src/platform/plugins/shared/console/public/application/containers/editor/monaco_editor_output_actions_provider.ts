@@ -11,9 +11,9 @@ import type { CSSProperties } from 'react';
 import { debounce } from 'lodash';
 import type { DebouncedFunc } from 'lodash';
 import { monaco } from '@kbn/monaco';
-import { createOutputParser } from '@kbn/monaco/src/languages/console/output_parser';
+import { createOutputParser } from '@kbn/monaco/src/languages/definitions/console/output_parser';
 
-import { getRequestEndLineNumber, getRequestStartLineNumber } from './utils';
+import { getRequestEndLineNumber, getRequestStartLineNumber } from './utils/request';
 
 import type { AdjustedParsedRequest } from './types';
 

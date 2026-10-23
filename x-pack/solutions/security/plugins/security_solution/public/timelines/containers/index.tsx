@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import { Subscription } from 'rxjs';
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { DataView } from '@kbn/data-plugin/common';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
@@ -68,11 +69,34 @@ export interface TimelineArgs {
   refetch: inputsModel.Refetch;
   totalCount: number;
   refreshedAt: number;
+  isPartial: boolean;
+  shardFailures: EqlShardFailure[];
+  timedOut: boolean;
+}
+
+/**
+ * Subset of an Elasticsearch shard failure carried to the Correlation tab so
+ * the incomplete-results callout can surface index / shard / reason detail.
+ */
+export interface EqlShardFailure {
+  index?: string;
+  shard?: number;
+  node?: string;
+  reason?: estypes.ErrorCause;
 }
 
 type OnNextResponseHandler = (response: TimelineArgs) => Promise<void> | void;
 
-type TimelineEventsSearchHandler = (onNextResponse?: OnNextResponseHandler) => void;
+/**
+ * Called when a search requested through the handler fails, or cannot start because no request
+ * has been built yet (e.g. no index names or no filter query).
+ */
+type OnSearchErrorHandler = (error: unknown) => void;
+
+type TimelineEventsSearchHandler = (
+  onNextResponse?: OnNextResponseHandler,
+  onError?: OnSearchErrorHandler
+) => void;
 
 type LoadPage = () => void;
 
@@ -91,6 +115,41 @@ type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
   : T extends 'eql'
   ? TimelineEqlResponse
   : TimelineEventsAllStrategyResponse;
+
+/**
+ * Raw response fields that signal incomplete results. EQL reports dropped shards in
+ * `shard_failures` and leaves `is_partial` false once the async search finishes, so
+ * `isPartial` alone misses timed-out or failed shards.
+ */
+interface PartialResultsRawResponse {
+  timed_out?: boolean;
+  _shards?: { failed?: number };
+  shard_failures?: EqlShardFailure[];
+}
+
+interface PartialResultsState {
+  isPartial: boolean;
+  shardFailures: EqlShardFailure[];
+  timedOut: boolean;
+}
+
+const getPartialResults = (
+  isPartial: boolean | undefined,
+  rawResponse: PartialResultsRawResponse | undefined
+): PartialResultsState => {
+  const shardFailures = Array.isArray(rawResponse?.shard_failures)
+    ? rawResponse.shard_failures
+    : [];
+  const timedOut = rawResponse?.timed_out === true;
+  const hasFailedShards =
+    typeof rawResponse?._shards?.failed === 'number' && rawResponse._shards.failed > 0;
+
+  return {
+    isPartial: isPartial === true || timedOut || shardFailures.length > 0 || hasFailedShards,
+    shardFailures,
+    timedOut,
+  };
+};
 
 export interface UseTimelineEventsProps {
   dataViewId: string | null;
@@ -240,6 +299,9 @@ export const useTimelineEventsHandler = ({
       rawEvents: [],
       loadNextBatch,
       refreshedAt: 0,
+      isPartial: false,
+      shardFailures: [],
+      timedOut: false,
     }),
     [id, loadNextBatch]
   );
@@ -249,9 +311,11 @@ export const useTimelineEventsHandler = ({
   const timelineSearch = useCallback(
     async (
       request: TimelineRequest<typeof language> | null,
-      onNextHandler?: OnNextResponseHandler
+      onNextHandler?: OnNextResponseHandler,
+      onErrorHandler?: OnSearchErrorHandler
     ) => {
       if (request == null || pageName === '' || skip) {
+        onErrorHandler?.(new Error('The timeline events search could not start.'));
         return;
       }
 
@@ -292,6 +356,10 @@ export const useTimelineEventsHandler = ({
                     pageInfo: response.pageInfo,
                     totalCount: response.totalCount,
                     refreshedAt: Date.now(),
+                    ...getPartialResults(
+                      response.isPartial,
+                      response.rawResponse as PartialResultsRawResponse | undefined
+                    ),
                   };
                   if (id === TimelineId.active) {
                     activeTimeline.setPageName(pageName);
@@ -315,6 +383,7 @@ export const useTimelineEventsHandler = ({
 
               setLoading(DataLoadingState.loaded);
               data.search.showError(msg);
+              onErrorHandler?.(msg);
               searchSubscription$.current.unsubscribe();
             },
           });
@@ -516,13 +585,13 @@ export const useTimelineEventsHandler = ({
   }, [defaultTimelineResponse, filterQuery]);
 
   const timelineSearchHandler = useCallback(
-    async (onNextHandler?: OnNextResponseHandler) => {
+    async (onNextHandler?: OnNextResponseHandler, onErrorHandler?: OnSearchErrorHandler) => {
       if (
         id !== TimelineId.active ||
         timerangeKind === 'absolute' ||
         !deepEqual(prevTimelineRequest.current, timelineRequest)
       ) {
-        await timelineSearch(timelineRequest, onNextHandler);
+        await timelineSearch(timelineRequest, onNextHandler, onErrorHandler);
       }
     },
     [id, timelineRequest, timelineSearch, timerangeKind]
