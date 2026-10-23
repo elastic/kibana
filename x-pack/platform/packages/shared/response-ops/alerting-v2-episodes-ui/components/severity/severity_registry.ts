@@ -6,13 +6,9 @@
  */
 
 import type { EuiBadgeProps } from '@elastic/eui';
-import {
-  EpisodeSeverity,
-  EPISODE_SEVERITIES,
-  EPISODE_SEVERITY_CHART_VALUE,
-} from '@kbn/alerting-v2-common-queries';
+import { EpisodeSeverity, EPISODE_SEVERITIES } from '@kbn/alerting-v2-common-queries';
 import type { SeverityExtension } from '../../types/episode_data_source';
-import { EPISODE_SEVERITY_BADGE_COLORS } from './severity_utils';
+import { EPISODE_SEVERITY_BADGE_COLORS, EPISODE_SEVERITY_SORT_RANK } from './severity_utils';
 import * as i18n from './translations';
 
 /** Unified entry in the merged severity registry. */
@@ -41,8 +37,8 @@ const EPISODE_SEVERITY_LABELS: Record<EpisodeSeverity, string> = {
 const BUILTIN_DOT_COLORS: Record<EpisodeSeverity, string> = {
   [EpisodeSeverity.Critical]: 'textDanger',
   [EpisodeSeverity.High]: 'textRisk',
-  [EpisodeSeverity.Medium]: 'textSuccess',
-  [EpisodeSeverity.Low]: 'textPrimary',
+  [EpisodeSeverity.Medium]: 'textWarning',
+  [EpisodeSeverity.Low]: 'textNeutral',
   [EpisodeSeverity.Info]: 'textParagraph',
 };
 
@@ -50,7 +46,7 @@ const BUILTIN_ENTRIES: SeverityRegistryEntry[] = EPISODE_SEVERITIES.map((severit
   value: severity,
   label: EPISODE_SEVERITY_LABELS[severity],
   color: EPISODE_SEVERITY_BADGE_COLORS[severity],
-  sortRank: EPISODE_SEVERITY_CHART_VALUE[severity],
+  sortRank: EPISODE_SEVERITY_SORT_RANK[severity],
   filterDotColor: BUILTIN_DOT_COLORS[severity],
 }));
 
