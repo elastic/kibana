@@ -25,6 +25,7 @@ import {
   inSpace,
   IS_NOT_DELETED,
   IS_NOT_EXCLUDED,
+  IS_NOT_EXPIRED,
 } from '../esql_helpers';
 import {
   DESCRIPTION,
@@ -65,6 +66,7 @@ import {
 } from './search_embedding_model';
 
 const SEARCH_SIZE_LIMIT = 10_000;
+const CROSS_SOURCE_RANK_LIMIT = 300;
 const QUERY_FEATURE_ID = 'query.features.id';
 // `FUSE` preserves this label only when the semantic branch contributes the row.
 const RANK_LABEL_COLUMN = 'label';
@@ -181,6 +183,99 @@ export class IndicatorSearcher {
     return {
       hits: hits.flatMap((h) => (h.type === 'feature' ? [h.feature] : [])),
     };
+  }
+
+  async findFeaturesAcrossSources(
+    sourceIds: string[],
+    query: string,
+    options: { featureType: string; searchMode?: SearchMode; limit?: number }
+  ): Promise<{ hits: Feature[] }> {
+    if (sourceIds.length === 0) {
+      return { hits: [] };
+    }
+
+    return searchWithKeywordFallback(
+      this.logger,
+      { searchMode: options.searchMode, label: 'KnowledgeIndicator', sourceIds },
+      (mode) => this.executeFindFeaturesAcrossSources(mode, sourceIds, query, options)
+    );
+  }
+
+  private async executeFindFeaturesAcrossSources(
+    mode: SearchMode,
+    sourceIds: string[],
+    queryText: string,
+    { featureType, limit }: { featureType: string; limit?: number }
+  ): Promise<{ hits: Feature[] }> {
+    // Latest-per-group cannot be folded into the rank query: a `KNN()`/`MATCH` placed after
+    // `INLINE STATS` is no longer pushed to Lucene (dense `KNN()` fails outright on `semantic_text`),
+    // so the current revisions are read first and ranking is prefiltered on their `revision_id`.
+    const latest = await this.revisionReader.fetchLatestRevisions(
+      combineWhere(inPredicate(SOURCE_ID, sourceIds), inPredicate(TYPE, [KI_TYPE_FEATURE])),
+      combineWhere(
+        IS_NOT_DELETED,
+        IS_NOT_EXCLUDED,
+        IS_NOT_EXPIRED,
+        inPredicate(FEATURE_TYPE, [featureType])
+      )
+    );
+    const latestByKey = new Map(
+      latest
+        .filter(isStoredFeatureKnowledgeIndicator)
+        .map((doc) => [`${doc['source.id']}:${doc.id}`, doc])
+    );
+    if (latestByKey.size === 0) {
+      return { hits: [] };
+    }
+
+    const rankWhere = andWhere(
+      combineWhere(
+        inPredicate(SOURCE_ID, sourceIds),
+        inPredicate(TYPE, [KI_TYPE_FEATURE]),
+        inPredicate(
+          REVISION_ID,
+          latest.map(({ revision_id: revisionId }) => revisionId)
+        )
+      ),
+      inSpace(this.space)
+    );
+    const model: SearchEmbeddingModel =
+      mode === 'keyword' ? { kind: 'unknown' } : await this.resolveEmbeddingModel();
+    const rankedRows = await this.rankWithTieFallback(
+      mode,
+      CROSS_SOURCE_RANK_LIMIT,
+      (semanticMinScore) =>
+        this.buildRankQuery(
+          mode,
+          rankWhere,
+          queryText,
+          [KI_TYPE_FEATURE],
+          CROSS_SOURCE_RANK_LIMIT,
+          semanticMinScore,
+          model
+        )
+    );
+
+    const seen = new Set<string>();
+    const hits: Feature[] = [];
+    for (const row of rankedRows) {
+      const id = row[ID];
+      const sourceId = row[SOURCE_ID];
+      if (typeof id !== 'string' || typeof sourceId !== 'string') {
+        continue;
+      }
+      const key = `${sourceId}:${id}`;
+      const doc = latestByKey.get(key);
+      if (!doc || seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      hits.push(fromStoredFeature(doc));
+    }
+    this.logger.debug(
+      `Cross-source feature search: ${hits.length} distinct groups in ${rankedRows.length} ranked rows`
+    );
+    return { hits: limit === undefined ? hits : hits.slice(0, limit) };
   }
 
   async findQueries(

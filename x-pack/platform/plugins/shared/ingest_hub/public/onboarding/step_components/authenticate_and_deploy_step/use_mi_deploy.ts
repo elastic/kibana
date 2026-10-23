@@ -16,6 +16,7 @@ import type {
 import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
 import { buildInstanceStatuses, collectDeployResults, deployGroup } from './deploy_groups';
 import type { DeployGroup } from './deploy_groups';
+import { toSOSettings, toSOSettingsUpdate } from './so_settings';
 import { toSOServiceVars } from './package_inputs';
 import { fetchAgentlessSecretRefs, withoutCoveredCredentials } from './secret_refs';
 import { runWithSharedSecrets } from './shared_secrets';
@@ -484,6 +485,7 @@ export function useMiDeploy({
           if (plan.targets.length === 0 && !plan.hasPendingCleanup) {
             if (onboardingDeploymentId) {
               const soUpdated = await updateDeployment(onboardingDeploymentId, {
+                ...toSOSettingsUpdate(serviceSettings),
                 services: selectedServiceIds,
                 serviceVars: toSOServiceVars(
                   serviceSettings?.serviceVars ?? {},
@@ -574,6 +576,7 @@ export function useMiDeploy({
               ([iid, pid]) => !cleanedInstanceIds.has(iid) && !deletedIds.has(pid)
             );
             soWriteSucceeded = await updateDeployment(onboardingDeploymentId, {
+              ...toSOSettingsUpdate(serviceSettings),
               services: selectedServiceIds,
               packagePolicyIds: [...new Set(survivingEntries.map(([, pid]) => pid))],
               policyIdsByInstance: Object.fromEntries(survivingEntries),
@@ -704,6 +707,8 @@ export function useMiDeploy({
       }
 
       const globalRegion = serviceSettings?.globalRegion ?? '';
+      const integrationName = serviceSettings?.integrationName?.trim() || undefined;
+      const description = serviceSettings?.description?.trim() || undefined;
       const storedServiceVars = serviceSettings?.serviceVars ?? {};
 
       const { connectorId } = authenticateAndDeployStep;
@@ -721,6 +726,7 @@ export function useMiDeploy({
               Record<string, unknown>
             >,
             globalRegion,
+            ...toSOSettings(serviceSettings),
             dataFormat,
             authMethod: connectorId ? 'identity_federation' : 'static_keys',
           })) ?? undefined;
@@ -778,6 +784,8 @@ export function useMiDeploy({
             namespace,
             globalRegion,
             storedServiceVars,
+            integrationName,
+            description,
             authenticateAndDeployStep: sharedRefs
               ? withSharedRefs(sharedRefs)
               : { ...authenticateAndDeployStep, existingSecretRefs: keptSecretRefs },
@@ -819,6 +827,7 @@ export function useMiDeploy({
           }).filter(([iid, pid]) => !cleanedInstanceIds.has(iid) && !deletedPolicyIds.has(pid))
         );
         soWriteSucceeded = await updateDeployment(currentOnboardingDeploymentId, {
+          ...toSOSettingsUpdate(serviceSettings),
           services: selectedServiceIds,
           serviceVars: toSOServiceVars(
             serviceSettings?.serviceVars ?? {},

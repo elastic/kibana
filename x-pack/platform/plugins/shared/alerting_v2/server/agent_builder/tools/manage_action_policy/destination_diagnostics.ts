@@ -290,7 +290,7 @@ export class DestinationValidator {
         if (diagnostic.severity !== 'error') continue;
         this.push(
           destinationId,
-          'warning',
+          this.config.blockOnStructuralErrors ? 'error' : 'warning',
           'workflow-validation',
           `[${diagnostic.ruleId}] ${diagnostic.message}${
             diagnostic.path ? ` (at ${diagnostic.path.join('.')})` : ''
