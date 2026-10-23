@@ -23,34 +23,29 @@ test.describe(
       await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
-    test('should handle network failures during rule creation', async ({
-      page,
-      context,
-      pageObjects,
-    }) => {
+    test('should handle network failures during rule creation', async ({ page, pageObjects }) => {
       await pageObjects.streams.clickCreateRoutingRule();
       await pageObjects.streams.fillRoutingRuleName('network-test');
 
-      // Simulate network failure
-      await context.setOffline(true);
+      // Simulate a network failure for the fork request
+      await page.route('**/api/streams/**/_fork*', (route) => route.abort('failed'));
 
       await pageObjects.streams.saveRoutingRule();
 
       // Should show error and stay in creating state
-      await pageObjects.toasts.waitFor();
-      expect(await pageObjects.toasts.getMessageText()).toBe('Failed to fetch');
-      await pageObjects.toasts.closeAll();
+      await expect(page.getByTestId('errorToast')).toContainText('Failed to save');
+      await pageObjects.toasts.dismissAll();
       await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
 
       // Restore network and retry
-      await context.setOffline(false);
+      await page.unroute('**/api/streams/**/_fork*');
       await pageObjects.streams.saveRoutingRule();
 
       // Should succeed
       await pageObjects.streams.expectRoutingRuleVisible('logs.otel.network-test');
     });
 
-    test('should recover from API errors during rule updates', async ({ context, pageObjects }) => {
+    test('should recover from API errors during rule updates', async ({ page, pageObjects }) => {
       // Create a rule first with a field condition (not the default "always" condition)
       await pageObjects.streams.clickCreateRoutingRule();
       await pageObjects.streams.fillRoutingRuleName('error-test');
@@ -60,7 +55,7 @@ test.describe(
         operator: 'equals',
       });
       await pageObjects.streams.saveRoutingRule();
-      await pageObjects.toasts.closeAll();
+      await pageObjects.toasts.dismissAll();
 
       // Edit the rule
       await pageObjects.streams.clickEditRoutingRule('logs.otel.error-test');
@@ -68,23 +63,25 @@ test.describe(
       // Make a change to enable the Update button (hasRoutingChanges guard)
       await pageObjects.streams.fillConditionEditor({ value: 'info' });
 
-      // Simulate network failure
-      await context.setOffline(true);
+      // Simulate a network failure for the ingest update request
+      await page.route('**/api/streams/**/_ingest*', (route) => route.abort('failed'));
 
       await pageObjects.streams.updateRoutingRule();
 
       // Should show error and return to editing state
-      await pageObjects.toasts.waitFor();
-      expect(await pageObjects.toasts.getMessageText()).toBe('Failed to fetch');
-      await pageObjects.toasts.closeAll();
+      await expect(page.getByTestId('errorToast')).toContainText('Failed to save');
+      await pageObjects.toasts.dismissAll();
 
       // Restore network and retry
-      await context.setOffline(false);
+      await page.unroute('**/api/streams/**/_ingest*');
       await pageObjects.streams.updateRoutingRule();
 
       // Should succeed
-      await pageObjects.toasts.waitFor();
-      expect(await pageObjects.toasts.getHeaderText()).toBe('Stream saved');
+      await expect(
+        page
+          .getByTestId('routingRule-logs.otel.error-test')
+          .getByTestId('streamsAppConditionDisplayValue')
+      ).toContainText('info');
     });
 
     test('should show server error message in Full error modal', async ({ page, pageObjects }) => {
