@@ -31,6 +31,7 @@ const moreSaveOptionsLabel = i18n.translate(
 interface ManagedEditorFooterSaveMenuItem {
   name: string;
   onClick: () => void;
+  disabled?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -104,9 +105,10 @@ const SaveSplitButton = ({
       }
     >
       <EuiContextMenuPanel
-        items={saveMenuItems.map(({ name, onClick, 'data-test-subj': dataTestSubj }) => (
+        items={saveMenuItems.map(({ name, onClick, disabled, 'data-test-subj': dataTestSubj }) => (
           <EuiContextMenuItem
             key={name}
+            disabled={disabled}
             data-test-subj={dataTestSubj}
             onClick={() => {
               setIsMenuOpen(false);

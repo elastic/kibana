@@ -313,6 +313,7 @@ export const VegaLibraryEditor = ({
                     defaultMessage: 'Save as new…',
                   }),
                   onClick: saveAsNewItem,
+                  disabled: hasTooManyFilters(draft.filters),
                   'data-test-subj': 'vegaLibraryEditorSaveAsNewButton',
                 },
               ]

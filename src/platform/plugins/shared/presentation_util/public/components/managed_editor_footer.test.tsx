@@ -110,5 +110,26 @@ describe('ManagedEditorFooter', () => {
 
       expect(screen.getByTestId('savePrimary')).toBeDisabled();
     });
+
+    it('disables a menu item when it is disabled', async () => {
+      const onMenuItemClick = jest.fn();
+      renderFooter({
+        saveMenuItems: [
+          {
+            name: 'Save as new…',
+            onClick: onMenuItemClick,
+            disabled: true,
+            'data-test-subj': 'as',
+          },
+        ],
+      });
+
+      await userEvent.click(screen.getByTestId('saveMenu'));
+      const menuItem = await screen.findByTestId('as');
+      fireEvent.click(menuItem);
+
+      expect(menuItem).toBeDisabled();
+      expect(onMenuItemClick).not.toHaveBeenCalled();
+    });
   });
 });

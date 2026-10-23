@@ -231,6 +231,13 @@ describe('VegaLibraryEditor', () => {
 
       expect(screen.getByTestId('vegaEditorTooManyFiltersCallout')).toBeInTheDocument();
       expect(screen.getByTestId('vegaLibraryEditorSaveButtonPrimary')).toBeDisabled();
+
+      await userEvent.click(screen.getByTestId('vegaLibraryEditorSaveButtonMenu'));
+      const saveAsNewButton = await screen.findByTestId('vegaLibraryEditorSaveAsNewButton');
+      fireEvent.click(saveAsNewButton);
+
+      expect(saveAsNewButton).toBeDisabled();
+      expect(saveVegaToLibrary).not.toHaveBeenCalled();
     });
 
     it('saves a copy with the current draft and the details of the item, and edits the copy', async () => {
