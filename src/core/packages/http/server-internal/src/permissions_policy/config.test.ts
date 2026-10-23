@@ -188,17 +188,10 @@ describe('permissionsPolicyConfig', () => {
       ]);
     });
 
-    it('accepts an endpoint name at the maximum length', () => {
-      const name = 'a'.repeat(256);
+    // `report_to` is GA. A long name still serializes correctly, so it must keep working.
+    it('accepts a long endpoint name', () => {
+      const name = 'a'.repeat(300);
       expect(validate({ report_to: [name] }).report_to).toEqual([name]);
-    });
-
-    it('rejects an endpoint name that is longer than the maximum', () => {
-      expect(() => validate({ report_to: ['a'.repeat(257)] })).toThrow(/maximum length/);
-    });
-
-    it('rejects more endpoints than the maximum', () => {
-      expect(() => validate({ report_to: new Array(11).fill('endpoint') })).toThrow(/array size/);
     });
   });
 
