@@ -1,5 +1,5 @@
 {
-  "sha1": "197b185bdf08a1a4ee0f5be367c757e9f66f080d",
+  "sha1": "f16b46546c2d990a28d3f4bfbb5a1f11a524b265",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -347,8 +347,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 201,
-        "column": 7
+        "line": 204,
+        "column": 20
       }
     },
     {

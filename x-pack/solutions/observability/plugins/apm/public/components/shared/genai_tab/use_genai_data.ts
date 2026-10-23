@@ -41,15 +41,19 @@ export function useGenAiData({
           path: { processorEvent, id },
           query: { start: timestamp, end: timestamp },
         },
-      });
+      }).then(({ metadata }) => ({ id, metadata }));
     },
     [processorEvent, id, timestamp]
   );
 
-  const isMetadataLoading = isPending(metadataStatus);
+  // The fetcher keeps the previous event's data and status until the next request starts, and
+  // keeps both when `id` is cleared, so data fetched for another event counts as loading. A failed
+  // request clears the data, which leaves nothing to compare.
+  const isOtherEvent = eventMetadata !== undefined && eventMetadata.id !== id;
+  const isMetadataLoading = isPending(metadataStatus) || isOtherEvent;
 
   return useMemo(() => {
-    const metadata = eventMetadata?.metadata ?? {};
+    const metadata = (isOtherEvent ? undefined : eventMetadata?.metadata) ?? {};
     const isGenAiSpan = hasGenAiData(metadata);
 
     return {
@@ -58,5 +62,5 @@ export function useGenAiData({
       isGenAiSpan,
       genAi: isGenAiSpan ? getGenAiFields(metadata) : undefined,
     };
-  }, [eventMetadata, isMetadataLoading]);
+  }, [eventMetadata, isMetadataLoading, isOtherEvent]);
 }

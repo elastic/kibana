@@ -52,7 +52,7 @@ interface ResumeExecutionButtonProps {
   autoOpen?: boolean;
   /** Step execution document id for the active waitForInput pause; when it changes, re-enable after a prior submit */
   waitingStepExecutionId?: string;
-  /** Shared across header and step-detail instances so one submit disables both. */
+  /** Lifted by the flyout so the submit state resets when the run or its waiting step changes. */
   submitState?: {
     isSubmitting: boolean;
     isSubmitted: boolean;
