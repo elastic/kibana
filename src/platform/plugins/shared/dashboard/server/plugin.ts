@@ -42,7 +42,7 @@ import {
   TASK_ID,
 } from './usage/dashboard_telemetry_collection_task';
 import { capabilitiesProvider } from './capabilities_provider';
-import type { DashboardPluginSetup, DashboardPluginStart } from './types';
+import type { DashboardPluginSetup, DashboardPluginStart, DashboardReadOptions } from './types';
 import { createDashboardSavedObjectType } from './dashboard_saved_object';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
@@ -206,8 +206,20 @@ export class DashboardPlugin
         perPage: number
       ) => scanDashboards(savedObjectsClient, page, perPage, getCachedDashboardStateSchema()),
       client: {
-        read: async (savedObjectsClient: SavedObjectsClientContract, id: string) => {
-          return (await read(savedObjectsClient, getCachedDashboardStateSchema(), id)).body;
+        read: async (
+          savedObjectsClient: SavedObjectsClientContract,
+          id: string,
+          options?: DashboardReadOptions
+        ) => {
+          return (
+            await read(
+              savedObjectsClient,
+              getCachedDashboardStateSchema(),
+              id,
+              undefined,
+              options?.isDashboardAppRequest
+            )
+          ).body;
         },
       },
     };

@@ -92,7 +92,9 @@ export const createDashboardSmlType = ({
   getSmlEntry: async (originId, context) => {
     try {
       const dashboardClient = await getDashboardClient();
-      const dashboard = await dashboardClient.read(context.savedObjectsClient, originId);
+      const dashboard = await dashboardClient.read(context.savedObjectsClient, originId, {
+        isDashboardAppRequest: true,
+      });
 
       return {
         type: DASHBOARD_KI_TYPE,
@@ -113,7 +115,9 @@ export const createDashboardSmlType = ({
     const originId = getSmlOriginId(item);
     try {
       const dashboardClient = await getDashboardClient();
-      const dashboard = await dashboardClient.read(context.savedObjectsClient, originId);
+      const dashboard = await dashboardClient.read(context.savedObjectsClient, originId, {
+        isDashboardAppRequest: true,
+      });
 
       return {
         type: DASHBOARD_ATTACHMENT_TYPE,

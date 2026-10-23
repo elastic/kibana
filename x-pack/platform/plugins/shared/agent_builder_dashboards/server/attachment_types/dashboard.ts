@@ -50,7 +50,9 @@ export const createDashboardAttachmentType = ({
       throw new Error('Saved objects client is required to read dashboard attachments');
     }
     const dashboardClient = await getDashboardClient();
-    return dashboardClient.read(context.savedObjectsClient, origin);
+    return dashboardClient.read(context.savedObjectsClient, origin, {
+      isDashboardAppRequest: true,
+    });
   };
 
   return {

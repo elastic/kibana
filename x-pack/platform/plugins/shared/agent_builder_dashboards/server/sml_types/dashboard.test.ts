@@ -190,6 +190,9 @@ describe('dashboardSmlType', () => {
     expect(result?.content).toContain('Operations');
     expect(result?.content).toContain('2 panels');
     expect(result?.content).toContain('1 sections');
+    expect(dashboardClient.read).toHaveBeenCalledWith(savedObjectsClient, 'dashboard-1', {
+      isDashboardAppRequest: true,
+    });
   });
 
   it('converts saved dashboards into dashboard attachments with origin', async () => {
@@ -253,6 +256,9 @@ describe('dashboardSmlType', () => {
         }),
       ])
     );
+    expect(dashboardClient.read).toHaveBeenCalledWith(savedObjectsClient, 'dashboard-1', {
+      isDashboardAppRequest: true,
+    });
   });
 
   it('falls back to generic panel storage when a lens panel is already in API format', async () => {
