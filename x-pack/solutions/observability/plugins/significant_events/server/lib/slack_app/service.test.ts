@@ -1422,15 +1422,15 @@ describe('SlackAppService', () => {
           });
 
         await expect(
-          new SlackAppService(server).findPrivateChannels(request, ['C1', 'C2', 'C9'])
+          new SlackAppService(server).findPrivateChannels(soClient as never, ['C1', 'C2', 'C9'])
         ).resolves.toEqual(['C2']);
       });
 
       it('skips the Relay when no channels are given', async () => {
-        const { server } = createHarnessWithListBindings();
-        await expect(new SlackAppService(server).findPrivateChannels(request, [])).resolves.toEqual(
-          []
-        );
+        const { server, soClient } = createHarnessWithListBindings();
+        await expect(
+          new SlackAppService(server).findPrivateChannels(soClient as never, [])
+        ).resolves.toEqual([]);
         expect(listBindings).not.toHaveBeenCalled();
       });
 
@@ -1439,7 +1439,7 @@ describe('SlackAppService', () => {
         soClient.get.mockResolvedValue(connected);
         listBindings.mockRejectedValue(new Error('boom'));
         await expect(
-          new SlackAppService(server).findPrivateChannels(request, ['C1'])
+          new SlackAppService(server).findPrivateChannels(soClient as never, ['C1'])
         ).rejects.toThrow('boom');
       });
     });

@@ -40,10 +40,7 @@ export interface InvestigationQuotaResult {
 export type InvestigationQuotaCallback = () => Promise<InvestigationQuotaResult>;
 
 /** Returns the ids among `channelIds` that automations may not use (private Slack channels). */
-export type SlackChannelEligibilityCallback = (
-  request: KibanaRequest,
-  channelIds: string[]
-) => Promise<string[]>;
+export type SlackChannelEligibilityCallback = (channelIds: string[]) => Promise<string[]>;
 
 export interface NightshiftInvestigationsServerSetup {
   registerInvestigationQuota: (callback: InvestigationQuotaCallback) => void;

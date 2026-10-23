@@ -93,7 +93,6 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
 
     validateScheduledAutomation(attributes);
     await assertSlackChannelsEligible({
-      request,
       automation: attributes,
       checkEligibility: getSlackChannelEligibility?.(),
     });

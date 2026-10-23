@@ -109,7 +109,6 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     // Disabling or renaming must stay possible for an automation that already holds a private channel.
     if (body.trigger || body.completions || body.isEnabled === true) {
       await assertSlackChannelsEligible({
-        request,
         automation: merged,
         checkEligibility: getSlackChannelEligibility?.(),
       });

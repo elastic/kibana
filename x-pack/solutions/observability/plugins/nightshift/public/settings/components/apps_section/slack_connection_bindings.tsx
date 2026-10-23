@@ -41,7 +41,7 @@ interface SlackConnectionBindingsProps {
 const failureCopy = ({ reason, message }: BindFailure): string => {
   switch (reason) {
     case 'not_a_member':
-      // The Relay sends this for any channel it can't see, private or not: https://github.com/elastic/relay-service/pull/523
+      // The Relay sends this for any channel it can't see, private or not.
       return i18n.translate('xpack.nightshift.settings.apps.bindNotMember', {
         defaultMessage:
           'Invite @Elastic to the channel, then try again. If the channel is private, you may also need to reconnect Slack and allow private channel access.',
@@ -119,7 +119,7 @@ export function SlackConnectionBindings({ canEdit, onReconnect }: SlackConnectio
       return;
     }
     // Binding changes the connected set, so return to the first page after it succeeds.
-    // Failure is surfaced via a toast in useBindChannel; ignore the rejection here.
+    // Failure renders inline from useBindChannel's `failure`; ignore the rejection here.
     bind(parsedChannelId)
       .then(() => {
         setChannelInput('');

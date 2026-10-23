@@ -193,14 +193,21 @@ export class SignificantEventsPlugin
       });
     });
 
-    plugins.nightshiftInvestigations?.registerSlackChannelEligibility(
-      async (request, channelIds) => {
-        if (!this.server) {
-          throw new Error('Significant Events services are unavailable');
-        }
-        return new SlackAppService(this.server).findPrivateChannels(request, channelIds);
+    // No feature privilege grants the hidden connection type; the automation routes require `manage_nightshift`.
+    plugins.nightshiftInvestigations?.registerSlackChannelEligibility(async (channelIds) => {
+      if (!this.server?.core) {
+        throw new Error('Significant Events start services are unavailable');
       }
-    );
+      const soClient = new SavedObjectsClient(
+        this.server.core.savedObjects.createInternalRepository([RELAY_APP_CONNECTION_SO_TYPE])
+      );
+      try {
+        return await new SlackAppService(this.server).findPrivateChannels(soClient, channelIds);
+      } catch (error) {
+        this.logger.warn(`Could not check Slack channel visibility: ${(error as Error).message}`);
+        throw error;
+      }
+    });
 
     core.dataStreams.registerDataStream(detectionsDataStream);
     core.dataStreams.registerDataStream(knowledgeIndicatorsDataStream);

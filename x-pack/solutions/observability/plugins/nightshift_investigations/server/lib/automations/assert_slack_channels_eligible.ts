@@ -6,7 +6,6 @@
  */
 
 import { badRequest, serverUnavailable } from '@hapi/boom';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SlackChannelEligibilityCallback } from '../../types';
 import type { NightshiftAutomationAttributes } from './types';
 
@@ -31,11 +30,9 @@ export const collectAutomationSlackChannels = ({
 
 /** Rejects private Slack channels, which automations don't support yet; fails closed when the check can't run. */
 export const assertSlackChannelsEligible = async ({
-  request,
   automation,
   checkEligibility,
 }: {
-  request: KibanaRequest;
   automation: Pick<NightshiftAutomationAttributes, 'trigger' | 'completions'>;
   checkEligibility?: SlackChannelEligibilityCallback;
 }): Promise<void> => {
@@ -44,7 +41,7 @@ export const assertSlackChannelsEligible = async ({
 
   let ineligible: string[];
   try {
-    ineligible = await checkEligibility(request, channels);
+    ineligible = await checkEligibility(channels);
   } catch {
     throw serverUnavailable('Could not check Slack channels. Try again in a moment.');
   }

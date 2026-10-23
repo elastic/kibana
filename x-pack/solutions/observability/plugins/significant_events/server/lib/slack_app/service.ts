@@ -742,13 +742,15 @@ export class SlackAppService {
   }
 
   /** Of `channelIds`, those this deployment bound as private; throws when the Relay can't answer so callers fail closed. */
-  async findPrivateChannels(request: KibanaRequest, channelIds: string[]): Promise<string[]> {
+  async findPrivateChannels(
+    soClient: SavedObjectsClientContract,
+    channelIds: string[]
+  ): Promise<string[]> {
     const wanted = new Set(channelIds);
     const found = new Set<string>();
     if (wanted.size === 0) {
       return [];
     }
-    const soClient = this.getSoClient(request);
     const [relayClient, connection] = await Promise.all([
       this.getRelayClient(),
       this.readConnection(soClient),
