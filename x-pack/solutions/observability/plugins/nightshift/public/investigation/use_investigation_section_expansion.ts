@@ -11,12 +11,14 @@ import {
   COLLAPSED_BY_DEFAULT_SECTION_IDS,
   type InvestigationSectionId,
 } from '../hooks/use_investigation_sections';
+import { useKibana } from '../hooks/use_kibana';
 
 /**
  * The user's explicit toggles, kept across reloads. Sections the user never toggled are absent and
- * fall back to their default. The preference is a browser-level one, so it is not keyed by space.
+ * fall back to their default. Per space: the base path carries the space prefix (`/s/<space id>`).
  */
-export const SECTION_EXPANSION_STORAGE_KEY = 'nightshift.investigations.sectionsExpanded';
+export const getSectionExpansionStorageKey = (basePath: string): string =>
+  `nightshift.investigations.sectionsExpanded:${basePath || 'default'}`;
 
 type ExpansionOverrides = Partial<Record<InvestigationSectionId, boolean>>;
 
@@ -41,8 +43,9 @@ const sanitizeOverrides = (value: unknown): ExpansionOverrides => {
 
 /** Which sections are expanded, remembering the user's toggles in local storage. */
 export const useInvestigationSectionExpansion = (): InvestigationSectionExpansion => {
+  const { http } = useKibana().services;
   const [storedOverrides, setStoredOverrides] = useLocalStorage<ExpansionOverrides>(
-    SECTION_EXPANSION_STORAGE_KEY,
+    getSectionExpansionStorageKey(http.basePath.get()),
     {}
   );
   const overrides = useMemo(() => sanitizeOverrides(storedOverrides), [storedOverrides]);

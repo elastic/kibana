@@ -11,11 +11,15 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
 import { InvestigationList, type InvestigationListHandle } from './investigation_list';
-import { SECTION_EXPANSION_STORAGE_KEY } from './use_investigation_section_expansion';
+import { getSectionExpansionStorageKey } from './use_investigation_section_expansion';
+
+let mockBasePath = '/s/team-a';
+const SECTION_EXPANSION_STORAGE_KEY = getSectionExpansionStorageKey('/s/team-a');
 
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
+      http: { basePath: { get: () => mockBasePath } },
       agenticInvestigations: {
         InvestigationCard: ({ investigation: item }: { investigation: InvestigationSummary }) => (
           <div data-test-subj="investigationCard">{item.title}</div>
@@ -83,6 +87,7 @@ Element.prototype.scrollIntoView = scrollIntoView;
 describe('InvestigationList', () => {
   beforeEach(() => {
     window.localStorage.clear();
+    mockBasePath = '/s/team-a';
     scrollIntoView.mockClear();
   });
 
@@ -171,6 +176,30 @@ describe('InvestigationList', () => {
 
     expect(getToggleControl('critical')).toHaveAttribute('aria-expanded', 'false');
     expect(getToggleControl('closed')).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('keeps a separate preference in each space', () => {
+    const sections = [makeSection('critical', { investigations: [investigation], total: 1 })];
+    const { unmount } = renderSections(sections);
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionToggle-critical'));
+    expect(getToggleControl('critical')).toHaveAttribute('aria-expanded', 'false');
+    unmount();
+
+    mockBasePath = '';
+    renderSections(sections);
+
+    expect(getToggleControl('critical')).toHaveAttribute('aria-expanded', 'true');
+    expect(
+      JSON.parse(
+        window.localStorage.getItem('nightshift.investigations.sectionsExpanded:/s/team-a') ?? '{}'
+      )
+    ).toEqual({ critical: false });
+    expect(
+      JSON.parse(
+        window.localStorage.getItem('nightshift.investigations.sectionsExpanded:default') ?? '{}'
+      )
+    ).toEqual({});
   });
 
   it('ignores a malformed stored preference', () => {

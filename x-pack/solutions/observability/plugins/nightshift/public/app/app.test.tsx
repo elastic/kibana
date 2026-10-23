@@ -175,6 +175,7 @@ describe('NightshiftApp', () => {
         agenticInvestigations: { InvestigationCard },
         agentBuilder: { openConversationDetails },
         notifications: { toasts: { addSuccess: jest.fn() } },
+        http: { basePath: { get: () => '' } },
       },
     });
     openConversationDetails.mockReset().mockImplementation(async () => closeConversationDetails);
