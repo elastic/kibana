@@ -9,14 +9,19 @@ import type { EsqlQueryRequest, FieldValue } from '@elastic/elasticsearch/lib/ap
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { ProbeStatus } from '@kbn/significant-events-schema';
-import { canCompileMatchMetric } from '../lib/significant_events/rules/can_compile_match_metric';
-import type { ProbeOutcome } from './classify_detection';
+import { canCompileMatchMetric } from './can_compile_match_metric';
 
 export interface ProbeWindow {
   /** Inclusive ISO start, bound to `?_tstart`. */
   from: string;
   /** Exclusive ISO end, bound to `?_tend`. */
   to: string;
+}
+
+/** What re-running a rule's stored query found. `hasRows` only means something when `ok`. */
+export interface ProbeOutcome {
+  status: ProbeStatus;
+  hasRows: boolean;
 }
 
 export interface ProbeResult extends ProbeOutcome {

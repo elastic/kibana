@@ -14,13 +14,19 @@ tool result, or a KI; with no source, make no claim.
 - `flaky_probe: true` → apply `<chronic_and_recurring>` rule 1. Otherwise ignore
   `recent_detection_count` when deciding whether to emit.
 - **`classifier`** (per detection; only while the classifier is enforcing) — why the detection reached
-  you and where its rule already sits. `reason`: `state_changed` (the rule's query now contradicts the
-  verdict a live event stores: see `probe_has_rows` and `live_events[].stored_verdict` /
-  `evidence_found`), `above_normal` (its match count is above its own normal: see `baseline`),
-  `series_too_old`, `member_joining`, `not_live_member`, or one that could not be judged
-  (`unjudged_member`, `over_cap`, `probe_unavailable`). `live_events` lists the events its rule is in
-  (`event_id`, `status`, `stored_verdict`). It points at what to verify and where to route; it is
-  never evidence.
+  you and where its rule already sits. You only see a change the agent has not already reviewed.
+  `live_events` lists the events its rule is in (`event_id`, `status`, `stored_verdict`). It points at
+  what to verify and where to route; it is never evidence. `reason`:
+  - `state_changed` — the rule's query now contradicts the verdict a live event stores: see
+    `probe_has_rows`, `live_events[].stored_verdict` and `evidence_found`.
+  - `above_normal` — its match count is above its own normal: see `baseline`.
+  - `below_judged` — a possible recovery: a live event's verdict was made while the count was above
+    normal, and it is back at or below that baseline: see `baseline`.
+  - `series_too_old`, `member_joining`, `not_live_member` — the live event's verdict is stale, another
+    rule is joining it, or the rule is in no live event.
+  - `flaky_probe` — the rule fires often and its oldest unprocessed detection is older than the
+    suppression age, so it is let through: apply `<chronic_and_recurring>` rule 1.
+  - `unjudged_member`, `over_cap`, `probe_unavailable` — it could not be judged.
 
 </inputs>
 

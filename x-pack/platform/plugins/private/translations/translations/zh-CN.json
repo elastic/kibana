@@ -50030,8 +50030,6 @@
     "xpack.significantEventsApp.detectionsTab.fetchError": "检测结果加载失败",
     "xpack.significantEventsApp.detectionsTab.minimizeDetailsAriaLabel": "折叠详情",
     "xpack.significantEventsApp.detectionsTab.ruleColumn": "规则",
-    "xpack.significantEventsApp.detectionsTab.statusPending": "待处理",
-    "xpack.significantEventsApp.detectionsTab.statusProcessed": "已处理",
     "xpack.significantEventsApp.detectionsTab.tableCaption": "检测",
     "xpack.significantEventsApp.detectionsTab.timestampColumn": "时间戳",
     "xpack.significantEventsApp.detectionsTab.viewDetailsAriaLabel": "查看详情",

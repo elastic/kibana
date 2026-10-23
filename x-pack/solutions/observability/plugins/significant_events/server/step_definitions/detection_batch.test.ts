@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toBatchEntry } from './detection_batch';
+import { isHeldBack, lastReviewedAt, toBatchEntry } from './detection_batch';
 
 const source = {
   p_value: 0.01,
@@ -62,5 +62,29 @@ describe('toBatchEntry', () => {
     expect(toBatchEntry({ columns: COLUMNS, row: ['rule-B'] })).toMatchObject({
       rule_uuid: 'rule-B',
     });
+  });
+});
+
+describe('isHeldBack', () => {
+  const columns = ['rule_uuid', '_source', 'held_back'];
+
+  it('holds back only a row whose held_back column is true', () => {
+    expect(isHeldBack({ columns, row: ['rule-A', source, true] })).toBe(true);
+    expect(isHeldBack({ columns, row: ['rule-A', source, false] })).toBe(false);
+    expect(isHeldBack({ columns, row: ['rule-A', source, 'true'] })).toBe(false);
+    expect(isHeldBack({ columns: ['rule_uuid', '_source'], row: ['rule-A', source] })).toBe(false);
+  });
+});
+
+describe('lastReviewedAt', () => {
+  const columns = ['rule_uuid', '_source', 'last_reviewed_at'];
+
+  it('reads the time of the last review in epoch milliseconds, when it is readable', () => {
+    expect(lastReviewedAt({ columns, row: ['rule-A', source, '2026-10-23T03:37:06.799Z'] })).toBe(
+      Date.parse('2026-10-23T03:37:06.799Z')
+    );
+    expect(lastReviewedAt({ columns, row: ['rule-A', source, null] })).toBeUndefined();
+    expect(lastReviewedAt({ columns, row: ['rule-A', source, 'yesterday'] })).toBeUndefined();
+    expect(lastReviewedAt({ columns: ['rule_uuid'], row: ['rule-A'] })).toBeUndefined();
   });
 });

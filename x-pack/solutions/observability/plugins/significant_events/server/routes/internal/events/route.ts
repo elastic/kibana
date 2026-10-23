@@ -316,6 +316,16 @@ const eventsLifecycleRoute = createServerRoute({
     path: z.object({
       id: z.string().max(255),
     }),
+    query: z
+      .object({
+        include_skipped: z
+          .enum(['true', 'false'])
+          .optional()
+          .describe(
+            'Also list the detections the classifier closed without the agent, with why. Off by default.'
+          ),
+      })
+      .optional(),
   }),
   handler: async ({
     params,
@@ -349,6 +359,10 @@ const eventsLifecycleRoute = createServerRoute({
       const detection = hit && toLifecycleDetection(hit, { rule_name, source_id });
       return detection ? [detection] : [];
     });
+
+    if (params.query?.include_skipped !== 'true') {
+      return { detections, events };
+    }
 
     const skipped = await findSkippedDetections({
       detectionClient,

@@ -49635,8 +49635,6 @@
     "xpack.significantEventsApp.detectionsTab.fetchError": "Échec du chargement des détections",
     "xpack.significantEventsApp.detectionsTab.minimizeDetailsAriaLabel": "Réduire les détails",
     "xpack.significantEventsApp.detectionsTab.ruleColumn": "Règle",
-    "xpack.significantEventsApp.detectionsTab.statusPending": "En attente",
-    "xpack.significantEventsApp.detectionsTab.statusProcessed": "Traité",
     "xpack.significantEventsApp.detectionsTab.tableCaption": "Détections",
     "xpack.significantEventsApp.detectionsTab.timestampColumn": "Horodatage",
     "xpack.significantEventsApp.detectionsTab.viewDetailsAriaLabel": "Afficher les détails",

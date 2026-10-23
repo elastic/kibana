@@ -35,7 +35,7 @@ export const useFetchEventLifecycle = (
       return significantEventsRepositoryClient.fetch(
         'GET /internal/significant_events/events/{id}/lifecycle',
         {
-          params: { path: { id: eventId } },
+          params: { path: { id: eventId }, query: { include_skipped: 'true' } },
           signal: signal ?? null,
         }
       );
