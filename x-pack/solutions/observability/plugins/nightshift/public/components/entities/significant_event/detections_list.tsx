@@ -35,7 +35,7 @@ import {
   filterOccurrencesForDetection,
   getChangePointLabel,
   type OccurrencePoint,
-} from '../detection/change_point';
+} from '../../../common/change_point';
 import { ChangePointSparkline } from '../detection/change_point_visualization';
 
 import { nightshiftBackgroundTransition } from '../../../common/transition';

@@ -23,7 +23,7 @@ import {
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { DetectionDetailsFlyout } from '../../../components/entities/detection/detection_details_flyout';
-import { getChangePointLabel } from '../../../components/entities/detection/change_point';
+import { getChangePointLabel } from '../../../common/change_point';
 import { FilterPopover } from '../../../components/ui/filter_popover';
 import { useDetectionById } from '../../../data/detections/use_detection_by_id';
 import { useDetectionsList } from '../../../data/detections/use_detections_list';
