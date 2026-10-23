@@ -49760,9 +49760,17 @@ paths:
                     - ecs
                     - otel
                   type: string
+                description:
+                  description: Integration description from the Service settings step.
+                  maxLength: 2048
+                  type: string
                 globalRegion:
                   description: Global AWS region from the Service Settings step.
                   maxLength: 64
+                  type: string
+                integrationName:
+                  description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
+                  maxLength: 160
                   type: string
                 mechanisms:
                   description: Delivery mechanisms active in this deployment.
@@ -49920,6 +49928,9 @@ paths:
                       deploymentName:
                         description: Opaque deployment name; for AWS, the CFN stack name.
                         type: string
+                      description:
+                        description: Integration description from the Service settings step.
+                        type: string
                       ecfStacks:
                         description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
                         items:
@@ -49966,6 +49977,9 @@ paths:
                         description: Global AWS region from the Service Settings step.
                         type: string
                       id:
+                        type: string
+                      integrationName:
+                        description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
                       mechanisms:
                         items:
@@ -50267,6 +50281,9 @@ paths:
                       deploymentName:
                         description: Opaque deployment name; for AWS, the CFN stack name.
                         type: string
+                      description:
+                        description: Integration description from the Service settings step.
+                        type: string
                       ecfStacks:
                         description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
                         items:
@@ -50313,6 +50330,9 @@ paths:
                         description: Global AWS region from the Service Settings step.
                         type: string
                       id:
+                        type: string
+                      integrationName:
+                        description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
                       mechanisms:
                         items:
@@ -50507,6 +50527,11 @@ paths:
                 deploymentName:
                   maxLength: 255
                   type: string
+                description:
+                  description: Integration description from the Service settings step. Send null to clear it.
+                  maxLength: 2048
+                  nullable: true
+                  type: string
                 ecfStacks:
                   description: ECF CloudFormation stacks to record for this deployment.
                   items:
@@ -50549,6 +50574,10 @@ paths:
                       - templateVersion
                   maxItems: 10
                   type: array
+                integrationName:
+                  description: Integration name used by the last deploy, before any per-package suffix. Refreshed on each deploy because an unedited default name follows the service selection.
+                  maxLength: 160
+                  type: string
                 mechanisms:
                   description: Delivery mechanisms active in this deployment. Replaces the stored mechanisms array.
                   items:
@@ -50674,6 +50703,9 @@ paths:
                       deploymentName:
                         description: Opaque deployment name; for AWS, the CFN stack name.
                         type: string
+                      description:
+                        description: Integration description from the Service settings step.
+                        type: string
                       ecfStacks:
                         description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
                         items:
@@ -50720,6 +50752,9 @@ paths:
                         description: Global AWS region from the Service Settings step.
                         type: string
                       id:
+                        type: string
+                      integrationName:
+                        description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
                       mechanisms:
                         items:
@@ -50948,6 +50983,9 @@ paths:
                         deploymentName:
                           description: Opaque deployment name; for AWS, the CFN stack name.
                           type: string
+                        description:
+                          description: Integration description from the Service settings step.
+                          type: string
                         ecfStacks:
                           description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
                           items:
@@ -50994,6 +51032,9 @@ paths:
                           description: Global AWS region from the Service Settings step.
                           type: string
                         id:
+                          type: string
+                        integrationName:
+                          description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                           type: string
                         mechanisms:
                           items:
