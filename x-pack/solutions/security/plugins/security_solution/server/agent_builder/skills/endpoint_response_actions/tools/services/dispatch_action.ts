@@ -6,6 +6,7 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   ToolHandlerContext,
   ToolHandlerStandardReturn,
@@ -15,7 +16,9 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { EndpointAuthz } from '../../../../../../common/endpoint/types/authz';
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import {
+  licenseLimitOf,
   licenseTierRequiredResult,
+  licenseUnavailableResult,
   responseActionErrorResult,
   insufficientPrivilegesResult,
 } from '../types';
@@ -73,6 +76,15 @@ export const DISPATCH_PRIVILEGE_LICENSE_TIERS: Record<
 export interface DispatchRequest {
   action: DispatchActionName;
   params: { hostName?: string; agentId?: string };
+  /**
+   * Model-facing arguments beyond the target that the confirmation card
+   * displays and the dispatch uses (scan `path`; every tool's `comment`).
+   * Recorded verbatim while the card is built and re-checked by the handler:
+   * a resumed call replaying a confirmed tool-call ID with different
+   * arguments (e.g. path `/B` after `/A` was approved) must not inherit the
+   * approval, so the analyst is shown a fresh card instead.
+   */
+  args?: DispatchConfirmationArgs;
   context: ToolHandlerContext;
   endpointAppContextService: EndpointAppContextService;
   /** Endpoint privilege the equivalent HTTP route requires for this action. */
@@ -118,15 +130,44 @@ export type ConfirmationTarget =
   | { kind: 'blocked'; message: string };
 
 /**
- * What the analyst was shown and approved, recorded while the confirmation card
- * is built and read back by the handler after the click.
- *
- * The handler re-resolves the target once the call is confirmed, so without this
- * record the card and the dispatch are independent evaluations of the same
- * request: a transient Fleet/authz failure renders a "this action will be
- * refused" card, and the handler dispatches to whatever it resolves after the
- * service recovers — a target the card never showed. The record is stored on the
- * tool call (`stateManager` is scoped to it), so it survives the prompt round.
+ * The model-authored arguments a confirmation card displays, keyed by name.
+ * Values are compared verbatim between the card build and the handler; an
+ * `undefined` value is the same as an absent key (a tool with no `comment`).
+ */
+export type DispatchConfirmationArgs = Record<string, string | undefined>;
+
+/** Order-independent comparison key for recorded vs. supplied arguments. */
+const stableArgsKey = (args: DispatchConfirmationArgs | undefined): string =>
+  JSON.stringify(
+    Object.entries(args ?? {})
+      .filter(([, value]) => value !== undefined)
+      .sort(([a], [b]) => a.localeCompare(b))
+  );
+
+/**
+ * The argument names whose defined values differ between the confirmed card
+ * and this call — what the model needs to correct, without echoing argument
+ * values into the error.
+ */
+const differingArgNames = (
+  confirmed: DispatchConfirmationArgs | undefined,
+  supplied: DispatchConfirmationArgs | undefined
+): string[] => {
+  const names = new Set([...Object.keys(confirmed ?? {}), ...Object.keys(supplied ?? {})]);
+  return [...names].filter(
+    (name) => (confirmed?.[name] ?? undefined) !== (supplied?.[name] ?? undefined)
+  );
+};
+
+/**
+ * Snapshot of the confirmation card, taken when it is built and read back by
+ * the handler after the analyst clicks. It binds the approval to what the
+ * card showed — the resolved agent id and the displayed arguments — so a
+ * later call replaying the confirmed tool call with a different target or
+ * different arguments does not inherit it. A refused card (failed preflight,
+ * missing privilege, hostname/agent-id mismatch) is recorded as a refusal:
+ * approving it must never dispatch. The record is stored on the tool call
+ * (`stateManager` is scoped to it), so it survives the prompt round.
  */
 export type DispatchConfirmationState =
   | {
@@ -134,6 +175,8 @@ export type DispatchConfirmationState =
       kind: 'confirmed';
       action: DispatchActionName;
       agentId: string;
+      /** The arguments the card displayed (`path`, `comment`); the dispatch is held to them. */
+      args?: DispatchConfirmationArgs;
     }
   | {
       /** The card said the action would be refused: never dispatch. */
@@ -144,49 +187,72 @@ export type DispatchConfirmationState =
     };
 
 /**
- * A lookup that can only resolve Elastic Defend agents. Both the hostname walk
- * and the agent-id lookup honour it, so neither path can hand a non-Defend
- * agent to a vendor response-actions client.
+ * A lookup that can only resolve Elastic Defend agents, and only on origin
+ * sources — but which still LOOKS at the request-scoped candidate set under
+ * CPS so a same-named endpoint in a linked project surfaces as ambiguity
+ * instead of the origin host being offered on a confirmation card. Both the
+ * hostname walk and the agent-id lookup honour the agent-type scope, so
+ * neither path can hand a non-Defend agent to a vendor response-actions
+ * client.
+ *
+ * `scoped` is request-bound and the confirmation card can be built without a
+ * request identity (e.g. a synthetic context in tests), so it is resolved
+ * defensively: a missing request degrades to the origin-only behaviour
+ * rather than failing the card.
  */
-export const createDispatchLookup = (
+export const createDispatchLookup = async (
   endpointAppContextService: EndpointAppContextService,
-  spaceId: string
-) =>
-  createEndpointLookupService(endpointAppContextService, spaceId, undefined, {
-    agentTypes: [...DISPATCH_AGENT_TYPES],
-  });
+  spaceId: string,
+  request?: KibanaRequest
+) => {
+  const scoped = request ? await endpointAppContextService.asScoped(request) : undefined;
 
-const resolveTarget = (request: DispatchRequest): Promise<ResolvedDispatchTarget> =>
+  return createEndpointLookupService(endpointAppContextService, spaceId, scoped, {
+    agentTypes: [...DISPATCH_AGENT_TYPES],
+    resolutionMode: 'dispatch',
+  });
+};
+
+const resolveTarget = async (request: DispatchRequest): Promise<ResolvedDispatchTarget> =>
   resolveDispatchTarget(
-    createDispatchLookup(request.endpointAppContextService, request.context.spaceId),
+    await createDispatchLookup(
+      request.endpointAppContextService,
+      request.context.spaceId,
+      request.context.request
+    ),
     request.action,
     request.params
   );
 
 /**
- * Distinguishes a missing role privilege from a license-tier limit when
+ * Distinguishes a missing role privilege from a license limit when
  * `authz[privilege]` is false, without re-deriving `calculateEndpointAuthz`'s
  * conjunctions here: the privilege flag already folds both in, so the license
- * service is only consulted when the flag is false to decide which of the two
+ * service is only consulted when the flag is false to decide which of the
  * refusal shapes to return. `undefined` means the privilege has no license
  * conjunction, so the license is never the explanation.
+ *
+ * A license refusal itself has two causes (see `licenseLimitOf`): the active
+ * license is honestly below the required tier, or the license has expired /
+ * could not be read — in which case no tier comparison is meaningful and the
+ * answer is renewal or restoration, not an upgrade.
  */
 const privilegeRefusal = (
   endpointAppContextService: EndpointAppContextService,
   privilege: DispatchPrivilege | 'canReadSecuritySolution'
 ):
   | { kind: 'privilege'; privilege: string }
-  | { kind: 'license'; privilege: DispatchPrivilege; tier: 'platinum' | 'enterprise' } => {
+  | { kind: 'license'; privilege: DispatchPrivilege; tier: 'platinum' | 'enterprise' }
+  | { kind: 'license_state'; privilege: DispatchPrivilege; expired: boolean } => {
   if (privilege !== 'canReadSecuritySolution') {
     const requiredTier = DISPATCH_PRIVILEGE_LICENSE_TIERS[privilege];
     if (requiredTier) {
-      const licenseService = endpointAppContextService.getLicenseService();
-      const atTier =
-        requiredTier === 'platinum'
-          ? licenseService.isPlatinumPlus()
-          : licenseService.isEnterprise();
-      if (!atTier) {
-        return { kind: 'license', privilege, tier: requiredTier };
+      const limit = licenseLimitOf(endpointAppContextService.getLicenseService(), requiredTier);
+      if (limit?.kind === 'tier') {
+        return { kind: 'license', privilege, tier: limit.tier };
+      }
+      if (limit?.kind === 'state') {
+        return { kind: 'license_state', privilege, expired: limit.expired };
       }
     }
   }
@@ -248,6 +314,20 @@ const hostNameMismatchRefusal = (mismatch: HostNameMismatch, agentId: string): s
   }' is not a hostname of agent ID ${agentId} (known: ${quotedNames(mismatch.knownHostNames)}).`;
 
 /**
+ * The model-facing arguments worth binding an approval to: only the ones with
+ * a defined value (a tool with no `comment` records no `args` at all), so the
+ * recorded state stays minimal and comparisons ignore absent keys.
+ */
+const confirmationArgsOf = (
+  args: DispatchConfirmationArgs | undefined
+): DispatchConfirmationArgs | undefined => {
+  const defined = Object.fromEntries(
+    Object.entries(args ?? {}).filter(([, value]) => value !== undefined)
+  );
+  return Object.keys(defined).length ? defined : undefined;
+};
+
+/**
  * Records what the card tells the analyst, so the handler can hold the dispatch
  * to it. A refused card (failed preflight, missing privilege, hostname/agent-id
  * mismatch) is recorded as a refusal: approving it must never dispatch.
@@ -277,6 +357,7 @@ const recordConfirmation = (request: DispatchRequest, target: ConfirmationTarget
     kind: 'confirmed',
     action,
     agentId: target.endpoint.agentId,
+    ...(request.args ? { args: confirmationArgsOf(request.args) } : {}),
   });
 };
 
@@ -299,6 +380,22 @@ const changedTargetResult = (confirmedAgentId: string, resolvedAgentId: string) 
   responseActionErrorResult(
     'invalid_argument',
     `The host resolved for this call changed after the analyst confirmed it (confirmed agent ID ${confirmedAgentId}, which now resolves to ${resolvedAgentId}), so nothing was dispatched. Call the tool again, so the analyst is shown the current target on a new confirmation card.`
+  );
+
+/**
+ * The arguments of this call are not the ones the analyst confirmed. The card
+ * is the human gate on the whole request — the scan path and the comment it
+ * displays are part of what was approved — so a call that resumes a confirmed
+ * tool call with different arguments (a replaced `path`, an edited `comment`)
+ * must not inherit the approval. Only argument NAMES are echoed, never their
+ * values: a rejected value was never approved, and the model already has it.
+ */
+const changedArgsResult = (differing: string[]) =>
+  responseActionErrorResult(
+    'invalid_argument',
+    `The arguments of this call differ from the ones the analyst confirmed (differing: ${differing.join(
+      ', '
+    )}), so nothing was dispatched. Call the tool again, so the analyst is shown the actual arguments on a new confirmation card.`
   );
 
 /**
@@ -335,6 +432,16 @@ export const describeDispatchTargetForConfirmation = async (
         return {
           kind: 'blocked',
           message: `This deployment's license tier does not include '${requiredPrivilege}' (requires ${tierName} or higher), so this action will be refused regardless of role. Ask an administrator about upgrading the Elastic license; nothing you can grant will enable it here.`,
+        };
+      }
+      if (refusal.kind === 'license_state') {
+        return {
+          kind: 'blocked',
+          message: `This deployment's Elastic license is ${
+            refusal.expired ? 'expired' : 'not available'
+          }, so '${requiredPrivilege}' is disabled regardless of role. Ask an administrator about ${
+            refusal.expired ? 'renewing the license' : 'restoring license availability'
+          }; while that is the case a role grant will not enable it here.`,
         };
       }
       return {
@@ -395,9 +502,16 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
   }
   if (!authz[requiredPrivilege]) {
     const refusal = privilegeRefusal(endpointAppContextService, requiredPrivilege);
-    return refusal.kind === 'license'
-      ? { kind: 'result', result: licenseTierRequiredResult(refusal.privilege, refusal.tier) }
-      : { kind: 'result', result: insufficientPrivilegesResult(refusal.privilege) };
+    if (refusal.kind === 'license') {
+      return { kind: 'result', result: licenseTierRequiredResult(refusal.privilege, refusal.tier) };
+    }
+    if (refusal.kind === 'license_state') {
+      return {
+        kind: 'result',
+        result: licenseUnavailableResult(refusal.privilege, refusal.expired),
+      };
+    }
+    return { kind: 'result', result: insufficientPrivilegesResult(refusal.privilege) };
   }
 
   const target = await resolveTarget(request);
@@ -432,6 +546,13 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
     return {
       kind: 'result',
       result: changedTargetResult(approved.agentId, target.endpoint.agentId),
+    };
+  }
+
+  if (stableArgsKey(approved.args) !== stableArgsKey(request.args)) {
+    return {
+      kind: 'result',
+      result: changedArgsResult(differingArgNames(approved.args, request.args)),
     };
   }
 

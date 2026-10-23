@@ -14,6 +14,7 @@ import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { HostInfo, ActionDetails } from '../../../../../common/endpoint/types';
+import type { LicenseService } from '../../../../../common/license/license';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { getActionDetailsById } from '../../../../endpoint/services/actions';
 
@@ -146,6 +147,7 @@ export type ResponseActionErrorType =
   | 'insufficient_privileges'
   | 'invalid_argument'
   | 'license_tier_required'
+  | 'license_unavailable'
   | 'unknown_error';
 
 /**
@@ -211,6 +213,65 @@ export function licenseTierRequiredResult(privilege: string, tier: 'platinum' | 
     `License limit: the '${privilege}' capability requires a ${tierName} license or higher, and this deployment's license tier does not include it. No role grant can supply it — an administrator would need to upgrade the Elastic license. Nothing was dispatched.`,
     { privilege, requiredLicenseTier: tier }
   );
+}
+
+/**
+ * Standard tool result returned when the license itself — not its tier, not
+ * the caller's role — is what withholds the privilege: it has expired, or it
+ * could not be read at all. `LicenseService.isPlatinumPlus()` /
+ * `isEnterprise()` fold `isAvailable && isActive` into the tier comparison
+ * (see `isAtLeast` in `common/license/license.ts`), so an expired Enterprise
+ * license fails `isEnterprise()` exactly like a Gold one and would otherwise
+ * be told to upgrade to Enterprise — when what restores the capability is
+ * renewing the license it already has.
+ */
+export function licenseUnavailableResult(privilege: string, expired: boolean) {
+  return responseActionErrorResult(
+    'license_unavailable',
+    expired
+      ? `License limit: this deployment's Elastic license has expired, so the '${privilege}' capability is disabled regardless of role. Renewing the license is what restores it — a role grant will not, and while it is expired a tier upgrade is not the issue. Nothing was dispatched.`
+      : `License limit: this deployment's Elastic license could not be read, so the '${privilege}' capability is disabled regardless of role. An administrator needs to restore license availability; a role grant will not help. Nothing was dispatched.`,
+    { privilege, licenseState: expired ? 'expired' : 'unavailable' }
+  );
+}
+
+/**
+ * What the license — as opposed to the caller's role — says about a privilege
+ * gated on a license tier: either the active license is genuinely below the
+ * required tier, or the license itself is expired/unreadable and no tier
+ * comparison is meaningful yet. `undefined` when the license raises no
+ * objection.
+ */
+export type LicenseLimit =
+  | { kind: 'tier'; tier: 'platinum' | 'enterprise' }
+  | { kind: 'state'; expired: boolean };
+
+/**
+ * Splits a failed `isPlatinumPlus()` / `isEnterprise()` check into its two
+ * causes. Both fold `isAvailable && isActive` into the tier comparison, so
+ * the license information is inspected before attributing the failure to the
+ * tier: a license that is present and active is honestly below the tier,
+ * anything else (missing, unreadable, expired, invalid) is a license-state
+ * problem that renewal or restoration — not a tier upgrade — addresses.
+ */
+export function licenseLimitOf(
+  licenseService: Pick<LicenseService, 'isPlatinumPlus' | 'isEnterprise' | 'getLicenseInformation'>,
+  requiredTier: 'platinum' | 'enterprise'
+): LicenseLimit | undefined {
+  const atTier =
+    requiredTier === 'platinum' ? licenseService.isPlatinumPlus() : licenseService.isEnterprise();
+  if (atTier) {
+    return undefined;
+  }
+
+  const license = licenseService.getLicenseInformation();
+
+  if (license?.isAvailable && license.isActive) {
+    return { kind: 'tier', tier: requiredTier };
+  }
+  // `expired` only when the license exists but is not active; a missing or
+  // unreadable one is reported as unavailable.
+  return { kind: 'state', expired: Boolean(license?.isAvailable) };
 }
 
 /**

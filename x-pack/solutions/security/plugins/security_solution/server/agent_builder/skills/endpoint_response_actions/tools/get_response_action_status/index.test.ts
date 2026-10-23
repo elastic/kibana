@@ -107,6 +107,7 @@ describe('getResponseActionStatusTool', () => {
         ({
           isPlatinumPlus: () => false,
           isEnterprise: () => false,
+          getLicenseInformation: () => ({ isAvailable: true, isActive: true }),
         } as unknown as ReturnType<EndpointAppContextService['getLicenseService']>)
     ) as unknown as EndpointAppContextService['getLicenseService'];
 

@@ -258,6 +258,7 @@ describe('scanHostTool', () => {
         ({
           isPlatinumPlus: () => true,
           isEnterprise: () => false,
+          getLicenseInformation: () => ({ isAvailable: true, isActive: true }),
         } as unknown as ReturnType<EndpointAppContextService['getLicenseService']>)
     ) as unknown as EndpointAppContextService['getLicenseService'];
 

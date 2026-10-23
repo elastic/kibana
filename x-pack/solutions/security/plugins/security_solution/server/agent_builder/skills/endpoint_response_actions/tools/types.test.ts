@@ -8,7 +8,9 @@
 import {
   endpointNotFoundData,
   insufficientPrivilegesResult,
+  licenseLimitOf,
   licenseTierRequiredResult,
+  licenseUnavailableResult,
   resolveAgentTypeFromPackages,
   responseActionErrorResult,
   summarizeActionHosts,
@@ -38,6 +40,19 @@ jest.mock('../../../../endpoint/services/actions', () => ({
 }));
 
 const mockGetActionDetailsById = getActionDetailsById as jest.Mock;
+
+/**
+ * A license service stand-in that only answers the questions
+ * `licenseLimitOf` asks: the tier checks and the license information.
+ */
+const licenseServiceWith = (
+  license: { isAvailable: boolean; isActive: boolean } | null
+): Parameters<typeof licenseLimitOf>[0] =>
+  ({
+    isPlatinumPlus: () => false,
+    isEnterprise: () => false,
+    getLicenseInformation: () => license,
+  } as unknown as Parameters<typeof licenseLimitOf>[0]);
 
 describe('response action error helpers', () => {
   it('responseActionErrorResult returns a typed error envelope', () => {
@@ -77,6 +92,76 @@ describe('response action error helpers', () => {
     const message = (result.results[0].data as { message: string }).message;
     expect(message).not.toContain('Ask an administrator to grant');
     expect(message).not.toContain('Security UI');
+  });
+
+  it('licenseLimitOf attributes an active-but-low license to the tier', () => {
+    const limit = licenseLimitOf(
+      licenseServiceWith({ isAvailable: true, isActive: true }),
+      'platinum'
+    );
+
+    expect(limit).toEqual({ kind: 'tier', tier: 'platinum' });
+  });
+
+  it('licenseLimitOf attributes an expired license to its state, not the tier', () => {
+    // An expired Enterprise license fails `isEnterprise()` exactly like a
+    // Gold one; the license information is what separates the two causes.
+    const limit = licenseLimitOf(
+      licenseServiceWith({ isAvailable: true, isActive: false }),
+      'enterprise'
+    );
+
+    expect(limit).toEqual({ kind: 'state', expired: true });
+  });
+
+  it('licenseLimitOf reports an unreadable license as unavailable, not expired', () => {
+    const limit = licenseLimitOf(licenseServiceWith(null), 'platinum');
+
+    expect(limit).toEqual({ kind: 'state', expired: false });
+  });
+
+  it('licenseLimitOf raises no limit when the license already satisfies the tier', () => {
+    expect(
+      licenseLimitOf(
+        {
+          isPlatinumPlus: () => true,
+          isEnterprise: () => true,
+          getLicenseInformation: () => null,
+        } as unknown as Parameters<typeof licenseLimitOf>[0],
+        'platinum'
+      )
+    ).toBeUndefined();
+  });
+
+  it('licenseUnavailableResult names renewal for an expired license, not a tier upgrade', () => {
+    const result = licenseUnavailableResult('canIsolateHost', true);
+
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({
+        error: 'license_unavailable',
+        privilege: 'canIsolateHost',
+        licenseState: 'expired',
+      })
+    );
+    const message = (result.results[0].data as { message: string }).message;
+    expect(message).toContain('expired');
+    expect(message).toContain('Renewing');
+    // The point of the split: an expired license is renewed, not upgraded.
+    expect(message).not.toContain('need to upgrade');
+    expect(message).not.toContain('Ask an administrator to grant');
+  });
+
+  it('licenseUnavailableResult distinguishes an unreadable license from an expired one', () => {
+    const result = licenseUnavailableResult('canGetRunningProcesses', false);
+
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({
+        error: 'license_unavailable',
+        licenseState: 'unavailable',
+      })
+    );
+    expect((result.results[0].data as { message: string }).message).toContain('could not be read');
   });
 
   it('endpointNotFoundData reports a hostname miss without fabricating host state', () => {
