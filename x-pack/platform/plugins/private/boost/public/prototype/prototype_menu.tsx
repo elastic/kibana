@@ -85,9 +85,9 @@ export const PrototypeMenu = ({ http, notifications, onRestored }: PrototypeMenu
           </EuiToolTip>
         }
       >
-        <EuiPopoverTitle paddingSize="s">{PROTOTYPE_MENU_LABEL}</EuiPopoverTitle>
+        <EuiPopoverTitle paddingSize="m">{PROTOTYPE_MENU_LABEL}</EuiPopoverTitle>
         {/* Each tester's own view, kept in their browser, unlike the shared prototype data. */}
-        <div css={{ padding: euiTheme.size.s }}>
+        <div css={{ padding: euiTheme.size.base }}>
           <EuiSwitch
             compressed
             label={i18n.translate('xpack.boost.prototype.showEstimates', {

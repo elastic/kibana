@@ -55,6 +55,7 @@ export const INDICES_PRESET_OPTIONS: ReadonlyArray<PresetOption<IndicesPresetId>
   },
 ];
 
+// "search-ready" uses a non-breaking hyphen (\u2011), so a line never ends at its hyphen.
 export const DATA_STREAMS_WINDOW_OPTIONS: ReadonlyArray<PresetOption<DataStreamsWindowId>> = [
   {
     id: 'last_1_day',
@@ -62,7 +63,7 @@ export const DATA_STREAMS_WINDOW_OPTIONS: ReadonlyArray<PresetOption<DataStreams
       defaultMessage: 'Last 1 day',
     }),
     description: i18n.translate('xpack.boost.presets.last1Day.description', {
-      defaultMessage: 'Only the most recent day of each data stream is kept search-ready.',
+      defaultMessage: 'Only the most recent day of each data stream is kept search\u2011ready.',
     }),
     isDefault: false,
   },
@@ -72,7 +73,7 @@ export const DATA_STREAMS_WINDOW_OPTIONS: ReadonlyArray<PresetOption<DataStreams
       defaultMessage: 'Last 3 days',
     }),
     description: i18n.translate('xpack.boost.presets.last3Days.description', {
-      defaultMessage: 'The most recent 3 days of each data stream are kept search-ready.',
+      defaultMessage: 'The most recent 3 days of each data stream are kept search\u2011ready.',
     }),
     isDefault: false,
   },
@@ -82,7 +83,7 @@ export const DATA_STREAMS_WINDOW_OPTIONS: ReadonlyArray<PresetOption<DataStreams
       defaultMessage: 'Last 7 days',
     }),
     description: i18n.translate('xpack.boost.presets.last7Days.description', {
-      defaultMessage: 'The most recent week of each data stream is kept search-ready.',
+      defaultMessage: 'The most recent week of each data stream is kept search\u2011ready.',
     }),
     isDefault: true,
   },

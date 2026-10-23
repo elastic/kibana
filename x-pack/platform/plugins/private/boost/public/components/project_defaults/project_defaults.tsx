@@ -210,8 +210,8 @@ const ProjectDefaultPanel = ({
             titleSize="m"
             data-test-subj={`boostProjectDefaultValue-${type}`}
           >
-            <EuiSpacer size="s" />
-            <EuiText size="xs" color="subdued">
+            <EuiSpacer size="xs" />
+            <EuiText size="s" color="subdued">
               <p>{preset ? preset.description : CUSTOM_PROFILE_DESCRIPTION}</p>
             </EuiText>
             {/* What the default applies to: how many, and how much data. */}
