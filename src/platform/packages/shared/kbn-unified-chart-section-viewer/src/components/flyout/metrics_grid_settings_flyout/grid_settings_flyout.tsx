@@ -88,7 +88,7 @@ export const GridSettingsFlyout = ({
     'metricsExperience.gridSettingsFlyout.dataDisplayGroupTooltip',
     {
       defaultMessage:
-        'Set how data is displayed for each metric type. Changes apply to every metric of that type in this Discover tab.',
+        'Set how data is displayed for histogram type metrics. Changes apply to every histogram metric in this Discover tab.',
     }
   );
 
