@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Shop: orders</title>
+  <style>
+    body { margin: 0; padding: 32px; font: 15px/1.4 system-ui, sans-serif; color: #1a1c21; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #d3dae6; }
+    th { background: #f1f4fa; }
+    .ok { color: #017d73; } .late { color: #bd271e; }
+  </style>
+</head>
+<body>
+  <h1>Orders</h1>
+  <table>
+    <thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <script>
+    var rows = document.getElementById('rows');
+    for (var i = 1; i <= 24; i++) {
+      var tr = document.createElement('tr');
+      var late = i % 7 === 0;
+      tr.innerHTML = '<td>#' + (1000 + i) + '</td><td>Customer ' + i + '</td><td>$' + (i * 13 % 200 + 20) + '.00</td><td class="' + (late ? 'late' : 'ok') + '">' + (late ? 'Delayed' : 'Shipped') + '</td>';
+      rows.appendChild(tr);
+    }
+  </script>
+</body>
+</html>

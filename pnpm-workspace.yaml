@@ -1579,6 +1579,7 @@ packages:
   - 'x-pack/solutions/observability/packages/kbn-nightshift-shared'
   - 'x-pack/solutions/observability/packages/kbn-observability-schema'
   - 'x-pack/solutions/observability/packages/kbn-scout-oblt'
+  - 'x-pack/solutions/observability/packages/kbn-session-replay-player'
   - 'x-pack/solutions/observability/packages/kbn-synthetics-forge'
   - 'x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli'
   - 'x-pack/solutions/observability/packages/nav-icons'

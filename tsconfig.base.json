@@ -2519,6 +2519,8 @@
       "@kbn/service-accounts-test-plugin/*": ["./x-pack/platform/test/security_api_integration/plugins/service_accounts/*"],
       "@kbn/session-notifications-plugin": ["./src/platform/test/plugin_functional/plugins/session_notifications"],
       "@kbn/session-notifications-plugin/*": ["./src/platform/test/plugin_functional/plugins/session_notifications/*"],
+      "@kbn/session-replay-player": ["./x-pack/solutions/observability/packages/kbn-session-replay-player"],
+      "@kbn/session-replay-player/*": ["./x-pack/solutions/observability/packages/kbn-session-replay-player/*"],
       "@kbn/session-view-plugin": ["./x-pack/solutions/security/plugins/session_view"],
       "@kbn/session-view-plugin/*": ["./x-pack/solutions/security/plugins/session_view/*"],
       "@kbn/set-map": ["./packages/kbn-set-map"],

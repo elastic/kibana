@@ -1376,6 +1376,7 @@ x-pack/solutions/observability/packages/kbn-nightshift-decision-trees @elastic/n
 x-pack/solutions/observability/packages/kbn-nightshift-shared @elastic/nightshift
 x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-signals-traces-team
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
+x-pack/solutions/observability/packages/kbn-session-replay-player @elastic/obs-signals-rum-team
 x-pack/solutions/observability/packages/kbn-synthetics-forge @elastic/obs-signals-logs-team
 x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli @elastic/observability-ui
 x-pack/solutions/observability/packages/nav-icons @elastic/obs-signals-logs-team
