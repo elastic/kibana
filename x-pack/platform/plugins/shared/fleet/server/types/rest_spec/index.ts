@@ -27,3 +27,4 @@ export * from './standalone_agent_api_key';
 export * from './managed_otlp_api_key';
 export * from './remote_synced_integrations';
 export * from './cloud_onboarding_deployment';
+export * from './provisioning_callback';

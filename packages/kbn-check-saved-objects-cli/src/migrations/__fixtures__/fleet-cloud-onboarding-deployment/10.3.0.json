@@ -1,0 +1,80 @@
+{
+  "10.2.0": [
+    {
+      "provider": "aws",
+      "mechanisms": ["managed_integration"],
+      "status": "succeeded",
+      "dataFormat": "ecs",
+      "connectorId": "cloud-connector-1",
+      "authMethod": "identity_federation",
+      "deploymentName": "AWS onboarding",
+      "services": ["guardduty", "cloudtrail"],
+      "attemptCount": 1,
+      "serviceVars": { "cloudtrail": { "bucket_arn": "arn:aws:s3:::cloudtrail-logs" } },
+      "globalRegion": "us-east-1",
+      "packagePolicyIds": ["package-policy-1"],
+      "policyIdsByInstance": { "guardduty": "package-policy-1", "cloudtrail": "package-policy-1" }
+    },
+    {
+      "provider": "aws",
+      "mechanisms": ["ecf", "agent_based"],
+      "status": "pending",
+      "dataFormat": "otel",
+      "connectorId": null,
+      "authMethod": "static_keys",
+      "services": ["vpcflow"],
+      "attemptCount": 2,
+      "statusMessage": "Waiting for the stack",
+      "agentPolicyIds": ["agent-policy-1"],
+      "apiKeyId": "api-key-1",
+      "ecfStacks": [
+        {
+          "family": "unified",
+          "stackName": "elastic-ecf-unified",
+          "templateVersion": "1.0.0",
+          "stackArn": "arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-ecf-unified/1111",
+          "serviceIds": ["vpcflow"]
+        }
+      ]
+    }
+  ],
+  "10.3.0": [
+    {
+      "provider": "aws",
+      "mechanisms": ["managed_integration"],
+      "status": "succeeded",
+      "dataFormat": "ecs",
+      "connectorId": "cloud-connector-1",
+      "authMethod": "identity_federation",
+      "deploymentName": "AWS onboarding",
+      "services": ["guardduty", "cloudtrail"],
+      "attemptCount": 1,
+      "serviceVars": { "cloudtrail": { "bucket_arn": "arn:aws:s3:::cloudtrail-logs" } },
+      "globalRegion": "us-east-1",
+      "packagePolicyIds": ["package-policy-1"],
+      "policyIdsByInstance": { "guardduty": "package-policy-1", "cloudtrail": "package-policy-1" }
+    },
+    {
+      "provider": "aws",
+      "mechanisms": ["ecf", "agent_based"],
+      "status": "pending",
+      "dataFormat": "otel",
+      "connectorId": null,
+      "authMethod": "static_keys",
+      "services": ["vpcflow"],
+      "attemptCount": 2,
+      "statusMessage": "Waiting for the stack",
+      "agentPolicyIds": ["agent-policy-1"],
+      "apiKeyId": "api-key-1",
+      "ecfStacks": [
+        {
+          "family": "unified",
+          "stackName": "elastic-ecf-unified",
+          "templateVersion": "1.0.0",
+          "stackArn": "arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-ecf-unified/1111",
+          "serviceIds": ["vpcflow"]
+        }
+      ]
+    }
+  ]
+}

@@ -132,6 +132,14 @@ export const CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES = {
 // IaC Provisioner API routes
 export const IAC_PROVISIONER_API_ROUTES = {
   RENDER_TEMPLATE_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/render_template`,
+  // One-time callback records that let a launched CloudFormation stack report its role back.
+  CALLBACK_CREATE_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/callbacks`,
+  // Whether a launched stack could report back to this Kibana, and why not.
+  CALLBACK_AVAILABILITY_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/callback_availability`,
+  CALLBACK_INFO_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/callbacks/{callbackId}`,
+  CALLBACK_DELETE_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/callbacks/{callbackId}`,
+  // Public: called by the stack's Lambda with the record's API key, not by the browser.
+  CALLBACK_RECEIVE_PATTERN: `${API_ROOT}/iac_provisioner/callbacks/{callbackId}`,
 };
 
 // Kubernetes Manifest API routes
