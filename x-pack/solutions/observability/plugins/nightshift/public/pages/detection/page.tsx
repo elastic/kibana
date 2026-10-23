@@ -140,6 +140,7 @@ export const DetectionPage = ({
     <div
       css={css`
         display: flex;
+        flex: 1 1 auto;
         flex-direction: column;
         min-height: 0;
       `}
