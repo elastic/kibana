@@ -599,6 +599,19 @@ describe('getDiscoveryQueriesRoute source resolution', () => {
       expect(result.total).toBe(ids.length);
     });
 
+    it('filters before paging, so a match past the first unfiltered page is returned', async () => {
+      const result = await discoveryQueriesRoute.handler(
+        makeDiscoveryHandlerParams({
+          ...discoveryBaseQuery,
+          page: 1,
+          perPage: 1,
+          entityIds: ['expired'],
+        })
+      );
+      expect(result.queries.map(({ id }) => id)).toEqual(['q3']);
+      expect(result.total).toBe(1);
+    });
+
     it('ignores Unassigned when the live entity list is truncated', async () => {
       mockGetLiveEntities.mockResolvedValue({ entities: [{ id: 'checkout' }], truncated: true });
       const result = await discoveryQueriesRoute.handler(

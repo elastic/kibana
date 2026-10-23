@@ -146,7 +146,8 @@ export const useFetchDiscoveryQueries = (
       perPage,
       status?.join(','),
       queryIds?.join(','),
-      entityIds?.join(','),
+      // The array itself, not a joined string: slugs can contain commas.
+      entityIds,
       unassignedEntities,
       ...deps,
     ],

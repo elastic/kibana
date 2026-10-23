@@ -213,7 +213,7 @@ export const RulesTab = ({
             },
           }}
         />
-      ) : rulesQuery.hasData && rulesQuery.total === 0 ? (
+      ) : rulesQuery.hasData && rulesQuery.total === 0 && !hasEntityFilter ? (
         <EuiEmptyPrompt
           iconType="magnify"
           title={<h2>{NO_RULES_TITLE}</h2>}

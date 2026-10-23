@@ -91,6 +91,19 @@ export const UNASSIGNED_LABEL = i18n.translate(
     defaultMessage: 'Unassigned',
   }
 );
+export const NOT_LOADED_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.notLoadedLabel',
+  {
+    defaultMessage: 'Not in the loaded list',
+  }
+);
+export const UNASSIGNED_UNAVAILABLE_TOOLTIP = i18n.translate(
+  'xpack.nightshift.detectionPage.entities.unassignedUnavailableTooltip',
+  {
+    defaultMessage:
+      'Not applied: there are too many entities to work out which items are unassigned.',
+  }
+);
 export const UNKNOWN_LABEL = i18n.translate(
   'xpack.nightshift.detectionPage.entities.unknownLabel',
   {

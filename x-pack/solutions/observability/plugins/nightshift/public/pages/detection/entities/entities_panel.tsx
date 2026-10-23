@@ -51,7 +51,9 @@ import {
   KNOWLEDGE_LINK,
   NO_ENTITY_GROUP_LABEL,
   UNASSIGNED_LABEL,
+  UNASSIGNED_UNAVAILABLE_TOOLTIP,
   NO_MATCHES_DESCRIPTION,
+  NOT_LOADED_LABEL,
   NO_RULES_LABEL,
   OTHER_LABEL,
   RETRY_LABEL,
@@ -152,35 +154,37 @@ export const EntitiesPanel = ({
     }
   }
   const liveIds = new Set(entities.map(({ id }) => id));
-  // A truncated list can't tell an expired slug from one past the cap.
-  const unknown =
-    query.data && !query.data.truncated
-      ? selected.filter((id) => !liveIds.has(id) && matches(id, 0, 0))
-      : [];
+  const isTruncated = Boolean(query.data?.truncated);
+  const unknown = query.data ? selected.filter((id) => !liveIds.has(id) && matches(id, 0, 0)) : [];
   if (unknown.length) {
-    options.push({ key: 'group:unknown', label: UNKNOWN_LABEL, isGroupLabel: true });
+    // A truncated list can't tell an expired slug from one past the cap, so don't call it expired.
+    options.push({
+      key: 'group:unknown',
+      label: isTruncated ? NOT_LOADED_LABEL : UNKNOWN_LABEL,
+      isGroupLabel: true,
+    });
     options.push(
       ...unknown.map((id) => makeOption({ id, name: id, active_events: 0 }, 'tokenKey'))
     );
   }
   const unassignedCounts = query.data?.unassigned;
+  // Without counts (truncated list) Unassigned isn't applied; a selected one still shows so it can be cleared.
+  const unassignedRow = unassignedCounts ?? (unassigned ? { rules: 0, active_events: 0 } : null);
   if (
-    unassignedCounts &&
-    matches(UNASSIGNED_LABEL, unassignedCounts.rules, unassignedCounts.active_events)
+    query.data &&
+    unassignedRow &&
+    matches(UNASSIGNED_LABEL, unassignedRow.rules, unassignedRow.active_events)
   ) {
     // Its own section, so it doesn't read as part of the last entity group.
     options.push({ key: 'group:no-entity', label: NO_ENTITY_GROUP_LABEL, isGroupLabel: true });
-    options.push(
-      makeOption(
-        {
-          id: 'unassigned:',
-          name: UNASSIGNED_LABEL,
-          active_events: unassignedCounts.active_events,
-        },
+    options.push({
+      ...makeOption(
+        { id: 'unassigned:', name: UNASSIGNED_LABEL, active_events: unassignedRow.active_events },
         'question',
         true
-      )
-    );
+      ),
+      ...(unassignedCounts ? {} : { toolTipContent: UNASSIGNED_UNAVAILABLE_TOOLTIP }),
+    });
   }
   const isChecked = (key: AttributeFilter) => (attributeFilters.includes(key) ? 'on' : undefined);
   const filterOptions: EuiSelectableOption[] = [
