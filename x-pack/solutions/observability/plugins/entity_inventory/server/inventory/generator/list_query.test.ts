@@ -225,6 +225,33 @@ describe('generateListQueries', () => {
     expect(normalised).toBe(kubeletstats);
   });
 
+  it('generates the full k8s.deployment state_deployment query under TS', () => {
+    const [, { esql }] = generateListQueries(
+      k8sDeploymentFixture,
+      plansOf(k8sDeploymentFixture, 'TS'),
+      window,
+      LIMIT
+    );
+
+    expect(esql).toBe(`SET unmapped_fields="nullify";
+TS metrics-kubernetes.state_deployment-*
+| WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND (metricset.name == "state_deployment")
+    AND (TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != "" AND TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != "")
+| STATS \`cluster\` = LAST(\`orchestrator.cluster.name\`, \`@timestamp\`) WHERE \`orchestrator.cluster.name\` IS NOT NULL,
+    \`paused\` = LAST(\`kubernetes.deployment.paused\`, \`@timestamp\`) WHERE \`kubernetes.deployment.paused\` IS NOT NULL,
+    \`last_seen\` = MAX(\`@timestamp\`)
+    BY \`kubernetes.namespace\`, \`kubernetes.deployment.name\`
+| EVAL kubernetes_namespace_present = TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != "",
+ kubernetes_deployment_name_present = TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != "",
+ kubernetes_namespace_present_or_null = CASE(kubernetes_namespace_present, TO_STRING(kubernetes.namespace)),
+ kubernetes_deployment_name_present_or_null = CASE(kubernetes_deployment_name_present, TO_STRING(kubernetes.deployment.name)),
+ entity.id = CONCAT("k8s.deployment:", CONCAT(kubernetes_namespace_present_or_null, "/", kubernetes_deployment_name_present_or_null))
+| KEEP \`entity.id\`, \`kubernetes.namespace\`, \`kubernetes.deployment.name\`, \`cluster\`, \`paused\`, \`last_seen\`
+| SORT \`last_seen\` DESC NULLS LAST
+| LIMIT 10000`);
+  });
+
   it('rejects an unsafe index pattern before assembling a query', () => {
     const definition: EntityDefinitionWithoutId = {
       ...k8sDeploymentFixture,
