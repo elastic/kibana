@@ -79,12 +79,16 @@ export const platformSignificantEventsTools = {
   createEvent: `${internalNamespaces.platformSignificantEvents}.event_create`,
   updateEventStatus: `${internalNamespaces.platformSignificantEvents}.event_status_update`,
   eventsWrite: `${internalNamespaces.platformSignificantEvents}.events_write`,
-  listSources: `${internalNamespaces.platformSignificantEvents}.source_list`,
-  getSource: `${internalNamespaces.platformSignificantEvents}.source_get`,
-  createSource: `${internalNamespaces.platformSignificantEvents}.source_create`,
-  updateSource: `${internalNamespaces.platformSignificantEvents}.source_update`,
-  deleteSource: `${internalNamespaces.platformSignificantEvents}.source_delete`,
   attachInvestigation: `${internalNamespaces.platformStreams}.sig_events.event_investigation_attach`,
+} as const;
+
+/** Nightshift source tools, registered by the Significant Events plugin. */
+export const observabilityNightshiftSourceTools = {
+  listSources: `${internalNamespaces.observability}.nightshift.source_list`,
+  getSource: `${internalNamespaces.observability}.nightshift.source_get`,
+  createSource: `${internalNamespaces.observability}.nightshift.source_create`,
+  updateSource: `${internalNamespaces.observability}.nightshift.source_update`,
+  deleteSource: `${internalNamespaces.observability}.nightshift.source_delete`,
 } as const;
 
 /** AI-index tools, registered by the Context Engine Agent Builder plugin. */

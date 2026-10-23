@@ -33,11 +33,11 @@ export const TOOL_EXECUTE_ENDPOINT = 'api/agent_builder/tools/_execute';
 
 export const EVENT_SEARCH_TOOL_ID = 'platform.sig_events.event_search';
 export const KI_FEATURE_CREATE_TOOL_ID = 'platform.sig_events.ki_feature_create';
-export const SOURCE_LIST_TOOL_ID = 'platform.sig_events.source_list';
-export const SOURCE_GET_TOOL_ID = 'platform.sig_events.source_get';
-export const SOURCE_CREATE_TOOL_ID = 'platform.sig_events.source_create';
-export const SOURCE_UPDATE_TOOL_ID = 'platform.sig_events.source_update';
-export const SOURCE_DELETE_TOOL_ID = 'platform.sig_events.source_delete';
+export const SOURCE_LIST_TOOL_ID = 'observability.nightshift.source_list';
+export const SOURCE_GET_TOOL_ID = 'observability.nightshift.source_get';
+export const SOURCE_CREATE_TOOL_ID = 'observability.nightshift.source_create';
+export const SOURCE_UPDATE_TOOL_ID = 'observability.nightshift.source_update';
+export const SOURCE_DELETE_TOOL_ID = 'observability.nightshift.source_delete';
 /** Holds the knowledge indicators of every source. Deleting a source writes tombstones to it. */
 export const KNOWLEDGE_INDICATORS_DATA_STREAM = '.significant_events-knowledge_indicators';
 

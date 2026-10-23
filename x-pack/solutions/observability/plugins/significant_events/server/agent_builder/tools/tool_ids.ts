@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
+import {
+  observabilityNightshiftSourceTools,
+  platformSignificantEventsTools,
+} from '@kbn/agent-builder-common';
 
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID =
   platformSignificantEventsTools.createFeatureKnowledgeIndicator;
@@ -19,10 +22,14 @@ export const SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID = platformSignificantEvents
 export const SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID =
   platformSignificantEventsTools.updateEventStatus;
 export const SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID = platformSignificantEventsTools.searchEvent;
-export const SIGNIFICANT_EVENTS_SOURCE_LIST_TOOL_ID = platformSignificantEventsTools.listSources;
-export const SIGNIFICANT_EVENTS_SOURCE_GET_TOOL_ID = platformSignificantEventsTools.getSource;
-export const SIGNIFICANT_EVENTS_SOURCE_CREATE_TOOL_ID = platformSignificantEventsTools.createSource;
-export const SIGNIFICANT_EVENTS_SOURCE_UPDATE_TOOL_ID = platformSignificantEventsTools.updateSource;
-export const SIGNIFICANT_EVENTS_SOURCE_DELETE_TOOL_ID = platformSignificantEventsTools.deleteSource;
+export const SIGNIFICANT_EVENTS_SOURCE_LIST_TOOL_ID =
+  observabilityNightshiftSourceTools.listSources;
+export const SIGNIFICANT_EVENTS_SOURCE_GET_TOOL_ID = observabilityNightshiftSourceTools.getSource;
+export const SIGNIFICANT_EVENTS_SOURCE_CREATE_TOOL_ID =
+  observabilityNightshiftSourceTools.createSource;
+export const SIGNIFICANT_EVENTS_SOURCE_UPDATE_TOOL_ID =
+  observabilityNightshiftSourceTools.updateSource;
+export const SIGNIFICANT_EVENTS_SOURCE_DELETE_TOOL_ID =
+  observabilityNightshiftSourceTools.deleteSource;
 export const SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID =
   platformSignificantEventsTools.attachInvestigation;
