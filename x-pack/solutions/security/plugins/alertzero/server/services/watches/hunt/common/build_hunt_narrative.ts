@@ -183,11 +183,13 @@ const describeTier2 = (result: HuntCoordinatorCoreResult): string[] => {
   return lines;
 };
 
-const describeTier1 = (tier1: HuntForThreatResult): string[] => {
+const describeTier1 = (tier1: HuntForThreatResult, excludedIocCount = 0): string[] => {
   const lines: string[] = ['**Tier 1: indicator and technique search**'];
   if (tier1.status === 'no_searchable_terms') {
     lines.push(
-      'Tier 1 had nothing to search: the report exposed no indicators or techniques that map to a searchable field.'
+      excludedIocCount > 0
+        ? 'Tier 1 had nothing to search: all extracted indicators were excluded by adjudication and the report exposed no searchable techniques.'
+        : 'Tier 1 had nothing to search: the report exposed no indicators or techniques that map to a searchable field.'
     );
     return lines;
   }
@@ -261,6 +263,10 @@ const describeSearch = (result: HuntCoordinatorCoreResult): string[] => {
       ? `- **Indicators (${iocs.length}):** ${describeIocs(iocs)}`
       : '- **Indicators:** none searchable'
   );
+  const excludedCount = result.excluded_report_iocs?.count ?? 0;
+  if (excludedCount > 0) {
+    lines.push(`- **Not searched (adjudicated out):** ${plural(excludedCount, 'indicator')}`);
+  }
   const techniques = tier1.resolved_techniques;
   lines.push(
     techniques.length > 0
@@ -427,7 +433,7 @@ export const buildHuntNarrative = (
   if (!terminal) {
     blocks.push(describeCoverage(result).join('\n'));
     blocks.push(describeSearch(result).join('\n'));
-    blocks.push(describeTier1(result.tier1).join('\n'));
+    blocks.push(describeTier1(result.tier1, result.excluded_report_iocs?.count ?? 0).join('\n'));
     blocks.push(describeTier2(result).join('\n'));
   }
   blocks.push(`_Hunt run ${code(result.run_id)}._`);

@@ -2528,4 +2528,119 @@ describe('huntCoordinator', () => {
       expect(result.incomplete).toBeUndefined();
     });
   });
+
+  describe('adjudicated-out report IOCs', () => {
+    const excluded = {
+      count: 2,
+      values: [
+        { type: 'ip' as const, value: '169.254.169.254' },
+        { type: 'domain' as const, value: 'process.name' },
+      ],
+    };
+
+    it('passes excluded_iocs to huntBehavior and sets excluded_report_iocs on a Tier 1+2 result', async () => {
+      const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+      const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+      const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+      mockLoad.mockResolvedValueOnce({
+        iocs: [{ type: 'hash', value: 'a'.repeat(64) }],
+        techniques: [],
+        text: 'report body text',
+        extraction_pending: false,
+        excluded_iocs: excluded,
+      });
+      mockT1.mockResolvedValueOnce({
+        status: 'no_environment_hits',
+        has_confirmed_hit: false,
+        searched_iocs: 1,
+        searched_techniques: 0,
+        resolved_iocs: [{ type: 'hash', value: 'a'.repeat(64) }],
+        resolved_techniques: [],
+        time_range: { from: 'now-24h', to: 'now' },
+        counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+        hits: [],
+        affected_assets: { hosts: [], users: [], services: [] },
+        per_index: [],
+      });
+      mockT2.mockClear();
+      const mockModels = allTiers({} as ScopedModel);
+
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        mockModels,
+        logger,
+        {
+          report_id: 'rpt-excluded',
+          spaceId: 'default',
+          indexPatterns: INDEX_PATTERNS,
+          trigger: 'scheduled',
+          run_id: 'run-excluded-t2',
+          tier2_when: 'always',
+        }
+      );
+
+      expect(mockT2).toHaveBeenCalledWith(
+        { extraction: mockModels.frontier, esql: mockModels.frontier },
+        logger,
+        expect.objectContaining({ excluded_iocs: excluded.values }),
+        esClient,
+        undefined
+      );
+      expect(result.excluded_report_iocs).toEqual({ count: 2 });
+    });
+
+    it('sets excluded_report_iocs on a tier1_only return when models are absent', async () => {
+      const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+      mockLoad.mockResolvedValueOnce({
+        iocs: [{ type: 'hash', value: 'a'.repeat(64) }],
+        techniques: [],
+        text: 'report body text',
+        extraction_pending: false,
+        excluded_iocs: excluded,
+      });
+
+      const result = await huntCoordinator({ esClient, reportsEsClient: esClient }, {}, logger, {
+        report_id: 'rpt-excluded-t1',
+        spaceId: 'default',
+        indexPatterns: INDEX_PATTERNS,
+        trigger: 'scheduled',
+        run_id: 'run-excluded-t1',
+      });
+
+      expect(result.status).toBe('tier1_only');
+      expect(result.excluded_report_iocs).toEqual({ count: 2 });
+    });
+
+    it('does not pass exclusions when the caller supplies iocs', async () => {
+      const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+      const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+      mockLoad.mockResolvedValueOnce({
+        iocs: [{ type: 'hash', value: 'a'.repeat(64) }],
+        techniques: [],
+        text: 'report body text',
+        extraction_pending: false,
+        excluded_iocs: excluded,
+      });
+      mockT2.mockClear();
+      const mockModels = allTiers({} as ScopedModel);
+
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        mockModels,
+        logger,
+        {
+          report_id: 'rpt-caller-iocs',
+          spaceId: 'default',
+          indexPatterns: INDEX_PATTERNS,
+          trigger: 'manual',
+          run_id: 'run-caller-iocs',
+          tier2_when: 'always',
+          iocs: [{ type: 'domain', value: 'evil.example' }],
+        }
+      );
+
+      expect(mockT2.mock.calls[0][2]).not.toHaveProperty('excluded_iocs');
+      expect(result.excluded_report_iocs).toBeUndefined();
+    });
+  });
 });
