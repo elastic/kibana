@@ -17,20 +17,15 @@ import type { ImpactService } from './impact_service';
 /**
  * In-process impact reads. The space and the principal both come from the
  * request, so a caller cannot supply another space or skip the investigations
- * read privilege (read or manage). Impact of a conversation the caller cannot
- * read is left out, as if it had none.
+ * read privilege (read or manage). Impact of a conversation the caller cannot read is left out, as
+ * if it had none.
  */
 export interface ImpactReadClient {
   listByConversationIds: (conversationIds: string[]) => Promise<Impact[]>;
   /**
-   * Entity ids per conversation, for landing-page hydration. Ids are deduped and read in
-   * chunks, so callers are not bound by the per-read cap. Conversations without an Impact
-   * document are absent from the map.
-   */
-  getEntityIdsByConversationId: (conversationIds: string[]) => Promise<Map<string, string[]>>;
-  /**
-   * Same read as `getEntityIdsByConversationId`, keeping each entity's `id`, `type`, and `name`
-   * so the landing page can label a pill with the entity and show what kind it is.
+   * Each entity's `id`, `type`, and `name` per conversation. Ids are deduped and read in chunks,
+   * so callers are not bound by the per-read cap. Conversations without an Impact document are
+   * absent from the map.
    */
   getEntitiesByConversationId: (
     conversationIds: string[]
@@ -51,8 +46,8 @@ export interface ImpactClientDeps {
 }
 
 /**
- * Builds a request-scoped reader. The privilege check runs before any search, and the impact
- * index (read as the internal user) is only read for conversations the caller can read.
+ * Builds a request-scoped reader. The privilege check runs before any search. The impact index
+ * (read as the internal user) is only read for conversations the caller can read.
  */
 export const createImpactClient =
   ({ getImpactService, getSpaceId, privileges, getConversationClient }: ImpactClientDeps) =>
@@ -108,10 +103,6 @@ export const createImpactClient =
     return {
       listByConversationIds,
       getEntitiesByConversationId,
-      getEntityIdsByConversationId: async (conversationIds) => {
-        const entities = await getEntitiesByConversationId(conversationIds);
-        return new Map([...entities].map(([id, list]) => [id, list.map((entity) => entity.id)]));
-      },
       searchConversationIdsByEntityId: async (entityId) => {
         await privileges.assertCanRead(request);
         const conversationIds = await getImpactService()

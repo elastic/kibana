@@ -32,7 +32,7 @@ export const OnePasswordConnector: ConnectorSpec = {
   metadata: {
     id: '.1password',
     displayName: '1Password',
-    description: i18n.translate('core.kibanaConnectorSpecs.onePassword.metadata.description', {
+    description: i18n.translate('connectorSpecs.onePassword.metadata.description', {
       defaultMessage:
         'Manage users in 1Password Enterprise Password Manager — list, get, suspend, and reactivate users',
     }),
@@ -66,13 +66,12 @@ export const OnePasswordConnector: ConnectorSpec = {
       accountUuid: z
         .string()
         .min(1, {
-          message: i18n.translate(
-            'core.kibanaConnectorSpecs.onePassword.config.accountUuidRequired',
-            { defaultMessage: 'Account UUID is required' }
-          ),
+          message: i18n.translate('connectorSpecs.onePassword.config.accountUuidRequired', {
+            defaultMessage: 'Account UUID is required',
+          }),
         })
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.onePassword.config.accountUuid', {
+          label: i18n.translate('connectorSpecs.onePassword.config.accountUuid', {
             defaultMessage: 'Account UUID',
           }),
         }),
@@ -83,10 +82,9 @@ export const OnePasswordConnector: ConnectorSpec = {
     listUsers: {
       isTool: true,
       scope: 'read',
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.onePassword.actions.listUsers.description',
-        { defaultMessage: 'List users in the 1Password account, optionally filtered by state' }
-      ),
+      description: i18n.translate('connectorSpecs.onePassword.actions.listUsers.description', {
+        defaultMessage: 'List users in the 1Password account, optionally filtered by state',
+      }),
       input: lazySchema(() =>
         z.object({
           filter: z
@@ -134,10 +132,9 @@ export const OnePasswordConnector: ConnectorSpec = {
     getUser: {
       isTool: true,
       scope: 'read',
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.onePassword.actions.getUser.description',
-        { defaultMessage: 'Get details for a single user by their UUID' }
-      ),
+      description: i18n.translate('connectorSpecs.onePassword.actions.getUser.description', {
+        defaultMessage: 'Get details for a single user by their UUID',
+      }),
       input: lazySchema(() =>
         z.object({
           uuid: z.string().min(1).max(200).describe('UUID of the 1Password user to retrieve'),
@@ -161,13 +158,10 @@ export const OnePasswordConnector: ConnectorSpec = {
     suspendUser: {
       isTool: true,
       scope: 'destroy',
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.onePassword.actions.suspendUser.description',
-        {
-          defaultMessage:
-            'Suspend an active user, preventing them from accessing the 1Password account',
-        }
-      ),
+      description: i18n.translate('connectorSpecs.onePassword.actions.suspendUser.description', {
+        defaultMessage:
+          'Suspend an active user, preventing them from accessing the 1Password account',
+      }),
       input: lazySchema(() =>
         z.object({
           uuid: z.string().min(1).max(200).describe('UUID of the active 1Password user to suspend'),
@@ -191,10 +185,9 @@ export const OnePasswordConnector: ConnectorSpec = {
     reactivateUser: {
       isTool: true,
       scope: 'destroy',
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.onePassword.actions.reactivateUser.description',
-        { defaultMessage: 'Reactivate a suspended user, restoring their access to 1Password' }
-      ),
+      description: i18n.translate('connectorSpecs.onePassword.actions.reactivateUser.description', {
+        defaultMessage: 'Reactivate a suspended user, restoring their access to 1Password',
+      }),
       input: lazySchema(() =>
         z.object({
           uuid: z
@@ -221,7 +214,7 @@ export const OnePasswordConnector: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.onePassword.test.description', {
+    description: i18n.translate('connectorSpecs.onePassword.test.description', {
       defaultMessage: 'Verifies the 1Password connection by listing users',
     }),
     handler: async (ctx) => {
