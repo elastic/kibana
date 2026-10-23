@@ -153,6 +153,35 @@ describe('triggerInvestigationStepDefinition', () => {
     expect(start).toHaveBeenCalledWith(expect.objectContaining({ slack_thread: slackThread }));
   });
 
+  it.each([
+    ['the Relay key when it sent one', 'slack:T1:C1:1.1-relay', 'slack:T1:C1:1.1-relay'],
+    ['the same key built from the thread when the Relay sent none', '', 'slack:T1:C1:1.1'],
+  ])('keys a Slack thread subject by %s', async (_, externalConversationId, expectedId) => {
+    const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+    const { definition } = createDefinition(start);
+    const slackThread = {
+      workspace: 'T1',
+      channel: 'C1',
+      thread_ts: '1.1',
+      external_conversation_id: externalConversationId,
+    };
+
+    await definition.handler(
+      createContext({
+        subject_type: 'slack_thread',
+        message: 'Investigate this alert.',
+        slack_thread: slackThread,
+      })
+    );
+
+    expect(start).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subject: { type: 'slack_thread', id: expectedId, summary: undefined },
+        slack_thread: slackThread,
+      })
+    );
+  });
+
   it('rejects a Slack thread without a workspace', async () => {
     const start = jest.fn();
     const { definition } = createDefinition(start);
@@ -272,6 +301,17 @@ it.each([
   { subject_type: 'alert' },
   { subject_type: 'significant_event' },
   { subject_type: 'manual', message: 'Review', timeout_seconds: 0 },
+  { subject_type: 'slack_thread', message: 'Review' },
+  {
+    subject_type: 'slack_thread',
+    slack_thread: { workspace: 'T1', channel: 'C1', thread_ts: '1.1' },
+  },
+  {
+    subject_type: 'slack_thread',
+    subject_id: 'slack:T1:C1:1.1',
+    message: 'Review',
+    slack_thread: { workspace: 'T1', channel: 'C1', thread_ts: '1.1' },
+  },
 ])('rejects an incomplete investigation before starting: %j', async (input) => {
   const start = jest.fn();
   const { definition } = createDefinition(start);

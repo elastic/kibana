@@ -131,7 +131,7 @@ Use operations[] to:
         // destinations (new policy, or an explicit set_destinations) — an edit
         // that leaves an already-persisted, already-invalid destination
         // untouched should warn instead of failing.
-        const blockOnMissingManualTrigger =
+        const blockOnStructuralErrors =
           isNew || operations.some((op) => op.operation === 'set_destinations');
 
         const destinationResult = await validateDestinations(updatedData.destinations, {
@@ -142,7 +142,7 @@ Use operations[] to:
           validateWorkflow,
           request,
           logger,
-          blockOnMissingManualTrigger,
+          blockOnStructuralErrors,
         });
         workflowDiagnostics = destinationResult.diagnostics;
       }

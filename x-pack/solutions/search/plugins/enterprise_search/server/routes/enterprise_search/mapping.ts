@@ -27,7 +27,7 @@ export function registerMappingRoute({ router, log }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          index_name: schema.string(),
+          index_name: schema.string({ maxLength: 1024 }),
         }),
       },
     },

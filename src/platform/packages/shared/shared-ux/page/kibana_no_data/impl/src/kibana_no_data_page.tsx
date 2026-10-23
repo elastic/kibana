@@ -23,6 +23,7 @@ export const KibanaNoDataPage = ({
   noDataConfig,
   allowAdHocDataView,
   onTryESQL,
+  isTryESQLDisabled,
   onESQLNavigationComplete,
   showPlainSpinner,
 }: KibanaNoDataPageProps) => {
@@ -61,6 +62,7 @@ export const KibanaNoDataPage = ({
         onDataViewCreated={onDataViewCreated}
         allowAdHocDataView={allowAdHocDataView}
         onTryESQL={onTryESQL}
+        isTryESQLDisabled={isTryESQLDisabled}
         onESQLNavigationComplete={onESQLNavigationComplete}
       />
     );
